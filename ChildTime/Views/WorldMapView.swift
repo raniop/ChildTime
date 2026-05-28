@@ -55,24 +55,14 @@ struct WorldMapView: View {
                     .padding(.bottom, AppSpacing.md)
             }
 
-            // Companion floats in bottom-trailing
-            VStack {
-                Spacer()
-                HStack(alignment: .bottom) {
-                    Spacer()
-                    ZStack(alignment: .topLeading) {
-                        if let bubble = companion.bubbleText {
-                            BubbleSpeech(text: bubble)
-                                .offset(x: -150, y: -30)
-                                .transition(.scale.combined(with: .opacity))
-                        }
-                        CompanionView(controller: companion, size: companionSize)
-                    }
-                    .padding(.trailing, AppSpacing.lg)
-                }
-            }
-            .padding(.bottom, isCompact ? 160 : 200)
-            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
+            // Companion wanders the screen and is also draggable
+            FloatingCompanion(
+                controller: companion,
+                size: companionSize,
+                topInset: 90,
+                bottomInset: isCompact ? 160 : 200,
+                horizontalInset: AppSpacing.lg
+            )
         }
         .onAppear {
             lastSeenStars = progress.stars
