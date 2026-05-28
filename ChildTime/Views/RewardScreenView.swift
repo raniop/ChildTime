@@ -31,74 +31,62 @@ struct RewardScreenView: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                // Backdrop
+                // Backdrop — richer, more festive
                 world.gradient.gradient
                     .ignoresSafeArea()
-                    .opacity(0.4)
-                Color.black.opacity(0.4).ignoresSafeArea()
-                SparkleField(count: 25, size: 14)
+                    .opacity(0.45)
+                Color.black.opacity(0.35).ignoresSafeArea()
+                FloatingOrbs(
+                    colors: [AppColor.starGold, AppColor.companionGlow, AppColor.gemPurple],
+                    count: 5, maxSize: 280, opacity: 0.35
+                )
+                SparkleField(count: 28, size: 16)
 
                 ScrollView {
-                    // Center the column on big screens, scroll on small ones.
-                    VStack(spacing: AppSpacing.lg) {
-                        Spacer(minLength: AppSpacing.md)
+                    VStack(spacing: 0) {
+                        Spacer(minLength: AppSpacing.lg)
 
-                        Text(stage == .revealed ? "🎉" : kind.label)
-                            .font(stage == .revealed ? .system(size: celebEmojiSize) : titleFont)
-                            .foregroundStyle(.white)
-                            .multilineTextAlignment(.center)
-                            .minimumScaleFactor(0.6)
-
-                        ChestView(kind: kind, stage: stage, size: chestSize)
-                            .onTapGesture {
-                                if stage == .glowing { openChest() }
+                        // Hero title + chest stack
+                        VStack(spacing: AppSpacing.md) {
+                            heroTitle
+                            chestBlock
+                            if stage == .glowing {
+                                Text("לחץ כדי לפתוח! ✨")
+                                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
+                                    .pulse()
                             }
-                            .padding(.vertical, AppSpacing.md)
-
-                        if stage == .glowing {
-                            Text("לחץ כדי לפתוח!")
-                                .font(AppFont.subtitle())
-                                .foregroundStyle(.white)
-                                .pulse()
                         }
 
                         if stage == .revealed {
+                            Spacer(minLength: AppSpacing.lg)
                             rewardItems
-                                .frame(maxWidth: 480)
-                        }
+                                .frame(maxWidth: isCompact ? .infinity : 420)
+                                .padding(.horizontal, AppSpacing.lg)
 
-                        if stage == .revealed {
+                            Spacer(minLength: AppSpacing.lg)
                             actionButtons
-                                .frame(maxWidth: 480)
-                                .padding(.top, AppSpacing.md)
+                                .frame(maxWidth: isCompact ? .infinity : 420)
+                                .padding(.horizontal, AppSpacing.lg)
                         }
 
-                        // Leave enough room for the companion + safe-area tabbar.
-                        Color.clear.frame(height: companionSize + 60)
+                        // Floor for the companion
+                        Spacer(minLength: companionSize + 40)
                     }
-                    .padding(.horizontal, AppSpacing.lg)
                     .frame(minHeight: proxy.size.height, alignment: .center)
                     .frame(maxWidth: .infinity)
                 }
                 .scrollIndicators(.hidden)
 
-            // Companion in corner
-            VStack {
-                Spacer()
-                HStack {
-                    ZStack(alignment: .top) {
-                        if let bubble = companion.bubbleText {
-                            BubbleSpeech(text: bubble)
-                                .offset(x: 80, y: -10)
-                        }
-                        CompanionView(controller: companion, size: companionSize)
-                    }
+                // Companion in corner — positioned so it never overlaps
+                // the CTA stack.
+                companionCorner
+                    .padding(.bottom, AppSpacing.md)
                     .padding(.leading, AppSpacing.md)
-                    Spacer()
-                }
-            }
-            .padding(.bottom, AppSpacing.lg)
-            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity,
+                           alignment: .bottomLeading)
+                    .allowsHitTesting(true)
 
                 Confetti(trigger: confettiTrigger)
             }
@@ -118,38 +106,127 @@ struct RewardScreenView: View {
         }
     }
 
+    // MARK: - Hero header
+
+    private var heroTitle: some View {
+        VStack(spacing: 4) {
+            if stage == .revealed {
+                Text("🎉")
+                    .font(.system(size: celebEmojiSize))
+                    .shadow(color: AppColor.starGold.opacity(0.6), radius: 10)
+                Text("איזה ניצחון!")
+                    .font(.system(size: isCompact ? 30 : 40, weight: .heavy, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [AppColor.starGold, AppColor.companionGlow,
+                                     Color(hex: "FFE082")],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    .shadow(color: AppColor.starGold.opacity(0.7), radius: 12)
+                    .shadow(color: .black.opacity(0.3), radius: 3, y: 2)
+                    .multilineTextAlignment(.center)
+            } else {
+                Text(kind.label)
+                    .font(.system(size: isCompact ? 28 : 38, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .shadow(color: .black.opacity(0.4), radius: 4, y: 2)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.6)
+            }
+        }
+        .padding(.horizontal, AppSpacing.lg)
+    }
+
+    private var chestBlock: some View {
+        ZStack {
+            // Glow halo behind the chest — much more dramatic than the
+            // bare emoji backdrop.
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            AppColor.starGold.opacity(0.5),
+                            AppColor.starGold.opacity(0.0)
+                        ],
+                        center: .center,
+                        startRadius: 10,
+                        endRadius: chestSize * 0.9
+                    )
+                )
+                .frame(width: chestSize * 1.6, height: chestSize * 1.6)
+                .opacity(stage == .closed ? 0.3 : 0.85)
+
+            ChestView(kind: kind, stage: stage, size: chestSize)
+                .onTapGesture {
+                    if stage == .glowing { openChest() }
+                }
+        }
+        .padding(.vertical, AppSpacing.sm)
+    }
+
+    // MARK: - Companion corner
+
+    private var companionCorner: some View {
+        ZStack(alignment: .topLeading) {
+            if let bubble = companion.bubbleText {
+                BubbleSpeech(text: bubble)
+                    .offset(x: companionSize * 0.7, y: -companionSize * 0.2)
+                    .transition(.scale.combined(with: .opacity))
+            }
+            CompanionView(controller: companion, size: companionSize)
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
+    }
+
     // MARK: - Reward items
 
     private var rewardItems: some View {
-        VStack(spacing: AppSpacing.md) {
+        VStack(spacing: 10) {
             if revealedItems >= 1 {
-                rewardRow(emoji: "⭐", text: "+\(reward.stars) כוכבים", color: AppColor.starGold)
+                rewardPill(emoji: "⭐", value: reward.stars, label: "כוכבים", color: AppColor.starGold)
             }
             if revealedItems >= 2 && reward.gems > 0 {
-                rewardRow(emoji: "💎", text: "+\(reward.gems) גבישים", color: AppColor.gemPurple)
+                rewardPill(emoji: "💎", value: reward.gems, label: "גבישים", color: AppColor.gemPurple)
             }
             if revealedItems >= 3 && reward.minutes > 0 {
-                rewardRow(emoji: "⏱", text: "+\(reward.minutes) דקות משחק", color: AppColor.successMint)
+                rewardPill(emoji: "⏱", value: reward.minutes, label: "דקות משחק", color: AppColor.successMint)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 
-    private func rewardRow(emoji: String, text: String, color: Color) -> some View {
-        HStack(spacing: AppSpacing.md) {
+    /// One reward as a centered pill: ⭐  +3  כוכבים
+    private func rewardPill(emoji: String, value: Int, label: String, color: Color) -> some View {
+        HStack(spacing: 10) {
             Text(emoji)
-                .font(.system(size: 36))
-            Text(text)
-                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .font(.system(size: 26))
+                .shadow(color: color.opacity(0.8), radius: 6)
+            Text("+\(value)")
+                .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Spacer()
+            Text(label)
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.9))
         }
-        .padding(AppSpacing.md)
-        .background(color.opacity(0.25), in: RoundedRectangle(cornerRadius: AppRadius.medium))
-        .overlay(
-            RoundedRectangle(cornerRadius: AppRadius.medium)
-                .stroke(color, lineWidth: 2)
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.vertical, 10)
+        .background(
+            Capsule()
+                .fill(.white.opacity(0.10))
+                .overlay(
+                    Capsule()
+                        .fill(LinearGradient(
+                            colors: [color.opacity(0.35), color.opacity(0.15)],
+                            startPoint: .leading, endPoint: .trailing
+                        ))
+                )
+                .overlay(
+                    Capsule().stroke(color.opacity(0.85), lineWidth: 2)
+                )
         )
         .glow(color, radius: 10)
+        .frame(maxWidth: .infinity, alignment: .center)
         .transition(.asymmetric(
             insertion: .scale(scale: 0.5).combined(with: .opacity).combined(with: .move(edge: .bottom)),
             removal: .opacity
@@ -157,13 +234,16 @@ struct RewardScreenView: View {
     }
 
     private var actionButtons: some View {
-        VStack(spacing: AppSpacing.sm) {
+        VStack(spacing: 10) {
             if progress.pendingMinutes > 0 {
                 JuicyButton(gradient: AppGradient.castle, glowColor: AppColor.flameOrange) {
                     unlockNow()
                 } label: {
-                    Label("פתחו לי \(progress.pendingMinutes) דקות 🎮", systemImage: "gamecontroller.fill")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                    HStack(spacing: 8) {
+                        Image(systemName: "gamecontroller.fill")
+                        Text("פתחו לי \(progress.pendingMinutes) דק' 🎮")
+                    }
+                    .font(.system(size: 20, weight: .heavy, design: .rounded))
                 }
             }
 
@@ -171,14 +251,16 @@ struct RewardScreenView: View {
                 proceedAfterReward()
             } label: {
                 Text("המשך")
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl)
-                    .padding(.vertical, AppSpacing.md)
-                    .background(.white.opacity(0.2), in: Capsule())
+                    .padding(.vertical, 12)
+                    .background(.white.opacity(0.18), in: Capsule())
+                    .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
             }
             .buttonStyle(.juicy)
         }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 
     // MARK: - Sequence
