@@ -456,6 +456,18 @@ struct OnboardingView: View {
             }
             .frame(maxWidth: 460)
             .padding(.horizontal, AppSpacing.lg)
+            // Strip non-digits and cap at 4 chars — important on iPad where
+            // .numberPad falls back to the full keyboard.
+            .onChange(of: newPIN) { _, new in
+                let filtered = String(new.filter(\.isNumber).prefix(4))
+                if filtered != new { newPIN = filtered }
+                if pinError != nil { pinError = nil }
+            }
+            .onChange(of: confirmPIN) { _, new in
+                let filtered = String(new.filter(\.isNumber).prefix(4))
+                if filtered != new { confirmPIN = filtered }
+                if pinError != nil { pinError = nil }
+            }
 
             if let err = pinError {
                 Text(err)
@@ -534,16 +546,25 @@ struct OnboardingView: View {
     }
 
     private func savePIN() {
-        guard newPIN.count == 4, newPIN.allSatisfy(\.isNumber) else {
-            pinError = "הקוד חייב להיות 4 ספרות"
+        // Defensive: re-filter at submit time even though onChange already does it.
+        let n = String(newPIN.filter(\.isNumber).prefix(4))
+        let c = String(confirmPIN.filter(\.isNumber).prefix(4))
+        guard n.count == 4 else {
+            pinError = n.isEmpty
+                ? "הקלד קוד בן 4 ספרות"
+                : "חסרות ספרות — צריך בדיוק 4"
             return
         }
-        guard newPIN == confirmPIN else {
-            pinError = "הקודים לא תואמים"
+        guard c.count == 4 else {
+            pinError = "צריך להקליד גם בשורת האימות"
+            return
+        }
+        guard n == c else {
+            pinError = "שני הקודים לא תואמים"
             return
         }
         pinError = nil
-        settings.pin = newPIN
+        settings.pin = n
         step = .accountSync
     }
 
