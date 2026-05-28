@@ -40,7 +40,7 @@ struct WorldCard: View {
                     .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
                 }
 
-                // Foreground content — vertical tile layout
+                // Foreground content — vertical tile layout, everything centered
                 VStack(spacing: 8) {
                     Spacer(minLength: 8)
 
@@ -51,6 +51,7 @@ struct WorldCard: View {
                         .shadow(color: world.glowColor.opacity(0.8), radius: 22)
                         .shadow(color: .black.opacity(0.25), radius: 4, y: 4)
                         .opacity(isUnlocked ? 1 : 0.35)
+                        .frame(maxWidth: .infinity, alignment: .center)
 
                     // Title
                     Text(world.name)
@@ -60,21 +61,21 @@ struct WorldCard: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
                         .minimumScaleFactor(0.7)
+                        .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.horizontal, 10)
+
+                    // Topic subtitle (clarifies what subject this world teaches)
+                    Text(world.topic.displayName)
+                        .font(.system(size: labelSize, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, alignment: .center)
 
                     Spacer(minLength: 4)
 
-                    // Bottom row: progress text + bar
+                    // Bottom row: lock badge if locked, else just the progress bar
                     VStack(spacing: 4) {
-                        if isUnlocked {
-                            HStack(spacing: 4) {
-                                Image(systemName: "door.left.hand.open")
-                                    .font(.system(size: labelSize - 2))
-                                Text("חדר \(currentRoom + 1) / \(world.rooms)")
-                                    .font(.system(size: labelSize, weight: .semibold, design: .rounded))
-                            }
-                            .foregroundStyle(.white.opacity(0.9))
-                        } else {
+                        if !isUnlocked {
                             HStack(spacing: 4) {
                                 Image(systemName: "lock.fill")
                                     .font(.system(size: labelSize - 2))
@@ -82,6 +83,7 @@ struct WorldCard: View {
                                     .font(.system(size: labelSize, weight: .semibold, design: .rounded))
                             }
                             .foregroundStyle(.white.opacity(0.85))
+                            .frame(maxWidth: .infinity, alignment: .center)
                         }
                         progressBar
                             .padding(.horizontal, 14)
