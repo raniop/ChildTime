@@ -52,6 +52,14 @@ struct ProfilePickerView: View {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.1)) {
                 headerAppear = true
             }
+            // First-time families: jump straight into "create your first
+            // profile" instead of making them tap the +. Smoother handoff
+            // from the end of onboarding.
+            if profiles.isEmpty && !showCreate {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                    showCreate = true
+                }
+            }
         }
         .sheet(isPresented: $showCreate) {
             ProfileEditorView(mode: .create) { newProfile in
