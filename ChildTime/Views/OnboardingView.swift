@@ -262,7 +262,8 @@ struct OnboardingView: View {
             .frame(width: 52, height: 52)
             .glow(tint, radius: 8)
 
-            VStack(alignment: .trailing, spacing: 2) {
+            // In RTL, .leading = right edge — so the title text sits next to the icon
+            VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
@@ -270,7 +271,7 @@ struct OnboardingView: View {
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
             }
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, AppSpacing.md)
