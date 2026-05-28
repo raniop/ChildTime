@@ -1,19 +1,27 @@
 import SwiftUI
 
+/// Shared juicy CTA button used across the app.
+///
+/// Default size is intentionally compact — caller can override the font via the
+/// label closure. Width is capped at `maxWidth` so the button doesn't stretch
+/// edge-to-edge on iPad.
 struct JuicyButton<Label: View>: View {
     let action: () -> Void
     let gradient: LinearGradient
     let glowColor: Color
+    let maxWidth: CGFloat?
     @ViewBuilder let label: () -> Label
 
     init(
         gradient: LinearGradient = AppGradient.success,
         glowColor: Color = AppColor.successMint,
+        maxWidth: CGFloat? = 420,
         action: @escaping () -> Void,
         @ViewBuilder label: @escaping () -> Label
     ) {
         self.gradient = gradient
         self.glowColor = glowColor
+        self.maxWidth = maxWidth
         self.action = action
         self.label = label
     }
@@ -25,14 +33,14 @@ struct JuicyButton<Label: View>: View {
             action()
         } label: {
             label()
-                .font(AppFont.title())
+                .font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.textPrimary)
-                .padding(.vertical, AppSpacing.xl)
-                .padding(.horizontal, AppSpacing.xxxl)
-                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .padding(.horizontal, 28)
+                .frame(maxWidth: maxWidth ?? .infinity)
                 .background(gradient)
-                .clipShape(RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous))
-                .glow(glowColor, radius: 24)
+                .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
+                .glow(glowColor, radius: 14)
         }
         .buttonStyle(.juicy)
     }
@@ -41,7 +49,7 @@ struct JuicyButton<Label: View>: View {
 #Preview {
     ZStack {
         AppGradient.dreamy.ignoresSafeArea()
-        VStack(spacing: 24) {
+        VStack(spacing: 16) {
             JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {} label: {
                 Label("יאללה!", systemImage: "play.fill")
             }
@@ -49,7 +57,7 @@ struct JuicyButton<Label: View>: View {
                 Text("בוא נתחיל")
             }
             JuicyButton(gradient: AppGradient.castle, glowColor: AppColor.flameOrange) {} label: {
-                Label("פתח דקות", systemImage: "gamecontroller.fill")
+                Label("פתחו לי 10 דקות", systemImage: "gamecontroller.fill")
             }
         }
         .padding()
