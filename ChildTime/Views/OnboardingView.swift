@@ -1,11 +1,14 @@
 import SwiftUI
 import FamilyControls
+import AuthenticationServices
 
 struct OnboardingView: View {
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var shields: ShieldManager
+    @EnvironmentObject var auth: AuthManager
     @Environment(\.horizontalSizeClass) private var hsc
+    @Environment(\.colorScheme) private var colorScheme
 
     @State private var step: Step = .welcome
     @State private var selection = FamilyActivitySelection()
@@ -43,6 +46,7 @@ struct OnboardingView: View {
         case parentInfo
         case familyControls
         case pinSetup
+        case accountSync
         case kidIntro
         case hatching
     }
@@ -63,6 +67,7 @@ struct OnboardingView: View {
             case .parentInfo: parentInfoView
             case .familyControls: familyControlsView
             case .pinSetup: pinView
+            case .accountSync: accountSyncView
             case .kidIntro: kidIntroView
             case .hatching: HatchingView { complete() }
             }
@@ -539,7 +544,127 @@ struct OnboardingView: View {
         }
         pinError = nil
         settings.pin = newPIN
-        step = .kidIntro
+        step = .accountSync
+    }
+
+    // MARK: - Account sync (optional)
+
+    private var accountSyncView: some View {
+        VStack(spacing: AppSpacing.lg) {
+            Spacer().frame(height: 60)
+
+            infoIcon(systemName: "icloud.and.arrow.up")
+
+            Text("סנכרון בין מכשירים")
+                .font(.system(size: 30, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+
+            Text("יש לילד גם iPad וגם iPhone?\nהתחבר כאן, וההתקדמות תיסנכרן ביניהם.\n\nלא חובה — אפשר גם לעבוד מקומית בלי חיבור.")
+                .font(.system(size: 17, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, AppSpacing.lg)
+
+            if auth.isSignedIn {
+                // Already signed in — show confirmation
+                VStack(spacing: 10) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 44))
+                        .foregroundStyle(AppColor.successMint)
+                        .glow(AppColor.successMint, radius: 12)
+                    Text("מחובר כ-\(auth.displayName ?? auth.email ?? "")")
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    if let p = auth.provider {
+                        Text(p == .apple ? "דרך Apple" : "דרך Google")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+                }
+                .padding(.vertical, AppSpacing.lg)
+            } else {
+                // Sign-in options
+                VStack(spacing: AppSpacing.md) {
+                    SignInWithAppleButton(.signIn) { request in
+                        auth.configureAppleRequest(request)
+                    } onCompletion: { result in
+                        auth.handleAppleCompletion(result)
+                    }
+                    .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                    .frame(maxWidth: 360, minHeight: 50)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+                    Button {
+                        Task {
+                            await auth.signInWithGoogle(presenting: AuthManager.topMostViewController())
+                        }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Text("G")
+                                .font(.system(size: 18, weight: .bold))
+                                .frame(width: 24, height: 24)
+                                .background(.white, in: Circle())
+                                .foregroundStyle(.black)
+                            Text("התחבר עם Google")
+                                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white)
+                        }
+                        .frame(maxWidth: 360, minHeight: 50)
+                        .background(Color(hex: "4285F4"), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .buttonStyle(.juicy)
+
+                    if let err = auth.lastError {
+                        Text(err)
+                            .font(.system(size: 13, design: .rounded))
+                            .foregroundStyle(.red)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, AppSpacing.lg)
+                    }
+                }
+                .padding(.horizontal, AppSpacing.lg)
+            }
+
+            Spacer()
+
+            if auth.isSignedIn {
+                JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
+                    step = .kidIntro
+                } label: {
+                    Text("המשך")
+                }
+                .padding(.bottom, AppSpacing.md)
+            } else {
+                Button {
+                    Haptic.light()
+                    step = .kidIntro
+                } label: {
+                    Text("דלג לעת עתה")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .padding(.horizontal, AppSpacing.lg)
+                        .padding(.vertical, 10)
+                        .background(.white.opacity(0.15), in: Capsule())
+                }
+                .padding(.bottom, AppSpacing.md)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay(alignment: .topTrailing) {
+            backArrowButton { step = .pinSetup }
+                .padding(AppSpacing.lg)
+        }
+        .onChange(of: auth.isSignedIn) { _, signed in
+            // Auto-advance after successful sign-in
+            if signed {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    if step == .accountSync {
+                        step = .kidIntro
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Kid intro flow
@@ -610,7 +735,7 @@ struct OnboardingView: View {
                         kidIntroQ = prev
                     }
                 } else {
-                    step = .pinSetup
+                    step = .accountSync
                 }
             }
             .padding(AppSpacing.lg)
@@ -965,5 +1090,6 @@ struct OnboardingView: View {
         .environmentObject(ParentSettings.shared)
         .environmentObject(ProgressStore.shared)
         .environmentObject(ShieldManager.shared)
+        .environmentObject(AuthManager.shared)
         .environment(\.layoutDirection, .rightToLeft)
 }
