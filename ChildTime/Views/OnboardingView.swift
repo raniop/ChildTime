@@ -197,11 +197,22 @@ struct OnboardingView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.lg)
 
-            VStack(spacing: AppSpacing.md) {
+            // Single grouped checklist card
+            VStack(spacing: 0) {
                 bulletItem("📱", "אילו אפליקציות לחסום בלי שאלות")
+                Divider().background(.white.opacity(0.25)).padding(.horizontal, AppSpacing.lg)
                 bulletItem("⏱", "כמה דקות משחק לכל תשובה נכונה")
+                Divider().background(.white.opacity(0.25)).padding(.horizontal, AppSpacing.lg)
                 bulletItem("🔒", "קוד 4-ספרות שרק אתה תדע")
             }
+            .padding(.vertical, AppSpacing.sm)
+            .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.large))
+            .overlay(
+                RoundedRectangle(cornerRadius: AppRadius.large)
+                    .stroke(.white.opacity(0.2), lineWidth: 1)
+            )
+            .frame(maxWidth: 540)
+            .padding(.horizontal, AppSpacing.lg)
 
             Spacer()
 
@@ -461,15 +472,14 @@ struct OnboardingView: View {
 
     private func bulletItem(_ emoji: String, _ text: String) -> some View {
         HStack(spacing: AppSpacing.md) {
-            Text(emoji).font(.system(size: 26))
+            Text(emoji).font(.system(size: 28))
             Text(text)
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
         }
+        .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, AppSpacing.lg)
-        .padding(.vertical, AppSpacing.sm + 2)
-        .background(.white.opacity(0.14), in: Capsule())
-        .frame(maxWidth: 460)
+        .padding(.vertical, AppSpacing.md)
     }
 
     private func pinField(text: Binding<String>, placeholder: String) -> some View {
