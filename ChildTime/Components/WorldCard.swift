@@ -13,9 +13,9 @@ struct WorldCard: View {
     @State private var shimmer: Bool = false
 
     private var isCompact: Bool { hsc == .compact }
-    private var emojiSize: CGFloat { isCompact ? 80 : 110 }
-    private var titleSize: CGFloat { isCompact ? 19 : 23 }
-    private var labelSize: CGFloat { isCompact ? 13 : 15 }
+    private var emojiSize: CGFloat { isCompact ? 72 : 84 }
+    private var titleSize: CGFloat { isCompact ? 20 : 22 }
+    private var labelSize: CGFloat { isCompact ? 14 : 15 }
 
     var body: some View {
         Button(action: onTap) {
@@ -89,7 +89,8 @@ struct WorldCard: View {
                     .padding(.bottom, 12)
                 }
             }
-            .aspectRatio(0.92, contentMode: .fit)
+            .aspectRatio(1.0, contentMode: .fit)
+            .frame(maxWidth: 220)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)

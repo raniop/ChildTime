@@ -26,11 +26,8 @@ struct WorldMapView: View {
     }
 
     private var worldGridColumns: [GridItem] {
-        let count = isCompact ? 2 : 3
-        return Array(
-            repeating: GridItem(.flexible(), spacing: AppSpacing.md),
-            count: count
-        )
+        // Adaptive: each card 170-220pt wide. Phones get 2 columns, iPads 3.
+        [GridItem(.adaptive(minimum: 170, maximum: 220), spacing: AppSpacing.md)]
     }
 
     var body: some View {
