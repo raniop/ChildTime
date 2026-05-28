@@ -141,14 +141,52 @@ enum QuestionBanks {
         BankQuestion(prompt: "🌍\nמה היבשת הגדולה ביותר?", correctAnswer: "אסיה", distractors: ["אפריקה", "אמריקה", "אירופה"])
     ]
 
+    /// Original + expanded — call sites get the full combined pool.
     static func bank(for topic: Topic) -> [BankQuestion]? {
         switch topic {
-        case .english:   return english
-        case .logic:     return logic
-        case .science:   return science
-        case .history:   return history
-        case .geography: return geography
+        case .english:   return english   + QuestionBanksExpanded.english
+        case .logic:     return logic     + QuestionBanksExpanded.logic
+        case .science:   return science   + QuestionBanksExpanded.science
+        case .history:   return history   + QuestionBanksExpanded.history
+        case .geography: return geography + QuestionBanksExpanded.geography
         case .math:      return nil  // generated algorithmically
         }
+    }
+}
+
+// MARK: - Anti-repeat memory
+
+/// Keeps the most-recently-served questions per topic in memory so the
+/// runner doesn't show the same item twice in a row. The window slides
+/// at ~60% of the bank size — small enough to leave a meaningful pool,
+/// big enough to feel "fresh."
+final class QuestionMemory {
+    static let shared = QuestionMemory()
+    private init() {}
+
+    private var recent: [Topic: [String]] = [:]
+
+    /// Pick a random question from `pool` that hasn't been served recently.
+    /// Falls back to a true random when every question is in the recent
+    /// window (e.g. tiny pool).
+    func pickFresh(_ pool: [BankQuestion], for topic: Topic) -> BankQuestion? {
+        guard !pool.isEmpty else { return nil }
+        let windowSize = max(3, (pool.count * 6) / 10)
+        let recentList = recent[topic] ?? []
+        let candidates = pool.filter { !recentList.contains(promptKey($0)) }
+        let chosen = (candidates.isEmpty ? pool : candidates).randomElement()
+        if let chosen {
+            remember(promptKey(chosen), in: topic, windowSize: windowSize)
+        }
+        return chosen
+    }
+
+    private func promptKey(_ q: BankQuestion) -> String { q.prompt }
+
+    private func remember(_ key: String, in topic: Topic, windowSize: Int) {
+        var list = recent[topic] ?? []
+        list.append(key)
+        if list.count > windowSize { list.removeFirst(list.count - windowSize) }
+        recent[topic] = list
     }
 }

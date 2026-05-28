@@ -104,7 +104,7 @@ struct QuestionGenerator {
 
     private static func makeFromBank(topic: Topic, difficulty: Difficulty) -> Question {
         let bank = QuestionBanks.bank(for: topic) ?? []
-        guard let item = bank.randomElement() else {
+        guard let item = QuestionMemory.shared.pickFresh(bank, for: topic) else {
             return Question(
                 topic: topic,
                 prompt: "אופס... אין שאלות לנושא הזה עדיין",
