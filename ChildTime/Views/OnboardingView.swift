@@ -181,35 +181,38 @@ struct OnboardingView: View {
     // MARK: - Parent info
 
     private var parentInfoView: some View {
-        ScrollView {
-            VStack(spacing: AppSpacing.lg) {
-                Spacer().frame(height: 60)
-                infoIcon(systemName: "person.2.fill")
-                Text("שלום, הורה 👋")
-                    .font(.system(size: 36, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                Text("לפני שניתן את האפליקציה לילד, צריך להגדיר כמה דברים:")
-                    .font(.system(size: 20, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, AppSpacing.lg)
+        VStack(spacing: AppSpacing.lg) {
+            Spacer()
 
+            infoIcon(systemName: "person.2.fill")
+
+            Text("שלום, הורה 👋")
+                .font(.system(size: 36, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+
+            Text("לפני שניתן את האפליקציה לילד, צריך להגדיר כמה דברים:")
+                .font(.system(size: 20, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, AppSpacing.lg)
+
+            VStack(spacing: AppSpacing.md) {
                 bulletItem("📱", "אילו אפליקציות לחסום בלי שאלות")
                 bulletItem("⏱", "כמה דקות משחק לכל תשובה נכונה")
                 bulletItem("🔒", "קוד 4-ספרות שרק אתה תדע")
-
-                Spacer().frame(height: 20)
-
-                JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
-                    step = .familyControls
-                } label: {
-                    Text("המשך")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                }
-                .padding(.horizontal, AppSpacing.xl)
-                .padding(.bottom, AppSpacing.xl)
             }
+
+            Spacer()
+
+            JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
+                step = .familyControls
+            } label: {
+                Text("המשך")
+            }
+            .padding(.bottom, AppSpacing.xl)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Family Controls
@@ -453,8 +456,8 @@ struct OnboardingView: View {
             Text(text)
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
-            Spacer()
         }
+        .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, AppSpacing.md)
         .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.medium))
