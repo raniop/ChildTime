@@ -45,9 +45,19 @@ final class RemoteSyncManager: ObservableObject {
     // MARK: - Public lifecycle
 
     /// Start syncing for the currently-signed-in parent. Idempotent.
-    func start() {
+    ///
+    /// Pass `explicitUID` when calling from inside `AuthManager` so we
+    /// don't reach back into `AuthManager.shared` while *that* singleton
+    /// is still inside its own dispatch_once init. Without the explicit
+    /// uid we deadlock the launcher with EXC_BREAKPOINT.
+    func start(uid explicitUID: String? = nil) {
         #if canImport(FirebaseFirestore)
-        guard let uid = AuthManager.shared.userID, !uid.isEmpty else {
+        let resolvedUID: String
+        if let explicitUID, !explicitUID.isEmpty {
+            resolvedUID = explicitUID
+        } else if let cached = AuthManager.shared.userID, !cached.isEmpty {
+            resolvedUID = cached
+        } else {
             lastError = "אין משתמש מחובר — סנכרון לא פעיל"
             isActive = false
             return
@@ -55,7 +65,7 @@ final class RemoteSyncManager: ObservableObject {
         isActive = true
         lastError = nil
         observeLocalChanges()
-        subscribeToAllProfiles(uid: uid)
+        subscribeToAllProfiles(uid: resolvedUID)
         // First push of the active profile's current state so the cloud
         // mirrors what's on disk.
         uploadActiveProfileSoon()

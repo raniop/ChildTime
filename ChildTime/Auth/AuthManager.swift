@@ -40,17 +40,26 @@ final class AuthManager: ObservableObject {
 
     private init() {
         loadCachedUser()
+        // CRUCIAL: cannot start RemoteSyncManager synchronously here.
+        // RemoteSyncManager.start reads back from AuthManager.shared,
+        // and we're still inside this very singleton's dispatch_once.
+        // Capturing the uid locally + deferring to the next runloop tick
+        // breaks the cycle (and start() also accepts an explicit uid so
+        // it never needs to touch AuthManager.shared).
         #if canImport(FirebaseAuth)
-        // If Firebase is configured, prefer its source of truth.
         if let user = Auth.auth().currentUser {
-            apply(firebaseUser: user)
-        } else if userID != nil {
-            // Cached uid (but no live Firebase user) — still safe to start
-            // sync; the manager checks `userID` on every operation.
-            RemoteSyncManager.shared.start()
+            apply(firebaseUser: user)   // also deferred internally
+        } else if let cachedUID = userID, !cachedUID.isEmpty {
+            DispatchQueue.main.async {
+                RemoteSyncManager.shared.start(uid: cachedUID)
+            }
         }
         #else
-        if userID != nil { RemoteSyncManager.shared.start() }
+        if let cachedUID = userID, !cachedUID.isEmpty {
+            DispatchQueue.main.async {
+                RemoteSyncManager.shared.start(uid: cachedUID)
+            }
+        }
         #endif
     }
 
@@ -169,7 +178,8 @@ final class AuthManager: ObservableObject {
 
     #if canImport(FirebaseAuth)
     private func apply(firebaseUser user: User) {
-        userID = user.uid
+        let uid = user.uid
+        userID = uid
         displayName = user.displayName
         email = user.email
         // Infer provider from the firebase providerData
@@ -178,8 +188,14 @@ final class AuthManager: ObservableObject {
             else if p.contains("google") { provider = .google }
         }
         cacheUser()
-        // Kick off cross-device sync now that we have a uid.
-        RemoteSyncManager.shared.start()
+        // Defer + pass the uid explicitly. Two layers of defense against
+        // singleton re-entry: even when invoked during this AuthManager's
+        // own init, the async hop pushes RemoteSyncManager.start outside
+        // the dispatch_once window, AND start() no longer needs to read
+        // AuthManager.shared.userID.
+        DispatchQueue.main.async {
+            RemoteSyncManager.shared.start(uid: uid)
+        }
     }
     #endif
 
