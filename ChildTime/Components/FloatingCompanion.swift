@@ -11,6 +11,8 @@ struct FloatingCompanion: View {
     var bottomInset: CGFloat = 220
     var horizontalInset: CGFloat = 20
 
+    @Environment(\.layoutDirection) private var layoutDirection
+
     @State private var position: CGPoint = .zero
     @State private var isDragging: Bool = false
     @State private var hasAppeared: Bool = false
@@ -42,7 +44,12 @@ struct FloatingCompanion: View {
                             Haptic.light()
                             cancelWandering()
                         }
-                        position = clamp(value.location, in: geo.size)
+                        // In RTL the gesture's local x is mirrored relative to .position,
+                        // so we flip it back to screen-space coords.
+                        let mirroredX = layoutDirection == .rightToLeft
+                            ? geo.size.width - value.location.x
+                            : value.location.x
+                        position = clamp(CGPoint(x: mirroredX, y: value.location.y), in: geo.size)
                     }
                     .onEnded { _ in
                         isDragging = false
