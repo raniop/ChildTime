@@ -620,22 +620,24 @@ struct OnboardingView: View {
     private var kidIntroBubble: String {
         switch kidIntroQ {
         case .gender:
-            return "היי! נעים מאוד! אני טופי 💫"
+            return "היי הורה! בוא נכיר את הילד שלך 👋"
         case .name:
-            let g = settings.childGender?.displayName ?? "חבר"
-            return "איזה כיף! מה השם שלך, \(g) חמוד?"
+            let g = settings.childGender?.displayName ?? "ילד"
+            return "ואיך לקרוא ל\(g)?"
         case .age:
-            let name = settings.childName.isEmpty
-                ? "חמוד"
-                : settings.childName
-            return "\(name), בן/בת כמה אתה?"
+            let isMale = settings.childGender == .boy
+            let benBat = isMale ? "בן" : "בת"
+            if !settings.childName.isEmpty {
+                return "\(benBat) כמה \(settings.childName)?"
+            }
+            return "\(benBat) כמה \(isMale ? "הילד" : "הילדה")?"
         }
     }
 
     @ViewBuilder
     private var genderAnswerArea: some View {
         VStack(spacing: AppSpacing.md) {
-            Text("אתה ילד או ילדה?")
+            Text("ילד או ילדה?")
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
             HStack(spacing: AppSpacing.lg) {
@@ -655,6 +657,12 @@ struct OnboardingView: View {
             kidIntroCompanion.cheer()
             withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
                 settings.childGender = gender
+            }
+            // Auto-advance after a moment to let the user see the selection
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                if settings.childGender == gender, kidIntroQ == .gender {
+                    advanceKidIntro(silent: true)
+                }
             }
         } label: {
             VStack(spacing: 8) {
@@ -684,11 +692,13 @@ struct OnboardingView: View {
 
     @ViewBuilder
     private var nameAnswerArea: some View {
+        let isMale = settings.childGender == .boy
+        let label = isMale ? "שם הילד" : "שם הילדה"
         VStack(spacing: AppSpacing.lg) {
-            Text("מה השם שלך?")
+            Text("מה \(label)?")
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            TextField("", text: $nameInput, prompt: Text("השם שלך").foregroundColor(.white.opacity(0.5)))
+            TextField("", text: $nameInput, prompt: Text(label).foregroundColor(.white.opacity(0.5)))
                 .multilineTextAlignment(.center)
                 .font(.system(size: 32, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
@@ -705,6 +715,7 @@ struct OnboardingView: View {
             Button {
                 nameInput = ""
                 Haptic.light()
+                advanceKidIntro(silent: true)
             } label: {
                 Text("דלג")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
@@ -720,18 +731,59 @@ struct OnboardingView: View {
 
     @ViewBuilder
     private var ageAnswerArea: some View {
+        let isMale = settings.childGender == .boy
         VStack(spacing: AppSpacing.md) {
-            Text("בן/בת כמה אתה?")
+            Text(isMale ? "בן כמה הילד?" : "בת כמה הילדה?")
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
             HStack(spacing: AppSpacing.sm) {
                 ForEach(ChildAge.allCases) { age in
-                    compactAgeChip(age)
+                    ageOptionWithAutoAdvance(age)
                 }
             }
             .frame(maxWidth: 600)
             .padding(.horizontal, AppSpacing.lg)
         }
+    }
+
+    private func ageOptionWithAutoAdvance(_ age: ChildAge) -> some View {
+        let isSelected = settings.childAge == age
+        return Button {
+            Haptic.medium()
+            kidIntroBurst += 1
+            kidIntroCompanion.cheer()
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+                settings.applyAgeDefaults(age)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                if settings.childAge == age, kidIntroQ == .age {
+                    advanceKidIntro(silent: true)
+                }
+            }
+        } label: {
+            VStack(spacing: 4) {
+                Text(age.emoji).font(.system(size: 34))
+                Text(age.label)
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, AppSpacing.sm)
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                    .fill(.white.opacity(isSelected ? 0.28 : 0.10))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                            .stroke(
+                                isSelected ? AppColor.successMint : .white.opacity(0.2),
+                                lineWidth: isSelected ? 2.5 : 1
+                            )
+                    )
+            )
+            .glow(isSelected ? AppColor.successMint : .clear, radius: isSelected ? 10 : 0)
+            .scaleEffect(isSelected ? 1.05 : 1.0)
+        }
+        .buttonStyle(.juicy)
     }
 
     private var canAdvanceKidIntro: Bool {
@@ -742,10 +794,12 @@ struct OnboardingView: View {
         }
     }
 
-    private func advanceKidIntro() {
-        Haptic.medium()
-        kidIntroBurst += 1
-        kidIntroCompanion.cheer()
+    private func advanceKidIntro(silent: Bool = false) {
+        if !silent {
+            Haptic.medium()
+            kidIntroBurst += 1
+            kidIntroCompanion.cheer()
+        }
         if let next = KidIntroQuestion(rawValue: kidIntroQ.rawValue + 1) {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
                 kidIntroQ = next
