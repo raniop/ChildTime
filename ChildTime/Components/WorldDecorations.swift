@@ -6,12 +6,18 @@ struct WorldDecorations: View {
 
     private var emojis: [String] {
         switch world.id {
-        case "numbers_kingdom":
-            return ["👑", "🏰", "💎", "⚔️", "🛡️", "🎠"]
-        case "letter_tower":
-            return ["📚", "✏️", "📜", "🪶", "🔮", "🕯️"]
-        case "multiplication_galaxy":
-            return ["🪐", "🛸", "☄️", "🌟", "🌌", "👽"]
+        case "math_kingdom":
+            return ["👑", "🏰", "➕", "➖", "✖️", "➗", "🔢"]
+        case "english_land":
+            return ["🇬🇧", "🇺🇸", "📖", "🔤", "🌐", "✏️"]
+        case "logic_lab":
+            return ["🧩", "🔍", "💡", "❓", "🎯", "🎲"]
+        case "science_lab":
+            return ["🔬", "🧪", "🧬", "🔭", "⚛️", "🦠"]
+        case "history_museum":
+            return ["🏛️", "⏳", "📜", "🗿", "⚔️", "🏺"]
+        case "geo_journey":
+            return ["🌍", "🗺️", "🧭", "🏔️", "🌊", "🌋"]
         default:
             return ["✨", "⭐", "🌟"]
         }

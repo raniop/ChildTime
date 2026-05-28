@@ -657,11 +657,11 @@ struct OnboardingView: View {
     private func complete() {
         settings.onboardingCompleted = true
         if settings.enabledTopics.isEmpty {
-            settings.enabledTopics = [.addSub, .hebrewSpelling, .mulDiv]
+            settings.enabledTopics = [.math, .english, .logic, .science]
         }
-        // Ensure starter world is unlocked
-        if !progress.unlockedWorlds.contains("numbers_kingdom") {
-            progress.unlockWorld("numbers_kingdom")
+        // Unlock all worlds by default (all open from start)
+        for world in Worlds.all {
+            progress.unlockWorld(world.id)
         }
     }
 }

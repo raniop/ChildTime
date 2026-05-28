@@ -1,25 +1,34 @@
 import Foundation
 
 enum Topic: String, CaseIterable, Codable, Identifiable {
-    case addSub
-    case mulDiv
-    case hebrewSpelling
+    case math       // חשבון — חיבור/חיסור/כפל/חילוק מאוחדים
+    case english    // אנגלית
+    case logic      // לוגיקה
+    case science    // מדע
+    case history    // היסטוריה
+    case geography  // גיאוגרפיה
 
     var id: String { rawValue }
 
     var displayName: String {
         switch self {
-        case .addSub: return "חיבור וחיסור"
-        case .mulDiv: return "כפל וחילוק"
-        case .hebrewSpelling: return "איות בעברית"
+        case .math:      return "חשבון"
+        case .english:   return "אנגלית"
+        case .logic:     return "לוגיקה"
+        case .science:   return "מדע"
+        case .history:   return "היסטוריה"
+        case .geography: return "גיאוגרפיה"
         }
     }
 
     var emoji: String {
         switch self {
-        case .addSub: return "➕"
-        case .mulDiv: return "✖️"
-        case .hebrewSpelling: return "📖"
+        case .math:      return "🧮"
+        case .english:   return "🇬🇧"
+        case .logic:     return "🧩"
+        case .science:   return "🔬"
+        case .history:   return "🏛️"
+        case .geography: return "🌍"
         }
     }
 }

@@ -59,9 +59,13 @@ final class ParentSettings: ObservableObject {
         self.questionsPerSession = qps == 0 ? 5 : qps
 
         if let raw = d.stringArray(forKey: Key.enabledTopics) {
-            self.enabledTopics = Set(raw.compactMap(Topic.init(rawValue:)))
+            let parsed = Set(raw.compactMap(Topic.init(rawValue:)))
+            // If migration left us with no recognized topics, fall back to defaults.
+            self.enabledTopics = parsed.isEmpty
+                ? [.math, .english, .logic, .science]
+                : parsed
         } else {
-            self.enabledTopics = [.addSub, .hebrewSpelling]
+            self.enabledTopics = [.math, .english, .logic, .science]
         }
 
         if let raw = d.dictionary(forKey: Key.difficulty) as? [String: String] {
@@ -96,9 +100,12 @@ final class ParentSettings: ObservableObject {
     }
 
     static let defaultDifficulties: [Topic: Difficulty] = [
-        .addSub: .easy,
-        .mulDiv: .easy,
-        .hebrewSpelling: .easy
+        .math: .easy,
+        .english: .easy,
+        .logic: .easy,
+        .science: .easy,
+        .history: .easy,
+        .geography: .easy
     ]
 
     func difficulty(for topic: Topic) -> Difficulty {

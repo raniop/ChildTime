@@ -12,6 +12,7 @@ struct World: Identifiable, Hashable {
 
     enum AppGradientKey: String {
         case castle, tower, valley, galaxy, dreamy, gold
+        case englishWorld, logicWorld, scienceWorld, historyWorld, geographyWorld
 
         var gradient: LinearGradient {
             switch self {
@@ -21,6 +22,11 @@ struct World: Identifiable, Hashable {
             case .galaxy: return AppGradient.galaxy
             case .dreamy: return AppGradient.dreamy
             case .gold: return AppGradient.gold
+            case .englishWorld: return AppGradient.englishWorld
+            case .logicWorld: return AppGradient.logicWorld
+            case .scienceWorld: return AppGradient.scienceWorld
+            case .historyWorld: return AppGradient.historyWorld
+            case .geographyWorld: return AppGradient.geographyWorld
             }
         }
     }
@@ -29,34 +35,64 @@ struct World: Identifiable, Hashable {
 enum Worlds {
     static let all: [World] = [
         World(
-            id: "numbers_kingdom",
-            name: "ממלכת המספרים",
+            id: "math_kingdom",
+            name: "ממלכת החשבון",
             emoji: "🧮",
-            topic: .addSub,
+            topic: .math,
             starsToUnlock: 0,
             rooms: 10,
             gradient: .castle,
             glowColor: AppColor.flameOrange
         ),
         World(
-            id: "letter_tower",
-            name: "מגדל האותיות",
-            emoji: "📚",
-            topic: .hebrewSpelling,
+            id: "english_land",
+            name: "ארץ אנגלית",
+            emoji: "🔤",
+            topic: .english,
             starsToUnlock: 0,
             rooms: 10,
-            gradient: .tower,
-            glowColor: AppColor.gemPurple
+            gradient: .englishWorld,
+            glowColor: Color(hex: "FF5252")
         ),
         World(
-            id: "multiplication_galaxy",
-            name: "גלקסיית הכפל",
-            emoji: "🚀",
-            topic: .mulDiv,
+            id: "logic_lab",
+            name: "חידות הלוגיקה",
+            emoji: "🧩",
+            topic: .logic,
             starsToUnlock: 0,
             rooms: 10,
-            gradient: .galaxy,
-            glowColor: Color(hex: "9B5DE5")
+            gradient: .logicWorld,
+            glowColor: Color(hex: "7C4DFF")
+        ),
+        World(
+            id: "science_lab",
+            name: "מעבדת המדע",
+            emoji: "🔬",
+            topic: .science,
+            starsToUnlock: 0,
+            rooms: 10,
+            gradient: .scienceWorld,
+            glowColor: Color(hex: "00C853")
+        ),
+        World(
+            id: "history_museum",
+            name: "מוזיאון ההיסטוריה",
+            emoji: "🏛️",
+            topic: .history,
+            starsToUnlock: 0,
+            rooms: 10,
+            gradient: .historyWorld,
+            glowColor: Color(hex: "FFC107")
+        ),
+        World(
+            id: "geo_journey",
+            name: "מסע סביב העולם",
+            emoji: "🌍",
+            topic: .geography,
+            starsToUnlock: 0,
+            rooms: 10,
+            gradient: .geographyWorld,
+            glowColor: Color(hex: "00ACC1")
         )
     ]
 

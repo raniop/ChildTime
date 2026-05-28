@@ -132,6 +132,43 @@ extension FloatingOrbs {
             count: 6
         )
     }
+
+    // MARK: - Topic-specific orb palettes (6 worlds)
+
+    static func englishWorld() -> FloatingOrbs {
+        FloatingOrbs(
+            colors: [Color(hex: "1E3A8A"), Color(hex: "DC2626"), Color(hex: "FFFFFF").opacity(0.6), Color(hex: "FBBF24")],
+            count: 5
+        )
+    }
+
+    static func logicWorld() -> FloatingOrbs {
+        FloatingOrbs(
+            colors: [Color(hex: "7C4DFF"), Color(hex: "00BCD4"), Color(hex: "F15BB5"), Color(hex: "FFD23F")],
+            count: 5
+        )
+    }
+
+    static func scienceWorld() -> FloatingOrbs {
+        FloatingOrbs(
+            colors: [Color(hex: "00C853"), Color(hex: "2962FF"), Color(hex: "00BCD4"), Color(hex: "AEEA00")],
+            count: 5
+        )
+    }
+
+    static func historyWorld() -> FloatingOrbs {
+        FloatingOrbs(
+            colors: [Color(hex: "8D6E63"), Color(hex: "FFC107"), Color(hex: "BF360C"), Color(hex: "FBE5A1")],
+            count: 5
+        )
+    }
+
+    static func geographyWorld() -> FloatingOrbs {
+        FloatingOrbs(
+            colors: [Color(hex: "0AAE6B"), Color(hex: "00ACC1"), Color(hex: "1565C0"), Color(hex: "FFD23F")],
+            count: 5
+        )
+    }
 }
 
 #Preview {

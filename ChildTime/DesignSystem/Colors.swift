@@ -60,6 +60,32 @@ enum AppGradient {
         startPoint: .topLeading, endPoint: .bottomTrailing
     )
 
+    // Topic-specific world backgrounds for the 6 categories
+    static let englishWorld = LinearGradient(
+        colors: [Color(hex: "1E3A8A"), Color(hex: "DC2626")],
+        startPoint: .topLeading, endPoint: .bottomTrailing
+    )
+
+    static let logicWorld = LinearGradient(
+        colors: [Color(hex: "7C4DFF"), Color(hex: "00BCD4")],
+        startPoint: .topLeading, endPoint: .bottomTrailing
+    )
+
+    static let scienceWorld = LinearGradient(
+        colors: [Color(hex: "00C853"), Color(hex: "2962FF")],
+        startPoint: .topLeading, endPoint: .bottomTrailing
+    )
+
+    static let historyWorld = LinearGradient(
+        colors: [Color(hex: "8D6E63"), Color(hex: "FFC107")],
+        startPoint: .topLeading, endPoint: .bottomTrailing
+    )
+
+    static let geographyWorld = LinearGradient(
+        colors: [Color(hex: "0AAE6B"), Color(hex: "00ACC1"), Color(hex: "1565C0")],
+        startPoint: .topLeading, endPoint: .bottomTrailing
+    )
+
     static let gold = LinearGradient(
         colors: [AppColor.starGold, AppColor.companionGlow],
         startPoint: .topLeading, endPoint: .bottomTrailing

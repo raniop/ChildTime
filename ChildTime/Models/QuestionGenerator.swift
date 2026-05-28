@@ -3,8 +3,6 @@ import Foundation
 struct QuestionGenerator {
 
     /// Dynamically derives difficulty from rolling accuracy.
-    /// - accuracy < 0.5 → drop one notch
-    /// - accuracy > 0.85 → bump one notch
     static func adaptiveDifficulty(base: Difficulty, accuracy: Double) -> Difficulty {
         let levels: [Difficulty] = [.easy, .medium, .hard]
         guard let idx = levels.firstIndex(of: base) else { return base }
@@ -16,16 +14,27 @@ struct QuestionGenerator {
 
     static func generate(topic: Topic, difficulty: Difficulty) -> Question {
         switch topic {
-        case .addSub:
-            return makeAddSub(difficulty: difficulty)
-        case .mulDiv:
-            return makeMulDiv(difficulty: difficulty)
-        case .hebrewSpelling:
-            return makeSpelling(difficulty: difficulty)
+        case .math:
+            return makeMath(difficulty: difficulty)
+        case .english, .logic, .science, .history, .geography:
+            return makeFromBank(topic: topic, difficulty: difficulty)
         }
     }
 
-    // MARK: - Math
+    // MARK: - Math (combines addition/subtraction and multiplication/division)
+
+    private static func makeMath(difficulty: Difficulty) -> Question {
+        // Easy: only +/− . Medium: 60% +/− , 40% ×/÷ . Hard: 50/50.
+        let useMulDiv: Bool
+        switch difficulty {
+        case .easy:   useMulDiv = false
+        case .medium: useMulDiv = Double.random(in: 0...1) < 0.4
+        case .hard:   useMulDiv = Bool.random()
+        }
+        return useMulDiv
+            ? makeMulDiv(difficulty: difficulty)
+            : makeAddSub(difficulty: difficulty)
+    }
 
     private static func makeAddSub(difficulty: Difficulty) -> Question {
         let max: Int
@@ -48,7 +57,7 @@ struct QuestionGenerator {
             prompt = "\(big) − \(small) = ?"
             answer = big - small
         }
-        return makeNumericQuestion(prompt: prompt, answer: answer, topic: .addSub)
+        return makeNumericQuestion(prompt: prompt, answer: answer, topic: .math)
     }
 
     private static func makeMulDiv(difficulty: Difficulty) -> Question {
@@ -71,7 +80,7 @@ struct QuestionGenerator {
             prompt = "\(product) ÷ \(a) = ?"
             answer = b
         }
-        return makeNumericQuestion(prompt: prompt, answer: answer, topic: .mulDiv)
+        return makeNumericQuestion(prompt: prompt, answer: answer, topic: .math)
     }
 
     private static func makeNumericQuestion(prompt: String, answer: Int, topic: Topic) -> Question {
@@ -91,96 +100,24 @@ struct QuestionGenerator {
         )
     }
 
-    // MARK: - Hebrew spelling
+    // MARK: - Bank-based questions
 
-    private static func makeSpelling(difficulty: Difficulty) -> Question {
-        let pool: [HebrewWord]
-        switch difficulty {
-        case .easy:   pool = HebrewWords.grade1
-        case .medium: pool = HebrewWords.grade1 + HebrewWords.grade2
-        case .hard:   pool = HebrewWords.grade2
+    private static func makeFromBank(topic: Topic, difficulty: Difficulty) -> Question {
+        let bank = QuestionBanks.bank(for: topic) ?? []
+        guard let item = bank.randomElement() else {
+            return Question(
+                topic: topic,
+                prompt: "אופס... אין שאלות לנושא הזה עדיין",
+                options: ["בסדר", "המשך", "תודה", "חזור"],
+                correctIndex: 0
+            )
         }
-
-        let word = pool.randomElement() ?? HebrewWord(text: "ילד", emoji: "👦")
-
-        // Pick a hide position that yields good distractors.
-        // We try every position (shuffled) and accept the first one that
-        // produces at least 3 letters that DON'T form another valid word.
-        let positions = Array(0..<word.text.count).shuffled()
-        for hideIndex in positions {
-            if let question = makeSpellingQuestion(word: word, hideIndex: hideIndex, strictDistractors: true) {
-                return question
-            }
-        }
-        // Fallback: at least one position must work loosely (emoji disambiguates).
-        return makeSpellingQuestion(word: word, hideIndex: positions[0], strictDistractors: false)!
-    }
-
-    /// Builds a spelling question for `word` with the letter at `hideIndex` hidden.
-    /// If `strictDistractors` is true, distractor letters must NOT form another
-    /// valid Hebrew word from our dictionary. Returns nil if it can't find enough.
-    private static func makeSpellingQuestion(
-        word: HebrewWord,
-        hideIndex: Int,
-        strictDistractors: Bool
-    ) -> Question? {
-        let chars = Array(word.text)
-        guard hideIndex >= 0 && hideIndex < chars.count else { return nil }
-        let hidden = chars[hideIndex]
-
-        // Normalize: if hidden is a final letter (ך, ם, ן, ף, ץ), the correct option
-        // displayed to the kid is the regular form (כ, מ, נ, פ, צ).
-        let normalized: Character
-        if let regular = HebrewWords.finalLetters.first(where: { $0.value == hidden })?.key {
-            normalized = regular
-        } else {
-            normalized = hidden
-        }
-
-        // Build the set of letters that would NOT form another valid word at hideIndex.
-        let isLastIndex = (hideIndex == chars.count - 1)
-        var safeDistractors: [Character] = []
-        for letter in HebrewWords.alphabet where letter != normalized {
-            // When position is at end of word, also test the final form (if applicable).
-            let testLetter: Character
-            if isLastIndex, let finalForm = HebrewWords.finalLetters[letter] {
-                testLetter = finalForm
-            } else {
-                testLetter = letter
-            }
-            var test = chars
-            test[hideIndex] = testLetter
-            let testWord = String(test)
-            let normalizedTest = HebrewWords.normalizeFinals(testWord)
-            let conflicts = HebrewWords.dictionary.contains(testWord)
-                || HebrewWords.dictionary.contains(normalizedTest)
-            if !conflicts {
-                safeDistractors.append(letter)
-            }
-        }
-
-        if strictDistractors && safeDistractors.count < 3 {
-            return nil
-        }
-
-        // Pick 3 distractors (from safe pool if strict, else from any non-correct letter).
-        let pool = strictDistractors
-            ? safeDistractors
-            : HebrewWords.alphabet.filter { $0 != normalized }
-        let chosenDistractors = Array(pool.shuffled().prefix(3))
-
-        let options = ([normalized] + chosenDistractors).shuffled().map { String($0) }
-        let correctIndex = options.firstIndex(of: String(normalized)) ?? 0
-
-        var displayChars = chars
-        displayChars[hideIndex] = "_"
-        let displayed = String(displayChars)
-        let prompt = "\(word.emoji)\nאיזו אות חסרה?\n\(displayed)"
-
+        let allOptions = ([item.correctAnswer] + item.distractors).shuffled()
+        let correctIndex = allOptions.firstIndex(of: item.correctAnswer) ?? 0
         return Question(
-            topic: .hebrewSpelling,
-            prompt: prompt,
-            options: options,
+            topic: topic,
+            prompt: item.prompt,
+            options: allOptions,
             correctIndex: correctIndex
         )
     }

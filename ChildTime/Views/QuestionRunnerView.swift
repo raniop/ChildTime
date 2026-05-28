@@ -120,9 +120,12 @@ struct QuestionRunnerView: View {
     @ViewBuilder
     private var themedOrbs: some View {
         switch world.id {
-        case "numbers_kingdom": FloatingOrbs.castle()
-        case "letter_tower":    FloatingOrbs.tower()
-        case "multiplication_galaxy": FloatingOrbs.galaxy()
+        case "math_kingdom":    FloatingOrbs.castle()
+        case "english_land":    FloatingOrbs.englishWorld()
+        case "logic_lab":       FloatingOrbs.logicWorld()
+        case "science_lab":     FloatingOrbs.scienceWorld()
+        case "history_museum":  FloatingOrbs.historyWorld()
+        case "geo_journey":     FloatingOrbs.geographyWorld()
         default:                FloatingOrbs.home()
         }
     }

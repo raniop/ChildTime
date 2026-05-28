@@ -38,24 +38,21 @@ enum ChildAge: Int, Codable, CaseIterable, Identifiable {
     /// Default difficulty for a topic based on the child's age.
     func defaultDifficulty(for topic: Topic) -> Difficulty {
         switch (self, topic) {
-        case (.preK, _):                 return .easy
-        case (.grade1, _):               return .easy   // including mulDiv — intro to תרגול הכפל בכיתה א-ב
-        case (.grade3, .addSub):         return .medium
-        case (.grade3, .hebrewSpelling): return .medium
-        case (.grade3, .mulDiv):         return .medium
-        case (.older, _):                return .medium
+        case (.preK, _):              return .easy
+        case (.grade1, _):            return .easy
+        case (.grade3, _):            return .medium
+        case (.older, _):             return .medium
         }
     }
 
     /// Topics that should be enabled by default for this age.
-    /// MulDiv is introduced from grade1 (ages 6-7) — kids start the multiplication
-    /// table in school, and exposure helps practice.
+    /// PreK gets a lighter set; older kids get all 6 topics.
     var defaultEnabledTopics: Set<Topic> {
         switch self {
-        case .preK:    return [.addSub, .hebrewSpelling]            // No mul/div in preK
-        case .grade1:  return [.addSub, .hebrewSpelling, .mulDiv]   // Intro to mul/div
-        case .grade3:  return [.addSub, .hebrewSpelling, .mulDiv]
-        case .older:   return [.addSub, .hebrewSpelling, .mulDiv]
+        case .preK:    return [.math, .logic]                                                  // Basic only
+        case .grade1:  return [.math, .english, .logic, .science]                              // Most topics
+        case .grade3:  return [.math, .english, .logic, .science, .history, .geography]       // All topics
+        case .older:   return [.math, .english, .logic, .science, .history, .geography]       // All topics
         }
     }
 
