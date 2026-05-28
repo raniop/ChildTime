@@ -510,31 +510,34 @@ struct OnboardingView: View {
     private var ageSelectionView: some View {
         ScrollView {
             VStack(spacing: AppSpacing.lg) {
-                Spacer().frame(height: 40)
+                Spacer().frame(height: 30)
                 infoIcon(systemName: "figure.child")
 
                 Text("בן כמה הילד?")
-                    .font(.system(size: isCompact ? 30 : 36, weight: .heavy, design: .rounded))
+                    .font(.system(size: isCompact ? 28 : 34, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
 
-                Text("נתאים את הקושי של השאלות לרמה שלו")
-                    .font(.system(size: isCompact ? 17 : 19, weight: .medium, design: .rounded))
+                Text("נבחר אוטומטית את הנושאים והקושי. אפשר לשנות הכל.")
+                    .font(.system(size: isCompact ? 15 : 17, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, AppSpacing.lg)
 
-                VStack(spacing: AppSpacing.md) {
+                // Compact age picker — segmented chips
+                HStack(spacing: AppSpacing.sm) {
                     ForEach(ChildAge.allCases) { age in
-                        ageOption(age)
+                        compactAgeChip(age)
                     }
                 }
                 .padding(.horizontal, AppSpacing.lg)
-                .padding(.top, AppSpacing.md)
 
-                Spacer().frame(height: 20)
+                // Live preview of what was selected
+                previewSection
+                    .padding(.horizontal, AppSpacing.lg)
+
+                Spacer().frame(height: 10)
 
                 JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
-                    settings.applyAgeDefaults(settings.childAge)
                     minutesPerAnswer = settings.minutesPerCorrectAnswer
                     step = .minutes
                 } label: {
@@ -547,50 +550,108 @@ struct OnboardingView: View {
         }
     }
 
-    private func ageOption(_ age: ChildAge) -> some View {
+    private func compactAgeChip(_ age: ChildAge) -> some View {
         let isSelected = settings.childAge == age
         return Button {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                settings.childAge = age
+                settings.applyAgeDefaults(age)
             }
             Haptic.light()
         } label: {
-            HStack(spacing: AppSpacing.md) {
+            VStack(spacing: 4) {
                 Text(age.emoji)
-                    .font(.system(size: isCompact ? 36 : 44))
-                    .frame(width: 56)
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(age.label)
-                        .font(.system(size: isCompact ? 22 : 26, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                    Text(age.description)
-                        .font(.system(size: isCompact ? 15 : 17, weight: .medium, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.75))
-                }
-                Spacer()
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 28))
-                        .foregroundStyle(AppColor.successMint)
-                        .glow(AppColor.successMint, radius: 8)
-                }
+                    .font(.system(size: isCompact ? 28 : 34))
+                Text(age.label)
+                    .font(.system(size: isCompact ? 16 : 18, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
             }
-            .padding(.horizontal, AppSpacing.lg)
-            .padding(.vertical, AppSpacing.md)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, AppSpacing.sm)
             .background(
-                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                    .fill(.white.opacity(isSelected ? 0.25 : 0.10))
+                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                    .fill(.white.opacity(isSelected ? 0.28 : 0.10))
                     .overlay(
-                        RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                        RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
                             .stroke(
                                 isSelected ? AppColor.successMint : .white.opacity(0.2),
                                 lineWidth: isSelected ? 2.5 : 1
                             )
                     )
             )
-            .glow(isSelected ? AppColor.successMint : .clear, radius: isSelected ? 12 : 0)
+            .glow(isSelected ? AppColor.successMint : .clear, radius: isSelected ? 10 : 0)
+            .scaleEffect(isSelected ? 1.05 : 1.0)
         }
         .buttonStyle(.juicy)
+    }
+
+    private var previewSection: some View {
+        VStack(alignment: .trailing, spacing: AppSpacing.sm) {
+            HStack {
+                Text("הקושי שיוגדר")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(AppColor.companionGlow)
+                Spacer()
+                Text(settings.childAge.description)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+
+            ForEach(Topic.allCases) { topic in
+                topicPreviewRow(topic)
+            }
+        }
+        .padding(AppSpacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                .fill(.white.opacity(0.10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                        .stroke(.white.opacity(0.2), lineWidth: 1)
+                )
+        )
+    }
+
+    private func topicPreviewRow(_ topic: Topic) -> some View {
+        let isEnabled = settings.enabledTopics.contains(topic)
+        return HStack(spacing: AppSpacing.sm) {
+            Toggle("", isOn: Binding(
+                get: { isEnabled },
+                set: { newValue in
+                    if newValue { settings.enabledTopics.insert(topic) }
+                    else { settings.enabledTopics.remove(topic) }
+                }
+            ))
+            .labelsHidden()
+            .tint(AppColor.successMint)
+
+            HStack(spacing: 6) {
+                Text(topic.emoji).font(.system(size: 22))
+                Text(topic.displayName)
+                    .font(.system(size: isCompact ? 15 : 17, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .opacity(isEnabled ? 1 : 0.4)
+            }
+
+            Spacer()
+
+            if isEnabled {
+                Picker("", selection: Binding(
+                    get: { settings.difficulty(for: topic) },
+                    set: { settings.setDifficulty($0, for: topic) }
+                )) {
+                    Text("קל").tag(Difficulty.easy)
+                    Text("בינוני").tag(Difficulty.medium)
+                    Text("קשה").tag(Difficulty.hard)
+                }
+                .pickerStyle(.menu)
+                .tint(.white)
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(.white.opacity(0.18), in: Capsule())
+            }
+        }
+        .padding(.vertical, 2)
     }
 
     private func complete() {
