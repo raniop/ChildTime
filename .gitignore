@@ -1,0 +1,59 @@
+# Claude Code config (local)
+.claude/
+
+# Xcode
+build/
+DerivedData/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+*.xcscmblueprint
+*.xccheckout
+
+# Build artifacts
+*.dSYM.zip
+*.dSYM
+*.ipa
+*.xcarchive
+
+# Swift Package Manager
+.swiftpm/
+Packages/
+Package.pins
+Package.resolved
+.build/
+
+# CocoaPods (not used but precaution)
+Pods/
+
+# Carthage (not used but precaution)
+Carthage/Build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Thumbnails
+.Thumbs.db
+ehthumbs.db
+
+# Folder config files
+.localized
+
+# Backup files
+*.bak
+*.swp
+*~
+
+# Logs
+*.log

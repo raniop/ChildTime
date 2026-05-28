@@ -1,0 +1,100 @@
+import SwiftUI
+
+struct LevelUpView: View {
+    let newLevel: Int
+    let onContinue: () -> Void
+
+    @State private var companion = CompanionController()
+    @State private var confettiTrigger: Int = 0
+    @State private var scale: CGFloat = 0.3
+    @State private var titleVisible = false
+
+    var body: some View {
+        ZStack {
+            // Backdrop
+            LinearGradient(
+                colors: [Color.black, AppColor.gemPurple.opacity(0.7), .black],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+            SparkleField(count: 40, size: 16)
+            Confetti(trigger: confettiTrigger)
+
+            VStack(spacing: AppSpacing.xl) {
+                Spacer()
+
+                CompanionView(controller: companion, size: 160)
+                    .scaleEffect(scale)
+                    .glow(AppColor.starGold, radius: 40)
+
+                if titleVisible {
+                    VStack(spacing: AppSpacing.md) {
+                        Text("עלית רמה!")
+                            .font(.system(size: 64, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppColor.starGold)
+                            .glow(AppColor.starGold, radius: 20)
+                            .transition(.scale.combined(with: .opacity))
+
+                        Text("רמה \(newLevel)")
+                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .transition(.scale.combined(with: .opacity))
+
+                        if let perk = perkForLevel(newLevel) {
+                            Text(perk)
+                                .font(.system(size: 22, weight: .medium, design: .rounded))
+                                .foregroundStyle(AppColor.companionGlow)
+                                .padding(.top, AppSpacing.sm)
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                }
+
+                Spacer()
+
+                JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
+                    onContinue()
+                } label: {
+                    Text("המשך")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                }
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.bottom, AppSpacing.xl)
+                .opacity(titleVisible ? 1 : 0)
+                .animation(.easeIn(duration: 0.4), value: titleVisible)
+            }
+        }
+        .onAppear { startAnimation() }
+    }
+
+    private func startAnimation() {
+        SoundPlayer.shared.play(.levelUp)
+        Haptic.heavy()
+        companion.wow()
+        withAnimation(.spring(response: 0.7, dampingFraction: 0.5)) {
+            scale = 1.3
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                scale = 1.0
+                titleVisible = true
+            }
+            confettiTrigger += 1
+        }
+    }
+
+    private func perkForLevel(_ lvl: Int) -> String? {
+        switch lvl {
+        case 5: return "🎩 כובע נפתח!"
+        case 10: return "✨ כנפיים נפתחות!"
+        case 20: return "🌈 צבעים נדירים!"
+        default: return nil
+        }
+    }
+}
+
+#Preview {
+    LevelUpView(newLevel: 5, onContinue: {})
+        .environment(\.layoutDirection, .rightToLeft)
+}
