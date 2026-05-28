@@ -613,7 +613,8 @@ struct OnboardingView: View {
                         auth.handleAppleCompletion(result)
                     }
                     .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-                    .frame(maxWidth: 360, minHeight: 50)
+                    .frame(maxWidth: 360)
+                    .frame(height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
                     Button {
