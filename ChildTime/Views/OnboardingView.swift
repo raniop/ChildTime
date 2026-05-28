@@ -218,127 +218,136 @@ struct OnboardingView: View {
     // MARK: - Family Controls
 
     private var familyControlsView: some View {
-        ScrollView {
-            VStack(spacing: AppSpacing.lg) {
-                Spacer().frame(height: 40)
-                infoIcon(systemName: "app.badge.fill")
-                Text("אילו אפליקציות לחסום?")
-                    .font(.system(size: 30, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                Text("בחר את האפליקציות והקטגוריות שיהיו נעולות עד שהילד יענה על שאלות. (YouTube, TikTok, משחקים...)")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, AppSpacing.lg)
+        VStack(spacing: AppSpacing.lg) {
+            Spacer()
 
-                // Status badge
-                HStack(spacing: 6) {
-                    Image(systemName: shields.isAuthorized ? "checkmark.shield.fill" : "exclamationmark.shield.fill")
-                    Text("סטטוס: \(shields.authStatusText)")
-                        .font(.system(size: 14, weight: .semibold, design: .monospaced))
+            infoIcon(systemName: "app.badge.fill")
+
+            Text("אילו אפליקציות לחסום?")
+                .font(.system(size: 30, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+
+            Text("בחר אילו אפליקציות יהיו נעולות עד שהילד יענה על שאלות\n(YouTube, TikTok, משחקים…)")
+                .font(.system(size: 17, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, AppSpacing.lg)
+
+            // Friendly status pill — only shown when something needs the parent's attention
+            if !shields.isAuthorized {
+                statusPill(
+                    icon: "exclamationmark.shield.fill",
+                    text: "צריך אישור Family Controls",
+                    color: AppColor.almostWarm
+                )
+            } else if !selectionHasItems {
+                statusPill(
+                    icon: "info.circle.fill",
+                    text: "עדיין לא נבחרו אפליקציות",
+                    color: AppColor.companionGlow
+                )
+            } else {
+                statusPill(
+                    icon: "checkmark.circle.fill",
+                    text: "\(selectionCount) אפליקציות נבחרו",
+                    color: AppColor.successMint
+                )
+            }
+
+            // Primary action — either approve, or pick apps
+            if !shields.isAuthorized {
+                JuicyButton(gradient: AppGradient.castle, glowColor: AppColor.flameOrange) {
+                    Task { await shields.requestAuthorizationIfNeeded() }
+                } label: {
+                    Label("אשר Family Controls", systemImage: "checkmark.shield.fill")
                 }
-                .foregroundStyle(shields.isAuthorized ? AppColor.successMint : AppColor.almostWarm)
-                .padding(.horizontal, AppSpacing.md)
-                .padding(.vertical, 6)
-                .background(.white.opacity(0.15), in: Capsule())
 
-                if !shields.isAuthorized {
-                    Button {
-                        Task { await shields.requestAuthorizationIfNeeded() }
-                    } label: {
-                        Label("אשר Family Controls", systemImage: "checkmark.shield.fill")
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, AppSpacing.lg)
-                            .padding(.vertical, AppSpacing.md)
-                            .background(AppGradient.castle, in: Capsule())
-                    }
-                    .buttonStyle(.juicy)
+                if let err = shields.authorizationError {
+                    errorBubble(message: err)
+                }
+                Button {
+                    openSettings()
+                } label: {
+                    Label("פתח Settings", systemImage: "arrow.up.right.square")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.vertical, 6)
+                        .background(.white.opacity(0.18), in: Capsule())
+                }
+            } else {
+                JuicyButton(gradient: AppGradient.castle, glowColor: AppColor.flameOrange) {
+                    showPicker = true
+                } label: {
+                    Label(
+                        selectionHasItems ? "ערוך בחירה" : "בחר אפליקציות",
+                        systemImage: "app.badge.fill"
+                    )
+                }
+            }
 
-                    if let err = shields.authorizationError {
-                        VStack(spacing: 6) {
-                            Text("⚠️ שגיאה באישור:")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(.white)
-                            Text(err)
-                                .font(.system(size: 12, design: .monospaced))
-                                .foregroundStyle(.white.opacity(0.9))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, AppSpacing.md)
-                        }
-                        .padding(AppSpacing.md)
-                        .background(Color.red.opacity(0.25), in: RoundedRectangle(cornerRadius: AppRadius.medium))
-                        .padding(.horizontal, AppSpacing.lg)
-                    }
+            Spacer()
 
-                    // Hint + deep link to Settings (Screen Time)
-                    VStack(spacing: AppSpacing.sm) {
-                        Text("הדיאלוג לא קופץ? כנראה ש-Screen Time כבוי ב-iPad")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.9))
-                            .multilineTextAlignment(.center)
-                        Button {
-                            openSettings()
-                        } label: {
-                            Label("פתח Settings", systemImage: "arrow.up.right.square")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, AppSpacing.lg)
-                                .padding(.vertical, AppSpacing.sm)
-                                .background(.white.opacity(0.2), in: Capsule())
-                        }
-                    }
-                    .padding(.top, AppSpacing.sm)
-                } else {
-                    Button {
-                        showPicker = true
-                    } label: {
-                        Label(
-                            selection.applicationTokens.isEmpty && selection.categoryTokens.isEmpty
-                                ? "בחר אפליקציות"
-                                : "ערוך בחירה (\(selection.applicationTokens.count + selection.categoryTokens.count) נבחרו)",
-                            systemImage: "app.badge.fill"
-                        )
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
+            // Bottom nav — back + continue, sized consistently
+            HStack(spacing: AppSpacing.md) {
+                Button {
+                    step = .parentInfo
+                } label: {
+                    Text("חזור")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, AppSpacing.lg)
-                        .padding(.vertical, AppSpacing.md)
-                        .background(AppGradient.castle, in: Capsule())
-                    }
-                    .buttonStyle(.juicy)
+                        .padding(.vertical, 12)
+                        .background(.white.opacity(0.18), in: Capsule())
                 }
+                .buttonStyle(.juicy)
 
-                if !selection.applicationTokens.isEmpty || !selection.categoryTokens.isEmpty {
-                    Text("✓ בחירה נשמרה")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundStyle(AppColor.successMint)
+                JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint, maxWidth: 280) {
+                    step = .pinSetup
+                } label: {
+                    Text("המשך")
                 }
-
-                Spacer().frame(height: 20)
-
-                HStack(spacing: AppSpacing.md) {
-                    Button {
-                        step = .parentInfo
-                    } label: {
-                        Text("חזור")
-                            .padding(.horizontal, AppSpacing.lg)
-                            .padding(.vertical, AppSpacing.md)
-                            .background(.white.opacity(0.2), in: Capsule())
-                            .foregroundStyle(.white)
-                    }
-
-                    JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
-                        step = .pinSetup
-                    } label: {
-                        Text("המשך")
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
-                    }
-                }
-                .padding(.horizontal, AppSpacing.xl)
-                .padding(.bottom, AppSpacing.xl)
             }
+            .padding(.bottom, AppSpacing.xl)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var selectionCount: Int {
+        selection.applicationTokens.count + selection.categoryTokens.count
+    }
+
+    private var selectionHasItems: Bool { selectionCount > 0 }
+
+    private func statusPill(icon: String, text: String, color: Color) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+            Text(text)
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
+        }
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.vertical, 10)
+        .background(.white.opacity(0.15), in: Capsule())
+        .overlay(Capsule().stroke(color.opacity(0.5), lineWidth: 1.5))
+    }
+
+    private func errorBubble(message: String) -> some View {
+        VStack(spacing: 6) {
+            Text("⚠️ שגיאה")
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+            Text(message)
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(.white.opacity(0.85))
+                .multilineTextAlignment(.center)
+                .lineLimit(3)
+        }
+        .padding(AppSpacing.md)
+        .frame(maxWidth: 420)
+        .background(Color.red.opacity(0.25), in: RoundedRectangle(cornerRadius: AppRadius.medium))
     }
 
     // MARK: - PIN setup
