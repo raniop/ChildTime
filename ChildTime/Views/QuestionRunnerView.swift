@@ -452,13 +452,18 @@ struct QuestionRunnerView: View {
         SoundPlayer.shared.play(.wrongSoft)
         Haptic.warning()
         consecutiveWrong += 1
-        progress.recordWrong(topic: q.topic)
-        companion.console([
-            "כמעט!",
-            "ממש קרוב",
-            "טעות מתוקה — הנה הנכון!",
-            "ננסה את הבאה"
-        ].randomElement()!)
+        let penaltyMinutes = progress.recordWrong(topic: q.topic)
+        if penaltyMinutes > 0 {
+            // Gentle messaging — never accusatory.
+            companion.console("נורא לא נורא — אבל הפסדנו \(penaltyMinutes) דק'")
+        } else {
+            companion.console([
+                "כמעט!",
+                "ממש קרוב",
+                "טעות מתוקה — הנה הנכון!",
+                "ננסה את הבאה"
+            ].randomElement()!)
+        }
     }
 }
 

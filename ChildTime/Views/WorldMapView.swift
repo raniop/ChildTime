@@ -136,6 +136,10 @@ struct WorldMapView: View {
 
     private var topBar: some View {
         HStack(spacing: AppSpacing.sm) {
+            // Child avatar — top-right in RTL (leading is the right edge).
+            // Tap to change photo; long-press for reset/replace.
+            ChildAvatarView(size: 50)
+
             // Settings button
             Button {
                 showingParentGate = true

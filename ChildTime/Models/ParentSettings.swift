@@ -17,6 +17,29 @@ final class ParentSettings: ObservableObject {
         static let childAge = "childAge"
         static let childGender = "childGender"
         static let childName = "childName"
+        static let childPhotoData = "childPhotoData"
+        static let soundsEnabled = "soundsEnabled"
+        static let rewardMode = "rewardMode"
+        static let batchAnswers = "batchAnswers"
+        static let batchMinutes = "batchMinutes"
+        static let penaltyEnabled = "penaltyEnabled"
+        static let penaltyAfterMistakes = "penaltyAfterMistakes"
+        static let penaltyMinutes = "penaltyMinutes"
+    }
+
+    enum RewardMode: String, CaseIterable, Identifiable {
+        /// Each correct answer awards N minutes immediately (default).
+        case perAnswer
+        /// Every N correct answers in total awards Y minutes (one big chunk).
+        case perBatch
+
+        var id: String { rawValue }
+        var displayName: String {
+            switch self {
+            case .perAnswer: return "דקות לכל תשובה"
+            case .perBatch:  return "צבירת תשובות"
+            }
+        }
     }
 
     @Published var pin: String {
@@ -60,6 +83,37 @@ final class ParentSettings: ObservableObject {
     @Published var childName: String {
         didSet { defaults.set(childName, forKey: Key.childName) }
     }
+    @Published var childPhotoData: Data? {
+        didSet {
+            if let d = childPhotoData { defaults.set(d, forKey: Key.childPhotoData) }
+            else { defaults.removeObject(forKey: Key.childPhotoData) }
+        }
+    }
+    @Published var soundsEnabled: Bool {
+        didSet { defaults.set(soundsEnabled, forKey: Key.soundsEnabled) }
+    }
+    @Published var rewardMode: RewardMode {
+        didSet { defaults.set(rewardMode.rawValue, forKey: Key.rewardMode) }
+    }
+    /// In `.perBatch` mode: how many correct answers per batch reward.
+    @Published var batchAnswers: Int {
+        didSet { defaults.set(batchAnswers, forKey: Key.batchAnswers) }
+    }
+    /// In `.perBatch` mode: minutes awarded when the batch fills.
+    @Published var batchMinutes: Int {
+        didSet { defaults.set(batchMinutes, forKey: Key.batchMinutes) }
+    }
+    @Published var penaltyEnabled: Bool {
+        didSet { defaults.set(penaltyEnabled, forKey: Key.penaltyEnabled) }
+    }
+    /// How many *consecutive* wrong answers before a penalty fires.
+    @Published var penaltyAfterMistakes: Int {
+        didSet { defaults.set(penaltyAfterMistakes, forKey: Key.penaltyAfterMistakes) }
+    }
+    /// Minutes deducted from `pendingMinutes` when the penalty fires.
+    @Published var penaltyMinutes: Int {
+        didSet { defaults.set(penaltyMinutes, forKey: Key.penaltyMinutes) }
+    }
 
     private init() {
         let d = AppGroup.defaults
@@ -71,7 +125,6 @@ final class ParentSettings: ObservableObject {
 
         if let raw = d.stringArray(forKey: Key.enabledTopics) {
             let parsed = Set(raw.compactMap(Topic.init(rawValue:)))
-            // If migration left us with no recognized topics, fall back to defaults.
             self.enabledTopics = parsed.isEmpty
                 ? [.math, .english, .logic, .science]
                 : parsed
@@ -102,6 +155,33 @@ final class ParentSettings: ObservableObject {
             self.childGender = nil
         }
         self.childName = d.string(forKey: Key.childName) ?? ""
+        self.childPhotoData = d.data(forKey: Key.childPhotoData)
+
+        // Sound: default ON. UserDefaults returns false for missing keys, so use object check.
+        if d.object(forKey: Key.soundsEnabled) == nil {
+            self.soundsEnabled = true
+        } else {
+            self.soundsEnabled = d.bool(forKey: Key.soundsEnabled)
+        }
+
+        // Reward mode
+        if let raw = d.string(forKey: Key.rewardMode),
+           let mode = RewardMode(rawValue: raw) {
+            self.rewardMode = mode
+        } else {
+            self.rewardMode = .perAnswer
+        }
+        let ba = d.integer(forKey: Key.batchAnswers)
+        self.batchAnswers = ba == 0 ? 5 : ba
+        let bm = d.integer(forKey: Key.batchMinutes)
+        self.batchMinutes = bm == 0 ? 10 : bm
+
+        // Penalty: default OFF. Be gentle by default — opt-in.
+        self.penaltyEnabled = d.bool(forKey: Key.penaltyEnabled)
+        let pam = d.integer(forKey: Key.penaltyAfterMistakes)
+        self.penaltyAfterMistakes = pam == 0 ? 3 : pam
+        let pm = d.integer(forKey: Key.penaltyMinutes)
+        self.penaltyMinutes = pm == 0 ? 1 : pm
     }
 
     /// Apply age-appropriate defaults (called when parent picks an age in onboarding

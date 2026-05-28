@@ -6,6 +6,9 @@ final class SoundPlayer {
     static let shared = SoundPlayer()
 
     private var players: [AppSound: AVAudioPlayer] = [:]
+
+    /// Programmatic override for testing/dev. Production gating lives on
+    /// `ParentSettings.shared.soundsEnabled`.
     var isMuted: Bool = false
 
     private init() {
@@ -29,12 +32,12 @@ final class SoundPlayer {
 
     func play(_ sound: AppSound) {
         guard !isMuted else { return }
+        // Respect the parent's master sound toggle.
+        guard ParentSettings.shared.soundsEnabled else { return }
         if let player = players[sound] {
-            // Prefer bundled audio asset if one exists.
             player.currentTime = 0
             player.play()
         } else {
-            // No bundled file — synthesize a pleasant melody procedurally.
             ToneSynth.shared.play(sound)
         }
     }

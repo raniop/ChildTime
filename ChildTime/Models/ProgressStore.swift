@@ -25,6 +25,8 @@ final class ProgressStore: ObservableObject {
         static let topicAccuracy = "topicAccuracy"
         static let topicAnswered = "topicAnswered"
         static let topicCorrect = "topicCorrect"
+        static let batchCounter = "batchCounter"
+        static let wrongStreak = "wrongStreak"
     }
 
     // MARK: - Currencies & progression
@@ -96,6 +98,17 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var topicCorrect: [String: Int] {
         didSet { defaults.set(topicCorrect, forKey: Key.topicCorrect) }
     }
+    /// Counts correct answers toward the next batch reward (perBatch mode).
+    @Published private(set) var batchCounter: Int {
+        didSet { defaults.set(batchCounter, forKey: Key.batchCounter) }
+    }
+    /// Consecutive wrong-answer count — drives the penalty system.
+    @Published private(set) var wrongStreak: Int {
+        didSet { defaults.set(wrongStreak, forKey: Key.wrongStreak) }
+    }
+    /// Set to a positive integer for one tick when a penalty fires, so the UI
+    /// can show feedback. Reset to 0 by the consumer after reading.
+    @Published var lastPenaltyMinutes: Int = 0
 
     // MARK: - Init
 
@@ -123,6 +136,8 @@ final class ProgressStore: ObservableObject {
         self.topicAccuracy = (d.dictionary(forKey: Key.topicAccuracy) as? [String: Double]) ?? [:]
         self.topicAnswered = (d.dictionary(forKey: Key.topicAnswered) as? [String: Int]) ?? [:]
         self.topicCorrect = (d.dictionary(forKey: Key.topicCorrect) as? [String: Int]) ?? [:]
+        self.batchCounter = d.integer(forKey: Key.batchCounter)
+        self.wrongStreak = d.integer(forKey: Key.wrongStreak)
     }
 
     // MARK: - Derived
@@ -184,19 +199,65 @@ final class ProgressStore: ObservableObject {
         totalAnswered += 1
         totalCorrect += 1
         currentStreak += 1
+        wrongStreak = 0  // any correct answer breaks the penalty streak
         stars += earned
-        pendingMinutes += minutesPerCorrect * multiplier
+        // Time reward — driven by ParentSettings.rewardMode.
+        let settings = ParentSettings.shared
+        switch settings.rewardMode {
+        case .perAnswer:
+            // Classic: each correct answer = N minutes (× multiplier on bonus Qs)
+            pendingMinutes += minutesPerCorrect * multiplier
+        case .perBatch:
+            // Save up: every `batchAnswers` correct answers = `batchMinutes`.
+            // Bonus questions still count their multiplier so super-Q is rewarding.
+            batchCounter += multiplier
+            let target = max(1, settings.batchAnswers)
+            while batchCounter >= target {
+                pendingMinutes += settings.batchMinutes
+                batchCounter -= target
+            }
+        }
         xp += RewardEngine.xpPerCorrect
         updateTopicStat(topic: ctx.topic, correct: true)
         maybeConvertStarsToGems()
         return earned
     }
 
-    func recordWrong(topic: Topic) {
+    /// Records a wrong answer. Returns the number of penalty minutes applied
+    /// this tick (0 if penalty disabled or threshold not met). The caller can
+    /// use the return value to show a gentle "lost X minutes" toast.
+    @discardableResult
+    func recordWrong(topic: Topic) -> Int {
         totalAnswered += 1
         currentStreak = 0
         xp += RewardEngine.xpPerQuestion
         updateTopicStat(topic: topic, correct: false)
+
+        // Penalty handling
+        let settings = ParentSettings.shared
+        guard settings.penaltyEnabled else {
+            wrongStreak = 0
+            return 0
+        }
+        wrongStreak += 1
+        let threshold = max(1, settings.penaltyAfterMistakes)
+        guard wrongStreak >= threshold else { return 0 }
+
+        // Deduct from pending pool first, then from active unlock window.
+        var minutesToDeduct = max(0, settings.penaltyMinutes)
+        let fromPending = min(pendingMinutes, minutesToDeduct)
+        pendingMinutes -= fromPending
+        minutesToDeduct -= fromPending
+
+        if minutesToDeduct > 0, let end = unlockEndsAt, end > Date() {
+            let newEnd = end.addingTimeInterval(-Double(minutesToDeduct * 60))
+            unlockEndsAt = newEnd > Date() ? newEnd : nil
+        }
+
+        wrongStreak = 0  // reset streak so penalty doesn't fire again next wrong
+        let applied = settings.penaltyMinutes
+        lastPenaltyMinutes = applied  // ping the UI
+        return applied
     }
 
     private func updateTopicStat(topic: Topic, correct: Bool) {

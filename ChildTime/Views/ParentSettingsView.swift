@@ -18,10 +18,13 @@ struct ParentSettingsView: View {
         NavigationStack {
             Form {
                 premiumSection
+                profileSection
                 authorizationSection
                 syncSection
                 ageSection
                 rewardSection
+                penaltySection
+                soundsSection
                 topicsSection
                 appsSection
                 pinSection
@@ -240,18 +243,107 @@ struct ParentSettingsView: View {
         }
     }
 
+    private var profileSection: some View {
+        Section("פרופיל הילד") {
+            HStack(spacing: 14) {
+                ChildAvatarView(size: 64)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(settings.childName.isEmpty ? "ללא שם" : settings.childName)
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    Text("הקש על התמונה כדי להחליף — בחר מהאלבום")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+            .padding(.vertical, 4)
+
+            TextField("שם הילד", text: $settings.childName)
+                .textInputAutocapitalization(.words)
+        }
+    }
+
     private var rewardSection: some View {
-        Section("תגמול") {
-            Stepper(
-                "דקות לכל תשובה נכונה: \(settings.minutesPerCorrectAnswer)",
-                value: $settings.minutesPerCorrectAnswer,
-                in: 1...10
-            )
+        Section {
+            Picker("שיטת תגמול", selection: $settings.rewardMode) {
+                ForEach(ParentSettings.RewardMode.allCases) { mode in
+                    Text(mode.displayName).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            switch settings.rewardMode {
+            case .perAnswer:
+                Stepper(
+                    "דקות לכל תשובה נכונה: \(settings.minutesPerCorrectAnswer)",
+                    value: $settings.minutesPerCorrectAnswer,
+                    in: 1...10
+                )
+            case .perBatch:
+                Stepper(
+                    "תשובות נכונות לפרס: \(settings.batchAnswers)",
+                    value: $settings.batchAnswers,
+                    in: 2...30
+                )
+                Stepper(
+                    "דקות שמקבל בכל פרס: \(settings.batchMinutes)",
+                    value: $settings.batchMinutes,
+                    in: 1...60
+                )
+            }
+
             Stepper(
                 "שאלות בכל סבב: \(settings.questionsPerSession)",
                 value: $settings.questionsPerSession,
                 in: 3...20
             )
+        } header: {
+            Text("תגמול")
+        } footer: {
+            Text(rewardModeExplanation)
+        }
+    }
+
+    private var rewardModeExplanation: String {
+        switch settings.rewardMode {
+        case .perAnswer:
+            return "כל תשובה נכונה מוסיפה דקות מיד. אידיאלי לילדים צעירים שצריכים feedback מהיר."
+        case .perBatch:
+            return "הילד צריך לענות נכון על \(settings.batchAnswers) שאלות לפני שמקבל \(settings.batchMinutes) דקות. מעודד התמדה."
+        }
+    }
+
+    private var penaltySection: some View {
+        Section {
+            Toggle("הורד זמן על טעויות", isOn: $settings.penaltyEnabled)
+            if settings.penaltyEnabled {
+                Stepper(
+                    "אחרי \(settings.penaltyAfterMistakes) טעויות ברצף",
+                    value: $settings.penaltyAfterMistakes,
+                    in: 2...10
+                )
+                Stepper(
+                    "להוריד דקות: \(settings.penaltyMinutes)",
+                    value: $settings.penaltyMinutes,
+                    in: 1...10
+                )
+            }
+        } header: {
+            Text("עונש על טעויות")
+        } footer: {
+            Text(settings.penaltyEnabled
+                ? "אם הילד טועה \(settings.penaltyAfterMistakes) פעמים ברצף — נוריד לו \(settings.penaltyMinutes) דקות מהזמן שצבר. תשובה נכונה מאפסת את המונה."
+                : "כבוי. הילד לא יאבד זמן גם אם יטעה הרבה.")
+        }
+    }
+
+    private var soundsSection: some View {
+        Section {
+            Toggle("צלילים פעילים", isOn: $settings.soundsEnabled)
+        } header: {
+            Text("צלילים")
+        } footer: {
+            Text("הצלילים באפליקציה רכים ומשמשים כפידבק על תשובות נכונות / שגויות. ניתן לכבות אותם לגמרי.")
         }
     }
 

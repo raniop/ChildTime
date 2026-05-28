@@ -46,87 +46,93 @@ final class ToneSynth {
     // MARK: - Pre-rendering
 
     private func preloadAll() {
+        // Volume design notes:
+        //   • Master volume default = 0.16 (was 0.32). Kids hold the iPad
+        //     close to their face — old volume was harsh, especially on the
+        //     wrong-answer chime.
+        //   • Notes are shorter so they don't linger.
+        //   • Wrong-answer is now a single soft thud, not a melody — most
+        //     parents felt the descending interval sounded "judging."
+
         // Bright, ascending major arpeggio. "Correct!"
         buffers[.correctSmall] = render(melody: [
-            (.c5, 0.09),
-            (.e5, 0.09),
-            (.g5, 0.20),
+            (.c5, 0.07),
+            (.e5, 0.07),
+            (.g5, 0.14),
         ])
 
-        // Bigger, longer ascending arpeggio ending an octave up. "Correct + bonus!"
+        // Bigger ascending arpeggio for super questions.
         buffers[.correctBig] = render(melody: [
-            (.c5, 0.08),
-            (.e5, 0.08),
-            (.g5, 0.08),
-            (.c6, 0.10),
-            (.e6, 0.28),
+            (.c5, 0.06),
+            (.e5, 0.06),
+            (.g5, 0.06),
+            (.c6, 0.08),
+            (.e6, 0.20),
         ])
 
-        // Gentle descending minor third. "Hmm — try again."
-        // Soft, never harsh — important for kids' confidence.
+        // Single, soft mid-low chime. Neutral — not punishing.
         buffers[.wrongSoft] = render(melody: [
-            (.a4, 0.12),
-            (.f4, 0.28),
-        ])
+            (.f4, 0.18),
+        ], volume: 0.08)
 
-        // Short brilliant ding. "Streak +1"
+        // Quick ding for streak +1.
         buffers[.streakUp] = render(melody: [
-            (.e6, 0.06),
-            (.g6, 0.16),
+            (.e6, 0.05),
+            (.g6, 0.10),
         ])
 
         // Magical shimmer when a portal opens.
         buffers[.portalAppear] = render(melody: [
-            (.g5, 0.07),
-            (.b5, 0.07),
-            (.d6, 0.07),
-            (.g6, 0.20),
+            (.g5, 0.05),
+            (.b5, 0.05),
+            (.d6, 0.05),
+            (.g6, 0.14),
         ])
 
-        // Festival fanfare — level up!
+        // Festival fanfare — level up. Kept lively but not loud.
         buffers[.levelUp] = render(melody: [
-            (.c5, 0.10),
-            (.e5, 0.10),
-            (.g5, 0.10),
-            (.c6, 0.10),
-            (.g5, 0.10),
-            (.c6, 0.32),
+            (.c5, 0.08),
+            (.e5, 0.08),
+            (.g5, 0.08),
+            (.c6, 0.08),
+            (.g5, 0.08),
+            (.c6, 0.22),
         ])
 
         // Chest opens — golden cascade.
         buffers[.chestOpen] = render(melody: [
-            (.g5, 0.07),
-            (.c6, 0.07),
-            (.e6, 0.07),
-            (.g6, 0.07),
-            (.c7, 0.26),
+            (.g5, 0.05),
+            (.c6, 0.05),
+            (.e6, 0.05),
+            (.g6, 0.05),
+            (.c7, 0.18),
         ])
 
         // Companion cheers — joyful jump up.
         buffers[.companionCheer] = render(melody: [
-            (.g5, 0.08),
-            (.c6, 0.18),
+            (.g5, 0.06),
+            (.c6, 0.12),
         ])
 
         // World unlock — long, magical, ascending.
         buffers[.worldUnlock] = render(melody: [
-            (.c5, 0.10),
-            (.g5, 0.10),
-            (.c6, 0.10),
-            (.e6, 0.10),
-            (.g6, 0.36),
+            (.c5, 0.08),
+            (.g5, 0.08),
+            (.c6, 0.08),
+            (.e6, 0.08),
+            (.g6, 0.26),
         ])
 
         // Soft UI tap — barely-there click.
         buffers[.uiTap] = render(melody: [
-            (.c6, 0.04),
-        ], volume: 0.18)
+            (.c6, 0.03),
+        ], volume: 0.09)
     }
 
     // MARK: - Synthesis
 
     /// Render a sequence of (frequency, duration) notes into a single buffer.
-    private func render(melody: [(freq: Double, dur: Double)], volume: Double = 0.32) -> AVAudioPCMBuffer {
+    private func render(melody: [(freq: Double, dur: Double)], volume: Double = 0.16) -> AVAudioPCMBuffer {
         let sampleRate = format.sampleRate
         var samples: [Float] = []
         for (freq, dur) in melody {

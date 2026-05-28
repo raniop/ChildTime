@@ -999,7 +999,6 @@ struct OnboardingView: View {
         let isSelected = settings.difficulty(for: topic) == d
         return Button {
             Haptic.light()
-            SoundPlayer.shared.play(.uiTap)
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 settings.setDifficulty(d, for: topic)
             }
