@@ -327,6 +327,18 @@ final class ProgressStore: ObservableObject {
         worldProgress[worldID] = min(current + 1, 9)
     }
 
+    // MARK: - Spending pending minutes
+
+    /// Pays for an in-app benefit (e.g. a hint) by burning pending minutes.
+    /// Returns `true` if the kid had enough minutes and the spend succeeded.
+    @discardableResult
+    func spendPendingMinutes(_ count: Int) -> Bool {
+        guard count > 0 else { return true }
+        guard pendingMinutes >= count else { return false }
+        pendingMinutes -= count
+        return true
+    }
+
     // MARK: - Session time
 
     func consumePendingMinutes() -> Int {

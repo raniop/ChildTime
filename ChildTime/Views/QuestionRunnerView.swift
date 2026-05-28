@@ -238,10 +238,62 @@ struct QuestionRunnerView: View {
 
             optionsGrid(for: q)
 
-            if consecutiveWrong >= 2 && !showFeedback {
-                magicWandButton
+            // Hint + magic-wand row. Both stay quiet until the kid actually
+            // needs them: hint shows whenever it's payable, wand only after
+            // 2 wrong picks (the kid is clearly stuck).
+            HStack(spacing: AppSpacing.md) {
+                if !showFeedback {
+                    hintButton(for: q)
+                }
+                if consecutiveWrong >= 2 && !showFeedback {
+                    magicWandButton
+                }
             }
+            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: consecutiveWrong)
         }
+    }
+
+    // Cost of one hint, in pending-minutes (the kid's banked play time).
+    private let hintCostMinutes = 1
+
+    private func canUseHint(_ q: Question) -> Bool {
+        guard !showFeedback else { return false }
+        guard progress.pendingMinutes >= hintCostMinutes else { return false }
+        // Need at least one wrong option still un-eliminated.
+        return q.options.indices.contains(where: { idx in
+            idx != q.correctIndex && (feedbackForIndex[idx] ?? .normal) == .normal
+        })
+    }
+
+    @ViewBuilder
+    private func hintButton(for q: Question) -> some View {
+        let enabled = canUseHint(q)
+        Button {
+            useHint(q: q)
+        } label: {
+            HStack(spacing: 8) {
+                Text("💡")
+                Text("רמז")
+                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("(\(hintCostMinutes) דק')")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.75))
+            }
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.vertical, AppSpacing.sm)
+            .background(
+                LinearGradient(
+                    colors: [AppColor.starGold, Color(hex: "FFB84D")],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                ),
+                in: Capsule()
+            )
+            .glow(AppColor.starGold, radius: enabled ? 10 : 0)
+            .opacity(enabled ? 1.0 : 0.4)
+        }
+        .buttonStyle(.juicy)
+        .disabled(!enabled)
     }
 
     private func optionsGrid(for q: Question) -> some View {
@@ -368,35 +420,71 @@ struct QuestionRunnerView: View {
     // MARK: - Picking
 
     private func pickOption(_ idx: Int, q: Question) {
+        // showFeedback only locks the grid AFTER the correct answer is found.
+        // Wrong picks just dim that single option and let the kid keep trying
+        // — this is essential for learning ("don't move on, change the choices").
         guard !showFeedback else { return }
+        // Defensive: this option is already eliminated (wrong / hinted).
+        if let existing = feedbackForIndex[idx], existing != .normal { return }
+
         selectedIndex = idx
         let correct = (idx == q.correctIndex)
         lastWasCorrect = correct
 
-        // Set feedback per option
-        var map: [Int: OptionFeedback] = [:]
-        for i in 0..<q.options.count {
-            if i == idx {
-                map[i] = correct ? .correct : .wrong
-            } else if i == q.correctIndex && !correct {
-                map[i] = .revealed
-            } else {
-                map[i] = .dimmed
+        if correct {
+            // Final correct answer: lock the grid, reveal everything,
+            // play the success flow, then advance.
+            var map = feedbackForIndex
+            for i in 0..<q.options.count {
+                if i == idx {
+                    map[i] = .correct
+                } else if (map[i] ?? .normal) == .normal {
+                    map[i] = .dimmed
+                }
+                // else keep whatever it was (already dimmed from prior wrong pick)
+            }
+            feedbackForIndex = map
+            showFeedback = true
+            handleCorrect(q: q)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                questionIndex += 1
+                nextQuestion()
+            }
+        } else {
+            // Wrong: flash that option red briefly, then dim it (eliminated).
+            // Do NOT reveal the correct answer. Do NOT advance.
+            feedbackForIndex[idx] = .wrong
+            handleWrong(q: q)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                // After the brief red flash, settle into the dimmed state so
+                // the kid can't pick it again. Other options stay tappable.
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                    feedbackForIndex[idx] = .dimmed
+                }
             }
         }
-        feedbackForIndex = map
-        showFeedback = true
+    }
 
-        if correct {
-            handleCorrect(q: q)
-        } else {
-            handleWrong(q: q)
-        }
+    // MARK: - Hint
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            questionIndex += 1
-            nextQuestion()
+    private func useHint(q: Question) {
+        guard canUseHint(q) else { return }
+        // Spend the minutes; bail out if the spend failed (race condition).
+        guard progress.spendPendingMinutes(hintCostMinutes) else { return }
+
+        // Pick a random wrong option that hasn't been eliminated yet.
+        let candidates = q.options.indices.filter { idx in
+            idx != q.correctIndex && (feedbackForIndex[idx] ?? .normal) == .normal
         }
+        guard let toEliminate = candidates.randomElement() else { return }
+
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            feedbackForIndex[toEliminate] = .dimmed
+        }
+        SoundPlayer.shared.play(.streakUp)
+        Haptic.light()
+        burstTrigger += 1
+        companion.cheer("רמז: זה לא! 💡")
     }
 
     private func handleCorrect(q: Question) {
