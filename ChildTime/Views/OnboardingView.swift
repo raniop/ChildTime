@@ -605,37 +605,27 @@ struct OnboardingView: View {
                 }
                 .padding(.vertical, AppSpacing.lg)
             } else {
-                // Sign-in options
+                // Sign-in options — on the colored onboarding gradient,
+                // both buttons use their light/on-color variants for
+                // matching visual weight.
                 VStack(spacing: AppSpacing.md) {
                     SignInWithAppleButton(.signIn) { request in
                         auth.configureAppleRequest(request)
                     } onCompletion: { result in
                         auth.handleAppleCompletion(result)
                     }
-                    .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                    .signInWithAppleButtonStyle(.white)
                     .frame(maxWidth: 360)
                     .frame(height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .shadow(color: .black.opacity(0.18), radius: 4, y: 2)
 
-                    Button {
+                    GoogleSignInBranded(surface: .onColor) {
                         Task {
                             await auth.signInWithGoogle(presenting: AuthManager.topMostViewController())
                         }
-                    } label: {
-                        HStack(spacing: 10) {
-                            Text("G")
-                                .font(.system(size: 18, weight: .bold))
-                                .frame(width: 24, height: 24)
-                                .background(.white, in: Circle())
-                                .foregroundStyle(.black)
-                            Text("התחבר עם Google")
-                                .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                .foregroundStyle(.white)
-                        }
-                        .frame(maxWidth: 360, minHeight: 50)
-                        .background(Color(hex: "4285F4"), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
-                    .buttonStyle(.juicy)
+                    .frame(maxWidth: 360)
 
                     if let err = auth.lastError {
                         Text(err)

@@ -30,7 +30,7 @@ struct SignInView: View {
 
                     Spacer().frame(height: 12)
 
-                    // Apple Sign-In button (Apple's native)
+                    // Apple Sign-In — black on light surface, white on dark.
                     SignInWithAppleButton(.signIn) { request in
                         auth.configureAppleRequest(request)
                     } onCompletion: { result in
@@ -40,26 +40,15 @@ struct SignInView: View {
                     .frame(maxWidth: 360)
                     .frame(height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
 
-                    // Google Sign-In button
-                    Button {
+                    // Google Sign-In — mirrors Apple's surface choice.
+                    GoogleSignInBranded(surface: colorScheme == .dark ? .onColor : .onLight) {
                         Task {
                             await auth.signInWithGoogle(presenting: AuthManager.topMostViewController())
                         }
-                    } label: {
-                        HStack(spacing: 10) {
-                            Text("G")
-                                .font(.system(size: 18, weight: .bold))
-                                .frame(width: 22, height: 22)
-                                .background(.white, in: Circle())
-                                .foregroundStyle(.black)
-                            Text("התחבר עם Google")
-                                .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                .foregroundStyle(.white)
-                        }
-                        .frame(maxWidth: 360, minHeight: 48)
-                        .background(Color(hex: "4285F4"), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
+                    .frame(maxWidth: 360)
 
                     if let err = auth.lastError {
                         Text(err)
