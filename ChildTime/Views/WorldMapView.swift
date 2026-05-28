@@ -18,6 +18,13 @@ struct WorldMapView: View {
     private var companionSize: CGFloat { isCompact ? 90 : 120 }
     private var heroTitleSize: CGFloat { isCompact ? 36 : 44 }
 
+    @State private var infoStat: StatInfo? = nil
+
+    enum StatInfo: String, Identifiable {
+        case minutes, stars, gems
+        var id: String { rawValue }
+    }
+
     private var worldGridColumns: [GridItem] {
         let count = isCompact ? 2 : 3
         return Array(
@@ -135,27 +142,140 @@ struct WorldMapView: View {
 
             Spacer()
 
-            // Primary stats — minutes is the hero stat, more prominent
+            // Primary stats — tap each chip for an explanation popover.
             HStack(spacing: AppSpacing.sm) {
-                MinutesBadge(minutes: progress.pendingMinutes, compact: isCompact)
-                statChip(
-                    icon: "star.fill",
-                    value: "\(progress.stars)",
-                    label: nil,
-                    color: AppColor.starGold,
-                    prominent: false
-                )
-                statChip(
-                    icon: "diamond.fill",
-                    value: "\(progress.gems)",
-                    label: nil,
-                    color: AppColor.gemPurple,
-                    prominent: false
-                )
+                Button {
+                    Haptic.light()
+                    infoStat = .minutes
+                } label: {
+                    MinutesBadge(minutes: progress.pendingMinutes, compact: isCompact)
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
+
+                Button {
+                    Haptic.light()
+                    infoStat = .stars
+                } label: {
+                    statChip(
+                        icon: "star.fill",
+                        value: "\(progress.stars)",
+                        label: nil,
+                        color: AppColor.starGold,
+                        prominent: false
+                    )
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: popoverBinding(for: .stars)) { statInfoCard(.stars) }
+
+                Button {
+                    Haptic.light()
+                    infoStat = .gems
+                } label: {
+                    statChip(
+                        icon: "diamond.fill",
+                        value: "\(progress.gems)",
+                        label: nil,
+                        color: AppColor.gemPurple,
+                        prominent: false
+                    )
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: popoverBinding(for: .gems)) { statInfoCard(.gems) }
             }
         }
         .padding(.horizontal, AppSpacing.lg)
         .padding(.top, AppSpacing.sm)
+    }
+
+    // MARK: - Stat info popovers
+
+    private func popoverBinding(for stat: StatInfo) -> Binding<Bool> {
+        Binding(
+            get: { infoStat == stat },
+            set: { isShowing in
+                if !isShowing { infoStat = nil }
+            }
+        )
+    }
+
+    @ViewBuilder
+    private func statInfoCard(_ stat: StatInfo) -> some View {
+        let info = statInfoContent(stat)
+        VStack(alignment: .trailing, spacing: 12) {
+            HStack(spacing: 10) {
+                Text(info.emoji)
+                    .font(.system(size: 44))
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(info.title)
+                        .font(.system(size: 22, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.primary)
+                    Text(info.subtitle)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+
+            Text(info.body)
+                .font(.system(size: 17, weight: .medium, design: .rounded))
+                .foregroundStyle(.primary)
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+
+            if let tip = info.tip {
+                HStack(spacing: 8) {
+                    Image(systemName: "lightbulb.fill")
+                        .foregroundStyle(AppColor.starGold)
+                    Text(tip)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.top, 4)
+            }
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+        .padding(20)
+        .frame(maxWidth: 320)
+        .presentationCompactAdaptation(.popover)
+    }
+
+    private struct InfoContent {
+        let emoji: String
+        let title: String
+        let subtitle: String
+        let body: String
+        let tip: String?
+    }
+
+    private func statInfoContent(_ stat: StatInfo) -> InfoContent {
+        switch stat {
+        case .minutes:
+            return InfoContent(
+                emoji: "🎮",
+                title: "דקות משחק",
+                subtitle: "מה שצברת",
+                body: "אלה הדקות שהרווחת כדי לשחק באפליקציות שההורה אישר. כל תשובה נכונה = עוד דקות!",
+                tip: "לחץ על 'פתחו לי X דקות' למטה כדי להתחיל לשחק."
+            )
+        case .stars:
+            return InfoContent(
+                emoji: "⭐",
+                title: "כוכבים",
+                subtitle: "ההישגים שלך",
+                body: "כוכבים מצטברים על כל תשובה נכונה. רצף תשובות נותן בונוס × 2 ו-× 3!",
+                tip: "ככל שמצטברים יותר כוכבים, טופי עולה רמה."
+            )
+        case .gems:
+            return InfoContent(
+                emoji: "💎",
+                title: "גבישים",
+                subtitle: "המטבע הנדיר",
+                body: "גבישים נופלים לפעמים מתשובות נכונות, ותקבל גם בקופסת הזהב.",
+                tip: "בקרוב — קוסמטיקה לטופי שניתן לקנות איתם 🎩"
+            )
+        }
     }
 
     private func statChip(icon: String, value: String, label: String?, color: Color, prominent: Bool) -> some View {
