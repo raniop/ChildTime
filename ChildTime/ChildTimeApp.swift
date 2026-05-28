@@ -1,11 +1,30 @@
 import SwiftUI
 
+#if canImport(FirebaseCore)
+import FirebaseCore
+#endif
+
+#if canImport(GoogleSignIn)
+import GoogleSignIn
+#endif
+
 @main
 struct ChildTimeApp: App {
     @StateObject private var settings = ParentSettings.shared
     @StateObject private var progress = ProgressStore.shared
     @StateObject private var shields = ShieldManager.shared
+    @StateObject private var auth = AuthManager.shared
     @Environment(\.scenePhase) private var scenePhase
+
+    init() {
+        #if canImport(FirebaseCore)
+        // Safe to call once at launch. No-op if GoogleService-Info.plist is missing
+        // (will print a console warning, but won't crash the app).
+        if FirebaseApp.app() == nil {
+            FirebaseApp.configure()
+        }
+        #endif
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -14,6 +33,7 @@ struct ChildTimeApp: App {
                 .environmentObject(settings)
                 .environmentObject(progress)
                 .environmentObject(shields)
+                .environmentObject(auth)
                 .task {
                     await shields.requestAuthorizationIfNeeded()
                     enforceShieldStateIfNeeded()
@@ -22,6 +42,12 @@ struct ChildTimeApp: App {
                     if phase == .active {
                         enforceShieldStateIfNeeded()
                     }
+                }
+                .onOpenURL { url in
+                    #if canImport(GoogleSignIn)
+                    // Google Sign-In returns control to the app via this URL.
+                    _ = GIDSignIn.sharedInstance.handle(url)
+                    #endif
                 }
         }
     }

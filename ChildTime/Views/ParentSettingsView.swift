@@ -4,16 +4,19 @@ import FamilyControls
 struct ParentSettingsView: View {
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var shields: ShieldManager
+    @EnvironmentObject var auth: AuthManager
     @Environment(\.dismiss) private var dismiss
 
     @State private var showAppPicker = false
     @State private var pickerSelection = FamilyActivitySelection()
     @State private var showChangePIN = false
+    @State private var showSignIn = false
 
     var body: some View {
         NavigationStack {
             Form {
                 authorizationSection
+                syncSection
                 ageSection
                 rewardSection
                 topicsSection
@@ -37,6 +40,11 @@ struct ParentSettingsView: View {
             }
             .sheet(isPresented: $showChangePIN) {
                 ChangePINView()
+            }
+            .sheet(isPresented: $showSignIn) {
+                SignInView()
+                    .environmentObject(auth)
+                    .environment(\.layoutDirection, .rightToLeft)
             }
         }
     }
@@ -64,6 +72,56 @@ struct ParentSettingsView: View {
                     }
                     .buttonStyle(.borderedProminent)
                 }
+            }
+        }
+    }
+
+    private var syncSection: some View {
+        Section("סנכרון בין מכשירים") {
+            if auth.isSignedIn {
+                HStack(spacing: 12) {
+                    Image(systemName: "checkmark.icloud.fill")
+                        .foregroundStyle(.green)
+                        .font(.title3)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(auth.displayName ?? auth.email ?? "מחובר")
+                            .font(.headline)
+                        if let email = auth.email, email != auth.displayName {
+                            Text(email)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        if let p = auth.provider {
+                            Text(p == .apple ? "דרך Apple" : "דרך Google")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer()
+                }
+                Button(role: .destructive) {
+                    auth.signOut()
+                } label: {
+                    Label("התנתק", systemImage: "rectangle.portrait.and.arrow.right")
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("התחבר כדי שההתקדמות של הילד תישמר גם ב-iPad וגם ב-iPhone.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Button {
+                        showSignIn = true
+                    } label: {
+                        Label("התחבר עם Apple או Google", systemImage: "icloud.and.arrow.up")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding(.vertical, 4)
+            }
+            if let err = auth.lastError {
+                Text(err)
+                    .font(.caption)
+                    .foregroundStyle(.red)
             }
         }
     }
@@ -237,5 +295,6 @@ struct ChangePINView: View {
     ParentSettingsView()
         .environmentObject(ParentSettings.shared)
         .environmentObject(ShieldManager.shared)
+        .environmentObject(AuthManager.shared)
         .environment(\.layoutDirection, .rightToLeft)
 }
