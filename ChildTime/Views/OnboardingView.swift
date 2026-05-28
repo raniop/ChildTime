@@ -452,16 +452,15 @@ struct OnboardingView: View {
 
     private func bulletItem(_ emoji: String, _ text: String) -> some View {
         HStack(spacing: AppSpacing.md) {
-            Text(emoji).font(.system(size: 28))
+            Text(emoji).font(.system(size: 26))
             Text(text)
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
         }
-        .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, AppSpacing.lg)
-        .padding(.vertical, AppSpacing.md)
-        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.medium))
-        .padding(.horizontal, AppSpacing.lg)
+        .padding(.vertical, AppSpacing.sm + 2)
+        .background(.white.opacity(0.14), in: Capsule())
+        .frame(maxWidth: 460)
     }
 
     private func pinField(text: Binding<String>, placeholder: String) -> some View {
