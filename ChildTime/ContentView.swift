@@ -4,15 +4,21 @@ struct ContentView: View {
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var profiles: ProfileStore
+    @EnvironmentObject var auth: AuthManager
 
     var body: some View {
         Group {
-            if !settings.onboardingCompleted {
-                // Brand-new family — run them through onboarding first.
+            if !auth.isSignedIn {
+                // Login is the very first gate — kid profiles, progress,
+                // and cosmetics only sync across devices when the parent
+                // is signed in. Required from day one.
+                LoginGateView()
+            } else if !settings.onboardingCompleted {
+                // Logged in but parent hasn't finished setup yet.
                 OnboardingView()
             } else if profiles.isEmpty || profiles.activeID == nil {
-                // Either no profiles yet OR the parent signed out of a
-                // profile — Netflix-style picker handles both.
+                // Onboarding done — Netflix-style picker (covers both
+                // 'no profiles yet' and 'parent signed out of a profile').
                 ProfilePickerView()
             } else if progress.isUnlocked {
                 UnlockedView()
@@ -29,5 +35,6 @@ struct ContentView: View {
         .environmentObject(ProgressStore.shared)
         .environmentObject(ShieldManager.shared)
         .environmentObject(ProfileStore.shared)
+        .environmentObject(AuthManager.shared)
         .environment(\.layoutDirection, .rightToLeft)
 }
