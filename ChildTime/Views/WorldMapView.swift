@@ -18,6 +18,14 @@ struct WorldMapView: View {
     private var companionSize: CGFloat { isCompact ? 90 : 120 }
     private var heroTitleSize: CGFloat { isCompact ? 36 : 44 }
 
+    private var worldGridColumns: [GridItem] {
+        let count = isCompact ? 2 : 3
+        return Array(
+            repeating: GridItem(.flexible(), spacing: AppSpacing.md),
+            count: count
+        )
+    }
+
     var body: some View {
         ZStack {
             // Layered background
@@ -31,14 +39,19 @@ struct WorldMapView: View {
                     VStack(spacing: AppSpacing.lg) {
                         heroTitle
                             .padding(.top, AppSpacing.sm)
-                        ForEach(Worlds.all) { world in
-                            WorldCard(
-                                world: world,
-                                isUnlocked: progress.unlockedWorlds.contains(world.id),
-                                currentRoom: progress.progress(in: world.id),
-                                starsHeld: progress.stars
-                            ) {
-                                selectedWorld = world
+                        LazyVGrid(
+                            columns: worldGridColumns,
+                            spacing: AppSpacing.md
+                        ) {
+                            ForEach(Worlds.all) { world in
+                                WorldCard(
+                                    world: world,
+                                    isUnlocked: progress.unlockedWorlds.contains(world.id),
+                                    currentRoom: progress.progress(in: world.id),
+                                    starsHeld: progress.stars
+                                ) {
+                                    selectedWorld = world
+                                }
                             }
                         }
                     }

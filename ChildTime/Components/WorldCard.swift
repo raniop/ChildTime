@@ -13,11 +13,9 @@ struct WorldCard: View {
     @State private var shimmer: Bool = false
 
     private var isCompact: Bool { hsc == .compact }
-    private var cardHeight: CGFloat { isCompact ? 120 : 150 }
-    private var emojiSize: CGFloat { isCompact ? 68 : 92 }
-    private var emojiFrame: CGFloat { isCompact ? 84 : 110 }
-    private var titleSize: CGFloat { isCompact ? 22 : 28 }
-    private var labelSize: CGFloat { isCompact ? 14 : 17 }
+    private var emojiSize: CGFloat { isCompact ? 80 : 110 }
+    private var titleSize: CGFloat { isCompact ? 19 : 23 }
+    private var labelSize: CGFloat { isCompact ? 13 : 15 }
 
     var body: some View {
         Button(action: onTap) {
@@ -27,73 +25,77 @@ struct WorldCard: View {
 
                 // Themed decorations behind everything else
                 WorldDecorations(world: world)
-                    .opacity(isUnlocked ? 0.7 : 0.25)
-                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous))
+                    .opacity(isUnlocked ? 0.55 : 0.2)
+                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
 
-                // Subtle shimmer sweep
+                // Subtle shimmer sweep (only when unlocked)
                 if isUnlocked {
                     LinearGradient(
-                        colors: [.clear, .white.opacity(0.18), .clear],
-                        startPoint: .leading,
-                        endPoint: .trailing
+                        colors: [.clear, .white.opacity(0.16), .clear],
+                        startPoint: .top,
+                        endPoint: .bottom
                     )
-                    .frame(width: 120)
-                    .offset(x: shimmer ? 200 : -200)
-                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous))
+                    .frame(height: 70)
+                    .offset(y: shimmer ? 200 : -200)
+                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
                 }
 
-                // Foreground content
-                HStack(spacing: AppSpacing.lg) {
-                    // Big emoji with float + glow
+                // Foreground content — vertical tile layout
+                VStack(spacing: 8) {
+                    Spacer(minLength: 8)
+
+                    // Big emoji centered
                     Text(world.emoji)
                         .font(.system(size: emojiSize))
                         .offset(y: float)
-                        .shadow(color: world.glowColor.opacity(0.7), radius: 20)
-                        .shadow(color: .black.opacity(0.2), radius: 4, y: 4)
+                        .shadow(color: world.glowColor.opacity(0.8), radius: 22)
+                        .shadow(color: .black.opacity(0.25), radius: 4, y: 4)
                         .opacity(isUnlocked ? 1 : 0.35)
-                        .frame(width: emojiFrame)
 
-                    // Right side: title + progress (RTL-aware: leading = right edge in RTL)
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(world.name)
-                            .font(.system(size: titleSize, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .shadow(color: .black.opacity(0.4), radius: 4, y: 2)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
+                    // Title
+                    Text(world.name)
+                        .font(.system(size: titleSize, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.4), radius: 4, y: 2)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
+                        .padding(.horizontal, 10)
 
+                    Spacer(minLength: 4)
+
+                    // Bottom row: progress text + bar
+                    VStack(spacing: 4) {
                         if isUnlocked {
-                            HStack(spacing: 6) {
+                            HStack(spacing: 4) {
                                 Image(systemName: "door.left.hand.open")
-                                    .font(.system(size: labelSize - 3))
+                                    .font(.system(size: labelSize - 2))
                                 Text("חדר \(currentRoom + 1) / \(world.rooms)")
                                     .font(.system(size: labelSize, weight: .semibold, design: .rounded))
                             }
                             .foregroundStyle(.white.opacity(0.9))
-
-                            progressBar
                         } else {
-                            HStack(spacing: 6) {
+                            HStack(spacing: 4) {
                                 Image(systemName: "lock.fill")
-                                    .font(.system(size: labelSize - 3))
-                                Text("\(world.starsToUnlock) ⭐ לפתיחה")
+                                    .font(.system(size: labelSize - 2))
+                                Text("\(world.starsToUnlock) ⭐")
                                     .font(.system(size: labelSize, weight: .semibold, design: .rounded))
                             }
                             .foregroundStyle(.white.opacity(0.85))
-                            progressBar
                         }
+                        progressBar
+                            .padding(.horizontal, 14)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 12)
                 }
-                .padding(AppSpacing.lg)
             }
-            .frame(height: cardHeight)
-            .clipShape(RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous))
+            .aspectRatio(0.92, contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous)
+                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                     .stroke(.white.opacity(isUnlocked ? 0.35 : 0.12), lineWidth: 2)
             )
-            .glow(world.glowColor, radius: isUnlocked ? 22 : 0)
+            .glow(world.glowColor, radius: isUnlocked ? 18 : 0)
             .scaleEffect(isUnlocked ? 1.0 : 0.97)
             .opacity(isUnlocked ? 1 : 0.88)
         }
@@ -103,7 +105,7 @@ struct WorldCard: View {
             withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
                 float = -4
             }
-            withAnimation(.linear(duration: 3.5).repeatForever(autoreverses: false).delay(1)) {
+            withAnimation(.linear(duration: 4).repeatForever(autoreverses: false).delay(1)) {
                 shimmer = true
             }
         }
@@ -113,12 +115,12 @@ struct WorldCard: View {
         ZStack {
             world.gradient.gradient
 
-            // Inner radial highlight (top-right)
+            // Inner radial highlight from top-right
             RadialGradient(
-                colors: [Color.white.opacity(0.18), .clear],
-                center: UnitPoint(x: 0.85, y: 0.1),
+                colors: [Color.white.opacity(0.20), .clear],
+                center: UnitPoint(x: 0.8, y: 0.15),
                 startRadius: 0,
-                endRadius: 200
+                endRadius: 160
             )
 
             if !isUnlocked {
@@ -149,10 +151,10 @@ struct WorldCard: View {
                         )
                     )
                     .frame(width: geo.size.width * progressValue)
-                    .glow(world.glowColor, radius: 8)
+                    .glow(world.glowColor, radius: 6)
             }
         }
-        .frame(height: 8)
+        .frame(height: 6)
     }
 }
 
@@ -160,7 +162,10 @@ struct WorldCard: View {
     ZStack {
         AppGradient.dreamy.ignoresSafeArea()
         FloatingOrbs.home()
-        VStack(spacing: 16) {
+        LazyVGrid(
+            columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)],
+            spacing: 14
+        ) {
             WorldCard(world: Worlds.all[0], isUnlocked: true,  currentRoom: 4, starsHeld: 47, onTap: {})
             WorldCard(world: Worlds.all[1], isUnlocked: true,  currentRoom: 0, starsHeld: 47, onTap: {})
             WorldCard(world: Worlds.all[2], isUnlocked: false, currentRoom: 0, starsHeld: 47, onTap: {})
