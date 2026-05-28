@@ -7,6 +7,7 @@ struct ParentSettingsView: View {
     @EnvironmentObject var auth: AuthManager
     @EnvironmentObject var subs: SubscriptionManager
     @EnvironmentObject var progress: ProgressStore
+    @EnvironmentObject var profiles: ProfileStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var showAppPicker = false
@@ -252,9 +253,15 @@ struct ParentSettingsView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(settings.childName.isEmpty ? "ללא שם" : settings.childName)
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
-                    Text("הקש על התמונה כדי להחליף — בחר מהאלבום")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if profiles.profiles.count > 1 {
+                        Text("\(profiles.profiles.count) פרופילים במשפחה")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("הקש על התמונה כדי להחליף תמונה")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
             }
@@ -262,6 +269,14 @@ struct ParentSettingsView: View {
 
             TextField("שם הילד", text: $settings.childName)
                 .textInputAutocapitalization(.words)
+                .onSubmit { profiles.syncBackFromSettings() }
+
+            Button {
+                profiles.syncBackFromSettings()
+                profiles.signOutCurrentProfile()
+            } label: {
+                Label("החלף פרופיל", systemImage: "person.crop.circle.badge.questionmark")
+            }
         }
     }
 
@@ -513,5 +528,6 @@ struct ChangePINView: View {
         .environmentObject(AuthManager.shared)
         .environmentObject(SubscriptionManager.shared)
         .environmentObject(ProgressStore.shared)
+        .environmentObject(ProfileStore.shared)
         .environment(\.layoutDirection, .rightToLeft)
 }
