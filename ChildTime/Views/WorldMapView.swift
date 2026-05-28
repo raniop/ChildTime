@@ -74,7 +74,9 @@ struct WorldMapView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                     }
                     .padding(.horizontal, AppSpacing.lg)
-                    .padding(.bottom, 260)
+                    // Big bottom inset on iPhone so the cards aren't hidden
+                    // by the floating daily-chest CTA + companion.
+                    .padding(.bottom, isCompact ? 360 : 260)
                 }
             }
 
@@ -86,12 +88,14 @@ struct WorldMapView: View {
                     .padding(.bottom, AppSpacing.md)
             }
 
-            // Companion wanders the screen and is also draggable
+            // Companion wanders the screen and is also draggable.
+            // On iPhone we keep the wander zone tighter so it doesn't park
+            // on top of world cards in the middle of the grid.
             FloatingCompanion(
                 controller: companion,
                 size: companionSize,
-                topInset: 90,
-                bottomInset: isCompact ? 160 : 200,
+                topInset: isCompact ? 140 : 90,
+                bottomInset: isCompact ? 220 : 200,
                 horizontalInset: AppSpacing.lg
             )
         }
@@ -142,101 +146,118 @@ struct WorldMapView: View {
 
     // MARK: - Top bar
 
+    @ViewBuilder
     private var topBar: some View {
-        HStack(spacing: AppSpacing.sm) {
-            // Child avatar — top-right in RTL (leading is the right edge).
-            // Tap to change photo; long-press for reset/replace.
-            ChildAvatarView(size: 50)
+        if isCompact {
+            // iPhone — stack actions and stats so nothing clips.
+            VStack(spacing: 8) {
+                topBarActions(buttonSize: 40, avatarSize: 44, iconSize: 18)
+                topBarStats(compactStats: true)
+            }
+            .padding(.horizontal, AppSpacing.md)
+            .padding(.top, AppSpacing.sm)
+        } else {
+            // iPad — one wide row.
+            HStack(spacing: AppSpacing.sm) {
+                topBarActions(buttonSize: 46, avatarSize: 50, iconSize: 22)
+                Spacer()
+                topBarStats(compactStats: false)
+            }
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.top, AppSpacing.sm)
+        }
+    }
 
-            // Settings button
+    private func topBarActions(buttonSize: CGFloat, avatarSize: CGFloat, iconSize: CGFloat) -> some View {
+        HStack(spacing: AppSpacing.sm) {
+            ChildAvatarView(size: avatarSize)
+
             Button {
                 showingParentGate = true
             } label: {
                 Image(systemName: "gearshape.fill")
-                    .font(.system(size: 22, weight: .medium))
+                    .font(.system(size: iconSize, weight: .medium))
                     .foregroundStyle(.white.opacity(0.9))
-                    .frame(width: 46, height: 46)
+                    .frame(width: buttonSize, height: buttonSize)
                     .background(.white.opacity(0.15), in: Circle())
                     .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
             }
             .onLongPressGesture(minimumDuration: 1.5) { showingDemo = true }
 
-            // Shop button — opens the cosmetics shop
             Button {
                 Haptic.light()
                 showingShop = true
             } label: {
                 Image(systemName: "bag.fill")
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.system(size: iconSize - 2, weight: .medium))
                     .foregroundStyle(AppColor.starGold)
-                    .frame(width: 46, height: 46)
+                    .frame(width: buttonSize, height: buttonSize)
                     .background(.white.opacity(0.15), in: Circle())
                     .overlay(Circle().stroke(AppColor.starGold.opacity(0.6), lineWidth: 1.5))
                     .glow(AppColor.starGold.opacity(0.5), radius: 6)
             }
 
-            // Lucky wheel button
             Button {
                 Haptic.light()
                 showingWheel = true
             } label: {
                 Text("🎡")
-                    .font(.system(size: 24))
-                    .frame(width: 46, height: 46)
+                    .font(.system(size: iconSize + 2))
+                    .frame(width: buttonSize, height: buttonSize)
                     .background(.white.opacity(0.15), in: Circle())
                     .overlay(Circle().stroke(AppColor.gemPurple.opacity(0.6), lineWidth: 1.5))
                     .glow(AppColor.gemPurple.opacity(0.5), radius: 6)
             }
 
-            Spacer()
-
-            // Primary stats — tap each chip for an explanation popover.
-            HStack(spacing: AppSpacing.sm) {
-                // Headline score
-                ScoreBadge(value: progress.totalScore, style: .lifetime, compact: isCompact)
-
-                Button {
-                    Haptic.light()
-                    infoStat = .minutes
-                } label: {
-                    MinutesBadge(minutes: progress.pendingMinutes, compact: isCompact)
-                }
-                .buttonStyle(.plain)
-                .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
-
-                Button {
-                    Haptic.light()
-                    infoStat = .stars
-                } label: {
-                    statChip(
-                        icon: "star.fill",
-                        value: "\(progress.stars)",
-                        label: nil,
-                        color: AppColor.starGold,
-                        prominent: false
-                    )
-                }
-                .buttonStyle(.plain)
-                .popover(isPresented: popoverBinding(for: .stars)) { statInfoCard(.stars) }
-
-                Button {
-                    Haptic.light()
-                    infoStat = .gems
-                } label: {
-                    statChip(
-                        icon: "diamond.fill",
-                        value: "\(progress.gems)",
-                        label: nil,
-                        color: AppColor.gemPurple,
-                        prominent: false
-                    )
-                }
-                .buttonStyle(.plain)
-                .popover(isPresented: popoverBinding(for: .gems)) { statInfoCard(.gems) }
-            }
+            if isCompact { Spacer() }
         }
-        .padding(.horizontal, AppSpacing.lg)
-        .padding(.top, AppSpacing.sm)
+    }
+
+    private func topBarStats(compactStats: Bool) -> some View {
+        HStack(spacing: compactStats ? 6 : AppSpacing.sm) {
+            if compactStats { Spacer(minLength: 0) }
+
+            ScoreBadge(value: progress.totalScore, style: .lifetime, compact: true)
+
+            Button {
+                Haptic.light()
+                infoStat = .minutes
+            } label: {
+                MinutesBadge(minutes: progress.pendingMinutes, compact: true)
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
+
+            Button {
+                Haptic.light()
+                infoStat = .stars
+            } label: {
+                statChip(
+                    icon: "star.fill",
+                    value: "\(progress.stars)",
+                    label: nil,
+                    color: AppColor.starGold,
+                    prominent: false
+                )
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: popoverBinding(for: .stars)) { statInfoCard(.stars) }
+
+            Button {
+                Haptic.light()
+                infoStat = .gems
+            } label: {
+                statChip(
+                    icon: "diamond.fill",
+                    value: "\(progress.gems)",
+                    label: nil,
+                    color: AppColor.gemPurple,
+                    prominent: false
+                )
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: popoverBinding(for: .gems)) { statInfoCard(.gems) }
+        }
     }
 
     // MARK: - Stat info popovers

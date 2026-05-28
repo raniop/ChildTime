@@ -3,9 +3,10 @@ import SwiftUI
 enum OptionFeedback {
     case normal
     case correct
-    case wrong       // chosen but wrong
+    case wrong       // chosen but wrong (briefly)
     case revealed    // not chosen, but highlight the correct one
-    case dimmed      // not chosen, neutral
+    case dimmed      // already-picked-wrong or not selected (neutral)
+    case eliminated  // removed by a hint — clear visual feedback
 }
 
 struct OptionCard: View {
@@ -32,20 +33,45 @@ struct OptionCard: View {
 
     var body: some View {
         Button(action: action) {
-            Text(text)
-                .font(.system(size: fontSize, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, minHeight: minHeight)
-                .padding(.horizontal, 12)
-                .background(backgroundStyle)
-                .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                        .stroke(borderColor, lineWidth: borderWidth)
-                )
-                .glow(glowColor, radius: glowRadius)
-                .scaleEffect(scale)
-                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: feedback)
+            ZStack {
+                Text(text)
+                    .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .strikethrough(feedback == .eliminated, color: .white.opacity(0.8))
+                    .frame(maxWidth: .infinity, minHeight: minHeight)
+                    .padding(.horizontal, 12)
+
+                // Hint badge — only on eliminated options. Sits in the
+                // top-leading corner (visually top-right in RTL).
+                if feedback == .eliminated {
+                    VStack {
+                        HStack {
+                            ZStack {
+                                Circle()
+                                    .fill(AppColor.starGold)
+                                    .frame(width: 28, height: 28)
+                                    .shadow(color: .black.opacity(0.35), radius: 3, y: 1)
+                                Text("💡")
+                                    .font(.system(size: 16))
+                            }
+                            Spacer()
+                        }
+                        Spacer()
+                    }
+                    .padding(8)
+                    .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .background(backgroundStyle)
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                    .stroke(borderColor, lineWidth: borderWidth)
+            )
+            .glow(glowColor, radius: glowRadius)
+            .scaleEffect(scale)
+            .opacity(feedback == .eliminated ? 0.55 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: feedback)
         }
         .buttonStyle(.juicy)
         .disabled(feedback != .normal)
@@ -62,42 +88,54 @@ struct OptionCard: View {
             AppGradient.almost
         case .dimmed:
             Color.gray.opacity(0.4)
+        case .eliminated:
+            // Keep the original tile color but heavily desaturated so the
+            // 💡 badge + strikethrough read as the source of truth.
+            palette[index % palette.count]
         }
     }
 
     private var borderColor: Color {
         switch feedback {
         case .correct, .revealed: return AppColor.successMint
-        case .wrong: return AppColor.almostWarm
-        default: return .white.opacity(0.2)
+        case .wrong:              return AppColor.almostWarm
+        case .eliminated:         return AppColor.starGold
+        default:                  return .white.opacity(0.2)
         }
     }
 
     private var borderWidth: CGFloat {
         switch feedback {
         case .correct, .wrong, .revealed: return 3
-        default: return 1
+        case .eliminated:                  return 2.5
+        default:                            return 1
         }
     }
 
     private var glowColor: Color {
         switch feedback {
         case .correct, .revealed: return AppColor.successMint
-        case .wrong: return AppColor.almostWarm
-        default: return .clear
+        case .wrong:              return AppColor.almostWarm
+        case .eliminated:         return AppColor.starGold.opacity(0.5)
+        default:                  return .clear
         }
     }
 
     private var glowRadius: CGFloat {
-        feedback == .normal || feedback == .dimmed ? 0 : 18
+        switch feedback {
+        case .normal, .dimmed: return 0
+        case .eliminated:      return 8
+        default:               return 18
+        }
     }
 
     private var scale: CGFloat {
         switch feedback {
         case .correct, .revealed: return 1.05
-        case .wrong: return 0.97
-        case .dimmed: return 0.95
-        default: return 1.0
+        case .wrong:               return 0.97
+        case .dimmed:              return 0.95
+        case .eliminated:          return 0.92
+        default:                   return 1.0
         }
     }
 }

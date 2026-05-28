@@ -512,13 +512,16 @@ struct QuestionRunnerView: View {
         }
         guard let toEliminate = candidates.randomElement() else { return }
 
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-            feedbackForIndex[toEliminate] = .dimmed
+        // Use the dedicated `.eliminated` state — it renders with a 💡
+        // badge + strikethrough so the kid can see at a glance which
+        // option the hint just removed, separate from wrong picks.
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.65)) {
+            feedbackForIndex[toEliminate] = .eliminated
         }
         SoundPlayer.shared.play(.streakUp)
-        Haptic.light()
+        Haptic.medium()
         burstTrigger += 1
-        companion.cheer("רמז: זה לא! 💡")
+        companion.cheer("הסרתי לך אופציה! 💡")
     }
 
     private func handleCorrect(q: Question) {
