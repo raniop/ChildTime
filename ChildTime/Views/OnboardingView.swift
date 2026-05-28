@@ -15,12 +15,22 @@ struct OnboardingView: View {
     @State private var pinError: String?
     @State private var minutesPerAnswer: Int = 2
 
+    // Welcome animation state
+    @State private var welcomeCompanion = CompanionController()
+    @State private var welcomeTitleAppeared = false
+    @State private var welcomeSubtitleAppeared = false
+    @State private var welcomeBubbleVisible = false
+    @State private var welcomeButtonAppeared = false
+    @State private var welcomeConfettiTrigger = 0
+    @State private var welcomeBurstTrigger = 0
+
     private var isCompact: Bool { hsc == .compact }
-    private var welcomeEmojiSize: CGFloat { isCompact ? 92 : 120 }
+    private var welcomeCompanionSize: CGFloat { isCompact ? 140 : 180 }
     private var titleSize: CGFloat { isCompact ? 38 : 56 }
     private var subtitleSize: CGFloat { isCompact ? 18 : 24 }
     private var iconSize: CGFloat { isCompact ? 38 : 50 }
     private var bigCounterSize: CGFloat { isCompact ? 72 : 100 }
+    private var welcomeTitleSize: CGFloat { isCompact ? 64 : 96 }
 
     enum Step {
         case welcome
@@ -64,29 +74,105 @@ struct OnboardingView: View {
     // MARK: - Welcome
 
     private var welcomeView: some View {
-        VStack(spacing: AppSpacing.xl) {
-            Spacer()
-            Text("✨")
-                .font(.system(size: welcomeEmojiSize))
-                .float()
-                .glow(AppColor.starGold, radius: 30)
-            Text("מסע הניצוץ")
-                .font(.system(size: titleSize, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .glow(AppColor.starGold, radius: 14)
-            Text("הרפתקה לימודית\nשמעניקה זמן משחק")
-                .font(.system(size: subtitleSize, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.85))
-                .multilineTextAlignment(.center)
-            Spacer()
-            JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-                step = .parentInfo
-            } label: {
-                Text("בוא נתחיל")
-                    .font(.system(size: 28, weight: .heavy, design: .rounded))
+        ZStack {
+            // Extra magical background layers
+            FloatingOrbs(
+                colors: [AppColor.starGold, AppColor.companionGlow, AppColor.gemPurple, AppColor.dreamyTeal],
+                count: 7,
+                maxSize: 300,
+                opacity: 0.5
+            )
+            SparkleField(count: 40, size: 16)
+            Confetti(trigger: welcomeConfettiTrigger)
+            StarBurst(count: 14, color: AppColor.starGold, trigger: welcomeBurstTrigger)
+
+            VStack(spacing: AppSpacing.lg) {
+                Spacer()
+
+                // Companion hero with bubble
+                ZStack(alignment: .topLeading) {
+                    if welcomeBubbleVisible {
+                        BubbleSpeech(text: "היי! אני קופיקו 💫")
+                            .offset(x: welcomeCompanionSize * 0.55, y: -30)
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                    CompanionView(controller: welcomeCompanion, size: welcomeCompanionSize)
+                        .scaleEffect(welcomeTitleAppeared ? 1 : 0.3)
+                        .opacity(welcomeTitleAppeared ? 1 : 0)
+                }
+                .frame(height: welcomeCompanionSize * 1.8)
+
+                // Animated title with letter-by-letter reveal feel
+                Text("קופיקו")
+                    .font(.system(size: welcomeTitleSize, weight: .heavy, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FFE082")],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    .shadow(color: AppColor.starGold.opacity(0.7), radius: 18)
+                    .shadow(color: .black.opacity(0.25), radius: 4, y: 4)
+                    .scaleEffect(welcomeTitleAppeared ? 1 : 0.4)
+                    .rotationEffect(.degrees(welcomeTitleAppeared ? 0 : -8))
+                    .opacity(welcomeTitleAppeared ? 1 : 0)
+
+                Text("שעת משחק\nשמתחילה בשאלה")
+                    .font(.system(size: subtitleSize, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .shadow(color: .black.opacity(0.3), radius: 4)
+                    .opacity(welcomeSubtitleAppeared ? 1 : 0)
+                    .offset(y: welcomeSubtitleAppeared ? 0 : 20)
+
+                Spacer()
+
+                JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
+                    welcomeCompanion.cheer("יאללה!")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        step = .parentInfo
+                    }
+                } label: {
+                    HStack {
+                        Text("בוא נתחיל!")
+                        Image(systemName: "play.fill")
+                    }
+                    .font(.system(size: 30, weight: .heavy, design: .rounded))
+                }
+                .padding(.horizontal, AppSpacing.xl)
+                .padding(.bottom, AppSpacing.xl)
+                .pulse(min: 0.92)
+                .scaleEffect(welcomeButtonAppeared ? 1 : 0.6)
+                .opacity(welcomeButtonAppeared ? 1 : 0)
             }
-            .padding(.horizontal, AppSpacing.xl)
-            .padding(.bottom, AppSpacing.xl)
+        }
+        .onAppear { runWelcomeSequence() }
+    }
+
+    private func runWelcomeSequence() {
+        // Title + companion appear with a bounce
+        withAnimation(.spring(response: 0.7, dampingFraction: 0.55).delay(0.2)) {
+            welcomeTitleAppeared = true
+        }
+        // Burst of stars right when companion appears
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            welcomeBurstTrigger += 1
+            welcomeConfettiTrigger += 1
+            welcomeCompanion.cheer()
+        }
+        // Subtitle fades up
+        withAnimation(.easeOut(duration: 0.5).delay(0.9)) {
+            welcomeSubtitleAppeared = true
+        }
+        // Bubble pops in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                welcomeBubbleVisible = true
+            }
+        }
+        // CTA appears last
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(1.9)) {
+            welcomeButtonAppeared = true
         }
     }
 

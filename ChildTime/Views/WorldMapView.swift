@@ -189,7 +189,7 @@ struct WorldMapView: View {
 
     private var heroTitle: some View {
         VStack(spacing: 4) {
-            Text("מסע הניצוץ")
+            Text("קופיקו")
                 .font(.system(size: heroTitleSize, weight: .heavy, design: .rounded))
                 .foregroundStyle(
                     LinearGradient(
@@ -209,7 +209,7 @@ struct WorldMapView: View {
 
             // XP bar — small, below subtitle
             HStack(spacing: 8) {
-                Text("רמת ניצוץ \(progress.companionLevel)")
+                Text("רמת קופיקו \(progress.companionLevel)")
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
                 XPBarMini(

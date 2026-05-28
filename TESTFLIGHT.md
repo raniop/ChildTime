@@ -53,7 +53,7 @@
 2. **My Apps** → **+** → **New App**
 3. מלא לפי `distribution/APP_STORE_METADATA.md`:
    - Platform: iOS
-   - Name: מסע הניצוץ
+   - Name: קופיקו
    - Primary Language: Hebrew
    - Bundle ID: com.rani.ChildTime (יבחר מהרשימה)
    - SKU: childtime-001

@@ -40,7 +40,7 @@ struct DemoView: View {
 
     private var header: some View {
         VStack(spacing: AppSpacing.xs) {
-            Text("מסע הניצוץ")
+            Text("קופיקו")
                 .heroStyle()
                 .glow(AppColor.starGold, radius: 16)
             Text("Phase A — Foundation Demo")
@@ -50,7 +50,7 @@ struct DemoView: View {
 
     private var companionSection: some View {
         VStack(spacing: AppSpacing.lg) {
-            sectionTitle("ניצוץ — Companion")
+            sectionTitle("קופיקו — Companion")
             ZStack(alignment: .top) {
                 CompanionView(controller: companion)
                 if let text = companion.bubbleText {
@@ -142,7 +142,7 @@ struct DemoView: View {
     private var textStylesSection: some View {
         VStack(alignment: .trailing, spacing: AppSpacing.md) {
             sectionTitle("Typography")
-            Text("Hero — מסע הניצוץ").font(AppFont.hero()).minimumScaleFactor(0.4)
+            Text("Hero — קופיקו").font(AppFont.hero()).minimumScaleFactor(0.4)
             Text("Title — ממלכת המספרים").font(AppFont.title())
             Text("Question — 7 + 5 = ?").font(AppFont.question())
             Text("Option — 12").font(AppFont.option())

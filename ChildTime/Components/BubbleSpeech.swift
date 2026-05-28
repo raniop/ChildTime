@@ -45,7 +45,7 @@ struct BubbleShape: Shape {
     ZStack {
         AppGradient.dreamy.ignoresSafeArea()
         VStack(spacing: 24) {
-            BubbleSpeech(text: "היי! אני ניצוץ! בוא נצא להרפתקה")
+            BubbleSpeech(text: "היי! אני קופיקו! בוא נצא להרפתקה")
             BubbleSpeech(text: "וואו! 5 ברצף 🔥")
             BubbleSpeech(text: "כמעט!")
         }
