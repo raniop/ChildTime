@@ -182,7 +182,7 @@ struct OnboardingView: View {
 
     private var parentInfoView: some View {
         VStack(spacing: AppSpacing.lg) {
-            Spacer()
+            Spacer().frame(height: 60)
 
             infoIcon(systemName: "person.2.fill")
 
@@ -191,27 +191,43 @@ struct OnboardingView: View {
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
-            Text("לפני שניתן את האפליקציה לילד, צריך להגדיר כמה דברים:")
-                .font(.system(size: 20, weight: .medium, design: .rounded))
+            Text("לפני שניתן את האפליקציה לילד,\nצריך להגדיר כמה דברים:")
+                .font(.system(size: 18, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.lg)
 
-            // Single grouped checklist card
-            VStack(spacing: 0) {
-                bulletItem("📱", "אילו אפליקציות לחסום בלי שאלות")
-                Divider().background(.white.opacity(0.25)).padding(.horizontal, AppSpacing.lg)
-                bulletItem("⏱", "כמה דקות משחק לכל תשובה נכונה")
-                Divider().background(.white.opacity(0.25)).padding(.horizontal, AppSpacing.lg)
-                bulletItem("🔒", "קוד 4-ספרות שרק אתה תדע")
+            // Premium setup card with icon-circles
+            VStack(spacing: 6) {
+                setupRow(
+                    icon: "📱",
+                    tint: Color(hex: "5B9BFF"),
+                    title: "אפליקציות לחסום",
+                    subtitle: "YouTube, TikTok, משחקים…"
+                )
+                rowDivider
+                setupRow(
+                    icon: "⏱",
+                    tint: AppColor.successMint,
+                    title: "דקות לכל תשובה נכונה",
+                    subtitle: "כמה זמן משחק הילד מרוויח"
+                )
+                rowDivider
+                setupRow(
+                    icon: "🔒",
+                    tint: AppColor.gemPurple,
+                    title: "קוד הורה",
+                    subtitle: "4 ספרות שרק אתה תדע"
+                )
             }
             .padding(.vertical, AppSpacing.sm)
-            .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.large))
+            .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: AppRadius.large))
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.large)
-                    .stroke(.white.opacity(0.2), lineWidth: 1)
+                    .stroke(.white.opacity(0.18), lineWidth: 1)
             )
-            .frame(maxWidth: 540)
+            .shadow(color: .black.opacity(0.2), radius: 18, y: 6)
+            .frame(maxWidth: 560)
             .padding(.horizontal, AppSpacing.lg)
 
             Spacer()
@@ -224,6 +240,40 @@ struct OnboardingView: View {
             .padding(.bottom, AppSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var rowDivider: some View {
+        Rectangle()
+            .fill(.white.opacity(0.12))
+            .frame(height: 1)
+            .padding(.horizontal, AppSpacing.lg)
+    }
+
+    private func setupRow(icon: String, tint: Color, title: String, subtitle: String) -> some View {
+        HStack(spacing: AppSpacing.md) {
+            // Circle icon badge
+            ZStack {
+                Circle()
+                    .fill(tint.opacity(0.22))
+                    .overlay(Circle().stroke(tint.opacity(0.55), lineWidth: 1.5))
+                Text(icon)
+                    .font(.system(size: 26))
+            }
+            .frame(width: 52, height: 52)
+            .glow(tint, radius: 8)
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text(subtitle)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.7))
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.vertical, AppSpacing.md)
     }
 
     // MARK: - Family Controls
