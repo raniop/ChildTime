@@ -40,10 +40,20 @@ final class ProfileStore: ObservableObject {
         loadProfiles()
         loadActiveID()
         migrateLegacyKidIfNeeded()
-        // If there's already an active profile (from a previous launch),
-        // ask the vault to bind to it so auto-save observers come online.
+        // CRUCIAL: defer the vault bind to the next runloop tick.
+        //
+        // If we call ProgressVault.switchTo here synchronously, it touches
+        // QuestionMemory.shared, whose init reads ProgressStore /
+        // ProfileStore.shared.activeID — and ProfileStore.shared is STILL
+        // inside its own dispatch_once init right now. dispatch_once
+        // detects the re-entry and traps with EXC_BREAKPOINT.
+        //
+        // Async-on-main breaks the cycle: by the time the closure runs,
+        // ProfileStore.shared has been fully constructed.
         if let id = activeID, let p = profiles.first(where: { $0.id == id }) {
-            ProgressVault.shared.switchTo(p)
+            DispatchQueue.main.async {
+                ProgressVault.shared.switchTo(p)
+            }
         }
     }
 

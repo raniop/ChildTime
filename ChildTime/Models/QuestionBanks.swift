@@ -165,20 +165,31 @@ enum QuestionBanks {
 /// closing and reopening the app doesn't erase the memory.
 final class QuestionMemory {
     static let shared = QuestionMemory()
-    private init() { load() }
+    // Init is intentionally empty so we never reach back into
+    // ProfileStore.shared during its own dispatch_once boot. The first
+    // call to pickFresh / reloadForActiveProfile lazily loads from disk.
+    private init() {}
 
     private let defaults = UserDefaults.standard
     private var recent: [Topic: [String]] = [:]
+    private var hasLoaded = false
 
     private var storageKey: String {
         let pid = ProfileStore.shared.activeID?.uuidString ?? "default"
         return "questionMemory.\(pid)"
     }
 
+    private func ensureLoaded() {
+        guard !hasLoaded else { return }
+        load()
+        hasLoaded = true
+    }
+
     /// Pick a random question from `pool` that hasn't been served recently.
     /// Falls back to a true random when every question is in the recent
     /// window (only possible for very small pools).
     func pickFresh(_ pool: [BankQuestion], for topic: Topic) -> BankQuestion? {
+        ensureLoaded()
         guard !pool.isEmpty else { return nil }
         // 85% — leaves a small pool of "fresh" candidates and keeps a long
         // tail of "already seen recently" out of rotation. With ~80 English
@@ -203,6 +214,7 @@ final class QuestionMemory {
     /// Pull state for the freshly-active profile.
     func reloadForActiveProfile() {
         load()
+        hasLoaded = true
     }
 
     private func promptKey(_ q: BankQuestion) -> String { q.prompt }
