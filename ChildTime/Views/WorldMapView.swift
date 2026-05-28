@@ -199,10 +199,10 @@ struct WorldMapView: View {
     @ViewBuilder
     private func statInfoCard(_ stat: StatInfo) -> some View {
         let info = statInfoContent(stat)
-        VStack(alignment: .trailing, spacing: 12) {
-            HStack(spacing: 10) {
+        VStack(alignment: .trailing, spacing: 14) {
+            HStack(alignment: .top, spacing: 12) {
                 Text(info.emoji)
-                    .font(.system(size: 44))
+                    .font(.system(size: 46))
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(info.title)
                         .font(.system(size: 22, weight: .heavy, design: .rounded))
@@ -211,30 +211,34 @@ struct WorldMapView: View {
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                 }
-                Spacer()
+                .frame(maxWidth: .infinity, alignment: .trailing)
             }
 
             Text(info.body)
                 .font(.system(size: 17, weight: .medium, design: .rounded))
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.trailing)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .trailing)
 
             if let tip = info.tip {
-                HStack(spacing: 8) {
+                HStack(alignment: .top, spacing: 8) {
                     Image(systemName: "lightbulb.fill")
                         .foregroundStyle(AppColor.starGold)
+                        .font(.system(size: 16))
                     Text(tip)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.secondary)
-                    Spacer()
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.trailing)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
                 }
                 .padding(.top, 4)
             }
         }
         .environment(\.layoutDirection, .rightToLeft)
         .padding(20)
-        .frame(maxWidth: 320)
+        .frame(width: 340)
         .presentationCompactAdaptation(.popover)
     }
 
