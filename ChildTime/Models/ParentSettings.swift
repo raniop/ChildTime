@@ -25,6 +25,8 @@ final class ParentSettings: ObservableObject {
         static let penaltyEnabled = "penaltyEnabled"
         static let penaltyAfterMistakes = "penaltyAfterMistakes"
         static let penaltyMinutes = "penaltyMinutes"
+        static let dailyCapEnabled = "dailyCapEnabled"
+        static let maxMinutesPerDay = "maxMinutesPerDay"
     }
 
     enum RewardMode: String, CaseIterable, Identifiable {
@@ -114,6 +116,15 @@ final class ParentSettings: ObservableObject {
     @Published var penaltyMinutes: Int {
         didSet { defaults.set(penaltyMinutes, forKey: Key.penaltyMinutes) }
     }
+    /// When ON, the kid can earn at most `maxMinutesPerDay` minutes per day.
+    /// Earnings beyond the cap silently don't add to `pendingMinutes`.
+    @Published var dailyCapEnabled: Bool {
+        didSet { defaults.set(dailyCapEnabled, forKey: Key.dailyCapEnabled) }
+    }
+    /// The daily ceiling (only enforced when `dailyCapEnabled == true`).
+    @Published var maxMinutesPerDay: Int {
+        didSet { defaults.set(maxMinutesPerDay, forKey: Key.maxMinutesPerDay) }
+    }
 
     private init() {
         let d = AppGroup.defaults
@@ -182,6 +193,12 @@ final class ParentSettings: ObservableObject {
         self.penaltyAfterMistakes = pam == 0 ? 3 : pam
         let pm = d.integer(forKey: Key.penaltyMinutes)
         self.penaltyMinutes = pm == 0 ? 1 : pm
+
+        // Daily cap: default OFF (so existing users see no change), but
+        // pre-fill a sensible 60-min cap so flipping the toggle Just Works.
+        self.dailyCapEnabled = d.bool(forKey: Key.dailyCapEnabled)
+        let mmd = d.integer(forKey: Key.maxMinutesPerDay)
+        self.maxMinutesPerDay = mmd == 0 ? 60 : mmd
     }
 
     /// Apply age-appropriate defaults (called when parent picks an age in onboarding

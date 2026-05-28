@@ -25,6 +25,37 @@ enum RewardEngine {
     static let xpPerQuestion = 1
     static let xpPerCorrect = 2
 
+    // MARK: - Score (the headline "ניקוד" metric)
+
+    /// Base points per correct answer. Tunable from one spot.
+    static let pointsPerCorrect = 10
+
+    /// Score awarded for a single correct answer. Reflects difficulty,
+    /// combos, super-Qs, and mystery portals so the kid sees the number
+    /// jump in moments of mastery.
+    static func pointsForCorrect(
+        combo: Int,
+        isSuperQuestion: Bool,
+        isMysteryPortal: Bool,
+        difficulty: Difficulty
+    ) -> Int {
+        var base = pointsPerCorrect
+        // Difficulty bump
+        switch difficulty {
+        case .easy:   base += 0
+        case .medium: base += 5
+        case .hard:   base += 10
+        }
+        // Combo bump
+        if combo >= 10 { base += 10 }
+        else if combo >= 5 { base += 5 }
+        else if combo >= 3 { base += 2 }
+        // Event multipliers (compound)
+        if isSuperQuestion { base *= 5 }
+        if isMysteryPortal { base *= 3 }
+        return base
+    }
+
     /// XP thresholds for each level.
     static let levelThresholds: [Int] = [0, 10, 25, 50, 100, 200, 350, 550, 800, 1100, 1500]
 

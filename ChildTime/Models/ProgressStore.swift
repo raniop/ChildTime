@@ -27,6 +27,9 @@ final class ProgressStore: ObservableObject {
         static let topicCorrect = "topicCorrect"
         static let batchCounter = "batchCounter"
         static let wrongStreak = "wrongStreak"
+        static let totalScore = "totalScore"
+        static let minutesEarnedToday = "minutesEarnedToday"
+        static let dailyEarnedDate = "dailyEarnedDate"
     }
 
     // MARK: - Currencies & progression
@@ -109,6 +112,28 @@ final class ProgressStore: ObservableObject {
     /// Set to a positive integer for one tick when a penalty fires, so the UI
     /// can show feedback. Reset to 0 by the consumer after reading.
     @Published var lastPenaltyMinutes: Int = 0
+    /// Lifetime score — the headline 'ניקוד' metric shown across the app.
+    @Published private(set) var totalScore: Int {
+        didSet { defaults.set(totalScore, forKey: Key.totalScore) }
+    }
+    /// Score earned in the current session only — resets when a new
+    /// QuestionRunner session starts.
+    @Published private(set) var sessionScore: Int = 0
+    /// Points awarded for the *last* correct answer, so the UI can flash
+    /// '+15' next to the running total. Consumers may set it back to 0.
+    @Published var lastEarnedPoints: Int = 0
+    /// Minutes already earned today (resets at midnight). Used to enforce
+    /// the optional `maxMinutesPerDay` cap.
+    @Published private(set) var minutesEarnedToday: Int {
+        didSet { defaults.set(minutesEarnedToday, forKey: Key.minutesEarnedToday) }
+    }
+    /// The day `minutesEarnedToday` refers to.
+    @Published private(set) var dailyEarnedDate: Date? {
+        didSet {
+            if let d = dailyEarnedDate { defaults.set(d, forKey: Key.dailyEarnedDate) }
+            else { defaults.removeObject(forKey: Key.dailyEarnedDate) }
+        }
+    }
 
     // MARK: - Init
 
@@ -138,6 +163,9 @@ final class ProgressStore: ObservableObject {
         self.topicCorrect = (d.dictionary(forKey: Key.topicCorrect) as? [String: Int]) ?? [:]
         self.batchCounter = d.integer(forKey: Key.batchCounter)
         self.wrongStreak = d.integer(forKey: Key.wrongStreak)
+        self.totalScore = d.integer(forKey: Key.totalScore)
+        self.minutesEarnedToday = d.integer(forKey: Key.minutesEarnedToday)
+        self.dailyEarnedDate = d.object(forKey: Key.dailyEarnedDate) as? Date
     }
 
     // MARK: - Derived
@@ -201,19 +229,32 @@ final class ProgressStore: ObservableObject {
         currentStreak += 1
         wrongStreak = 0  // any correct answer breaks the penalty streak
         stars += earned
-        // Time reward — driven by ParentSettings.rewardMode.
+
+        // Score — the headline 'ניקוד' metric. Includes combo / bonus boosts.
         let settings = ParentSettings.shared
+        let topicDifficulty = settings.difficulty(for: ctx.topic)
+        let pts = RewardEngine.pointsForCorrect(
+            combo: ctx.combo,
+            isSuperQuestion: ctx.isSuperQuestion,
+            isMysteryPortal: ctx.isMysteryPortal,
+            difficulty: topicDifficulty
+        )
+        totalScore += pts
+        sessionScore += pts
+        lastEarnedPoints = pts
+
+        // Time reward — driven by ParentSettings.rewardMode + daily cap.
         switch settings.rewardMode {
         case .perAnswer:
             // Classic: each correct answer = N minutes (× multiplier on bonus Qs)
-            pendingMinutes += minutesPerCorrect * multiplier
+            _ = grantMinutesCapped(minutesPerCorrect * multiplier)
         case .perBatch:
             // Save up: every `batchAnswers` correct answers = `batchMinutes`.
             // Bonus questions still count their multiplier so super-Q is rewarding.
             batchCounter += multiplier
             let target = max(1, settings.batchAnswers)
             while batchCounter >= target {
-                pendingMinutes += settings.batchMinutes
+                _ = grantMinutesCapped(settings.batchMinutes)
                 batchCounter -= target
             }
         }
@@ -221,6 +262,67 @@ final class ProgressStore: ObservableObject {
         updateTopicStat(topic: ctx.topic, correct: true)
         maybeConvertStarsToGems()
         return earned
+    }
+
+    // MARK: - Daily cap on earned minutes
+
+    /// True iff the kid has already hit today's earning ceiling.
+    var atDailyCap: Bool {
+        let s = ParentSettings.shared
+        guard s.dailyCapEnabled else { return false }
+        return minutesRemainingTodayCap == 0
+    }
+
+    /// Minutes the kid can still earn today (when cap is active). When the
+    /// cap is disabled, returns `.max` so callers can treat it as unlimited.
+    var minutesRemainingTodayCap: Int {
+        let s = ParentSettings.shared
+        guard s.dailyCapEnabled else { return .max }
+        let limit = max(0, s.maxMinutesPerDay)
+        return max(0, limit - minutesEarnedTodayRespectingDate())
+    }
+
+    /// Minutes earned today, rolling over silently if the date has changed.
+    /// Mutating helper so the in-memory counter always reflects "today".
+    @discardableResult
+    private func minutesEarnedTodayRespectingDate() -> Int {
+        let today = Calendar.current.startOfDay(for: Date())
+        if let last = dailyEarnedDate.map({ Calendar.current.startOfDay(for: $0) }),
+           Calendar.current.isDate(last, inSameDayAs: today) {
+            return minutesEarnedToday
+        }
+        // New day — reset.
+        minutesEarnedToday = 0
+        dailyEarnedDate = today
+        return 0
+    }
+
+    /// Adds minutes to `pendingMinutes` while honoring the daily cap.
+    /// Returns the amount actually granted (may be less than `amount` if
+    /// the cap clips it).
+    @discardableResult
+    func grantMinutesCapped(_ amount: Int) -> Int {
+        guard amount > 0 else { return 0 }
+        _ = minutesEarnedTodayRespectingDate()
+        let allowed: Int = {
+            let s = ParentSettings.shared
+            guard s.dailyCapEnabled else { return amount }
+            let remaining = max(0, s.maxMinutesPerDay - minutesEarnedToday)
+            return min(amount, remaining)
+        }()
+        guard allowed > 0 else { return 0 }
+        pendingMinutes += allowed
+        minutesEarnedToday += allowed
+        if dailyEarnedDate == nil {
+            dailyEarnedDate = Calendar.current.startOfDay(for: Date())
+        }
+        return allowed
+    }
+
+    /// Reset the per-session score — call at the start of QuestionRunner.
+    func resetSessionScore() {
+        sessionScore = 0
+        lastEarnedPoints = 0
     }
 
     /// Records a wrong answer. Returns the number of penalty minutes applied
@@ -298,7 +400,8 @@ final class ProgressStore: ObservableObject {
     func applyChestReward(_ reward: ChestReward) {
         stars += reward.stars
         gems += reward.gems
-        pendingMinutes += reward.minutes
+        // Time bonuses honor the daily cap (so chests can't smuggle around it).
+        _ = grantMinutesCapped(reward.minutes)
         if let cosmetic = reward.cosmeticID {
             ownedCosmetics.insert(cosmetic)
         }

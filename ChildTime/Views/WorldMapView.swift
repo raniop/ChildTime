@@ -157,6 +157,9 @@ struct WorldMapView: View {
 
             // Primary stats — tap each chip for an explanation popover.
             HStack(spacing: AppSpacing.sm) {
+                // Headline score
+                ScoreBadge(value: progress.totalScore, style: .lifetime, compact: isCompact)
+
                 Button {
                     Haptic.light()
                     infoStat = .minutes

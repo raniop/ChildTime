@@ -153,8 +153,12 @@ struct QuestionRunnerView: View {
                     }
                     HStack(spacing: AppSpacing.sm) {
                         Spacer()
+                        ScoreBadge(value: progress.sessionScore, style: .session, compact: true)
                         MinutesBadge(minutes: progress.pendingMinutes, compact: true)
                         StarCounter(value: progress.stars)
+                    }
+                    if dailyCapChipVisible {
+                        HStack { Spacer(); dailyCapChip; Spacer() }
                     }
                 }
                 .padding(.horizontal, AppSpacing.md)
@@ -176,11 +180,17 @@ struct QuestionRunnerView: View {
                     }
                     Spacer()
                     StreakMeter(streak: progress.currentStreak)
+                    ScoreBadge(value: progress.sessionScore, style: .session, compact: false)
                     MinutesBadge(minutes: progress.pendingMinutes, compact: true)
                     StarCounter(value: progress.stars)
                 }
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.top, AppSpacing.sm)
+                .overlay(alignment: .bottom) {
+                    if dailyCapChipVisible {
+                        dailyCapChip.padding(.top, 6)
+                    }
+                }
             )
         }
     }
@@ -193,6 +203,29 @@ struct QuestionRunnerView: View {
                 .font(.system(size: size))
                 .foregroundStyle(.white.opacity(0.8))
         }
+    }
+
+    // MARK: - Daily cap chip
+
+    private var dailyCapChipVisible: Bool { settings.dailyCapEnabled }
+
+    private var dailyCapChip: some View {
+        let earned = progress.minutesEarnedToday
+        let cap = settings.maxMinutesPerDay
+        let atCap = earned >= cap
+        let tint: Color = atCap ? AppColor.almostWarm : AppColor.successMint
+        return HStack(spacing: 6) {
+            Image(systemName: atCap ? "timer.circle.fill" : "timer")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(tint)
+            Text(atCap ? "הגעת למקסימום היומי" : "\(earned)/\(cap) דק' היום")
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.9))
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 4)
+        .background(Capsule().fill(.white.opacity(0.15)))
+        .overlay(Capsule().stroke(tint.opacity(0.6), lineWidth: 1))
     }
 
     // MARK: - Question content
@@ -361,6 +394,7 @@ struct QuestionRunnerView: View {
     private func startSession() {
         startedLevel = progress.companionLevel
         progress.registerSessionToday()
+        progress.resetSessionScore()
         questionIndex = 0
         correctInSession = 0
         earnedThisSession = 0

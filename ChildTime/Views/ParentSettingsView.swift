@@ -6,6 +6,7 @@ struct ParentSettingsView: View {
     @EnvironmentObject var shields: ShieldManager
     @EnvironmentObject var auth: AuthManager
     @EnvironmentObject var subs: SubscriptionManager
+    @EnvironmentObject var progress: ProgressStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var showAppPicker = false
@@ -23,6 +24,7 @@ struct ParentSettingsView: View {
                 syncSection
                 ageSection
                 rewardSection
+                dailyCapSection
                 penaltySection
                 soundsSection
                 topicsSection
@@ -313,6 +315,34 @@ struct ParentSettingsView: View {
         }
     }
 
+    private var dailyCapSection: some View {
+        Section {
+            Toggle("הגבל זמן יומי", isOn: $settings.dailyCapEnabled)
+            if settings.dailyCapEnabled {
+                Stepper(
+                    "מקסימום \(settings.maxMinutesPerDay) דק' ליום",
+                    value: $settings.maxMinutesPerDay,
+                    in: 10...240,
+                    step: 5
+                )
+                HStack {
+                    Text("נצבר היום")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text("\(progress.minutesEarnedToday) / \(settings.maxMinutesPerDay) דק'")
+                        .font(.system(.body, design: .rounded).weight(.semibold))
+                        .foregroundStyle(progress.minutesEarnedToday >= settings.maxMinutesPerDay ? .orange : .primary)
+                }
+            }
+        } header: {
+            Text("מגבלת זמן יומית")
+        } footer: {
+            Text(settings.dailyCapEnabled
+                ? "גם אם הילד עונה נכון על הרבה שאלות, הוא לא ירוויח יותר מ-\(settings.maxMinutesPerDay) דקות ביום. המונה מתאפס כל יום בחצות."
+                : "כבוי. הילד יכול לצבור כמה דקות שירצה.")
+        }
+    }
+
     private var penaltySection: some View {
         Section {
             Toggle("הורד זמן על טעויות", isOn: $settings.penaltyEnabled)
@@ -482,5 +512,6 @@ struct ChangePINView: View {
         .environmentObject(ShieldManager.shared)
         .environmentObject(AuthManager.shared)
         .environmentObject(SubscriptionManager.shared)
+        .environmentObject(ProgressStore.shared)
         .environment(\.layoutDirection, .rightToLeft)
 }
