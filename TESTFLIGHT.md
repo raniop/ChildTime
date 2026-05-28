@@ -53,7 +53,7 @@
 2. **My Apps** → **+** → **New App**
 3. מלא לפי `distribution/APP_STORE_METADATA.md`:
    - Platform: iOS
-   - Name: קופיקו
+   - Name: טופי
    - Primary Language: Hebrew
    - Bundle ID: com.rani.ChildTime (יבחר מהרשימה)
    - SKU: childtime-001

@@ -8,7 +8,7 @@
 
 | שדה | ערך |
 |---|---|
-| **Name** | קופיקו |
+| **Name** | טופי |
 | **Subtitle** | למידה שפותחת זמן משחק |
 | **Bundle ID** | com.rani.ChildTime |
 | **SKU** | childtime-001 |
@@ -22,7 +22,7 @@
 ## Description (עברית)
 
 ```
-קופיקו הופך את המסך של הילד למשחק לימוד.
+טופי הופך את המסך של הילד למשחק לימוד.
 
 הילד בוחר עולם, עונה על שאלות בחשבון או בעברית, ומקבל
 דקות לשחק באפליקציות שאתה אישרת — YouTube, משחקים, מה שתבחר.
@@ -32,7 +32,7 @@
 • אתה בוחר אילו אפליקציות חסומות עד שהילד מרוויח זמן
 • הילד עונה על שאלות במסע ויוצא איתן עם דקות
 • ככל שהוא מצליח יותר — הוא צובר כוכבים ופותח עולמות חדשים
-• קופיקו, חבר קסום, מלווה אותו בכל הדרך ומגיב לכל הצלחה
+• טופי, חבר קסום, מלווה אותו בכל הדרך ומגיב לכל הצלחה
 
 🏰 שלושה עולמות בגרסה הראשונה
 • ממלכת המספרים — חיבור וחיסור
@@ -67,7 +67,7 @@ have a real reason to do one more.
 • Your child answers questions in the journey and earns minutes
 • The more they succeed — the more stars they collect, the more
   worlds they unlock
-• Kofiko, a magical friend, guides them and reacts to every win
+• Tofi, a magical friend, guides them and reacts to every win
 
 🏰 Three worlds in the first release
 • Numbers Kingdom — addition and subtraction
@@ -102,7 +102,7 @@ have a real reason to do one more.
 ```
 🎉 השקה ראשונה!
 • 3 עולמות לימוד עם 30 חדרים בסך הכל
-• קופיקו — חבר מצויר שמלווה את הילד
+• טופי — חבר מצויר שמלווה את הילד
 • מערכת קופסאות, רמות וכוכבים
 • רמת קושי מסתגלת
 • ממשק בעברית מלא
@@ -159,12 +159,12 @@ have a real reason to do one more.
 
 תכין צילומי מסך של:
 
-1. **מסך המפה** — 3 עולמות עם קופיקו פינתי + כותרת "עולמות לגלות"
-2. **שאלה במהלך משחק** — שאלת חשבון עם 4 אופציות + קופיקו + קומבו
+1. **מסך המפה** — 3 עולמות עם טופי פינתי + כותרת "עולמות לגלות"
+2. **שאלה במהלך משחק** — שאלת חשבון עם 4 אופציות + טופי + קומבו
 3. **מסך הקופסה הנפתחת** — Confetti + ⭐ ו-💎 חשופים
 4. (אופציונלי) מסך onboarding של ההורה — כפתור Family Controls
 5. (אופציונלי) מסך זמן משחק — countdown timer
-6. (אופציונלי) מסך עליית רמה של קופיקו
+6. (אופציונלי) מסך עליית רמה של טופי
 
 **איך מצלמים**: על ה-iPad — Volume Up + Power button בו זמנית. או דרך Xcode → Window → Devices and Simulators → תיקח screenshot.
 

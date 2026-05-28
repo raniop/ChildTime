@@ -22,7 +22,7 @@ https://developer.apple.com/contact/request/family-controls-distribution
 
 **App Name**:
 ```
-ChildTime (קופיקו)
+ChildTime (טופי)
 ```
 
 **App Bundle ID**:
@@ -37,7 +37,7 @@ Education
 
 **App Description** (English):
 ```
-ChildTime ("Kofiko" in Hebrew) is an educational app for
+ChildTime ("Tofi" in Hebrew) is an educational app for
 children ages 4-10. The parent selects which entertainment apps
 (YouTube, TikTok, games, etc.) should be blocked by default. The
 child can unlock these apps for a limited time window by correctly
@@ -45,7 +45,7 @@ answering educational questions (math: addition, subtraction,
 multiplication, division; and Hebrew spelling).
 
 The app gamifies learning through worlds, a friendly animated
-companion ("Kofiko"), reward chests, streaks, and an XP system. The
+companion ("Tofi"), reward chests, streaks, and an XP system. The
 goal is to make the child want to do educational practice in order
 to earn screen time.
 

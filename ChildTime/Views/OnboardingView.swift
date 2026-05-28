@@ -92,7 +92,7 @@ struct OnboardingView: View {
                 // Companion hero with bubble
                 ZStack(alignment: .topLeading) {
                     if welcomeBubbleVisible {
-                        BubbleSpeech(text: "היי! אני קופיקו 💫")
+                        BubbleSpeech(text: "היי! אני טופי 💫")
                             .offset(x: welcomeCompanionSize * 0.55, y: -30)
                             .transition(.scale.combined(with: .opacity))
                     }
@@ -103,7 +103,7 @@ struct OnboardingView: View {
                 .frame(height: welcomeCompanionSize * 1.8)
 
                 // Animated title with letter-by-letter reveal feel
-                Text("קופיקו")
+                Text("טופי")
                     .font(.system(size: welcomeTitleSize, weight: .heavy, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(

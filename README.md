@@ -1,11 +1,11 @@
-# קופיקו — ChildTime
+# טופי — ChildTime
 
 > An iPadOS app that turns screen time into a learning game for kids ages 4-10.
 > אפליקציית iPadOS שהופכת זמן מסך למשחק לימוד לילדים בגילאי 4-10.
 
 The parent picks which entertainment apps (YouTube, TikTok, games) are blocked
 by default. The child unlocks them for a limited time by answering educational
-questions inside a gamified adventure with worlds, a magical companion (Kofiko),
+questions inside a gamified adventure with worlds, a magical companion (Tofi),
 chests, streaks, and XP.
 
 ## Stack
@@ -23,7 +23,7 @@ ChildTime/                  Main app
 ├── ContentView.swift       Router (Onboarding / Unlocked / WorldMap)
 ├── DesignSystem/           Color, type, spacing, motion tokens
 ├── Components/             Reusable UI (JuicyButton, ChestView, etc.)
-├── Companion/              Kofiko — the floating companion
+├── Companion/              Tofi — the floating companion
 ├── Audio/                  Sound + haptics
 ├── Models/                 Topic, Question, World, ProgressStore, RewardEngine
 ├── Views/                  All screens
