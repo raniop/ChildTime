@@ -25,12 +25,14 @@ final class ShieldManager: ObservableObject {
     private func refreshStatus() {
         let status = authCenter.authorizationStatus
         isAuthorized = (status == .approved)
+        let text: String
         switch status {
-        case .notDetermined: authStatusText = "notDetermined"
-        case .denied: authStatusText = "denied"
-        case .approved: authStatusText = "approved"
-        @unknown default: authStatusText = "unknown"
+        case .notDetermined: text = "notDetermined"
+        case .denied: text = "denied"
+        case .approved: text = "approved"
+        @unknown default: text = "unknown"
         }
+        authStatusText = text
     }
 
     func requestAuthorizationIfNeeded() async {
