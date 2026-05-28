@@ -12,6 +12,7 @@ struct ParentDashboardView: View {
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var auth: AuthManager
+    @StateObject private var remote = RemoteSyncManager.shared
     @Environment(\.dismiss) private var dismiss
 
     @State private var resettingProfile: Profile? = nil
@@ -19,11 +20,22 @@ struct ParentDashboardView: View {
     @State private var lastRefreshed = Date()
 
     /// Rows recomputed on each refresh so values stay live as the kid plays.
+    /// Prefers a remote snapshot when one is available and newer than the
+    /// local copy — that's how the parent sees the kid's other device.
     private var rows: [(profile: Profile, snapshot: ProgressSnapshot)] {
-        // The `refreshTrigger` dependency forces SwiftUI to re-call this
-        // when we bump it via a Timer below.
         _ = refreshTrigger
-        return ProgressVault.shared.allSnapshots(for: profiles.profiles)
+        let locals = ProgressVault.shared.allSnapshots(for: profiles.profiles)
+        return locals.map { row in
+            guard let remoteSnap = remote.remoteSnapshots[row.profile.id] else {
+                return row
+            }
+            // Prefer remote if it has a higher revision OR newer timestamp.
+            let useRemote =
+                remoteSnap.revision > row.snapshot.revision ||
+                (remoteSnap.revision == row.snapshot.revision &&
+                 remoteSnap.lastModifiedAt > row.snapshot.lastModifiedAt)
+            return (row.profile, useRemote ? remoteSnap : row.snapshot)
+        }
     }
 
     var body: some View {
@@ -94,20 +106,34 @@ struct ParentDashboardView: View {
     // MARK: - Sub-views
 
     private var syncStatusCard: some View {
-        HStack(spacing: 12) {
-            Image(systemName: auth.isSignedIn ? "checkmark.icloud.fill" : "icloud.slash")
-                .foregroundStyle(auth.isSignedIn ? AppColor.successMint : .secondary)
+        let synced = auth.isSignedIn && remote.isActive
+        return HStack(spacing: 12) {
+            Image(systemName: synced ? "checkmark.icloud.fill" : "icloud.slash")
+                .foregroundStyle(synced ? AppColor.successMint : .secondary)
                 .font(.title3)
             VStack(alignment: .leading, spacing: 2) {
-                Text(auth.isSignedIn
-                     ? "מצב מקומי + סנכרון מ-iCloud פעיל"
-                     : "מצב מקומי בלבד")
+                Text(synced ? "סנכרון בין מכשירים פעיל" : "מצב מקומי בלבד")
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
-                Text(auth.isSignedIn
-                     ? "כדי לראות גם מכשירים אחרים — הקפד שכל המכשירים מחוברים לחשבון \(auth.email ?? "")"
-                     : "כדי לצפות במצב הילד ממכשיר אחר, התחבר ב-Parent Settings → סנכרון בין מכשירים.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                if synced {
+                    if let when = remote.lastUploadAt {
+                        Text("סנכרון אחרון: \(relativeTime(when))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("מסנכרן… (מכשירים אחרים יקבלו עדכון תוך שניות)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } else {
+                    Text("כדי לראות את הילד ממכשיר אחר, התחבר ב-Parent Settings → סנכרון בין מכשירים.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if let err = remote.lastError, synced {
+                    Text(err)
+                        .font(.caption2)
+                        .foregroundStyle(.red.opacity(0.85))
+                }
             }
             Spacer()
         }
@@ -116,6 +142,14 @@ struct ParentDashboardView: View {
             RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
                 .fill(Color(.secondarySystemGroupedBackground))
         )
+    }
+
+    private func relativeTime(_ when: Date) -> String {
+        let elapsed = Int(-when.timeIntervalSinceNow)
+        if elapsed < 5 { return "ממש עכשיו" }
+        if elapsed < 60 { return "לפני \(elapsed) שניות" }
+        if elapsed < 3600 { return "לפני \(elapsed / 60) דק'" }
+        return "לפני \(elapsed / 3600) שעות"
     }
 
     private var emptyState: some View {
@@ -275,6 +309,9 @@ struct ParentDashboardView: View {
     private func resetProgress(for profile: Profile) {
         Haptic.warning()
         ProgressVault.shared.resetProfile(profile.id)
+        // Push immediately so the kid's other device picks up the reset
+        // within seconds rather than waiting for the debounced upload.
+        remote.pushNow()
         refreshTrigger &+= 1
     }
 

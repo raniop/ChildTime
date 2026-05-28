@@ -44,13 +44,21 @@ final class AuthManager: ObservableObject {
         // If Firebase is configured, prefer its source of truth.
         if let user = Auth.auth().currentUser {
             apply(firebaseUser: user)
+        } else if userID != nil {
+            // Cached uid (but no live Firebase user) — still safe to start
+            // sync; the manager checks `userID` on every operation.
+            RemoteSyncManager.shared.start()
         }
+        #else
+        if userID != nil { RemoteSyncManager.shared.start() }
         #endif
     }
 
     // MARK: - Sign out
 
     func signOut() {
+        // Stop remote sync first so we don't fire writes during teardown.
+        RemoteSyncManager.shared.stop()
         #if canImport(FirebaseAuth)
         try? Auth.auth().signOut()
         #endif
@@ -170,6 +178,8 @@ final class AuthManager: ObservableObject {
             else if p.contains("google") { provider = .google }
         }
         cacheUser()
+        // Kick off cross-device sync now that we have a uid.
+        RemoteSyncManager.shared.start()
     }
     #endif
 
