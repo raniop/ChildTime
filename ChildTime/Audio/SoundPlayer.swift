@@ -1,6 +1,5 @@
 import Foundation
 import AVFoundation
-import AudioToolbox
 
 @MainActor
 final class SoundPlayer {
@@ -31,28 +30,12 @@ final class SoundPlayer {
     func play(_ sound: AppSound) {
         guard !isMuted else { return }
         if let player = players[sound] {
+            // Prefer bundled audio asset if one exists.
             player.currentTime = 0
             player.play()
         } else {
-            // No bundled file yet — emit a soft system sound as placeholder.
-            placeholderSystemSound(for: sound)
+            // No bundled file — synthesize a pleasant melody procedurally.
+            ToneSynth.shared.play(sound)
         }
-    }
-
-    private func placeholderSystemSound(for sound: AppSound) {
-        let systemID: SystemSoundID
-        switch sound {
-        case .uiTap:           systemID = 1104 // Tock
-        case .correctSmall:    systemID = 1003 // Tweet
-        case .correctBig:      systemID = 1025 // Fanfare
-        case .wrongSoft:       systemID = 1306 // Soft click
-        case .streakUp:        systemID = 1057 // Tick
-        case .portalAppear:    systemID = 1117 // Glass
-        case .chestOpen:       systemID = 1336 // Reward
-        case .levelUp:         systemID = 1025
-        case .companionCheer:  systemID = 1003
-        case .worldUnlock:     systemID = 1025
-        }
-        AudioServicesPlaySystemSound(systemID)
     }
 }
