@@ -5,16 +5,19 @@ struct ParentSettingsView: View {
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var shields: ShieldManager
     @EnvironmentObject var auth: AuthManager
+    @EnvironmentObject var subs: SubscriptionManager
     @Environment(\.dismiss) private var dismiss
 
     @State private var showAppPicker = false
     @State private var pickerSelection = FamilyActivitySelection()
     @State private var showChangePIN = false
     @State private var showSignIn = false
+    @State private var showPaywall = false
 
     var body: some View {
         NavigationStack {
             Form {
+                premiumSection
                 authorizationSection
                 syncSection
                 ageSection
@@ -46,6 +49,96 @@ struct ParentSettingsView: View {
                     .environmentObject(auth)
                     .environment(\.layoutDirection, .rightToLeft)
             }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
+                    .environmentObject(subs)
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+        }
+    }
+
+    private var premiumSection: some View {
+        Section {
+            if subs.isPremium {
+                // Active subscriber
+                HStack(spacing: 12) {
+                    Text("👑").font(.system(size: 32))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("טופי+ פעיל")
+                            .font(.system(size: 17, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppColor.starGold)
+                        Text(premiumStatusSubtitle)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                Button {
+                    if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    Label("נהל מנוי ב-Apple ID", systemImage: "gear")
+                }
+            } else {
+                // Upsell card
+                Button {
+                    showPaywall = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Text("👑").font(.system(size: 28))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("שדרג ל-טופי+")
+                                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                            Text("כל הנושאים, כל העולמות, פרופילים לכל ילד")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.leading)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.left")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    Task { await subs.restorePurchases() }
+                } label: {
+                    Label("שחזר רכישה קיימת", systemImage: "arrow.clockwise")
+                        .font(.caption)
+                }
+            }
+        } header: {
+            Text("מנוי")
+        } footer: {
+            if !subs.isPremium {
+                Text("ניסיון 7 ימים חינם במסלול השנתי. ניתן לבטל בכל עת בהגדרות Apple ID.")
+                    .font(.caption2)
+            } else {
+                EmptyView()
+            }
+        }
+    }
+
+    private var premiumStatusSubtitle: String {
+        switch subs.subscriptionState {
+        case .active(let expires?, let willRenew):
+            let df = DateFormatter()
+            df.dateStyle = .medium
+            df.locale = Locale(identifier: "he_IL")
+            return willRenew
+                ? "מתחדש ב-\(df.string(from: expires))"
+                : "פעיל עד \(df.string(from: expires))"
+        case .active(nil, _):
+            return "רכישה לכל החיים ✨"
+        case .inTrial(let expires):
+            let df = DateFormatter()
+            df.dateStyle = .medium
+            df.locale = Locale(identifier: "he_IL")
+            return "ניסיון חינם עד \(df.string(from: expires))"
+        default:
+            return ""
         }
     }
 
@@ -296,5 +389,6 @@ struct ChangePINView: View {
         .environmentObject(ParentSettings.shared)
         .environmentObject(ShieldManager.shared)
         .environmentObject(AuthManager.shared)
+        .environmentObject(SubscriptionManager.shared)
         .environment(\.layoutDirection, .rightToLeft)
 }
