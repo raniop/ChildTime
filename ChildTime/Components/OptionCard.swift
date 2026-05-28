@@ -14,6 +14,11 @@ struct OptionCard: View {
     let index: Int
     let action: () -> Void
 
+    @Environment(\.horizontalSizeClass) private var hsc
+    private var isCompact: Bool { hsc == .compact }
+    private var minHeight: CGFloat { isCompact ? 80 : 110 }
+    private var fontSize: CGFloat { isCompact ? 34 : 44 }
+
     private let palette: [LinearGradient] = [
         LinearGradient(colors: [Color(hex: "118AB2"), Color(hex: "06D6A0")],
                        startPoint: .topLeading, endPoint: .bottomTrailing),
@@ -28,9 +33,9 @@ struct OptionCard: View {
     var body: some View {
         Button(action: action) {
             Text(text)
-                .font(AppFont.option())
+                .font(.system(size: fontSize, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, minHeight: 110)
+                .frame(maxWidth: .infinity, minHeight: minHeight)
                 .padding(.horizontal, 12)
                 .background(backgroundStyle)
                 .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))

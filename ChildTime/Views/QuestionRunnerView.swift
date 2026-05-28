@@ -4,8 +4,16 @@ struct QuestionRunnerView: View {
     let world: World
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var hsc
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var progress: ProgressStore
+
+    private var isCompact: Bool { hsc == .compact }
+    private var questionSize: CGFloat { isCompact ? 42 : 58 }
+    private var topicEmojiSize: CGFloat { isCompact ? 30 : 36 }
+    private var companionSize: CGFloat { isCompact ? 78 : 90 }
+    private var portalEmojiSize: CGFloat { isCompact ? 130 : 180 }
+    private var portalTitleSize: CGFloat { isCompact ? 36 : 56 }
 
     @State private var companion = CompanionController()
     @State private var current: Question?
@@ -52,7 +60,7 @@ struct QuestionRunnerView: View {
                                 .offset(x: 70, y: -10)
                                 .transition(.scale.combined(with: .opacity))
                         }
-                        CompanionView(controller: companion, size: 90)
+                        CompanionView(controller: companion, size: companionSize)
                     }
                     .padding(.leading, AppSpacing.md)
                     Spacer()
@@ -148,7 +156,7 @@ struct QuestionRunnerView: View {
             // Topic / super indicator
             HStack(spacing: 8) {
                 Text(q.topic.emoji)
-                    .font(.system(size: 36))
+                    .font(.system(size: topicEmojiSize))
                 if isSuperQuestion {
                     Text("⭐ שאלת זהב!")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
@@ -163,7 +171,7 @@ struct QuestionRunnerView: View {
             }
 
             Text(q.prompt)
-                .font(.system(size: 58, weight: .heavy, design: .rounded))
+                .font(.system(size: questionSize, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.5)
@@ -233,12 +241,12 @@ struct QuestionRunnerView: View {
             Color.black.opacity(0.7).ignoresSafeArea()
             VStack(spacing: AppSpacing.lg) {
                 Text("🌀")
-                    .font(.system(size: 180))
+                    .font(.system(size: portalEmojiSize))
                     .rotationEffect(.degrees(showPortalIntro ? 360 : 0))
                     .animation(.linear(duration: 1.5).repeatForever(autoreverses: false), value: showPortalIntro)
                     .glow(AppColor.gemPurple, radius: 30)
                 Text("פורטל מסתורין!")
-                    .font(AppFont.title())
+                    .font(.system(size: portalTitleSize, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .glow(AppColor.gemPurple, radius: 14)
                 Text("×3 כוכבים")

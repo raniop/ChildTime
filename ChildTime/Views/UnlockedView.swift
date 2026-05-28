@@ -2,10 +2,17 @@ import SwiftUI
 
 struct UnlockedView: View {
     @EnvironmentObject var progress: ProgressStore
+    @Environment(\.horizontalSizeClass) private var hsc
     @State private var secondsRemaining: Int = 0
     @State private var timer: Timer?
     @State private var companion = CompanionController()
     @State private var greeted = false
+
+    private var isCompact: Bool { hsc == .compact }
+    private var heroEmojiSize: CGFloat { isCompact ? 96 : 140 }
+    private var titleSize: CGFloat { isCompact ? 42 : 56 }
+    private var timerSize: CGFloat { isCompact ? 68 : 96 }
+    private var companionSize: CGFloat { isCompact ? 60 : 70 }
 
     var body: some View {
         ZStack {
@@ -16,18 +23,18 @@ struct UnlockedView: View {
                 Spacer()
 
                 Text("🎮")
-                    .font(.system(size: 140))
+                    .font(.system(size: heroEmojiSize))
                     .float()
                     .glow(AppColor.successMint, radius: 24)
 
                 Text("זמן משחק!")
-                    .font(.system(size: 56, weight: .heavy, design: .rounded))
+                    .font(.system(size: titleSize, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .glow(AppColor.successMint, radius: 14)
 
                 VStack(spacing: AppSpacing.sm) {
                     Text(timeString)
-                        .font(.system(size: 96, weight: .bold, design: .monospaced))
+                        .font(.system(size: timerSize, weight: .bold, design: .monospaced))
                         .foregroundStyle(.white)
                         .glow(AppColor.starGold, radius: 12)
                         .contentTransition(.numericText())
@@ -66,7 +73,7 @@ struct UnlockedView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    CompanionView(controller: companion, size: 70)
+                    CompanionView(controller: companion, size: companionSize)
                         .opacity(0.6)
                         .padding(.trailing, AppSpacing.lg)
                 }

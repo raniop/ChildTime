@@ -5,6 +5,7 @@ struct OnboardingView: View {
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var shields: ShieldManager
+    @Environment(\.horizontalSizeClass) private var hsc
 
     @State private var step: Step = .welcome
     @State private var selection = FamilyActivitySelection()
@@ -13,6 +14,13 @@ struct OnboardingView: View {
     @State private var confirmPIN: String = ""
     @State private var pinError: String?
     @State private var minutesPerAnswer: Int = 2
+
+    private var isCompact: Bool { hsc == .compact }
+    private var welcomeEmojiSize: CGFloat { isCompact ? 92 : 120 }
+    private var titleSize: CGFloat { isCompact ? 38 : 56 }
+    private var subtitleSize: CGFloat { isCompact ? 18 : 24 }
+    private var iconSize: CGFloat { isCompact ? 38 : 50 }
+    private var bigCounterSize: CGFloat { isCompact ? 72 : 100 }
 
     enum Step {
         case welcome
@@ -59,15 +67,15 @@ struct OnboardingView: View {
         VStack(spacing: AppSpacing.xl) {
             Spacer()
             Text("✨")
-                .font(.system(size: 120))
+                .font(.system(size: welcomeEmojiSize))
                 .float()
                 .glow(AppColor.starGold, radius: 30)
             Text("מסע הניצוץ")
-                .font(.system(size: 56, weight: .heavy, design: .rounded))
+                .font(.system(size: titleSize, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .glow(AppColor.starGold, radius: 14)
             Text("הרפתקה לימודית\nשמעניקה זמן משחק")
-                .font(.system(size: 24, weight: .semibold, design: .rounded))
+                .font(.system(size: subtitleSize, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
             Spacer()
@@ -306,7 +314,7 @@ struct OnboardingView: View {
 
             VStack(spacing: AppSpacing.sm) {
                 Text("\(minutesPerAnswer)")
-                    .font(.system(size: 100, weight: .heavy, design: .rounded))
+                    .font(.system(size: bigCounterSize, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
                     .glow(AppColor.starGold, radius: 18)
                 Text("דקות")
@@ -345,7 +353,7 @@ struct OnboardingView: View {
 
     private func infoIcon(systemName: String) -> some View {
         Image(systemName: systemName)
-            .font(.system(size: 50))
+            .font(.system(size: iconSize))
             .foregroundStyle(.white)
             .padding(AppSpacing.md)
             .background(.white.opacity(0.18), in: Circle())

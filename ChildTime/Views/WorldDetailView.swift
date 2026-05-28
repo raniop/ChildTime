@@ -3,12 +3,19 @@ import SwiftUI
 struct WorldDetailView: View {
     let world: World
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var hsc
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var progress: ProgressStore
 
     @State private var companion = CompanionController()
     @State private var startSession = false
     @State private var heroAppeared = false
+
+    private var isCompact: Bool { hsc == .compact }
+    private var heroEmojiSize: CGFloat { isCompact ? 110 : 160 }
+    private var worldNameSize: CGFloat { isCompact ? 38 : 52 }
+    private var companionSize: CGFloat { isCompact ? 88 : 110 }
+    private var ctaSize: CGFloat { isCompact ? 30 : 38 }
 
     var currentRoom: Int { progress.progress(in: world.id) }
     var rewardPerCorrect: Int { settings.minutesPerCorrectAnswer }
@@ -58,7 +65,7 @@ struct WorldDetailView: View {
                 // World hero — bigger, more dramatic
                 VStack(spacing: AppSpacing.md) {
                     Text(world.emoji)
-                        .font(.system(size: 160))
+                        .font(.system(size: heroEmojiSize))
                         .float(amplitude: 8)
                         .shadow(color: world.glowColor.opacity(0.9), radius: 40)
                         .shadow(color: .black.opacity(0.3), radius: 8, y: 6)
@@ -66,7 +73,7 @@ struct WorldDetailView: View {
                         .rotationEffect(.degrees(heroAppeared ? 0 : -20))
 
                     Text(world.name)
-                        .font(.system(size: 52, weight: .heavy, design: .rounded))
+                        .font(.system(size: worldNameSize, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .shadow(color: .black.opacity(0.35), radius: 6, y: 3)
                         .scaleEffect(heroAppeared ? 1 : 0.7)
@@ -92,7 +99,7 @@ struct WorldDetailView: View {
                         BubbleSpeech(text: bubble)
                             .offset(y: -10)
                     }
-                    CompanionView(controller: companion, size: 110)
+                    CompanionView(controller: companion, size: companionSize)
                         .offset(y: 80)
                 }
                 .frame(height: 190)
@@ -128,7 +135,7 @@ struct WorldDetailView: View {
                     }
                 } label: {
                     Label("יאללה! 🚀", systemImage: "play.fill")
-                        .font(.system(size: 38, weight: .heavy, design: .rounded))
+                        .font(.system(size: ctaSize, weight: .heavy, design: .rounded))
                 }
                 .padding(.horizontal, AppSpacing.lg)
 

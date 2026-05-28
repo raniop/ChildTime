@@ -7,8 +7,17 @@ struct WorldCard: View {
     let starsHeld: Int
     let onTap: () -> Void
 
+    @Environment(\.horizontalSizeClass) private var hsc
+
     @State private var float: CGFloat = 0
     @State private var shimmer: Bool = false
+
+    private var isCompact: Bool { hsc == .compact }
+    private var cardHeight: CGFloat { isCompact ? 120 : 150 }
+    private var emojiSize: CGFloat { isCompact ? 68 : 92 }
+    private var emojiFrame: CGFloat { isCompact ? 84 : 110 }
+    private var titleSize: CGFloat { isCompact ? 22 : 28 }
+    private var labelSize: CGFloat { isCompact ? 14 : 17 }
 
     var body: some View {
         Button(action: onTap) {
@@ -37,37 +46,38 @@ struct WorldCard: View {
                 HStack(spacing: AppSpacing.lg) {
                     // Big emoji with float + glow
                     Text(world.emoji)
-                        .font(.system(size: 92))
+                        .font(.system(size: emojiSize))
                         .offset(y: float)
                         .shadow(color: world.glowColor.opacity(0.7), radius: 20)
                         .shadow(color: .black.opacity(0.2), radius: 4, y: 4)
                         .opacity(isUnlocked ? 1 : 0.35)
-                        .frame(width: 110)
+                        .frame(width: emojiFrame)
 
                     // Right side: title + progress
                     VStack(alignment: .trailing, spacing: 8) {
                         Text(world.name)
-                            .font(.system(size: 28, weight: .heavy, design: .rounded))
+                            .font(.system(size: titleSize, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .shadow(color: .black.opacity(0.4), radius: 4, y: 2)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
 
                         if isUnlocked {
                             HStack(spacing: 6) {
                                 Image(systemName: "door.left.hand.open")
-                                    .font(.system(size: 14))
+                                    .font(.system(size: labelSize - 3))
                                 Text("חדר \(currentRoom + 1) / \(world.rooms)")
-                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                    .font(.system(size: labelSize, weight: .semibold, design: .rounded))
                             }
                             .foregroundStyle(.white.opacity(0.9))
 
-                            // Progress bar (custom — more juicy than ProgressView)
                             progressBar
                         } else {
                             HStack(spacing: 6) {
                                 Image(systemName: "lock.fill")
-                                    .font(.system(size: 14))
+                                    .font(.system(size: labelSize - 3))
                                 Text("\(world.starsToUnlock) ⭐ לפתיחה")
-                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                    .font(.system(size: labelSize, weight: .semibold, design: .rounded))
                             }
                             .foregroundStyle(.white.opacity(0.85))
                             progressBar
@@ -77,7 +87,7 @@ struct WorldCard: View {
                 }
                 .padding(AppSpacing.lg)
             }
-            .frame(height: 150)
+            .frame(height: cardHeight)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous)

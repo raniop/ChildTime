@@ -4,10 +4,16 @@ struct LevelUpView: View {
     let newLevel: Int
     let onContinue: () -> Void
 
+    @Environment(\.horizontalSizeClass) private var hsc
     @State private var companion = CompanionController()
     @State private var confettiTrigger: Int = 0
     @State private var scale: CGFloat = 0.3
     @State private var titleVisible = false
+
+    private var isCompact: Bool { hsc == .compact }
+    private var companionSize: CGFloat { isCompact ? 120 : 160 }
+    private var titleFontSize: CGFloat { isCompact ? 46 : 64 }
+    private var levelFontSize: CGFloat { isCompact ? 28 : 36 }
 
     var body: some View {
         ZStack {
@@ -24,20 +30,20 @@ struct LevelUpView: View {
             VStack(spacing: AppSpacing.xl) {
                 Spacer()
 
-                CompanionView(controller: companion, size: 160)
+                CompanionView(controller: companion, size: companionSize)
                     .scaleEffect(scale)
                     .glow(AppColor.starGold, radius: 40)
 
                 if titleVisible {
                     VStack(spacing: AppSpacing.md) {
                         Text("עלית רמה!")
-                            .font(.system(size: 64, weight: .heavy, design: .rounded))
+                            .font(.system(size: titleFontSize, weight: .heavy, design: .rounded))
                             .foregroundStyle(AppColor.starGold)
                             .glow(AppColor.starGold, radius: 20)
                             .transition(.scale.combined(with: .opacity))
 
                         Text("רמה \(newLevel)")
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                            .font(.system(size: levelFontSize, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                             .transition(.scale.combined(with: .opacity))
 

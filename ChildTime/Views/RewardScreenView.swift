@@ -7,9 +7,18 @@ struct RewardScreenView: View {
     let startedLevel: Int
     let onDismiss: () -> Void
 
+    @Environment(\.horizontalSizeClass) private var hsc
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var shields: ShieldManager
+
+    private var isCompact: Bool { hsc == .compact }
+    private var chestSize: CGFloat { isCompact ? 130 : 180 }
+    private var celebEmojiSize: CGFloat { isCompact ? 60 : 80 }
+    private var titleFont: Font {
+        isCompact ? .system(size: 36, weight: .bold, design: .rounded) : .system(size: 56, weight: .bold, design: .rounded)
+    }
+    private var companionSize: CGFloat { isCompact ? 64 : 80 }
 
     @State private var stage: ChestStage = .closed
     @State private var revealedItems: Int = 0
@@ -32,10 +41,10 @@ struct RewardScreenView: View {
                 Spacer()
 
                 Text(stage == .revealed ? "🎉" : kind.label)
-                    .font(stage == .revealed ? .system(size: 80) : AppFont.title())
+                    .font(stage == .revealed ? .system(size: celebEmojiSize) : titleFont)
                     .foregroundStyle(.white)
 
-                ChestView(kind: kind, stage: stage, size: 180)
+                ChestView(kind: kind, stage: stage, size: chestSize)
                     .onTapGesture {
                         if stage == .glowing { openChest() }
                     }
@@ -69,7 +78,7 @@ struct RewardScreenView: View {
                             BubbleSpeech(text: bubble)
                                 .offset(x: 80, y: -10)
                         }
-                        CompanionView(controller: companion, size: 80)
+                        CompanionView(controller: companion, size: companionSize)
                     }
                     .padding(.leading, AppSpacing.md)
                     Spacer()

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DailyChestView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var hsc
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var progress: ProgressStore
 
@@ -10,6 +11,10 @@ struct DailyChestView: View {
     @State private var reward: ChestReward = ChestReward(stars: 0, gems: 0, minutes: 0)
     @State private var companion = CompanionController()
     @State private var confettiTrigger = 0
+
+    private var isCompact: Bool { hsc == .compact }
+    private var chestSize: CGFloat { isCompact ? 130 : 180 }
+    private var companionSize: CGFloat { isCompact ? 70 : 90 }
 
     var body: some View {
         ZStack {
@@ -25,7 +30,7 @@ struct DailyChestView: View {
                     .foregroundStyle(.white)
                     .glow(AppColor.gemPurple, radius: 12)
 
-                ChestView(kind: .magic, stage: stage, size: 180)
+                ChestView(kind: .magic, stage: stage, size: chestSize)
                     .onTapGesture {
                         if stage == .glowing { open() }
                     }
@@ -78,7 +83,7 @@ struct DailyChestView: View {
                         if let bubble = companion.bubbleText {
                             BubbleSpeech(text: bubble).offset(x: 80, y: -10)
                         }
-                        CompanionView(controller: companion, size: 90)
+                        CompanionView(controller: companion, size: companionSize)
                     }
                     .padding(.leading, AppSpacing.md)
                     Spacer()

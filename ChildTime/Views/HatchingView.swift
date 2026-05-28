@@ -3,6 +3,7 @@ import SwiftUI
 struct HatchingView: View {
     let onContinue: () -> Void
 
+    @Environment(\.horizontalSizeClass) private var hsc
     @State private var stage: Int = 0
     @State private var shake: CGFloat = 0
     @State private var eggScale: CGFloat = 1.0
@@ -12,6 +13,11 @@ struct HatchingView: View {
     @State private var bubbleVisible = false
     @State private var confettiTrigger = 0
     @State private var burstTrigger = 0
+
+    private var isCompact: Bool { hsc == .compact }
+    private var eggSize: CGFloat { isCompact ? 150 : 200 }
+    private var companionSize: CGFloat { isCompact ? 140 : 180 }
+    private var ctaSize: CGFloat { isCompact ? 22 : 26 }
 
     var body: some View {
         ZStack {
@@ -32,13 +38,13 @@ struct HatchingView: View {
                 ZStack {
                     if !companionVisible {
                         Text("🥚")
-                            .font(.system(size: 200))
+                            .font(.system(size: eggSize))
                             .offset(x: shake)
                             .scaleEffect(eggScale)
                             .opacity(eggOpacity)
                             .glow(AppColor.starGold, radius: 40)
                     } else {
-                        CompanionView(controller: companion, size: 180)
+                        CompanionView(controller: companion, size: companionSize)
                             .transition(.scale(scale: 0.3).combined(with: .opacity))
                     }
                 }
@@ -56,7 +62,7 @@ struct HatchingView: View {
                         onContinue()
                     } label: {
                         Text("בוא נצא להרפתקה!")
-                            .font(.system(size: 26, weight: .heavy, design: .rounded))
+                            .font(.system(size: ctaSize, weight: .heavy, design: .rounded))
                     }
                     .padding(.horizontal, AppSpacing.xl)
                     .padding(.bottom, AppSpacing.xl)

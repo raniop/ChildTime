@@ -4,9 +4,15 @@ struct WorldUnlockView: View {
     let world: World
     let onContinue: () -> Void
 
+    @Environment(\.horizontalSizeClass) private var hsc
     @State private var companion = CompanionController()
     @State private var confettiTrigger = 0
     @State private var stage: Int = 0
+
+    private var isCompact: Bool { hsc == .compact }
+    private var emojiSize: CGFloat { isCompact ? 130 : 180 }
+    private var subtitleFontSize: CGFloat { isCompact ? 26 : 32 }
+    private var titleFontSize: CGFloat { isCompact ? 42 : 56 }
 
     var body: some View {
         ZStack {
@@ -18,7 +24,7 @@ struct WorldUnlockView: View {
                 Spacer()
 
                 Text(world.emoji)
-                    .font(.system(size: 180))
+                    .font(.system(size: emojiSize))
                     .scaleEffect(stage >= 1 ? 1.2 : 0.5)
                     .opacity(stage >= 1 ? 1 : 0)
                     .glow(world.glowColor, radius: 40)
@@ -27,12 +33,12 @@ struct WorldUnlockView: View {
                 if stage >= 2 {
                     VStack(spacing: AppSpacing.md) {
                         Text("עולם חדש נפתח!")
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .font(.system(size: subtitleFontSize, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
                             .transition(.scale.combined(with: .opacity))
 
                         Text(world.name)
-                            .font(.system(size: 56, weight: .heavy, design: .rounded))
+                            .font(.system(size: titleFontSize, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .glow(world.glowColor, radius: 20)
                             .transition(.scale.combined(with: .opacity))

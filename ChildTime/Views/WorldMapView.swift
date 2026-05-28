@@ -4,6 +4,7 @@ struct WorldMapView: View {
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var shields: ShieldManager
+    @Environment(\.horizontalSizeClass) private var hsc
 
     @State private var companion = CompanionController()
     @State private var selectedWorld: World?
@@ -12,6 +13,10 @@ struct WorldMapView: View {
     @State private var showingDemo = false
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
+
+    private var isCompact: Bool { hsc == .compact }
+    private var companionSize: CGFloat { isCompact ? 90 : 120 }
+    private var heroTitleSize: CGFloat { isCompact ? 36 : 44 }
 
     var body: some View {
         ZStack {
@@ -61,12 +66,12 @@ struct WorldMapView: View {
                                 .offset(x: -150, y: -30)
                                 .transition(.scale.combined(with: .opacity))
                         }
-                        CompanionView(controller: companion, size: 120)
+                        CompanionView(controller: companion, size: companionSize)
                     }
                     .padding(.trailing, AppSpacing.lg)
                 }
             }
-            .padding(.bottom, 200)
+            .padding(.bottom, isCompact ? 160 : 200)
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
         }
         .onAppear {
@@ -185,7 +190,7 @@ struct WorldMapView: View {
     private var heroTitle: some View {
         VStack(spacing: 4) {
             Text("מסע הניצוץ")
-                .font(.system(size: 44, weight: .heavy, design: .rounded))
+                .font(.system(size: heroTitleSize, weight: .heavy, design: .rounded))
                 .foregroundStyle(
                     LinearGradient(
                         colors: [AppColor.starGold, AppColor.companionGlow, .white],
@@ -198,7 +203,7 @@ struct WorldMapView: View {
                 .opacity(heroAppeared ? 1 : 0)
 
             Text("בחר עולם והתחל הרפתקה!")
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .font(.system(size: isCompact ? 16 : 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.75))
                 .opacity(heroAppeared ? 1 : 0)
 
