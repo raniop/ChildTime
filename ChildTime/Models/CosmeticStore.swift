@@ -90,6 +90,13 @@ final class CosmeticStore: ObservableObject {
         }
     }
 
+    /// Grant an item for free (e.g. Lucky Wheel prize). No-op if already owned.
+    func unlockFree(_ item: CosmeticItem) {
+        guard !ownedIDs.contains(item.id) else { return }
+        ownedIDs.insert(item.id)
+        lastPurchasedItem = item
+    }
+
     /// Buy + auto-equip in one motion. Throws if not enough coins or
     /// already owned. Returns the bought item on success.
     @discardableResult

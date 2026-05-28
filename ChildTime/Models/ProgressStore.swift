@@ -451,6 +451,19 @@ final class ProgressStore: ObservableObject {
         gems = max(0, gems - amount)
     }
 
+    /// Generic XP grant — used by Lucky Wheel and any future "+XP" rewards.
+    func addXP(_ amount: Int) {
+        guard amount > 0 else { return }
+        xp += amount
+    }
+
+    /// Generic score bump — used by Lucky Wheel.
+    func addScore(_ amount: Int) {
+        guard amount > 0 else { return }
+        totalScore += amount
+        sessionScore += amount
+    }
+
     // MARK: - Session time
 
     func consumePendingMinutes() -> Int {

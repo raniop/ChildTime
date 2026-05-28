@@ -12,6 +12,7 @@ struct WorldMapView: View {
     @State private var showingParentGate = false
     @State private var showingDemo = false
     @State private var showingShop = false
+    @State private var showingWheel = false
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
 
@@ -123,6 +124,9 @@ struct WorldMapView: View {
         .fullScreenCover(isPresented: $showingShop) {
             ShopView()
         }
+        .fullScreenCover(isPresented: $showingWheel) {
+            LuckyWheelView { showingWheel = false }
+        }
         .fullScreenCover(isPresented: $showingDemo) {
             ZStack(alignment: .topTrailing) {
                 DemoView()
@@ -169,6 +173,19 @@ struct WorldMapView: View {
                     .background(.white.opacity(0.15), in: Circle())
                     .overlay(Circle().stroke(AppColor.starGold.opacity(0.6), lineWidth: 1.5))
                     .glow(AppColor.starGold.opacity(0.5), radius: 6)
+            }
+
+            // Lucky wheel button
+            Button {
+                Haptic.light()
+                showingWheel = true
+            } label: {
+                Text("🎡")
+                    .font(.system(size: 24))
+                    .frame(width: 46, height: 46)
+                    .background(.white.opacity(0.15), in: Circle())
+                    .overlay(Circle().stroke(AppColor.gemPurple.opacity(0.6), lineWidth: 1.5))
+                    .glow(AppColor.gemPurple.opacity(0.5), radius: 6)
             }
 
             Spacer()
