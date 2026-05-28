@@ -55,6 +55,7 @@ struct OnboardingView: View {
         case gender = 0
         case name
         case age
+        case difficulty
     }
 
     var body: some View {
@@ -701,9 +702,10 @@ struct OnboardingView: View {
                 // Answer area
                 Group {
                     switch kidIntroQ {
-                    case .gender: genderAnswerArea
-                    case .name:   nameAnswerArea
-                    case .age:    ageAnswerArea
+                    case .gender:     genderAnswerArea
+                    case .name:       nameAnswerArea
+                    case .age:        ageAnswerArea
+                    case .difficulty: difficultyAnswerArea
                     }
                 }
                 .transition(.asymmetric(
@@ -728,7 +730,7 @@ struct OnboardingView: View {
                 JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
                     advanceKidIntro()
                 } label: {
-                    Text(kidIntroQ == .age ? "בוא נצא להרפתקה!" : "המשך")
+                    Text(kidIntroQ == .difficulty ? "בוא נצא להרפתקה!" : "המשך")
                 }
                 .opacity(canAdvanceKidIntro ? 1 : 0.4)
                 .disabled(!canAdvanceKidIntro)
@@ -768,6 +770,11 @@ struct OnboardingView: View {
                 return "\(benBat) כמה \(settings.childName)?"
             }
             return "\(benBat) כמה \(isMale ? "הילד" : "הילדה")?"
+        case .difficulty:
+            if !settings.childName.isEmpty {
+                return "באיזו רמת קושי שיהיו השאלות ל\(settings.childName)?"
+            }
+            return "באיזו רמת קושי שיהיו השאלות?"
         }
     }
 
@@ -923,11 +930,100 @@ struct OnboardingView: View {
         .buttonStyle(.juicy)
     }
 
+    // MARK: - Difficulty selection
+
+    @ViewBuilder
+    private var difficultyAnswerArea: some View {
+        // Always show all 6 topics — they're pre-filled from age defaults,
+        // parent just confirms / adjusts.
+        let topics = Topic.allCases
+        VStack(spacing: AppSpacing.sm) {
+            Text("בחר רמה לכל נושא")
+                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .padding(.bottom, 4)
+
+            VStack(spacing: 8) {
+                ForEach(topics) { topic in
+                    difficultyTopicRow(topic)
+                }
+            }
+            .frame(maxWidth: 560)
+            .padding(.horizontal, AppSpacing.lg)
+        }
+    }
+
+    private func difficultyTopicRow(_ topic: Topic) -> some View {
+        HStack(spacing: AppSpacing.sm) {
+            // Topic emoji + name
+            HStack(spacing: 8) {
+                Text(topic.emoji).font(.system(size: 22))
+                Text(topic.displayName)
+                    .font(.system(size: isCompact ? 14 : 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Difficulty chips
+            HStack(spacing: 5) {
+                ForEach(Difficulty.allCases) { d in
+                    difficultyChip(topic: topic, difficulty: d)
+                }
+            }
+        }
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                .fill(.white.opacity(0.10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                        .stroke(.white.opacity(0.15), lineWidth: 1)
+                )
+        )
+    }
+
+    private func difficultyChip(topic: Topic, difficulty d: Difficulty) -> some View {
+        let isSelected = settings.difficulty(for: topic) == d
+        return Button {
+            Haptic.light()
+            SoundPlayer.shared.play(.uiTap)
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                settings.setDifficulty(d, for: topic)
+            }
+        } label: {
+            Text(d.displayName)
+                .font(.system(size: isCompact ? 12 : 13, weight: .bold, design: .rounded))
+                .foregroundStyle(isSelected ? .white : .white.opacity(0.6))
+                .frame(minWidth: isCompact ? 40 : 46)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule().fill(
+                        isSelected
+                            ? AppColor.successMint.opacity(0.75)
+                            : .white.opacity(0.12)
+                    )
+                )
+                .overlay(
+                    Capsule().stroke(
+                        isSelected ? AppColor.successMint : .clear,
+                        lineWidth: 1.5
+                    )
+                )
+                .scaleEffect(isSelected ? 1.03 : 1.0)
+                .glow(isSelected ? AppColor.successMint : .clear, radius: isSelected ? 6 : 0)
+        }
+        .buttonStyle(.juicy)
+    }
+
     private var canAdvanceKidIntro: Bool {
         switch kidIntroQ {
-        case .gender: return settings.childGender != nil
-        case .name:   return true  // name is optional
-        case .age:    return true  // age has a default
+        case .gender:     return settings.childGender != nil
+        case .name:       return true  // name is optional
+        case .age:        return true  // age has a default
+        case .difficulty: return true  // each topic has a default
         }
     }
 
@@ -942,8 +1038,9 @@ struct OnboardingView: View {
                 kidIntroQ = next
             }
         } else {
-            // Done — apply defaults and move to hatching
-            settings.applyAgeDefaults(settings.childAge)
+            // Done — age defaults were already applied when age was chosen
+            // (in ageOptionWithAutoAdvance), and the parent has now confirmed
+            // / adjusted difficulty per topic. Just hand off to hatching.
             minutesPerAnswer = settings.minutesPerCorrectAnswer
             step = .hatching
         }
