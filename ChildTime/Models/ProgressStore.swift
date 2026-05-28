@@ -442,6 +442,15 @@ final class ProgressStore: ObservableObject {
         return true
     }
 
+    /// Burn gems (the cosmetic shop currency). Caller must check
+    /// affordability first — this asserts only that the value isn't
+    /// negative, but happily takes us below the gem count if asked.
+    /// Use after `gems >= amount` is verified.
+    func spendGems(_ amount: Int) {
+        guard amount > 0 else { return }
+        gems = max(0, gems - amount)
+    }
+
     // MARK: - Session time
 
     func consumePendingMinutes() -> Int {

@@ -173,10 +173,20 @@ struct ProfilePickerView: View {
 struct ProfileAvatarView: View {
     let profile: Profile
     var size: CGFloat = 110
+    /// Set to a non-empty array to render a *preview* loadout (e.g. in the
+    /// shop) without touching the profile's persisted equipment.
+    var overrideItems: [CosmeticItem]? = nil
+
+    @EnvironmentObject private var cosmetics: CosmeticStore
+
+    private var equippedItems: [CosmeticItem] {
+        if let overrideItems { return overrideItems }
+        return cosmetics.equippedItems(for: profile.id)
+    }
 
     var body: some View {
         ZStack {
-            // Background — photo trumps preset.
+            // Base — photo trumps preset.
             if let data = profile.photoData, let img = UIImage(data: data) {
                 Image(uiImage: img)
                     .resizable()
@@ -195,6 +205,11 @@ struct ProfileAvatarView: View {
                 Text(preset.emoji)
                     .font(.system(size: size * 0.55))
             }
+
+            // Cosmetic layers — positioned around the avatar circle.
+            ForEach(equippedItems, id: \.id) { item in
+                cosmeticLayer(for: item)
+            }
         }
         .overlay(
             Circle().stroke(
@@ -206,6 +221,32 @@ struct ProfileAvatarView: View {
             )
         )
         .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
+    }
+
+    /// Layered cosmetic — each category sits in a tuned spot around the
+    /// avatar circle so a hat goes on top, glasses cover the face, shoes
+    /// peek at the bottom, etc.
+    @ViewBuilder
+    private func cosmeticLayer(for item: CosmeticItem) -> some View {
+        let (offset, scale) = position(for: item.category)
+        Text(item.emoji)
+            .font(.system(size: size * scale))
+            .offset(x: offset.x * size, y: offset.y * size)
+            .shadow(color: .black.opacity(0.35), radius: 2, y: 1)
+    }
+
+    /// Offset (x, y) is in units of `size` (i.e. 0.45 = 45% of avatar diameter).
+    private func position(for category: CosmeticCategory) -> (offset: CGPoint, scale: CGFloat) {
+        switch category {
+        case .hat:       return (CGPoint(x: 0,     y: -0.45), 0.38)
+        case .glasses:   return (CGPoint(x: 0,     y: -0.07), 0.30)
+        case .shirt:     return (CGPoint(x: 0,     y:  0.30), 0.30)
+        case .pants:     return (CGPoint(x: 0,     y:  0.42), 0.24)
+        case .shoes:     return (CGPoint(x: 0,     y:  0.50), 0.22)
+        case .accessory: return (CGPoint(x:  0.36, y: -0.30), 0.26)
+        case .backpack:  return (CGPoint(x: -0.36, y:  0.08), 0.28)
+        case .vehicle:   return (CGPoint(x:  0.36, y:  0.36), 0.30)
+        }
     }
 }
 

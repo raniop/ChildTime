@@ -11,6 +11,7 @@ struct WorldMapView: View {
     @State private var showDailyChest = false
     @State private var showingParentGate = false
     @State private var showingDemo = false
+    @State private var showingShop = false
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
 
@@ -119,6 +120,9 @@ struct WorldMapView: View {
         .sheet(isPresented: $showingParentGate) {
             ParentGateView()
         }
+        .fullScreenCover(isPresented: $showingShop) {
+            ShopView()
+        }
         .fullScreenCover(isPresented: $showingDemo) {
             ZStack(alignment: .topTrailing) {
                 DemoView()
@@ -152,6 +156,20 @@ struct WorldMapView: View {
                     .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
             }
             .onLongPressGesture(minimumDuration: 1.5) { showingDemo = true }
+
+            // Shop button — opens the cosmetics shop
+            Button {
+                Haptic.light()
+                showingShop = true
+            } label: {
+                Image(systemName: "bag.fill")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(AppColor.starGold)
+                    .frame(width: 46, height: 46)
+                    .background(.white.opacity(0.15), in: Circle())
+                    .overlay(Circle().stroke(AppColor.starGold.opacity(0.6), lineWidth: 1.5))
+                    .glow(AppColor.starGold.opacity(0.5), radius: 6)
+            }
 
             Spacer()
 

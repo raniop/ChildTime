@@ -16,6 +16,7 @@ struct ChildTimeApp: App {
     @StateObject private var auth = AuthManager.shared
     @StateObject private var subs = SubscriptionManager.shared
     @StateObject private var profiles = ProfileStore.shared
+    @StateObject private var cosmetics = CosmeticStore.shared
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -38,6 +39,7 @@ struct ChildTimeApp: App {
                 .environmentObject(auth)
                 .environmentObject(subs)
                 .environmentObject(profiles)
+                .environmentObject(cosmetics)
                 .task {
                     await shields.requestAuthorizationIfNeeded()
                     enforceShieldStateIfNeeded()
