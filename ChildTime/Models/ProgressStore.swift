@@ -519,4 +519,69 @@ final class ProgressStore: ObservableObject {
     func resetCombo() {
         currentStreak = 0
     }
+
+    // MARK: - Snapshot capture / apply (per-profile)
+
+    /// Read the current store state into a portable snapshot.
+    func captureSnapshot() -> ProgressSnapshot {
+        var s = ProgressSnapshot()
+        s.pendingMinutes      = pendingMinutes
+        s.totalCorrect        = totalCorrect
+        s.totalAnswered       = totalAnswered
+        s.unlockEndsAt        = unlockEndsAt
+        s.stars               = stars
+        s.gems                = gems
+        s.xp                  = xp
+        s.currentStreak       = currentStreak
+        s.dayStreak           = dayStreak
+        s.lastSessionDate     = lastSessionDate
+        s.lastDailyChestDate  = lastDailyChestDate
+        s.unlockedWorlds      = Array(unlockedWorlds)
+        s.worldProgress       = worldProgress
+        s.topicAccuracy       = topicAccuracy
+        s.topicAnswered       = topicAnswered
+        s.topicCorrect        = topicCorrect
+        s.batchCounter        = batchCounter
+        s.wrongStreak         = wrongStreak
+        s.totalScore          = totalScore
+        s.minutesEarnedToday  = minutesEarnedToday
+        s.dailyEarnedDate     = dailyEarnedDate
+        s.lastModifiedAt      = .now
+        return s
+    }
+
+    /// Overwrite the store with a snapshot — used when switching profiles
+    /// or applying a remote update.
+    func apply(_ s: ProgressSnapshot) {
+        pendingMinutes      = s.pendingMinutes
+        totalCorrect        = s.totalCorrect
+        totalAnswered       = s.totalAnswered
+        unlockEndsAt        = s.unlockEndsAt
+        stars               = s.stars
+        gems                = s.gems
+        xp                  = s.xp
+        currentStreak       = s.currentStreak
+        dayStreak           = s.dayStreak
+        lastSessionDate     = s.lastSessionDate
+        lastDailyChestDate  = s.lastDailyChestDate
+        unlockedWorlds      = Set(s.unlockedWorlds)
+        worldProgress       = s.worldProgress
+        topicAccuracy       = s.topicAccuracy
+        topicAnswered       = s.topicAnswered
+        topicCorrect        = s.topicCorrect
+        batchCounter        = s.batchCounter
+        wrongStreak         = s.wrongStreak
+        totalScore          = s.totalScore
+        minutesEarnedToday  = s.minutesEarnedToday
+        dailyEarnedDate     = s.dailyEarnedDate
+    }
+
+    /// Hard-reset everything for a fresh profile. Keeps onboarding /
+    /// settings — only the progress side.
+    func resetAll() {
+        apply(.blank)
+        sessionScore = 0
+        lastEarnedPoints = 0
+        lastPenaltyMinutes = 0
+    }
 }

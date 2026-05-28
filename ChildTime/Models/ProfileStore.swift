@@ -40,6 +40,11 @@ final class ProfileStore: ObservableObject {
         loadProfiles()
         loadActiveID()
         migrateLegacyKidIfNeeded()
+        // If there's already an active profile (from a previous launch),
+        // ask the vault to bind to it so auto-save observers come online.
+        if let id = activeID, let p = profiles.first(where: { $0.id == id }) {
+            ProgressVault.shared.switchTo(p)
+        }
     }
 
     // MARK: - Public API
@@ -82,10 +87,11 @@ final class ProfileStore: ObservableObject {
 
     func setActive(_ profile: Profile) {
         guard profiles.contains(where: { $0.id == profile.id }) else { return }
+        // Save the OLD profile's progress + load the new one BEFORE we
+        // flip `activeID`, so listeners that react to activeID see a
+        // store that already holds the new kid's state.
+        ProgressVault.shared.switchTo(profile)
         activeID = profile.id
-        // Question anti-repeat memory is per-profile — reload so the kid
-        // sees their own history, not the previous profile's.
-        QuestionMemory.shared.reloadForActiveProfile()
     }
 
     /// Sign-out style: clears active selection (forces the picker on next launch).

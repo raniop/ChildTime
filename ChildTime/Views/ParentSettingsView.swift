@@ -15,11 +15,13 @@ struct ParentSettingsView: View {
     @State private var showChangePIN = false
     @State private var showSignIn = false
     @State private var showPaywall = false
+    @State private var showDashboard = false
 
     var body: some View {
         NavigationStack {
             Form {
                 premiumSection
+                dashboardSection
                 profileSection
                 authorizationSection
                 syncSection
@@ -60,6 +62,38 @@ struct ParentSettingsView: View {
                     .environmentObject(subs)
                     .environment(\.layoutDirection, .rightToLeft)
             }
+            .sheet(isPresented: $showDashboard) {
+                ParentDashboardView()
+                    .environmentObject(profiles)
+                    .environmentObject(settings)
+                    .environmentObject(auth)
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+        }
+    }
+
+    private var dashboardSection: some View {
+        Section {
+            Button {
+                showDashboard = true
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "chart.bar.xaxis")
+                        .font(.title3)
+                        .foregroundStyle(AppColor.successMint)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("מבט-על על המשפחה")
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        Text("\(profiles.profiles.count) פרופילים • זמן, ניקוד, ואיפוסים")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.left")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .buttonStyle(.plain)
         }
     }
 
