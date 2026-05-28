@@ -14,6 +14,7 @@ final class ParentSettings: ObservableObject {
         static let difficulty = "difficulty"
         static let activitySelection = "activitySelection"
         static let onboardingCompleted = "onboardingCompleted"
+        static let childAge = "childAge"
     }
 
     @Published var pin: String {
@@ -45,6 +46,9 @@ final class ParentSettings: ObservableObject {
     @Published var onboardingCompleted: Bool {
         didSet { defaults.set(onboardingCompleted, forKey: Key.onboardingCompleted) }
     }
+    @Published var childAge: ChildAge {
+        didSet { defaults.set(childAge.rawValue, forKey: Key.childAge) }
+    }
 
     private init() {
         let d = AppGroup.defaults
@@ -74,6 +78,21 @@ final class ParentSettings: ObservableObject {
 
         self.activitySelectionData = d.data(forKey: Key.activitySelection)
         self.onboardingCompleted = d.bool(forKey: Key.onboardingCompleted)
+        let ageRaw = d.integer(forKey: Key.childAge)
+        self.childAge = ChildAge(rawValue: ageRaw == 0 ? 6 : ageRaw) ?? .grade1
+    }
+
+    /// Apply age-appropriate defaults (called when parent picks an age in onboarding
+    /// or changes it later in Settings).
+    func applyAgeDefaults(_ age: ChildAge) {
+        self.childAge = age
+        self.enabledTopics = age.defaultEnabledTopics
+        self.minutesPerCorrectAnswer = age.defaultMinutesPerCorrect
+        var newDifficulty: [Topic: Difficulty] = [:]
+        for topic in age.defaultEnabledTopics {
+            newDifficulty[topic] = age.defaultDifficulty(for: topic)
+        }
+        self.difficultyByTopic = newDifficulty
     }
 
     static let defaultDifficulties: [Topic: Difficulty] = [

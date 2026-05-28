@@ -94,17 +94,42 @@ struct QuestionGenerator {
     // MARK: - Hebrew spelling
 
     private static func makeSpelling(difficulty: Difficulty) -> Question {
-        let wordPool: [String]
+        let pool: [HebrewWord]
         switch difficulty {
-        case .easy: wordPool = HebrewWords.grade1
-        case .medium: wordPool = HebrewWords.grade1 + HebrewWords.grade2
-        case .hard: wordPool = HebrewWords.grade2
+        case .easy:   pool = HebrewWords.grade1
+        case .medium: pool = HebrewWords.grade1 + HebrewWords.grade2
+        case .hard:   pool = HebrewWords.grade2
         }
-        let word = wordPool.randomElement() ?? "ילד"
-        let chars = Array(word)
-        let hideIndex = Int.random(in: 0..<chars.count)
+
+        let word = pool.randomElement() ?? HebrewWord(text: "ילד", emoji: "👦")
+
+        // Pick a hide position that yields good distractors.
+        // We try every position (shuffled) and accept the first one that
+        // produces at least 3 letters that DON'T form another valid word.
+        let positions = Array(0..<word.text.count).shuffled()
+        for hideIndex in positions {
+            if let question = makeSpellingQuestion(word: word, hideIndex: hideIndex, strictDistractors: true) {
+                return question
+            }
+        }
+        // Fallback: at least one position must work loosely (emoji disambiguates).
+        return makeSpellingQuestion(word: word, hideIndex: positions[0], strictDistractors: false)!
+    }
+
+    /// Builds a spelling question for `word` with the letter at `hideIndex` hidden.
+    /// If `strictDistractors` is true, distractor letters must NOT form another
+    /// valid Hebrew word from our dictionary. Returns nil if it can't find enough.
+    private static func makeSpellingQuestion(
+        word: HebrewWord,
+        hideIndex: Int,
+        strictDistractors: Bool
+    ) -> Question? {
+        let chars = Array(word.text)
+        guard hideIndex >= 0 && hideIndex < chars.count else { return nil }
         let hidden = chars[hideIndex]
 
+        // Normalize: if hidden is a final letter (ך, ם, ן, ף, ץ), the correct option
+        // displayed to the kid is the regular form (כ, מ, נ, פ, צ).
         let normalized: Character
         if let regular = HebrewWords.finalLetters.first(where: { $0.value == hidden })?.key {
             normalized = regular
@@ -112,20 +137,46 @@ struct QuestionGenerator {
             normalized = hidden
         }
 
+        // Build the set of letters that would NOT form another valid word at hideIndex.
+        let isLastIndex = (hideIndex == chars.count - 1)
+        var safeDistractors: [Character] = []
+        for letter in HebrewWords.alphabet where letter != normalized {
+            // When position is at end of word, also test the final form (if applicable).
+            let testLetter: Character
+            if isLastIndex, let finalForm = HebrewWords.finalLetters[letter] {
+                testLetter = finalForm
+            } else {
+                testLetter = letter
+            }
+            var test = chars
+            test[hideIndex] = testLetter
+            let testWord = String(test)
+            let normalizedTest = HebrewWords.normalizeFinals(testWord)
+            let conflicts = HebrewWords.dictionary.contains(testWord)
+                || HebrewWords.dictionary.contains(normalizedTest)
+            if !conflicts {
+                safeDistractors.append(letter)
+            }
+        }
+
+        if strictDistractors && safeDistractors.count < 3 {
+            return nil
+        }
+
+        // Pick 3 distractors (from safe pool if strict, else from any non-correct letter).
+        let pool = strictDistractors
+            ? safeDistractors
+            : HebrewWords.alphabet.filter { $0 != normalized }
+        let chosenDistractors = Array(pool.shuffled().prefix(3))
+
+        let options = ([normalized] + chosenDistractors).shuffled().map { String($0) }
+        let correctIndex = options.firstIndex(of: String(normalized)) ?? 0
+
         var displayChars = chars
         displayChars[hideIndex] = "_"
         let displayed = String(displayChars)
-        let prompt = "איזו אות חסרה?\n\(displayed)"
+        let prompt = "\(word.emoji)\nאיזו אות חסרה?\n\(displayed)"
 
-        var optionSet: Set<Character> = [normalized]
-        let alphabet = HebrewWords.alphabet
-        while optionSet.count < 4 {
-            if let pick = alphabet.randomElement() {
-                optionSet.insert(pick)
-            }
-        }
-        let options = optionSet.shuffled().map { String($0) }
-        let correctIndex = options.firstIndex(of: String(normalized)) ?? 0
         return Question(
             topic: .hebrewSpelling,
             prompt: prompt,

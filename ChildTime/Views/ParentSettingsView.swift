@@ -14,6 +14,7 @@ struct ParentSettingsView: View {
         NavigationStack {
             Form {
                 authorizationSection
+                ageSection
                 rewardSection
                 topicsSection
                 appsSection
@@ -64,6 +65,27 @@ struct ParentSettingsView: View {
                     .buttonStyle(.borderedProminent)
                 }
             }
+        }
+    }
+
+    private var ageSection: some View {
+        Section("גיל הילד") {
+            Picker("גיל", selection: Binding(
+                get: { settings.childAge },
+                set: { newAge in
+                    settings.childAge = newAge
+                }
+            )) {
+                ForEach(ChildAge.allCases) { age in
+                    Text("\(age.emoji)  \(age.label) — \(age.description)").tag(age)
+                }
+            }
+            Button {
+                settings.applyAgeDefaults(settings.childAge)
+            } label: {
+                Label("התאם קושי לפי גיל", systemImage: "wand.and.stars")
+            }
+            .foregroundStyle(.tint)
         }
     }
 

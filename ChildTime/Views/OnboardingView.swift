@@ -37,6 +37,7 @@ struct OnboardingView: View {
         case parentInfo
         case familyControls
         case pinSetup
+        case ageSelection
         case minutes
         case hatching
     }
@@ -51,6 +52,7 @@ struct OnboardingView: View {
             case .parentInfo: parentInfoView
             case .familyControls: familyControlsView
             case .pinSetup: pinView
+            case .ageSelection: ageSelectionView
             case .minutes: minutesView
             case .hatching: HatchingView { complete() }
             }
@@ -500,7 +502,95 @@ struct OnboardingView: View {
         }
         pinError = nil
         settings.pin = newPIN
-        step = .minutes
+        step = .ageSelection
+    }
+
+    // MARK: - Age selection
+
+    private var ageSelectionView: some View {
+        ScrollView {
+            VStack(spacing: AppSpacing.lg) {
+                Spacer().frame(height: 40)
+                infoIcon(systemName: "figure.child")
+
+                Text("בן כמה הילד?")
+                    .font(.system(size: isCompact ? 30 : 36, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+
+                Text("נתאים את הקושי של השאלות לרמה שלו")
+                    .font(.system(size: isCompact ? 17 : 19, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, AppSpacing.lg)
+
+                VStack(spacing: AppSpacing.md) {
+                    ForEach(ChildAge.allCases) { age in
+                        ageOption(age)
+                    }
+                }
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.top, AppSpacing.md)
+
+                Spacer().frame(height: 20)
+
+                JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
+                    settings.applyAgeDefaults(settings.childAge)
+                    minutesPerAnswer = settings.minutesPerCorrectAnswer
+                    step = .minutes
+                } label: {
+                    Text("המשך")
+                        .font(.system(size: isCompact ? 22 : 26, weight: .bold, design: .rounded))
+                }
+                .padding(.horizontal, AppSpacing.xl)
+                .padding(.bottom, AppSpacing.xl)
+            }
+        }
+    }
+
+    private func ageOption(_ age: ChildAge) -> some View {
+        let isSelected = settings.childAge == age
+        return Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                settings.childAge = age
+            }
+            Haptic.light()
+        } label: {
+            HStack(spacing: AppSpacing.md) {
+                Text(age.emoji)
+                    .font(.system(size: isCompact ? 36 : 44))
+                    .frame(width: 56)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(age.label)
+                        .font(.system(size: isCompact ? 22 : 26, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text(age.description)
+                        .font(.system(size: isCompact ? 15 : 17, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.75))
+                }
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundStyle(AppColor.successMint)
+                        .glow(AppColor.successMint, radius: 8)
+                }
+            }
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.vertical, AppSpacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                    .fill(.white.opacity(isSelected ? 0.25 : 0.10))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                            .stroke(
+                                isSelected ? AppColor.successMint : .white.opacity(0.2),
+                                lineWidth: isSelected ? 2.5 : 1
+                            )
+                    )
+            )
+            .glow(isSelected ? AppColor.successMint : .clear, radius: isSelected ? 12 : 0)
+        }
+        .buttonStyle(.juicy)
     }
 
     private func complete() {
