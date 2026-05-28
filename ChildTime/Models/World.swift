@@ -42,7 +42,7 @@ enum Worlds {
             name: "מגדל האותיות",
             emoji: "📜",
             topic: .hebrewSpelling,
-            starsToUnlock: 20,
+            starsToUnlock: 0,
             rooms: 10,
             gradient: .tower,
             glowColor: AppColor.gemPurple
@@ -52,7 +52,7 @@ enum Worlds {
             name: "עמק הדינוזאורים",
             emoji: "🦖",
             topic: .mulDiv,
-            starsToUnlock: 60,
+            starsToUnlock: 0,
             rooms: 10,
             gradient: .valley,
             glowColor: AppColor.successMint
