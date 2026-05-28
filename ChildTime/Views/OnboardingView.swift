@@ -581,45 +581,48 @@ struct OnboardingView: View {
     // MARK: - Age selection
 
     private var ageSelectionView: some View {
-        ScrollView {
-            VStack(spacing: AppSpacing.lg) {
-                Spacer().frame(height: 30)
-                infoIcon(systemName: "figure.child")
+        VStack(spacing: AppSpacing.lg) {
+            Spacer().frame(height: 40)
+            infoIcon(systemName: "figure.child")
 
-                Text("בן כמה הילד?")
-                    .font(.system(size: isCompact ? 28 : 34, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
+            Text("בן כמה הילד?")
+                .font(.system(size: 30, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
 
-                Text("נבחר אוטומטית את הנושאים והקושי. אפשר לשנות הכל.")
-                    .font(.system(size: isCompact ? 15 : 17, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, AppSpacing.lg)
-
-                // Compact age picker — segmented chips
-                HStack(spacing: AppSpacing.sm) {
-                    ForEach(ChildAge.allCases) { age in
-                        compactAgeChip(age)
-                    }
-                }
+            Text("נבחר אוטומטית את הנושאים והקושי, אפשר לשנות הכל")
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+                .multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.lg)
 
-                // Live preview of what was selected
-                previewSection
-                    .padding(.horizontal, AppSpacing.lg)
-
-                Spacer().frame(height: 10)
-
-                JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
-                    minutesPerAnswer = settings.minutesPerCorrectAnswer
-                    step = .minutes
-                } label: {
-                    Text("המשך")
-                        .font(.system(size: isCompact ? 22 : 26, weight: .bold, design: .rounded))
+            // Age chips
+            HStack(spacing: AppSpacing.sm) {
+                ForEach(ChildAge.allCases) { age in
+                    compactAgeChip(age)
                 }
-                .padding(.horizontal, AppSpacing.xl)
-                .padding(.bottom, AppSpacing.xl)
             }
+            .frame(maxWidth: 600)
+            .padding(.horizontal, AppSpacing.lg)
+
+            // Topic preview card
+            previewSection
+                .frame(maxWidth: 560)
+                .padding(.horizontal, AppSpacing.lg)
+
+            Spacer()
+
+            JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
+                minutesPerAnswer = settings.minutesPerCorrectAnswer
+                step = .minutes
+            } label: {
+                Text("המשך")
+            }
+            .padding(.bottom, AppSpacing.xl)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay(alignment: .topTrailing) {
+            backArrowButton { step = .pinSetup }
+                .padding(AppSpacing.lg)
         }
     }
 
@@ -658,35 +661,52 @@ struct OnboardingView: View {
     }
 
     private var previewSection: some View {
-        VStack(alignment: .trailing, spacing: AppSpacing.sm) {
+        VStack(spacing: 0) {
+            // Header
             HStack {
-                Text("הקושי שיוגדר")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundStyle(AppColor.companionGlow)
+                Image(systemName: "wand.and.stars")
+                    .foregroundStyle(AppColor.starGold)
+                    .font(.system(size: 14))
+                Text("הקושי לפי גיל")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
                 Spacer()
                 Text(settings.childAge.description)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.6))
             }
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.top, AppSpacing.md)
+            .padding(.bottom, AppSpacing.sm)
 
-            ForEach(Topic.allCases) { topic in
-                topicPreviewRow(topic)
+            Divider().background(.white.opacity(0.15))
+
+            // Topic rows
+            VStack(spacing: 0) {
+                let topics = Topic.allCases
+                ForEach(Array(topics.enumerated()), id: \.element) { idx, topic in
+                    topicPreviewRow(topic)
+                    if idx < topics.count - 1 {
+                        Divider().background(.white.opacity(0.10)).padding(.horizontal, AppSpacing.lg)
+                    }
+                }
             }
+            .padding(.bottom, AppSpacing.sm)
         }
-        .padding(AppSpacing.md)
         .background(
             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                 .fill(.white.opacity(0.10))
                 .overlay(
                     RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                        .stroke(.white.opacity(0.2), lineWidth: 1)
+                        .stroke(.white.opacity(0.18), lineWidth: 1)
                 )
         )
+        .shadow(color: .black.opacity(0.2), radius: 16, y: 4)
     }
 
     private func topicPreviewRow(_ topic: Topic) -> some View {
         let isEnabled = settings.enabledTopics.contains(topic)
-        return HStack(spacing: AppSpacing.sm) {
+        return HStack(spacing: AppSpacing.md) {
             Toggle("", isOn: Binding(
                 get: { isEnabled },
                 set: { newValue in
@@ -696,35 +716,50 @@ struct OnboardingView: View {
             ))
             .labelsHidden()
             .tint(AppColor.successMint)
+            .scaleEffect(0.85)
+            .frame(width: 44)
 
-            HStack(spacing: 6) {
+            HStack(spacing: 8) {
                 Text(topic.emoji).font(.system(size: 22))
                 Text(topic.displayName)
-                    .font(.system(size: isCompact ? 15 : 17, weight: .semibold, design: .rounded))
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .opacity(isEnabled ? 1 : 0.4)
             }
 
-            Spacer()
+            Spacer(minLength: 0)
 
+            // Difficulty as 3 inline chips (only if enabled)
             if isEnabled {
-                Picker("", selection: Binding(
-                    get: { settings.difficulty(for: topic) },
-                    set: { settings.setDifficulty($0, for: topic) }
-                )) {
-                    Text("קל").tag(Difficulty.easy)
-                    Text("בינוני").tag(Difficulty.medium)
-                    Text("קשה").tag(Difficulty.hard)
-                }
-                .pickerStyle(.menu)
-                .tint(.white)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(.white.opacity(0.18), in: Capsule())
+                difficultyChips(for: topic)
             }
         }
-        .padding(.vertical, 2)
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.vertical, 10)
+    }
+
+    private func difficultyChips(for topic: Topic) -> some View {
+        HStack(spacing: 4) {
+            ForEach(Difficulty.allCases) { d in
+                let isSelected = settings.difficulty(for: topic) == d
+                Button {
+                    Haptic.light()
+                    settings.setDifficulty(d, for: topic)
+                } label: {
+                    Text(d.displayName)
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(isSelected ? .white : .white.opacity(0.55))
+                        .frame(minWidth: 42)
+                        .padding(.vertical, 5)
+                        .background(
+                            Capsule().fill(
+                                isSelected ? AppColor.successMint.opacity(0.7) : .white.opacity(0.12)
+                            )
+                        )
+                }
+                .buttonStyle(.juicy)
+            }
+        }
     }
 
     private func complete() {
