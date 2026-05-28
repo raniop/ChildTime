@@ -24,6 +24,12 @@ struct OnboardingView: View {
     @State private var welcomeConfettiTrigger = 0
     @State private var welcomeBurstTrigger = 0
 
+    // Kid intro flow state
+    @State private var kidIntroQ: KidIntroQuestion = .gender
+    @State private var kidIntroCompanion = CompanionController()
+    @State private var kidIntroBurst = 0
+    @State private var nameInput: String = ""
+
     private var isCompact: Bool { hsc == .compact }
     private var welcomeCompanionSize: CGFloat { isCompact ? 140 : 180 }
     private var titleSize: CGFloat { isCompact ? 38 : 56 }
@@ -37,9 +43,14 @@ struct OnboardingView: View {
         case parentInfo
         case familyControls
         case pinSetup
-        case ageSelection
-        case minutes
+        case kidIntro
         case hatching
+    }
+
+    enum KidIntroQuestion: Int, CaseIterable {
+        case gender = 0
+        case name
+        case age
     }
 
     var body: some View {
@@ -52,8 +63,7 @@ struct OnboardingView: View {
             case .parentInfo: parentInfoView
             case .familyControls: familyControlsView
             case .pinSetup: pinView
-            case .ageSelection: ageSelectionView
-            case .minutes: minutesView
+            case .kidIntro: kidIntroView
             case .hatching: HatchingView { complete() }
             }
         }
@@ -466,52 +476,6 @@ struct OnboardingView: View {
 
     // MARK: - Minutes
 
-    private var minutesView: some View {
-        VStack(spacing: AppSpacing.xl) {
-            Spacer().frame(height: 60)
-            infoIcon(systemName: "clock.fill")
-            Text("כמה דקות לכל תשובה נכונה?")
-                .font(.system(size: 28, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-
-            VStack(spacing: AppSpacing.sm) {
-                Text("\(minutesPerAnswer)")
-                    .font(.system(size: bigCounterSize, weight: .heavy, design: .rounded))
-                    .foregroundStyle(AppColor.starGold)
-                    .glow(AppColor.starGold, radius: 18)
-                Text("דקות")
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
-            }
-
-            HStack(spacing: AppSpacing.xl) {
-                stepperButton(symbol: "minus") {
-                    if minutesPerAnswer > 1 { minutesPerAnswer -= 1 }
-                }
-                stepperButton(symbol: "plus") {
-                    if minutesPerAnswer < 10 { minutesPerAnswer += 1 }
-                }
-            }
-
-            Text("טיפ: ניתן לשנות בהמשך מהגדרות ההורה")
-                .font(.system(size: 14, weight: .medium, design: .rounded))
-                .foregroundStyle(.white.opacity(0.6))
-
-            Spacer()
-
-            JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-                settings.minutesPerCorrectAnswer = minutesPerAnswer
-                step = .hatching
-            } label: {
-                Text("מוכן! יאללה לילד 🎉")
-                    .font(.system(size: 22, weight: .heavy, design: .rounded))
-            }
-            .padding(.horizontal, AppSpacing.xl)
-            .padding(.bottom, AppSpacing.xl)
-        }
-    }
-
     // MARK: - Helpers
 
     private func infoIcon(systemName: String) -> some View {
@@ -575,27 +539,191 @@ struct OnboardingView: View {
         }
         pinError = nil
         settings.pin = newPIN
-        step = .ageSelection
+        step = .kidIntro
     }
 
-    // MARK: - Age selection
+    // MARK: - Kid intro flow
 
-    private var ageSelectionView: some View {
-        VStack(spacing: AppSpacing.lg) {
-            Spacer().frame(height: 40)
-            infoIcon(systemName: "figure.child")
+    private var kidIntroView: some View {
+        ZStack {
+            VStack(spacing: AppSpacing.lg) {
+                Spacer().frame(height: 60)
 
-            Text("בן כמה הילד?")
-                .font(.system(size: 30, weight: .heavy, design: .rounded))
+                // Companion at top
+                ZStack(alignment: .top) {
+                    BubbleSpeech(text: kidIntroBubble)
+                        .offset(x: -120, y: -20)
+                        .transition(.scale.combined(with: .opacity))
+                        .id(kidIntroQ)  // re-animate when question changes
+                    CompanionView(controller: kidIntroCompanion, size: 130)
+                        .offset(y: 40)
+                }
+                .frame(height: 200)
+                .animation(.spring(response: 0.4, dampingFraction: 0.7), value: kidIntroQ)
+
+                // Answer area
+                Group {
+                    switch kidIntroQ {
+                    case .gender: genderAnswerArea
+                    case .name:   nameAnswerArea
+                    case .age:    ageAnswerArea
+                    }
+                }
+                .transition(.asymmetric(
+                    insertion: .opacity.combined(with: .move(edge: .trailing)),
+                    removal: .opacity.combined(with: .move(edge: .leading))
+                ))
+
+                Spacer()
+
+                // Progress dots
+                HStack(spacing: 8) {
+                    ForEach(KidIntroQuestion.allCases, id: \.self) { q in
+                        Circle()
+                            .fill(q.rawValue <= kidIntroQ.rawValue ? AppColor.successMint : .white.opacity(0.3))
+                            .frame(width: 10, height: 10)
+                            .scaleEffect(q == kidIntroQ ? 1.3 : 1.0)
+                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: kidIntroQ)
+                    }
+                }
+                .padding(.bottom, AppSpacing.md)
+
+                JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
+                    advanceKidIntro()
+                } label: {
+                    Text(kidIntroQ == .age ? "בוא נצא להרפתקה!" : "המשך")
+                }
+                .opacity(canAdvanceKidIntro ? 1 : 0.4)
+                .disabled(!canAdvanceKidIntro)
+                .padding(.bottom, AppSpacing.xl)
+            }
+
+            // Burst of stars on selection
+            StarBurst(count: 12, color: AppColor.starGold, trigger: kidIntroBurst)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay(alignment: .topTrailing) {
+            backArrowButton {
+                if kidIntroQ.rawValue > 0,
+                   let prev = KidIntroQuestion(rawValue: kidIntroQ.rawValue - 1) {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
+                        kidIntroQ = prev
+                    }
+                } else {
+                    step = .pinSetup
+                }
+            }
+            .padding(AppSpacing.lg)
+        }
+    }
+
+    private var kidIntroBubble: String {
+        switch kidIntroQ {
+        case .gender:
+            return "היי! נעים מאוד! אני טופי 💫"
+        case .name:
+            let g = settings.childGender?.displayName ?? "חבר"
+            return "איזה כיף! מה השם שלך, \(g) חמוד?"
+        case .age:
+            let name = settings.childName.isEmpty
+                ? "חמוד"
+                : settings.childName
+            return "\(name), בן/בת כמה אתה?"
+        }
+    }
+
+    @ViewBuilder
+    private var genderAnswerArea: some View {
+        VStack(spacing: AppSpacing.md) {
+            Text("אתה ילד או ילדה?")
+                .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
+            HStack(spacing: AppSpacing.lg) {
+                ForEach(ChildGender.allCases) { gender in
+                    genderOption(gender)
+                }
+            }
+            .padding(.horizontal, AppSpacing.lg)
+        }
+    }
 
-            Text("נבחר אוטומטית את הנושאים והקושי, אפשר לשנות הכל")
-                .font(.system(size: 16, weight: .medium, design: .rounded))
-                .foregroundStyle(.white.opacity(0.85))
+    private func genderOption(_ gender: ChildGender) -> some View {
+        let isSelected = settings.childGender == gender
+        return Button {
+            Haptic.medium()
+            kidIntroBurst += 1
+            kidIntroCompanion.cheer()
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+                settings.childGender = gender
+            }
+        } label: {
+            VStack(spacing: 8) {
+                Text(gender.emoji)
+                    .font(.system(size: 80))
+                Text(gender.displayName)
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+            }
+            .frame(width: 160, height: 180)
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.large)
+                    .fill(.white.opacity(isSelected ? 0.30 : 0.12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppRadius.large)
+                            .stroke(
+                                isSelected ? AppColor.successMint : .white.opacity(0.2),
+                                lineWidth: isSelected ? 3 : 1
+                            )
+                    )
+            )
+            .glow(isSelected ? AppColor.successMint : .clear, radius: isSelected ? 16 : 0)
+            .scaleEffect(isSelected ? 1.05 : 1.0)
+        }
+        .buttonStyle(.juicy)
+    }
+
+    @ViewBuilder
+    private var nameAnswerArea: some View {
+        VStack(spacing: AppSpacing.lg) {
+            Text("מה השם שלך?")
+                .font(.system(size: 24, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            TextField("", text: $nameInput, prompt: Text("השם שלך").foregroundColor(.white.opacity(0.5)))
                 .multilineTextAlignment(.center)
+                .font(.system(size: 32, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.vertical, AppSpacing.md)
+                .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: AppRadius.large))
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppRadius.large)
+                        .stroke(.white.opacity(0.35), lineWidth: 1.5)
+                )
+                .frame(maxWidth: 420)
                 .padding(.horizontal, AppSpacing.lg)
 
-            // Age chips
+            Button {
+                nameInput = ""
+                Haptic.light()
+            } label: {
+                Text("דלג")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .underline()
+            }
+            .opacity(nameInput.isEmpty ? 1 : 0)
+        }
+        .onChange(of: nameInput) { _, new in
+            settings.childName = new
+        }
+    }
+
+    @ViewBuilder
+    private var ageAnswerArea: some View {
+        VStack(spacing: AppSpacing.md) {
+            Text("בן/בת כמה אתה?")
+                .font(.system(size: 24, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
             HStack(spacing: AppSpacing.sm) {
                 ForEach(ChildAge.allCases) { age in
                     compactAgeChip(age)
@@ -603,26 +731,30 @@ struct OnboardingView: View {
             }
             .frame(maxWidth: 600)
             .padding(.horizontal, AppSpacing.lg)
-
-            // Topic preview card
-            previewSection
-                .frame(maxWidth: 560)
-                .padding(.horizontal, AppSpacing.lg)
-
-            Spacer()
-
-            JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
-                minutesPerAnswer = settings.minutesPerCorrectAnswer
-                step = .minutes
-            } label: {
-                Text("המשך")
-            }
-            .padding(.bottom, AppSpacing.xl)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .overlay(alignment: .topTrailing) {
-            backArrowButton { step = .pinSetup }
-                .padding(AppSpacing.lg)
+    }
+
+    private var canAdvanceKidIntro: Bool {
+        switch kidIntroQ {
+        case .gender: return settings.childGender != nil
+        case .name:   return true  // name is optional
+        case .age:    return true  // age has a default
+        }
+    }
+
+    private func advanceKidIntro() {
+        Haptic.medium()
+        kidIntroBurst += 1
+        kidIntroCompanion.cheer()
+        if let next = KidIntroQuestion(rawValue: kidIntroQ.rawValue + 1) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
+                kidIntroQ = next
+            }
+        } else {
+            // Done — apply defaults and move to hatching
+            settings.applyAgeDefaults(settings.childAge)
+            minutesPerAnswer = settings.minutesPerCorrectAnswer
+            step = .hatching
         }
     }
 

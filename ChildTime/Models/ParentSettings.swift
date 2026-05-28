@@ -15,6 +15,8 @@ final class ParentSettings: ObservableObject {
         static let activitySelection = "activitySelection"
         static let onboardingCompleted = "onboardingCompleted"
         static let childAge = "childAge"
+        static let childGender = "childGender"
+        static let childName = "childName"
     }
 
     @Published var pin: String {
@@ -48,6 +50,15 @@ final class ParentSettings: ObservableObject {
     }
     @Published var childAge: ChildAge {
         didSet { defaults.set(childAge.rawValue, forKey: Key.childAge) }
+    }
+    @Published var childGender: ChildGender? {
+        didSet {
+            if let g = childGender { defaults.set(g.rawValue, forKey: Key.childGender) }
+            else { defaults.removeObject(forKey: Key.childGender) }
+        }
+    }
+    @Published var childName: String {
+        didSet { defaults.set(childName, forKey: Key.childName) }
     }
 
     private init() {
@@ -84,6 +95,13 @@ final class ParentSettings: ObservableObject {
         self.onboardingCompleted = d.bool(forKey: Key.onboardingCompleted)
         let ageRaw = d.integer(forKey: Key.childAge)
         self.childAge = ChildAge(rawValue: ageRaw == 0 ? 6 : ageRaw) ?? .grade1
+
+        if let g = d.string(forKey: Key.childGender), let gender = ChildGender(rawValue: g) {
+            self.childGender = gender
+        } else {
+            self.childGender = nil
+        }
+        self.childName = d.string(forKey: Key.childName) ?? ""
     }
 
     /// Apply age-appropriate defaults (called when parent picks an age in onboarding
