@@ -161,7 +161,7 @@ struct WorldDetailView: View {
         switch world.id {
         case "numbers_kingdom": FloatingOrbs.castle()
         case "letter_tower":    FloatingOrbs.tower()
-        case "dino_valley":     FloatingOrbs.valley()
+        case "multiplication_galaxy": FloatingOrbs.galaxy()
         default:                FloatingOrbs.home()
         }
     }

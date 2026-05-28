@@ -119,6 +119,19 @@ extension FloatingOrbs {
             count: 5
         )
     }
+
+    static func galaxy() -> FloatingOrbs {
+        FloatingOrbs(
+            colors: [
+                Color(hex: "9B5DE5"),
+                Color(hex: "C04EE8"),
+                Color(hex: "FF6B9D"),
+                Color(hex: "48BFE3"),
+                Color(hex: "FFD23F")
+            ],
+            count: 6
+        )
+    }
 }
 
 #Preview {

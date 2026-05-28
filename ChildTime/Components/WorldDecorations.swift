@@ -10,8 +10,8 @@ struct WorldDecorations: View {
             return ["👑", "🏰", "💎", "⚔️", "🛡️", "🎠"]
         case "letter_tower":
             return ["📚", "✏️", "📜", "🪶", "🔮", "🕯️"]
-        case "dino_valley":
-            return ["🦕", "🦖", "🌴", "🥚", "🌿", "🪨"]
+        case "multiplication_galaxy":
+            return ["🪐", "🛸", "☄️", "🌟", "🌌", "👽"]
         default:
             return ["✨", "⭐", "🌟"]
         }

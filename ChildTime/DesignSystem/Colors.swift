@@ -55,6 +55,11 @@ enum AppGradient {
         startPoint: .topLeading, endPoint: .bottomTrailing
     )
 
+    static let galaxy = LinearGradient(
+        colors: [Color(hex: "1B0D45"), Color(hex: "4B1380"), Color(hex: "C04EE8")],
+        startPoint: .topLeading, endPoint: .bottomTrailing
+    )
+
     static let gold = LinearGradient(
         colors: [AppColor.starGold, AppColor.companionGlow],
         startPoint: .topLeading, endPoint: .bottomTrailing
