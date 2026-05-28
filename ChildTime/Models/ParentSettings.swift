@@ -131,8 +131,10 @@ final class ParentSettings: ObservableObject {
         self.pin = (d.string(forKey: Key.pin) ?? "1234")
         let mpc = d.integer(forKey: Key.minutesPerCorrect)
         self.minutesPerCorrectAnswer = mpc == 0 ? 2 : mpc
+        // Minimum 15 — fewer than that doesn't give the kid enough practice
+        // to learn anything meaningful. Cap at 30 for attention-span reasons.
         let qps = d.integer(forKey: Key.questionsPerSession)
-        self.questionsPerSession = qps == 0 ? 5 : qps
+        self.questionsPerSession = max(15, qps == 0 ? 15 : qps)
 
         if let raw = d.stringArray(forKey: Key.enabledTopics) {
             let parsed = Set(raw.compactMap(Topic.init(rawValue:)))

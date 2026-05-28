@@ -156,22 +156,34 @@ enum QuestionBanks {
 
 // MARK: - Anti-repeat memory
 
-/// Keeps the most-recently-served questions per topic in memory so the
-/// runner doesn't show the same item twice in a row. The window slides
-/// at ~60% of the bank size — small enough to leave a meaningful pool,
-/// big enough to feel "fresh."
+/// Keeps the most-recently-served questions per topic so the runner
+/// doesn't repeat items inside a session OR across the next few
+/// sessions. Window slides at ~85% of the pool — when the pool refreshes
+/// the kid won't see the same question for a long time.
+///
+/// Persisted to UserDefaults (per profile when a profile is active) so
+/// closing and reopening the app doesn't erase the memory.
 final class QuestionMemory {
     static let shared = QuestionMemory()
-    private init() {}
+    private init() { load() }
 
+    private let defaults = UserDefaults.standard
     private var recent: [Topic: [String]] = [:]
+
+    private var storageKey: String {
+        let pid = ProfileStore.shared.activeID?.uuidString ?? "default"
+        return "questionMemory.\(pid)"
+    }
 
     /// Pick a random question from `pool` that hasn't been served recently.
     /// Falls back to a true random when every question is in the recent
-    /// window (e.g. tiny pool).
+    /// window (only possible for very small pools).
     func pickFresh(_ pool: [BankQuestion], for topic: Topic) -> BankQuestion? {
         guard !pool.isEmpty else { return nil }
-        let windowSize = max(3, (pool.count * 6) / 10)
+        // 85% — leaves a small pool of "fresh" candidates and keeps a long
+        // tail of "already seen recently" out of rotation. With ~80 English
+        // questions the kid will go through ~68 before any can repeat.
+        let windowSize = max(5, (pool.count * 85) / 100)
         let recentList = recent[topic] ?? []
         let candidates = pool.filter { !recentList.contains(promptKey($0)) }
         let chosen = (candidates.isEmpty ? pool : candidates).randomElement()
@@ -181,6 +193,18 @@ final class QuestionMemory {
         return chosen
     }
 
+    /// Wipe memory for a specific profile (used by remote-reset).
+    func clear(for profileID: UUID? = nil) {
+        recent = [:]
+        let key = profileID.map { "questionMemory.\($0.uuidString)" } ?? storageKey
+        defaults.removeObject(forKey: key)
+    }
+
+    /// Pull state for the freshly-active profile.
+    func reloadForActiveProfile() {
+        load()
+    }
+
     private func promptKey(_ q: BankQuestion) -> String { q.prompt }
 
     private func remember(_ key: String, in topic: Topic, windowSize: Int) {
@@ -188,5 +212,29 @@ final class QuestionMemory {
         list.append(key)
         if list.count > windowSize { list.removeFirst(list.count - windowSize) }
         recent[topic] = list
+        save()
+    }
+
+    // MARK: - Persistence (per profile)
+
+    private func load() {
+        guard let data = defaults.data(forKey: storageKey),
+              let decoded = try? JSONDecoder().decode([String: [String]].self, from: data) else {
+            recent = [:]
+            return
+        }
+        var rebuilt: [Topic: [String]] = [:]
+        for (rawTopic, list) in decoded {
+            if let t = Topic(rawValue: rawTopic) { rebuilt[t] = list }
+        }
+        recent = rebuilt
+    }
+
+    private func save() {
+        let encodable = recent.reduce(into: [String: [String]]()) { dict, pair in
+            dict[pair.key.rawValue] = pair.value
+        }
+        guard let data = try? JSONEncoder().encode(encodable) else { return }
+        defaults.set(data, forKey: storageKey)
     }
 }

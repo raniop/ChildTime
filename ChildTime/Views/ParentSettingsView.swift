@@ -312,7 +312,7 @@ struct ParentSettingsView: View {
             Stepper(
                 "שאלות בכל סבב: \(settings.questionsPerSession)",
                 value: $settings.questionsPerSession,
-                in: 3...20
+                in: 15...30
             )
         } header: {
             Text("תגמול")

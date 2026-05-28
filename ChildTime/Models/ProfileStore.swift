@@ -83,6 +83,9 @@ final class ProfileStore: ObservableObject {
     func setActive(_ profile: Profile) {
         guard profiles.contains(where: { $0.id == profile.id }) else { return }
         activeID = profile.id
+        // Question anti-repeat memory is per-profile — reload so the kid
+        // sees their own history, not the previous profile's.
+        QuestionMemory.shared.reloadForActiveProfile()
     }
 
     /// Sign-out style: clears active selection (forces the picker on next launch).
