@@ -370,45 +370,52 @@ struct WorldMapView: View {
                 Button {
                     showDailyChest = true
                 } label: {
-                    HStack(spacing: 8) {
-                        Text("🎁").font(.system(size: 22))
-                        Text("קופסה יומית מחכה!")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                    HStack(spacing: 12) {
+                        Text("🎁").font(.system(size: 30))
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text("קופסה יומית מחכה!")
+                                .font(.system(size: 19, weight: .heavy, design: .rounded))
+                            Text("טאפ לפתוח")
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.8))
+                        }
                         Spacer()
                         Image(systemName: "chevron.left.circle.fill")
-                            .font(.system(size: 18))
+                            .font(.system(size: 22))
                     }
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.lg)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 14)
+                    .frame(maxWidth: .infinity)
                     .background(AppGradient.portal)
-                    .clipShape(Capsule())
-                    .glow(AppColor.gemPurple, radius: 10)
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .glow(AppColor.gemPurple, radius: 14)
                     .pulse(min: 0.92)
                 }
                 .buttonStyle(.juicy)
-                .frame(maxWidth: 420)
+                .frame(maxWidth: 480)
             }
 
             if progress.pendingMinutes > 0 {
                 Button {
                     redeemMinutes()
                 } label: {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 10) {
                         Image(systemName: "gamecontroller.fill")
+                            .font(.system(size: 24))
                         Text("פתחו לי \(progress.pendingMinutes) דקות לשחק")
+                            .font(.system(size: 22, weight: .heavy, design: .rounded))
                     }
-                    .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl)
-                    .padding(.vertical, 12)
+                    .padding(.vertical, 16)
                     .frame(maxWidth: .infinity)
                     .background(AppGradient.castle)
-                    .clipShape(Capsule())
-                    .glow(AppColor.flameOrange, radius: 12)
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .glow(AppColor.flameOrange, radius: 16)
                 }
                 .buttonStyle(.juicy)
-                .frame(maxWidth: 420)
+                .frame(maxWidth: 480)
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)

@@ -30,7 +30,7 @@ enum Worlds {
         World(
             id: "numbers_kingdom",
             name: "ממלכת המספרים",
-            emoji: "🏰",
+            emoji: "🧮",
             topic: .addSub,
             starsToUnlock: 0,
             rooms: 10,
@@ -40,7 +40,7 @@ enum Worlds {
         World(
             id: "letter_tower",
             name: "מגדל האותיות",
-            emoji: "📜",
+            emoji: "📚",
             topic: .hebrewSpelling,
             starsToUnlock: 0,
             rooms: 10,
