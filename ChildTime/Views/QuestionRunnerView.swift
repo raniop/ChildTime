@@ -86,11 +86,26 @@ struct QuestionRunnerView: View {
 
     // MARK: - Background
 
+    @ViewBuilder
     private var background: some View {
         ZStack {
             (isInPortal ? AppGradient.portal : world.gradient.gradient)
                 .ignoresSafeArea()
-            SparkleField(count: 10, size: 12)
+            if !isInPortal {
+                themedOrbs
+                WorldDecorations(world: world).opacity(0.18)
+            }
+            SparkleField(count: 12, size: 12)
+        }
+    }
+
+    @ViewBuilder
+    private var themedOrbs: some View {
+        switch world.id {
+        case "numbers_kingdom": FloatingOrbs.castle()
+        case "letter_tower":    FloatingOrbs.tower()
+        case "dino_valley":     FloatingOrbs.valley()
+        default:                FloatingOrbs.home()
         }
     }
 

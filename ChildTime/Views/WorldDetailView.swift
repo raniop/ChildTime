@@ -8,47 +8,80 @@ struct WorldDetailView: View {
 
     @State private var companion = CompanionController()
     @State private var startSession = false
+    @State private var heroAppeared = false
 
     var currentRoom: Int { progress.progress(in: world.id) }
     var rewardPerCorrect: Int { settings.minutesPerCorrectAnswer }
 
     var body: some View {
         ZStack {
+            // Themed layered background
             world.gradient.gradient.ignoresSafeArea()
-            SparkleField(count: 15, size: 14)
+            themedOrbs
+            WorldDecorations(world: world)
+                .opacity(0.55)
+            SparkleField(count: 22, size: 14)
 
-            VStack(spacing: AppSpacing.xl) {
+            VStack(spacing: AppSpacing.lg) {
                 // Top bar
                 HStack {
                     Button {
                         dismiss()
                     } label: {
                         Image(systemName: "chevron.right.circle.fill")
-                            .font(.system(size: 36))
-                            .foregroundStyle(.white.opacity(0.85))
+                            .font(.system(size: 40))
+                            .foregroundStyle(.white)
+                            .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
                     }
+                    .buttonStyle(.juicy)
+
                     Spacer()
-                    StarCounter(value: progress.stars)
+
+                    HStack(spacing: 6) {
+                        Image(systemName: "star.fill")
+                            .foregroundStyle(AppColor.starGold)
+                            .font(.system(size: 18))
+                        Text("\(progress.stars)")
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(.white.opacity(0.18), in: Capsule())
+                    .overlay(Capsule().stroke(AppColor.starGold.opacity(0.5), lineWidth: 1.5))
                 }
                 .padding(.horizontal, AppSpacing.lg)
                 .padding(.top, AppSpacing.sm)
 
                 Spacer()
 
-                // World hero
+                // World hero — bigger, more dramatic
                 VStack(spacing: AppSpacing.md) {
                     Text(world.emoji)
-                        .font(.system(size: 120))
-                        .float()
-                        .glow(world.glowColor, radius: 24)
+                        .font(.system(size: 160))
+                        .float(amplitude: 8)
+                        .shadow(color: world.glowColor.opacity(0.9), radius: 40)
+                        .shadow(color: .black.opacity(0.3), radius: 8, y: 6)
+                        .scaleEffect(heroAppeared ? 1.0 : 0.3)
+                        .rotationEffect(.degrees(heroAppeared ? 0 : -20))
 
                     Text(world.name)
-                        .font(.system(size: 44, weight: .heavy, design: .rounded))
+                        .font(.system(size: 52, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.35), radius: 6, y: 3)
+                        .scaleEffect(heroAppeared ? 1 : 0.7)
+                        .opacity(heroAppeared ? 1 : 0)
 
-                    Text("חדר \(currentRoom + 1) מתוך \(world.rooms)")
-                        .font(.system(size: 22, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
+                    HStack(spacing: 8) {
+                        Image(systemName: "door.left.hand.open")
+                        Text("חדר \(currentRoom + 1) מתוך \(world.rooms)")
+                            .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    }
+                    .foregroundStyle(.white.opacity(0.9))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(.white.opacity(0.18), in: Capsule())
+                    .opacity(heroAppeared ? 1 : 0)
                 }
 
                 Spacer()
@@ -59,47 +92,70 @@ struct WorldDetailView: View {
                         BubbleSpeech(text: bubble)
                             .offset(y: -10)
                     }
-                    CompanionView(controller: companion, size: 100)
-                        .offset(y: 70)
+                    CompanionView(controller: companion, size: 110)
+                        .offset(y: 80)
                 }
-                .frame(height: 180)
+                .frame(height: 190)
+                .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
 
-                // Quest summary
+                // Quest summary card
                 VStack(spacing: AppSpacing.sm) {
-                    Text("\(settings.questionsPerSession) שאלות → 🎁 קופסה")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
+                    HStack(spacing: 8) {
+                        Image(systemName: "questionmark.circle.fill")
+                            .foregroundStyle(.white)
+                        Text("\(settings.questionsPerSession) שאלות → 🎁 קופסה")
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                    }
                     Text("כל תשובה נכונה = \(rewardPerCorrect) דקות משחק")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.8))
+                        .foregroundStyle(.white.opacity(0.85))
                 }
                 .padding(.horizontal, AppSpacing.lg)
                 .padding(.vertical, AppSpacing.md)
-                .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: AppRadius.large))
+                .background(.ultraThinMaterial.opacity(0.7), in: RoundedRectangle(cornerRadius: AppRadius.large))
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppRadius.large)
+                        .stroke(.white.opacity(0.3), lineWidth: 1.5)
+                )
+                .padding(.horizontal, AppSpacing.lg)
 
                 // Start button
                 JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
                     companion.cheer("יאללה!")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                         startSession = true
                     }
                 } label: {
-                    Label("יאללה!", systemImage: "play.fill")
-                        .font(.system(size: 36, weight: .heavy, design: .rounded))
+                    Label("יאללה! 🚀", systemImage: "play.fill")
+                        .font(.system(size: 38, weight: .heavy, design: .rounded))
                 }
                 .padding(.horizontal, AppSpacing.lg)
 
-                Spacer().frame(height: AppSpacing.xl)
+                Spacer().frame(height: AppSpacing.lg)
             }
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            withAnimation(.spring(response: 0.7, dampingFraction: 0.55)) {
+                heroAppeared = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 companion.cheer("מוכן לחדר \(currentRoom + 1)?")
             }
         }
         .fullScreenCover(isPresented: $startSession) {
             QuestionRunnerView(world: world)
                 .onDisappear { dismiss() }
+        }
+    }
+
+    @ViewBuilder
+    private var themedOrbs: some View {
+        switch world.id {
+        case "numbers_kingdom": FloatingOrbs.castle()
+        case "letter_tower":    FloatingOrbs.tower()
+        case "dino_valley":     FloatingOrbs.valley()
+        default:                FloatingOrbs.home()
         }
     }
 }

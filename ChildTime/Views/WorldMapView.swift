@@ -11,17 +11,21 @@ struct WorldMapView: View {
     @State private var showingParentGate = false
     @State private var showingDemo = false
     @State private var lastSeenStars = 0
+    @State private var heroAppeared = false
 
     var body: some View {
         ZStack {
+            // Layered background
             AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 18, size: 12)
+            FloatingOrbs.home()
+            SparkleField(count: 25, size: 14)
 
-            VStack(spacing: AppSpacing.lg) {
+            VStack(spacing: 0) {
                 topBar
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
-                        Spacer().frame(height: AppSpacing.xs)
+                        heroTitle
+                            .padding(.top, AppSpacing.sm)
                         ForEach(Worlds.all) { world in
                             WorldCard(
                                 world: world,
@@ -34,41 +38,45 @@ struct WorldMapView: View {
                         }
                     }
                     .padding(.horizontal, AppSpacing.lg)
-                    .padding(.bottom, 200)
+                    .padding(.bottom, 260)
                 }
-                Spacer(minLength: 0)
             }
 
-            // Bottom CTAs
+            // Bottom CTAs floating panel
             VStack {
                 Spacer()
                 bottomCTAs
                     .padding(.horizontal, AppSpacing.lg)
-                    .padding(.bottom, AppSpacing.lg)
+                    .padding(.bottom, AppSpacing.md)
             }
 
-            // Companion floats around
+            // Companion floats in bottom-trailing
             VStack {
                 Spacer()
-                HStack {
+                HStack(alignment: .bottom) {
+                    Spacer()
                     ZStack(alignment: .topLeading) {
-                        CompanionView(controller: companion, size: 110)
-                            .padding(.leading, AppSpacing.lg)
                         if let bubble = companion.bubbleText {
                             BubbleSpeech(text: bubble)
-                                .offset(x: 100, y: -10)
+                                .offset(x: -150, y: -30)
                                 .transition(.scale.combined(with: .opacity))
                         }
+                        CompanionView(controller: companion, size: 120)
                     }
-                    Spacer()
+                    .padding(.trailing, AppSpacing.lg)
                 }
             }
-            .padding(.bottom, 140)
+            .padding(.bottom, 200)
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
         }
         .onAppear {
             lastSeenStars = progress.stars
-            greetIfNeeded()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                greetIfNeeded()
+            }
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.2)) {
+                heroAppeared = true
+            }
             checkWorldUnlocks()
         }
         .onChange(of: progress.stars) { _, new in
@@ -100,60 +108,152 @@ struct WorldMapView: View {
         }
     }
 
-    // MARK: - Subviews
+    // MARK: - Top bar
 
     private var topBar: some View {
         HStack(spacing: AppSpacing.sm) {
-            // Gear (parent gate)
+            // Settings button
             Button {
                 showingParentGate = true
             } label: {
                 Image(systemName: "gearshape.fill")
-                    .font(.title2)
-                    .foregroundStyle(.white.opacity(0.85))
-                    .padding(10)
-                    .background(.ultraThinMaterial, in: Circle())
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .frame(width: 46, height: 46)
+                    .background(.white.opacity(0.15), in: Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
             }
             .onLongPressGesture(minimumDuration: 1.5) { showingDemo = true }
 
             Spacer()
 
-            MinuteCounter(minutes: progress.pendingMinutes)
-            StarCounter(value: progress.stars)
-            StarCounter(value: progress.gems, icon: "diamond.fill", color: AppColor.gemPurple)
-
-            XPBar(
-                level: progress.companionLevel,
-                xp: progress.xp,
-                xpForCurrentLevel: progress.xpForCurrentLevel,
-                xpForNextLevel: progress.xpForNextLevel
-            )
+            // Primary stats — clean horizontal chips
+            HStack(spacing: AppSpacing.sm) {
+                statChip(
+                    icon: "clock.fill",
+                    value: "\(progress.pendingMinutes)",
+                    label: "דק׳",
+                    color: AppColor.successMint,
+                    prominent: progress.pendingMinutes > 0
+                )
+                statChip(
+                    icon: "star.fill",
+                    value: "\(progress.stars)",
+                    label: nil,
+                    color: AppColor.starGold,
+                    prominent: false
+                )
+                statChip(
+                    icon: "diamond.fill",
+                    value: "\(progress.gems)",
+                    label: nil,
+                    color: AppColor.gemPurple,
+                    prominent: false
+                )
+            }
         }
         .padding(.horizontal, AppSpacing.lg)
         .padding(.top, AppSpacing.sm)
     }
 
+    private func statChip(icon: String, value: String, label: String?, color: Color, prominent: Bool) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+                .font(.system(size: 16, weight: .semibold))
+            Text(value)
+                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .contentTransition(.numericText(value: Double(value) ?? 0))
+            if let label = label {
+                Text(label)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.7))
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(
+            Capsule().fill(.white.opacity(prominent ? 0.25 : 0.15))
+                .overlay(Capsule().stroke(color.opacity(prominent ? 0.6 : 0.3), lineWidth: 1.5))
+        )
+        .glow(color, radius: prominent ? 12 : 0)
+    }
+
+    // MARK: - Hero title
+
+    private var heroTitle: some View {
+        VStack(spacing: 4) {
+            Text("מסע הניצוץ")
+                .font(.system(size: 44, weight: .heavy, design: .rounded))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [AppColor.starGold, AppColor.companionGlow, .white],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .glow(AppColor.starGold, radius: 14)
+                .scaleEffect(heroAppeared ? 1 : 0.5)
+                .opacity(heroAppeared ? 1 : 0)
+
+            Text("בחר עולם והתחל הרפתקה!")
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.75))
+                .opacity(heroAppeared ? 1 : 0)
+
+            // XP bar — small, below subtitle
+            HStack(spacing: 8) {
+                Text("רמת ניצוץ \(progress.companionLevel)")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundStyle(AppColor.starGold)
+                XPBarMini(
+                    progress: xpProgress
+                )
+                .frame(width: 100)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(.white.opacity(0.12), in: Capsule())
+            .opacity(heroAppeared ? 1 : 0)
+            .padding(.top, 4)
+        }
+    }
+
+    private var xpProgress: Double {
+        let range = max(1, progress.xpForNextLevel - progress.xpForCurrentLevel)
+        let done = max(0, progress.xp - progress.xpForCurrentLevel)
+        return min(1, Double(done) / Double(range))
+    }
+
+    // MARK: - Bottom CTAs
+
     @ViewBuilder
     private var bottomCTAs: some View {
-        VStack(spacing: AppSpacing.md) {
+        VStack(spacing: AppSpacing.sm) {
             if progress.dailyChestAvailable {
                 Button {
                     showDailyChest = true
                 } label: {
-                    HStack {
-                        Text("🎁")
-                            .font(.system(size: 30))
-                        Text("קופסה יומית מחכה!")
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                    HStack(spacing: 12) {
+                        Text("🎁").font(.system(size: 32))
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text("קופסה יומית!")
+                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                            Text("מחכה לך")
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.75))
+                        }
                         Spacer()
-                        Image(systemName: "chevron.left")
+                        Image(systemName: "chevron.left.circle.fill").font(.system(size: 24))
                     }
                     .foregroundStyle(.white)
-                    .padding(.horizontal, AppSpacing.xl)
+                    .padding(.horizontal, AppSpacing.lg)
                     .padding(.vertical, AppSpacing.md)
                     .background(AppGradient.portal)
                     .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
-                    .glow(AppColor.gemPurple, radius: 12)
+                    .glow(AppColor.gemPurple, radius: 14)
+                    .pulse(min: 0.9)
                 }
                 .buttonStyle(.juicy)
             }
@@ -166,7 +266,7 @@ struct WorldMapView: View {
                     redeemMinutes()
                 } label: {
                     Label("פתחו לי \(progress.pendingMinutes) דקות לשחק", systemImage: "gamecontroller.fill")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .font(.system(size: 22, weight: .heavy, design: .rounded))
                 }
             }
         }
@@ -175,11 +275,12 @@ struct WorldMapView: View {
     // MARK: - Actions
 
     private func greetIfNeeded() {
-        // Greet once per session
         if progress.dayStreak == 0 {
-            companion.cheer("היי! יאללה הרפתקה 🌟")
+            companion.cheer("היי! יאללה להרפתקה 🌟")
+        } else if progress.dayStreak == 1 {
+            companion.cheer("ברוך הבא! 👋")
         } else {
-            companion.cheer("חזרת!")
+            companion.cheer("חזרת! \(progress.dayStreak) ימים ברצף 🔥")
         }
     }
 
@@ -197,6 +298,25 @@ struct WorldMapView: View {
         guard minutes > 0 else { return }
         shields.unlock(minutes: minutes)
         progress.startUnlock(minutes: minutes)
+    }
+}
+
+/// Minimal animated XP bar for the hero header.
+struct XPBarMini: View {
+    let progress: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(.white.opacity(0.18))
+                Capsule()
+                    .fill(AppGradient.gold)
+                    .frame(width: geo.size.width * progress)
+                    .glow(AppColor.starGold, radius: 4)
+                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: progress)
+            }
+        }
+        .frame(height: 6)
     }
 }
 
