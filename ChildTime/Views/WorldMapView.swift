@@ -26,8 +26,17 @@ struct WorldMapView: View {
     }
 
     private var worldGridColumns: [GridItem] {
-        // Adaptive: each card 170-220pt wide. Phones get 2 columns, iPads 3.
-        [GridItem(.adaptive(minimum: 170, maximum: 220), spacing: AppSpacing.md)]
+        let count = isCompact ? 2 : 3
+        return Array(
+            repeating: GridItem(.flexible(), spacing: AppSpacing.md),
+            count: count
+        )
+    }
+
+    /// Total width cap for the world grid (so the 3 cards stay centered on iPad
+    /// instead of pushing to one edge).
+    private var worldGridMaxWidth: CGFloat {
+        isCompact ? .infinity : 860
     }
 
     var body: some View {
@@ -56,8 +65,11 @@ struct WorldMapView: View {
                                 ) {
                                     selectedWorld = world
                                 }
+                                .frame(maxWidth: .infinity)
                             }
                         }
+                        .frame(maxWidth: worldGridMaxWidth)
+                        .frame(maxWidth: .infinity, alignment: .center)
                     }
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.bottom, 260)
