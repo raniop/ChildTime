@@ -282,6 +282,21 @@ final class ProgressStore: ObservableObject {
         unlockEndsAt = nil
     }
 
+    /// Stop the current unlock window early and return whatever full minutes
+    /// remained back to the pending pool so the kid doesn't lose them.
+    /// Returns the number of minutes returned.
+    @discardableResult
+    func endUnlockAndReturnRemainingMinutes() -> Int {
+        let remainingSeconds = unlockSecondsRemaining
+        // Round to nearest full minute (don't credit partial seconds back).
+        let remainingMinutes = remainingSeconds / 60
+        if remainingMinutes > 0 {
+            pendingMinutes += remainingMinutes
+        }
+        unlockEndsAt = nil
+        return remainingMinutes
+    }
+
     // MARK: - Day streak
 
     func registerSessionToday() {

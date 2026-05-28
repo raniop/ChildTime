@@ -128,7 +128,8 @@ struct UnlockedView: View {
             let selection = SelectionStorage.decode(data)
             ShieldManager.shared.applyShield(from: selection)
         }
-        progress.endUnlock()
+        // Refund any remaining full minutes back to the pending pool
+        progress.endUnlockAndReturnRemainingMinutes()
     }
 }
 

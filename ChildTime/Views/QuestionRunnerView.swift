@@ -133,33 +133,66 @@ struct QuestionRunnerView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        HStack(spacing: AppSpacing.md) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 32))
-                    .foregroundStyle(.white.opacity(0.8))
-            }
-
-            HStack(spacing: 6) {
-                ForEach(0..<totalQuestions, id: \.self) { i in
-                    Circle()
-                        .fill(i < questionIndex ? AppColor.successMint : .white.opacity(0.3))
-                        .frame(width: 14, height: 14)
-                        .scaleEffect(i == questionIndex - 1 ? 1.3 : 1.0)
-                        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: questionIndex)
+        if isCompact {
+            // iPhone: two rows so all stats fit
+            return AnyView(
+                VStack(spacing: 8) {
+                    HStack(spacing: AppSpacing.sm) {
+                        closeButton(size: 26)
+                        HStack(spacing: 5) {
+                            ForEach(0..<totalQuestions, id: \.self) { i in
+                                Circle()
+                                    .fill(i < questionIndex ? AppColor.successMint : .white.opacity(0.3))
+                                    .frame(width: 10, height: 10)
+                                    .scaleEffect(i == questionIndex - 1 ? 1.3 : 1.0)
+                                    .animation(.spring(response: 0.4, dampingFraction: 0.6), value: questionIndex)
+                            }
+                        }
+                        Spacer()
+                        StreakMeter(streak: progress.currentStreak)
+                    }
+                    HStack(spacing: AppSpacing.sm) {
+                        Spacer()
+                        MinutesBadge(minutes: progress.pendingMinutes, compact: true)
+                        StarCounter(value: progress.stars)
+                    }
                 }
-            }
-
-            Spacer()
-
-            StreakMeter(streak: progress.currentStreak)
-            MinutesBadge(minutes: progress.pendingMinutes, compact: true)
-            StarCounter(value: progress.stars)
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.top, AppSpacing.sm)
+            )
+        } else {
+            // iPad: single row
+            return AnyView(
+                HStack(spacing: AppSpacing.md) {
+                    closeButton(size: 32)
+                    HStack(spacing: 6) {
+                        ForEach(0..<totalQuestions, id: \.self) { i in
+                            Circle()
+                                .fill(i < questionIndex ? AppColor.successMint : .white.opacity(0.3))
+                                .frame(width: 14, height: 14)
+                                .scaleEffect(i == questionIndex - 1 ? 1.3 : 1.0)
+                                .animation(.spring(response: 0.4, dampingFraction: 0.6), value: questionIndex)
+                        }
+                    }
+                    Spacer()
+                    StreakMeter(streak: progress.currentStreak)
+                    MinutesBadge(minutes: progress.pendingMinutes, compact: true)
+                    StarCounter(value: progress.stars)
+                }
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.top, AppSpacing.sm)
+            )
         }
-        .padding(.horizontal, AppSpacing.md)
-        .padding(.top, AppSpacing.sm)
+    }
+
+    private func closeButton(size: CGFloat) -> some View {
+        Button {
+            dismiss()
+        } label: {
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: size))
+                .foregroundStyle(.white.opacity(0.8))
+        }
     }
 
     // MARK: - Question content
