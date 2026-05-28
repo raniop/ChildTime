@@ -1,4 +1,4 @@
-# טופי — ChildTime
+# טופי וחברים — ChildTime
 
 > An iPadOS app that turns screen time into a learning game for kids ages 4-10.
 > אפליקציית iPadOS שהופכת זמן מסך למשחק לימוד לילדים בגילאי 4-10.
