@@ -15,49 +15,60 @@ struct WorldUnlockView: View {
     private var titleFontSize: CGFloat { isCompact ? 42 : 56 }
 
     var body: some View {
-        ZStack {
-            world.gradient.gradient.ignoresSafeArea()
-            SparkleField(count: 50, size: 16)
-            Confetti(trigger: confettiTrigger)
+        GeometryReader { proxy in
+            ZStack {
+                world.gradient.gradient.ignoresSafeArea()
+                SparkleField(count: 50, size: 16)
+                Confetti(trigger: confettiTrigger)
 
-            VStack(spacing: AppSpacing.xl) {
-                Spacer()
+                ScrollView {
+                    VStack(spacing: AppSpacing.xl) {
+                        Spacer(minLength: AppSpacing.lg)
 
-                Text(world.emoji)
-                    .font(.system(size: emojiSize))
-                    .scaleEffect(stage >= 1 ? 1.2 : 0.5)
-                    .opacity(stage >= 1 ? 1 : 0)
-                    .glow(world.glowColor, radius: 40)
-                    .animation(.spring(response: 0.7, dampingFraction: 0.5), value: stage)
+                        Text(world.emoji)
+                            .font(.system(size: emojiSize))
+                            .scaleEffect(stage >= 1 ? 1.2 : 0.5)
+                            .opacity(stage >= 1 ? 1 : 0)
+                            .glow(world.glowColor, radius: 40)
+                            .animation(.spring(response: 0.7, dampingFraction: 0.5), value: stage)
 
-                if stage >= 2 {
-                    VStack(spacing: AppSpacing.md) {
-                        Text("עולם חדש נפתח!")
-                            .font(.system(size: subtitleFontSize, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.85))
-                            .transition(.scale.combined(with: .opacity))
+                        if stage >= 2 {
+                            VStack(spacing: AppSpacing.md) {
+                                Text("עולם חדש נפתח!")
+                                    .font(.system(size: subtitleFontSize, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.white.opacity(0.85))
+                                    .multilineTextAlignment(.center)
+                                    .minimumScaleFactor(0.7)
+                                    .transition(.scale.combined(with: .opacity))
 
-                        Text(world.name)
-                            .font(.system(size: titleFontSize, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .glow(world.glowColor, radius: 20)
-                            .transition(.scale.combined(with: .opacity))
+                                Text(world.name)
+                                    .font(.system(size: titleFontSize, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .glow(world.glowColor, radius: 20)
+                                    .multilineTextAlignment(.center)
+                                    .minimumScaleFactor(0.5)
+                                    .padding(.horizontal, AppSpacing.lg)
+                                    .transition(.scale.combined(with: .opacity))
+                            }
+                        }
+
+                        if stage >= 3 {
+                            JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
+                                onContinue()
+                            } label: {
+                                Text("בוא נחקור!")
+                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                            }
+                            .padding(.horizontal, AppSpacing.lg)
+                            .transition(.opacity)
+                        }
+
+                        Color.clear.frame(height: AppSpacing.lg)
                     }
+                    .frame(minHeight: proxy.size.height, alignment: .center)
+                    .frame(maxWidth: .infinity)
                 }
-
-                Spacer()
-
-                if stage >= 3 {
-                    JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-                        onContinue()
-                    } label: {
-                        Text("בוא נחקור!")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                    }
-                    .padding(.horizontal, AppSpacing.lg)
-                    .padding(.bottom, AppSpacing.xl)
-                    .transition(.opacity)
-                }
+                .scrollIndicators(.hidden)
             }
         }
         .onAppear { runSequence() }

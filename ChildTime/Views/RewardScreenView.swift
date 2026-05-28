@@ -29,45 +29,58 @@ struct RewardScreenView: View {
     @State private var goWorldUnlock: World?
 
     var body: some View {
-        ZStack {
-            // Backdrop
-            world.gradient.gradient
-                .ignoresSafeArea()
-                .opacity(0.4)
-            Color.black.opacity(0.4).ignoresSafeArea()
-            SparkleField(count: 25, size: 14)
+        GeometryReader { proxy in
+            ZStack {
+                // Backdrop
+                world.gradient.gradient
+                    .ignoresSafeArea()
+                    .opacity(0.4)
+                Color.black.opacity(0.4).ignoresSafeArea()
+                SparkleField(count: 25, size: 14)
 
-            VStack(spacing: AppSpacing.lg) {
-                Spacer()
+                ScrollView {
+                    // Center the column on big screens, scroll on small ones.
+                    VStack(spacing: AppSpacing.lg) {
+                        Spacer(minLength: AppSpacing.md)
 
-                Text(stage == .revealed ? "🎉" : kind.label)
-                    .font(stage == .revealed ? .system(size: celebEmojiSize) : titleFont)
-                    .foregroundStyle(.white)
+                        Text(stage == .revealed ? "🎉" : kind.label)
+                            .font(stage == .revealed ? .system(size: celebEmojiSize) : titleFont)
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.center)
+                            .minimumScaleFactor(0.6)
 
-                ChestView(kind: kind, stage: stage, size: chestSize)
-                    .onTapGesture {
-                        if stage == .glowing { openChest() }
+                        ChestView(kind: kind, stage: stage, size: chestSize)
+                            .onTapGesture {
+                                if stage == .glowing { openChest() }
+                            }
+                            .padding(.vertical, AppSpacing.md)
+
+                        if stage == .glowing {
+                            Text("לחץ כדי לפתוח!")
+                                .font(AppFont.subtitle())
+                                .foregroundStyle(.white)
+                                .pulse()
+                        }
+
+                        if stage == .revealed {
+                            rewardItems
+                                .frame(maxWidth: 480)
+                        }
+
+                        if stage == .revealed {
+                            actionButtons
+                                .frame(maxWidth: 480)
+                                .padding(.top, AppSpacing.md)
+                        }
+
+                        // Leave enough room for the companion + safe-area tabbar.
+                        Color.clear.frame(height: companionSize + 60)
                     }
-                    .padding(.vertical, AppSpacing.lg)
-
-                if stage == .glowing {
-                    Text("לחץ כדי לפתוח!")
-                        .font(AppFont.subtitle())
-                        .foregroundStyle(.white)
-                        .pulse()
+                    .padding(.horizontal, AppSpacing.lg)
+                    .frame(minHeight: proxy.size.height, alignment: .center)
+                    .frame(maxWidth: .infinity)
                 }
-
-                if stage == .revealed {
-                    rewardItems
-                }
-
-                Spacer()
-
-                if stage == .revealed {
-                    actionButtons
-                }
-            }
-            .padding(.horizontal, AppSpacing.lg)
+                .scrollIndicators(.hidden)
 
             // Companion in corner
             VStack {
@@ -87,7 +100,8 @@ struct RewardScreenView: View {
             .padding(.bottom, AppSpacing.lg)
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
 
-            Confetti(trigger: confettiTrigger)
+                Confetti(trigger: confettiTrigger)
+            }
         }
         .onAppear { startSequence() }
         .fullScreenCover(isPresented: $goLevelUp) {
