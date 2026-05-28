@@ -53,8 +53,8 @@ struct WorldCard: View {
                         .opacity(isUnlocked ? 1 : 0.35)
                         .frame(width: emojiFrame)
 
-                    // Right side: title + progress
-                    VStack(alignment: .trailing, spacing: 8) {
+                    // Right side: title + progress (RTL-aware: leading = right edge in RTL)
+                    VStack(alignment: .leading, spacing: 8) {
                         Text(world.name)
                             .font(.system(size: titleSize, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
@@ -83,7 +83,7 @@ struct WorldCard: View {
                             progressBar
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(AppSpacing.lg)
             }

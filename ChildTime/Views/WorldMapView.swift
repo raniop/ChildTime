@@ -122,15 +122,9 @@ struct WorldMapView: View {
 
             Spacer()
 
-            // Primary stats — clean horizontal chips
+            // Primary stats — minutes is the hero stat, more prominent
             HStack(spacing: AppSpacing.sm) {
-                statChip(
-                    icon: "clock.fill",
-                    value: "\(progress.pendingMinutes)",
-                    label: "דק׳",
-                    color: AppColor.successMint,
-                    prominent: progress.pendingMinutes > 0
-                )
+                MinutesBadge(minutes: progress.pendingMinutes, compact: isCompact)
                 statChip(
                     icon: "star.fill",
                     value: "\(progress.stars)",

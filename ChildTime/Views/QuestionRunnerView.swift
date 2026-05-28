@@ -33,6 +33,8 @@ struct QuestionRunnerView: View {
     @State private var goToReward: Bool = false
     @State private var earnedThisSession: Int = 0
     @State private var startedLevel: Int = 1
+    @State private var lastEarnedMinutes: Int = 0
+    @State private var showEarnedPopup: Bool = false
 
     private var totalQuestions: Int { settings.questionsPerSession }
 
@@ -72,6 +74,14 @@ struct QuestionRunnerView: View {
             // Effects overlays
             StarBurst(color: AppColor.starGold, trigger: burstTrigger)
             Confetti(trigger: confettiTrigger)
+
+            // Earned-minutes popup (center-screen, brief)
+            VStack {
+                Spacer()
+                EarnedMinutesPopup(minutes: lastEarnedMinutes, visible: showEarnedPopup)
+                Spacer().frame(maxHeight: .infinity)
+            }
+            .allowsHitTesting(false)
 
             // Portal overlay
             if showPortalIntro {
@@ -142,6 +152,7 @@ struct QuestionRunnerView: View {
             Spacer()
 
             StreakMeter(streak: progress.currentStreak)
+            MinutesBadge(minutes: progress.pendingMinutes, compact: true)
             StarCounter(value: progress.stars)
         }
         .padding(.horizontal, AppSpacing.md)
@@ -368,6 +379,11 @@ struct QuestionRunnerView: View {
         let earned = progress.recordCorrect(ctx, minutesPerCorrect: settings.minutesPerCorrectAnswer)
         earnedThisSession += earned
 
+        // Show "+X דקות" popup
+        let minuteMultiplier = isInPortal ? 3 : (isSuperQuestion ? 5 : 1)
+        let minutesGained = settings.minutesPerCorrectAnswer * minuteMultiplier
+        showEarnedMinutesPopup(minutes: minutesGained)
+
         // Companion reaction
         if isSuperQuestion {
             companion.wow("שאלת זהב! ⭐")
@@ -381,6 +397,18 @@ struct QuestionRunnerView: View {
             rumbleTrigger += 1
         } else {
             companion.cheer(["יש!", "טוב!", "כן!", "וואו!", "אלוף!"].randomElement()!)
+        }
+    }
+
+    private func showEarnedMinutesPopup(minutes: Int) {
+        lastEarnedMinutes = minutes
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.55)) {
+            showEarnedPopup = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            withAnimation(.easeOut(duration: 0.4)) {
+                showEarnedPopup = false
+            }
         }
     }
 
