@@ -280,6 +280,14 @@ struct OnboardingView: View {
     // MARK: - Family Controls
 
     private var familyControlsView: some View {
+        mainContent
+            .overlay(alignment: .topTrailing) {
+                backArrowButton { step = .parentInfo }
+                    .padding(AppSpacing.lg)
+            }
+    }
+
+    private var mainContent: some View {
         VStack(spacing: AppSpacing.lg) {
             Spacer()
 
@@ -296,7 +304,7 @@ struct OnboardingView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.lg)
 
-            // Friendly status pill — only shown when something needs the parent's attention
+            // Friendly status pill
             if !shields.isAuthorized {
                 statusPill(
                     icon: "exclamationmark.shield.fill",
@@ -351,29 +359,29 @@ struct OnboardingView: View {
 
             Spacer()
 
-            // Bottom nav — back + continue, sized consistently
-            HStack(spacing: AppSpacing.md) {
-                Button {
-                    step = .parentInfo
-                } label: {
-                    Text("חזור")
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, AppSpacing.lg)
-                        .padding(.vertical, 12)
-                        .background(.white.opacity(0.18), in: Capsule())
-                }
-                .buttonStyle(.juicy)
-
-                JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint, maxWidth: 280) {
-                    step = .pinSetup
-                } label: {
-                    Text("המשך")
-                }
+            JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
+                step = .pinSetup
+            } label: {
+                Text("המשך")
             }
             .padding(.bottom, AppSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// A top-left back arrow button — explicitly placed at top-trailing in RTL
+    /// (which is the visual left side of the screen).
+    private func backArrowButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "chevron.left")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 44, height: 44)
+                .background(.white.opacity(0.18), in: Circle())
+                .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
+        }
+        .buttonStyle(.juicy)
+        .environment(\.layoutDirection, .leftToRight)  // keep arrow pointing left regardless
     }
 
     private var selectionCount: Int {
@@ -431,6 +439,7 @@ struct OnboardingView: View {
                 pinField(text: $newPIN, placeholder: "קוד חדש (4 ספרות)")
                 pinField(text: $confirmPIN, placeholder: "אמת קוד")
             }
+            .frame(maxWidth: 460)
             .padding(.horizontal, AppSpacing.lg)
 
             if let err = pinError {
@@ -441,25 +450,17 @@ struct OnboardingView: View {
 
             Spacer()
 
-            HStack(spacing: AppSpacing.md) {
-                Button {
-                    step = .familyControls
-                } label: {
-                    Text("חזור")
-                        .padding(.horizontal, AppSpacing.lg)
-                        .padding(.vertical, AppSpacing.md)
-                        .background(.white.opacity(0.2), in: Capsule())
-                        .foregroundStyle(.white)
-                }
-                JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
-                    savePIN()
-                } label: {
-                    Text("שמור")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                }
+            JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
+                savePIN()
+            } label: {
+                Text("שמור")
             }
-            .padding(.horizontal, AppSpacing.xl)
             .padding(.bottom, AppSpacing.xl)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay(alignment: .topTrailing) {
+            backArrowButton { step = .familyControls }
+                .padding(AppSpacing.lg)
         }
     }
 
