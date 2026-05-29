@@ -60,7 +60,13 @@ struct ChildTimeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ZStack {
+                // A base layer in the launch-screen color, so the very first
+                // SwiftUI frame is on-brand indigo instead of a white flash
+                // between the launch screen and ContentView's first paint.
+                AppColor.dreamyIndigo.ignoresSafeArea()
+                ContentView()
+            }
                 .environment(\.layoutDirection, .rightToLeft)
                 .environmentObject(settings)
                 .environmentObject(progress)
