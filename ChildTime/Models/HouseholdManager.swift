@@ -28,9 +28,6 @@ final class HouseholdManager: ObservableObject {
     private func markLoaded() { isLoading = false }
 
     private var uid: String?
-    private enum K {
-        static let didMigrateHousehold = "household.didMigrate"
-    }
 
     #if canImport(FirebaseFirestore)
     private var db: Firestore { Firestore.firestore() }
@@ -79,7 +76,7 @@ final class HouseholdManager: ObservableObject {
             try await ensureParentDoc(uid: uid, email: email, displayName: displayName)
             let hh = try await ensureHousehold(uid: uid)
             self.household = hh
-            await migrateLocalProfilesIfNeeded(into: hh)
+            reconcileLocalChildren(into: hh)
             listenToHousehold(hh.id)
             listenToChildren(in: hh.id)
         } catch {
@@ -198,10 +195,11 @@ final class HouseholdManager: ObservableObject {
     // MARK: - Migration
 
     #if canImport(FirebaseFirestore)
-    private func migrateLocalProfilesIfNeeded(into hh: Household) async {
-        let d = UserDefaults.standard
-        guard !d.bool(forKey: K.didMigrateHousehold) else { return }
-        d.set(true, forKey: K.didMigrateHousehold)
+    /// Push any locally-known children up to the cloud (idempotent). This makes
+    /// a device that already has kids locally — e.g. the one they were created
+    /// on — publish them so other devices on the household can pull them. Runs
+    /// every sign-in; no-op on a fresh device (no local profiles yet).
+    private func reconcileLocalChildren(into hh: Household) {
         for profile in ProfileStore.shared.profiles {
             upsertChild(profile)
         }
