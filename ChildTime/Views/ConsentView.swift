@@ -14,17 +14,17 @@ struct ConsentView: View {
 
             GeometryReader { proxy in
             ScrollView {
-                VStack(alignment: .trailing, spacing: AppSpacing.lg) {
+                VStack(alignment: .leading, spacing: AppSpacing.lg) {
                     Text("🔒").font(.system(size: 64))
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, AppSpacing.xl)
                     Text("הפרטיות של הילד שלכם — קודם כול")
                         .font(.system(size: 26, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                        .multilineTextAlignment(.trailing)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
-                    VStack(alignment: .trailing, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 14) {
                         principle("👨‍👩‍👧", "הפרדה מלאה בין משפחות", "הנתונים של כל משפחה מבודדים. אף משפחה אחרת לא יכולה לראות את הילד שלכם.")
                         principle("📉", "איסוף נתונים מינימלי", "אנחנו אוספים רק את מה שדרוש כדי להציג התקדמות למידה — בלי פרסום מבוסס פרופיל ובלי מכירת נתונים.")
                         principle("🔐", "מאובטח", "ההתקדמות מסונכרנת בצורה מאובטחת, והקוד ההורי נשמר מוצפן במכשיר.")
@@ -39,7 +39,7 @@ struct ConsentView: View {
                          destination: URL(string: "https://github.com/raniop/ChildTime/blob/main/distribution/PRIVACY_POLICY.html")!)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
-                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                     Button {
                         accept()
@@ -71,14 +71,14 @@ struct ConsentView: View {
             Text(emoji)
                 .font(.system(size: 28))
                 .frame(width: 40, alignment: .center)
-            VStack(alignment: .trailing, spacing: 2) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 Text(body).font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.trailing)
+                    .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 

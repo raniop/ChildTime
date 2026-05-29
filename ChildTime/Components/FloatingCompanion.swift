@@ -8,6 +8,8 @@ struct FloatingCompanion: View {
     /// When set, the floating buddy *is* the child — their own avatar wanders
     /// the screen instead of the generic Tofy face.
     var profile: Profile? = nil
+    /// Tapping (not dragging) the buddy fires this — used to open avatar settings.
+    var onTap: (() -> Void)? = nil
     var size: CGFloat = 120
     /// Insets from the parent edges that constrain wandering / drag.
     var topInset: CGFloat = 80
@@ -61,6 +63,9 @@ struct FloatingCompanion: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
+                        // Ignore tiny movement so a tap doesn't yank the buddy.
+                        let dist = hypot(value.translation.width, value.translation.height)
+                        guard dist > 8 else { return }
                         if !isDragging {
                             isDragging = true
                             controller.cheer()
@@ -74,10 +79,17 @@ struct FloatingCompanion: View {
                             : value.location.x
                         position = clamp(CGPoint(x: mirroredX, y: value.location.y), in: geo.size)
                     }
-                    .onEnded { _ in
+                    .onEnded { value in
+                        let dist = hypot(value.translation.width, value.translation.height)
+                        if dist <= 8 {
+                            // A tap, not a drag → open avatar settings.
+                            Haptic.light()
+                            onTap?()
+                        } else {
+                            Haptic.soft()
+                            scheduleWander(in: geo.size)
+                        }
                         isDragging = false
-                        Haptic.soft()
-                        scheduleWander(in: geo.size)
                     }
             )
             .onAppear {

@@ -126,6 +126,10 @@ struct WorldMapView: View {
             FloatingCompanion(
                 controller: companion,
                 profile: profiles.active,
+                onTap: {
+                    Haptic.light()
+                    showingChildSettings = true
+                },
                 size: companionSize,
                 topInset: isCompact ? 140 : 90,
                 bottomInset: isCompact ? 220 : 200,
@@ -234,21 +238,9 @@ struct WorldMapView: View {
 
     private func topBarActions(buttonSize: CGFloat, avatarSize: CGFloat, iconSize: CGFloat) -> some View {
         HStack(spacing: AppSpacing.sm) {
-            // Tapping the avatar opens the child's own basic profile settings.
-            // Show the real, cosmetic-wearing avatar (hat/glasses on the head)
-            // so purchases are visible right where the child lives.
-            if let active = profiles.active {
-                Button {
-                    Haptic.light()
-                    showingChildSettings = true
-                } label: {
-                    ProfileAvatarView(profile: active, size: buttonSize, headItemsOnly: true)
-                }
-                .buttonStyle(.plain)
-            } else {
-                ChildAvatarView(size: buttonSize)
-            }
-
+            // The child's avatar now lives ONLY as the floating buddy — tapping
+            // it opens the avatar settings. So the top bar keeps just the
+            // settings / shop / gift actions.
             Button {
                 showingParentGate = true
             } label: {
