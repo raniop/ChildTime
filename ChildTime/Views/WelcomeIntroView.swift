@@ -20,14 +20,14 @@ struct WelcomeIntroView: View {
 
             GeometryReader { proxy in
                 ScrollView {
-                    VStack(spacing: AppSpacing.xl) {
+                    VStack(spacing: isCompact ? 14 : AppSpacing.lg) {
                         hero
                         stepsCard
                         screenTimeNoticeCard
                         startButton
                     }
                     .padding(.horizontal, AppSpacing.lg)
-                    .padding(.vertical, AppSpacing.xl)
+                    .padding(.vertical, AppSpacing.md)
                     .frame(minHeight: proxy.size.height, alignment: .center)
                     .frame(maxWidth: 520)
                     .frame(maxWidth: .infinity)
@@ -42,17 +42,17 @@ struct WelcomeIntroView: View {
     // MARK: - Hero
 
     private var hero: some View {
-        VStack(spacing: AppSpacing.md) {
-            CompanionView(controller: companion, size: isCompact ? 120 : 150)
+        VStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.md) {
+            CompanionView(controller: companion, size: isCompact ? 92 : 130)
             Text("טוֹפִּי")
-                .font(.system(size: isCompact ? 52 : 68, weight: .heavy, design: .rounded))
+                .font(.system(size: isCompact ? 42 : 58, weight: .heavy, design: .rounded))
                 .foregroundStyle(
                     LinearGradient(colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FFE082")],
                                    startPoint: .top, endPoint: .bottom)
                 )
                 .shadow(color: AppColor.starGold.opacity(0.5), radius: 12)
             Text("לוֹמְדִים, מַרְוִיחִים זְמַן מָסָךְ —\nוְהַהוֹרִים רוֹאִים הַכֹּל.")
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .font(.system(size: isCompact ? 16 : 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.92))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -85,14 +85,14 @@ struct WelcomeIntroView: View {
     }
 
     private var divider: some View {
-        Rectangle().fill(.white.opacity(0.12)).frame(height: 1).padding(.vertical, 4)
+        Rectangle().fill(.white.opacity(0.12)).frame(height: 1).padding(.vertical, 2)
     }
 
     private func step(_ emoji: String, _ tint: Color, _ title: String, _ body: String) -> some View {
         HStack(alignment: .center, spacing: 14) {
             Text(emoji)
-                .font(.system(size: 28))
-                .frame(width: 54, height: 54)
+                .font(.system(size: 24))
+                .frame(width: 48, height: 48)
                 .background(
                     Circle().fill(
                         LinearGradient(colors: [tint.opacity(0.9), tint.opacity(0.5)],
@@ -112,7 +112,7 @@ struct WelcomeIntroView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, isCompact ? 6 : 8)
     }
 
     // MARK: - Screen Time notice
@@ -155,7 +155,7 @@ struct WelcomeIntroView: View {
                 .font(.system(size: 21, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 17)
+                .padding(.vertical, isCompact ? 15 : 17)
                 .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .glow(AppColor.starGold, radius: 14)
         }
