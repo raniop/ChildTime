@@ -5,6 +5,9 @@ struct WorldCard: View {
     let isUnlocked: Bool
     let currentRoom: Int
     let starsHeld: Int
+    /// When true the world is gated behind the monthly subscription. The card
+    /// stays tappable (tapping opens the paywall) but shows a "טופי+" badge.
+    var subscriptionLocked: Bool = false
     let onTap: () -> Void
 
     @Environment(\.horizontalSizeClass) private var hsc
@@ -13,6 +16,9 @@ struct WorldCard: View {
     @State private var shimmer: Bool = false
 
     private var isCompact: Bool { hsc == .compact }
+    /// Whether the card should render with the dimmed "locked" treatment —
+    /// either it hasn't been unlocked by stars yet, or it's behind the paywall.
+    private var showsLocked: Bool { !isUnlocked || subscriptionLocked }
     private var emojiSize: CGFloat { isCompact ? 80 : 100 }
     private var titleSize: CGFloat { isCompact ? 22 : 26 }
     private var labelSize: CGFloat { isCompact ? 15 : 17 }
@@ -25,11 +31,11 @@ struct WorldCard: View {
 
                 // Themed decorations behind everything else
                 WorldDecorations(world: world)
-                    .opacity(isUnlocked ? 0.55 : 0.2)
+                    .opacity(showsLocked ? 0.2 : 0.55)
                     .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
 
                 // Subtle shimmer sweep (only when unlocked)
-                if isUnlocked {
+                if !showsLocked {
                     LinearGradient(
                         colors: [.clear, .white.opacity(0.16), .clear],
                         startPoint: .top,
@@ -50,7 +56,7 @@ struct WorldCard: View {
                         .offset(y: float)
                         .shadow(color: world.glowColor.opacity(0.8), radius: 22)
                         .shadow(color: .black.opacity(0.25), radius: 4, y: 4)
-                        .opacity(isUnlocked ? 1 : 0.35)
+                        .opacity(showsLocked ? 0.35 : 1)
                         .frame(maxWidth: .infinity, alignment: .center)
 
                     // Title
@@ -75,7 +81,16 @@ struct WorldCard: View {
 
                     // Bottom row: lock badge if locked, else just the progress bar
                     VStack(spacing: 4) {
-                        if !isUnlocked {
+                        if subscriptionLocked {
+                            HStack(spacing: 4) {
+                                Image(systemName: "crown.fill")
+                                    .font(.system(size: labelSize - 2))
+                                Text("טוֹפִּי+")
+                                    .font(.system(size: labelSize, weight: .heavy, design: .rounded))
+                            }
+                            .foregroundStyle(AppColor.starGold)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        } else if !isUnlocked {
                             HStack(spacing: 4) {
                                 Image(systemName: "lock.fill")
                                     .font(.system(size: labelSize - 2))
@@ -96,14 +111,20 @@ struct WorldCard: View {
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                    .stroke(.white.opacity(isUnlocked ? 0.35 : 0.12), lineWidth: 2)
+                    .stroke(subscriptionLocked ? AppColor.starGold.opacity(0.6)
+                                                : .white.opacity(showsLocked ? 0.12 : 0.35),
+                            lineWidth: 2)
             )
-            .glow(world.glowColor, radius: isUnlocked ? 18 : 0)
-            .scaleEffect(isUnlocked ? 1.0 : 0.97)
-            .opacity(isUnlocked ? 1 : 0.88)
+            // Subscription-locked cards keep a gold glow to read as "premium";
+            // star-locked ones stay flat. Footprint is identical in every state.
+            .glow(subscriptionLocked ? AppColor.starGold : world.glowColor,
+                  radius: showsLocked && !subscriptionLocked ? 0 : 18)
+            .opacity(showsLocked ? 0.9 : 1)
         }
         .buttonStyle(.juicy)
-        .disabled(!isUnlocked)
+        // Star-locked worlds are inert; subscription-locked ones stay tappable so
+        // the tap can open the paywall.
+        .disabled(!isUnlocked && !subscriptionLocked)
         .onAppear {
             withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
                 float = -4

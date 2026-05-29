@@ -5,6 +5,7 @@ struct WorldMapView: View {
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var shields: ShieldManager
     @EnvironmentObject var profiles: ProfileStore
+    @EnvironmentObject var subs: SubscriptionManager
     @Environment(\.horizontalSizeClass) private var hsc
 
     @State private var companion = CompanionController()
@@ -16,6 +17,7 @@ struct WorldMapView: View {
     @State private var showingWheel = false
     @State private var showingSmartFeed = false
     @State private var showingChildSettings = false
+    @State private var showingPaywall = false
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
 
@@ -81,9 +83,17 @@ struct WorldMapView: View {
                                     world: world,
                                     isUnlocked: progress.unlockedWorlds.contains(world.id),
                                     currentRoom: progress.progress(in: world.id),
-                                    starsHeld: progress.stars
+                                    starsHeld: progress.stars,
+                                    subscriptionLocked: !subs.isPremium
                                 ) {
-                                    selectedWorld = world
+                                    if subs.isPremium {
+                                        selectedWorld = world
+                                    } else {
+                                        // Until they subscribe, only "הרפתקה חכמה"
+                                        // is playable — the worlds open the paywall.
+                                        Haptic.light()
+                                        showingPaywall = true
+                                    }
                                 }
                                 .frame(maxWidth: .infinity)
                             }
@@ -156,6 +166,11 @@ struct WorldMapView: View {
         .fullScreenCover(isPresented: $showingSmartFeed) {
             // Smart Feed play — grants minutes (capped by the daily maximum).
             QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
+        }
+        .fullScreenCover(isPresented: $showingPaywall) {
+            PaywallView()
+                .environmentObject(subs)
+                .environment(\.layoutDirection, .rightToLeft)
         }
         .sheet(isPresented: $showingChildSettings) {
             if let active = profiles.active {
