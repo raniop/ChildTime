@@ -14,17 +14,16 @@ final class SubscriptionManager: ObservableObject {
 
     // MARK: - Product identifiers
     //
+    // Flat family pricing — one plan covers all the family's children.
     // Configure these EXACT IDs in App Store Connect → Subscriptions:
     //   • Group:   "tofi_premium" (auto-renewable subscription group)
-    //   • Monthly: com.rani.ChildTime.premium.monthly  (₪29.90)
-    //   • Yearly:  com.rani.ChildTime.premium.yearly   (₪249, with 7-day intro free trial)
-    //   • Lifetime: com.rani.ChildTime.premium.lifetime (₪449, non-consumable)
+    //   • Monthly: com.rani.ChildTime.premium.monthly  (₪19.90)
+    //   • Yearly:  com.rani.ChildTime.premium.yearly   (₪149, with 7-day intro free trial)
 
     static let monthlyID  = "com.rani.ChildTime.premium.monthly"
     static let yearlyID   = "com.rani.ChildTime.premium.yearly"
-    static let lifetimeID = "com.rani.ChildTime.premium.lifetime"
 
-    static let allProductIDs: Set<String> = [monthlyID, yearlyID, lifetimeID]
+    static let allProductIDs: Set<String> = [monthlyID, yearlyID]
 
     // MARK: - Published state
 
@@ -89,7 +88,6 @@ final class SubscriptionManager: ObservableObject {
         switch id {
         case monthlyID:  return 0
         case yearlyID:   return 1
-        case lifetimeID: return 2
         default:         return 99
         }
     }
@@ -230,20 +228,17 @@ extension Product {
         switch id {
         case SubscriptionManager.monthlyID:  return "חודשי"
         case SubscriptionManager.yearlyID:   return "שנתי"
-        case SubscriptionManager.lifetimeID: return "לכל החיים"
         default: return displayName
         }
     }
 
-    /// e.g. "₪29.90 / חודש"
+    /// e.g. "₪19.90 / חודש"
     var pricePerPeriod: String {
         switch id {
         case SubscriptionManager.monthlyID:
             return "\(displayPrice) / חודש"
         case SubscriptionManager.yearlyID:
             return "\(displayPrice) / שנה"
-        case SubscriptionManager.lifetimeID:
-            return "\(displayPrice) — תשלום חד-פעמי"
         default:
             return displayPrice
         }
