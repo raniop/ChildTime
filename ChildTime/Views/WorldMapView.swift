@@ -26,7 +26,7 @@ struct WorldMapView: View {
     @State private var infoStat: StatInfo? = nil
 
     enum StatInfo: String, Identifiable {
-        case minutes, stars, gems
+        case score, minutes, stars, gems
         var id: String { rawValue }
     }
 
@@ -254,7 +254,20 @@ struct WorldMapView: View {
         HStack(spacing: compactStats ? 6 : AppSpacing.sm) {
             if compactStats { Spacer(minLength: 0) }
 
-            ScoreBadge(value: progress.totalScore, style: .lifetime, compact: true)
+            Button {
+                Haptic.light()
+                infoStat = .score
+            } label: {
+                statChip(
+                    icon: "trophy.fill",
+                    value: "\(progress.totalScore)",
+                    label: nil,
+                    color: AppColor.starGold,
+                    prominent: false
+                )
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: popoverBinding(for: .score)) { statInfoCard(.score) }
 
             Button {
                 Haptic.light()
@@ -364,6 +377,14 @@ struct WorldMapView: View {
 
     private func statInfoContent(_ stat: StatInfo) -> InfoContent {
         switch stat {
+        case .score:
+            return InfoContent(
+                emoji: "🏆",
+                title: "ניקוד",
+                subtitle: "סך הנקודות שלך",
+                body: "נקודות נצברות על כל תשובה נכונה. שאלות קשות יותר, רצפים ושאלות זהב שוות יותר נקודות!",
+                tip: "הניקוד ממשיך לעלות ככל שאתה לומד — נסה לשבור את השיא שלך."
+            )
         case .minutes:
             return InfoContent(
                 emoji: "🎮",

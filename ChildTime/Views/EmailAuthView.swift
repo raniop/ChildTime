@@ -70,6 +70,7 @@ struct EmailAuthView: View {
                     .disabled(!canSubmit || working)
                 }
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("חשבון הורה")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

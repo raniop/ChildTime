@@ -12,6 +12,7 @@ struct ConsentView: View {
             AppGradient.dreamy.ignoresSafeArea()
             SparkleField(count: 18, size: 12)
 
+            GeometryReader { proxy in
             ScrollView {
                 VStack(spacing: AppSpacing.lg) {
                     Text("🔒").font(.system(size: 64)).padding(.top, AppSpacing.xl)
@@ -51,13 +52,21 @@ struct ConsentView: View {
                     .padding(.bottom, AppSpacing.xl)
                 }
                 .padding(.horizontal, AppSpacing.lg)
+                .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
+                // Center vertically on tall screens (iPad) instead of clinging to top.
+                .frame(minHeight: proxy.size.height, alignment: .center)
+            }
             }
         }
     }
 
     private func principle(_ emoji: String, _ title: String, _ body: String) -> some View {
+        // Icon leads on the right (RTL); text right-aligned beside it.
         HStack(alignment: .top, spacing: 12) {
+            Text(emoji)
+                .font(.system(size: 28))
+                .frame(width: 40, alignment: .center)
             VStack(alignment: .trailing, spacing: 2) {
                 Text(title).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 Text(body).font(.system(size: 13, weight: .medium, design: .rounded))
@@ -66,7 +75,6 @@ struct ConsentView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
-            Text(emoji).font(.system(size: 28))
         }
     }
 

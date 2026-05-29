@@ -96,6 +96,7 @@ struct ProfileEditorView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
+            .dismissKeyboardOnTap()
             .navigationTitle(isEdit ? "ערוך פרופיל" : "פרופיל חדש")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
