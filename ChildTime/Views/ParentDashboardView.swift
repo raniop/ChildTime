@@ -60,6 +60,8 @@ struct ParentDashboardView: View {
                     }
                 }
             }
+            // The whole dashboard reads right-to-left.
+            .environment(\.layoutDirection, .rightToLeft)
             .navigationTitle("מבט-על על המשפחה")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -226,6 +228,9 @@ struct ParentDashboardView: View {
             // Learning profile — what the Smart Feed has learned about this kid.
             learningProfileCard(for: profile, snapshot: s)
 
+            // Actionable coaching — where to reinforce + concrete tips.
+            coachingCard(for: profile, snapshot: s)
+
             // Full analytics deep-dive (daily/weekly/monthly + coaching).
             NavigationLink {
                 ChildInsightsView(profile: profile, snapshot: s)
@@ -336,6 +341,74 @@ struct ParentDashboardView: View {
             .background(
                 RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
                     .fill(Color(.systemBackground).opacity(0.5))
+            )
+        }
+    }
+
+    /// "המלצות להורה" — surfaces where the child needs reinforcement (the
+    /// topics they get wrong most) plus the CoachingEngine's concrete, low-effort
+    /// tips. Only appears once the kid has played enough to have signal.
+    @ViewBuilder
+    private func coachingCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
+        let lp = LearningProfile(snapshot: s, enabledTopics: settings.enabledTopics, age: profile.age)
+        let history = LearningHistoryStore.shared.history(for: profile.id)
+        let engine = InsightsEngine(history: history, profile: lp)
+        let coach = CoachingEngine(childName: profile.name, insights: engine, profile: lp)
+        let actions = Array(coach.recommendedActions().prefix(3))
+        let weak = Array(lp.weak.prefix(2))
+
+        if s.totalAnswered >= 4 {
+            VStack(alignment: .trailing, spacing: 10) {
+                HStack(spacing: 6) {
+                    Spacer()
+                    Text("המלצות להורה")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "lightbulb.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(AppColor.starGold)
+                }
+
+                // Where the child struggles most — what to reinforce.
+                if !weak.isEmpty {
+                    HStack(spacing: 6) {
+                        Spacer()
+                        ForEach(weak) { t in
+                            Text("\(t.emoji) \(t.displayName)")
+                                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Capsule().fill(AppColor.flameOrange.opacity(0.18)))
+                                .overlay(Capsule().stroke(AppColor.flameOrange.opacity(0.5), lineWidth: 1))
+                        }
+                        Text("כדאי לחזק:")
+                            .font(.system(size: 12, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                // Concrete tips.
+                ForEach(actions) { act in
+                    HStack(alignment: .top, spacing: 8) {
+                        Text(act.emoji).font(.system(size: 14))
+                        Text(act.text)
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundStyle(.primary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .multilineTextAlignment(.trailing)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(AppSpacing.sm)
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                    .fill(AppColor.starGold.opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                            .stroke(AppColor.starGold.opacity(0.25), lineWidth: 1)
+                    )
             )
         }
     }
