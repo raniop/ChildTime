@@ -64,10 +64,47 @@ struct FamilyLinkingView: View {
                 Label("צרף ילד/ה לפי אימייל", systemImage: "person.crop.circle.badge.plus")
             }
             .disabled(working || !childEmail.contains("@"))
+
+            // Live status of requests already sent.
+            ForEach(household.sentChildLinks) { req in
+                HStack {
+                    Image(systemName: statusIcon(req.status))
+                        .foregroundStyle(statusColor(req.status))
+                    Text(req.toEmail)
+                        .font(.subheadline)
+                        .lineLimit(1)
+                    Spacer()
+                    Text(statusLabel(req.status))
+                        .font(.caption.weight(.heavy))
+                        .foregroundStyle(statusColor(req.status))
+                }
+            }
         } header: {
             Text("צירוף ילד/ה")
         } footer: {
             Text("אם הילד/ה נרשמו בעצמם עם אימייל — הזינו אותו כאן. תישלח בקשה שתופיע במכשיר שלהם, ואחרי אישור הפרופילים שלהם יעברו תחת המשפחה שלכם.")
+        }
+    }
+
+    private func statusLabel(_ s: String) -> String {
+        switch s {
+        case "approved": return "אושר ✅"
+        case "declined": return "נדחה"
+        default:         return "ממתין לאישור…"
+        }
+    }
+    private func statusIcon(_ s: String) -> String {
+        switch s {
+        case "approved": return "checkmark.circle.fill"
+        case "declined": return "xmark.circle.fill"
+        default:         return "clock.fill"
+        }
+    }
+    private func statusColor(_ s: String) -> Color {
+        switch s {
+        case "approved": return AppColor.successMint
+        case "declined": return .secondary
+        default:         return AppColor.starGold
         }
     }
 

@@ -11,7 +11,7 @@
  * Requires: APNs key uploaded to Firebase (Project Settings → Cloud Messaging),
  *           Push Notifications capability on the iOS app.
  */
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const admin = require("firebase-admin");
 
@@ -45,6 +45,20 @@ function liveMessage(event) {
   }
 }
 
+async function tokensForUID(uid) {
+  const p = await db.collection("parents").doc(uid).get();
+  if (p.exists && Array.isArray(p.data().fcmTokens)) return [...new Set(p.data().fcmTokens)];
+  return [];
+}
+
+async function tokensForEmail(email) {
+  if (!email) return [];
+  const snap = await db.collection("parents").where("email", "==", email).get();
+  const tokens = [];
+  snap.forEach((d) => { if (Array.isArray(d.data().fcmTokens)) tokens.push(...d.data().fcmTokens); });
+  return [...new Set(tokens)];
+}
+
 async function send(tokens, notification, data) {
   if (!tokens.length) return;
   await admin.messaging().sendEachForMulticast({
@@ -69,6 +83,33 @@ exports.sendLiveEvent = onDocumentCreated("children/{childID}/events/{eventID}",
   const msg = liveMessage(data);
   if (!msg) return;
   await send(tokens, msg, { childID: event.params.childID, type: data.type });
+});
+
+// ---- 1b) Child-link requests ----------------------------------------------
+
+exports.onChildLinkRequest = onDocumentWritten("childLinkRequests/{id}", async (event) => {
+  const before = event.data.before.exists ? event.data.before.data() : null;
+  const after = event.data.after.exists ? event.data.after.data() : null;
+  if (!after) return;
+
+  // Created → notify the child (the targeted email) to open & approve.
+  if (!before && after.status === "pending") {
+    const tokens = await tokensForEmail(after.toEmail);
+    await send(tokens,
+      { title: "בקשת צירוף למשפחה 👨‍👩‍👧",
+        body: `${after.fromParentName || "הורה"} מבקש/ת לצרף אותך למשפחה. פתחו את טופי כדי לאשר.` },
+      { kind: "childLinkRequest", requestID: event.params.id });
+    return;
+  }
+
+  // Approved → notify the requesting parent that the child is now linked.
+  if (before && before.status !== "approved" && after.status === "approved") {
+    const tokens = await tokensForUID(after.fromParentUID);
+    await send(tokens,
+      { title: "הצירוף אושר! ✅",
+        body: "הילד/ה אישר/ה את הבקשה ומופיע/ה עכשיו במשפחה שלך." },
+      { kind: "childLinkApproved", requestID: event.params.id });
+  }
 });
 
 // ---- 2) Weekly report ------------------------------------------------------

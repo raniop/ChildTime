@@ -26,6 +26,8 @@ final class HouseholdManager: ObservableObject {
     /// A pending request from a parent to absorb THIS account's child profiles
     /// into their household — surfaced on the child's device for approval.
     @Published var pendingChildLink: ChildLinkRequest?
+    /// Requests THIS parent has sent (child-link by email), with live status.
+    @Published private(set) var sentChildLinks: [ChildLinkRequest] = []
     private var didReceiveChildren = false
 
     private func markLoaded() { isLoading = false }
@@ -39,6 +41,7 @@ final class HouseholdManager: ObservableObject {
     private var householdListener: ListenerRegistration?
     private var childrenListener: ListenerRegistration?
     private var childLinkListener: ListenerRegistration?
+    private var sentChildLinkListener: ListenerRegistration?
     #endif
 
     private init() {}
@@ -74,11 +77,13 @@ final class HouseholdManager: ObservableObject {
         householdListener?.remove(); householdListener = nil
         childrenListener?.remove(); childrenListener = nil
         childLinkListener?.remove(); childLinkListener = nil
+        sentChildLinkListener?.remove(); sentChildLinkListener = nil
         #endif
         household = nil
         parentAccount = nil
         linkedParentSummaries = []
         pendingChildLink = nil
+        sentChildLinks = []
         isLoading = false
         didReceiveChildren = false
         uid = nil
@@ -95,6 +100,7 @@ final class HouseholdManager: ObservableObject {
             listenToHousehold(hh.id)
             listenToChildren(in: hh.id)
             listenForIncomingChildLinks()
+            listenForSentChildLinks()
         } catch {
             lastError = error.localizedDescription
             markLoaded()   // sync failed (e.g. rules not deployed) — let the UI proceed
@@ -306,6 +312,20 @@ final class HouseholdManager: ObservableObject {
                     Self.decodeChildLink(id: $0.documentID, $0.data())
                 }
                 self.pendingChildLink = reqs.first
+            }
+    }
+
+    /// Parent side: watch the status of requests I've sent (pending/approved).
+    private func listenForSentChildLinks() {
+        guard let uid else { return }
+        sentChildLinkListener?.remove()
+        sentChildLinkListener = db.collection("childLinkRequests")
+            .whereField("fromParentUID", isEqualTo: uid)
+            .addSnapshotListener { [weak self] snap, _ in
+                guard let self, let snap else { return }
+                self.sentChildLinks = snap.documents
+                    .compactMap { Self.decodeChildLink(id: $0.documentID, $0.data()) }
+                    .sorted { $0.createdAt > $1.createdAt }
             }
     }
     #endif
