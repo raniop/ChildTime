@@ -130,6 +130,10 @@ final class ProgressStore: ObservableObject {
     /// separate chest figure, so the in-game chip, the reward screen, and the
     /// home total all agree.
     @Published private(set) var sessionStarsEarned: Int = 0
+    /// Play-minutes earned in the current session — the single minutes source
+    /// (every `batchAnswers` correct → `batchMinutes`). Shown on the reward
+    /// screen so it matches exactly what was added to the bank.
+    @Published private(set) var sessionMinutesEarned: Int = 0
     /// Points awarded for the *last* correct answer, so the UI can flash
     /// '+15' next to the running total. Consumers may set it back to 0.
     @Published var lastEarnedPoints: Int = 0
@@ -400,14 +404,14 @@ final class ProgressStore: ObservableObject {
             switch settings.rewardMode {
             case .perAnswer:
                 // Classic: each correct answer = N minutes (× multiplier on bonus Qs)
-                _ = grantMinutesCapped(minutesPerCorrect * multiplier)
+                sessionMinutesEarned += grantMinutesCapped(minutesPerCorrect * multiplier)
             case .perBatch:
-                // Save up: every `batchAnswers` correct answers = `batchMinutes`.
-                // Bonus questions still count their multiplier so super-Q is rewarding.
+                // Default for everyone: every `batchAnswers` correct = `batchMinutes`.
+                // This is the SINGLE source of play-minutes (no chest bonus).
                 batchCounter += multiplier
                 let target = max(1, settings.batchAnswers)
                 while batchCounter >= target {
-                    _ = grantMinutesCapped(settings.batchMinutes)
+                    sessionMinutesEarned += grantMinutesCapped(settings.batchMinutes)
                     batchCounter -= target
                 }
             }
@@ -493,6 +497,7 @@ final class ProgressStore: ObservableObject {
     func resetSessionScore() {
         sessionScore = 0
         sessionStarsEarned = 0
+        sessionMinutesEarned = 0
         lastEarnedPoints = 0
     }
 

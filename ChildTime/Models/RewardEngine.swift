@@ -107,18 +107,16 @@ struct ChestReward: Equatable {
 
 extension RewardEngine {
     static func chestContents(kind: ChestKind, correctInSession: Int, minutesPerCorrect: Int) -> ChestReward {
-        let baseMinutes = correctInSession * minutesPerCorrect
-
-        // NOTE: ⭐ are already awarded per correct answer (live). Session chests
-        // therefore add only a small *flat* bonus on top — they must NOT re-scale
-        // stars by correctInSession, or the in-game total, the reward screen, and
-        // the home total would all disagree. (magic/legendary are non-session
-        // chests — e.g. the daily chest — so they grant their stars outright.)
+        // Play-minutes come from ONE place only: the per-batch grant during play
+        // (every N correct → M minutes). Session chests (wood/gold) therefore add
+        // NO bonus minutes — only a small flat ⭐ bonus + cosmetics. (magic /
+        // legendary are non-session chests like the daily chest, so they grant
+        // their own minutes/stars outright.)
         switch kind {
         case .wood:
-            return ChestReward(stars: 0, gems: 0, minutes: baseMinutes, cosmeticID: nil)
+            return ChestReward(stars: 0, gems: 0, minutes: 0, cosmeticID: nil)
         case .gold:
-            return ChestReward(stars: 3, gems: 0, minutes: baseMinutes + 2, cosmeticID: nil)
+            return ChestReward(stars: 3, gems: 0, minutes: 0, cosmeticID: nil)
         case .magic:
             return ChestReward(stars: 10, gems: 0, minutes: 5, cosmeticID: nil)
         case .legendary:

@@ -188,8 +188,8 @@ struct RewardScreenView: View {
                 // + the chest's flat bonus. Matches the home total's increase.
                 rewardPill(emoji: "⭐", value: progress.sessionStarsEarned + reward.stars, label: "כּוֹכָבִים", color: AppColor.starGold)
             }
-            if revealedItems >= 2 && reward.minutes > 0 {
-                rewardPill(emoji: "⏱", value: reward.minutes, label: "דַּקּוֹת מִשְׂחָק", color: AppColor.successMint)
+            if revealedItems >= 2 && progress.sessionMinutesEarned > 0 {
+                rewardPill(emoji: "⏱", value: progress.sessionMinutesEarned, label: "דַּקּוֹת מִשְׂחָק", color: AppColor.successMint)
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)
@@ -305,15 +305,10 @@ struct RewardScreenView: View {
     }
 
     private func applyReward() {
-        // The session "earned" minutes were already added per-correct. Here we add chest extras.
-        let extraMinutes = max(0, reward.minutes - correctInSession * settings.minutesPerCorrect)
-        let chestOnly = ChestReward(
-            stars: reward.stars,
-            gems: reward.gems,
-            minutes: extraMinutes,
-            cosmeticID: reward.cosmeticID
-        )
-        progress.applyChestReward(chestOnly)
+        // Play-minutes were already granted during play (the per-batch calc).
+        // Session chests carry 0 minutes, so just apply the chest's flat ⭐
+        // bonus + any cosmetic.
+        progress.applyChestReward(reward)
         progress.advanceRoom(in: world.id)
     }
 

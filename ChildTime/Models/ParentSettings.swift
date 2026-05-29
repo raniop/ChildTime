@@ -244,7 +244,7 @@ final class ParentSettings: ObservableObject {
         let ba = d.integer(forKey: Key.batchAnswers)
         self.batchAnswers = ba == 0 ? 10 : ba
         let bm = d.integer(forKey: Key.batchMinutes)
-        self.batchMinutes = bm == 0 ? 3 : bm
+        self.batchMinutes = bm == 0 ? 4 : bm
 
         // Mistake cost: default ON. Mistakes now matter (half the reward) but
         // are immediately recoverable, so this is gentle by design.
