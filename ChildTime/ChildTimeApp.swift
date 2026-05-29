@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 #if canImport(FirebaseCore)
 import FirebaseCore
@@ -8,8 +9,25 @@ import FirebaseCore
 import GoogleSignIn
 #endif
 
+/// Forwards the APNs device token from the system to PushManager, which hands
+/// it to Firebase Messaging and uploads the resulting FCM token to the parent's
+/// account. SwiftUI apps need this adaptor because remote-notification
+/// callbacks are only delivered to a UIApplicationDelegate.
+final class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Task { @MainActor in PushManager.shared.didRegisterAPNs(deviceToken) }
+    }
+
+    func application(_ application: UIApplication,
+                     didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("[Push] APNs registration failed: \(error.localizedDescription)")
+    }
+}
+
 @main
 struct ChildTimeApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var settings: ParentSettings
     @StateObject private var progress: ProgressStore
     @StateObject private var shields: ShieldManager
