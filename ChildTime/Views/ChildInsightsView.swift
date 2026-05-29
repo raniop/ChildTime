@@ -53,6 +53,9 @@ struct ChildInsightsView: View {
             .padding(AppSpacing.lg)
             .frame(maxWidth: 720)
             .frame(maxWidth: .infinity)
+            // Sections are authored with `.trailing` == right, so render LTR;
+            // Hebrew still flows RTL within each label.
+            .environment(\.layoutDirection, .leftToRight)
         }
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .navigationTitle(profile.name)

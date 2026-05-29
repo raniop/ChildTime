@@ -57,11 +57,13 @@ struct ParentDashboardView: View {
                         .padding(AppSpacing.lg)
                         .frame(maxWidth: 720)
                         .frame(maxWidth: .infinity)
+                        // These cards are authored with `.trailing` == right,
+                        // so render them LTR; Hebrew text still flows RTL within
+                        // each label. (Forcing RTL here would flip them left.)
+                        .environment(\.layoutDirection, .leftToRight)
                     }
                 }
             }
-            // The whole dashboard reads right-to-left.
-            .environment(\.layoutDirection, .rightToLeft)
             .navigationTitle("מבט-על על המשפחה")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -110,10 +112,8 @@ struct ParentDashboardView: View {
     private var syncStatusCard: some View {
         let synced = auth.isSignedIn && remote.isActive
         return HStack(spacing: 12) {
-            Image(systemName: synced ? "checkmark.icloud.fill" : "icloud.slash")
-                .foregroundStyle(synced ? AppColor.successMint : .secondary)
-                .font(.title3)
-            VStack(alignment: .leading, spacing: 2) {
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
                 Text(synced ? "סנכרון בין מכשירים פעיל" : "מצב מקומי בלבד")
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                 if synced {
@@ -130,14 +130,18 @@ struct ParentDashboardView: View {
                     Text("כדי לראות את הילד ממכשיר אחר, התחבר ב-Parent Settings → סנכרון בין מכשירים.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.trailing)
                 }
                 if let err = remote.lastError, synced {
                     Text(err)
                         .font(.caption2)
                         .foregroundStyle(.red.opacity(0.85))
+                        .multilineTextAlignment(.trailing)
                 }
             }
-            Spacer()
+            Image(systemName: synced ? "checkmark.icloud.fill" : "icloud.slash")
+                .foregroundStyle(synced ? AppColor.successMint : .secondary)
+                .font(.title3)
         }
         .padding(AppSpacing.md)
         .background(
@@ -177,25 +181,6 @@ struct ParentDashboardView: View {
 
         return VStack(spacing: 14) {
             HStack(spacing: 12) {
-                ProfileAvatarView(profile: profile, size: 54)
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        Text(profile.name)
-                            .font(.system(size: 18, weight: .heavy, design: .rounded))
-                        if isActive {
-                            Text("פעיל")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Capsule().fill(AppColor.successMint))
-                        }
-                    }
-                    Text("\(profile.age.label) • \(profile.gender?.displayName ?? "לא צוין")")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
                 Menu {
                     if !isActive {
                         Button {
@@ -214,6 +199,25 @@ struct ParentDashboardView: View {
                         .font(.system(size: 22))
                         .foregroundStyle(.secondary)
                 }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    HStack(spacing: 6) {
+                        if isActive {
+                            Text("פעיל")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(AppColor.successMint))
+                        }
+                        Text(profile.name)
+                            .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    }
+                    Text("\(profile.age.label) • \(profile.gender?.displayName ?? "לא צוין")")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                ProfileAvatarView(profile: profile, size: 54)
             }
 
             HStack(spacing: 10) {
@@ -235,7 +239,6 @@ struct ParentDashboardView: View {
             NavigationLink {
                 ChildInsightsView(profile: profile, snapshot: s)
                     .environmentObject(settings)
-                    .environment(\.layoutDirection, .rightToLeft)
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "chart.line.uptrend.xyaxis")
