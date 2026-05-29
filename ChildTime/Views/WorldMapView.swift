@@ -263,7 +263,19 @@ struct WorldMapView: View {
             }
 
             if isCompact { Spacer() }
+
+            // Daily gift lives here — a lively dancing icon, but only when there
+            // is actually a gift to claim today. Once opened it disappears for
+            // the rest of the day (see `dailyChestAvailable`).
+            if progress.dailyChestAvailable {
+                DailyGiftBeacon(size: buttonSize + 6) {
+                    showDailyChest = true
+                }
+                .transition(.scale.combined(with: .opacity))
+            }
         }
+        .animation(.spring(response: 0.5, dampingFraction: 0.7),
+                   value: progress.dailyChestAvailable)
     }
 
     private func topBarStats(compactStats: Bool) -> some View {
@@ -503,38 +515,10 @@ struct WorldMapView: View {
     @ViewBuilder
     private var bottomCTAs: some View {
         VStack(spacing: AppSpacing.sm) {
-            // (Every world & Smart Adventure already earns minutes, so the old
-            // dedicated "earn screen time" button was redundant and removed.)
-            if progress.dailyChestAvailable {
-                Button {
-                    showDailyChest = true
-                } label: {
-                    HStack(spacing: 12) {
-                        Text("🎁").font(.system(size: 30))
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text("קֻפְסָה יוֹמִית מְחַכָּה!")
-                                .font(.system(size: 19, weight: .heavy, design: .rounded))
-                            Text("טַאפּ לִפְתֹּחַ")
-                                .font(.system(size: 13, weight: .medium, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.8))
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.left.circle.fill")
-                            .font(.system(size: 22))
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, AppSpacing.lg)
-                    .padding(.vertical, 14)
-                    .frame(maxWidth: .infinity)
-                    .background(AppGradient.portal)
-                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    .glow(AppColor.gemPurple, radius: 14)
-                    .pulse(min: 0.92)
-                }
-                .buttonStyle(.juicy)
-                .frame(maxWidth: 480)
-            }
-
+            // The daily gift now lives as a lively beacon in the top bar (see
+            // DailyGiftBeacon) instead of a full-width bottom button. Every world
+            // & Smart Adventure earns minutes, so the only bottom CTA left is the
+            // "redeem my minutes" button below.
             if progress.pendingMinutes > 0 {
                 Button {
                     redeemMinutes()
