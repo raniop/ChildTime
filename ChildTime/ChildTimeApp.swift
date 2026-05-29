@@ -47,6 +47,9 @@ struct ChildTimeApp: App {
                 .onChange(of: scenePhase) { _, phase in
                     if phase == .active {
                         enforceShieldStateIfNeeded()
+                        ToneSynth.shared.resumeMusicIfWanted()
+                    } else {
+                        ToneSynth.shared.pauseMusic()
                     }
                 }
                 .onOpenURL { url in

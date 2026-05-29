@@ -14,15 +14,21 @@ final class ToneSynth {
 
     private let engine = AVAudioEngine()
     private let player = AVAudioPlayerNode()
+    private let musicPlayer = AVAudioPlayerNode()
     private let format = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)!
 
     private var buffers: [AppSound: AVAudioPCMBuffer] = [:]
+    private var musicBuffer: AVAudioPCMBuffer?
     private var didStart = false
+    private var musicOn = false
 
     private init() {
         engine.attach(player)
         engine.connect(player, to: engine.mainMixerNode, format: format)
+        engine.attach(musicPlayer)
+        engine.connect(musicPlayer, to: engine.mainMixerNode, format: format)
         preloadAll()
+        musicBuffer = renderMusicLoop()
     }
 
     /// Lazy-start the engine on first play (avoids audio session conflicts at launch).
@@ -41,6 +47,52 @@ final class ToneSynth {
         ensureRunning()
         guard let buf = buffers[sound] else { return }
         player.scheduleBuffer(buf, at: nil, options: .interrupts, completionHandler: nil)
+    }
+
+    // MARK: - Background music
+
+    /// Whether the music bed *should* be playing (the child is in the main app).
+    /// Distinct from `musicOn` so we can pause for backgrounding and resume
+    /// without ever starting music on the login / parent screens.
+    private var wantsMusic = false
+
+    /// Start the gentle looping music bed (idempotent). No-op when sounds are
+    /// disabled in Parent Settings.
+    func startMusic() {
+        wantsMusic = true
+        guard ParentSettings.shared.soundsEnabled else { stopMusic(keepIntent: true); return }
+        ensureRunning()
+        guard !musicOn, let buf = musicBuffer else { return }
+        musicOn = true
+        musicPlayer.scheduleBuffer(buf, at: nil, options: .loops, completionHandler: nil)
+        musicPlayer.play()
+    }
+
+    /// Stop the music. By default clears the intent (e.g. the sound toggle was
+    /// turned off); pass `keepIntent` to merely silence it for now.
+    func stopMusic(keepIntent: Bool = false) {
+        if !keepIntent { wantsMusic = false }
+        guard musicOn else { return }
+        musicOn = false
+        musicPlayer.stop()
+    }
+
+    /// Pause for app backgrounding without losing the intent to play.
+    func pauseMusic() {
+        guard musicOn else { return }
+        musicPlayer.pause()
+    }
+
+    /// Resume after returning to the foreground, only if music was wanted.
+    func resumeMusicIfWanted() {
+        guard wantsMusic, ParentSettings.shared.soundsEnabled else { return }
+        ensureRunning()
+        if musicOn { musicPlayer.play() } else { startMusic() }
+    }
+
+    /// Re-evaluate against the current sound setting (call when the toggle flips).
+    func refreshMusic() {
+        if ParentSettings.shared.soundsEnabled { startMusic() } else { stopMusic() }
     }
 
     // MARK: - Pre-rendering
@@ -141,33 +193,36 @@ final class ToneSynth {
         return buffer(from: samples)
     }
 
-    /// Synthesize a single note: sine wave + soft 2nd harmonic + attack/release envelope.
+    /// Synthesize a single note with a warm music-box / glockenspiel timbre:
+    /// a few harmonics that fade quickly, a gentle exponential "bell" decay so
+    /// notes ring and soften, plus a touch of vibrato for life. Much friendlier
+    /// to a child's ear than a flat sine.
     private func synthesizeNote(freq: Double, duration: Double, sampleRate: Double, volume: Double) -> [Float] {
         let count = Int(duration * sampleRate)
         guard count > 0 else { return [] }
         var out = [Float](repeating: 0, count: count)
 
-        // Envelope: ~10ms attack, decay over the second half. Prevents clicks.
-        let attack = min(count / 20, Int(sampleRate * 0.012))
-        let release = max(count / 3, 1)
+        // Short click-free attack, then exponential decay across the whole note.
+        let attack = max(1, Int(sampleRate * 0.006))
+        let decayTau = max(0.04, duration * 0.45)
 
         let twoPiF = 2.0 * .pi * freq
+        // Harmonic recipe — bright but rounded; upper partials are quiet.
+        let harmonics: [(mult: Double, amp: Double)] = [
+            (1.0, 1.0), (2.0, 0.5), (3.0, 0.22), (4.0, 0.10)
+        ]
+        let norm = 1.82   // sum of amps, to keep peak ≈ 1
+        let vibratoHz = 5.0
+        let vibratoDepth = 0.004
 
         for i in 0..<count {
             let t = Double(i) / sampleRate
-            // Envelope value 0…1
-            var env: Double = 1.0
-            if i < attack {
-                env = Double(i) / Double(max(attack, 1))
-            } else if i > count - release {
-                let remaining = Double(count - i) / Double(release)
-                // smoothstep release for a softer tail
-                env = remaining * remaining * (3.0 - 2.0 * remaining)
-            }
-            // Soft tone: fundamental + a hint of 2nd harmonic for warmth.
-            let primary = sin(twoPiF * t)
-            let harmonic = 0.16 * sin(twoPiF * 2.0 * t)
-            out[i] = Float(env * volume * (primary + harmonic))
+            var env = exp(-t / decayTau)
+            if i < attack { env *= Double(i) / Double(attack) }
+            let vib = 1.0 + vibratoDepth * sin(2.0 * .pi * vibratoHz * t)
+            var s = 0.0
+            for h in harmonics { s += h.amp * sin(twoPiF * h.mult * t * vib) }
+            out[i] = Float(env * volume * (s / norm))
         }
         return out
     }
@@ -181,12 +236,54 @@ final class ToneSynth {
         }
         return buf
     }
+
+    // MARK: - Music loop
+
+    /// Build a soft, cheerful, seamlessly-looping melody bed using the same
+    /// bell timbre. C-major pentatonic (C D E G A) so nothing ever clashes —
+    /// a calm, inviting backdrop, kept very quiet under the sound effects.
+    private func renderMusicLoop() -> AVAudioPCMBuffer {
+        let sr = format.sampleRate
+        let beat = 0.5                      // 120 BPM feel
+        let totalBeats = 16                 // ~8s loop
+        let totalSamples = Int(Double(totalBeats) * beat * sr)
+        var mix = [Float](repeating: 0, count: totalSamples)
+
+        func place(_ freq: Double, beatIndex: Double, dur: Double, vol: Double) {
+            let start = Int(beatIndex * beat * sr)
+            let note = synthesizeNote(freq: freq, duration: dur, sampleRate: sr, volume: vol)
+            for j in 0..<note.count {
+                let idx = start + j
+                if idx >= 0 && idx < totalSamples { mix[idx] += note[j] }
+            }
+        }
+
+        // Flowing pentatonic melody (rest on the final beat → seamless loop).
+        let melody: [(Double, Double)] = [
+            (.c5, 0), (.e5, 1), (.g5, 2), (.e5, 3),
+            (.d5, 4), (.g5, 5), (.a5, 6), (.g5, 7),
+            (.e5, 8), (.g5, 9), (.c6, 10), (.a5, 11),
+            (.g5, 12), (.e5, 13), (.d5, 14),
+        ]
+        for (f, b) in melody { place(f, beatIndex: b, dur: 0.7, vol: 0.05) }
+
+        // Soft low root, one per bar, for a gentle harmonic floor.
+        place(.c4, beatIndex: 0,  dur: 1.8, vol: 0.045)
+        place(.a3, beatIndex: 4,  dur: 1.8, vol: 0.045)
+        place(.c4, beatIndex: 8,  dur: 1.8, vol: 0.045)
+        place(.g3, beatIndex: 12, dur: 1.8, vol: 0.045)
+
+        // Soft clamp so summed notes never clip.
+        for i in 0..<totalSamples { mix[i] = max(-0.85, min(0.85, mix[i])) }
+        return buffer(from: mix)
+    }
 }
 
 // MARK: - Note frequencies (Hz)
 
 private extension Double {
     // Octave 3
+    static let g3:  Double = 196.00
     static let a3:  Double = 220.00
     static let b3:  Double = 246.94
     // Octave 4
