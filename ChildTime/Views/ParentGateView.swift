@@ -21,63 +21,84 @@ struct ParentGateView: View {
     }
 
     private var gate: some View {
-        VStack(spacing: 32) {
-            HStack {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.title2)
-                        .foregroundStyle(.secondary)
-                        .padding(12)
+        ZStack {
+            AppGradient.dreamy.ignoresSafeArea()
+            SparkleField(count: 18, size: 12)
+
+            VStack(spacing: 0) {
+                HStack {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.white.opacity(0.85))
+                            .frame(width: 40, height: 40)
+                            .background(.white.opacity(0.15), in: Circle())
+                    }
+                    Spacer()
                 }
-                Spacer()
-            }
-            .padding(.horizontal, 8)
 
-            Spacer()
+                // Header block — pulled toward the top so nothing floats in a
+                // big empty middle.
+                VStack(spacing: 16) {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 56))
+                        .foregroundStyle(AppColor.starGold)
+                        .glow(AppColor.starGold, radius: 14)
 
-            Image(systemName: "lock.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(.blue)
+                    Text("הַגְדָּרוֹת הוֹרֶה")
+                        .font(.system(size: 30, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
 
-            Text("הגדרות הורה")
-                .font(.system(size: 32, weight: .bold, design: .rounded))
+                    Text("הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת")
+                        .font(.system(size: 17, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.8))
 
-            Text("הזן קוד 4 ספרות")
-                .font(.system(size: 18))
-                .foregroundStyle(.secondary)
+                    HStack(spacing: 18) {
+                        ForEach(0..<4, id: \.self) { i in
+                            Circle()
+                                .stroke(.white.opacity(0.7), lineWidth: 2)
+                                .background(
+                                    Circle().fill(i < entered.count ? AppColor.starGold : Color.clear)
+                                )
+                                .frame(width: 26, height: 26)
+                        }
+                    }
+                    .padding(.top, 4)
+                    .offset(x: shake ? -10 : 0)
+                    .animation(shake ? .default.repeatCount(3, autoreverses: true).speed(6) : .default, value: shake)
 
-            HStack(spacing: 16) {
-                ForEach(0..<4, id: \.self) { i in
-                    Circle()
-                        .stroke(Color.secondary, lineWidth: 2)
-                        .background(
-                            Circle().fill(i < entered.count ? Color.blue : Color.clear)
-                        )
-                        .frame(width: 28, height: 28)
+                    if canUseFaceID {
+                        Button {
+                            Task { await tryBiometric() }
+                        } label: {
+                            Label("פִּתְחוּ עִם Face ID", systemImage: "faceid")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(.white.opacity(0.15), in: Capsule())
+                        }
+                        .padding(.top, 6)
+                    }
                 }
+                .padding(.top, 28)
+
+                // Fixed gap (not flexible) so the header + keypad stay grouped
+                // near the top instead of drifting to the vertical center.
+                Color.clear.frame(height: 32)
+
+                keypad
+
+                // All remaining slack collects at the bottom — everything rides
+                // high on the screen.
+                Spacer(minLength: 0)
             }
-            .offset(x: shake ? -10 : 0)
-            .animation(shake ? .default.repeatCount(3, autoreverses: true).speed(6) : .default, value: shake)
-
-            if canUseFaceID {
-                Button {
-                    Task { await tryBiometric() }
-                } label: {
-                    Label("פתח עם Face ID", systemImage: "faceid")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.blue)
-                }
-                .padding(.top, 4)
-            }
-
-            Spacer()
-
-            keypad
-                .padding(.bottom, 24)
+            .padding(.horizontal, 24)
+            .padding(.top, 12)
+            .padding(.bottom, 24)
         }
-        .padding()
         .onAppear {
             if canUseFaceID { Task { await tryBiometric() } }
         }
@@ -96,33 +117,41 @@ struct ParentGateView: View {
             ["7", "8", "9"],
             ["", "0", "⌫"]
         ]
-        return VStack(spacing: 16) {
+        return VStack(spacing: 18) {
             ForEach(layout, id: \.self) { row in
-                HStack(spacing: 16) {
+                HStack(spacing: 22) {
                     ForEach(row, id: \.self) { key in
                         keyButton(key)
                     }
                 }
             }
         }
-        .padding(.horizontal, 24)
         .environment(\.layoutDirection, .leftToRight)
     }
 
     private func keyButton(_ key: String) -> some View {
         Group {
             if key.isEmpty {
-                Color.clear.frame(width: 80, height: 80)
+                Color.clear.frame(width: 76, height: 76)
             } else {
                 Button {
                     handleKey(key)
                 } label: {
-                    Text(key)
-                        .font(.system(size: 32, weight: .medium, design: .rounded))
-                        .frame(width: 80, height: 80)
-                        .background(Color.gray.opacity(0.15))
-                        .clipShape(Circle())
+                    Group {
+                        if key == "⌫" {
+                            Image(systemName: "delete.left.fill")
+                                .font(.system(size: 26, weight: .medium))
+                        } else {
+                            Text(key)
+                                .font(.system(size: 32, weight: .semibold, design: .rounded))
+                        }
+                    }
+                    .foregroundStyle(.white)
+                    .frame(width: 76, height: 76)
+                    .background(.white.opacity(0.15), in: Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
                 }
+                .buttonStyle(.plain)
             }
         }
     }
