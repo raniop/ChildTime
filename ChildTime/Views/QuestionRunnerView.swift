@@ -184,17 +184,42 @@ struct QuestionRunnerView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        // Minimal, focused: close · slim progress bar · streak · stars. The
-        // motivational chips (wheel/level/prize/earned) and the daily-cap chip
-        // live on the map & reward screen, not over the question.
-        HStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.md) {
-            closeButton(size: isCompact ? 26 : 32)
-            progressIndicator
-            StreakMeter(streak: progress.currentStreak)
-            StarCounter(value: progress.stars)
+        // Slim progress row + one tidy row of the currencies the child collects
+        // (minutes / gems / stars / trophy). The motivational chips
+        // (wheel/level/prize) still live on the map & reward screen.
+        VStack(spacing: 8) {
+            HStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.md) {
+                closeButton(size: isCompact ? 26 : 32)
+                progressIndicator
+                StreakMeter(streak: progress.currentStreak)
+            }
+            HStack(spacing: isCompact ? 6 : 10) {
+                Spacer(minLength: 0)
+                statChip("🎮", progress.pendingMinutes, AppColor.successMint)   // game minutes
+                statChip("💎", progress.gems, AppColor.gemPurple)               // gems
+                statChip("⭐", progress.stars, AppColor.starGold)               // stars
+                statChip("🏆", progress.totalScore, AppColor.starGold)          // trophy / score
+            }
         }
         .padding(.horizontal, AppSpacing.md)
         .padding(.top, AppSpacing.sm)
+    }
+
+    /// A small currency pill (emoji + value), animating its number on change.
+    private func statChip(_ emoji: String, _ value: Int, _ tint: Color) -> some View {
+        HStack(spacing: 4) {
+            Text(emoji).font(.system(size: isCompact ? 14 : 16))
+            Text("\(value)")
+                .font(.system(size: isCompact ? 14 : 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .monospacedDigit()
+                .contentTransition(.numericText(value: Double(value)))
+        }
+        .padding(.horizontal, isCompact ? 9 : 11)
+        .padding(.vertical, 5)
+        .background(Capsule().fill(.white.opacity(0.15)))
+        .overlay(Capsule().stroke(tint.opacity(0.55), lineWidth: 1))
+        .animation(.spring(response: 0.35, dampingFraction: 0.6), value: value)
     }
 
     /// Slim progress bar toward the end of the round + a small "done/total"
