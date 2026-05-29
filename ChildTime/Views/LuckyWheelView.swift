@@ -36,8 +36,6 @@ struct LuckyWheelView: View {
 
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
-                        Spacer(minLength: AppSpacing.md)
-
                         header
 
                         wheelStack
@@ -51,10 +49,10 @@ struct LuckyWheelView: View {
                         primaryButton
 
                         skipButton
-
-                        Color.clear.frame(height: AppSpacing.lg)
                     }
                     .padding(.horizontal, AppSpacing.lg)
+                    .padding(.vertical, AppSpacing.xl)
+                    // No flexible Spacer inside — let this frame center the block.
                     .frame(minHeight: proxy.size.height, alignment: .center)
                     .frame(maxWidth: 720)
                     .frame(maxWidth: .infinity)
