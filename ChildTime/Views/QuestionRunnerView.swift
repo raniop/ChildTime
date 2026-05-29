@@ -179,52 +179,34 @@ struct QuestionRunnerView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        if isCompact {
-            // iPhone: stacked rows so all stats fit
-            return AnyView(
-                VStack(spacing: 8) {
-                    HStack(spacing: AppSpacing.sm) {
-                        closeButton(size: 26)
-                        progressIndicator
-                        Spacer()
-                        StreakMeter(streak: progress.currentStreak)
-                    }
+        // Keep the in-session top bar light: just close, progress, streak and
+        // stars on the main row. The detailed score + earned-minutes chips show
+        // only in Earn mode (Free Learning earns no minutes, so they'd be noise).
+        let earn = purpose == .earnTime
+        return AnyView(
+            VStack(spacing: 8) {
+                HStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.md) {
+                    closeButton(size: isCompact ? 26 : 32)
+                    progressIndicator
+                    Spacer()
+                    StreakMeter(streak: progress.currentStreak)
+                    StarCounter(value: progress.stars)
+                }
+                if earn {
                     HStack(spacing: AppSpacing.sm) {
                         Spacer()
                         ScoreBadge(value: progress.sessionScore, style: .session, compact: true)
                         MinutesBadge(minutes: progress.pendingMinutes, compact: true)
-                        StarCounter(value: progress.stars)
-                    }
-                    progressHUD(compact: true)
-                    if dailyCapChipVisible {
-                        HStack { Spacer(); dailyCapChip; Spacer() }
                     }
                 }
-                .padding(.horizontal, AppSpacing.md)
-                .padding(.top, AppSpacing.sm)
-            )
-        } else {
-            // iPad: single stat row + HUD beneath
-            return AnyView(
-                VStack(spacing: 8) {
-                    HStack(spacing: AppSpacing.md) {
-                        closeButton(size: 32)
-                        progressIndicator
-                        Spacer()
-                        StreakMeter(streak: progress.currentStreak)
-                        ScoreBadge(value: progress.sessionScore, style: .session, compact: false)
-                        MinutesBadge(minutes: progress.pendingMinutes, compact: true)
-                        StarCounter(value: progress.stars)
-                    }
-                    progressHUD(compact: false)
-                    if dailyCapChipVisible {
-                        dailyCapChip
-                    }
+                progressHUD(compact: isCompact)
+                if dailyCapChipVisible {
+                    HStack { Spacer(); dailyCapChip; if isCompact { Spacer() } }
                 }
-                .padding(.horizontal, AppSpacing.md)
-                .padding(.top, AppSpacing.sm)
-            )
-        }
+            }
+            .padding(.horizontal, AppSpacing.md)
+            .padding(.top, AppSpacing.sm)
+        )
     }
 
     /// Earn mode shows progress dots toward the 30-question cap; Free mode shows
