@@ -42,8 +42,8 @@ final class ToneSynth {
             .compactMap { Bundle.main.url(forResource: name, withExtension: $0) }
             .first
         guard let url, let p = try? AVAudioPlayer(contentsOf: url) else { return nil }
-        p.numberOfLoops = -1     // seamless infinite loop
-        p.volume = 0.5           // soft bed under the effects
+        p.numberOfLoops = 0      // play once at the start — not a loop
+        p.volume = 0.5
         p.prepareToPlay()
         return p
     }
@@ -66,61 +66,40 @@ final class ToneSynth {
         player.scheduleBuffer(buf, at: nil, options: .interrupts, completionHandler: nil)
     }
 
-    // MARK: - Background music
+    // MARK: - Intro music
 
-    /// Whether the music bed *should* be playing (the child is in the main app).
-    /// Distinct from `musicOn` so we can pause for backgrounding and resume
-    /// without ever starting music on the login / parent screens.
-    private var wantsMusic = false
+    /// Plays only ONCE per launch — a short welcome tune at the start, then it's
+    /// gone (no looping background bed).
+    private var musicPlayedOnce = false
 
-    /// Start the gentle looping music bed (idempotent). No-op when sounds are
-    /// disabled in Parent Settings.
+    /// Play the intro music a single time. No-op if already played this launch
+    /// or if sounds are disabled.
     func startMusic() {
-        wantsMusic = true
-        guard ParentSettings.shared.soundsEnabled else { stopMusic(keepIntent: true); return }
-        // Prefer a bundled professional track if one exists.
+        guard !musicPlayedOnce, ParentSettings.shared.soundsEnabled else { return }
+        musicPlayedOnce = true
         if let fp = musicFilePlayer {
-            if !fp.isPlaying { fp.play() }
+            fp.numberOfLoops = 0
+            fp.currentTime = 0
+            fp.play()
             musicOn = true
             return
         }
         ensureRunning()
-        guard !musicOn, let buf = musicBuffer else { return }
+        guard let buf = musicBuffer else { return }
         musicOn = true
-        musicPlayer.scheduleBuffer(buf, at: nil, options: .loops, completionHandler: nil)
+        musicPlayer.scheduleBuffer(buf, at: nil, options: [], completionHandler: nil)  // once
         musicPlayer.play()
     }
 
-    /// Stop the music. By default clears the intent (e.g. the sound toggle was
-    /// turned off); pass `keepIntent` to merely silence it for now.
-    func stopMusic(keepIntent: Bool = false) {
-        if !keepIntent { wantsMusic = false }
+    func stopMusic() {
         guard musicOn else { return }
         musicOn = false
-        if let fp = musicFilePlayer { fp.stop(); fp.currentTime = 0 }
-        else { musicPlayer.stop() }
+        if let fp = musicFilePlayer { fp.stop() } else { musicPlayer.stop() }
     }
 
-    /// Pause for app backgrounding without losing the intent to play.
-    func pauseMusic() {
-        guard musicOn else { return }
-        if let fp = musicFilePlayer { fp.pause() } else { musicPlayer.pause() }
-    }
-
-    /// Resume after returning to the foreground, only if music was wanted.
-    func resumeMusicIfWanted() {
-        guard wantsMusic, ParentSettings.shared.soundsEnabled else { return }
-        if let fp = musicFilePlayer {
-            if !fp.isPlaying { fp.play() }
-            return
-        }
-        ensureRunning()
-        if musicOn { musicPlayer.play() } else { startMusic() }
-    }
-
-    /// Re-evaluate against the current sound setting (call when the toggle flips).
+    /// If the parent turns sounds off mid-intro, silence it. Never restarts.
     func refreshMusic() {
-        if ParentSettings.shared.soundsEnabled { startMusic() } else { stopMusic() }
+        if !ParentSettings.shared.soundsEnabled { stopMusic() }
     }
 
     // MARK: - Pre-rendering
