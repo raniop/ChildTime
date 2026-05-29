@@ -73,6 +73,36 @@ struct Invite: Codable, Identifiable, Equatable {
     }
 }
 
+/// A request from a parent to absorb a child who signed up independently (with
+/// their own email) into the parent's household. The parent creates it with the
+/// child's email; the child approves it on their own device, which moves their
+/// profiles into the parent's household.
+struct ChildLinkRequest: Codable, Identifiable, Equatable {
+    let id: String
+    var fromHouseholdID: String
+    var fromParentUID: String
+    var fromParentName: String     // friendly label shown to the child
+    var toEmail: String            // the child's email, lowercased
+    var status: String             // "pending" | "approved" | "declined"
+    var createdAt: Date
+
+    init(id: String = UUID().uuidString,
+         fromHouseholdID: String,
+         fromParentUID: String,
+         fromParentName: String,
+         toEmail: String,
+         status: String = "pending",
+         createdAt: Date = .now) {
+        self.id = id
+        self.fromHouseholdID = fromHouseholdID
+        self.fromParentUID = fromParentUID
+        self.fromParentName = fromParentName
+        self.toEmail = toEmail
+        self.status = status
+        self.createdAt = createdAt
+    }
+}
+
 /// The current parental-consent version. Bump when the privacy terms change to
 /// force re-consent.
 enum Consent {

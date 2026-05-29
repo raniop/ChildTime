@@ -23,16 +23,22 @@ final class HouseholdManager: ObservableObject {
     /// True while we're fetching the family from the cloud right after sign-in,
     /// so the UI can wait instead of prematurely showing "create a child".
     @Published private(set) var isLoading = false
+    /// A pending request from a parent to absorb THIS account's child profiles
+    /// into their household — surfaced on the child's device for approval.
+    @Published var pendingChildLink: ChildLinkRequest?
     private var didReceiveChildren = false
 
     private func markLoaded() { isLoading = false }
 
     private var uid: String?
+    private var email: String?
+    private let preferredHouseholdKey = "preferredHouseholdID"
 
     #if canImport(FirebaseFirestore)
     private var db: Firestore { Firestore.firestore() }
     private var householdListener: ListenerRegistration?
     private var childrenListener: ListenerRegistration?
+    private var childLinkListener: ListenerRegistration?
     #endif
 
     private init() {}
@@ -45,6 +51,7 @@ final class HouseholdManager: ObservableObject {
     /// exist, migrates local profiles on first run, then starts listening.
     func start(uid: String, email: String?, displayName: String?) {
         self.uid = uid
+        self.email = email?.lowercased()
         #if canImport(FirebaseFirestore)
         // start() is invoked from the auth-state listener, which can fire while
         // SwiftUI is mid-update. Defer the @Published mutations one tick so they
@@ -66,13 +73,16 @@ final class HouseholdManager: ObservableObject {
         #if canImport(FirebaseFirestore)
         householdListener?.remove(); householdListener = nil
         childrenListener?.remove(); childrenListener = nil
+        childLinkListener?.remove(); childLinkListener = nil
         #endif
         household = nil
         parentAccount = nil
         linkedParentSummaries = []
+        pendingChildLink = nil
         isLoading = false
         didReceiveChildren = false
         uid = nil
+        email = nil
     }
 
     #if canImport(FirebaseFirestore)
@@ -84,6 +94,7 @@ final class HouseholdManager: ObservableObject {
             reconcileLocalChildren(into: hh)
             listenToHousehold(hh.id)
             listenToChildren(in: hh.id)
+            listenForIncomingChildLinks()
         } catch {
             lastError = error.localizedDescription
             markLoaded()   // sync failed (e.g. rules not deployed) — let the UI proceed
@@ -112,6 +123,14 @@ final class HouseholdManager: ObservableObject {
         // Find a household that already lists this uid.
         let query = db.collection("households").whereField("parentUIDs", arrayContains: uid)
         let results = try await query.getDocuments()
+        // Prefer the household we last adopted (e.g. after a child link), so a
+        // child who joined a parent's household lands there — not on their own
+        // orphaned solo household.
+        if let preferred = UserDefaults.standard.string(forKey: preferredHouseholdKey),
+           let doc = results.documents.first(where: { $0.documentID == preferred }),
+           let hh = Self.decodeHousehold(id: doc.documentID, doc.data()) {
+            return hh
+        }
         if let doc = results.documents.first, let hh = Self.decodeHousehold(id: doc.documentID, doc.data()) {
             return hh
         }
@@ -271,6 +290,100 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    // MARK: - Child linking by email (parent claims an independently-registered child)
+
+    #if canImport(FirebaseFirestore)
+    /// Child side: watch for a parent's pending request to absorb my profiles.
+    private func listenForIncomingChildLinks() {
+        guard let email else { return }
+        childLinkListener?.remove()
+        childLinkListener = db.collection("childLinkRequests")
+            .whereField("toEmail", isEqualTo: email)
+            .whereField("status", isEqualTo: "pending")
+            .addSnapshotListener { [weak self] snap, _ in
+                guard let self, let snap else { return }
+                let reqs = snap.documents.compactMap {
+                    Self.decodeChildLink(id: $0.documentID, $0.data())
+                }
+                self.pendingChildLink = reqs.first
+            }
+    }
+    #endif
+
+    /// Parent side: ask to link a child who registered with their own email.
+    /// The child must approve on their device. Returns true if the request was
+    /// created.
+    @discardableResult
+    func requestChildLink(childEmail: String) async -> Bool {
+        #if canImport(FirebaseFirestore)
+        guard let hh = household, let uid else { return false }
+        let target = childEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard target.contains("@"), target.count >= 5 else {
+            lastError = "אנא הזינו כתובת אימייל תקינה"; return false
+        }
+        guard target != email else { lastError = "זה האימייל שלך 🙂"; return false }
+        let name = parentAccount?.displayName ?? parentAccount?.email ?? email ?? "הוֹרֶה"
+        let req = ChildLinkRequest(fromHouseholdID: hh.id, fromParentUID: uid,
+                                   fromParentName: name, toEmail: target)
+        do {
+            try await db.collection("childLinkRequests").document(req.id).setData(Self.encode(req))
+            return true
+        } catch { lastError = error.localizedDescription; return false }
+        #else
+        return false
+        #endif
+    }
+
+    /// Child side: approve the pending request — join the parent's household and
+    /// move my profiles into it, so the parent can see & manage them.
+    @discardableResult
+    func approveChildLink() async -> Bool {
+        #if canImport(FirebaseFirestore)
+        guard let req = pendingChildLink, let uid else { return false }
+        do {
+            // 1) Join the parent's household (so I'm allowed to write into it).
+            try await db.collection("households").document(req.fromHouseholdID)
+                .updateData(["parentUIDs": FieldValue.arrayUnion([uid])])
+            // 2) Move my children into the parent's household.
+            let childIDs = ProfileStore.shared.profiles.map { $0.id.uuidString }
+            for cid in childIDs {
+                try await db.collection("children").document(cid)
+                    .updateData(["householdID": req.fromHouseholdID])
+            }
+            if !childIDs.isEmpty {
+                try await db.collection("households").document(req.fromHouseholdID)
+                    .updateData(["childIDs": FieldValue.arrayUnion(childIDs)])
+            }
+            // 3) Mark the request approved + adopt the parent's household as mine.
+            try await db.collection("childLinkRequests").document(req.id)
+                .updateData(["status": "approved"])
+            try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([req.fromHouseholdID])])
+            UserDefaults.standard.set(req.fromHouseholdID, forKey: preferredHouseholdKey)
+            // 4) Re-point my listeners at the shared household.
+            let hhDoc = try await db.collection("households").document(req.fromHouseholdID).getDocument()
+            if let data = hhDoc.data(), let hh = Self.decodeHousehold(id: req.fromHouseholdID, data) {
+                self.household = hh
+                listenToHousehold(hh.id)
+                listenToChildren(in: hh.id)
+            }
+            self.pendingChildLink = nil
+            return true
+        } catch { lastError = error.localizedDescription; return false }
+        #else
+        return false
+        #endif
+    }
+
+    /// Child side: dismiss/decline the pending request.
+    func declineChildLink() async {
+        #if canImport(FirebaseFirestore)
+        guard let req = pendingChildLink else { return }
+        try? await db.collection("childLinkRequests").document(req.id)
+            .updateData(["status": "declined"])
+        #endif
+        pendingChildLink = nil
+    }
+
     // MARK: - Consent
 
     func recordConsent(version: Int) {
@@ -338,6 +451,9 @@ final class HouseholdManager: ObservableObject {
     }
     private static func decodeInvite(id: String, _ raw: [String: Any]) -> Invite? {
         var r = raw; r["id"] = id; return decode(Invite.self, r)
+    }
+    private static func decodeChildLink(id: String, _ raw: [String: Any]) -> ChildLinkRequest? {
+        var r = raw; r["id"] = id; return decode(ChildLinkRequest.self, r)
     }
     #endif
 }

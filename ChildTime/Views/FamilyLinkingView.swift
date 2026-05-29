@@ -11,11 +11,13 @@ struct FamilyLinkingView: View {
     @State private var joinCode = ""
     @State private var working = false
     @State private var message: String?
+    @State private var childEmail = ""
 
     var body: some View {
         NavigationStack {
             Form {
                 linkedParentsSection
+                linkChildSection
                 inviteSection
                 joinSection
                 if let message {
@@ -39,6 +41,33 @@ struct FamilyLinkingView: View {
                     Label(parent, systemImage: "person.fill")
                 }
             }
+        }
+    }
+
+    private var linkChildSection: some View {
+        Section {
+            TextField("אימייל של הילד/ה", text: $childEmail)
+                .textInputAutocapitalization(.never)
+                .keyboardType(.emailAddress)
+                .autocorrectionDisabled()
+            Button {
+                Task {
+                    working = true
+                    let ok = await household.requestChildLink(childEmail: childEmail)
+                    message = ok
+                        ? "נשלחה בקשה ל-\(childEmail). ברגע שהילד/ה יאשר/תאשר במכשיר שלהם — הם יופיעו אצלך."
+                        : (household.lastError ?? "לא ניתן לשלוח בקשה")
+                    if ok { childEmail = "" }
+                    working = false
+                }
+            } label: {
+                Label("צרף ילד/ה לפי אימייל", systemImage: "person.crop.circle.badge.plus")
+            }
+            .disabled(working || !childEmail.contains("@"))
+        } header: {
+            Text("צירוף ילד/ה")
+        } footer: {
+            Text("אם הילד/ה נרשמו בעצמם עם אימייל — הזינו אותו כאן. תישלח בקשה שתופיע במכשיר שלהם, ואחרי אישור הפרופילים שלהם יעברו תחת המשפחה שלכם.")
         }
     }
 

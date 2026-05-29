@@ -66,6 +66,19 @@ service cloud.firestore {
       allow update: if signedIn();
     }
 
+    // Child-link requests — a parent asks to absorb a child who registered with
+    // their own email; the child approves on their device. Visible only to the
+    // requesting parent and to the account whose email is targeted.
+    match /childLinkRequests/{id} {
+      allow create: if signedIn() && request.auth.uid == request.resource.data.fromParentUID;
+      allow read:   if signedIn() && (
+        request.auth.uid == resource.data.fromParentUID ||
+        request.auth.token.email.lower() == resource.data.toEmail
+      );
+      // Only the targeted child can change the status (approve / decline).
+      allow update: if signedIn() && request.auth.token.email.lower() == resource.data.toEmail;
+    }
+
     // Weekly reports — readable by the child's household parents (written by
     // Cloud Functions with admin privileges, which bypass these rules).
     match /weeklyReports/{childID}/{rest=**} {
