@@ -19,6 +19,7 @@ struct QuestionRunnerView: View {
     @Environment(\.horizontalSizeClass) private var hsc
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var progress: ProgressStore
+    @EnvironmentObject var profiles: ProfileStore
 
     private var isCompact: Bool { hsc == .compact }
     private var questionSize: CGFloat { isCompact ? 42 : 58 }
@@ -108,7 +109,22 @@ struct QuestionRunnerView: View {
                                 .offset(x: 70, y: -10)
                                 .transition(.scale.combined(with: .opacity))
                         }
-                        CompanionView(controller: companion, size: companionSize)
+                        // The buddy is the child's own avatar (with cosmetics);
+                        // falls back to the Tofy face if no profile is active.
+                        if let profile = profiles.active {
+                            ZStack {
+                                Circle()
+                                    .fill(AppColor.companionGlow.opacity(0.28))
+                                    .frame(width: companionSize * 1.15, height: companionSize * 1.15)
+                                    .blur(radius: 8)
+                                ProfileAvatarView(profile: profile, size: companionSize)
+                                    .clipShape(Circle())
+                                    .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 2))
+                                    .shadow(color: .black.opacity(0.25), radius: 5, y: 3)
+                            }
+                        } else {
+                            CompanionView(controller: companion, size: companionSize)
+                        }
                     }
                     .padding(.leading, AppSpacing.md)
                     Spacer()
@@ -801,5 +817,6 @@ struct QuestionRunnerView: View {
     QuestionRunnerView(mode: .smartFeed)
         .environmentObject(ParentSettings.shared)
         .environmentObject(ProgressStore.shared)
+        .environmentObject(ProfileStore.shared)
         .environment(\.layoutDirection, .rightToLeft)
 }
