@@ -64,6 +64,16 @@ struct FeatureCard: View {
                         .padding(.horizontal, 10)
 
                     Spacer(minLength: 4)
+
+                    // Decorative bottom bar so the tile matches the world cards'
+                    // footprint exactly (they show a progress bar here).
+                    Capsule()
+                        .fill(LinearGradient(
+                            colors: [glowColor, Color.white.opacity(0.7), glowColor],
+                            startPoint: .leading, endPoint: .trailing))
+                        .frame(height: 6)
+                        .glow(glowColor, radius: 6)
+                        .padding(.horizontal, 14)
                 }
                 .padding(.bottom, 12)
             }

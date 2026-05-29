@@ -15,7 +15,6 @@ struct WorldMapView: View {
     @State private var showingShop = false
     @State private var showingWheel = false
     @State private var showingSmartFeed = false
-    @State private var showingEarn = false
     @State private var showingChildSettings = false
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
@@ -156,10 +155,6 @@ struct WorldMapView: View {
         }
         .fullScreenCover(isPresented: $showingSmartFeed) {
             // Smart Feed play — grants minutes (capped by the daily maximum).
-            QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
-        }
-        .fullScreenCover(isPresented: $showingEarn) {
-            // Earn-to-Unlock → capped 30, grants screen-time minutes.
             QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
         }
         .sheet(isPresented: $showingChildSettings) {
@@ -493,39 +488,8 @@ struct WorldMapView: View {
     @ViewBuilder
     private var bottomCTAs: some View {
         VStack(spacing: AppSpacing.sm) {
-            // Primary Earn-to-Unlock entry — answer up to 30 questions for minutes.
-            Button {
-                Haptic.light()
-                companion.cheer("בּוֹא נַרְוִיחַ זְמַן מָסָךְ! ⏱️")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    showingEarn = true
-                }
-            } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "timer")
-                        .font(.system(size: 24))
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("הַרְוִיחוּ זְמַן מָסָךְ")
-                            .font(.system(size: 20, weight: .heavy, design: .rounded))
-                        Text("עַד 30 שְׁאֵלוֹת = דַּקּוֹת מִשְׂחָק")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.85))
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.left.circle.fill")
-                        .font(.system(size: 22))
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, AppSpacing.lg)
-                .padding(.vertical, 14)
-                .frame(maxWidth: .infinity)
-                .background(AppGradient.castle)
-                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                .glow(AppColor.flameOrange, radius: 14)
-            }
-            .buttonStyle(.juicy)
-            .frame(maxWidth: 480)
-
+            // (Every world & Smart Adventure already earns minutes, so the old
+            // dedicated "earn screen time" button was redundant and removed.)
             if progress.dailyChestAvailable {
                 Button {
                     showDailyChest = true
