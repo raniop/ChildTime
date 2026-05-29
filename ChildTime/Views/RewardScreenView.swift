@@ -184,7 +184,9 @@ struct RewardScreenView: View {
     private var rewardItems: some View {
         VStack(spacing: 10) {
             if revealedItems >= 1 {
-                rewardPill(emoji: "⭐", value: reward.stars + reward.gems, label: "כּוֹכָבִים", color: AppColor.starGold)
+                // Full session total: ⭐ earned per-answer (already credited live)
+                // + the chest's flat bonus. Matches the home total's increase.
+                rewardPill(emoji: "⭐", value: progress.sessionStarsEarned + reward.stars, label: "כּוֹכָבִים", color: AppColor.starGold)
             }
             if revealedItems >= 2 && reward.minutes > 0 {
                 rewardPill(emoji: "⏱", value: reward.minutes, label: "דַּקּוֹת מִשְׂחָק", color: AppColor.successMint)

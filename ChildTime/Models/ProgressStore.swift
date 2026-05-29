@@ -125,6 +125,11 @@ final class ProgressStore: ObservableObject {
     /// Score earned in the current session only — resets when a new
     /// QuestionRunner session starts.
     @Published private(set) var sessionScore: Int = 0
+    /// ⭐ earned (per-answer) in the current session — resets with the session.
+    /// Lets the reward screen show the *full* session total instead of a
+    /// separate chest figure, so the in-game chip, the reward screen, and the
+    /// home total all agree.
+    @Published private(set) var sessionStarsEarned: Int = 0
     /// Points awarded for the *last* correct answer, so the UI can flash
     /// '+15' next to the running total. Consumers may set it back to 0.
     @Published var lastEarnedPoints: Int = 0
@@ -374,6 +379,7 @@ final class ProgressStore: ObservableObject {
         currentStreak += 1
         wrongStreak = 0  // any correct answer breaks the penalty streak
         stars += earned
+        sessionStarsEarned += earned
 
         // Score — the headline 'ניקוד' metric. Includes combo / bonus boosts.
         let settings = ParentSettings.shared
@@ -486,6 +492,7 @@ final class ProgressStore: ObservableObject {
     /// Reset the per-session score — call at the start of QuestionRunner.
     func resetSessionScore() {
         sessionScore = 0
+        sessionStarsEarned = 0
         lastEarnedPoints = 0
     }
 
