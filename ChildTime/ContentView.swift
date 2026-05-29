@@ -13,7 +13,11 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if !auth.isSignedIn && !auth.isGuest {
+            if !settings.hasSeenWelcome {
+                // Very first launch — explain what the app is + the Screen Time
+                // notice, before anything else.
+                WelcomeIntroView()
+            } else if !auth.isSignedIn && !auth.isGuest {
                 // Login is the first gate — but a child may also tap "play
                 // without an account" to try up to 30 questions as a guest.
                 LoginGateView()

@@ -32,6 +32,7 @@ final class ParentSettings: ObservableObject {
         static let consentVersionAccepted = "consentVersionAccepted"
         static let parentInsightFrequency = "parentInsightFrequency"
         static let deviceRole = "deviceRole"
+        static let hasSeenWelcome = "hasSeenWelcome"
     }
 
     /// What this device is used for — chosen once at first launch. Steers the
@@ -195,6 +196,10 @@ final class ParentSettings: ObservableObject {
     @Published var deviceRole: DeviceRole {
         didSet { defaults.set(deviceRole.rawValue, forKey: Key.deviceRole) }
     }
+    /// Whether the one-time welcome/explainer has been shown.
+    @Published var hasSeenWelcome: Bool {
+        didSet { defaults.set(hasSeenWelcome, forKey: Key.hasSeenWelcome) }
+    }
 
     private init() {
         let d = AppGroup.defaults
@@ -293,6 +298,7 @@ final class ParentSettings: ObservableObject {
             rawValue: d.string(forKey: Key.parentInsightFrequency) ?? ""
         ) ?? .once
         self.deviceRole = DeviceRole(rawValue: d.string(forKey: Key.deviceRole) ?? "") ?? .unset
+        self.hasSeenWelcome = d.bool(forKey: Key.hasSeenWelcome)
     }
 
     var hasConsented: Bool { consentVersionAccepted >= Consent.currentVersion }
