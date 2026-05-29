@@ -125,6 +125,7 @@ struct WorldMapView: View {
             // on top of world cards in the middle of the grid.
             FloatingCompanion(
                 controller: companion,
+                profile: profiles.active,
                 size: companionSize,
                 topInset: isCompact ? 140 : 90,
                 bottomInset: isCompact ? 220 : 200,

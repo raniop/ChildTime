@@ -5,6 +5,9 @@ import SwiftUI
 /// Use as an overlay so it stays above other content but doesn't push layout.
 struct FloatingCompanion: View {
     var controller: CompanionController
+    /// When set, the floating buddy *is* the child — their own avatar wanders
+    /// the screen instead of the generic Tofy face.
+    var profile: Profile? = nil
     var size: CGFloat = 120
     /// Insets from the parent edges that constrain wandering / drag.
     var topInset: CGFloat = 80
@@ -29,9 +32,29 @@ struct FloatingCompanion: View {
                         .allowsHitTesting(false)
                 }
 
-                CompanionView(controller: controller, size: size)
-                    .scaleEffect(isDragging ? 1.12 : 1.0)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.55), value: isDragging)
+                Group {
+                    if let profile {
+                        // The child's own avatar floats around (with their
+                        // cosmetics), wrapped in a soft glow so it still reads
+                        // as a lively buddy.
+                        ZStack {
+                            Circle()
+                                .fill(AppColor.companionGlow.opacity(0.28))
+                                .frame(width: size * 1.18, height: size * 1.18)
+                                .blur(radius: 10)
+                            ProfileAvatarView(profile: profile, size: size)
+                                .overlay(
+                                    Circle().stroke(.white.opacity(0.5), lineWidth: 2)
+                                )
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
+                        }
+                    } else {
+                        CompanionView(controller: controller, size: size)
+                    }
+                }
+                .scaleEffect(isDragging ? 1.12 : 1.0)
+                .animation(.spring(response: 0.3, dampingFraction: 0.55), value: isDragging)
             }
             .position(position == .zero ? defaultPosition(in: geo.size) : position)
             .animation(isDragging ? nil : .easeInOut(duration: 4), value: position)
