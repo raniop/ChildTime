@@ -124,13 +124,13 @@ struct PaywallView: View {
 
     private var benefitsCard: some View {
         VStack(spacing: 14) {
-            benefitRow("🧠", "כל 6 הנושאים", "חשבון, אנגלית, לוגיקה, מדע, היסטוריה, גיאוגרפיה")
+            benefitRow("🧠", "כל הנושאים", "חשבון, עברית, אנגלית, לוגיקה, מדע, היסטוריה, גיאוגרפיה, כסף")
             divider
-            benefitRow("🌍", "כל 6 העולמות", "ממלכת המספרים, מגדל המסרים, ועוד")
+            benefitRow("🌍", "כל העולמות", "ממלכת החשבון, שוק הכסף, ועוד")
             divider
             benefitRow("⏱", "זמן פרס ללא הגבלה", "הילד יכול להרוויח כמה דקות שירצה")
             divider
-            benefitRow("👨‍👩‍👧‍👦", "עד 4 ילדים", "פרופיל לכל ילד עם התקדמות נפרדת")
+            benefitRow("👨‍👩‍👧‍👦", "כל הילדים במשפחה", "פרופיל לכל ילד עם התקדמות נפרדת")
             divider
             benefitRow("📊", "דוחות הורה שבועיים", "בדיוק איפה הילד חזק, איפה צריך עזרה")
             divider
@@ -262,14 +262,38 @@ struct PaywallView: View {
         .buttonStyle(.juicy)
     }
 
+    @ViewBuilder
     private var placeholderPlans: some View {
         VStack(spacing: 8) {
-            ProgressView()
-                .tint(.white)
-                .padding(.vertical, AppSpacing.md)
-            Text("טוען מסלולים…")
-                .font(.system(size: 13, design: .rounded))
-                .foregroundStyle(.white.opacity(0.7))
+            if subs.isLoadingProducts {
+                ProgressView()
+                    .tint(.white)
+                    .padding(.vertical, AppSpacing.md)
+                Text("טוֹעֵן מַסְלוּלִים…")
+                    .font(.system(size: 13, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.7))
+            } else {
+                // Finished loading but got nothing — almost always an App Store
+                // setup issue, not an app bug. Give the parent a clear nudge.
+                Text("המַּסְלוּלִים עֲדַיִן לֹא זְמִינִים")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("ודאו שהמנויים ב-App Store Connect במצב \"Ready to Submit\", ושאתם מחוברים לחשבון Sandbox במכשיר.")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, AppSpacing.md)
+                Button {
+                    Task { await subs.loadProducts() }
+                } label: {
+                    Label("נַסּוּ שׁוּב", systemImage: "arrow.clockwise")
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16).padding(.vertical, 8)
+                        .background(.white.opacity(0.18), in: Capsule())
+                }
+                .padding(.top, 4)
+            }
             if let err = subs.lastError {
                 Text(err)
                     .font(.system(size: 11, design: .monospaced))
@@ -280,6 +304,7 @@ struct PaywallView: View {
             }
         }
         .frame(maxWidth: .infinity, minHeight: 120)
+        .padding(.vertical, AppSpacing.sm)
         .background(
             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                 .fill(.white.opacity(0.10))
