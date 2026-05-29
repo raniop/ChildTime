@@ -30,12 +30,13 @@ struct WorldCard: View {
     /// Whether the card should render with the dimmed "locked" treatment —
     /// either it hasn't been unlocked by stars yet, or it's behind the paywall.
     private var showsLocked: Bool { !isUnlocked || subscriptionLocked }
-    private var emojiSize: CGFloat { isCompact ? 80 : 100 }
+    private var emojiSize: CGFloat { isCompact ? 64 : 84 }
     private var titleSize: CGFloat { isCompact ? 22 : 26 }
     private var labelSize: CGFloat { isCompact ? 15 : 17 }
     /// Fixed tile height (shared verbatim with FeatureCard) so every home tile
     /// has an identical footprint regardless of how much content it holds.
-    private var tileHeight: CGFloat { isCompact ? 200 : 260 }
+    /// Tall enough that the emoji/title/subtitle/footer never overflow & clip.
+    private var tileHeight: CGFloat { isCompact ? 224 : 284 }
 
     var body: some View {
         Button(action: onTap) {
@@ -124,8 +125,22 @@ struct WorldCard: View {
                         .frame(height: HomeTileLayout.badgeZone(labelSize))
                         .frame(maxWidth: .infinity, alignment: .center)
 
-                        progressBar
-                            .padding(.horizontal, 14)
+                        // Subscription-locked worlds show a decorative gold bar
+                        // (a star-unlock bar would be meaningless there); every
+                        // other state shows the real progress bar.
+                        Group {
+                            if subscriptionLocked {
+                                Capsule()
+                                    .fill(LinearGradient(
+                                        colors: [AppColor.starGold, .white.opacity(0.7), AppColor.starGold],
+                                        startPoint: .leading, endPoint: .trailing))
+                                    .frame(height: 8)
+                                    .glow(AppColor.starGold, radius: 6)
+                            } else {
+                                progressBar
+                            }
+                        }
+                        .padding(.horizontal, 14)
                     }
                 }
                 .padding(.vertical, 14)

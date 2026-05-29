@@ -16,12 +16,12 @@ struct FeatureCard: View {
     @State private var shimmer = false
 
     private var isCompact: Bool { hsc == .compact }
-    private var emojiSize: CGFloat { isCompact ? 80 : 100 }
+    private var emojiSize: CGFloat { isCompact ? 64 : 84 }
     private var titleSize: CGFloat { isCompact ? 22 : 26 }
     private var labelSize: CGFloat { isCompact ? 15 : 17 }
     /// Fixed tile height (shared verbatim with WorldCard) so every home tile
     /// has an identical footprint.
-    private var tileHeight: CGFloat { isCompact ? 200 : 260 }
+    private var tileHeight: CGFloat { isCompact ? 224 : 284 }
 
     var body: some View {
         Button(action: onTap) {
