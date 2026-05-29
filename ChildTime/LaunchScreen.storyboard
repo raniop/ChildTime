@@ -15,10 +15,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="LaunchLogo" translatesAutoresizingMaskIntoConstraints="NO" id="Lgo-im-001">
-                                <rect key="frame" x="136.5" y="366" width="120" height="120"/>
+                                <rect key="frame" x="111.5" y="346" width="170" height="170"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="120" id="Lgo-wd-001"/>
-                                    <constraint firstAttribute="height" constant="120" id="Lgo-ht-001"/>
+                                    <constraint firstAttribute="width" constant="170" id="Lgo-wd-001"/>
+                                    <constraint firstAttribute="height" constant="170" id="Lgo-ht-001"/>
                                 </constraints>
                             </imageView>
                         </subviews>

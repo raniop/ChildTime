@@ -105,7 +105,7 @@ struct ProfileEditorView: View {
                     Button("בַּטֵּל") { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("שְׁמֹר") { save() }
+                    Button("שְׁמוֹר") { save() }
                         .disabled(!canSave)
                         .fontWeight(.bold)
                 }

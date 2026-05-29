@@ -64,7 +64,7 @@ struct ImageCropperView: View {
                         Haptic.success()
                         onDone(render())
                     } label: {
-                        Text("שְׁמֹר")
+                        Text("שְׁמוֹר")
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
