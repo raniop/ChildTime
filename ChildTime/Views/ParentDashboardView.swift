@@ -30,6 +30,8 @@ struct ParentDashboardView: View {
     @State private var showingCreateChild = false
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
+    /// After creating a child we offer to connect their device right away.
+    @State private var pendingQRChild: Profile? = nil
 
     /// Rows recomputed on each refresh so values stay live as the kid plays.
     /// Prefers a remote snapshot when one is available and newer than the
@@ -129,10 +131,18 @@ struct ParentDashboardView: View {
                 FamilyLinkingView()
                     .environment(\.layoutDirection, .rightToLeft)
             }
-            .sheet(isPresented: $showingCreateChild) {
+            .sheet(isPresented: $showingCreateChild, onDismiss: {
+                // Next step after creating: connect that child's device (skippable).
+                if let p = pendingQRChild {
+                    pendingQRChild = nil
+                    qrCode = nil
+                    qrChild = p
+                }
+            }) {
                 ProfileEditorView(mode: .create) { newProfile in
                     profiles.add(newProfile)
                     HouseholdManager.shared.upsertChild(newProfile)
+                    pendingQRChild = newProfile
                 } onDelete: { _ in }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .rightToLeft)
@@ -223,11 +233,11 @@ struct ParentDashboardView: View {
 
             Picker("תדירות", selection: $settings.parentInsightFrequency) {
                 ForEach(ParentSettings.InsightFrequency.allCases) { f in
-                    Text(f.displayName).tag(f)
+                    Text(freqShortLabel(f)).tag(f)
                 }
             }
             .pickerStyle(.segmented)
-            .environment(\.layoutDirection, .leftToRight)
+            .environment(\.layoutDirection, .rightToLeft)
         }
         .padding(AppSpacing.md)
         .frame(maxWidth: .infinity, alignment: .trailing)
@@ -235,6 +245,18 @@ struct ParentDashboardView: View {
             RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
                 .fill(Color(.secondarySystemGroupedBackground))
         )
+    }
+
+    /// Compact labels for the 4-segment frequency control so Hebrew text
+    /// doesn't truncate (the full names live in `displayName`). "ביום" is
+    /// implied by the card title above.
+    private func freqShortLabel(_ f: ParentSettings.InsightFrequency) -> String {
+        switch f {
+        case .off:    return "כבוי"
+        case .once:   return "פעם"
+        case .twice:  return "פעמיים"
+        case .thrice: return "3 פעמים"
+        }
     }
 
     private func rescheduleInsights() {
@@ -361,11 +383,16 @@ struct ParentDashboardView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, AppSpacing.lg)
 
-                Button("סְגֹר") { qrChild = nil; qrCode = nil }
+                Button("סְגוֹר") { qrChild = nil; qrCode = nil }
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 24).padding(.vertical, 12)
                     .background(.white.opacity(0.18), in: Capsule())
+
+                Text("אֶפְשָׁר לְדַלֵּג וּלְחַבֵּר אֶת הַמַּכְשִׁיר אַחַר כָּךְ — מֵהַמָּסָךְ הָרָאשִׁי.")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
             }
             .padding(AppSpacing.xl)
             .frame(maxWidth: 460)
@@ -395,6 +422,9 @@ struct ParentDashboardView: View {
                 summaryTile("❓", "\(questionsToday)", "שאלות היום")
                 summaryTile("🔥", "\(activeKids)/\(theRows.count)", "ילדים פעילים")
             }
+            // Read right-to-left like the rest of the Hebrew UI (the dashboard
+            // body is forced LTR for the .trailing-authored cards).
+            .environment(\.layoutDirection, .rightToLeft)
         }
     }
 
@@ -497,26 +527,28 @@ struct ParentDashboardView: View {
             // Actionable coaching — where to reinforce + concrete tips.
             coachingCard(for: profile, snapshot: s)
 
-            // Set up this child's own device (QR / code).
+            // Set up this child's own device (QR / code) — primary action.
             if isRoot {
                 Button {
                     Haptic.light()
                     qrCode = nil
                     qrChild = profile
                 } label: {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 10) {
                         Image(systemName: "qrcode")
+                            .font(.system(size: 20, weight: .bold))
                         Text("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name)")
-                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
                         Spacer()
-                        Image(systemName: "chevron.left").font(.caption)
+                        Image(systemName: "chevron.left").font(.subheadline.weight(.bold))
                     }
-                    .foregroundStyle(AppColor.gemPurple)
-                    .padding(.vertical, 10).padding(.horizontal, 12)
-                    .background(RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                        .fill(AppColor.gemPurple.opacity(0.12)))
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 14).padding(.horizontal, 16)
+                    .frame(maxWidth: .infinity)
+                    .background(AppGradient.purpleDream, in: RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
+                    .glow(AppColor.gemPurple, radius: 10)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.juicy)
             }
 
             // Full analytics deep-dive (daily/weekly/monthly + coaching).

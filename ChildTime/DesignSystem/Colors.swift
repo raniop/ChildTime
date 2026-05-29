@@ -105,4 +105,9 @@ enum AppGradient {
         colors: [AppColor.gemPurple, Color(hex: "FF6B9D"), AppColor.gemPurple],
         startPoint: .topLeading, endPoint: .bottomTrailing
     )
+
+    static let purpleDream = LinearGradient(
+        colors: [AppColor.gemPurple, Color(hex: "7C4DFF")],
+        startPoint: .topLeading, endPoint: .bottomTrailing
+    )
 }
