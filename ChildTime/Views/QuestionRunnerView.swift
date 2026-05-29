@@ -84,13 +84,17 @@ struct QuestionRunnerView: View {
         ZStack {
             background
 
-            VStack(spacing: AppSpacing.lg) {
+            VStack(spacing: AppSpacing.md) {
                 topBar
-                Spacer(minLength: 0)
                 if let q = current {
-                    questionContent(q)
+                    Spacer(minLength: 0)
+                    questionHeader(q)
+                    Spacer(minLength: 0)
+                    answersBlock(q)
+                    Spacer(minLength: AppSpacing.xxl)   // breathing room above the companion
+                } else {
+                    Spacer()
                 }
-                Spacer(minLength: 0)
             }
             .padding(.horizontal, AppSpacing.md)
 
@@ -180,54 +184,41 @@ struct QuestionRunnerView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        // Light top bar: close, progress, streak and stars. Earned minutes live
-        // in the HUD ("🎮 היום X דק'") and the daily-cap chip, so we don't repeat
-        // them here.
-        return AnyView(
-            VStack(spacing: 8) {
-                HStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.md) {
-                    closeButton(size: isCompact ? 26 : 32)
-                    progressIndicator
-                    Spacer()
-                    StreakMeter(streak: progress.currentStreak)
-                    StarCounter(value: progress.stars)
-                }
-                progressHUD(compact: isCompact)
-                if dailyCapChipVisible {
-                    HStack { Spacer(); dailyCapChip; if isCompact { Spacer() } }
-                }
-            }
-            .padding(.horizontal, AppSpacing.md)
-            .padding(.top, AppSpacing.sm)
-        )
+        // Minimal, focused: close · slim progress bar · streak · stars. The
+        // motivational chips (wheel/level/prize/earned) and the daily-cap chip
+        // live on the map & reward screen, not over the question.
+        HStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.md) {
+            closeButton(size: isCompact ? 26 : 32)
+            progressIndicator
+            StreakMeter(streak: progress.currentStreak)
+            StarCounter(value: progress.stars)
+        }
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.top, AppSpacing.sm)
     }
 
-    /// Earn mode shows progress dots toward the 30-question cap; Free mode shows
-    /// a "סיום" button since the child decides when to stop.
+    /// Slim progress bar toward the end of the round + a small "done/total"
+    /// label. Replaces the long row of dots — far calmer at the top.
     @ViewBuilder
     private var progressIndicator: some View {
-        if purpose == .earnTime {
-            HStack(spacing: isCompact ? 5 : 6) {
-                ForEach(0..<totalQuestions, id: \.self) { i in
-                    Circle()
-                        .fill(i < questionIndex ? AppColor.successMint : .white.opacity(0.3))
-                        .frame(width: isCompact ? 10 : 14, height: isCompact ? 10 : 14)
-                        .scaleEffect(i == questionIndex - 1 ? 1.3 : 1.0)
-                        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: questionIndex)
+        let total = max(1, totalQuestions)
+        let done = min(questionIndex, total)
+        HStack(spacing: 8) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.white.opacity(0.22))
+                    Capsule()
+                        .fill(AppGradient.gold)
+                        .frame(width: max(6, geo.size.width * CGFloat(done) / CGFloat(total)))
+                        .glow(AppColor.starGold, radius: 4)
+                        .animation(.spring(response: 0.45, dampingFraction: 0.8), value: questionIndex)
                 }
             }
-        } else {
-            Button { endSession() } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill")
-                    Text("סִיּוּם")
-                }
-                .font(.system(size: isCompact ? 14 : 16, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 12).padding(.vertical, 6)
-                .background(Capsule().fill(.white.opacity(0.2)))
-            }
-            .buttonStyle(.juicy)
+            .frame(height: 8)
+            Text("\(done)/\(total)")
+                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.9))
+                .monospacedDigit()
         }
     }
 
@@ -291,9 +282,10 @@ struct QuestionRunnerView: View {
 
     // MARK: - Question content
 
+    /// Topic indicator + the prompt card (the upper block).
     @ViewBuilder
-    private func questionContent(_ q: Question) -> some View {
-        VStack(spacing: AppSpacing.xl) {
+    private func questionHeader(_ q: Question) -> some View {
+        VStack(spacing: AppSpacing.md) {
             // Topic / super indicator
             HStack(spacing: 8) {
                 Text(q.topic.emoji)
@@ -320,8 +312,9 @@ struct QuestionRunnerView: View {
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.5)
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, AppSpacing.lg)
-                .padding(.vertical, AppSpacing.lg)
+                .padding(.vertical, AppSpacing.xl)
                 .background(
                     RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                         .fill(.white.opacity(0.12))
@@ -333,12 +326,16 @@ struct QuestionRunnerView: View {
                 )
                 .glow(isSuperQuestion ? AppColor.starGold : .clear, radius: isSuperQuestion ? 16 : 0)
                 .padding(.horizontal, AppSpacing.lg)
+        }
+    }
 
+    /// The answers grid + the hint / magic-wand row (the lower block).
+    @ViewBuilder
+    private func answersBlock(_ q: Question) -> some View {
+        VStack(spacing: AppSpacing.lg) {
             optionsGrid(for: q)
 
-            // Hint + magic-wand row. Both stay quiet until the kid actually
-            // needs them: hint shows whenever it's payable, wand only after
-            // 2 wrong picks (the kid is clearly stuck).
+            // Hint shows whenever it's payable; wand only after 2 wrong picks.
             HStack(spacing: AppSpacing.md) {
                 if !showFeedback {
                     hintButton(for: q)
