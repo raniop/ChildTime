@@ -19,6 +19,9 @@ struct FeatureCard: View {
     private var emojiSize: CGFloat { isCompact ? 80 : 100 }
     private var titleSize: CGFloat { isCompact ? 22 : 26 }
     private var labelSize: CGFloat { isCompact ? 15 : 17 }
+    /// Fixed tile height (shared verbatim with WorldCard) so every home tile
+    /// has an identical footprint.
+    private var tileHeight: CGFloat { isCompact ? 200 : 260 }
 
     var body: some View {
         Button(action: onTap) {
@@ -77,8 +80,8 @@ struct FeatureCard: View {
                 }
                 .padding(.bottom, 12)
             }
-            .aspectRatio(0.95, contentMode: .fit)
             .frame(maxWidth: 270)
+            .frame(height: tileHeight)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
