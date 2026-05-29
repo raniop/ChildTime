@@ -32,8 +32,8 @@ struct EmailAuthView: View {
 
                 Section("פרטי החשבון") {
                     if mode == .signUp {
-                        TextField("שם ההורה", text: $name)
-                            .textInputAutocapitalization(.words)
+                        RTLTextField(placeholder: "שם ההורה", text: $name)
+                            .frame(height: 24)
                     }
                     TextField("אימייל", text: $email)
                         .keyboardType(.emailAddress)

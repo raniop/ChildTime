@@ -339,9 +339,9 @@ struct ParentSettingsView: View {
             }
             .padding(.vertical, 4)
 
-            TextField("שם הילד", text: $settings.childName)
-                .textInputAutocapitalization(.words)
-                .onSubmit { profiles.syncBackFromSettings() }
+            RTLTextField(placeholder: "שם הילד", text: $settings.childName,
+                         onCommit: { profiles.syncBackFromSettings() })
+                .frame(height: 24)
 
             Button {
                 profiles.syncBackFromSettings()

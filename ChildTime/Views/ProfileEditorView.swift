@@ -175,7 +175,7 @@ struct ProfileEditorView: View {
             Text("שֵׁם")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
-            RTLTextField(placeholder: "שֵׁם הַיֶּלֶד/ה", text: $name)
+            RTLTextField(placeholder: "שֵׁם הַיֶּלֶד/ה", text: $name, textColor: .white)
                 .frame(height: 28)
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.vertical, AppSpacing.sm)

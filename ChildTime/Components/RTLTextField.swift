@@ -8,8 +8,9 @@ import UIKit
 struct RTLTextField: UIViewRepresentable {
     let placeholder: String
     @Binding var text: String
-    var textColor: UIColor = .white
+    var textColor: UIColor = .label
     var pointSize: CGFloat = 20
+    var onCommit: (() -> Void)? = nil
 
     func makeUIView(context: Context) -> UITextField {
         let tf = UITextField()
@@ -39,12 +40,17 @@ struct RTLTextField: UIViewRepresentable {
         uiView.textColor = textColor
     }
 
-    func makeCoordinator() -> Coordinator { Coordinator(text: $text) }
+    func makeCoordinator() -> Coordinator { Coordinator(text: $text, onCommit: onCommit) }
 
     final class Coordinator: NSObject, UITextFieldDelegate {
         private let text: Binding<String>
-        init(text: Binding<String>) { self.text = text }
+        private let onCommit: (() -> Void)?
+        init(text: Binding<String>, onCommit: (() -> Void)?) {
+            self.text = text; self.onCommit = onCommit
+        }
         @objc func editingChanged(_ tf: UITextField) { text.wrappedValue = tf.text ?? "" }
-        func textFieldShouldReturn(_ tf: UITextField) -> Bool { tf.resignFirstResponder(); return true }
+        func textFieldShouldReturn(_ tf: UITextField) -> Bool {
+            tf.resignFirstResponder(); onCommit?(); return true
+        }
     }
 }
