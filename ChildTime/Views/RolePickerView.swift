@@ -93,6 +93,11 @@ struct RolePickerView: View {
     private func choose(_ role: ParentSettings.DeviceRole) {
         Haptic.medium()
         settings.deviceRole = role
+        // A parent's device wants live events + reports, so ask for notification
+        // permission right here (the iOS "Allow Notifications" prompt).
+        if role == .parent {
+            Task { await PushManager.shared.requestAuthorization() }
+        }
     }
 }
 
