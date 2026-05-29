@@ -21,10 +21,17 @@ struct ContentView: View {
                         && progress.totalAnswered >= Self.guestQuestionLimit {
                 // Free-trial limit reached — registration required to continue.
                 LoginGateView(allowGuest: false, limitBanner: true)
+            } else if settings.deviceRole == .unset {
+                // First launch: is this a child's play device or a parent's
+                // monitoring device? Steers the whole UI from here on.
+                RolePickerView()
             } else if !settings.hasConsented {
                 // Privacy by Design: explicit parental consent before any
                 // child profile or data exists.
                 ConsentView()
+            } else if settings.deviceRole == .parent {
+                // Parent's device → straight into the family monitoring view.
+                ParentDashboardView(isRoot: true)
             } else if !settings.onboardingCompleted {
                 // Logged in but parent hasn't finished setup yet.
                 OnboardingView()

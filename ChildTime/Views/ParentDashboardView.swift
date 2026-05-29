@@ -9,6 +9,10 @@ import Combine
 /// layer Firestore sync on top so the dashboard reflects state even when
 /// the kid is on a different device.
 struct ParentDashboardView: View {
+    /// When true this is the device's HOME screen (parent device), not a sheet —
+    /// so there's no "Done" button and we expose Settings via a gear instead.
+    var isRoot: Bool = false
+
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var auth: AuthManager
@@ -18,6 +22,7 @@ struct ParentDashboardView: View {
     @State private var resettingProfile: Profile? = nil
     @State private var refreshTrigger = 0
     @State private var lastRefreshed = Date()
+    @State private var showingSettings = false
 
     /// Rows recomputed on each refresh so values stay live as the kid plays.
     /// Prefers a remote snapshot when one is available and newer than the
@@ -69,7 +74,13 @@ struct ParentDashboardView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("סיום") { dismiss() }
+                    if isRoot {
+                        Button { showingSettings = true } label: {
+                            Image(systemName: "gearshape.fill")
+                        }
+                    } else {
+                        Button("סיום") { dismiss() }
+                    }
                 }
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -95,6 +106,10 @@ struct ParentDashboardView: View {
                 Button("בטל", role: .cancel) { resettingProfile = nil }
             } message: {
                 Text("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן, ועונש טעויות. לא ימחק שמות, פרופילים או פריטי קוסמטיקה.")
+            }
+            .sheet(isPresented: $showingSettings) {
+                ParentSettingsView()
+                    .environment(\.layoutDirection, .rightToLeft)
             }
             .onAppear {
                 refreshTrigger &+= 1

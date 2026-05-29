@@ -31,6 +31,15 @@ final class ParentSettings: ObservableObject {
         static let faceIDForParentGate = "faceIDForParentGate"
         static let consentVersionAccepted = "consentVersionAccepted"
         static let parentInsightFrequency = "parentInsightFrequency"
+        static let deviceRole = "deviceRole"
+    }
+
+    /// What this device is used for — chosen once at first launch. Steers the
+    /// whole UI: a child's device boots into play; a parent's device boots into
+    /// the family monitoring view. Device-local (not synced).
+    enum DeviceRole: String, CaseIterable, Identifiable {
+        case unset, child, parent
+        var id: String { rawValue }
     }
 
     /// How often the parent wants on-device "insight" notifications about their
@@ -182,6 +191,10 @@ final class ParentSettings: ObservableObject {
     @Published var parentInsightFrequency: InsightFrequency {
         didSet { defaults.set(parentInsightFrequency.rawValue, forKey: Key.parentInsightFrequency) }
     }
+    /// This device's role (child play device vs parent monitoring device).
+    @Published var deviceRole: DeviceRole {
+        didSet { defaults.set(deviceRole.rawValue, forKey: Key.deviceRole) }
+    }
 
     private init() {
         let d = AppGroup.defaults
@@ -277,6 +290,7 @@ final class ParentSettings: ObservableObject {
         self.parentInsightFrequency = InsightFrequency(
             rawValue: d.string(forKey: Key.parentInsightFrequency) ?? ""
         ) ?? .off
+        self.deviceRole = DeviceRole(rawValue: d.string(forKey: Key.deviceRole) ?? "") ?? .unset
     }
 
     var hasConsented: Bool { consentVersionAccepted >= Consent.currentVersion }
