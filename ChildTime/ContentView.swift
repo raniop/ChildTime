@@ -7,13 +7,20 @@ struct ContentView: View {
     @EnvironmentObject var auth: AuthManager
     @StateObject private var household = HouseholdManager.shared
 
+    /// Guests (no account) can answer this many questions before registration
+    /// is required.
+    static let guestQuestionLimit = 30
+
     var body: some View {
         Group {
-            if !auth.isSignedIn {
-                // Login is the very first gate — kid profiles, progress,
-                // and cosmetics only sync across devices when the parent
-                // is signed in. Required from day one.
+            if !auth.isSignedIn && !auth.isGuest {
+                // Login is the first gate — but a child may also tap "play
+                // without an account" to try up to 30 questions as a guest.
                 LoginGateView()
+            } else if auth.isGuest && !auth.isSignedIn
+                        && progress.totalAnswered >= Self.guestQuestionLimit {
+                // Free-trial limit reached — registration required to continue.
+                LoginGateView(allowGuest: false, limitBanner: true)
             } else if !settings.hasConsented {
                 // Privacy by Design: explicit parental consent before any
                 // child profile or data exists.

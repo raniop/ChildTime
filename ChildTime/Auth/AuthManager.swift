@@ -27,6 +27,14 @@ final class AuthManager: ObservableObject {
     @Published var email: String?
     @Published var provider: AuthProvider?
     @Published var lastError: String?
+    /// Local trial mode — play without an account (capped at 30 questions).
+    /// Cleared once a real account signs in.
+    @Published var isGuest: Bool = UserDefaults.standard.bool(forKey: "isGuestMode") {
+        didSet { UserDefaults.standard.set(isGuest, forKey: "isGuestMode") }
+    }
+
+    /// Enter the local trial. No cloud account, data stays on-device.
+    func continueAsGuest() { isGuest = true }
 
     enum AuthProvider: String {
         case apple
@@ -84,6 +92,7 @@ final class AuthManager: ObservableObject {
         displayName = nil
         email = nil
         provider = nil
+        isGuest = false
         clearCache()
     }
 
@@ -246,6 +255,7 @@ final class AuthManager: ObservableObject {
     private func apply(firebaseUser user: User) {
         let uid = user.uid
         userID = uid
+        isGuest = false   // a real account replaces guest mode
         displayName = user.displayName
         email = user.email
         // Infer provider from the firebase providerData

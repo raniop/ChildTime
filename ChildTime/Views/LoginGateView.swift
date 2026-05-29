@@ -8,6 +8,12 @@ import AuthenticationServices
 /// now that login is mandatory upfront, by the time the parent reaches
 /// onboarding/profile-picker they're already authenticated.
 struct LoginGateView: View {
+    /// When false, hides the "play without an account" button (e.g. after the
+    /// free-trial limit is reached — registration is now required).
+    var allowGuest: Bool = true
+    /// Shows the "you've used your 30 free questions" banner.
+    var limitBanner: Bool = false
+
     @EnvironmentObject var auth: AuthManager
     @Environment(\.horizontalSizeClass) private var hsc
     @Environment(\.colorScheme) private var colorScheme
@@ -42,6 +48,7 @@ struct LoginGateView: View {
                         Spacer(minLength: AppSpacing.md)
 
                         hero
+                        if limitBanner { limitBannerView }
                         valueProps
                         signInButtons
                         Spacer(minLength: AppSpacing.lg)
@@ -143,6 +150,26 @@ struct LoginGateView: View {
         }
     }
 
+    private var limitBannerView: some View {
+        VStack(spacing: 6) {
+            Text("🎉 כָּל הַכָּבוֹד!")
+                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            Text("שִׂחַקְתָּ אֶת 30 הַשְּׁאֵלוֹת הַחִנָּם. הִירָשְׁמוּ כְּדֵי לְהַמְשִׁיךְ לְשַׂחֵק לְלֹא הַגְבָּלָה — וְלִשְׁמֹר אֶת הַהִתְקַדְּמוּת.")
+                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.9))
+                .multilineTextAlignment(.center)
+        }
+        .padding(AppSpacing.md)
+        .frame(maxWidth: 460)
+        .background(
+            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                .fill(.white.opacity(0.14))
+                .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                    .stroke(AppColor.starGold.opacity(0.5), lineWidth: 1.5))
+        )
+    }
+
     // MARK: - Sign-in buttons
 
     private var signInButtons: some View {
@@ -181,6 +208,20 @@ struct LoginGateView: View {
                     .frame(height: 52)
                     .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
+            }
+
+            // Try without an account (capped at 30 questions).
+            if allowGuest {
+                Button {
+                    Haptic.light()
+                    auth.continueAsGuest()
+                } label: {
+                    Text("שַׂחֵק בְּלִי חֶשְׁבּוֹן")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.9))
+                        .underline()
+                        .padding(.top, 2)
+                }
             }
 
             if let err = auth.lastError {
