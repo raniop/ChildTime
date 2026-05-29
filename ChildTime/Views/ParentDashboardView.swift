@@ -23,6 +23,7 @@ struct ParentDashboardView: View {
     @State private var refreshTrigger = 0
     @State private var lastRefreshed = Date()
     @State private var showingSettings = false
+    @State private var showingLinking = false
 
     /// Rows recomputed on each refresh so values stay live as the kid plays.
     /// Prefers a remote snapshot when one is available and newer than the
@@ -46,14 +47,17 @@ struct ParentDashboardView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppGradient.dreamy.ignoresSafeArea().opacity(0.4)
-                Color(.systemGroupedBackground).ignoresSafeArea().opacity(0.6)
+                // A real, branded control center — vibrant, not a grey list.
+                AppGradient.dreamy.ignoresSafeArea()
+                FloatingOrbs.home()
+                SparkleField(count: 20, size: 12)
 
                 if profiles.profiles.isEmpty {
                     emptyState
                 } else {
                     ScrollView {
                         VStack(spacing: 14) {
+                            if isRoot { linkCallout }
                             syncStatusCard
                             insightNotificationsCard
                             ForEach(rows, id: \.profile.id) { row in
@@ -109,6 +113,10 @@ struct ParentDashboardView: View {
             }
             .sheet(isPresented: $showingSettings) {
                 ParentSettingsView()
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(isPresented: $showingLinking) {
+                FamilyLinkingView()
                     .environment(\.layoutDirection, .rightToLeft)
             }
             .onAppear {
@@ -224,18 +232,45 @@ struct ParentDashboardView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: AppSpacing.md) {
+        VStack(spacing: AppSpacing.lg) {
             Text("👨‍👩‍👧‍👦")
-                .font(.system(size: 60))
-            Text("עוד אין פרופילים במשפחה")
-                .font(.system(size: 19, weight: .heavy, design: .rounded))
-            Text("חזור ל-Parent Settings ולחץ \"החלף פרופיל\" כדי ליצור את הראשון.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 64))
+            Text("בּוֹאוּ נְחַבֵּר אֶת הַיֶּלֶד")
+                .font(.system(size: 24, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            Text("בְּמַכְשִׁיר שֶׁל הַיֶּלֶד צְרוּ קוֹד, וְסִרְקוּ אוֹתוֹ כָּאן — הַפְּרוֹפִילִים שֶׁלּוֹ וְהַהִתְקַדְּמוּת יוֹפִיעוּ בַּמָּסָךְ הַזֶּה.")
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, AppSpacing.lg)
+                .padding(.horizontal, AppSpacing.xl)
+            linkButton
         }
+        .padding(AppSpacing.lg)
     }
+
+    /// Prominent "link a child/device" action — the parent's primary action.
+    private var linkButton: some View {
+        Button {
+            Haptic.light()
+            showingLinking = true
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "qrcode.viewfinder")
+                Text("קַשְּׁרוּ יֶלֶד / מַכְשִׁיר")
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, AppSpacing.xl)
+            .padding(.vertical, 15)
+            .frame(maxWidth: .infinity)
+            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .glow(AppColor.starGold, radius: 12)
+        }
+        .buttonStyle(.juicy)
+        .frame(maxWidth: 460)
+    }
+
+    private var linkCallout: some View { linkButton }
 
     private func profileCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
         let isActive = profile.id == profiles.activeID
