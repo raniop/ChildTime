@@ -57,8 +57,8 @@ struct FamilyLinkingView: View {
             }
             .disabled(working || !childEmail.contains("@"))
 
-            // Live status of requests already sent — each can be re-sent.
-            ForEach(household.sentChildLinks) { req in
+            // Live status of requests already sent — one row per email (latest).
+            ForEach(dedupedSentLinks) { req in
                 HStack {
                     Image(systemName: statusIcon(req.status))
                         .foregroundStyle(statusColor(req.status))
@@ -80,6 +80,12 @@ struct FamilyLinkingView: View {
         } footer: {
             Text("אם הילד/ה נרשמו בעצמם עם אימייל — הזינו אותו כאן. תישלח בקשה שתופיע במכשיר שלהם, ואחרי אישור הפרופילים שלהם יעברו תחת המשפחה שלכם.")
         }
+    }
+
+    /// One row per target email — newest wins (sentChildLinks is newest-first).
+    private var dedupedSentLinks: [ChildLinkRequest] {
+        var seen = Set<String>()
+        return household.sentChildLinks.filter { seen.insert($0.toEmail).inserted }
     }
 
     private func sendLink(to email: String) {

@@ -346,9 +346,17 @@ final class HouseholdManager: ObservableObject {
         }
         guard target != email else { lastError = "זה האימייל שלך 🙂"; return false }
         let name = parentAccount?.displayName ?? parentAccount?.email ?? email ?? "הוֹרֶה"
-        let req = ChildLinkRequest(fromHouseholdID: hh.id, fromParentUID: uid,
-                                   fromParentName: name, toEmail: target)
         do {
+            // Clean up any earlier requests from me to this email so "resend"
+            // doesn't pile up duplicate rows — then create one fresh request.
+            let existing = try await db.collection("childLinkRequests")
+                .whereField("fromParentUID", isEqualTo: uid)
+                .whereField("toEmail", isEqualTo: target)
+                .getDocuments()
+            for doc in existing.documents { try? await doc.reference.delete() }
+
+            let req = ChildLinkRequest(fromHouseholdID: hh.id, fromParentUID: uid,
+                                       fromParentName: name, toEmail: target)
             try await db.collection("childLinkRequests").document(req.id).setData(Self.encode(req))
             return true
         } catch { lastError = error.localizedDescription; return false }
