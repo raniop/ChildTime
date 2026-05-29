@@ -154,11 +154,16 @@ final class HouseholdManager: ObservableObject {
     private func refreshLinkedParentSummaries(_ uids: [String]) {
         Task {
             var summaries: [String] = []
-            for parentUID in uids {
+            // Only OTHER parents (not me), and never surface a raw UID —
+            // fall back to a friendly "הוֹרֶה" when the account has no name/email.
+            for parentUID in uids where parentUID != self.uid {
+                var label = "הוֹרֶה"
                 if let doc = try? await parentRef(parentUID).getDocument(), let data = doc.data() {
                     let acc = Self.decodeParent(id: parentUID, data)
-                    summaries.append(acc.displayName ?? acc.email ?? parentUID)
+                    if let name = acc.displayName, !name.isEmpty { label = name }
+                    else if let email = acc.email, !email.isEmpty { label = email }
                 }
+                summaries.append(label)
             }
             self.linkedParentSummaries = summaries
         }

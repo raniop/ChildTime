@@ -27,6 +27,12 @@ enum RewardEngine {
 
     // MARK: - Score (the headline "ניקוד" metric)
 
+    /// THE single play-minutes rule for everyone: every N correct answers
+    /// grants M minutes. Fixed (not parent-configurable) so the number shown
+    /// in-game, on the reward screen, and banked on home is always the same.
+    static let answersPerReward = 10
+    static let minutesPerReward = 4
+
     /// Base points per correct answer. Tunable from one spot.
     static let pointsPerCorrect = 10
 

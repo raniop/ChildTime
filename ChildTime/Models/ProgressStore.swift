@@ -373,11 +373,6 @@ final class ProgressStore: ObservableObject {
             isSuperQuestion: ctx.isSuperQuestion,
             isMysteryPortal: ctx.isMysteryPortal
         )
-        let multiplier: Int = {
-            if ctx.isMysteryPortal { return 3 }
-            if ctx.isSuperQuestion { return 5 }
-            return 1
-        }()
         totalAnswered += 1
         totalCorrect += 1
         currentStreak += 1
@@ -401,19 +396,13 @@ final class ProgressStore: ObservableObject {
         // Time reward — ONLY in Earn-to-Unlock sessions. In Free Learning mode
         // the reward is in-game progression (XP/coins/levels), never minutes.
         if grantsScreenTime {
-            switch settings.rewardMode {
-            case .perAnswer:
-                // Classic: each correct answer = N minutes (× multiplier on bonus Qs)
-                sessionMinutesEarned += grantMinutesCapped(minutesPerCorrect * multiplier)
-            case .perBatch:
-                // Default for everyone: every `batchAnswers` correct = `batchMinutes`.
-                // This is the SINGLE source of play-minutes (no chest bonus).
-                batchCounter += multiplier
-                let target = max(1, settings.batchAnswers)
-                while batchCounter >= target {
-                    sessionMinutesEarned += grantMinutesCapped(settings.batchMinutes)
-                    batchCounter -= target
-                }
+            // THE single fixed rule for everyone: every 10 correct answers → 4
+            // play-minutes. Not parent-configurable, so the number is always the
+            // same in-game, on the reward screen, and in the bank.
+            batchCounter += 1
+            while batchCounter >= RewardEngine.answersPerReward {
+                sessionMinutesEarned += grantMinutesCapped(RewardEngine.minutesPerReward)
+                batchCounter -= RewardEngine.answersPerReward
             }
         }
         xp += RewardEngine.xpPerCorrect
