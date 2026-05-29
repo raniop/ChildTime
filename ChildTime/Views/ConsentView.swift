@@ -14,12 +14,15 @@ struct ConsentView: View {
 
             GeometryReader { proxy in
             ScrollView {
-                VStack(spacing: AppSpacing.lg) {
-                    Text("🔒").font(.system(size: 64)).padding(.top, AppSpacing.xl)
+                VStack(alignment: .trailing, spacing: AppSpacing.lg) {
+                    Text("🔒").font(.system(size: 64))
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.top, AppSpacing.xl)
                     Text("הפרטיות של הילד שלכם — קודם כול")
                         .font(.system(size: 26, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
+                        .multilineTextAlignment(.trailing)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
 
                     VStack(alignment: .trailing, spacing: 14) {
                         principle("👨‍👩‍👧", "הפרדה מלאה בין משפחות", "הנתונים של כל משפחה מבודדים. אף משפחה אחרת לא יכולה לראות את הילד שלכם.")
@@ -28,7 +31,7 @@ struct ConsentView: View {
                         principle("🗑️", "בשליטתכם", "אפשר לייצא את כל הנתונים או למחוק אותם לחלוטין בכל רגע, מתוך הגדרות ההורה.")
                     }
                     .padding(AppSpacing.md)
-                    .frame(maxWidth: 460)
+                    .frame(maxWidth: .infinity)
                     .background(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                         .fill(.white.opacity(0.12)))
 
@@ -36,6 +39,7 @@ struct ConsentView: View {
                          destination: URL(string: "https://github.com/raniop/ChildTime/blob/main/distribution/PRIVACY_POLICY.html")!)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
+                        .frame(maxWidth: .infinity, alignment: .trailing)
 
                     Button {
                         accept()
