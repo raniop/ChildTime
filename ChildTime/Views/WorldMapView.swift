@@ -128,7 +128,7 @@ struct WorldMapView: View {
                 profile: profiles.active,
                 onTap: {
                     Haptic.light()
-                    showingChildSettings = true
+                    showingShop = true
                 },
                 size: companionSize,
                 topInset: isCompact ? 140 : 90,

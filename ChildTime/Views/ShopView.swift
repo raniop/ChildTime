@@ -17,6 +17,7 @@ struct ShopView: View {
     @State private var purchaseError: String? = nil
     @State private var celebrateTrigger = 0
     @State private var confettiTrigger = 0
+    @State private var showingProfileEditor = false
 
     private var isCompact: Bool { hsc == .compact }
     private var avatarSize: CGFloat { isCompact ? 130 : 170 }
@@ -59,6 +60,17 @@ struct ShopView: View {
             .environmentObject(cosmetics)
             .environment(\.layoutDirection, .rightToLeft)
             .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showingProfileEditor) {
+            if let active = profiles.active {
+                ProfileEditorView(mode: .edit(active)) { updated in
+                    profiles.update(updated)
+                } onDelete: { profile in
+                    profiles.remove(profile)
+                }
+                .environmentObject(profiles)
+                .environment(\.layoutDirection, .rightToLeft)
+            }
         }
         .alert("רֶגַע", isPresented: Binding(get: { purchaseError != nil }, set: { if !$0 { purchaseError = nil } })) {
             Button("הֵבַנְתִּי", role: .cancel) { purchaseError = nil }
@@ -122,6 +134,25 @@ struct ShopView: View {
                 Text("הַלְבִּישׁוּ אֶת \(profile.name)")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
+
+                // Edit-profile shortcut, right where the avatar lives.
+                Button {
+                    Haptic.light()
+                    showingProfileEditor = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "pencil")
+                        Text("עֲרֹךְ פְּרוֹפִיל")
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(.white.opacity(0.18), in: Capsule())
+                    .overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
             }
             .padding(.top, AppSpacing.sm)
         } else {
