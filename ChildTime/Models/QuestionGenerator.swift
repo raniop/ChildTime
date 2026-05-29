@@ -16,7 +16,7 @@ struct QuestionGenerator {
         switch topic {
         case .math:
             return makeMath(difficulty: difficulty)
-        case .english, .hebrew, .logic, .science, .history, .geography:
+        case .english, .hebrew, .logic, .science, .history, .geography, .money:
             return makeFromBank(topic: topic, difficulty: difficulty)
         }
     }

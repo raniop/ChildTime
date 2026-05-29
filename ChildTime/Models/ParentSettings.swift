@@ -301,7 +301,8 @@ final class ParentSettings: ObservableObject {
         .logic: .easy,
         .science: .easy,
         .history: .easy,
-        .geography: .easy
+        .geography: .easy,
+        .money: .easy
     ]
 
     func difficulty(for topic: Topic) -> Difficulty {

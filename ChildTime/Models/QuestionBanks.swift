@@ -166,6 +166,31 @@ enum QuestionBanks {
         BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "כְּבִישׁ",   distractors: ["קְבִישׁ", "כְּבִית", "גְּבִישׁ"]),
     ]
 
+    // MARK: - כסף וחיים (חינוך פיננסי)
+
+    static let money: [BankQuestion] = [
+        BankQuestion(prompt: "💰\nכַּמָּה אֲגוֹרוֹת יֵשׁ בְּשֶׁקֶל אֶחָד?", correctAnswer: "100", distractors: ["10", "50", "1000"]),
+        BankQuestion(prompt: "🪙🪙🪙🪙🪙\n5 מַטְבְּעוֹת שֶׁל 1 ₪ — כַּמָּה זֶה בְּיַחַד?", correctAnswer: "5 ₪", distractors: ["3 ₪", "4 ₪", "6 ₪"]),
+        BankQuestion(prompt: "🍦\nיֵשׁ לְךָ 10 ₪ וּגְלִידָה עוֹלָה 6 ₪. כַּמָּה עֹדֶף תְּקַבֵּל?", correctAnswer: "4 ₪", distractors: ["2 ₪", "3 ₪", "5 ₪"]),
+        BankQuestion(prompt: "💵\nאֵיזֶה שְׁטָר שָׁוֶה הֲכִי הַרְבֵּה?", correctAnswer: "200 ₪", distractors: ["20 ₪", "50 ₪", "100 ₪"]),
+        BankQuestion(prompt: "🐷\nמָה עוֹשִׂים בְּקֻפַּת חִסָּכוֹן?", correctAnswer: "שָׂמִים בָּהּ כֶּסֶף לֶעָתִיד", distractors: ["שׁוֹמְרִים בָּהּ מַמְתַּקִּים", "מְשַׂחֲקִים אִתָּהּ כַּדּוּר", "זוֹרְקִים אוֹתָהּ"]),
+        BankQuestion(prompt: "🛒\nרוֹצִים לִקְנוֹת צַעֲצוּעַ יָקָר. מָה כְּדַאי לַעֲשׂוֹת?", correctAnswer: "לַחְסֹךְ קְצָת כָּל שָׁבוּעַ", distractors: ["לְבַזְבֵּז הַכֹּל מִיָּד", "לְבַקֵּשׁ עוֹד וְעוֹד", "לֹא לַחְשֹׁב עַל זֶה"]),
+        BankQuestion(prompt: "🥤\nמַה מֵאֵלֶּה הוּא 'צֹרֶךְ' חָשׁוּב?", correctAnswer: "אֹכֶל וּמַיִם", distractors: ["צַעֲצוּעַ חָדָשׁ", "מַדְבֵּקוֹת", "מִשְׂחָק בַּטֶּלֶפוֹן"]),
+        BankQuestion(prompt: "🪙🪙\n2 מַטְבְּעוֹת שֶׁל 5 ₪ — כַּמָּה זֶה?", correctAnswer: "10 ₪", distractors: ["7 ₪", "12 ₪", "15 ₪"]),
+        BankQuestion(prompt: "🛍️\nקָנִיתָ בְּ-12 ₪ וְשִׁלַּמְתָּ עִם שְׁטָר שֶׁל 20 ₪. כַּמָּה עֹדֶף?", correctAnswer: "8 ₪", distractors: ["6 ₪", "7 ₪", "10 ₪"]),
+        BankQuestion(prompt: "💳\nמָה זֶה כַּרְטִיס אַשְׁרַאי?", correctAnswer: "דֶּרֶךְ לְשַׁלֵּם בְּלִי מְזֻמָּן", distractors: ["צַעֲצוּעַ", "כַּרְטִיס לְמִשְׂחָק", "תְּמוּנָה"]),
+        BankQuestion(prompt: "🏷️\nאֵיזֶה מוּצָר זוֹל יוֹתֵר — בְּ-8 ₪ אוֹ בְּ-12 ₪?", correctAnswer: "8 ₪", distractors: ["12 ₪", "שְׁנֵיהֶם שָׁוִים", "אִי אֶפְשָׁר לָדַעַת"]),
+        BankQuestion(prompt: "💝\nחָבֵר שָׁכַח כֶּסֶף לְאֹכֶל. מָה נֶחְמָד לַעֲשׂוֹת?", correctAnswer: "לְשַׁתֵּף אוֹתוֹ בָּאֹכֶל שֶׁלִּי", distractors: ["לְהִתְעַלֵּם", "לִצְחֹק עָלָיו", "לֶאֱכֹל מַהֵר"]),
+        BankQuestion(prompt: "🪙\nכַּמָּה שָׁוֶה מַטְבֵּעַ שֶׁל חֲצִי שֶׁקֶל בַּאֲגוֹרוֹת?", correctAnswer: "50", distractors: ["5", "10", "100"]),
+        BankQuestion(prompt: "📋\nמָה זֶה 'תַּקְצִיב'?", correctAnswer: "תָּכְנִית כַּמָּה כֶּסֶף לְהוֹצִיא", distractors: ["סוּג שֶׁל מַמְתָּק", "מִשְׂחָק קוּפְסָה", "סוּג שֶׁל מַטְבֵּעַ"]),
+        BankQuestion(prompt: "💰\nיֵשׁ לְךָ 3 ₪ וְקִבַּלְתָּ עוֹד 5 ₪. כַּמָּה יֵשׁ לְךָ עַכְשָׁו?", correctAnswer: "8 ₪", distractors: ["2 ₪", "7 ₪", "9 ₪"]),
+        BankQuestion(prompt: "🤔\nמָתַי כְּדַאי לִקְנוֹת מַשֶּׁהוּ?", correctAnswer: "כְּשֶׁבֶּאֱמֶת צְרִיכִים אוֹתוֹ", distractors: ["תָּמִיד מִיָּד", "כְּשֶׁחָבֵר קָנָה", "אַף פַּעַם"]),
+        BankQuestion(prompt: "🏦\nאֵיפֹה מְבֻגָּרִים שׁוֹמְרִים כֶּסֶף בְּבִטָּחוֹן?", correctAnswer: "בַּבַּנְק", distractors: ["בָּרְחוֹב", "בַּפַּח", "בָּעֵץ"]),
+        BankQuestion(prompt: "🎁\nחָסַכְתָּ 50 ₪ וְהַמַּתָּנָה עוֹלָה 80 ₪. כַּמָּה עוֹד צָרִיךְ?", correctAnswer: "30 ₪", distractors: ["20 ₪", "40 ₪", "50 ₪"]),
+        BankQuestion(prompt: "♻️\nאֵיךְ אֶפְשָׁר לַחְסֹךְ כֶּסֶף בַּבַּיִת?", correctAnswer: "לְכַבּוֹת אוֹר שֶׁלֹּא צְרִיכִים", distractors: ["לְהַשְׁאִיר הַכֹּל דָּלוּק", "לִזְרֹק אֹכֶל", "לִקְנוֹת כָּפוּל"]),
+        BankQuestion(prompt: "🪙🪙🪙\n3 מַטְבְּעוֹת שֶׁל 2 ₪ — כַּמָּה זֶה?", correctAnswer: "6 ₪", distractors: ["5 ₪", "8 ₪", "9 ₪"]),
+    ]
+
     /// Original + expanded — call sites get the full combined pool.
     static func bank(for topic: Topic) -> [BankQuestion]? {
         switch topic {
@@ -175,6 +200,7 @@ enum QuestionBanks {
         case .science:   return science   + QuestionBanksExpanded.science
         case .history:   return history   + QuestionBanksExpanded.history
         case .geography: return geography + QuestionBanksExpanded.geography
+        case .money:     return money
         case .math:      return nil  // generated algorithmically
         }
     }

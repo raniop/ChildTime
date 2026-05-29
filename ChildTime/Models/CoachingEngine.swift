@@ -108,6 +108,7 @@ struct CoachingEngine {
         case .science:   return "שאלו את \(name) שאלת \"למה\" על משהו בטבע."
         case .history:   return "ספרו ל\(name) סיפור קצר על משהו שקרה פעם."
         case .geography: return "הסתכלו יחד על מפה ובחרו מדינה ללמוד עליה."
+        case .money:     return "תנו ל\(name) לספור כסף קטן בחנות, או לדבר על חיסכון לצעצוע."
         }
     }
 }

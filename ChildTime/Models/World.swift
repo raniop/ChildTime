@@ -103,6 +103,16 @@ enum Worlds {
             rooms: 10,
             gradient: .geographyWorld,
             glowColor: Color(hex: "00ACC1")
+        ),
+        World(
+            id: "money_market",
+            name: "שׁוּק הַכֶּסֶף",
+            emoji: "💰",
+            topic: .money,
+            starsToUnlock: 0,
+            rooms: 10,
+            gradient: .gold,
+            glowColor: Color(hex: "43A047")
         )
     ]
 

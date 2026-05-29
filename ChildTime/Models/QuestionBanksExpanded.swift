@@ -369,6 +369,7 @@ enum QuestionBanksExpanded {
         case .history:   return history
         case .geography: return geography
         case .hebrew:    return []
+        case .money:     return []
         case .math:      return []
         }
     }
