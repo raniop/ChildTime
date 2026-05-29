@@ -60,8 +60,8 @@ struct ShopView: View {
             .environment(\.layoutDirection, .rightToLeft)
             .presentationDetents([.medium, .large])
         }
-        .alert("רגע", isPresented: Binding(get: { purchaseError != nil }, set: { if !$0 { purchaseError = nil } })) {
-            Button("הבנתי", role: .cancel) { purchaseError = nil }
+        .alert("רֶגַע", isPresented: Binding(get: { purchaseError != nil }, set: { if !$0 { purchaseError = nil } })) {
+            Button("הֵבַנְתִּי", role: .cancel) { purchaseError = nil }
         } message: {
             Text(purchaseError ?? "")
         }
@@ -85,7 +85,7 @@ struct ShopView: View {
 
             Spacer()
 
-            Text("חנות הקסם")
+            Text("חֲנוּת הַקֶּסֶם")
                 .font(.system(size: isCompact ? 20 : 26, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
@@ -119,13 +119,13 @@ struct ShopView: View {
                 Text(profile.name)
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("הלבישו את \(profile.name)")
+                Text("הַלְבִּישׁוּ אֶת \(profile.name)")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
             }
             .padding(.top, AppSpacing.sm)
         } else {
-            Text("צרו פרופיל כדי להתחיל")
+            Text("צְרוּ פְּרוֹפִיל כְּדֵי לְהַתְחִיל")
                 .foregroundStyle(.white)
         }
     }
@@ -261,11 +261,11 @@ struct ShopView: View {
     @ViewBuilder
     private func priceOrStatusFooter(item: CosmeticItem, owned: Bool, equipped: Bool) -> some View {
         if equipped {
-            Text("לבוש 👤")
+            Text("לָבוּשׁ 👤")
                 .font(.system(size: 12, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.successMint)
         } else if owned {
-            Text("ברשותך")
+            Text("בִּרְשׁוּתְךָ")
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
         } else {
@@ -376,7 +376,7 @@ struct ShopItemDetail: View {
                 primaryButton
 
                 if !owned && !canAfford {
-                    Text("חסרים \(item.price - progress.gems) מטבעות 💎")
+                    Text("חֲסֵרִים \(item.price - progress.gems) מַטְבְּעוֹת 💎")
                         .font(.caption)
                         .foregroundStyle(AppColor.almostWarm)
                 }
@@ -392,13 +392,13 @@ struct ShopItemDetail: View {
             JuicyButton(gradient: AppGradient.almost, glowColor: AppColor.almostWarm) {
                 onPrimary()
             } label: {
-                Label("הסר מהדמות", systemImage: "xmark.circle")
+                Label("הָסֵר מֵהַדְּמוּת", systemImage: "xmark.circle")
             }
         } else if owned {
             JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
                 onPrimary()
             } label: {
-                Label("הלבש", systemImage: "sparkles")
+                Label("הַלְבֵּשׁ", systemImage: "sparkles")
             }
         } else {
             JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
@@ -406,7 +406,7 @@ struct ShopItemDetail: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "cart.fill")
-                    Text("קנה ב-\(item.price) 💎")
+                    Text("קְנֵה בְּ-\(item.price) 💎")
                 }
             }
             .opacity(canAfford ? 1 : 0.55)

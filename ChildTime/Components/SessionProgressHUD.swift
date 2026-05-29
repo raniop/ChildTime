@@ -26,7 +26,7 @@ struct SessionProgressHUD: View {
                 // 🎮 Time earned today — the headline (Earn mode only).
                 chip(
                     emoji: "🎮",
-                    text: "היום \(earnedToday) דק׳",
+                    text: "הַיּוֹם \(earnedToday) דַּק׳",
                     tint: AppColor.successMint,
                     prominent: true
                 )
@@ -41,14 +41,14 @@ struct SessionProgressHUD: View {
             // 🎁 Questions to the lucky wheel.
             chip(
                 emoji: "🎁",
-                text: wheelReady ? "גלגל מוכן!" : "גלגל ב-\(questionsUntilWheel)",
+                text: wheelReady ? "גַּלְגַּל מוּכָן!" : "גַּלְגַּל בְּ-\(questionsUntilWheel)",
                 tint: AppColor.gemPurple,
                 prominent: wheelReady
             )
             // ⭐ Questions to the next level.
             chip(
                 emoji: "⭐",
-                text: "רמה ב-\(questionsUntilLevel)",
+                text: "רָמָה בְּ-\(questionsUntilLevel)",
                 tint: AppColor.starGold,
                 prominent: false
             )
@@ -56,7 +56,7 @@ struct SessionProgressHUD: View {
     }
 
     private var rewardText: String {
-        questionsUntilReward <= 0 ? "פרס!" : "פרס ב-\(questionsUntilReward)"
+        questionsUntilReward <= 0 ? "פְּרָס!" : "פְּרָס בְּ-\(questionsUntilReward)"
     }
 
     private func chip(emoji: String, text: String, tint: Color, prominent: Bool) -> some View {

@@ -15,8 +15,8 @@ enum ChildGender: String, Codable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .boy:  return "ילד"
-        case .girl: return "ילדה"
+        case .boy:  return "יֶלֶד"
+        case .girl: return "יַלְדָּה"
         }
     }
 }

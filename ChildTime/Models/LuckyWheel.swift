@@ -30,29 +30,29 @@ enum LuckyWheelCatalog {
     /// Bias toward upbeat wedges (~75% good vs 25% chore).
     static let prizes: [WheelPrize] = [
         // Good (10 wedges)
-        WheelPrize(kind: .gems(5),           label: "5 גבישים",      emoji: "💎", color: Color(hex: "9B5DE5")),
-        WheelPrize(kind: .gems(15),          label: "15 גבישים",     emoji: "💎", color: Color(hex: "5E60CE")),
-        WheelPrize(kind: .gems(30),          label: "30 גבישים!",   emoji: "💎", color: Color(hex: "F15BB5")),
+        WheelPrize(kind: .gems(5),           label: "5 גְּבִישִׁים",      emoji: "💎", color: Color(hex: "9B5DE5")),
+        WheelPrize(kind: .gems(15),          label: "15 גְּבִישִׁים",     emoji: "💎", color: Color(hex: "5E60CE")),
+        WheelPrize(kind: .gems(30),          label: "30 גְּבִישִׁים!",   emoji: "💎", color: Color(hex: "F15BB5")),
         WheelPrize(kind: .xp(50),            label: "50 XP",        emoji: "⚡", color: Color(hex: "FFD166")),
-        WheelPrize(kind: .minutes(5),        label: "+5 דק' משחק",   emoji: "⏰", color: Color(hex: "06D6A0")),
-        WheelPrize(kind: .minutes(10),       label: "+10 דק' משחק",  emoji: "⏱", color: Color(hex: "118AB2")),
-        WheelPrize(kind: .scoreBoost(100),   label: "+100 ניקוד",   emoji: "🏆", color: Color(hex: "FFB84D")),
-        WheelPrize(kind: .scoreBoost(250),   label: "+250 ניקוד!",  emoji: "🏆", color: Color(hex: "F59E0B")),
+        WheelPrize(kind: .minutes(5),        label: "+5 דַּק' מִשְׂחָק",   emoji: "⏰", color: Color(hex: "06D6A0")),
+        WheelPrize(kind: .minutes(10),       label: "+10 דַּק' מִשְׂחָק",  emoji: "⏱", color: Color(hex: "118AB2")),
+        WheelPrize(kind: .scoreBoost(100),   label: "+100 נִקּוּד",   emoji: "🏆", color: Color(hex: "FFB84D")),
+        WheelPrize(kind: .scoreBoost(250),   label: "+250 נִקּוּד!",  emoji: "🏆", color: Color(hex: "F59E0B")),
         WheelPrize(kind: .rareItem("hat_crown"),
-                                              label: "כתר זהב!",     emoji: "👑", color: Color(hex: "FFD166")),
+                                              label: "כֶּתֶר זָהָב!",     emoji: "👑", color: Color(hex: "FFD166")),
         WheelPrize(kind: .rareItem("shoes_magic"),
-                                              label: "נעלי קסם!",    emoji: "✨", color: Color(hex: "9B5DE5")),
+                                              label: "נַעֲלֵי קֶסֶם!",    emoji: "✨", color: Color(hex: "9B5DE5")),
 
         // Fun missions (4 wedges) — gentle "you lost" alternatives.
         // Phrased as friendly nudges, never punishment.
-        WheelPrize(kind: .funMission("לסדר את החדר 🧸"),
-                                              label: "מסדרים חדר",   emoji: "🧹", color: Color(hex: "FF6B6B")),
-        WheelPrize(kind: .funMission("להכין תיק לגן/בית ספר 🎒"),
-                                              label: "מכינים תיק",   emoji: "🎒", color: Color(hex: "FF6B9D")),
-        WheelPrize(kind: .funMission("לעזור לערוך שולחן 🍽"),
-                                              label: "עורכים שולחן", emoji: "🍽",  color: Color(hex: "FFB84D")),
-        WheelPrize(kind: .funMission("לקפל גרביים קטנים 🧦"),
-                                              label: "מקפלים גרביים", emoji: "🧦", color: Color(hex: "5B9BFF")),
+        WheelPrize(kind: .funMission("לְסַדֵּר אֶת הַחֶדֶר 🧸"),
+                                              label: "מְסַדְּרִים חֶדֶר",   emoji: "🧹", color: Color(hex: "FF6B6B")),
+        WheelPrize(kind: .funMission("לְהָכִין תִּיק לַגַּן/בֵּית סֵפֶר 🎒"),
+                                              label: "מְכִינִים תִּיק",   emoji: "🎒", color: Color(hex: "FF6B9D")),
+        WheelPrize(kind: .funMission("לַעֲזֹר לַעֲרֹךְ שֻׁלְחָן 🍽"),
+                                              label: "עוֹרְכִים שֻׁלְחָן", emoji: "🍽",  color: Color(hex: "FFB84D")),
+        WheelPrize(kind: .funMission("לְקַפֵּל גַּרְבַּיִם קְטַנִּים 🧦"),
+                                              label: "מְקַפְּלִים גַּרְבַּיִם", emoji: "🧦", color: Color(hex: "5B9BFF")),
     ]
 
     /// 8-wedge layout for one spin. Always at least 5 good wedges so the
@@ -76,21 +76,21 @@ extension WheelPrize {
         switch kind {
         case .gems(let n):
             progress.applyChestReward(ChestReward(stars: 0, gems: n, minutes: 0, cosmeticID: nil))
-            return "+\(n) גבישים נוספו לחשבון"
+            return "+\(n) גְּבִישִׁים נוֹסְפוּ לַחֶשְׁבּוֹן"
         case .xp(let n):
             progress.applyChestReward(ChestReward(stars: 0, gems: 0, minutes: 0, cosmeticID: nil))
             progress.addXP(n)
-            return "+\(n) XP נוספו"
+            return "+\(n) XP נוֹסְפוּ"
         case .minutes(let n):
             _ = progress.grantMinutesCapped(n)
-            return "+\(n) דקות נוספו לזמן המשחק"
+            return "+\(n) דַּקּוֹת נוֹסְפוּ לִזְמַן הַמִּשְׂחָק"
         case .scoreBoost(let n):
             progress.addScore(n)
-            return "+\(n) ניקוד מתנה!"
+            return "+\(n) נִקּוּד מַתָּנָה!"
         case .rareItem(let id):
             if let item = CosmeticCatalog.item(id), !cosmetics.owns(item) {
                 cosmetics.unlockFree(item)
-                return "פתחת פריט נדיר: \(item.name)!"
+                return "פָּתַחְתָּ פְּרִיט נָדִיר: \(item.name)!"
             }
             // Already owned — fall back to a nice gem consolation.
             progress.applyChestReward(ChestReward(stars: 0, gems: 15, minutes: 0, cosmeticID: nil))

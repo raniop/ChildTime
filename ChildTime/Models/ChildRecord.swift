@@ -12,10 +12,10 @@ enum LearningLevel: String, Codable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .beginner:   return "מתחיל"
-        case .developing: return "מתפתח"
-        case .proficient: return "שולט"
-        case .advanced:   return "מתקדם"
+        case .beginner:   return "מַתְחִיל"
+        case .developing: return "מִתְפַּתֵּחַ"
+        case .proficient: return "שׁוֹלֵט"
+        case .advanced:   return "מִתְקַדֵּם"
         }
     }
 
@@ -61,18 +61,18 @@ enum InterestCatalog {
     }
 
     static let all: [Interest] = [
-        Interest(id: "sports",   label: "ספורט",    emoji: "⚽️", topics: [.geography, .math]),
-        Interest(id: "space",    label: "חלל",      emoji: "🚀", topics: [.science]),
-        Interest(id: "animals",  label: "בעלי חיים", emoji: "🦁", topics: [.science]),
-        Interest(id: "flags",    label: "דגלים",    emoji: "🚩", topics: [.geography]),
-        Interest(id: "music",    label: "מוזיקה",   emoji: "🎵", topics: [.history]),
-        Interest(id: "art",      label: "אמנות",    emoji: "🎨", topics: [.history]),
-        Interest(id: "history",  label: "היסטוריה", emoji: "🏛️", topics: [.history]),
-        Interest(id: "science",  label: "מדע",      emoji: "🔬", topics: [.science]),
-        Interest(id: "english",  label: "אנגלית",   emoji: "🔤", topics: [.english]),
-        Interest(id: "numbers",  label: "מספרים",   emoji: "🔢", topics: [.math, .logic]),
-        Interest(id: "puzzles",  label: "חידות",    emoji: "🧩", topics: [.logic]),
-        Interest(id: "geography",label: "מדינות",   emoji: "🌍", topics: [.geography]),
+        Interest(id: "sports",   label: "סְפּוֹרְט",    emoji: "⚽️", topics: [.geography, .math]),
+        Interest(id: "space",    label: "חָלָל",      emoji: "🚀", topics: [.science]),
+        Interest(id: "animals",  label: "בַּעֲלֵי חַיִּים", emoji: "🦁", topics: [.science]),
+        Interest(id: "flags",    label: "דְּגָלִים",    emoji: "🚩", topics: [.geography]),
+        Interest(id: "music",    label: "מוּזִיקָה",   emoji: "🎵", topics: [.history]),
+        Interest(id: "art",      label: "אָמָנוּת",    emoji: "🎨", topics: [.history]),
+        Interest(id: "history",  label: "הִיסְטוֹרְיָה", emoji: "🏛️", topics: [.history]),
+        Interest(id: "science",  label: "מַדָּע",      emoji: "🔬", topics: [.science]),
+        Interest(id: "english",  label: "אַנְגְּלִית",   emoji: "🔤", topics: [.english]),
+        Interest(id: "numbers",  label: "מִסְפָּרִים",   emoji: "🔢", topics: [.math, .logic]),
+        Interest(id: "puzzles",  label: "חִידוֹת",    emoji: "🧩", topics: [.logic]),
+        Interest(id: "geography",label: "מְדִינוֹת",   emoji: "🌍", topics: [.geography]),
     ]
 
     static func find(_ id: String) -> Interest? { all.first { $0.id == id } }

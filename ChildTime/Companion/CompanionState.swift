@@ -41,7 +41,7 @@ final class CompanionController {
 
     func console(_ text: String? = nil) {
         state = .console
-        bubbleText = text ?? "כמעט!"
+        bubbleText = text ?? "כִּמְעַט!"
         Haptic.soft()
         scheduleReturnToIdle(after: 1.6)
     }

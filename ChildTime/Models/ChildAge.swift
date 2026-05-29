@@ -19,10 +19,10 @@ enum ChildAge: Int, Codable, CaseIterable, Identifiable {
 
     var description: String {
         switch self {
-        case .preK:   return "גן וטרום"
-        case .grade1: return "כיתות א-ב"
-        case .grade3: return "כיתות ג-ד"
-        case .older:  return "כיתה ה ומעלה"
+        case .preK:   return "גַּן וּטְרוֹם"
+        case .grade1: return "כִּתּוֹת א-ב"
+        case .grade3: return "כִּתּוֹת ג-ד"
+        case .older:  return "כִּתָּה ה וּמַעְלָה"
         }
     }
 

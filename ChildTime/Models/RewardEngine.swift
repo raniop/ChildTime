@@ -90,10 +90,10 @@ enum ChestKind: String, Codable {
 
     var label: String {
         switch self {
-        case .wood: return "קופסת עץ"
-        case .gold: return "קופסת זהב"
-        case .magic: return "קופסת קסם"
-        case .legendary: return "קופסת אגדה"
+        case .wood: return "קֻפְסַת עֵץ"
+        case .gold: return "קֻפְסַת זָהָב"
+        case .magic: return "קֻפְסַת קֶסֶם"
+        case .legendary: return "קֻפְסַת אַגָּדָה"
         }
     }
 }

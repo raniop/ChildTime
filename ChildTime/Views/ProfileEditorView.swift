@@ -67,7 +67,7 @@ struct ProfileEditorView: View {
                             Button(role: .destructive) {
                                 showDeleteConfirm = true
                             } label: {
-                                Label("מחק פרופיל", systemImage: "trash")
+                                Label("מְחַק פְּרוֹפִיל", systemImage: "trash")
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
@@ -76,17 +76,17 @@ struct ProfileEditorView: View {
                             }
                             .padding(.top, AppSpacing.md)
                             .confirmationDialog(
-                                "למחוק את הפרופיל של \(name)?",
+                                "לִמְחוֹק אֶת הַפְּרוֹפִיל שֶׁל \(name)?",
                                 isPresented: $showDeleteConfirm,
                                 titleVisibility: .visible
                             ) {
-                                Button("מחק", role: .destructive) {
+                                Button("מְחַק", role: .destructive) {
                                     if case .edit(let p) = mode {
                                         onDelete?(p)
                                     }
                                     _ = id  // silence unused
                                 }
-                                Button("בטל", role: .cancel) {}
+                                Button("בַּטֵּל", role: .cancel) {}
                             }
                         }
                     }
@@ -97,14 +97,14 @@ struct ProfileEditorView: View {
                 }
             }
             .dismissKeyboardOnTap()
-            .navigationTitle(isEdit ? "ערוך פרופיל" : "פרופיל חדש")
+            .navigationTitle(isEdit ? "עֲרֹךְ פְּרוֹפִיל" : "פְּרוֹפִיל חָדָשׁ")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("בטל") { dismiss() }
+                    Button("בַּטֵּל") { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("שמור") { save() }
+                    Button("שְׁמֹר") { save() }
                         .disabled(!canSave)
                         .fontWeight(.bold)
                 }
@@ -145,10 +145,10 @@ struct ProfileEditorView: View {
 
     private var nameField: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("שם")
+            Text("שֵׁם")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
-            TextField("איך קוראים לך?", text: $name)
+            TextField("אֵיךְ קוֹרְאִים לְךָ?", text: $name)
                 .font(.system(size: 20, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
                 .textInputAutocapitalization(.words)
@@ -160,7 +160,7 @@ struct ProfileEditorView: View {
 
     private var genderRow: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("ילד או ילדה?")
+            Text("יֶלֶד אוֹ יַלְדָּה?")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             HStack(spacing: AppSpacing.md) {
@@ -200,7 +200,7 @@ struct ProfileEditorView: View {
 
     private var ageRow: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("בן/בת כמה?")
+            Text("בֶּן/בַּת כַּמָּה?")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 6) {
@@ -241,7 +241,7 @@ struct ProfileEditorView: View {
 
     private var learningLevelRow: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("רמת למידה התחלתית")
+            Text("רָמַת לְמִידָה הַתְחָלָתִית")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 6) {
@@ -272,7 +272,7 @@ struct ProfileEditorView: View {
 
     private var interestsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("תחומי עניין (לפיד החכם)")
+            Text("תְּחוּמֵי עִנְיָן (לַפִּיד הֶחָכָם)")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
@@ -304,7 +304,7 @@ struct ProfileEditorView: View {
 
     private var avatarPresetGrid: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("🙂 בחר פרצוף")
+            Text("🙂 בְּחַר פַּרְצוּף")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
 
@@ -347,14 +347,14 @@ struct ProfileEditorView: View {
 
     private var photoControls: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("📷 או העלה תמונה (אופציונלי)")
+            Text("📷 אוֹ הַעֲלֵה תְּמוּנָה (אוֹפְּצִיוֹנָלִי)")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 10) {
                 Button {
                     showPicker = true
                 } label: {
-                    Label(photoData == nil ? "בחר תמונה" : "החלף תמונה",
+                    Label(photoData == nil ? "בְּחַר תְּמוּנָה" : "הַחְלֵף תְּמוּנָה",
                           systemImage: "photo.on.rectangle.angled")
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white)
@@ -367,7 +367,7 @@ struct ProfileEditorView: View {
                     Button(role: .destructive) {
                         photoData = nil
                     } label: {
-                        Label("הסר", systemImage: "trash")
+                        Label("הָסֵר", systemImage: "trash")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.8))
                             .padding(.horizontal, AppSpacing.md)

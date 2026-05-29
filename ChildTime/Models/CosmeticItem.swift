@@ -16,14 +16,14 @@ enum CosmeticCategory: String, Codable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .hat:       return "כובעים"
-        case .glasses:   return "משקפיים"
-        case .shirt:     return "חולצות"
-        case .pants:     return "מכנסיים"
-        case .shoes:     return "נעליים"
-        case .accessory: return "אקססוריז"
-        case .backpack:  return "תיקים"
-        case .vehicle:   return "גלגלים"
+        case .hat:       return "כּוֹבָעִים"
+        case .glasses:   return "מִשְׁקָפַיִם"
+        case .shirt:     return "חֻלְצוֹת"
+        case .pants:     return "מִכְנָסַיִם"
+        case .shoes:     return "נַעֲלַיִם"
+        case .accessory: return "אַקְסֶסוֹרִיז"
+        case .backpack:  return "תִּיקִים"
+        case .vehicle:   return "גַּלְגַּלִּים"
         }
     }
 
@@ -77,10 +77,10 @@ enum CosmeticRarity: String, Codable, CaseIterable, Comparable {
 
     var label: String {
         switch self {
-        case .common:    return "רגיל"
-        case .rare:      return "נדיר"
-        case .epic:      return "אגדי"
-        case .legendary: return "נדיר במיוחד"
+        case .common:    return "רָגִיל"
+        case .rare:      return "נָדִיר"
+        case .epic:      return "אַגָּדִי"
+        case .legendary: return "נָדִיר בִּמְיֻחָד"
         }
     }
 

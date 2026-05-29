@@ -37,7 +37,7 @@ struct LevelUpView: View {
 
                         if titleVisible {
                             VStack(spacing: AppSpacing.md) {
-                                Text("עלית רמה!")
+                                Text("עָלִיתָ רָמָה!")
                                     .font(.system(size: titleFontSize, weight: .heavy, design: .rounded))
                                     .foregroundStyle(AppColor.starGold)
                                     .glow(AppColor.starGold, radius: 20)
@@ -45,7 +45,7 @@ struct LevelUpView: View {
                                     .minimumScaleFactor(0.6)
                                     .transition(.scale.combined(with: .opacity))
 
-                                Text("רמה \(newLevel)")
+                                Text("רָמָה \(newLevel)")
                                     .font(.system(size: levelFontSize, weight: .bold, design: .rounded))
                                     .foregroundStyle(.white)
                                     .transition(.scale.combined(with: .opacity))
@@ -65,7 +65,7 @@ struct LevelUpView: View {
                         JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
                             onContinue()
                         } label: {
-                            Text("המשך")
+                            Text("הַמְשֵׁךְ")
                                 .font(.system(size: 28, weight: .bold, design: .rounded))
                         }
                         .padding(.horizontal, AppSpacing.lg)
@@ -101,9 +101,9 @@ struct LevelUpView: View {
 
     private func perkForLevel(_ lvl: Int) -> String? {
         switch lvl {
-        case 5: return "🎩 כובע נפתח!"
-        case 10: return "✨ כנפיים נפתחות!"
-        case 20: return "🌈 צבעים נדירים!"
+        case 5: return "🎩 כּוֹבַע נִפְתָּח!"
+        case 10: return "✨ כְּנָפַיִם נִפְתָּחוֹת!"
+        case 20: return "🌈 צְבָעִים נְדִירִים!"
         default: return nil
         }
     }

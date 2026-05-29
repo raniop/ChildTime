@@ -13,13 +13,13 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .math:      return "חשבון"
-        case .english:   return "אנגלית"
-        case .hebrew:    return "עברית"
-        case .logic:     return "לוגיקה"
-        case .science:   return "מדע"
-        case .history:   return "היסטוריה"
-        case .geography: return "גיאוגרפיה"
+        case .math:      return "חֶשְׁבּוֹן"
+        case .english:   return "אַנְגְּלִית"
+        case .hebrew:    return "עִבְרִית"
+        case .logic:     return "לוֹגִיקָה"
+        case .science:   return "מַדָּע"
+        case .history:   return "הִיסְטוֹרְיָה"
+        case .geography: return "גֵּאוֹגְרַפְיָה"
         }
     }
 
@@ -45,9 +45,9 @@ enum Difficulty: String, CaseIterable, Codable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .easy: return "קל"
-        case .medium: return "בינוני"
-        case .hard: return "קשה"
+        case .easy: return "קַל"
+        case .medium: return "בֵּינוֹנִי"
+        case .hard: return "קָשֶׁה"
         }
     }
 }

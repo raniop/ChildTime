@@ -25,7 +25,7 @@ struct DailyChestView: View {
             VStack(spacing: AppSpacing.lg) {
                 Spacer()
 
-                Text("🎁 קופסת קסם יומית")
+                Text("🎁 קֻפְסַת קֶסֶם יוֹמִית")
                     .font(AppFont.title())
                     .foregroundStyle(.white)
                     .glow(AppColor.gemPurple, radius: 12)
@@ -37,7 +37,7 @@ struct DailyChestView: View {
                     .padding(.vertical, AppSpacing.lg)
 
                 if stage == .glowing {
-                    Text("טאפ לפתוח!")
+                    Text("טַאפּ לִפְתֹּחַ!")
                         .font(AppFont.subtitle())
                         .foregroundStyle(.white)
                         .pulse()
@@ -46,15 +46,15 @@ struct DailyChestView: View {
                 if stage == .revealed {
                     VStack(spacing: AppSpacing.md) {
                         if revealed >= 1 {
-                            row(emoji: "⭐", text: "+\(reward.stars) כוכבים")
+                            row(emoji: "⭐", text: "+\(reward.stars) כּוֹכָבִים")
                                 .transition(.scale.combined(with: .opacity))
                         }
                         if revealed >= 2 {
-                            row(emoji: "💎", text: "+\(reward.gems) גבישים")
+                            row(emoji: "💎", text: "+\(reward.gems) גְּבִישִׁים")
                                 .transition(.scale.combined(with: .opacity))
                         }
                         if revealed >= 3 {
-                            row(emoji: "⏱", text: "+\(reward.minutes) דקות")
+                            row(emoji: "⏱", text: "+\(reward.minutes) דַּקּוֹת")
                                 .transition(.scale.combined(with: .opacity))
                         }
                     }
@@ -67,7 +67,7 @@ struct DailyChestView: View {
                     JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
                         dismiss()
                     } label: {
-                        Text("המשך")
+                        Text("הַמְשֵׁךְ")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
                     }
                     .padding(.horizontal, AppSpacing.lg)
@@ -94,7 +94,7 @@ struct DailyChestView: View {
         }
         .onAppear {
             reward = RewardEngine.chestContents(kind: .magic, correctInSession: 0, minutesPerCorrect: 0)
-            companion.cheer("חיכיתי לך!")
+            companion.cheer("חִכִּיתִי לְךָ!")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 stage = .glowing
             }
@@ -121,7 +121,7 @@ struct DailyChestView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             stage = .revealed
             confettiTrigger += 1
-            companion.wow("טא-דה!")
+            companion.wow("טָא-דָה!")
             progress.applyChestReward(reward)
             progress.openDailyChest()
             revealItems()

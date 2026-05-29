@@ -36,7 +36,7 @@ enum Worlds {
     static let all: [World] = [
         World(
             id: "math_kingdom",
-            name: "ממלכת החשבון",
+            name: "מַמְלֶכֶת הַחֶשְׁבּוֹן",
             emoji: "🧮",
             topic: .math,
             starsToUnlock: 0,
@@ -46,7 +46,7 @@ enum Worlds {
         ),
         World(
             id: "english_land",
-            name: "ארץ אנגלית",
+            name: "אֶרֶץ אַנְגְּלִית",
             emoji: "🔤",
             topic: .english,
             starsToUnlock: 0,
@@ -56,7 +56,7 @@ enum Worlds {
         ),
         World(
             id: "hebrew_land",
-            name: "ארץ העברית",
+            name: "אֶרֶץ הָעִבְרִית",
             emoji: "✍️",
             topic: .hebrew,
             starsToUnlock: 0,
@@ -66,7 +66,7 @@ enum Worlds {
         ),
         World(
             id: "logic_lab",
-            name: "חידות הלוגיקה",
+            name: "חִידוֹת הַלּוֹגִיקָה",
             emoji: "🧩",
             topic: .logic,
             starsToUnlock: 0,
@@ -76,7 +76,7 @@ enum Worlds {
         ),
         World(
             id: "science_lab",
-            name: "מעבדת המדע",
+            name: "מַעְבְּדַת הַמַּדָּע",
             emoji: "🔬",
             topic: .science,
             starsToUnlock: 0,
@@ -86,7 +86,7 @@ enum Worlds {
         ),
         World(
             id: "history_museum",
-            name: "מוזיאון ההיסטוריה",
+            name: "מוּזֵיאוֹן הַהִיסְטוֹרְיָה",
             emoji: "🏛️",
             topic: .history,
             starsToUnlock: 0,
@@ -96,7 +96,7 @@ enum Worlds {
         ),
         World(
             id: "geo_journey",
-            name: "מסע סביב העולם",
+            name: "מַסָּע סְבִיב הָעוֹלָם",
             emoji: "🌍",
             topic: .geography,
             starsToUnlock: 0,

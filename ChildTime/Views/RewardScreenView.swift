@@ -51,7 +51,7 @@ struct RewardScreenView: View {
                             heroTitle
                             chestBlock
                             if stage == .glowing {
-                                Text("לחץ כדי לפתוח! ✨")
+                                Text("לְחַץ כְּדֵי לִפְתֹּחַ! ✨")
                                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                                     .foregroundStyle(.white)
                                     .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
@@ -114,7 +114,7 @@ struct RewardScreenView: View {
                 Text("🎉")
                     .font(.system(size: celebEmojiSize))
                     .shadow(color: AppColor.starGold.opacity(0.6), radius: 10)
-                Text("איזה ניצחון!")
+                Text("אֵיזֶה נִצָּחוֹן!")
                     .font(.system(size: isCompact ? 30 : 40, weight: .heavy, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
@@ -184,13 +184,13 @@ struct RewardScreenView: View {
     private var rewardItems: some View {
         VStack(spacing: 10) {
             if revealedItems >= 1 {
-                rewardPill(emoji: "⭐", value: reward.stars, label: "כוכבים", color: AppColor.starGold)
+                rewardPill(emoji: "⭐", value: reward.stars, label: "כּוֹכָבִים", color: AppColor.starGold)
             }
             if revealedItems >= 2 && reward.gems > 0 {
-                rewardPill(emoji: "💎", value: reward.gems, label: "גבישים", color: AppColor.gemPurple)
+                rewardPill(emoji: "💎", value: reward.gems, label: "גְּבִישִׁים", color: AppColor.gemPurple)
             }
             if revealedItems >= 3 && reward.minutes > 0 {
-                rewardPill(emoji: "⏱", value: reward.minutes, label: "דקות משחק", color: AppColor.successMint)
+                rewardPill(emoji: "⏱", value: reward.minutes, label: "דַּקּוֹת מִשְׂחָק", color: AppColor.successMint)
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)
@@ -241,7 +241,7 @@ struct RewardScreenView: View {
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "gamecontroller.fill")
-                        Text("פתחו לי \(progress.pendingMinutes) דק' 🎮")
+                        Text("פִּתְחוּ לִי \(progress.pendingMinutes) דַּק' 🎮")
                     }
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                 }
@@ -250,7 +250,7 @@ struct RewardScreenView: View {
             Button {
                 proceedAfterReward()
             } label: {
-                Text("המשך")
+                Text("הַמְשֵׁךְ")
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl)
@@ -273,7 +273,7 @@ struct RewardScreenView: View {
             minutesPerCorrect: settings.minutesPerCorrect
         )
         SoundPlayer.shared.play(.chestOpen)
-        companion.cheer("שיחקת מצוין!")
+        companion.cheer("שִׂחַקְתָּ מְצֻיָּן!")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             stage = .glowing
         }
@@ -286,7 +286,7 @@ struct RewardScreenView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             stage = .revealed
             confettiTrigger += 1
-            companion.wow("טא-דה!")
+            companion.wow("טָא-דָה!")
             revealItemsOneByOne()
             applyReward()
         }

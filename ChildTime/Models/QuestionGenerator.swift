@@ -107,8 +107,8 @@ struct QuestionGenerator {
         guard let item = QuestionMemory.shared.pickFresh(bank, for: topic) else {
             return Question(
                 topic: topic,
-                prompt: "אופס... אין שאלות לנושא הזה עדיין",
-                options: ["בסדר", "המשך", "תודה", "חזור"],
+                prompt: "אוֹפְּס... אֵין שְׁאֵלוֹת לַנּוֹשֵׂא הַזֶּה עֲדַיִן",
+                options: ["בְּסֵדֶר", "הַמְשֵׁךְ", "תּוֹדָה", "חֲזוֹר"],
                 correctIndex: 0
             )
         }

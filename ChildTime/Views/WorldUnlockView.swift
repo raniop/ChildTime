@@ -34,7 +34,7 @@ struct WorldUnlockView: View {
 
                         if stage >= 2 {
                             VStack(spacing: AppSpacing.md) {
-                                Text("עולם חדש נפתח!")
+                                Text("עוֹלָם חָדָשׁ נִפְתַּח!")
                                     .font(.system(size: subtitleFontSize, weight: .bold, design: .rounded))
                                     .foregroundStyle(.white.opacity(0.85))
                                     .multilineTextAlignment(.center)
@@ -56,7 +56,7 @@ struct WorldUnlockView: View {
                             JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
                                 onContinue()
                             } label: {
-                                Text("בוא נחקור!")
+                                Text("בּוֹא נַחְקֹר!")
                                     .font(.system(size: 28, weight: .bold, design: .rounded))
                             }
                             .padding(.horizontal, AppSpacing.lg)

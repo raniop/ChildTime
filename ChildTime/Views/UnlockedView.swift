@@ -27,7 +27,7 @@ struct UnlockedView: View {
                     .float()
                     .glow(AppColor.successMint, radius: 24)
 
-                Text("זמן משחק!")
+                Text("זְמַן מִשְׂחָק!")
                     .font(.system(size: titleSize, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .glow(AppColor.successMint, radius: 14)
@@ -38,7 +38,7 @@ struct UnlockedView: View {
                         .foregroundStyle(.white)
                         .glow(AppColor.starGold, radius: 12)
                         .contentTransition(.numericText())
-                    Text("נותרו")
+                    Text("נוֹתְרוּ")
                         .font(.system(size: 22, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.7))
                 }
@@ -46,7 +46,7 @@ struct UnlockedView: View {
                 .padding(.vertical, AppSpacing.xxl)
                 .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous))
 
-                Text("עכשיו אפשר לעבור לאפליקציה שאתה רוצה לשחק בה 🚀")
+                Text("עַכְשָׁו אֶפְשָׁר לַעֲבֹר לָאַפְּלִיקַצְיָה שֶׁאַתָּה רוֹצֶה לְשַׂחֵק בָּהּ 🚀")
                     .font(.system(size: 20, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
@@ -57,7 +57,7 @@ struct UnlockedView: View {
                 Button {
                     endEarly()
                 } label: {
-                    Text("סיימתי לשחק")
+                    Text("סִיַּמְתִּי לְשַׂחֵק")
                         .font(.system(size: 22, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, AppSpacing.xl)
@@ -85,7 +85,7 @@ struct UnlockedView: View {
             if !greeted {
                 greeted = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    companion.cheer("שיחק יפה!")
+                    companion.cheer("שִׂחַקְתָּ יָפֶה!")
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     companion.state = .sleep

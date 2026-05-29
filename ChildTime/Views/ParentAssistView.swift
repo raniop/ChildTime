@@ -12,22 +12,22 @@ struct ParentAssistView: View {
     var body: some View {
         VStack(spacing: AppSpacing.lg) {
             Text("🤔").font(.system(size: 72))
-            Text("רוצה עזרה בשאלה הזו?")
+            Text("רוֹצֶה עֶזְרָה בַּשְּׁאֵלָה הַזּוֹ?")
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
             if sent {
-                Text("שלחנו בקשת עזרה 💌")
+                Text("שָׁלַחְנוּ בַּקָּשַׁת עֶזְרָה 💌")
                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                     .foregroundStyle(AppColor.successMint)
             } else {
                 VStack(spacing: AppSpacing.sm) {
                     ForEach(parentOptions, id: \.self) { parent in
-                        assistButton("👨‍👩‍👧 בקש עזרה מ\(parent)") { askParent() }
+                        assistButton("👨‍👩‍👧 בַּקֵּשׁ עֶזְרָה מ\(parent)") { askParent() }
                     }
                     if parentOptions.isEmpty {
-                        assistButton("💌 בקש עזרה מהורה") { askParent() }
+                        assistButton("💌 בַּקֵּשׁ עֶזְרָה מֵהוֹרֶה") { askParent() }
                     }
                 }
             }
@@ -35,7 +35,7 @@ struct ParentAssistView: View {
             Button {
                 onContinue(); dismiss()
             } label: {
-                Text("🚀 אמשיך לבד")
+                Text("🚀 אַמְשִׁיךְ לְבַד")
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)

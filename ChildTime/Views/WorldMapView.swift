@@ -64,13 +64,13 @@ struct WorldMapView: View {
                         ) {
                             FeatureCard(
                                 emoji: "🧠",
-                                title: "הרפתקה חכמה",
-                                subtitle: "שאלות במיוחד בשבילך",
+                                title: "הַרְפַּתְקָה חֲכָמָה",
+                                subtitle: "שְׁאֵלוֹת בִּמְיֻחָד בִּשְׁבִילְךָ",
                                 gradient: AppGradient.portal,
                                 glowColor: AppColor.companionGlow
                             ) {
                                 Haptic.light()
-                                companion.cheer("יאללה, הרפתקה חכמה! 🧠")
+                                companion.cheer("יַאלְלָה, הַרְפַּתְקָה חֲכָמָה! 🧠")
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                     showingSmartFeed = true
                                 }
@@ -386,34 +386,34 @@ struct WorldMapView: View {
         case .score:
             return InfoContent(
                 emoji: "🏆",
-                title: "ניקוד",
-                subtitle: "סך הנקודות שלך",
-                body: "נקודות נצברות על כל תשובה נכונה. שאלות קשות יותר, רצפים ושאלות זהב שוות יותר נקודות!",
-                tip: "הניקוד ממשיך לעלות ככל שאתה לומד — נסה לשבור את השיא שלך."
+                title: "נִקּוּד",
+                subtitle: "סַךְ הַנְּקֻדּוֹת שֶׁלְּךָ",
+                body: "נְקֻדּוֹת נִצְבָּרוֹת עַל כָּל תְּשׁוּבָה נְכוֹנָה. שְׁאֵלוֹת קָשׁוֹת יוֹתֵר, רְצָפִים וּשְׁאֵלוֹת זָהָב שָׁווֹת יוֹתֵר נְקֻדּוֹת!",
+                tip: "הַנִּקּוּד מַמְשִׁיךְ לַעֲלוֹת כְּכָל שֶׁאַתָּה לוֹמֵד — נַסֵּה לִשְׁבֹּר אֶת הַשִּׂיא שֶׁלְּךָ."
             )
         case .minutes:
             return InfoContent(
                 emoji: "🎮",
-                title: "דקות משחק",
-                subtitle: "מה שצברת",
-                body: "אלה הדקות שהרווחת כדי לשחק באפליקציות שההורה אישר. כל תשובה נכונה = עוד דקות!",
-                tip: "לחץ על 'פתחו לי X דקות' למטה כדי להתחיל לשחק."
+                title: "דַּקּוֹת מִשְׂחָק",
+                subtitle: "מַה שֶּׁצָּבַרְתָּ",
+                body: "אֵלֶּה הַדַּקּוֹת שֶׁהִרְוַחְתָּ כְּדֵי לְשַׂחֵק בָּאַפְּלִיקַצְיוֹת שֶׁהַהוֹרֶה אִשֵּׁר. כָּל תְּשׁוּבָה נְכוֹנָה = עוֹד דַּקּוֹת!",
+                tip: "לְחַץ עַל 'פִּתְחוּ לִי X דַּקּוֹת' לְמַטָּה כְּדֵי לְהַתְחִיל לְשַׂחֵק."
             )
         case .stars:
             return InfoContent(
                 emoji: "⭐",
-                title: "כוכבים",
-                subtitle: "ההישגים שלך",
-                body: "כוכבים מצטברים על כל תשובה נכונה. רצף תשובות נותן בונוס × 2 ו-× 3!",
-                tip: "ככל שמצטברים יותר כוכבים, טופי עולה רמה."
+                title: "כּוֹכָבִים",
+                subtitle: "הַהֶשֵּׂגִים שֶׁלְּךָ",
+                body: "כּוֹכָבִים מִצְטַבְּרִים עַל כָּל תְּשׁוּבָה נְכוֹנָה. רֶצֶף תְּשׁוּבוֹת נוֹתֵן בּוֹנוּס × 2 וְ-× 3!",
+                tip: "כְּכָל שֶׁמִּצְטַבְּרִים יוֹתֵר כּוֹכָבִים, טוֹפִי עוֹלֶה רָמָה."
             )
         case .gems:
             return InfoContent(
                 emoji: "💎",
-                title: "גבישים",
-                subtitle: "המטבע הנדיר",
-                body: "גבישים נופלים לפעמים מתשובות נכונות, ותקבל גם בקופסת הזהב.",
-                tip: "בקרוב — קוסמטיקה לטופי שניתן לקנות איתם 🎩"
+                title: "גְּבִישִׁים",
+                subtitle: "הַמַּטְבֵּעַ הַנָּדִיר",
+                body: "גְּבִישִׁים נוֹפְלִים לִפְעָמִים מִתְּשׁוּבוֹת נְכוֹנוֹת, וּתְקַבֵּל גַּם בְּקֻפְסַת הַזָּהָב.",
+                tip: "בְּקָרוֹב — קוֹסְמֵטִיקָה לְטוֹפִי שֶׁנִּתָּן לִקְנוֹת אִתָּם 🎩"
             )
         }
     }
@@ -446,7 +446,7 @@ struct WorldMapView: View {
 
     private var heroTitle: some View {
         VStack(spacing: 4) {
-            Text("טופי")
+            Text("טוֹפִי")
                 .font(.system(size: heroTitleSize, weight: .heavy, design: .rounded))
                 .foregroundStyle(
                     LinearGradient(
@@ -459,14 +459,14 @@ struct WorldMapView: View {
                 .scaleEffect(heroAppeared ? 1 : 0.5)
                 .opacity(heroAppeared ? 1 : 0)
 
-            Text("בחר עולם והתחל הרפתקה!")
+            Text("בְּחַר עוֹלָם וְהַתְחֵל הַרְפַּתְקָה!")
                 .font(.system(size: isCompact ? 16 : 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.75))
                 .opacity(heroAppeared ? 1 : 0)
 
             // XP bar — small, below subtitle
             HStack(spacing: 8) {
-                Text("רמת טופי \(progress.companionLevel)")
+                Text("רָמַת טוֹפִי \(progress.companionLevel)")
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
                 XPBarMini(
@@ -496,7 +496,7 @@ struct WorldMapView: View {
             // Primary Earn-to-Unlock entry — answer up to 30 questions for minutes.
             Button {
                 Haptic.light()
-                companion.cheer("בוא נרוויח זמן מסך! ⏱️")
+                companion.cheer("בּוֹא נַרְוִיחַ זְמַן מָסָךְ! ⏱️")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     showingEarn = true
                 }
@@ -505,9 +505,9 @@ struct WorldMapView: View {
                     Image(systemName: "timer")
                         .font(.system(size: 24))
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text("הרוויחו זמן מסך")
+                        Text("הַרְוִיחוּ זְמַן מָסָךְ")
                             .font(.system(size: 20, weight: .heavy, design: .rounded))
-                        Text("עד 30 שאלות = דקות משחק")
+                        Text("עַד 30 שְׁאֵלוֹת = דַּקּוֹת מִשְׂחָק")
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
                     }
@@ -533,9 +533,9 @@ struct WorldMapView: View {
                     HStack(spacing: 12) {
                         Text("🎁").font(.system(size: 30))
                         VStack(alignment: .trailing, spacing: 2) {
-                            Text("קופסה יומית מחכה!")
+                            Text("קֻפְסָה יוֹמִית מְחַכָּה!")
                                 .font(.system(size: 19, weight: .heavy, design: .rounded))
-                            Text("טאפ לפתוח")
+                            Text("טַאפּ לִפְתֹּחַ")
                                 .font(.system(size: 13, weight: .medium, design: .rounded))
                                 .foregroundStyle(.white.opacity(0.8))
                         }
@@ -563,7 +563,7 @@ struct WorldMapView: View {
                     HStack(spacing: 10) {
                         Image(systemName: "gamecontroller.fill")
                             .font(.system(size: 24))
-                        Text("פתחו לי \(progress.pendingMinutes) דקות לשחק")
+                        Text("פִּתְחוּ לִי \(progress.pendingMinutes) דַּקּוֹת לְשַׂחֵק")
                             .font(.system(size: 22, weight: .heavy, design: .rounded))
                     }
                     .foregroundStyle(.white)
@@ -585,11 +585,11 @@ struct WorldMapView: View {
 
     private func greetIfNeeded() {
         if progress.dayStreak == 0 {
-            companion.cheer("היי! יאללה להרפתקה 🌟")
+            companion.cheer("הֵיי! יַאלְלָה לְהַרְפַּתְקָה 🌟")
         } else if progress.dayStreak == 1 {
-            companion.cheer("ברוך הבא! 👋")
+            companion.cheer("בָּרוּךְ הַבָּא! 👋")
         } else {
-            companion.cheer("חזרת! \(progress.dayStreak) ימים ברצף 🔥")
+            companion.cheer("חָזַרְתָּ! \(progress.dayStreak) יָמִים בְּרֶצֶף 🔥")
         }
     }
 
@@ -608,7 +608,7 @@ struct WorldMapView: View {
         for world in Worlds.all where !progress.unlockedWorlds.contains(world.id) {
             if progress.canUnlock(world: world) {
                 progress.unlockWorld(world.id)
-                companion.wow("\(world.emoji) \(world.name) נפתח!")
+                companion.wow("\(world.emoji) \(world.name) נִפְתַּח!")
             }
         }
     }

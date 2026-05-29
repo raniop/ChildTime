@@ -81,7 +81,7 @@ struct WorldDetailView: View {
 
                     HStack(spacing: 8) {
                         Image(systemName: "door.left.hand.open")
-                        Text("חדר \(currentRoom + 1) מתוך \(world.rooms)")
+                        Text("חֶדֶר \(currentRoom + 1) מִתּוֹךְ \(world.rooms)")
                             .font(.system(size: 22, weight: .semibold, design: .rounded))
                     }
                     .foregroundStyle(.white.opacity(0.9))
@@ -110,11 +110,11 @@ struct WorldDetailView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "questionmark.circle.fill")
                             .foregroundStyle(.white)
-                        Text("\(settings.questionsPerSession) שאלות → 🎁 קופסה")
+                        Text("\(settings.questionsPerSession) שְׁאֵלוֹת → 🎁 קֻפְסָה")
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                     }
-                    Text("כל תשובה נכונה = \(rewardPerCorrect) דקות משחק")
+                    Text("כָּל תְּשׁוּבָה נְכוֹנָה = \(rewardPerCorrect) דַּקּוֹת מִשְׂחָק")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                 }
@@ -129,12 +129,12 @@ struct WorldDetailView: View {
 
                 // Start button
                 JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-                    companion.cheer("יאללה!")
+                    companion.cheer("יַאללָה!")
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                         startSession = true
                     }
                 } label: {
-                    Label("יאללה! 🚀", systemImage: "play.fill")
+                    Label("יַאללָה! 🚀", systemImage: "play.fill")
                         .font(.system(size: ctaSize, weight: .heavy, design: .rounded))
                 }
                 .padding(.horizontal, AppSpacing.lg)
@@ -147,7 +147,7 @@ struct WorldDetailView: View {
                 heroAppeared = true
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                companion.cheer("מוכן לחדר \(currentRoom + 1)?")
+                companion.cheer("מוּכָן לְחֶדֶר \(currentRoom + 1)?")
             }
         }
         .fullScreenCover(isPresented: $startSession) {

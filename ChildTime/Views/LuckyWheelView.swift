@@ -75,7 +75,7 @@ struct LuckyWheelView: View {
         VStack(spacing: 4) {
             Text("🎡")
                 .font(.system(size: isCompact ? 44 : 56))
-            Text("גלגל מזל!")
+            Text("גַּלְגַּל מַזָּל!")
                 .font(.system(size: isCompact ? 32 : 44, weight: .heavy, design: .rounded))
                 .foregroundStyle(
                     LinearGradient(
@@ -85,7 +85,7 @@ struct LuckyWheelView: View {
                 )
                 .shadow(color: AppColor.starGold.opacity(0.7), radius: 10)
             if winner == nil {
-                Text("הקש על הגלגל כדי לסובב")
+                Text("הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב")
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
             }
@@ -131,7 +131,7 @@ struct LuckyWheelView: View {
         VStack(spacing: 10) {
             Text(prize.emoji)
                 .font(.system(size: 54))
-            Text(prize.isPenalty ? "משימה משפחתית 🤗" : "זכית!")
+            Text(prize.isPenalty ? "מְשִׂימָה מִשְׁפַּחְתִּית 🤗" : "זָכִיתָ!")
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(prize.isPenalty ? AppColor.companionGlow : AppColor.starGold)
             Text(prize.label)
@@ -163,9 +163,9 @@ struct LuckyWheelView: View {
 
     private var primaryButton: some View {
         let label: String = {
-            if winner != nil { return "אחלה — סגור" }
-            if isSpinning   { return "מסתובב…" }
-            return "סובב!"
+            if winner != nil { return "אַחְלָה — סְגֹר" }
+            if isSpinning   { return "מִסְתּוֹבֵב…" }
+            return "סוֹבֵב!"
         }()
         return JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
             if winner != nil { onClose() }
@@ -182,7 +182,7 @@ struct LuckyWheelView: View {
             Haptic.light()
             onClose()
         } label: {
-            Text(winner == nil ? "דלג הפעם" : "סגור")
+            Text(winner == nil ? "דַּלֵּג הַפַּעַם" : "סְגֹר")
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.75))
                 .underline()

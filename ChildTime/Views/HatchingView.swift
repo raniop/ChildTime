@@ -51,7 +51,7 @@ struct HatchingView: View {
                 .frame(height: 300)
 
                 if bubbleVisible {
-                    BubbleSpeech(text: "היי! חיכיתי לך... אני טופי! 💫")
+                    BubbleSpeech(text: "הֵיי! חִכִּיתִי לְךָ... אֲנִי טוֹפִּי! 💫")
                         .transition(.scale.combined(with: .opacity))
                 }
 
@@ -61,7 +61,7 @@ struct HatchingView: View {
                     JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
                         onContinue()
                     } label: {
-                        Text("בוא נצא להרפתקה!")
+                        Text("בּוֹא נֵצֵא לְהַרְפַּתְקָה!")
                             .font(.system(size: ctaSize, weight: .heavy, design: .rounded))
                     }
                     .padding(.horizontal, AppSpacing.xl)
@@ -73,7 +73,7 @@ struct HatchingView: View {
             if stage == 0 {
                 VStack {
                     Spacer()
-                    Text("טאפ על הביצה")
+                    Text("טַאפּ עַל הַבֵּיצָה")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .pulse()

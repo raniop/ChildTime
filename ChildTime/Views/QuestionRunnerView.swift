@@ -245,7 +245,7 @@ struct QuestionRunnerView: View {
             Button { endSession() } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill")
-                    Text("סיום")
+                    Text("סִיּוּם")
                 }
                 .font(.system(size: isCompact ? 14 : 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
@@ -304,7 +304,7 @@ struct QuestionRunnerView: View {
             Image(systemName: atCap ? "timer.circle.fill" : "timer")
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(tint)
-            Text(atCap ? "הגעת למקסימום היומי" : "\(earned)/\(cap) דק' היום")
+            Text(atCap ? "הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי" : "\(earned)/\(cap) דַּק' הַיּוֹם")
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
         }
@@ -324,12 +324,12 @@ struct QuestionRunnerView: View {
                 Text(q.topic.emoji)
                     .font(.system(size: topicEmojiSize))
                 if isSuperQuestion {
-                    Text("⭐ שאלת זהב!")
+                    Text("⭐ שְׁאֵלַת זָהָב!")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(AppColor.starGold)
                         .glow(AppColor.starGold, radius: 8)
                 } else if isInPortal {
-                    Text("🌀 מסתורין!")
+                    Text("🌀 מִסְתּוֹרִין!")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .glow(AppColor.gemPurple, radius: 10)
@@ -396,10 +396,10 @@ struct QuestionRunnerView: View {
         } label: {
             HStack(spacing: 8) {
                 Text("💡")
-                Text("רמז")
+                Text("רֶמֶז")
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("(\(hintCostMinutes) דק')")
+                Text("(\(hintCostMinutes) דַּק')")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.75))
             }
@@ -437,14 +437,14 @@ struct QuestionRunnerView: View {
 
     private var magicWandButton: some View {
         Button {
-            companion.cheer("בוא ננסה אחרת")
+            companion.cheer("בּוֹא נְנַסֶּה אַחֶרֶת")
             withAnimation(.spring()) {
                 regenerateQuestion()
             }
         } label: {
             HStack {
                 Text("🪄")
-                Text("החלף שאלה")
+                Text("הַחְלֵף שְׁאֵלָה")
             }
             .font(.system(size: 18, weight: .semibold, design: .rounded))
             .foregroundStyle(.white)
@@ -467,11 +467,11 @@ struct QuestionRunnerView: View {
                     .rotationEffect(.degrees(showPortalIntro ? 360 : 0))
                     .animation(.linear(duration: 1.5).repeatForever(autoreverses: false), value: showPortalIntro)
                     .glow(AppColor.gemPurple, radius: 30)
-                Text("פורטל מסתורין!")
+                Text("פּוֹרְטַל מִסְתּוֹרִין!")
                     .font(.system(size: portalTitleSize, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .glow(AppColor.gemPurple, radius: 14)
-                Text("×3 כוכבים")
+                Text("×3 כּוֹכָבִים")
                     .font(AppFont.subtitle())
                     .foregroundStyle(AppColor.starGold)
             }
@@ -496,7 +496,7 @@ struct QuestionRunnerView: View {
         consecutiveWrong = 0
         topicHistory = []
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            companion.cheer(mode.isFeed ? "הרפתקה חכמה — קדימה! 🧠" : "מוכן? קדימה!")
+            companion.cheer(mode.isFeed ? "הַרְפַּתְקָה חֲכָמָה — קָדִימָה! 🧠" : "מוּכָן? קָדִימָה!")
         }
         nextQuestion()
     }
@@ -518,7 +518,7 @@ struct QuestionRunnerView: View {
             isInPortal = true
             showPortalIntro = true
             SoundPlayer.shared.play(.portalAppear)
-            companion.wow("וואו! פורטל!")
+            companion.wow("וָואוּ! פּוֹרְטַל!")
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 withAnimation { showPortalIntro = false }
                 createQuestion(super: false)
@@ -640,7 +640,7 @@ struct QuestionRunnerView: View {
         SoundPlayer.shared.play(.streakUp)
         Haptic.medium()
         burstTrigger += 1
-        companion.cheer("הסרתי לך אופציה! 💡")
+        companion.cheer("הֵסַרְתִּי לְךָ אוֹפְּצְיָה! 💡")
     }
 
     private func handleCorrect(q: Question) {
@@ -684,24 +684,24 @@ struct QuestionRunnerView: View {
         if progress.lastRecoveredMinutes > 0 {
             let back = progress.lastRecoveredMinutes
             progress.lastRecoveredMinutes = 0
-            companion.wow("החזרת \(back) דק'! ⭐")
+            companion.wow("הֶחְזַרְתָּ \(back) דַּק'! ⭐")
             confettiTrigger += 1
             return
         }
 
         // Companion reaction
         if isSuperQuestion {
-            companion.wow("שאלת זהב! ⭐")
+            companion.wow("שְׁאֵלַת זָהָב! ⭐")
             confettiTrigger += 1
         } else if isInPortal {
-            companion.wow("פתחת מסתורין! 🌀")
+            companion.wow("פָּתַחְתָּ מִסְתּוֹרִין! 🌀")
             confettiTrigger += 1
         } else if EventEngine.shouldFireComboEvent(streak: progress.currentStreak) {
-            companion.hype("🔥 \(progress.currentStreak) ברצף!")
+            companion.hype("🔥 \(progress.currentStreak) בָּרֶצֶף!")
             confettiTrigger += 1
             rumbleTrigger += 1
         } else {
-            companion.cheer(["יש!", "טוב!", "כן!", "וואו!", "אלוף!"].randomElement()!)
+            companion.cheer(["יֵשׁ!", "טוֹב!", "כֵּן!", "וָואוּ!", "אַלּוּף!"].randomElement()!)
         }
     }
 
@@ -759,16 +759,16 @@ struct QuestionRunnerView: View {
         if penaltyMinutes > 0 {
             // Safe negative experience: never accusatory, always a way back.
             companion.console([
-                "💡 כמעט! ענה נכון עכשיו ותחזיר את הזמן",
-                "✨ קרוב! תשובה נכונה תחזיר \(penaltyMinutes) דק'",
-                "⭐ אפשר להחזיר את הזמן מיד — נסה שוב"
+                "💡 כִּמְעַט! עֲנֵה נָכוֹן עַכְשָׁו וְתַחֲזִיר אֶת הַזְּמַן",
+                "✨ קָרוֹב! תְּשׁוּבָה נְכוֹנָה תַּחֲזִיר \(penaltyMinutes) דַּק'",
+                "⭐ אֶפְשָׁר לְהַחֲזִיר אֶת הַזְּמַן מִיָּד — נַסֵּה שׁוּב"
             ].randomElement()!)
         } else {
             companion.console([
-                "כמעט!",
-                "ממש קרוב",
-                "בוא ננסה שוב",
-                "ננסה את הבאה"
+                "כִּמְעַט!",
+                "מַמָּשׁ קָרוֹב",
+                "בּוֹא נְנַסֶּה שׁוּב",
+                "נְנַסֶּה אֶת הַבָּאָה"
             ].randomElement()!)
         }
     }

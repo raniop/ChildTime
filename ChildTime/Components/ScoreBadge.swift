@@ -27,8 +27,8 @@ struct ScoreBadge: View {
 
     private var label: String {
         switch style {
-        case .lifetime: return "ניקוד"
-        case .session:  return "סבב"
+        case .lifetime: return "נִקּוּד"
+        case .session:  return "סִבּוּב"
         }
     }
 

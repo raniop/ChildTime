@@ -399,10 +399,10 @@ private struct OpenSmileShape: Shape {
                     Spacer()
                     HStack {
                         Button("idle")    { c.state = .idle; c.bubbleText = nil }
-                        Button("cheer")   { c.cheer("יש!") }
-                        Button("hype")    { c.hype("🔥 אש!") }
-                        Button("wow")     { c.wow("וואו!") }
-                        Button("console") { c.console("כמעט!") }
+                        Button("cheer")   { c.cheer("יֵשׁ!") }
+                        Button("hype")    { c.hype("🔥 אֵשׁ!") }
+                        Button("wow")     { c.wow("וָואוּ!") }
+                        Button("console") { c.console("כִּמְעַט!") }
                     }
                     .buttonStyle(.bordered)
                     .padding()
