@@ -246,7 +246,12 @@ struct ParentSettingsView: View {
                 Button {
                     showFamilyLinking = true
                 } label: {
-                    Label("הורים מקושרים", systemImage: "person.2.fill")
+                    Label("צֵרוּף יֶלֶד/ה לְפִי אִימֵייל", systemImage: "person.crop.circle.badge.plus")
+                }
+                Button {
+                    showFamilyLinking = true
+                } label: {
+                    Label("קִישּׁוּר הוֹרֶה נוֹסָף", systemImage: "person.2.fill")
                 }
                 Button(role: .destructive) {
                     auth.signOut()
