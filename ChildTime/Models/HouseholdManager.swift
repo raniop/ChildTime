@@ -46,8 +46,13 @@ final class HouseholdManager: ObservableObject {
     func start(uid: String, email: String?, displayName: String?) {
         self.uid = uid
         #if canImport(FirebaseFirestore)
-        isLoading = true
-        didReceiveChildren = false
+        // start() is invoked from the auth-state listener, which can fire while
+        // SwiftUI is mid-update. Defer the @Published mutations one tick so they
+        // don't trigger "Publishing changes from within view updates".
+        Task { @MainActor in
+            self.isLoading = true
+            self.didReceiveChildren = false
+        }
         // Safety net: never block the UI forever if the cloud is slow/unreachable.
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 7_000_000_000)

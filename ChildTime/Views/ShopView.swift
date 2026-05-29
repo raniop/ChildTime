@@ -377,17 +377,16 @@ struct ShopItemDetail: View {
             SparkleField(count: 14, size: 12)
 
             VStack(spacing: AppSpacing.lg) {
-                Spacer().frame(height: 12)
-
                 // Live preview on the kid's avatar
                 if let profile {
-                    ProfileAvatarView(profile: profile, size: 170, overrideItems: previewItems)
+                    ProfileAvatarView(profile: profile, size: 150, overrideItems: previewItems)
                 }
 
-                VStack(spacing: 4) {
+                VStack(spacing: 6) {
                     Text(item.name)
                         .font(.system(size: 26, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
                     HStack(spacing: 8) {
                         Text(item.category.icon)
                         Text(item.category.displayName)
@@ -402,9 +401,8 @@ struct ShopItemDetail: View {
                         .background(Capsule().fill(item.rarity.gradient))
                 }
 
-                Spacer()
-
                 primaryButton
+                    .padding(.top, 4)
 
                 if !owned && !canAfford {
                     Text("חֲסֵרִים \(item.price - progress.stars) כּוֹכָבִים ⭐")
@@ -412,8 +410,10 @@ struct ShopItemDetail: View {
                         .foregroundStyle(AppColor.almostWarm)
                 }
             }
-            .padding(.horizontal, AppSpacing.lg)
-            .padding(.bottom, AppSpacing.lg)
+            .padding(AppSpacing.xl)
+            .frame(maxWidth: 460)
+            // Center the column so it reads as a tidy card at any sheet size.
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
     }
 

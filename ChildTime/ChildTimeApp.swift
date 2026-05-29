@@ -15,6 +15,17 @@ import GoogleSignIn
 /// callbacks are only delivered to a UIApplicationDelegate.
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        // Firebase's recommended spot — runs at the UIKit entry point, before
+        // any singleton touches Auth/Firestore, so the "default Firebase app has
+        // not yet been configured" warning never fires.
+        #if canImport(FirebaseCore)
+        if FirebaseApp.app() == nil { FirebaseApp.configure() }
+        #endif
+        return true
+    }
+
+    func application(_ application: UIApplication,
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Task { @MainActor in PushManager.shared.didRegisterAPNs(deviceToken) }
     }
