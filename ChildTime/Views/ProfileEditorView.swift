@@ -134,7 +134,23 @@ struct ProfileEditorView: View {
             avatarPresetID: avatarPresetID
         )
         return VStack(spacing: 10) {
-            ProfileAvatarView(profile: preview, size: 130)
+            // Tapping the avatar opens the photo picker (with a camera badge so
+            // it's clearly tappable).
+            Button {
+                showPicker = true
+            } label: {
+                ProfileAvatarView(profile: preview, size: 130)
+                    .overlay(alignment: .bottomTrailing) {
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(9)
+                            .background(AppColor.gemPurple, in: Circle())
+                            .overlay(Circle().stroke(.white, lineWidth: 2))
+                            .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
+                    }
+            }
+            .buttonStyle(.plain)
             Text(preview.name)
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
