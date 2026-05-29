@@ -26,7 +26,11 @@ struct MinutesBadge: View {
                     .font(.system(size: compact ? 14 : 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
             }
+            // Never let "30" wrap into "3"/"0" when the row is tight.
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
         }
+        .fixedSize(horizontal: true, vertical: false)
         .padding(.horizontal, compact ? 12 : 18)
         .padding(.vertical, compact ? 8 : 12)
         .background(

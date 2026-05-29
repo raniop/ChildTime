@@ -201,19 +201,26 @@ struct WorldMapView: View {
     @ViewBuilder
     private var topBar: some View {
         if isCompact {
-            // iPhone — stack actions and stats so nothing clips.
+            // iPhone — stack actions and stats so nothing clips. The earned
+            // play-minutes badge sits at the top-left (trailing) corner, above
+            // everything, since it's the reward the child cares about most.
             VStack(spacing: 8) {
-                topBarActions(buttonSize: 40, avatarSize: 44, iconSize: 18)
+                HStack(spacing: AppSpacing.sm) {
+                    topBarActions(buttonSize: 40, avatarSize: 44, iconSize: 18)
+                    Spacer(minLength: 8)
+                    minutesButton
+                }
                 topBarStats(compactStats: true)
             }
             .padding(.horizontal, AppSpacing.md)
             .padding(.top, AppSpacing.sm)
         } else {
-            // iPad — one wide row.
+            // iPad — one wide row, minutes pinned to the far-left (trailing) end.
             HStack(spacing: AppSpacing.sm) {
                 topBarActions(buttonSize: 46, avatarSize: 50, iconSize: 22)
                 Spacer()
                 topBarStats(compactStats: false)
+                minutesButton
             }
             .padding(.horizontal, AppSpacing.lg)
             .padding(.top, AppSpacing.sm)
@@ -262,13 +269,11 @@ struct WorldMapView: View {
                     .glow(AppColor.starGold.opacity(0.5), radius: 6)
             }
 
-            if isCompact { Spacer() }
-
-            // Daily gift lives here — a lively dancing icon, but only when there
-            // is actually a gift to claim today. Once opened it disappears for
-            // the rest of the day (see `dailyChestAvailable`).
+            // Daily gift lives next to the action buttons — a lively dancing
+            // icon, but only when there is actually a gift to claim today. Once
+            // opened it disappears for the rest of the day.
             if progress.dailyChestAvailable {
-                DailyGiftBeacon(size: buttonSize + 6) {
+                DailyGiftBeacon(size: buttonSize + 4) {
                     showDailyChest = true
                 }
                 .transition(.scale.combined(with: .opacity))
@@ -278,18 +283,23 @@ struct WorldMapView: View {
                    value: progress.dailyChestAvailable)
     }
 
+    /// The earned play-minutes badge, lifted out so it can live on its own at
+    /// the top-left (trailing) corner instead of being squeezed into the stats
+    /// row (where the number wrapped on narrow iPhones).
+    private var minutesButton: some View {
+        Button {
+            Haptic.light()
+            infoStat = .minutes
+        } label: {
+            MinutesBadge(minutes: progress.pendingMinutes, compact: true)
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
+    }
+
     private func topBarStats(compactStats: Bool) -> some View {
         HStack(spacing: compactStats ? 6 : AppSpacing.sm) {
             if compactStats { Spacer(minLength: 0) }
-
-            Button {
-                Haptic.light()
-                infoStat = .minutes
-            } label: {
-                MinutesBadge(minutes: progress.pendingMinutes, compact: true)
-            }
-            .buttonStyle(.plain)
-            .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
 
             Button {
                 Haptic.light()
