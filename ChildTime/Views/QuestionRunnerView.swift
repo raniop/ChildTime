@@ -318,8 +318,8 @@ struct QuestionRunnerView: View {
                         .foregroundStyle(AppColor.starGold)
                         .glow(AppColor.starGold, radius: 8)
                 } else if isInPortal {
-                    Text("🌀 מִסְתּוֹרִין!")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                    Text("🌀 בּוֹנוּס ×3 כּוֹכָבִים!")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .glow(AppColor.gemPurple, radius: 10)
                 } else if mode.isFeed {
@@ -465,13 +465,14 @@ struct QuestionRunnerView: View {
                     .rotationEffect(.degrees(showPortalIntro ? 360 : 0))
                     .animation(.linear(duration: 1.5).repeatForever(autoreverses: false), value: showPortalIntro)
                     .glow(AppColor.gemPurple, radius: 30)
-                Text("פּוֹרְטַל מִסְתּוֹרִין!")
+                Text("שְׁאֵלַת בּוֹנוּס! 🌀")
                     .font(.system(size: portalTitleSize, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .glow(AppColor.gemPurple, radius: 14)
-                Text("×3 כּוֹכָבִים")
+                Text("עֲנוּ נָכוֹן וְקַבְּלוּ פִּי 3 כּוֹכָבִים!")
                     .font(AppFont.subtitle())
                     .foregroundStyle(AppColor.starGold)
+                    .multilineTextAlignment(.center)
             }
         }
         .transition(.opacity)
@@ -713,7 +714,7 @@ struct QuestionRunnerView: View {
             companion.wow("שְׁאֵלַת זָהָב! ⭐")
             confettiTrigger += 1
         } else if isInPortal {
-            companion.wow("פָּתַחְתָּ מִסְתּוֹרִין! 🌀")
+            companion.wow("שְׁאֵלַת בּוֹנוּס — פִּי 3 כּוֹכָבִים! 🌀")
             confettiTrigger += 1
         } else if EventEngine.shouldFireComboEvent(streak: progress.currentStreak) {
             companion.hype("🔥 \(progress.currentStreak) בָּרֶצֶף!")
