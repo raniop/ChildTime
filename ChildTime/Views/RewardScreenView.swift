@@ -42,42 +42,48 @@ struct RewardScreenView: View {
                 )
                 SparkleField(count: 28, size: 16)
 
-                ScrollView {
-                    VStack(spacing: 0) {
-                        Spacer(minLength: AppSpacing.lg)
+                VStack(spacing: 0) {
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            Spacer(minLength: AppSpacing.md)
 
-                        // Hero title + chest stack
-                        VStack(spacing: AppSpacing.md) {
-                            heroTitle
-                            chestBlock
-                            if stage == .glowing {
-                                Text("לְחַץ כְּדֵי לִפְתֹּחַ! ✨")
-                                    .font(.system(size: 20, weight: .heavy, design: .rounded))
-                                    .foregroundStyle(.white)
-                                    .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
-                                    .pulse()
+                            // Hero title + chest stack
+                            VStack(spacing: AppSpacing.md) {
+                                heroTitle
+                                chestBlock
+                                if stage == .glowing {
+                                    Text("לְחַץ כְּדֵי לִפְתֹּחַ! ✨")
+                                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                        .foregroundStyle(.white)
+                                        .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
+                                        .pulse()
+                                }
                             }
-                        }
 
-                        if stage == .revealed {
+                            if stage == .revealed {
+                                Spacer(minLength: AppSpacing.lg)
+                                rewardItems
+                                    .frame(maxWidth: isCompact ? .infinity : 420)
+                                    .padding(.horizontal, AppSpacing.lg)
+                            }
+
                             Spacer(minLength: AppSpacing.lg)
-                            rewardItems
-                                .frame(maxWidth: isCompact ? .infinity : 420)
-                                .padding(.horizontal, AppSpacing.lg)
-
-                            Spacer(minLength: AppSpacing.lg)
-                            actionButtons
-                                .frame(maxWidth: isCompact ? .infinity : 420)
-                                .padding(.horizontal, AppSpacing.lg)
                         }
-
-                        // Floor for the companion
-                        Spacer(minLength: companionSize + 40)
+                        .frame(maxWidth: .infinity)
                     }
-                    .frame(minHeight: proxy.size.height, alignment: .center)
-                    .frame(maxWidth: .infinity)
+                    .scrollIndicators(.hidden)
+
+                    // Action buttons are PINNED to the bottom (outside the scroll)
+                    // so a child always sees them — no scrolling needed, even on
+                    // landscape iPad.
+                    if stage == .revealed {
+                        actionButtons
+                            .frame(maxWidth: isCompact ? .infinity : 420)
+                            .padding(.horizontal, AppSpacing.lg)
+                            .padding(.bottom, AppSpacing.lg)
+                            .frame(maxWidth: .infinity)
+                    }
                 }
-                .scrollIndicators(.hidden)
 
                 // Companion in corner — positioned so it never overlaps
                 // the CTA stack.
