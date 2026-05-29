@@ -354,33 +354,13 @@ struct ParentSettingsView: View {
 
     private var rewardSection: some View {
         Section {
-            Picker("שיטת תגמול", selection: $settings.rewardMode) {
-                ForEach(ParentSettings.RewardMode.allCases) { mode in
-                    Text(mode.displayName).tag(mode)
-                }
+            HStack(spacing: 10) {
+                Image(systemName: "gamecontroller.fill")
+                    .foregroundStyle(AppColor.successMint)
+                Text("כל 10 תשובות נכונות = 4 דקות משחק")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                Spacer()
             }
-            .pickerStyle(.segmented)
-
-            switch settings.rewardMode {
-            case .perAnswer:
-                Stepper(
-                    "דקות לכל תשובה נכונה: \(settings.minutesPerCorrectAnswer)",
-                    value: $settings.minutesPerCorrectAnswer,
-                    in: 1...10
-                )
-            case .perBatch:
-                Stepper(
-                    "תשובות נכונות לפרס: \(settings.batchAnswers)",
-                    value: $settings.batchAnswers,
-                    in: 2...30
-                )
-                Stepper(
-                    "דקות שמקבל בכל פרס: \(settings.batchMinutes)",
-                    value: $settings.batchMinutes,
-                    in: 1...60
-                )
-            }
-
             Stepper(
                 "שאלות בכל סבב: \(settings.questionsPerSession)",
                 value: $settings.questionsPerSession,
@@ -389,16 +369,7 @@ struct ParentSettingsView: View {
         } header: {
             Text("תגמול")
         } footer: {
-            Text(rewardModeExplanation)
-        }
-    }
-
-    private var rewardModeExplanation: String {
-        switch settings.rewardMode {
-        case .perAnswer:
-            return "כל תשובה נכונה מוסיפה דקות מיד. אידיאלי לילדים צעירים שצריכים feedback מהיר."
-        case .perBatch:
-            return "הילד צריך לענות נכון על \(settings.batchAnswers) שאלות לפני שמקבל \(settings.batchMinutes) דקות. מעודד התמדה."
+            Text("התגמול קבוע: הילד מרוויח 4 דקות משחק על כל 10 תשובות נכונות.")
         }
     }
 
