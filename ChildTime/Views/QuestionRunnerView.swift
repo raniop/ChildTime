@@ -361,6 +361,8 @@ struct QuestionRunnerView: View {
             optionsGrid(for: q)
 
             // Hint shows whenever it's payable; wand only after 2 wrong picks.
+            // Fixed height so the layout never jumps when these appear/disappear
+            // (e.g. the hint hides the moment the answer is locked in).
             HStack(spacing: AppSpacing.md) {
                 if !showFeedback {
                     hintButton(for: q)
@@ -369,6 +371,8 @@ struct QuestionRunnerView: View {
                     magicWandButton
                 }
             }
+            .frame(maxWidth: .infinity)
+            .frame(height: 56)
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: consecutiveWrong)
         }
     }
