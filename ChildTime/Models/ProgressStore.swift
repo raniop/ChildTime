@@ -425,7 +425,6 @@ final class ProgressStore: ObservableObject {
             }
         }
 
-        maybeConvertStarsToGems()
         return earned
     }
 
@@ -556,26 +555,12 @@ final class ProgressStore: ObservableObject {
         topicAccuracy[key] = newAcc
     }
 
-    private func maybeConvertStarsToGems() {
-        // Every 10 stars accumulated total, gain 1 gem
-        let totalGemsEarnedFromStars = stars / 10
-        let alreadyEarnedFromStars = (defaults.integer(forKey: "gemsFromStars"))
-        if totalGemsEarnedFromStars > alreadyEarnedFromStars {
-            let delta = totalGemsEarnedFromStars - alreadyEarnedFromStars
-            gems += delta
-            defaults.set(totalGemsEarnedFromStars, forKey: "gemsFromStars")
-        }
-        // Rare drop
-        if Double.random(in: 0...1) < RewardEngine.rareGemDropChance {
-            gems += RewardEngine.rareGemAmount
-        }
-    }
-
     // MARK: - Chest / Daily
 
     func applyChestReward(_ reward: ChestReward) {
-        stars += reward.stars
-        gems += reward.gems
+        // Single currency: any legacy "gem" portion of a reward is folded into
+        // stars so the child only ever collects ⭐.
+        stars += reward.stars + reward.gems
         // Time bonuses honor the daily cap (so chests can't smuggle around it).
         _ = grantMinutesCapped(reward.minutes)
         if let cosmetic = reward.cosmeticID {
@@ -618,13 +603,11 @@ final class ProgressStore: ObservableObject {
         return true
     }
 
-    /// Burn gems (the cosmetic shop currency). Caller must check
-    /// affordability first — this asserts only that the value isn't
-    /// negative, but happily takes us below the gem count if asked.
-    /// Use after `gems >= amount` is verified.
-    func spendGems(_ amount: Int) {
+    /// Burn stars — the single currency, used to buy cosmetics in the shop.
+    /// Caller must verify `stars >= amount` first.
+    func spendStars(_ amount: Int) {
         guard amount > 0 else { return }
-        gems = max(0, gems - amount)
+        stars = max(0, stars - amount)
     }
 
     /// Generic XP grant — used by Lucky Wheel and any future "+XP" rewards.

@@ -92,18 +92,18 @@ struct ShopView: View {
 
             Spacer()
 
-            // Gem balance
+            // Star balance — the single currency.
             HStack(spacing: 4) {
-                Text("💎").font(.system(size: 16))
-                Text("\(progress.gems)")
+                Text("⭐").font(.system(size: 16))
+                Text("\(progress.stars)")
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                    .contentTransition(.numericText(value: Double(progress.gems)))
+                    .contentTransition(.numericText(value: Double(progress.stars)))
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
-            .background(Capsule().fill(AppColor.gemPurple.opacity(0.4)))
-            .overlay(Capsule().stroke(AppColor.gemPurple, lineWidth: 1.5))
+            .background(Capsule().fill(AppColor.starGold.opacity(0.4)))
+            .overlay(Capsule().stroke(AppColor.starGold, lineWidth: 1.5))
         }
         .padding(.horizontal, AppSpacing.md)
         .padding(.vertical, AppSpacing.sm)
@@ -270,10 +270,10 @@ struct ShopView: View {
                 .foregroundStyle(.white.opacity(0.85))
         } else {
             HStack(spacing: 3) {
-                Text("💎").font(.system(size: 11))
+                Text("⭐").font(.system(size: 11))
                 Text("\(item.price)")
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .foregroundStyle(progress.gems >= item.price ? .white : AppColor.almostWarm)
+                    .foregroundStyle(progress.stars >= item.price ? .white : AppColor.almostWarm)
             }
         }
     }
@@ -329,7 +329,7 @@ struct ShopItemDetail: View {
         guard let pid = profiles.activeID else { return false }
         return cosmetics.equipped(for: pid, in: item.category)?.id == item.id
     }
-    private var canAfford: Bool { progress.gems >= item.price }
+    private var canAfford: Bool { progress.stars >= item.price }
 
     /// Preview loadout: take the kid's current outfit but replace this
     /// category with the item being considered, so they see how it looks.
@@ -376,7 +376,7 @@ struct ShopItemDetail: View {
                 primaryButton
 
                 if !owned && !canAfford {
-                    Text("חֲסֵרִים \(item.price - progress.gems) מַטְבְּעוֹת 💎")
+                    Text("חֲסֵרִים \(item.price - progress.stars) כּוֹכָבִים ⭐")
                         .font(.caption)
                         .foregroundStyle(AppColor.almostWarm)
                 }
@@ -406,7 +406,7 @@ struct ShopItemDetail: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "cart.fill")
-                    Text("קְנֵה בְּ-\(item.price) 💎")
+                    Text("קְנֵה בְּ-\(item.price) ⭐")
                 }
             }
             .opacity(canAfford ? 1 : 0.55)

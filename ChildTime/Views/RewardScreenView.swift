@@ -184,12 +184,9 @@ struct RewardScreenView: View {
     private var rewardItems: some View {
         VStack(spacing: 10) {
             if revealedItems >= 1 {
-                rewardPill(emoji: "⭐", value: reward.stars, label: "כּוֹכָבִים", color: AppColor.starGold)
+                rewardPill(emoji: "⭐", value: reward.stars + reward.gems, label: "כּוֹכָבִים", color: AppColor.starGold)
             }
-            if revealedItems >= 2 && reward.gems > 0 {
-                rewardPill(emoji: "💎", value: reward.gems, label: "גְּבִישִׁים", color: AppColor.gemPurple)
-            }
-            if revealedItems >= 3 && reward.minutes > 0 {
+            if revealedItems >= 2 && reward.minutes > 0 {
                 rewardPill(emoji: "⏱", value: reward.minutes, label: "דַּקּוֹת מִשְׂחָק", color: AppColor.successMint)
             }
         }

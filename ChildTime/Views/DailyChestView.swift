@@ -46,14 +46,10 @@ struct DailyChestView: View {
                 if stage == .revealed {
                     VStack(spacing: AppSpacing.md) {
                         if revealed >= 1 {
-                            row(emoji: "⭐", text: "+\(reward.stars) כּוֹכָבִים")
+                            row(emoji: "⭐", text: "+\(reward.stars + reward.gems) כּוֹכָבִים")
                                 .transition(.scale.combined(with: .opacity))
                         }
                         if revealed >= 2 {
-                            row(emoji: "💎", text: "+\(reward.gems) גְּבִישִׁים")
-                                .transition(.scale.combined(with: .opacity))
-                        }
-                        if revealed >= 3 {
                             row(emoji: "⏱", text: "+\(reward.minutes) דַּקּוֹת")
                                 .transition(.scale.combined(with: .opacity))
                         }

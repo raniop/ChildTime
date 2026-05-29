@@ -103,11 +103,11 @@ final class CosmeticStore: ObservableObject {
     func purchase(_ item: CosmeticItem, for profileID: UUID) throws -> CosmeticItem {
         guard !ownedIDs.contains(item.id) else { throw PurchaseError.alreadyOwned }
         let progress = ProgressStore.shared
-        guard progress.gems >= item.price else {
-            throw PurchaseError.notEnoughCoins(short: item.price - progress.gems)
+        guard progress.stars >= item.price else {
+            throw PurchaseError.notEnoughCoins(short: item.price - progress.stars)
         }
-        // Spend gems through ProgressStore so the value stays canonical.
-        progress.spendGems(item.price)
+        // Spend stars through ProgressStore so the value stays canonical.
+        progress.spendStars(item.price)
         ownedIDs.insert(item.id)
         equip(item, in: item.category, for: profileID)
         lastPurchasedItem = item

@@ -184,9 +184,8 @@ struct QuestionRunnerView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        // Slim progress row + one tidy row of the currencies the child collects
-        // (minutes / gems / stars / trophy). The motivational chips
-        // (wheel/level/prize) still live on the map & reward screen.
+        // Slim progress row + a tidy row of the two things the child collects:
+        // game-minutes and stars (the single currency).
         VStack(spacing: 8) {
             HStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.md) {
                 closeButton(size: isCompact ? 26 : 32)
@@ -196,9 +195,7 @@ struct QuestionRunnerView: View {
             HStack(spacing: isCompact ? 6 : 10) {
                 Spacer(minLength: 0)
                 statChip("🎮", progress.pendingMinutes, AppColor.successMint)   // game minutes
-                statChip("💎", progress.gems, AppColor.gemPurple)               // gems
                 statChip("⭐", progress.stars, AppColor.starGold)               // stars
-                statChip("🏆", progress.totalScore, AppColor.starGold)          // trophy / score
             }
         }
         .padding(.horizontal, AppSpacing.md)

@@ -28,7 +28,7 @@ struct WorldMapView: View {
     @State private var infoStat: StatInfo? = nil
 
     enum StatInfo: String, Identifiable {
-        case score, minutes, stars, gems
+        case minutes, stars
         var id: String { rawValue }
     }
 
@@ -80,8 +80,12 @@ struct WorldMapView: View {
 
                             ForEach(Worlds.all) { world in
                                 WorldCard(
+                                    // Premium unlocks every world (that's what the
+                                    // subscription buys). Stars are now a spendable
+                                    // currency, so they no longer gate worlds —
+                                    // otherwise buying cosmetics could re-lock them.
                                     world: world,
-                                    isUnlocked: progress.unlockedWorlds.contains(world.id),
+                                    isUnlocked: subs.isPremium,
                                     currentRoom: progress.progress(in: world.id),
                                     starsHeld: progress.stars,
                                     subscriptionLocked: !subs.isPremium
@@ -301,21 +305,7 @@ struct WorldMapView: View {
         HStack(spacing: compactStats ? 6 : AppSpacing.sm) {
             if compactStats { Spacer(minLength: 0) }
 
-            Button {
-                Haptic.light()
-                infoStat = .score
-            } label: {
-                statChip(
-                    icon: "trophy.fill",
-                    value: "\(progress.totalScore)",
-                    label: nil,
-                    color: AppColor.starGold,
-                    prominent: false
-                )
-            }
-            .buttonStyle(.plain)
-            .popover(isPresented: popoverBinding(for: .score)) { statInfoCard(.score) }
-
+            // Stars are the single currency now — the only stat chip here.
             Button {
                 Haptic.light()
                 infoStat = .stars
@@ -330,21 +320,6 @@ struct WorldMapView: View {
             }
             .buttonStyle(.plain)
             .popover(isPresented: popoverBinding(for: .stars)) { statInfoCard(.stars) }
-
-            Button {
-                Haptic.light()
-                infoStat = .gems
-            } label: {
-                statChip(
-                    icon: "diamond.fill",
-                    value: "\(progress.gems)",
-                    label: nil,
-                    color: AppColor.gemPurple,
-                    prominent: false
-                )
-            }
-            .buttonStyle(.plain)
-            .popover(isPresented: popoverBinding(for: .gems)) { statInfoCard(.gems) }
         }
     }
 
@@ -415,14 +390,6 @@ struct WorldMapView: View {
 
     private func statInfoContent(_ stat: StatInfo) -> InfoContent {
         switch stat {
-        case .score:
-            return InfoContent(
-                emoji: "🏆",
-                title: "נִקּוּד",
-                subtitle: "סַךְ הַנְּקֻדּוֹת שֶׁלְּךָ",
-                body: "נְקֻדּוֹת נִצְבָּרוֹת עַל כָּל תְּשׁוּבָה נְכוֹנָה. שְׁאֵלוֹת קָשׁוֹת יוֹתֵר, רְצָפִים וּשְׁאֵלוֹת זָהָב שָׁווֹת יוֹתֵר נְקֻדּוֹת!",
-                tip: "הַנִּקּוּד מַמְשִׁיךְ לַעֲלוֹת כְּכָל שֶׁאַתָּה לוֹמֵד — נַסֵּה לִשְׁבֹּר אֶת הַשִּׂיא שֶׁלְּךָ."
-            )
         case .minutes:
             return InfoContent(
                 emoji: "🎮",
@@ -435,17 +402,9 @@ struct WorldMapView: View {
             return InfoContent(
                 emoji: "⭐",
                 title: "כּוֹכָבִים",
-                subtitle: "הַהֶשֵּׂגִים שֶׁלְּךָ",
+                subtitle: "הַמַּטְבֵּעַ שֶׁלְּךָ",
                 body: "כּוֹכָבִים מִצְטַבְּרִים עַל כָּל תְּשׁוּבָה נְכוֹנָה. רֶצֶף תְּשׁוּבוֹת נוֹתֵן בּוֹנוּס × 2 וְ-× 3!",
-                tip: "כְּכָל שֶׁמִּצְטַבְּרִים יוֹתֵר כּוֹכָבִים, טוֹפִי עוֹלֶה רָמָה."
-            )
-        case .gems:
-            return InfoContent(
-                emoji: "💎",
-                title: "גְּבִישִׁים",
-                subtitle: "הַמַּטְבֵּעַ הַנָּדִיר",
-                body: "גְּבִישִׁים נוֹפְלִים לִפְעָמִים מִתְּשׁוּבוֹת נְכוֹנוֹת, וּתְקַבֵּל גַּם בְּקֻפְסַת הַזָּהָב.",
-                tip: "בְּקָרוֹב — קוֹסְמֵטִיקָה לְטוֹפִי שֶׁנִּתָּן לִקְנוֹת אִתָּם 🎩"
+                tip: "אֶפְשָׁר לִקְנוֹת בָּהֶם קוֹסְמֵטִיקָה לְטוֹפִי בַּחֲנוּת 🎩"
             )
         }
     }

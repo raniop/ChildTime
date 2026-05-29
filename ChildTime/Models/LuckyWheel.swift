@@ -4,10 +4,9 @@ import SwiftUI
 /// One wedge on the lucky wheel.
 struct WheelPrize: Identifiable, Equatable {
     enum Kind: Equatable {
-        case gems(Int)
+        case stars(Int)
         case xp(Int)
         case minutes(Int)
-        case scoreBoost(Int)
         case rareItem(String)        // cosmetic item ID
         case funMission(String)      // family chore — gentle "loser" wedge
     }
@@ -30,14 +29,14 @@ enum LuckyWheelCatalog {
     /// Bias toward upbeat wedges (~75% good vs 25% chore).
     static let prizes: [WheelPrize] = [
         // Good (10 wedges)
-        WheelPrize(kind: .gems(5),           label: "5 גְּבִישִׁים",      emoji: "💎", color: Color(hex: "9B5DE5")),
-        WheelPrize(kind: .gems(15),          label: "15 גְּבִישִׁים",     emoji: "💎", color: Color(hex: "5E60CE")),
-        WheelPrize(kind: .gems(30),          label: "30 גְּבִישִׁים!",   emoji: "💎", color: Color(hex: "F15BB5")),
+        WheelPrize(kind: .stars(5),          label: "5 כּוֹכָבִים",      emoji: "⭐", color: Color(hex: "9B5DE5")),
+        WheelPrize(kind: .stars(15),         label: "15 כּוֹכָבִים",     emoji: "⭐", color: Color(hex: "5E60CE")),
+        WheelPrize(kind: .stars(30),         label: "30 כּוֹכָבִים!",   emoji: "🌟", color: Color(hex: "F15BB5")),
         WheelPrize(kind: .xp(50),            label: "50 XP",        emoji: "⚡", color: Color(hex: "FFD166")),
         WheelPrize(kind: .minutes(5),        label: "+5 דַּק' מִשְׂחָק",   emoji: "⏰", color: Color(hex: "06D6A0")),
         WheelPrize(kind: .minutes(10),       label: "+10 דַּק' מִשְׂחָק",  emoji: "⏱", color: Color(hex: "118AB2")),
-        WheelPrize(kind: .scoreBoost(100),   label: "+100 נִקּוּד",   emoji: "🏆", color: Color(hex: "FFB84D")),
-        WheelPrize(kind: .scoreBoost(250),   label: "+250 נִקּוּד!",  emoji: "🏆", color: Color(hex: "F59E0B")),
+        WheelPrize(kind: .stars(20),         label: "+20 כּוֹכָבִים",   emoji: "🌟", color: Color(hex: "FFB84D")),
+        WheelPrize(kind: .stars(50),         label: "+50 כּוֹכָבִים!",  emoji: "🌟", color: Color(hex: "F59E0B")),
         WheelPrize(kind: .rareItem("hat_crown"),
                                               label: "כֶּתֶר זָהָב!",     emoji: "👑", color: Color(hex: "FFD166")),
         WheelPrize(kind: .rareItem("shoes_magic"),
@@ -74,27 +73,23 @@ extension WheelPrize {
         let progress = ProgressStore.shared
         let cosmetics = CosmeticStore.shared
         switch kind {
-        case .gems(let n):
-            progress.applyChestReward(ChestReward(stars: 0, gems: n, minutes: 0, cosmeticID: nil))
-            return "+\(n) גְּבִישִׁים נוֹסְפוּ לַחֶשְׁבּוֹן"
+        case .stars(let n):
+            progress.applyChestReward(ChestReward(stars: n, gems: 0, minutes: 0, cosmeticID: nil))
+            return "+\(n) כּוֹכָבִים נוֹסְפוּ!"
         case .xp(let n):
-            progress.applyChestReward(ChestReward(stars: 0, gems: 0, minutes: 0, cosmeticID: nil))
             progress.addXP(n)
             return "+\(n) XP נוֹסְפוּ"
         case .minutes(let n):
             _ = progress.grantMinutesCapped(n)
             return "+\(n) דַּקּוֹת נוֹסְפוּ לִזְמַן הַמִּשְׂחָק"
-        case .scoreBoost(let n):
-            progress.addScore(n)
-            return "+\(n) נִקּוּד מַתָּנָה!"
         case .rareItem(let id):
             if let item = CosmeticCatalog.item(id), !cosmetics.owns(item) {
                 cosmetics.unlockFree(item)
                 return "פָּתַחְתָּ פְּרִיט נָדִיר: \(item.name)!"
             }
-            // Already owned — fall back to a nice gem consolation.
-            progress.applyChestReward(ChestReward(stars: 0, gems: 15, minutes: 0, cosmeticID: nil))
-            return "כבר יש לך את הפריט הזה — קבל 15 גבישים במקום"
+            // Already owned — fall back to a nice star consolation.
+            progress.applyChestReward(ChestReward(stars: 15, gems: 0, minutes: 0, cosmeticID: nil))
+            return "כְּבָר יֵשׁ לְךָ אֶת הַפְּרִיט הַזֶּה — קַבֵּל 15 כּוֹכָבִים בִּמְקוֹם"
         case .funMission(let task):
             return "משימה: \(task)"
         }

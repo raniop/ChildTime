@@ -217,11 +217,9 @@ struct ParentDashboardView: View {
             HStack(spacing: 10) {
                 statCell(emoji: "⏱", value: "\(s.pendingMinutes)", label: "דק' זמינות")
                 statCell(emoji: "🎮", value: activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : "—", label: "זמן פעיל")
-                statCell(emoji: "🏆", value: "\(s.totalScore)", label: "ניקוד")
             }
             HStack(spacing: 10) {
                 statCell(emoji: "⭐", value: "\(s.stars)", label: "כוכבים")
-                statCell(emoji: "💎", value: "\(s.gems)", label: "מטבעות")
                 statCell(emoji: "🔥", value: "\(s.dayStreak)", label: "רצף ימים")
             }
 
