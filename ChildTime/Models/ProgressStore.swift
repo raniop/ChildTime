@@ -30,6 +30,12 @@ final class ProgressStore: ObservableObject {
         static let totalScore = "totalScore"
         static let minutesEarnedToday = "minutesEarnedToday"
         static let dailyEarnedDate = "dailyEarnedDate"
+        static let topicResponseMs = "topicResponseMs"
+        static let topicAffinity = "topicAffinity"
+        static let topicExposure = "topicExposure"
+        static let topicAbandon = "topicAbandon"
+        static let wheelProgressCount = "wheelProgressCount"
+        static let recoveryPot = "recoveryPot"
     }
 
     // MARK: - Currencies & progression
@@ -135,6 +141,37 @@ final class ProgressStore: ObservableObject {
         }
     }
 
+    // MARK: - Smart Learning Feed signals
+
+    /// [topicRawValue: rolling avg response time, ms]
+    @Published private(set) var topicResponseMs: [String: Double] {
+        didSet { defaults.set(topicResponseMs, forKey: Key.topicResponseMs) }
+    }
+    /// [topicRawValue: learned affinity 0...1] — drives explore/exploit.
+    @Published private(set) var topicAffinity: [String: Double] {
+        didSet { defaults.set(topicAffinity, forKey: Key.topicAffinity) }
+    }
+    /// [topicRawValue: questions served] — novelty signal for explore.
+    @Published private(set) var topicExposure: [String: Int] {
+        didSet { defaults.set(topicExposure, forKey: Key.topicExposure) }
+    }
+    /// [topicRawValue: abandonment count] — replaced question / quit mid-topic.
+    @Published private(set) var topicAbandon: [String: Int] {
+        didSet { defaults.set(topicAbandon, forKey: Key.topicAbandon) }
+    }
+    /// Questions answered since the last free Lucky Wheel spin.
+    @Published private(set) var wheelProgressCount: Int {
+        didSet { defaults.set(wheelProgressCount, forKey: Key.wheelProgressCount) }
+    }
+    /// Minutes lost to the most recent mistake, refundable by a clean correct
+    /// answer on the very next question (Risk & Recovery loop). 0 = nothing pending.
+    @Published private(set) var recoveryPot: Int {
+        didSet { defaults.set(recoveryPot, forKey: Key.recoveryPot) }
+    }
+    /// Set to a positive value for one tick when the recovery loop refunds time,
+    /// so the UI can celebrate. Consumers reset to 0 after reading.
+    @Published var lastRecoveredMinutes: Int = 0
+
     // MARK: - Init
 
     private init() {
@@ -166,6 +203,13 @@ final class ProgressStore: ObservableObject {
         self.totalScore = d.integer(forKey: Key.totalScore)
         self.minutesEarnedToday = d.integer(forKey: Key.minutesEarnedToday)
         self.dailyEarnedDate = d.object(forKey: Key.dailyEarnedDate) as? Date
+
+        self.topicResponseMs = (d.dictionary(forKey: Key.topicResponseMs) as? [String: Double]) ?? [:]
+        self.topicAffinity = (d.dictionary(forKey: Key.topicAffinity) as? [String: Double]) ?? [:]
+        self.topicExposure = (d.dictionary(forKey: Key.topicExposure) as? [String: Int]) ?? [:]
+        self.topicAbandon = (d.dictionary(forKey: Key.topicAbandon) as? [String: Int]) ?? [:]
+        self.wheelProgressCount = d.integer(forKey: Key.wheelProgressCount)
+        self.recoveryPot = d.integer(forKey: Key.recoveryPot)
     }
 
     // MARK: - Derived
@@ -203,6 +247,103 @@ final class ProgressStore: ObservableObject {
         topicAccuracy[topic.rawValue] ?? 0.7
     }
 
+    // MARK: - Smart Learning Feed — derived signals
+
+    /// Learned affinity for a topic. Unseen topics are seeded from whether the
+    /// parent enabled them: enabled → 0.6 (slight head-start), else 0.4.
+    func affinity(for topic: Topic) -> Double {
+        if let a = topicAffinity[topic.rawValue] { return a }
+        return ParentSettings.shared.enabledTopics.contains(topic) ? 0.6 : 0.4
+    }
+
+    /// Rolling average response time (ms) for a topic; nil if never answered.
+    func responseMs(for topic: Topic) -> Double? {
+        topicResponseMs[topic.rawValue]
+    }
+
+    func exposure(for topic: Topic) -> Int {
+        topicExposure[topic.rawValue] ?? 0
+    }
+
+    /// Overall rolling accuracy across every topic the child has touched.
+    var overallAccuracy: Double {
+        let vals = topicAccuracy.values
+        guard !vals.isEmpty else { return 0.7 }
+        return vals.reduce(0, +) / Double(vals.count)
+    }
+
+    /// Questions still to answer before the next free Lucky Wheel spin.
+    var questionsUntilWheel: Int {
+        max(0, ParentSettings.shared.questionsPerWheel - wheelProgressCount)
+    }
+
+    /// True once enough questions have been answered to earn a free spin.
+    var freeWheelAvailable: Bool {
+        wheelProgressCount >= ParentSettings.shared.questionsPerWheel
+    }
+
+    /// Approximate number of correct answers needed to reach the next level.
+    var questionsUntilNextLevel: Int {
+        let remaining = max(0, xpForNextLevel - xp)
+        let perCorrect = max(1, RewardEngine.xpPerCorrect)
+        return Int(ceil(Double(remaining) / Double(perCorrect)))
+    }
+
+    /// Reset the wheel counter after the child spins the free wheel.
+    func resetWheelProgress() {
+        wheelProgressCount = 0
+    }
+
+    /// Records that the child abandoned a topic (replaced its question or quit
+    /// mid-topic). Lowers affinity so the feed offers it less often.
+    func recordAbandon(topic: Topic) {
+        let key = topic.rawValue
+        topicAbandon[key] = (topicAbandon[key] ?? 0) + 1
+        let current = affinity(for: topic)
+        topicAffinity[key] = min(1, max(0, current - 0.08))
+    }
+
+    /// Seed a brand-new child's learning signals from the interests and level
+    /// the parent picked, so the Smart Feed isn't cold on day one. No-op once
+    /// the child has answered anything (we don't overwrite real signals).
+    func seedLearning(from profile: Profile) {
+        guard totalAnswered == 0 else { return }
+        let topics = InterestCatalog.topics(for: profile.interests)
+        let boost = profile.learningLevel.affinityBoost
+        for topic in topics {
+            let base = ParentSettings.shared.enabledTopics.contains(topic) ? 0.6 : 0.4
+            topicAffinity[topic.rawValue] = min(1, base + boost)
+        }
+        // Seed starting difficulty from the level for enabled topics.
+        let seed = profile.learningLevel.seedDifficulty
+        for topic in ParentSettings.shared.enabledTopics {
+            ParentSettings.shared.setDifficulty(seed, for: topic)
+        }
+    }
+
+    /// Continuously updates the per-topic learning signals after each answer.
+    /// Called from `recordCorrect` / `recordWrong`.
+    private func updateLearningSignals(topic: Topic, correct: Bool, responseMs: Double) {
+        let key = topic.rawValue
+        // Rolling response time (only when we have a real measurement).
+        var fast = false
+        if responseMs > 0 {
+            if let prev = topicResponseMs[key] {
+                fast = responseMs < prev * 0.9
+                topicResponseMs[key] = prev * 0.8 + responseMs * 0.2
+            } else {
+                topicResponseMs[key] = responseMs
+            }
+        }
+        topicExposure[key] = (topicExposure[key] ?? 0) + 1
+
+        // Affinity drift — the heart of the discovery engine.
+        var delta = correct ? 0.06 : -0.04
+        if correct && fast { delta += 0.03 }
+        let current = affinity(for: topic)
+        topicAffinity[key] = min(1, max(0, current + delta))
+    }
+
     // MARK: - Recording
 
     struct AnswerContext {
@@ -213,7 +354,10 @@ final class ProgressStore: ObservableObject {
     }
 
     @discardableResult
-    func recordCorrect(_ ctx: AnswerContext, minutesPerCorrect: Int) -> Int {
+    func recordCorrect(_ ctx: AnswerContext,
+                       minutesPerCorrect: Int,
+                       responseMs: Double = 0,
+                       hadMistakeThisQuestion: Bool = false) -> Int {
         let earned = RewardEngine.starsForCorrect(
             combo: ctx.combo,
             isSuperQuestion: ctx.isSuperQuestion,
@@ -260,6 +404,22 @@ final class ProgressStore: ObservableObject {
         }
         xp += RewardEngine.xpPerCorrect
         updateTopicStat(topic: ctx.topic, correct: true)
+        updateLearningSignals(topic: ctx.topic, correct: true, responseMs: responseMs)
+        wheelProgressCount += 1
+
+        // Risk & Recovery loop. A clean first-try correct answer redeems any
+        // minutes a previous mistake put into the recovery pot. If this very
+        // question had a mistake, its loss stays pending for the *next* clean
+        // answer to win back.
+        if hadMistakeThisQuestion {
+            // This question contributed to the pot — carry it forward.
+        } else if recoveryPot > 0 {
+            let refund = recoveryPot
+            pendingMinutes += refund
+            recoveryPot = 0
+            lastRecoveredMinutes = refund
+        }
+
         maybeConvertStarsToGems()
         return earned
     }
@@ -328,38 +488,46 @@ final class ProgressStore: ObservableObject {
     /// Records a wrong answer. Returns the number of penalty minutes applied
     /// this tick (0 if penalty disabled or threshold not met). The caller can
     /// use the return value to show a gentle "lost X minutes" toast.
+    /// Minutes a single mistake costs: half of the per-correct reward, rounded,
+    /// at least 1 (4→2, 2→1, 3→2). 0 when the parent disabled mistake costs.
+    func mistakePenaltyMinutes(minutesPerCorrect: Int) -> Int {
+        guard ParentSettings.shared.penaltyEnabled, minutesPerCorrect > 0 else { return 0 }
+        return max(1, Int((Double(minutesPerCorrect) / 2.0).rounded()))
+    }
+
+    /// Records a wrong pick. Deducts half the per-correct reward and parks it in
+    /// the recovery pot — a clean correct answer on the next question wins it
+    /// back (Risk & Recovery loop). Returns the minutes deducted this tick.
     @discardableResult
-    func recordWrong(topic: Topic) -> Int {
+    func recordWrong(topic: Topic, minutesPerCorrect: Int) -> Int {
         totalAnswered += 1
         currentStreak = 0
+        wrongStreak += 1
         xp += RewardEngine.xpPerQuestion
         updateTopicStat(topic: topic, correct: false)
 
-        // Penalty handling
-        let settings = ParentSettings.shared
-        guard settings.penaltyEnabled else {
-            wrongStreak = 0
-            return 0
-        }
-        wrongStreak += 1
-        let threshold = max(1, settings.penaltyAfterMistakes)
-        guard wrongStreak >= threshold else { return 0 }
+        // Gentle affinity nudge down (no exposure/response bump — those are
+        // counted once per question when it's finally answered correctly).
+        let key = topic.rawValue
+        topicAffinity[key] = min(1, max(0, affinity(for: topic) - 0.04))
 
-        // Deduct from pending pool first, then from active unlock window.
-        var minutesToDeduct = max(0, settings.penaltyMinutes)
-        let fromPending = min(pendingMinutes, minutesToDeduct)
+        let penalty = mistakePenaltyMinutes(minutesPerCorrect: minutesPerCorrect)
+        guard penalty > 0 else { return 0 }
+
+        // Deduct from the banked pool first, then trim an active unlock window.
+        var toDeduct = penalty
+        let fromPending = min(pendingMinutes, toDeduct)
         pendingMinutes -= fromPending
-        minutesToDeduct -= fromPending
-
-        if minutesToDeduct > 0, let end = unlockEndsAt, end > Date() {
-            let newEnd = end.addingTimeInterval(-Double(minutesToDeduct * 60))
+        toDeduct -= fromPending
+        if toDeduct > 0, let end = unlockEndsAt, end > Date() {
+            let newEnd = end.addingTimeInterval(-Double(toDeduct * 60))
             unlockEndsAt = newEnd > Date() ? newEnd : nil
         }
 
-        wrongStreak = 0  // reset streak so penalty doesn't fire again next wrong
-        let applied = settings.penaltyMinutes
-        lastPenaltyMinutes = applied  // ping the UI
-        return applied
+        // Park the loss so the next clean answer can refund it.
+        recoveryPot += penalty
+        lastPenaltyMinutes = penalty  // ping the UI
+        return penalty
     }
 
     private func updateTopicStat(topic: Topic, correct: Bool) {
@@ -546,6 +714,12 @@ final class ProgressStore: ObservableObject {
         s.totalScore          = totalScore
         s.minutesEarnedToday  = minutesEarnedToday
         s.dailyEarnedDate     = dailyEarnedDate
+        s.topicResponseMs     = topicResponseMs
+        s.topicAffinity       = topicAffinity
+        s.topicExposure       = topicExposure
+        s.topicAbandon        = topicAbandon
+        s.wheelProgressCount  = wheelProgressCount
+        s.recoveryPot         = recoveryPot
         s.lastModifiedAt      = .now
         return s
     }
@@ -574,6 +748,12 @@ final class ProgressStore: ObservableObject {
         totalScore          = s.totalScore
         minutesEarnedToday  = s.minutesEarnedToday
         dailyEarnedDate     = s.dailyEarnedDate
+        topicResponseMs     = s.topicResponseMs
+        topicAffinity       = s.topicAffinity
+        topicExposure       = s.topicExposure
+        topicAbandon        = s.topicAbandon
+        wheelProgressCount  = s.wheelProgressCount
+        recoveryPot         = s.recoveryPot
     }
 
     /// Hard-reset everything for a fresh profile. Keeps onboarding /
@@ -583,5 +763,6 @@ final class ProgressStore: ObservableObject {
         sessionScore = 0
         lastEarnedPoints = 0
         lastPenaltyMinutes = 0
+        lastRecoveredMinutes = 0
     }
 }

@@ -59,10 +59,37 @@ struct MinutesBadge: View {
     }
 }
 
-/// A floating popup that animates "+X דקות 🎮" briefly when the child earns minutes.
+/// A floating popup that pops "+X דקות 🎮" at center on a correct answer, then
+/// *flies up toward the top timer* as it fades — so the child sees the time they
+/// just earned travel into their banked total.
 struct EarnedMinutesPopup: View {
     let minutes: Int
     var visible: Bool
+
+    private enum Phase { case hidden, popped, flying }
+    @State private var phase: Phase = .hidden
+
+    private var scale: CGFloat {
+        switch phase {
+        case .hidden: return 0.4
+        case .popped: return 1.0
+        case .flying: return 0.5
+        }
+    }
+    private var opacity: Double {
+        switch phase {
+        case .hidden: return 0
+        case .popped: return 1
+        case .flying: return 0
+        }
+    }
+    private var offsetY: CGFloat {
+        switch phase {
+        case .hidden: return 30
+        case .popped: return -20
+        case .flying: return -300   // flies up toward the HUD timer
+        }
+    }
 
     var body: some View {
         HStack(spacing: 8) {
@@ -87,10 +114,24 @@ struct EarnedMinutesPopup: View {
                 )
         )
         .glow(AppColor.successMint, radius: 30)
-        .scaleEffect(visible ? 1.0 : 0.4)
-        .opacity(visible ? 1.0 : 0.0)
-        .offset(y: visible ? -20 : 20)
-        .animation(.spring(response: 0.5, dampingFraction: 0.55), value: visible)
+        .scaleEffect(scale)
+        .opacity(opacity)
+        .offset(y: offsetY)
+        .onChange(of: visible) { _, isVisible in
+            if isVisible {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.55)) {
+                    phase = .popped
+                }
+                // After a beat at center, launch it up toward the timer.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                    withAnimation(.easeIn(duration: 0.55)) {
+                        phase = .flying
+                    }
+                }
+            } else {
+                phase = .hidden
+            }
+        }
     }
 }
 

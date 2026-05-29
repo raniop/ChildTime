@@ -128,12 +128,13 @@ final class RemoteSyncManager: ObservableObject {
 
     #if canImport(FirebaseFirestore)
     private func uploadActiveProfile() {
-        guard let uid = AuthManager.shared.userID else { return }
         guard let pid = ProfileStore.shared.activeID else { return }
         let snapshot = ProgressStore.shared.captureSnapshot()
         guard let data = Self.encode(snapshot) else { return }
-        db.collection("users").document(uid)
-          .collection("profiles").document(pid.uuidString)
+        // Children are household-owned (top-level `children` collection) so
+        // co-parents on different uids can both sync. Access is gated by
+        // firestore.rules (uid must be on the child's household).
+        db.collection("children").document(pid.uuidString)
           .collection("state").document("current")
           .setData(data, merge: true) { [weak self] err in
               if let err {
@@ -150,18 +151,17 @@ final class RemoteSyncManager: ObservableObject {
 
     #if canImport(FirebaseFirestore)
     private func subscribeToAllProfiles(uid: String) {
-        // Listen on the user's collection so we react when new profiles
-        // are created on another device, too.
-        db.collection("users").document(uid)
-          .collection("profiles")
-          .addSnapshotListener { [weak self] _, _ in
-              self?.refreshProfileSubscriptions(uid: uid)
-          }
-        refreshProfileSubscriptions(uid: uid)
+        // React when the local roster of children changes (e.g. a co-parent's
+        // child arrives via the household listener) by re-subscribing.
+        ProfileStore.shared.$profiles
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.refreshProfileSubscriptions() }
+            .store(in: &cancellables)
+        refreshProfileSubscriptions()
     }
 
-    private func refreshProfileSubscriptions(uid: String) {
-        // Drop listeners for profiles we no longer have locally.
+    private func refreshProfileSubscriptions() {
+        // Drop listeners for children we no longer have locally.
         let localIDs = Set(ProfileStore.shared.profiles.map { $0.id.uuidString })
         for (id, listener) in listeners where !localIDs.contains(id) {
             listener.remove()
@@ -170,12 +170,11 @@ final class RemoteSyncManager: ObservableObject {
                 remoteSnapshots.removeValue(forKey: uuid)
             }
         }
-        // Add listeners for new ones.
+        // Add listeners for new ones — household-owned `children` docs.
         for profile in ProfileStore.shared.profiles {
             let id = profile.id.uuidString
             if listeners[id] != nil { continue }
-            let listener = db.collection("users").document(uid)
-                .collection("profiles").document(id)
+            let listener = db.collection("children").document(id)
                 .collection("state").document("current")
                 .addSnapshotListener { [weak self] doc, _ in
                     guard let self, let doc, let raw = doc.data() else { return }

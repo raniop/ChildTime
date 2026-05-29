@@ -1,7 +1,12 @@
 import SwiftUI
 
 struct QuestionRunnerView: View {
-    let world: World
+    /// How this session sources its topics — a single world, or the Smart Feed.
+    let mode: SessionMode
+
+    /// Convenience for the classic focused-world session.
+    init(world: World) { self.mode = .world(world) }
+    init(mode: SessionMode) { self.mode = mode }
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hsc
@@ -36,7 +41,29 @@ struct QuestionRunnerView: View {
     @State private var lastEarnedMinutes: Int = 0
     @State private var showEarnedPopup: Bool = false
 
+    // Smart Feed / learning state
+    @State private var currentTopic: Topic = .math
+    @State private var topicHistory: [Topic] = []
+    @State private var questionShownAt: Date? = nil
+    @State private var hadMistakeThisQuestion: Bool = false
+
+    // Live-event / Parent Assist bookkeeping (one report per session each).
+    @State private var reportedMilestone = false
+    @State private var reportedWheel = false
+    @State private var reportedDiscovery: Set<Topic> = []
+    @State private var showParentAssist = false
+    @State private var assistOfferedThisQuestion = false
+
     private var totalQuestions: Int { settings.questionsPerSession }
+
+    /// The world used to theme the current question (background, orbs, glow).
+    /// Fixed for a world session; follows the question's topic in the feed.
+    private var themeWorld: World {
+        switch mode {
+        case .world(let w): return w
+        case .smartFeed:    return Worlds.forTopic(currentTopic)
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -75,7 +102,7 @@ struct QuestionRunnerView: View {
             StarBurst(color: AppColor.starGold, trigger: burstTrigger)
             Confetti(trigger: confettiTrigger)
 
-            // Earned-minutes popup (center-screen, brief)
+            // Earned-minutes popup (pops at center, then flies up to the timer)
             VStack {
                 Spacer()
                 EarnedMinutesPopup(minutes: lastEarnedMinutes, visible: showEarnedPopup)
@@ -89,12 +116,16 @@ struct QuestionRunnerView: View {
             }
         }
         .rumble(trigger: rumbleTrigger)
+        .sheet(isPresented: $showParentAssist) {
+            ParentAssistView { }
+                .environment(\.layoutDirection, .rightToLeft)
+        }
         .onAppear { startSession() }
         .fullScreenCover(isPresented: $goToReward) {
             RewardScreenView(
                 kind: RewardEngine.endOfSessionChestKind(correctInSession: correctInSession, total: totalQuestions),
                 correctInSession: correctInSession,
-                world: world,
+                world: themeWorld,
                 startedLevel: startedLevel
             ) {
                 dismiss()
@@ -107,11 +138,12 @@ struct QuestionRunnerView: View {
     @ViewBuilder
     private var background: some View {
         ZStack {
-            (isInPortal ? AppGradient.portal : world.gradient.gradient)
+            (isInPortal ? AppGradient.portal : themeWorld.gradient.gradient)
                 .ignoresSafeArea()
+                .animation(.easeInOut(duration: 0.5), value: themeWorld.id)
             if !isInPortal {
                 themedOrbs
-                WorldDecorations(world: world).opacity(0.18)
+                WorldDecorations(world: themeWorld).opacity(0.18)
             }
             SparkleField(count: 12, size: 12)
         }
@@ -119,7 +151,7 @@ struct QuestionRunnerView: View {
 
     @ViewBuilder
     private var themedOrbs: some View {
-        switch world.id {
+        switch themeWorld.id {
         case "math_kingdom":    FloatingOrbs.castle()
         case "english_land":    FloatingOrbs.englishWorld()
         case "logic_lab":       FloatingOrbs.logicWorld()
@@ -134,7 +166,7 @@ struct QuestionRunnerView: View {
 
     private var topBar: some View {
         if isCompact {
-            // iPhone: two rows so all stats fit
+            // iPhone: stacked rows so all stats fit
             return AnyView(
                 VStack(spacing: 8) {
                     HStack(spacing: AppSpacing.sm) {
@@ -157,6 +189,7 @@ struct QuestionRunnerView: View {
                         MinutesBadge(minutes: progress.pendingMinutes, compact: true)
                         StarCounter(value: progress.stars)
                     }
+                    progressHUD(compact: true)
                     if dailyCapChipVisible {
                         HStack { Spacer(); dailyCapChip; Spacer() }
                     }
@@ -165,34 +198,47 @@ struct QuestionRunnerView: View {
                 .padding(.top, AppSpacing.sm)
             )
         } else {
-            // iPad: single row
+            // iPad: single stat row + HUD beneath
             return AnyView(
-                HStack(spacing: AppSpacing.md) {
-                    closeButton(size: 32)
-                    HStack(spacing: 6) {
-                        ForEach(0..<totalQuestions, id: \.self) { i in
-                            Circle()
-                                .fill(i < questionIndex ? AppColor.successMint : .white.opacity(0.3))
-                                .frame(width: 14, height: 14)
-                                .scaleEffect(i == questionIndex - 1 ? 1.3 : 1.0)
-                                .animation(.spring(response: 0.4, dampingFraction: 0.6), value: questionIndex)
+                VStack(spacing: 8) {
+                    HStack(spacing: AppSpacing.md) {
+                        closeButton(size: 32)
+                        HStack(spacing: 6) {
+                            ForEach(0..<totalQuestions, id: \.self) { i in
+                                Circle()
+                                    .fill(i < questionIndex ? AppColor.successMint : .white.opacity(0.3))
+                                    .frame(width: 14, height: 14)
+                                    .scaleEffect(i == questionIndex - 1 ? 1.3 : 1.0)
+                                    .animation(.spring(response: 0.4, dampingFraction: 0.6), value: questionIndex)
+                            }
                         }
+                        Spacer()
+                        StreakMeter(streak: progress.currentStreak)
+                        ScoreBadge(value: progress.sessionScore, style: .session, compact: false)
+                        MinutesBadge(minutes: progress.pendingMinutes, compact: true)
+                        StarCounter(value: progress.stars)
                     }
-                    Spacer()
-                    StreakMeter(streak: progress.currentStreak)
-                    ScoreBadge(value: progress.sessionScore, style: .session, compact: false)
-                    MinutesBadge(minutes: progress.pendingMinutes, compact: true)
-                    StarCounter(value: progress.stars)
+                    progressHUD(compact: false)
+                    if dailyCapChipVisible {
+                        dailyCapChip
+                    }
                 }
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.top, AppSpacing.sm)
-                .overlay(alignment: .bottom) {
-                    if dailyCapChipVisible {
-                        dailyCapChip.padding(.top, 6)
-                    }
-                }
             )
         }
+    }
+
+    /// The motivational time HUD (earned today / next prize / wheel / level).
+    private func progressHUD(compact: Bool) -> some View {
+        SessionProgressHUD(
+            earnedToday: progress.minutesEarnedToday,
+            questionsUntilReward: max(0, totalQuestions - questionIndex),
+            questionsUntilWheel: progress.questionsUntilWheel,
+            questionsUntilLevel: progress.questionsUntilNextLevel,
+            wheelReady: progress.freeWheelAvailable,
+            compact: compact
+        )
     }
 
     private func closeButton(size: CGFloat) -> some View {
@@ -247,6 +293,10 @@ struct QuestionRunnerView: View {
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .glow(AppColor.gemPurple, radius: 10)
+                } else if mode.isFeed {
+                    Text(q.topic.displayName)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
                 }
             }
 
@@ -395,12 +445,18 @@ struct QuestionRunnerView: View {
         startedLevel = progress.companionLevel
         progress.registerSessionToday()
         progress.resetSessionScore()
+        LearningHistoryStore.shared.recordSessionStart()
+        LiveEventReporter.report(.sessionStart)
+        reportedMilestone = false
+        reportedWheel = false
+        reportedDiscovery = []
         questionIndex = 0
         correctInSession = 0
         earnedThisSession = 0
         consecutiveWrong = 0
+        topicHistory = []
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            companion.cheer("מוכן? קדימה!")
+            companion.cheer(mode.isFeed ? "הרפתקה חכמה — קדימה! 🧠" : "מוכן? קדימה!")
         }
         nextQuestion()
     }
@@ -433,20 +489,43 @@ struct QuestionRunnerView: View {
         }
     }
 
+    /// Chooses the topic for the question about to be created, per session mode.
+    private func pickTopic() -> Topic {
+        switch mode {
+        case .world(let w):
+            return w.topic
+        case .smartFeed:
+            let profile = LearningProfile(store: progress, settings: settings)
+            let engine = LearningFeedEngine(profile: profile)
+            return engine.nextTopic(history: topicHistory, index: questionIndex)
+        }
+    }
+
     private func createQuestion(super isSuper: Bool) {
         isSuperQuestion = isSuper
         selectedIndex = nil
         feedbackForIndex = [:]
         showFeedback = false
+        hadMistakeThisQuestion = false
+        assistOfferedThisQuestion = false
 
-        // DDA: pick difficulty
-        let baseDiff = settings.difficulty(for: world.topic)
-        let acc = progress.accuracy(for: world.topic)
+        let topic = pickTopic()
+        currentTopic = topic
+        topicHistory.append(topic)
+
+        // DDA: pick difficulty from rolling accuracy for this topic.
+        let baseDiff = settings.difficulty(for: topic)
+        let acc = progress.accuracy(for: topic)
         let effective = QuestionGenerator.adaptiveDifficulty(base: baseDiff, accuracy: acc)
-        current = QuestionGenerator.generate(topic: world.topic, difficulty: effective)
+        current = QuestionGenerator.generate(topic: topic, difficulty: effective)
+        questionShownAt = Date()
     }
 
     private func regenerateQuestion() {
+        // Replacing a question is an abandonment signal for its topic.
+        progress.recordAbandon(topic: currentTopic)
+        // Drop the just-served topic from history so the replacement re-picks.
+        if !topicHistory.isEmpty { topicHistory.removeLast() }
         createQuestion(super: isSuperQuestion)
         consecutiveWrong = 0
     }
@@ -531,19 +610,42 @@ struct QuestionRunnerView: View {
         correctInSession += 1
         consecutiveWrong = 0
 
+        let responseMs = questionShownAt.map { Date().timeIntervalSince($0) * 1000 } ?? 0
         let ctx = ProgressStore.AnswerContext(
             topic: q.topic,
             combo: progress.currentStreak,
             isSuperQuestion: isSuperQuestion,
             isMysteryPortal: isInPortal
         )
-        let earned = progress.recordCorrect(ctx, minutesPerCorrect: settings.minutesPerCorrectAnswer)
+        let earned = progress.recordCorrect(
+            ctx,
+            minutesPerCorrect: settings.minutesPerCorrectAnswer,
+            responseMs: responseMs,
+            hadMistakeThisQuestion: hadMistakeThisQuestion
+        )
         earnedThisSession += earned
 
-        // Show "+X דקות" popup
+        let minuteMult = isInPortal ? 3 : (isSuperQuestion ? 5 : 1)
+        LearningHistoryStore.shared.recordAnswer(
+            topic: q.topic, correct: true, responseMs: responseMs,
+            earnedMinutes: settings.minutesPerCorrectAnswer * minuteMult,
+            streak: progress.currentStreak
+        )
+        reportLiveEvents(for: q)
+
+        // Show "+X דקות" popup that flies to the timer.
         let minuteMultiplier = isInPortal ? 3 : (isSuperQuestion ? 5 : 1)
         let minutesGained = settings.minutesPerCorrectAnswer * minuteMultiplier
         showEarnedMinutesPopup(minutes: minutesGained)
+
+        // Risk & Recovery payoff — celebrate winning time back.
+        if progress.lastRecoveredMinutes > 0 {
+            let back = progress.lastRecoveredMinutes
+            progress.lastRecoveredMinutes = 0
+            companion.wow("החזרת \(back) דק'! ⭐")
+            confettiTrigger += 1
+            return
+        }
 
         // Companion reaction
         if isSuperQuestion {
@@ -561,12 +663,32 @@ struct QuestionRunnerView: View {
         }
     }
 
+    /// Fires the in-session live events a co-parent gets notified about.
+    private func reportLiveEvents(for q: Question) {
+        if progress.currentStreak == 5 {
+            LiveEventReporter.report(.streak, value: "5")
+        }
+        if !reportedMilestone, totalQuestions >= 10, correctInSession == 8 {
+            reportedMilestone = true
+            LiveEventReporter.report(.milestone, value: "8/\(totalQuestions)")
+        }
+        if !reportedWheel, progress.freeWheelAvailable {
+            reportedWheel = true
+            LiveEventReporter.report(.wheelWin)
+        }
+        if mode.isFeed, !reportedDiscovery.contains(q.topic),
+           progress.exposure(for: q.topic) <= 3, progress.affinity(for: q.topic) >= 0.65 {
+            reportedDiscovery.insert(q.topic)
+            LiveEventReporter.report(.discovery, topic: q.topic)
+        }
+    }
+
     private func showEarnedMinutesPopup(minutes: Int) {
         lastEarnedMinutes = minutes
         withAnimation(.spring(response: 0.5, dampingFraction: 0.55)) {
             showEarnedPopup = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {
             withAnimation(.easeOut(duration: 0.4)) {
                 showEarnedPopup = false
             }
@@ -577,15 +699,32 @@ struct QuestionRunnerView: View {
         SoundPlayer.shared.play(.wrongSoft)
         Haptic.warning()
         consecutiveWrong += 1
-        let penaltyMinutes = progress.recordWrong(topic: q.topic)
+        hadMistakeThisQuestion = true
+        // Stuck? Gently offer to bring a parent in (once per question).
+        if consecutiveWrong == 2, !assistOfferedThisQuestion {
+            assistOfferedThisQuestion = true
+            showParentAssist = true
+        }
+        let penaltyMinutes = progress.recordWrong(
+            topic: q.topic,
+            minutesPerCorrect: settings.minutesPerCorrectAnswer
+        )
+        LearningHistoryStore.shared.recordAnswer(
+            topic: q.topic, correct: false, responseMs: 0,
+            earnedMinutes: 0, streak: 0
+        )
         if penaltyMinutes > 0 {
-            // Gentle messaging — never accusatory.
-            companion.console("נורא לא נורא — אבל הפסדנו \(penaltyMinutes) דק'")
+            // Safe negative experience: never accusatory, always a way back.
+            companion.console([
+                "💡 כמעט! ענה נכון עכשיו ותחזיר את הזמן",
+                "✨ קרוב! תשובה נכונה תחזיר \(penaltyMinutes) דק'",
+                "⭐ אפשר להחזיר את הזמן מיד — נסה שוב"
+            ].randomElement()!)
         } else {
             companion.console([
                 "כמעט!",
                 "ממש קרוב",
-                "טעות מתוקה — הנה הנכון!",
+                "בוא ננסה שוב",
                 "ננסה את הבאה"
             ].randomElement()!)
         }
@@ -593,7 +732,7 @@ struct QuestionRunnerView: View {
 }
 
 #Preview {
-    QuestionRunnerView(world: Worlds.all[0])
+    QuestionRunnerView(mode: .smartFeed)
         .environmentObject(ParentSettings.shared)
         .environmentObject(ProgressStore.shared)
         .environment(\.layoutDirection, .rightToLeft)

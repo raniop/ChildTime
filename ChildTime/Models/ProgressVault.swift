@@ -74,6 +74,7 @@ final class ProgressVault {
         boundProfileID = profile.id
         // 4. Reset live caches that don't belong to the new profile
         QuestionMemory.shared.reloadForActiveProfile()
+        LearningHistoryStore.shared.bind(to: profile.id)
         observeAndAutoSave()
     }
 

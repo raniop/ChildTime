@@ -225,6 +225,29 @@ struct ParentDashboardView: View {
                 statCell(emoji: "🔥", value: "\(s.dayStreak)", label: "רצף ימים")
             }
 
+            // Learning profile — what the Smart Feed has learned about this kid.
+            learningProfileCard(for: profile, snapshot: s)
+
+            // Full analytics deep-dive (daily/weekly/monthly + coaching).
+            NavigationLink {
+                ChildInsightsView(profile: profile, snapshot: s)
+                    .environmentObject(settings)
+                    .environment(\.layoutDirection, .rightToLeft)
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                    Text("תובנות מלאות")
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                    Spacer()
+                    Image(systemName: "chevron.left").font(.caption)
+                }
+                .foregroundStyle(AppColor.gemPurple)
+                .padding(.vertical, 10).padding(.horizontal, 12)
+                .background(RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                    .fill(AppColor.gemPurple.opacity(0.12)))
+            }
+            .buttonStyle(.plain)
+
             // Daily cap line (if enabled)
             if settings.dailyCapEnabled {
                 HStack(spacing: 6) {
@@ -283,6 +306,57 @@ struct ParentDashboardView: View {
             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                 .stroke(isActive ? AppColor.successMint.opacity(0.6) : .clear, lineWidth: 2)
         )
+    }
+
+    @ViewBuilder
+    private func learningProfileCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
+        let lp = LearningProfile(snapshot: s, enabledTopics: settings.enabledTopics, age: profile.age)
+        let favorites = Array(lp.favorites.prefix(3))
+        let strong = Array(lp.strong.prefix(3))
+        let weak = Array(lp.weak.prefix(3))
+        let discovering = Array(lp.discovering.prefix(3))
+
+        // Only show once the kid has actually played enough to have signals.
+        if s.totalAnswered >= 4 {
+            VStack(alignment: .trailing, spacing: 8) {
+                HStack(spacing: 6) {
+                    Spacer()
+                    Text("פרופיל למידה")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "brain.head.profile")
+                        .font(.system(size: 13))
+                        .foregroundStyle(AppColor.gemPurple)
+                }
+                if !favorites.isEmpty { topicLine("אוהב", topics: favorites, tint: AppColor.successMint) }
+                if !strong.isEmpty   { topicLine("חזק ב", topics: strong, tint: AppColor.starGold) }
+                if !weak.isEmpty     { topicLine("מתאמן על", topics: weak, tint: AppColor.flameOrange) }
+                if !discovering.isEmpty { topicLine("מגלה", topics: discovering, tint: AppColor.gemPurple) }
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(AppSpacing.sm)
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                    .fill(Color(.systemBackground).opacity(0.5))
+            )
+        }
+    }
+
+    private func topicLine(_ label: String, topics: [Topic], tint: Color) -> some View {
+        HStack(spacing: 6) {
+            Spacer()
+            ForEach(topics) { t in
+                Text("\(t.emoji) \(t.displayName)")
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Capsule().fill(tint.opacity(0.18)))
+                    .overlay(Capsule().stroke(tint.opacity(0.5), lineWidth: 1))
+            }
+            Text("\(label):")
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(.secondary)
+        }
     }
 
     private func statCell(emoji: String, value: String, label: String) -> some View {

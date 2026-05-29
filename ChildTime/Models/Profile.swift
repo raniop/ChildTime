@@ -15,6 +15,16 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     var avatarPresetID: String      // initial character preset (boy_red, girl_blue, etc.)
     var createdAt: Date
 
+    // MARK: - Learning identity (Parent Platform)
+    /// School grade (1–12), if the parent specified one. Independent of the
+    /// coarse `age` bracket used for difficulty defaults.
+    var grade: Int?
+    /// Interest tags the parent picked at setup (see `InterestCatalog`). Seed
+    /// the Smart Feed's topic affinity toward what the child already likes.
+    var interests: [String]
+    /// Initial learning level the parent estimated — seeds starting difficulty.
+    var learningLevel: LearningLevel
+
     init(
         id: UUID = UUID(),
         name: String,
@@ -22,7 +32,10 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         age: ChildAge = .grade1,
         photoData: Data? = nil,
         avatarPresetID: String = AvatarPreset.defaultID(for: nil),
-        createdAt: Date = .now
+        createdAt: Date = .now,
+        grade: Int? = nil,
+        interests: [String] = [],
+        learningLevel: LearningLevel = .developing
     ) {
         self.id = id
         self.name = name
@@ -31,6 +44,30 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.photoData = photoData
         self.avatarPresetID = avatarPresetID
         self.createdAt = createdAt
+        self.grade = grade
+        self.interests = interests
+        self.learningLevel = learningLevel
+    }
+
+    // Backward-compatible decoding: profiles stored before the Parent Platform
+    // shipped won't have grade / interests / learningLevel keys.
+    enum CodingKeys: String, CodingKey {
+        case id, name, gender, age, photoData, avatarPresetID, createdAt
+        case grade, interests, learningLevel
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try c.decode(UUID.self, forKey: .id)
+        self.name = try c.decode(String.self, forKey: .name)
+        self.gender = try c.decodeIfPresent(ChildGender.self, forKey: .gender)
+        self.age = try c.decode(ChildAge.self, forKey: .age)
+        self.photoData = try c.decodeIfPresent(Data.self, forKey: .photoData)
+        self.avatarPresetID = try c.decode(String.self, forKey: .avatarPresetID)
+        self.createdAt = try c.decode(Date.self, forKey: .createdAt)
+        self.grade = try c.decodeIfPresent(Int.self, forKey: .grade)
+        self.interests = try c.decodeIfPresent([String].self, forKey: .interests) ?? []
+        self.learningLevel = try c.decodeIfPresent(LearningLevel.self, forKey: .learningLevel) ?? .developing
     }
 
     /// Display avatar — photo if available, otherwise the preset.

@@ -31,6 +31,7 @@ final class AuthManager: ObservableObject {
     enum AuthProvider: String {
         case apple
         case google
+        case emailPassword
     }
 
     var isSignedIn: Bool { userID != nil }
@@ -50,13 +51,17 @@ final class AuthManager: ObservableObject {
         if let user = Auth.auth().currentUser {
             apply(firebaseUser: user)   // also deferred internally
         } else if let cachedUID = userID, !cachedUID.isEmpty {
+            let mail = email, name = displayName
             DispatchQueue.main.async {
+                HouseholdManager.shared.start(uid: cachedUID, email: mail, displayName: name)
                 RemoteSyncManager.shared.start(uid: cachedUID)
             }
         }
         #else
         if let cachedUID = userID, !cachedUID.isEmpty {
+            let mail = email, name = displayName
             DispatchQueue.main.async {
+                HouseholdManager.shared.start(uid: cachedUID, email: mail, displayName: name)
                 RemoteSyncManager.shared.start(uid: cachedUID)
             }
         }
@@ -68,6 +73,7 @@ final class AuthManager: ObservableObject {
     func signOut() {
         // Stop remote sync first so we don't fire writes during teardown.
         RemoteSyncManager.shared.stop()
+        HouseholdManager.shared.stop()
         #if canImport(FirebaseAuth)
         try? Auth.auth().signOut()
         #endif
@@ -142,6 +148,66 @@ final class AuthManager: ObservableObject {
         #endif
     }
 
+    // MARK: - Email / password
+
+    func signUpWithEmail(_ email: String, password: String, displayName: String?) async {
+        #if canImport(FirebaseAuth)
+        do {
+            let result = try await Auth.auth().createUser(withEmail: email, password: password)
+            if let displayName, !displayName.isEmpty {
+                let change = result.user.createProfileChangeRequest()
+                change.displayName = displayName
+                try? await change.commitChanges()
+            }
+            apply(firebaseUser: result.user)
+            provider = .emailPassword
+            lastError = nil
+        } catch {
+            lastError = mapAuthError(error)
+        }
+        #else
+        lastError = "Firebase Auth לא הותקן"
+        #endif
+    }
+
+    func signInWithEmail(_ email: String, password: String) async {
+        #if canImport(FirebaseAuth)
+        do {
+            let result = try await Auth.auth().signIn(withEmail: email, password: password)
+            apply(firebaseUser: result.user)
+            provider = .emailPassword
+            lastError = nil
+        } catch {
+            lastError = mapAuthError(error)
+        }
+        #else
+        lastError = "Firebase Auth לא הותקן"
+        #endif
+    }
+
+    func sendPasswordReset(to email: String) async {
+        #if canImport(FirebaseAuth)
+        do {
+            try await Auth.auth().sendPasswordReset(withEmail: email)
+            lastError = nil
+        } catch {
+            lastError = mapAuthError(error)
+        }
+        #endif
+    }
+
+    private func mapAuthError(_ error: Error) -> String {
+        let ns = error as NSError
+        switch ns.code {
+        case 17007: return "האימייל כבר רשום"
+        case 17008: return "כתובת אימייל לא תקינה"
+        case 17009: return "סיסמה שגויה"
+        case 17011: return "לא נמצא משתמש עם אימייל זה"
+        case 17026: return "הסיסמה חלשה מדי (לפחות 6 תווים)"
+        default:    return "שגיאת התחברות: \(ns.localizedDescription)"
+        }
+    }
+
     // MARK: - Google
 
     func signInWithGoogle(presenting controller: UIViewController?) async {
@@ -193,7 +259,10 @@ final class AuthManager: ObservableObject {
         // own init, the async hop pushes RemoteSyncManager.start outside
         // the dispatch_once window, AND start() no longer needs to read
         // AuthManager.shared.userID.
+        let name = user.displayName
+        let mail = user.email
         DispatchQueue.main.async {
+            HouseholdManager.shared.start(uid: uid, email: mail, displayName: name)
             RemoteSyncManager.shared.start(uid: uid)
         }
     }

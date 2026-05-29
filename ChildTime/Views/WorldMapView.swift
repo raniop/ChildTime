@@ -13,6 +13,7 @@ struct WorldMapView: View {
     @State private var showingDemo = false
     @State private var showingShop = false
     @State private var showingWheel = false
+    @State private var showingSmartFeed = false
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
 
@@ -131,6 +132,9 @@ struct WorldMapView: View {
         .fullScreenCover(isPresented: $showingWheel) {
             LuckyWheelView { showingWheel = false }
         }
+        .fullScreenCover(isPresented: $showingSmartFeed) {
+            QuestionRunnerView(mode: .smartFeed)
+        }
         .fullScreenCover(isPresented: $showingDemo) {
             ZStack(alignment: .topTrailing) {
                 DemoView()
@@ -199,14 +203,25 @@ struct WorldMapView: View {
 
             Button {
                 Haptic.light()
+                if progress.freeWheelAvailable { progress.resetWheelProgress() }
                 showingWheel = true
             } label: {
                 Text("🎡")
                     .font(.system(size: iconSize + 2))
                     .frame(width: buttonSize, height: buttonSize)
                     .background(.white.opacity(0.15), in: Circle())
-                    .overlay(Circle().stroke(AppColor.gemPurple.opacity(0.6), lineWidth: 1.5))
-                    .glow(AppColor.gemPurple.opacity(0.5), radius: 6)
+                    .overlay(Circle().stroke(AppColor.gemPurple.opacity(progress.freeWheelAvailable ? 1 : 0.6), lineWidth: progress.freeWheelAvailable ? 2.5 : 1.5))
+                    .glow(AppColor.gemPurple.opacity(progress.freeWheelAvailable ? 0.9 : 0.5), radius: progress.freeWheelAvailable ? 12 : 6)
+                    .overlay(alignment: .topTrailing) {
+                        if progress.freeWheelAvailable {
+                            Circle()
+                                .fill(AppColor.starGold)
+                                .frame(width: 12, height: 12)
+                                .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                                .offset(x: 2, y: -2)
+                        }
+                    }
+                    .pulse(min: progress.freeWheelAvailable ? 0.9 : 1.0)
             }
 
             if isCompact { Spacer() }
@@ -429,6 +444,38 @@ struct WorldMapView: View {
     @ViewBuilder
     private var bottomCTAs: some View {
         VStack(spacing: AppSpacing.sm) {
+            // Primary play mode — the personalized Smart Feed.
+            Button {
+                Haptic.light()
+                companion.cheer("יאללה, הרפתקה חכמה! 🧠")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    showingSmartFeed = true
+                }
+            } label: {
+                HStack(spacing: 10) {
+                    Text("🧠").font(.system(size: 28))
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("הרפתקה חכמה")
+                            .font(.system(size: 22, weight: .heavy, design: .rounded))
+                        Text("שאלות שנבחרו במיוחד בשבילך")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.85))
+                    }
+                    Spacer()
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 22))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.vertical, 14)
+                .frame(maxWidth: .infinity)
+                .background(AppGradient.portal)
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .glow(AppColor.companionGlow, radius: 14)
+            }
+            .buttonStyle(.juicy)
+            .frame(maxWidth: 480)
+
             if progress.dailyChestAvailable {
                 Button {
                     showDailyChest = true
@@ -510,6 +557,7 @@ struct WorldMapView: View {
         guard minutes > 0 else { return }
         shields.unlock(minutes: minutes)
         progress.startUnlock(minutes: minutes)
+        LearningHistoryStore.shared.recordMinutesUsed(minutes)
     }
 }
 

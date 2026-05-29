@@ -21,6 +21,9 @@ struct ProfileEditorView: View {
     @State private var age: ChildAge = .grade1
     @State private var photoData: Data? = nil
     @State private var avatarPresetID: String = AvatarPreset.defaultID(for: nil)
+    @State private var grade: Int? = nil
+    @State private var interests: Set<String> = []
+    @State private var learningLevel: LearningLevel = .developing
     @State private var pickerItem: PhotosPickerItem? = nil
     @State private var showPicker = false
     @State private var showDeleteConfirm = false
@@ -51,6 +54,10 @@ struct ProfileEditorView: View {
                         genderRow
 
                         ageRow
+
+                        learningLevelRow
+
+                        interestsSection
 
                         avatarPresetGrid
 
@@ -231,6 +238,69 @@ struct ProfileEditorView: View {
         .buttonStyle(.juicy)
     }
 
+    private var learningLevelRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("רמת למידה התחלתית")
+                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+            HStack(spacing: 6) {
+                ForEach(LearningLevel.allCases) { level in
+                    let selected = learningLevel == level
+                    Button {
+                        Haptic.light()
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { learningLevel = level }
+                    } label: {
+                        VStack(spacing: 4) {
+                            Text(level.emoji).font(.system(size: 22))
+                            Text(level.displayName)
+                                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .lineLimit(1).minimumScaleFactor(0.7)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, AppSpacing.sm)
+                        .background(.white.opacity(selected ? 0.26 : 0.10), in: RoundedRectangle(cornerRadius: AppRadius.medium))
+                        .overlay(RoundedRectangle(cornerRadius: AppRadius.medium)
+                            .stroke(selected ? AppColor.successMint : .white.opacity(0.18), lineWidth: selected ? 2.2 : 1))
+                    }
+                    .buttonStyle(.juicy)
+                }
+            }
+        }
+    }
+
+    private var interestsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("תחומי עניין (לפיד החכם)")
+                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
+                ForEach(InterestCatalog.all) { interest in
+                    let selected = interests.contains(interest.id)
+                    Button {
+                        Haptic.light()
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            if selected { interests.remove(interest.id) } else { interests.insert(interest.id) }
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Text(interest.emoji)
+                            Text(interest.label)
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(.white.opacity(selected ? 0.26 : 0.10), in: Capsule())
+                        .overlay(Capsule().stroke(selected ? AppColor.starGold : .white.opacity(0.18),
+                                                  lineWidth: selected ? 2 : 1))
+                    }
+                    .buttonStyle(.juicy)
+                }
+            }
+        }
+    }
+
     private var avatarPresetGrid: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("בחר דמות התחלתית")
@@ -318,6 +388,9 @@ struct ProfileEditorView: View {
             age = p.age
             photoData = p.photoData
             avatarPresetID = p.avatarPresetID
+            grade = p.grade
+            interests = Set(p.interests)
+            learningLevel = p.learningLevel
         } else {
             // Sensible defaults for the create flow
             avatarPresetID = AvatarPreset.defaultID(for: nil)
@@ -333,7 +406,10 @@ struct ProfileEditorView: View {
             age: age,
             photoData: photoData,
             avatarPresetID: avatarPresetID,
-            createdAt: .now
+            createdAt: .now,
+            grade: grade,
+            interests: Array(interests),
+            learningLevel: learningLevel
         )
         Haptic.success()
         SoundPlayer.shared.play(.companionCheer)

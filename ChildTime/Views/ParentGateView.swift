@@ -7,6 +7,10 @@ struct ParentGateView: View {
     @State private var shake: Bool = false
     @State private var authorized: Bool = false
 
+    private var canUseFaceID: Bool {
+        settings.faceIDForParentGate && PINManager.shared.biometryAvailable
+    }
+
     var body: some View {
         if authorized {
             ParentSettingsView()
@@ -57,12 +61,32 @@ struct ParentGateView: View {
             .offset(x: shake ? -10 : 0)
             .animation(shake ? .default.repeatCount(3, autoreverses: true).speed(6) : .default, value: shake)
 
+            if canUseFaceID {
+                Button {
+                    Task { await tryBiometric() }
+                } label: {
+                    Label("פתח עם Face ID", systemImage: "faceid")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.blue)
+                }
+                .padding(.top, 4)
+            }
+
             Spacer()
 
             keypad
                 .padding(.bottom, 24)
         }
         .padding()
+        .onAppear {
+            if canUseFaceID { Task { await tryBiometric() } }
+        }
+    }
+
+    private func tryBiometric() async {
+        if await PINManager.shared.authenticateBiometric() {
+            authorized = true
+        }
     }
 
     private var keypad: some View {
@@ -116,7 +140,7 @@ struct ParentGateView: View {
     }
 
     private func verify() {
-        if entered == settings.pin {
+        if PINManager.shared.verify(entered) {
             authorized = true
         } else {
             shake = true

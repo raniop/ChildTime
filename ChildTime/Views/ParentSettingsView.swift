@@ -16,6 +16,10 @@ struct ParentSettingsView: View {
     @State private var showSignIn = false
     @State private var showPaywall = false
     @State private var showDashboard = false
+    @State private var showFamilyLinking = false
+    @State private var exportURL: URL?
+    @State private var showDeleteAllConfirm = false
+    @State private var deleting = false
 
     var body: some View {
         NavigationStack {
@@ -25,14 +29,17 @@ struct ParentSettingsView: View {
                 profileSection
                 authorizationSection
                 syncSection
+                notificationsSection
                 ageSection
                 rewardSection
+                smartFeedSection
                 dailyCapSection
                 penaltySection
                 soundsSection
                 topicsSection
                 appsSection
                 pinSection
+                privacySection
             }
             .navigationTitle("הגדרות הורה")
             .navigationBarTitleDisplayMode(.inline)
@@ -60,6 +67,10 @@ struct ParentSettingsView: View {
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
                     .environmentObject(subs)
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(isPresented: $showFamilyLinking) {
+                FamilyLinkingView()
                     .environment(\.layoutDirection, .rightToLeft)
             }
             .sheet(isPresented: $showDashboard) {
@@ -232,6 +243,11 @@ struct ParentSettingsView: View {
                     }
                     Spacer()
                 }
+                Button {
+                    showFamilyLinking = true
+                } label: {
+                    Label("הורים מקושרים", systemImage: "person.2.fill")
+                }
                 Button(role: .destructive) {
                     auth.signOut()
                 } label: {
@@ -257,6 +273,28 @@ struct ParentSettingsView: View {
                     .foregroundStyle(.red)
             }
         }
+    }
+
+    @StateObject private var push = PushManager.shared
+
+    private var notificationsSection: some View {
+        Section {
+            if push.authorized {
+                Label("התראות פעילות", systemImage: "bell.badge.fill")
+                    .foregroundStyle(AppColor.successMint)
+            } else {
+                Button {
+                    Task { await push.requestAuthorization() }
+                } label: {
+                    Label("הפעל התראות חיות", systemImage: "bell.fill")
+                }
+            }
+        } header: {
+            Text("התראות להורה")
+        } footer: {
+            Text("קבלו עדכון כשהילד מתחיל מסע למידה, פותח רצף, זוכה בגלגל מזל או מגלה תחום חדש — וגם דוח שבועי. ההתראות נשלחות בין המכשירים בבית.")
+        }
+        .task { await push.refreshAuthorizationStatus() }
     }
 
     private var ageSection: some View {
@@ -364,6 +402,21 @@ struct ParentSettingsView: View {
         }
     }
 
+    private var smartFeedSection: some View {
+        Section {
+            Stepper(
+                "גלגל מזל כל \(settings.questionsPerWheel) שאלות",
+                value: $settings.questionsPerWheel,
+                in: 5...50,
+                step: 5
+            )
+        } header: {
+            Text("פיד למידה חכם")
+        } footer: {
+            Text("ב\"הרפתקה חכמה\" המערכת בונה לכל ילד פיד אישי: 80% מהנושאים שהוא אוהב ו-20% תחומים חדשים לגילוי. הפיד משתפר אחרי כל שאלה. כל \(settings.questionsPerWheel) שאלות הילד מרוויח סיבוב חינם בגלגל המזל.")
+        }
+    }
+
     private var dailyCapSection: some View {
         Section {
             Toggle("הגבל זמן יומי", isOn: $settings.dailyCapEnabled)
@@ -393,25 +446,14 @@ struct ParentSettingsView: View {
     }
 
     private var penaltySection: some View {
-        Section {
-            Toggle("הורד זמן על טעויות", isOn: $settings.penaltyEnabled)
-            if settings.penaltyEnabled {
-                Stepper(
-                    "אחרי \(settings.penaltyAfterMistakes) טעויות ברצף",
-                    value: $settings.penaltyAfterMistakes,
-                    in: 2...10
-                )
-                Stepper(
-                    "להוריד דקות: \(settings.penaltyMinutes)",
-                    value: $settings.penaltyMinutes,
-                    in: 1...10
-                )
-            }
+        let perMistake = progress.mistakePenaltyMinutes(minutesPerCorrect: settings.minutesPerCorrectAnswer)
+        return Section {
+            Toggle("טעויות עולות זמן", isOn: $settings.penaltyEnabled)
         } header: {
-            Text("עונש על טעויות")
+            Text("טעויות ולולאת תיקון")
         } footer: {
             Text(settings.penaltyEnabled
-                ? "אם הילד טועה \(settings.penaltyAfterMistakes) פעמים ברצף — נוריד לו \(settings.penaltyMinutes) דקות מהזמן שצבר. תשובה נכונה מאפסת את המונה."
+                ? "כל טעות מורידה \(perMistake) דק' (חצי מתגמול תשובה נכונה) — אבל הילד יכול להחזיר את הזמן מיד: תשובה נכונה ונקייה בשאלה הבאה מחזירה את כל הזמן שירד. אף פעם לא מוצג לילד \"טעית\" או \"הפסדת\"."
                 : "כבוי. הילד לא יאבד זמן גם אם יטעה הרבה.")
         }
     }
@@ -496,13 +538,69 @@ struct ParentSettingsView: View {
         }
     }
 
+    private var privacySection: some View {
+        Section {
+            Button {
+                exportURL = DataExporter.writeExportFile()
+            } label: {
+                Label("ייצוא הנתונים שלי (JSON)", systemImage: "square.and.arrow.up")
+            }
+            if let url = exportURL {
+                ShareLink(item: url) {
+                    Label("שתף את קובץ הייצוא", systemImage: "doc.badge.arrow.up")
+                        .font(.subheadline)
+                }
+            }
+            Button(role: .destructive) {
+                showDeleteAllConfirm = true
+            } label: {
+                if deleting {
+                    HStack { ProgressView(); Text("מוחק…") }
+                } else {
+                    Label("מחק את כל הנתונים שלי", systemImage: "trash.fill")
+                }
+            }
+            .disabled(deleting)
+        } header: {
+            Text("פרטיות ונתונים")
+        } footer: {
+            Text("ייצוא מפיק קובץ JSON עם כל הפרופילים, ההתקדמות וההיסטוריה. מחיקה מסירה לצמיתות את כל הנתונים מהמכשיר ומהענן — לא ניתן לשחזר.")
+        }
+        .confirmationDialog("למחוק את כל הנתונים לצמיתות?",
+                            isPresented: $showDeleteAllConfirm, titleVisibility: .visible) {
+            Button("מחק הכול", role: .destructive) { Task { await deleteEverything() } }
+            Button("בטל", role: .cancel) {}
+        } message: {
+            Text("פעולה זו תמחק את כל הילדים, ההתקדמות וההיסטוריה מהמכשיר ומהענן, ותנתק את החשבון. לא ניתן לבטל.")
+        }
+    }
+
+    private func deleteEverything() async {
+        deleting = true
+        await HouseholdManager.shared.deleteAllData()
+        DataExporter.wipeLocalData()
+        ProgressStore.shared.resetAll()
+        auth.signOut()
+        deleting = false
+        dismiss()
+    }
+
     private var pinSection: some View {
-        Section("אבטחה") {
+        Section {
             Button {
                 showChangePIN = true
             } label: {
                 Label("שנה קוד הורה", systemImage: "key.fill")
             }
+            if PINManager.shared.biometryAvailable {
+                Toggle(isOn: $settings.faceIDForParentGate) {
+                    Label("פתח עם Face ID / Touch ID", systemImage: "faceid")
+                }
+            }
+        } header: {
+            Text("אבטחה")
+        } footer: {
+            Text("הקוד נשמר מוצפן (hash) במכשיר ולא בטקסט גלוי.")
         }
     }
 }
@@ -550,7 +648,8 @@ struct ChangePINView: View {
             error = "הקודים לא תואמים"
             return
         }
-        settings.pin = newPIN
+        settings.pin = newPIN          // keep legacy mirror for migration safety
+        PINManager.shared.setPIN(newPIN)
         dismiss()
     }
 }

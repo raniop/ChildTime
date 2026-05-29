@@ -1,0 +1,134 @@
+import Foundation
+
+/// The parent's estimate of where a child starts out. Seeds the initial
+/// per-topic difficulty so the Smart Feed isn't cold on day one.
+enum LearningLevel: String, Codable, CaseIterable, Identifiable {
+    case beginner       // just starting out
+    case developing     // typical for the age
+    case proficient     // comfortable, ready for a challenge
+    case advanced       // ahead of the age bracket
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .beginner:   return "מתחיל"
+        case .developing: return "מתפתח"
+        case .proficient: return "שולט"
+        case .advanced:   return "מתקדם"
+        }
+    }
+
+    var emoji: String {
+        switch self {
+        case .beginner:   return "🌱"
+        case .developing: return "🌿"
+        case .proficient: return "🌳"
+        case .advanced:   return "🚀"
+        }
+    }
+
+    /// Starting difficulty this level implies, before DDA adjusts it live.
+    var seedDifficulty: Difficulty {
+        switch self {
+        case .beginner:   return .easy
+        case .developing: return .easy
+        case .proficient: return .medium
+        case .advanced:   return .hard
+        }
+    }
+
+    /// Affinity seed bump for interest-matched topics (0...1 space).
+    var affinityBoost: Double {
+        switch self {
+        case .beginner:   return 0.10
+        case .developing: return 0.15
+        case .proficient: return 0.20
+        case .advanced:   return 0.25
+        }
+    }
+}
+
+/// The interest tags a parent can pick for a child at setup. Each maps to the
+/// learning `Topic`s it should boost in the Smart Feed, so "ספורט"/"דגלים"
+/// nudge geography, "חלל" nudges science, etc.
+enum InterestCatalog {
+    struct Interest: Identifiable, Hashable {
+        let id: String
+        let label: String
+        let emoji: String
+        let topics: [Topic]
+    }
+
+    static let all: [Interest] = [
+        Interest(id: "sports",   label: "ספורט",    emoji: "⚽️", topics: [.geography, .math]),
+        Interest(id: "space",    label: "חלל",      emoji: "🚀", topics: [.science]),
+        Interest(id: "animals",  label: "בעלי חיים", emoji: "🦁", topics: [.science]),
+        Interest(id: "flags",    label: "דגלים",    emoji: "🚩", topics: [.geography]),
+        Interest(id: "music",    label: "מוזיקה",   emoji: "🎵", topics: [.history]),
+        Interest(id: "art",      label: "אמנות",    emoji: "🎨", topics: [.history]),
+        Interest(id: "history",  label: "היסטוריה", emoji: "🏛️", topics: [.history]),
+        Interest(id: "science",  label: "מדע",      emoji: "🔬", topics: [.science]),
+        Interest(id: "english",  label: "אנגלית",   emoji: "🔤", topics: [.english]),
+        Interest(id: "numbers",  label: "מספרים",   emoji: "🔢", topics: [.math, .logic]),
+        Interest(id: "puzzles",  label: "חידות",    emoji: "🧩", topics: [.logic]),
+        Interest(id: "geography",label: "מדינות",   emoji: "🌍", topics: [.geography]),
+    ]
+
+    static func find(_ id: String) -> Interest? { all.first { $0.id == id } }
+
+    /// The set of topics a child's chosen interests point at.
+    static func topics(for interestIDs: [String]) -> Set<Topic> {
+        var result: Set<Topic> = []
+        for id in interestIDs {
+            if let i = find(id) { result.formUnion(i.topics) }
+        }
+        return result
+    }
+}
+
+/// Firestore representation of a child, owned by a household (not a single
+/// parent uid) so co-parents can both see and manage them. Mirrors `Profile`
+/// plus the household link. Progress lives in `children/{id}/state/current`.
+struct ChildRecord: Codable, Identifiable, Equatable {
+    let id: String                 // == Profile.id.uuidString
+    var householdID: String
+    var name: String
+    var age: Int                   // ChildAge.rawValue
+    var gender: String?            // ChildGender.rawValue
+    var avatarPresetID: String
+    var grade: Int?
+    var interests: [String]
+    var learningLevel: String      // LearningLevel.rawValue
+    var createdAt: Date
+
+    init(profile: Profile, householdID: String) {
+        self.id = profile.id.uuidString
+        self.householdID = householdID
+        self.name = profile.name
+        self.age = profile.age.rawValue
+        self.gender = profile.gender?.rawValue
+        self.avatarPresetID = profile.avatarPresetID
+        self.grade = profile.grade
+        self.interests = profile.interests
+        self.learningLevel = profile.learningLevel.rawValue
+        self.createdAt = profile.createdAt
+    }
+
+    /// Rehydrate a local `Profile` (photo data stays device-local, not synced).
+    func toProfile() -> Profile? {
+        guard let uuid = UUID(uuidString: id) else { return nil }
+        return Profile(
+            id: uuid,
+            name: name,
+            gender: gender.flatMap(ChildGender.init(rawValue:)),
+            age: ChildAge(rawValue: age) ?? .grade1,
+            photoData: nil,
+            avatarPresetID: avatarPresetID,
+            createdAt: createdAt,
+            grade: grade,
+            interests: interests,
+            learningLevel: LearningLevel(rawValue: learningLevel) ?? .developing
+        )
+    }
+}

@@ -13,6 +13,10 @@ struct ContentView: View {
                 // and cosmetics only sync across devices when the parent
                 // is signed in. Required from day one.
                 LoginGateView()
+            } else if !settings.hasConsented {
+                // Privacy by Design: explicit parental consent before any
+                // child profile or data exists.
+                ConsentView()
             } else if !settings.onboardingCompleted {
                 // Logged in but parent hasn't finished setup yet.
                 OnboardingView()

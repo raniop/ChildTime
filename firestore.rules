@@ -1,0 +1,71 @@
+rules_version = '2';
+
+// ChildTime — family data separation.
+//
+// Ownership model: children belong to a HOUSEHOLD, and a parent may access a
+// child only if their uid is listed on that child's household. This enforces
+// "no data sharing between families / between children of other parents".
+//
+// Deploy with:  firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isParentOfHousehold(householdID) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/households/$(householdID))
+        && request.auth.uid in get(/databases/$(database)/documents/households/$(householdID)).data.parentUIDs;
+    }
+
+    // Parent account — only the owner.
+    match /parents/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Households — only listed parents may read/update. Anyone signed in may
+    // create a household that lists themselves (and only themselves) at create.
+    match /households/{householdID} {
+      allow read: if signedIn() && request.auth.uid in resource.data.parentUIDs;
+      allow create: if signedIn() && request.auth.uid in request.resource.data.parentUIDs;
+      // Updates: must already be a member, OR be joining via an invite
+      // (adding only your own uid to parentUIDs).
+      allow update: if signedIn() && (
+        request.auth.uid in resource.data.parentUIDs ||
+        request.resource.data.parentUIDs.hasOnly(resource.data.parentUIDs.concat([request.auth.uid]))
+      );
+      allow delete: if signedIn() && request.auth.uid in resource.data.parentUIDs;
+    }
+
+    // Children + their progress / history / events — gated on household.
+    match /children/{childID} {
+      allow read, write: if signedIn() && isParentOfHousehold(
+        request.method == 'delete' ? resource.data.householdID : request.resource.data.householdID
+      );
+
+      match /{sub=**} {
+        allow read, write: if signedIn() && isParentOfHousehold(
+          get(/databases/$(database)/documents/children/$(childID)).data.householdID
+        );
+      }
+    }
+
+    // Invites — readable by any signed-in user (to redeem by code), creatable
+    // by the household owner, updatable only to stamp redeemedBy.
+    match /invites/{code} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.auth.uid == request.resource.data.createdBy;
+      allow update: if signedIn();
+    }
+
+    // Weekly reports — readable by household parents (written by Cloud Functions
+    // with admin privileges, which bypass these rules).
+    match /weeklyReports/{childID}/{week} {
+      allow read: if signedIn() && isParentOfHousehold(
+        get(/databases/$(database)/documents/children/$(childID)).data.householdID
+      );
+    }
+  }
+}

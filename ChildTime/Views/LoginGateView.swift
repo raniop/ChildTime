@@ -17,6 +17,7 @@ struct LoginGateView: View {
     @State private var ctaAppear = false
     @State private var bubbleVisible = false
     @State private var burst = 0
+    @State private var showEmailAuth = false
 
     private var isCompact: Bool { hsc == .compact }
     private var companionSize: CGFloat { isCompact ? 130 : 170 }
@@ -55,6 +56,11 @@ struct LoginGateView: View {
             }
         }
         .onAppear { runEntranceSequence() }
+        .sheet(isPresented: $showEmailAuth) {
+            EmailAuthView()
+                .environmentObject(auth)
+                .environment(\.layoutDirection, .rightToLeft)
+        }
     }
 
     // MARK: - Hero
@@ -162,6 +168,20 @@ struct LoginGateView: View {
                 }
             }
             .frame(maxWidth: 360)
+
+            // Email / password
+            Button {
+                auth.lastError = nil
+                showEmailAuth = true
+            } label: {
+                Label("המשך עם אימייל", systemImage: "envelope.fill")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: 360)
+                    .frame(height: 52)
+                    .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
+            }
 
             if let err = auth.lastError {
                 Text(err)

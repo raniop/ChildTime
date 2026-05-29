@@ -79,6 +79,7 @@ final class ProfileStore: ObservableObject {
         profiles.append(profile)
         // If this is the first profile, make it active automatically.
         if activeID == nil { activeID = profile.id }
+        HouseholdManager.shared.upsertChild(profile)
     }
 
     func remove(_ profile: Profile) {
@@ -86,12 +87,14 @@ final class ProfileStore: ObservableObject {
         if activeID == profile.id {
             activeID = profiles.first?.id
         }
+        HouseholdManager.shared.deleteChild(profile.id)
     }
 
     func update(_ profile: Profile) {
         if let idx = profiles.firstIndex(where: { $0.id == profile.id }) {
             profiles[idx] = profile
             if profile.id == activeID { mirrorActiveIntoSettings() }
+            HouseholdManager.shared.upsertChild(profile)
         }
     }
 
@@ -101,12 +104,37 @@ final class ProfileStore: ObservableObject {
         // flip `activeID`, so listeners that react to activeID see a
         // store that already holds the new kid's state.
         ProgressVault.shared.switchTo(profile)
+        // Fresh child? Seed the Smart Feed from their interests + level.
+        ProgressStore.shared.seedLearning(from: profile)
         activeID = profile.id
     }
 
     /// Sign-out style: clears active selection (forces the picker on next launch).
     func signOutCurrentProfile() {
         activeID = nil
+    }
+
+    /// Merge children pulled from the household in Firestore into the local
+    /// store. Adds new ones and refreshes identity fields, while preserving
+    /// device-local photo data. Does not auto-remove (avoids data-loss races
+    /// from listener ordering); explicit deletes go through `remove`.
+    func mergeRemoteChildren(_ records: [ChildRecord]) {
+        var working = profiles
+        var changed = false
+        for record in records {
+            guard let remote = record.toProfile() else { continue }
+            if let idx = working.firstIndex(where: { $0.id == remote.id }) {
+                var merged = remote
+                merged.photoData = working[idx].photoData   // keep local photo
+                if working[idx] != merged { working[idx] = merged; changed = true }
+            } else {
+                working.append(remote); changed = true
+            }
+        }
+        if changed {
+            profiles = working
+            if activeID == nil { activeID = profiles.first?.id }
+        }
     }
 
     // MARK: - Mirroring to legacy settings

@@ -28,6 +28,23 @@ struct ProgressSnapshot: Codable, Equatable {
     var totalScore: Int = 0
     var minutesEarnedToday: Int = 0
     var dailyEarnedDate: Date? = nil
+
+    // MARK: - Smart Learning Feed signals (per-topic)
+    /// Rolling average response time per topic, in milliseconds.
+    var topicResponseMs: [String: Double] = [:]
+    /// Learned affinity per topic, 0...1 — drives the explore/exploit engine.
+    var topicAffinity: [String: Double] = [:]
+    /// How many questions of each topic the child has been served (novelty signal).
+    var topicExposure: [String: Int] = [:]
+    /// Times the child abandoned a topic (replaced a question / quit mid-topic).
+    var topicAbandon: [String: Int] = [:]
+
+    // MARK: - Time economy progression
+    /// Questions answered since the last free Lucky Wheel spin.
+    var wheelProgressCount: Int = 0
+    /// Minutes deducted by the most recent mistake, refundable by a clean
+    /// correct answer on the next question (Risk & Recovery loop).
+    var recoveryPot: Int = 0
     /// Bumped each time the device writes the snapshot — Firestore listeners
     /// use this to skip echoes of their own writes.
     var revision: Int = 0

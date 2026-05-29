@@ -27,6 +27,9 @@ final class ParentSettings: ObservableObject {
         static let penaltyMinutes = "penaltyMinutes"
         static let dailyCapEnabled = "dailyCapEnabled"
         static let maxMinutesPerDay = "maxMinutesPerDay"
+        static let questionsPerWheel = "questionsPerWheel"
+        static let faceIDForParentGate = "faceIDForParentGate"
+        static let consentVersionAccepted = "consentVersionAccepted"
     }
 
     enum RewardMode: String, CaseIterable, Identifiable {
@@ -105,14 +108,19 @@ final class ParentSettings: ObservableObject {
     @Published var batchMinutes: Int {
         didSet { defaults.set(batchMinutes, forKey: Key.batchMinutes) }
     }
+    /// When ON (default), each mistake costs half the per-correct reward, parked
+    /// in the recovery pot to be won back by a clean next answer. The parent can
+    /// turn this off to make wrong answers entirely consequence-free.
     @Published var penaltyEnabled: Bool {
         didSet { defaults.set(penaltyEnabled, forKey: Key.penaltyEnabled) }
     }
-    /// How many *consecutive* wrong answers before a penalty fires.
+    /// Legacy: consecutive-wrong threshold. No longer drives the penalty (kept
+    /// for back-compat / migration); the penalty now applies per mistake.
     @Published var penaltyAfterMistakes: Int {
         didSet { defaults.set(penaltyAfterMistakes, forKey: Key.penaltyAfterMistakes) }
     }
-    /// Minutes deducted from `pendingMinutes` when the penalty fires.
+    /// Legacy fixed deduction. Superseded by the half-of-correct rule in
+    /// `ProgressStore.mistakePenaltyMinutes`; retained for migration only.
     @Published var penaltyMinutes: Int {
         didSet { defaults.set(penaltyMinutes, forKey: Key.penaltyMinutes) }
     }
@@ -124,6 +132,18 @@ final class ParentSettings: ObservableObject {
     /// The daily ceiling (only enforced when `dailyCapEnabled == true`).
     @Published var maxMinutesPerDay: Int {
         didSet { defaults.set(maxMinutesPerDay, forKey: Key.maxMinutesPerDay) }
+    }
+    /// How many answered questions earn one free Lucky Wheel spin.
+    @Published var questionsPerWheel: Int {
+        didSet { defaults.set(questionsPerWheel, forKey: Key.questionsPerWheel) }
+    }
+    /// Allow Face ID / Touch ID as an alternative to the PIN at the parent gate.
+    @Published var faceIDForParentGate: Bool {
+        didSet { defaults.set(faceIDForParentGate, forKey: Key.faceIDForParentGate) }
+    }
+    /// The parental-consent version this parent accepted. 0 = not yet consented.
+    @Published var consentVersionAccepted: Int {
+        didSet { defaults.set(consentVersionAccepted, forKey: Key.consentVersionAccepted) }
     }
 
     private init() {
@@ -189,8 +209,13 @@ final class ParentSettings: ObservableObject {
         let bm = d.integer(forKey: Key.batchMinutes)
         self.batchMinutes = bm == 0 ? 10 : bm
 
-        // Penalty: default OFF. Be gentle by default — opt-in.
-        self.penaltyEnabled = d.bool(forKey: Key.penaltyEnabled)
+        // Mistake cost: default ON. Mistakes now matter (half the reward) but
+        // are immediately recoverable, so this is gentle by design.
+        if d.object(forKey: Key.penaltyEnabled) == nil {
+            self.penaltyEnabled = true
+        } else {
+            self.penaltyEnabled = d.bool(forKey: Key.penaltyEnabled)
+        }
         let pam = d.integer(forKey: Key.penaltyAfterMistakes)
         self.penaltyAfterMistakes = pam == 0 ? 3 : pam
         let pm = d.integer(forKey: Key.penaltyMinutes)
@@ -201,7 +226,15 @@ final class ParentSettings: ObservableObject {
         self.dailyCapEnabled = d.bool(forKey: Key.dailyCapEnabled)
         let mmd = d.integer(forKey: Key.maxMinutesPerDay)
         self.maxMinutesPerDay = mmd == 0 ? 60 : mmd
+
+        let qpw = d.integer(forKey: Key.questionsPerWheel)
+        self.questionsPerWheel = qpw == 0 ? 20 : qpw
+
+        self.faceIDForParentGate = d.bool(forKey: Key.faceIDForParentGate)
+        self.consentVersionAccepted = d.integer(forKey: Key.consentVersionAccepted)
     }
+
+    var hasConsented: Bool { consentVersionAccepted >= Consent.currentVersion }
 
     /// Apply age-appropriate defaults (called when parent picks an age in onboarding
     /// or changes it later in Settings).
