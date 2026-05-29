@@ -50,6 +50,7 @@ struct ParentDashboardView: View {
                     ScrollView {
                         VStack(spacing: 14) {
                             syncStatusCard
+                            insightNotificationsCard
                             ForEach(rows, id: \.profile.id) { row in
                                 profileCard(profile: row.profile, snapshot: row.snapshot)
                             }
@@ -98,6 +99,13 @@ struct ParentDashboardView: View {
             .onAppear {
                 refreshTrigger &+= 1
                 lastRefreshed = .now
+                rescheduleInsights()
+            }
+            .onChange(of: settings.parentInsightFrequency) { _, freq in
+                if freq != .off {
+                    Task { await PushManager.shared.requestAuthorization() }
+                }
+                rescheduleInsights()
             }
             // Tick every 5s so 'minutes remaining' counts down live.
             .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect()) { _ in
@@ -150,6 +158,48 @@ struct ParentDashboardView: View {
         )
     }
 
+    private var insightNotificationsCard: some View {
+        VStack(alignment: .trailing, spacing: 10) {
+            HStack(spacing: 8) {
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("התראות תובנות להורה")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    Text("עדכונים קצרים ואישיים על כל ילד — במה השתפר, איפה התקשה ומה לתרגל.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.trailing)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Image(systemName: "bell.badge.fill")
+                    .font(.title3)
+                    .foregroundStyle(AppColor.gemPurple)
+            }
+
+            Picker("תדירות", selection: $settings.parentInsightFrequency) {
+                ForEach(ParentSettings.InsightFrequency.allCases) { f in
+                    Text(f.displayName).tag(f)
+                }
+            }
+            .pickerStyle(.segmented)
+            .environment(\.layoutDirection, .leftToRight)
+        }
+        .padding(AppSpacing.md)
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .background(
+            RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                .fill(Color(.secondarySystemGroupedBackground))
+        )
+    }
+
+    private func rescheduleInsights() {
+        InsightNotificationScheduler.reschedule(
+            rows: rows,
+            enabledTopics: settings.enabledTopics,
+            frequency: settings.parentInsightFrequency
+        )
+    }
+
     private func relativeTime(_ when: Date) -> String {
         let elapsed = Int(-when.timeIntervalSinceNow)
         if elapsed < 5 { return "ממש עכשיו" }
@@ -178,6 +228,10 @@ struct ParentDashboardView: View {
             guard let end = s.unlockEndsAt else { return 0 }
             return max(0, Int(end.timeIntervalSinceNow))
         }()
+        let lp = LearningProfile(snapshot: s, enabledTopics: settings.enabledTopics, age: profile.age)
+        let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: profile.id), profile: lp)
+        let today = engine.today
+        let status = overallStatus(engine: engine, lp: lp, hasData: s.totalAnswered >= 4)
 
         return VStack(spacing: 14) {
             HStack(spacing: 12) {
@@ -216,17 +270,28 @@ struct ParentDashboardView: View {
                     Text("\(profile.age.label) • \(profile.gender?.displayName ?? "לא צוין")")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                    if let status {
+                        Text(status.text)
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(status.color))
+                    }
                 }
                 ProfileAvatarView(profile: profile, size: 54)
             }
 
+            // Today at a glance.
             HStack(spacing: 10) {
-                statCell(emoji: "⏱", value: "\(s.pendingMinutes)", label: "דק' זמינות")
-                statCell(emoji: "🎮", value: activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : "—", label: "זמן פעיל")
+                statCell(emoji: "⏱", value: "\(s.minutesEarnedToday)", label: "זמן מסך היום")
+                statCell(emoji: "❓", value: "\(today.questions)", label: "שאלות היום")
+                statCell(emoji: "🎯", value: today.questions > 0 ? "\(Int(today.accuracy * 100))%" : "—", label: "הצלחה היום")
             }
             HStack(spacing: 10) {
-                statCell(emoji: "⭐", value: "\(s.stars)", label: "כוכבים")
                 statCell(emoji: "🔥", value: "\(s.dayStreak)", label: "רצף ימים")
+                statCell(emoji: "⭐", value: "\(s.stars)", label: "כוכבים")
+                statCell(emoji: "🎮", value: s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : (activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : "—"), label: "דק' זמינות")
             }
 
             // Learning profile — what the Smart Feed has learned about this kid.
@@ -334,9 +399,9 @@ struct ParentDashboardView: View {
                         .font(.system(size: 13))
                         .foregroundStyle(AppColor.gemPurple)
                 }
-                if !favorites.isEmpty { topicLine("אוהב", topics: favorites, tint: AppColor.successMint) }
                 if !strong.isEmpty   { topicLine("חזק ב", topics: strong, tint: AppColor.starGold) }
-                if !weak.isEmpty     { topicLine("מתאמן על", topics: weak, tint: AppColor.flameOrange) }
+                if !favorites.isEmpty { topicLine("אוהב", topics: favorites, tint: AppColor.successMint) }
+                if !weak.isEmpty     { topicLine("כדאי לחזק", topics: weak, tint: AppColor.flameOrange) }
                 if !discovering.isEmpty { topicLine("מגלה", topics: discovering, tint: AppColor.gemPurple) }
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
@@ -414,6 +479,23 @@ struct ParentDashboardView: View {
                     )
             )
         }
+    }
+
+    /// Overall one-glance status for the child: progressing / needs reinforcement
+    /// / discovering. Returns nil until there's enough data.
+    private func overallStatus(engine: InsightsEngine, lp: LearningProfile, hasData: Bool) -> (text: String, color: Color)? {
+        guard hasData else { return nil }
+        let acc = engine.thisWeek.accuracy
+        if acc >= 0.75 || engine.weeklyAccuracyDelta >= 8 {
+            return ("מתקדם יפה 🎉", AppColor.successMint)
+        }
+        if engine.challenges.isEmpty, !engine.discovering.isEmpty {
+            return ("מגלה עניין חדש 🔭", AppColor.gemPurple)
+        }
+        if !engine.challenges.isEmpty {
+            return ("צריך חיזוק 💪", AppColor.flameOrange)
+        }
+        return ("מתקדם יפה 🎉", AppColor.successMint)
     }
 
     private func topicLine(_ label: String, topics: [Topic], tint: Color) -> some View {

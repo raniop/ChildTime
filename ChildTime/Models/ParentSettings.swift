@@ -30,6 +30,39 @@ final class ParentSettings: ObservableObject {
         static let questionsPerWheel = "questionsPerWheel"
         static let faceIDForParentGate = "faceIDForParentGate"
         static let consentVersionAccepted = "consentVersionAccepted"
+        static let parentInsightFrequency = "parentInsightFrequency"
+    }
+
+    /// How often the parent wants on-device "insight" notifications about their
+    /// kids (what improved, where they struggled, what to practice).
+    enum InsightFrequency: String, CaseIterable, Identifiable {
+        case off, once, twice, thrice
+        var id: String { rawValue }
+        var perDay: Int {
+            switch self {
+            case .off: return 0
+            case .once: return 1
+            case .twice: return 2
+            case .thrice: return 3
+            }
+        }
+        var displayName: String {
+            switch self {
+            case .off:    return "כבוי"
+            case .once:   return "פעם ביום"
+            case .twice:  return "פעמיים ביום"
+            case .thrice: return "שלוש פעמים ביום"
+            }
+        }
+        /// Hours of day to fire at, for each frequency.
+        var hours: [Int] {
+            switch self {
+            case .off:    return []
+            case .once:   return [17]
+            case .twice:  return [9, 18]
+            case .thrice: return [9, 14, 19]
+            }
+        }
     }
 
     enum RewardMode: String, CaseIterable, Identifiable {
@@ -145,6 +178,10 @@ final class ParentSettings: ObservableObject {
     @Published var consentVersionAccepted: Int {
         didSet { defaults.set(consentVersionAccepted, forKey: Key.consentVersionAccepted) }
     }
+    /// How often to send on-device parent-insight notifications.
+    @Published var parentInsightFrequency: InsightFrequency {
+        didSet { defaults.set(parentInsightFrequency.rawValue, forKey: Key.parentInsightFrequency) }
+    }
 
     private init() {
         let d = AppGroup.defaults
@@ -237,6 +274,9 @@ final class ParentSettings: ObservableObject {
 
         self.faceIDForParentGate = d.bool(forKey: Key.faceIDForParentGate)
         self.consentVersionAccepted = d.integer(forKey: Key.consentVersionAccepted)
+        self.parentInsightFrequency = InsightFrequency(
+            rawValue: d.string(forKey: Key.parentInsightFrequency) ?? ""
+        ) ?? .off
     }
 
     var hasConsented: Bool { consentVersionAccepted >= Consent.currentVersion }
