@@ -4,6 +4,7 @@ struct WorldMapView: View {
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var shields: ShieldManager
+    @EnvironmentObject var profiles: ProfileStore
     @Environment(\.horizontalSizeClass) private var hsc
 
     @State private var companion = CompanionController()
@@ -14,6 +15,7 @@ struct WorldMapView: View {
     @State private var showingShop = false
     @State private var showingWheel = false
     @State private var showingSmartFeed = false
+    @State private var showingChildSettings = false
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
 
@@ -59,6 +61,21 @@ struct WorldMapView: View {
                             columns: worldGridColumns,
                             spacing: AppSpacing.md
                         ) {
+                            FeatureCard(
+                                emoji: "🧠",
+                                title: "הרפתקה חכמה",
+                                subtitle: "שאלות במיוחד בשבילך",
+                                gradient: AppGradient.portal,
+                                glowColor: AppColor.companionGlow
+                            ) {
+                                Haptic.light()
+                                companion.cheer("יאללה, הרפתקה חכמה! 🧠")
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    showingSmartFeed = true
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+
                             ForEach(Worlds.all) { world in
                                 WorldCard(
                                     world: world,
@@ -109,6 +126,10 @@ struct WorldMapView: View {
                 heroAppeared = true
             }
             checkWorldUnlocks()
+            // Wheel pops when we return to the map after earning a free spin.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                maybeAutoPresentWheel()
+            }
         }
         .onChange(of: progress.stars) { _, new in
             if new > lastSeenStars {
@@ -134,6 +155,17 @@ struct WorldMapView: View {
         }
         .fullScreenCover(isPresented: $showingSmartFeed) {
             QuestionRunnerView(mode: .smartFeed)
+        }
+        .sheet(isPresented: $showingChildSettings) {
+            if let active = profiles.active {
+                ProfileEditorView(mode: .edit(active)) { updated in
+                    profiles.update(updated)
+                } onDelete: { profile in
+                    profiles.remove(profile)
+                }
+                .environmentObject(profiles)
+                .environment(\.layoutDirection, .rightToLeft)
+            }
         }
         .fullScreenCover(isPresented: $showingDemo) {
             ZStack(alignment: .topTrailing) {
@@ -174,7 +206,13 @@ struct WorldMapView: View {
 
     private func topBarActions(buttonSize: CGFloat, avatarSize: CGFloat, iconSize: CGFloat) -> some View {
         HStack(spacing: AppSpacing.sm) {
-            ChildAvatarView(size: avatarSize)
+            // Tapping the avatar opens the child's own basic profile settings.
+            ChildAvatarView(size: buttonSize) {
+                if profiles.active != nil {
+                    Haptic.light()
+                    showingChildSettings = true
+                }
+            }
 
             Button {
                 showingParentGate = true
@@ -199,29 +237,6 @@ struct WorldMapView: View {
                     .background(.white.opacity(0.15), in: Circle())
                     .overlay(Circle().stroke(AppColor.starGold.opacity(0.6), lineWidth: 1.5))
                     .glow(AppColor.starGold.opacity(0.5), radius: 6)
-            }
-
-            Button {
-                Haptic.light()
-                if progress.freeWheelAvailable { progress.resetWheelProgress() }
-                showingWheel = true
-            } label: {
-                Text("🎡")
-                    .font(.system(size: iconSize + 2))
-                    .frame(width: buttonSize, height: buttonSize)
-                    .background(.white.opacity(0.15), in: Circle())
-                    .overlay(Circle().stroke(AppColor.gemPurple.opacity(progress.freeWheelAvailable ? 1 : 0.6), lineWidth: progress.freeWheelAvailable ? 2.5 : 1.5))
-                    .glow(AppColor.gemPurple.opacity(progress.freeWheelAvailable ? 0.9 : 0.5), radius: progress.freeWheelAvailable ? 12 : 6)
-                    .overlay(alignment: .topTrailing) {
-                        if progress.freeWheelAvailable {
-                            Circle()
-                                .fill(AppColor.starGold)
-                                .frame(width: 12, height: 12)
-                                .overlay(Circle().stroke(.white, lineWidth: 1.5))
-                                .offset(x: 2, y: -2)
-                        }
-                    }
-                    .pulse(min: progress.freeWheelAvailable ? 0.9 : 1.0)
             }
 
             if isCompact { Spacer() }
@@ -444,38 +459,6 @@ struct WorldMapView: View {
     @ViewBuilder
     private var bottomCTAs: some View {
         VStack(spacing: AppSpacing.sm) {
-            // Primary play mode — the personalized Smart Feed.
-            Button {
-                Haptic.light()
-                companion.cheer("יאללה, הרפתקה חכמה! 🧠")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    showingSmartFeed = true
-                }
-            } label: {
-                HStack(spacing: 10) {
-                    Text("🧠").font(.system(size: 28))
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("הרפתקה חכמה")
-                            .font(.system(size: 22, weight: .heavy, design: .rounded))
-                        Text("שאלות שנבחרו במיוחד בשבילך")
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.85))
-                    }
-                    Spacer()
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 22))
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, AppSpacing.lg)
-                .padding(.vertical, 14)
-                .frame(maxWidth: .infinity)
-                .background(AppGradient.portal)
-                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                .glow(AppColor.companionGlow, radius: 14)
-            }
-            .buttonStyle(.juicy)
-            .frame(maxWidth: 480)
-
             if progress.dailyChestAvailable {
                 Button {
                     showDailyChest = true
@@ -543,6 +526,17 @@ struct WorldMapView: View {
         }
     }
 
+    /// Auto-presents the Lucky Wheel once the child has earned a free spin
+    /// (after `questionsPerWheel` answers), then resets the counter so it
+    /// won't pop again until the next batch. Replaces the old top-bar button.
+    private func maybeAutoPresentWheel() {
+        guard progress.freeWheelAvailable, !showingWheel, !showingSmartFeed else { return }
+        progress.resetWheelProgress()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            showingWheel = true
+        }
+    }
+
     private func checkWorldUnlocks() {
         for world in Worlds.all where !progress.unlockedWorlds.contains(world.id) {
             if progress.canUnlock(world: world) {
@@ -585,5 +579,6 @@ struct XPBarMini: View {
         .environmentObject(ParentSettings.shared)
         .environmentObject(ProgressStore.shared)
         .environmentObject(ShieldManager.shared)
+        .environmentObject(ProfileStore.shared)
         .environment(\.layoutDirection, .rightToLeft)
 }

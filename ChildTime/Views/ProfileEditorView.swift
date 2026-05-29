@@ -303,7 +303,7 @@ struct ProfileEditorView: View {
 
     private var avatarPresetGrid: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("בחר דמות התחלתית")
+            Text("🙂 בחר פרצוף")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
 
@@ -346,7 +346,7 @@ struct ProfileEditorView: View {
 
     private var photoControls: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("תמונה אישית (אופציונלי)")
+            Text("📷 או העלה תמונה (אופציונלי)")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 10) {
