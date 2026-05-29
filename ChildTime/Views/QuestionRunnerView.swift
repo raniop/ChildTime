@@ -662,6 +662,10 @@ struct QuestionRunnerView: View {
         let earnsTime = purpose.grantsScreenTime
         let cappedBefore = earnsTime && progress.atDailyCap
 
+        // Minutes are granted in batches (every 10 correct → 4 min), so measure
+        // what was ACTUALLY added this answer rather than assuming a per-answer
+        // rate — most answers add 0, and the 10th adds the batch.
+        let minutesBefore = progress.pendingMinutes
         let earned = progress.recordCorrect(
             ctx,
             minutesPerCorrect: settings.minutesPerCorrectAnswer,
@@ -670,20 +674,19 @@ struct QuestionRunnerView: View {
             grantsScreenTime: earnsTime
         )
         earnedThisSession += earned
+        let minutesGranted = max(0, progress.pendingMinutes - minutesBefore)
 
-        let minuteMult = isInPortal ? 3 : (isSuperQuestion ? 5 : 1)
-        let gotMinutes = earnsTime && !cappedBefore
         LearningHistoryStore.shared.recordAnswer(
             topic: q.topic, correct: true, responseMs: responseMs,
-            earnedMinutes: gotMinutes ? settings.minutesPerCorrectAnswer * minuteMult : 0,
+            earnedMinutes: minutesGranted,
             streak: progress.currentStreak,
             voluntary: cappedBefore   // learning past the max = voluntary
         )
         reportLiveEvents(for: q)
 
-        // "+X דקות" popup flies to the timer — only while actually earning.
-        if gotMinutes {
-            showEarnedMinutesPopup(minutes: settings.minutesPerCorrectAnswer * minuteMult)
+        // "+X דקות" popup — only when minutes were actually banked this answer.
+        if minutesGranted > 0 {
+            showEarnedMinutesPopup(minutes: minutesGranted)
         }
 
         // Crossed the daily maximum just now? Celebrate once and make it clear

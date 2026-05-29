@@ -59,6 +59,29 @@ struct LuckyWheelView: View {
                 }
                 .scrollIndicators(.hidden)
             }
+            // After a prize is revealed, a tap ANYWHERE continues — so a kid
+            // never has to find/scroll to a button (e.g. on landscape iPad).
+            .overlay {
+                if winner != nil {
+                    VStack {
+                        Spacer()
+                        Text("טַאפּ בְּכָל מָקוֹם כְּדֵי לְהַמְשִׁיךְ 👆")
+                            .font(.system(size: 18, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 22).padding(.vertical, 12)
+                            .background(.black.opacity(0.45), in: Capsule())
+                            .padding(.bottom, 48)
+                            .pulse()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        Haptic.light()
+                        onClose()
+                    }
+                    .transition(.opacity)
+                }
+            }
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
