@@ -19,6 +19,9 @@ final class ToneSynth {
 
     private var buffers: [AppSound: AVAudioPCMBuffer] = [:]
     private var musicBuffer: AVAudioPCMBuffer?
+    /// If a real music track is bundled (background_music.mp3/.m4a/.caf/.wav),
+    /// we play THAT instead of the procedural loop. Drop a file in to upgrade.
+    private var musicFilePlayer: AVAudioPlayer?
     private var didStart = false
     private var musicOn = false
 
@@ -28,7 +31,21 @@ final class ToneSynth {
         engine.attach(musicPlayer)
         engine.connect(musicPlayer, to: engine.mainMixerNode, format: format)
         preloadAll()
-        musicBuffer = renderMusicLoop()
+        musicFilePlayer = Self.loadBundledMusic()
+        if musicFilePlayer == nil { musicBuffer = renderMusicLoop() }
+    }
+
+    /// Looks for a bundled background-music track (any common format).
+    private static func loadBundledMusic() -> AVAudioPlayer? {
+        let name = "background_music"
+        let url = ["mp3", "m4a", "caf", "wav"].lazy
+            .compactMap { Bundle.main.url(forResource: name, withExtension: $0) }
+            .first
+        guard let url, let p = try? AVAudioPlayer(contentsOf: url) else { return nil }
+        p.numberOfLoops = -1     // seamless infinite loop
+        p.volume = 0.5           // soft bed under the effects
+        p.prepareToPlay()
+        return p
     }
 
     /// Lazy-start the engine on first play (avoids audio session conflicts at launch).
@@ -61,6 +78,12 @@ final class ToneSynth {
     func startMusic() {
         wantsMusic = true
         guard ParentSettings.shared.soundsEnabled else { stopMusic(keepIntent: true); return }
+        // Prefer a bundled professional track if one exists.
+        if let fp = musicFilePlayer {
+            if !fp.isPlaying { fp.play() }
+            musicOn = true
+            return
+        }
         ensureRunning()
         guard !musicOn, let buf = musicBuffer else { return }
         musicOn = true
@@ -74,18 +97,23 @@ final class ToneSynth {
         if !keepIntent { wantsMusic = false }
         guard musicOn else { return }
         musicOn = false
-        musicPlayer.stop()
+        if let fp = musicFilePlayer { fp.stop(); fp.currentTime = 0 }
+        else { musicPlayer.stop() }
     }
 
     /// Pause for app backgrounding without losing the intent to play.
     func pauseMusic() {
         guard musicOn else { return }
-        musicPlayer.pause()
+        if let fp = musicFilePlayer { fp.pause() } else { musicPlayer.pause() }
     }
 
     /// Resume after returning to the foreground, only if music was wanted.
     func resumeMusicIfWanted() {
         guard wantsMusic, ParentSettings.shared.soundsEnabled else { return }
+        if let fp = musicFilePlayer {
+            if !fp.isPlaying { fp.play() }
+            return
+        }
         ensureRunning()
         if musicOn { musicPlayer.play() } else { startMusic() }
     }
