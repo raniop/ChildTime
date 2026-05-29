@@ -10,23 +10,34 @@ import GoogleSignIn
 
 @main
 struct ChildTimeApp: App {
-    @StateObject private var settings = ParentSettings.shared
-    @StateObject private var progress = ProgressStore.shared
-    @StateObject private var shields = ShieldManager.shared
-    @StateObject private var auth = AuthManager.shared
-    @StateObject private var subs = SubscriptionManager.shared
-    @StateObject private var profiles = ProfileStore.shared
-    @StateObject private var cosmetics = CosmeticStore.shared
+    @StateObject private var settings: ParentSettings
+    @StateObject private var progress: ProgressStore
+    @StateObject private var shields: ShieldManager
+    @StateObject private var auth: AuthManager
+    @StateObject private var subs: SubscriptionManager
+    @StateObject private var profiles: ProfileStore
+    @StateObject private var cosmetics: CosmeticStore
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
         #if canImport(FirebaseCore)
-        // Safe to call once at launch. No-op if GoogleService-Info.plist is missing
-        // (will print a console warning, but won't crash the app).
+        // MUST run before any singleton below is touched — several of them
+        // (auth, progress, household sync) reach for Auth/Firestore in their
+        // init, which warns "default Firebase app has not yet been configured"
+        // if Firebase isn't up yet. Assigning the @StateObjects *inside* init,
+        // after configure(), guarantees that ordering.
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
         }
         #endif
+
+        _settings = StateObject(wrappedValue: ParentSettings.shared)
+        _progress = StateObject(wrappedValue: ProgressStore.shared)
+        _shields = StateObject(wrappedValue: ShieldManager.shared)
+        _auth = StateObject(wrappedValue: AuthManager.shared)
+        _subs = StateObject(wrappedValue: SubscriptionManager.shared)
+        _profiles = StateObject(wrappedValue: ProfileStore.shared)
+        _cosmetics = StateObject(wrappedValue: CosmeticStore.shared)
     }
 
     var body: some Scene {
