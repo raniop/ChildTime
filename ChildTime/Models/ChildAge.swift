@@ -49,10 +49,10 @@ enum ChildAge: Int, Codable, CaseIterable, Identifiable {
     /// PreK gets a lighter set; older kids get all 6 topics.
     var defaultEnabledTopics: Set<Topic> {
         switch self {
-        case .preK:    return [.math, .logic]                                                  // Basic only
-        case .grade1:  return [.math, .english, .logic, .science]                              // Most topics
-        case .grade3:  return [.math, .english, .logic, .science, .history, .geography]       // All topics
-        case .older:   return [.math, .english, .logic, .science, .history, .geography]       // All topics
+        case .preK:    return [.math, .logic]                                                            // Basic only
+        case .grade1:  return [.math, .hebrew, .english, .logic, .science]                               // Most topics
+        case .grade3:  return [.math, .hebrew, .english, .logic, .science, .history, .geography]        // All topics
+        case .older:   return [.math, .hebrew, .english, .logic, .science, .history, .geography]        // All topics
         }
     }
 

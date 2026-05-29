@@ -103,6 +103,7 @@ struct CoachingEngine {
         switch topic {
         case .math:      return "נסו לתרגל חיבור וחיסור קצר בזמן ארוחת הערב."
         case .english:   return "הקדישו 10 דקות לקריאת מילים באנגלית יחד."
+        case .hebrew:    return "כתבו יחד כמה מילים והתרגלו איות נכון."
         case .logic:     return "פתרו חידה או משחק חשיבה אחד ביחד היום."
         case .science:   return "שאלו את \(name) שאלת \"למה\" על משהו בטבע."
         case .history:   return "ספרו ל\(name) סיפור קצר על משהו שקרה פעם."

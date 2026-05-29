@@ -141,10 +141,36 @@ enum QuestionBanks {
         BankQuestion(prompt: "🌍\nמה היבשת הגדולה ביותר?", correctAnswer: "אסיה", distractors: ["אפריקה", "אמריקה", "אירופה"])
     ]
 
+    /// Hebrew spelling (איות) — pick the correctly-spelled word among plausible
+    /// single-letter mistakes kids commonly make (כ/ח, ת/ט, ק/כ, ס/שׂ, א/ע/ה).
+    static let hebrew: [BankQuestion] = [
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "חתול",   distractors: ["כתול", "חטול", "חתל"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "שולחן",  distractors: ["סולחן", "שולכן", "שולחנ"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "כדור",   distractors: ["קדור", "גדור", "כדר"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "מחברת",  distractors: ["מהברת", "מכברת", "מחברט"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "צהוב",   distractors: ["סהוב", "צחוב", "זהוב"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "אוטובוס", distractors: ["עוטובוס", "אוטובוז", "אוטופוס"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "ספר",    distractors: ["סבר", "שפר", "צפר"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "תפוז",   distractors: ["טפוז", "תפוס", "דפוז"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "מים",    distractors: ["מיים", "מימ", "נים"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "ילד",    distractors: ["יעלד", "ילט", "יילד"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "כלב",    distractors: ["קלב", "כלף", "גלב"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "בית",    distractors: ["ביט", "פית", "בעת"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "עץ",     distractors: ["אץ", "עס", "חץ"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "ארנב",   distractors: ["ערנב", "ארנף", "הרנב"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "גשם",    distractors: ["קשם", "גסם", "גשמ"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "חבר",    distractors: ["כבר", "הבר", "חפר"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "שמש",    distractors: ["שמס", "סמש", "צמש"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "עוגה",   distractors: ["אוגה", "עוקה", "עוגע"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "מקרר",   distractors: ["מכרר", "מקר", "נקרר"]),
+        BankQuestion(prompt: "איך כותבים נכון?", correctAnswer: "כביש",   distractors: ["קביש", "כבית", "גביש"]),
+    ]
+
     /// Original + expanded — call sites get the full combined pool.
     static func bank(for topic: Topic) -> [BankQuestion]? {
         switch topic {
         case .english:   return english   + QuestionBanksExpanded.english
+        case .hebrew:    return hebrew
         case .logic:     return logic     + QuestionBanksExpanded.logic
         case .science:   return science   + QuestionBanksExpanded.science
         case .history:   return history   + QuestionBanksExpanded.history

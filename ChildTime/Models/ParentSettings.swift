@@ -159,10 +159,10 @@ final class ParentSettings: ObservableObject {
         if let raw = d.stringArray(forKey: Key.enabledTopics) {
             let parsed = Set(raw.compactMap(Topic.init(rawValue:)))
             self.enabledTopics = parsed.isEmpty
-                ? [.math, .english, .logic, .science]
+                ? [.math, .hebrew, .english, .logic, .science]
                 : parsed
         } else {
-            self.enabledTopics = [.math, .english, .logic, .science]
+            self.enabledTopics = [.math, .hebrew, .english, .logic, .science]
         }
 
         if let raw = d.dictionary(forKey: Key.difficulty) as? [String: String] {
@@ -252,6 +252,7 @@ final class ParentSettings: ObservableObject {
     static let defaultDifficulties: [Topic: Difficulty] = [
         .math: .easy,
         .english: .easy,
+        .hebrew: .easy,
         .logic: .easy,
         .science: .easy,
         .history: .easy,

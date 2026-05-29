@@ -262,6 +262,15 @@ struct WorldMapView: View {
 
             Button {
                 Haptic.light()
+                infoStat = .minutes
+            } label: {
+                MinutesBadge(minutes: progress.pendingMinutes, compact: true)
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
+
+            Button {
+                Haptic.light()
                 infoStat = .score
             } label: {
                 statChip(
@@ -274,15 +283,6 @@ struct WorldMapView: View {
             }
             .buttonStyle(.plain)
             .popover(isPresented: popoverBinding(for: .score)) { statInfoCard(.score) }
-
-            Button {
-                Haptic.light()
-                infoStat = .minutes
-            } label: {
-                MinutesBadge(minutes: progress.pendingMinutes, compact: true)
-            }
-            .buttonStyle(.plain)
-            .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
 
             Button {
                 Haptic.light()

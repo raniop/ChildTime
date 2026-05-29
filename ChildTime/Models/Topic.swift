@@ -3,6 +3,7 @@ import Foundation
 enum Topic: String, CaseIterable, Codable, Identifiable {
     case math       // חשבון — חיבור/חיסור/כפל/חילוק מאוחדים
     case english    // אנגלית
+    case hebrew     // עברית — איות/כתיב נכון
     case logic      // לוגיקה
     case science    // מדע
     case history    // היסטוריה
@@ -14,6 +15,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         switch self {
         case .math:      return "חשבון"
         case .english:   return "אנגלית"
+        case .hebrew:    return "עברית"
         case .logic:     return "לוגיקה"
         case .science:   return "מדע"
         case .history:   return "היסטוריה"
@@ -25,6 +27,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         switch self {
         case .math:      return "🧮"
         case .english:   return "🇬🇧"
+        case .hebrew:    return "✍️"
         case .logic:     return "🧩"
         case .science:   return "🔬"
         case .history:   return "🏛️"

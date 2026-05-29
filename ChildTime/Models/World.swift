@@ -55,6 +55,16 @@ enum Worlds {
             glowColor: Color(hex: "FF5252")
         ),
         World(
+            id: "hebrew_land",
+            name: "ארץ העברית",
+            emoji: "✍️",
+            topic: .hebrew,
+            starsToUnlock: 0,
+            rooms: 10,
+            gradient: .valley,
+            glowColor: Color(hex: "FF8FAB")
+        ),
+        World(
             id: "logic_lab",
             name: "חידות הלוגיקה",
             emoji: "🧩",
