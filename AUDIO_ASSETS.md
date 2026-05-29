@@ -1,5 +1,12 @@
 # Audio Assets — dropping in professional sounds & music
 
+> **Currently bundled:** the 10 sound effects are real recorded sounds from
+> **Kenney's Interface Sounds** pack (https://kenney.nl/assets/interface-sounds),
+> licensed **CC0 1.0** (public domain — no attribution required). Swap any of
+> them by replacing the matching file below. Background music is still the
+> procedural loop until a `background_music` track is added.
+
+
 The app ships with **procedural** (code-generated) sounds and music so it's never
 silent. To upgrade to **real recorded audio**, just add files with the exact
 names below to the app bundle — the app loads them automatically and falls back
