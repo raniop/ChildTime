@@ -184,12 +184,33 @@ struct ProfileAvatarView: View {
     /// Set to a non-empty array to render a *preview* loadout (e.g. in the
     /// shop) without touching the profile's persisted equipment.
     var overrideItems: [CosmeticItem]? = nil
+    /// On small avatars (e.g. the home top bar) render only head/face items
+    /// (hat, glasses, accessory) so the loadout reads cleanly at tiny sizes.
+    var headItemsOnly: Bool = false
 
     @EnvironmentObject private var cosmetics: CosmeticStore
 
     private var equippedItems: [CosmeticItem] {
-        if let overrideItems { return overrideItems }
-        return cosmetics.equippedItems(for: profile.id)
+        let base = overrideItems ?? cosmetics.equippedItems(for: profile.id)
+        let filtered = headItemsOnly
+            ? base.filter { [.hat, .glasses, .accessory].contains($0.category) }
+            : base
+        // Draw back-to-front: body first, glasses over the face, hat on top.
+        return filtered.sorted { zIndex($0.category) < zIndex($1.category) }
+    }
+
+    /// Paint order — higher draws later (on top).
+    private func zIndex(_ c: CosmeticCategory) -> Int {
+        switch c {
+        case .vehicle:   return 0
+        case .backpack:  return 1
+        case .shoes:     return 2
+        case .pants:     return 3
+        case .shirt:     return 4
+        case .accessory: return 5
+        case .glasses:   return 6
+        case .hat:       return 7
+        }
     }
 
     var body: some View {
@@ -237,23 +258,48 @@ struct ProfileAvatarView: View {
     @ViewBuilder
     private func cosmeticLayer(for item: CosmeticItem) -> some View {
         let (offset, scale) = position(for: item.category)
-        Text(item.emoji)
-            .font(.system(size: size * scale))
-            .offset(x: offset.x * size, y: offset.y * size)
-            .shadow(color: .black.opacity(0.35), radius: 2, y: 1)
+        Group {
+            switch item.render {
+            case .image(let name):
+                Image(name)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: size * scale, height: size * scale)
+            case .symbol(let sym):
+                // Worn glasses read best as a dark, bold line symbol on the eyes.
+                Image(systemName: sym)
+                    .font(.system(size: size * scale * 0.72, weight: .semibold))
+                    .foregroundStyle(symbolColor(for: item.category))
+                    .frame(width: size * scale, height: size * scale)
+            case .emoji(let e):
+                Text(e)
+                    .font(.system(size: size * scale))
+            }
+        }
+        .offset(x: offset.x * size, y: offset.y * size)
+        .shadow(color: .black.opacity(0.35), radius: 2, y: 1)
+    }
+
+    private func symbolColor(for category: CosmeticCategory) -> Color {
+        switch category {
+        case .glasses: return Color.black.opacity(0.82)   // looks like real lenses
+        default:       return .primary
+        }
     }
 
     /// Offset (x, y) is in units of `size` (i.e. 0.45 = 45% of avatar diameter).
+    /// Tuned so the hat sits ON the head crown and glasses sit ON the eyes —
+    /// they read as worn rather than floating.
     private func position(for category: CosmeticCategory) -> (offset: CGPoint, scale: CGFloat) {
         switch category {
-        case .hat:       return (CGPoint(x: 0,     y: -0.45), 0.38)
-        case .glasses:   return (CGPoint(x: 0,     y: -0.07), 0.30)
-        case .shirt:     return (CGPoint(x: 0,     y:  0.30), 0.30)
-        case .pants:     return (CGPoint(x: 0,     y:  0.42), 0.24)
-        case .shoes:     return (CGPoint(x: 0,     y:  0.50), 0.22)
-        case .accessory: return (CGPoint(x:  0.36, y: -0.30), 0.26)
+        case .hat:       return (CGPoint(x: 0,     y: -0.40), 0.54)  // on the crown, overlapping
+        case .glasses:   return (CGPoint(x: 0,     y: -0.05), 0.52)  // across the eyes
+        case .shirt:     return (CGPoint(x: 0,     y:  0.34), 0.32)
+        case .pants:     return (CGPoint(x: 0,     y:  0.46), 0.24)
+        case .shoes:     return (CGPoint(x: 0,     y:  0.52), 0.22)
+        case .accessory: return (CGPoint(x:  0.34, y: -0.30), 0.26)
         case .backpack:  return (CGPoint(x: -0.36, y:  0.08), 0.28)
-        case .vehicle:   return (CGPoint(x:  0.36, y:  0.36), 0.30)
+        case .vehicle:   return (CGPoint(x:  0.36, y:  0.38), 0.30)
         }
     }
 }

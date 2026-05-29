@@ -121,4 +121,31 @@ struct CosmeticItem: Identifiable, Codable, Equatable, Hashable {
     let emoji: String         // rendering token; future: swap to bundled art
     let rarity: CosmeticRarity
     let price: Int            // in gems
+    /// Optional bundled art (PNG/SVG in Assets) — preferred when present.
+    var assetName: String? = nil
+    /// Optional SF Symbol — a crisp "worn" look for face/head items (glasses).
+    var symbol: String? = nil
+
+    /// How this item should be drawn on the avatar, in priority order:
+    /// real art → SF Symbol → themed emoji.
+    enum Render: Equatable {
+        case image(String)
+        case symbol(String)
+        case emoji(String)
+    }
+
+    var render: Render {
+        if let assetName, !assetName.isEmpty { return .image(assetName) }
+        if let sym = symbol ?? Self.defaultSymbols[id] { return .symbol(sym) }
+        return .emoji(emoji)
+    }
+
+    /// Face/head items where a clean SF Symbol reads as truly "worn" better
+    /// than a floating emoji. Themed shapes (heart/star glasses) stay emoji.
+    static let defaultSymbols: [String: String] = [
+        "glasses_round": "eyeglasses",
+        "glasses_shade": "sunglasses.fill",
+        "glasses_3d":    "eyeglasses",
+        "glasses_vr":    "sunglasses.fill"
+    ]
 }
