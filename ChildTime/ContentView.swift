@@ -5,6 +5,7 @@ struct ContentView: View {
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var auth: AuthManager
+    @StateObject private var household = HouseholdManager.shared
 
     var body: some View {
         Group {
@@ -20,6 +21,10 @@ struct ContentView: View {
             } else if !settings.onboardingCompleted {
                 // Logged in but parent hasn't finished setup yet.
                 OnboardingView()
+            } else if profiles.isEmpty && household.isLoading {
+                // Signed in but the family is still downloading from the cloud —
+                // wait instead of prematurely offering to create a child.
+                familyLoadingView
             } else if profiles.isEmpty || profiles.activeID == nil {
                 // Onboarding done — Netflix-style picker (covers both
                 // 'no profiles yet' and 'parent signed out of a profile').
@@ -28,6 +33,18 @@ struct ContentView: View {
                 UnlockedView()
             } else {
                 WorldMapView()
+            }
+        }
+    }
+
+    private var familyLoadingView: some View {
+        ZStack {
+            AppGradient.dreamy.ignoresSafeArea()
+            VStack(spacing: AppSpacing.lg) {
+                ProgressView().scaleEffect(1.4).tint(.white)
+                Text("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…")
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
             }
         }
     }

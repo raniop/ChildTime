@@ -20,6 +20,12 @@ final class HouseholdManager: ObservableObject {
     @Published private(set) var parentAccount: ParentAccount?
     @Published private(set) var linkedParentSummaries: [String] = []   // display names / emails
     @Published private(set) var lastError: String?
+    /// True while we're fetching the family from the cloud right after sign-in,
+    /// so the UI can wait instead of prematurely showing "create a child".
+    @Published private(set) var isLoading = false
+    private var didReceiveChildren = false
+
+    private func markLoaded() { isLoading = false }
 
     private var uid: String?
     private enum K {
@@ -43,6 +49,13 @@ final class HouseholdManager: ObservableObject {
     func start(uid: String, email: String?, displayName: String?) {
         self.uid = uid
         #if canImport(FirebaseFirestore)
+        isLoading = true
+        didReceiveChildren = false
+        // Safety net: never block the UI forever if the cloud is slow/unreachable.
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 7_000_000_000)
+            self.markLoaded()
+        }
         Task { await bootstrap(uid: uid, email: email, displayName: displayName) }
         #endif
     }
@@ -55,6 +68,8 @@ final class HouseholdManager: ObservableObject {
         household = nil
         parentAccount = nil
         linkedParentSummaries = []
+        isLoading = false
+        didReceiveChildren = false
         uid = nil
     }
 
@@ -69,6 +84,7 @@ final class HouseholdManager: ObservableObject {
             listenToChildren(in: hh.id)
         } catch {
             lastError = error.localizedDescription
+            markLoaded()   // sync failed (e.g. rules not deployed) — let the UI proceed
         }
     }
 
@@ -125,6 +141,11 @@ final class HouseholdManager: ObservableObject {
                     Self.decodeChild(id: $0.documentID, $0.data())
                 }
                 ProfileStore.shared.mergeRemoteChildren(records)
+                // First reply from the cloud → the family has finished loading.
+                if !self.didReceiveChildren {
+                    self.didReceiveChildren = true
+                    self.markLoaded()
+                }
             }
     }
 
