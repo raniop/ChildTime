@@ -26,6 +26,7 @@ struct ProfileEditorView: View {
     @State private var learningLevel: LearningLevel = .developing
     @State private var pickerItem: PhotosPickerItem? = nil
     @State private var showPicker = false
+    @State private var pendingCrop: PendingCrop? = nil
     @State private var showDeleteConfirm = false
 
     private var isEdit: Bool {
@@ -115,6 +116,16 @@ struct ProfileEditorView: View {
                 matching: .images,
                 photoLibrary: .shared()
             )
+            .fullScreenCover(item: $pendingCrop) { pc in
+                ImageCropperView(image: pc.image) { cropped in
+                    photoData = cropped.jpegData(compressionQuality: 0.82)
+                    Haptic.success()
+                    pendingCrop = nil
+                } onCancel: {
+                    pendingCrop = nil
+                }
+                .environment(\.layoutDirection, .rightToLeft)
+            }
             .onChange(of: pickerItem) { _, newItem in
                 Task { await loadPhoto(newItem) }
             }
@@ -440,13 +451,15 @@ struct ProfileEditorView: View {
         guard let item else { return }
         guard let data = try? await item.loadTransferable(type: Data.self),
               let image = UIImage(data: data) else { return }
-        let resized = image.resizedSquareForAvatar(maxEdge: 512)
-        let jpeg = resized.jpegData(compressionQuality: 0.82)
-        await MainActor.run {
-            photoData = jpeg
-            Haptic.success()
-        }
+        // Don't auto-crop — hand the picked image to the interactive cropper.
+        await MainActor.run { pendingCrop = PendingCrop(image: image) }
     }
+}
+
+/// Wrapper so the picked image can drive an `item:`-based cover.
+private struct PendingCrop: Identifiable {
+    let id = UUID()
+    let image: UIImage
 }
 
 // MARK: - UIImage helper
