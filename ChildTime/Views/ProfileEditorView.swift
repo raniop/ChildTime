@@ -175,12 +175,8 @@ struct ProfileEditorView: View {
             Text("שֵׁם")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
-            TextField("שֵׁם הַיֶּלֶד/ה", text: $name)
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white)
-                .textInputAutocapitalization(.words)
-                .environment(\.layoutDirection, .rightToLeft)   // force RTL on the field
-                .multilineTextAlignment(.leading)               // = right edge under RTL
+            RTLTextField(placeholder: "שֵׁם הַיֶּלֶד/ה", text: $name)
+                .frame(height: 28)
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.vertical, AppSpacing.sm)
                 .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: AppRadius.medium))
