@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import UIKit
 
 /// Dashboard the parent opens from Parent Settings — shows every profile
 /// (every kid in the family) with their current time / score / progress
@@ -17,7 +18,9 @@ struct ParentDashboardView: View {
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var auth: AuthManager
     @StateObject private var remote = RemoteSyncManager.shared
+    @ObservedObject private var push = PushManager.shared
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
 
     @State private var resettingProfile: Profile? = nil
     @State private var refreshTrigger = 0
@@ -57,7 +60,10 @@ struct ParentDashboardView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 14) {
-                            if isRoot { linkCallout }
+                            if isRoot {
+                                if !push.authorized { notificationsBanner }
+                                linkCallout
+                            }
                             syncStatusCard
                             insightNotificationsCard
                             ForEach(rows, id: \.profile.id) { row in
@@ -123,6 +129,7 @@ struct ParentDashboardView: View {
                 refreshTrigger &+= 1
                 lastRefreshed = .now
                 rescheduleInsights()
+                Task { await push.refreshAuthorizationStatus() }
             }
             .onChange(of: settings.parentInsightFrequency) { _, freq in
                 if freq != .off {
@@ -244,8 +251,47 @@ struct ParentDashboardView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.xl)
             linkButton
+            if !push.authorized {
+                notificationsBanner.frame(maxWidth: 460)
+            }
         }
         .padding(AppSpacing.lg)
+    }
+
+    /// Shown on the parent control screen when notifications are off — taps
+    /// re-prompt (if possible) or open iOS Settings.
+    private var notificationsBanner: some View {
+        Button {
+            Task {
+                await push.requestAuthorization()
+                if !push.authorized, let url = URL(string: UIApplication.openSettingsURLString) {
+                    await MainActor.run { openURL(url) }
+                }
+            }
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "bell.badge.fill")
+                    .font(.title3)
+                    .foregroundStyle(.white)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("הַהַתְרָאוֹת כָּבוּיוֹת")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text("הַפְעִילוּ כְּדֵי לְקַבֵּל עֲדְכּוּנִים עַל הַיֶּלֶד")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.9))
+                        .multilineTextAlignment(.trailing)
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                Image(systemName: "chevron.left").font(.caption.weight(.bold)).foregroundStyle(.white.opacity(0.8))
+            }
+            .padding(AppSpacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                    .fill(AppColor.flameOrange.opacity(0.9))
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     /// Prominent "link a child/device" action — the parent's primary action.

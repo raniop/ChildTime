@@ -287,9 +287,11 @@ final class ParentSettings: ObservableObject {
 
         self.faceIDForParentGate = d.bool(forKey: Key.faceIDForParentGate)
         self.consentVersionAccepted = d.integer(forKey: Key.consentVersionAccepted)
+        // Insight notifications are ON by default (once a day) so parents get
+        // updates out of the box.
         self.parentInsightFrequency = InsightFrequency(
             rawValue: d.string(forKey: Key.parentInsightFrequency) ?? ""
-        ) ?? .off
+        ) ?? .once
         self.deviceRole = DeviceRole(rawValue: d.string(forKey: Key.deviceRole) ?? "") ?? .unset
     }
 
