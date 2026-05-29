@@ -51,21 +51,13 @@ struct FamilyLinkingView: View {
                 .keyboardType(.emailAddress)
                 .autocorrectionDisabled()
             Button {
-                Task {
-                    working = true
-                    let ok = await household.requestChildLink(childEmail: childEmail)
-                    message = ok
-                        ? "נשלחה בקשה ל-\(childEmail). ברגע שהילד/ה יאשר/תאשר במכשיר שלהם — הם יופיעו אצלך."
-                        : (household.lastError ?? "לא ניתן לשלוח בקשה")
-                    if ok { childEmail = "" }
-                    working = false
-                }
+                sendLink(to: childEmail)
             } label: {
                 Label("צרף ילד/ה לפי אימייל", systemImage: "person.crop.circle.badge.plus")
             }
             .disabled(working || !childEmail.contains("@"))
 
-            // Live status of requests already sent.
+            // Live status of requests already sent — each can be re-sent.
             ForEach(household.sentChildLinks) { req in
                 HStack {
                     Image(systemName: statusIcon(req.status))
@@ -77,12 +69,27 @@ struct FamilyLinkingView: View {
                     Text(statusLabel(req.status))
                         .font(.caption.weight(.heavy))
                         .foregroundStyle(statusColor(req.status))
+                    Button("שְׁלַח שׁוּב") { sendLink(to: req.toEmail) }
+                        .font(.caption.weight(.bold))
+                        .buttonStyle(.borderless)
+                        .disabled(working)
                 }
             }
         } header: {
             Text("צירוף ילד/ה")
         } footer: {
             Text("אם הילד/ה נרשמו בעצמם עם אימייל — הזינו אותו כאן. תישלח בקשה שתופיע במכשיר שלהם, ואחרי אישור הפרופילים שלהם יעברו תחת המשפחה שלכם.")
+        }
+    }
+
+    private func sendLink(to email: String) {
+        Task {
+            working = true
+            let ok = await household.requestChildLink(childEmail: email)
+            message = ok
+                ? "נשלחה בקשה ל-\(email). ברגע שהילד/ה יאשר/תאשר במכשיר שלהם — הם יופיעו אצלך."
+                : (household.lastError ?? "לא ניתן לשלוח בקשה כרגע")
+            working = false
         }
     }
 

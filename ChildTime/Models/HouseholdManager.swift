@@ -336,7 +336,10 @@ final class HouseholdManager: ObservableObject {
     @discardableResult
     func requestChildLink(childEmail: String) async -> Bool {
         #if canImport(FirebaseFirestore)
-        guard let hh = household, let uid else { return false }
+        guard let hh = household, let uid else {
+            lastError = "צריך להיות מחובר עם חשבון כדי לצרף ילד/ה (בדקו את הסנכרון)."
+            return false
+        }
         let target = childEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard target.contains("@"), target.count >= 5 else {
             lastError = "אנא הזינו כתובת אימייל תקינה"; return false
