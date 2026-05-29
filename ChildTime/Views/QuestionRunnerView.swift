@@ -3,10 +3,17 @@ import SwiftUI
 struct QuestionRunnerView: View {
     /// How this session sources its topics — a single world, or the Smart Feed.
     let mode: SessionMode
+    /// Why the child is here — earn screen time (capped, grants minutes) or
+    /// free voluntary learning (uncapped, no minutes, in-game rewards only).
+    let purpose: SessionPurpose
 
-    /// Convenience for the classic focused-world session.
-    init(world: World) { self.mode = .world(world) }
-    init(mode: SessionMode) { self.mode = mode }
+    /// Worlds are entered voluntarily → Free Learning by default.
+    init(world: World, purpose: SessionPurpose = .freePlay) {
+        self.mode = .world(world); self.purpose = purpose
+    }
+    init(mode: SessionMode, purpose: SessionPurpose = .earnTime) {
+        self.mode = mode; self.purpose = purpose
+    }
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hsc
@@ -54,7 +61,14 @@ struct QuestionRunnerView: View {
     @State private var showParentAssist = false
     @State private var assistOfferedThisQuestion = false
 
-    private var totalQuestions: Int { settings.questionsPerSession }
+    /// Earn mode: the parent's session length, hard-capped at 30 ("no matter
+    /// what"). Free mode: effectively unlimited — the child ends it with סיום.
+    private var totalQuestions: Int {
+        switch purpose {
+        case .earnTime: return min(settings.questionsPerSession, 30)
+        case .freePlay: return 100_000
+        }
+    }
 
     /// The world used to theme the current question (background, orbs, glow).
     /// Fixed for a world session; follows the question's topic in the feed.
@@ -123,7 +137,7 @@ struct QuestionRunnerView: View {
         .onAppear { startSession() }
         .fullScreenCover(isPresented: $goToReward) {
             RewardScreenView(
-                kind: RewardEngine.endOfSessionChestKind(correctInSession: correctInSession, total: totalQuestions),
+                kind: RewardEngine.endOfSessionChestKind(correctInSession: correctInSession, total: chestDenominator),
                 correctInSession: correctInSession,
                 world: themeWorld,
                 startedLevel: startedLevel
@@ -171,15 +185,7 @@ struct QuestionRunnerView: View {
                 VStack(spacing: 8) {
                     HStack(spacing: AppSpacing.sm) {
                         closeButton(size: 26)
-                        HStack(spacing: 5) {
-                            ForEach(0..<totalQuestions, id: \.self) { i in
-                                Circle()
-                                    .fill(i < questionIndex ? AppColor.successMint : .white.opacity(0.3))
-                                    .frame(width: 10, height: 10)
-                                    .scaleEffect(i == questionIndex - 1 ? 1.3 : 1.0)
-                                    .animation(.spring(response: 0.4, dampingFraction: 0.6), value: questionIndex)
-                            }
-                        }
+                        progressIndicator
                         Spacer()
                         StreakMeter(streak: progress.currentStreak)
                     }
@@ -203,15 +209,7 @@ struct QuestionRunnerView: View {
                 VStack(spacing: 8) {
                     HStack(spacing: AppSpacing.md) {
                         closeButton(size: 32)
-                        HStack(spacing: 6) {
-                            ForEach(0..<totalQuestions, id: \.self) { i in
-                                Circle()
-                                    .fill(i < questionIndex ? AppColor.successMint : .white.opacity(0.3))
-                                    .frame(width: 14, height: 14)
-                                    .scaleEffect(i == questionIndex - 1 ? 1.3 : 1.0)
-                                    .animation(.spring(response: 0.4, dampingFraction: 0.6), value: questionIndex)
-                            }
-                        }
+                        progressIndicator
                         Spacer()
                         StreakMeter(streak: progress.currentStreak)
                         ScoreBadge(value: progress.sessionScore, style: .session, compact: false)
@@ -229,7 +227,38 @@ struct QuestionRunnerView: View {
         }
     }
 
-    /// The motivational time HUD (earned today / next prize / wheel / level).
+    /// Earn mode shows progress dots toward the 30-question cap; Free mode shows
+    /// a "סיום" button since the child decides when to stop.
+    @ViewBuilder
+    private var progressIndicator: some View {
+        if purpose == .earnTime {
+            HStack(spacing: isCompact ? 5 : 6) {
+                ForEach(0..<totalQuestions, id: \.self) { i in
+                    Circle()
+                        .fill(i < questionIndex ? AppColor.successMint : .white.opacity(0.3))
+                        .frame(width: isCompact ? 10 : 14, height: isCompact ? 10 : 14)
+                        .scaleEffect(i == questionIndex - 1 ? 1.3 : 1.0)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: questionIndex)
+                }
+            }
+        } else {
+            Button { endSession() } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill")
+                    Text("סיום")
+                }
+                .font(.system(size: isCompact ? 14 : 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12).padding(.vertical, 6)
+                .background(Capsule().fill(.white.opacity(0.2)))
+            }
+            .buttonStyle(.juicy)
+        }
+    }
+
+    /// The motivational HUD. In Earn mode it foregrounds screen-time (earned
+    /// today / questions-to-prize); in Free mode it foregrounds progression
+    /// (wheel / level) and hides screen-time, which isn't earned here.
     private func progressHUD(compact: Bool) -> some View {
         SessionProgressHUD(
             earnedToday: progress.minutesEarnedToday,
@@ -237,8 +266,19 @@ struct QuestionRunnerView: View {
             questionsUntilWheel: progress.questionsUntilWheel,
             questionsUntilLevel: progress.questionsUntilNextLevel,
             wheelReady: progress.freeWheelAvailable,
+            showsEarn: purpose == .earnTime,
             compact: compact
         )
+    }
+
+    private func endSession() {
+        goToReward = true
+    }
+
+    /// Chest tier scales with accuracy over the questions actually answered.
+    /// Earn mode uses the fixed cap; Free mode uses how many were attempted.
+    private var chestDenominator: Int {
+        purpose == .earnTime ? totalQuestions : max(1, questionIndex)
     }
 
     private func closeButton(size: CGFloat) -> some View {
@@ -445,7 +485,7 @@ struct QuestionRunnerView: View {
         startedLevel = progress.companionLevel
         progress.registerSessionToday()
         progress.resetSessionScore()
-        LearningHistoryStore.shared.recordSessionStart()
+        LearningHistoryStore.shared.recordSessionStart(purpose: purpose)
         LiveEventReporter.report(.sessionStart)
         reportedMilestone = false
         reportedWheel = false
@@ -621,22 +661,24 @@ struct QuestionRunnerView: View {
             ctx,
             minutesPerCorrect: settings.minutesPerCorrectAnswer,
             responseMs: responseMs,
-            hadMistakeThisQuestion: hadMistakeThisQuestion
+            hadMistakeThisQuestion: hadMistakeThisQuestion,
+            grantsScreenTime: purpose.grantsScreenTime
         )
         earnedThisSession += earned
 
         let minuteMult = isInPortal ? 3 : (isSuperQuestion ? 5 : 1)
         LearningHistoryStore.shared.recordAnswer(
             topic: q.topic, correct: true, responseMs: responseMs,
-            earnedMinutes: settings.minutesPerCorrectAnswer * minuteMult,
+            earnedMinutes: purpose.grantsScreenTime ? settings.minutesPerCorrectAnswer * minuteMult : 0,
             streak: progress.currentStreak
         )
         reportLiveEvents(for: q)
 
-        // Show "+X דקות" popup that flies to the timer.
-        let minuteMultiplier = isInPortal ? 3 : (isSuperQuestion ? 5 : 1)
-        let minutesGained = settings.minutesPerCorrectAnswer * minuteMultiplier
-        showEarnedMinutesPopup(minutes: minutesGained)
+        // "+X דקות" popup flies to the timer — Earn mode only (no minutes in Free).
+        if purpose.grantsScreenTime {
+            let minutesGained = settings.minutesPerCorrectAnswer * minuteMult
+            showEarnedMinutesPopup(minutes: minutesGained)
+        }
 
         // Risk & Recovery payoff — celebrate winning time back.
         if progress.lastRecoveredMinutes > 0 {
@@ -707,7 +749,8 @@ struct QuestionRunnerView: View {
         }
         let penaltyMinutes = progress.recordWrong(
             topic: q.topic,
-            minutesPerCorrect: settings.minutesPerCorrectAnswer
+            minutesPerCorrect: settings.minutesPerCorrectAnswer,
+            grantsScreenTime: purpose.grantsScreenTime
         )
         LearningHistoryStore.shared.recordAnswer(
             topic: q.topic, correct: false, responseMs: 0,

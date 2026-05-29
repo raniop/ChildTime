@@ -6,6 +6,20 @@ import Foundation
 ///   world's topic (the original behavior).
 /// - `.smartFeed` — the personalized feed: each question's topic is chosen on
 ///   the fly by `LearningFeedEngine`, mixing favorites with fresh discoveries.
+/// Why the child is in a session — the second, orthogonal axis to `SessionMode`.
+///
+/// - `earnTime`: the Earn-to-Unlock flow (default screen-time context). Capped
+///   at ≤30 questions, grants screen-time minutes, ends with an earnings screen.
+/// - `freePlay`: the child opened Tofy voluntarily to learn/play. No question
+///   cap, no screen-time minutes — the reward is in-game progression (XP, coins,
+///   chests, wheel, levels, worlds).
+enum SessionPurpose: Equatable {
+    case earnTime
+    case freePlay
+
+    var grantsScreenTime: Bool { self == .earnTime }
+}
+
 enum SessionMode: Equatable {
     case world(World)
     case smartFeed

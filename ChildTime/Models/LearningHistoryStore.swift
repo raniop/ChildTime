@@ -17,6 +17,11 @@ struct DailyStat: Codable, Equatable {
     var longestStreak: Int = 0
     var learningSeconds: Int = 0     // active time spent answering
     var sessions: Int = 0
+    /// Earn-to-Unlock sessions (child came to earn screen time).
+    var earnSessions: Int = 0
+    /// Free Learning sessions (child opened Tofy voluntarily) — drives the
+    /// Voluntary Learning Rate KPI.
+    var freeSessions: Int = 0
     /// rawValue → per-topic tallies for the day.
     var perTopic: [String: TopicDay] = [:]
 
@@ -54,8 +59,14 @@ final class LearningHistoryStore: ObservableObject {
 
     // MARK: - Recording (called during play)
 
-    func recordSessionStart() {
-        mutateToday { $0.sessions += 1 }
+    func recordSessionStart(purpose: SessionPurpose) {
+        mutateToday { stat in
+            stat.sessions += 1
+            switch purpose {
+            case .earnTime: stat.earnSessions += 1
+            case .freePlay: stat.freeSessions += 1
+            }
+        }
     }
 
     func recordAnswer(topic: Topic, correct: Bool, responseMs: Double,

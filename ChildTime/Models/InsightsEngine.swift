@@ -23,8 +23,14 @@ struct InsightsEngine {
         var longestStreak = 0
         var learningMinutes = 0
         var sessions = 0
+        var earnSessions = 0
+        var freeSessions = 0
         var activeDays = 0
         var accuracy: Double { questions > 0 ? Double(correct) / Double(questions) : 0 }
+        /// Share of sessions the child opened voluntarily (not to earn time).
+        var voluntaryLearningRate: Double {
+            sessions > 0 ? Double(freeSessions) / Double(sessions) : 0
+        }
     }
 
     var today: PeriodSummary {
@@ -50,6 +56,11 @@ struct InsightsEngine {
     var weeklyMinutesDelta: Int {
         summarize(daysInLast(7)).minutesEarned - summarize(daysInRange(from: 14, to: 7)).minutesEarned
     }
+
+    /// THE key product KPI: over the last 30 days, what share of sessions did the
+    /// child start voluntarily (Free Learning) vs. to earn screen time. Rising =
+    /// the product is becoming a real learning engine, not just a reward gate.
+    var voluntaryLearningRate: Double { thisMonth.voluntaryLearningRate }
 
     // MARK: - Per-topic
 
@@ -112,6 +123,8 @@ struct InsightsEngine {
             s.longestStreak = max(s.longestStreak, d.longestStreak)
             s.learningMinutes += d.learningSeconds / 60
             s.sessions += d.sessions
+            s.earnSessions += d.earnSessions
+            s.freeSessions += d.freeSessions
             if d.questionsAnswered > 0 { s.activeDays += 1 }
         }
         return s

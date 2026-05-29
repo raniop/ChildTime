@@ -10,6 +10,9 @@ struct SessionProgressHUD: View {
     let questionsUntilWheel: Int
     let questionsUntilLevel: Int
     let wheelReady: Bool
+    /// In Free Learning mode there's no screen-time, so the 🎮 earned-today and
+    /// 🚀 prize-countdown chips are hidden; progression chips remain.
+    var showsEarn: Bool = true
     var compact: Bool = false
 
     private var chipFont: Font {
@@ -19,20 +22,22 @@ struct SessionProgressHUD: View {
 
     var body: some View {
         HStack(spacing: compact ? 6 : 10) {
-            // 🎮 Time earned today — the headline.
-            chip(
-                emoji: "🎮",
-                text: "היום \(earnedToday) דק׳",
-                tint: AppColor.successMint,
-                prominent: true
-            )
-            // 🚀 Questions to the next chest.
-            chip(
-                emoji: "🚀",
-                text: rewardText,
-                tint: AppColor.flameOrange,
-                prominent: false
-            )
+            if showsEarn {
+                // 🎮 Time earned today — the headline (Earn mode only).
+                chip(
+                    emoji: "🎮",
+                    text: "היום \(earnedToday) דק׳",
+                    tint: AppColor.successMint,
+                    prominent: true
+                )
+                // 🚀 Questions to the next chest.
+                chip(
+                    emoji: "🚀",
+                    text: rewardText,
+                    tint: AppColor.flameOrange,
+                    prominent: false
+                )
+            }
             // 🎁 Questions to the lucky wheel.
             chip(
                 emoji: "🎁",

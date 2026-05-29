@@ -81,6 +81,7 @@ struct ChildInsightsView: View {
             metric("📚", "\(summary.learningMinutes)", "דק' למידה")
             metric("🎯", "\(Int(summary.accuracy * 100))%", "דיוק")
             metric("📅", "\(summary.activeDays)", "ימי פעילות")
+            metric("🙋", "\(Int(summary.voluntaryLearningRate * 100))%", "למידה מרצון")
         }
     }
 

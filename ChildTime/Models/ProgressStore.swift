@@ -357,7 +357,8 @@ final class ProgressStore: ObservableObject {
     func recordCorrect(_ ctx: AnswerContext,
                        minutesPerCorrect: Int,
                        responseMs: Double = 0,
-                       hadMistakeThisQuestion: Bool = false) -> Int {
+                       hadMistakeThisQuestion: Bool = false,
+                       grantsScreenTime: Bool = true) -> Int {
         let earned = RewardEngine.starsForCorrect(
             combo: ctx.combo,
             isSuperQuestion: ctx.isSuperQuestion,
@@ -387,19 +388,22 @@ final class ProgressStore: ObservableObject {
         sessionScore += pts
         lastEarnedPoints = pts
 
-        // Time reward — driven by ParentSettings.rewardMode + daily cap.
-        switch settings.rewardMode {
-        case .perAnswer:
-            // Classic: each correct answer = N minutes (× multiplier on bonus Qs)
-            _ = grantMinutesCapped(minutesPerCorrect * multiplier)
-        case .perBatch:
-            // Save up: every `batchAnswers` correct answers = `batchMinutes`.
-            // Bonus questions still count their multiplier so super-Q is rewarding.
-            batchCounter += multiplier
-            let target = max(1, settings.batchAnswers)
-            while batchCounter >= target {
-                _ = grantMinutesCapped(settings.batchMinutes)
-                batchCounter -= target
+        // Time reward — ONLY in Earn-to-Unlock sessions. In Free Learning mode
+        // the reward is in-game progression (XP/coins/levels), never minutes.
+        if grantsScreenTime {
+            switch settings.rewardMode {
+            case .perAnswer:
+                // Classic: each correct answer = N minutes (× multiplier on bonus Qs)
+                _ = grantMinutesCapped(minutesPerCorrect * multiplier)
+            case .perBatch:
+                // Save up: every `batchAnswers` correct answers = `batchMinutes`.
+                // Bonus questions still count their multiplier so super-Q is rewarding.
+                batchCounter += multiplier
+                let target = max(1, settings.batchAnswers)
+                while batchCounter >= target {
+                    _ = grantMinutesCapped(settings.batchMinutes)
+                    batchCounter -= target
+                }
             }
         }
         xp += RewardEngine.xpPerCorrect
@@ -407,17 +411,18 @@ final class ProgressStore: ObservableObject {
         updateLearningSignals(topic: ctx.topic, correct: true, responseMs: responseMs)
         wheelProgressCount += 1
 
-        // Risk & Recovery loop. A clean first-try correct answer redeems any
-        // minutes a previous mistake put into the recovery pot. If this very
-        // question had a mistake, its loss stays pending for the *next* clean
-        // answer to win back.
-        if hadMistakeThisQuestion {
-            // This question contributed to the pot — carry it forward.
-        } else if recoveryPot > 0 {
-            let refund = recoveryPot
-            pendingMinutes += refund
-            recoveryPot = 0
-            lastRecoveredMinutes = refund
+        // Risk & Recovery loop (Earn mode only — there's no time to win back in
+        // Free Learning). A clean first-try correct answer redeems minutes a
+        // previous mistake parked in the recovery pot.
+        if grantsScreenTime {
+            if hadMistakeThisQuestion {
+                // This question contributed to the pot — carry it forward.
+            } else if recoveryPot > 0 {
+                let refund = recoveryPot
+                pendingMinutes += refund
+                recoveryPot = 0
+                lastRecoveredMinutes = refund
+            }
         }
 
         maybeConvertStarsToGems()
@@ -499,7 +504,7 @@ final class ProgressStore: ObservableObject {
     /// the recovery pot — a clean correct answer on the next question wins it
     /// back (Risk & Recovery loop). Returns the minutes deducted this tick.
     @discardableResult
-    func recordWrong(topic: Topic, minutesPerCorrect: Int) -> Int {
+    func recordWrong(topic: Topic, minutesPerCorrect: Int, grantsScreenTime: Bool = true) -> Int {
         totalAnswered += 1
         currentStreak = 0
         wrongStreak += 1
@@ -511,6 +516,9 @@ final class ProgressStore: ObservableObject {
         let key = topic.rawValue
         topicAffinity[key] = min(1, max(0, affinity(for: topic) - 0.04))
 
+        // Free Learning mode has no screen-time economy, so mistakes never cost
+        // minutes there — only in-game progress is at stake.
+        guard grantsScreenTime else { return 0 }
         let penalty = mistakePenaltyMinutes(minutesPerCorrect: minutesPerCorrect)
         guard penalty > 0 else { return 0 }
 
