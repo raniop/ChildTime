@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Lets a parent link a co-parent to the same household: generate a share code,
-/// or redeem a code to join an existing family. Both then see — and manage —
-/// the same children and their analytics.
+/// Link two devices into one family — by a 6-character code or by scanning its
+/// QR. Whoever scans/enters the code joins the other's family and brings their
+/// kids along, so a parent can absorb a child who registered separately, and
+/// co-parents end up sharing the same children and analytics.
 struct FamilyLinkingView: View {
     @ObservedObject private var household = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
@@ -11,26 +12,30 @@ struct FamilyLinkingView: View {
     @State private var joinCode = ""
     @State private var working = false
     @State private var message: String?
-    @State private var childEmail = ""
+    @State private var showScanner = false
 
     var body: some View {
         NavigationStack {
             Form {
                 linkedParentsSection
-                linkChildSection
-                inviteSection
+                generateSection
                 joinSection
                 if let message {
                     Section { Text(message).font(.caption).foregroundStyle(.secondary) }
                 }
             }
-            .navigationTitle("הורים מקושרים")
+            .navigationTitle("קישור משפחה")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) { Button("סיום") { dismiss() } }
             }
+            .sheet(isPresented: $showScanner) {
+                scannerSheet
+            }
         }
     }
+
+    // MARK: - Who's linked
 
     private var linkedParentsSection: some View {
         Section("המשפחה") {
@@ -44,134 +49,106 @@ struct FamilyLinkingView: View {
         }
     }
 
-    private var linkChildSection: some View {
-        Section {
-            TextField("אימייל של הילד/ה", text: $childEmail)
-                .textInputAutocapitalization(.never)
-                .keyboardType(.emailAddress)
-                .autocorrectionDisabled()
-            Button {
-                sendLink(to: childEmail)
-            } label: {
-                Label("צרף ילד/ה לפי אימייל", systemImage: "person.crop.circle.badge.plus")
-            }
-            .disabled(working || !childEmail.contains("@"))
+    // MARK: - Generate a code + QR
 
-            // Live status of requests already sent — one row per email (latest).
-            ForEach(dedupedSentLinks) { req in
-                HStack {
-                    Image(systemName: statusIcon(req.status))
-                        .foregroundStyle(statusColor(req.status))
-                    Text(req.toEmail)
-                        .font(.subheadline)
-                        .lineLimit(1)
-                    Spacer()
-                    Text(statusLabel(req.status))
-                        .font(.caption.weight(.heavy))
-                        .foregroundStyle(statusColor(req.status))
-                    Button("שְׁלַח שׁוּב") { sendLink(to: req.toEmail) }
-                        .font(.caption.weight(.bold))
-                        .buttonStyle(.borderless)
-                        .disabled(working)
-                }
-            }
-        } header: {
-            Text("צירוף ילד/ה")
-        } footer: {
-            Text("אם הילד/ה נרשמו בעצמם עם אימייל — הזינו אותו כאן. תישלח בקשה שתופיע במכשיר שלהם, ואחרי אישור הפרופילים שלהם יעברו תחת המשפחה שלכם.")
-        }
-    }
-
-    /// One row per target email — newest wins (sentChildLinks is newest-first).
-    private var dedupedSentLinks: [ChildLinkRequest] {
-        var seen = Set<String>()
-        return household.sentChildLinks.filter { seen.insert($0.toEmail).inserted }
-    }
-
-    private func sendLink(to email: String) {
-        Task {
-            working = true
-            let ok = await household.requestChildLink(childEmail: email)
-            message = ok
-                ? "נשלחה בקשה ל-\(email). ברגע שהילד/ה יאשר/תאשר במכשיר שלהם — הם יופיעו אצלך."
-                : (household.lastError ?? "לא ניתן לשלוח בקשה כרגע")
-            working = false
-        }
-    }
-
-    private func statusLabel(_ s: String) -> String {
-        switch s {
-        case "approved": return "אושר ✅"
-        case "declined": return "נדחה"
-        default:         return "ממתין לאישור…"
-        }
-    }
-    private func statusIcon(_ s: String) -> String {
-        switch s {
-        case "approved": return "checkmark.circle.fill"
-        case "declined": return "xmark.circle.fill"
-        default:         return "clock.fill"
-        }
-    }
-    private func statusColor(_ s: String) -> Color {
-        switch s {
-        case "approved": return AppColor.successMint
-        case "declined": return .secondary
-        default:         return AppColor.starGold
-        }
-    }
-
-    private var inviteSection: some View {
+    private var generateSection: some View {
         Section {
             if let code = generatedCode {
-                HStack {
+                VStack(spacing: 12) {
+                    QRCodeView(text: code, size: 200)
+                        .frame(maxWidth: .infinity)
                     Text(code)
-                        .font(.system(size: 28, weight: .heavy, design: .monospaced))
-                        .kerning(4)
-                    Spacer()
-                    ShareLink(item: "הצטרפו אליי ב-טופי! קוד המשפחה: \(code)") {
-                        Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 30, weight: .heavy, design: .monospaced))
+                        .kerning(6)
+                    ShareLink(item: "הצטרפו אליי באפליקציית טופי! קוד המשפחה: \(code)") {
+                        Label("שיתוף הקוד", systemImage: "square.and.arrow.up")
                     }
                 }
+                .frame(maxWidth: .infinity)
+                .environment(\.layoutDirection, .leftToRight)
             }
             Button {
                 Task {
                     working = true
                     generatedCode = await household.createInvite()
-                    message = generatedCode == nil ? "לא ניתן ליצור קוד כרגע" : "הקוד תקף ל-7 ימים"
+                    message = generatedCode == nil
+                        ? (household.lastError ?? "לא ניתן ליצור קוד כרגע")
+                        : "הציגו את ה-QR או מסרו את הקוד למכשיר השני. תקף ל-7 ימים."
                     working = false
                 }
             } label: {
-                Label(generatedCode == nil ? "צור קוד הזמנה" : "צור קוד חדש", systemImage: "qrcode")
+                Label(generatedCode == nil ? "צור קוד קישור" : "צור קוד חדש", systemImage: "qrcode")
             }
             .disabled(working)
         } header: {
-            Text("הזמינו הורה נוסף")
+            Text("צרו קוד במכשיר אחד")
         } footer: {
-            Text("שתפו את הקוד עם ההורה השני. אחרי שהוא יזין אותו, שניכם תראו את אותם הילדים והנתונים.")
+            Text("צרו קוד כאן, ובמכשיר השני סרקו את ה-QR או הקלידו את הקוד — וכך תתקשרו לאותה משפחה (כולל הילדים).")
         }
     }
 
+    // MARK: - Join by scanning or typing a code
+
     private var joinSection: some View {
         Section {
-            TextField("קוד משפחה (6 תווים)", text: $joinCode)
+            Button {
+                showScanner = true
+            } label: {
+                Label("סרוק קוד QR", systemImage: "qrcode.viewfinder")
+            }
+
+            TextField("…או הקלידו קוד (6 תווים)", text: $joinCode)
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
                 .font(.system(.body, design: .monospaced))
             Button {
-                Task {
-                    working = true
-                    let ok = await household.redeemInvite(code: joinCode)
-                    message = ok ? "הצטרפת למשפחה! 🎉" : (household.lastError ?? "קוד לא תקין")
-                    if ok { joinCode = "" }
-                    working = false
-                }
+                redeem(joinCode)
             } label: {
-                Label("הצטרף למשפחה קיימת", systemImage: "person.badge.plus")
+                Label("הצטרף לפי קוד", systemImage: "person.badge.plus")
             }
             .disabled(working || joinCode.count < 6)
         } header: {
-            Text("הצטרפות למשפחה")
+            Text("הצטרפות במכשיר השני")
+        } footer: {
+            Text("סריקה/הקלדה של הקוד מצרפת את המכשיר הזה למשפחה — והפרופילים של הילד יעברו תחת המשפחה המשותפת.")
+        }
+    }
+
+    private var scannerSheet: some View {
+        NavigationStack {
+            QRScannerView { scanned in
+                showScanner = false
+                redeem(scanned)
+            }
+            .ignoresSafeArea()
+            .overlay(alignment: .bottom) {
+                Text("כוונו את המצלמה לקוד ה-QR")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .padding()
+                    .background(.black.opacity(0.5), in: Capsule())
+                    .padding(.bottom, 40)
+            }
+            .navigationTitle("סריקת קוד")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) { Button("ביטול") { showScanner = false } }
+            }
+        }
+    }
+
+    // MARK: - Redeem
+
+    private func redeem(_ code: String) {
+        let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= 6 else { return }
+        Task {
+            working = true
+            let ok = await household.redeemInvite(code: trimmed)
+            message = ok ? "התחברתם למשפחה! 🎉 הילדים יופיעו תוך כמה שניות."
+                         : (household.lastError ?? "קוד לא תקין")
+            if ok { joinCode = "" }
+            working = false
         }
     }
 }

@@ -37,6 +37,8 @@
 	<false/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>פתיחת הגדרות ההורה באמצעות Face ID במקום הקלדת הקוד.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>סריקת קוד QR כדי לקשר בין מכשירים במשפחה.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

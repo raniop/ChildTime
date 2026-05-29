@@ -42,19 +42,6 @@ struct ContentView: View {
                 WorldMapView()
             }
         }
-        // A parent asked to absorb this account's profiles into their household.
-        .alert("בַּקָּשָׁה לְהִצְטָרֵף לְמִשְׁפָּחָה 👨‍👩‍👧",
-               isPresented: Binding(
-                   get: { household.pendingChildLink != nil },
-                   set: { if !$0 { household.pendingChildLink = nil } }
-               )) {
-            Button("אִשּׁוּר ✅") { Task { await household.approveChildLink() } }
-            Button("לֹא עַכְשָׁו", role: .cancel) { Task { await household.declineChildLink() } }
-        } message: {
-            if let req = household.pendingChildLink {
-                Text("\(req.fromParentName) מְבַקֵּשׁ/ת לְצָרֵף אֶתְכֶם לַמִּשְׁפָּחָה. אַחֲרֵי אִשּׁוּר, הַהִתְקַדְּמוּת שֶׁלָּכֶם תּוֹפִיעַ גַּם אֶצְלָם.")
-            }
-        }
     }
 
     private var familyLoadingView: some View {

@@ -99,8 +99,6 @@ final class HouseholdManager: ObservableObject {
             reconcileLocalChildren(into: hh)
             listenToHousehold(hh.id)
             listenToChildren(in: hh.id)
-            listenForIncomingChildLinks()
-            listenForSentChildLinks()
         } catch {
             lastError = error.localizedDescription
             markLoaded()   // sync failed (e.g. rules not deployed) — let the UI proceed
@@ -274,12 +272,31 @@ final class HouseholdManager: ObservableObject {
                 lastError = "קוד לא נמצא"; return false
             }
             guard !invite.isExpired else { lastError = "הקוד פג תוקף"; return false }
-            // Add this parent to the household + mark invite redeemed.
+            // Add me to the household + mark invite redeemed.
             try await db.collection("households").document(invite.householdID)
                 .updateData(["parentUIDs": FieldValue.arrayUnion([uid])])
             try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([invite.householdID])])
             try await db.collection("invites").document(trimmed).updateData(["redeemedBy": uid])
-            // Switch to the joined household.
+
+            // Bring MY children into the joined household, so whoever scans the
+            // code brings their kids with them (works for absorbing a child who
+            // registered separately, and for co-parents). setData(merge) creates
+            // the doc if it was never synced before.
+            var movedIDs: [String] = []
+            for p in ProfileStore.shared.profiles {
+                let id = p.id.uuidString
+                movedIDs.append(id)
+                let record = ChildRecord(profile: p, householdID: invite.householdID)
+                try? await db.collection("children").document(id)
+                    .setData(Self.encode(record), merge: true)
+            }
+            if !movedIDs.isEmpty {
+                try? await db.collection("households").document(invite.householdID)
+                    .updateData(["childIDs": FieldValue.arrayUnion(movedIDs)])
+            }
+
+            // Adopt the joined household as my canonical one + switch listeners.
+            UserDefaults.standard.set(invite.householdID, forKey: preferredHouseholdKey)
             let hhDoc = try await db.collection("households").document(invite.householdID).getDocument()
             if let hhData = hhDoc.data(), let hh = Self.decodeHousehold(id: invite.householdID, hhData) {
                 self.household = hh
