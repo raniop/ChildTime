@@ -62,6 +62,7 @@ struct ParentDashboardView: View {
                         VStack(spacing: 14) {
                             if isRoot {
                                 if !push.authorized { notificationsBanner }
+                                familySummaryCard
                                 linkCallout
                             }
                             syncStatusCard
@@ -317,6 +318,50 @@ struct ParentDashboardView: View {
     }
 
     private var linkCallout: some View { linkButton }
+
+    /// Quick family-wide summary for today — minutes earned, questions answered,
+    /// and how many kids were active. Only meaningful when kids are linked.
+    @ViewBuilder
+    private var familySummaryCard: some View {
+        let theRows = rows
+        if !theRows.isEmpty {
+            let questionsPerKid = theRows.map { row -> Int in
+                let lp = LearningProfile(snapshot: row.snapshot, enabledTopics: settings.enabledTopics, age: row.profile.age)
+                let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: row.profile.id), profile: lp)
+                return engine.today.questions
+            }
+            let minutesToday = theRows.reduce(0) { $0 + $1.snapshot.minutesEarnedToday }
+            let questionsToday = questionsPerKid.reduce(0, +)
+            let activeKids = questionsPerKid.filter { $0 > 0 }.count
+
+            HStack(spacing: 10) {
+                summaryTile("⏱", "\(minutesToday)", "דק' מסך היום")
+                summaryTile("❓", "\(questionsToday)", "שאלות היום")
+                summaryTile("🔥", "\(activeKids)/\(theRows.count)", "ילדים פעילים")
+            }
+        }
+    }
+
+    private func summaryTile(_ emoji: String, _ value: String, _ label: String) -> some View {
+        VStack(spacing: 3) {
+            Text(emoji).font(.system(size: 22))
+            Text(value)
+                .font(.system(size: 24, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Text(label)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, AppSpacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                .fill(.white.opacity(0.15))
+                .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                    .stroke(.white.opacity(0.25), lineWidth: 1))
+        )
+    }
 
     private func profileCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
         let isActive = profile.id == profiles.activeID
