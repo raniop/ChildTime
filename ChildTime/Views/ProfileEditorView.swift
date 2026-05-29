@@ -164,10 +164,11 @@ struct ProfileEditorView: View {
             Text("שֵׁם")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
-            TextField("אֵיךְ קוֹרְאִים לְךָ?", text: $name)
+            TextField("שֵׁם הַיֶּלֶד/ה", text: $name)
                 .font(.system(size: 20, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
                 .textInputAutocapitalization(.words)
+                .multilineTextAlignment(.leading)   // = right under RTL
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.vertical, AppSpacing.sm)
                 .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: AppRadius.medium))
