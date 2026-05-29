@@ -40,14 +40,18 @@ struct FeatureCard: View {
                     .offset(y: shimmer ? 200 : -200)
                     .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
 
-                VStack(spacing: 8) {
-                    Spacer(minLength: 8)
+                // Shared rhythm with WorldCard (see HomeTileLayout) so emoji /
+                // title / subtitle / footer align across every home tile.
+                VStack(spacing: HomeTileLayout.rowSpacing) {
+                    Spacer(minLength: 0)
+
                     Text(emoji)
                         .font(.system(size: emojiSize))
                         .offset(y: float)
                         .shadow(color: glowColor.opacity(0.8), radius: 22)
                         .shadow(color: .black.opacity(0.25), radius: 4, y: 4)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .frame(height: HomeTileLayout.emojiZone(emojiSize))
 
                     Text(title)
                         .font(.system(size: titleSize, weight: .heavy, design: .rounded))
@@ -56,29 +60,35 @@ struct FeatureCard: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(2).minimumScaleFactor(0.7)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .frame(height: HomeTileLayout.titleZone(titleSize))
                         .padding(.horizontal, 10)
 
                     Text(subtitle)
                         .font(.system(size: labelSize, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                         .multilineTextAlignment(.center)
-                        .lineLimit(2).minimumScaleFactor(0.7)
+                        .lineLimit(1).minimumScaleFactor(0.7)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .frame(height: HomeTileLayout.subtitleZone(labelSize))
                         .padding(.horizontal, 10)
 
-                    Spacer(minLength: 4)
+                    Spacer(minLength: 0)
 
-                    // Decorative bottom bar so the tile matches the world cards'
-                    // footprint exactly (they show a progress bar here).
-                    Capsule()
-                        .fill(LinearGradient(
-                            colors: [glowColor, Color.white.opacity(0.7), glowColor],
-                            startPoint: .leading, endPoint: .trailing))
-                        .frame(height: 6)
-                        .glow(glowColor, radius: 6)
-                        .padding(.horizontal, 14)
+                    // Footer matches WorldCard's: an (empty) badge slot above a
+                    // decorative bar, so the bars line up between tiles.
+                    VStack(spacing: 4) {
+                        Color.clear
+                            .frame(height: HomeTileLayout.badgeZone(labelSize))
+                        Capsule()
+                            .fill(LinearGradient(
+                                colors: [glowColor, Color.white.opacity(0.7), glowColor],
+                                startPoint: .leading, endPoint: .trailing))
+                            .frame(height: 8)
+                            .glow(glowColor, radius: 6)
+                            .padding(.horizontal, 14)
+                    }
                 }
-                .padding(.bottom, 12)
+                .padding(.vertical, 14)
             }
             .frame(maxWidth: 270)
             .frame(height: tileHeight)

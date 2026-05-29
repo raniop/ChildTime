@@ -1,5 +1,16 @@
 import SwiftUI
 
+/// Shared sizing constants so every home tile (WorldCard + FeatureCard) lays
+/// out its emoji, title, subtitle, and footer in exactly the same vertical
+/// positions, regardless of how much content each card carries.
+enum HomeTileLayout {
+    static let rowSpacing: CGFloat = 6
+    static func emojiZone(_ size: CGFloat) -> CGFloat { size }
+    static func titleZone(_ size: CGFloat) -> CGFloat { size * 2.1 }    // up to 2 lines
+    static func subtitleZone(_ size: CGFloat) -> CGFloat { size * 1.4 }
+    static func badgeZone(_ size: CGFloat) -> CGFloat { size + 4 }
+}
+
 struct WorldCard: View {
     let world: World
     let isUnlocked: Bool
@@ -49,11 +60,12 @@ struct WorldCard: View {
                     .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
                 }
 
-                // Foreground content — vertical tile layout, everything centered
-                VStack(spacing: 8) {
-                    Spacer(minLength: 8)
+                // Foreground content — shared rhythm with FeatureCard so the
+                // emoji / title / subtitle / footer line up across every tile.
+                VStack(spacing: HomeTileLayout.rowSpacing) {
+                    Spacer(minLength: 0)
 
-                    // Big emoji centered
+                    // Big emoji centered (fixed zone)
                     Text(world.emoji)
                         .font(.system(size: emojiSize))
                         .offset(y: float)
@@ -61,8 +73,9 @@ struct WorldCard: View {
                         .shadow(color: .black.opacity(0.25), radius: 4, y: 4)
                         .opacity(showsLocked ? 0.35 : 1)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .frame(height: HomeTileLayout.emojiZone(emojiSize))
 
-                    // Title
+                    // Title (fixed zone)
                     Text(world.name)
                         .font(.system(size: titleSize, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
@@ -71,43 +84,51 @@ struct WorldCard: View {
                         .lineLimit(2)
                         .minimumScaleFactor(0.7)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .frame(height: HomeTileLayout.titleZone(titleSize))
                         .padding(.horizontal, 10)
 
-                    // Topic subtitle (clarifies what subject this world teaches)
+                    // Topic subtitle (fixed zone)
                     Text(world.topic.displayName)
                         .font(.system(size: labelSize, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                         .multilineTextAlignment(.center)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .frame(height: HomeTileLayout.subtitleZone(labelSize))
+
+                    Spacer(minLength: 0)
+
+                    // Footer (fixed zone): badge slot on top, progress bar pinned
+                    // to the bottom — identical to FeatureCard so bars align.
+                    VStack(spacing: 4) {
+                        Group {
+                            if subscriptionLocked {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "crown.fill")
+                                    Text("טוֹפִּי+")
+                                        .fontWeight(.heavy)
+                                }
+                                .foregroundStyle(AppColor.starGold)
+                            } else if !isUnlocked {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "lock.fill")
+                                    Text("\(world.starsToUnlock) ⭐")
+                                        .fontWeight(.semibold)
+                                }
+                                .foregroundStyle(.white.opacity(0.85))
+                            } else {
+                                Color.clear
+                            }
+                        }
+                        .font(.system(size: labelSize - 1, weight: .semibold, design: .rounded))
+                        .frame(height: HomeTileLayout.badgeZone(labelSize))
                         .frame(maxWidth: .infinity, alignment: .center)
 
-                    Spacer(minLength: 4)
-
-                    // Bottom row: lock badge if locked, else just the progress bar
-                    VStack(spacing: 4) {
-                        if subscriptionLocked {
-                            HStack(spacing: 4) {
-                                Image(systemName: "crown.fill")
-                                    .font(.system(size: labelSize - 2))
-                                Text("טוֹפִּי+")
-                                    .font(.system(size: labelSize, weight: .heavy, design: .rounded))
-                            }
-                            .foregroundStyle(AppColor.starGold)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                        } else if !isUnlocked {
-                            HStack(spacing: 4) {
-                                Image(systemName: "lock.fill")
-                                    .font(.system(size: labelSize - 2))
-                                Text("\(world.starsToUnlock) ⭐")
-                                    .font(.system(size: labelSize, weight: .semibold, design: .rounded))
-                            }
-                            .foregroundStyle(.white.opacity(0.85))
-                            .frame(maxWidth: .infinity, alignment: .center)
-                        }
                         progressBar
                             .padding(.horizontal, 14)
                     }
-                    .padding(.bottom, 12)
                 }
+                .padding(.vertical, 14)
             }
             .frame(maxWidth: 270)
             .frame(height: tileHeight)
@@ -177,11 +198,11 @@ struct WorldCard: View {
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: geo.size.width * progressValue)
+                    .frame(width: max(8, geo.size.width * progressValue))
                     .glow(world.glowColor, radius: 6)
             }
         }
-        .frame(height: 6)
+        .frame(height: 8)
     }
 }
 
