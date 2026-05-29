@@ -3,9 +3,10 @@
 > **Currently bundled:** the 10 sound effects are real recorded sounds from
 > **Kenney's Interface Sounds** pack (https://kenney.nl/assets/interface-sounds),
 > licensed **CC0 1.0** (public domain — no attribution required). Swap any of
-> them by replacing the matching file below. **Background music** is now a real
-> CC0 track too — "Farm Frolics" from Kenney's Music Loops (CC0 1.0), converted
-> to `background_music.m4a` and looped softly. Replace that file to change it.
+> them by replacing the matching file below. **Background music is currently
+> disabled** (removed by request). To bring it back, drop a `background_music`
+> track into `ChildTime/Audio` and call `ToneSynth.shared.startMusic()` from
+> `WorldMapView.onAppear` again.
 
 
 The app ships with **procedural** (code-generated) sounds and music so it's never

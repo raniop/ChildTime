@@ -126,14 +126,10 @@ struct WorldMapView: View {
                 heroAppeared = true
             }
             checkWorldUnlocks()
-            ToneSynth.shared.startMusic()   // gentle music bed (respects sound toggle)
             // Wheel pops when we return to the map after earning a free spin.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 maybeAutoPresentWheel()
             }
-        }
-        .onChange(of: settings.soundsEnabled) { _, _ in
-            ToneSynth.shared.refreshMusic()
         }
         .onChange(of: progress.stars) { _, new in
             if new > lastSeenStars {
