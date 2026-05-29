@@ -221,9 +221,14 @@ final class ParentSettings: ObservableObject {
         let pm = d.integer(forKey: Key.penaltyMinutes)
         self.penaltyMinutes = pm == 0 ? 1 : pm
 
-        // Daily cap: default OFF (so existing users see no change), but
-        // pre-fill a sensible 60-min cap so flipping the toggle Just Works.
-        self.dailyCapEnabled = d.bool(forKey: Key.dailyCapEnabled)
+        // Daily cap: default ON — it's the "maximum" minutes a child can earn
+        // per day. Once hit, play continues but stops granting minutes. Parents
+        // can disable it (unlimited) or adjust the ceiling in Settings.
+        if d.object(forKey: Key.dailyCapEnabled) == nil {
+            self.dailyCapEnabled = true
+        } else {
+            self.dailyCapEnabled = d.bool(forKey: Key.dailyCapEnabled)
+        }
         let mmd = d.integer(forKey: Key.maxMinutesPerDay)
         self.maxMinutesPerDay = mmd == 0 ? 60 : mmd
 

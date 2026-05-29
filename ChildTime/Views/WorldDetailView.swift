@@ -151,7 +151,7 @@ struct WorldDetailView: View {
             }
         }
         .fullScreenCover(isPresented: $startSession) {
-            QuestionRunnerView(world: world)
+            QuestionRunnerView(world: world, purpose: .earnTime)
                 .onDisappear { dismiss() }
         }
     }

@@ -155,8 +155,8 @@ struct WorldMapView: View {
             LuckyWheelView { showingWheel = false }
         }
         .fullScreenCover(isPresented: $showingSmartFeed) {
-            // Voluntary entry → Free Learning (no minutes, in-game rewards only).
-            QuestionRunnerView(mode: .smartFeed, purpose: .freePlay)
+            // Smart Feed play — grants minutes (capped by the daily maximum).
+            QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
         }
         .fullScreenCover(isPresented: $showingEarn) {
             // Earn-to-Unlock → capped 30, grants screen-time minutes.

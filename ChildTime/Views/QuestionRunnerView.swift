@@ -60,6 +60,7 @@ struct QuestionRunnerView: View {
     @State private var reportedDiscovery: Set<Topic> = []
     @State private var showParentAssist = false
     @State private var assistOfferedThisQuestion = false
+    @State private var capMessageShown = false
 
     /// Earn mode: the parent's session length, hard-capped at 30 ("no matter
     /// what"). Free mode: effectively unlimited — the child ends it with סיום.
@@ -179,10 +180,9 @@ struct QuestionRunnerView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        // Keep the in-session top bar light: just close, progress, streak and
-        // stars on the main row. The detailed score + earned-minutes chips show
-        // only in Earn mode (Free Learning earns no minutes, so they'd be noise).
-        let earn = purpose == .earnTime
+        // Light top bar: close, progress, streak and stars. Earned minutes live
+        // in the HUD ("🎮 היום X דק'") and the daily-cap chip, so we don't repeat
+        // them here.
         return AnyView(
             VStack(spacing: 8) {
                 HStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.md) {
@@ -191,13 +191,6 @@ struct QuestionRunnerView: View {
                     Spacer()
                     StreakMeter(streak: progress.currentStreak)
                     StarCounter(value: progress.stars)
-                }
-                if earn {
-                    HStack(spacing: AppSpacing.sm) {
-                        Spacer()
-                        ScoreBadge(value: progress.sessionScore, style: .session, compact: true)
-                        MinutesBadge(minutes: progress.pendingMinutes, compact: true)
-                    }
                 }
                 progressHUD(compact: isCompact)
                 if dailyCapChipVisible {
@@ -472,6 +465,7 @@ struct QuestionRunnerView: View {
         reportedMilestone = false
         reportedWheel = false
         reportedDiscovery = []
+        capMessageShown = false
         questionIndex = 0
         correctInSession = 0
         earnedThisSession = 0
@@ -639,27 +633,47 @@ struct QuestionRunnerView: View {
             isSuperQuestion: isSuperQuestion,
             isMysteryPortal: isInPortal
         )
+        // Was the child already at their daily maximum *before* this answer?
+        // If so, they keep playing & learning but earn no more minutes.
+        let earnsTime = purpose.grantsScreenTime
+        let cappedBefore = earnsTime && progress.atDailyCap
+
         let earned = progress.recordCorrect(
             ctx,
             minutesPerCorrect: settings.minutesPerCorrectAnswer,
             responseMs: responseMs,
             hadMistakeThisQuestion: hadMistakeThisQuestion,
-            grantsScreenTime: purpose.grantsScreenTime
+            grantsScreenTime: earnsTime
         )
         earnedThisSession += earned
 
         let minuteMult = isInPortal ? 3 : (isSuperQuestion ? 5 : 1)
+        let gotMinutes = earnsTime && !cappedBefore
         LearningHistoryStore.shared.recordAnswer(
             topic: q.topic, correct: true, responseMs: responseMs,
-            earnedMinutes: purpose.grantsScreenTime ? settings.minutesPerCorrectAnswer * minuteMult : 0,
-            streak: progress.currentStreak
+            earnedMinutes: gotMinutes ? settings.minutesPerCorrectAnswer * minuteMult : 0,
+            streak: progress.currentStreak,
+            voluntary: cappedBefore   // learning past the max = voluntary
         )
         reportLiveEvents(for: q)
 
-        // "+X דקות" popup flies to the timer — Earn mode only (no minutes in Free).
-        if purpose.grantsScreenTime {
-            let minutesGained = settings.minutesPerCorrectAnswer * minuteMult
-            showEarnedMinutesPopup(minutes: minutesGained)
+        // "+X דקות" popup flies to the timer — only while actually earning.
+        if gotMinutes {
+            showEarnedMinutesPopup(minutes: settings.minutesPerCorrectAnswer * minuteMult)
+        }
+
+        // Crossed the daily maximum just now? Celebrate once and make it clear
+        // that play continues for fun/learning without more minutes.
+        if earnsTime, !cappedBefore, progress.atDailyCap, !capMessageShown {
+            capMessageShown = true
+            companion.wow("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמֹד בְּלִי דַּקּוֹת נוֹסָפוֹת")
+            confettiTrigger += 1
+            return
+        }
+        // Already past the max — gentle, occasional reminder (no minutes now).
+        if cappedBefore {
+            companion.cheer(["יָפֶה! לוֹמְדִים בִּשְׁבִיל הַכֵּיף 🌟", "כֹּל הַכָּבוֹד! עוֹד נְקֻדּוֹת וְכוֹכָבִים", "אַלּוּף! מַמְשִׁיכִים לְהִתְקַדֵּם"].randomElement()!)
+            return
         }
 
         // Risk & Recovery payoff — celebrate winning time back.

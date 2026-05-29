@@ -25,11 +25,14 @@ struct InsightsEngine {
         var sessions = 0
         var earnSessions = 0
         var freeSessions = 0
+        var voluntaryAnswers = 0
         var activeDays = 0
         var accuracy: Double { questions > 0 ? Double(correct) / Double(questions) : 0 }
-        /// Share of sessions the child opened voluntarily (not to earn time).
+        /// Share of answers the child gave AFTER hitting the daily minute-max —
+        /// i.e. learning purely for its own sake, not to earn time. The headline
+        /// "is this becoming a real learning engine?" signal.
         var voluntaryLearningRate: Double {
-            sessions > 0 ? Double(freeSessions) / Double(sessions) : 0
+            questions > 0 ? Double(voluntaryAnswers) / Double(questions) : 0
         }
     }
 
@@ -125,6 +128,7 @@ struct InsightsEngine {
             s.sessions += d.sessions
             s.earnSessions += d.earnSessions
             s.freeSessions += d.freeSessions
+            s.voluntaryAnswers += d.voluntaryAnswers
             if d.questionsAnswered > 0 { s.activeDays += 1 }
         }
         return s
