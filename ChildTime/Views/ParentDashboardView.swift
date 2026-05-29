@@ -27,6 +27,9 @@ struct ParentDashboardView: View {
     @State private var lastRefreshed = Date()
     @State private var showingSettings = false
     @State private var showingLinking = false
+    @State private var showingCreateChild = false
+    @State private var qrChild: Profile? = nil
+    @State private var qrCode: String? = nil
 
     /// Rows recomputed on each refresh so values stay live as the kid plays.
     /// Prefers a remote snapshot when one is available and newer than the
@@ -125,6 +128,17 @@ struct ParentDashboardView: View {
             .sheet(isPresented: $showingLinking) {
                 FamilyLinkingView()
                     .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(isPresented: $showingCreateChild) {
+                ProfileEditorView(mode: .create) { newProfile in
+                    profiles.add(newProfile)
+                    HouseholdManager.shared.upsertChild(newProfile)
+                } onDelete: { _ in }
+                .environmentObject(profiles)
+                .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(item: $qrChild) { child in
+                childQRSheet(for: child)
             }
             .onAppear {
                 refreshTrigger &+= 1
@@ -243,10 +257,10 @@ struct ParentDashboardView: View {
         VStack(spacing: AppSpacing.lg) {
             Text("👨‍👩‍👧‍👦")
                 .font(.system(size: 64))
-            Text("בּוֹאוּ נְחַבֵּר אֶת הַיֶּלֶד")
+            Text("בּוֹאוּ נְצַרֵף אֶת הַיְּלָדִים")
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("בְּמַכְשִׁיר שֶׁל הַיֶּלֶד צְרוּ קוֹד, וְסִרְקוּ אוֹתוֹ כָּאן — הַפְּרוֹפִילִים שֶׁלּוֹ וְהַהִתְקַדְּמוּת יוֹפִיעוּ בַּמָּסָךְ הַזֶּה.")
+            Text("צְרוּ פְּרוֹפִיל לְכָל יֶלֶד/ה כָּאן. אַחַר כָּךְ כָּל יֶלֶד יְקַבֵּל קוֹד QR — סוֹרְקִים אוֹתוֹ בַּמַּכְשִׁיר שֶׁל הַיֶּלֶד, וְהוּא נִכְנָס יְשִׁירוֹת לְשַׂחֵק.")
                 .font(.system(size: 16, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
@@ -295,15 +309,16 @@ struct ParentDashboardView: View {
         .buttonStyle(.plain)
     }
 
-    /// Prominent "link a child/device" action — the parent's primary action.
+    /// The parent's primary action — create a child profile. Each child then
+    /// gets a QR to set up their own device.
     private var linkButton: some View {
         Button {
             Haptic.light()
-            showingLinking = true
+            showingCreateChild = true
         } label: {
             HStack(spacing: 10) {
-                Image(systemName: "qrcode.viewfinder")
-                Text("קַשְּׁרוּ יֶלֶד / מַכְשִׁיר")
+                Image(systemName: "person.crop.circle.badge.plus")
+                Text("צְרוּ יֶלֶד/ה")
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
             }
             .foregroundStyle(.white)
@@ -318,6 +333,47 @@ struct ParentDashboardView: View {
     }
 
     private var linkCallout: some View { linkButton }
+
+    /// Per-child QR + code for setting up that child's own device.
+    private func childQRSheet(for child: Profile) -> some View {
+        ZStack {
+            AppGradient.dreamy.ignoresSafeArea()
+            SparkleField(count: 16, size: 12)
+            VStack(spacing: AppSpacing.lg) {
+                Text("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(child.name)")
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+
+                if let code = qrCode {
+                    QRCodeView(text: code, size: 230)
+                    Text(String(code.split(separator: "|").first ?? ""))
+                        .font(.system(size: 26, weight: .heavy, design: .monospaced))
+                        .kerning(4)
+                        .foregroundStyle(.white)
+                } else {
+                    ProgressView().tint(.white).scaleEffect(1.3).frame(height: 230)
+                }
+
+                Text("בַּמַּכְשִׁיר שֶׁל \(child.name): פִּתְחוּ אֶת טוֹפִּי, בַּחֲרוּ \"הַמַּכְשִׁיר שֶׁל הַיֶּלֶד\", וְסִרְקוּ אֶת הַקּוֹד — וְהוּא יִכָּנֵס יְשִׁירוֹת לְשַׂחֵק.")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, AppSpacing.lg)
+
+                Button("סְגֹר") { qrChild = nil; qrCode = nil }
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 24).padding(.vertical, 12)
+                    .background(.white.opacity(0.18), in: Capsule())
+            }
+            .padding(AppSpacing.xl)
+            .frame(maxWidth: 460)
+        }
+        .task {
+            qrCode = await HouseholdManager.shared.makeChildJoinCode(for: child.id.uuidString)
+        }
+    }
 
     /// Quick family-wide summary for today — minutes earned, questions answered,
     /// and how many kids were active. Only meaningful when kids are linked.
@@ -440,6 +496,28 @@ struct ParentDashboardView: View {
 
             // Actionable coaching — where to reinforce + concrete tips.
             coachingCard(for: profile, snapshot: s)
+
+            // Set up this child's own device (QR / code).
+            if isRoot {
+                Button {
+                    Haptic.light()
+                    qrCode = nil
+                    qrChild = profile
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "qrcode")
+                        Text("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name)")
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        Spacer()
+                        Image(systemName: "chevron.left").font(.caption)
+                    }
+                    .foregroundStyle(AppColor.gemPurple)
+                    .padding(.vertical, 10).padding(.horizontal, 12)
+                    .background(RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                        .fill(AppColor.gemPurple.opacity(0.12)))
+                }
+                .buttonStyle(.plain)
+            }
 
             // Full analytics deep-dive (daily/weekly/monthly + coaching).
             NavigationLink {

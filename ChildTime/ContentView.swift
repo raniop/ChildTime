@@ -34,18 +34,18 @@ struct ContentView: View {
                 // child profile or data exists.
                 ConsentView()
             } else if settings.deviceRole == .parent {
-                // Parent's device → straight into the family monitoring view.
+                // Parent's device → the family control center (create kids, see
+                // reports, generate each child's device code). No games here.
                 ParentDashboardView(isRoot: true)
-            } else if !settings.onboardingCompleted {
-                // Logged in but parent hasn't finished setup yet.
-                OnboardingView()
             } else if profiles.isEmpty && household.isLoading {
-                // Signed in but the family is still downloading from the cloud —
-                // wait instead of prematurely offering to create a child.
+                // Joining/syncing the family from the cloud — wait.
                 familyLoadingView
-            } else if profiles.isEmpty || profiles.activeID == nil {
-                // Onboarding done — Netflix-style picker (covers both
-                // 'no profiles yet' and 'parent signed out of a profile').
+            } else if profiles.isEmpty {
+                // Child's device, not joined yet → scan/enter the code the
+                // parent created for this child.
+                ChildJoinView()
+            } else if profiles.activeID == nil {
+                // Joined with more than one child on this device → pick who.
                 ProfilePickerView()
             } else if progress.isUnlocked {
                 UnlockedView()

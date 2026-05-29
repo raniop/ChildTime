@@ -109,6 +109,16 @@ final class ProfileStore: ObservableObject {
         activeID = profile.id
     }
 
+    /// Select a child by id — used after a child device joins by code, where
+    /// the profile may still be streaming down from the cloud.
+    func setActiveID(_ id: UUID) {
+        if let p = profiles.first(where: { $0.id == id }) {
+            setActive(p)
+        } else {
+            activeID = id   // profile will arrive via mergeRemoteChildren
+        }
+    }
+
     /// Sign-out style: clears active selection (forces the picker on next launch).
     func signOutCurrentProfile() {
         activeID = nil

@@ -261,6 +261,14 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    /// A per-child join code/QR payload: the household invite code + the child's
+    /// id, so the child's device joins this family AND lands straight on that
+    /// child. Format: "CODE|childID".
+    func makeChildJoinCode(for childID: String) async -> String? {
+        guard let code = await createInvite() else { return nil }
+        return "\(code)|\(childID)"
+    }
+
     /// Joins the household behind `code`. Returns true on success.
     func redeemInvite(code: String) async -> Bool {
         #if canImport(FirebaseFirestore)
