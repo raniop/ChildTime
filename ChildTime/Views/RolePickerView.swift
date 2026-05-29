@@ -66,8 +66,11 @@ struct RolePickerView: View {
                           glow: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: AppSpacing.md) {
-                Text(emoji).font(.system(size: 44))
-                VStack(alignment: .trailing, spacing: 4) {
+                Text(emoji)
+                    .font(.system(size: 40))
+                    .frame(width: 56, height: 56)
+                    .background(Circle().fill(.white.opacity(0.18)))
+                VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
@@ -75,7 +78,7 @@ struct RolePickerView: View {
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.8))
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(AppSpacing.lg)
             .frame(maxWidth: .infinity)
