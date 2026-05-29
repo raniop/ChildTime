@@ -168,7 +168,8 @@ struct ProfileEditorView: View {
                 .font(.system(size: 20, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
                 .textInputAutocapitalization(.words)
-                .multilineTextAlignment(.leading)   // = right under RTL
+                .environment(\.layoutDirection, .rightToLeft)   // force RTL on the field
+                .multilineTextAlignment(.leading)               // = right edge under RTL
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.vertical, AppSpacing.sm)
                 .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: AppRadius.medium))
