@@ -234,17 +234,17 @@ final class ParentSettings: ObservableObject {
             self.soundsEnabled = d.bool(forKey: Key.soundsEnabled)
         }
 
-        // Reward mode
+        // Reward mode — default for everyone: every 10 answers → 3 minutes.
         if let raw = d.string(forKey: Key.rewardMode),
            let mode = RewardMode(rawValue: raw) {
             self.rewardMode = mode
         } else {
-            self.rewardMode = .perAnswer
+            self.rewardMode = .perBatch
         }
         let ba = d.integer(forKey: Key.batchAnswers)
-        self.batchAnswers = ba == 0 ? 5 : ba
+        self.batchAnswers = ba == 0 ? 10 : ba
         let bm = d.integer(forKey: Key.batchMinutes)
-        self.batchMinutes = bm == 0 ? 10 : bm
+        self.batchMinutes = bm == 0 ? 3 : bm
 
         // Mistake cost: default ON. Mistakes now matter (half the reward) but
         // are immediately recoverable, so this is gentle by design.
