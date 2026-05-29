@@ -364,11 +364,18 @@ final class HouseholdManager: ObservableObject {
             // 1) Join the parent's household (so I'm allowed to write into it).
             try await db.collection("households").document(req.fromHouseholdID)
                 .updateData(["parentUIDs": FieldValue.arrayUnion([uid])])
-            // 2) Move my children into the parent's household.
-            let childIDs = ProfileStore.shared.profiles.map { $0.id.uuidString }
-            for cid in childIDs {
-                try await db.collection("children").document(cid)
-                    .updateData(["householdID": req.fromHouseholdID])
+            // 2) Move my children into the parent's household. Use setData(merge)
+            // with the FULL record so it works whether the child doc already
+            // exists (move it) or was never synced before (create it there) —
+            // updateData would silently fail on a missing doc.
+            let profiles = ProfileStore.shared.profiles
+            var childIDs: [String] = []
+            for p in profiles {
+                let id = p.id.uuidString
+                childIDs.append(id)
+                let record = ChildRecord(profile: p, householdID: req.fromHouseholdID)
+                try await db.collection("children").document(id)
+                    .setData(Self.encode(record), merge: true)
             }
             if !childIDs.isEmpty {
                 try await db.collection("households").document(req.fromHouseholdID)
