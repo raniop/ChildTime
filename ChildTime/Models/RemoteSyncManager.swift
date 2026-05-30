@@ -96,6 +96,31 @@ final class RemoteSyncManager: ObservableObject {
         #endif
     }
 
+    /// Parent action: grant/spend a child's play-minutes by editing the CLOUD
+    /// snapshot directly, in a transaction that BUMPS the revision so the child's
+    /// device accepts it (a stale local push from the parent would otherwise lose
+    /// the revision race and be ignored). Works for ANY child, active or not.
+    func adjustChildMinutes(childID: UUID, deltaMinutes: Int) {
+        #if canImport(FirebaseFirestore)
+        let ref = db.collection("children").document(childID.uuidString)
+            .collection("state").document("current")
+        db.runTransaction({ txn, _ -> Any? in
+            let existing = try? txn.getDocument(ref)
+            var snap = (existing?.data()).flatMap { Self.decode($0) } ?? ProgressSnapshot()
+            snap.pendingMinutes = max(0, snap.pendingMinutes + deltaMinutes)
+            snap.revision += 1
+            snap.lastModifiedAt = Date()
+            snap.deviceID = ProgressSnapshot.thisDeviceID
+            if let data = Self.encode(snap) {
+                txn.setData(data, forDocument: ref, merge: true)
+            }
+            return nil
+        }) { [weak self] _, _ in
+            self?.refreshNow()
+        }
+        #endif
+    }
+
     /// Force an immediate re-fetch of every child's cloud state (used by the
     /// parent's "refresh" button). Also re-ensures the live listeners are
     /// attached, in case they were dropped.

@@ -667,7 +667,6 @@ struct ParentDashboardView: View {
                         .foregroundStyle(.primary)
                 }
                 .buttonStyle(.borderless)
-                .disabled(!isActive)
 
                 Button {
                     quickAdjust(profile: profile, deltaMinutes: -5)
@@ -680,15 +679,8 @@ struct ParentDashboardView: View {
                         .foregroundStyle(.primary)
                 }
                 .buttonStyle(.borderless)
-                .disabled(!isActive)
 
                 Spacer()
-
-                if !isActive {
-                    Text("ניתן לערוך רק את הפרופיל הפעיל")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
             }
         }
         .padding(AppSpacing.md)
@@ -938,16 +930,11 @@ struct ParentDashboardView: View {
     /// edit the snapshot directly — kept out of v1 to avoid stale-data
     /// races; the parent can switch to that profile first.
     private func quickAdjust(profile: Profile, deltaMinutes: Int) {
-        guard profile.id == profiles.activeID else { return }
         Haptic.light()
-        if deltaMinutes > 0 {
-            _ = ProgressStore.shared.grantMinutesCapped(deltaMinutes)
-        } else {
-            _ = ProgressStore.shared.spendPendingMinutes(-deltaMinutes)
-        }
-        // Auto-upload is off on the parent device, so push this deliberate edit
-        // explicitly to reach the child's device.
-        remote.pushNow()
+        // Edit the child's CLOUD snapshot directly (revision-bumping transaction)
+        // so it reaches the child's device regardless of which profile is active
+        // on this parent device.
+        remote.adjustChildMinutes(childID: profile.id, deltaMinutes: deltaMinutes)
         refreshTrigger &+= 1
     }
 
