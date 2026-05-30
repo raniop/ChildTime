@@ -10,6 +10,7 @@ struct BubbleSpeech: View {
             .foregroundStyle(AppColor.textOnLight)
             .padding(.horizontal, AppSpacing.lg)
             .padding(.vertical, AppSpacing.md)
+            .padding(.bottom, 8)   // reserve room for the tail
             .background {
                 BubbleShape(pointDirection: pointDirection)
                     .fill(.white)
@@ -25,16 +26,22 @@ struct BubbleShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
         let r: CGFloat = 18
-        path.addRoundedRect(in: rect.insetBy(dx: 0, dy: 8), cornerSize: CGSize(width: r, height: r))
+        let tailH: CGFloat = 11
+        let tailW: CGFloat = 22
 
-        // Triangle tail at bottom-trailing
+        // Body fills everything except the reserved tail strip at the bottom.
+        let body = CGRect(x: rect.minX, y: rect.minY,
+                          width: rect.width, height: rect.height - tailH)
+        path.addRoundedRect(in: body, cornerSize: CGSize(width: r, height: r))
+
+        // A clean downward tail, centered, whose base sits flush ON the body's
+        // bottom edge (1pt overlap) so it merges seamlessly — no notch, no gap.
         if pointDirection == .bottom {
-            let tip = CGPoint(x: rect.maxX - 30, y: rect.maxY)
-            let baseL = CGPoint(x: rect.maxX - 50, y: rect.maxY - 12)
-            let baseR = CGPoint(x: rect.maxX - 20, y: rect.maxY - 12)
-            path.move(to: baseL)
-            path.addLine(to: tip)
-            path.addLine(to: baseR)
+            let cx = rect.midX
+            let baseY = body.maxY
+            path.move(to: CGPoint(x: cx - tailW / 2, y: baseY - 1))
+            path.addLine(to: CGPoint(x: cx, y: baseY + tailH))
+            path.addLine(to: CGPoint(x: cx + tailW / 2, y: baseY - 1))
             path.closeSubpath()
         }
         return path

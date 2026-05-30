@@ -53,8 +53,8 @@ struct ContentView: View {
     private var childFlow: some View {
         if !auth.isSignedIn {
             // Signing in anonymously — brief, automatic, no UI to fill in.
-            familyLoadingView
-                .task { auth.signInAnonymouslyIfNeeded() }
+            // Robust: times out to an error+retry instead of spinning forever.
+            ChildAuthLoadingView()
         } else if profiles.isEmpty && household.isLoading {
             familyLoadingView
         } else if profiles.isEmpty {
