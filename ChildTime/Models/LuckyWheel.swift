@@ -54,12 +54,10 @@ enum LuckyWheelCatalog {
                                               label: "מְקַפְּלִים גַּרְבַּיִם", emoji: "🧦", color: Color(hex: "5B9BFF")),
     ]
 
-    /// 8-wedge layout for one spin. Always at least 5 good wedges so the
-    /// odds feel friendly.
+    /// 8-wedge layout for one spin. Every wedge is a win — no "loss"/chore
+    /// wedges, so the wheel is always a happy moment.
     static func wedgesForSpin() -> [WheelPrize] {
-        let good = prizes.filter { !$0.isPenalty }.shuffled().prefix(6)
-        let chores = prizes.filter { $0.isPenalty }.shuffled().prefix(2)
-        return Array((good + chores).shuffled())
+        Array(prizes.filter { !$0.isPenalty }.shuffled().prefix(8))
     }
 }
 
