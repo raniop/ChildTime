@@ -114,7 +114,7 @@ struct WorldDetailView: View {
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                     }
-                    Text("כָּל תְּשׁוּבָה נְכוֹנָה = \(rewardPerCorrect) דַּקּוֹת מִשְׂחָק")
+                    Text("כָּל \(settings.batchAnswers) תְּשׁוּבוֹת נְכוֹנוֹת = \(settings.batchMinutes) דַּקּוֹת מִשְׂחָק")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 struct ContentView: View {
     @EnvironmentObject var settings: ParentSettings
@@ -26,6 +27,14 @@ struct ContentView: View {
                 childFlow
             } else {
                 parentFlow
+            }
+        }
+        // Global presence heartbeat: while a CHILD device is open (any screen),
+        // refresh "last seen" every 30s so the parent sees "משחק עכשיו" live —
+        // not just while inside a question.
+        .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { _ in
+            if settings.deviceRole == .child, auth.isSignedIn, let cid = profiles.activeID {
+                Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
             }
         }
     }

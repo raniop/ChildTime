@@ -46,7 +46,7 @@ struct UnlockedView: View {
                 .padding(.vertical, AppSpacing.xxl)
                 .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous))
 
-                Text("עַכְשָׁו אֶפְשָׁר לַעֲבֹר לָאַפְּלִיקַצְיָה שֶׁאַתָּה רוֹצֶה לְשַׂחֵק בָּהּ 🚀")
+                Text("עַכְשָׁיו אֶפְשָׁר לַעֲבֹר לָאַפְּלִיקַצְיָה שֶׁ\(Gendered.g("אַתָּה רוֹצֶה", "אַתְּ רוֹצָה")) לְשַׂחֵק בָּהּ 🚀")
                     .font(.system(size: 20, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
@@ -85,7 +85,7 @@ struct UnlockedView: View {
             if !greeted {
                 greeted = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    companion.cheer("שִׂחַקְתָּ יָפֶה!")
+                    companion.cheer("\(Gendered.g("שִׂחַקְתָּ", "שִׂחַקְתְּ")) יָפֶה!")
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     companion.state = .sleep
