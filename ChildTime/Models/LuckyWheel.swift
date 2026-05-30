@@ -29,14 +29,14 @@ enum LuckyWheelCatalog {
     /// Bias toward upbeat wedges (~75% good vs 25% chore).
     static let prizes: [WheelPrize] = [
         // Good (10 wedges)
-        WheelPrize(kind: .stars(5),          label: "5 כּוֹכָבִים",      emoji: "⭐", color: Color(hex: "9B5DE5")),
-        WheelPrize(kind: .stars(15),         label: "15 כּוֹכָבִים",     emoji: "⭐", color: Color(hex: "5E60CE")),
-        WheelPrize(kind: .stars(30),         label: "30 כּוֹכָבִים!",   emoji: "🌟", color: Color(hex: "F15BB5")),
+        WheelPrize(kind: .stars(15),         label: "15 כּוֹכָבִים",     emoji: "⭐", color: Color(hex: "9B5DE5")),
+        WheelPrize(kind: .stars(45),         label: "45 כּוֹכָבִים",     emoji: "⭐", color: Color(hex: "5E60CE")),
+        WheelPrize(kind: .stars(90),         label: "90 כּוֹכָבִים!",   emoji: "🌟", color: Color(hex: "F15BB5")),
         WheelPrize(kind: .xp(50),            label: "50 XP",        emoji: "⚡", color: Color(hex: "FFD166")),
         WheelPrize(kind: .minutes(5),        label: "+5 דַּק' מִשְׂחָק",   emoji: "⏰", color: Color(hex: "06D6A0")),
         WheelPrize(kind: .minutes(10),       label: "+10 דַּק' מִשְׂחָק",  emoji: "⏱", color: Color(hex: "118AB2")),
-        WheelPrize(kind: .stars(20),         label: "+20 כּוֹכָבִים",   emoji: "🌟", color: Color(hex: "FFB84D")),
-        WheelPrize(kind: .stars(50),         label: "+50 כּוֹכָבִים!",  emoji: "🌟", color: Color(hex: "F59E0B")),
+        WheelPrize(kind: .stars(60),         label: "+60 כּוֹכָבִים",   emoji: "🌟", color: Color(hex: "FFB84D")),
+        WheelPrize(kind: .stars(150),        label: "+150 כּוֹכָבִים!", emoji: "🌟", color: Color(hex: "F59E0B")),
         WheelPrize(kind: .rareItem("hat_crown"),
                                               label: "כֶּתֶר זָהָב!",     emoji: "👑", color: Color(hex: "FFD166")),
         WheelPrize(kind: .rareItem("shoes_magic"),
@@ -88,8 +88,8 @@ extension WheelPrize {
                 return "פָּתַחְתָּ פְּרִיט נָדִיר: \(item.name)!"
             }
             // Already owned — fall back to a nice star consolation.
-            progress.applyChestReward(ChestReward(stars: 15, gems: 0, minutes: 0, cosmeticID: nil))
-            return "כְּבָר יֵשׁ לְךָ אֶת הַפְּרִיט הַזֶּה — קַבֵּל 15 כּוֹכָבִים בִּמְקוֹם"
+            progress.applyChestReward(ChestReward(stars: 45, gems: 0, minutes: 0, cosmeticID: nil))
+            return "כְּבָר יֵשׁ לְךָ אֶת הַפְּרִיט הַזֶּה — קַבֵּל 45 כּוֹכָבִים בִּמְקוֹם"
         case .funMission(let task):
             return "משימה: \(task)"
         }

@@ -2,13 +2,19 @@ import Foundation
 
 /// Centralized rules: how many stars / gems / minutes for each event.
 enum RewardEngine {
+    /// How many times the base star rewards are multiplied. 3× makes earning
+    /// feel more generous without touching world-unlock costs or shop prices.
+    static let starMultiplier = 3
+
     /// Stars granted for a correct answer, taking combo + super into account.
     static func starsForCorrect(combo: Int, isSuperQuestion: Bool, isMysteryPortal: Bool) -> Int {
-        if isMysteryPortal { return 3 }
-        if isSuperQuestion { return 5 }
-        if combo >= 5 { return 3 }
-        if combo >= 3 { return 2 }
-        return 1
+        let base: Int
+        if isMysteryPortal { base = 3 }
+        else if isSuperQuestion { base = 5 }
+        else if combo >= 5 { base = 3 }
+        else if combo >= 3 { base = 2 }
+        else { base = 1 }
+        return base * starMultiplier
     }
 
     /// Bonus minutes for a streak of correct answers (added on top of per-correct rate).
@@ -119,14 +125,16 @@ extension RewardEngine {
         // legendary are non-session chests like the daily chest, so they grant
         // their own minutes/stars outright.)
         switch kind {
+        // Star bonuses are ×starMultiplier to match the in-game earn rate;
+        // minutes stay as-is (screen-time economy, not stars).
         case .wood:
             return ChestReward(stars: 0, gems: 0, minutes: 0, cosmeticID: nil)
         case .gold:
-            return ChestReward(stars: 3, gems: 0, minutes: 0, cosmeticID: nil)
+            return ChestReward(stars: 3 * starMultiplier, gems: 0, minutes: 0, cosmeticID: nil)
         case .magic:
-            return ChestReward(stars: 10, gems: 0, minutes: 5, cosmeticID: nil)
+            return ChestReward(stars: 10 * starMultiplier, gems: 0, minutes: 5, cosmeticID: nil)
         case .legendary:
-            return ChestReward(stars: 50, gems: 0, minutes: 15, cosmeticID: "legendary_aura")
+            return ChestReward(stars: 50 * starMultiplier, gems: 0, minutes: 15, cosmeticID: "legendary_aura")
         }
     }
 
