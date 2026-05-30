@@ -50,12 +50,22 @@ struct ParentDashboardView: View {
     private var rows: [(profile: Profile, snapshot: ProgressSnapshot)] {
         _ = refreshTrigger
         let locals = ProgressVault.shared.allSnapshots(for: profiles.profiles)
-        return locals.map { row in
+        let mapped: [(profile: Profile, snapshot: ProgressSnapshot)] = locals.map { row in
             if let remoteSnap = remote.remoteSnapshots[row.profile.id] {
                 return (row.profile, remoteSnap)
             }
             return row
         }
+        // Whoever is playing LIVE floats to the top — dynamic, re-sorts on each
+        // 5s tick / presence update. Stable for the rest (keeps profile order).
+        return mapped.enumerated()
+            .sorted { a, b in
+                let aLive = isChildPlayingNow(a.element.profile)
+                let bLive = isChildPlayingNow(b.element.profile)
+                if aLive != bLive { return aLive }      // live first
+                return a.offset < b.offset              // otherwise keep order
+            }
+            .map { $0.element }
     }
 
     var body: some View {
@@ -81,6 +91,8 @@ struct ParentDashboardView: View {
                             ForEach(rows, id: \.profile.id) { row in
                                 profileCard(profile: row.profile, snapshot: row.snapshot)
                             }
+                            .animation(.spring(response: 0.5, dampingFraction: 0.85),
+                                       value: rows.map(\.profile.id))
                         }
                         .padding(AppSpacing.lg)
                         .frame(maxWidth: 720)
