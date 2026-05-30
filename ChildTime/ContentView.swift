@@ -56,25 +56,37 @@ struct ContentView: View {
     }
 
     /// Child device → NO sign-in screen. Get an anonymous identity in the
-    /// background (so it can join the family + sync), then scan the parent's QR
-    /// and play.
+    /// background, then scan the parent's QR to bind THIS device to ONE specific
+    /// child. A child device must scan to join — it never auto-drops into a
+    /// profile just because the account already has children.
     @ViewBuilder
     private var childFlow: some View {
         if !auth.isSignedIn {
             // Signing in anonymously — brief, automatic, no UI to fill in.
-            // Robust: times out to an error+retry instead of spinning forever.
             ChildAuthLoadingView()
-        } else if profiles.isEmpty && household.isLoading {
-            familyLoadingView
-        } else if profiles.isEmpty {
-            // Not joined yet → scan/enter the code the parent created.
-            ChildJoinView()
-        } else if profiles.activeID == nil {
-            ProfilePickerView()
-        } else if progress.isUnlocked {
-            UnlockedView()
+        } else if let joined = settings.joinedChildID, let cid = UUID(uuidString: joined) {
+            if profiles.profiles.contains(where: { $0.id == cid }) {
+                childPlay(cid: cid)
+            } else if household.isLoading {
+                familyLoadingView
+            } else {
+                // The bound child isn't here (removed / not synced) → re-scan.
+                ChildJoinView()
+            }
         } else {
-            WorldMapView()
+            // Not bound to a child on this device yet → must scan a code.
+            ChildJoinView()
+        }
+    }
+
+    /// Play as the bound child — make sure that profile is the active one.
+    @ViewBuilder
+    private func childPlay(cid: UUID) -> some View {
+        Group {
+            if progress.isUnlocked { UnlockedView() } else { WorldMapView() }
+        }
+        .onAppear {
+            if profiles.activeID != cid { profiles.setActiveID(cid) }
         }
     }
 

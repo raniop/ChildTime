@@ -97,6 +97,8 @@ struct ChildJoinView: View {
             message = "מִתְחַבְּרִים…"
             let ok = await household.redeemInvite(code: codePart)
             if ok, let cid = childID {
+                // Bind THIS device to this specific child.
+                ParentSettings.shared.joinedChildID = cid.uuidString
                 profiles.setActiveID(cid)
                 await household.registerDevice(forChildID: cid)
             }

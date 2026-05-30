@@ -34,6 +34,7 @@ final class ParentSettings: ObservableObject {
         static let deviceRole = "deviceRole"
         static let hasSeenWelcome = "hasSeenWelcome"
         static let hasPromptedChildAppLock = "hasPromptedChildAppLock"
+        static let joinedChildID = "joinedChildID"
     }
 
     /// What this device is used for — chosen once at first launch. Steers the
@@ -206,6 +207,13 @@ final class ParentSettings: ObservableObject {
     @Published var hasPromptedChildAppLock: Bool {
         didSet { defaults.set(hasPromptedChildAppLock, forKey: Key.hasPromptedChildAppLock) }
     }
+    /// On a CHILD device, the specific child this device joined as (set when a QR
+    /// is scanned). A child device is bound to ONE child — it must scan to join,
+    /// even if the account already has children, so it never auto-drops into a
+    /// random profile.
+    @Published var joinedChildID: String? {
+        didSet { defaults.set(joinedChildID, forKey: Key.joinedChildID) }
+    }
 
     private init() {
         let d = AppGroup.defaults
@@ -306,6 +314,7 @@ final class ParentSettings: ObservableObject {
         self.deviceRole = DeviceRole(rawValue: d.string(forKey: Key.deviceRole) ?? "") ?? .unset
         self.hasSeenWelcome = d.bool(forKey: Key.hasSeenWelcome)
         self.hasPromptedChildAppLock = d.bool(forKey: Key.hasPromptedChildAppLock)
+        self.joinedChildID = d.string(forKey: Key.joinedChildID)
     }
 
     var hasConsented: Bool { consentVersionAccepted >= Consent.currentVersion }
