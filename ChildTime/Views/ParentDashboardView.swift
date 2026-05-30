@@ -36,6 +36,8 @@ struct ParentDashboardView: View {
     /// Flips to true when the child device redeems the code — shows success then
     /// auto-closes the QR sheet.
     @State private var childDeviceLinked = false
+    /// A connected device pending removal (e.g. linked to the wrong child).
+    @State private var deviceToRemove: ChildDevice? = nil
 
     /// Rows recomputed on each refresh so values stay live as the kid plays.
     /// Prefers a remote snapshot when one is available and newer than the
@@ -155,6 +157,22 @@ struct ParentDashboardView: View {
             }
             .sheet(item: $qrChild) { child in
                 childQRSheet(for: child)
+            }
+            .confirmationDialog(
+                deviceToRemove.map { "להסיר את \"\($0.name)\"?" } ?? "",
+                isPresented: Binding(
+                    get: { deviceToRemove != nil },
+                    set: { if !$0 { deviceToRemove = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("הסר מכשיר", role: .destructive) {
+                    if let d = deviceToRemove { household.removeChildDevice(id: d.id) }
+                    deviceToRemove = nil
+                }
+                Button("ביטול", role: .cancel) { deviceToRemove = nil }
+            } message: {
+                Text("המכשיר יוסר מהרשימה. אם הוא עדיין פתוח אצל הילד הוא עשוי להופיע שוב — כדי לקשר אותו לילד אחר, סרקו בו מחדש את ה-QR של הילד הנכון.")
             }
             .onAppear {
                 refreshTrigger &+= 1
@@ -836,6 +854,15 @@ struct ParentDashboardView: View {
             }
             ForEach(devices) { device in
                 HStack(spacing: 10) {
+                    Button {
+                        Haptic.light()
+                        deviceToRemove = device
+                    } label: {
+                        Image(systemName: "minus.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(.red.opacity(0.8))
+                    }
+                    .buttonStyle(.plain)
                     Spacer()
                     VStack(alignment: .trailing, spacing: 1) {
                         Text(device.name)

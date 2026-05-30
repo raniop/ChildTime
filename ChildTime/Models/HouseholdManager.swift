@@ -362,6 +362,14 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    /// Remove a connected device from a child (e.g. one mistakenly linked to the
+    /// wrong child). Deletes its `childDevices` doc; the listener updates the UI.
+    func removeChildDevice(id: String) {
+        #if canImport(FirebaseFirestore)
+        db.collection("childDevices").document(id).delete()
+        #endif
+    }
+
     func stopWatchingInviteRedemption() {
         #if canImport(FirebaseFirestore)
         inviteWatchListener?.remove()
