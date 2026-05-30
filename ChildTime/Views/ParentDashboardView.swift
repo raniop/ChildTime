@@ -40,21 +40,20 @@ struct ParentDashboardView: View {
     @State private var deviceToRemove: ChildDevice? = nil
 
     /// Rows recomputed on each refresh so values stay live as the kid plays.
-    /// Prefers a remote snapshot when one is available and newer than the
-    /// local copy — that's how the parent sees the kid's other device.
+    /// The parent is a MONITOR that never plays, so the cloud snapshot is the
+    /// source of truth: whenever we have one for a child, use it. (The old
+    /// revision/timestamp comparison made the parent show stale local data when
+    /// revisions diverged — e.g. after a +minutes transaction or a child-device
+    /// reinstall reset the revision.) Local vault is only a fallback before the
+    /// first cloud snapshot arrives.
     private var rows: [(profile: Profile, snapshot: ProgressSnapshot)] {
         _ = refreshTrigger
         let locals = ProgressVault.shared.allSnapshots(for: profiles.profiles)
         return locals.map { row in
-            guard let remoteSnap = remote.remoteSnapshots[row.profile.id] else {
-                return row
+            if let remoteSnap = remote.remoteSnapshots[row.profile.id] {
+                return (row.profile, remoteSnap)
             }
-            // Prefer remote if it has a higher revision OR newer timestamp.
-            let useRemote =
-                remoteSnap.revision > row.snapshot.revision ||
-                (remoteSnap.revision == row.snapshot.revision &&
-                 remoteSnap.lastModifiedAt > row.snapshot.lastModifiedAt)
-            return (row.profile, useRemote ? remoteSnap : row.snapshot)
+            return row
         }
     }
 
