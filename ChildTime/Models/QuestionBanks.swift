@@ -203,13 +203,13 @@ enum QuestionBanks {
     /// Original + expanded — call sites get the full combined pool.
     static func bank(for topic: Topic) -> [BankQuestion]? {
         switch topic {
-        case .english:   return english   + QuestionBanksExpanded.english   + QuestionBanksWorkflow.english
-        case .hebrew:    return hebrew    + QuestionBanksWorkflow.hebrew
-        case .logic:     return logic     + QuestionBanksExpanded.logic     + QuestionBanksWorkflow.logic
-        case .science:   return science   + QuestionBanksExpanded.science   + QuestionBanksWorkflow.science
-        case .history:   return history   + QuestionBanksExpanded.history   + QuestionBanksWorkflow.history
-        case .geography: return geography + QuestionBanksExpanded.geography + QuestionBanksWorkflow.geography
-        case .money:     return money     + QuestionBanksWorkflow.money
+        case .english:   return english   + QuestionBanksExpanded.english   + QuestionBanksWorkflow.english   + QuestionBanksWorkflow2.english
+        case .hebrew:    return hebrew    + QuestionBanksWorkflow.hebrew    + QuestionBanksWorkflow2.hebrew
+        case .logic:     return logic     + QuestionBanksExpanded.logic     + QuestionBanksWorkflow.logic     + QuestionBanksWorkflow2.logic
+        case .science:   return science   + QuestionBanksExpanded.science   + QuestionBanksWorkflow.science   + QuestionBanksWorkflow2.science
+        case .history:   return history   + QuestionBanksExpanded.history   + QuestionBanksWorkflow.history   + QuestionBanksWorkflow2.history
+        case .geography: return geography + QuestionBanksExpanded.geography + QuestionBanksWorkflow.geography + QuestionBanksWorkflow2.geography
+        case .money:     return money     + QuestionBanksWorkflow.money     + QuestionBanksWorkflow2.money
         case .math:      return nil  // generated algorithmically
         }
     }
