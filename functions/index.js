@@ -38,7 +38,19 @@ function liveMessage(event) {
   const g = (male, female) => (f ? female : male);   // pick by gender
   switch (event.type) {
     case "sessionStart": return { title: g("התחיל לשחק 📱", "התחילה לשחק 📱"), body: `${name} ${g("התחיל", "התחילה")} עכשיו לשחק ${g("ולומד", "ולומדת")}.` };
-    case "sessionEnd":   return { title: g("סיים לשחק ✅", "סיימה לשחק ✅"), body: `${name} ${g("סיים", "סיימה")} עכשיו את מסע הלמידה.` };
+    case "sessionEnd": {
+      const q = Number(event.questions) || 0;
+      const acc = Number(event.accuracy) || 0;
+      const mins = Number(event.minutes) || 0;
+      const stars = Number(event.stars) || 0;
+      const parts = [];
+      if (q > 0) parts.push(`${q} שאלות`);
+      if (q > 0) parts.push(`${acc}% הצלחה`);
+      if (mins > 0) parts.push(`${mins} דק' שנצברו`);
+      if (stars > 0) parts.push(`${stars} ⭐`);
+      const summary = parts.length ? parts.join(" · ") : `${g("סיים", "סיימה")} את מסע הלמידה`;
+      return { title: g("סיים לשחק ✅", "סיימה לשחק ✅"), body: `${name}: ${summary}` };
+    }
     case "milestone":    return { title: "כל הכבוד! ✅", body: `${name} ${g("ענה", "ענתה")} נכון על ${event.value || "כמה"} שאלות.` };
     case "streak":       return { title: "רצף! 🔥", body: `${name} ${g("נמצא", "נמצאת")} ברצף של ${event.value || "כמה"} תשובות נכונות.` };
     case "wheelWin":     return { title: "גלגל מזל! 🎡", body: `${name} ${g("זכה", "זכתה")} בסיבוב בגלגל המזל.` };

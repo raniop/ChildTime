@@ -51,7 +51,10 @@ struct ContentView: View {
         } else if !settings.hasConsented {
             ConsentView()
         } else {
-            ParentDashboardView(isRoot: true)
+            // The control center is locked behind the parent code + Face ID.
+            ParentGateView(allowClose: false) {
+                ParentDashboardView(isRoot: true)
+            }
         }
     }
 

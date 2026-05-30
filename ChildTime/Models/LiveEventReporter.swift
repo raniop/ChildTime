@@ -22,7 +22,8 @@ enum LiveEventReporter {
         case assistRequest      // child asked a parent for help
     }
 
-    static func report(_ type: EventType, value: String? = nil, topic: Topic? = nil) {
+    static func report(_ type: EventType, value: String? = nil, topic: Topic? = nil,
+                       extra: [String: Any] = [:]) {
         #if canImport(FirebaseFirestore)
         guard AuthManager.shared.isSignedIn,
               let childID = ProfileStore.shared.activeID else { return }
@@ -38,6 +39,7 @@ enum LiveEventReporter {
         ]
         if let value { payload["value"] = value }
         if let topic { payload["topic"] = topic.displayName }
+        payload.merge(extra) { _, new in new }
         Firestore.firestore()
             .collection("children").document(childID.uuidString)
             .collection("events").addDocument(data: payload)

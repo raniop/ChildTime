@@ -180,10 +180,19 @@ struct QuestionRunnerView: View {
         }
         .onAppear { startSession() }
         .onDisappear {
-            // Tell the parent the child finished playing (once).
+            // Tell the parent the child finished playing (once), with a brief
+            // summary of how the session went.
             if !didReportSessionEnd {
                 didReportSessionEnd = true
-                LiveEventReporter.report(.sessionEnd)
+                let answered = max(questionIndex, correctInSession)
+                let accuracy = answered > 0 ? Int(Double(correctInSession) / Double(answered) * 100) : 0
+                LiveEventReporter.report(.sessionEnd, extra: [
+                    "questions": answered,
+                    "correct": correctInSession,
+                    "accuracy": accuracy,
+                    "minutes": progress.sessionMinutesEarned,
+                    "stars": progress.sessionStarsEarned
+                ])
             }
         }
         // Live presence: refresh this child device's "last seen" every 30s while

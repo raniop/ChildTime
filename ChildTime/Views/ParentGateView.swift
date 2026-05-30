@@ -1,6 +1,19 @@
 import SwiftUI
 
-struct ParentGateView: View {
+struct ParentGateView<Content: View>: View {
+    /// What to show once unlocked. Defaults to Parent Settings (its original use),
+    /// but the parent device also wraps the whole dashboard with it.
+    private let content: () -> Content
+    var allowClose: Bool = true
+
+    init(allowClose: Bool = true,
+         @ViewBuilder content: @escaping () -> Content = {
+             ParentSettingsView().environment(\.layoutDirection, .rightToLeft)
+         }) {
+        self.allowClose = allowClose
+        self.content = content
+    }
+
     @EnvironmentObject var settings: ParentSettings
     @Environment(\.dismiss) private var dismiss
     @State private var entered: String = ""
@@ -19,8 +32,7 @@ struct ParentGateView: View {
 
     var body: some View {
         if authorized {
-            ParentSettingsView()
-                .environment(\.layoutDirection, .rightToLeft)
+            content()
         } else {
             gate
         }
@@ -33,14 +45,16 @@ struct ParentGateView: View {
 
             VStack(spacing: 0) {
                 HStack {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(.white.opacity(0.85))
-                            .frame(width: 40, height: 40)
-                            .background(.white.opacity(0.15), in: Circle())
+                    if allowClose {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundStyle(.white.opacity(0.85))
+                                .frame(width: 40, height: 40)
+                                .background(.white.opacity(0.15), in: Circle())
+                        }
                     }
                     Spacer()
                 }
