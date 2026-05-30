@@ -9,17 +9,25 @@ struct Household: Codable, Identifiable, Equatable {
     var childIDs: [String]
     var createdBy: String
     var createdAt: Date
+    /// Display names of REAL co-parents, keyed by uid. Child play-devices (which
+    /// also appear in `parentUIDs` for access) never write here, so this is the
+    /// clean source for "linked parents" — and avoids reading other parents'
+    /// private docs (which the rules deny). Optional so older household docs
+    /// (without this field) still decode.
+    var parentNames: [String: String]?
 
     init(id: String = UUID().uuidString,
          parentUIDs: [String],
          childIDs: [String] = [],
          createdBy: String,
-         createdAt: Date = .now) {
+         createdAt: Date = .now,
+         parentNames: [String: String]? = nil) {
         self.id = id
         self.parentUIDs = parentUIDs
         self.childIDs = childIDs
         self.createdBy = createdBy
         self.createdAt = createdAt
+        self.parentNames = parentNames
     }
 }
 

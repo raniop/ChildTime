@@ -40,6 +40,7 @@ final class HouseholdManager: ObservableObject {
 
     private var uid: String?
     private var email: String?
+    private var displayName: String?
     private let preferredHouseholdKey = "preferredHouseholdID"
 
     #if canImport(FirebaseFirestore)
@@ -63,6 +64,7 @@ final class HouseholdManager: ObservableObject {
     func start(uid: String, email: String?, displayName: String?) {
         self.uid = uid
         self.email = email?.lowercased()
+        self.displayName = displayName
         #if canImport(FirebaseFirestore)
         // start() is invoked from the auth-state listener, which can fire while
         // SwiftUI is mid-update. Defer the @Published mutations one tick so they
@@ -162,8 +164,22 @@ final class HouseholdManager: ObservableObject {
                 guard let self, let doc, let data = doc.data(),
                       let hh = Self.decodeHousehold(id: doc.documentID, data) else { return }
                 self.household = hh
-                self.refreshLinkedParentSummaries(hh.parentUIDs)
+                self.recordMyParentName(in: hh)
+                self.refreshLinkedParentSummaries(from: hh)
             }
+    }
+
+    /// Publish MY display name into the household (so co-parents can show it
+    /// without reading my private `parents/{uid}` doc). Only real accounts with a
+    /// name write here — anonymous child play-devices stay out of the list.
+    private func recordMyParentName(in hh: Household) {
+        guard let uid else { return }
+        let name = (displayName?.isEmpty == false ? displayName : email) ?? ""
+        guard !name.isEmpty, (hh.parentNames ?? [:])[uid] != name else { return }
+        Task {
+            try? await db.collection("households").document(hh.id)
+                .updateData(["parentNames.\(uid)": name])
+        }
     }
 
     private func listenToChildren(in householdID: String) {
@@ -229,22 +245,14 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
-    private func refreshLinkedParentSummaries(_ uids: [String]) {
-        Task {
-            var summaries: [String] = []
-            // Only OTHER parents (not me), and never surface a raw UID —
-            // fall back to a friendly "הוֹרֶה" when the account has no name/email.
-            for parentUID in uids where parentUID != self.uid {
-                var label = "הוֹרֶה"
-                if let doc = try? await parentRef(parentUID).getDocument(), let data = doc.data() {
-                    let acc = Self.decodeParent(id: parentUID, data)
-                    if let name = acc.displayName, !name.isEmpty { label = name }
-                    else if let email = acc.email, !email.isEmpty { label = email }
-                }
-                summaries.append(label)
-            }
-            self.linkedParentSummaries = summaries
-        }
+    /// Linked co-parents = the names recorded in the household, minus me. Reads
+    /// only the household doc (no denied cross-parent reads), and naturally
+    /// excludes anonymous child play-devices (they never record a name).
+    private func refreshLinkedParentSummaries(from hh: Household) {
+        linkedParentSummaries = (hh.parentNames ?? [:])
+            .filter { $0.key != self.uid && !$0.value.isEmpty }
+            .map { $0.value }
+            .sorted()
     }
     #endif
 
