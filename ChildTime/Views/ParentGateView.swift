@@ -6,9 +6,15 @@ struct ParentGateView: View {
     @State private var entered: String = ""
     @State private var shake: Bool = false
     @State private var authorized: Bool = false
+    /// First-time setup: the parent never picked a code on this device, so we
+    /// let them CREATE one (enter → confirm) instead of guessing the default.
+    @State private var setupFirst: String? = nil   // first entry while confirming
+
+    private var isSetupMode: Bool { !settings.hasSetParentPIN }
 
     private var canUseFaceID: Bool {
         settings.faceIDForParentGate && PINManager.shared.biometryAvailable
+            && !isSetupMode
     }
 
     var body: some View {
@@ -47,13 +53,14 @@ struct ParentGateView: View {
                         .foregroundStyle(AppColor.starGold)
                         .glow(AppColor.starGold, radius: 14)
 
-                    Text("הַגְדָּרוֹת הוֹרֶה")
+                    Text(isSetupMode ? "בְּחֲרוּ קוֹד הוֹרֶה" : "הַגְדָּרוֹת הוֹרֶה")
                         .font(.system(size: 30, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
 
-                    Text("הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת")
+                    Text(gateSubtitle)
                         .font(.system(size: 17, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.8))
+                        .multilineTextAlignment(.center)
 
                     HStack(spacing: 18) {
                         ForEach(0..<4, id: \.self) { i in
@@ -168,7 +175,37 @@ struct ParentGateView: View {
         }
     }
 
+    private var gateSubtitle: String {
+        if isSetupMode {
+            return setupFirst == nil
+                ? "בִּחֲרוּ קוֹד בֶּן 4 סְפָרוֹת לְהָגֵן עַל הַהַגְדָּרוֹת"
+                : "הַזִּינוּ שׁוּב אֶת הַקּוֹד לְאִשּׁוּר"
+        }
+        return "הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת"
+    }
+
     private func verify() {
+        if isSetupMode {
+            if let first = setupFirst {
+                // Confirming the new code.
+                if entered == first {
+                    PINManager.shared.setPIN(entered)
+                    settings.hasSetParentPIN = true
+                    Haptic.success()
+                    authorized = true
+                } else {
+                    shake = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        shake = false; entered = ""; setupFirst = nil
+                    }
+                }
+            } else {
+                // First entry → ask to confirm.
+                setupFirst = entered
+                entered = ""
+            }
+            return
+        }
         if PINManager.shared.verify(entered) {
             authorized = true
         } else {

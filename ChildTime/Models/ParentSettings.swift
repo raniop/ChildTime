@@ -35,6 +35,7 @@ final class ParentSettings: ObservableObject {
         static let hasSeenWelcome = "hasSeenWelcome"
         static let hasPromptedChildAppLock = "hasPromptedChildAppLock"
         static let joinedChildID = "joinedChildID"
+        static let hasSetParentPIN = "hasSetParentPIN"
     }
 
     /// What this device is used for — chosen once at first launch. Steers the
@@ -214,6 +215,12 @@ final class ParentSettings: ObservableObject {
     @Published var joinedChildID: String? {
         didSet { defaults.set(joinedChildID, forKey: Key.joinedChildID) }
     }
+    /// Whether the parent has explicitly chosen a PIN on this device. Until then
+    /// the parent gate runs a first-time "create a code" flow instead of asking
+    /// for the (default 1234) code the parent never set.
+    @Published var hasSetParentPIN: Bool {
+        didSet { defaults.set(hasSetParentPIN, forKey: Key.hasSetParentPIN) }
+    }
 
     private init() {
         let d = AppGroup.defaults
@@ -315,6 +322,7 @@ final class ParentSettings: ObservableObject {
         self.hasSeenWelcome = d.bool(forKey: Key.hasSeenWelcome)
         self.hasPromptedChildAppLock = d.bool(forKey: Key.hasPromptedChildAppLock)
         self.joinedChildID = d.string(forKey: Key.joinedChildID)
+        self.hasSetParentPIN = d.bool(forKey: Key.hasSetParentPIN)
     }
 
     var hasConsented: Bool { consentVersionAccepted >= Consent.currentVersion }

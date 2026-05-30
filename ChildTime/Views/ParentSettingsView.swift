@@ -642,6 +642,7 @@ struct ChangePINView: View {
         }
         settings.pin = newPIN          // keep legacy mirror for migration safety
         PINManager.shared.setPIN(newPIN)
+        settings.hasSetParentPIN = true
         dismiss()
     }
 }
