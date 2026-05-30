@@ -37,19 +37,26 @@ private struct Orb: View {
 
     private var size: CGFloat {
         let base = maxSize * 0.5
-        let variance = maxSize * 0.5
-        return base + CGFloat((seed * 37) % Int(variance))
+        // Guard the modulus: `% 0` is a fatal division-by-zero crash.
+        let variance = max(1, Int(maxSize * 0.5))
+        return base + CGFloat((seed * 37) % variance)
     }
 
     private var startPoint: CGPoint {
-        let x = CGFloat((seed * 71) % Int(canvas.width.rounded()))
-        let y = CGFloat((seed * 113) % Int(canvas.height.rounded()))
+        // GeometryReader reports .zero on the first layout pass — guard so the
+        // remainder operation never divides by zero (it crashes the app).
+        let w = max(1, Int(canvas.width.rounded()))
+        let h = max(1, Int(canvas.height.rounded()))
+        let x = CGFloat((seed * 71) % w)
+        let y = CGFloat((seed * 113) % h)
         return CGPoint(x: x, y: y)
     }
 
     private var endPoint: CGPoint {
-        let x = CGFloat((seed * 197 + 313) % Int(canvas.width.rounded()))
-        let y = CGFloat((seed * 251 + 419) % Int(canvas.height.rounded()))
+        let w = max(1, Int(canvas.width.rounded()))
+        let h = max(1, Int(canvas.height.rounded()))
+        let x = CGFloat((seed * 197 + 313) % w)
+        let y = CGFloat((seed * 251 + 419) % h)
         return CGPoint(x: x, y: y)
     }
 
