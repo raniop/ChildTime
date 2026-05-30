@@ -34,6 +34,8 @@ struct ProgressSnapshot: Codable, Equatable {
     var correctToday: Int = 0
     /// Longest-ever streak of correct answers (synced so the parent can see it).
     var bestStreak: Int = 0
+    /// Fractional progress (seconds) toward the next play-minutes bonus.
+    var cycleSeconds: Double = 0
 
     // MARK: - Smart Learning Feed signals (per-topic)
     /// Rolling average response time per topic, in milliseconds.

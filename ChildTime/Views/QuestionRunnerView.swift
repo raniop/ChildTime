@@ -50,6 +50,10 @@ struct QuestionRunnerView: View {
     @State private var startedLevel: Int = 1
     @State private var lastEarnedMinutes: Int = 0
     @State private var showEarnedPopup: Bool = false
+    // Per-question seconds feedback ("+24 שניות" / "−12 שניות · כמעט!").
+    @State private var secondsFlashText: String? = nil
+    @State private var secondsFlashPositive = true
+    @State private var secondsFlashID = 0
 
     // Smart Feed / learning state
     @State private var currentTopic: Topic = .math
@@ -147,6 +151,23 @@ struct QuestionRunnerView: View {
             }
             .allowsHitTesting(false)
 
+            // Per-question seconds feedback — rises toward the timer and fades.
+            if let text = secondsFlashText {
+                Text(text)
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 16).padding(.vertical, 9)
+                    .background(Capsule().fill((secondsFlashPositive ? AppColor.successMint : AppColor.flameOrange).opacity(0.95)))
+                    .glow(secondsFlashPositive ? AppColor.successMint : AppColor.flameOrange, radius: 10)
+                    .id(secondsFlashID)
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.5).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)))
+                    .padding(.top, 140)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .allowsHitTesting(false)
+            }
+
             // Portal overlay
             if showPortalIntro {
                 portalIntro
@@ -229,9 +250,63 @@ struct QuestionRunnerView: View {
                 statChip("🎮", progress.pendingMinutes, AppColor.successMint)   // game minutes
                 statChip("⭐", progress.stars, AppColor.starGold)               // stars
             }
+            // Live earned-time bar — fills a little after every correct answer.
+            if earnsTime { earnedTimeBar }
         }
         .padding(.horizontal, AppSpacing.md)
         .padding(.top, AppSpacing.sm)
+    }
+
+    /// Only Earn-to-Unlock sessions grow play-time.
+    private var earnsTime: Bool { purpose.grantsScreenTime }
+
+    private func timeString(_ seconds: Int) -> String {
+        String(format: "%02d:%02d", max(0, seconds) / 60, max(0, seconds) % 60)
+    }
+
+    /// The fractional-reward timer: the seconds earned toward the next bonus,
+    /// a progress bar that fills per question, and a "question X / N" label.
+    @ViewBuilder
+    private var earnedTimeBar: some View {
+        let target = progress.bonusTargetSeconds
+        let secs = min(target, Int(progress.cycleSeconds.rounded()))
+        let frac = target > 0 ? min(1, Double(secs) / Double(target)) : 0
+        VStack(spacing: 5) {
+            HStack(spacing: 6) {
+                Text("🎮").font(.system(size: 14))
+                Text("זְמַן שֶׁהִרְוַחְתָּ")
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                Spacer()
+                Text(timeString(secs))
+                    .font(.system(size: 19, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+            }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.white.opacity(0.2))
+                    Capsule()
+                        .fill(AppGradient.success)
+                        .frame(width: max(6, geo.size.width * frac))
+                        .glow(AppColor.successMint, radius: 4)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.7), value: progress.cycleSeconds)
+                }
+            }
+            .frame(height: 8)
+            HStack {
+                Text("שְׁאֵלָה \(min(progress.cycleQuestionsDone, progress.cycleQuestionsTotal)) מִתּוֹךְ \(progress.cycleQuestionsTotal)")
+                Spacer()
+                Text("\(timeString(secs)) מִתּוֹךְ \(timeString(target))")
+            }
+            .font(.system(size: 10, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.7))
+            .monospacedDigit()
+        }
+        .padding(.horizontal, 12).padding(.vertical, 8)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.12)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(AppColor.successMint.opacity(0.4), lineWidth: 1))
     }
 
     /// A small currency pill (emoji + value), animating its number on change.
@@ -716,7 +791,11 @@ struct QuestionRunnerView: View {
         )
         reportLiveEvents(for: q)
 
-        // "+X דקות" popup — only when minutes were actually banked this answer.
+        // Immediate per-question reward: "+24 שניות" rising into the timer.
+        if earnsTime, !cappedBefore {
+            flashSeconds("+\(progress.secondsPerCorrect) שְׁנִיּוֹת", positive: true)
+        }
+        // "+X דקות" popup — only when a full bonus was banked this answer.
         if minutesGranted > 0 {
             showEarnedMinutesPopup(minutes: minutesGranted)
         }
@@ -790,6 +869,21 @@ struct QuestionRunnerView: View {
         }
     }
 
+    /// Flash a small "+24 שניות" / "−12 שניות" near the timer.
+    private func flashSeconds(_ text: String, positive: Bool) {
+        secondsFlashPositive = positive
+        secondsFlashID += 1
+        let id = secondsFlashID
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            secondsFlashText = text
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) {
+            if secondsFlashID == id {
+                withAnimation(.easeOut(duration: 0.4)) { secondsFlashText = nil }
+            }
+        }
+    }
+
     private func showEarnedMinutesPopup(minutes: Int) {
         lastEarnedMinutes = minutes
         withAnimation(.spring(response: 0.5, dampingFraction: 0.55)) {
@@ -812,7 +906,7 @@ struct QuestionRunnerView: View {
             assistOfferedThisQuestion = true
             showParentAssist = true
         }
-        let penaltyMinutes = progress.recordWrong(
+        let lostSeconds = progress.recordWrong(
             topic: q.topic,
             minutesPerCorrect: settings.minutesPerCorrectAnswer,
             grantsScreenTime: purpose.grantsScreenTime
@@ -821,12 +915,14 @@ struct QuestionRunnerView: View {
             topic: q.topic, correct: false, responseMs: 0,
             earnedMinutes: 0, streak: 0
         )
-        if penaltyMinutes > 0 {
+        if lostSeconds > 0 {
+            // Gentle: small seconds dip + a "you can win it right back" message.
+            flashSeconds("−\(lostSeconds) שְׁנִיּוֹת · כִּמְעַט!", positive: false)
             // Safe negative experience: never accusatory, always a way back.
             companion.console([
-                "💡 כִּמְעַט! עֲנֵה נָכוֹן עַכְשָׁו וְתַחֲזִיר אֶת הַזְּמַן",
-                "✨ קָרוֹב! תְּשׁוּבָה נְכוֹנָה תַּחֲזִיר \(penaltyMinutes) דַּק'",
-                "⭐ אֶפְשָׁר לְהַחֲזִיר אֶת הַזְּמַן מִיָּד — נַסֵּה שׁוּב"
+                "💡 כִּמְעַט! תְּשׁוּבָה נְכוֹנָה תַּחֲזִיר אֶת הַזְּמַן",
+                "✨ קָרוֹב! אֶפְשָׁר לְהַחֲזִיר מִיָּד בַּשְּׁאֵלָה הַבָּאָה",
+                "⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם"
             ].randomElement()!)
         } else {
             companion.console([

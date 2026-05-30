@@ -33,6 +33,7 @@ final class ProgressStore: ObservableObject {
         static let answeredToday = "answeredToday"
         static let correctToday = "correctToday"
         static let bestStreak = "bestStreak"
+        static let cycleSeconds = "cycleSeconds"
         static let topicResponseMs = "topicResponseMs"
         static let topicAffinity = "topicAffinity"
         static let topicExposure = "topicExposure"
@@ -113,6 +114,25 @@ final class ProgressStore: ObservableObject {
     /// Counts correct answers toward the next batch reward (perBatch mode).
     @Published private(set) var batchCounter: Int {
         didSet { defaults.set(batchCounter, forKey: Key.batchCounter) }
+    }
+    /// Progress toward the next play-minutes bonus, in SECONDS. Each correct
+    /// answer adds a fraction (target ÷ batchAnswers, e.g. 24s); a wrong answer
+    /// gently removes half a step. When it reaches the target (batchMinutes × 60),
+    /// batchMinutes are banked into pendingMinutes. Gives immediate per-question
+    /// progress instead of waiting for the whole batch.
+    @Published private(set) var cycleSeconds: Double {
+        didSet { defaults.set(cycleSeconds, forKey: Key.cycleSeconds) }
+    }
+    /// Seconds needed for the next bonus.
+    var bonusTargetSeconds: Int { max(1, ParentSettings.shared.batchMinutes * 60) }
+    /// Seconds one correct answer is worth (the "+Ns" the child sees).
+    var secondsPerCorrect: Int { max(1, bonusTargetSeconds / max(1, ParentSettings.shared.batchAnswers)) }
+    /// How many questions make a full bonus cycle (for the progress bar).
+    var cycleQuestionsTotal: Int { max(1, ParentSettings.shared.batchAnswers) }
+    /// Questions completed in the current cycle (derived from cycleSeconds).
+    var cycleQuestionsDone: Int {
+        let perSec = Double(bonusTargetSeconds) / Double(cycleQuestionsTotal)
+        return min(cycleQuestionsTotal, max(0, Int((cycleSeconds / max(1, perSec)).rounded())))
     }
     /// Consecutive wrong-answer count — drives the penalty system.
     @Published private(set) var wrongStreak: Int {
@@ -230,6 +250,7 @@ final class ProgressStore: ObservableObject {
         self.topicAnswered = (d.dictionary(forKey: Key.topicAnswered) as? [String: Int]) ?? [:]
         self.topicCorrect = (d.dictionary(forKey: Key.topicCorrect) as? [String: Int]) ?? [:]
         self.batchCounter = d.integer(forKey: Key.batchCounter)
+        self.cycleSeconds = d.double(forKey: Key.cycleSeconds)
         self.wrongStreak = d.integer(forKey: Key.wrongStreak)
         self.totalScore = d.integer(forKey: Key.totalScore)
         self.minutesEarnedToday = d.integer(forKey: Key.minutesEarnedToday)
@@ -436,15 +457,15 @@ final class ProgressStore: ObservableObject {
         // Time reward — ONLY in Earn-to-Unlock sessions. In Free Learning mode
         // the reward is in-game progression (XP/coins/levels), never minutes.
         if grantsScreenTime {
-            // Every N correct answers → M play-minutes. Defaults to 10 → 4, and
-            // the parent can tune both in Parent Settings. Clamped to safe ranges
-            // so the loop always terminates.
-            let perReward = max(1, ParentSettings.shared.batchAnswers)
-            let minutes = max(1, ParentSettings.shared.batchMinutes)
-            batchCounter += 1
-            while batchCounter >= perReward {
-                sessionMinutesEarned += grantMinutesCapped(minutes)
-                batchCounter -= perReward
+            // Fractional reward: each correct answer adds its share of seconds to
+            // the cycle (e.g. 24s of a 4-min/10-question bonus). When the cycle
+            // fills, bank batchMinutes into the spendable balance.
+            let target = Double(bonusTargetSeconds)
+            let perSec = target / Double(cycleQuestionsTotal)
+            cycleSeconds += perSec
+            while cycleSeconds >= target - 0.01 {
+                sessionMinutesEarned += grantMinutesCapped(max(1, ParentSettings.shared.batchMinutes))
+                cycleSeconds -= target
             }
         }
         xp += RewardEngine.xpPerCorrect
@@ -564,25 +585,18 @@ final class ProgressStore: ObservableObject {
         topicAffinity[key] = min(1, max(0, affinity(for: topic) - 0.04))
 
         // Free Learning mode has no screen-time economy, so mistakes never cost
-        // minutes there — only in-game progress is at stake.
+        // anything there — only in-game progress is at stake.
         guard grantsScreenTime else { return 0 }
-        let penalty = mistakePenaltyMinutes(minutesPerCorrect: minutesPerCorrect)
-        guard penalty > 0 else { return 0 }
+        guard ParentSettings.shared.penaltyEnabled else { return 0 }
 
-        // Deduct from the banked pool first, then trim an active unlock window.
-        var toDeduct = penalty
-        let fromPending = min(pendingMinutes, toDeduct)
-        pendingMinutes -= fromPending
-        toDeduct -= fromPending
-        if toDeduct > 0, let end = unlockEndsAt, end > Date() {
-            let newEnd = end.addingTimeInterval(-Double(toDeduct * 60))
-            unlockEndsAt = newEnd > Date() ? newEnd : nil
-        }
-
-        // Park the loss so the next clean answer can refund it.
-        recoveryPot += penalty
-        lastPenaltyMinutes = penalty  // ping the UI
-        return penalty
+        // Gentle: a mistake removes HALF a step from the cycle progress (no
+        // banked minutes are ever taken). One correct answer wins it back.
+        // Returns the SECONDS removed, for a soft "−Ns · כמעט!" toast.
+        let perSec = Double(bonusTargetSeconds) / Double(cycleQuestionsTotal)
+        let before = cycleSeconds
+        cycleSeconds = max(0, cycleSeconds - perSec / 2)
+        lastPenaltyMinutes = 0
+        return Int((before - cycleSeconds).rounded())
     }
 
     private func updateTopicStat(topic: Topic, correct: Bool) {
@@ -749,6 +763,7 @@ final class ProgressStore: ObservableObject {
         s.topicAnswered       = topicAnswered
         s.topicCorrect        = topicCorrect
         s.batchCounter        = batchCounter
+        s.cycleSeconds        = cycleSeconds
         s.wrongStreak         = wrongStreak
         s.totalScore          = totalScore
         s.minutesEarnedToday  = minutesEarnedToday
@@ -786,6 +801,7 @@ final class ProgressStore: ObservableObject {
         topicAnswered       = s.topicAnswered
         topicCorrect        = s.topicCorrect
         batchCounter        = s.batchCounter
+        cycleSeconds        = s.cycleSeconds
         wrongStreak         = s.wrongStreak
         totalScore          = s.totalScore
         minutesEarnedToday  = s.minutesEarnedToday
