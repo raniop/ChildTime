@@ -46,6 +46,7 @@ final class PushManager: NSObject, ObservableObject {
     /// Called by the AppDelegate when APNs returns a device token.
     func didRegisterAPNs(_ deviceToken: Data) {
         #if canImport(FirebaseMessaging)
+        Messaging.messaging().delegate = self
         Messaging.messaging().apnsToken = deviceToken
         Messaging.messaging().token { [weak self] token, _ in
             if let token { self?.uploadFCMToken(token) }
@@ -73,3 +74,15 @@ extension PushManager: UNUserNotificationCenterDelegate {
         [.banner, .sound]
     }
 }
+
+#if canImport(FirebaseMessaging)
+extension PushManager: MessagingDelegate {
+    // FCM tokens can refresh at any time — upload the new one so pushes keep
+    // reaching this device.
+    nonisolated func messaging(_ messaging: Messaging,
+                               didReceiveRegistrationToken fcmToken: String?) {
+        guard let fcmToken else { return }
+        Task { @MainActor in self.uploadFCMToken(fcmToken) }
+    }
+}
+#endif
