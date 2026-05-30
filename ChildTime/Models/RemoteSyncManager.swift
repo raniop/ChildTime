@@ -234,9 +234,10 @@ final class RemoteSyncManager: ObservableObject {
     }
 
     private func handleRemoteSnapshot(_ snap: ProgressSnapshot, profileID: UUID) {
-        // Skip echoes of our own write.
-        if snap.deviceID == ProgressSnapshot.thisDeviceID { return }
-        // Store for the dashboard.
+        // Always cache for the dashboard — the parent monitor must reflect the
+        // cloud even when THIS device made the last write (e.g. a +minutes
+        // grant). Skipping our own writes here is what made the parent's view
+        // stop updating after it edited a child.
         remoteSnapshots[profileID] = snap
         // If this is the ACTIVE profile and the remote snapshot is newer
         // than what we have locally, apply it (so a reset on the parent's
@@ -247,6 +248,9 @@ final class RemoteSyncManager: ObservableObject {
             ProgressVault.shared.write(snap, for: profileID)
             return
         }
+        // Don't re-apply our OWN echo to the live in-memory store (it would fight
+        // local play). Display caching above already happened.
+        if snap.deviceID == ProgressSnapshot.thisDeviceID { return }
         let local = ProgressStore.shared.captureSnapshot()
         if snap.revision > local.revision ||
            (snap.revision == local.revision && snap.lastModifiedAt > local.lastModifiedAt) {
