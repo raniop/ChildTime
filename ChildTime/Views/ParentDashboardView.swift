@@ -24,6 +24,7 @@ struct ParentDashboardView: View {
     @Environment(\.openURL) private var openURL
 
     @State private var resettingProfile: Profile? = nil
+    @State private var deletingProfile: Profile? = nil
     @State private var refreshTrigger = 0
     @State private var lastRefreshed = Date()
     @State private var showingSettings = false
@@ -89,6 +90,14 @@ struct ParentDashboardView: View {
                         // each label. (Forcing RTL here would flip them left.)
                         .environment(\.layoutDirection, .leftToRight)
                     }
+                    .refreshable {
+                        // Pull-to-refresh: actually re-fetch every child's cloud
+                        // state and give the listeners a beat to deliver.
+                        remote.refreshNow()
+                        refreshTrigger &+= 1
+                        lastRefreshed = .now
+                        try? await Task.sleep(nanoseconds: 700_000_000)
+                    }
                 }
             }
             .navigationTitle("מבט-על על המשפחה")
@@ -101,16 +110,6 @@ struct ParentDashboardView: View {
                         }
                     } else {
                         Button("סיום") { dismiss() }
-                    }
-                }
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        Haptic.light()
-                        remote.refreshNow()   // actually re-fetch from the cloud
-                        refreshTrigger &+= 1
-                        lastRefreshed = .now
-                    } label: {
-                        Label("רענון", systemImage: "arrow.clockwise")
                     }
                 }
             }
@@ -129,6 +128,24 @@ struct ParentDashboardView: View {
                 Button("בטל", role: .cancel) { resettingProfile = nil }
             } message: {
                 Text("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן, ועונש טעויות. לא ימחק שמות, פרופילים או פריטי קוסמטיקה.")
+            }
+            .confirmationDialog(
+                deletingProfile.map { "למחוק את \($0.name)?" } ?? "",
+                isPresented: Binding(
+                    get: { deletingProfile != nil },
+                    set: { if !$0 { deletingProfile = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("מחק ילד/ה", role: .destructive) {
+                    if let p = deletingProfile {
+                        profiles.remove(p)   // removes locally + from the cloud
+                    }
+                    deletingProfile = nil
+                }
+                Button("בטל", role: .cancel) { deletingProfile = nil }
+            } message: {
+                Text("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק.")
             }
             .sheet(isPresented: $showingSettings) {
                 ParentSettingsView()
@@ -530,6 +547,11 @@ struct ParentDashboardView: View {
                         resettingProfile = profile
                     } label: {
                         Label("אפס התקדמות", systemImage: "arrow.counterclockwise")
+                    }
+                    Button(role: .destructive) {
+                        deletingProfile = profile
+                    } label: {
+                        Label("מחק ילד/ה", systemImage: "trash")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
