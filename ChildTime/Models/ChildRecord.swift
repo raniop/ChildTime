@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// The parent's estimate of where a child starts out. Seeds the initial
 /// per-topic difficulty so the Smart Feed isn't cold on day one.
@@ -101,6 +104,10 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     var interests: [String]
     var learningLevel: String      // LearningLevel.rawValue
     var createdAt: Date
+    /// A small, compressed copy of the child's photo so it syncs to co-parents'
+    /// devices. Downscaled to ≤256px JPEG to stay well under Firestore's 1MB
+    /// document limit. nil when the child uses a preset face (no custom photo).
+    var photoData: Data?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -113,9 +120,11 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.interests = profile.interests
         self.learningLevel = profile.learningLevel.rawValue
         self.createdAt = profile.createdAt
+        self.photoData = Self.compressForSync(profile.photoData)
     }
 
-    /// Rehydrate a local `Profile` (photo data stays device-local, not synced).
+    /// Rehydrate a local `Profile`. The photo now syncs (compressed), so a custom
+    /// avatar picked on the child's device shows up on the parent's device too.
     func toProfile() -> Profile? {
         guard let uuid = UUID(uuidString: id) else { return nil }
         return Profile(
@@ -123,12 +132,33 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             name: name,
             gender: gender.flatMap(ChildGender.init(rawValue:)),
             age: ChildAge(rawValue: age) ?? .grade1,
-            photoData: nil,
+            photoData: photoData,
             avatarPresetID: avatarPresetID,
             createdAt: createdAt,
             grade: grade,
             interests: interests,
             learningLevel: LearningLevel(rawValue: learningLevel) ?? .developing
         )
+    }
+
+    /// Downscale + JPEG-compress a photo so it's safe to store in a Firestore
+    /// document (a few KB instead of hundreds). Returns the original when UIKit
+    /// is unavailable or the data isn't an image.
+    static func compressForSync(_ data: Data?) -> Data? {
+        guard let data else { return nil }
+        #if canImport(UIKit)
+        guard let image = UIImage(data: data) else { return data }
+        let maxDim: CGFloat = 256
+        let longest = max(image.size.width, image.size.height)
+        let scale = longest > maxDim ? maxDim / longest : 1
+        let newSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        let renderer = UIGraphicsImageRenderer(size: newSize, format: format)
+        let resized = renderer.image { _ in image.draw(in: CGRect(origin: .zero, size: newSize)) }
+        return resized.jpegData(compressionQuality: 0.7) ?? data
+        #else
+        return data
+        #endif
     }
 }

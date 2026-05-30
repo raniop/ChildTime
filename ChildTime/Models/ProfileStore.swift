@@ -135,7 +135,10 @@ final class ProfileStore: ObservableObject {
             guard let remote = record.toProfile() else { continue }
             if let idx = working.firstIndex(where: { $0.id == remote.id }) {
                 var merged = remote
-                merged.photoData = working[idx].photoData   // keep local photo
+                // Prefer the synced photo (so a photo the child picked shows up
+                // here); fall back to the existing local photo when the remote
+                // has none — e.g. legacy profiles or a preset-face child.
+                merged.photoData = remote.photoData ?? working[idx].photoData
                 if working[idx] != merged { working[idx] = merged; changed = true }
             } else {
                 working.append(remote); changed = true
