@@ -33,15 +33,17 @@ async function tokensForHousehold(householdID, excludeUID) {
 }
 
 function liveMessage(event) {
-  const name = event.childName || "הילד";
+  const f = event.gender === "girl";                 // feminine forms?
+  const name = event.childName || (f ? "הילדה" : "הילד");
+  const g = (male, female) => (f ? female : male);   // pick by gender
   switch (event.type) {
-    case "sessionStart": return { title: "התחיל לשחק 📱", body: `${name} התחיל עכשיו לשחק ולומד.` };
-    case "sessionEnd":   return { title: "סיים לשחק ✅", body: `${name} סיים עכשיו את מסע הלמידה.` };
-    case "milestone":    return { title: "כל הכבוד! ✅", body: `${name} ענה נכון על ${event.value || "כמה"} שאלות.` };
-    case "streak":       return { title: "רצף! 🔥", body: `${name} נמצא ברצף של ${event.value || "כמה"} תשובות נכונות.` };
-    case "wheelWin":     return { title: "גלגל מזל! 🎡", body: `${name} זכה בסיבוב בגלגל המזל.` };
-    case "discovery":    return { title: "גילוי חדש 🔭", body: `${name} מגלה עניין גובר ב${event.topic || "תחום חדש"}.` };
-    case "assistRequest":return { title: "בקשת עזרה 💌", body: `${name} ביקש את עזרתכם בשאלה.` };
+    case "sessionStart": return { title: g("התחיל לשחק 📱", "התחילה לשחק 📱"), body: `${name} ${g("התחיל", "התחילה")} עכשיו לשחק ${g("ולומד", "ולומדת")}.` };
+    case "sessionEnd":   return { title: g("סיים לשחק ✅", "סיימה לשחק ✅"), body: `${name} ${g("סיים", "סיימה")} עכשיו את מסע הלמידה.` };
+    case "milestone":    return { title: "כל הכבוד! ✅", body: `${name} ${g("ענה", "ענתה")} נכון על ${event.value || "כמה"} שאלות.` };
+    case "streak":       return { title: "רצף! 🔥", body: `${name} ${g("נמצא", "נמצאת")} ברצף של ${event.value || "כמה"} תשובות נכונות.` };
+    case "wheelWin":     return { title: "גלגל מזל! 🎡", body: `${name} ${g("זכה", "זכתה")} בסיבוב בגלגל המזל.` };
+    case "discovery":    return { title: "גילוי חדש 🔭", body: `${name} ${g("מגלה", "מגלָה")} עניין גובר ב${event.topic || "תחום חדש"}.` };
+    case "assistRequest":return { title: "בקשת עזרה 💌", body: `${name} ${g("ביקש", "ביקשה")} את עזרתכם בשאלה.` };
     default:             return null;
   }
 }

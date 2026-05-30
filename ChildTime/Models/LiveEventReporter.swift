@@ -30,6 +30,7 @@ enum LiveEventReporter {
         var payload: [String: Any] = [
             "type": type.rawValue,
             "childName": childName,
+            "gender": ProfileStore.shared.active?.gender?.rawValue ?? "",
             "originUID": AuthManager.shared.userID ?? "",
             "originToken": PushManager.shared.currentToken ?? "",
             "deviceID": ProgressSnapshot.thisDeviceID,
