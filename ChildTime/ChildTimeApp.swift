@@ -48,6 +48,10 @@ struct ChildTimeApp: App {
     @StateObject private var cosmetics: CosmeticStore
     @Environment(\.scenePhase) private var scenePhase
 
+    /// Animated welcome splash plays once per cold launch (never in screenshot
+    /// mode). Starts true so it covers the very first frame.
+    @State private var showSplash: Bool = (ProcessInfo.processInfo.environment["DEMO_SCREEN"] == nil)
+
     init() {
         #if canImport(FirebaseCore)
         // MUST run before any singleton below is touched — several of them
@@ -94,6 +98,14 @@ struct ChildTimeApp: App {
                 // between the launch screen and ContentView's first paint.
                 AppColor.dreamyIndigo.ignoresSafeArea()
                 if let demo = Self.demoScreen { demoRoot(demo) } else { ContentView() }
+
+                // Animated welcome splash on top of the first frame, then it
+                // fades away to reveal the app.
+                if showSplash {
+                    SplashScreenView { showSplash = false }
+                        .transition(.opacity)
+                        .zIndex(10)
+                }
             }
                 .environment(\.layoutDirection, .rightToLeft)
                 .environmentObject(settings)
