@@ -53,6 +53,15 @@ service cloud.firestore {
       }
     }
 
+    // Child devices — which devices each child plays on. Gated on the household.
+    match /childDevices/{id} {
+      allow read:   if householdHasMe(resource.data.householdID);
+      allow create: if householdHasMe(request.resource.data.householdID);
+      allow update: if householdHasMe(resource.data.householdID)
+                    && householdHasMe(request.resource.data.householdID);
+      allow delete: if householdHasMe(resource.data.householdID);
+    }
+
     // Legacy per-user progress path (older builds wrote here). Owner-only.
     match /users/{uid}/{document=**} {
       allow read, write: if signedIn() && request.auth.uid == uid;

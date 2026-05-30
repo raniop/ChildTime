@@ -357,10 +357,20 @@ struct ParentSettingsView: View {
             HStack(spacing: 10) {
                 Image(systemName: "gamecontroller.fill")
                     .foregroundStyle(AppColor.successMint)
-                Text("כל 10 תשובות נכונות = 4 דקות משחק")
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                Text("כל \(settings.batchAnswers) תשובות נכונות = \(settings.batchMinutes) דקות משחק")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
                 Spacer()
             }
+            Stepper(
+                "תשובות נכונות לתגמול: \(settings.batchAnswers)",
+                value: $settings.batchAnswers,
+                in: 1...30
+            )
+            Stepper(
+                "דקות משחק לתגמול: \(settings.batchMinutes)",
+                value: $settings.batchMinutes,
+                in: 1...30
+            )
             Stepper(
                 "שאלות בכל סבב: \(settings.questionsPerSession)",
                 value: $settings.questionsPerSession,
@@ -369,7 +379,7 @@ struct ParentSettingsView: View {
         } header: {
             Text("תגמול")
         } footer: {
-            Text("התגמול קבוע: הילד מרוויח 4 דקות משחק על כל 10 תשובות נכונות.")
+            Text("הילד מרוויח \(settings.batchMinutes) דקות משחק על כל \(settings.batchAnswers) תשובות נכונות. אפשר לשנות את שני המספרים. ברירת המחדל: 10 תשובות = 4 דקות.")
         }
     }
 

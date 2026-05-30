@@ -590,6 +590,9 @@ struct ParentDashboardView: View {
                 .buttonStyle(.juicy)
             }
 
+            // Connected devices for this child.
+            connectedDevicesView(for: profile)
+
             // Full analytics deep-dive (daily/weekly/monthly + coaching).
             NavigationLink {
                 ChildInsightsView(profile: profile, snapshot: s)
@@ -803,6 +806,54 @@ struct ParentDashboardView: View {
                 .font(.system(size: 12, weight: .heavy, design: .rounded))
                 .foregroundStyle(.secondary)
         }
+    }
+
+    /// Which devices this child plays on, with how long ago each was active.
+    @ViewBuilder
+    private func connectedDevicesView(for profile: Profile) -> some View {
+        let devices = household.devicesByChild[profile.id.uuidString] ?? []
+        VStack(alignment: .trailing, spacing: 8) {
+            HStack(spacing: 6) {
+                Spacer()
+                Text(devices.isEmpty ? "אֵין מַכְשִׁירִים מְחֻבָּרִים" : "\(devices.count) מַכְשִׁירִים מְחֻבָּרִים")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.secondary)
+                Image(systemName: "ipad.and.iphone")
+                    .font(.system(size: 13))
+                    .foregroundStyle(AppColor.gemPurple)
+            }
+            ForEach(devices) { device in
+                HStack(spacing: 10) {
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 1) {
+                        Text(device.name)
+                            .font(.system(size: 13, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.primary)
+                        Text(deviceSeenText(device))
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
+                    Image(systemName: device.sfSymbol)
+                        .font(.system(size: 18))
+                        .foregroundStyle(AppColor.gemPurple)
+                        .frame(width: 26)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .padding(AppSpacing.sm)
+        .background(
+            RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                .fill(Color(.systemBackground).opacity(0.5))
+        )
+    }
+
+    private func deviceSeenText(_ device: ChildDevice) -> String {
+        let elapsed = Int(-device.lastSeenAt.timeIntervalSinceNow)
+        if elapsed < 90 { return "פָּעִיל עַכְשָׁו 🟢" }
+        if elapsed < 3600 { return "נִרְאָה לִפְנֵי \(elapsed / 60) דַּקּוֹת" }
+        if elapsed < 86400 { return "נִרְאָה לִפְנֵי \(elapsed / 3600) שָׁעוֹת" }
+        return "נִרְאָה לִפְנֵי \(elapsed / 86400) יָמִים"
     }
 
     private func statCell(emoji: String, value: String, label: String) -> some View {

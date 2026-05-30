@@ -396,13 +396,15 @@ final class ProgressStore: ObservableObject {
         // Time reward — ONLY in Earn-to-Unlock sessions. In Free Learning mode
         // the reward is in-game progression (XP/coins/levels), never minutes.
         if grantsScreenTime {
-            // THE single fixed rule for everyone: every 10 correct answers → 4
-            // play-minutes. Not parent-configurable, so the number is always the
-            // same in-game, on the reward screen, and in the bank.
+            // Every N correct answers → M play-minutes. Defaults to 10 → 4, and
+            // the parent can tune both in Parent Settings. Clamped to safe ranges
+            // so the loop always terminates.
+            let perReward = max(1, ParentSettings.shared.batchAnswers)
+            let minutes = max(1, ParentSettings.shared.batchMinutes)
             batchCounter += 1
-            while batchCounter >= RewardEngine.answersPerReward {
-                sessionMinutesEarned += grantMinutesCapped(RewardEngine.minutesPerReward)
-                batchCounter -= RewardEngine.answersPerReward
+            while batchCounter >= perReward {
+                sessionMinutesEarned += grantMinutesCapped(minutes)
+                batchCounter -= perReward
             }
         }
         xp += RewardEngine.xpPerCorrect

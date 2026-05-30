@@ -96,7 +96,10 @@ struct ChildJoinView: View {
             working = true
             message = "מִתְחַבְּרִים…"
             let ok = await household.redeemInvite(code: codePart)
-            if ok, let cid = childID { profiles.setActiveID(cid) }
+            if ok, let cid = childID {
+                profiles.setActiveID(cid)
+                await household.registerDevice(forChildID: cid)
+            }
             message = ok ? "הִתְחַבַּרְתֶּם! 🎉" : (household.lastError ?? "קוֹד לֹא תָּקִין")
             working = false
         }

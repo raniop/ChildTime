@@ -31,6 +31,9 @@ final class HouseholdManager: ObservableObject {
     /// Set to the invite code once a child device redeems it — lets the parent's
     /// QR sheet auto-close the moment the child's device joins.
     @Published var redeemedInviteCode: String?
+    /// Devices connected per child (childID string → devices), so the parent can
+    /// see which/how many devices each child plays on.
+    @Published private(set) var devicesByChild: [String: [ChildDevice]] = [:]
     private var didReceiveChildren = false
 
     private func markLoaded() { isLoading = false }
@@ -46,6 +49,7 @@ final class HouseholdManager: ObservableObject {
     private var childLinkListener: ListenerRegistration?
     private var sentChildLinkListener: ListenerRegistration?
     private var inviteWatchListener: ListenerRegistration?
+    private var childDevicesListener: ListenerRegistration?
     #endif
 
     private init() {}
@@ -82,7 +86,9 @@ final class HouseholdManager: ObservableObject {
         childrenListener?.remove(); childrenListener = nil
         childLinkListener?.remove(); childLinkListener = nil
         sentChildLinkListener?.remove(); sentChildLinkListener = nil
+        childDevicesListener?.remove(); childDevicesListener = nil
         #endif
+        devicesByChild = [:]
         household = nil
         parentAccount = nil
         linkedParentSummaries = []
@@ -102,7 +108,7 @@ final class HouseholdManager: ObservableObject {
             self.household = hh
             reconcileLocalChildren(into: hh)
             listenToHousehold(hh.id)
-            listenToChildren(in: hh.id)
+            listenToChildren(in: hh.id); listenToChildDevices(in: hh.id)
         } catch {
             lastError = error.localizedDescription
             markLoaded()   // sync failed (e.g. rules not deployed) — let the UI proceed
@@ -176,6 +182,51 @@ final class HouseholdManager: ObservableObject {
                     self.markLoaded()
                 }
             }
+    }
+
+    private func listenToChildDevices(in householdID: String) {
+        childDevicesListener?.remove()
+        childDevicesListener = db.collection("childDevices")
+            .whereField("householdID", isEqualTo: householdID)
+            .addSnapshotListener { [weak self] snap, _ in
+                guard let self, let snap else { return }
+                let devices = snap.documents.compactMap {
+                    Self.decode(ChildDevice.self, $0.data())
+                }
+                var grouped: [String: [ChildDevice]] = [:]
+                for d in devices { grouped[d.childID, default: []].append(d) }
+                for key in grouped.keys {
+                    grouped[key]?.sort { $0.lastSeenAt > $1.lastSeenAt }
+                }
+                self.devicesByChild = grouped
+            }
+    }
+
+    /// Register / refresh THIS device under a child (called when a child device
+    /// joins and on each launch), so the parent sees it as connected with a
+    /// fresh "last seen". Idempotent — keyed by the install ID.
+    func registerDevice(forChildID childID: UUID) async {
+        #if canImport(FirebaseFirestore)
+        guard let hh = household, uid != nil else { return }
+        let cid = childID.uuidString
+        let docID = "\(cid)_\(DeviceIdentity.installID)"
+        let now = Date()
+        var device = ChildDevice(
+            id: docID, childID: cid, householdID: hh.id,
+            deviceID: DeviceIdentity.installID, name: DeviceIdentity.friendlyName,
+            kind: DeviceIdentity.kind, systemVersion: DeviceIdentity.systemVersion,
+            joinedAt: now, lastSeenAt: now
+        )
+        do {
+            // Don't clobber the original joinedAt on relaunch.
+            let existing = try? await db.collection("childDevices").document(docID).getDocument()
+            if let data = existing?.data(), let prior = Self.decode(ChildDevice.self, data) {
+                device.joinedAt = prior.joinedAt
+            }
+            try await db.collection("childDevices").document(docID)
+                .setData(Self.encode(device), merge: true)
+        } catch { lastError = error.localizedDescription }
+        #endif
     }
 
     private func refreshLinkedParentSummaries(_ uids: [String]) {
@@ -341,7 +392,7 @@ final class HouseholdManager: ObservableObject {
             if let hhData = hhDoc.data(), let hh = Self.decodeHousehold(id: invite.householdID, hhData) {
                 self.household = hh
                 listenToHousehold(hh.id)
-                listenToChildren(in: hh.id)
+                listenToChildren(in: hh.id); listenToChildDevices(in: hh.id)
             }
             return true
         } catch {
@@ -459,7 +510,7 @@ final class HouseholdManager: ObservableObject {
             if let data = hhDoc.data(), let hh = Self.decodeHousehold(id: req.fromHouseholdID, data) {
                 self.household = hh
                 listenToHousehold(hh.id)
-                listenToChildren(in: hh.id)
+                listenToChildren(in: hh.id); listenToChildDevices(in: hh.id)
             }
             self.pendingChildLink = nil
             return true

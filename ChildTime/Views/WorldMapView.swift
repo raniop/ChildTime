@@ -151,6 +151,10 @@ struct WorldMapView: View {
                 maybeAutoPresentWheel()
             }
             maybePromptAppLockSetup()
+            // Refresh this child device's "last seen" so the parent sees it live.
+            if settings.deviceRole == .child, let cid = profiles.activeID {
+                Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
+            }
         }
         .onChange(of: progress.stars) { _, new in
             if new > lastSeenStars {
