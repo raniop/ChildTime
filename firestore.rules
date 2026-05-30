@@ -62,6 +62,12 @@ service cloud.firestore {
       allow delete: if householdHasMe(resource.data.householdID);
     }
 
+    // Test-push trigger — a parent writes their own uid to fire a self-test push.
+    match /pushTests/{id} {
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow read, delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
     // Legacy per-user progress path (older builds wrote here). Owner-only.
     match /users/{uid}/{document=**} {
       allow read, write: if signedIn() && request.auth.uid == uid;

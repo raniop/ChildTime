@@ -20,6 +20,7 @@ struct ParentSettingsView: View {
     @State private var exportURL: URL?
     @State private var showDeleteAllConfirm = false
     @State private var deleting = false
+    @State private var testPushMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -289,10 +290,20 @@ struct ParentSettingsView: View {
                     Label("הפעל התראות חיות", systemImage: "bell.fill")
                 }
             }
+            Button {
+                Task { testPushMessage = await push.sendTestPush() }
+            } label: {
+                Label("שלח התראת בדיקה", systemImage: "paperplane.fill")
+            }
+            if let testPushMessage {
+                Text(testPushMessage)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         } header: {
             Text("התראות להורה")
         } footer: {
-            Text("קבלו עדכון כשהילד מתחיל מסע למידה, פותח רצף, זוכה בגלגל מזל או מגלה תחום חדש — וגם דוח שבועי. ההתראות נשלחות בין המכשירים בבית.")
+            Text("קבלו עדכון כשהילד מתחיל ומסיים לשחק, פותח רצף, זוכה בגלגל מזל או מגלה תחום חדש — וגם דוח שבועי. ההתראות נשלחות בין המכשירים בבית. \"שלח התראת בדיקה\" שולח התראה אליכם עכשיו כדי לוודא שהכול עובד.")
         }
         .task { await push.refreshAuthorizationStatus() }
     }

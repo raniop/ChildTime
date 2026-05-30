@@ -43,6 +43,30 @@ final class PushManager: NSObject, ObservableObject {
         authorized = settings.authorizationStatus == .authorized
     }
 
+    /// Self-test: ensures permission + a token, then writes a `pushTests` doc that
+    /// the `sendTestPush` Cloud Function turns into a real push back to THIS
+    /// device. If it arrives, the whole APNs→FCM path works.
+    @discardableResult
+    func sendTestPush() async -> String {
+        await requestAuthorization()
+        guard authorized else { return "צריך לאשר התראות קודם" }
+        UIApplication.shared.registerForRemoteNotifications()
+        #if canImport(FirebaseFirestore)
+        guard let uid = AuthManager.shared.userID else { return "אין משתמש מחובר" }
+        do {
+            try await Firestore.firestore().collection("pushTests").addDocument(data: [
+                "uid": uid,
+                "createdAt": Date().timeIntervalSince1970
+            ])
+            return "נשלחה בקשת בדיקה — ההתראה אמורה להגיע תוך כמה שניות"
+        } catch {
+            return "שגיאה: \(error.localizedDescription)"
+        }
+        #else
+        return "Firestore לא זמין"
+        #endif
+    }
+
     /// Called by the AppDelegate when APNs returns a device token.
     func didRegisterAPNs(_ deviceToken: Data) {
         #if canImport(FirebaseMessaging)

@@ -153,3 +153,16 @@ exports.weeklyReport = onSchedule({ schedule: "every monday 18:00", timeZone: "A
       { childID, kind: "weeklyReport" });
   }
 });
+
+// ---- Test push (self-check from Parent Settings) ---------------------------
+// The app writes pushTests/{id} with its own uid; we push a test notification
+// to THAT uid's tokens (not excluding any device, so the sender gets it too).
+exports.sendTestPush = onDocumentCreated("pushTests/{id}", async (event) => {
+  const data = event.data && event.data.data();
+  if (!data || !data.uid) return;
+  const tokens = await tokensForUID(data.uid);
+  await send(tokens,
+    { title: "טופי — בדיקת התראות ✅", body: "מעולה! ההתראות עובדות." },
+    { kind: "test" });
+  await event.data.ref.delete().catch(() => {});
+});
