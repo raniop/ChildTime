@@ -12,4 +12,11 @@ enum SelectionStorage {
         let encoder = JSONEncoder()
         return try? encoder.encode(selection)
     }
+
+    /// True when no apps/categories are selected — lets callers check without
+    /// importing FamilyControls themselves.
+    static func isEmpty(_ data: Data?) -> Bool {
+        let s = decode(data)
+        return s.applicationTokens.isEmpty && s.categoryTokens.isEmpty
+    }
 }

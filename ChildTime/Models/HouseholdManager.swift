@@ -28,6 +28,9 @@ final class HouseholdManager: ObservableObject {
     @Published var pendingChildLink: ChildLinkRequest?
     /// Requests THIS parent has sent (child-link by email), with live status.
     @Published private(set) var sentChildLinks: [ChildLinkRequest] = []
+    /// Set to the invite code once a child device redeems it — lets the parent's
+    /// QR sheet auto-close the moment the child's device joins.
+    @Published var redeemedInviteCode: String?
     private var didReceiveChildren = false
 
     private func markLoaded() { isLoading = false }
@@ -42,6 +45,7 @@ final class HouseholdManager: ObservableObject {
     private var childrenListener: ListenerRegistration?
     private var childLinkListener: ListenerRegistration?
     private var sentChildLinkListener: ListenerRegistration?
+    private var inviteWatchListener: ListenerRegistration?
     #endif
 
     private init() {}
@@ -267,6 +271,34 @@ final class HouseholdManager: ObservableObject {
     func makeChildJoinCode(for childID: String) async -> String? {
         guard let code = await createInvite() else { return nil }
         return "\(code)|\(childID)"
+    }
+
+    /// Watch an invite (by full "CODE|childID" payload or bare code) and publish
+    /// `redeemedInviteCode` the instant a child device redeems it — so the
+    /// parent's QR sheet can auto-close. Replaces any prior watch.
+    func watchInviteRedemption(payload: String) {
+        #if canImport(FirebaseFirestore)
+        let code = String(payload.split(separator: "|").first ?? Substring(payload))
+            .trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard !code.isEmpty else { return }
+        inviteWatchListener?.remove()
+        redeemedInviteCode = nil
+        inviteWatchListener = db.collection("invites").document(code)
+            .addSnapshotListener { [weak self] snap, _ in
+                guard let self else { return }
+                if let data = snap?.data(), data["redeemedBy"] != nil {
+                    Task { @MainActor in self.redeemedInviteCode = code }
+                }
+            }
+        #endif
+    }
+
+    func stopWatchingInviteRedemption() {
+        #if canImport(FirebaseFirestore)
+        inviteWatchListener?.remove()
+        inviteWatchListener = nil
+        #endif
+        redeemedInviteCode = nil
     }
 
     /// Joins the household behind `code`. Returns true on success.

@@ -18,6 +18,7 @@ struct WorldMapView: View {
     @State private var showingSmartFeed = false
     @State private var showingChildSettings = false
     @State private var showingPaywall = false
+    @State private var showingAppLockSetup = false
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
 
@@ -149,6 +150,7 @@ struct WorldMapView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 maybeAutoPresentWheel()
             }
+            maybePromptAppLockSetup()
         }
         .onChange(of: progress.stars) { _, new in
             if new > lastSeenStars {
@@ -165,6 +167,10 @@ struct WorldMapView: View {
         }
         .sheet(isPresented: $showingParentGate) {
             ParentGateView()
+        }
+        .fullScreenCover(isPresented: $showingAppLockSetup) {
+            ChildAppLockSetupView()
+                .environment(\.layoutDirection, .rightToLeft)
         }
         .fullScreenCover(isPresented: $showingShop) {
             ShopView()
@@ -526,6 +532,19 @@ struct WorldMapView: View {
         progress.resetWheelProgress()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             showingWheel = true
+        }
+    }
+
+    /// One-time, after a child device joins: offer to pick which apps to lock.
+    /// Shielding is device-local, so this has to happen here on the child device.
+    private func maybePromptAppLockSetup() {
+        guard settings.deviceRole == .child,
+              !settings.hasPromptedChildAppLock,
+              SelectionStorage.isEmpty(settings.activitySelectionData),
+              !showingWheel, !showingSmartFeed
+        else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            showingAppLockSetup = true
         }
     }
 

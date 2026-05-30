@@ -16,6 +16,14 @@ struct ImageCropperView: View {
     private let cropSize: CGFloat = 300
 
     var body: some View {
+        content
+            // Force LTR: under RTL, SwiftUI mirrors the drag gesture's horizontal
+            // translation, which made panning feel reversed and let the photo
+            // slide off to the side. LTR keeps gesture + .offset consistent.
+            .environment(\.layoutDirection, .leftToRight)
+    }
+
+    private var content: some View {
         ZStack {
             AppGradient.dreamy.ignoresSafeArea()
             SparkleField(count: 16, size: 12)
@@ -34,11 +42,15 @@ struct ImageCropperView: View {
                         SimultaneousGesture(
                             MagnificationGesture()
                                 .onChanged { v in scale = min(6, max(1, lastScale * v)) }
-                                .onEnded { _ in lastScale = scale },
+                                .onEnded { _ in
+                                    lastScale = scale
+                                    offset = clamp(offset)   // re-clamp after zoom
+                                    lastOffset = offset
+                                },
                             DragGesture()
                                 .onChanged { v in
-                                    offset = CGSize(width: lastOffset.width + v.translation.width,
-                                                    height: lastOffset.height + v.translation.height)
+                                    offset = clamp(CGSize(width: lastOffset.width + v.translation.width,
+                                                          height: lastOffset.height + v.translation.height))
                                 }
                                 .onEnded { _ in lastOffset = offset }
                         )
@@ -91,6 +103,24 @@ struct ImageCropperView: View {
             .offset(offset)
             .frame(width: cropSize, height: cropSize)
             .clipped()
+    }
+
+    /// Largest pan (in points) that keeps the image covering the crop window —
+    /// so it can't be dragged off and reveal empty corners.
+    private func maxOffset() -> CGSize {
+        let iw = max(image.size.width, 1)
+        let ih = max(image.size.height, 1)
+        let fill = cropSize / min(iw, ih)          // scaledToFill base scale
+        let w = iw * fill * scale
+        let h = ih * fill * scale
+        return CGSize(width: max(0, (w - cropSize) / 2),
+                      height: max(0, (h - cropSize) / 2))
+    }
+
+    private func clamp(_ o: CGSize) -> CGSize {
+        let m = maxOffset()
+        return CGSize(width: min(m.width, max(-m.width, o.width)),
+                      height: min(m.height, max(-m.height, o.height)))
     }
 
     @MainActor private func render() -> UIImage {

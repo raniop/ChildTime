@@ -19,6 +19,7 @@ struct ParentDashboardView: View {
     @EnvironmentObject var auth: AuthManager
     @StateObject private var remote = RemoteSyncManager.shared
     @ObservedObject private var push = PushManager.shared
+    @ObservedObject private var household = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
@@ -32,6 +33,9 @@ struct ParentDashboardView: View {
     @State private var qrCode: String? = nil
     /// After creating a child we offer to connect their device right away.
     @State private var pendingQRChild: Profile? = nil
+    /// Flips to true when the child device redeems the code — shows success then
+    /// auto-closes the QR sheet.
+    @State private var childDeviceLinked = false
 
     /// Rows recomputed on each refresh so values stay live as the kid plays.
     /// Prefers a remote snapshot when one is available and newer than the
@@ -361,45 +365,80 @@ struct ParentDashboardView: View {
         ZStack {
             AppGradient.dreamy.ignoresSafeArea()
             SparkleField(count: 16, size: 12)
-            VStack(spacing: AppSpacing.lg) {
-                Text("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(child.name)")
-                    .font(.system(size: 22, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
 
-                if let code = qrCode {
-                    QRCodeView(text: code, size: 230)
-                    Text(String(code.split(separator: "|").first ?? ""))
-                        .font(.system(size: 26, weight: .heavy, design: .monospaced))
-                        .kerning(4)
+            if childDeviceLinked {
+                // Auto-shown the moment the child's device joins.
+                VStack(spacing: AppSpacing.lg) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 84))
+                        .foregroundStyle(AppColor.successMint)
+                        .glow(AppColor.successMint, radius: 16)
+                    Text("הַמַּכְשִׁיר שֶׁל \(child.name) חֻבַּר! 🎉")
+                        .font(.system(size: 24, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                } else {
-                    ProgressView().tint(.white).scaleEffect(1.3).frame(height: 230)
+                        .multilineTextAlignment(.center)
                 }
+                .padding(AppSpacing.xl)
+                .transition(.scale.combined(with: .opacity))
+            } else {
+                VStack(spacing: AppSpacing.lg) {
+                    Text("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(child.name)")
+                        .font(.system(size: 22, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
 
-                Text("בַּמַּכְשִׁיר שֶׁל \(child.name): פִּתְחוּ אֶת טוֹפִּי, בַּחֲרוּ \"הַמַּכְשִׁיר שֶׁל הַיֶּלֶד\", וְסִרְקוּ אֶת הַקּוֹד — וְהוּא יִכָּנֵס יְשִׁירוֹת לְשַׂחֵק.")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, AppSpacing.lg)
+                    if let code = qrCode {
+                        QRCodeView(text: code, size: 230)
+                        Text(String(code.split(separator: "|").first ?? ""))
+                            .font(.system(size: 26, weight: .heavy, design: .monospaced))
+                            .kerning(4)
+                            .foregroundStyle(.white)
+                    } else {
+                        ProgressView().tint(.white).scaleEffect(1.3).frame(height: 230)
+                    }
 
-                Button("סְגוֹר") { qrChild = nil; qrCode = nil }
-                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 24).padding(.vertical, 12)
-                    .background(.white.opacity(0.18), in: Capsule())
+                    Text("בַּמַּכְשִׁיר שֶׁל \(child.name): פִּתְחוּ אֶת טוֹפִּי, בַּחֲרוּ \"הַמַּכְשִׁיר שֶׁל הַיֶּלֶד\", וְסִרְקוּ אֶת הַקּוֹד — וְהוּא יִכָּנֵס יְשִׁירוֹת לְשַׂחֵק.")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, AppSpacing.lg)
 
-                Text("אֶפְשָׁר לְדַלֵּג וּלְחַבֵּר אֶת הַמַּכְשִׁיר אַחַר כָּךְ — מֵהַמָּסָךְ הָרָאשִׁי.")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.7))
-                    .multilineTextAlignment(.center)
+                    Button("סְגוֹר") { closeQRSheet() }
+                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 24).padding(.vertical, 12)
+                        .background(.white.opacity(0.18), in: Capsule())
+
+                    Text("אֶפְשָׁר לְדַלֵּג וּלְחַבֵּר אֶת הַמַּכְשִׁיר אַחַר כָּךְ — מֵהַמָּסָךְ הָרָאשִׁי.")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(AppSpacing.xl)
+                .frame(maxWidth: 460)
             }
-            .padding(AppSpacing.xl)
-            .frame(maxWidth: 460)
         }
-        .task {
+        .task(id: child.id) {
+            childDeviceLinked = false
             qrCode = await HouseholdManager.shared.makeChildJoinCode(for: child.id.uuidString)
+            if let code = qrCode {
+                HouseholdManager.shared.watchInviteRedemption(payload: code)
+            }
         }
+        .onChange(of: household.redeemedInviteCode) { _, redeemed in
+            guard redeemed != nil, qrChild != nil, !childDeviceLinked else { return }
+            Haptic.success()
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { childDeviceLinked = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { closeQRSheet() }
+        }
+        .onDisappear { HouseholdManager.shared.stopWatchingInviteRedemption() }
+    }
+
+    private func closeQRSheet() {
+        HouseholdManager.shared.stopWatchingInviteRedemption()
+        qrChild = nil
+        qrCode = nil
+        childDeviceLinked = false
     }
 
     /// Quick family-wide summary for today — minutes earned, questions answered,

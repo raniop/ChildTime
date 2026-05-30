@@ -33,6 +33,7 @@ final class ParentSettings: ObservableObject {
         static let parentInsightFrequency = "parentInsightFrequency"
         static let deviceRole = "deviceRole"
         static let hasSeenWelcome = "hasSeenWelcome"
+        static let hasPromptedChildAppLock = "hasPromptedChildAppLock"
     }
 
     /// What this device is used for — chosen once at first launch. Steers the
@@ -200,6 +201,11 @@ final class ParentSettings: ObservableObject {
     @Published var hasSeenWelcome: Bool {
         didSet { defaults.set(hasSeenWelcome, forKey: Key.hasSeenWelcome) }
     }
+    /// Whether we've already offered the one-time "choose apps to lock" setup on
+    /// this child device (so we don't nag every launch).
+    @Published var hasPromptedChildAppLock: Bool {
+        didSet { defaults.set(hasPromptedChildAppLock, forKey: Key.hasPromptedChildAppLock) }
+    }
 
     private init() {
         let d = AppGroup.defaults
@@ -299,6 +305,7 @@ final class ParentSettings: ObservableObject {
         ) ?? .once
         self.deviceRole = DeviceRole(rawValue: d.string(forKey: Key.deviceRole) ?? "") ?? .unset
         self.hasSeenWelcome = d.bool(forKey: Key.hasSeenWelcome)
+        self.hasPromptedChildAppLock = d.bool(forKey: Key.hasPromptedChildAppLock)
     }
 
     var hasConsented: Bool { consentVersionAccepted >= Consent.currentVersion }
