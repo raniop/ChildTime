@@ -192,10 +192,19 @@ final class ProfileStore: ObservableObject {
     }
 
     private func loadActiveID() {
-        if let raw = defaults.string(forKey: Key.activeID),
-           let id = UUID(uuidString: raw),
+        let raw = defaults.string(forKey: Key.activeID)
+        if let raw, let id = UUID(uuidString: raw),
            profiles.contains(where: { $0.id == id }) {
             activeID = id
+        }
+        // Migration: a child device already bound to a kid (persisted activeID)
+        // BEFORE `joinedChildID` existed should keep its binding — don't force a
+        // surprise re-scan. A fresh device has no persisted activeID, so it still
+        // must scan to bind.
+        if ParentSettings.shared.deviceRole == .child,
+           ParentSettings.shared.joinedChildID == nil,
+           let raw, !raw.isEmpty {
+            ParentSettings.shared.joinedChildID = raw
         }
     }
 
