@@ -225,6 +225,16 @@ final class QuestionMemory {
     private let defaults = UserDefaults.standard
     private var recent: [Topic: [String]] = [:]
     private var hasLoaded = false
+    /// Prompts already shown in the CURRENT session — never repeated within a
+    /// session (the only allowed repeat is a deliberate re-ask of a wrong one,
+    /// handled by the runner). Reset at session start.
+    private var sessionServed: Set<String> = []
+
+    func beginSession() { sessionServed = [] }
+    func markServedThisSession(_ prompt: String) { sessionServed.insert(prompt) }
+    func wasServedThisSession(_ prompt: String) -> Bool { sessionServed.contains(prompt) }
+    /// Allow a wrong question to come back (the runner re-asks it).
+    func allowReask(_ prompt: String) { sessionServed.remove(prompt) }
 
     private var storageKey: String {
         let pid = ProfileStore.shared.activeID?.uuidString ?? "default"
@@ -248,10 +258,15 @@ final class QuestionMemory {
         // questions the kid will go through ~68 before any can repeat.
         let windowSize = max(5, (pool.count * 85) / 100)
         let recentList = recent[topic] ?? []
-        let candidates = pool.filter { !recentList.contains(promptKey($0)) }
-        let chosen = (candidates.isEmpty ? pool : candidates).randomElement()
+        // Never repeat within the session; also avoid the cross-session window.
+        let fresh = pool.filter { !recentList.contains(promptKey($0)) && !sessionServed.contains(promptKey($0)) }
+        // Fallback chain: still avoid session repeats, only allow a true repeat
+        // if the whole (small) pool was already used this session.
+        let notInSession = pool.filter { !sessionServed.contains(promptKey($0)) }
+        let chosen = (fresh.first != nil ? fresh : (notInSession.isEmpty ? pool : notInSession)).randomElement()
         if let chosen {
             remember(promptKey(chosen), in: topic, windowSize: windowSize)
+            sessionServed.insert(promptKey(chosen))
         }
         return chosen
     }

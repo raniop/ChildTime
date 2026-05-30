@@ -58,6 +58,9 @@ struct QuestionRunnerView: View {
     // Smart Feed / learning state
     @State private var currentTopic: Topic = .math
     @State private var topicHistory: [Topic] = []
+    /// Questions the child got wrong this session — re-asked later (the only
+    /// allowed repeat). Deduped by prompt.
+    @State private var reAskQueue: [Question] = []
     @State private var questionShownAt: Date? = nil
     @State private var hadMistakeThisQuestion: Bool = false
 
@@ -611,6 +614,8 @@ struct QuestionRunnerView: View {
         earnedThisSession = 0
         consecutiveWrong = 0
         topicHistory = []
+        reAskQueue = []
+        QuestionMemory.shared.beginSession()   // no repeats within this session
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             companion.cheer(mode.isFeed ? "הַרְפַּתְקָה חֲכָמָה — קָדִימָה! 🧠" : "מוּכָן? קָדִימָה!")
         }
@@ -665,6 +670,16 @@ struct QuestionRunnerView: View {
         hadMistakeThisQuestion = false
         assistOfferedThisQuestion = false
 
+        // Re-ask a previously-wrong question every few questions (spaced out) —
+        // the only repeat we allow.
+        if !isSuper, questionIndex > 0, questionIndex % 3 == 0, !reAskQueue.isEmpty {
+            let requeued = reAskQueue.removeFirst()
+            currentTopic = requeued.topic
+            current = requeued
+            questionShownAt = Date()
+            return
+        }
+
         let topic = pickTopic()
         currentTopic = topic
         topicHistory.append(topic)
@@ -673,7 +688,18 @@ struct QuestionRunnerView: View {
         let baseDiff = settings.difficulty(for: topic)
         let acc = progress.accuracy(for: topic)
         let effective = QuestionGenerator.adaptiveDifficulty(base: baseDiff, accuracy: acc)
-        current = QuestionGenerator.generate(topic: topic, difficulty: effective)
+        var q = QuestionGenerator.generate(topic: topic, difficulty: effective)
+        // Bank questions already avoid session repeats (QuestionMemory). Math is
+        // generated, so re-roll if we happen to produce a prompt seen this round.
+        if topic == .math {
+            var tries = 0
+            while QuestionMemory.shared.wasServedThisSession(q.prompt), tries < 8 {
+                q = QuestionGenerator.generate(topic: topic, difficulty: effective)
+                tries += 1
+            }
+        }
+        QuestionMemory.shared.markServedThisSession(q.prompt)
+        current = q
         questionShownAt = Date()
     }
 
@@ -715,6 +741,11 @@ struct QuestionRunnerView: View {
             feedbackForIndex = map
             showFeedback = true
             handleCorrect(q: q)
+            // If the child stumbled on this one, queue it to re-ask later — the
+            // only question that's allowed to repeat in a session.
+            if hadMistakeThisQuestion, !reAskQueue.contains(where: { $0.prompt == q.prompt }) {
+                reAskQueue.append(q)
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 questionIndex += 1
                 nextQuestion()
