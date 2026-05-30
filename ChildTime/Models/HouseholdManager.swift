@@ -136,17 +136,27 @@ final class HouseholdManager: ObservableObject {
     /// Returns the parent's household, creating one (with this uid as the sole
     /// parent) if they have none.
     private func ensureHousehold(uid: String) async throws -> Household {
+        // SELF-HEAL: if we previously adopted a household (a child device that
+        // joined a parent), make sure we're STILL a member. A child device whose
+        // (anonymous) uid changed would otherwise lose access — writes to the
+        // child's progress/devices get "permission denied" and the parent stops
+        // seeing updates. The rules allow a non-member to add ONLY their own uid,
+        // so this re-grants access without a re-scan.
+        if let preferred = UserDefaults.standard.string(forKey: preferredHouseholdKey) {
+            // arrayUnion adds our uid (no-op if already present); allowed for
+            // members AND for non-members adding just themselves.
+            try? await db.collection("households").document(preferred)
+                .updateData(["parentUIDs": FieldValue.arrayUnion([uid])])
+            // Now that we're a member we can read it.
+            if let doc = try? await db.collection("households").document(preferred).getDocument(),
+               let data = doc.data(), let hh = Self.decodeHousehold(id: preferred, data) {
+                try? await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([preferred])])
+                return hh
+            }
+        }
         // Find a household that already lists this uid.
         let query = db.collection("households").whereField("parentUIDs", arrayContains: uid)
         let results = try await query.getDocuments()
-        // Prefer the household we last adopted (e.g. after a child link), so a
-        // child who joined a parent's household lands there — not on their own
-        // orphaned solo household.
-        if let preferred = UserDefaults.standard.string(forKey: preferredHouseholdKey),
-           let doc = results.documents.first(where: { $0.documentID == preferred }),
-           let hh = Self.decodeHousehold(id: doc.documentID, doc.data()) {
-            return hh
-        }
         if let doc = results.documents.first, let hh = Self.decodeHousehold(id: doc.documentID, doc.data()) {
             return hh
         }
