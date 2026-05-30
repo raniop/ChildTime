@@ -35,7 +35,8 @@ async function tokensForHousehold(householdID, excludeUID) {
 function liveMessage(event) {
   const name = event.childName || "הילד";
   switch (event.type) {
-    case "sessionStart": return { title: "מסע למידה חדש 📱", body: `${name} התחיל עכשיו מסע למידה חדש.` };
+    case "sessionStart": return { title: "התחיל לשחק 📱", body: `${name} התחיל עכשיו לשחק ולומד.` };
+    case "sessionEnd":   return { title: "סיים לשחק ✅", body: `${name} סיים עכשיו את מסע הלמידה.` };
     case "milestone":    return { title: "כל הכבוד! ✅", body: `${name} ענה נכון על ${event.value || "כמה"} שאלות.` };
     case "streak":       return { title: "רצף! 🔥", body: `${name} נמצא ברצף של ${event.value || "כמה"} תשובות נכונות.` };
     case "wheelWin":     return { title: "גלגל מזל! 🎡", body: `${name} זכה בסיבוב בגלגל המזל.` };
@@ -79,7 +80,11 @@ exports.sendLiveEvent = onDocumentCreated("children/{childID}/events/{eventID}",
   if (!child.exists) return;
   const householdID = child.data().householdID;
 
-  const tokens = await tokensForHousehold(householdID, data.originUID);
+  // Notify every parent device in the household EXCEPT the one that's playing.
+  // Exclude by FCM token (not uid) so the parent's other device still gets the
+  // push even when both devices share one account.
+  let tokens = await tokensForHousehold(householdID, null);
+  if (data.originToken) tokens = tokens.filter((t) => t !== data.originToken);
   const msg = liveMessage(data);
   if (!msg) return;
   await send(tokens, msg, { childID: event.params.childID, type: data.type });

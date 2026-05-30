@@ -14,6 +14,7 @@ import FirebaseFirestore
 enum LiveEventReporter {
     enum EventType: String {
         case sessionStart
+        case sessionEnd         // child finished / left a play session
         case milestone          // e.g. answered 8/10
         case streak             // hit a streak threshold
         case wheelWin           // earned / spun the lucky wheel
@@ -30,6 +31,7 @@ enum LiveEventReporter {
             "type": type.rawValue,
             "childName": childName,
             "originUID": AuthManager.shared.userID ?? "",
+            "originToken": PushManager.shared.currentToken ?? "",
             "deviceID": ProgressSnapshot.thisDeviceID,
             "createdAt": Date().timeIntervalSince1970
         ]

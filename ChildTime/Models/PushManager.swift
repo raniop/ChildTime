@@ -23,6 +23,10 @@ final class PushManager: NSObject, ObservableObject {
     static let shared = PushManager()
 
     @Published private(set) var authorized = false
+    /// This device's FCM token, cached so live-events can exclude the playing
+    /// device (the parent's other device still gets notified, even on the same
+    /// account).
+    @Published private(set) var currentToken: String?
 
     /// Ask the parent for notification permission, then register with APNs.
     func requestAuthorization() async {
@@ -51,6 +55,7 @@ final class PushManager: NSObject, ObservableObject {
 
     /// Persist the FCM token on the parent's record (array-union, multi-device).
     func uploadFCMToken(_ token: String) {
+        currentToken = token
         #if canImport(FirebaseFirestore) && canImport(FirebaseMessaging)
         guard let uid = AuthManager.shared.userID else { return }
         Firestore.firestore()

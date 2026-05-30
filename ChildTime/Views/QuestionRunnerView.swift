@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 struct QuestionRunnerView: View {
     /// How this session sources its topics — a single world, or the Smart Feed.
@@ -29,6 +30,7 @@ struct QuestionRunnerView: View {
     private var portalTitleSize: CGFloat { isCompact ? 36 : 56 }
 
     @State private var companion = CompanionController()
+    @State private var didReportSessionEnd = false
     @State private var current: Question?
     @State private var questionIndex: Int = 0
     @State private var correctInSession: Int = 0
@@ -156,6 +158,20 @@ struct QuestionRunnerView: View {
                 .environment(\.layoutDirection, .rightToLeft)
         }
         .onAppear { startSession() }
+        .onDisappear {
+            // Tell the parent the child finished playing (once).
+            if !didReportSessionEnd {
+                didReportSessionEnd = true
+                LiveEventReporter.report(.sessionEnd)
+            }
+        }
+        // Live presence: refresh this child device's "last seen" every 30s while
+        // playing, so the parent dashboard shows "🟢 משחק עכשיו" in real time.
+        .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { _ in
+            if settings.deviceRole == .child, let cid = profiles.activeID {
+                Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
+            }
+        }
         .fullScreenCover(isPresented: $goToReward) {
             RewardScreenView(
                 kind: RewardEngine.endOfSessionChestKind(correctInSession: correctInSession, total: chestDenominator),

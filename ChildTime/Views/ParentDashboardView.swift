@@ -519,7 +519,17 @@ struct ParentDashboardView: View {
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
                     HStack(spacing: 6) {
-                        if isActive {
+                        if isChildPlayingNow(profile) {
+                            HStack(spacing: 4) {
+                                Circle().fill(AppColor.successMint).frame(width: 7, height: 7)
+                                Text("מְשַׂחֵק עַכְשָׁו")
+                                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                            }
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(AppColor.successMint.opacity(0.9)))
+                        } else if isActive {
                             Text("פעיל")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.white)
@@ -843,6 +853,14 @@ struct ParentDashboardView: View {
             RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
                 .fill(Color(.systemBackground).opacity(0.5))
         )
+    }
+
+    /// True when any of the child's devices sent a heartbeat in the last ~75s
+    /// (the play screen refreshes every 30s) — i.e. the child is playing now.
+    private func isChildPlayingNow(_ profile: Profile) -> Bool {
+        _ = refreshTrigger   // recompute on the dashboard's 5s tick
+        let devices = household.devicesByChild[profile.id.uuidString] ?? []
+        return devices.contains { -$0.lastSeenAt.timeIntervalSinceNow < 75 }
     }
 
     private func deviceSeenText(_ device: ChildDevice) -> String {
