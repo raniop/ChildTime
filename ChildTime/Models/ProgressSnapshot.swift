@@ -28,6 +28,10 @@ struct ProgressSnapshot: Codable, Equatable {
     var totalScore: Int = 0
     var minutesEarnedToday: Int = 0
     var dailyEarnedDate: Date? = nil
+    /// Questions answered / correct TODAY — synced so the parent's dashboard
+    /// shows today's activity even though the full learning history is local.
+    var answeredToday: Int = 0
+    var correctToday: Int = 0
 
     // MARK: - Smart Learning Feed signals (per-topic)
     /// Rolling average response time per topic, in milliseconds.

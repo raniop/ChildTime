@@ -447,11 +447,9 @@ struct ParentDashboardView: View {
     private var familySummaryCard: some View {
         let theRows = rows
         if !theRows.isEmpty {
-            let questionsPerKid = theRows.map { row -> Int in
-                let lp = LearningProfile(snapshot: row.snapshot, enabledTopics: settings.enabledTopics, age: row.profile.age)
-                let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: row.profile.id), profile: lp)
-                return engine.today.questions
-            }
+            // Use the synced snapshot counts so this reflects the kid's other
+            // device (local learning history doesn't sync).
+            let questionsPerKid = theRows.map { $0.snapshot.answeredToday }
             let minutesToday = theRows.reduce(0) { $0 + $1.snapshot.minutesEarnedToday }
             let questionsToday = questionsPerKid.reduce(0, +)
             let activeKids = questionsPerKid.filter { $0 > 0 }.count
@@ -496,7 +494,6 @@ struct ParentDashboardView: View {
         }()
         let lp = LearningProfile(snapshot: s, enabledTopics: settings.enabledTopics, age: profile.age)
         let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: profile.id), profile: lp)
-        let today = engine.today
         let status = overallStatus(engine: engine, lp: lp, hasData: s.totalAnswered >= 4)
 
         return VStack(spacing: 14) {
@@ -551,8 +548,8 @@ struct ParentDashboardView: View {
             // Today at a glance.
             HStack(spacing: 10) {
                 statCell(emoji: "⏱", value: "\(s.minutesEarnedToday)", label: "זמן מסך היום")
-                statCell(emoji: "❓", value: "\(today.questions)", label: "שאלות היום")
-                statCell(emoji: "🎯", value: today.questions > 0 ? "\(Int(today.accuracy * 100))%" : "—", label: "הצלחה היום")
+                statCell(emoji: "❓", value: "\(s.answeredToday)", label: "שאלות היום")
+                statCell(emoji: "🎯", value: s.answeredToday > 0 ? "\(Int(Double(s.correctToday) / Double(s.answeredToday) * 100))%" : "—", label: "הצלחה היום")
             }
             HStack(spacing: 10) {
                 statCell(emoji: "🔥", value: "\(s.dayStreak)", label: "רצף ימים")
@@ -898,6 +895,9 @@ struct ParentDashboardView: View {
         } else {
             _ = ProgressStore.shared.spendPendingMinutes(-deltaMinutes)
         }
+        // Auto-upload is off on the parent device, so push this deliberate edit
+        // explicitly to reach the child's device.
+        remote.pushNow()
         refreshTrigger &+= 1
     }
 

@@ -118,6 +118,11 @@ final class RemoteSyncManager: ObservableObject {
     // MARK: - Upload (debounced ~3s)
 
     private func uploadActiveProfileSoon() {
+        // The parent control-center device is a MONITOR — it must never push its
+        // own (empty) local state, or it clobbers the child's real cloud data
+        // with zeros. Explicit parent actions (reset / ±minutes) still go through
+        // pushNow() → uploadActiveProfile().
+        guard ParentSettings.shared.deviceRole != .parent else { return }
         saveDebounce?.cancel()
         saveDebounce = Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 3_000_000_000)

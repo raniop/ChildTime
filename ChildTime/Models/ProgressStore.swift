@@ -30,6 +30,8 @@ final class ProgressStore: ObservableObject {
         static let totalScore = "totalScore"
         static let minutesEarnedToday = "minutesEarnedToday"
         static let dailyEarnedDate = "dailyEarnedDate"
+        static let answeredToday = "answeredToday"
+        static let correctToday = "correctToday"
         static let topicResponseMs = "topicResponseMs"
         static let topicAffinity = "topicAffinity"
         static let topicExposure = "topicExposure"
@@ -142,6 +144,14 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var minutesEarnedToday: Int {
         didSet { defaults.set(minutesEarnedToday, forKey: Key.minutesEarnedToday) }
     }
+    /// Questions answered / correct today (reset on the same daily boundary as
+    /// minutesEarnedToday). Synced so the parent sees today's activity.
+    @Published private(set) var answeredToday: Int {
+        didSet { defaults.set(answeredToday, forKey: Key.answeredToday) }
+    }
+    @Published private(set) var correctToday: Int {
+        didSet { defaults.set(correctToday, forKey: Key.correctToday) }
+    }
     /// The day `minutesEarnedToday` refers to.
     @Published private(set) var dailyEarnedDate: Date? {
         didSet {
@@ -211,6 +221,8 @@ final class ProgressStore: ObservableObject {
         self.wrongStreak = d.integer(forKey: Key.wrongStreak)
         self.totalScore = d.integer(forKey: Key.totalScore)
         self.minutesEarnedToday = d.integer(forKey: Key.minutesEarnedToday)
+        self.answeredToday = d.integer(forKey: Key.answeredToday)
+        self.correctToday = d.integer(forKey: Key.correctToday)
         self.dailyEarnedDate = d.object(forKey: Key.dailyEarnedDate) as? Date
 
         self.topicResponseMs = (d.dictionary(forKey: Key.topicResponseMs) as? [String: Double]) ?? [:]
@@ -375,6 +387,9 @@ final class ProgressStore: ObservableObject {
         )
         totalAnswered += 1
         totalCorrect += 1
+        _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
+        answeredToday += 1
+        correctToday += 1
         currentStreak += 1
         wrongStreak = 0  // any correct answer breaks the penalty streak
         stars += earned
@@ -456,8 +471,10 @@ final class ProgressStore: ObservableObject {
            Calendar.current.isDate(last, inSameDayAs: today) {
             return minutesEarnedToday
         }
-        // New day — reset.
+        // New day — reset the daily counters together.
         minutesEarnedToday = 0
+        answeredToday = 0
+        correctToday = 0
         dailyEarnedDate = today
         return 0
     }
@@ -508,6 +525,8 @@ final class ProgressStore: ObservableObject {
     @discardableResult
     func recordWrong(topic: Topic, minutesPerCorrect: Int, grantsScreenTime: Bool = true) -> Int {
         totalAnswered += 1
+        _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
+        answeredToday += 1
         currentStreak = 0
         wrongStreak += 1
         xp += RewardEngine.xpPerQuestion
@@ -708,6 +727,8 @@ final class ProgressStore: ObservableObject {
         s.totalScore          = totalScore
         s.minutesEarnedToday  = minutesEarnedToday
         s.dailyEarnedDate     = dailyEarnedDate
+        s.answeredToday       = answeredToday
+        s.correctToday        = correctToday
         s.topicResponseMs     = topicResponseMs
         s.topicAffinity       = topicAffinity
         s.topicExposure       = topicExposure
@@ -742,6 +763,8 @@ final class ProgressStore: ObservableObject {
         totalScore          = s.totalScore
         minutesEarnedToday  = s.minutesEarnedToday
         dailyEarnedDate     = s.dailyEarnedDate
+        answeredToday       = s.answeredToday
+        correctToday        = s.correctToday
         topicResponseMs     = s.topicResponseMs
         topicAffinity       = s.topicAffinity
         topicExposure       = s.topicExposure
