@@ -17,41 +17,55 @@ struct ContentView: View {
                 // Very first launch — explain what the app is + the Screen Time
                 // notice, before anything else.
                 WelcomeIntroView()
-            } else if !auth.isSignedIn && !auth.isGuest {
-                // Login is the first gate — but a child may also tap "play
-                // without an account" to try up to 30 questions as a guest.
-                LoginGateView()
-            } else if auth.isGuest && !auth.isSignedIn
-                        && progress.totalAnswered >= Self.guestQuestionLimit {
-                // Free-trial limit reached — registration required to continue.
-                LoginGateView(allowGuest: false, limitBanner: true)
             } else if settings.deviceRole == .unset {
-                // First launch: is this a child's play device or a parent's
-                // monitoring device? Steers the whole UI from here on.
+                // Choose the device's role FIRST: a child's play device (joins by
+                // scanning a QR — no sign-in) or a parent's monitoring device
+                // (needs an account). This steers the whole flow.
                 RolePickerView()
-            } else if !settings.hasConsented {
-                // Privacy by Design: explicit parental consent before any
-                // child profile or data exists.
-                ConsentView()
-            } else if settings.deviceRole == .parent {
-                // Parent's device → the family control center (create kids, see
-                // reports, generate each child's device code). No games here.
-                ParentDashboardView(isRoot: true)
-            } else if profiles.isEmpty && household.isLoading {
-                // Joining/syncing the family from the cloud — wait.
-                familyLoadingView
-            } else if profiles.isEmpty {
-                // Child's device, not joined yet → scan/enter the code the
-                // parent created for this child.
-                ChildJoinView()
-            } else if profiles.activeID == nil {
-                // Joined with more than one child on this device → pick who.
-                ProfilePickerView()
-            } else if progress.isUnlocked {
-                UnlockedView()
+            } else if settings.deviceRole == .child {
+                childFlow
             } else {
-                WorldMapView()
+                parentFlow
             }
+        }
+    }
+
+    /// Parent device → account required (or guest trial), consent, then the
+    /// family control center.
+    @ViewBuilder
+    private var parentFlow: some View {
+        if !auth.isSignedIn && !auth.isGuest {
+            LoginGateView()
+        } else if auth.isGuest && !auth.isSignedIn
+                    && progress.totalAnswered >= Self.guestQuestionLimit {
+            LoginGateView(allowGuest: false, limitBanner: true)
+        } else if !settings.hasConsented {
+            ConsentView()
+        } else {
+            ParentDashboardView(isRoot: true)
+        }
+    }
+
+    /// Child device → NO sign-in screen. Get an anonymous identity in the
+    /// background (so it can join the family + sync), then scan the parent's QR
+    /// and play.
+    @ViewBuilder
+    private var childFlow: some View {
+        if !auth.isSignedIn {
+            // Signing in anonymously — brief, automatic, no UI to fill in.
+            familyLoadingView
+                .task { auth.signInAnonymouslyIfNeeded() }
+        } else if profiles.isEmpty && household.isLoading {
+            familyLoadingView
+        } else if profiles.isEmpty {
+            // Not joined yet → scan/enter the code the parent created.
+            ChildJoinView()
+        } else if profiles.activeID == nil {
+            ProfilePickerView()
+        } else if progress.isUnlocked {
+            UnlockedView()
+        } else {
+            WorldMapView()
         }
     }
 

@@ -36,6 +36,25 @@ final class AuthManager: ObservableObject {
     /// Enter the local trial. No cloud account, data stays on-device.
     func continueAsGuest() { isGuest = true }
 
+    /// A child's device joins by scanning the parent's QR — it never sees a
+    /// sign-in screen. To still get a uid (needed to join the family + sync), we
+    /// sign it in ANONYMOUSLY in the background. Requires the "Anonymous"
+    /// provider to be enabled in the Firebase console (Authentication → Sign-in).
+    func signInAnonymouslyIfNeeded() {
+        #if canImport(FirebaseAuth)
+        guard userID == nil else { return }
+        Auth.auth().signInAnonymously { [weak self] result, error in
+            Task { @MainActor in
+                if let user = result?.user {
+                    self?.apply(firebaseUser: user)
+                } else if let error {
+                    self?.lastError = error.localizedDescription
+                }
+            }
+        }
+        #endif
+    }
+
     enum AuthProvider: String {
         case apple
         case google
