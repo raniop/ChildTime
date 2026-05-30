@@ -144,26 +144,45 @@ enum QuestionBanks {
     /// Hebrew spelling (איות) — pick the correctly-spelled word among plausible
     /// single-letter mistakes kids commonly make (כ/ח, ת/ט, ק/כ, ס/שׂ, א/ע/ה).
     static let hebrew: [BankQuestion] = [
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "חָתוּל",   distractors: ["כָּתוּל", "חָטוּל", "חָתֻל"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "שֻׁלְחָן",  distractors: ["סֻלְחָן", "שֻׁלְכָן", "שֻׁלְחַן"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "כַּדּוּר",   distractors: ["קַדּוּר", "גַּדּוּר", "כַּדֻּר"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "מַחְבֶּרֶת",  distractors: ["מַהְבֶּרֶת", "מַכְבֶּרֶת", "מַחְבֶּרֶט"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "צָהֹב",   distractors: ["סָהֹב", "צָחֹב", "זָהֹב"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "אוֹטוֹבּוּס", distractors: ["עוֹטוֹבּוּס", "אוֹטוֹבּוּז", "אוֹטוֹפּוּס"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "סֵפֶר",    distractors: ["סֵבֶר", "שֵׁפֶר", "צֵפֶר"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "תַּפּוּז",   distractors: ["טַפּוּז", "תַּפּוּס", "דַּפּוּז"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "מַיִם",    distractors: ["מַיִים", "מַימ", "נַיִם"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "יֶלֶד",    distractors: ["יֶעֶלֶד", "יֶלֶט", "יִילֶד"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "כֶּלֶב",    distractors: ["קֶלֶב", "כֶּלֶף", "גֶּלֶב"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "בַּיִת",    distractors: ["בַּיִט", "פַּית", "בַּעַת"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "עֵץ",     distractors: ["אֵץ", "עֵס", "חֵץ"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "אַרְנָב",   distractors: ["עַרְנָב", "אַרְנָף", "הַרְנָב"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "גֶּשֶׁם",    distractors: ["קֶשֶׁם", "גֶּסֶם", "גֶּשֶׁמ"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "חָבֵר",    distractors: ["כָּבֵר", "הָבֵר", "חָפֵר"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "שֶׁמֶשׁ",    distractors: ["שֶׁמֶס", "סֶמֶשׁ", "צֶמֶשׁ"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "עוּגָה",   distractors: ["אוּגָה", "עוּקָה", "עוּגַע"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "מְקָרֵר",   distractors: ["מְכָרֵר", "מְקָר", "נְקָרֵר"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "כְּבִישׁ",   distractors: ["קְבִישׁ", "כְּבִית", "גְּבִישׁ"]),
+        // הפכים
+        BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'גָּדוֹל'?",  correctAnswer: "קָטָן",   distractors: ["גָּבוֹהַּ", "כָּבֵד", "רָחָב"]),
+        BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'חַם'?",     correctAnswer: "קַר",    distractors: ["שֶׁמֶשׁ", "אֵשׁ", "קַיִץ"]),
+        BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'יוֹם'?",    correctAnswer: "לַיְלָה",  distractors: ["בֹּקֶר", "אוֹר", "שֶׁמֶשׁ"]),
+        BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'שָׂמֵחַ'?",  correctAnswer: "עָצוּב",  distractors: ["צוֹחֵק", "טוֹב", "יָפֶה"]),
+        BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'פָּתוּחַ'?", correctAnswer: "סָגוּר",  distractors: ["גָּדוֹל", "רֵיק", "נָקִי"]),
+        BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'מָּלֵא'?",   correctAnswer: "רֵיק",   distractors: ["כָּבֵד", "גָּדוֹל", "חָדָשׁ"]),
+
+        // רבים
+        BankQuestion(prompt: "מָה הָרַבִּים שֶׁל 'יֶלֶד'?",   correctAnswer: "יְלָדִים",  distractors: ["יְלָדוֹת", "יַלְדָּה", "יֶלֶדִים"]),
+        BankQuestion(prompt: "מָה הָרַבִּים שֶׁל 'סֵפֶר'?",   correctAnswer: "סְפָרִים",  distractors: ["סְפָרוֹת", "סֵפֶרִים", "סְפָרַיִם"]),
+        BankQuestion(prompt: "מָה הָרַבִּים שֶׁל 'בַּיִת'?",   correctAnswer: "בָּתִּים",  distractors: ["בַּיִתִים", "בֵּיתוֹת", "בַּיּוֹת"]),
+        BankQuestion(prompt: "מָה הָרַבִּים שֶׁל 'תַּפּוּחַ'?", correctAnswer: "תַּפּוּחִים", distractors: ["תַּפּוּחוֹת", "תַּפּוּחֵי", "תַּפּוּחַיִם"]),
+
+        // קטגוריות
+        BankQuestion(prompt: "אֵיזוֹ מִלָּה הִיא בַּעַל חַיִּים?", correctAnswer: "פִּיל",     distractors: ["כִּסֵּא", "דֶּלֶת", "עִפָּרוֹן"]),
+        BankQuestion(prompt: "אֵיזוֹ מִלָּה הִיא פְּרִי?",       correctAnswer: "בָּנָנָה",   distractors: ["כִּסֵּא", "מְכוֹנִית", "נַעַל"]),
+        BankQuestion(prompt: "אֵיזוֹ מִלָּה הִיא צֶבַע?",       correctAnswer: "אָדֹם",     distractors: ["שֻׁלְחָן", "מָהִיר", "גָּדוֹל"]),
+        BankQuestion(prompt: "בְּמָה כּוֹתְבִים?",            correctAnswer: "עִפָּרוֹן",  distractors: ["כֶּלֶב", "תַּפּוּחַ", "כִּסֵּא"]),
+
+        // קולות של חיות / השלמה
+        BankQuestion(prompt: "אֵיזֶה קוֹל מַשְׁמִיעַ הֶחָתוּל? 🐱", correctAnswer: "מְיָאוּ",  distractors: ["הַב הַב", "מוּ", "קוּקוּרִיקוּ"]),
+        BankQuestion(prompt: "אֵיזֶה קוֹל מַשְׁמִיעַ הַכֶּלֶב? 🐶", correctAnswer: "הַב הַב", distractors: ["מְיָאוּ", "מוּ", "קְוָואק"]),
+        BankQuestion(prompt: "אֵיזֶה קוֹל מַשְׁמִיעָה הַפָּרָה? 🐮", correctAnswer: "מוּ",    distractors: ["מְיָאוּ", "הַב הַב", "צִיּוּץ"]),
+
+        // ידע יומיומי
+        BankQuestion(prompt: "מָה שׁוֹתִים כְּשֶׁצְּמֵאִים?",   correctAnswer: "מַיִם",    distractors: ["לֶחֶם", "נַעַל", "סֵפֶר"]),
+        BankQuestion(prompt: "מָה לוֹבְשִׁים עַל הָרַגְלַיִם?", correctAnswer: "נַעֲלַיִם", distractors: ["כּוֹבַע", "מִשְׁקָפַיִם", "שָׁעוֹן"]),
+        BankQuestion(prompt: "אֵיפֹה גָּרִים הַדָּגִים?",      correctAnswer: "בַּמַּיִם",  distractors: ["בָּעֵץ", "בַּשָּׁמַיִם", "בַּחוֹל"]),
+
+        // איות נכון (עם רמז-אמוג'י — פרומפט ייחודי לכל שאלה)
+        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🐱", correctAnswer: "חָתוּל",   distractors: ["כָּתוּל", "חָטוּל", "חָתֻל"]),
+        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🐶", correctAnswer: "כֶּלֶב",    distractors: ["קֶלֶב", "כֶּלֶף", "גֶּלֶב"]),
+        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? ☀️", correctAnswer: "שֶׁמֶשׁ",   distractors: ["שֶׁמֶס", "סֶמֶשׁ", "צֶמֶשׁ"]),
+        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 📖", correctAnswer: "סֵפֶר",    distractors: ["סֵבֶר", "שֵׁפֶר", "צֵפֶר"]),
+        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? ⚽", correctAnswer: "כַּדּוּר",   distractors: ["קַדּוּר", "גַּדּוּר", "כַּדֻּר"]),
+        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 📓", correctAnswer: "מַחְבֶּרֶת",  distractors: ["מַהְבֶּרֶת", "מַכְבֶּרֶת", "מַחְבֶּרֶט"]),
+        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🐰", correctAnswer: "אַרְנָב",   distractors: ["עַרְנָב", "אַרְנָף", "הַרְנָב"]),
+        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🏠", correctAnswer: "בַּיִת",    distractors: ["בַּיִט", "פַּיִת", "בַּעַת"]),
     ]
 
     // MARK: - כסף וחיים (חינוך פיננסי)
