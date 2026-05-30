@@ -744,6 +744,16 @@ struct QuestionRunnerView: View {
             return
         }
 
+        // Personal-best streak — the headline celebration, takes priority.
+        if progress.newStreakRecord {
+            progress.newStreakRecord = false
+            companion.wow("שִׂיא חָדָשׁ! 🏆 \(progress.currentStreak) בָּרֶצֶף!")
+            confettiTrigger += 1
+            rumbleTrigger += 1
+            SoundPlayer.shared.play(.levelUp)
+            return
+        }
+
         // Companion reaction
         if isSuperQuestion {
             companion.wow("שְׁאֵלַת זָהָב! ⭐")

@@ -6,15 +6,36 @@ enum RewardEngine {
     /// feel more generous without touching world-unlock costs or shop prices.
     static let starMultiplier = 3
 
-    /// Stars granted for a correct answer, taking combo + super into account.
+    /// The streak (combo) multiplier — the longer the run of correct answers, the
+    /// bigger every reward. Escalates well past 5 to make a long streak feel worth
+    /// protecting. Tiers: 1× · ×2 (3) · ×3 (5) · ×4 (10) · ×5 (15+).
+    static func comboMultiplier(streak: Int) -> Int {
+        switch streak {
+        case ..<3:    return 1
+        case 3..<5:   return 2
+        case 5..<10:  return 3
+        case 10..<15: return 4
+        default:      return 5
+        }
+    }
+
+    /// Short label for the current combo tier (shown in-game while on a streak).
+    static func comboLabel(streak: Int) -> String? {
+        switch streak {
+        case ..<3:    return nil
+        case 3..<5:   return "קוֹמְבּוֹ ×2 🔥"
+        case 5..<10:  return "קוֹמְבּוֹ ×3 🔥🔥"
+        case 10..<15: return "קוֹמְבּוֹ ×4 ⚡"
+        default:      return "עַל הָאֵשׁ! ×5 👑"
+        }
+    }
+
+    /// Stars granted for a correct answer. Mystery/super are flat bonuses; a
+    /// normal answer scales with the combo multiplier so long streaks pay off.
     static func starsForCorrect(combo: Int, isSuperQuestion: Bool, isMysteryPortal: Bool) -> Int {
-        let base: Int
-        if isMysteryPortal { base = 3 }
-        else if isSuperQuestion { base = 5 }
-        else if combo >= 5 { base = 3 }
-        else if combo >= 3 { base = 2 }
-        else { base = 1 }
-        return base * starMultiplier
+        if isMysteryPortal { return 3 * starMultiplier }
+        if isSuperQuestion { return 5 * starMultiplier }
+        return comboMultiplier(streak: combo) * starMultiplier
     }
 
     /// Bonus minutes for a streak of correct answers (added on top of per-correct rate).

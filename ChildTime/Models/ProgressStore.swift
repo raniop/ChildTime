@@ -32,6 +32,7 @@ final class ProgressStore: ObservableObject {
         static let dailyEarnedDate = "dailyEarnedDate"
         static let answeredToday = "answeredToday"
         static let correctToday = "correctToday"
+        static let bestStreak = "bestStreak"
         static let topicResponseMs = "topicResponseMs"
         static let topicAffinity = "topicAffinity"
         static let topicExposure = "topicExposure"
@@ -152,6 +153,17 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var correctToday: Int {
         didSet { defaults.set(correctToday, forKey: Key.correctToday) }
     }
+    /// The child's longest-ever run of correct answers. Beating it triggers a
+    /// celebration — the core "I want a longer streak" motivator.
+    @Published private(set) var bestStreak: Int {
+        didSet { defaults.set(bestStreak, forKey: Key.bestStreak) }
+    }
+    /// Transient flag (not persisted): set true the moment a new record is set,
+    /// consumed by the UI to fire the celebration.
+    @Published var newStreakRecord = false
+    /// Whether we've already celebrated a record in the current run of correct
+    /// answers — reset when the streak breaks, so we celebrate once per run.
+    private var recordCelebratedThisRun = false
     /// The day `minutesEarnedToday` refers to.
     @Published private(set) var dailyEarnedDate: Date? {
         didSet {
@@ -223,6 +235,7 @@ final class ProgressStore: ObservableObject {
         self.minutesEarnedToday = d.integer(forKey: Key.minutesEarnedToday)
         self.answeredToday = d.integer(forKey: Key.answeredToday)
         self.correctToday = d.integer(forKey: Key.correctToday)
+        self.bestStreak = d.integer(forKey: Key.bestStreak)
         self.dailyEarnedDate = d.object(forKey: Key.dailyEarnedDate) as? Date
 
         self.topicResponseMs = (d.dictionary(forKey: Key.topicResponseMs) as? [String: Double]) ?? [:]
@@ -380,11 +393,6 @@ final class ProgressStore: ObservableObject {
                        responseMs: Double = 0,
                        hadMistakeThisQuestion: Bool = false,
                        grantsScreenTime: Bool = true) -> Int {
-        let earned = RewardEngine.starsForCorrect(
-            combo: ctx.combo,
-            isSuperQuestion: ctx.isSuperQuestion,
-            isMysteryPortal: ctx.isMysteryPortal
-        )
         totalAnswered += 1
         totalCorrect += 1
         _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
@@ -392,7 +400,24 @@ final class ProgressStore: ObservableObject {
         correctToday += 1
         currentStreak += 1
         wrongStreak = 0  // any correct answer breaks the penalty streak
+        // Stars scale with the NEW streak length, so each consecutive correct
+        // answer is worth more — the incentive to keep the run going.
+        let earned = RewardEngine.starsForCorrect(
+            combo: currentStreak,
+            isSuperQuestion: ctx.isSuperQuestion,
+            isMysteryPortal: ctx.isMysteryPortal
+        )
         stars += earned
+        // Personal best — beating it is a big, celebrated moment. Fire the
+        // celebration ONCE per run (the moment the record breaks), not on every
+        // subsequent answer.
+        if currentStreak > bestStreak {
+            bestStreak = currentStreak
+            if currentStreak >= 3 && !recordCelebratedThisRun {
+                recordCelebratedThisRun = true
+                newStreakRecord = true
+            }
+        }
         sessionStarsEarned += earned
 
         // Score — the headline 'ניקוד' metric. Includes combo / bonus boosts.
@@ -528,6 +553,7 @@ final class ProgressStore: ObservableObject {
         _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
         answeredToday += 1
         currentStreak = 0
+        recordCelebratedThisRun = false   // streak broke — arm the next record
         wrongStreak += 1
         xp += RewardEngine.xpPerQuestion
         updateTopicStat(topic: topic, correct: false)
@@ -729,6 +755,7 @@ final class ProgressStore: ObservableObject {
         s.dailyEarnedDate     = dailyEarnedDate
         s.answeredToday       = answeredToday
         s.correctToday        = correctToday
+        s.bestStreak          = bestStreak
         s.topicResponseMs     = topicResponseMs
         s.topicAffinity       = topicAffinity
         s.topicExposure       = topicExposure
@@ -765,6 +792,7 @@ final class ProgressStore: ObservableObject {
         dailyEarnedDate     = s.dailyEarnedDate
         answeredToday       = s.answeredToday
         correctToday        = s.correctToday
+        bestStreak          = max(bestStreak, s.bestStreak)
         topicResponseMs     = s.topicResponseMs
         topicAffinity       = s.topicAffinity
         topicExposure       = s.topicExposure
