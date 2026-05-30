@@ -151,9 +151,13 @@ struct WorldMapView: View {
                 maybeAutoPresentWheel()
             }
             maybePromptAppLockSetup()
-            // Refresh this child device's "last seen" so the parent sees it live.
+            // Refresh this child device's "last seen" so the parent sees it live,
+            // and re-publish this child's local progress to the cloud — this is
+            // the source of truth and restores the parent's view if the cloud doc
+            // was ever stale/zeroed.
             if settings.deviceRole == .child, let cid = profiles.activeID {
                 Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
+                RemoteSyncManager.shared.pushNow()
             }
         }
         .onChange(of: progress.stars) { _, new in
