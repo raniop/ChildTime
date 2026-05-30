@@ -27,11 +27,9 @@ struct ParentSettingsView: View {
             Form {
                 premiumSection
                 dashboardSection
-                profileSection
                 authorizationSection
                 syncSection
                 notificationsSection
-                ageSection
                 rewardSection
                 smartFeedSection
                 dailyCapSection
@@ -306,61 +304,6 @@ struct ParentSettingsView: View {
             Text("קבלו עדכון כשהילד מתחיל ומסיים לשחק, פותח רצף, זוכה בגלגל מזל או מגלה תחום חדש — וגם דוח שבועי. ההתראות נשלחות בין המכשירים בבית. \"שלח התראת בדיקה\" שולח התראה אליכם עכשיו כדי לוודא שהכול עובד.")
         }
         .task { await push.refreshAuthorizationStatus() }
-    }
-
-    private var ageSection: some View {
-        Section("גיל הילד") {
-            Picker("גיל", selection: Binding(
-                get: { settings.childAge },
-                set: { newAge in
-                    settings.childAge = newAge
-                }
-            )) {
-                ForEach(ChildAge.allCases) { age in
-                    Text("\(age.emoji)  \(age.label) — \(age.description)").tag(age)
-                }
-            }
-            Button {
-                settings.applyAgeDefaults(settings.childAge)
-            } label: {
-                Label("התאם קושי לפי גיל", systemImage: "wand.and.stars")
-            }
-            .foregroundStyle(.tint)
-        }
-    }
-
-    private var profileSection: some View {
-        Section("פרופיל הילד") {
-            HStack(spacing: 14) {
-                ChildAvatarView(size: 64)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(settings.childName.isEmpty ? "ללא שם" : settings.childName)
-                        .font(.system(size: 17, weight: .heavy, design: .rounded))
-                    if profiles.profiles.count > 1 {
-                        Text("\(profiles.profiles.count) פרופילים במשפחה")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text("הקש על התמונה כדי להחליף תמונה")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                Spacer()
-            }
-            .padding(.vertical, 4)
-
-            RTLTextField(placeholder: "שם הילד", text: $settings.childName,
-                         onCommit: { profiles.syncBackFromSettings() })
-                .frame(height: 24)
-
-            Button {
-                profiles.syncBackFromSettings()
-                profiles.signOutCurrentProfile()
-            } label: {
-                Label("החלף פרופיל", systemImage: "person.crop.circle.badge.questionmark")
-            }
-        }
     }
 
     private var rewardSection: some View {
