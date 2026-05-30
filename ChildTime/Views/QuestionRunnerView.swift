@@ -858,25 +858,10 @@ struct QuestionRunnerView: View {
         }
     }
 
-    /// Fires the in-session live events a co-parent gets notified about.
-    private func reportLiveEvents(for q: Question) {
-        if progress.currentStreak == 5 {
-            LiveEventReporter.report(.streak, value: "5")
-        }
-        if !reportedMilestone, totalQuestions >= 10, correctInSession == 8 {
-            reportedMilestone = true
-            LiveEventReporter.report(.milestone, value: "8/\(totalQuestions)")
-        }
-        if !reportedWheel, progress.freeWheelAvailable {
-            reportedWheel = true
-            LiveEventReporter.report(.wheelWin)
-        }
-        if mode.isFeed, !reportedDiscovery.contains(q.topic),
-           progress.exposure(for: q.topic) <= 3, progress.affinity(for: q.topic) >= 0.65 {
-            reportedDiscovery.insert(q.topic)
-            LiveEventReporter.report(.discovery, topic: q.topic)
-        }
-    }
+    /// In-session milestones used to push notifications mid-game (streak,
+    /// 8/15, wheel, discovery) — they flooded the parent. We now notify ONLY on
+    /// session start + finish (and explicit help requests), so this is a no-op.
+    private func reportLiveEvents(for q: Question) { }
 
     /// Flash a small "+24 שניות" / "−12 שניות" near the timer.
     private func flashSeconds(_ text: String, positive: Bool) {

@@ -309,7 +309,7 @@ final class ParentSettings: ObservableObject {
         self.maxMinutesPerDay = mmd == 0 ? 60 : mmd
 
         let qpw = d.integer(forKey: Key.questionsPerWheel)
-        self.questionsPerWheel = qpw == 0 ? 20 : qpw
+        self.questionsPerWheel = qpw == 0 ? 10 : qpw
 
         self.faceIDForParentGate = d.bool(forKey: Key.faceIDForParentGate)
         self.consentVersionAccepted = d.integer(forKey: Key.consentVersionAccepted)

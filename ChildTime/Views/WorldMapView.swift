@@ -160,6 +160,14 @@ struct WorldMapView: View {
                 RemoteSyncManager.shared.pushNow()
             }
         }
+        // A fullScreenCover doesn't re-fire the map's .onAppear when it closes,
+        // so check the wheel when a play session actually ends.
+        .onChange(of: showingSmartFeed) { _, shown in
+            if !shown { DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { maybeAutoPresentWheel() } }
+        }
+        .onChange(of: selectedWorld?.id) { _, world in
+            if world == nil { DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { maybeAutoPresentWheel() } }
+        }
         .onChange(of: progress.stars) { _, new in
             if new > lastSeenStars {
                 companion.cheer()

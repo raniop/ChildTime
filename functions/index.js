@@ -51,11 +51,9 @@ function liveMessage(event) {
       const summary = parts.length ? parts.join(" · ") : `${g("סיים", "סיימה")} את מסע הלמידה`;
       return { title: g("סיים לשחק ✅", "סיימה לשחק ✅"), body: `${name}: ${summary}` };
     }
-    case "milestone":    return { title: "כל הכבוד! ✅", body: `${name} ${g("ענה", "ענתה")} נכון על ${event.value || "כמה"} שאלות.` };
-    case "streak":       return { title: "רצף! 🔥", body: `${name} ${g("נמצא", "נמצאת")} ברצף של ${event.value || "כמה"} תשובות נכונות.` };
-    case "wheelWin":     return { title: "גלגל מזל! 🎡", body: `${name} ${g("זכה", "זכתה")} בסיבוב בגלגל המזל.` };
-    case "discovery":    return { title: "גילוי חדש 🔭", body: `${name} ${g("מגלה", "מגלָה")} עניין גובר ב${event.topic || "תחום חדש"}.` };
     case "assistRequest":return { title: "בקשת עזרה 💌", body: `${name} ${g("ביקש", "ביקשה")} את עזרתכם בשאלה.` };
+    // Intentionally NO push for milestone / streak / wheelWin / discovery —
+    // those flooded the parent. Only start, finish, and help requests notify.
     default:             return null;
   }
 }
