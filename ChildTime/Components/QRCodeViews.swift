@@ -71,11 +71,40 @@ struct QRScannerView: UIViewControllerRepresentable {
             preview.frame = view.layer.bounds
             view.layer.addSublayer(preview)
             previewLayer = preview
+            applyRotation()
         }
 
         override func viewDidLayoutSubviews() {
             super.viewDidLayoutSubviews()
             previewLayer?.frame = view.layer.bounds
+            applyRotation()
+        }
+
+        override func viewWillTransition(to size: CGSize,
+                                         with coordinator: UIViewControllerTransitionCoordinator) {
+            super.viewWillTransition(to: size, with: coordinator)
+            coordinator.animate(alongsideTransition: { _ in
+                self.previewLayer?.frame = self.view.layer.bounds
+                self.applyRotation()
+            })
+        }
+
+        /// Rotate the camera preview to match the current interface orientation —
+        /// otherwise the feed is sideways/stretched in landscape (iPad).
+        private func applyRotation() {
+            guard let connection = previewLayer?.connection else { return }
+            let orientation = view.window?.windowScene?.interfaceOrientation ?? .portrait
+            let angle: CGFloat
+            switch orientation {
+            case .portrait:           angle = 90
+            case .portraitUpsideDown: angle = 270
+            case .landscapeLeft:      angle = 180
+            case .landscapeRight:     angle = 0
+            default:                  angle = 90
+            }
+            if connection.isVideoRotationAngleSupported(angle) {
+                connection.videoRotationAngle = angle
+            }
         }
         override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(animated)
