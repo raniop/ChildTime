@@ -690,17 +690,23 @@ struct QuestionRunnerView: View {
         let effective = QuestionGenerator.adaptiveDifficulty(base: baseDiff, accuracy: acc)
         var q = QuestionGenerator.generate(topic: topic, difficulty: effective)
         // Bank questions already avoid session repeats (QuestionMemory). Math is
-        // generated, so re-roll if we happen to produce a prompt seen this round.
+        // generated, so re-roll if we happen to produce one seen this round.
         if topic == .math {
             var tries = 0
-            while QuestionMemory.shared.wasServedThisSession(q.prompt), tries < 8 {
+            while QuestionMemory.shared.wasServedThisSession(sessionKey(q)), tries < 8 {
                 q = QuestionGenerator.generate(topic: topic, difficulty: effective)
                 tries += 1
             }
         }
-        QuestionMemory.shared.markServedThisSession(q.prompt)
+        QuestionMemory.shared.markServedThisSession(sessionKey(q))
         current = q
         questionShownAt = Date()
+    }
+
+    /// Dedup key matching QuestionMemory's (prompt + correct answer).
+    private func sessionKey(_ q: Question) -> String {
+        let correct = q.correctIndex < q.options.count ? q.options[q.correctIndex] : ""
+        return "\(q.prompt)|\(correct)"
     }
 
     private func regenerateQuestion() {

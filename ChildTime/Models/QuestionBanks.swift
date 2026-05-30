@@ -213,13 +213,13 @@ enum QuestionBanks {
     /// Original + expanded — call sites get the full combined pool.
     static func bank(for topic: Topic) -> [BankQuestion]? {
         switch topic {
-        case .english:   return english   + QuestionBanksExpanded.english
-        case .hebrew:    return hebrew
-        case .logic:     return logic     + QuestionBanksExpanded.logic
-        case .science:   return science   + QuestionBanksExpanded.science
-        case .history:   return history   + QuestionBanksExpanded.history
-        case .geography: return geography + QuestionBanksExpanded.geography
-        case .money:     return money
+        case .english:   return english   + QuestionBanksExpanded.english   + QuestionBanksWorkflow.english
+        case .hebrew:    return hebrew    + QuestionBanksWorkflow.hebrew
+        case .logic:     return logic     + QuestionBanksExpanded.logic     + QuestionBanksWorkflow.logic
+        case .science:   return science   + QuestionBanksExpanded.science   + QuestionBanksWorkflow.science
+        case .history:   return history   + QuestionBanksExpanded.history   + QuestionBanksWorkflow.history
+        case .geography: return geography + QuestionBanksExpanded.geography + QuestionBanksWorkflow.geography
+        case .money:     return money     + QuestionBanksWorkflow.money
         case .math:      return nil  // generated algorithmically
         }
     }
@@ -303,7 +303,9 @@ final class QuestionMemory {
         hasLoaded = true
     }
 
-    private func promptKey(_ q: BankQuestion) -> String { q.prompt }
+    // Key by prompt + answer so questions that SHARE a prompt (e.g. several
+    // "מי לא שייך?") are treated as distinct and aren't collapsed by the dedup.
+    private func promptKey(_ q: BankQuestion) -> String { "\(q.prompt)|\(q.correctAnswer)" }
 
     private func remember(_ key: String, in topic: Topic, windowSize: Int) {
         var list = recent[topic] ?? []
