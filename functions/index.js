@@ -159,10 +159,26 @@ exports.weeklyReport = onSchedule({ schedule: "every monday 18:00", timeZone: "A
 // to THAT uid's tokens (not excluding any device, so the sender gets it too).
 exports.sendTestPush = onDocumentCreated("pushTests/{id}", async (event) => {
   const data = event.data && event.data.data();
-  if (!data || !data.uid) return;
+  if (!data || !data.uid) { console.log("[testPush] no uid in doc"); return; }
   const tokens = await tokensForUID(data.uid);
-  await send(tokens,
-    { title: "טופי — בדיקת התראות ✅", body: "מעולה! ההתראות עובדות." },
-    { kind: "test" });
+  console.log(`[testPush] uid=${data.uid} tokenCount=${tokens.length}`);
+  if (!tokens.length) {
+    console.warn("[testPush] NO TOKENS for this uid — the app hasn't uploaded an FCM token to parents/{uid}.fcmTokens yet.");
+    await event.data.ref.delete().catch(() => {});
+    return;
+  }
+  try {
+    const res = await admin.messaging().sendEachForMulticast({
+      tokens,
+      notification: { title: "טופי — בדיקת התראות ✅", body: "מעולה! ההתראות עובדות." },
+      apns: { payload: { aps: { sound: "default" } } },
+    });
+    console.log(`[testPush] sent: success=${res.successCount} failure=${res.failureCount}`);
+    res.responses.forEach((r, i) => {
+      if (!r.success) console.error(`[testPush] token#${i} FAILED: ${r.error && r.error.message}`);
+    });
+  } catch (e) {
+    console.error("[testPush] send threw:", e && e.message);
+  }
   await event.data.ref.delete().catch(() => {});
 });
