@@ -67,6 +67,23 @@ struct ChildTimeApp: App {
         _subs = StateObject(wrappedValue: SubscriptionManager.shared)
         _profiles = StateObject(wrappedValue: ProfileStore.shared)
         _cosmetics = StateObject(wrappedValue: CosmeticStore.shared)
+
+        if Self.demoScreen != nil { Self.seedDemo() }
+    }
+
+    /// App Store screenshot mode — render a specific screen with sample data.
+    /// Activated only via the DEMO_SCREEN launch env var; never in production.
+    static var demoScreen: String? { ProcessInfo.processInfo.environment["DEMO_SCREEN"] }
+
+    private static func seedDemo() {
+        if ProfileStore.shared.profiles.isEmpty {
+            let dana = Profile(name: "דָּנָה", gender: .girl, age: .grade1)
+            ProfileStore.shared.add(dana)
+            let yoav = Profile(name: "יוֹאָב", gender: .boy, age: .grade1)
+            ProfileStore.shared.add(yoav)
+            ProfileStore.shared.setActive(dana)
+        }
+        ProgressStore.shared.seedForDemo()
     }
 
     var body: some Scene {
@@ -76,7 +93,7 @@ struct ChildTimeApp: App {
                 // SwiftUI frame is on-brand indigo instead of a white flash
                 // between the launch screen and ContentView's first paint.
                 AppColor.dreamyIndigo.ignoresSafeArea()
-                ContentView()
+                if let demo = Self.demoScreen { demoRoot(demo) } else { ContentView() }
             }
                 .environment(\.layoutDirection, .rightToLeft)
                 .environmentObject(settings)
@@ -87,11 +104,12 @@ struct ChildTimeApp: App {
                 .environmentObject(profiles)
                 .environmentObject(cosmetics)
                 .task {
+                    guard Self.demoScreen == nil else { return }   // no system prompts in screenshot mode
                     await shields.requestAuthorizationIfNeeded()
                     enforceShieldStateIfNeeded()
                 }
                 .onChange(of: scenePhase) { _, phase in
-                    if phase == .active {
+                    if phase == .active, Self.demoScreen == nil {
                         enforceShieldStateIfNeeded()
                     }
                 }
@@ -101,6 +119,16 @@ struct ChildTimeApp: App {
                     _ = GIDSignIn.sharedInstance.handle(url)
                     #endif
                 }
+        }
+    }
+
+    @ViewBuilder
+    private func demoRoot(_ name: String) -> some View {
+        switch name {
+        case "question": QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
+        case "wheel":    LuckyWheelView(onClose: {})
+        case "dashboard": ParentDashboardView(isRoot: true)
+        default:         WorldMapView()   // "worldmap"
         }
     }
 

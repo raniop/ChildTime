@@ -547,6 +547,28 @@ final class ProgressStore: ObservableObject {
         return allowed
     }
 
+    /// Seed pleasant demo numbers for App Store screenshots (DEMO_SCREEN only).
+    func seedForDemo() {
+        stars = 213
+        pendingMinutes = 12
+        cycleSeconds = 144            // 6/10 toward the 4-min bonus
+        currentStreak = 5
+        bestStreak = 9
+        dayStreak = 4
+        totalAnswered = 48
+        totalCorrect = 44
+        answeredToday = 12
+        correctToday = 11
+        minutesEarnedToday = 16
+        sessionStarsEarned = 24
+        xp = 96
+        topicAnswered = [Topic.math.rawValue: 20, Topic.logic.rawValue: 12, Topic.hebrew.rawValue: 9, Topic.science.rawValue: 7]
+        topicCorrect  = [Topic.math.rawValue: 19, Topic.logic.rawValue: 11, Topic.hebrew.rawValue: 8, Topic.science.rawValue: 6]
+        topicAccuracy = [Topic.math.rawValue: 0.95, Topic.logic.rawValue: 0.92, Topic.hebrew.rawValue: 0.89, Topic.science.rawValue: 0.86]
+        topicAffinity = [Topic.math.rawValue: 0.9, Topic.logic.rawValue: 0.8, Topic.science.rawValue: 0.7]
+        unlockedWorlds = Set(Worlds.all.prefix(4).map { $0.id })
+    }
+
     /// Reset the per-session score — call at the start of QuestionRunner.
     func resetSessionScore() {
         sessionScore = 0
