@@ -16,6 +16,8 @@ final class PINManager {
     private init() { migrateLegacyPlainPINIfNeeded() }
 
     var isSet: Bool { readBlob() != nil }
+    /// The local salted-hash blob, for publishing to the household (never plain).
+    var storedBlob: String? { readBlob() }
 
     // MARK: - Set / verify
 
@@ -28,11 +30,21 @@ final class PINManager {
 
     func verify(_ pin: String) -> Bool {
         guard let blob = readBlob() else { return false }
+        return verify(pin, against: blob)
+    }
+
+    /// A salted-hash blob ("salt:hash") for sharing the family code via the
+    /// household doc (never the plain code).
+    func makeBlob(_ pin: String) -> String {
+        let salt = Self.randomSalt()
+        return salt + ":" + Self.hash(pin: pin, salt: salt)
+    }
+
+    /// Verify a code against an externally-supplied blob (e.g. the household's).
+    func verify(_ pin: String, against blob: String) -> Bool {
         let parts = blob.split(separator: ":", maxSplits: 1).map(String.init)
         guard parts.count == 2 else { return false }
-        let salt = parts[0]
-        let expected = parts[1]
-        return Self.hash(pin: pin, salt: salt) == expected
+        return Self.hash(pin: pin, salt: parts[0]) == parts[1]
     }
 
     // MARK: - Biometrics

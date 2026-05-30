@@ -362,6 +362,18 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    /// Family-wide parent code (salted hash). Any device in the household uses it.
+    var householdPIN: String? { household?.parentPinHash }
+
+    /// Save the family parent code (hash) to the household so every device shares it.
+    func setHouseholdPIN(_ blob: String) {
+        #if canImport(FirebaseFirestore)
+        guard let hh = household else { return }
+        Task { try? await db.collection("households").document(hh.id)
+            .updateData(["parentPinHash": blob]) }
+        #endif
+    }
+
     /// Remove a connected device from a child (e.g. one mistakenly linked to the
     /// wrong child). Deletes its `childDevices` doc; the listener updates the UI.
     func removeChildDevice(id: String) {

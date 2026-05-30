@@ -15,19 +15,24 @@ struct Household: Codable, Identifiable, Equatable {
     /// private docs (which the rules deny). Optional so older household docs
     /// (without this field) still decode.
     var parentNames: [String: String]?
+    /// Family-wide parent gate code as a salted hash ("salt:hash") so the same
+    /// code works on every device in the household — never the plain code.
+    var parentPinHash: String?
 
     init(id: String = UUID().uuidString,
          parentUIDs: [String],
          childIDs: [String] = [],
          createdBy: String,
          createdAt: Date = .now,
-         parentNames: [String: String]? = nil) {
+         parentNames: [String: String]? = nil,
+         parentPinHash: String? = nil) {
         self.id = id
         self.parentUIDs = parentUIDs
         self.childIDs = childIDs
         self.createdBy = createdBy
         self.createdAt = createdAt
         self.parentNames = parentNames
+        self.parentPinHash = parentPinHash
     }
 }
 

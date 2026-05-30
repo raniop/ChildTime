@@ -586,6 +586,7 @@ struct ChangePINView: View {
         settings.pin = newPIN          // keep legacy mirror for migration safety
         PINManager.shared.setPIN(newPIN)
         settings.hasSetParentPIN = true
+        HouseholdManager.shared.setHouseholdPIN(PINManager.shared.makeBlob(newPIN))  // share family-wide
         dismiss()
     }
 }

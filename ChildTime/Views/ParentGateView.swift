@@ -15,6 +15,7 @@ struct ParentGateView<Content: View>: View {
     }
 
     @EnvironmentObject var settings: ParentSettings
+    @ObservedObject private var household = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var entered: String = ""
     @State private var shake: Bool = false
@@ -23,7 +24,10 @@ struct ParentGateView<Content: View>: View {
     /// let them CREATE one (enter → confirm) instead of guessing the default.
     @State private var setupFirst: String? = nil   // first entry while confirming
 
-    private var isSetupMode: Bool { !settings.hasSetParentPIN }
+    // First-time setup only when NEITHER this device NOR the family has a code.
+    // If the family already set one (e.g. on the parent's phone), this device
+    // asks to ENTER it — not create a new one.
+    private var isSetupMode: Bool { !settings.hasSetParentPIN && household.householdPIN == nil }
 
     private var canUseFaceID: Bool {
         settings.faceIDForParentGate && PINManager.shared.biometryAvailable
@@ -205,6 +209,8 @@ struct ParentGateView<Content: View>: View {
                 if entered == first {
                     PINManager.shared.setPIN(entered)
                     settings.hasSetParentPIN = true
+                    // Share it family-wide so other devices use the same code.
+                    household.setHouseholdPIN(PINManager.shared.makeBlob(entered))
                     Haptic.success()
                     authorized = true
                 } else {
@@ -220,7 +226,18 @@ struct ParentGateView<Content: View>: View {
             }
             return
         }
-        if PINManager.shared.verify(entered) {
+        // Accept the device's local code OR the family code (household).
+        let okLocal = PINManager.shared.verify(entered)
+        let okFamily = household.householdPIN.map { PINManager.shared.verify(entered, against: $0) } ?? false
+        if okLocal || okFamily {
+            // Cache locally so next time (and Face ID) work on this device.
+            if !okLocal { PINManager.shared.setPIN(entered) }
+            settings.hasSetParentPIN = true
+            // Backfill the family code if it isn't shared yet (e.g. a parent who
+            // set a PIN before this feature) so other devices use the same one.
+            if household.householdPIN == nil, let blob = PINManager.shared.storedBlob {
+                household.setHouseholdPIN(blob)
+            }
             authorized = true
         } else {
             shake = true
