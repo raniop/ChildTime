@@ -173,16 +173,6 @@ enum QuestionBanks {
         BankQuestion(prompt: "מָה שׁוֹתִים כְּשֶׁצְּמֵאִים?",   correctAnswer: "מַיִם",    distractors: ["לֶחֶם", "נַעַל", "סֵפֶר"]),
         BankQuestion(prompt: "מָה לוֹבְשִׁים עַל הָרַגְלַיִם?", correctAnswer: "נַעֲלַיִם", distractors: ["כּוֹבַע", "מִשְׁקָפַיִם", "שָׁעוֹן"]),
         BankQuestion(prompt: "אֵיפֹה גָּרִים הַדָּגִים?",      correctAnswer: "בַּמַּיִם",  distractors: ["בָּעֵץ", "בַּשָּׁמַיִם", "בַּחוֹל"]),
-
-        // איות נכון (עם רמז-אמוג'י — פרומפט ייחודי לכל שאלה)
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🐱", correctAnswer: "חָתוּל",   distractors: ["כָּתוּל", "חָטוּל", "חָתֻל"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🐶", correctAnswer: "כֶּלֶב",    distractors: ["קֶלֶב", "כֶּלֶף", "גֶּלֶב"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? ☀️", correctAnswer: "שֶׁמֶשׁ",   distractors: ["שֶׁמֶס", "סֶמֶשׁ", "צֶמֶשׁ"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 📖", correctAnswer: "סֵפֶר",    distractors: ["סֵבֶר", "שֵׁפֶר", "צֵפֶר"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? ⚽", correctAnswer: "כַּדּוּר",   distractors: ["קַדּוּר", "גַּדּוּר", "כַּדֻּר"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 📓", correctAnswer: "מַחְבֶּרֶת",  distractors: ["מַהְבֶּרֶת", "מַכְבֶּרֶת", "מַחְבֶּרֶט"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🐰", correctAnswer: "אַרְנָב",   distractors: ["עַרְנָב", "אַרְנָף", "הַרְנָב"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🏠", correctAnswer: "בַּיִת",    distractors: ["בַּיִט", "פַּיִת", "בַּעַת"]),
     ]
 
     // MARK: - כסף וחיים (חינוך פיננסי)

@@ -62,10 +62,6 @@ enum QuestionBanksWorkflow {
         BankQuestion(prompt: "הַשְׁלִימוּ: 'הַצִּפּוֹר עָפָה בַּ...'", correctAnswer: "שָׁמַיִם", distractors: ["מַיִם", "אֲדָמָה", "אָרוֹן"]),
         BankQuestion(prompt: "הַשְׁלִימוּ: 'אֲנִי יָשֵׁן בַּלַּיְלָה עַל הַ...'", correctAnswer: "מִטָּה", distractors: ["עֵץ", "כְּבִישׁ", "גַּג"]),
         BankQuestion(prompt: "הַשְׁלִימוּ: 'הַשֶּׁמֶשׁ זוֹרַחַת בַּ...'", correctAnswer: "בֹּקֶר", distractors: ["לַיְלָה", "אָרוֹן", "כּוֹס"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🐟", correctAnswer: "דָּג", distractors: ["דָּק", "דַּאג", "טָג"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🥕", correctAnswer: "גֶּזֶר", distractors: ["גֶּזֵר", "כֶּזֶר", "גֶּסֶר"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🌧️", correctAnswer: "גֶּשֶׁם", distractors: ["גֶּשֶׂם", "כֶּשֶׁם", "גֶּסֶם"]),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן? 🪟", correctAnswer: "חַלּוֹן", distractors: ["כַּלּוֹן", "חָלוֹן", "הַלּוֹן"]),
     ]
 
     static let logic: [BankQuestion] = [
