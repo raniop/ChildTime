@@ -96,6 +96,24 @@ final class RemoteSyncManager: ObservableObject {
         #endif
     }
 
+    /// Force an immediate re-fetch of every child's cloud state (used by the
+    /// parent's "refresh" button). Also re-ensures the live listeners are
+    /// attached, in case they were dropped.
+    func refreshNow() {
+        #if canImport(FirebaseFirestore)
+        refreshProfileSubscriptions()
+        for profile in ProfileStore.shared.profiles {
+            let id = profile.id.uuidString
+            db.collection("children").document(id)
+              .collection("state").document("current")
+              .getDocument { [weak self] doc, _ in
+                  guard let raw = doc?.data(), let snap = Self.decode(raw) else { return }
+                  self?.handleRemoteSnapshot(snap, profileID: profile.id)
+              }
+        }
+        #endif
+    }
+
     // MARK: - Local change observation
 
     private func observeLocalChanges() {

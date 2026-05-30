@@ -104,6 +104,8 @@ struct ParentDashboardView: View {
                 }
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
+                        Haptic.light()
+                        remote.refreshNow()   // actually re-fetch from the cloud
                         refreshTrigger &+= 1
                         lastRefreshed = .now
                     } label: {
@@ -157,6 +159,7 @@ struct ParentDashboardView: View {
             .onAppear {
                 refreshTrigger &+= 1
                 lastRefreshed = .now
+                remote.refreshNow()   // pull fresh child state on open
                 rescheduleInsights()
                 Task { await push.refreshAuthorizationStatus() }
             }
@@ -522,7 +525,7 @@ struct ParentDashboardView: View {
                         if isChildPlayingNow(profile) {
                             HStack(spacing: 4) {
                                 Circle().fill(AppColor.successMint).frame(width: 7, height: 7)
-                                Text("מְשַׂחֵק עַכְשָׁו")
+                                Text("מְשַׂחֵק עַכְשָׁיו")
                                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                             }
                             .foregroundStyle(.white)
@@ -583,7 +586,9 @@ struct ParentDashboardView: View {
                     HStack(spacing: 10) {
                         Image(systemName: "qrcode")
                             .font(.system(size: 20, weight: .bold))
-                        Text("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name)")
+                        Text((household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
+                             ? "חַבְּרוּ מַכְשִׁיר נוֹסָף לְ\(profile.name)"
+                             : "חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name)")
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                         Spacer()
                         Image(systemName: "chevron.left").font(.subheadline.weight(.bold))
@@ -865,7 +870,7 @@ struct ParentDashboardView: View {
 
     private func deviceSeenText(_ device: ChildDevice) -> String {
         let elapsed = Int(-device.lastSeenAt.timeIntervalSinceNow)
-        if elapsed < 90 { return "פָּעִיל עַכְשָׁו 🟢" }
+        if elapsed < 90 { return "פָּעִיל עַכְשָׁיו 🟢" }
         if elapsed < 3600 { return "נִרְאָה לִפְנֵי \(elapsed / 60) דַּקּוֹת" }
         if elapsed < 86400 { return "נִרְאָה לִפְנֵי \(elapsed / 3600) שָׁעוֹת" }
         return "נִרְאָה לִפְנֵי \(elapsed / 86400) יָמִים"
