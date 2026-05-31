@@ -15,6 +15,7 @@ struct LoginGateView: View {
     var limitBanner: Bool = false
 
     @EnvironmentObject var auth: AuthManager
+    @EnvironmentObject var settings: ParentSettings
     @Environment(\.horizontalSizeClass) private var hsc
     @Environment(\.colorScheme) private var colorScheme
 
@@ -50,6 +51,7 @@ struct LoginGateView: View {
                         hero
                         if limitBanner { limitBannerView }
                         valueProps
+                        if settings.pendingJoinFamily { joinFamilyBanner }
                         signInButtons
                         Spacer(minLength: AppSpacing.lg)
                         footer
@@ -60,6 +62,30 @@ struct LoginGateView: View {
                     .frame(maxWidth: .infinity)
                 }
                 .scrollIndicators(.hidden)
+            }
+
+            // Back to the device-role choice (in case "parent" was tapped by
+            // mistake). Only shown when a role is already set.
+            if settings.deviceRole != .unset {
+                VStack {
+                    HStack {
+                        Button {
+                            Haptic.light()
+                            settings.pendingJoinFamily = false
+                            settings.deviceRole = .unset
+                        } label: {
+                            Label("חֲזָרָה", systemImage: "chevron.backward")
+                                .font(.system(size: 15, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 14).padding(.vertical, 8)
+                                .background(.white.opacity(0.16), in: Capsule())
+                        }
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.top, AppSpacing.sm)
             }
         }
         .onAppear { runEntranceSequence() }
@@ -210,6 +236,26 @@ struct LoginGateView: View {
                     .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
             }
 
+            // Co-parent joining an existing family (with an invite code).
+            Button {
+                Haptic.light()
+                settings.pendingJoinFamily.toggle()
+            } label: {
+                Label(settings.pendingJoinFamily
+                        ? "✓ מִצְטָרְפִים לְמִשְׁפָּחָה קַיֶּמֶת"
+                        : "כְּבָר יֵשׁ לָכֶם מִשְׁפָּחָה? הִצְטָרְפוּ",
+                      systemImage: "person.2.badge.plus.fill")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: 360).frame(height: 48)
+                    .background(settings.pendingJoinFamily
+                                ? AnyShapeStyle(AppColor.successMint.opacity(0.4))
+                                : AnyShapeStyle(.white.opacity(0.10)),
+                                in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(.white.opacity(0.28), lineWidth: 1))
+            }
+
             // Try without an account (capped at 30 questions).
             if allowGuest {
                 Button {
@@ -235,6 +281,22 @@ struct LoginGateView: View {
         }
         .opacity(ctaAppear ? 1 : 0)
         .offset(y: ctaAppear ? 0 : 18)
+    }
+
+    private var joinFamilyBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "person.2.fill")
+                .foregroundStyle(AppColor.successMint)
+            Text("הִתְחַבְּרוּ עִם הַחֶשְׁבּוֹן שֶׁלָּכֶם — וּמִיָּד תַּזִּינוּ אֶת קוֹד הַמִּשְׁפָּחָה שֶׁקִּבַּלְתֶּם.")
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(14)
+        .frame(maxWidth: 440)
+        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .stroke(AppColor.successMint.opacity(0.5), lineWidth: 1))
     }
 
     // MARK: - Footer

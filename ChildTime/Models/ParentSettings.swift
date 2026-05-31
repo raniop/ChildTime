@@ -36,6 +36,7 @@ final class ParentSettings: ObservableObject {
         static let deviceRole = "deviceRole"
         static let hasSeenWelcome = "hasSeenWelcome"
         static let hasPromptedChildAppLock = "hasPromptedChildAppLock"
+        static let pendingJoinFamily = "pendingJoinFamily"
         static let joinedChildID = "joinedChildID"
         static let hasSetParentPIN = "hasSetParentPIN"
     }
@@ -219,6 +220,12 @@ final class ParentSettings: ObservableObject {
     }
     /// Whether we've already offered the one-time "choose apps to lock" setup on
     /// this child device (so we don't nag every launch).
+    /// Set on the login screen when a parent chose "join an existing family".
+    /// After they sign in, the dashboard auto-opens the family-linking sheet so
+    /// they can enter the invite code instead of starting a fresh family.
+    @Published var pendingJoinFamily: Bool {
+        didSet { defaults.set(pendingJoinFamily, forKey: Key.pendingJoinFamily) }
+    }
     @Published var hasPromptedChildAppLock: Bool {
         didSet { defaults.set(hasPromptedChildAppLock, forKey: Key.hasPromptedChildAppLock) }
     }
@@ -337,6 +344,7 @@ final class ParentSettings: ObservableObject {
         self.deviceRole = DeviceRole(rawValue: d.string(forKey: Key.deviceRole) ?? "") ?? .unset
         self.hasSeenWelcome = d.bool(forKey: Key.hasSeenWelcome)
         self.hasPromptedChildAppLock = d.bool(forKey: Key.hasPromptedChildAppLock)
+        self.pendingJoinFamily = d.bool(forKey: Key.pendingJoinFamily)
         self.joinedChildID = d.string(forKey: Key.joinedChildID)
         self.hasSetParentPIN = d.bool(forKey: Key.hasSetParentPIN)
     }

@@ -6,6 +6,7 @@ import SwiftUI
 struct ChildJoinView: View {
     @ObservedObject private var household = HouseholdManager.shared
     @EnvironmentObject var profiles: ProfileStore
+    @EnvironmentObject var settings: ParentSettings
     @State private var companion = CompanionController()
     @State private var code = ""
     @State private var showScanner = false
@@ -17,6 +18,27 @@ struct ChildJoinView: View {
             AppGradient.dreamy.ignoresSafeArea()
             FloatingOrbs.home()
             SparkleField(count: 22, size: 14)
+
+            // Back to device-role choice (in case "child" was tapped by mistake).
+            VStack {
+                HStack {
+                    Button {
+                        Haptic.light()
+                        settings.deviceRole = .unset
+                    } label: {
+                        Label("חֲזָרָה", systemImage: "chevron.backward")
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14).padding(.vertical, 8)
+                            .background(.white.opacity(0.16), in: Capsule())
+                    }
+                    Spacer()
+                }
+                Spacer()
+            }
+            .padding(.horizontal, AppSpacing.md)
+            .padding(.top, AppSpacing.sm)
+            .zIndex(2)
 
             ScrollView {
                 VStack(spacing: AppSpacing.lg) {
