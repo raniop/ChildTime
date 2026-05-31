@@ -146,6 +146,8 @@ struct WorldMapView: View {
                 heroAppeared = true
             }
             checkWorldUnlocks()
+            // Returning after being away earns a "welcome back" spin.
+            progress.grantComebackWheelIfReturning()
             // Wheel pops when we return to the map after earning a free spin.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 maybeAutoPresentWheel()

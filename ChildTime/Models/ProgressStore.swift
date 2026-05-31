@@ -39,6 +39,8 @@ final class ProgressStore: ObservableObject {
         static let topicExposure = "topicExposure"
         static let topicAbandon = "topicAbandon"
         static let wheelProgressCount = "wheelProgressCount"
+        static let pendingBonusWheel = "pendingBonusWheel"
+        static let lastComebackWheelAt = "lastComebackWheelAt"
         static let recoveryPot = "recoveryPot"
     }
 
@@ -214,6 +216,20 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var wheelProgressCount: Int {
         didSet { defaults.set(wheelProgressCount, forKey: Key.wheelProgressCount) }
     }
+    /// A free spin earned by a special moment (a comeback after being away, or a
+    /// hot correct-answer streak) — surfaces the wheel even before the normal
+    /// per-question count is reached, to pull the kid back and keep momentum.
+    @Published private(set) var pendingBonusWheel: Bool {
+        didSet { defaults.set(pendingBonusWheel, forKey: Key.pendingBonusWheel) }
+    }
+    /// When we last gave a "welcome back" bonus wheel, so it fires at most once
+    /// per day even if the child reopens the app repeatedly.
+    @Published private(set) var lastComebackWheelAt: Date? {
+        didSet {
+            if let d = lastComebackWheelAt { defaults.set(d, forKey: Key.lastComebackWheelAt) }
+            else { defaults.removeObject(forKey: Key.lastComebackWheelAt) }
+        }
+    }
     /// Minutes lost to the most recent mistake, refundable by a clean correct
     /// answer on the very next question (Risk & Recovery loop). 0 = nothing pending.
     @Published private(set) var recoveryPot: Int {
@@ -264,6 +280,8 @@ final class ProgressStore: ObservableObject {
         self.topicExposure = (d.dictionary(forKey: Key.topicExposure) as? [String: Int]) ?? [:]
         self.topicAbandon = (d.dictionary(forKey: Key.topicAbandon) as? [String: Int]) ?? [:]
         self.wheelProgressCount = d.integer(forKey: Key.wheelProgressCount)
+        self.pendingBonusWheel = d.bool(forKey: Key.pendingBonusWheel)
+        self.lastComebackWheelAt = d.object(forKey: Key.lastComebackWheelAt) as? Date
         self.recoveryPot = d.integer(forKey: Key.recoveryPot)
     }
 
@@ -332,9 +350,28 @@ final class ProgressStore: ObservableObject {
         max(0, ParentSettings.shared.questionsPerWheel - wheelProgressCount)
     }
 
-    /// True once enough questions have been answered to earn a free spin.
+    /// True once enough questions have been answered to earn a free spin — or
+    /// when a bonus spin was granted (comeback / hot streak).
     var freeWheelAvailable: Bool {
-        wheelProgressCount >= ParentSettings.shared.questionsPerWheel
+        pendingBonusWheel || wheelProgressCount >= ParentSettings.shared.questionsPerWheel
+    }
+
+    /// Grant a free spin for a special moment (comeback / streak).
+    func grantBonusWheel() {
+        pendingBonusWheel = true
+    }
+
+    /// If the child is returning after being away (~a day), hand them a
+    /// "welcome back" spin — at most once per calendar day. Call on the map
+    /// before auto-presenting the wheel.
+    func grantComebackWheelIfReturning() {
+        guard let last = lastSessionDate else { return }   // brand-new child → no comeback
+        let hoursAway = -last.timeIntervalSinceNow / 3600
+        guard hoursAway >= 20 else { return }
+        let cal = Calendar.current
+        if let granted = lastComebackWheelAt, cal.isDate(granted, inSameDayAs: Date()) { return }
+        lastComebackWheelAt = Date()
+        grantBonusWheel()
     }
 
     /// Approximate number of correct answers needed to reach the next level.
@@ -344,9 +381,11 @@ final class ProgressStore: ObservableObject {
         return Int(ceil(Double(remaining) / Double(perCorrect)))
     }
 
-    /// Reset the wheel counter after the child spins the free wheel.
+    /// Reset the wheel counter after the child spins the free wheel (also clears
+    /// any pending bonus spin).
     func resetWheelProgress() {
         wheelProgressCount = 0
+        pendingBonusWheel = false
     }
 
     /// Records that the child abandoned a topic (replaced its question or quit
@@ -421,6 +460,9 @@ final class ProgressStore: ObservableObject {
         correctToday += 1
         currentStreak += 1
         wrongStreak = 0  // any correct answer breaks the penalty streak
+        // Hot-streak reward: a free spin at streak milestones (fires once each
+        // since the streak rises by 1) — keeps the run exciting and motivating.
+        if currentStreak == 5 || currentStreak == 10 { grantBonusWheel() }
         // Stars scale with the NEW streak length, so each consecutive correct
         // answer is worth more — the incentive to keep the run going.
         let earned = RewardEngine.starsForCorrect(
