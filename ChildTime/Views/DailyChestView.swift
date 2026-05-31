@@ -26,9 +26,12 @@ struct DailyChestView: View {
                 Spacer()
 
                 Text("קֻפְסַת קֶסֶם יוֹמִית")
-                    .font(AppFont.title())
+                    .font(.system(size: isCompact ? 34 : 48, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.6)
+                    .padding(.horizontal, AppSpacing.md)
                     .frame(maxWidth: .infinity)
                     .glow(AppColor.gemPurple, radius: 12)
 
