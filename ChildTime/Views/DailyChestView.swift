@@ -25,7 +25,7 @@ struct DailyChestView: View {
             VStack(spacing: AppSpacing.lg) {
                 Spacer()
 
-                Text("🎁 קֻפְסַת קֶסֶם יוֹמִית")
+                Text("קֻפְסַת קֶסֶם יוֹמִית")
                     .font(AppFont.title())
                     .foregroundStyle(.white)
                     .glow(AppColor.gemPurple, radius: 12)
