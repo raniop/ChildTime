@@ -63,23 +63,15 @@ struct LuckyWheelView: View {
             // never has to find/scroll to a button (e.g. on landscape iPad).
             .overlay {
                 if winner != nil {
-                    VStack {
-                        Spacer()
-                        Text("לַחֲצוּ בְּכָל מָקוֹם כְּדֵי לְהַמְשִׁיךְ 👆")
-                            .font(.system(size: 18, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 22).padding(.vertical, 12)
-                            .background(.black.opacity(0.45), in: Capsule())
-                            .padding(.bottom, 48)
-                            .pulse()
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        Haptic.light()
-                        onClose()
-                    }
-                    .transition(.opacity)
+                    // Tap anywhere to continue — no on-screen hint text needed.
+                    Color.clear
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            Haptic.light()
+                            onClose()
+                        }
+                        .transition(.opacity)
                 } else if !isSpinning {
                     // Before spinning, a tap ANYWHERE spins too — not only on
                     // the wheel itself.

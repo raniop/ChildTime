@@ -70,6 +70,7 @@ struct QuestionRunnerView: View {
     @State private var reportedDiscovery: Set<Topic> = []
     @State private var showParentAssist = false
     @State private var assistOfferedThisQuestion = false
+    @State private var showReportConfirm = false
     @State private var capMessageShown = false
 
     /// Earn mode: the parent's session length, hard-capped at 30 ("no matter
@@ -181,6 +182,19 @@ struct QuestionRunnerView: View {
             ParentAssistView { }
                 .environment(\.layoutDirection, .rightToLeft)
         }
+        .confirmationDialog("דִּוּוּחַ עַל הַשְּׁאֵלָה",
+                            isPresented: $showReportConfirm, titleVisibility: .visible) {
+            Button("דַּוְּחוּ וְהַסִּירוּ אֶת הַשְּׁאֵלָה", role: .destructive) {
+                if let q = current {
+                    QuestionReporter.shared.report(q)
+                    Haptic.success()
+                    createQuestion(super: false)   // replace with a fresh question
+                }
+            }
+            Button("בִּטּוּל", role: .cancel) {}
+        } message: {
+            Text("נָסִיר אֶת הַשְּׁאֵלָה הַזּוֹ וְלֹא נַצִּיג אוֹתָהּ שׁוּב, וְנִשְׁלַח עָלֶיהָ דִּוּוּחַ כְּדֵי שֶׁנְּשַׁפֵּר.")
+        }
         .onAppear { startSession() }
         .onDisappear {
             // Tell the parent the child finished playing (once), with a brief
@@ -256,6 +270,14 @@ struct QuestionRunnerView: View {
                 closeButton(size: isCompact ? 26 : 32)
                 progressIndicator
                 StreakMeter(streak: progress.currentStreak)
+                // Parent: flag a bad question (confirmed, so a kid won't trigger it).
+                Button { showReportConfirm = true } label: {
+                    Image(systemName: "flag")
+                        .font(.system(size: isCompact ? 14 : 16, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .frame(width: isCompact ? 30 : 34, height: isCompact ? 30 : 34)
+                        .background(.white.opacity(0.12), in: Circle())
+                }
             }
             HStack(spacing: isCompact ? 6 : 10) {
                 Spacer(minLength: 0)
@@ -453,9 +475,10 @@ struct QuestionRunnerView: View {
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.5)
+                .fixedSize(horizontal: false, vertical: true)   // never truncate the question
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, AppSpacing.lg)
-                .padding(.vertical, AppSpacing.xl)
+                .padding(.vertical, AppSpacing.lg)
                 .background(
                     RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                         .fill(.white.opacity(0.12))
@@ -697,6 +720,12 @@ struct QuestionRunnerView: View {
                 q = QuestionGenerator.generate(topic: topic, difficulty: effective)
                 tries += 1
             }
+        }
+        // Skip questions a parent reported/removed.
+        var hideTries = 0
+        while QuestionReporter.shared.isHidden(q.prompt), hideTries < 12 {
+            q = QuestionGenerator.generate(topic: topic, difficulty: effective)
+            hideTries += 1
         }
         QuestionMemory.shared.markServedThisSession(sessionKey(q))
         current = q

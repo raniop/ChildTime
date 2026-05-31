@@ -68,6 +68,12 @@ service cloud.firestore {
       allow read, delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
+    // Parent-flagged "bad question" reports — any signed-in user may submit;
+    // only admins (via console) read them. No client reads/edits.
+    match /questionReports/{id} {
+      allow create: if signedIn();
+    }
+
     // Legacy per-user progress path (older builds wrote here). Owner-only.
     match /users/{uid}/{document=**} {
       allow read, write: if signedIn() && request.auth.uid == uid;
