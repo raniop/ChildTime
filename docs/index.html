@@ -3,30 +3,277 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>טופי — ChildTime</title>
+<title>טופי — לומדים, ומרוויחים זמן מסך</title>
+<meta name="description" content="טופי הופך זמן מסך לפרס שמרוויחים בלמידה. הילד עונה על שאלות בחשבון, עברית, אנגלית ומדע — ומקבל דקות משחק אמיתיות. ההורה רואה ושולט מהטלפון שלו.">
+<meta property="og:title" content="טופי — לומדים, ומרוויחים זמן מסך">
+<meta property="og:description" content="זמן מסך שמרוויחים בלמידה. כיף לילד, שקט להורה.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='52' r='34' fill='%23FFB02E'/><circle cx='40' cy='48' r='5' fill='%23000'/><circle cx='60' cy='48' r='5' fill='%23000'/></svg>">
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-         max-width: 740px; margin: 60px auto; padding: 0 20px; line-height: 1.6;
-         color: #1d1d1f; text-align: center; }
-  h1 { font-size: 48px; margin-bottom: 8px; }
-  .tagline { font-size: 20px; color: #6e6e73; margin-bottom: 40px; }
-  .links { margin-top: 40px; }
-  .links a { display: inline-block; margin: 8px;
-             padding: 12px 24px; background: #007aff;
-             color: white; text-decoration: none; border-radius: 12px;
-             font-weight: 600; }
-  .links a:hover { background: #0051d5; }
-  .emoji { font-size: 72px; margin: 20px 0; }
+  :root{
+    --indigo:#5E60CE; --teal:#48BFE3; --gold:#FFD23F; --purple:#9B5DE5;
+    --pink:#FF6B9D; --mint:#06D6A0; --glow:#FFB84D; --ink:#1b1340;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Heebo","Helvetica Neue",Arial,sans-serif;
+    color:#fff; background:#4b2e9e; overflow-x:hidden; line-height:1.6;
+  }
+  a{color:inherit; text-decoration:none}
+
+  /* ---------- animated star backdrop ---------- */
+  .bg{position:fixed; inset:0; z-index:-2;
+    background:linear-gradient(160deg,#5E60CE 0%, #6A4BD0 35%, #48BFE3 100%);}
+  .stars{position:fixed; inset:0; z-index:-1; overflow:hidden}
+  .star{position:absolute; opacity:.8; animation:tw 3s ease-in-out infinite}
+  @keyframes tw{0%,100%{opacity:.25; transform:scale(.7)} 50%{opacity:.95; transform:scale(1.1)}}
+  @keyframes floaty{0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)}}
+
+  .wrap{max-width:1080px; margin:0 auto; padding:0 22px}
+
+  /* ---------- header ---------- */
+  header{position:sticky; top:0; z-index:50; backdrop-filter:blur(12px);
+    background:rgba(75,46,158,.35); border-bottom:1px solid rgba(255,255,255,.12)}
+  header .wrap{display:flex; align-items:center; justify-content:space-between; height:64px}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:900; font-size:24px}
+  .brand .dot{width:34px;height:34px}
+  .nav a{margin-inline-start:18px; font-weight:600; opacity:.9; font-size:15px}
+  .nav a:hover{opacity:1}
+  .btn{display:inline-block; font-weight:800; border-radius:999px; padding:12px 24px;
+    background:linear-gradient(180deg,var(--gold),#F2A93B); color:#3a2a00;
+    box-shadow:0 8px 24px rgba(255,184,77,.45); transition:transform .15s, box-shadow .15s}
+  .btn:hover{transform:translateY(-2px); box-shadow:0 12px 30px rgba(255,184,77,.6)}
+  .btn.ghost{background:rgba(255,255,255,.16); color:#fff; box-shadow:none; border:1px solid rgba(255,255,255,.3)}
+  @media(max-width:640px){.nav a:not(.btn){display:none}}
+
+  /* ---------- hero ---------- */
+  .hero{text-align:center; padding:70px 0 40px}
+  .hero h1{font-size:clamp(42px,8vw,84px); font-weight:900; line-height:1.05;
+    background:linear-gradient(180deg,#fff,#FFE9A8); -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 6px 40px rgba(255,210,63,.25)}
+  .hero .sub{font-size:clamp(18px,3.4vw,26px); font-weight:700; margin:18px auto 6px; max-width:680px; opacity:.96}
+  .hero .micro{font-size:16px; opacity:.8; margin-bottom:30px}
+  .mascot{width:clamp(150px,34vw,230px); margin:6px auto 18px; animation:floaty 4s ease-in-out infinite; filter:drop-shadow(0 18px 40px rgba(0,0,0,.3))}
+  .cta-row{display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:8px}
+  .badge{display:inline-flex; align-items:center; gap:8px; font-weight:800; font-size:17px;
+    padding:13px 26px; border-radius:16px; background:#000; color:#fff; border:1px solid rgba(255,255,255,.18)}
+  .badge small{display:block; font-size:11px; font-weight:600; opacity:.8}
+  .pill{display:inline-block; margin-top:22px; font-size:14px; font-weight:700; padding:7px 16px;
+    border-radius:999px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25)}
+
+  /* ---------- generic section ---------- */
+  section{padding:64px 0}
+  .eyebrow{text-align:center; font-weight:800; color:var(--gold); letter-spacing:.5px; margin-bottom:8px}
+  h2.title{text-align:center; font-size:clamp(28px,5vw,44px); font-weight:900; margin-bottom:10px}
+  .lead{text-align:center; max-width:640px; margin:0 auto 40px; opacity:.9; font-size:18px}
+
+  .reveal{opacity:0; transform:translateY(26px); transition:opacity .7s, transform .7s}
+  .reveal.in{opacity:1; transform:none}
+
+  /* steps */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:20px}
+  .step{background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16);
+    border-radius:24px; padding:30px 22px; text-align:center}
+  .step .n{width:44px;height:44px;line-height:44px;border-radius:50%;margin:0 auto 14px;
+    font-weight:900; background:linear-gradient(180deg,var(--gold),#F2A93B); color:#3a2a00}
+  .step .ico{font-size:46px; margin-bottom:10px}
+  .step h3{font-size:21px; margin-bottom:8px}
+  .step p{opacity:.88; font-size:15px}
+
+  /* video */
+  .video-wrap{max-width:380px; margin:0 auto; border-radius:38px; overflow:hidden;
+    border:10px solid #1c1340; box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .video-wrap video{display:block; width:100%; background:#000}
+
+  /* features */
+  .feat{display:grid; grid-template-columns:repeat(3,1fr); gap:18px}
+  .card{background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16);
+    border-radius:22px; padding:26px; transition:transform .2s, background .2s}
+  .card:hover{transform:translateY(-4px); background:rgba(255,255,255,.16)}
+  .card .ico{font-size:38px; margin-bottom:12px}
+  .card h3{font-size:19px; margin-bottom:6px}
+  .card p{opacity:.86; font-size:15px}
+  @media(max-width:780px){.steps,.feat{grid-template-columns:1fr}}
+
+  /* parents band */
+  .band{background:rgba(27,19,64,.45); border-radius:32px; padding:48px 28px; text-align:center;
+    border:1px solid rgba(255,255,255,.14)}
+  .band ul{list-style:none; display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top:24px}
+  .band li{font-weight:700; font-size:16px; background:rgba(255,255,255,.12); padding:10px 18px; border-radius:14px}
+
+  /* faq */
+  .faq{max-width:760px; margin:0 auto}
+  details{background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.16);
+    border-radius:16px; padding:18px 22px; margin-bottom:12px}
+  details summary{font-weight:800; font-size:18px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; gap:12px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+"; font-size:24px; opacity:.7}
+  details[open] summary::after{content:"–"}
+  details p{margin-top:12px; opacity:.9}
+
+  /* footer */
+  footer{text-align:center; padding:50px 0 40px; opacity:.85; font-size:14px}
+  footer a{font-weight:700; margin:0 10px; text-decoration:underline}
+
+  .final{text-align:center}
+  .final h2{font-size:clamp(26px,5vw,40px); font-weight:900; margin-bottom:8px}
+  .final p{opacity:.9; margin-bottom:26px; font-size:18px}
 </style>
 </head>
 <body>
-  <div class="emoji">✨</div>
-  <h1>טופי</h1>
-  <p class="tagline">למידה שפותחת זמן משחק לילדים בגילאי 4-10</p>
+<div class="bg"></div>
+<div class="stars" id="stars"></div>
 
-  <div class="links">
-    <a href="privacy-policy.html">מדיניות פרטיות</a>
+<!-- shared mascot face gradient -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <radialGradient id="face" cx="40%" cy="35%" r="75%">
+    <stop offset="0%" stop-color="#FFF3C4"/>
+    <stop offset="45%" stop-color="#FFC94A"/>
+    <stop offset="100%" stop-color="#F5921E"/>
+  </radialGradient>
+</defs></svg>
+
+<header><div class="wrap">
+  <div class="brand">
+    <svg class="dot" viewBox="0 0 100 100"><circle cx="50" cy="54" r="34" fill="url(#face)"/><circle cx="40" cy="50" r="5.5" fill="#1b1340"/><circle cx="60" cy="50" r="5.5" fill="#1b1340"/><path d="M40 64 Q50 73 60 64" stroke="#1b1340" stroke-width="4.5" fill="none" stroke-linecap="round"/></svg>
+    <span>טופי</span>
+  </div>
+  <nav class="nav">
+    <a href="#how">איך זה עובד</a>
+    <a href="#features">יכולות</a>
+    <a href="#parents">להורים</a>
+    <a href="#faq">שאלות</a>
+    <a class="btn" href="#download">הורידו</a>
+  </nav>
+</div></header>
+
+<!-- HERO -->
+<section class="hero"><div class="wrap">
+  <svg class="mascot" viewBox="0 0 220 220">
+    <circle cx="110" cy="115" r="92" fill="#fff" opacity="0.10"/>
+    <circle cx="110" cy="115" r="74" fill="url(#face)"/>
+    <circle cx="92" cy="106" r="11" fill="#1b1340"/><circle cx="95" cy="103" r="3.4" fill="#fff"/>
+    <circle cx="128" cy="106" r="11" fill="#1b1340"/><circle cx="131" cy="103" r="3.4" fill="#fff"/>
+    <circle cx="80" cy="126" r="9" fill="#FF8FA3" opacity=".6"/>
+    <circle cx="140" cy="126" r="9" fill="#FF8FA3" opacity=".6"/>
+    <path d="M92 132 Q110 150 128 132" stroke="#1b1340" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M110 16 l6 14 14 6 -14 6 -6 14 -6 -14 -14 -6 14 -6z" fill="#FFD23F"/>
+  </svg>
+  <h1>זמן מסך<br>שמרוויחים בלמידה</h1>
+  <p class="sub">הילד לומד, עונה על שאלות — ומקבל דקות משחק אמיתיות. כיף לילד, שקט להורה.</p>
+  <p class="micro">לגילאי 4–10 · עברית מלאה · חשבון, עברית, אנגלית, מדע ועוד</p>
+  <div class="cta-row">
+    <a class="badge" href="#download"><span>הורידו ל-iPhone &amp; iPad<small>בקרוב ב-App Store</small></span></a>
+    <a class="btn ghost" href="#video">צפו איך זה עובד ▶</a>
+  </div>
+  <div class="pill">🔒 מאובטח למשפחה · ללא פרסומות לילד</div>
+</div></section>
+
+<!-- HOW -->
+<section id="how"><div class="wrap">
+  <div class="eyebrow reveal">פשוט וברור</div>
+  <h2 class="title reveal">איך זה עובד</h2>
+  <p class="lead reveal">במקום לתת זמן מסך בחינם — הופכים אותו לעסקה הוגנת שכולם מרוויחים ממנה.</p>
+  <div class="steps">
+    <div class="step reveal"><div class="n">1</div><div class="ico">🧠</div><h3>הילד לומד ומשחק</h3><p>שאלות מותאמות גיל בחשבון, עברית, אנגלית, מדע ועוד — בתוך הרפתקה צבעונית.</p></div>
+    <div class="step reveal"><div class="n">2</div><div class="ico">🎮</div><h3>מרוויח זמן מסך</h3><p>כל כמה תשובות נכונות פותחות דקות משחק אמיתיות באפליקציות שחסומות.</p></div>
+    <div class="step reveal"><div class="n">3</div><div class="ico">📊</div><h3>ההורה שולט ועוקב</h3><p>דוחות, חוזקות וחולשות, התראות ושליטה ברמת הקושי — ממכשיר נפרד, מאחורי קוד.</p></div>
+  </div>
+</div></section>
+
+<!-- VIDEO -->
+<section id="video"><div class="wrap">
+  <div class="eyebrow reveal">הצצה</div>
+  <h2 class="title reveal">טופי בפעולה</h2>
+  <p class="lead reveal">חצי דקה שמראה הכל — מהלמידה ועד הפרסים והמעקב להורה.</p>
+  <div class="video-wrap reveal">
+    <video src="tofy-explainer.mp4" controls playsinline preload="metadata"></video>
+  </div>
+</div></section>
+
+<!-- FEATURES -->
+<section id="features"><div class="wrap">
+  <div class="eyebrow reveal">למה ילדים (והורים) אוהבים</div>
+  <h2 class="title reveal">מלא דברים מגניבים</h2>
+  <div class="feat">
+    <div class="card reveal"><div class="ico">⭐</div><h3>כוכבים ורמות</h3><p>אוספים כוכבים, עולים רמות ופותחים עולמות חדשים.</p></div>
+    <div class="card reveal"><div class="ico">🎁</div><h3>תיבות אוצר</h3><p>פרסים מרגשים שנפתחים באנימציה — מדרבן להמשיך.</p></div>
+    <div class="card reveal"><div class="ico">🎡</div><h3>גלגל מזל</h3><p>סיבובי בונוס על רצף תשובות ועל חזרה לשחק.</p></div>
+    <div class="card reveal"><div class="ico">🧩</div><h3>למידה חכמה</h3><p>השאלות מתאימות את עצמן לרמת הילד ולתחומי העניין שלו.</p></div>
+    <div class="card reveal"><div class="ico">📱</div><h3>חסימת אפליקציות</h3><p>האפליקציות נעולות עד שמרוויחים — ואפשר לפתוח ידנית בכל רגע.</p></div>
+    <div class="card reveal"><div class="ico">🔔</div><h3>התראות חכמות</h3><p>ההורה יודע מתי הילד התחיל, סיים, או ביקש עזרה — ומאיזה מכשיר.</p></div>
+  </div>
+</div></section>
+
+<!-- PARENTS -->
+<section id="parents"><div class="wrap">
+  <div class="band reveal">
+    <div class="eyebrow">שקט נפשי</div>
+    <h2 class="title">בנוי גם בשביל ההורים</h2>
+    <p class="lead" style="margin-bottom:0">מסך בקרה במכשיר נפרד, נעול בקוד וב-Face ID. רואים את ההתקדמות, מקבלים המלצות, ושולטים בזמן המסך — מכל מקום.</p>
+    <ul>
+      <li>📈 דוחות והתקדמות</li>
+      <li>🎯 שליטה ברמת קושי</li>
+      <li>⏱️ פתיחת זמן ידנית</li>
+      <li>👨‍👩‍👧 כמה הורים, כמה ילדים</li>
+      <li>🔐 נעול בקוד</li>
+    </ul>
+  </div>
+</div></section>
+
+<!-- FAQ -->
+<section id="faq"><div class="wrap">
+  <h2 class="title reveal">שאלות נפוצות</h2>
+  <div class="faq" style="margin-top:30px">
+    <details class="reveal"><summary>לאיזה גיל טופי מתאים?</summary><p>לילדים בגילאי 4–10. התוכן ורמת הקושי מתאימים את עצמם לגיל ולרמת הילד.</p></details>
+    <details class="reveal"><summary>איך באמת נחסם זמן המסך?</summary><p>טופי משתמש ב-Screen Time של אפל (Family Controls) כדי לנעול אפליקציות שתבחרו, עד שהילד מרוויח דקות בלמידה. הכל מקומי ומאובטח.</p></details>
+    <details class="reveal"><summary>צריך שני מכשירים?</summary><p>מומלץ: מכשיר הילד לשחק עליו, ומכשיר ההורה למעקב ושליטה. אפשר גם לחבר כמה מכשירים לכל ילד.</p></details>
+    <details class="reveal"><summary>זה בטוח לילדים?</summary><p>כן. אין פרסומות לילד, הנתונים מופרדים לכל משפחה, וההגדרות נעולות מאחורי קוד הורה.</p></details>
+    <details class="reveal"><summary>כמה זה עולה?</summary><p>אפשר להתחיל בחינם. פרטים על מנוי יופיעו באפליקציה.</p></details>
+  </div>
+</div></section>
+
+<!-- FINAL CTA -->
+<section id="download"><div class="wrap final reveal">
+  <svg width="90" viewBox="0 0 220 220" style="margin-bottom:6px"><circle cx="110" cy="115" r="74" fill="url(#face)"/><circle cx="92" cy="106" r="11" fill="#1b1340"/><circle cx="128" cy="106" r="11" fill="#1b1340"/><path d="M92 132 Q110 150 128 132" stroke="#1b1340" stroke-width="6" fill="none" stroke-linecap="round"/></svg>
+  <h2>טופי הופך "תכבה את המסך"<br>ל"בוא נלמד עוד קצת"</h2>
+  <p>הצטרפו למשפחות שכבר הפכו את זמן המסך לזמן איכות.</p>
+  <a class="badge" href="mailto:ranioph@gmail.com?subject=טופי%20-%20מעוניין%20לנסות"><span>הורידו ל-iPhone &amp; iPad<small>בקרוב ב-App Store · ליצירת קשר לחצו</small></span></a>
+</div></section>
+
+<footer><div class="wrap">
+  <div>טופי (Tofy) · אפליקציית למידה וזמן מסך לילדים</div>
+  <div style="margin-top:10px">
+    <a href="privacy.html">מדיניות פרטיות</a> ·
+    <a href="support.html">תמיכה</a> ·
     <a href="mailto:ranioph@gmail.com">צור קשר</a>
   </div>
+  <div style="margin-top:14px; opacity:.6">© 2026 Tofy · tofyapp.com</div>
+</div></footer>
+
+<script>
+  // twinkling stars
+  (function(){
+    const c=document.getElementById('stars'); const N=70;
+    for(let i=0;i<N;i++){
+      const s=document.createElement('div'); s.className='star';
+      const z=Math.random(); const size=6+z*16;
+      s.textContent='✦';
+      s.style.left=(Math.random()*100)+'%';
+      s.style.top=(Math.random()*100)+'%';
+      s.style.fontSize=size+'px';
+      s.style.color=Math.random()<.55?'#FFD23F':'#fff';
+      s.style.animationDelay=(Math.random()*3)+'s';
+      s.style.animationDuration=(2+Math.random()*3)+'s';
+      c.appendChild(s);
+    }
+  })();
+  // scroll reveal
+  const io=new IntersectionObserver((es)=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.15});
+  document.querySelectorAll('.reveal').forEach((el)=>io.observe(el));
+</script>
 </body>
 </html>
