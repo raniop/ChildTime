@@ -20,10 +20,12 @@
     <string>$(MARKETING_VERSION)</string>
     <key>CFBundleVersion</key>
     <string>$(CURRENT_PROJECT_VERSION)</string>
-    <key>EXAppExtensionAttributes</key>
+    <key>NSExtension</key>
     <dict>
-        <key>EXExtensionPointIdentifier</key>
+        <key>NSExtensionPointIdentifier</key>
         <string>com.apple.deviceactivity.monitor-extension</string>
+        <key>NSExtensionPrincipalClass</key>
+        <string>$(PRODUCT_MODULE_NAME).DeviceActivityMonitorExtension</string>
     </dict>
 </dict>
 </plist>
