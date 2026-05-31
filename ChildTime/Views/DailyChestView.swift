@@ -39,7 +39,7 @@ struct DailyChestView: View {
                     .padding(.vertical, AppSpacing.lg)
 
                 if stage == .glowing {
-                    Text("טַאפּ לִפְתֹּחַ!")
+                    Text("לַחֲצוּ לִפְתִיחָה!")
                         .font(AppFont.subtitle())
                         .foregroundStyle(.white)
                         .pulse()

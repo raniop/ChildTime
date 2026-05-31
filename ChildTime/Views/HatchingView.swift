@@ -73,7 +73,7 @@ struct HatchingView: View {
             if stage == 0 {
                 VStack {
                     Spacer()
-                    Text("טַאפּ עַל הַבֵּיצָה")
+                    Text("לַחֲצוּ עַל הַבֵּיצָה")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .pulse()

@@ -65,7 +65,7 @@ struct LuckyWheelView: View {
                 if winner != nil {
                     VStack {
                         Spacer()
-                        Text("טַאפּ בְּכָל מָקוֹם כְּדֵי לְהַמְשִׁיךְ 👆")
+                        Text("לַחֲצוּ בְּכָל מָקוֹם כְּדֵי לְהַמְשִׁיךְ 👆")
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 22).padding(.vertical, 12)

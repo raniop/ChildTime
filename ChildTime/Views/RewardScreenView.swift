@@ -52,7 +52,7 @@ struct RewardScreenView: View {
                                 heroTitle
                                 chestBlock
                                 if stage == .glowing {
-                                    Text("לְחַץ כְּדֵי לִפְתֹּחַ! ✨")
+                                    Text("לַחֲצוּ לִפְתִיחָה! ✨")
                                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                                         .foregroundStyle(.white)
                                         .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
