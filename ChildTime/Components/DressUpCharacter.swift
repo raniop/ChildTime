@@ -57,9 +57,10 @@ struct DressUpCharacter: View {
             .offset(y: -size * 0.06)
             .scaleEffect(x: breathe ? 1.02 : 1.0, y: breathe ? 0.98 : 1.0, anchor: .bottom)
 
-            // Torso cosmetics.
-            if let p = item(.pants) { worn(p, y: 0.18, scale: 0.40) }
-            if let s = item(.shirt) { worn(s, y: 0.02, scale: 0.44) }
+            // Torso cosmetics. The shirt is drawn as VECTOR so it fits the body
+            // (an emoji shirt just floats); other items use their render.
+            if let p = item(.pants) { worn(p, y: 0.20, scale: 0.40) }
+            if item(.shirt) != nil { vectorShirt.offset(y: size * 0.06) }
 
             if let sh = item(.shoes) {
                 HStack(spacing: size * 0.12) { wornRaw(sh, scale: 0.20); wornRaw(sh, scale: 0.20) }
@@ -67,9 +68,9 @@ struct DressUpCharacter: View {
             }
 
             // Face + head cosmetics.
-            if let g = item(.glasses) { worn(g, y: -0.20, scale: 0.40) }
-            if let a = item(.accessory) { worn(a, x: 0.42, y: 0.06, scale: 0.26, rotate: -6) }
-            if let h = item(.hat) { worn(h, y: -0.44, scale: 0.46) }
+            if let g = item(.glasses) { worn(g, y: -0.22, scale: 0.40) }
+            if let a = item(.accessory) { worn(a, x: 0.40, y: 0.10, scale: 0.24, rotate: -6) }
+            if let h = item(.hat) { worn(h, y: -0.52, scale: 0.40) }
         }
         .frame(width: size, height: H)
         .onAppear { startIdle() }
@@ -78,32 +79,59 @@ struct DressUpCharacter: View {
     // MARK: - Limbs
 
     private var legs: some View {
-        HStack(spacing: size * 0.14) {
+        HStack(spacing: size * 0.10) {
             ForEach(0..<2, id: \.self) { _ in
-                VStack(spacing: 0) {
-                    Capsule().fill(bodyColor).frame(width: size * 0.11, height: size * 0.14)
+                VStack(spacing: -size * 0.01) {
+                    Capsule().fill(bodyColor).frame(width: size * 0.12, height: size * 0.20)
                     Ellipse().fill(bodyColor)
-                        .frame(width: size * 0.17, height: size * 0.09)
+                        .frame(width: size * 0.18, height: size * 0.10)
                         .overlay(Ellipse().stroke(.white.opacity(0.2), lineWidth: 1))
-                        .offset(y: -size * 0.02)
                 }
             }
         }
-        .offset(y: size * 0.40)
+        .offset(y: size * 0.42)
     }
 
     private func arm(left: Bool) -> some View {
-        // Shoulder is tucked UNDER the body (arms draw behind it), so the joint
-        // is hidden and only the forearm + hand peek out — looks attached, not
-        // floating. The arm pivots from the shoulder.
-        VStack(spacing: -size * 0.015) {
-            Capsule().fill(bodyColor).frame(width: size * 0.105, height: size * 0.26)
-            Circle().fill(bodyColor).frame(width: size * 0.115, height: size * 0.115)   // hand
+        // Short, stubby arm that HANGS along the body. Shoulder tucks under the
+        // body (arms draw behind it), so it reads as attached, not floating.
+        VStack(spacing: -size * 0.012) {
+            Capsule().fill(bodyColor).frame(width: size * 0.10, height: size * 0.17)
+            Circle().fill(bodyColor).frame(width: size * 0.11, height: size * 0.11)   // hand
                 .overlay(Circle().stroke(.white.opacity(0.2), lineWidth: 1))
         }
-        .rotationEffect(.degrees(left ? 30 : (wave ? -52 : -30)), anchor: .top)
-        .offset(x: (left ? -1 : 1) * size * 0.28, y: -size * 0.04)
+        .rotationEffect(.degrees(left ? 12 : (wave ? -60 : -12)), anchor: .top)
+        .offset(x: (left ? -1 : 1) * size * 0.30, y: size * 0.06)
         .animation(.easeInOut(duration: 0.4), value: wave)
+    }
+
+    /// A cohesive vector shirt that fits the torso (collar + short sleeves +
+    /// rounded body) — looks worn, unlike a floating emoji.
+    private var vectorShirt: some View {
+        let w = size * 0.52
+        let h = size * 0.40
+        let shirtColor = Color(hex: "5AA9E6")
+        return ZStack {
+            // sleeves
+            HStack(spacing: w * 0.5) {
+                Capsule().fill(shirtColor).frame(width: w * 0.30, height: h * 0.34)
+                Capsule().fill(shirtColor).frame(width: w * 0.30, height: h * 0.34)
+            }
+            .offset(y: -h * 0.18)
+            // body
+            RoundedRectangle(cornerRadius: w * 0.18, style: .continuous)
+                .fill(LinearGradient(colors: [shirtColor, shirtColor.opacity(0.85)],
+                                     startPoint: .top, endPoint: .bottom))
+                .frame(width: w * 0.78, height: h)
+                .overlay(RoundedRectangle(cornerRadius: w * 0.18).stroke(.white.opacity(0.25), lineWidth: 1.5))
+            // collar
+            Triangle()
+                .fill(shirtColor.opacity(0.6))
+                .frame(width: w * 0.18, height: h * 0.22)
+                .offset(y: -h * 0.36)
+        }
+        .frame(width: w, height: h)
+        .shadow(color: .black.opacity(0.2), radius: 3, y: 2)
     }
 
     // MARK: - Face
@@ -183,6 +211,18 @@ struct DressUpCharacter: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { wave = false }
             scheduleWave()
         }
+    }
+}
+
+/// Downward-pointing triangle (shirt collar notch).
+private struct Triangle: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: r.minX, y: r.minY))
+        p.addLine(to: CGPoint(x: r.maxX, y: r.minY))
+        p.addLine(to: CGPoint(x: r.midX, y: r.maxY))
+        p.closeSubpath()
+        return p
     }
 }
 
