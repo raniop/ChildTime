@@ -63,7 +63,11 @@ struct ParentDashboardView: View {
                 let aLive = isChildPlayingNow(a.element.profile)
                 let bLive = isChildPlayingNow(b.element.profile)
                 if aLive != bLive { return aLive }      // live first
-                return a.offset < b.offset              // otherwise keep order
+                // Then most-recently-active child first (by last device heartbeat).
+                let aSeen = lastActivity(a.element.profile)
+                let bSeen = lastActivity(b.element.profile)
+                if aSeen != bSeen { return aSeen > bSeen }
+                return a.offset < b.offset              // stable fallback
             }
             .map { $0.element }
     }
@@ -583,13 +587,6 @@ struct ParentDashboardView: View {
                             .padding(.horizontal, 7)
                             .padding(.vertical, 3)
                             .background(Capsule().fill(AppColor.successMint.opacity(0.9)))
-                        } else if isActive {
-                            Text("פעיל")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Capsule().fill(AppColor.successMint))
                         }
                         Text(profile.name)
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
@@ -918,6 +915,15 @@ struct ParentDashboardView: View {
         _ = refreshTrigger   // recompute on the dashboard's 5s tick
         let devices = household.devicesByChild[profile.id.uuidString] ?? []
         return devices.contains { -$0.lastSeenAt.timeIntervalSinceNow < 75 }
+    }
+
+    /// Most recent time any of the child's devices was seen — used to order the
+    /// dashboard by who played last (most recent on top). `.distantPast` if the
+    /// child has no connected device yet.
+    private func lastActivity(_ profile: Profile) -> Date {
+        _ = refreshTrigger
+        let devices = household.devicesByChild[profile.id.uuidString] ?? []
+        return devices.map(\.lastSeenAt).max() ?? .distantPast
     }
 
     private func deviceSeenText(_ device: ChildDevice) -> String {
