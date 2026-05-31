@@ -28,6 +28,8 @@ struct DailyChestView: View {
                 Text("קֻפְסַת קֶסֶם יוֹמִית")
                     .font(AppFont.title())
                     .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
                     .glow(AppColor.gemPurple, radius: 12)
 
                 ChestView(kind: .magic, stage: stage, size: chestSize)
