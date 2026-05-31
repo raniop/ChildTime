@@ -49,14 +49,24 @@ struct ChildAppLockSetupView: View {
                             if shields.isAuthorized { showAppPicker = true }
                         }
                     } label: {
-                        Label(selectedCount > 0 ? "\(selectedCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ" : "בַּחֲרוּ אַפְּלִיקַצְיוֹת",
-                              systemImage: "app.badge.fill")
-                            .font(.system(size: 19, weight: .heavy, design: .rounded))
+                        Label(selectedCount > 0
+                                ? "\(selectedCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · הַקִּישׁוּ לַעֲרֹךְ"
+                                : "בַּחֲרוּ אַפְּלִיקַצְיוֹת",
+                              systemImage: selectedCount > 0 ? "checkmark.circle.fill" : "app.badge.fill")
+                            .font(.system(size: 18, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-                            .glow(AppColor.starGold, radius: 12)
+                            .background(
+                                selectedCount > 0
+                                    ? AnyShapeStyle(.white.opacity(0.18))
+                                    : AnyShapeStyle(AppGradient.gold),
+                                in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                    .stroke(.white.opacity(selectedCount > 0 ? 0.35 : 0), lineWidth: 1.5)
+                            )
+                            .glow(selectedCount > 0 ? .clear : AppColor.starGold, radius: 12)
                     }
                     .buttonStyle(.juicy)
 
@@ -67,15 +77,37 @@ struct ChildAppLockSetupView: View {
                             .multilineTextAlignment(.center)
                     }
 
-                    Button {
-                        Haptic.medium()
-                        finish()
-                    } label: {
-                        Text(selectedCount > 0 ? "סִיַּמְנוּ ✓" : "אַחַר כָּךְ")
-                            .font(.system(size: 17, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 28).padding(.vertical, 12)
-                            .background(.white.opacity(0.18), in: Capsule())
+                    // Clear primary "let's start" button once apps are chosen, so
+                    // it's obvious you confirm to continue (not just back out).
+                    if selectedCount > 0 {
+                        Button {
+                            Haptic.success()
+                            finish()
+                        } label: {
+                            Label("בּוֹאוּ נַתְחִיל! 🚀", systemImage: "checkmark.circle.fill")
+                                .font(.system(size: 21, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 17)
+                                .background(
+                                    LinearGradient(colors: [AppColor.successMint, Color(hex: "06A57E")],
+                                                   startPoint: .top, endPoint: .bottom),
+                                    in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                                .glow(AppColor.successMint, radius: 12)
+                        }
+                        .buttonStyle(.juicy)
+                        .padding(.top, AppSpacing.sm)
+                    } else {
+                        Button {
+                            Haptic.medium()
+                            finish()
+                        } label: {
+                            Text("אֶבְחַר אַחַר כָּךְ")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.85))
+                                .padding(.horizontal, 28).padding(.vertical, 12)
+                                .background(.white.opacity(0.12), in: Capsule())
+                        }
                     }
                 }
                 .padding(.horizontal, AppSpacing.lg)

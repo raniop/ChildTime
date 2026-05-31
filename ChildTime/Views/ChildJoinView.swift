@@ -24,7 +24,7 @@ struct ChildJoinView: View {
                     Text("הֵיי! בּוֹאוּ נִתְחַבֵּר")
                         .font(.system(size: 30, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text("בַּקְּשׁוּ מֵהַהוֹרֶה אֶת קוֹד הַחִבּוּר, וְסִרְקוּ אוֹתוֹ כָּאן.")
+                    Text("בְּמַכְשִׁיר הַהוֹרֶה מוֹפִיעַ קוֹד QR לַיֶּלֶד.\nסִרְקוּ אוֹתוֹ כָּאן וְהַמַּכְשִׁיר יִתְחַבֵּר.")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
