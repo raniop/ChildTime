@@ -270,14 +270,6 @@ struct QuestionRunnerView: View {
                 closeButton(size: isCompact ? 26 : 32)
                 progressIndicator
                 StreakMeter(streak: progress.currentStreak)
-                // Parent: flag a bad question (confirmed, so a kid won't trigger it).
-                Button { showReportConfirm = true } label: {
-                    Image(systemName: "flag")
-                        .font(.system(size: isCompact ? 14 : 16, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.7))
-                        .frame(width: isCompact ? 30 : 34, height: isCompact ? 30 : 34)
-                        .background(.white.opacity(0.12), in: Circle())
-                }
             }
             HStack(spacing: isCompact ? 6 : 10) {
                 Spacer(minLength: 0)
@@ -488,6 +480,18 @@ struct QuestionRunnerView: View {
                                         lineWidth: isSuperQuestion ? 3 : 1)
                         )
                 )
+                // Report a bad question — subtle flag in the card's top-left
+                // corner (confirmed, so a child won't trigger it by accident).
+                .overlay(alignment: .topTrailing) {
+                    Button { showReportConfirm = true } label: {
+                        Image(systemName: "flag")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.55))
+                            .padding(7)
+                            .background(.white.opacity(0.12), in: Circle())
+                    }
+                    .padding(8)
+                }
                 .glow(isSuperQuestion ? AppColor.starGold : .clear, radius: isSuperQuestion ? 16 : 0)
                 .padding(.horizontal, AppSpacing.lg)
         }
