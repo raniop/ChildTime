@@ -93,13 +93,16 @@ struct DressUpCharacter: View {
     }
 
     private func arm(left: Bool) -> some View {
-        VStack(spacing: -size * 0.01) {
-            Capsule().fill(bodyColor).frame(width: size * 0.10, height: size * 0.24)
-            Circle().fill(bodyColor).frame(width: size * 0.12, height: size * 0.12)   // hand
+        // Shoulder is tucked UNDER the body (arms draw behind it), so the joint
+        // is hidden and only the forearm + hand peek out — looks attached, not
+        // floating. The arm pivots from the shoulder.
+        VStack(spacing: -size * 0.015) {
+            Capsule().fill(bodyColor).frame(width: size * 0.105, height: size * 0.26)
+            Circle().fill(bodyColor).frame(width: size * 0.115, height: size * 0.115)   // hand
                 .overlay(Circle().stroke(.white.opacity(0.2), lineWidth: 1))
         }
-        .rotationEffect(.degrees(left ? 18 : (wave ? -55 : -18)), anchor: .top)
-        .offset(x: (left ? -1 : 1) * size * 0.36, y: size * 0.0)
+        .rotationEffect(.degrees(left ? 30 : (wave ? -52 : -30)), anchor: .top)
+        .offset(x: (left ? -1 : 1) * size * 0.28, y: -size * 0.04)
         .animation(.easeInOut(duration: 0.4), value: wave)
     }
 
