@@ -22,6 +22,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         #if canImport(FirebaseCore)
         if FirebaseApp.app() == nil { FirebaseApp.configure() }
         #endif
+        // Own notification handling from the very start so tapped action buttons
+        // (e.g. "כן, העלו רמה") are delivered even on a cold launch.
+        Task { @MainActor in
+            UNUserNotificationCenter.current().delegate = PushManager.shared
+            PushManager.shared.configureCategories()
+        }
         return true
     }
 

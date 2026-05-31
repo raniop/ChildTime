@@ -12,6 +12,15 @@ import UserNotifications
 enum InsightNotificationScheduler {
     private static let idPrefix = "insight."
 
+    /// One scheduled insight. When `levelUpTopic` is set, the notification gets
+    /// interactive "raise the level?" Yes/No buttons for that topic.
+    struct InsightItem {
+        let name: String
+        let text: String
+        var levelUpTopic: Topic? = nil
+        var childID: UUID? = nil
+    }
+
     /// Cancel any previously-scheduled insight notifications and, unless the
     /// frequency is off, schedule a fresh week of rotating per-child insights.
     static func reschedule(
@@ -31,7 +40,7 @@ enum InsightNotificationScheduler {
 
         // Build a pool of insight strings across all children, then shuffle so
         // consecutive notifications feel varied.
-        var pool: [(name: String, text: String)] = []
+        var pool: [InsightItem] = []
         for row in rows {
             // Only include kids with enough signal to say something real.
             guard row.snapshot.totalAnswered >= 4 else { continue }
@@ -60,6 +69,16 @@ enum InsightNotificationScheduler {
                 content.title = "טופי — \(item.name)"
                 content.body = item.text
                 content.sound = .default
+                // Strength insight → offer to raise the level right from the push.
+                if let topic = item.levelUpTopic {
+                    content.categoryIdentifier = PushManager.Category.insightLevelUp
+                    content.userInfo = [
+                        "action": "levelup",
+                        "topic": topic.rawValue,
+                        "childName": item.name,
+                        "childID": item.childID?.uuidString ?? ""
+                    ]
+                }
 
                 let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
                 let req = UNNotificationRequest(
@@ -79,46 +98,50 @@ enum InsightNotificationScheduler {
         for profile: Profile,
         snapshot s: ProgressSnapshot,
         enabledTopics: Set<Topic>
-    ) -> [(name: String, text: String)] {
+    ) -> [InsightItem] {
         let name = profile.name.isEmpty ? "הילד" : profile.name
         let lp = LearningProfile(snapshot: s, enabledTopics: enabledTopics, age: profile.age)
         let history = LearningHistoryStore.shared.history(for: profile.id)
         let engine = InsightsEngine(history: history, profile: lp)
         let coach = CoachingEngine(childName: name, insights: engine, profile: lp)
 
-        var out: [(String, String)] = []
+        var out: [InsightItem] = []
 
         // Improvement / week-over-week.
         let delta = engine.weeklyAccuracyDelta
         if delta >= 8 {
-            out.append((name, "📈 \(name) השתפר ב-\(Int(delta))% השבוע — שווה לציין לו כמה התקדם!"))
+            out.append(InsightItem(name: name, text: "📈 \(name) השתפר ב-\(Int(delta))% השבוע — שווה לציין לו כמה התקדם!"))
         }
 
-        // Strength.
+        // Strength → actionable: offer to raise the level for this topic.
         if let strong = engine.strengths.first {
-            out.append((name, "🌟 \(name) זוהר ב\(strong.displayName). אתגרו אותו בשאלה קצת יותר קשה."))
+            out.append(InsightItem(
+                name: name,
+                text: "🌟 \(name) זוהר ב\(strong.displayName). רוצים שאתגר אותו בשאלות קצת יותר קשות?",
+                levelUpTopic: strong,
+                childID: profile.id))
         }
 
         // Interest / discovery.
         if let disc = engine.discovering.first {
-            out.append((name, "🔭 \(name) מגלה עניין ב\(disc.displayName). עודדו אותו לבחור עוד שאלות בנושא."))
+            out.append(InsightItem(name: name, text: "🔭 \(name) מגלה עניין ב\(disc.displayName). עודדו אותו לבחור עוד שאלות בנושא."))
         } else if let fav = lp.favorites.first {
-            out.append((name, "💙 \(name) הכי אוהב \(fav.displayName). אפשר להתחיל מזה כדי לבנות ביטחון."))
+            out.append(InsightItem(name: name, text: "💙 \(name) הכי אוהב \(fav.displayName). אפשר להתחיל מזה כדי לבנות ביטחון."))
         }
 
         // Challenge + concrete tip.
         if let weak = engine.challenges.first, let tip = coach.recommendedActions().first {
-            out.append((name, "💪 כדאי לחזק את \(name) ב\(weak.displayName). \(tip.text)"))
+            out.append(InsightItem(name: name, text: "💪 כדאי לחזק את \(name) ב\(weak.displayName). \(tip.text)"))
         }
 
         // Self-initiated learning.
         if engine.thisWeek.voluntaryLearningRate >= 0.4 {
-            out.append((name, "🙋 \(name) בחר ללמוד מיוזמתו השבוע — סקרנות זה הדלק הכי טוב ללמידה!"))
+            out.append(InsightItem(name: name, text: "🙋 \(name) בחר ללמוד מיוזמתו השבוע — סקרנות זה הדלק הכי טוב ללמידה!"))
         }
 
         // Fallback so there's always something kind to say.
         if out.isEmpty {
-            out.append((name, "🌱 \(name) ממשיך לתרגל. 10 דקות משחק משותף היום יחזקו את ההרגל."))
+            out.append(InsightItem(name: name, text: "🌱 \(name) ממשיך לתרגל. 10 דקות משחק משותף היום יחזקו את ההרגל."))
         }
         return out
     }
