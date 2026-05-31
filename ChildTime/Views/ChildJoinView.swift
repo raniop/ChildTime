@@ -24,13 +24,13 @@ struct ChildJoinView: View {
                     Text("הֵיי! בּוֹאוּ נִתְחַבֵּר")
                         .font(.system(size: 30, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text("בַּקְּשׁוּ מֵהַהוֹרֶה אֶת הַקּוֹד שֶׁלָּכֶם, וְסִרְקוּ אוֹתוֹ כָּאן.")
+                    Text("בַּקְּשׁוּ מֵהַהוֹרֶה אֶת קוֹד הַחִבּוּר, וְסִרְקוּ אוֹתוֹ כָּאן.")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
 
                     Button { showScanner = true } label: {
-                        Label("סְרֹק קוֹד QR", systemImage: "qrcode.viewfinder")
+                        Label("סִרְקוּ קוֹד QR", systemImage: "qrcode.viewfinder")
                             .font(.system(size: 20, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -41,7 +41,7 @@ struct ChildJoinView: View {
                     .buttonStyle(.juicy)
 
                     VStack(spacing: 8) {
-                        TextField("…אוֹ הַקְלִידוּ קוֹד", text: $code)
+                        TextField("אוֹ הַקְלִידוּ אֶת הַקּוֹד", text: $code)
                             .textInputAutocapitalization(.characters)
                             .autocorrectionDisabled()
                             .font(.system(.title3, design: .monospaced))
