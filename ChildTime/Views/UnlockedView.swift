@@ -117,6 +117,8 @@ struct UnlockedView: View {
                     }
                     progress.endUnlock()
                     timer?.invalidate()
+                    // Window ran out — let the parent know play time ended.
+                    LiveEventReporter.report(.screenTimeEnd, extra: ["minutes": 0])
                 }
             }
         }
@@ -129,7 +131,9 @@ struct UnlockedView: View {
             ShieldManager.shared.applyShield(from: selection)
         }
         // Refund any remaining full minutes back to the pending pool
-        progress.endUnlockAndReturnRemainingMinutes()
+        let remaining = progress.endUnlockAndReturnRemainingMinutes()
+        // Child chose to stop early — tell the parent (+ minutes banked back).
+        LiveEventReporter.report(.screenTimeEnd, extra: ["minutes": remaining])
     }
 }
 

@@ -20,6 +20,8 @@ enum LiveEventReporter {
         case wheelWin           // earned / spun the lucky wheel
         case discovery          // growing interest in a new topic
         case assistRequest      // child asked a parent for help
+        case screenTimeStart    // child opened earned screen-time (unlocked apps)
+        case screenTimeEnd      // child finished / closed the screen-time window
     }
 
     static func report(_ type: EventType, value: String? = nil, topic: Topic? = nil,
@@ -35,6 +37,9 @@ enum LiveEventReporter {
             "originUID": AuthManager.shared.userID ?? "",
             "originToken": PushManager.shared.currentToken ?? "",
             "deviceID": ProgressSnapshot.thisDeviceID,
+            // So the parent's push can say WHICH device (iPad / iPhone) it's on.
+            "deviceKind": DeviceIdentity.kind,
+            "deviceName": DeviceIdentity.friendlyName,
             "createdAt": Date().timeIntervalSince1970
         ]
         if let value { payload["value"] = value }

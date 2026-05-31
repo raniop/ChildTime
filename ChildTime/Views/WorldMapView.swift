@@ -579,6 +579,8 @@ struct WorldMapView: View {
         shields.unlock(minutes: minutes)
         progress.startUnlock(minutes: minutes)
         LearningHistoryStore.shared.recordMinutesUsed(minutes)
+        // Tell the parent the child just opened screen time (+ how many minutes).
+        LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes])
     }
 }
 

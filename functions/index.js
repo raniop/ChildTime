@@ -32,12 +32,24 @@ async function tokensForHousehold(householdID, excludeUID) {
   return [...new Set(tokens)];
 }
 
+// A short " · <device>" suffix so the parent knows WHICH device it happened on
+// (iPad vs iPhone). Prefers the device's friendly name, else a generic label.
+function deviceLabel(event) {
+  const nm = (event.deviceName || "").trim();
+  const generic = ["מכשיר", "iPhone", "iPad", "iPod touch"];
+  if (nm && !generic.includes(nm)) return ` · ${nm}`;
+  if (event.deviceKind === "ipad") return " · אייפד";
+  if (event.deviceKind === "iphone") return " · אייפון";
+  return "";
+}
+
 function liveMessage(event) {
   const f = event.gender === "girl";                 // feminine forms?
   const name = event.childName || (f ? "הילדה" : "הילד");
   const g = (male, female) => (f ? female : male);   // pick by gender
+  const dev = deviceLabel(event);                    // " · אייפד" / " · אייפון" / ""
   switch (event.type) {
-    case "sessionStart": return { title: g("התחיל לשחק 📱", "התחילה לשחק 📱"), body: `${name} ${g("התחיל", "התחילה")} עכשיו לשחק ${g("ולומד", "ולומדת")}.` };
+    case "sessionStart": return { title: g("התחיל לשחק 📱", "התחילה לשחק 📱"), body: `${name} ${g("התחיל", "התחילה")} עכשיו לשחק ${g("ולומד", "ולומדת")}${dev}.` };
     case "sessionEnd": {
       const q = Number(event.questions) || 0;
       const acc = Number(event.accuracy) || 0;
@@ -49,11 +61,22 @@ function liveMessage(event) {
       if (mins > 0) parts.push(`${mins} דק' שנצברו`);
       if (stars > 0) parts.push(`${stars} ⭐`);
       const summary = parts.length ? parts.join(" · ") : `${g("סיים", "סיימה")} את מסע הלמידה`;
-      return { title: g("סיים לשחק ✅", "סיימה לשחק ✅"), body: `${name}: ${summary}` };
+      return { title: g("סיים לשחק ✅", "סיימה לשחק ✅"), body: `${name}${dev}: ${summary}` };
     }
-    case "assistRequest":return { title: "בקשת עזרה 💌", body: `${name} ${g("ביקש", "ביקשה")} את עזרתכם בשאלה.` };
+    case "screenTimeStart": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` (${mins} דק')` : "";
+      return { title: g("פתח זמן מסך 🎮", "פתחה זמן מסך 🎮"), body: `${name} ${g("פתח", "פתחה")} זמן משחק${tail}${dev}.` };
+    }
+    case "screenTimeEnd": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` · נשארו ${mins} דק'` : "";
+      return { title: g("סיים זמן מסך ⏹️", "סיימה זמן מסך ⏹️"), body: `${name} ${g("סיים", "סיימה")} את זמן המשחק${dev}${tail}.` };
+    }
+    case "assistRequest":return { title: "בקשת עזרה 💌", body: `${name} ${g("ביקש", "ביקשה")} את עזרתכם בשאלה${dev}.` };
     // Intentionally NO push for milestone / streak / wheelWin / discovery —
-    // those flooded the parent. Only start, finish, and help requests notify.
+    // those flooded the parent. Only start/finish, screen-time open/close, and
+    // help requests notify.
     default:             return null;
   }
 }

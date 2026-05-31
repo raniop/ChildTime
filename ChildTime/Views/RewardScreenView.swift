@@ -94,6 +94,14 @@ struct RewardScreenView: View {
                            alignment: .bottomLeading)
                     .allowsHitTesting(true)
 
+                // Tap ANYWHERE (not only the small chest) to open while it's
+                // glowing — a child shouldn't have to aim at the chest.
+                if stage == .glowing {
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .onTapGesture { openChest() }
+                }
+
                 Confetti(trigger: confettiTrigger)
             }
         }
@@ -323,6 +331,8 @@ struct RewardScreenView: View {
         guard minutes > 0 else { return }
         shields.unlock(minutes: minutes)
         progress.startUnlock(minutes: minutes)
+        // Tell the parent the child just opened screen time (+ how many minutes).
+        LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes])
         onDismiss()
     }
 

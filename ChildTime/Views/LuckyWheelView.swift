@@ -80,6 +80,12 @@ struct LuckyWheelView: View {
                         onClose()
                     }
                     .transition(.opacity)
+                } else if !isSpinning {
+                    // Before spinning, a tap ANYWHERE spins too — not only on
+                    // the wheel itself.
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .onTapGesture { spin() }
                 }
             }
         }

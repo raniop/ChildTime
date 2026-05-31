@@ -87,6 +87,13 @@ struct DailyChestView: View {
             }
             .padding(.bottom, AppSpacing.lg)
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
+
+            // Tap ANYWHERE to open while glowing — not only on the chest.
+            if stage == .glowing {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture { open() }
+            }
         }
         .onAppear {
             reward = RewardEngine.chestContents(kind: .magic, correctInSession: 0, minutesPerCorrect: 0)
