@@ -182,7 +182,13 @@ struct WorldMapView: View {
             DailyChestView()
         }
         .sheet(isPresented: $showingParentGate) {
-            ParentGateView()
+            // On the child device the gate opens ONLY the device-local parent
+            // controls (app-lock + manual unlock) — everything else is on the
+            // parent's own device.
+            ParentGateView {
+                ChildDeviceControlsView()
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
         }
         .fullScreenCover(isPresented: $showingAppLockSetup) {
             ChildAppLockSetupView()
