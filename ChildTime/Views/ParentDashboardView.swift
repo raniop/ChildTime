@@ -449,7 +449,9 @@ struct ParentDashboardView: View {
                         .multilineTextAlignment(.center)
 
                     if let code = qrCode {
-                        QRCodeView(text: code, size: 230)
+                        // Encode a Universal Link so the iPhone's native Camera
+                        // can scan it and open Tofy straight into joining.
+                        QRCodeView(text: JoinLink.url(forPayload: code), size: 230)
                         Text(String(code.split(separator: "|").first ?? ""))
                             .font(.system(size: 26, weight: .heavy, design: .monospaced))
                             .kerning(4)

@@ -37,6 +37,7 @@ final class ParentSettings: ObservableObject {
         static let hasSeenWelcome = "hasSeenWelcome"
         static let hasPromptedChildAppLock = "hasPromptedChildAppLock"
         static let pendingJoinFamily = "pendingJoinFamily"
+        static let pendingJoinPayload = "pendingJoinPayload"
         static let joinedChildID = "joinedChildID"
         static let hasSetParentPIN = "hasSetParentPIN"
     }
@@ -226,6 +227,14 @@ final class ParentSettings: ObservableObject {
     @Published var pendingJoinFamily: Bool {
         didSet { defaults.set(pendingJoinFamily, forKey: Key.pendingJoinFamily) }
     }
+    /// A child-join payload ("CODE|childID") captured from a scanned Universal
+    /// Link (native Camera). The child connect screen redeems it automatically.
+    @Published var pendingJoinPayload: String? {
+        didSet {
+            if let p = pendingJoinPayload { defaults.set(p, forKey: Key.pendingJoinPayload) }
+            else { defaults.removeObject(forKey: Key.pendingJoinPayload) }
+        }
+    }
     @Published var hasPromptedChildAppLock: Bool {
         didSet { defaults.set(hasPromptedChildAppLock, forKey: Key.hasPromptedChildAppLock) }
     }
@@ -345,6 +354,7 @@ final class ParentSettings: ObservableObject {
         self.hasSeenWelcome = d.bool(forKey: Key.hasSeenWelcome)
         self.hasPromptedChildAppLock = d.bool(forKey: Key.hasPromptedChildAppLock)
         self.pendingJoinFamily = d.bool(forKey: Key.pendingJoinFamily)
+        self.pendingJoinPayload = d.string(forKey: Key.pendingJoinPayload)
         self.joinedChildID = d.string(forKey: Key.joinedChildID)
         self.hasSetParentPIN = d.bool(forKey: Key.hasSetParentPIN)
     }

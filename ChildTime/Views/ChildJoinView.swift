@@ -105,12 +105,20 @@ struct ChildJoinView: View {
                 .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("ביטול") { showScanner = false } } }
             }
         }
+        .onAppear {
+            // A join link scanned by the native Camera lands here — redeem it.
+            if let payload = settings.pendingJoinPayload, !payload.isEmpty {
+                settings.pendingJoinPayload = nil
+                join(payload)
+            }
+        }
     }
 
     /// Payload is "CODE|childID". Redeem the code (join the family), then land on
     /// that specific child.
     private func join(_ raw: String) {
-        let payload = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Accept a raw "CODE|childID" OR a scanned/opened join Universal Link.
+        let payload = JoinLink.payload(from: raw)
         let parts = payload.split(separator: "|", maxSplits: 1).map(String.init)
         guard let codePart = parts.first, codePart.count >= 6 else { return }
         let childID = parts.count > 1 ? UUID(uuidString: parts[1]) : nil

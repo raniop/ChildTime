@@ -138,8 +138,21 @@ struct ChildTimeApp: App {
                 .onOpenURL { url in
                     #if canImport(GoogleSignIn)
                     // Google Sign-In returns control to the app via this URL.
-                    _ = GIDSignIn.sharedInstance.handle(url)
+                    if GIDSignIn.sharedInstance.handle(url) { return }
                     #endif
+                    // A scanned join link (from the native Camera or a shared
+                    // link): capture the code and start the child-join flow.
+                    if JoinLink.isJoinURL(url) {
+                        settings.pendingJoinPayload = JoinLink.payload(from: url.absoluteString)
+                        if settings.deviceRole != .child { settings.deviceRole = .child }
+                    }
+                }
+                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                    // Universal Link opened from the native Camera / Safari.
+                    if let url = activity.webpageURL, JoinLink.isJoinURL(url) {
+                        settings.pendingJoinPayload = JoinLink.payload(from: url.absoluteString)
+                        if settings.deviceRole != .child { settings.deviceRole = .child }
+                    }
                 }
         }
     }
