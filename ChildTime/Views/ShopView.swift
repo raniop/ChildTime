@@ -127,7 +127,7 @@ struct ShopView: View {
     private var hero: some View {
         if let profile = profiles.active {
             VStack(spacing: 6) {
-                ProfileAvatarView(profile: profile, size: avatarSize)
+                DressUpCharacter(items: cosmetics.equippedItems(for: profile.id), size: avatarSize)
                 Text(profile.name)
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
@@ -377,9 +377,9 @@ struct ShopItemDetail: View {
             SparkleField(count: 14, size: 12)
 
             VStack(spacing: AppSpacing.lg) {
-                // Live preview on the kid's avatar
-                if let profile {
-                    ProfileAvatarView(profile: profile, size: 150, overrideItems: previewItems)
+                // Live preview on the kid's character
+                if profile != nil {
+                    DressUpCharacter(items: previewItems, size: 150)
                 }
 
                 VStack(spacing: 6) {

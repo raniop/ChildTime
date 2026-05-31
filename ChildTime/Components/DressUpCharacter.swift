@@ -8,7 +8,7 @@ import SwiftUI
 struct DressUpCharacter: View {
     /// Equipped cosmetics to wear.
     var items: [CosmeticItem] = []
-    /// Body tint (future: player-customizable).
+    /// Body tint (player-customizable in the future).
     var bodyColor: Color = AppColor.companionBody
     /// Overall width; height is derived.
     var size: CGFloat = 240
@@ -18,128 +18,123 @@ struct DressUpCharacter: View {
     @State private var blink = false
     @State private var wave = false
 
-    private var H: CGFloat { size * 1.18 }
+    // Character canvas is size × size*1.35 (room for legs/feet + a hat).
+    private var H: CGFloat { size * 1.35 }
+    private var bodyW: CGFloat { size * 0.74 }
+    private var bodyH: CGFloat { size * 0.92 }
 
-    private func item(_ c: CosmeticCategory) -> CosmeticItem? {
-        items.first { $0.category == c }
-    }
+    private func item(_ c: CosmeticCategory) -> CosmeticItem? { items.first { $0.category == c } }
 
     var body: some View {
         ZStack {
-            // Soft glow behind the buddy.
+            // Soft glow.
             Circle()
-                .fill(RadialGradient(colors: [AppColor.companionGlow.opacity(0.5), .clear],
-                                     center: .center, startRadius: 0, endRadius: size * 0.75))
+                .fill(RadialGradient(colors: [AppColor.companionGlow.opacity(0.45), .clear],
+                                     center: .center, startRadius: 0, endRadius: size * 0.7))
                 .frame(width: size * 1.5, height: size * 1.5)
                 .blur(radius: 16)
-                .scaleEffect(breathe ? 1.05 : 0.97)
+                .scaleEffect(breathe ? 1.04 : 0.98)
 
-            // ---- back-layer cosmetics ----
-            if let v = item(.vehicle) { worn(v, y: 0.50, scale: 0.72) }
-            if let b = item(.backpack) { worn(b, x: -0.34, y: 0.04, scale: 0.36, rotate: -8) }
+            // Back-layer cosmetics.
+            if let v = item(.vehicle)  { worn(v, y: 0.46, scale: 0.74) }
+            if let b = item(.backpack) { worn(b, x: -0.33, y: 0.02, scale: 0.36, rotate: -8) }
 
-            // ---- legs / feet ----
-            HStack(spacing: size * 0.16) {
-                foot; foot
-            }
-            .offset(y: size * 0.46)
-
-            if let sh = item(.shoes) {
-                HStack(spacing: size * 0.10) { wornRaw(sh, scale: 0.22); wornRaw(sh, scale: 0.22) }
-                    .offset(y: size * 0.52)
-            }
-
-            // ---- arms (one waves) ----
+            legs
             arm(left: true)
             arm(left: false)
 
-            // ---- body ----
+            // ---- body (egg-shaped: tapered head on top, round belly below) ----
             ZStack {
-                Circle()
+                EggShape()
                     .fill(RadialGradient(
-                        colors: [Color(hex: "FFF3C4"), bodyColor, Color(hex: "F5921E")],
-                        center: .init(x: 0.38, y: 0.32), startRadius: 2, endRadius: size * 0.5))
-                    .frame(width: size * 0.78, height: size * 0.78)
-                    .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 2))
+                        colors: [Color(hex: "FFF6D8"), bodyColor, Color(hex: "EE8E1E")],
+                        center: .init(x: 0.4, y: 0.32), startRadius: 4, endRadius: bodyH * 0.7))
+                    .overlay(EggShape().stroke(.white.opacity(0.25), lineWidth: 2))
+                    .frame(width: bodyW, height: bodyH)
                     .shadow(color: .black.opacity(0.18), radius: 8, y: 6)
-                face
+                face.offset(y: -bodyH * 0.16)
             }
-            .offset(y: -size * 0.04)
+            .offset(y: -size * 0.06)
             .scaleEffect(x: breathe ? 1.02 : 1.0, y: breathe ? 0.98 : 1.0, anchor: .bottom)
 
-            // shirt sits on the lower torso
-            if let s = item(.shirt) { worn(s, y: 0.16, scale: 0.46) }
-            if let p = item(.pants) { worn(p, y: 0.34, scale: 0.40) }
+            // Torso cosmetics.
+            if let p = item(.pants) { worn(p, y: 0.18, scale: 0.40) }
+            if let s = item(.shirt) { worn(s, y: 0.02, scale: 0.44) }
 
-            // ---- face-layer cosmetics ----
-            if let g = item(.glasses) { worn(g, y: -0.10, scale: 0.42) }
-            if let a = item(.accessory) { worn(a, x: 0.40, y: 0.10, scale: 0.26, rotate: -6) }
-            if let h = item(.hat) { worn(h, y: -0.40, scale: 0.46) }
+            if let sh = item(.shoes) {
+                HStack(spacing: size * 0.12) { wornRaw(sh, scale: 0.20); wornRaw(sh, scale: 0.20) }
+                    .offset(y: size * 0.56)
+            }
+
+            // Face + head cosmetics.
+            if let g = item(.glasses) { worn(g, y: -0.20, scale: 0.40) }
+            if let a = item(.accessory) { worn(a, x: 0.42, y: 0.06, scale: 0.26, rotate: -6) }
+            if let h = item(.hat) { worn(h, y: -0.44, scale: 0.46) }
         }
         .frame(width: size, height: H)
         .onAppear { startIdle() }
     }
 
-    // MARK: - Body parts
+    // MARK: - Limbs
 
-    private var foot: some View {
-        Ellipse()
-            .fill(bodyColor.opacity(0.95))
-            .frame(width: size * 0.16, height: size * 0.10)
-            .overlay(Ellipse().stroke(.white.opacity(0.2), lineWidth: 1))
+    private var legs: some View {
+        HStack(spacing: size * 0.14) {
+            ForEach(0..<2, id: \.self) { _ in
+                VStack(spacing: 0) {
+                    Capsule().fill(bodyColor).frame(width: size * 0.11, height: size * 0.14)
+                    Ellipse().fill(bodyColor)
+                        .frame(width: size * 0.17, height: size * 0.09)
+                        .overlay(Ellipse().stroke(.white.opacity(0.2), lineWidth: 1))
+                        .offset(y: -size * 0.02)
+                }
+            }
+        }
+        .offset(y: size * 0.40)
     }
 
     private func arm(left: Bool) -> some View {
-        Capsule()
-            .fill(bodyColor)
-            .frame(width: size * 0.10, height: size * 0.26)
-            .rotationEffect(.degrees(left ? 24 : (wave ? -50 : -24)),
-                            anchor: .top)
-            .offset(x: (left ? -1 : 1) * size * 0.34, y: size * 0.04)
-            .animation(.easeInOut(duration: 0.4), value: wave)
+        VStack(spacing: -size * 0.01) {
+            Capsule().fill(bodyColor).frame(width: size * 0.10, height: size * 0.24)
+            Circle().fill(bodyColor).frame(width: size * 0.12, height: size * 0.12)   // hand
+                .overlay(Circle().stroke(.white.opacity(0.2), lineWidth: 1))
+        }
+        .rotationEffect(.degrees(left ? 18 : (wave ? -55 : -18)), anchor: .top)
+        .offset(x: (left ? -1 : 1) * size * 0.36, y: size * 0.0)
+        .animation(.easeInOut(duration: 0.4), value: wave)
     }
+
+    // MARK: - Face
 
     private var face: some View {
         ZStack {
-            // eyes
-            HStack(spacing: size * 0.16) {
-                eye; eye
-            }
-            .offset(y: -size * 0.05)
-            // blush
-            HStack(spacing: size * 0.30) {
-                blush; blush
-            }
-            .offset(y: size * 0.04)
-            // smile
+            HStack(spacing: size * 0.15) { eye; eye }
+            HStack(spacing: size * 0.32) { blush; blush }.offset(y: size * 0.07)
             SmileShape()
                 .stroke(Color(hex: "1b1340"), style: StrokeStyle(lineWidth: size * 0.022, lineCap: .round))
-                .frame(width: size * 0.22, height: size * 0.12)
-                .offset(y: size * 0.10)
+                .frame(width: size * 0.22, height: size * 0.11)
+                .offset(y: size * 0.13)
         }
     }
 
     private var eye: some View {
         ZStack {
-            Capsule()
-                .fill(Color(hex: "1b1340"))
-                .frame(width: size * 0.07, height: blink ? size * 0.012 : size * 0.10)
+            Capsule().fill(Color(hex: "1b1340"))
+                .frame(width: size * 0.075, height: blink ? size * 0.012 : size * 0.105)
             if !blink {
-                Circle().fill(.white).frame(width: size * 0.022, height: size * 0.022)
-                    .offset(x: size * 0.012, y: -size * 0.022)
+                Circle().fill(.white).frame(width: size * 0.024, height: size * 0.024)
+                    .offset(x: size * 0.013, y: -size * 0.024)
             }
         }
         .animation(.easeInOut(duration: 0.12), value: blink)
     }
 
     private var blush: some View {
-        Ellipse().fill(Color(hex: "FF8FA3").opacity(0.55))
-            .frame(width: size * 0.08, height: size * 0.05)
+        Ellipse().fill(Color(hex: "FF8FA3").opacity(0.5))
+            .frame(width: size * 0.085, height: size * 0.05)
     }
 
     // MARK: - Cosmetic rendering
 
-    /// A cosmetic worn at a body-relative anchor (offsets in units of `size`).
     @ViewBuilder
     private func worn(_ item: CosmeticItem, x: CGFloat = 0, y: CGFloat, scale: CGFloat, rotate: Double = 0) -> some View {
         wornRaw(item, scale: scale)
@@ -170,8 +165,7 @@ struct DressUpCharacter: View {
     private func startIdle() {
         guard animated else { return }
         withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true)) { breathe = true }
-        scheduleBlink()
-        scheduleWave()
+        scheduleBlink(); scheduleWave()
     }
     private func scheduleBlink() {
         DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 2.5...5)) {
@@ -203,6 +197,6 @@ private struct SmileShape: Shape {
 #Preview {
     ZStack {
         AppGradient.dreamy.ignoresSafeArea()
-        DressUpCharacter(items: [], size: 240)
+        DressUpCharacter(size: 240)
     }
 }
