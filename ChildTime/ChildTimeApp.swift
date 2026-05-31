@@ -159,14 +159,21 @@ struct ChildTimeApp: App {
         let selection = SelectionStorage.decode(data)
 
         if progress.isUnlocked {
-            // Currently inside an unlock window — make sure shield is OFF.
+            // Currently inside a full unlock window — make sure shield is OFF.
             shields.clearShield()
+            return
+        }
+        // No active full unlock — clear a stale window if any.
+        if progress.unlockEndsAt != nil {
+            progress.endUnlock()
+        }
+
+        // A per-app allowance keeps the chosen apps open while the rest stay
+        // locked. When it expires, drop it and re-apply the full shield.
+        if settings.allowExceptionActive, let aData = settings.allowExceptionData {
+            shields.applyShield(from: selection, allowing: SelectionStorage.decode(aData))
         } else {
-            // No active unlock — make sure shield is ON.
-            // (This also re-applies after an unlock window has expired.)
-            if progress.unlockEndsAt != nil {
-                progress.endUnlock()
-            }
+            if settings.allowExceptionEndsAt != nil { settings.clearAllowException() }
             shields.applyShield(from: selection)
         }
     }

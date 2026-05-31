@@ -71,6 +71,27 @@ final class ShieldManager: ObservableObject {
         store.shield.webDomains = nil
     }
 
+    /// Block the full `blocked` set EXCEPT the `allowed` apps — so specific apps
+    /// (e.g. YouTube) stay open while everything else remains locked.
+    func applyShield(from blocked: FamilyActivitySelection, allowing allowed: FamilyActivitySelection) {
+        let allowedApps = allowed.applicationTokens
+        let blockedApps = blocked.applicationTokens.subtracting(allowedApps)
+        store.shield.applications = blockedApps.isEmpty ? nil : blockedApps
+        store.shield.applicationCategories = blocked.categoryTokens.isEmpty
+            ? ShieldSettings.ActivityCategoryPolicy<Application>.none
+            : .specific(blocked.categoryTokens, except: allowedApps)
+        store.shield.webDomains = blocked.webDomainTokens.isEmpty ? nil : blocked.webDomainTokens
+    }
+
+    /// Start a temporary per-app allowance: open `allowed` now (rest stays
+    /// locked) and schedule a full re-shield after `minutes`.
+    func startAllowException(allowed: FamilyActivitySelection,
+                             blocked: FamilyActivitySelection,
+                             minutes: Int) {
+        applyShield(from: blocked, allowing: allowed)
+        scheduleReshield(after: minutes)
+    }
+
     // MARK: - Unlock for a duration
 
     func unlock(minutes: Int) {

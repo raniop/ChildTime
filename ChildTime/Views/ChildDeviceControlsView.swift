@@ -14,10 +14,13 @@ struct ChildDeviceControlsView: View {
 
     @State private var showAppPicker = false
     @State private var selection = FamilyActivitySelection()
+    @State private var showAllowPicker = false
+    @State private var allowSelection = FamilyActivitySelection()
 
     private var selectedCount: Int {
         selection.applicationTokens.count + selection.categoryTokens.count
     }
+    private var allowCount: Int { allowSelection.applicationTokens.count }
     private var isUnlocked: Bool { progress.isUnlocked }
 
     var body: some View {
@@ -31,6 +34,7 @@ struct ChildDeviceControlsView: View {
                     header
 
                     manualUnlockCard
+                    perAppAllowCard
                     appLockCard
 
                     Text("שְׁאָר הַהַגְדָּרוֹת — פְּרָסִים, דּוּחוֹת, רָמַת קֹשִׁי וְהַתְרָאוֹת — מְנֻהֲלוֹת בְּמַכְשִׁיר הַהוֹרֶה.")
@@ -65,6 +69,7 @@ struct ChildDeviceControlsView: View {
         }
         .onAppear {
             selection = SelectionStorage.decode(settings.activitySelectionData)
+            allowSelection = SelectionStorage.decode(settings.allowExceptionData)
         }
     }
 
@@ -152,6 +157,101 @@ struct ChildDeviceControlsView: View {
         .buttonStyle(.juicy)
     }
 
+    // MARK: - Per-app temporary allowance
+
+    private var perAppAllowCard: some View {
+        VStack(alignment: .center, spacing: AppSpacing.md) {
+            Label("פְּתִיחַת אַפְּלִיקַצְיָה מְסֻיֶּמֶת", systemImage: "app.badge.checkmark")
+                .font(.system(size: 19, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+
+            if settings.allowExceptionActive {
+                Text("אַפְּלִיקַצְיוֹת מְסֻיָּמוֹת פְּתוּחוֹת כָּעֵת\(allowEndText). הַשְּׁאָר נְעוּלוֹת.")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                Button {
+                    Haptic.medium()
+                    cancelAllowException()
+                } label: {
+                    Label("נְעִילַת הַכֹּל עַכְשָׁיו", systemImage: "lock.fill")
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(AppColor.flameOrange.opacity(0.85), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                }
+                .buttonStyle(.juicy)
+            } else {
+                Text("פִּתְחוּ רַק אַפְּלִיקַצְיָה אַחַת אוֹ כַּמָּה (לְמָשָׁל יוּטְיוּבּ) לְפֶרֶק זְמַן — הַשְּׁאָר יִשָּׁאֲרוּ נְעוּלוֹת.")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .multilineTextAlignment(.center)
+
+                Button {
+                    Task {
+                        await shields.requestAuthorizationIfNeeded()
+                        if shields.isAuthorized { showAllowPicker = true }
+                    }
+                } label: {
+                    Label(allowCount > 0 ? "\(allowCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · עֲרִיכָה" : "בְּחִירַת אַפְּלִיקַצְיוֹת לִפְתִיחָה",
+                          systemImage: "checkmark.circle.fill")
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
+                }
+                .buttonStyle(.juicy)
+
+                if allowCount > 0 {
+                    VStack(spacing: 10) {
+                        HStack(spacing: 10) {
+                            allowDurationButton("חֲצִי שָׁעָה", minutes: 30)
+                            allowDurationButton("שָׁעָה", minutes: 60)
+                        }
+                        HStack(spacing: 10) {
+                            allowDurationButton("שְׁעָתַיִם", minutes: 120)
+                            allowDurationButton("עַד סוֹף הַיּוֹם", minutes: minutesUntilEndOfDay())
+                        }
+                    }
+                }
+            }
+        }
+        .padding(AppSpacing.lg)
+        .frame(maxWidth: .infinity)
+        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
+        .familyActivityPicker(isPresented: $showAllowPicker, selection: $allowSelection)
+    }
+
+    private func allowDurationButton(_ title: String, minutes: Int) -> some View {
+        Button {
+            Haptic.success()
+            startAllow(minutes: minutes)
+        } label: {
+            Text(title)
+                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(
+                    LinearGradient(colors: [AppColor.successMint, Color(hex: "06A57E")],
+                                   startPoint: .top, endPoint: .bottom),
+                    in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .glow(AppColor.successMint, radius: 8)
+        }
+        .buttonStyle(.juicy)
+    }
+
+    private var allowEndText: String {
+        guard let end = settings.allowExceptionEndsAt else { return "" }
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        return " עַד \(f.string(from: end))"
+    }
+
     // MARK: - App lock
 
     private var appLockCard: some View {
@@ -212,6 +312,24 @@ struct ChildDeviceControlsView: View {
     private func lockNow() {
         shields.cancelScheduledReshield()
         progress.endUnlock()
+        shields.applyShield(from: SelectionStorage.decode(settings.activitySelectionData))
+        dismiss()
+    }
+
+    private func startAllow(minutes: Int) {
+        Task {
+            await shields.requestAuthorizationIfNeeded()
+            let blocked = SelectionStorage.decode(settings.activitySelectionData)
+            settings.allowExceptionData = SelectionStorage.encode(allowSelection)
+            settings.allowExceptionEndsAt = Date().addingTimeInterval(TimeInterval(minutes * 60))
+            shields.startAllowException(allowed: allowSelection, blocked: blocked, minutes: minutes)
+            dismiss()
+        }
+    }
+
+    private func cancelAllowException() {
+        shields.cancelScheduledReshield()
+        settings.clearAllowException()
         shields.applyShield(from: SelectionStorage.decode(settings.activitySelectionData))
         dismiss()
     }

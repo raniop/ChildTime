@@ -13,6 +13,8 @@ final class ParentSettings: ObservableObject {
         static let enabledTopics = "enabledTopics"
         static let difficulty = "difficulty"
         static let activitySelection = "activitySelection"
+        static let allowExceptionData = "allowExceptionData"
+        static let allowExceptionEndsAt = "allowExceptionEndsAt"
         static let onboardingCompleted = "onboardingCompleted"
         static let childAge = "childAge"
         static let childGender = "childGender"
@@ -118,6 +120,18 @@ final class ParentSettings: ObservableObject {
     }
     @Published var activitySelectionData: Data? {
         didSet { defaults.set(activitySelectionData, forKey: Key.activitySelection) }
+    }
+    /// A temporary per-app allowance: which apps are open right now even though
+    /// they're in the blocked list, and until when. Lets a parent open just one
+    /// app (e.g. YouTube) for a while while the rest stay locked.
+    @Published var allowExceptionData: Data? {
+        didSet { defaults.set(allowExceptionData, forKey: Key.allowExceptionData) }
+    }
+    @Published var allowExceptionEndsAt: Date? {
+        didSet {
+            if let d = allowExceptionEndsAt { defaults.set(d, forKey: Key.allowExceptionEndsAt) }
+            else { defaults.removeObject(forKey: Key.allowExceptionEndsAt) }
+        }
     }
     @Published var onboardingCompleted: Bool {
         didSet { defaults.set(onboardingCompleted, forKey: Key.onboardingCompleted) }
@@ -254,6 +268,8 @@ final class ParentSettings: ObservableObject {
         }
 
         self.activitySelectionData = d.data(forKey: Key.activitySelection)
+        self.allowExceptionData = d.data(forKey: Key.allowExceptionData)
+        self.allowExceptionEndsAt = d.object(forKey: Key.allowExceptionEndsAt) as? Date
         self.onboardingCompleted = d.bool(forKey: Key.onboardingCompleted)
         let ageRaw = d.integer(forKey: Key.childAge)
         self.childAge = ChildAge(rawValue: ageRaw == 0 ? 6 : ageRaw) ?? .grade1
@@ -357,5 +373,16 @@ final class ParentSettings: ObservableObject {
 
     func setDifficulty(_ d: Difficulty, for topic: Topic) {
         difficultyByTopic[topic] = d
+    }
+
+    /// True while a temporary per-app allowance is in effect.
+    var allowExceptionActive: Bool {
+        guard let end = allowExceptionEndsAt else { return false }
+        return end > Date()
+    }
+
+    func clearAllowException() {
+        allowExceptionData = nil
+        allowExceptionEndsAt = nil
     }
 }
