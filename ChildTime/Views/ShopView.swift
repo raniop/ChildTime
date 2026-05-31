@@ -82,40 +82,42 @@ struct ShopView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        HStack {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 38, height: 38)
-                    .background(.white.opacity(0.18), in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
-            }
-            .environment(\.layoutDirection, .leftToRight)
-
-            Spacer()
-
+        // Title is truly centered (ZStack); the close button and star balance
+        // sit on the leading/trailing edges so they don't push it off-center.
+        ZStack {
             Text("חֲנוּת הַקֶּסֶם")
                 .font(.system(size: isCompact ? 20 : 26, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
+                .frame(maxWidth: .infinity)
 
-            Spacer()
+            HStack {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 38, height: 38)
+                        .background(.white.opacity(0.18), in: Circle())
+                        .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
+                }
+                .environment(\.layoutDirection, .leftToRight)
 
-            // Star balance — the single currency.
-            HStack(spacing: 4) {
-                Text("⭐").font(.system(size: 16))
-                Text("\(progress.stars)")
-                    .font(.system(size: 17, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .contentTransition(.numericText(value: Double(progress.stars)))
+                Spacer()
+
+                HStack(spacing: 4) {
+                    Text("⭐").font(.system(size: 16))
+                    Text("\(progress.stars)")
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .contentTransition(.numericText(value: Double(progress.stars)))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(Capsule().fill(AppColor.starGold.opacity(0.4)))
+                .overlay(Capsule().stroke(AppColor.starGold, lineWidth: 1.5))
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 7)
-            .background(Capsule().fill(AppColor.starGold.opacity(0.4)))
-            .overlay(Capsule().stroke(AppColor.starGold, lineWidth: 1.5))
         }
         .padding(.horizontal, AppSpacing.md)
         .padding(.vertical, AppSpacing.sm)

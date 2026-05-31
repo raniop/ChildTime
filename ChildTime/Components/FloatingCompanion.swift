@@ -22,6 +22,7 @@ struct FloatingCompanion: View {
     @State private var isDragging: Bool = false
     @State private var hasAppeared: Bool = false
     @State private var wanderTask: Task<Void, Never>? = nil
+    @ObservedObject private var cosmeticStore = CosmeticStore.shared
 
     var body: some View {
         GeometryReader { geo in
@@ -36,21 +37,13 @@ struct FloatingCompanion: View {
 
                 Group {
                     if let profile {
-                        // The child's own avatar floats around (with their
-                        // cosmetics), wrapped in a soft glow so it still reads
-                        // as a lively buddy.
-                        ZStack {
-                            Circle()
-                                .fill(AppColor.companionGlow.opacity(0.28))
-                                .frame(width: size * 1.18, height: size * 1.18)
-                                .blur(radius: 10)
-                            ProfileAvatarView(profile: profile, size: size)
-                                .overlay(
-                                    Circle().stroke(.white.opacity(0.5), lineWidth: 2)
-                                )
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
-                        }
+                        // Same dress-up character as the shop (wearing the
+                        // child's equipped cosmetics), so the buddy and the shop
+                        // avatar always match.
+                        DressUpCharacter(
+                            items: cosmeticStore.equippedItems(for: profile.id),
+                            size: size,
+                            animated: false)
                     } else {
                         CompanionView(controller: controller, size: size)
                     }

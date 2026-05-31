@@ -60,7 +60,7 @@ struct DressUpCharacter: View {
             // Torso cosmetics. The shirt is drawn as VECTOR so it fits the body
             // (an emoji shirt just floats); other items use their render.
             if let p = item(.pants) { worn(p, y: 0.20, scale: 0.40) }
-            if item(.shirt) != nil { vectorShirt.offset(y: size * 0.06) }
+            if item(.shirt) != nil { vectorShirt.offset(y: size * 0.10) }
 
             if let sh = item(.shoes) {
                 HStack(spacing: size * 0.12) { wornRaw(sh, scale: 0.20); wornRaw(sh, scale: 0.20) }
@@ -105,33 +105,17 @@ struct DressUpCharacter: View {
         .animation(.easeInOut(duration: 0.4), value: wave)
     }
 
-    /// A cohesive vector shirt that fits the torso (collar + short sleeves +
-    /// rounded body) — looks worn, unlike a floating emoji.
+    /// A cohesive vector t-shirt (neckline, shoulders, short sleeves, body) that
+    /// actually reads as worn — unlike a floating emoji or a blue blob.
     private var vectorShirt: some View {
-        let w = size * 0.52
-        let h = size * 0.40
-        let shirtColor = Color(hex: "5AA9E6")
-        return ZStack {
-            // sleeves
-            HStack(spacing: w * 0.5) {
-                Capsule().fill(shirtColor).frame(width: w * 0.30, height: h * 0.34)
-                Capsule().fill(shirtColor).frame(width: w * 0.30, height: h * 0.34)
-            }
-            .offset(y: -h * 0.18)
-            // body
-            RoundedRectangle(cornerRadius: w * 0.18, style: .continuous)
-                .fill(LinearGradient(colors: [shirtColor, shirtColor.opacity(0.85)],
-                                     startPoint: .top, endPoint: .bottom))
-                .frame(width: w * 0.78, height: h)
-                .overlay(RoundedRectangle(cornerRadius: w * 0.18).stroke(.white.opacity(0.25), lineWidth: 1.5))
-            // collar
-            Triangle()
-                .fill(shirtColor.opacity(0.6))
-                .frame(width: w * 0.18, height: h * 0.22)
-                .offset(y: -h * 0.36)
-        }
-        .frame(width: w, height: h)
-        .shadow(color: .black.opacity(0.2), radius: 3, y: 2)
+        let w = size * 0.56
+        let h = size * 0.34
+        let c = Color(hex: "5AA9E6")
+        return ShirtShape()
+            .fill(LinearGradient(colors: [c, c.opacity(0.82)], startPoint: .top, endPoint: .bottom))
+            .overlay(ShirtShape().stroke(.white.opacity(0.3), lineWidth: 1.5))
+            .frame(width: w, height: h)
+            .shadow(color: .black.opacity(0.18), radius: 3, y: 2)
     }
 
     // MARK: - Face
@@ -214,15 +198,26 @@ struct DressUpCharacter: View {
     }
 }
 
-/// Downward-pointing triangle (shirt collar notch).
-private struct Triangle: Shape {
+/// A simple t-shirt silhouette: neckline dip, shoulders, short sleeves, body.
+private struct ShirtShape: Shape {
     func path(in r: CGRect) -> Path {
-        var p = Path()
-        p.move(to: CGPoint(x: r.minX, y: r.minY))
-        p.addLine(to: CGPoint(x: r.maxX, y: r.minY))
-        p.addLine(to: CGPoint(x: r.midX, y: r.maxY))
-        p.closeSubpath()
-        return p
+        let w = r.width, h = r.height
+        func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: r.minX + x * w, y: r.minY + y * h) }
+        var path = Path()
+        path.move(to: p(0.30, 0.04))                                   // left neck
+        path.addQuadCurve(to: p(0.70, 0.04), control: p(0.50, 0.20))   // neckline dip
+        path.addLine(to: p(0.80, 0.04))                                // right shoulder
+        path.addLine(to: p(1.00, 0.30))                                // right sleeve tip
+        path.addLine(to: p(0.82, 0.46))                                // right sleeve hem
+        path.addLine(to: p(0.76, 0.38))                                // right armpit
+        path.addLine(to: p(0.80, 1.00))                                // right body hem
+        path.addLine(to: p(0.20, 1.00))                                // left body hem
+        path.addLine(to: p(0.24, 0.38))                                // left armpit
+        path.addLine(to: p(0.18, 0.46))                                // left sleeve hem
+        path.addLine(to: p(0.00, 0.30))                                // left sleeve tip
+        path.addLine(to: p(0.20, 0.04))                                // left shoulder
+        path.closeSubpath()
+        return path
     }
 }
 
