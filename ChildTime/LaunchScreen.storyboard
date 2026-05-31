@@ -14,6 +14,9 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="LaunchBackdrop" translatesAutoresizingMaskIntoConstraints="NO" id="Bg0-im-001">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                            </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="LaunchLogo" translatesAutoresizingMaskIntoConstraints="NO" id="Lgo-im-001">
                                 <rect key="frame" x="111.5" y="346" width="170" height="170"/>
                                 <constraints>
@@ -25,6 +28,10 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" red="0.36862745098039218" green="0.37647058823529411" blue="0.80784313725490198" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="Bg0-im-001" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="Bg0-tp-001"/>
+                            <constraint firstItem="Bg0-im-001" firstAttribute="bottom" secondItem="Ze5-6b-2t3" secondAttribute="bottom" id="Bg0-bt-001"/>
+                            <constraint firstItem="Bg0-im-001" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="Bg0-ld-001"/>
+                            <constraint firstItem="Bg0-im-001" firstAttribute="trailing" secondItem="Ze5-6b-2t3" secondAttribute="trailing" id="Bg0-tr-001"/>
                             <constraint firstItem="Lgo-im-001" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="Lgo-cx-001"/>
                             <constraint firstItem="Lgo-im-001" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="Lgo-cy-001"/>
                         </constraints>
@@ -36,6 +43,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="LaunchBackdrop" width="1290" height="2796"/>
         <image name="LaunchLogo" width="120" height="120"/>
     </resources>
 </document>

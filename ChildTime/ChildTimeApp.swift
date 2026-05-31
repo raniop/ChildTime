@@ -99,10 +99,10 @@ struct ChildTimeApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                // A base layer in the launch-screen color, so the very first
-                // SwiftUI frame is on-brand indigo instead of a white flash
-                // between the launch screen and ContentView's first paint.
-                AppColor.dreamyIndigo.ignoresSafeArea()
+                // A base layer in the brand gradient (matching the launch
+                // screen + splash) so the first SwiftUI frame is the same blue
+                // backdrop — never a flat purple or white flash.
+                AppGradient.dreamy.ignoresSafeArea()
                 if let demo = Self.demoScreen { demoRoot(demo) } else { ContentView() }
 
                 // Animated welcome splash on top of the first frame, then it
