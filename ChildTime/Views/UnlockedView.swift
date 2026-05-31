@@ -3,6 +3,7 @@ import SwiftUI
 struct UnlockedView: View {
     @EnvironmentObject var progress: ProgressStore
     @Environment(\.horizontalSizeClass) private var hsc
+    @Environment(\.scenePhase) private var scenePhase
     @State private var secondsRemaining: Int = 0
     @State private var timer: Timer?
     @State private var companion = CompanionController()
@@ -93,6 +94,14 @@ struct UnlockedView: View {
             }
         }
         .onDisappear { timer?.invalidate() }
+        // Returning from another app (or the app switcher) pauses the Timer —
+        // recompute from the absolute end time and restart so it's never frozen.
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                secondsRemaining = progress.unlockSecondsRemaining
+                startTimer()
+            }
+        }
     }
 
     private var timeString: String {

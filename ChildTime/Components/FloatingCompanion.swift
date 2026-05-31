@@ -152,11 +152,15 @@ struct FloatingCompanion: View {
         return clamp(CGPoint(x: pick.0, y: pick.1), in: container)
     }
 
+    /// Keep the buddy on-screen but let it roam the WHOLE screen (only a small
+    /// safe margin near the very edges). The larger top/bottom insets are used
+    /// only to bias auto-wandering — never to cage a manual drag.
     private func clamp(_ point: CGPoint, in container: CGSize) -> CGPoint {
-        let minX = horizontalInset + size * 0.5
-        let maxX = container.width - horizontalInset - size * 0.5
-        let minY = topInset + size * 0.5
-        let maxY = container.height - bottomInset * 0.5 - size * 0.5
+        let margin = size * 0.30          // a sliver may sit past the edge
+        let minX = margin
+        let maxX = container.width - margin
+        let minY = margin
+        let maxY = container.height - margin
         return CGPoint(
             x: min(max(minX, point.x), maxX),
             y: min(max(minY, point.y), maxY)
