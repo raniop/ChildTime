@@ -21,6 +21,7 @@ struct WorldMapView: View {
     @State private var showingAppLockSetup = false
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
+    @State private var showLevelInfo = false
 
     private var isCompact: Bool { hsc == .compact }
     private var companionSize: CGFloat { isCompact ? 90 : 120 }
@@ -478,21 +479,78 @@ struct WorldMapView: View {
                 .foregroundStyle(.white.opacity(0.75))
                 .opacity(heroAppeared ? 1 : 0)
 
-            // XP bar — small, below subtitle
-            HStack(spacing: 8) {
-                Text("רָמַת טוֹפִי \(progress.companionLevel)")
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundStyle(AppColor.starGold)
-                XPBarMini(
-                    progress: xpProgress
-                )
-                .frame(width: 100)
+            // XP bar — small, below subtitle. Tap for an explanation.
+            Button {
+                Haptic.light()
+                showLevelInfo = true
+            } label: {
+                HStack(spacing: 8) {
+                    Text("רָמַת טוֹפִי \(progress.companionLevel)")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(AppColor.starGold)
+                    XPBarMini(progress: xpProgress)
+                        .frame(width: 100)
+                    Image(systemName: "questionmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(.white.opacity(0.12), in: Capsule())
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(.white.opacity(0.12), in: Capsule())
+            .buttonStyle(.plain)
             .opacity(heroAppeared ? 1 : 0)
             .padding(.top, 4)
+        }
+        .sheet(isPresented: $showLevelInfo) {
+            levelInfoSheet
+                .environment(\.layoutDirection, .rightToLeft)
+                .presentationDetents([.medium])
+        }
+    }
+
+    private var levelInfoSheet: some View {
+        ZStack {
+            AppGradient.dreamy.ignoresSafeArea()
+            SparkleField(count: 14, size: 12)
+            VStack(spacing: AppSpacing.lg) {
+                Text("⭐").font(.system(size: 54))
+                Text("רָמַת טוֹפִי")
+                    .font(.system(size: 28, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("כָּל תְּשׁוּבָה נְכוֹנָה נוֹתֶנֶת נְקֻדּוֹת. כְּשֶׁהַפַּס מִתְמַלֵּא — טוֹפִי עוֹלֶה רָמָה, וְאַתֶּם פּוֹתְחִים עוֹלָמוֹת וְהַפְתָּעוֹת חֲדָשׁוֹת!")
+                    .font(.system(size: 17, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.92))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, AppSpacing.lg)
+
+                VStack(spacing: 6) {
+                    Text("רָמָה נוֹכְחִית: \(progress.companionLevel)")
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(AppColor.starGold)
+                    Text("עוֹד \(progress.questionsUntilNextLevel) תְּשׁוּבוֹת נְכוֹנוֹת לָרָמָה הַבָּאָה")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+                .padding(.vertical, AppSpacing.md)
+                .frame(maxWidth: .infinity)
+                .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
+                .padding(.horizontal, AppSpacing.lg)
+
+                Button { showLevelInfo = false } label: {
+                    Text("הֵבַנְתִּי!")
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .glow(AppColor.starGold, radius: 10)
+                }
+                .buttonStyle(.juicy)
+                .padding(.horizontal, AppSpacing.lg)
+            }
+            .padding(.vertical, AppSpacing.xl)
         }
     }
 
