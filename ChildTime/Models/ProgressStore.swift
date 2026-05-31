@@ -460,6 +460,7 @@ final class ProgressStore: ObservableObject {
         correctToday += 1
         currentStreak += 1
         wrongStreak = 0  // any correct answer breaks the penalty streak
+        AppAnalytics.questionAnswered(topic: ctx.topic.rawValue, correct: true)
         // Hot-streak reward: a free spin at streak milestones (fires once each
         // since the streak rises by 1) — keeps the run exciting and motivating.
         if currentStreak == 5 || currentStreak == 10 { grantBonusWheel() }
@@ -634,6 +635,7 @@ final class ProgressStore: ObservableObject {
     /// back (Risk & Recovery loop). Returns the minutes deducted this tick.
     @discardableResult
     func recordWrong(topic: Topic, minutesPerCorrect: Int, grantsScreenTime: Bool = true) -> Int {
+        AppAnalytics.questionAnswered(topic: topic.rawValue, correct: false)
         totalAnswered += 1
         _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
         answeredToday += 1
@@ -701,7 +703,9 @@ final class ProgressStore: ObservableObject {
     // MARK: - World progression
 
     func unlockWorld(_ id: String) {
+        let isNew = !unlockedWorlds.contains(id)
         unlockedWorlds.insert(id)
+        if isNew { AppAnalytics.worldUnlocked(id) }
     }
 
     func canUnlock(world: World) -> Bool {

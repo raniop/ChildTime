@@ -123,6 +123,7 @@ struct DailyChestView: View {
     }
 
     private func open() {
+        AppAnalytics.chestOpened(kind: "daily")
         SoundPlayer.shared.play(.chestOpen)
         Haptic.heavy()
         stage = .opening

@@ -101,6 +101,7 @@ struct ChildJoinView: View {
                 ParentSettings.shared.joinedChildID = cid.uuidString
                 profiles.setActiveID(cid)
                 await household.registerDevice(forChildID: cid)
+                AppAnalytics.deviceJoined(kind: DeviceIdentity.kind)
             }
             message = ok ? "הִתְחַבַּרְתֶּם! 🎉" : (household.lastError ?? "קוֹד לֹא תָּקִין")
             working = false

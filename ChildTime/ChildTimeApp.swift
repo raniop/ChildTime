@@ -123,6 +123,10 @@ struct ChildTimeApp: App {
                 .environmentObject(cosmetics)
                 .task {
                     guard Self.demoScreen == nil else { return }   // no system prompts in screenshot mode
+                    let role = settings.deviceRole == .parent ? "parent"
+                             : settings.deviceRole == .child ? "child" : "unset"
+                    AppAnalytics.setUserProperty(role, "device_role")
+                    AppAnalytics.setSubscribed(subs.isPremium)
                     await shields.requestAuthorizationIfNeeded()
                     enforceShieldStateIfNeeded()
                 }

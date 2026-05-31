@@ -48,6 +48,7 @@ struct PaywallView: View {
             }
         }
         .onAppear {
+            AppAnalytics.paywallView()
             withAnimation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.1)) {
                 headerAppeared = true
             }

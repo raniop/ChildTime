@@ -90,6 +90,12 @@ struct ContentView: View {
         }
         .onAppear {
             if profiles.activeID != cid { profiles.setActiveID(cid) }
+            if let p = profiles.active {
+                AppAnalytics.describeAudience(
+                    role: "child",
+                    ageBand: "age_\(p.age.rawValue)",
+                    gender: p.gender?.rawValue)
+            }
         }
     }
 

@@ -222,6 +222,7 @@ struct LuckyWheelView: View {
     private func spin() {
         guard !isSpinning, winner == nil else { return }
         isSpinning = true
+        AppAnalytics.wheelSpin(bonus: ProgressStore.shared.pendingBonusWheel)
         SoundPlayer.shared.play(.portalAppear)
         Haptic.medium()
 

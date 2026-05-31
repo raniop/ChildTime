@@ -26,6 +26,26 @@ enum LiveEventReporter {
 
     static func report(_ type: EventType, value: String? = nil, topic: Topic? = nil,
                        extra: [String: Any] = [:]) {
+        // Mirror the main funnel to Google Analytics (no PII — counts only).
+        switch type {
+        case .sessionStart:
+            AppAnalytics.log("learning_session_start")
+        case .sessionEnd:
+            AppAnalytics.sessionEnd(
+                questions: (extra["questions"] as? Int) ?? 0,
+                accuracy: (extra["accuracy"] as? Int) ?? 0,
+                minutes: (extra["minutes"] as? Int) ?? 0,
+                stars: (extra["stars"] as? Int) ?? 0)
+        case .screenTimeStart:
+            AppAnalytics.screenTimeOpened(minutes: (extra["minutes"] as? Int) ?? 0)
+        case .screenTimeEnd:
+            AppAnalytics.screenTimeEnded(minutesLeft: (extra["minutes"] as? Int) ?? 0)
+        case .assistRequest:
+            AppAnalytics.helpRequested()
+        default:
+            break
+        }
+
         #if canImport(FirebaseFirestore)
         guard AuthManager.shared.isSignedIn,
               let childID = ProfileStore.shared.activeID else { return }

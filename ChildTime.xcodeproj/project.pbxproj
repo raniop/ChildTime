@@ -13,6 +13,7 @@
 		AA0000000000000000001004 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000002004 /* GoogleSignIn */; };
 		AA0000000000000000001005 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000002005 /* GoogleSignInSwift */; };
 		AA00000000000000000010F1 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000020F1 /* FirebaseMessaging */; };
+		AA00000000000000000010F2 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000020F2 /* FirebaseAnalyticsWithoutAdIdSupport */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,6 +79,7 @@
 				AA0000000000000000001001 /* FirebaseAuth in Frameworks */,
 				AA0000000000000000001002 /* FirebaseFirestore in Frameworks */,
 				AA00000000000000000010F1 /* FirebaseMessaging in Frameworks */,
+				AA00000000000000000010F2 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				AA0000000000000000001004 /* GoogleSignIn in Frameworks */,
 				AA0000000000000000001005 /* GoogleSignInSwift in Frameworks */,
 			);
@@ -144,6 +146,7 @@
 				AA0000000000000000002001 /* FirebaseAuth */,
 				AA0000000000000000002002 /* FirebaseFirestore */,
 				AA00000000000000000020F1 /* FirebaseMessaging */,
+				AA00000000000000000020F2 /* FirebaseAnalyticsWithoutAdIdSupport */,
 				AA0000000000000000002004 /* GoogleSignIn */,
 				AA0000000000000000002005 /* GoogleSignInSwift */,
 			);
@@ -662,6 +665,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AA0000000000000000003001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
+		};
+		AA00000000000000000020F2 /* FirebaseAnalyticsWithoutAdIdSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0000000000000000003001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsWithoutAdIdSupport;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

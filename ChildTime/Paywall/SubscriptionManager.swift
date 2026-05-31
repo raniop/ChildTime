@@ -108,6 +108,7 @@ final class SubscriptionManager: ObservableObject {
                 let transaction = try Self.verify(verification)
                 await refreshSubscriptionStatus()
                 await transaction.finish()
+                AppAnalytics.subscribed(product.id)
                 lastError = nil
                 return true
             case .userCancelled:
