@@ -55,10 +55,12 @@ struct ChestView: View {
             // 4. Orbiting sparkles around the chest.
             if active { orbitingSparkles }
 
-            // 5. The chest itself — bobbing + rocking, then a bouncy pop.
-            Text(kind.emoji)
-                .font(.system(size: size))
-                .shadow(color: glowColor.opacity(0.6), radius: 12, y: 4)
+            // 5. The chest itself — a drawn treasure chest whose lid lifts open.
+            //    Bobbing + rocking while glowing, then a bouncy pop.
+            TreasureChest(palette: palette,
+                          open: stage == .opening || stage == .revealed,
+                          size: size)
+                .shadow(color: glowColor.opacity(0.6), radius: 12, y: 6)
                 .offset(x: shake, y: bob)
                 .rotationEffect(.degrees(rock))
                 .scaleEffect(pop)
@@ -138,6 +140,27 @@ struct ChestView: View {
         case .gold: return AppColor.starGold
         case .magic: return AppColor.gemPurple
         case .legendary: return Color(hex: "FF6B9D")
+        }
+    }
+
+    private var palette: ChestPalette {
+        switch kind {
+        case .wood:
+            return ChestPalette(bodyTop: Color(hex: "A9743F"), bodyBottom: Color(hex: "6E4621"),
+                                metal: Color(hex: "FFD23F"), metalDark: Color(hex: "C9961F"),
+                                glow: AppColor.companionGlow)
+        case .gold:
+            return ChestPalette(bodyTop: Color(hex: "FFDE7A"), bodyBottom: Color(hex: "E0A82E"),
+                                metal: Color(hex: "FFF3C4"), metalDark: Color(hex: "C9961F"),
+                                glow: AppColor.starGold)
+        case .magic:
+            return ChestPalette(bodyTop: Color(hex: "8B6BE6"), bodyBottom: Color(hex: "4B2E9E"),
+                                metal: Color(hex: "E7C9FF"), metalDark: Color(hex: "8E5BD0"),
+                                glow: AppColor.gemPurple)
+        case .legendary:
+            return ChestPalette(bodyTop: Color(hex: "FF8FB4"), bodyBottom: Color(hex: "C03A6E"),
+                                metal: Color(hex: "FFE08A"), metalDark: Color(hex: "D98BA6"),
+                                glow: Color(hex: "FF6B9D"))
         }
     }
 
@@ -287,6 +310,151 @@ private struct BurstParticle: View {
                     opacity = 0
                 }
             }
+    }
+}
+
+// MARK: - Drawn treasure chest
+
+struct ChestPalette {
+    let bodyTop: Color
+    let bodyBottom: Color
+    let metal: Color
+    let metalDark: Color
+    let glow: Color
+}
+
+/// A classic treasure chest drawn with shapes (wood body, metal bands, a gold
+/// lock, gems) whose domed lid lifts open. Themed by `palette` so wood / gold /
+/// magic / legendary chests each look distinct.
+struct TreasureChest: View {
+    let palette: ChestPalette
+    let open: Bool
+    let size: CGFloat
+
+    var body: some View {
+        let s = size
+        let bodyH = s * 0.5
+        let lidH = s * 0.34
+        let w = s * 0.92
+
+        ZStack {
+            // Glow + treasure spilling out of the open chest.
+            if open {
+                Ellipse()
+                    .fill(RadialGradient(
+                        colors: [.white, palette.metal.opacity(0.0)],
+                        center: .center, startRadius: 0, endRadius: w * 0.5))
+                    .frame(width: w * 0.95, height: bodyH * 1.1)
+                    .offset(y: -bodyH * 0.55)
+                    .blur(radius: 1)
+                gems(width: w, bodyH: bodyH)
+                    .offset(y: -bodyH * 0.5)
+            }
+
+            // Chest body.
+            ZStack {
+                RoundedRectangle(cornerRadius: s * 0.07, style: .continuous)
+                    .fill(LinearGradient(colors: [palette.bodyTop, palette.bodyBottom],
+                                         startPoint: .top, endPoint: .bottom))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: s * 0.07, style: .continuous)
+                            .stroke(palette.metalDark.opacity(0.5), lineWidth: s * 0.015)
+                    )
+                // Vertical wood seams.
+                HStack(spacing: w * 0.28) {
+                    ForEach(0..<2, id: \.self) { _ in
+                        Rectangle().fill(palette.bodyBottom.opacity(0.35)).frame(width: s * 0.012)
+                    }
+                }
+                // Center metal strap + lock.
+                Rectangle()
+                    .fill(LinearGradient(colors: [palette.metal, palette.metalDark],
+                                         startPoint: .leading, endPoint: .trailing))
+                    .frame(width: s * 0.12)
+                lock(s: s)
+            }
+            .frame(width: w, height: bodyH)
+            .offset(y: s * 0.18)
+
+            // Domed lid, hinged at its bottom edge so it swings open.
+            ZStack {
+                ChestLidShape()
+                    .fill(LinearGradient(colors: [palette.bodyTop, palette.bodyBottom],
+                                         startPoint: .top, endPoint: .bottom))
+                ChestLidShape()
+                    .stroke(palette.metalDark.opacity(0.5), lineWidth: s * 0.015)
+                // Metal rim along the lid base + center strap.
+                VStack(spacing: 0) {
+                    Spacer()
+                    Rectangle()
+                        .fill(LinearGradient(colors: [palette.metal, palette.metalDark],
+                                             startPoint: .top, endPoint: .bottom))
+                        .frame(height: s * 0.07)
+                }
+                Rectangle()
+                    .fill(LinearGradient(colors: [palette.metal, palette.metalDark],
+                                         startPoint: .leading, endPoint: .trailing))
+                    .frame(width: s * 0.12)
+            }
+            .frame(width: w, height: lidH)
+            .offset(y: s * 0.18 - bodyH * 0.5 - lidH * 0.5 + s * 0.02)
+            .rotation3DEffect(.degrees(open ? -118 : 0),
+                              axis: (x: 1, y: 0, z: 0),
+                              anchor: .bottom, anchorZ: 0, perspective: 0.6)
+        }
+        .frame(width: s, height: s)
+        .animation(.spring(response: 0.45, dampingFraction: 0.6), value: open)
+    }
+
+    private func lock(s: CGFloat) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: s * 0.02, style: .continuous)
+                .fill(LinearGradient(colors: [palette.metal, palette.metalDark],
+                                     startPoint: .top, endPoint: .bottom))
+                .frame(width: s * 0.16, height: s * 0.14)
+                .overlay(
+                    RoundedRectangle(cornerRadius: s * 0.02)
+                        .stroke(.black.opacity(0.18), lineWidth: 1)
+                )
+            // Keyhole.
+            Circle().fill(.black.opacity(0.55)).frame(width: s * 0.04, height: s * 0.04)
+                .offset(y: -s * 0.01)
+        }
+    }
+
+    private func gems(width w: CGFloat, bodyH: CGFloat) -> some View {
+        HStack(spacing: w * 0.06) {
+            gem(Color(hex: "06D6A0"), w * 0.12)
+            gem(Color(hex: "FF5C8A"), w * 0.15).offset(y: -bodyH * 0.06)
+            gem(Color(hex: "48BFE3"), w * 0.11)
+        }
+    }
+
+    private func gem(_ c: Color, _ d: CGFloat) -> some View {
+        Circle()
+            .fill(RadialGradient(colors: [.white, c],
+                                 center: .init(x: 0.35, y: 0.3), startRadius: 0, endRadius: d))
+            .frame(width: d, height: d)
+            .overlay(Circle().stroke(.white.opacity(0.6), lineWidth: 1))
+            .shadow(color: c.opacity(0.6), radius: 4)
+    }
+}
+
+/// A rectangle with a rounded (domed) top — the chest lid.
+struct ChestLidShape: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        let radius = min(r.width * 0.5, r.height)
+        p.move(to: CGPoint(x: r.minX, y: r.maxY))
+        p.addLine(to: CGPoint(x: r.minX, y: r.minY + radius))
+        p.addQuadCurve(to: CGPoint(x: r.minX + radius, y: r.minY),
+                       control: CGPoint(x: r.minX, y: r.minY))
+        p.addLine(to: CGPoint(x: r.maxX - radius, y: r.minY))
+        p.addQuadCurve(to: CGPoint(x: r.maxX, y: r.minY + radius),
+                       control: CGPoint(x: r.maxX, y: r.minY))
+        p.addLine(to: CGPoint(x: r.maxX, y: r.maxY))
+        p.closeSubpath()
+        return p
     }
 }
 
