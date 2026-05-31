@@ -397,6 +397,25 @@ struct WorldMapView: View {
                 }
                 .padding(.top, 4)
             }
+
+            // Quick jump to the shop, straight from the stars explanation.
+            if stat == .stars {
+                Button {
+                    Haptic.light()
+                    infoStat = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { showingShop = true }
+                } label: {
+                    Label("לַחֲנוּת", systemImage: "bag.fill")
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .glow(AppColor.starGold, radius: 8)
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
+            }
         }
         .environment(\.layoutDirection, .rightToLeft)
         .padding(20)
