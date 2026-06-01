@@ -113,10 +113,10 @@ struct QuestionRunnerView: View {
             VStack {
                 Spacer()
                 HStack(alignment: .bottom) {
-                    ZStack(alignment: .top) {
+                    // Bubble sits ABOVE the avatar (no overlap, always readable).
+                    VStack(alignment: .leading, spacing: 6) {
                         if let bubble = companion.bubbleText {
                             BubbleSpeech(text: bubble)
-                                .offset(x: 70, y: -10)
                                 .transition(.scale.combined(with: .opacity))
                         }
                         // The buddy is the child's own avatar (with cosmetics);

@@ -315,18 +315,7 @@ struct WorldMapView: View {
                     .glow(AppColor.successMint.opacity(0.45), radius: 5)
             }
 
-            // Daily gift lives next to the action buttons — a lively dancing
-            // icon, but only when there is actually a gift to claim today. Once
-            // opened it disappears for the rest of the day.
-            if progress.dailyChestAvailable {
-                DailyGiftBeacon(size: buttonSize + 4) {
-                    showDailyChest = true
-                }
-                .transition(.scale.combined(with: .opacity))
-            }
         }
-        .animation(.spring(response: 0.5, dampingFraction: 0.7),
-                   value: progress.dailyChestAvailable)
     }
 
     /// The earned play-minutes badge, lifted out so it can live on its own at
@@ -347,6 +336,15 @@ struct WorldMapView: View {
         HStack(spacing: compactStats ? 6 : AppSpacing.sm) {
             if compactStats { Spacer(minLength: 0) }
 
+            // Daily gift — a lively dancing icon right next to the stars, only
+            // when there's a gift to claim today. Disappears once opened.
+            if progress.dailyChestAvailable {
+                DailyGiftBeacon(size: compactStats ? 42 : 48) {
+                    showDailyChest = true
+                }
+                .transition(.scale.combined(with: .opacity))
+            }
+
             // Stars are the single currency now — the only stat chip here.
             Button {
                 Haptic.light()
@@ -363,6 +361,8 @@ struct WorldMapView: View {
             .buttonStyle(.plain)
             .popover(isPresented: popoverBinding(for: .stars)) { statInfoCard(.stars) }
         }
+        .animation(.spring(response: 0.5, dampingFraction: 0.7),
+                   value: progress.dailyChestAvailable)
     }
 
     // MARK: - Stat info popovers
