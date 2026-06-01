@@ -34,6 +34,8 @@ enum Character3DCatalog {
     static let defaultID = "unicorn"
 
     static func find(_ id: String?) -> Character3D {
-        all.first { $0.id == id } ?? all[0]
+        if let id, let match = all.first(where: { $0.id == id }) { return match }
+        // nil / unknown → the default character (not just the first listed).
+        return all.first { $0.id == defaultID } ?? all[0]
     }
 }
