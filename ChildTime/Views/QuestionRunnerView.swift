@@ -523,9 +523,19 @@ struct QuestionRunnerView: View {
     // Cost of one hint, in pending-minutes (the kid's banked play time).
     private let hintCostMinutes = 1
 
+    /// The equipped character is the "smart helper". Higher tiers help more:
+    /// rare/epic add a topic nudge, legendary/mythic add a method explanation
+    /// AND make the hint free. This is the payoff for a pricier character.
+    private var helperLevel: Character3D.HelpLevel {
+        (profiles.active?.character ?? Character3DCatalog.find(nil)).helpLevel
+    }
+
+    /// Legendary/mythic helpers give their hint for free.
+    private var hintCost: Int { helperLevel == .explain ? 0 : hintCostMinutes }
+
     private func canUseHint(_ q: Question) -> Bool {
         guard !showFeedback else { return false }
-        guard progress.pendingMinutes >= hintCostMinutes else { return false }
+        guard progress.pendingMinutes >= hintCost else { return false }
         // Need at least one wrong option still un-eliminated.
         return q.options.indices.contains(where: { idx in
             idx != q.correctIndex && (feedbackForIndex[idx] ?? .normal) == .normal
@@ -543,7 +553,7 @@ struct QuestionRunnerView: View {
                 Text("רֶמֶז")
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("(\(hintCostMinutes) דַּק')")
+                Text(hintCost == 0 ? "(חִינָּם)" : "(\(hintCost) דַּק')")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.75))
             }
@@ -829,8 +839,8 @@ struct QuestionRunnerView: View {
 
     private func useHint(q: Question) {
         guard canUseHint(q) else { return }
-        // Spend the minutes; bail out if the spend failed (race condition).
-        guard progress.spendPendingMinutes(hintCostMinutes) else { return }
+        // Spend the minutes (0 for a free legendary/mythic helper → always true).
+        guard progress.spendPendingMinutes(hintCost) else { return }
 
         // Pick a random wrong option that hasn't been eliminated yet.
         let candidates = q.options.indices.filter { idx in
@@ -847,7 +857,16 @@ struct QuestionRunnerView: View {
         SoundPlayer.shared.play(.streakUp)
         Haptic.medium()
         burstTrigger += 1
-        companion.cheer("הֵסַרְתִּי לְךָ אוֹפְּצְיָה! 💡")
+
+        // The character speaks — the smarter (pricier) it is, the more it helps.
+        switch helperLevel {
+        case .encourage:
+            companion.cheer("הֵסַרְתִּי לְךָ אוֹפְּצְיָה! אַתָּה יָכוֹל 💪")
+        case .hint:
+            companion.cheer("הֵסַרְתִּי אוֹפְּצְיָה. \(HintContent.hint(q.topic))")
+        case .explain:
+            companion.cheer(HintContent.explain(q.topic))
+        }
     }
 
     private func handleCorrect(q: Question) {
