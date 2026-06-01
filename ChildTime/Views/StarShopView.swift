@@ -19,7 +19,11 @@ struct StarShopView: View {
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
                         balanceCard
-                        if store.products.isEmpty {
+                        if ProcessInfo.processInfo.environment["STARSHOP_DEMO"] != nil {
+                            mockRow(stars: 300, price: "₪9.90", best: false)
+                            mockRow(stars: 1000, price: "₪24.90", best: true)
+                            mockRow(stars: 2500, price: "₪49.90", best: false)
+                        } else if store.products.isEmpty {
                             placeholder
                         } else {
                             ForEach(store.products, id: \.id) { product in
@@ -83,6 +87,39 @@ struct StarShopView: View {
         .padding(.vertical, AppSpacing.md)
         .frame(maxWidth: .infinity)
         .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(.white.opacity(0.12)))
+    }
+
+    // Demo-only static row (no StoreKit product) for screenshots.
+    private func mockRow(stars: Int, price: String, best: Bool) -> some View {
+        HStack(spacing: AppSpacing.md) {
+            ZStack {
+                Circle().fill(AppColor.starGold.opacity(0.25)).frame(width: 58, height: 58)
+                Text("⭐").font(.system(size: 30))
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(stars) כּוֹכָבִים")
+                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                if best {
+                    Text("הֲכִי מִשְׁתַּלֵּם 🔥")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(AppColor.starGold)
+                }
+            }
+            Spacer()
+            Text(price)
+                .font(.system(size: 18, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16).padding(.vertical, 9)
+                .background(Capsule().fill(AppColor.gemPurple))
+        }
+        .padding(AppSpacing.md)
+        .frame(maxWidth: .infinity)
+        .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(.white.opacity(0.10)))
+        .overlay(
+            RoundedRectangle(cornerRadius: AppRadius.large)
+                .stroke(best ? AppColor.starGold : .white.opacity(0.2), lineWidth: best ? 2.5 : 1.5)
+        )
     }
 
     private func packRow(_ product: Product) -> some View {

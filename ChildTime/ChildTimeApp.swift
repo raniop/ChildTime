@@ -182,6 +182,7 @@ struct ChildTimeApp: App {
         case "question": QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
         case "wheel":    LuckyWheelView(onClose: {})
         case "dashboard": ParentDashboardView(isRoot: true)
+        case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
         default:         WorldMapView()   // "worldmap"
         }
     }
