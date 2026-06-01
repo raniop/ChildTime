@@ -22,6 +22,8 @@ enum Character3DCatalog {
         // Cute 2D animal characters.
         Character3D(id: "fox",      name: "שׁוּעָל",    imageAsset: "fox"),
         Character3D(id: "unicorn",  name: "חַד-קֶרֶן",  imageAsset: "unicorn"),
+        Character3D(id: "lion",     name: "אַרְיֵה",     imageAsset: "lion"),
+        Character3D(id: "koala",    name: "קוֹאָלָה",    imageAsset: "koala"),
         Character3D(id: "dragon",   name: "דְּרָקוֹן",   imageAsset: "dragon"),
         Character3D(id: "bear",     name: "דֹּב",       imageAsset: "bear"),
         Character3D(id: "tiger",    name: "נָמֵר",      imageAsset: "tiger"),
@@ -29,6 +31,7 @@ enum Character3DCatalog {
         Character3D(id: "monkey",   name: "קוֹף",       imageAsset: "monkey"),
         Character3D(id: "penguin",  name: "פִּינְגְּוִין", imageAsset: "penguin"),
         Character3D(id: "elephant", name: "פִּיל",       imageAsset: "elephant"),
+        Character3D(id: "octopus",  name: "תַּמְנוּן",     imageAsset: "octopus"),
     ]
 
     static let defaultID = "fox"
