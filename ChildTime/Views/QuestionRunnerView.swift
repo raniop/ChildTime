@@ -113,27 +113,32 @@ struct QuestionRunnerView: View {
             VStack {
                 Spacer()
                 HStack(alignment: .bottom) {
-                    // Bubble sits ABOVE the avatar (no overlap, always readable).
-                    VStack(alignment: .leading, spacing: 6) {
-                        if let bubble = companion.bubbleText {
-                            BubbleSpeech(text: bubble)
-                                .transition(.scale.combined(with: .opacity))
-                        }
+                    // Bubble sits ABOVE the avatar with its tail pointing down at
+                    // it — readable, attached, and never covering the character.
+                    ZStack(alignment: .bottomLeading) {
                         // The buddy is the child's own avatar (with cosmetics);
                         // falls back to the Tofy face if no profile is active.
-                        if let profile = profiles.active {
-                            ZStack {
-                                Circle()
-                                    .fill(AppColor.companionGlow.opacity(0.28))
-                                    .frame(width: companionSize * 1.15, height: companionSize * 1.15)
-                                    .blur(radius: 8)
-                                ProfileAvatarView(profile: profile, size: companionSize)
-                                    .clipShape(Circle())
-                                    .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 2))
-                                    .shadow(color: .black.opacity(0.25), radius: 5, y: 3)
+                        Group {
+                            if let profile = profiles.active {
+                                ZStack {
+                                    Circle()
+                                        .fill(AppColor.companionGlow.opacity(0.28))
+                                        .frame(width: companionSize * 1.15, height: companionSize * 1.15)
+                                        .blur(radius: 8)
+                                    ProfileAvatarView(profile: profile, size: companionSize)
+                                        .clipShape(Circle())
+                                        .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 2))
+                                        .shadow(color: .black.opacity(0.25), radius: 5, y: 3)
+                                }
+                            } else {
+                                CompanionView(controller: companion, size: companionSize)
                             }
-                        } else {
-                            CompanionView(controller: companion, size: companionSize)
+                        }
+                        if let bubble = companion.bubbleText {
+                            BubbleSpeech(text: bubble, tailInsetFromRight: companionSize * 0.55)
+                                .fixedSize()
+                                .offset(y: -(companionSize + 8))
+                                .transition(.scale.combined(with: .opacity))
                         }
                     }
                     .padding(.leading, AppSpacing.md)

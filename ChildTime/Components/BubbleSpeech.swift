@@ -3,6 +3,10 @@ import SwiftUI
 struct BubbleSpeech: View {
     let text: String
     var pointDirection: Edge = .bottom
+    /// Distance of the downward tail's center from the bubble's RIGHT edge. nil =
+    /// centered. Set it (≈ avatar radius) to point at an avatar sitting under the
+    /// bubble's right edge.
+    var tailInsetFromRight: CGFloat? = nil
 
     var body: some View {
         Text(text)
@@ -12,7 +16,7 @@ struct BubbleSpeech: View {
             .padding(.vertical, AppSpacing.md)
             .padding(.bottom, 8)   // reserve room for the tail
             .background {
-                BubbleShape(pointDirection: pointDirection)
+                BubbleShape(pointDirection: pointDirection, tailInsetFromRight: tailInsetFromRight)
                     .fill(.white)
                     .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
             }
@@ -22,6 +26,7 @@ struct BubbleSpeech: View {
 
 struct BubbleShape: Shape {
     var pointDirection: Edge = .bottom
+    var tailInsetFromRight: CGFloat? = nil
 
     func path(in rect: CGRect) -> Path {
         var path = Path()
@@ -34,10 +39,14 @@ struct BubbleShape: Shape {
                           width: rect.width, height: rect.height - tailH)
         path.addRoundedRect(in: body, cornerSize: CGSize(width: r, height: r))
 
-        // A clean downward tail, centered, whose base sits flush ON the body's
-        // bottom edge (1pt overlap) so it merges seamlessly — no notch, no gap.
+        // A clean downward tail whose base sits flush ON the body's bottom edge
+        // (1pt overlap) so it merges seamlessly — no notch, no gap.
         if pointDirection == .bottom {
-            let cx = rect.midX
+            let cx: CGFloat = {
+                guard let inset = tailInsetFromRight else { return rect.midX }
+                return min(max(rect.minX + r + tailW / 2, rect.maxX - inset),
+                           rect.maxX - r - tailW / 2)
+            }()
             let baseY = body.maxY
             path.move(to: CGPoint(x: cx - tailW / 2, y: baseY - 1))
             path.addLine(to: CGPoint(x: cx, y: baseY + tailH))

@@ -248,18 +248,8 @@ struct RewardScreenView: View {
 
     private var actionButtons: some View {
         VStack(spacing: 10) {
-            if progress.pendingMinutes > 0 {
-                JuicyButton(gradient: AppGradient.castle, glowColor: AppColor.flameOrange) {
-                    unlockNow()
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "gamecontroller.fill")
-                        Text("פִּתְחוּ לִי \(progress.pendingMinutes) דַּק' 🎮")
-                    }
-                    .font(.system(size: 20, weight: .heavy, design: .rounded))
-                }
-            }
-
+            // Opening game time belongs on the world map, not the reward screen —
+            // here we only celebrate and continue.
             Button {
                 proceedAfterReward()
             } label: {
@@ -324,16 +314,6 @@ struct RewardScreenView: View {
         // bonus + any cosmetic.
         progress.applyChestReward(reward)
         progress.advanceRoom(in: world.id)
-    }
-
-    private func unlockNow() {
-        let minutes = progress.consumePendingMinutes()
-        guard minutes > 0 else { return }
-        shields.unlock(minutes: minutes)
-        progress.startUnlock(minutes: minutes)
-        // Tell the parent the child just opened screen time (+ how many minutes).
-        LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes])
-        onDismiss()
     }
 
     private func proceedAfterReward() {
