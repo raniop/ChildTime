@@ -59,16 +59,21 @@ final class FriendsManager: ObservableObject {
 
     // MARK: - My code / invite link
 
-    /// Stable per-child friend code (generated once, kept locally + on the card).
+    /// Stable per-child friend code, derived deterministically from the child id
+    /// (the first 6 UUID bytes → an unambiguous alphabet), so it's the SAME code
+    /// every launch and even after a reinstall.
     private func codeForActiveChild() -> String {
         guard let id = myID else { return "" }
-        let key = "friend.code.\(id)"
-        if let c = defaults.string(forKey: key) { return c }
         let alphabet = Array("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") // no ambiguous chars
+        let hex = id.replacingOccurrences(of: "-", with: "")
+        guard hex.count >= 12 else { return "" }
         var c = ""
-        var seed = abs(id.hashValue)
-        for _ in 0..<6 { c.append(alphabet[seed % alphabet.count]); seed /= alphabet.count }
-        defaults.set(c, forKey: key)
+        for i in stride(from: 0, to: 12, by: 2) {
+            let start = hex.index(hex.startIndex, offsetBy: i)
+            let end = hex.index(start, offsetBy: 2)
+            let byte = Int(hex[start..<end], radix: 16) ?? 0
+            c.append(alphabet[byte % alphabet.count])
+        }
         return c
     }
 
@@ -81,11 +86,14 @@ final class FriendsManager: ObservableObject {
 
     /// Push my current card (name, character, stars, code) and reload the board.
     func refresh() async {
+        // The code is LOCAL (derived from the child id) — always show it so the
+        // QR + share link work even offline / before sign-in.
+        guard let id = myID else { return }
+        myCode = codeForActiveChild()
         #if canImport(FirebaseFirestore)
-        guard let id = myID, AuthManager.shared.isSignedIn else { return }
+        guard AuthManager.shared.isSignedIn else { return }
         isLoading = true
         defer { isLoading = false }
-        myCode = codeForActiveChild()
         await upsertMyCard(id: id)
         await loadLeaderboard(myID: id)
         #endif
