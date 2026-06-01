@@ -77,4 +77,7 @@ enum AppAnalytics {
 
     static func paywallView() { log("paywall_view") }
     static func subscribed(_ product: String) { log("subscribe", ["product": product]); setSubscribed(true) }
+    static func purchasedStars(_ product: String, stars: Int) {
+        log("stars_purchased", ["product": product, "stars": stars])
+    }
 }

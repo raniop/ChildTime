@@ -1,7 +1,53 @@
 {
   "identifier" : "A1B2C3D4-0000-0000-0000-000000000001",
   "nonRenewingSubscriptions" : [],
-  "products" : [],
+  "products" : [
+    {
+      "displayPrice" : "9.90",
+      "familyShareable" : false,
+      "internalID" : "50000001",
+      "localizations" : [
+        {
+          "description" : "300 כוכבים לחנות הדמויות.",
+          "displayName" : "300 כוכבים",
+          "locale" : "he_IL"
+        }
+      ],
+      "productID" : "com.rani.ChildTime.stars.small",
+      "referenceName" : "Stars 300",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "24.90",
+      "familyShareable" : false,
+      "internalID" : "50000002",
+      "localizations" : [
+        {
+          "description" : "1000 כוכבים לחנות הדמויות. הכי משתלם.",
+          "displayName" : "1000 כוכבים",
+          "locale" : "he_IL"
+        }
+      ],
+      "productID" : "com.rani.ChildTime.stars.medium",
+      "referenceName" : "Stars 1000",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "49.90",
+      "familyShareable" : false,
+      "internalID" : "50000003",
+      "localizations" : [
+        {
+          "description" : "2500 כוכבים לחנות הדמויות.",
+          "displayName" : "2500 כוכבים",
+          "locale" : "he_IL"
+        }
+      ],
+      "productID" : "com.rani.ChildTime.stars.large",
+      "referenceName" : "Stars 2500",
+      "type" : "Consumable"
+    }
+  ],
   "settings" : {
     "_failTransactionsEnabled" : false,
     "_locale" : "he_IL",

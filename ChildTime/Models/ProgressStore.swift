@@ -740,6 +740,13 @@ final class ProgressStore: ObservableObject {
         stars = max(0, stars - amount)
     }
 
+    /// Add stars — earned in play, or bought as a real-money star pack
+    /// (parent-gated). Single entry point so the balance stays canonical.
+    func addStars(_ amount: Int) {
+        guard amount > 0 else { return }
+        stars += amount
+    }
+
     /// Generic XP grant — used by Lucky Wheel and any future "+XP" rewards.
     func addXP(_ amount: Int) {
         guard amount > 0 else { return }

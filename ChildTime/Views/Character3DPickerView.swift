@@ -13,6 +13,7 @@ struct Character3DPickerView: View {
 
     @State private var pendingPurchase: Character3D?
     @State private var shortBy: Int?
+    @State private var showStarShop = false
 
     private var selectedID: String {
         profiles.profiles.first { $0.id == profileID }?.character3DID ?? Character3DCatalog.defaultID
@@ -53,9 +54,15 @@ struct Character3DPickerView: View {
         .alert("חֲסֵרִים כּוֹכָבִים ⭐",
                isPresented: Binding(get: { shortBy != nil },
                                     set: { if !$0 { shortBy = nil } })) {
+            Button("קְנֵה כּוֹכָבִים") { showStarShop = true }
             Button("הֲבַנְתִּי", role: .cancel) {}
         } message: {
-            if let s = shortBy { Text("צָרִיךְ עוֹד \(s) כּוֹכָבִים. תַּמְשִׁיךְ לִלְמֹד וְתַרְוִיחַ עוֹד!") }
+            if let s = shortBy { Text("צָרִיךְ עוֹד \(s) כּוֹכָבִים. תַּמְשִׁיךְ לִלְמֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.") }
+        }
+        .sheet(isPresented: $showStarShop) {
+            ParentGateView(allowClose: true) { StarShopView() }
+                .environmentObject(ParentSettings.shared)
+                .environment(\.layoutDirection, .rightToLeft)
         }
     }
 
@@ -83,15 +90,21 @@ struct Character3DPickerView: View {
     }
 
     private var starsChip: some View {
-        HStack(spacing: 4) {
-            Text("⭐").font(.system(size: 15))
-            Text("\(progress.stars)")
-                .font(.system(size: 16, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
+        Button { showStarShop = true } label: {
+            HStack(spacing: 4) {
+                Text("⭐").font(.system(size: 15))
+                Text("\(progress.stars)")
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 15))
+                    .foregroundStyle(AppColor.starGold)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(Capsule().fill(.white.opacity(0.18)))
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 7)
-        .background(Capsule().fill(.white.opacity(0.18)))
+        .buttonStyle(.plain)
     }
 
     private func tierColor(_ tier: CharacterTier) -> Color {
