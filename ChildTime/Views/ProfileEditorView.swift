@@ -60,10 +60,6 @@ struct ProfileEditorView: View {
 
                         interestsSection
 
-                        avatarPresetGrid
-
-                        photoControls
-
                         if isEdit, let id = existingID {
                             Button(role: .destructive) {
                                 showDeleteConfirm = true
@@ -110,25 +106,6 @@ struct ProfileEditorView: View {
                         .fontWeight(.bold)
                 }
             }
-            .photosPicker(
-                isPresented: $showPicker,
-                selection: $pickerItem,
-                matching: .images,
-                photoLibrary: .shared()
-            )
-            .fullScreenCover(item: $pendingCrop) { pc in
-                ImageCropperView(image: pc.image) { cropped in
-                    photoData = cropped.jpegData(compressionQuality: 0.82)
-                    Haptic.success()
-                    pendingCrop = nil
-                } onCancel: {
-                    pendingCrop = nil
-                }
-                .environment(\.layoutDirection, .rightToLeft)
-            }
-            .onChange(of: pickerItem) { _, newItem in
-                Task { await loadPhoto(newItem) }
-            }
             .onAppear { hydrateFromMode() }
         }
     }
@@ -145,23 +122,9 @@ struct ProfileEditorView: View {
             avatarPresetID: avatarPresetID
         )
         return VStack(spacing: 10) {
-            // Tapping the avatar opens the photo picker (with a camera badge so
-            // it's clearly tappable).
-            Button {
-                showPicker = true
-            } label: {
-                ProfileAvatarView(profile: preview, size: 130)
-                    .overlay(alignment: .bottomTrailing) {
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(.white)
-                            .padding(9)
-                            .background(AppColor.gemPurple, in: Circle())
-                            .overlay(Circle().stroke(.white, lineWidth: 2))
-                            .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
-                    }
-            }
-            .buttonStyle(.plain)
+            // Shows the child's chosen 3D character (picked in the shop) — no
+            // more profile photo.
+            ProfileAvatarView(profile: preview, size: 130)
             Text(preview.name)
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)

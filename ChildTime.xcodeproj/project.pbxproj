@@ -89,15 +89,11 @@
 		};
 		4FD27B962FC70B4700909B38 /* ChildTimeTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = ChildTimeTests;
 			sourceTree = "<group>";
 		};
 		4FD27BA02FC70B4700909B38 /* ChildTimeUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = ChildTimeUITests;
 			sourceTree = "<group>";
 		};
@@ -150,7 +146,6 @@
 				AF85E1C4DBB972D75EDDF8BB /* Info.plist */,
 				21FA339BEBF141B64D9C4169 /* DeviceActivityMonitorExt.entitlements */,
 			);
-			name = DeviceActivityMonitorExt;
 			path = DeviceActivityMonitorExt;
 			sourceTree = "<group>";
 		};

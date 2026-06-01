@@ -18,6 +18,8 @@ struct ShopView: View {
     @State private var celebrateTrigger = 0
     @State private var confettiTrigger = 0
     @State private var showingProfileEditor = false
+    @State private var showingCharacterPicker = false
+    @ObservedObject private var characters = Character3DStore.shared
 
     private var isCompact: Bool { hsc == .compact }
     private var avatarSize: CGFloat { isCompact ? 130 : 170 }
@@ -60,6 +62,11 @@ struct ShopView: View {
             .environmentObject(cosmetics)
             .environment(\.layoutDirection, .rightToLeft)
             .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showingCharacterPicker) {
+            if let active = profiles.active {
+                Character3DPickerView(profileID: active.id)
+            }
         }
         .sheet(isPresented: $showingProfileEditor) {
             if let active = profiles.active {
@@ -129,31 +136,25 @@ struct ShopView: View {
     private var hero: some View {
         if let profile = profiles.active {
             VStack(spacing: 6) {
-                DressUpCharacter(items: cosmetics.equippedItems(for: profile.id), size: avatarSize)
+                // The selected 3D character (drag to spin 360°). Resolved through
+                // the catalog so a removed/unknown id falls back to the default
+                // instead of showing the placeholder. `.id` forces a reload when
+                // the child picks a different character.
+                Character3DView(modelName: selectedCharacter(for: profile).scn, animated: true)
+                    .id(selectedCharacter(for: profile).id)
+                    .frame(width: avatarSize, height: avatarSize * 1.45)
                 Text(profile.name)
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("הַלְבִּישׁוּ אֶת \(profile.name)")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.7))
 
-                // Edit-profile shortcut, right where the avatar lives.
-                Button {
-                    Haptic.light()
-                    showingProfileEditor = true
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "pencil")
-                        Text("עֲרֹךְ פְּרוֹפִיל")
-                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                HStack(spacing: 8) {
+                    pillButton(icon: "person.crop.rectangle.stack", title: "הַחְלֵף דְּמוּת") {
+                        showingCharacterPicker = true
                     }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(.white.opacity(0.18), in: Capsule())
-                    .overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: 1))
+                    pillButton(icon: "pencil", title: "עֲרֹךְ פְּרוֹפִיל") {
+                        showingProfileEditor = true
+                    }
                 }
-                .buttonStyle(.plain)
                 .padding(.top, 4)
             }
             .padding(.top, AppSpacing.sm)
@@ -161,6 +162,29 @@ struct ShopView: View {
             Text("צְרוּ פְּרוֹפִיל כְּדֵי לְהַתְחִיל")
                 .foregroundStyle(.white)
         }
+    }
+
+    private func selectedCharacter(for profile: Profile) -> Character3D {
+        Character3DCatalog.find(characters.selectedID(for: profile.id))
+    }
+
+    private func pillButton(icon: String, title: String, action: @escaping () -> Void) -> some View {
+        Button {
+            Haptic.light()
+            action()
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                Text(title)
+                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(.white.opacity(0.18), in: Capsule())
+            .overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Category strip
@@ -381,7 +405,7 @@ struct ShopItemDetail: View {
             VStack(spacing: AppSpacing.lg) {
                 // Live preview on the kid's character
                 if profile != nil {
-                    DressUpCharacter(items: previewItems, size: 150)
+                    DressUpCharacter(items: previewItems, photoData: profile?.photoData, size: 150)
                 }
 
                 VStack(spacing: 6) {

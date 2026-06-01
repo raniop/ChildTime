@@ -8,6 +8,11 @@ import SwiftUI
 struct DressUpCharacter: View {
     /// Equipped cosmetics to wear.
     var items: [CosmeticItem] = []
+    /// Optional real photo of the child. When set, it becomes the character's
+    /// FACE (a circle on the head) — the body, limbs and all cosmetics stay, so
+    /// the kid is literally dressing up *themselves*. The drawn eyes/blush/smile
+    /// are used only when there's no photo.
+    var photoData: Data? = nil
     /// Body tint (player-customizable in the future).
     var bodyColor: Color = AppColor.companionBody
     /// Overall width; height is derived.
@@ -17,6 +22,7 @@ struct DressUpCharacter: View {
     @State private var breathe = false
     @State private var blink = false
     @State private var wave = false
+    @State private var photo: UIImage? = nil
 
     // Character canvas is size × size*1.35 (room for legs/feet + a hat).
     private var H: CGFloat { size * 1.35 }
@@ -52,7 +58,11 @@ struct DressUpCharacter: View {
                     .overlay(EggShape().stroke(.white.opacity(0.25), lineWidth: 2))
                     .frame(width: bodyW, height: bodyH)
                     .shadow(color: .black.opacity(0.18), radius: 8, y: 6)
-                face.offset(y: -bodyH * 0.16)
+                if let photo {
+                    photoFace(photo).offset(y: -bodyH * 0.17)
+                } else {
+                    face.offset(y: -bodyH * 0.16)
+                }
             }
             .offset(y: -size * 0.06)
             .scaleEffect(x: breathe ? 1.02 : 1.0, y: breathe ? 0.98 : 1.0, anchor: .bottom)
@@ -73,7 +83,26 @@ struct DressUpCharacter: View {
             if let h = item(.hat) { worn(h, y: -0.52, scale: 0.40) }
         }
         .frame(width: size, height: H)
-        .onAppear { startIdle() }
+        .onAppear { startIdle(); decodePhoto() }
+        .onChange(of: photoData) { _, _ in decodePhoto() }
+    }
+
+    private func decodePhoto() {
+        guard let data = photoData else { photo = nil; return }
+        photo = UIImage(data: data)
+    }
+
+    /// The child's photo as a round face on the head — bordered so it reads as a
+    /// clean face and not a sticker slapped on the body.
+    private func photoFace(_ image: UIImage) -> some View {
+        let d = size * 0.46
+        return Image(uiImage: image)
+            .resizable()
+            .scaledToFill()
+            .frame(width: d, height: d)
+            .clipShape(Circle())
+            .overlay(Circle().stroke(.white, lineWidth: max(1.5, size * 0.02)))
+            .shadow(color: .black.opacity(0.15), radius: 2, y: 1)
     }
 
     // MARK: - Limbs

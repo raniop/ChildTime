@@ -23,6 +23,7 @@ struct FloatingCompanion: View {
     @State private var hasAppeared: Bool = false
     @State private var wanderTask: Task<Void, Never>? = nil
     @ObservedObject private var cosmeticStore = CosmeticStore.shared
+    @ObservedObject private var characterStore = Character3DStore.shared
 
     var body: some View {
         GeometryReader { geo in
@@ -37,13 +38,14 @@ struct FloatingCompanion: View {
 
                 Group {
                     if let profile {
-                        // Same dress-up character as the shop (wearing the
-                        // child's equipped cosmetics), so the buddy and the shop
-                        // avatar always match.
-                        DressUpCharacter(
-                            items: cosmeticStore.equippedItems(for: profile.id),
-                            size: size,
-                            animated: false)
+                        // The child's selected 3D character — the SAME avatar as
+                        // the shop, so the buddy and the shop always match.
+                        Character3DView(
+                            modelName: characterStore.selectedID(for: profile.id) + ".scn",
+                            animated: false,
+                            interactive: false)
+                            .id(characterStore.selectedID(for: profile.id))
+                            .frame(width: size, height: size * 1.3)
                     } else {
                         CompanionView(controller: controller, size: size)
                     }
@@ -131,17 +133,26 @@ struct FloatingCompanion: View {
     }
 
     private func randomTarget(in container: CGSize) -> CGPoint {
-        // Pick from a few anchor zones, biased to corners/edges that don't fully
-        // overlap the cards. This gives variety without parking on a card.
+        // Anchor zones live STRICTLY inside the band defined by the insets, so a
+        // large bottomInset (e.g. on the pre-mission screen) keeps the buddy
+        // above the cards/buttons instead of parking on them. Biased to the
+        // edges so it frames the content rather than sitting dead-center on it.
+        let r = size * 0.5
+        let minX = horizontalInset + r
+        let maxX = max(minX, container.width - horizontalInset - r)
+        let minY = topInset + r
+        let maxY = max(minY, container.height - bottomInset - r)
+        let midX = (minX + maxX) / 2
+        func y(_ t: CGFloat) -> CGFloat { minY + (maxY - minY) * t }
         let zones: [(CGFloat, CGFloat)] = [
-            (container.width - horizontalInset - size * 0.5, container.height * 0.18),  // top-right
-            (horizontalInset + size * 0.5,                  container.height * 0.32),  // mid-left
-            (container.width - horizontalInset - size * 0.5, container.height * 0.55),  // mid-right
-            (horizontalInset + size * 0.5,                  container.height * 0.78),  // bottom-left
-            (container.width * 0.5,                          container.height - bottomInset - size * 0.5),  // bottom-center
-            (container.width - horizontalInset - size * 0.5, container.height - bottomInset - size * 0.5)   // bottom-right
+            (maxX, y(0.0)),    // top-trailing
+            (minX, y(0.30)),   // upper-leading
+            (maxX, y(0.55)),   // mid-trailing
+            (minX, y(1.0)),    // lower-leading
+            (midX, y(1.0)),    // lower-center
+            (maxX, y(1.0))     // lower-trailing
         ]
-        let pick = zones.randomElement() ?? zones[0]
+        let pick = zones.randomElement() ?? (maxX, minY)
         return clamp(CGPoint(x: pick.0, y: pick.1), in: container)
     }
 

@@ -189,6 +189,7 @@ struct ProfileAvatarView: View {
     var headItemsOnly: Bool = false
 
     @EnvironmentObject private var cosmetics: CosmeticStore
+    @ObservedObject private var characterStore = Character3DStore.shared
 
     private var equippedItems: [CosmeticItem] {
         let base = overrideItems ?? cosmetics.equippedItems(for: profile.id)
@@ -214,42 +215,23 @@ struct ProfileAvatarView: View {
     }
 
     var body: some View {
-        ZStack {
-            // Base — photo trumps preset.
-            if let data = profile.photoData, let img = UIImage(data: data) {
-                Image(uiImage: img)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: size, height: size)
-                    .clipShape(Circle())
-            } else {
-                let preset = AvatarPreset.find(profile.avatarPresetID)
-                Circle()
-                    .fill(LinearGradient(
-                        colors: [preset.topColor, preset.bottomColor],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
-                    .frame(width: size, height: size)
-                Text(preset.emoji)
-                    .font(.system(size: size * 0.55))
-            }
-
-            // Cosmetic layers — positioned around the avatar circle.
-            ForEach(equippedItems, id: \.id) { item in
-                cosmeticLayer(for: item)
-            }
-        }
-        .overlay(
-            Circle().stroke(
-                LinearGradient(
-                    colors: [AppColor.starGold, AppColor.companionGlow],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                ),
-                lineWidth: 3
+        // The child's chosen 3D character as a head-and-shoulders portrait —
+        // there's no profile photo anymore, only the picked character.
+        Character3DView(modelName: characterStore.selectedID(for: profile.id) + ".scn",
+                        animated: false, interactive: false, portrait: true)
+            .id(characterStore.selectedID(for: profile.id))
+            .frame(width: size, height: size)
+            .clipShape(Circle())
+            .overlay(
+                Circle().stroke(
+                    LinearGradient(
+                        colors: [AppColor.starGold, AppColor.companionGlow],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 3
+                )
             )
-        )
-        .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
+            .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
     }
 
     /// Layered cosmetic — each category sits in a tuned spot around the
