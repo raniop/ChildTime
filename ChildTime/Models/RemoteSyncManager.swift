@@ -96,6 +96,23 @@ final class RemoteSyncManager: ObservableObject {
         #endif
     }
 
+    /// One-shot fetch of a child's current cloud snapshot — used by Kid Mode to
+    /// force-load the child's real progress before handing them the phone, even
+    /// if the live listeners never ran or the cache is stale.
+    func fetchSnapshot(for childID: UUID) async -> ProgressSnapshot? {
+        #if canImport(FirebaseFirestore)
+        guard AuthManager.shared.isSignedIn else { return nil }
+        let doc = try? await db.collection("children").document(childID.uuidString)
+            .collection("state").document("current").getDocument()
+        guard let raw = doc?.data() else { return nil }
+        let snap = Self.decode(raw)
+        if let snap { handleRemoteSnapshot(snap, profileID: childID) }
+        return snap
+        #else
+        return nil
+        #endif
+    }
+
     /// Parent action: grant/spend a child's play-minutes by editing the CLOUD
     /// snapshot directly, in a transaction that BUMPS the revision so the child's
     /// device accepts it (a stale local push from the parent would otherwise lose

@@ -47,29 +47,25 @@ final class KidModeManager: ObservableObject {
     /// Enter kid mode for `child`: pull the child's full progress from the cloud,
     /// lock the phone to ChildTime + the allow-list, switch to that child's
     /// profile, and show the kid experience with THEIR real data.
-    func enter(childID id: UUID) {
+    func enter(childID id: UUID) async {
         defaults.set(ProfileStore.shared.activeID?.uuidString, forKey: Key.prevID)
         childID = id
 
-        // Force a fresh pull of every child's cloud state (newer snapshots then
-        // apply to the active profile via the live listener).
-        RemoteSyncManager.shared.refreshNow()
+        // Force-pull the child's CURRENT cloud snapshot directly (don't rely on a
+        // possibly-empty cache or revision races); fetchSnapshot also mirrors it
+        // into the vault.
+        let cloud = await RemoteSyncManager.shared.fetchSnapshot(for: id)
+        // Pull the child's day-by-day learning history too.
+        await LearningHistoryStore.shared.fetchRemoteHistory(for: id)
 
-        // Switch to the child — loads their vault snapshot (stars, minutes, world
-        // progress, topic stats…) into ProgressStore and binds their history.
+        // Switch to the child — loads the (now-fresh) vault snapshot into
+        // ProgressStore and binds their history.
         if let p = ProfileStore.shared.profiles.first(where: { $0.id == id }) {
             ProfileStore.shared.setActive(p)
         }
-        // Apply the freshest cloud snapshot we already have cached over any stale
-        // local copy, so the kid sees their real progress immediately.
-        if let remote = RemoteSyncManager.shared.remoteSnapshots[id] {
-            let local = ProgressStore.shared.captureSnapshot()
-            if remote.revision >= local.revision {
-                ProgressStore.shared.apply(remote)
-            }
-        }
-        // Pull the child's day-by-day learning history too.
-        Task { await LearningHistoryStore.shared.fetchRemoteHistory(for: id) }
+        // Force the cloud truth into the live store (covers the case where the
+        // child was already the active profile, so the switch saved over it).
+        if let cloud { ProgressStore.shared.apply(cloud) }
 
         ShieldManager.shared.applyLockAllExcept(allowedSelection)
         active = true
