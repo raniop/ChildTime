@@ -63,14 +63,18 @@ struct ContentView: View {
         }
         .overlay(alignment: .topLeading) {
             Button { showExitGate = true } label: {
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.9))
-                    .frame(width: 34, height: 34)
-                    .background(.black.opacity(0.28), in: Circle())
+                HStack(spacing: 5) {
+                    Image(systemName: "lock.fill").font(.system(size: 12, weight: .bold))
+                    Text("יְצִיאַת הוֹרֶה").font(.system(size: 13, weight: .heavy, design: .rounded))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Capsule().fill(.black.opacity(0.4)))
+                .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
             }
-            .padding(.top, 8)
-            .padding(.leading, 8)
+            .padding(.top, 10)
+            .padding(.leading, 10)
         }
         .sheet(isPresented: $showExitGate) {
             ParentGateView(allowClose: true,

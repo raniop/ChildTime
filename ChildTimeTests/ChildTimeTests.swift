@@ -31,15 +31,15 @@ struct ChildTimeTests {
         }
 
         // 3. Tier + helper derivation.
-        #expect(CharacterTier(priceStars: 0)    == .free)
-        #expect(CharacterTier(priceStars: 200)  == .common)
-        #expect(CharacterTier(priceStars: 500)  == .rare)
-        #expect(CharacterTier(priceStars: 800)  == .epic)
-        #expect(CharacterTier(priceStars: 1500) == .legendary)
-        #expect(CharacterTier(priceStars: 3000) == .mythic)
+        #expect(CharacterTier(priceStars: 0)     == .free)
+        #expect(CharacterTier(priceStars: 1500)  == .common)
+        #expect(CharacterTier(priceStars: 3500)  == .rare)
+        #expect(CharacterTier(priceStars: 7000)  == .epic)
+        #expect(CharacterTier(priceStars: 14000) == .legendary)
+        #expect(CharacterTier(priceStars: 25000) == .mythic)
         #expect(Character3DCatalog.find("fox").helpLevel == .encourage)
-        #expect(CharacterTier(priceStars: 500).help == .hint)
-        #expect(CharacterTier(priceStars: 1500).help == .explain)
+        #expect(CharacterTier(priceStars: 3500).help == .hint)
+        #expect(CharacterTier(priceStars: 14000).help == .explain)
 
         let store = CharacterStore.shared
         let progress = ProgressStore.shared

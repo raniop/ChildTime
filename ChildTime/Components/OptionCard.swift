@@ -37,6 +37,7 @@ struct OptionCard: View {
                 Text(text)
                     .font(.system(size: fontSize, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)   // tidy 2-word answers that wrap
                     .strikethrough(feedback == .eliminated, color: .white.opacity(0.8))
                     .frame(maxWidth: .infinity, minHeight: minHeight)
                     .padding(.horizontal, 12)
