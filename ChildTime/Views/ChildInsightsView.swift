@@ -29,7 +29,7 @@ struct ChildInsightsView: View {
     }
     private var engine: InsightsEngine { InsightsEngine(history: history, profile: lp) }
     private var coach: CoachingEngine {
-        CoachingEngine(childName: profile.name, insights: engine, profile: lp)
+        CoachingEngine(childName: profile.name, insights: engine, profile: lp, isGirl: profile.gender == .girl)
     }
     private var summary: InsightsEngine.PeriodSummary {
         switch period {

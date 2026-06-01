@@ -771,6 +771,9 @@ struct ParentDashboardView: View {
         let weak = Array(lp.weak.prefix(3))
         let discovering = Array(lp.discovering.prefix(3))
 
+        // Hebrew labels inflect by gender — pick by this child's gender.
+        let g: (String, String) -> String = { profile.gender == .girl ? $1 : $0 }
+
         // Only show once the kid has actually played enough to have signals.
         if s.totalAnswered >= 4 {
             VStack(alignment: .trailing, spacing: 8) {
@@ -783,10 +786,10 @@ struct ParentDashboardView: View {
                         .font(.system(size: 13))
                         .foregroundStyle(AppColor.gemPurple)
                 }
-                if !strong.isEmpty   { topicLine("חזק ב", topics: strong, tint: AppColor.starGold) }
-                if !favorites.isEmpty { topicLine("אוהב", topics: favorites, tint: AppColor.successMint) }
+                if !strong.isEmpty   { topicLine(g("חזק ב","חזקה ב"), topics: strong, tint: AppColor.starGold) }
+                if !favorites.isEmpty { topicLine(g("אוהב","אוהבת"), topics: favorites, tint: AppColor.successMint) }
                 if !weak.isEmpty     { topicLine("כדאי לחזק", topics: weak, tint: AppColor.flameOrange) }
-                if !discovering.isEmpty { topicLine("מגלה", topics: discovering, tint: AppColor.gemPurple) }
+                if !discovering.isEmpty { topicLine(g("מגלה","מגלה"), topics: discovering, tint: AppColor.gemPurple) }
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(AppSpacing.sm)
@@ -805,7 +808,7 @@ struct ParentDashboardView: View {
         let lp = LearningProfile(snapshot: s, enabledTopics: settings.enabledTopics, age: profile.age)
         let history = LearningHistoryStore.shared.history(for: profile.id)
         let engine = InsightsEngine(history: history, profile: lp)
-        let coach = CoachingEngine(childName: profile.name, insights: engine, profile: lp)
+        let coach = CoachingEngine(childName: profile.name, insights: engine, profile: lp, isGirl: profile.gender == .girl)
         let actions = Array(coach.recommendedActions().prefix(3))
         let weak = Array(lp.weak.prefix(2))
 

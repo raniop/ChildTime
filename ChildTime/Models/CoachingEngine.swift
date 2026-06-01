@@ -7,6 +7,12 @@ struct CoachingEngine {
     let childName: String
     let insights: InsightsEngine
     let profile: LearningProfile
+    /// Hebrew inflects by gender — pick the right verb/adjective forms.
+    var isGirl: Bool = false
+
+    private func g(_ masculine: String, _ feminine: String) -> String {
+        isGirl ? feminine : masculine
+    }
 
     struct Insight: Identifiable {
         enum Kind { case positive, attention, discovery, neutral }
@@ -36,7 +42,7 @@ struct CoachingEngine {
                 text: "השבוע נרשמה ירידה של \(Int(abs(delta)))% בביצועים הכלליים. שווה לתרגל יחד קצת."))
         } else if delta >= 10 {
             out.append(.init(kind: .positive, emoji: "📈",
-                text: "\(name) שיפר את הביצועים ב-\(Int(delta))% השבוע. כל הכבוד!"))
+                text: "\(name) \(g("שיפר","שיפרה")) את הביצועים ב-\(Int(delta))% השבוע. כל הכבוד!"))
         }
 
         // Challenges (weak topics).
@@ -49,7 +55,7 @@ struct CoachingEngine {
         if !insights.strengths.isEmpty {
             let list = insights.strengths.prefix(3).map { $0.displayName }.joined(separator: "، ")
             out.append(.init(kind: .positive, emoji: "🌟",
-                text: "\(name) מצטיין ב\(list). תחומים שכיף לחגוג בהם."))
+                text: "\(name) \(g("מצטיין","מצטיינת")) ב\(list). תחומים שכיף לחגוג בהם."))
         }
 
         // Discovery.
@@ -62,7 +68,7 @@ struct CoachingEngine {
         let week = insights.thisWeek
         if week.activeDays >= 5 {
             out.append(.init(kind: .positive, emoji: "🔥",
-                text: "\(name) למד ב-\(week.activeDays) מתוך 7 הימים האחרונים — עקביות יפה!"))
+                text: "\(name) \(g("למד","למדה")) ב-\(week.activeDays) מתוך 7 הימים האחרונים — עקביות יפה!"))
         }
 
         if out.isEmpty {
@@ -82,7 +88,7 @@ struct CoachingEngine {
         }
         if let disc = insights.discovering.first {
             out.append(.init(emoji: "💡",
-                text: "שאלו את \(name) מה הוא למד היום ב\(disc.displayName) — סקרנות מחזקת זיכרון."))
+                text: "שאלו את \(name) מה \(g("הוא למד","היא למדה")) היום ב\(disc.displayName) — סקרנות מחזקת זיכרון."))
         }
         if insights.thisWeek.activeDays < 3 {
             out.append(.init(emoji: "💡",
@@ -90,11 +96,11 @@ struct CoachingEngine {
         }
         if out.count < 2, let strong = insights.strengths.first {
             out.append(.init(emoji: "💡",
-                text: "\(name) חזק ב\(strong.displayName) — אתגרו אותו בשאלה קשה יותר ותראו את הביטחון."))
+                text: "\(name) \(g("חזק","חזקה")) ב\(strong.displayName) — אתגרו \(g("אותו","אותה")) בשאלה קשה יותר ותראו את הביטחון."))
         }
         if out.isEmpty {
             out.append(.init(emoji: "💡",
-                text: "הקדישו 10 דקות למשחק משותף — זו דרך נהדרת לראות איך \(name) חושב."))
+                text: "הקדישו 10 דקות למשחק משותף — זו דרך נהדרת לראות איך \(name) \(g("חושב","חושבת"))."))
         }
         return out
     }
