@@ -298,7 +298,14 @@ struct AddFriendView: View {
             let ok = await friends.addFriend(code: raw)
             added = ok
             message = ok ? "הִתְחַבַּרְתֶּם! 🎉" : (friends.lastError ?? "לֹא הִצְלַחְנוּ")
-            if ok { typed = ""; Haptic.success() } else { Haptic.warning() }
+            if ok {
+                typed = ""; Haptic.success()
+                // Briefly celebrate, then return to the (now-updated) leaderboard.
+                try? await Task.sleep(nanoseconds: 1_100_000_000)
+                dismiss()
+            } else {
+                Haptic.warning()
+            }
         }
     }
 }
