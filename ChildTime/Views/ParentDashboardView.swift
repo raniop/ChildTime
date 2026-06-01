@@ -30,6 +30,7 @@ struct ParentDashboardView: View {
     @State private var showingSettings = false
     @State private var showingCreateChild = false
     @State private var showingKidMode = false
+    @State private var friendsProfile: Profile?
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
     /// After creating a child we offer to connect their device right away.
@@ -170,6 +171,10 @@ struct ParentDashboardView: View {
             }
             .sheet(isPresented: $showingKidMode) {
                 KidModeEntryView()
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(item: $friendsProfile) { p in
+                ChildFriendsView(childID: p.id.uuidString, childName: p.name)
                     .environment(\.layoutDirection, .rightToLeft)
             }
             .sheet(isPresented: $showingCreateChild, onDismiss: {
@@ -589,6 +594,11 @@ struct ParentDashboardView: View {
                         } label: {
                             Label("עבור לפרופיל זה", systemImage: "person.crop.circle.fill")
                         }
+                    }
+                    Button {
+                        friendsProfile = profile
+                    } label: {
+                        Label("חברים", systemImage: "person.2.fill")
                     }
                     Button(role: .destructive) {
                         resettingProfile = profile

@@ -112,6 +112,7 @@ struct ChildTimeApp: App {
             ProfileStore.shared.setActive(dana)
         }
         ProgressStore.shared.seedForDemo()
+        if Self.demoScreen == "leaderboard" { FriendsManager.shared.seedDemo() }
     }
 
     var body: some Scene {
@@ -164,13 +165,20 @@ struct ChildTimeApp: App {
                     if JoinLink.isJoinURL(url) {
                         settings.pendingJoinPayload = JoinLink.payload(from: url.absoluteString)
                         if settings.deviceRole != .child { settings.deviceRole = .child }
+                    } else if FriendLink.isFriendURL(url) {
+                        // A friend invite link → remember the code; the leaderboard
+                        // adds it the next time the child opens it.
+                        FriendsManager.shared.pendingFriendCode = FriendLink.code(from: url.absoluteString)
                     }
                 }
                 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
                     // Universal Link opened from the native Camera / Safari.
-                    if let url = activity.webpageURL, JoinLink.isJoinURL(url) {
+                    guard let url = activity.webpageURL else { return }
+                    if JoinLink.isJoinURL(url) {
                         settings.pendingJoinPayload = JoinLink.payload(from: url.absoluteString)
                         if settings.deviceRole != .child { settings.deviceRole = .child }
+                    } else if FriendLink.isFriendURL(url) {
+                        FriendsManager.shared.pendingFriendCode = FriendLink.code(from: url.absoluteString)
                     }
                 }
         }
@@ -183,6 +191,7 @@ struct ChildTimeApp: App {
         case "wheel":    LuckyWheelView(onClose: {})
         case "dashboard": ParentDashboardView(isRoot: true)
         case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
+        case "leaderboard": LeaderboardView()   // DEMO_SCREEN=leaderboard
         default:         WorldMapView()   // "worldmap"
         }
     }

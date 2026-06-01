@@ -15,6 +15,7 @@ struct WorldMapView: View {
     @State private var showingDemo = false
     @State private var showingShop = false
     @State private var showingWheel = false
+    @State private var showingLeaderboard = false
     @State private var showingSmartFeed = false
     @State private var showingChildSettings = false
     @State private var showingPaywall = false
@@ -200,6 +201,9 @@ struct WorldMapView: View {
         .fullScreenCover(isPresented: $showingShop) {
             ShopView()
         }
+        .fullScreenCover(isPresented: $showingLeaderboard) {
+            LeaderboardView()
+        }
         .fullScreenCover(isPresented: $showingWheel) {
             LuckyWheelView { showingWheel = false }
         }
@@ -295,6 +299,19 @@ struct WorldMapView: View {
                     .background(.white.opacity(0.15), in: Circle())
                     .overlay(Circle().stroke(AppColor.starGold.opacity(0.6), lineWidth: 1.5))
                     .glow(AppColor.starGold.opacity(0.5), radius: 6)
+            }
+
+            // Friends leaderboard.
+            Button {
+                Haptic.light()
+                showingLeaderboard = true
+            } label: {
+                Image(systemName: "trophy.fill")
+                    .font(.system(size: iconSize - 2, weight: .medium))
+                    .foregroundStyle(AppColor.companionGlow)
+                    .frame(width: buttonSize, height: buttonSize)
+                    .background(.white.opacity(0.15), in: Circle())
+                    .overlay(Circle().stroke(AppColor.companionGlow.opacity(0.6), lineWidth: 1.5))
             }
 
             // Daily gift lives next to the action buttons — a lively dancing

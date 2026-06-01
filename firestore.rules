@@ -108,5 +108,16 @@ service cloud.firestore {
       allow read: if signedIn() &&
         householdHasMe(get(/databases/$(database)/documents/children/$(childID)).data.householdID);
     }
+
+    // Friends leaderboard cards — a child's PUBLIC mini-card (first name, chosen
+    // character, star count, friend code). Readable by any signed-in user so
+    // friends (in other households) can see each other + look up by code/array;
+    // writable only by the card owner's household (each device writes ONLY its
+    // own card, so mutual friendship needs no cross-household writes).
+    match /friendCards/{childID} {
+      allow read:  if signedIn();
+      allow write: if signedIn() &&
+        householdHasMe(get(/databases/$(database)/documents/children/$(childID)).data.householdID);
+    }
   }
 }
