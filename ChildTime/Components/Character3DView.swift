@@ -69,9 +69,10 @@ struct Character3DView: UIViewRepresentable {
         let camNode = SCNNode()
         camNode.camera = camera
         if portrait {
-            // Close-up on the head + shoulders for small circular avatars.
-            camNode.position = SCNVector3(0, 1.62, 1.95)
-            camNode.look(at: SCNVector3(0, 1.6, 0))
+            // Head + shoulders for small circular avatars. Framed wide enough
+            // that even a big-headed character (e.g. the cat) fits uncropped.
+            camNode.position = SCNVector3(0, 1.6, 2.35)
+            camNode.look(at: SCNVector3(0, 1.5, 0))
         } else {
             camNode.position = SCNVector3(0, 0.95, 3.9)
             camNode.look(at: SCNVector3(0, 0.9, 0))
