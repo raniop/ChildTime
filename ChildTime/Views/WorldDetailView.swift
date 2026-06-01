@@ -8,15 +8,13 @@ struct WorldDetailView: View {
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var profiles: ProfileStore
 
-    @State private var companion = CompanionController()
     @State private var startSession = false
     @State private var heroAppeared = false
 
     private var isCompact: Bool { hsc == .compact }
-    private var heroEmojiSize: CGFloat { isCompact ? 96 : 140 }
-    private var worldNameSize: CGFloat { isCompact ? 36 : 50 }
-    private var companionSize: CGFloat { isCompact ? 70 : 90 }
-    private var ctaSize: CGFloat { isCompact ? 30 : 38 }
+    private var heroEmojiSize: CGFloat { isCompact ? 92 : 130 }
+    private var worldNameSize: CGFloat { isCompact ? 34 : 46 }
+    private var ctaSize: CGFloat { isCompact ? 28 : 34 }
 
     var currentRoom: Int { progress.progress(in: world.id) }
     var rewardPerCorrect: Int { settings.minutesPerCorrectAnswer }
@@ -31,53 +29,34 @@ struct WorldDetailView: View {
                     .opacity(0.5)
                 SparkleField(count: 20, size: 13)
 
-                VStack(spacing: 0) {
+                // A centered, scrollable column. Capped width keeps it tidy on a
+                // wide iPad; minHeight = screen height centers it vertically; the
+                // ScrollView guarantees nothing is ever cut off in landscape.
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: AppSpacing.xl) {
+                        heroBlock
+                        missionCard
+                        startButton
+                    }
+                    .frame(maxWidth: 480)
+                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.top, 72)
+                    .padding(.bottom, AppSpacing.xl)
+                    .frame(maxWidth: .infinity, minHeight: geo.size.height)
+                }
+
+                // Top bar pinned above the scrolling content.
+                VStack {
                     topBar
                         .padding(.horizontal, AppSpacing.lg)
                         .padding(.top, AppSpacing.sm)
-
-                    Spacer(minLength: AppSpacing.lg)
-
-                    heroBlock
-
-                    // Flexible middle — the buddy roams here (overlay below). The
-                    // generous Spacer + the wandering avatar fill this band.
-                    Spacer(minLength: AppSpacing.xxl)
-
-                    missionCard
-                        .padding(.horizontal, AppSpacing.lg)
-
-                    startButton
-                        .padding(.horizontal, AppSpacing.lg)
-                        .padding(.top, AppSpacing.md)
-
-                    Spacer(minLength: AppSpacing.xl)
+                    Spacer()
                 }
-
-                // The child's avatar buddy wanders — but ONLY the middle band
-                // (insets keep it clear of the hero text above and the mission
-                // card / Start button below, so it never covers anything tappable).
-                FloatingCompanion(
-                    controller: companion,
-                    profile: profiles.active,
-                    onTap: {
-                        Haptic.light()
-                        companion.cheer("יַאללָה! 🚀")
-                    },
-                    size: companionSize,
-                    topInset: geo.size.height * 0.47,
-                    bottomInset: geo.size.height * 0.37,
-                    horizontalInset: AppSpacing.xl
-                )
             }
-            .frame(width: geo.size.width, height: geo.size.height)
         }
         .onAppear {
             withAnimation(.spring(response: 0.7, dampingFraction: 0.55)) {
                 heroAppeared = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                companion.cheer("מוּכָן לְחֶדֶר \(currentRoom + 1)?")
             }
         }
         .fullScreenCover(isPresented: $startSession) {
@@ -212,8 +191,8 @@ struct WorldDetailView: View {
 
     private var startButton: some View {
         JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-            companion.cheer("יַאללָה!")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            Haptic.light()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 startSession = true
             }
         } label: {

@@ -604,22 +604,43 @@ struct QuestionRunnerView: View {
 
     private var portalIntro: some View {
         ZStack {
-            Color.black.opacity(0.7).ignoresSafeArea()
+            // A full, rich backdrop so the question fully recedes — no more
+            // see-through clutter behind the announcement.
+            AppGradient.purpleDream.ignoresSafeArea()
+            FloatingOrbs(
+                colors: [AppColor.gemPurple, AppColor.starGold, AppColor.dreamyTeal],
+                count: 6, maxSize: 260, opacity: 0.5
+            )
+            SparkleField(count: 26, size: 14)
+
             VStack(spacing: AppSpacing.lg) {
                 Text("🌀")
                     .font(.system(size: portalEmojiSize))
                     .rotationEffect(.degrees(showPortalIntro ? 360 : 0))
                     .animation(.linear(duration: 1.5).repeatForever(autoreverses: false), value: showPortalIntro)
                     .glow(AppColor.gemPurple, radius: 30)
-                Text("שְׁאֵלַת בּוֹנוּס! 🌀")
-                    .font(.system(size: portalTitleSize, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .glow(AppColor.gemPurple, radius: 14)
+                    .shadow(color: .black.opacity(0.3), radius: 10, y: 6)
+
+                Text("שְׁאֵלַת בּוֹנוּס!")
+                    .font(.system(size: portalTitleSize, weight: .heavy, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FFE082")],
+                                       startPoint: .top, endPoint: .bottom)
+                    )
+                    .glow(AppColor.starGold, radius: 16)
+
+                HStack(spacing: 8) {
+                    ForEach(0..<3, id: \.self) { _ in
+                        Text("⭐️").font(.system(size: isCompact ? 28 : 36))
+                    }
+                }
+
                 Text("עֲנוּ נָכוֹן וְקַבְּלוּ פִּי 3 כּוֹכָבִים!")
-                    .font(AppFont.subtitle())
-                    .foregroundStyle(AppColor.starGold)
+                    .font(.system(size: isCompact ? 18 : 24, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
             }
+            .padding(.horizontal, AppSpacing.xl)
         }
         .transition(.opacity)
     }

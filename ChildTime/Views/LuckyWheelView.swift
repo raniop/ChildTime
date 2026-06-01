@@ -20,10 +20,14 @@ struct LuckyWheelView: View {
     @State private var pulse = false
 
     private var isCompact: Bool { hsc == .compact }
-    private var wheelSize: CGFloat { isCompact ? 300 : 420 }
 
     var body: some View {
         GeometryReader { proxy in
+            let landscape = proxy.size.width > proxy.size.height
+            // Fit the wheel to the space — never let it crowd out the prize/buttons.
+            let wheelSize = min(isCompact ? 300 : 440,
+                                proxy.size.height * (landscape ? 0.80 : 0.48),
+                                proxy.size.width * (landscape ? 0.46 : 0.92))
             ZStack {
                 AppGradient.dreamy.ignoresSafeArea()
                 FloatingOrbs(
@@ -34,30 +38,36 @@ struct LuckyWheelView: View {
                 Confetti(trigger: confetti)
                 StarBurst(count: 14, color: AppColor.starGold, trigger: stars)
 
-                ScrollView {
-                    VStack(spacing: AppSpacing.lg) {
-                        header
-
-                        wheelStack
-                            .padding(.vertical, AppSpacing.md)
-
-                        if let prize = winner {
-                            winnerCard(prize)
-                                .transition(.scale.combined(with: .opacity))
-                        }
-
-                        primaryButton
-
-                        skipButton
+                if landscape {
+                    // Wide: wheel on one side, info on the other — nothing scrolls
+                    // off the bottom.
+                    HStack(spacing: AppSpacing.xxl) {
+                        wheelStack(size: wheelSize)
+                        infoColumn
+                            .frame(maxWidth: 380)
                     }
-                    .padding(.horizontal, AppSpacing.lg)
-                    .padding(.vertical, AppSpacing.xl)
-                    // No flexible Spacer inside — let this frame center the block.
-                    .frame(minHeight: proxy.size.height, alignment: .center)
-                    .frame(maxWidth: 720)
-                    .frame(maxWidth: .infinity)
+                    .padding(AppSpacing.xl)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        VStack(spacing: AppSpacing.lg) {
+                            header
+                            wheelStack(size: wheelSize)
+                                .padding(.vertical, AppSpacing.md)
+                            if let prize = winner {
+                                winnerCard(prize)
+                                    .transition(.scale.combined(with: .opacity))
+                            }
+                            primaryButton
+                            skipButton
+                        }
+                        .padding(.horizontal, AppSpacing.lg)
+                        .padding(.vertical, AppSpacing.xl)
+                        .frame(maxWidth: 720)
+                        .frame(maxWidth: .infinity, minHeight: proxy.size.height, alignment: .center)
+                    }
+                    .scrollIndicators(.hidden)
                 }
-                .scrollIndicators(.hidden)
             }
             // After a prize is revealed, a tap ANYWHERE continues — so a kid
             // never has to find/scroll to a button (e.g. on landscape iPad).
@@ -111,7 +121,20 @@ struct LuckyWheelView: View {
         }
     }
 
-    private var wheelStack: some View {
+    /// The header + prize + buttons column (used beside the wheel in landscape).
+    private var infoColumn: some View {
+        VStack(spacing: AppSpacing.lg) {
+            header
+            if let prize = winner {
+                winnerCard(prize)
+                    .transition(.scale.combined(with: .opacity))
+            }
+            primaryButton
+            skipButton
+        }
+    }
+
+    private func wheelStack(size wheelSize: CGFloat) -> some View {
         ZStack {
             // The wheel
             WheelShape(wedges: wedges, size: wheelSize)
