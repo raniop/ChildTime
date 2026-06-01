@@ -36,10 +36,13 @@ struct FloatingCompanion: View {
                 }
 
                 Group {
-                    if let profile, let snap = CharacterSnapshot.image(modelName: profile.character.scn, pixelSize: size * 2) {
-                        // A flat snapshot of the child's chosen character — drags
-                        // and wanders perfectly smoothly (a live SCNView does not).
-                        Image(uiImage: snap)
+                    // A flat image of the child's chosen character — the 2D
+                    // animal directly, or a snapshot of the 3D model — so it
+                    // drags and wanders perfectly smoothly (a live SCNView won't).
+                    if let profile,
+                       let img = profile.character.uiImage
+                        ?? CharacterSnapshot.image(modelName: profile.character.scn, pixelSize: size * 2) {
+                        Image(uiImage: img)
                             .resizable()
                             .scaledToFit()
                             .frame(width: size, height: size * 1.3)

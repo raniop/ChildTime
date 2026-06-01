@@ -216,8 +216,7 @@ struct ProfileAvatarView: View {
     var body: some View {
         // The child's chosen 3D character as a head-and-shoulders portrait —
         // there's no profile photo anymore, only the picked character.
-        Character3DView(modelName: profile.character.scn,
-                        animated: false, interactive: false, portrait: true)
+        CharacterView(character: profile.character, portrait: true)
             .id(profile.character.id)
             .frame(width: size, height: size)
             .clipShape(Circle())

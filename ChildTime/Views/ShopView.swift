@@ -139,7 +139,7 @@ struct ShopView: View {
                 // the catalog so a removed/unknown id falls back to the default
                 // instead of showing the placeholder. `.id` forces a reload when
                 // the child picks a different character.
-                Character3DView(modelName: selectedCharacter(for: profile).scn, animated: true)
+                CharacterView(character: selectedCharacter(for: profile), animated: true, interactive: true)
                     .id(selectedCharacter(for: profile).id)
                     .frame(width: avatarSize, height: avatarSize * 1.45)
                 Text(profile.name)

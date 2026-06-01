@@ -73,7 +73,7 @@ struct Character3DPickerView: View {
         } label: {
             // No character name — the only name in the app is the child's. A
             // character is just a look to pick.
-            Character3DView(modelName: character.scn, animated: false, interactive: false)
+            CharacterView(character: character)
                 .frame(height: 190)
                 .allowsHitTesting(false)   // the whole card is the tap target
                 .padding(.vertical, 8)
