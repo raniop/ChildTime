@@ -762,11 +762,16 @@ final class ProgressStore: ObservableObject {
     }
 
     func startUnlock(minutes: Int) {
-        unlockEndsAt = Date().addingTimeInterval(TimeInterval(minutes * 60))
+        let end = Date().addingTimeInterval(TimeInterval(minutes * 60))
+        unlockEndsAt = end
+        // Lock-screen / Dynamic Island countdown of the remaining play time.
+        PlayTimeLiveActivity.start(endsAt: end,
+                                   characterName: ProfileStore.shared.active?.character.name ?? "")
     }
 
     func endUnlock() {
         unlockEndsAt = nil
+        PlayTimeLiveActivity.end()
     }
 
     /// Stop the current unlock window early and return whatever full minutes
@@ -781,6 +786,7 @@ final class ProgressStore: ObservableObject {
             pendingMinutes += remainingMinutes
         }
         unlockEndsAt = nil
+        PlayTimeLiveActivity.end()
         return remainingMinutes
     }
 
