@@ -7,6 +7,8 @@ struct ContentView: View {
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var auth: AuthManager
     @StateObject private var household = HouseholdManager.shared
+    @StateObject private var kidMode = KidModeManager.shared
+    @State private var showExitGate = false
 
     /// Guests (no account) can answer this many questions before registration
     /// is required.
@@ -14,7 +16,10 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if !settings.hasSeenWelcome {
+            if kidMode.active {
+                // Parent's phone temporarily acting as the kid's device.
+                kidModeRoot
+            } else if !settings.hasSeenWelcome {
                 // Very first launch — explain what the app is + the Screen Time
                 // notice, before anything else.
                 WelcomeIntroView()
@@ -36,6 +41,45 @@ struct ContentView: View {
             if settings.deviceRole == .child, auth.isSignedIn, let cid = profiles.activeID {
                 Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
             }
+        }
+        // Home-screen Quick Action → present the Kid Mode entry flow.
+        .sheet(isPresented: Binding(get: { kidMode.pendingEntry && !kidMode.active },
+                                    set: { kidMode.pendingEntry = $0 })) {
+            KidModeEntryView()
+                .environment(\.layoutDirection, .rightToLeft)
+        }
+    }
+
+    /// The kid experience shown while Kid Mode is on (parent's phone). Same play
+    /// surface as a child device, plus a discreet, parent-gated exit.
+    @ViewBuilder
+    private var kidModeRoot: some View {
+        Group {
+            if let cid = kidMode.childID {
+                childPlay(cid: cid)
+            } else {
+                WorldMapView()
+            }
+        }
+        .overlay(alignment: .topLeading) {
+            Button { showExitGate = true } label: {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .frame(width: 34, height: 34)
+                    .background(.black.opacity(0.28), in: Circle())
+            }
+            .padding(.top, 8)
+            .padding(.leading, 8)
+        }
+        .sheet(isPresented: $showExitGate) {
+            ParentGateView(allowClose: true,
+                           gateTitle: "יְצִיאָה מִמַּצַּב יֶלֶד",
+                           gateReason: "הַזִּינוּ קוֹד הוֹרֶה כְּדֵי לָצֵאת") {
+                KidModeExitView { kidMode.exit(); showExitGate = false }
+            }
+            .environmentObject(settings)
+            .environment(\.layoutDirection, .rightToLeft)
         }
     }
 

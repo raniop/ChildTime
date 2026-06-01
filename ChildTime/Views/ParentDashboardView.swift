@@ -30,6 +30,7 @@ struct ParentDashboardView: View {
     @State private var showingSettings = false
     @State private var showingLinking = false
     @State private var showingCreateChild = false
+    @State private var showingKidMode = false
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
     /// After creating a child we offer to connect their device right away.
@@ -89,6 +90,7 @@ struct ParentDashboardView: View {
                                 if !push.authorized { notificationsBanner }
                                 familySummaryCard
                                 linkCallout
+                                if !profiles.profiles.isEmpty { kidModeButton }
                             }
                             syncStatusCard
                             insightNotificationsCard
@@ -165,6 +167,10 @@ struct ParentDashboardView: View {
             }
             .sheet(isPresented: $showingSettings) {
                 ParentSettingsView()
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(isPresented: $showingKidMode) {
+                KidModeEntryView()
                     .environment(\.layoutDirection, .rightToLeft)
             }
             .sheet(isPresented: $showingLinking) {
@@ -420,6 +426,29 @@ struct ParentDashboardView: View {
     }
 
     private var linkCallout: some View { linkButton }
+
+    /// Hand the phone to a child: lock it to ChildTime + approved apps until the
+    /// parent exits with their code.
+    private var kidModeButton: some View {
+        Button {
+            Haptic.light()
+            showingKidMode = true
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "lock.shield.fill")
+                Text("תֵּן לַיֶּלֶד לְשַׂחֵק")
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, AppSpacing.xl)
+            .padding(.vertical, 15)
+            .frame(maxWidth: .infinity)
+            .background(AppGradient.purpleDream, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .glow(AppColor.gemPurple, radius: 12)
+        }
+        .buttonStyle(.juicy)
+        .frame(maxWidth: 460)
+    }
 
     /// Per-child QR + code for setting up that child's own device.
     private func childQRSheet(for child: Profile) -> some View {

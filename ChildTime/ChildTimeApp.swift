@@ -28,6 +28,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             UNUserNotificationCenter.current().delegate = PushManager.shared
             PushManager.shared.configureCategories()
         }
+        // Cold launch via the "מצב ילד" Quick Action.
+        if let sc = launchOptions?[.shortcutItem] as? UIApplicationShortcutItem,
+           sc.type == KidModeManager.shortcutType {
+            Task { @MainActor in KidModeManager.shared.pendingEntry = true }
+        }
         return true
     }
 
@@ -39,6 +44,17 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("[Push] APNs registration failed: \(error.localizedDescription)")
+    }
+
+    // Home-screen Quick Action ("מצב ילד") while the app is already running.
+    func application(_ application: UIApplication,
+                     performActionFor shortcutItem: UIApplicationShortcutItem,
+                     completionHandler: @escaping (Bool) -> Void) {
+        let handled = shortcutItem.type == KidModeManager.shortcutType
+        if handled {
+            Task { @MainActor in KidModeManager.shared.pendingEntry = true }
+        }
+        completionHandler(handled)
     }
 }
 
@@ -175,6 +191,12 @@ struct ChildTimeApp: App {
     /// If the unlock window is still active → keep shield off.
     private func enforceShieldStateIfNeeded() {
         guard shields.isAuthorized else { return }
+        // Kid Mode owns the shield while it's on — re-assert its lock and let the
+        // normal per-app enforcement stand down so it can't clobber it.
+        if KidModeManager.shared.active {
+            KidModeManager.shared.reassertIfActive()
+            return
+        }
         guard let data = settings.activitySelectionData else { return }
         let selection = SelectionStorage.decode(data)
 

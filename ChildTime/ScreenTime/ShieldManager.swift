@@ -72,6 +72,24 @@ final class ShieldManager: ObservableObject {
         store.shield.webDomains = nil
     }
 
+    /// Kid Mode (parent's own phone): lock EVERY app except the `allowed` set —
+    /// the inverse of the normal block-list. Everything the parent didn't approve
+    /// is shielded; ChildTime + the approved apps stay open. The kid is confined
+    /// to a safe sandbox on the parent's device.
+    ///
+    /// NOTE: `.all(except:)` shields all categories. iOS keeps the *foreground*
+    /// controlling app usable, but to guarantee the kid can always return to
+    /// ChildTime, pass ChildTime's own token in `allowed` too (the entry screen
+    /// nudges the parent to include it). Verify on a real device — the simulator
+    /// does not enforce shields.
+    func applyLockAllExcept(_ allowed: FamilyActivitySelection) {
+        store.shield.applications = nil
+        store.shield.applicationCategories = .all(except: allowed.applicationTokens)
+        store.shield.webDomains = nil
+        store.shield.webDomainCategories =
+            ShieldSettings.ActivityCategoryPolicy<WebDomain>.all(except: allowed.webDomainTokens)
+    }
+
     /// Block the full `blocked` set EXCEPT the `allowed` apps — so specific apps
     /// (e.g. YouTube) stay open while everything else remains locked.
     func applyShield(from blocked: FamilyActivitySelection, allowing allowed: FamilyActivitySelection) {

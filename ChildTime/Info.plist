@@ -4,6 +4,19 @@
 <dict>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.rani.ChildTime.kidmode</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>מצב ילד</string>
+			<key>UIApplicationShortcutItemSubtitle</key>
+			<string>נעל את הטלפון לילד</string>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeLove</string>
+		</dict>
+	</array>
 	<key>GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS</key>
 	<false/>
 	<key>GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED</key>
