@@ -1,31 +1,19 @@
 import SwiftUI
 
-/// The cosmetics shop. Kids spend gems to unlock hats, glasses, shirts,
-/// shoes, vehicles, etc., then equip them on their profile.
-///
-/// Layout: top hero (live avatar preview + gem balance), horizontal
-/// category strip, then a grid of items in the selected category.
+/// The character shop. Kids browse the collectible characters, buy locked ones
+/// with earned stars (or buy more stars with real money, parent-gated), and
+/// equip them. The hero shows the currently-equipped character big.
 struct ShopView: View {
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var progress: ProgressStore
-    @EnvironmentObject var cosmetics: CosmeticStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hsc
 
-    @State private var selectedCategory: CosmeticCategory = .hat
-    @State private var detailItem: CosmeticItem? = nil
-    @State private var purchaseError: String? = nil
-    @State private var celebrateTrigger = 0
-    @State private var confettiTrigger = 0
     @State private var showingProfileEditor = false
-    @State private var showingCharacterPicker = false
     @State private var showStarShop = false
 
     private var isCompact: Bool { hsc == .compact }
-    private var avatarSize: CGFloat { isCompact ? 130 : 170 }
-    private var itemsInCategory: [CosmeticItem] {
-        CosmeticCatalog.items(in: selectedCategory)
-    }
+    private var avatarSize: CGFloat { isCompact ? 140 : 180 }
 
     var body: some View {
         ZStack {
@@ -35,37 +23,22 @@ struct ShopView: View {
                 count: 6, maxSize: 280, opacity: 0.35
             )
             SparkleField(count: 22, size: 14)
-            StarBurst(count: 14, color: AppColor.starGold, trigger: celebrateTrigger)
-            Confetti(trigger: confettiTrigger)
 
             VStack(spacing: 0) {
                 topBar
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
                         hero
-                        categoryStrip
-                        itemsGrid
+                        if let active = profiles.active {
+                            CharacterCollectionView(profileID: active.id,
+                                                    showStarShop: $showStarShop)
+                        }
                     }
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.bottom, AppSpacing.xxxl)
                     .frame(maxWidth: 820)
                     .frame(maxWidth: .infinity)
                 }
-            }
-        }
-        .sheet(item: $detailItem) { item in
-            ShopItemDetail(item: item) {
-                attemptPurchase(item)
-            }
-            .environmentObject(profiles)
-            .environmentObject(progress)
-            .environmentObject(cosmetics)
-            .environment(\.layoutDirection, .rightToLeft)
-            .presentationDetents([.medium, .large])
-        }
-        .sheet(isPresented: $showingCharacterPicker) {
-            if let active = profiles.active {
-                Character3DPickerView(profileID: active.id)
             }
         }
         .sheet(isPresented: $showStarShop) {
@@ -88,20 +61,13 @@ struct ShopView: View {
                 .environment(\.layoutDirection, .rightToLeft)
             }
         }
-        .alert("רֶגַע", isPresented: Binding(get: { purchaseError != nil }, set: { if !$0 { purchaseError = nil } })) {
-            Button("הֵבַנְתִּי", role: .cancel) { purchaseError = nil }
-        } message: {
-            Text(purchaseError ?? "")
-        }
     }
 
     // MARK: - Top bar
 
     private var topBar: some View {
-        // Title is truly centered (ZStack); the close button and star balance
-        // sit on the leading/trailing edges so they don't push it off-center.
         ZStack {
-            Text("חֲנוּת הַקֶּסֶם")
+            Text("חֲנוּת הַדְּמוּיוֹת")
                 .font(.system(size: isCompact ? 20 : 26, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
@@ -122,8 +88,7 @@ struct ShopView: View {
 
                 Spacer()
 
-                // Tappable balance → buy more stars (parent-gated). This keeps
-                // star-buying inside the shop instead of a separate detour.
+                // Tappable balance → buy more stars (parent-gated).
                 Button {
                     Haptic.light()
                     showStarShop = true
@@ -150,30 +115,21 @@ struct ShopView: View {
         .padding(.vertical, AppSpacing.sm)
     }
 
-    // MARK: - Hero
+    // MARK: - Hero (currently-equipped character)
 
     @ViewBuilder
     private var hero: some View {
         if let profile = profiles.active {
             VStack(spacing: 6) {
-                // The selected 3D character (drag to spin 360°). Resolved through
-                // the catalog so a removed/unknown id falls back to the default
-                // instead of showing the placeholder. `.id` forces a reload when
-                // the child picks a different character.
-                CharacterView(character: selectedCharacter(for: profile), animated: true, interactive: true)
-                    .id(selectedCharacter(for: profile).id)
+                CharacterView(character: profile.character, animated: true, interactive: true)
+                    .id(profile.character.id)
                     .frame(width: avatarSize, height: avatarSize * 1.45)
                 Text(profile.name)
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
 
-                HStack(spacing: 8) {
-                    pillButton(icon: "person.crop.rectangle.stack", title: "הַחְלֵף דְּמוּת") {
-                        showingCharacterPicker = true
-                    }
-                    pillButton(icon: "pencil", title: "עֲרֹךְ פְּרוֹפִיל") {
-                        showingProfileEditor = true
-                    }
+                pillButton(icon: "pencil", title: "עֲרֹךְ פְּרוֹפִיל") {
+                    showingProfileEditor = true
                 }
                 .padding(.top, 4)
             }
@@ -182,10 +138,6 @@ struct ShopView: View {
             Text("צְרוּ פְּרוֹפִיל כְּדֵי לְהַתְחִיל")
                 .foregroundStyle(.white)
         }
-    }
-
-    private func selectedCharacter(for profile: Profile) -> Character3D {
-        profile.character
     }
 
     private func pillButton(icon: String, title: String, action: @escaping () -> Void) -> some View {
@@ -206,325 +158,11 @@ struct ShopView: View {
         }
         .buttonStyle(.plain)
     }
-
-    // MARK: - Category strip
-
-    private var categoryStrip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                ForEach(CosmeticCategory.allCases.sorted { $0.sortOrder < $1.sortOrder }) { cat in
-                    categoryChip(cat)
-                }
-            }
-            .padding(.horizontal, 4)
-        }
-        .scrollClipDisabled()
-    }
-
-    private func categoryChip(_ cat: CosmeticCategory) -> some View {
-        let selected = selectedCategory == cat
-        return Button {
-            Haptic.light()
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                selectedCategory = cat
-            }
-        } label: {
-            HStack(spacing: 6) {
-                Text(cat.icon).font(.system(size: 18))
-                Text(cat.displayName)
-                    .font(.system(size: 14, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 9)
-            .background(
-                Capsule().fill(.white.opacity(selected ? 0.28 : 0.12))
-            )
-            .overlay(
-                Capsule().stroke(
-                    selected ? AppColor.starGold : .white.opacity(0.2),
-                    lineWidth: selected ? 2 : 1
-                )
-            )
-            .glow(selected ? AppColor.starGold : .clear, radius: selected ? 8 : 0)
-        }
-        .buttonStyle(.juicy)
-    }
-
-    // MARK: - Items grid
-
-    private var itemsGrid: some View {
-        let columns = [
-            GridItem(.adaptive(minimum: isCompact ? 130 : 160), spacing: 12)
-        ]
-        return LazyVGrid(columns: columns, spacing: 14) {
-            ForEach(itemsInCategory) { item in
-                itemCard(item)
-            }
-        }
-    }
-
-    private func itemCard(_ item: CosmeticItem) -> some View {
-        let owned = cosmetics.owns(item)
-        let equipped: Bool = {
-            guard let pid = profiles.activeID else { return false }
-            return cosmetics.equipped(for: pid, in: item.category)?.id == item.id
-        }()
-        return Button {
-            Haptic.light()
-            detailItem = item
-        } label: {
-            VStack(spacing: 8) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                        .fill(.white.opacity(0.10))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                                .stroke(item.rarity.color.opacity(0.7), lineWidth: 1.5)
-                        )
-                    Text(item.emoji)
-                        .font(.system(size: isCompact ? 50 : 64))
-                        .padding(.vertical, 8)
-                    if equipped {
-                        VStack { HStack {
-                            Spacer()
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(AppColor.successMint)
-                                .background(Circle().fill(.white).scaleEffect(0.7))
-                                .font(.system(size: 22))
-                        }; Spacer() }
-                        .padding(8)
-                    } else if !owned {
-                        VStack { HStack {
-                            Spacer()
-                            Image(systemName: "lock.fill")
-                                .foregroundStyle(.white.opacity(0.6))
-                                .font(.system(size: 14))
-                        }; Spacer() }
-                        .padding(10)
-                    }
-                }
-                .frame(height: isCompact ? 90 : 120)
-
-                Text(item.name)
-                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-
-                rarityBadge(item.rarity)
-
-                priceOrStatusFooter(item: item, owned: owned, equipped: equipped)
-            }
-            .padding(.vertical, 10)
-            .padding(.horizontal, 10)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                    .fill(.white.opacity(0.06))
-            )
-        }
-        .buttonStyle(.juicy)
-    }
-
-    private func rarityBadge(_ rarity: CosmeticRarity) -> some View {
-        Text(rarity.label)
-            .font(.system(size: 10, weight: .heavy, design: .rounded))
-            .foregroundStyle(.white)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(Capsule().fill(rarity.gradient))
-    }
-
-    @ViewBuilder
-    private func priceOrStatusFooter(item: CosmeticItem, owned: Bool, equipped: Bool) -> some View {
-        if equipped {
-            Text("לָבוּשׁ 👤")
-                .font(.system(size: 12, weight: .heavy, design: .rounded))
-                .foregroundStyle(AppColor.successMint)
-        } else if owned {
-            Text("בִּרְשׁוּתְךָ")
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.85))
-        } else {
-            HStack(spacing: 3) {
-                Text("⭐").font(.system(size: 11))
-                Text("\(item.price)")
-                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .foregroundStyle(progress.stars >= item.price ? .white : AppColor.almostWarm)
-            }
-        }
-    }
-
-    // MARK: - Purchase
-
-    private func attemptPurchase(_ item: CosmeticItem) {
-        guard let pid = profiles.activeID else { return }
-        // Already owned → just equip (or un-equip if already wearing).
-        if cosmetics.owns(item) {
-            if cosmetics.equipped(for: pid, in: item.category)?.id == item.id {
-                cosmetics.equip(nil, in: item.category, for: pid)
-            } else {
-                cosmetics.equip(item, in: item.category, for: pid)
-            }
-            Haptic.success()
-            SoundPlayer.shared.play(.uiTap)
-            detailItem = nil
-            return
-        }
-        // Otherwise — try to buy.
-        do {
-            try cosmetics.purchase(item, for: pid)
-            celebrateTrigger += 1
-            confettiTrigger += 1
-            SoundPlayer.shared.play(.chestOpen)
-            Haptic.success()
-            detailItem = nil
-        } catch let err as CosmeticStore.PurchaseError {
-            purchaseError = err.errorDescription
-            Haptic.warning()
-        } catch {
-            purchaseError = error.localizedDescription
-            Haptic.warning()
-        }
-    }
-}
-
-// MARK: - Detail sheet
-
-struct ShopItemDetail: View {
-    let item: CosmeticItem
-    let onPrimary: () -> Void
-
-    @EnvironmentObject var profiles: ProfileStore
-    @EnvironmentObject var progress: ProgressStore
-    @EnvironmentObject var cosmetics: CosmeticStore
-    @Environment(\.dismiss) private var dismiss
-
-    private var profile: Profile? { profiles.active }
-    private var owned: Bool { cosmetics.owns(item) }
-    private var equipped: Bool {
-        guard let pid = profiles.activeID else { return false }
-        return cosmetics.equipped(for: pid, in: item.category)?.id == item.id
-    }
-    private var canAfford: Bool { progress.stars >= item.price }
-
-    private let previewW: CGFloat = 150
-    private let previewH: CGFloat = 210
-
-    /// Where a cosmetic emoji sits on the (flat) character preview.
-    private func cosmeticOffset(for cat: CosmeticCategory) -> CGSize {
-        switch cat {
-        case .hat:       return CGSize(width: 0,                height: -previewH * 0.40)
-        case .glasses:   return CGSize(width: 0,                height: -previewH * 0.20)
-        case .shirt:     return CGSize(width: 0,                height:  previewH * 0.02)
-        case .pants:     return CGSize(width: 0,                height:  previewH * 0.22)
-        case .shoes:     return CGSize(width: 0,                height:  previewH * 0.42)
-        case .accessory: return CGSize(width: previewW * 0.34,  height:  0)
-        case .backpack:  return CGSize(width: -previewW * 0.32, height:  0)
-        case .vehicle:   return CGSize(width: 0,                height:  previewH * 0.46)
-        }
-    }
-
-    /// Preview loadout: take the kid's current outfit but replace this
-    /// category with the item being considered, so they see how it looks.
-    private var previewItems: [CosmeticItem] {
-        guard let pid = profiles.activeID else { return [item] }
-        var items = cosmetics.equippedItems(for: pid).filter { $0.category != item.category }
-        items.append(item)
-        return items
-    }
-
-    var body: some View {
-        ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 14, size: 12)
-
-            VStack(spacing: AppSpacing.lg) {
-                // Live preview on the kid's CURRENT character (the 2D collectible),
-                // with the cosmetic emojis placed at body positions. The item being
-                // considered is drawn larger so it stands out.
-                if let profile {
-                    ZStack {
-                        CharacterView(character: profile.character, portrait: true)
-                            .frame(width: previewW, height: previewH)
-                        ForEach(previewItems, id: \.id) { ci in
-                            Text(ci.emoji)
-                                .font(.system(size: ci.category == item.category ? 54 : 38))
-                                .shadow(color: .black.opacity(0.25), radius: 3, y: 2)
-                                .offset(cosmeticOffset(for: ci.category))
-                        }
-                    }
-                    .frame(width: previewW, height: previewH)
-                }
-
-                VStack(spacing: 6) {
-                    Text(item.name)
-                        .font(.system(size: 26, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
-                    HStack(spacing: 8) {
-                        Text(item.category.icon)
-                        Text(item.category.displayName)
-                            .font(.system(size: 13, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.7))
-                    }
-                    Text(item.rarity.label)
-                        .font(.system(size: 12, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 4)
-                        .background(Capsule().fill(item.rarity.gradient))
-                }
-
-                primaryButton
-                    .padding(.top, 4)
-
-                if !owned && !canAfford {
-                    Text("חֲסֵרִים \(item.price - progress.stars) כּוֹכָבִים ⭐")
-                        .font(.caption)
-                        .foregroundStyle(AppColor.almostWarm)
-                }
-            }
-            .padding(AppSpacing.xl)
-            .frame(maxWidth: 460)
-            // Center the column so it reads as a tidy card at any sheet size.
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        }
-    }
-
-    @ViewBuilder
-    private var primaryButton: some View {
-        if equipped {
-            JuicyButton(gradient: AppGradient.almost, glowColor: AppColor.almostWarm) {
-                onPrimary()
-            } label: {
-                Label("הָסֵר מֵהַדְּמוּת", systemImage: "xmark.circle")
-            }
-        } else if owned {
-            JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
-                onPrimary()
-            } label: {
-                Label("הַלְבֵּשׁ", systemImage: "sparkles")
-            }
-        } else {
-            JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-                onPrimary()
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "cart.fill")
-                    Text("קְנֵה בְּ-\(item.price) ⭐")
-                }
-            }
-            .opacity(canAfford ? 1 : 0.55)
-            .disabled(!canAfford)
-        }
-    }
 }
 
 #Preview {
     ShopView()
         .environmentObject(ProfileStore.shared)
         .environmentObject(ProgressStore.shared)
-        .environmentObject(CosmeticStore.shared)
         .environment(\.layoutDirection, .rightToLeft)
 }
