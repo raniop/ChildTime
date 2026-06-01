@@ -64,12 +64,18 @@ final class ShieldManager: ObservableObject {
             ? ShieldSettings.ActivityCategoryPolicy<Application>.none
             : .specific(selection.categoryTokens)
         store.shield.webDomains = selection.webDomainTokens.isEmpty ? nil : selection.webDomainTokens
+        // Never the all-web restriction here — that's Kid Mode only. Clear it so a
+        // previous Kid Mode session can't leave Safari blocked.
+        store.shield.webDomainCategories = ShieldSettings.ActivityCategoryPolicy<WebDomain>.none
     }
 
     func clearShield() {
         store.shield.applications = nil
         store.shield.applicationCategories = ShieldSettings.ActivityCategoryPolicy<Application>.none
         store.shield.webDomains = nil
+        // CRITICAL: also drop the all-web category restriction set by Kid Mode,
+        // otherwise the browser stays blocked after exiting.
+        store.shield.webDomainCategories = ShieldSettings.ActivityCategoryPolicy<WebDomain>.none
     }
 
     /// Kid Mode (parent's own phone): lock EVERY app except the `allowed` set —
@@ -100,6 +106,7 @@ final class ShieldManager: ObservableObject {
             ? ShieldSettings.ActivityCategoryPolicy<Application>.none
             : .specific(blocked.categoryTokens, except: allowedApps)
         store.shield.webDomains = blocked.webDomainTokens.isEmpty ? nil : blocked.webDomainTokens
+        store.shield.webDomainCategories = ShieldSettings.ActivityCategoryPolicy<WebDomain>.none
     }
 
     /// Start a temporary per-app allowance: open `allowed` now (rest stays

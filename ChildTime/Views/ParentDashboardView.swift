@@ -238,6 +238,11 @@ struct ParentDashboardView: View {
                 refreshTrigger &+= 1
                 lastRefreshed = .now
             }
+            // Safety net every 20s: re-attach any dropped Firestore listeners and
+            // re-fetch, so live child updates can't "suddenly stop" until reopened.
+            .onReceive(Timer.publish(every: 20, on: .main, in: .common).autoconnect()) { _ in
+                remote.refreshNow()
+            }
         }
     }
 

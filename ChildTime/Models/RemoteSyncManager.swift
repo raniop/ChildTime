@@ -165,7 +165,9 @@ final class RemoteSyncManager: ObservableObject {
         // own (empty) local state, or it clobbers the child's real cloud data
         // with zeros. Explicit parent actions (reset / ±minutes) still go through
         // pushNow() → uploadActiveProfile().
-        guard ParentSettings.shared.deviceRole != .parent else { return }
+        // EXCEPTION: in Kid Mode the parent's phone IS the child's session, so it
+        // must upload the child's real play (otherwise it never syncs back).
+        guard ParentSettings.shared.deviceRole != .parent || KidModeManager.shared.active else { return }
         saveDebounce?.cancel()
         saveDebounce = Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 3_000_000_000)

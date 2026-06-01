@@ -198,7 +198,12 @@ struct ChildTimeApp: App {
             KidModeManager.shared.reassertIfActive()
             return
         }
-        guard let data = settings.activitySelectionData else { return }
+        guard let data = settings.activitySelectionData else {
+            // No managed apps on this device (e.g. a parent's phone) → make sure
+            // nothing is left shielded, including a stale Kid Mode web/app lock.
+            shields.clearShield()
+            return
+        }
         let selection = SelectionStorage.decode(data)
 
         if progress.isUnlocked {
