@@ -19,6 +19,9 @@ struct BubbleSpeech: View {
                 BubbleShape(pointDirection: pointDirection, tailInsetFromRight: tailInsetFromRight)
                     .fill(.white)
                     .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+                    // Pin the shape's coordinates to LTR so the tail position is
+                    // deterministic (RTL would mirror it to the wrong side).
+                    .environment(\.layoutDirection, .leftToRight)
             }
             .frame(maxWidth: 260)
     }
