@@ -84,38 +84,45 @@ enum Character3DCatalog {
         Character3D(id: "penguin",  name: "פִּינְגְּוִין", priceStars: 0,    imageAsset: "penguin"),
         Character3D(id: "bear",     name: "דֹּב",       priceStars: 0,    imageAsset: "bear"),
 
-        // 🟢 Common (≤300) — encourage-level help.
-        Character3D(id: "hamster",  name: "אוֹגֵר",      priceStars: 120,  imageAsset: "hamster"),
-        Character3D(id: "squirrel", name: "סְנָאִי",      priceStars: 120,  imageAsset: "squirrel"),
-        Character3D(id: "turtle",   name: "צָב",        priceStars: 140,  imageAsset: "turtle"),
-        Character3D(id: "hedgehog", name: "קִיפּוֹד",     priceStars: 140,  imageAsset: "hedgehog"),
-        Character3D(id: "fennec",   name: "פֶנֶק",       priceStars: 160,  imageAsset: "fennec"),
-        Character3D(id: "monkey",   name: "קוֹף",       priceStars: 170,  imageAsset: "monkey"),
-        Character3D(id: "gazelle",  name: "צְבִי",       priceStars: 180,  imageAsset: "gazelle"),
-        Character3D(id: "ibex",     name: "יָעֵל",       priceStars: 190,  imageAsset: "ibex"),
-        Character3D(id: "koala",    name: "קוֹאָלָה",    priceStars: 220,  imageAsset: "koala"),
-        Character3D(id: "otter",    name: "לוּטְרָה",     priceStars: 240,  imageAsset: "otter"),
-        Character3D(id: "pig",      name: "חֲזַרְזִיר",    priceStars: 260,  imageAsset: "pig"),
-        // Alternate drawings of the same animals (distinct art, own entry).
-        Character3D(id: "fox_orange",        name: "שׁוּעָל אָדֹם",  priceStars: 200,  imageAsset: "fox_orange"),
-        Character3D(id: "crocodile_green",   name: "תַּנִּין יָרֹק",   priceStars: 240,  imageAsset: "crocodile_green"),
-        Character3D(id: "koala_winter",      name: "קוֹאָלָה",      priceStars: 280,  imageAsset: "koala_winter"),
-        Character3D(id: "elephant_explorer", name: "פִּיל חוֹקֵר",   priceStars: 300,  imageAsset: "elephant_explorer"),
+        // 🟢 Common (≤300) — encourage-level help. (incl. alternate-art variants)
+        Character3D(id: "hamster",     name: "אוֹגֵר",     priceStars: 120,  imageAsset: "hamster"),
+        Character3D(id: "hamster_b",   name: "אוֹגֵר",     priceStars: 130,  imageAsset: "hamster_b"),
+        Character3D(id: "squirrel",    name: "סְנָאִי",     priceStars: 130,  imageAsset: "squirrel"),
+        Character3D(id: "squirrel_b",  name: "סְנָאִי",     priceStars: 140,  imageAsset: "squirrel_b"),
+        Character3D(id: "turtle",      name: "צָב",       priceStars: 140,  imageAsset: "turtle"),
+        Character3D(id: "hedgehog",    name: "קִיפּוֹד",    priceStars: 150,  imageAsset: "hedgehog"),
+        Character3D(id: "hedgehog_b",  name: "קִיפּוֹד",    priceStars: 150,  imageAsset: "hedgehog_b"),
+        Character3D(id: "fennec",      name: "פֶנֶק",      priceStars: 160,  imageAsset: "fennec"),
+        Character3D(id: "monkey",      name: "קוֹף",      priceStars: 170,  imageAsset: "monkey"),
+        Character3D(id: "gazelle",     name: "צְבִי",      priceStars: 180,  imageAsset: "gazelle"),
+        Character3D(id: "ibex",        name: "יָעֵל",      priceStars: 190,  imageAsset: "ibex"),
+        Character3D(id: "pig",         name: "חֲזַרְזִיר",   priceStars: 200,  imageAsset: "pig"),
+        Character3D(id: "pig_b",       name: "חֲזַרְזִיר",   priceStars: 210,  imageAsset: "pig_b"),
+        Character3D(id: "koala",       name: "קוֹאָלָה",   priceStars: 220,  imageAsset: "koala"),
+        Character3D(id: "koala_b",     name: "קוֹאָלָה",   priceStars: 230,  imageAsset: "koala_b"),
+        Character3D(id: "koala_c",     name: "קוֹאָלָה",   priceStars: 240,  imageAsset: "koala_c"),
+        Character3D(id: "otter",       name: "לוּטְרָה",    priceStars: 250,  imageAsset: "otter"),
+        Character3D(id: "fox_b",       name: "שׁוּעָל",    priceStars: 260,  imageAsset: "fox_b"),
+        Character3D(id: "crocodile_b", name: "תַּנִּין",    priceStars: 280,  imageAsset: "crocodile_b"),
 
         // 🔵 Rare (301–650) — hint-level help.
-        Character3D(id: "tiger",    name: "נָמֵר",      priceStars: 380,  imageAsset: "tiger"),
-        Character3D(id: "zebra",    name: "זֶבְּרָה",     priceStars: 420,  imageAsset: "zebra"),
-        Character3D(id: "crocodile", name: "תַּנִּין",     priceStars: 460,  imageAsset: "crocodile"),
-        Character3D(id: "elephant", name: "פִּיל",       priceStars: 520,  imageAsset: "elephant"),
+        Character3D(id: "tiger",       name: "נָמֵר",      priceStars: 360,  imageAsset: "tiger"),
+        Character3D(id: "zebra",       name: "זֶבְּרָה",    priceStars: 400,  imageAsset: "zebra"),
+        Character3D(id: "zebra_b",     name: "זֶבְּרָה",    priceStars: 430,  imageAsset: "zebra_b"),
+        Character3D(id: "crocodile",   name: "תַּנִּין",    priceStars: 470,  imageAsset: "crocodile"),
+        Character3D(id: "elephant",    name: "פִּיל",      priceStars: 520,  imageAsset: "elephant"),
+        Character3D(id: "elephant_b",  name: "פִּיל",      priceStars: 560,  imageAsset: "elephant_b"),
+        Character3D(id: "elephant_c",  name: "פִּיל",      priceStars: 600,  imageAsset: "elephant_c"),
 
         // 🟣 Epic (651–1100) — hint-level help.
-        Character3D(id: "panda",    name: "פַּנְדָּה",     priceStars: 750,  imageAsset: "panda"),
-        Character3D(id: "octopus",  name: "תַּמְנוּן",     priceStars: 850,  imageAsset: "octopus"),
-        Character3D(id: "lion",     name: "אַרְיֵה",     priceStars: 1000, imageAsset: "lion"),
+        Character3D(id: "panda",       name: "פַּנְדָּה",    priceStars: 750,  imageAsset: "panda"),
+        Character3D(id: "panda_b",     name: "פַּנְדָּה",    priceStars: 820,  imageAsset: "panda_b"),
+        Character3D(id: "octopus",     name: "תַּמְנוּן",    priceStars: 900,  imageAsset: "octopus"),
+        Character3D(id: "lion",        name: "אַרְיֵה",    priceStars: 1000, imageAsset: "lion"),
 
         // 👑 Legendary (1101–2500) — explain-level help.
-        Character3D(id: "dragon",   name: "דְּרָקוֹן",   priceStars: 1500, imageAsset: "dragon"),
-        Character3D(id: "unicorn",  name: "חַד-קֶרֶן",  priceStars: 2000, imageAsset: "unicorn"),
+        Character3D(id: "dragon",      name: "דְּרָקוֹן",  priceStars: 1500, imageAsset: "dragon"),
+        Character3D(id: "unicorn",     name: "חַד-קֶרֶן", priceStars: 2000, imageAsset: "unicorn"),
 
         // 🩷 Mythic (2501+) — explain-level help. (Premium tier; more coming.)
     ]
