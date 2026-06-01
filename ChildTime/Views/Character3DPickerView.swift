@@ -94,10 +94,16 @@ struct Character3DPickerView: View {
         .background(Capsule().fill(.white.opacity(0.18)))
     }
 
+    private func tierColor(_ tier: CharacterTier) -> Color {
+        let c = tier.rgb
+        return Color(red: c.r, green: c.g, blue: c.b)
+    }
+
     private func card(_ character: Character3D) -> some View {
         let selected = selectedID == character.id
         let owned = characters.owns(character)
         let affordable = progress.stars >= character.priceStars
+        let tColor = tierColor(character.tier)
         return Button {
             tap(character)
         } label: {
@@ -111,13 +117,14 @@ struct Character3DPickerView: View {
             .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: AppRadius.large)
-                    .fill(selected ? AppColor.starGold.opacity(0.28) : Color.white.opacity(0.10))
+                    .fill(selected ? AppColor.starGold.opacity(0.28) : tColor.opacity(0.12))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.large)
-                    .stroke(selected ? AppColor.starGold : .white.opacity(0.25),
-                            lineWidth: selected ? 3 : 1.5)
+                    .stroke(selected ? AppColor.starGold : tColor.opacity(0.85),
+                            lineWidth: selected ? 3 : 2)
             )
+            .overlay(alignment: .topLeading) { tierBadge(character.tier, color: tColor) }
             .overlay(alignment: .topTrailing) {
                 if selected {
                     Image(systemName: "checkmark.circle.fill")
@@ -132,6 +139,17 @@ struct Character3DPickerView: View {
             }
         }
         .buttonStyle(.plain)
+    }
+
+    private func tierBadge(_ tier: CharacterTier, color: Color) -> some View {
+        Text(tier.label)
+            .font(.system(size: 11, weight: .heavy, design: .rounded))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 9)
+            .padding(.vertical, 4)
+            .background(Capsule().fill(color))
+            .overlay(Capsule().stroke(.white.opacity(0.5), lineWidth: 1))
+            .padding(8)
     }
 
     private func priceBadge(_ price: Int, affordable: Bool) -> some View {
