@@ -60,9 +60,13 @@ struct Character3DPickerView: View {
             if let s = shortBy { Text("צָרִיךְ עוֹד \(s) כּוֹכָבִים. תַּמְשִׁיךְ לִלְמֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.") }
         }
         .sheet(isPresented: $showStarShop) {
-            ParentGateView(allowClose: true) { StarShopView() }
-                .environmentObject(ParentSettings.shared)
-                .environment(\.layoutDirection, .rightToLeft)
+            ParentGateView(allowClose: true,
+                           gateTitle: "אִישּׁוּר הוֹרֶה",
+                           gateReason: "כְּדֵי לִקְנוֹת כּוֹכָבִים בְּכֶסֶף אֲמִתִּי") {
+                StarShopView()
+            }
+            .environmentObject(ParentSettings.shared)
+            .environment(\.layoutDirection, .rightToLeft)
         }
     }
 

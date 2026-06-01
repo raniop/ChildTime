@@ -5,12 +5,20 @@ struct ParentGateView<Content: View>: View {
     /// but the parent device also wraps the whole dashboard with it.
     private let content: () -> Content
     var allowClose: Bool = true
+    /// Optional contextual title/reason — e.g. when gating a star purchase rather
+    /// than opening Parent Settings. Falls back to the settings wording.
+    var gateTitle: String? = nil
+    var gateReason: String? = nil
 
     init(allowClose: Bool = true,
+         gateTitle: String? = nil,
+         gateReason: String? = nil,
          @ViewBuilder content: @escaping () -> Content = {
              ParentSettingsView().environment(\.layoutDirection, .rightToLeft)
          }) {
         self.allowClose = allowClose
+        self.gateTitle = gateTitle
+        self.gateReason = gateReason
         self.content = content
     }
 
@@ -71,7 +79,7 @@ struct ParentGateView<Content: View>: View {
                         .foregroundStyle(AppColor.starGold)
                         .glow(AppColor.starGold, radius: 14)
 
-                    Text(isSetupMode ? "בְּחֲרוּ קוֹד הוֹרֶה" : "הַגְדָּרוֹת הוֹרֶה")
+                    Text(isSetupMode ? "בְּחֲרוּ קוֹד הוֹרֶה" : (gateTitle ?? "הַגְדָּרוֹת הוֹרֶה"))
                         .font(.system(size: 30, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
 
@@ -199,6 +207,7 @@ struct ParentGateView<Content: View>: View {
                 ? "בִּחֲרוּ קוֹד בֶּן 4 סְפָרוֹת לְהָגֵן עַל הַהַגְדָּרוֹת"
                 : "הַזִּינוּ שׁוּב אֶת הַקּוֹד לְאִשּׁוּר"
         }
+        if let reason = gateReason { return reason }
         return "הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת"
     }
 

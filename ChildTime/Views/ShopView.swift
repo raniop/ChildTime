@@ -19,6 +19,7 @@ struct ShopView: View {
     @State private var confettiTrigger = 0
     @State private var showingProfileEditor = false
     @State private var showingCharacterPicker = false
+    @State private var showStarShop = false
 
     private var isCompact: Bool { hsc == .compact }
     private var avatarSize: CGFloat { isCompact ? 130 : 170 }
@@ -67,6 +68,15 @@ struct ShopView: View {
                 Character3DPickerView(profileID: active.id)
             }
         }
+        .sheet(isPresented: $showStarShop) {
+            ParentGateView(allowClose: true,
+                           gateTitle: "אִישּׁוּר הוֹרֶה",
+                           gateReason: "כְּדֵי לִקְנוֹת כּוֹכָבִים בְּכֶסֶף אֲמִתִּי") {
+                StarShopView()
+            }
+            .environmentObject(ParentSettings.shared)
+            .environment(\.layoutDirection, .rightToLeft)
+        }
         .sheet(isPresented: $showingProfileEditor) {
             if let active = profiles.active {
                 ProfileEditorView(mode: .edit(active)) { updated in
@@ -112,17 +122,28 @@ struct ShopView: View {
 
                 Spacer()
 
-                HStack(spacing: 4) {
-                    Text("⭐").font(.system(size: 16))
-                    Text("\(progress.stars)")
-                        .font(.system(size: 17, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .contentTransition(.numericText(value: Double(progress.stars)))
+                // Tappable balance → buy more stars (parent-gated). This keeps
+                // star-buying inside the shop instead of a separate detour.
+                Button {
+                    Haptic.light()
+                    showStarShop = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("⭐").font(.system(size: 16))
+                        Text("\(progress.stars)")
+                            .font(.system(size: 17, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .contentTransition(.numericText(value: Double(progress.stars)))
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Capsule().fill(AppColor.starGold.opacity(0.4)))
+                    .overlay(Capsule().stroke(AppColor.starGold, lineWidth: 1.5))
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .background(Capsule().fill(AppColor.starGold.opacity(0.4)))
-                .overlay(Capsule().stroke(AppColor.starGold, lineWidth: 1.5))
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, AppSpacing.md)
@@ -387,6 +408,23 @@ struct ShopItemDetail: View {
     }
     private var canAfford: Bool { progress.stars >= item.price }
 
+    private let previewW: CGFloat = 150
+    private let previewH: CGFloat = 210
+
+    /// Where a cosmetic emoji sits on the (flat) character preview.
+    private func cosmeticOffset(for cat: CosmeticCategory) -> CGSize {
+        switch cat {
+        case .hat:       return CGSize(width: 0,                height: -previewH * 0.40)
+        case .glasses:   return CGSize(width: 0,                height: -previewH * 0.20)
+        case .shirt:     return CGSize(width: 0,                height:  previewH * 0.02)
+        case .pants:     return CGSize(width: 0,                height:  previewH * 0.22)
+        case .shoes:     return CGSize(width: 0,                height:  previewH * 0.42)
+        case .accessory: return CGSize(width: previewW * 0.34,  height:  0)
+        case .backpack:  return CGSize(width: -previewW * 0.32, height:  0)
+        case .vehicle:   return CGSize(width: 0,                height:  previewH * 0.46)
+        }
+    }
+
     /// Preview loadout: take the kid's current outfit but replace this
     /// category with the item being considered, so they see how it looks.
     private var previewItems: [CosmeticItem] {
@@ -402,9 +440,21 @@ struct ShopItemDetail: View {
             SparkleField(count: 14, size: 12)
 
             VStack(spacing: AppSpacing.lg) {
-                // Live preview on the kid's character
-                if profile != nil {
-                    DressUpCharacter(items: previewItems, photoData: profile?.photoData, size: 150)
+                // Live preview on the kid's CURRENT character (the 2D collectible),
+                // with the cosmetic emojis placed at body positions. The item being
+                // considered is drawn larger so it stands out.
+                if let profile {
+                    ZStack {
+                        CharacterView(character: profile.character, portrait: true)
+                            .frame(width: previewW, height: previewH)
+                        ForEach(previewItems, id: \.id) { ci in
+                            Text(ci.emoji)
+                                .font(.system(size: ci.category == item.category ? 54 : 38))
+                                .shadow(color: .black.opacity(0.25), radius: 3, y: 2)
+                                .offset(cosmeticOffset(for: ci.category))
+                        }
+                    }
+                    .frame(width: previewW, height: previewH)
                 }
 
                 VStack(spacing: 6) {
