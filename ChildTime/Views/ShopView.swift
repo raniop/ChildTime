@@ -17,10 +17,11 @@ struct ShopView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
+            // Magical purple — distinct from the blue leaderboard / world map.
+            AppGradient.purpleDream.ignoresSafeArea()
             FloatingOrbs(
-                colors: [AppColor.gemPurple, AppColor.starGold, AppColor.companionGlow],
-                count: 6, maxSize: 280, opacity: 0.35
+                colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FF6B9D")],
+                count: 6, maxSize: 280, opacity: 0.30
             )
             SparkleField(count: 22, size: 14)
 
