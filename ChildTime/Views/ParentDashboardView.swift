@@ -665,11 +665,11 @@ struct ParentDashboardView: View {
                 friendsProfile = profile
             } label: {
                 HStack(spacing: 6) {
-                    Image(systemName: "person.2.fill")
+                    Image(systemName: "chevron.left").font(.system(size: 11, weight: .bold))
+                    Spacer()
                     Text("הַחֲבֵרִים שֶׁל \(profile.name)")
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    Spacer()
-                    Image(systemName: "chevron.left").font(.system(size: 11, weight: .bold))
+                    Image(systemName: "person.2.fill")
                 }
                 .foregroundStyle(.white)
                 .padding(.horizontal, 14).padding(.vertical, 10)
@@ -691,14 +691,14 @@ struct ParentDashboardView: View {
                     qrChild = profile
                 } label: {
                     HStack(spacing: 10) {
-                        Image(systemName: "qrcode")
-                            .font(.system(size: 20, weight: .bold))
+                        Image(systemName: "chevron.left").font(.subheadline.weight(.bold))
+                        Spacer()
                         Text((household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
                              ? "חַבְּרוּ מַכְשִׁיר נוֹסָף לְ\(profile.name)"
                              : "חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name)")
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
-                        Spacer()
-                        Image(systemName: "chevron.left").font(.subheadline.weight(.bold))
+                        Image(systemName: "qrcode")
+                            .font(.system(size: 20, weight: .bold))
                     }
                     .foregroundStyle(.white)
                     .padding(.vertical, 14).padding(.horizontal, 16)
@@ -718,11 +718,11 @@ struct ParentDashboardView: View {
                     .environmentObject(settings)
             } label: {
                 HStack(spacing: 8) {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
+                    Image(systemName: "chevron.left").font(.caption)
+                    Spacer()
                     Text("תובנות מלאות")
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
-                    Spacer()
-                    Image(systemName: "chevron.left").font(.caption)
+                    Image(systemName: "chart.line.uptrend.xyaxis")
                 }
                 .foregroundStyle(AppColor.gemPurple)
                 .padding(.vertical, 10).padding(.horizontal, 12)
