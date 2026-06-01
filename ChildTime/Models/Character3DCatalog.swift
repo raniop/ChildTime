@@ -31,7 +31,7 @@ enum Character3DCatalog {
         Character3D(id: "elephant", name: "פִּיל",       imageAsset: "elephant"),
     ]
 
-    static let defaultID = "unicorn"
+    static let defaultID = "fox"
 
     static func find(_ id: String?) -> Character3D {
         if let id, let match = all.first(where: { $0.id == id }) { return match }
