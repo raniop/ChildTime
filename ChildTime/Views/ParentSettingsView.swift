@@ -69,7 +69,7 @@ struct ParentSettingsView: View {
                     .environment(\.layoutDirection, .rightToLeft)
             }
             .sheet(isPresented: $showFamilyLinking) {
-                FamilyLinkingView()
+                AddParentView()
                     .environment(\.layoutDirection, .rightToLeft)
             }
             .sheet(isPresented: $showDashboard) {
@@ -245,7 +245,7 @@ struct ParentSettingsView: View {
                 Button {
                     showFamilyLinking = true
                 } label: {
-                    Label("קִישּׁוּר מִשְׁפָּחָה (QR / קוֹד)", systemImage: "qrcode")
+                    Label("הוֹסִיפוּ הוֹרֶה לַמִּשְׁפָּחָה", systemImage: "person.2.badge.plus.fill")
                 }
                 Button(role: .destructive) {
                     auth.signOut()

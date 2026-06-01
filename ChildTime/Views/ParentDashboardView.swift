@@ -28,7 +28,6 @@ struct ParentDashboardView: View {
     @State private var refreshTrigger = 0
     @State private var lastRefreshed = Date()
     @State private var showingSettings = false
-    @State private var showingLinking = false
     @State private var showingCreateChild = false
     @State private var showingKidMode = false
     @State private var qrChild: Profile? = nil
@@ -173,10 +172,6 @@ struct ParentDashboardView: View {
                 KidModeEntryView()
                     .environment(\.layoutDirection, .rightToLeft)
             }
-            .sheet(isPresented: $showingLinking) {
-                FamilyLinkingView()
-                    .environment(\.layoutDirection, .rightToLeft)
-            }
             .sheet(isPresented: $showingCreateChild, onDismiss: {
                 // Next step after creating: connect that child's device (skippable).
                 if let p = pendingQRChild {
@@ -218,14 +213,6 @@ struct ParentDashboardView: View {
                 remote.refreshNow()   // pull fresh child state on open
                 rescheduleInsights()
                 Task { await push.refreshAuthorizationStatus() }
-                // Co-parent who chose "join existing family" on login →
-                // auto-open the linking sheet to enter the invite code.
-                if isRoot, settings.pendingJoinFamily {
-                    settings.pendingJoinFamily = false
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        showingLinking = true
-                    }
-                }
             }
             .onChange(of: settings.parentInsightFrequency) { _, freq in
                 if freq != .off {

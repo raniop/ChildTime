@@ -98,6 +98,10 @@ struct ContentView: View {
             LoginGateView(allowGuest: false, limitBanner: true)
         } else if !settings.hasConsented {
             ConsentView()
+        } else if settings.pendingJoinFamily && auth.isSignedIn {
+            // Co-parent who chose "join an existing family" → a focused, guided
+            // join screen BEFORE the dashboard (clears the flag on join/skip).
+            JoinFamilyFlowView()
         } else {
             // The control center is locked behind the parent code + Face ID.
             ParentGateView(allowClose: false) {
