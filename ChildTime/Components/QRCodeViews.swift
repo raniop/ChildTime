@@ -55,9 +55,31 @@ struct QRScannerView: UIViewControllerRepresentable {
         override func viewDidLoad() {
             super.viewDidLoad()
             view.backgroundColor = .black
+            // Handle camera permission explicitly so a denied/undetermined state
+            // doesn't just show a silent black screen that "reads nothing".
+            switch AVCaptureDevice.authorizationStatus(for: .video) {
+            case .authorized:
+                setupSession()
+            case .notDetermined:
+                AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                    DispatchQueue.main.async {
+                        if granted { self?.setupSession() }
+                        else { self?.showMessage("אֵין הַרְשָׁאָה לְמַצְלֵמָה.\nהַקְלִידוּ אֶת הַקּוֹד בִּמְקוֹם זֹאת.") }
+                    }
+                }
+            default:
+                showMessage("אֵין הַרְשָׁאָה לְמַצְלֵמָה.\nהַקְלִידוּ אֶת הַקּוֹד בִּמְקוֹם זֹאת.")
+            }
+        }
+
+        private func setupSession() {
             guard let device = AVCaptureDevice.default(for: .video),
                   let input = try? AVCaptureDeviceInput(device: device),
-                  session.canAddInput(input) else { return }
+                  session.canAddInput(input) else {
+                // No camera (e.g. the Simulator) — point to the code field.
+                showMessage("אֵין מַצְלֵמָה בַּמַּכְשִׁיר הַזֶּה.\nהַקְלִידוּ אֶת הַקּוֹד בִּמְקוֹם זֹאת.")
+                return
+            }
             session.addInput(input)
 
             let output = AVCaptureMetadataOutput()
@@ -72,6 +94,24 @@ struct QRScannerView: UIViewControllerRepresentable {
             view.layer.addSublayer(preview)
             previewLayer = preview
             applyRotation()
+            DispatchQueue.global(qos: .userInitiated).async { self.session.startRunning() }
+        }
+
+        private func showMessage(_ text: String) {
+            let label = UILabel()
+            label.text = text
+            label.textColor = .white
+            label.numberOfLines = 0
+            label.textAlignment = .center
+            label.font = .systemFont(ofSize: 17, weight: .semibold)
+            label.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(label)
+            NSLayoutConstraint.activate([
+                label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                label.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 24),
+                label.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -24),
+            ])
         }
 
         override func viewDidLayoutSubviews() {
@@ -109,7 +149,9 @@ struct QRScannerView: UIViewControllerRepresentable {
         override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(animated)
             didScan = false
-            if !session.isRunning {
+            // Only resume once the session actually has the camera input wired up
+            // (setupSession owns the first start).
+            if !session.isRunning && !session.inputs.isEmpty {
                 DispatchQueue.global(qos: .userInitiated).async { self.session.startRunning() }
             }
         }
