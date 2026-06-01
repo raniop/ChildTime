@@ -29,19 +29,9 @@ enum Character3DCatalog {
         Character3D(id: "monkey",   name: "קוֹף",       imageAsset: "monkey"),
         Character3D(id: "penguin",  name: "פִּינְגְּוִין", imageAsset: "penguin"),
         Character3D(id: "elephant", name: "פִּיל",       imageAsset: "elephant"),
-        // 3D characters.
-        Character3D(id: "hero3",  name: "מַאיָה"),
-        Character3D(id: "hero6",  name: "נוֹעָה"),
-        Character3D(id: "hero5",  name: "רוֹנִי"),
-        Character3D(id: "mousey", name: "מַאוּסִי"),
-        Character3D(id: "kaya",   name: "קַאיָה"),
-        Character3D(id: "sophie", name: "סוֹפִי"),
-        Character3D(id: "ninja",  name: "נִינְגָ'ה"),
-        Character3D(id: "knight", name: "אַבִּיר"),
-        Character3D(id: "pirate", name: "שׁוֹדֵד יָם"),
     ]
 
-    static let defaultID = "hero3"
+    static let defaultID = "unicorn"
 
     static func find(_ id: String?) -> Character3D {
         all.first { $0.id == id } ?? all[0]
