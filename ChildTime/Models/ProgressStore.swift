@@ -14,6 +14,7 @@ final class ProgressStore: ObservableObject {
         static let stars = "stars"
         static let gems = "gems"
         static let xp = "xp"
+        static let ownedCharacters = "ownedCharacterIDs"
         static let currentStreak = "currentStreak"
         static let dayStreak = "dayStreak"
         static let lastSessionDate = "lastSessionDate"
@@ -66,6 +67,10 @@ final class ProgressStore: ObservableObject {
     }
     @Published private(set) var gems: Int {
         didSet { defaults.set(gems, forKey: Key.gems) }
+    }
+    /// Characters this (active) child owns — per profile, synced via the snapshot.
+    @Published private(set) var ownedCharacterIDs: Set<String> = [] {
+        didSet { defaults.set(Array(ownedCharacterIDs), forKey: Key.ownedCharacters) }
     }
     @Published private(set) var xp: Int {
         didSet { defaults.set(xp, forKey: Key.xp) }
@@ -248,6 +253,7 @@ final class ProgressStore: ObservableObject {
         self.totalAnswered = d.integer(forKey: Key.totalAnswered)
         self.unlockEndsAt = d.object(forKey: Key.unlockEndsAt) as? Date
         self.stars = d.integer(forKey: Key.stars)
+        self.ownedCharacterIDs = Set(d.stringArray(forKey: Key.ownedCharacters) ?? [])
         self.gems = d.integer(forKey: Key.gems)
         self.xp = d.integer(forKey: Key.xp)
         self.currentStreak = d.integer(forKey: Key.currentStreak)
@@ -858,6 +864,7 @@ final class ProgressStore: ObservableObject {
         s.topicAbandon        = topicAbandon
         s.wheelProgressCount  = wheelProgressCount
         s.recoveryPot         = recoveryPot
+        s.ownedCharacterIDs   = Array(ownedCharacterIDs)
         s.lastModifiedAt      = .now
         return s
     }
@@ -896,6 +903,15 @@ final class ProgressStore: ObservableObject {
         topicAbandon        = s.topicAbandon
         wheelProgressCount  = s.wheelProgressCount
         recoveryPot         = s.recoveryPot
+        // Replace (not union) — apply() also runs on profile switch, so merging
+        // would leak one child's characters onto another. Revision/lastModified
+        // ordering in the sync layer already keeps the newest set.
+        ownedCharacterIDs   = Set(s.ownedCharacterIDs)
+    }
+
+    /// Grant a character to the active child (bought or awarded).
+    func addOwnedCharacter(_ id: String) {
+        ownedCharacterIDs.insert(id)
     }
 
     /// Hard-reset everything for a fresh profile. Keeps onboarding /

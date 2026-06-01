@@ -14,25 +14,31 @@ final class CharacterStore: ObservableObject {
 
     private let defaults = UserDefaults.standard
     private enum Key {
-        static let owned = "characters.ownedIDs"
-    }
-
-    /// IDs of paid characters the family has unlocked. Free ones are implicit.
-    @Published private(set) var ownedIDs: Set<String> = [] {
-        didSet { defaults.set(Array(ownedIDs), forKey: Key.owned) }
+        static let legacyOwned = "characters.ownedIDs"   // pre-sync, family-wide
+        static let didMigrate  = "characters.didMigrateToProfile"
     }
 
     /// Set briefly to the just-purchased character so the UI can celebrate.
     @Published var lastPurchased: Character3D? = nil
 
     private init() {
-        ownedIDs = Set(defaults.stringArray(forKey: Key.owned) ?? [])
+        migrateLegacyOwnershipIfNeeded()
+    }
+
+    /// Ownership now lives per-profile on the synced ProgressSnapshot. Carry any
+    /// previously-bought (family-wide, local) characters onto the active profile
+    /// once, so nobody loses what they already unlocked.
+    private func migrateLegacyOwnershipIfNeeded() {
+        guard !defaults.bool(forKey: Key.didMigrate) else { return }
+        let legacy = defaults.stringArray(forKey: Key.legacyOwned) ?? []
+        for id in legacy { ProgressStore.shared.addOwnedCharacter(id) }
+        defaults.set(true, forKey: Key.didMigrate)
     }
 
     // MARK: - Queries
 
     func owns(_ character: Character3D) -> Bool {
-        character.isFree || ownedIDs.contains(character.id)
+        character.isFree || ProgressStore.shared.ownedCharacterIDs.contains(character.id)
     }
 
     func owns(_ id: String) -> Bool { owns(Character3DCatalog.find(id)) }
@@ -60,7 +66,7 @@ final class CharacterStore: ObservableObject {
             throw PurchaseError.notEnoughStars(short: character.priceStars - progress.stars)
         }
         progress.spendStars(character.priceStars)
-        ownedIDs.insert(character.id)
+        progress.addOwnedCharacter(character.id)
         lastPurchased = character
         return character
     }
@@ -68,7 +74,7 @@ final class CharacterStore: ObservableObject {
     /// Grant a character for free (e.g. a prize). No-op if already owned.
     func unlockFree(_ character: Character3D) {
         guard !owns(character) else { return }
-        ownedIDs.insert(character.id)
+        ProgressStore.shared.addOwnedCharacter(character.id)
         lastPurchased = character
     }
 }

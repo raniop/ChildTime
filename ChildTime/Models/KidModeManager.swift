@@ -44,14 +44,33 @@ final class KidModeManager: ObservableObject {
         allowedData = defaults.data(forKey: Key.allowed)
     }
 
-    /// Enter kid mode for `child`: lock the phone to ChildTime + the allow-list,
-    /// switch to that child's profile, and show the kid experience.
+    /// Enter kid mode for `child`: pull the child's full progress from the cloud,
+    /// lock the phone to ChildTime + the allow-list, switch to that child's
+    /// profile, and show the kid experience with THEIR real data.
     func enter(childID id: UUID) {
         defaults.set(ProfileStore.shared.activeID?.uuidString, forKey: Key.prevID)
         childID = id
+
+        // Force a fresh pull of every child's cloud state (newer snapshots then
+        // apply to the active profile via the live listener).
+        RemoteSyncManager.shared.refreshNow()
+
+        // Switch to the child — loads their vault snapshot (stars, minutes, world
+        // progress, topic stats…) into ProgressStore and binds their history.
         if let p = ProfileStore.shared.profiles.first(where: { $0.id == id }) {
             ProfileStore.shared.setActive(p)
         }
+        // Apply the freshest cloud snapshot we already have cached over any stale
+        // local copy, so the kid sees their real progress immediately.
+        if let remote = RemoteSyncManager.shared.remoteSnapshots[id] {
+            let local = ProgressStore.shared.captureSnapshot()
+            if remote.revision >= local.revision {
+                ProgressStore.shared.apply(remote)
+            }
+        }
+        // Pull the child's day-by-day learning history too.
+        Task { await LearningHistoryStore.shared.fetchRemoteHistory(for: id) }
+
         ShieldManager.shared.applyLockAllExcept(allowedSelection)
         active = true
         Haptic.success()

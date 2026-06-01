@@ -53,6 +53,9 @@ struct ProgressSnapshot: Codable, Equatable {
     /// Minutes deducted by the most recent mistake, refundable by a clean
     /// correct answer on the next question (Risk & Recovery loop).
     var recoveryPot: Int = 0
+    /// Characters this child has bought (ids from Character3DCatalog). Synced so
+    /// the kid's collection follows them — e.g. into Kid Mode on a parent's phone.
+    var ownedCharacterIDs: [String] = []
     /// Bumped each time the device writes the snapshot — Firestore listeners
     /// use this to skip echoes of their own writes.
     var revision: Int = 0
