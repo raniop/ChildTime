@@ -30,11 +30,17 @@ enum InsightNotificationScheduler {
     ) {
         let center = UNUserNotificationCenter.current()
 
-        // Clear our previously-scheduled insight notifications.
-        center.getPendingNotificationRequests { reqs in
-            let ids = reqs.map(\.identifier).filter { $0.hasPrefix(idPrefix) }
-            if !ids.isEmpty { center.removePendingNotificationRequests(withIdentifiers: ids) }
+        // Clear previously-scheduled insight notifications by their KNOWN ids,
+        // synchronously. (Using the async getPendingNotificationRequests + remove
+        // raced with the re-add below: our ids are deterministic — "insight.day.hour"
+        // — so the delayed removal would wipe the notifications we just scheduled,
+        // and the parent would get none.)
+        let allHours = [9, 14, 17, 18, 19]   // union of every frequency's slots
+        var oldIDs: [String] = []
+        for day in 0..<7 {
+            for h in allHours { oldIDs.append("\(idPrefix)\(day).\(h)") }
         }
+        center.removePendingNotificationRequests(withIdentifiers: oldIDs)
 
         guard frequency != .off, !rows.isEmpty else { return }
 
@@ -86,7 +92,9 @@ enum InsightNotificationScheduler {
                     content: content,
                     trigger: trigger
                 )
-                center.add(req)
+                center.add(req) { error in
+                    if let error { print("[Insight] schedule failed: \(error.localizedDescription)") }
+                }
             }
         }
     }
