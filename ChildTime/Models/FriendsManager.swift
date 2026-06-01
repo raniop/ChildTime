@@ -103,7 +103,11 @@ final class FriendsManager: ObservableObject {
     @discardableResult
     func addFriend(code raw: String) async -> Bool {
         #if canImport(FirebaseFirestore)
-        guard let myID, AuthManager.shared.isSignedIn else { return false }
+        guard let myID else { lastError = "אֵין פְּרוֹפִיל פָּעִיל"; return false }
+        guard AuthManager.shared.isSignedIn else {
+            lastError = "צָרִיךְ לְהִתְחַבֵּר לְחֶשְׁבּוֹן כְּדֵי לְהוֹסִיף חֲבֵרִים"
+            return false
+        }
         let code = FriendLink.code(from: raw).uppercased()
         guard !code.isEmpty, code != myCode else {
             lastError = code == myCode ? "זֶה הַקּוֹד שֶׁלְּךָ 🙂" : "קוֹד לֹא תָּקִין"

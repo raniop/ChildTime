@@ -51,6 +51,16 @@
 				<string>com.googleusercontent.apps.870781732446-ho1dv5ksn0g7jtcchd7rumfctoq720ik</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.rani.ChildTime.tofy</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>tofy</string>
+			</array>
+		</dict>
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>

@@ -10,7 +10,9 @@
   .card{padding:36px 24px;max-width:420px}
   h1{font-size:44px;margin:0 0 6px;color:#FFD23F}
   p{font-size:18px;opacity:.95;line-height:1.6}
-  .btn{display:inline-block;margin-top:18px;font-weight:800;background:#000;color:#fff;
+  .code{font-size:40px;font-weight:800;letter-spacing:8px;background:rgba(255,255,255,.15);
+        border-radius:16px;padding:14px 18px;margin:14px 0;display:inline-block}
+  .btn{display:inline-block;margin-top:10px;font-weight:800;background:#000;color:#fff;
        padding:14px 26px;border-radius:14px;text-decoration:none}
 </style>
 </head>
@@ -18,9 +20,24 @@
   <div class="card">
     <div style="font-size:64px">🤝</div>
     <h1>טופי</h1>
-    <p>חבר רוצה להתחבר אליכם! פִּתחו את אפליקציית <b>טופי</b> במכשיר הזה — וההוספה תקרה אוטומטית.</p>
-    <p style="opacity:.85;font-size:15px">אם האפליקציה עדיין לא מותקנת, התקינו אותה, ואז פִּתחו שוב את הקישור או הקלידו את הקוד מתוך מסך "הוספת חבר".</p>
-    <a class="btn" href="https://tofyapp.com">חזרה לאתר טופי</a>
+    <p>חבר רוצה להתחבר אליכם!</p>
+    <div id="codeBox" style="display:none">
+      <p style="opacity:.9;font-size:15px">פִּתחו את טופי → לוח החברים 🏆 → הוספת חבר, והקלידו את הקוד:</p>
+      <div class="code" id="code">······</div>
+    </div>
+    <p style="opacity:.85;font-size:15px">אם טופי מותקן, היא תיפתח אוטומטית. אם לא — התקינו אותה ואז הקלידו את הקוד למעלה.</p>
+    <a class="btn" id="openBtn" href="#">פִּתחו את טופי</a>
   </div>
+  <script>
+    var f = new URLSearchParams(location.search).get('f');
+    if (f) {
+      document.getElementById('code').textContent = f;
+      document.getElementById('codeBox').style.display = 'block';
+      var deep = 'tofy://friend?f=' + encodeURIComponent(f);
+      document.getElementById('openBtn').href = deep;
+      // Try to bounce into the app automatically.
+      setTimeout(function(){ location.href = deep; }, 350);
+    }
+  </script>
 </body>
 </html>
