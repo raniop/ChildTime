@@ -40,12 +40,13 @@ struct LeaderboardView: View {
         }
         .environment(\.layoutDirection, .rightToLeft)
         .task {
-            await friends.refresh()
+            await friends.startLive()   // real-time: new friends + live stars
             if let code = friends.pendingFriendCode {
                 friends.pendingFriendCode = nil
                 _ = await friends.addFriend(code: code)
             }
         }
+        .onDisappear { friends.stopLive() }
         .sheet(isPresented: $showAdd) {
             AddFriendView().environment(\.layoutDirection, .rightToLeft)
         }
@@ -190,6 +191,8 @@ struct AddFriendView: View {
     @State private var typed = ""
     @State private var message: String?
     @State private var added = false
+    @State private var celebrate: FriendCard?
+    @State private var confettiTrigger = 0
 
     var body: some View {
         ZStack {
@@ -221,6 +224,26 @@ struct AddFriendView: View {
                     .padding(AppSpacing.lg).frame(maxWidth: 460).frame(maxWidth: .infinity)
                 }
             }
+
+            // 🎉 New-friend celebration.
+            if let f = celebrate {
+                Color.black.opacity(0.6).ignoresSafeArea()
+                VStack(spacing: AppSpacing.md) {
+                    Text("🎉").font(.system(size: 56))
+                    CharacterView(character: f.character)
+                        .frame(width: 130, height: 130)
+                        .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                    Text(f.name)
+                        .font(.system(size: 24, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text("אַתֶּם חֲבֵרִים עַכְשָׁיו! 🤝")
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(AppColor.starGold)
+                }
+                .transition(.scale.combined(with: .opacity))
+            }
+            Confetti(trigger: confettiTrigger)
+                .allowsHitTesting(false)
         }
         .environment(\.layoutDirection, .rightToLeft)
         .task { await friends.refresh() }
@@ -300,8 +323,13 @@ struct AddFriendView: View {
             message = ok ? "הִתְחַבַּרְתֶּם! 🎉" : (friends.lastError ?? "לֹא הִצְלַחְנוּ")
             if ok {
                 typed = ""; Haptic.success()
-                // Briefly celebrate, then return to the (now-updated) leaderboard.
-                try? await Task.sleep(nanoseconds: 1_100_000_000)
+                SoundPlayer.shared.play(.chestOpen)
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                    celebrate = friends.lastAddedFriend
+                }
+                confettiTrigger += 1
+                // Celebrate, then return to the (now-updated) leaderboard.
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
                 dismiss()
             } else {
                 Haptic.warning()

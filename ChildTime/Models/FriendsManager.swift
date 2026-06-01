@@ -60,6 +60,8 @@ final class FriendsManager: ObservableObject {
     @Published var lastError: String?
     /// Set from an incoming friend Universal Link; consumed by the leaderboard.
     @Published var pendingFriendCode: String?
+    /// The friend just added — so the UI can celebrate (confetti + their character).
+    @Published var lastAddedFriend: FriendCard?
 
     private let defaults = UserDefaults.standard
     private var myID: String? { ProfileStore.shared.activeID?.uuidString }
@@ -161,6 +163,7 @@ final class FriendsManager: ObservableObject {
             ], merge: true)
             log("✅ write OK — added \(card.id)")
             lastError = nil
+            lastAddedFriend = card
             await loadLeaderboard(myID: myID)
             return true
         } catch {
@@ -190,6 +193,78 @@ final class FriendsManager: ObservableObject {
 
     #if canImport(FirebaseFirestore)
     private var db: Firestore { Firestore.firestore() }
+
+    // Live listeners: my card + the inbound query (who added me) + one per friend.
+    private var myCardListener: ListenerRegistration?
+    private var inboundListener: ListenerRegistration?
+    private var friendListeners: [String: ListenerRegistration] = [:]
+    private var cardCache: [String: FriendCard] = [:]
+
+    /// Start real-time updates: upsert my card, then listen so the board reflects
+    /// new friends + friends' star changes instantly on every device.
+    func startLive() async {
+        guard let id = myID, AuthManager.shared.isSignedIn else { return }
+        myCode = codeForActiveChild()
+        await upsertMyCard(id: id)
+        stopLive()
+
+        myCardListener = db.collection("friendCards").document(id)
+            .addSnapshotListener { [weak self] snap, _ in
+                Task { @MainActor in
+                    guard let self else { return }
+                    if let c = Self.decode(snap?.data() ?? [:]) { self.cardCache[id] = c }
+                    self.rebuild(myID: id)
+                }
+            }
+        inboundListener = db.collection("friendCards")
+            .whereField("friendIDs", arrayContains: id)
+            .addSnapshotListener { [weak self] snap, _ in
+                Task { @MainActor in
+                    guard let self else { return }
+                    for d in snap?.documents ?? [] { if let c = Self.decode(d.data()) { self.cardCache[d.documentID] = c } }
+                    self.rebuild(myID: id)
+                }
+            }
+    }
+
+    func stopLive() {
+        myCardListener?.remove(); myCardListener = nil
+        inboundListener?.remove(); inboundListener = nil
+        friendListeners.values.forEach { $0.remove() }
+        friendListeners.removeAll()
+    }
+
+    /// Recompute my friend set from the cache, (un)subscribe to each friend's card
+    /// for live stars, and publish the sorted board.
+    private func rebuild(myID: String) {
+        guard let me = cardCache[myID] else { return }
+        var ids = Set(me.friendIDs)
+        for (fid, c) in cardCache where c.friendIDs.contains(myID) { ids.insert(fid) }
+        ids.subtract(me.hiddenIDs); ids.remove(myID)
+
+        // Subscribe to any new friends; drop ones no longer friends.
+        for fid in ids where friendListeners[fid] == nil {
+            friendListeners[fid] = db.collection("friendCards").document(fid)
+                .addSnapshotListener { [weak self] snap, _ in
+                    Task { @MainActor in
+                        guard let self else { return }
+                        if let c = Self.decode(snap?.data() ?? [:]) { self.cardCache[fid] = c; self.publish(myID: myID) }
+                    }
+                }
+        }
+        for (fid, l) in friendListeners where !ids.contains(fid) { l.remove(); friendListeners[fid] = nil }
+        publish(myID: myID)
+    }
+
+    private func publish(myID: String) {
+        guard let me = cardCache[myID] else { return }
+        var ids = Set(me.friendIDs)
+        for (fid, c) in cardCache where c.friendIDs.contains(myID) { ids.insert(fid) }
+        ids.subtract(me.hiddenIDs); ids.remove(myID)
+        var cards = [me]
+        for fid in ids { if let c = cardCache[fid] { cards.append(c) } }
+        leaderboard = cards.sorted { $0.stars > $1.stars }
+    }
 
     private func upsertMyCard(id: String) async {
         let profile = ProfileStore.shared.active
