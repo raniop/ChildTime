@@ -283,7 +283,7 @@ struct AddFriendView: View {
     private var addCard: some View {
         VStack(spacing: AppSpacing.md) {
             Button { showScanner = true } label: {
-                Label("סְרֹק חָבֵר", systemImage: "qrcode.viewfinder")
+                Label("סְרוֹק חָבֵר", systemImage: "qrcode.viewfinder")
                     .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(AppGradient.purpleDream, in: Capsule())

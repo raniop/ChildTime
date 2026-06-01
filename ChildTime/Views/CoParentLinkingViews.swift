@@ -172,7 +172,7 @@ struct JoinFamilyFlowView: View {
     @ViewBuilder private var content: some View {
         VStack(spacing: 8) {
             Text("🔗").font(.system(size: 52))
-            Text("הִצְטָרְפוּ לַמִּשְׁפָּחָה הַקַּיֶּמֶת")
+            Text("הִצְטָרְפוּ לְמִשְׁפָּחָה קַיֶּמֶת")
                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
         }
@@ -186,7 +186,7 @@ struct JoinFamilyFlowView: View {
         // Scan + manual entry
         VStack(spacing: AppSpacing.md) {
             Button { showScanner = true } label: {
-                Label("סְרֹק קוֹד QR", systemImage: "qrcode.viewfinder")
+                Label("סְרוֹק קוֹד QR", systemImage: "qrcode.viewfinder")
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(AppGradient.purpleDream, in: Capsule())
@@ -310,23 +310,25 @@ private struct StepsCard: View {
     let title: String
     let steps: [String]
     var body: some View {
-        VStack(alignment: .trailing, spacing: 12) {
+        // leading == right in this RTL screen — number on the right, text
+        // right-aligned beside it.
+        VStack(alignment: .leading, spacing: 12) {
             Text(title)
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.starGold)
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: .leading)
             ForEach(Array(steps.enumerated()), id: \.offset) { i, step in
                 HStack(alignment: .top, spacing: 10) {
-                    Text(step)
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .fixedSize(horizontal: false, vertical: true)
                     ZStack {
                         Circle().fill(AppColor.starGold).frame(width: 26, height: 26)
                         Text("\(i + 1)").font(.system(size: 14, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                     }
+                    Text(step)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
