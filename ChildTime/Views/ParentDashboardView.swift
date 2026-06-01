@@ -659,6 +659,24 @@ struct ParentDashboardView: View {
                 statCell(emoji: "🎮", value: s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : (activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : "—"), label: "דק' זמינות")
             }
 
+            // See & manage this child's leaderboard friends.
+            Button {
+                Haptic.light()
+                friendsProfile = profile
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "person.2.fill")
+                    Text("הַחֲבֵרִים שֶׁל \(profile.name)")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    Spacer()
+                    Image(systemName: "chevron.left").font(.system(size: 11, weight: .bold))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(AppColor.gemPurple.opacity(0.85)))
+            }
+
             // Learning profile — what the Smart Feed has learned about this kid.
             learningProfileCard(for: profile, snapshot: s)
 

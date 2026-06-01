@@ -294,25 +294,25 @@ struct WorldMapView: View {
             } label: {
                 Image(systemName: "bag.fill")
                     .font(.system(size: iconSize - 2, weight: .medium))
-                    .foregroundStyle(AppColor.gemPurple)
+                    .foregroundStyle(AppColor.starGold)
                     .frame(width: buttonSize, height: buttonSize)
                     .background(.white.opacity(0.15), in: Circle())
-                    .overlay(Circle().stroke(AppColor.gemPurple.opacity(0.7), lineWidth: 1.5))
-                    .glow(AppColor.gemPurple.opacity(0.5), radius: 6)
+                    .overlay(Circle().stroke(AppColor.starGold.opacity(0.6), lineWidth: 1.5))
+                    .glow(AppColor.starGold.opacity(0.5), radius: 6)
             }
 
-            // Friends leaderboard.
+            // Friends leaderboard — mint, clearly distinct from the gold shop.
             Button {
                 Haptic.light()
                 showingLeaderboard = true
             } label: {
                 Image(systemName: "trophy.fill")
                     .font(.system(size: iconSize - 2, weight: .medium))
-                    .foregroundStyle(AppColor.starGold)
+                    .foregroundStyle(AppColor.successMint)
                     .frame(width: buttonSize, height: buttonSize)
                     .background(.white.opacity(0.15), in: Circle())
-                    .overlay(Circle().stroke(AppColor.starGold.opacity(0.6), lineWidth: 1.5))
-                    .glow(AppColor.starGold.opacity(0.4), radius: 5)
+                    .overlay(Circle().stroke(AppColor.successMint.opacity(0.7), lineWidth: 1.5))
+                    .glow(AppColor.successMint.opacity(0.45), radius: 5)
             }
 
             // Daily gift lives next to the action buttons — a lively dancing
