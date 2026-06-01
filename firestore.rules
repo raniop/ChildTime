@@ -115,9 +115,14 @@ service cloud.firestore {
     // writable only by the card owner's household (each device writes ONLY its
     // own card, so mutual friendship needs no cross-household writes).
     match /friendCards/{childID} {
-      allow read:  if signedIn();
-      allow write: if signedIn() &&
-        householdHasMe(get(/databases/$(database)/documents/children/$(childID)).data.householdID);
+      allow read:   if signedIn();
+      // The owning device (it stamps its own uid) creates/updates its card; a
+      // parent on the child's household may also update it (to remove a friend).
+      allow create: if signedIn() && request.resource.data.ownerUID == request.auth.uid;
+      allow update: if signedIn() && (
+        resource.data.ownerUID == request.auth.uid ||
+        householdHasMe(get(/databases/$(database)/documents/children/$(childID)).data.householdID)
+      );
     }
   }
 }

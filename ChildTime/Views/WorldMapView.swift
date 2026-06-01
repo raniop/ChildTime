@@ -8,6 +8,7 @@ struct WorldMapView: View {
     @EnvironmentObject var subs: SubscriptionManager
     @Environment(\.horizontalSizeClass) private var hsc
 
+    @ObservedObject private var friends = FriendsManager.shared
     @State private var companion = CompanionController()
     @State private var selectedWorld: World?
     @State private var showDailyChest = false
@@ -203,6 +204,14 @@ struct WorldMapView: View {
         }
         .fullScreenCover(isPresented: $showingLeaderboard) {
             LeaderboardView()
+        }
+        // A friend invite link opened the app → jump to the leaderboard, which
+        // consumes the pending code and adds the friend.
+        .onChange(of: friends.pendingFriendCode) { _, code in
+            if code != nil { showingLeaderboard = true }
+        }
+        .onAppear {
+            if friends.pendingFriendCode != nil { showingLeaderboard = true }
         }
         .fullScreenCover(isPresented: $showingWheel) {
             LuckyWheelView { showingWheel = false }

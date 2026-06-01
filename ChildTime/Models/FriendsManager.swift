@@ -14,6 +14,7 @@ struct FriendCard: Codable, Identifiable, Equatable {
     var character3DID: String?
     var stars: Int
     var code: String               // short friend code (for QR / invite link)
+    var ownerUID: String = ""      // the device uid that owns this card (write gate)
     var friendIDs: [String] = []   // friends THIS child added
     var hiddenIDs: [String] = []   // friends removed by this child / their parent
     var updatedAt: Date = .now
@@ -122,7 +123,10 @@ final class FriendsManager: ObservableObject {
             }
             guard card.id != myID else { lastError = "זֶה אַתָּה 🙂"; return false }
             // Add to MY card's friend list (+ un-hide if previously removed).
+            // Include ownerUID so the write passes the owner gate even if this is
+            // the first write to my card.
             try await db.collection("friendCards").document(myID).setData([
+                "ownerUID": AuthManager.shared.userID ?? "",
                 "friendIDs": FieldValue.arrayUnion([card.id]),
                 "hiddenIDs": FieldValue.arrayRemove([card.id]),
             ], merge: true)
@@ -163,7 +167,8 @@ final class FriendsManager: ObservableObject {
             name: profile?.name ?? "",
             character3DID: profile?.character3DID,
             stars: ProgressStore.shared.stars,
-            code: myCode
+            code: myCode,
+            ownerUID: AuthManager.shared.userID ?? ""
         )
         guard let data = try? JSONEncoder.firestore.encode(card),
               let dict = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { return }
