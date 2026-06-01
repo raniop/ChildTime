@@ -36,16 +36,13 @@ struct FloatingCompanion: View {
                 }
 
                 Group {
-                    if let profile {
-                        // The child's selected 3D character — the SAME avatar as
-                        // the shop, so the buddy and the shop always match.
-                        Character3DView(
-                            modelName: profile.character.scn,
-                            animated: false,
-                            interactive: false)
-                            .id(profile.character.id)
+                    if let profile, let snap = CharacterSnapshot.image(modelName: profile.character.scn, pixelSize: size * 2) {
+                        // A flat snapshot of the child's chosen character — drags
+                        // and wanders perfectly smoothly (a live SCNView does not).
+                        Image(uiImage: snap)
+                            .resizable()
+                            .scaledToFit()
                             .frame(width: size, height: size * 1.3)
-                            .allowsHitTesting(false)   // let the buddy's tap/drag gesture win
                     } else {
                         CompanionView(controller: controller, size: size)
                     }
