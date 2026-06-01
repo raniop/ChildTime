@@ -29,13 +29,10 @@ struct Character3DPickerView: View {
         }
         .environment(\.layoutDirection, .rightToLeft)
         .sheet(isPresented: $showStarShop) {
-            ParentGateView(allowClose: true,
-                           gateTitle: "אִישּׁוּר הוֹרֶה",
-                           gateReason: "כְּדֵי לִקְנוֹת כּוֹכָבִים בְּכֶסֶף אֲמִתִּי") {
-                StarShopView()
-            }
-            .environmentObject(ParentSettings.shared)
-            .environment(\.layoutDirection, .rightToLeft)
+            // No parent gate: the purchase itself is protected by Apple ID /
+            // Face ID payment auth.
+            StarShopView()
+                .environment(\.layoutDirection, .rightToLeft)
         }
     }
 

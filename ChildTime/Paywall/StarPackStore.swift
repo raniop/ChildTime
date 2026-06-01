@@ -28,6 +28,9 @@ final class StarPackStore: ObservableObject {
 
     @Published private(set) var products: [Product] = []
     @Published private(set) var isLoading = false
+    /// True once a load attempt has finished (success or failure) — so the UI can
+    /// tell "still loading" apart from "loaded, but no packs available".
+    @Published private(set) var didAttemptLoad = false
     @Published var isPurchasing = false
     @Published var lastError: String?
     /// Set to the number of stars just granted so the UI can celebrate; reset to nil.
@@ -50,7 +53,7 @@ final class StarPackStore: ObservableObject {
 
     func loadProducts() async {
         isLoading = true
-        defer { isLoading = false }
+        defer { isLoading = false; didAttemptLoad = true }
         do {
             let fetched = try await Product.products(for: Self.allIDs)
             products = fetched.sorted { Self.stars(for: $0.id) < Self.stars(for: $1.id) }
@@ -59,6 +62,9 @@ final class StarPackStore: ObservableObject {
             lastError = error.localizedDescription
         }
     }
+
+    /// Retry loading (e.g. a "try again" button after a failed/empty load).
+    func reload() async { await loadProducts() }
 
     /// Best-value badge for the middle pack.
     func isBestValue(_ product: Product) -> Bool { product.id == Self.mediumID }

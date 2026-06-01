@@ -42,13 +42,10 @@ struct ShopView: View {
             }
         }
         .sheet(isPresented: $showStarShop) {
-            ParentGateView(allowClose: true,
-                           gateTitle: "אִישּׁוּר הוֹרֶה",
-                           gateReason: "כְּדֵי לִקְנוֹת כּוֹכָבִים בְּכֶסֶף אֲמִתִּי") {
-                StarShopView()
-            }
-            .environmentObject(ParentSettings.shared)
-            .environment(\.layoutDirection, .rightToLeft)
+            // No parent gate: the purchase itself is protected by the Apple ID /
+            // Face ID payment auth, so the packs can be shown like any app.
+            StarShopView()
+                .environment(\.layoutDirection, .rightToLeft)
         }
         .sheet(isPresented: $showingProfileEditor) {
             if let active = profiles.active {

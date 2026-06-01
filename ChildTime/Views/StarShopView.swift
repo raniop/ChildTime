@@ -26,7 +26,7 @@ struct StarShopView: View {
                                 packRow(product)
                             }
                         }
-                        Text("הָרְכִישָׁה מְאֻשֶּׁרֶת עַל יְדֵי הַהוֹרֶה. הַכּוֹכָבִים מְשַׁמְּשִׁים לִקְנִיַּת דְּמוּיוֹת בְּתוֹךְ הָאַפְּלִיקַצְיָה בִּלְבַד.")
+                        Text("הָרְכִישָׁה דּוֹרֶשֶׁת אִישּׁוּר Apple ID (סִיסְמָה / Face ID). הַכּוֹכָבִים מְשַׁמְּשִׁים לִקְנִיַּת דְּמוּיוֹת בְּתוֹךְ הָאַפְּלִיקַצְיָה בִּלְבַד.")
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.6))
                             .multilineTextAlignment(.center)
@@ -129,20 +129,45 @@ struct StarShopView: View {
         .opacity(store.isPurchasing ? 0.6 : 1)
     }
 
+    @ViewBuilder
     private var placeholder: some View {
-        VStack(spacing: AppSpacing.sm) {
-            ProgressView().tint(.white)
-            Text("טוֹעֵן חֲבִילוֹת…")
-                .font(.system(size: 15, weight: .medium, design: .rounded))
-                .foregroundStyle(.white.opacity(0.7))
-            if let err = store.lastError {
-                Text(err)
-                    .font(.system(size: 12))
-                    .foregroundStyle(.white.opacity(0.5))
-                    .multilineTextAlignment(.center)
+        if !store.didAttemptLoad {
+            // Genuinely still loading.
+            VStack(spacing: AppSpacing.sm) {
+                ProgressView().tint(.white)
+                Text("טוֹעֵן חֲבִילוֹת…")
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.7))
             }
+            .padding(.vertical, AppSpacing.xl)
+        } else {
+            // Loaded but empty — products aren't configured / available yet.
+            VStack(spacing: AppSpacing.md) {
+                Text("🛒").font(.system(size: 44))
+                Text("הַחֲבִילוֹת אֵינָן זְמִינוֹת כָּרֶגַע")
+                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("נַסּוּ שׁוּב בְּעוֹד רֶגַע.")
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.7))
+                Button {
+                    Task { await store.reload() }
+                } label: {
+                    Text("נַסּוּ שׁוּב")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 22).padding(.vertical, 10)
+                        .background(Capsule().fill(AppColor.gemPurple))
+                }
+                if let err = store.lastError {
+                    Text(err)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.white.opacity(0.45))
+                        .multilineTextAlignment(.center)
+                }
+            }
+            .padding(.vertical, AppSpacing.xl)
         }
-        .padding(.vertical, AppSpacing.xl)
     }
 }
 
