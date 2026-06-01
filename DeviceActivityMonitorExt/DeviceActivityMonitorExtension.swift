@@ -16,6 +16,20 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         clearUnlockEnd()
     }
 
+    /// Fires when the kid has actually *used* the unlocked apps for the granted
+    /// number of minutes — even while ChildTime itself is in the background.
+    /// This is what re-locks short (<15 min) grants when the kid wanders off to
+    /// another app instead of returning to ChildTime.
+    override func eventDidReachThreshold(_ event: DeviceActivityEvent.Name,
+                                         activity: DeviceActivityName) {
+        super.eventDidReachThreshold(event, activity: activity)
+        guard activity == Self.unlockName else { return }
+        reapplyShield()
+        clearUnlockEnd()
+        // The grant is spent — free the monitoring slot for the next unlock.
+        DeviceActivityCenter().stopMonitoring([activity])
+    }
+
     override func intervalWillEndWarning(for activity: DeviceActivityName) {
         super.intervalWillEndWarning(for: activity)
     }

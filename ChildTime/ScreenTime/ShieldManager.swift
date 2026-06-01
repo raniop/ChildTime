@@ -13,6 +13,7 @@ final class ShieldManager: ObservableObject {
     private let authCenter = AuthorizationCenter.shared
 
     static let unlockActivityName = DeviceActivityName("childtime.unlock")
+    static let unlockEventName = DeviceActivityEvent.Name("childtime.unlock.usage")
 
     @Published var isAuthorized: Bool = false
     @Published var authorizationError: String?
@@ -84,42 +85,68 @@ final class ShieldManager: ObservableObject {
     }
 
     /// Start a temporary per-app allowance: open `allowed` now (rest stays
-    /// locked) and schedule a full re-shield after `minutes`.
+    /// locked) and re-shield after `minutes` of actual use of those apps.
     func startAllowException(allowed: FamilyActivitySelection,
                              blocked: FamilyActivitySelection,
                              minutes: Int) {
         applyShield(from: blocked, allowing: allowed)
-        scheduleReshield(after: minutes)
+        // The kid spends the window inside the `allowed` apps — meter THOSE.
+        scheduleUsageLimit(after: minutes, monitoring: allowed)
     }
 
     // MARK: - Unlock for a duration
 
     func unlock(minutes: Int) {
         clearShield()
-        scheduleReshield(after: minutes)
+        // Everything in the blocked set is now open. Meter usage of those apps
+        // so the shield comes back after `minutes` of real play — even while
+        // ChildTime is in the background and the kid is inside another app
+        // (e.g. YouTube). This is what makes short (<15 min) grants enforce.
+        let monitored = SelectionStorage.decode(ParentSettings.shared.activitySelectionData)
+        scheduleUsageLimit(after: minutes, monitoring: monitored)
     }
 
-    /// Apple's DeviceActivitySchedule requires a minimum interval (≥ 15 min).
-    /// For shorter unlock windows we rely on the in-app scenePhase + timer logic
-    /// in ChildTimeApp / UnlockedView to re-apply the shield when the kid returns.
+    /// Apple's DeviceActivitySchedule requires the containing interval to be at
+    /// least 15 minutes (`MonitoringError.intervalTooShort`), so a plain
+    /// schedule can't enforce a shorter grant. Instead we put the real limit on
+    /// a usage-based `DeviceActivityEvent` threshold — it can be any number of
+    /// minutes and fires `eventDidReachThreshold` in the monitor extension even
+    /// while ChildTime is backgrounded. The 15-min schedule around it is only a
+    /// wall-clock backstop in case the threshold ever misfires.
     private static let minimumOSScheduleMinutes = 15
 
-    private func scheduleReshield(after minutes: Int) {
+    private func scheduleUsageLimit(after minutes: Int,
+                                    monitoring selection: FamilyActivitySelection) {
         center.stopMonitoring([Self.unlockActivityName])
 
-        // Skip OS-level scheduling for short windows — the in-app foreground
-        // observer handles it.
-        guard minutes >= Self.minimumOSScheduleMinutes else {
-            print("[ShieldManager] Skipping OS schedule (only \(minutes) min — relying on in-app re-shield)")
+        let safeMinutes = max(1, minutes)
+
+        // Nothing selected to meter → there's no shield to bring back anyway.
+        guard !selection.applicationTokens.isEmpty
+                || !selection.categoryTokens.isEmpty
+                || !selection.webDomainTokens.isEmpty else {
+            print("[ShieldManager] Nothing to monitor — skipping usage limit")
             return
         }
 
-        let now = Date()
-        let endDate = now.addingTimeInterval(TimeInterval(minutes * 60))
-        let calendar = Calendar.current
+        let event = DeviceActivityEvent(
+            applications: selection.applicationTokens,
+            categories: selection.categoryTokens,
+            webDomains: selection.webDomainTokens,
+            threshold: DateComponents(minute: safeMinutes)
+        )
 
+        // Backstop window: at least the OS minimum, but long enough to contain
+        // the grant if the kid plays straight through. Time-of-day components
+        // only — mixed date+time components stop `intervalDidEnd` from firing.
+        let windowMinutes = max(safeMinutes, Self.minimumOSScheduleMinutes)
+        let now = Date()
+        let calendar = Calendar.current
         let startComponents = calendar.dateComponents([.hour, .minute, .second], from: now)
-        let endComponents = calendar.dateComponents([.hour, .minute, .second], from: endDate)
+        let endComponents = calendar.dateComponents(
+            [.hour, .minute, .second],
+            from: now.addingTimeInterval(TimeInterval(windowMinutes * 60))
+        )
 
         let schedule = DeviceActivitySchedule(
             intervalStart: startComponents,
@@ -128,10 +155,14 @@ final class ShieldManager: ObservableObject {
         )
 
         do {
-            try center.startMonitoring(Self.unlockActivityName, during: schedule)
-            print("[ShieldManager] Scheduled OS re-shield in \(minutes) min")
+            try center.startMonitoring(
+                Self.unlockActivityName,
+                during: schedule,
+                events: [Self.unlockEventName: event]
+            )
+            print("[ShieldManager] Metering \(safeMinutes) min of usage (backstop \(windowMinutes) min)")
         } catch {
-            print("[ShieldManager] Failed to schedule re-shield: \(error)")
+            print("[ShieldManager] Failed to start usage monitoring: \(error)")
         }
     }
 
