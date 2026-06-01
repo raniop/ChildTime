@@ -186,7 +186,7 @@ struct JoinFamilyFlowView: View {
         // Scan + manual entry
         VStack(spacing: AppSpacing.md) {
             Button { showScanner = true } label: {
-                Label("סְרוֹק קוֹד QR", systemImage: "qrcode.viewfinder")
+                Label("סִרְקוּ קוֹד QR", systemImage: "qrcode.viewfinder")
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(AppGradient.purpleDream, in: Capsule())
@@ -246,7 +246,7 @@ struct JoinFamilyFlowView: View {
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8)).multilineTextAlignment(.center)
             Button { settings.pendingJoinFamily = false } label: {
-                Text("הַמְשֵׁךְ")
+                Text("הַמְשִׁיכוּ")
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(AppGradient.success, in: Capsule())

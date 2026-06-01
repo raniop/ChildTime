@@ -153,7 +153,7 @@ struct KidModeEntryView: View {
             HStack(spacing: 8) {
                 if requesting { ProgressView().tint(.white) }
                 Image(systemName: "lock.fill")
-                Text("הַתְחֵל מַצַּב יֶלֶד")
+                Text("הַתְחִילוּ מַצַּב יֶלֶד")
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
             }
             .foregroundStyle(.white)
@@ -186,7 +186,7 @@ struct KidModeExitView: View {
                     .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
                 Button { onExit() } label: {
-                    Text("כֵּן, צֵא")
+                    Text("כֵּן, צְאוּ")
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
