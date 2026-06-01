@@ -13,6 +13,9 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     var age: ChildAge
     var photoData: Data?
     var avatarPresetID: String      // initial character preset (boy_red, girl_blue, etc.)
+    /// The chosen 3D character's id (see Character3DCatalog). nil → default.
+    /// Lives on the profile so it syncs to co-parents' devices via ChildRecord.
+    var character3DID: String?
     var createdAt: Date
 
     // MARK: - Learning identity (Parent Platform)
@@ -32,6 +35,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         age: ChildAge = .grade1,
         photoData: Data? = nil,
         avatarPresetID: String = AvatarPreset.defaultID(for: nil),
+        character3DID: String? = nil,
         createdAt: Date = .now,
         grade: Int? = nil,
         interests: [String] = [],
@@ -43,6 +47,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.age = age
         self.photoData = photoData
         self.avatarPresetID = avatarPresetID
+        self.character3DID = character3DID
         self.createdAt = createdAt
         self.grade = grade
         self.interests = interests
@@ -52,7 +57,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     // Backward-compatible decoding: profiles stored before the Parent Platform
     // shipped won't have grade / interests / learningLevel keys.
     enum CodingKeys: String, CodingKey {
-        case id, name, gender, age, photoData, avatarPresetID, createdAt
+        case id, name, gender, age, photoData, avatarPresetID, character3DID, createdAt
         case grade, interests, learningLevel
     }
 
@@ -64,6 +69,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.age = try c.decode(ChildAge.self, forKey: .age)
         self.photoData = try c.decodeIfPresent(Data.self, forKey: .photoData)
         self.avatarPresetID = try c.decode(String.self, forKey: .avatarPresetID)
+        self.character3DID = try c.decodeIfPresent(String.self, forKey: .character3DID)
         self.createdAt = try c.decode(Date.self, forKey: .createdAt)
         self.grade = try c.decodeIfPresent(Int.self, forKey: .grade)
         self.interests = try c.decodeIfPresent([String].self, forKey: .interests) ?? []
@@ -72,6 +78,9 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
 
     /// Display avatar — photo if available, otherwise the preset.
     var hasPhoto: Bool { photoData != nil }
+
+    /// The chosen 3D character (falls back to the catalog default).
+    var character: Character3D { Character3DCatalog.find(character3DID) }
 }
 
 // MARK: - Avatar presets

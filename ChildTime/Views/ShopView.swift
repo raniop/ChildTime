@@ -19,7 +19,6 @@ struct ShopView: View {
     @State private var confettiTrigger = 0
     @State private var showingProfileEditor = false
     @State private var showingCharacterPicker = false
-    @ObservedObject private var characters = Character3DStore.shared
 
     private var isCompact: Bool { hsc == .compact }
     private var avatarSize: CGFloat { isCompact ? 130 : 170 }
@@ -165,7 +164,7 @@ struct ShopView: View {
     }
 
     private func selectedCharacter(for profile: Profile) -> Character3D {
-        Character3DCatalog.find(characters.selectedID(for: profile.id))
+        profile.character
     }
 
     private func pillButton(icon: String, title: String, action: @escaping () -> Void) -> some View {

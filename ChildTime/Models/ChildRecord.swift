@@ -100,6 +100,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     var age: Int                   // ChildAge.rawValue
     var gender: String?            // ChildGender.rawValue
     var avatarPresetID: String
+    var character3DID: String?     // chosen 3D character — syncs to co-parents
     var grade: Int?
     var interests: [String]
     var learningLevel: String      // LearningLevel.rawValue
@@ -116,6 +117,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.age = profile.age.rawValue
         self.gender = profile.gender?.rawValue
         self.avatarPresetID = profile.avatarPresetID
+        self.character3DID = profile.character3DID
         self.grade = profile.grade
         self.interests = profile.interests
         self.learningLevel = profile.learningLevel.rawValue
@@ -134,6 +136,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             age: ChildAge(rawValue: age) ?? .grade1,
             photoData: photoData,
             avatarPresetID: avatarPresetID,
+            character3DID: character3DID,
             createdAt: createdAt,
             grade: grade,
             interests: interests,

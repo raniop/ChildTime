@@ -5,9 +5,13 @@ import SwiftUI
 /// to `Character3DCatalog` over time.
 struct Character3DPickerView: View {
     let profileID: UUID
-    @ObservedObject private var store = Character3DStore.shared
+    @ObservedObject private var profiles = ProfileStore.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hsc
+
+    private var selectedID: String {
+        profiles.profiles.first { $0.id == profileID }?.character3DID ?? Character3DCatalog.defaultID
+    }
 
     private var columns: [GridItem] {
         [GridItem(.adaptive(minimum: hsc == .compact ? 150 : 200), spacing: AppSpacing.md)]
@@ -56,10 +60,14 @@ struct Character3DPickerView: View {
     }
 
     private func card(_ character: Character3D) -> some View {
-        let selected = store.selectedID(for: profileID) == character.id
+        let selected = selectedID == character.id
         return Button {
             Haptic.light()
-            store.select(character.id, for: profileID)
+            // Persist on the PROFILE so it syncs to co-parents' devices.
+            if var p = profiles.profiles.first(where: { $0.id == profileID }) {
+                p.character3DID = character.id
+                profiles.update(p)
+            }
             // Brief beat so the gold check registers, then close automatically.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { dismiss() }
         } label: {

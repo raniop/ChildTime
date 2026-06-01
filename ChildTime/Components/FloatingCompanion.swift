@@ -23,7 +23,6 @@ struct FloatingCompanion: View {
     @State private var hasAppeared: Bool = false
     @State private var wanderTask: Task<Void, Never>? = nil
     @ObservedObject private var cosmeticStore = CosmeticStore.shared
-    @ObservedObject private var characterStore = Character3DStore.shared
 
     var body: some View {
         GeometryReader { geo in
@@ -41,15 +40,20 @@ struct FloatingCompanion: View {
                         // The child's selected 3D character — the SAME avatar as
                         // the shop, so the buddy and the shop always match.
                         Character3DView(
-                            modelName: characterStore.selectedID(for: profile.id) + ".scn",
+                            modelName: profile.character.scn,
                             animated: false,
                             interactive: false)
-                            .id(characterStore.selectedID(for: profile.id))
+                            .id(profile.character.id)
                             .frame(width: size, height: size * 1.3)
+                            .allowsHitTesting(false)   // let the buddy's tap/drag gesture win
                     } else {
                         CompanionView(controller: controller, size: size)
                     }
                 }
+                .frame(width: size, height: size * 1.3)
+                // The 3D view disables its own hit testing, so give the buddy an
+                // explicit tappable/draggable area for the gesture below.
+                .contentShape(Rectangle())
                 .scaleEffect(isDragging ? 1.12 : 1.0)
                 .animation(.spring(response: 0.3, dampingFraction: 0.55), value: isDragging)
             }

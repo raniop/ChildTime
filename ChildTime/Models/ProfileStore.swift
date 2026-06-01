@@ -139,6 +139,9 @@ final class ProfileStore: ObservableObject {
                 // here); fall back to the existing local photo when the remote
                 // has none — e.g. legacy profiles or a preset-face child.
                 merged.photoData = remote.photoData ?? working[idx].photoData
+                // Same idea for the chosen 3D character — keep the local pick if
+                // the remote record predates this field.
+                merged.character3DID = remote.character3DID ?? working[idx].character3DID
                 if working[idx] != merged { working[idx] = merged; changed = true }
             } else {
                 working.append(remote); changed = true

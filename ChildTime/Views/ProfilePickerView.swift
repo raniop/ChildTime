@@ -189,7 +189,6 @@ struct ProfileAvatarView: View {
     var headItemsOnly: Bool = false
 
     @EnvironmentObject private var cosmetics: CosmeticStore
-    @ObservedObject private var characterStore = Character3DStore.shared
 
     private var equippedItems: [CosmeticItem] {
         let base = overrideItems ?? cosmetics.equippedItems(for: profile.id)
@@ -217,9 +216,9 @@ struct ProfileAvatarView: View {
     var body: some View {
         // The child's chosen 3D character as a head-and-shoulders portrait —
         // there's no profile photo anymore, only the picked character.
-        Character3DView(modelName: characterStore.selectedID(for: profile.id) + ".scn",
+        Character3DView(modelName: profile.character.scn,
                         animated: false, interactive: false, portrait: true)
-            .id(characterStore.selectedID(for: profile.id))
+            .id(profile.character.id)
             .frame(width: size, height: size)
             .clipShape(Circle())
             .overlay(
