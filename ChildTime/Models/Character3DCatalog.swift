@@ -96,6 +96,11 @@ enum Character3DCatalog {
         Character3D(id: "koala",    name: "קוֹאָלָה",    priceStars: 220,  imageAsset: "koala"),
         Character3D(id: "otter",    name: "לוּטְרָה",     priceStars: 240,  imageAsset: "otter"),
         Character3D(id: "pig",      name: "חֲזַרְזִיר",    priceStars: 260,  imageAsset: "pig"),
+        // Alternate drawings of the same animals (distinct art, own entry).
+        Character3D(id: "fox_orange",        name: "שׁוּעָל אָדֹם",  priceStars: 200,  imageAsset: "fox_orange"),
+        Character3D(id: "crocodile_green",   name: "תַּנִּין יָרֹק",   priceStars: 240,  imageAsset: "crocodile_green"),
+        Character3D(id: "koala_winter",      name: "קוֹאָלָה",      priceStars: 280,  imageAsset: "koala_winter"),
+        Character3D(id: "elephant_explorer", name: "פִּיל חוֹקֵר",   priceStars: 300,  imageAsset: "elephant_explorer"),
 
         // 🔵 Rare (301–650) — hint-level help.
         Character3D(id: "tiger",    name: "נָמֵר",      priceStars: 380,  imageAsset: "tiger"),
