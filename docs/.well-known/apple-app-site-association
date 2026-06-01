@@ -4,7 +4,7 @@
     "details": [
       {
         "appID": "TFG2H9C76N.com.rani.ChildTime",
-        "paths": ["/join", "/join/*"]
+        "paths": ["/join", "/join/*", "/friend", "/friend/*"]
       }
     ]
   }
