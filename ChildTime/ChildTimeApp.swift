@@ -52,6 +52,7 @@ struct ChildTimeApp: App {
     @StateObject private var subs: SubscriptionManager
     @StateObject private var profiles: ProfileStore
     @StateObject private var cosmetics: CosmeticStore
+    @StateObject private var characters: CharacterStore
     @Environment(\.scenePhase) private var scenePhase
 
     /// Animated welcome splash plays once per cold launch (never in screenshot
@@ -77,6 +78,7 @@ struct ChildTimeApp: App {
         _subs = StateObject(wrappedValue: SubscriptionManager.shared)
         _profiles = StateObject(wrappedValue: ProfileStore.shared)
         _cosmetics = StateObject(wrappedValue: CosmeticStore.shared)
+        _characters = StateObject(wrappedValue: CharacterStore.shared)
 
         if Self.demoScreen != nil { Self.seedDemo() }
     }
@@ -121,6 +123,7 @@ struct ChildTimeApp: App {
                 .environmentObject(subs)
                 .environmentObject(profiles)
                 .environmentObject(cosmetics)
+                .environmentObject(characters)
                 .task {
                     guard Self.demoScreen == nil else { return }   // no system prompts in screenshot mode
                     let role = settings.deviceRole == .parent ? "parent"
