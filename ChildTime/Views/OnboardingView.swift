@@ -143,7 +143,7 @@ struct OnboardingView: View {
                 Spacer()
 
                 JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-                    welcomeCompanion.cheer("יאללה!")
+                    welcomeCompanion.cheer("קָדִימָה!")
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                         step = .parentInfo
                     }

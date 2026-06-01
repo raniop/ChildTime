@@ -196,7 +196,7 @@ struct WorldDetailView: View {
                 startSession = true
             }
         } label: {
-            Label("יַאללָה! 🚀", systemImage: "play.fill")
+            Text("קָדִימָה! 🚀")
                 .font(.system(size: ctaSize, weight: .heavy, design: .rounded))
         }
     }
