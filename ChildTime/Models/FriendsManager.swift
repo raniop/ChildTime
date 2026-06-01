@@ -22,6 +22,28 @@ struct FriendCard: Codable, Identifiable, Equatable {
     var character: Character3D { Character3DCatalog.find(character3DID) }
 }
 
+extension FriendCard {
+    enum CodingKeys: String, CodingKey {
+        case id, name, character3DID, stars, code, ownerUID, friendIDs, hiddenIDs, updatedAt
+    }
+    // Resilient decode: cards on the server may omit fields (e.g. friendIDs /
+    // hiddenIDs are stripped on upsert; older docs lack ownerUID). Swift's default
+    // values do NOT apply to Decodable, so decode each tolerantly — otherwise a
+    // card with a missing field silently fails to decode ("no card matches").
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id            = try c.decode(String.self, forKey: .id)
+        name          = (try? c.decode(String.self, forKey: .name)) ?? ""
+        character3DID = try? c.decodeIfPresent(String.self, forKey: .character3DID)
+        stars         = (try? c.decode(Int.self, forKey: .stars)) ?? 0
+        code          = (try? c.decode(String.self, forKey: .code)) ?? ""
+        ownerUID      = (try? c.decode(String.self, forKey: .ownerUID)) ?? ""
+        friendIDs     = (try? c.decode([String].self, forKey: .friendIDs)) ?? []
+        hiddenIDs     = (try? c.decode([String].self, forKey: .hiddenIDs)) ?? []
+        updatedAt     = (try? c.decode(Date.self, forKey: .updatedAt)) ?? .distantPast
+    }
+}
+
 /// Backs the kid-friendly friends leaderboard. Each child keeps a public
 /// `friendCards/{childID}` doc; friendship is mutual-by-union: A adds B to A's
 /// list, and B sees A because B queries the cards that array-contain B. Removal
@@ -43,6 +65,8 @@ final class FriendsManager: ObservableObject {
     private var myID: String? { ProfileStore.shared.activeID?.uuidString }
 
     private init() {}
+
+    private func log(_ s: String) { print("[Friends] \(s)") }
 
     /// Sample board for screenshots (DEMO_SCREEN). Never used in production.
     func seedDemo() {
@@ -110,18 +134,23 @@ final class FriendsManager: ObservableObject {
             return false
         }
         let code = FriendLink.code(from: raw).uppercased()
+        log("addFriend raw=\(raw) → code=\(code), myCode=\(myCode), myID=\(myID)")
         guard !code.isEmpty, code != myCode else {
             lastError = code == myCode ? "זֶה הַקּוֹד שֶׁלְּךָ 🙂" : "קוֹד לֹא תָּקִין"
+            log("rejected: \(lastError ?? "")")
             return false
         }
         do {
             let snap = try await db.collection("friendCards")
                 .whereField("code", isEqualTo: code).limit(to: 1).getDocuments()
+            log("query code=\(code) → \(snap.documents.count) result(s)")
             guard let doc = snap.documents.first, let card = Self.decode(doc.data()) else {
                 lastError = "לֹא מָצָאנוּ חָבֵר עִם הַקּוֹד הַזֶּה"
+                log("no card matches code=\(code)")
                 return false
             }
             guard card.id != myID else { lastError = "זֶה אַתָּה 🙂"; return false }
+            log("found friend id=\(card.id) name=\(card.name); writing to my card…")
             // Add to MY card's friend list (+ un-hide if previously removed).
             // Include ownerUID so the write passes the owner gate even if this is
             // the first write to my card.
@@ -130,11 +159,13 @@ final class FriendsManager: ObservableObject {
                 "friendIDs": FieldValue.arrayUnion([card.id]),
                 "hiddenIDs": FieldValue.arrayRemove([card.id]),
             ], merge: true)
+            log("✅ write OK — added \(card.id)")
             lastError = nil
             await loadLeaderboard(myID: myID)
             return true
         } catch {
             lastError = error.localizedDescription
+            log("❌ FIRESTORE ERROR: \((error as NSError).domain) #\((error as NSError).code): \(error.localizedDescription)")
             return false
         }
         #else
@@ -177,7 +208,57 @@ final class FriendsManager: ObservableObject {
         fields["friendIDs"] = nil
         fields["hiddenIDs"] = nil
         fields = fields.compactMapValues { $0 }
-        try? await db.collection("friendCards").document(id).setData(fields, merge: true)
+        do {
+            try await db.collection("friendCards").document(id).setData(fields, merge: true)
+            log("✅ upsertMyCard OK id=\(id) code=\(myCode) ownerUID=\(card.ownerUID)")
+        } catch {
+            log("❌ upsertMyCard FAILED: \((error as NSError).domain) #\((error as NSError).code): \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Live diagnostic (DEMO only)
+
+    /// Signs in anonymously and exercises the full friend flow against the LIVE
+    /// Firestore + deployed rules, logging each step — to reveal a permission
+    /// block. Creates a throwaway "friend" card owned by this device.
+    func runDiagnostic() async {
+        log("=== DIAGNOSTIC START ===")
+        AuthManager.shared.signInAnonymouslyIfNeeded()
+        for _ in 0..<25 where !AuthManager.shared.isSignedIn {
+            try? await Task.sleep(nanoseconds: 300_000_000)
+        }
+        guard let uid = AuthManager.shared.userID else { log("❌ not signed in after wait"); return }
+        log("signed in uid=\(uid)")
+        let myID = ProfileStore.shared.activeID?.uuidString ?? "diag-me"
+        myCode = "MYCODE"
+
+        // 1) write my card
+        await diagWrite(id: myID, code: "MYCODE", uid: uid, label: "my card")
+        // 2) write a throwaway friend card (owned by me so the rule passes)
+        let friendID = "diag-friend"
+        await diagWrite(id: friendID, code: "FRND01", uid: uid, label: "friend card")
+        // 3) query by the friend's code
+        do {
+            let snap = try await db.collection("friendCards").whereField("code", isEqualTo: "FRND01").getDocuments()
+            log("3) query FRND01 → \(snap.documents.count) doc(s)")
+        } catch {
+            log("3) ❌ QUERY FAILED: \((error as NSError).code) \(error.localizedDescription)")
+        }
+        // 4) add the friend
+        let ok = await addFriend(code: "FRND01")
+        log("4) addFriend(FRND01) → \(ok) (lastError=\(lastError ?? "nil"))")
+        log("=== DIAGNOSTIC END ===")
+    }
+
+    private func diagWrite(id: String, code: String, uid: String, label: String) async {
+        do {
+            try await db.collection("friendCards").document(id).setData([
+                "id": id, "name": "Diag", "stars": 50, "code": code, "ownerUID": uid,
+            ], merge: true)
+            log("write \(label) (\(id)) → ✅")
+        } catch {
+            log("write \(label) (\(id)) → ❌ \((error as NSError).code) \(error.localizedDescription)")
+        }
     }
 
     /// Load my friends (the ones I added + the ones who added me) minus hidden,

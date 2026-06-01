@@ -192,6 +192,9 @@ struct ChildTimeApp: App {
         case "dashboard": ParentDashboardView(isRoot: true)
         case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
         case "leaderboard": LeaderboardView()   // DEMO_SCREEN=leaderboard
+        case "friendtest":                      // DEMO_SCREEN=friendtest — runs the live Firestore diagnostic
+            Text("Friends diagnostic — see console ([Friends])")
+                .padding().task { await FriendsManager.shared.runDiagnostic() }
         default:         WorldMapView()   // "worldmap"
         }
     }
