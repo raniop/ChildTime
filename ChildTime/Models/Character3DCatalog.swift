@@ -32,6 +32,18 @@ enum Character3DCatalog {
         Character3D(id: "penguin",  name: "פִּינְגְּוִין", imageAsset: "penguin"),
         Character3D(id: "elephant", name: "פִּיל",       imageAsset: "elephant"),
         Character3D(id: "octopus",  name: "תַּמְנוּן",     imageAsset: "octopus"),
+        Character3D(id: "panda",    name: "פַּנְדָּה",     imageAsset: "panda"),
+        Character3D(id: "otter",    name: "לוּטְרָה",     imageAsset: "otter"),
+        Character3D(id: "turtle",   name: "צָב",        imageAsset: "turtle"),
+        Character3D(id: "fennec",   name: "פֶנֶק",       imageAsset: "fennec"),
+        Character3D(id: "ibex",     name: "יָעֵל",       imageAsset: "ibex"),
+        Character3D(id: "gazelle",  name: "צְבִי",       imageAsset: "gazelle"),
+        Character3D(id: "zebra",    name: "זֶבְּרָה",     imageAsset: "zebra"),
+        Character3D(id: "hedgehog", name: "קִיפּוֹד",     imageAsset: "hedgehog"),
+        Character3D(id: "hamster",  name: "אוֹגֵר",      imageAsset: "hamster"),
+        Character3D(id: "squirrel", name: "סְנָאִי",      imageAsset: "squirrel"),
+        Character3D(id: "crocodile", name: "תַּנִּין",     imageAsset: "crocodile"),
+        Character3D(id: "pig",      name: "חֲזַרְזִיר",    imageAsset: "pig"),
     ]
 
     static let defaultID = "fox"
