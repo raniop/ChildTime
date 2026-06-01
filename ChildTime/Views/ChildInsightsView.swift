@@ -8,6 +8,7 @@ struct ChildInsightsView: View {
     let profile: Profile
     let snapshot: ProgressSnapshot
     @EnvironmentObject var settings: ParentSettings
+    @ObservedObject private var historyStore = LearningHistoryStore.shared
     @Environment(\.dismiss) private var dismiss
 
     enum Period: String, CaseIterable, Identifiable {
@@ -60,6 +61,11 @@ struct ChildInsightsView: View {
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .navigationTitle(profile.name)
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            // On the parent's device the child's day-by-day history isn't local —
+            // pull it from Firestore so the week/month summaries aren't all zeros.
+            await historyStore.fetchRemoteHistory(for: profile.id)
+        }
     }
 
     // MARK: - Sections

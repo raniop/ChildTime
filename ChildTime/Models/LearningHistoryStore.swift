@@ -148,6 +148,39 @@ final class LearningHistoryStore: ObservableObject {
 
     // MARK: - Firestore sync
 
+    /// Pull a child's daily history DOWN from Firestore and cache it locally, so
+    /// the parent's device (which never recorded this child's play) can show the
+    /// full week/month insights. The child's own device records locally and only
+    /// uploads — this is the missing read side.
+    func fetchRemoteHistory(for childID: UUID) async {
+        #if canImport(FirebaseFirestore)
+        guard AuthManager.shared.isSignedIn else { return }
+        let docs = try? await Firestore.firestore()
+            .collection("children").document(childID.uuidString)
+            .collection("dailyStats").getDocuments()
+        guard let documents = docs?.documents, !documents.isEmpty else { return }
+
+        var fetched: [String: DailyStat] = [:]
+        for doc in documents {
+            guard let data = try? JSONSerialization.data(withJSONObject: doc.data()),
+                  let stat = try? JSONDecoder.firestore.decode(DailyStat.self, from: data)
+            else { continue }
+            fetched[stat.date] = stat
+        }
+        guard !fetched.isEmpty else { return }
+
+        // Merge over any local cache and persist under this child's key so
+        // `history(for:)` returns it.
+        var merged = loadDays(for: childID)
+        for (k, v) in fetched { merged[k] = v }
+        if let encoded = try? JSONEncoder().encode(merged) {
+            defaults.set(encoded, forKey: storageKey(childID))
+        }
+        if childID == boundChildID { days = merged }
+        objectWillChange.send()
+        #endif
+    }
+
     private func sync(_ stat: DailyStat, childID: UUID) {
         #if canImport(FirebaseFirestore)
         guard AuthManager.shared.isSignedIn else { return }
