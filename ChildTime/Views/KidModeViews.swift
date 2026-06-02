@@ -117,7 +117,7 @@ struct KidModeEntryView: View {
                     Text("אַפְּלִיקַצְיוֹת מֻתָּרוֹת")
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text(allowedCount == 0 ? "רַק טוֹפִי — הַקֵּשׁ לִבְחֹר עוֹד"
+                    Text(allowedCount == 0 ? "רַק טוֹפִי — הַקִּישׁוּ לִבְחֹר עוֹד"
                                            : "\(allowedCount) אַפְּלִיקַצְיוֹת + טוֹפִי")
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.75))
@@ -132,7 +132,7 @@ struct KidModeEntryView: View {
     }
 
     private var explainer: some View {
-        Text("כָּל שְׁאָר הָאַפְּלִיקַצְיוֹת בַּטֶּלֶפוֹן יִנָּעֲלוּ. הַיֶּלֶד יִלְמַד וְיְשַׂחֵק בְּטוֹפִי, וְכֻלָּם יוּכַל לִפְתֹּחַ אֶת הַמֻּתָּרוֹת. לִיצִיאָה — קוֹד הוֹרֶה.")
+        Text("כָּל שְׁאָר הָאַפְּלִיקַצְיוֹת בַּטֶּלֶפוֹן יִנָּעֲלוּ. הַיֶּלֶד יִלְמַד וִישַׂחֵק בְּטוֹפִי, וְיוּכַל לִפְתֹּחַ אֶת הָאַפְּלִיקַצְיוֹת הַמֻּתָּרוֹת. לִיצִיאָה — קוֹד הוֹרֶה.")
             .font(.system(size: 13, weight: .medium, design: .rounded))
             .foregroundStyle(.white.opacity(0.65))
             .multilineTextAlignment(.center)

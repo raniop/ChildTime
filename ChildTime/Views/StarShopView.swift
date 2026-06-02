@@ -184,13 +184,13 @@ struct StarShopView: View {
                 Text("הַחֲבִילוֹת אֵינָן זְמִינוֹת כָּרֶגַע")
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("נַסּוּ שׁוּב בְּעוֹד רֶגַע.")
+                Text("נַסֵּה שׁוּב בְּעוֹד רֶגַע.")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
                 Button {
                     Task { await store.reload() }
                 } label: {
-                    Text("נַסּוּ שׁוּב")
+                    Text("נַסֵּה שׁוּב")
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 22).padding(.vertical, 10)

@@ -133,7 +133,7 @@ struct ShopView: View {
             }
             .padding(.top, AppSpacing.sm)
         } else {
-            Text("צְרוּ פְּרוֹפִיל כְּדֵי לְהַתְחִיל")
+            Text("צֹר פְּרוֹפִיל כְּדֵי לְהַתְחִיל")
                 .foregroundStyle(.white)
         }
     }

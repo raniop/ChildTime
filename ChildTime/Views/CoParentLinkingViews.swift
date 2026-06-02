@@ -209,7 +209,7 @@ struct JoinFamilyFlowView: View {
             Button { redeem(joinCode) } label: {
                 HStack(spacing: 8) {
                     if working { ProgressView().tint(.white) }
-                    Text("הִצְטָרֵף")
+                    Text("הִצְטָרְפוּ")
                 }
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
