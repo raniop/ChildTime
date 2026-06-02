@@ -103,10 +103,8 @@ struct LeaderboardView: View {
             if rank == 1 { Text("👑").font(.system(size: 26)) }
             CharacterView(character: card.character, portrait: true)
                 .frame(width: size, height: size)
-                .clipShape(Circle())
-                .overlay(Circle().stroke(isMe ? AppColor.starGold : .white.opacity(0.6),
-                                         lineWidth: isMe ? 3 : 2))
                 .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
+                .glow(isMe ? AppColor.starGold : .clear, radius: isMe ? 14 : 0)
             Text(card.name).font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).lineLimit(1)
             starsPill(card.stars)
@@ -137,8 +135,7 @@ struct LeaderboardView: View {
             Text("\(rank)").font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.7)).frame(width: 28)
             CharacterView(character: card.character, portrait: true)
-                .frame(width: 46, height: 46).clipShape(Circle())
-                .overlay(Circle().stroke(.white.opacity(0.4), lineWidth: 1.5))
+                .frame(width: 46, height: 46)
             Text(card.name).font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
             Spacer()
