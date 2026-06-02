@@ -128,12 +128,21 @@ extension PushManager {
         guard actionID == Action.levelUpYes else { return }  // "no"/default → nothing
         guard let raw = userInfo["topic"] as? String, let topic = Topic(rawValue: raw) else { return }
 
+        // Difficulty is per-child — bump THIS child's level for the topic and sync
+        // it to their device. The notification carries the child's id.
+        let idStr = (userInfo["childID"] as? String) ?? ""
+        guard let cid = UUID(uuidString: idStr),
+              var profile = ProfileStore.shared.profiles.first(where: { $0.id == cid }) else { return }
+
         let levels: [Difficulty] = [.easy, .medium, .hard]
-        let current = ParentSettings.shared.difficulty(for: topic)
+        let current = profile.difficulty(for: topic)
         guard let idx = levels.firstIndex(of: current) else { return }
         let next = levels[min(levels.count - 1, idx + 1)]
         let changed = next != current
-        if changed { ParentSettings.shared.setDifficulty(next, for: topic) }
+        if changed {
+            profile.difficultyByTopic[topic.rawValue] = next.rawValue
+            ProfileStore.shared.update(profile)
+        }
 
         let name = (userInfo["childName"] as? String) ?? "הילד"
         let content = UNMutableNotificationContent()

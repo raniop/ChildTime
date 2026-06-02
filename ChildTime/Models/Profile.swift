@@ -27,6 +27,12 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     var interests: [String]
     /// Initial learning level the parent estimated — seeds starting difficulty.
     var learningLevel: LearningLevel
+    /// Per-topic question difficulty for THIS child (topic.rawValue →
+    /// Difficulty.rawValue). Set by the parent from their device and synced via
+    /// `ChildRecord`. Empty for a topic → fall back to `learningLevel.seedDifficulty`.
+    /// Difficulty is per-child (not a global device setting) so siblings at
+    /// different levels each get the right challenge.
+    var difficultyByTopic: [String: String]
 
     init(
         id: UUID = UUID(),
@@ -39,7 +45,8 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         createdAt: Date = .now,
         grade: Int? = nil,
         interests: [String] = [],
-        learningLevel: LearningLevel = .developing
+        learningLevel: LearningLevel = .developing,
+        difficultyByTopic: [String: String] = [:]
     ) {
         self.id = id
         self.name = name
@@ -52,13 +59,14 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.grade = grade
         self.interests = interests
         self.learningLevel = learningLevel
+        self.difficultyByTopic = difficultyByTopic
     }
 
     // Backward-compatible decoding: profiles stored before the Parent Platform
     // shipped won't have grade / interests / learningLevel keys.
     enum CodingKeys: String, CodingKey {
         case id, name, gender, age, photoData, avatarPresetID, character3DID, createdAt
-        case grade, interests, learningLevel
+        case grade, interests, learningLevel, difficultyByTopic
     }
 
     init(from decoder: Decoder) throws {
@@ -74,6 +82,17 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.grade = try c.decodeIfPresent(Int.self, forKey: .grade)
         self.interests = try c.decodeIfPresent([String].self, forKey: .interests) ?? []
         self.learningLevel = try c.decodeIfPresent(LearningLevel.self, forKey: .learningLevel) ?? .developing
+        self.difficultyByTopic = try c.decodeIfPresent([String: String].self, forKey: .difficultyByTopic) ?? [:]
+    }
+
+    /// Effective base difficulty for a topic: the parent's explicit per-topic
+    /// choice if set, otherwise the starting level implied by `learningLevel`.
+    /// (The live question feed still nudges this up/down via DDA on top.)
+    func difficulty(for topic: Topic) -> Difficulty {
+        if let raw = difficultyByTopic[topic.rawValue], let d = Difficulty(rawValue: raw) {
+            return d
+        }
+        return learningLevel.seedDifficulty
     }
 
     /// Display avatar — photo if available, otherwise the preset.

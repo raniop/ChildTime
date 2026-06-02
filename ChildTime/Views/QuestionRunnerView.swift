@@ -740,8 +740,10 @@ struct QuestionRunnerView: View {
         currentTopic = topic
         topicHistory.append(topic)
 
-        // DDA: pick difficulty from rolling accuracy for this topic.
-        let baseDiff = settings.difficulty(for: topic)
+        // DDA: pick difficulty from rolling accuracy for this topic. The base is
+        // this child's parent-set per-topic level (falls back to their learning
+        // level); DDA then nudges it up/down by their accuracy.
+        let baseDiff = profiles.active?.difficulty(for: topic) ?? .easy
         let acc = progress.accuracy(for: topic)
         let effective = QuestionGenerator.adaptiveDifficulty(base: baseDiff, accuracy: acc)
         var q = QuestionGenerator.generate(topic: topic, difficulty: effective)

@@ -109,6 +109,11 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// devices. Downscaled to ≤256px JPEG to stay well under Firestore's 1MB
     /// document limit. nil when the child uses a preset face (no custom photo).
     var photoData: Data?
+    /// Per-topic difficulty the parent set for this child (topic.rawValue →
+    /// Difficulty.rawValue). Optional so children docs created before this field
+    /// existed still decode. The parent's device is authoritative — it edits this
+    /// from the dashboard; the child's device mirrors it.
+    var difficultyByTopic: [String: String]?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -123,6 +128,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.learningLevel = profile.learningLevel.rawValue
         self.createdAt = profile.createdAt
         self.photoData = Self.compressForSync(profile.photoData)
+        self.difficultyByTopic = profile.difficultyByTopic.isEmpty ? nil : profile.difficultyByTopic
     }
 
     /// Rehydrate a local `Profile`. The photo now syncs (compressed), so a custom
@@ -140,7 +146,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             createdAt: createdAt,
             grade: grade,
             interests: interests,
-            learningLevel: LearningLevel(rawValue: learningLevel) ?? .developing
+            learningLevel: LearningLevel(rawValue: learningLevel) ?? .developing,
+            difficultyByTopic: difficultyByTopic ?? [:]
         )
     }
 

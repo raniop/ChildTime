@@ -31,6 +31,8 @@ struct ParentDashboardView: View {
     @State private var showingCreateChild = false
     @State private var showingKidMode = false
     @State private var friendsProfile: Profile?
+    @State private var difficultyProfile: Profile?
+    @State private var showingFeedback = false
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
     /// After creating a child we offer to connect their device right away.
@@ -103,10 +105,6 @@ struct ParentDashboardView: View {
                         .padding(AppSpacing.lg)
                         .frame(maxWidth: 720)
                         .frame(maxWidth: .infinity)
-                        // These cards are authored with `.trailing` == right,
-                        // so render them LTR; Hebrew text still flows RTL within
-                        // each label. (Forcing RTL here would flip them left.)
-                        .environment(\.layoutDirection, .leftToRight)
                     }
                     .refreshable {
                         // Pull-to-refresh: actually re-fetch every child's cloud
@@ -116,6 +114,28 @@ struct ParentDashboardView: View {
                         lastRefreshed = .now
                         try? await Task.sleep(nanoseconds: 700_000_000)
                     }
+                    // Force the WHOLE scroll container (not just its content) to LTR.
+                    // The cards are authored with `.trailing` == right; Hebrew text
+                    // still flows RTL inside each label. Applying this only to the
+                    // inner content while the ScrollView stayed RTL created a
+                    // container/content mismatch that let the page drift sideways —
+                    // matching the container fixes it so it scrolls vertically only.
+                    .environment(\.layoutDirection, .leftToRight)
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if isRoot && !profiles.profiles.isEmpty {
+                    Button { showingFeedback = true } label: {
+                        Image(systemName: "text.bubble.fill")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 56, height: 56)
+                            .background(AppGradient.success, in: Circle())
+                            .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
+                            .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
+                    }
+                    .padding(20)
+                    .accessibilityLabel("שליחת פידבק לצוות")
                 }
             }
             .navigationTitle("מבט-על על המשפחה")
@@ -175,6 +195,15 @@ struct ParentDashboardView: View {
             }
             .sheet(item: $friendsProfile) { p in
                 ChildFriendsView(childID: p.id.uuidString, childName: p.name)
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(item: $difficultyProfile) { p in
+                ChildDifficultyView(profileID: p.id)
+                    .environmentObject(profiles)
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(isPresented: $showingFeedback) {
+                ParentFeedbackView()
                     .environment(\.layoutDirection, .rightToLeft)
             }
             .sheet(isPresented: $showingCreateChild, onDismiss: {
@@ -594,6 +623,11 @@ struct ParentDashboardView: View {
                         } label: {
                             Label("עבור לפרופיל זה", systemImage: "person.crop.circle.fill")
                         }
+                    }
+                    Button {
+                        difficultyProfile = profile
+                    } label: {
+                        Label("רמת קושי", systemImage: "slider.horizontal.3")
                     }
                     Button {
                         friendsProfile = profile

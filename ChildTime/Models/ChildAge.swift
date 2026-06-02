@@ -35,16 +35,6 @@ enum ChildAge: Int, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// Default difficulty for a topic based on the child's age.
-    func defaultDifficulty(for topic: Topic) -> Difficulty {
-        switch (self, topic) {
-        case (.preK, _):              return .easy
-        case (.grade1, _):            return .easy
-        case (.grade3, _):            return .medium
-        case (.older, _):             return .medium
-        }
-    }
-
     /// Topics that should be enabled by default for this age.
     /// PreK gets a lighter set; older kids get all 6 topics.
     var defaultEnabledTopics: Set<Topic> {
