@@ -47,7 +47,9 @@ struct FloatingCompanion: View {
                             .scaledToFit()
                             .frame(width: size, height: size * 1.3)
                     } else {
-                        CompanionView(controller: controller, size: size)
+                        // Main-screen fallback when the child has no character —
+                        // kept as the original smiley (per "don't touch the main screen").
+                        CompanionView(controller: controller, size: size, useLion: false)
                     }
                 }
                 .frame(width: size, height: size * 1.3)

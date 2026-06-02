@@ -104,8 +104,20 @@ struct ParentDashboardView: View {
                         }
                         .padding(AppSpacing.lg)
                         .frame(maxWidth: 720)
-                        .frame(maxWidth: .infinity)
+                        // Pin the content to EXACTLY the scroll container's width.
+                        // A vertical ScrollView can only drift sideways if its
+                        // content's cross-axis (horizontal) size exceeds the
+                        // viewport; locking it to the container width removes that
+                        // possibility outright — belt to the `.scrollBounceBehavior`
+                        // suspenders below, and to the LTR-container fix.
+                        .containerRelativeFrame(.horizontal)
                     }
+                    // Never allow horizontal scrolling/bounce — this is a
+                    // vertical-only page. On some iOS versions the RTL→LTR
+                    // container flip left a hair of horizontal slack that became
+                    // a draggable sideways drift; `.basedOnSize` disables the
+                    // horizontal axis entirely when the content already fits.
+                    .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
                     .refreshable {
                         // Pull-to-refresh: actually re-fetch every child's cloud
                         // state and give the listeners a beat to deliver.
@@ -464,13 +476,25 @@ struct ParentDashboardView: View {
                 Image(systemName: "lock.shield.fill")
                 Text("תֵּן לַיֶּלֶד לְשַׂחֵק")
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .foregroundStyle(.white)
             .padding(.horizontal, AppSpacing.xl)
             .padding(.vertical, 15)
             .frame(maxWidth: .infinity)
-            .background(AppGradient.purpleDream, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .glow(AppColor.gemPurple, radius: 12)
+            // Same size as "צרו ילד/ה" — prominence comes from a vivid lime→emerald
+            // green (distinct from the muted sync teal) plus a brighter glow + border.
+            .background(
+                LinearGradient(colors: [Color(hex: "3BE36E"), AppColor.successMint],
+                               startPoint: .topLeading, endPoint: .bottomTrailing),
+                in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(.white.opacity(0.4), lineWidth: 1.5)
+            )
+            .glow(AppColor.successMint, radius: 16)
         }
         .buttonStyle(.juicy)
         .frame(maxWidth: 460)
@@ -693,28 +717,13 @@ struct ParentDashboardView: View {
                 statCell(emoji: "🎮", value: s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : (activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : "—"), label: "דק' זמינות")
             }
 
-            // See & manage this child's leaderboard friends — same secondary
-            // style as the "full insights" link below it (a matching pair).
-            Button {
-                Haptic.light()
-                friendsProfile = profile
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "chevron.left").font(.caption)
-                    Spacer()
-                    Text("הַחֲבֵרִים שֶׁל \(profile.name)")
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                    Image(systemName: "person.2.fill")
-                }
-                .foregroundStyle(AppColor.gemPurple)
-                .padding(.vertical, 10).padding(.horizontal, 12)
-                .background(RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                    .fill(AppColor.gemPurple.opacity(0.12)))
-            }
-            .buttonStyle(.plain)
+            // (Friends are managed from the "⋯" menu — "חברים".)
 
             // Learning profile — what the Smart Feed has learned about this kid.
             learningProfileCard(for: profile, snapshot: s)
+
+            // Smart difficulty — current per-topic level + where it adapted.
+            adaptiveDifficultyCard(for: profile, snapshot: s)
 
             // Actionable coaching — where to reinforce + concrete tips.
             coachingCard(for: profile, snapshot: s)
@@ -854,6 +863,115 @@ struct ParentDashboardView: View {
                     .fill(Color(.systemBackground).opacity(0.5))
             )
         }
+    }
+
+    /// "רמת קושי חכמה" — the adaptive engine's current per-topic level and where
+    /// it has nudged the difficulty up (mastering) or eased it (building
+    /// confidence). Framed positively, per the app's tone.
+    @ViewBuilder
+    private func adaptiveDifficultyCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
+        let levels = s.topicAdaptiveLevel ?? [:]
+        // Topics the child has actually practiced, most-practiced first.
+        let topics = settings.enabledTopics
+            .filter { (s.topicAnswered[$0.rawValue] ?? 0) >= 1 }
+            .sorted { (s.topicAnswered[$0.rawValue] ?? 0) > (s.topicAnswered[$1.rawValue] ?? 0) }
+            .prefix(6)
+        let g: (String, String) -> String = { profile.gender == .girl ? $1 : $0 }
+
+        if s.totalAnswered >= 4, !topics.isEmpty {
+            VStack(alignment: .trailing, spacing: 8) {
+                HStack(spacing: 6) {
+                    Spacer()
+                    Text("רמת קושי חכמה")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "dial.medium.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(AppColor.gemPurple)
+                }
+
+                ForEach(Array(topics)) { topic in
+                    let base = profile.difficulty(for: topic)
+                    let level = levels[topic.rawValue] ?? AdaptiveDifficultyEngine.level(for: base)
+                    let served = AdaptiveDifficultyEngine.difficulty(forLevel: level)
+                    let baseLevel = AdaptiveDifficultyEngine.level(for: base)
+                    let dir = adaptiveDirection(level: level, base: baseLevel)
+                    HStack(spacing: 8) {
+                        Spacer()
+                        if let dir { dir.chip }
+                        Text(served.displayName)
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .padding(.horizontal, 8).padding(.vertical, 3)
+                            .background(Capsule().fill(AppColor.gemPurple.opacity(0.15)))
+                            .overlay(Capsule().stroke(AppColor.gemPurple.opacity(0.4), lineWidth: 1))
+                        Text("\(topic.emoji) \(topic.displayName)")
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.primary)
+                    }
+                }
+
+                if let sentence = adaptiveSentence(for: Array(topics), levels: levels,
+                                                   profile: profile, g: g) {
+                    Text(sentence)
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.trailing)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(AppSpacing.sm)
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                    .fill(AppColor.gemPurple.opacity(0.06))
+                    .overlay(RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                        .stroke(AppColor.gemPurple.opacity(0.2), lineWidth: 1))
+            )
+        }
+    }
+
+    private enum AdaptiveDir {
+        case raised, eased
+        @ViewBuilder var chip: some View {
+            switch self {
+            case .raised:
+                Label("מאתגר יותר", systemImage: "arrow.up")
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .padding(.horizontal, 7).padding(.vertical, 3)
+                    .background(Capsule().fill(AppColor.successMint.opacity(0.22)))
+                    .foregroundStyle(AppColor.successMint)
+            case .eased:
+                Label("בונה ביטחון", systemImage: "arrow.down")
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .padding(.horizontal, 7).padding(.vertical, 3)
+                    .background(Capsule().fill(AppColor.starGold.opacity(0.22)))
+                    .foregroundStyle(Color(hex: "B8860B"))
+            }
+        }
+    }
+
+    private func adaptiveDirection(level: Double, base: Double) -> AdaptiveDir? {
+        if level > base + 0.35 { return .raised }
+        if level < base - 0.35 { return .eased }
+        return nil
+    }
+
+    /// One warm, plain-language sentence about the most notable adaptation —
+    /// a topic where the system raised the challenge, else one it eased.
+    private func adaptiveSentence(for topics: [Topic], levels: [String: Double],
+                                  profile: Profile, g: (String, String) -> String) -> String? {
+        func dir(_ t: Topic) -> AdaptiveDir? {
+            let base = AdaptiveDifficultyEngine.level(for: profile.difficulty(for: t))
+            return adaptiveDirection(level: levels[t.rawValue] ?? base, base: base)
+        }
+        if let raised = topics.first(where: { dir($0) == .raised }) {
+            return "\(profile.name) \(g("מתקדם","מתקדמת")) יפה ב\(raised.displayName), אז המערכת התחילה להוסיף שאלות מעט מאתגרות יותר."
+        }
+        if let eased = topics.first(where: { dir($0) == .eased }) {
+            return "ב\(eased.displayName) המערכת הורידה מעט את הקושי כדי לבנות ביטחון והצלחה."
+        }
+        return nil
     }
 
     /// "המלצות להורה" — surfaces where the child needs reinforcement (the

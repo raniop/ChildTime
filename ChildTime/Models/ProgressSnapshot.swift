@@ -46,6 +46,11 @@ struct ProgressSnapshot: Codable, Equatable {
     var topicExposure: [String: Int] = [:]
     /// Times the child abandoned a topic (replaced a question / quit mid-topic).
     var topicAbandon: [String: Int] = [:]
+    /// Adaptive difficulty engine state per topic: a CONTINUOUS level
+    /// (0 = easy … 2 = hard) that floats around the parent's chosen base as the
+    /// child performs. Optional so snapshots written by older app versions
+    /// (which lack the key) still decode cleanly — read it back as `?? [:]`.
+    var topicAdaptiveLevel: [String: Double]? = nil
 
     // MARK: - Time economy progression
     /// Questions answered since the last free Lucky Wheel spin.

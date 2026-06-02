@@ -3,6 +3,10 @@ import SwiftUI
 struct CompanionView: View {
     var controller: CompanionController
     var size: CGFloat = 140
+    /// When true (default) the mascot is the lion brand character; when false it
+    /// falls back to the original drawn smiley (kept only for the world-map
+    /// floating companion, via FloatingCompanion).
+    var useLion: Bool = true
 
     @State private var float: CGFloat = 0
     @State private var blinkClosed: Bool = false
@@ -40,7 +44,7 @@ struct CompanionView: View {
             magicAccent
 
             // 5. Body
-            spark
+            mascotBody
                 .rotationEffect(.degrees(spin))
                 .scaleEffect(currentScale)
                 .offset(y: float)
@@ -59,6 +63,18 @@ struct CompanionView: View {
     }
 
     // MARK: - Body composition
+
+    /// The mascot itself — the lion brand character (default), or the original
+    /// drawn smiley when `useLion` is false. The surrounding halo, sparkles,
+    /// float/scale/bounce animations are applied by `body` either way.
+    @ViewBuilder private var mascotBody: some View {
+        if useLion {
+            CharacterView(character: Character3DCatalog.find("lion"))
+                .frame(width: size * 1.3, height: size * 1.3)
+        } else {
+            spark
+        }
+    }
 
     private var spark: some View {
         ZStack {

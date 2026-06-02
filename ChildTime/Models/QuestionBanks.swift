@@ -256,10 +256,31 @@ final class QuestionMemory {
         hasLoaded = true
     }
 
+    /// Difficulty-aware variant: prefers fresh questions at `target` difficulty,
+    /// falling back to adjacent tiers (then any tier) when that tier is exhausted
+    /// for now. Keeps the same anti-repeat guarantees as `pickFresh`.
+    func pickFresh(_ pool: [BankQuestion], for topic: Topic, target: Difficulty) -> BankQuestion? {
+        // Tier preference: the requested level first, then its neighbours, then
+        // whatever's left — so a thin tier never starves the child of questions.
+        let order: [Difficulty]
+        switch target {
+        case .easy:   order = [.easy, .medium, .hard]
+        case .medium: order = [.medium, .easy, .hard]
+        case .hard:   order = [.hard, .medium, .easy]
+        }
+        for tier in order {
+            let slice = pool.filter { $0.difficulty == tier }
+            // Strict (no session repeats) so an exhausted tier yields to the next.
+            if let chosen = pickFresh(slice, for: topic, allowSessionRepeat: false) { return chosen }
+        }
+        // Every tier was fully served this session — allow a lenient repeat.
+        return pickFresh(pool, for: topic)
+    }
+
     /// Pick a random question from `pool` that hasn't been served recently.
     /// Falls back to a true random when every question is in the recent
     /// window (only possible for very small pools).
-    func pickFresh(_ pool: [BankQuestion], for topic: Topic) -> BankQuestion? {
+    func pickFresh(_ pool: [BankQuestion], for topic: Topic, allowSessionRepeat: Bool = true) -> BankQuestion? {
         ensureLoaded()
         guard !pool.isEmpty else { return nil }
         // 85% — leaves a small pool of "fresh" candidates and keeps a long
@@ -272,7 +293,12 @@ final class QuestionMemory {
         // Fallback chain: still avoid session repeats, only allow a true repeat
         // if the whole (small) pool was already used this session.
         let notInSession = pool.filter { !sessionServed.contains(promptKey($0)) }
-        let chosen = (fresh.first != nil ? fresh : (notInSession.isEmpty ? pool : notInSession)).randomElement()
+        let candidates: [BankQuestion]
+        if !fresh.isEmpty { candidates = fresh }
+        else if !notInSession.isEmpty { candidates = notInSession }
+        else if allowSessionRepeat { candidates = pool }
+        else { return nil }   // caller (tier picker) will try another tier instead of repeating
+        let chosen = candidates.randomElement()
         if let chosen {
             remember(promptKey(chosen), in: topic, windowSize: windowSize)
             sessionServed.insert(promptKey(chosen))

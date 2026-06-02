@@ -106,6 +106,10 @@ enum Character3DCatalog {
         Character3D(id: "otter",       name: "לוּטְרָה",    priceStars: 2000, imageAsset: "otter"),
         Character3D(id: "fox_b",       name: "שׁוּעָל",    priceStars: 2100, imageAsset: "fox_b"),
         Character3D(id: "crocodile_b", name: "תַּנִּין",    priceStars: 2250, imageAsset: "crocodile_b"),
+        Character3D(id: "mouse",       name: "עַכְבָּר",    priceStars: 1500, imageAsset: "mouse"),
+        Character3D(id: "chinchilla",  name: "צִ'ינְצִ'ילָה", priceStars: 1650, imageAsset: "chinchilla"),
+        Character3D(id: "koala_d",     name: "קוֹאָלָה",   priceStars: 1900, imageAsset: "koala_d"),
+        Character3D(id: "koala_e",     name: "קוֹאָלָה",   priceStars: 2300, imageAsset: "koala_e"),
 
         // 🔵 Rare (2401–5200) — hint-level help.
         Character3D(id: "tiger",       name: "נָמֵר",      priceStars: 2900, imageAsset: "tiger"),
@@ -115,18 +119,26 @@ enum Character3DCatalog {
         Character3D(id: "elephant",    name: "פִּיל",      priceStars: 4200, imageAsset: "elephant"),
         Character3D(id: "elephant_b",  name: "פִּיל",      priceStars: 4500, imageAsset: "elephant_b"),
         Character3D(id: "elephant_c",  name: "פִּיל",      priceStars: 4800, imageAsset: "elephant_c"),
+        Character3D(id: "hedgehog_c",  name: "קִיפּוֹד",    priceStars: 2650, imageAsset: "hedgehog_c"),
+        Character3D(id: "lemur",       name: "לֶמוּר",     priceStars: 3100, imageAsset: "lemur"),
+        Character3D(id: "camel",       name: "גָּמָל",      priceStars: 3600, imageAsset: "camel"),
+        Character3D(id: "quokka",      name: "קְווֹקָה",   priceStars: 4300, imageAsset: "quokka"),
 
         // 🟣 Epic (5201–8800) — hint-level help.
         Character3D(id: "panda",       name: "פַּנְדָּה",    priceStars: 6000, imageAsset: "panda"),
         Character3D(id: "panda_b",     name: "פַּנְדָּה",    priceStars: 6600, imageAsset: "panda_b"),
         Character3D(id: "octopus",     name: "תַּמְנוּן",    priceStars: 7200, imageAsset: "octopus"),
         Character3D(id: "lion",        name: "אַרְיֵה",    priceStars: 8000, imageAsset: "lion"),
+        Character3D(id: "octopus_b",   name: "תַּמְנוּן",    priceStars: 7400, imageAsset: "octopus_b"),
+        Character3D(id: "lion_b",      name: "אַרְיֵה",    priceStars: 8400, imageAsset: "lion_b"),
 
         // 👑 Legendary (8801–20000) — explain-level help.
         Character3D(id: "dragon",      name: "דְּרָקוֹן",  priceStars: 12000, imageAsset: "dragon"),
+        Character3D(id: "redpanda",    name: "פַּנְדָּה אֲדֻמָּה", priceStars: 13000, imageAsset: "redpanda"),
         Character3D(id: "unicorn",     name: "חַד-קֶרֶן", priceStars: 16000, imageAsset: "unicorn"),
 
         // 🩷 Mythic (20001+) — explain-level help. (Premium tier; more coming.)
+        Character3D(id: "owl",         name: "יַנְשׁוּף",    priceStars: 22000, imageAsset: "owl"),
     ]
 
     static let defaultID = "fox"

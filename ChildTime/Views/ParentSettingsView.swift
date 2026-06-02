@@ -552,7 +552,11 @@ struct ParentSettingsView: View {
 
     private func deleteEverything() async {
         deleting = true
+        // Order matters: wipe the cloud data first (Firestore rules need a valid
+        // auth session), THEN delete the auth account itself (App Store 5.1.1(v)),
+        // then clear local state and sign out.
         await HouseholdManager.shared.deleteAllData()
+        await auth.deleteAccount()
         DataExporter.wipeLocalData()
         ProgressStore.shared.resetAll()
         auth.signOut()

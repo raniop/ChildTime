@@ -39,6 +39,7 @@ final class ProgressStore: ObservableObject {
         static let topicAffinity = "topicAffinity"
         static let topicExposure = "topicExposure"
         static let topicAbandon = "topicAbandon"
+        static let topicAdaptiveLevel = "topicAdaptiveLevel"
         static let wheelProgressCount = "wheelProgressCount"
         static let pendingBonusWheel = "pendingBonusWheel"
         static let lastComebackWheelAt = "lastComebackWheelAt"
@@ -219,6 +220,13 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var topicAbandon: [String: Int] {
         didSet { defaults.set(topicAbandon, forKey: Key.topicAbandon) }
     }
+    /// [topicRawValue: continuous adaptive difficulty level, 0 (easy) … 2 (hard)].
+    /// Maintained by `AdaptiveDifficultyEngine`; floats around the parent's
+    /// per-topic base. Rides along with the answer's revision bump (like the
+    /// other per-topic signals — not a version trigger of its own).
+    @Published private(set) var topicAdaptiveLevel: [String: Double] {
+        didSet { defaults.set(topicAdaptiveLevel, forKey: Key.topicAdaptiveLevel) }
+    }
     /// Questions answered since the last free Lucky Wheel spin.
     @Published private(set) var wheelProgressCount: Int {
         didSet { defaults.set(wheelProgressCount, forKey: Key.wheelProgressCount) }
@@ -308,6 +316,7 @@ final class ProgressStore: ObservableObject {
         self.topicAffinity = (d.dictionary(forKey: Key.topicAffinity) as? [String: Double]) ?? [:]
         self.topicExposure = (d.dictionary(forKey: Key.topicExposure) as? [String: Int]) ?? [:]
         self.topicAbandon = (d.dictionary(forKey: Key.topicAbandon) as? [String: Int]) ?? [:]
+        self.topicAdaptiveLevel = (d.dictionary(forKey: Key.topicAdaptiveLevel) as? [String: Double]) ?? [:]
         self.wheelProgressCount = d.integer(forKey: Key.wheelProgressCount)
         self.pendingBonusWheel = d.bool(forKey: Key.pendingBonusWheel)
         self.lastComebackWheelAt = d.object(forKey: Key.lastComebackWheelAt) as? Date
@@ -411,6 +420,26 @@ final class ProgressStore: ObservableObject {
         topicExposure[topic.rawValue] ?? 0
     }
 
+    /// Current adaptive difficulty level for a topic (continuous 0…2). Seeded
+    /// from the parent's chosen base until the child has been measured.
+    func adaptiveLevel(for topic: Topic, base: Difficulty) -> Double {
+        topicAdaptiveLevel[topic.rawValue] ?? AdaptiveDifficultyEngine.level(for: base)
+    }
+
+    /// Feeds one answer's signals into the adaptive engine and stores the new
+    /// per-topic level. The parent's per-topic choice is the anchor the level
+    /// floats around.
+    private func adjustAdaptiveLevel(topic: Topic, correct: Bool, fast: Bool,
+                                     hintUsed: Bool, abandoned: Bool) {
+        let base = ProfileStore.shared.active?.difficulty(for: topic) ?? .easy
+        let key = topic.rawValue
+        let current = topicAdaptiveLevel[key] ?? AdaptiveDifficultyEngine.level(for: base)
+        let signals = AdaptiveDifficultyEngine.Signals(
+            correct: correct, fast: fast, hintUsed: hintUsed, abandoned: abandoned)
+        topicAdaptiveLevel[key] = AdaptiveDifficultyEngine.updatedLevel(
+            current: current, base: base, signals: signals)
+    }
+
     /// Overall rolling accuracy across every topic the child has touched.
     var overallAccuracy: Double {
         let vals = topicAccuracy.values
@@ -468,6 +497,9 @@ final class ProgressStore: ObservableObject {
         topicAbandon[key] = (topicAbandon[key] ?? 0) + 1
         let current = affinity(for: topic)
         topicAffinity[key] = min(1, max(0, current - 0.08))
+        // Giving up on a question is a strong "too hard right now" signal.
+        adjustAdaptiveLevel(topic: topic, correct: false, fast: false,
+                            hintUsed: false, abandoned: true)
     }
 
     /// Seed a brand-new child's learning signals from the interests and level
@@ -488,7 +520,8 @@ final class ProgressStore: ObservableObject {
 
     /// Continuously updates the per-topic learning signals after each answer.
     /// Called from `recordCorrect` / `recordWrong`.
-    private func updateLearningSignals(topic: Topic, correct: Bool, responseMs: Double) {
+    private func updateLearningSignals(topic: Topic, correct: Bool, responseMs: Double,
+                                       hintUsed: Bool = false) {
         let key = topic.rawValue
         // Rolling response time (only when we have a real measurement).
         var fast = false
@@ -507,6 +540,10 @@ final class ProgressStore: ObservableObject {
         if correct && fast { delta += 0.03 }
         let current = affinity(for: topic)
         topicAffinity[key] = min(1, max(0, current + delta))
+
+        // Nudge the adaptive difficulty level from this answer's signals.
+        adjustAdaptiveLevel(topic: topic, correct: correct, fast: fast,
+                            hintUsed: hintUsed, abandoned: false)
     }
 
     // MARK: - Recording
@@ -523,6 +560,7 @@ final class ProgressStore: ObservableObject {
                        minutesPerCorrect: Int,
                        responseMs: Double = 0,
                        hadMistakeThisQuestion: Bool = false,
+                       hintUsed: Bool = false,
                        grantsScreenTime: Bool = true) -> Int {
         totalAnswered += 1
         totalCorrect += 1
@@ -583,7 +621,7 @@ final class ProgressStore: ObservableObject {
         }
         xp += RewardEngine.xpPerCorrect
         updateTopicStat(topic: ctx.topic, correct: true)
-        updateLearningSignals(topic: ctx.topic, correct: true, responseMs: responseMs)
+        updateLearningSignals(topic: ctx.topic, correct: true, responseMs: responseMs, hintUsed: hintUsed)
         wheelProgressCount += 1
 
         // Risk & Recovery loop (Earn mode only — there's no time to win back in
@@ -704,7 +742,8 @@ final class ProgressStore: ObservableObject {
     /// the recovery pot — a clean correct answer on the next question wins it
     /// back (Risk & Recovery loop). Returns the minutes deducted this tick.
     @discardableResult
-    func recordWrong(topic: Topic, minutesPerCorrect: Int, grantsScreenTime: Bool = true) -> Int {
+    func recordWrong(topic: Topic, minutesPerCorrect: Int, hintUsed: Bool = false,
+                     grantsScreenTime: Bool = true) -> Int {
         AppAnalytics.questionAnswered(topic: topic.rawValue, correct: false)
         totalAnswered += 1
         _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
@@ -714,6 +753,9 @@ final class ProgressStore: ObservableObject {
         wrongStreak += 1
         xp += RewardEngine.xpPerQuestion
         updateTopicStat(topic: topic, correct: false)
+        // A miss eases the adaptive level for this topic (gentle, capped).
+        adjustAdaptiveLevel(topic: topic, correct: false, fast: false,
+                            hintUsed: hintUsed, abandoned: false)
 
         // Gentle affinity nudge down (no exposure/response bump — those are
         // counted once per question when it's finally answered correctly).
@@ -926,6 +968,7 @@ final class ProgressStore: ObservableObject {
         s.topicAffinity       = topicAffinity
         s.topicExposure       = topicExposure
         s.topicAbandon        = topicAbandon
+        s.topicAdaptiveLevel  = topicAdaptiveLevel
         s.wheelProgressCount  = wheelProgressCount
         s.recoveryPot         = recoveryPot
         s.ownedCharacterIDs   = Array(ownedCharacterIDs)
@@ -979,6 +1022,7 @@ final class ProgressStore: ObservableObject {
         topicAffinity       = s.topicAffinity
         topicExposure       = s.topicExposure
         topicAbandon        = s.topicAbandon
+        topicAdaptiveLevel  = s.topicAdaptiveLevel ?? [:]
         wheelProgressCount  = s.wheelProgressCount
         recoveryPot         = s.recoveryPot
         // Replace (not union) — apply() also runs on profile switch, so merging

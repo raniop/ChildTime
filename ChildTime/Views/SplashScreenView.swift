@@ -44,7 +44,9 @@ struct SplashScreenView: View {
                             )
                     }
 
-                    CompanionView(controller: companion, size: 150)
+                    // Brand mascot — the lion (matches the app icon & launch logo).
+                    CharacterView(character: Character3DCatalog.find("lion"))
+                        .frame(width: 168, height: 168)
                         .scaleEffect(showMascot ? 1 : 0.2)
                         .opacity(showMascot ? 1 : 0)
                 }

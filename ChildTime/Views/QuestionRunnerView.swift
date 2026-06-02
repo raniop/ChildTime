@@ -41,6 +41,9 @@ struct QuestionRunnerView: View {
     @State private var isSuperQuestion: Bool = false
     @State private var isInPortal: Bool = false
     @State private var showPortalIntro: Bool = false
+    /// Index of the last bonus event (super question / mystery portal). Enforces a
+    /// cooldown so bonuses never cluster several-in-a-row — they stay special.
+    @State private var lastBonusIndex: Int = -100
     @State private var consecutiveWrong: Int = 0
     @State private var burstTrigger: Int = 0
     @State private var confettiTrigger: Int = 0
@@ -63,6 +66,13 @@ struct QuestionRunnerView: View {
     @State private var reAskQueue: [Question] = []
     @State private var questionShownAt: Date? = nil
     @State private var hadMistakeThisQuestion: Bool = false
+    /// Whether the child leaned on a hint for the current question — fed to the
+    /// adaptive engine (a hinted win shouldn't push difficulty up like a clean one).
+    @State private var usedHintThisQuestion: Bool = false
+    /// Last difficulty BAND (rounded adaptive level) served per topic, so we can
+    /// celebrate stepping up / soften stepping down — only on a real band change,
+    /// never on the per-question 70/20/10 sampling noise.
+    @State private var lastBandByTopic: [Topic: Int] = [:]
 
     // Live-event / Parent Assist bookkeeping (one report per session each).
     @State private var reportedMilestone = false
@@ -687,9 +697,13 @@ struct QuestionRunnerView: View {
             return
         }
 
-        // Decide special events
-        let mystery = EventEngine.shouldFireMysteryPortal(questionIndex: questionIndex, totalQuestions: totalQuestions)
-        let superQ = !mystery && EventEngine.shouldFireSuperQuestion(questionIndex: questionIndex, totalQuestions: totalQuestions)
+        // Decide special events. A cooldown keeps at least 3 normal questions
+        // between bonuses so they never fire several-in-a-row (which read as a bug
+        // and made the bonus feel cheap).
+        let bonusCooldownOK = (questionIndex - lastBonusIndex) >= 3
+        let mystery = bonusCooldownOK && EventEngine.shouldFireMysteryPortal(questionIndex: questionIndex, totalQuestions: totalQuestions)
+        let superQ = bonusCooldownOK && !mystery && EventEngine.shouldFireSuperQuestion(questionIndex: questionIndex, totalQuestions: totalQuestions)
+        if mystery || superQ { lastBonusIndex = questionIndex }
 
         if mystery {
             isInPortal = true
@@ -724,6 +738,7 @@ struct QuestionRunnerView: View {
         feedbackForIndex = [:]
         showFeedback = false
         hadMistakeThisQuestion = false
+        usedHintThisQuestion = false
         assistOfferedThisQuestion = false
 
         // Re-ask a previously-wrong question every few questions (spaced out) —
@@ -740,12 +755,24 @@ struct QuestionRunnerView: View {
         currentTopic = topic
         topicHistory.append(topic)
 
-        // DDA: pick difficulty from rolling accuracy for this topic. The base is
-        // this child's parent-set per-topic level (falls back to their learning
-        // level); DDA then nudges it up/down by their accuracy.
+        // Adaptive difficulty: the base is this child's parent-set per-topic level
+        // (anchor). The engine maintains a continuous level that drifts around it
+        // from the child's recent performance; we then sample a tier for THIS
+        // question (mostly at-level, with a few harder/easier mixed in).
         let baseDiff = profiles.active?.difficulty(for: topic) ?? .easy
-        let acc = progress.accuracy(for: topic)
-        let effective = QuestionGenerator.adaptiveDifficulty(base: baseDiff, accuracy: acc)
+        let level = progress.adaptiveLevel(for: topic, base: baseDiff)
+        let effective = AdaptiveDifficultyEngine.sampledDifficulty(forLevel: level, base: baseDiff)
+        // Celebrate / soften only when the underlying level BAND actually shifts
+        // (positive framing — never "it got hard" or "we lowered you").
+        let band = Int(level.rounded())
+        if let prev = lastBandByTopic[topic], prev != band {
+            if band > prev {
+                companion.hype(Gendered.g("מִתְקַדֵּם שָׁלָב! 🚀", "מִתְקַדֶּמֶת שָׁלָב! 🚀"))
+            } else {
+                companion.cheer("בּוֹא נַעֲשֶׂה חִימּוּם קָטָן 🌟")
+            }
+        }
+        lastBandByTopic[topic] = band
         var q = QuestionGenerator.generate(topic: topic, difficulty: effective)
         // Bank questions already avoid session repeats (QuestionMemory). Math is
         // generated, so re-roll if we happen to produce one seen this round.
@@ -841,6 +868,7 @@ struct QuestionRunnerView: View {
         guard canUseHint(q) else { return }
         // Spend the minutes (0 for a free legendary/mythic helper → always true).
         guard progress.spendPendingMinutes(hintCost) else { return }
+        usedHintThisQuestion = true   // adaptive engine: a hinted win counts as "shaky"
 
         // Pick a random wrong option that hasn't been eliminated yet.
         let candidates = q.options.indices.filter { idx in
@@ -897,6 +925,7 @@ struct QuestionRunnerView: View {
             minutesPerCorrect: settings.minutesPerCorrectAnswer,
             responseMs: responseMs,
             hadMistakeThisQuestion: hadMistakeThisQuestion,
+            hintUsed: usedHintThisQuestion,
             grantsScreenTime: earnsTime
         )
         earnedThisSession += earned
@@ -1013,6 +1042,7 @@ struct QuestionRunnerView: View {
         let lostSeconds = progress.recordWrong(
             topic: q.topic,
             minutesPerCorrect: settings.minutesPerCorrectAnswer,
+            hintUsed: usedHintThisQuestion,
             grantsScreenTime: purpose.grantsScreenTime
         )
         LearningHistoryStore.shared.recordAnswer(

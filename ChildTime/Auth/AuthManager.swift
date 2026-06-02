@@ -115,6 +115,38 @@ final class AuthManager: ObservableObject {
         clearCache()
     }
 
+    // MARK: - Account deletion (App Store 5.1.1(v))
+
+    /// Permanently deletes the Firebase Auth account itself. Call this AFTER the
+    /// cloud + local data has been wiped (Firestore deletes need a still-valid
+    /// auth session to pass the security rules).
+    ///
+    /// Returns `true` if the auth user was removed (or there was no signed-in
+    /// user to begin with). Firebase refuses with `requiresRecentLogin` (17014)
+    /// when the session is stale — we surface that via `lastError` so the user
+    /// can re-sign-in and retry, but by then the rest of the wipe has already
+    /// happened, so the caller still signs out.
+    @discardableResult
+    func deleteAccount() async -> Bool {
+        #if canImport(FirebaseAuth)
+        guard let user = Auth.auth().currentUser else { return true }
+        do {
+            try await user.delete()
+            return true
+        } catch {
+            let ns = error as NSError
+            if ns.code == 17014 {   // AuthErrorCode.requiresRecentLogin
+                lastError = "כדי למחוק את החשבון לצמיתות יש להתחבר מחדש ואז לנסות שוב. שאר הנתונים כבר נמחקו."
+            } else {
+                lastError = "מחיקת החשבון נכשלה: \(ns.localizedDescription)"
+            }
+            return false
+        }
+        #else
+        return true
+        #endif
+    }
+
     // MARK: - Apple
 
     /// Configure the request used by SignInWithAppleButton.

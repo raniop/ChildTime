@@ -2,16 +2,6 @@ import Foundation
 
 struct QuestionGenerator {
 
-    /// Dynamically derives difficulty from rolling accuracy.
-    static func adaptiveDifficulty(base: Difficulty, accuracy: Double) -> Difficulty {
-        let levels: [Difficulty] = [.easy, .medium, .hard]
-        guard let idx = levels.firstIndex(of: base) else { return base }
-        var target = idx
-        if accuracy < 0.5 { target = max(0, idx - 1) }
-        else if accuracy > 0.85 { target = min(levels.count - 1, idx + 1) }
-        return levels[target]
-    }
-
     static func generate(topic: Topic, difficulty: Difficulty) -> Question {
         switch topic {
         case .math:
@@ -104,7 +94,7 @@ struct QuestionGenerator {
 
     private static func makeFromBank(topic: Topic, difficulty: Difficulty) -> Question {
         let bank = QuestionBanks.bank(for: topic) ?? []
-        guard let item = QuestionMemory.shared.pickFresh(bank, for: topic) else {
+        guard let item = QuestionMemory.shared.pickFresh(bank, for: topic, target: difficulty) else {
             return Question(
                 topic: topic,
                 prompt: "אוֹפְּס... אֵין שְׁאֵלוֹת לַנּוֹשֵׂא הַזֶּה עֲדַיִן",
