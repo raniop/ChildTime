@@ -707,7 +707,9 @@ struct ParentDashboardView: View {
 
             // Today at a glance.
             HStack(spacing: 10) {
-                statCell(emoji: "⏱", value: "\(s.minutesEarnedToday)", label: "זמן מסך היום")
+                statCell(emoji: "⏱",
+                         value: settings.dailyCapEnabled ? "\(s.minutesEarnedToday)/\(settings.maxMinutesPerDay)" : "\(s.minutesEarnedToday)",
+                         label: "זמן מסך היום")
                 statCell(emoji: "❓", value: "\(s.answeredToday)", label: "שאלות היום")
                 statCell(emoji: "🎯", value: s.answeredToday > 0 ? "\(Int(Double(s.correctToday) / Double(s.answeredToday) * 100))%" : "—", label: "הצלחה היום")
             }
@@ -776,12 +778,14 @@ struct ParentDashboardView: View {
             }
             .buttonStyle(.plain)
 
-            // Daily cap line (if enabled)
+            // Daily cap line (if enabled) — earned-out-of-max + any minutes banked
+            // for tomorrow (bonus overflow once the daily cap was full).
             if settings.dailyCapEnabled {
                 HStack(spacing: 6) {
                     Image(systemName: "timer")
                         .foregroundStyle(.secondary)
-                    Text("נצבר היום: \(s.minutesEarnedToday) / \(settings.maxMinutesPerDay) דק'")
+                    Text("נצבר היום: \(s.minutesEarnedToday) / \(settings.maxMinutesPerDay) דק'"
+                         + ((s.carryOverMinutes ?? 0) > 0 ? "  ·  🎁 \(s.carryOverMinutes ?? 0) למחר" : ""))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()
