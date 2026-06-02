@@ -1134,7 +1134,7 @@ struct ParentDashboardView: View {
     private func isChildPlayingNow(_ profile: Profile) -> Bool {
         _ = refreshTrigger   // recompute on the dashboard's 5s tick
         let devices = household.devicesByChild[profile.id.uuidString] ?? []
-        return devices.contains { -$0.lastSeenAt.timeIntervalSinceNow < 75 }
+        return devices.contains { -$0.lastSeenAt.timeIntervalSinceNow < 45 }
     }
 
     /// Most recent time any of the child's devices was seen — used to order the

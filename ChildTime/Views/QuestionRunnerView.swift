@@ -230,9 +230,9 @@ struct QuestionRunnerView: View {
                 ])
             }
         }
-        // Live presence: refresh this child device's "last seen" every 30s while
+        // Live presence: refresh this child device's "last seen" every 15s while
         // playing, so the parent dashboard shows "🟢 משחק עכשיו" in real time.
-        .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { _ in
+        .onReceive(Timer.publish(every: 15, on: .main, in: .common).autoconnect()) { _ in
             if settings.deviceRole == .child, let cid = profiles.activeID {
                 Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
             }
@@ -681,6 +681,11 @@ struct QuestionRunnerView: View {
         progress.resetSessionScore()
         LearningHistoryStore.shared.recordSessionStart(purpose: purpose)
         LiveEventReporter.report(.sessionStart)
+        // Mark this child "playing now" IMMEDIATELY (don't wait for the 15s tick),
+        // so the parent dashboard floats them to the top the moment they start.
+        if settings.deviceRole == .child, let cid = profiles.activeID {
+            Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
+        }
         reportedMilestone = false
         reportedWheel = false
         reportedDiscovery = []

@@ -35,11 +35,17 @@ struct ContentView: View {
             }
         }
         // Global presence heartbeat: while a CHILD device is open (any screen),
-        // refresh "last seen" every 30s so the parent sees "משחק עכשיו" live —
+        // refresh "last seen" every 15s so the parent sees "משחק עכשיו" live —
         // not just while inside a question.
-        .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { _ in
+        .onReceive(Timer.publish(every: 15, on: .main, in: .common).autoconnect()) { _ in
             if settings.deviceRole == .child, auth.isSignedIn, let cid = profiles.activeID {
                 Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
+            }
+        }
+        // …and an immediate beat the moment a child device appears (no 15s wait).
+        .task {
+            if settings.deviceRole == .child, auth.isSignedIn, let cid = profiles.activeID {
+                await HouseholdManager.shared.registerDevice(forChildID: cid)
             }
         }
         // Home-screen Quick Action → present the Kid Mode entry flow.
