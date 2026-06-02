@@ -12,6 +12,8 @@ struct ParentSettingsView: View {
 
     @State private var showAppPicker = false
     @State private var pickerSelection = FamilyActivitySelection()
+    @State private var showAllowedPicker = false
+    @State private var allowedSelection = FamilyActivitySelection()
     @State private var showChangePIN = false
     @State private var showSignIn = false
     @State private var showPaywall = false
@@ -50,10 +52,16 @@ struct ParentSettingsView: View {
             .familyActivityPicker(isPresented: $showAppPicker, selection: $pickerSelection)
             .onChange(of: pickerSelection) { _, new in
                 settings.activitySelectionData = SelectionStorage.encode(new)
-                shields.applyShield(from: new)
+                shields.applyDefaultLock()
+            }
+            .familyActivityPicker(isPresented: $showAllowedPicker, selection: $allowedSelection)
+            .onChange(of: allowedSelection) { _, new in
+                settings.allowedAppsData = SelectionStorage.encode(new)
+                shields.applyDefaultLock()
             }
             .onAppear {
                 pickerSelection = SelectionStorage.decode(settings.activitySelectionData)
+                allowedSelection = SelectionStorage.decode(settings.allowedAppsData)
             }
             .sheet(isPresented: $showChangePIN) {
                 ChangePINView()
@@ -404,10 +412,14 @@ struct ParentSettingsView: View {
     }
 
     private var topicsSection: some View {
-        Section("נושאי שאלות") {
+        Section {
             ForEach(Topic.allCases) { topic in
                 topicRow(topic)
             }
+        } header: {
+            Text("נושאי שאלות")
+        } footer: {
+            Text("את רמת הקושי קובעים לכל ילד בנפרד מהמסך הראשי של ההורה (תפריט הילד ← רמת קושי).")
         }
     }
 
@@ -419,57 +431,85 @@ struct ParentSettingsView: View {
                 else { settings.enabledTopics.remove(topic) }
             }
         )
-        return VStack(alignment: .leading, spacing: 8) {
-            Toggle(isOn: binding) {
-                HStack {
-                    Text(topic.emoji)
-                    Text(topic.displayName)
-                }
-            }
-            if settings.enabledTopics.contains(topic) {
-                Picker("רמת קושי", selection: Binding(
-                    get: { settings.difficulty(for: topic) },
-                    set: { settings.setDifficulty($0, for: topic) }
-                )) {
-                    ForEach(Difficulty.allCases) { d in
-                        Text(d.displayName).tag(d)
-                    }
-                }
-                .pickerStyle(.segmented)
+        return Toggle(isOn: binding) {
+            HStack {
+                Text(topic.emoji)
+                Text(topic.displayName)
             }
         }
     }
 
     private var appsSection: some View {
-        Section("אפליקציות לחסום") {
-            Button {
-                showAppPicker = true
-            } label: {
-                HStack {
-                    Image(systemName: "app.badge.fill")
-                    Text("בחר אפליקציות")
-                    Spacer()
-                    let count = pickerSelection.applicationTokens.count
-                        + pickerSelection.categoryTokens.count
-                    if count > 0 {
-                        Text("\(count) נבחרו")
-                            .foregroundStyle(.secondary)
-                    }
-                    Image(systemName: "chevron.left").foregroundStyle(.secondary)
-                }
+        Section {
+            Toggle(isOn: $settings.blockAllExceptAllowed) {
+                Label("חסום הכל חוץ מהמותר", systemImage: "lock.shield.fill")
             }
-            if pickerSelection.applicationTokens.isEmpty
-                && pickerSelection.categoryTokens.isEmpty {
-                Text("עדיין לא בחרת אפליקציות לחסום. בלי בחירה - לא יקרה כלום כשהילד פותח את ה-iPad.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else {
-                Button(role: .destructive) {
-                    pickerSelection = FamilyActivitySelection()
+
+            if settings.blockAllExceptAllowed {
+                // Block-all-except-allowlist model.
+                Button {
+                    showAllowedPicker = true
                 } label: {
-                    Label("נקה בחירה", systemImage: "trash")
+                    HStack {
+                        Image(systemName: "checkmark.shield.fill")
+                        Text("בחר אפליקציות מותרות")
+                        Spacer()
+                        let count = allowedSelection.applicationTokens.count
+                            + allowedSelection.categoryTokens.count
+                        if count > 0 {
+                            Text("\(count) מותרות").foregroundStyle(.secondary)
+                        }
+                        Image(systemName: "chevron.left").foregroundStyle(.secondary)
+                    }
+                }
+                if allowedSelection.applicationTokens.isEmpty
+                    && allowedSelection.categoryTokens.isEmpty {
+                    Text("⚠️ חשוב: בחרו אילו אפליקציות יישארו פתוחות — והקפידו לכלול את ChildTime (וכן אפליקציות חיוניות כמו טלפון). עד שתבחרו — לא ייחסם כלום, כדי לא לנעול את המכשיר בטעות.")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                } else {
+                    Button(role: .destructive) {
+                        allowedSelection = FamilyActivitySelection()
+                    } label: {
+                        Label("נקה רשימת מותרות", systemImage: "trash")
+                    }
+                }
+            } else {
+                // Classic block-list model.
+                Button {
+                    showAppPicker = true
+                } label: {
+                    HStack {
+                        Image(systemName: "app.badge.fill")
+                        Text("בחר אפליקציות")
+                        Spacer()
+                        let count = pickerSelection.applicationTokens.count
+                            + pickerSelection.categoryTokens.count
+                        if count > 0 {
+                            Text("\(count) נבחרו").foregroundStyle(.secondary)
+                        }
+                        Image(systemName: "chevron.left").foregroundStyle(.secondary)
+                    }
+                }
+                if pickerSelection.applicationTokens.isEmpty
+                    && pickerSelection.categoryTokens.isEmpty {
+                    Text("עדיין לא בחרת אפליקציות לחסום. בלי בחירה - לא יקרה כלום כשהילד פותח את ה-iPad.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Button(role: .destructive) {
+                        pickerSelection = FamilyActivitySelection()
+                    } label: {
+                        Label("נקה בחירה", systemImage: "trash")
+                    }
                 }
             }
+        } header: {
+            Text("חסימת אפליקציות")
+        } footer: {
+            Text(settings.blockAllExceptAllowed
+                 ? "כל האפליקציות ייחסמו עד שהילד מרוויח זמן — חוץ מהאפליקציות שתבחרו כ\"מותרות\". חובה לכלול את ChildTime ברשימה."
+                 : "רק האפליקציות שתבחרו ייחסמו. כל השאר נשארות פתוחות.")
         }
     }
 

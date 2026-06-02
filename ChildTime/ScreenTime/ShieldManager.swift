@@ -119,16 +119,70 @@ final class ShieldManager: ObservableObject {
         scheduleUsageLimit(after: minutes, monitoring: allowed)
     }
 
+    /// Apply the device's LOCKED baseline (called whenever no play window is
+    /// active). Two models:
+    ///  • block-all-except-allowlist — when the parent enabled it AND picked a
+    ///    non-empty allowlist (which must include ChildTime). The safe default.
+    ///  • classic block-list — block only the parent-selected apps, honoring a
+    ///    temporary per-app allowance.
+    func applyDefaultLock() {
+        let s = ParentSettings.shared
+        if s.blockAllActive {
+            applyLockAllExcept(SelectionStorage.decode(s.allowedAppsData))
+            return
+        }
+        let blocked = SelectionStorage.decode(s.activitySelectionData)
+        if s.allowExceptionActive, let aData = s.allowExceptionData {
+            applyShield(from: blocked, allowing: SelectionStorage.decode(aData))
+        } else {
+            applyShield(from: blocked)
+        }
+    }
+
     // MARK: - Unlock for a duration
 
     func unlock(minutes: Int) {
         clearShield()
-        // Everything in the blocked set is now open. Meter usage of those apps
-        // so the shield comes back after `minutes` of real play — even while
-        // ChildTime is in the background and the kid is inside another app
-        // (e.g. YouTube). This is what makes short (<15 min) grants enforce.
-        let monitored = SelectionStorage.decode(ParentSettings.shared.activitySelectionData)
-        scheduleUsageLimit(after: minutes, monitoring: monitored)
+        let s = ParentSettings.shared
+        if s.blockAllActive {
+            // Block-all has no concrete blocked-token set to usage-meter, so the
+            // shield returns via a wall-clock backstop (the in-app timer re-locks
+            // sooner when the kid comes back to ChildTime).
+            scheduleWallClockReshield(after: minutes)
+        } else {
+            // Everything in the blocked set is now open. Meter usage of those apps
+            // so the shield comes back after `minutes` of real play — even while
+            // ChildTime is in the background and the kid is inside another app
+            // (e.g. YouTube). This is what makes short (<15 min) grants enforce.
+            let monitored = SelectionStorage.decode(s.activitySelectionData)
+            scheduleUsageLimit(after: minutes, monitoring: monitored)
+        }
+    }
+
+    /// Wall-clock-only re-lock (used in block-all mode where there's no concrete
+    /// set to usage-meter). Fires `intervalDidEnd` in the monitor after the
+    /// window, which re-applies the block-all baseline.
+    private func scheduleWallClockReshield(after minutes: Int) {
+        center.stopMonitoring([Self.unlockActivityName])
+        let windowMinutes = max(max(1, minutes), Self.minimumOSScheduleMinutes)
+        let now = Date()
+        let calendar = Calendar.current
+        let startComponents = calendar.dateComponents([.hour, .minute, .second], from: now)
+        let endComponents = calendar.dateComponents(
+            [.hour, .minute, .second],
+            from: now.addingTimeInterval(TimeInterval(windowMinutes * 60))
+        )
+        let schedule = DeviceActivitySchedule(
+            intervalStart: startComponents,
+            intervalEnd: endComponents,
+            repeats: false
+        )
+        do {
+            try center.startMonitoring(Self.unlockActivityName, during: schedule)
+            print("[ShieldManager] Block-all: wall-clock reshield in \(windowMinutes) min")
+        } catch {
+            print("[ShieldManager] Failed to schedule wall-clock reshield: \(error)")
+        }
     }
 
     /// Apple's DeviceActivitySchedule requires the containing interval to be at

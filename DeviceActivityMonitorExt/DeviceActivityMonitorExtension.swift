@@ -36,8 +36,24 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
 
     private func reapplyShield() {
         let defaults = UserDefaults(suiteName: appGroupID) ?? .standard
-        guard let data = defaults.data(forKey: "activitySelection") else { return }
         let decoder = JSONDecoder()
+
+        // Block-all-except-allowlist mode — only when an allowlist actually exists
+        // (otherwise we'd shield ChildTime itself and brick the device). Mirrors
+        // ParentSettings.blockAllActive + ShieldManager.applyLockAllExcept.
+        let blockAll = (defaults.object(forKey: "blockAllExceptAllowed") as? Bool) ?? true
+        if blockAll,
+           let allowedData = defaults.data(forKey: "allowedAppsData"),
+           let allowed = try? decoder.decode(FamilyActivitySelection.self, from: allowedData),
+           !(allowed.applicationTokens.isEmpty && allowed.categoryTokens.isEmpty && allowed.webDomainTokens.isEmpty) {
+            store.shield.applications = nil
+            store.shield.applicationCategories = .all(except: allowed.applicationTokens)
+            store.shield.webDomains = nil
+            store.shield.webDomainCategories = .all(except: allowed.webDomainTokens)
+            return
+        }
+
+        guard let data = defaults.data(forKey: "activitySelection") else { return }
         guard let selection = try? decoder.decode(FamilyActivitySelection.self, from: data) else { return }
 
         store.shield.applications = selection.applicationTokens.isEmpty ? nil : selection.applicationTokens
@@ -45,6 +61,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             ? .none
             : .specific(selection.categoryTokens)
         store.shield.webDomains = selection.webDomainTokens.isEmpty ? nil : selection.webDomainTokens
+        store.shield.webDomainCategories = .none
     }
 
     private func clearUnlockEnd() {

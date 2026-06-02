@@ -210,13 +210,14 @@ struct ChildTimeApp: App {
             KidModeManager.shared.reassertIfActive()
             return
         }
-        guard let data = settings.activitySelectionData else {
-            // No managed apps on this device (e.g. a parent's phone) → make sure
-            // nothing is left shielded, including a stale Kid Mode web/app lock.
+        // Nothing managed on this device (e.g. a parent's phone with no block-list
+        // and no block-all allowlist) → make sure nothing is left shielded,
+        // including a stale Kid Mode web/app lock.
+        let hasBlockList = !SelectionStorage.isEmpty(settings.activitySelectionData)
+        guard hasBlockList || settings.blockAllActive else {
             shields.clearShield()
             return
         }
-        let selection = SelectionStorage.decode(data)
 
         if progress.isUnlocked {
             // Currently inside a full unlock window — make sure shield is OFF.
@@ -228,13 +229,11 @@ struct ChildTimeApp: App {
             progress.endUnlock()
         }
 
-        // A per-app allowance keeps the chosen apps open while the rest stay
-        // locked. When it expires, drop it and re-apply the full shield.
-        if settings.allowExceptionActive, let aData = settings.allowExceptionData {
-            shields.applyShield(from: selection, allowing: SelectionStorage.decode(aData))
-        } else {
-            if settings.allowExceptionEndsAt != nil { settings.clearAllowException() }
-            shields.applyShield(from: selection)
+        // Re-apply the locked baseline (block-all-except-allowlist, or the classic
+        // block-list honoring a temporary per-app allowance).
+        if !(settings.allowExceptionActive) && settings.allowExceptionEndsAt != nil {
+            settings.clearAllowException()
         }
+        shields.applyDefaultLock()
     }
 }

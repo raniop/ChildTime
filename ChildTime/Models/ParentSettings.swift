@@ -11,8 +11,9 @@ final class ParentSettings: ObservableObject {
         static let minutesPerCorrect = "minutesPerCorrect"
         static let questionsPerSession = "questionsPerSession"
         static let enabledTopics = "enabledTopics"
-        static let difficulty = "difficulty"
         static let activitySelection = "activitySelection"
+        static let blockAllExceptAllowed = "blockAllExceptAllowed"
+        static let allowedAppsData = "allowedAppsData"
         static let allowExceptionData = "allowExceptionData"
         static let allowExceptionEndsAt = "allowExceptionEndsAt"
         static let onboardingCompleted = "onboardingCompleted"
@@ -112,16 +113,28 @@ final class ParentSettings: ObservableObject {
             defaults.set(arr, forKey: Key.enabledTopics)
         }
     }
-    @Published var difficultyByTopic: [Topic: Difficulty] {
-        didSet {
-            let raw = difficultyByTopic.reduce(into: [String: String]()) { result, pair in
-                result[pair.key.rawValue] = pair.value.rawValue
-            }
-            defaults.set(raw, forKey: Key.difficulty)
-        }
-    }
     @Published var activitySelectionData: Data? {
         didSet { defaults.set(activitySelectionData, forKey: Key.activitySelection) }
+    }
+    /// When true, the child device's LOCKED baseline blocks every app except the
+    /// `allowedAppsData` allowlist (the inverse of the block-list model), so the
+    /// device is protected by default. SAFETY: this only actually takes effect
+    /// when the allowlist is non-empty — otherwise we'd shield ChildTime itself
+    /// (whose token we can't add programmatically) and brick the device, so we
+    /// fall back to the block-list model. The allowlist MUST include ChildTime.
+    @Published var blockAllExceptAllowed: Bool {
+        didSet { defaults.set(blockAllExceptAllowed, forKey: Key.blockAllExceptAllowed) }
+    }
+    /// Apps that stay OPEN while the device is locked (block-all mode). Picked by
+    /// the parent; must include ChildTime so the child can always earn time.
+    @Published var allowedAppsData: Data? {
+        didSet { defaults.set(allowedAppsData, forKey: Key.allowedAppsData) }
+    }
+    /// Block-all is only SAFE to enforce once the parent has chosen a non-empty
+    /// allowlist (otherwise ChildTime itself would be shielded). This is the
+    /// single source of truth both the app and the monitor extension use.
+    var blockAllActive: Bool {
+        blockAllExceptAllowed && !SelectionStorage.isEmpty(allowedAppsData)
     }
     /// A temporary per-app allowance: which apps are open right now even though
     /// they're in the blocked list, and until when. Lets a parent open just one
@@ -271,19 +284,12 @@ final class ParentSettings: ObservableObject {
             self.enabledTopics = [.math, .hebrew, .english, .logic, .science]
         }
 
-        if let raw = d.dictionary(forKey: Key.difficulty) as? [String: String] {
-            var dict: [Topic: Difficulty] = [:]
-            for (k, v) in raw {
-                if let t = Topic(rawValue: k), let diff = Difficulty(rawValue: v) {
-                    dict[t] = diff
-                }
-            }
-            self.difficultyByTopic = dict.isEmpty ? Self.defaultDifficulties : dict
-        } else {
-            self.difficultyByTopic = Self.defaultDifficulties
-        }
 
         self.activitySelectionData = d.data(forKey: Key.activitySelection)
+        // Default ON so the device is protected by default — but it only blocks
+        // all once the parent picks an allowlist (see the property's note).
+        self.blockAllExceptAllowed = (d.object(forKey: Key.blockAllExceptAllowed) as? Bool) ?? true
+        self.allowedAppsData = d.data(forKey: Key.allowedAppsData)
         self.allowExceptionData = d.data(forKey: Key.allowExceptionData)
         self.allowExceptionEndsAt = d.object(forKey: Key.allowExceptionEndsAt) as? Date
         self.onboardingCompleted = d.bool(forKey: Key.onboardingCompleted)
@@ -367,30 +373,8 @@ final class ParentSettings: ObservableObject {
         self.childAge = age
         self.enabledTopics = age.defaultEnabledTopics
         self.minutesPerCorrectAnswer = age.defaultMinutesPerCorrect
-        var newDifficulty: [Topic: Difficulty] = [:]
-        for topic in age.defaultEnabledTopics {
-            newDifficulty[topic] = age.defaultDifficulty(for: topic)
-        }
-        self.difficultyByTopic = newDifficulty
-    }
-
-    static let defaultDifficulties: [Topic: Difficulty] = [
-        .math: .easy,
-        .english: .easy,
-        .hebrew: .easy,
-        .logic: .easy,
-        .science: .easy,
-        .history: .easy,
-        .geography: .easy,
-        .money: .easy
-    ]
-
-    func difficulty(for topic: Topic) -> Difficulty {
-        difficultyByTopic[topic] ?? .easy
-    }
-
-    func setDifficulty(_ d: Difficulty, for topic: Topic) {
-        difficultyByTopic[topic] = d
+        // Difficulty is per-child now (see `Profile.difficultyByTopic`), seeded
+        // from the child's learning level — not a global age default here.
     }
 
     /// True while a temporary per-app allowance is in effect.
