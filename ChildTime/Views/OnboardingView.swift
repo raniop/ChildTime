@@ -563,7 +563,16 @@ struct OnboardingView: View {
         }
         pinError = nil
         settings.pin = n
-        step = .hatching
+        // Offer Face ID / Touch ID right after the first PIN so the parent enables
+        // fast unlock here, not later in settings. Enable only on approval.
+        Task { @MainActor in
+            if PINManager.shared.biometryAvailable {
+                let ok = await PINManager.shared.authenticateBiometric(
+                    reason: "הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID")
+                if ok { settings.faceIDForParentGate = true }
+            }
+            step = .hatching
+        }
     }
 
     private func complete() {

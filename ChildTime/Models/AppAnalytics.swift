@@ -4,13 +4,16 @@ import Foundation
 import FirebaseAnalytics
 #endif
 
-/// Thin wrapper over Firebase / Google Analytics. Gives a comprehensive picture
-/// of usage — active users (DAU/MAU), retention, sessions, and the full learning
-/// funnel — WITHOUT ever sending personal data: only structural signals (counts,
-/// topic, age band, gender, device kind). No names, emails, or free text.
+/// Thin wrapper over Firebase / Google Analytics.
 ///
-/// Compiles to no-ops until FirebaseAnalytics is linked (SPM). Firebase Analytics
-/// is thread-safe, so this is safe to call from anywhere.
+/// ⚠️ DISABLED for the App Store **Kids Category**: the `FirebaseAnalytics`
+/// product is intentionally NOT linked (removed from the target), so every call
+/// below compiles to a no-op via `#if canImport(FirebaseAnalytics)` and the app
+/// collects/transmits **zero** analytics. Apple prohibits third-party analytics
+/// in Kids-Category apps. Do NOT re-add the FirebaseAnalytics SPM product unless
+/// you are shipping a NON-Kids build — doing so would silently start collecting
+/// usage data (incl. the child age band / gender properties below) and fail
+/// Kids-Category review.
 enum AppAnalytics {
 
     // MARK: - Core

@@ -221,7 +221,18 @@ struct ParentGateView<Content: View>: View {
                     // Share it family-wide so other devices use the same code.
                     household.setHouseholdPIN(PINManager.shared.makeBlob(entered))
                     Haptic.success()
-                    authorized = true
+                    // First-time setup: immediately offer Face ID / Touch ID so the
+                    // parent turns on fast unlock right here, instead of having to find
+                    // the toggle in settings later. Enable it only if they approve the
+                    // system prompt; if they cancel, it stays off (and they still get in).
+                    Task { @MainActor in
+                        if PINManager.shared.biometryAvailable {
+                            let ok = await PINManager.shared.authenticateBiometric(
+                                reason: "הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID")
+                            if ok { settings.faceIDForParentGate = true }
+                        }
+                        authorized = true
+                    }
                 } else {
                     shake = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {

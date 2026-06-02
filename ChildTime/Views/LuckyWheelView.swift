@@ -236,6 +236,8 @@ struct LuckyWheelView: View {
 
     private func spin() {
         guard !isSpinning, winner == nil else { return }
+        // No wedges → nothing to spin (and `Int.random(in: 0..<0)` / ÷0 would crash).
+        guard !wedges.isEmpty else { return }
         isSpinning = true
         AppAnalytics.wheelSpin(bonus: ProgressStore.shared.pendingBonusWheel)
         SoundPlayer.shared.play(.portalAppear)

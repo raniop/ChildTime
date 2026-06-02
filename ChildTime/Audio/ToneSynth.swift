@@ -235,9 +235,12 @@ final class ToneSynth {
     }
 
     private func buffer(from samples: [Float]) -> AVAudioPCMBuffer {
-        let buf = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(samples.count))!
+        // frameCapacity must be ≥ 1 — AVAudioPCMBuffer(frameCapacity: 0) returns
+        // nil, so clamp it; with a valid format + capacity ≥ 1 the init never fails.
+        let buf = AVAudioPCMBuffer(pcmFormat: format,
+                                   frameCapacity: AVAudioFrameCount(max(1, samples.count)))!
         buf.frameLength = AVAudioFrameCount(samples.count)
-        let channel = buf.floatChannelData![0]
+        guard let channel = buf.floatChannelData?[0] else { return buf }
         for i in 0..<samples.count {
             channel[i] = samples[i]
         }
