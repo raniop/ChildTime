@@ -1092,6 +1092,14 @@ final class ProgressStore: ObservableObject {
         x.revision = 0;          y.revision = 0
         x.lastModifiedAt = .distantPast; y.lastModifiedAt = .distantPast
         x.deviceID = "";         y.deviceID = ""
+        // CRITICAL: `unlockedWorlds` / `ownedCharacterIDs` are produced via
+        // `Array(Set(...))`, whose element ORDER is nondeterministic. Comparing
+        // them with the synthesized (order-sensitive) `==` would make two equal
+        // sets read as "different" on every merge — so a device would believe it
+        // is perpetually "ahead" and re-upload forever (an infinite ping-pong
+        // that hammers Firestore). Normalize the order before comparing.
+        x.unlockedWorlds.sort();    y.unlockedWorlds.sort()
+        x.ownedCharacterIDs.sort(); y.ownedCharacterIDs.sort()
         return x == y
     }
 
