@@ -160,11 +160,19 @@ final class ProfileStore: ObservableObject {
     /// view in v1.
     private func mirrorActiveIntoSettings() {
         guard let p = active else { return }
-        let s = ParentSettings.shared
-        s.childName = p.name
-        s.childGender = p.gender
-        s.childAge = p.age
-        s.childPhotoData = p.photoData
+        // Deferred to the next runloop tick: this is often triggered as a side
+        // effect of a view update (a view switching the active profile), and
+        // mutating ParentSettings' @Published fields *synchronously* during a
+        // view update trips SwiftUI's "Publishing changes from within view
+        // updates is not allowed" warning. The equality guards also skip
+        // needless publishes when nothing actually changed.
+        DispatchQueue.main.async {
+            let s = ParentSettings.shared
+            if s.childName != p.name { s.childName = p.name }
+            if s.childGender != p.gender { s.childGender = p.gender }
+            if s.childAge != p.age { s.childAge = p.age }
+            if s.childPhotoData != p.photoData { s.childPhotoData = p.photoData }
+        }
     }
 
     /// Pull the latest identity edits *from* ParentSettings back into the
