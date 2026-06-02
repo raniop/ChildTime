@@ -80,6 +80,10 @@ struct QuestionRunnerView: View {
     @State private var reportedDiscovery: Set<Topic> = []
     @State private var showParentAssist = false
     @State private var assistOfferedThisQuestion = false
+    @ObservedObject private var parentHelp = ParentHelpManager.shared
+    /// True once a parent's help removed an option on this question (for "success
+    /// after help" analytics).
+    @State private var receivedHelpThisQuestion = false
     @State private var showReportConfirm = false
     @State private var capMessageShown = false
 
@@ -187,8 +191,14 @@ struct QuestionRunnerView: View {
         }
         .rumble(trigger: rumbleTrigger)
         .sheet(isPresented: $showParentAssist) {
-            ParentAssistView { }
-                .environment(\.layoutDirection, .rightToLeft)
+            if let q = current {
+                ParentAssistView(question: q, topic: currentTopic) { }
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+        }
+        // The parent answered from their notification → remove the wrong option.
+        .onChange(of: parentHelp.lastReply?.kept) { _, kept in
+            if kept != nil { applyParentHelp() }
         }
         .confirmationDialog("דִּוּוּחַ עַל הַשְּׁאֵלָה",
                             isPresented: $showReportConfirm, titleVisibility: .visible) {
@@ -740,6 +750,8 @@ struct QuestionRunnerView: View {
         hadMistakeThisQuestion = false
         usedHintThisQuestion = false
         assistOfferedThisQuestion = false
+        receivedHelpThisQuestion = false
+        parentHelp.stopListening()
 
         // Re-ask a previously-wrong question every few questions (spaced out) —
         // the only repeat we allow.
@@ -798,6 +810,33 @@ struct QuestionRunnerView: View {
     private func sessionKey(_ q: Question) -> String {
         let correct = q.correctIndex < q.options.count ? q.options[q.correctIndex] : ""
         return "\(q.prompt)|\(correct)"
+    }
+
+    /// A parent answered the help notification. Remove the WRONG option of the
+    /// two they were shown (never the correct answer — safety), and celebrate.
+    private func applyParentHelp() {
+        guard let reply = parentHelp.lastReply, let q = current, !showFeedback else {
+            parentHelp.lastReply = nil; return
+        }
+        let correct = q.correctIndex < q.options.count ? q.options[q.correctIndex] : ""
+        // The wrong one of the two shown to the parent (= whichever isn't correct).
+        guard let toRemove = [reply.kept, reply.removed].first(where: { $0 != correct }),
+              let idx = q.options.firstIndex(of: toRemove),
+              (feedbackForIndex[idx] ?? .normal) == .normal else {
+            parentHelp.lastReply = nil
+            return
+        }
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.65)) {
+            feedbackForIndex[idx] = .eliminated
+        }
+        SoundPlayer.shared.play(.streakUp)
+        Haptic.success()
+        burstTrigger += 1
+        companion.wow("✨ קִבַּלְתָּ רֶמֶז מֵהוֹרֶה!")
+        receivedHelpThisQuestion = true
+        parentHelp.lastReply = nil
+        parentHelp.stopListening()
+        AppAnalytics.log("parent_help_applied", ["topic": q.topic.rawValue])
     }
 
     private func regenerateQuestion() {
@@ -929,6 +968,9 @@ struct QuestionRunnerView: View {
             grantsScreenTime: earnsTime
         )
         earnedThisSession += earned
+        if receivedHelpThisQuestion {
+            AppAnalytics.log("parent_help_success", ["topic": q.topic.rawValue])
+        }
         let minutesGranted = max(0, progress.pendingMinutes - minutesBefore)
 
         LearningHistoryStore.shared.recordAnswer(

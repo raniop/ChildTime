@@ -148,10 +148,12 @@ struct ChildTimeApp: App {
                     AppAnalytics.setUserProperty(role, "device_role")
                     AppAnalytics.setSubscribed(subs.isPremium)
                     await shields.requestAuthorizationIfNeeded()
+                    progress.applyDailyRolloverIfNeeded()   // release minutes banked for "tomorrow"
                     enforceShieldStateIfNeeded()
                 }
                 .onChange(of: scenePhase) { _, phase in
                     if phase == .active, Self.demoScreen == nil {
+                        progress.applyDailyRolloverIfNeeded()
                         enforceShieldStateIfNeeded()
                     }
                 }
@@ -219,14 +221,16 @@ struct ChildTimeApp: App {
             return
         }
 
-        if progress.isUnlocked {
-            // Currently inside a full unlock window — make sure shield is OFF.
+        // Re-sync with the DeviceActivity monitor, which clears the shared grant
+        // ONLY when it's truly spent (real usage reached the limit, or the long
+        // safety backstop ended) — NOT when the iPad was merely locked/idle.
+        progress.reloadUnlockFromShared()
+        if progress.hasLiveUnlockGrant {
+            // Grant still live → keep apps open. Usage-based re-locking is owned by
+            // the monitor extension, so we must NOT burn unused minutes just
+            // because the wall-clock deadline elapsed while the device was locked.
             shields.clearShield()
             return
-        }
-        // No active full unlock — clear a stale window if any.
-        if progress.unlockEndsAt != nil {
-            progress.endUnlock()
         }
 
         // Re-apply the locked baseline (block-all-except-allowlist, or the classic

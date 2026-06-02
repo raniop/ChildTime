@@ -97,10 +97,17 @@ extension PushManager {
     enum Category {
         /// A "strength" insight that offers to raise the child's level.
         static let insightLevelUp = "INSIGHT_LEVELUP"
+        /// A child asked for help — interactive notification with the two answer
+        /// options as buttons (rendered by HelpContentExtension). Must match the
+        /// extension's `UNNotificationExtensionCategory`.
+        static let parentHelp = "PARENT_HELP"
     }
     enum Action {
         static let levelUpYes = "LEVELUP_YES"
         static let levelUpNo  = "LEVELUP_NO"
+        /// The parent kept option A / option B from a help notification.
+        static let helpOptionA = "HELP_OPT_A"
+        static let helpOptionB = "HELP_OPT_B"
     }
 
     /// Register interactive notification categories so the strength-insight push
@@ -119,7 +126,52 @@ extension PushManager {
             actions: [yes, no],
             intentIdentifiers: [],
             options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([cat])
+
+        // Parent-help: two answer buttons. The titles here are only a fallback
+        // (collapsed banner); HelpContentExtension replaces them with the real
+        // option texts when the notification is expanded. Actions are NOT
+        // `.foreground` — the tap is handled in the background, no app launch.
+        let optA = UNNotificationAction(identifier: Action.helpOptionA, title: "אפשרות א׳", options: [])
+        let optB = UNNotificationAction(identifier: Action.helpOptionB, title: "אפשרות ב׳", options: [])
+        let helpCat = UNNotificationCategory(
+            identifier: Category.parentHelp,
+            actions: [optA, optB],
+            intentIdentifiers: [],
+            options: [])
+
+        UNUserNotificationCenter.current().setNotificationCategories([cat, helpCat])
+    }
+
+    /// Apply the parent's tapped answer: the option they kept stays on the child's
+    /// screen, the other is removed. Written to the `helpRequests/{id}` doc, which
+    /// the child's app is listening to — all in the background, no app launch.
+    func handleParentHelpDecision(_ actionID: String, userInfo: [AnyHashable: Any]) {
+        guard actionID == Action.helpOptionA || actionID == Action.helpOptionB else { return }
+        guard let requestID = userInfo["helpRequestID"] as? String else { return }
+        let optionA = (userInfo["optionA"] as? String) ?? ""
+        let optionB = (userInfo["optionB"] as? String) ?? ""
+        let keptA = (actionID == Action.helpOptionA)
+        let kept = keptA ? optionA : optionB
+        let removed = keptA ? optionB : optionA
+        guard !kept.isEmpty, !removed.isEmpty else { return }
+
+        #if canImport(FirebaseFirestore)
+        Firestore.firestore().collection("helpRequests").document(requestID).setData([
+            "keptOption": kept,
+            "removedOption": removed,
+            "status": "answered",
+            "respondedByUID": AuthManager.shared.userID ?? "",
+            "respondedAt": Date().timeIntervalSince1970,
+        ], merge: true)
+        #endif
+
+        // Quietly confirm to the parent.
+        let childName = (userInfo["childName"] as? String) ?? "הילד"
+        let content = UNMutableNotificationContent()
+        content.title = "✅ הָעֶזְרָה נִשְׁלְחָה"
+        content.body = "עָזַרְתָּ לְ\(childName) — נִשְׁאֲרָה הָאֶפְשָׁרוּת \(kept)."
+        UNUserNotificationCenter.current().add(
+            UNNotificationRequest(identifier: "help.confirm.\(requestID)", content: content, trigger: nil))
     }
 
     /// Apply a tapped "raise level" action: bump the named topic's difficulty by
@@ -177,6 +229,7 @@ extension PushManager: UNUserNotificationCenterDelegate {
         let info = response.notification.request.content.userInfo
         await MainActor.run {
             PushManager.shared.handleLevelUpDecision(actionID, userInfo: info)
+            PushManager.shared.handleParentHelpDecision(actionID, userInfo: info)
         }
     }
 }

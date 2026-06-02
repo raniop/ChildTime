@@ -11,6 +11,8 @@ struct DailyChestView: View {
     @State private var reward: ChestReward = ChestReward(stars: 0, gems: 0, minutes: 0)
     @State private var companion = CompanionController()
     @State private var confettiTrigger = 0
+    /// Shown when some/all won minutes were banked for tomorrow (daily cap full).
+    @State private var bankedNote: String? = nil
 
     private var isCompact: Bool { hsc == .compact }
     private var chestSize: CGFloat { isCompact ? 130 : 180 }
@@ -54,8 +56,16 @@ struct DailyChestView: View {
                             row(emoji: "⭐", text: "+\(reward.stars + reward.gems) כּוֹכָבִים")
                                 .transition(.scale.combined(with: .opacity))
                         }
-                        if revealed >= 2 {
+                        if revealed >= 2 && reward.minutes > 0 {
                             row(emoji: "⏱", text: "+\(reward.minutes) דַּקּוֹת")
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                        if revealed >= 2, let note = bankedNote {
+                            Text(note)
+                                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, AppSpacing.md)
                                 .transition(.scale.combined(with: .opacity))
                         }
                     }
@@ -101,7 +111,14 @@ struct DailyChestView: View {
             }
         }
         .onAppear {
+            progress.applyDailyRolloverIfNeeded()
             reward = RewardEngine.chestContents(kind: .magic, correctInSession: 0, minutesPerCorrect: 0)
+            // No room for play-minutes (today's cap full AND tomorrow's bank full)
+            // → don't promise minutes; give a few extra stars instead.
+            if progress.bonusMinutesRoom() <= 0 {
+                reward = ChestReward(stars: reward.stars + reward.gems + 5, gems: 0,
+                                     minutes: 0, cosmeticID: reward.cosmeticID)
+            }
             companion.cheer("חִכִּיתִי לְךָ!")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 stage = .glowing
@@ -131,7 +148,10 @@ struct DailyChestView: View {
             stage = .revealed
             confettiTrigger += 1
             companion.wow("טָא-דָה!")
-            progress.applyChestReward(reward)
+            let grant = progress.applyChestReward(reward)
+            if grant.bankedForTomorrow > 0 {
+                bankedNote = "הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"
+            }
             progress.openDailyChest()
             revealItems()
         }

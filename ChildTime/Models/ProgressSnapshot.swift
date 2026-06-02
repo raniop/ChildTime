@@ -32,6 +32,9 @@ struct ProgressSnapshot: Codable, Equatable {
     /// shows today's activity even though the full learning history is local.
     var answeredToday: Int = 0
     var correctToday: Int = 0
+    /// Bonus minutes banked for tomorrow (≤30). Optional so older snapshots that
+    /// lack the key still decode cleanly — read back as `?? 0`.
+    var carryOverMinutes: Int? = nil
     /// Longest-ever streak of correct answers (synced so the parent can see it).
     var bestStreak: Int = 0
     /// Fractional progress (seconds) toward the next play-minutes bonus.

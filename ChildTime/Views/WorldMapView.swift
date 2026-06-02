@@ -142,6 +142,9 @@ struct WorldMapView: View {
         }
         .onAppear {
             lastSeenStars = progress.stars
+            // Keep my friends-board score live during play (even with the board
+            // closed), so friends always see my current stars.
+            FriendsManager.shared.beginScoreSync()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 greetIfNeeded()
             }
@@ -335,7 +338,17 @@ struct WorldMapView: View {
             Haptic.light()
             infoStat = .minutes
         } label: {
-            MinutesBadge(minutes: progress.pendingMinutes, compact: true)
+            VStack(spacing: 2) {
+                MinutesBadge(minutes: progress.pendingMinutes, compact: true)
+                // How much of today's allowance is used, + minutes banked for tomorrow.
+                if settings.dailyCapEnabled {
+                    Text("\(progress.minutesEarnedToday)/\(settings.maxMinutesPerDay) הַיּוֹם"
+                         + (progress.carryOverMinutes > 0 ? "  ·  🎁 \(progress.carryOverMinutes) לְמָחָר" : ""))
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                }
+            }
         }
         .buttonStyle(.plain)
         .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }

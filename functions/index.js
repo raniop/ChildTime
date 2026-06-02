@@ -148,6 +148,45 @@ exports.sendLiveEvent = onDocumentCreated("children/{childID}/events/{eventID}",
   await send(tokens, msg, { childID: event.params.childID, type: data.type });
 });
 
+// ---- 1c) Parent quick-help -------------------------------------------------
+// A child asked a specific parent for help on a question. Push that parent an
+// interactive notification (category PARENT_HELP) whose two buttons are the
+// answer options — rendered with real text by the HelpContentExtension. The
+// parent's tap is handled in the app (background) and written back to the doc.
+
+exports.onHelpRequest = onDocumentCreated("helpRequests/{id}", async (event) => {
+  const data = event.data && event.data.data();
+  if (!data || !data.parentUID) return;
+
+  const tokens = await tokensForUID(data.parentUID);
+  if (!tokens.length) return;
+
+  const childName = data.childName || "הילד";
+  await admin.messaging().sendEachForMulticast({
+    tokens,
+    notification: { title: `🧠 ${childName} ביקש עזרה`, body: String(data.question || "") },
+    data: {
+      type: "parentHelp",
+      helpRequestID: event.params.id,
+      optionA: String(data.optionA || ""),
+      optionB: String(data.optionB || ""),
+      correctAnswer: String(data.correctAnswer || ""),
+      childName: String(childName),
+      question: String(data.question || ""),
+      topic: String(data.topic || ""),
+    },
+    apns: {
+      payload: {
+        aps: {
+          category: "PARENT_HELP",
+          "mutable-content": 1,
+          sound: "default",
+        },
+      },
+    },
+  });
+});
+
 // ---- 1b) Child-link requests ----------------------------------------------
 
 exports.onChildLinkRequest = onDocumentWritten("childLinkRequests/{id}", async (event) => {

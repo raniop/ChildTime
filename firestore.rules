@@ -130,5 +130,14 @@ service cloud.firestore {
         householdHasMe(get(/databases/$(database)/documents/children/$(childID)).data.householdID)
       );
     }
+
+    // Parent quick-help requests — the child (a household member) creates one
+    // targeting a parent; that parent answers from their notification. Gated on
+    // the household; only the targeted parent may write the answer.
+    match /helpRequests/{id} {
+      allow create: if householdHasMe(request.resource.data.householdID);
+      allow read:   if householdHasMe(resource.data.householdID);
+      allow update: if signedIn() && request.auth.uid == resource.data.parentUID;
+    }
   }
 }

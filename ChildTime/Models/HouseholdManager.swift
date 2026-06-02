@@ -19,6 +19,9 @@ final class HouseholdManager: ObservableObject {
     @Published private(set) var household: Household?
     @Published private(set) var parentAccount: ParentAccount?
     @Published private(set) var linkedParentSummaries: [String] = []   // display names / emails
+    /// Linked parents as (uid, name) — used to target a SPECIFIC parent for a
+    /// help request (the child picks which parent to ask).
+    @Published private(set) var linkedParents: [(uid: String, name: String)] = []
     @Published private(set) var lastError: String?
     /// True while we're fetching the family from the cloud right after sign-in,
     /// so the UI can wait instead of prematurely showing "create a child".
@@ -263,6 +266,10 @@ final class HouseholdManager: ObservableObject {
             .filter { $0.key != self.uid && !$0.value.isEmpty }
             .map { $0.value }
             .sorted()
+        linkedParents = (hh.parentNames ?? [:])
+            .filter { !$0.value.isEmpty }
+            .map { (uid: $0.key, name: $0.value) }
+            .sorted { $0.name < $1.name }
     }
     #endif
 

@@ -1,10 +1,15 @@
 import SwiftUI
 
-/// Shown mid-session when a child is clearly stuck (2 wrong picks). Offers a
-/// warm, no-pressure choice: ask a linked parent for help (sends them a push via
-/// the events → Cloud Function pipeline) or keep going solo. Never shaming.
+/// Shown mid-session when a child is clearly stuck (2 wrong picks). The child
+/// picks a linked parent → an interactive push goes to that parent with the
+/// question and two answer buttons; one tap from the notification removes a
+/// wrong option from the child's screen. Warm, no-pressure, never shaming.
 struct ParentAssistView: View {
+    /// The question the child needs help with.
+    let question: Question
+    let topic: Topic
     let onContinue: () -> Void
+
     @ObservedObject private var household = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var sent = false
@@ -21,13 +26,15 @@ struct ParentAssistView: View {
                 Text("שָׁלַחְנוּ בַּקָּשַׁת עֶזְרָה 💌")
                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                     .foregroundStyle(AppColor.successMint)
+            } else if household.linkedParents.isEmpty {
+                // No linked parent on file — fall back to a general nudge.
+                assistButton("💌 בַּקֵּשׁ עֶזְרָה מֵהוֹרֶה") { askGeneral() }
             } else {
                 VStack(spacing: AppSpacing.sm) {
-                    ForEach(parentOptions, id: \.self) { parent in
-                        assistButton("👨‍👩‍👧 בַּקֵּשׁ עֶזְרָה מ\(parent)") { askParent() }
-                    }
-                    if parentOptions.isEmpty {
-                        assistButton("💌 בַּקֵּשׁ עֶזְרָה מֵהוֹרֶה") { askParent() }
+                    ForEach(household.linkedParents, id: \.uid) { parent in
+                        assistButton("👨‍👩‍👧 בַּקֵּשׁ עֶזְרָה מ\(parent.name)") {
+                            askParent(uid: parent.uid)
+                        }
                     }
                 }
             }
@@ -51,10 +58,6 @@ struct ParentAssistView: View {
         .presentationDetents([.medium])
     }
 
-    private var parentOptions: [String] {
-        Array(household.linkedParentSummaries.prefix(2))
-    }
-
     private func assistButton(_ title: String, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
@@ -68,9 +71,39 @@ struct ParentAssistView: View {
         .buttonStyle(.juicy)
     }
 
-    private func askParent() {
+    /// The correct answer + one random wrong option — the two choices the parent
+    /// will see in the notification.
+    private var correctAnswer: String {
+        question.correctIndex < question.options.count ? question.options[question.correctIndex] : ""
+    }
+    private var distractor: String {
+        question.options.enumerated()
+            .filter { $0.offset != question.correctIndex }
+            .map(\.element)
+            .randomElement() ?? ""
+    }
+
+    private func askParent(uid: String) {
+        Haptic.light()
+        guard let childID = ProfileStore.shared.activeID?.uuidString,
+              let householdID = household.household?.id else { askGeneral(); return }
+        let childName = ProfileStore.shared.active?.name ?? "הילד"
+        ParentHelpManager.shared.requestHelp(
+            childID: childID, childName: childName, parentUID: uid,
+            householdID: householdID, topic: topic,
+            question: question.prompt, correctAnswer: correctAnswer, distractor: distractor)
+        finish()
+    }
+
+    /// Fallback when no specific parent is linked: the legacy "a parent device
+    /// gets a generic nudge" path (no interactive answer buttons).
+    private func askGeneral() {
         Haptic.light()
         LiveEventReporter.report(.assistRequest)
+        finish()
+    }
+
+    private func finish() {
         withAnimation { sent = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
             onContinue(); dismiss()

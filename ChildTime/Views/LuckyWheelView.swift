@@ -92,6 +92,12 @@ struct LuckyWheelView: View {
             }
         }
         .onAppear {
+            progress.applyDailyRolloverIfNeeded()
+            // No room for play-minutes today (cap full) AND tomorrow's bank is
+            // full → don't offer minute prizes on the wheel.
+            if progress.bonusMinutesRoom() <= 0 {
+                wedges = LuckyWheelCatalog.wedgesForSpin(excludeMinutes: true)
+            }
             withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
                 pulse = true
             }

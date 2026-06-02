@@ -215,10 +215,13 @@ final class ShieldManager: ObservableObject {
             threshold: DateComponents(minute: safeMinutes)
         )
 
-        // Backstop window: at least the OS minimum, but long enough to contain
-        // the grant if the kid plays straight through. Time-of-day components
-        // only — mixed date+time components stop `intervalDidEnd` from firing.
-        let windowMinutes = max(safeMinutes, Self.minimumOSScheduleMinutes)
+        // Backstop window is ONLY a safety net in case the usage event misfires —
+        // NOT the real limit. The usage event re-locks after `safeMinutes` of
+        // ACTUAL play (it pauses while the device is locked / idle). So we make
+        // the wall-clock window generous: locking the iPad mid-session no longer
+        // burns the grant — the kid keeps their unused minutes for real play.
+        // Time-of-day components only — mixed date+time stop `intervalDidEnd`.
+        let windowMinutes = max(safeMinutes + 5, 120)
         let now = Date()
         let calendar = Calendar.current
         let startComponents = calendar.dateComponents([.hour, .minute, .second], from: now)

@@ -206,6 +206,7 @@ final class FriendsManager: ObservableObject {
         guard let id = myID, AuthManager.shared.isSignedIn else { return }
         myCode = codeForActiveChild()
         await upsertMyCard(id: id)
+        beginScoreSync()   // keep my score live while the board is open
         stopLive()
 
         myCardListener = db.collection("friendCards").document(id)
@@ -234,6 +235,35 @@ final class FriendsManager: ObservableObject {
         friendListeners.removeAll()
     }
 
+    private var scoreSyncCancellable: AnyCancellable?
+
+    /// Keep my PUBLIC card's star count fresh in real time WHENEVER my stars
+    /// change during play — so friends' live boards always show my current score,
+    /// not just the value from the last time I opened my own board. Debounced to
+    /// avoid hammering Firestore; only writes once I actually have a card.
+    func beginScoreSync() {
+        guard scoreSyncCancellable == nil else { return }   // idempotent
+        scoreSyncCancellable = ProgressStore.shared.$stars
+            .dropFirst()
+            .debounce(for: .seconds(2.5), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                Task { @MainActor in
+                    guard let self,
+                          AuthManager.shared.isSignedIn,
+                          let id = ProfileStore.shared.activeID?.uuidString,
+                          Self.cardExists(id) else { return }
+                    await self.upsertMyCard(id: id)
+                }
+            }
+    }
+
+    private static func cardExists(_ id: String) -> Bool {
+        UserDefaults.standard.bool(forKey: "friendCard.exists.\(id)")
+    }
+    private static func markCardExists(_ id: String) {
+        UserDefaults.standard.set(true, forKey: "friendCard.exists.\(id)")
+    }
+
     /// Recompute my friend set from the cache, (un)subscribe to each friend's card
     /// for live stars, and publish the sorted board.
     private func rebuild(myID: String) {
@@ -257,7 +287,10 @@ final class FriendsManager: ObservableObject {
     }
 
     private func publish(myID: String) {
-        guard let me = cardCache[myID] else { return }
+        guard var me = cardCache[myID] else { return }
+        // My own row reflects my LIVE local star count immediately (no waiting for
+        // the Firestore round-trip), so the board never lags my own play.
+        me.stars = ProgressStore.shared.stars
         var ids = Set(me.friendIDs)
         for (fid, c) in cardCache where c.friendIDs.contains(myID) { ids.insert(fid) }
         ids.subtract(me.hiddenIDs); ids.remove(myID)
@@ -285,6 +318,7 @@ final class FriendsManager: ObservableObject {
         fields = fields.compactMapValues { $0 }
         do {
             try await db.collection("friendCards").document(id).setData(fields, merge: true)
+            Self.markCardExists(id)   // enable live score-sync from now on
             log("✅ upsertMyCard OK id=\(id) code=\(myCode) ownerUID=\(card.ownerUID)")
         } catch {
             log("❌ upsertMyCard FAILED: \((error as NSError).domain) #\((error as NSError).code): \(error.localizedDescription)")

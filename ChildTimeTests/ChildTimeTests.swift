@@ -19,9 +19,9 @@ struct ChildTimeTests {
         let all = Character3DCatalog.all
 
         // 1. Roster integrity.
-        #expect(all.count == 36)
+        #expect(all.count == 48)
         #expect(all.filter { $0.isFree }.count == 4)
-        #expect(Set(all.map(\.id)).count == 36)               // no duplicate ids
+        #expect(Set(all.map(\.id)).count == 48)               // no duplicate ids
         #expect(Character3DCatalog.find(nil).id == "fox")     // default fallback
         #expect(Character3DCatalog.find("does_not_exist").id == "fox")
 

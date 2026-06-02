@@ -31,6 +31,7 @@ final class ProgressStore: ObservableObject {
         static let totalScore = "totalScore"
         static let minutesEarnedToday = "minutesEarnedToday"
         static let dailyEarnedDate = "dailyEarnedDate"
+        static let carryOverMinutes = "carryOverMinutes"
         static let answeredToday = "answeredToday"
         static let correctToday = "correctToday"
         static let bestStreak = "bestStreak"
@@ -175,6 +176,14 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var minutesEarnedToday: Int {
         didSet { defaults.set(minutesEarnedToday, forKey: Key.minutesEarnedToday) }
     }
+    /// Bonus minutes (wheel/chest) won AFTER today's cap was full — banked for
+    /// TOMORROW, capped at `maxCarryOverMinutes`. Becomes playable on the next
+    /// day's rollover.
+    @Published private(set) var carryOverMinutes: Int {
+        didSet { defaults.set(carryOverMinutes, forKey: Key.carryOverMinutes) }
+    }
+    /// Ceiling on minutes banked for tomorrow.
+    static let maxCarryOverMinutes = 30
     /// Questions answered / correct today (reset on the same daily boundary as
     /// minutesEarnedToday). Synced so the parent sees today's activity.
     @Published private(set) var answeredToday: Int {
@@ -307,6 +316,7 @@ final class ProgressStore: ObservableObject {
         self.wrongStreak = d.integer(forKey: Key.wrongStreak)
         self.totalScore = d.integer(forKey: Key.totalScore)
         self.minutesEarnedToday = d.integer(forKey: Key.minutesEarnedToday)
+        self.carryOverMinutes = d.integer(forKey: Key.carryOverMinutes)
         self.answeredToday = d.integer(forKey: Key.answeredToday)
         self.correctToday = d.integer(forKey: Key.correctToday)
         self.bestStreak = d.integer(forKey: Key.bestStreak)
@@ -351,6 +361,7 @@ final class ProgressStore: ObservableObject {
             $bestStreak.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $answeredToday.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $correctToday.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $carryOverMinutes.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $cycleSeconds.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $ownedCharacterIDs.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $unlockedWorlds.dropFirst().map { _ in () }.eraseToAnyPublisher(),
@@ -668,7 +679,12 @@ final class ProgressStore: ObservableObject {
            Calendar.current.isDate(last, inSameDayAs: today) {
             return minutesEarnedToday
         }
-        // New day — reset the daily counters together.
+        // New day — first, yesterday's banked bonus minutes become playable.
+        if carryOverMinutes > 0 {
+            pendingMinutes += carryOverMinutes
+            carryOverMinutes = 0
+        }
+        // Reset the daily counters together.
         minutesEarnedToday = 0
         answeredToday = 0
         correctToday = 0
@@ -677,6 +693,59 @@ final class ProgressStore: ObservableObject {
     }
 
     /// Adds minutes to `pendingMinutes` while honoring the daily cap.
+    /// Outcome of granting bonus minutes — lets the UI explain exactly what
+    /// happened (added now vs. banked for tomorrow vs. bank full).
+    struct BonusGrant { var addedToday: Int = 0; var bankedForTomorrow: Int = 0; var bankFull: Bool = false }
+
+    /// How many bonus minutes can still be granted right now — today's remaining
+    /// cap room PLUS the room left in tomorrow's bank. 0 means no minute prize can
+    /// land (used to stop the wheel/chest from offering minutes).
+    func bonusMinutesRoom() -> Int {
+        let s = ParentSettings.shared
+        guard s.dailyCapEnabled else { return .max }
+        let todayRoom = max(0, s.maxMinutesPerDay - minutesEarnedToday)
+        let bankRoom = max(0, Self.maxCarryOverMinutes - carryOverMinutes)
+        return todayRoom + bankRoom
+    }
+
+    /// Roll the daily counters over if the calendar day changed — and release any
+    /// minutes banked for "tomorrow" into the playable pool. Safe to call often
+    /// (e.g. on app foreground); it's a no-op within the same day.
+    func applyDailyRolloverIfNeeded() {
+        _ = minutesEarnedTodayRespectingDate()
+    }
+
+    /// Bonus play-minutes from the Lucky Wheel / chests — a reward for engagement.
+    /// Fills today's remaining allowance first; once today's cap is full, the
+    /// overflow is BANKED for tomorrow (capped at `maxCarryOverMinutes`). Returns
+    /// what actually happened so the UI can show the right message.
+    @discardableResult
+    func grantBonusMinutes(_ amount: Int) -> BonusGrant {
+        guard amount > 0 else { return BonusGrant() }
+        let s = ParentSettings.shared
+        guard s.dailyCapEnabled else {
+            pendingMinutes += amount
+            return BonusGrant(addedToday: amount)
+        }
+        _ = minutesEarnedTodayRespectingDate()
+        var result = BonusGrant()
+        let todayRoom = max(0, s.maxMinutesPerDay - minutesEarnedToday)
+        let toToday = min(amount, todayRoom)
+        if toToday > 0 {
+            pendingMinutes += toToday
+            minutesEarnedToday += toToday
+            result.addedToday = toToday
+        }
+        let overflow = amount - toToday
+        if overflow > 0 {
+            let bankRoom = max(0, Self.maxCarryOverMinutes - carryOverMinutes)
+            let banked = min(overflow, bankRoom)
+            if banked > 0 { carryOverMinutes += banked; result.bankedForTomorrow = banked }
+        }
+        result.bankFull = (carryOverMinutes >= Self.maxCarryOverMinutes)
+        return result
+    }
+
     /// Returns the amount actually granted (may be less than `amount` if
     /// the cap clips it).
     @discardableResult
@@ -797,15 +866,18 @@ final class ProgressStore: ObservableObject {
 
     // MARK: - Chest / Daily
 
-    func applyChestReward(_ reward: ChestReward) {
+    @discardableResult
+    func applyChestReward(_ reward: ChestReward) -> BonusGrant {
         // Single currency: any legacy "gem" portion of a reward is folded into
         // stars so the child only ever collects ⭐.
         stars += reward.stars + reward.gems
-        // Time bonuses honor the daily cap (so chests can't smuggle around it).
-        _ = grantMinutesCapped(reward.minutes)
+        // Chest/wheel time is a BONUS: it fills today's allowance, then banks the
+        // overflow for tomorrow (≤30) — so a win is never silently lost.
+        let grant = grantBonusMinutes(reward.minutes)
         if let cosmetic = reward.cosmeticID {
             ownedCosmetics.insert(cosmetic)
         }
+        return grant
     }
 
     func openDailyChest() {
@@ -893,6 +965,28 @@ final class ProgressStore: ObservableObject {
         PlayTimeLiveActivity.end()
     }
 
+    /// True while a play-time grant is still LIVE — i.e. the DeviceActivity
+    /// monitor extension hasn't re-locked yet. The extension clears the shared
+    /// `unlockEndsAt` key ONLY when the grant is truly spent (real usage reached
+    /// the threshold, or the long safety backstop ended). So a present key means
+    /// the kid still has usage budget, even if the wall-clock deadline elapsed
+    /// while the iPad was locked/idle — we must NOT burn it.
+    var hasLiveUnlockGrant: Bool {
+        defaults.object(forKey: Key.unlockEndsAt) as? Date != nil
+    }
+
+    /// Re-sync the unlock deadline from the shared app group (the monitor
+    /// extension may have cleared it while we were backgrounded). Call on
+    /// foreground before deciding whether to re-lock.
+    func reloadUnlockFromShared() {
+        let shared = defaults.object(forKey: Key.unlockEndsAt) as? Date
+        if shared == nil {
+            if unlockEndsAt != nil { endUnlock() }   // extension spent/ended it
+        } else if shared != unlockEndsAt {
+            unlockEndsAt = shared
+        }
+    }
+
     /// Stop the current unlock window early and return whatever full minutes
     /// remained back to the pending pool so the kid doesn't lose them.
     /// Returns the number of minutes returned.
@@ -963,6 +1057,7 @@ final class ProgressStore: ObservableObject {
         s.dailyEarnedDate     = dailyEarnedDate
         s.answeredToday       = answeredToday
         s.correctToday        = correctToday
+        s.carryOverMinutes    = carryOverMinutes
         s.bestStreak          = bestStreak
         s.topicResponseMs     = topicResponseMs
         s.topicAffinity       = topicAffinity
@@ -1017,6 +1112,7 @@ final class ProgressStore: ObservableObject {
         dailyEarnedDate     = s.dailyEarnedDate
         answeredToday       = s.answeredToday
         correctToday        = s.correctToday
+        carryOverMinutes    = s.carryOverMinutes ?? 0
         bestStreak          = max(bestStreak, s.bestStreak)
         topicResponseMs     = s.topicResponseMs
         topicAffinity       = s.topicAffinity

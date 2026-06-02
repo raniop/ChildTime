@@ -56,8 +56,14 @@ enum LuckyWheelCatalog {
 
     /// 8-wedge layout for one spin. Every wedge is a win — no "loss"/chore
     /// wedges, so the wheel is always a happy moment.
-    static func wedgesForSpin() -> [WheelPrize] {
-        Array(prizes.filter { !$0.isPenalty }.shuffled().prefix(8))
+    static func wedgesForSpin(excludeMinutes: Bool = false) -> [WheelPrize] {
+        var pool = prizes.filter { !$0.isPenalty }
+        // When there's no room left for play-minutes (daily cap full AND the
+        // tomorrow-bank is full), don't offer minute prizes at all.
+        if excludeMinutes {
+            pool = pool.filter { if case .minutes = $0.kind { return false }; return true }
+        }
+        return Array(pool.shuffled().prefix(8))
     }
 }
 
@@ -78,8 +84,14 @@ extension WheelPrize {
             progress.addXP(n)
             return "+\(n) XP נוֹסְפוּ"
         case .minutes(let n):
-            _ = progress.grantMinutesCapped(n)
-            return "+\(n) דַּקּוֹת נוֹסְפוּ לִזְמַן הַמִּשְׂחָק"
+            let g = progress.grantBonusMinutes(n)
+            if g.addedToday > 0 && g.bankedForTomorrow > 0 {
+                return "+\(g.addedToday) דַּקּוֹת עַכְשָׁיו · עוֹד \(g.bankedForTomorrow) נִשְׁמְרוּ לְמָחָר 🎁"
+            } else if g.bankedForTomorrow > 0 {
+                return "הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(g.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"
+            } else {
+                return "+\(g.addedToday) דַּקּוֹת נוֹסְפוּ לִזְמַן הַמִּשְׂחָק"
+            }
         case .rareItem(let id):
             if let item = CosmeticCatalog.item(id), !cosmetics.owns(item) {
                 cosmetics.unlockFree(item)
