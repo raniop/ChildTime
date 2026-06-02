@@ -654,20 +654,27 @@ final class ProgressStore: ObservableObject {
 
     // MARK: - Daily cap on earned minutes
 
+    /// Effective daily cap for the ACTIVE child: a per-child value (set by the
+    /// parent and synced via ChildRecord) overrides the device-global setting.
+    var dailyCap: (enabled: Bool, max: Int) {
+        let s = ParentSettings.shared
+        return ProfileStore.shared.active?
+            .resolvedDailyCap(globalEnabled: s.dailyCapEnabled, globalMax: s.maxMinutesPerDay)
+            ?? (s.dailyCapEnabled, s.maxMinutesPerDay)
+    }
+
     /// True iff the kid has already hit today's earning ceiling.
     var atDailyCap: Bool {
-        let s = ParentSettings.shared
-        guard s.dailyCapEnabled else { return false }
+        guard dailyCap.enabled else { return false }
         return minutesRemainingTodayCap == 0
     }
 
     /// Minutes the kid can still earn today (when cap is active). When the
     /// cap is disabled, returns `.max` so callers can treat it as unlimited.
     var minutesRemainingTodayCap: Int {
-        let s = ParentSettings.shared
-        guard s.dailyCapEnabled else { return .max }
-        let limit = max(0, s.maxMinutesPerDay)
-        return max(0, limit - minutesEarnedTodayRespectingDate())
+        let cap = dailyCap
+        guard cap.enabled else { return .max }
+        return max(0, max(0, cap.max) - minutesEarnedTodayRespectingDate())
     }
 
     /// Minutes earned today, rolling over silently if the date has changed.
@@ -701,9 +708,9 @@ final class ProgressStore: ObservableObject {
     /// cap room PLUS the room left in tomorrow's bank. 0 means no minute prize can
     /// land (used to stop the wheel/chest from offering minutes).
     func bonusMinutesRoom() -> Int {
-        let s = ParentSettings.shared
-        guard s.dailyCapEnabled else { return .max }
-        let todayRoom = max(0, s.maxMinutesPerDay - minutesEarnedToday)
+        let cap = dailyCap
+        guard cap.enabled else { return .max }
+        let todayRoom = max(0, cap.max - minutesEarnedToday)
         let bankRoom = max(0, Self.maxCarryOverMinutes - carryOverMinutes)
         return todayRoom + bankRoom
     }
@@ -722,14 +729,14 @@ final class ProgressStore: ObservableObject {
     @discardableResult
     func grantBonusMinutes(_ amount: Int) -> BonusGrant {
         guard amount > 0 else { return BonusGrant() }
-        let s = ParentSettings.shared
-        guard s.dailyCapEnabled else {
+        let cap = dailyCap
+        guard cap.enabled else {
             pendingMinutes += amount
             return BonusGrant(addedToday: amount)
         }
         _ = minutesEarnedTodayRespectingDate()
         var result = BonusGrant()
-        let todayRoom = max(0, s.maxMinutesPerDay - minutesEarnedToday)
+        let todayRoom = max(0, cap.max - minutesEarnedToday)
         let toToday = min(amount, todayRoom)
         if toToday > 0 {
             pendingMinutes += toToday
@@ -753,9 +760,9 @@ final class ProgressStore: ObservableObject {
         guard amount > 0 else { return 0 }
         _ = minutesEarnedTodayRespectingDate()
         let allowed: Int = {
-            let s = ParentSettings.shared
-            guard s.dailyCapEnabled else { return amount }
-            let remaining = max(0, s.maxMinutesPerDay - minutesEarnedToday)
+            let cap = dailyCap
+            guard cap.enabled else { return amount }
+            let remaining = max(0, cap.max - minutesEarnedToday)
             return min(amount, remaining)
         }()
         guard allowed > 0 else { return 0 }

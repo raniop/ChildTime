@@ -32,6 +32,7 @@ struct ParentDashboardView: View {
     @State private var showingKidMode = false
     @State private var friendsProfile: Profile?
     @State private var difficultyProfile: Profile?
+    @State private var screenTimeProfile: Profile?
     @State private var showingFeedback = false
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
@@ -212,6 +213,12 @@ struct ParentDashboardView: View {
             .sheet(item: $difficultyProfile) { p in
                 ChildDifficultyView(profileID: p.id)
                     .environmentObject(profiles)
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(item: $screenTimeProfile) { p in
+                ChildScreenTimeView(profileID: p.id)
+                    .environmentObject(profiles)
+                    .environmentObject(settings)
                     .environment(\.layoutDirection, .rightToLeft)
             }
             .sheet(isPresented: $showingFeedback) {
@@ -637,6 +644,8 @@ struct ParentDashboardView: View {
         let lp = LearningProfile(snapshot: s, enabledTopics: settings.enabledTopics, age: profile.age)
         let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: profile.id), profile: lp)
         let status = overallStatus(engine: engine, lp: lp, hasData: s.totalAnswered >= 4)
+        // This child's effective daily screen-time cap (per-child override, else global).
+        let cap = profile.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
 
         return VStack(spacing: 14) {
             HStack(spacing: 12) {
@@ -652,6 +661,11 @@ struct ParentDashboardView: View {
                         difficultyProfile = profile
                     } label: {
                         Label("רמת קושי", systemImage: "slider.horizontal.3")
+                    }
+                    Button {
+                        screenTimeProfile = profile
+                    } label: {
+                        Label("זמן מסך יומי", systemImage: "hourglass")
                     }
                     Button {
                         friendsProfile = profile
@@ -708,7 +722,7 @@ struct ParentDashboardView: View {
             // Today at a glance.
             HStack(spacing: 10) {
                 statCell(emoji: "⏱",
-                         value: settings.dailyCapEnabled ? "\(s.minutesEarnedToday)/\(settings.maxMinutesPerDay)" : "\(s.minutesEarnedToday)",
+                         value: cap.enabled ? "\(s.minutesEarnedToday)/\(cap.minutes)" : "\(s.minutesEarnedToday)",
                          label: "זמן מסך היום")
                 statCell(emoji: "❓", value: "\(s.answeredToday)", label: "שאלות היום")
                 statCell(emoji: "🎯", value: s.answeredToday > 0 ? "\(Int(Double(s.correctToday) / Double(s.answeredToday) * 100))%" : "—", label: "הצלחה היום")
@@ -780,11 +794,11 @@ struct ParentDashboardView: View {
 
             // Daily cap line (if enabled) — earned-out-of-max + any minutes banked
             // for tomorrow (bonus overflow once the daily cap was full).
-            if settings.dailyCapEnabled {
+            if cap.enabled {
                 HStack(spacing: 6) {
                     Image(systemName: "timer")
                         .foregroundStyle(.secondary)
-                    Text("נצבר היום: \(s.minutesEarnedToday) / \(settings.maxMinutesPerDay) דק'"
+                    Text("נצבר היום: \(s.minutesEarnedToday) / \(cap.minutes) דק'"
                          + ((s.carryOverMinutes ?? 0) > 0 ? "  ·  🎁 \(s.carryOverMinutes ?? 0) למחר" : ""))
                         .font(.caption)
                         .foregroundStyle(.secondary)

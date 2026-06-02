@@ -33,6 +33,10 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// Difficulty is per-child (not a global device setting) so siblings at
     /// different levels each get the right challenge.
     var difficultyByTopic: [String: String]
+    /// Daily screen-time cap for THIS child, in minutes — set by the parent from
+    /// their device and synced via `ChildRecord`. nil → inherit the device's
+    /// global setting; 0 → unlimited (no cap). Per-child so siblings can differ.
+    var dailyCapMinutes: Int?
 
     init(
         id: UUID = UUID(),
@@ -46,7 +50,8 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         grade: Int? = nil,
         interests: [String] = [],
         learningLevel: LearningLevel = .developing,
-        difficultyByTopic: [String: String] = [:]
+        difficultyByTopic: [String: String] = [:],
+        dailyCapMinutes: Int? = nil
     ) {
         self.id = id
         self.name = name
@@ -60,13 +65,14 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.interests = interests
         self.learningLevel = learningLevel
         self.difficultyByTopic = difficultyByTopic
+        self.dailyCapMinutes = dailyCapMinutes
     }
 
     // Backward-compatible decoding: profiles stored before the Parent Platform
     // shipped won't have grade / interests / learningLevel keys.
     enum CodingKeys: String, CodingKey {
         case id, name, gender, age, photoData, avatarPresetID, character3DID, createdAt
-        case grade, interests, learningLevel, difficultyByTopic
+        case grade, interests, learningLevel, difficultyByTopic, dailyCapMinutes
     }
 
     init(from decoder: Decoder) throws {
@@ -83,6 +89,16 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.interests = try c.decodeIfPresent([String].self, forKey: .interests) ?? []
         self.learningLevel = try c.decodeIfPresent(LearningLevel.self, forKey: .learningLevel) ?? .developing
         self.difficultyByTopic = try c.decodeIfPresent([String: String].self, forKey: .difficultyByTopic) ?? [:]
+        self.dailyCapMinutes = try c.decodeIfPresent(Int.self, forKey: .dailyCapMinutes)
+    }
+
+    /// Resolved daily screen-time cap for this child. A per-child value overrides
+    /// the device-global setting; nil → inherit the global; ≤0 → unlimited.
+    func resolvedDailyCap(globalEnabled: Bool, globalMax: Int) -> (enabled: Bool, minutes: Int) {
+        if let m = dailyCapMinutes {
+            return m <= 0 ? (false, 0) : (true, m)
+        }
+        return (globalEnabled, globalMax)
     }
 
     /// Effective base difficulty for a topic: the parent's explicit per-topic

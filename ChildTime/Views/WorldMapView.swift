@@ -341,8 +341,8 @@ struct WorldMapView: View {
             VStack(spacing: 2) {
                 MinutesBadge(minutes: progress.pendingMinutes, compact: true)
                 // How much of today's allowance is used, + minutes banked for tomorrow.
-                if settings.dailyCapEnabled {
-                    Text("\(progress.minutesEarnedToday)/\(settings.maxMinutesPerDay) הַיּוֹם"
+                if progress.dailyCap.enabled {
+                    Text("\(progress.minutesEarnedToday)/\(progress.dailyCap.max) הַיּוֹם"
                          + (progress.carryOverMinutes > 0 ? "  ·  🎁 \(progress.carryOverMinutes) לְמָחָר" : ""))
                         .font(.system(size: 10, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))

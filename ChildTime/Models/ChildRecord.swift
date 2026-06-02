@@ -114,6 +114,9 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// existed still decode. The parent's device is authoritative — it edits this
     /// from the dashboard; the child's device mirrors it.
     var difficultyByTopic: [String: String]?
+    /// Per-child daily screen-time cap in minutes (parent-set, authoritative on
+    /// the parent's device). nil → inherit the device global; 0 → unlimited.
+    var dailyCapMinutes: Int?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -129,6 +132,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.createdAt = profile.createdAt
         self.photoData = Self.compressForSync(profile.photoData)
         self.difficultyByTopic = profile.difficultyByTopic.isEmpty ? nil : profile.difficultyByTopic
+        self.dailyCapMinutes = profile.dailyCapMinutes
     }
 
     /// Rehydrate a local `Profile`. The photo now syncs (compressed), so a custom
@@ -147,7 +151,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             grade: grade,
             interests: interests,
             learningLevel: LearningLevel(rawValue: learningLevel) ?? .developing,
-            difficultyByTopic: difficultyByTopic ?? [:]
+            difficultyByTopic: difficultyByTopic ?? [:],
+            dailyCapMinutes: dailyCapMinutes
         )
     }
 
