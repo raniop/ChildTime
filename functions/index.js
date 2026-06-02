@@ -13,10 +13,33 @@
  */
 const { onDocumentCreated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
+const nodemailer = require("nodemailer");
 
 admin.initializeApp();
 const db = admin.firestore();
+
+// Where parent feedback is emailed, and the Gmail account used to send it.
+// Set the secrets before deploying:
+//   firebase functions:secrets:set GMAIL_USER   (the sending Gmail address)
+//   firebase functions:secrets:set GMAIL_PASS   (a Gmail APP PASSWORD, not the login)
+// Optionally override the recipient:
+//   firebase deploy --only functions  (FEEDBACK_TO defaults to ranioph@gmail.com)
+const GMAIL_USER = defineSecret("GMAIL_USER");
+const GMAIL_PASS = defineSecret("GMAIL_PASS");
+const FEEDBACK_TO = ["ranioph@gmail.com", "amitgolans@gmail.com"];  // recipients for feedback + question reports
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Wrap the lines in a right-to-left, right-aligned HTML body so Hebrew emails
+// render correctly (plain text shows left-aligned in most clients).
+function rtlBody(lines) {
+  const html = lines.map((l) => escapeHtml(l) || "&nbsp;").join("<br>");
+  return `<div dir="rtl" style="text-align:right;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;">${html}</div>`;
+}
 
 // ---- Helpers ---------------------------------------------------------------
 
@@ -217,3 +240,102 @@ exports.sendTestPush = onDocumentCreated("pushTests/{id}", async (event) => {
   }
   await event.data.ref.delete().catch(() => {});
 });
+
+// ---- Parent feedback → email ----------------------------------------------
+// When a parent submits feedback from the dashboard's floating button (written
+// to `parentFeedback/{id}`), email it to the team so we see suggestions/bugs.
+// Needs the GMAIL_USER / GMAIL_PASS secrets set (see top of file). Degrades
+// gracefully: if creds are missing it just logs and leaves the doc in place.
+exports.onParentFeedback = onDocumentCreated(
+  { document: "parentFeedback/{id}", secrets: [GMAIL_USER, GMAIL_PASS] },
+  async (event) => {
+    const fb = (event.data && event.data.data()) || {};
+    const when = fb.createdAt
+      ? new Date(Number(fb.createdAt) * 1000).toLocaleString("he-IL", { timeZone: "Asia/Jerusalem" })
+      : "";
+    const lines = [
+      `הודעה:`,
+      `${fb.message || "(ריק)"}`,
+      ``,
+      `— מאת (uid): ${fb.fromUID || "anonymous"}`,
+      `— משפחה: ${fb.householdID || "-"}`,
+      `— גרסה: ${fb.appVersion || "-"}`,
+      `— שפה: ${fb.locale || "-"}`,
+      `— מתי: ${when}`,
+    ];
+
+    // Email to the team.
+    const user = GMAIL_USER.value();
+    const pass = GMAIL_PASS.value();
+    if (!user || !pass) {
+      console.warn("[feedback] GMAIL_USER/GMAIL_PASS not set — skipping email. Feedback:", lines.join(" | "));
+      return;
+    }
+
+    try {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: { user, pass },
+      });
+      await transporter.sendMail({
+        from: `ChildTime <${user}>`,
+        to: FEEDBACK_TO,
+        subject: "📩 פידבק חדש מהורה — ChildTime",
+        text: lines.join("\n"),
+        html: rtlBody(lines),
+      });
+      console.log("[feedback] emailed to", FEEDBACK_TO.join(", "));
+    } catch (e) {
+      console.error("[feedback] send failed:", e && e.message);
+    }
+  }
+);
+
+// ---- Bad-question report → email ------------------------------------------
+// When a parent flags a question (the 🚩 in the game, written to
+// `questionReports/{id}`), email it to the team so we can fix/remove it.
+// Same Gmail secrets + recipient as parent feedback.
+exports.onQuestionReport = onDocumentCreated(
+  { document: "questionReports/{id}", secrets: [GMAIL_USER, GMAIL_PASS] },
+  async (event) => {
+    const r = (event.data && event.data.data()) || {};
+    const when = r.createdAt
+      ? new Date(Number(r.createdAt) * 1000).toLocaleString("he-IL", { timeZone: "Asia/Jerusalem" })
+      : "";
+    const lines = [
+      `דווח על שאלה לא טובה:`,
+      ``,
+      `שאלה: ${r.prompt || "(ריק)"}`,
+      `תשובה נכונה: ${r.correctAnswer || "-"}`,
+      `נושא: ${r.topic || "-"}`,
+      `סיבה: ${r.reason || "(לא צוינה)"}`,
+      ``,
+      `— דווח ע"י (uid): ${r.reportedBy || "anonymous"}`,
+      `— מתי: ${when}`,
+    ];
+
+    const user = GMAIL_USER.value();
+    const pass = GMAIL_PASS.value();
+    if (!user || !pass) {
+      console.warn("[questionReport] GMAIL_USER/GMAIL_PASS not set — skipping email. Report:", lines.join(" | "));
+      return;
+    }
+
+    try {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: { user, pass },
+      });
+      await transporter.sendMail({
+        from: `ChildTime <${user}>`,
+        to: FEEDBACK_TO,
+        subject: "🚩 דיווח על שאלה לא טובה — ChildTime",
+        text: lines.join("\n"),
+        html: rtlBody(lines),
+      });
+      console.log("[questionReport] emailed to", FEEDBACK_TO.join(", "));
+    } catch (e) {
+      console.error("[questionReport] send failed:", e && e.message);
+    }
+  }
+);

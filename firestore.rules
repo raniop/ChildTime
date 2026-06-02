@@ -74,6 +74,12 @@ service cloud.firestore {
       allow create: if signedIn();
     }
 
+    // Parent feedback / suggestions sent from the dashboard's floating button —
+    // any signed-in parent may submit; only admins (via console) read them.
+    match /parentFeedback/{id} {
+      allow create: if signedIn();
+    }
+
     // Legacy per-user progress path (older builds wrote here). Owner-only.
     match /users/{uid}/{document=**} {
       allow read, write: if signedIn() && request.auth.uid == uid;
