@@ -43,6 +43,8 @@ final class ProgressStore: ObservableObject {
         static let pendingBonusWheel = "pendingBonusWheel"
         static let lastComebackWheelAt = "lastComebackWheelAt"
         static let recoveryPot = "recoveryPot"
+        static let revision = "progress.revision"
+        static let lastModifiedAt = "progress.lastModifiedAt"
     }
 
     // MARK: - Currencies & progression
@@ -244,6 +246,27 @@ final class ProgressStore: ObservableObject {
     /// so the UI can celebrate. Consumers reset to 0 after reading.
     @Published var lastRecoveredMinutes: Int = 0
 
+    // MARK: - Sync versioning
+
+    /// Monotonic version of the ACTIVE profile's progress. The sync layer uses
+    /// `revision` (then `lastModifiedAt`) to decide which device's snapshot wins.
+    /// Persisted so it survives relaunches — otherwise every capture would look
+    /// like revision 0 and the "is the remote newer?" check could never be true.
+    private(set) var revision: Int {
+        didSet { defaults.set(revision, forKey: Key.revision) }
+    }
+    /// Wall-clock of the last real local change to the active profile. Tiebreaker
+    /// when two devices land on the same `revision`.
+    private(set) var lastModifiedAt: Date {
+        didSet { defaults.set(lastModifiedAt, forKey: Key.lastModifiedAt) }
+    }
+    /// True while `apply(_:)` is loading a snapshot (profile switch or a winning
+    /// remote update), so the change observers don't mistake it for a local edit
+    /// and bump the revision — which would make the receiver always look newest
+    /// and ping-pong with the sender.
+    private var isApplyingSnapshot = false
+    private var versionCancellables: Set<AnyCancellable> = []
+
     // MARK: - Init
 
     private init() {
@@ -289,6 +312,50 @@ final class ProgressStore: ObservableObject {
         self.pendingBonusWheel = d.bool(forKey: Key.pendingBonusWheel)
         self.lastComebackWheelAt = d.object(forKey: Key.lastComebackWheelAt) as? Date
         self.recoveryPot = d.integer(forKey: Key.recoveryPot)
+
+        self.revision = d.integer(forKey: Key.revision)
+        self.lastModifiedAt = (d.object(forKey: Key.lastModifiedAt) as? Date) ?? .distantPast
+
+        setupVersionTracking()
+    }
+
+    // MARK: - Sync versioning
+
+    /// Watch the synced progress fields and bump `revision`/`lastModifiedAt` on
+    /// every genuine local change, so a captured snapshot carries a version that
+    /// climbs over time. Each `$prop.dropFirst()` ignores the value the publisher
+    /// replays on subscribe, so loading the store at launch doesn't count as an
+    /// edit. Changes made by `apply(_:)` are skipped via `isApplyingSnapshot`.
+    private func setupVersionTracking() {
+        let triggers: [AnyPublisher<Void, Never>] = [
+            $pendingMinutes.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $totalCorrect.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $totalAnswered.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $stars.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $gems.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $xp.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $totalScore.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $unlockEndsAt.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $minutesEarnedToday.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $currentStreak.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $dayStreak.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $bestStreak.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $answeredToday.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $correctToday.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $cycleSeconds.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $ownedCharacterIDs.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $unlockedWorlds.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $worldProgress.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+        ]
+        Publishers.MergeMany(triggers)
+            .sink { [weak self] _ in self?.markLocalChange() }
+            .store(in: &versionCancellables)
+    }
+
+    private func markLocalChange() {
+        guard !isApplyingSnapshot else { return }
+        revision += 1
+        lastModifiedAt = .now
     }
 
     // MARK: - Derived
@@ -414,11 +481,9 @@ final class ProgressStore: ObservableObject {
             let base = ParentSettings.shared.enabledTopics.contains(topic) ? 0.6 : 0.4
             topicAffinity[topic.rawValue] = min(1, base + boost)
         }
-        // Seed starting difficulty from the level for enabled topics.
-        let seed = profile.learningLevel.seedDifficulty
-        for topic in ParentSettings.shared.enabledTopics {
-            ParentSettings.shared.setDifficulty(seed, for: topic)
-        }
+        // Starting difficulty is no longer seeded into a global setting — it's
+        // derived per-child from `profile.learningLevel` (see `Profile.difficulty(for:)`)
+        // until the parent overrides it per-topic from their dashboard.
     }
 
     /// Continuously updates the per-topic learning signals after each answer.
@@ -491,8 +556,7 @@ final class ProgressStore: ObservableObject {
         sessionStarsEarned += earned
 
         // Score — the headline 'ניקוד' metric. Includes combo / bonus boosts.
-        let settings = ParentSettings.shared
-        let topicDifficulty = settings.difficulty(for: ctx.topic)
+        let topicDifficulty = ProfileStore.shared.active?.difficulty(for: ctx.topic) ?? .easy
         let pts = RewardEngine.pointsForCorrect(
             combo: ctx.combo,
             isSuperQuestion: ctx.isSuperQuestion,
@@ -865,13 +929,27 @@ final class ProgressStore: ObservableObject {
         s.wheelProgressCount  = wheelProgressCount
         s.recoveryPot         = recoveryPot
         s.ownedCharacterIDs   = Array(ownedCharacterIDs)
-        s.lastModifiedAt      = .now
+        // Carry the REAL version forward. Stamping `.now` here (the old bug) made
+        // every capture look freshly-modified, so a remote snapshot's older
+        // timestamp could never win the comparison and cross-device sync was dead.
+        s.revision            = revision
+        s.lastModifiedAt      = lastModifiedAt
+        s.deviceID            = ProgressSnapshot.thisDeviceID
         return s
     }
 
     /// Overwrite the store with a snapshot — used when switching profiles
     /// or applying a remote update.
     func apply(_ s: ProgressSnapshot) {
+        // Loading a snapshot is not a local edit — suppress revision bumps while
+        // the fields change, then adopt the snapshot's own version so a later
+        // local edit builds on top of it (and outranks what we just received).
+        isApplyingSnapshot = true
+        defer {
+            isApplyingSnapshot = false
+            revision = s.revision
+            lastModifiedAt = s.lastModifiedAt
+        }
         pendingMinutes      = s.pendingMinutes
         totalCorrect        = s.totalCorrect
         totalAnswered       = s.totalAnswered
@@ -909,6 +987,114 @@ final class ProgressStore: ObservableObject {
         ownedCharacterIDs   = Set(s.ownedCharacterIDs)
     }
 
+    /// Merge a remote snapshot of the SAME active profile into local state
+    /// WITHOUT ever losing locally-earned progress — used only by the sync
+    /// layer (profile switching still uses the wholesale `apply(_:)`).
+    ///
+    /// • Monotonic accumulators (stars, score, XP, lifetime totals, per-topic
+    ///   counts, world progress, best streak) take the **max** of local/remote,
+    ///   so neither device's earnings are thrown away by a revision race.
+    /// • Owned sets (characters, unlocked worlds) are **unioned**.
+    /// • "Latest" dates (last session / last daily chest) take the later one.
+    /// • Spendable / session fields (pending minutes, the active unlock, current
+    ///   streak, cycle progress, today's counters) can't be safely maxed, so
+    ///   they follow last-write-wins by (revision, lastModifiedAt).
+    ///
+    /// Returns `true` when the caller should explicitly re-upload — i.e. local
+    /// holds something the remote lacked, so the peer must be told. When local
+    /// gained nothing new we adopt the remote as-is (or do nothing if already
+    /// equal), which is what guarantees the exchange CONVERGES instead of
+    /// ping-ponging: re-uploading at the same revision would make each device's
+    /// listener fire forever. Crucially we only touch the live `@Published`
+    /// fields when the data actually changes, so an unchanged merge produces no
+    /// publisher events (and therefore no spurious upload).
+    @discardableResult
+    func mergeRemote(_ remote: ProgressSnapshot) -> Bool {
+        let local = captureSnapshot()
+        let remoteWins = remote.revision > local.revision ||
+            (remote.revision == local.revision && remote.lastModifiedAt > local.lastModifiedAt)
+
+        // LWW fields come from the winner; we then ratchet the mergeable fields
+        // up over both, so a loser's higher accumulator is still preserved.
+        var merged = remoteWins ? remote : local
+        merged.stars         = max(local.stars, remote.stars)
+        merged.gems          = max(local.gems, remote.gems)
+        merged.xp            = max(local.xp, remote.xp)
+        merged.totalScore    = max(local.totalScore, remote.totalScore)
+        merged.totalCorrect  = max(local.totalCorrect, remote.totalCorrect)
+        merged.totalAnswered = max(local.totalAnswered, remote.totalAnswered)
+        merged.bestStreak    = max(local.bestStreak, remote.bestStreak)
+        merged.topicAnswered = Self.mergeMaxInt(local.topicAnswered, remote.topicAnswered)
+        merged.topicCorrect  = Self.mergeMaxInt(local.topicCorrect, remote.topicCorrect)
+        merged.topicExposure = Self.mergeMaxInt(local.topicExposure, remote.topicExposure)
+        merged.topicAbandon  = Self.mergeMaxInt(local.topicAbandon, remote.topicAbandon)
+        merged.worldProgress = Self.mergeMaxInt(local.worldProgress, remote.worldProgress)
+        merged.unlockedWorlds = Array(Set(local.unlockedWorlds).union(remote.unlockedWorlds))
+        merged.ownedCharacterIDs = Array(Set(local.ownedCharacterIDs).union(remote.ownedCharacterIDs))
+        merged.lastSessionDate = Self.laterDate(local.lastSessionDate, remote.lastSessionDate)
+        merged.lastDailyChestDate = Self.laterDate(local.lastDailyChestDate, remote.lastDailyChestDate)
+
+        let changedLocal = !Self.sameData(merged, local)   // does adopting change us?
+        let aheadOfRemote = !Self.sameData(merged, remote)  // do we hold more than remote?
+
+        if changedLocal {
+            // Real change → adopt it. If we're also ahead of the remote, stamp a
+            // winning revision so the peer accepts our merged copy; otherwise we
+            // merely caught up to the remote, so adopt its exact version.
+            if aheadOfRemote {
+                merged.revision = max(local.revision, remote.revision) + 1
+                merged.lastModifiedAt = .now
+            } else {
+                merged.revision = remote.revision
+                merged.lastModifiedAt = remote.lastModifiedAt
+            }
+            merged.deviceID = ProgressSnapshot.thisDeviceID
+            apply(merged)
+            // Only force an upload when we out-hold the remote; if we just caught
+            // up, the harmless echo from apply() dies at the peer (same revision).
+            return aheadOfRemote
+        }
+
+        // No data change. If we're still ahead of the remote, bump the revision
+        // SILENTLY (revision/lastModifiedAt aren't @Published, so this fires no
+        // upload loop) and let the caller push once. Otherwise we're converged.
+        if aheadOfRemote {
+            revision = max(local.revision, remote.revision) + 1
+            lastModifiedAt = .now
+            return true
+        }
+        return false
+    }
+
+    /// Per-key max of two `[String: Int]` maps (keeps the highest count each
+    /// device has seen for every key).
+    private static func mergeMaxInt(_ a: [String: Int], _ b: [String: Int]) -> [String: Int] {
+        var out = a
+        for (k, v) in b { out[k] = max(out[k] ?? 0, v) }
+        return out
+    }
+
+    /// The later of two optional dates (nil counts as "no date").
+    private static func laterDate(_ a: Date?, _ b: Date?) -> Date? {
+        switch (a, b) {
+        case let (x?, y?): return max(x, y)
+        case let (x?, nil): return x
+        case let (nil, y?): return y
+        case (nil, nil): return nil
+        }
+    }
+
+    /// Compare two snapshots ignoring the version metadata (revision /
+    /// lastModifiedAt / deviceID), so we can tell whether the actual progress
+    /// payload differs.
+    private static func sameData(_ a: ProgressSnapshot, _ b: ProgressSnapshot) -> Bool {
+        var x = a, y = b
+        x.revision = 0;          y.revision = 0
+        x.lastModifiedAt = .distantPast; y.lastModifiedAt = .distantPast
+        x.deviceID = "";         y.deviceID = ""
+        return x == y
+    }
+
     /// Grant a character to the active child (bought or awarded).
     func addOwnedCharacter(_ id: String) {
         ownedCharacterIDs.insert(id)
@@ -917,7 +1103,10 @@ final class ProgressStore: ObservableObject {
     /// Hard-reset everything for a fresh profile. Keeps onboarding /
     /// settings — only the progress side.
     func resetAll() {
-        apply(.blank)
+        let nextRevision = revision + 1
+        apply(.blank)                  // zeroes the data (and adopts blank's rev 0)
+        revision = nextRevision        // …but bump so the wipe outranks cloud state
+        lastModifiedAt = .now
         sessionScore = 0
         lastEarnedPoints = 0
         lastPenaltyMinutes = 0

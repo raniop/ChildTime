@@ -1,9 +1,20 @@
 import Foundation
 import Combine
+import os
 
 #if canImport(FirebaseFirestore)
 import FirebaseFirestore
 #endif
+
+/// Lightweight, always-on logging for the cross-device sync path. Visible in
+/// Console.app / Xcode by filtering the "ChildTime" subsystem, "sync" category —
+/// the fastest way to confirm on a real device whether sync is actually running
+/// (e.g. "no signed-in user" means Anonymous Auth is off in the Firebase console).
+enum SyncLog {
+    private static let logger = Logger(subsystem: "ChildTime", category: "sync")
+    static func log(_ message: String) { logger.notice("\(message, privacy: .public)") }
+    static func error(_ message: String) { logger.error("\(message, privacy: .public)") }
+}
 
 /// Cross-device sync layer for per-profile progress snapshots.
 ///
@@ -60,10 +71,12 @@ final class RemoteSyncManager: ObservableObject {
         } else {
             lastError = "אין משתמש מחובר — סנכרון לא פעיל"
             isActive = false
+            SyncLog.error("start: NO signed-in user — sync inactive. If this is a child device, enable Anonymous Auth in the Firebase console.")
             return
         }
         isActive = true
         lastError = nil
+        SyncLog.log("start: active uid=\(resolvedUID.prefix(6))… role=\(ParentSettings.shared.deviceRole) device=\(ProgressSnapshot.thisDeviceID.prefix(8))")
         observeLocalChanges()
         subscribeToAllProfiles(uid: resolvedUID)
         // First push of the active profile's current state so the cloud
@@ -206,9 +219,11 @@ final class RemoteSyncManager: ObservableObject {
           .setData(data, merge: true) { [weak self] err in
               if let err {
                   self?.lastError = err.localizedDescription
+                  SyncLog.error("upload FAILED for \(pid.uuidString.prefix(8)): \(err.localizedDescription)")
               } else {
                   self?.lastUploadAt = .now
                   self?.lastError = nil
+                  SyncLog.log("upload OK for \(pid.uuidString.prefix(8)) rev=\(snapshot.revision) stars=\(snapshot.stars) min=\(snapshot.pendingMinutes)")
               }
           }
     }
@@ -270,10 +285,16 @@ final class RemoteSyncManager: ObservableObject {
         // Don't re-apply our OWN echo to the live in-memory store (it would fight
         // local play). Display caching above already happened.
         if snap.deviceID == ProgressSnapshot.thisDeviceID { return }
-        let local = ProgressStore.shared.captureSnapshot()
-        if snap.revision > local.revision ||
-           (snap.revision == local.revision && snap.lastModifiedAt > local.lastModifiedAt) {
-            ProgressStore.shared.apply(snap)
+        // Merge instead of clobber: a plain revision race would discard the
+        // losing device's earnings wholesale (the symptom: one device showing
+        // 129⭐, the other 75⭐). `mergeRemote` ratchets accumulators up over
+        // both, so stars/score/characters converge to the combined best and
+        // neither device loses progress. It returns true when WE still held
+        // something the remote lacked — push it so the peer converges too.
+        let needsUpload = ProgressStore.shared.mergeRemote(snap)
+        if needsUpload {
+            SyncLog.log("merge: local was ahead — re-uploading merged snapshot for \(profileID.uuidString.prefix(8))")
+            uploadActiveProfile()
         }
     }
     #endif

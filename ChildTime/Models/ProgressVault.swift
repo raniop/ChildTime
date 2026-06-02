@@ -34,13 +34,14 @@ final class ProgressVault {
         return snap
     }
 
-    /// Persist `snapshot` for `profileID` (overwrites any previous).
+    /// Persist `snapshot` for `profileID` (overwrites any previous). Stored
+    /// VERBATIM — the version metadata (`revision`/`lastModifiedAt`/`deviceID`)
+    /// is now owned by whoever produced the snapshot (`ProgressStore` for local
+    /// state, the remote sender for cached cloud state). Bumping it here used to
+    /// corrupt both: local saves never climbed past revision 1, and cached remote
+    /// snapshots got restamped as if this device authored them.
     func write(_ snapshot: ProgressSnapshot, for profileID: UUID) {
-        var copy = snapshot
-        copy.revision += 1
-        copy.lastModifiedAt = .now
-        copy.deviceID = ProgressSnapshot.thisDeviceID
-        if let data = try? JSONEncoder().encode(copy) {
+        if let data = try? JSONEncoder().encode(snapshot) {
             defaults.set(data, forKey: key(for: profileID))
         }
     }
@@ -81,10 +82,20 @@ final class ProgressVault {
     /// Reset a specific profile's progress to a blank slate. If it's the
     /// active profile we also clear ProgressStore in memory.
     func resetProfile(_ profileID: UUID) {
-        let blank = ProgressSnapshot.blank
-        write(blank, for: profileID)
         if profileID == boundProfileID {
+            // Active profile: ProgressStore.resetAll() zeroes the data AND bumps
+            // its revision; capture that bumped-blank state and persist it.
             ProgressStore.shared.resetAll()
+            write(ProgressStore.shared.captureSnapshot(), for: profileID)
+        } else {
+            // Non-active profile: bump past the last-known revision so the wipe
+            // outranks whatever the kid's other device last synced to the cloud.
+            let prior = snapshot(for: profileID)
+            var blank = ProgressSnapshot.blank
+            blank.revision = prior.revision + 1
+            blank.lastModifiedAt = .now
+            blank.deviceID = ProgressSnapshot.thisDeviceID
+            write(blank, for: profileID)
         }
         QuestionMemory.shared.clear(for: profileID)
     }
