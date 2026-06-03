@@ -745,17 +745,17 @@ struct WorldMapView: View {
     private func bottomHint(_ text: String) -> some View {
         Text(text)
             .font(.system(size: 17, weight: .heavy, design: .rounded))
-            .foregroundStyle(.white)
+            // Dark text on a LIGHT pill — readable, and the 🎮 emoji (dark) shows
+            // up too. The dark pill made the controller emoji invisible.
+            .foregroundStyle(Color(hex: "2A1E5C"))
             .multilineTextAlignment(.center)
-            .padding(.horizontal, AppSpacing.xl).padding(.vertical, 15)
+            .padding(.horizontal, AppSpacing.xl).padding(.vertical, 14)
             .frame(maxWidth: .infinity)
-            // Solid dark pill (+ gold edge) so it's clearly readable over the
-            // bright world cards behind it — the translucent version vanished.
-            .background(Color(hex: "1B1340").opacity(0.82),
+            .background(.white.opacity(0.92),
                         in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(AppColor.starGold.opacity(0.5), lineWidth: 1.5))
-            .glow(AppColor.starGold.opacity(0.3), radius: 8)
+                .stroke(AppColor.starGold.opacity(0.7), lineWidth: 2))
+            .shadow(color: .black.opacity(0.18), radius: 8, y: 3)
             .frame(maxWidth: 480)
     }
 
