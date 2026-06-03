@@ -18,7 +18,15 @@ struct OptionCard: View {
     @Environment(\.horizontalSizeClass) private var hsc
     private var isCompact: Bool { hsc == .compact }
     private var minHeight: CGFloat { isCompact ? 80 : 110 }
-    private var fontSize: CGFloat { isCompact ? 34 : 44 }
+    /// Big by default; shrinks for a long answer / long word so it never breaks
+    /// mid-word across lines.
+    private var fontSize: CGFloat {
+        let longest = text.split(separator: " ").map(\.count).max() ?? text.count
+        if longest >= 11      { return isCompact ? 19 : 26 }
+        else if longest >= 8  { return isCompact ? 25 : 33 }
+        else if text.count >= 16 { return isCompact ? 23 : 30 }
+        return isCompact ? 34 : 44
+    }
 
     private let palette: [LinearGradient] = [
         LinearGradient(colors: [Color(hex: "118AB2"), Color(hex: "06D6A0")],
@@ -38,6 +46,8 @@ struct OptionCard: View {
                     .font(.system(size: fontSize, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)   // tidy 2-word answers that wrap
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.45)          // shrink, don't break, long words
                     .strikethrough(feedback == .eliminated, color: .white.opacity(0.8))
                     .frame(maxWidth: .infinity, minHeight: minHeight)
                     .padding(.horizontal, 12)

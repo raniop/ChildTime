@@ -24,6 +24,18 @@ struct QuestionRunnerView: View {
 
     private var isCompact: Bool { hsc == .compact }
     private var questionSize: CGFloat { isCompact ? 42 : 58 }
+
+    /// Big by default, but shrinks when the prompt contains a LONG word (or is a
+    /// long sentence) — so a word never gets broken mid-way across two lines.
+    private func questionFontSize(for prompt: String) -> CGFloat {
+        let longestWord = prompt.split(whereSeparator: { $0 == " " || $0 == "\n" }).map(\.count).max() ?? 0
+        var size = questionSize
+        if longestWord >= 13      { size = isCompact ? 26 : 34 }
+        else if longestWord >= 10 { size = isCompact ? 32 : 42 }
+        else if longestWord >= 8  { size = isCompact ? 37 : 50 }
+        if prompt.count >= 75 { size = min(size, isCompact ? 30 : 40) }
+        return size
+    }
     private var topicEmojiSize: CGFloat { isCompact ? 30 : 36 }
     private var companionSize: CGFloat { isCompact ? 78 : 90 }
     private var portalEmojiSize: CGFloat { isCompact ? 130 : 180 }
@@ -490,10 +502,10 @@ struct QuestionRunnerView: View {
             }
 
             Text(q.prompt)
-                .font(.system(size: questionSize, weight: .heavy, design: .rounded))
+                .font(.system(size: questionFontSize(for: q.prompt), weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.5)
+                .minimumScaleFactor(0.4)
                 .fixedSize(horizontal: false, vertical: true)   // never truncate the question
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, AppSpacing.lg)
@@ -516,6 +528,22 @@ struct QuestionRunnerView: View {
                             .foregroundStyle(.white.opacity(0.55))
                             .padding(7)
                             .background(.white.opacity(0.12), in: Circle())
+                    }
+                    .padding(8)
+                }
+                // Read aloud — for early readers. Reads the question + all answers.
+                .overlay(alignment: .topLeading) {
+                    Button {
+                        Haptic.light()
+                        SpeechReader.shared.readQuestion(prompt: q.prompt, options: q.options)
+                    } label: {
+                        Image(systemName: "speaker.wave.2.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(9)
+                            .background(AppColor.companionGlow.opacity(0.85), in: Circle())
+                            .overlay(Circle().stroke(.white.opacity(0.4), lineWidth: 1))
+                            .glow(AppColor.companionGlow.opacity(0.5), radius: 5)
                     }
                     .padding(8)
                 }
@@ -733,7 +761,7 @@ struct QuestionRunnerView: View {
             isInPortal = true
             showPortalIntro = true
             SoundPlayer.shared.play(.portalAppear)
-            companion.wow("וָואוּ! פּוֹרְטַל!")
+            companion.wow("שְׁאֵלַת בּוֹנוּס! 🌟 פִּי 3 כּוֹכָבִים")
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 withAnimation { showPortalIntro = false }
                 createQuestion(super: false)
