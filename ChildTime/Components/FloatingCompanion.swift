@@ -113,24 +113,22 @@ struct FloatingCompanion: View {
             }
 
             // Layer 3 (front): the speech bubble — ALWAYS on top so the child can
-            // read it, kept fully ON SCREEN (clamped horizontally) with its tail
-            // still pointing at the avatar.
+            // read it, floating just above the avatar's head and kept fully ON
+            // SCREEN (clamped horizontally). No tail: the buddy wanders, so a tail
+            // can't reliably point at it — a clean bubble right above reads best.
             if let bubble = controller.bubbleText {
                 let margin: CGFloat = 10
                 let half = bubbleSize.width / 2
                 let clampedX = bubbleSize.width > 0
                     ? min(max(margin + half, anchor.x), geo.size.width - margin - half)
                     : anchor.x
-                // Tail lands on the avatar (anchor.x), measured from the bubble's
-                // RIGHT edge (the direction that renders correctly under RTL).
-                let tailFromRight = max(0, (clampedX + half) - anchor.x)
-                BubbleSpeech(text: bubble, tailInsetFromRight: tailFromRight)
+                BubbleSpeech(text: bubble, showTail: false)
                     .fixedSize()
                     .background(GeometryReader { g in
                         Color.clear.preference(key: BubbleSizeKey.self, value: g.size)
                     })
                     .onPreferenceChange(BubbleSizeKey.self) { bubbleSize = $0 }
-                    .position(x: clampedX, y: anchor.y - size * 0.95)
+                    .position(x: clampedX, y: anchor.y - size * 0.9)
                     .animation(isDragging ? nil : .easeInOut(duration: 4), value: position)
                     .transition(.scale.combined(with: .opacity))
                     .allowsHitTesting(false)

@@ -10,6 +10,9 @@ struct BubbleSpeech: View {
     /// Same, but measured from the bubble's LEFT edge — for an avatar sitting
     /// under the bubble's left edge. Takes priority over `tailInsetFromRight`.
     var tailInsetFromLeft: CGFloat? = nil
+    /// Draw the little downward tail. Off for a clean tail-less bubble (e.g. the
+    /// wandering home companion, where the bubble just floats above the avatar).
+    var showTail: Bool = true
     /// Reveal the words one-by-one (typewriter), as if the companion is speaking.
     var animated: Bool = true
     /// Seconds between each revealed word.
@@ -36,9 +39,9 @@ struct BubbleSpeech: View {
         .foregroundStyle(AppColor.textOnLight)
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, AppSpacing.md)
-        .padding(.bottom, 8)   // reserve room for the tail
+        .padding(.bottom, showTail ? 8 : 0)   // reserve room for the tail
         .background {
-            BubbleShape(pointDirection: pointDirection, tailInsetFromRight: tailInsetFromRight, tailInsetFromLeft: tailInsetFromLeft)
+            BubbleShape(pointDirection: pointDirection, tailInsetFromRight: tailInsetFromRight, tailInsetFromLeft: tailInsetFromLeft, showTail: showTail)
                 .fill(.white)
                 .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
                 // Pin the shape's coordinates to LTR so the tail position is
@@ -69,11 +72,12 @@ struct BubbleShape: Shape {
     var pointDirection: Edge = .bottom
     var tailInsetFromRight: CGFloat? = nil
     var tailInsetFromLeft: CGFloat? = nil
+    var showTail: Bool = true
 
     func path(in rect: CGRect) -> Path {
         var path = Path()
         let r: CGFloat = 18
-        let tailH: CGFloat = 11
+        let tailH: CGFloat = showTail ? 11 : 0
         let tailW: CGFloat = 22
 
         // Body fills everything except the reserved tail strip at the bottom.
@@ -83,7 +87,7 @@ struct BubbleShape: Shape {
 
         // A clean downward tail whose base sits flush ON the body's bottom edge
         // (1pt overlap) so it merges seamlessly — no notch, no gap.
-        if pointDirection == .bottom {
+        if showTail && pointDirection == .bottom {
             let cx: CGFloat = {
                 let lo = rect.minX + r + tailW / 2
                 let hi = rect.maxX - r - tailW / 2
