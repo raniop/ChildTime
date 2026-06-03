@@ -305,12 +305,8 @@ struct WorldMapView: View {
                 Haptic.light()
                 showingShop = true
             } label: {
-                Image("ShopBag")
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: buttonSize * 0.52, height: buttonSize * 0.52)
-                    .foregroundStyle(AppColor.starGold)
+                Text("🏬")
+                    .font(.system(size: iconSize + 4))
                     .frame(width: buttonSize, height: buttonSize)
                     .background(.white.opacity(0.15), in: Circle())
                     .overlay(Circle().stroke(AppColor.starGold.opacity(0.6), lineWidth: 1.5))
@@ -481,15 +477,7 @@ struct WorldMapView: View {
                     infoStat = nil
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { showingShop = true }
                 } label: {
-                    Label {
-                        Text("לַחֲנוּת")
-                    } icon: {
-                        Image("ShopBag")
-                            .renderingMode(.template)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 19, height: 19)
-                    }
+                    Text("🏬 לַחֲנוּת")
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
