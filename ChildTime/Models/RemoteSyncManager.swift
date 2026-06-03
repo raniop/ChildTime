@@ -209,23 +209,41 @@ final class RemoteSyncManager: ObservableObject {
     #if canImport(FirebaseFirestore)
     private func uploadActiveProfile() {
         guard let pid = ProfileStore.shared.activeID else { return }
-        let snapshot = ProgressStore.shared.captureSnapshot()
-        guard let data = Self.encode(snapshot) else { return }
-        // Children are household-owned (top-level `children` collection) so
-        // co-parents on different uids can both sync. Access is gated by
-        // firestore.rules (uid must be on the child's household).
-        db.collection("children").document(pid.uuidString)
-          .collection("state").document("current")
-          .setData(data, merge: true) { [weak self] err in
-              if let err {
-                  self?.lastError = err.localizedDescription
-                  SyncLog.error("upload FAILED for \(pid.uuidString.prefix(8)): \(err.localizedDescription)")
-              } else {
-                  self?.lastUploadAt = .now
-                  self?.lastError = nil
-                  SyncLog.log("upload OK for \(pid.uuidString.prefix(8)) rev=\(snapshot.revision) stars=\(snapshot.stars) min=\(snapshot.pendingMinutes)")
-              }
-          }
+        // Capture local state on the calling (main) thread, then MERGE it into the
+        // cloud doc inside a transaction. A plain setData(merge:) was a BLIND
+        // overwrite — a stale local push (e.g. the `pushNow()` on launch, before
+        // the listener delivered the cloud state) could clobber a HIGHER cloud
+        // value with a lower local one (this is how a restored 4100★ could drop
+        // back to a device's local 153★). Ratchet-merging with the cloud means an
+        // upload can only ever raise accumulators, never lower them.
+        let local = ProgressStore.shared.captureSnapshot()
+        let ref = db.collection("children").document(pid.uuidString)
+            .collection("state").document("current")
+        db.runTransaction({ txn, _ -> Any? in
+            guard let cloud = (try? txn.getDocument(ref))?.data().flatMap({ Self.decode($0) }) else {
+                // No cloud doc yet → first write is just our local state.
+                if let data = Self.encode(local) { txn.setData(data, forDocument: ref, merge: true) }
+                return nil
+            }
+            var merged = ProgressSnapshot.ratchetMerged(local: local, remote: cloud)
+            // Cloud already holds everything we have → don't write (no churn, and
+            // never lowers the cloud with a stale push).
+            if ProgressSnapshot.sameProgressData(merged, cloud) { return nil }
+            merged.revision = max(local.revision, cloud.revision) + 1
+            merged.lastModifiedAt = Date()
+            merged.deviceID = ProgressSnapshot.thisDeviceID
+            if let data = Self.encode(merged) { txn.setData(data, forDocument: ref, merge: true) }
+            return nil
+        }) { [weak self] _, err in
+            if let err {
+                self?.lastError = err.localizedDescription
+                SyncLog.error("upload FAILED for \(pid.uuidString.prefix(8)): \(err.localizedDescription)")
+            } else {
+                self?.lastUploadAt = .now
+                self?.lastError = nil
+                SyncLog.log("upload OK (merge) for \(pid.uuidString.prefix(8)) stars=\(local.stars) min=\(local.pendingMinutes)")
+            }
+        }
     }
     #endif
 

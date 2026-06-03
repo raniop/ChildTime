@@ -162,3 +162,60 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(String.self, forKey: .deviceID)) ?? nil { deviceID = v }
     }
 }
+
+// MARK: - Conflict-free merge (shared by the device-side merge AND merge-on-upload)
+extension ProgressSnapshot {
+    /// Pure ratchet-merge of two snapshots of the SAME profile. Monotonic
+    /// accumulators take the **max** (so neither side's earnings are lost), owned
+    /// sets union, "latest" dates take the later, and the remaining LWW/spendable
+    /// fields come from the (revision, lastModifiedAt) winner. Version metadata is
+    /// left as the winner's — callers finalize `revision` as needed.
+    static func ratchetMerged(local: ProgressSnapshot, remote: ProgressSnapshot) -> ProgressSnapshot {
+        let remoteWins = remote.revision > local.revision ||
+            (remote.revision == local.revision && remote.lastModifiedAt > local.lastModifiedAt)
+        var m = remoteWins ? remote : local
+        m.stars         = max(local.stars, remote.stars)
+        m.diamonds      = max(local.diamonds, remote.diamonds)
+        m.xp            = max(local.xp, remote.xp)
+        m.totalScore    = max(local.totalScore, remote.totalScore)
+        m.totalCorrect  = max(local.totalCorrect, remote.totalCorrect)
+        m.totalAnswered = max(local.totalAnswered, remote.totalAnswered)
+        m.bestStreak    = max(local.bestStreak, remote.bestStreak)
+        m.topicAnswered = mergeMaxInt(local.topicAnswered, remote.topicAnswered)
+        m.topicCorrect  = mergeMaxInt(local.topicCorrect, remote.topicCorrect)
+        m.topicExposure = mergeMaxInt(local.topicExposure, remote.topicExposure)
+        m.topicAbandon  = mergeMaxInt(local.topicAbandon, remote.topicAbandon)
+        m.worldProgress = mergeMaxInt(local.worldProgress, remote.worldProgress)
+        m.unlockedWorlds = Array(Set(local.unlockedWorlds).union(remote.unlockedWorlds))
+        m.ownedCharacterIDs = Array(Set(local.ownedCharacterIDs).union(remote.ownedCharacterIDs))
+        m.lastSessionDate = laterDate(local.lastSessionDate, remote.lastSessionDate)
+        m.lastDailyChestDate = laterDate(local.lastDailyChestDate, remote.lastDailyChestDate)
+        return m
+    }
+
+    /// Equal ignoring version metadata (revision/lastModifiedAt/deviceID) and the
+    /// nondeterministic order of the set-derived arrays.
+    static func sameProgressData(_ a: ProgressSnapshot, _ b: ProgressSnapshot) -> Bool {
+        var x = a, y = b
+        x.revision = 0;                  y.revision = 0
+        x.lastModifiedAt = .distantPast; y.lastModifiedAt = .distantPast
+        x.deviceID = "";                 y.deviceID = ""
+        x.unlockedWorlds.sort();         y.unlockedWorlds.sort()
+        x.ownedCharacterIDs.sort();      y.ownedCharacterIDs.sort()
+        return x == y
+    }
+
+    static func mergeMaxInt(_ a: [String: Int], _ b: [String: Int]) -> [String: Int] {
+        var out = a
+        for (k, v) in b { out[k] = max(out[k] ?? 0, v) }
+        return out
+    }
+    static func laterDate(_ a: Date?, _ b: Date?) -> Date? {
+        switch (a, b) {
+        case let (x?, y?): return max(x, y)
+        case let (x?, nil): return x
+        case let (nil, y?): return y
+        case (nil, nil): return nil
+        }
+    }
+}

@@ -47,6 +47,29 @@ struct ChildTimeTests {
         #expect(snap.diamonds == 0)
     }
 
+    /// The exact re-wipe scenario: a device with stale local 153★ uploading over a
+    /// freshly-restored cloud 4100★. The merge-on-upload must NEVER lower the cloud.
+    @Test func ratchetMerge_neverLowersCloudStars() {
+        var local = ProgressSnapshot(); local.stars = 153;  local.revision = 197; local.diamonds = 34
+        var cloud = ProgressSnapshot(); cloud.stars = 4100; cloud.revision = 198; cloud.diamonds = 34
+
+        let merged = ProgressSnapshot.ratchetMerged(local: local, remote: cloud)
+        #expect(merged.stars == 4100)                                   // stale push can't lower it
+        #expect(ProgressSnapshot.ratchetMerged(local: cloud, remote: local).stars == 4100)
+        // local added nothing → equals cloud → the upload transaction skips the write.
+        #expect(ProgressSnapshot.sameProgressData(merged, cloud))
+    }
+
+    /// New local earnings still propagate up.
+    @Test func ratchetMerge_raisesStarsWhenLocalAhead() {
+        var local = ProgressSnapshot(); local.stars = 4200; local.revision = 199
+        var cloud = ProgressSnapshot(); cloud.stars = 4100; cloud.revision = 198
+
+        let merged = ProgressSnapshot.ratchetMerged(local: local, remote: cloud)
+        #expect(merged.stars == 4200)                                   // earnings preserved
+        #expect(!ProgressSnapshot.sameProgressData(merged, cloud))      // upload WOULD write
+    }
+
     /// End-to-end proof that the character shop works: catalog integrity, every
     /// image actually loads from the bundle, tier/help derivation, and a real
     /// buy (not-enough-stars → fail, enough → deduct + own, double-buy → fail).

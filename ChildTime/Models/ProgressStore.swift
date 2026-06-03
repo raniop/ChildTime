@@ -1203,31 +1203,13 @@ final class ProgressStore: ObservableObject {
     @discardableResult
     func mergeRemote(_ remote: ProgressSnapshot) -> Bool {
         let local = captureSnapshot()
-        let remoteWins = remote.revision > local.revision ||
-            (remote.revision == local.revision && remote.lastModifiedAt > local.lastModifiedAt)
 
-        // LWW fields come from the winner; we then ratchet the mergeable fields
-        // up over both, so a loser's higher accumulator is still preserved.
-        var merged = remoteWins ? remote : local
-        merged.stars         = max(local.stars, remote.stars)
-        merged.diamonds      = max(local.diamonds, remote.diamonds)
-        merged.xp            = max(local.xp, remote.xp)
-        merged.totalScore    = max(local.totalScore, remote.totalScore)
-        merged.totalCorrect  = max(local.totalCorrect, remote.totalCorrect)
-        merged.totalAnswered = max(local.totalAnswered, remote.totalAnswered)
-        merged.bestStreak    = max(local.bestStreak, remote.bestStreak)
-        merged.topicAnswered = Self.mergeMaxInt(local.topicAnswered, remote.topicAnswered)
-        merged.topicCorrect  = Self.mergeMaxInt(local.topicCorrect, remote.topicCorrect)
-        merged.topicExposure = Self.mergeMaxInt(local.topicExposure, remote.topicExposure)
-        merged.topicAbandon  = Self.mergeMaxInt(local.topicAbandon, remote.topicAbandon)
-        merged.worldProgress = Self.mergeMaxInt(local.worldProgress, remote.worldProgress)
-        merged.unlockedWorlds = Array(Set(local.unlockedWorlds).union(remote.unlockedWorlds))
-        merged.ownedCharacterIDs = Array(Set(local.ownedCharacterIDs).union(remote.ownedCharacterIDs))
-        merged.lastSessionDate = Self.laterDate(local.lastSessionDate, remote.lastSessionDate)
-        merged.lastDailyChestDate = Self.laterDate(local.lastDailyChestDate, remote.lastDailyChestDate)
+        // LWW fields come from the winner; the mergeable fields ratchet up over
+        // both (shared with the merge-on-upload path so neither can lose data).
+        var merged = ProgressSnapshot.ratchetMerged(local: local, remote: remote)
 
-        let changedLocal = !Self.sameData(merged, local)   // does adopting change us?
-        let aheadOfRemote = !Self.sameData(merged, remote)  // do we hold more than remote?
+        let changedLocal = !ProgressSnapshot.sameProgressData(merged, local)   // does adopting change us?
+        let aheadOfRemote = !ProgressSnapshot.sameProgressData(merged, remote)  // do we hold more than remote?
 
         if changedLocal {
             // Real change → adopt it. If we're also ahead of the remote, stamp a
@@ -1258,42 +1240,8 @@ final class ProgressStore: ObservableObject {
         return false
     }
 
-    /// Per-key max of two `[String: Int]` maps (keeps the highest count each
-    /// device has seen for every key).
-    private static func mergeMaxInt(_ a: [String: Int], _ b: [String: Int]) -> [String: Int] {
-        var out = a
-        for (k, v) in b { out[k] = max(out[k] ?? 0, v) }
-        return out
-    }
-
-    /// The later of two optional dates (nil counts as "no date").
-    private static func laterDate(_ a: Date?, _ b: Date?) -> Date? {
-        switch (a, b) {
-        case let (x?, y?): return max(x, y)
-        case let (x?, nil): return x
-        case let (nil, y?): return y
-        case (nil, nil): return nil
-        }
-    }
-
-    /// Compare two snapshots ignoring the version metadata (revision /
-    /// lastModifiedAt / deviceID), so we can tell whether the actual progress
-    /// payload differs.
-    private static func sameData(_ a: ProgressSnapshot, _ b: ProgressSnapshot) -> Bool {
-        var x = a, y = b
-        x.revision = 0;          y.revision = 0
-        x.lastModifiedAt = .distantPast; y.lastModifiedAt = .distantPast
-        x.deviceID = "";         y.deviceID = ""
-        // CRITICAL: `unlockedWorlds` / `ownedCharacterIDs` are produced via
-        // `Array(Set(...))`, whose element ORDER is nondeterministic. Comparing
-        // them with the synthesized (order-sensitive) `==` would make two equal
-        // sets read as "different" on every merge — so a device would believe it
-        // is perpetually "ahead" and re-upload forever (an infinite ping-pong
-        // that hammers Firestore). Normalize the order before comparing.
-        x.unlockedWorlds.sort();    y.unlockedWorlds.sort()
-        x.ownedCharacterIDs.sort(); y.ownedCharacterIDs.sort()
-        return x == y
-    }
+    // (mergeMaxInt / laterDate / sameProgressData now live on ProgressSnapshot,
+    // shared with the merge-on-upload transaction in RemoteSyncManager.)
 
     /// Grant a character to the active child (bought or awarded).
     func addOwnedCharacter(_ id: String) {
