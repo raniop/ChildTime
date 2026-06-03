@@ -3,6 +3,12 @@ import Combine
 import FamilyControls
 import ManagedSettings
 import DeviceActivity
+import os.log
+
+/// Shared logger so the app and the monitor extension log to the SAME subsystem —
+/// filter Console.app on a real device by subsystem "com.rani.ChildTime" + category
+/// "ScreenTime" to watch the whole unlock → enforce → re-lock flow.
+let screenTimeLog = Logger(subsystem: "com.rani.ChildTime", category: "ScreenTime")
 
 @MainActor
 final class ShieldManager: ObservableObject {
@@ -144,6 +150,7 @@ final class ShieldManager: ObservableObject {
     func unlock(minutes: Int) {
         clearShield()
         let s = ParentSettings.shared
+        screenTimeLog.notice("unlock(\(minutes, privacy: .public) min) mode=\(s.blockAllActive ? "block-all" : "block-list", privacy: .public)")
         if s.blockAllActive {
             // Block-all has no concrete blocked-token set to usage-meter, so the
             // shield returns via a wall-clock backstop (the in-app timer re-locks
@@ -179,9 +186,9 @@ final class ShieldManager: ObservableObject {
         )
         do {
             try center.startMonitoring(Self.unlockActivityName, during: schedule)
-            print("[ShieldManager] Block-all: wall-clock reshield in \(windowMinutes) min")
+            screenTimeLog.notice("block-all: wall-clock reshield scheduled in \(windowMinutes, privacy: .public) min")
         } catch {
-            print("[ShieldManager] Failed to schedule wall-clock reshield: \(error)")
+            screenTimeLog.error("block-all: failed to schedule wall-clock reshield: \(String(describing: error), privacy: .public)")
         }
     }
 
@@ -204,7 +211,7 @@ final class ShieldManager: ObservableObject {
         guard !selection.applicationTokens.isEmpty
                 || !selection.categoryTokens.isEmpty
                 || !selection.webDomainTokens.isEmpty else {
-            print("[ShieldManager] Nothing to monitor — skipping usage limit")
+            screenTimeLog.error("block-list: nothing to monitor — skipping usage limit (no re-lock will fire!)")
             return
         }
 
@@ -221,7 +228,11 @@ final class ShieldManager: ObservableObject {
         // the wall-clock window generous: locking the iPad mid-session no longer
         // burns the grant — the kid keeps their unused minutes for real play.
         // Time-of-day components only — mixed date+time stop `intervalDidEnd`.
-        let windowMinutes = max(safeMinutes + 5, 120)
+        // Backstop is ONLY a safety net behind the usage event. Keep it tight
+        // (grant + 5, floor 20 — above iOS's 15-min minimum) so a missed usage
+        // event still re-locks within a few minutes of the intended end, not up to
+        // 2 hours later. (Re-armed on each foreground so idle time isn't burned.)
+        let windowMinutes = max(safeMinutes + 5, 20)
         let now = Date()
         let calendar = Calendar.current
         let startComponents = calendar.dateComponents([.hour, .minute, .second], from: now)
@@ -242,9 +253,9 @@ final class ShieldManager: ObservableObject {
                 during: schedule,
                 events: [Self.unlockEventName: event]
             )
-            print("[ShieldManager] Metering \(safeMinutes) min of usage (backstop \(windowMinutes) min)")
+            screenTimeLog.notice("block-list: metering \(safeMinutes, privacy: .public) min of usage (backstop \(windowMinutes, privacy: .public) min)")
         } catch {
-            print("[ShieldManager] Failed to start usage monitoring: \(error)")
+            screenTimeLog.error("block-list: failed to start usage monitoring: \(String(describing: error), privacy: .public)")
         }
     }
 

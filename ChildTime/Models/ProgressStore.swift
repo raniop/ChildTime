@@ -1066,9 +1066,29 @@ final class ProgressStore: ObservableObject {
     var redeemableMinutesNow: Int {
         let cap = dailyCap
         guard cap.enabled else { return pendingMinutes }
-        let roomToday = max(0, cap.max - minutesUnlockedToday)
+        let roomToday = max(0, cap.max - minutesUnlockedTodayResolved)
         return min(pendingMinutes, roomToday)
     }
+
+    /// `minutesUnlockedToday`, but treated as 0 if the stored counter is from a
+    /// previous day — so the redeem math is correct even if the daily rollover
+    /// hasn't run yet (e.g. the app stayed foreground across midnight). Read-only:
+    /// the real reset still happens in `minutesEarnedTodayRespectingDate()`.
+    private var minutesUnlockedTodayResolved: Int {
+        guard let d = dailyEarnedDate,
+              Calendar.current.isDate(d, inSameDayAs: Date()) else { return 0 }
+        return minutesUnlockedToday
+    }
+
+    /// Smallest grant we can actually ENFORCE in the background. In block-all mode
+    /// iOS won't re-lock a window shorter than 15 min, so the kid can't open less
+    /// than that (they accumulate). Block-list meters real usage, so any length works.
+    var minimumUnlockMinutes: Int {
+        ParentSettings.shared.blockAllActive ? 15 : 1
+    }
+
+    /// True when there are enough redeemable minutes to open a window we can enforce.
+    var canRedeemNow: Bool { redeemableMinutesNow >= minimumUnlockMinutes }
 
     /// Consume up to today's remaining allowance from the wallet for an unlock.
     /// Returns the granted amount; any leftover stays in `pendingMinutes` for a
