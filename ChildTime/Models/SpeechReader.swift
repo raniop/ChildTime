@@ -44,10 +44,22 @@ final class SpeechReader {
 
     func stop() { synth.stopSpeaking(at: .immediate) }
 
-    /// Strip what the Hebrew voice mangles: emoji/pictographs (it reads their
-    /// names), and geresh / quote marks (it stutters on them).
-    private static func cleanForSpeech(_ raw: String) -> String {
-        let noEmoji = String(String.UnicodeScalarView(raw.unicodeScalars.filter { s in
+    /// Clean text for the Hebrew voice: drop emoji (it reads their names), turn
+    /// math symbols into spoken words (`−`/`=`/`×`/`÷` are otherwise SILENT, so
+    /// "4 − 2 = ?" came out "four two"), and remove geresh / quote marks.
+    static func cleanForSpeech(_ raw: String) -> String {
+        // 1) Math symbols → words. The generator uses the dedicated −/×/÷ glyphs
+        //    (never a plain hyphen), so this never touches ordinary text.
+        var math = raw
+        math = math.replacingOccurrences(of: "= ?", with: " כַּמָּה זֶה ")
+        math = math.replacingOccurrences(of: "=?", with: " כַּמָּה זֶה ")
+        math = math.replacingOccurrences(of: "+", with: " וְעוֹד ")
+        math = math.replacingOccurrences(of: "\u{2212}", with: " פָּחוֹת ")   // − minus sign
+        math = math.replacingOccurrences(of: "\u{00D7}", with: " כָּפוּל ")   // × times
+        math = math.replacingOccurrences(of: "\u{00F7}", with: " חֶלְקֵי ")   // ÷ divide
+        math = math.replacingOccurrences(of: "=", with: " שָׁוֶה ")           // any other =
+
+        let noEmoji = String(String.UnicodeScalarView(math.unicodeScalars.filter { s in
             switch s.value {
             case 0x1F000...0x1FAFF,   // emoji, supplemental symbols & pictographs
                  0x2600...0x27BF,     // misc symbols + dingbats

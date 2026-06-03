@@ -60,6 +60,25 @@ struct ChildTimeTests {
         #expect(ProgressSnapshot.sameProgressData(merged, cloud))
     }
 
+    /// The voice must SAY the math operator — "4 − 2 = ?" was coming out
+    /// "four two" because −/=/? are silent glyphs.
+    @MainActor @Test func mathSpeech_speaksOperators() {
+        let out = SpeechReader.cleanForSpeech("4 − 2 = ?")
+        #expect(out.contains("פָּחוֹת"))      // minus is spoken
+        #expect(out.contains("כַּמָּה זֶה"))   // "= ?" → "how much"
+        #expect(!out.contains("\u{2212}"))     // no bare minus glyph left
+        #expect(SpeechReader.cleanForSpeech("4 + 3 = ?").contains("וְעוֹד"))
+        #expect(SpeechReader.cleanForSpeech("2 × 3 = ?").contains("כָּפוּל"))
+    }
+
+    /// Emoji/geresh must not reach the voice (it read emoji NAMES + stuttered).
+    @MainActor @Test func speechStripsEmojiAndGeresh() {
+        let out = SpeechReader.cleanForSpeech("🌊 אֵיזֶה 'אוֹקְיָנוֹס'?")
+        #expect(!out.contains("🌊"))
+        #expect(!out.contains("'"))
+        #expect(out.contains("אֵיזֶה"))
+    }
+
     /// New local earnings still propagate up.
     @Test func ratchetMerge_raisesStarsWhenLocalAhead() {
         var local = ProgressSnapshot(); local.stars = 4200; local.revision = 199
