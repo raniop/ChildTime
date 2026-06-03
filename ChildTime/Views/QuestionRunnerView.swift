@@ -535,7 +535,7 @@ struct QuestionRunnerView: View {
                 .overlay(alignment: .topLeading) {
                     Button {
                         Haptic.light()
-                        SpeechReader.shared.readQuestion(prompt: q.prompt, options: q.options)
+                        SpeechReader.shared.readQuestion(prompt: q.readAloudText, options: q.options)
                     } label: {
                         Image(systemName: "speaker.wave.2.fill")
                             .font(.system(size: 16, weight: .semibold))
@@ -802,6 +802,7 @@ struct QuestionRunnerView: View {
             currentTopic = requeued.topic
             current = requeued
             questionShownAt = Date()
+            if isPreReader { SpeechReader.shared.speak(requeued.readAloudText) }
             return
         }
 
@@ -827,26 +828,39 @@ struct QuestionRunnerView: View {
             }
         }
         lastBandByTopic[topic] = band
-        var q = QuestionGenerator.generate(topic: topic, difficulty: effective)
-        // Bank questions already avoid session repeats (QuestionMemory). Math is
-        // generated, so re-roll if we happen to produce one seen this round.
-        if topic == .math {
+        // Early readers (age 4) get picture-based questions instead of text ones.
+        let preReader = isPreReader
+        func makeQuestion() -> Question {
+            preReader
+                ? PreReaderContent.generate(topic: topic)
+                : QuestionGenerator.generate(topic: topic, difficulty: effective)
+        }
+        var q = makeQuestion()
+        // Generated questions (math + every pre-reader visual) can repeat — re-roll
+        // a few times to avoid serving the same one twice this round. (Bank
+        // questions already avoid session repeats via QuestionMemory.)
+        if preReader || topic == .math {
             var tries = 0
             while QuestionMemory.shared.wasServedThisSession(sessionKey(q)), tries < 8 {
-                q = QuestionGenerator.generate(topic: topic, difficulty: effective)
+                q = makeQuestion()
                 tries += 1
             }
         }
         // Skip questions a parent reported/removed.
         var hideTries = 0
         while QuestionReporter.shared.isHidden(q.prompt), hideTries < 12 {
-            q = QuestionGenerator.generate(topic: topic, difficulty: effective)
+            q = makeQuestion()
             hideTries += 1
         }
         QuestionMemory.shared.markServedThisSession(sessionKey(q))
         current = q
         questionShownAt = Date()
+        // Read the instruction aloud automatically for early readers.
+        if preReader { SpeechReader.shared.speak(q.readAloudText) }
     }
+
+    /// The active child is in the pre-reader (age 4) picture mode.
+    private var isPreReader: Bool { profiles.active?.age == .preK }
 
     /// Dedup key matching QuestionMemory's (prompt + correct answer).
     private func sessionKey(_ q: Question) -> String {
