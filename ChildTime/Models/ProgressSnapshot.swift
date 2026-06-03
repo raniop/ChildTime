@@ -175,7 +175,11 @@ extension ProgressSnapshot {
             (remote.revision == local.revision && remote.lastModifiedAt > local.lastModifiedAt)
         var m = remoteWins ? remote : local
         m.stars         = max(local.stars, remote.stars)
-        m.diamonds      = max(local.diamonds, remote.diamonds)
+        // 💎 diamonds are a SPENDABLE wallet — they go DOWN when the child buys in
+        // the shop. Max-merging them (like the never-decreasing ⭐ rank) made every
+        // purchase un-spendable: the spend was never written to Firestore and got
+        // reverted on the next pull. So diamonds are LWW — they take the (revision,
+        // lastModifiedAt) winner's value, already in `m`. (Same as pendingMinutes.)
         m.xp            = max(local.xp, remote.xp)
         m.totalScore    = max(local.totalScore, remote.totalScore)
         m.totalCorrect  = max(local.totalCorrect, remote.totalCorrect)
