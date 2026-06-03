@@ -44,6 +44,25 @@ final class PushManager: NSObject, ObservableObject {
         authorized = settings.authorizationStatus == .authorized
     }
 
+    /// Prompt for permission ONLY if the user hasn't decided yet. Safe to call on
+    /// every launch / screen-appear: a child device that was registered before we
+    /// ever asked gets the system prompt now, an already-authorized device just
+    /// re-registers its token, and anyone who declined is left alone (no nagging).
+    func requestAuthorizationIfNotDetermined() async {
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
+        let status = await center.notificationSettings().authorizationStatus
+        switch status {
+        case .notDetermined:
+            await requestAuthorization()                 // shows the iOS prompt
+        case .authorized, .provisional, .ephemeral:
+            authorized = true
+            UIApplication.shared.registerForRemoteNotifications()   // refresh token
+        default:
+            authorized = false                           // .denied → respect it
+        }
+    }
+
     /// Self-test: ensures permission + a token, then writes a `pushTests` doc that
     /// the `sendTestPush` Cloud Function turns into a real push back to THIS
     /// device. If it arrives, the whole APNs→FCM path works.

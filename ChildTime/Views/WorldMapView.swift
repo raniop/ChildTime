@@ -177,6 +177,14 @@ struct WorldMapView: View {
             if settings.deviceRole == .child, let cid = profiles.activeID {
                 Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
                 RemoteSyncManager.shared.pushNow()
+                // A registered child device needs notification permission too (for
+                // live-game invites + parent live events). We never asked on the
+                // child side before — prompt now, but ONLY if undecided, so it also
+                // catches devices that registered before this existed and never
+                // gets re-shown to anyone who already chose.
+                if ChildTimeApp.demoScreen == nil {
+                    Task { await PushManager.shared.requestAuthorizationIfNotDetermined() }
+                }
             }
         }
         // A fullScreenCover doesn't re-fire the map's .onAppear when it closes,
