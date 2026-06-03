@@ -131,6 +131,36 @@ service cloud.firestore {
       );
     }
 
+    // Live friends quiz games. Host-authoritative: the creator's device owns the
+    // main doc (stamps hostOwnerUID) and is the ONLY writer of game state + scores.
+    // Readable by any signed-in user (minimal, transient game data — like
+    // friendCards). Players announce themselves in `players/{playerID}` (each
+    // writes only their own doc) and submit answers in `answers/{id}` which are
+    // create-once + immutable, so no one can change their answer after the fact.
+    match /liveGames/{gameID} {
+      allow read:   if signedIn();
+      allow create: if signedIn() && request.resource.data.hostOwnerUID == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.hostOwnerUID == request.auth.uid;
+
+      match /players/{playerID} {
+        allow read:           if signedIn();
+        allow create, update: if signedIn() && request.resource.data.ownerUID == request.auth.uid;
+        allow delete:         if signedIn() && resource.data.ownerUID == request.auth.uid;
+      }
+      match /answers/{answerID} {
+        allow read:   if signedIn();
+        allow create: if signedIn() && request.resource.data.ownerUID == request.auth.uid;
+        allow update, delete: if false;   // answers are final — you can't change yours
+      }
+      // Direct "come join" nudges the host sends to a specific friend; a Cloud
+      // Function turns each into a push. Created only by the sender (the host).
+      match /nudges/{nudgeID} {
+        allow read:   if signedIn();
+        allow create: if signedIn() && request.resource.data.ownerUID == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
     // Parent quick-help requests — the child (a household member) creates one
     // targeting a parent; that parent answers from their notification. Gated on
     // the household; only the targeted parent may write the answer.

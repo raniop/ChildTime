@@ -110,6 +110,18 @@ async function tokensForUID(uid) {
   return [];
 }
 
+// Every FCM token belonging to the HOUSEHOLD that owns a child — used to EXCLUDE
+// the host's own family from game invites, so a kid's game never pings their own
+// parent's monitoring device (or a sibling on the same account). Real friends in
+// OTHER households are unaffected.
+async function householdTokensForChild(childID) {
+  if (!childID) return new Set();
+  const child = await db.collection("children").doc(childID).get();
+  const hid = child.exists ? child.data().householdID : null;
+  if (!hid) return new Set();
+  return new Set(await tokensForHousehold(hid, null));
+}
+
 async function tokensForEmail(email) {
   if (!email) return [];
   const snap = await db.collection("parents").where("email", "==", email).get();
@@ -146,6 +158,68 @@ exports.sendLiveEvent = onDocumentCreated("children/{childID}/events/{eventID}",
   const msg = liveMessage(data);
   if (!msg) return;
   await send(tokens, msg, { childID: event.params.childID, type: data.type });
+});
+
+// ---- 1b) Live friends-quiz invite ------------------------------------------
+// A child started a live quiz and invited their friends. Push each invited
+// friend's device so they can jump in. We can't read tokens by childID directly
+// (tokens live under the PARENT uid), so we resolve each invited child's owning
+// parent via their public friendCard.ownerUID, then look up that parent's tokens.
+
+exports.onLiveGameInvite = onDocumentCreated("liveGames/{gameID}", async (event) => {
+  const data = event.data && event.data.data();
+  if (!data) return;
+  const invited = Array.isArray(data.invited) ? data.invited : [];
+  if (!invited.length) return;
+
+  const gameID = event.params.gameID;
+  const hostName = data.hostName || "חבר";
+  const hostOwnerUID = data.hostOwnerUID || null;
+
+  // Never invite the host's own family (so the monitoring parent / siblings on
+  // the same account aren't pinged about a game started within their household).
+  const hostExclude = await householdTokensForChild(data.hostID);
+
+  const tokenSet = new Set();
+  for (const childID of invited) {
+    const card = await db.collection("friendCards").doc(childID).get();
+    const ownerUID = card.exists ? card.data().ownerUID : null;
+    if (!ownerUID || ownerUID === hostOwnerUID) continue;  // skip self / host device
+    const tokens = await tokensForUID(ownerUID);
+    tokens.forEach((t) => { if (!hostExclude.has(t)) tokenSet.add(t); });
+  }
+  const tokens = [...tokenSet];
+  if (!tokens.length) return;
+
+  await send(
+    tokens,
+    { title: "🎮 הזמנה למשחק!", body: `${hostName} מזמין/ה אתכם למשחק חידון נגד חברים — מי הכי מהיר?` },
+    { type: "liveGameInvite", gameID, link: `tofy://game?g=${gameID}` },
+  );
+});
+
+// A direct invite to ONE friend, sent from the lobby ("הזמינו" button) so the
+// host can call a specific friend who hasn't joined yet.
+exports.onLiveGameNudge = onDocumentCreated("liveGames/{gameID}/nudges/{nudgeID}", async (event) => {
+  const data = event.data && event.data.data();
+  if (!data || !data.targetID) return;
+
+  const gameID = event.params.gameID;
+  const hostName = data.hostName || "חבר";
+  const card = await db.collection("friendCards").doc(data.targetID).get();
+  const ownerUID = card.exists ? card.data().ownerUID : null;
+  if (!ownerUID) return;
+  // Exclude the host's own household devices (same as the auto-invite).
+  const game = await db.collection("liveGames").doc(gameID).get();
+  const hostExclude = await householdTokensForChild(game.exists ? game.data().hostID : null);
+  const tokens = (await tokensForUID(ownerUID)).filter((t) => !hostExclude.has(t));
+  if (!tokens.length) return;
+
+  await send(
+    tokens,
+    { title: "🎮 קוראים לך למשחק!", body: `${hostName} מזמין/ה אותך להצטרף עכשיו — מי הכי מהיר?` },
+    { type: "liveGameInvite", gameID, link: `tofy://game?g=${gameID}` },
+  );
 });
 
 // ---- 1c) Parent quick-help -------------------------------------------------

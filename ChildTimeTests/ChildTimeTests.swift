@@ -79,6 +79,31 @@ struct ChildTimeTests {
         #expect(out.contains("אֵיזֶה"))
     }
 
+    /// REGRESSION: diamonds are a SPENDABLE wallet. They were wrongly max-merged
+    /// like ⭐ stars, so a shop purchase (diamonds go DOWN) was never written to
+    /// Firestore and got reverted on the next pull. Diamonds must be LWW (the
+    /// revision winner's value) so spends — and earns — both sync in either
+    /// direction. Stars (rank) must STILL ratchet up regardless.
+    @Test func ratchetMerge_diamondsAreSpendableLWW() {
+        // Local just spent: 100 → 40, bumping revision. The spend must win.
+        var local = ProgressSnapshot();  local.diamonds = 40;  local.stars = 500; local.revision = 200
+        var cloud = ProgressSnapshot();  cloud.diamonds = 100; cloud.stars = 500; cloud.revision = 199
+        #expect(ProgressSnapshot.ratchetMerged(local: local, remote: cloud).diamonds == 40)
+
+        // Same spend seen from the other device (remote is the newer spender).
+        var localOld = ProgressSnapshot(); localOld.diamonds = 100; localOld.revision = 199
+        var remoteNew = ProgressSnapshot(); remoteNew.diamonds = 40; remoteNew.revision = 200
+        #expect(ProgressSnapshot.ratchetMerged(local: localOld, remote: remoteNew).diamonds == 40)
+
+        // Earning still propagates up (local ahead → its higher balance wins).
+        var earn = ProgressSnapshot(); earn.diamonds = 120; earn.revision = 201
+        var old = ProgressSnapshot();  old.diamonds = 80;   old.revision = 200
+        #expect(ProgressSnapshot.ratchetMerged(local: earn, remote: old).diamonds == 120)
+
+        // ⭐ stars are rank — they must STILL never drop, even when diamonds fall.
+        #expect(ProgressSnapshot.ratchetMerged(local: local, remote: cloud).stars == 500)
+    }
+
     /// New local earnings still propagate up.
     @Test func ratchetMerge_raisesStarsWhenLocalAhead() {
         var local = ProgressSnapshot(); local.stars = 4200; local.revision = 199
@@ -152,5 +177,84 @@ struct ChildTimeTests {
         #expect(throws: CharacterStore.PurchaseError.self) {
             try store.purchase(target)
         }
+    }
+
+    // MARK: - Live friends quiz
+
+    /// Speed scoring: an instant correct answer earns the full base; the slowest
+    /// correct answer (at the buzzer) earns half; never less (everyone-earns).
+    @Test func liveGameScoring_fastestEarnsMostSlowestHalf() {
+        let dur = Double(LiveGameRules.questionDurationMs)
+        // Instant answer → full base points.
+        #expect(LiveGameRules.points(responseMs: 0, durationMs: dur) == LiveGameRules.basePoints)
+        // At the buzzer → exactly half.
+        #expect(LiveGameRules.points(responseMs: dur, durationMs: dur) == LiveGameRules.basePoints / 2)
+        // Past the buzzer (clock skew / grace) → still clamped at half, never lower.
+        #expect(LiveGameRules.points(responseMs: dur * 2, durationMs: dur) == LiveGameRules.basePoints / 2)
+        // Monotonic: faster is always ≥ slower.
+        let fast = LiveGameRules.points(responseMs: dur * 0.2, durationMs: dur)
+        let slow = LiveGameRules.points(responseMs: dur * 0.8, durationMs: dur)
+        #expect(fast > slow)
+        // Degenerate duration never crashes / divides by zero.
+        #expect(LiveGameRules.points(responseMs: 100, durationMs: 0) == LiveGameRules.basePoints)
+    }
+
+    /// The game-doc parser must survive Firestore's mixed numeric bridging
+    /// (Int / Int64 / NSNumber / Double) and strip the never-public answer key.
+    @Test func liveGameParsing_robustToFirestoreTypes() {
+        let data: [String: Any] = [
+            "id": "g1", "hostID": "h1", "hostName": "דָּנָה",
+            "state": "question",
+            "topic": "math", "difficulty": "easy",
+            "totalQuestions": Int64(5),                 // Int64 bridge
+            "currentIndex": NSNumber(value: 2),         // NSNumber bridge
+            "questionDurationMs": 9000.0,               // Double bridge
+            "questions": [
+                ["prompt": "1+1", "options": ["1", "2", "3", "4"]],
+                ["prompt": "2+2", "options": ["3", "4", "5", "6"]],
+                ["prompt": "3+3", "options": ["5", "6", "7", "8"]],
+            ],
+            "revealCorrectIndex": Int64(1),
+            "scores": ["h1": NSNumber(value: 150), "f2": Int64(80)],
+            "invited": ["f2", "f3"],
+        ]
+        let g = LiveGame(from: data)
+        #expect(g != nil)
+        #expect(g?.totalQuestions == 5)
+        #expect(g?.currentIndex == 2)
+        #expect(g?.questionDurationMs == 9000)
+        #expect(g?.revealCorrectIndex == 1)
+        #expect(g?.scores["h1"] == 150)
+        #expect(g?.scores["f2"] == 80)
+        #expect(g?.currentQuestion?.options.count == 4)
+        // A doc missing required keys yields nil (not a crash, not a blank game).
+        #expect(LiveGame(from: ["id": "x"]) == nil)
+    }
+
+    /// Best-of-3 match winner: most rounds won, tie-broken by total points, and a
+    /// genuine dead heat returns nil.
+    @Test func liveGameMatchWinner_bestOfThree() {
+        // Clear: 2 rounds beats 1 regardless of points.
+        #expect(LiveGame.matchWinnerID(roundWins: ["a": 2, "b": 1], scores: ["a": 10, "b": 999]) == "a")
+        // Tie in rounds → decided by total points.
+        #expect(LiveGame.matchWinnerID(roundWins: ["a": 1, "b": 1], scores: ["a": 300, "b": 200]) == "a")
+        // No rounds decided (all draws) → fall back to total points.
+        #expect(LiveGame.matchWinnerID(roundWins: [:], scores: ["a": 50, "b": 30]) == "a")
+        // True dead heat (same wins AND same points) → no single winner.
+        #expect(LiveGame.matchWinnerID(roundWins: ["a": 1, "b": 1], scores: ["a": 100, "b": 100]) == nil)
+        // Empty game → nil, no crash.
+        #expect(LiveGame.matchWinnerID(roundWins: [:], scores: [:]) == nil)
+    }
+
+    /// Game deep links round-trip through both the https Universal Link and the
+    /// custom scheme, and reject non-game URLs.
+    @Test func gameLink_roundTrips() {
+        let id = "ABC-123"
+        #expect(GameLink.id(from: GameLink.url(forID: id)) == id)
+        #expect(GameLink.id(from: GameLink.appURL(forID: id)) == id)
+        #expect(GameLink.isGameURL(URL(string: GameLink.appURL(forID: id))!))
+        #expect(GameLink.isGameURL(URL(string: "https://\(GameLink.host)/game?g=\(id)")!))
+        // A friend link is NOT a game link.
+        #expect(!GameLink.isGameURL(URL(string: FriendLink.url(forCode: "XYZ"))!))
     }
 }

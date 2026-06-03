@@ -177,6 +177,9 @@ struct ChildTimeApp: App {
                         // A friend invite link → remember the code; the leaderboard
                         // adds it the next time the child opens it.
                         FriendsManager.shared.pendingFriendCode = FriendLink.code(from: url.absoluteString)
+                    } else if GameLink.isGameURL(url) {
+                        // A live-game invite → remember the id; the home screen joins.
+                        LiveGameManager.shared.pendingGameID = GameLink.id(from: url.absoluteString)
                     }
                 }
                 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
@@ -187,6 +190,8 @@ struct ChildTimeApp: App {
                         if settings.deviceRole != .child { settings.deviceRole = .child }
                     } else if FriendLink.isFriendURL(url) {
                         FriendsManager.shared.pendingFriendCode = FriendLink.code(from: url.absoluteString)
+                    } else if GameLink.isGameURL(url) {
+                        LiveGameManager.shared.pendingGameID = GameLink.id(from: url.absoluteString)
                     }
                 }
         }
@@ -200,6 +205,8 @@ struct ChildTimeApp: App {
         case "dashboard": ParentDashboardView(isRoot: true)
         case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
         case "leaderboard": LeaderboardView()   // DEMO_SCREEN=leaderboard
+        case "livegame": LiveGameDemoHost()      // DEMO_SCREEN=livegame — live quiz setup/flow
+        case "gameinvite": WorldMapView().onAppear { LiveGameManager.shared.seedDemoInvite() }  // invite banner
         case "friendtest":                      // DEMO_SCREEN=friendtest — runs the live Firestore diagnostic
             Text("Friends diagnostic — see console ([Friends])")
                 .padding().task { await FriendsManager.shared.runDiagnostic() }

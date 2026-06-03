@@ -9,6 +9,8 @@ struct WorldMapView: View {
     @Environment(\.horizontalSizeClass) private var hsc
 
     @ObservedObject private var friends = FriendsManager.shared
+    @ObservedObject private var liveGame = LiveGameManager.shared
+    @State private var inviteBannerVisible = false
     @State private var companion = CompanionController()
     @State private var selectedWorld: World?
     @State private var showDailyChest = false
@@ -217,13 +219,55 @@ struct WorldMapView: View {
         .fullScreenCover(isPresented: $showingLeaderboard) {
             LeaderboardView()
         }
+        // The live friends quiz — ONE flow cover for setup → lobby → game, so
+        // there's never a second presentation racing the first.
+        .fullScreenCover(isPresented: Binding(
+            get: { liveGame.isSettingUp || liveGame.game != nil },
+            set: { if !$0 { Task { await liveGame.leaveGame() } } })) {
+            LiveGameFlowView()
+        }
         // A friend invite link opened the app → jump to the leaderboard, which
         // consumes the pending code and adds the friend.
         .onChange(of: friends.pendingFriendCode) { _, code in
             if code != nil { showingLeaderboard = true }
         }
+        // A game deep link / push tap → join the game (the cover shows it).
+        .onChange(of: liveGame.pendingGameID) { _, id in
+            guard let id else { return }
+            liveGame.pendingGameID = nil
+            Task { await liveGame.joinGame(id) }
+        }
+        // The leaderboard's "create game" button asked to open setup. Delay a beat
+        // so the leaderboard cover finishes dismissing before this one presents.
+        .onChange(of: liveGame.wantsNewGame) { _, want in
+            guard want else { return }
+            liveGame.wantsNewGame = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { liveGame.openSetup() }
+        }
         .onAppear {
             if friends.pendingFriendCode != nil { showingLeaderboard = true }
+            if let id = liveGame.pendingGameID { liveGame.pendingGameID = nil; Task { await liveGame.joinGame(id) } }
+            liveGame.startInvitesListener()
+        }
+        .onDisappear { liveGame.stopInvitesListener() }
+        // A friend started a game I'm invited to → pop a toast at the top (far more
+        // visible than the small red dot). It auto-hides after a few seconds; the
+        // red dot on the controller button stays as the persistent reminder.
+        .overlay(alignment: .top) {
+            if inviteBannerVisible, let invite = liveGame.invites.first,
+               liveGame.game == nil, !liveGame.isSettingUp {
+                gameInviteBanner(invite)
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.top, AppSpacing.xs)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: inviteBannerVisible)
+        .onChange(of: liveGame.invites.count) { old, new in
+            guard new > old else { if new == 0 { inviteBannerVisible = false }; return }
+            Haptic.success(); SoundPlayer.shared.play(.portalAppear)
+            inviteBannerVisible = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) { inviteBannerVisible = false }
         }
         .fullScreenCover(isPresented: $showingWheel) {
             LuckyWheelView { showingWheel = false }
@@ -259,6 +303,37 @@ struct WorldMapView: View {
                 }
             }
         }
+    }
+
+    /// A friendly "you're invited!" banner that drops in at the top of the home
+    /// screen, with the host's name and a one-tap Join.
+    private func gameInviteBanner(_ invite: LiveGameInvite) -> some View {
+        HStack(spacing: 12) {
+            Text("🎮").font(.system(size: 30))
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("\(invite.hostName) מַזְמִין/ה אוֹתְךָ!")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Text("מִשְׂחָק חִידוֹן נֶגֶד חֲבֵרִים")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.85))
+            }
+            Spacer()
+            Button {
+                Haptic.medium()
+                Task { await liveGame.joinGame(invite.id) }
+            } label: {
+                Text("הִצְטָרְפוּ")
+                    .font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(AppColor.textOnLight)
+                    .padding(.horizontal, 18).padding(.vertical, 9)
+                    .background(Capsule().fill(AppColor.starGold))
+            }
+        }
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).fill(AppColor.gemPurple))
+        .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).stroke(.white.opacity(0.25), lineWidth: 1))
+        .glow(AppColor.gemPurple, radius: 14)
+        .shadow(color: .black.opacity(0.3), radius: 10, y: 5)
+        .frame(maxWidth: 520)
+        .environment(\.layoutDirection, .rightToLeft)
     }
 
     // MARK: - Top bar
@@ -338,6 +413,31 @@ struct WorldMapView: View {
                     .glow(Color(hex: "10B981").opacity(0.35), radius: 4)
             }
 
+            // Live friends quiz — start a head-to-head game with friends. Pulses
+            // gently when a friend has an open game I'm invited to.
+            Button {
+                Haptic.light()
+                if let invite = liveGame.invites.first {
+                    Task { await liveGame.joinGame(invite.id) }
+                } else {
+                    liveGame.openSetup()
+                }
+            } label: {
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: "gamecontroller.fill")
+                        .font(.system(size: iconSize - 3, weight: .medium))
+                        .foregroundStyle(AppColor.gemPurple)
+                        .frame(width: buttonSize, height: buttonSize)
+                        .background(.white.opacity(0.15), in: Circle())
+                        .overlay(Circle().stroke(AppColor.gemPurple.opacity(0.6), lineWidth: 1.5))
+                        .glow(AppColor.gemPurple.opacity(0.4), radius: 4)
+                    if !liveGame.invites.isEmpty {
+                        Circle().fill(AppColor.flameOrange).frame(width: 12, height: 12)
+                            .overlay(Circle().stroke(.white, lineWidth: 2))
+                            .offset(x: 2, y: -2)
+                    }
+                }
+            }
         }
     }
 

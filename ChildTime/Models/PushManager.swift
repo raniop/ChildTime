@@ -240,6 +240,12 @@ extension PushManager: UNUserNotificationCenterDelegate {
         let info = response.notification.request.content.userInfo
         await MainActor.run {
             PushManager.shared.handleLevelUpDecision(actionID, userInfo: info)
+            // A tapped live-game invite → remember the game id; the home screen
+            // joins it as soon as the app is active.
+            if info["type"] as? String == "liveGameInvite",
+               let gameID = info["gameID"] as? String {
+                LiveGameManager.shared.pendingGameID = gameID
+            }
         }
         // Awaited (not fire-and-forget) so the Firestore write-back completes
         // before iOS suspends the briefly-woken background app — otherwise the

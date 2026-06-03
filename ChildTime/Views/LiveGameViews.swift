@@ -1,0 +1,612 @@
+import SwiftUI
+
+// MARK: - Live game root
+
+/// The live friends quiz, presented full-screen. Switches on the game's state:
+/// lobby → countdown → question → reveal → final (or a gentle "cancelled").
+struct LiveGameView: View {
+    @ObservedObject private var lg = LiveGameManager.shared
+    @ObservedObject private var friends = FriendsManager.shared
+    @State private var confetti = 0
+    @State private var countdownValue = LiveGameRules.countdownSeconds
+    @State private var nudged: Set<String> = []     // friends I just re-invited
+
+    private var meID: String? { ProfileStore.shared.activeID?.uuidString }
+
+    var body: some View {
+        ZStack {
+            AppGradient.galaxy.ignoresSafeArea()
+            FloatingOrbs(colors: [AppColor.gemPurple, AppColor.starGold, AppColor.diamondBlue],
+                         count: 6, maxSize: 240, opacity: 0.32)
+            SparkleField(count: 18, size: 12)
+
+            if let g = lg.game {
+                switch g.state {
+                case .lobby:     lobby(g)
+                case .countdown: countdown
+                case .question:  questionView(g)
+                case .reveal:    revealView(g)
+                case .roundBreak: roundBreakView(g)
+                case .final:     finalView(g)
+                case .cancelled: endedView(title: "הַמִּשְׂחָק הִסְתַּיֵּם 🎈",
+                                           subtitle: "תָּמִיד אֶפְשָׁר לְהַתְחִיל מִשְׂחָק חָדָשׁ!")
+                }
+            } else {
+                ProgressView().tint(.white)
+            }
+
+            Confetti(trigger: confetti).allowsHitTesting(false)
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+        .onDisappear { Task { await lg.leaveGame() } }
+    }
+
+    private var closeButton: some View {
+        HStack {
+            Button { Task { await lg.leaveGame() } } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
+                    .frame(width: 38, height: 38).background(.white.opacity(0.18), in: Circle())
+            }
+            Spacer()
+        }
+        .environment(\.layoutDirection, .leftToRight)
+        .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.md)
+    }
+
+    // MARK: Lobby
+
+    private func lobby(_ g: LiveGame) -> some View {
+        let isHost = g.hostID == meID
+        let canStart = lg.players.count >= LiveGameRules.minPlayers
+        return VStack(spacing: AppSpacing.lg) {
+            closeButton
+            Text("🎮").font(.system(size: 56))
+            Text(isHost ? "מִי מִצְטָרֵף?" : "\(g.hostName) פָּתַח/ה מִשְׂחָק!")
+                .font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+            Text("\(g.topicEmoji) \(g.topicName) · הַטּוֹב מִ-\(g.totalRounds) סִבּוּבִים")
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+
+            playerGrid
+
+            if isHost { friendsInviteList(g) }
+
+            Spacer()
+
+            if isHost {
+                if let url = URL(string: GameLink.url(forID: g.id)) {
+                    ShareLink(item: url, message: Text("בּוֹא נְשַׂחֵק בְּטוֹפִי! 🎮")) {
+                        Label("הַזְמִינוּ עוֹד חֲבֵרִים", systemImage: "square.and.arrow.up")
+                            .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                            .padding(.horizontal, 18).padding(.vertical, 10)
+                            .background(AppColor.gemPurple, in: Capsule())
+                    }
+                }
+                Button { lg.startGame() } label: {
+                    Text(canStart ? "מַתְחִילִים! 🚀" : "מְחַכִּים לְעוֹד שַׂחְקָן אֶחָד לְפָחוֹת…")
+                        .font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                        .frame(maxWidth: .infinity).padding(.vertical, 16)
+                        .background(AppGradient.gold, in: Capsule())
+                        .glow(canStart ? AppColor.starGold : .clear, radius: 12)
+                }
+                .disabled(!canStart).opacity(canStart ? 1 : 0.55)
+                .padding(.horizontal, AppSpacing.xl)
+            } else {
+                Text("מְחַכִּים שֶׁ\(g.hostName) יַתְחִיל… ⏳")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .padding(.bottom, AppSpacing.lg)
+            }
+        }
+        .padding(.bottom, AppSpacing.xl)
+        .frame(maxWidth: 560).frame(maxWidth: .infinity)
+    }
+
+    private var playerGrid: some View {
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 92), spacing: 14)], spacing: 18) {
+                ForEach(lg.players) { p in
+                    VStack(spacing: 6) {
+                        CharacterView(character: p.character, portrait: true)
+                            .frame(width: 64, height: 64)
+                            .glow(p.id == meID ? AppColor.starGold : .clear, radius: 18)
+                        Text(p.name).font(.system(size: 13, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white).lineLimit(1)
+                    }
+                    .padding(.top, 8)   // room so the glow isn't clipped by the scroll edge
+                }
+            }
+            // Generous vertical padding so the soft glow has room to breathe top
+            // and bottom instead of being cut off at the ScrollView's edge.
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.vertical, AppSpacing.lg)
+        }
+    }
+
+    /// The host's friends with their join status + a direct "invite" (push) button —
+    /// so you can call specific friends to the game, not just share a link.
+    @ViewBuilder private func friendsInviteList(_ g: LiveGame) -> some View {
+        let joinedIDs = Set(lg.players.map(\.id))
+        let myFriends = friends.leaderboard.filter { $0.id != meID }
+        if !myFriends.isEmpty {
+            // RTL: .leading is the RIGHT edge, so the title sits flush right above
+            // the rows (instead of floating to the left under .trailing).
+            VStack(alignment: .leading, spacing: 8) {
+                Text("הַחֲבֵרִים שֶׁלִּי")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                ScrollView {
+                    VStack(spacing: 8) {
+                        ForEach(myFriends) { f in
+                            HStack(spacing: 10) {
+                                CharacterView(character: f.character, portrait: true).frame(width: 36, height: 36)
+                                Text(f.name).font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                                Spacer()
+                                if joinedIDs.contains(f.id) {
+                                    Label("הִצְטָרֵף", systemImage: "checkmark.circle.fill")
+                                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                                        .foregroundStyle(AppColor.successMint).labelStyle(.titleAndIcon)
+                                } else {
+                                    Button {
+                                        Haptic.light(); nudged.insert(f.id)
+                                        Task { await lg.invite(friendID: f.id) }
+                                    } label: {
+                                        Label(nudged.contains(f.id) ? "נִשְׁלַח" : "הַזְמִינוּ",
+                                              systemImage: nudged.contains(f.id) ? "paperplane.fill" : "bell.fill")
+                                            .font(.system(size: 13, weight: .heavy, design: .rounded))
+                                            .foregroundStyle(.white)
+                                            .padding(.horizontal, 12).padding(.vertical, 6)
+                                            .background(Capsule().fill(nudged.contains(f.id) ? AppColor.successMint.opacity(0.6) : AppColor.gemPurple))
+                                    }
+                                    .disabled(nudged.contains(f.id))
+                                }
+                            }
+                            .padding(.horizontal, 14).padding(.vertical, 6)
+                            .background(RoundedRectangle(cornerRadius: AppRadius.medium).fill(.white.opacity(0.08)))
+                        }
+                    }
+                }
+                .frame(maxHeight: 200)
+            }
+            .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.sm)
+        }
+    }
+
+    // MARK: Countdown
+
+    private var countdown: some View {
+        VStack(spacing: AppSpacing.lg) {
+            Spacer()
+            Text(countdownValue > 0 ? "\(countdownValue)" : "🚀")
+                .font(.system(size: 120, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .glow(AppColor.starGold, radius: 20)
+                .id(countdownValue)
+                .transition(.scale.combined(with: .opacity))
+            Text("מִתְכּוֹנְנִים…").font(.system(size: 20, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+            Spacer()
+        }
+        .onAppear {
+            countdownValue = LiveGameRules.countdownSeconds
+            tickCountdown()
+        }
+    }
+
+    private func tickCountdown() {
+        guard countdownValue > 0 else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                if countdownValue > 0 { countdownValue -= 1 }
+            }
+            if countdownValue > 0 { tickCountdown() }
+        }
+    }
+
+    // MARK: Question
+
+    private func questionView(_ g: LiveGame) -> some View {
+        let q = g.currentQuestion
+        return VStack(spacing: AppSpacing.lg) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("סִבּוּב \(g.currentRound + 1) מִתּוֹךְ \(g.totalRounds)")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(AppColor.starGold)
+                    Text("שְׁאֵלָה \(g.questionInRound + 1) מִתּוֹךְ \(g.roundQuestions)")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+                Spacer()
+                timerRing(g)
+            }
+            .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.lg)
+
+            Spacer()
+            Text(q?.prompt ?? "")
+                .font(.system(size: 30, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white).multilineTextAlignment(.center)
+                .padding(.horizontal, AppSpacing.lg)
+            Spacer()
+
+            answerGrid(q)
+                .padding(.horizontal, AppSpacing.lg).padding(.bottom, AppSpacing.xl)
+
+            if lg.myChoiceIndex != nil {
+                Text("עָנִיתָ! מְחַכִּים לַשְּׁאָר… ⏳")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(AppColor.starGold).padding(.bottom, AppSpacing.md)
+            }
+        }
+        .frame(maxWidth: 560).frame(maxWidth: .infinity)
+    }
+
+    private func timerRing(_ g: LiveGame) -> some View {
+        TimelineView(.animation) { timeline in
+            let total = Double(g.questionDurationMs) / 1000.0
+            let elapsed: Double = {
+                guard let start = g.questionStartedAt else { return 0 }
+                return max(0, timeline.date.timeIntervalSince(start))
+            }()
+            let remaining = max(0, total - elapsed)
+            let frac = total > 0 ? remaining / total : 0
+            ZStack {
+                Circle().stroke(.white.opacity(0.18), lineWidth: 5)
+                Circle().trim(from: 0, to: frac)
+                    .stroke(frac > 0.3 ? AppColor.successMint : AppColor.almostWarm,
+                            style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Text("\(Int(remaining.rounded(.up)))")
+                    .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+            }
+            .frame(width: 44, height: 44)
+        }
+    }
+
+    private let answerColors: [Color] = [
+        Color(hex: "F25C54"), Color(hex: "4CC9F0"), Color(hex: "06D6A0"), Color(hex: "9B5DE5"),
+    ]
+
+    private func answerGrid(_ q: LiveGameQuestion?) -> some View {
+        let options = q?.options ?? []
+        return LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+            ForEach(Array(options.enumerated()), id: \.offset) { idx, text in
+                let answered = lg.myChoiceIndex != nil
+                let mine = lg.myChoiceIndex == idx
+                Button {
+                    Task { await lg.submitAnswer(idx) }
+                } label: {
+                    Text(text)
+                        .font(.system(size: 22, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white).lineLimit(2).minimumScaleFactor(0.6)
+                        .frame(maxWidth: .infinity, minHeight: 78)
+                        .background(RoundedRectangle(cornerRadius: AppRadius.large)
+                            .fill(answerColors[idx % answerColors.count].opacity(answered && !mine ? 0.35 : 1)))
+                        .overlay(RoundedRectangle(cornerRadius: AppRadius.large)
+                            .stroke(.white, lineWidth: mine ? 4 : 0))
+                        .glow(mine ? .white : .clear, radius: 8)
+                }
+                .disabled(answered)
+            }
+        }
+    }
+
+    // MARK: Reveal
+
+    private func revealView(_ g: LiveGame) -> some View {
+        let q = g.currentQuestion
+        let correct = g.revealCorrectIndex
+        let mine = lg.myChoiceIndex
+        let gotIt = mine != nil && mine == correct
+        return VStack(spacing: AppSpacing.lg) {
+            Spacer()
+            Text(gotIt ? "נֶהֱדָר! 🎉" : (mine == nil ? "הַשְּׁאֵלָה הַבָּאָה תַּגִּיעַ 💫" : "כִּמְעַט! 🌟"))
+                .font(.system(size: 26, weight: .heavy, design: .rounded))
+                .foregroundStyle(gotIt ? AppColor.successMint : .white)
+
+            VStack(spacing: 10) {
+                ForEach(Array((q?.options ?? []).enumerated()), id: \.offset) { idx, text in
+                    let isCorrect = idx == correct
+                    let isMine = idx == mine
+                    HStack {
+                        Text(text).font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                        Spacer()
+                        if isCorrect { Text("✓").font(.system(size: 20, weight: .black)).foregroundStyle(.white) }
+                        else if isMine { Text("בָּחַרְתָּ").font(.system(size: 12, weight: .bold)).foregroundStyle(.white.opacity(0.8)) }
+                    }
+                    .padding(.horizontal, 16).padding(.vertical, 12)
+                    .background(RoundedRectangle(cornerRadius: AppRadius.medium)
+                        .fill(isCorrect ? AppColor.successMint.opacity(0.9)
+                              : (isMine ? AppColor.almostWarm.opacity(0.5) : .white.opacity(0.10))))
+                }
+            }
+            .padding(.horizontal, AppSpacing.lg)
+
+            Spacer()
+            scoreStrip
+            Spacer()
+        }
+        .frame(maxWidth: 560).frame(maxWidth: .infinity)
+        .onAppear {
+            // Celebrate a correct answer; otherwise stay gentle (no "wrong" sound).
+            if gotIt { SoundPlayer.shared.play(.correctBig); Haptic.success() }
+            else { Haptic.soft() }
+        }
+    }
+
+    /// Compact live standings shown between questions.
+    private var scoreStrip: some View {
+        VStack(spacing: 8) {
+            Text("הַנִּקּוּד").font(.system(size: 14, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.8))
+            ForEach(Array(lg.players.prefix(6).enumerated()), id: \.element.id) { idx, p in
+                HStack(spacing: 10) {
+                    Text("\(idx + 1)").font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.7)).frame(width: 20)
+                    CharacterView(character: p.character, portrait: true).frame(width: 34, height: 34)
+                    Text(p.name).font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    Spacer()
+                    Text("\(p.score)").font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .foregroundStyle(AppColor.starGold)
+                }
+                .padding(.horizontal, 14).padding(.vertical, 8)
+                .background(RoundedRectangle(cornerRadius: AppRadius.medium)
+                    .fill(p.id == meID ? AppColor.starGold.opacity(0.20) : .white.opacity(0.08)))
+            }
+        }
+        .padding(.horizontal, AppSpacing.lg)
+    }
+
+    // MARK: Round break
+
+    private func roundBreakView(_ g: LiveGame) -> some View {
+        let winner = lg.players.first(where: { $0.id == g.lastRoundWinnerID })
+        return VStack(spacing: AppSpacing.lg) {
+            Spacer()
+            Text("🏁").font(.system(size: 56))
+            Text("סִיַּמְנוּ סִבּוּב \(g.currentRound + 1)!")
+                .font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+            if let winner {
+                Text("\(winner.name) לָקַח/ה אֶת הַסִּבּוּב! 🎉")
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .foregroundStyle(AppColor.starGold)
+            } else {
+                Text("תֵּיקוּ בַּסִּבּוּב! 🤝")
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.9))
+            }
+            roundWinsTally
+            Text("הַסִּבּוּב הַבָּא מַתְחִיל… ⏳")
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.8))
+            Spacer(); Spacer()
+        }
+        .frame(maxWidth: 560).frame(maxWidth: .infinity)
+        .onAppear { SoundPlayer.shared.play(.streakUp); Haptic.medium() }
+    }
+
+    /// 🏆 per player — the running best-of-3 tally.
+    private var roundWinsTally: some View {
+        VStack(spacing: 8) {
+            ForEach(lg.players.sorted { $0.roundWins != $1.roundWins ? $0.roundWins > $1.roundWins : $0.score > $1.score }) { p in
+                HStack(spacing: 10) {
+                    CharacterView(character: p.character, portrait: true).frame(width: 36, height: 36)
+                    Text(p.name).font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    Spacer()
+                    Text(String(repeating: "🏆", count: p.roundWins).isEmpty ? "—" : String(repeating: "🏆", count: p.roundWins))
+                        .font(.system(size: 15))
+                }
+                .padding(.horizontal, 16).padding(.vertical, 8)
+                .background(RoundedRectangle(cornerRadius: AppRadius.medium)
+                    .fill(p.id == meID ? AppColor.starGold.opacity(0.20) : .white.opacity(0.08)))
+            }
+        }
+        .padding(.horizontal, AppSpacing.xl)
+    }
+
+    // MARK: Final
+
+    private func finalView(_ g: LiveGame) -> some View {
+        // Match winner = most rounds won (tie-broken by points).
+        let winnerID = g.matchWinnerID
+        let iWon = winnerID == meID
+        let sorted = lg.players.sorted {
+            $0.roundWins != $1.roundWins ? $0.roundWins > $1.roundWins : $0.score > $1.score
+        }
+        return VStack(spacing: AppSpacing.lg) {
+            closeButton
+            Text(iWon ? "🏆" : "🎉").font(.system(size: 64))
+            Text(iWon ? "נִצַּחְתָּ!" : "כָּל הַכָּבוֹד!")
+                .font(.system(size: 30, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                .glow(AppColor.starGold, radius: 12)
+            Text(iWon ? "זָכִיתָ בְּ-\(LiveGameRules.winnerDiamonds) 💎"
+                      : "הִשְׁתַּתַּפְתָּ וְזָכִיתָ בְּ-\(LiveGameRules.participationDiamonds) 💎")
+                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(AppColor.diamondBlue)
+
+            ScrollView {
+                VStack(spacing: 10) {
+                    ForEach(Array(sorted.enumerated()), id: \.element.id) { idx, p in
+                        HStack(spacing: 12) {
+                            Text(idx == 0 ? "🥇" : idx == 1 ? "🥈" : idx == 2 ? "🥉" : "\(idx + 1)")
+                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white).frame(width: 32)
+                            CharacterView(character: p.character, portrait: true).frame(width: 44, height: 44)
+                            Text(p.name).font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                            Spacer()
+                            VStack(alignment: .trailing, spacing: 1) {
+                                Text(String(repeating: "🏆", count: p.roundWins)).font(.system(size: 14))
+                                Text("\(p.score) נְקֻדּוֹת").font(.system(size: 13, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(AppColor.starGold)
+                            }
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 10)
+                        .background(RoundedRectangle(cornerRadius: AppRadius.large)
+                            .fill(p.id == meID ? AppColor.starGold.opacity(0.20) : .white.opacity(0.10)))
+                    }
+                }
+                .padding(.horizontal, AppSpacing.lg)
+            }
+
+            Button { Task { await lg.leaveGame() } } label: {
+                Text("סִיּוּם").font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).padding(.vertical, 14).background(AppGradient.purpleDream, in: Capsule())
+            }
+            .padding(.horizontal, AppSpacing.xl).padding(.bottom, AppSpacing.lg)
+        }
+        .frame(maxWidth: 560).frame(maxWidth: .infinity)
+        .onAppear {
+            confetti += 1
+            SoundPlayer.shared.play(.chestOpen)
+            Haptic.success()
+        }
+    }
+
+    // MARK: Ended / cancelled
+
+    private func endedView(title: String, subtitle: String) -> some View {
+        VStack(spacing: AppSpacing.md) {
+            Spacer()
+            Text("🎈").font(.system(size: 64))
+            Text(title).font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+            Text(subtitle).font(.system(size: 15, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.8)).multilineTextAlignment(.center)
+                .padding(.horizontal, AppSpacing.xl)
+            Button { Task { await lg.leaveGame() } } label: {
+                Text("סְגִירָה").font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    .padding(.horizontal, AppSpacing.xl).padding(.vertical, 14)
+                    .background(AppGradient.gold, in: Capsule())
+            }
+            .padding(.top, 6)
+            Spacer(); Spacer()
+        }
+    }
+}
+
+private extension LiveGame {
+    var topicName: String { Topic(rawValue: topic)?.displayName ?? "" }
+    var topicEmoji: String { Topic(rawValue: topic)?.emoji ?? "🎯" }
+}
+
+// MARK: - Flow wrapper
+
+/// ONE full-screen flow for the whole live game: the topic-pick screen until a
+/// game exists, then the lobby/game itself. Presenting both from a single cover
+/// (instead of a sheet + a separate cover) avoids the SwiftUI presentation race
+/// that briefly opened the lobby and slammed it shut.
+struct LiveGameFlowView: View {
+    @ObservedObject private var lg = LiveGameManager.shared
+    var body: some View {
+        if lg.game != nil {
+            LiveGameView()
+        } else {
+            LiveGameSetupSheet()
+        }
+    }
+}
+
+/// DEMO_SCREEN=livegame — reproduces the EXACT presentation path the home screen
+/// uses (the flow's full-screen cover), so a screenshot proves the setup opens
+/// full-screen. Never used in production.
+struct LiveGameDemoHost: View {
+    @ObservedObject private var lg = LiveGameManager.shared
+    var body: some View {
+        ZStack {
+            AppGradient.dreamy.ignoresSafeArea()
+            Text("DEMO").font(.system(size: 12, weight: .bold)).foregroundStyle(.white.opacity(0.3))
+        }
+        .fullScreenCover(isPresented: Binding(
+            get: { lg.isSettingUp || lg.game != nil },
+            set: { if !$0 { Task { await lg.leaveGame() } } })) {
+            LiveGameFlowView()
+        }
+        .onAppear { lg.openSetup() }
+    }
+}
+
+// MARK: - New-game setup
+
+/// Kid-simple: ONE decision. Tap a big topic tile and the game starts — the
+/// difficulty follows the child's own level and the length is a short 5
+/// questions, so there are no extra menus to read.
+struct LiveGameSetupSheet: View {
+    @ObservedObject private var lg = LiveGameManager.shared
+    @State private var creating = false
+
+    private let columns = [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)]
+
+    var body: some View {
+        ZStack {
+            AppGradient.galaxy.ignoresSafeArea()
+            SparkleField(count: 14, size: 11)
+            VStack(spacing: AppSpacing.lg) {
+                Text("בְּמָה מְשַׂחֲקִים? 🎮")
+                    .font(.system(size: 26, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    .padding(.top, AppSpacing.xxl)
+                Text("בַּחֲרוּ נוֹשֵׂא וְהַמִּשְׂחָק מַתְחִיל!")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 14) {
+                        ForEach(Topic.allCases) { t in topicTile(t) }
+                    }
+                    .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.sm)
+                    .padding(.bottom, AppSpacing.xxxl)
+                }
+
+                if let err = lg.lastError, creating == false {
+                    Text(err).font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(AppColor.almostWarm).multilineTextAlignment(.center)
+                        .padding(.bottom, AppSpacing.sm)
+                }
+            }
+            .frame(maxWidth: 520).frame(maxWidth: .infinity)
+
+            if creating {
+                Color.black.opacity(0.4).ignoresSafeArea()
+                VStack(spacing: AppSpacing.md) {
+                    Text("🚀").font(.system(size: 52))
+                    Text("מַכְינִים אֶת הַמִּשְׂחָק…")
+                        .font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                }
+            }
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+        .overlay(alignment: .topLeading) {
+            Button { lg.closeSetup() } label: {
+                Image(systemName: "xmark").font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                    .frame(width: 36, height: 36).background(.white.opacity(0.18), in: Circle())
+            }
+            .padding(AppSpacing.lg)
+        }
+    }
+
+    /// A big, emoji-first tile. One tap creates the game at the child's own level.
+    private func topicTile(_ t: Topic) -> some View {
+        Button {
+            guard !creating else { return }
+            Haptic.medium(); SoundPlayer.shared.play(.uiTap)
+            creating = true
+            Task {
+                let level = ProfileStore.shared.active?.difficulty(for: t) ?? .easy
+                // On success, `game` becomes non-nil and the SAME flow cover swaps
+                // to the lobby — no second presentation, so no flash-and-close.
+                _ = await lg.createGame(topic: t, difficulty: level)
+                creating = false
+            }
+        } label: {
+            VStack(spacing: 8) {
+                Text(t.emoji).font(.system(size: 52))
+                Text(t.displayName).font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white).lineLimit(1).minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity).frame(height: 130)
+            .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(.white.opacity(0.12)))
+            .overlay(RoundedRectangle(cornerRadius: AppRadius.large).stroke(.white.opacity(0.18), lineWidth: 1))
+        }
+        .disabled(creating)
+    }
+}
