@@ -128,6 +128,23 @@
   .band ul{list-style:none; display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top:24px}
   .band li{font-weight:700; font-size:16px; background:rgba(255,255,255,.12); padding:10px 18px; border-radius:14px}
 
+  /* early-access form */
+  .ef{display:flex; flex-direction:column; gap:12px; max-width:420px; margin:24px auto 0}
+  .ef input,.ef select{width:100%; font-family:inherit; font-size:16px; font-weight:600; color:#fff;
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.28); border-radius:14px;
+    padding:14px 16px; outline:none; transition:border .2s, background .2s}
+  .ef input::placeholder{color:rgba(255,255,255,.6)}
+  .ef input:focus,.ef select:focus{border-color:var(--gold); background:rgba(255,255,255,.18)}
+  .ef select{appearance:none}
+  .ef option{color:#1b1340}
+  .ef button{font-weight:900; font-size:18px; border:0; cursor:pointer; border-radius:999px; padding:15px 24px;
+    background:linear-gradient(180deg,var(--gold),#F2A93B); color:#3a2a00;
+    box-shadow:0 10px 26px rgba(255,184,77,.45); transition:transform .15s, box-shadow .15s}
+  .ef button:hover{transform:translateY(-2px); box-shadow:0 14px 32px rgba(255,184,77,.6)}
+  .ef button:disabled{opacity:.6; cursor:default; transform:none}
+  .ef-ok{font-weight:800; font-size:19px; color:var(--mint); margin-top:22px}
+  .ef-note{font-size:13px; opacity:.7; margin-top:14px}
+
   /* faq */
   .faq{max-width:760px; margin:0 auto}
   details{background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.16);
@@ -162,7 +179,7 @@
     <a href="#features">יכולות</a>
     <a href="#parents">להורים</a>
     <a href="#faq">שאלות</a>
-    <a class="btn" href="#download">הורידו</a>
+    <a class="btn" href="#early">נסיון מוקדם</a>
   </nav>
 </div></header>
 
@@ -174,7 +191,7 @@
   <p class="sub">הילד לומד, עונה על שאלות — ומקבל דקות משחק אמיתיות. כיף לילד, שקט להורה.</p>
   <p class="micro">לגילאי 4+ · עברית מלאה · חשבון, עברית, אנגלית, מדע ועוד</p>
   <div class="cta-row">
-    <a class="appstore" href="#download">
+    <a class="appstore" href="#early">
       <svg class="apple" viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.1 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
       <span class="tx"><small>בקרוב ב־</small><b>App&nbsp;Store</b></span>
     </a>
@@ -235,6 +252,26 @@
   </div>
 </div></section>
 
+<!-- EARLY ACCESS -->
+<section id="early"><div class="wrap">
+  <div class="band reveal">
+    <div class="eyebrow">בקרוב · מקומות מוגבלים</div>
+    <h2 class="title">רוצים להיות מהראשונים?</h2>
+    <p class="lead" style="margin-bottom:0">טופי עולה לאוויר ממש בקרוב. הצטרפו לרשימת ההמתנה — ותהיו מהראשונים לנסות, עם הטבת השקה מיוחדת ל־טופי+. 🦁</p>
+    <form class="ef" id="earlyForm" onsubmit="return joinWaitlist(event)">
+      <input id="ef-name" type="text" placeholder="השם שלכם" autocomplete="name">
+      <input id="ef-email" type="email" placeholder="אימייל" required autocomplete="email">
+      <select id="ef-age" aria-label="גיל הילד">
+        <option value="">גיל הילד (לא חובה)</option>
+        <option>4–5</option><option>6–7</option><option>8–9</option><option>10+</option>
+      </select>
+      <button type="submit" id="ef-btn">שריינו לי מקום 🎉</button>
+    </form>
+    <div class="ef-ok" id="ef-ok" style="display:none">יש! שמרנו לכם מקום 🎉 נעדכן אתכם ברגע שטופי עולה לאוויר.</div>
+    <div class="ef-note">בלי ספאם — רק עדכון אחד כשנשיק, וההטבה.</div>
+  </div>
+</div></section>
+
 <!-- FAQ -->
 <section id="faq"><div class="wrap">
   <h2 class="title reveal">שאלות נפוצות</h2>
@@ -290,6 +327,39 @@
     es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
   },{threshold:.15});
   document.querySelectorAll('.reveal').forEach((el)=>io.observe(el));
+
+  // Early-access signup → Firestore `waitlist` (REST, no SDK). Falls back to a
+  // pre-filled email so a lead is never lost if the write is blocked.
+  async function joinWaitlist(e){
+    e.preventDefault();
+    const email=document.getElementById('ef-email').value.trim();
+    const name =document.getElementById('ef-name').value.trim();
+    const age  =document.getElementById('ef-age').value;
+    if(!email) return false;
+    const btn=document.getElementById('ef-btn'); btn.disabled=true; btn.textContent='שולח…';
+    const PROJECT='childtime-86e98';
+    const KEY='AIzaSyB2sLDqhZsZ0gTFD2qUs9upO3JljuwV1Tw'; // public Firebase web key (safe; secured by rules)
+    const url='https://firestore.googleapis.com/v1/projects/'+PROJECT+'/databases/(default)/documents/waitlist?key='+KEY;
+    const body={fields:{
+      email:{stringValue:email},
+      name:{stringValue:name||''},
+      childAge:{stringValue:age||''},
+      source:{stringValue:'web'},
+      createdAt:{timestampValue:new Date().toISOString()}
+    }};
+    try{
+      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      if(!r.ok) throw new Error('status '+r.status);
+      document.getElementById('earlyForm').style.display='none';
+      document.getElementById('ef-ok').style.display='block';
+    }catch(err){
+      const subj=encodeURIComponent('טופי - מעוניין בנסיון מוקדם');
+      const bdy=encodeURIComponent('שם: '+name+'\nאימייל: '+email+'\nגיל הילד: '+age);
+      window.location.href='mailto:ranioph@gmail.com?subject='+subj+'&body='+bdy;
+      btn.disabled=false; btn.textContent='שריינו לי מקום 🎉';
+    }
+    return false;
+  }
 </script>
 </body>
 </html>

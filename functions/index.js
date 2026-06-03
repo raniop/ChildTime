@@ -378,3 +378,53 @@ exports.onQuestionReport = onDocumentCreated(
     }
   }
 );
+
+// ---- Early-access signup (marketing site) → email -------------------------
+// A new doc in `waitlist/{id}` is created by the tofyapp.com early-access form.
+// Email the team so we see every signup the moment it lands. Same Gmail secrets
+// + recipients as feedback/reports.
+exports.onWaitlistSignup = onDocumentCreated(
+  { document: "waitlist/{id}", secrets: [GMAIL_USER, GMAIL_PASS] },
+  async (event) => {
+    const w = (event.data && event.data.data()) || {};
+    let when = "";
+    try {
+      const t = w.createdAt;
+      const d = t && t.toDate ? t.toDate() : (t ? new Date(t) : new Date());
+      when = d.toLocaleString("he-IL", { timeZone: "Asia/Jerusalem" });
+    } catch (e) { /* leave blank */ }
+    const lines = [
+      `נרשם חדש לרשימת ההמתנה של טופי! 🦁🎉`,
+      ``,
+      `אימייל: ${w.email || "-"}`,
+      `שם: ${w.name || "-"}`,
+      `גיל הילד: ${w.childAge || "-"}`,
+      `מקור: ${w.source || "web"}`,
+      `מתי: ${when}`,
+    ];
+
+    const user = GMAIL_USER.value();
+    const pass = GMAIL_PASS.value();
+    if (!user || !pass) {
+      console.warn("[waitlist] GMAIL_USER/GMAIL_PASS not set — skipping email. Signup:", lines.join(" | "));
+      return;
+    }
+
+    try {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: { user, pass },
+      });
+      await transporter.sendMail({
+        from: `טופי <${user}>`,
+        to: FEEDBACK_TO,
+        subject: "🦁 נרשם חדש לרשימת ההמתנה — טופי",
+        text: lines.join("\n"),
+        html: rtlBody(lines),
+      });
+      console.log("[waitlist] emailed to", FEEDBACK_TO.join(", "));
+    } catch (e) {
+      console.error("[waitlist] send failed:", e && e.message);
+    }
+  }
+);
