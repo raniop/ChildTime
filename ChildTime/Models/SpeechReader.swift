@@ -11,9 +11,11 @@ final class SpeechReader {
 
     private init() {}
 
-    /// Speak a line of Hebrew. Empty/whitespace input is ignored.
+    /// Speak a line of Hebrew. Empty/whitespace input is ignored. The text is
+    /// cleaned first so the synthesizer doesn't blurt out emoji NAMES ("water
+    /// wave") or choke on a geresh / quote mark.
     func speak(_ text: String) {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = Self.cleanForSpeech(text)
         guard !trimmed.isEmpty else { return }
         // Make sure speech actually plays — duck (not silence) game sound, and
         // play even when the ringer switch is on silent (read-aloud must be heard).
@@ -30,10 +32,45 @@ final class SpeechReader {
         synth.speak(u)
     }
 
-    /// Read a question and all of its answer options, one after another.
+    /// Read a question and then each numbered answer ("תשובה 1: …, תשובה 2: …")
+    /// so a non-reader can pick by number.
     func readQuestion(prompt: String, options: [String]) {
-        speak(([prompt] + options).joined(separator: ". "))
+        var parts = [prompt]
+        for (i, opt) in options.enumerated() {
+            parts.append("תְּשׁוּבָה \(i + 1): \(opt)")
+        }
+        speak(parts.joined(separator: ". "))
     }
 
     func stop() { synth.stopSpeaking(at: .immediate) }
+
+    /// Strip what the Hebrew voice mangles: emoji/pictographs (it reads their
+    /// names), and geresh / quote marks (it stutters on them).
+    private static func cleanForSpeech(_ raw: String) -> String {
+        let noEmoji = String(String.UnicodeScalarView(raw.unicodeScalars.filter { s in
+            switch s.value {
+            case 0x1F000...0x1FAFF,   // emoji, supplemental symbols & pictographs
+                 0x2600...0x27BF,     // misc symbols + dingbats
+                 0x2B00...0x2BFF,     // misc symbols & arrows (stars, etc.)
+                 0x2190...0x21FF,     // arrows
+                 0x2300...0x23FF,     // technical (▶︎ etc.)
+                 0xFE00...0xFE0F,     // variation selectors
+                 0x1F1E6...0x1F1FF,   // regional indicators (flags)
+                 0x200D:              // zero-width joiner
+                return false
+            default:
+                return true
+            }
+        }))
+        let junk: Set<Character> = [
+            "'", "\u{2018}", "\u{2019}", "\u{05F3}",            // ' ' ' geresh
+            "\"", "\u{201C}", "\u{201D}", "\u{201E}", "\u{05F4}", // " " gershayim
+            "\u{00AB}", "\u{00BB}", "`", "\u{00B4}"
+        ]
+        let cleaned = noEmoji.filter { !junk.contains($0) }
+        return cleaned
+            .split(whereSeparator: { $0 == " " || $0 == "\n" || $0 == "\t" })
+            .joined(separator: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 }

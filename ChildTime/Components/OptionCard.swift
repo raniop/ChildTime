@@ -52,11 +52,28 @@ struct OptionCard: View {
                     .frame(maxWidth: .infinity, minHeight: minHeight)
                     .padding(.horizontal, 12)
 
-                // Hint badge — only on eliminated options. Sits in the
-                // top-leading corner (visually top-right in RTL).
+                // Number badge (1-4) — so the read-aloud can say "answer 2" and
+                // the child knows which tile to tap. Top-leading corner.
+                VStack {
+                    HStack {
+                        Text("\(index + 1)")
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .frame(width: 26, height: 26)
+                            .background(Circle().fill(.black.opacity(0.28)))
+                            .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 1))
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                .padding(8)
+
+                // Hint badge — only on eliminated options. Top-TRAILING corner so
+                // it never sits on top of the number badge.
                 if feedback == .eliminated {
                     VStack {
                         HStack {
+                            Spacer()
                             ZStack {
                                 Circle()
                                     .fill(AppColor.starGold)
@@ -65,7 +82,6 @@ struct OptionCard: View {
                                 Text("💡")
                                     .font(.system(size: 16))
                             }
-                            Spacer()
                         }
                         Spacer()
                     }

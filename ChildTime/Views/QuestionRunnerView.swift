@@ -480,26 +480,43 @@ struct QuestionRunnerView: View {
     @ViewBuilder
     private func questionHeader(_ q: Question) -> some View {
         VStack(spacing: AppSpacing.md) {
-            // Topic / super indicator
+            // Control + topic row. Read-aloud (right) and report (left) live HERE,
+            // outside the prompt card, so they never cover the question text — and
+            // the two buttons are the same size.
             HStack(spacing: 8) {
-                Text(q.topic.emoji)
-                    .font(.system(size: topicEmojiSize))
-                if isSuperQuestion {
-                    Text("⭐ שְׁאֵלַת זָהָב!")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundStyle(AppColor.starGold)
-                        .glow(AppColor.starGold, radius: 8)
-                } else if isInPortal {
-                    Text("🌀 בּוֹנוּס ×3 כּוֹכָבִים!")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .glow(AppColor.gemPurple, radius: 10)
-                } else if mode.isFeed {
-                    Text(q.topic.displayName)
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
+                cardIconButton(system: "speaker.wave.2.fill",
+                               fg: .white,
+                               bg: AppColor.companionGlow.opacity(0.9),
+                               glow: AppColor.companionGlow.opacity(0.5)) {
+                    Haptic.light()
+                    SpeechReader.shared.readQuestion(prompt: q.readAloudText, options: q.options)
+                }
+                Spacer(minLength: 4)
+                HStack(spacing: 8) {
+                    Text(q.topic.emoji).font(.system(size: topicEmojiSize))
+                    if isSuperQuestion {
+                        Text("⭐ שְׁאֵלַת זָהָב!")
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .foregroundStyle(AppColor.starGold).glow(AppColor.starGold, radius: 8)
+                    } else if isInPortal {
+                        Text("🌀 בּוֹנוּס ×3 כּוֹכָבִים!")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white).glow(AppColor.gemPurple, radius: 10)
+                    } else if mode.isFeed {
+                        Text(q.topic.displayName)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.85))
+                    }
+                }
+                .lineLimit(1).minimumScaleFactor(0.7)
+                Spacer(minLength: 4)
+                cardIconButton(system: "flag",
+                               fg: .white.opacity(0.6),
+                               bg: .white.opacity(0.15)) {
+                    showReportConfirm = true
                 }
             }
+            .padding(.horizontal, AppSpacing.lg)
 
             Text(q.prompt)
                 .font(.system(size: questionFontSize(for: q.prompt), weight: .heavy, design: .rounded))
@@ -519,37 +536,26 @@ struct QuestionRunnerView: View {
                                         lineWidth: isSuperQuestion ? 3 : 1)
                         )
                 )
-                // Report a bad question — subtle flag in the card's top-left
-                // corner (confirmed, so a child won't trigger it by accident).
-                .overlay(alignment: .topTrailing) {
-                    Button { showReportConfirm = true } label: {
-                        Image(systemName: "flag")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.white.opacity(0.55))
-                            .padding(7)
-                            .background(.white.opacity(0.12), in: Circle())
-                    }
-                    .padding(8)
-                }
-                // Read aloud — for early readers. Reads the question + all answers.
-                .overlay(alignment: .topLeading) {
-                    Button {
-                        Haptic.light()
-                        SpeechReader.shared.readQuestion(prompt: q.readAloudText, options: q.options)
-                    } label: {
-                        Image(systemName: "speaker.wave.2.fill")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .padding(9)
-                            .background(AppColor.companionGlow.opacity(0.85), in: Circle())
-                            .overlay(Circle().stroke(.white.opacity(0.4), lineWidth: 1))
-                            .glow(AppColor.companionGlow.opacity(0.5), radius: 5)
-                    }
-                    .padding(8)
-                }
                 .glow(isSuperQuestion ? AppColor.starGold : .clear, radius: isSuperQuestion ? 16 : 0)
                 .padding(.horizontal, AppSpacing.lg)
         }
+    }
+
+    /// A consistent round icon button for the question's control row (read-aloud,
+    /// report) — both the same size so the row reads tidy.
+    private func cardIconButton(system: String, fg: Color, bg: Color,
+                                glow: Color = .clear,
+                                action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: system)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(fg)
+                .frame(width: 36, height: 36)
+                .background(bg, in: Circle())
+                .overlay(Circle().stroke(.white.opacity(0.35), lineWidth: 1))
+                .glow(glow, radius: 5)
+        }
+        .buttonStyle(.plain)
     }
 
     /// The answers grid + the hint / magic-wand row (the lower block).
