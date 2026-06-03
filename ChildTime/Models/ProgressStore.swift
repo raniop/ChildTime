@@ -427,7 +427,7 @@ final class ProgressStore: ObservableObject {
     /// parent enabled them: enabled → 0.6 (slight head-start), else 0.4.
     func affinity(for topic: Topic) -> Double {
         if let a = topicAffinity[topic.rawValue] { return a }
-        return ParentSettings.shared.enabledTopics.contains(topic) ? 0.6 : 0.4
+        return (ProfileStore.shared.active?.enabledTopics ?? ParentSettings.shared.enabledTopics).contains(topic) ? 0.6 : 0.4
     }
 
     /// Rolling average response time (ms) for a topic; nil if never answered.
@@ -529,7 +529,7 @@ final class ProgressStore: ObservableObject {
         let topics = InterestCatalog.topics(for: profile.interests)
         let boost = profile.learningLevel.affinityBoost
         for topic in topics {
-            let base = ParentSettings.shared.enabledTopics.contains(topic) ? 0.6 : 0.4
+            let base = (ProfileStore.shared.active?.enabledTopics ?? ParentSettings.shared.enabledTopics).contains(topic) ? 0.6 : 0.4
             topicAffinity[topic.rawValue] = min(1, base + boost)
         }
         // Starting difficulty is no longer seeded into a global setting — it's

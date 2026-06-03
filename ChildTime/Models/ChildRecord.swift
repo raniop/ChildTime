@@ -117,6 +117,9 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// Per-child daily screen-time cap in minutes (parent-set, authoritative on
     /// the parent's device). nil → inherit the device global; 0 → unlimited.
     var dailyCapMinutes: Int?
+    /// Topics (worlds) the parent enabled for this child (topic.rawValues).
+    /// nil → all topics enabled (also the backward-compatible default).
+    var enabledTopics: [String]?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -133,6 +136,10 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.photoData = Self.compressForSync(profile.photoData)
         self.difficultyByTopic = profile.difficultyByTopic.isEmpty ? nil : profile.difficultyByTopic
         self.dailyCapMinutes = profile.dailyCapMinutes
+        // Store only when the parent narrowed it (all-enabled stays nil → smaller doc).
+        self.enabledTopics = profile.enabledTopics.count >= Topic.allCases.count
+            ? nil
+            : profile.enabledTopics.map { $0.rawValue }.sorted()
     }
 
     /// Rehydrate a local `Profile`. The photo now syncs (compressed), so a custom
@@ -152,7 +159,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             interests: interests,
             learningLevel: LearningLevel(rawValue: learningLevel) ?? .developing,
             difficultyByTopic: difficultyByTopic ?? [:],
-            dailyCapMinutes: dailyCapMinutes
+            dailyCapMinutes: dailyCapMinutes,
+            enabledTopics: enabledTopics.map { Set($0.compactMap(Topic.init(rawValue:))) } ?? Set(Topic.allCases)
         )
     }
 

@@ -44,6 +44,14 @@ struct WorldMapView: View {
         )
     }
 
+    /// Worlds the parent enabled for the active child (all topics if unset). A
+    /// disabled topic is hidden entirely — the child never sees that world card,
+    /// and the Smart Feed won't serve its questions either.
+    private var enabledWorlds: [World] {
+        let allowed = profiles.active?.enabledTopics ?? Set(Topic.allCases)
+        return Worlds.all.filter { allowed.contains($0.topic) }
+    }
+
     /// Total width cap for the world grid (so the 3 cards stay centered on iPad
     /// instead of pushing to one edge).
     private var worldGridMaxWidth: CGFloat {
@@ -81,7 +89,7 @@ struct WorldMapView: View {
                             }
                             .frame(maxWidth: .infinity)
 
-                            ForEach(Worlds.all) { world in
+                            ForEach(enabledWorlds) { world in
                                 WorldCard(
                                     // Premium unlocks every world (that's what the
                                     // subscription buys). Stars are now a spendable

@@ -37,6 +37,11 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// their device and synced via `ChildRecord`. nil → inherit the device's
     /// global setting; 0 → unlimited (no cap). Per-child so siblings can differ.
     var dailyCapMinutes: Int?
+    /// Topics (worlds) the parent allows THIS child to learn. Drives BOTH the
+    /// world cards on the home screen AND the Smart Feed's topic universe — so a
+    /// parent who turns off English hides that world and stops English questions.
+    /// Synced via `ChildRecord`. Default: every topic enabled (opt-out per child).
+    var enabledTopics: Set<Topic>
 
     init(
         id: UUID = UUID(),
@@ -51,7 +56,8 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         interests: [String] = [],
         learningLevel: LearningLevel = .developing,
         difficultyByTopic: [String: String] = [:],
-        dailyCapMinutes: Int? = nil
+        dailyCapMinutes: Int? = nil,
+        enabledTopics: Set<Topic> = Set(Topic.allCases)
     ) {
         self.id = id
         self.name = name
@@ -66,13 +72,14 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.learningLevel = learningLevel
         self.difficultyByTopic = difficultyByTopic
         self.dailyCapMinutes = dailyCapMinutes
+        self.enabledTopics = enabledTopics
     }
 
     // Backward-compatible decoding: profiles stored before the Parent Platform
     // shipped won't have grade / interests / learningLevel keys.
     enum CodingKeys: String, CodingKey {
         case id, name, gender, age, photoData, avatarPresetID, character3DID, createdAt
-        case grade, interests, learningLevel, difficultyByTopic, dailyCapMinutes
+        case grade, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
     }
 
     init(from decoder: Decoder) throws {
@@ -90,7 +97,12 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.learningLevel = try c.decodeIfPresent(LearningLevel.self, forKey: .learningLevel) ?? .developing
         self.difficultyByTopic = try c.decodeIfPresent([String: String].self, forKey: .difficultyByTopic) ?? [:]
         self.dailyCapMinutes = try c.decodeIfPresent(Int.self, forKey: .dailyCapMinutes)
+        // Older profiles (pre per-child topics) decode to "everything enabled".
+        self.enabledTopics = try c.decodeIfPresent(Set<Topic>.self, forKey: .enabledTopics) ?? Set(Topic.allCases)
     }
+
+    /// Whether the parent allows this topic for the child.
+    func allows(_ topic: Topic) -> Bool { enabledTopics.contains(topic) }
 
     /// Resolved daily screen-time cap for this child. A per-child value overrides
     /// the device-global setting; nil → inherit the global; ≤0 → unlimited.

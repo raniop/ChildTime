@@ -23,7 +23,7 @@ struct ChildInsightsView: View {
     @State private var period: Period = .week
 
     private var lp: LearningProfile {
-        LearningProfile(snapshot: snapshot, enabledTopics: settings.enabledTopics, age: profile.age)
+        LearningProfile(snapshot: snapshot, enabledTopics: profile.enabledTopics, age: profile.age)
     }
     private var history: [DailyStat] {
         LearningHistoryStore.shared.history(for: profile.id)

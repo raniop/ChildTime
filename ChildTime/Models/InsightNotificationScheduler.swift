@@ -50,7 +50,7 @@ enum InsightNotificationScheduler {
         for row in rows {
             // Only include kids with enough signal to say something real.
             guard row.snapshot.totalAnswered >= 4 else { continue }
-            pool += insights(for: row.profile, snapshot: row.snapshot, enabledTopics: enabledTopics)
+            pool += insights(for: row.profile, snapshot: row.snapshot, enabledTopics: row.profile.enabledTopics)
         }
         guard !pool.isEmpty else { return }
         pool.shuffle()

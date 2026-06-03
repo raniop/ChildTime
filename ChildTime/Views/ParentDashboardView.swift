@@ -33,6 +33,7 @@ struct ParentDashboardView: View {
     @State private var friendsProfile: Profile?
     @State private var difficultyProfile: Profile?
     @State private var screenTimeProfile: Profile?
+    @State private var worldsProfile: Profile?
     @State private var showingFeedback = false
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
@@ -219,6 +220,11 @@ struct ParentDashboardView: View {
                 ChildScreenTimeView(profileID: p.id)
                     .environmentObject(profiles)
                     .environmentObject(settings)
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(item: $worldsProfile) { p in
+                ChildWorldsView(profileID: p.id)
+                    .environmentObject(profiles)
                     .environment(\.layoutDirection, .rightToLeft)
             }
             .sheet(isPresented: $showingFeedback) {
@@ -641,7 +647,7 @@ struct ParentDashboardView: View {
             guard let end = s.unlockEndsAt else { return 0 }
             return max(0, Int(end.timeIntervalSinceNow))
         }()
-        let lp = LearningProfile(snapshot: s, enabledTopics: settings.enabledTopics, age: profile.age)
+        let lp = LearningProfile(snapshot: s, enabledTopics: profile.enabledTopics, age: profile.age)
         let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: profile.id), profile: lp)
         let status = overallStatus(engine: engine, lp: lp, hasData: s.totalAnswered >= 4)
         // This child's effective daily screen-time cap (per-child override, else global).
@@ -666,6 +672,11 @@ struct ParentDashboardView: View {
                         screenTimeProfile = profile
                     } label: {
                         Label("זמן מסך יומי", systemImage: "hourglass")
+                    }
+                    Button {
+                        worldsProfile = profile
+                    } label: {
+                        Label("עולמות פעילים", systemImage: "square.grid.2x2.fill")
                     }
                     Button {
                         friendsProfile = profile
@@ -849,7 +860,7 @@ struct ParentDashboardView: View {
 
     @ViewBuilder
     private func learningProfileCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
-        let lp = LearningProfile(snapshot: s, enabledTopics: settings.enabledTopics, age: profile.age)
+        let lp = LearningProfile(snapshot: s, enabledTopics: profile.enabledTopics, age: profile.age)
         let favorites = Array(lp.favorites.prefix(3))
         let strong = Array(lp.strong.prefix(3))
         let weak = Array(lp.weak.prefix(3))
@@ -891,7 +902,7 @@ struct ParentDashboardView: View {
     private func adaptiveDifficultyCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
         let levels = s.topicAdaptiveLevel ?? [:]
         // Topics the child has actually practiced, most-practiced first.
-        let topics = settings.enabledTopics
+        let topics = profile.enabledTopics
             .filter { (s.topicAnswered[$0.rawValue] ?? 0) >= 1 }
             .sorted { (s.topicAnswered[$0.rawValue] ?? 0) > (s.topicAnswered[$1.rawValue] ?? 0) }
             .prefix(6)
@@ -998,7 +1009,7 @@ struct ParentDashboardView: View {
     /// tips. Only appears once the kid has played enough to have signal.
     @ViewBuilder
     private func coachingCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
-        let lp = LearningProfile(snapshot: s, enabledTopics: settings.enabledTopics, age: profile.age)
+        let lp = LearningProfile(snapshot: s, enabledTopics: profile.enabledTopics, age: profile.age)
         let history = LearningHistoryStore.shared.history(for: profile.id)
         let engine = InsightsEngine(history: history, profile: lp)
         let coach = CoachingEngine(childName: profile.name, insights: engine, profile: lp, isGirl: profile.gender == .girl)
