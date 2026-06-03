@@ -582,17 +582,17 @@ struct QuestionRunnerView: View {
     }
 
     // Cost of one hint, in pending-minutes (the kid's banked play time).
-    private let hintCostMinutes = 1
+    private let hintCostMinutes = 2
 
     /// The equipped character is the "smart helper". Higher tiers help more:
     /// rare/epic add a topic nudge, legendary/mythic add a method explanation
-    /// AND make the hint free. This is the payoff for a pricier character.
+    /// AND a cheaper hint. This is the payoff for a pricier character.
     private var helperLevel: Character3D.HelpLevel {
         (profiles.active?.character ?? Character3DCatalog.find(nil)).helpLevel
     }
 
-    /// Legendary/mythic helpers give their hint for free.
-    private var hintCost: Int { helperLevel == .explain ? 0 : hintCostMinutes }
+    /// A hint costs 2 minutes; legendary/mythic helpers discount it to 1 (never free).
+    private var hintCost: Int { helperLevel == .explain ? 1 : hintCostMinutes }
 
     private func canUseHint(_ q: Question) -> Bool {
         guard !showFeedback else { return false }
