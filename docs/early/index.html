@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#5E60CE">
+<title>הצטרפו לטופי — רשימת המתנה 🦁</title>
+<meta name="description" content="טופי עולה בקרוב! הצטרפו לרשימת ההמתנה והיו מהראשונים לנסות — עם הטבת השקה מיוחדת ל־טופי+.">
+<meta property="og:title" content="הצטרפו לרשימת ההמתנה של טופי 🦁">
+<meta property="og:description" content="היו מהראשונים לנסות את טופי — עם הטבת השקה מיוחדת ל־טופי+. השאירו אימייל ונעדכן ברגע שנשיק!">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="טופי">
+<meta property="og:url" content="https://tofyapp.com/early/">
+<meta property="og:locale" content="he_IL">
+<meta property="og:image" content="https://tofyapp.com/og-image.png?v=3">
+<meta property="og:image:secure_url" content="https://tofyapp.com/og-image.png?v=3">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="טופי — אפליקציית למידה וזמן מסך לילדים">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="הצטרפו לרשימת ההמתנה של טופי 🦁">
+<meta name="twitter:description" content="היו מהראשונים לנסות — עם הטבת השקה מיוחדת ל־טופי+.">
+<meta name="twitter:image" content="https://tofyapp.com/og-image.png?v=3">
+<link rel="icon" href="/favicon.png">
+<style>
+  :root{--gold:#FFD23F; --mint:#06D6A0}
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Heebo","Helvetica Neue",Arial,sans-serif;
+    color:#fff; min-height:100vh; line-height:1.6;
+    background:linear-gradient(160deg,#5E60CE 0%,#6A4BD0 38%,#48BFE3 100%);
+    display:flex; align-items:center; justify-content:center; padding:28px 18px}
+  a{color:inherit}
+  .card{width:100%; max-width:460px; text-align:center;
+    background:rgba(27,19,64,.32); border:1px solid rgba(255,255,255,.16);
+    border-radius:30px; padding:34px 26px 28px; box-shadow:0 30px 80px rgba(0,0,0,.35)}
+  .lion{width:120px; height:auto; margin:0 auto 10px; display:block;
+    filter:drop-shadow(0 14px 30px rgba(0,0,0,.3))}
+  .eyebrow{font-weight:800; color:var(--gold); letter-spacing:.4px; font-size:14px; margin-bottom:6px}
+  h1{font-size:clamp(28px,7vw,38px); font-weight:900; line-height:1.1; margin-bottom:10px}
+  .lead{opacity:.92; font-size:16px; margin-bottom:22px}
+  form{display:flex; flex-direction:column; gap:12px}
+  input,select{width:100%; font-family:inherit; font-size:16px; font-weight:600; color:#fff;
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.28); border-radius:14px;
+    padding:14px 16px; outline:none; transition:border .2s, background .2s}
+  input::placeholder{color:rgba(255,255,255,.6)}
+  input:focus,select:focus{border-color:var(--gold); background:rgba(255,255,255,.18)}
+  select{appearance:none} option{color:#1b1340}
+  button{font-weight:900; font-size:18px; border:0; cursor:pointer; border-radius:999px; padding:15px 24px;
+    background:linear-gradient(180deg,var(--gold),#F2A93B); color:#3a2a00;
+    box-shadow:0 10px 26px rgba(255,184,77,.45); transition:transform .15s, box-shadow .15s}
+  button:hover{transform:translateY(-2px); box-shadow:0 14px 32px rgba(255,184,77,.6)}
+  button:disabled{opacity:.6; cursor:default; transform:none}
+  .ok{font-weight:800; font-size:19px; color:var(--mint); margin-top:8px}
+  .note{font-size:13px; opacity:.7; margin-top:14px}
+  .back{display:inline-block; margin-top:18px; font-size:14px; font-weight:700; opacity:.85; text-decoration:underline}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="lion" src="/lion.png" alt="טופי">
+    <div class="eyebrow">בקרוב · מקומות מוגבלים</div>
+    <h1>הצטרפו לרשימת ההמתנה 🦁</h1>
+    <p class="lead">טופי עולה לאוויר ממש בקרוב. השאירו פרטים ותהיו מהראשונים לנסות — עם הטבת השקה מיוחדת ל־טופי+.</p>
+    <form id="earlyForm" onsubmit="return joinWaitlist(event)">
+      <input id="ef-name" type="text" placeholder="השם שלכם" autocomplete="name">
+      <input id="ef-email" type="email" placeholder="אימייל" required autocomplete="email">
+      <select id="ef-age" aria-label="גיל הילד">
+        <option value="">גיל הילד (לא חובה)</option>
+        <option>4–5</option><option>6–7</option><option>8–9</option><option>10+</option>
+      </select>
+      <button type="submit" id="ef-btn">שריינו לי מקום 🎉</button>
+    </form>
+    <div class="ok" id="ef-ok" style="display:none">יש! שמרנו לכם מקום 🎉 נעדכן אתכם ברגע שטופי עולה לאוויר.</div>
+    <div class="note">בלי ספאם — רק עדכון אחד כשנשיק, וההטבה.</div>
+    <a class="back" href="/">← לאתר של טופי</a>
+  </div>
+
+<script>
+  async function joinWaitlist(e){
+    e.preventDefault();
+    const email=document.getElementById('ef-email').value.trim();
+    const name =document.getElementById('ef-name').value.trim();
+    const age  =document.getElementById('ef-age').value;
+    if(!email) return false;
+    const btn=document.getElementById('ef-btn'); btn.disabled=true; btn.textContent='שולח…';
+    const PROJECT='childtime-86e98';
+    const KEY='AIzaSyB2sLDqhZsZ0gTFD2qUs9upO3JljuwV1Tw'; // public Firebase web key (safe; secured by rules)
+    const url='https://firestore.googleapis.com/v1/projects/'+PROJECT+'/databases/(default)/documents/waitlist?key='+KEY;
+    const body={fields:{
+      email:{stringValue:email},
+      name:{stringValue:name||''},
+      childAge:{stringValue:age||''},
+      source:{stringValue:'web-early'},
+      createdAt:{timestampValue:new Date().toISOString()}
+    }};
+    try{
+      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      if(!r.ok) throw new Error('status '+r.status);
+      document.getElementById('earlyForm').style.display='none';
+      document.getElementById('ef-ok').style.display='block';
+    }catch(err){
+      const subj=encodeURIComponent('טופי - מעוניין בנסיון מוקדם');
+      const bdy=encodeURIComponent('שם: '+name+'\nאימייל: '+email+'\nגיל הילד: '+age);
+      window.location.href='mailto:ranioph@gmail.com?subject='+subj+'&body='+bdy;
+      btn.disabled=false; btn.textContent='שריינו לי מקום 🎉';
+    }
+    return false;
+  }
+</script>
+</body>
+</html>
