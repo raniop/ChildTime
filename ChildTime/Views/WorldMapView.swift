@@ -723,18 +723,28 @@ struct WorldMapView: View {
                 .buttonStyle(.juicy)
                 .frame(maxWidth: 480)
             } else if progress.redeemableMinutesNow > 0 {
-                // Has some minutes but below the enforceable minimum (block-all needs
-                // ≥15 min). Tell the kid instead of silently hiding the button.
-                Text("עוֹד \(max(0, progress.minimumUnlockMinutes - progress.redeemableMinutesNow)) דַּקּוֹת וְאֶפְשָׁר לִפְתֹּחַ זְמַן מִשְׂחָק 🎮")
-                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.9))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, AppSpacing.lg).padding(.vertical, 12)
-                    .background(.white.opacity(0.12), in: Capsule())
-                    .frame(maxWidth: 480)
+                // Has some minutes but below the 15-min minimum we can enforce.
+                // Tell the kid how many more to go instead of hiding the button.
+                bottomHint("עוֹד \(max(0, progress.minimumUnlockMinutes - progress.redeemableMinutesNow)) דַּקּוֹת וְאֶפְשָׁר לִפְתֹּחַ זְמַן מִשְׂחָק 🎮")
+            } else {
+                // Empty wallet (nothing earned / all opened). Nudge to earn instead
+                // of leaving the spot blank.
+                bottomHint("עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק 🎮")
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    /// A pill-styled hint shown in the bottom CTA spot when there's no openable
+    /// grant — so the area is never silently blank.
+    private func bottomHint(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 16, weight: .heavy, design: .rounded))
+            .foregroundStyle(.white.opacity(0.9))
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, AppSpacing.lg).padding(.vertical, 12)
+            .background(.white.opacity(0.12), in: Capsule())
+            .frame(maxWidth: 480)
     }
 
     // MARK: - Actions

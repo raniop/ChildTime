@@ -1080,12 +1080,11 @@ final class ProgressStore: ObservableObject {
         return minutesUnlockedToday
     }
 
-    /// Smallest grant we can actually ENFORCE in the background. In block-all mode
-    /// iOS won't re-lock a window shorter than 15 min, so the kid can't open less
-    /// than that (they accumulate). Block-list meters real usage, so any length works.
-    var minimumUnlockMinutes: Int {
-        ParentSettings.shared.blockAllActive ? 15 : 1
-    }
+    /// Smallest grant the kid may open — ALWAYS 15 min, in every blocking mode.
+    /// iOS can't reliably re-lock a shorter window in the background (block-all has
+    /// a hard 15-min schedule minimum, and the block-list usage event is flaky), so
+    /// we never open less than that; the kid accumulates to 15 first.
+    var minimumUnlockMinutes: Int { 15 }
 
     /// True when there are enough redeemable minutes to open a window we can enforce.
     var canRedeemNow: Bool { redeemableMinutesNow >= minimumUnlockMinutes }
