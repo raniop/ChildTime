@@ -415,6 +415,7 @@ exports.onWaitlistSignup = onDocumentCreated(
         service: "gmail",
         auth: { user, pass },
       });
+      // 1) Notify the team.
       await transporter.sendMail({
         from: `טופי <${user}>`,
         to: FEEDBACK_TO,
@@ -422,7 +423,33 @@ exports.onWaitlistSignup = onDocumentCreated(
         text: lines.join("\n"),
         html: rtlBody(lines),
       });
-      console.log("[waitlist] emailed to", FEEDBACK_TO.join(", "));
+      console.log("[waitlist] team emailed to", FEEDBACK_TO.join(", "));
+
+      // 2) Warm welcome/confirmation to the signup themselves (only if the
+      //    address looks like a real email — never blast junk input).
+      const signupEmail = String(w.email || "").trim();
+      if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(signupEmail)) {
+        const hi = w.name ? `היי ${w.name}! 🎉` : "היי! 🎉";
+        const welcome = [
+          hi,
+          ``,
+          `תודה שנרשמתם לרשימת ההמתנה של טופי — אתם רשמית מהראשונים בתור! 🦁`,
+          ``,
+          `נעדכן אתכם ברגע שטופי עולה לאוויר, ותקבלו הטבת השקה מיוחדת ל־טופי+.`,
+          `בקרוב נלמד, נשחק, ונהפוך זמן מסך לפרס שמרוויחים. ✨`,
+          ``,
+          `נתראה בקרוב,`,
+          `צוות טופי 🦁`,
+        ];
+        await transporter.sendMail({
+          from: `טופי <${user}>`,
+          to: signupEmail,
+          subject: "ברוכים הבאים לטופי! 🦁 שמרנו לכם מקום",
+          text: welcome.join("\n"),
+          html: rtlBody(welcome),
+        });
+        console.log("[waitlist] welcome emailed to", signupEmail);
+      }
     } catch (e) {
       console.error("[waitlist] send failed:", e && e.message);
     }
