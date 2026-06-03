@@ -89,3 +89,76 @@ struct ProgressSnapshot: Codable, Equatable {
         return new
     }()
 }
+
+// MARK: - Resilient decoding
+//
+// CRITICAL: Swift's *synthesized* Decodable throws `keyNotFound` for any missing
+// non-optional key — which would discard the ENTIRE snapshot (stars and all)
+// when an old payload lacks a newer key. (That's exactly what renaming `gems` →
+// `diamonds` did, wiping accumulated progress.) So we decode DEFENSIVELY: start
+// from all-defaults, then overwrite only the keys that are actually present — a
+// missing/renamed/bad field can never nuke the rest. `diamonds` also falls back
+// to the legacy `gems` key. Kept in an extension so the memberwise `init()` (used
+// by `captureSnapshot`/`blank`) is still synthesized.
+extension ProgressSnapshot {
+    enum CodingKeys: String, CodingKey {
+        case pendingMinutes, totalCorrect, totalAnswered, unlockEndsAt, stars, diamonds, xp
+        case currentStreak, dayStreak, lastSessionDate, lastDailyChestDate
+        case unlockedWorlds, worldProgress, topicAccuracy, topicAnswered, topicCorrect
+        case batchCounter, wrongStreak, totalScore, minutesEarnedToday, dailyEarnedDate
+        case answeredToday, correctToday, carryOverMinutes, bestStreak, cycleSeconds
+        case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
+        case wheelProgressCount, recoveryPot, ownedCharacterIDs
+        case revision, lastModifiedAt, deviceID
+    }
+    private enum LegacyCodingKeys: String, CodingKey { case gems }
+
+    init(from decoder: Decoder) throws {
+        self.init()  // seed every field with its default
+        guard let c = try? decoder.container(keyedBy: CodingKeys.self) else { return }
+
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .pendingMinutes)) ?? nil { pendingMinutes = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .totalCorrect)) ?? nil { totalCorrect = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .totalAnswered)) ?? nil { totalAnswered = v }
+        if let v = (try? c.decodeIfPresent(Date.self, forKey: .unlockEndsAt)) ?? nil { unlockEndsAt = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .stars)) ?? nil { stars = v }
+        // diamonds: prefer the new key, else recover the legacy "gems" value.
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .diamonds)) ?? nil {
+            diamonds = v
+        } else if let legacy = try? decoder.container(keyedBy: LegacyCodingKeys.self),
+                  let g = (try? legacy.decodeIfPresent(Int.self, forKey: .gems)) ?? nil {
+            diamonds = g
+        }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .xp)) ?? nil { xp = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .currentStreak)) ?? nil { currentStreak = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .dayStreak)) ?? nil { dayStreak = v }
+        if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastSessionDate)) ?? nil { lastSessionDate = v }
+        if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastDailyChestDate)) ?? nil { lastDailyChestDate = v }
+        if let v = (try? c.decodeIfPresent([String].self, forKey: .unlockedWorlds)) ?? nil { unlockedWorlds = v }
+        if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .worldProgress)) ?? nil { worldProgress = v }
+        if let v = (try? c.decodeIfPresent([String: Double].self, forKey: .topicAccuracy)) ?? nil { topicAccuracy = v }
+        if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .topicAnswered)) ?? nil { topicAnswered = v }
+        if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .topicCorrect)) ?? nil { topicCorrect = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .batchCounter)) ?? nil { batchCounter = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .wrongStreak)) ?? nil { wrongStreak = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .totalScore)) ?? nil { totalScore = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .minutesEarnedToday)) ?? nil { minutesEarnedToday = v }
+        if let v = (try? c.decodeIfPresent(Date.self, forKey: .dailyEarnedDate)) ?? nil { dailyEarnedDate = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .answeredToday)) ?? nil { answeredToday = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .correctToday)) ?? nil { correctToday = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .carryOverMinutes)) ?? nil { carryOverMinutes = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .bestStreak)) ?? nil { bestStreak = v }
+        if let v = (try? c.decodeIfPresent(Double.self, forKey: .cycleSeconds)) ?? nil { cycleSeconds = v }
+        if let v = (try? c.decodeIfPresent([String: Double].self, forKey: .topicResponseMs)) ?? nil { topicResponseMs = v }
+        if let v = (try? c.decodeIfPresent([String: Double].self, forKey: .topicAffinity)) ?? nil { topicAffinity = v }
+        if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .topicExposure)) ?? nil { topicExposure = v }
+        if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .topicAbandon)) ?? nil { topicAbandon = v }
+        if let v = (try? c.decodeIfPresent([String: Double].self, forKey: .topicAdaptiveLevel)) ?? nil { topicAdaptiveLevel = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .wheelProgressCount)) ?? nil { wheelProgressCount = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .recoveryPot)) ?? nil { recoveryPot = v }
+        if let v = (try? c.decodeIfPresent([String].self, forKey: .ownedCharacterIDs)) ?? nil { ownedCharacterIDs = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .revision)) ?? nil { revision = v }
+        if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastModifiedAt)) ?? nil { lastModifiedAt = v }
+        if let v = (try? c.decodeIfPresent(String.self, forKey: .deviceID)) ?? nil { deviceID = v }
+    }
+}

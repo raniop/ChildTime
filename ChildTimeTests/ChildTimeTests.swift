@@ -6,11 +6,46 @@
 //
 
 import Testing
+import Foundation
 @testable import ChildTime
 
 struct ChildTimeTests {
 
     @Test func example() async throws {}
+
+    /// REGRESSION: renaming the snapshot's `gems` field to `diamonds` made old
+    /// payloads (which have "gems" / "stars" but NO "diamonds") fail to decode
+    /// entirely, wiping ALL accumulated progress. The resilient decoder must keep
+    /// every present field — and recover diamonds from the legacy `gems` key.
+    @Test func oldSnapshotMissingDiamonds_keepsStars() throws {
+        let json: [String: Any] = [
+            "stars": 12_345,            // lots of accumulated stars
+            "gems": 7,                  // legacy key (pre-diamonds)
+            "xp": 88,
+            "totalScore": 4_200,
+            "ownedCharacterIDs": ["fox", "bear"],
+            "revision": 9
+            // NOTE: no "diamonds" key — exactly the old-payload shape.
+        ]
+        let data = try JSONSerialization.data(withJSONObject: json)
+        let snap = try JSONDecoder().decode(ProgressSnapshot.self, from: data)
+
+        #expect(snap.stars == 12_345)                       // NOT wiped
+        #expect(snap.diamonds == 7)                         // recovered from "gems"
+        #expect(snap.xp == 88)
+        #expect(snap.totalScore == 4_200)
+        #expect(snap.ownedCharacterIDs == ["fox", "bear"])
+        #expect(snap.revision == 9)
+    }
+
+    /// An empty / garbage payload must decode to defaults, never throw (which the
+    /// vault would treat as `.blank` and overwrite good data with).
+    @Test func emptySnapshotJSON_decodesToBlankNotThrow() throws {
+        let data = try JSONSerialization.data(withJSONObject: [String: Any]())
+        let snap = try JSONDecoder().decode(ProgressSnapshot.self, from: data)
+        #expect(snap.stars == 0)
+        #expect(snap.diamonds == 0)
+    }
 
     /// End-to-end proof that the character shop works: catalog integrity, every
     /// image actually loads from the bundle, tier/help derivation, and a real
