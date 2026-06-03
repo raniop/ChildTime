@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>משחק נגד חברים — טופי</title>
+<link rel="icon" href="favicon.png">
+<style>
+  body{margin:0;font-family:-apple-system,"Heebo",Arial,sans-serif;color:#fff;text-align:center;
+       background:linear-gradient(160deg,#9B5DE5,#5E60CE);min-height:100vh;display:grid;place-items:center}
+  .card{padding:36px 24px;max-width:420px}
+  h1{font-size:44px;margin:0 0 6px;color:#FFD23F}
+  p{font-size:18px;opacity:.95;line-height:1.6}
+  .btn{display:inline-block;margin-top:10px;font-weight:800;background:#000;color:#fff;
+       padding:14px 26px;border-radius:14px;text-decoration:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div style="font-size:64px">🎮</div>
+    <h1>טופי</h1>
+    <p>חבר מזמין אתכם למשחק חידון — מי הכי מהיר?</p>
+    <p style="opacity:.85;font-size:15px">אם טופי מותקן, המשחק ייפתח אוטומטית. אם לא — התקינו את טופי ונסו שוב מהקישור.</p>
+    <a class="btn" id="openBtn" href="#">פִּתחו את טופי</a>
+  </div>
+  <script>
+    var g = new URLSearchParams(location.search).get('g');
+    if (g) {
+      var deep = 'tofy://game?g=' + encodeURIComponent(g);
+      document.getElementById('openBtn').href = deep;
+      // Try to bounce into the app automatically.
+      setTimeout(function(){ location.href = deep; }, 350);
+    }
+  </script>
+</body>
+</html>
