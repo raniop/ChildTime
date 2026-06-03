@@ -13,7 +13,7 @@ struct RewardScreenView: View {
     @EnvironmentObject var shields: ShieldManager
 
     private var isCompact: Bool { hsc == .compact }
-    private var chestSize: CGFloat { isCompact ? 130 : 180 }
+    private var chestSize: CGFloat { isCompact ? 120 : 150 }
     private var celebEmojiSize: CGFloat { isCompact ? 60 : 80 }
     private var titleFont: Font {
         isCompact ? .system(size: 36, weight: .bold, design: .rounded) : .system(size: 56, weight: .bold, design: .rounded)
@@ -43,6 +43,7 @@ struct RewardScreenView: View {
                 SparkleField(count: 28, size: 16)
 
                 VStack(spacing: 0) {
+                    ScrollViewReader { proxy in
                     ScrollView {
                         VStack(spacing: 0) {
                             Spacer(minLength: AppSpacing.md)
@@ -68,10 +69,19 @@ struct RewardScreenView: View {
                             }
 
                             Spacer(minLength: AppSpacing.lg)
+                                .id("rewardsAnchor")
                         }
                         .frame(maxWidth: .infinity)
                     }
                     .scrollIndicators(.hidden)
+                    .onChange(of: revealedItems) { _, _ in
+                        // Auto-scroll so each revealed reward comes into view — no
+                        // manual scrolling to see what you won.
+                        withAnimation(.easeInOut(duration: 0.4)) {
+                            proxy.scrollTo("rewardsAnchor", anchor: .bottom)
+                        }
+                    }
+                    }
 
                     // Action buttons are PINNED to the bottom (outside the scroll)
                     // so a child always sees them — no scrolling needed, even on
@@ -226,6 +236,8 @@ struct RewardScreenView: View {
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
         }
+        // Fill the column so ⭐/💎/⏱ pills are all the same width.
+        .frame(maxWidth: .infinity)
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, 10)
         .background(
@@ -243,7 +255,6 @@ struct RewardScreenView: View {
                 )
         )
         .glow(color, radius: 10)
-        .frame(maxWidth: .infinity, alignment: .center)
         .transition(.asymmetric(
             insertion: .scale(scale: 0.5).combined(with: .opacity).combined(with: .move(edge: .bottom)),
             removal: .opacity

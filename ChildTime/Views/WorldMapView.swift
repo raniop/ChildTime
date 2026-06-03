@@ -519,12 +519,17 @@ struct WorldMapView: View {
         case .minutes:
             let cap = progress.dailyCap
             var lines: [String] = []
-            if cap.enabled && progress.redeemableMinutesNow < progress.pendingMinutes {
-                // Wallet exceeds today's remaining allowance — explain the split.
-                lines.append("אֶפְשָׁר לִפְתֹּחַ עַכְשָׁיו \(progress.redeemableMinutesNow) דַּקּוֹת (עַד הַתִּקְרָה הַיּוֹמִית).")
-                lines.append("בָּאַרְנָק יֵשׁ \(progress.pendingMinutes) דַּקּוֹת — הַשְּׁאָר נִשְׁמָר לְיָמִים הַבָּאִים.")
+            if progress.canRedeemNow {
+                // Enough to open now.
+                lines.append("אֶפְשָׁר לִפְתֹּחַ עַכְשָׁיו \(progress.redeemableMinutesNow) דַּקּוֹת מִשְׂחָק! 🎮")
+                if progress.pendingMinutes > progress.redeemableMinutesNow {
+                    lines.append("בָּאַרְנָק יֵשׁ \(progress.pendingMinutes) — הַשְּׁאָר נִשְׁמָר לְיָמִים הַבָּאִים.")
+                }
+            } else if progress.pendingMinutes > 0 {
+                // Has some, but below the 15-min minimum we can open.
+                lines.append("יֵשׁ לְךָ \(progress.pendingMinutes) דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-\(progress.minimumUnlockMinutes) דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊")
             } else {
-                lines.append("יֵשׁ לְךָ עַכְשָׁיו \(progress.pendingMinutes) דַּקּוֹת מִשְׂחָק לְשַׂחֵק.")
+                lines.append("עֲדַיִן אֵין דַּקּוֹת. עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק! 🎮")
             }
             if cap.enabled {
                 lines.append("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת.")
