@@ -1181,7 +1181,10 @@ final class ProgressStore: ObservableObject {
         s.pendingMinutes      = pendingMinutes
         s.totalCorrect        = totalCorrect
         s.totalAnswered       = totalAnswered
-        s.unlockEndsAt        = unlockEndsAt
+        // unlockEndsAt is intentionally NOT synced — the screen-time unlock window
+        // is per-DEVICE OS state (which apps are open right now). Syncing it made a
+        // stale/other-device grant re-appear on every sync, popping the "game time"
+        // screen unprompted and surviving "סיימתי לשחק".
         s.stars               = stars
         s.diamonds            = diamonds
         s.xp                  = xp
@@ -1236,7 +1239,7 @@ final class ProgressStore: ObservableObject {
         pendingMinutes      = s.pendingMinutes
         totalCorrect        = s.totalCorrect
         totalAnswered       = s.totalAnswered
-        unlockEndsAt        = s.unlockEndsAt
+        // unlockEndsAt deliberately NOT applied from sync (per-device — see captureSnapshot).
         stars               = s.stars
         diamonds            = s.diamonds
         xp                  = s.xp
