@@ -55,6 +55,13 @@ final class FriendsManager: ObservableObject {
 
     /// Me + my friends, sorted by stars (desc) — the leaderboard rows.
     @Published private(set) var leaderboard: [FriendCard] = []
+    /// Top players across the WHOLE app (not just friends), sorted by stars.
+    /// Fetched on demand (pull-to-refresh) — NOT a live listener, since every
+    /// player's score changing would otherwise stream a flood of updates.
+    @Published private(set) var globalBoard: [FriendCard] = []
+    /// My rank among ALL players (1-based), even when I'm outside the top 100.
+    @Published private(set) var myGlobalRank: Int?
+    @Published private(set) var isLoadingGlobal = false
     @Published private(set) var myCode: String = ""
     @Published private(set) var isLoading = false
     @Published var lastError: String?
@@ -393,6 +400,52 @@ final class FriendsManager: ObservableObject {
             }
         }
         leaderboard = cards.sorted { $0.stars > $1.stars }
+    }
+
+    // MARK: - Global leaderboard (all players)
+
+    /// Load the top players across the WHOLE app + my own global rank. Reads the
+    /// same public mini-cards as the friends board, so it exposes no new data.
+    /// On demand only (call on tab open / pull-to-refresh) — not a live listener.
+    func loadGlobal() async {
+        guard AuthManager.shared.isSignedIn else { return }
+        isLoadingGlobal = true
+        defer { isLoadingGlobal = false }
+        // Make sure my own card exists & is fresh so I can appear in the ranking.
+        if let id = myID { await upsertMyCard(id: id) }
+        do {
+            let snap = try await db.collection("friendCards")
+                .order(by: "stars", descending: true)
+                .limit(to: 100)
+                .getDocuments()
+            var cards = snap.documents.compactMap { Self.decode($0.data()) }
+            // My row reflects my LIVE local stars (no Firestore round-trip lag).
+            let myStars = ProgressStore.shared.stars
+            if let id = myID, let idx = cards.firstIndex(where: { $0.id == id }) {
+                cards[idx].stars = myStars
+                cards.sort { $0.stars > $1.stars }
+            }
+            globalBoard = cards
+            await computeMyGlobalRank(myStars: myStars)
+        } catch {
+            log("❌ loadGlobal FAILED: \((error as NSError).code) \(error.localizedDescription)")
+        }
+    }
+
+    /// My global rank = (players with strictly more stars) + 1, via a count
+    /// aggregation so it's exact even when I'm far outside the fetched top 100.
+    private func computeMyGlobalRank(myStars: Int) async {
+        guard let id = myID else { myGlobalRank = nil; return }
+        do {
+            let agg = try await db.collection("friendCards")
+                .whereField("stars", isGreaterThan: myStars)
+                .count.getAggregation(source: .server)
+            myGlobalRank = agg.count.intValue + 1
+        } catch {
+            log("rank aggregation failed: \(error.localizedDescription)")
+            // Fallback: rank within the fetched board if I'm in it.
+            myGlobalRank = globalBoard.firstIndex(where: { $0.id == id }).map { $0 + 1 }
+        }
     }
 
     /// Friends of a specific child — for the PARENT dashboard (see + remove).

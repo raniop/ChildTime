@@ -10,6 +10,10 @@ struct LeaderboardView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showAdd = false
     @State private var friendToRemove: FriendCard?
+    @State private var tab: Board = .friends
+
+    /// Which leaderboard the child is looking at.
+    private enum Board { case friends, global }
 
     private var meID: String? { ProfileStore.shared.activeID?.uuidString }
 
@@ -22,20 +26,10 @@ struct LeaderboardView: View {
 
             VStack(spacing: 0) {
                 header
-                if friends.leaderboard.count <= 1 {
-                    emptyState
-                } else {
-                    ScrollView {
-                        VStack(spacing: AppSpacing.lg) {
-                            podium
-                            restList
-                        }
-                        .padding(.horizontal, AppSpacing.lg)
-                        .padding(.bottom, AppSpacing.xxxl)
-                        .frame(maxWidth: 560)
-                        .frame(maxWidth: .infinity)
-                    }
-                    .refreshable { await friends.refresh() }
+                tabPicker
+                switch tab {
+                case .friends: friendsContent
+                case .global:  globalContent
                 }
             }
         }
@@ -87,6 +81,16 @@ struct LeaderboardView: View {
                         .frame(width: 38, height: 38).background(.white.opacity(0.18), in: Circle())
                 }
                 Spacer()
+                Button {
+                    // Start a live game with friends — hand off to the home screen,
+                    // which presents the setup + game over the world map.
+                    LiveGameManager.shared.wantsNewGame = true
+                    dismiss()
+                } label: {
+                    Image(systemName: "gamecontroller.fill")
+                        .font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
+                        .frame(width: 38, height: 38).background(AppColor.gemPurple.opacity(0.9), in: Circle())
+                }
                 Button { showAdd = true } label: {
                     Image(systemName: "person.badge.plus")
                         .font(.system(size: 17, weight: .bold)).foregroundStyle(.white)
@@ -98,9 +102,113 @@ struct LeaderboardView: View {
         .padding(.horizontal, AppSpacing.lg).padding(.vertical, AppSpacing.md)
     }
 
+    // Two tabs: my friends vs. everyone in the app.
+    private var tabPicker: some View {
+        HStack(spacing: 6) {
+            tabButton("הַחֲבֵרִים שֶׁלִּי", .friends)
+            tabButton("כָּל הַשַּׂחְקָנִים", .global)
+        }
+        .padding(4)
+        .background(Capsule().fill(.white.opacity(0.12)))
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.bottom, AppSpacing.sm)
+    }
+
+    private func tabButton(_ title: String, _ value: Board) -> some View {
+        let active = tab == value
+        return Button {
+            withAnimation(.easeOut(duration: 0.2)) { tab = value }
+            if value == .global { Task { await friends.loadGlobal() } }
+        } label: {
+            Text(title)
+                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity).padding(.vertical, 9)
+                .background(Capsule().fill(active ? AppColor.starGold.opacity(0.9) : .clear))
+        }
+    }
+
+    // MARK: Friends tab
+
+    @ViewBuilder private var friendsContent: some View {
+        if friends.leaderboard.count <= 1 {
+            emptyState
+        } else {
+            ScrollView {
+                VStack(spacing: AppSpacing.lg) {
+                    podium(friends.leaderboard, removable: true)
+                    restList(friends.leaderboard, removable: true)
+                }
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.bottom, AppSpacing.xxxl)
+                .frame(maxWidth: 560).frame(maxWidth: .infinity)
+            }
+            .refreshable { await friends.refresh() }
+        }
+    }
+
+    // MARK: Global tab
+
+    @ViewBuilder private var globalContent: some View {
+        if friends.globalBoard.isEmpty {
+            VStack { Spacer(); ProgressView().tint(.white); Spacer(); Spacer() }
+        } else {
+            ScrollView {
+                VStack(spacing: AppSpacing.lg) {
+                    myRankBanner
+                    podium(friends.globalBoard, removable: false)
+                    restList(friends.globalBoard, removable: false)
+                    myGlobalFooter
+                }
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.bottom, AppSpacing.xxxl)
+                .frame(maxWidth: 560).frame(maxWidth: .infinity)
+            }
+            .refreshable { await friends.loadGlobal() }
+        }
+    }
+
+    /// My place among ALL players — always positive, never failure language.
+    @ViewBuilder private var myRankBanner: some View {
+        if let rank = friends.myGlobalRank {
+            VStack(spacing: 2) {
+                Text("הַמָּקוֹם שֶׁלְּךָ בְּכָל הָעוֹלָם")
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                Text("#\(rank.formatted())")
+                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("כָּל כּוֹכָב מְקַדֵּם אוֹתְךָ לְמַעְלָה! ⭐")
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(AppColor.starGold)
+            }
+            .frame(maxWidth: .infinity).padding(AppSpacing.md)
+            .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(AppColor.starGold.opacity(0.18)))
+            .overlay(RoundedRectangle(cornerRadius: AppRadius.large).stroke(AppColor.starGold.opacity(0.5), lineWidth: 1.5))
+            .padding(.top, AppSpacing.sm)
+        }
+    }
+
+    /// If I'm outside the top 100, show my own highlighted row at the bottom with
+    /// my real rank — so I always see myself on the board.
+    @ViewBuilder private var myGlobalFooter: some View {
+        if let rank = friends.myGlobalRank, let meID,
+           !friends.globalBoard.contains(where: { $0.id == meID }) {
+            let me = FriendCard(id: meID,
+                                name: ProfileStore.shared.active?.name ?? "אֲנִי",
+                                character3DID: ProfileStore.shared.active?.character3DID,
+                                stars: ProgressStore.shared.stars,
+                                code: friends.myCode)
+            VStack(spacing: 8) {
+                Text("• • •").font(.system(size: 20, weight: .heavy)).foregroundStyle(.white.opacity(0.45))
+                row(rank: rank, card: me, removable: false)
+            }
+        }
+    }
+
     // Top 3 podium: #1 center & tallest.
-    private var podium: some View {
-        let top = Array(friends.leaderboard.prefix(3))
+    private func podium(_ board: [FriendCard], removable: Bool) -> some View {
+        let top = Array(board.prefix(3))
         let ordered: [(rank: Int, card: FriendCard)] = {
             var a: [(Int, FriendCard)] = []
             if top.count > 1 { a.append((2, top[1])) }      // left
@@ -110,13 +218,13 @@ struct LeaderboardView: View {
         }()
         return HStack(alignment: .bottom, spacing: 10) {
             ForEach(ordered, id: \.card.id) { item in
-                podiumColumn(rank: item.rank, card: item.card)
+                podiumColumn(rank: item.rank, card: item.card, removable: removable)
             }
         }
         .padding(.top, AppSpacing.sm)
     }
 
-    private func podiumColumn(rank: Int, card: FriendCard) -> some View {
+    private func podiumColumn(rank: Int, card: FriendCard, removable: Bool) -> some View {
         let isMe = card.id == meID
         let size: CGFloat = rank == 1 ? 96 : 76
         let medal = rank == 1 ? "🥇" : rank == 2 ? "🥈" : "🥉"
@@ -139,20 +247,20 @@ struct LeaderboardView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .contextMenu { removeMenu(for: card, isMe: isMe) }
+        .contextMenu { if removable { removeMenu(for: card, isMe: isMe) } }
     }
 
     // Ranks 4+.
-    private var restList: some View {
-        let rest = Array(friends.leaderboard.enumerated()).dropFirst(3)
+    private func restList(_ board: [FriendCard], removable: Bool) -> some View {
+        let rest = Array(board.enumerated()).dropFirst(3)
         return VStack(spacing: 10) {
             ForEach(Array(rest), id: \.element.id) { idx, card in
-                row(rank: idx + 1, card: card)
+                row(rank: idx + 1, card: card, removable: removable)
             }
         }
     }
 
-    private func row(rank: Int, card: FriendCard) -> some View {
+    private func row(rank: Int, card: FriendCard, removable: Bool) -> some View {
         let isMe = card.id == meID
         return HStack(spacing: 12) {
             Text("\(rank)").font(.system(size: 17, weight: .heavy, design: .rounded))
@@ -169,7 +277,7 @@ struct LeaderboardView: View {
             .fill(isMe ? AppColor.starGold.opacity(0.22) : .white.opacity(0.10)))
         .overlay(RoundedRectangle(cornerRadius: AppRadius.large)
             .stroke(isMe ? AppColor.starGold : .clear, lineWidth: 2))
-        .contextMenu { removeMenu(for: card, isMe: isMe) }
+        .contextMenu { if removable { removeMenu(for: card, isMe: isMe) } }
     }
 
     private func starsPill(_ n: Int) -> some View {
