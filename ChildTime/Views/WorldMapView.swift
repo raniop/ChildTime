@@ -32,7 +32,7 @@ struct WorldMapView: View {
     @State private var infoStat: StatInfo? = nil
 
     enum StatInfo: String, Identifiable {
-        case minutes, stars
+        case minutes, stars, diamonds
         var id: String { rawValue }
     }
 
@@ -74,11 +74,10 @@ struct WorldMapView: View {
                                 gradient: AppGradient.portal,
                                 glowColor: AppColor.companionGlow
                             ) {
+                                // No companion line here — we leave this screen
+                                // immediately, so a bubble would only flash & clip.
                                 Haptic.light()
-                                companion.cheer("יַאלְלָה, הַרְפַּתְקָה חֲכָמָה! 🧠")
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                    showingSmartFeed = true
-                                }
+                                showingSmartFeed = true
                             }
                             .frame(maxWidth: .infinity)
 
@@ -134,6 +133,8 @@ struct WorldMapView: View {
                     Haptic.light()
                     showingShop = true
                 },
+                showGift: progress.dailyChestAvailable,
+                onGiftTap: { showDailyChest = true },
                 size: companionSize,
                 topInset: isCompact ? 140 : 90,
                 bottomInset: isCompact ? 220 : 200,
@@ -304,9 +305,8 @@ struct WorldMapView: View {
                 Haptic.light()
                 showingShop = true
             } label: {
-                Image(systemName: "bag.fill")
-                    .font(.system(size: iconSize - 2, weight: .medium))
-                    .foregroundStyle(AppColor.starGold)
+                Text("🛍️")
+                    .font(.system(size: iconSize + 3))
                     .frame(width: buttonSize, height: buttonSize)
                     .background(.white.opacity(0.15), in: Circle())
                     .overlay(Circle().stroke(AppColor.starGold.opacity(0.6), lineWidth: 1.5))
@@ -330,25 +330,43 @@ struct WorldMapView: View {
         }
     }
 
-    /// The earned play-minutes badge, lifted out so it can live on its own at
-    /// the top-left (trailing) corner instead of being squeezed into the stats
-    /// row (where the number wrapped on narrow iPhones).
+    /// The play-minutes badge. Shows "earned / daily-cap" right INSIDE the pill
+    /// (just the 🎮 icon — no "דק׳" word, no white caption beneath it). Tapping
+    /// opens the popover that spells out the exact numbers.
     private var minutesButton: some View {
-        Button {
+        let cap = progress.dailyCap
+        let hasMinutes = progress.pendingMinutes > 0
+        return Button {
             Haptic.light()
             infoStat = .minutes
         } label: {
-            VStack(spacing: 2) {
-                MinutesBadge(minutes: progress.pendingMinutes, compact: true)
-                // How much of today's allowance is used, + minutes banked for tomorrow.
-                if progress.dailyCap.enabled {
-                    Text("\(progress.minutesEarnedToday)/\(progress.dailyCap.max) הַיּוֹם"
-                         + (progress.carryOverMinutes > 0 ? "  ·  🎁 \(progress.carryOverMinutes) לְמָחָר" : ""))
-                        .font(.system(size: 10, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
-                        .lineLimit(1).minimumScaleFactor(0.7)
-                }
+            HStack(spacing: 6) {
+                Text("🎮").font(.system(size: 18))
+                Text(cap.enabled
+                     ? "\(progress.minutesEarnedToday)/\(cap.max)"
+                     : "\(progress.pendingMinutes)")
+                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .contentTransition(.numericText(value: Double(progress.minutesEarnedToday)))
             }
+            .fixedSize()
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                Capsule().fill(
+                    LinearGradient(
+                        colors: hasMinutes
+                            ? [AppColor.successMint.opacity(0.4), Color(hex: "118AB2").opacity(0.4)]
+                            : [Color.white.opacity(0.12), Color.white.opacity(0.12)],
+                        startPoint: .leading, endPoint: .trailing
+                    )
+                )
+                .overlay(Capsule().stroke(hasMinutes ? AppColor.successMint : .white.opacity(0.2),
+                                          lineWidth: hasMinutes ? 2 : 1))
+            )
+            .glow(hasMinutes ? AppColor.successMint : .clear, radius: hasMinutes ? 14 : 0)
         }
         .buttonStyle(.plain)
         .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
@@ -358,23 +376,17 @@ struct WorldMapView: View {
         HStack(spacing: compactStats ? 6 : AppSpacing.sm) {
             if compactStats { Spacer(minLength: 0) }
 
-            // Daily gift — a lively dancing icon right next to the stars, only
-            // when there's a gift to claim today. Disappears once opened.
-            if progress.dailyChestAvailable {
-                DailyGiftBeacon(size: compactStats ? 42 : 48) {
-                    showDailyChest = true
-                }
-                .transition(.scale.combined(with: .opacity))
-            }
+            // (The daily gift 🎁 now floats above the buddy's head — see
+            // FloatingCompanion(showGift:) below — so it's no longer in this row.)
 
-            // Stars are the single currency now — the only stat chip here.
+            // ⭐ stars — the leaderboard rank (never spent).
             Button {
                 Haptic.light()
                 infoStat = .stars
             } label: {
                 statChip(
                     icon: "star.fill",
-                    value: "\(progress.stars)",
+                    value: progress.stars,
                     label: nil,
                     color: AppColor.starGold,
                     prominent: false
@@ -382,6 +394,23 @@ struct WorldMapView: View {
             }
             .buttonStyle(.plain)
             .popover(isPresented: popoverBinding(for: .stars)) { statInfoCard(.stars) }
+
+            // 💎 diamonds — the spendable shop wallet. Tap opens the shop.
+            Button {
+                Haptic.light()
+                infoStat = .diamonds
+            } label: {
+                statChip(
+                    icon: "diamond.fill",
+                    emoji: "💎",
+                    value: progress.diamonds,
+                    label: nil,
+                    color: AppColor.diamondBlue,
+                    prominent: false
+                )
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: popoverBinding(for: .diamonds)) { statInfoCard(.diamonds) }
         }
         .animation(.spring(response: 0.5, dampingFraction: 0.7),
                    value: progress.dailyChestAvailable)
@@ -401,11 +430,11 @@ struct WorldMapView: View {
     @ViewBuilder
     private func statInfoCard(_ stat: StatInfo) -> some View {
         let info = statInfoContent(stat)
-        VStack(alignment: .trailing, spacing: 14) {
+        // Card forces RTL, so `.leading` = the visual RIGHT. Everything is
+        // right-aligned (natural Hebrew); the emoji sits on the left.
+        VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top, spacing: 12) {
-                Text(info.emoji)
-                    .font(.system(size: 46))
-                VStack(alignment: .trailing, spacing: 2) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(info.title)
                         .font(.system(size: 22, weight: .heavy, design: .rounded))
                         .foregroundStyle(.primary)
@@ -413,39 +442,42 @@ struct WorldMapView: View {
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Text(info.emoji)
+                    .font(.system(size: 46))
             }
 
             Text(info.body)
                 .font(.system(size: 17, weight: .medium, design: .rounded))
                 .foregroundStyle(.primary)
-                .multilineTextAlignment(.trailing)
+                .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             if let tip = info.tip {
                 HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "lightbulb.fill")
-                        .foregroundStyle(AppColor.starGold)
-                        .font(.system(size: 16))
                     Text(tip)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
-                        .multilineTextAlignment(.trailing)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Image(systemName: "lightbulb.fill")
+                        .foregroundStyle(AppColor.starGold)
+                        .font(.system(size: 16))
                 }
                 .padding(.top, 4)
             }
 
-            // Quick jump to the shop, straight from the stars explanation.
-            if stat == .stars {
+            // Quick jump to the shop, straight from the diamonds explanation
+            // (diamonds are what the shop spends).
+            if stat == .diamonds {
                 Button {
                     Haptic.light()
                     infoStat = nil
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { showingShop = true }
                 } label: {
-                    Label("לַחֲנוּת", systemImage: "bag.fill")
+                    Text("🛍️ לַחֲנוּת")
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -474,33 +506,56 @@ struct WorldMapView: View {
     private func statInfoContent(_ stat: StatInfo) -> InfoContent {
         switch stat {
         case .minutes:
+            let cap = progress.dailyCap
+            var lines = ["יֵשׁ לְךָ עַכְשָׁיו \(progress.pendingMinutes) דַּקּוֹת מִשְׂחָק לְשַׂחֵק."]
+            if cap.enabled {
+                lines.append("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת.")
+            }
+            if progress.carryOverMinutes > 0 {
+                lines.append("🎁 \(progress.carryOverMinutes) דַּקּוֹת נִשְׁמְרוּ לְמָחָר.")
+            }
             return InfoContent(
                 emoji: "🎮",
                 title: "דַּקּוֹת מִשְׂחָק",
-                subtitle: "זְמִינוֹת עַכְשָׁיו",
-                body: "אֵלֶּה הַדַּקּוֹת שֶׁאֶפְשָׁר לְהַשְׁתַּמֵּשׁ בָּהֶן עַכְשָׁיו כְּדֵי לְשַׂחֵק. עוֹנִים נָכוֹן — מַרְוִיחִים עוֹד.",
-                tip: "פּוֹתְחִים אוֹתָן בַּכַּפְתּוֹר לְמַטָּה 🎮"
+                subtitle: "זְמַן הַמִּשְׂחָק שֶׁלְּךָ",
+                body: lines.joined(separator: "\n"),
+                tip: "עוֹנִים נָכוֹן — מַרְוִיחִים עוֹד דַּקּוֹת!"
             )
         case .stars:
             return InfoContent(
                 emoji: "⭐",
-                title: "כּוֹכָבִים",
-                subtitle: "הַמַּטְבֵּעַ שֶׁלָּכֶם",
-                body: "אוֹסְפִים כּוֹכָב עַל כָּל תְּשׁוּבָה נְכוֹנָה.",
-                tip: "קוֹנִים בָּהֶם קִשּׁוּטִים וּדְמֻיּוֹת לְטוֹפִי בַּחֲנוּת 🎩"
+                title: "\(progress.stars.grouped) כּוֹכָבִים",
+                subtitle: "הַדֵּרוּג שֶׁלָּכֶם",
+                body: "אוֹסְפִים כּוֹכָב עַל כָּל תְּשׁוּבָה נְכוֹנָה. הַכּוֹכָבִים אַף פַּעַם לֹא יוֹרְדִים — הֵם הַנִּקּוּד שֶׁלָּכֶם בְּטַבְלַת הַחֲבֵרִים!",
+                tip: "כָּל מַה שֶּׁאַתֶּם לוֹמְדִים מְטַפֵּס בַּדֵּרוּג 🏆"
+            )
+        case .diamonds:
+            return InfoContent(
+                emoji: "💎",
+                title: "\(progress.diamonds.grouped) יַהֲלוֹמִים",
+                subtitle: "הַאַרְנָק שֶׁלָּכֶם",
+                body: "מַרְוִיחִים יַהֲלוֹמִים עַל תְּשׁוּבוֹת נְכוֹנוֹת, מִמַּתָּנוֹת וּמִגַּלְגַּל הַמַּזָּל — וְקוֹנִים בָּהֶם בַּחֲנוּת.",
+                tip: "קְנִיָּה לֹא פּוֹגַעַת בַּדֵּרוּג שֶׁלָּכֶם 😊"
             )
         }
     }
 
-    private func statChip(icon: String, value: String, label: String?, color: Color, prominent: Bool) -> some View {
+    private func statChip(icon: String, emoji: String? = nil, value: Int, label: String?, color: Color, prominent: Bool) -> some View {
         HStack(spacing: 6) {
-            Image(systemName: icon)
-                .foregroundStyle(color)
-                .font(.system(size: 16, weight: .semibold))
-            Text(value)
+            if let emoji {
+                // Use the colorful emoji glyph (e.g. the blue 💎) so it matches
+                // the shop exactly, instead of a flat tinted SF symbol.
+                Text(emoji).font(.system(size: 16))
+            } else {
+                Image(systemName: icon)
+                    .foregroundStyle(color)
+                    .font(.system(size: 16, weight: .semibold))
+            }
+            Text(value.currencyShort)
                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-                .contentTransition(.numericText(value: Double(value) ?? 0))
+                .lineLimit(1)
+                .contentTransition(.numericText(value: Double(value)))
             if let label = label {
                 Text(label)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))

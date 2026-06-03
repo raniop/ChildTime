@@ -10,6 +10,10 @@ struct FloatingCompanion: View {
     var profile: Profile? = nil
     /// Tapping (not dragging) the buddy fires this — used to open avatar settings.
     var onTap: (() -> Void)? = nil
+    /// When true, a daily-gift 🎁 floats just above the buddy's head and follows
+    /// it as it wanders. Tapping the gift fires `onGiftTap` (opens the chest).
+    var showGift: Bool = false
+    var onGiftTap: (() -> Void)? = nil
     var size: CGFloat = 120
     /// Insets from the parent edges that constrain wandering / drag.
     var topInset: CGFloat = 80
@@ -22,19 +26,15 @@ struct FloatingCompanion: View {
     @State private var isDragging: Bool = false
     @State private var hasAppeared: Bool = false
     @State private var wanderTask: Task<Void, Never>? = nil
+    @State private var bubbleSize: CGSize = .zero
     @ObservedObject private var cosmeticStore = CosmeticStore.shared
 
     var body: some View {
         GeometryReader { geo in
+            let anchor = position == .zero ? defaultPosition(in: geo.size) : position
             ZStack {
-                // Optional speech bubble above the companion
-                if let bubble = controller.bubbleText {
-                    BubbleSpeech(text: bubble)
-                        .offset(x: -size * 0.35, y: -size * 0.85)
-                        .transition(.scale.combined(with: .opacity))
-                        .allowsHitTesting(false)
-                }
-
+            // Layer 1 (back): the draggable avatar.
+            ZStack {
                 Group {
                     // A flat image of the child's chosen character — the 2D
                     // animal directly, or a snapshot of the 3D model — so it
@@ -59,7 +59,7 @@ struct FloatingCompanion: View {
                 .scaleEffect(isDragging ? 1.12 : 1.0)
                 .animation(.spring(response: 0.3, dampingFraction: 0.55), value: isDragging)
             }
-            .position(position == .zero ? defaultPosition(in: geo.size) : position)
+            .position(anchor)
             .animation(isDragging ? nil : .easeInOut(duration: 4), value: position)
             .gesture(
                 DragGesture(minimumDistance: 0)
@@ -101,7 +101,43 @@ struct FloatingCompanion: View {
                 }
             }
             .onDisappear { cancelWandering() }
+
+            // Layer 2 (middle): the daily gift 🎁 — IN FRONT of the avatar,
+            // floating above its head and following it. Its own button opens
+            // the chest without selecting/dragging the avatar.
+            if showGift, let onGiftTap {
+                DailyGiftBeacon(size: size * 0.5) { onGiftTap() }
+                    .position(x: anchor.x, y: anchor.y - size * 0.72)
+                    .animation(isDragging ? nil : .easeInOut(duration: 4), value: position)
+                    .transition(.scale.combined(with: .opacity))
+            }
+
+            // Layer 3 (front): the speech bubble — ALWAYS on top so the child can
+            // read it, kept fully ON SCREEN (clamped horizontally) with its tail
+            // still pointing at the avatar.
+            if let bubble = controller.bubbleText {
+                let margin: CGFloat = 10
+                let half = bubbleSize.width / 2
+                let clampedX = bubbleSize.width > 0
+                    ? min(max(margin + half, anchor.x), geo.size.width - margin - half)
+                    : anchor.x
+                // Tail lands on the avatar (anchor.x), measured from the bubble's
+                // RIGHT edge (the direction that renders correctly under RTL).
+                let tailFromRight = max(0, (clampedX + half) - anchor.x)
+                BubbleSpeech(text: bubble, tailInsetFromRight: tailFromRight)
+                    .fixedSize()
+                    .background(GeometryReader { g in
+                        Color.clear.preference(key: BubbleSizeKey.self, value: g.size)
+                    })
+                    .onPreferenceChange(BubbleSizeKey.self) { bubbleSize = $0 }
+                    .position(x: clampedX, y: anchor.y - size * 0.95)
+                    .animation(isDragging ? nil : .easeInOut(duration: 4), value: position)
+                    .transition(.scale.combined(with: .opacity))
+                    .allowsHitTesting(false)
+            }
+            }
             .animation(.spring(response: 0.5, dampingFraction: 0.7), value: controller.bubbleText)
+            .animation(.spring(response: 0.5, dampingFraction: 0.7), value: showGift)
         }
     }
 
@@ -176,6 +212,12 @@ struct FloatingCompanion: View {
             y: min(max(minY, point.y), maxY)
         )
     }
+}
+
+/// Measures the speech bubble's rendered size so it can be kept on screen.
+private struct BubbleSizeKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) { value = nextValue() }
 }
 
 #Preview {

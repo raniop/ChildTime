@@ -22,7 +22,7 @@ struct RewardScreenView: View {
 
     @State private var stage: ChestStage = .closed
     @State private var revealedItems: Int = 0
-    @State private var reward: ChestReward = ChestReward(stars: 0, gems: 0, minutes: 0)
+    @State private var reward: ChestReward = ChestReward(stars: 0, diamonds: 0, minutes: 0)
     @State private var companion = CompanionController()
     @State private var confettiTrigger = 0
     @State private var goLevelUp = false
@@ -202,7 +202,11 @@ struct RewardScreenView: View {
                 // + the chest's flat bonus. Matches the home total's increase.
                 rewardPill(emoji: "⭐", value: progress.sessionStarsEarned + reward.stars, label: "כּוֹכָבִים", color: AppColor.starGold)
             }
-            if revealedItems >= 2 && progress.sessionMinutesEarned > 0 {
+            if revealedItems >= 2 && (progress.sessionDiamondsEarned + reward.diamonds) > 0 {
+                // 💎 the spendable wallet earned this session — what buys characters.
+                rewardPill(emoji: "💎", value: progress.sessionDiamondsEarned + reward.diamonds, label: "יַהֲלוֹמִים", color: AppColor.gemPurple)
+            }
+            if revealedItems >= 3 && progress.sessionMinutesEarned > 0 {
                 rewardPill(emoji: "⏱", value: progress.sessionMinutesEarned, label: "דַּקּוֹת מִשְׂחָק", color: AppColor.successMint)
             }
         }

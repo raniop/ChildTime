@@ -15,12 +15,14 @@ final class CompanionController {
     var state: CompanionState = .idle
     var bubbleText: String?
 
+    @ObservationIgnored private var bubbleTask: Task<Void, Never>?
+
     func cheer(_ text: String? = nil) {
         state = .cheer
         bubbleText = text
         SoundPlayer.shared.play(.companionCheer)
         Haptic.light()
-        scheduleReturnToIdle(after: 1.4)
+        holdBubble(text: text, idleAfter: 1.4)
     }
 
     func hype(_ text: String? = nil) {
@@ -28,7 +30,7 @@ final class CompanionController {
         bubbleText = text
         SoundPlayer.shared.play(.streakUp)
         Haptic.medium()
-        scheduleReturnToIdle(after: 1.6)
+        holdBubble(text: text, idleAfter: 1.6)
     }
 
     func wow(_ text: String? = nil) {
@@ -36,21 +38,31 @@ final class CompanionController {
         bubbleText = text
         SoundPlayer.shared.play(.portalAppear)
         Haptic.heavy()
-        scheduleReturnToIdle(after: 2.0)
+        holdBubble(text: text, idleAfter: 2.0)
     }
 
     func console(_ text: String? = nil) {
+        let line = text ?? "כִּמְעַט!"
         state = .console
-        bubbleText = text ?? "כִּמְעַט!"
+        bubbleText = line
         Haptic.soft()
-        scheduleReturnToIdle(after: 1.6)
+        holdBubble(text: line, idleAfter: 1.6)
     }
 
-    private func scheduleReturnToIdle(after seconds: TimeInterval) {
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+    /// Keep the bubble on screen long enough to actually READ it — the words
+    /// reveal one-by-one (typewriter), so the hold scales with the line length:
+    /// reveal time (~0.16/word) + a generous reading buffer, never under 4s.
+    private func holdBubble(text: String?, idleAfter: TimeInterval) {
+        bubbleTask?.cancel()
+        let words = max(1, text?.split(separator: " ").count ?? 1)
+        let visible = max(4.0, Double(words) * 0.55 + 2.6)
+        bubbleTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: UInt64(idleAfter * 1_000_000_000))
+            if Task.isCancelled { return }
             self.state = .idle
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            let remaining = max(0, visible - idleAfter)
+            try? await Task.sleep(nanoseconds: UInt64(remaining * 1_000_000_000))
+            if Task.isCancelled { return }
             if self.state == .idle { self.bubbleText = nil }
         }
     }

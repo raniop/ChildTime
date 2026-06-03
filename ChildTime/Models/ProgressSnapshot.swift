@@ -12,7 +12,10 @@ struct ProgressSnapshot: Codable, Equatable {
     var totalAnswered: Int = 0
     var unlockEndsAt: Date? = nil
     var stars: Int = 0
-    var gems: Int = 0
+    /// 💎 spendable shop wallet (was the dormant "gems" slot). Older snapshots
+    /// that lack the key decode as 0 — correct, since no real diamonds existed
+    /// before this currency split.
+    var diamonds: Int = 0
     var xp: Int = 0
     var currentStreak: Int = 0
     var dayStreak: Int = 0

@@ -112,7 +112,7 @@ final class ProgressVault {
             store.$pendingMinutes.map { _ in () }.eraseToAnyPublisher(),
             store.$totalScore.map { _ in () }.eraseToAnyPublisher(),
             store.$stars.map { _ in () }.eraseToAnyPublisher(),
-            store.$gems.map { _ in () }.eraseToAnyPublisher(),
+            store.$diamonds.map { _ in () }.eraseToAnyPublisher(),
             store.$xp.map { _ in () }.eraseToAnyPublisher(),
             store.$unlockEndsAt.map { _ in () }.eraseToAnyPublisher(),
             store.$minutesEarnedToday.map { _ in () }.eraseToAnyPublisher(),

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Centralized rules: how many stars / gems / minutes for each event.
+/// Centralized rules: how many stars / diamonds / minutes for each event.
 enum RewardEngine {
     /// How many times the base star rewards are multiplied. 3× makes earning
     /// feel more generous without touching world-unlock costs or shop prices.
@@ -36,6 +36,31 @@ enum RewardEngine {
         if isMysteryPortal { return 3 * starMultiplier }
         if isSuperQuestion { return 5 * starMultiplier }
         return comboMultiplier(streak: combo) * starMultiplier
+    }
+
+    /// 💎 diamonds for a correct answer — the SPENDABLE shop wallet. Earned at a
+    /// deliberately slower pace than ⭐ stars (roughly ~1 per answer) so the shop
+    /// keeps its value: a long streak / super / mystery still pays a little more.
+    static func diamondsForCorrect(combo: Int, isSuperQuestion: Bool, isMysteryPortal: Bool) -> Int {
+        if isMysteryPortal { return 3 }
+        if isSuperQuestion { return 5 }
+        switch combo {
+        case ..<5:    return 1
+        case 5..<10:  return 2
+        default:      return 3
+        }
+    }
+
+    /// Shop prices are authored in ⭐ (legacy `priceStars` / `price`). Diamonds
+    /// accrue ~⅕ as fast as stars used to, so a diamond price is the star price
+    /// scaled down by this divisor — keeping time-to-buy roughly familiar while
+    /// re-denominating the shop in the new, slower currency. Tunable in one spot.
+    static let diamondPriceDivisor = 5
+
+    /// Convert a legacy ⭐ price into its 💎 diamond price (never below 1).
+    static func diamondPrice(forStarPrice stars: Int) -> Int {
+        guard stars > 0 else { return 0 }
+        return max(1, Int((Double(stars) / Double(diamondPriceDivisor)).rounded()))
     }
 
     /// Bonus minutes for a streak of correct answers (added on top of per-correct rate).
@@ -99,11 +124,6 @@ enum RewardEngine {
         }
         return lvl
     }
-
-    /// Gems are converted from stars (1 gem per 10 stars) plus rare drops.
-    static let gemsPer10Stars = 1
-    static let rareGemDropChance: Double = 0.05  // 5%
-    static let rareGemAmount = 3
 }
 
 enum ChestKind: String, Codable {
@@ -132,8 +152,8 @@ enum ChestKind: String, Codable {
 }
 
 struct ChestReward: Equatable {
-    var stars: Int
-    var gems: Int
+    var stars: Int      // ⭐ leaderboard rank
+    var diamonds: Int   // 💎 spendable shop wallet
     var minutes: Int
     var cosmeticID: String?
 }
@@ -148,14 +168,16 @@ extension RewardEngine {
         switch kind {
         // Star bonuses are ×starMultiplier to match the in-game earn rate;
         // minutes stay as-is (screen-time economy, not stars).
+        // Each chest now also drips 💎 diamonds (the spendable wallet), scaled
+        // down from its ⭐ figure so a gift fills both pockets at once.
         case .wood:
-            return ChestReward(stars: 0, gems: 0, minutes: 0, cosmeticID: nil)
+            return ChestReward(stars: 0, diamonds: 0, minutes: 0, cosmeticID: nil)
         case .gold:
-            return ChestReward(stars: 3 * starMultiplier, gems: 0, minutes: 0, cosmeticID: nil)
+            return ChestReward(stars: 3 * starMultiplier, diamonds: 3, minutes: 0, cosmeticID: nil)
         case .magic:
-            return ChestReward(stars: 10 * starMultiplier, gems: 0, minutes: 5, cosmeticID: nil)
+            return ChestReward(stars: 10 * starMultiplier, diamonds: 8, minutes: 5, cosmeticID: nil)
         case .legendary:
-            return ChestReward(stars: 50 * starMultiplier, gems: 0, minutes: 15, cosmeticID: "legendary_aura")
+            return ChestReward(stars: 50 * starMultiplier, diamonds: 35, minutes: 15, cosmeticID: "legendary_aura")
         }
     }
 

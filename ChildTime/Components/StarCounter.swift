@@ -1,5 +1,36 @@
 import SwiftUI
 
+extension Int {
+    /// Compact, readable balance label for HUD chips and stat cells.
+    /// Exact under 1,000 ("850"), then abbreviated from the thousands up so a
+    /// growing balance never overflows a chip: 1.2K · 2.5K · 104K · 1.3M · 3B.
+    /// One decimal while the leading value is < 10 ("1.2K"), whole otherwise
+    /// ("104K"). Always rounded DOWN (truncated) so the label never overstates
+    /// what the child holds — 1,284,500 is "1.2M", not yet "1.3M". Stars never
+    /// decrease, so this keeps the leaderboard rank legible years in.
+    var currencyShort: String {
+        let a = abs(self)
+        if a < 1_000 { return "\(self)" }
+        let sign = self < 0 ? "-" : ""
+        func fmt(_ value: Double, _ suffix: String) -> String {
+            if value < 10 {
+                // Truncate to 1 decimal (e.g. 1.28 → "1.2"), dropping a trailing ".0".
+                let t = (value * 10).rounded(.towardZero) / 10
+                let s = String(format: "%.1f", t)
+                return sign + (s.hasSuffix(".0") ? String(s.dropLast(2)) : s) + suffix
+            }
+            return sign + "\(Int(value.rounded(.towardZero)))" + suffix
+        }
+        if a < 1_000_000     { return fmt(Double(a) / 1_000, "K") }
+        if a < 1_000_000_000 { return fmt(Double(a) / 1_000_000, "M") }
+        return fmt(Double(a) / 1_000_000_000, "B")
+    }
+
+    /// The EXACT value with locale thousands separators ("1,284,500"). Used in
+    /// the tap-to-explain popovers, where the chip itself shows `currencyShort`.
+    var grouped: String { self.formatted(.number.grouping(.automatic)) }
+}
+
 struct StarCounter: View {
     let value: Int
     var icon: String = "star.fill"

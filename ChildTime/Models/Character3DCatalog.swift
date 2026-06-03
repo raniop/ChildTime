@@ -16,6 +16,10 @@ struct Character3D: Identifiable, Hashable {
     var is2D: Bool { imageAsset != nil }
     var isFree: Bool { priceStars == 0 }
 
+    /// 💎 cost in the shop — the legacy ⭐ price re-denominated into diamonds
+    /// (the spendable currency). Catalog stays authored in `priceStars`.
+    var priceDiamonds: Int { RewardEngine.diamondPrice(forStarPrice: priceStars) }
+
     /// Rarity tier, derived from price so adding a character only needs a price.
     var tier: CharacterTier { CharacterTier(priceStars: priceStars) }
 

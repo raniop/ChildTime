@@ -1,8 +1,8 @@
 import SwiftUI
 import StoreKit
 
-/// Buy star packs with real money. ALWAYS presented inside `ParentGateView`, so
-/// a child can't purchase without a parent entering the PIN / Face ID.
+/// Buy 💎 diamond packs with real money. ALWAYS presented inside `ParentGateView`,
+/// so a child can't purchase without a parent entering the PIN / Face ID.
 struct StarShopView: View {
     @ObservedObject private var store = StarPackStore.shared
     @ObservedObject private var progress = ProgressStore.shared
@@ -20,9 +20,9 @@ struct StarShopView: View {
                     VStack(spacing: AppSpacing.lg) {
                         balanceCard
                         if ProcessInfo.processInfo.environment["STARSHOP_DEMO"] != nil {
-                            mockRow(stars: 300, price: "₪9.90", best: false)
-                            mockRow(stars: 1000, price: "₪24.90", best: true)
-                            mockRow(stars: 2500, price: "₪49.90", best: false)
+                            mockRow(diamonds: 60, price: "₪9.90", best: false)
+                            mockRow(diamonds: 200, price: "₪24.90", best: true)
+                            mockRow(diamonds: 500, price: "₪49.90", best: false)
                         } else if store.products.isEmpty {
                             placeholder
                         } else {
@@ -30,7 +30,7 @@ struct StarShopView: View {
                                 packRow(product)
                             }
                         }
-                        Text("הָרְכִישָׁה דּוֹרֶשֶׁת אִישּׁוּר Apple ID (סִיסְמָה / Face ID). הַכּוֹכָבִים מְשַׁמְּשִׁים לִקְנִיַּת דְּמוּיוֹת בְּתוֹךְ הָאַפְּלִיקַצְיָה בִּלְבַד.")
+                        Text("הָרְכִישָׁה דּוֹרֶשֶׁת אִישּׁוּר Apple ID (סִיסְמָה / Face ID). הַיַּהֲלוֹמִים מְשַׁמְּשִׁים לִקְנִיַּת דְּמוּיוֹת בְּתוֹךְ הָאַפְּלִיקַצְיָה בִּלְבַד.")
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.6))
                             .multilineTextAlignment(.center)
@@ -47,14 +47,14 @@ struct StarShopView: View {
             }
         }
         .environment(\.layoutDirection, .rightToLeft)
-        .onChange(of: store.lastGrantedStars) { _, new in
-            if let new { celebrate = new; store.lastGrantedStars = nil; Haptic.success() }
+        .onChange(of: store.lastGrantedDiamonds) { _, new in
+            if let new { celebrate = new; store.lastGrantedDiamonds = nil; Haptic.success() }
         }
     }
 
     private var header: some View {
         ZStack {
-            Text("חֲנוּת כּוֹכָבִים")
+            Text("חֲנוּת יַהֲלוֹמִים")
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
@@ -76,11 +76,13 @@ struct StarShopView: View {
 
     private var balanceCard: some View {
         HStack(spacing: 8) {
-            Text("⭐").font(.system(size: 26))
-            Text("\(progress.stars)")
+            Text("💎").font(.system(size: 26))
+            Text(progress.diamonds.currencyShort)
                 .font(.system(size: 30, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("כּוֹכָבִים שֶׁלְּךָ")
+                .lineLimit(1)
+                .contentTransition(.numericText(value: Double(progress.diamonds)))
+            Text("יַהֲלוֹמִים שֶׁלְּךָ")
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
         }
@@ -90,14 +92,14 @@ struct StarShopView: View {
     }
 
     // Demo-only static row (no StoreKit product) for screenshots.
-    private func mockRow(stars: Int, price: String, best: Bool) -> some View {
+    private func mockRow(diamonds: Int, price: String, best: Bool) -> some View {
         HStack(spacing: AppSpacing.md) {
             ZStack {
-                Circle().fill(AppColor.starGold.opacity(0.25)).frame(width: 58, height: 58)
-                Text("⭐").font(.system(size: 30))
+                Circle().fill(AppColor.gemPurple.opacity(0.25)).frame(width: 58, height: 58)
+                Text("💎").font(.system(size: 30))
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(stars) כּוֹכָבִים")
+                Text("\(diamonds) יַהֲלוֹמִים")
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                 if best {
@@ -123,18 +125,18 @@ struct StarShopView: View {
     }
 
     private func packRow(_ product: Product) -> some View {
-        let stars = StarPackStore.stars(for: product.id)
+        let diamonds = StarPackStore.diamonds(for: product.id)
         let best = store.isBestValue(product)
         return Button {
             Task { _ = await store.purchase(product) }
         } label: {
             HStack(spacing: AppSpacing.md) {
                 ZStack {
-                    Circle().fill(AppColor.starGold.opacity(0.25)).frame(width: 58, height: 58)
-                    Text("⭐").font(.system(size: 30))
+                    Circle().fill(AppColor.gemPurple.opacity(0.25)).frame(width: 58, height: 58)
+                    Text("💎").font(.system(size: 30))
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(stars) כּוֹכָבִים")
+                    Text("\(diamonds) יַהֲלוֹמִים")
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                     if best {
@@ -218,11 +220,11 @@ private struct StarGrantCelebration: View {
         ZStack {
             Color.black.opacity(0.55).ignoresSafeArea()
             VStack(spacing: AppSpacing.md) {
-                Text("⭐").font(.system(size: 90)).scaleEffect(shown ? 1 : 0.4)
+                Text("💎").font(.system(size: 90)).scaleEffect(shown ? 1 : 0.4)
                 Text("+\(amount)")
                     .font(.system(size: 44, weight: .heavy, design: .rounded))
-                    .foregroundStyle(AppColor.starGold)
-                Text("כּוֹכָבִים נוֹסְפוּ!")
+                    .foregroundStyle(AppColor.gemPurple)
+                Text("יַהֲלוֹמִים נוֹסְפוּ!")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
             }

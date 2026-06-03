@@ -86,25 +86,26 @@ struct ShopView: View {
 
                 Spacer()
 
-                // Tappable balance → buy more stars (parent-gated).
+                // Tappable balance → buy more diamonds (parent-gated).
                 Button {
                     Haptic.light()
                     showStarShop = true
                 } label: {
                     HStack(spacing: 4) {
-                        Text("⭐").font(.system(size: 16))
-                        Text("\(progress.stars)")
+                        Text("💎").font(.system(size: 16))
+                        Text(progress.diamonds.currencyShort)
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
-                            .contentTransition(.numericText(value: Double(progress.stars)))
+                            .lineLimit(1)
+                            .contentTransition(.numericText(value: Double(progress.diamonds)))
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 16))
                             .foregroundStyle(.white)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 7)
-                    .background(Capsule().fill(AppColor.starGold.opacity(0.4)))
-                    .overlay(Capsule().stroke(AppColor.starGold, lineWidth: 1.5))
+                    .background(Capsule().fill(AppColor.gemPurple.opacity(0.4)))
+                    .overlay(Capsule().stroke(AppColor.gemPurple, lineWidth: 1.5))
                 }
                 .buttonStyle(.plain)
             }

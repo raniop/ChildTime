@@ -5,6 +5,7 @@ import SwiftUI
 struct WheelPrize: Identifiable, Equatable {
     enum Kind: Equatable {
         case stars(Int)
+        case diamonds(Int)           // 💎 spendable shop wallet
         case xp(Int)
         case minutes(Int)
         case rareItem(String)        // cosmetic item ID
@@ -42,6 +43,11 @@ enum LuckyWheelCatalog {
         WheelPrize(kind: .rareItem("shoes_magic"),
                                               label: "נַעֲלֵי קֶסֶם!",    emoji: "✨", color: Color(hex: "9B5DE5")),
 
+        // 💎 Diamonds — the spendable shop wallet (kids buy characters with these).
+        WheelPrize(kind: .diamonds(10),      label: "10 יַהֲלוֹמִים",   emoji: "💎", color: Color(hex: "4CC9F0")),
+        WheelPrize(kind: .diamonds(25),      label: "25 יַהֲלוֹמִים",   emoji: "💎", color: Color(hex: "4895EF")),
+        WheelPrize(kind: .diamonds(50),      label: "50 יַהֲלוֹמִים!",  emoji: "💎", color: Color(hex: "3A86FF")),
+
         // Fun missions (4 wedges) — gentle "you lost" alternatives.
         // Phrased as friendly nudges, never punishment.
         WheelPrize(kind: .funMission("לְסַדֵּר אֶת הַחֶדֶר 🧸"),
@@ -78,8 +84,11 @@ extension WheelPrize {
         let cosmetics = CosmeticStore.shared
         switch kind {
         case .stars(let n):
-            progress.applyChestReward(ChestReward(stars: n, gems: 0, minutes: 0, cosmeticID: nil))
+            progress.applyChestReward(ChestReward(stars: n, diamonds: 0, minutes: 0, cosmeticID: nil))
             return "+\(n) כּוֹכָבִים נוֹסְפוּ!"
+        case .diamonds(let n):
+            progress.applyChestReward(ChestReward(stars: 0, diamonds: n, minutes: 0, cosmeticID: nil))
+            return "+\(n) יַהֲלוֹמִים נוֹסְפוּ! 💎"
         case .xp(let n):
             progress.addXP(n)
             return "+\(n) XP נוֹסְפוּ"
@@ -97,9 +106,10 @@ extension WheelPrize {
                 cosmetics.unlockFree(item)
                 return "פָּתַחְתָּ פְּרִיט נָדִיר: \(item.name)!"
             }
-            // Already owned — fall back to a nice star consolation.
-            progress.applyChestReward(ChestReward(stars: 45, gems: 0, minutes: 0, cosmeticID: nil))
-            return "כְּבָר יֵשׁ לְךָ אֶת הַפְּרִיט הַזֶּה — קַבֵּל 45 כּוֹכָבִים בִּמְקוֹם"
+            // Already owned — fall back to a nice diamond consolation the kid
+            // can actually spend (not just rank), so it never feels like a loss.
+            progress.applyChestReward(ChestReward(stars: 45, diamonds: 15, minutes: 0, cosmeticID: nil))
+            return "כְּבָר יֵשׁ לְךָ אֶת הַפְּרִיט הַזֶּה — קַבֵּל 15 יַהֲלוֹמִים בִּמְקוֹם 💎"
         case .funMission(let task):
             return "משימה: \(task)"
         }

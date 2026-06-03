@@ -2,9 +2,9 @@ import SwiftUI
 
 /// The collectible-character grid + buy/equip flow, shared by the character
 /// picker and the shop. Renders every character as a card with its rarity tier
-/// (color + badge), price for locked ones, and a check on the equipped one.
+/// (color + badge), 💎 price for locked ones, and a check on the equipped one.
 /// Tapping an owned character equips it; a locked one runs a buy-and-equip
-/// confirmation (or routes to the star shop when short on stars).
+/// confirmation (or routes to the diamond shop when short on diamonds).
 struct CharacterCollectionView: View {
     let profileID: UUID
     /// Parent owns the (parent-gated) star-shop sheet; we flip this to open it.
@@ -35,7 +35,7 @@ struct CharacterCollectionView: View {
             }
         }
         .confirmationDialog(
-            pendingPurchase.map { "\($0.name) — \($0.priceStars) ⭐" } ?? "",
+            pendingPurchase.map { "\($0.name) — \($0.priceDiamonds) 💎" } ?? "",
             isPresented: Binding(get: { pendingPurchase != nil },
                                  set: { if !$0 { pendingPurchase = nil } }),
             titleVisibility: .visible,
@@ -44,13 +44,13 @@ struct CharacterCollectionView: View {
             Button("קְנֵה וְהַחֲלֵף") { buy(character) }
             Button("בִּטּוּל", role: .cancel) {}
         }
-        .alert("חֲסֵרִים כּוֹכָבִים ⭐",
+        .alert("חֲסֵרִים יַהֲלוֹמִים 💎",
                isPresented: Binding(get: { shortBy != nil },
                                     set: { if !$0 { shortBy = nil } })) {
-            Button("קְנֵה כּוֹכָבִים") { showStarShop = true }
+            Button("קְנֵה יַהֲלוֹמִים") { showStarShop = true }
             Button("הֲבַנְתִּי", role: .cancel) {}
         } message: {
-            if let s = shortBy { Text("צָרִיךְ עוֹד \(s) כּוֹכָבִים. תַּמְשִׁיךְ לִלְמֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.") }
+            if let s = shortBy { Text("צָרִיךְ עוֹד \(s) יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.") }
         }
     }
 
@@ -62,7 +62,7 @@ struct CharacterCollectionView: View {
     private func card(_ character: Character3D) -> some View {
         let selected = selectedID == character.id
         let owned = characters.owns(character)
-        let affordable = progress.stars >= character.priceStars
+        let affordable = progress.diamonds >= character.priceDiamonds
         let tColor = tierColor(character.tier)
         return Button {
             tap(character)
@@ -94,7 +94,7 @@ struct CharacterCollectionView: View {
                 }
             }
             .overlay(alignment: .bottom) {
-                if !owned { priceBadge(character.priceStars, affordable: affordable) }
+                if !owned { priceBadge(character.priceDiamonds, affordable: affordable) }
             }
         }
         .buttonStyle(.plain)
@@ -115,13 +115,13 @@ struct CharacterCollectionView: View {
         HStack(spacing: 4) {
             Image(systemName: "lock.fill").font(.system(size: 10, weight: .bold))
             Text("\(price)").font(.system(size: 15, weight: .heavy, design: .rounded))
-            Text("⭐").font(.system(size: 12))
+            Text("💎").font(.system(size: 12))
         }
         .foregroundStyle(.white)
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(
-            Capsule().fill(affordable ? AppColor.starGold.opacity(0.95) : Color.black.opacity(0.5))
+            Capsule().fill(affordable ? AppColor.gemPurple.opacity(0.95) : Color.black.opacity(0.5))
         )
         .padding(.bottom, 12)
     }
@@ -131,12 +131,12 @@ struct CharacterCollectionView: View {
     private func tap(_ character: Character3D) {
         if characters.owns(character) {
             select(character)
-        } else if progress.stars >= character.priceStars {
+        } else if progress.diamonds >= character.priceDiamonds {
             Haptic.light()
             pendingPurchase = character
         } else {
             Haptic.light()
-            shortBy = character.priceStars - progress.stars
+            shortBy = character.priceDiamonds - progress.diamonds
         }
     }
 

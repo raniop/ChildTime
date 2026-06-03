@@ -8,7 +8,7 @@ struct DailyChestView: View {
 
     @State private var stage: ChestStage = .closed
     @State private var revealed: Int = 0
-    @State private var reward: ChestReward = ChestReward(stars: 0, gems: 0, minutes: 0)
+    @State private var reward: ChestReward = ChestReward(stars: 0, diamonds: 0, minutes: 0)
     @State private var companion = CompanionController()
     @State private var confettiTrigger = 0
     /// Shown when some/all won minutes were banked for tomorrow (daily cap full).
@@ -17,6 +17,11 @@ struct DailyChestView: View {
     private var isCompact: Bool { hsc == .compact }
     private var chestSize: CGFloat { isCompact ? 130 : 180 }
     private var companionSize: CGFloat { isCompact ? 70 : 90 }
+
+    /// The child's OWN chosen character (falls back to the default if none).
+    private var childCharacter: Character3D {
+        ProfileStore.shared.active?.character ?? Character3DCatalog.find(Character3DCatalog.defaultID)
+    }
 
     var body: some View {
         ZStack {
@@ -53,7 +58,11 @@ struct DailyChestView: View {
                 if stage == .revealed {
                     VStack(spacing: AppSpacing.md) {
                         if revealed >= 1 {
-                            row(emoji: "⭐", text: "+\(reward.stars + reward.gems) כּוֹכָבִים")
+                            row(emoji: "⭐", text: "+\(reward.stars) כּוֹכָבִים")
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                        if revealed >= 1 && reward.diamonds > 0 {
+                            row(emoji: "💎", text: "+\(reward.diamonds) יַהֲלוֹמִים", glow: AppColor.gemPurple)
                                 .transition(.scale.combined(with: .opacity))
                         }
                         if revealed >= 2 && reward.minutes > 0 {
@@ -86,17 +95,21 @@ struct DailyChestView: View {
                 }
             }
 
-            // Companion
+            // Companion — the child's OWN chosen character, greeting from a
+            // bubble stacked right above it so its tail points down at the avatar.
             VStack {
                 Spacer()
                 HStack {
-                    ZStack(alignment: .top) {
+                    VStack(spacing: -4) {
                         if let bubble = companion.bubbleText {
-                            BubbleSpeech(text: bubble).offset(x: 80, y: -10)
+                            BubbleSpeech(text: bubble)
+                                .transition(.scale.combined(with: .opacity))
                         }
-                        CompanionView(controller: companion, size: companionSize)
+                        CharacterView(character: childCharacter, animated: true)
+                            .id(childCharacter.id)
+                            .frame(width: companionSize, height: companionSize * 1.3)
                     }
-                    .padding(.leading, AppSpacing.md)
+                    .padding(.leading, AppSpacing.lg)
                     Spacer()
                 }
             }
@@ -116,7 +129,7 @@ struct DailyChestView: View {
             // No room for play-minutes (today's cap full AND tomorrow's bank full)
             // → don't promise minutes; give a few extra stars instead.
             if progress.bonusMinutesRoom() <= 0 {
-                reward = ChestReward(stars: reward.stars + reward.gems + 5, gems: 0,
+                reward = ChestReward(stars: reward.stars + 5, diamonds: reward.diamonds + 5,
                                      minutes: 0, cosmeticID: reward.cosmeticID)
             }
             companion.cheer("חִכִּיתִי לְךָ!")
@@ -126,7 +139,7 @@ struct DailyChestView: View {
         }
     }
 
-    private func row(emoji: String, text: String) -> some View {
+    private func row(emoji: String, text: String, glow: Color = AppColor.starGold) -> some View {
         HStack(spacing: AppSpacing.md) {
             Text(emoji).font(.system(size: 36))
             Text(text)
@@ -136,7 +149,7 @@ struct DailyChestView: View {
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, AppSpacing.md)
         .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: AppRadius.medium))
-        .glow(AppColor.starGold, radius: 8)
+        .glow(glow, radius: 8)
     }
 
     private func open() {

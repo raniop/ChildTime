@@ -120,7 +120,10 @@ struct CosmeticItem: Identifiable, Codable, Equatable, Hashable {
     let name: String
     let emoji: String         // rendering token; future: swap to bundled art
     let rarity: CosmeticRarity
-    let price: Int            // in gems
+    let price: Int            // legacy ⭐ price (catalog stays authored in stars)
+
+    /// 💎 cost in the shop — the legacy ⭐ `price` re-denominated into diamonds.
+    var priceDiamonds: Int { RewardEngine.diamondPrice(forStarPrice: price) }
     /// Optional bundled art (PNG/SVG in Assets) — preferred when present.
     var assetName: String? = nil
     /// Optional SF Symbol — a crisp "worn" look for face/head items (glasses).

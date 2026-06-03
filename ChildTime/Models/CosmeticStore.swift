@@ -4,7 +4,7 @@ import Combine
 /// Tracks which cosmetics each profile owns and what each one is wearing.
 ///
 /// Ownership is family-wide (one kid buys, the family owns); equipping
-/// is per-profile so each kid has their own look. Purchases burn gems
+/// is per-profile so each kid has their own look. Purchases burn 💎 diamonds
 /// from the (shared, v1) ProgressStore.
 @MainActor
 final class CosmeticStore: ObservableObject {
@@ -80,12 +80,12 @@ final class CosmeticStore: ObservableObject {
 
     enum PurchaseError: LocalizedError {
         case alreadyOwned
-        case notEnoughCoins(short: Int)
+        case notEnoughDiamonds(short: Int)
 
         var errorDescription: String? {
             switch self {
-            case .alreadyOwned:                return "כבר יש לך את הפריט הזה"
-            case .notEnoughCoins(let short):   return "חסרים לך \(short) מטבעות"
+            case .alreadyOwned:                  return "כבר יש לך את הפריט הזה"
+            case .notEnoughDiamonds(let short):  return "חסרים לך \(short) יהלומים"
             }
         }
     }
@@ -103,11 +103,11 @@ final class CosmeticStore: ObservableObject {
     func purchase(_ item: CosmeticItem, for profileID: UUID) throws -> CosmeticItem {
         guard !ownedIDs.contains(item.id) else { throw PurchaseError.alreadyOwned }
         let progress = ProgressStore.shared
-        guard progress.stars >= item.price else {
-            throw PurchaseError.notEnoughCoins(short: item.price - progress.stars)
+        guard progress.diamonds >= item.priceDiamonds else {
+            throw PurchaseError.notEnoughDiamonds(short: item.priceDiamonds - progress.diamonds)
         }
-        // Spend stars through ProgressStore so the value stays canonical.
-        progress.spendStars(item.price)
+        // Spend diamonds through ProgressStore so the value stays canonical.
+        progress.spendDiamonds(item.priceDiamonds)
         ownedIDs.insert(item.id)
         equip(item, in: item.category, for: profileID)
         lastPurchasedItem = item

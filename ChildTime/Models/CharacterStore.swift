@@ -2,10 +2,10 @@ import Foundation
 import Combine
 
 /// Tracks which characters the family owns. Free characters (priceStars == 0)
-/// are always owned; the rest are bought with earned stars.
+/// are always owned; the rest are bought with earned 💎 diamonds.
 ///
 /// Like `CosmeticStore`, ownership is family-wide (one kid buys, the family
-/// owns) and burns stars from the shared `ProgressStore`. Which character each
+/// owns) and burns diamonds from the shared `ProgressStore`. Which character each
 /// kid *equips* lives on `Profile.character3DID` (synced per-profile), so this
 /// store only answers "do we own it" and "buy it".
 @MainActor
@@ -47,25 +47,25 @@ final class CharacterStore: ObservableObject {
 
     enum PurchaseError: LocalizedError {
         case alreadyOwned
-        case notEnoughStars(short: Int)
+        case notEnoughDiamonds(short: Int)
 
         var errorDescription: String? {
             switch self {
-            case .alreadyOwned:               return "הדמות כבר שלך"
-            case .notEnoughStars(let short):  return "חסרים \(short) כוכבים"
+            case .alreadyOwned:                  return "הדמות כבר שלך"
+            case .notEnoughDiamonds(let short):  return "חסרים \(short) יהלומים"
             }
         }
     }
 
-    /// Buy a character with stars. Throws if already owned or too few stars.
+    /// Buy a character with 💎 diamonds. Throws if already owned or too few.
     @discardableResult
     func purchase(_ character: Character3D) throws -> Character3D {
         guard !owns(character) else { throw PurchaseError.alreadyOwned }
         let progress = ProgressStore.shared
-        guard progress.stars >= character.priceStars else {
-            throw PurchaseError.notEnoughStars(short: character.priceStars - progress.stars)
+        guard progress.diamonds >= character.priceDiamonds else {
+            throw PurchaseError.notEnoughDiamonds(short: character.priceDiamonds - progress.diamonds)
         }
-        progress.spendStars(character.priceStars)
+        progress.spendDiamonds(character.priceDiamonds)
         progress.addOwnedCharacter(character.id)
         lastPurchased = character
         return character

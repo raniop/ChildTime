@@ -7,29 +7,68 @@ struct BubbleSpeech: View {
     /// centered. Set it (≈ avatar radius) to point at an avatar sitting under the
     /// bubble's right edge.
     var tailInsetFromRight: CGFloat? = nil
+    /// Same, but measured from the bubble's LEFT edge — for an avatar sitting
+    /// under the bubble's left edge. Takes priority over `tailInsetFromRight`.
+    var tailInsetFromLeft: CGFloat? = nil
+    /// Reveal the words one-by-one (typewriter), as if the companion is speaking.
+    var animated: Bool = true
+    /// Seconds between each revealed word.
+    var perWord: Double = 0.16
+
+    @State private var shownWords: Int = 0
+
+    private var words: [Substring] {
+        text.split(separator: " ", omittingEmptySubsequences: false)
+    }
+    private var shownText: String {
+        guard animated else { return text }
+        return words.prefix(shownWords).joined(separator: " ")
+    }
 
     var body: some View {
-        Text(text)
-            .font(AppFont.bubble())
-            .foregroundStyle(AppColor.textOnLight)
-            .padding(.horizontal, AppSpacing.lg)
-            .padding(.vertical, AppSpacing.md)
-            .padding(.bottom, 8)   // reserve room for the tail
-            .background {
-                BubbleShape(pointDirection: pointDirection, tailInsetFromRight: tailInsetFromRight)
-                    .fill(.white)
-                    .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
-                    // Pin the shape's coordinates to LTR so the tail position is
-                    // deterministic (RTL would mirror it to the wrong side).
-                    .environment(\.layoutDirection, .leftToRight)
+        ZStack(alignment: .topTrailing) {
+            // An invisible copy of the FULL line fixes the bubble's size so it
+            // never grows/jumps as words appear — the words just fill it in.
+            Text(text).opacity(0).accessibilityHidden(true)
+            Text(shownText)
+        }
+        .font(AppFont.bubble())
+        .foregroundStyle(AppColor.textOnLight)
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.vertical, AppSpacing.md)
+        .padding(.bottom, 8)   // reserve room for the tail
+        .background {
+            BubbleShape(pointDirection: pointDirection, tailInsetFromRight: tailInsetFromRight, tailInsetFromLeft: tailInsetFromLeft)
+                .fill(.white)
+                .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+                // Pin the shape's coordinates to LTR so the tail position is
+                // deterministic (RTL would mirror it to the wrong side).
+                .environment(\.layoutDirection, .leftToRight)
+        }
+        .frame(maxWidth: 260)
+        .onAppear { startTyping() }
+        .onChange(of: text) { _, _ in startTyping() }
+    }
+
+    private func startTyping() {
+        guard animated else { return }
+        let total = words.count
+        shownWords = total <= 1 ? total : 0
+        guard total > 1 else { return }
+        for i in 1...total {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * perWord) {
+                // Ignore stale timers from a previous phrase.
+                guard i <= words.count else { return }
+                withAnimation(.easeOut(duration: 0.14)) { shownWords = i }
             }
-            .frame(maxWidth: 260)
+        }
     }
 }
 
 struct BubbleShape: Shape {
     var pointDirection: Edge = .bottom
     var tailInsetFromRight: CGFloat? = nil
+    var tailInsetFromLeft: CGFloat? = nil
 
     func path(in rect: CGRect) -> Path {
         var path = Path()
@@ -46,9 +85,15 @@ struct BubbleShape: Shape {
         // (1pt overlap) so it merges seamlessly — no notch, no gap.
         if pointDirection == .bottom {
             let cx: CGFloat = {
-                guard let inset = tailInsetFromRight else { return rect.midX }
-                return min(max(rect.minX + r + tailW / 2, rect.maxX - inset),
-                           rect.maxX - r - tailW / 2)
+                let lo = rect.minX + r + tailW / 2
+                let hi = rect.maxX - r - tailW / 2
+                if let inset = tailInsetFromLeft {
+                    return min(max(lo, rect.minX + inset), hi)
+                }
+                if let inset = tailInsetFromRight {
+                    return min(max(lo, rect.maxX - inset), hi)
+                }
+                return rect.midX
             }()
             let baseY = body.maxY
             path.move(to: CGPoint(x: cx - tailW / 2, y: baseY - 1))

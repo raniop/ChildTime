@@ -142,7 +142,10 @@ struct QuestionRunnerView: View {
                             }
                         }
                         if let bubble = companion.bubbleText {
-                            BubbleSpeech(text: bubble, tailInsetFromRight: companionSize * 0.55)
+                            // The companion section is pinned RTL (below), so the
+                            // avatar sits under the bubble's RIGHT edge — point the
+                            // tail there so it lands straight on the character.
+                            BubbleSpeech(text: bubble, tailInsetFromRight: companionSize * 0.5)
                                 .fixedSize()
                                 .offset(y: -(companionSize + 8))
                                 .transition(.scale.combined(with: .opacity))
@@ -153,6 +156,10 @@ struct QuestionRunnerView: View {
                 }
             }
             .padding(.bottom, AppSpacing.lg)
+            // Pin RTL so the avatar+bubble always sit on the same (trailing) side
+            // and the tail lands on the character regardless of how this screen
+            // was presented (fullScreenCover can arrive LTR).
+            .environment(\.layoutDirection, .rightToLeft)
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
 
             // Effects overlays
@@ -292,7 +299,8 @@ struct QuestionRunnerView: View {
             HStack(spacing: isCompact ? 6 : 10) {
                 Spacer(minLength: 0)
                 statChip("🎮", progress.pendingMinutes, AppColor.successMint)   // game minutes
-                statChip("⭐", progress.stars, AppColor.starGold)               // stars
+                statChip("⭐", progress.stars, AppColor.starGold)               // stars (rank)
+                statChip("💎", progress.diamonds, AppColor.diamondBlue)         // diamonds (shop)
             }
             // Live earned-time bar — fills a little after every correct answer.
             if earnsTime { earnedTimeBar }
@@ -357,10 +365,11 @@ struct QuestionRunnerView: View {
     private func statChip(_ emoji: String, _ value: Int, _ tint: Color) -> some View {
         HStack(spacing: 4) {
             Text(emoji).font(.system(size: isCompact ? 14 : 16))
-            Text("\(value)")
+            Text(value.currencyShort)
                 .font(.system(size: isCompact ? 14 : 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .monospacedDigit()
+                .lineLimit(1)
                 .contentTransition(.numericText(value: Double(value)))
         }
         .padding(.horizontal, isCompact ? 9 : 11)

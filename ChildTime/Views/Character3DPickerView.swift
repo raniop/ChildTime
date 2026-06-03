@@ -62,13 +62,15 @@ struct Character3DPickerView: View {
     private var starsChip: some View {
         Button { showStarShop = true } label: {
             HStack(spacing: 4) {
-                Text("⭐").font(.system(size: 15))
-                Text("\(progress.stars)")
+                Text("💎").font(.system(size: 15))
+                Text(progress.diamonds.currencyShort)
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .contentTransition(.numericText(value: Double(progress.diamonds)))
                 Image(systemName: "plus.circle.fill")
                     .font(.system(size: 15))
-                    .foregroundStyle(AppColor.starGold)
+                    .foregroundStyle(AppColor.gemPurple)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 7)

@@ -12,7 +12,7 @@ final class ProgressStore: ObservableObject {
         static let totalAnswered = "totalAnswered"
         static let unlockEndsAt = "unlockEndsAt"
         static let stars = "stars"
-        static let gems = "gems"
+        static let diamonds = "diamonds"
         static let xp = "xp"
         static let ownedCharacters = "ownedCharacterIDs"
         static let currentStreak = "currentStreak"
@@ -69,8 +69,13 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var stars: Int {
         didSet { defaults.set(stars, forKey: Key.stars) }
     }
-    @Published private(set) var gems: Int {
-        didSet { defaults.set(gems, forKey: Key.gems) }
+    /// 💎 the SPENDABLE wallet — earned from correct answers / gifts and burned
+    /// in the shop. Kept separate from ⭐ stars (which are the never-decreasing
+    /// leaderboard rank) so spending never costs the child their ranking.
+    /// (Reuses the formerly-dormant "gems" slot, so all sync plumbing already
+    /// carries it end-to-end.)
+    @Published private(set) var diamonds: Int {
+        didSet { defaults.set(diamonds, forKey: Key.diamonds) }
     }
     /// Characters this (active) child owns — per profile, synced via the snapshot.
     @Published private(set) var ownedCharacterIDs: Set<String> = [] {
@@ -164,6 +169,9 @@ final class ProgressStore: ObservableObject {
     /// separate chest figure, so the in-game chip, the reward screen, and the
     /// home total all agree.
     @Published private(set) var sessionStarsEarned: Int = 0
+    /// 💎 earned (per-answer) in the current session — resets with the session.
+    /// Lets the reward screen show the full session diamond total.
+    @Published private(set) var sessionDiamondsEarned: Int = 0
     /// Play-minutes earned in the current session — the single minutes source
     /// (every `batchAnswers` correct → `batchMinutes`). Shown on the reward
     /// screen so it matches exactly what was added to the bank.
@@ -294,7 +302,7 @@ final class ProgressStore: ObservableObject {
         self.unlockEndsAt = d.object(forKey: Key.unlockEndsAt) as? Date
         self.stars = d.integer(forKey: Key.stars)
         self.ownedCharacterIDs = Set(d.stringArray(forKey: Key.ownedCharacters) ?? [])
-        self.gems = d.integer(forKey: Key.gems)
+        self.diamonds = d.integer(forKey: Key.diamonds)
         self.xp = d.integer(forKey: Key.xp)
         self.currentStreak = d.integer(forKey: Key.currentStreak)
         self.dayStreak = d.integer(forKey: Key.dayStreak)
@@ -351,7 +359,7 @@ final class ProgressStore: ObservableObject {
             $totalCorrect.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $totalAnswered.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $stars.dropFirst().map { _ in () }.eraseToAnyPublisher(),
-            $gems.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $diamonds.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $xp.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $totalScore.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $unlockEndsAt.dropFirst().map { _ in () }.eraseToAnyPublisher(),
@@ -592,6 +600,15 @@ final class ProgressStore: ObservableObject {
             isMysteryPortal: ctx.isMysteryPortal
         )
         stars += earned
+        // 💎 spendable wallet — earned alongside ⭐, but at a slower rate so the
+        // shop keeps its value. Stars stay the leaderboard rank; diamonds buy.
+        let earnedDiamonds = RewardEngine.diamondsForCorrect(
+            combo: currentStreak,
+            isSuperQuestion: ctx.isSuperQuestion,
+            isMysteryPortal: ctx.isMysteryPortal
+        )
+        diamonds += earnedDiamonds
+        sessionDiamondsEarned += earnedDiamonds
         // Personal best — beating it is a big, celebrated moment. Fire the
         // celebration ONCE per run (the moment the record breaks), not on every
         // subsequent answer.
@@ -787,19 +804,31 @@ final class ProgressStore: ObservableObject {
         answeredToday = 12
         correctToday = 11
         minutesEarnedToday = 16
+        // Stamp TODAY so the date-rollover guard doesn't wipe the seeded daily
+        // counters the first time minutes are granted (e.g. opening the chest).
+        dailyEarnedDate = Calendar.current.startOfDay(for: Date())
         sessionStarsEarned = 24
+        sessionDiamondsEarned = 6
+        diamonds = 120
         xp = 96
         topicAnswered = [Topic.math.rawValue: 20, Topic.logic.rawValue: 12, Topic.hebrew.rawValue: 9, Topic.science.rawValue: 7]
         topicCorrect  = [Topic.math.rawValue: 19, Topic.logic.rawValue: 11, Topic.hebrew.rawValue: 8, Topic.science.rawValue: 6]
         topicAccuracy = [Topic.math.rawValue: 0.95, Topic.logic.rawValue: 0.92, Topic.hebrew.rawValue: 0.89, Topic.science.rawValue: 0.86]
         topicAffinity = [Topic.math.rawValue: 0.9, Topic.logic.rawValue: 0.8, Topic.science.rawValue: 0.7]
         unlockedWorlds = Set(Worlds.all.prefix(4).map { $0.id })
+        // DEMO_BIG=1 → stress-test the currency chips with huge balances.
+        if ProcessInfo.processInfo.environment["DEMO_BIG"] != nil {
+            stars = 1284500      // → "1.3M"
+            diamonds = 2500      // → "2.5K"
+            pendingMinutes = 1280
+        }
     }
 
     /// Reset the per-session score — call at the start of QuestionRunner.
     func resetSessionScore() {
         sessionScore = 0
         sessionStarsEarned = 0
+        sessionDiamondsEarned = 0
         sessionMinutesEarned = 0
         lastEarnedPoints = 0
     }
@@ -875,9 +904,10 @@ final class ProgressStore: ObservableObject {
 
     @discardableResult
     func applyChestReward(_ reward: ChestReward) -> BonusGrant {
-        // Single currency: any legacy "gem" portion of a reward is folded into
-        // stars so the child only ever collects ⭐.
-        stars += reward.stars + reward.gems
+        // Two pockets: ⭐ stars climb the leaderboard rank, 💎 diamonds fill the
+        // spendable shop wallet. A gift can grant either or both.
+        stars += reward.stars
+        diamonds += reward.diamonds
         // Chest/wheel time is a BONUS: it fills today's allowance, then banks the
         // overflow for tomorrow (≤30) — so a win is never silently lost.
         let grant = grantBonusMinutes(reward.minutes)
@@ -936,6 +966,21 @@ final class ProgressStore: ObservableObject {
     func addStars(_ amount: Int) {
         guard amount > 0 else { return }
         stars += amount
+    }
+
+    /// Burn 💎 diamonds — the SPENDABLE shop currency. Spending never touches
+    /// ⭐ stars, so the child's leaderboard rank is unaffected by purchases.
+    /// Caller must verify `diamonds >= amount` first.
+    func spendDiamonds(_ amount: Int) {
+        guard amount > 0 else { return }
+        diamonds = max(0, diamonds - amount)
+    }
+
+    /// Add 💎 diamonds — earned in play, won from chests/wheel, or bought as a
+    /// real-money pack (parent-gated). Single entry point so it stays canonical.
+    func addDiamonds(_ amount: Int) {
+        guard amount > 0 else { return }
+        diamonds += amount
     }
 
     /// Generic XP grant — used by Lucky Wheel and any future "+XP" rewards.
@@ -1045,7 +1090,7 @@ final class ProgressStore: ObservableObject {
         s.totalAnswered       = totalAnswered
         s.unlockEndsAt        = unlockEndsAt
         s.stars               = stars
-        s.gems                = gems
+        s.diamonds            = diamonds
         s.xp                  = xp
         s.currentStreak       = currentStreak
         s.dayStreak           = dayStreak
@@ -1100,7 +1145,7 @@ final class ProgressStore: ObservableObject {
         totalAnswered       = s.totalAnswered
         unlockEndsAt        = s.unlockEndsAt
         stars               = s.stars
-        gems                = s.gems
+        diamonds            = s.diamonds
         xp                  = s.xp
         currentStreak       = s.currentStreak
         dayStreak           = s.dayStreak
@@ -1165,7 +1210,7 @@ final class ProgressStore: ObservableObject {
         // up over both, so a loser's higher accumulator is still preserved.
         var merged = remoteWins ? remote : local
         merged.stars         = max(local.stars, remote.stars)
-        merged.gems          = max(local.gems, remote.gems)
+        merged.diamonds      = max(local.diamonds, remote.diamonds)
         merged.xp            = max(local.xp, remote.xp)
         merged.totalScore    = max(local.totalScore, remote.totalScore)
         merged.totalCorrect  = max(local.totalCorrect, remote.totalCorrect)

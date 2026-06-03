@@ -47,11 +47,12 @@ struct ChildTimeTests {
         // 4. Free characters are always owned.
         #expect(store.owns(Character3DCatalog.find("fox")))
 
-        // 5. Buying with too few stars fails; with enough it deducts + grants.
-        progress.spendStars(progress.stars)                   // zero the balance
-        #expect(progress.stars == 0)
+        // 5. Buying with too few diamonds fails; with enough it deducts + grants.
+        //    (Stars are rank-only now — purchases burn 💎 diamonds.)
+        progress.spendDiamonds(progress.diamonds)             // zero the wallet
+        #expect(progress.diamonds == 0)
 
-        guard let target = all.first(where: { !store.owns($0) && $0.priceStars > 0 }) else {
+        guard let target = all.first(where: { !store.owns($0) && $0.priceDiamonds > 0 }) else {
             return  // everything already owned from a prior run — nothing to buy
         }
 
@@ -60,12 +61,15 @@ struct ChildTimeTests {
         }
         #expect(!store.owns(target))
 
-        progress.addStars(target.priceStars)
-        let before = progress.stars
+        progress.addDiamonds(target.priceDiamonds)
+        let before = progress.diamonds
+        let starsBefore = progress.stars
         let bought = try store.purchase(target)
         #expect(bought.id == target.id)
         #expect(store.owns(target))
-        #expect(progress.stars == before - target.priceStars)
+        #expect(progress.diamonds == before - target.priceDiamonds)
+        // Spending must NOT touch the leaderboard rank.
+        #expect(progress.stars == starsBefore)
 
         // 6. Can't buy the same character twice.
         #expect(throws: CharacterStore.PurchaseError.self) {

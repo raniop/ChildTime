@@ -2,8 +2,9 @@ import Foundation
 import StoreKit
 import Combine
 
-/// Sells consumable "star packs" for real money. Stars are the in-app currency
-/// kids spend on characters; buying them is ALWAYS behind the parent gate
+/// Sells consumable "diamond packs" for real money. 💎 diamonds are the
+/// SPENDABLE shop currency kids buy characters with (⭐ stars are rank-only, so
+/// they're deliberately NOT for sale). Buying is ALWAYS behind the parent gate
 /// (the UI wraps `StarShopView` in `ParentGateView`).
 ///
 /// Configure these EXACT consumable IDs in App Store Connect → In-App Purchases.
@@ -11,17 +12,17 @@ import Combine
 final class StarPackStore: ObservableObject {
     static let shared = StarPackStore()
 
-    static let smallID  = "com.rani.ChildTime.stars.small"   // 300
-    static let mediumID = "com.rani.ChildTime.stars.medium"  // 1000
-    static let largeID  = "com.rani.ChildTime.stars.large"   // 2500
+    static let smallID  = "com.rani.ChildTime.stars.small"   // 60 💎
+    static let mediumID = "com.rani.ChildTime.stars.medium"  // 200 💎
+    static let largeID  = "com.rani.ChildTime.stars.large"   // 500 💎
     static let allIDs: Set<String> = [smallID, mediumID, largeID]
 
-    /// How many stars each pack grants.
-    static func stars(for productID: String) -> Int {
+    /// How many 💎 diamonds each pack grants.
+    static func diamonds(for productID: String) -> Int {
         switch productID {
-        case smallID:  return 300
-        case mediumID: return 1000
-        case largeID:  return 2500
+        case smallID:  return 60
+        case mediumID: return 200
+        case largeID:  return 500
         default:       return 0
         }
     }
@@ -33,8 +34,8 @@ final class StarPackStore: ObservableObject {
     @Published private(set) var didAttemptLoad = false
     @Published var isPurchasing = false
     @Published var lastError: String?
-    /// Set to the number of stars just granted so the UI can celebrate; reset to nil.
-    @Published var lastGrantedStars: Int? = nil
+    /// Set to the number of 💎 diamonds just granted so the UI can celebrate; reset to nil.
+    @Published var lastGrantedDiamonds: Int? = nil
 
     /// Transaction IDs already credited — guards against double-granting across
     /// the purchase path and the `Transaction.updates` stream (and relaunches).
@@ -56,7 +57,7 @@ final class StarPackStore: ObservableObject {
         defer { isLoading = false; didAttemptLoad = true }
         do {
             let fetched = try await Product.products(for: Self.allIDs)
-            products = fetched.sorted { Self.stars(for: $0.id) < Self.stars(for: $1.id) }
+            products = fetched.sorted { Self.diamonds(for: $0.id) < Self.diamonds(for: $1.id) }
             lastError = nil
         } catch {
             lastError = error.localizedDescription
@@ -100,12 +101,12 @@ final class StarPackStore: ObservableObject {
     private func grant(_ transaction: Transaction) {
         let txKey = String(transaction.id)
         guard !grantedTxIDs.contains(txKey) else { return }
-        let amount = Self.stars(for: transaction.productID)
+        let amount = Self.diamonds(for: transaction.productID)
         guard amount > 0 else { return }
         grantedTxIDs.insert(txKey)
         UserDefaults.standard.set(Array(grantedTxIDs), forKey: grantedKey)
-        ProgressStore.shared.addStars(amount)
-        lastGrantedStars = amount
+        ProgressStore.shared.addDiamonds(amount)
+        lastGrantedDiamonds = amount
         AppAnalytics.purchasedStars(transaction.productID, stars: amount)
     }
 
@@ -127,8 +128,8 @@ final class StarPackStore: ObservableObject {
 }
 
 extension Product {
-    /// "300 ⭐" style label for a star pack.
+    /// "60 💎" style label for a diamond pack.
     var starPackLabel: String {
-        "\(StarPackStore.stars(for: id)) ⭐"
+        "\(StarPackStore.diamonds(for: id)) 💎"
     }
 }

@@ -17,6 +17,9 @@ enum AppColor {
     // Accents
     static let starGold      = Color(hex: "FFD23F")
     static let gemPurple     = Color(hex: "9B5DE5")
+    /// 💎 diamond accent — a bright cyan-blue matching the diamond emoji used in
+    /// the shop, so the diamonds currency reads blue (not purple) everywhere.
+    static let diamondBlue   = Color(hex: "4CC9F0")
     static let companionGlow = Color(hex: "FFB84D")
     static let companionBody = Color(hex: "FFC94A")
     static let successMint   = Color(hex: "06D6A0")
