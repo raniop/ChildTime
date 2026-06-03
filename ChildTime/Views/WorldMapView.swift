@@ -739,11 +739,18 @@ struct WorldMapView: View {
     /// grant — so the area is never silently blank.
     private func bottomHint(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 16, weight: .heavy, design: .rounded))
-            .foregroundStyle(.white.opacity(0.9))
+            .font(.system(size: 17, weight: .heavy, design: .rounded))
+            .foregroundStyle(.white)
             .multilineTextAlignment(.center)
-            .padding(.horizontal, AppSpacing.lg).padding(.vertical, 12)
-            .background(.white.opacity(0.12), in: Capsule())
+            .padding(.horizontal, AppSpacing.xl).padding(.vertical, 15)
+            .frame(maxWidth: .infinity)
+            // Solid dark pill (+ gold edge) so it's clearly readable over the
+            // bright world cards behind it — the translucent version vanished.
+            .background(Color(hex: "1B1340").opacity(0.82),
+                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(AppColor.starGold.opacity(0.5), lineWidth: 1.5))
+            .glow(AppColor.starGold.opacity(0.3), radius: 8)
             .frame(maxWidth: 480)
     }
 
