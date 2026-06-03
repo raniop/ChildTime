@@ -9,6 +9,7 @@ struct LeaderboardView: View {
     @ObservedObject private var friends = FriendsManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var showAdd = false
+    @State private var friendToRemove: FriendCard?
 
     private var meID: String? { ProfileStore.shared.activeID?.uuidString }
 
@@ -49,6 +50,27 @@ struct LeaderboardView: View {
         .onDisappear { friends.stopLive() }
         .sheet(isPresented: $showAdd) {
             AddFriendView().environment(\.layoutDirection, .rightToLeft)
+        }
+        .confirmationDialog("לְהָסִיר חָבֵר?",
+                            isPresented: Binding(get: { friendToRemove != nil },
+                                                 set: { if !$0 { friendToRemove = nil } }),
+                            titleVisibility: .visible,
+                            presenting: friendToRemove) { f in
+            Button("הָסִירוּ אֶת \(f.name)", role: .destructive) {
+                Task { await friends.removeFriend(f.id); friendToRemove = nil }
+            }
+            Button("בִּטּוּל", role: .cancel) { friendToRemove = nil }
+        } message: { f in
+            Text("\(f.name) יֵצֵא מִלּוּחַ הַחֲבֵרִים שֶׁלְּךָ. תָּמִיד אֶפְשָׁר לְהוֹסִיף שׁוּב.")
+        }
+    }
+
+    /// Long-press remove — only for friends, never your own card.
+    @ViewBuilder private func removeMenu(for card: FriendCard, isMe: Bool) -> some View {
+        if !isMe {
+            Button(role: .destructive) { friendToRemove = card } label: {
+                Label("הָסִירוּ חָבֵר", systemImage: "person.badge.minus")
+            }
         }
     }
 
@@ -117,6 +139,7 @@ struct LeaderboardView: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .contextMenu { removeMenu(for: card, isMe: isMe) }
     }
 
     // Ranks 4+.
@@ -146,6 +169,7 @@ struct LeaderboardView: View {
             .fill(isMe ? AppColor.starGold.opacity(0.22) : .white.opacity(0.10)))
         .overlay(RoundedRectangle(cornerRadius: AppRadius.large)
             .stroke(isMe ? AppColor.starGold : .clear, lineWidth: 2))
+        .contextMenu { removeMenu(for: card, isMe: isMe) }
     }
 
     private func starsPill(_ n: Int) -> some View {
@@ -190,6 +214,10 @@ struct AddFriendView: View {
     @State private var added = false
     @State private var celebrate: FriendCard?
     @State private var confettiTrigger = 0
+    /// Friend IDs known when the sheet opened — so a NEW one arriving (someone
+    /// scanned MY code) is detected and the sheet auto-closes, just like the
+    /// scanning side does.
+    @State private var knownFriendIDs: Set<String> = []
 
     var body: some View {
         ZStack {
@@ -243,7 +271,24 @@ struct AddFriendView: View {
                 .allowsHitTesting(false)
         }
         .environment(\.layoutDirection, .rightToLeft)
-        .task { await friends.refresh() }
+        // Live so the inbound listener fires the instant someone scans MY code.
+        .task { await friends.startLive() }
+        .onAppear { knownFriendIDs = Set(friends.leaderboard.map(\.id)) }
+        .onChange(of: friends.leaderboard.map(\.id)) { _, ids in
+            // A new friend appeared while this sheet is open (someone connected to
+            // me) → celebrate and auto-close, like the scanning side already does.
+            let fresh = Set(ids).subtracting(knownFriendIDs)
+            knownFriendIDs = Set(ids)
+            guard celebrate == nil, let newID = fresh.first,
+                  newID != ProfileStore.shared.activeID?.uuidString,
+                  let card = friends.leaderboard.first(where: { $0.id == newID }) else { return }
+            added = true
+            message = "הִתְחַבַּרְתֶּם! 🎉"
+            Haptic.success(); SoundPlayer.shared.play(.chestOpen)
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) { celebrate = card }
+            confettiTrigger += 1
+            Task { try? await Task.sleep(nanoseconds: 2_000_000_000); dismiss() }
+        }
         .sheet(isPresented: $showScanner) { scannerSheet }
     }
 

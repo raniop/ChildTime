@@ -322,18 +322,20 @@ struct WorldMapView: View {
                     .glow(AppColor.starGold.opacity(0.5), radius: 6)
             }
 
-            // Friends leaderboard — mint, clearly distinct from the gold shop.
+            // Friends leaderboard — a pleasant emerald (not the harsh neon mint),
+            // with the SAME subtle treatment as the gold shop so the row reads as a
+            // matching set. Distinct color, easy on the eye.
             Button {
                 Haptic.light()
                 showingLeaderboard = true
             } label: {
                 Image(systemName: "trophy.fill")
                     .font(.system(size: iconSize - 2, weight: .medium))
-                    .foregroundStyle(AppColor.successMint)
+                    .foregroundStyle(Color(hex: "10B981"))
                     .frame(width: buttonSize, height: buttonSize)
                     .background(.white.opacity(0.15), in: Circle())
-                    .overlay(Circle().stroke(AppColor.successMint.opacity(0.7), lineWidth: 1.5))
-                    .glow(AppColor.successMint.opacity(0.45), radius: 5)
+                    .overlay(Circle().stroke(Color(hex: "10B981").opacity(0.6), lineWidth: 1.5))
+                    .glow(Color(hex: "10B981").opacity(0.35), radius: 4)
             }
 
         }
@@ -516,7 +518,14 @@ struct WorldMapView: View {
         switch stat {
         case .minutes:
             let cap = progress.dailyCap
-            var lines = ["יֵשׁ לְךָ עַכְשָׁיו \(progress.pendingMinutes) דַּקּוֹת מִשְׂחָק לְשַׂחֵק."]
+            var lines: [String] = []
+            if cap.enabled && progress.redeemableMinutesNow < progress.pendingMinutes {
+                // Wallet exceeds today's remaining allowance — explain the split.
+                lines.append("אֶפְשָׁר לִפְתֹּחַ עַכְשָׁיו \(progress.redeemableMinutesNow) דַּקּוֹת (עַד הַתִּקְרָה הַיּוֹמִית).")
+                lines.append("בָּאַרְנָק יֵשׁ \(progress.pendingMinutes) דַּקּוֹת — הַשְּׁאָר נִשְׁמָר לְיָמִים הַבָּאִים.")
+            } else {
+                lines.append("יֵשׁ לְךָ עַכְשָׁיו \(progress.pendingMinutes) דַּקּוֹת מִשְׂחָק לְשַׂחֵק.")
+            }
             if cap.enabled {
                 lines.append("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת.")
             }
@@ -584,7 +593,8 @@ struct WorldMapView: View {
 
     private var heroTitle: some View {
         VStack(spacing: 4) {
-            Text("טוֹפִי")
+            // Premium subscribers see the "+" brand — matches the paywall / settings.
+            Text(subs.isPremium ? "טופי+" : "טופי")
                 .font(.system(size: heroTitleSize, weight: .heavy, design: .rounded))
                 .foregroundStyle(
                     LinearGradient(
@@ -692,14 +702,14 @@ struct WorldMapView: View {
             // DailyGiftBeacon) instead of a full-width bottom button. Every world
             // & Smart Adventure earns minutes, so the only bottom CTA left is the
             // "redeem my minutes" button below.
-            if progress.pendingMinutes > 0 {
+            if progress.redeemableMinutesNow > 0 {
                 Button {
                     redeemMinutes()
                 } label: {
                     HStack(spacing: 10) {
                         Image(systemName: "gamecontroller.fill")
                             .font(.system(size: 24))
-                        Text("פִּתְחוּ לִי \(progress.pendingMinutes) דַּקּוֹת לְשַׂחֵק")
+                        Text("פִּתְחוּ לִי \(progress.redeemableMinutesNow) דַּקּוֹת לְשַׂחֵק")
                             .font(.system(size: 22, weight: .heavy, design: .rounded))
                     }
                     .foregroundStyle(.white)
@@ -763,7 +773,9 @@ struct WorldMapView: View {
     }
 
     private func redeemMinutes() {
-        let minutes = progress.consumePendingMinutes()
+        // Cap a single unlock to today's remaining screen-time allowance; the
+        // accumulated wallet beyond the daily cap stays for future days.
+        let minutes = progress.consumeMinutesForUnlock()
         guard minutes > 0 else { return }
         shields.unlock(minutes: minutes)
         progress.startUnlock(minutes: minutes)

@@ -156,6 +156,12 @@ struct ChildTimeApp: App {
                         progress.applyDailyRolloverIfNeeded()
                         enforceShieldStateIfNeeded()
                     }
+                    // Child LEFT the app → send the single "finished playing" report
+                    // now (covers all adventures this sitting). Self-guards: no-op if
+                    // nothing was played. NOT fired per-adventure, which spammed the parent.
+                    if phase == .background, Self.demoScreen == nil {
+                        progress.endSittingAndReport()
+                    }
                 }
                 .onOpenURL { url in
                     #if canImport(GoogleSignIn)

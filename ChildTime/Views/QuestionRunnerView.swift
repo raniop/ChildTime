@@ -42,7 +42,6 @@ struct QuestionRunnerView: View {
     private var portalTitleSize: CGFloat { isCompact ? 36 : 56 }
 
     @State private var companion = CompanionController()
-    @State private var didReportSessionEnd = false
     @State private var current: Question?
     @State private var questionIndex: Int = 0
     @State private var correctInSession: Int = 0
@@ -233,22 +232,9 @@ struct QuestionRunnerView: View {
             Text("נָסִיר אֶת הַשְּׁאֵלָה הַזּוֹ וְלֹא נַצִּיג אוֹתָהּ שׁוּב, וְנִשְׁלַח עָלֶיהָ דִּוּוּחַ כְּדֵי שֶׁנְּשַׁפֵּר.")
         }
         .onAppear { startSession() }
-        .onDisappear {
-            // Tell the parent the child finished playing (once), with a brief
-            // summary of how the session went.
-            if !didReportSessionEnd {
-                didReportSessionEnd = true
-                let answered = max(questionIndex, correctInSession)
-                let accuracy = answered > 0 ? Int(Double(correctInSession) / Double(answered) * 100) : 0
-                LiveEventReporter.report(.sessionEnd, extra: [
-                    "questions": answered,
-                    "correct": correctInSession,
-                    "accuracy": accuracy,
-                    "minutes": progress.sessionMinutesEarned,
-                    "stars": progress.sessionStarsEarned
-                ])
-            }
-        }
+        // NOTE: the "child finished playing" report is NOT sent here — leaving an
+        // adventure isn't leaving the app (they often start another). It's sent
+        // once when the app backgrounds (see ChildTimeApp scenePhase handling).
         // Live presence: refresh this child device's "last seen" every 15s while
         // playing, so the parent dashboard shows "🟢 משחק עכשיו" in real time.
         .onReceive(Timer.publish(every: 15, on: .main, in: .common).autoconnect()) { _ in
@@ -518,6 +504,20 @@ struct QuestionRunnerView: View {
             }
             .padding(.horizontal, AppSpacing.lg)
 
+            // Early-reader visual questions carry the instruction in `spoken` (the
+            // prompt itself is pictures). Show it as a written line ABOVE the
+            // pictures too — e.g. "כַּמָּה כּוֹכָבִים?" over the ⭐⭐ — not only read aloud.
+            if let instruction = q.spoken, !instruction.isEmpty {
+                Text(instruction)
+                    .font(.system(size: isCompact ? 26 : 34, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.6)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, AppSpacing.lg)
+            }
+
             Text(q.prompt)
                 .font(.system(size: questionFontSize(for: q.prompt), weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
@@ -723,7 +723,9 @@ struct QuestionRunnerView: View {
         progress.registerSessionToday()
         progress.resetSessionScore()
         LearningHistoryStore.shared.recordSessionStart(purpose: purpose)
-        LiveEventReporter.report(.sessionStart)
+        // Notify the parent ONCE per app-sitting (the first adventure), not on each
+        // adventure — and the matching "finished" report fires on app background.
+        progress.beginSitting()
         // Mark this child "playing now" IMMEDIATELY (don't wait for the 15s tick),
         // so the parent dashboard floats them to the top the moment they start.
         if settings.deviceRole == .child, let cid = profiles.activeID {

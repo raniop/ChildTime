@@ -34,6 +34,9 @@ final class HouseholdManager: ObservableObject {
     /// Set to the invite code once a child device redeems it — lets the parent's
     /// QR sheet auto-close the moment the child's device joins.
     @Published var redeemedInviteCode: String?
+    /// The childID carried by the last successfully-redeemed invite (from the
+    /// invite doc), so a child device binds to the right child even from a typed code.
+    @Published var redeemedInviteChildID: String?
     /// Devices connected per child (childID string → devices), so the parent can
     /// see which/how many devices each child plays on.
     @Published private(set) var devicesByChild: [String: [ChildDevice]] = [:]
@@ -323,12 +326,13 @@ final class HouseholdManager: ObservableObject {
 
     /// Creates a join code valid for 7 days. Returns nil if Firebase is absent
     /// or there's no household yet.
-    func createInvite() async -> String? {
+    func createInvite(childID: String? = nil) async -> String? {
         #if canImport(FirebaseFirestore)
         guard let hh = household, let uid else { return nil }
         let code = Invite.makeCode()
         let invite = Invite(id: code, householdID: hh.id, createdBy: uid,
-                            createdAt: .now, expiresAt: Date().addingTimeInterval(7 * 24 * 3600))
+                            createdAt: .now, expiresAt: Date().addingTimeInterval(7 * 24 * 3600),
+                            childID: childID)
         do {
             try await db.collection("invites").document(code).setData(Self.encode(invite))
             return code
@@ -345,7 +349,9 @@ final class HouseholdManager: ObservableObject {
     /// id, so the child's device joins this family AND lands straight on that
     /// child. Format: "CODE|childID".
     func makeChildJoinCode(for childID: String) async -> String? {
-        guard let code = await createInvite() else { return nil }
+        // Store the childID IN the invite doc (not just appended to the string) so
+        // a typed bare code resolves the same child a scanned QR would.
+        guard let code = await createInvite(childID: childID) else { return nil }
         return "\(code)|\(childID)"
     }
 
@@ -398,7 +404,13 @@ final class HouseholdManager: ObservableObject {
     }
 
     /// Joins the household behind `code`. Returns true on success.
-    func redeemInvite(code: String) async -> Bool {
+    ///
+    /// `bringLocalChildren`: when true (a co-parent joining), this device's local
+    /// child profiles are pushed into the joined household — so the co-parent
+    /// brings their kids along. A CHILD play-device must pass FALSE: it only binds
+    /// to ONE existing child, and uploading its local throwaway profile would
+    /// create a phantom new child in the family.
+    func redeemInvite(code: String, bringLocalChildren: Bool = true) async -> Bool {
         #if canImport(FirebaseFirestore)
         guard let uid else { return false }
         let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
@@ -408,6 +420,9 @@ final class HouseholdManager: ObservableObject {
                 lastError = "קוד לא נמצא"; return false
             }
             guard !invite.isExpired else { lastError = "הקוד פג תוקף"; return false }
+            // Surface the bound child (if this is a per-child code) so a typed code
+            // binds the device to the right kid, not just a scanned QR.
+            redeemedInviteChildID = invite.childID
             // Add me to the household + mark invite redeemed.
             try await db.collection("households").document(invite.householdID)
                 .updateData(["parentUIDs": FieldValue.arrayUnion([uid])])
@@ -418,17 +433,23 @@ final class HouseholdManager: ObservableObject {
             // code brings their kids with them (works for absorbing a child who
             // registered separately, and for co-parents). setData(merge) creates
             // the doc if it was never synced before.
-            var movedIDs: [String] = []
-            for p in ProfileStore.shared.profiles {
-                let id = p.id.uuidString
-                movedIDs.append(id)
-                let record = ChildRecord(profile: p, householdID: invite.householdID)
-                try? await db.collection("children").document(id)
-                    .setData(Self.encode(record), merge: true)
-            }
-            if !movedIDs.isEmpty {
-                try? await db.collection("households").document(invite.householdID)
-                    .updateData(["childIDs": FieldValue.arrayUnion(movedIDs)])
+            //
+            // SKIPPED for a child play-device (bringLocalChildren == false): it
+            // only binds to one EXISTING child, so uploading its local profiles
+            // would spawn phantom new kids in the family.
+            if bringLocalChildren {
+                var movedIDs: [String] = []
+                for p in ProfileStore.shared.profiles {
+                    let id = p.id.uuidString
+                    movedIDs.append(id)
+                    let record = ChildRecord(profile: p, householdID: invite.householdID)
+                    try? await db.collection("children").document(id)
+                        .setData(Self.encode(record), merge: true)
+                }
+                if !movedIDs.isEmpty {
+                    try? await db.collection("households").document(invite.householdID)
+                        .updateData(["childIDs": FieldValue.arrayUnion(movedIDs)])
+                }
             }
 
             // Adopt the joined household as my canonical one + switch listeners.

@@ -63,6 +63,10 @@ struct WorldDetailView: View {
             QuestionRunnerView(world: world, purpose: .earnTime)
                 .onDisappear { dismiss() }
         }
+        // Presented as a fullScreenCover, which does NOT inherit the app root's
+        // RTL layout direction — set it here so Hebrew rows (and the top bar)
+        // align right, not left.
+        .environment(\.layoutDirection, .rightToLeft)
     }
 
     // MARK: - Top bar

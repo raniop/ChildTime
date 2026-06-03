@@ -39,6 +39,14 @@ struct OptionCard: View {
                        startPoint: .topLeading, endPoint: .bottomTrailing)
     ]
 
+    /// Hebrew color name per tile, in the SAME order as `palette`. Lets the
+    /// read-aloud identify a tile by COLOR ("יָרֹק, 4") when the answers are
+    /// numbers — otherwise "1, 4" reads as two confusing numbers.
+    static let colorNames = ["יָרֹק", "סָגֹל", "כָּתֹם", "כָּחֹל"]
+    static func colorName(for index: Int) -> String {
+        colorNames[((index % colorNames.count) + colorNames.count) % colorNames.count]
+    }
+
     var body: some View {
         Button(action: action) {
             ZStack {

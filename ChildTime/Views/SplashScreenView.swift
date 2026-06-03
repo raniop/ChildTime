@@ -52,14 +52,17 @@ struct SplashScreenView: View {
                 }
 
                 VStack(spacing: AppSpacing.sm) {
-                    Text("טוֹפִּי")
+                    // Same clean wordmark as the home header (unvocalized + the same
+                    // gradient) so the two "טופי" match exactly — the niqqud version
+                    // read as a different, thinner font.
+                    Text("טופי")
                         .font(.system(size: 64, weight: .heavy, design: .rounded))
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FFE082")],
-                                startPoint: .top, endPoint: .bottom)
+                                colors: [AppColor.starGold, AppColor.companionGlow, .white],
+                                startPoint: .leading, endPoint: .trailing)
                         )
-                        .shadow(color: AppColor.starGold.opacity(0.5), radius: 14)
+                        .glow(AppColor.starGold, radius: 14)
                         .scaleEffect(showWordmark ? 1 : 0.7)
                         .opacity(showWordmark ? 1 : 0)
                         .offset(y: showWordmark ? 0 : 20)

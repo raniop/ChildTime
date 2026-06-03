@@ -145,7 +145,13 @@ extension PushManager {
     /// Apply the parent's tapped answer: the option they kept stays on the child's
     /// screen, the other is removed. Written to the `helpRequests/{id}` doc, which
     /// the child's app is listening to — all in the background, no app launch.
-    func handleParentHelpDecision(_ actionID: String, userInfo: [AnyHashable: Any]) {
+    ///
+    /// MUST be awaited from `didReceive`: a tapped non-foreground action only wakes
+    /// the app briefly in the background. A fire-and-forget `setData` would just be
+    /// queued locally and the app could suspend before it ever reaches the server,
+    /// so the child's listener would never fire. Awaiting the write keeps the
+    /// background task alive until Firestore confirms it.
+    func handleParentHelpDecision(_ actionID: String, userInfo: [AnyHashable: Any]) async {
         guard actionID == Action.helpOptionA || actionID == Action.helpOptionB else { return }
         guard let requestID = userInfo["helpRequestID"] as? String else { return }
         let optionA = (userInfo["optionA"] as? String) ?? ""
@@ -156,13 +162,18 @@ extension PushManager {
         guard !kept.isEmpty, !removed.isEmpty else { return }
 
         #if canImport(FirebaseFirestore)
-        Firestore.firestore().collection("helpRequests").document(requestID).setData([
-            "keptOption": kept,
-            "removedOption": removed,
-            "status": "answered",
-            "respondedByUID": AuthManager.shared.userID ?? "",
-            "respondedAt": Date().timeIntervalSince1970,
-        ], merge: true)
+        do {
+            try await Firestore.firestore().collection("helpRequests").document(requestID).setData([
+                "keptOption": kept,
+                "removedOption": removed,
+                "status": "answered",
+                "respondedByUID": AuthManager.shared.userID ?? "",
+                "respondedAt": Date().timeIntervalSince1970,
+            ], merge: true)
+        } catch {
+            print("[ParentHelp] write-back failed: \(error.localizedDescription)")
+            return
+        }
         #endif
 
         // Quietly confirm to the parent.
@@ -170,7 +181,7 @@ extension PushManager {
         let content = UNMutableNotificationContent()
         content.title = "✅ הָעֶזְרָה נִשְׁלְחָה"
         content.body = "עָזַרְתָּ לְ\(childName) — נִשְׁאֲרָה הָאֶפְשָׁרוּת \(kept)."
-        UNUserNotificationCenter.current().add(
+        try? await UNUserNotificationCenter.current().add(
             UNNotificationRequest(identifier: "help.confirm.\(requestID)", content: content, trigger: nil))
     }
 
@@ -229,8 +240,11 @@ extension PushManager: UNUserNotificationCenterDelegate {
         let info = response.notification.request.content.userInfo
         await MainActor.run {
             PushManager.shared.handleLevelUpDecision(actionID, userInfo: info)
-            PushManager.shared.handleParentHelpDecision(actionID, userInfo: info)
         }
+        // Awaited (not fire-and-forget) so the Firestore write-back completes
+        // before iOS suspends the briefly-woken background app — otherwise the
+        // child's listener never sees the parent's answer.
+        await PushManager.shared.handleParentHelpDecision(actionID, userInfo: info)
     }
 }
 

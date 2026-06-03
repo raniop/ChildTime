@@ -103,7 +103,8 @@ final class ParentHelpManager: ObservableObject {
         listener?.remove()
         let createdAt = Date()
         listener = db.collection("helpRequests").document(id)
-            .addSnapshotListener { [weak self] snap, _ in
+            .addSnapshotListener { [weak self] snap, error in
+                if let error { print("[ParentHelp] listen failed: \(error.localizedDescription)") }
                 guard let self, let data = snap?.data(),
                       let kept = data["keptOption"] as? String,
                       let removed = data["removedOption"] as? String else { return }

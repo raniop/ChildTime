@@ -32,13 +32,20 @@ final class SpeechReader {
         synth.speak(u)
     }
 
-    /// Read a question and then each answer as just "<number>, <answer>"
-    /// (e.g. "1, קטן. 2, קטנות") so a non-reader can pick by number — no
-    /// repeated "תשובה" word.
+    /// Read a question, then each answer. Normally "<number>, <answer>"
+    /// (e.g. "1, קטן. 2, קטנות") so a non-reader can pick by number.
+    ///
+    /// BUT when every answer is itself a NUMBER, "1, 4" reads as two numbers and
+    /// confuses — so the tile is identified by its COLOR instead: "יָרֹק, 4.
+    /// סָגֹל, 2" (colors match OptionCard's palette order).
     func readQuestion(prompt: String, options: [String]) {
+        let numericAnswers = !options.isEmpty && options.allSatisfy {
+            Int($0.trimmingCharacters(in: .whitespaces)) != nil
+        }
         var parts = [prompt]
         for (i, opt) in options.enumerated() {
-            parts.append("\(i + 1), \(opt)")
+            let label = numericAnswers ? OptionCard.colorName(for: i) : "\(i + 1)"
+            parts.append("\(label), \(opt)")
         }
         speak(parts.joined(separator: ". "))
     }

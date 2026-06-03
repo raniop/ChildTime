@@ -75,6 +75,10 @@ struct Invite: Codable, Identifiable, Equatable {
     var createdAt: Date
     var expiresAt: Date
     var redeemedBy: String?
+    /// For a per-child join code, the child this device should bind to — stored
+    /// in the doc so even a TYPED bare code (not just a scanned QR) resolves the
+    /// right child. nil for a generic co-parent invite. Optional → older docs decode.
+    var childID: String?
 
     var isExpired: Bool { Date() > expiresAt }
     var isRedeemed: Bool { redeemedBy != nil }

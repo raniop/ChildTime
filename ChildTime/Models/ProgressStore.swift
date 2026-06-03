@@ -30,6 +30,7 @@ final class ProgressStore: ObservableObject {
         static let wrongStreak = "wrongStreak"
         static let totalScore = "totalScore"
         static let minutesEarnedToday = "minutesEarnedToday"
+        static let minutesUnlockedToday = "minutesUnlockedToday"
         static let dailyEarnedDate = "dailyEarnedDate"
         static let carryOverMinutes = "carryOverMinutes"
         static let answeredToday = "answeredToday"
@@ -176,6 +177,18 @@ final class ProgressStore: ObservableObject {
     /// (every `batchAnswers` correct → `batchMinutes`). Shown on the reward
     /// screen so it matches exactly what was added to the bank.
     @Published private(set) var sessionMinutesEarned: Int = 0
+
+    // MARK: - Play "sitting" (whole foreground period, across adventures)
+    /// A sitting spans the entire time the app is in the foreground, however many
+    /// adventures the child enters. It drives a SINGLE "child finished playing"
+    /// report when the app backgrounds — NOT one per adventure (which spammed the
+    /// parent). Cumulative across adventures; reset when the report fires.
+    @Published private(set) var sittingActive = false
+    private var sittingQuestions = 0
+    private var sittingCorrect = 0
+    private var sittingStars = 0
+    private var sittingMinutes = 0
+
     /// Points awarded for the *last* correct answer, so the UI can flash
     /// '+15' next to the running total. Consumers may set it back to 0.
     @Published var lastEarnedPoints: Int = 0
@@ -183,6 +196,13 @@ final class ProgressStore: ObservableObject {
     /// the optional `maxMinutesPerDay` cap.
     @Published private(set) var minutesEarnedToday: Int {
         didSet { defaults.set(minutesEarnedToday, forKey: Key.minutesEarnedToday) }
+    }
+    /// Net play-minutes actually UNLOCKED today (unlocked − returned-unused),
+    /// resets on the same daily boundary as `minutesEarnedToday`. Caps a single
+    /// redemption so an accumulated wallet can't be cashed in past the daily
+    /// screen-time allowance — the overflow waits in `pendingMinutes` for later.
+    @Published private(set) var minutesUnlockedToday: Int {
+        didSet { defaults.set(minutesUnlockedToday, forKey: Key.minutesUnlockedToday) }
     }
     /// Bonus minutes (wheel/chest) won AFTER today's cap was full — banked for
     /// TOMORROW, capped at `maxCarryOverMinutes`. Becomes playable on the next
@@ -324,6 +344,7 @@ final class ProgressStore: ObservableObject {
         self.wrongStreak = d.integer(forKey: Key.wrongStreak)
         self.totalScore = d.integer(forKey: Key.totalScore)
         self.minutesEarnedToday = d.integer(forKey: Key.minutesEarnedToday)
+        self.minutesUnlockedToday = d.integer(forKey: Key.minutesUnlockedToday)
         self.carryOverMinutes = d.integer(forKey: Key.carryOverMinutes)
         self.answeredToday = d.integer(forKey: Key.answeredToday)
         self.correctToday = d.integer(forKey: Key.correctToday)
@@ -620,6 +641,9 @@ final class ProgressStore: ObservableObject {
             }
         }
         sessionStarsEarned += earned
+        sittingQuestions += 1
+        sittingCorrect += 1
+        sittingStars += earned
 
         // Score — the headline 'ניקוד' metric. Includes combo / bonus boosts.
         let topicDifficulty = ProfileStore.shared.active?.difficulty(for: ctx.topic) ?? .easy
@@ -643,7 +667,9 @@ final class ProgressStore: ObservableObject {
             let perSec = target / Double(cycleQuestionsTotal)
             cycleSeconds += perSec
             while cycleSeconds >= target - 0.01 {
-                sessionMinutesEarned += grantMinutesCapped(max(1, ParentSettings.shared.batchMinutes))
+                let granted = grantMinutesCapped(max(1, ParentSettings.shared.batchMinutes))
+                sessionMinutesEarned += granted
+                sittingMinutes += granted
                 cycleSeconds -= target
             }
         }
@@ -710,6 +736,7 @@ final class ProgressStore: ObservableObject {
         }
         // Reset the daily counters together.
         minutesEarnedToday = 0
+        minutesUnlockedToday = 0
         answeredToday = 0
         correctToday = 0
         dailyEarnedDate = today
@@ -833,6 +860,33 @@ final class ProgressStore: ObservableObject {
         lastEarnedPoints = 0
     }
 
+    /// Begin (or continue) a play sitting. Reports `sessionStart` to the parent
+    /// ONCE — on the first adventure of the sitting — instead of on every adventure.
+    func beginSitting() {
+        guard !sittingActive else { return }   // already in a sitting → don't re-notify
+        sittingActive = true
+        sittingQuestions = 0; sittingCorrect = 0; sittingStars = 0; sittingMinutes = 0
+        LiveEventReporter.report(.sessionStart)
+    }
+
+    /// End the sitting when the child LEAVES THE APP (call on app background).
+    /// Sends ONE `sessionEnd` summary covering every adventure in the sitting.
+    /// No-op if nothing was played, so browsing the map alone never notifies.
+    func endSittingAndReport() {
+        guard sittingActive else { return }
+        sittingActive = false
+        let answered = max(sittingQuestions, sittingCorrect)
+        let accuracy = answered > 0 ? Int(Double(sittingCorrect) / Double(answered) * 100) : 0
+        LiveEventReporter.report(.sessionEnd, extra: [
+            "questions": answered,
+            "correct": sittingCorrect,
+            "accuracy": accuracy,
+            "minutes": sittingMinutes,
+            "stars": sittingStars
+        ])
+        sittingQuestions = 0; sittingCorrect = 0; sittingStars = 0; sittingMinutes = 0
+    }
+
     /// Records a wrong answer. Returns the number of penalty minutes applied
     /// this tick (0 if penalty disabled or threshold not met). The caller can
     /// use the return value to show a gentle "lost X minutes" toast.
@@ -853,6 +907,7 @@ final class ProgressStore: ObservableObject {
         totalAnswered += 1
         _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
         answeredToday += 1
+        sittingQuestions += 1
         currentStreak = 0
         recordCelebratedThisRun = false   // streak broke — arm the next record
         wrongStreak += 1
@@ -1004,6 +1059,30 @@ final class ProgressStore: ObservableObject {
         return m
     }
 
+    /// The most minutes the kid may unlock RIGHT NOW: their accumulated wallet,
+    /// clamped to what's left of today's screen-time allowance (daily cap minus
+    /// what's already been unlocked today). Wallet beyond the daily cap stays put
+    /// for future days. When the cap is disabled, the whole wallet is available.
+    var redeemableMinutesNow: Int {
+        let cap = dailyCap
+        guard cap.enabled else { return pendingMinutes }
+        let roomToday = max(0, cap.max - minutesUnlockedToday)
+        return min(pendingMinutes, roomToday)
+    }
+
+    /// Consume up to today's remaining allowance from the wallet for an unlock.
+    /// Returns the granted amount; any leftover stays in `pendingMinutes` for a
+    /// later day so a large wallet can't be cashed in past the daily cap at once.
+    @discardableResult
+    func consumeMinutesForUnlock() -> Int {
+        _ = minutesEarnedTodayRespectingDate()   // roll the day over first if needed
+        let amount = redeemableMinutesNow
+        guard amount > 0 else { return 0 }
+        pendingMinutes -= amount
+        minutesUnlockedToday += amount
+        return amount
+    }
+
     func startUnlock(minutes: Int) {
         let end = Date().addingTimeInterval(TimeInterval(minutes * 60))
         unlockEndsAt = end
@@ -1024,7 +1103,13 @@ final class ProgressStore: ObservableObject {
     /// the kid still has usage budget, even if the wall-clock deadline elapsed
     /// while the iPad was locked/idle — we must NOT burn it.
     var hasLiveUnlockGrant: Bool {
-        defaults.object(forKey: Key.unlockEndsAt) as? Date != nil
+        guard let end = defaults.object(forKey: Key.unlockEndsAt) as? Date else { return false }
+        // Fail CLOSED: the wall-clock window is the source of truth. A grant is
+        // only "live" while its deadline is still in the future. The background
+        // monitor may re-lock EARLIER (usage-based), but if it never fires we must
+        // NOT leave apps open past the granted window — a present-but-expired key
+        // is treated as spent so the baseline lock re-applies.
+        return end > Date()
     }
 
     /// Re-sync the unlock deadline from the shared app group (the monitor
@@ -1034,6 +1119,11 @@ final class ProgressStore: ObservableObject {
         let shared = defaults.object(forKey: Key.unlockEndsAt) as? Date
         if shared == nil {
             if unlockEndsAt != nil { endUnlock() }   // extension spent/ended it
+        } else if shared! <= Date() {
+            // Window elapsed but the monitor never cleared it (e.g. the extension
+            // didn't fire). Fail CLOSED — end the grant so the baseline lock
+            // re-applies. Apps must never stay open past the granted window.
+            endUnlock()
         } else if shared != unlockEndsAt {
             unlockEndsAt = shared
         }
@@ -1049,6 +1139,9 @@ final class ProgressStore: ObservableObject {
         let remainingMinutes = remainingSeconds / 60
         if remainingMinutes > 0 {
             pendingMinutes += remainingMinutes
+            // These minutes were returned unused — they don't count against today's
+            // unlocked allowance, so the kid can re-open them later today.
+            minutesUnlockedToday = max(0, minutesUnlockedToday - remainingMinutes)
         }
         unlockEndsAt = nil
         PlayTimeLiveActivity.end()

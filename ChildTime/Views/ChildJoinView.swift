@@ -121,19 +121,40 @@ struct ChildJoinView: View {
         let payload = JoinLink.payload(from: raw)
         let parts = payload.split(separator: "|", maxSplits: 1).map(String.init)
         guard let codePart = parts.first, codePart.count >= 6 else { return }
-        let childID = parts.count > 1 ? UUID(uuidString: parts[1]) : nil
+        let codeChildID = parts.count > 1 ? UUID(uuidString: parts[1]) : nil
         Task {
             working = true
             message = "מִתְחַבְּרִים…"
-            let ok = await household.redeemInvite(code: codePart)
-            if ok, let cid = childID {
-                // Bind THIS device to this specific child.
-                ParentSettings.shared.joinedChildID = cid.uuidString
-                profiles.setActiveID(cid)
-                await household.registerDevice(forChildID: cid)
-                AppAnalytics.deviceJoined(kind: DeviceIdentity.kind)
+            // A child play-device only BINDS to one existing child — it must not
+            // upload its local profiles as new kids (that spawned phantom children).
+            let ok = await household.redeemInvite(code: codePart, bringLocalChildren: false)
+            guard ok else {
+                message = household.lastError ?? "קוֹד לֹא תָּקִין"
+                working = false
+                return
             }
-            message = ok ? "הִתְחַבַּרְתֶּם! 🎉" : (household.lastError ?? "קוֹד לֹא תָּקִין")
+            // Which child is THIS device for? In priority: the code-string's
+            // childID (scanned QR), the invite doc's childID (typed per-child code),
+            // or — as a last resort — the family's single child.
+            let resolved: UUID? = codeChildID
+                ?? household.redeemedInviteChildID.flatMap { UUID(uuidString: $0) }
+                ?? {
+                    let ids = household.household?.childIDs ?? []
+                    if ids.count == 1, let only = UUID(uuidString: ids[0]) { return only }
+                    return nil
+                }()
+            guard let cid = resolved else {
+                // Joined, but a bare code can't disambiguate among several kids.
+                message = "כִּמְעַט! בְּמַכְשִׁיר הַהוֹרֶה לַחֲצוּ עַל הַיֶּלֶד הַסְּפֵּצִיפִי כְּדֵי לְקַבֵּל קוֹד אִישִׁי, אוֹ סִרְקוּ אֶת קוֹד הַ-QR שֶׁלּוֹ."
+                working = false
+                return
+            }
+            // Bind THIS device to this specific child.
+            ParentSettings.shared.joinedChildID = cid.uuidString
+            profiles.setActiveID(cid)
+            await household.registerDevice(forChildID: cid)
+            AppAnalytics.deviceJoined(kind: DeviceIdentity.kind)
+            message = "הִתְחַבַּרְתֶּם! 🎉"
             working = false
         }
     }

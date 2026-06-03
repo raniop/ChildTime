@@ -46,7 +46,7 @@ struct WelcomeIntroView: View {
             // Brand mascot — the lion (matches the app icon & launch logo).
             CharacterView(character: Character3DCatalog.find("lion"))
                 .frame(width: isCompact ? 104 : 148, height: isCompact ? 104 : 148)
-            Text("טוֹפִּי")
+            Text("טופי")
                 .font(.system(size: isCompact ? 42 : 58, weight: .heavy, design: .rounded))
                 .foregroundStyle(
                     LinearGradient(colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FFE082")],
