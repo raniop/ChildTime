@@ -18,13 +18,14 @@ struct FriendCard: Codable, Identifiable, Equatable {
     var friendIDs: [String] = []   // friends THIS child added
     var hiddenIDs: [String] = []   // friends removed by this child / their parent
     var updatedAt: Date = .now
+    var demo: Bool = false         // test/diagnostic card — hidden from the global board
 
     var character: Character3D { Character3DCatalog.find(character3DID) }
 }
 
 extension FriendCard {
     enum CodingKeys: String, CodingKey {
-        case id, name, character3DID, stars, code, ownerUID, friendIDs, hiddenIDs, updatedAt
+        case id, name, character3DID, stars, code, ownerUID, friendIDs, hiddenIDs, updatedAt, demo
     }
     // Resilient decode: cards on the server may omit fields (e.g. friendIDs /
     // hiddenIDs are stripped on upsert; older docs lack ownerUID). Swift's default
@@ -41,6 +42,7 @@ extension FriendCard {
         friendIDs     = (try? c.decode([String].self, forKey: .friendIDs)) ?? []
         hiddenIDs     = (try? c.decode([String].self, forKey: .hiddenIDs)) ?? []
         updatedAt     = (try? c.decode(Date.self, forKey: .updatedAt)) ?? .distantPast
+        demo          = (try? c.decode(Bool.self, forKey: .demo)) ?? false
     }
 }
 
@@ -370,6 +372,7 @@ final class FriendsManager: ObservableObject {
         do {
             try await db.collection("friendCards").document(id).setData([
                 "id": id, "name": "Diag", "stars": 50, "code": code, "ownerUID": uid,
+                "demo": true,   // keep diagnostic cards off the public board
             ], merge: true)
             log("write \(label) (\(id)) → ✅")
         } catch {
@@ -418,7 +421,8 @@ final class FriendsManager: ObservableObject {
                 .order(by: "stars", descending: true)
                 .limit(to: 100)
                 .getDocuments()
-            var cards = snap.documents.compactMap { Self.decode($0.data()) }
+            // Hide test/diagnostic cards from the public board.
+            var cards = snap.documents.compactMap { Self.decode($0.data()) }.filter { !$0.demo }
             // My row reflects my LIVE local stars (no Firestore round-trip lag).
             let myStars = ProgressStore.shared.stars
             if let id = myID, let idx = cards.firstIndex(where: { $0.id == id }) {
