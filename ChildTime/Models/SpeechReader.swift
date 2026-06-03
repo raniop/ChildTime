@@ -32,12 +32,13 @@ final class SpeechReader {
         synth.speak(u)
     }
 
-    /// Read a question and then each numbered answer ("תשובה 1: …, תשובה 2: …")
-    /// so a non-reader can pick by number.
+    /// Read a question and then each answer as just "<number>, <answer>"
+    /// (e.g. "1, קטן. 2, קטנות") so a non-reader can pick by number — no
+    /// repeated "תשובה" word.
     func readQuestion(prompt: String, options: [String]) {
         var parts = [prompt]
         for (i, opt) in options.enumerated() {
-            parts.append("תְּשׁוּבָה \(i + 1): \(opt)")
+            parts.append("\(i + 1), \(opt)")
         }
         speak(parts.joined(separator: ". "))
     }
