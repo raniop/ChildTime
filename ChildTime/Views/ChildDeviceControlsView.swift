@@ -97,12 +97,12 @@ struct ChildDeviceControlsView: View {
                 .foregroundStyle(.white)
 
             if isUnlocked {
-                Text("הָאַפְּלִיקַצְיוֹת פְּתוּחוֹת. אֶפְשָׁר לִנְעֹל מִיָּד אוֹ לְהוֹסִיף זְמַן.")
+                Text("הָאַפְּלִיקַצְיוֹת פְּתוּחוֹת — נִשְׁאֲרוּ כְּ-\(max(1, progress.unlockSecondsRemaining / 60)) דַּקּוֹת. בְּחִירָה חֲדָשָׁה תַּחֲלִיף אֶת הַחַלּוֹן (לֹא מִתְוַסֶּפֶת).")
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
             } else {
-                Text("פִּתְחוּ לַיֶּלֶד אֶת הָאַפְּלִיקַצְיוֹת הַחֲסוּמוֹת לְפֶרֶק זְמַן — בְּלִי שֶׁיִּצְטָרֵךְ לְהַרְוִיחַ.")
+                Text("פְּתִיחָה חַד-פַּעֲמִית שֶׁל כָּל הָאַפְּלִיקַצְיוֹת לְפֶרֶק זְמַן. זֶה לֹא מִשְׁתַּמֵּשׁ בַּדַּקּוֹת שֶׁהַיֶּלֶד צָבַר וְלֹא מִתְוַסֵּף אֲלֵיהֶן.")
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
@@ -146,7 +146,7 @@ struct ChildDeviceControlsView: View {
             Haptic.success()
             grant(minutes: minutes)
         } label: {
-            Text(isUnlocked ? "+\(title)" : title)
+            Text(title)
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
@@ -296,15 +296,13 @@ struct ChildDeviceControlsView: View {
         Task {
             await shields.requestAuthorizationIfNeeded()
             shields.cancelScheduledReshield()
-            // If already unlocked, ADD to the remaining window; else start fresh.
-            let total: Int
-            if isUnlocked {
-                total = max(0, progress.unlockSecondsRemaining / 60) + minutes
-            } else {
-                total = minutes
-            }
-            shields.unlock(minutes: total)
-            progress.startUnlock(minutes: total)
+            // A ONE-TIME temporary window: open everything for exactly `minutes`
+            // from now. It does NOT stack on an existing window and does NOT touch
+            // the play-minutes the child EARNED — tapping again just sets a new
+            // window. (Previously it added on top, which piled up onto the child's
+            // earned/redeemed time and caused confusion.)
+            shields.unlock(minutes: minutes)
+            progress.startUnlock(minutes: minutes)
             dismiss()
         }
     }
