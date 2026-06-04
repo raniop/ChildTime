@@ -537,21 +537,26 @@ struct WorldMapView: View {
                            label: "יַהֲלוֹמִים", iconTrailing: false)
             }
             .buttonStyle(.plain)
-            .popover(isPresented: popoverBinding(for: .diamonds)) { statInfoCard(.diamonds) }
 
             Button { Haptic.light(); infoStat = .minutes } label: { timeCenterCard }
                 .buttonStyle(.plain)
-                .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
 
             Button { Haptic.light(); infoStat = .stars } label: {
                 statColumn(emoji: "⭐", value: progress.stars.currencyShort,
                            label: "כּוֹכָבִים", iconTrailing: true)
             }
             .buttonStyle(.plain)
-            .popover(isPresented: popoverBinding(for: .stars)) { statInfoCard(.stars) }
         }
         .padding(isCompact ? 8 : 10)
         .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Color.white.opacity(0.07)))
+        // One clean bottom sheet for the stat explanations (a popover floated
+        // awkwardly over the header on iPhone).
+        .sheet(item: $infoStat) { stat in
+            statInfoCard(stat)
+                .environment(\.layoutDirection, .rightToLeft)
+                .presentationDetents([.height(stat == .minutes ? 460 : 380)])
+                .presentationDragIndicator(.visible)
+        }
     }
 
     private func statColumn(emoji: String, value: String, label: String, iconTrailing: Bool) -> some View {
@@ -614,15 +619,6 @@ struct WorldMapView: View {
 
     // MARK: - Stat info popovers
 
-    private func popoverBinding(for stat: StatInfo) -> Binding<Bool> {
-        Binding(
-            get: { infoStat == stat },
-            set: { isShowing in
-                if !isShowing { infoStat = nil }
-            }
-        )
-    }
-
     @ViewBuilder
     private func statInfoCard(_ stat: StatInfo) -> some View {
         let info = statInfoContent(stat)
@@ -665,30 +661,48 @@ struct WorldMapView: View {
                 .padding(.top, 4)
             }
 
-            // Quick jump to the shop, straight from the diamonds explanation
-            // (diamonds are what the shop spends).
+            Spacer(minLength: 8)
+
+            // Quick jump straight from the explanation: diamonds → shop,
+            // stars → the friends leaderboard (דֵּירוּג).
             if stat == .diamonds {
-                Button {
-                    Haptic.light()
-                    infoStat = nil
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { showingShop = true }
-                } label: {
-                    Label("לַחֲנוּת", systemImage: "storefront.fill")
-                        .font(.system(size: 17, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .glow(AppColor.starGold, radius: 8)
+                infoCTA(title: "לַחֲנוּת", icon: "storefront.fill",
+                        gradient: AnyShapeStyle(AppGradient.gold), glow: AppColor.starGold) {
+                    showingShop = true
                 }
-                .buttonStyle(.plain)
-                .padding(.top, 4)
+            } else if stat == .stars {
+                infoCTA(title: "לַדֵּרוּג", icon: "trophy.fill",
+                        gradient: AnyShapeStyle(LinearGradient(
+                            colors: [Color(hex: "10B981"), Color(hex: "0E9E72")],
+                            startPoint: .leading, endPoint: .trailing)),
+                        glow: Color(hex: "10B981")) {
+                    showingLeaderboard = true
+                }
             }
         }
         .environment(\.layoutDirection, .rightToLeft)
-        .padding(20)
-        .frame(width: 340)
-        .popoverCompact()
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    /// A full-width CTA at the bottom of a stat sheet (closes it, then navigates).
+    private func infoCTA(title: String, icon: String, gradient: AnyShapeStyle,
+                         glow: Color, action: @escaping () -> Void) -> some View {
+        Button {
+            Haptic.light()
+            infoStat = nil
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: action)
+        } label: {
+            Label(title, systemImage: icon)
+                .font(.system(size: 18, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(gradient, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .glow(glow, radius: 8)
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 4)
     }
 
     private struct InfoContent {
