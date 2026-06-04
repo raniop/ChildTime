@@ -397,12 +397,12 @@ struct WorldMapView: View {
                 showingShop = true
             } label: {
                 Image(systemName: "storefront.fill")
-                    .font(.system(size: iconSize, weight: .medium))
-                    .foregroundStyle(AppColor.starGold)
+                    .font(.system(size: iconSize, weight: .bold))
+                    .foregroundStyle(.white)
                     .frame(width: buttonSize, height: buttonSize)
-                    .background(.white.opacity(0.15), in: Circle())
-                    .overlay(Circle().stroke(AppColor.starGold.opacity(0.6), lineWidth: 1.5))
-                    .glow(AppColor.starGold.opacity(0.5), radius: 6)
+                    .background(AppColor.starGold, in: Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
+                    .glow(AppColor.starGold.opacity(0.6), radius: 8)
             }
 
             // Friends leaderboard — a pleasant emerald (not the harsh neon mint),
@@ -413,12 +413,12 @@ struct WorldMapView: View {
                 showingLeaderboard = true
             } label: {
                 Image(systemName: "trophy.fill")
-                    .font(.system(size: iconSize - 2, weight: .medium))
-                    .foregroundStyle(Color(hex: "10B981"))
+                    .font(.system(size: iconSize - 2, weight: .bold))
+                    .foregroundStyle(.white)
                     .frame(width: buttonSize, height: buttonSize)
-                    .background(.white.opacity(0.15), in: Circle())
-                    .overlay(Circle().stroke(Color(hex: "10B981").opacity(0.6), lineWidth: 1.5))
-                    .glow(Color(hex: "10B981").opacity(0.35), radius: 4)
+                    .background(Color(hex: "10B981"), in: Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
+                    .glow(Color(hex: "10B981").opacity(0.5), radius: 6)
             }
 
             // Live friends quiz — start a head-to-head game with friends. Pulses
@@ -433,12 +433,12 @@ struct WorldMapView: View {
             } label: {
                 ZStack(alignment: .topTrailing) {
                     Image(systemName: "gamecontroller.fill")
-                        .font(.system(size: iconSize - 3, weight: .medium))
-                        .foregroundStyle(AppColor.gemPurple)
+                        .font(.system(size: iconSize - 3, weight: .bold))
+                        .foregroundStyle(.white)
                         .frame(width: buttonSize, height: buttonSize)
-                        .background(.white.opacity(0.15), in: Circle())
-                        .overlay(Circle().stroke(AppColor.gemPurple.opacity(0.6), lineWidth: 1.5))
-                        .glow(AppColor.gemPurple.opacity(0.4), radius: 4)
+                        .background(AppColor.gemPurple, in: Circle())
+                        .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
+                        .glow(AppColor.gemPurple.opacity(0.6), radius: 6)
                     if !liveGame.invites.isEmpty {
                         Circle().fill(AppColor.flameOrange).frame(width: 12, height: 12)
                             .overlay(Circle().stroke(.white, lineWidth: 2))
