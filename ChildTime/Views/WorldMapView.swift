@@ -132,6 +132,8 @@ struct WorldMapView: View {
                     .frame(maxWidth: worldGridMaxWidth)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.horizontal, homeHPad)
+                    // Breathing room between the header card and the world grid.
+                    .padding(.top, isCompact ? AppSpacing.sm : AppSpacing.xl)
                     // Big bottom inset on iPhone so the cards aren't hidden
                     // by the floating daily-chest CTA + companion.
                     .padding(.bottom, isCompact ? 360 : 260)
@@ -402,19 +404,20 @@ struct WorldMapView: View {
             // alignment puts the avatar, the name and every button CIRCLE on one
             // line (the button captions hang below without shifting it). Forced LTR
             // so it matches the design even though the app root is RTL.
-            HStack(alignment: .headerIcon, spacing: isCompact ? 6 : 14) {
-                identityBlock(avatar: avatarSize)
-                    .alignmentGuide(.headerIcon) { $0[VerticalAlignment.center] }
-                Spacer(minLength: 2)
-                // On iPad the "טופי" title sits in the MIDDLE of this row, level
-                // with the name and the buttons. On iPhone it stays below the card.
-                if !isCompact {
-                    heroTitle
+            ZStack {
+                HStack(alignment: .headerIcon, spacing: isCompact ? 6 : 14) {
+                    identityBlock(avatar: avatarSize)
                         .alignmentGuide(.headerIcon) { $0[VerticalAlignment.center] }
                     Spacer(minLength: 2)
+                    navButtonsRow(size: btnSize)
+                        .alignmentGuide(.headerIcon) { _ in btnSize / 2 }
                 }
-                navButtonsRow(size: btnSize)
-                    .alignmentGuide(.headerIcon) { _ in btnSize / 2 }
+                // On iPad the "טופי" title is centered over the whole row (= screen
+                // center, since the card is centered). On iPhone it stays below.
+                if !isCompact {
+                    heroTitle
+                        .frame(maxWidth: 360)
+                }
             }
             statsPanel
         }
