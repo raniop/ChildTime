@@ -576,19 +576,25 @@ struct LiveGameView: View {
         // Match winner = most rounds won (tie-broken by points).
         let winnerID = g.matchWinnerID
         let iWon = winnerID == meID
+        let myStars = iWon ? LiveGameRules.winnerStars : LiveGameRules.participationStars
+        let myGems  = iWon ? LiveGameRules.winnerDiamonds : LiveGameRules.participationDiamonds
         let sorted = lg.players.sorted {
             $0.roundWins != $1.roundWins ? $0.roundWins > $1.roundWins : $0.score > $1.score
         }
         return VStack(spacing: AppSpacing.lg) {
             closeButton
-            Text(iWon ? "🏆" : "🎉").font(.system(size: 64))
-            Text(iWon ? "נִצַּחְתָּ!" : "כָּל הַכָּבוֹד!")
-                .font(.system(size: 30, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                .glow(AppColor.starGold, radius: 12)
-            Text(iWon ? "זָכִיתָ בְּ-\(LiveGameRules.winnerDiamonds) 💎"
-                      : "הִשְׁתַּתַּפְתָּ וְזָכִיתָ בְּ-\(LiveGameRules.participationDiamonds) 💎")
-                .font(.system(size: 16, weight: .heavy, design: .rounded))
-                .foregroundStyle(AppColor.diamondBlue)
+            Text(iWon ? "🏆" : "🎉").font(.system(size: 76))
+            Text(iWon ? "וָואו, נִצַּחְתָּ! 🤩" : "כָּל הַכָּבוֹד! 🎉")
+                .font(.system(size: 32, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                .glow(AppColor.starGold, radius: 14)
+                .multilineTextAlignment(.center)
+            Text("הַפְּרָסִים שֶׁלְּךָ:")
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+            HStack(spacing: 16) {
+                prizePill("⭐", myStars, AppColor.starGold)
+                prizePill("💎", myGems, AppColor.diamondBlue)
+            }
 
             ScrollView {
                 VStack(spacing: 10) {
@@ -617,18 +623,36 @@ struct LiveGameView: View {
                 .padding(.horizontal, AppSpacing.lg)
             }
 
-            Button { Task { await lg.leaveGame() } } label: {
-                Text("סִיּוּם").font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                    .frame(maxWidth: .infinity).padding(.vertical, 14).background(AppGradient.purpleDream, in: Capsule())
+            VStack(spacing: 10) {
+                Button { Haptic.light(); Task { await lg.leaveGame(); lg.wantsNewGame = true } } label: {
+                    Text("שַׂחֵק שׁוּב 🔄").font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                        .frame(maxWidth: .infinity).padding(.vertical, 15).background(AppGradient.gold, in: Capsule())
+                }
+                Button { Task { await lg.leaveGame() } } label: {
+                    Text("סִיּוּם").font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.9))
+                        .frame(maxWidth: .infinity).padding(.vertical, 13).background(.white.opacity(0.12), in: Capsule())
+                }
             }
             .padding(.horizontal, AppSpacing.xl).padding(.bottom, AppSpacing.lg)
         }
         .frame(maxWidth: 560).frame(maxWidth: .infinity)
         .onAppear {
             confetti += 1
-            SoundPlayer.shared.play(.chestOpen)
+            SoundPlayer.shared.play(.levelUp)
             Haptic.success()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { confetti += 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { confetti += 1; Haptic.success() }
         }
+    }
+
+    private func prizePill(_ emoji: String, _ amount: Int, _ tint: Color) -> some View {
+        VStack(spacing: 3) {
+            Text(emoji).font(.system(size: 36))
+            Text("+\(amount)").font(.system(size: 22, weight: .heavy, design: .rounded)).foregroundStyle(tint)
+        }
+        .frame(width: 96, height: 96)
+        .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(tint.opacity(0.16)))
+        .overlay(RoundedRectangle(cornerRadius: AppRadius.large).stroke(tint.opacity(0.45), lineWidth: 1.5))
     }
 
     // MARK: Ended / cancelled

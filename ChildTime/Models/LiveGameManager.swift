@@ -19,6 +19,8 @@ enum LiveGameRules {
     static let maxPlayers         = 6
     static let winnerDiamonds     = 20          // 💎 bonus for the winner
     static let participationDiamonds = 5        // 💎 everyone earns for playing
+    static let winnerStars        = 15          // ⭐ bonus for the winner (leaderboard rank)
+    static let participationStars = 5           // ⭐ everyone earns for playing
     // A match is BEST OF 3 rounds, each round 5 questions. First to win 2 rounds
     // takes the match (so it can end after 2 rounds, or go the full 3).
     static let totalRounds        = 3
@@ -600,7 +602,9 @@ final class LiveGameManager: ObservableObject {
         rewardedFinal = true
         let isWinner = game?.matchWinnerID == myID
         let reward = isWinner ? LiveGameRules.winnerDiamonds : LiveGameRules.participationDiamonds
+        let starReward = isWinner ? LiveGameRules.winnerStars : LiveGameRules.participationStars
         if reward > 0 { ProgressStore.shared.addDiamonds(reward) }
+        if starReward > 0 { ProgressStore.shared.addStars(starReward) }
     }
 }
 
