@@ -365,210 +365,235 @@ struct WorldMapView: View {
             Haptic.light()
             showKidExit = true
         } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "figure.walk.departure").font(.system(size: 13, weight: .bold))
-                Text("יְצִיאָה מִמַּצַּב יֶלֶד").font(.system(size: 13, weight: .heavy, design: .rounded))
-                Image(systemName: "lock.fill").font(.system(size: 10, weight: .bold)).opacity(0.7)
+            HStack(spacing: 8) {
+                Image(systemName: "lock.fill").font(.system(size: 14, weight: .bold))
+                Text("יְצִיאָה מִמַּצַּב יֶלֶד").font(.system(size: 15, weight: .heavy, design: .rounded))
             }
             .foregroundStyle(.white)
-            .padding(.horizontal, 14).padding(.vertical, 7)
-            .background(Capsule().fill(AppColor.flameOrange.opacity(0.9)))
+            .padding(.horizontal, 28).padding(.vertical, 12)
+            .background(Capsule().fill(Color(hex: "EF4655")))
             .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
+            .shadow(color: Color(hex: "EF4655").opacity(0.4), radius: 10, y: 4)
         }
         .buttonStyle(.juicy)
-        .padding(.top, 6)
-        .padding(.horizontal, AppSpacing.md)
+        .padding(.top, 12)
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Top bar
 
     @ViewBuilder
     private var topBar: some View {
-        if isCompact {
-            // iPhone — stack actions and stats so nothing clips. The earned
-            // play-minutes badge sits at the top-left (trailing) corner, above
-            // everything, since it's the reward the child cares about most.
-            VStack(spacing: 8) {
-                HStack(spacing: AppSpacing.sm) {
-                    topBarActions(buttonSize: 40, avatarSize: 44, iconSize: 18)
-                    Spacer(minLength: 8)
-                    minutesButton
+        Group {
+            if isCompact {
+                VStack(spacing: 14) {
+                    HStack(alignment: .center, spacing: 10) {
+                        identityBlock(avatar: 48)
+                        Spacer(minLength: 8)
+                        settingsButton(size: 46)
+                    }
+                    navButtonsRow(size: 48)
+                    cardDivider
+                    statsRow
                 }
-                topBarStats(compactStats: true)
+            } else {
+                VStack(spacing: 16) {
+                    HStack(alignment: .center, spacing: 16) {
+                        identityBlock(avatar: 56)
+                        Spacer(minLength: 12)
+                        navButtonsRow(size: 54)
+                        Spacer(minLength: 12)
+                        settingsButton(size: 54)
+                    }
+                    cardDivider
+                    statsRow
+                }
             }
-            .padding(.horizontal, AppSpacing.md)
-            .padding(.top, AppSpacing.sm)
-        } else {
-            // iPad — one wide row, minutes pinned to the far-left (trailing) end.
-            HStack(spacing: AppSpacing.sm) {
-                topBarActions(buttonSize: 46, avatarSize: 50, iconSize: 22)
-                Spacer()
-                topBarStats(compactStats: false)
-                minutesButton
+        }
+        .padding(.vertical, isCompact ? 14 : 18)
+        .padding(.horizontal, isCompact ? 14 : 22)
+        .background(
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .fill(Color.white)
+                .shadow(color: .black.opacity(0.16), radius: 18, x: 0, y: 8)
+        )
+        .padding(.horizontal, isCompact ? AppSpacing.sm : AppSpacing.lg)
+        .padding(.top, AppSpacing.sm)
+        .environment(\.layoutDirection, .rightToLeft)
+    }
+
+    /// Dark navy used for text/numbers on the white header card.
+    private var cardText: Color { Color(hex: "203A63") }
+
+    private var cardDivider: some View {
+        Rectangle().fill(Color.black.opacity(0.08)).frame(height: 1)
+    }
+
+    /// Avatar (+ crown) with the child's name and a level badge. Tapping opens
+    /// the level/XP info.
+    private func identityBlock(avatar: CGFloat) -> some View {
+        Button {
+            Haptic.light()
+            showLevelInfo = true
+        } label: {
+            HStack(spacing: 10) {
+                ZStack(alignment: .topTrailing) {
+                    CharacterView(character: profiles.active?.character
+                                  ?? Character3DCatalog.find(Character3DCatalog.defaultID),
+                                  portrait: true)
+                        .frame(width: avatar, height: avatar)
+                        .background(Circle().fill(Color(hex: "EAF0FF")))
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(.white, lineWidth: 3))
+                        .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+                    Text("👑")
+                        .font(.system(size: avatar * 0.36))
+                        .rotationEffect(.degrees(-18))
+                        .offset(x: 3, y: -avatar * 0.18)
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(profiles.active?.name ?? "טוֹפִי")
+                        .font(.system(size: avatar * 0.42, weight: .black, design: .rounded))
+                        .foregroundStyle(cardText)
+                        .lineLimit(1).minimumScaleFactor(0.6)
+                    Text("רָמָה \(progress.companionLevel)")
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10).padding(.vertical, 3)
+                        .background(Capsule().fill(AppColor.gemPurple))
+                }
             }
-            .padding(.horizontal, AppSpacing.lg)
-            .padding(.top, AppSpacing.sm)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func navButtonsRow(size: CGFloat) -> some View {
+        HStack(spacing: size * 0.5) {
+            navButton(icon: "gamecontroller.fill", color: AppColor.gemPurple,
+                      label: "טוּרְנִיר", badge: !liveGame.invites.isEmpty, size: size) {
+                Haptic.light()
+                if let invite = liveGame.invites.first { Task { await liveGame.joinGame(invite.id) } }
+                else { liveGame.openSetup() }
+            }
+            navButton(icon: "trophy.fill", color: Color(hex: "10B981"),
+                      label: "דֵּירוּג", badge: false, size: size) {
+                Haptic.light(); showingLeaderboard = true
+            }
+            navButton(icon: "storefront.fill", color: AppColor.starGold,
+                      label: "חֲנוּת", badge: false, size: size) {
+                Haptic.light(); showingShop = true
+            }
         }
     }
 
-    private func topBarActions(buttonSize: CGFloat, avatarSize: CGFloat, iconSize: CGFloat) -> some View {
-        HStack(spacing: AppSpacing.sm) {
-            // The child's avatar now lives ONLY as the floating buddy — tapping
-            // it opens the avatar settings. So the top bar keeps just the
-            // settings / shop / gift actions.
-            Button {
-                showingParentGate = true
-            } label: {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: iconSize, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.9))
-                    .frame(width: buttonSize, height: buttonSize)
-                    .background(.white.opacity(0.15), in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
-            }
-            .onLongPressGesture(minimumDuration: 1.5) { showingDemo = true }
-
-            Button {
-                Haptic.light()
-                showingShop = true
-            } label: {
-                Image(systemName: "storefront.fill")
-                    .font(.system(size: iconSize, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: buttonSize, height: buttonSize)
-                    .background(AppColor.starGold, in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
-                    .glow(AppColor.starGold.opacity(0.6), radius: 8)
-            }
-
-            // Friends leaderboard — a pleasant emerald (not the harsh neon mint),
-            // with the SAME subtle treatment as the gold shop so the row reads as a
-            // matching set. Distinct color, easy on the eye.
-            Button {
-                Haptic.light()
-                showingLeaderboard = true
-            } label: {
-                Image(systemName: "trophy.fill")
-                    .font(.system(size: iconSize - 2, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: buttonSize, height: buttonSize)
-                    .background(Color(hex: "10B981"), in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
-                    .glow(Color(hex: "10B981").opacity(0.5), radius: 6)
-            }
-
-            // Live friends quiz — start a head-to-head game with friends. Pulses
-            // gently when a friend has an open game I'm invited to.
-            Button {
-                Haptic.light()
-                if let invite = liveGame.invites.first {
-                    Task { await liveGame.joinGame(invite.id) }
-                } else {
-                    liveGame.openSetup()
-                }
-            } label: {
+    private func navButton(icon: String, color: Color, label: String, badge: Bool,
+                           size: CGFloat, action: @escaping () -> Void) -> some View {
+        VStack(spacing: 5) {
+            Button(action: action) {
                 ZStack(alignment: .topTrailing) {
-                    Image(systemName: "gamecontroller.fill")
-                        .font(.system(size: iconSize - 3, weight: .bold))
+                    Image(systemName: icon)
+                        .font(.system(size: size * 0.42, weight: .bold))
                         .foregroundStyle(.white)
-                        .frame(width: buttonSize, height: buttonSize)
-                        .background(AppColor.gemPurple, in: Circle())
-                        .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
-                        .glow(AppColor.gemPurple.opacity(0.6), radius: 6)
-                    if !liveGame.invites.isEmpty {
-                        Circle().fill(AppColor.flameOrange).frame(width: 12, height: 12)
-                            .overlay(Circle().stroke(.white, lineWidth: 2))
-                            .offset(x: 2, y: -2)
+                        .frame(width: size, height: size)
+                        .background(
+                            Circle().fill(LinearGradient(colors: [color, color.opacity(0.82)],
+                                                         startPoint: .top, endPoint: .bottom))
+                        )
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .shadow(color: color.opacity(0.5), radius: 6, y: 3)
+                    if badge {
+                        Circle().fill(AppColor.flameOrange).frame(width: 13, height: 13)
+                            .overlay(Circle().stroke(.white, lineWidth: 2)).offset(x: 3, y: -3)
                     }
                 }
             }
+            .buttonStyle(.plain)
+            Text(label)
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(cardText.opacity(0.75))
         }
     }
 
-    /// The play-minutes badge. Shows "earned / daily-cap" right INSIDE the pill
-    /// (just the 🎮 icon — no "דק׳" word, no white caption beneath it). Tapping
-    /// opens the popover that spells out the exact numbers.
-    private var minutesButton: some View {
-        let cap = progress.dailyCap
-        let hasMinutes = progress.pendingMinutes > 0
-        return Button {
-            Haptic.light()
-            infoStat = .minutes
-        } label: {
-            HStack(spacing: 6) {
-                Text("🎮").font(.system(size: 18))
-                Text(cap.enabled
-                     ? "\(progress.minutesEarnedToday)/\(cap.max)"
-                     : "\(progress.pendingMinutes)")
-                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+    private func settingsButton(size: CGFloat) -> some View {
+        VStack(spacing: 5) {
+            Button { showingParentGate = true } label: {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: size * 0.42, weight: .bold))
                     .foregroundStyle(.white)
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .numericTextTransition(Double(progress.minutesEarnedToday))
-            }
-            .fixedSize()
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(
-                Capsule().fill(
-                    LinearGradient(
-                        colors: hasMinutes
-                            ? [AppColor.successMint.opacity(0.4), Color(hex: "118AB2").opacity(0.4)]
-                            : [Color.white.opacity(0.12), Color.white.opacity(0.12)],
-                        startPoint: .leading, endPoint: .trailing
+                    .frame(width: size, height: size)
+                    .background(
+                        Circle().fill(LinearGradient(colors: [AppColor.gemPurple, AppColor.gemPurple.opacity(0.82)],
+                                                     startPoint: .top, endPoint: .bottom))
                     )
-                )
-                .overlay(Capsule().stroke(hasMinutes ? AppColor.successMint : .white.opacity(0.2),
-                                          lineWidth: hasMinutes ? 2 : 1))
-            )
-            .glow(hasMinutes ? AppColor.successMint : .clear, radius: hasMinutes ? 14 : 0)
+                    .overlay(Circle().stroke(.white, lineWidth: 2))
+                    .shadow(color: AppColor.gemPurple.opacity(0.5), radius: 6, y: 3)
+            }
+            .buttonStyle(.plain)
+            .onLongPressGesture(minimumDuration: 1.5) { showingDemo = true }
+            Text("הַגְדָּרוֹת")
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(cardText.opacity(0.75))
         }
-        .buttonStyle(.plain)
-        .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
     }
 
-    private func topBarStats(compactStats: Bool) -> some View {
-        HStack(spacing: compactStats ? 6 : AppSpacing.sm) {
-            if compactStats { Spacer(minLength: 0) }
+    /// The bottom stats row of the header card: 💎 diamonds · ⭐ stars · ⏱ time
+    /// earned today (the "time earned" lives ONLY here — not duplicated up top).
+    private var statsRow: some View {
+        HStack(spacing: 0) {
+            Button { Haptic.light(); infoStat = .diamonds } label: {
+                statCell(emoji: "💎", value: progress.diamonds.currencyShort, label: "יַהֲלוֹמִים")
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: popoverBinding(for: .diamonds)) { statInfoCard(.diamonds) }
 
-            // (The daily gift 🎁 now floats above the buddy's head — see
-            // FloatingCompanion(showGift:) below — so it's no longer in this row.)
+            statSeparator
 
-            // ⭐ stars — the leaderboard rank (never spent).
-            Button {
-                Haptic.light()
-                infoStat = .stars
-            } label: {
-                statChip(
-                    icon: "star.fill",
-                    value: progress.stars,
-                    label: nil,
-                    color: AppColor.starGold,
-                    prominent: false
-                )
+            Button { Haptic.light(); infoStat = .stars } label: {
+                statCell(emoji: "⭐", value: progress.stars.currencyShort, label: "כּוֹכָבִים")
             }
             .buttonStyle(.plain)
             .popover(isPresented: popoverBinding(for: .stars)) { statInfoCard(.stars) }
 
-            // 💎 diamonds — the spendable shop wallet. Tap opens the shop.
-            Button {
-                Haptic.light()
-                infoStat = .diamonds
-            } label: {
-                statChip(
-                    icon: "diamond.fill",
-                    emoji: "💎",
-                    value: progress.diamonds,
-                    label: nil,
-                    color: AppColor.diamondBlue,
-                    prominent: false
-                )
+            statSeparator
+
+            Button { Haptic.light(); infoStat = .minutes } label: {
+                timeStatCell
             }
             .buttonStyle(.plain)
-            .popover(isPresented: popoverBinding(for: .diamonds)) { statInfoCard(.diamonds) }
+            .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
         }
-        .animation(.spring(response: 0.5, dampingFraction: 0.7),
-                   value: progress.dailyChestAvailable)
+    }
+
+    private var statSeparator: some View {
+        Rectangle().fill(Color.black.opacity(0.08)).frame(width: 1, height: 42)
+    }
+
+    private func statCell(emoji: String, value: String, label: String,
+                          valueColor: Color? = nil) -> some View {
+        HStack(spacing: 9) {
+            Text(emoji).font(.system(size: 26))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(value)
+                    .font(.system(size: 26, weight: .black, design: .rounded))
+                    .foregroundStyle(valueColor ?? cardText)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                Text(label)
+                    .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                    .foregroundStyle(cardText.opacity(0.6))
+                    .lineLimit(1).minimumScaleFactor(0.6)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 4)
+    }
+
+    private var timeStatCell: some View {
+        let cap = progress.dailyCap
+        let value = cap.enabled ? "\(progress.minutesEarnedToday)/\(cap.max)"
+                                : "\(progress.pendingMinutes)"
+        return statCell(emoji: "⏱", value: value,
+                        label: "זְמַן שֶׁהִרְוַחְתִּי הַיּוֹם",
+                        valueColor: Color(hex: "10B981"))
     }
 
     // MARK: - Stat info popovers
@@ -705,37 +730,6 @@ struct WorldMapView: View {
                 tip: "קְנִיָּה לֹא פּוֹגַעַת בַּדֵּרוּג שֶׁלָּכֶם 😊"
             )
         }
-    }
-
-    private func statChip(icon: String, emoji: String? = nil, value: Int, label: String?, color: Color, prominent: Bool) -> some View {
-        HStack(spacing: 6) {
-            if let emoji {
-                // Use the colorful emoji glyph (e.g. the blue 💎) so it matches
-                // the shop exactly, instead of a flat tinted SF symbol.
-                Text(emoji).font(.system(size: 16))
-            } else {
-                Image(systemName: icon)
-                    .foregroundStyle(color)
-                    .font(.system(size: 16, weight: .semibold))
-            }
-            Text(value.currencyShort)
-                .font(.system(size: 20, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-                .numericTextTransition(Double(value))
-            if let label = label {
-                Text(label)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.7))
-            }
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(
-            Capsule().fill(.white.opacity(prominent ? 0.25 : 0.15))
-                .overlay(Capsule().stroke(color.opacity(prominent ? 0.6 : 0.3), lineWidth: 1.5))
-        )
-        .glow(color, radius: prominent ? 12 : 0)
     }
 
     // MARK: - Hero title
