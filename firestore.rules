@@ -20,6 +20,17 @@ service cloud.firestore {
         && request.auth.uid in get(/databases/$(database)/documents/households/$(hid)).data.parentUIDs;
     }
 
+    // Founder analytics — AGGREGATE, non-PII numbers written by the
+    // refreshAdminStats Cloud Function (admin SDK bypasses these rules).
+    // Readable ONLY by founder emails; never writable from a client. The
+    // tofyapp.com/admin dashboard reads these docs and nothing else.
+    match /adminStats/{doc=**} {
+      allow read: if signedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() in ['ranioph@gmail.com'];
+      allow write: if false;
+    }
+
     // Parent account — only the owner.
     match /parents/{uid} {
       allow read, write: if signedIn() && request.auth.uid == uid;

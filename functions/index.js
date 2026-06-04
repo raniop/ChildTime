@@ -538,3 +538,135 @@ exports.onWaitlistSignup = onDocumentCreated(
     }
   }
 );
+
+// ---- 3) Founder analytics aggregator ---------------------------------------
+// Computes AGGREGATE, non-PII numbers from the family data and writes them to
+// adminStats/summary. The tofyapp.com/admin dashboard reads ONLY this doc — no
+// raw child data ever reaches the browser. Refreshed every 6h, and triggerable
+// on demand via runAdminStats (token-guarded) for the first backfill.
+const { onRequest } = require("firebase-functions/v2/https");
+const ADMIN_TASK_TOKEN = defineSecret("ADMIN_TASK_TOKEN");
+const DAY = 24 * 3600;
+
+async function countOf(ref) {
+  try { const s = await ref.count().get(); return s.data().count; }
+  catch (e) { console.error("count failed", e && e.message); return 0; }
+}
+
+async function computeAdminStats() {
+  const now = Date.now() / 1000;
+  const cut30 = now - 30 * DAY, cut7 = now - 7 * DAY, cut1 = now - 1 * DAY;
+
+  // Totals — cheap server-side count() aggregations.
+  const [parents, children, households, devices] = await Promise.all([
+    countOf(db.collection("parents")),
+    countOf(db.collection("children")),
+    countOf(db.collection("households")),
+    countOf(db.collection("childDevices")),
+  ]);
+
+  // Last-30-day events per child (subcollection single-field index on createdAt
+  // is automatic — no index config needed). Chunked to bound concurrency.
+  const childrenSnap = await db.collection("children").get();
+  const childIDs = childrenSnap.docs.map((d) => d.id);
+  const events = [];
+  const CHUNK = 40;
+  for (let i = 0; i < childIDs.length; i += CHUNK) {
+    const slice = childIDs.slice(i, i + CHUNK);
+    const snaps = await Promise.all(slice.map((id) =>
+      db.collection("children").doc(id).collection("events")
+        .where("createdAt", ">=", cut30).get().catch(() => ({ docs: [] }))));
+    snaps.forEach((snap, k) => snap.docs.forEach((doc) => {
+      const e = doc.data();
+      events.push({
+        childID: slice[k], type: e.type, createdAt: Number(e.createdAt) || 0,
+        accuracy: Number(e.accuracy) || 0, minutes: Number(e.minutes) || 0,
+        stars: Number(e.stars) || 0, questions: Number(e.questions) || 0,
+        topic: (e.topic || "").trim(),
+      });
+    }));
+  }
+
+  const uniq = (arr) => new Set(arr).size;
+  const ends = events.filter((e) => e.type === "sessionEnd");   // completed rounds
+  const ends7 = ends.filter((e) => e.createdAt >= cut7);
+  const ends1 = ends.filter((e) => e.createdAt >= cut1);
+  const accSamples = ends7.filter((e) => e.questions > 0);
+
+  const active = {
+    dau: uniq(events.filter((e) => e.createdAt >= cut1).map((e) => e.childID)),
+    wau: uniq(events.filter((e) => e.createdAt >= cut7).map((e) => e.childID)),
+    mau: uniq(events.map((e) => e.childID)),
+  };
+  const engagement = { sessionsToday: ends1.length, sessions7d: ends7.length, totalSessions: ends.length };
+  const learning = {
+    questions7d: ends7.reduce((s, e) => s + e.questions, 0),
+    avgAccuracy: accSamples.length ? accSamples.reduce((s, e) => s + e.accuracy, 0) / accSamples.length / 100 : 0,
+    minutes7d: ends7.reduce((s, e) => s + e.minutes, 0),
+    stars7d: ends7.reduce((s, e) => s + e.stars, 0),
+  };
+
+  // Daily series (oldest → newest), keyed by local day bucket.
+  const dayKey = (ts) => Math.floor(ts / DAY);
+  const todayKey = dayKey(now);
+  const daily = [];
+  for (let d = 29; d >= 0; d--) {
+    const k = todayKey - d;
+    const dt = new Date(k * DAY * 1000);
+    daily.push({
+      date: `${dt.getDate()}/${dt.getMonth() + 1}`,
+      activeChildren: uniq(events.filter((e) => dayKey(e.createdAt) === k).map((e) => e.childID)),
+      sessions: ends.filter((e) => dayKey(e.createdAt) === k).length,
+    });
+  }
+
+  // Topics (last 7 days).
+  const topicMap = {};
+  ends7.forEach((e) => {
+    if (!e.topic) return;
+    const t = topicMap[e.topic] || (topicMap[e.topic] = { topic: e.topic, sessions: 0, accSum: 0, accN: 0 });
+    t.sessions += 1;
+    if (e.questions > 0) { t.accSum += e.accuracy; t.accN += 1; }
+  });
+  const topics = Object.values(topicMap)
+    .map((t) => ({ topic: t.topic, sessions: t.sessions, avgAccuracy: t.accN ? t.accSum / t.accN / 100 : 0 }))
+    .sort((a, b) => b.sessions - a.sessions).slice(0, 8);
+
+  // Accuracy distribution (last 7 days).
+  const buckets = [
+    { range: "0-50%", lo: 0, hi: 50, n: 0 }, { range: "50-70%", lo: 50, hi: 70, n: 0 },
+    { range: "70-85%", lo: 70, hi: 85, n: 0 }, { range: "85-100%", lo: 85, hi: 101, n: 0 },
+  ];
+  accSamples.forEach((e) => { const b = buckets.find((b) => e.accuracy >= b.lo && e.accuracy < b.hi); if (b) b.n += 1; });
+
+  const summary = {
+    updatedAt: new Date().toLocaleString("he-IL", { timeZone: "Asia/Jerusalem" }),
+    updatedAtUnix: now,
+    totals: { parents, children, households, devices },
+    active, engagement, learning, daily, topics,
+    accuracyBuckets: buckets.map((b) => ({ range: b.range, n: b.n })),
+  };
+  await db.collection("adminStats").doc("summary").set(summary);
+  console.log("[adminStats] wrote summary", { parents, children, events: events.length });
+  return summary;
+}
+
+exports.refreshAdminStats = onSchedule(
+  { schedule: "every 6 hours", timeZone: "Asia/Jerusalem", timeoutSeconds: 300, memory: "512MiB" },
+  async () => { await computeAdminStats(); }
+);
+
+// Manual trigger / first backfill — guarded by a shared token (secret). Returns
+// the aggregate only to the token holder; otherwise 403.
+exports.runAdminStats = onRequest(
+  { secrets: [ADMIN_TASK_TOKEN], timeoutSeconds: 300, memory: "512MiB" },
+  async (req, res) => {
+    const token = req.query.token || req.get("x-admin-token");
+    if (!ADMIN_TASK_TOKEN.value() || token !== ADMIN_TASK_TOKEN.value()) {
+      res.status(403).json({ error: "forbidden" });
+      return;
+    }
+    try { res.json({ ok: true, summary: await computeAdminStats() }); }
+    catch (e) { console.error(e); res.status(500).json({ error: e && e.message }); }
+  }
+);

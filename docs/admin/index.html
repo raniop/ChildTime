@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#5E60CE">
+<title>טופי — לוח בקרה</title>
+<link rel="icon" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  /* =========================================================
+     טופי — Admin Dashboard
+     עיצוב תואם-מותג. כל הצבעים/הכרטיסים נשלטים מכאן.
+     ערוך בחופשיות.
+     ========================================================= */
+  :root{
+    --indigo:#5E60CE; --teal:#48BFE3; --gold:#FFD23F; --purple:#9B5DE5;
+    --pink:#FF6B9D; --mint:#06D6A0; --glow:#FFB84D; --ink:#1b1340;
+    --card:rgba(255,255,255,.10); --card-brd:rgba(255,255,255,.16);
+    --muted:rgba(255,255,255,.66);
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{
+    font-family:"Heebo",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    color:#fff; min-height:100vh; line-height:1.5;
+    background:linear-gradient(160deg,#5E60CE 0%, #6A4BD0 38%, #48BFE3 100%);
+    background-attachment:fixed;
+  }
+  a{color:var(--gold)}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 22px 70px}
+
+  /* ---------- header ---------- */
+  header{position:sticky; top:0; z-index:30; backdrop-filter:blur(12px);
+    background:rgba(75,46,158,.40); border-bottom:1px solid var(--card-brd)}
+  header .wrap{display:flex; align-items:center; justify-content:space-between; height:66px; padding-bottom:0}
+  .brand{display:flex; align-items:center; gap:11px; font-weight:900; font-size:22px}
+  .brand img{width:36px; height:36px; border-radius:9px}
+  .brand small{font-weight:600; font-size:13px; opacity:.7; margin-inline-start:2px}
+  .who{display:flex; align-items:center; gap:12px; font-size:14px}
+  .who .email{opacity:.85}
+  .who button{font-family:inherit; cursor:pointer; font-weight:700; font-size:13px;
+    border:1px solid var(--card-brd); background:rgba(255,255,255,.10); color:#fff;
+    border-radius:999px; padding:7px 14px}
+  .who button:hover{background:rgba(255,255,255,.18)}
+
+  /* ---------- demo / status banner ---------- */
+  .banner{margin:18px 0 0; border-radius:14px; padding:11px 16px; font-weight:600; font-size:14px;
+    border:1px solid var(--card-brd); display:flex; align-items:center; gap:10px}
+  .banner.demo{background:rgba(255,210,63,.16); border-color:rgba(255,210,63,.4)}
+  .banner.live{background:rgba(6,214,160,.14); border-color:rgba(6,214,160,.4)}
+  .banner.err{background:rgba(255,107,157,.16); border-color:rgba(255,107,157,.45)}
+  .banner .tag{font-weight:900; letter-spacing:.5px; font-size:12px; padding:2px 9px; border-radius:999px; background:rgba(0,0,0,.18)}
+
+  h2.section{font-size:15px; font-weight:800; letter-spacing:.4px; opacity:.8;
+    margin:30px 4px 13px; text-transform:uppercase}
+
+  /* ---------- KPI tiles ---------- */
+  .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+  @media(max-width:860px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:480px){.kpis{grid-template-columns:1fr}}
+  .kpi{position:relative; overflow:hidden; border-radius:18px; padding:18px 18px 16px;
+    background:var(--card); border:1px solid var(--card-brd);
+    box-shadow:0 10px 30px rgba(20,10,60,.18)}
+  .kpi .ico{font-size:22px; margin-bottom:8px}
+  .kpi .val{font-size:34px; font-weight:900; line-height:1.05; letter-spacing:-.5px}
+  .kpi .lbl{font-size:14px; color:var(--muted); margin-top:3px; font-weight:600}
+  .kpi .delta{margin-top:9px; font-size:12.5px; font-weight:800; display:inline-flex; gap:5px; align-items:center;
+    padding:3px 9px; border-radius:999px; background:rgba(255,255,255,.08)}
+  .kpi .delta.up{color:#9bf6cf} .kpi .delta.down{color:#ffb3c9}
+  .kpi::after{content:""; position:absolute; inset:0 0 auto auto; width:120px; height:120px;
+    background:radial-gradient(circle at top left, var(--accent,transparent), transparent 70%); opacity:.5}
+
+  /* ---------- chart cards ---------- */
+  .grid{display:grid; gap:16px}
+  .grid.two{grid-template-columns:1.4fr 1fr}
+  .grid.two-eq{grid-template-columns:1fr 1fr}
+  @media(max-width:860px){.grid.two,.grid.two-eq{grid-template-columns:1fr}}
+  .card{border-radius:18px; padding:18px 20px 20px; background:var(--card);
+    border:1px solid var(--card-brd); box-shadow:0 10px 30px rgba(20,10,60,.18)}
+  .card h3{font-size:16px; font-weight:800; margin-bottom:3px}
+  .card p.hint{font-size:12.5px; color:var(--muted); margin-bottom:14px}
+  .chart-box{position:relative; height:280px}
+  .chart-box.short{height:230px}
+
+  /* topic table */
+  table{width:100%; border-collapse:collapse; font-size:14px}
+  th,td{text-align:start; padding:10px 8px; border-bottom:1px solid rgba(255,255,255,.10)}
+  th{font-size:12px; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); font-weight:800}
+  td .bar{height:7px; border-radius:999px; background:rgba(255,255,255,.14); overflow:hidden; min-width:60px}
+  td .bar > i{display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--gold),var(--glow))}
+  .updated{margin-top:26px; text-align:center; font-size:12.5px; color:var(--muted)}
+
+  /* ---------- login overlay ---------- */
+  .gate{position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(160deg,#5E60CE,#48BFE3); padding:24px}
+  .gate .box{max-width:380px; width:100%; text-align:center; background:rgba(255,255,255,.10);
+    border:1px solid var(--card-brd); border-radius:24px; padding:38px 30px;
+    box-shadow:0 24px 60px rgba(20,10,60,.4); backdrop-filter:blur(8px)}
+  .gate img{width:84px; height:84px; border-radius:20px; margin-bottom:14px}
+  .gate h1{font-size:24px; font-weight:900; margin-bottom:6px}
+  .gate p{font-size:14px; color:var(--muted); margin-bottom:22px}
+  .gate button{font-family:inherit; cursor:pointer; width:100%; font-weight:800; font-size:16px;
+    border:none; border-radius:14px; padding:14px; color:#3a2a00;
+    background:linear-gradient(180deg,var(--gold),#F2A93B); box-shadow:0 10px 26px rgba(255,184,77,.45)}
+  .gate button:hover{transform:translateY(-2px)} .gate button:disabled{opacity:.6; transform:none; cursor:default}
+  .gate .msg{margin-top:16px; font-size:13.5px; font-weight:700; min-height:20px}
+  .gate .msg.err{color:#ffb3c9}
+  .hidden{display:none !important}
+  .spin{display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,.4);
+    border-top-color:#fff; border-radius:50%; animation:rot .7s linear infinite; vertical-align:-3px}
+  @keyframes rot{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN GATE ============ -->
+<div class="gate" id="gate">
+  <div class="box">
+    <img src="../lion.png" alt="טופי">
+    <h1>לוח בקרה — טופי</h1>
+    <p>גישה למייסדים בלבד. התחבר עם חשבון Google המורשה.</p>
+    <button id="loginBtn">התחבר עם Google</button>
+    <div class="msg" id="gateMsg"></div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" class="hidden">
+  <header>
+    <div class="wrap">
+      <div class="brand"><img src="../lion.png" alt="">טופי <small>· לוח בקרה</small></div>
+      <div class="who"><span class="email" id="whoEmail"></span><button id="logoutBtn">התנתק</button></div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="banner demo" id="banner"><span class="tag">DEMO</span><span id="bannerText">מוצגים נתוני דוגמה. לאחר פריסת ה-Cloud Function יוצגו הנתונים האמיתיים.</span></div>
+
+    <!-- KPIs -->
+    <h2 class="section">סקירה כללית</h2>
+    <div class="kpis" id="kpis"></div>
+
+    <!-- Activity over time -->
+    <h2 class="section">פעילות לאורך זמן</h2>
+    <div class="grid two">
+      <div class="card">
+        <h3>ילדים פעילים ביום</h3>
+        <p class="hint">מספר הילדים הייחודיים שלמדו בכל יום (30 ימים אחרונים)</p>
+        <div class="chart-box"><canvas id="activeChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>סבבי למידה</h3>
+        <p class="hint">סבבים שהושלמו ליום</p>
+        <div class="chart-box"><canvas id="sessionsChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Topics + accuracy -->
+    <h2 class="section">למידה</h2>
+    <div class="grid two-eq">
+      <div class="card">
+        <h3>נושאים פופולריים</h3>
+        <p class="hint">לפי מספר סבבים (7 ימים אחרונים)</p>
+        <table id="topicsTable"><thead><tr><th>נושא</th><th>סבבים</th><th>דיוק</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="card">
+        <h3>התפלגות דיוק</h3>
+        <p class="hint">אחוז התשובות הנכונות, לפי טווחים</p>
+        <div class="chart-box short"><canvas id="accChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="updated" id="updated"></div>
+  </div>
+</div>
+
+<script type="module">
+/* =========================================================
+   1) הגדרות — ערוך כאן
+   ========================================================= */
+const CONFIG = {
+  // הדבק כאן את Firebase Web config (Firebase Console → Project settings → Web app).
+  // עד שתמלא — הדשבורד רץ במצב DEMO עם נתוני דוגמה.
+  firebase: {
+    apiKey: "AIzaSyCjZFUZFXwsbNrDA8Icw_ZZ-bPGARCLMLI",
+    authDomain: "childtime-86e98.firebaseapp.com",
+    projectId: "childtime-86e98",
+    appId: "1:870781732446:web:4c39e0cb113042657d96cf",
+    // measurementId הושמט בכוונה — לא טוענים Analytics (תאימות Kids/הצהרת אפל)
+  },
+  // רק המיילים האלה יוכלו להיכנס ולראות נתונים:
+  adminEmails: ["ranioph@gmail.com"],
+};
+
+/* =========================================================
+   2) נתוני דוגמה (DEMO) — מבנה זהה למה שה-Cloud Function תכתוב ל-adminStats/summary
+   ========================================================= */
+const SAMPLE = (() => {
+  const days = [...Array(30)].map((_,i)=>{
+    const base = 38 + i*1.4;
+    const wobble = Math.round(Math.sin(i/2)*6 + (i%7<2?-8:4));
+    const active = Math.max(6, Math.round(base + wobble));
+    return { date:`יום ${i+1}`, activeChildren:active, sessions:Math.round(active*2.3 + (i%5)*3) };
+  });
+  return {
+    updatedAt: "נתוני דוגמה",
+    totals:{ parents:312, children:418, households:301, devices:540 },
+    active:{ dau:74, wau:206, mau:355 },
+    engagement:{ sessionsToday:171, sessions7d:1184, totalSessions:21940 },
+    learning:{ questions7d:14820, avgAccuracy:0.78, minutes7d:9260, stars7d:5310 },
+    daily: days,
+    topics:[
+      {topic:"חיבור וחיסור", sessions:430, avgAccuracy:0.82},
+      {topic:"איות בעברית", sessions:388, avgAccuracy:0.74},
+      {topic:"כפל וחילוק", sessions:266, avgAccuracy:0.69},
+      {topic:"קריאה", sessions:201, avgAccuracy:0.80},
+      {topic:"מדע", sessions:142, avgAccuracy:0.77},
+    ],
+    accuracyBuckets:[ {range:"0-50%", n:34}, {range:"50-70%", n:96}, {range:"70-85%", n:168}, {range:"85-100%", n:120} ],
+  };
+})();
+
+/* =========================================================
+   3) שכבת נתונים — מנסה Firestore, נופל ל-DEMO
+   ========================================================= */
+async function loadStats(db, getDoc, doc){
+  if(!db) return { mode:"demo", data:SAMPLE };
+  try{
+    const snap = await getDoc(doc(db,"adminStats","summary"));
+    if(!snap.exists()) return { mode:"empty", data:SAMPLE };
+    return { mode:"live", data:snap.data() };
+  }catch(e){
+    console.error(e);
+    return { mode:"error", data:SAMPLE, error:e.message };
+  }
+}
+
+/* =========================================================
+   4) רינדור
+   ========================================================= */
+const fmt = n => (n??0).toLocaleString("he-IL");
+const pct = n => Math.round((n??0)*100) + "%";
+const TXT = getComputedStyle(document.documentElement);
+const cssvar = v => TXT.getPropertyValue(v).trim();
+Chart.defaults.color = "rgba(255,255,255,.75)";
+Chart.defaults.font.family = "Heebo, sans-serif";
+Chart.defaults.borderColor = "rgba(255,255,255,.10)";
+
+function renderKPIs(d){
+  const tiles = [
+    {ico:"👨‍👩‍👧", val:fmt(d.totals?.parents), lbl:"הורים רשומים", accent:"rgba(155,93,229,.45)"},
+    {ico:"🧒", val:fmt(d.totals?.children), lbl:"פרופילי ילדים", accent:"rgba(72,191,227,.45)"},
+    {ico:"⚡", val:fmt(d.active?.dau), lbl:"פעילים היום (DAU)", accent:"rgba(255,210,63,.45)",
+      delta:d.active?.wau? {dir:"up", txt:`${fmt(d.active.wau)} השבוע`} : null},
+    {ico:"🎯", val:fmt(d.engagement?.sessions7d), lbl:"סבבי למידה (7 ימים)", accent:"rgba(6,214,160,.45)"},
+  ];
+  document.getElementById("kpis").innerHTML = tiles.map(t=>`
+    <div class="kpi" style="--accent:${t.accent}">
+      <div class="ico">${t.ico}</div>
+      <div class="val">${t.val}</div>
+      <div class="lbl">${t.lbl}</div>
+      ${t.delta?`<span class="delta ${t.delta.dir}">▲ ${t.delta.txt}</span>`:""}
+    </div>`).join("");
+}
+
+function lineChart(id, labels, data, color){
+  const ctx = document.getElementById(id);
+  const grad = ctx.getContext("2d").createLinearGradient(0,0,0,280);
+  grad.addColorStop(0, color.replace(")", ",.45)").replace("rgb","rgba"));
+  grad.addColorStop(1, color.replace(")", ",0)").replace("rgb","rgba"));
+  new Chart(ctx,{type:"line", data:{labels, datasets:[{data, borderColor:color, backgroundColor:grad,
+    fill:true, tension:.38, pointRadius:0, borderWidth:3}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:8}}, y:{beginAtZero:true, ticks:{maxTicksLimit:5}}}}});
+}
+function barChart(id, labels, data, color){
+  new Chart(document.getElementById(id),{type:"bar", data:{labels, datasets:[{data, backgroundColor:color, borderRadius:7, maxBarThickness:22}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:8}}, y:{beginAtZero:true, ticks:{maxTicksLimit:5}}}}});
+}
+
+function renderTopics(d){
+  const rows = (d.topics||[]).slice().sort((a,b)=>b.sessions-a.sessions);
+  const max = Math.max(1, ...rows.map(r=>r.sessions));
+  document.querySelector("#topicsTable tbody").innerHTML = rows.map(r=>`
+    <tr><td>${r.topic}</td>
+    <td style="min-width:120px"><div class="bar"><i style="width:${Math.round(r.sessions/max*100)}%"></i></div>
+      <span style="font-size:12px;opacity:.7">${fmt(r.sessions)}</span></td>
+    <td><b>${pct(r.avgAccuracy)}</b></td></tr>`).join("");
+}
+
+function render(state){
+  const d = state.data;
+  // banner
+  const b = document.getElementById("banner"), bt = document.getElementById("bannerText");
+  if(state.mode==="live"){ b.className="banner live"; b.querySelector(".tag").textContent="LIVE";
+    bt.textContent="נתונים חיים מ-Firestore."; }
+  else if(state.mode==="empty"){ b.className="banner demo"; b.querySelector(".tag").textContent="ממתין";
+    bt.textContent="עדיין אין נתוני adminStats — מוצגים נתוני דוגמה. הרץ את ה-Cloud Function כדי למלא."; }
+  else if(state.mode==="error"){ b.className="banner err"; b.querySelector(".tag").textContent="שגיאה";
+    bt.textContent="שגיאת קריאה: "+(state.error||"")+" — מוצגים נתוני דוגמה."; }
+
+  renderKPIs(d);
+  lineChart("activeChart", d.daily.map(x=>x.date), d.daily.map(x=>x.activeChildren), "rgb(72,191,227)");
+  barChart("sessionsChart", d.daily.map(x=>x.date), d.daily.map(x=>x.sessions), "rgba(255,210,63,.85)");
+  renderTopics(d);
+  barChart("accChart", (d.accuracyBuckets||[]).map(x=>x.range), (d.accuracyBuckets||[]).map(x=>x.n), "rgba(6,214,160,.85)");
+  document.getElementById("updated").textContent = "עודכן לאחרונה: " + (d.updatedAt || "—");
+}
+
+/* =========================================================
+   5) Auth + bootstrap
+   ========================================================= */
+const gate = document.getElementById("gate"), app = document.getElementById("app");
+const gateMsg = document.getElementById("gateMsg"), loginBtn = document.getElementById("loginBtn");
+
+function showApp(email){
+  document.getElementById("whoEmail").textContent = email||"";
+  gate.classList.add("hidden"); app.classList.remove("hidden");
+}
+
+async function boot(){
+  // אם אין Firebase config — מצב DEMO ללא התחברות (כדי שתראה את העיצוב מיד).
+  if(!CONFIG.firebase.apiKey){
+    showApp("מצב הדגמה");
+    render({mode:"demo", data:SAMPLE});
+    return;
+  }
+  // טוען Firebase רק כשיש config
+  const [{initializeApp}, auth, fs] = await Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+  ]);
+  const fbApp = initializeApp(CONFIG.firebase);
+  const authI = auth.getAuth(fbApp);
+  const db = fs.getFirestore(fbApp);
+  const provider = new auth.GoogleAuthProvider();
+
+  loginBtn.onclick = async () => {
+    gateMsg.className="msg"; gateMsg.innerHTML='<span class="spin"></span> מתחבר…';
+    try{ await auth.signInWithPopup(authI, provider); }
+    catch(e){ gateMsg.className="msg err"; gateMsg.textContent = "ההתחברות נכשלה: "+e.code; }
+  };
+  document.getElementById("logoutBtn").onclick = () => auth.signOut(authI);
+
+  auth.onAuthStateChanged(authI, async user => {
+    if(!user){ app.classList.add("hidden"); gate.classList.remove("hidden"); loginBtn.disabled=false; return; }
+    const email = (user.email||"").toLowerCase();
+    if(!CONFIG.adminEmails.map(e=>e.toLowerCase()).includes(email)){
+      gateMsg.className="msg err"; gateMsg.textContent = "החשבון "+email+" אינו מורשה.";
+      await auth.signOut(authI); return;
+    }
+    showApp(user.email);
+    render(await loadStats(db, fs.getDoc, fs.doc));
+  });
+}
+boot();
+</script>
+</body>
+</html>
