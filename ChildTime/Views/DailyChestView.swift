@@ -8,7 +8,7 @@ struct DailyChestView: View {
 
     @State private var stage: ChestStage = .closed
     @State private var taps: Int = 0
-    private let tapsToOpen = 3
+    private let tapsToOpen = 5
     @State private var revealed: Int = 0
     @State private var reward: ChestReward = ChestReward(stars: 0, diamonds: 0, minutes: 0)
     @StateObject private var companion = CompanionController()
