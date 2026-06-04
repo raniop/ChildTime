@@ -81,8 +81,10 @@ struct WorldMapView: View {
                         .padding(.horizontal, homeHPad)
                     if kidMode.active { kidExitBar }
                     VStack(spacing: AppSpacing.lg) {
-                        heroTitle
-                            .padding(.top, AppSpacing.sm)
+                        if isCompact {
+                            heroTitle
+                                .padding(.top, AppSpacing.sm)
+                        }
                         LazyVGrid(
                             columns: worldGridColumns,
                             spacing: AppSpacing.md
@@ -406,6 +408,9 @@ struct WorldMapView: View {
                 navButtonsRow(size: btnSize)
                     .alignmentGuide(.headerIcon) { _ in btnSize / 2 }
             }
+            // On iPad the "טופי" title + subtitle live INSIDE the card, centered
+            // (there's room). On iPhone they stay below the card.
+            if !isCompact { heroTitle }
             statsPanel
         }
         .environment(\.layoutDirection, .leftToRight)
