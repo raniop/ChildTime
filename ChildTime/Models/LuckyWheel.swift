@@ -6,7 +6,6 @@ struct WheelPrize: Identifiable, Equatable {
     enum Kind: Equatable {
         case stars(Int)
         case diamonds(Int)           // 💎 spendable shop wallet
-        case xp(Int)
         case minutes(Int)
         case rareItem(String)        // cosmetic item ID
         case funMission(String)      // family chore — gentle "loser" wedge
@@ -33,15 +32,15 @@ enum LuckyWheelCatalog {
         WheelPrize(kind: .stars(15),         label: "15 כּוֹכָבִים",     emoji: "⭐", color: Color(hex: "9B5DE5")),
         WheelPrize(kind: .stars(45),         label: "45 כּוֹכָבִים",     emoji: "⭐", color: Color(hex: "5E60CE")),
         WheelPrize(kind: .stars(90),         label: "90 כּוֹכָבִים!",   emoji: "🌟", color: Color(hex: "F15BB5")),
-        WheelPrize(kind: .xp(50),            label: "50 XP",        emoji: "⚡", color: Color(hex: "FFD166")),
+        WheelPrize(kind: .stars(30),         label: "30 כּוֹכָבִים",     emoji: "⭐", color: Color(hex: "FFD166")),
         WheelPrize(kind: .minutes(5),        label: "+5 דַּק' מִשְׂחָק",   emoji: "⏰", color: Color(hex: "06D6A0")),
         WheelPrize(kind: .minutes(10),       label: "+10 דַּק' מִשְׂחָק",  emoji: "⏱", color: Color(hex: "118AB2")),
         WheelPrize(kind: .stars(60),         label: "+60 כּוֹכָבִים",   emoji: "🌟", color: Color(hex: "FFB84D")),
         WheelPrize(kind: .stars(150),        label: "+150 כּוֹכָבִים!", emoji: "🌟", color: Color(hex: "F59E0B")),
         WheelPrize(kind: .rareItem("hat_crown"),
                                               label: "כֶּתֶר זָהָב!",     emoji: "👑", color: Color(hex: "FFD166")),
-        WheelPrize(kind: .rareItem("shoes_magic"),
-                                              label: "נַעֲלֵי קֶסֶם!",    emoji: "✨", color: Color(hex: "9B5DE5")),
+        WheelPrize(kind: .rareItem("hat_unicorn"),
+                                              label: "קֶרֶן חַד-קֶרֶן!", emoji: "🦄", color: Color(hex: "9B5DE5")),
 
         // 💎 Diamonds — the spendable shop wallet (kids buy characters with these).
         WheelPrize(kind: .diamonds(10),      label: "10 יַהֲלוֹמִים",   emoji: "💎", color: Color(hex: "4CC9F0")),
@@ -89,9 +88,6 @@ extension WheelPrize {
         case .diamonds(let n):
             progress.applyChestReward(ChestReward(stars: 0, diamonds: n, minutes: 0, cosmeticID: nil))
             return "+\(n) יַהֲלוֹמִים נוֹסְפוּ! 💎"
-        case .xp(let n):
-            progress.addXP(n)
-            return "+\(n) XP נוֹסְפוּ"
         case .minutes(let n):
             let g = progress.grantBonusMinutes(n)
             if g.addedToday > 0 && g.bankedForTomorrow > 0 {

@@ -303,7 +303,12 @@ private struct WheelShape: View {
         let degreesPerWedge = 360.0 / Double(count)
         let startAngle = Angle.degrees(Double(index) * degreesPerWedge - 90)
         let endAngle = Angle.degrees(Double(index + 1) * degreesPerWedge - 90)
-        let midAngle = Angle.degrees(Double(index) * degreesPerWedge + degreesPerWedge / 2 - 90)
+        let midDeg = Double(index) * degreesPerWedge + degreesPerWedge / 2 - 90
+        let midAngle = Angle.degrees(midDeg)
+        // Align each label with its wedge bisector so they read radially and sit
+        // symmetrically; flip 180° on the lower half so text never goes upside-down.
+        let flip = midDeg > 90 || midDeg < -90
+        let labelRotation = midDeg + (flip ? 180 : 0)
 
         return ZStack {
             WedgePath(startAngle: startAngle, endAngle: endAngle)
@@ -316,23 +321,24 @@ private struct WheelShape: View {
                         .stroke(.white.opacity(0.5), lineWidth: 2)
                 )
 
-            // Wedge content — emoji + short label, oriented along the radius.
-            VStack(spacing: 2) {
+            // Wedge content — emoji + short label, centered on the wedge bisector.
+            VStack(spacing: 3) {
                 Text(prize.emoji)
-                    .font(.system(size: size * 0.08))
+                    .font(.system(size: size * 0.075))
                 Text(prize.label)
-                    .font(.system(size: size * 0.035, weight: .heavy, design: .rounded))
+                    .font(.system(size: size * 0.036, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
-                    .frame(width: size * 0.22)
+                    .frame(width: size * 0.26)
                     .minimumScaleFactor(0.6)
             }
             .shadow(color: .black.opacity(0.45), radius: 2, y: 1)
-            // Place the label out along the wedge radius.
+            // Rotate in place to follow the wedge, THEN push out along its radius.
+            .rotationEffect(.degrees(labelRotation))
             .offset(
-                x: cos(midAngle.radians) * size * 0.30,
-                y: sin(midAngle.radians) * size * 0.30
+                x: cos(midAngle.radians) * size * 0.32,
+                y: sin(midAngle.radians) * size * 0.32
             )
         }
         .frame(width: size, height: size)
