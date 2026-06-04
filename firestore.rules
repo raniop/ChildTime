@@ -27,7 +27,7 @@ service cloud.firestore {
     match /adminStats/{doc=**} {
       allow read: if signedIn()
         && request.auth.token.email != null
-        && request.auth.token.email.lower() in ['ranioph@gmail.com'];
+        && request.auth.token.email.lower() in ['ranioph@gmail.com', 'amitgolans@gmail.com'];
       allow write: if false;
     }
 
