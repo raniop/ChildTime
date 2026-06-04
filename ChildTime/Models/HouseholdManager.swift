@@ -224,7 +224,7 @@ final class HouseholdManager: ObservableObject {
                 guard let self, let snap else { return }
                 let devices = snap.documents.compactMap {
                     Self.decode(ChildDevice.self, $0.data())
-                }
+                }.filter { $0.removed != true }   // hide removed devices from the parent
                 var grouped: [String: [ChildDevice]] = [:]
                 for d in devices { grouped[d.childID, default: []].append(d) }
                 for key in grouped.keys {
@@ -253,10 +253,15 @@ final class HouseholdManager: ObservableObject {
             // Don't clobber the original joinedAt on relaunch.
             let existing = try? await db.collection("childDevices").document(docID).getDocument()
             if let data = existing?.data(), let prior = Self.decode(ChildDevice.self, data) {
+                // The parent removed this device while it was closed → reset to a
+                // fresh install instead of re-registering (and don't reappear).
+                if prior.removed == true { resetAsRemovedDevice(); return }
                 device.joinedAt = prior.joinedAt
             }
             try await db.collection("childDevices").document(docID)
                 .setData(Self.encode(device), merge: true)
+            // Live-disconnect if the parent removes it later this session.
+            watchOwnDeviceRemoval(childID: childID)
         } catch { lastError = error.localizedDescription }
         #endif
     }
@@ -387,11 +392,52 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
-    /// Remove a connected device from a child (e.g. one mistakenly linked to the
-    /// wrong child). Deletes its `childDevices` doc; the listener updates the UI.
+    /// Remove a connected device from a child. TOMBSTONES the doc (`removed:true`)
+    /// instead of deleting it, so the device itself notices and resets to a fresh
+    /// install — otherwise it would just re-register on its next heartbeat.
     func removeChildDevice(id: String) {
         #if canImport(FirebaseFirestore)
-        db.collection("childDevices").document(id).delete()
+        db.collection("childDevices").document(id)
+            .setData(["removed": true, "removedAt": FieldValue.serverTimestamp()], merge: true)
+        #endif
+    }
+
+    // MARK: - This device was removed → reset to a fresh install
+
+    private var ownDeviceListener: ListenerRegistration?
+
+    /// CHILD device: watch its OWN row so a parent's "remove device" disconnects
+    /// it live. Idempotent.
+    func watchOwnDeviceRemoval(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        let docID = "\(childID.uuidString)_\(DeviceIdentity.installID)"
+        ownDeviceListener?.remove()
+        ownDeviceListener = db.collection("childDevices").document(docID)
+            .addSnapshotListener { [weak self] snap, _ in
+                guard let self else { return }
+                if (snap?.data()?["removed"] as? Bool) == true {
+                    self.resetAsRemovedDevice()
+                }
+            }
+        #endif
+    }
+
+    /// Disconnect THIS device and return it to a just-installed state. CRITICAL:
+    /// it must NOT push anything to the cloud (no `resetAll` — that bumps the
+    /// revision and would wipe the child's cloud progress that other devices still
+    /// need). So: stop sync, wipe LOCAL data only, drop the binding → RolePicker.
+    func resetAsRemovedDevice() {
+        #if canImport(FirebaseFirestore)
+        RemoteSyncManager.shared.stop()          // no uploads/listeners → cloud safe
+        ownDeviceListener?.remove(); ownDeviceListener = nil
+        let s = ParentSettings.shared
+        if let cid = s.joinedChildID {           // clean up our own (tombstoned) row
+            db.collection("childDevices").document("\(cid)_\(DeviceIdentity.installID)").delete()
+        }
+        DataExporter.wipeLocalData()             // local cache only — never the cloud
+        s.pendingJoinPayload = nil
+        s.joinedChildID = nil
+        s.deviceRole = .unset                    // → fresh RolePicker / scan flow
         #endif
     }
 

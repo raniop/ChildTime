@@ -17,6 +17,10 @@ struct ChildDevice: Codable, Identifiable, Equatable {
     var systemVersion: String
     var joinedAt: Date
     var lastSeenAt: Date
+    /// Tombstone: the parent removed this device. The device itself sees this and
+    /// resets to a fresh install (instead of silently re-registering). Optional so
+    /// older docs without the key still decode.
+    var removed: Bool?
 
     var sfSymbol: String {
         switch kind {
