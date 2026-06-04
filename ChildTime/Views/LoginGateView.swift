@@ -310,10 +310,10 @@ struct LoginGateView: View {
 
             HStack(spacing: 14) {
                 Link("תנאי שימוש",
-                     destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                     destination: URL(string: "https://tofyapp.com/terms")!)
                 Text("•").foregroundStyle(.white.opacity(0.4))
                 Link("מדיניות פרטיות",
-                     destination: URL(string: "https://github.com/raniop/ChildTime/blob/main/distribution/PRIVACY_POLICY.html")!)
+                     destination: URL(string: "https://tofyapp.com/privacy")!)
             }
             .font(.system(size: 12, weight: .semibold, design: .rounded))
             .foregroundStyle(.white.opacity(0.85))

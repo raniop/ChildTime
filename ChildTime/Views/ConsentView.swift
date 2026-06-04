@@ -36,7 +36,7 @@ struct ConsentView: View {
                         .fill(.white.opacity(0.12)))
 
                     Link("קראו את מדיניות הפרטיות המלאה",
-                         destination: URL(string: "https://github.com/raniop/ChildTime/blob/main/distribution/PRIVACY_POLICY.html")!)
+                         destination: URL(string: "https://tofyapp.com/privacy")!)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .frame(maxWidth: .infinity, alignment: .leading)
