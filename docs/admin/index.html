@@ -52,6 +52,8 @@
   .hero .row{display:flex; gap:26px; margin-top:14px; flex-wrap:wrap}
   .hero .row div{font-size:14px; color:rgba(255,255,255,.85)}
   .hero .row b{font-size:20px; font-weight:900; display:block}
+  .hero .cap{font-size:13px; color:rgba(255,255,255,.82); margin-top:14px; line-height:1.55; max-width:700px}
+  .hero .cap b{color:#fff}
 
   .layer{margin-top:34px}
   .layer h2{font-size:13px; font-weight:900; letter-spacing:.6px; text-transform:uppercase; opacity:.7; margin:0 4px 4px}
@@ -130,10 +132,11 @@
       <div class="title">Learning Minutes Generated · דקות מסך שנוצרו דרך למידה</div>
       <div class="big" id="heroBig">—</div>
       <div class="row">
-        <div>היום<b id="heroToday">—</b></div>
-        <div>השבוע<b id="heroWeek">—</b></div>
-        <div>החודש<b id="heroMonth">—</b></div>
+        <div>🎮 הומרו למשחק<b id="heroUsed">—</b></div>
+        <div>💚 נחסכו · לא נוצל<b id="heroSaved">—</b></div>
+        <div>📅 החודש<b id="heroMonth">—</b></div>
       </div>
+      <div class="cap" id="heroCap"></div>
     </div>
 
     <!-- LAYER 1: GROWTH -->
@@ -239,11 +242,15 @@ function render(state){
   else if(state.mode==="error"){ b.className="banner err"; b.querySelector(".tag").textContent="שגיאה"; bt.textContent="שגיאת קריאה — נתוני דוגמה."; }
 
   // HERO
-  const lm = d.headline?.learningMinutes || {};
+  const lm = d.headline?.learningMinutes || {}; const ec0 = d.economy || {};
   document.getElementById("heroBig").innerHTML = `${fmt(lm.week)} <small>דק' השבוע</small>`;
-  document.getElementById("heroToday").textContent = fmt(lm.today);
-  document.getElementById("heroWeek").textContent = fmt(lm.week);
+  document.getElementById("heroUsed").textContent = fmt(ec0.minutesUsed7);
+  document.getElementById("heroSaved").textContent = fmt(ec0.minutesUnused7);
   document.getElementById("heroMonth").textContent = fmt(lm.month);
+  const savedPct = (lm.week>0 && ec0.minutesUnused7!=null) ? Math.round(ec0.minutesUnused7/lm.week*100) : null;
+  document.getElementById("heroCap").innerHTML = (ec0.minutesUsed7!=null)
+    ? `השבוע הילד הרוויח <b>${fmt(lm.week)}</b> דק' משחק דרך למידה, מימש <b>${fmt(ec0.minutesUsed7)}</b> בפועל${savedPct!=null?`, ו-<b>${fmt(ec0.minutesUnused7)}</b> דק' (${savedPct}%) <b>נחסכו</b> — זמן מסך שלא בוזבז על משחקים אחרים`:""}.`
+    : "";
 
   // GROWTH
   const g=d.growth||{};
@@ -295,8 +302,8 @@ function render(state){
   const ec=d.economy||{}; const em=ec.minutesEarned||{}; const xp=ec.xp||{};
   document.getElementById("econTiles").innerHTML =
     tile("דקות שנוצרו · השבוע", `${fmt(em.week)} <small>דק'</small>`, `היום ${fmt(em.today)} · החודש ${fmt(em.month)}`) +
-    tile("דקות שנוצלו · השבוע", `${fmt(ec.minutesUsed7)} <small>דק'</small>`) +
-    tile("דקות שלא נוצלו · השבוע", `${fmt(ec.minutesUnused7)} <small>דק'</small>`) +
+    tile("הומרו למשחק · השבוע", `${fmt(ec.minutesUsed7)} <small>דק'</small>`, "זמן ששוחק בפועל") +
+    tile("נחסכו · לא נוצל · השבוע", `${fmt(ec.minutesUnused7)} <small>דק'</small>`, "לא בוזבז על משחקים אחרים") +
     tile("XP · השבוע", fmt(xp.week), `היום ${fmt(xp.today)} · החודש ${fmt(xp.month)}`) +
     tile("גלגל מזל · סיבובים", fmt(ec.wheelSpins7), "7 ימים אחרונים") +
     tile("Mystery · פורטלים", fmt(ec.mystery7), "7 ימים אחרונים");
