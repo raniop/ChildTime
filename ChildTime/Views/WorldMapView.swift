@@ -10,7 +10,9 @@ struct WorldMapView: View {
 
     @ObservedObject private var friends = FriendsManager.shared
     @ObservedObject private var liveGame = LiveGameManager.shared
+    @ObservedObject private var kidMode = KidModeManager.shared
     @State private var inviteBannerVisible = false
+    @State private var showKidExit = false
     @StateObject private var companion = CompanionController()
     @State private var selectedWorld: World?
     @State private var showDailyChest = false
@@ -69,6 +71,7 @@ struct WorldMapView: View {
 
             VStack(spacing: 0) {
                 topBar
+                if kidMode.active { kidExitBar }
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
                         heroTitle
@@ -258,6 +261,17 @@ struct WorldMapView: View {
             liveGame.startInvitesListener()
         }
         .onDisappear { liveGame.stopInvitesListener() }
+        // Leaving Kid Mode — parent-code gated, but NO auto Face ID (predictable).
+        .sheet(isPresented: $showKidExit) {
+            ParentGateView(allowClose: true,
+                           gateTitle: "יְצִיאָה מִמַּצַּב יֶלֶד",
+                           gateReason: "הַזִּינוּ קוֹד הוֹרֶה כְּדֵי לָצֵאת",
+                           useFaceID: false) {
+                KidModeExitView { KidModeManager.shared.exit(); showKidExit = false }
+            }
+            .environmentObject(settings)
+            .environment(\.layoutDirection, .rightToLeft)
+        }
         // A friend started a game I'm invited to → pop a toast at the top (far more
         // visible than the small red dot). It auto-hides after a few seconds; the
         // red dot on the controller button stays as the persistent reminder.
@@ -342,6 +356,28 @@ struct WorldMapView: View {
         .shadow(color: .black.opacity(0.3), radius: 10, y: 5)
         .frame(maxWidth: 520)
         .environment(\.layoutDirection, .rightToLeft)
+    }
+
+    /// Slim "exit Kid Mode" bar shown UNDER the top-bar buttons while the parent's
+    /// phone is acting as a kid device — so it never overlaps the action buttons.
+    private var kidExitBar: some View {
+        Button {
+            Haptic.light()
+            showKidExit = true
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "figure.walk.departure").font(.system(size: 13, weight: .bold))
+                Text("יְצִיאָה מִמַּצַּב יֶלֶד").font(.system(size: 13, weight: .heavy, design: .rounded))
+                Image(systemName: "lock.fill").font(.system(size: 10, weight: .bold)).opacity(0.7)
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14).padding(.vertical, 7)
+            .background(Capsule().fill(AppColor.flameOrange.opacity(0.9)))
+            .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
+        }
+        .buttonStyle(.juicy)
+        .padding(.top, 6)
+        .padding(.horizontal, AppSpacing.md)
     }
 
     // MARK: - Top bar

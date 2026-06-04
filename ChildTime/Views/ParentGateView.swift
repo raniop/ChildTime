@@ -9,16 +9,21 @@ struct ParentGateView<Content: View>: View {
     /// than opening Parent Settings. Falls back to the settings wording.
     var gateTitle: String? = nil
     var gateReason: String? = nil
+    /// Allow biometric (Face ID) unlock. Off for quick, predictable gates like
+    /// leaving Kid Mode, where an auto Face-ID prompt is jarring — code only.
+    var useFaceID: Bool = true
 
     init(allowClose: Bool = true,
          gateTitle: String? = nil,
          gateReason: String? = nil,
+         useFaceID: Bool = true,
          @ViewBuilder content: @escaping () -> Content = {
              ParentSettingsView().environment(\.layoutDirection, .rightToLeft)
          }) {
         self.allowClose = allowClose
         self.gateTitle = gateTitle
         self.gateReason = gateReason
+        self.useFaceID = useFaceID
         self.content = content
     }
 
@@ -38,7 +43,7 @@ struct ParentGateView<Content: View>: View {
     private var isSetupMode: Bool { !settings.hasSetParentPIN && household.householdPIN == nil }
 
     private var canUseFaceID: Bool {
-        settings.faceIDForParentGate && PINManager.shared.biometryAvailable
+        useFaceID && settings.faceIDForParentGate && PINManager.shared.biometryAvailable
             && !isSetupMode
     }
 
