@@ -46,6 +46,10 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         let defaults = UserDefaults(suiteName: appGroupID) ?? .standard
         let decoder = JSONDecoder()
 
+        // Keep app DELETION blocked on every background re-lock — deleting
+        // ChildTime would wipe the shield and unlock every app.
+        store.application.denyAppRemoval = true
+
         // Block-all-except-allowlist mode — only when an allowlist actually exists
         // (otherwise we'd shield ChildTime itself and brick the device). Mirrors
         // ParentSettings.blockAllActive + ShieldManager.applyLockAllExcept.

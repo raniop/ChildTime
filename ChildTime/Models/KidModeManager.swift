@@ -75,6 +75,8 @@ final class KidModeManager: ObservableObject {
     /// Exit kid mode (the caller must parent-gate this): unlock the phone, restore.
     func exit() {
         ShieldManager.shared.clearShield()
+        // Parent's phone returns to normal → allow deleting apps again.
+        ShieldManager.shared.setAppRemovalLocked(false)
         ShieldManager.shared.cancelScheduledReshield()
         active = false
         // Restore whoever the parent had selected before (best effort).

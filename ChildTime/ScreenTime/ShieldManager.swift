@@ -75,7 +75,18 @@ final class ShieldManager: ObservableObject {
         store.shield.webDomainCategories = ShieldSettings.ActivityCategoryPolicy<WebDomain>.none
     }
 
+    /// Prevent DELETING apps (iOS Screen Time restriction). Deleting ChildTime
+    /// would wipe the shield and unlock every app, so a managed device keeps this
+    /// ON — even during a temporary play-time window. Device-wide (iOS can't
+    /// target a single app). Cleared only when management truly ends (Kid Mode
+    /// exit on a parent's phone).
+    func setAppRemovalLocked(_ locked: Bool) {
+        store.application.denyAppRemoval = locked ? true : nil
+    }
+
     func clearShield() {
+        // NOTE: intentionally does NOT touch denyAppRemoval — a temporary unlock
+        // must not let the kid delete ChildTime and escape the lock.
         store.shield.applications = nil
         store.shield.applicationCategories = ShieldSettings.ActivityCategoryPolicy<Application>.none
         store.shield.webDomains = nil
@@ -100,6 +111,8 @@ final class ShieldManager: ObservableObject {
         store.shield.webDomains = nil
         store.shield.webDomainCategories =
             ShieldSettings.ActivityCategoryPolicy<WebDomain>.all(except: allowed.webDomainTokens)
+        // Kid Mode: also block app deletion (can't sneak out by removing ChildTime).
+        store.application.denyAppRemoval = true
     }
 
     /// Block the full `blocked` set EXCEPT the `allowed` apps — so specific apps
@@ -132,6 +145,8 @@ final class ShieldManager: ObservableObject {
     ///  • classic block-list — block only the parent-selected apps, honoring a
     ///    temporary per-app allowance.
     func applyDefaultLock() {
+        // A managed device must not be deletable — that would remove the shield.
+        store.application.denyAppRemoval = true
         let s = ParentSettings.shared
         if s.blockAllActive {
             applyLockAllExcept(SelectionStorage.decode(s.allowedAppsData))
