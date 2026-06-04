@@ -32,7 +32,7 @@ struct WorldMapView: View {
     private var isCompact: Bool { hsc == .compact }
     private var companionSize: CGFloat { isCompact ? 90 : 120 }
     // iPad shows the title inside the header row, so it's smaller there.
-    private var heroTitleSize: CGFloat { isCompact ? 36 : 30 }
+    private var heroTitleSize: CGFloat { isCompact ? 46 : 40 }
 
     @State private var infoStat: StatInfo? = nil
 
