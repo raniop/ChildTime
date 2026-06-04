@@ -21,6 +21,9 @@ struct ProfileEditorView: View {
     @State private var age: ChildAge = .grade1
     @State private var photoData: Data? = nil
     @State private var avatarPresetID: String = AvatarPreset.defaultID(for: nil)
+    /// The child's chosen 3D character (picked in the shop). Carried through the
+    /// editor so the preview shows the REAL avatar and saving never wipes it.
+    @State private var character3DID: String? = nil
     @State private var grade: Int? = nil
     @State private var interests: Set<String> = []
     @State private var learningLevel: LearningLevel = .developing
@@ -119,7 +122,8 @@ struct ProfileEditorView: View {
             gender: gender,
             age: age,
             photoData: photoData,
-            avatarPresetID: avatarPresetID
+            avatarPresetID: avatarPresetID,
+            character3DID: character3DID
         )
         return VStack(spacing: 10) {
             // Shows the child's chosen 3D character (picked in the shop) — no
@@ -377,6 +381,7 @@ struct ProfileEditorView: View {
             age = p.age
             photoData = p.photoData
             avatarPresetID = p.avatarPresetID
+            character3DID = p.character3DID
             grade = p.grade
             interests = Set(p.interests)
             learningLevel = p.learningLevel
@@ -395,6 +400,7 @@ struct ProfileEditorView: View {
             age: age,
             photoData: photoData,
             avatarPresetID: avatarPresetID,
+            character3DID: character3DID,
             createdAt: .now,
             grade: grade,
             interests: Array(interests),

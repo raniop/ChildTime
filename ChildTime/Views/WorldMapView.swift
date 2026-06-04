@@ -384,16 +384,20 @@ struct WorldMapView: View {
 
     // MARK: - Top bar
 
-    @ViewBuilder
     private var topBar: some View {
-        VStack(spacing: isCompact ? 12 : 16) {
-            // Row 1 — identity on the left, the round nav buttons grouped on the
-            // right. The whole card is forced LTR so it matches the design even
-            // though the app root is RTL (Hebrew text still renders right-to-left).
-            HStack(alignment: .center, spacing: isCompact ? 6 : 14) {
-                identityBlock(avatar: isCompact ? 44 : 58)
+        let avatarSize: CGFloat = isCompact ? 46 : 58
+        let btnSize: CGFloat = isCompact ? 42 : 52
+        return VStack(spacing: isCompact ? 12 : 16) {
+            // Row 1 — identity on the left, round nav buttons on the right. A custom
+            // alignment puts the avatar, the name and every button CIRCLE on one
+            // line (the button captions hang below without shifting it). Forced LTR
+            // so it matches the design even though the app root is RTL.
+            HStack(alignment: .headerIcon, spacing: isCompact ? 6 : 14) {
+                identityBlock(avatar: avatarSize)
+                    .alignmentGuide(.headerIcon) { $0[VerticalAlignment.center] }
                 Spacer(minLength: 2)
-                navButtonsRow(size: isCompact ? 42 : 52)
+                navButtonsRow(size: btnSize)
+                    .alignmentGuide(.headerIcon) { _ in btnSize / 2 }
             }
             statsPanel
         }
@@ -417,14 +421,13 @@ struct WorldMapView: View {
             .shadow(color: .black.opacity(0.25), radius: 22, y: 12)
     }
 
-    /// Avatar (+ crown) with the child's name and a level badge. Tapping opens
-    /// the level/XP info.
+    /// Avatar + name (tap → edit the child's profile) and a level badge
+    /// (tap → the "רָמַת טוֹפִי" level info). The name is centered over the badge.
     private func identityBlock(avatar: CGFloat) -> some View {
-        Button {
-            Haptic.light()
-            showLevelInfo = true
-        } label: {
-            HStack(spacing: 9) {
+        HStack(spacing: 9) {
+            Button {
+                Haptic.light(); showingChildSettings = true
+            } label: {
                 CharacterView(character: profiles.active?.character
                               ?? Character3DCatalog.find(Character3DCatalog.defaultID),
                               portrait: true)
@@ -433,11 +436,23 @@ struct WorldMapView: View {
                     .clipShape(Circle())
                     .overlay(Circle().stroke(.white.opacity(0.85), lineWidth: 2.5))
                     .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
-                VStack(alignment: .leading, spacing: 3) {
+            }
+            .buttonStyle(.plain)
+
+            VStack(alignment: .center, spacing: 3) {
+                Button {
+                    Haptic.light(); showingChildSettings = true
+                } label: {
                     Text(profiles.active?.name ?? "טוֹפִי")
                         .font(.system(size: avatar * 0.40, weight: .black, design: .rounded))
                         .foregroundStyle(.white)
                         .lineLimit(1).minimumScaleFactor(0.6)
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    Haptic.light(); showLevelInfo = true
+                } label: {
                     Text("רָמָה \(progress.companionLevel)")
                         .font(.system(size: 12, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
@@ -445,9 +460,9 @@ struct WorldMapView: View {
                         .background(Capsule().fill(AppColor.gemPurple))
                         .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
                 }
+                .buttonStyle(.plain)
             }
         }
-        .buttonStyle(.plain)
     }
 
     private func navButtonsRow(size: CGFloat) -> some View {
@@ -961,4 +976,13 @@ struct XPBarMini: View {
         .environmentObject(ShieldManager.shared)
         .environmentObject(ProfileStore.shared)
         .environment(\.layoutDirection, .rightToLeft)
+}
+
+/// Aligns the avatar, the name, and each header button CIRCLE on one line — the
+/// button captions hang below without shifting it.
+private extension VerticalAlignment {
+    enum HeaderIconID: AlignmentID {
+        static func defaultValue(in d: ViewDimensions) -> CGFloat { d[VerticalAlignment.center] }
+    }
+    static let headerIcon = VerticalAlignment(HeaderIconID.self)
 }
