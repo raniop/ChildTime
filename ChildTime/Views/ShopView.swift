@@ -97,7 +97,7 @@ struct ShopView: View {
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .lineLimit(1)
-                            .contentTransition(.numericText(value: Double(progress.diamonds)))
+                            .numericTextTransition(Double(progress.diamonds))
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 16))
                             .foregroundStyle(.white)

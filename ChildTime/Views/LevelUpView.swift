@@ -5,7 +5,7 @@ struct LevelUpView: View {
     let onContinue: () -> Void
 
     @Environment(\.horizontalSizeClass) private var hsc
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var confettiTrigger: Int = 0
     @State private var scale: CGFloat = 0.3
     @State private var titleVisible = false

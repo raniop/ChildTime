@@ -84,7 +84,7 @@ struct DressUpCharacter: View {
         }
         .frame(width: size, height: H)
         .onAppear { startIdle(); decodePhoto() }
-        .onChange(of: photoData) { _, _ in decodePhoto() }
+        .onChangeCompat(of: photoData) { _, _ in decodePhoto() }
     }
 
     private func decodePhoto() {

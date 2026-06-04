@@ -134,16 +134,31 @@ struct QRScannerView: UIViewControllerRepresentable {
         private func applyRotation() {
             guard let connection = previewLayer?.connection else { return }
             let orientation = view.window?.windowScene?.interfaceOrientation ?? .portrait
-            let angle: CGFloat
-            switch orientation {
-            case .portrait:           angle = 90
-            case .portraitUpsideDown: angle = 270
-            case .landscapeLeft:      angle = 180
-            case .landscapeRight:     angle = 0
-            default:                  angle = 90
-            }
-            if connection.isVideoRotationAngleSupported(angle) {
-                connection.videoRotationAngle = angle
+            if #available(iOS 17.0, *) {
+                let angle: CGFloat
+                switch orientation {
+                case .portrait:           angle = 90
+                case .portraitUpsideDown: angle = 270
+                case .landscapeLeft:      angle = 180
+                case .landscapeRight:     angle = 0
+                default:                  angle = 90
+                }
+                if connection.isVideoRotationAngleSupported(angle) {
+                    connection.videoRotationAngle = angle
+                }
+            } else {
+                // iOS 16: the pre-videoRotationAngle API.
+                let videoOrientation: AVCaptureVideoOrientation
+                switch orientation {
+                case .portrait:           videoOrientation = .portrait
+                case .portraitUpsideDown: videoOrientation = .portraitUpsideDown
+                case .landscapeLeft:      videoOrientation = .landscapeLeft
+                case .landscapeRight:     videoOrientation = .landscapeRight
+                default:                  videoOrientation = .portrait
+                }
+                if connection.isVideoOrientationSupported {
+                    connection.videoOrientation = videoOrientation
+                }
             }
         }
         override func viewWillAppear(_ animated: Bool) {

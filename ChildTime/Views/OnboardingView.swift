@@ -16,7 +16,7 @@ struct OnboardingView: View {
     @State private var minutesPerAnswer: Int = 2
 
     // Welcome animation state
-    @State private var welcomeCompanion = CompanionController()
+    @StateObject private var welcomeCompanion = CompanionController()
     @State private var welcomeTitleAppeared = false
     @State private var welcomeSubtitleAppeared = false
     @State private var welcomeBubbleVisible = false
@@ -61,7 +61,7 @@ struct OnboardingView: View {
             }
         }
         .familyActivityPicker(isPresented: $showPicker, selection: $selection)
-        .onChange(of: selection) { _, new in
+        .onChangeCompat(of: selection) { _, new in
             settings.activitySelectionData = SelectionStorage.encode(new)
             shields.applyShield(from: new)
         }
@@ -456,12 +456,12 @@ struct OnboardingView: View {
             .padding(.horizontal, AppSpacing.lg)
             // Strip non-digits and cap at 4 chars — important on iPad where
             // .numberPad falls back to the full keyboard.
-            .onChange(of: newPIN) { _, new in
+            .onChangeCompat(of: newPIN) { _, new in
                 let filtered = String(new.filter(\.isNumber).prefix(4))
                 if filtered != new { newPIN = filtered }
                 if pinError != nil { pinError = nil }
             }
-            .onChange(of: confirmPIN) { _, new in
+            .onChangeCompat(of: confirmPIN) { _, new in
                 let filtered = String(new.filter(\.isNumber).prefix(4))
                 if filtered != new { confirmPIN = filtered }
                 if pinError != nil { pinError = nil }

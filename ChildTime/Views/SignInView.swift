@@ -76,7 +76,7 @@ struct SignInView: View {
                     Button("סגור") { dismiss() }
                 }
             }
-            .onChange(of: auth.isSignedIn) { _, signed in
+            .onChangeCompat(of: auth.isSignedIn) { _, signed in
                 if signed { dismiss() }
             }
         }

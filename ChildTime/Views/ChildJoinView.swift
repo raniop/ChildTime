@@ -7,7 +7,7 @@ struct ChildJoinView: View {
     @ObservedObject private var household = HouseholdManager.shared
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var settings: ParentSettings
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var code = ""
     @State private var showScanner = false
     @State private var working = false

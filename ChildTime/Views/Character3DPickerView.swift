@@ -67,7 +67,7 @@ struct Character3DPickerView: View {
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(1)
-                    .contentTransition(.numericText(value: Double(progress.diamonds)))
+                    .numericTextTransition(Double(progress.diamonds))
                 Image(systemName: "plus.circle.fill")
                     .font(.system(size: 15))
                     .foregroundStyle(AppColor.gemPurple)

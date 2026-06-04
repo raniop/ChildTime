@@ -9,7 +9,7 @@ struct DailyChestView: View {
     @State private var stage: ChestStage = .closed
     @State private var revealed: Int = 0
     @State private var reward: ChestReward = ChestReward(stars: 0, diamonds: 0, minutes: 0)
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var confettiTrigger = 0
     /// Shown when some/all won minutes were banked for tomorrow (daily cap full).
     @State private var bankedNote: String? = nil
@@ -99,7 +99,7 @@ struct DailyChestView: View {
                     .padding(.horizontal, AppSpacing.lg)
                 }
                 .scrollIndicators(.hidden)
-                .onChange(of: revealed) { _, _ in
+                .onChangeCompat(of: revealed) { _, _ in
                     withAnimation(.easeInOut(duration: 0.4)) {
                         proxy.scrollTo("rewardsBottom", anchor: .bottom)
                     }

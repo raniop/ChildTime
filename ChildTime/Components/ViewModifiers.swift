@@ -102,7 +102,7 @@ struct RumbleModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .offset(x: offset)
-            .onChange(of: trigger) { _, _ in
+            .onChangeCompat(of: trigger) { _, _ in
                 withAnimation(.easeInOut(duration: 0.05).repeatCount(6, autoreverses: true)) {
                     offset = 3
                 }
@@ -133,4 +133,61 @@ struct JuicyPressStyle: ButtonStyle {
 
 extension ButtonStyle where Self == JuicyPressStyle {
     static var juicy: JuicyPressStyle { JuicyPressStyle() }
+}
+
+// MARK: - onChangeCompat — iOS 16-safe onChange(of:) { old, new }
+
+extension View {
+    /// Drop-in replacement for the iOS-17 two-parameter `onChange(of:) { old, new in }`
+    /// that also works on iOS 16. On iOS 17+ it calls the native API (identical
+    /// behaviour for today's users); on iOS 16 it emulates the (old, new) pair by
+    /// tracking the previous value.
+    @ViewBuilder
+    func onChangeCompat<V: Equatable>(of value: V,
+                                      _ action: @escaping (_ old: V, _ new: V) -> Void) -> some View {
+        if #available(iOS 17.0, *) {
+            self.onChange(of: value) { old, new in action(old, new) }
+        } else {
+            self.modifier(LegacyOnChange(value: value, action: action))
+        }
+    }
+}
+
+extension View {
+    /// iOS 17+ `containerRelativeFrame(.horizontal)`; no-op on iOS 16 (the
+    /// surrounding `.frame(maxWidth:)` still constrains width there).
+    @ViewBuilder func containerWidthLock() -> some View {
+        if #available(iOS 17.0, *) { self.containerRelativeFrame(.horizontal) } else { self }
+    }
+    /// iOS 16.4+ `scrollBounceBehavior(.basedOnSize, axes: .horizontal)`; no-op below.
+    @ViewBuilder func noHorizontalBounce() -> some View {
+        if #available(iOS 16.4, *) { self.scrollBounceBehavior(.basedOnSize, axes: .horizontal) } else { self }
+    }
+
+    /// Animated rolling-number transition. Uses the value-aware iOS 17 form when
+    /// available, falling back to the plain numeric transition on iOS 16.
+    @ViewBuilder func numericTextTransition(_ value: Double) -> some View {
+        if #available(iOS 17.0, *) { self.contentTransition(.numericText(value: value)) }
+        else { self.contentTransition(.numericText()) }
+    }
+
+    /// Keep a popover compact (a real popover, not an auto-sheet) on iPhone.
+    /// iOS 16.4+; below that the popover simply adapts to a sheet (default).
+    @ViewBuilder func popoverCompact() -> some View {
+        if #available(iOS 16.4, *) { self.presentationCompactAdaptation(.popover) } else { self }
+    }
+}
+
+private struct LegacyOnChange<V: Equatable>: ViewModifier {
+    let value: V
+    let action: (V, V) -> Void
+    @State private var previous: V?
+    func body(content: Content) -> some View {
+        content
+            .onAppear { if previous == nil { previous = value } }
+            .onChange(of: value) { newValue in
+                action(previous ?? newValue, newValue)
+                previous = newValue
+            }
+    }
 }

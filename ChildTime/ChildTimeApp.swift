@@ -151,7 +151,7 @@ struct ChildTimeApp: App {
                     progress.applyDailyRolloverIfNeeded()   // release minutes banked for "tomorrow"
                     enforceShieldStateIfNeeded()
                 }
-                .onChange(of: scenePhase) { _, phase in
+                .onChangeCompat(of: scenePhase) { _, phase in
                     if phase == .active, Self.demoScreen == nil {
                         progress.applyDailyRolloverIfNeeded()
                         enforceShieldStateIfNeeded()

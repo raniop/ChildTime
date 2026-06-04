@@ -82,7 +82,7 @@ struct ChildScreenTimeView: View {
         // Persist when the sheet closes (covers both typed and stepped values)
         // — keeps Firestore writes to one per edit session, not one per keystroke.
         .onDisappear { save() }
-        .onChange(of: limited) { _, on in if on && minutes < Self.minMinutes { minutes = 60 } }
+        .onChangeCompat(of: limited) { _, on in if on && minutes < Self.minMinutes { minutes = 60 } }
     }
 
     private var readout: String {

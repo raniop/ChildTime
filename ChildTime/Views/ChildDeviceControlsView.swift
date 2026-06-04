@@ -62,7 +62,7 @@ struct ChildDeviceControlsView: View {
         }
         .environment(\.layoutDirection, .rightToLeft)
         .familyActivityPicker(isPresented: $showAppPicker, selection: $selection)
-        .onChange(of: selection) { _, new in
+        .onChangeCompat(of: selection) { _, new in
             settings.activitySelectionData = SelectionStorage.encode(new)
             // Keep the live shield in sync only when the child isn't mid-unlock.
             if !isUnlocked { shields.applyShield(from: new) }

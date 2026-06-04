@@ -50,12 +50,12 @@ struct ParentSettingsView: View {
                 }
             }
             .familyActivityPicker(isPresented: $showAppPicker, selection: $pickerSelection)
-            .onChange(of: pickerSelection) { _, new in
+            .onChangeCompat(of: pickerSelection) { _, new in
                 settings.activitySelectionData = SelectionStorage.encode(new)
                 shields.applyDefaultLock()
             }
             .familyActivityPicker(isPresented: $showAllowedPicker, selection: $allowedSelection)
-            .onChange(of: allowedSelection) { _, new in
+            .onChangeCompat(of: allowedSelection) { _, new in
                 settings.allowedAppsData = SelectionStorage.encode(new)
                 shields.applyDefaultLock()
             }

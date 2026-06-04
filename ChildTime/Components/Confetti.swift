@@ -21,7 +21,7 @@ struct Confetti: View {
             }
         }
         .allowsHitTesting(false)
-        .onChange(of: trigger) { _, new in
+        .onChangeCompat(of: trigger) { _, new in
             animateID = new
         }
     }
@@ -54,7 +54,7 @@ private struct ConfettiPiece: View {
             .rotationEffect(.degrees(rot))
             .position(x: startX, y: y)
             .opacity(opacity)
-            .onChange(of: animateID) { _, _ in
+            .onChangeCompat(of: animateID) { _, _ in
                 y = -80
                 rot = 0
                 opacity = 1

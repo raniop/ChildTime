@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CompanionView: View {
-    var controller: CompanionController
+    @ObservedObject var controller: CompanionController
     var size: CGFloat = 140
     /// When true (default) the mascot is the lion brand character; when false it
     /// falls back to the original drawn smiley (kept only for the world-map
@@ -57,7 +57,7 @@ struct CompanionView: View {
             startAmbientOrbit()
             startMagicStarBounce()
         }
-        .onChange(of: controller.state) { _, new in
+        .onChangeCompat(of: controller.state) { _, new in
             handleStateChange(new)
         }
     }
@@ -403,7 +403,7 @@ private struct OpenSmileShape: Shape {
 
 #Preview {
     struct DemoWrapper: View {
-        @State var c = CompanionController()
+        @StateObject var c = CompanionController()
         var body: some View {
             ZStack {
                 AppGradient.dreamy.ignoresSafeArea()

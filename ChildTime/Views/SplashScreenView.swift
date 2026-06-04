@@ -9,7 +9,7 @@ struct SplashScreenView: View {
     /// Called once the intro animation has finished playing.
     var onFinish: () -> Void
 
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
 
     // Animation stages, driven on a short timeline.
     @State private var showRings = false

@@ -4,7 +4,7 @@ import SwiftUI
 ///
 /// Use as an overlay so it stays above other content but doesn't push layout.
 struct FloatingCompanion: View {
-    var controller: CompanionController
+    @ObservedObject var controller: CompanionController
     /// When set, the floating buddy *is* the child — their own avatar wanders
     /// the screen instead of the generic Tofy face.
     var profile: Profile? = nil
@@ -220,7 +220,7 @@ private struct BubbleSizeKey: PreferenceKey {
 
 #Preview {
     struct DemoWrapper: View {
-        @State var c = CompanionController()
+        @StateObject var c = CompanionController()
         var body: some View {
             ZStack {
                 AppGradient.dreamy.ignoresSafeArea()

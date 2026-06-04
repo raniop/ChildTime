@@ -6,7 +6,7 @@ struct UnlockedView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var secondsRemaining: Int = 0
     @State private var timer: Timer?
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var greeted = false
 
     private var isCompact: Bool { hsc == .compact }
@@ -96,7 +96,7 @@ struct UnlockedView: View {
         .onDisappear { timer?.invalidate() }
         // Returning from another app (or the app switcher) pauses the Timer —
         // recompute from the absolute end time and restart so it's never frozen.
-        .onChange(of: scenePhase) { _, phase in
+        .onChangeCompat(of: scenePhase) { _, phase in
             if phase == .active {
                 secondsRemaining = progress.unlockSecondsRemaining
                 startTimer()

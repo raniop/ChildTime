@@ -87,7 +87,7 @@ struct ChestView: View {
             startOrbitLoop()
             startStageAnimation()
         }
-        .onChange(of: stage) { _, _ in startStageAnimation() }
+        .onChangeCompat(of: stage) { _, _ in startStageAnimation() }
     }
 
     // MARK: - Layers
@@ -243,7 +243,7 @@ private struct ShockwaveRing: View {
             .frame(width: baseSize * 1.4, height: baseSize * 1.4)
             .scaleEffect(scale)
             .opacity(opacity)
-            .onChange(of: trigger) { _, _ in
+            .onChangeCompat(of: trigger) { _, _ in
                 scale = 0.3
                 opacity = 0.85
                 withAnimation(.easeOut(duration: 0.8).delay(delay)) {
@@ -300,7 +300,7 @@ private struct BurstParticle: View {
                     y: sin(angle) * distance * t - (t * 18))  // slight upward drift
             .scaleEffect(0.4 + t * 0.9)
             .opacity(opacity)
-            .onChange(of: trigger) { _, _ in
+            .onChangeCompat(of: trigger) { _, _ in
                 t = 0; opacity = 1; spin = 0
                 withAnimation(.easeOut(duration: 0.9)) {
                     t = 1

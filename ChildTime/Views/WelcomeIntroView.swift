@@ -7,7 +7,7 @@ import SwiftUI
 struct WelcomeIntroView: View {
     @EnvironmentObject var settings: ParentSettings
     @Environment(\.horizontalSizeClass) private var hsc
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var appeared = false
 
     private var isCompact: Bool { hsc == .compact }

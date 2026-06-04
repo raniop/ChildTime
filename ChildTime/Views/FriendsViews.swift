@@ -382,7 +382,7 @@ struct AddFriendView: View {
         // Live so the inbound listener fires the instant someone scans MY code.
         .task { await friends.startLive() }
         .onAppear { knownFriendIDs = Set(friends.leaderboard.map(\.id)) }
-        .onChange(of: friends.leaderboard.map(\.id)) { _, ids in
+        .onChangeCompat(of: friends.leaderboard.map(\.id)) { _, ids in
             // A new friend appeared while this sheet is open (someone connected to
             // me) → celebrate and auto-close, like the scanning side already does.
             let fresh = Set(ids).subtracting(knownFriendIDs)
@@ -440,7 +440,7 @@ struct AddFriendView: View {
             }
             Text("אוֹ הַקְלִידוּ קוֹד שֶׁל חָבֵר").font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.7))
-            TextField("", text: $typed, prompt: Text("קוֹד").foregroundStyle(.white.opacity(0.5)))
+            TextField("", text: $typed, prompt: Text("קוֹד").foregroundColor(.white.opacity(0.5)))
                 .textInputAutocapitalization(.characters).autocorrectionDisabled()
                 .multilineTextAlignment(.center)
                 .font(.system(size: 24, weight: .heavy, design: .monospaced)).kerning(5).foregroundStyle(.white)

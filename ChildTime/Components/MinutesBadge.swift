@@ -20,7 +20,7 @@ struct MinutesBadge: View {
                 Text("\(minutes)")
                     .font(.system(size: compact ? 22 : 28, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                    .contentTransition(.numericText(value: Double(minutes)))
+                    .numericTextTransition(Double(minutes))
                     .scaleEffect(bounce ? 1.15 : 1.0)
                 Text("דַּק׳")
                     .font(.system(size: compact ? 14 : 16, weight: .semibold, design: .rounded))
@@ -54,7 +54,7 @@ struct MinutesBadge: View {
         .glow(hasMinutes ? AppColor.successMint : .clear, radius: hasMinutes ? 14 : 0)
         .scaleEffect(bounce ? 1.05 : 1.0)
         .animation(.spring(response: 0.35, dampingFraction: 0.5), value: bounce)
-        .onChange(of: minutes) { _, _ in
+        .onChangeCompat(of: minutes) { _, _ in
             bounce = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 bounce = false
@@ -121,7 +121,7 @@ struct EarnedMinutesPopup: View {
         .scaleEffect(scale)
         .opacity(opacity)
         .offset(y: offsetY)
-        .onChange(of: visible) { _, isVisible in
+        .onChangeCompat(of: visible) { _, isVisible in
             if isVisible {
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.55)) {
                     phase = .popped

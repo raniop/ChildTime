@@ -68,7 +68,7 @@ struct StreakMeter: View {
         )
         .opacity(streak > 0 ? 1 : 0)
         .animation(.spring(response: 0.4, dampingFraction: 0.6), value: streak)
-        .onChange(of: streak) { _, _ in
+        .onChangeCompat(of: streak) { _, _ in
             pulsing = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { pulsing = false }
         }

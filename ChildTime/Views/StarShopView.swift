@@ -47,7 +47,7 @@ struct StarShopView: View {
             }
         }
         .environment(\.layoutDirection, .rightToLeft)
-        .onChange(of: store.lastGrantedDiamonds) { _, new in
+        .onChangeCompat(of: store.lastGrantedDiamonds) { _, new in
             if let new { celebrate = new; store.lastGrantedDiamonds = nil; Haptic.success() }
         }
     }
@@ -81,7 +81,7 @@ struct StarShopView: View {
                 .font(.system(size: 30, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .lineLimit(1)
-                .contentTransition(.numericText(value: Double(progress.diamonds)))
+                .numericTextTransition(Double(progress.diamonds))
             Text("יַהֲלוֹמִים שֶׁלְּךָ")
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))

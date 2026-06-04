@@ -38,7 +38,7 @@ struct AddParentView: View {
             baselineParents = household.linkedParentSummaries.count
             if code == nil { generate() }
         }
-        .onChange(of: household.linkedParentSummaries.count) { _, now in
+        .onChangeCompat(of: household.linkedParentSummaries.count) { _, now in
             if now > baselineParents { withAnimation(.spring) { justJoined = true } }
         }
     }
@@ -195,7 +195,7 @@ struct JoinFamilyFlowView: View {
             Text("אוֹ הַקְלִידוּ אֶת הַקּוֹד").font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.7))
 
-            TextField("", text: $joinCode, prompt: Text("6 תָּוִים").foregroundStyle(.white.opacity(0.5)))
+            TextField("", text: $joinCode, prompt: Text("6 תָּוִים").foregroundColor(.white.opacity(0.5)))
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
                 .multilineTextAlignment(.center)

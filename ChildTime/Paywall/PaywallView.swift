@@ -14,7 +14,7 @@ struct PaywallView: View {
     @Environment(\.horizontalSizeClass) private var hsc
 
     @State private var selectedID: String = SubscriptionManager.yearlyID  // year highlighted by default
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var headerAppeared = false
     @State private var burst = 0
     @State private var successConfetti = 0
@@ -61,7 +61,7 @@ struct PaywallView: View {
                 Task { await subs.loadProducts() }
             }
         }
-        .onChange(of: subs.subscriptionState) { _, newState in
+        .onChangeCompat(of: subs.subscriptionState) { _, newState in
             // The moment we detect a successful purchase, celebrate + dismiss.
             if case .active = newState { celebrateAndDismiss() }
             if case .inTrial = newState { celebrateAndDismiss() }

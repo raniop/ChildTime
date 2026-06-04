@@ -14,7 +14,7 @@ struct StarBurst: View {
                 StarParticle(angle: angle, color: color, animateID: animateID, particleIndex: i)
             }
         }
-        .onChange(of: trigger) { _, new in
+        .onChangeCompat(of: trigger) { _, new in
             animateID = new
         }
     }
@@ -39,7 +39,7 @@ private struct StarParticle: View {
             )
             .opacity(opacity)
             .scaleEffect(1 - 0.3 * t)
-            .onChange(of: animateID) { _, _ in
+            .onChangeCompat(of: animateID) { _, _ in
                 t = 0
                 opacity = 1
                 withAnimation(.easeOut(duration: 0.7)) {

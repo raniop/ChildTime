@@ -13,7 +13,7 @@ struct ChildAppLockSetupView: View {
 
     @State private var showAppPicker = false
     @State private var selection = FamilyActivitySelection()
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
 
     private var selectedCount: Int {
         selection.applicationTokens.count + selection.categoryTokens.count
@@ -117,7 +117,7 @@ struct ChildAppLockSetupView: View {
             }
         }
         .familyActivityPicker(isPresented: $showAppPicker, selection: $selection)
-        .onChange(of: selection) { _, new in
+        .onChangeCompat(of: selection) { _, new in
             settings.activitySelectionData = SelectionStorage.encode(new)
             shields.applyShield(from: new)
         }

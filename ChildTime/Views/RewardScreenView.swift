@@ -23,7 +23,7 @@ struct RewardScreenView: View {
     @State private var stage: ChestStage = .closed
     @State private var revealedItems: Int = 0
     @State private var reward: ChestReward = ChestReward(stars: 0, diamonds: 0, minutes: 0)
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var confettiTrigger = 0
     @State private var goLevelUp = false
     @State private var goWorldUnlock: World?
@@ -74,7 +74,7 @@ struct RewardScreenView: View {
                         .frame(maxWidth: .infinity)
                     }
                     .scrollIndicators(.hidden)
-                    .onChange(of: revealedItems) { _, _ in
+                    .onChangeCompat(of: revealedItems) { _, _ in
                         // Auto-scroll so each revealed reward comes into view — no
                         // manual scrolling to see what you won.
                         withAnimation(.easeInOut(duration: 0.4)) {

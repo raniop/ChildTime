@@ -18,7 +18,7 @@ struct HatchingView: View {
     @State private var splitOpen: Bool = false      // shells separated yet?
 
     // Companion emerging.
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var companionVisible = false
     @State private var companionScale: CGFloat = 0.2
     @State private var companionOffsetY: CGFloat = 0

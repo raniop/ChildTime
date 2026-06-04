@@ -48,14 +48,14 @@ struct StarCounter: View {
             Text("\(displayed)")
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .foregroundStyle(AppColor.textPrimary)
-                .contentTransition(.numericText(value: Double(displayed)))
+                .numericTextTransition(Double(displayed))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(.ultraThinMaterial, in: Capsule())
         .glow(color, radius: 10)
         .onAppear { displayed = value }
-        .onChange(of: value) { _, new in
+        .onChangeCompat(of: value) { _, new in
             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                 displayed = new
             }
@@ -75,7 +75,7 @@ struct MinuteCounter: View {
             Text("\(minutes) דק׳")
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .foregroundStyle(AppColor.textPrimary)
-                .contentTransition(.numericText(value: Double(minutes)))
+                .numericTextTransition(Double(minutes))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)

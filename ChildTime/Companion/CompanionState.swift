@@ -1,5 +1,5 @@
 import SwiftUI
-import Observation
+import Combine
 
 enum CompanionState: Equatable {
     case idle
@@ -10,12 +10,13 @@ enum CompanionState: Equatable {
     case sleep
 }
 
-@Observable
-final class CompanionController {
-    var state: CompanionState = .idle
-    var bubbleText: String?
+/// ObservableObject (not the iOS-17 `@Observable` macro) so the app supports
+/// iOS 16. Behaviour is identical on 17/18 — these are tiny companion views.
+final class CompanionController: ObservableObject {
+    @Published var state: CompanionState = .idle
+    @Published var bubbleText: String?
 
-    @ObservationIgnored private var bubbleTask: Task<Void, Never>?
+    private var bubbleTask: Task<Void, Never>?
 
     func cheer(_ text: String? = nil) {
         state = .cheer

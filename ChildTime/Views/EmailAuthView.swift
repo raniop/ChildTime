@@ -76,7 +76,7 @@ struct EmailAuthView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button("בטל") { dismiss() } }
             }
-            .onChange(of: auth.isSignedIn) { _, signedIn in
+            .onChangeCompat(of: auth.isSignedIn) { _, signedIn in
                 if signedIn { dismiss() }
             }
         }

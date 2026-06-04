@@ -11,7 +11,7 @@ struct WorldMapView: View {
     @ObservedObject private var friends = FriendsManager.shared
     @ObservedObject private var liveGame = LiveGameManager.shared
     @State private var inviteBannerVisible = false
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var selectedWorld: World?
     @State private var showDailyChest = false
     @State private var showingParentGate = false
@@ -189,13 +189,13 @@ struct WorldMapView: View {
         }
         // A fullScreenCover doesn't re-fire the map's .onAppear when it closes,
         // so check the wheel when a play session actually ends.
-        .onChange(of: showingSmartFeed) { _, shown in
+        .onChangeCompat(of: showingSmartFeed) { _, shown in
             if !shown { DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { maybeAutoPresentWheel() } }
         }
-        .onChange(of: selectedWorld?.id) { _, world in
+        .onChangeCompat(of: selectedWorld?.id) { _, world in
             if world == nil { DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { maybeAutoPresentWheel() } }
         }
-        .onChange(of: progress.stars) { _, new in
+        .onChangeCompat(of: progress.stars) { _, new in
             if new > lastSeenStars {
                 companion.cheer()
             }
@@ -236,18 +236,18 @@ struct WorldMapView: View {
         }
         // A friend invite link opened the app → jump to the leaderboard, which
         // consumes the pending code and adds the friend.
-        .onChange(of: friends.pendingFriendCode) { _, code in
+        .onChangeCompat(of: friends.pendingFriendCode) { _, code in
             if code != nil { showingLeaderboard = true }
         }
         // A game deep link / push tap → join the game (the cover shows it).
-        .onChange(of: liveGame.pendingGameID) { _, id in
+        .onChangeCompat(of: liveGame.pendingGameID) { _, id in
             guard let id else { return }
             liveGame.pendingGameID = nil
             Task { await liveGame.joinGame(id) }
         }
         // The leaderboard's "create game" button asked to open setup. Delay a beat
         // so the leaderboard cover finishes dismissing before this one presents.
-        .onChange(of: liveGame.wantsNewGame) { _, want in
+        .onChangeCompat(of: liveGame.wantsNewGame) { _, want in
             guard want else { return }
             liveGame.wantsNewGame = false
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { liveGame.openSetup() }
@@ -271,7 +271,7 @@ struct WorldMapView: View {
             }
         }
         .animation(.spring(response: 0.5, dampingFraction: 0.8), value: inviteBannerVisible)
-        .onChange(of: liveGame.invites.count) { old, new in
+        .onChangeCompat(of: liveGame.invites.count) { old, new in
             guard new > old else { if new == 0 { inviteBannerVisible = false }; return }
             Haptic.success(); SoundPlayer.shared.play(.portalAppear)
             inviteBannerVisible = true
@@ -468,7 +468,7 @@ struct WorldMapView: View {
                     .foregroundStyle(.white)
                     .monospacedDigit()
                     .lineLimit(1)
-                    .contentTransition(.numericText(value: Double(progress.minutesEarnedToday)))
+                    .numericTextTransition(Double(progress.minutesEarnedToday))
             }
             .fixedSize()
             .padding(.horizontal, 12)
@@ -611,7 +611,7 @@ struct WorldMapView: View {
         .environment(\.layoutDirection, .rightToLeft)
         .padding(20)
         .frame(width: 340)
-        .presentationCompactAdaptation(.popover)
+        .popoverCompact()
     }
 
     private struct InfoContent {
@@ -686,7 +686,7 @@ struct WorldMapView: View {
                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .lineLimit(1)
-                .contentTransition(.numericText(value: Double(value)))
+                .numericTextTransition(Double(value))
             if let label = label {
                 Text(label)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))

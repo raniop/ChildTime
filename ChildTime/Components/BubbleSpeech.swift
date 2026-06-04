@@ -50,7 +50,7 @@ struct BubbleSpeech: View {
         }
         .frame(maxWidth: 260)
         .onAppear { startTyping() }
-        .onChange(of: text) { _, _ in startTyping() }
+        .onChangeCompat(of: text) { _, _ in startTyping() }
     }
 
     private func startTyping() {

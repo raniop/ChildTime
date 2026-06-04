@@ -112,14 +112,14 @@ struct ParentDashboardView: View {
                         // viewport; locking it to the container width removes that
                         // possibility outright — belt to the `.scrollBounceBehavior`
                         // suspenders below, and to the LTR-container fix.
-                        .containerRelativeFrame(.horizontal)
+                        .containerWidthLock()
                     }
                     // Never allow horizontal scrolling/bounce — this is a
                     // vertical-only page. On some iOS versions the RTL→LTR
                     // container flip left a hair of horizontal slack that became
                     // a draggable sideways drift; `.basedOnSize` disables the
                     // horizontal axis entirely when the content already fits.
-                    .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+                    .noHorizontalBounce()
                     .refreshable {
                         // Pull-to-refresh: actually re-fetch every child's cloud
                         // state and give the listeners a beat to deliver.
@@ -273,7 +273,7 @@ struct ParentDashboardView: View {
                 rescheduleInsights()
                 Task { await push.refreshAuthorizationStatus() }
             }
-            .onChange(of: settings.parentInsightFrequency) { _, freq in
+            .onChangeCompat(of: settings.parentInsightFrequency) { _, freq in
                 if freq != .off {
                     Task { await PushManager.shared.requestAuthorization() }
                 }
@@ -580,7 +580,7 @@ struct ParentDashboardView: View {
                 HouseholdManager.shared.watchInviteRedemption(payload: code)
             }
         }
-        .onChange(of: household.redeemedInviteCode) { _, redeemed in
+        .onChangeCompat(of: household.redeemedInviteCode) { _, redeemed in
             guard redeemed != nil, qrChild != nil, !childDeviceLinked else { return }
             Haptic.success()
             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { childDeviceLinked = true }

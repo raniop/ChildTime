@@ -41,7 +41,7 @@ struct QuestionRunnerView: View {
     private var portalEmojiSize: CGFloat { isCompact ? 130 : 180 }
     private var portalTitleSize: CGFloat { isCompact ? 36 : 56 }
 
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var current: Question?
     @State private var questionIndex: Int = 0
     @State private var correctInSession: Int = 0
@@ -215,7 +215,7 @@ struct QuestionRunnerView: View {
             }
         }
         // The parent answered from their notification → remove the wrong option.
-        .onChange(of: parentHelp.lastReply?.kept) { _, kept in
+        .onChangeCompat(of: parentHelp.lastReply?.kept) { _, kept in
             if kept != nil { applyParentHelp() }
         }
         .confirmationDialog("דִּוּוּחַ עַל הַשְּׁאֵלָה",
@@ -368,7 +368,7 @@ struct QuestionRunnerView: View {
                 .foregroundStyle(.white)
                 .monospacedDigit()
                 .lineLimit(1)
-                .contentTransition(.numericText(value: Double(value)))
+                .numericTextTransition(Double(value))
         }
         .padding(.horizontal, isCompact ? 9 : 11)
         .padding(.vertical, 5)

@@ -39,7 +39,7 @@ struct ScoreBadge: View {
             Text("\(value)")
                 .font(.system(size: compact ? 14 : 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-                .contentTransition(.numericText(value: Double(value)))
+                .numericTextTransition(Double(value))
             if !compact {
                 Text(label)
                     .font(.system(size: 11, weight: .semibold, design: .rounded))

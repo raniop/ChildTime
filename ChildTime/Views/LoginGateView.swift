@@ -19,7 +19,7 @@ struct LoginGateView: View {
     @Environment(\.horizontalSizeClass) private var hsc
     @Environment(\.colorScheme) private var colorScheme
 
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var heroAppear = false
     @State private var ctaAppear = false
     @State private var bubbleVisible = false

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct DemoView: View {
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var burstTrigger = 0
     @State private var confettiTrigger = 0
     @State private var rumbleTrigger = 0

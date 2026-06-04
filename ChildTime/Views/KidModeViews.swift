@@ -42,7 +42,7 @@ struct KidModeEntryView: View {
         }
         .environment(\.layoutDirection, .rightToLeft)
         .familyActivityPicker(isPresented: $showPicker, selection: $selection)
-        .onChange(of: selection) { _, new in
+        .onChangeCompat(of: selection) { _, new in
             kidMode.allowedData = SelectionStorage.encode(new)
         }
         .onAppear {

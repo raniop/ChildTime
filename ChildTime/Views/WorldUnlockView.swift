@@ -5,7 +5,7 @@ struct WorldUnlockView: View {
     let onContinue: () -> Void
 
     @Environment(\.horizontalSizeClass) private var hsc
-    @State private var companion = CompanionController()
+    @StateObject private var companion = CompanionController()
     @State private var confettiTrigger = 0
     @State private var stage: Int = 0
 

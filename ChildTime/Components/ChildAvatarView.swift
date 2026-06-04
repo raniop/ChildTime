@@ -49,7 +49,7 @@ struct ChildAvatarView: View {
                     matching: .images,
                     photoLibrary: .shared()
                 )
-                .onChange(of: pickerItem) { _, newItem in
+                .onChangeCompat(of: pickerItem) { _, newItem in
                     Task { await loadAndStore(newItem) }
                 }
                 .contextMenu {
