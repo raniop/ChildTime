@@ -188,6 +188,14 @@ final class ProgressStore: ObservableObject {
     private var sittingCorrect = 0
     private var sittingStars = 0
     private var sittingMinutes = 0
+    // Analytics accumulators summarized into the sessionEnd event (per sitting).
+    private struct SittingTopic { var q = 0; var correct = 0; var ms = 0.0 }
+    private var sittingTopics: [String: SittingTopic] = [:]
+    private var sittingResponseMsTotal = 0.0
+    private var sittingResponseCount = 0
+    private var sittingXP = 0
+    private var sittingWheelSpins = 0
+    private var sittingMystery = 0
 
     /// Points awarded for the *last* correct answer, so the UI can flash
     /// '+15' next to the running total. Consumers may set it back to 0.
@@ -528,6 +536,7 @@ final class ProgressStore: ObservableObject {
     func resetWheelProgress() {
         wheelProgressCount = 0
         pendingBonusWheel = false
+        sittingWheelSpins += 1   // the child actually spun the wheel
     }
 
     /// Records that the child abandoned a topic (replaced its question or quit
@@ -677,6 +686,14 @@ final class ProgressStore: ObservableObject {
         updateTopicStat(topic: ctx.topic, correct: true)
         updateLearningSignals(topic: ctx.topic, correct: true, responseMs: responseMs, hintUsed: hintUsed)
         wheelProgressCount += 1
+
+        // Per-sitting analytics for the sessionEnd summary.
+        sittingXP += RewardEngine.xpPerCorrect
+        if responseMs > 0 { sittingResponseMsTotal += responseMs; sittingResponseCount += 1 }
+        if ctx.isMysteryPortal { sittingMystery += 1 }
+        var st = sittingTopics[ctx.topic.displayName] ?? SittingTopic()
+        st.q += 1; st.correct += 1; if responseMs > 0 { st.ms += responseMs }
+        sittingTopics[ctx.topic.displayName] = st
 
         // Risk & Recovery loop (Earn mode only — there's no time to win back in
         // Free Learning). A clean first-try correct answer redeems minutes a
@@ -866,6 +883,8 @@ final class ProgressStore: ObservableObject {
         guard !sittingActive else { return }   // already in a sitting → don't re-notify
         sittingActive = true
         sittingQuestions = 0; sittingCorrect = 0; sittingStars = 0; sittingMinutes = 0
+        sittingTopics = [:]; sittingResponseMsTotal = 0; sittingResponseCount = 0
+        sittingXP = 0; sittingWheelSpins = 0; sittingMystery = 0
         LiveEventReporter.report(.sessionStart)
     }
 
@@ -877,14 +896,25 @@ final class ProgressStore: ObservableObject {
         sittingActive = false
         let answered = max(sittingQuestions, sittingCorrect)
         let accuracy = answered > 0 ? Int(Double(sittingCorrect) / Double(answered) * 100) : 0
+        let avgMs = sittingResponseCount > 0 ? Int(sittingResponseMsTotal / Double(sittingResponseCount)) : 0
+        let topicsPayload: [String: [String: Int]] = sittingTopics.mapValues { t in
+            ["q": t.q, "correct": t.correct, "avgMs": t.correct > 0 ? Int(t.ms / Double(t.correct)) : 0]
+        }
         LiveEventReporter.report(.sessionEnd, extra: [
             "questions": answered,
             "correct": sittingCorrect,
             "accuracy": accuracy,
             "minutes": sittingMinutes,
-            "stars": sittingStars
+            "stars": sittingStars,
+            "xp": sittingXP,
+            "avgResponseMs": avgMs,
+            "wheelSpins": sittingWheelSpins,
+            "mystery": sittingMystery,
+            "topics": topicsPayload
         ])
         sittingQuestions = 0; sittingCorrect = 0; sittingStars = 0; sittingMinutes = 0
+        sittingTopics = [:]; sittingResponseMsTotal = 0; sittingResponseCount = 0
+        sittingXP = 0; sittingWheelSpins = 0; sittingMystery = 0
     }
 
     /// Records a wrong answer. Returns the number of penalty minutes applied
@@ -913,6 +943,9 @@ final class ProgressStore: ObservableObject {
         wrongStreak += 1
         xp += RewardEngine.xpPerQuestion
         updateTopicStat(topic: topic, correct: false)
+        sittingXP += RewardEngine.xpPerQuestion
+        var stW = sittingTopics[topic.displayName] ?? SittingTopic()
+        stW.q += 1; sittingTopics[topic.displayName] = stW
         // A miss eases the adaptive level for this topic (gentle, capped).
         adjustAdaptiveLevel(topic: topic, correct: false, fast: false,
                             hintUsed: hintUsed, abandoned: false)

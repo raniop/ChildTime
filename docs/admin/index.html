@@ -156,11 +156,11 @@
     <!-- LAYER 3: LEARNING -->
     <div class="layer">
       <h2>שכבה 3 · Learning</h2><div class="q">האם הילדים באמת לומדים?</div>
-      <div class="grid g3" id="accuracyTiles"></div>
+      <div class="grid g4" id="accuracyTiles"></div>
       <div class="grid g2" style="margin-top:14px">
         <div class="card">
           <h3>נושאים פופולריים</h3><p class="hint">לפי מספר סבבים (7 ימים)</p>
-          <table id="topicTable"><thead><tr><th>נושא</th><th>סבבים</th><th>דיוק</th></tr></thead><tbody></tbody></table>
+          <table id="topicTable"><thead><tr><th>נושא</th><th>שאלות</th><th>דיוק</th></tr></thead><tbody></tbody></table>
         </div>
         <div class="card">
           <h3>חזקים / לחיזוק</h3><p class="hint">לפי אחוז הצלחה</p>
@@ -204,11 +204,12 @@ const SAMPLE = {
     retention: { d1: 0.61, d7: 0.44, d30: null, cohort: { d1: 13, d7: 9, d30: 0 } } },
   engagement: { avgMinPerChildDay: 26, avgSessionLengthMin: 3.7, sessionsPerActiveChildDay: 7,
     questionsPerDay: 531, questionsPerSession: 11.8, totalQuestions: 3721, sessionsToday: 26, sessions7d: 316 },
-  learning: { accuracy: { today: 0.75, week: 0.94, month: 0.93 },
+  learning: { accuracy: { today: 0.75, week: 0.94, month: 0.93 }, avgResponseSec: 4.8,
     topicsPopular: [{topic:"חיבור וחיסור",sessions:120,avgAccuracy:.82},{topic:"איות",sessions:88,avgAccuracy:.74}],
     topicsStrong: [{topic:"חיבור וחיסור",sessions:120,avgAccuracy:.82}],
     topicsWeak: [{topic:"כפל וחילוק",sessions:40,avgAccuracy:.66}] },
-  economy: { minutesEarned: { today: 92, week: 851, month: 3120 }, minutesUsed7: 609, minutesUnused7: 242 },
+  economy: { minutesEarned: { today: 92, week: 851, month: 3120 }, minutesUsed7: 609, minutesUnused7: 242,
+    xp: { today: 480, week: 4200, month: 15800 }, wheelSpins7: 73, mystery7: 41 },
   daily: [...Array(30)].map((_,i)=>({date:`${i+1}/6`, activeChildren:Math.max(0,Math.round(6+Math.sin(i/2)*4)), sessions:Math.round(20+Math.sin(i/3)*12), minutes:Math.round(60+Math.sin(i/3)*40)})),
   notTracked: ["responseTimePerQuestion","xp","wheelOfFortune","mysteryBox","minutesLostToMistakes"],
 };
@@ -273,10 +274,12 @@ function render(state){
 
   // LEARNING
   const acc=(d.learning?.accuracy)||{};
+  const rtSec = d.learning?.avgResponseSec;
   document.getElementById("accuracyTiles").innerHTML =
     tile("אחוז הצלחה · היום", pct(acc.today)) +
     tile("אחוז הצלחה · השבוע", pct(acc.week)) +
-    tile("אחוז הצלחה · החודש", pct(acc.month));
+    tile("אחוז הצלחה · החודש", pct(acc.month)) +
+    tile("זמן תגובה ממוצע", rtSec!=null ? `${fmt1(rtSec)} <small>שנ'</small>` : "—", "לשאלה");
   const tp=d.learning?.topicsPopular||[];
   const tb=document.querySelector("#topicTable tbody");
   if(tp.length){ const max=Math.max(1,...tp.map(t=>t.sessions));
@@ -289,16 +292,21 @@ function render(state){
     `<div style="font-size:12px;font-weight:800;opacity:.7;margin:12px 0 4px">🎯 דורשים חיזוק</div>${list(sw?.topicsWeak,"down")}`;
 
   // ECONOMY
-  const ec=d.economy||{}; const em=ec.minutesEarned||{};
+  const ec=d.economy||{}; const em=ec.minutesEarned||{}; const xp=ec.xp||{};
   document.getElementById("econTiles").innerHTML =
     tile("דקות שנוצרו · השבוע", `${fmt(em.week)} <small>דק'</small>`, `היום ${fmt(em.today)} · החודש ${fmt(em.month)}`) +
     tile("דקות שנוצלו · השבוע", `${fmt(ec.minutesUsed7)} <small>דק'</small>`) +
-    tile("דקות שלא נוצלו · השבוע", `${fmt(ec.minutesUnused7)} <small>דק'</small>`);
+    tile("דקות שלא נוצלו · השבוע", `${fmt(ec.minutesUnused7)} <small>דק'</small>`) +
+    tile("XP · השבוע", fmt(xp.week), `היום ${fmt(xp.today)} · החודש ${fmt(xp.month)}`) +
+    tile("גלגל מזל · סיבובים", fmt(ec.wheelSpins7), "7 ימים אחרונים") +
+    tile("Mystery · פורטלים", fmt(ec.mystery7), "7 ימים אחרונים");
 
   // pending / not tracked
   const labels={responseTimePerQuestion:"זמן תשובה לשאלה",xp:"XP",wheelOfFortune:"גלגל מזל",mysteryBox:"Mystery Box",minutesLostToMistakes:"דקות שאבדו מטעויות"};
   const nt=(d.notTracked||[]).map(k=>labels[k]||k);
-  document.getElementById("pending").innerHTML = nt.length? `🛠️ <b>ממתין ל-tracking</b> (דורש הוספת אירועים באפליקציה + בילד חדש): ${nt.join(" · ")}` : "";
+  let html = `ℹ️ <b>מדדים חדשים</b> (נושאים · זמן תגובה · XP · גלגל מזל · Mystery) מתחילים להיאסף מהבילד הבא — יתמלאו תוך כמה ימי שימוש.`;
+  if(nt.length) html += `<br>🛠️ עדיין דורש tracking: ${nt.join(" · ")}`;
+  document.getElementById("pending").innerHTML = html;
 
   drawChart(d.daily||[]);
   document.getElementById("updated").textContent = "עודכן לאחרונה: " + (d.updatedAt||"—");

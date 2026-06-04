@@ -588,7 +588,9 @@ async function computeAdminStats() {
           type: e.type, createdAt: Number(e.createdAt) || 0,
           accuracy: Number(e.accuracy) || 0, minutes: Number(e.minutes) || 0,
           stars: Number(e.stars) || 0, questions: Number(e.questions) || 0,
-          topic: (e.topic || "").trim(),
+          xp: Number(e.xp) || 0, avgResponseMs: Number(e.avgResponseMs) || 0,
+          wheelSpins: Number(e.wheelSpins) || 0, mystery: Number(e.mystery) || 0,
+          topics: (e.topics && typeof e.topics === "object") ? e.topics : null,
         };
       }).sort((a, b) => a.createdAt - b.createdAt);
     });
@@ -666,12 +668,17 @@ async function computeAdminStats() {
   const accuracy = { today: accAvg(ends1), week: accAvg(ends7), month: accAvg(ends30) };
   const topicMap = {};
   ends7.forEach((e) => {
-    if (!e.topic) return;
-    const t = topicMap[e.topic] || (topicMap[e.topic] = { topic: e.topic, sessions: 0, accSum: 0, accN: 0 });
-    t.sessions += 1;
-    if (e.questions > 0) { t.accSum += e.accuracy; t.accN += 1; }
+    if (!e.topics) return;
+    for (const [name, v] of Object.entries(e.topics)) {
+      const q = Number(v.q) || 0, correct = Number(v.correct) || 0, avgMs = Number(v.avgMs) || 0;
+      const t = topicMap[name] || (topicMap[name] = { topic: name, q: 0, correct: 0, msW: 0 });
+      t.q += q; t.correct += correct; t.msW += avgMs * correct;
+    }
   });
-  const topicArr = Object.values(topicMap).map((t) => ({ topic: t.topic, sessions: t.sessions, avgAccuracy: t.accN ? t.accSum / t.accN / 100 : null }));
+  const topicArr = Object.values(topicMap).map((t) => ({
+    topic: t.topic, sessions: t.q, avgAccuracy: t.q ? t.correct / t.q : null,
+    avgResponseSec: t.correct ? Math.round(t.msW / t.correct / 100) / 10 : null,
+  }));
   const topicsPopular = topicArr.slice().sort((a, b) => b.sessions - a.sessions).slice(0, 5);
   const ranked = topicArr.filter((t) => t.avgAccuracy != null && t.sessions >= 2);
   const topicsStrong = ranked.slice().sort((a, b) => b.avgAccuracy - a.avgAccuracy).slice(0, 3);
@@ -691,6 +698,13 @@ async function computeAdminStats() {
       }
     });
   });
+  // XP, wheel spins, mystery portals, and response time (from the enriched
+  // sessionEnd events — populate once the build that emits them is in use).
+  const xp1 = sum(ends1, (e) => e.xp), xp7 = sum(ends7, (e) => e.xp), xp30 = sum(ends30, (e) => e.xp);
+  const wheelSpins7 = sum(ends7, (e) => e.wheelSpins), mystery7 = sum(ends7, (e) => e.mystery);
+  const rtS = ends7.filter((e) => e.avgResponseMs > 0 && e.questions > 0);
+  const rtNum = sum(rtS, (e) => e.avgResponseMs * e.questions), rtDen = sum(rtS, (e) => e.questions);
+  const avgResponseSec = rtDen ? Math.round(rtNum / rtDen / 100) / 10 : null;
 
   // Daily series (30d): active children, sessions, minutes earned.
   const daily = [];
@@ -718,10 +732,14 @@ async function computeAdminStats() {
       questionsPerDay, questionsPerSession, totalQuestions,
       sessionsToday: ends1.length, sessions7d: ends7.length,
     },
-    learning: { accuracy, topicsPopular, topicsStrong, topicsWeak },
-    economy: { minutesEarned: { today: earned1, week: earned7, month: earned30 }, minutesUsed7: used7, minutesUnused7: Math.max(0, earned7 - used7) },
+    learning: { accuracy, avgResponseSec, topicsPopular, topicsStrong, topicsWeak },
+    economy: {
+      minutesEarned: { today: earned1, week: earned7, month: earned30 },
+      minutesUsed7: used7, minutesUnused7: Math.max(0, earned7 - used7),
+      xp: { today: xp1, week: xp7, month: xp30 }, wheelSpins7, mystery7,
+    },
     daily,
-    notTracked: ["responseTimePerQuestion", "xp", "wheelOfFortune", "mysteryBox", "minutesLostToMistakes"],
+    notTracked: ["minutesLostToMistakes"],
   };
   await db.collection("adminStats").doc("summary").set(summary);
   console.log("[adminStats] wrote summary", { ...totals, events: allEvents.length });
