@@ -71,6 +71,10 @@ struct LuckyWheelView: View {
             }
             // After a prize is revealed, a tap ANYWHERE continues — so a kid
             // never has to find/scroll to a button (e.g. on landscape iPad).
+            // NOTE: we intentionally do NOT add a "tap anywhere to spin" layer
+            // before spinning — it sat on top of the buttons and swallowed the
+            // first tap on "skip"/"spin". The wheel itself is tappable to spin
+            // (and so is the big button), which matches the on-screen hint.
             .overlay {
                 if winner != nil {
                     // Tap anywhere to continue — no on-screen hint text needed.
@@ -82,12 +86,6 @@ struct LuckyWheelView: View {
                             onClose()
                         }
                         .transition(.opacity)
-                } else if !isSpinning {
-                    // Before spinning, a tap ANYWHERE spins too — not only on
-                    // the wheel itself.
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .onTapGesture { spin() }
                 }
             }
         }
