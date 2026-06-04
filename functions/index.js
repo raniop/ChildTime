@@ -550,51 +550,54 @@ const DAY = 24 * 3600;
 
 async function computeAdminStats() {
   const now = Date.now() / 1000;
-  const cut30 = now - 30 * DAY, cut7 = now - 7 * DAY, cut1 = now - 1 * DAY;
+  const cut1 = now - 1 * DAY, cut7 = now - 7 * DAY, cut30 = now - 30 * DAY;
+  const DK = (ts) => Math.floor(ts / DAY);
+  const todayKey = DK(now);
+  const uniq = (arr) => new Set(arr).size;
+  const sum = (arr, f) => arr.reduce((s, x) => s + f(x), 0);
+  const inWin = (arr, cut) => arr.filter((e) => e.createdAt >= cut);
 
-  // Fetch the core collections (tens of docs) so we can drop internal/test
-  // accounts before counting.
   const [parentsSnap, householdsSnap, childrenSnap, devicesSnap] = await Promise.all([
-    db.collection("parents").get(),
-    db.collection("households").get(),
-    db.collection("children").get(),
-    db.collection("childDevices").get(),
+    db.collection("parents").get(), db.collection("households").get(),
+    db.collection("children").get(), db.collection("childDevices").get(),
   ]);
 
-  // Pull events per child. A child with ZERO events ever is an empty seeded/demo
-  // profile and is dropped — "real" = ever actually played. Family/founder
-  // accounts are intentionally KEPT: their usage is real data.
-  const events = [];                 // last-30-day events of real children (metrics)
-  const realChildIDs = [];
-  const realHouseholds = new Set();
+  // childID -> {createdAt, householdID}
+  const meta = {};
+  childrenSnap.docs.forEach((c) => {
+    const d = c.data();
+    meta[c.id] = { createdAt: Number(d.createdAt) || 0, householdID: d.householdID };
+  });
+
+  // Pull ALL events per child. Empty (zero events ever) = seeded/demo profile → dropped.
+  const byChild = {};                 // childID -> sorted event array
+  const realChildIDs = [], realHouseholds = new Set();
   const CHUNK = 25;
   for (let i = 0; i < childrenSnap.docs.length; i += CHUNK) {
     const slice = childrenSnap.docs.slice(i, i + CHUNK);
     const snaps = await Promise.all(slice.map((c) =>
       c.ref.collection("events").get().catch(() => ({ docs: [] }))));
     snaps.forEach((snap, k) => {
-      if (snap.docs.length === 0) return;            // empty seed/demo profile → skip
+      if (snap.docs.length === 0) return;
       const c = slice[k];
       realChildIDs.push(c.id);
       realHouseholds.add(c.data().householdID);
-      snap.docs.forEach((doc) => {
+      byChild[c.id] = snap.docs.map((doc) => {
         const e = doc.data();
-        const createdAt = Number(e.createdAt) || 0;
-        if (createdAt < cut30) return;               // keep only last 30d for metrics
-        events.push({
-          childID: c.id, type: e.type, createdAt,
+        return {
+          type: e.type, createdAt: Number(e.createdAt) || 0,
           accuracy: Number(e.accuracy) || 0, minutes: Number(e.minutes) || 0,
           stars: Number(e.stars) || 0, questions: Number(e.questions) || 0,
           topic: (e.topic || "").trim(),
-        });
-      });
+        };
+      }).sort((a, b) => a.createdAt - b.createdAt);
     });
   }
+  const allEvents = realChildIDs.flatMap((id) => byChild[id].map((e) => ({ ...e, childID: id })));
+  const ends = allEvents.filter((e) => e.type === "sessionEnd");
+  const ends1 = inWin(ends, cut1), ends7 = inWin(ends, cut7), ends30 = inWin(ends, cut30);
 
-  // Totals derived from real (active-ever) households only. "Parents" counts
-  // only real ADULT accounts — has an email AND no child-device token. This
-  // drops anonymous child devices and kids who signed in with their own email
-  // (those carry childFcmTokens, like Yoav), so parents no longer exceed kids.
+  // ---- Totals: real adults + active-ever children ----
   const adultUIDs = new Set(parentsSnap.docs
     .filter((p) => { const d = p.data(); const cf = d.childFcmTokens; return !!d.email && !(cf && cf.length); })
     .map((p) => p.id));
@@ -603,50 +606,64 @@ async function computeAdminStats() {
     if (realHouseholds.has(h.id)) (h.data().parentUIDs || []).forEach((u) => { if (adultUIDs.has(u)) realParentUIDs.add(u); });
   });
   const totals = {
-    parents: realParentUIDs.size,
-    children: realChildIDs.length,
-    households: realHouseholds.size,
+    parents: realParentUIDs.size, children: realChildIDs.length, households: realHouseholds.size,
     devices: devicesSnap.docs.filter((d) => realHouseholds.has(d.data().householdID)).length,
   };
-  const excluded = {
-    children: childrenSnap.size - realChildIDs.length,   // empty/demo profiles dropped
-    parents: parentsSnap.size - realParentUIDs.size,     // anon devices + kids' own accounts
-  };
+  const excluded = { children: childrenSnap.size - realChildIDs.length, parents: parentsSnap.size - realParentUIDs.size };
 
-  const uniq = (arr) => new Set(arr).size;
-  const ends = events.filter((e) => e.type === "sessionEnd");   // completed rounds
-  const ends7 = ends.filter((e) => e.createdAt >= cut7);
-  const ends1 = ends.filter((e) => e.createdAt >= cut1);
-  const accSamples = ends7.filter((e) => e.questions > 0);
-
-  const active = {
-    dau: uniq(events.filter((e) => e.createdAt >= cut1).map((e) => e.childID)),
-    wau: uniq(events.filter((e) => e.createdAt >= cut7).map((e) => e.childID)),
-    mau: uniq(events.map((e) => e.childID)),
-  };
-  const engagement = { sessionsToday: ends1.length, sessions7d: ends7.length, totalSessions: ends.length };
-  const learning = {
-    questions7d: ends7.reduce((s, e) => s + e.questions, 0),
-    avgAccuracy: accSamples.length ? accSamples.reduce((s, e) => s + e.accuracy, 0) / accSamples.length / 100 : 0,
-    minutes7d: ends7.reduce((s, e) => s + e.minutes, 0),
-    stars7d: ends7.reduce((s, e) => s + e.stars, 0),
-  };
-
-  // Daily series (oldest → newest), keyed by local day bucket.
-  const dayKey = (ts) => Math.floor(ts / DAY);
-  const todayKey = dayKey(now);
-  const daily = [];
-  for (let d = 29; d >= 0; d--) {
-    const k = todayKey - d;
-    const dt = new Date(k * DAY * 1000);
-    daily.push({
-      date: `${dt.getDate()}/${dt.getMonth() + 1}`,
-      activeChildren: uniq(events.filter((e) => dayKey(e.createdAt) === k).map((e) => e.childID)),
-      sessions: ends.filter((e) => dayKey(e.createdAt) === k).length,
-    });
+  // ================= 1) GROWTH =================
+  const dau = uniq(inWin(allEvents, cut1).map((e) => e.childID));
+  const wau = uniq(inWin(allEvents, cut7).map((e) => e.childID));
+  const mau = uniq(inWin(allEvents, cut30).map((e) => e.childID));
+  const newChildren7d = realChildIDs.filter((id) => meta[id].createdAt >= cut7).length;
+  const hhFirst = {};                 // household -> earliest child createdAt
+  realChildIDs.forEach((id) => {
+    const hh = meta[id].householdID, ts = meta[id].createdAt;
+    if (hh && ts && (hhFirst[hh] === undefined || ts < hhFirst[hh])) hhFirst[hh] = ts;
+  });
+  const newFamilies7d = Object.values(hhFirst).filter((ts) => ts >= cut7).length;
+  // Retention: of children whose account is ≥N days old, the share who returned
+  // (were active on a different day) within N days of joining.
+  function retention(n) {
+    const cohort = realChildIDs.filter((id) => meta[id].createdAt > 0 && (todayKey - DK(meta[id].createdAt)) >= n);
+    if (!cohort.length) return { rate: null, cohort: 0 };
+    const back = cohort.filter((id) => {
+      const jd = DK(meta[id].createdAt);
+      const days = new Set(byChild[id].map((e) => DK(e.createdAt)));
+      for (let d = 1; d <= n; d++) if (days.has(jd + d)) return true;
+      return false;
+    }).length;
+    return { rate: back / cohort.length, cohort: cohort.length };
   }
+  const r1 = retention(1), r7 = retention(7), r30 = retention(30);
 
-  // Topics (last 7 days).
+  // ================= 2) ENGAGEMENT =================
+  // Session durations by pairing sessionStart -> sessionEnd per child.
+  const sessions = [];                // {endTs, durMin|null}
+  realChildIDs.forEach((id) => {
+    let openTs = null;
+    byChild[id].forEach((e) => {
+      if (e.type === "sessionStart") openTs = e.createdAt;
+      else if (e.type === "sessionEnd") {
+        let dur = openTs != null ? (e.createdAt - openTs) / 60 : null;
+        if (dur != null && (dur < 0 || dur > 180)) dur = null;   // sanity cap 3h
+        sessions.push({ endTs: e.createdAt, durMin: dur });
+        openTs = null;
+      }
+    });
+  });
+  const dur7 = sessions.filter((s) => s.endTs >= cut7 && s.durMin != null);
+  const avgSessionLengthMin = dur7.length ? sum(dur7, (s) => s.durMin) / dur7.length : null;
+  const childDays7 = uniq(inWin(allEvents, cut7).map((e) => e.childID + "|" + DK(e.createdAt)));
+  const sessionsPerActiveChildDay = childDays7 ? ends7.length / childDays7 : 0;
+  const avgMinPerChildDay = avgSessionLengthMin != null ? avgSessionLengthMin * sessionsPerActiveChildDay : null;
+  const questionsPerDay = sum(ends7, (e) => e.questions) / 7;
+  const questionsPerSession = ends7.length ? sum(ends7, (e) => e.questions) / ends7.length : 0;
+  const totalQuestions = sum(ends, (e) => e.questions);
+
+  // ================= 3) LEARNING =================
+  const accAvg = (arr) => { const s = arr.filter((e) => e.questions > 0); return s.length ? sum(s, (e) => e.accuracy) / s.length / 100 : null; };
+  const accuracy = { today: accAvg(ends1), week: accAvg(ends7), month: accAvg(ends30) };
   const topicMap = {};
   ends7.forEach((e) => {
     if (!e.topic) return;
@@ -654,26 +671,60 @@ async function computeAdminStats() {
     t.sessions += 1;
     if (e.questions > 0) { t.accSum += e.accuracy; t.accN += 1; }
   });
-  const topics = Object.values(topicMap)
-    .map((t) => ({ topic: t.topic, sessions: t.sessions, avgAccuracy: t.accN ? t.accSum / t.accN / 100 : 0 }))
-    .sort((a, b) => b.sessions - a.sessions).slice(0, 8);
+  const topicArr = Object.values(topicMap).map((t) => ({ topic: t.topic, sessions: t.sessions, avgAccuracy: t.accN ? t.accSum / t.accN / 100 : null }));
+  const topicsPopular = topicArr.slice().sort((a, b) => b.sessions - a.sessions).slice(0, 5);
+  const ranked = topicArr.filter((t) => t.avgAccuracy != null && t.sessions >= 2);
+  const topicsStrong = ranked.slice().sort((a, b) => b.avgAccuracy - a.avgAccuracy).slice(0, 3);
+  const topicsWeak = ranked.slice().sort((a, b) => a.avgAccuracy - b.avgAccuracy).slice(0, 3);
 
-  // Accuracy distribution (last 7 days).
-  const buckets = [
-    { range: "0-50%", lo: 0, hi: 50, n: 0 }, { range: "50-70%", lo: 50, hi: 70, n: 0 },
-    { range: "70-85%", lo: 70, hi: 85, n: 0 }, { range: "85-100%", lo: 85, hi: 101, n: 0 },
-  ];
-  accSamples.forEach((e) => { const b = buckets.find((b) => e.accuracy >= b.lo && e.accuracy < b.hi); if (b) b.n += 1; });
+  // ================= 4) ECONOMY =================
+  const earned1 = sum(ends1, (e) => e.minutes), earned7 = sum(ends7, (e) => e.minutes), earned30 = sum(ends30, (e) => e.minutes);
+  // Minutes USED: pair screenTimeStart (available) -> screenTimeEnd (left); used = avail - left.
+  let used7 = 0;
+  realChildIDs.forEach((id) => {
+    let openMin = null;
+    byChild[id].forEach((e) => {
+      if (e.type === "screenTimeStart") openMin = e.minutes;
+      else if (e.type === "screenTimeEnd") {
+        if (openMin != null && e.createdAt >= cut7) { const u = openMin - e.minutes; if (u > 0 && u <= 600) used7 += u; }
+        openMin = null;
+      }
+    });
+  });
+
+  // Daily series (30d): active children, sessions, minutes earned.
+  const daily = [];
+  for (let d = 29; d >= 0; d--) {
+    const k = todayKey - d, dt = new Date(k * DAY * 1000);
+    const dayEnds = ends.filter((e) => DK(e.createdAt) === k);
+    daily.push({
+      date: `${dt.getDate()}/${dt.getMonth() + 1}`,
+      activeChildren: uniq(allEvents.filter((e) => DK(e.createdAt) === k).map((e) => e.childID)),
+      sessions: dayEnds.length, minutes: sum(dayEnds, (e) => e.minutes),
+    });
+  }
 
   const summary = {
     updatedAt: new Date().toLocaleString("he-IL", { timeZone: "Asia/Jerusalem" }),
     updatedAtUnix: now,
     totals, excluded,
-    active, engagement, learning, daily, topics,
-    accuracyBuckets: buckets.map((b) => ({ range: b.range, n: b.n })),
+    headline: { learningMinutes: { today: earned1, week: earned7, month: earned30 } },
+    growth: {
+      dau, wau, mau, newChildren7d, newFamilies7d,
+      retention: { d1: r1.rate, d7: r7.rate, d30: r30.rate, cohort: { d1: r1.cohort, d7: r7.cohort, d30: r30.cohort } },
+    },
+    engagement: {
+      avgMinPerChildDay, avgSessionLengthMin, sessionsPerActiveChildDay,
+      questionsPerDay, questionsPerSession, totalQuestions,
+      sessionsToday: ends1.length, sessions7d: ends7.length,
+    },
+    learning: { accuracy, topicsPopular, topicsStrong, topicsWeak },
+    economy: { minutesEarned: { today: earned1, week: earned7, month: earned30 }, minutesUsed7: used7, minutesUnused7: Math.max(0, earned7 - used7) },
+    daily,
+    notTracked: ["responseTimePerQuestion", "xp", "wheelOfFortune", "mysteryBox", "minutesLostToMistakes"],
   };
   await db.collection("adminStats").doc("summary").set(summary);
-  console.log("[adminStats] wrote summary", { ...totals, excluded, events: events.length });
+  console.log("[adminStats] wrote summary", { ...totals, events: allEvents.length });
   return summary;
 }
 
