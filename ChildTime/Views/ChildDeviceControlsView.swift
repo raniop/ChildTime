@@ -133,6 +133,16 @@ struct ChildDeviceControlsView: View {
 
     private func banner(title: String, detail: String, open: Bool, lock: (() -> Void)?) -> some View {
         HStack(spacing: 12) {
+            // RTL: first child renders on the RIGHT, so icon + text sit flush
+            // right; the Spacer (and Lock button) fall to the left.
+            Image(systemName: open ? "lock.open.fill" : "lock.fill")
+                .font(.system(size: 22))
+                .foregroundStyle(open ? AppColor.successMint : AppColor.starGold)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Text(detail).font(.system(size: 12, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.75))
+            }
+            Spacer()
             if let lock {
                 Button { lock() } label: {
                     Label("נְעֹל", systemImage: "lock.fill")
@@ -143,14 +153,6 @@ struct ChildDeviceControlsView: View {
                 }
                 .buttonStyle(.juicy)
             }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 1) {
-                Text(title).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                Text(detail).font(.system(size: 12, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.75))
-            }
-            Image(systemName: open ? "lock.open.fill" : "lock.fill")
-                .font(.system(size: 22))
-                .foregroundStyle(open ? AppColor.successMint : AppColor.starGold)
         }
         .padding(.horizontal, AppSpacing.lg).padding(.vertical, 14)
         .frame(maxWidth: .infinity)
