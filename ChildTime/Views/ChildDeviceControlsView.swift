@@ -15,6 +15,7 @@ struct ChildDeviceControlsView: View {
 
     @State private var showAppPicker = false
     @State private var removalNote: String?
+    @State private var showDisconnect = false
     @State private var selection = FamilyActivitySelection()
     @State private var showAllowPicker = false
     @State private var allowSelection = FamilyActivitySelection()
@@ -40,6 +41,7 @@ struct ChildDeviceControlsView: View {
                     perAppAllowCard
                     appLockCard
                     allowDeleteCard
+                    disconnectButton
 
                     Text("שְׁאָר הַהַגְדָּרוֹת — פְּרָסִים, דּוּחוֹת, רָמַת קֹשִׁי וְהַתְרָאוֹת — מְנֻהֲלוֹת בְּמַכְשִׁיר הַהוֹרֶה.")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
@@ -74,6 +76,16 @@ struct ChildDeviceControlsView: View {
         .onAppear {
             selection = SelectionStorage.decode(settings.activitySelectionData)
             allowSelection = SelectionStorage.decode(settings.allowExceptionData)
+        }
+        .confirmationDialog("לְנַתֵּק אֶת הַמַּכְשִׁיר?",
+                            isPresented: $showDisconnect, titleVisibility: .visible) {
+            Button("נַתֵּק וְאַפֵּס", role: .destructive) {
+                HouseholdManager.shared.resetAsRemovedDevice()
+                dismiss()
+            }
+            Button("בִּטּוּל", role: .cancel) {}
+        } message: {
+            Text("הַמַּכְשִׁיר יִתְנַתֵּק מֵהַיֶּלֶד וְיַחֲזֹר לְמַצָּב הַתְחָלָתִי (כְּאִלּוּ הֻתְקַן מֵחָדָשׁ). הַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמֶרֶת — אֶפְשָׁר תָּמִיד לְחַבֵּר שׁוּב בִּסְרִיקַת הַקּוֹד.")
         }
     }
 
@@ -342,6 +354,20 @@ struct ChildDeviceControlsView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+
+    /// Disconnect THIS device from the child and reset to a just-installed state.
+    /// (Parent-gated, like everything on this screen.) Cloud progress is kept.
+    private var disconnectButton: some View {
+        Button { Haptic.medium(); showDisconnect = true } label: {
+            Label("הִתְנַתְּקוּ מֵהַמִּשְׁפָּחָה", systemImage: "iphone.slash")
+                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(AppColor.flameOrange)
+                .frame(maxWidth: .infinity).padding(.vertical, 13)
+                .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(AppColor.flameOrange.opacity(0.5), lineWidth: 1))
+        }
+        .buttonStyle(.juicy)
     }
 
     // MARK: - Actions
