@@ -110,16 +110,13 @@ async function tokensForUID(uid) {
   return [];
 }
 
-// Every FCM token belonging to the HOUSEHOLD that owns a child — used to EXCLUDE
-// the host's own family from game invites, so a kid's game never pings their own
-// parent's monitoring device (or a sibling on the same account). Real friends in
-// OTHER households are unaffected.
-async function householdTokensForChild(childID) {
-  if (!childID) return new Set();
-  const child = await db.collection("children").doc(childID).get();
-  const hid = child.exists ? child.data().householdID : null;
-  if (!hid) return new Set();
-  return new Set(await tokensForHousehold(hid, null));
+// Deliver a push to recipients, dropping the host's OWN device tokens so the
+// host isn't pinged by their own invite — but NEVER drop a real invite to empty
+// (same-account test families share tokens; the invited kid must still get it).
+function withoutHost(recipientTokens, hostTokens) {
+  const host = new Set(hostTokens || []);
+  const filtered = recipientTokens.filter((t) => !host.has(t));
+  return filtered.length ? filtered : recipientTokens;
 }
 
 async function tokensForEmail(email) {
@@ -175,20 +172,18 @@ exports.onLiveGameInvite = onDocumentCreated("liveGames/{gameID}", async (event)
   const gameID = event.params.gameID;
   const hostName = data.hostName || "חבר";
   const hostOwnerUID = data.hostOwnerUID || null;
-
-  // Never invite the host's own family (so the monitoring parent / siblings on
-  // the same account aren't pinged about a game started within their household).
-  const hostExclude = await householdTokensForChild(data.hostID);
+  const hostTokens = hostOwnerUID ? await tokensForUID(hostOwnerUID) : [];
 
   const tokenSet = new Set();
   for (const childID of invited) {
     const card = await db.collection("friendCards").doc(childID).get();
     const ownerUID = card.exists ? card.data().ownerUID : null;
-    if (!ownerUID || ownerUID === hostOwnerUID) continue;  // skip self / host device
+    if (!ownerUID || ownerUID === hostOwnerUID) continue;  // skip the host's own account
     const tokens = await tokensForUID(ownerUID);
-    tokens.forEach((t) => { if (!hostExclude.has(t)) tokenSet.add(t); });
+    tokens.forEach((t) => tokenSet.add(t));
   }
-  const tokens = [...tokenSet];
+  const tokens = withoutHost([...tokenSet], hostTokens);
+  console.log(`onLiveGameInvite game=${gameID} invited=${invited.length} -> ${tokens.length} token(s)`);
   if (!tokens.length) return;
 
   await send(
@@ -208,11 +203,13 @@ exports.onLiveGameNudge = onDocumentCreated("liveGames/{gameID}/nudges/{nudgeID}
   const hostName = data.hostName || "חבר";
   const card = await db.collection("friendCards").doc(data.targetID).get();
   const ownerUID = card.exists ? card.data().ownerUID : null;
-  if (!ownerUID) return;
-  // Exclude the host's own household devices (same as the auto-invite).
-  const game = await db.collection("liveGames").doc(gameID).get();
-  const hostExclude = await householdTokensForChild(game.exists ? game.data().hostID : null);
-  const tokens = (await tokensForUID(ownerUID)).filter((t) => !hostExclude.has(t));
+  if (!ownerUID) { console.log(`onLiveGameNudge: no friendCard/ownerUID for ${data.targetID}`); return; }
+  // This is an INTENTIONAL invite to one chosen friend — just drop the host's own
+  // device (with a fallback so a same-account test still delivers).
+  const targetTokens = await tokensForUID(ownerUID);
+  const hostTokens = data.ownerUID ? await tokensForUID(data.ownerUID) : [];
+  const tokens = withoutHost(targetTokens, hostTokens);
+  console.log(`onLiveGameNudge target=${data.targetID} owner=${ownerUID} targetTokens=${targetTokens.length} -> send ${tokens.length}`);
   if (!tokens.length) return;
 
   await send(
