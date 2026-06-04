@@ -7,6 +7,8 @@ struct DailyChestView: View {
     @EnvironmentObject var progress: ProgressStore
 
     @State private var stage: ChestStage = .closed
+    @State private var taps: Int = 0
+    private let tapsToOpen = 3
     @State private var revealed: Int = 0
     @State private var reward: ChestReward = ChestReward(stars: 0, diamonds: 0, minutes: 0)
     @StateObject private var companion = CompanionController()
@@ -35,6 +37,7 @@ struct DailyChestView: View {
             // it off-screen.
             VStack(spacing: 0) {
                 ScrollViewReader { proxy in
+                GeometryReader { geo in
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
                         Spacer(minLength: AppSpacing.lg)
@@ -49,17 +52,18 @@ struct DailyChestView: View {
                             .frame(maxWidth: .infinity)
                             .glow(AppColor.gemPurple, radius: 12)
 
-                        ChestView(kind: .magic, stage: stage, size: chestSize)
-                            .onTapGesture {
-                                if stage == .glowing { open() }
-                            }
+                        ChestView(kind: .magic, stage: stage, size: chestSize, nudge: taps)
+                            .onTapGesture { tapChest() }
                             .padding(.vertical, AppSpacing.md)
 
                         if stage == .glowing {
-                            Text("לַחֲצוּ לִפְתִיחָה!")
-                                .font(AppFont.subtitle())
-                                .foregroundStyle(.white)
-                                .pulse()
+                            VStack(spacing: AppSpacing.md) {
+                                Text(taps == 0 ? "לַחֲצוּ שׁוּב וָשׁוּב לִפְתִיחָה!" : "עוֹד \(tapsToOpen - taps)!")
+                                    .font(AppFont.subtitle())
+                                    .foregroundStyle(.white)
+                                    .pulse()
+                                tapDots
+                            }
                         }
 
                         if stage == .revealed {
@@ -96,6 +100,9 @@ struct DailyChestView: View {
                             .id("rewardsBottom")
                     }
                     .frame(maxWidth: .infinity)
+                    // Fill the viewport so the chest sits VERTICALLY CENTERED when
+                    // there's room, and only scrolls when it genuinely overflows.
+                    .frame(minHeight: geo.size.height)
                     .padding(.horizontal, AppSpacing.lg)
                 }
                 .scrollIndicators(.hidden)
@@ -103,6 +110,7 @@ struct DailyChestView: View {
                     withAnimation(.easeInOut(duration: 0.4)) {
                         proxy.scrollTo("rewardsBottom", anchor: .bottom)
                     }
+                }
                 }
                 }
 
@@ -140,11 +148,11 @@ struct DailyChestView: View {
             .padding(.bottom, AppSpacing.lg)
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
 
-            // Tap ANYWHERE to open while glowing — not only on the chest.
+            // Tap ANYWHERE to charge open while glowing — not only on the chest.
             if stage == .glowing {
                 Color.clear
                     .contentShape(Rectangle())
-                    .onTapGesture { open() }
+                    .onTapGesture { tapChest() }
             }
         }
         .onAppear {
@@ -178,6 +186,30 @@ struct DailyChestView: View {
         .padding(.vertical, AppSpacing.md)
         .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: AppRadius.medium))
         .glow(glow, radius: 8)
+    }
+
+    /// A row of dots that fills as the kid taps, so they SEE the chest charging up.
+    private var tapDots: some View {
+        HStack(spacing: 12) {
+            ForEach(0..<tapsToOpen, id: \.self) { i in
+                Circle()
+                    .fill(i < taps ? AppColor.starGold : Color.white.opacity(0.22))
+                    .frame(width: 18, height: 18)
+                    .overlay(Circle().stroke(.white.opacity(0.45), lineWidth: 1))
+                    .glow(i < taps ? AppColor.starGold : .clear, radius: 6)
+                    .scaleEffect(i < taps ? 1.18 : 1)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.5), value: taps)
+            }
+        }
+    }
+
+    /// Each tap charges the chest a little; it bursts open on the final tap.
+    private func tapChest() {
+        guard stage == .glowing else { return }
+        taps += 1
+        Haptic.medium()
+        SoundPlayer.shared.play(.uiTap)
+        if taps >= tapsToOpen { open() }
     }
 
     private func open() {

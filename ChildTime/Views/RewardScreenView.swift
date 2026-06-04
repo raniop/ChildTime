@@ -21,6 +21,8 @@ struct RewardScreenView: View {
     private var companionSize: CGFloat { isCompact ? 64 : 80 }
 
     @State private var stage: ChestStage = .closed
+    @State private var taps: Int = 0
+    private let tapsToOpen = 3
     @State private var revealedItems: Int = 0
     @State private var reward: ChestReward = ChestReward(stars: 0, diamonds: 0, minutes: 0)
     @StateObject private var companion = CompanionController()
@@ -29,7 +31,7 @@ struct RewardScreenView: View {
     @State private var goWorldUnlock: World?
 
     var body: some View {
-        GeometryReader { proxy in
+        GeometryReader { geo in
             ZStack {
                 // Backdrop — richer, more festive
                 world.gradient.gradient
@@ -53,11 +55,12 @@ struct RewardScreenView: View {
                                 heroTitle
                                 chestBlock
                                 if stage == .glowing {
-                                    Text("לַחֲצוּ לִפְתִיחָה! ✨")
+                                    Text(taps == 0 ? "לַחֲצוּ שׁוּב וָשׁוּב לִפְתִיחָה! ✨" : "עוֹד \(tapsToOpen - taps)!")
                                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                                         .foregroundStyle(.white)
                                         .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
                                         .pulse()
+                                    tapDots
                                 }
                             }
 
@@ -72,6 +75,9 @@ struct RewardScreenView: View {
                                 .id("rewardsAnchor")
                         }
                         .frame(maxWidth: .infinity)
+                        // Center the chest vertically when there's room; only
+                        // scroll when the rewards genuinely overflow.
+                        .frame(minHeight: geo.size.height)
                     }
                     .scrollIndicators(.hidden)
                     .onChangeCompat(of: revealedItems) { _, _ in
@@ -109,7 +115,7 @@ struct RewardScreenView: View {
                 if stage == .glowing {
                     Color.clear
                         .contentShape(Rectangle())
-                        .onTapGesture { openChest() }
+                        .onTapGesture { tapChest() }
                 }
 
                 Confetti(trigger: confettiTrigger)
@@ -181,12 +187,34 @@ struct RewardScreenView: View {
                 .frame(width: chestSize * 1.6, height: chestSize * 1.6)
                 .opacity(stage == .closed ? 0.3 : 0.85)
 
-            ChestView(kind: kind, stage: stage, size: chestSize)
-                .onTapGesture {
-                    if stage == .glowing { openChest() }
-                }
+            ChestView(kind: kind, stage: stage, size: chestSize, nudge: taps)
+                .onTapGesture { tapChest() }
         }
         .padding(.vertical, AppSpacing.sm)
+    }
+
+    /// A row of dots that fills as the kid taps, so they SEE the chest charging up.
+    private var tapDots: some View {
+        HStack(spacing: 12) {
+            ForEach(0..<tapsToOpen, id: \.self) { i in
+                Circle()
+                    .fill(i < taps ? AppColor.starGold : Color.white.opacity(0.22))
+                    .frame(width: 18, height: 18)
+                    .overlay(Circle().stroke(.white.opacity(0.45), lineWidth: 1))
+                    .glow(i < taps ? AppColor.starGold : .clear, radius: 6)
+                    .scaleEffect(i < taps ? 1.18 : 1)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.5), value: taps)
+            }
+        }
+    }
+
+    /// Each tap charges the chest a little; it bursts open on the final tap.
+    private func tapChest() {
+        guard stage == .glowing else { return }
+        taps += 1
+        Haptic.medium()
+        SoundPlayer.shared.play(.uiTap)
+        if taps >= tapsToOpen { openChest() }
     }
 
     // MARK: - Companion corner

@@ -16,8 +16,12 @@ struct ChestView: View {
     let kind: ChestKind
     let stage: ChestStage
     let size: CGFloat
+    /// Bump this to make the chest do a quick squash-and-bounce — used to give
+    /// satisfying per-tap feedback while a kid taps repeatedly to open it.
+    var nudge: Int = 0
 
     @State private var shake: CGFloat = 0
+    @State private var nudgeScale: CGFloat = 1
     @State private var glowScale: CGFloat = 1
     @State private var bob: CGFloat = 0
     @State private var rock: Double = 0
@@ -64,6 +68,7 @@ struct ChestView: View {
                 .offset(x: shake, y: bob)
                 .rotationEffect(.degrees(rock))
                 .scaleEffect(pop)
+                .scaleEffect(nudgeScale)
 
             // 6. Bright flash at the moment of opening.
             Circle()
@@ -88,6 +93,11 @@ struct ChestView: View {
             startStageAnimation()
         }
         .onChangeCompat(of: stage) { _, _ in startStageAnimation() }
+        .onChangeCompat(of: nudge) { _, _ in
+            guard nudge > 0 else { return }
+            withAnimation(.easeIn(duration: 0.08)) { nudgeScale = 0.86 }
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.38).delay(0.08)) { nudgeScale = 1 }
+        }
     }
 
     // MARK: - Layers
