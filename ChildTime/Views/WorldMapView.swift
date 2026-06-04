@@ -390,10 +390,10 @@ struct WorldMapView: View {
             // Row 1 — identity on the left, the round nav buttons grouped on the
             // right. The whole card is forced LTR so it matches the design even
             // though the app root is RTL (Hebrew text still renders right-to-left).
-            HStack(alignment: .center, spacing: isCompact ? 8 : 14) {
-                identityBlock(avatar: isCompact ? 50 : 58)
-                Spacer(minLength: 4)
-                navButtonsRow(size: isCompact ? 44 : 52)
+            HStack(alignment: .center, spacing: isCompact ? 6 : 14) {
+                identityBlock(avatar: isCompact ? 44 : 58)
+                Spacer(minLength: 2)
+                navButtonsRow(size: isCompact ? 42 : 52)
             }
             statsPanel
         }
@@ -424,21 +424,15 @@ struct WorldMapView: View {
             Haptic.light()
             showLevelInfo = true
         } label: {
-            HStack(spacing: 10) {
-                ZStack(alignment: .topLeading) {
-                    CharacterView(character: profiles.active?.character
-                                  ?? Character3DCatalog.find(Character3DCatalog.defaultID),
-                                  portrait: true)
-                        .frame(width: avatar, height: avatar)
-                        .background(Circle().fill(Color.white.opacity(0.18)))
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(.white.opacity(0.85), lineWidth: 2.5))
-                        .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
-                    Text("👑")
-                        .font(.system(size: avatar * 0.40))
-                        .rotationEffect(.degrees(-22))
-                        .offset(x: -avatar * 0.10, y: -avatar * 0.22)
-                }
+            HStack(spacing: 9) {
+                CharacterView(character: profiles.active?.character
+                              ?? Character3DCatalog.find(Character3DCatalog.defaultID),
+                              portrait: true)
+                    .frame(width: avatar, height: avatar)
+                    .background(Circle().fill(Color.white.opacity(0.18)))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.85), lineWidth: 2.5))
+                    .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(profiles.active?.name ?? "טוֹפִי")
                         .font(.system(size: avatar * 0.40, weight: .black, design: .rounded))
@@ -457,7 +451,7 @@ struct WorldMapView: View {
     }
 
     private func navButtonsRow(size: CGFloat) -> some View {
-        HStack(spacing: isCompact ? 7 : 12) {
+        HStack(spacing: isCompact ? 5 : 12) {
             navButton(icon: "gamecontroller.fill", color: AppColor.gemPurple,
                       label: "טוּרְנִיר", badge: !liveGame.invites.isEmpty, size: size) {
                 Haptic.light()
@@ -512,7 +506,8 @@ struct WorldMapView: View {
             Text(label)
                 .font(.system(size: isCompact ? 10 : 12, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
-                .lineLimit(1).minimumScaleFactor(0.6)
+                .lineLimit(1)
+                .fixedSize()   // show the full word — never truncate to "…"
         }
     }
 
@@ -758,29 +753,8 @@ struct WorldMapView: View {
                 .font(.system(size: isCompact ? 16 : 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.75))
                 .opacity(heroAppeared ? 1 : 0)
-
-            // XP bar — small, below subtitle. Tap for an explanation.
-            Button {
-                Haptic.light()
-                showLevelInfo = true
-            } label: {
-                HStack(spacing: 8) {
-                    Text("רָמַת טוֹפִי \(progress.companionLevel)")
-                        .font(.system(size: 12, weight: .bold, design: .rounded))
-                        .foregroundStyle(AppColor.starGold)
-                    XPBarMini(progress: xpProgress)
-                        .frame(width: 100)
-                    Image(systemName: "questionmark.circle.fill")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.white.opacity(0.6))
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(.white.opacity(0.12), in: Capsule())
-            }
-            .buttonStyle(.plain)
-            .opacity(heroAppeared ? 1 : 0)
-            .padding(.top, 4)
+            // (The "רָמַת טוֹפִי" XP pill was removed — the level now lives in the
+            // header card's level badge; tapping the avatar opens the level info.)
         }
         .sheet(isPresented: $showLevelInfo) {
             levelInfoSheet
