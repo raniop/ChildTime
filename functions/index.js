@@ -110,6 +110,18 @@ async function tokensForUID(uid) {
   return [];
 }
 
+// CHILD-device tokens (live-game invites target a kid's own device). Reads
+// `childFcmTokens`, plus legacy `fcmTokens` so devices that haven't re-uploaded
+// since the parent/child token split still get game invites during migration.
+async function childTokensForUID(uid) {
+  const p = await db.collection("parents").doc(uid).get();
+  if (!p.exists) return [];
+  const d = p.data();
+  const child = Array.isArray(d.childFcmTokens) ? d.childFcmTokens : [];
+  const legacy = Array.isArray(d.fcmTokens) ? d.fcmTokens : [];
+  return [...new Set([...child, ...legacy])];
+}
+
 // Deliver a push to recipients, dropping the host's OWN device tokens so the
 // host isn't pinged by their own invite — but NEVER drop a real invite to empty
 // (same-account test families share tokens; the invited kid must still get it).
@@ -172,14 +184,14 @@ exports.onLiveGameInvite = onDocumentCreated("liveGames/{gameID}", async (event)
   const gameID = event.params.gameID;
   const hostName = data.hostName || "חבר";
   const hostOwnerUID = data.hostOwnerUID || null;
-  const hostTokens = hostOwnerUID ? await tokensForUID(hostOwnerUID) : [];
+  const hostTokens = hostOwnerUID ? await childTokensForUID(hostOwnerUID) : [];
 
   const tokenSet = new Set();
   for (const childID of invited) {
     const card = await db.collection("friendCards").doc(childID).get();
     const ownerUID = card.exists ? card.data().ownerUID : null;
     if (!ownerUID || ownerUID === hostOwnerUID) continue;  // skip the host's own account
-    const tokens = await tokensForUID(ownerUID);
+    const tokens = await childTokensForUID(ownerUID);       // invite a kid's OWN device
     tokens.forEach((t) => tokenSet.add(t));
   }
   const tokens = withoutHost([...tokenSet], hostTokens);
@@ -206,8 +218,8 @@ exports.onLiveGameNudge = onDocumentCreated("liveGames/{gameID}/nudges/{nudgeID}
   if (!ownerUID) { console.log(`onLiveGameNudge: no friendCard/ownerUID for ${data.targetID}`); return; }
   // This is an INTENTIONAL invite to one chosen friend — just drop the host's own
   // device (with a fallback so a same-account test still delivers).
-  const targetTokens = await tokensForUID(ownerUID);
-  const hostTokens = data.ownerUID ? await tokensForUID(data.ownerUID) : [];
+  const targetTokens = await childTokensForUID(ownerUID);    // the friend's OWN device
+  const hostTokens = data.ownerUID ? await childTokensForUID(data.ownerUID) : [];
   const tokens = withoutHost(targetTokens, hostTokens);
   console.log(`onLiveGameNudge target=${data.targetID} owner=${ownerUID} targetTokens=${targetTokens.length} -> send ${tokens.length}`);
   if (!tokens.length) return;

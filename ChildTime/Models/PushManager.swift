@@ -98,14 +98,25 @@ final class PushManager: NSObject, ObservableObject {
         #endif
     }
 
-    /// Persist the FCM token on the parent's record (array-union, multi-device).
+    /// Persist the FCM token, SEPARATED BY DEVICE ROLE so notifications target the
+    /// right audience:
+    ///  • PARENT device → `fcmTokens` (family broadcasts: a kid started/finished,
+    ///    reports, help — `sendLiveEvent`/`weeklyReport` read ONLY this).
+    ///  • CHILD device → `childFcmTokens` (kid-to-kid is ONLY live-game invites,
+    ///    which read this).
+    /// A child's token must NOT sit in `fcmTokens`, or a sibling's device would get
+    /// the parent's "started playing" notifications. We also remove the token from
+    /// the OTHER field in case this device changed role.
     func uploadFCMToken(_ token: String) {
         currentToken = token
         #if canImport(FirebaseFirestore) && canImport(FirebaseMessaging)
         guard let uid = AuthManager.shared.userID else { return }
-        Firestore.firestore()
-            .collection("parents").document(uid)
-            .setData(["fcmTokens": FieldValue.arrayUnion([token])], merge: true)
+        let isChild = ParentSettings.shared.deviceRole == .child
+        let mine  = isChild ? "childFcmTokens" : "fcmTokens"
+        let other = isChild ? "fcmTokens" : "childFcmTokens"
+        let ref = Firestore.firestore().collection("parents").document(uid)
+        ref.setData([mine: FieldValue.arrayUnion([token])], merge: true)
+        ref.updateData([other: FieldValue.arrayRemove([token])])   // move if role changed
         #endif
     }
 }
