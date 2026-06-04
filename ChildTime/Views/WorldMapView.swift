@@ -149,7 +149,9 @@ struct WorldMapView: View {
                 showGift: progress.dailyChestAvailable,
                 onGiftTap: { showDailyChest = true },
                 size: companionSize,
-                topInset: isCompact ? 140 : 90,
+                // Keep the buddy (and the gift above its head) BELOW the taller
+                // header card so it never parks on top of the stats.
+                topInset: isCompact ? 300 : 230,
                 bottomInset: isCompact ? 220 : 200,
                 horizontalInset: AppSpacing.lg
             )
@@ -384,49 +386,35 @@ struct WorldMapView: View {
 
     @ViewBuilder
     private var topBar: some View {
-        Group {
-            if isCompact {
-                VStack(spacing: 14) {
-                    HStack(alignment: .center, spacing: 10) {
-                        identityBlock(avatar: 48)
-                        Spacer(minLength: 8)
-                        settingsButton(size: 46)
-                    }
-                    navButtonsRow(size: 48)
-                    cardDivider
-                    statsRow
-                }
-            } else {
-                VStack(spacing: 16) {
-                    HStack(alignment: .center, spacing: 16) {
-                        identityBlock(avatar: 56)
-                        Spacer(minLength: 12)
-                        navButtonsRow(size: 54)
-                        Spacer(minLength: 12)
-                        settingsButton(size: 54)
-                    }
-                    cardDivider
-                    statsRow
-                }
+        VStack(spacing: isCompact ? 12 : 16) {
+            // Row 1 — identity on the left, the round nav buttons grouped on the
+            // right. The whole card is forced LTR so it matches the design even
+            // though the app root is RTL (Hebrew text still renders right-to-left).
+            HStack(alignment: .center, spacing: isCompact ? 8 : 14) {
+                identityBlock(avatar: isCompact ? 50 : 58)
+                Spacer(minLength: 4)
+                navButtonsRow(size: isCompact ? 44 : 52)
             }
+            statsPanel
         }
-        .padding(.vertical, isCompact ? 14 : 18)
-        .padding(.horizontal, isCompact ? 14 : 22)
-        .background(
-            RoundedRectangle(cornerRadius: 30, style: .continuous)
-                .fill(Color.white)
-                .shadow(color: .black.opacity(0.16), radius: 18, x: 0, y: 8)
-        )
+        .environment(\.layoutDirection, .leftToRight)
+        .padding(isCompact ? 14 : 18)
+        .background(glassCard)
         .padding(.horizontal, isCompact ? AppSpacing.sm : AppSpacing.lg)
         .padding(.top, AppSpacing.sm)
-        .environment(\.layoutDirection, .rightToLeft)
     }
 
-    /// Dark navy used for text/numbers on the white header card.
-    private var cardText: Color { Color(hex: "203A63") }
-
-    private var cardDivider: some View {
-        Rectangle().fill(Color.black.opacity(0.08)).frame(height: 1)
+    /// Frosted translucent card so the dreamy background glows through.
+    private var glassCard: some View {
+        RoundedRectangle(cornerRadius: 30, style: .continuous)
+            .fill(LinearGradient(colors: [Color.white.opacity(0.18), Color.white.opacity(0.06)],
+                                 startPoint: .topLeading, endPoint: .bottomTrailing))
+            .overlay(
+                RoundedRectangle(cornerRadius: 30, style: .continuous)
+                    .stroke(LinearGradient(colors: [.white.opacity(0.5), .white.opacity(0.12)],
+                                           startPoint: .top, endPoint: .bottom), lineWidth: 1.2)
+            )
+            .shadow(color: .black.opacity(0.25), radius: 22, y: 12)
     }
 
     /// Avatar (+ crown) with the child's name and a level badge. Tapping opens
@@ -437,30 +425,31 @@ struct WorldMapView: View {
             showLevelInfo = true
         } label: {
             HStack(spacing: 10) {
-                ZStack(alignment: .topTrailing) {
+                ZStack(alignment: .topLeading) {
                     CharacterView(character: profiles.active?.character
                                   ?? Character3DCatalog.find(Character3DCatalog.defaultID),
                                   portrait: true)
                         .frame(width: avatar, height: avatar)
-                        .background(Circle().fill(Color(hex: "EAF0FF")))
+                        .background(Circle().fill(Color.white.opacity(0.18)))
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(.white, lineWidth: 3))
-                        .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+                        .overlay(Circle().stroke(.white.opacity(0.85), lineWidth: 2.5))
+                        .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
                     Text("👑")
-                        .font(.system(size: avatar * 0.36))
-                        .rotationEffect(.degrees(-18))
-                        .offset(x: 3, y: -avatar * 0.18)
+                        .font(.system(size: avatar * 0.40))
+                        .rotationEffect(.degrees(-22))
+                        .offset(x: -avatar * 0.10, y: -avatar * 0.22)
                 }
                 VStack(alignment: .leading, spacing: 3) {
                     Text(profiles.active?.name ?? "טוֹפִי")
-                        .font(.system(size: avatar * 0.42, weight: .black, design: .rounded))
-                        .foregroundStyle(cardText)
+                        .font(.system(size: avatar * 0.40, weight: .black, design: .rounded))
+                        .foregroundStyle(.white)
                         .lineLimit(1).minimumScaleFactor(0.6)
                     Text("רָמָה \(progress.companionLevel)")
                         .font(.system(size: 12, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                        .padding(.horizontal, 10).padding(.vertical, 3)
+                        .padding(.horizontal, 9).padding(.vertical, 3)
                         .background(Capsule().fill(AppColor.gemPurple))
+                        .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
                 }
             }
         }
@@ -468,7 +457,7 @@ struct WorldMapView: View {
     }
 
     private func navButtonsRow(size: CGFloat) -> some View {
-        HStack(spacing: size * 0.5) {
+        HStack(spacing: isCompact ? 7 : 12) {
             navButton(icon: "gamecontroller.fill", color: AppColor.gemPurple,
                       label: "טוּרְנִיר", badge: !liveGame.invites.isEmpty, size: size) {
                 Haptic.light()
@@ -479,121 +468,136 @@ struct WorldMapView: View {
                       label: "דֵּירוּג", badge: false, size: size) {
                 Haptic.light(); showingLeaderboard = true
             }
-            navButton(icon: "storefront.fill", color: AppColor.starGold,
+            navButton(icon: "storefront.fill", color: Color(hex: "F59E0B"),
                       label: "חֲנוּת", badge: false, size: size) {
                 Haptic.light(); showingShop = true
+            }
+            navButton(icon: "gearshape.fill", color: AppColor.gemPurple,
+                      label: "הַגְדָּרוֹת", badge: false, size: size,
+                      longPress: { showingDemo = true }) {
+                showingParentGate = true
             }
         }
     }
 
     private func navButton(icon: String, color: Color, label: String, badge: Bool,
-                           size: CGFloat, action: @escaping () -> Void) -> some View {
-        VStack(spacing: 5) {
-            Button(action: action) {
-                ZStack(alignment: .topTrailing) {
-                    Image(systemName: icon)
-                        .font(.system(size: size * 0.42, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: size, height: size)
-                        .background(
-                            Circle().fill(LinearGradient(colors: [color, color.opacity(0.82)],
-                                                         startPoint: .top, endPoint: .bottom))
-                        )
-                        .overlay(Circle().stroke(.white, lineWidth: 2))
-                        .shadow(color: color.opacity(0.5), radius: 6, y: 3)
-                    if badge {
-                        Circle().fill(AppColor.flameOrange).frame(width: 13, height: 13)
-                            .overlay(Circle().stroke(.white, lineWidth: 2)).offset(x: 3, y: -3)
-                    }
-                }
-            }
-            .buttonStyle(.plain)
-            Text(label)
-                .font(.system(size: 12, weight: .heavy, design: .rounded))
-                .foregroundStyle(cardText.opacity(0.75))
-        }
-    }
-
-    private func settingsButton(size: CGFloat) -> some View {
-        VStack(spacing: 5) {
-            Button { showingParentGate = true } label: {
-                Image(systemName: "gearshape.fill")
+                           size: CGFloat, longPress: (() -> Void)? = nil,
+                           action: @escaping () -> Void) -> some View {
+        let circle = Button(action: action) {
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: icon)
                     .font(.system(size: size * 0.42, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: size, height: size)
                     .background(
-                        Circle().fill(LinearGradient(colors: [AppColor.gemPurple, AppColor.gemPurple.opacity(0.82)],
+                        Circle().fill(LinearGradient(colors: [color, color.opacity(0.8)],
                                                      startPoint: .top, endPoint: .bottom))
                     )
-                    .overlay(Circle().stroke(.white, lineWidth: 2))
-                    .shadow(color: AppColor.gemPurple.opacity(0.5), radius: 6, y: 3)
+                    .overlay(Circle().stroke(.white.opacity(0.9), lineWidth: 2))
+                    .shadow(color: color.opacity(0.45), radius: 6, y: 3)
+                if badge {
+                    Circle().fill(AppColor.flameOrange).frame(width: 12, height: 12)
+                        .overlay(Circle().stroke(.white, lineWidth: 2)).offset(x: 3, y: -3)
+                }
             }
-            .buttonStyle(.plain)
-            .onLongPressGesture(minimumDuration: 1.5) { showingDemo = true }
-            Text("הַגְדָּרוֹת")
-                .font(.system(size: 12, weight: .heavy, design: .rounded))
-                .foregroundStyle(cardText.opacity(0.75))
+        }
+        .buttonStyle(.plain)
+
+        return VStack(spacing: 5) {
+            if let longPress {
+                circle.onLongPressGesture(minimumDuration: 1.5, perform: longPress)
+            } else {
+                circle
+            }
+            Text(label)
+                .font(.system(size: isCompact ? 10 : 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+                .lineLimit(1).minimumScaleFactor(0.6)
         }
     }
 
-    /// The bottom stats row of the header card: 💎 diamonds · ⭐ stars · ⏱ time
-    /// earned today (the "time earned" lives ONLY here — not duplicated up top).
-    private var statsRow: some View {
-        HStack(spacing: 0) {
+    /// The stats panel: 💎 diamonds (left) · big time card (center, with progress
+    /// bar) · ⭐ stars (right). The "time earned today" lives ONLY here.
+    private var statsPanel: some View {
+        HStack(spacing: isCompact ? 8 : 12) {
             Button { Haptic.light(); infoStat = .diamonds } label: {
-                statCell(emoji: "💎", value: progress.diamonds.currencyShort, label: "יַהֲלוֹמִים")
+                statColumn(emoji: "💎", value: progress.diamonds.currencyShort,
+                           label: "יַהֲלוֹמִים", iconTrailing: false)
             }
             .buttonStyle(.plain)
             .popover(isPresented: popoverBinding(for: .diamonds)) { statInfoCard(.diamonds) }
 
-            statSeparator
+            Button { Haptic.light(); infoStat = .minutes } label: { timeCenterCard }
+                .buttonStyle(.plain)
+                .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
 
             Button { Haptic.light(); infoStat = .stars } label: {
-                statCell(emoji: "⭐", value: progress.stars.currencyShort, label: "כּוֹכָבִים")
+                statColumn(emoji: "⭐", value: progress.stars.currencyShort,
+                           label: "כּוֹכָבִים", iconTrailing: true)
             }
             .buttonStyle(.plain)
             .popover(isPresented: popoverBinding(for: .stars)) { statInfoCard(.stars) }
-
-            statSeparator
-
-            Button { Haptic.light(); infoStat = .minutes } label: {
-                timeStatCell
-            }
-            .buttonStyle(.plain)
-            .popover(isPresented: popoverBinding(for: .minutes)) { statInfoCard(.minutes) }
         }
+        .padding(isCompact ? 8 : 10)
+        .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Color.white.opacity(0.07)))
     }
 
-    private var statSeparator: some View {
-        Rectangle().fill(Color.black.opacity(0.08)).frame(width: 1, height: 42)
-    }
-
-    private func statCell(emoji: String, value: String, label: String,
-                          valueColor: Color? = nil) -> some View {
-        HStack(spacing: 9) {
-            Text(emoji).font(.system(size: 26))
-            VStack(alignment: .leading, spacing: 1) {
+    private func statColumn(emoji: String, value: String, label: String, iconTrailing: Bool) -> some View {
+        HStack(spacing: 7) {
+            if !iconTrailing { Text(emoji).font(.system(size: isCompact ? 22 : 28)) }
+            VStack(spacing: 1) {
                 Text(value)
-                    .font(.system(size: 26, weight: .black, design: .rounded))
-                    .foregroundStyle(valueColor ?? cardText)
+                    .font(.system(size: isCompact ? 22 : 30, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
                     .lineLimit(1).minimumScaleFactor(0.6)
                 Text(label)
-                    .font(.system(size: 12.5, weight: .heavy, design: .rounded))
-                    .foregroundStyle(cardText.opacity(0.6))
-                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .font(.system(size: isCompact ? 11 : 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.75))
+                    .lineLimit(1).minimumScaleFactor(0.7)
             }
+            if iconTrailing { Text(emoji).font(.system(size: isCompact ? 22 : 28)) }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 4)
     }
 
-    private var timeStatCell: some View {
+    private var timeCenterCard: some View {
         let cap = progress.dailyCap
-        let value = cap.enabled ? "\(progress.minutesEarnedToday)/\(cap.max)"
-                                : "\(progress.pendingMinutes)"
-        return statCell(emoji: "⏱", value: value,
-                        label: "זְמַן שֶׁהִרְוַחְתִּי הַיּוֹם",
-                        valueColor: Color(hex: "10B981"))
+        let earned = progress.minutesEarnedToday
+        let frac: Double = cap.enabled
+            ? min(1, Double(earned) / Double(max(1, cap.max)))
+            : (progress.pendingMinutes > 0 ? 1 : 0)
+        let value = cap.enabled ? "\(earned)/\(cap.max)" : "\(progress.pendingMinutes)"
+        return VStack(spacing: isCompact ? 4 : 6) {
+            HStack(spacing: 5) {
+                Image(systemName: "gamecontroller.fill")
+                    .font(.system(size: isCompact ? 10 : 12, weight: .bold))
+                Text("זְמַן שֶׁהִרְוַחְתִּי הַיּוֹם")
+                    .font(.system(size: isCompact ? 10 : 12, weight: .heavy, design: .rounded))
+                    .lineLimit(1).minimumScaleFactor(0.6)
+            }
+            .foregroundStyle(.white.opacity(0.85))
+
+            Text(value)
+                .font(.system(size: isCompact ? 26 : 34, weight: .black, design: .rounded))
+                .foregroundStyle(.white).monospacedDigit()
+                .lineLimit(1).minimumScaleFactor(0.5)
+
+            GeometryReader { g in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.white.opacity(0.20))
+                    Capsule()
+                        .fill(LinearGradient(colors: [AppColor.successMint, AppColor.diamondBlue, AppColor.gemPurple],
+                                             startPoint: .leading, endPoint: .trailing))
+                        .frame(width: max(6, g.size.width * frac))
+                }
+            }
+            .frame(height: 7)
+        }
+        .padding(.horizontal, isCompact ? 10 : 16)
+        .padding(.vertical, isCompact ? 8 : 10)
+        .frame(maxWidth: .infinity)
+        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.white.opacity(0.13)))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.18), lineWidth: 1))
     }
 
     // MARK: - Stat info popovers
