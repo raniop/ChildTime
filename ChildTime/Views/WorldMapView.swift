@@ -31,7 +31,8 @@ struct WorldMapView: View {
 
     private var isCompact: Bool { hsc == .compact }
     private var companionSize: CGFloat { isCompact ? 90 : 120 }
-    private var heroTitleSize: CGFloat { isCompact ? 36 : 44 }
+    // iPad shows the title inside the header row, so it's smaller there.
+    private var heroTitleSize: CGFloat { isCompact ? 36 : 30 }
 
     @State private var infoStat: StatInfo? = nil
 
@@ -405,12 +406,16 @@ struct WorldMapView: View {
                 identityBlock(avatar: avatarSize)
                     .alignmentGuide(.headerIcon) { $0[VerticalAlignment.center] }
                 Spacer(minLength: 2)
+                // On iPad the "טופי" title sits in the MIDDLE of this row, level
+                // with the name and the buttons. On iPhone it stays below the card.
+                if !isCompact {
+                    heroTitle
+                        .alignmentGuide(.headerIcon) { $0[VerticalAlignment.center] }
+                    Spacer(minLength: 2)
+                }
                 navButtonsRow(size: btnSize)
                     .alignmentGuide(.headerIcon) { _ in btnSize / 2 }
             }
-            // On iPad the "טופי" title + subtitle live INSIDE the card, centered
-            // (there's room). On iPhone they stay below the card.
-            if !isCompact { heroTitle }
             statsPanel
         }
         .environment(\.layoutDirection, .leftToRight)
@@ -788,12 +793,14 @@ struct WorldMapView: View {
                     )
                 )
                 .glow(AppColor.starGold, radius: 14)
+                .lineLimit(1).minimumScaleFactor(0.5)
                 .scaleEffect(heroAppeared ? 1 : 0.5)
                 .opacity(heroAppeared ? 1 : 0)
 
             Text("בְּחַר עוֹלָם וְהַתְחֵל הַרְפַּתְקָה!")
-                .font(.system(size: isCompact ? 16 : 18, weight: .semibold, design: .rounded))
+                .font(.system(size: isCompact ? 16 : 14, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.75))
+                .lineLimit(1).minimumScaleFactor(0.6)
                 .opacity(heroAppeared ? 1 : 0)
             // (The "רָמַת טוֹפִי" XP pill was removed — the level now lives in the
             // header card's level badge; tapping the avatar opens the level info.)
