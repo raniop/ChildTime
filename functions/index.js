@@ -548,10 +548,6 @@ const { onRequest } = require("firebase-functions/v2/https");
 const ADMIN_TASK_TOKEN = defineSecret("ADMIN_TASK_TOKEN");
 const DAY = 24 * 3600;
 
-// Internal / test accounts — their households are excluded from all dashboard
-// metrics so the numbers reflect real users. Add tester emails here.
-const EXCLUDE_EMAILS = ["ranioph@gmail.com", "amitgolans@gmail.com"];
-
 async function computeAdminStats() {
   const now = Date.now() / 1000;
   const cut30 = now - 30 * DAY, cut7 = now - 7 * DAY, cut1 = now - 1 * DAY;
@@ -565,46 +561,51 @@ async function computeAdminStats() {
     db.collection("childDevices").get(),
   ]);
 
-  // Internal parent uids = parents whose email is on EXCLUDE_EMAILS. A household
-  // is internal only if EVERY parent on it is internal (so a real co-parent who
-  // shares a household with a founder is never dropped).
-  const excludeSet = new Set(EXCLUDE_EMAILS.map((e) => e.toLowerCase()));
-  const internalUIDs = new Set(parentsSnap.docs
-    .filter((d) => excludeSet.has(String(d.data().email || "").toLowerCase()))
-    .map((d) => d.id));
-  const internalHouseholds = new Set(householdsSnap.docs
-    .filter((d) => { const ps = d.data().parentUIDs || []; return ps.length > 0 && ps.every((u) => internalUIDs.has(u)); })
-    .map((d) => d.id));
-
-  const realChildren = childrenSnap.docs.filter((d) => !internalHouseholds.has(d.data().householdID));
-  const childIDs = realChildren.map((d) => d.id);
-  const totals = {
-    parents: parentsSnap.size - internalUIDs.size,
-    children: realChildren.length,
-    households: householdsSnap.size - internalHouseholds.size,
-    devices: devicesSnap.docs.filter((d) => !internalHouseholds.has(d.data().householdID)).length,
-  };
-  const excluded = { parents: internalUIDs.size, children: childrenSnap.size - realChildren.length };
-
-  // Last-30-day events per real child (subcollection single-field index on
-  // createdAt is automatic — no index config needed). Chunked for concurrency.
-  const events = [];
-  const CHUNK = 40;
-  for (let i = 0; i < childIDs.length; i += CHUNK) {
-    const slice = childIDs.slice(i, i + CHUNK);
-    const snaps = await Promise.all(slice.map((id) =>
-      db.collection("children").doc(id).collection("events")
-        .where("createdAt", ">=", cut30).get().catch(() => ({ docs: [] }))));
-    snaps.forEach((snap, k) => snap.docs.forEach((doc) => {
-      const e = doc.data();
-      events.push({
-        childID: slice[k], type: e.type, createdAt: Number(e.createdAt) || 0,
-        accuracy: Number(e.accuracy) || 0, minutes: Number(e.minutes) || 0,
-        stars: Number(e.stars) || 0, questions: Number(e.questions) || 0,
-        topic: (e.topic || "").trim(),
+  // Pull events per child. A child with ZERO events ever is an empty seeded/demo
+  // profile and is dropped — "real" = ever actually played. Family/founder
+  // accounts are intentionally KEPT: their usage is real data.
+  const events = [];                 // last-30-day events of real children (metrics)
+  const realChildIDs = [];
+  const realHouseholds = new Set();
+  const CHUNK = 25;
+  for (let i = 0; i < childrenSnap.docs.length; i += CHUNK) {
+    const slice = childrenSnap.docs.slice(i, i + CHUNK);
+    const snaps = await Promise.all(slice.map((c) =>
+      c.ref.collection("events").get().catch(() => ({ docs: [] }))));
+    snaps.forEach((snap, k) => {
+      if (snap.docs.length === 0) return;            // empty seed/demo profile → skip
+      const c = slice[k];
+      realChildIDs.push(c.id);
+      realHouseholds.add(c.data().householdID);
+      snap.docs.forEach((doc) => {
+        const e = doc.data();
+        const createdAt = Number(e.createdAt) || 0;
+        if (createdAt < cut30) return;               // keep only last 30d for metrics
+        events.push({
+          childID: c.id, type: e.type, createdAt,
+          accuracy: Number(e.accuracy) || 0, minutes: Number(e.minutes) || 0,
+          stars: Number(e.stars) || 0, questions: Number(e.questions) || 0,
+          topic: (e.topic || "").trim(),
+        });
       });
-    }));
+    });
   }
+
+  // Totals derived from real (active-ever) households only.
+  const realParentUIDs = new Set();
+  householdsSnap.docs.forEach((h) => {
+    if (realHouseholds.has(h.id)) (h.data().parentUIDs || []).forEach((u) => realParentUIDs.add(u));
+  });
+  const totals = {
+    parents: realParentUIDs.size,
+    children: realChildIDs.length,
+    households: realHouseholds.size,
+    devices: devicesSnap.docs.filter((d) => realHouseholds.has(d.data().householdID)).length,
+  };
+  const excluded = {
+    children: childrenSnap.size - realChildIDs.length,   // empty/demo profiles dropped
+    parents: parentsSnap.size - realParentUIDs.size,
+  };
 
   const uniq = (arr) => new Set(arr).size;
   const ends = events.filter((e) => e.type === "sessionEnd");   // completed rounds
