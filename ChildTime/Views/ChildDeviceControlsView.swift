@@ -89,25 +89,30 @@ struct ChildDeviceControlsView: View {
 
     // MARK: - Reusable card + section header
 
-    private func controlCard<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-        VStack(alignment: .trailing, spacing: AppSpacing.md) { content() }
+    private func controlCard<Content: View>(tint: Color = .white,
+                                            @ViewBuilder _ content: () -> Content) -> some View {
+        // RTL: .leading is the RIGHT edge, so headers/text sit flush right.
+        VStack(alignment: .leading, spacing: AppSpacing.md) { content() }
             .padding(AppSpacing.lg)
             .frame(maxWidth: .infinity)
-            .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.18), lineWidth: 1))
+            .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(tint.opacity(0.45), lineWidth: 1))
     }
 
-    private func sectionHead(_ title: String, _ subtitle: String, icon: String) -> some View {
-        VStack(alignment: .trailing, spacing: 4) {
-            Label(title, systemImage: icon)
-                .font(.system(size: 18, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
+    private func sectionHead(_ title: String, _ subtitle: String, icon: String, tint: Color) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label {
+                Text(title).font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+            } icon: {
+                Image(systemName: icon).font(.system(size: 18, weight: .bold)).foregroundStyle(tint)
+            }
             Text(subtitle)
                 .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundStyle(.white.opacity(0.7))
+                .foregroundStyle(.white.opacity(0.75))
                 .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.leading)
         }
-        .frame(maxWidth: .infinity, alignment: .trailing)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Status banner (one clear place for the current lock state)
@@ -158,10 +163,10 @@ struct ChildDeviceControlsView: View {
     // MARK: - Quick open (manual, all apps)
 
     private var quickOpenCard: some View {
-        controlCard {
+        controlCard(tint: AppColor.starGold) {
             sectionHead("פְּתִיחָה מְהִירָה",
                         "חַד-פַּעֲמִי · פּוֹתֵחַ אֶת כָּל הָאַפְּלִיקַצְיוֹת. לֹא מֵהַדַּקּוֹת שֶׁהַיֶּלֶד צָבַר.",
-                        icon: "hourglass")
+                        icon: "hourglass", tint: AppColor.starGold)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                 durationPill("חֲצִי שָׁעָה", minutes: 30)
                 durationPill("שָׁעָה", minutes: 60)
@@ -189,10 +194,10 @@ struct ChildDeviceControlsView: View {
     // MARK: - Per-app temporary allowance
 
     private var perAppAllowCard: some View {
-        controlCard {
+        controlCard(tint: AppColor.diamondBlue) {
             sectionHead("פְּתִיחַת אַפְּלִיקַצְיָה מְסֻיֶּמֶת",
                         "רַק אַפְּלִיקַצְיָה אַחַת אוֹ כַּמָּה (לְמָשָׁל יוּטְיוּבּ). הַשְּׁאָר נְעוּלוֹת.",
-                        icon: "app.badge.checkmark")
+                        icon: "app.badge.checkmark", tint: AppColor.diamondBlue)
 
             Button {
                 Task {
@@ -251,12 +256,12 @@ struct ChildDeviceControlsView: View {
     // MARK: - App lock
 
     private var appLockCard: some View {
-        controlCard {
+        controlCard(tint: AppColor.successMint) {
             sectionHead("אֵילוּ אַפְּלִיקַצְיוֹת נְעוּלוֹת",
                         selectedCount > 0
                             ? "\(selectedCount) אַפְּלִיקַצְיוֹת/קָטֵגוֹרְיוֹת נְעוּלוֹת עַד שֶׁמַּרְוִיחִים זְמַן."
                             : "עֲדַיִן לֹא נִבְחֲרוּ אַפְּלִיקַצְיוֹת לִנְעִילָה.",
-                        icon: "lock.app.dashed")
+                        icon: "lock.app.dashed", tint: AppColor.successMint)
             Button {
                 Task {
                     await shields.requestAuthorizationIfNeeded()
@@ -268,9 +273,11 @@ struct ChildDeviceControlsView: View {
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.28), lineWidth: 1))
+                    .padding(.vertical, 13)
+                    .background(
+                        LinearGradient(colors: [AppColor.successMint, Color(hex: "06A57E")],
+                                       startPoint: .top, endPoint: .bottom),
+                        in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
             .buttonStyle(.juicy)
         }
