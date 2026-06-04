@@ -19,6 +19,9 @@ struct ChestView: View {
     /// Bump this to make the chest do a quick squash-and-bounce — used to give
     /// satisfying per-tap feedback while a kid taps repeatedly to open it.
     var nudge: Int = 0
+    /// 0…1 — how "charged" the chest is from repeated taps. While glowing, the lid
+    /// cracks open a little more as this grows, so each tap visibly pries it open.
+    var charge: Double = 0
 
     @State private var shake: CGFloat = 0
     @State private var nudgeScale: CGFloat = 1
@@ -63,6 +66,7 @@ struct ChestView: View {
             //    Bobbing + rocking while glowing, then a bouncy pop.
             TreasureChest(palette: palette,
                           open: stage == .opening || stage == .revealed,
+                          lift: stage == .glowing ? charge * 28 : 0,
                           size: size)
                 .shadow(color: glowColor.opacity(0.6), radius: 12, y: 6)
                 .offset(x: shake, y: bob)
@@ -95,8 +99,15 @@ struct ChestView: View {
         .onChangeCompat(of: stage) { _, _ in startStageAnimation() }
         .onChangeCompat(of: nudge) { _, _ in
             guard nudge > 0 else { return }
-            withAnimation(.easeIn(duration: 0.08)) { nudgeScale = 0.86 }
-            withAnimation(.spring(response: 0.34, dampingFraction: 0.38).delay(0.08)) { nudgeScale = 1 }
+            // Squash-and-bounce…
+            withAnimation(.easeIn(duration: 0.08)) { nudgeScale = 0.84 }
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.36).delay(0.08)) { nudgeScale = 1 }
+            // …a burst of light…
+            flash = 0.55
+            withAnimation(.easeOut(duration: 0.4)) { flash = 0 }
+            // …a shockwave ring + a few sparks fly out on every tap.
+            ringTrigger += 1
+            burstTrigger += 1
         }
     }
 
@@ -339,6 +350,9 @@ struct ChestPalette {
 struct TreasureChest: View {
     let palette: ChestPalette
     let open: Bool
+    /// Degrees the lid is partially cracked open (used while charging, before the
+    /// full pop). Ignored once `open` is true.
+    var lift: Double = 0
     let size: CGFloat
 
     var body: some View {
@@ -408,12 +422,13 @@ struct TreasureChest: View {
             }
             .frame(width: w, height: lidH)
             .offset(y: s * 0.18 - bodyH * 0.5 - lidH * 0.5 + s * 0.02)
-            .rotation3DEffect(.degrees(open ? -118 : 0),
+            .rotation3DEffect(.degrees(open ? -118 : -lift),
                               axis: (x: 1, y: 0, z: 0),
                               anchor: .bottom, anchorZ: 0, perspective: 0.6)
         }
         .frame(width: s, height: s)
         .animation(.spring(response: 0.45, dampingFraction: 0.6), value: open)
+        .animation(.spring(response: 0.32, dampingFraction: 0.5), value: lift)
     }
 
     private func lock(s: CGFloat) -> some View {

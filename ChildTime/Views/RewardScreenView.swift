@@ -187,7 +187,8 @@ struct RewardScreenView: View {
                 .frame(width: chestSize * 1.6, height: chestSize * 1.6)
                 .opacity(stage == .closed ? 0.3 : 0.85)
 
-            ChestView(kind: kind, stage: stage, size: chestSize, nudge: taps)
+            ChestView(kind: kind, stage: stage, size: chestSize,
+                      nudge: taps, charge: Double(taps) / Double(tapsToOpen))
                 .onTapGesture { tapChest() }
         }
         .padding(.vertical, AppSpacing.sm)
@@ -209,10 +210,13 @@ struct RewardScreenView: View {
     }
 
     /// Each tap charges the chest a little; it bursts open on the final tap.
+    /// Feedback escalates (light → medium → heavy) so it feels like prying it open.
     private func tapChest() {
         guard stage == .glowing else { return }
         taps += 1
-        Haptic.medium()
+        if taps >= tapsToOpen { Haptic.heavy() }
+        else if taps >= tapsToOpen - 2 { Haptic.medium() }
+        else { Haptic.light() }
         SoundPlayer.shared.play(.uiTap)
         if taps >= tapsToOpen { openChest() }
     }
