@@ -11,7 +11,9 @@ enum CompanionState: Equatable {
 }
 
 /// ObservableObject (not the iOS-17 `@Observable` macro) so the app supports
-/// iOS 16. Behaviour is identical on 17/18 — these are tiny companion views.
+/// iOS 16. @MainActor because it drives @Published UI state — mutating those off
+/// the main thread crashes SwiftUI ("Call must be made on main thread").
+@MainActor
 final class CompanionController: ObservableObject {
     @Published var state: CompanionState = .idle
     @Published var bubbleText: String?
