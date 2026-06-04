@@ -743,6 +743,9 @@ struct WorldMapView: View {
                 if progress.pendingMinutes > progress.redeemableMinutesNow {
                     lines.append("בָּאַרְנָק יֵשׁ \(progress.pendingMinutes) — הַשְּׁאָר נִשְׁמָר לְיָמִים הַבָּאִים.")
                 }
+            } else if progress.dailyScreenTimeMaxedOut {
+                // Today's screen-time cap is used up — the wallet waits for tomorrow.
+                lines.append("הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לְמָחָר!")
             } else if progress.pendingMinutes > 0 {
                 // Has some, but below the 15-min minimum we can open.
                 lines.append("יֵשׁ לְךָ \(progress.pendingMinutes) דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-\(progress.minimumUnlockMinutes) דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊")
@@ -895,6 +898,10 @@ struct WorldMapView: View {
                 }
                 .buttonStyle(.juicy)
                 .frame(maxWidth: 480)
+            } else if progress.dailyScreenTimeMaxedOut {
+                // Wallet has minutes, but today's screen-time cap is used up — they
+                // wait for tomorrow. Say so clearly (don't tell them to earn more).
+                bottomHint("הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לְמָחָר")
             } else if progress.redeemableMinutesNow > 0 {
                 // Has some minutes but below the 15-min minimum we can enforce.
                 // Tell the kid how many more to go instead of hiding the button.

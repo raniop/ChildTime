@@ -548,27 +548,46 @@ const { onRequest } = require("firebase-functions/v2/https");
 const ADMIN_TASK_TOKEN = defineSecret("ADMIN_TASK_TOKEN");
 const DAY = 24 * 3600;
 
-async function countOf(ref) {
-  try { const s = await ref.count().get(); return s.data().count; }
-  catch (e) { console.error("count failed", e && e.message); return 0; }
-}
+// Internal / test accounts — their households are excluded from all dashboard
+// metrics so the numbers reflect real users. Add tester emails here.
+const EXCLUDE_EMAILS = ["ranioph@gmail.com", "amitgolans@gmail.com"];
 
 async function computeAdminStats() {
   const now = Date.now() / 1000;
   const cut30 = now - 30 * DAY, cut7 = now - 7 * DAY, cut1 = now - 1 * DAY;
 
-  // Totals — cheap server-side count() aggregations.
-  const [parents, children, households, devices] = await Promise.all([
-    countOf(db.collection("parents")),
-    countOf(db.collection("children")),
-    countOf(db.collection("households")),
-    countOf(db.collection("childDevices")),
+  // Fetch the core collections (tens of docs) so we can drop internal/test
+  // accounts before counting.
+  const [parentsSnap, householdsSnap, childrenSnap, devicesSnap] = await Promise.all([
+    db.collection("parents").get(),
+    db.collection("households").get(),
+    db.collection("children").get(),
+    db.collection("childDevices").get(),
   ]);
 
-  // Last-30-day events per child (subcollection single-field index on createdAt
-  // is automatic — no index config needed). Chunked to bound concurrency.
-  const childrenSnap = await db.collection("children").get();
-  const childIDs = childrenSnap.docs.map((d) => d.id);
+  // Internal parent uids = parents whose email is on EXCLUDE_EMAILS. A household
+  // is internal only if EVERY parent on it is internal (so a real co-parent who
+  // shares a household with a founder is never dropped).
+  const excludeSet = new Set(EXCLUDE_EMAILS.map((e) => e.toLowerCase()));
+  const internalUIDs = new Set(parentsSnap.docs
+    .filter((d) => excludeSet.has(String(d.data().email || "").toLowerCase()))
+    .map((d) => d.id));
+  const internalHouseholds = new Set(householdsSnap.docs
+    .filter((d) => { const ps = d.data().parentUIDs || []; return ps.length > 0 && ps.every((u) => internalUIDs.has(u)); })
+    .map((d) => d.id));
+
+  const realChildren = childrenSnap.docs.filter((d) => !internalHouseholds.has(d.data().householdID));
+  const childIDs = realChildren.map((d) => d.id);
+  const totals = {
+    parents: parentsSnap.size - internalUIDs.size,
+    children: realChildren.length,
+    households: householdsSnap.size - internalHouseholds.size,
+    devices: devicesSnap.docs.filter((d) => !internalHouseholds.has(d.data().householdID)).length,
+  };
+  const excluded = { parents: internalUIDs.size, children: childrenSnap.size - realChildren.length };
+
+  // Last-30-day events per real child (subcollection single-field index on
+  // createdAt is automatic — no index config needed). Chunked for concurrency.
   const events = [];
   const CHUNK = 40;
   for (let i = 0; i < childIDs.length; i += CHUNK) {
@@ -642,12 +661,12 @@ async function computeAdminStats() {
   const summary = {
     updatedAt: new Date().toLocaleString("he-IL", { timeZone: "Asia/Jerusalem" }),
     updatedAtUnix: now,
-    totals: { parents, children, households, devices },
+    totals, excluded,
     active, engagement, learning, daily, topics,
     accuracyBuckets: buckets.map((b) => ({ range: b.range, n: b.n })),
   };
   await db.collection("adminStats").doc("summary").set(summary);
-  console.log("[adminStats] wrote summary", { parents, children, events: events.length });
+  console.log("[adminStats] wrote summary", { ...totals, excluded, events: events.length });
   return summary;
 }
 
@@ -666,7 +685,29 @@ exports.runAdminStats = onRequest(
       res.status(403).json({ error: "forbidden" });
       return;
     }
-    try { res.json({ ok: true, summary: await computeAdminStats() }); }
-    catch (e) { console.error(e); res.status(500).json({ error: e && e.message }); }
+    try {
+      // ?breakdown=1 — founder-only diagnostic (token-guarded, never stored):
+      // lists each child with its parent email + recent activity, so you can
+      // spot which accounts are test/demo and add them to EXCLUDE_EMAILS.
+      if (req.query.breakdown) {
+        const [pSnap, hSnap, cSnap] = await Promise.all([
+          db.collection("parents").get(), db.collection("households").get(), db.collection("children").get(),
+        ]);
+        const email = {}; pSnap.docs.forEach((p) => { email[p.id] = p.data().email || p.data().displayName || p.id; });
+        const hhP = {}; hSnap.docs.forEach((h) => { hhP[h.id] = (h.data().parentUIDs || []).map((u) => email[u] || u); });
+        const cut7 = Date.now() / 1000 - 7 * DAY;
+        const rows = await Promise.all(cSnap.docs.map(async (c) => {
+          const ev = await c.ref.collection("events").where("createdAt", ">=", cut7).get().catch(() => ({ docs: [] }));
+          return {
+            child: c.data().name || c.id,
+            parents: (hhP[c.data().householdID] || []).join(", "),
+            sessions7d: ev.docs.filter((d) => d.data().type === "sessionEnd").length,
+          };
+        }));
+        res.json({ ok: true, children: rows.length, rows: rows.sort((a, b) => b.sessions7d - a.sessions7d) });
+        return;
+      }
+      res.json({ ok: true, summary: await computeAdminStats() });
+    } catch (e) { console.error(e); res.status(500).json({ error: e && e.message }); }
   }
 );

@@ -1089,6 +1089,14 @@ final class ProgressStore: ObservableObject {
     /// True when there are enough redeemable minutes to open a window we can enforce.
     var canRedeemNow: Bool { redeemableMinutesNow >= minimumUnlockMinutes }
 
+    /// True when the kid has wallet minutes they CAN'T open today only because
+    /// today's screen-time cap is already used up (the rest waits for tomorrow) —
+    /// distinct from simply not having earned enough yet. Drives an accurate
+    /// "you hit today's limit" message instead of "answer more questions".
+    var dailyScreenTimeMaxedOut: Bool {
+        dailyCap.enabled && !canRedeemNow && pendingMinutes > redeemableMinutesNow
+    }
+
     /// Consume up to today's remaining allowance from the wallet for an unlock.
     /// Returns the granted amount; any leftover stays in `pendingMinutes` for a
     /// later day so a large wallet can't be cashed in past the daily cap at once.
