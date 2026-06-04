@@ -249,7 +249,7 @@ function render(state){
   document.getElementById("heroMonth").textContent = fmt(lm.month);
   const savedPct = (lm.week>0 && ec0.minutesUnused7!=null) ? Math.round(ec0.minutesUnused7/lm.week*100) : null;
   document.getElementById("heroCap").innerHTML = (ec0.minutesUsed7!=null)
-    ? `השבוע הילד הרוויח <b>${fmt(lm.week)}</b> דק' משחק דרך למידה, מימש <b>${fmt(ec0.minutesUsed7)}</b> בפועל${savedPct!=null?`, ו-<b>${fmt(ec0.minutesUnused7)}</b> דק' (${savedPct}%) <b>נחסכו</b> — זמן מסך שלא בוזבז על משחקים אחרים`:""}.`
+    ? `השבוע הילדים באפליקציה הרוויחו יחד <b>${fmt(lm.week)}</b> דק' משחק דרך למידה, מימשו <b>${fmt(ec0.minutesUsed7)}</b> בפועל${savedPct!=null?`, ו-<b>${fmt(ec0.minutesUnused7)}</b> דק' (${savedPct}%) <b>נחסכו</b> — זמן מסך שלא בוזבז על משחקים אחרים`:""}.`
     : "";
 
   // GROWTH
