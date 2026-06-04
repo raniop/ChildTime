@@ -8,6 +8,7 @@ struct ContentView: View {
     @EnvironmentObject var auth: AuthManager
     @StateObject private var household = HouseholdManager.shared
     @StateObject private var kidMode = KidModeManager.shared
+    @StateObject private var joinCoord = JoinCoordinator.shared
 
     /// Guests (no account) can answer this many questions before registration
     /// is required.
@@ -51,6 +52,12 @@ struct ContentView: View {
         .sheet(isPresented: Binding(get: { kidMode.pendingEntry && !kidMode.active },
                                     set: { kidMode.pendingEntry = $0 })) {
             KidModeEntryView()
+                .environment(\.layoutDirection, .rightToLeft)
+        }
+        // Any scanned/typed family-or-child code → detect type + confirm first.
+        .fullScreenCover(isPresented: $joinCoord.active) {
+            JoinConfirmView()
+                .environmentObject(settings)
                 .environment(\.layoutDirection, .rightToLeft)
         }
     }

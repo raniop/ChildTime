@@ -71,7 +71,7 @@ struct ChildJoinView: View {
                             .multilineTextAlignment(.center)
                             .padding(.vertical, 12)
                             .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: 14))
-                        Button { join(code) } label: {
+                        Button { JoinCoordinator.shared.present(code) } label: {
                             Text("הִתְחַבְּרוּ")
                                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
@@ -97,7 +97,7 @@ struct ChildJoinView: View {
             NavigationStack {
                 QRScannerView { scanned in
                     showScanner = false
-                    join(scanned)
+                    JoinCoordinator.shared.present(scanned)
                 }
                 .ignoresSafeArea()
                 .navigationTitle("סריקת קוד")
@@ -106,8 +106,15 @@ struct ChildJoinView: View {
             }
         }
         .onAppear {
-            // A join link scanned by the native Camera lands here — redeem it.
+            // The confirmed child-join hands off here via pendingJoinPayload.
             if let payload = settings.pendingJoinPayload, !payload.isEmpty {
+                settings.pendingJoinPayload = nil
+                join(payload)
+            }
+        }
+        // …and when the confirmation sets it while this screen is already showing.
+        .onChangeCompat(of: settings.pendingJoinPayload) { _, payload in
+            if let payload, !payload.isEmpty {
                 settings.pendingJoinPayload = nil
                 join(payload)
             }

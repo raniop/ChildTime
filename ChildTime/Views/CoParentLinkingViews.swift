@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // MARK: - Invite (existing parent shows a code)
 
@@ -206,7 +207,7 @@ struct JoinFamilyFlowView: View {
                 .background(RoundedRectangle(cornerRadius: 14).fill(.white.opacity(0.12)))
                 .environment(\.layoutDirection, .leftToRight)
 
-            Button { redeem(joinCode) } label: {
+            Button { JoinCoordinator.shared.present(joinCode) } label: {
                 HStack(spacing: 8) {
                     if working { ProgressView().tint(.white) }
                     Text("הִצְטָרְפוּ")
@@ -258,7 +259,7 @@ struct JoinFamilyFlowView: View {
 
     private var scannerSheet: some View {
         NavigationStack {
-            QRScannerView { scanned in showScanner = false; redeem(scanned) }
+            QRScannerView { scanned in showScanner = false; JoinCoordinator.shared.present(scanned) }
                 .ignoresSafeArea()
                 .navigationTitle("סְרִיקַת קוֹד").navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("בִּטּוּל") { showScanner = false } } }
@@ -279,6 +280,169 @@ struct JoinFamilyFlowView: View {
 }
 
 // MARK: - Shared bits
+
+// MARK: - Join coordinator (detect parent-vs-child on EVERY scan/code + confirm)
+
+/// Every scanned QR / typed family-or-child code goes through here FIRST. It
+/// looks up the invite to learn whether it's a CHILD-join code (`childID != nil`)
+/// or a CO-PARENT family code, and `JoinConfirmView` shows a confirmation BEFORE
+/// anything changes — and BLOCKS turning an existing parent device into a child
+/// (the accident where a parent scanned a child QR and families got mixed).
+@MainActor
+final class JoinCoordinator: ObservableObject {
+    static let shared = JoinCoordinator()
+
+    @Published var active = false
+    @Published private(set) var resolving = false
+    @Published private(set) var resolved = false
+    @Published private(set) var invite: Invite?     // after resolve: nil = invalid/expired
+    private(set) var rawPayload = ""
+
+    /// The bare invite code (drops the "|childID" suffix a scanned child QR adds).
+    var code: String {
+        String(rawPayload.split(separator: "|").first ?? Substring(rawPayload))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Entry point for ANY scan / typed code that might be a family/child code.
+    func present(_ scanned: String) {
+        rawPayload = JoinLink.payload(from: scanned)
+        invite = nil; resolved = false; resolving = true; active = true
+        Task {
+            let inv = await HouseholdManager.shared.inspectInvite(code: code)
+            invite = (inv?.isExpired == true) ? nil : inv
+            resolving = false; resolved = true
+        }
+    }
+
+    func dismiss() {
+        active = false; rawPayload = ""
+        invite = nil; resolved = false; resolving = false
+    }
+
+    /// DEMO only (screenshots): seed a resolved invite without hitting Firestore.
+    func seedDemo(childCode: Bool) {
+        rawPayload = "DEMO12"
+        invite = Invite(id: "DEMO12", householdID: "demo", createdBy: "demo",
+                        createdAt: Date(), expiresAt: Date().addingTimeInterval(3600),
+                        redeemedBy: nil, childID: childCode ? "demo-child" : nil)
+        resolving = false; resolved = true; active = true
+    }
+}
+
+/// The always-on confirmation shown over everything when a code is scanned/typed.
+struct JoinConfirmView: View {
+    @ObservedObject private var coord = JoinCoordinator.shared
+    @ObservedObject private var household = HouseholdManager.shared
+    @EnvironmentObject private var settings: ParentSettings
+    @State private var working = false
+    @State private var note: String?
+    @State private var joined = false
+
+    private var isParentDevice: Bool { settings.deviceRole == .parent }
+
+    var body: some View {
+        ZStack {
+            AppGradient.dreamy.ignoresSafeArea()
+            SparkleField(count: 14, size: 12)
+            VStack(spacing: AppSpacing.lg) { content }
+                .padding(AppSpacing.xl)
+                .frame(maxWidth: 440).frame(maxWidth: .infinity)
+            if let note {
+                VStack { Spacer()
+                    Text(note).font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(AppColor.almostWarm).multilineTextAlignment(.center)
+                        .padding(.bottom, AppSpacing.xl)
+                }
+            }
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+    }
+
+    @ViewBuilder private var content: some View {
+        if coord.resolving || working {
+            ProgressView().tint(.white).scaleEffect(1.3)
+            Text(working ? "מְחַבְּרִים…" : "בּוֹדְקִים אֶת הַקּוֹד…")
+                .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+        } else if joined {
+            panel(emoji: "🎉", title: "הִצְטָרַפְתֶּם לַמִּשְׁפָּחָה!",
+                  body: "הַיְּלָדִים וְהַהִתְקַדְּמוּת יוֹפִיעוּ תּוֹךְ כַּמָּה שְׁנִיּוֹת.") {
+                primaryButton("הַמְשִׁיכוּ") { settings.pendingJoinFamily = false; coord.dismiss() }
+            }
+        } else if coord.invite == nil {
+            panel(emoji: "⚠️", title: "הַקּוֹד לֹא תָּקִין",
+                  body: "הַקּוֹד שֶׁסָּרַקְתֶּם לֹא נִמְצָא אוֹ פָּג תּוֹקֶף. בַּקְּשׁוּ קוֹד חָדָשׁ וְנַסּוּ שׁוּב.") {
+                secondaryButton("סְגִירָה") { coord.dismiss() }
+            }
+        } else if let inv = coord.invite, inv.childID != nil {
+            if isParentDevice {
+                // ⚠️ THE ACCIDENT: a parent device must NOT become a child.
+                panel(emoji: "🛑", title: "אִי אֶפְשָׁר לְהוֹסִיף הוֹרֶה כְּיֶלֶד",
+                      body: "לַמַּכְשִׁיר הַזֶּה כְּבָר יֵשׁ מִשְׁפָּחָה מִשֶּׁלְּךָ, וְהַקּוֹד שֶׁסָּרַקְתָּ הוּא קוֹד שֶׁל יֶלֶד.\n\nכְּדֵי לְהוֹסִיף הוֹרֶה נוֹסָף — בַּמַּכְשִׁיר שֶׁלּוֹ: הַגְדָּרוֹת ⚙️ ← \u{201C}הוֹסִיפוּ הוֹרֶה\u{201D}, וְסִרְקוּ אֶת הַקּוֹד שֶׁמּוֹפִיעַ.") {
+                    secondaryButton("הֵבַנְתִּי") { coord.dismiss() }
+                }
+            } else {
+                panel(emoji: "🎮", title: "לְחַבֵּר אֶת הַמַּכְשִׁיר הַזֶּה כְּמַכְשִׁיר שֶׁל יֶלֶד?",
+                      body: "הַמַּכְשִׁיר הַזֶּה יֵהָפֵךְ לְמַכְשִׁיר הַמִּשְׂחָק שֶׁל הַיֶּלֶד וְיִתְחַבֵּר לַמִּשְׁפָּחָה. אֶפְשָׁר תָּמִיד לְשַׁנּוֹת בַּהַגְדָּרוֹת.") {
+                    primaryButton("כֵּן, חַבְּרוּ") {
+                        settings.deviceRole = .child
+                        settings.pendingJoinPayload = coord.rawPayload
+                        coord.dismiss()
+                    }
+                    secondaryButton("בִּטּוּל") { coord.dismiss() }
+                }
+            }
+        } else {
+            // CO-PARENT family code.
+            panel(emoji: "👨‍👩‍👧‍👦", title: "לְהִצְטָרֵף לַמִּשְׁפָּחָה כְּהוֹרֶה?",
+                  body: "תִּהְיוּ הוֹרֶה נוֹסָף בַּמִּשְׁפָּחָה וְתִרְאוּ אֶת אוֹתָם הַיְּלָדִים וְאֶת אוֹתָהּ הַהִתְקַדְּמוּת.") {
+                primaryButton("כֵּן, הִצְטָרְפוּ") { joinAsCoParent() }
+                secondaryButton("בִּטּוּל") { coord.dismiss() }
+            }
+        }
+    }
+
+    private func joinAsCoParent() {
+        Task {
+            working = true; note = nil
+            let ok = await household.redeemInvite(code: coord.code, bringLocalChildren: true)
+            working = false
+            if ok { Haptic.success(); withAnimation(.spring) { joined = true } }
+            else { note = household.lastError ?? "לֹא הִצְלַחְנוּ לְהִצְטָרֵף"; Haptic.warning() }
+        }
+    }
+
+    // MARK: building blocks
+
+    @ViewBuilder
+    private func panel<Buttons: View>(emoji: String, title: String, body: String,
+                                      @ViewBuilder buttons: () -> Buttons) -> some View {
+        Text(emoji).font(.system(size: 64))
+        Text(title).font(.system(size: 23, weight: .heavy, design: .rounded))
+            .foregroundStyle(.white).multilineTextAlignment(.center)
+        Text(body).font(.system(size: 15, weight: .medium, design: .rounded))
+            .foregroundStyle(.white.opacity(0.85)).multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+        VStack(spacing: 10) { buttons() }.padding(.top, 6)
+    }
+
+    private func primaryButton(_ title: String, _ action: @escaping () -> Void) -> some View {
+        Button { Haptic.medium(); action() } label: {
+            Text(title).font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                .frame(maxWidth: .infinity).padding(.vertical, 15)
+                .background(AppGradient.gold, in: Capsule()).glow(AppColor.starGold, radius: 10)
+        }
+    }
+
+    private func secondaryButton(_ title: String, _ action: @escaping () -> Void) -> some View {
+        Button { Haptic.light(); action() } label: {
+            Text(title).font(.system(size: 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 13)
+                .background(.white.opacity(0.14), in: Capsule())
+                .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
+        }
+    }
+}
 
 private struct LinkHeader: View {
     let title: String

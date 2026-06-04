@@ -171,8 +171,9 @@ struct ChildTimeApp: App {
                     // A scanned join link (from the native Camera or a shared
                     // link): capture the code and start the child-join flow.
                     if JoinLink.isJoinURL(url) {
-                        settings.pendingJoinPayload = JoinLink.payload(from: url.absoluteString)
-                        if settings.deviceRole != .child { settings.deviceRole = .child }
+                        // Detect parent-vs-child + confirm BEFORE changing anything —
+                        // never silently flip an existing parent device into a child.
+                        JoinCoordinator.shared.present(url.absoluteString)
                     } else if FriendLink.isFriendURL(url) {
                         // A friend invite link → remember the code; the leaderboard
                         // adds it the next time the child opens it.
@@ -186,8 +187,9 @@ struct ChildTimeApp: App {
                     // Universal Link opened from the native Camera / Safari.
                     guard let url = activity.webpageURL else { return }
                     if JoinLink.isJoinURL(url) {
-                        settings.pendingJoinPayload = JoinLink.payload(from: url.absoluteString)
-                        if settings.deviceRole != .child { settings.deviceRole = .child }
+                        // Detect parent-vs-child + confirm BEFORE changing anything —
+                        // never silently flip an existing parent device into a child.
+                        JoinCoordinator.shared.present(url.absoluteString)
                     } else if FriendLink.isFriendURL(url) {
                         FriendsManager.shared.pendingFriendCode = FriendLink.code(from: url.absoluteString)
                     } else if GameLink.isGameURL(url) {
@@ -208,6 +210,9 @@ struct ChildTimeApp: App {
         case "livegame": LiveGameDemoHost()      // DEMO_SCREEN=livegame — live quiz setup/flow
         case "gameinvite": WorldMapView().onAppear { LiveGameManager.shared.seedDemoInvite() }  // invite banner
         case "devicecontrols": ChildDeviceControlsView()   // parent controls on child device
+        case "joinguard":                                  // parent-scans-child-code block dialog
+            JoinConfirmView().environmentObject(ParentSettings.shared)
+                .onAppear { ParentSettings.shared.deviceRole = .parent; JoinCoordinator.shared.seedDemo(childCode: true) }
         case "friendtest":                      // DEMO_SCREEN=friendtest — runs the live Firestore diagnostic
             Text("Friends diagnostic — see console ([Friends])")
                 .padding().task { await FriendsManager.shared.runDiagnostic() }

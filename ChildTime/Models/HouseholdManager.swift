@@ -410,6 +410,21 @@ final class HouseholdManager: ObservableObject {
     /// brings their kids along. A CHILD play-device must pass FALSE: it only binds
     /// to ONE existing child, and uploading its local throwaway profile would
     /// create a phantom new child in the family.
+    /// Look up an invite WITHOUT redeeming it — so the UI can detect whether a
+    /// scanned/typed code is a CHILD-join code (`childID != nil`) or a CO-PARENT
+    /// family code, and confirm the right action before changing anything.
+    func inspectInvite(code: String) async -> Invite? {
+        #if canImport(FirebaseFirestore)
+        let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard !trimmed.isEmpty,
+              let doc = try? await db.collection("invites").document(trimmed).getDocument(),
+              let data = doc.data() else { return nil }
+        return Self.decodeInvite(id: trimmed, data)
+        #else
+        return nil
+        #endif
+    }
+
     func redeemInvite(code: String, bringLocalChildren: Bool = true) async -> Bool {
         #if canImport(FirebaseFirestore)
         guard let uid else { return false }
