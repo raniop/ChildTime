@@ -801,7 +801,7 @@ struct WorldMapView: View {
                 .opacity(heroAppeared ? 1 : 0)
 
             Text("בְּחַר עוֹלָם וְהַתְחֵל הַרְפַּתְקָה!")
-                .font(.system(size: isCompact ? 16 : 14, weight: .semibold, design: .rounded))
+                .font(.system(size: isCompact ? 16 : 22, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.75))
                 .lineLimit(1).minimumScaleFactor(0.6)
                 .opacity(heroAppeared ? 1 : 0)
