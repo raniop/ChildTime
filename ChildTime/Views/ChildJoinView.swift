@@ -160,6 +160,14 @@ struct ChildJoinView: View {
             ParentSettings.shared.joinedChildID = cid.uuidString
             profiles.setActiveID(cid)
             await household.registerDevice(forChildID: cid)
+            // PULL the child's existing cloud progress NOW (stars / diamonds /
+            // play-minutes) so it shows immediately — otherwise the fresh device
+            // stays blank until an app restart re-subscribes. apply() adopts the
+            // cloud revision, so this never pushes a blank over the cloud.
+            if let cloud = await RemoteSyncManager.shared.fetchSnapshot(for: cid) {
+                ProgressStore.shared.apply(cloud)
+            }
+            RemoteSyncManager.shared.start()   // ensure live sync now follows this child
             AppAnalytics.deviceJoined(kind: DeviceIdentity.kind)
             message = "הִתְחַבַּרְתֶּם! 🎉"
             working = false
