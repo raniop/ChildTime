@@ -231,6 +231,11 @@ struct ChildTimeApp: App {
             KidModeManager.shared.reassertIfActive()
             return
         }
+        // App DELETION lock is tied to the DEVICE being a child's — NOT to whether
+        // any apps are currently blocked. Otherwise a child device with an empty
+        // block-list (or mid-unlock) could be deleted, dropping the shield and
+        // unlocking everything. A parent's own phone stays unrestricted.
+        shields.setAppRemovalLocked(settings.deviceRole == .child)
         // Nothing managed on this device (e.g. a parent's phone with no block-list
         // and no block-all allowlist) → make sure nothing is left shielded,
         // including a stale Kid Mode web/app lock.
