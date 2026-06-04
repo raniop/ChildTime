@@ -10,8 +10,10 @@ struct LiveGameView: View {
     @State private var confetti = 0
     @State private var countdownValue = LiveGameRules.countdownSeconds
     @State private var nudged: Set<String> = []     // friends I just re-invited
+    @State private var showQuit = false             // "leave the game?" confirm
 
     private var meID: String? { ProfileStore.shared.activeID?.uuidString }
+    private var amHost: Bool { lg.game?.hostID == meID }
 
     var body: some View {
         ZStack {
@@ -35,10 +37,45 @@ struct LiveGameView: View {
                 ProgressView().tint(.white)
             }
 
+            // A persistent "leave" button during live play (lobby + final have
+            // their own close button), so anyone can bow out mid-match.
+            if let g = lg.game,
+               [.countdown, .question, .reveal, .roundBreak].contains(g.state) {
+                quitOverlay
+            }
+
             Confetti(trigger: confetti).allowsHitTesting(false)
         }
         .environment(\.layoutDirection, .rightToLeft)
+        .confirmationDialog("לָצֵאת מֵהַמִּשְׂחָק?", isPresented: $showQuit, titleVisibility: .visible) {
+            Button(amHost ? "כֵּן, לְסַיֵּם לְכֻלָּם" : "כֵּן, לָצֵאת", role: .destructive) {
+                Task { await lg.leaveGame() }
+            }
+            Button("נִשְׁאָרִים בַּמִּשְׂחָק", role: .cancel) {}
+        } message: {
+            Text(amHost ? "אַתָּה הַמַּנְהִיג — הַמִּשְׂחָק יִסְתַּיֵּם לְכָל הַחֲבֵרִים."
+                        : "אֶפְשָׁר תָּמִיד לְהִצְטָרֵף לְמִשְׂחָק חָדָשׁ אַחַר כָּךְ.")
+        }
         .onDisappear { Task { await lg.leaveGame() } }
+    }
+
+    /// Floating leave button (top-left in LTR terms) shown throughout live play.
+    private var quitOverlay: some View {
+        VStack {
+            HStack {
+                Button { Haptic.light(); showQuit = true } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 18, weight: .heavy)).foregroundStyle(.white)
+                        .frame(width: 48, height: 48)
+                        .background(.black.opacity(0.30), in: Circle())
+                        .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
+                }
+                Spacer()
+            }
+            Spacer()
+        }
+        .environment(\.layoutDirection, .leftToRight)
+        .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.md)
     }
 
     private var closeButton: some View {
@@ -210,37 +247,71 @@ struct LiveGameView: View {
     private func questionView(_ g: LiveGame) -> some View {
         let q = g.currentQuestion
         return VStack(spacing: AppSpacing.lg) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("סִבּוּב \(g.currentRound + 1) מִתּוֹךְ \(g.totalRounds)")
-                        .font(.system(size: 13, weight: .heavy, design: .rounded))
-                        .foregroundStyle(AppColor.starGold)
-                    Text("שְׁאֵלָה \(g.questionInRound + 1) מִתּוֹךְ \(g.roundQuestions)")
-                        .font(.system(size: 15, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
-                }
-                Spacer()
+            // Header: big timer ring on one side, round/question pills on the other.
+            HStack(alignment: .center) {
                 timerRing(g)
+                Spacer()
+                progressPills(g)
             }
-            .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.lg)
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.top, 64)   // clear the floating quit button
 
-            Spacer()
-            Text(q?.prompt ?? "")
-                .font(.system(size: 30, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white).multilineTextAlignment(.center)
+            Spacer(minLength: AppSpacing.md)
+
+            questionCard(q)
                 .padding(.horizontal, AppSpacing.lg)
-            Spacer()
+
+            Spacer(minLength: AppSpacing.md)
 
             answerGrid(q)
-                .padding(.horizontal, AppSpacing.lg).padding(.bottom, AppSpacing.xl)
+                .padding(.horizontal, AppSpacing.lg)
 
             if lg.myChoiceIndex != nil {
-                Text("עָנִיתָ! מְחַכִּים לַשְּׁאָר… ⏳")
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundStyle(AppColor.starGold).padding(.bottom, AppSpacing.md)
+                Label("עָנִיתָ! מְחַכִּים לַשְּׁאָר…", systemImage: "checkmark.circle.fill")
+                    .font(.system(size: 19, weight: .heavy, design: .rounded))
+                    .foregroundStyle(AppColor.starGold)
+                    .padding(.top, AppSpacing.sm)
             }
+            Spacer(minLength: 0)
         }
-        .frame(maxWidth: 560).frame(maxWidth: .infinity)
+        .padding(.bottom, AppSpacing.lg)
+        .frame(maxWidth: 680).frame(maxWidth: .infinity)
+    }
+
+    /// Round + question position as bold gold pills.
+    private func progressPills(_ g: LiveGame) -> some View {
+        VStack(alignment: .trailing, spacing: 6) {
+            Text("סִבּוּב \(g.currentRound + 1)/\(g.totalRounds)")
+                .font(.system(size: 17, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14).padding(.vertical, 7)
+                .background(AppGradient.gold, in: Capsule())
+            Text("שְׁאֵלָה \(g.questionInRound + 1)/\(g.roundQuestions)")
+                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.9))
+                .padding(.horizontal, 14).padding(.vertical, 6)
+                .background(.white.opacity(0.12), in: Capsule())
+        }
+    }
+
+    /// The question in a big, glassy card so it pops off the galaxy background
+    /// instead of floating as lonely text.
+    private func questionCard(_ q: LiveGameQuestion?) -> some View {
+        Text(q?.prompt ?? "")
+            .font(.system(size: 42, weight: .black, design: .rounded))
+            .foregroundStyle(.white)
+            .multilineTextAlignment(.center)
+            .lineLimit(5).minimumScaleFactor(0.45)
+            .shadow(color: .black.opacity(0.28), radius: 10, y: 5)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 44).padding(.horizontal, 26)
+            .background(
+                RoundedRectangle(cornerRadius: 40, style: .continuous)
+                    .fill(.white.opacity(0.10))
+                    .overlay(RoundedRectangle(cornerRadius: 40, style: .continuous)
+                        .stroke(.white.opacity(0.22), lineWidth: 1.5))
+                    .shadow(color: .black.opacity(0.25), radius: 24, y: 12)
+            )
     }
 
     private func timerRing(_ g: LiveGame) -> some View {
@@ -252,16 +323,17 @@ struct LiveGameView: View {
             }()
             let remaining = max(0, total - elapsed)
             let frac = total > 0 ? remaining / total : 0
+            let tint = frac > 0.3 ? AppColor.successMint : AppColor.almostWarm
             ZStack {
-                Circle().stroke(.white.opacity(0.18), lineWidth: 5)
+                Circle().stroke(.white.opacity(0.18), lineWidth: 8)
                 Circle().trim(from: 0, to: frac)
-                    .stroke(frac > 0.3 ? AppColor.successMint : AppColor.almostWarm,
-                            style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                    .stroke(tint, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                     .rotationEffect(.degrees(-90))
+                    .glow(tint, radius: 8)
                 Text("\(Int(remaining.rounded(.up)))")
-                    .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    .font(.system(size: 28, weight: .black, design: .rounded)).foregroundStyle(.white)
             }
-            .frame(width: 44, height: 44)
+            .frame(width: 72, height: 72)
         }
     }
 
@@ -271,24 +343,32 @@ struct LiveGameView: View {
 
     private func answerGrid(_ q: LiveGameQuestion?) -> some View {
         let options = q?.options ?? []
-        return LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+        return LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)], spacing: 16) {
             ForEach(Array(options.enumerated()), id: \.offset) { idx, text in
                 let answered = lg.myChoiceIndex != nil
                 let mine = lg.myChoiceIndex == idx
+                let color = answerColors[idx % answerColors.count]
                 Button {
                     Task { await lg.submitAnswer(idx) }
                 } label: {
                     Text(text)
-                        .font(.system(size: 22, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white).lineLimit(2).minimumScaleFactor(0.6)
-                        .frame(maxWidth: .infinity, minHeight: 78)
-                        .background(RoundedRectangle(cornerRadius: AppRadius.large)
-                            .fill(answerColors[idx % answerColors.count].opacity(answered && !mine ? 0.35 : 1)))
-                        .overlay(RoundedRectangle(cornerRadius: AppRadius.large)
-                            .stroke(.white, lineWidth: mine ? 4 : 0))
-                        .glow(mine ? .white : .clear, radius: 8)
+                        .font(.system(size: 30, weight: .black, design: .rounded))
+                        .foregroundStyle(.white).lineLimit(2).minimumScaleFactor(0.5)
+                        .frame(maxWidth: .infinity, minHeight: 118)
+                        .padding(.horizontal, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                                .fill(color.opacity(answered && !mine ? 0.30 : 1))
+                                .shadow(color: color.opacity(answered && !mine ? 0 : 0.45), radius: 14, y: 8)
+                        )
+                        .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous)
+                            .stroke(.white, lineWidth: mine ? 5 : 0))
+                        .scaleEffect(mine ? 1.04 : 1)
+                        .glow(mine ? .white : .clear, radius: 14)
                 }
+                .buttonStyle(.plain)
                 .disabled(answered)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: mine)
             }
         }
     }
@@ -303,26 +383,28 @@ struct LiveGameView: View {
         return VStack(spacing: AppSpacing.lg) {
             Spacer()
             Text(gotIt ? "נֶהֱדָר! 🎉" : (mine == nil ? "הַשְּׁאֵלָה הַבָּאָה תַּגִּיעַ 💫" : "כִּמְעַט! 🌟"))
-                .font(.system(size: 26, weight: .heavy, design: .rounded))
+                .font(.system(size: 34, weight: .black, design: .rounded))
                 .foregroundStyle(gotIt ? AppColor.successMint : .white)
 
-            VStack(spacing: 10) {
+            VStack(spacing: 12) {
                 ForEach(Array((q?.options ?? []).enumerated()), id: \.offset) { idx, text in
                     let isCorrect = idx == correct
                     let isMine = idx == mine
                     HStack {
-                        Text(text).font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                        Text(text).font(.system(size: 24, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white).lineLimit(2).minimumScaleFactor(0.6)
                         Spacer()
-                        if isCorrect { Text("✓").font(.system(size: 20, weight: .black)).foregroundStyle(.white) }
-                        else if isMine { Text("בָּחַרְתָּ").font(.system(size: 12, weight: .bold)).foregroundStyle(.white.opacity(0.8)) }
+                        if isCorrect { Text("✓").font(.system(size: 26, weight: .black)).foregroundStyle(.white) }
+                        else if isMine { Text("בָּחַרְתָּ").font(.system(size: 14, weight: .bold)).foregroundStyle(.white.opacity(0.8)) }
                     }
-                    .padding(.horizontal, 16).padding(.vertical, 12)
-                    .background(RoundedRectangle(cornerRadius: AppRadius.medium)
+                    .padding(.horizontal, 18).padding(.vertical, 16)
+                    .background(RoundedRectangle(cornerRadius: AppRadius.large)
                         .fill(isCorrect ? AppColor.successMint.opacity(0.9)
                               : (isMine ? AppColor.almostWarm.opacity(0.5) : .white.opacity(0.10))))
                 }
             }
             .padding(.horizontal, AppSpacing.lg)
+            .frame(maxWidth: 600)
 
             Spacer()
             scoreStrip

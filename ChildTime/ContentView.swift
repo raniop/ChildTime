@@ -9,6 +9,7 @@ struct ContentView: View {
     @StateObject private var household = HouseholdManager.shared
     @StateObject private var kidMode = KidModeManager.shared
     @StateObject private var joinCoord = JoinCoordinator.shared
+    @StateObject private var liveGame = LiveGameManager.shared
 
     /// Guests (no account) can answer this many questions before registration
     /// is required.
@@ -129,7 +130,15 @@ struct ContentView: View {
     @ViewBuilder
     private func childPlay(cid: UUID) -> some View {
         Group {
-            if progress.isUnlocked { UnlockedView() } else { WorldMapView() }
+            // A live-game invite was tapped (pendingGameID) or a game is active →
+            // always show WorldMap, which hosts the live-game cover. Otherwise an
+            // active screen-time window would land on UnlockedView and the tap
+            // would never open the game.
+            if progress.isUnlocked && liveGame.pendingGameID == nil && liveGame.game == nil && !liveGame.isSettingUp {
+                UnlockedView()
+            } else {
+                WorldMapView()
+            }
         }
         .onAppear {
             if profiles.activeID != cid { profiles.setActiveID(cid) }

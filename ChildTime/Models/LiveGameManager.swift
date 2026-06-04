@@ -320,7 +320,13 @@ final class LiveGameManager: ObservableObject {
     func leaveGame() async {
         #if canImport(FirebaseFirestore)
         if isHost, let g = game, g.state != .final, g.state != .cancelled {
+            // Host bailing mid-match → end it gently for everyone.
             await patch(g.id, ["state": LiveGameState.cancelled.rawValue])
+        } else if !isHost, let g = game, g.state != .final, g.state != .cancelled, let myID {
+            // A player who quits mid-game drops out of the roster, so the host
+            // stops waiting for their answer on every remaining question.
+            try? await db.collection("liveGames").document(g.id)
+                .collection("players").document(myID).delete()
         }
         #endif
         hostTask?.cancel(); hostTask = nil
