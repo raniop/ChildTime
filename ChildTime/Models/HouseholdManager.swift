@@ -397,8 +397,11 @@ final class HouseholdManager: ObservableObject {
     /// install — otherwise it would just re-register on its next heartbeat.
     func removeChildDevice(id: String) {
         #if canImport(FirebaseFirestore)
-        db.collection("childDevices").document(id)
-            .setData(["removed": true, "removedAt": FieldValue.serverTimestamp()], merge: true)
+        // NB: do NOT write FieldValue.serverTimestamp() here — childDevices docs
+        // are decoded via JSONSerialization, which raises an (uncatchable) ObjC
+        // exception on a FIRTimestamp and crashed both apps. The boolean tombstone
+        // is all we need.
+        db.collection("childDevices").document(id).setData(["removed": true], merge: true)
         #endif
     }
 
@@ -708,9 +711,35 @@ final class HouseholdManager: ObservableObject {
         return dict
     }
     private static func decode<T: Decodable>(_ type: T.Type, _ raw: [String: Any]) -> T? {
-        guard let data = try? JSONSerialization.data(withJSONObject: raw),
+        // Sanitize FIRST: JSONSerialization raises an uncatchable ObjC exception on
+        // a non-JSON value (e.g. a Firestore Timestamp / FieldValue), which crashes
+        // the app. jsonSafe() converts Timestamps to epoch seconds and drops any
+        // other unsupported type.
+        let safe = jsonSafe(raw)
+        guard let data = try? JSONSerialization.data(withJSONObject: safe),
               let value = try? JSONDecoder.firestore.decode(T.self, from: data) else { return nil }
         return value
+    }
+
+    /// Make a Firestore dictionary safe for `JSONSerialization` — Timestamps →
+    /// epoch seconds (matches `JSONDecoder.firestore`), nested containers recursed,
+    /// and any other non-JSON value dropped.
+    private static func jsonSafe(_ value: Any) -> Any? {
+        #if canImport(FirebaseFirestore)
+        if let ts = value as? Timestamp { return ts.dateValue().timeIntervalSince1970 }
+        #endif
+        switch value {
+        case let dict as [String: Any]:
+            var out: [String: Any] = [:]
+            for (k, v) in dict { if let s = jsonSafe(v) { out[k] = s } }
+            return out
+        case let arr as [Any]:
+            return arr.compactMap { jsonSafe($0) }
+        case is String, is NSNull, is Bool, is Int, is Double, is NSNumber:
+            return value
+        default:
+            return nil   // drop FieldValue sentinels / unknown Firestore types
+        }
     }
     private static func decodeHousehold(id: String, _ raw: [String: Any]) -> Household? {
         var r = raw; r["id"] = id; return decode(Household.self, r)
