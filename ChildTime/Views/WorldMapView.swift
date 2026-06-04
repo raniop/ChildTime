@@ -69,10 +69,10 @@ struct WorldMapView: View {
             FloatingOrbs.home()
             SparkleField(count: 25, size: 14)
 
-            VStack(spacing: 0) {
-                topBar
-                if kidMode.active { kidExitBar }
-                ScrollView {
+            ScrollView {
+                VStack(spacing: 0) {
+                    topBar
+                    if kidMode.active { kidExitBar }
                     VStack(spacing: AppSpacing.lg) {
                         heroTitle
                             .padding(.top, AppSpacing.sm)
@@ -467,7 +467,7 @@ struct WorldMapView: View {
                 Haptic.light(); showingShop = true
             }
             navButton(icon: "gearshape.fill", color: AppColor.gemPurple,
-                      label: "הַגְדָּרוֹת", badge: false, size: size,
+                      label: "הַגְדָּרוֹת", badge: false, size: size, neutral: true,
                       longPress: { showingDemo = true }) {
                 showingParentGate = true
             }
@@ -475,7 +475,7 @@ struct WorldMapView: View {
     }
 
     private func navButton(icon: String, color: Color, label: String, badge: Bool,
-                           size: CGFloat, longPress: (() -> Void)? = nil,
+                           size: CGFloat, neutral: Bool = false, longPress: (() -> Void)? = nil,
                            action: @escaping () -> Void) -> some View {
         let circle = Button(action: action) {
             ZStack(alignment: .topTrailing) {
@@ -484,11 +484,13 @@ struct WorldMapView: View {
                     .foregroundStyle(.white)
                     .frame(width: size, height: size)
                     .background(
-                        Circle().fill(LinearGradient(colors: [color, color.opacity(0.8)],
-                                                     startPoint: .top, endPoint: .bottom))
+                        Circle().fill(neutral
+                            ? AnyShapeStyle(Color.white.opacity(0.16))
+                            : AnyShapeStyle(LinearGradient(colors: [color, color.opacity(0.8)],
+                                                           startPoint: .top, endPoint: .bottom)))
                     )
-                    .overlay(Circle().stroke(.white.opacity(0.9), lineWidth: 2))
-                    .shadow(color: color.opacity(0.45), radius: 6, y: 3)
+                    .overlay(Circle().stroke(.white.opacity(neutral ? 0.4 : 0.9), lineWidth: neutral ? 1.5 : 2))
+                    .shadow(color: neutral ? .clear : color.opacity(0.45), radius: 6, y: 3)
                 if badge {
                     Circle().fill(AppColor.flameOrange).frame(width: 12, height: 12)
                         .overlay(Circle().stroke(.white, lineWidth: 2)).offset(x: 3, y: -3)
