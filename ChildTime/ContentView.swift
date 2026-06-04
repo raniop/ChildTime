@@ -8,7 +8,6 @@ struct ContentView: View {
     @EnvironmentObject var auth: AuthManager
     @StateObject private var household = HouseholdManager.shared
     @StateObject private var kidMode = KidModeManager.shared
-    @State private var showExitGate = false
 
     /// Guests (no account) can answer this many questions before registration
     /// is required.
@@ -60,36 +59,15 @@ struct ContentView: View {
     /// surface as a child device, plus a discreet, parent-gated exit.
     @ViewBuilder
     private var kidModeRoot: some View {
+        // Exit from Kid Mode now lives inside the parent-gated settings (the gear
+        // → "בקרת המכשיר" → "צא ממצב ילד"), instead of a floating button that
+        // overlapped the top-bar buttons (and could disappear behind covers).
         Group {
             if let cid = kidMode.childID {
                 childPlay(cid: cid)
             } else {
                 WorldMapView()
             }
-        }
-        .overlay(alignment: .topLeading) {
-            Button { showExitGate = true } label: {
-                HStack(spacing: 5) {
-                    Image(systemName: "lock.fill").font(.system(size: 12, weight: .bold))
-                    Text("יְצִיאַת הוֹרֶה").font(.system(size: 13, weight: .heavy, design: .rounded))
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Capsule().fill(.black.opacity(0.4)))
-                .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
-            }
-            .padding(.top, 10)
-            .padding(.leading, 10)
-        }
-        .sheet(isPresented: $showExitGate) {
-            ParentGateView(allowClose: true,
-                           gateTitle: "יְצִיאָה מִמַּצַּב יֶלֶד",
-                           gateReason: "הַזִּינוּ קוֹד הוֹרֶה כְּדֵי לָצֵאת") {
-                KidModeExitView { kidMode.exit(); showExitGate = false }
-            }
-            .environmentObject(settings)
-            .environment(\.layoutDirection, .rightToLeft)
         }
     }
 

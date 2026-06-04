@@ -10,6 +10,7 @@ struct ChildDeviceControlsView: View {
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var shields: ShieldManager
     @EnvironmentObject var progress: ProgressStore
+    @ObservedObject private var kidMode = KidModeManager.shared
     @Environment(\.dismiss) private var dismiss
 
     @State private var showAppPicker = false
@@ -32,6 +33,7 @@ struct ChildDeviceControlsView: View {
             ScrollView {
                 VStack(spacing: AppSpacing.lg) {
                     header
+                    if kidMode.active { exitKidModeButton }
                     statusBanner
                     quickOpenCard
                     perAppAllowCard
@@ -85,6 +87,28 @@ struct ChildDeviceControlsView: View {
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
         }
+    }
+
+    // MARK: - Exit Kid Mode (parent's phone temporarily acting as a kid device)
+
+    /// Shown only while Kid Mode is active. The parent already passed the gate to
+    /// reach this screen, so leaving is a single tap from here — replaces the old
+    /// floating "exit" button that overlapped the top-bar buttons.
+    private var exitKidModeButton: some View {
+        Button {
+            Haptic.medium()
+            kidMode.exit()
+            dismiss()
+        } label: {
+            Label("צֵא מִמַּצַּב יֶלֶד", systemImage: "figure.walk.departure")
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 15)
+                .background(AppColor.flameOrange, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .glow(AppColor.flameOrange.opacity(0.6), radius: 8)
+        }
+        .buttonStyle(.juicy)
     }
 
     // MARK: - Reusable card + section header
