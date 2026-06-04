@@ -207,6 +207,7 @@ struct ChildTimeApp: App {
         case "leaderboard": LeaderboardView()   // DEMO_SCREEN=leaderboard
         case "livegame": LiveGameDemoHost()      // DEMO_SCREEN=livegame — live quiz setup/flow
         case "gameinvite": WorldMapView().onAppear { LiveGameManager.shared.seedDemoInvite() }  // invite banner
+        case "devicecontrols": ChildDeviceControlsView()   // parent controls on child device
         case "friendtest":                      // DEMO_SCREEN=friendtest — runs the live Firestore diagnostic
             Text("Friends diagnostic — see console ([Friends])")
                 .padding().task { await FriendsManager.shared.runDiagnostic() }

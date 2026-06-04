@@ -32,8 +32,8 @@ struct ChildDeviceControlsView: View {
             ScrollView {
                 VStack(spacing: AppSpacing.lg) {
                     header
-
-                    manualUnlockCard
+                    statusBanner
+                    quickOpenCard
                     perAppAllowCard
                     appLockCard
 
@@ -87,72 +87,101 @@ struct ChildDeviceControlsView: View {
         }
     }
 
-    // MARK: - Manual unlock
+    // MARK: - Reusable card + section header
 
-    private var manualUnlockCard: some View {
-        VStack(alignment: .center, spacing: AppSpacing.md) {
-            Label(isUnlocked ? "זְמַן מָסָךְ פָּתוּחַ כָּעֵת" : "פְּתִיחָה יְדָנִית שֶׁל זְמַן מָסָךְ",
-                  systemImage: isUnlocked ? "lock.open.fill" : "hourglass")
-                .font(.system(size: 19, weight: .heavy, design: .rounded))
+    private func controlCard<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .trailing, spacing: AppSpacing.md) { content() }
+            .padding(AppSpacing.lg)
+            .frame(maxWidth: .infinity)
+            .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.18), lineWidth: 1))
+    }
+
+    private func sectionHead(_ title: String, _ subtitle: String, icon: String) -> some View {
+        VStack(alignment: .trailing, spacing: 4) {
+            Label(title, systemImage: icon)
+                .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
+            Text(subtitle)
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.7))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+    }
 
-            if isUnlocked {
-                Text("הָאַפְּלִיקַצְיוֹת פְּתוּחוֹת — נִשְׁאֲרוּ כְּ-\(max(1, progress.unlockSecondsRemaining / 60)) דַּקּוֹת. בְּחִירָה חֲדָשָׁה תַּחֲלִיף אֶת הַחַלּוֹן (לֹא מִתְוַסֶּפֶת).")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
-            } else {
-                Text("פְּתִיחָה חַד-פַּעֲמִית שֶׁל כָּל הָאַפְּלִיקַצְיוֹת לְפֶרֶק זְמַן. זֶה לֹא מִשְׁתַּמֵּשׁ בַּדַּקּוֹת שֶׁהַיֶּלֶד צָבַר וְלֹא מִתְוַסֵּף אֲלֵיהֶן.")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
-            }
+    // MARK: - Status banner (one clear place for the current lock state)
 
-            // Duration choices.
-            VStack(spacing: 10) {
-                HStack(spacing: 10) {
-                    durationButton("חֲצִי שָׁעָה", minutes: 30)
-                    durationButton("שָׁעָה", minutes: 60)
-                }
-                HStack(spacing: 10) {
-                    durationButton("שְׁעָתַיִם", minutes: 120)
-                    durationButton("עַד סוֹף הַיּוֹם", minutes: minutesUntilEndOfDay())
-                }
-            }
+    @ViewBuilder private var statusBanner: some View {
+        if isUnlocked {
+            banner(title: "פָּתוּחַ עַכְשָׁיו",
+                   detail: "נִשְׁאֲרוּ כְּ-\(max(1, progress.unlockSecondsRemaining / 60)) דַּקּוֹת",
+                   open: true, lock: { Haptic.medium(); lockNow() })
+        } else if settings.allowExceptionActive {
+            banner(title: "אַפְּלִיקַצְיָה מְסֻיֶּמֶת פְּתוּחָה",
+                   detail: "הַשְּׁאָר נְעוּלוֹת\(allowEndText)",
+                   open: true, lock: { Haptic.medium(); cancelAllowException() })
+        } else {
+            banner(title: "הַכֹּל נָעוּל", detail: "הַיֶּלֶד מַרְוִיחַ זְמַן כְּדֵי לִפְתֹּחַ", open: false, lock: nil)
+        }
+    }
 
-            if isUnlocked {
-                Button {
-                    Haptic.medium()
-                    lockNow()
-                } label: {
-                    Label("נְעִילָה עַכְשָׁיו", systemImage: "lock.fill")
-                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+    private func banner(title: String, detail: String, open: Bool, lock: (() -> Void)?) -> some View {
+        HStack(spacing: 12) {
+            if let lock {
+                Button { lock() } label: {
+                    Label("נְעֹל", systemImage: "lock.fill")
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(AppColor.flameOrange.opacity(0.85), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .padding(.horizontal, 14).padding(.vertical, 8)
+                        .background(AppColor.flameOrange.opacity(0.9), in: Capsule())
                 }
                 .buttonStyle(.juicy)
             }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 1) {
+                Text(title).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Text(detail).font(.system(size: 12, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.75))
+            }
+            Image(systemName: open ? "lock.open.fill" : "lock.fill")
+                .font(.system(size: 22))
+                .foregroundStyle(open ? AppColor.successMint : AppColor.starGold)
         }
-        .padding(AppSpacing.lg)
+        .padding(.horizontal, AppSpacing.lg).padding(.vertical, 14)
         .frame(maxWidth: .infinity)
-        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
+        .background((open ? AppColor.successMint : AppColor.starGold).opacity(0.16),
+                    in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
+            .stroke((open ? AppColor.successMint : AppColor.starGold).opacity(0.5), lineWidth: 1))
     }
 
-    private func durationButton(_ title: String, minutes: Int) -> some View {
+    // MARK: - Quick open (manual, all apps)
+
+    private var quickOpenCard: some View {
+        controlCard {
+            sectionHead("פְּתִיחָה מְהִירָה",
+                        "חַד-פַּעֲמִי · פּוֹתֵחַ אֶת כָּל הָאַפְּלִיקַצְיוֹת. לֹא מֵהַדַּקּוֹת שֶׁהַיֶּלֶד צָבַר.",
+                        icon: "hourglass")
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                durationPill("חֲצִי שָׁעָה", minutes: 30)
+                durationPill("שָׁעָה", minutes: 60)
+                durationPill("שְׁעָתַיִם", minutes: 120)
+                durationPill("עַד סוֹף הַיּוֹם", minutes: minutesUntilEndOfDay())
+            }
+        }
+    }
+
+    private func durationPill(_ title: String, minutes: Int) -> some View {
         Button {
             Haptic.success()
             grant(minutes: minutes)
         } label: {
             Text(title)
-                .font(.system(size: 16, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(AppColor.textOnLight)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .glow(AppColor.starGold, radius: 8)
+                .padding(.vertical, 12)
+                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.juicy)
     }
@@ -160,87 +189,54 @@ struct ChildDeviceControlsView: View {
     // MARK: - Per-app temporary allowance
 
     private var perAppAllowCard: some View {
-        VStack(alignment: .center, spacing: AppSpacing.md) {
-            Label("פְּתִיחַת אַפְּלִיקַצְיָה מְסֻיֶּמֶת", systemImage: "app.badge.checkmark")
-                .font(.system(size: 19, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
+        controlCard {
+            sectionHead("פְּתִיחַת אַפְּלִיקַצְיָה מְסֻיֶּמֶת",
+                        "רַק אַפְּלִיקַצְיָה אַחַת אוֹ כַּמָּה (לְמָשָׁל יוּטְיוּבּ). הַשְּׁאָר נְעוּלוֹת.",
+                        icon: "app.badge.checkmark")
 
-            if settings.allowExceptionActive {
-                Text("אַפְּלִיקַצְיוֹת מְסֻיָּמוֹת פְּתוּחוֹת כָּעֵת\(allowEndText). הַשְּׁאָר נְעוּלוֹת.")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
-                Button {
-                    Haptic.medium()
-                    cancelAllowException()
-                } label: {
-                    Label("נְעִילַת הַכֹּל עַכְשָׁיו", systemImage: "lock.fill")
-                        .font(.system(size: 17, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(AppColor.flameOrange.opacity(0.85), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            Button {
+                Task {
+                    await shields.requestAuthorizationIfNeeded()
+                    if shields.isAuthorized { showAllowPicker = true }
                 }
-                .buttonStyle(.juicy)
-            } else {
-                Text("פִּתְחוּ רַק אַפְּלִיקַצְיָה אַחַת אוֹ כַּמָּה (לְמָשָׁל יוּטְיוּבּ) לְפֶרֶק זְמַן — הַשְּׁאָר יִשָּׁאֲרוּ נְעוּלוֹת.")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
+            } label: {
+                Label(allowCount > 0 ? "\(allowCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · עֲרִיכָה" : "בְּחִירַת אַפְּלִיקַצְיוֹת",
+                      systemImage: "checkmark.circle.fill")
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.28), lineWidth: 1))
+            }
+            .buttonStyle(.juicy)
 
-                Button {
-                    Task {
-                        await shields.requestAuthorizationIfNeeded()
-                        if shields.isAuthorized { showAllowPicker = true }
-                    }
-                } label: {
-                    Label(allowCount > 0 ? "\(allowCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · עֲרִיכָה" : "בְּחִירַת אַפְּלִיקַצְיוֹת לִפְתִיחָה",
-                          systemImage: "checkmark.circle.fill")
-                        .font(.system(size: 17, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
-                }
-                .buttonStyle(.juicy)
-
-                if allowCount > 0 {
-                    VStack(spacing: 10) {
-                        HStack(spacing: 10) {
-                            allowDurationButton("חֲצִי שָׁעָה", minutes: 30)
-                            allowDurationButton("שָׁעָה", minutes: 60)
-                        }
-                        HStack(spacing: 10) {
-                            allowDurationButton("שְׁעָתַיִם", minutes: 120)
-                            allowDurationButton("עַד סוֹף הַיּוֹם", minutes: minutesUntilEndOfDay())
-                        }
-                    }
+            if allowCount > 0 {
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                    allowDurationPill("חֲצִי שָׁעָה", minutes: 30)
+                    allowDurationPill("שָׁעָה", minutes: 60)
+                    allowDurationPill("שְׁעָתַיִם", minutes: 120)
+                    allowDurationPill("עַד סוֹף הַיּוֹם", minutes: minutesUntilEndOfDay())
                 }
             }
         }
-        .padding(AppSpacing.lg)
-        .frame(maxWidth: .infinity)
-        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
         .familyActivityPicker(isPresented: $showAllowPicker, selection: $allowSelection)
     }
 
-    private func allowDurationButton(_ title: String, minutes: Int) -> some View {
+    private func allowDurationPill(_ title: String, minutes: Int) -> some View {
         Button {
             Haptic.success()
             startAllow(minutes: minutes)
         } label: {
             Text(title)
-                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .padding(.vertical, 12)
                 .background(
                     LinearGradient(colors: [AppColor.successMint, Color(hex: "06A57E")],
                                    startPoint: .top, endPoint: .bottom),
-                    in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .glow(AppColor.successMint, radius: 8)
+                    in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.juicy)
     }
@@ -255,18 +251,12 @@ struct ChildDeviceControlsView: View {
     // MARK: - App lock
 
     private var appLockCard: some View {
-        VStack(alignment: .center, spacing: AppSpacing.md) {
-            Label("אֵילוּ אַפְּלִיקַצְיוֹת נְעוּלוֹת", systemImage: "lock.app.dashed")
-                .font(.system(size: 19, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-
-            Text(selectedCount > 0
-                 ? "\(selectedCount) אַפְּלִיקַצְיוֹת/קָטֵגוֹרְיוֹת נְעוּלוֹת עַד שֶׁמַּרְוִיחִים זְמַן."
-                 : "עֲדַיִן לֹא נִבְחֲרוּ אַפְּלִיקַצְיוֹת לִנְעִילָה.")
-                .font(.system(size: 14, weight: .medium, design: .rounded))
-                .foregroundStyle(.white.opacity(0.85))
-                .multilineTextAlignment(.center)
-
+        controlCard {
+            sectionHead("אֵילוּ אַפְּלִיקַצְיוֹת נְעוּלוֹת",
+                        selectedCount > 0
+                            ? "\(selectedCount) אַפְּלִיקַצְיוֹת/קָטֵגוֹרְיוֹת נְעוּלוֹת עַד שֶׁמַּרְוִיחִים זְמַן."
+                            : "עֲדַיִן לֹא נִבְחֲרוּ אַפְּלִיקַצְיוֹת לִנְעִילָה.",
+                        icon: "lock.app.dashed")
             Button {
                 Task {
                     await shields.requestAuthorizationIfNeeded()
@@ -275,19 +265,15 @@ struct ChildDeviceControlsView: View {
             } label: {
                 Label(selectedCount > 0 ? "עֲרִיכַת הָרְשִׁימָה" : "בְּחִירַת אַפְּלִיקַצְיוֹת",
                       systemImage: "app.badge.fill")
-                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
+                    .padding(.vertical, 12)
+                    .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.28), lineWidth: 1))
             }
             .buttonStyle(.juicy)
         }
-        .padding(AppSpacing.lg)
-        .frame(maxWidth: .infinity)
-        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
     }
 
     // MARK: - Actions
