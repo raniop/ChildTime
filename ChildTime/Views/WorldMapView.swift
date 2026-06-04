@@ -62,6 +62,10 @@ struct WorldMapView: View {
         isCompact ? .infinity : 860
     }
 
+    /// Shared side margin for the header card AND the world grid, so both have the
+    /// exact same gap from the screen edges (and the same width on iPad).
+    private var homeHPad: CGFloat { isCompact ? AppSpacing.sm : AppSpacing.lg }
+
     var body: some View {
         ZStack {
             // Layered background
@@ -72,6 +76,9 @@ struct WorldMapView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     topBar
+                        .frame(maxWidth: worldGridMaxWidth)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.horizontal, homeHPad)
                     if kidMode.active { kidExitBar }
                     VStack(spacing: AppSpacing.lg) {
                         heroTitle
@@ -118,10 +125,10 @@ struct WorldMapView: View {
                                 .frame(maxWidth: .infinity)
                             }
                         }
-                        .frame(maxWidth: worldGridMaxWidth)
-                        .frame(maxWidth: .infinity, alignment: .center)
                     }
-                    .padding(.horizontal, AppSpacing.lg)
+                    .frame(maxWidth: worldGridMaxWidth)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.horizontal, homeHPad)
                     // Big bottom inset on iPhone so the cards aren't hidden
                     // by the floating daily-chest CTA + companion.
                     .padding(.bottom, isCompact ? 360 : 260)
@@ -404,7 +411,6 @@ struct WorldMapView: View {
         .environment(\.layoutDirection, .leftToRight)
         .padding(isCompact ? 14 : 18)
         .background(glassCard)
-        .padding(.horizontal, isCompact ? AppSpacing.sm : AppSpacing.lg)
         .padding(.top, AppSpacing.sm)
     }
 
