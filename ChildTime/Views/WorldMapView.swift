@@ -133,7 +133,7 @@ struct WorldMapView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.horizontal, homeHPad)
                     // Breathing room between the header card and the world grid.
-                    .padding(.top, isCompact ? AppSpacing.sm : AppSpacing.xl)
+                    .padding(.top, isCompact ? AppSpacing.sm : AppSpacing.xxxl)
                     // Big bottom inset on iPhone so the cards aren't hidden
                     // by the floating daily-chest CTA + companion.
                     .padding(.bottom, isCompact ? 360 : 260)
