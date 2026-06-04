@@ -473,6 +473,18 @@ final class FriendsManager: ObservableObject {
         return out.sorted { $0.stars > $1.stars }
     }
 
+    /// Fetch ONE player's public mini-card (name, character, stars, code) by id —
+    /// used by the live-game player peek. Same public data as the global board, so
+    /// it exposes nothing new. Returns nil if the card doesn't exist.
+    func card(for id: String) async -> FriendCard? {
+        if let doc = try? await db.collection("friendCards").document(id).getDocument(),
+           let card = Self.decode(doc.data() ?? [:]) { return card }
+        return nil
+    }
+
+    /// True if `id` is already on my friends board.
+    func isFriend(_ id: String) -> Bool { leaderboard.contains { $0.id == id } }
+
     private static func decode(_ raw: [String: Any]) -> FriendCard? {
         guard !raw.isEmpty,
               let data = try? JSONSerialization.data(withJSONObject: raw) else { return nil }

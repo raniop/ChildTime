@@ -11,6 +11,7 @@ struct LiveGameView: View {
     @State private var countdownValue = LiveGameRules.countdownSeconds
     @State private var nudged: Set<String> = []     // friends I just re-invited
     @State private var showQuit = false             // "leave the game?" confirm
+    @State private var peekPlayer: LiveGamePlayer?  // tapped player → profile peek
 
     private var meID: String? { ProfileStore.shared.activeID?.uuidString }
     private var amHost: Bool { lg.game?.hostID == meID }
@@ -55,6 +56,10 @@ struct LiveGameView: View {
         } message: {
             Text(amHost ? "אַתָּה הַמַּנְהִיג — הַמִּשְׂחָק יִסְתַּיֵּם לְכָל הַחֲבֵרִים."
                         : "אֶפְשָׁר תָּמִיד לְהִצְטָרֵף לְמִשְׂחָק חָדָשׁ אַחַר כָּךְ.")
+        }
+        .sheet(item: $peekPlayer) { p in
+            PlayerPeekView(player: p)
+                .environment(\.layoutDirection, .rightToLeft)
         }
         .onDisappear { Task { await lg.leaveGame() } }
     }
@@ -144,14 +149,17 @@ struct LiveGameView: View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 92), spacing: 14)], spacing: 18) {
                 ForEach(lg.players) { p in
-                    VStack(spacing: 6) {
-                        CharacterView(character: p.character, portrait: true)
-                            .frame(width: 64, height: 64)
-                            .glow(p.id == meID ? AppColor.starGold : .clear, radius: 18)
-                        Text(p.name).font(.system(size: 13, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white).lineLimit(1)
+                    Button { Haptic.light(); peekPlayer = p } label: {
+                        VStack(spacing: 6) {
+                            CharacterView(character: p.character, portrait: true)
+                                .frame(width: 64, height: 64)
+                                .glow(p.id == meID ? AppColor.starGold : .clear, radius: 18)
+                            Text(p.name).font(.system(size: 13, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white).lineLimit(1)
+                        }
+                        .padding(.top, 8)   // room so the glow isn't clipped by the scroll edge
                     }
-                    .padding(.top, 8)   // room so the glow isn't clipped by the scroll edge
+                    .buttonStyle(.plain)
                 }
             }
             // Generous vertical padding so the soft glow has room to breathe top
@@ -256,6 +264,9 @@ struct LiveGameView: View {
             .padding(.horizontal, AppSpacing.lg)
             .padding(.top, 64)   // clear the floating quit button
 
+            headToHead(g)
+                .padding(.horizontal, AppSpacing.lg)
+
             Spacer(minLength: AppSpacing.md)
 
             questionCard(q)
@@ -312,6 +323,71 @@ struct LiveGameView: View {
                         .stroke(.white.opacity(0.22), lineWidth: 1.5))
                     .shadow(color: .black.opacity(0.25), radius: 24, y: 12)
             )
+    }
+
+    /// The live "כמה–כמה": a dramatic VS for a 2-player duel (round wins big in
+    /// the middle, e.g. 1 — 0), or a compact chip row for 3+ players. Shown during
+    /// the question so you always know the score. Display-only (no peek mid-play).
+    @ViewBuilder
+    private func headToHead(_ g: LiveGame) -> some View {
+        let ps = lg.players
+        if ps.count == 2 {
+            // players are sorted by score; show ME on the right (RTL) when I'm in it.
+            let ordered = ps.contains { $0.id == meID }
+                ? ps.sorted { ($0.id == meID ? 1 : 0) > ($1.id == meID ? 1 : 0) }
+                : ps
+            let left = ordered[0], right = ordered[1]
+            HStack(spacing: 12) {
+                vsSide(left)
+                VStack(spacing: 1) {
+                    Text("\(left.roundWins) — \(right.roundWins)")
+                        .font(.system(size: 30, weight: .black, design: .rounded))
+                        .foregroundStyle(.white).monospacedDigit()
+                    Text("🏆 סִבּוּבִים")
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+                vsSide(right)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10).padding(.horizontal, 16)
+            .background(Capsule().fill(.white.opacity(0.10))
+                .overlay(Capsule().stroke(.white.opacity(0.18), lineWidth: 1)))
+        } else if ps.count > 2 {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(ps) { p in
+                        HStack(spacing: 6) {
+                            CharacterView(character: p.character, portrait: true).frame(width: 30, height: 30)
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(p.name).font(.system(size: 12, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.white).lineLimit(1)
+                                Text("🏆\(p.roundWins) · \(p.score)")
+                                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(AppColor.starGold)
+                            }
+                        }
+                        .padding(.horizontal, 10).padding(.vertical, 6)
+                        .background(Capsule().fill(p.id == meID ? AppColor.starGold.opacity(0.22) : .white.opacity(0.10)))
+                    }
+                }
+                .padding(.horizontal, 2)
+            }
+        }
+    }
+
+    /// One side of the 2-player VS card.
+    private func vsSide(_ p: LiveGamePlayer) -> some View {
+        VStack(spacing: 3) {
+            CharacterView(character: p.character, portrait: true)
+                .frame(width: 50, height: 50)
+                .glow(p.id == meID ? AppColor.starGold : .clear, radius: 10)
+            Text(p.name).font(.system(size: 13, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white).lineLimit(1)
+            Text("\(p.score)").font(.system(size: 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(AppColor.starGold)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private func timerRing(_ g: LiveGame) -> some View {
@@ -424,18 +500,21 @@ struct LiveGameView: View {
             Text("הַנִּקּוּד").font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
             ForEach(Array(lg.players.prefix(6).enumerated()), id: \.element.id) { idx, p in
-                HStack(spacing: 10) {
-                    Text("\(idx + 1)").font(.system(size: 14, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.7)).frame(width: 20)
-                    CharacterView(character: p.character, portrait: true).frame(width: 34, height: 34)
-                    Text(p.name).font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                    Spacer()
-                    Text("\(p.score)").font(.system(size: 16, weight: .heavy, design: .rounded))
-                        .foregroundStyle(AppColor.starGold)
+                Button { Haptic.light(); peekPlayer = p } label: {
+                    HStack(spacing: 10) {
+                        Text("\(idx + 1)").font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.7)).frame(width: 20)
+                        CharacterView(character: p.character, portrait: true).frame(width: 34, height: 34)
+                        Text(p.name).font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                        Spacer()
+                        Text("\(p.score)").font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppColor.starGold)
+                    }
+                    .padding(.horizontal, 14).padding(.vertical, 8)
+                    .background(RoundedRectangle(cornerRadius: AppRadius.medium)
+                        .fill(p.id == meID ? AppColor.starGold.opacity(0.20) : .white.opacity(0.08)))
                 }
-                .padding(.horizontal, 14).padding(.vertical, 8)
-                .background(RoundedRectangle(cornerRadius: AppRadius.medium)
-                    .fill(p.id == meID ? AppColor.starGold.opacity(0.20) : .white.opacity(0.08)))
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, AppSpacing.lg)
@@ -473,16 +552,19 @@ struct LiveGameView: View {
     private var roundWinsTally: some View {
         VStack(spacing: 8) {
             ForEach(lg.players.sorted { $0.roundWins != $1.roundWins ? $0.roundWins > $1.roundWins : $0.score > $1.score }) { p in
-                HStack(spacing: 10) {
-                    CharacterView(character: p.character, portrait: true).frame(width: 36, height: 36)
-                    Text(p.name).font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                    Spacer()
-                    Text(String(repeating: "🏆", count: p.roundWins).isEmpty ? "—" : String(repeating: "🏆", count: p.roundWins))
-                        .font(.system(size: 15))
+                Button { Haptic.light(); peekPlayer = p } label: {
+                    HStack(spacing: 10) {
+                        CharacterView(character: p.character, portrait: true).frame(width: 36, height: 36)
+                        Text(p.name).font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                        Spacer()
+                        Text(String(repeating: "🏆", count: p.roundWins).isEmpty ? "—" : String(repeating: "🏆", count: p.roundWins))
+                            .font(.system(size: 15))
+                    }
+                    .padding(.horizontal, 16).padding(.vertical, 8)
+                    .background(RoundedRectangle(cornerRadius: AppRadius.medium)
+                        .fill(p.id == meID ? AppColor.starGold.opacity(0.20) : .white.opacity(0.08)))
                 }
-                .padding(.horizontal, 16).padding(.vertical, 8)
-                .background(RoundedRectangle(cornerRadius: AppRadius.medium)
-                    .fill(p.id == meID ? AppColor.starGold.opacity(0.20) : .white.opacity(0.08)))
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, AppSpacing.xl)
@@ -511,22 +593,25 @@ struct LiveGameView: View {
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach(Array(sorted.enumerated()), id: \.element.id) { idx, p in
-                        HStack(spacing: 12) {
-                            Text(idx == 0 ? "🥇" : idx == 1 ? "🥈" : idx == 2 ? "🥉" : "\(idx + 1)")
-                                .font(.system(size: 20, weight: .heavy, design: .rounded))
-                                .foregroundStyle(.white).frame(width: 32)
-                            CharacterView(character: p.character, portrait: true).frame(width: 44, height: 44)
-                            Text(p.name).font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                            Spacer()
-                            VStack(alignment: .trailing, spacing: 1) {
-                                Text(String(repeating: "🏆", count: p.roundWins)).font(.system(size: 14))
-                                Text("\(p.score) נְקֻדּוֹת").font(.system(size: 13, weight: .heavy, design: .rounded))
-                                    .foregroundStyle(AppColor.starGold)
+                        Button { Haptic.light(); peekPlayer = p } label: {
+                            HStack(spacing: 12) {
+                                Text(idx == 0 ? "🥇" : idx == 1 ? "🥈" : idx == 2 ? "🥉" : "\(idx + 1)")
+                                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.white).frame(width: 32)
+                                CharacterView(character: p.character, portrait: true).frame(width: 44, height: 44)
+                                Text(p.name).font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                                Spacer()
+                                VStack(alignment: .trailing, spacing: 1) {
+                                    Text(String(repeating: "🏆", count: p.roundWins)).font(.system(size: 14))
+                                    Text("\(p.score) נְקֻדּוֹת").font(.system(size: 13, weight: .heavy, design: .rounded))
+                                        .foregroundStyle(AppColor.starGold)
+                                }
                             }
+                            .padding(.horizontal, 14).padding(.vertical, 10)
+                            .background(RoundedRectangle(cornerRadius: AppRadius.large)
+                                .fill(p.id == meID ? AppColor.starGold.opacity(0.20) : .white.opacity(0.10)))
                         }
-                        .padding(.horizontal, 14).padding(.vertical, 10)
-                        .background(RoundedRectangle(cornerRadius: AppRadius.large)
-                            .fill(p.id == meID ? AppColor.starGold.opacity(0.20) : .white.opacity(0.10)))
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, AppSpacing.lg)
@@ -570,6 +655,123 @@ struct LiveGameView: View {
 private extension LiveGame {
     var topicName: String { Topic(rawValue: topic)?.displayName ?? "" }
     var topicEmoji: String { Topic(rawValue: topic)?.emoji ?? "🎯" }
+}
+
+// MARK: - Player peek
+
+/// A tap on any player opens this kid-friendly mini-profile: their character,
+/// name, ⭐ stars, and this-match stats — plus an "add friend" shortcut if we're
+/// not friends yet. Shows ONLY the same public data as the friends leaderboard
+/// (no contact info, and never any "losses"/shaming stats).
+struct PlayerPeekView: View {
+    let player: LiveGamePlayer
+    @ObservedObject private var friends = FriendsManager.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var card: FriendCard?
+    @State private var loading = true
+    @State private var adding = false
+    @State private var added = false
+
+    private var meID: String? { ProfileStore.shared.activeID?.uuidString }
+    private var isMe: Bool { player.id == meID }
+
+    var body: some View {
+        ZStack {
+            AppGradient.galaxy.ignoresSafeArea()
+            SparkleField(count: 12, size: 10)
+
+            VStack(spacing: AppSpacing.lg) {
+                HStack {
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark").font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                            .frame(width: 36, height: 36).background(.white.opacity(0.18), in: Circle())
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.md)
+
+                CharacterView(character: player.character, portrait: true)
+                    .frame(width: 140, height: 140)
+                    .glow(AppColor.starGold, radius: 22)
+
+                Text(player.name.isEmpty ? "שַׂחְקָן" : player.name)
+                    .font(.system(size: 34, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+
+                if let stars = card?.stars {
+                    Label("\(stars) כּוֹכָבִים", systemImage: "star.fill")
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 18).padding(.vertical, 9)
+                        .background(AppGradient.gold, in: Capsule())
+                } else if loading {
+                    ProgressView().tint(.white)
+                }
+
+                HStack(spacing: 14) {
+                    statTile("🏆", "\(player.roundWins)", "סִבּוּבִים")
+                    statTile("⚡️", "\(player.score)", "נְקֻדּוֹת")
+                }
+                .padding(.horizontal, AppSpacing.lg)
+                Text("בַּמִּשְׂחָק הַזֶּה")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.7))
+
+                Spacer()
+
+                addFriendArea
+                    .padding(.horizontal, AppSpacing.xl).padding(.bottom, AppSpacing.xl)
+            }
+            .frame(maxWidth: 460).frame(maxWidth: .infinity)
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+        .presentationDetents([.medium, .large])
+        .task {
+            card = await friends.card(for: player.id)
+            loading = false
+        }
+    }
+
+    private func statTile(_ emoji: String, _ value: String, _ label: String) -> some View {
+        VStack(spacing: 4) {
+            Text(emoji).font(.system(size: 26))
+            Text(value).font(.system(size: 24, weight: .black, design: .rounded)).foregroundStyle(.white)
+            Text(label).font(.system(size: 12, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.75))
+        }
+        .frame(maxWidth: .infinity).padding(.vertical, 14)
+        .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(.white.opacity(0.10)))
+    }
+
+    @ViewBuilder private var addFriendArea: some View {
+        if isMe {
+            Label("זֶה אַתָּה 🙂", systemImage: "person.fill")
+                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+        } else if added || friends.isFriend(player.id) {
+            Label("חָבֵר שֶׁלְּךָ", systemImage: "checkmark.circle.fill")
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(AppColor.successMint)
+        } else if let code = card?.code, !code.isEmpty {
+            Button {
+                adding = true
+                Task {
+                    let ok = await friends.addFriend(code: code)
+                    adding = false
+                    if ok { added = true; Haptic.success() } else { Haptic.warning() }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    if adding { ProgressView().tint(.white) }
+                    else { Image(systemName: "person.badge.plus") }
+                    Text("הוֹסִיפוּ לַחֲבֵרִים")
+                }
+                .font(.system(size: 18, weight: .black, design: .rounded)).foregroundStyle(.white)
+                .frame(maxWidth: .infinity).padding(.vertical, 14)
+                .background(AppGradient.purpleDream, in: Capsule())
+            }
+            .disabled(adding)
+        }
+    }
 }
 
 // MARK: - Flow wrapper
