@@ -235,7 +235,10 @@ struct ChildTimeApp: App {
         // any apps are currently blocked. Otherwise a child device with an empty
         // block-list (or mid-unlock) could be deleted, dropping the shield and
         // unlocking everything. A parent's own phone stays unrestricted.
-        shields.setAppRemovalLocked(settings.deviceRole == .child)
+        // EXCEPTION: a parent can open a short "allow deletion" window from Settings
+        // (to legitimately uninstall Tofy); it auto-re-locks when the window ends.
+        let removalAllowed = (settings.appRemovalUnlockedUntil ?? .distantPast) > Date()
+        shields.setAppRemovalLocked(settings.deviceRole == .child && !removalAllowed)
         // Nothing managed on this device (e.g. a parent's phone with no block-list
         // and no block-all allowlist) → make sure nothing is left shielded,
         // including a stale Kid Mode web/app lock.

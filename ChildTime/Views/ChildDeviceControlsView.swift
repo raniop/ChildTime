@@ -14,6 +14,7 @@ struct ChildDeviceControlsView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var showAppPicker = false
+    @State private var removalNote: String?
     @State private var selection = FamilyActivitySelection()
     @State private var showAllowPicker = false
     @State private var allowSelection = FamilyActivitySelection()
@@ -38,6 +39,7 @@ struct ChildDeviceControlsView: View {
                     quickOpenCard
                     perAppAllowCard
                     appLockCard
+                    allowDeleteCard
 
                     Text("שְׁאָר הַהַגְדָּרוֹת — פְּרָסִים, דּוּחוֹת, רָמַת קֹשִׁי וְהַתְרָאוֹת — מְנֻהֲלוֹת בְּמַכְשִׁיר הַהוֹרֶה.")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
@@ -306,6 +308,39 @@ struct ChildDeviceControlsView: View {
                         in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
             .buttonStyle(.juicy)
+        }
+    }
+
+    // MARK: - Allow deleting the app (parent only, temporary window)
+
+    /// A child device blocks app deletion (so the kid can't uninstall to escape
+    /// the lock). This lets the PARENT — who's already past the code gate — open a
+    /// short window to legitimately uninstall Tofy. It auto-re-locks after 5 min.
+    private var allowDeleteCard: some View {
+        controlCard(tint: AppColor.flameOrange) {
+            sectionHead("מְחִיקַת הָאַפְּלִיקַצְיָה",
+                        "בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה. לִמְחִיקָה אֲמִתִּית — פִּתְחוּ חַלּוֹן קָצָר וְהָסִירוּ אֶת טוֹפִי מִמָּסַךְ הַבַּיִת.",
+                        icon: "trash", tint: AppColor.flameOrange)
+            Button {
+                Haptic.medium()
+                settings.appRemovalUnlockedUntil = Date().addingTimeInterval(5 * 60)
+                shields.setAppRemovalLocked(false)
+                removalNote = "נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת. צְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרֻכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד."
+            } label: {
+                Label("אַפְשְׁרוּ מְחִיקָה לְ-5 דַּקּוֹת", systemImage: "trash")
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).padding(.vertical, 13)
+                    .background(AppColor.flameOrange.opacity(0.9), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .buttonStyle(.juicy)
+            if let removalNote {
+                Text(removalNote)
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 

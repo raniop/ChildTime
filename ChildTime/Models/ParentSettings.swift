@@ -16,6 +16,7 @@ final class ParentSettings: ObservableObject {
         static let allowedAppsData = "allowedAppsData"
         static let allowExceptionData = "allowExceptionData"
         static let allowExceptionEndsAt = "allowExceptionEndsAt"
+        static let appRemovalUnlockedUntil = "appRemovalUnlockedUntil"
         static let onboardingCompleted = "onboardingCompleted"
         static let childAge = "childAge"
         static let childGender = "childGender"
@@ -146,6 +147,15 @@ final class ParentSettings: ObservableObject {
         didSet {
             if let d = allowExceptionEndsAt { defaults.set(d, forKey: Key.allowExceptionEndsAt) }
             else { defaults.removeObject(forKey: Key.allowExceptionEndsAt) }
+        }
+    }
+    /// While this is in the future, a child device temporarily ALLOWS app deletion
+    /// (the parent opened a short window from Settings to uninstall Tofy). It
+    /// auto-re-locks once the window passes.
+    @Published var appRemovalUnlockedUntil: Date? {
+        didSet {
+            if let d = appRemovalUnlockedUntil { defaults.set(d, forKey: Key.appRemovalUnlockedUntil) }
+            else { defaults.removeObject(forKey: Key.appRemovalUnlockedUntil) }
         }
     }
     @Published var onboardingCompleted: Bool {
@@ -292,6 +302,7 @@ final class ParentSettings: ObservableObject {
         self.allowedAppsData = d.data(forKey: Key.allowedAppsData)
         self.allowExceptionData = d.data(forKey: Key.allowExceptionData)
         self.allowExceptionEndsAt = d.object(forKey: Key.allowExceptionEndsAt) as? Date
+        self.appRemovalUnlockedUntil = d.object(forKey: Key.appRemovalUnlockedUntil) as? Date
         self.onboardingCompleted = d.bool(forKey: Key.onboardingCompleted)
         let ageRaw = d.integer(forKey: Key.childAge)
         self.childAge = ChildAge(rawValue: ageRaw == 0 ? 6 : ageRaw) ?? .grade1
