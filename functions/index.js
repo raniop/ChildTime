@@ -591,10 +591,16 @@ async function computeAdminStats() {
     });
   }
 
-  // Totals derived from real (active-ever) households only.
+  // Totals derived from real (active-ever) households only. "Parents" counts
+  // only real ADULT accounts — has an email AND no child-device token. This
+  // drops anonymous child devices and kids who signed in with their own email
+  // (those carry childFcmTokens, like Yoav), so parents no longer exceed kids.
+  const adultUIDs = new Set(parentsSnap.docs
+    .filter((p) => { const d = p.data(); const cf = d.childFcmTokens; return !!d.email && !(cf && cf.length); })
+    .map((p) => p.id));
   const realParentUIDs = new Set();
   householdsSnap.docs.forEach((h) => {
-    if (realHouseholds.has(h.id)) (h.data().parentUIDs || []).forEach((u) => realParentUIDs.add(u));
+    if (realHouseholds.has(h.id)) (h.data().parentUIDs || []).forEach((u) => { if (adultUIDs.has(u)) realParentUIDs.add(u); });
   });
   const totals = {
     parents: realParentUIDs.size,
@@ -604,7 +610,7 @@ async function computeAdminStats() {
   };
   const excluded = {
     children: childrenSnap.size - realChildIDs.length,   // empty/demo profiles dropped
-    parents: parentsSnap.size - realParentUIDs.size,
+    parents: parentsSnap.size - realParentUIDs.size,     // anon devices + kids' own accounts
   };
 
   const uniq = (arr) => new Set(arr).size;
