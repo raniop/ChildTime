@@ -26,6 +26,7 @@ struct ParentDashboardView: View {
     @State private var resettingProfile: Profile? = nil
     @State private var deletingProfile: Profile? = nil
     @State private var navPath: [UUID] = []   // pushed child-detail pages (pop on delete)
+    @State private var gridDeleteProfile: Profile? = nil   // long-press delete from the grid
     @State private var refreshTrigger = 0
     @State private var lastRefreshed = Date()
     @State private var showingSettings = false
@@ -100,6 +101,14 @@ struct ParentDashboardView: View {
                                         childCard(profile: row.profile, snapshot: row.snapshot)
                                     }
                                     .buttonStyle(.plain)
+                                    .contextMenu {
+                                        Button {
+                                            navPath.append(row.profile.id)
+                                        } label: { Label("פתח כרטיס", systemImage: "rectangle.portrait.and.arrow.right") }
+                                        Button(role: .destructive) {
+                                            gridDeleteProfile = row.profile
+                                        } label: { Label("מחק ילד/ה", systemImage: "trash") }
+                                    }
                                 }
                             }
                             .animation(.spring(response: 0.5, dampingFraction: 0.85),
@@ -170,6 +179,22 @@ struct ParentDashboardView: View {
             // delete inside the page can pop back to the grid on its own).
             .navigationDestination(for: UUID.self) { id in
                 childDetailScreen(for: id)
+            }
+            // Long-press → delete straight from the grid (its own state so it can't
+            // clash with the detail page's delete dialog).
+            .confirmationDialog(
+                gridDeleteProfile.map { "למחוק את \($0.name)?" } ?? "",
+                isPresented: Binding(get: { gridDeleteProfile != nil },
+                                     set: { if !$0 { gridDeleteProfile = nil } }),
+                titleVisibility: .visible
+            ) {
+                Button("מחק ילד/ה", role: .destructive) {
+                    if let p = gridDeleteProfile { profiles.remove(p) }
+                    gridDeleteProfile = nil
+                }
+                Button("בטל", role: .cancel) { gridDeleteProfile = nil }
+            } message: {
+                Text("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק.")
             }
             .sheet(isPresented: $showingSettings) {
                 ParentSettingsView()
@@ -839,25 +864,30 @@ struct ParentDashboardView: View {
         let isActive = profile.id == profiles.activeID
         let cap = profile.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
         let timeToday = cap.enabled ? "\(s.minutesEarnedToday)/\(cap.minutes)" : "\(s.minutesEarnedToday)"
+        let success = s.answeredToday > 0 ? "\(Int((Double(s.correctToday) / Double(s.answeredToday)) * 100))%" : "—"
+        let available = s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"
         return VStack(spacing: 8) {
             ZStack(alignment: .topTrailing) {
-                ProfileAvatarView(profile: profile, size: 74)
+                ProfileAvatarView(profile: profile, size: 62)
                 if isChildPlayingNow(profile) {
                     Circle().fill(AppColor.successMint)
-                        .frame(width: 15, height: 15)
+                        .frame(width: 14, height: 14)
                         .overlay(Circle().stroke(.white, lineWidth: 2))
-                        .offset(x: 3, y: -3)
+                        .offset(x: 2, y: -2)
                 }
             }
             Text(profile.name)
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.7)
-            Text("⏱ \(timeToday)   ·   🔥 \(s.dayStreak)")
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7)
+            VStack(spacing: 5) {
+                HStack(spacing: 8) { miniStat("⏱", timeToday); miniStat("🎯", success) }
+                HStack(spacing: 8) { miniStat("⭐", s.stars.currencyShort); miniStat("💎", s.diamonds.currencyShort) }
+                HStack(spacing: 8) { miniStat("🎮", available); miniStat("🔥", "\(s.dayStreak)") }
+            }
+            .padding(.top, 2)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16).padding(.horizontal, 8)
+        .padding(.vertical, 14).padding(.horizontal, 10)
         .background(
             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                 .fill(Color(.secondarySystemGroupedBackground))
@@ -866,6 +896,17 @@ struct ParentDashboardView: View {
             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                 .stroke(isActive ? AppColor.successMint.opacity(0.6) : .clear, lineWidth: 2)
         )
+    }
+
+    /// One compact stat in a grid card: emoji + value (⏱ time · 🎯 success ·
+    /// ⭐ stars · 💎 diamonds · 🎮 available min · 🔥 streak).
+    private func miniStat(_ emoji: String, _ value: String) -> some View {
+        HStack(spacing: 3) {
+            Text(emoji).font(.system(size: 12))
+            Text(value).font(.system(size: 12.5, weight: .bold, design: .rounded))
+                .foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.55)
+            Spacer(minLength: 0)
+        }
     }
 
     /// The full per-child page (all stats, insights, settings menu) pushed when a
