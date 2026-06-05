@@ -275,13 +275,21 @@ struct WorldMapView: View {
             liveGame.startInvitesListener()
         }
         .onDisappear { liveGame.stopInvitesListener() }
-        // Leaving Kid Mode — parent-code gated, but NO auto Face ID (predictable).
+        // Leaving Kid Mode — a SINGLE authentication (Face ID, with code fallback).
+        // On success we mark the session unlocked and exit immediately, so the
+        // dashboard doesn't re-prompt: one Face ID, no separate "are you sure?".
+        // respectSession:false so this gate itself always authenticates.
         .sheet(isPresented: $showKidExit) {
             ParentGateView(allowClose: true,
                            gateTitle: "יְצִיאָה מִמַּצַּב יֶלֶד",
-                           gateReason: "הַזִּינוּ קוֹד הוֹרֶה כְּדֵי לָצֵאת",
-                           useFaceID: false) {
-                KidModeExitView { KidModeManager.shared.exit(); showKidExit = false }
+                           gateReason: "אַמְּתוּ זֶהוּת כְּדֵי לָצֵאת מִמַּצַּב יֶלֶד",
+                           useFaceID: true,
+                           respectSession: false,
+                           onAuthorized: {
+                               KidModeManager.shared.exit()
+                               showKidExit = false
+                           }) {
+                Color.clear
             }
             .environmentObject(settings)
             .environment(\.layoutDirection, .rightToLeft)

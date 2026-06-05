@@ -48,6 +48,9 @@ final class KidModeManager: ObservableObject {
     /// lock the phone to ChildTime + the allow-list, switch to that child's
     /// profile, and show the kid experience with THEIR real data.
     func enter(childID id: UUID) async {
+        // A fresh session-unlock must not survive into Kid Mode, or leaving it
+        // would skip the gate. Leaving Kid Mode must always re-authenticate.
+        ParentSettings.shared.sessionUnlocked = false
         defaults.set(ProfileStore.shared.activeID?.uuidString, forKey: Key.prevID)
         childID = id
 

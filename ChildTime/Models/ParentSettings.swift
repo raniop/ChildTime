@@ -226,6 +226,12 @@ final class ParentSettings: ObservableObject {
     @Published var faceIDForParentGate: Bool {
         didSet { defaults.set(faceIDForParentGate, forKey: Key.faceIDForParentGate) }
     }
+    /// In-memory "the parent already authenticated this session" flag. Lets the
+    /// root dashboard gate skip re-prompting right after another parent gate has
+    /// just authenticated (e.g. leaving Kid Mode → one Face ID, not two). NOT
+    /// persisted; reset on entering Kid Mode and on app background so a child can
+    /// never inherit an open gate.
+    @Published var sessionUnlocked = false
     /// The parental-consent version this parent accepted. 0 = not yet consented.
     @Published var consentVersionAccepted: Int {
         didSet { defaults.set(consentVersionAccepted, forKey: Key.consentVersionAccepted) }

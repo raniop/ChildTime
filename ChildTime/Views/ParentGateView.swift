@@ -9,14 +9,23 @@ struct ParentGateView<Content: View>: View {
     /// than opening Parent Settings. Falls back to the settings wording.
     var gateTitle: String? = nil
     var gateReason: String? = nil
-    /// Allow biometric (Face ID) unlock. Off for quick, predictable gates like
-    /// leaving Kid Mode, where an auto Face-ID prompt is jarring — code only.
+    /// Allow biometric (Face ID) unlock.
     var useFaceID: Bool = true
+    /// When true, this gate opens automatically if the parent already
+    /// authenticated elsewhere this session (`settings.sessionUnlocked`) — used by
+    /// the root dashboard so leaving Kid Mode needs only ONE Face ID. Gates that
+    /// must always authenticate (like the Kid-Mode exit itself) pass false.
+    var respectSession: Bool = true
+    /// Fired the moment the gate is unlocked (any method). Lets a caller act on
+    /// the single authentication — e.g. exit Kid Mode — without a second screen.
+    var onAuthorized: (() -> Void)? = nil
 
     init(allowClose: Bool = true,
          gateTitle: String? = nil,
          gateReason: String? = nil,
          useFaceID: Bool = true,
+         respectSession: Bool = true,
+         onAuthorized: (() -> Void)? = nil,
          @ViewBuilder content: @escaping () -> Content = {
              ParentSettingsView().environment(\.layoutDirection, .rightToLeft)
          }) {
@@ -24,6 +33,8 @@ struct ParentGateView<Content: View>: View {
         self.gateTitle = gateTitle
         self.gateReason = gateReason
         self.useFaceID = useFaceID
+        self.respectSession = respectSession
+        self.onAuthorized = onAuthorized
         self.content = content
     }
 
@@ -48,7 +59,7 @@ struct ParentGateView<Content: View>: View {
     }
 
     var body: some View {
-        if authorized {
+        if authorized || (respectSession && settings.sessionUnlocked) {
             content()
         } else {
             gate
@@ -144,8 +155,16 @@ struct ParentGateView<Content: View>: View {
 
     private func tryBiometric() async {
         if await PINManager.shared.authenticateBiometric() {
-            authorized = true
+            grantAccess()
         }
+    }
+
+    /// Unlock the gate (any method): remember it for the session, flip the local
+    /// state, and notify the caller so a single auth can also drive an action.
+    private func grantAccess() {
+        settings.sessionUnlocked = true
+        authorized = true
+        onAuthorized?()
     }
 
     private var keypad: some View {
@@ -236,7 +255,7 @@ struct ParentGateView<Content: View>: View {
                                 reason: "הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID")
                             if ok { settings.faceIDForParentGate = true }
                         }
-                        authorized = true
+                        grantAccess()
                     }
                 } else {
                     shake = true
@@ -263,7 +282,7 @@ struct ParentGateView<Content: View>: View {
             if household.householdPIN == nil, let blob = PINManager.shared.storedBlob {
                 household.setHouseholdPIN(blob)
             }
-            authorized = true
+            grantAccess()
         } else {
             shake = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {

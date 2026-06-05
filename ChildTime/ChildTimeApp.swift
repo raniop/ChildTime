@@ -161,6 +161,8 @@ struct ChildTimeApp: App {
                     // nothing was played. NOT fired per-adventure, which spammed the parent.
                     if phase == .background, Self.demoScreen == nil {
                         progress.endSittingAndReport()
+                        // Re-lock the parent gate when the app leaves the foreground.
+                        ParentSettings.shared.sessionUnlocked = false
                     }
                 }
                 .onOpenURL { url in

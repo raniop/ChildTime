@@ -203,11 +203,11 @@ final class LiveGameManager: ObservableObject {
         }
         guard !wireQuestions.isEmpty else { lastError = "לֹא הִצְלַחְנוּ לְהָכִין שְׁאֵלוֹת"; return nil }
 
-        // Make sure my friend list is loaded so the auto-invite actually reaches
-        // everyone (otherwise `invited` could be empty if the board wasn't opened).
+        // Load my friend list so the lobby can show who to invite. We do NOT
+        // auto-invite everyone on create anymore — the host picks who to invite
+        // from the lobby's friends list (each "הַזְמִינוּ" button sends a push).
         if FriendsManager.shared.leaderboard.count <= 1 { await FriendsManager.shared.refresh() }
-        // Invite my current friends (the leaderboard graph) — they get a push.
-        let invited = FriendsManager.shared.leaderboard.map(\.id).filter { $0 != myID }
+        let invited: [String] = []
 
         let gameID = UUID().uuidString
         let doc: [String: Any] = [
