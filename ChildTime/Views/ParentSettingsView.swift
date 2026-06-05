@@ -21,6 +21,7 @@ struct ParentSettingsView: View {
     @State private var showFamilyLinking = false
     @State private var exportURL: URL?
     @State private var showDeleteAllConfirm = false
+    @State private var showResetDeviceConfirm = false
     @State private var deleting = false
     @State private var testPushMessage: String?
 
@@ -470,6 +471,11 @@ struct ParentSettingsView: View {
                         .font(.subheadline)
                 }
             }
+            Button {
+                showResetDeviceConfirm = true
+            } label: {
+                Label("אפס מכשיר זה", systemImage: "arrow.triangle.2.circlepath")
+            }
             Button(role: .destructive) {
                 showDeleteAllConfirm = true
             } label: {
@@ -483,7 +489,17 @@ struct ParentSettingsView: View {
         } header: {
             Text("פרטיות ונתונים")
         } footer: {
-            Text("ייצוא מפיק קובץ JSON עם כל הפרופילים, ההתקדמות וההיסטוריה. מחיקה מסירה לצמיתות את כל הנתונים מהמכשיר ומהענן — לא ניתן לשחזר.")
+            Text("ייצוא מפיק קובץ JSON עם כל הפרופילים, ההתקדמות וההיסטוריה.\n\n‏\"אפס מכשיר זה\" מנקה את המכשיר לגמרי (מנותק, בלי קוד, בלי נתונים מקומיים) אבל משאיר את המשפחה בענן.\n\n‏\"מחק את כל הנתונים\" מוחק לצמיתות גם מהמכשיר וגם מהענן — לא ניתן לשחזר.")
+        }
+        .confirmationDialog("לאפס את המכשיר הזה?",
+                            isPresented: $showResetDeviceConfirm, titleVisibility: .visible) {
+            Button("אפס מכשיר", role: .destructive) {
+                HouseholdManager.shared.resetThisDevice()
+                dismiss()
+            }
+            Button("בטל", role: .cancel) {}
+        } message: {
+            Text("המכשיר יחזור למצב התחלתי: מנותק, בלי קוד הורה, בלי נתונים מקומיים. המשפחה וההתקדמות בענן יישמרו — אפשר להתחבר מחדש בכל עת.")
         }
         .confirmationDialog("למחוק את כל הנתונים לצמיתות?",
                             isPresented: $showDeleteAllConfirm, titleVisibility: .visible) {

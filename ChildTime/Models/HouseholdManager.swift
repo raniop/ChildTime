@@ -225,10 +225,20 @@ final class HouseholdManager: ObservableObject {
                     Self.decodeChild(id: $0.documentID, $0.data())
                 }
                 ProfileStore.shared.mergeRemoteChildren(records)
+                let hadFamily = self.didReceiveChildren
                 // First reply from the cloud → the family has finished loading.
                 if !self.didReceiveChildren {
                     self.didReceiveChildren = true
                     self.markLoaded()
+                }
+                // If the parent DELETED the child this device is bound to, disconnect
+                // it now (back to scan-QR) instead of letting the kid keep playing a
+                // phantom profile. Guarded by `hadFamily` so a transient first load
+                // can't kick a device whose child is fine.
+                let s = ParentSettings.shared
+                if hadFamily, s.deviceRole == .child, let joined = s.joinedChildID,
+                   !records.contains(where: { $0.id == joined }) {
+                    self.resetAsRemovedDevice()
                 }
             }
     }
@@ -339,6 +349,10 @@ final class HouseholdManager: ObservableObject {
     /// on — publish them so other devices on the household can pull them. Runs
     /// every sign-in; no-op on a fresh device (no local profiles yet).
     private func reconcileLocalChildren(into hh: Household) {
+        // A child device binds to ONE existing child and must NEVER re-upload its
+        // local profiles — that re-creates kids the parent just deleted (the dupes
+        // that "kept coming back"). Only PARENT devices heal missing cloud records.
+        guard ParentSettings.shared.deviceRole != .child else { return }
         for profile in ProfileStore.shared.profiles {
             upsertChild(profile)
         }
@@ -460,6 +474,28 @@ final class HouseholdManager: ObservableObject {
         s.joinedChildID = nil
         s.deviceRole = .unset                    // → fresh RolePicker / scan flow
         #endif
+    }
+
+    /// Full reset of THIS device only: sign out, wipe the local cache + the parent
+    /// code (Keychain), drop the binding → RolePicker — WITHOUT deleting the cloud
+    /// family (sign back in to restore). For "start this device over" without
+    /// nuking everyone, unlike `deleteEverything()`.
+    func resetThisDevice() {
+        let s = ParentSettings.shared
+        #if canImport(FirebaseFirestore)
+        if let cid = s.joinedChildID {           // remove our own child-device row
+            db.collection("childDevices").document("\(cid)_\(DeviceIdentity.installID)").delete()
+        }
+        #endif
+        ownDeviceListener?.remove(); ownDeviceListener = nil
+        AuthManager.shared.signOut()             // stops sync + clears the session
+        DataExporter.wipeLocalData()             // local cache only — cloud untouched
+        PINManager.shared.deletePIN()            // erase the parent code from the Keychain
+        s.hasSetParentPIN = false
+        s.faceIDForParentGate = false
+        s.pendingJoinPayload = nil
+        s.joinedChildID = nil
+        s.deviceRole = .unset                    // → "who uses this device?"
     }
 
     func stopWatchingInviteRedemption() {
