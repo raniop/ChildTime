@@ -100,15 +100,18 @@ struct LoginGateView: View {
 
     private var hero: some View {
         VStack(spacing: AppSpacing.sm) {
-            ZStack(alignment: .topLeading) {
-                if bubbleVisible {
-                    BubbleSpeech(text: "היי! אני טופי 💫")
-                        .offset(x: companionSize * 0.55, y: -28)
-                        .transition(.scale.combined(with: .opacity))
-                }
+            ZStack(alignment: .top) {
                 CompanionView(controller: companion, size: companionSize)
                     .scaleEffect(heroAppear ? 1 : 0.3)
                     .opacity(heroAppear ? 1 : 0)
+                    .offset(y: 20)   // drop the lion so there's a gap below the bubble
+                if bubbleVisible {
+                    // Centered above the lion's head; centered tail points straight
+                    // down at it — width-independent, so it always lines up.
+                    BubbleSpeech(text: "היי! אני טופי 💫")
+                        .offset(y: -10)
+                        .transition(.scale.combined(with: .opacity))
+                }
             }
             .frame(height: companionSize * 1.5)
 
@@ -124,12 +127,6 @@ struct LoginGateView: View {
                     )
                     .shadow(color: AppColor.starGold.opacity(0.7), radius: 16)
                     .shadow(color: .black.opacity(0.25), radius: 3, y: 2)
-
-                Text("וחברים")
-                    .font(.system(size: titleSize * 0.42, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .shadow(color: AppColor.starGold.opacity(0.35), radius: 8)
-                    .offset(y: -titleSize * 0.10)
             }
             .scaleEffect(heroAppear ? 1 : 0.4)
             .opacity(heroAppear ? 1 : 0)
@@ -152,7 +149,7 @@ struct LoginGateView: View {
                 bullet("🔒", "פרטי בלבד — רק אתם ולא משותף")
             }
             .padding(AppSpacing.md)
-            .frame(maxWidth: 420)
+            .frame(maxWidth: 360)   // match the sign-in buttons' width
             .background(
                 RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                     .fill(.white.opacity(0.10))

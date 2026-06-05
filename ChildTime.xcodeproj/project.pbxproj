@@ -606,6 +606,7 @@
 				INFOPLIST_FILE = PlayTimeWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PlayTimeWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -613,7 +614,6 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rani.ChildTime.PlayTimeWidget;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -637,6 +637,7 @@
 				INFOPLIST_FILE = PlayTimeWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PlayTimeWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -644,7 +645,6 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rani.ChildTime.PlayTimeWidget;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

@@ -262,6 +262,7 @@ struct ParentDashboardView: View {
                 lastRefreshed = .now
                 remote.refreshNow()   // pull fresh child state on open
                 rescheduleInsights()
+                WidgetBridge.writeFamily(rows)   // keep the family home-screen widget fresh
                 Task { await push.refreshAuthorizationStatus() }
             }
             .onChangeCompat(of: settings.parentInsightFrequency) { _, freq in

@@ -107,8 +107,7 @@ struct OnboardingView: View {
                 }
                 .frame(height: welcomeCompanionSize * 1.8)
 
-                // Animated title — "טופי" big & gradient, "וחברים" smaller below
-                // (classic logo + subtitle treatment for the full app name).
+                // Animated title — "טופי" big & gradient.
                 VStack(spacing: 0) {
                     Text("טופי")
                         .font(.system(size: welcomeTitleSize, weight: .heavy, design: .rounded))
@@ -120,13 +119,6 @@ struct OnboardingView: View {
                         )
                         .shadow(color: AppColor.starGold.opacity(0.7), radius: 18)
                         .shadow(color: .black.opacity(0.25), radius: 4, y: 4)
-
-                    Text("וחברים")
-                        .font(.system(size: welcomeTitleSize * 0.42, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .shadow(color: AppColor.starGold.opacity(0.35), radius: 8)
-                        .shadow(color: .black.opacity(0.3), radius: 3, y: 2)
-                        .offset(y: -welcomeTitleSize * 0.10) // tuck slightly into "טופי"
                 }
                 .scaleEffect(welcomeTitleAppeared ? 1 : 0.4)
                 .rotationEffect(.degrees(welcomeTitleAppeared ? 0 : -8))

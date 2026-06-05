@@ -155,6 +155,7 @@ struct ChildTimeApp: App {
                     if phase == .active, Self.demoScreen == nil {
                         progress.applyDailyRolloverIfNeeded()
                         enforceShieldStateIfNeeded()
+                        WidgetBridge.refreshKid()
                     }
                     // Child LEFT the app → send the single "finished playing" report
                     // now (covers all adventures this sitting). Self-guards: no-op if
@@ -163,6 +164,7 @@ struct ChildTimeApp: App {
                         progress.endSittingAndReport()
                         // Re-lock the parent gate when the app leaves the foreground.
                         ParentSettings.shared.sessionUnlocked = false
+                        WidgetBridge.refreshKid()
                     }
                 }
                 .onOpenURL { url in

@@ -5,5 +5,7 @@ import SwiftUI
 struct PlayTimeWidgetBundle: WidgetBundle {
     var body: some Widget {
         PlayTimeWidgetLiveActivity()
+        TofyKidWidget()
+        TofyFamilyWidget()
     }
 }
