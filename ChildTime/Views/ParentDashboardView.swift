@@ -162,13 +162,18 @@ struct ParentDashboardView: View {
                     .accessibilityLabel("שליחת פידבק לצוות")
                 }
             }
-            .navigationTitle("מבט-על על המשפחה")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("מבט-על על המשפחה")
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     if isRoot {
                         Button { showingSettings = true } label: {
                             Image(systemName: "gearshape.fill")
+                                .foregroundStyle(.white)
                         }
                     } else {
                         Button("סיום") { dismiss() }
@@ -879,15 +884,15 @@ struct ParentDashboardView: View {
             Text(profile.name)
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.7)
-            VStack(spacing: 5) {
-                HStack(spacing: 8) { miniStat("⏱", timeToday); miniStat("🎯", success) }
-                HStack(spacing: 8) { miniStat("⭐", s.stars.currencyShort); miniStat("💎", s.diamonds.currencyShort) }
-                HStack(spacing: 8) { miniStat("🎮", available); miniStat("🔥", "\(s.dayStreak)") }
+            VStack(spacing: 6) {
+                HStack(spacing: 6) { miniStat("⏱", timeToday); miniStat("🎯", success) }
+                HStack(spacing: 6) { miniStat("⭐", s.stars.currencyShort); miniStat("💎", s.diamonds.currencyShort) }
+                HStack(spacing: 6) { miniStat("🎮", available); miniStat("🔥", "\(s.dayStreak)") }
             }
-            .padding(.top, 2)
+            .padding(.top, 4)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14).padding(.horizontal, 10)
+        .padding(.vertical, 16).padding(.horizontal, 12)
         .background(
             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                 .fill(Color(.secondarySystemGroupedBackground))
@@ -901,12 +906,17 @@ struct ParentDashboardView: View {
     /// One compact stat in a grid card: emoji + value (⏱ time · 🎯 success ·
     /// ⭐ stars · 💎 diamonds · 🎮 available min · 🔥 streak).
     private func miniStat(_ emoji: String, _ value: String) -> some View {
-        HStack(spacing: 3) {
-            Text(emoji).font(.system(size: 12))
-            Text(value).font(.system(size: 12.5, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.55)
-            Spacer(minLength: 0)
+        HStack(spacing: 4) {
+            Text(emoji).font(.system(size: 13))
+            Text(value).font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.6)
         }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.primary.opacity(0.05))
+        )
     }
 
     /// The full per-child page (all stats, insights, settings menu) pushed when a
