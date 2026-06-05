@@ -53,7 +53,7 @@ struct WelcomeIntroView: View {
                                    startPoint: .top, endPoint: .bottom)
                 )
                 .shadow(color: AppColor.starGold.opacity(0.5), radius: 12)
-            Text("לוֹמְדִים, מַרְוִיחִים זְמַן מָסָךְ —\nוְהַהוֹרִים רוֹאִים הַכֹּל.")
+            Text("לוֹמְדִים, מַרְוִיחִים זְמַן מָסָךְ —\nוְהַהוֹרִים תָּמִיד בַּתְּמוּנָה.")
                 .font(.system(size: isCompact ? 16 : 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.92))
                 .multilineTextAlignment(.center)
