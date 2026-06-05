@@ -111,6 +111,13 @@
   .video-wrap{max-width:380px; margin:0 auto; border-radius:38px; overflow:hidden;
     border:10px solid #1c1340; box-shadow:0 30px 80px rgba(0,0,0,.5)}
   .video-wrap video{display:block; width:100%; background:#000}
+  .shots{display:flex; gap:18px; overflow-x:auto; padding:8px 4px 20px;
+    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch}
+  .shots figure{flex:0 0 auto; margin:0; text-align:center; scroll-snap-align:center}
+  .shots img{width:208px; border-radius:26px; display:block;
+    box-shadow:0 18px 44px rgba(0,0,0,.32); border:1px solid rgba(255,255,255,.14)}
+  .shots figcaption{margin-top:10px; font-size:14px; font-weight:700; color:#cfd6ff}
+  @media(min-width:820px){ .shots{flex-wrap:wrap; justify-content:center; overflow:visible} }
 
   /* features */
   .feat{display:grid; grid-template-columns:repeat(3,1fr); gap:18px}
@@ -216,9 +223,14 @@
 <section id="video"><div class="wrap">
   <div class="eyebrow reveal">הצצה</div>
   <h2 class="title reveal">טופי בפעולה</h2>
-  <p class="lead reveal">הצצה קצרה לטופי בפעולה — למידה, פרסים, גלגל מזל ומשחק חי עם חברים.</p>
-  <div class="video-wrap reveal">
-    <video src="tofy-explainer.mp4?v=3" controls playsinline preload="metadata"></video>
+  <p class="lead reveal">כמה מסכים מהאפליקציה — מצד הילד ומצד ההורה.</p>
+  <div class="shots reveal">
+    <figure><img src="tofy-kid-1.jpg" alt="מסך משחק" loading="lazy"><figcaption>🎮 משחק ולמידה</figcaption></figure>
+    <figure><img src="tofy-kid-2.jpg" alt="חנות יהלומים" loading="lazy"><figcaption>💎 חנות</figcaption></figure>
+    <figure><img src="tofy-kid-3.jpg" alt="גלגל מזל" loading="lazy"><figcaption>🎡 גלגל מזל</figcaption></figure>
+    <figure><img src="tofy-kid-4.jpg" alt="חברים ולוח מובילים" loading="lazy"><figcaption>🏆 חברים</figcaption></figure>
+    <figure><img src="tofy-parent-1.jpg" alt="מבט על המשפחה" loading="lazy"><figcaption>👨‍👩‍👧 מבט הורה</figcaption></figure>
+    <figure><img src="tofy-parent-2.jpg" alt="בקרת המכשיר" loading="lazy"><figcaption>🔒 בקרת מכשיר</figcaption></figure>
   </div>
 </div></section>
 
