@@ -271,6 +271,7 @@ struct LiveGameView: View {
 
             questionCard(q)
                 .padding(.horizontal, AppSpacing.lg)
+                .layoutPriority(1)   // win vertical space over the flexible spacers
 
             Spacer(minLength: AppSpacing.md)
 
@@ -312,7 +313,8 @@ struct LiveGameView: View {
             .font(.system(size: 42, weight: .black, design: .rounded))
             .foregroundStyle(.white)
             .multilineTextAlignment(.center)
-            .lineLimit(5).minimumScaleFactor(0.45)
+            .lineLimit(5).minimumScaleFactor(0.6)
+            .fixedSize(horizontal: false, vertical: true)   // claim full height — never drop the 2nd (Hebrew) line
             .shadow(color: .black.opacity(0.28), radius: 10, y: 5)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 44).padding(.horizontal, 26)
