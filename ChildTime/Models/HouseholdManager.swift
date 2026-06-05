@@ -67,20 +67,27 @@ final class HouseholdManager: ObservableObject {
 
     /// Called from AuthManager after sign-in. Ensures the parent + household
     /// exist, migrates local profiles on first run, then starts listening.
-    /// Screenshot/demo builds (DEMO_SCREEN env var) seed sample profiles
-    /// (דָּנָה/יוֹאָב…) into the LOCAL stores. Those must NEVER mirror to
-    /// Firestore — repeated demo runs are exactly how dozens of seed kids, plus
-    /// anonymous households/parents, leaked into production. In demo mode every
-    /// HouseholdManager cloud write is a no-op; the demo renders purely local.
-    static var isScreenshotDemo: Bool { ProcessInfo.processInfo.environment["DEMO_SCREEN"] != nil }
+    ///
+    /// Builds that must NEVER write to Firestore:
+    ///  • screenshot/demo runs (DEMO_SCREEN) — they seed sample profiles
+    ///    (דָּנָה/יוֹאָב…) into the LOCAL stores;
+    ///  • automated test runs — `xcodebuild test` launches the HOST app, which
+    ///    once synced stale local profiles straight into the real production
+    ///    household (that's how junk יוֹאָב/שיפי dupes leaked in).
+    /// In these modes every HouseholdManager cloud write is a no-op (local only).
+    static var skipsCloudSync: Bool {
+        if ProcessInfo.processInfo.environment["DEMO_SCREEN"] != nil { return true }
+        if NSClassFromString("XCTestCase") != nil { return true }   // running under tests
+        return false
+    }
 
     func start(uid: String, email: String?, displayName: String?) {
         self.uid = uid
         self.email = email?.lowercased()
         self.displayName = displayName
-        // Demo/screenshot builds stay entirely local — no parent, household,
-        // child, or device docs are ever written to production.
-        guard !Self.isScreenshotDemo else { Task { @MainActor in self.markLoaded() }; return }
+        // Demo / screenshot / test builds stay entirely local — no parent,
+        // household, child, or device docs are ever written to production.
+        guard !Self.skipsCloudSync else { Task { @MainActor in self.markLoaded() }; return }
         #if canImport(FirebaseFirestore)
         // start() is invoked from the auth-state listener, which can fire while
         // SwiftUI is mid-update. Defer the @Published mutations one tick so they
@@ -295,7 +302,7 @@ final class HouseholdManager: ObservableObject {
 
     func upsertChild(_ profile: Profile) {
         #if canImport(FirebaseFirestore)
-        guard !Self.isScreenshotDemo else { return }   // never sync demo-seeded kids
+        guard !Self.skipsCloudSync else { return }   // never sync in demo/test builds
         guard let hh = household else { return }
         let record = ChildRecord(profile: profile, householdID: hh.id)
         Task {
