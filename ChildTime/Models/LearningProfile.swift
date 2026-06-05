@@ -106,35 +106,50 @@ struct LearningProfile {
     var favorites: [Topic] {
         enabledTopics
             .filter { exposure(for: $0) > 0 }
-            .sorted { affinity(for: $0) > affinity(for: $1) }
+            .sorted {
+                let a = affinity(for: $0), b = affinity(for: $1)
+                return a == b ? $0.rawValue < $1.rawValue : a > b
+            }
     }
 
     /// Topics with confidently high accuracy.
     var strong: [Topic] {
         Topic.allCases
             .filter { isConfident($0) && successRate(for: $0) >= 0.8 }
-            .sorted { successRate(for: $0) > successRate(for: $1) }
+            .sorted {
+                let a = successRate(for: $0), b = successRate(for: $1)
+                return a == b ? $0.rawValue < $1.rawValue : a > b
+            }
     }
 
     /// Topics the child struggles with — candidates for gentle reinforcement.
     var weak: [Topic] {
         Topic.allCases
             .filter { isConfident($0) && successRate(for: $0) < 0.5 }
-            .sorted { successRate(for: $0) < successRate(for: $1) }
+            .sorted {
+                let a = successRate(for: $0), b = successRate(for: $1)
+                return a == b ? $0.rawValue < $1.rawValue : a < b
+            }
     }
 
     /// Topics the child barely meets — the explore frontier.
     var unexplored: [Topic] {
         enabledTopics
             .filter { exposure(for: $0) < Self.confidentSampleCount }
-            .sorted { exposure(for: $0) < exposure(for: $1) }
+            .sorted {
+                let a = exposure(for: $0), b = exposure(for: $1)
+                return a == b ? $0.rawValue < $1.rawValue : a < b
+            }
     }
 
     /// Topics the child tends to bail on (highest abandonment first).
     var abandoned: [Topic] {
         Topic.allCases
             .filter { (abandon[$0] ?? 0) > 0 }
-            .sorted { (abandon[$0] ?? 0) > (abandon[$1] ?? 0) }
+            .sorted {
+                let a = abandon[$0] ?? 0, b = abandon[$1] ?? 0
+                return a == b ? $0.rawValue < $1.rawValue : a > b
+            }
     }
 
     /// Topics newly "discovered": low exposure yet high affinity — the child
@@ -142,6 +157,9 @@ struct LearningProfile {
     var discovering: [Topic] {
         enabledTopics
             .filter { exposure(for: $0) > 0 && exposure(for: $0) < 8 && affinity(for: $0) >= 0.65 }
-            .sorted { affinity(for: $0) > affinity(for: $1) }
+            .sorted {
+                let a = affinity(for: $0), b = affinity(for: $1)
+                return a == b ? $0.rawValue < $1.rawValue : a > b
+            }
     }
 }

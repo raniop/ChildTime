@@ -61,20 +61,11 @@ struct ParentDashboardView: View {
             }
             return row
         }
-        // Whoever is playing LIVE floats to the top — dynamic, re-sorts on each
-        // 5s tick / presence update. Stable for the rest (keeps profile order).
-        return mapped.enumerated()
-            .sorted { a, b in
-                let aLive = isChildPlayingNow(a.element.profile)
-                let bLive = isChildPlayingNow(b.element.profile)
-                if aLive != bLive { return aLive }      // live first
-                // Then most-recently-active child first (by last device heartbeat).
-                let aSeen = lastActivity(a.element.profile)
-                let bSeen = lastActivity(b.element.profile)
-                if aSeen != bSeen { return aSeen > bSeen }
-                return a.offset < b.offset              // stable fallback
-            }
-            .map { $0.element }
+        // Fixed alphabetical order by name (Hebrew א,ב,ג…) so the list never
+        // reshuffles when a child starts/stops playing. Locale-aware compare.
+        return mapped.sorted {
+            $0.profile.name.localizedCompare($1.profile.name) == .orderedAscending
+        }
     }
 
     var body: some View {
@@ -1100,7 +1091,7 @@ struct ParentDashboardView: View {
                     .background(Capsule().fill(tint.opacity(0.18)))
                     .overlay(Capsule().stroke(tint.opacity(0.5), lineWidth: 1))
             }
-            Text("\(label):")
+            Text(":\(label)")
                 .font(.system(size: 12, weight: .heavy, design: .rounded))
                 .foregroundStyle(.secondary)
         }

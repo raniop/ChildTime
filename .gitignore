@@ -57,3 +57,6 @@ ehthumbs.db
 
 # Logs
 *.log
+
+# Local Firestore backups — contain emails/child data, never commit
+backups/
