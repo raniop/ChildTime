@@ -504,6 +504,12 @@ struct ParentSettingsView: View {
         DataExporter.wipeLocalData()
         ProgressStore.shared.resetAll()
         auth.signOut()
+        // Wipe the Keychain too — it survives an app delete/reinstall, so without
+        // this the parent code lingers. Reset the PIN flags so the gate returns to
+        // "create a code" instead of locking the parent out asking for a gone code.
+        PINManager.shared.deletePIN()
+        settings.hasSetParentPIN = false
+        settings.faceIDForParentGate = false
         deleting = false
         dismiss()
     }
