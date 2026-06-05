@@ -87,8 +87,8 @@ final class FriendsManager: ObservableObject {
             FriendCard(id: "f2", name: "מָאיָה", character3DID: "panda",   stars: 1530, code: "BBB"),
             FriendCard(id: meID, name: "דָּנָה", character3DID: "unicorn", stars: 1240, code: "ABC234"),
             FriendCard(id: "f3", name: "אִיתַי", character3DID: "dragon",  stars: 980,  code: "CCC"),
-            FriendCard(id: "f4", name: "נֹעָה",  character3DID: "fox",     stars: 640,  code: "DDD"),
-            FriendCard(id: "f5", name: "עֹמֶר",  character3DID: "tiger",   stars: 410,  code: "EEE"),
+            FriendCard(id: "f4", name: "נוֹעָה",  character3DID: "fox",     stars: 640,  code: "DDD"),
+            FriendCard(id: "f5", name: "עוֹמֶר",  character3DID: "tiger",   stars: 410,  code: "EEE"),
         ].sorted { $0.stars > $1.stars }
         myCode = "ABC234"
     }

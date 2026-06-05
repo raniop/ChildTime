@@ -42,7 +42,7 @@ struct DailyChestView: View {
                     VStack(spacing: AppSpacing.lg) {
                         Spacer(minLength: AppSpacing.lg)
 
-                        Text("קֻפְסַת קֶסֶם יוֹמִית")
+                        Text("קוּפְסַת קֶסֶם יוֹמִית")
                             .font(.system(size: isCompact ? 34 : 48, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)

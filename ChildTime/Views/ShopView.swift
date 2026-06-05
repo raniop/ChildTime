@@ -127,14 +127,14 @@ struct ShopView: View {
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
 
-                pillButton(icon: "pencil", title: "עֲרֹךְ פְּרוֹפִיל") {
+                pillButton(icon: "pencil", title: "עֲרוֹךְ פְּרוֹפִיל") {
                     showingProfileEditor = true
                 }
                 .padding(.top, 4)
             }
             .padding(.top, AppSpacing.sm)
         } else {
-            Text("צֹר פְּרוֹפִיל כְּדֵי לְהַתְחִיל")
+            Text("צוֹר פְּרוֹפִיל כְּדֵי לְהַתְחִיל")
                 .foregroundStyle(.white)
         }
     }

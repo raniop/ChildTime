@@ -36,8 +36,8 @@ final class SpeechReader {
     /// (e.g. "1, קטן. 2, קטנות") so a non-reader can pick by number.
     ///
     /// BUT when every answer is itself a NUMBER, "1, 4" reads as two numbers and
-    /// confuses — so the tile is identified by its COLOR instead: "יָרֹק, 4.
-    /// סָגֹל, 2" (colors match OptionCard's palette order).
+    /// confuses — so the tile is identified by its COLOR instead: "יָרוֹק, 4.
+    /// סָגוֹל, 2" (colors match OptionCard's palette order).
     func readQuestion(prompt: String, options: [String]) {
         let numericAnswers = !options.isEmpty && options.allSatisfy {
             Int($0.trimmingCharacters(in: .whitespaces)) != nil

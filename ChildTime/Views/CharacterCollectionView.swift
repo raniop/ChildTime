@@ -50,7 +50,7 @@ struct CharacterCollectionView: View {
             Button("קְנֵה יַהֲלוֹמִים") { showStarShop = true }
             Button("הֲבַנְתִּי", role: .cancel) {}
         } message: {
-            if let s = shortBy { Text("צָרִיךְ עוֹד \(s) יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.") }
+            if let s = shortBy { Text("צָרִיךְ עוֹד \(s) יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמוֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.") }
         }
     }
 

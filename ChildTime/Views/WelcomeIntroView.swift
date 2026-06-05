@@ -75,7 +75,7 @@ struct WelcomeIntroView: View {
             divider
             step("📊", AppColor.starGold,
                  "אַתֶּם עוֹקְבִים וּמְקַבְּלִים הַמְלָצוֹת",
-                 "דּוּחוֹת, חֹזֶק וְחֻלְשָׁה, וְהַתְרָאוֹת — בְּמַכְשִׁיר נִפְרָד.")
+                 "דּוּחוֹת, חוֹזֶק וְחוּלְשָׁה, וְהַתְרָאוֹת — בְּמַכְשִׁיר נִפְרָד.")
         }
         .padding(AppSpacing.md)
         .background(
@@ -124,7 +124,7 @@ struct WelcomeIntroView: View {
             HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(AppColor.flameOrange)
-                Text("זְמַן הַמָּסָךְ מְנֻהָל בְּטוֹפִּי")
+                Text("זְמַן הַמָּסָךְ מְנוּהָל בְּטוֹפִּי")
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                 Spacer(minLength: 0)

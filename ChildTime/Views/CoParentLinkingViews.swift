@@ -128,7 +128,7 @@ struct AddParentView: View {
             working = true; error = nil
             let c = await household.createInvite()
             code = c
-            if c == nil { error = household.lastError ?? "לֹא נִיתָּן לִיצֹר קוֹד כָּעֵת" }
+            if c == nil { error = household.lastError ?? "לֹא נִיתָּן לִיצוֹר קוֹד כָּעֵת" }
             working = false
         }
     }
@@ -230,7 +230,7 @@ struct JoinFamilyFlowView: View {
         Button {
             settings.pendingJoinFamily = false   // fall through to their own dashboard
         } label: {
-            Text("אֵין לִי קוֹד — אֶצֹּר מִשְׁפָּחָה מִשֶּׁלִּי")
+            Text("אֵין לִי קוֹד — אֶצּוֹר מִשְׁפָּחָה מִשֶּׁלִּי")
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85)).underline()
         }

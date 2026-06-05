@@ -52,7 +52,7 @@ struct KidModeEntryView: View {
         .alert("צָרִיךְ הַרְשָׁאַת Screen Time", isPresented: $authFailed) {
             Button("הֲבַנְתִּי", role: .cancel) {}
         } message: {
-            Text("כְּדֵי לִנְעֹל אֶת הַטֶּלֶפוֹן בְּמַצַּב יֶלֶד צָרִיךְ לְאַשֵּׁר Screen Time בִּשְׁבִיל טוֹפִי.")
+            Text("כְּדֵי לִנְעוֹל אֶת הַטֶּלֶפוֹן בְּמַצַּב יֶלֶד צָרִיךְ לְאַשֵּׁר Screen Time בִּשְׁבִיל טוֹפִי.")
         }
     }
 
@@ -114,10 +114,10 @@ struct KidModeEntryView: View {
                     .font(.system(size: 26))
                     .foregroundStyle(AppColor.successMint)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("אַפְּלִיקַצְיוֹת מֻתָּרוֹת")
+                    Text("אַפְּלִיקַצְיוֹת מוּתָּרוֹת")
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text(allowedCount == 0 ? "רַק טוֹפִי — הַקִּישׁוּ לִבְחֹר עוֹד"
+                    Text(allowedCount == 0 ? "רַק טוֹפִי — הַקִּישׁוּ לִבְחוֹר עוֹד"
                                            : "\(allowedCount) אַפְּלִיקַצְיוֹת + טוֹפִי")
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.75))
@@ -132,7 +132,7 @@ struct KidModeEntryView: View {
     }
 
     private var explainer: some View {
-        Text("כָּל שְׁאָר הָאַפְּלִיקַצְיוֹת בַּטֶּלֶפוֹן יִנָּעֲלוּ. הַיֶּלֶד יִלְמַד וִישַׂחֵק בְּטוֹפִי, וְיוּכַל לִפְתֹּחַ אֶת הָאַפְּלִיקַצְיוֹת הַמֻּתָּרוֹת. לִיצִיאָה — קוֹד הוֹרֶה.")
+        Text("כָּל שְׁאָר הָאַפְּלִיקַצְיוֹת בַּטֶּלֶפוֹן יִנָּעֲלוּ. הַיֶּלֶד יִלְמַד וִישַׂחֵק בְּטוֹפִי, וְיוּכַל לִפְתּוֹחַ אֶת הָאַפְּלִיקַצְיוֹת הַמּוּתָּרוֹת. לִיצִיאָה — קוֹד הוֹרֶה.")
             .font(.system(size: 13, weight: .medium, design: .rounded))
             .foregroundStyle(.white.opacity(0.65))
             .multilineTextAlignment(.center)
@@ -181,7 +181,7 @@ struct KidModeExitView: View {
                 Text("לָצֵאת מִמַּצַּב יֶלֶד?")
                     .font(.system(size: 24, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("הַטֶּלֶפוֹן יַחֲזֹר לְמַצָּב רָגִיל וְהַנְּעִילָה תּוּסַר.")
+                Text("הַטֶּלֶפוֹן יַחֲזוֹר לְמַצָּב רָגִיל וְהַנְּעִילָה תּוּסַר.")
                     .font(.system(size: 15, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)

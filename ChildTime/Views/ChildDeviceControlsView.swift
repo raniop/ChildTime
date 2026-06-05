@@ -43,7 +43,7 @@ struct ChildDeviceControlsView: View {
                     allowDeleteCard
                     disconnectButton
 
-                    Text("שְׁאָר הַהַגְדָּרוֹת — פְּרָסִים, דּוּחוֹת, רָמַת קֹשִׁי וְהַתְרָאוֹת — מְנֻהֲלוֹת בְּמַכְשִׁיר הַהוֹרֶה.")
+                    Text("שְׁאָר הַהַגְדָּרוֹת — פְּרָסִים, דּוּחוֹת, רָמַת קוֹשִׁי וְהַתְרָאוֹת — מְנוּהֲלוֹת בְּמַכְשִׁיר הַהוֹרֶה.")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.75))
                         .multilineTextAlignment(.center)
@@ -85,7 +85,7 @@ struct ChildDeviceControlsView: View {
             }
             Button("בִּטּוּל", role: .cancel) {}
         } message: {
-            Text("הַמַּכְשִׁיר יִתְנַתֵּק מֵהַיֶּלֶד וְיַחֲזֹר לְמַצָּב הַתְחָלָתִי (כְּאִלּוּ הֻתְקַן מֵחָדָשׁ). הַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמֶרֶת — אֶפְשָׁר תָּמִיד לְחַבֵּר שׁוּב בִּסְרִיקַת הַקּוֹד.")
+            Text("הַמַּכְשִׁיר יִתְנַתֵּק מֵהַיֶּלֶד וְיַחֲזוֹר לְמַצָּב הַתְחָלָתִי (כְּאִלּוּ הוּתְקַן מֵחָדָשׁ). הַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמֶרֶת — אֶפְשָׁר תָּמִיד לְחַבֵּר שׁוּב בִּסְרִיקַת הַקּוֹד.")
         }
     }
 
@@ -161,11 +161,11 @@ struct ChildDeviceControlsView: View {
                    detail: "נִשְׁאֲרוּ כְּ-\(max(1, progress.unlockSecondsRemaining / 60)) דַּקּוֹת",
                    open: true, lock: { Haptic.medium(); lockNow() })
         } else if settings.allowExceptionActive {
-            banner(title: "אַפְּלִיקַצְיָה מְסֻיֶּמֶת פְּתוּחָה",
+            banner(title: "אַפְּלִיקַצְיָה מְסוּיֶּמֶת פְּתוּחָה",
                    detail: "הַשְּׁאָר נְעוּלוֹת\(allowEndText)",
                    open: true, lock: { Haptic.medium(); cancelAllowException() })
         } else {
-            banner(title: "הַכֹּל נָעוּל", detail: "הַיֶּלֶד מַרְוִיחַ זְמַן כְּדֵי לִפְתֹּחַ", open: false, lock: nil)
+            banner(title: "הַכֹּל נָעוּל", detail: "הַיֶּלֶד מַרְוִיחַ זְמַן כְּדֵי לִפְתּוֹחַ", open: false, lock: nil)
         }
     }
 
@@ -183,7 +183,7 @@ struct ChildDeviceControlsView: View {
             Spacer()
             if let lock {
                 Button { lock() } label: {
-                    Label("נְעֹל", systemImage: "lock.fill")
+                    Label("נְעוֹל", systemImage: "lock.fill")
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 14).padding(.vertical, 8)
@@ -235,7 +235,7 @@ struct ChildDeviceControlsView: View {
 
     private var perAppAllowCard: some View {
         controlCard(tint: AppColor.diamondBlue) {
-            sectionHead("פְּתִיחַת אַפְּלִיקַצְיָה מְסֻיֶּמֶת",
+            sectionHead("פְּתִיחַת אַפְּלִיקַצְיָה מְסוּיֶּמֶת",
                         "רַק אַפְּלִיקַצְיָה אַחַת אוֹ כַּמָּה (לְמָשָׁל יוּטְיוּבּ). הַשְּׁאָר נְעוּלוֹת.",
                         icon: "app.badge.checkmark", tint: AppColor.diamondBlue)
 
@@ -337,7 +337,7 @@ struct ChildDeviceControlsView: View {
                 Haptic.medium()
                 settings.appRemovalUnlockedUntil = Date().addingTimeInterval(5 * 60)
                 shields.setAppRemovalLocked(false)
-                removalNote = "נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת. צְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרֻכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד."
+                removalNote = "נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת. צְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד."
             } label: {
                 Label("אַפְשְׁרוּ מְחִיקָה לְ-5 דַּקּוֹת", systemImage: "trash")
                     .font(.system(size: 16, weight: .heavy, design: .rounded))

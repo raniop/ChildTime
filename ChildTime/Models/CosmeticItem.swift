@@ -18,7 +18,7 @@ enum CosmeticCategory: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .hat:       return "כּוֹבָעִים"
         case .glasses:   return "מִשְׁקָפַיִם"
-        case .shirt:     return "חֻלְצוֹת"
+        case .shirt:     return "חוּלְצוֹת"
         case .pants:     return "מִכְנָסַיִם"
         case .shoes:     return "נַעֲלַיִם"
         case .accessory: return "אַקְסֶסוֹרִיז"
@@ -80,7 +80,7 @@ enum CosmeticRarity: String, Codable, CaseIterable, Comparable {
         case .common:    return "רָגִיל"
         case .rare:      return "נָדִיר"
         case .epic:      return "אַגָּדִי"
-        case .legendary: return "נָדִיר בִּמְיֻחָד"
+        case .legendary: return "נָדִיר בִּמְיוּחָד"
         }
     }
 

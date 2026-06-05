@@ -86,7 +86,7 @@ enum Character3DCatalog {
         Character3D(id: "fox",      name: "שׁוּעָל",    priceStars: 0,    imageAsset: "fox"),
         Character3D(id: "bunny",    name: "אַרְנָב",     priceStars: 0,    imageAsset: "bunny"),
         Character3D(id: "penguin",  name: "פִּינְגְּוִין", priceStars: 0,    imageAsset: "penguin"),
-        Character3D(id: "bear",     name: "דֹּב",       priceStars: 0,    imageAsset: "bear"),
+        Character3D(id: "bear",     name: "דּוֹב",       priceStars: 0,    imageAsset: "bear"),
 
         // 🟢 Common (≤2400) — encourage-level help. (incl. alternate-art variants)
         // Prices are intentionally high — a character should be days/weeks of
@@ -138,7 +138,7 @@ enum Character3DCatalog {
 
         // 👑 Legendary (8801–20000) — explain-level help.
         Character3D(id: "dragon",      name: "דְּרָקוֹן",  priceStars: 12000, imageAsset: "dragon"),
-        Character3D(id: "redpanda",    name: "פַּנְדָּה אֲדֻמָּה", priceStars: 13000, imageAsset: "redpanda"),
+        Character3D(id: "redpanda",    name: "פַּנְדָּה אֲדוּמָּה", priceStars: 13000, imageAsset: "redpanda"),
         Character3D(id: "unicorn",     name: "חַד-קֶרֶן", priceStars: 16000, imageAsset: "unicorn"),
 
         // 🩷 Mythic (20001+) — explain-level help. (Premium tier; more coming.)

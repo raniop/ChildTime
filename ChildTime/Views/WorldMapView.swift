@@ -93,7 +93,7 @@ struct WorldMapView: View {
                             FeatureCard(
                                 emoji: "🧠",
                                 title: "הַרְפַּתְקָה חֲכָמָה",
-                                subtitle: "שְׁאֵלוֹת בִּמְיֻחָד בִּשְׁבִילְךָ",
+                                subtitle: "שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ",
                                 gradient: AppGradient.portal,
                                 glowColor: AppColor.companionGlow
                             ) {
@@ -747,7 +747,7 @@ struct WorldMapView: View {
             var lines: [String] = []
             if progress.canRedeemNow {
                 // Enough to open now.
-                lines.append("אֶפְשָׁר לִפְתֹּחַ עַכְשָׁיו \(progress.redeemableMinutesNow) דַּקּוֹת מִשְׂחָק! 🎮")
+                lines.append("אֶפְשָׁר לִפְתּוֹחַ עַכְשָׁיו \(progress.redeemableMinutesNow) דַּקּוֹת מִשְׂחָק! 🎮")
                 if progress.pendingMinutes > progress.redeemableMinutesNow {
                     lines.append("בָּאַרְנָק יֵשׁ \(progress.pendingMinutes) — הַשְּׁאָר נִשְׁמָר לְיָמִים הַבָּאִים.")
                 }
@@ -835,7 +835,7 @@ struct WorldMapView: View {
                 Text("רָמַת טוֹפִי")
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("כָּל תְּשׁוּבָה נְכוֹנָה נוֹתֶנֶת נְקֻדּוֹת. כְּשֶׁהַפַּס מִתְמַלֵּא — טוֹפִי עוֹלֶה רָמָה, וְאַתֶּם פּוֹתְחִים עוֹלָמוֹת וְהַפְתָּעוֹת חֲדָשׁוֹת!")
+                Text("כָּל תְּשׁוּבָה נְכוֹנָה נוֹתֶנֶת נְקוּדּוֹת. כְּשֶׁהַפַּס מִתְמַלֵּא — טוֹפִי עוֹלֶה רָמָה, וְאַתֶּם פּוֹתְחִים עוֹלָמוֹת וְהַפְתָּעוֹת חֲדָשׁוֹת!")
                     .font(.system(size: 17, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.92))
                     .multilineTextAlignment(.center)
@@ -913,7 +913,7 @@ struct WorldMapView: View {
             } else if progress.redeemableMinutesNow > 0 {
                 // Has some minutes but below the 15-min minimum we can enforce.
                 // Tell the kid how many more to go instead of hiding the button.
-                bottomHint("עוֹד \(max(0, progress.minimumUnlockMinutes - progress.redeemableMinutesNow)) דַּקּוֹת וְאֶפְשָׁר לִפְתֹּחַ זְמַן מִשְׂחָק 🎮")
+                bottomHint("עוֹד \(max(0, progress.minimumUnlockMinutes - progress.redeemableMinutesNow)) דַּקּוֹת וְאֶפְשָׁר לִפְתּוֹחַ זְמַן מִשְׂחָק 🎮")
             } else {
                 // Empty wallet (nothing earned / all opened). Nudge to earn instead
                 // of leaving the spot blank.

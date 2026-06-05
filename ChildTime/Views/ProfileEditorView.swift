@@ -103,7 +103,7 @@ struct ProfileEditorView: View {
                 }
             }
             .dismissKeyboardOnTap()
-            .navigationTitle(isEdit ? "עֲרֹךְ פְּרוֹפִיל" : "פְּרוֹפִיל חָדָשׁ")
+            .navigationTitle(isEdit ? "עֲרוֹךְ פְּרוֹפִיל" : "פְּרוֹפִיל חָדָשׁ")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

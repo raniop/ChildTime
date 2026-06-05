@@ -209,7 +209,7 @@ struct LuckyWheelView: View {
 
     private var primaryButton: some View {
         let label: String = {
-            if winner != nil { return "אַחְלָה — סְגֹר" }
+            if winner != nil { return "אַחְלָה — סְגוֹר" }
             if isSpinning   { return "מִסְתּוֹבֵב…" }
             return "סוֹבֵב!"
         }()
@@ -228,7 +228,7 @@ struct LuckyWheelView: View {
             Haptic.light()
             onClose()
         } label: {
-            Text(winner == nil ? "דַּלֵּג הַפַּעַם" : "סְגֹר")
+            Text(winner == nil ? "דַּלֵּג הַפַּעַם" : "סְגוֹר")
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.75))
                 .underline()

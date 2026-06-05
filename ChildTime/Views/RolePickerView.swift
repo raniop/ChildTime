@@ -29,7 +29,7 @@ struct RolePickerView: View {
                             .font(.system(size: isCompact ? 26 : 34, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
-                        Text("אֶפְשָׁר לְשַׁנּוֹת מְאֻחָר יוֹתֵר בְּהַגְדָּרוֹת.")
+                        Text("אֶפְשָׁר לְשַׁנּוֹת מְאוּחָר יוֹתֵר בְּהַגְדָּרוֹת.")
                             .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.8))
                     }
@@ -39,7 +39,7 @@ struct RolePickerView: View {
                         roleCard(
                             emoji: "🧒",
                             title: "הַמַּכְשִׁיר שֶׁל הַיֶּלֶד",
-                            subtitle: "לְשַׂחֵק וְלִלְמֹד",
+                            subtitle: "לְשַׂחֵק וְלִלְמוֹד",
                             glow: AppColor.companionGlow
                         ) { choose(.child) }
 

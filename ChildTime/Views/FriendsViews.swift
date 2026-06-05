@@ -421,7 +421,7 @@ struct AddFriendView: View {
             } else {
                 ProgressView().tint(.white)
             }
-            Text("חֲבֵרִים סוֹרְקִים אֶת הַקּוֹד אוֹ פּוֹתְחִים אֶת הַקִּישּׁוּר — וְאַתֶּם מְחֻבָּרִים!")
+            Text("חֲבֵרִים סוֹרְקִים אֶת הַקּוֹד אוֹ פּוֹתְחִים אֶת הַקִּישּׁוּר — וְאַתֶּם מְחוּבָּרִים!")
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.7)).multilineTextAlignment(.center)
         }

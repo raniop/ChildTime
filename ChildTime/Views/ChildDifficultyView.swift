@@ -21,7 +21,7 @@ struct ChildDifficultyView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text("בִּחֲרוּ רָמַת קֹשִׁי לְכָל נוֹשֵׂא עֲבוּר \(profile?.name ?? "הַיֶּלֶד"). הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד.")
+                    Text("בִּחֲרוּ רָמַת קוֹשִׁי לְכָל נוֹשֵׂא עֲבוּר \(profile?.name ?? "הַיֶּלֶד"). הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -52,7 +52,7 @@ struct ChildDifficultyView: View {
                                 Text(topic.emoji)
                                 Text(topic.displayName)
                             }
-                            Picker("רָמַת קֹשִׁי", selection: binding(for: topic)) {
+                            Picker("רָמַת קוֹשִׁי", selection: binding(for: topic)) {
                                 ForEach(Difficulty.allCases) { d in
                                     Text(d.displayName).tag(d)
                                 }
@@ -65,7 +65,7 @@ struct ChildDifficultyView: View {
                     Text("לְפִי נוֹשֵׂא")
                 }
             }
-            .navigationTitle("רָמַת קֹשִׁי")
+            .navigationTitle("רָמַת קוֹשִׁי")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

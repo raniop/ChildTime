@@ -56,7 +56,7 @@ struct WorldUnlockView: View {
                             JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
                                 onContinue()
                             } label: {
-                                Text("בּוֹא נַחְקֹר!")
+                                Text("בּוֹא נַחְקוֹר!")
                                     .font(.system(size: 28, weight: .bold, design: .rounded))
                             }
                             .padding(.horizontal, AppSpacing.lg)

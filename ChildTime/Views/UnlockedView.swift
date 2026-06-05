@@ -47,7 +47,7 @@ struct UnlockedView: View {
                 .padding(.vertical, AppSpacing.xxl)
                 .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous))
 
-                Text("עַכְשָׁיו אֶפְשָׁר לַעֲבֹר לָאַפְּלִיקַצְיָה שֶׁ\(Gendered.g("אַתָּה רוֹצֶה", "אַתְּ רוֹצָה")) לְשַׂחֵק בָּהּ 🚀")
+                Text("עַכְשָׁיו אֶפְשָׁר לַעֲבוֹר לָאַפְּלִיקַצְיָה שֶׁ\(Gendered.g("אַתָּה רוֹצֶה", "אַתְּ רוֹצָה")) לְשַׂחֵק בָּהּ 🚀")
                     .font(.system(size: 20, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)

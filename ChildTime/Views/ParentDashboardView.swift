@@ -529,7 +529,7 @@ struct ParentDashboardView: View {
                         .font(.system(size: 84))
                         .foregroundStyle(AppColor.successMint)
                         .glow(AppColor.successMint, radius: 16)
-                    Text("הַמַּכְשִׁיר שֶׁל \(child.name) חֻבַּר! 🎉")
+                    Text("הַמַּכְשִׁיר שֶׁל \(child.name) חוּבַּר! 🎉")
                         .font(.system(size: 24, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
@@ -1230,7 +1230,7 @@ struct ParentDashboardView: View {
         VStack(alignment: .trailing, spacing: 8) {
             HStack(spacing: 6) {
                 Spacer()
-                Text(devices.isEmpty ? "אֵין מַכְשִׁירִים מְחֻבָּרִים" : "\(devices.count) מַכְשִׁירִים מְחֻבָּרִים")
+                Text(devices.isEmpty ? "אֵין מַכְשִׁירִים מְחוּבָּרִים" : "\(devices.count) מַכְשִׁירִים מְחוּבָּרִים")
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(.secondary)
                 Image(systemName: "ipad.and.iphone")

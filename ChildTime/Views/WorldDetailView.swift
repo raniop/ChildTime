@@ -166,7 +166,7 @@ struct WorldDetailView: View {
 
     private var missionCard: some View {
         VStack(spacing: AppSpacing.md) {
-            rewardRow("🎁", "\(settings.questionsPerSession) שְׁאֵלוֹת → קֻפְסַת הַפְתָּעָה")
+            rewardRow("🎁", "\(settings.questionsPerSession) שְׁאֵלוֹת → קוּפְסַת הַפְתָּעָה")
             rewardRow("🎮", "כָּל \(settings.batchAnswers) נְכוֹנוֹת = \(settings.batchMinutes) דַּקּוֹת מִשְׂחָק")
         }
         .padding(AppSpacing.lg)

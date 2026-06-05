@@ -1060,13 +1060,13 @@ struct QuestionRunnerView: View {
         // that play continues for fun/learning without more minutes.
         if earnsTime, !cappedBefore, progress.atDailyCap, !capMessageShown {
             capMessageShown = true
-            companion.wow("\(Gendered.g("הִגַּעְתָּ", "הִגַּעְתְּ")) לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמֹד בְּלִי דַּקּוֹת נוֹסָפוֹת")
+            companion.wow("\(Gendered.g("הִגַּעְתָּ", "הִגַּעְתְּ")) לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת")
             confettiTrigger += 1
             return
         }
         // Already past the max — gentle, occasional reminder (no minutes now).
         if cappedBefore {
-            companion.cheer(["יָפֶה! לוֹמְדִים בִּשְׁבִיל הַכֵּיף 🌟", "כֹּל הַכָּבוֹד! עוֹד נְקֻדּוֹת וְכוֹכָבִים", "\(Gendered.g("אַלּוּף", "אַלּוּפָה"))! מַמְשִׁיכִים לְהִתְקַדֵּם"].randomElement()!)
+            companion.cheer(["יָפֶה! לוֹמְדִים בִּשְׁבִיל הַכֵּיף 🌟", "כֹּל הַכָּבוֹד! עוֹד נְקוּדּוֹת וְכוֹכָבִים", "\(Gendered.g("אַלּוּף", "אַלּוּפָה"))! מַמְשִׁיכִים לְהִתְקַדֵּם"].randomElement()!)
             return
         }
 

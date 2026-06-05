@@ -50,7 +50,7 @@ struct LiveGameView: View {
         }
         .environment(\.layoutDirection, .rightToLeft)
         .confirmationDialog("לָצֵאת מֵהַמִּשְׂחָק?", isPresented: $showQuit, titleVisibility: .visible) {
-            Button(amHost ? "כֵּן, לְסַיֵּם לְכֻלָּם" : "כֵּן, לָצֵאת", role: .destructive) {
+            Button(amHost ? "כֵּן, לְסַיֵּם לְכוּלָּם" : "כֵּן, לָצֵאת", role: .destructive) {
                 Task { await lg.leaveGame() }
             }
             Button("נִשְׁאָרִים בַּמִּשְׂחָק", role: .cancel) {}
@@ -612,7 +612,7 @@ struct LiveGameView: View {
                                 Spacer()
                                 VStack(alignment: .trailing, spacing: 1) {
                                     Text(String(repeating: "🏆", count: p.roundWins)).font(.system(size: 14))
-                                    Text("\(p.score) נְקֻדּוֹת").font(.system(size: 13, weight: .heavy, design: .rounded))
+                                    Text("\(p.score) נְקוּדּוֹת").font(.system(size: 13, weight: .heavy, design: .rounded))
                                         .foregroundStyle(AppColor.starGold)
                                 }
                             }
@@ -741,7 +741,7 @@ struct PlayerPeekView: View {
 
                 HStack(spacing: 14) {
                     statTile("🏆", "\(player.roundWins)", "סִבּוּבִים")
-                    statTile("⚡️", "\(player.score)", "נְקֻדּוֹת")
+                    statTile("⚡️", "\(player.score)", "נְקוּדּוֹת")
                 }
                 .padding(.horizontal, AppSpacing.lg)
                 Text("בַּמִּשְׂחָק הַזֶּה")

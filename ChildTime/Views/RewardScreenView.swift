@@ -323,7 +323,7 @@ struct RewardScreenView: View {
             minutesPerCorrect: settings.minutesPerCorrect
         )
         SoundPlayer.shared.play(.chestOpen)
-        companion.cheer("\(Gendered.g("שִׂחַקְתָּ", "שִׂחַקְתְּ")) מְצֻיָּן!")
+        companion.cheer("\(Gendered.g("שִׂחַקְתָּ", "שִׂחַקְתְּ")) מְצוּיָּן!")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             stage = .glowing
         }

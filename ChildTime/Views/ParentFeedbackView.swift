@@ -33,7 +33,7 @@ struct ParentFeedbackView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("סְגֹר") { dismiss() }
+                    Button("סְגוֹר") { dismiss() }
                 }
             }
         }
@@ -42,7 +42,7 @@ struct ParentFeedbackView: View {
     private var form: some View {
         Form {
             Section {
-                Text("נִשְׂמַח לִשְׁמֹעַ מָה דַּעְתְּכֶם — מָה לְשַׁפֵּר, מָה חָסֵר, אוֹ כָּל רַעְיוֹן שֶׁיֵּשׁ לָכֶם. כָּל מִלָּה עוֹזֶרֶת לָנוּ לְשַׁפֵּר אֶת ChildTime לַיְּלָדִים.")
+                Text("נִשְׂמַח לִשְׁמוֹעַ מָה דַּעְתְּכֶם — מָה לְשַׁפֵּר, מָה חָסֵר, אוֹ כָּל רַעְיוֹן שֶׁיֵּשׁ לָכֶם. כָּל מִלָּה עוֹזֶרֶת לָנוּ לְשַׁפֵּר אֶת ChildTime לַיְּלָדִים.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -84,13 +84,13 @@ struct ParentFeedbackView: View {
                 .font(.system(size: 60))
             Text("תּוֹדָה רַבָּה!")
                 .font(.title2.weight(.bold))
-            Text("קִבַּלְנוּ אֶת הַפִידְבֶּק שֶׁלָּכֶם — זֶה מְאֹד עוֹזֵר לָנוּ.")
+            Text("קִבַּלְנוּ אֶת הַפִידְבֶּק שֶׁלָּכֶם — זֶה מְאוֹד עוֹזֵר לָנוּ.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Spacer()
-            Button("סְגֹר") { dismiss() }
+            Button("סְגוֹר") { dismiss() }
                 .buttonStyle(.borderedProminent)
                 .padding(.bottom, 24)
         }

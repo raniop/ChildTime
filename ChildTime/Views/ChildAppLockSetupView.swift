@@ -32,7 +32,7 @@ struct ChildAppLockSetupView: View {
                         .foregroundStyle(AppColor.starGold)
                         .glow(AppColor.starGold, radius: 14)
 
-                    Text("אֵילוּ אַפְּלִיקַצְיוֹת לִנְעֹל?")
+                    Text("אֵילוּ אַפְּלִיקַצְיוֹת לִנְעוֹל?")
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
@@ -50,7 +50,7 @@ struct ChildAppLockSetupView: View {
                         }
                     } label: {
                         Label(selectedCount > 0
-                                ? "\(selectedCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · הַקִּישׁוּ לַעֲרֹךְ"
+                                ? "\(selectedCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · הַקִּישׁוּ לַעֲרוֹךְ"
                                 : "בַּחֲרוּ אַפְּלִיקַצְיוֹת",
                               systemImage: selectedCount > 0 ? "checkmark.circle.fill" : "app.badge.fill")
                             .font(.system(size: 18, weight: .heavy, design: .rounded))

@@ -53,8 +53,8 @@ enum LuckyWheelCatalog {
                                               label: "מְסַדְּרִים חֶדֶר",   emoji: "🧹", color: Color(hex: "FF6B6B")),
         WheelPrize(kind: .funMission("לְהָכִין תִּיק לַגַּן/בֵּית סֵפֶר 🎒"),
                                               label: "מְכִינִים תִּיק",   emoji: "🎒", color: Color(hex: "FF6B9D")),
-        WheelPrize(kind: .funMission("לַעֲזֹר לַעֲרֹךְ שֻׁלְחָן 🍽"),
-                                              label: "עוֹרְכִים שֻׁלְחָן", emoji: "🍽",  color: Color(hex: "FFB84D")),
+        WheelPrize(kind: .funMission("לַעֲזוֹר לַעֲרוֹךְ שׁוּלְחָן 🍽"),
+                                              label: "עוֹרְכִים שׁוּלְחָן", emoji: "🍽",  color: Color(hex: "FFB84D")),
         WheelPrize(kind: .funMission("לְקַפֵּל גַּרְבַּיִם קְטַנִּים 🧦"),
                                               label: "מְקַפְּלִים גַּרְבַּיִם", emoji: "🧦", color: Color(hex: "5B9BFF")),
     ]
