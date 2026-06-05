@@ -25,6 +25,7 @@ struct ParentDashboardView: View {
 
     @State private var resettingProfile: Profile? = nil
     @State private var deletingProfile: Profile? = nil
+    @State private var navPath: [UUID] = []   // pushed child-detail pages (pop on delete)
     @State private var refreshTrigger = 0
     @State private var lastRefreshed = Date()
     @State private var showingSettings = false
@@ -69,7 +70,7 @@ struct ParentDashboardView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navPath) {
             ZStack {
                 // A real, branded control center — vibrant, not a grey list.
                 AppGradient.dreamy.ignoresSafeArea()
@@ -89,13 +90,17 @@ struct ParentDashboardView: View {
                             }
                             syncStatusCard
                             insightNotificationsCard
-                            ForEach(rows, id: \.profile.id) { row in
-                                NavigationLink {
-                                    childDetailScreen(for: row.profile.id)
-                                } label: {
-                                    childRow(profile: row.profile, snapshot: row.snapshot)
+                            LazyVGrid(
+                                columns: [GridItem(.flexible(), spacing: 12),
+                                          GridItem(.flexible(), spacing: 12)],
+                                spacing: 12
+                            ) {
+                                ForEach(rows, id: \.profile.id) { row in
+                                    NavigationLink(value: row.profile.id) {
+                                        childCard(profile: row.profile, snapshot: row.snapshot)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
                             }
                             .animation(.spring(response: 0.5, dampingFraction: 0.85),
                                        value: rows.map(\.profile.id))
@@ -161,39 +166,10 @@ struct ParentDashboardView: View {
                     }
                 }
             }
-            .confirmationDialog(
-                resettingProfile.map { "לאפס את ההתקדמות של \($0.name)?" } ?? "",
-                isPresented: Binding(
-                    get: { resettingProfile != nil },
-                    set: { if !$0 { resettingProfile = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("אפס דקות + ניקוד", role: .destructive) {
-                    if let p = resettingProfile { resetProgress(for: p) }
-                    resettingProfile = nil
-                }
-                Button("בטל", role: .cancel) { resettingProfile = nil }
-            } message: {
-                Text("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן, ועונש טעויות. לא ימחק שמות, פרופילים או פריטי קוסמטיקה.")
-            }
-            .confirmationDialog(
-                deletingProfile.map { "למחוק את \($0.name)?" } ?? "",
-                isPresented: Binding(
-                    get: { deletingProfile != nil },
-                    set: { if !$0 { deletingProfile = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("מחק ילד/ה", role: .destructive) {
-                    if let p = deletingProfile {
-                        profiles.remove(p)   // removes locally + from the cloud
-                    }
-                    deletingProfile = nil
-                }
-                Button("בטל", role: .cancel) { deletingProfile = nil }
-            } message: {
-                Text("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק.")
+            // Push a full child page when a grid card is tapped (path-based so a
+            // delete inside the page can pop back to the grid on its own).
+            .navigationDestination(for: UUID.self) { id in
+                childDetailScreen(for: id)
             }
             .sheet(isPresented: $showingSettings) {
                 ParentSettingsView()
@@ -855,43 +831,33 @@ struct ParentDashboardView: View {
         )
     }
 
-    // MARK: - Compact list row + per-child detail page
+    // MARK: - Child collection tile + per-child detail page
 
-    /// One tappable child in the family list: avatar, name, "playing now", and a
-    /// one-line glance. Tapping it pushes the full per-child page.
-    private func childRow(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
+    /// One child as a 2-up collection tile: big avatar, name, mini glance.
+    /// Tapping it pushes the full child page.
+    private func childCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
         let isActive = profile.id == profiles.activeID
         let cap = profile.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
         let timeToday = cap.enabled ? "\(s.minutesEarnedToday)/\(cap.minutes)" : "\(s.minutesEarnedToday)"
-        return HStack(spacing: 12) {
-            Image(systemName: "chevron.left")
-                .font(.system(size: 15, weight: .bold))
-                .foregroundStyle(.secondary)
-            Spacer(minLength: 4)
-            VStack(alignment: .trailing, spacing: 4) {
-                HStack(spacing: 6) {
-                    if isChildPlayingNow(profile) {
-                        HStack(spacing: 4) {
-                            Circle().fill(AppColor.successMint).frame(width: 7, height: 7)
-                            Text("מְשַׂחֵק עַכְשָׁיו")
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
-                        }
-                        .padding(.horizontal, 7).padding(.vertical, 3)
-                        .background(Capsule().fill(AppColor.successMint.opacity(0.9)))
-                    }
-                    Text(profile.name)
-                        .font(.system(size: 18, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.primary)
+        return VStack(spacing: 8) {
+            ZStack(alignment: .topTrailing) {
+                ProfileAvatarView(profile: profile, size: 74)
+                if isChildPlayingNow(profile) {
+                    Circle().fill(AppColor.successMint)
+                        .frame(width: 15, height: 15)
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .offset(x: 3, y: -3)
                 }
-                Text("⏱ \(timeToday) דק'   ·   🔥 \(s.dayStreak)   ·   ⭐ \(s.stars.currencyShort)")
-                    .font(.system(size: 12.5, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1).minimumScaleFactor(0.75)
             }
-            ProfileAvatarView(profile: profile, size: 50)
+            Text(profile.name)
+                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.7)
+            Text("⏱ \(timeToday)   ·   🔥 \(s.dayStreak)")
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7)
         }
-        .padding(AppSpacing.md)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16).padding(.horizontal, 8)
         .background(
             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                 .fill(Color(.secondarySystemGroupedBackground))
@@ -903,7 +869,7 @@ struct ParentDashboardView: View {
     }
 
     /// The full per-child page (all stats, insights, settings menu) pushed when a
-    /// row is tapped. Reuses the existing `profileCard` and looks the snapshot up
+    /// card is tapped. Reuses the existing `profileCard` and looks the snapshot up
     /// live from `rows`, so it keeps refreshing while open and handles deletion.
     @ViewBuilder
     private func childDetailScreen(for id: UUID) -> some View {
@@ -919,6 +885,40 @@ struct ParentDashboardView: View {
             .background(AppGradient.dreamy.ignoresSafeArea())
             .navigationTitle(row.profile.name)
             .navigationBarTitleDisplayMode(.inline)
+            // These dialogs live on the DETAIL page (not the root) so they present
+            // IN-CONTEXT — at the root they only popped up after navigating back.
+            // Delete also pops the page back to the grid.
+            .confirmationDialog(
+                resettingProfile.map { "לאפס את ההתקדמות של \($0.name)?" } ?? "",
+                isPresented: Binding(get: { resettingProfile != nil },
+                                     set: { if !$0 { resettingProfile = nil } }),
+                titleVisibility: .visible
+            ) {
+                Button("אפס דקות + ניקוד", role: .destructive) {
+                    if let p = resettingProfile { resetProgress(for: p) }
+                    resettingProfile = nil
+                }
+                Button("בטל", role: .cancel) { resettingProfile = nil }
+            } message: {
+                Text("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן, ועונש טעויות. לא ימחק שמות, פרופילים או פריטי קוסמטיקה.")
+            }
+            .confirmationDialog(
+                deletingProfile.map { "למחוק את \($0.name)?" } ?? "",
+                isPresented: Binding(get: { deletingProfile != nil },
+                                     set: { if !$0 { deletingProfile = nil } }),
+                titleVisibility: .visible
+            ) {
+                Button("מחק ילד/ה", role: .destructive) {
+                    if let p = deletingProfile {
+                        profiles.remove(p)     // removes locally + from the cloud
+                        navPath.removeAll()    // pop back to the family grid
+                    }
+                    deletingProfile = nil
+                }
+                Button("בטל", role: .cancel) { deletingProfile = nil }
+            } message: {
+                Text("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק.")
+            }
         } else {
             Color.clear.background(AppGradient.dreamy.ignoresSafeArea())
         }
