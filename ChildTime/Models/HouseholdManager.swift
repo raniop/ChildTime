@@ -57,6 +57,7 @@ final class HouseholdManager: ObservableObject {
     private var sentChildLinkListener: ListenerRegistration?
     private var inviteWatchListener: ListenerRegistration?
     private var childDevicesListener: ListenerRegistration?
+    private var tombstoneListener: ListenerRegistration?
     #endif
 
     private init() {}
@@ -112,6 +113,7 @@ final class HouseholdManager: ObservableObject {
         childLinkListener?.remove(); childLinkListener = nil
         sentChildLinkListener?.remove(); sentChildLinkListener = nil
         childDevicesListener?.remove(); childDevicesListener = nil
+        tombstoneListener?.remove(); tombstoneListener = nil
         #endif
         devicesByChild = [:]
         household = nil
@@ -131,6 +133,7 @@ final class HouseholdManager: ObservableObject {
             try await ensureParentDoc(uid: uid, email: email, displayName: displayName)
             let hh = try await ensureHousehold(uid: uid)
             self.household = hh
+            listenToTombstones(in: hh.id)   // before reconcile, so deleted kids aren't re-pushed
             reconcileLocalChildren(into: hh)
             listenToHousehold(hh.id)
             listenToChildren(in: hh.id); listenToChildDevices(in: hh.id)
@@ -243,6 +246,22 @@ final class HouseholdManager: ObservableObject {
             }
     }
 
+    /// Watch the household's tombstones (deleted children). When one appears, drop
+    /// that child from THIS device's local store too — so a deletion on one device
+    /// propagates everywhere and this device stops re-uploading the deleted kid.
+    private func listenToTombstones(in householdID: String) {
+        tombstoneListener?.remove()
+        tombstoneListener = db.collection("deletedChildren")
+            .whereField("householdID", isEqualTo: householdID)
+            .addSnapshotListener { snap, _ in
+                guard let snap else { return }
+                let ids = snap.documents.compactMap { UUID(uuidString: $0.documentID) }
+                Task { @MainActor in
+                    for id in ids { ProfileStore.shared.removeLocalOnly(id) }
+                }
+            }
+    }
+
     private func listenToChildDevices(in householdID: String) {
         childDevicesListener?.remove()
         childDevicesListener = db.collection("childDevices")
@@ -331,11 +350,20 @@ final class HouseholdManager: ObservableObject {
         let id = profileID.uuidString
         Task {
             do {
+                // Tombstone FIRST so a racing re-upload from another device is
+                // blocked (the `blockTombstonedChild` function wipes any resurrection).
+                try await db.collection("deletedChildren").document(id).setData([
+                    "householdID": hh.id,
+                    "deletedAt": Date().timeIntervalSince1970,
+                ])
                 try await db.collection("households").document(hh.id)
                     .updateData(["childIDs": FieldValue.arrayRemove([id])])
                 try await db.collection("children").document(id).delete()
                 try await db.collection("children").document(id)
                     .collection("state").document("current").delete()
+                // Remove the public leaderboard card too (otherwise the deleted kid
+                // lingers on the friends board).
+                try? await db.collection("friendCards").document(id).delete()
             } catch { lastError = error.localizedDescription }
         }
         #endif

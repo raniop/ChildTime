@@ -90,6 +90,15 @@ final class ProfileStore: ObservableObject {
         HouseholdManager.shared.deleteChild(profile.id)
     }
 
+    /// Drop a profile from the LOCAL store only — no cloud delete. Used by the
+    /// tombstone listener so a child deleted on another device disappears here too
+    /// (and this device stops re-uploading it), without re-triggering a cloud delete.
+    func removeLocalOnly(_ id: UUID) {
+        guard profiles.contains(where: { $0.id == id }) else { return }
+        profiles.removeAll { $0.id == id }
+        if activeID == id { activeID = profiles.first?.id }
+    }
+
     func update(_ profile: Profile) {
         if let idx = profiles.firstIndex(where: { $0.id == profile.id }) {
             profiles[idx] = profile

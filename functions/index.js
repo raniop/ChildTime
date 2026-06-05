@@ -169,6 +169,30 @@ exports.sendLiveEvent = onDocumentCreated("children/{childID}/events/{eventID}",
   await send(tokens, msg, { childID: event.params.childID, type: data.type });
 });
 
+// ---- 1a) Tombstone enforcement — deleted children can't come back -----------
+// A child is deleted on one device, but OTHER devices in the household still
+// hold it locally and re-upload it on next launch (so it "kept coming back").
+// On delete we write a `deletedChildren/{id}` tombstone; whenever a child doc is
+// (re)created, if it's tombstoned we wipe it again — server-side, regardless of
+// which device tried — plus its subcollections and leaderboard card.
+exports.blockTombstonedChild = onDocumentCreated("children/{childID}", async (event) => {
+  const childID = event.params.childID;
+  const tomb = await db.collection("deletedChildren").doc(childID).get();
+  if (!tomb.exists) return;   // a normal, live child — leave it alone
+  try {
+    const hid = event.data && event.data.data() && event.data.data().householdID;
+    if (hid) {
+      await db.collection("households").doc(hid)
+        .update({ childIDs: admin.firestore.FieldValue.arrayRemove(childID) }).catch(() => {});
+    }
+    await db.recursiveDelete(db.collection("children").doc(childID));
+    await db.collection("friendCards").doc(childID).delete().catch(() => {});
+    console.log("[tombstone] blocked resurrection of deleted child", childID);
+  } catch (e) {
+    console.error("[tombstone] cleanup failed for", childID, e && e.message);
+  }
+});
+
 // ---- 1b) Live friends-quiz invite ------------------------------------------
 // A child started a live quiz and invited their friends. Push each invited
 // friend's device so they can jump in. We can't read tokens by childID directly

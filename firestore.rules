@@ -64,6 +64,14 @@ service cloud.firestore {
       }
     }
 
+    // Tombstones for deleted children — a household member writes one on delete so
+    // a re-upload from another device gets blocked server-side and never resurrects.
+    match /deletedChildren/{childID} {
+      allow read:   if householdHasMe(resource.data.householdID);
+      allow create: if householdHasMe(request.resource.data.householdID);
+      allow delete: if householdHasMe(resource.data.householdID);
+    }
+
     // Child devices — which devices each child plays on. Gated on the household.
     match /childDevices/{id} {
       allow read:   if householdHasMe(resource.data.householdID);
