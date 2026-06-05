@@ -40,6 +40,12 @@
   .banner.live{background:rgba(6,214,160,.14); border-color:rgba(6,214,160,.4)}
   .banner.err{background:rgba(255,107,157,.16); border-color:rgba(255,107,157,.45)}
   .banner .tag{font-weight:900; letter-spacing:.5px; font-size:12px; padding:2px 9px; border-radius:999px; background:rgba(0,0,0,.18)}
+  /* LIVE — bright green pill with a soft pulsing halo so it stands out */
+  .banner.live .tag{background:#06d6a0; color:#04231b; padding:3px 12px; display:inline-flex; align-items:center; gap:6px;
+    box-shadow:0 2px 10px rgba(6,214,160,.45); animation:livePulse 1.8s ease-in-out infinite}
+  .banner.live .tag::before{content:""; width:7px; height:7px; border-radius:50%; background:#04231b; opacity:.85}
+  @keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(6,214,160,.55), 0 2px 10px rgba(6,214,160,.4)}
+    50%{box-shadow:0 0 0 7px rgba(6,214,160,0), 0 2px 10px rgba(6,214,160,.4)}}
 
   /* hero KPI */
   .hero{margin-top:20px; border-radius:24px; padding:26px 28px; position:relative; overflow:hidden;
@@ -107,7 +113,11 @@
 </head>
 <body>
 
-<div class="gate" id="gate">
+<!-- Shown while Firebase restores the session, so the login box never flashes
+     on refresh for an already-signed-in admin. -->
+<div class="gate" id="loader"><span class="spin" style="width:34px;height:34px;border-width:4px"></span></div>
+
+<div class="gate hidden" id="gate">
   <div class="box">
     <img src="../lion.png" alt="טופי">
     <h1>לוח בקרה — טופי</h1>
@@ -217,14 +227,6 @@ const SAMPLE = {
   notTracked: ["responseTimePerQuestion","xp","wheelOfFortune","mysteryBox","minutesLostToMistakes"],
 };
 
-/* ===== 3) שכבת נתונים ===== */
-async function loadStats(db, getDoc, doc){
-  if(!db) return { mode:"demo", data:SAMPLE };
-  try{ const s = await getDoc(doc(db,"adminStats","summary"));
-    return s.exists() ? { mode:"live", data:s.data() } : { mode:"empty", data:SAMPLE };
-  }catch(e){ console.error(e); return { mode:"error", data:SAMPLE, error:e.message }; }
-}
-
 /* ===== 4) פורמט ===== */
 const NF = new Intl.NumberFormat("he-IL");
 const fmt = n => (n==null||isNaN(n)) ? "—" : NF.format(Math.round(n));
@@ -237,7 +239,7 @@ const tile = (lbl,val,sub) => `<div class="tile"><div class="lbl">${lbl}</div><d
 function render(state){
   const d = state.data;
   const b=document.getElementById("banner"), bt=document.getElementById("bannerText");
-  if(state.mode==="live"){ b.className="banner live"; b.querySelector(".tag").textContent="LIVE"; bt.textContent="נתונים חיים מ-Firestore (משתמשים אמיתיים בלבד)."; }
+  if(state.mode==="live"){ b.className="banner live"; b.querySelector(".tag").textContent="LIVE"; bt.textContent="נתונים חיים מ-Firestore (משתמשים אמיתיים בלבד)"+(d.updatedAt?` · עודכן ${d.updatedAt}`:"")+"."; }
   else if(state.mode==="empty"){ b.className="banner demo"; b.querySelector(".tag").textContent="ממתין"; bt.textContent="אין עדיין adminStats — נתוני דוגמה."; }
   else if(state.mode==="error"){ b.className="banner err"; b.querySelector(".tag").textContent="שגיאה"; bt.textContent="שגיאת קריאה — נתוני דוגמה."; }
 
@@ -335,30 +337,55 @@ function drawChart(daily){
 }
 
 /* ===== 5) Auth ===== */
-const gate=document.getElementById("gate"), app=document.getElementById("app");
+const gate=document.getElementById("gate"), app=document.getElementById("app"), loader=document.getElementById("loader");
 const gateMsg=document.getElementById("gateMsg"), loginBtn=document.getElementById("loginBtn");
-function showApp(email){ document.getElementById("whoEmail").textContent=email||""; gate.classList.add("hidden"); app.classList.remove("hidden"); }
+function showApp(email){ document.getElementById("whoEmail").textContent=email||""; loader.classList.add("hidden"); gate.classList.add("hidden"); app.classList.remove("hidden"); }
+function showGate(){ loader.classList.add("hidden"); app.classList.add("hidden"); gate.classList.remove("hidden"); }
 async function boot(){
   // ?demo=1 — מציג את העיצוב עם נתוני דוגמה בלבד (בלי התחברות, בלי נתונים אמיתיים).
   if(new URLSearchParams(location.search).has("demo") || !CONFIG.firebase.apiKey){
     showApp("מצב הדגמה"); render({mode:"demo",data:SAMPLE}); return; }
-  const [{initializeApp}, auth, fs] = await Promise.all([
+  const [{initializeApp}, auth, fs, fns] = await Promise.all([
     import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
     import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"),
     import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js"),
   ]);
   const fbApp=initializeApp(CONFIG.firebase); const authI=auth.getAuth(fbApp); const db=fs.getFirestore(fbApp);
+  const functionsI=fns.getFunctions(fbApp);
   const provider=new auth.GoogleAuthProvider();
   loginBtn.onclick=async()=>{ gateMsg.className="msg"; gateMsg.innerHTML='<span class="spin"></span> מתחבר…';
     try{ await auth.signInWithPopup(authI,provider); }catch(e){ gateMsg.className="msg err"; gateMsg.textContent="ההתחברות נכשלה: "+e.code; } };
   document.getElementById("logoutBtn").onclick=()=>auth.signOut(authI);
   auth.onAuthStateChanged(authI, async user=>{
-    if(!user){ app.classList.add("hidden"); gate.classList.remove("hidden"); loginBtn.disabled=false; return; }
+    if(!user){ showGate(); loginBtn.disabled=false; return; }
     const email=(user.email||"").toLowerCase();
     if(!CONFIG.adminEmails.map(e=>e.toLowerCase()).includes(email)){
       gateMsg.className="msg err"; gateMsg.textContent="החשבון "+email+" אינו מורשה."; await auth.signOut(authI); return; }
-    showApp(user.email); render(await loadStats(db, fs.getDoc, fs.doc));
+    showApp(user.email); startLive(db, fs, functionsI, fns);
   });
+}
+
+/* ===== 5) עדכון חי ===== */
+// LISTEN: re-render the instant adminStats/summary changes (scheduled refresh,
+// or our own on-demand recompute below). POLL: every 10s, while the tab is
+// visible, ask the backend to recompute — its write fires the listener, so the
+// numbers refresh on screen without a manual reload.
+const REFRESH_MS = 10000;
+function startLive(db, fs, functionsI, fns){
+  fs.onSnapshot(fs.doc(db,"adminStats","summary"),
+    snap => render(snap.exists() ? {mode:"live", data:snap.data()} : {mode:"empty", data:SAMPLE}),
+    err  => { console.error(err); render({mode:"error", data:SAMPLE, error:err.message}); });
+  const recompute = fns.httpsCallable(functionsI, "recomputeAdminStats");
+  let busy = false;
+  const tick = async () => {
+    if(document.hidden || busy) return;
+    busy = true;
+    try{ await recompute(); }catch(e){ console.error("recompute failed", e); }
+    finally{ busy = false; }
+  };
+  tick();
+  setInterval(tick, REFRESH_MS);
 }
 boot();
 </script>

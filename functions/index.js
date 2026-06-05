@@ -544,9 +544,11 @@ exports.onWaitlistSignup = onDocumentCreated(
 // adminStats/summary. The tofyapp.com/admin dashboard reads ONLY this doc — no
 // raw child data ever reaches the browser. Refreshed every 6h, and triggerable
 // on demand via runAdminStats (token-guarded) for the first backfill.
-const { onRequest } = require("firebase-functions/v2/https");
+const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
 const ADMIN_TASK_TOKEN = defineSecret("ADMIN_TASK_TOKEN");
 const DAY = 24 * 3600;
+// Who may trigger an on-demand recompute from the signed-in /admin dashboard.
+const ADMIN_EMAILS = ["ranioph@gmail.com", "amitgolans@gmail.com"];
 
 async function computeAdminStats() {
   const now = Date.now() / 1000;
@@ -749,6 +751,21 @@ async function computeAdminStats() {
 exports.refreshAdminStats = onSchedule(
   { schedule: "every 6 hours", timeZone: "Asia/Jerusalem", timeoutSeconds: 300, memory: "512MiB" },
   async () => { await computeAdminStats(); }
+);
+
+// On-demand recompute for the signed-in /admin dashboard. The dashboard polls
+// this every few seconds so the founder sees fresh numbers without reloading.
+// Auth-guarded: only the allow-listed admin Google accounts may call it.
+exports.recomputeAdminStats = onCall(
+  { timeoutSeconds: 120, memory: "512MiB" },
+  async (request) => {
+    const email = (request.auth && request.auth.token && request.auth.token.email || "").toLowerCase();
+    if (!email || !ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(email)) {
+      throw new HttpsError("permission-denied", "Not an authorized admin.");
+    }
+    const summary = await computeAdminStats();
+    return { ok: true, updatedAt: summary.updatedAt };
+  }
 );
 
 // Manual trigger / first backfill — guarded by a shared token (secret). Returns
