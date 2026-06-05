@@ -171,7 +171,7 @@ extension RewardEngine {
         // Each chest now also drips 💎 diamonds (the spendable wallet), scaled
         // down from its ⭐ figure so a gift fills both pockets at once.
         case .wood:
-            return ChestReward(stars: 0, diamonds: 0, minutes: 0, cosmeticID: nil)
+            return ChestReward(stars: 2 * starMultiplier, diamonds: 2, minutes: 0, cosmeticID: nil)
         case .gold:
             return ChestReward(stars: 3 * starMultiplier, diamonds: 3, minutes: 0, cosmeticID: nil)
         case .magic:
