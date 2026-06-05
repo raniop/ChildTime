@@ -439,11 +439,13 @@ struct QuestionRunnerView: View {
 
     // MARK: - Daily cap chip
 
-    private var dailyCapChipVisible: Bool { settings.dailyCapEnabled }
+    // Use the ACTIVE child's resolved cap (per-child overrides the device global)
+    // so the chip always matches what's actually enforced.
+    private var dailyCapChipVisible: Bool { progress.dailyCap.enabled }
 
     private var dailyCapChip: some View {
         let earned = progress.minutesEarnedToday
-        let cap = settings.maxMinutesPerDay
+        let cap = progress.dailyCap.max
         let atCap = earned >= cap
         let tint: Color = atCap ? AppColor.almostWarm : AppColor.successMint
         return HStack(spacing: 6) {

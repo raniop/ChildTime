@@ -34,10 +34,8 @@ struct ParentSettingsView: View {
                 notificationsSection
                 rewardSection
                 smartFeedSection
-                dailyCapSection
                 penaltySection
                 soundsSection
-                topicsSection
                 appsSection
                 pinSection
                 privacySection
@@ -360,33 +358,6 @@ struct ParentSettingsView: View {
         }
     }
 
-    private var dailyCapSection: some View {
-        Section {
-            Toggle("הגבל זמן יומי", isOn: $settings.dailyCapEnabled)
-            if settings.dailyCapEnabled {
-                Stepper(
-                    "מקסימום \(settings.maxMinutesPerDay) דק' ליום",
-                    value: $settings.maxMinutesPerDay,
-                    in: 10...240,
-                    step: 5
-                )
-                HStack {
-                    Text("נצבר היום")
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Text("\(progress.minutesEarnedToday) / \(settings.maxMinutesPerDay) דק'")
-                        .font(.system(.body, design: .rounded).weight(.semibold))
-                        .foregroundStyle(progress.minutesEarnedToday >= settings.maxMinutesPerDay ? .orange : .primary)
-                }
-            }
-        } header: {
-            Text("מגבלת זמן יומית")
-        } footer: {
-            Text(settings.dailyCapEnabled
-                ? "גם אם הילד עונה נכון על הרבה שאלות, הוא לא ירוויח יותר מ-\(settings.maxMinutesPerDay) דקות ביום. המונה מתאפס כל יום בחצות."
-                : "כבוי. הילד יכול לצבור כמה דקות שירצה.")
-        }
-    }
 
     private var penaltySection: some View {
         let perMistake = progress.mistakePenaltyMinutes(minutesPerCorrect: settings.minutesPerCorrectAnswer)
@@ -408,34 +379,6 @@ struct ParentSettingsView: View {
             Text("צלילים")
         } footer: {
             Text("הצלילים באפליקציה רכים ומשמשים כפידבק על תשובות נכונות / שגויות. ניתן לכבות אותם לגמרי.")
-        }
-    }
-
-    private var topicsSection: some View {
-        Section {
-            ForEach(Topic.allCases) { topic in
-                topicRow(topic)
-            }
-        } header: {
-            Text("נושאי שאלות")
-        } footer: {
-            Text("את רמת הקושי קובעים לכל ילד בנפרד מהמסך הראשי של ההורה (תפריט הילד ← רמת קושי).")
-        }
-    }
-
-    private func topicRow(_ topic: Topic) -> some View {
-        let binding = Binding<Bool>(
-            get: { settings.enabledTopics.contains(topic) },
-            set: { isOn in
-                if isOn { settings.enabledTopics.insert(topic) }
-                else { settings.enabledTopics.remove(topic) }
-            }
-        )
-        return Toggle(isOn: binding) {
-            HStack {
-                Text(topic.emoji)
-                Text(topic.displayName)
-            }
         }
     }
 
