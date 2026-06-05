@@ -8,6 +8,7 @@ struct LiveGameView: View {
     @ObservedObject private var lg = LiveGameManager.shared
     @ObservedObject private var friends = FriendsManager.shared
     @State private var confetti = 0
+    @State private var celebrated = false   // fire the winner confetti once per screen appearance
     @State private var countdownValue = LiveGameRules.countdownSeconds
     @State private var nudged: Set<String> = []     // friends I just re-invited
     @State private var showQuit = false             // "leave the game?" confirm
@@ -638,13 +639,17 @@ struct LiveGameView: View {
             .padding(.horizontal, AppSpacing.xl).padding(.bottom, AppSpacing.lg)
         }
         .frame(maxWidth: 560).frame(maxWidth: .infinity)
+        // One clean confetti burst per appearance — re-triggering it mid-fall made
+        // the pieces snap above the screen, which read as "vanished then re-appeared".
+        // The `celebrated` flag also shrugs off any duplicate onAppear.
         .onAppear {
+            guard !celebrated else { return }
+            celebrated = true
             confetti += 1
             SoundPlayer.shared.play(.levelUp)
             Haptic.success()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { confetti += 1 }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { confetti += 1; Haptic.success() }
         }
+        .onDisappear { celebrated = false }
     }
 
     private func prizePill(_ emoji: String, _ amount: Int, _ tint: Color) -> some View {

@@ -1211,20 +1211,22 @@ final class ProgressStore: ObservableObject {
     // MARK: - Day streak
 
     func registerSessionToday() {
-        let today = Calendar.current.startOfDay(for: Date())
-        if let last = lastSessionDate.map({ Calendar.current.startOfDay(for: $0) }) {
-            let dayDiff = Calendar.current.dateComponents([.day], from: last, to: today).day ?? 0
-            if dayDiff == 0 {
-                // same day, no change
-            } else if dayDiff == 1 {
-                dayStreak += 1
-            } else {
-                dayStreak = 1
-            }
-        } else {
-            dayStreak = 1
-        }
+        dayStreak = Self.nextDayStreak(current: dayStreak, last: lastSessionDate, now: Date())
         lastSessionDate = Date()
+    }
+
+    /// Pure, testable day-streak transition. Same calendar day → unchanged; the
+    /// next consecutive day → +1; a gap of >1 day (or the first ever play) → 1.
+    /// Calendar-based so it's timezone/DST-safe.
+    static func nextDayStreak(current: Int, last: Date?, now: Date,
+                              calendar: Calendar = .current) -> Int {
+        guard let last else { return 1 }
+        let today = calendar.startOfDay(for: now)
+        let lastDay = calendar.startOfDay(for: last)
+        let dayDiff = calendar.dateComponents([.day], from: lastDay, to: today).day ?? 0
+        if dayDiff == 0 { return current }   // same day — already counted
+        if dayDiff == 1 { return current + 1 }
+        return 1                              // gap → restart at 1
     }
 
     // MARK: - Dev / reset

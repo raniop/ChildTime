@@ -104,7 +104,7 @@ struct LoginGateView: View {
                 CompanionView(controller: companion, size: companionSize)
                     .scaleEffect(heroAppear ? 1 : 0.3)
                     .opacity(heroAppear ? 1 : 0)
-                    .offset(y: 20)   // drop the lion so there's a gap below the bubble
+                    .offset(y: 34)   // drop the lion so there's a gap below the bubble
                 if bubbleVisible {
                     // Centered above the lion's head; centered tail points straight
                     // down at it — width-independent, so it always lines up.

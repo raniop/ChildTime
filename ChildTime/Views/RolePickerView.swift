@@ -6,6 +6,7 @@ import SwiftUI
 struct RolePickerView: View {
     @EnvironmentObject var settings: ParentSettings
     @Environment(\.horizontalSizeClass) private var hsc
+    @StateObject private var companion = CompanionController()
     @State private var appeared = false
 
     private var isCompact: Bool { hsc == .compact }
@@ -22,9 +23,9 @@ struct RolePickerView: View {
             ScrollView {
                 VStack(spacing: AppSpacing.xl) {
                     VStack(spacing: AppSpacing.sm) {
-                        Text("👋")
-                            .font(.system(size: isCompact ? 56 : 72))
-                        Text("בְּמִי מִשְׁתַּמְּשִׁים בַּמַּכְשִׁיר הַזֶּה?")
+                        CompanionView(controller: companion, size: isCompact ? 124 : 150)
+                            .scaleEffect(appeared ? 1 : 0.4)
+                        Text("מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר הַזֶּה?")
                             .font(.system(size: isCompact ? 26 : 34, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
@@ -32,7 +33,7 @@ struct RolePickerView: View {
                             .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.8))
                     }
-                    .padding(.top, AppSpacing.xl)
+                    .padding(.top, AppSpacing.lg)
 
                     VStack(spacing: AppSpacing.lg) {
                         roleCard(
@@ -67,9 +68,15 @@ struct RolePickerView: View {
         Button(action: action) {
             HStack(spacing: AppSpacing.md) {
                 Text(emoji)
-                    .font(.system(size: 40))
-                    .frame(width: 56, height: 56)
-                    .background(Circle().fill(.white.opacity(0.18)))
+                    .font(.system(size: 38))
+                    .frame(width: 64, height: 64)
+                    .background(
+                        Circle().fill(
+                            LinearGradient(colors: [glow.opacity(0.55), glow.opacity(0.18)],
+                                           startPoint: .top, endPoint: .bottom)
+                        )
+                    )
+                    .overlay(Circle().stroke(.white.opacity(0.35), lineWidth: 1))
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
@@ -79,6 +86,9 @@ struct RolePickerView: View {
                         .foregroundStyle(.white.opacity(0.8))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "chevron.forward")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.55))
             }
             .padding(AppSpacing.lg)
             .frame(maxWidth: .infinity)

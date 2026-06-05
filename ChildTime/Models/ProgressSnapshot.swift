@@ -192,6 +192,16 @@ extension ProgressSnapshot {
         m.worldProgress = mergeMaxInt(local.worldProgress, remote.worldProgress)
         m.unlockedWorlds = Array(Set(local.unlockedWorlds).union(remote.unlockedWorlds))
         m.ownedCharacterIDs = Array(Set(local.ownedCharacterIDs).union(remote.ownedCharacterIDs))
+        // `dayStreak` is only meaningful PAIRED with `lastSessionDate` (the day it was
+        // last bumped). Merge them as a unit: take the streak from whichever device
+        // played most recently, so a stale (revision) winner can't drop/desync it.
+        // A genuine >1-day gap still resets the streak in registerSessionToday() on
+        // the next play, since lastSessionDate keeps the later date.
+        if (remote.lastSessionDate ?? .distantPast) > (local.lastSessionDate ?? .distantPast) {
+            m.dayStreak = remote.dayStreak
+        } else {
+            m.dayStreak = local.dayStreak
+        }
         m.lastSessionDate = laterDate(local.lastSessionDate, remote.lastSessionDate)
         m.lastDailyChestDate = laterDate(local.lastDailyChestDate, remote.lastDailyChestDate)
         return m

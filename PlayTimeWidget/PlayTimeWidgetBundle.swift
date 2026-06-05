@@ -6,6 +6,7 @@ struct PlayTimeWidgetBundle: WidgetBundle {
     var body: some Widget {
         PlayTimeWidgetLiveActivity()
         TofyKidWidget()
+        TofyKidHeroWidget()
         TofyFamilyWidget()
     }
 }

@@ -39,6 +39,7 @@ struct ParentSettingsView: View {
                 appsSection
                 pinSection
                 privacySection
+                versionSection
             }
             .navigationTitle("הגדרות הורה")
             .navigationBarTitleDisplayMode(.inline)
@@ -523,6 +524,22 @@ struct ParentSettingsView: View {
             Text("אבטחה")
         } footer: {
             Text("הקוד נשמר מוצפן (hash) במכשיר ולא בטקסט גלוי.")
+        }
+    }
+
+    private var versionSection: some View {
+        Section {
+            VStack(spacing: 3) {
+                Text("טופי")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.secondary)
+                Text(AppInfo.versionLine)
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(.tertiary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+            .listRowBackground(Color.clear)
         }
     }
 }

@@ -257,4 +257,56 @@ struct ChildTimeTests {
         // A friend link is NOT a game link.
         #expect(!GameLink.isGameURL(URL(string: FriendLink.url(forCode: "XYZ"))!))
     }
+
+    // MARK: - Day streak (consecutive days played)
+
+    /// The core day-streak transition: same day keeps it, the next day bumps it,
+    /// a gap restarts it, and the first ever play starts at 1. A fixed UTC
+    /// calendar makes "next day" deterministic (no DST/midnight flakiness).
+    @Test func dayStreak_transitions() {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        let morning = cal.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 9))!
+        let sameDayEvening = cal.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 21))!
+        let nextDay = cal.date(byAdding: .day, value: 1, to: morning)!
+        let twoDayGap = cal.date(byAdding: .day, value: 2, to: morning)!
+
+        // First ever play → 1.
+        #expect(ProgressStore.nextDayStreak(current: 0, last: nil, now: morning, calendar: cal) == 1)
+        // Same calendar day (different hour) → unchanged.
+        #expect(ProgressStore.nextDayStreak(current: 5, last: morning, now: sameDayEvening, calendar: cal) == 5)
+        // Next consecutive day → +1.
+        #expect(ProgressStore.nextDayStreak(current: 5, last: morning, now: nextDay, calendar: cal) == 6)
+        // Missed a day → restart at 1.
+        #expect(ProgressStore.nextDayStreak(current: 5, last: morning, now: twoDayGap, calendar: cal) == 1)
+    }
+
+    /// REGRESSION (the cross-device bug): the streak is coupled to its
+    /// `lastSessionDate`. When the device that played MOST RECENTLY has the
+    /// up-to-date streak, the merge must keep that streak — even if the OTHER
+    /// snapshot "wins" the revision tie-break. Otherwise a stale device silently
+    /// drops the streak.
+    @Test func merge_dayStreak_followsMostRecentPlay() {
+        let earlier = Date(timeIntervalSince1970: 1_000_000)
+        let later   = Date(timeIntervalSince1970: 2_000_000)
+
+        // Local played later (streak 6); remote is stale (streak 5) yet wins by revision.
+        var local = ProgressSnapshot()
+        local.dayStreak = 6; local.lastSessionDate = later;    local.revision = 50
+        var remote = ProgressSnapshot()
+        remote.dayStreak = 5; remote.lastSessionDate = earlier; remote.revision = 51
+
+        let merged = ProgressSnapshot.ratchetMerged(local: local, remote: remote)
+        #expect(merged.dayStreak == 6)            // NOT dropped to the stale 5
+        #expect(merged.lastSessionDate == later)
+
+        // Symmetric case: remote played later → its streak wins.
+        var local2 = ProgressSnapshot()
+        local2.dayStreak = 4; local2.lastSessionDate = earlier; local2.revision = 60
+        var remote2 = ProgressSnapshot()
+        remote2.dayStreak = 7; remote2.lastSessionDate = later;  remote2.revision = 59
+        let merged2 = ProgressSnapshot.ratchetMerged(local: local2, remote: remote2)
+        #expect(merged2.dayStreak == 7)
+        #expect(merged2.lastSessionDate == later)
+    }
 }

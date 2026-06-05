@@ -90,7 +90,12 @@ struct ParentDashboardView: View {
                             syncStatusCard
                             insightNotificationsCard
                             ForEach(rows, id: \.profile.id) { row in
-                                profileCard(profile: row.profile, snapshot: row.snapshot)
+                                NavigationLink {
+                                    childDetailScreen(for: row.profile.id)
+                                } label: {
+                                    childRow(profile: row.profile, snapshot: row.snapshot)
+                                }
+                                .buttonStyle(.plain)
                             }
                             .animation(.spring(response: 0.5, dampingFraction: 0.85),
                                        value: rows.map(\.profile.id))
@@ -848,6 +853,75 @@ struct ParentDashboardView: View {
             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                 .stroke(isActive ? AppColor.successMint.opacity(0.6) : .clear, lineWidth: 2)
         )
+    }
+
+    // MARK: - Compact list row + per-child detail page
+
+    /// One tappable child in the family list: avatar, name, "playing now", and a
+    /// one-line glance. Tapping it pushes the full per-child page.
+    private func childRow(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
+        let isActive = profile.id == profiles.activeID
+        let cap = profile.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
+        let timeToday = cap.enabled ? "\(s.minutesEarnedToday)/\(cap.minutes)" : "\(s.minutesEarnedToday)"
+        return HStack(spacing: 12) {
+            Image(systemName: "chevron.left")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(.secondary)
+            Spacer(minLength: 4)
+            VStack(alignment: .trailing, spacing: 4) {
+                HStack(spacing: 6) {
+                    if isChildPlayingNow(profile) {
+                        HStack(spacing: 4) {
+                            Circle().fill(AppColor.successMint).frame(width: 7, height: 7)
+                            Text("מְשַׂחֵק עַכְשָׁיו")
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                        }
+                        .padding(.horizontal, 7).padding(.vertical, 3)
+                        .background(Capsule().fill(AppColor.successMint.opacity(0.9)))
+                    }
+                    Text(profile.name)
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.primary)
+                }
+                Text("⏱ \(timeToday) דק'   ·   🔥 \(s.dayStreak)   ·   ⭐ \(s.stars.currencyShort)")
+                    .font(.system(size: 12.5, weight: .medium, design: .rounded))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1).minimumScaleFactor(0.75)
+            }
+            ProfileAvatarView(profile: profile, size: 50)
+        }
+        .padding(AppSpacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                .fill(Color(.secondarySystemGroupedBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                .stroke(isActive ? AppColor.successMint.opacity(0.6) : .clear, lineWidth: 2)
+        )
+    }
+
+    /// The full per-child page (all stats, insights, settings menu) pushed when a
+    /// row is tapped. Reuses the existing `profileCard` and looks the snapshot up
+    /// live from `rows`, so it keeps refreshing while open and handles deletion.
+    @ViewBuilder
+    private func childDetailScreen(for id: UUID) -> some View {
+        if let row = rows.first(where: { $0.profile.id == id }) {
+            ScrollView {
+                profileCard(profile: row.profile, snapshot: row.snapshot)
+                    .padding(AppSpacing.lg)
+                    .frame(maxWidth: 720)
+                    .containerWidthLock()
+            }
+            .noHorizontalBounce()
+            .environment(\.layoutDirection, .leftToRight)
+            .background(AppGradient.dreamy.ignoresSafeArea())
+            .navigationTitle(row.profile.name)
+            .navigationBarTitleDisplayMode(.inline)
+        } else {
+            Color.clear.background(AppGradient.dreamy.ignoresSafeArea())
+        }
     }
 
     @ViewBuilder

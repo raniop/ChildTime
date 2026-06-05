@@ -89,6 +89,12 @@ struct ProfileEditorView: View {
                                 Button("בַּטֵּל", role: .cancel) {}
                             }
                         }
+
+                        Text("טופי · \(AppInfo.versionLine)")
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.5))
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, AppSpacing.lg)
                     }
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.bottom, AppSpacing.xxl)

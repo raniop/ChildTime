@@ -20,11 +20,11 @@ struct KidSnapshot: Codable {
     var answeredToday = 0
     var correctToday = 0
     var goalToday = 10
+    var playMinutes = 0
 
     var accuracyToday: Int { answeredToday > 0 ? Int((Double(correctToday) / Double(answeredToday)) * 100) : 0 }
-    var goalProgress: Double { goalToday > 0 ? min(1, Double(answeredToday) / Double(goalToday)) : 0 }
 
-    static let sample = KidSnapshot(name: "דָּן", stars: 4823, diamonds: 302, dayStreak: 5, answeredToday: 7, correctToday: 5, goalToday: 10)
+    static let sample = KidSnapshot(name: "דָּן", stars: 4823, diamonds: 302, dayStreak: 5, answeredToday: 7, correctToday: 5, goalToday: 10, playMinutes: 42)
 
     static func load() -> KidSnapshot {
         guard let d = WidgetStore.defaults.data(forKey: WidgetStore.kidKey),
@@ -84,15 +84,25 @@ private struct Pill: View {
 
 // MARK: - KID widget
 
-struct KidEntry: TimelineEntry { let date: Date; let kid: KidSnapshot }
+struct KidEntry: TimelineEntry { let date: Date; let kid: KidSnapshot; let avatar: UIImage? }
+
+/// The child's real avatar — a small PNG of their chosen character that the app
+/// renders into the App Group. nil → the widget shows the 🦁 fallback.
+enum KidAvatar {
+    static func load() -> UIImage? {
+        guard let d = WidgetStore.defaults.data(forKey: "widget.kid.avatar") else { return nil }
+        return UIImage(data: d)
+    }
+}
 
 struct KidProvider: TimelineProvider {
-    func placeholder(in context: Context) -> KidEntry { KidEntry(date: Date(), kid: .sample) }
+    func placeholder(in context: Context) -> KidEntry { KidEntry(date: Date(), kid: .sample, avatar: nil) }
     func getSnapshot(in context: Context, completion: @escaping (KidEntry) -> Void) {
-        completion(KidEntry(date: Date(), kid: context.isPreview ? .sample : KidSnapshot.load()))
+        let preview = context.isPreview
+        completion(KidEntry(date: Date(), kid: preview ? .sample : KidSnapshot.load(), avatar: preview ? nil : KidAvatar.load()))
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<KidEntry>) -> Void) {
-        let entry = KidEntry(date: Date(), kid: KidSnapshot.load())
+        let entry = KidEntry(date: Date(), kid: KidSnapshot.load(), avatar: KidAvatar.load())
         // Refresh hourly as a backstop; the app also reloads on data change.
         let next = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date().addingTimeInterval(3600)
         completion(Timeline(entries: [entry], policy: .after(next)))
@@ -102,6 +112,26 @@ struct KidProvider: TimelineProvider {
 struct KidWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let kid: KidSnapshot
+    var avatar: UIImage? = nil
+
+    /// The child's chosen character, or 🦁 if none/3D-only.
+    private func avatarView(size: CGFloat) -> some View {
+        ZStack {
+            Circle().fill(.white.opacity(0.18))
+            if let avatar {
+                Image(uiImage: avatar).resizable().scaledToFit().padding(size * 0.1)
+            } else {
+                Text("🦁").font(.system(size: size * 0.62))
+            }
+        }
+        .frame(width: size, height: size)
+    }
+
+    // The three things a kid actually cares about — each gets its own tint.
+    private let mint = Color(red: 0.30, green: 0.86, blue: 0.60)   // play minutes
+    private let cyan = Color(red: 0.37, green: 0.76, blue: 0.97)   // diamonds
+    private let gold = Color(red: 1.00, green: 0.82, blue: 0.30)   // stars
+
     var body: some View {
         Group {
             if family == .systemSmall { small } else { medium }
@@ -110,72 +140,140 @@ struct KidWidgetView: View {
         .tofyBackground()
     }
 
-    private var small: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
-                Text("🦁").font(.system(size: 20))
-                Text(kid.name).font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white).lineLimit(1)
-                Spacer()
+    private var header: some View {
+        HStack(spacing: 7) {
+            avatarView(size: 30)
+            Text(kid.name).font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white).lineLimit(1)
+            Spacer(minLength: 4)
+            if kid.dayStreak > 0 { Pill(icon: "🔥", value: "\(kid.dayStreak)") }
+        }
+    }
+
+    private var medium: some View {
+        VStack(spacing: 10) {
+            header
+            HStack(spacing: 9) {
+                rewardTile("⏱️", "\(kid.playMinutes)", "דַּקּוֹת לְשַׂחֵק", mint)
+                rewardTile("💎", kid.diamonds.formatted(), "יַהֲלוֹמִים", cyan)
+                rewardTile("⭐", kid.stars.formatted(), "כּוֹכָבִים", gold)
             }
             Spacer(minLength: 0)
-            HStack(spacing: 4) {
-                Text("⭐").font(.system(size: 22))
-                Text("\(kid.stars)").font(.system(size: 30, weight: .heavy, design: .rounded)).foregroundStyle(.white).minimumScaleFactor(0.6).lineLimit(1)
-            }
-            HStack(spacing: 6) {
-                Pill(icon: "🔥", value: "\(kid.dayStreak)")
-                Pill(icon: "💎", value: "\(kid.diamonds)")
-            }
         }
         .padding(14)
     }
 
-    private var medium: some View {
-        HStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 6) {
-                    Text("🦁").font(.system(size: 26))
-                    Text(kid.name).font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white).lineLimit(1)
-                }
-                HStack(spacing: 4) {
-                    Text("⭐").font(.system(size: 20))
-                    Text("\(kid.stars)").font(.system(size: 26, weight: .heavy, design: .rounded)).foregroundStyle(.white).minimumScaleFactor(0.6).lineLimit(1)
-                }
-                HStack(spacing: 6) {
-                    Pill(icon: "🔥", value: "\(kid.dayStreak)")
-                    Pill(icon: "💎", value: "\(kid.diamonds)")
-                }
+    // Small: play minutes is the hero (what the kid wants most); ⭐/💎 below.
+    private var small: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                avatarView(size: 26)
+                Text(kid.name).font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(.white).lineLimit(1)
                 Spacer(minLength: 0)
             }
             Spacer(minLength: 0)
-            VStack(spacing: 6) {
-                ZStack {
-                    Circle().stroke(.white.opacity(0.22), lineWidth: 9)
-                    Circle().trim(from: 0, to: kid.goalProgress)
-                        .stroke(Color(red: 1, green: 0.85, blue: 0.3), style: StrokeStyle(lineWidth: 9, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                    VStack(spacing: 0) {
-                        Text("\(kid.answeredToday)").font(.system(size: 22, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                        Text("/\(kid.goalToday)").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
-                    }
-                }
-                .frame(width: 78, height: 78)
-                Text(kid.answeredToday >= kid.goalToday ? "כל הכבוד! 🎉" : "שאלות היום")
-                    .font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.9)).lineLimit(1)
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text("⏱️").font(.system(size: 20))
+                Text("\(kid.playMinutes)").font(.system(size: 36, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white).minimumScaleFactor(0.5).lineLimit(1)
             }
+            Text("דַּקּוֹת לְשַׂחֵק").font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.75))
+            Spacer(minLength: 0)
+            HStack(spacing: 12) {
+                Text("💎 \(kid.diamonds.formatted())")
+                Text("⭐ \(kid.stars.formatted())")
+            }
+            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .foregroundStyle(.white).lineLimit(1).minimumScaleFactor(0.6)
         }
-        .padding(16)
+        .padding(14)
+    }
+
+    private func rewardTile(_ icon: String, _ value: String, _ label: String, _ tint: Color) -> some View {
+        VStack(spacing: 2) {
+            Text(icon).font(.system(size: 22))
+            Text(value).font(.system(size: 21, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white).minimumScaleFactor(0.45).lineLimit(1)
+            Text(label).font(.system(size: 10.5, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.78)).lineLimit(1).minimumScaleFactor(0.65)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 11)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(tint.opacity(0.22)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(tint.opacity(0.5), lineWidth: 1))
     }
 }
 
 struct TofyKidWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "TofyKidWidget", provider: KidProvider()) { entry in
-            KidWidgetView(kid: entry.kid)
+            KidWidgetView(kid: entry.kid, avatar: entry.avatar)
         }
         .configurationDisplayName("טופי שלי")
-        .description("הכוכבים, הרצף וההתקדמות של היום.")
+        .description("דקות המשחק, היהלומים והכוכבים שלך.")
         .supportedFamilies([.systemSmall, .systemMedium])
+    }
+}
+
+// MARK: - KID HERO widget — big avatar on the right, stats stacked on the left
+
+struct KidHeroView: View {
+    let kid: KidSnapshot
+    var avatar: UIImage? = nil
+
+    private let mint = Color(red: 0.30, green: 0.86, blue: 0.60)
+    private let cyan = Color(red: 0.37, green: 0.76, blue: 0.97)
+    private let gold = Color(red: 1.00, green: 0.82, blue: 0.30)
+
+    var body: some View {
+        HStack(spacing: 12) {
+            bigAvatar
+            VStack(alignment: .leading, spacing: 9) {
+                Text(kid.name).font(.system(size: 19, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white).lineLimit(1).minimumScaleFactor(0.7)
+                statRow("⏱️", "\(kid.playMinutes)", "דַּקּוֹת לְשַׂחֵק", mint)
+                statRow("💎", kid.diamonds.formatted(), "יַהֲלוֹמִים", cyan)
+                statRow("⭐", kid.stars.formatted(), "כּוֹכָבִים", gold)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(16)
+        .environment(\.layoutDirection, .rightToLeft)
+        .tofyBackground()
+    }
+
+    private var bigAvatar: some View {
+        ZStack {
+            Circle().fill(.white.opacity(0.16))
+            if let avatar {
+                Image(uiImage: avatar).resizable().scaledToFit().padding(11)
+            } else {
+                Text("🦁").font(.system(size: 62))
+            }
+        }
+        .frame(width: 110, height: 110)
+        .overlay(Circle().stroke(.white.opacity(0.28), lineWidth: 1))
+    }
+
+    private func statRow(_ icon: String, _ value: String, _ label: String, _ tint: Color) -> some View {
+        HStack(spacing: 7) {
+            Text(icon).font(.system(size: 18))
+            Text(value).font(.system(size: 20, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white).minimumScaleFactor(0.55).lineLimit(1)
+            Text(label).font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.72)).lineLimit(1).minimumScaleFactor(0.7)
+            Spacer(minLength: 0)
+        }
+    }
+}
+
+struct TofyKidHeroWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "TofyKidHeroWidget", provider: KidProvider()) { entry in
+            KidHeroView(kid: entry.kid, avatar: entry.avatar)
+        }
+        .configurationDisplayName("טופי — הדמות שלי")
+        .description("הדמות שלך בגדול, עם דקות, יהלומים וכוכבים.")
+        .supportedFamilies([.systemMedium])
     }
 }
 
