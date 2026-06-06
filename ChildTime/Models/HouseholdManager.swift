@@ -506,6 +506,7 @@ final class HouseholdManager: ObservableObject {
         // also hides the "back to role choice" escape on the join screen.
         s.deviceRole = .child
         s.justDisconnected = true
+        s.sessionUnlocked = false   // re-lock the parent gate after a disconnect
         #endif
     }
 
@@ -523,11 +524,19 @@ final class HouseholdManager: ObservableObject {
         ownDeviceListener?.remove(); ownDeviceListener = nil
         AuthManager.shared.signOut()             // stops sync + clears the session
         DataExporter.wipeLocalData()             // local cache only — cloud untouched
+        ProgressStore.shared.resetAll()          // wipe in-memory stars/diamonds/minutes (post sign-out → no cloud push)
         PINManager.shared.deletePIN()            // erase the parent code from the Keychain
         s.hasSetParentPIN = false
         s.faceIDForParentGate = false
         s.pendingJoinPayload = nil
         s.joinedChildID = nil
+        s.justDisconnected = false
+        // A FULL reset → the device must look brand-new on next launch: re-lock the
+        // parent gate (security: it previously stayed unlocked across a reset), and
+        // replay onboarding (welcome + consent) so re-signing-in starts clean.
+        s.sessionUnlocked = false
+        s.hasSeenWelcome = false
+        s.consentVersionAccepted = 0
         s.deviceRole = .unset                    // → "who uses this device?"
     }
 
@@ -592,6 +601,18 @@ final class HouseholdManager: ObservableObject {
                 var movedIDs: [String] = []
                 for p in ProfileStore.shared.profiles {
                     let id = p.id.uuidString
+                    // SAFETY: never hijack a child that ALREADY belongs to a
+                    // DIFFERENT household. Moving such a child merges two separate
+                    // families into one — the bug that tangled multiple families
+                    // (parents seeing each other's kids; a child stops syncing once
+                    // its householdID is rewritten out from under its own family).
+                    // Only bring children that are new / unbound / already ours.
+                    if let existing = try? await db.collection("children").document(id).getDocument(),
+                       let existingHH = existing.data()?["householdID"] as? String,
+                       !existingHH.isEmpty, existingHH != invite.householdID {
+                        print("[Household] skip bringing child \(id): already bound to \(existingHH)")
+                        continue
+                    }
                     movedIDs.append(id)
                     let record = ChildRecord(profile: p, householdID: invite.householdID)
                     try? await db.collection("children").document(id)

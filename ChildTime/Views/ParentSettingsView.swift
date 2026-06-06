@@ -23,6 +23,7 @@ struct ParentSettingsView: View {
     @State private var showDeleteAllConfirm = false
     @State private var showResetDeviceConfirm = false
     @State private var showRolePickerConfirm = false
+    @State private var showSignOutConfirm = false
     @State private var deleting = false
     @State private var testPushMessage: String?
     @State private var removalNote: String?
@@ -259,9 +260,18 @@ struct ParentSettingsView: View {
                     Label("הוֹסִיפוּ הוֹרֶה לַמִּשְׁפָּחָה", systemImage: "person.2.badge.plus.fill")
                 }
                 Button(role: .destructive) {
-                    auth.signOut()
+                    showSignOutConfirm = true
                 } label: {
-                    Label("התנתק", systemImage: "rectangle.portrait.and.arrow.right")
+                    Label("התנתק ומחק מהמכשיר", systemImage: "rectangle.portrait.and.arrow.right")
+                }
+                .alert("להתנתק ולמחוק הכול מהמכשיר?", isPresented: $showSignOutConfirm) {
+                    Button("התנתק ומחק", role: .destructive) {
+                        HouseholdManager.shared.resetThisDevice()
+                        dismiss()
+                    }
+                    Button("בטל", role: .cancel) {}
+                } message: {
+                    Text("המכשיר יחזור למצב התחלתי לגמרי — בלי חשבון, בלי קוד הורה, בלי נתונים מקומיים (כאילו הותקן מחדש). המשפחה וההתקדמות בענן נשמרות — התחברות מחדש תשחזר אותן.")
                 }
             } else {
                 VStack(alignment: .leading, spacing: 8) {
@@ -490,6 +500,12 @@ struct ParentSettingsView: View {
         .confirmationDialog("לַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד?",
                             isPresented: $showRolePickerConfirm, titleVisibility: .visible) {
             Button("חֲזֹר לִבְחִירָה") {
+                settings.sessionUnlocked = false   // re-lock the gate after a role switch
+                // Clear the child binding so re-picking "child" starts a FRESH scan
+                // instead of silently dropping back into the previously-bound kid.
+                settings.joinedChildID = nil
+                settings.pendingJoinPayload = nil
+                settings.justDisconnected = false
                 settings.deviceRole = .unset
                 dismiss()
             }
