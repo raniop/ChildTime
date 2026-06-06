@@ -148,6 +148,31 @@ service cloud.firestore {
         resource.data.ownerUID == request.auth.uid ||
         householdHasMe(get(/databases/$(database)/documents/children/$(childID)).data.householdID)
       );
+
+      // Pending friend REQUESTS dropped into this card's inbox. Unlike a QR/code
+      // add (instant, mutual-by-union — you already hold their code), a request is
+      // for someone you found on a leaderboard: it waits until the card owner
+      // accepts. The SENDER owns the request doc (doc id = their childID; stamps
+      // their own uid), so they create + may cancel/read it. The card OWNER (the
+      // device, or a parent on the child's household) reads to show the inbox and
+      // deletes to accept / decline. Acceptance forms the edge via the normal
+      // friendIDs union on the owner's own card — no cross-household write here.
+      match /requests/{fromID} {
+        function iOwnThisCard() {
+          return get(/databases/$(database)/documents/friendCards/$(childID)).data.ownerUID == request.auth.uid
+            || householdHasMe(get(/databases/$(database)/documents/children/$(childID)).data.householdID);
+        }
+        allow create: if signedIn()
+          && request.resource.data.requesterUID == request.auth.uid
+          && fromID == request.resource.data.fromID;
+        // The sender may refresh their own pending request (e.g. updated star
+        // count) / re-send idempotently — but can't hijack it to another sender.
+        allow update: if signedIn()
+          && resource.data.requesterUID == request.auth.uid
+          && request.resource.data.requesterUID == request.auth.uid;
+        allow read:   if signedIn() && (iOwnThisCard() || resource.data.requesterUID == request.auth.uid);
+        allow delete: if signedIn() && (iOwnThisCard() || resource.data.requesterUID == request.auth.uid);
+      }
     }
 
     // Live friends quiz games. Host-authoritative: the creator's device owns the

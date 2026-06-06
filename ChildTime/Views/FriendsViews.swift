@@ -10,6 +10,8 @@ struct LeaderboardView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showAdd = false
     @State private var friendToRemove: FriendCard?
+    @State private var selectedCard: FriendCard?
+    @State private var showRequests = false
     @State private var tab: Board = .friends
 
     /// Which leaderboard the child is looking at.
@@ -44,6 +46,12 @@ struct LeaderboardView: View {
         .onDisappear { friends.stopLive() }
         .sheet(isPresented: $showAdd) {
             AddFriendView().environment(\.layoutDirection, .rightToLeft)
+        }
+        .sheet(item: $selectedCard) { card in
+            FriendProfileView(card: card).environment(\.layoutDirection, .rightToLeft)
+        }
+        .sheet(isPresented: $showRequests) {
+            FriendRequestsView().environment(\.layoutDirection, .rightToLeft)
         }
         .confirmationDialog("לְהָסִיר חָבֵר?",
                             isPresented: Binding(get: { friendToRemove != nil },
@@ -90,6 +98,22 @@ struct LeaderboardView: View {
                     Image(systemName: "gamecontroller.fill")
                         .font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
                         .frame(width: 38, height: 38).background(AppColor.gemPurple.opacity(0.9), in: Circle())
+                }
+                Button { showRequests = true } label: {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "tray.fill")
+                            .font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
+                            .frame(width: 38, height: 38).background(.white.opacity(0.18), in: Circle())
+                        if !friends.incomingRequests.isEmpty {
+                            Text("\(friends.incomingRequests.count)")
+                                .font(.system(size: 11, weight: .black, design: .rounded))
+                                .foregroundStyle(.white)
+                                .frame(minWidth: 18, minHeight: 18)
+                                .background(Circle().fill(AppColor.almostWarm))
+                                .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                                .offset(x: 4, y: -4)
+                        }
+                    }
                 }
                 Button { showAdd = true } label: {
                     Image(systemName: "person.badge.plus")
@@ -247,6 +271,8 @@ struct LeaderboardView: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .onTapGesture { Haptic.light(); selectedCard = card }
         .contextMenu { if removable { removeMenu(for: card, isMe: isMe) } }
     }
 
@@ -277,6 +303,8 @@ struct LeaderboardView: View {
             .fill(isMe ? AppColor.starGold.opacity(0.22) : .white.opacity(0.10)))
         .overlay(RoundedRectangle(cornerRadius: AppRadius.large)
             .stroke(isMe ? AppColor.starGold : .clear, lineWidth: 2))
+        .contentShape(Rectangle())
+        .onTapGesture { Haptic.light(); selectedCard = card }
         .contextMenu { if removable { removeMenu(for: card, isMe: isMe) } }
     }
 
@@ -540,5 +568,244 @@ struct ChildFriendsView: View {
             await FriendsManager.shared.removeFriend(f.id, forChild: childID)
             await reload()
         }
+    }
+}
+
+// MARK: - Friend profile (tap a card on the board)
+
+/// Tapping any avatar on the leaderboard opens this read-only mini-profile —
+/// character, name, ⭐ stars — plus a friend-request action. Shows ONLY the
+/// public card data (no contact info, no shaming stats). A request is pending by
+/// design: the other child accepts it from their inbox. If THEY already asked me,
+/// the button becomes a one-tap accept instead.
+struct FriendProfileView: View {
+    let card: FriendCard
+    @ObservedObject private var friends = FriendsManager.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var sending = false
+    @State private var sent = false
+
+    private var meID: String? { ProfileStore.shared.activeID?.uuidString }
+    private var isMe: Bool { card.id == meID }
+    private var incoming: FriendRequest? { friends.incomingRequests.first { $0.fromID == card.id } }
+
+    var body: some View {
+        ZStack {
+            AppGradient.galaxy.ignoresSafeArea()
+            SparkleField(count: 12, size: 10)
+
+            // A fixed dismiss bar over a scrollable body, so the action button is
+            // always reachable — even at the .medium detent on a short screen.
+            VStack(spacing: 0) {
+                HStack {
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark").font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                            .frame(width: 36, height: 36).background(.white.opacity(0.18), in: Circle())
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.md)
+
+                ScrollView {
+                    VStack(spacing: AppSpacing.lg) {
+                        CharacterView(character: card.character, portrait: true)
+                            .frame(width: 140, height: 140)
+                            .glow(AppColor.starGold, radius: 22)
+
+                        Text(card.name.isEmpty ? "שַׂחְקָן" : card.name)
+                            .font(.system(size: 32, weight: .black, design: .rounded))
+                            .foregroundStyle(.white)
+
+                        Label("\(card.stars) כּוֹכָבִים", systemImage: "star.fill")
+                            .font(.system(size: 18, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 18).padding(.vertical, 9)
+                            .background(AppGradient.gold, in: Capsule())
+
+                        actionArea.padding(.top, AppSpacing.sm)
+                    }
+                    .padding(.horizontal, AppSpacing.xl)
+                    .padding(.top, AppSpacing.md).padding(.bottom, AppSpacing.xl)
+                    .frame(maxWidth: 460).frame(maxWidth: .infinity)
+                }
+            }
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+        // A fixed height sized to the content (avatar + name + stars + button), so
+        // the action button is fully visible without scrolling — `.medium` left it
+        // clipped below the fold, especially on iPad's centered card sheet.
+        .presentationDetents([.height(480), .large])
+        .task { sent = await friends.hasOutgoingRequest(to: card.id) }
+    }
+
+    @ViewBuilder private var actionArea: some View {
+        if isMe {
+            Label("זֶה אַתָּה 🙂", systemImage: "person.fill")
+                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+        } else if friends.isFriend(card.id) {
+            Label("חָבֵר שֶׁלְּךָ", systemImage: "checkmark.circle.fill")
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(AppColor.successMint)
+        } else if let incoming {
+            // They asked first — one tap to become friends.
+            Button {
+                Task { await friends.acceptRequest(incoming); Haptic.success(); dismiss() }
+            } label: {
+                HStack(spacing: 8) { Image(systemName: "checkmark.circle.fill"); Text("אַשְּׁרוּ בַּקָּשַׁת חֲבֵרוּת") }
+                    .font(.system(size: 18, weight: .black, design: .rounded)).foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).padding(.vertical, 14)
+                    .background(AppGradient.gold, in: Capsule())
+            }
+        } else if sent {
+            Label("בַּקָּשָׁה נִשְׁלְחָה ⏳", systemImage: "paperplane.fill")
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+                .frame(maxWidth: .infinity).padding(.vertical, 14)
+                .background(Capsule().fill(.white.opacity(0.12)))
+        } else {
+            Button {
+                sending = true
+                Task {
+                    let ok = await friends.sendRequest(to: card)
+                    sending = false
+                    if ok { sent = true; Haptic.success() } else { Haptic.warning() }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    if sending { ProgressView().tint(.white) }
+                    else { Image(systemName: "person.badge.plus") }
+                    Text("שִׁלְחוּ בַּקָּשַׁת חֲבֵרוּת")
+                }
+                .font(.system(size: 18, weight: .black, design: .rounded)).foregroundStyle(.white)
+                .frame(maxWidth: .infinity).padding(.vertical, 14)
+                .background(AppGradient.purpleDream, in: Capsule())
+            }
+            .disabled(sending)
+        }
+    }
+}
+
+// MARK: - Friend requests inbox
+
+/// The inbox of pending requests others sent me — opened from the leaderboard's
+/// tray button. Each row shows who's asking (character, name, ⭐ stars) with a
+/// gentle accept / "not now". Accepting connects us (+ a little celebration);
+/// declining quietly clears it, with no failure surfaced to anyone.
+struct FriendRequestsView: View {
+    @ObservedObject private var friends = FriendsManager.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var celebrate: FriendCard?
+    @State private var confettiTrigger = 0
+
+    var body: some View {
+        ZStack {
+            AppGradient.dreamy.ignoresSafeArea()
+            SparkleField(count: 16, size: 12)
+            VStack(spacing: 0) {
+                header
+                if friends.incomingRequests.isEmpty {
+                    emptyState
+                } else {
+                    ScrollView {
+                        VStack(spacing: AppSpacing.md) {
+                            ForEach(friends.incomingRequests) { requestRow($0) }
+                        }
+                        .padding(AppSpacing.lg).frame(maxWidth: 460).frame(maxWidth: .infinity)
+                    }
+                }
+            }
+
+            if let f = celebrate {
+                Color.black.opacity(0.6).ignoresSafeArea()
+                VStack(spacing: AppSpacing.md) {
+                    Text("🎉").font(.system(size: 56))
+                    CharacterView(character: f.character)
+                        .frame(width: 130, height: 130).shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                    Text(f.name).font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    Text("אַתֶּם חֲבֵרִים עַכְשָׁיו! 🤝")
+                        .font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(AppColor.starGold)
+                }
+                .transition(.scale.combined(with: .opacity))
+            }
+            Confetti(trigger: confettiTrigger).allowsHitTesting(false)
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+        .task { await friends.startLive() }
+    }
+
+    private var header: some View {
+        ZStack {
+            Text("בַּקָּשׁוֹת חֲבֵרוּת").font(.system(size: 22, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            HStack { Spacer()
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark").font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                        .frame(width: 36, height: 36).background(.white.opacity(0.18), in: Circle())
+                }.environment(\.layoutDirection, .leftToRight)
+            }
+        }
+        .padding(.horizontal, AppSpacing.lg).padding(.vertical, AppSpacing.md)
+    }
+
+    private func requestRow(_ req: FriendRequest) -> some View {
+        HStack(spacing: 12) {
+            CharacterView(character: req.character, portrait: true)
+                .frame(width: 54, height: 54)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(req.name.isEmpty ? "שַׂחְקָן" : req.name)
+                    .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Text("\(req.stars) ⭐").font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.75))
+            }
+            Spacer()
+            Button { decline(req) } label: {
+                Text("לֹא עַכְשָׁיו").font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .padding(.horizontal, 12).padding(.vertical, 9)
+                    .background(Capsule().fill(.white.opacity(0.12)))
+            }
+            Button { accept(req) } label: {
+                Label("אַשְּׁרוּ", systemImage: "checkmark")
+                    .font(.system(size: 14, weight: .black, design: .rounded)).foregroundStyle(.white)
+                    .padding(.horizontal, 14).padding(.vertical, 9)
+                    .background(AppGradient.gold, in: Capsule())
+            }
+        }
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(.white.opacity(0.10)))
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: AppSpacing.md) {
+            Spacer()
+            Text("📭").font(.system(size: 64))
+            Text("אֵין בַּקָּשׁוֹת חֲדָשׁוֹת")
+                .font(.system(size: 20, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+            Text("כְּשֶׁמִּישֶׁהוּ יְבַקֵּשׁ לִהְיוֹת חָבֵר שֶׁלְּךָ — זֶה יוֹפִיעַ כָּאן.")
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.8)).multilineTextAlignment(.center)
+                .padding(.horizontal, AppSpacing.xl)
+            Spacer(); Spacer()
+        }
+    }
+
+    private func accept(_ req: FriendRequest) {
+        Task {
+            await friends.acceptRequest(req)
+            Haptic.success(); SoundPlayer.shared.play(.chestOpen)
+            let card = FriendCard(id: req.fromID, name: req.name,
+                                  character3DID: req.character3DID, stars: req.stars, code: "")
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) { celebrate = card }
+            confettiTrigger += 1
+            try? await Task.sleep(nanoseconds: 1_600_000_000)
+            withAnimation { celebrate = nil }
+            if friends.incomingRequests.isEmpty { dismiss() }
+        }
+    }
+
+    private func decline(_ req: FriendRequest) {
+        Haptic.light()
+        Task { await friends.declineRequest(req) }
     }
 }

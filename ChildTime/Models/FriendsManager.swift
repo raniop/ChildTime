@@ -46,6 +46,39 @@ extension FriendCard {
     }
 }
 
+/// A PENDING friend request, stored at `friendCards/{toID}/requests/{fromID}`.
+/// Carries the sender's PUBLIC facts only (same fields as a card) so the inbox
+/// can show who's asking without a second fetch. One pending request per sender
+/// (the doc id is the sender's childID), so re-sending is idempotent.
+struct FriendRequest: Codable, Identifiable, Equatable {
+    var id: String                 // = fromID (sender childID) — one request per sender
+    var fromID: String
+    var name: String
+    var character3DID: String?
+    var stars: Int
+    var requesterUID: String       // sender's auth uid (write gate)
+    var createdAt: Date = .now
+
+    var character: Character3D { Character3DCatalog.find(character3DID) }
+}
+
+extension FriendRequest {
+    enum CodingKeys: String, CodingKey {
+        case id, fromID, name, character3DID, stars, requesterUID, createdAt
+    }
+    // Tolerant decode — older/partial docs shouldn't silently fail (see FriendCard).
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        fromID        = (try? c.decode(String.self, forKey: .fromID)) ?? ""
+        id            = (try? c.decode(String.self, forKey: .id)) ?? fromID
+        name          = (try? c.decode(String.self, forKey: .name)) ?? ""
+        character3DID = try? c.decodeIfPresent(String.self, forKey: .character3DID)
+        stars         = (try? c.decode(Int.self, forKey: .stars)) ?? 0
+        requesterUID  = (try? c.decode(String.self, forKey: .requesterUID)) ?? ""
+        createdAt     = (try? c.decode(Date.self, forKey: .createdAt)) ?? .distantPast
+    }
+}
+
 /// Backs the kid-friendly friends leaderboard. Each child keeps a public
 /// `friendCards/{childID}` doc; friendship is mutual-by-union: A adds B to A's
 /// list, and B sees A because B queries the cards that array-contain B. Removal
@@ -71,6 +104,10 @@ final class FriendsManager: ObservableObject {
     @Published var pendingFriendCode: String?
     /// The friend just added — so the UI can celebrate (confetti + their character).
     @Published var lastAddedFriend: FriendCard?
+    /// Pending friend requests OTHERS sent ME, newest first — drives the inbox.
+    @Published private(set) var incomingRequests: [FriendRequest] = []
+    /// childIDs I've sent a request to — so a profile shows "request sent ⏳".
+    @Published private(set) var outgoingRequestIDs: Set<String> = []
 
     private let defaults = UserDefaults.standard
     private var myID: String? { ProfileStore.shared.activeID?.uuidString }
@@ -198,6 +235,107 @@ final class FriendsManager: ObservableObject {
         #endif
     }
 
+    // MARK: - Friend requests (board → pending → accept)
+
+    /// Send a PENDING friend request to a child found on the leaderboard. Unlike
+    /// `addFriend(code:)` this does NOT connect immediately — it drops my public
+    /// facts into their inbox and waits for them to accept. Idempotent (the doc id
+    /// is my childID). Returns false (with `lastError`) on guard failure / error.
+    @discardableResult
+    func sendRequest(to card: FriendCard) async -> Bool {
+        #if canImport(FirebaseFirestore)
+        guard let myID else { lastError = "אֵין פְּרוֹפִיל פָּעִיל"; return false }
+        guard AuthManager.shared.isSignedIn else {
+            lastError = "צָרִיךְ לְהִתְחַבֵּר לְחֶשְׁבּוֹן כְּדֵי לִשְׁלוֹחַ בַּקָּשָׁה"
+            return false
+        }
+        guard card.id != myID else { lastError = "זֶה אַתָּה 🙂"; return false }
+        guard !isFriend(card.id) else { lastError = "אַתֶּם כְּבָר חֲבֵרִים 🙂"; return false }
+        let profile = ProfileStore.shared.active
+        let req = FriendRequest(
+            id: myID, fromID: myID,
+            name: profile?.name ?? "",
+            character3DID: profile?.character3DID,
+            stars: ProgressStore.shared.stars,
+            requesterUID: AuthManager.shared.userID ?? ""
+        )
+        guard let data = try? JSONEncoder.firestore.encode(req),
+              let dict = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+            lastError = "לֹא הִצְלַחְנוּ"; return false
+        }
+        do {
+            try await db.collection("friendCards").document(card.id)
+                .collection("requests").document(myID).setData(dict, merge: true)
+            outgoingRequestIDs.insert(card.id)
+            lastError = nil
+            log("✅ sent request to \(card.id) (\(card.name))")
+            return true
+        } catch {
+            lastError = error.localizedDescription
+            log("❌ sendRequest FAILED: \((error as NSError).code) \(error.localizedDescription)")
+            return false
+        }
+        #else
+        return false
+        #endif
+    }
+
+    /// Accept a pending request: form the friendship by adding the sender to MY
+    /// card's `friendIDs` (the normal mutual-by-union edge), then clear the inbox
+    /// doc. Both sides see each other immediately via the existing listeners.
+    func acceptRequest(_ req: FriendRequest) async {
+        #if canImport(FirebaseFirestore)
+        guard let myID else { return }
+        do {
+            try await db.collection("friendCards").document(myID).setData([
+                "ownerUID": AuthManager.shared.userID ?? "",
+                "friendIDs": FieldValue.arrayUnion([req.fromID]),
+                "hiddenIDs": FieldValue.arrayRemove([req.fromID]),
+            ], merge: true)
+            lastAddedFriend = FriendCard(id: req.fromID, name: req.name,
+                                         character3DID: req.character3DID,
+                                         stars: req.stars, code: "")
+            try? await db.collection("friendCards").document(myID)
+                .collection("requests").document(req.fromID).delete()
+            await loadLeaderboard(myID: myID)
+            refilterRequests()
+            log("✅ accepted request from \(req.fromID)")
+        } catch {
+            log("❌ acceptRequest FAILED: \((error as NSError).code) \(error.localizedDescription)")
+        }
+        #endif
+    }
+
+    /// Decline a pending request — just clear the inbox doc. No edge is formed and
+    /// the sender isn't told (gentle: no failure surfaced to anyone).
+    func declineRequest(_ req: FriendRequest) async {
+        #if canImport(FirebaseFirestore)
+        guard let myID else { return }
+        try? await db.collection("friendCards").document(myID)
+            .collection("requests").document(req.fromID).delete()
+        rawIncoming.removeAll { $0.fromID == req.fromID }
+        refilterRequests()
+        #endif
+    }
+
+    /// Whether I already have a pending request out to `id` — so a freshly opened
+    /// profile can restore the "request sent ⏳" state across launches. Reads only
+    /// my own request doc in their inbox (allowed: I'm the requester).
+    func hasOutgoingRequest(to id: String) async -> Bool {
+        #if canImport(FirebaseFirestore)
+        guard let myID else { return false }
+        if outgoingRequestIDs.contains(id) { return true }
+        if let doc = try? await db.collection("friendCards").document(id)
+            .collection("requests").document(myID).getDocument(), doc.exists {
+            outgoingRequestIDs.insert(id)
+            return true
+        }
+        return false
+        #else
+        return false
+        #endif
+    }
+
     // MARK: - Firestore
 
     #if canImport(FirebaseFirestore)
@@ -206,8 +344,12 @@ final class FriendsManager: ObservableObject {
     // Live listeners: my card + the inbound query (who added me) + one per friend.
     private var myCardListener: ListenerRegistration?
     private var inboundListener: ListenerRegistration?
+    private var requestsListener: ListenerRegistration?
     private var friendListeners: [String: ListenerRegistration] = [:]
     private var cardCache: [String: FriendCard] = [:]
+    /// Last decoded inbox (unfiltered) — re-filtered against the live friend set
+    /// whenever the board OR the inbox changes, so accepted requests drop instantly.
+    private var rawIncoming: [FriendRequest] = []
 
     /// Start real-time updates: upsert my card, then listen so the board reflects
     /// new friends + friends' star changes instantly on every device.
@@ -235,11 +377,35 @@ final class FriendsManager: ObservableObject {
                     self.rebuild(myID: id)
                 }
             }
+        // Pending requests others sent me → the inbox badge + list, live.
+        requestsListener = db.collection("friendCards").document(id).collection("requests")
+            .addSnapshotListener { [weak self] snap, _ in
+                Task { @MainActor in
+                    guard let self else { return }
+                    self.publishRequests(myID: id, docs: snap?.documents ?? [])
+                }
+            }
+    }
+
+    /// Decode the inbox docs and re-publish (filtered against the live friend set).
+    private func publishRequests(myID: String, docs: [QueryDocumentSnapshot]) {
+        rawIncoming = docs.compactMap { Self.decodeRequest($0.data()) }.filter { $0.fromID != myID }
+        refilterRequests()
+    }
+
+    /// Drop any request from someone who's already a friend (e.g. they added me by
+    /// code meanwhile, or I just accepted), newest-first. Cheap — call freely.
+    private func refilterRequests() {
+        let friendIDs = Set(leaderboard.map(\.id))
+        incomingRequests = rawIncoming
+            .filter { !friendIDs.contains($0.fromID) }
+            .sorted { $0.createdAt > $1.createdAt }
     }
 
     func stopLive() {
         myCardListener?.remove(); myCardListener = nil
         inboundListener?.remove(); inboundListener = nil
+        requestsListener?.remove(); requestsListener = nil
         friendListeners.values.forEach { $0.remove() }
         friendListeners.removeAll()
     }
@@ -306,6 +472,7 @@ final class FriendsManager: ObservableObject {
         var cards = [me]
         for fid in ids { if let c = cardCache[fid] { cards.append(c) } }
         leaderboard = cards.sorted { $0.stars > $1.stars }
+        refilterRequests()   // a new friend may resolve a pending request
     }
 
     private func upsertMyCard(id: String) async {
@@ -365,7 +532,60 @@ final class FriendsManager: ObservableObject {
         // 4) add the friend
         let ok = await addFriend(code: "FRND01")
         log("4) addFriend(FRND01) → \(ok) (lastError=\(lastError ?? "nil"))")
+        // 5) friend-REQUEST flow against the deployed rules
+        await diagRequestRules(uid: uid)
         log("=== DIAGNOSTIC END ===")
+    }
+
+    /// Exercise every friend-request rule branch against the LIVE deployed rules,
+    /// logging PASS/FAIL per step (incl. a negative test that MUST be denied).
+    private func diagRequestRules(uid: String) async {
+        log("--- request rules check ---")
+        let target = "diag-target", from = "diag-me"
+        await diagWrite(id: target, code: "TRGT01", uid: uid, label: "target card")
+        let reqRef = db.collection("friendCards").document(target).collection("requests").document(from)
+
+        // A) sender creates a request (sender gate: requesterUID == auth.uid)
+        do {
+            try await reqRef.setData(["fromID": from, "requesterUID": uid, "name": "Diag", "stars": 5, "createdAt": 0])
+            log("A) create request → ✅ PASS")
+        } catch { log("A) create request → ❌ FAIL #\((error as NSError).code) \(error.localizedDescription)") }
+
+        // B) sender refreshes / re-sends (the update rule we just added)
+        do {
+            try await reqRef.setData(["requesterUID": uid, "stars": 7], merge: true)
+            log("B) update/re-send request → ✅ PASS")
+        } catch { log("B) update/re-send request → ❌ FAIL #\((error as NSError).code) \(error.localizedDescription)") }
+
+        // C) card owner reads the request
+        do { _ = try await reqRef.getDocument(); log("C) owner read → ✅ PASS") }
+        catch { log("C) owner read → ❌ FAIL #\((error as NSError).code) \(error.localizedDescription)") }
+
+        // D) card owner lists their inbox (the live listener's query)
+        do {
+            let s = try await db.collection("friendCards").document(target).collection("requests").getDocuments()
+            log("D) owner list inbox → ✅ PASS (\(s.documents.count) doc)")
+        } catch { log("D) owner list inbox → ❌ FAIL #\((error as NSError).code) \(error.localizedDescription)") }
+
+        // E) accept: owner adds the sender to its OWN friendIDs (forms the edge)
+        do {
+            try await db.collection("friendCards").document(target)
+                .setData(["ownerUID": uid, "friendIDs": FieldValue.arrayUnion([from])], merge: true)
+            log("E) accept (friendIDs union) → ✅ PASS")
+        } catch { log("E) accept → ❌ FAIL #\((error as NSError).code) \(error.localizedDescription)") }
+
+        // F) clear the request (accept / decline cleanup)
+        do { try await reqRef.delete(); log("F) delete request → ✅ PASS") }
+        catch { log("F) delete request → ❌ FAIL #\((error as NSError).code) \(error.localizedDescription)") }
+
+        // G) NEGATIVE: spoof a different requesterUID — rules MUST deny this.
+        do {
+            try await db.collection("friendCards").document(target).collection("requests").document("diag-spoof")
+                .setData(["fromID": "diag-spoof", "requesterUID": "not-me", "name": "X", "stars": 1, "createdAt": 0])
+            log("G) spoofed requesterUID → ❌ FAIL (should have been DENIED!)")
+        } catch { log("G) spoofed requesterUID DENIED → ✅ PASS (expected) [#\((error as NSError).code)]") }
+
+        log("--- request rules check done ---")
     }
 
     private func diagWrite(id: String, code: String, uid: String, label: String) async {
@@ -489,6 +709,12 @@ final class FriendsManager: ObservableObject {
         guard !raw.isEmpty,
               let data = try? JSONSerialization.data(withJSONObject: raw) else { return nil }
         return try? JSONDecoder.firestore.decode(FriendCard.self, from: data)
+    }
+
+    private static func decodeRequest(_ raw: [String: Any]) -> FriendRequest? {
+        guard !raw.isEmpty,
+              let data = try? JSONSerialization.data(withJSONObject: raw) else { return nil }
+        return try? JSONDecoder.firestore.decode(FriendRequest.self, from: data)
     }
     #endif
 }
