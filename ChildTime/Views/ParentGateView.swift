@@ -162,6 +162,12 @@ struct ParentGateView<Content: View>: View {
     /// Unlock the gate (any method): remember it for the session, flip the local
     /// state, and notify the caller so a single auth can also drive an action.
     private func grantAccess() {
+        // On a CHILD's device, the parent isn't usually present — so any unlock of
+        // the parent gate (code or Face ID) pings the household's parents, so they
+        // know someone opened the parent controls on the kid's device.
+        if settings.deviceRole == .child {
+            LiveEventReporter.report(.parentGateOpened)
+        }
         settings.sessionUnlocked = true
         authorized = true
         onAuthorized?()

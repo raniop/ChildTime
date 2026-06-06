@@ -97,6 +97,7 @@ function liveMessage(event) {
       return { title: g("סיים זמן מסך ⏹️", "סיימה זמן מסך ⏹️"), body: `${name} ${g("סיים", "סיימה")} את זמן המשחק${dev}${tail}.` };
     }
     case "assistRequest":return { title: "בקשת עזרה 💌", body: `${name} ${g("ביקש", "ביקשה")} את עזרתכם בשאלה${dev}.` };
+    case "parentGateOpened": return { title: "🔐 נכנסו להגדרות ההורה", body: `מישהו פתח את הגדרות ההורה במכשיר של ${name}${dev}.` };
     // Intentionally NO push for milestone / streak / wheelWin / discovery —
     // those flooded the parent. Only start/finish, screen-time open/close, and
     // help requests notify.

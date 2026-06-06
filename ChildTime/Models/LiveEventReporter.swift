@@ -22,6 +22,7 @@ enum LiveEventReporter {
         case assistRequest      // child asked a parent for help
         case screenTimeStart    // child opened earned screen-time (unlocked apps)
         case screenTimeEnd      // child finished / closed the screen-time window
+        case parentGateOpened   // someone entered the parent code/Face ID on a CHILD device
     }
 
     static func report(_ type: EventType, value: String? = nil, topic: Topic? = nil,
