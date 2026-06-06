@@ -163,6 +163,10 @@ struct ParentDashboardView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            // Keep the title floating over the app gradient. Without this, iOS pops
+            // a translucent system material strip behind the inline title the moment
+            // the page scrolls — which clashes badly with the gradient on iPad.
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("מבט-על על המשפחה")
@@ -186,19 +190,21 @@ struct ParentDashboardView: View {
                 childDetailScreen(for: id)
             }
             // Long-press → delete straight from the grid (its own state so it can't
-            // clash with the detail page's delete dialog).
-            .confirmationDialog(
+            // clash with the detail page's delete dialog). An `alert` (not a
+            // `confirmationDialog`) — the latter is a popover on iPad that, when
+            // fired from a context menu, often has no anchor and never appears.
+            .alert(
                 gridDeleteProfile.map { "למחוק את \($0.name)?" } ?? "",
                 isPresented: Binding(get: { gridDeleteProfile != nil },
                                      set: { if !$0 { gridDeleteProfile = nil } }),
-                titleVisibility: .visible
-            ) {
+                presenting: gridDeleteProfile
+            ) { p in
                 Button("מחק ילד/ה", role: .destructive) {
-                    if let p = gridDeleteProfile { profiles.remove(p) }
+                    profiles.remove(p)
                     gridDeleteProfile = nil
                 }
                 Button("בטל", role: .cancel) { gridDeleteProfile = nil }
-            } message: {
+            } message: { _ in
                 Text("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק.")
             }
             .sheet(isPresented: $showingSettings) {
@@ -939,35 +945,33 @@ struct ParentDashboardView: View {
             // These dialogs live on the DETAIL page (not the root) so they present
             // IN-CONTEXT — at the root they only popped up after navigating back.
             // Delete also pops the page back to the grid.
-            .confirmationDialog(
+            .alert(
                 resettingProfile.map { "לאפס את ההתקדמות של \($0.name)?" } ?? "",
                 isPresented: Binding(get: { resettingProfile != nil },
                                      set: { if !$0 { resettingProfile = nil } }),
-                titleVisibility: .visible
-            ) {
+                presenting: resettingProfile
+            ) { p in
                 Button("אפס דקות + ניקוד", role: .destructive) {
-                    if let p = resettingProfile { resetProgress(for: p) }
+                    resetProgress(for: p)
                     resettingProfile = nil
                 }
                 Button("בטל", role: .cancel) { resettingProfile = nil }
-            } message: {
+            } message: { _ in
                 Text("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן, ועונש טעויות. לא ימחק שמות, פרופילים או פריטי קוסמטיקה.")
             }
-            .confirmationDialog(
+            .alert(
                 deletingProfile.map { "למחוק את \($0.name)?" } ?? "",
                 isPresented: Binding(get: { deletingProfile != nil },
                                      set: { if !$0 { deletingProfile = nil } }),
-                titleVisibility: .visible
-            ) {
+                presenting: deletingProfile
+            ) { p in
                 Button("מחק ילד/ה", role: .destructive) {
-                    if let p = deletingProfile {
-                        profiles.remove(p)     // removes locally + from the cloud
-                        navPath.removeAll()    // pop back to the family grid
-                    }
+                    profiles.remove(p)     // removes locally + from the cloud
+                    navPath.removeAll()    // pop back to the family grid
                     deletingProfile = nil
                 }
                 Button("בטל", role: .cancel) { deletingProfile = nil }
-            } message: {
+            } message: { _ in
                 Text("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק.")
             }
         } else {
