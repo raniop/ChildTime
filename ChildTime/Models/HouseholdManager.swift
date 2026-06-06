@@ -500,7 +500,12 @@ final class HouseholdManager: ObservableObject {
         DataExporter.wipeLocalData()             // local cache only — never the cloud
         s.pendingJoinPayload = nil
         s.joinedChildID = nil
-        s.deviceRole = .unset                    // → fresh RolePicker / scan flow
+        // Stay a CHILD device → the reconnect (scan) screen, NEVER the role picker.
+        // A removed child device must not be able to silently become a parent (which
+        // would expose the parent control center on a kid's iPad). `justDisconnected`
+        // also hides the "back to role choice" escape on the join screen.
+        s.deviceRole = .child
+        s.justDisconnected = true
         #endif
     }
 

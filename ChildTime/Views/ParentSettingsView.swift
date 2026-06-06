@@ -22,8 +22,10 @@ struct ParentSettingsView: View {
     @State private var exportURL: URL?
     @State private var showDeleteAllConfirm = false
     @State private var showResetDeviceConfirm = false
+    @State private var showRolePickerConfirm = false
     @State private var deleting = false
     @State private var testPushMessage: String?
+    @State private var removalNote: String?
 
     var body: some View {
         NavigationStack {
@@ -39,6 +41,7 @@ struct ParentSettingsView: View {
                 soundsSection
                 appsSection
                 pinSection
+                deviceSection
                 privacySection
                 versionSection
             }
@@ -455,6 +458,44 @@ struct ParentSettingsView: View {
             Text(settings.blockAllExceptAllowed
                  ? "כל האפליקציות ייחסמו עד שהילד מרוויח זמן — חוץ מהאפליקציות שתבחרו כ\"מותרות\". חובה לכלול את ChildTime ברשימה."
                  : "רק האפליקציות שתבחרו ייחסמו. כל השאר נשארות פתוחות.")
+        }
+    }
+
+    /// Device-level escape hatches a parent may need from any device: send this
+    /// device back to the role picker (e.g. it ended up the wrong role), and open a
+    /// short window to uninstall the app (which is blocked on a child device).
+    private var deviceSection: some View {
+        Section {
+            Button {
+                showRolePickerConfirm = true
+            } label: {
+                Label("הַחְלֵף תַּפְקִיד מַכְשִׁיר (חֲזָרָה לִבְחִירָה)", systemImage: "person.2.badge.gearshape")
+            }
+            Button {
+                Haptic.medium()
+                settings.appRemovalUnlockedUntil = Date().addingTimeInterval(5 * 60)
+                shields.setAppRemovalLocked(false)
+                removalNote = "נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת. צְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד."
+            } label: {
+                Label("אַפְשְׁרוּ מְחִיקַת הָאַפְּלִיקַצְיָה (5 דַּקּוֹת)", systemImage: "trash")
+            }
+            if let removalNote {
+                Text(removalNote).font(.footnote).foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("מַכְשִׁיר")
+        } footer: {
+            Text("\"הַחְלֵף תַּפְקִיד\" מַחֲזִיר אֶת הַמַּכְשִׁיר לְמָסַךְ \"מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר?\" — לְמָשָׁל לְהָפֹךְ מַכְשִׁיר הוֹרֶה בַּחֲזָרָה לְמַכְשִׁיר יֶלֶד. בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה; הַכַּפְתּוֹר פּוֹתֵחַ חַלּוֹן קָצָר לְהָסָרָה אֲמִתִּית.")
+        }
+        .confirmationDialog("לַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד?",
+                            isPresented: $showRolePickerConfirm, titleVisibility: .visible) {
+            Button("חֲזֹר לִבְחִירָה") {
+                settings.deviceRole = .unset
+                dismiss()
+            }
+            Button("בִּטּוּל", role: .cancel) {}
+        } message: {
+            Text("הַמַּכְשִׁיר יַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד. הַנְּתוּנִים בֶּעָנָן נִשְׁמָרִים — אֶפְשָׁר לִבְחֹר יֶלֶד וְלִסְרֹק שׁוּב, אוֹ לְהִשָּׁאֵר הוֹרֶה.")
         }
     }
 

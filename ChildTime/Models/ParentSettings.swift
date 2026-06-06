@@ -42,6 +42,7 @@ final class ParentSettings: ObservableObject {
         static let pendingJoinPayload = "pendingJoinPayload"
         static let joinedChildID = "joinedChildID"
         static let hasSetParentPIN = "hasSetParentPIN"
+        static let justDisconnected = "justDisconnected"
     }
 
     /// What this device is used for — chosen once at first launch. Steers the
@@ -280,6 +281,13 @@ final class ParentSettings: ObservableObject {
     @Published var hasSetParentPIN: Bool {
         didSet { defaults.set(hasSetParentPIN, forKey: Key.hasSetParentPIN) }
     }
+    /// This CHILD device was just disconnected (parent removed it / tapped
+    /// "disconnect"). It stays a child and shows the reconnect (scan) screen —
+    /// never the role picker — so a kid's device can't silently become a parent.
+    /// Cleared once it rejoins. Persisted so it survives an app relaunch.
+    @Published var justDisconnected: Bool {
+        didSet { defaults.set(justDisconnected, forKey: Key.justDisconnected) }
+    }
 
     private init() {
         let d = AppGroup.defaults
@@ -380,6 +388,7 @@ final class ParentSettings: ObservableObject {
         self.pendingJoinPayload = d.string(forKey: Key.pendingJoinPayload)
         self.joinedChildID = d.string(forKey: Key.joinedChildID)
         self.hasSetParentPIN = d.bool(forKey: Key.hasSetParentPIN)
+        self.justDisconnected = d.bool(forKey: Key.justDisconnected)
     }
 
     var hasConsented: Bool { consentVersionAccepted >= Consent.currentVersion }

@@ -19,37 +19,59 @@ struct ChildJoinView: View {
             FloatingOrbs.home()
             SparkleField(count: 22, size: 14)
 
-            // Back to device-role choice (in case "child" was tapped by mistake).
-            VStack {
-                HStack {
-                    Button {
-                        Haptic.light()
-                        settings.deviceRole = .unset
-                    } label: {
-                        Label("חֲזָרָה", systemImage: "chevron.backward")
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 14).padding(.vertical, 8)
-                            .background(.white.opacity(0.16), in: Capsule())
+            // Back to device-role choice — ONLY during first-time setup (in case
+            // "child" was tapped by mistake). HIDDEN once this is an established
+            // child device that was disconnected: it must never expose a one-tap
+            // path to becoming a parent device. (A parent repurposes a device from
+            // the parent-gated Settings instead.)
+            if !settings.justDisconnected {
+                VStack {
+                    HStack {
+                        Button {
+                            Haptic.light()
+                            settings.deviceRole = .unset
+                        } label: {
+                            Label("חֲזָרָה", systemImage: "chevron.backward")
+                                .font(.system(size: 15, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 14).padding(.vertical, 8)
+                                .background(.white.opacity(0.16), in: Capsule())
+                        }
+                        Spacer()
                     }
                     Spacer()
                 }
-                Spacer()
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.top, AppSpacing.sm)
+                .zIndex(2)
             }
-            .padding(.horizontal, AppSpacing.md)
-            .padding(.top, AppSpacing.sm)
-            .zIndex(2)
 
             ScrollView {
                 VStack(spacing: AppSpacing.lg) {
                     CompanionView(controller: companion, size: 120)
-                    Text("הֵיי! בּוֹאוּ נִתְחַבֵּר")
-                        .font(.system(size: 30, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                    Text("בְּמַכְשִׁיר הַהוֹרֶה מוֹפִיעַ קוֹד QR לַיֶּלֶד.\nסִרְקוּ אוֹתוֹ כָּאן וְהַמַּכְשִׁיר יִתְחַבֵּר.")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.9))
-                        .multilineTextAlignment(.center)
+                    if settings.justDisconnected {
+                        Text("הַמַּכְשִׁיר נוּתַּק")
+                            .font(.system(size: 30, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                        Label("סִרְקוּ שׁוּב אֶת קוֹד הַהוֹרֶה כְּדֵי לְהַמְשִׁיךְ", systemImage: "qrcode.viewfinder")
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 16).padding(.vertical, 10)
+                            .background(AppColor.almostWarm.opacity(0.9), in: Capsule())
+                        Text("הַהִתְקַדְּמוּת שֶׁלְּךָ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד.")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.85))
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Text("הֵיי! בּוֹאוּ נִתְחַבֵּר")
+                            .font(.system(size: 30, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                        Text("בְּמַכְשִׁיר הַהוֹרֶה מוֹפִיעַ קוֹד QR לַיֶּלֶד.\nסִרְקוּ אוֹתוֹ כָּאן וְהַמַּכְשִׁיר יִתְחַבֵּר.")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.9))
+                            .multilineTextAlignment(.center)
+                    }
 
                     Button { showScanner = true } label: {
                         Label("סִרְקוּ קוֹד QR", systemImage: "qrcode.viewfinder")
@@ -158,6 +180,7 @@ struct ChildJoinView: View {
             }
             // Bind THIS device to this specific child.
             ParentSettings.shared.joinedChildID = cid.uuidString
+            ParentSettings.shared.justDisconnected = false   // reconnected → clear
             profiles.setActiveID(cid)
             await household.registerDevice(forChildID: cid)
             // PULL the child's existing cloud progress NOW (stars / diamonds /
