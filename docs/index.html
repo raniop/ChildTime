@@ -107,10 +107,10 @@
   .step h3{font-size:21px; margin-bottom:8px}
   .step p{opacity:.88; font-size:15px}
 
-  /* video */
-  .video-wrap{max-width:380px; margin:0 auto; border-radius:38px; overflow:hidden;
-    border:10px solid #1c1340; box-shadow:0 30px 80px rgba(0,0,0,.5)}
-  .video-wrap video{display:block; width:100%; background:#000}
+  /* screens — split into kid side + parent side */
+  .side{margin-top:34px}
+  .side-title{text-align:center; font-size:25px; font-weight:900; margin-bottom:6px}
+  .side-sub{text-align:center; max-width:580px; margin:0 auto 20px; opacity:.86; font-size:16px}
   .shots{display:flex; gap:18px; overflow-x:auto; padding:8px 4px 20px;
     scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch}
   .shots figure{flex:0 0 auto; margin:0; text-align:center; scroll-snap-align:center}
@@ -202,7 +202,7 @@
       <svg class="apple" viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.1 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
       <span class="tx"><small>בקרוב ב־</small><b>App&nbsp;Store</b></span>
     </a>
-    <a class="watch" href="#video"><span class="play">▶</span> צפו בסרטון</a>
+    <a class="watch" href="#screens"><span class="play">👀</span> הצצה לאפליקציה</a>
   </div>
   <div class="pill">🔒 מאובטח למשפחה · ללא פרסומות לילד</div>
 </div></section>
@@ -219,18 +219,31 @@
   </div>
 </div></section>
 
-<!-- VIDEO -->
-<section id="video"><div class="wrap">
+<!-- SCREENS -->
+<section id="screens"><div class="wrap">
   <div class="eyebrow reveal">הצצה</div>
   <h2 class="title reveal">טופי בפעולה</h2>
-  <p class="lead reveal">כמה מסכים מהאפליקציה — מצד הילד ומצד ההורה.</p>
-  <div class="shots reveal">
-    <figure><img src="tofy-kid-1.jpg" alt="מסך משחק" loading="lazy"><figcaption>🎮 משחק ולמידה</figcaption></figure>
-    <figure><img src="tofy-kid-2.jpg" alt="חנות יהלומים" loading="lazy"><figcaption>💎 חנות</figcaption></figure>
-    <figure><img src="tofy-kid-3.jpg" alt="גלגל מזל" loading="lazy"><figcaption>🎡 גלגל מזל</figcaption></figure>
-    <figure><img src="tofy-kid-4.jpg" alt="חברים ולוח מובילים" loading="lazy"><figcaption>🏆 חברים</figcaption></figure>
-    <figure><img src="tofy-parent-1.jpg" alt="מבט על המשפחה" loading="lazy"><figcaption>👨‍👩‍👧 מבט הורה</figcaption></figure>
-    <figure><img src="tofy-parent-2.jpg" alt="בקרת המכשיר" loading="lazy"><figcaption>🔒 בקרת מכשיר</figcaption></figure>
+  <p class="lead reveal">לטופי שני צדדים: מה שהילד רואה ומשחק — ומה שההורה רואה ושולט בו, ממכשיר נפרד.</p>
+
+  <div class="side reveal">
+    <h3 class="side-title">🧒 צד הילד</h3>
+    <p class="side-sub">הרפתקה צבעונית במכשיר של הילד: עונים על שאלות, אוספים כוכבים ויהלומים, ומרוויחים דקות משחק אמיתיות.</p>
+    <div class="shots">
+      <figure><img src="tofy-kid-1.jpg" alt="מסך משחק ולמידה" loading="lazy"><figcaption>🎮 משחק ולמידה</figcaption></figure>
+      <figure><img src="tofy-kid-2.jpg" alt="חנות יהלומים" loading="lazy"><figcaption>💎 חנות יהלומים</figcaption></figure>
+      <figure><img src="tofy-kid-3.jpg" alt="גלגל מזל" loading="lazy"><figcaption>🎡 גלגל מזל</figcaption></figure>
+      <figure><img src="tofy-kid-4.jpg" alt="חברים ולוח מובילים" loading="lazy"><figcaption>🏆 חברים ולוח מובילים</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="side reveal">
+    <h3 class="side-title">👨‍👩‍👧 צד ההורה</h3>
+    <p class="side-sub">מסך בקרה במכשיר נפרד, נעול בקוד וב-Face ID: רואים התקדמות, מקבלים המלצות, ושולטים בזמן המסך וברמת הקושי — מכל מקום.</p>
+    <div class="shots">
+      <figure><img src="tofy-parent-1.jpg" alt="מבט על המשפחה" loading="lazy"><figcaption>👨‍👩‍👧 מבט על המשפחה</figcaption></figure>
+      <figure><img src="tofy-parent-2.jpg" alt="בקרת המכשיר" loading="lazy"><figcaption>🔒 בקרת מכשיר</figcaption></figure>
+      <figure><img src="tofy-parent-3.jpg" alt="הגדרות הורה" loading="lazy"><figcaption>⚙️ הגדרות הורה</figcaption></figure>
+    </div>
   </div>
 </div></section>
 
