@@ -37,6 +37,14 @@ final class QuestionReporter {
             "createdAt": Date().timeIntervalSince1970,
         ]
         payload["reportedBy"] = AuthManager.shared.userID ?? "anonymous"
+        // Who to identify in the report email: the child profile that was playing,
+        // plus the parent account (email / name). The Cloud Function falls back to
+        // a parents/{uid} lookup if these are empty (e.g. on a child device).
+        if let childName = ProfileStore.shared.active?.name, !childName.isEmpty {
+            payload["childName"] = childName
+        }
+        if let email = AuthManager.shared.email, !email.isEmpty { payload["reporterEmail"] = email }
+        if let name = AuthManager.shared.displayName, !name.isEmpty { payload["reporterName"] = name }
         if let reason, !reason.isEmpty { payload["reason"] = reason }
         Firestore.firestore().collection("questionReports").addDocument(data: payload)
         #endif

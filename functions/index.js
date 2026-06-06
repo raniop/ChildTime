@@ -448,6 +448,24 @@ exports.onQuestionReport = onDocumentCreated(
     const when = r.createdAt
       ? new Date(Number(r.createdAt) * 1000).toLocaleString("he-IL", { timeZone: "Asia/Jerusalem" })
       : "";
+
+    // Identify the reporter for the email: prefer the parent email/name the client
+    // attached; if absent (e.g. reported from a child device), look up the account
+    // by its uid. Falls back to the raw uid so the line is never empty.
+    let reporterEmail = r.reporterEmail || "";
+    let reporterName = r.reporterName || "";
+    if ((!reporterEmail || !reporterName) && r.reportedBy && r.reportedBy !== "anonymous") {
+      try {
+        const p = await db.collection("parents").doc(r.reportedBy).get();
+        if (p.exists) {
+          reporterEmail = reporterEmail || p.data().email || "";
+          reporterName = reporterName || p.data().displayName || "";
+        }
+      } catch (e) { console.warn("[questionReport] parent lookup failed:", e && e.message); }
+    }
+    const reporter = [reporterName, reporterEmail].filter(Boolean).join(" · ")
+      || r.reportedBy || "anonymous";
+
     const lines = [
       `דווח על שאלה לא טובה:`,
       ``,
@@ -456,7 +474,9 @@ exports.onQuestionReport = onDocumentCreated(
       `נושא: ${r.topic || "-"}`,
       `סיבה: ${r.reason || "(לא צוינה)"}`,
       ``,
-      `— דווח ע"י (uid): ${r.reportedBy || "anonymous"}`,
+      `— ילד: ${r.childName || "-"}`,
+      `— דווח ע"י: ${reporter}`,
+      `— uid: ${r.reportedBy || "anonymous"}`,
       `— מתי: ${when}`,
     ];
 
