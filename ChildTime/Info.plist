@@ -2,25 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSSupportsLiveActivities</key>
-	<true/>
-	<key>UIApplicationShortcutItems</key>
-	<array>
-		<dict>
-			<key>UIApplicationShortcutItemType</key>
-			<string>com.rani.ChildTime.kidmode</string>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>מצב ילד</string>
-			<key>UIApplicationShortcutItemSubtitle</key>
-			<string>נעל את הטלפון לילד</string>
-			<key>UIApplicationShortcutItemIconType</key>
-			<string>UIApplicationShortcutIconTypeLove</string>
-		</dict>
-	</array>
-	<key>GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS</key>
-	<false/>
-	<key>GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED</key>
-	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -37,8 +18,6 @@
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
-	<key>CFBundleVersion</key>
-	<string>33</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -62,13 +41,21 @@
 			</array>
 		</dict>
 	</array>
+	<key>CFBundleVersion</key>
+	<string>79</string>
+	<key>GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS</key>
+	<false/>
+	<key>GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED</key>
+	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<key>NSFaceIDUsageDescription</key>
-	<string>פתיחת הגדרות ההורה באמצעות Face ID במקום הקלדת הקוד.</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>סריקת קוד QR כדי לקשר בין מכשירים במשפחה.</string>
-	<key>LSRequiresIPhoneOS</key>
+	<key>NSFaceIDUsageDescription</key>
+	<string>פתיחת הגדרות ההורה באמצעות Face ID במקום הקלדת הקוד.</string>
+	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
@@ -77,6 +64,19 @@
 		<key>UISceneConfigurations</key>
 		<dict/>
 	</dict>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeLove</string>
+			<key>UIApplicationShortcutItemSubtitle</key>
+			<string>נעל את הטלפון לילד</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>מצב ילד</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.rani.ChildTime.kidmode</string>
+		</dict>
+	</array>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
