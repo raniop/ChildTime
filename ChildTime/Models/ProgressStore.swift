@@ -1155,6 +1155,15 @@ final class ProgressStore: ObservableObject {
     /// `manual: true` marks a parent's one-time "quick open" grant — a fixed
     /// wall-clock window whose leftover minutes are NEVER banked back to the
     /// earned pool (see `endUnlockAndReturnRemainingMinutes`).
+    /// Apply a parent's minute grant/deduction to the live balance (clamped ≥0).
+    /// Bumps revision via the normal change path so it syncs back to the cloud and
+    /// the parent's dashboard. Used by RemoteSyncManager when the child's device
+    /// consumes a `pendingMinuteAdjustment` command.
+    func addPendingMinutes(_ delta: Int) {
+        guard delta != 0 else { return }
+        pendingMinutes = max(0, pendingMinutes + delta)
+    }
+
     func startUnlock(minutes: Int, manual: Bool = false) {
         let end = Date().addingTimeInterval(TimeInterval(minutes * 60))
         unlockIsManual = manual

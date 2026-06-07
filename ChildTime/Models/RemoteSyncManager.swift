@@ -42,13 +42,20 @@ final class RemoteSyncManager: ObservableObject {
     /// Snapshots pulled from Firestore for non-active profiles, keyed by
     /// profile UUID. The dashboard merges these in.
     @Published private(set) var remoteSnapshots: [UUID: ProgressSnapshot] = [:]
+    /// Parent minute grants still WAITING to be applied on the child's device,
+    /// keyed by child UUID (the `pendingMinuteAdjustment` field on the child doc).
+    /// The dashboard adds this to the shown balance so a +10/-5 reflects instantly
+    /// and doesn't "revert" while it's in flight.
+    @Published private(set) var pendingAdjustments: [UUID: Int] = [:]
 
     private var cancellables: Set<AnyCancellable> = []
     private var saveDebounce: Task<Void, Never>? = nil
+    private var applyingGrant = false
 
     #if canImport(FirebaseFirestore)
     private var db: Firestore { Firestore.firestore() }
     private var listeners: [String: ListenerRegistration] = [:]   // keyed by profileID
+    private var childDocListeners: [String: ListenerRegistration] = [:]   // child doc (for minute grants)
     #endif
 
     private init() {}
@@ -130,23 +137,41 @@ final class RemoteSyncManager: ObservableObject {
     /// snapshot directly, in a transaction that BUMPS the revision so the child's
     /// device accepts it (a stale local push from the parent would otherwise lose
     /// the revision race and be ignored). Works for ANY child, active or not.
+    /// A parent's +10 / −5 minute control. Writes a DELTA COMMAND
+    /// (`pendingMinuteAdjustment += delta`, atomic) onto the child doc rather than
+    /// editing the live `state/current` snapshot. Editing the snapshot raced the
+    /// child device's fast-churning `revision` (it bumps on every play tick), so
+    /// the child's next upload reverted the parent's change — the adjustment
+    /// "didn't work". The child's device consumes this command additively
+    /// (`applyPendingMinuteGrant`), so grants always land and even compose, and
+    /// nothing else (stars / diamonds) is touched.
     func adjustChildMinutes(childID: UUID, deltaMinutes: Int) {
         #if canImport(FirebaseFirestore)
+        // Optimistic local bump so the parent sees it immediately (reconciles when
+        // the child device applies it and `pendingMinuteAdjustment` returns to 0).
+        pendingAdjustments[childID, default: 0] += deltaMinutes
+        db.collection("children").document(childID.uuidString)
+            .setData(["pendingMinuteAdjustment": FieldValue.increment(Int64(deltaMinutes))], merge: true)
+        #endif
+    }
+
+    /// CHILD device: consume any parent minute grant on this child's doc exactly
+    /// once. Reads + zeroes `pendingMinuteAdjustment` in a transaction (so two
+    /// devices can't double-apply), then adds it to the live balance.
+    private func applyPendingMinuteGrant(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        guard !applyingGrant else { return }
+        applyingGrant = true
         let ref = db.collection("children").document(childID.uuidString)
-            .collection("state").document("current")
         db.runTransaction({ txn, _ -> Any? in
-            let existing = try? txn.getDocument(ref)
-            var snap = (existing?.data()).flatMap { Self.decode($0) } ?? ProgressSnapshot()
-            snap.pendingMinutes = max(0, snap.pendingMinutes + deltaMinutes)
-            snap.revision += 1
-            snap.lastModifiedAt = Date()
-            snap.deviceID = ProgressSnapshot.thisDeviceID
-            if let data = Self.encode(snap) {
-                txn.setData(data, forDocument: ref, merge: true)
-            }
-            return nil
-        }) { [weak self] _, _ in
-            self?.refreshNow()
+            let doc = try? txn.getDocument(ref)
+            let adj = (doc?.data()?["pendingMinuteAdjustment"] as? Int) ?? 0
+            if adj != 0 { txn.updateData(["pendingMinuteAdjustment": 0], forDocument: ref) }
+            return adj
+        }) { [weak self] result, _ in
+            self?.applyingGrant = false
+            let adj = (result as? Int) ?? 0
+            if adj != 0 { ProgressStore.shared.addPendingMinutes(adj) }
         }
         #endif
     }
@@ -266,8 +291,11 @@ final class RemoteSyncManager: ObservableObject {
         for (id, listener) in listeners where !localIDs.contains(id) {
             listener.remove()
             listeners.removeValue(forKey: id)
+            childDocListeners[id]?.remove()
+            childDocListeners.removeValue(forKey: id)
             if let uuid = UUID(uuidString: id) {
                 remoteSnapshots.removeValue(forKey: uuid)
+                pendingAdjustments.removeValue(forKey: uuid)
             }
         }
         // Add listeners for new ones — household-owned `children` docs.
@@ -282,6 +310,30 @@ final class RemoteSyncManager: ObservableObject {
                     self.handleRemoteSnapshot(snap, profileID: profile.id)
                 }
             listeners[id] = listener
+
+            // Watch the child DOC for parent minute grants (pendingMinuteAdjustment):
+            // surface it for the parent's display, and — on THIS child's own play
+            // device — consume it additively.
+            childDocListeners[id] = db.collection("children").document(id)
+                .addSnapshotListener { [weak self] doc, _ in
+                    guard let self else { return }
+                    let adj = (doc?.data()?["pendingMinuteAdjustment"] as? Int) ?? 0
+                    Task { @MainActor in
+                        if adj != 0 { self.pendingAdjustments[profile.id] = adj }
+                        else { self.pendingAdjustments.removeValue(forKey: profile.id) }
+                    }
+                    // Consume the grant on whatever device is currently BEING this
+                    // child: its own bound play device, or the parent's phone while
+                    // it's in Kid Mode for this child. The read+zero transaction
+                    // guarantees it's applied exactly once even if both are open.
+                    let s = ParentSettings.shared
+                    let isBoundChildDevice = s.deviceRole == .child && s.joinedChildID == id
+                    let isKidModeForThis = KidModeManager.shared.active
+                        && KidModeManager.shared.childID?.uuidString == id
+                    if adj != 0 && (isBoundChildDevice || isKidModeForThis) {
+                        self.applyPendingMinuteGrant(childID: profile.id)
+                    }
+                }
         }
     }
 

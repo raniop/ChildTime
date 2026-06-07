@@ -58,10 +58,12 @@ struct ParentDashboardView: View {
         _ = refreshTrigger
         let locals = ProgressVault.shared.allSnapshots(for: profiles.profiles)
         let mapped: [(profile: Profile, snapshot: ProgressSnapshot)] = locals.map { row in
-            if let remoteSnap = remote.remoteSnapshots[row.profile.id] {
-                return (row.profile, remoteSnap)
-            }
-            return row
+            var snap = remote.remoteSnapshots[row.profile.id] ?? row.snapshot
+            // Fold in any parent minute grant still in flight to the child's device,
+            // so a +10/−5 shows immediately and doesn't appear to "revert".
+            let adj = remote.pendingAdjustments[row.profile.id, default: 0]
+            if adj != 0 { snap.pendingMinutes = max(0, snap.pendingMinutes + adj) }
+            return (row.profile, snap)
         }
         // Fixed alphabetical order by name (Hebrew א,ב,ג…) so the list never
         // reshuffles when a child starts/stops playing. Locale-aware compare.
