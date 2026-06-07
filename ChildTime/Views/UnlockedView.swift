@@ -55,18 +55,22 @@ struct UnlockedView: View {
 
                 Spacer()
 
-                Button {
-                    endEarly()
-                } label: {
-                    Text("סִיַּמְתִּי לְשַׂחֵק")
-                        .font(.system(size: 22, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, AppSpacing.xl)
-                        .padding(.vertical, AppSpacing.md)
-                        .background(.white.opacity(0.18), in: Capsule())
+                // A parent's one-time grant is a FIXED window — no early-stop (and
+                // nothing to bank). Earned time stays pausable via this button.
+                if !progress.unlockIsManual {
+                    Button {
+                        endEarly()
+                    } label: {
+                        Text("סִיַּמְתִּי לְשַׂחֵק")
+                            .font(.system(size: 22, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, AppSpacing.xl)
+                            .padding(.vertical, AppSpacing.md)
+                            .background(.white.opacity(0.18), in: Capsule())
+                    }
+                    .buttonStyle(.juicy)
+                    .padding(.bottom, AppSpacing.xxl)
                 }
-                .buttonStyle(.juicy)
-                .padding(.bottom, AppSpacing.xxl)
             }
 
             // Sleepy companion

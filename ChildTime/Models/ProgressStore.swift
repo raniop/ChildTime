@@ -11,6 +11,7 @@ final class ProgressStore: ObservableObject {
         static let totalCorrect = "totalCorrect"
         static let totalAnswered = "totalAnswered"
         static let unlockEndsAt = "unlockEndsAt"
+        static let unlockIsManual = "unlockIsManual"
         static let stars = "stars"
         static let diamonds = "diamonds"
         static let xp = "xp"
@@ -66,6 +67,13 @@ final class ProgressStore: ObservableObject {
             if let d = unlockEndsAt { defaults.set(d, forKey: Key.unlockEndsAt) }
             else { defaults.removeObject(forKey: Key.unlockEndsAt) }
         }
+    }
+    /// True when the CURRENT window is a parent's one-time manual grant ("quick
+    /// open") — a fixed wall-clock window that must NOT bank its leftover minutes
+    /// back into the child's earned pool when it ends, and offers no early-stop.
+    /// Earned redemptions leave this false (they're pausable + bankable).
+    @Published private(set) var unlockIsManual: Bool {
+        didSet { defaults.set(unlockIsManual, forKey: Key.unlockIsManual) }
     }
     @Published private(set) var stars: Int {
         didSet { defaults.set(stars, forKey: Key.stars) }
@@ -328,6 +336,7 @@ final class ProgressStore: ObservableObject {
         self.totalCorrect = d.integer(forKey: Key.totalCorrect)
         self.totalAnswered = d.integer(forKey: Key.totalAnswered)
         self.unlockEndsAt = d.object(forKey: Key.unlockEndsAt) as? Date
+        self.unlockIsManual = d.bool(forKey: Key.unlockIsManual)
         self.stars = d.integer(forKey: Key.stars)
         self.ownedCharacterIDs = Set(d.stringArray(forKey: Key.ownedCharacters) ?? [])
         self.diamonds = d.integer(forKey: Key.diamonds)
@@ -1143,8 +1152,12 @@ final class ProgressStore: ObservableObject {
         return amount
     }
 
-    func startUnlock(minutes: Int) {
+    /// `manual: true` marks a parent's one-time "quick open" grant — a fixed
+    /// wall-clock window whose leftover minutes are NEVER banked back to the
+    /// earned pool (see `endUnlockAndReturnRemainingMinutes`).
+    func startUnlock(minutes: Int, manual: Bool = false) {
         let end = Date().addingTimeInterval(TimeInterval(minutes * 60))
+        unlockIsManual = manual
         unlockEndsAt = end
         // Lock-screen / Dynamic Island countdown of the remaining play time.
         PlayTimeLiveActivity.start(endsAt: end,
@@ -1153,6 +1166,7 @@ final class ProgressStore: ObservableObject {
 
     func endUnlock() {
         unlockEndsAt = nil
+        unlockIsManual = false
         PlayTimeLiveActivity.end()
     }
 
@@ -1194,6 +1208,9 @@ final class ProgressStore: ObservableObject {
     /// Returns the number of minutes returned.
     @discardableResult
     func endUnlockAndReturnRemainingMinutes() -> Int {
+        // A parent's one-time manual grant is a fixed window — its leftover time is
+        // NOT the child's to keep. End it without banking anything back.
+        if unlockIsManual { endUnlock(); return 0 }
         let remainingSeconds = unlockSecondsRemaining
         // Round to nearest full minute (don't credit partial seconds back).
         let remainingMinutes = remainingSeconds / 60

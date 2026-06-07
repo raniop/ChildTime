@@ -382,7 +382,7 @@ struct ChildDeviceControlsView: View {
             // window. (Previously it added on top, which piled up onto the child's
             // earned/redeemed time and caused confusion.)
             shields.unlock(minutes: minutes)
-            progress.startUnlock(minutes: minutes)
+            progress.startUnlock(minutes: minutes, manual: true)   // one-time fixed window, not bankable
             dismiss()
         }
     }
