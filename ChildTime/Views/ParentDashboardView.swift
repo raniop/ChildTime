@@ -113,6 +113,24 @@ struct ParentDashboardView: View {
                             }
                             .animation(.spring(response: 0.5, dampingFraction: 0.85),
                                        value: rows.map(\.profile.id))
+
+                            // Report-a-problem — a plain button BELOW everything
+                            // (replaces the floating bubble that overlapped a child
+                            // card on smaller screens).
+                            if isRoot {
+                                Button { showingFeedback = true } label: {
+                                    Label("דִּוּוּחַ עַל תַּקָּלָה", systemImage: "exclamationmark.bubble.fill")
+                                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                                        .foregroundStyle(.white)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 13)
+                                        .background(.white.opacity(0.14), in: Capsule())
+                                        .overlay(Capsule().stroke(.white.opacity(0.25), lineWidth: 1))
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.top, AppSpacing.sm)
+                                .accessibilityLabel("דיווח על תקלה לצוות")
+                            }
                         }
                         .padding(AppSpacing.lg)
                         .frame(maxWidth: 720)
@@ -145,21 +163,6 @@ struct ParentDashboardView: View {
                     // container/content mismatch that let the page drift sideways —
                     // matching the container fixes it so it scrolls vertically only.
                     .environment(\.layoutDirection, .leftToRight)
-                }
-            }
-            .overlay(alignment: .bottomTrailing) {
-                if isRoot && !profiles.profiles.isEmpty {
-                    Button { showingFeedback = true } label: {
-                        Image(systemName: "text.bubble.fill")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundStyle(.white)
-                            .frame(width: 56, height: 56)
-                            .background(AppGradient.success, in: Circle())
-                            .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
-                            .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
-                    }
-                    .padding(20)
-                    .accessibilityLabel("שליחת פידבק לצוות")
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
