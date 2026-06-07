@@ -116,12 +116,12 @@ struct ParentDashboardView: View {
                             .animation(.spring(response: 0.5, dampingFraction: 0.85),
                                        value: rows.map(\.profile.id))
 
-                            // Report-a-problem — a plain button BELOW everything
+                            // Feedback to the team — a plain button BELOW everything
                             // (replaces the floating bubble that overlapped a child
                             // card on smaller screens).
                             if isRoot {
                                 Button { showingFeedback = true } label: {
-                                    Label("דִּוּוּחַ עַל תַּקָּלָה", systemImage: "exclamationmark.bubble.fill")
+                                    Label("פִידְבֵּק וְהַצָּעוֹת", systemImage: "text.bubble.fill")
                                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                                         .foregroundStyle(.white)
                                         .frame(maxWidth: .infinity)
@@ -131,7 +131,7 @@ struct ParentDashboardView: View {
                                 }
                                 .buttonStyle(.plain)
                                 .padding(.top, AppSpacing.sm)
-                                .accessibilityLabel("דיווח על תקלה לצוות")
+                                .accessibilityLabel("שליחת פידבק לצוות")
                             }
                         }
                         .padding(AppSpacing.lg)
