@@ -309,4 +309,30 @@ struct ChildTimeTests {
         #expect(merged2.dayStreak == 7)
         #expect(merged2.lastSessionDate == later)
     }
+
+    // MARK: - Chest bonus minutes
+
+    /// REGRESSION (the "gold box doesn't add minutes" report): end-of-session
+    /// wood/gold chests used to grant 0 minutes by design, so opening one never
+    /// raised the play-time wallet. They now hand out a small bonus, climbing with
+    /// the tier — and opening a chest must actually credit the wallet.
+    @MainActor @Test func sessionChests_grantBonusMinutes() {
+        // 1. Config: the tiers carry bonus minutes (wood < gold < magic < legendary).
+        #expect(RewardEngine.chestContents(kind: .wood, correctInSession: 5, minutesPerCorrect: 1).minutes == 1)
+        #expect(RewardEngine.chestContents(kind: .gold, correctInSession: 5, minutesPerCorrect: 1).minutes == 3)
+        #expect(RewardEngine.chestContents(kind: .magic, correctInSession: 0, minutesPerCorrect: 0).minutes == 5)
+        #expect(RewardEngine.chestContents(kind: .legendary, correctInSession: 0, minutesPerCorrect: 0).minutes == 15)
+
+        // 2. Opening a gold chest actually credits the wallet (only assert when no
+        //    daily cap is in force, so the whole bonus lands today rather than
+        //    banking for tomorrow).
+        let p = ProgressStore.shared
+        ParentSettings.shared.dailyCapEnabled = false
+        if !p.dailyCap.enabled {
+            let reward = RewardEngine.chestContents(kind: .gold, correctInSession: 5, minutesPerCorrect: 1)
+            let before = p.pendingMinutes
+            _ = p.applyChestReward(reward)
+            #expect(p.pendingMinutes == before + reward.minutes)   // +3 actually added
+        }
+    }
 }

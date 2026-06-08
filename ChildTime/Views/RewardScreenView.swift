@@ -25,6 +25,9 @@ struct RewardScreenView: View {
     private let tapsToOpen = 5
     @State private var revealedItems: Int = 0
     @State private var reward: ChestReward = ChestReward(stars: 0, diamonds: 0, minutes: 0)
+    /// Shown when some/all of the chest's bonus minutes were banked for tomorrow
+    /// (today's cap was already full).
+    @State private var bankedNote: String? = nil
     @StateObject private var companion = CompanionController()
     @State private var confettiTrigger = 0
     @State private var goLevelUp = false
@@ -248,8 +251,17 @@ struct RewardScreenView: View {
                 // 💎 the spendable wallet earned this session — what buys characters.
                 rewardPill(emoji: "💎", value: progress.sessionDiamondsEarned + reward.diamonds, label: "יַהֲלוֹמִים", color: AppColor.gemPurple)
             }
-            if revealedItems >= 3 && progress.sessionMinutesEarned > 0 {
-                rewardPill(emoji: "⏱", value: progress.sessionMinutesEarned, label: "דַּקּוֹת מִשְׂחָק", color: AppColor.successMint)
+            if revealedItems >= 3 && (progress.sessionMinutesEarned + reward.minutes) > 0 {
+                // Minutes won this round = what play granted + the chest's bonus.
+                rewardPill(emoji: "⏱", value: progress.sessionMinutesEarned + reward.minutes, label: "דַּקּוֹת מִשְׂחָק", color: AppColor.successMint)
+            }
+            if revealedItems >= 3, let note = bankedNote {
+                Text(note)
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, AppSpacing.md)
+                    .transition(.scale.combined(with: .opacity))
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)
@@ -356,10 +368,14 @@ struct RewardScreenView: View {
     }
 
     private func applyReward() {
-        // Play-minutes were already granted during play (the per-batch calc).
-        // Session chests carry 0 minutes, so just apply the chest's flat ⭐
-        // bonus + any cosmetic.
-        progress.applyChestReward(reward)
+        // Most play-minutes were granted live during play; the chest adds a small
+        // bonus on top (⭐/💎 + a few minutes). grantBonusMinutes honors the daily
+        // cap and banks any overflow for tomorrow — surface that so the kid knows
+        // the won minutes weren't lost.
+        let grant = progress.applyChestReward(reward)
+        if grant.bankedForTomorrow > 0 {
+            bankedNote = "הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"
+        }
         progress.advanceRoom(in: world.id)
     }
 

@@ -160,20 +160,21 @@ struct ChestReward: Equatable {
 
 extension RewardEngine {
     static func chestContents(kind: ChestKind, correctInSession: Int, minutesPerCorrect: Int) -> ChestReward {
-        // Play-minutes come from ONE place only: the per-batch grant during play
-        // (every N correct → M minutes). Session chests (wood/gold) therefore add
-        // NO bonus minutes — only a small flat ⭐ bonus + cosmetics. (magic /
-        // legendary are non-session chests like the daily chest, so they grant
-        // their own minutes/stars outright.)
+        // Most play-minutes come from the per-batch grant during play (every N
+        // correct → M minutes). On top of that, the end-of-session chest hands out
+        // a small bonus of play-minutes too, so opening it feels rewarding — the
+        // chest visibly adds time, not only stars. The bonus goes through
+        // grantBonusMinutes, which respects the daily cap and banks any overflow
+        // for tomorrow, so it can never push past the parent's limit.
         switch kind {
-        // Star bonuses are ×starMultiplier to match the in-game earn rate;
-        // minutes stay as-is (screen-time economy, not stars).
-        // Each chest now also drips 💎 diamonds (the spendable wallet), scaled
+        // Star bonuses are ×starMultiplier to match the in-game earn rate.
+        // Each chest also drips 💎 diamonds (the spendable wallet), scaled
         // down from its ⭐ figure so a gift fills both pockets at once.
+        // Minutes climb with the chest tier: wood 1 < gold 3 < magic 5 < legendary 15.
         case .wood:
-            return ChestReward(stars: 2 * starMultiplier, diamonds: 2, minutes: 0, cosmeticID: nil)
+            return ChestReward(stars: 2 * starMultiplier, diamonds: 2, minutes: 1, cosmeticID: nil)
         case .gold:
-            return ChestReward(stars: 3 * starMultiplier, diamonds: 3, minutes: 0, cosmeticID: nil)
+            return ChestReward(stars: 3 * starMultiplier, diamonds: 3, minutes: 3, cosmeticID: nil)
         case .magic:
             return ChestReward(stars: 10 * starMultiplier, diamonds: 8, minutes: 5, cosmeticID: nil)
         case .legendary:
