@@ -210,6 +210,7 @@ struct ChildTimeApp: App {
         case "wheel":    LuckyWheelView(onClose: {})
         case "dashboard": ParentDashboardView(isRoot: true)
         case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
+        case "paywall":  PaywallView()    // DEMO_SCREEN=paywall — the "טופי+" subscription screen (App Review proof)
         case "leaderboard": LeaderboardView()   // DEMO_SCREEN=leaderboard
         case "livegame": LiveGameDemoHost()      // DEMO_SCREEN=livegame — live quiz setup/flow
         case "gameinvite": WorldMapView().onAppear { LiveGameManager.shared.seedDemoInvite() }  // invite banner

@@ -1,0 +1,33 @@
+{
+  "configurations" : [
+    {
+      "id" : "A1B2C3D4-0000-0000-0000-000000000001",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "storeKitConfigurationFileReference" : {
+      "identifier" : "ChildTime/Tofy.storekit"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:ChildTime.xcodeproj",
+        "identifier" : "4FD27B9C2FC70B4700909B38",
+        "name" : "ChildTimeUITests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:ChildTime.xcodeproj",
+        "identifier" : "4FD27B922FC70B4700909B38",
+        "name" : "ChildTimeTests"
+      }
+    }
+  ],
+  "version" : 1
+}
