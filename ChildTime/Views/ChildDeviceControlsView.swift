@@ -19,11 +19,14 @@ struct ChildDeviceControlsView: View {
     @State private var selection = FamilyActivitySelection()
     @State private var showAllowPicker = false
     @State private var allowSelection = FamilyActivitySelection()
+    @State private var showAlwaysAllowPicker = false
+    @State private var alwaysAllowSelection = FamilyActivitySelection()
 
     private var selectedCount: Int {
         selection.applicationTokens.count + selection.categoryTokens.count
     }
     private var allowCount: Int { allowSelection.applicationTokens.count }
+    private var alwaysAllowCount: Int { alwaysAllowSelection.applicationTokens.count }
     private var isUnlocked: Bool { progress.isUnlocked }
 
     var body: some View {
@@ -40,6 +43,7 @@ struct ChildDeviceControlsView: View {
                     quickOpenCard
                     perAppAllowCard
                     appLockCard
+                    alwaysAllowedCard
                     allowDeleteCard
                     disconnectButton
 
@@ -76,6 +80,7 @@ struct ChildDeviceControlsView: View {
         .onAppear {
             selection = SelectionStorage.decode(settings.activitySelectionData)
             allowSelection = SelectionStorage.decode(settings.allowExceptionData)
+            alwaysAllowSelection = SelectionStorage.decode(settings.alwaysAllowedAppsData)
         }
         .confirmationDialog("לְנַתֵּק אֶת הַמַּכְשִׁיר?",
                             isPresented: $showDisconnect, titleVisibility: .visible) {
@@ -320,6 +325,42 @@ struct ChildDeviceControlsView: View {
                         in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
             .buttonStyle(.juicy)
+        }
+    }
+
+    // MARK: - Always-allowed apps (permanent whitelist, even under a blocked category)
+
+    /// Apps that are NEVER locked — even when their whole category is blocked. Lets
+    /// the parent permanently allow a specific app (e.g. a newly installed app that
+    /// fell under a locked category) without unlocking the entire category.
+    private var alwaysAllowedCard: some View {
+        controlCard(tint: AppColor.companionGlow) {
+            sectionHead("אַפְּלִיקַצְיוֹת שֶׁתָּמִיד מוּתָּרוֹת",
+                        "אַף פַּעַם לֹא נְעוּלוֹת — גַּם אִם הַקָּטֵגוֹרְיָה שֶׁלָּהֶן חֲסוּמָה. שִׁמּוּשִׁי כְּדֵי לְאַפְשֵׁר אַפְּלִיקַצְיָה חֲדָשָׁה לִצְמִיתוּת.",
+                        icon: "checkmark.shield.fill", tint: AppColor.companionGlow)
+            Button {
+                Task {
+                    await shields.requestAuthorizationIfNeeded()
+                    if shields.isAuthorized { showAlwaysAllowPicker = true }
+                }
+            } label: {
+                Label(alwaysAllowCount > 0 ? "\(alwaysAllowCount) אַפְּלִיקַצְיוֹת מוּתָּרוֹת · עֲרִיכָה" : "בְּחִירַת אַפְּלִיקַצְיוֹת",
+                      systemImage: "checkmark.shield.fill")
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.28), lineWidth: 1))
+            }
+            .buttonStyle(.juicy)
+        }
+        .familyActivityPicker(isPresented: $showAlwaysAllowPicker, selection: $alwaysAllowSelection)
+        .onChangeCompat(of: alwaysAllowSelection) { _, new in
+            settings.alwaysAllowedAppsData = SelectionStorage.encode(new)
+            // Re-apply the locked baseline so the whitelist takes effect right away
+            // (unless the child is mid-unlock, where everything is already open).
+            if !isUnlocked { shields.applyDefaultLock() }
         }
     }
 

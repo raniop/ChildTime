@@ -14,6 +14,7 @@ final class ParentSettings: ObservableObject {
         static let activitySelection = "activitySelection"
         static let blockAllExceptAllowed = "blockAllExceptAllowed"
         static let allowedAppsData = "allowedAppsData"
+        static let alwaysAllowedAppsData = "alwaysAllowedAppsData"
         static let allowExceptionData = "allowExceptionData"
         static let allowExceptionEndsAt = "allowExceptionEndsAt"
         static let appRemovalUnlockedUntil = "appRemovalUnlockedUntil"
@@ -131,6 +132,15 @@ final class ParentSettings: ObservableObject {
     /// the parent; must include ChildTime so the child can always earn time.
     @Published var allowedAppsData: Data? {
         didSet { defaults.set(allowedAppsData, forKey: Key.allowedAppsData) }
+    }
+    /// Apps the parent marked "ALWAYS allowed" in the classic block-list model:
+    /// they are NEVER shielded, even when their whole category is blocked (e.g. a
+    /// newly installed app that fell under a locked category). The parent uses this
+    /// to permanently whitelist a specific app without unlocking its category.
+    /// Device-local (FamilyControls tokens can't sync); shared with the monitor
+    /// extension via the app group so re-locks honor it too.
+    @Published var alwaysAllowedAppsData: Data? {
+        didSet { defaults.set(alwaysAllowedAppsData, forKey: Key.alwaysAllowedAppsData) }
     }
     /// Block-all is only SAFE to enforce once the parent has chosen a non-empty
     /// allowlist (otherwise ChildTime itself would be shielded). This is the
@@ -314,6 +324,7 @@ final class ParentSettings: ObservableObject {
         // all once the parent picks an allowlist (see the property's note).
         self.blockAllExceptAllowed = (d.object(forKey: Key.blockAllExceptAllowed) as? Bool) ?? true
         self.allowedAppsData = d.data(forKey: Key.allowedAppsData)
+        self.alwaysAllowedAppsData = d.data(forKey: Key.alwaysAllowedAppsData)
         self.allowExceptionData = d.data(forKey: Key.allowExceptionData)
         self.allowExceptionEndsAt = d.object(forKey: Key.allowExceptionEndsAt) as? Date
         self.appRemovalUnlockedUntil = d.object(forKey: Key.appRemovalUnlockedUntil) as? Date

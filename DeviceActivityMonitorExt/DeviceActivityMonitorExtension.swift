@@ -83,6 +83,13 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             monitorLog.notice("ext: honoring active parent exception (\(allowedApps.count, privacy: .public) apps)")
         }
 
+        // Permanent "always allowed" whitelist — never re-shielded, even under a
+        // blocked category. Mirrors ShieldManager.applyShield(from:allowing:).
+        if let alwaysData = defaults.data(forKey: "alwaysAllowedAppsData"),
+           let alwaysSel = try? decoder.decode(FamilyActivitySelection.self, from: alwaysData) {
+            allowedApps.formUnion(alwaysSel.applicationTokens)
+        }
+
         let blockedApps = selection.applicationTokens.subtracting(allowedApps)
         store.shield.applications = blockedApps.isEmpty ? nil : blockedApps
         store.shield.applicationCategories = selection.categoryTokens.isEmpty

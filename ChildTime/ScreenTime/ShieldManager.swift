@@ -65,14 +65,10 @@ final class ShieldManager: ObservableObject {
     // MARK: - Shield (block) management
 
     func applyShield(from selection: FamilyActivitySelection) {
-        store.shield.applications = selection.applicationTokens.isEmpty ? nil : selection.applicationTokens
-        store.shield.applicationCategories = selection.categoryTokens.isEmpty
-            ? ShieldSettings.ActivityCategoryPolicy<Application>.none
-            : .specific(selection.categoryTokens)
-        store.shield.webDomains = selection.webDomainTokens.isEmpty ? nil : selection.webDomainTokens
-        // Never the all-web restriction here — that's Kid Mode only. Clear it so a
-        // previous Kid Mode session can't leave Safari blocked.
-        store.shield.webDomainCategories = ShieldSettings.ActivityCategoryPolicy<WebDomain>.none
+        // Route through the allowing: variant so the parent's permanent
+        // "always allowed" whitelist is honored here too — a whitelisted app must
+        // never be shielded, even when its whole category is blocked.
+        applyShield(from: selection, allowing: FamilyActivitySelection())
     }
 
     /// Prevent DELETING apps (iOS Screen Time restriction). Deleting ChildTime
@@ -118,7 +114,11 @@ final class ShieldManager: ObservableObject {
     /// Block the full `blocked` set EXCEPT the `allowed` apps — so specific apps
     /// (e.g. YouTube) stay open while everything else remains locked.
     func applyShield(from blocked: FamilyActivitySelection, allowing allowed: FamilyActivitySelection) {
+        // The exempt set = the caller's `allowed` (e.g. a temporary per-app window)
+        // PLUS the parent's permanent "always allowed" whitelist. Both stay open
+        // even when their category is blocked, via `.specific(_, except:)`.
         let allowedApps = allowed.applicationTokens
+            .union(SelectionStorage.decode(ParentSettings.shared.alwaysAllowedAppsData).applicationTokens)
         let blockedApps = blocked.applicationTokens.subtracting(allowedApps)
         store.shield.applications = blockedApps.isEmpty ? nil : blockedApps
         store.shield.applicationCategories = blocked.categoryTokens.isEmpty

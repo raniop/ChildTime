@@ -41,6 +41,7 @@ struct ParentGateView<Content: View>: View {
     @EnvironmentObject var settings: ParentSettings
     @ObservedObject private var household = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @State private var entered: String = ""
     @State private var shake: Bool = false
     @State private var authorized: Bool = false
@@ -59,10 +60,23 @@ struct ParentGateView<Content: View>: View {
     }
 
     var body: some View {
-        if authorized || (respectSession && settings.sessionUnlocked) {
-            content()
-        } else {
-            gate
+        Group {
+            if authorized || (respectSession && settings.sessionUnlocked) {
+                content()
+            } else {
+                gate
+            }
+        }
+        .onChangeCompat(of: scenePhase) { _, phase in
+            // On a CHILD device, leaving the app must re-lock the parent gate
+            // IMMEDIATELY — otherwise returning lands straight back in the unlocked
+            // controls and the child could reach the settings. (sessionUnlocked is
+            // already reset on background; we must also drop the local `authorized`
+            // flag, which otherwise keeps the content showing.) The parent's own
+            // device keeps its session so the parent isn't re-prompted constantly.
+            if phase == .background, settings.deviceRole == .child {
+                authorized = false
+            }
         }
     }
 
