@@ -33,18 +33,14 @@ struct UnlockedView: View {
                     .foregroundStyle(.white)
                     .glow(AppColor.successMint, radius: 14)
 
-                VStack(spacing: AppSpacing.sm) {
-                    Text(timeString)
-                        .font(.system(size: timerSize, weight: .bold, design: .monospaced))
-                        .foregroundStyle(.white)
-                        .glow(AppColor.starGold, radius: 12)
-                        .contentTransition(.numericText())
+                VStack(spacing: AppSpacing.md) {
                     Text("נוֹתְרוּ")
-                        .font(.system(size: 22, weight: .medium, design: .rounded))
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.7))
+                    timerRow
                 }
-                .padding(.horizontal, AppSpacing.xxxl)
-                .padding(.vertical, AppSpacing.xxl)
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.vertical, AppSpacing.xl)
                 .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous))
 
                 Text("עַכְשָׁיו אֶפְשָׁר לַעֲבוֹר לָאַפְּלִיקַצְיָה שֶׁ\(Gendered.g("אַתָּה רוֹצֶה", "אַתְּ רוֹצָה")) לְשַׂחֵק בָּהּ 🚀")
@@ -108,10 +104,55 @@ struct UnlockedView: View {
         }
     }
 
-    private var timeString: String {
-        let m = secondsRemaining / 60
+    /// The countdown as labeled columns — each number sits above its unit
+    /// (שעות / דקות / שניות) so a young child can read what every digit means.
+    /// Hours only appear once an hour or more is left; big grants (a parent's
+    /// "until end of day") would otherwise show "801:27", which reads as nonsense.
+    private var timerRow: some View {
+        let showHours = secondsRemaining >= 3600
+        let h = secondsRemaining / 3600
+        let m = (secondsRemaining % 3600) / 60
         let s = secondsRemaining % 60
-        return String(format: "%02d:%02d", m, s)
+        return HStack(alignment: .top, spacing: isCompact ? 4 : 8) {
+            if showHours {
+                timeColumn(h, "שָׁעוֹת")
+                timerColon
+            }
+            timeColumn(m, "דַּקּוֹת")
+            timerColon
+            timeColumn(s, "שְׁנִיּוֹת")
+        }
+        // A clock always reads hours→minutes→seconds left-to-right, even in the RTL
+        // UI — otherwise the columns flip and seconds land on the left.
+        .environment(\.layoutDirection, .leftToRight)
+        .frame(maxWidth: .infinity)
+    }
+
+    private func timeColumn(_ value: Int, _ label: String) -> some View {
+        VStack(spacing: 4) {
+            Text(String(format: "%02d", value))
+                .font(.system(size: timerSize, weight: .bold, design: .monospaced))
+                .foregroundStyle(.white)
+                .glow(AppColor.starGold, radius: 12)
+                .contentTransition(.numericText())
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+            Text(label)
+                .font(.system(size: isCompact ? 15 : 18, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.7))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+    }
+
+    /// The ":" separator — sized like the digits and pinned to the top so it lines
+    /// up with the numbers, not the unit labels below them.
+    private var timerColon: some View {
+        Text(":")
+            .font(.system(size: timerSize, weight: .bold, design: .monospaced))
+            .foregroundStyle(.white.opacity(0.8))
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
     }
 
     private func startTimer() {
