@@ -35,6 +35,7 @@ struct ParentDashboardView: View {
     @State private var friendsProfile: Profile?
     @State private var difficultyProfile: Profile?
     @State private var screenTimeProfile: Profile?
+    @State private var editProfile: Profile?
     @State private var worldsProfile: Profile?
     @State private var showingFeedback = false
     @State private var qrChild: Profile? = nil
@@ -234,6 +235,15 @@ struct ParentDashboardView: View {
                     .environmentObject(profiles)
                     .environmentObject(settings)
                     .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(item: $editProfile) { p in
+                ProfileEditorView(mode: .edit(p)) { updated in
+                    profiles.update(updated)
+                } onDelete: { profile in
+                    profiles.remove(profile)
+                }
+                .environmentObject(profiles)
+                .environment(\.layoutDirection, .rightToLeft)
             }
             .sheet(item: $worldsProfile) { p in
                 ChildWorldsView(profileID: p.id)
@@ -676,6 +686,11 @@ struct ParentDashboardView: View {
                         } label: {
                             Label("עבור לפרופיל זה", systemImage: "person.crop.circle.fill")
                         }
+                    }
+                    Button {
+                        editProfile = profile
+                    } label: {
+                        Label("ערוך פרופיל (שם, גיל)", systemImage: "pencil")
                     }
                     Button {
                         difficultyProfile = profile

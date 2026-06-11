@@ -42,6 +42,13 @@ struct ProfileEditorView: View {
     }
     private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty }
 
+    /// Age + learning level are difficulty-affecting → editable only from a real
+    /// PARENT device, never on a child device or while the parent's phone is in
+    /// Kid Mode (where a child is using it).
+    private var canEditLearning: Bool {
+        ParentSettings.shared.deviceRole == .parent && !KidModeManager.shared.active
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -57,9 +64,14 @@ struct ProfileEditorView: View {
 
                         genderRow
 
-                        ageRow
+                        // Age + learning level drive question difficulty — so they
+                        // are PARENT-ONLY. Hidden on a child device (and in Kid Mode)
+                        // so a kid can't lower their own age to get easier questions.
+                        if canEditLearning {
+                            ageRow
 
-                        learningLevelRow
+                            learningLevelRow
+                        }
 
                         interestsSection
 
