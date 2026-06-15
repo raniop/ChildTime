@@ -20,6 +20,7 @@ final class ProgressStore: ObservableObject {
         static let dayStreak = "dayStreak"
         static let lastSessionDate = "lastSessionDate"
         static let lastDailyChestDate = "lastDailyChestDate"
+        static let lastDailyChallengeDate = "lastDailyChallengeDate"
         static let unlockedWorlds = "unlockedWorlds"
         static let worldProgress = "worldProgress"
         static let ownedCosmetics = "ownedCosmetics"
@@ -109,6 +110,14 @@ final class ProgressStore: ObservableObject {
         didSet {
             if let d = lastDailyChestDate { defaults.set(d, forKey: Key.lastDailyChestDate) }
             else { defaults.removeObject(forKey: Key.lastDailyChestDate) }
+        }
+    }
+    /// Day the kid last CLAIMED the daily-challenge reward (answer-N-today goal).
+    /// nil/older-than-today → the reward is claimable again. Synced like the chest.
+    @Published private(set) var lastDailyChallengeDate: Date? {
+        didSet {
+            if let d = lastDailyChallengeDate { defaults.set(d, forKey: Key.lastDailyChallengeDate) }
+            else { defaults.removeObject(forKey: Key.lastDailyChallengeDate) }
         }
     }
     @Published private(set) var unlockedWorlds: Set<String> {
@@ -345,6 +354,7 @@ final class ProgressStore: ObservableObject {
         self.dayStreak = d.integer(forKey: Key.dayStreak)
         self.lastSessionDate = d.object(forKey: Key.lastSessionDate) as? Date
         self.lastDailyChestDate = d.object(forKey: Key.lastDailyChestDate) as? Date
+        self.lastDailyChallengeDate = d.object(forKey: Key.lastDailyChallengeDate) as? Date
 
         let unlockedArray = d.stringArray(forKey: Key.unlockedWorlds) ?? ["numbers_kingdom"]
         self.unlockedWorlds = Set(unlockedArray)
@@ -1018,6 +1028,43 @@ final class ProgressStore: ObservableObject {
         lastDailyChestDate = Date()
     }
 
+    // MARK: - Daily challenge (answer-N-today goal + streak)
+
+    /// How many questions make up today's challenge. Small enough to finish in
+    /// one short sitting, so the streak feels achievable every day.
+    static let dailyChallengeTarget = 10
+
+    /// Questions answered today toward the goal, capped at the target.
+    var dailyChallengeProgress: Int { min(answeredToday, Self.dailyChallengeTarget) }
+
+    /// The goal was reached today (regardless of whether the reward was claimed).
+    var dailyChallengeGoalMet: Bool { answeredToday >= Self.dailyChallengeTarget }
+
+    /// Today's reward was already collected.
+    var dailyChallengeClaimed: Bool {
+        guard let last = lastDailyChallengeDate else { return false }
+        return Calendar.current.isDateInToday(last)
+    }
+
+    /// Goal met AND not yet claimed today → the card shows a "collect" button.
+    var dailyChallengeRewardReady: Bool { dailyChallengeGoalMet && !dailyChallengeClaimed }
+
+    /// Collect today's challenge reward (once per day). Diamonds + bonus minutes
+    /// grow gently with the day-streak so a longer streak feels more rewarding.
+    /// The streak itself is the existing `dayStreak` (maintained per session).
+    @discardableResult
+    func claimDailyChallenge() -> BonusGrant {
+        guard dailyChallengeRewardReady else { return BonusGrant() }
+        lastDailyChallengeDate = Date()
+        let streakBonus = min(dayStreak, 7)                 // caps the ramp at a week
+        let reward = ChestReward(stars: 0,
+                                 diamonds: 15 + streakBonus * 2,
+                                 minutes: 3,
+                                 cosmeticID: nil)
+        AppAnalytics.log("daily_challenge_claimed", ["streak": "\(dayStreak)"])
+        return applyChestReward(reward)
+    }
+
     // MARK: - World progression
 
     func unlockWorld(_ id: String) {
@@ -1280,6 +1327,7 @@ final class ProgressStore: ObservableObject {
         s.dayStreak           = dayStreak
         s.lastSessionDate     = lastSessionDate
         s.lastDailyChestDate  = lastDailyChestDate
+        s.lastDailyChallengeDate = lastDailyChallengeDate
         s.unlockedWorlds      = Array(unlockedWorlds)
         s.worldProgress       = worldProgress
         s.topicAccuracy       = topicAccuracy
@@ -1335,6 +1383,7 @@ final class ProgressStore: ObservableObject {
         dayStreak           = s.dayStreak
         lastSessionDate     = s.lastSessionDate
         lastDailyChestDate  = s.lastDailyChestDate
+        lastDailyChallengeDate = s.lastDailyChallengeDate
         unlockedWorlds      = Set(s.unlockedWorlds)
         worldProgress       = s.worldProgress
         topicAccuracy       = s.topicAccuracy

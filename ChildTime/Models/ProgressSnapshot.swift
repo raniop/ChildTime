@@ -21,6 +21,7 @@ struct ProgressSnapshot: Codable, Equatable {
     var dayStreak: Int = 0
     var lastSessionDate: Date? = nil
     var lastDailyChestDate: Date? = nil
+    var lastDailyChallengeDate: Date? = nil
     var unlockedWorlds: [String] = ["numbers_kingdom"]
     var worldProgress: [String: Int] = [:]
     var topicAccuracy: [String: Double] = [:]
@@ -103,7 +104,7 @@ struct ProgressSnapshot: Codable, Equatable {
 extension ProgressSnapshot {
     enum CodingKeys: String, CodingKey {
         case pendingMinutes, totalCorrect, totalAnswered, unlockEndsAt, stars, diamonds, xp
-        case currentStreak, dayStreak, lastSessionDate, lastDailyChestDate
+        case currentStreak, dayStreak, lastSessionDate, lastDailyChestDate, lastDailyChallengeDate
         case unlockedWorlds, worldProgress, topicAccuracy, topicAnswered, topicCorrect
         case batchCounter, wrongStreak, totalScore, minutesEarnedToday, dailyEarnedDate
         case answeredToday, correctToday, carryOverMinutes, bestStreak, cycleSeconds
@@ -134,6 +135,7 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .dayStreak)) ?? nil { dayStreak = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastSessionDate)) ?? nil { lastSessionDate = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastDailyChestDate)) ?? nil { lastDailyChestDate = v }
+        if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastDailyChallengeDate)) ?? nil { lastDailyChallengeDate = v }
         if let v = (try? c.decodeIfPresent([String].self, forKey: .unlockedWorlds)) ?? nil { unlockedWorlds = v }
         if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .worldProgress)) ?? nil { worldProgress = v }
         if let v = (try? c.decodeIfPresent([String: Double].self, forKey: .topicAccuracy)) ?? nil { topicAccuracy = v }
@@ -204,6 +206,7 @@ extension ProgressSnapshot {
         }
         m.lastSessionDate = laterDate(local.lastSessionDate, remote.lastSessionDate)
         m.lastDailyChestDate = laterDate(local.lastDailyChestDate, remote.lastDailyChestDate)
+        m.lastDailyChallengeDate = laterDate(local.lastDailyChallengeDate, remote.lastDailyChallengeDate)
         return m
     }
 

@@ -16,6 +16,7 @@ struct WorldMapView: View {
     @StateObject private var companion = CompanionController()
     @State private var selectedWorld: World?
     @State private var showDailyChest = false
+    @State private var challengeCelebration: String? = nil
     @State private var showingParentGate = false
     @State private var showingDemo = false
     @State private var showingShop = false
@@ -225,6 +226,20 @@ struct WorldMapView: View {
         .fullScreenCover(isPresented: $showDailyChest) {
             DailyChestView()
         }
+        .overlay(alignment: .top) {
+            if let msg = challengeCelebration {
+                Text(msg)
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 18).padding(.vertical, 12)
+                    .background(AppColor.successMint.opacity(0.95), in: Capsule())
+                    .glow(AppColor.successMint, radius: 12)
+                    .padding(.top, 60)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+        }
+        .animation(.spring(response: 0.5, dampingFraction: 0.7), value: challengeCelebration)
         .sheet(isPresented: $showingParentGate) {
             // On the child device the gate opens ONLY the device-local parent
             // controls (app-lock + manual unlock) — everything else is on the
@@ -428,11 +443,74 @@ struct WorldMapView: View {
                 }
             }
             statsPanel
+            dailyChallengeCard
         }
         .environment(\.layoutDirection, .leftToRight)
         .padding(isCompact ? 14 : 18)
         .background(glassCard)
         .padding(.top, AppSpacing.sm)
+    }
+
+    /// Daily challenge: answer N questions today → collect a reward, and keep the
+    /// 🔥 day-streak alive. The "don't break the streak" loop that brings kids back
+    /// every day. Forced RTL inside the LTR header so the Hebrew reads correctly.
+    private var dailyChallengeCard: some View {
+        let target = ProgressStore.dailyChallengeTarget
+        let done = progress.dailyChallengeProgress
+        let ready = progress.dailyChallengeRewardReady
+        let claimed = progress.dailyChallengeClaimed
+        return VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Text("🔥").font(.system(size: 20))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("אֶתְגָּר יוֹמִי")
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text(progress.dayStreak > 0 ? "\(progress.dayStreak) יָמִים בְּרֶצֶף" : "מַתְחִילִים רֶצֶף חָדָשׁ!")
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+                Spacer()
+                if claimed {
+                    Text("✓ הוּשְׁלַם הַיּוֹם")
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .foregroundStyle(AppColor.successMint)
+                } else if ready {
+                    Button {
+                        let grant = progress.claimDailyChallenge()
+                        Haptic.success()
+                        SoundPlayer.shared.play(.streakUp)
+                        let total = grant.addedToday + grant.bankedForTomorrow
+                        challengeCelebration = "🎉 כָּל הַכָּבוֹד! +\(15 + min(progress.dayStreak, 7) * 2) 💎" + (total > 0 ? " וְ-\(total) דַּקּוֹת" : "")
+                        companion.hype("שָׁמַרְתָּ עַל הָרֶצֶף! 🔥")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { challengeCelebration = nil }
+                    } label: {
+                        Text("אַסְפוּ פְּרָס 🎁")
+                            .font(.system(size: 13, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppColor.textOnLight)
+                            .padding(.horizontal, 12).padding(.vertical, 6)
+                            .background(AppGradient.gold, in: Capsule())
+                    }
+                    .buttonStyle(.juicy)
+                } else {
+                    Text("\(done)/\(target)")
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                }
+            }
+            // Progress bar of today's answers toward the goal.
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.white.opacity(0.15))
+                    Capsule().fill(ready || claimed ? AnyShapeStyle(AppColor.successMint) : AnyShapeStyle(AppGradient.gold))
+                        .frame(width: geo.size.width * CGFloat(done) / CGFloat(max(1, target)))
+                }
+            }
+            .frame(height: 8)
+        }
+        .padding(isCompact ? 10 : 12)
+        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.white.opacity(0.07)))
+        .environment(\.layoutDirection, .rightToLeft)
     }
 
     /// Frosted translucent card so the dreamy background glows through.
