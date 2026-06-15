@@ -29,6 +29,7 @@ enum QuestionDifficultyTags {
 extension BankQuestion {
     /// The graded difficulty of this bank question (falls back to `.medium`).
     var difficulty: Difficulty {
-        QuestionDifficultyTags.difficulty(prompt: prompt, correctAnswer: correctAnswer)
+        // Inline tier (newer questions) wins; otherwise fall back to the side-map.
+        tier ?? QuestionDifficultyTags.difficulty(prompt: prompt, correctAnswer: correctAnswer)
     }
 }

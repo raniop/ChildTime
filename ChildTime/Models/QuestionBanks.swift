@@ -7,6 +7,10 @@ struct BankQuestion {
     let prompt: String
     let correctAnswer: String
     let distractors: [String]
+    /// Difficulty baked directly into newer questions. When nil, the difficulty
+    /// falls back to the side-map (`QuestionDifficultyTags`) so the original
+    /// hand-graded questions keep working unchanged.
+    var tier: Difficulty? = nil
 }
 
 enum QuestionBanks {
@@ -203,13 +207,13 @@ enum QuestionBanks {
     /// Original + expanded — call sites get the full combined pool.
     static func bank(for topic: Topic) -> [BankQuestion]? {
         switch topic {
-        case .english:   return english   + QuestionBanksExpanded.english   + QuestionBanksWorkflow.english   + QuestionBanksWorkflow2.english
-        case .hebrew:    return hebrew    + QuestionBanksWorkflow.hebrew    + QuestionBanksWorkflow2.hebrew
-        case .logic:     return logic     + QuestionBanksExpanded.logic     + QuestionBanksWorkflow.logic     + QuestionBanksWorkflow2.logic
-        case .science:   return science   + QuestionBanksExpanded.science   + QuestionBanksWorkflow.science   + QuestionBanksWorkflow2.science
-        case .history:   return history   + QuestionBanksExpanded.history   + QuestionBanksWorkflow.history   + QuestionBanksWorkflow2.history
-        case .geography: return geography + QuestionBanksExpanded.geography + QuestionBanksWorkflow.geography + QuestionBanksWorkflow2.geography
-        case .money:     return money     + QuestionBanksWorkflow.money     + QuestionBanksWorkflow2.money
+        case .english:   return english   + QuestionBanksExpanded.english   + QuestionBanksWorkflow.english   + QuestionBanksWorkflow2.english   + QuestionBanksWorkflow3.english
+        case .hebrew:    return hebrew    + QuestionBanksWorkflow.hebrew    + QuestionBanksWorkflow2.hebrew    + QuestionBanksWorkflow3.hebrew
+        case .logic:     return logic     + QuestionBanksExpanded.logic     + QuestionBanksWorkflow.logic     + QuestionBanksWorkflow2.logic     + QuestionBanksWorkflow3.logic
+        case .science:   return science   + QuestionBanksExpanded.science   + QuestionBanksWorkflow.science   + QuestionBanksWorkflow2.science   + QuestionBanksWorkflow3.science
+        case .history:   return history   + QuestionBanksExpanded.history   + QuestionBanksWorkflow.history   + QuestionBanksWorkflow2.history   + QuestionBanksWorkflow3.history
+        case .geography: return geography + QuestionBanksExpanded.geography + QuestionBanksWorkflow.geography + QuestionBanksWorkflow2.geography + QuestionBanksWorkflow3.geography
+        case .money:     return money     + QuestionBanksWorkflow.money     + QuestionBanksWorkflow2.money     + QuestionBanksWorkflow3.money
         case .math:      return nil  // generated algorithmically
         }
     }
@@ -268,25 +272,34 @@ final class QuestionMemory {
         case .medium: order = [.medium, .easy, .hard]
         case .hard:   order = [.hard, .medium, .easy]
         }
+        // Anchor the recency window to the WHOLE topic pool, not the per-tier
+        // slice. Otherwise we'd only remember ~85% of a single tier (~39 items),
+        // so off-tier questions and the dominant tier alike got forgotten — and
+        // repeated — far too soon. The full-pool window keeps a long, topic-wide
+        // memory so the child cycles through much more before anything returns.
+        let fullWindow = max(5, (pool.count * 85) / 100)
         for tier in order {
             let slice = pool.filter { $0.difficulty == tier }
             // Strict (no session repeats) so an exhausted tier yields to the next.
-            if let chosen = pickFresh(slice, for: topic, allowSessionRepeat: false) { return chosen }
+            if let chosen = pickFresh(slice, for: topic, allowSessionRepeat: false,
+                                      windowOverride: fullWindow) { return chosen }
         }
         // Every tier was fully served this session — allow a lenient repeat.
-        return pickFresh(pool, for: topic)
+        return pickFresh(pool, for: topic, windowOverride: fullWindow)
     }
 
     /// Pick a random question from `pool` that hasn't been served recently.
     /// Falls back to a true random when every question is in the recent
-    /// window (only possible for very small pools).
-    func pickFresh(_ pool: [BankQuestion], for topic: Topic, allowSessionRepeat: Bool = true) -> BankQuestion? {
+    /// window (only possible for very small pools). `windowOverride` lets the
+    /// tier-aware caller size the recency window by the whole topic pool.
+    func pickFresh(_ pool: [BankQuestion], for topic: Topic, allowSessionRepeat: Bool = true,
+                   windowOverride: Int? = nil) -> BankQuestion? {
         ensureLoaded()
         guard !pool.isEmpty else { return nil }
         // 85% — leaves a small pool of "fresh" candidates and keeps a long
         // tail of "already seen recently" out of rotation. With ~80 English
         // questions the kid will go through ~68 before any can repeat.
-        let windowSize = max(5, (pool.count * 85) / 100)
+        let windowSize = windowOverride ?? max(5, (pool.count * 85) / 100)
         let recentList = recent[topic] ?? []
         // Never repeat within the session; also avoid the cross-session window.
         let fresh = pool.filter { !recentList.contains(promptKey($0)) && !sessionServed.contains(promptKey($0)) }
