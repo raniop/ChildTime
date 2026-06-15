@@ -51,22 +51,22 @@ struct UnlockedView: View {
 
                 Spacer()
 
-                // A parent's one-time grant is a FIXED window — no early-stop (and
-                // nothing to bank). Earned time stays pausable via this button.
-                if !progress.unlockIsManual {
-                    Button {
-                        endEarly()
-                    } label: {
-                        Text("סִיַּמְתִּי לְשַׂחֵק")
-                            .font(.system(size: 22, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, AppSpacing.xl)
-                            .padding(.vertical, AppSpacing.md)
-                            .background(.white.opacity(0.18), in: Capsule())
-                    }
-                    .buttonStyle(.juicy)
-                    .padding(.bottom, AppSpacing.xxl)
+                // Always offer a way OUT of play mode — otherwise a parent's manual
+                // grant traps the device on this screen with no exit. Earned time
+                // refunds its unused minutes; a manual grant just locks (nothing was
+                // spent from the earned pool, so there's nothing to bank back).
+                Button {
+                    endEarly()
+                } label: {
+                    Text("סִיַּמְתִּי לְשַׂחֵק")
+                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, AppSpacing.xl)
+                        .padding(.vertical, AppSpacing.md)
+                        .background(.white.opacity(0.18), in: Capsule())
                 }
+                .buttonStyle(.juicy)
+                .padding(.bottom, AppSpacing.xxl)
             }
 
             // Sleepy companion
@@ -184,10 +184,16 @@ struct UnlockedView: View {
             let selection = SelectionStorage.decode(data)
             ShieldManager.shared.applyShield(from: selection)
         }
-        // Refund any remaining full minutes back to the pending pool
-        let remaining = progress.endUnlockAndReturnRemainingMinutes()
-        // Child chose to stop early — tell the parent (+ minutes banked back).
-        LiveEventReporter.report(.screenTimeEnd, extra: ["minutes": remaining])
+        // A manual (parent) grant spent nothing from the earned pool — just lock,
+        // no refund. An earned window refunds its unused full minutes.
+        if progress.unlockIsManual {
+            progress.endUnlock()
+            LiveEventReporter.report(.screenTimeEnd, extra: ["minutes": 0])
+        } else {
+            let remaining = progress.endUnlockAndReturnRemainingMinutes()
+            // Child chose to stop early — tell the parent (+ minutes banked back).
+            LiveEventReporter.report(.screenTimeEnd, extra: ["minutes": remaining])
+        }
     }
 }
 

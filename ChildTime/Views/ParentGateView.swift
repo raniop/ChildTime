@@ -163,6 +163,9 @@ struct ParentGateView<Content: View>: View {
             .padding(.bottom, 24)
         }
         .onAppear {
+            // Pull the freshest family code so a just-changed parent code works here
+            // immediately (and the old one stops) even if the live listener lagged.
+            household.refreshHouseholdNow()
             if canUseFaceID { Task { await tryBiometric() } }
         }
     }
@@ -290,11 +293,18 @@ struct ParentGateView<Content: View>: View {
             }
             return
         }
-        // Accept the device's local code OR the family code (household).
+        let family = household.householdPIN
         let okLocal = PINManager.shared.verify(entered)
-        let okFamily = household.householdPIN.map { PINManager.shared.verify(entered, against: $0) } ?? false
-        if okLocal || okFamily {
-            // Cache locally so next time (and Face ID) work on this device.
+        let okFamily = family.map { PINManager.shared.verify(entered, against: $0) } ?? false
+        // The family code is AUTHORITATIVE whenever the household has one: changing
+        // the parent code on one device must invalidate the OLD code on every other
+        // device once it has synced here. We only fall back to the device-local code
+        // when there is NO family code yet (offline first run / pre-feature setup) —
+        // otherwise a stale cached PIN would keep working forever after a change.
+        let accepted = family != nil ? okFamily : okLocal
+        if accepted {
+            // Cache locally so next time (and Face ID) work on this device — and so
+            // a refreshed family code overwrites any stale local one.
             if !okLocal { PINManager.shared.setPIN(entered) }
             settings.hasSetParentPIN = true
             // Backfill the family code if it isn't shared yet (e.g. a parent who

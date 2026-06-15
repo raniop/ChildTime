@@ -443,12 +443,57 @@ final class HouseholdManager: ObservableObject {
     /// Family-wide parent code (salted hash). Any device in the household uses it.
     var householdPIN: String? { household?.parentPinHash }
 
+    /// One-shot pull of the latest household doc — belt-and-suspenders for when the
+    /// live listener may have lagged or dropped (e.g. the parent just changed the
+    /// family code and we're about to verify it at the gate). Safe to call often.
+    func refreshHouseholdNow() {
+        #if canImport(FirebaseFirestore)
+        let id = household?.id
+            ?? UserDefaults.standard.string(forKey: preferredHouseholdKey)
+        guard let id, !id.isEmpty else { return }
+        Task { @MainActor in
+            if let doc = try? await db.collection("households").document(id).getDocument(),
+               let data = doc.data(),
+               let hh = Self.decodeHousehold(id: id, data) {
+                self.household = hh
+            }
+        }
+        #endif
+    }
+
     /// Save the family parent code (hash) to the household so every device shares it.
     func setHouseholdPIN(_ blob: String) {
         #if canImport(FirebaseFirestore)
         guard let hh = household else { return }
         Task { try? await db.collection("households").document(hh.id)
             .updateData(["parentPinHash": blob]) }
+        #endif
+    }
+
+    /// PARENT: open screen time for a child RIGHT NOW, from afar — the kid doesn't
+    /// have to play or earn. Stamps a one-time command on every device row for that
+    /// child; each device's live listener picks it up and opens a fixed `minutes`
+    /// window. Works while the child's app is open or backgrounded with an active
+    /// listener (a fully-suspended device applies it the moment it's reopened, as
+    /// long as the grant is still fresh).
+    func grantRemoteScreenTime(toChildID childID: UUID, minutes: Int) {
+        #if canImport(FirebaseFirestore)
+        guard let hh = household, minutes > 0 else { return }
+        let cid = childID.uuidString
+        let stamp = Date().timeIntervalSince1970
+        Task {
+            let snap = try? await db.collection("childDevices")
+                .whereField("householdID", isEqualTo: hh.id)
+                .whereField("childID", isEqualTo: cid)
+                .getDocuments()
+            for doc in snap?.documents ?? [] {
+                try? await doc.reference.updateData([
+                    "remoteUnlockMinutes": minutes,
+                    "remoteUnlockAt": stamp,
+                ])
+            }
+            await MainActor.run { AppAnalytics.log("remote_screentime_granted", ["minutes": "\(minutes)"]) }
+        }
         #endif
     }
 
@@ -470,19 +515,45 @@ final class HouseholdManager: ObservableObject {
     private var ownDeviceListener: ListenerRegistration?
 
     /// CHILD device: watch its OWN row so a parent's "remove device" disconnects
-    /// it live. Idempotent.
+    /// it live — and so a parent's REMOTE "open screen time now" applies live.
+    /// Idempotent.
     func watchOwnDeviceRemoval(childID: UUID) {
         #if canImport(FirebaseFirestore)
         let docID = "\(childID.uuidString)_\(DeviceIdentity.installID)"
         ownDeviceListener?.remove()
         ownDeviceListener = db.collection("childDevices").document(docID)
             .addSnapshotListener { [weak self] snap, _ in
-                guard let self else { return }
-                if (snap?.data()?["removed"] as? Bool) == true {
+                guard let self, let data = snap?.data() else { return }
+                if (data["removed"] as? Bool) == true {
                     self.resetAsRemovedDevice()
+                    return
                 }
+                self.applyRemoteUnlockIfNeeded(data)
             }
         #endif
+    }
+
+    private let lastRemoteUnlockKey = "lastRemoteUnlockAt"
+
+    /// A parent opened screen time for this child from afar. Apply it exactly once
+    /// per command, and only when it's FRESH (last 10 min) so an old command never
+    /// re-fires when the app relaunches and the listener re-reads the doc.
+    @MainActor
+    private func applyRemoteUnlockIfNeeded(_ data: [String: Any]) {
+        guard let at = data["remoteUnlockAt"] as? Double,
+              let minutes = data["remoteUnlockMinutes"] as? Int, minutes > 0 else { return }
+        let last = UserDefaults.standard.double(forKey: lastRemoteUnlockKey)
+        let now = Date().timeIntervalSince1970
+        guard at > last, now - at < 600 else { return }   // unseen + fresh
+        UserDefaults.standard.set(at, forKey: lastRemoteUnlockKey)
+        Task { @MainActor in
+            await ShieldManager.shared.requestAuthorizationIfNeeded()
+            ShieldManager.shared.cancelScheduledReshield()
+            ShieldManager.shared.unlock(minutes: minutes)
+            // Manual = fixed window, not drawn from the child's earned/banked pool.
+            ProgressStore.shared.startUnlock(minutes: minutes, manual: true)
+            Haptic.success()
+        }
     }
 
     /// Disconnect THIS device and return it to a just-installed state. CRITICAL:

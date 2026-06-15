@@ -36,6 +36,7 @@ struct ParentDashboardView: View {
     @State private var difficultyProfile: Profile?
     @State private var screenTimeProfile: Profile?
     @State private var editProfile: Profile?
+    @State private var remoteGrantMsg: String?
     @State private var worldsProfile: Profile?
     @State private var showingFeedback = false
     @State private var qrChild: Profile? = nil
@@ -235,6 +236,13 @@ struct ParentDashboardView: View {
                     .environmentObject(profiles)
                     .environmentObject(settings)
                     .environment(\.layoutDirection, .rightToLeft)
+            }
+            .alert("פָּתַחְתָּ זְמַן מָסָךְ", isPresented: Binding(
+                get: { remoteGrantMsg != nil },
+                set: { if !$0 { remoteGrantMsg = nil } })) {
+                Button("הֵבַנְתִּי", role: .cancel) {}
+            } message: {
+                Text(remoteGrantMsg ?? "")
             }
             .sheet(item: $editProfile) { p in
                 ProfileEditorView(mode: .edit(p)) { updated in
@@ -686,6 +694,13 @@ struct ParentDashboardView: View {
                         } label: {
                             Label("עבור לפרופיל זה", systemImage: "person.crop.circle.fill")
                         }
+                    }
+                    Menu {
+                        Button("חֲצִי שָׁעָה") { remoteOpen(profile, 30) }
+                        Button("שָׁעָה") { remoteOpen(profile, 60) }
+                        Button("שְׁעָתַיִם") { remoteOpen(profile, 120) }
+                    } label: {
+                        Label("פְּתַח זְמַן מָסָךְ עַכְשָׁיו (מֵרָחוֹק)", systemImage: "lock.open.fill")
                     }
                     Button {
                         editProfile = profile
@@ -1341,6 +1356,17 @@ struct ParentDashboardView: View {
     }
 
     // MARK: - Actions
+
+    /// Remotely open screen time on the child's device(s) right now.
+    private func remoteOpen(_ profile: Profile, _ minutes: Int) {
+        Haptic.success()
+        household.grantRemoteScreenTime(toChildID: profile.id, minutes: minutes)
+        let label = minutes % 60 == 0 ? "\(minutes / 60) שָׁעוֹת" : "\(minutes) דַּקּוֹת"
+        let connected = (household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
+        remoteGrantMsg = connected
+            ? "פָּתַחְתָּ לְ\(profile.name) \(label) שֶׁל זְמַן מָסָךְ. זֶה יִפָּתַח בַּמַּכְשִׁיר שֶׁלּוֹ מִיָּד (אוֹ בָּרֶגַע שֶׁיִּפְתַּח אֶת טוֹפִּי)."
+            : "אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַפְּתִיחָה תֻּחַל בָּרֶגַע שֶׁיִּתְחַבֵּר."
+    }
 
     private func resetProgress(for profile: Profile) {
         Haptic.warning()
