@@ -21,6 +21,7 @@ struct WorldMapView: View {
     @State private var showingDemo = false
     @State private var showingShop = false
     @State private var showingWheel = false
+    @State private var showingTrueFalse = false
     @State private var showingLeaderboard = false
     @State private var showingSmartFeed = false
     @State private var showingChildSettings = false
@@ -328,6 +329,9 @@ struct WorldMapView: View {
             inviteBannerVisible = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 5) { inviteBannerVisible = false }
         }
+        .fullScreenCover(isPresented: $showingTrueFalse) {
+            TrueFalseRaceView { showingTrueFalse = false }
+        }
         .fullScreenCover(isPresented: $showingWheel) {
             LuckyWheelView { showingWheel = false }
         }
@@ -577,6 +581,10 @@ struct WorldMapView: View {
                 Haptic.light()
                 if let invite = liveGame.invites.first { Task { await liveGame.joinGame(invite.id) } }
                 else { liveGame.openSetup() }
+            }
+            navButton(icon: "bolt.fill", color: Color(hex: "EF476F"),
+                      label: "מֵרוֹץ", badge: false, size: size) {
+                Haptic.light(); showingTrueFalse = true
             }
             navButton(icon: "trophy.fill", color: Color(hex: "10B981"),
                       label: "דֵּירוּג", badge: false, size: size) {
