@@ -9,7 +9,12 @@ struct WorldDetailView: View {
     @EnvironmentObject var profiles: ProfileStore
 
     @State private var startSession = false
+    @State private var showBoss = false
     @State private var heroAppeared = false
+
+    /// The boss waits in the final room — a finale challenge once the kid has
+    /// worked through the world.
+    private var bossUnlocked: Bool { currentRoom >= world.rooms - 1 }
 
     private var isCompact: Bool { hsc == .compact }
     private var heroEmojiSize: CGFloat { isCompact ? 92 : 130 }
@@ -37,6 +42,7 @@ struct WorldDetailView: View {
                         heroBlock
                         missionCard
                         startButton
+                        if bossUnlocked { bossButton }
                     }
                     .frame(maxWidth: 480)
                     .padding(.horizontal, AppSpacing.lg)
@@ -62,6 +68,9 @@ struct WorldDetailView: View {
         .fullScreenCover(isPresented: $startSession) {
             QuestionRunnerView(world: world, purpose: .earnTime)
                 .onDisappear { dismiss() }
+        }
+        .fullScreenCover(isPresented: $showBoss) {
+            BossBattleView(world: world) { showBoss = false }
         }
         // Presented as a fullScreenCover, which does NOT inherit the app root's
         // RTL layout direction — set it here so Hebrew rows (and the top bar)
@@ -201,6 +210,19 @@ struct WorldDetailView: View {
             }
         } label: {
             Text("קָדִימָה! 🚀")
+                .font(.system(size: ctaSize, weight: .heavy, design: .rounded))
+        }
+    }
+
+    /// Finale challenge — appears in the world's last room.
+    private var bossButton: some View {
+        JuicyButton(gradient: LinearGradient(colors: [Color(hex: "EF476F"), Color(hex: "9B5DE5")],
+                                             startPoint: .top, endPoint: .bottom),
+                    glowColor: Color(hex: "EF476F")) {
+            Haptic.light()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { showBoss = true }
+        } label: {
+            Text("קְרַב בּוֹס 👹")
                 .font(.system(size: ctaSize, weight: .heavy, design: .rounded))
         }
     }
