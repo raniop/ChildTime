@@ -118,6 +118,8 @@ struct ParentDashboardView: View {
                             .animation(.spring(response: 0.5, dampingFraction: 0.85),
                                        value: rows.map(\.profile.id))
 
+                            if rows.count >= 2 { familyComparison(rows) }
+
                             // Feedback to the team — a plain button BELOW everything
                             // (replaces the floating bubble that overlapped a child
                             // card on smaller screens).
@@ -906,6 +908,54 @@ struct ParentDashboardView: View {
 
     /// One child as a 2-up collection tile: big avatar, name, mini glance.
     /// Tapping it pushes the full child page.
+    /// Side-by-side family view: each child's top strength + interest + trend.
+    /// Deliberately NO ranking or sibling competition — just helping the parent
+    /// see each child individually.
+    private func familyComparison(_ rows: [(profile: Profile, snapshot: ProgressSnapshot)]) -> some View {
+        VStack(alignment: .trailing, spacing: 12) {
+            Text("הַשְׁוָאָה מִשְׁפַּחְתִּית")
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            Text("חוֹזְקָה וְעִנְיָן שֶׁל כָּל יֶלֶד — בְּלִי דֵּירוּג וְתַחֲרוּת")
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.7))
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            ForEach(rows, id: \.profile.id) { row in
+                let lp = LearningProfile(snapshot: row.snapshot, enabledTopics: row.profile.enabledTopics, age: row.profile.age)
+                let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: row.profile.id), profile: lp)
+                let strength = engine.strengths.first ?? engine.confidenceByTopic.first?.topic
+                let interest = engine.gainedInterest.first ?? lp.favorites.first
+                HStack(spacing: 8) {
+                    Spacer(minLength: 0)
+                    Text(engine.learningTrend.label)
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    if let interest { compChip("עִנְיָן", interest) }
+                    if let strength { compChip("חוֹזְקָה", strength) }
+                    Text(row.profile.name)
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(minWidth: 56, alignment: .trailing)
+                }
+                .padding(.vertical, 4)
+            }
+        }
+        .padding(AppSpacing.md)
+        .frame(maxWidth: .infinity)
+        .background(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).fill(.white.opacity(0.10)))
+        .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
+    }
+
+    private func compChip(_ label: String, _ topic: Topic) -> some View {
+        Text("\(topic.emoji) \(topic.displayName)")
+            .font(.system(size: 11, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 8).padding(.vertical, 3)
+            .background(Capsule().fill(.white.opacity(0.14)))
+            .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
+    }
+
     private func childCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
         let isActive = profile.id == profiles.activeID
         let cap = profile.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
