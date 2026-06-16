@@ -82,6 +82,10 @@ struct WorldMapView: View {
                         .frame(maxWidth: worldGridMaxWidth)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.horizontal, homeHPad)
+                    eventBanner
+                        .frame(maxWidth: worldGridMaxWidth)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.horizontal, homeHPad)
                     if kidMode.active { kidExitBar }
                     VStack(spacing: AppSpacing.lg) {
                         if isCompact {
@@ -515,6 +519,27 @@ struct WorldMapView: View {
         .padding(isCompact ? 10 : 12)
         .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.white.opacity(0.07)))
         .environment(\.layoutDirection, .rightToLeft)
+    }
+
+    /// Limited-time event banner (e.g. weekend 💎×2 / topic-of-the-day). Driven
+    /// purely by GameEvent.current() so it appears/disappears with the date.
+    @ViewBuilder private var eventBanner: some View {
+        if let event = GameEvent.current() {
+            HStack(spacing: 8) {
+                Text(event.emoji).font(.system(size: 18))
+                Text(event.bannerText)
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(AppColor.textOnLight)
+                    .lineLimit(2).minimumScaleFactor(0.8)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
+            .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+            .padding(.top, 10)
+            .environment(\.layoutDirection, .rightToLeft)
+        }
     }
 
     /// Frosted translucent card so the dreamy background glows through.

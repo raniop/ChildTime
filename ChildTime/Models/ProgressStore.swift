@@ -651,11 +651,13 @@ final class ProgressStore: ObservableObject {
         stars += earned
         // 💎 spendable wallet — earned alongside ⭐, but at a slower rate so the
         // shop keeps its value. Stars stay the leaderboard rank; diamonds buy.
+        // Limited-time event bonus (e.g. weekend / topic-of-the-day → 💎×2).
+        let eventMult = GameEvent.current()?.diamondMultiplier(for: ctx.topic) ?? 1
         let earnedDiamonds = RewardEngine.diamondsForCorrect(
             combo: currentStreak,
             isSuperQuestion: ctx.isSuperQuestion,
             isMysteryPortal: ctx.isMysteryPortal
-        )
+        ) * eventMult
         diamonds += earnedDiamonds
         sessionDiamondsEarned += earnedDiamonds
         // Personal best — beating it is a big, celebrated moment. Fire the
