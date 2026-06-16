@@ -84,6 +84,7 @@ struct LearningProfile {
 
     func affinity(for topic: Topic) -> Double { affinity[topic] ?? 0.5 }
     func exposure(for topic: Topic) -> Int { exposure[topic] ?? 0 }
+    func abandonCount(for topic: Topic) -> Int { abandon[topic] ?? 0 }
     func successRate(for topic: Topic) -> Double { accuracy[topic] ?? 0 }
     func avgResponseMs(for topic: Topic) -> Double? { responseMs[topic] }
 

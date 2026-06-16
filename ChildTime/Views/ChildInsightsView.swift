@@ -43,11 +43,15 @@ struct ChildInsightsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .trailing, spacing: 18) {
+                snapshotStrip
                 periodPicker
                 summaryGrid
                 if period != .day { trendCharts }
                 confidenceSection
                 strengthsChallenges
+                interestsSection
+                learningStyleSection
+                persistenceSection
                 coachingSection
                 actionsSection
             }
@@ -69,6 +73,68 @@ struct ChildInsightsView: View {
     }
 
     // MARK: - Sections
+
+    /// Quick top-line snapshot — independent of the period picker.
+    private var snapshotStrip: some View {
+        HStack(spacing: 8) {
+            snapChip(engine.learningTrend.label, color: engine.learningTrend.color)
+            if let s = engine.avgResponseSeconds {
+                snapChip("⏳ \(s) שׁנִיּוֹת מֵעֲנֶה", color: .secondary)
+            }
+            snapChip("🔥 \(snapshot.dayStreak) יְמֵי רֶצֶף", color: AppColor.flameOrange)
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+    }
+
+    private func snapChip(_ text: String, color: Color) -> some View {
+        Text(text)
+            .font(.system(size: 12, weight: .heavy, design: .rounded))
+            .foregroundStyle(color)
+            .padding(.horizontal, 10).padding(.vertical, 6)
+            .background(Capsule().fill(color.opacity(0.14)))
+    }
+
+    @ViewBuilder private var interestsSection: some View {
+        if !engine.gainedInterest.isEmpty || !engine.lostInterest.isEmpty {
+            card(title: "תְּחוּמֵי עִנְיָן") {
+                VStack(alignment: .trailing, spacing: 10) {
+                    topicRow("צוֹבֵר עִנְיָן", engine.gainedInterest, AppColor.gemPurple, empty: "")
+                    if !engine.lostInterest.isEmpty {
+                        topicRow("אִבֵּד עִנְיָן", engine.lostInterest, AppColor.flameOrange, empty: "")
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private var learningStyleSection: some View {
+        if let style = engine.learningStyle {
+            card(title: "סִגְנוֹן לְמִידָה") {
+                labeledRow(style)
+            }
+        }
+    }
+
+    @ViewBuilder private var persistenceSection: some View {
+        if let p = engine.persistence {
+            card(title: "הַתְמָדָה") {
+                labeledRow(p)
+            }
+        }
+    }
+
+    private func labeledRow(_ l: InsightsEngine.Labeled) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Spacer(minLength: 0)
+            VStack(alignment: .trailing, spacing: 3) {
+                Text(l.title).font(.system(size: 15, weight: .heavy, design: .rounded))
+                Text(l.detail).font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(.secondary).multilineTextAlignment(.trailing)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Text(l.emoji).font(.system(size: 30))
+        }
+    }
 
     private var periodPicker: some View {
         Picker("תקופה", selection: $period) {
