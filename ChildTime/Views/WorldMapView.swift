@@ -21,7 +21,9 @@ struct WorldMapView: View {
     @State private var showingDemo = false
     @State private var showingShop = false
     @State private var showingWheel = false
+    @State private var showingGames = false
     @State private var showingTrueFalse = false
+    @State private var showingMatch = false
     @State private var showingLeaderboard = false
     @State private var showingSmartFeed = false
     @State private var showingChildSettings = false
@@ -333,8 +335,16 @@ struct WorldMapView: View {
             inviteBannerVisible = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 5) { inviteBannerVisible = false }
         }
+        .confirmationDialog("בְּחַרוּ מִשְׂחָק", isPresented: $showingGames, titleVisibility: .visible) {
+            Button("מֵרוֹץ נָכוֹן/לֹא נָכוֹן ⚡") { showingTrueFalse = true }
+            Button("הַתְאָמַת זוּגוֹת 🧩") { showingMatch = true }
+            Button("בִּיטּוּל", role: .cancel) {}
+        }
         .fullScreenCover(isPresented: $showingTrueFalse) {
             TrueFalseRaceView { showingTrueFalse = false }
+        }
+        .fullScreenCover(isPresented: $showingMatch) {
+            MatchPairsView { showingMatch = false }
         }
         .fullScreenCover(isPresented: $showingWheel) {
             LuckyWheelView { showingWheel = false }
@@ -607,9 +617,9 @@ struct WorldMapView: View {
                 if let invite = liveGame.invites.first { Task { await liveGame.joinGame(invite.id) } }
                 else { liveGame.openSetup() }
             }
-            navButton(icon: "bolt.fill", color: Color(hex: "EF476F"),
-                      label: "מֵרוֹץ", badge: false, size: size) {
-                Haptic.light(); showingTrueFalse = true
+            navButton(icon: "puzzlepiece.fill", color: Color(hex: "EF476F"),
+                      label: "מִשְׂחָקִים", badge: false, size: size) {
+                Haptic.light(); showingGames = true
             }
             navButton(icon: "trophy.fill", color: Color(hex: "10B981"),
                       label: "דֵּירוּג", badge: false, size: size) {
