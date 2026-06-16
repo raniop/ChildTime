@@ -21,6 +21,8 @@ final class ProgressStore: ObservableObject {
         static let lastSessionDate = "lastSessionDate"
         static let lastDailyChestDate = "lastDailyChestDate"
         static let lastDailyChallengeDate = "lastDailyChallengeDate"
+        static let hourlyAnswered = "hourlyAnswered"
+        static let hourlyCorrect = "hourlyCorrect"
         static let unlockedWorlds = "unlockedWorlds"
         static let worldProgress = "worldProgress"
         static let ownedCosmetics = "ownedCosmetics"
@@ -119,6 +121,15 @@ final class ProgressStore: ObservableObject {
             if let d = lastDailyChallengeDate { defaults.set(d, forKey: Key.lastDailyChallengeDate) }
             else { defaults.removeObject(forKey: Key.lastDailyChallengeDate) }
         }
+    }
+    /// 24 hour-of-day buckets of answers / correct answers (lifetime). Feeds the
+    /// parent-only "Focus" insight (best time of day). Synced so the parent's
+    /// device can read it. Monotonic counters → merged element-wise by max.
+    @Published private(set) var hourlyAnswered: [Int] {
+        didSet { defaults.set(hourlyAnswered, forKey: Key.hourlyAnswered) }
+    }
+    @Published private(set) var hourlyCorrect: [Int] {
+        didSet { defaults.set(hourlyCorrect, forKey: Key.hourlyCorrect) }
     }
     @Published private(set) var unlockedWorlds: Set<String> {
         didSet { defaults.set(Array(unlockedWorlds), forKey: Key.unlockedWorlds) }
@@ -355,6 +366,8 @@ final class ProgressStore: ObservableObject {
         self.lastSessionDate = d.object(forKey: Key.lastSessionDate) as? Date
         self.lastDailyChestDate = d.object(forKey: Key.lastDailyChestDate) as? Date
         self.lastDailyChallengeDate = d.object(forKey: Key.lastDailyChallengeDate) as? Date
+        self.hourlyAnswered = (d.array(forKey: Key.hourlyAnswered) as? [Int]).flatMap { $0.count == 24 ? $0 : nil } ?? Array(repeating: 0, count: 24)
+        self.hourlyCorrect = (d.array(forKey: Key.hourlyCorrect) as? [Int]).flatMap { $0.count == 24 ? $0 : nil } ?? Array(repeating: 0, count: 24)
 
         let unlockedArray = d.stringArray(forKey: Key.unlockedWorlds) ?? ["numbers_kingdom"]
         self.unlockedWorlds = Set(unlockedArray)
@@ -635,6 +648,7 @@ final class ProgressStore: ObservableObject {
         _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
         answeredToday += 1
         correctToday += 1
+        recordHourly(correct: true)
         currentStreak += 1
         wrongStreak = 0  // any correct answer breaks the penalty streak
         AppAnalytics.questionAnswered(topic: ctx.topic.rawValue, correct: true)
@@ -958,6 +972,7 @@ final class ProgressStore: ObservableObject {
         totalAnswered += 1
         _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
         answeredToday += 1
+        recordHourly(correct: false)
         sittingQuestions += 1
         currentStreak = 0
         recordCelebratedThisRun = false   // streak broke — arm the next record
@@ -1283,6 +1298,16 @@ final class ProgressStore: ObservableObject {
         return remainingMinutes
     }
 
+    // MARK: - Focus (hour-of-day buckets)
+
+    /// Bump the current hour's answer/correct counters (parent-only Focus insight).
+    private func recordHourly(correct: Bool) {
+        let h = Calendar.current.component(.hour, from: Date())
+        guard h >= 0, h < 24 else { return }
+        if hourlyAnswered.count == 24 { hourlyAnswered[h] += 1 }
+        if correct, hourlyCorrect.count == 24 { hourlyCorrect[h] += 1 }
+    }
+
     // MARK: - Day streak
 
     func registerSessionToday() {
@@ -1330,6 +1355,8 @@ final class ProgressStore: ObservableObject {
         s.lastSessionDate     = lastSessionDate
         s.lastDailyChestDate  = lastDailyChestDate
         s.lastDailyChallengeDate = lastDailyChallengeDate
+        s.hourlyAnswered = hourlyAnswered
+        s.hourlyCorrect = hourlyCorrect
         s.unlockedWorlds      = Array(unlockedWorlds)
         s.worldProgress       = worldProgress
         s.topicAccuracy       = topicAccuracy
@@ -1386,6 +1413,8 @@ final class ProgressStore: ObservableObject {
         lastSessionDate     = s.lastSessionDate
         lastDailyChestDate  = s.lastDailyChestDate
         lastDailyChallengeDate = s.lastDailyChallengeDate
+        if let h = s.hourlyAnswered, h.count == 24 { hourlyAnswered = h }
+        if let h = s.hourlyCorrect, h.count == 24 { hourlyCorrect = h }
         unlockedWorlds      = Set(s.unlockedWorlds)
         worldProgress       = s.worldProgress
         topicAccuracy       = s.topicAccuracy

@@ -58,6 +58,8 @@ struct ProgressSnapshot: Codable, Equatable {
     /// child performs. Optional so snapshots written by older app versions
     /// (which lack the key) still decode cleanly — read it back as `?? [:]`.
     var topicAdaptiveLevel: [String: Double]? = nil
+    var hourlyAnswered: [Int]? = nil
+    var hourlyCorrect: [Int]? = nil
 
     // MARK: - Time economy progression
     /// Questions answered since the last free Lucky Wheel spin.
@@ -109,6 +111,7 @@ extension ProgressSnapshot {
         case batchCounter, wrongStreak, totalScore, minutesEarnedToday, dailyEarnedDate
         case answeredToday, correctToday, carryOverMinutes, bestStreak, cycleSeconds
         case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
+        case hourlyAnswered, hourlyCorrect
         case wheelProgressCount, recoveryPot, ownedCharacterIDs
         case revision, lastModifiedAt, deviceID
     }
@@ -156,6 +159,8 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .topicExposure)) ?? nil { topicExposure = v }
         if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .topicAbandon)) ?? nil { topicAbandon = v }
         if let v = (try? c.decodeIfPresent([String: Double].self, forKey: .topicAdaptiveLevel)) ?? nil { topicAdaptiveLevel = v }
+        if let v = (try? c.decodeIfPresent([Int].self, forKey: .hourlyAnswered)) ?? nil { hourlyAnswered = v }
+        if let v = (try? c.decodeIfPresent([Int].self, forKey: .hourlyCorrect)) ?? nil { hourlyCorrect = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .wheelProgressCount)) ?? nil { wheelProgressCount = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .recoveryPot)) ?? nil { recoveryPot = v }
         if let v = (try? c.decodeIfPresent([String].self, forKey: .ownedCharacterIDs)) ?? nil { ownedCharacterIDs = v }
@@ -207,7 +212,42 @@ extension ProgressSnapshot {
         m.lastSessionDate = laterDate(local.lastSessionDate, remote.lastSessionDate)
         m.lastDailyChestDate = laterDate(local.lastDailyChestDate, remote.lastDailyChestDate)
         m.lastDailyChallengeDate = laterDate(local.lastDailyChallengeDate, remote.lastDailyChallengeDate)
+        m.hourlyAnswered = mergeHourly(local.hourlyAnswered, remote.hourlyAnswered)
+        m.hourlyCorrect  = mergeHourly(local.hourlyCorrect, remote.hourlyCorrect)
         return m
+    }
+
+    /// Element-wise max of two 24-slot hour-bucket arrays (monotonic counters).
+    private static func mergeHourly(_ a: [Int]?, _ b: [Int]?) -> [Int]? {
+        guard let a, a.count == 24 else { return b }
+        guard let b, b.count == 24 else { return a }
+        return (0..<24).map { Swift.max(a[$0], b[$0]) }
+    }
+
+    /// Parent-only "Focus" insight: the time-of-day band where the child answers
+    /// most accurately, once there's enough data. nil until then.
+    var focusInsight: (title: String, detail: String)? {
+        guard let ans = hourlyAnswered, let cor = hourlyCorrect,
+              ans.count == 24, cor.count == 24 else { return nil }
+        guard ans.reduce(0, +) >= 25 else { return nil }   // need enough signal
+        // Bands: morning 6–11, noon 12–16, evening 17–21, night 22–05.
+        let bands: [(name: String, hours: [Int])] = [
+            ("בַּבֹּקֶר", Array(6...11)),
+            ("אַחַר הַצָּהֳרַיִם", Array(12...16)),
+            ("בָּעֶרֶב", Array(17...21)),
+            ("בַּלַּיְלָה", [22, 23, 0, 1, 2, 3, 4, 5]),
+        ]
+        var best: (name: String, acc: Double, vol: Int)? = nil
+        for b in bands {
+            let vol = b.hours.reduce(0) { $0 + ans[$1] }
+            guard vol >= 5 else { continue }
+            let correct = b.hours.reduce(0) { $0 + cor[$1] }
+            let acc = Double(correct) / Double(vol)
+            if best == nil || acc > best!.acc { best = (b.name, acc, vol) }
+        }
+        guard let best else { return nil }
+        return (title: "שְׁעוֹת הַשִּׂיא: \(best.name)",
+                detail: "\(best.name) הַהַצְלָחָה הֲכִי גְּבוֹהָה — \(Int((best.acc * 100).rounded()))%. כְּדַאי לְתַזְמֵן לְמִידָה לַשָּׁעוֹת הָאֵלֶּה.")
     }
 
     /// Equal ignoring version metadata (revision/lastModifiedAt/deviceID) and the

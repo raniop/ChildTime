@@ -52,6 +52,7 @@ struct ChildInsightsView: View {
                 interestsSection
                 learningStyleSection
                 persistenceSection
+                focusSection
                 coachingSection
                 actionsSection
             }
@@ -119,6 +120,14 @@ struct ChildInsightsView: View {
         if let p = engine.persistence {
             card(title: "הַתְמָדָה") {
                 labeledRow(p)
+            }
+        }
+    }
+
+    @ViewBuilder private var focusSection: some View {
+        if let f = snapshot.focusInsight {
+            card(title: "רִכּוּז וּשְׁעוֹת שִׂיא") {
+                labeledRow(InsightsEngine.Labeled(emoji: "⏰", title: f.title, detail: f.detail))
             }
         }
     }
