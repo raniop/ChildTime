@@ -777,8 +777,12 @@ final class ProgressStore: ObservableObject {
     @discardableResult
     private func minutesEarnedTodayRespectingDate() -> Int {
         let today = Calendar.current.startOfDay(for: Date())
+        // Roll over ONLY when the stored date is a genuinely PAST day. A same-day
+        // (or, due to sync/clock-skew, a future-dated) value must NOT trigger a
+        // rollover — a spurious rollover re-releases banked carry-over minutes and
+        // zeroes the daily counters, which made the redeemable minutes jump around.
         if let last = dailyEarnedDate.map({ Calendar.current.startOfDay(for: $0) }),
-           Calendar.current.isDate(last, inSameDayAs: today) {
+           last >= today {
             return minutesEarnedToday
         }
         // New day — first, yesterday's banked bonus minutes become playable.

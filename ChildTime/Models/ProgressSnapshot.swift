@@ -209,6 +209,25 @@ extension ProgressSnapshot {
         } else {
             m.dayStreak = local.dayStreak
         }
+        // `minutesEarnedToday` is a same-DAY counter paired with `dailyEarnedDate`.
+        // Merge them as a unit and NEVER let the date move backward — a stale remote
+        // (or a device in another timezone) pushing an older date would otherwise
+        // trigger a false mid-day "new day" rollover on the child: it re-releases
+        // banked carry-over into the wallet and flips `minutesUnlockedToday` to 0,
+        // making the "open X minutes" number jump around. Same day → keep the larger
+        // earned count; otherwise take the later-dated side.
+        let lDay = local.dailyEarnedDate ?? .distantPast
+        let rDay = remote.dailyEarnedDate ?? .distantPast
+        if Calendar.current.isDate(lDay, inSameDayAs: rDay) {
+            m.dailyEarnedDate = local.dailyEarnedDate ?? remote.dailyEarnedDate
+            m.minutesEarnedToday = max(local.minutesEarnedToday, remote.minutesEarnedToday)
+        } else if rDay > lDay {
+            m.dailyEarnedDate = remote.dailyEarnedDate
+            m.minutesEarnedToday = remote.minutesEarnedToday
+        } else {
+            m.dailyEarnedDate = local.dailyEarnedDate
+            m.minutesEarnedToday = local.minutesEarnedToday
+        }
         m.lastSessionDate = laterDate(local.lastSessionDate, remote.lastSessionDate)
         m.lastDailyChestDate = laterDate(local.lastDailyChestDate, remote.lastDailyChestDate)
         m.lastDailyChallengeDate = laterDate(local.lastDailyChallengeDate, remote.lastDailyChallengeDate)
