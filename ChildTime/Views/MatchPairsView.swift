@@ -224,7 +224,8 @@ struct MatchPairsView: View {
 
     private func win() {
         won = true
-        earnedMinutes = max(1, pairCount - min(mistakes, pairCount - 1))
+        // Max 2 play-minutes per round (2 for a clean round, else 1).
+        earnedMinutes = mistakes <= 2 ? 2 : 1
         progress.applyChestReward(ChestReward(stars: pairCount, diamonds: max(8, 20 - mistakes * 2), minutes: earnedMinutes))
         SoundPlayer.shared.play(.chestOpen)
         Haptic.success()

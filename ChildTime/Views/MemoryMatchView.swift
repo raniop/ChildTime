@@ -8,7 +8,7 @@ struct MemoryMatchView: View {
 
     @ObservedObject private var progress = ProgressStore.shared
 
-    private let pairCount = 6
+    private let pairCount = 8
 
     /// Kid-friendly emoji → English word vocabulary.
     private static let vocab: [(emoji: String, word: String)] = [
@@ -74,12 +74,13 @@ struct MemoryMatchView: View {
             }
             .padding(.top, 60)
 
-            let cols = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
+            Spacer(minLength: 0)
+            let cols = Array(repeating: GridItem(.flexible(), spacing: 10), count: 4)
             LazyVGrid(columns: cols, spacing: 10) {
                 ForEach(cards) { card in cardView(card) }
             }
-            .padding(.horizontal, 18)
-            Spacer()
+            .padding(.horizontal, 14)
+            Spacer(minLength: 0)
         }
     }
 
@@ -194,7 +195,8 @@ struct MemoryMatchView: View {
 
     private func win() {
         won = true
-        earnedMinutes = max(1, pairCount - min(mistakes, pairCount - 1))
+        // Max 2 play-minutes per round (2 for a clean round, else 1).
+        earnedMinutes = mistakes <= 2 ? 2 : 1
         progress.applyChestReward(ChestReward(stars: pairCount, diamonds: max(8, 20 - mistakes * 2), minutes: earnedMinutes))
         SoundPlayer.shared.play(.chestOpen); Haptic.success(); confetti += 1
         AppAnalytics.log("memory_match_done", ["mistakes": "\(mistakes)"])

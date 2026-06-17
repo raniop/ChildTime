@@ -303,7 +303,8 @@ struct TrueFalseRaceView: View {
 
     private func finish() {
         phase = .done
-        earnedMinutes = max(1, correctCount / 2)
+        // Max 2 play-minutes per round (2 for a strong round, else 1).
+        earnedMinutes = correctCount >= (total * 3) / 4 ? 2 : 1
         progress.applyChestReward(ChestReward(stars: correctCount, diamonds: score, minutes: earnedMinutes))
         SoundPlayer.shared.play(.chestOpen)
         Haptic.success()
