@@ -8,6 +8,7 @@ final class ProgressStore: ObservableObject {
 
     private enum Key {
         static let pendingMinutes = "pendingMinutes"
+        static let pendingSecondsCarry = "pendingSecondsCarry"
         static let totalCorrect = "totalCorrect"
         static let totalAnswered = "totalAnswered"
         static let unlockEndsAt = "unlockEndsAt"
@@ -58,6 +59,15 @@ final class ProgressStore: ObservableObject {
 
     @Published private(set) var pendingMinutes: Int {
         didSet { defaults.set(pendingMinutes, forKey: Key.pendingMinutes) }
+    }
+    /// Sub-minute leftover seconds (0–59) owed to the child — the remainder that
+    /// doesn't fit into the whole-minute `pendingMinutes` wallet. When a play
+    /// window is stopped early we bank the exact leftover (e.g. 58:50 → 58 min +
+    /// 50 s carry) instead of flooring the seconds away OR rounding the minute up.
+    /// Re-applied to the next window in `startUnlock`, so reopening resumes at
+    /// 58:50 — never jumps back up to 59. Local-only (sub-minute, not worth syncing).
+    @Published private(set) var pendingSecondsCarry: Int {
+        didSet { defaults.set(pendingSecondsCarry, forKey: Key.pendingSecondsCarry) }
     }
     @Published private(set) var totalCorrect: Int {
         didSet { defaults.set(totalCorrect, forKey: Key.totalCorrect) }
@@ -353,6 +363,7 @@ final class ProgressStore: ObservableObject {
     private init() {
         let d = AppGroup.defaults
         self.pendingMinutes = d.integer(forKey: Key.pendingMinutes)
+        self.pendingSecondsCarry = d.integer(forKey: Key.pendingSecondsCarry)
         self.totalCorrect = d.integer(forKey: Key.totalCorrect)
         self.totalAnswered = d.integer(forKey: Key.totalAnswered)
         self.unlockEndsAt = d.object(forKey: Key.unlockEndsAt) as? Date
@@ -1233,7 +1244,12 @@ final class ProgressStore: ObservableObject {
     }
 
     func startUnlock(minutes: Int, manual: Bool = false) {
-        let end = Date().addingTimeInterval(TimeInterval(minutes * 60))
+        // Fold any banked sub-minute carry into a real (non-manual) window so the
+        // kid resumes at the exact leftover (e.g. 58 min wallet + 50 s carry →
+        // 58:50). A parent's manual quick-open is a fixed window — it ignores carry.
+        let extraSeconds = manual ? 0 : pendingSecondsCarry
+        if !manual { pendingSecondsCarry = 0 }
+        let end = Date().addingTimeInterval(TimeInterval(minutes * 60 + extraSeconds))
         unlockIsManual = manual
         unlockEndsAt = end
         // Lock-screen / Dynamic Island countdown of the remaining play time.
@@ -1289,11 +1305,13 @@ final class ProgressStore: ObservableObject {
         // NOT the child's to keep. End it without banking anything back.
         if unlockIsManual { endUnlock(); return 0 }
         let remainingSeconds = unlockSecondsRemaining
-        // Round to the NEAREST minute so the partial minute isn't floored away and
-        // wasted on every stop (19:42 left → 20 back, not 19). Bounded by the
-        // granted window (remaining ≤ minutes*60), so it can never refund MORE than
-        // was consumed — only avoids silently eating the leftover seconds.
-        let remainingMinutes = (remainingSeconds + 30) / 60
+        // Bank the EXACT leftover time, to the second. Neither floor it (which wasted
+        // the partial minute: 58:50 → 58) nor round the minute up (which invented
+        // time: 58:50 → 59). Instead split into whole minutes + a sub-minute carry,
+        // so reopening resumes at precisely 58:50.
+        let totalSeconds = (pendingSecondsCarry + remainingSeconds)
+        let remainingMinutes = totalSeconds / 60
+        pendingSecondsCarry = totalSeconds % 60
         if remainingMinutes > 0 {
             pendingMinutes += remainingMinutes
             // These minutes were returned unused — they don't count against today's
