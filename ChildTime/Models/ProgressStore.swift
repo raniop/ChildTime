@@ -1289,8 +1289,11 @@ final class ProgressStore: ObservableObject {
         // NOT the child's to keep. End it without banking anything back.
         if unlockIsManual { endUnlock(); return 0 }
         let remainingSeconds = unlockSecondsRemaining
-        // Round to nearest full minute (don't credit partial seconds back).
-        let remainingMinutes = remainingSeconds / 60
+        // Round to the NEAREST minute so the partial minute isn't floored away and
+        // wasted on every stop (19:42 left → 20 back, not 19). Bounded by the
+        // granted window (remaining ≤ minutes*60), so it can never refund MORE than
+        // was consumed — only avoids silently eating the leftover seconds.
+        let remainingMinutes = (remainingSeconds + 30) / 60
         if remainingMinutes > 0 {
             pendingMinutes += remainingMinutes
             // These minutes were returned unused — they don't count against today's
