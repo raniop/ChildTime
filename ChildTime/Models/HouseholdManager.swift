@@ -535,16 +535,23 @@ final class HouseholdManager: ObservableObject {
 
     private let lastRemoteUnlockKey = "lastRemoteUnlockAt"
 
+    /// How long a remote "open screen time now" stays applicable. The parent's
+    /// confirmation promises it opens "the moment the child opens Tofy", so the
+    /// window must be generous enough to cover a child who picks up the device a
+    /// while later — not just the next 10 minutes (the old window silently dropped
+    /// grants and was the cause of "sometimes the child doesn't get it"). Still
+    /// bounded so a day-old grant doesn't surprise-unlock on a future launch.
+    private static let remoteUnlockFreshness: TimeInterval = 6 * 3600   // 6 hours
+
     /// A parent opened screen time for this child from afar. Apply it exactly once
-    /// per command, and only when it's FRESH (last 10 min) so an old command never
-    /// re-fires when the app relaunches and the listener re-reads the doc.
+    /// per command (`at > last`), as long as it's still within the freshness window.
     @MainActor
     private func applyRemoteUnlockIfNeeded(_ data: [String: Any]) {
         guard let at = data["remoteUnlockAt"] as? Double,
               let minutes = data["remoteUnlockMinutes"] as? Int, minutes > 0 else { return }
         let last = UserDefaults.standard.double(forKey: lastRemoteUnlockKey)
         let now = Date().timeIntervalSince1970
-        guard at > last, now - at < 600 else { return }   // unseen + fresh
+        guard at > last, now - at < Self.remoteUnlockFreshness else { return }   // unseen + fresh
         UserDefaults.standard.set(at, forKey: lastRemoteUnlockKey)
         Task { @MainActor in
             await ShieldManager.shared.requestAuthorizationIfNeeded()

@@ -82,6 +82,11 @@ struct UnlockedView: View {
             .padding(.bottom, 100)
         }
         .onAppear {
+            // A play session means the device is now the kid's — re-lock the parent
+            // gate so re-entering Settings asks for the PIN again (a parent who opened
+            // manual time with the PIN, then the kid taps "finish", must not leave the
+            // gate open behind them).
+            ParentSettings.shared.sessionUnlocked = false
             startTimer()
             if !greeted {
                 greeted = true

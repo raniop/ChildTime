@@ -61,6 +61,13 @@ final class TimeTransferManager: ObservableObject {
         minutes * max(1, ParentSettings.shared.diamondsPerMinute)
     }
 
+    /// A child's last-known available play-minutes. For my own active profile that's
+    /// the live wallet; for a sibling it's their last-synced snapshot in the vault.
+    func availableMinutes(of childID: UUID) -> Int {
+        if childID == ProfileStore.shared.activeID { return ProgressStore.shared.pendingMinutes }
+        return ProgressVault.shared.snapshot(for: childID).pendingMinutes
+    }
+
     // MARK: - Buyer
 
     /// BUYER initiates: validate, escrow the diamonds locally, and post the
@@ -76,6 +83,12 @@ final class TimeTransferManager: ObservableObject {
         guard let hh = HouseholdManager.shared.household else { return "אין משפחה מחוברת" }
         let cost = price(forMinutes: minutes)
         guard ProgressStore.shared.diamonds >= cost else { return "אין לך מספיק יהלומים 💎" }
+        // The sibling must actually have the minutes to sell (last synced balance);
+        // the seller re-checks at settle, but block here so we don't post a doomed
+        // request. Read the sibling's wallet from the vault (mirrored from cloud).
+        guard availableMinutes(of: seller.id) >= minutes else {
+            return "לְ\(seller.name) אֵין מַסְפִּיק דַּקּוֹת לִמְכֹּר"
+        }
 
         let buyerName = ProfileStore.shared.profiles.first { $0.id == myID }?.name ?? "אני"
         // Escrow: take the diamonds now so they can't be double-spent while pending.

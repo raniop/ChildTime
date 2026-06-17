@@ -26,9 +26,15 @@ struct SiblingTimeShopView: View {
     private var selected: Profile? { profiles.profiles.first { $0.id == selectedID } }
     private var cost: Int { transfers.price(forMinutes: minutes) }
 
+    /// In buy mode, how many minutes the selected sibling has available to sell.
+    private func sellerMinutes(_ id: UUID) -> Int { transfers.availableMinutes(of: id) }
+
     private var canAct: Bool {
-        guard selected != nil else { return false }
-        return mode == .buy ? progress.diamonds >= cost : progress.pendingMinutes >= minutes
+        guard let sel = selected else { return false }
+        if mode == .buy {
+            return progress.diamonds >= cost && sellerMinutes(sel.id) >= minutes
+        }
+        return progress.pendingMinutes >= minutes
     }
 
     var body: some View {
@@ -133,6 +139,9 @@ struct SiblingTimeShopView: View {
 
     private func siblingChip(_ sib: Profile) -> some View {
         let isSel = sib.id == selectedID
+        // In buy mode a sibling with no minutes can't sell — show it dimmed/disabled.
+        let avail = sellerMinutes(sib.id)
+        let sellable = mode == .buy ? avail > 0 : true
         return Button {
             Haptic.light(); selectedID = sib.id
         } label: {
@@ -142,6 +151,11 @@ struct SiblingTimeShopView: View {
                 Text(sib.name)
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).lineLimit(1).minimumScaleFactor(0.7)
+                if mode == .buy {
+                    Text(avail > 0 ? "יֵשׁ \(avail) דַּקּוֹת" : "אֵין דַּקּוֹת")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundStyle(avail > 0 ? AppColor.successMint : .white.opacity(0.6))
+                }
             }
             .frame(width: 96)
             .padding(.vertical, 12)
@@ -150,8 +164,10 @@ struct SiblingTimeShopView: View {
             .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .stroke(.white.opacity(isSel ? 0.9 : 0.3), lineWidth: isSel ? 2.5 : 1))
             .glow(isSel ? AppColor.starGold : .clear, radius: isSel ? 10 : 0)
+            .opacity(sellable ? 1 : 0.45)
         }
         .buttonStyle(.juicy)
+        .disabled(!sellable)
     }
 
     // MARK: - Amount
@@ -197,10 +213,14 @@ struct SiblingTimeShopView: View {
 
     private var actionButton: some View {
         let title: String
-        if !canAct {
-            title = mode == .buy ? "אֵין מַסְפִּיק יְהָלוֹמִים 💎" : "אֵין מַסְפִּיק דַּקּוֹת 🎮"
-        } else {
+        if canAct {
             title = mode == .buy ? "שְׁלַח בַּקָּשָׁה לְאִשּׁוּר הוֹרֶה 🛒" : "שְׁלַח מַתָּנָה לְאִשּׁוּר הוֹרֶה 🎁"
+        } else if mode == .buy, let sel = selected, sellerMinutes(sel.id) < minutes {
+            title = "לְ\(sel.name) אֵין מַסְפִּיק דַּקּוֹת"
+        } else if mode == .buy {
+            title = "אֵין לְךָ מַסְפִּיק יְהָלוֹמִים 💎"
+        } else {
+            title = "אֵין לְךָ מַסְפִּיק דַּקּוֹת 🎮"
         }
         return Button {
             attemptAction()
