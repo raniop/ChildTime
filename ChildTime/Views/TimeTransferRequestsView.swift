@@ -8,7 +8,11 @@ struct TimeTransferRequestsView: View {
     @Environment(\.dismiss) private var dismiss
 
     private var pending: [TimeTransfer] { transfers.pendingForParent }
-    private var history: [TimeTransfer] { transfers.allTransfers.filter { $0.status != .pendingParent } }
+    /// Decided requests only — not the ones still awaiting the parent OR still
+    /// waiting for the sibling to agree (those aren't the parent's concern yet).
+    private var history: [TimeTransfer] {
+        transfers.allTransfers.filter { $0.status != .pendingParent && $0.status != .pendingSeller }
+    }
 
     var body: some View {
         ZStack {
@@ -137,23 +141,27 @@ struct TimeTransferRequestsView: View {
 
     private func statusEmoji(_ s: TimeTransfer.Status) -> String {
         switch s {
-        case .pendingParent: return "⏳"
-        case .approved:      return "✅"
-        case .completed:     return "🎉"
-        case .rejected:      return "🚫"
-        case .canceled:      return "↩️"
-        case .failed:        return "⚠️"
+        case .pendingSeller:    return "⏳"
+        case .pendingParent:    return "⏳"
+        case .approved:         return "✅"
+        case .completed:        return "🎉"
+        case .declinedBySeller: return "🙅"
+        case .rejected:         return "🚫"
+        case .canceled:         return "↩️"
+        case .failed:           return "⚠️"
         }
     }
 
     private func statusText(_ s: TimeTransfer.Status) -> String {
         switch s {
-        case .pendingParent: return "מַמְתִּינָה לְאִשּׁוּר"
-        case .approved:      return "אֻשַּׁר — בְּהַעֲבָרָה"
-        case .completed:     return "הוּשְׁלַם"
-        case .rejected:      return "נִדְחָה"
-        case .canceled:      return "בֻּטַּל"
-        case .failed:        return "לֹא הִסְתַּדֵּר"
+        case .pendingSeller:    return "מַמְתִּינָה לָאָח"
+        case .pendingParent:    return "מַמְתִּינָה לְאִשּׁוּר"
+        case .approved:         return "אֻשַּׁר — בְּהַעֲבָרָה"
+        case .completed:        return "הוּשְׁלַם"
+        case .declinedBySeller: return "הָאָח לֹא הִסְכִּים"
+        case .rejected:         return "נִדְחָה"
+        case .canceled:         return "בֻּטַּל"
+        case .failed:           return "לֹא הִסְתַּדֵּר"
         }
     }
 }

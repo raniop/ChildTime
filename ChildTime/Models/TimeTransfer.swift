@@ -13,8 +13,10 @@ import Foundation
 /// LWW sync carries the change — no cross-child writes.
 struct TimeTransfer: Codable, Identifiable, Equatable {
     enum Status: String, Codable {
-        case pendingParent   // waiting for a parent to approve
+        case pendingSeller   // BUY: waiting for the sibling (seller) to agree to sell
+        case pendingParent   // seller agreed (or it's a gift) → waiting for a parent
         case approved        // parent approved → seller will settle
+        case declinedBySeller // the sibling refused to sell → refund the buyer
         case rejected        // parent declined → refund the buyer
         case canceled        // buyer (or parent) canceled before completion → refund
         case completed       // settled on both sides
@@ -48,7 +50,7 @@ struct TimeTransfer: Codable, Identifiable, Equatable {
 
     /// A terminal state that should refund the buyer's escrowed diamonds.
     var isRefundable: Bool {
-        status == .rejected || status == .canceled || status == .failed
+        status == .rejected || status == .canceled || status == .failed || status == .declinedBySeller
     }
 
     /// A free gift (no diamonds) rather than a sale. For a gift the GIVER is the

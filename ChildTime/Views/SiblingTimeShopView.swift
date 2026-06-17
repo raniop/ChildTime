@@ -48,6 +48,7 @@ struct SiblingTimeShopView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
                     header
+                    if !transfers.incomingForSeller.isEmpty { incomingSection }
                     if siblings.isEmpty {
                         emptyState
                     } else {
@@ -235,6 +236,40 @@ struct SiblingTimeShopView: View {
         .disabled(!canAct)
     }
 
+    // MARK: - Requests waiting for ME to sell
+
+    private var incomingSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionTitle("בַּקָּשׁוֹת אֵלַי 🔔")
+            ForEach(transfers.incomingForSeller) { t in
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("\(t.toName) רוֹצֶה לִקְנוֹת מִמְּךָ \(t.minutes) דַּקּוֹת תְּמוּרַת \(t.diamondPrice) 💎")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: 10) {
+                        Button { transfers.sellerDecline(t); Haptic.light() } label: {
+                            Text("לֹא")
+                                .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                                .frame(maxWidth: .infinity).padding(.vertical, 10)
+                                .background(.white.opacity(0.16), in: Capsule())
+                        }
+                        .buttonStyle(.juicy)
+                        Button { transfers.sellerApprove(t); Haptic.success() } label: {
+                            Text("כֵּן, לִמְכֹּר ✅")
+                                .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(AppColor.textOnLight)
+                                .frame(maxWidth: .infinity).padding(.vertical, 10)
+                                .background(AppColor.successMint, in: Capsule())
+                        }
+                        .buttonStyle(.juicy)
+                    }
+                }
+                .padding(16)
+                .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(.white.opacity(0.16)))
+                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(AppColor.starGold.opacity(0.7), lineWidth: 1.5))
+            }
+        }
+    }
+
     // MARK: - Status of my requests
 
     private var statusSection: some View {
@@ -269,7 +304,7 @@ struct SiblingTimeShopView: View {
                     .font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            if iAmInitiator && t.status == .pendingParent {
+            if iAmInitiator && (t.status == .pendingSeller || t.status == .pendingParent) {
                 Button { transfers.cancel(t) } label: {
                     Text("בַּטֵּל").font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white).padding(.horizontal, 12).padding(.vertical, 6)
@@ -284,18 +319,22 @@ struct SiblingTimeShopView: View {
 
     private func statusEmoji(_ s: TimeTransfer.Status) -> String {
         switch s {
-        case .pendingParent: return "⏳"
-        case .approved:      return "✅"
-        case .completed:     return "🎉"
-        case .rejected:      return "🚫"
-        case .canceled:      return "↩️"
-        case .failed:        return "⚠️"
+        case .pendingSeller:    return "⏳"
+        case .pendingParent:    return "⏳"
+        case .approved:         return "✅"
+        case .completed:        return "🎉"
+        case .declinedBySeller: return "🙅"
+        case .rejected:         return "🚫"
+        case .canceled:         return "↩️"
+        case .failed:           return "⚠️"
         }
     }
 
     private func statusText(_ s: TimeTransfer.Status, isGift: Bool) -> String {
         let back = isGift ? "" : " — הַיְהָלוֹמִים הוּחְזְרוּ"
         switch s {
+        case .pendingSeller:    return "מְחַכֶּה שֶׁהָאָח יְאַשֵּׁר"
+        case .declinedBySeller: return "הָאָח לֹא רָצָה לִמְכֹּר\(back)"
         case .pendingParent: return "מְחַכֶּה לְאִשּׁוּר הוֹרֶה"
         case .approved:      return "אֻשַּׁר — מַעֲבִיר…"
         case .completed:     return "הוּשְׁלַם!"

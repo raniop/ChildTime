@@ -24,6 +24,9 @@ final class TimeTransferManager: ObservableObject {
     /// Every household transfer, newest first — drives the parent's requests
     /// screen (pending + the approved/rejected/completed history).
     @Published private(set) var allTransfers: [TimeTransfer] = []
+    /// Buy requests waiting for THIS device's child to agree to sell (the sibling
+    /// must say yes before it goes to the parent).
+    @Published private(set) var incomingForSeller: [TimeTransfer] = []
     /// Transfers involving THIS device's child (drives the kid's status view).
     @Published private(set) var myTransfers: [TimeTransfer] = []
     @Published private(set) var lastError: String?
@@ -106,7 +109,7 @@ final class TimeTransferManager: ObservableObject {
             toName: buyerName,
             minutes: minutes,
             diamondPrice: cost,
-            status: .pendingParent,
+            status: .pendingSeller,   // first the sibling agrees to sell, then the parent
             createdAt: Date().timeIntervalSince1970
         )
         guard let data = Self.encode(t) else {
@@ -158,6 +161,21 @@ final class TimeTransferManager: ObservableObject {
         #endif
     }
 
+    // MARK: - Seller (the sibling agreeing to sell)
+
+    /// The sibling agrees to sell → the request moves on to the parent for the
+    /// final OK (a Cloud Function then pushes the parent).
+    func sellerApprove(_ t: TimeTransfer) {
+        setStatus(t, to: .pendingParent)
+        AppAnalytics.log("sibling_transfer_seller_approved", ["minutes": "\(t.minutes)"])
+    }
+
+    /// The sibling refuses to sell → the buyer's escrowed diamonds are refunded.
+    func sellerDecline(_ t: TimeTransfer) {
+        setStatus(t, to: .declinedBySeller)
+        AppAnalytics.log("sibling_transfer_seller_declined", [:])
+    }
+
     // MARK: - Parent
 
     func approve(_ t: TimeTransfer) {
@@ -189,7 +207,7 @@ final class TimeTransferManager: ObservableObject {
     #if canImport(FirebaseFirestore)
     private func attach(householdID: String?) {
         listener?.remove(); listener = nil
-        pendingForParent = []; myTransfers = []; allTransfers = []
+        pendingForParent = []; myTransfers = []; allTransfers = []; incomingForSeller = []
         guard let hh = householdID else { return }
         listener = db.collection("timeTransfers")
             .whereField("householdID", isEqualTo: hh)
@@ -207,8 +225,11 @@ final class TimeTransferManager: ObservableObject {
         if let mine = currentChildID?.uuidString {
             myTransfers = all.filter { $0.fromChildID == mine || $0.toChildID == mine }
                 .sorted { $0.createdAt > $1.createdAt }
+            incomingForSeller = all.filter { $0.fromChildID == mine && $0.status == .pendingSeller }
+                .sorted { $0.createdAt < $1.createdAt }
         } else {
             myTransfers = []
+            incomingForSeller = []
         }
         for t in all { dispatchSideEffects(t) }
     }

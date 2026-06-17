@@ -123,6 +123,18 @@ async function childTokensForUID(uid) {
   return [...new Set([...child, ...legacy])];
 }
 
+// All CHILD-device tokens across a household (best-effort sibling notifications:
+// same-account siblings share the parent's childFcmTokens, so this reaches every
+// kid device in the family — the right sibling acts on it in-app).
+async function childTokensForHousehold(householdID) {
+  const hh = await db.collection("households").doc(householdID).get();
+  if (!hh.exists) return [];
+  const parentUIDs = hh.data().parentUIDs || [];
+  const tokens = [];
+  for (const uid of parentUIDs) tokens.push(...(await childTokensForUID(uid)));
+  return [...new Set(tokens)];
+}
+
 // Deliver a push to recipients, dropping the host's OWN device tokens so the
 // host isn't pinged by their own invite — but NEVER drop a real invite to empty
 // (same-account test families share tokens; the invited kid must still get it).
@@ -254,6 +266,46 @@ exports.onLiveGameNudge = onDocumentCreated("liveGames/{gameID}/nudges/{nudgeID}
     { title: "🎮 קוראים לך למשחק!", body: `${hostName} מזמין/ה אותך להצטרף עכשיו — מי הכי מהיר?` },
     { type: "liveGameInvite", gameID, link: `tofy://game?g=${gameID}` },
   );
+});
+
+// ---- 1d) Sibling time transfers --------------------------------------------
+// Buy flow: a child requests → the sibling (seller) agrees (pendingSeller) → a
+// parent gives the final OK (pendingParent). Push the sibling when their consent
+// is needed, and the parents when the final approval is needed. Gifts skip the
+// sibling step and land straight on pendingParent.
+
+exports.onTimeTransferWritten = onDocumentWritten("timeTransfers/{id}", async (event) => {
+  const before = event.data && event.data.before && event.data.before.data();
+  const after = event.data && event.data.after && event.data.after.data();
+  if (!after || !after.householdID) return;   // deleted, or malformed
+  const beforeStatus = before ? before.status : null;
+
+  // → pendingSeller: the sibling must agree to sell. Notify family child devices.
+  if (after.status === "pendingSeller" && beforeStatus !== "pendingSeller") {
+    const tokens = await childTokensForHousehold(after.householdID);
+    if (tokens.length) {
+      await send(
+        tokens,
+        { title: "🛒 בקשה לקניית זמן", body: `${after.toName} רוצה לקנות ממך ${after.minutes} דקות תמורת ${after.diamondPrice} 💎` },
+        { type: "timeTransferSeller", id: event.params.id },
+      );
+    }
+  }
+
+  // → pendingParent: the sibling agreed (or it's a gift). Notify the parents.
+  if (after.status === "pendingParent" && beforeStatus !== "pendingParent") {
+    const tokens = await tokensForHousehold(after.householdID, null);
+    if (tokens.length) {
+      const body = (after.diamondPrice > 0)
+        ? `${after.toName} רוצה לקנות ${after.minutes} דקות מ${after.fromName} — צריך אישור`
+        : `${after.fromName} רוצה לתת ${after.minutes} דקות ל${after.toName} — צריך אישור`;
+      await send(
+        tokens,
+        { title: "⏳ בקשת העברת זמן לאישור", body },
+        { type: "timeTransferParent", id: event.params.id },
+      );
+    }
+  }
 });
 
 // ---- 1c) Parent quick-help -------------------------------------------------
