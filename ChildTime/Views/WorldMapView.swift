@@ -672,7 +672,11 @@ struct WorldMapView: View {
                 .font(.system(size: isCompact ? 10 : 12, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .lineLimit(1)
-                .fixedSize()   // show the full word — never truncate to "…"
+                // Keep each caption within its button column so a long word (e.g.
+                // "מִשְׂחָקִים") can't spill over and collide with the neighbour's
+                // caption. Shrink-to-fit instead of truncating to "…".
+                .minimumScaleFactor(0.6)
+                .frame(width: size + (isCompact ? 8 : 16))
         }
     }
 
