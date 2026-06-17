@@ -252,16 +252,27 @@ struct TrueFalseRaceView: View {
 
     private func makeItem() -> TFItem {
         let topics = Array(profiles.active?.enabledTopics ?? Set(Topic.allCases))
-        let topic = topics.randomElement() ?? .math
-        let base = profiles.active?.difficulty(for: topic) ?? .easy
-        let level = progress.adaptiveLevel(for: topic, base: base)
-        let diff = AdaptiveDifficultyEngine.sampledDifficulty(forLevel: level, base: base)
-        let q = QuestionGenerator.generate(topic: topic, difficulty: diff)
+        // Skip set-dependent questions: a "מי לא שיך?" / odd-one-out prompt only
+        // makes sense when the whole group is visible, but the True/False race
+        // shows a single candidate — so the prompt alone is unanswerable. Retry
+        // until we get a self-contained question (bounded so we never spin).
+        var q = generateOne(topics)
+        var tries = 0
+        while !q.isSelfContainedPrompt && tries < 12 { q = generateOne(topics); tries += 1 }
         if Bool.random() { return TFItem(question: q, candidate: q.correctAnswer, isTrue: true) }
         let wrongIdx = q.options.indices.filter { $0 != q.correctIndex }.randomElement()
         let wrong = wrongIdx.map { q.options[$0] } ?? q.correctAnswer
         return TFItem(question: q, candidate: wrong, isTrue: wrong == q.correctAnswer)
     }
+
+    private func generateOne(_ topics: [Topic]) -> Question {
+        let topic = topics.randomElement() ?? .math
+        let base = profiles.active?.difficulty(for: topic) ?? .easy
+        let level = progress.adaptiveLevel(for: topic, base: base)
+        let diff = AdaptiveDifficultyEngine.sampledDifficulty(forLevel: level, base: base)
+        return QuestionGenerator.generate(topic: topic, difficulty: diff)
+    }
+
 
     private func answer(_ saidTrue: Bool) {
         guard !answered, let item else { return }

@@ -177,6 +177,7 @@ struct MatchPairsView: View {
         let topics = Array(profiles.active?.enabledTopics ?? Set(Topic.allCases))
         var pairs: [(prompt: String, answer: String)] = []
         var seenAnswers = Set<String>()
+        var seenPrompts = Set<String>()
         var tries = 0
         while pairs.count < pairCount, tries < 60 {
             tries += 1
@@ -184,8 +185,13 @@ struct MatchPairsView: View {
             let base = profiles.active?.difficulty(for: topic) ?? .easy
             let q = QuestionGenerator.generate(topic: topic, difficulty: base)
             let ans = q.correctAnswer
-            guard ans.count <= 24, q.prompt.count <= 60, !seenAnswers.contains(ans) else { continue }
+            // Skip odd-one-out prompts (group lives only in the hidden options) and
+            // any repeated prompt — two identical prompts can't be matched unambiguously.
+            guard q.isSelfContainedPrompt,
+                  ans.count <= 24, q.prompt.count <= 60,
+                  !seenAnswers.contains(ans), !seenPrompts.contains(q.prompt) else { continue }
             seenAnswers.insert(ans)
+            seenPrompts.insert(q.prompt)
             pairs.append((q.prompt, ans))
         }
         lefts = pairs.enumerated().map { Card(pair: $0.offset, text: $0.element.prompt) }.shuffled()
