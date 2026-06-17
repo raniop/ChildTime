@@ -21,6 +21,9 @@ final class TimeTransferManager: ObservableObject {
 
     /// Requests awaiting a parent decision (drives the dashboard approvals list).
     @Published private(set) var pendingForParent: [TimeTransfer] = []
+    /// Every household transfer, newest first — drives the parent's requests
+    /// screen (pending + the approved/rejected/completed history).
+    @Published private(set) var allTransfers: [TimeTransfer] = []
     /// Transfers involving THIS device's child (drives the kid's status view).
     @Published private(set) var myTransfers: [TimeTransfer] = []
     @Published private(set) var lastError: String?
@@ -186,7 +189,7 @@ final class TimeTransferManager: ObservableObject {
     #if canImport(FirebaseFirestore)
     private func attach(householdID: String?) {
         listener?.remove(); listener = nil
-        pendingForParent = []; myTransfers = []
+        pendingForParent = []; myTransfers = []; allTransfers = []
         guard let hh = householdID else { return }
         listener = db.collection("timeTransfers")
             .whereField("householdID", isEqualTo: hh)
@@ -198,6 +201,7 @@ final class TimeTransferManager: ObservableObject {
     }
 
     private func handle(_ all: [TimeTransfer]) {
+        allTransfers = all.sorted { $0.createdAt > $1.createdAt }
         pendingForParent = all.filter { $0.status == .pendingParent }
             .sorted { $0.createdAt < $1.createdAt }
         if let mine = currentChildID?.uuidString {

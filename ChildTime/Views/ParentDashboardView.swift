@@ -40,6 +40,7 @@ struct ParentDashboardView: View {
     @State private var remoteGrantMsg: String?
     @State private var worldsProfile: Profile?
     @State private var showingFeedback = false
+    @State private var showingTransferRequests = false
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
     /// After creating a child we offer to connect their device right away.
@@ -96,7 +97,7 @@ struct ParentDashboardView: View {
                             }
                             syncStatusCard
                             insightNotificationsCard
-                            if !transfers.pendingForParent.isEmpty { transferApprovalsCard }
+                            if !transfers.allTransfers.isEmpty { transferRequestsEntry }
                             LazyVGrid(
                                 columns: [GridItem(.flexible(), spacing: 12),
                                           GridItem(.flexible(), spacing: 12)],
@@ -265,6 +266,9 @@ struct ParentDashboardView: View {
             .sheet(isPresented: $showingFeedback) {
                 ParentFeedbackView()
                     .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(isPresented: $showingTransferRequests) {
+                TimeTransferRequestsView()
             }
             .sheet(isPresented: $showingCreateChild, onDismiss: {
                 // Next step after creating: connect that child's device (skippable).
@@ -913,54 +917,39 @@ struct ParentDashboardView: View {
     /// Side-by-side family view: each child's top strength + interest + trend.
     /// Deliberately NO ranking or sibling competition — just helping the parent
     /// see each child individually.
-    /// Pending sibling time-transfer requests awaiting this parent's approval.
-    private var transferApprovalsCard: some View {
-        VStack(alignment: .trailing, spacing: 12) {
-            Text("בַּקָּשׁוֹת הַעֲבָרַת זְמַן 🛒")
-                .font(.system(size: 17, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-            Text("יֶלֶד מְבַקֵּשׁ לְהַעֲבִיר דַּקּוֹת מִשְׂחָק לְאָח — בִּקְנִיָּה אוֹ בְּמַתָּנָה")
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundStyle(.white.opacity(0.7))
-                .frame(maxWidth: .infinity, alignment: .trailing)
-            ForEach(transfers.pendingForParent) { t in
-                VStack(alignment: .trailing, spacing: 8) {
-                    Text(t.isGift
-                         ? "\(t.fromName) רוֹצֶה לָתֵת בְּמַתָּנָה \(t.minutes) דַּקּוֹת לְ\(t.toName) 🎁"
-                         : "\(t.toName) רוֹצֶה לִקְנוֹת \(t.minutes) דַּקּוֹת מֵ\(t.fromName)")
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
+    /// Compact entry to the sibling time-transfer requests screen (kept off the
+    /// dashboard itself so it doesn't grow into an endless scroll). Badges the
+    /// number of requests still awaiting approval.
+    private var transferRequestsEntry: some View {
+        let pendingCount = transfers.pendingForParent.count
+        return Button { showingTransferRequests = true } label: {
+            HStack(spacing: 12) {
+                Text("🛒").font(.system(size: 28))
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("בַּקָּשׁוֹת הַעֲבָרַת זְמַן")
+                        .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                         .frame(maxWidth: .infinity, alignment: .trailing)
-                    HStack(spacing: 10) {
-                        Button { transfers.reject(t) } label: {
-                            Text("דְּחֵה")
-                                .font(.system(size: 14, weight: .heavy, design: .rounded))
-                                .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity).padding(.vertical, 9)
-                                .background(.white.opacity(0.14), in: Capsule())
-                        }
-                        .buttonStyle(.plain)
-                        Button { transfers.approve(t) } label: {
-                            Text("אַשֵּׁר ✅")
-                                .font(.system(size: 14, weight: .heavy, design: .rounded))
-                                .foregroundStyle(AppColor.textOnLight)
-                                .frame(maxWidth: .infinity).padding(.vertical, 9)
-                                .background(AppColor.successMint, in: Capsule())
-                        }
-                        .buttonStyle(.plain)
-                        Text(t.isGift ? "🎁 חִנָּם" : "💎 \(t.diamondPrice)")
-                            .font(.system(size: 15, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                    }
+                    Text(pendingCount > 0 ? "\(pendingCount) מַמְתִּינוֹת לְאִשּׁוּר" : "אֵין בַּקָּשׁוֹת חֲדָשׁוֹת")
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(pendingCount > 0 ? AppColor.starGold : .white.opacity(0.7))
+                        .frame(maxWidth: .infinity, alignment: .trailing)
                 }
-                .padding(.vertical, 6)
+                if pendingCount > 0 {
+                    Text("\(pendingCount)")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded)).foregroundStyle(AppColor.textOnLight)
+                        .frame(minWidth: 24, minHeight: 24)
+                        .background(Circle().fill(AppColor.starGold))
+                }
+                Image(systemName: "chevron.backward")
+                    .font(.system(size: 14, weight: .heavy)).foregroundStyle(.white.opacity(0.6))
             }
+            .padding(AppSpacing.md)
+            .frame(maxWidth: .infinity)
+            .background(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).fill(.white.opacity(0.10)))
+            .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
         }
-        .padding(AppSpacing.md)
-        .frame(maxWidth: .infinity)
-        .background(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).fill(.white.opacity(0.10)))
-        .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
+        .buttonStyle(.plain)
+        .environment(\.layoutDirection, .rightToLeft)
     }
 
     private func familyComparison(_ rows: [(profile: Profile, snapshot: ProgressSnapshot)]) -> some View {
