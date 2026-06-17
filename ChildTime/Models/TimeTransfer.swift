@@ -50,4 +50,8 @@ struct TimeTransfer: Codable, Identifiable, Equatable {
     var isRefundable: Bool {
         status == .rejected || status == .canceled || status == .failed
     }
+
+    /// A free gift (no diamonds) rather than a sale. For a gift the GIVER is the
+    /// initiator and is `fromChildID` (loses minutes); the recipient is `toChildID`.
+    var isGift: Bool { diamondPrice == 0 }
 }

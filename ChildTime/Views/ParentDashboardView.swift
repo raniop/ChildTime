@@ -920,13 +920,15 @@ struct ParentDashboardView: View {
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .trailing)
-            Text("יֶלֶד מְבַקֵּשׁ לִקְנוֹת דַּקּוֹת מִשְׂחָק מֵאָח תְּמוּרַת יְהָלוֹמִים")
+            Text("יֶלֶד מְבַקֵּשׁ לְהַעֲבִיר דַּקּוֹת מִשְׂחָק לְאָח — בִּקְנִיָּה אוֹ בְּמַתָּנָה")
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.7))
                 .frame(maxWidth: .infinity, alignment: .trailing)
             ForEach(transfers.pendingForParent) { t in
                 VStack(alignment: .trailing, spacing: 8) {
-                    Text("\(t.toName) רוֹצֶה לִקְנוֹת \(t.minutes) דַּקּוֹת מֵ\(t.fromName)")
+                    Text(t.isGift
+                         ? "\(t.fromName) רוֹצֶה לָתֵת בְּמַתָּנָה \(t.minutes) דַּקּוֹת לְ\(t.toName) 🎁"
+                         : "\(t.toName) רוֹצֶה לִקְנוֹת \(t.minutes) דַּקּוֹת מֵ\(t.fromName)")
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity, alignment: .trailing)
@@ -947,7 +949,7 @@ struct ParentDashboardView: View {
                                 .background(AppColor.successMint, in: Capsule())
                         }
                         .buttonStyle(.plain)
-                        Text("💎 \(t.diamondPrice)")
+                        Text(t.isGift ? "🎁 חִנָּם" : "💎 \(t.diamondPrice)")
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                     }

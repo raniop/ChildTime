@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// "קְנִיַּת זְמַן מֵאָח" — a child buys play-minutes from a sibling with 💎 diamonds.
-/// The buyer picks a sibling + an amount, sees the price, and sends the request
-/// for a parent to approve. Status of their requests shows below.
+/// "זְמַן מֵאָח" — a child either BUYS play-minutes from a sibling with 💎 diamonds
+/// or GIVES minutes to a sibling for free. Picks a sibling + an amount, then sends
+/// the request for a parent to approve. Status of their requests shows below.
 struct SiblingTimeShopView: View {
     var onClose: () -> Void
 
@@ -11,6 +11,8 @@ struct SiblingTimeShopView: View {
     @ObservedObject private var profiles = ProfileStore.shared
     @ObservedObject private var settings = ParentSettings.shared
 
+    private enum Mode { case buy, gift }
+    @State private var mode: Mode = .buy
     @State private var selectedID: UUID?
     @State private var minutes = 5
     @State private var banner: String?
@@ -23,7 +25,11 @@ struct SiblingTimeShopView: View {
     private var siblings: [Profile] { profiles.profiles.filter { $0.id != myID } }
     private var selected: Profile? { profiles.profiles.first { $0.id == selectedID } }
     private var cost: Int { transfers.price(forMinutes: minutes) }
-    private var canBuy: Bool { selected != nil && progress.diamonds >= cost }
+
+    private var canAct: Bool {
+        guard selected != nil else { return false }
+        return mode == .buy ? progress.diamonds >= cost : progress.pendingMinutes >= minutes
+    }
 
     var body: some View {
         ZStack {
@@ -39,10 +45,11 @@ struct SiblingTimeShopView: View {
                     if siblings.isEmpty {
                         emptyState
                     } else {
+                        modePicker
                         siblingPicker
                         amountPicker
-                        priceCard
-                        buyButton
+                        if mode == .buy { priceCard }
+                        actionButton
                     }
                     if !transfers.myTransfers.isEmpty { statusSection }
                 }
@@ -65,14 +72,14 @@ struct SiblingTimeShopView: View {
 
     private var header: some View {
         VStack(spacing: 6) {
-            Text("קְנִיַּת זְמַן מֵאָח 🛒")
+            Text("זְמַן מֵאָח 🛒")
                 .font(.system(size: 32, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).shadow(color: .black.opacity(0.25), radius: 6, y: 3)
                 .multilineTextAlignment(.center)
             HStack(spacing: 6) {
-                Text("💎 \(progress.diamonds)")
+                Text(mode == .buy ? "💎 \(progress.diamonds)" : "🎮 \(progress.pendingMinutes)")
                     .font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                Text("בָּאַרְנָק שֶׁלְּךָ")
+                Text(mode == .buy ? "בָּאַרְנָק שֶׁלְּךָ" : "דַּקּוֹת בָּאַרְנָק")
                     .font(.system(size: 14, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.85))
             }
             .padding(.horizontal, 14).padding(.vertical, 6)
@@ -83,23 +90,41 @@ struct SiblingTimeShopView: View {
     private var emptyState: some View {
         VStack(spacing: 10) {
             Text("🙂").font(.system(size: 54))
-            Text("אֵין עֲדַיִן אַחִים בַּמִּשְׁפָּחָה לִקְנוֹת מֵהֶם")
+            Text("אֵין עֲדַיִן אַחִים בַּמִּשְׁפָּחָה")
                 .font(.system(size: 17, weight: .bold, design: .rounded))
                 .foregroundStyle(.white).multilineTextAlignment(.center)
         }
         .padding(.top, 40)
     }
 
+    // MARK: - Mode (buy / gift)
+
+    private var modePicker: some View {
+        HStack(spacing: 10) {
+            modeTab("קְנֵה 💎", on: mode == .buy) { mode = .buy }
+            modeTab("תֵּן בְּמַתָּנָה 🎁", on: mode == .gift) { mode = .gift }
+        }
+    }
+
+    private func modeTab(_ title: String, on: Bool, action: @escaping () -> Void) -> some View {
+        Button { Haptic.light(); withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { action() } } label: {
+            Text(title)
+                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(on ? AppColor.textOnLight : .white)
+                .frame(maxWidth: .infinity).padding(.vertical, 12)
+                .background(on ? AnyShapeStyle(Color.white) : AnyShapeStyle(Color.white.opacity(0.14)), in: Capsule())
+        }
+        .buttonStyle(.juicy)
+    }
+
     // MARK: - Sibling picker
 
     private var siblingPicker: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionTitle("מִמִּי לִקְנוֹת?")
+            sectionTitle(mode == .buy ? "מִמִּי לִקְנוֹת?" : "לְמִי לָתֵת?")
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(siblings) { sib in
-                        siblingChip(sib)
-                    }
+                    ForEach(siblings) { sib in siblingChip(sib) }
                 }
                 .padding(.horizontal, 2).padding(.vertical, 4)
             }
@@ -170,18 +195,24 @@ struct SiblingTimeShopView: View {
         .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
     }
 
-    private var buyButton: some View {
-        Button {
-            attemptBuy()
+    private var actionButton: some View {
+        let title: String
+        if !canAct {
+            title = mode == .buy ? "אֵין מַסְפִּיק יְהָלוֹמִים 💎" : "אֵין מַסְפִּיק דַּקּוֹת 🎮"
+        } else {
+            title = mode == .buy ? "שְׁלַח בַּקָּשָׁה לְאִשּׁוּר הוֹרֶה 🛒" : "שְׁלַח מַתָּנָה לְאִשּׁוּר הוֹרֶה 🎁"
+        }
+        return Button {
+            attemptAction()
         } label: {
-            Text(canBuy ? "שְׁלַח בַּקָּשָׁה לְאִשּׁוּר הוֹרֶה 🛒" : "אֵין מַסְפִּיק יְהָלוֹמִים 💎")
+            Text(title)
                 .font(.system(size: 19, weight: .heavy, design: .rounded))
-                .foregroundStyle(canBuy ? AppColor.textOnLight : .white.opacity(0.8))
+                .foregroundStyle(canAct ? AppColor.textOnLight : .white.opacity(0.8))
                 .frame(maxWidth: .infinity).padding(.vertical, 16)
-                .background(canBuy ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.15)), in: Capsule())
+                .background(canAct ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.15)), in: Capsule())
         }
         .buttonStyle(.juicy)
-        .disabled(!canBuy)
+        .disabled(!canAct)
     }
 
     // MARK: - Status of my requests
@@ -189,29 +220,36 @@ struct SiblingTimeShopView: View {
     private var statusSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionTitle("הַבַּקָּשׁוֹת שֶׁלִּי")
-            ForEach(transfers.myTransfers) { t in
-                statusRow(t)
-            }
+            ForEach(transfers.myTransfers) { t in statusRow(t) }
         }
         .padding(.top, 6)
     }
 
     private func statusRow(_ t: TimeTransfer) -> some View {
-        let iAmBuyer = t.toChildID == myID?.uuidString
-        let label: String = iAmBuyer
-            ? "קָנִיתָ \(t.minutes) דַּקּוֹת מֵ\(t.fromName)"
-            : "\(t.toName) קָנָה מִמְּךָ \(t.minutes) דַּקּוֹת"
+        let mine = myID?.uuidString
+        let iAmRecipient = t.toChildID == mine          // gains minutes
+        let iAmInitiator = t.isGift ? (t.fromChildID == mine) : (t.toChildID == mine)
+        let label: String
+        if t.isGift {
+            label = iAmRecipient
+                ? "\(t.fromName) נוֹתֵן לְךָ \(t.minutes) דַּקּוֹת 🎁"
+                : "נָתַתָּ \(t.minutes) דַּקּוֹת לְ\(t.toName) 🎁"
+        } else {
+            label = iAmRecipient
+                ? "קָנִיתָ \(t.minutes) דַּקּוֹת מֵ\(t.fromName)"
+                : "\(t.toName) קָנָה מִמְּךָ \(t.minutes) דַּקּוֹת"
+        }
         return HStack(spacing: 12) {
             Text(statusEmoji(t.status)).font(.system(size: 26))
             VStack(alignment: .trailing, spacing: 2) {
                 Text(label)
                     .font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text(statusText(t.status))
+                Text(statusText(t.status, isGift: t.isGift))
                     .font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            if iAmBuyer && t.status == .pendingParent {
+            if iAmInitiator && t.status == .pendingParent {
                 Button { transfers.cancel(t) } label: {
                     Text("בַּטֵּל").font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white).padding(.horizontal, 12).padding(.vertical, 6)
@@ -235,14 +273,15 @@ struct SiblingTimeShopView: View {
         }
     }
 
-    private func statusText(_ s: TimeTransfer.Status) -> String {
+    private func statusText(_ s: TimeTransfer.Status, isGift: Bool) -> String {
+        let back = isGift ? "" : " — הַיְהָלוֹמִים הוּחְזְרוּ"
         switch s {
         case .pendingParent: return "מְחַכֶּה לְאִשּׁוּר הוֹרֶה"
         case .approved:      return "אֻשַּׁר — מַעֲבִיר…"
         case .completed:     return "הוּשְׁלַם!"
-        case .rejected:      return "הַהוֹרֶה דָּחָה — הַיְהָלוֹמִים הוּחְזְרוּ"
-        case .canceled:      return "בֻּטַּל — הַיְהָלוֹמִים הוּחְזְרוּ"
-        case .failed:        return "לֹא הִסְתַּדֵּר — הַיְהָלוֹמִים הוּחְזְרוּ"
+        case .rejected:      return "הַהוֹרֶה דָּחָה\(back)"
+        case .canceled:      return "בֻּטַּל\(back)"
+        case .failed:        return "לֹא הִסְתַּדֵּר\(back)"
         }
     }
 
@@ -281,13 +320,18 @@ struct SiblingTimeShopView: View {
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
-    private func attemptBuy() {
-        guard let seller = selected else { return }
-        if let err = transfers.requestPurchase(from: seller, minutes: minutes) {
+    private func attemptAction() {
+        guard let sib = selected else { return }
+        let err = mode == .buy
+            ? transfers.requestPurchase(from: sib, minutes: minutes)
+            : transfers.requestGift(to: sib, minutes: minutes)
+        if let err {
             show(err, good: false)
         } else {
             SoundPlayer.shared.play(.chestOpen); Haptic.success()
-            show("הַבַּקָּשָׁה נִשְׁלְחָה! מְחַכִּים לְאִשּׁוּר הַהוֹרֶה 🎉", good: true)
+            show(mode == .buy
+                 ? "הַבַּקָּשָׁה נִשְׁלְחָה! מְחַכִּים לְאִשּׁוּר הַהוֹרֶה 🎉"
+                 : "הַמַּתָּנָה נִשְׁלְחָה! מְחַכִּים לְאִשּׁוּר הַהוֹרֶה 🎁", good: true)
         }
     }
 

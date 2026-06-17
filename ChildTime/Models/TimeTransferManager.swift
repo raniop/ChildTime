@@ -105,6 +105,43 @@ final class TimeTransferManager: ObservableObject {
         #endif
     }
 
+    /// GIVER initiates a free gift: validate they have the minutes, then post the
+    /// request for parent approval. No diamonds change hands (price 0), so the
+    /// existing settlement just moves minutes giver → recipient. Returns a Hebrew
+    /// error string on failure, nil on success.
+    @discardableResult
+    func requestGift(to recipient: Profile, minutes: Int) -> String? {
+        guard ParentSettings.shared.siblingTransferEnabled else { return "התכונה כבויה" }
+        guard minutes > 0 else { return "בחרו כמה דקות" }
+        guard let myID = currentChildID else { return "אי אפשר מהמכשיר הזה" }
+        guard myID != recipient.id else { return "אי אפשר לתת לעצמך" }
+        #if canImport(FirebaseFirestore)
+        guard let hh = HouseholdManager.shared.household else { return "אין משפחה מחוברת" }
+        // The giver must actually have the minutes (checked again at settle).
+        guard ProgressStore.shared.pendingMinutes >= minutes else { return "אין לך מספיק דקות 🎮" }
+
+        let giverName = ProfileStore.shared.profiles.first { $0.id == myID }?.name ?? "אני"
+        let t = TimeTransfer(
+            id: UUID().uuidString,
+            householdID: hh.id,
+            fromChildID: myID.uuidString,        // giver — loses minutes
+            toChildID: recipient.id.uuidString,  // recipient — gains minutes
+            fromName: giverName,
+            toName: recipient.name,
+            minutes: minutes,
+            diamondPrice: 0,                     // free gift
+            status: .pendingParent,
+            createdAt: Date().timeIntervalSince1970
+        )
+        guard let data = Self.encode(t) else { return "שגיאה ביצירת הבקשה" }
+        db.collection("timeTransfers").document(t.id).setData(data)
+        AppAnalytics.log("sibling_gift_requested", ["minutes": "\(minutes)"])
+        return nil
+        #else
+        return "לא זמין"
+        #endif
+    }
+
     // MARK: - Parent
 
     func approve(_ t: TimeTransfer) {

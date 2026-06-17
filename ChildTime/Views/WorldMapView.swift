@@ -130,7 +130,7 @@ struct WorldMapView: View {
                                 FeatureCard(
                                     emoji: "🛒",
                                     title: "זְמַן מֵאָח",
-                                    subtitle: "קְנֵה דַּקּוֹת מִשְׂחָק תְּמוּרַת 💎",
+                                    subtitle: "קְנֵה 💎 אוֹ תֵּן בְּמַתָּנָה 🎁",
                                     gradient: LinearGradient(colors: [Color(hex: "06D6A0"), Color(hex: "118AB2")],
                                                              startPoint: .topLeading, endPoint: .bottomTrailing),
                                     glowColor: Color(hex: "06D6A0")
