@@ -99,7 +99,10 @@ struct MemoryMatchView: View {
                         .foregroundStyle(AppColor.textOnLight)
                         .minimumScaleFactor(0.5).lineLimit(1).padding(4)
                 } else {
+                    // The card back is shown at a 180° Y-rotation (see below), which
+                    // mirrors its content — so counter-mirror the "?" to keep it readable.
                     Text("?").font(.system(size: 34, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.85))
+                        .scaleEffect(x: -1, y: 1)
                 }
             }
             .frame(height: 84)

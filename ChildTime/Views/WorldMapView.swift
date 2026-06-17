@@ -17,6 +17,10 @@ struct WorldMapView: View {
     @State private var selectedWorld: World?
     @State private var showDailyChest = false
     @State private var challengeCelebration: String? = nil
+    @State private var infoSheet: InfoSheet? = nil
+
+    /// Which home-card explainer is open (daily challenge / topic-of-the-day).
+    private enum InfoSheet: Int, Identifiable { case dailyChallenge, event; var id: Int { rawValue } }
     @State private var showingParentGate = false
     @State private var showingDemo = false
     @State private var showingShop = false
@@ -377,6 +381,9 @@ struct WorldMapView: View {
             // Smart Feed play — grants minutes (capped by the daily maximum).
             QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
         }
+        .fullScreenCover(item: $infoSheet) { sheet in
+            challengeInfoScreen(for: sheet)
+        }
         .fullScreenCover(isPresented: $showingPaywall) {
             PaywallView()
                 .environmentObject(subs)
@@ -501,76 +508,157 @@ struct WorldMapView: View {
         let done = progress.dailyChallengeProgress
         let ready = progress.dailyChallengeRewardReady
         let claimed = progress.dailyChallengeClaimed
-        return VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                Text("🔥").font(.system(size: 20))
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("אֶתְגָּר יוֹמִי")
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                    Text(progress.dayStreak > 0 ? "\(progress.dayStreak) יָמִים בְּרֶצֶף" : "מַתְחִילִים רֶצֶף חָדָשׁ!")
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.7))
-                }
-                Spacer()
-                if claimed {
-                    Text("✓ הוּשְׁלַם הַיּוֹם")
-                        .font(.system(size: 12, weight: .heavy, design: .rounded))
-                        .foregroundStyle(AppColor.successMint)
-                } else if ready {
-                    Button {
-                        let grant = progress.claimDailyChallenge()
-                        Haptic.success()
-                        SoundPlayer.shared.play(.streakUp)
-                        let total = grant.addedToday + grant.bankedForTomorrow
-                        challengeCelebration = "🎉 כָּל הַכָּבוֹד! +\(15 + min(progress.dayStreak, 7) * 2) 💎" + (total > 0 ? " וְ-\(total) דַּקּוֹת" : "")
-                        companion.hype("שָׁמַרְתָּ עַל הָרֶצֶף! 🔥")
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { challengeCelebration = nil }
-                    } label: {
-                        Text("אַסְפוּ פְּרָס 🎁")
+        return Button {
+            Haptic.light()
+            infoSheet = .dailyChallenge
+        } label: {
+            VStack(spacing: 8) {
+                HStack(spacing: 8) {
+                    Text("🔥").font(.system(size: 20))
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("אֶתְגָּר יוֹמִי")
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                        Text(progress.dayStreak > 0 ? "\(progress.dayStreak) יָמִים בְּרֶצֶף" : "מַתְחִילִים רֶצֶף חָדָשׁ!")
+                            .font(.system(size: 11, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+                    Spacer()
+                    if claimed {
+                        Text("✓ הוּשְׁלַם הַיּוֹם")
+                            .font(.system(size: 12, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppColor.successMint)
+                    } else if ready {
+                        Text("מוּכָן! 🎁")
                             .font(.system(size: 13, weight: .heavy, design: .rounded))
                             .foregroundStyle(AppColor.textOnLight)
                             .padding(.horizontal, 12).padding(.vertical, 6)
                             .background(AppGradient.gold, in: Capsule())
+                    } else {
+                        HStack(spacing: 4) {
+                            Text("\(done)/\(target)")
+                                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                            Image(systemName: "chevron.backward")
+                                .font(.system(size: 12, weight: .heavy)).foregroundStyle(.white.opacity(0.7))
+                        }
                     }
-                    .buttonStyle(.juicy)
-                } else {
-                    Text("\(done)/\(target)")
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
                 }
-            }
-            // Progress bar of today's answers toward the goal.
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.15))
-                    Capsule().fill(ready || claimed ? AnyShapeStyle(AppColor.successMint) : AnyShapeStyle(AppGradient.gold))
-                        .frame(width: geo.size.width * CGFloat(done) / CGFloat(max(1, target)))
+                // Progress bar of today's answers toward the goal.
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.white.opacity(0.15))
+                        Capsule().fill(ready || claimed ? AnyShapeStyle(AppColor.successMint) : AnyShapeStyle(AppGradient.gold))
+                            .frame(width: geo.size.width * CGFloat(done) / CGFloat(max(1, target)))
+                    }
                 }
+                .frame(height: 8)
             }
-            .frame(height: 8)
+            .padding(isCompact ? 10 : 12)
+            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.white.opacity(0.07)))
         }
-        .padding(isCompact ? 10 : 12)
-        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.white.opacity(0.07)))
+        .buttonStyle(.plain)
         .environment(\.layoutDirection, .rightToLeft)
+    }
+
+    /// Claim the daily-challenge prize (called from the explainer's CTA).
+    private func claimChallenge() {
+        let grant = progress.claimDailyChallenge()
+        Haptic.success()
+        SoundPlayer.shared.play(.streakUp)
+        let total = grant.addedToday + grant.bankedForTomorrow
+        challengeCelebration = "🎉 כָּל הַכָּבוֹד! +\(15 + min(progress.dayStreak, 7) * 2) 💎" + (total > 0 ? " וְ-\(total) דַּקּוֹת" : "")
+        companion.hype("שָׁמַרְתָּ עַל הָרֶצֶף! 🔥")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { challengeCelebration = nil }
+    }
+
+    /// Close any open explainer, then jump into the Smart Feed to play/earn.
+    private func enterSmartFeedFromInfo() {
+        infoSheet = nil
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { showingSmartFeed = true }
+    }
+
+    @ViewBuilder
+    private func challengeInfoScreen(for sheet: InfoSheet) -> some View {
+        switch sheet {
+        case .dailyChallenge:
+            let target = ProgressStore.dailyChallengeTarget
+            let done = progress.dailyChallengeProgress
+            let ready = progress.dailyChallengeRewardReady
+            let claimed = progress.dailyChallengeClaimed
+            let prize = 15 + min(progress.dayStreak, 7) * 2
+            ChallengeInfoView(
+                emoji: "🔥",
+                title: "אֶתְגָּר יוֹמִי",
+                message: claimed
+                    ? "הִשְׁלַמְתָּ אֶת הָאֶתְגָּר הַיּוֹם — כָּל הַכָּבוֹד! 🎉\nאֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק וְלִצְבֹּר עוֹד."
+                    : "עֲנֵה נָכוֹן עַל \(target) שְׁאֵלוֹת הַיּוֹם וְזָכֵה בִּ-\(prize) 💎!\nכָּל יוֹם רָצוּף שֶׁמְּשַׂחֲקִים — הַפְּרָס גָּדֵל. 🔥",
+                progressText: "\(done)/\(target)",
+                ctaTitle: ready ? "אַסְפוּ אֶת הַפְּרָס 🎁" : "קָדִימָה, נְעַנֶּה! 🚀",
+                onCTA: {
+                    if ready { claimChallenge(); infoSheet = nil }
+                    else { enterSmartFeedFromInfo() }
+                },
+                onClose: { infoSheet = nil }
+            )
+        case .event:
+            eventInfoScreen
+        }
+    }
+
+    private func eventCopy(_ event: GameEvent) -> (title: String, message: String) {
+        switch event {
+        case .doubleDiamonds:
+            return ("סוֹף שָׁבוּעַ כָּפוּל!",
+                    "כָּל הַיַּהֲלוֹמִים שֶׁתִּצְבְּרוּ הַיּוֹם — כְּפוּלִים! 💎×2\nזֶה הַזְּמַן הֲכִי טוֹב לֶאֱסֹף הַרְבֵּה.")
+        case .featuredTopic(let t):
+            return ("נוֹשֵׂא הַיּוֹם: \(t.displayName)",
+                    "הַיּוֹם כָּל תְּשׁוּבָה נְכוֹנָה בְּ\(t.displayName) שָׁוָה יַהֲלוֹמִים כְּפוּלִים! 💎×2")
+        }
+    }
+
+    @ViewBuilder
+    private var eventInfoScreen: some View {
+        if let event = GameEvent.current() {
+            let copy = eventCopy(event)
+            ChallengeInfoView(
+                emoji: event.emoji,
+                title: copy.title,
+                message: copy.message,
+                ctaTitle: "קָדִימָה! 🚀",
+                onCTA: { enterSmartFeedFromInfo() },
+                onClose: { infoSheet = nil }
+            )
+        } else {
+            // Event lapsed while open — nothing to show; just dismiss.
+            Color.clear.onAppear { infoSheet = nil }
+        }
     }
 
     /// Limited-time event banner (e.g. weekend 💎×2 / topic-of-the-day). Driven
     /// purely by GameEvent.current() so it appears/disappears with the date.
     @ViewBuilder private var eventBanner: some View {
         if let event = GameEvent.current() {
-            HStack(spacing: 8) {
-                Text(event.emoji).font(.system(size: 18))
-                Text(event.bannerText)
-                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .foregroundStyle(AppColor.textOnLight)
-                    .lineLimit(2).minimumScaleFactor(0.8)
-                Spacer(minLength: 0)
+            Button {
+                Haptic.light()
+                infoSheet = .event
+            } label: {
+                HStack(spacing: 8) {
+                    Text(event.emoji).font(.system(size: 18))
+                    Text(event.bannerText)
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(AppColor.textOnLight)
+                        .lineLimit(2).minimumScaleFactor(0.8)
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.backward")
+                        .font(.system(size: 12, weight: .heavy)).foregroundStyle(AppColor.textOnLight.opacity(0.6))
+                }
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
+                .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
             }
-            .padding(.horizontal, 14).padding(.vertical, 10)
-            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
-            .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+            .buttonStyle(.juicy)
             .padding(.top, 10)
             .environment(\.layoutDirection, .rightToLeft)
         }
