@@ -8,6 +8,8 @@ struct GamesMenuView: View {
 
     @State private var showingTrueFalse = false
     @State private var showingMatch = false
+    @State private var showingQuiz = false
+    @State private var showingMemory = false
     @State private var appeared = false
 
     var body: some View {
@@ -18,24 +20,40 @@ struct GamesMenuView: View {
             FloatingOrbs.home().opacity(0.5)
             SparkleField(count: 22, size: 12)
 
-            VStack(spacing: 22) {
+            VStack(spacing: 16) {
                 header
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 16) {
+                        gameCard(
+                            emoji: "⚡️",
+                            title: "מֵרוֹץ נָכוֹן/לֹא נָכוֹן",
+                            subtitle: "מַהֵר! נָכוֹן אוֹ לֹא? בּוֹנוּס עַל מְהִירוּת 🔥",
+                            colors: [Color(hex: "EF476F"), Color(hex: "FF8A5B")]
+                        ) { showingTrueFalse = true }
 
-                gameCard(
-                    emoji: "⚡️",
-                    title: "מֵרוֹץ נָכוֹן/לֹא נָכוֹן",
-                    subtitle: "מַהֵר! נָכוֹן אוֹ לֹא? בּוֹנוּס עַל מְהִירוּת 🔥",
-                    colors: [Color(hex: "EF476F"), Color(hex: "FF8A5B")]
-                ) { showingTrueFalse = true }
+                        gameCard(
+                            emoji: "🎯",
+                            title: "חִידוֹן בָּזָק",
+                            subtitle: "אַרְבַּע תְּשׁוּבוֹת — בְּחַר אֶת הַנְּכוֹנָה מַהֵר!",
+                            colors: [Color(hex: "118AB2"), Color(hex: "5B6CFF")]
+                        ) { showingQuiz = true }
 
-                gameCard(
-                    emoji: "🧩",
-                    title: "הַתְאָמַת זוּגוֹת",
-                    subtitle: "הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וְזִכּוּ בְּפַרְסִים",
-                    colors: [Color(hex: "06D6A0"), Color(hex: "118AB2")]
-                ) { showingMatch = true }
+                        gameCard(
+                            emoji: "🧩",
+                            title: "הַתְאָמַת זוּגוֹת",
+                            subtitle: "הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וְזִכּוּ בְּפַרְסִים",
+                            colors: [Color(hex: "06D6A0"), Color(hex: "118AB2")]
+                        ) { showingMatch = true }
 
-                Spacer()
+                        gameCard(
+                            emoji: "🧠",
+                            title: "מִשְׂחַק הַזִּכָּרוֹן",
+                            subtitle: "מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה בְּאַנְגְּלִית",
+                            colors: [Color(hex: "9B5DE5"), Color(hex: "EF476F")]
+                        ) { showingMemory = true }
+                    }
+                    .padding(.bottom, 24)
+                }
             }
             .padding(.horizontal, 22)
             .padding(.top, 80)
@@ -59,8 +77,14 @@ struct GamesMenuView: View {
         .fullScreenCover(isPresented: $showingTrueFalse) {
             TrueFalseRaceView { showingTrueFalse = false }
         }
+        .fullScreenCover(isPresented: $showingQuiz) {
+            QuickQuizView { showingQuiz = false }
+        }
         .fullScreenCover(isPresented: $showingMatch) {
             MatchPairsView { showingMatch = false }
+        }
+        .fullScreenCover(isPresented: $showingMemory) {
+            MemoryMatchView { showingMemory = false }
         }
     }
 
@@ -83,12 +107,8 @@ struct GamesMenuView: View {
             action()
         } label: {
             HStack(spacing: 16) {
-                Text(emoji)
-                    .font(.system(size: 56))
-                    .frame(width: 92, height: 92)
-                    .background(Circle().fill(.white.opacity(0.22)))
-                    .overlay(Circle().stroke(.white.opacity(0.4), lineWidth: 1.5))
-                    .float(amplitude: 5)
+                // Text first → in RTL it sits flush against the right edge; the
+                // emoji medallion sits on the left.
                 VStack(alignment: .trailing, spacing: 6) {
                     Text(title)
                         .font(.system(size: 23, weight: .heavy, design: .rounded))
@@ -101,6 +121,12 @@ struct GamesMenuView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
+                Text(emoji)
+                    .font(.system(size: 56))
+                    .frame(width: 92, height: 92)
+                    .background(Circle().fill(.white.opacity(0.22)))
+                    .overlay(Circle().stroke(.white.opacity(0.4), lineWidth: 1.5))
+                    .float(amplitude: 5)
             }
             .padding(18)
             .frame(maxWidth: .infinity)
