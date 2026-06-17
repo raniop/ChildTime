@@ -22,8 +22,6 @@ struct WorldMapView: View {
     @State private var showingShop = false
     @State private var showingWheel = false
     @State private var showingGames = false
-    @State private var showingTrueFalse = false
-    @State private var showingMatch = false
     @State private var showingLeaderboard = false
     @State private var showingSmartFeed = false
     @State private var showingChildSettings = false
@@ -348,16 +346,8 @@ struct WorldMapView: View {
             inviteBannerVisible = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 5) { inviteBannerVisible = false }
         }
-        .confirmationDialog("בְּחַרוּ מִשְׂחָק", isPresented: $showingGames, titleVisibility: .visible) {
-            Button("מֵרוֹץ נָכוֹן/לֹא נָכוֹן ⚡") { showingTrueFalse = true }
-            Button("הַתְאָמַת זוּגוֹת 🧩") { showingMatch = true }
-            Button("בִּיטּוּל", role: .cancel) {}
-        }
-        .fullScreenCover(isPresented: $showingTrueFalse) {
-            TrueFalseRaceView { showingTrueFalse = false }
-        }
-        .fullScreenCover(isPresented: $showingMatch) {
-            MatchPairsView { showingMatch = false }
+        .fullScreenCover(isPresented: $showingGames) {
+            GamesMenuView { showingGames = false }
         }
         .fullScreenCover(isPresented: $showingWheel) {
             LuckyWheelView { showingWheel = false }
