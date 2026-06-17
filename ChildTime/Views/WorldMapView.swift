@@ -112,6 +112,19 @@ struct WorldMapView: View {
                             }
                             .frame(maxWidth: .infinity)
 
+                            FeatureCard(
+                                emoji: "🎮",
+                                title: "מִשְׂחָקִים",
+                                subtitle: "מֵרוֹץ נָכוֹן/לֹא · הַתְאָמַת זוּגוֹת",
+                                gradient: LinearGradient(colors: [Color(hex: "EF476F"), Color(hex: "9B5DE5")],
+                                                         startPoint: .topLeading, endPoint: .bottomTrailing),
+                                glowColor: Color(hex: "EF476F")
+                            ) {
+                                Haptic.light()
+                                showingGames = true
+                            }
+                            .frame(maxWidth: .infinity)
+
                             ForEach(enabledWorlds) { world in
                                 WorldCard(
                                     // Premium unlocks every world (that's what the
@@ -616,10 +629,6 @@ struct WorldMapView: View {
                 Haptic.light()
                 if let invite = liveGame.invites.first { Task { await liveGame.joinGame(invite.id) } }
                 else { liveGame.openSetup() }
-            }
-            navButton(icon: "puzzlepiece.fill", color: Color(hex: "EF476F"),
-                      label: "מִשְׂחָקִים", badge: false, size: size) {
-                Haptic.light(); showingGames = true
             }
             navButton(icon: "trophy.fill", color: Color(hex: "10B981"),
                       label: "דֵּירוּג", badge: false, size: size) {
