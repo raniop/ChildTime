@@ -22,6 +22,7 @@ struct WorldMapView: View {
     @State private var showingShop = false
     @State private var showingWheel = false
     @State private var showingGames = false
+    @State private var showingSiblingShop = false
     @State private var showingLeaderboard = false
     @State private var showingSmartFeed = false
     @State private var showingChildSettings = false
@@ -122,6 +123,23 @@ struct WorldMapView: View {
                                 showingGames = true
                             }
                             .frame(maxWidth: .infinity)
+
+                            // Sibling time shop — only when enabled AND the family
+                            // actually has a sibling to buy from.
+                            if settings.siblingTransferEnabled && profiles.profiles.count > 1 {
+                                FeatureCard(
+                                    emoji: "🛒",
+                                    title: "זְמַן מֵאָח",
+                                    subtitle: "קְנֵה דַּקּוֹת מִשְׂחָק תְּמוּרַת 💎",
+                                    gradient: LinearGradient(colors: [Color(hex: "06D6A0"), Color(hex: "118AB2")],
+                                                             startPoint: .topLeading, endPoint: .bottomTrailing),
+                                    glowColor: Color(hex: "06D6A0")
+                                ) {
+                                    Haptic.light()
+                                    showingSiblingShop = true
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
 
                             ForEach(enabledWorlds) { world in
                                 WorldCard(
@@ -348,6 +366,9 @@ struct WorldMapView: View {
         }
         .fullScreenCover(isPresented: $showingGames) {
             GamesMenuView { showingGames = false }
+        }
+        .fullScreenCover(isPresented: $showingSiblingShop) {
+            SiblingTimeShopView { showingSiblingShop = false }
         }
         .fullScreenCover(isPresented: $showingWheel) {
             LuckyWheelView { showingWheel = false }

@@ -44,6 +44,8 @@ final class ParentSettings: ObservableObject {
         static let joinedChildID = "joinedChildID"
         static let hasSetParentPIN = "hasSetParentPIN"
         static let justDisconnected = "justDisconnected"
+        static let siblingTransferEnabled = "siblingTransferEnabled"
+        static let diamondsPerMinute = "diamondsPerMinute"
     }
 
     /// What this device is used for — chosen once at first launch. Steers the
@@ -255,6 +257,17 @@ final class ParentSettings: ObservableObject {
     @Published var deviceRole: DeviceRole {
         didSet { defaults.set(deviceRole.rawValue, forKey: Key.deviceRole) }
     }
+    /// When ON, a child can buy play-minutes from a sibling using 💎 diamonds
+    /// (each transfer is parent-approved). Default ON — it's safe-by-design since
+    /// received minutes are still gated by the daily screen-time cap at unlock.
+    @Published var siblingTransferEnabled: Bool {
+        didSet { defaults.set(siblingTransferEnabled, forKey: Key.siblingTransferEnabled) }
+    }
+    /// How many 💎 a child pays a sibling per minute of play time bought. Parents
+    /// can tune the exchange rate; default 10 💎 per minute.
+    @Published var diamondsPerMinute: Int {
+        didSet { defaults.set(diamondsPerMinute, forKey: Key.diamondsPerMinute) }
+    }
     /// Whether the one-time welcome/explainer has been shown.
     @Published var hasSeenWelcome: Bool {
         didSet { defaults.set(hasSeenWelcome, forKey: Key.hasSeenWelcome) }
@@ -400,6 +413,14 @@ final class ParentSettings: ObservableObject {
         self.joinedChildID = d.string(forKey: Key.joinedChildID)
         self.hasSetParentPIN = d.bool(forKey: Key.hasSetParentPIN)
         self.justDisconnected = d.bool(forKey: Key.justDisconnected)
+        // Sibling time-transfer: ON by default (cap-gated, parent-approved).
+        if d.object(forKey: Key.siblingTransferEnabled) == nil {
+            self.siblingTransferEnabled = true
+        } else {
+            self.siblingTransferEnabled = d.bool(forKey: Key.siblingTransferEnabled)
+        }
+        let dpm = d.integer(forKey: Key.diamondsPerMinute)
+        self.diamondsPerMinute = dpm == 0 ? 10 : dpm
     }
 
     var hasConsented: Bool { consentVersionAccepted >= Consent.currentVersion }

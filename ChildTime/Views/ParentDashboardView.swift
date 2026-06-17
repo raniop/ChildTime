@@ -20,6 +20,7 @@ struct ParentDashboardView: View {
     @StateObject private var remote = RemoteSyncManager.shared
     @ObservedObject private var push = PushManager.shared
     @ObservedObject private var household = HouseholdManager.shared
+    @ObservedObject private var transfers = TimeTransferManager.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
@@ -95,6 +96,7 @@ struct ParentDashboardView: View {
                             }
                             syncStatusCard
                             insightNotificationsCard
+                            if !transfers.pendingForParent.isEmpty { transferApprovalsCard }
                             LazyVGrid(
                                 columns: [GridItem(.flexible(), spacing: 12),
                                           GridItem(.flexible(), spacing: 12)],
@@ -911,6 +913,54 @@ struct ParentDashboardView: View {
     /// Side-by-side family view: each child's top strength + interest + trend.
     /// Deliberately NO ranking or sibling competition — just helping the parent
     /// see each child individually.
+    /// Pending sibling time-transfer requests awaiting this parent's approval.
+    private var transferApprovalsCard: some View {
+        VStack(alignment: .trailing, spacing: 12) {
+            Text("בַּקָּשׁוֹת הַעֲבָרַת זְמַן 🛒")
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            Text("יֶלֶד מְבַקֵּשׁ לִקְנוֹת דַּקּוֹת מִשְׂחָק מֵאָח תְּמוּרַת יְהָלוֹמִים")
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.7))
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            ForEach(transfers.pendingForParent) { t in
+                VStack(alignment: .trailing, spacing: 8) {
+                    Text("\(t.toName) רוֹצֶה לִקְנוֹת \(t.minutes) דַּקּוֹת מֵ\(t.fromName)")
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                    HStack(spacing: 10) {
+                        Button { transfers.reject(t) } label: {
+                            Text("דְּחֵה")
+                                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity).padding(.vertical, 9)
+                                .background(.white.opacity(0.14), in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        Button { transfers.approve(t) } label: {
+                            Text("אַשֵּׁר ✅")
+                                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                                .foregroundStyle(AppColor.textOnLight)
+                                .frame(maxWidth: .infinity).padding(.vertical, 9)
+                                .background(AppColor.successMint, in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        Text("💎 \(t.diamondPrice)")
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                    }
+                }
+                .padding(.vertical, 6)
+            }
+        }
+        .padding(AppSpacing.md)
+        .frame(maxWidth: .infinity)
+        .background(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).fill(.white.opacity(0.10)))
+        .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
+    }
+
     private func familyComparison(_ rows: [(profile: Profile, snapshot: ProgressSnapshot)]) -> some View {
         VStack(alignment: .trailing, spacing: 12) {
             Text("הַשְׁוָאָה מִשְׁפַּחְתִּית")

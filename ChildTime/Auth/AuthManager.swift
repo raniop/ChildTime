@@ -82,6 +82,7 @@ final class AuthManager: ObservableObject {
             DispatchQueue.main.async {
                 HouseholdManager.shared.start(uid: cachedUID, email: mail, displayName: name)
                 RemoteSyncManager.shared.start(uid: cachedUID)
+                TimeTransferManager.shared.start()
             }
         }
         #else
@@ -90,6 +91,7 @@ final class AuthManager: ObservableObject {
             DispatchQueue.main.async {
                 HouseholdManager.shared.start(uid: cachedUID, email: mail, displayName: name)
                 RemoteSyncManager.shared.start(uid: cachedUID)
+                TimeTransferManager.shared.start()
             }
         }
         #endif
@@ -325,6 +327,7 @@ final class AuthManager: ObservableObject {
         DispatchQueue.main.async {
             HouseholdManager.shared.start(uid: uid, email: mail, displayName: name)
             RemoteSyncManager.shared.start(uid: uid)
+            TimeTransferManager.shared.start()
         }
     }
     #endif

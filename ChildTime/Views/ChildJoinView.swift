@@ -191,6 +191,7 @@ struct ChildJoinView: View {
                 ProgressStore.shared.apply(cloud)
             }
             RemoteSyncManager.shared.start()   // ensure live sync now follows this child
+            TimeTransferManager.shared.start()
             AppAnalytics.deviceJoined(kind: DeviceIdentity.kind)
             message = "הִתְחַבַּרְתֶּם! 🎉"
             working = false

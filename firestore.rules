@@ -214,6 +214,19 @@ service cloud.firestore {
       allow update: if signedIn() && request.auth.uid == resource.data.parentUID;
     }
 
+    // Sibling time transfers — one child buys play-minutes from a sibling for 💎,
+    // parent-approved. Any household member may create (buyer), read (all sides),
+    // and update (parent approve/reject, seller settle, buyer credit/refund flags).
+    // Conservation + once-only application are enforced client-side via transaction
+    // flags; nothing here touches another child's wallet directly.
+    match /timeTransfers/{id} {
+      allow create: if householdHasMe(request.resource.data.householdID);
+      allow read:   if householdHasMe(resource.data.householdID);
+      allow update: if householdHasMe(resource.data.householdID)
+                    && householdHasMe(request.resource.data.householdID);
+      allow delete: if householdHasMe(resource.data.householdID);
+    }
+
     // Early-access signups from the marketing site (tofyapp.com). Anyone may
     // CREATE one (no account needed), with light validation to curb junk; the
     // collection is never readable from a client — view leads in the console.
