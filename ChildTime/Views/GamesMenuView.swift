@@ -108,19 +108,21 @@ struct GamesMenuView: View {
         } label: {
             HStack(spacing: 16) {
                 // Text first → in RTL it sits flush against the right edge; the
-                // emoji medallion sits on the left.
-                VStack(alignment: .trailing, spacing: 6) {
+                // emoji medallion sits on the left. NOTE: in an RTL environment
+                // `.leading` is the RIGHT edge (and `.trailing` is the left), so
+                // right-aligning Hebrew here uses `.leading`.
+                VStack(alignment: .leading, spacing: 6) {
                     Text(title)
                         .font(.system(size: 23, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                        .multilineTextAlignment(.trailing)
+                        .multilineTextAlignment(.leading)
                     Text(subtitle)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
-                        .multilineTextAlignment(.trailing)
+                        .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 Text(emoji)
                     .font(.system(size: 56))
                     .frame(width: 92, height: 92)
