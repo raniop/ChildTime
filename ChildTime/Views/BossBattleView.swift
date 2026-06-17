@@ -24,6 +24,10 @@ struct BossBattleView: View {
     @State private var locked = false
     @State private var bossHit = false
     @State private var shake = false
+    @State private var burst = 0
+    @State private var confetti = 0
+    @State private var earnedMinutes = 0
+    @State private var revealStep = 0
 
     var body: some View {
         ZStack {
@@ -35,6 +39,9 @@ struct BossBattleView: View {
             case .won:      result(win: true)
             case .lost:     result(win: false)
             }
+
+            StarBurst(count: 14, color: AppColor.starGold, trigger: burst)
+            Confetti(trigger: confetti)
 
             VStack {
                 HStack {
@@ -139,9 +146,11 @@ struct BossBattleView: View {
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).multilineTextAlignment(.center)
             if win {
-                Text("פְּרָס עָנָק: +20 ⭐ וְ-30 💎")
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.9))
+                HStack(spacing: 14) {
+                    bossRewardPill("⭐", 20, AppColor.starGold, step: 1)
+                    bossRewardPill("💎", 30, AppColor.gemPurple, step: 2)
+                    bossRewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: " דק'")
+                }
             }
             VStack(spacing: 12) {
                 if !win {
@@ -154,6 +163,20 @@ struct BossBattleView: View {
             .padding(.horizontal, 44).padding(.top, 6)
         }
         .padding(28)
+    }
+
+    private func bossRewardPill(_ emoji: String, _ value: Int, _ color: Color, step: Int, suffix: String = "") -> some View {
+        VStack(spacing: 4) {
+            Text(emoji).font(.system(size: 26))
+            Text("+\(value)\(suffix)").font(.system(size: 19, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+        }
+        .frame(minWidth: 76).padding(.vertical, 12)
+        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(color.opacity(0.25)))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(color, lineWidth: 1.5))
+        .glow(color, radius: revealStep >= step ? 10 : 0)
+        .scaleEffect(revealStep >= step ? 1 : 0.3)
+        .opacity(revealStep >= step ? 1 : 0)
     }
 
     private func ctaLabel(_ t: String, dark: Bool) -> some View {
@@ -180,6 +203,7 @@ struct BossBattleView: View {
         if correct {
             SoundPlayer.shared.play(.correctBig)
             Haptic.success()
+            burst += 1
             withAnimation(.spring(response: 0.25, dampingFraction: 0.5)) { bossHit = true }
             bossHP = max(0, bossHP - 1)
         } else {
@@ -198,14 +222,22 @@ struct BossBattleView: View {
 
     private func win() {
         phase = .won
-        progress.applyChestReward(ChestReward(stars: 20, diamonds: 30, minutes: 2))
+        earnedMinutes = 5
+        progress.applyChestReward(ChestReward(stars: 20, diamonds: 30, minutes: earnedMinutes))
         SoundPlayer.shared.play(.worldUnlock)
         Haptic.success()
+        confetti += 1
         AppAnalytics.log("boss_battle_won", ["world": world.id])
+        for s in 1...3 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25 * Double(s)) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.5)) { revealStep = s }
+                SoundPlayer.shared.play(.correctSmall)
+            }
+        }
     }
 
     private func restart() {
-        bossHP = bossMaxHP; hearts = startHearts; phase = .fighting
+        bossHP = bossMaxHP; hearts = startHearts; phase = .fighting; revealStep = 0
         newQuestion()
     }
 }
