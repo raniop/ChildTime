@@ -1,5 +1,8 @@
 import SwiftUI
 import FamilyControls
+import os.log
+
+private let controlsLog = Logger(subsystem: "com.rani.ChildTime", category: "ScreenTime")
 
 /// The ONLY parent-facing screen on a CHILD's device, reached via the gear in
 /// the corner and locked behind the family parent code. It holds just the things
@@ -414,18 +417,19 @@ struct ChildDeviceControlsView: View {
     // MARK: - Actions
 
     private func grant(minutes: Int) {
+        controlsLog.notice("manual quick-open tapped: \(minutes, privacy: .public) min")
+        // Set the play window IMMEDIATELY and authoritatively — before any async
+        // shield work — so the countdown always reflects exactly the tapped amount
+        // and can't be pre-empted by a slow auth hop or a stale earlier window.
+        // A ONE-TIME fixed window: it does NOT stack and does NOT touch the
+        // play-minutes the child EARNED — tapping again just replaces the window.
+        progress.startUnlock(minutes: minutes, manual: true)
         Task {
             await shields.requestAuthorizationIfNeeded()
             shields.cancelScheduledReshield()
-            // A ONE-TIME temporary window: open everything for exactly `minutes`
-            // from now. It does NOT stack on an existing window and does NOT touch
-            // the play-minutes the child EARNED — tapping again just sets a new
-            // window. (Previously it added on top, which piled up onto the child's
-            // earned/redeemed time and caused confusion.)
             shields.unlock(minutes: minutes)
-            progress.startUnlock(minutes: minutes, manual: true)   // one-time fixed window, not bankable
-            dismiss()
         }
+        dismiss()
     }
 
     private func lockNow() {
