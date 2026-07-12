@@ -1250,6 +1250,7 @@ final class ProgressStore: ObservableObject {
         let extraSeconds = manual ? 0 : pendingSecondsCarry
         if !manual { pendingSecondsCarry = 0 }
         let end = Date().addingTimeInterval(TimeInterval(minutes * 60 + extraSeconds))
+        NSLog("[ScreenTime] startUnlock(minutes: %d, manual: %@) → window %d min + %ds carry", minutes, manual ? "true" : "false", minutes, extraSeconds)
         unlockIsManual = manual
         unlockEndsAt = end
         // Lock-screen / Dynamic Island countdown of the remaining play time.
