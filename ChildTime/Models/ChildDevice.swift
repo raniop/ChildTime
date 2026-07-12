@@ -21,6 +21,12 @@ struct ChildDevice: Codable, Identifiable, Equatable {
     /// resets to a fresh install (instead of silently re-registering). Optional so
     /// older docs without the key still decode.
     var removed: Bool?
+    /// The parent's last remote screen-time grant to this device — how many minutes
+    /// and when (unix seconds). Written by `grantRemoteScreenTime`; lets the parent
+    /// dashboard show a live countdown of the window they opened (the child's own
+    /// `unlockEndsAt` is deliberately NOT synced, so this is the parent's view of it).
+    var remoteUnlockMinutes: Int?
+    var remoteUnlockAt: Double?
 
     var sfSymbol: String {
         switch kind {

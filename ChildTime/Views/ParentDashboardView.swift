@@ -242,13 +242,6 @@ struct ParentDashboardView: View {
                     .environmentObject(settings)
                     .environment(\.layoutDirection, .rightToLeft)
             }
-            .alert("פָּתַחְתָּ זְמַן מָסָךְ", isPresented: Binding(
-                get: { remoteGrantMsg != nil },
-                set: { if !$0 { remoteGrantMsg = nil } })) {
-                Button("הֵבַנְתִּי", role: .cancel) {}
-            } message: {
-                Text(remoteGrantMsg ?? "")
-            }
             .sheet(item: $editProfile) { p in
                 ProfileEditorView(mode: .edit(p)) { updated in
                     profiles.update(updated)
@@ -683,10 +676,7 @@ struct ParentDashboardView: View {
 
     private func profileCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
         let isActive = profile.id == profiles.activeID
-        let activeUnlockSecs: Int = {
-            guard let end = s.unlockEndsAt else { return 0 }
-            return max(0, Int(end.timeIntervalSinceNow))
-        }()
+        let activeUnlockSecs = manualGrantSecondsRemaining(profile)
         let lp = LearningProfile(snapshot: s, enabledTopics: profile.enabledTopics, age: profile.age)
         let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: profile.id), profile: lp)
         let status = overallStatus(engine: engine, lp: lp, hasData: s.totalAnswered >= 4)
@@ -794,7 +784,7 @@ struct ParentDashboardView: View {
                 statCell(emoji: "🔥", value: "\(s.dayStreak)", label: "רצף ימים")
                 statCell(emoji: "⭐", value: s.stars.currencyShort, label: "כוכבים (דירוג)")
                 statCell(emoji: "💎", value: s.diamonds.currencyShort, label: "יהלומים (חנות)")
-                statCell(emoji: "🎮", value: s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : (activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : "—"), label: "דק' זמינות")
+                statCell(emoji: "🎮", value: activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"), label: "דק' זמינות")
             }
 
             // (Friends are managed from the "⋯" menu — "חברים".)
@@ -1002,7 +992,10 @@ struct ParentDashboardView: View {
         let cap = profile.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
         let timeToday = cap.enabled ? "\(s.minutesEarnedToday)/\(cap.minutes)" : "\(s.minutesEarnedToday)"
         let success = s.answeredToday > 0 ? "\(Int((Double(s.correctToday) / Double(s.answeredToday)) * 100))%" : "—"
-        let available = s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"
+        // Show the parent's just-opened window first (a live countdown of the time
+        // they granted); fall back to the child's banked wallet.
+        let unlockSecs = manualGrantSecondsRemaining(profile)
+        let available = unlockSecs > 0 ? formatTime(unlockSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—")
         return VStack(spacing: 8) {
             ZStack(alignment: .topTrailing) {
                 ProfileAvatarView(profile: profile, size: 62)
@@ -1099,6 +1092,15 @@ struct ParentDashboardView: View {
                 Button("בטל", role: .cancel) { deletingProfile = nil }
             } message: { _ in
                 Text("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק.")
+            }
+            // Remote screen-time confirmation — also on the detail page so it shows
+            // immediately where the parent tapped, not only after popping back.
+            .alert("פָּתַחְתָּ זְמַן מָסָךְ", isPresented: Binding(
+                get: { remoteGrantMsg != nil },
+                set: { if !$0 { remoteGrantMsg = nil } })) {
+                Button("הֵבַנְתִּי", role: .cancel) {}
+            } message: {
+                Text(remoteGrantMsg ?? "")
             }
         } else {
             Color.clear.background(AppGradient.dreamy.ignoresSafeArea())
@@ -1449,6 +1451,20 @@ struct ParentDashboardView: View {
     // MARK: - Actions
 
     /// Remotely open screen time on the child's device(s) right now.
+    /// Seconds left in the screen-time window the parent last opened for this child
+    /// (from the `childDevices` grant we wrote). The child's own `unlockEndsAt` is
+    /// intentionally not synced, so this is the parent's view of the open window.
+    private func manualGrantSecondsRemaining(_ profile: Profile) -> Int {
+        let devices = household.devicesByChild[profile.id.uuidString] ?? []
+        let now = Date().timeIntervalSince1970
+        let ends: [Double] = devices.compactMap { d in
+            guard let m = d.remoteUnlockMinutes, m > 0, let at = d.remoteUnlockAt else { return nil }
+            return at + Double(m * 60)
+        }
+        guard let maxEnd = ends.max(), maxEnd > now else { return 0 }
+        return Int(maxEnd - now)
+    }
+
     private func remoteOpen(_ profile: Profile, _ minutes: Int) {
         Haptic.success()
         household.grantRemoteScreenTime(toChildID: profile.id, minutes: minutes)
