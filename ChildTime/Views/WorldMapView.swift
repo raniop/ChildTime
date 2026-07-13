@@ -1098,6 +1098,32 @@ struct WorldMapView: View {
             // DailyGiftBeacon) instead of a full-width bottom button. Every world
             // & Smart Adventure earns minutes, so the only bottom CTA left is the
             // "redeem my minutes" button below.
+            // Frozen manual time the child paused earlier — let them resume it so a
+            // parent's grant is never wasted. Shown above the earn/redeem CTA.
+            if progress.hasPausedManualTime {
+                Button {
+                    resumeManual()
+                } label: {
+                    HStack(spacing: 10) {
+                        Text("❄️").font(.system(size: 22))
+                        Text("הַמְשֵׁךְ זְמַן מָסָךְ · \(progress.pausedManualMinutes) דַּקּוֹת שְׁמוּרוֹת")
+                            .font(.system(size: 20, weight: .heavy, design: .rounded))
+                            .minimumScaleFactor(0.7).lineLimit(1)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, AppSpacing.xl)
+                    .padding(.vertical, 16)
+                    .frame(maxWidth: .infinity)
+                    .background(LinearGradient(colors: [Color(hex: "5B6CFF"), Color(hex: "06D6A0")],
+                                               startPoint: .leading, endPoint: .trailing))
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .glow(Color(hex: "5B6CFF"), radius: 16)
+                }
+                .buttonStyle(.juicy)
+                .frame(maxWidth: 480)
+                .padding(.bottom, 6)
+            }
+
             if progress.canRedeemNow {
                 Button {
                     redeemMinutes()
@@ -1208,6 +1234,15 @@ struct WorldMapView: View {
         progress.startUnlock(minutes: minutes)
         LearningHistoryStore.shared.recordMinutesUsed(minutes)
         // Tell the parent the child just opened screen time (+ how many minutes).
+        LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes])
+    }
+
+    /// Resume the frozen leftover of a parent's manual grant (reopens the shield +
+    /// the play window from the exact saved seconds).
+    private func resumeManual() {
+        let minutes = progress.resumeManualUnlock()
+        guard minutes > 0 else { return }
+        shields.unlock(minutes: minutes)
         LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes])
     }
 }

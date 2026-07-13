@@ -58,7 +58,7 @@ struct UnlockedView: View {
                 Button {
                     endEarly()
                 } label: {
-                    Text("סִיַּמְתִּי לְשַׂחֵק")
+                    Text(progress.unlockIsManual ? "עֲצֹר וּשְׁמֹר אֶת הַזְּמַן ❄️" : "סִיַּמְתִּי לְשַׂחֵק")
                         .font(.system(size: 22, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, AppSpacing.xl)
@@ -189,10 +189,11 @@ struct UnlockedView: View {
             let selection = SelectionStorage.decode(data)
             ShieldManager.shared.applyShield(from: selection)
         }
-        // A manual (parent) grant spent nothing from the earned pool — just lock,
-        // no refund. An earned window refunds its unused full minutes.
+        // A manual (parent) grant now FREEZES its leftover so it isn't wasted — the
+        // child can resume it later from the home screen. An earned window refunds
+        // its unused minutes to the wallet as before.
         if progress.unlockIsManual {
-            progress.endUnlock()
+            progress.pauseManualUnlock()
             LiveEventReporter.report(.screenTimeEnd, extra: ["minutes": 0])
         } else {
             let remaining = progress.endUnlockAndReturnRemainingMinutes()

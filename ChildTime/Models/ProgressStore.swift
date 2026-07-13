@@ -9,6 +9,7 @@ final class ProgressStore: ObservableObject {
     private enum Key {
         static let pendingMinutes = "pendingMinutes"
         static let pendingSecondsCarry = "pendingSecondsCarry"
+        static let manualPausedSeconds = "manualPausedSeconds"
         static let totalCorrect = "totalCorrect"
         static let totalAnswered = "totalAnswered"
         static let unlockEndsAt = "unlockEndsAt"
@@ -68,6 +69,13 @@ final class ProgressStore: ObservableObject {
     /// 58:50 — never jumps back up to 59. Local-only (sub-minute, not worth syncing).
     @Published private(set) var pendingSecondsCarry: Int {
         didSet { defaults.set(pendingSecondsCarry, forKey: Key.pendingSecondsCarry) }
+    }
+    /// Frozen seconds left over from a parent's MANUAL grant that the child paused
+    /// ("עֲצֹר וּשְׁמֹר") instead of wasting. Resumed later as a fresh manual window.
+    /// Device-local like `unlockEndsAt` — a manual grant is per-device OS state and
+    /// isn't synced.
+    @Published private(set) var manualPausedSeconds: Int {
+        didSet { defaults.set(manualPausedSeconds, forKey: Key.manualPausedSeconds) }
     }
     @Published private(set) var totalCorrect: Int {
         didSet { defaults.set(totalCorrect, forKey: Key.totalCorrect) }
@@ -364,6 +372,7 @@ final class ProgressStore: ObservableObject {
         let d = AppGroup.defaults
         self.pendingMinutes = d.integer(forKey: Key.pendingMinutes)
         self.pendingSecondsCarry = d.integer(forKey: Key.pendingSecondsCarry)
+        self.manualPausedSeconds = d.integer(forKey: Key.manualPausedSeconds)
         self.totalCorrect = d.integer(forKey: Key.totalCorrect)
         self.totalAnswered = d.integer(forKey: Key.totalAnswered)
         self.unlockEndsAt = d.object(forKey: Key.unlockEndsAt) as? Date
@@ -1262,6 +1271,36 @@ final class ProgressStore: ObservableObject {
         unlockEndsAt = nil
         unlockIsManual = false
         PlayTimeLiveActivity.end()
+    }
+
+    /// Whole minutes of frozen manual time waiting to be resumed (ceil, so 20:10
+    /// reads as "21" rather than hiding the leftover). For display.
+    var pausedManualMinutes: Int { (manualPausedSeconds + 59) / 60 }
+    var hasPausedManualTime: Bool { manualPausedSeconds > 0 }
+
+    /// Child stopped mid-play on a parent's MANUAL grant — FREEZE the exact leftover
+    /// (to the second) instead of wasting it, and end the live window. Caller
+    /// re-applies the shield. No-op for an earned window (that banks to the wallet).
+    func pauseManualUnlock() {
+        guard unlockIsManual else { return }
+        let remaining = unlockSecondsRemaining
+        if remaining > 0 { manualPausedSeconds += remaining }
+        endUnlock()
+    }
+
+    /// Resume frozen manual time — reopen a manual window from the saved seconds and
+    /// clear the frozen balance. Returns whole minutes (ceil) for the shield schedule.
+    @discardableResult
+    func resumeManualUnlock() -> Int {
+        guard manualPausedSeconds > 0 else { return 0 }
+        let seconds = manualPausedSeconds
+        manualPausedSeconds = 0
+        let end = Date().addingTimeInterval(TimeInterval(seconds))
+        unlockIsManual = true
+        unlockEndsAt = end
+        PlayTimeLiveActivity.start(endsAt: end,
+                                   characterName: ProfileStore.shared.active?.character.name ?? "")
+        return (seconds + 59) / 60
     }
 
     /// True while a play-time grant is still LIVE — i.e. the DeviceActivity
