@@ -50,10 +50,20 @@ struct ShopView: View {
             SiblingTimeShopView { showSiblingTime = false }
         }
         .sheet(isPresented: $showStarShop) {
-            // No parent gate: the purchase itself is protected by the Apple ID /
-            // Face ID payment auth, so the packs can be shown like any app.
-            StarShopView()
-                .environment(\.layoutDirection, .rightToLeft)
+            // Kids Category (guideline 1.3): real-money packs MUST sit behind a
+            // parental gate. Apple ID / Face ID payment auth is NOT a substitute —
+            // that reasoning is exactly what got the app rejected. respectSession:
+            // false so an earlier unlock this session can't open the store.
+            ParentGateView(allowClose: true,
+                           gateTitle: "אֵזוֹר הוֹרִים",
+                           gateReason: "כְּדֵי לִקְנוֹת יַהֲלוֹמִים — בַּקְּשׁוּ מֵהוֹרֶה לְהַזִּין אֶת הַקּוֹד",
+                           useFaceID: true,
+                           respectSession: false) {
+                StarShopView()
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .environmentObject(ParentSettings.shared)
+            .environment(\.layoutDirection, .rightToLeft)
         }
         .sheet(isPresented: $showingProfileEditor) {
             if let active = profiles.active {

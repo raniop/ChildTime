@@ -363,10 +363,21 @@ struct WorldMapView: View {
         .fullScreenCover(item: $infoSheet) { sheet in
             challengeInfoScreen(for: sheet)
         }
+        // Kids Category (App Review guideline 1.3): commerce must sit behind a
+        // parental gate that can't be bypassed. respectSession:false so this ALWAYS
+        // re-authenticates — an earlier unlock this session must not open the store.
         .fullScreenCover(isPresented: $showingPaywall) {
-            PaywallView()
-                .environmentObject(subs)
-                .environment(\.layoutDirection, .rightToLeft)
+            ParentGateView(allowClose: true,
+                           gateTitle: "אֵזוֹר הוֹרִים",
+                           gateReason: "כְּדֵי לִרְאוֹת אֶת הַמִּנּוּי בְּתַשְׁלוּם — בַּקְּשׁוּ מֵהוֹרֶה לְהַזִּין אֶת הַקּוֹד",
+                           useFaceID: true,
+                           respectSession: false) {
+                PaywallView()
+                    .environmentObject(subs)
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .environmentObject(settings)
+            .environment(\.layoutDirection, .rightToLeft)
         }
         .sheet(isPresented: $showingChildSettings) {
             if let active = profiles.active {

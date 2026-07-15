@@ -118,14 +118,9 @@ struct LiveGameView: View {
             Spacer()
 
             if isHost {
-                if let url = URL(string: GameLink.url(forID: g.id)) {
-                    ShareLink(item: url, message: Text("בּוֹא נְשַׂחֵק בְּטוֹפִי! 🎮")) {
-                        Label("הַזְמִינוּ עוֹד חֲבֵרִים", systemImage: "square.and.arrow.up")
-                            .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                            .padding(.horizontal, 18).padding(.vertical, 10)
-                            .background(AppColor.gemPurple, in: Capsule())
-                    }
-                }
+                // NO share button: a share sheet leaves the app, which the Kids
+                // Category (guideline 1.3) forbids without a parental gate. Friends
+                // are invited in-app from the list above (push invites).
                 Button { lg.startGame() } label: {
                     Text(canStart ? "מַתְחִילִים! 🚀" : "מְחַכִּים לְעוֹד שַׂחְקָן אֶחָד לְפָחוֹת…")
                         .font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)

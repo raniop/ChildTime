@@ -29,10 +29,18 @@ struct Character3DPickerView: View {
         }
         .environment(\.layoutDirection, .rightToLeft)
         .sheet(isPresented: $showStarShop) {
-            // No parent gate: the purchase itself is protected by Apple ID /
-            // Face ID payment auth.
-            StarShopView()
-                .environment(\.layoutDirection, .rightToLeft)
+            // Kids Category (guideline 1.3): real-money packs MUST sit behind a
+            // parental gate — Apple ID / Face ID payment auth is NOT a substitute.
+            ParentGateView(allowClose: true,
+                           gateTitle: "אֵזוֹר הוֹרִים",
+                           gateReason: "כְּדֵי לִקְנוֹת יַהֲלוֹמִים — בַּקְּשׁוּ מֵהוֹרֶה לְהַזִּין אֶת הַקּוֹד",
+                           useFaceID: true,
+                           respectSession: false) {
+                StarShopView()
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .environmentObject(ParentSettings.shared)
+            .environment(\.layoutDirection, .rightToLeft)
         }
     }
 

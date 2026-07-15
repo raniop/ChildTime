@@ -437,15 +437,10 @@ struct AddFriendView: View {
                     .padding(10).background(RoundedRectangle(cornerRadius: 14).fill(.white))
                 Text(friends.myCode).font(.system(size: 28, weight: .heavy, design: .monospaced))
                     .kerning(5).foregroundStyle(.white)
-                if let url = friends.myInviteURL {
-                    ShareLink(item: URL(string: url) ?? URL(string: "https://\(FriendLink.host)")!,
-                              message: Text("בּוֹא נִהְיֶה חֲבֵרִים בְּטוֹפִי! 🌟")) {
-                        Label("שַׁתְּפוּ קִישּׁוּר", systemImage: "square.and.arrow.up")
-                            .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                            .padding(.horizontal, 18).padding(.vertical, 10)
-                            .background(AppColor.gemPurple, in: Capsule())
-                    }
-                }
+                // NO share button: a share sheet leaves the app, which the Kids
+                // Category (guideline 1.3) forbids without a parental gate. The QR
+                // code + the code above stay — they add friends without ever
+                // leaving Tofy.
             } else {
                 ProgressView().tint(.white)
             }
