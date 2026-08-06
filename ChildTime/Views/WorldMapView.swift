@@ -636,15 +636,16 @@ struct WorldMapView: View {
                 infoSheet = .event
             } label: {
                 HStack(spacing: 8) {
+                    Spacer(minLength: 0)
                     Text(event.emoji).font(.system(size: 18))
                     Text(event.bannerText)
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(AppColor.textOnLight)
                         .lineLimit(2).minimumScaleFactor(0.8)
+                        .multilineTextAlignment(.center)
                     Spacer(minLength: 0)
-                    Image(systemName: "chevron.backward")
-                        .font(.system(size: 12, weight: .heavy)).foregroundStyle(AppColor.textOnLight.opacity(0.6))
                 }
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 14).padding(.vertical, 10)
                 .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
