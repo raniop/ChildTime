@@ -242,19 +242,55 @@ final class HouseholdManager: ObservableObject {
                     self.didReceiveChildren = true
                     self.markLoaded()
                 }
-                // NOTE: we deliberately do NOT disconnect a child device just because
-                // its bound child is momentarily ABSENT from this snapshot. A transient
-                // partial/empty snapshot (listener re-attach, offline→online, an auth
-                // refresh) would otherwise kick BOTH the child's devices at once and
-                // strand them on "device disconnected". A REAL deletion always writes a
-                // `deletedChildren` tombstone first, so `listenToTombstones` is the one
-                // authoritative signal that disconnects the device (see below).
+                // We do NOT disconnect merely because the bound child is ABSENT from
+                // this snapshot — a transient partial/empty snapshot would kick BOTH a
+                // child's devices at once. But a PERSISTENTLY-missing binding (child
+                // deleted/replaced, so its UUID is orphaned) must not leave the device
+                // stuck on an empty phantom profile. When the bound child is absent, do
+                // a one-shot authoritative check: read its own doc. Only if that doc is
+                // truly gone / access-denied do we disconnect to the reconnect screen.
+                if self.didReceiveChildren, s0.deviceRole == .child,
+                   let j = s0.joinedChildID, boundPresent == false {
+                    self.verifyBoundChildOrDisconnect(j)
+                }
             }
     }
 
     /// Watch the household's tombstones (deleted children). When one appears, drop
     /// that child from THIS device's local store too — so a deletion on one device
     /// propagates everywhere and this device stops re-uploading the deleted kid.
+    private var verifyingBoundChild = false
+
+    /// The bound child was ABSENT from the household list. Read its own doc once to
+    /// tell a real orphan (deleted/replaced UUID → doc gone or access denied) apart
+    /// from a transient list blip (doc still there). Disconnect ONLY on a definitive
+    /// gone/denied — never on a plain network error (that would strand a fine device).
+    private func verifyBoundChildOrDisconnect(_ childID: String) {
+        #if canImport(FirebaseFirestore)
+        guard !verifyingBoundChild else { return }
+        verifyingBoundChild = true
+        db.collection("children").document(childID).getDocument { [weak self] snap, err in
+            Task { @MainActor in
+                guard let self else { return }
+                self.verifyingBoundChild = false
+                let s = ParentSettings.shared
+                // Bail if we re-bound to a different child meanwhile.
+                guard s.deviceRole == .child, s.joinedChildID == childID else { return }
+                let denied = (err as NSError?).map {
+                    $0.domain == FirestoreErrorDomain && $0.code == FirestoreErrorCode.permissionDenied.rawValue
+                } ?? false
+                let definitelyGone = denied || (err == nil && snap?.exists == false)
+                if definitelyGone {
+                    TofyLink("verifyBoundChild: children/\(childID.prefix(8)) is gone/denied (denied=\(denied)) → disconnecting to reconnect screen")
+                    self.resetAsRemovedDevice()
+                } else {
+                    TofyLink("verifyBoundChild: children/\(childID.prefix(8)) still reachable (err=\(err?.localizedDescription ?? "nil")) — treating as transient, staying")
+                }
+            }
+        }
+        #endif
+    }
+
     private func listenToTombstones(in householdID: String) {
         tombstoneListener?.remove()
         tombstoneListener = db.collection("deletedChildren")
