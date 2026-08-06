@@ -690,6 +690,11 @@ struct ParentDashboardView: View {
                         Label("פְּתַח זְמַן מָסָךְ עַכְשָׁיו (מֵרָחוֹק)", systemImage: "lock.open.fill")
                     }
                     Button {
+                        remoteLock(profile)
+                    } label: {
+                        Label("נְעַל עַכְשָׁיו (מֵרָחוֹק)", systemImage: "lock.fill")
+                    }
+                    Button {
                         editProfile = profile
                     } label: {
                         Label("ערוך פרופיל (שם, גיל)", systemImage: "pencil")
@@ -1481,6 +1486,15 @@ struct ParentDashboardView: View {
         remoteGrantMsg = connected
             ? "פָּתַחְתָּ לְ\(profile.name) \(label) שֶׁל זְמַן מָסָךְ. זֶה יִפָּתַח בַּמַּכְשִׁיר שֶׁלּוֹ מִיָּד (אוֹ בָּרֶגַע שֶׁיִּפְתַּח אֶת טוֹפִּי)."
             : "אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַפְּתִיחָה תֻּחַל בָּרֶגַע שֶׁיִּתְחַבֵּר."
+    }
+
+    private func remoteLock(_ profile: Profile) {
+        Haptic.warning()
+        household.lockRemoteScreenTime(toChildID: profile.id)
+        let connected = (household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
+        remoteGrantMsg = connected
+            ? "נָעַלְתָּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name) מֵרָחוֹק. הַנְּעִילָה תֻּחַל מִיָּד (אוֹ בָּרֶגַע שֶׁיִּפְתַּח אֶת טוֹפִּי)."
+            : "אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַנְּעִילָה תֻּחַל בָּרֶגַע שֶׁיִּתְחַבֵּר."
     }
 
     private func resetProgress(for profile: Profile) {

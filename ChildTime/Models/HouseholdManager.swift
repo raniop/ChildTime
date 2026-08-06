@@ -552,6 +552,28 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    /// Parent action: RE-LOCK the child's device now, from afar. Writes a
+    /// `remoteLockAt` stamp onto the child's device rows; the device applies it
+    /// once (ends any open play window + re-applies the shield). Mirror of
+    /// `grantRemoteScreenTime`.
+    func lockRemoteScreenTime(toChildID childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        guard let hh = household else { return }
+        let cid = childID.uuidString
+        let stamp = Date().timeIntervalSince1970
+        Task {
+            let snap = try? await db.collection("childDevices")
+                .whereField("householdID", isEqualTo: hh.id)
+                .whereField("childID", isEqualTo: cid)
+                .getDocuments()
+            for doc in snap?.documents ?? [] {
+                try? await doc.reference.updateData(["remoteLockAt": stamp])
+            }
+            await MainActor.run { AppAnalytics.log("remote_screentime_locked", [:]) }
+        }
+        #endif
+    }
+
     /// Remove a connected device from a child. TOMBSTONES the doc (`removed:true`)
     /// instead of deleting it, so the device itself notices and resets to a fresh
     /// install — otherwise it would just re-register on its next heartbeat.
@@ -584,11 +606,32 @@ final class HouseholdManager: ObservableObject {
                     return
                 }
                 self.applyRemoteUnlockIfNeeded(data)
+                self.applyRemoteLockIfNeeded(data)
             }
         #endif
     }
 
     private let lastRemoteUnlockKey = "lastRemoteUnlockAt"
+    private let lastRemoteLockKey = "lastRemoteLockAt"
+
+    /// A parent RE-LOCKED this child's device from afar. Apply exactly once per
+    /// command (`at > last`) and only when fresh. Ends any open window + re-shields.
+    @MainActor
+    private func applyRemoteLockIfNeeded(_ data: [String: Any]) {
+        #if canImport(FirebaseFirestore)
+        guard let at = data["remoteLockAt"] as? Double else { return }
+        let last = UserDefaults.standard.double(forKey: lastRemoteLockKey)
+        let now = Date().timeIntervalSince1970
+        guard at > last, now - at < Self.remoteUnlockFreshness else { return }   // unseen + fresh
+        UserDefaults.standard.set(at, forKey: lastRemoteLockKey)
+        Task { @MainActor in
+            ProgressStore.shared.endUnlock()          // close the play window
+            ShieldManager.shared.cancelScheduledReshield()
+            ShieldManager.shared.applyDefaultLock()    // re-lock now
+            Haptic.warning()
+        }
+        #endif
+    }
 
     /// How long a remote "open screen time now" stays applicable. The parent's
     /// confirmation promises it opens "the moment the child opens Tofy", so the
