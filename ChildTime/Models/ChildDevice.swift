@@ -27,6 +27,16 @@ struct ChildDevice: Codable, Identifiable, Equatable {
     /// `unlockEndsAt` is deliberately NOT synced, so this is the parent's view of it).
     var remoteUnlockMinutes: Int?
     var remoteUnlockAt: Double?
+    /// The child device's ACTUAL live time-state, reported by the child so the
+    /// parent dashboard shows the truth (not a wall-clock guess from the grant):
+    ///  • windowEndsAt  — unix seconds the open play window ends (nil = none live).
+    ///                     Cleared the instant the child pauses/stops, so the
+    ///                     parent's countdown stops too instead of ticking on.
+    ///  • frozenSeconds — manual time the child froze ("עצר ושמור"), waiting to resume.
+    ///  • windowIsManual — the live window is a parent's manual grant (vs earned).
+    var windowEndsAt: Double?
+    var frozenSeconds: Int?
+    var windowIsManual: Bool?
 
     var sfSymbol: String {
         switch kind {

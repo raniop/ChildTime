@@ -1470,7 +1470,19 @@ struct ParentDashboardView: View {
     private func manualGrantSecondsRemaining(_ profile: Profile) -> Int {
         let devices = household.devicesByChild[profile.id.uuidString] ?? []
         let now = Date().timeIntervalSince1970
-        let ends: [Double] = devices.compactMap { d in
+        // 1) The child's ACTUAL open window (reported live) — reflects pauses, so it
+        //    stops counting the instant the child freezes instead of ticking on.
+        let liveEnds = devices.compactMap { d -> Double? in
+            guard let end = d.windowEndsAt, end > now else { return nil }
+            return end
+        }
+        if let maxEnd = liveEnds.max() { return Int(maxEnd - now) }
+        // 2) Frozen ("עצר ושמור") — show the saved amount STATICALLY (no countdown).
+        let frozen = devices.compactMap { $0.frozenSeconds }.max() ?? 0
+        if frozen > 0 { return frozen }
+        // 3) Fallback: the parent's own last grant, until the device reports its
+        //    real state (older app, or the first moment after opening).
+        let ends = devices.compactMap { d -> Double? in
             guard let m = d.remoteUnlockMinutes, m > 0, let at = d.remoteUnlockAt else { return nil }
             return at + Double(m * 60)
         }

@@ -362,7 +362,49 @@ final class HouseholdManager: ObservableObject {
                 .setData(Self.encode(device), merge: true)
             // Live-disconnect if the parent removes it later this session.
             watchOwnDeviceRemoval(childID: childID)
+            // Report the real play-time state so the parent sees the truth.
+            startReportingTimeState(childID: childID)
         } catch { lastError = error.localizedDescription }
+        #endif
+    }
+
+    private var timeStateCancellables = Set<AnyCancellable>()
+
+    /// CHILD device: keep this device's `childDevices` doc updated with the ACTUAL
+    /// play-window state (open window end / frozen minutes), so the parent dashboard
+    /// reflects reality instead of guessing a countdown from the grant. Writes only
+    /// when the window starts/ends/pauses (not per second — the parent computes the
+    /// live countdown from `windowEndsAt` locally).
+    func startReportingTimeState(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        guard ParentSettings.shared.deviceRole == .child else { return }
+        timeStateCancellables.removeAll()
+        let p = ProgressStore.shared
+        Publishers.MergeMany([
+            p.$unlockEndsAt.map { _ in () }.eraseToAnyPublisher(),
+            p.$manualPausedSeconds.map { _ in () }.eraseToAnyPublisher(),
+        ])
+        .dropFirst()
+        .sink { [weak self] in self?.reportTimeState(childID: childID) }
+        .store(in: &timeStateCancellables)
+        reportTimeState(childID: childID)
+        #endif
+    }
+
+    private func reportTimeState(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        guard household != nil else { return }
+        let docID = "\(childID.uuidString)_\(DeviceIdentity.installID)"
+        let p = ProgressStore.shared
+        var data: [String: Any] = ["frozenSeconds": p.manualPausedSeconds]
+        if let end = p.unlockEndsAt, end > Date() {
+            data["windowEndsAt"] = end.timeIntervalSince1970
+            data["windowIsManual"] = p.unlockIsManual
+        } else {
+            data["windowEndsAt"] = FieldValue.delete()
+            data["windowIsManual"] = FieldValue.delete()
+        }
+        db.collection("childDevices").document(docID).setData(data, merge: true)
         #endif
     }
 
