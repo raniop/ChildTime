@@ -10,6 +10,7 @@ struct ChildJoinView: View {
     @StateObject private var companion = CompanionController()
     @State private var code = ""
     @State private var showScanner = false
+    @State private var showRemovalGate = false
     @State private var working = false
     @State private var message: String?
 
@@ -108,6 +109,20 @@ struct ChildJoinView: View {
                             .foregroundStyle(.white.opacity(0.9))
                             .multilineTextAlignment(.center)
                     }
+
+                    // Escape hatch: a child device blocks app deletion, so a device
+                    // stranded HERE (can't reach the in-app parent controls) would be
+                    // impossible to uninstall. This lets a parent — with the code —
+                    // open a 5-minute deletion window from the disconnected screen.
+                    Button { showRemovalGate = true } label: {
+                        Label("אֲנִי הוֹרֶה · פְּתִיחַת מְחִיקַת הָאַפְּלִיקַצְיָה", systemImage: "trash")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.75))
+                            .padding(.horizontal, 14).padding(.vertical, 9)
+                            .background(.white.opacity(0.10), in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 8)
                 }
                 .padding(.horizontal, AppSpacing.lg)
                 .padding(.vertical, AppSpacing.xl)
@@ -126,6 +141,20 @@ struct ChildJoinView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("ביטול") { showScanner = false } } }
             }
+        }
+        .sheet(isPresented: $showRemovalGate) {
+            // respectSession:false → always re-authenticate; a child must never open
+            // the deletion window off a stale unlock.
+            ParentGateView(allowClose: true,
+                           gateTitle: "אֵזוֹר הוֹרִים",
+                           gateReason: "כְּדֵי לְאַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת — הַזִּינוּ קוֹד הוֹרֶה",
+                           useFaceID: true,
+                           respectSession: false) {
+                AppRemovalUnlockView { showRemovalGate = false }
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .environmentObject(settings)
+            .environment(\.layoutDirection, .rightToLeft)
         }
         .onAppear {
             // The confirmed child-join hands off here via pendingJoinPayload.
@@ -179,6 +208,7 @@ struct ChildJoinView: View {
                 return
             }
             // Bind THIS device to this specific child.
+            TofyLink("JOIN: binding this device to child \(cid.uuidString.prefix(8))")
             ParentSettings.shared.joinedChildID = cid.uuidString
             ParentSettings.shared.justDisconnected = false   // reconnected → clear
             profiles.setActiveID(cid)
@@ -188,13 +218,63 @@ struct ChildJoinView: View {
             // stays blank until an app restart re-subscribes. apply() adopts the
             // cloud revision, so this never pushes a blank over the cloud.
             if let cloud = await RemoteSyncManager.shared.fetchSnapshot(for: cid) {
+                TofyLink("JOIN: applying cloud snapshot stars=\(cloud.stars) diamonds=\(cloud.diamonds) min=\(cloud.pendingMinutes)")
                 ProgressStore.shared.apply(cloud)
+            } else {
+                TofyLink("JOIN: NO cloud snapshot for \(cid.uuidString.prefix(8)) — profile will show empty until sync delivers one")
             }
             RemoteSyncManager.shared.start()   // ensure live sync now follows this child
             TimeTransferManager.shared.start()
             AppAnalytics.deviceJoined(kind: DeviceIdentity.kind)
             message = "הִתְחַבַּרְתֶּם! 🎉"
             working = false
+        }
+    }
+}
+
+/// Shown behind the parent gate from the disconnected screen: opens a 5-minute
+/// window in which the (otherwise deletion-locked) child device can be uninstalled.
+private struct AppRemovalUnlockView: View {
+    var onDone: () -> Void
+    @State private var opened = false
+
+    var body: some View {
+        ZStack {
+            AppGradient.dreamy.ignoresSafeArea()
+            SparkleField(count: 14, size: 12)
+            VStack(spacing: 20) {
+                Image(systemName: "trash.circle.fill")
+                    .font(.system(size: 64)).foregroundStyle(AppColor.flameOrange)
+                    .glow(AppColor.flameOrange, radius: 12)
+                Text("מְחִיקַת הָאַפְּלִיקַצְיָה")
+                    .font(.system(size: 26, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Text(opened
+                     ? "נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת.\nצְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד."
+                     : "בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה. פִּתְחוּ חַלּוֹן קָצָר כְּדֵי לְהָסִיר אֶת טוֹפִי מִמָּסַךְ הַבַּיִת.")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.9)).multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true).padding(.horizontal, 24)
+                if opened {
+                    Button { onDone() } label: {
+                        Text("סְגִירָה").font(.system(size: 17, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
+                            .background(.white.opacity(0.18), in: Capsule())
+                    }.buttonStyle(.juicy).padding(.horizontal, 40)
+                } else {
+                    Button {
+                        Haptic.medium()
+                        ParentSettings.shared.appRemovalUnlockedUntil = Date().addingTimeInterval(5 * 60)
+                        ShieldManager.shared.setAppRemovalLocked(false)
+                        withAnimation { opened = true }
+                    } label: {
+                        Label("אַפְשְׁרוּ מְחִיקָה לְ-5 דַּקּוֹת", systemImage: "trash")
+                            .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                            .frame(maxWidth: .infinity).padding(.vertical, 15)
+                            .background(AppColor.flameOrange.opacity(0.9), in: Capsule())
+                    }.buttonStyle(.juicy).padding(.horizontal, 32)
+                }
+            }
+            .padding(.top, 40)
         }
     }
 }

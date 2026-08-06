@@ -5,6 +5,12 @@ import Combine
 import FirebaseFirestore
 #endif
 
+/// Diagnostic logging for the child ↔ household ↔ device binding flow. Prints via
+/// NSLog so it shows in Xcode's console AND Console.app (filter: "TofyLink").
+func TofyLink(_ msg: @autoclosure () -> String) {
+    NSLog("[TofyLink] %@", msg())
+}
+
 /// Owns the household ↔ children ↔ parents graph in Firestore and keeps the
 /// local `ProfileStore` in sync with it. This is what makes multi-parent
 /// linking and family data-separation possible: children belong to a household
@@ -227,22 +233,22 @@ final class HouseholdManager: ObservableObject {
                 let records = snap.documents.compactMap {
                     Self.decodeChild(id: $0.documentID, $0.data())
                 }
+                let s0 = ParentSettings.shared
+                let boundPresent = s0.joinedChildID.map { (j: String) in records.contains(where: { $0.id == j }) }
+                TofyLink("children snapshot: \(records.count) child(ren) [\(records.map { $0.name }.joined(separator: ", "))]; bound=\(s0.joinedChildID ?? "nil") present=\(boundPresent.map(String.init) ?? "n/a")")
                 ProfileStore.shared.mergeRemoteChildren(records)
-                let hadFamily = self.didReceiveChildren
                 // First reply from the cloud → the family has finished loading.
                 if !self.didReceiveChildren {
                     self.didReceiveChildren = true
                     self.markLoaded()
                 }
-                // If the parent DELETED the child this device is bound to, disconnect
-                // it now (back to scan-QR) instead of letting the kid keep playing a
-                // phantom profile. Guarded by `hadFamily` so a transient first load
-                // can't kick a device whose child is fine.
-                let s = ParentSettings.shared
-                if hadFamily, s.deviceRole == .child, let joined = s.joinedChildID,
-                   !records.contains(where: { $0.id == joined }) {
-                    self.resetAsRemovedDevice()
-                }
+                // NOTE: we deliberately do NOT disconnect a child device just because
+                // its bound child is momentarily ABSENT from this snapshot. A transient
+                // partial/empty snapshot (listener re-attach, offline→online, an auth
+                // refresh) would otherwise kick BOTH the child's devices at once and
+                // strand them on "device disconnected". A REAL deletion always writes a
+                // `deletedChildren` tombstone first, so `listenToTombstones` is the one
+                // authoritative signal that disconnects the device (see below).
             }
     }
 
@@ -253,11 +259,22 @@ final class HouseholdManager: ObservableObject {
         tombstoneListener?.remove()
         tombstoneListener = db.collection("deletedChildren")
             .whereField("householdID", isEqualTo: householdID)
-            .addSnapshotListener { snap, _ in
+            .addSnapshotListener { [weak self] snap, _ in
                 guard let snap else { return }
                 let ids = snap.documents.compactMap { UUID(uuidString: $0.documentID) }
                 Task { @MainActor in
                     for id in ids { ProfileStore.shared.removeLocalOnly(id) }
+                    // Authoritative disconnect: a tombstone means the bound child was
+                    // really DELETED (not just briefly absent from a snapshot). This is
+                    // the ONLY thing that strands a child device on the reconnect screen.
+                    let s = ParentSettings.shared
+                    if s.deviceRole == .child, let joined = s.joinedChildID,
+                       let jid = UUID(uuidString: joined), ids.contains(jid) {
+                        TofyLink("tombstone for BOUND child \(joined) → disconnecting this device")
+                        self?.resetAsRemovedDevice()
+                    } else if !ids.isEmpty {
+                        TofyLink("tombstones: \(ids.count) (none is the bound child \(s.joinedChildID ?? "nil"))")
+                    }
                 }
             }
     }
@@ -569,6 +586,7 @@ final class HouseholdManager: ObservableObject {
     /// need). So: stop sync, wipe LOCAL data only, drop the binding → RolePicker.
     func resetAsRemovedDevice() {
         #if canImport(FirebaseFirestore)
+        TofyLink("resetAsRemovedDevice() — wiping LOCAL cache, dropping binding \(ParentSettings.shared.joinedChildID ?? "nil"). Cloud is NOT touched.")
         RemoteSyncManager.shared.stop()          // no uploads/listeners → cloud safe
         ownDeviceListener?.remove(); ownDeviceListener = nil
         let s = ParentSettings.shared

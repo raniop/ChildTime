@@ -121,11 +121,18 @@ final class RemoteSyncManager: ObservableObject {
     /// if the live listeners never ran or the cache is stale.
     func fetchSnapshot(for childID: UUID) async -> ProgressSnapshot? {
         #if canImport(FirebaseFirestore)
-        guard AuthManager.shared.isSignedIn else { return nil }
+        guard AuthManager.shared.isSignedIn else {
+            TofyLink("fetchSnapshot(\(childID.uuidString.prefix(8))): NOT signed in → nil")
+            return nil
+        }
         let doc = try? await db.collection("children").document(childID.uuidString)
             .collection("state").document("current").getDocument()
-        guard let raw = doc?.data() else { return nil }
+        guard let raw = doc?.data() else {
+            TofyLink("fetchSnapshot(\(childID.uuidString.prefix(8))): NO cloud state/current doc (empty/deleted) → nil")
+            return nil
+        }
         let snap = Self.decode(raw)
+        TofyLink("fetchSnapshot(\(childID.uuidString.prefix(8))): cloud has stars=\(snap?.stars ?? -1) diamonds=\(snap?.diamonds ?? -1) min=\(snap?.pendingMinutes ?? -1) rev=\(snap?.revision ?? -1)")
         if let snap { handleRemoteSnapshot(snap, profileID: childID) }
         return snap
         #else
@@ -338,6 +345,9 @@ final class RemoteSyncManager: ObservableObject {
     }
 
     private func handleRemoteSnapshot(_ snap: ProgressSnapshot, profileID: UUID) {
+        let isActive = profileID == ProfileStore.shared.activeID
+        let ownEcho = snap.deviceID == ProgressSnapshot.thisDeviceID
+        TofyLink("remoteSnapshot in: child=\(profileID.uuidString.prefix(8)) active=\(isActive) ownEcho=\(ownEcho) stars=\(snap.stars) diamonds=\(snap.diamonds) min=\(snap.pendingMinutes) rev=\(snap.revision)")
         // Always cache for the dashboard — the parent monitor must reflect the
         // cloud even when THIS device made the last write (e.g. a +minutes
         // grant). Skipping our own writes here is what made the parent's view
