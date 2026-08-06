@@ -907,7 +907,17 @@ struct ParentDashboardView: View {
     private var transferRequestsEntry: some View {
         let pendingCount = transfers.pendingForParent.count
         return Button { showingTransferRequests = true } label: {
+            // Authored LTR like the rest of the dashboard, so `.trailing` == RIGHT.
+            // Icons on the left, the Hebrew text flush to the RIGHT edge.
             HStack(spacing: 12) {
+                Image(systemName: "chevron.backward")
+                    .font(.system(size: 14, weight: .heavy)).foregroundStyle(.white.opacity(0.6))
+                if pendingCount > 0 {
+                    Text("\(pendingCount)")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded)).foregroundStyle(AppColor.textOnLight)
+                        .frame(minWidth: 24, minHeight: 24)
+                        .background(Circle().fill(AppColor.starGold))
+                }
                 Text("🛒").font(.system(size: 28))
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("בַּקָּשׁוֹת הַעֲבָרַת זְמַן")
@@ -918,14 +928,6 @@ struct ParentDashboardView: View {
                         .foregroundStyle(pendingCount > 0 ? AppColor.starGold : .white.opacity(0.7))
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
-                if pendingCount > 0 {
-                    Text("\(pendingCount)")
-                        .font(.system(size: 13, weight: .heavy, design: .rounded)).foregroundStyle(AppColor.textOnLight)
-                        .frame(minWidth: 24, minHeight: 24)
-                        .background(Circle().fill(AppColor.starGold))
-                }
-                Image(systemName: "chevron.backward")
-                    .font(.system(size: 14, weight: .heavy)).foregroundStyle(.white.opacity(0.6))
             }
             .padding(AppSpacing.md)
             .frame(maxWidth: .infinity)
@@ -933,7 +935,6 @@ struct ParentDashboardView: View {
             .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
         }
         .buttonStyle(.plain)
-        .environment(\.layoutDirection, .rightToLeft)
     }
 
     private func familyComparison(_ rows: [(profile: Profile, snapshot: ProgressSnapshot)]) -> some View {
