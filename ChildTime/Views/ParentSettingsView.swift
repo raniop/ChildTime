@@ -8,6 +8,7 @@ struct ParentSettingsView: View {
     @EnvironmentObject var subs: SubscriptionManager
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var profiles: ProfileStore
+    @ObservedObject private var household = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
 
     @State private var showAppPicker = false
@@ -254,6 +255,19 @@ struct ParentSettingsView: View {
                         }
                     }
                     Spacer()
+                }
+                // Co-parents in the family (names come from the household doc, so no
+                // cross-account reads). Excludes anonymous child play-devices + self.
+                ForEach(household.linkedParentSummaries, id: \.self) { name in
+                    HStack(spacing: 12) {
+                        Image(systemName: "person.2.fill")
+                            .foregroundStyle(AppColor.gemPurple).font(.title3)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(name).font(.headline)
+                            Text("הוֹרֶה בַּמִּשְׁפָּחָה").font(.caption).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                    }
                 }
                 Button {
                     showFamilyLinking = true
