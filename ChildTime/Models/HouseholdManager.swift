@@ -235,7 +235,8 @@ final class HouseholdManager: ObservableObject {
                 }
                 let s0 = ParentSettings.shared
                 let boundPresent = s0.joinedChildID.map { (j: String) in records.contains(where: { $0.id == j }) }
-                TofyLink("children snapshot: \(records.count) child(ren) [\(records.map { $0.name }.joined(separator: ", "))]; bound=\(s0.joinedChildID ?? "nil") present=\(boundPresent.map(String.init) ?? "n/a")")
+                TofyLink("children snapshot: \(records.count) child(ren) [\(records.map { "\($0.name):\($0.id.prefix(8))" }.joined(separator: ", "))]; bound=\(s0.joinedChildID ?? "nil") present=\(boundPresent.map(String.init) ?? "n/a")")
+                TofyLink("LOCAL profiles: [\(ProfileStore.shared.profiles.map { "\($0.name):\($0.id.uuidString.prefix(8))" }.joined(separator: ", "))]")
                 ProfileStore.shared.mergeRemoteChildren(records)
                 // First reply from the cloud → the family has finished loading.
                 if !self.didReceiveChildren {
@@ -447,6 +448,7 @@ final class HouseholdManager: ObservableObject {
     func createInvite(childID: String? = nil) async -> String? {
         #if canImport(FirebaseFirestore)
         guard let hh = household, let uid else { return nil }
+        TofyLink("createInvite: encoding childID=\(childID ?? "nil") into QR, household=\(hh.id.prefix(8))")
         let code = Invite.makeCode()
         let invite = Invite(id: code, householdID: hh.id, createdBy: uid,
                             createdAt: .now, expiresAt: Date().addingTimeInterval(7 * 24 * 3600),
