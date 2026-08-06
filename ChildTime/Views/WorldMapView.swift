@@ -459,30 +459,29 @@ struct WorldMapView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        let avatarSize: CGFloat = isCompact ? 46 : 58
-        let btnSize: CGFloat = isCompact ? 42 : 52
+        let avatarSize: CGFloat = isCompact ? 46 : 54
+        let btnSize: CGFloat = isCompact ? 42 : 46
         return VStack(spacing: isCompact ? 12 : 16) {
             // Row 1 — identity on the left, round nav buttons on the right. A custom
             // alignment puts the avatar, the name and every button CIRCLE on one
             // line (the button captions hang below without shifting it). Forced LTR
             // so it matches the design even though the app root is RTL.
-            HStack(alignment: .headerIcon, spacing: isCompact ? 6 : 14) {
-                identityBlock(avatar: avatarSize)
-                    .alignmentGuide(.headerIcon) { $0[VerticalAlignment.center] }
-                // On iPad the "טופי" title sits between identity and the nav buttons
-                // as a real center column, so it can't overlap them (a centered ZStack
-                // overlay collided with the nav captions on narrower widths). On
-                // iPhone the title stays below (rendered elsewhere).
-                if !isCompact {
-                    Spacer(minLength: 8)
-                    heroTitle
-                        .frame(maxWidth: 360)
-                        .layoutPriority(1)
+            ZStack {
+                HStack(alignment: .headerIcon, spacing: isCompact ? 6 : 14) {
+                    identityBlock(avatar: avatarSize)
                         .alignmentGuide(.headerIcon) { $0[VerticalAlignment.center] }
+                    Spacer(minLength: 2)
+                    navButtonsRow(size: btnSize)
+                        .alignmentGuide(.headerIcon) { _ in btnSize / 2 }
                 }
-                Spacer(minLength: 8)
-                navButtonsRow(size: btnSize)
-                    .alignmentGuide(.headerIcon) { _ in btnSize / 2 }
+                // On iPad the "טופי" title is centered over the whole row (= screen
+                // center, since the card is centered). Capped narrower than the gap
+                // between identity and the (smaller) nav buttons so it can't overlap.
+                if !isCompact {
+                    heroTitle
+                        .frame(maxWidth: 300)
+                        .allowsHitTesting(false)
+                }
             }
             statsPanel
             dailyChallengeCard
@@ -715,7 +714,7 @@ struct WorldMapView: View {
     }
 
     private func navButtonsRow(size: CGFloat) -> some View {
-        HStack(spacing: isCompact ? 5 : 12) {
+        HStack(spacing: isCompact ? 5 : 9) {
             navButton(icon: "gamecontroller.fill", color: AppColor.gemPurple,
                       label: "טוּרְנִיר", badge: !liveGame.invites.isEmpty, size: size) {
                 Haptic.light()
@@ -770,7 +769,7 @@ struct WorldMapView: View {
                 circle
             }
             Text(label)
-                .font(.system(size: isCompact ? 10 : 12, weight: .heavy, design: .rounded))
+                .font(.system(size: isCompact ? 10 : 11, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .lineLimit(1)
                 // Keep each caption within its button column so a long word (e.g.
