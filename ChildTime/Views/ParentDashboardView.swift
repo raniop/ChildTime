@@ -97,7 +97,6 @@ struct ParentDashboardView: View {
                             }
                             syncStatusCard
                             insightNotificationsCard
-                            if !transfers.allTransfers.isEmpty { transferRequestsEntry }
                             LazyVGrid(
                                 columns: [GridItem(.flexible(), spacing: 12),
                                           GridItem(.flexible(), spacing: 12)],
@@ -118,8 +117,14 @@ struct ParentDashboardView: View {
                                     }
                                 }
                             }
+                            // RTL so the cards fill right-to-left — with an odd count
+                            // the lone card sits on the RIGHT, not the left.
+                            .environment(\.layoutDirection, .rightToLeft)
                             .animation(.spring(response: 0.5, dampingFraction: 0.85),
                                        value: rows.map(\.profile.id))
+
+                            // Time-transfer requests live BELOW the children.
+                            if !transfers.allTransfers.isEmpty { transferRequestsEntry }
 
                             if rows.count >= 2 { familyComparison(rows) }
 
@@ -281,22 +286,6 @@ struct ParentDashboardView: View {
             }
             .sheet(item: $qrChild) { child in
                 childQRSheet(for: child)
-            }
-            .confirmationDialog(
-                deviceToRemove.map { "להסיר את \"\($0.name)\"?" } ?? "",
-                isPresented: Binding(
-                    get: { deviceToRemove != nil },
-                    set: { if !$0 { deviceToRemove = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("הסר מכשיר", role: .destructive) {
-                    if let d = deviceToRemove { household.removeChildDevice(id: d.id) }
-                    deviceToRemove = nil
-                }
-                Button("ביטול", role: .cancel) { deviceToRemove = nil }
-            } message: {
-                Text("המכשיר יתנתק אוטומטית מהילד ויחזור למצב התחלתי (כאילו הותקן מחדש). ההתקדמות בענן נשמרת — כדי לחבר אותו שוב (או לילד אחר), סרקו בו מחדש את ה-QR של הילד הנכון.")
             }
             .onAppear {
                 refreshTrigger &+= 1
@@ -1101,6 +1090,25 @@ struct ParentDashboardView: View {
                 Button("הֵבַנְתִּי", role: .cancel) {}
             } message: {
                 Text(remoteGrantMsg ?? "")
+            }
+            // Remove-linked-device confirmation — on the detail page too, since the
+            // "remove device" button lives here; on the root it only popped up after
+            // navigating back.
+            .confirmationDialog(
+                deviceToRemove.map { "להסיר את \"\($0.name)\"?" } ?? "",
+                isPresented: Binding(
+                    get: { deviceToRemove != nil },
+                    set: { if !$0 { deviceToRemove = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("הסר מכשיר", role: .destructive) {
+                    if let d = deviceToRemove { household.removeChildDevice(id: d.id) }
+                    deviceToRemove = nil
+                }
+                Button("ביטול", role: .cancel) { deviceToRemove = nil }
+            } message: {
+                Text("המכשיר יתנתק אוטומטית מהילד ויחזור למצב התחלתי (כאילו הותקן מחדש). ההתקדמות בענן נשמרת — כדי לחבר אותו שוב (או לילד אחר), סרקו בו מחדש את ה-QR של הילד הנכון.")
             }
         } else {
             Color.clear.background(AppGradient.dreamy.ignoresSafeArea())

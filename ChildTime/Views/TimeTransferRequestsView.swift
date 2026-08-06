@@ -75,18 +75,18 @@ struct TimeTransferRequestsView: View {
         Text(t)
             .font(.system(size: 14, weight: .heavy, design: .rounded))
             .foregroundStyle(.white.opacity(0.85))
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 4)
     }
 
     // MARK: - Rows
 
     private func pendingRow(_ t: TimeTransfer) -> some View {
-        VStack(alignment: .trailing, spacing: 10) {
+        VStack(alignment: .leading, spacing: 10) {
             Text(headline(t))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 10) {
                 Button { transfers.reject(t) } label: {
                     Text("דְּחֵה")
@@ -115,13 +115,13 @@ struct TimeTransferRequestsView: View {
     private func historyRow(_ t: TimeTransfer) -> some View {
         HStack(spacing: 10) {
             Text(statusEmoji(t.status)).font(.system(size: 22))
-            VStack(alignment: .trailing, spacing: 2) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(headline(t))
                     .font(.system(size: 14, weight: .bold, design: .rounded)).foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Text(statusText(t.status))
                     .font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.7))
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             Text(t.isGift ? "🎁" : "💎\(t.diamondPrice)")
                 .font(.system(size: 13, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.85))
