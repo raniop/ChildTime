@@ -466,20 +466,23 @@ struct WorldMapView: View {
             // alignment puts the avatar, the name and every button CIRCLE on one
             // line (the button captions hang below without shifting it). Forced LTR
             // so it matches the design even though the app root is RTL.
-            ZStack {
-                HStack(alignment: .headerIcon, spacing: isCompact ? 6 : 14) {
-                    identityBlock(avatar: avatarSize)
-                        .alignmentGuide(.headerIcon) { $0[VerticalAlignment.center] }
-                    Spacer(minLength: 2)
-                    navButtonsRow(size: btnSize)
-                        .alignmentGuide(.headerIcon) { _ in btnSize / 2 }
-                }
-                // On iPad the "טופי" title is centered over the whole row (= screen
-                // center, since the card is centered). On iPhone it stays below.
+            HStack(alignment: .headerIcon, spacing: isCompact ? 6 : 14) {
+                identityBlock(avatar: avatarSize)
+                    .alignmentGuide(.headerIcon) { $0[VerticalAlignment.center] }
+                // On iPad the "טופי" title sits between identity and the nav buttons
+                // as a real center column, so it can't overlap them (a centered ZStack
+                // overlay collided with the nav captions on narrower widths). On
+                // iPhone the title stays below (rendered elsewhere).
                 if !isCompact {
+                    Spacer(minLength: 8)
                     heroTitle
                         .frame(maxWidth: 360)
+                        .layoutPriority(1)
+                        .alignmentGuide(.headerIcon) { $0[VerticalAlignment.center] }
                 }
+                Spacer(minLength: 8)
+                navButtonsRow(size: btnSize)
+                    .alignmentGuide(.headerIcon) { _ in btnSize / 2 }
             }
             statsPanel
             dailyChallengeCard

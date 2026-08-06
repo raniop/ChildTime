@@ -143,6 +143,8 @@ struct ChildTimeApp: App {
                 .environmentObject(characters)
                 .task {
                     guard Self.demoScreen == nil else { return }   // no system prompts in screenshot mode
+                    StopAndSaveBridge.start()                // Live Activity "עצור ושמור" listener
+                    StopAndSaveBridge.applyIfRequested()     // handle a request that raced launch
                     let role = settings.deviceRole == .parent ? "parent"
                              : settings.deviceRole == .child ? "child" : "unset"
                     AppAnalytics.setUserProperty(role, "device_role")
@@ -154,6 +156,7 @@ struct ChildTimeApp: App {
                 .onChangeCompat(of: scenePhase) { _, phase in
                     if phase == .active, Self.demoScreen == nil {
                         progress.applyDailyRolloverIfNeeded()
+                        StopAndSaveBridge.applyIfRequested()   // Live Activity "עצור ושמור" fallback
                         enforceShieldStateIfNeeded()
                         WidgetBridge.refreshKid()
                     }

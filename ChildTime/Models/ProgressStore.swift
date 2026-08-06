@@ -1278,6 +1278,16 @@ final class ProgressStore: ObservableObject {
     var pausedManualMinutes: Int { (manualPausedSeconds + 59) / 60 }
     var hasPausedManualTime: Bool { manualPausedSeconds > 0 }
 
+    /// Stop the current play window and SAVE the leftover: FREEZE it for a parent's
+    /// manual grant (resume later), or BANK it to the wallet for earned time. Does
+    /// NOT re-apply the shield — the caller does. Used by the "עצור ושמור" action
+    /// (play screen + Live Activity button).
+    func stopAndSaveCurrentUnlock() {
+        guard isUnlocked else { return }
+        if unlockIsManual { pauseManualUnlock() }
+        else { _ = endUnlockAndReturnRemainingMinutes() }
+    }
+
     /// Child stopped mid-play on a parent's MANUAL grant — FREEZE the exact leftover
     /// (to the second) instead of wasting it, and end the live window. Caller
     /// re-applies the shield. No-op for an earned window (that banks to the wallet).
