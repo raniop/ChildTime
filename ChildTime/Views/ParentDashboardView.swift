@@ -806,6 +806,38 @@ struct ParentDashboardView: View {
 
             // (Friends are managed from the "⋯" menu — "חברים".)
 
+            // The child's play-protection code — full parental transparency: the
+            // parent SEES the code (to remind a forgetful kid) and can reset it.
+            if profile.hasPlayPIN {
+                HStack(spacing: 10) {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(AppColor.starGold)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("קוד הגנת זמן המשחק")
+                            .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                        Text("הילד מזין אותו כדי לפתוח את הדקות שצבר")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Text(profile.playPIN ?? "")
+                        .font(.system(size: 19, weight: .heavy, design: .monospaced))
+                        .kerning(3)
+                    Button("אפס") {
+                        pinResetProfile = profile
+                    }
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .buttonStyle(.bordered)
+                    .tint(.orange)
+                }
+                .padding(12)
+                .background(RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                    .fill(AppColor.starGold.opacity(0.1)))
+                .overlay(RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                    .stroke(AppColor.starGold.opacity(0.35), lineWidth: 1))
+            }
+
             // Learning profile — what the Smart Feed has learned about this kid.
             learningProfileCard(for: profile, snapshot: s)
 
@@ -1105,7 +1137,7 @@ struct ParentDashboardView: View {
                 Button("אפס קוד", role: .destructive) {
                     var updated = p
                     // "" (not nil) — deliberate-clear sentinel; survives sync merges.
-                    updated.playPINHash = ""
+                    updated.playPIN = ""
                     profiles.update(updated)
                     pinResetProfile = nil
                 }

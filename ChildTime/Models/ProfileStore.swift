@@ -154,8 +154,8 @@ final class ProfileStore: ObservableObject {
                 // Play-protection code: a MISSING remote field (pre-field doc /
                 // stale writer) must not wipe a code the child just set locally —
                 // but an EMPTY string is a deliberate clear (parent reset), and
-                // must win. (See Profile.playPINHash.)
-                merged.playPINHash = remote.playPINHash ?? working[idx].playPINHash
+                // must win. (See Profile.playPIN.)
+                merged.playPIN = remote.playPIN ?? working[idx].playPIN
                 if working[idx] != merged { working[idx] = merged; changed = true }
             } else {
                 working.append(remote); changed = true

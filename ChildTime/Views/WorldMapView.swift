@@ -1248,7 +1248,7 @@ struct WorldMapView: View {
 
     private func savePlayPIN(_ pin: String) {
         guard var p = profiles.active else { return }
-        p.playPINHash = Profile.playPINHash(pin, childID: p.id)
+        p.playPIN = pin
         profiles.update(p)
         companion.cheer("הַזְּמַן שֶׁלְּךָ מוּגָן! 🔒")
     }
@@ -1256,7 +1256,7 @@ struct WorldMapView: View {
     private func clearPlayPIN() {
         guard var p = profiles.active else { return }
         // "" (not nil) — the deliberate-clear sentinel that survives sync merges.
-        p.playPINHash = ""
+        p.playPIN = ""
         profiles.update(p)
         companion.cheer("הַקּוֹד הוּסַר 🔓")
     }

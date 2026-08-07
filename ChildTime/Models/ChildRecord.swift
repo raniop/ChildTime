@@ -120,11 +120,12 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// Topics (worlds) the parent enabled for this child (topic.rawValues).
     /// nil → all topics enabled (also the backward-compatible default).
     var enabledTopics: [String]?
-    /// SHA-256 hash of the child's own "protect my time" code (see
-    /// `Profile.playPINHash`). Child-editable (like `character3DID`); the parent
-    /// dashboard may clear it if the child forgot the code. Optional so docs
-    /// created before this field existed still decode.
-    var playPINHash: String?
+    /// The child's own "protect my time" code (see `Profile.playPIN` — stored
+    /// in the clear on purpose so the parent dashboard can SHOW it). Child-
+    /// editable (like `character3DID`); the parent dashboard may clear it if
+    /// the child forgot the code ("" sentinel). Optional so docs created
+    /// before this field existed still decode.
+    var playPIN: String?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -145,7 +146,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.enabledTopics = profile.enabledTopics.count >= Topic.allCases.count
             ? nil
             : profile.enabledTopics.map { $0.rawValue }.sorted()
-        self.playPINHash = profile.playPINHash
+        self.playPIN = profile.playPIN
     }
 
     /// Rehydrate a local `Profile`. The photo now syncs (compressed), so a custom
@@ -167,7 +168,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             difficultyByTopic: difficultyByTopic ?? [:],
             dailyCapMinutes: dailyCapMinutes,
             enabledTopics: enabledTopics.map { Set($0.compactMap(Topic.init(rawValue:))) } ?? Set(Topic.allCases),
-            playPINHash: playPINHash
+            playPIN: playPIN
         )
     }
 
