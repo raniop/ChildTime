@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import CryptoKit
 
 /// A child profile — identity + appearance.
 ///
@@ -42,6 +43,13 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// parent who turns off English hides that world and stops English questions.
     /// Synced via `ChildRecord`. Default: every topic enabled (opt-out per child).
     var enabledTopics: Set<Topic>
+    /// SHA-256 hash of the child's OWN 4-digit "protect my time" code. When set,
+    /// redeeming/resuming play minutes on the child's device asks for this code —
+    /// so a sibling/friend holding the device can't burn the minutes the child
+    /// earned. nil → no code (default). Only the hash is ever stored or synced;
+    /// the child sets/changes it on their device, the parent can only RESET it
+    /// (to nil) from the dashboard if the child forgot it.
+    var playPINHash: String?
 
     init(
         id: UUID = UUID(),
@@ -57,7 +65,8 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         learningLevel: LearningLevel = .developing,
         difficultyByTopic: [String: String] = [:],
         dailyCapMinutes: Int? = nil,
-        enabledTopics: Set<Topic> = Set(Topic.allCases)
+        enabledTopics: Set<Topic> = Set(Topic.allCases),
+        playPINHash: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -73,6 +82,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.difficultyByTopic = difficultyByTopic
         self.dailyCapMinutes = dailyCapMinutes
         self.enabledTopics = enabledTopics
+        self.playPINHash = playPINHash
     }
 
     // Backward-compatible decoding: profiles stored before the Parent Platform
@@ -80,6 +90,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     enum CodingKeys: String, CodingKey {
         case id, name, gender, age, photoData, avatarPresetID, character3DID, createdAt
         case grade, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
+        case playPINHash
     }
 
     init(from decoder: Decoder) throws {
@@ -99,6 +110,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.dailyCapMinutes = try c.decodeIfPresent(Int.self, forKey: .dailyCapMinutes)
         // Older profiles (pre per-child topics) decode to "everything enabled".
         self.enabledTopics = try c.decodeIfPresent(Set<Topic>.self, forKey: .enabledTopics) ?? Set(Topic.allCases)
+        self.playPINHash = try c.decodeIfPresent(String.self, forKey: .playPINHash)
     }
 
     /// Whether the parent allows this topic for the child.
@@ -121,6 +133,26 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
             return d
         }
         return learningLevel.seedDifficulty
+    }
+
+    /// Whether the child protected their play minutes with a personal code.
+    /// Empty string counts as "no code" — it's the deliberate-clear sentinel a
+    /// parent reset writes (nil can't be used for that: a missing field in a
+    /// stale record must not wipe a freshly set code during merge).
+    var hasPlayPIN: Bool { !(playPINHash?.isEmpty ?? true) }
+
+    /// Hash for the child's play-protection code. Salted with the child's id so
+    /// the same code hashes identically on every device (the hash syncs), but
+    /// differently for each child.
+    static func playPINHash(_ pin: String, childID: UUID) -> String {
+        let data = Data((childID.uuidString + pin).utf8)
+        return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+
+    /// Does `pin` match this profile's stored play-protection code?
+    func verifyPlayPIN(_ pin: String) -> Bool {
+        guard hasPlayPIN else { return true }
+        return playPINHash == Self.playPINHash(pin, childID: id)
     }
 
     /// Display avatar — photo if available, otherwise the preset.

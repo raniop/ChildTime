@@ -23,9 +23,12 @@ struct ParentDashboardView: View {
     @ObservedObject private var transfers = TimeTransferManager.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
+    @Environment(\.horizontalSizeClass) private var hsc
 
     @State private var resettingProfile: Profile? = nil
     @State private var deletingProfile: Profile? = nil
+    /// Confirm clearing a child's "protect my time" code (when the kid forgot it).
+    @State private var pinResetProfile: Profile? = nil
     @State private var navPath: [UUID] = []   // pushed child-detail pages (pop on delete)
     @State private var gridDeleteProfile: Profile? = nil   // long-press delete from the grid
     @State private var refreshTrigger = 0
@@ -92,8 +95,19 @@ struct ParentDashboardView: View {
                             if isRoot {
                                 if !push.authorized { notificationsBanner }
                                 familySummaryCard
-                                linkCallout
-                                if !profiles.profiles.isEmpty { kidModeButton }
+                                // Wide screens (iPad): the two primary actions sit
+                                // side by side instead of stacking.
+                                if hsc == .regular && !profiles.profiles.isEmpty {
+                                    // RTL priority: the primary "create child" sits
+                                    // on the RIGHT, "let the child play" on the left.
+                                    HStack(spacing: 12) {
+                                        kidModeButton
+                                        linkButton
+                                    }
+                                } else {
+                                    linkCallout
+                                    if !profiles.profiles.isEmpty { kidModeButton }
+                                }
                             }
                             syncStatusCard
                             insightNotificationsCard
@@ -719,6 +733,15 @@ struct ParentDashboardView: View {
                     } label: {
                         Label("חברים", systemImage: "person.2.fill")
                     }
+                    // Shown only when the child actually set a play-protection
+                    // code — the escape hatch for a forgotten code.
+                    if profile.hasPlayPIN {
+                        Button {
+                            pinResetProfile = profile
+                        } label: {
+                            Label("אפס קוד הגנת זמן", systemImage: "lock.rotation")
+                        }
+                    }
                     Button(role: .destructive) {
                         resettingProfile = profile
                     } label: {
@@ -1072,6 +1095,23 @@ struct ParentDashboardView: View {
                 Button("בטל", role: .cancel) { resettingProfile = nil }
             } message: { _ in
                 Text("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן, ועונש טעויות. לא ימחק שמות, פרופילים או פריטי קוסמטיקה.")
+            }
+            .alert(
+                pinResetProfile.map { "לאפס את קוד הגנת הזמן של \($0.name)?" } ?? "",
+                isPresented: Binding(get: { pinResetProfile != nil },
+                                     set: { if !$0 { pinResetProfile = nil } }),
+                presenting: pinResetProfile
+            ) { p in
+                Button("אפס קוד", role: .destructive) {
+                    var updated = p
+                    // "" (not nil) — deliberate-clear sentinel; survives sync merges.
+                    updated.playPINHash = ""
+                    profiles.update(updated)
+                    pinResetProfile = nil
+                }
+                Button("בטל", role: .cancel) { pinResetProfile = nil }
+            } message: { _ in
+                Text("הקוד שהילד הגדיר לפתיחת זמן משחק יימחק. הילד יוכל להגדיר קוד חדש מהמכשיר שלו. שימושי כשהקוד נשכח.")
             }
             .alert(
                 deletingProfile.map { "למחוק את \($0.name)?" } ?? "",

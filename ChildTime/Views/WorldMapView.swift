@@ -31,6 +31,10 @@ struct WorldMapView: View {
     @State private var showingChildSettings = false
     @State private var showingPaywall = false
     @State private var showingAppLockSetup = false
+    /// The child's "protect my time" code flow. `pendingUnlockAction` remembers
+    /// which unlock the kid tapped, to run right after a successful verify.
+    @State private var playPINSheet: PlayPINSheet? = nil
+    @State private var pendingUnlockAction: (() -> Void)? = nil
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
     @State private var showLevelInfo = false
@@ -273,6 +277,12 @@ struct WorldMapView: View {
         }
         .fullScreenCover(isPresented: $showingAppLockSetup) {
             ChildAppLockSetupView()
+                .environment(\.layoutDirection, .rightToLeft)
+        }
+        // The child's "protect my time" code — verify before spending minutes,
+        // plus the set/change/remove flows.
+        .fullScreenCover(item: $playPINSheet) { sheet in
+            playPINCover(sheet)
                 .environment(\.layoutDirection, .rightToLeft)
         }
         .fullScreenCover(isPresented: $showingShop) {
@@ -1116,7 +1126,7 @@ struct WorldMapView: View {
             // parent's grant is never wasted. Shown above the earn/redeem CTA.
             if progress.hasPausedManualTime {
                 Button {
-                    resumeManual()
+                    requestUnlock { resumeManual() }
                 } label: {
                     HStack(spacing: 10) {
                         Text("❄️").font(.system(size: 22))
@@ -1140,7 +1150,7 @@ struct WorldMapView: View {
 
             if progress.canRedeemNow {
                 Button {
-                    redeemMinutes()
+                    requestUnlock { redeemMinutes() }
                 } label: {
                     HStack(spacing: 10) {
                         Image(systemName: "gamecontroller.fill")
@@ -1171,6 +1181,27 @@ struct WorldMapView: View {
                 // of leaving the spot blank.
                 bottomHint("עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק 🎮")
             }
+
+            // "Protect my time" — the child's own code on the unlock buttons, so a
+            // sibling/friend holding the device can't spend the earned minutes.
+            // Discreet: a small text button, only where it's relevant (there's
+            // something to protect, or a code already exists to manage).
+            if let p = profiles.active,
+               p.hasPlayPIN || progress.pendingMinutes > 0 || progress.hasPausedManualTime {
+                Button {
+                    Haptic.light()
+                    playPINSheet = p.hasPlayPIN ? .manage : .setNew
+                } label: {
+                    Label(p.hasPlayPIN ? "הַזְּמַן שֶׁלְּךָ מוּגָן בְּקוֹד" : "הָגֵנּוּ עַל הַזְּמַן שֶׁלָּכֶם בְּקוֹד",
+                          systemImage: p.hasPlayPIN ? "lock.fill" : "lock.open")
+                        .font(.system(size: 13.5, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .padding(.horizontal, 14).padding(.vertical, 8)
+                        .background(.white.opacity(0.12), in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 2)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .center)
     }
@@ -1192,6 +1223,82 @@ struct WorldMapView: View {
                 .stroke(AppColor.starGold.opacity(0.7), lineWidth: 2))
             .shadow(color: .black.opacity(0.18), radius: 8, y: 3)
             .frame(maxWidth: 480)
+    }
+
+    // MARK: - Play-protection code (the child's own 🔒)
+
+    /// Which KidPIN screen is up. All flows re-ask for the code — the whole
+    /// point is a sibling grabbing the device mid-session.
+    enum PlayPINSheet: String, Identifiable {
+        case verifyUnlock      // code before spending minutes
+        case setNew            // first-time setup (enter → confirm)
+        case manage            // has a code: choose change / remove
+        case verifyThenSet     // change: prove you know it, then pick a new one
+        case verifyThenClear   // remove: prove you know it, then clear
+        var id: String { rawValue }
+    }
+
+    /// Run `action` immediately when the child has no protection code, otherwise
+    /// hold it and ask for the code first.
+    private func requestUnlock(_ action: @escaping () -> Void) {
+        guard let p = profiles.active, p.hasPlayPIN else { action(); return }
+        pendingUnlockAction = action
+        playPINSheet = .verifyUnlock
+    }
+
+    private func savePlayPIN(_ pin: String) {
+        guard var p = profiles.active else { return }
+        p.playPINHash = Profile.playPINHash(pin, childID: p.id)
+        profiles.update(p)
+        companion.cheer("הַזְּמַן שֶׁלְּךָ מוּגָן! 🔒")
+    }
+
+    private func clearPlayPIN() {
+        guard var p = profiles.active else { return }
+        // "" (not nil) — the deliberate-clear sentinel that survives sync merges.
+        p.playPINHash = ""
+        profiles.update(p)
+        companion.cheer("הַקּוֹד הוּסַר 🔓")
+    }
+
+    /// The KidPIN full-screen flows, attached to the map's root in `body`.
+    @ViewBuilder
+    fileprivate func playPINCover(_ sheet: PlayPINSheet) -> some View {
+        if let p = profiles.active {
+            switch sheet {
+            case .verifyUnlock:
+                KidPINView(profile: p, mode: .verify(title: "פּוֹתְחִים זְמַן מִשְׂחָק")) { _ in
+                    playPINSheet = nil
+                    let action = pendingUnlockAction
+                    pendingUnlockAction = nil
+                    // Present-dismiss race safety: run after the cover closes.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { action?() }
+                } onCancel: {
+                    pendingUnlockAction = nil
+                    playPINSheet = nil
+                }
+            case .setNew:
+                KidPINView(profile: p, mode: .setNew) { pin in
+                    savePlayPIN(pin)
+                    playPINSheet = nil
+                } onCancel: { playPINSheet = nil }
+            case .manage:
+                PlayPINManageView(
+                    onChange: { playPINSheet = .verifyThenSet },
+                    onRemove: { playPINSheet = .verifyThenClear },
+                    onClose: { playPINSheet = nil }
+                )
+            case .verifyThenSet:
+                KidPINView(profile: p, mode: .verify(title: "קֹדֶם הַקּוֹד הַנּוֹכְחִי")) { _ in
+                    playPINSheet = .setNew
+                } onCancel: { playPINSheet = nil }
+            case .verifyThenClear:
+                KidPINView(profile: p, mode: .verify(title: "קֹדֶם הַקּוֹד הַנּוֹכְחִי")) { _ in
+                    clearPlayPIN()
+                    playPINSheet = nil
+                } onCancel: { playPINSheet = nil }
+            }
+        }
     }
 
     // MARK: - Actions

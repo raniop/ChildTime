@@ -151,6 +151,11 @@ final class ProfileStore: ObservableObject {
                 // Same idea for the chosen 3D character — keep the local pick if
                 // the remote record predates this field.
                 merged.character3DID = remote.character3DID ?? working[idx].character3DID
+                // Play-protection code: a MISSING remote field (pre-field doc /
+                // stale writer) must not wipe a code the child just set locally —
+                // but an EMPTY string is a deliberate clear (parent reset), and
+                // must win. (See Profile.playPINHash.)
+                merged.playPINHash = remote.playPINHash ?? working[idx].playPINHash
                 if working[idx] != merged { working[idx] = merged; changed = true }
             } else {
                 working.append(remote); changed = true
