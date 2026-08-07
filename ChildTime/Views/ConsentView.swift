@@ -62,6 +62,28 @@ struct ConsentView: View {
                 .frame(minHeight: proxy.size.height, alignment: .center)
             }
             }
+
+            // Back to the device-role choice — consent only shows during first-time
+            // parent setup, so "I meant a child device" must still be escapable here.
+            VStack {
+                HStack {
+                    Button {
+                        Haptic.light()
+                        settings.pendingJoinFamily = false
+                        settings.deviceRole = .unset
+                    } label: {
+                        Label("חֲזָרָה", systemImage: "chevron.backward")
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14).padding(.vertical, 8)
+                            .background(.white.opacity(0.16), in: Capsule())
+                    }
+                    Spacer()
+                }
+                Spacer()
+            }
+            .padding(.horizontal, AppSpacing.md)
+            .padding(.top, AppSpacing.sm)
         }
     }
 

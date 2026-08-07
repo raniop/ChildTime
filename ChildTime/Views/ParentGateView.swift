@@ -97,6 +97,22 @@ struct ParentGateView<Content: View>: View {
                                 .frame(width: 40, height: 40)
                                 .background(.white.opacity(0.15), in: Circle())
                         }
+                    } else if isSetupMode {
+                        // Root gate during FIRST-TIME setup (no parent code exists
+                        // yet, anywhere in the family) — "parent" may have been
+                        // tapped by mistake, so allow going back to the role picker.
+                        // Once a code exists this never shows: the everyday unlock
+                        // gate must not offer a way around it.
+                        Button {
+                            Haptic.light()
+                            settings.deviceRole = .unset
+                        } label: {
+                            Label("חֲזָרָה", systemImage: "chevron.backward")
+                                .font(.system(size: 15, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 14).padding(.vertical, 8)
+                                .background(.white.opacity(0.16), in: Capsule())
+                        }
                     }
                     Spacer()
                 }

@@ -62,6 +62,32 @@ struct ChildAuthLoadingView: View {
                         .foregroundStyle(.white)
                 }
             }
+
+            // Back to the device-role choice, visible from the very first moment —
+            // not only after the timeout — so a mistaken "child" tap is instantly
+            // recoverable. ONLY during first-time setup: an established child
+            // device (already bound / disconnected) must not offer a one-tap path
+            // out of the child role.
+            if settings.joinedChildID == nil && !settings.justDisconnected {
+                VStack {
+                    HStack {
+                        Button {
+                            Haptic.light()
+                            settings.deviceRole = .unset
+                        } label: {
+                            Label("חֲזָרָה", systemImage: "chevron.backward")
+                                .font(.system(size: 15, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 14).padding(.vertical, 8)
+                                .background(.white.opacity(0.16), in: Capsule())
+                        }
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.top, AppSpacing.sm)
+            }
         }
         .task(id: attempt) { await runAttempt() }
     }
