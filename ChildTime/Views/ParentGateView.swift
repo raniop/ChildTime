@@ -19,12 +19,20 @@ struct ParentGateView<Content: View>: View {
     /// Fired the moment the gate is unlocked (any method). Lets a caller act on
     /// the single authentication — e.g. exit Kid Mode — without a second screen.
     var onAuthorized: (() -> Void)? = nil
+    /// When false, this gate REFUSES to run first-time code creation: if no
+    /// parent code exists on this device yet (e.g. the household code hasn't
+    /// synced), it shows a "not available" notice instead of letting whoever
+    /// holds the device invent a parent code. Pass false for privileged actions
+    /// on a CHILD device (like resetting the kid's play-protection code) where
+    /// "create a code right now" would be a bypass.
+    var allowSetup: Bool = true
 
     init(allowClose: Bool = true,
          gateTitle: String? = nil,
          gateReason: String? = nil,
          useFaceID: Bool = true,
          respectSession: Bool = true,
+         allowSetup: Bool = true,
          onAuthorized: (() -> Void)? = nil,
          @ViewBuilder content: @escaping () -> Content = {
              ParentSettingsView().environment(\.layoutDirection, .rightToLeft)
@@ -34,6 +42,7 @@ struct ParentGateView<Content: View>: View {
         self.gateReason = gateReason
         self.useFaceID = useFaceID
         self.respectSession = respectSession
+        self.allowSetup = allowSetup
         self.onAuthorized = onAuthorized
         self.content = content
     }
@@ -63,6 +72,11 @@ struct ParentGateView<Content: View>: View {
         Group {
             if authorized || (respectSession && settings.sessionUnlocked) {
                 content()
+            } else if isSetupMode && !allowSetup {
+                // No parent code exists on this device (yet) and this gate must
+                // not offer to create one — that would let whoever HOLDS the
+                // device mint a parent code and walk through.
+                setupUnavailable
             } else {
                 gate
             }
@@ -77,6 +91,43 @@ struct ParentGateView<Content: View>: View {
             if phase == .background, settings.deviceRole == .child {
                 authorized = false
             }
+        }
+    }
+
+    /// Shown instead of the keypad when `allowSetup == false` and no parent code
+    /// is available on this device: explain + gentle exit, never a create-flow.
+    private var setupUnavailable: some View {
+        ZStack {
+            AppGradient.dreamy.ignoresSafeArea()
+            SparkleField(count: 14, size: 12)
+            VStack(spacing: AppSpacing.lg) {
+                Image(systemName: "lock.badge.clock")
+                    .font(.system(size: 56))
+                    .foregroundStyle(AppColor.starGold)
+                    .glow(AppColor.starGold, radius: 14)
+                Text("קוֹד הַהוֹרֶה לֹא זָמִין כָּאן")
+                    .font(.system(size: 26, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                Text("קוֹד הַהוֹרֶה שֶׁל הַמִּשְׁפָּחָה עֲדַיִן לֹא הִגִּיעַ לַמַּכְשִׁיר הַזֶּה (בִּדְקוּ חִבּוּר לָאִינְטֶרְנֶט). אֶפְשָׁר תָּמִיד לְאַפֵּס מִלּוּחַ הַהוֹרִים בַּמַּכְשִׁיר שֶׁל אַבָּא אוֹ אִמָּא.")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, AppSpacing.xl)
+                if allowClose {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Text("סְגִירָה")
+                            .font(.system(size: 17, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 34).padding(.vertical, 13)
+                            .background(.white.opacity(0.16), in: Capsule())
+                    }
+                    .buttonStyle(.juicy)
+                }
+            }
+            .padding(.top, 30)
         }
     }
 

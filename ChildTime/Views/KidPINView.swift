@@ -19,6 +19,9 @@ struct KidPINView: View {
     let mode: Mode
     var onSuccess: (String) -> Void      // verified pin / newly chosen pin
     var onCancel: () -> Void
+    /// Verify mode only: "I forgot my code" — routes to the forgot screen
+    /// (parent notification + parent-code reset). nil hides the button.
+    var onForgot: (() -> Void)? = nil
 
     @State private var entered = ""
     @State private var firstEntry: String?   // set-mode: the code awaiting confirm
@@ -100,6 +103,21 @@ struct KidPINView: View {
 
                 Color.clear.frame(height: 26)
                 keypad
+
+                if !isSetMode, let onForgot {
+                    Button {
+                        Haptic.light()
+                        onForgot()
+                    } label: {
+                        Text("שָׁכַחְתִּי אֶת הַקּוֹד 🤔")
+                            .font(.system(size: 14.5, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.85))
+                            .padding(.horizontal, 16).padding(.vertical, 9)
+                            .background(.white.opacity(0.12), in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 16)
+                }
                 Spacer(minLength: 0)
             }
             .padding(.top, 14)
@@ -180,6 +198,100 @@ struct KidPINView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
             shake = false
             entered = ""
+        }
+    }
+}
+
+/// "I forgot my code" — kid-safe dead end that ISN'T a dead end:
+/// 1. On appear it pings the parents (push via LiveEventReporter), so a remote
+///    parent knows to look the code up / reset from the dashboard.
+/// 2. A parent standing next to the kid can reset ON THE SPOT behind the
+///    parent gate (respectSession:false — always re-authenticates, so a kid
+///    can never ride an old unlock).
+/// The kid alone still has no way through — that's the whole protection.
+struct PlayPINForgotView: View {
+    let childName: String
+    var onParentReset: () -> Void
+    var onClose: () -> Void
+
+    @EnvironmentObject var settings: ParentSettings
+    @State private var showParentGate = false
+    @State private var notified = false
+
+    var body: some View {
+        ZStack {
+            AppGradient.dreamy.ignoresSafeArea()
+            SparkleField(count: 12, size: 12)
+
+            VStack(spacing: AppSpacing.lg) {
+                Text("💌")
+                    .font(.system(size: 54))
+                    .glow(AppColor.companionGlow, radius: 12)
+
+                Text("זֶה בְּסֵדֶר, קוֹרֶה לְכֻלָּם!")
+                    .font(.system(size: 25, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+
+                Text("שָׁלַחְנוּ עַכְשָׁיו הוֹדָעָה לְאַבָּא וּלְאִמָּא 💌\nהֵם רוֹאִים אֶת הַקּוֹד שֶׁלְּךָ בַּלּוּחַ שֶׁלָּהֶם,\nוְיוֹדְעִים אֵיךְ לַעֲזוֹר.")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 28)
+
+                VStack(spacing: 12) {
+                    // For a parent standing right here.
+                    Button {
+                        Haptic.light()
+                        showParentGate = true
+                    } label: {
+                        Label("אֲנִי הוֹרֶה · אִפּוּס עִם קוֹד הוֹרֶה", systemImage: "key.fill")
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity).padding(.vertical, 15)
+                            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .glow(AppColor.starGold, radius: 10)
+                    }
+                    .buttonStyle(.juicy)
+
+                    Button {
+                        Haptic.light(); onClose()
+                    } label: {
+                        Text("סְגִירָה")
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.8))
+                            .padding(.top, 4)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .frame(maxWidth: 340)
+                .padding(.horizontal, AppSpacing.lg)
+            }
+        }
+        .onAppear {
+            // Ping the parents ONCE per appearance of this screen.
+            guard !notified else { return }
+            notified = true
+            LiveEventReporter.report(.playPINForgot)
+        }
+        // The parent-code gate; success clears the child's code immediately.
+        .sheet(isPresented: $showParentGate) {
+            ParentGateView(allowClose: true,
+                           gateTitle: "אִפּוּס קוֹד הֲגַנַּת הַזְּמַן",
+                           gateReason: "הַזִּינוּ קוֹד הוֹרֶה כְּדֵי לְאַפֵּס אֶת הַקּוֹד שֶׁל \(childName)",
+                           useFaceID: true,
+                           respectSession: false,
+                           // NEVER offer to CREATE a parent code here — a kid
+                           // holding the device could mint one and self-reset.
+                           allowSetup: false,
+                           onAuthorized: {
+                               showParentGate = false
+                               onParentReset()
+                           }) {
+                Color.clear
+            }
+            .environmentObject(settings)
+            .environment(\.layoutDirection, .rightToLeft)
         }
     }
 }

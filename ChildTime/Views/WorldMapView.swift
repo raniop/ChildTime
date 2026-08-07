@@ -1235,6 +1235,7 @@ struct WorldMapView: View {
         case manage            // has a code: choose change / remove
         case verifyThenSet     // change: prove you know it, then pick a new one
         case verifyThenClear   // remove: prove you know it, then clear
+        case forgot            // "I forgot" — pings the parents + parent-code reset
         var id: String { rawValue }
     }
 
@@ -1276,6 +1277,9 @@ struct WorldMapView: View {
                 } onCancel: {
                     pendingUnlockAction = nil
                     playPINSheet = nil
+                } onForgot: {
+                    pendingUnlockAction = nil
+                    playPINSheet = .forgot
                 }
             case .setNew:
                 KidPINView(profile: p, mode: .setNew) { pin in
@@ -1292,11 +1296,21 @@ struct WorldMapView: View {
                 KidPINView(profile: p, mode: .verify(title: "קֹדֶם הַקּוֹד הַנּוֹכְחִי")) { _ in
                     playPINSheet = .setNew
                 } onCancel: { playPINSheet = nil }
+                  onForgot: { playPINSheet = .forgot }
             case .verifyThenClear:
                 KidPINView(profile: p, mode: .verify(title: "קֹדֶם הַקּוֹד הַנּוֹכְחִי")) { _ in
                     clearPlayPIN()
                     playPINSheet = nil
                 } onCancel: { playPINSheet = nil }
+                  onForgot: { playPINSheet = .forgot }
+            case .forgot:
+                PlayPINForgotView(childName: p.name) {
+                    // A parent authenticated with the PARENT code right here —
+                    // clear the kid's code on the spot.
+                    clearPlayPIN()
+                    playPINSheet = nil
+                    companion.cheer("הַקּוֹד אֻפַּס! אֶפְשָׁר לִבְחוֹר חָדָשׁ 🔓")
+                } onClose: { playPINSheet = nil }
             }
         }
     }

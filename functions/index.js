@@ -98,6 +98,10 @@ function liveMessage(event) {
     }
     case "assistRequest":return { title: "בקשת עזרה 💌", body: `${name} ${g("ביקש", "ביקשה")} את עזרתכם בשאלה${dev}.` };
     case "parentGateOpened": return { title: "🔐 נכנסו להגדרות ההורה", body: `מישהו פתח את הגדרות ההורה במכשיר של ${name}${dev}.` };
+    // Deliberately does NOT include the code itself — lock-screen previews are
+    // often visible to the very kid (or sibling) the code guards against. The
+    // parent sees the code inside the gated dashboard.
+    case "playPINForgot": return { title: "🔒 קוד הגנת הזמן נשכח", body: `${name} ${g("שכח", "שכחה")} את קוד הגנת זמן המשחק${dev}. הקוד מופיע בכרטיס של ${name} בלוח ההורים — ואפשר גם לאפס שם, או ישירות במכשיר של הילד עם קוד ההורה.` };
     // Intentionally NO push for milestone / streak / wheelWin / discovery —
     // those flooded the parent. Only start/finish, screen-time open/close, and
     // help requests notify.
