@@ -1208,7 +1208,9 @@ struct ParentDashboardView: View {
                     // remote controls (open / lock now) without
                     // opening the child's page. Overlaid on the link
                     // (not inside it) so the tap isn't swallowed.
-                    .overlay(alignment: .topLeading) {
+                    // The grid is forced RTL, so "leading" = right; the ⋯ belongs
+                    // on the LEFT corner (away from the avatar's status dot).
+                    .overlay(alignment: .topTrailing) {
                         gridCardMenu(row.profile)
                             .padding(8)
                     }
