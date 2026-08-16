@@ -66,9 +66,12 @@ final class KidModeManager: ObservableObject {
         if let p = ProfileStore.shared.profiles.first(where: { $0.id == id }) {
             ProfileStore.shared.setActive(p)
         }
-        // Force the cloud truth into the live store (covers the case where the
-        // child was already the active profile, so the switch saved over it).
-        if let cloud { ProgressStore.shared.apply(cloud) }
+        // Bring in the cloud truth — MERGE (LWW by revision + ratchet), not a
+        // blind apply: switchTo above may have just migrated device-local frozen
+        // parent time into the gift pocket (revision bumped), and a blind
+        // apply(cloud) overwrote it. mergeRemote keeps the newer local pocket
+        // and still ratchets accumulators up to the cloud.
+        if let cloud { _ = ProgressStore.shared.mergeRemote(cloud) }
         // This phone may hold the kid's frozen parent-time from a previous Kid
         // Mode session (device-local, stashed on exit) — bring it back.
         ProgressStore.shared.restoreDeviceLocalPlayState(for: id)

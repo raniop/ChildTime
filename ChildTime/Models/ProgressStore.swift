@@ -1390,8 +1390,31 @@ final class ProgressStore: ObservableObject {
     func pauseManualUnlock() {
         guard unlockIsManual else { return }
         let remaining = unlockSecondsRemaining
-        if remaining > 0 { manualPausedSeconds += remaining }
+        // The leftover of a PARENT window goes back to the SYNCED gift pocket
+        // (whole minutes, rounded UP so the child never loses a partial minute)
+        // — not to a device-local freezer. Rani: "חייב להיות אותו דבר בשני
+        // המכשירים" — the kid must see the same 💝 on the iPad and the iPhone
+        // and be able to resume from either. `manualPausedSeconds` stays as a
+        // legacy field (always 0 from now on; old stashes are migrated below).
+        // FLOOR to whole minutes (a round-up let a kid replay <60s chunks forever).
+        if remaining > 0 { parentGiftMinutes += remaining / 60 }
         endUnlock()
+    }
+
+    /// One-time migration: any device-local frozen seconds left over from the
+    /// pre-sync design (live value or a per-profile stash) are folded into the
+    /// synced gift pocket so they're not stranded on one device.
+    @discardableResult
+    func migrateFrozenIntoGiftPocket(for profileID: UUID) -> Bool {
+        var secs = manualPausedSeconds
+        let key = "manualPausedSeconds.\(profileID.uuidString)"
+        secs += defaults.integer(forKey: key)
+        defaults.removeObject(forKey: key)
+        guard secs > 0 else { return false }
+        manualPausedSeconds = 0
+        parentGiftMinutes += (secs + 59) / 60   // one-time legacy migration: be generous
+        NSLog("[ScreenTime] migrated %ds of frozen parent time into the synced gift pocket", secs)
+        return true
     }
 
     /// Resume frozen manual time — reopen a manual window from the saved seconds and

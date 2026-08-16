@@ -83,6 +83,11 @@ final class ProgressVault {
         // 1. Save the outgoing profile
         if let outgoing = boundProfileID {
             write(ProgressStore.shared.captureSnapshot(), for: outgoing)
+            // …and push it NOW while `activeID` is still the outgoing kid: the
+            // debounced upload would fire later for the NEW active kid, leaving the
+            // outgoing kid's just-banked leftover only in the vault (where the next
+            // cloud echo overwrites it).
+            if switching { RemoteSyncManager.shared.pushNow() }
         }
         // 2. Apply incoming snapshot
         let incoming = snapshot(for: profile.id)
@@ -90,8 +95,14 @@ final class ProgressVault {
         // 3. Bind
         boundProfileID = profile.id
         // 3b. Restore the incoming kid's own frozen parent time (if any) —
-        //     only on a real switch (see step 0).
+        //     only on a real switch (see step 0)…
         if switching { ProgressStore.shared.restoreDeviceLocalPlayState(for: profile.id) }
+        //     …then fold ANY device-local frozen time (live or stashed) into the
+        //     synced gift pocket — frozen time is no longer device-local. Persist
+        //     right away so a kill before the next autosave can't lose it.
+        if ProgressStore.shared.migrateFrozenIntoGiftPocket(for: profile.id) {
+            write(ProgressStore.shared.captureSnapshot(), for: profile.id)
+        }
         // 4. Reset live caches that don't belong to the new profile
         QuestionMemory.shared.reloadForActiveProfile()
         LearningHistoryStore.shared.bind(to: profile.id)
@@ -129,6 +140,7 @@ final class ProgressVault {
         let store = ProgressStore.shared
         let triggers: [AnyPublisher<Void, Never>] = [
             store.$pendingMinutes.map { _ in () }.eraseToAnyPublisher(),
+            store.$parentGiftMinutes.map { _ in () }.eraseToAnyPublisher(),   // 💝 synced pocket
             store.$totalScore.map { _ in () }.eraseToAnyPublisher(),
             store.$stars.map { _ in () }.eraseToAnyPublisher(),
             store.$diamonds.map { _ in () }.eraseToAnyPublisher(),

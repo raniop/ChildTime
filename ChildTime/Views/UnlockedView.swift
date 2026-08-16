@@ -58,7 +58,7 @@ struct UnlockedView: View {
                 Button {
                     endEarly()
                 } label: {
-                    Text(progress.unlockIsManual ? "עֲצֹר וּשְׁמֹר אֶת הַזְּמַן ❄️" : "סִיַּמְתִּי לְשַׂחֵק")
+                    Text(progress.unlockIsManual ? "עֲצֹר וּשְׁמֹר אֶת הַזְּמַן 💝" : "סִיַּמְתִּי לְשַׂחֵק")
                         .font(.system(size: 22, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, AppSpacing.xl)

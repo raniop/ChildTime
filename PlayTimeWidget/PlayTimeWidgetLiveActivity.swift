@@ -78,7 +78,7 @@ struct PlayTimeWidgetLiveActivity: Widget {
     private func stopButton() -> some View {
         if #available(iOS 17.0, *) {
             Button(intent: StopAndSavePlayIntent()) {
-                Label("עֲצֹר וּשְׁמֹר ❄️", systemImage: "pause.fill")
+                Label("עֲצֹר וּשְׁמֹר", systemImage: "pause.fill")
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
