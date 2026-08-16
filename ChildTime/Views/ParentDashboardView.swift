@@ -23,7 +23,6 @@ struct ParentDashboardView: View {
     @ObservedObject private var transfers = TimeTransferManager.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
-    @Environment(\.horizontalSizeClass) private var hsc
 
     @State private var resettingProfile: Profile? = nil
     @State private var deletingProfile: Profile? = nil
@@ -107,22 +106,20 @@ struct ParentDashboardView: View {
                             if isRoot {
                                 if !push.authorized { notificationsBanner }
                                 familySummaryCard
-                                // Wide screens (iPad): the two primary actions sit
-                                // side by side instead of stacking.
-                                if hsc == .regular && !profiles.profiles.isEmpty {
-                                    // RTL priority: the primary "create child" sits
-                                    // on the RIGHT, "let the child play" on the left.
-                                    HStack(spacing: 12) {
+                                // The two primary actions side by side (iPhone and
+                                // iPad alike) — stacking wasted a whole row. RTL
+                                // priority: "create child" on the RIGHT, "let the
+                                // child play" on the left. Text scales down on
+                                // narrow phones (both buttons allow it).
+                                if !profiles.profiles.isEmpty {
+                                    HStack(spacing: 10) {
                                         kidModeButton
                                         linkButton
                                     }
                                 } else {
                                     linkCallout
-                                    if !profiles.profiles.isEmpty { kidModeButton }
                                 }
                             }
-                            syncStatusCard
-                            insightNotificationsCard
                             LazyVGrid(
                                 columns: [GridItem(.flexible(), spacing: 12),
                                           GridItem(.flexible(), spacing: 12)],
@@ -169,6 +166,13 @@ struct ParentDashboardView: View {
                                 }
                                 .buttonStyle(.plain)
                             }
+
+                            // Secondary status/settings cards live BELOW the
+                            // children — the kids are what the parent opens the
+                            // dashboard for; sync + insight-notification settings
+                            // are glance-and-forget.
+                            syncStatusCard
+                            insightNotificationsCard
 
                             // Time-transfer requests live BELOW the children.
                             if !transfers.allTransfers.isEmpty { transferRequestsEntry }
@@ -539,9 +543,11 @@ struct ParentDashboardView: View {
                 Image(systemName: "person.crop.circle.badge.plus")
                 Text("צְרוּ יֶלֶד/ה")
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .foregroundStyle(.white)
-            .padding(.horizontal, AppSpacing.xl)
+            .padding(.horizontal, AppSpacing.md)
             .padding(.vertical, 15)
             .frame(maxWidth: .infinity)
             .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -568,7 +574,7 @@ struct ParentDashboardView: View {
                     .minimumScaleFactor(0.8)
             }
             .foregroundStyle(.white)
-            .padding(.horizontal, AppSpacing.xl)
+            .padding(.horizontal, AppSpacing.md)
             .padding(.vertical, 15)
             .frame(maxWidth: .infinity)
             // Same size as "צרו ילד/ה" — prominence comes from a vivid lime→emerald
