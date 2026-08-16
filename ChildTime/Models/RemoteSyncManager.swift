@@ -162,6 +162,74 @@ final class RemoteSyncManager: ObservableObject {
         #endif
     }
 
+    /// PARENT: reset a child's progress everywhere.
+    ///
+    /// Why not just push a blank snapshot? Uploads are RATCHET-merged (they can
+    /// only ever raise accumulators — the guard against stale pushes wiping
+    /// real progress), so a blank push from the parent is silently discarded,
+    /// and the parent's dashboard (which prefers the cloud) never changes.
+    /// That's exactly the "reset does nothing" symptom.
+    ///
+    /// So a reset is a COMMAND on the child doc (like ±minutes): the child's own
+    /// device consumes `resetRequestedAt`, wipes its live store (revision-bumped)
+    /// and pushes the blank up — the one writer allowed to lower the cloud. And
+    /// so the parent isn't left staring at stale numbers meanwhile, we ALSO
+    /// overwrite the cloud `state/current` doc directly here (a plain set, not a
+    /// ratchet), stamped as a fresh higher revision. Together: instant on the
+    /// parent, durable on the child even if it was offline when the reset ran.
+    func resetChildProgress(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        let id = childID.uuidString
+        // 1. Command for the child's device (works even if it's offline now).
+        db.collection("children").document(id)
+            .setData(["resetRequestedAt": FieldValue.serverTimestamp()], merge: true)
+        // 2. Immediate cloud state overwrite so every monitor shows zeros now.
+        let ref = db.collection("children").document(id)
+            .collection("state").document("current")
+        db.runTransaction({ txn, _ -> Any? in
+            let cloudRev = (try? txn.getDocument(ref))?.data()
+                .flatMap({ Self.decode($0) })?.revision ?? 0
+            var blank = ProgressSnapshot.blank
+            blank.revision = cloudRev + 1
+            blank.lastModifiedAt = Date()
+            blank.deviceID = ProgressSnapshot.thisDeviceID
+            if let data = Self.encode(blank) { txn.setData(data, forDocument: ref) }   // NOT merge — a real wipe
+            return nil
+        }) { _, err in
+            if let err { TofyLink("resetChildProgress cloud wipe FAILED: \(err.localizedDescription)") }
+        }
+        // 3. Local mirror so the dashboard row flips instantly (before the
+        //    listener echoes the wipe back).
+        var blank = ProgressSnapshot.blank
+        blank.revision = (remoteSnapshots[childID]?.revision ?? 0) + 1
+        blank.lastModifiedAt = Date()
+        remoteSnapshots[childID] = blank
+        pendingAdjustments.removeValue(forKey: childID)
+        #endif
+    }
+
+    /// CHILD device: a parent asked to reset THIS child. Consume the command
+    /// exactly once (read + clear in a transaction), then wipe the live store
+    /// and push the blank state up.
+    private func applyPendingReset(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        let ref = db.collection("children").document(childID.uuidString)
+        db.runTransaction({ txn, _ -> Any? in
+            let doc = try? txn.getDocument(ref)
+            let requested = doc?.data()?["resetRequestedAt"] != nil
+            if requested { txn.updateData(["resetRequestedAt": FieldValue.delete()], forDocument: ref) }
+            return requested
+        }) { [weak self] result, _ in
+            guard (result as? Bool) == true else { return }
+            Task { @MainActor in
+                TofyLink("applyPendingReset: parent reset for \(childID.uuidString.prefix(8)) → wiping local + pushing")
+                ProgressVault.shared.resetProfile(childID)
+                self?.pushNow()
+            }
+        }
+        #endif
+    }
+
     /// CHILD device: consume any parent minute grant on this child's doc exactly
     /// once. Reads + zeroes `pendingMinuteAdjustment` in a transaction (so two
     /// devices can't double-apply), then adds it to the live balance.
@@ -339,6 +407,12 @@ final class RemoteSyncManager: ObservableObject {
                         && KidModeManager.shared.childID?.uuidString == id
                     if adj != 0 && (isBoundChildDevice || isKidModeForThis) {
                         self.applyPendingMinuteGrant(childID: profile.id)
+                    }
+                    // A parent's "reset progress" — consumed the same way, by the
+                    // device that IS this child right now.
+                    let resetRequested = doc?.data()?["resetRequestedAt"] != nil
+                    if resetRequested && (isBoundChildDevice || isKidModeForThis) {
+                        self.applyPendingReset(childID: profile.id)
                     }
                 }
         }

@@ -1584,10 +1584,13 @@ struct ParentDashboardView: View {
 
     private func resetProgress(for profile: Profile) {
         Haptic.warning()
+        // Local wipe (covers Kid Mode / a device that IS this child).
         ProgressVault.shared.resetProfile(profile.id)
-        // Push immediately so the kid's other device picks up the reset
-        // within seconds rather than waiting for the debounced upload.
-        remote.pushNow()
+        // Cloud: a reset COMMAND for the child's device + a direct cloud-state
+        // wipe so the dashboard shows zeros now. (A plain pushNow() here was a
+        // no-op: it uploads only the ACTIVE profile and ratchet-merges — it can
+        // never lower cloud values, so the reset "did nothing".)
+        remote.resetChildProgress(childID: profile.id)
         refreshTrigger &+= 1
     }
 
