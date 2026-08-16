@@ -869,7 +869,9 @@ struct ParentDashboardView: View {
             HStack(spacing: 10) {
                 statCell(emoji: "🎮",
                          value: activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"),
-                         label: activeUnlockSecs > 0 ? "משחק/ת עכשיו" : "דק' שהרוויח/ה")
+                         label: activeUnlockSecs > 0
+                            ? (profile.gender == .girl ? "משחקת עכשיו" : "משחק עכשיו")
+                            : (profile.gender == .girl ? "דק' שהרוויחה" : "דק' שהרוויח"))
                 statCell(emoji: "💝",
                          value: giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—",
                          label: "דק' מתנה מכם")
@@ -1142,7 +1144,7 @@ struct ParentDashboardView: View {
             Text(profile.name)
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.7)
-            liveWindowBanner(profile, compact: true)
+            gridStatusStrip(profile)
             VStack(spacing: 6) {
                 HStack(spacing: 6) { miniStat("⏱", timeToday); miniStat("🎯", success) }
                 HStack(spacing: 6) { miniStat("⭐", s.stars.currencyShort); miniStat("💎", s.diamonds.currencyShort) }
@@ -1274,17 +1276,56 @@ struct ParentDashboardView: View {
         return open.max(by: { $0.0 < $1.0 })
     }
 
+    /// The grid card's status strip — ALWAYS present at the same height so every
+    /// card in the grid lines up. Live play window → green + ticking countdown;
+    /// otherwise a calm neutral line that still says something useful (frozen
+    /// time waiting, app open without a window, or simply "not playing now").
+    @ViewBuilder
+    private func gridStatusStrip(_ profile: Profile) -> some View {
+        let live = liveWindow(profile)
+        let frozen = (household.devicesByChild[profile.id.uuidString] ?? [])
+            .compactMap { $0.frozenSeconds }.max() ?? 0
+        // Gendered — we know each child's gender, so never "משחק/ת".
+        let girl = profile.gender == .girl
+        let text: String = {
+            if let live { return "\(girl ? "מְשַׂחֶקֶת" : "מְשַׂחֵק") עַכְשָׁיו · \(formatTime(live.secondsLeft))" }
+            if frozen > 0 { return "❄️ \((frozen + 59) / 60) דַּקּוֹת שְׁמוּרוֹת" }
+            if isChildPlayingNow(profile) { return "בְּטוֹפִי עַכְשָׁיו · \(girl ? "לוֹמֶדֶת" : "לוֹמֵד") 📚" }
+            return girl ? "לֹא מְשַׂחֶקֶת כָּרֶגַע" : "לֹא מְשַׂחֵק כָּרֶגַע"
+        }()
+        HStack(spacing: 6) {
+            if live != nil { LivePulseDot() }
+            Text(text)
+                .font(.system(size: 11.5, weight: .heavy, design: .rounded))
+                .monospacedDigit()
+                .lineLimit(1).minimumScaleFactor(0.7)
+        }
+        .foregroundStyle(live != nil ? .white : Color.secondary)
+        .padding(.horizontal, 8)
+        .frame(maxWidth: .infinity)
+        .frame(height: 26)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(live != nil
+                      ? AnyShapeStyle(LinearGradient(colors: [Color(hex: "22C55E"), Color(hex: "16A34A")],
+                                                     startPoint: .leading, endPoint: .trailing))
+                      : AnyShapeStyle(Color.primary.opacity(0.05)))
+        )
+        .glow(live != nil ? Color(hex: "22C55E") : .clear, radius: live != nil ? 6 : 0)
+        .animation(.easeInOut(duration: 0.3), value: live != nil)
+    }
+
     /// Green, pulsing "playing NOW" strip: live countdown + the device it's on.
     /// Shown on the grid card (compact) and the detail card (full sentence).
     @ViewBuilder
     private func liveWindowBanner(_ profile: Profile, compact: Bool) -> some View {
         if let live = liveWindow(profile) {
             let deviceLabel = live.device.kind == "ipad" ? "בָּאַיְפֵּד" : (live.device.kind == "iphone" ? "בָּאַיְפוֹן" : "בַּמַּכְשִׁיר")
-            let source = live.isManual ? "זְמַן שֶׁנָּתַתֶּם" : "זְמַן שֶׁהִרְוִיחַ/ה"
+            let source = live.isManual ? "זְמַן שֶׁנָּתַתֶּם" : (profile.gender == .girl ? "זְמַן שֶׁהִרְוִיחָה" : "זְמַן שֶׁהִרְוִיחַ")
             HStack(spacing: 6) {
                 LivePulseDot()
                 if compact {
-                    Text("מְשַׂחֵק/ת עַכְשָׁיו · \(formatTime(live.secondsLeft))")
+                    Text("\(profile.gender == .girl ? "מְשַׂחֶקֶת" : "מְשַׂחֵק") עַכְשָׁיו · \(formatTime(live.secondsLeft))")
                         .font(.system(size: 11.5, weight: .heavy, design: .rounded))
                         .lineLimit(1).minimumScaleFactor(0.7)
                 } else {
