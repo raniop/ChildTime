@@ -1401,19 +1401,20 @@ final class ProgressStore: ObservableObject {
         endUnlock()
     }
 
-    /// One-time migration: any device-local frozen seconds left over from the
-    /// pre-sync design (live value or a per-profile stash) are folded into the
-    /// synced gift pocket so they're not stranded on one device.
+    /// One-time cleanup of the pre-sync design's device-local frozen seconds
+    /// (live value or a per-profile stash). DISCARDED, not migrated: a parent may
+    /// have already revoked/reset this child's parent time while this device was
+    /// on the old build — folding a stale local freezer into the synced pocket
+    /// would resurrect exactly what the parent removed (Dan's phone held a
+    /// phantom 121 min). From now on leftovers go straight into the synced 💝.
     @discardableResult
     func migrateFrozenIntoGiftPocket(for profileID: UUID) -> Bool {
-        var secs = manualPausedSeconds
         let key = "manualPausedSeconds.\(profileID.uuidString)"
-        secs += defaults.integer(forKey: key)
+        let secs = manualPausedSeconds + defaults.integer(forKey: key)
         defaults.removeObject(forKey: key)
         guard secs > 0 else { return false }
         manualPausedSeconds = 0
-        parentGiftMinutes += (secs + 59) / 60   // one-time legacy migration: be generous
-        NSLog("[ScreenTime] migrated %ds of frozen parent time into the synced gift pocket", secs)
+        NSLog("[ScreenTime] discarded %ds of legacy device-local frozen time (parent time is synced now)", secs)
         return true
     }
 

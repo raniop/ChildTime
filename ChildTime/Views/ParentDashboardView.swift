@@ -1290,14 +1290,11 @@ struct ParentDashboardView: View {
     @ViewBuilder
     private func gridStatusStrip(_ profile: Profile) -> some View {
         let live = liveWindow(profile)
-        let frozen = (household.devicesByChild[profile.id.uuidString] ?? [])
-            .compactMap { $0.frozenSeconds }.max() ?? 0
         // Gendered — we know each child's gender, so never "משחק/ת".
         let girl = profile.gender == .girl
         let text: String = {
             // No countdown here — the 🎮 stat below already ticks in green.
             if live != nil { return "🎮 זְמַן מָסָךְ פָּתוּחַ" }
-            if frozen > 0 { return "❄️ \((frozen + 59) / 60) דַּקּוֹת שְׁמוּרוֹת" }
             if isChildPlayingNow(profile) { return "בְּטוֹפִי עַכְשָׁיו · \(girl ? "לוֹמֶדֶת" : "לוֹמֵד") 📚" }
             return "לֹא בְּטוֹפִי כָּרֶגַע"
         }()
@@ -2083,12 +2080,12 @@ struct ParentDashboardView: View {
     /// 💝 Gift pocket as the parent should see it: the synced value plus any
     /// gift still in flight to the child's device (so a "+10" shows at once).
     private func giftShownFor(_ profile: Profile, _ s: ProgressSnapshot) -> Int {
-        // Frozen leftover of an earlier parent window is parent time too — the
-        // kid's 💝 button opens both together, so the parent's tile matches.
-        let frozenSecs = (household.devicesByChild[profile.id.uuidString] ?? [])
-            .compactMap { $0.frozenSeconds }.max() ?? 0
-        let frozenMin = (frozenSecs + 59) / 60
-        return max(0, (s.parentGiftMinutes ?? 0) + remote.pendingGifts[profile.id, default: 0] + frozenMin)
+        // 💝 = the SYNCED gift pocket + any "+N" still in flight. Frozen leftover
+        // now lives INSIDE the synced pocket (pauseManualUnlock), so device-row
+        // frozenSeconds is NOT added — a stale row from a device that hasn't
+        // updated/come online would otherwise double-count or haunt the tile
+        // (Dan: 29 real + a phantom 121 from an old-build phone).
+        max(0, (s.parentGiftMinutes ?? 0) + remote.pendingGifts[profile.id, default: 0])
     }
 
     /// 💝 Give minutes — into the child's separate GIFT pocket (never the earned
