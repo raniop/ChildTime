@@ -869,9 +869,11 @@ struct ParentDashboardView: View {
             HStack(spacing: 10) {
                 statCell(emoji: "🎮",
                          value: activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"),
-                         label: activeUnlockSecs > 0
+                         label: liveWindow(profile) != nil
                             ? "זמן מסך פתוח"
-                            : (profile.gender == .girl ? "דק' שהרוויחה" : "דק' שהרוויח"))
+                            : (activeUnlockSecs > 0
+                               ? "❄️ דק' שמורות"
+                               : (profile.gender == .girl ? "דק' שהרוויחה" : "דק' שהרוויח")))
                 statCell(emoji: "💝",
                          value: giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—",
                          label: "דק' מתנה מכם")
@@ -1148,7 +1150,9 @@ struct ParentDashboardView: View {
             VStack(spacing: 6) {
                 HStack(spacing: 6) { miniStat("⏱", timeToday); miniStat("🎯", success) }
                 HStack(spacing: 6) { miniStat("⭐", s.stars.currencyShort); miniStat("💎", s.diamonds.currencyShort) }
-                HStack(spacing: 6) { miniStat("🎮", available, live: unlockSecs > 0); miniStat("🔥", "\(s.dayStreak)") }
+                // Green ONLY while a window is actually open — frozen time shows
+                // its static number in neutral (it isn't ticking or burning).
+                HStack(spacing: 6) { miniStat("🎮", available, live: liveWindow(profile) != nil); miniStat("🔥", "\(s.dayStreak)") }
                 // 💝 Parent gift pocket — kept apart from earned (🎮) even here.
                 HStack(spacing: 6) {
                     let gift = giftShownFor(profile, s)
