@@ -18,6 +18,11 @@ struct Household: Codable, Identifiable, Equatable {
     /// Family-wide parent gate code as a salted hash ("salt:hash") so the same
     /// code works on every device in the household — never the plain code.
     var parentPinHash: String?
+    /// The parent's chosen display order of the children on the dashboard
+    /// (child UUID strings). nil / missing ids → alphabetical fallback. Lives on
+    /// the household so both parents see the same order. Optional so older
+    /// household docs still decode.
+    var childOrder: [String]?
 
     init(id: String = UUID().uuidString,
          parentUIDs: [String],
@@ -25,7 +30,8 @@ struct Household: Codable, Identifiable, Equatable {
          createdBy: String,
          createdAt: Date = .now,
          parentNames: [String: String]? = nil,
-         parentPinHash: String? = nil) {
+         parentPinHash: String? = nil,
+         childOrder: [String]? = nil) {
         self.id = id
         self.parentUIDs = parentUIDs
         self.childIDs = childIDs
@@ -33,6 +39,7 @@ struct Household: Codable, Identifiable, Equatable {
         self.createdAt = createdAt
         self.parentNames = parentNames
         self.parentPinHash = parentPinHash
+        self.childOrder = childOrder
     }
 }
 

@@ -31,6 +31,8 @@ struct ParentDashboardView: View {
     @State private var pinResetProfile: Profile? = nil
     @State private var navPath: [UUID] = []   // pushed child-detail pages (pop on delete)
     @State private var gridDeleteProfile: Profile? = nil   // long-press delete from the grid
+    @State private var showingReorder = false               // manual child order sheet
+    @State private var statExplain: StatExplain? = nil      // tapped-stat explanation
     @State private var refreshTrigger = 0
     @State private var lastRefreshed = Date()
     @State private var showingSettings = false
@@ -72,10 +74,20 @@ struct ParentDashboardView: View {
             if adj != 0 { snap.pendingMinutes = max(0, snap.pendingMinutes + adj) }
             return (row.profile, snap)
         }
-        // Fixed alphabetical order by name (Hebrew א,ב,ג…) so the list never
-        // reshuffles when a child starts/stops playing. Locale-aware compare.
-        return mapped.sorted {
-            $0.profile.name.localizedCompare($1.profile.name) == .orderedAscending
+        // Stable order so the grid never reshuffles when a child starts/stops
+        // playing: the parent's MANUAL order first (household.childOrder — drag
+        // to reorder), then alphabetical (Hebrew א,ב,ג…) for anyone not placed
+        // yet (e.g. a newly created child).
+        let manual = household.effectiveChildOrder
+        let rank: [String: Int] = Dictionary(uniqueKeysWithValues: manual.enumerated().map { ($1, $0) })
+        return mapped.sorted { a, b in
+            let ra = rank[a.profile.id.uuidString], rb = rank[b.profile.id.uuidString]
+            switch (ra, rb) {
+            case let (x?, y?): return x < y
+            case (_?, nil):    return true
+            case (nil, _?):    return false
+            default:           return a.profile.name.localizedCompare(b.profile.name) == .orderedAscending
+            }
         }
     }
 
@@ -125,6 +137,11 @@ struct ParentDashboardView: View {
                                         Button {
                                             navPath.append(row.profile.id)
                                         } label: { Label("פתח כרטיס", systemImage: "rectangle.portrait.and.arrow.right") }
+                                        if rows.count >= 2 {
+                                            Button {
+                                                showingReorder = true
+                                            } label: { Label("סדר את הילדים", systemImage: "arrow.up.arrow.down") }
+                                        }
                                         Button(role: .destructive) {
                                             gridDeleteProfile = row.profile
                                         } label: { Label("מחק ילד/ה", systemImage: "trash") }
@@ -136,6 +153,22 @@ struct ParentDashboardView: View {
                             .environment(\.layoutDirection, .rightToLeft)
                             .animation(.spring(response: 0.5, dampingFraction: 0.85),
                                        value: rows.map(\.profile.id))
+
+                            // Manual order — a discreet entry under the grid (also in
+                            // each card's long-press menu). Only meaningful with 2+.
+                            if rows.count >= 2 {
+                                Button {
+                                    Haptic.light()
+                                    showingReorder = true
+                                } label: {
+                                    Label("סַדְּרוּ אֶת הַיְלָדִים", systemImage: "arrow.up.arrow.down")
+                                        .font(.system(size: 13.5, weight: .bold, design: .rounded))
+                                        .foregroundStyle(.white.opacity(0.85))
+                                        .padding(.horizontal, 14).padding(.vertical, 8)
+                                        .background(.white.opacity(0.12), in: Capsule())
+                                }
+                                .buttonStyle(.plain)
+                            }
 
                             // Time-transfer requests live BELOW the children.
                             if !transfers.allTransfers.isEmpty { transferRequestsEntry }
@@ -241,6 +274,12 @@ struct ParentDashboardView: View {
             .sheet(isPresented: $showingSettings) {
                 ParentSettingsView()
                     .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(isPresented: $showingReorder) {
+                ChildOrderView(profiles: rows.map(\.profile)) { ordered in
+                    household.setChildOrder(ordered.map(\.id))
+                }
+                .environment(\.layoutDirection, .rightToLeft)
             }
             .sheet(isPresented: $showingKidMode) {
                 KidModeEntryView()
@@ -1128,6 +1167,17 @@ struct ParentDashboardView: View {
             } message: { _ in
                 Text("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן, ועונש טעויות. לא ימחק שמות, פרופילים או פריטי קוסמטיקה.")
             }
+            // "What does this number mean?" — tapped stat cell explanation.
+            .alert(
+                statExplain.map { "\($0.emoji) \($0.label) — \($0.value)" } ?? "",
+                isPresented: Binding(get: { statExplain != nil },
+                                     set: { if !$0 { statExplain = nil } }),
+                presenting: statExplain
+            ) { _ in
+                Button("הבנתי", role: .cancel) { statExplain = nil }
+            } message: { s in
+                Text(s.text)
+            }
             .alert(
                 pinResetProfile.map { "לאפס את קוד הגנת הזמן של \($0.name)?" } ?? "",
                 isPresented: Binding(get: { pinResetProfile != nil },
@@ -1516,22 +1566,61 @@ struct ParentDashboardView: View {
     }
 
     private func statCell(emoji: String, value: String, label: String) -> some View {
-        VStack(spacing: 2) {
-            Text(emoji).font(.system(size: 18))
-            Text(value)
-                .font(.system(size: 17, weight: .heavy, design: .rounded))
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-            Text(label)
-                .font(.system(size: 10, weight: .medium, design: .rounded))
-                .foregroundStyle(.secondary)
+        // Tappable: every number on the child card explains itself (a parent
+        // shouldn't have to guess what "דק' זמינות" or ⭐ vs 💎 mean).
+        Button {
+            Haptic.light()
+            statExplain = StatExplain(emoji: emoji, label: label, value: value)
+        } label: {
+            VStack(spacing: 2) {
+                Text(emoji).font(.system(size: 18))
+                Text(value)
+                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                Text(label)
+                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                    .fill(Color(.systemBackground).opacity(0.6))
+            )
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                .fill(Color(.systemBackground).opacity(0.6))
-        )
+        .buttonStyle(.plain)
+        .foregroundStyle(.primary)
+    }
+
+    /// Which stat the parent tapped for an explanation.
+    struct StatExplain: Identifiable {
+        let emoji: String
+        let label: String
+        let value: String
+        var id: String { label }
+
+        /// Plain-Hebrew explanation of what the number means and how it's earned.
+        var text: String {
+            switch emoji {
+            case "⏱":
+                return "כמה דקות זמן מסך הילד/ה הרוויח/ה היום, מתוך התקרה היומית שקבעתם (המספר אחרי הקו). כל 10 תשובות נכונות = 4 דקות. כשמגיעים לתקרה — שאר הדקות נשמרות למחר."
+            case "❓":
+                return "כמה שאלות הילד/ה ענה/תה היום — בכל העולמות, במשחקים ובהרפתקה החכמה. מתאפס בחצות."
+            case "🎯":
+                return "אחוז התשובות הנכונות מתוך כל השאלות של היום. \"—\" = עוד לא ענה/תה היום. מתחת ל-50% לאורך זמן? כדאי להוריד רמת קושי מהתפריט ⋯."
+            case "🔥":
+                return "כמה ימים ברצף הילד/ה שיחק/ה בטופי (לפחות שאלה אחת ביום). יום שמדלגים עליו מאפס את הרצף — זה מה שמניע לחזור מחר."
+            case "⭐":
+                return "כוכבים = הדירוג. הם רק עולים ולעולם לא נגמרים — הם מה שקובע את הרמה של הילד/ה ואת המקום בלוח החברים. אי אפשר לבזבז אותם."
+            case "💎":
+                return "יהלומים = הארנק של החנות. מרוויחים לאט יותר מכוכבים (בערך 1 לתשובה), ומוציאים אותם על דמויות ופריטים בחנות. יורדים כשקונים — זה תקין."
+            case "🎮":
+                return "דקות משחק שהילד/ה צבר/ה ועוד לא פתח/ה (הארנק). כשיש חלון פתוח — רואים כאן ספירה לאחור של הזמן שנשאר. \"—\" = אין דקות ממתינות."
+            default:
+                return "נתון מסכם על הפעילות של הילד/ה בטופי."
+            }
+        }
     }
 
     // MARK: - Actions
@@ -1611,6 +1700,56 @@ struct ParentDashboardView: View {
         let m = seconds / 60
         let s = seconds % 60
         return String(format: "%d:%02d", m, s)
+    }
+}
+
+/// Manual child order for the dashboard grid — a native reorderable list
+/// (drag the handles), saved family-wide on "שמור". Sheet, not in-grid
+/// drag: LazyVGrid drag-and-drop is flaky across iPhone/iPad + RTL, and a
+/// list with handles is what parents already know from iOS.
+struct ChildOrderView: View {
+    let profiles: [Profile]
+    var onSave: ([Profile]) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var working: [Profile] = []
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(working) { p in
+                        HStack(spacing: 12) {
+                            ProfileAvatarView(profile: p, size: 40)
+                            Text(p.name)
+                                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                            Spacer()
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .onMove { from, to in working.move(fromOffsets: from, toOffset: to) }
+                } footer: {
+                    Text("גררו את הידיות כדי לקבוע את הסדר בלוח. הסדר נשמר לכל ההורים במשפחה.")
+                }
+            }
+            .environment(\.editMode, .constant(.active))
+            .navigationTitle("סדר הילדים")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("ביטול") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("שמור") {
+                        Haptic.success()
+                        onSave(working)
+                        dismiss()
+                    }
+                    .fontWeight(.bold)
+                }
+            }
+        }
+        .onAppear { if working.isEmpty { working = profiles } }
     }
 }
 

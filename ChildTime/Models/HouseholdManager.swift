@@ -558,6 +558,31 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    /// The dashboard's manual child order: the household's (family-wide) value
+    /// when we have one, else the device-local cache — so ordering works
+    /// instantly and offline, and before/without a synced household.
+    @Published private(set) var localChildOrder: [String] =
+        UserDefaults.standard.stringArray(forKey: "dashboard.childOrder") ?? []
+    var effectiveChildOrder: [String] {
+        if let hh = household?.childOrder, !hh.isEmpty { return hh }
+        return localChildOrder
+    }
+
+    /// PARENT: save the dashboard's manual child order (family-wide, so a
+    /// co-parent's dashboard matches). Applies locally at once for a snappy
+    /// drag-and-drop; the household listener echoes the same value back.
+    func setChildOrder(_ ids: [UUID]) {
+        let order = ids.map { $0.uuidString }
+        localChildOrder = order
+        UserDefaults.standard.set(order, forKey: "dashboard.childOrder")
+        household?.childOrder = order
+        #if canImport(FirebaseFirestore)
+        guard let hh = household else { return }
+        Task { try? await db.collection("households").document(hh.id)
+            .updateData(["childOrder": order]) }
+        #endif
+    }
+
     /// Save the family parent code (hash) to the household so every device shares it.
     func setHouseholdPIN(_ blob: String) {
         #if canImport(FirebaseFirestore)
