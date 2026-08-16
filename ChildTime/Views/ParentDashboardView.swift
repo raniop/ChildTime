@@ -821,7 +821,7 @@ struct ParentDashboardView: View {
                         if isChildPlayingNow(profile) {
                             HStack(spacing: 4) {
                                 Circle().fill(AppColor.successMint).frame(width: 7, height: 7)
-                                Text("מְשַׂחֵק עַכְשָׁיו")
+                                Text("בְּטוֹפִי עַכְשָׁיו")
                                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                             }
                             .foregroundStyle(.white)
@@ -870,7 +870,7 @@ struct ParentDashboardView: View {
                 statCell(emoji: "🎮",
                          value: activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"),
                          label: activeUnlockSecs > 0
-                            ? (profile.gender == .girl ? "משחקת עכשיו" : "משחק עכשיו")
+                            ? "זמן מסך פתוח"
                             : (profile.gender == .girl ? "דק' שהרוויחה" : "דק' שהרוויח"))
                 statCell(emoji: "💝",
                          value: giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—",
@@ -1235,9 +1235,13 @@ struct ParentDashboardView: View {
         guard !theRows.isEmpty else { return nil }
         func g(_ p: Profile, _ m: String, _ f: String) -> String { p.gender == .girl ? f : m }
 
-        // 1. Someone is playing right now.
+        // 1. Someone has a screen-time window OPEN right now (minutes burning).
+        if let win = theRows.first(where: { liveWindow($0.profile) != nil }) {
+            return "\(win.profile.name) \(g(win.profile, "פָּתַח", "פָּתְחָה")) זְמַן מָסָךְ עַכְשָׁיו 🎮"
+        }
+        // 1b. Someone is inside Tofy right now (learning).
         if let live = theRows.first(where: { isChildPlayingNow($0.profile) }) {
-            return "\(live.profile.name) \(g(live.profile, "מְשַׂחֵק", "מְשַׂחֶקֶת")) עַכְשָׁיו 🟢"
+            return "\(live.profile.name) בְּטוֹפִי עַכְשָׁיו — \(g(live.profile, "לוֹמֵד", "לוֹמֶדֶת")) 📚"
         }
         // 2. Best streak in the family (≥3 is worth celebrating).
         if let hot = theRows.max(by: { $0.snapshot.dayStreak < $1.snapshot.dayStreak }),
@@ -1288,10 +1292,10 @@ struct ParentDashboardView: View {
         // Gendered — we know each child's gender, so never "משחק/ת".
         let girl = profile.gender == .girl
         let text: String = {
-            if let live { return "\(girl ? "מְשַׂחֶקֶת" : "מְשַׂחֵק") עַכְשָׁיו · \(formatTime(live.secondsLeft))" }
+            if let live { return "🎮 זְמַן מָסָךְ פָּתוּחַ · \(formatTime(live.secondsLeft))" }
             if frozen > 0 { return "❄️ \((frozen + 59) / 60) דַּקּוֹת שְׁמוּרוֹת" }
             if isChildPlayingNow(profile) { return "בְּטוֹפִי עַכְשָׁיו · \(girl ? "לוֹמֶדֶת" : "לוֹמֵד") 📚" }
-            return girl ? "לֹא מְשַׂחֶקֶת כָּרֶגַע" : "לֹא מְשַׂחֵק כָּרֶגַע"
+            return "לֹא בְּטוֹפִי כָּרֶגַע"
         }()
         HStack(spacing: 6) {
             if live != nil { LivePulseDot() }
@@ -1325,12 +1329,12 @@ struct ParentDashboardView: View {
             HStack(spacing: 6) {
                 LivePulseDot()
                 if compact {
-                    Text("\(profile.gender == .girl ? "מְשַׂחֶקֶת" : "מְשַׂחֵק") עַכְשָׁיו · \(formatTime(live.secondsLeft))")
+                    Text("🎮 זְמַן מָסָךְ פָּתוּחַ · \(formatTime(live.secondsLeft))")
                         .font(.system(size: 11.5, weight: .heavy, design: .rounded))
                         .lineLimit(1).minimumScaleFactor(0.7)
                 } else {
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("\(profile.name) \(profile.gender == .girl ? "מְשַׂחֶקֶת" : "מְשַׂחֵק") עַכְשָׁיו \(deviceLabel)")
+                        Text("\(profile.name) \(profile.gender == .girl ? "פָּתְחָה" : "פָּתַח") זְמַן מָסָךְ \(deviceLabel) 🎮")
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                         Text("נִשְׁאֲרוּ \(formatTime(live.secondsLeft)) דַּקּוֹת · \(source)")
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
