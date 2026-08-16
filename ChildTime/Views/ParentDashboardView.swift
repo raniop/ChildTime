@@ -840,7 +840,17 @@ struct ParentDashboardView: View {
                 statCell(emoji: "🔥", value: "\(s.dayStreak)", label: "רצף ימים")
                 statCell(emoji: "⭐", value: s.stars.currencyShort, label: "כוכבים (דירוג)")
                 statCell(emoji: "💎", value: s.diamonds.currencyShort, label: "יהלומים (חנות)")
-                statCell(emoji: "🎮", value: activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"), label: "דק' זמינות")
+            }
+            // Minutes — the two pockets side by side, never blurred: what the
+            // child EARNED (or the live countdown of an open window) vs what
+            // the parent GAVE. Same split as the kid's own home screen.
+            HStack(spacing: 10) {
+                statCell(emoji: "🎮",
+                         value: activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"),
+                         label: activeUnlockSecs > 0 ? "משחק/ת עכשיו" : "דק' שהרוויח/ה")
+                statCell(emoji: "💝",
+                         value: giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—",
+                         label: "דק' מתנה מכם")
             }
 
             // (Friends are managed from the "⋯" menu — "חברים".)
@@ -950,7 +960,7 @@ struct ParentDashboardView: View {
 
             // Two clearly-separated pockets: what the child EARNED vs what the
             // parent GAVE. Give → gift pocket (💝). Take back → earned wallet.
-            let giftShown = max(0, (s.parentGiftMinutes ?? 0) + remote.pendingGifts[profile.id, default: 0])
+            let giftShown = giftShownFor(profile, s)
             HStack(spacing: 6) {
                 Image(systemName: "wallet.pass")
                     .foregroundStyle(.secondary)
@@ -1114,6 +1124,12 @@ struct ParentDashboardView: View {
                 HStack(spacing: 6) { miniStat("⏱", timeToday); miniStat("🎯", success) }
                 HStack(spacing: 6) { miniStat("⭐", s.stars.currencyShort); miniStat("💎", s.diamonds.currencyShort) }
                 HStack(spacing: 6) { miniStat("🎮", available); miniStat("🔥", "\(s.dayStreak)") }
+                // 💝 Parent gift pocket — kept apart from earned (🎮) even here.
+                HStack(spacing: 6) {
+                    let gift = giftShownFor(profile, s)
+                    miniStat("💝", gift > 0 ? "\(gift)" : "—")
+                    Color.clear.frame(maxWidth: .infinity).frame(height: 1)
+                }
             }
             .padding(.top, 4)
         }
@@ -1629,6 +1645,8 @@ struct ParentDashboardView: View {
                 return "יהלומים = הארנק של החנות. מרוויחים לאט יותר מכוכבים (בערך 1 לתשובה), ומוציאים אותם על דמויות ופריטים בחנות. יורדים כשקונים — זה תקין."
             case "🎮":
                 return "דקות משחק שהילד/ה הרוויח/ה מלמידה ועוד לא פתח/ה (הארנק המורווח). דקות שאתם נותנים (💝 מתנה) נשמרות בנפרד ולא נספרות כאן. כשיש חלון פתוח — רואים ספירה לאחור. \"—\" = אין דקות ממתינות."
+            case "💝":
+                return "דקות שאתם נתתם במתנה (הכפתור \"💝 +10 מתנה\") ועוד לא נפתחו. נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, לא כפופות לתקרה היומית, והילד/ה פותח/ת אותן בכפתור ורוד משלו במסך הבית."
             default:
                 return "נתון מסכם על הפעילות של הילד/ה בטופי."
             }
@@ -1699,6 +1717,12 @@ struct ParentDashboardView: View {
     /// one with state in memory). For non-active profiles we'd need to
     /// edit the snapshot directly — kept out of v1 to avoid stale-data
     /// races; the parent can switch to that profile first.
+    /// 💝 Gift pocket as the parent should see it: the synced value plus any
+    /// gift still in flight to the child's device (so a "+10" shows at once).
+    private func giftShownFor(_ profile: Profile, _ s: ProgressSnapshot) -> Int {
+        max(0, (s.parentGiftMinutes ?? 0) + remote.pendingGifts[profile.id, default: 0])
+    }
+
     /// 💝 Give minutes — into the child's separate GIFT pocket (never the earned
     /// wallet). Cloud delta-command; the child's device applies it.
     private func quickGift(profile: Profile, minutes: Int) {
