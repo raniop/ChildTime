@@ -208,9 +208,21 @@ struct ParentDashboardView: View {
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("מבט-על על המשפחה")
-                        .font(.system(size: 20, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
+                    // A personal hello instead of a static title: time-of-day
+                    // greeting + first name, and one live line that shows the app
+                    // actually knows this family (from real data, rotates on entry).
+                    VStack(spacing: 1) {
+                        Text(greetingLine)
+                            .font(.system(size: 19, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                        if let sub = familyMomentLine {
+                            Text(sub)
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.85))
+                                .lineLimit(1).minimumScaleFactor(0.7)
+                        }
+                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     if isRoot {
@@ -1189,6 +1201,56 @@ struct ParentDashboardView: View {
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Personal greeting (title area)
+
+    /// "בוקר טוב, רני ☀️" — time-of-day + the parent's first name (or a plain
+    /// hello for a guest / no name).
+    private var greetingLine: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        let (greet, emoji): (String, String) = {
+            switch hour {
+            case 5..<12:  return ("בֹּקֶר טוֹב", "☀️")
+            case 12..<17: return ("צָהֳרַיִם טוֹבִים", "🌤️")
+            case 17..<21: return ("עֶרֶב טוֹב", "🌆")
+            default:      return ("לַיְלָה טוֹב", "🌙")
+            }
+        }()
+        let first = (auth.displayName ?? "")
+            .split(separator: " ").first.map(String.init) ?? ""
+        return first.isEmpty ? "\(greet)! \(emoji)" : "\(greet), \(first) \(emoji)"
+    }
+
+    /// One short line from real family data — picked by priority so it's always
+    /// the most interesting true thing right now. nil when there are no kids.
+    private var familyMomentLine: String? {
+        let theRows = rows
+        guard !theRows.isEmpty else { return nil }
+        func g(_ p: Profile, _ m: String, _ f: String) -> String { p.gender == .girl ? f : m }
+
+        // 1. Someone is playing right now.
+        if let live = theRows.first(where: { isChildPlayingNow($0.profile) }) {
+            return "\(live.profile.name) \(g(live.profile, "מְשַׂחֵק", "מְשַׂחֶקֶת")) עַכְשָׁיו 🟢"
+        }
+        // 2. Best streak in the family (≥3 is worth celebrating).
+        if let hot = theRows.max(by: { $0.snapshot.dayStreak < $1.snapshot.dayStreak }),
+           hot.snapshot.dayStreak >= 3 {
+            return "\(hot.profile.name) בְּרֶצֶף שֶׁל \(hot.snapshot.dayStreak) יָמִים 🔥"
+        }
+        // 3. Family activity today.
+        let questions = theRows.reduce(0) { $0 + $1.snapshot.answeredToday }
+        let idle = theRows.filter { $0.snapshot.answeredToday == 0 }
+        if questions > 0, idle.count == 1, theRows.count > 1 {
+            let kid = idle[0].profile
+            return "\(kid.name) עוֹד לֹא \(g(kid, "שִׂחֵק", "שִׂחֲקָה")) הַיּוֹם — אוּלַי לְעוֹדֵד? 💛"
+        }
+        if questions > 0 {
+            return "הַמִּשְׁפָּחָה עָנְתָה עַל \(questions) שְׁאֵלוֹת הַיּוֹם 👏"
+        }
+        // 4. Quiet day.
+        let hour = Calendar.current.component(.hour, from: Date())
+        return hour < 12 ? "יוֹם חָדָשׁ, הַרְפַּתְקָאוֹת חֲדָשׁוֹת ✨" : "שֶׁקֶט הַיּוֹם — הַכֹּל בְּסֵדֶר 🌤️"
     }
 
     /// The children grid (pulled out of `body` — the type-checker choked on the
