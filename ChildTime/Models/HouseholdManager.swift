@@ -139,8 +139,15 @@ final class HouseholdManager: ObservableObject {
             try await ensureParentDoc(uid: uid, email: email, displayName: displayName)
             let hh = try await ensureHousehold(uid: uid)
             self.household = hh
-            listenToTombstones(in: hh.id)   // before reconcile, so deleted kids aren't re-pushed
-            reconcileLocalChildren(into: hh)
+            listenToTombstones(in: hh.id)
+            // Reconcile must not race the tombstone LISTENER (its first snapshot
+            // is async): fetch the tombstones NOW, drop those kids locally, and
+            // only then re-upload what's left. Otherwise a device that was closed
+            // during a delete on another device re-pushed the deleted child on
+            // its next launch — and every other device pulled the kid back.
+            let tombstoned = await fetchTombstonedChildIDs(in: hh.id)
+            for id in tombstoned { ProfileStore.shared.removeLocalOnly(id) }
+            reconcileLocalChildren(into: hh, skipping: tombstoned)
             listenToHousehold(hh.id)
             listenToChildren(in: hh.id); listenToChildDevices(in: hh.id)
         } catch {
@@ -432,6 +439,15 @@ final class HouseholdManager: ObservableObject {
         let record = ChildRecord(profile: profile, householdID: hh.id)
         Task {
             do {
+                // Second line of defense against resurrecting a deleted child
+                // (the single cloud write path for children): if a tombstone
+                // exists for this id, drop it locally instead of uploading.
+                let tomb = try? await db.collection("deletedChildren").document(record.id).getDocument()
+                if tomb?.exists == true {
+                    TofyLink("upsertChild: \(record.id.prefix(8)) is TOMBSTONED → dropping locally, not uploading")
+                    await MainActor.run { ProfileStore.shared.removeLocalOnly(profile.id) }
+                    return
+                }
                 try await db.collection("children").document(record.id).setData(Self.encode(record), merge: true)
                 try await db.collection("households").document(hh.id)
                     .updateData(["childIDs": FieldValue.arrayUnion([record.id])])
@@ -472,14 +488,25 @@ final class HouseholdManager: ObservableObject {
     /// a device that already has kids locally — e.g. the one they were created
     /// on — publish them so other devices on the household can pull them. Runs
     /// every sign-in; no-op on a fresh device (no local profiles yet).
-    private func reconcileLocalChildren(into hh: Household) {
+    private func reconcileLocalChildren(into hh: Household, skipping tombstoned: Set<UUID> = []) {
         // A child device binds to ONE existing child and must NEVER re-upload its
         // local profiles — that re-creates kids the parent just deleted (the dupes
         // that "kept coming back"). Only PARENT devices heal missing cloud records.
         guard ParentSettings.shared.deviceRole != .child else { return }
-        for profile in ProfileStore.shared.profiles {
+        for profile in ProfileStore.shared.profiles where !tombstoned.contains(profile.id) {
             upsertChild(profile)
         }
+    }
+
+    /// One-shot read of the household's tombstones (children deleted on ANY
+    /// device). Used at bootstrap so reconcile can't resurrect a deleted kid.
+    /// On a read error returns [] — the live tombstone listener still cleans up
+    /// after the fact (and the cloud `blockTombstonedChild` guard, once deployed).
+    private func fetchTombstonedChildIDs(in householdID: String) async -> Set<UUID> {
+        let snap = try? await db.collection("deletedChildren")
+            .whereField("householdID", isEqualTo: householdID)
+            .getDocuments()
+        return Set((snap?.documents ?? []).compactMap { UUID(uuidString: $0.documentID) })
     }
     #endif
 
