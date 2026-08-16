@@ -28,13 +28,20 @@ struct ParentSettingsView: View {
     @State private var deleting = false
     @State private var testPushMessage: String?
     @State private var removalNote: String?
+    @State private var requestingShield = false
 
     var body: some View {
         NavigationStack {
             Form {
                 premiumSection
                 dashboardSection
-                authorizationSection
+                // Screen Time authorization matters where apps get shielded (a
+                // child device / Kid Mode). On the parent's own monitoring phone
+                // it's noise — and an unfixable "only one app at a time" error
+                // there just alarms the parent. Show it only when relevant.
+                if settings.deviceRole != .parent || shields.isAuthorized {
+                    authorizationSection
+                }
                 syncSection
                 notificationsSection
                 rewardSection
@@ -224,10 +231,24 @@ struct ParentSettingsView: View {
                 }
                 Spacer()
                 if !shields.isAuthorized {
-                    Button("בקש") {
-                        Task { await shields.requestAuthorizationIfNeeded() }
+                    // Visible feedback: a spinner while Apple's prompt is up, and
+                    // a fresh error line if it fails again (so the tap never looks
+                    // like it "did nothing").
+                    Button {
+                        Task {
+                            requestingShield = true
+                            await shields.requestAuthorizationIfNeeded()
+                            requestingShield = false
+                        }
+                    } label: {
+                        if requestingShield {
+                            ProgressView().tint(.white)
+                        } else {
+                            Text(shields.authorizationError == nil ? "בקש" : "נסו שוב")
+                        }
                     }
                     .buttonStyle(.borderedProminent)
+                    .disabled(requestingShield)
                 }
             }
         }

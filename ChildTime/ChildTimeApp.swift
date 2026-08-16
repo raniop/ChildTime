@@ -149,7 +149,15 @@ struct ChildTimeApp: App {
                              : settings.deviceRole == .child ? "child" : "unset"
                     AppAnalytics.setUserProperty(role, "device_role")
                     AppAnalytics.setSubscribed(subs.isPremium)
-                    await shields.requestAuthorizationIfNeeded()
+                    // Screen Time (Family Controls) is only needed where apps get
+                    // shielded: a CHILD device. A parent's own phone must not be
+                    // prompted for it on every launch — the parent flows that DO
+                    // need it (Kid Mode, remote quick-open) request it themselves.
+                    if settings.deviceRole != .parent {
+                        await shields.requestAuthorizationIfNeeded()
+                    } else {
+                        shields.refreshStatus()
+                    }
                     progress.applyDailyRolloverIfNeeded()   // release minutes banked for "tomorrow"
                     enforceShieldStateIfNeeded()
                 }

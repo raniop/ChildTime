@@ -29,7 +29,7 @@ final class ShieldManager: ObservableObject {
         refreshStatus()
     }
 
-    private func refreshStatus() {
+    func refreshStatus() {
         let status = authCenter.authorizationStatus
         isAuthorized = (status == .approved)
         let text: String
@@ -57,8 +57,32 @@ final class ShieldManager: ObservableObject {
         } catch {
             refreshStatus()
             let nsErr = error as NSError
-            authorizationError = "\(nsErr.domain) #\(nsErr.code): \(error.localizedDescription)"
-            print("[ShieldManager] Auth FAILED: \(authorizationError ?? "?")")
+            authorizationError = Self.friendlyAuthError(nsErr)
+            print("[ShieldManager] Auth FAILED: \(nsErr.domain) #\(nsErr.code): \(error.localizedDescription)")
+        }
+    }
+
+    /// Turn Apple's raw FamilyControls errors into something a parent can act on.
+    /// The raw text ("FamilyControls.FamilyControlsError #4: ... only one
+    /// application at a time") is meaningless to a parent — and the fix is
+    /// usually in iOS Settings, not in Tofy.
+    static func friendlyAuthError(_ err: NSError) -> String {
+        guard err.domain.contains("FamilyControls") else {
+            return "לא הצלחנו לקבל את ההרשאה (\(err.localizedDescription))."
+        }
+        switch err.code {
+        case 4:   // authorizationConflict — another app already holds Family Controls
+            return "אפליקציה אחרת במכשיר כבר משתמשת ב-Screen Time (אפל מאפשרת אחת בלבד). הסירו אותה מ״הגדרות ← זמן מסך ← אפליקציות עם גישה״, ונסו שוב."
+        case 2:   // authorizationCanceled
+            return "האישור בוטל. נסו שוב ואשרו בחלון של אפל."
+        case 3:   // networkError
+            return "אין חיבור לאינטרנט. התחברו ונסו שוב."
+        case 5:   // invalidAccountType — child/Family Sharing account limits
+            return "החשבון במכשיר לא מאפשר את זה. ודאו שמחוברים עם Apple ID של הורה (לא של ילד)."
+        case 6:   // restricted — MDM / Screen Time restrictions
+            return "המכשיר מוגבל (זמן מסך / ניהול ארגוני). בטלו את ההגבלה ונסו שוב."
+        default:
+            return "אפל לא אישרה את ההרשאה (\(err.localizedDescription))."
         }
     }
 

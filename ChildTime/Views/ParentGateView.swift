@@ -370,6 +370,16 @@ struct ParentGateView<Content: View>: View {
         // otherwise a stale cached PIN would keep working forever after a change.
         let accepted = family != nil ? okFamily : okLocal
         if accepted {
+            // First successful ENTRY of the code on this device (e.g. a second
+            // parent device that received the family code) → offer Face ID right
+            // now, exactly like first-time creation does. Otherwise the parent
+            // only discovers the toggle later in Settings. Decide BEFORE we flip
+            // hasSetParentPIN, and only on a PARENT device (a kid's device must
+            // never enroll biometrics for the parent gate).
+            let firstEntryHere = !settings.hasSetParentPIN
+                && settings.deviceRole == .parent
+                && !settings.faceIDForParentGate
+                && PINManager.shared.biometryAvailable
             // Cache locally so next time (and Face ID) work on this device — and so
             // a refreshed family code overwrites any stale local one.
             if !okLocal { PINManager.shared.setPIN(entered) }
@@ -379,7 +389,17 @@ struct ParentGateView<Content: View>: View {
             if household.householdPIN == nil, let blob = PINManager.shared.storedBlob {
                 household.setHouseholdPIN(blob)
             }
-            grantAccess()
+            if firstEntryHere {
+                Haptic.success()
+                Task { @MainActor in
+                    let ok = await PINManager.shared.authenticateBiometric(
+                        reason: "הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID")
+                    if ok { settings.faceIDForParentGate = true }
+                    grantAccess()   // in either case — the code was right
+                }
+            } else {
+                grantAccess()
+            }
         } else {
             shake = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
