@@ -850,33 +850,37 @@ struct ParentDashboardView: View {
             // LIVE: an open play window right now — green, ticking, with the device.
             liveWindowBanner(profile, compact: false)
 
-            // Today at a glance.
-            HStack(spacing: 10) {
-                statCell(emoji: "⏱",
-                         value: cap.enabled ? "\(s.minutesEarnedToday)/\(cap.minutes)" : "\(s.minutesEarnedToday)",
-                         label: "זמן מסך היום")
-                statCell(emoji: "❓", value: "\(s.answeredToday)", label: "שאלות היום")
-                statCell(emoji: "🎯", value: s.answeredToday > 0 ? "\(Int(Double(s.correctToday) / Double(s.answeredToday) * 100))%" : "—", label: "הצלחה היום")
-            }
-            HStack(spacing: 10) {
-                statCell(emoji: "🔥", value: "\(s.dayStreak)", label: "רצף ימים")
-                statCell(emoji: "⭐", value: s.stars.currencyShort, label: "כוכבים (דירוג)")
-                statCell(emoji: "💎", value: s.diamonds.currencyShort, label: "יהלומים (חנות)")
-            }
-            // Minutes — the two pockets side by side, never blurred: what the
-            // child EARNED (or the live countdown of an open window) vs what
-            // the parent GAVE. Same split as the kid's own home screen.
-            HStack(spacing: 10) {
-                statCell(emoji: "🎮",
-                         value: activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"),
-                         label: liveWindow(profile) != nil
-                            ? "זמן מסך פתוח"
-                            : (activeUnlockSecs > 0
-                               ? "❄️ דק' שמורות"
-                               : (profile.gender == .girl ? "דק' שהרוויחה" : "דק' שהרוויח")))
-                statCell(emoji: "💝",
-                         value: giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—",
-                         label: "דק' מתנה מכם")
+            // Stats, grouped so the card reads top-down: TODAY → PLAY MINUTES →
+            // PROGRESS. Each group has a tiny caption; every cell stays tappable
+            // for its explanation.
+            VStack(alignment: .leading, spacing: 10) {
+                statGroup("הַיּוֹם") {
+                    statCell(emoji: "⏱",
+                             value: cap.enabled ? "\(s.minutesEarnedToday)/\(cap.minutes)" : "\(s.minutesEarnedToday)",
+                             label: "זמן מסך היום")
+                    statCell(emoji: "❓", value: "\(s.answeredToday)", label: "שאלות היום")
+                    statCell(emoji: "🎯", value: s.answeredToday > 0 ? "\(Int(Double(s.correctToday) / Double(s.answeredToday) * 100))%" : "—", label: "הצלחה היום")
+                }
+                // The two pockets side by side, never blurred: what the child
+                // EARNED (or the live countdown of an open window) vs what the
+                // parent GAVE. Same split as the kid's own home screen.
+                statGroup("דַּקּוֹת מִשְׂחָק") {
+                    statCell(emoji: "🎮",
+                             value: activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"),
+                             label: liveWindow(profile) != nil
+                                ? "זמן מסך פתוח"
+                                : (activeUnlockSecs > 0
+                                   ? "❄️ דק' שמורות"
+                                   : (profile.gender == .girl ? "דק' שהרוויחה" : "דק' שהרוויח")))
+                    statCell(emoji: "💝",
+                             value: giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—",
+                             label: "דק' מתנה מכם")
+                }
+                statGroup("הִתְקַדְּמוּת") {
+                    statCell(emoji: "🔥", value: "\(s.dayStreak)", label: "רצף ימים")
+                    statCell(emoji: "⭐", value: s.stars.currencyShort, label: "כוכבים (דירוג)")
+                    statCell(emoji: "💎", value: s.diamonds.currencyShort, label: "יהלומים (חנות)")
+                }
             }
 
             // (Friends are managed from the "⋯" menu — "חברים".)
@@ -1331,7 +1335,10 @@ struct ParentDashboardView: View {
         if let live = liveWindow(profile) {
             let deviceLabel = live.device.kind == "ipad" ? "בָּאַיְפֵּד" : (live.device.kind == "iphone" ? "בָּאַיְפוֹן" : "בַּמַּכְשִׁיר")
             let source = live.isManual ? "זְמַן שֶׁנָּתַתֶּם" : (profile.gender == .girl ? "זְמַן שֶׁהִרְוִיחָה" : "זְמַן שֶׁהִרְוִיחַ")
-            HStack(spacing: 6) {
+            // Authored RTL explicitly (the detail card is forced LTR): the pulse
+            // dot leads on the RIGHT, Hebrew text is right-aligned, device icon
+            // trails on the LEFT.
+            HStack(spacing: 8) {
                 LivePulseDot()
                 if compact {
                     Text("🎮 זְמַן מָסָךְ פָּתוּחַ · \(formatTime(live.secondsLeft))")
@@ -1346,11 +1353,13 @@ struct ParentDashboardView: View {
                             .opacity(0.9)
                             .monospacedDigit()
                     }
-                    Spacer()
+                    .multilineTextAlignment(.leading)
+                    Spacer(minLength: 0)
                     Image(systemName: live.device.sfSymbol)
                         .font(.system(size: 18, weight: .semibold))
                 }
             }
+            .environment(\.layoutDirection, .rightToLeft)
             .foregroundStyle(.white)
             .padding(.horizontal, compact ? 8 : 12)
             .padding(.vertical, compact ? 5 : 9)
@@ -1885,11 +1894,30 @@ struct ParentDashboardView: View {
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                    .fill(Color(.systemBackground).opacity(0.6))
+                    .fill(Color(.systemBackground))
+                    .shadow(color: .black.opacity(0.05), radius: 3, y: 1)
             )
         }
         .buttonStyle(.plain)
         .foregroundStyle(.primary)
+    }
+
+    /// A captioned row of stat cells — the caption sits on the RIGHT (Hebrew)
+    /// above the row, so the three groups on the card read as sections.
+    private func statGroup<Content: View>(_ title: String, @ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .trailing, spacing: 6) {
+            Text(title)
+                .font(.system(size: 11.5, weight: .heavy, design: .rounded))
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.trailing, 4)
+            HStack(spacing: 8) { content() }
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
     }
 
     /// Which stat the parent tapped for an explanation.
