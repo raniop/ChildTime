@@ -1377,7 +1377,7 @@ struct ParentDashboardView: View {
         // Presented from either menu (root grid ⋯ / detail ⋯).
         .alert(
             revokeGiftProfile.map { "לִנְעֹל וּלְאַפֵּס אֶת דַּקּוֹת הַמַּתָּנָה שֶׁל \($0.name)?" } ?? "",
-            isPresented: Binding(get: { revokeGiftProfile != nil },
+            isPresented: Binding(get: { revokeGiftProfile != nil && navPath.isEmpty },
                                  set: { if !$0 { revokeGiftProfile = nil } }),
             presenting: revokeGiftProfile
         ) { p in
@@ -1557,6 +1557,22 @@ struct ParentDashboardView: View {
                 Button("בטל", role: .cancel) { deletingProfile = nil }
             } message: { _ in
                 Text("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק.")
+            }
+            // "Lock + revoke gift" confirmation on the DETAIL page (dialogs must sit
+            // on the visible page — on the root it only appeared after popping back).
+            .alert(
+                revokeGiftProfile.map { "לִנְעֹל וּלְאַפֵּס אֶת דַּקּוֹת הַמַּתָּנָה שֶׁל \($0.name)?" } ?? "",
+                isPresented: Binding(get: { revokeGiftProfile != nil && !navPath.isEmpty },
+                                     set: { if !$0 { revokeGiftProfile = nil } }),
+                presenting: revokeGiftProfile
+            ) { p in
+                Button("נְעַל וְאַפֵּס", role: .destructive) {
+                    lockAndRevokeGift(p)
+                    revokeGiftProfile = nil
+                }
+                Button("בַּטֵּל", role: .cancel) { revokeGiftProfile = nil }
+            } message: { p in
+                Text(revokeGiftMessage(p))
             }
             // Remote screen-time confirmation — also on the detail page so it shows
             // immediately where the parent tapped, not only after popping back.

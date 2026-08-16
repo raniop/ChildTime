@@ -219,7 +219,7 @@ final class RemoteSyncManager: ObservableObject {
         let id = childID.uuidString
         // 1. Command for the child's device (works even if it's offline now).
         db.collection("children").document(id)
-            .setData(["resetRequestedAt": FieldValue.serverTimestamp()], merge: true)
+            .setData(["resetRequestedAt": Date().timeIntervalSince1970], merge: true)
         // 2. Immediate cloud state overwrite so every monitor shows zeros now.
         let ref = db.collection("children").document(id)
             .collection("state").document("current")
@@ -251,8 +251,11 @@ final class RemoteSyncManager: ObservableObject {
     /// lock itself is sent separately via HouseholdManager.lockRemoteScreenTime.
     func revokeChildGift(childID: UUID) {
         #if canImport(FirebaseFirestore)
+        // Plain unix-seconds stamp — NOT FieldValue.serverTimestamp(): a
+        // FIRTimestamp on the child doc is a known decoding hazard here (see
+        // removeChildDevice), and a plain Double is enough for a one-shot command.
         db.collection("children").document(childID.uuidString)
-            .setData(["revokeGiftAt": FieldValue.serverTimestamp()], merge: true)
+            .setData(["revokeGiftAt": Date().timeIntervalSince1970], merge: true)
         // Optimistic local mirror so the parent's 💝 tile drops to 0 at once.
         pendingGifts.removeValue(forKey: childID)
         if var snap = remoteSnapshots[childID] {
@@ -501,6 +504,9 @@ final class RemoteSyncManager: ObservableObject {
                         self.applyPendingReset(childID: profile.id)
                     }
                     let revokeRequested = doc?.data()?["revokeGiftAt"] != nil
+                    if revokeRequested {
+                        TofyLink("childDoc \(id.prefix(8)): revokeGiftAt present; bound=\(isBoundChildDevice) kidMode=\(isKidModeForThis) role=\(s.deviceRole) joined=\(s.joinedChildID?.prefix(8) ?? "nil")")
+                    }
                     if revokeRequested && (isBoundChildDevice || isKidModeForThis) {
                         self.applyPendingGiftRevoke(childID: profile.id)
                     }
