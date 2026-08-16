@@ -46,6 +46,24 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         print("[Push] APNs registration failed: \(error.localizedDescription)")
     }
 
+    /// SILENT push ("wake"): a parent issued a command (±minutes, gift, reset,
+    /// revoke, remote lock/unlock). The Firestore listeners are already attached
+    /// on a child device — we just need the app to be AWAKE for a few seconds so
+    /// they fire and the command applies (a backgrounded app otherwise only
+    /// caught up when the kid reopened Tofy — useless for a remote LOCK).
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        let type = userInfo["type"] as? String ?? ""
+        guard type == "wake" else { completionHandler(.noData); return }
+        Task { @MainActor in
+            TofyLink("silent wake push (\(userInfo["reason"] as? String ?? "")) — letting listeners drain")
+            // Firestore delivers pending snapshots on wake; give them a moment.
+            try? await Task.sleep(nanoseconds: 4_000_000_000)
+            completionHandler(.newData)
+        }
+    }
+
     // Home-screen Quick Action ("מצב ילד") while the app is already running.
     func application(_ application: UIApplication,
                      performActionFor shortcutItem: UIApplicationShortcutItem,

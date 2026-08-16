@@ -210,6 +210,56 @@ exports.blockTombstonedChild = onDocumentCreated("children/{childID}", async (ev
   }
 });
 
+// ---- 1a) Wake the child's device for a parent command -----------------------
+// Parent commands (±minutes, gift, reset, revoke, remote lock/unlock) are written
+// to Firestore and consumed by the child's device listener — but a BACKGROUNDED
+// app never sees the write until the kid reopens Tofy. For a remote LOCK that's
+// exactly the wrong moment. So: on any command write, send a SILENT push
+// (content-available) to the household's child devices; iOS wakes the app for a
+// few seconds, the listener fires, the command applies. No banner, no sound.
+const COMMAND_FIELDS_CHILD = ["pendingMinuteAdjustment", "pendingGiftAdjustment", "resetRequestedAt", "revokeGiftAt"];
+const COMMAND_FIELDS_DEVICE = ["remoteLockAt", "remoteUnlockAt"];
+
+function commandChanged(before, after, fields) {
+  return fields.some((f) => {
+    const a = after ? after[f] : undefined, b = before ? before[f] : undefined;
+    if (a === undefined || a === null) return false;      // cleared/consumed → not a new command
+    if (typeof a === "number" && a === 0) return false;    // zeroed → consumed
+    return a !== b;
+  });
+}
+
+async function wakeChildDevices(householdID, reason) {
+  if (!householdID) return;
+  const tokens = await childTokensForHousehold(householdID);
+  if (!tokens.length) return;
+  try {
+    const res = await admin.messaging().sendEachForMulticast({
+      tokens,
+      data: { type: "wake", reason: String(reason || "") },
+      apns: { headers: { "apns-priority": "5", "apns-push-type": "background" },
+              payload: { aps: { "content-available": 1 } } },
+    });
+    console.log("[wake]", reason, "sent", res.successCount, "/", tokens.length);
+  } catch (e) { console.error("[wake] failed", e && e.message); }
+}
+
+exports.wakeOnChildCommand = onDocumentWritten("children/{childID}", async (event) => {
+  const before = event.data.before.exists ? event.data.before.data() : null;
+  const after = event.data.after.exists ? event.data.after.data() : null;
+  if (!after) return;
+  if (!commandChanged(before, after, COMMAND_FIELDS_CHILD)) return;
+  await wakeChildDevices(after.householdID, "child-command");
+});
+
+exports.wakeOnDeviceCommand = onDocumentWritten("childDevices/{id}", async (event) => {
+  const before = event.data.before.exists ? event.data.before.data() : null;
+  const after = event.data.after.exists ? event.data.after.data() : null;
+  if (!after) return;
+  if (!commandChanged(before, after, COMMAND_FIELDS_DEVICE)) return;
+  await wakeChildDevices(after.householdID, "device-command");
+});
+
 // ---- 1b) Live friends-quiz invite ------------------------------------------
 // A child started a live quiz and invited their friends. Push each invited
 // friend's device so they can jump in. We can't read tokens by childID directly
