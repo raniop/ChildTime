@@ -1297,6 +1297,18 @@ final class ProgressStore: ObservableObject {
                                    characterName: ProfileStore.shared.active?.character.name ?? "")
     }
 
+    /// Add minutes to the CURRENTLY open window (keeps its manual/earned kind).
+    /// Used when the gift pocket is opened together with resumed frozen time.
+    func extendUnlock(minutes: Int) {
+        guard minutes > 0, let end = unlockEndsAt, end > Date() else {
+            startUnlock(minutes: minutes, manual: true); return
+        }
+        let newEnd = end.addingTimeInterval(TimeInterval(minutes * 60))
+        unlockEndsAt = newEnd
+        PlayTimeLiveActivity.start(endsAt: newEnd,
+                                   characterName: ProfileStore.shared.active?.character.name ?? "")
+    }
+
     func endUnlock() {
         unlockEndsAt = nil
         unlockIsManual = false

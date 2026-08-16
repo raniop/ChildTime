@@ -1956,7 +1956,7 @@ struct ParentDashboardView: View {
             case "🎮":
                 return "דקות משחק שהילד/ה הרוויח/ה מלמידה ועוד לא פתח/ה (הארנק המורווח). דקות שאתם נותנים (💝 מתנה) נשמרות בנפרד ולא נספרות כאן. כשיש חלון פתוח — רואים ספירה לאחור. \"—\" = אין דקות ממתינות."
             case "💝":
-                return "דקות שאתם נתתם במתנה (הכפתור \"💝 +10 מתנה\") ועוד לא נפתחו. נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, לא כפופות לתקרה היומית, והילד/ה פותח/ת אותן בכפתור ורוד משלו במסך הבית."
+                return "דקות שאתם נתתם (הכפתור \"💝 +10 מתנה\", פתיחה מרחוק, או ❄️ שארית שהילד/ה הקפיא/ה מחלון שנתתם) ועוד לא נפתחו. נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, לא כפופות לתקרה היומית, ונפתחות בכפתור ורוד אחד במסך הבית."
             default:
                 return "נתון מסכם על הפעילות של הילד/ה בטופי."
             }
@@ -2030,7 +2030,12 @@ struct ParentDashboardView: View {
     /// 💝 Gift pocket as the parent should see it: the synced value plus any
     /// gift still in flight to the child's device (so a "+10" shows at once).
     private func giftShownFor(_ profile: Profile, _ s: ProgressSnapshot) -> Int {
-        max(0, (s.parentGiftMinutes ?? 0) + remote.pendingGifts[profile.id, default: 0])
+        // Frozen leftover of an earlier parent window is parent time too — the
+        // kid's 💝 button opens both together, so the parent's tile matches.
+        let frozenSecs = (household.devicesByChild[profile.id.uuidString] ?? [])
+            .compactMap { $0.frozenSeconds }.max() ?? 0
+        let frozenMin = (frozenSecs + 59) / 60
+        return max(0, (s.parentGiftMinutes ?? 0) + remote.pendingGifts[profile.id, default: 0] + frozenMin)
     }
 
     /// 💝 Give minutes — into the child's separate GIFT pocket (never the earned

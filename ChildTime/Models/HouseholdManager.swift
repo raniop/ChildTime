@@ -388,6 +388,24 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    /// CHILD device: is one of THIS child's OTHER devices reporting an open play
+    /// window right now? Prevents the classic double-spend — the kid opens 30
+    /// minutes on the iPad, the iPhone hasn't synced the drained wallet yet, and
+    /// opens the same 30 again. The window itself stays per-device (it shields
+    /// apps on ONE device), but the fact that it exists is family-wide.
+    /// Returns (device, secondsLeft) for the freshest open window elsewhere.
+    func otherDeviceOpenWindow(forChildID childID: UUID) -> (device: ChildDevice, secondsLeft: Int)? {
+        let mine = DeviceIdentity.installID
+        let now = Date().timeIntervalSince1970
+        let others = (devicesByChild[childID.uuidString] ?? [])
+            .filter { $0.deviceID != mine }
+            .compactMap { d -> (ChildDevice, Int)? in
+                guard let end = d.windowEndsAt, end > now else { return nil }
+                return (d, Int(end - now))
+            }
+        return others.max(by: { $0.1 < $1.1 })
+    }
+
     private var timeStateCancellables = Set<AnyCancellable>()
 
     /// CHILD device: keep this device's `childDevices` doc updated with the ACTUAL

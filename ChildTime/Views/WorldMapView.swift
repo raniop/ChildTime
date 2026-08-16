@@ -6,6 +6,7 @@ struct WorldMapView: View {
     @EnvironmentObject var shields: ShieldManager
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var subs: SubscriptionManager
+    @ObservedObject private var household = HouseholdManager.shared
     @Environment(\.horizontalSizeClass) private var hsc
 
     @ObservedObject private var friends = FriendsManager.shared
@@ -1122,42 +1123,17 @@ struct WorldMapView: View {
             // DailyGiftBeacon) instead of a full-width bottom button. Every world
             // & Smart Adventure earns minutes, so the only bottom CTA left is the
             // "redeem my minutes" button below.
-            // Frozen manual time the child paused earlier — let them resume it so a
-            // parent's grant is never wasted. Shown above the earn/redeem CTA.
-            if progress.hasPausedManualTime {
-                Button {
-                    requestUnlock { resumeManual() }
-                } label: {
-                    HStack(spacing: 10) {
-                        Text("❄️").font(.system(size: 22))
-                        Text("הַמְשֵׁךְ זְמַן מָסָךְ · \(progress.pausedManualMinutes) דַּקּוֹת שְׁמוּרוֹת")
-                            .font(.system(size: 20, weight: .heavy, design: .rounded))
-                            .minimumScaleFactor(0.7).lineLimit(1)
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, AppSpacing.xl)
-                    .padding(.vertical, 16)
-                    .frame(maxWidth: .infinity)
-                    .background(LinearGradient(colors: [Color(hex: "5B6CFF"), Color(hex: "06D6A0")],
-                                               startPoint: .leading, endPoint: .trailing))
-                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    .glow(Color(hex: "5B6CFF"), radius: 16)
-                }
-                .buttonStyle(.juicy)
-                .frame(maxWidth: 480)
-                .padding(.bottom, 6)
-            }
-
-            // 💝 A parent's GIFT minutes — its own button, its own pocket, so the
-            // kid always sees "I earned X" and "mom gave Y" as two things. Opens
-            // as a fixed manual window (not capped by the daily limit).
-            if progress.parentGiftMinutes > 0 && !progress.isUnlocked {
+            // 💝 ONE button for everything the PARENTS gave: the gift pocket plus
+            // any frozen leftover of an earlier parent window (the kid tapped "עצור
+            // ושמור"). Both are parent time — never blurred with earned minutes.
+            // Opens both together as one fixed manual window (outside the cap).
+            if (progress.parentGiftMinutes > 0 || progress.hasPausedManualTime) && !progress.isUnlocked {
                 Button {
                     requestUnlock { redeemGift() }
                 } label: {
                     HStack(spacing: 10) {
                         Text("💝").font(.system(size: 22))
-                        Text("מַתָּנָה מֵהַהוֹרִים · \(progress.parentGiftMinutes) דַּקּוֹת")
+                        Text(giftButtonTitle)
                             .font(.system(size: 20, weight: .heavy, design: .rounded))
                             .minimumScaleFactor(0.7).lineLimit(1)
                     }
@@ -1175,6 +1151,13 @@ struct WorldMapView: View {
                 .padding(.bottom, 6)
             }
 
+            // Another device of THIS child has the window open — say so instead of
+            // showing a "redeem" button that would be refused on tap.
+            if let other = household.otherDeviceOpenWindow(forChildID: profiles.activeID ?? UUID()) {
+                let mins = max(1, (other.secondsLeft + 59) / 60)
+                let where_ = other.device.kind == "ipad" ? "בָּאַיְפֵּד" : (other.device.kind == "iphone" ? "בָּאַיְפוֹן" : "בְּמַכְשִׁיר אַחֵר")
+                bottomHint("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו \(where_) — עוֹד \(mins) דַּקּוֹת")
+            } else
             if progress.canRedeemNow {
                 Button {
                     requestUnlock { redeemMinutes() }
@@ -1269,7 +1252,18 @@ struct WorldMapView: View {
     /// Run `action` immediately when the child has no protection code, otherwise
     /// hold it and ask for the code first.
     private func requestUnlock(_ action: @escaping () -> Void) {
-        guard let p = profiles.active, p.hasPlayPIN else { action(); return }
+        guard let p = profiles.active else { return }
+        // Family-wide double-spend guard: if THIS child's OTHER device already has
+        // a play window open, don't open a second one here (the wallet drain
+        // may not have synced yet — that's how 30 minutes became 60).
+        if let other = HouseholdManager.shared.otherDeviceOpenWindow(forChildID: p.id) {
+            let mins = max(1, (other.secondsLeft + 59) / 60)
+            let where_ = other.device.kind == "ipad" ? "בָּאַיְפֵּד" : (other.device.kind == "iphone" ? "בָּאַיְפוֹן" : "בְּמַכְשִׁיר אַחֵר")
+            Haptic.warning()
+            companion.console("הַזְּמַן שֶׁלְּךָ כְּבָר פָּתוּחַ \(where_) — עוֹד \(mins) דַּקּוֹת 🎮")
+            return
+        }
+        guard p.hasPlayPIN else { action(); return }
         pendingUnlockAction = action
         playPINSheet = .verifyUnlock
     }
@@ -1399,14 +1393,31 @@ struct WorldMapView: View {
         LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes])
     }
 
-    /// 💝 Open the parent's gift pocket as one fixed manual window (like a remote
-    /// grant): outside the daily cap, leftover freezes on stop-and-save.
+    /// "מַתָּנָה מֵהַהוֹרִים · 10 דַּקּוֹת + ❄️ 8 שְׁמוּרוֹת" — whatever parts exist.
+    private var giftButtonTitle: String {
+        let gift = progress.parentGiftMinutes
+        let frozen = progress.pausedManualMinutes
+        var parts: [String] = []
+        if gift > 0 { parts.append("\(gift) דַּקּוֹת") }
+        if frozen > 0 { parts.append("❄️ \(frozen) שְׁמוּרוֹת") }
+        return "מַתָּנָה מֵהַהוֹרִים · " + parts.joined(separator: " + ")
+    }
+
+    /// 💝 Open ALL parent time as one fixed manual window: the gift pocket plus
+    /// any frozen leftover. Outside the daily cap; leftover freezes again on
+    /// stop-and-save (so nothing a parent gave is ever wasted).
     private func redeemGift() {
-        let minutes = progress.consumeParentGiftForUnlock()
-        guard minutes > 0 else { return }
-        shields.unlock(minutes: minutes)
-        progress.startUnlock(minutes: minutes, manual: true)
-        LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes, "gift": true])
+        let gift = progress.consumeParentGiftForUnlock()
+        // Frozen seconds resume as their own manual window; fold the gift on top.
+        let frozenMinutes = progress.hasPausedManualTime ? progress.resumeManualUnlock() : 0
+        let total = gift + frozenMinutes
+        guard total > 0 else { return }
+        if gift > 0 {
+            if frozenMinutes > 0 { progress.extendUnlock(minutes: gift) }
+            else { progress.startUnlock(minutes: gift, manual: true) }
+        }
+        shields.unlock(minutes: total)
+        LiveEventReporter.report(.screenTimeStart, extra: ["minutes": total, "gift": true])
     }
 
     /// Resume the frozen leftover of a parent's manual grant (reopens the shield +
