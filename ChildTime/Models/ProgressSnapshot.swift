@@ -70,6 +70,12 @@ struct ProgressSnapshot: Codable, Equatable {
     /// Characters this child has bought (ids from Character3DCatalog). Synced so
     /// the kid's collection follows them — e.g. into Kid Mode on a parent's phone.
     var ownedCharacterIDs: [String] = []
+    /// 💝 Minutes a PARENT gave (the "+10" buttons) — a separate pocket from the
+    /// earned wallet `pendingMinutes`, so "you earned 30" and "mom gave 10" never
+    /// blur together. Not subject to the child's daily cap (a parent's gift is the
+    /// parent's decision). Opened as a fixed `manual` window, like a remote grant.
+    /// LWW like pendingMinutes. Optional so older snapshots decode (nil → 0).
+    var parentGiftMinutes: Int? = nil
     /// Bumped each time the device writes the snapshot — Firestore listeners
     /// use this to skip echoes of their own writes.
     var revision: Int = 0
@@ -112,7 +118,7 @@ extension ProgressSnapshot {
         case answeredToday, correctToday, carryOverMinutes, bestStreak, cycleSeconds
         case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
         case hourlyAnswered, hourlyCorrect
-        case wheelProgressCount, recoveryPot, ownedCharacterIDs
+        case wheelProgressCount, recoveryPot, ownedCharacterIDs, parentGiftMinutes
         case revision, lastModifiedAt, deviceID
     }
     private enum LegacyCodingKeys: String, CodingKey { case gems }
@@ -164,6 +170,7 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .wheelProgressCount)) ?? nil { wheelProgressCount = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .recoveryPot)) ?? nil { recoveryPot = v }
         if let v = (try? c.decodeIfPresent([String].self, forKey: .ownedCharacterIDs)) ?? nil { ownedCharacterIDs = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .parentGiftMinutes)) ?? nil { parentGiftMinutes = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .revision)) ?? nil { revision = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastModifiedAt)) ?? nil { lastModifiedAt = v }
         if let v = (try? c.decodeIfPresent(String.self, forKey: .deviceID)) ?? nil { deviceID = v }

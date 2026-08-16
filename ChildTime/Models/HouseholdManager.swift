@@ -692,7 +692,11 @@ final class HouseholdManager: ObservableObject {
         guard at > last, now - at < Self.remoteUnlockFreshness else { return }   // unseen + fresh
         UserDefaults.standard.set(at, forKey: lastRemoteLockKey)
         Task { @MainActor in
-            ProgressStore.shared.endUnlock()          // close the play window
+            // Close the window but SAVE the leftover — a remote lock is "not
+            // now", not a punishment: earned minutes bank back to the child's
+            // wallet, a parent gift/grant freezes for later. (endUnlock() alone
+            // silently burned whatever was left.)
+            ProgressStore.shared.stopAndSaveCurrentUnlock()
             ShieldManager.shared.cancelScheduledReshield()
             ShieldManager.shared.applyDefaultLock()    // re-lock now
             Haptic.warning()

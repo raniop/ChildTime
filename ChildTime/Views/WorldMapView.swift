@@ -1148,6 +1148,33 @@ struct WorldMapView: View {
                 .padding(.bottom, 6)
             }
 
+            // 💝 A parent's GIFT minutes — its own button, its own pocket, so the
+            // kid always sees "I earned X" and "mom gave Y" as two things. Opens
+            // as a fixed manual window (not capped by the daily limit).
+            if progress.parentGiftMinutes > 0 && !progress.isUnlocked {
+                Button {
+                    requestUnlock { redeemGift() }
+                } label: {
+                    HStack(spacing: 10) {
+                        Text("💝").font(.system(size: 22))
+                        Text("מַתָּנָה מֵהַהוֹרִים · \(progress.parentGiftMinutes) דַּקּוֹת")
+                            .font(.system(size: 20, weight: .heavy, design: .rounded))
+                            .minimumScaleFactor(0.7).lineLimit(1)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, AppSpacing.xl)
+                    .padding(.vertical, 16)
+                    .frame(maxWidth: .infinity)
+                    .background(LinearGradient(colors: [Color(hex: "FF6FAE"), Color(hex: "FFB347")],
+                                               startPoint: .leading, endPoint: .trailing))
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .glow(Color(hex: "FF6FAE"), radius: 16)
+                }
+                .buttonStyle(.juicy)
+                .frame(maxWidth: 480)
+                .padding(.bottom, 6)
+            }
+
             if progress.canRedeemNow {
                 Button {
                     requestUnlock { redeemMinutes() }
@@ -1370,6 +1397,16 @@ struct WorldMapView: View {
         LearningHistoryStore.shared.recordMinutesUsed(minutes)
         // Tell the parent the child just opened screen time (+ how many minutes).
         LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes])
+    }
+
+    /// 💝 Open the parent's gift pocket as one fixed manual window (like a remote
+    /// grant): outside the daily cap, leftover freezes on stop-and-save.
+    private func redeemGift() {
+        let minutes = progress.consumeParentGiftForUnlock()
+        guard minutes > 0 else { return }
+        shields.unlock(minutes: minutes)
+        progress.startUnlock(minutes: minutes, manual: true)
+        LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes, "gift": true])
     }
 
     /// Resume the frozen leftover of a parent's manual grant (reopens the shield +

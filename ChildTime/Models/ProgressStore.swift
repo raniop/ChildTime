@@ -52,6 +52,7 @@ final class ProgressStore: ObservableObject {
         static let pendingBonusWheel = "pendingBonusWheel"
         static let lastComebackWheelAt = "lastComebackWheelAt"
         static let recoveryPot = "recoveryPot"
+        static let parentGiftMinutes = "parentGiftMinutes"
         static let revision = "progress.revision"
         static let lastModifiedAt = "progress.lastModifiedAt"
     }
@@ -344,6 +345,12 @@ final class ProgressStore: ObservableObject {
     /// Set to a positive value for one tick when the recovery loop refunds time,
     /// so the UI can celebrate. Consumers reset to 0 after reading.
     @Published var lastRecoveredMinutes: Int = 0
+    /// 💝 Minutes a parent GAVE (dashboard "+10"). A separate pocket from the
+    /// earned wallet `pendingMinutes` — never mixed: shown apart, opened apart
+    /// (as a fixed `manual` window), and NOT counted against the daily cap.
+    @Published private(set) var parentGiftMinutes: Int {
+        didSet { defaults.set(parentGiftMinutes, forKey: Key.parentGiftMinutes) }
+    }
 
     // MARK: - Sync versioning
 
@@ -420,6 +427,7 @@ final class ProgressStore: ObservableObject {
         self.pendingBonusWheel = d.bool(forKey: Key.pendingBonusWheel)
         self.lastComebackWheelAt = d.object(forKey: Key.lastComebackWheelAt) as? Date
         self.recoveryPot = d.integer(forKey: Key.recoveryPot)
+        self.parentGiftMinutes = d.integer(forKey: Key.parentGiftMinutes)
 
         self.revision = d.integer(forKey: Key.revision)
         self.lastModifiedAt = (d.object(forKey: Key.lastModifiedAt) as? Date) ?? .distantPast
@@ -898,6 +906,7 @@ final class ProgressStore: ObservableObject {
     func seedForDemo() {
         stars = 213
         pendingMinutes = 12
+        parentGiftMinutes = 10        // 💝 a parent gift, shown apart from earned
         cycleSeconds = 144            // 6/10 toward the 4-min bonus
         currentStreak = 5
         bestStreak = 9
@@ -1252,6 +1261,27 @@ final class ProgressStore: ObservableObject {
         pendingMinutes = max(0, pendingMinutes + delta)
     }
 
+    // MARK: - 💝 Parent gift pocket (separate from the earned wallet)
+
+    /// A parent's "+N" gift (or "−N" taken back from the gift pocket). Clamped ≥0.
+    /// Never touches `pendingMinutes` — the earned wallet stays the child's own.
+    func addParentGiftMinutes(_ delta: Int) {
+        guard delta != 0 else { return }
+        parentGiftMinutes = max(0, parentGiftMinutes + delta)
+    }
+
+    /// Child opens the whole gift pocket as ONE fixed `manual` window (like a
+    /// remote grant): not capped by the daily limit, and its leftover freezes
+    /// on stop-and-save (`pauseManualUnlock`) rather than banking to the wallet.
+    /// Returns the minutes opened (0 = nothing to open).
+    @discardableResult
+    func consumeParentGiftForUnlock() -> Int {
+        let amount = parentGiftMinutes
+        guard amount > 0 else { return 0 }
+        parentGiftMinutes = 0
+        return amount
+    }
+
     func startUnlock(minutes: Int, manual: Bool = false) {
         // Fold any banked sub-minute carry into a real (non-manual) window so the
         // kid resumes at the exact leftover (e.g. 58 min wallet + 50 s carry →
@@ -1454,6 +1484,7 @@ final class ProgressStore: ObservableObject {
         s.topicAdaptiveLevel  = topicAdaptiveLevel
         s.wheelProgressCount  = wheelProgressCount
         s.recoveryPot         = recoveryPot
+        s.parentGiftMinutes   = parentGiftMinutes
         s.ownedCharacterIDs   = Array(ownedCharacterIDs)
         // Carry the REAL version forward. Stamping `.now` here (the old bug) made
         // every capture look freshly-modified, so a remote snapshot's older
@@ -1512,6 +1543,7 @@ final class ProgressStore: ObservableObject {
         topicAdaptiveLevel  = s.topicAdaptiveLevel ?? [:]
         wheelProgressCount  = s.wheelProgressCount
         recoveryPot         = s.recoveryPot
+        parentGiftMinutes   = s.parentGiftMinutes ?? 0
         // Replace (not union) — apply() also runs on profile switch, so merging
         // would leak one child's characters onto another. Revision/lastModified
         // ordering in the sync layer already keeps the newest set.

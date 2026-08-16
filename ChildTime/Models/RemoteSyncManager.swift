@@ -47,10 +47,15 @@ final class RemoteSyncManager: ObservableObject {
     /// The dashboard adds this to the shown balance so a +10/-5 reflects instantly
     /// and doesn't "revert" while it's in flight.
     @Published private(set) var pendingAdjustments: [UUID: Int] = [:]
+    /// 💝 Parent GIFT minutes still in flight to the child's device (the
+    /// `pendingGiftAdjustment` field). Shown by the dashboard on top of the
+    /// synced gift pocket.
+    @Published private(set) var pendingGifts: [UUID: Int] = [:]
 
     private var cancellables: Set<AnyCancellable> = []
     private var saveDebounce: Task<Void, Never>? = nil
     private var applyingGrant = false
+    private var applyingGift = false
 
     #if canImport(FirebaseFirestore)
     private var db: Firestore { Firestore.firestore() }
@@ -159,6 +164,38 @@ final class RemoteSyncManager: ObservableObject {
         pendingAdjustments[childID, default: 0] += deltaMinutes
         db.collection("children").document(childID.uuidString)
             .setData(["pendingMinuteAdjustment": FieldValue.increment(Int64(deltaMinutes))], merge: true)
+        #endif
+    }
+
+    /// 💝 Parent GIVES minutes — into the child's separate GIFT pocket, never the
+    /// earned wallet (so "you earned 30" and "mom gave 10" stay distinct). Same
+    /// delta-command mechanics as `adjustChildMinutes`, on its own field.
+    func giftChildMinutes(childID: UUID, minutes: Int) {
+        #if canImport(FirebaseFirestore)
+        guard minutes != 0 else { return }
+        pendingGifts[childID, default: 0] += minutes
+        db.collection("children").document(childID.uuidString)
+            .setData(["pendingGiftAdjustment": FieldValue.increment(Int64(minutes))], merge: true)
+        #endif
+    }
+
+    /// CHILD device: consume a parent's gift command exactly once (read + zero
+    /// in a transaction), then add it to the GIFT pocket.
+    private func applyPendingGift(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        guard !applyingGift else { return }
+        applyingGift = true
+        let ref = db.collection("children").document(childID.uuidString)
+        db.runTransaction({ txn, _ -> Any? in
+            let doc = try? txn.getDocument(ref)
+            let adj = (doc?.data()?["pendingGiftAdjustment"] as? Int) ?? 0
+            if adj != 0 { txn.updateData(["pendingGiftAdjustment": 0], forDocument: ref) }
+            return adj
+        }) { [weak self] result, _ in
+            self?.applyingGift = false
+            let adj = (result as? Int) ?? 0
+            if adj != 0 { ProgressStore.shared.addParentGiftMinutes(adj) }
+        }
         #endif
     }
 
@@ -393,9 +430,12 @@ final class RemoteSyncManager: ObservableObject {
                 .addSnapshotListener { [weak self] doc, _ in
                     guard let self else { return }
                     let adj = (doc?.data()?["pendingMinuteAdjustment"] as? Int) ?? 0
+                    let gift = (doc?.data()?["pendingGiftAdjustment"] as? Int) ?? 0
                     Task { @MainActor in
                         if adj != 0 { self.pendingAdjustments[profile.id] = adj }
                         else { self.pendingAdjustments.removeValue(forKey: profile.id) }
+                        if gift != 0 { self.pendingGifts[profile.id] = gift }
+                        else { self.pendingGifts.removeValue(forKey: profile.id) }
                     }
                     // Consume the grant on whatever device is currently BEING this
                     // child: its own bound play device, or the parent's phone while
@@ -407,6 +447,9 @@ final class RemoteSyncManager: ObservableObject {
                         && KidModeManager.shared.childID?.uuidString == id
                     if adj != 0 && (isBoundChildDevice || isKidModeForThis) {
                         self.applyPendingMinuteGrant(childID: profile.id)
+                    }
+                    if gift != 0 && (isBoundChildDevice || isKidModeForThis) {
+                        self.applyPendingGift(childID: profile.id)
                     }
                     // A parent's "reset progress" — consumed the same way, by the
                     // device that IS this child right now.

@@ -948,12 +948,24 @@ struct ParentDashboardView: View {
                 }
             }
 
+            // Two clearly-separated pockets: what the child EARNED vs what the
+            // parent GAVE. Give → gift pocket (💝). Take back → earned wallet.
+            let giftShown = max(0, (s.parentGiftMinutes ?? 0) + remote.pendingGifts[profile.id, default: 0])
+            HStack(spacing: 6) {
+                Image(systemName: "wallet.pass")
+                    .foregroundStyle(.secondary)
+                Text("🎮 \(s.pendingMinutes) דק' \(profile.gender == .girl ? "הרוויחה" : "הרוויח") מלמידה  ·  💝 \(giftShown) דק' מתנה מכם")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+
             // Quick actions
             HStack(spacing: 10) {
                 Button {
-                    quickAdjust(profile: profile, deltaMinutes: 10)
+                    quickGift(profile: profile, minutes: 10)
                 } label: {
-                    Text("+10 דק'")
+                    Text("💝 +10 מתנה")
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .padding(.horizontal, 10).padding(.vertical, 6)
                         .background(Capsule().fill(AppColor.successMint.opacity(0.25)))
@@ -965,7 +977,7 @@ struct ParentDashboardView: View {
                 Button {
                     quickAdjust(profile: profile, deltaMinutes: -5)
                 } label: {
-                    Text("−5 דק'")
+                    Text("−5 מהמורווח")
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .padding(.horizontal, 10).padding(.vertical, 6)
                         .background(Capsule().fill(Color.orange.opacity(0.25)))
@@ -1616,7 +1628,7 @@ struct ParentDashboardView: View {
             case "💎":
                 return "יהלומים = הארנק של החנות. מרוויחים לאט יותר מכוכבים (בערך 1 לתשובה), ומוציאים אותם על דמויות ופריטים בחנות. יורדים כשקונים — זה תקין."
             case "🎮":
-                return "דקות משחק שהילד/ה צבר/ה ועוד לא פתח/ה (הארנק). כשיש חלון פתוח — רואים כאן ספירה לאחור של הזמן שנשאר. \"—\" = אין דקות ממתינות."
+                return "דקות משחק שהילד/ה הרוויח/ה מלמידה ועוד לא פתח/ה (הארנק המורווח). דקות שאתם נותנים (💝 מתנה) נשמרות בנפרד ולא נספרות כאן. כשיש חלון פתוח — רואים ספירה לאחור. \"—\" = אין דקות ממתינות."
             default:
                 return "נתון מסכם על הפעילות של הילד/ה בטופי."
             }
@@ -1687,6 +1699,14 @@ struct ParentDashboardView: View {
     /// one with state in memory). For non-active profiles we'd need to
     /// edit the snapshot directly — kept out of v1 to avoid stale-data
     /// races; the parent can switch to that profile first.
+    /// 💝 Give minutes — into the child's separate GIFT pocket (never the earned
+    /// wallet). Cloud delta-command; the child's device applies it.
+    private func quickGift(profile: Profile, minutes: Int) {
+        Haptic.light()
+        remote.giftChildMinutes(childID: profile.id, minutes: minutes)
+        refreshTrigger &+= 1
+    }
+
     private func quickAdjust(profile: Profile, deltaMinutes: Int) {
         Haptic.light()
         // Edit the child's CLOUD snapshot directly (revision-bumping transaction)
