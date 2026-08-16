@@ -1292,7 +1292,8 @@ struct ParentDashboardView: View {
         // Gendered — we know each child's gender, so never "משחק/ת".
         let girl = profile.gender == .girl
         let text: String = {
-            if let live { return "🎮 זְמַן מָסָךְ פָּתוּחַ · \(formatTime(live.secondsLeft))" }
+            // No countdown here — the 🎮 stat below already ticks in green.
+            if live != nil { return "🎮 זְמַן מָסָךְ פָּתוּחַ" }
             if frozen > 0 { return "❄️ \((frozen + 59) / 60) דַּקּוֹת שְׁמוּרוֹת" }
             if isChildPlayingNow(profile) { return "בְּטוֹפִי עַכְשָׁיו · \(girl ? "לוֹמֶדֶת" : "לוֹמֵד") 📚" }
             return "לֹא בְּטוֹפִי כָּרֶגַע"
