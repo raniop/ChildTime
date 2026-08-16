@@ -120,36 +120,7 @@ struct ParentDashboardView: View {
                                     linkCallout
                                 }
                             }
-                            LazyVGrid(
-                                columns: [GridItem(.flexible(), spacing: 12),
-                                          GridItem(.flexible(), spacing: 12)],
-                                spacing: 12
-                            ) {
-                                ForEach(rows, id: \.profile.id) { row in
-                                    NavigationLink(value: row.profile.id) {
-                                        childCard(profile: row.profile, snapshot: row.snapshot)
-                                    }
-                                    .buttonStyle(.plain)
-                                    .contextMenu {
-                                        Button {
-                                            navPath.append(row.profile.id)
-                                        } label: { Label("פתח כרטיס", systemImage: "rectangle.portrait.and.arrow.right") }
-                                        if rows.count >= 2 {
-                                            Button {
-                                                showingReorder = true
-                                            } label: { Label("סדר את הילדים", systemImage: "arrow.up.arrow.down") }
-                                        }
-                                        Button(role: .destructive) {
-                                            gridDeleteProfile = row.profile
-                                        } label: { Label("מחק ילד/ה", systemImage: "trash") }
-                                    }
-                                }
-                            }
-                            // RTL so the cards fill right-to-left — with an odd count
-                            // the lone card sits on the RIGHT, not the left.
-                            .environment(\.layoutDirection, .rightToLeft)
-                            .animation(.spring(response: 0.5, dampingFraction: 0.85),
-                                       value: rows.map(\.profile.id))
+                            childrenGrid
 
                             // Manual order — a discreet entry under the grid (also in
                             // each card's long-press menu). Only meaningful with 2+.
@@ -284,6 +255,15 @@ struct ParentDashboardView: View {
                     household.setChildOrder(ordered.map(\.id))
                 }
                 .environment(\.layoutDirection, .rightToLeft)
+            }
+            // Remote open/lock confirmation on the ROOT — the grid-card ⋯ menu
+            // fires these without opening the child's page.
+            .alert("שְׁלִיטָה מֵרָחוֹק", isPresented: Binding(
+                get: { remoteGrantMsg != nil && navPath.isEmpty },
+                set: { if !$0 { remoteGrantMsg = nil } })) {
+                Button("הֵבַנְתִּי", role: .cancel) {}
+            } message: {
+                Text(remoteGrantMsg ?? "")
             }
             // Family-tile explanations present here (root); the per-child stat
             // alert lives on the detail page (dialogs must sit on the visible
@@ -1172,6 +1152,88 @@ struct ParentDashboardView: View {
         )
     }
 
+    /// ⋯ on a grid card: remote open / lock now (the two things a parent reaches
+    /// for from the overview), plus open card / reorder / delete.
+    private func gridCardMenu(_ profile: Profile) -> some View {
+        Menu {
+            Menu {
+                Button("חֲצִי שָׁעָה") { remoteOpen(profile, 30) }
+                Button("שָׁעָה") { remoteOpen(profile, 60) }
+                Button("שְׁעָתַיִם") { remoteOpen(profile, 120) }
+            } label: {
+                Label("פְּתַח זְמַן מָסָךְ עַכְשָׁיו (מֵרָחוֹק)", systemImage: "lock.open.fill")
+            }
+            Button {
+                remoteLock(profile)
+            } label: {
+                Label("נְעַל עַכְשָׁיו (מֵרָחוֹק)", systemImage: "lock.fill")
+            }
+            Divider()
+            Button {
+                navPath.append(profile.id)
+            } label: { Label("פתח כרטיס", systemImage: "rectangle.portrait.and.arrow.right") }
+            if rows.count >= 2 {
+                Button {
+                    showingReorder = true
+                } label: { Label("סדר את הילדים", systemImage: "arrow.up.arrow.down") }
+            }
+            Button(role: .destructive) {
+                gridDeleteProfile = profile
+            } label: { Label("מחק ילד/ה", systemImage: "trash") }
+        } label: {
+            Image(systemName: "ellipsis.circle.fill")
+                .font(.system(size: 22))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(.secondary)
+                .frame(width: 34, height: 34)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// The children grid (pulled out of `body` — the type-checker choked on the
+    /// full inline expression).
+    private var childrenGrid: some View {
+            LazyVGrid(
+                columns: [GridItem(.flexible(), spacing: 12),
+                          GridItem(.flexible(), spacing: 12)],
+                spacing: 12
+            ) {
+                ForEach(rows, id: \.profile.id) { row in
+                    NavigationLink(value: row.profile.id) {
+                        childCard(profile: row.profile, snapshot: row.snapshot)
+                    }
+                    .buttonStyle(.plain)
+                    // ⋯ quick actions right on the card — the two
+                    // remote controls (open / lock now) without
+                    // opening the child's page. Overlaid on the link
+                    // (not inside it) so the tap isn't swallowed.
+                    .overlay(alignment: .topLeading) {
+                        gridCardMenu(row.profile)
+                            .padding(8)
+                    }
+                    .contextMenu {
+                        Button {
+                            navPath.append(row.profile.id)
+                        } label: { Label("פתח כרטיס", systemImage: "rectangle.portrait.and.arrow.right") }
+                        if rows.count >= 2 {
+                            Button {
+                                showingReorder = true
+                            } label: { Label("סדר את הילדים", systemImage: "arrow.up.arrow.down") }
+                        }
+                        Button(role: .destructive) {
+                            gridDeleteProfile = row.profile
+                        } label: { Label("מחק ילד/ה", systemImage: "trash") }
+                    }
+                }
+            }
+            // RTL so the cards fill right-to-left — with an odd count
+            // the lone card sits on the RIGHT, not the left.
+            .environment(\.layoutDirection, .rightToLeft)
+            .animation(.spring(response: 0.5, dampingFraction: 0.85),
+                       value: rows.map(\.profile.id))
+    }
+
     /// One compact stat in a grid card: emoji + value (⏱ time · 🎯 success ·
     /// ⭐ stars · 💎 diamonds · 🎮 available min · 🔥 streak).
     private func miniStat(_ emoji: String, _ value: String) -> some View {
@@ -1267,8 +1329,8 @@ struct ParentDashboardView: View {
             }
             // Remote screen-time confirmation — also on the detail page so it shows
             // immediately where the parent tapped, not only after popping back.
-            .alert("פָּתַחְתָּ זְמַן מָסָךְ", isPresented: Binding(
-                get: { remoteGrantMsg != nil },
+            .alert("שְׁלִיטָה מֵרָחוֹק", isPresented: Binding(
+                get: { remoteGrantMsg != nil && !navPath.isEmpty },
                 set: { if !$0 { remoteGrantMsg = nil } })) {
                 Button("הֵבַנְתִּי", role: .cancel) {}
             } message: {
