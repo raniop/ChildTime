@@ -220,6 +220,7 @@ struct ChildTimeApp: App {
         case "question": QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
         case "wheel":    LuckyWheelView(onClose: {})
         case "dashboard": ParentDashboardView(isRoot: true)
+            .onAppear { if let id = ProfileStore.shared.activeID { HouseholdManager.shared.seedDemoLiveWindow(childID: id) } }
         case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
         case "paywall":  PaywallView()    // DEMO_SCREEN=paywall — the "טופי+" subscription screen (App Review proof)
         case "unlocked": UnlockedView().onAppear { ProgressStore.shared.startUnlock(minutes: 670, manual: false) }  // DEMO_SCREEN=unlocked — game-time countdown

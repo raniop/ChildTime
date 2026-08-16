@@ -46,6 +46,19 @@ final class HouseholdManager: ObservableObject {
     /// Devices connected per child (childID string → devices), so the parent can
     /// see which/how many devices each child plays on.
     @Published private(set) var devicesByChild: [String: [ChildDevice]] = [:]
+
+    /// DEMO_SCREEN=dashboard only: fake a live iPad play window for the active
+    /// child so the "playing now" banner can be seen in screenshots.
+    func seedDemoLiveWindow(childID: UUID) {
+        let now = Date()
+        let dev = ChildDevice(id: "\(childID.uuidString)_demo", childID: childID.uuidString,
+                              householdID: "demo", deviceID: "demo", name: "אייפד", kind: "ipad",
+                              systemVersion: "18", joinedAt: now, lastSeenAt: now, removed: nil,
+                              remoteUnlockMinutes: nil, remoteUnlockAt: nil,
+                              windowEndsAt: now.timeIntervalSince1970 + 23 * 60 + 40,
+                              frozenSeconds: nil, windowIsManual: false)
+        devicesByChild[childID.uuidString] = [dev]
+    }
     private var didReceiveChildren = false
 
     private func markLoaded() { isLoading = false }

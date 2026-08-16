@@ -847,6 +847,9 @@ struct ParentDashboardView: View {
                 ProfileAvatarView(profile: profile, size: 54)
             }
 
+            // LIVE: an open play window right now — green, ticking, with the device.
+            liveWindowBanner(profile, compact: false)
+
             // Today at a glance.
             HStack(spacing: 10) {
                 statCell(emoji: "⏱",
@@ -1139,10 +1142,11 @@ struct ParentDashboardView: View {
             Text(profile.name)
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.7)
+            liveWindowBanner(profile, compact: true)
             VStack(spacing: 6) {
                 HStack(spacing: 6) { miniStat("⏱", timeToday); miniStat("🎯", success) }
                 HStack(spacing: 6) { miniStat("⭐", s.stars.currencyShort); miniStat("💎", s.diamonds.currencyShort) }
-                HStack(spacing: 6) { miniStat("🎮", available); miniStat("🔥", "\(s.dayStreak)") }
+                HStack(spacing: 6) { miniStat("🎮", available, live: unlockSecs > 0); miniStat("🔥", "\(s.dayStreak)") }
                 // 💝 Parent gift pocket — kept apart from earned (🎮) even here.
                 HStack(spacing: 6) {
                     let gift = giftShownFor(profile, s)
@@ -1253,6 +1257,64 @@ struct ParentDashboardView: View {
         return hour < 12 ? "יוֹם חָדָשׁ, הַרְפַּתְקָאוֹת חֲדָשׁוֹת ✨" : "שֶׁקֶט הַיּוֹם — הַכֹּל בְּסֵדֶר 🌤️"
     }
 
+    // MARK: - Live play window (what's happening RIGHT NOW)
+
+    /// The child's currently OPEN play window, if any: seconds left, which
+    /// device it's on, and whether it's a parent grant/gift or earned time.
+    /// Derived from the live device rows (windowEndsAt reflects pauses), so it
+    /// ticks down each dashboard refresh and vanishes the moment it closes.
+    private func liveWindow(_ profile: Profile) -> (secondsLeft: Int, device: ChildDevice, isManual: Bool)? {
+        _ = refreshTrigger   // recompute on the 5s tick
+        let now = Date().timeIntervalSince1970
+        let open = (household.devicesByChild[profile.id.uuidString] ?? [])
+            .compactMap { d -> (Int, ChildDevice, Bool)? in
+                guard let end = d.windowEndsAt, end > now else { return nil }
+                return (Int(end - now), d, d.windowIsManual ?? false)
+            }
+        return open.max(by: { $0.0 < $1.0 })
+    }
+
+    /// Green, pulsing "playing NOW" strip: live countdown + the device it's on.
+    /// Shown on the grid card (compact) and the detail card (full sentence).
+    @ViewBuilder
+    private func liveWindowBanner(_ profile: Profile, compact: Bool) -> some View {
+        if let live = liveWindow(profile) {
+            let deviceLabel = live.device.kind == "ipad" ? "בָּאַיְפֵּד" : (live.device.kind == "iphone" ? "בָּאַיְפוֹן" : "בַּמַּכְשִׁיר")
+            let source = live.isManual ? "זְמַן שֶׁנָּתַתֶּם" : "זְמַן שֶׁהִרְוִיחַ/ה"
+            HStack(spacing: 6) {
+                LivePulseDot()
+                if compact {
+                    Text("מְשַׂחֵק/ת עַכְשָׁיו · \(formatTime(live.secondsLeft))")
+                        .font(.system(size: 11.5, weight: .heavy, design: .rounded))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                } else {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("\(profile.name) \(profile.gender == .girl ? "מְשַׂחֶקֶת" : "מְשַׂחֵק") עַכְשָׁיו \(deviceLabel)")
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        Text("נִשְׁאֲרוּ \(formatTime(live.secondsLeft)) דַּקּוֹת · \(source)")
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .opacity(0.9)
+                            .monospacedDigit()
+                    }
+                    Spacer()
+                    Image(systemName: live.device.sfSymbol)
+                        .font(.system(size: 18, weight: .semibold))
+                }
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, compact ? 8 : 12)
+            .padding(.vertical, compact ? 5 : 9)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: compact ? 10 : AppRadius.medium, style: .continuous)
+                    .fill(LinearGradient(colors: [Color(hex: "22C55E"), Color(hex: "16A34A")],
+                                         startPoint: .leading, endPoint: .trailing))
+            )
+            .glow(Color(hex: "22C55E"), radius: compact ? 6 : 10)
+            .transition(.scale.combined(with: .opacity))
+        }
+    }
+
     /// The children grid (pulled out of `body` — the type-checker choked on the
     /// full inline expression).
     private var childrenGrid: some View {
@@ -1300,17 +1362,23 @@ struct ParentDashboardView: View {
 
     /// One compact stat in a grid card: emoji + value (⏱ time · 🎯 success ·
     /// ⭐ stars · 💎 diamonds · 🎮 available min · 🔥 streak).
-    private func miniStat(_ emoji: String, _ value: String) -> some View {
+    private func miniStat(_ emoji: String, _ value: String, live: Bool = false) -> some View {
         HStack(spacing: 4) {
             Text(emoji).font(.system(size: 13))
             Text(value).font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.6)
+                .monospacedDigit()
+                .foregroundStyle(live ? Color(hex: "15803D") : .primary)
+                .lineLimit(1).minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.primary.opacity(0.05))
+                .fill(live ? Color(hex: "22C55E").opacity(0.18) : Color.primary.opacity(0.05))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(live ? Color(hex: "22C55E").opacity(0.7) : .clear, lineWidth: 1)
         )
     }
 
@@ -1958,6 +2026,23 @@ struct ChildOrderView: View {
             }
         }
         .onAppear { if working.isEmpty { working = profiles } }
+    }
+}
+
+/// A small green dot that breathes — the universal "live" cue.
+struct LivePulseDot: View {
+    @State private var on = false
+    var body: some View {
+        ZStack {
+            Circle().fill(.white.opacity(0.35))
+                .frame(width: 14, height: 14)
+                .scaleEffect(on ? 1.5 : 0.8)
+                .opacity(on ? 0 : 0.8)
+            Circle().fill(.white).frame(width: 8, height: 8)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.2).repeatForever(autoreverses: false)) { on = true }
+        }
     }
 }
 
