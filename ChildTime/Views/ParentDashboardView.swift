@@ -28,6 +28,8 @@ struct ParentDashboardView: View {
     @State private var deletingProfile: Profile? = nil
     /// Confirm clearing a child's "protect my time" code (when the kid forgot it).
     @State private var pinResetProfile: Profile? = nil
+    /// Confirm 'lock + revoke all parent-given minutes' (a deliberate act).
+    @State private var revokeGiftProfile: Profile? = nil
     @State private var navPath: [UUID] = []   // pushed child-detail pages (pop on delete)
     @State private var gridDeleteProfile: Profile? = nil   // long-press delete from the grid
     @State private var showingReorder = false               // manual child order sheet
@@ -268,29 +270,9 @@ struct ParentDashboardView: View {
                 }
                 .environment(\.layoutDirection, .rightToLeft)
             }
-            // Remote open/lock confirmation on the ROOT — the grid-card ⋯ menu
-            // fires these without opening the child's page.
-            .alert("שְׁלִיטָה מֵרָחוֹק", isPresented: Binding(
-                get: { remoteGrantMsg != nil && navPath.isEmpty },
-                set: { if !$0 { remoteGrantMsg = nil } })) {
-                Button("הֵבַנְתִּי", role: .cancel) {}
-            } message: {
-                Text(remoteGrantMsg ?? "")
-            }
-            // Family-tile explanations present here (root); the per-child stat
-            // alert lives on the detail page (dialogs must sit on the visible
-            // page). Guarded so both never try to present at once: this one only
-            // fires while the grid (root) is showing.
-            .alert(
-                statExplain.map { "\($0.emoji) \($0.label) — \($0.value)" } ?? "",
-                isPresented: Binding(get: { statExplain != nil && navPath.isEmpty },
-                                     set: { if !$0 { statExplain = nil } }),
-                presenting: statExplain
-            ) { _ in
-                Button("הבנתי", role: .cancel) { statExplain = nil }
-            } message: { s in
-                Text(s.text)
-            }
+            // Root-level alerts hosted on an invisible overlay — keeps the main
+            // modifier chain small enough for the type-checker.
+            .overlay(rootAlertsHost)
             .sheet(isPresented: $showingKidMode) {
                 KidModeEntryView()
                     .environment(\.layoutDirection, .rightToLeft)
@@ -766,6 +748,11 @@ struct ParentDashboardView: View {
                     } label: {
                         Label("נְעַל עַכְשָׁיו (מֵרָחוֹק)", systemImage: "lock.fill")
                     }
+                    Button(role: .destructive) {
+                        revokeGiftProfile = profile
+                    } label: {
+                        Label("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה", systemImage: "gift.circle")
+                    }
                     Button {
                         editProfile = profile
                     } label: {
@@ -1194,6 +1181,11 @@ struct ParentDashboardView: View {
             } label: {
                 Label("נְעַל עַכְשָׁיו (מֵרָחוֹק)", systemImage: "lock.fill")
             }
+            Button(role: .destructive) {
+                revokeGiftProfile = profile
+            } label: {
+                Label("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה", systemImage: "gift.circle")
+            }
             Divider()
             Button {
                 navPath.append(profile.id)
@@ -1371,6 +1363,54 @@ struct ParentDashboardView: View {
             )
             .glow(Color(hex: "22C55E"), radius: compact ? 6 : 10)
             .transition(.scale.combined(with: .opacity))
+        }
+    }
+
+    /// Invisible host for the root-level alerts (revoke-gift confirm, remote
+    /// open/lock confirm, family-tile explanations). Splitting them off the
+    /// main body's modifier chain keeps the type-checker happy.
+    private var rootAlertsHost: some View {
+        Color.clear
+            .frame(width: 0, height: 0)
+            .allowsHitTesting(false)
+        // "Lock + revoke gift" confirmation — a real consequence, so it asks.
+        // Presented from either menu (root grid ⋯ / detail ⋯).
+        .alert(
+            revokeGiftProfile.map { "לִנְעֹל וּלְאַפֵּס אֶת דַּקּוֹת הַמַּתָּנָה שֶׁל \($0.name)?" } ?? "",
+            isPresented: Binding(get: { revokeGiftProfile != nil },
+                                 set: { if !$0 { revokeGiftProfile = nil } }),
+            presenting: revokeGiftProfile
+        ) { p in
+            Button("נְעַל וְאַפֵּס", role: .destructive) {
+                lockAndRevokeGift(p)
+                revokeGiftProfile = nil
+            }
+            Button("בַּטֵּל", role: .cancel) { revokeGiftProfile = nil }
+        } message: { p in
+            Text(revokeGiftMessage(p))
+        }
+        // Remote open/lock confirmation on the ROOT — the grid-card ⋯ menu
+        // fires these without opening the child's page.
+        .alert("שְׁלִיטָה מֵרָחוֹק", isPresented: Binding(
+            get: { remoteGrantMsg != nil && navPath.isEmpty },
+            set: { if !$0 { remoteGrantMsg = nil } })) {
+            Button("הֵבַנְתִּי", role: .cancel) {}
+        } message: {
+            Text(remoteGrantMsg ?? "")
+        }
+        // Family-tile explanations present here (root); the per-child stat
+        // alert lives on the detail page (dialogs must sit on the visible
+        // page). Guarded so both never try to present at once: this one only
+        // fires while the grid (root) is showing.
+        .alert(
+            statExplain.map { "\($0.emoji) \($0.label) — \($0.value)" } ?? "",
+            isPresented: Binding(get: { statExplain != nil && navPath.isEmpty },
+                                 set: { if !$0 { statExplain = nil } }),
+            presenting: statExplain
+        ) { _ in
+            Button("הבנתי", role: .cancel) { statExplain = nil }
+        } message: { s in
+            Text(s.text)
         }
     }
 
@@ -2009,6 +2049,26 @@ struct ParentDashboardView: View {
         remoteGrantMsg = connected
             ? "נָעַלְתָּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name) מֵרָחוֹק. הַנְּעִילָה תֻּחַל מִיָּד (אוֹ בָּרֶגַע שֶׁיִּפְתַּח אֶת טוֹפִּי)."
             : "אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַנְּעִילָה תֻּחַל בָּרֶגַע שֶׁיִּתְחַבֵּר."
+    }
+
+    /// "נעל ואפס דקות מתנה": remote-lock the child's device(s) AND revoke every
+    /// parent-given minute (💝 pocket, ❄️ frozen, an open parent window). Earned
+    /// minutes are the child's own — untouched (an open earned window is
+    /// stopped-and-banked). Confirmed first — this one IS a consequence.
+    private func revokeGiftMessage(_ p: Profile) -> String {
+        let earned = p.gender == .girl ? "הִיא הִרְוִיחָה" : "הוּא הִרְוִיחַ"
+        return "הַמַּכְשִׁיר יִנָּעֵל עַכְשָׁיו, וְכָל הַדַּקּוֹת שֶׁנְּתַתֶּם (💝 מַתָּנָה, ❄️ שְׁמוּרוֹת, וְחַלּוֹן פָּתוּחַ שֶׁל מַתָּנָה) יִמָּחֲקוּ. הַדַּקּוֹת שֶׁ\(earned) מִלְּמִידָה לֹא נִפְגָּעוֹת."
+    }
+
+    private func lockAndRevokeGift(_ profile: Profile) {
+        Haptic.warning()
+        remote.revokeChildGift(childID: profile.id)
+        household.lockRemoteScreenTime(toChildID: profile.id)
+        let connected = (household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
+        remoteGrantMsg = connected
+            ? "נָעַלְתָּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name) וּבִטַּלְתָּ אֶת דַּקּוֹת הַמַּתָּנָה. הַדַּקּוֹת שֶׁ\(profile.gender == .girl ? "הִיא הִרְוִיחָה" : "הוּא הִרְוִיחַ") נִשְׁאֲרוּ."
+            : "אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַנְּעִילָה וְהָאִפּוּס יָחוּלוּ בָּרֶגַע שֶׁיִּתְחַבֵּר."
+        refreshTrigger &+= 1
     }
 
     private func resetProgress(for profile: Profile) {

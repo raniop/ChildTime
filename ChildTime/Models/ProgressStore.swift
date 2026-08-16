@@ -1270,6 +1270,21 @@ final class ProgressStore: ObservableObject {
         parentGiftMinutes = max(0, parentGiftMinutes + delta)
     }
 
+    /// Parent revoked their gift ("נעל ואפס דקות מתנה"): wipe EVERY bit of parent
+    /// time — the gift pocket, frozen leftover, and an open MANUAL window (a
+    /// parent grant/gift). Earned minutes are the child's own and are untouched:
+    /// an open EARNED window is stopped-and-banked back to the wallet.
+    /// Returns true if an open window was closed (caller re-shields).
+    @discardableResult
+    func revokeAllParentTime() -> Bool {
+        parentGiftMinutes = 0
+        manualPausedSeconds = 0
+        guard isUnlocked else { return false }
+        if unlockIsManual { endUnlock() }                       // parent time → gone
+        else { _ = endUnlockAndReturnRemainingMinutes() }      // earned → banked
+        return true
+    }
+
     /// Child opens the whole gift pocket as ONE fixed `manual` window (like a
     /// remote grant): not capped by the daily limit, and its leftover freezes
     /// on stop-and-save (`pauseManualUnlock`) rather than banking to the wallet.

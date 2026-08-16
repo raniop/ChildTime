@@ -245,6 +245,49 @@ final class RemoteSyncManager: ObservableObject {
         #endif
     }
 
+    /// PARENT: "נעל ואפס דקות מתנה" — revoke ALL parent-given time on the child
+    /// (gift pocket + frozen leftover + an open parent window). A command on the
+    /// child doc, consumed by the device that IS this child (like reset/±). The
+    /// lock itself is sent separately via HouseholdManager.lockRemoteScreenTime.
+    func revokeChildGift(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        db.collection("children").document(childID.uuidString)
+            .setData(["revokeGiftAt": FieldValue.serverTimestamp()], merge: true)
+        // Optimistic local mirror so the parent's 💝 tile drops to 0 at once.
+        pendingGifts.removeValue(forKey: childID)
+        if var snap = remoteSnapshots[childID] {
+            snap.parentGiftMinutes = 0
+            remoteSnapshots[childID] = snap
+        }
+        #endif
+    }
+
+    /// CHILD device: consume a parent's gift-revoke exactly once, wipe all parent
+    /// time locally, re-shield if a window was open, and push the new state up.
+    private func applyPendingGiftRevoke(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        let ref = db.collection("children").document(childID.uuidString)
+        db.runTransaction({ txn, _ -> Any? in
+            let doc = try? txn.getDocument(ref)
+            let requested = doc?.data()?["revokeGiftAt"] != nil
+            if requested { txn.updateData(["revokeGiftAt": FieldValue.delete()], forDocument: ref) }
+            return requested
+        }) { [weak self] result, _ in
+            guard (result as? Bool) == true else { return }
+            Task { @MainActor in
+                TofyLink("applyPendingGiftRevoke: parent revoked gift for \(childID.uuidString.prefix(8))")
+                let closed = ProgressStore.shared.revokeAllParentTime()
+                if closed {
+                    ShieldManager.shared.cancelScheduledReshield()
+                    ShieldManager.shared.applyDefaultLock()
+                }
+                Haptic.warning()
+                self?.pushNow()
+            }
+        }
+        #endif
+    }
+
     /// CHILD device: a parent asked to reset THIS child. Consume the command
     /// exactly once (read + clear in a transaction), then wipe the live store
     /// and push the blank state up.
@@ -456,6 +499,10 @@ final class RemoteSyncManager: ObservableObject {
                     let resetRequested = doc?.data()?["resetRequestedAt"] != nil
                     if resetRequested && (isBoundChildDevice || isKidModeForThis) {
                         self.applyPendingReset(childID: profile.id)
+                    }
+                    let revokeRequested = doc?.data()?["revokeGiftAt"] != nil
+                    if revokeRequested && (isBoundChildDevice || isKidModeForThis) {
+                        self.applyPendingGiftRevoke(childID: profile.id)
                     }
                 }
         }
