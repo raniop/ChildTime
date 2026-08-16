@@ -719,7 +719,7 @@ struct ParentDashboardView: View {
 
     private func profileCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
         let isActive = profile.id == profiles.activeID
-        let activeUnlockSecs = manualGrantSecondsRemaining(profile)
+        let liveSecs = liveWindow(profile)?.secondsLeft ?? 0
         let lp = LearningProfile(snapshot: s, enabledTopics: profile.enabledTopics, age: profile.age)
         let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: profile.id), profile: lp)
         let status = overallStatus(engine: engine, lp: lp, hasData: s.totalAnswered >= 4)
@@ -852,13 +852,14 @@ struct ParentDashboardView: View {
                 // EARNED (or the live countdown of an open window) vs what the
                 // parent GAVE. Same split as the kid's own home screen.
                 statGroup("דַּקּוֹת מִשְׂחָק") {
+                    // 🎮 = EARNED wallet only (or the live countdown of an open
+                    // window). Frozen parent time is NOT here — it's parent
+                    // time, counted once, under 💝.
                     statCell(emoji: "🎮",
-                             value: activeUnlockSecs > 0 ? formatTime(activeUnlockSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"),
-                             label: liveWindow(profile) != nil
+                             value: liveSecs > 0 ? formatTime(liveSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"),
+                             label: liveSecs > 0
                                 ? "זמן מסך פתוח"
-                                : (activeUnlockSecs > 0
-                                   ? "❄️ דק' שמורות"
-                                   : (profile.gender == .girl ? "דק' שהרוויחה" : "דק' שהרוויח")))
+                                : (profile.gender == .girl ? "דק' שהרוויחה" : "דק' שהרוויח"))
                     statCell(emoji: "💝",
                              value: giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—",
                              label: "דק' מתנה מכם")
@@ -1122,8 +1123,10 @@ struct ParentDashboardView: View {
         let success = s.answeredToday > 0 ? "\(Int((Double(s.correctToday) / Double(s.answeredToday)) * 100))%" : "—"
         // Show the parent's just-opened window first (a live countdown of the time
         // they granted); fall back to the child's banked wallet.
-        let unlockSecs = manualGrantSecondsRemaining(profile)
-        let available = unlockSecs > 0 ? formatTime(unlockSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—")
+        // 🎮 shows the EARNED wallet, or the live countdown while a window is
+        // open. Frozen parent time belongs to 💝 (counted once, there).
+        let liveSecs = liveWindow(profile)?.secondsLeft ?? 0
+        let available = liveSecs > 0 ? formatTime(liveSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—")
         return VStack(spacing: 8) {
             ZStack(alignment: .topTrailing) {
                 ProfileAvatarView(profile: profile, size: 62)
@@ -1143,7 +1146,7 @@ struct ParentDashboardView: View {
                 HStack(spacing: 6) { miniStat("⭐", s.stars.currencyShort); miniStat("💎", s.diamonds.currencyShort) }
                 // Green ONLY while a window is actually open — frozen time shows
                 // its static number in neutral (it isn't ticking or burning).
-                HStack(spacing: 6) { miniStat("🎮", available, live: liveWindow(profile) != nil); miniStat("🔥", "\(s.dayStreak)") }
+                HStack(spacing: 6) { miniStat("🎮", available, live: liveSecs > 0); miniStat("🔥", "\(s.dayStreak)") }
                 // 💝 Parent gift pocket — kept apart from earned (🎮) even here.
                 HStack(spacing: 6) {
                     let gift = giftShownFor(profile, s)
@@ -2021,32 +2024,6 @@ struct ParentDashboardView: View {
 
     // MARK: - Actions
 
-    /// Remotely open screen time on the child's device(s) right now.
-    /// Seconds left in the screen-time window the parent last opened for this child
-    /// (from the `childDevices` grant we wrote). The child's own `unlockEndsAt` is
-    /// intentionally not synced, so this is the parent's view of the open window.
-    private func manualGrantSecondsRemaining(_ profile: Profile) -> Int {
-        let devices = household.devicesByChild[profile.id.uuidString] ?? []
-        let now = Date().timeIntervalSince1970
-        // 1) The child's ACTUAL open window (reported live) — reflects pauses, so it
-        //    stops counting the instant the child freezes instead of ticking on.
-        let liveEnds = devices.compactMap { d -> Double? in
-            guard let end = d.windowEndsAt, end > now else { return nil }
-            return end
-        }
-        if let maxEnd = liveEnds.max() { return Int(maxEnd - now) }
-        // 2) Frozen ("עצר ושמור") — show the saved amount STATICALLY (no countdown).
-        let frozen = devices.compactMap { $0.frozenSeconds }.max() ?? 0
-        if frozen > 0 { return frozen }
-        // 3) Fallback: the parent's own last grant, until the device reports its
-        //    real state (older app, or the first moment after opening).
-        let ends = devices.compactMap { d -> Double? in
-            guard let m = d.remoteUnlockMinutes, m > 0, let at = d.remoteUnlockAt else { return nil }
-            return at + Double(m * 60)
-        }
-        guard let maxEnd = ends.max(), maxEnd > now else { return 0 }
-        return Int(maxEnd - now)
-    }
 
     private func remoteOpen(_ profile: Profile, _ minutes: Int) {
         Haptic.success()
