@@ -285,6 +285,20 @@ struct ParentDashboardView: View {
                 }
                 .environment(\.layoutDirection, .rightToLeft)
             }
+            // Family-tile explanations present here (root); the per-child stat
+            // alert lives on the detail page (dialogs must sit on the visible
+            // page). Guarded so both never try to present at once: this one only
+            // fires while the grid (root) is showing.
+            .alert(
+                statExplain.map { "\($0.emoji) \($0.label) — \($0.value)" } ?? "",
+                isPresented: Binding(get: { statExplain != nil && navPath.isEmpty },
+                                     set: { if !$0 { statExplain = nil } }),
+                presenting: statExplain
+            ) { _ in
+                Button("הבנתי", role: .cancel) { statExplain = nil }
+            } message: { s in
+                Text(s.text)
+            }
             .sheet(isPresented: $showingKidMode) {
                 KidModeEntryView()
                     .environment(\.layoutDirection, .rightToLeft)
@@ -702,24 +716,31 @@ struct ParentDashboardView: View {
     }
 
     private func summaryTile(_ emoji: String, _ value: String, _ label: String) -> some View {
-        VStack(spacing: 3) {
-            Text(emoji).font(.system(size: 22))
-            Text(value)
-                .font(.system(size: 24, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .lineLimit(1).minimumScaleFactor(0.6)
-            Text(label)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.85))
+        // Tappable — the family tiles explain themselves like the per-child stats.
+        Button {
+            Haptic.light()
+            statExplain = StatExplain(emoji: emoji, label: label, value: value)
+        } label: {
+            VStack(spacing: 3) {
+                Text(emoji).font(.system(size: 22))
+                Text(value)
+                    .font(.system(size: 24, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                Text(label)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, AppSpacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                    .fill(.white.opacity(0.15))
+                    .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                        .stroke(.white.opacity(0.25), lineWidth: 1))
+            )
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, AppSpacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .fill(.white.opacity(0.15))
-                .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                    .stroke(.white.opacity(0.25), lineWidth: 1))
-        )
+        .buttonStyle(.plain)
     }
 
     private func profileCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
@@ -1204,7 +1225,7 @@ struct ParentDashboardView: View {
             // "What does this number mean?" — tapped stat cell explanation.
             .alert(
                 statExplain.map { "\($0.emoji) \($0.label) — \($0.value)" } ?? "",
-                isPresented: Binding(get: { statExplain != nil },
+                isPresented: Binding(get: { statExplain != nil && !navPath.isEmpty },
                                      set: { if !$0 { statExplain = nil } }),
                 presenting: statExplain
             ) { _ in
@@ -1636,6 +1657,17 @@ struct ParentDashboardView: View {
 
         /// Plain-Hebrew explanation of what the number means and how it's earned.
         var text: String {
+            // Family-level tiles (top of the dashboard) — keyed by label because
+            // they share emojis with the per-child stats but sum the whole family.
+            switch label {
+            case "דק' מסך היום":
+                return "סך כל דקות זמן המסך שכל הילדים הרוויחו היום ביחד (מכל המכשירים). מתאפס בחצות. לפירוט לכל ילד — פתחו את הכרטיס שלו."
+            case "שאלות היום":
+                return "כמה שאלות ענו כל הילדים ביחד היום — בכל העולמות, במשחקים ובהרפתקה החכמה. מספר טוב לתחושה כללית של \"היה יום למידה או לא\"."
+            case "ילדים פעילים":
+                return "כמה מהילדים כבר ענו לפחות על שאלה אחת היום, מתוך כלל הילדים במשפחה. 1/2 = ילד אחד מתוך שניים שיחק היום."
+            default: break
+            }
             switch emoji {
             case "⏱":
                 return "כמה דקות זמן מסך הילד/ה הרוויח/ה היום, מתוך התקרה היומית שקבעתם (המספר אחרי הקו). כל 10 תשובות נכונות = 4 דקות. כשמגיעים לתקרה — שאר הדקות נשמרות למחר."
