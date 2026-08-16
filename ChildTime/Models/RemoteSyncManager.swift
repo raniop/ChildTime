@@ -54,8 +54,6 @@ final class RemoteSyncManager: ObservableObject {
 
     private var cancellables: Set<AnyCancellable> = []
     private var saveDebounce: Task<Void, Never>? = nil
-    private var applyingGrant = false
-    private var applyingGift = false
 
     #if canImport(FirebaseFirestore)
     private var db: Firestore { Firestore.firestore() }
@@ -111,6 +109,7 @@ final class RemoteSyncManager: ObservableObject {
         #endif
         isActive = false
         remoteSnapshots = [:]
+        resetPending = [:]
     }
 
     /// Force-write the current active profile's snapshot now (used after
@@ -183,8 +182,8 @@ final class RemoteSyncManager: ObservableObject {
     /// in a transaction), then add it to the GIFT pocket.
     private func applyPendingGift(childID: UUID) {
         #if canImport(FirebaseFirestore)
-        guard !applyingGift else { return }
-        applyingGift = true
+        // No in-flight guard: the transaction reads+zeroes atomically, so a second
+        // event just finds 0 — whereas a guard could STRAND a fast second "+10".
         let ref = db.collection("children").document(childID.uuidString)
         db.runTransaction({ txn, _ -> Any? in
             let doc = try? txn.getDocument(ref)
@@ -192,7 +191,6 @@ final class RemoteSyncManager: ObservableObject {
             if adj != 0 { txn.updateData(["pendingGiftAdjustment": 0], forDocument: ref) }
             return adj
         }) { [weak self] result, _ in
-            self?.applyingGift = false
             let adj = (result as? Int) ?? 0
             if adj != 0 { ProgressStore.shared.addParentGiftMinutes(adj) }
         }
@@ -217,33 +215,33 @@ final class RemoteSyncManager: ObservableObject {
     func resetChildProgress(childID: UUID) {
         #if canImport(FirebaseFirestore)
         let id = childID.uuidString
-        // 1. Command for the child's device (works even if it's offline now).
+        // 1. Command for the child's device — the AUTHORITATIVE wipe. (A direct
+        //    cloud-state overwrite from here RACED the child: if the blank doc
+        //    reached the kid before the command, mergeRemote ratchet-maxed stars
+        //    back over it and re-uploaded them, and no later push could lower the
+        //    cloud again. So: command only; the child wipes + pushes.)
         db.collection("children").document(id)
-            .setData(["resetRequestedAt": Date().timeIntervalSince1970], merge: true)
-        // 2. Immediate cloud state overwrite so every monitor shows zeros now.
-        let ref = db.collection("children").document(id)
-            .collection("state").document("current")
-        db.runTransaction({ txn, _ -> Any? in
-            let cloudRev = (try? txn.getDocument(ref))?.data()
-                .flatMap({ Self.decode($0) })?.revision ?? 0
-            var blank = ProgressSnapshot.blank
-            blank.revision = cloudRev + 1
-            blank.lastModifiedAt = Date()
-            blank.deviceID = ProgressSnapshot.thisDeviceID
-            if let data = Self.encode(blank) { txn.setData(data, forDocument: ref) }   // NOT merge — a real wipe
-            return nil
-        }) { _, err in
-            if let err { TofyLink("resetChildProgress cloud wipe FAILED: \(err.localizedDescription)") }
-        }
-        // 3. Local mirror so the dashboard row flips instantly (before the
-        //    listener echoes the wipe back).
+            .setData(["resetRequestedAt": Date().timeIntervalSince1970,
+                      "pendingMinuteAdjustment": 0,
+                      "pendingGiftAdjustment": 0], merge: true)
+        // 2. Parent-side mirror: show zeros NOW and keep showing them until the
+        //    child's post-reset snapshot arrives (a stale, pre-reset cloud echo
+        //    must not flip the tile back).
         var blank = ProgressSnapshot.blank
         blank.revision = (remoteSnapshots[childID]?.revision ?? 0) + 1
         blank.lastModifiedAt = Date()
         remoteSnapshots[childID] = blank
+        // Gate by REVISION (clock skew between devices is real), with a TTL so a
+        // child that never comes back can't pin the parent on zeros forever.
+        resetPending[childID] = (minRevision: blank.revision, until: Date().addingTimeInterval(24 * 3600))
         pendingAdjustments.removeValue(forKey: childID)
+        pendingGifts.removeValue(forKey: childID)
         #endif
     }
+
+    /// Children whose reset command is out but not yet echoed back by the child
+    /// device: ignore cloud snapshots BELOW `minRevision` until then (or TTL).
+    private var resetPending: [UUID: (minRevision: Int, until: Date)] = [:]
 
     /// PARENT: "נעל ואפס דקות מתנה" — revoke ALL parent-given time on the child
     /// (gift pocket + frozen leftover + an open parent window). A command on the
@@ -255,7 +253,9 @@ final class RemoteSyncManager: ObservableObject {
         // FIRTimestamp on the child doc is a known decoding hazard here (see
         // removeChildDevice), and a plain Double is enough for a one-shot command.
         db.collection("children").document(childID.uuidString)
-            .setData(["revokeGiftAt": Date().timeIntervalSince1970], merge: true)
+            .setData(["revokeGiftAt": Date().timeIntervalSince1970,
+                      "pendingGiftAdjustment": 0],   // cancel any in-flight "+10"
+                     merge: true)
         // Optimistic local mirror so the parent's 💝 tile drops to 0 at once.
         pendingGifts.removeValue(forKey: childID)
         if var snap = remoteSnapshots[childID] {
@@ -273,6 +273,9 @@ final class RemoteSyncManager: ObservableObject {
         db.runTransaction({ txn, _ -> Any? in
             let doc = try? txn.getDocument(ref)
             let requested = doc?.data()?["revokeGiftAt"] != nil
+            // Only clear the command. A non-zero pendingGiftAdjustment seen
+            // alongside it is a NEWER "+10" (revokeChildGift zeroed the field
+            // atomically with the stamp) — it must survive and apply after.
             if requested { txn.updateData(["revokeGiftAt": FieldValue.delete()], forDocument: ref) }
             return requested
         }) { [weak self] result, _ in
@@ -282,10 +285,12 @@ final class RemoteSyncManager: ObservableObject {
                 let closed = ProgressStore.shared.revokeAllParentTime()
                 if closed {
                     ShieldManager.shared.cancelScheduledReshield()
-                    ShieldManager.shared.applyDefaultLock()
+                    ShieldManager.shared.relockBaseline()
                 }
                 Haptic.warning()
                 self?.pushNow()
+                // Order: revoke first, THEN any gift given after it.
+                self?.applyPendingGift(childID: childID)
             }
         }
         #endif
@@ -305,9 +310,43 @@ final class RemoteSyncManager: ObservableObject {
         }) { [weak self] result, _ in
             guard (result as? Bool) == true else { return }
             Task { @MainActor in
-                TofyLink("applyPendingReset: parent reset for \(childID.uuidString.prefix(8)) → wiping local + pushing")
+                guard let self else { return }
+                TofyLink("applyPendingReset: parent reset for \(childID.uuidString.prefix(8)) → wiping local + cloud")
+                let wasOpen = ProgressStore.shared.isUnlocked
                 ProgressVault.shared.resetProfile(childID)
-                self?.pushNow()
+                if wasOpen {   // resetAll ended the window — bring the shield back
+                    ShieldManager.shared.cancelScheduledReshield()
+                    ShieldManager.shared.relockBaseline()
+                }
+                // AUTHORITATIVE cloud wipe: a plain (non-ratchet) set from the child.
+                // pushNow() would ratchet-merge and resurrect stars/xp from the cloud.
+                self.writeBlankCloudState(childID: childID)
+            }
+        }
+        #endif
+    }
+
+    /// CHILD device: overwrite this child's cloud state with a blank snapshot at a
+    /// revision above both cloud and local (so it wins, and our echo is skipped),
+    /// then adopt that revision locally.
+    private func writeBlankCloudState(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        let ref = db.collection("children").document(childID.uuidString)
+            .collection("state").document("current")
+        let localRev = ProgressStore.shared.revision
+        db.runTransaction({ txn, _ -> Any? in
+            let cloudRev = (try? txn.getDocument(ref))?.data()
+                .flatMap({ Self.decode($0) })?.revision ?? 0
+            var blank = ProgressSnapshot.blank
+            blank.revision = max(cloudRev, localRev) + 1
+            blank.lastModifiedAt = Date()
+            blank.deviceID = ProgressSnapshot.thisDeviceID
+            if let data = Self.encode(blank) { txn.setData(data, forDocument: ref) }   // NOT merge
+            return blank.revision
+        }) { result, err in
+            if let err { TofyLink("writeBlankCloudState FAILED: \(err.localizedDescription)"); return }
+            if let rev = result as? Int {
+                Task { @MainActor in ProgressStore.shared.adoptRevision(rev) }
             }
         }
         #endif
@@ -318,8 +357,6 @@ final class RemoteSyncManager: ObservableObject {
     /// devices can't double-apply), then adds it to the live balance.
     private func applyPendingMinuteGrant(childID: UUID) {
         #if canImport(FirebaseFirestore)
-        guard !applyingGrant else { return }
-        applyingGrant = true
         let ref = db.collection("children").document(childID.uuidString)
         db.runTransaction({ txn, _ -> Any? in
             let doc = try? txn.getDocument(ref)
@@ -327,7 +364,6 @@ final class RemoteSyncManager: ObservableObject {
             if adj != 0 { txn.updateData(["pendingMinuteAdjustment": 0], forDocument: ref) }
             return adj
         }) { [weak self] result, _ in
-            self?.applyingGrant = false
             let adj = (result as? Int) ?? 0
             if adj != 0 { ProgressStore.shared.addPendingMinutes(adj) }
         }
@@ -359,6 +395,7 @@ final class RemoteSyncManager: ObservableObject {
         let store = ProgressStore.shared
         let triggers: [AnyPublisher<Void, Never>] = [
             store.$pendingMinutes.map { _ in () }.eraseToAnyPublisher(),
+            store.$parentGiftMinutes.map { _ in () }.eraseToAnyPublisher(),
             store.$totalScore.map { _ in () }.eraseToAnyPublisher(),
             store.$stars.map { _ in () }.eraseToAnyPublisher(),
             store.$diamonds.map { _ in () }.eraseToAnyPublisher(),
@@ -494,8 +531,9 @@ final class RemoteSyncManager: ObservableObject {
                     if adj != 0 && (isBoundChildDevice || isKidModeForThis) {
                         self.applyPendingMinuteGrant(childID: profile.id)
                     }
-                    if gift != 0 && (isBoundChildDevice || isKidModeForThis) {
-                        self.applyPendingGift(childID: profile.id)
+                    let revokePending = doc?.data()?["revokeGiftAt"] != nil
+                    if gift != 0 && !revokePending && (isBoundChildDevice || isKidModeForThis) {
+                        self.applyPendingGift(childID: profile.id)   // else: applied after the revoke
                     }
                     // A parent's "reset progress" — consumed the same way, by the
                     // device that IS this child right now.
@@ -515,6 +553,13 @@ final class RemoteSyncManager: ObservableObject {
     }
 
     private func handleRemoteSnapshot(_ snap: ProgressSnapshot, profileID: UUID) {
+        // Parent tapped reset and the child hasn't echoed the wipe yet: drop
+        // pre-reset snapshots so the dashboard doesn't flip back to old numbers.
+        if let gate = resetPending[profileID] {
+            if Date() > gate.until { resetPending.removeValue(forKey: profileID) }
+            else if snap.revision < gate.minRevision { return }          // stale, pre-reset
+            else { resetPending.removeValue(forKey: profileID) }         // child echoed the wipe
+        }
         let isActive = profileID == ProfileStore.shared.activeID
         let ownEcho = snap.deviceID == ProgressSnapshot.thisDeviceID
         TofyLink("remoteSnapshot in: child=\(profileID.uuidString.prefix(8)) active=\(isActive) ownEcho=\(ownEcho) stars=\(snap.stars) diamonds=\(snap.diamonds) min=\(snap.pendingMinutes) rev=\(snap.revision)")

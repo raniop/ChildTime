@@ -168,6 +168,18 @@ final class ShieldManager: ObservableObject {
     ///    non-empty allowlist (which must include ChildTime). The safe default.
     ///  • classic block-list — block only the parent-selected apps, honoring a
     ///    temporary per-app allowance.
+    /// The single "re-lock the baseline NOW" entry point. Kid-Mode-aware: on a
+    /// parent phone in Kid Mode, the baseline is the kid-mode allow-list, NOT the
+    /// (usually empty) parent block-list — calling applyDefaultLock there UNLOCKED
+    /// the whole phone for the kid until the next foreground enforce.
+    func relockBaseline() {
+        if KidModeManager.shared.active {
+            applyLockAllExcept(KidModeManager.shared.allowedSelection)
+        } else {
+            applyDefaultLock()
+        }
+    }
+
     func applyDefaultLock() {
         // A managed device must not be deletable — that would remove the shield.
         store.application.denyAppRemoval = true

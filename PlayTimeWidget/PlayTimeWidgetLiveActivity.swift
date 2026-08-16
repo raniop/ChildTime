@@ -10,52 +10,61 @@ import AppIntents
 struct PlayTimeWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: PlayTimeActivityAttributes.self) { context in
-            // Lock screen / banner.
+            // Lock screen / banner. Once endsAt has passed (the app was killed /
+            // backgrounded, so it couldn't end the activity), say so plainly —
+            // no frozen 0:00 with a live "stop" button.
+            let over = context.isStale || context.state.endsAt <= Date()
             VStack(spacing: 10) {
                 HStack(spacing: 14) {
                     ZStack {
                         Circle().fill(Color.yellow.opacity(0.22)).frame(width: 50, height: 50)
-                        Text("🎮").font(.system(size: 26))
+                        Text(over ? "🔒" : "🎮").font(.system(size: 26))
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("זְמַן מִשְׂחָק")
+                        Text(over ? "הַזְּמַן נִגְמַר" : "זְמַן מִשְׂחָק")
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
-                        Text("נִשְׁאָר לְשַׂחֵק")
+                        Text(over ? "פִּתְחוּ אֶת טוֹפִי לְהַרְוִיחַ עוֹד" : "נִשְׁאָר לְשַׂחֵק")
                             .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.7))
                     }
                     Spacer(minLength: 8)
-                    countdown(to: context.state.endsAt, size: 32).frame(minWidth: 96)
+                    if !over { countdown(to: context.state.endsAt, size: 32).frame(minWidth: 96) }
                 }
-                stopButton()
+                if !over { stopButton() }
             }
             .padding(16)
             .activityBackgroundTint(Color.black.opacity(0.55))
             .activitySystemActionForegroundColor(.white)
 
         } dynamicIsland: { context in
-            DynamicIsland {
+            let over = context.isStale || context.state.endsAt <= Date()
+            return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     Label("זמן משחק", systemImage: "gamecontroller.fill")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.yellow)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    countdown(to: context.state.endsAt, size: 20).frame(minWidth: 72)
+                    if over {
+                        Text("נִגְמַר").font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.yellow)
+                    } else {
+                        countdown(to: context.state.endsAt, size: 20).frame(minWidth: 72)
+                    }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(spacing: 8) {
-                        Text("נִשְׁאָר זְמַן לְשַׂחֵק 🎮")
+                        Text(over ? "הַזְּמַן נִגְמַר 🔒" : "נִשְׁאָר זְמַן לְשַׂחֵק 🎮")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
-                        stopButton()
+                        if !over { stopButton() }
                     }
                 }
             } compactLeading: {
                 Image(systemName: "gamecontroller.fill").foregroundStyle(.yellow)
             } compactTrailing: {
-                countdown(to: context.state.endsAt, size: 15).frame(minWidth: 46)
+                if over { Image(systemName: "lock.fill").foregroundStyle(.yellow) }
+                else { countdown(to: context.state.endsAt, size: 15).frame(minWidth: 46) }
             } minimal: {
                 Image(systemName: "gamecontroller.fill").foregroundStyle(.yellow)
             }

@@ -34,9 +34,13 @@ enum PlayTimeLiveActivity {
         guard #available(iOS 16.2, *) else { return }
         let toEnd = current
         current = nil
+        // Capture the stray list SYNCHRONOUSLY. Enumerating inside the Task raced
+        // a start() issued right after end() (bank-and-restart, extend, resume)
+        // and killed the brand-new activity too — no lock-screen countdown.
+        let strays = Activity<PlayTimeActivityAttributes>.activities
         Task {
             await toEnd?.end(nil, dismissalPolicy: .immediate)
-            for activity in Activity<PlayTimeActivityAttributes>.activities {
+            for activity in strays where activity.id != toEnd?.id {
                 await activity.end(nil, dismissalPolicy: .immediate)
             }
         }

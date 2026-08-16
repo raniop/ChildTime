@@ -445,6 +445,9 @@ final class ProgressStore: ObservableObject {
     private func setupVersionTracking() {
         let triggers: [AnyPublisher<Void, Never>] = [
             $pendingMinutes.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            // 💝 gift pocket is SYNCED state — a gift/revoke must bump the
+            // revision or the upload ratchet keeps the stale cloud value.
+            $parentGiftMinutes.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $totalCorrect.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $totalAnswered.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $stars.dropFirst().map { _ in () }.eraseToAnyPublisher(),
@@ -1298,6 +1301,9 @@ final class ProgressStore: ObservableObject {
     }
 
     func startUnlock(minutes: Int, manual: Bool = false) {
+        // Never silently overwrite an OPEN EARNED window with a parent/manual one —
+        // bank its leftover back to the wallet first (pocket integrity).
+        if isUnlocked && !unlockIsManual { _ = endUnlockAndReturnRemainingMinutes() }
         // Fold any banked sub-minute carry into a real (non-manual) window so the
         // kid resumes at the exact leftover (e.g. 58 min wallet + 50 s carry →
         // 58:50). A parent's manual quick-open is a fixed window — it ignores carry.
@@ -1315,7 +1321,10 @@ final class ProgressStore: ObservableObject {
     /// Add minutes to the CURRENTLY open window (keeps its manual/earned kind).
     /// Used when the gift pocket is opened together with resumed frozen time.
     func extendUnlock(minutes: Int) {
-        guard minutes > 0, let end = unlockEndsAt, end > Date() else {
+        // Only ever extends a MANUAL (parent) window. If the open window is EARNED,
+        // start a fresh manual one instead (startUnlock banks the earned leftover) —
+        // gift minutes must never be folded into the earned pocket.
+        guard minutes > 0, let end = unlockEndsAt, end > Date(), unlockIsManual else {
             startUnlock(minutes: minutes, manual: true); return
         }
         let newEnd = end.addingTimeInterval(TimeInterval(minutes * 60))
@@ -1328,6 +1337,36 @@ final class ProgressStore: ObservableObject {
         unlockEndsAt = nil
         unlockIsManual = false
         PlayTimeLiveActivity.end()
+    }
+
+    // MARK: - Device-local play state per profile (not in the synced snapshot)
+
+    /// Frozen parent time is device-local AND per-child. On a shared device the
+    /// active profile can change (multi-kid device, Kid Mode), so park the
+    /// outgoing kid's frozen seconds under THEIR id and clear the live value.
+    /// Non-destructive: ADDS to any existing stash (a second stash on the same
+    /// switch with a now-empty live value must not overwrite a real one with 0).
+    func stashDeviceLocalPlayState(for profileID: UUID) {
+        guard manualPausedSeconds > 0 else { return }
+        let key = "manualPausedSeconds.\(profileID.uuidString)"
+        defaults.set(defaults.integer(forKey: key) + manualPausedSeconds, forKey: key)
+        manualPausedSeconds = 0
+    }
+
+    /// Bring back the incoming kid's own frozen seconds — additive + consumed, so
+    /// it's idempotent and can never resurrect the same seconds twice.
+    func restoreDeviceLocalPlayState(for profileID: UUID) {
+        let key = "manualPausedSeconds.\(profileID.uuidString)"
+        let stashed = defaults.integer(forKey: key)
+        guard stashed > 0 else { return }
+        manualPausedSeconds += stashed
+        defaults.removeObject(forKey: key)
+    }
+
+    /// Kid Mode exit on a PARENT phone: nothing kid-specific may remain live.
+    func clearDeviceLocalPlayState() {
+        manualPausedSeconds = 0
+        if isUnlocked { endUnlock() }
     }
 
     /// Whole minutes of frozen manual time waiting to be resumed (ceil, so 20:10
@@ -1360,6 +1399,8 @@ final class ProgressStore: ObservableObject {
     @discardableResult
     func resumeManualUnlock() -> Int {
         guard manualPausedSeconds > 0 else { return 0 }
+        // Same guard as startUnlock: an open EARNED window banks first.
+        if isUnlocked && !unlockIsManual { _ = endUnlockAndReturnRemainingMinutes() }
         let seconds = manualPausedSeconds
         manualPausedSeconds = 0
         let end = Date().addingTimeInterval(TimeInterval(seconds))
@@ -1648,11 +1689,22 @@ final class ProgressStore: ObservableObject {
 
     /// Hard-reset everything for a fresh profile. Keeps onboarding /
     /// settings — only the progress side.
+    /// After an authoritative cloud write (reset wipe), adopt that revision so the
+    /// next local edit outranks the wipe and our own echo is skipped.
+    func adoptRevision(_ r: Int) {
+        revision = max(revision, r)
+        lastModifiedAt = .now
+    }
+
     func resetAll() {
         let nextRevision = revision + 1
         apply(.blank)                  // zeroes the data (and adopts blank's rev 0)
         revision = nextRevision        // …but bump so the wipe outranks cloud state
         lastModifiedAt = .now
+        // Device-local pockets aren't in the snapshot — wipe them too (a reset is
+        // total): frozen parent time and any open window.
+        manualPausedSeconds = 0
+        if isUnlocked { endUnlock() }
         sessionScore = 0
         lastEarnedPoints = 0
         lastPenaltyMinutes = 0

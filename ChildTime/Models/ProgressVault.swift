@@ -64,6 +64,22 @@ final class ProgressVault {
     /// Save the currently-active profile's state, then load `profile`'s
     /// state into the live `ProgressStore`.
     func switchTo(_ profile: Profile) {
+        // 0. Device-local play state (open window / frozen parent time) belongs
+        //    to the OUTGOING kid — save it into their wallet/freezer, then clear,
+        //    so it can't leak onto the incoming profile. ONLY on a real switch
+        //    (first bind and same-profile re-selects leave the live value alone —
+        //    restoring there wiped frozen time on every launch of a 1-kid device).
+        let switching = boundProfileID != nil && boundProfileID != profile.id
+        if switching, let outgoing = boundProfileID {
+            let hadWindow = ProgressStore.shared.isUnlocked
+            ProgressStore.shared.stopAndSaveCurrentUnlock()
+            if hadWindow {
+                // The window's apps must not stay open for the NEXT kid.
+                ShieldManager.shared.cancelScheduledReshield()
+                ShieldManager.shared.relockBaseline()
+            }
+            ProgressStore.shared.stashDeviceLocalPlayState(for: outgoing)
+        }
         // 1. Save the outgoing profile
         if let outgoing = boundProfileID {
             write(ProgressStore.shared.captureSnapshot(), for: outgoing)
@@ -73,6 +89,9 @@ final class ProgressVault {
         ProgressStore.shared.apply(incoming)
         // 3. Bind
         boundProfileID = profile.id
+        // 3b. Restore the incoming kid's own frozen parent time (if any) —
+        //     only on a real switch (see step 0).
+        if switching { ProgressStore.shared.restoreDeviceLocalPlayState(for: profile.id) }
         // 4. Reset live caches that don't belong to the new profile
         QuestionMemory.shared.reloadForActiveProfile()
         LearningHistoryStore.shared.bind(to: profile.id)

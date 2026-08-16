@@ -97,6 +97,13 @@ struct ChildTimeApp: App {
         _characters = StateObject(wrappedValue: CharacterStore.shared)
 
         if Self.demoScreen != nil { Self.seedDemo() }
+        // Live Activity "עצור ושמור": iOS may launch the app HEADLESS to run the
+        // intent — the root view's .task never runs then. Register here so the
+        // request is applied immediately (apps re-lock) instead of on next open.
+        if Self.demoScreen == nil {
+            StopAndSaveBridge.start()
+            StopAndSaveBridge.applyIfRequested()
+        }
     }
 
     /// App Store screenshot mode — render a specific screen with sample data.

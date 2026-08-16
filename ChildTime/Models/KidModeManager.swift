@@ -69,6 +69,9 @@ final class KidModeManager: ObservableObject {
         // Force the cloud truth into the live store (covers the case where the
         // child was already the active profile, so the switch saved over it).
         if let cloud { ProgressStore.shared.apply(cloud) }
+        // This phone may hold the kid's frozen parent-time from a previous Kid
+        // Mode session (device-local, stashed on exit) — bring it back.
+        ProgressStore.shared.restoreDeviceLocalPlayState(for: id)
 
         ShieldManager.shared.applyLockAllExcept(allowedSelection)
         active = true
@@ -77,6 +80,19 @@ final class KidModeManager: ObservableObject {
 
     /// Exit kid mode (the caller must parent-gate this): unlock the phone, restore.
     func exit() {
+        // Close/save the kid's window BEFORE restoring the parent's profile —
+        // otherwise a window or frozen parent time (device-local, not in the
+        // snapshot) would leak onto whichever profile is active next.
+        ProgressStore.shared.stopAndSaveCurrentUnlock()
+        // The kid's banked earned leftover (and the last seconds of play) live
+        // only in the LIVE store right now — push them under the KID's id before
+        // the profile switches to the parent (the debounced upload would fire
+        // 3s later against the wrong active profile and never upload them).
+        RemoteSyncManager.shared.pushNow()
+        // A frozen parent leftover belongs to the KID — park it under their id.
+        // (Non-destructive stash; switchTo below may stash again with 0 → no-op.)
+        if let kid = childID { ProgressStore.shared.stashDeviceLocalPlayState(for: kid) }
+        ProgressStore.shared.clearDeviceLocalPlayState()
         ShieldManager.shared.clearShield()
         // Parent's phone returns to normal → allow deleting apps again.
         ShieldManager.shared.setAppRemovalLocked(false)

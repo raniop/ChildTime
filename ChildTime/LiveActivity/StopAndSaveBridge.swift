@@ -11,7 +11,10 @@ enum StopAndSaveBridge {
     private static let handledKey = "stopAndSaveHandledAt"
 
     /// Register the Darwin observer once, early in app launch.
+    private static var started = false
     static func start() {
+        guard !started else { return }   // idempotent — registered from init AND .task
+        started = true
         let center = CFNotificationCenterGetDarwinNotifyCenter()
         CFNotificationCenterAddObserver(
             center,
@@ -39,7 +42,7 @@ enum StopAndSaveBridge {
         guard ProgressStore.shared.isUnlocked else { return }
         ProgressStore.shared.stopAndSaveCurrentUnlock()   // freeze (manual) / bank (earned)
         ShieldManager.shared.cancelScheduledReshield()
-        ShieldManager.shared.applyDefaultLock()            // re-lock now
+        ShieldManager.shared.relockBaseline()            // re-lock now
         PlayTimeLiveActivity.end()
     }
 }

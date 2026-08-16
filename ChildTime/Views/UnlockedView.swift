@@ -170,10 +170,8 @@ struct UnlockedView: View {
                     // Time's up — re-apply the shield in-app (the extension would normally do this,
                     // but this covers the case where the kid is still inside ChildTime).
                     ShieldManager.shared.cancelScheduledReshield()
-                    if let data = ParentSettings.shared.activitySelectionData {
-                        let selection = SelectionStorage.decode(data)
-                        ShieldManager.shared.applyShield(from: selection)
-                    }
+                    // Baseline re-lock (Kid-Mode-aware; block-all vs block-list).
+                    ShieldManager.shared.relockBaseline()
                     progress.endUnlock()
                     timer?.invalidate()
                     // Window ran out — let the parent know play time ended.
@@ -185,10 +183,8 @@ struct UnlockedView: View {
 
     private func endEarly() {
         ShieldManager.shared.cancelScheduledReshield()
-        if let data = ParentSettings.shared.activitySelectionData {
-            let selection = SelectionStorage.decode(data)
-            ShieldManager.shared.applyShield(from: selection)
-        }
+        // Baseline re-lock (Kid-Mode-aware; block-all vs block-list).
+        ShieldManager.shared.relockBaseline()
         // A manual (parent) grant now FREEZES its leftover so it isn't wasted — the
         // child can resume it later from the home screen. An earned window refunds
         // its unused minutes to the wallet as before.

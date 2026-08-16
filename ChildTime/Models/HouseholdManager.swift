@@ -756,7 +756,7 @@ final class HouseholdManager: ObservableObject {
             // silently burned whatever was left.)
             ProgressStore.shared.stopAndSaveCurrentUnlock()
             ShieldManager.shared.cancelScheduledReshield()
-            ShieldManager.shared.applyDefaultLock()    // re-lock now
+            ShieldManager.shared.relockBaseline()    // re-lock now
             Haptic.warning()
         }
         #endif

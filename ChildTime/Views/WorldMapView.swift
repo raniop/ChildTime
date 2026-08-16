@@ -1127,7 +1127,8 @@ struct WorldMapView: View {
             // any frozen leftover of an earlier parent window (the kid tapped "עצור
             // ושמור"). Both are parent time — never blurred with earned minutes.
             // Opens both together as one fixed manual window (outside the cap).
-            if (progress.parentGiftMinutes > 0 || progress.hasPausedManualTime) && !progress.isUnlocked {
+            if (progress.parentGiftMinutes > 0 || progress.hasPausedManualTime) && !progress.isUnlocked
+                && household.otherDeviceOpenWindow(forChildID: profiles.activeID ?? UUID()) == nil {
                 Button {
                     requestUnlock { redeemGift() }
                 } label: {
@@ -1157,8 +1158,7 @@ struct WorldMapView: View {
                 let mins = max(1, (other.secondsLeft + 59) / 60)
                 let where_ = other.device.kind == "ipad" ? "בָּאַיְפֵּד" : (other.device.kind == "iphone" ? "בָּאַיְפוֹן" : "בְּמַכְשִׁיר אַחֵר")
                 bottomHint("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו \(where_) — עוֹד \(mins) דַּקּוֹת")
-            } else
-            if progress.canRedeemNow {
+            } else if progress.canRedeemNow {
                 Button {
                     requestUnlock { redeemMinutes() }
                 } label: {
@@ -1407,6 +1407,7 @@ struct WorldMapView: View {
     /// any frozen leftover. Outside the daily cap; leftover freezes again on
     /// stop-and-save (so nothing a parent gave is ever wasted).
     private func redeemGift() {
+        guard !progress.isUnlocked else { return }   // re-check: PIN cover runs us later
         let gift = progress.consumeParentGiftForUnlock()
         // Frozen seconds resume as their own manual window; fold the gift on top.
         let frozenMinutes = progress.hasPausedManualTime ? progress.resumeManualUnlock() : 0
@@ -1420,14 +1421,6 @@ struct WorldMapView: View {
         LiveEventReporter.report(.screenTimeStart, extra: ["minutes": total, "gift": true])
     }
 
-    /// Resume the frozen leftover of a parent's manual grant (reopens the shield +
-    /// the play window from the exact saved seconds).
-    private func resumeManual() {
-        let minutes = progress.resumeManualUnlock()
-        guard minutes > 0 else { return }
-        shields.unlock(minutes: minutes)
-        LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes])
-    }
 }
 
 /// Minimal animated XP bar for the hero header.

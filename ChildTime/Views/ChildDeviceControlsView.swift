@@ -434,7 +434,9 @@ struct ChildDeviceControlsView: View {
 
     private func lockNow() {
         shields.cancelScheduledReshield()
-        progress.endUnlock()
+        // Save, don't burn — same semantics as the remote lock: an EARNED window
+        // banks back to the wallet, a parent window freezes for later.
+        progress.stopAndSaveCurrentUnlock()
         shields.applyShield(from: SelectionStorage.decode(settings.activitySelectionData))
         dismiss()
     }
