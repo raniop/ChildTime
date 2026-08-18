@@ -53,6 +53,8 @@ final class ProgressStore: ObservableObject {
         static let lastComebackWheelAt = "lastComebackWheelAt"
         static let recoveryPot = "recoveryPot"
         static let parentGiftMinutes = "parentGiftMinutes"
+        static let giftGivenToday = "giftGivenToday"
+        static let giftGivenDate = "giftGivenDate"
         static let revision = "progress.revision"
         static let lastModifiedAt = "progress.lastModifiedAt"
     }
@@ -351,6 +353,16 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var parentGiftMinutes: Int {
         didSet { defaults.set(parentGiftMinutes, forKey: Key.parentGiftMinutes) }
     }
+    /// 💝 given TODAY (for the "until midnight" daily cap) + which day.
+    @Published private(set) var giftGivenToday: Int {
+        didSet { defaults.set(giftGivenToday, forKey: Key.giftGivenToday) }
+    }
+    @Published private(set) var giftGivenDate: Date? {
+        didSet {
+            if let d = giftGivenDate { defaults.set(d, forKey: Key.giftGivenDate) }
+            else { defaults.removeObject(forKey: Key.giftGivenDate) }
+        }
+    }
 
     // MARK: - Sync versioning
 
@@ -428,6 +440,8 @@ final class ProgressStore: ObservableObject {
         self.lastComebackWheelAt = d.object(forKey: Key.lastComebackWheelAt) as? Date
         self.recoveryPot = d.integer(forKey: Key.recoveryPot)
         self.parentGiftMinutes = d.integer(forKey: Key.parentGiftMinutes)
+        self.giftGivenToday = d.integer(forKey: Key.giftGivenToday)
+        self.giftGivenDate = d.object(forKey: Key.giftGivenDate) as? Date
 
         self.revision = d.integer(forKey: Key.revision)
         self.lastModifiedAt = (d.object(forKey: Key.lastModifiedAt) as? Date) ?? .distantPast
@@ -448,6 +462,7 @@ final class ProgressStore: ObservableObject {
             // 💝 gift pocket is SYNCED state — a gift/revoke must bump the
             // revision or the upload ratchet keeps the stale cloud value.
             $parentGiftMinutes.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $giftGivenToday.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $totalCorrect.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $totalAnswered.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $stars.dropFirst().map { _ in () }.eraseToAnyPublisher(),
@@ -1271,6 +1286,31 @@ final class ProgressStore: ObservableObject {
     func addParentGiftMinutes(_ delta: Int) {
         guard delta != 0 else { return }
         parentGiftMinutes = max(0, parentGiftMinutes + delta)
+        // Count what was GIVEN today (for the "until midnight" cap). Roll the
+        // counter when the day changed. Unused gift itself carries over (Rani).
+        if delta > 0 {
+            if let d = giftGivenDate, Calendar.current.isDateInToday(d) {
+                giftGivenToday += delta
+            } else {
+                giftGivenToday = delta
+                giftGivenDate = Date()
+            }
+        }
+    }
+
+    /// 💝 given today, day-aware (0 if the counter is from a previous day).
+    var giftGivenTodayResolved: Int {
+        guard let d = giftGivenDate, Calendar.current.isDateInToday(d) else { return 0 }
+        return giftGivenToday
+    }
+
+    /// The daily cap for parent gifts: you can't give more than there is left
+    /// until midnight (a 20:00 gift can be at most 240 min in total today).
+    static func minutesUntilMidnight(_ now: Date = Date()) -> Int {
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: now)
+        guard let midnight = cal.date(byAdding: .day, value: 1, to: start) else { return 0 }
+        return max(0, Int(midnight.timeIntervalSince(now) / 60))
     }
 
     /// Parent revoked their gift ("נעל ואפס דקות מתנה"): wipe EVERY bit of parent
@@ -1577,6 +1617,8 @@ final class ProgressStore: ObservableObject {
         s.wheelProgressCount  = wheelProgressCount
         s.recoveryPot         = recoveryPot
         s.parentGiftMinutes   = parentGiftMinutes
+        s.giftGivenToday      = giftGivenToday
+        s.giftGivenDate       = giftGivenDate
         s.ownedCharacterIDs   = Array(ownedCharacterIDs)
         // Carry the REAL version forward. Stamping `.now` here (the old bug) made
         // every capture look freshly-modified, so a remote snapshot's older
@@ -1636,6 +1678,8 @@ final class ProgressStore: ObservableObject {
         wheelProgressCount  = s.wheelProgressCount
         recoveryPot         = s.recoveryPot
         parentGiftMinutes   = s.parentGiftMinutes ?? 0
+        giftGivenToday      = s.giftGivenToday ?? 0
+        giftGivenDate       = s.giftGivenDate
         // Replace (not union) — apply() also runs on profile switch, so merging
         // would leak one child's characters onto another. Revision/lastModified
         // ordering in the sync layer already keeps the newest set.

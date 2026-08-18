@@ -13,6 +13,7 @@ struct ChildDeviceControlsView: View {
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var shields: ShieldManager
     @EnvironmentObject var progress: ProgressStore
+    @ObservedObject private var profiles = ProfileStore.shared
     @ObservedObject private var kidMode = KidModeManager.shared
     @Environment(\.dismiss) private var dismiss
 
@@ -211,23 +212,40 @@ struct ChildDeviceControlsView: View {
     // MARK: - Quick open (manual, all apps)
 
     private var quickOpenCard: some View {
-        controlCard(tint: AppColor.starGold) {
-            sectionHead("פְּתִיחָה מְהִירָה",
-                        "חַד-פַּעֲמִי · פּוֹתֵחַ אֶת כָּל הָאַפְּלִיקַצְיוֹת. לֹא מֵהַדַּקּוֹת שֶׁהַיֶּלֶד צָבַר.",
-                        icon: "hourglass", tint: AppColor.starGold)
+        // Same rule as the parent dashboard: a parent GIVES 💝 minutes into the
+        // child's synced gift pocket — never a surprise unlock. The child opens
+        // them when they choose (from any device). Capped per day at what's left
+        // until midnight; unused gift carries over.
+        let capLeft = max(0, ProgressStore.minutesUntilMidnight() - progress.giftGivenTodayResolved)
+        return controlCard(tint: AppColor.starGold) {
+            sectionHead("תֵּן דַּקּוֹת מַתָּנָה 💝",
+                        capLeft > 0
+                            ? "נִכְנָס לַכִּיס 💝 שֶׁל הַיֶּלֶד — \(profileName) \(isGirl ? "פּוֹתַחַת" : "פּוֹתֵחַ") מָתַי שֶׁ\(isGirl ? "תִּרְצֶה" : "יִרְצֶה"), מִכָּל מַכְשִׁיר. אֶפְשָׁר לָתֵת עוֹד עַד \(capLeft) דַּקּוֹת הַיּוֹם (עַד חֲצוֹת)."
+                            : "הִגַּעְתֶּם לַמַּקְסִימוּם לְהַיּוֹם (עַד חֲצוֹת). מָחָר אֶפְשָׁר שׁוּב.",
+                        icon: "gift.fill", tint: AppColor.starGold)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                durationPill("חֲצִי שָׁעָה", minutes: 30)
-                durationPill("שָׁעָה", minutes: 60)
-                durationPill("שְׁעָתַיִם", minutes: 120)
-                durationPill("עַד סוֹף הַיּוֹם", minutes: minutesUntilEndOfDay())
+                durationPill("10 דַּקּוֹת", minutes: 10, capLeft: capLeft)
+                durationPill("חֲצִי שָׁעָה", minutes: 30, capLeft: capLeft)
+                durationPill("שָׁעָה", minutes: 60, capLeft: capLeft)
+                durationPill("עַד סוֹף הַיּוֹם", minutes: capLeft, capLeft: capLeft)
+            }
+            if progress.parentGiftMinutes > 0 {
+                Text("בַּכִּיס עַכְשָׁיו: 💝 \(progress.parentGiftMinutes) דַּקּוֹת")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(AppColor.textOnLight.opacity(0.8))
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
     }
 
-    private func durationPill(_ title: String, minutes: Int) -> some View {
-        Button {
+    private var profileName: String { profiles.active?.name ?? "הַיֶּלֶד" }
+    private var isGirl: Bool { profiles.active?.gender == .girl }
+
+    private func durationPill(_ title: String, minutes: Int, capLeft: Int) -> some View {
+        let allowed = min(minutes, capLeft)
+        return Button {
             Haptic.success()
-            grant(minutes: minutes)
+            gift(minutes: allowed)
         } label: {
             Text(title)
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
@@ -237,6 +255,8 @@ struct ChildDeviceControlsView: View {
                 .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.juicy)
+        .disabled(allowed <= 0)
+        .opacity(allowed <= 0 ? 0.45 : 1)
     }
 
     // MARK: - Per-app temporary allowance
@@ -416,19 +436,13 @@ struct ChildDeviceControlsView: View {
 
     // MARK: - Actions
 
-    private func grant(minutes: Int) {
-        controlsLog.notice("manual quick-open tapped: \(minutes, privacy: .public) min")
-        // Set the play window IMMEDIATELY and authoritatively — before any async
-        // shield work — so the countdown always reflects exactly the tapped amount
-        // and can't be pre-empted by a slow auth hop or a stale earlier window.
-        // A ONE-TIME fixed window: it does NOT stack and does NOT touch the
-        // play-minutes the child EARNED — tapping again just replaces the window.
-        progress.startUnlock(minutes: minutes, manual: true)
-        Task {
-            await shields.requestAuthorizationIfNeeded()
-            shields.cancelScheduledReshield()
-            shields.unlock(minutes: minutes)
-        }
+    /// 💝 Give minutes on the child's own device: straight into the synced gift
+    /// pocket (this device IS the child, so no cloud command needed — the store
+    /// change syncs up). Never opens a window — the child does that.
+    private func gift(minutes: Int) {
+        guard minutes > 0 else { return }
+        controlsLog.notice("parent gift on-device: \(minutes, privacy: .public) min")
+        progress.addParentGiftMinutes(minutes)
         dismiss()
     }
 

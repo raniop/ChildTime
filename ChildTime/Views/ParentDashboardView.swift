@@ -737,11 +737,12 @@ struct ParentDashboardView: View {
                         }
                     }
                     Menu {
+                        Button("10 דַּקּוֹת") { remoteOpen(profile, 10) }
                         Button("חֲצִי שָׁעָה") { remoteOpen(profile, 30) }
                         Button("שָׁעָה") { remoteOpen(profile, 60) }
                         Button("שְׁעָתַיִם") { remoteOpen(profile, 120) }
                     } label: {
-                        Label("פְּתַח זְמַן מָסָךְ עַכְשָׁיו (מֵרָחוֹק)", systemImage: "lock.open.fill")
+                        Label("תֵּן דַּקּוֹת מַתָּנָה 💝", systemImage: "gift.fill")
                     }
                     Button {
                         remoteLock(profile)
@@ -1173,11 +1174,12 @@ struct ParentDashboardView: View {
     private func gridCardMenu(_ profile: Profile) -> some View {
         Menu {
             Menu {
+                Button("10 דַּקּוֹת") { remoteOpen(profile, 10) }
                 Button("חֲצִי שָׁעָה") { remoteOpen(profile, 30) }
                 Button("שָׁעָה") { remoteOpen(profile, 60) }
                 Button("שְׁעָתַיִם") { remoteOpen(profile, 120) }
             } label: {
-                Label("פְּתַח זְמַן מָסָךְ עַכְשָׁיו (מֵרָחוֹק)", systemImage: "lock.open.fill")
+                Label("תֵּן דַּקּוֹת מַתָּנָה 💝", systemImage: "gift.fill")
             }
             Button {
                 remoteLock(profile)
@@ -2012,7 +2014,7 @@ struct ParentDashboardView: View {
             case "🎮":
                 return "דקות משחק שהילד/ה הרוויח/ה מלמידה ועוד לא פתח/ה (הארנק המורווח). דקות שאתם נותנים (💝 מתנה) נשמרות בנפרד ולא נספרות כאן. כשיש חלון פתוח — רואים ספירה לאחור. \"—\" = אין דקות ממתינות."
             case "💝":
-                return "דקות שאתם נתתם (הכפתור \"💝 +10 מתנה\", פתיחה מרחוק, או ❄️ שארית שהילד/ה הקפיא/ה מחלון שנתתם) ועוד לא נפתחו. נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, לא כפופות לתקרה היומית, ונפתחות בכפתור ורוד אחד במסך הבית."
+                return "דקות שאתם נתתם במתנה ועוד לא נפתחו — נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, אותו מספר בכל מכשיר. הילד/ה פותח/ת אותן מתי שרוצה. אפשר לתת ביום עד מה שנשאר עד חצות; מה שלא נוצל נשאר למחר."
             default:
                 return "נתון מסכם על הפעילות של הילד/ה בטופי."
             }
@@ -2022,14 +2024,40 @@ struct ParentDashboardView: View {
     // MARK: - Actions
 
 
+    /// 💝 Give minutes — the ONE way a parent hands the child time. It lands in
+    /// the child's synced gift pocket (same 💝 on every device); the child opens
+    /// it when THEY choose — never a surprise unlock on a device they may not
+    /// even be holding. Capped per day: you can't give more than there is left
+    /// until midnight (a 20:00 gift tops out at 240 min total for today).
+    /// Unused gift carries over — the cap is on GIVING, not on holding.
     private func remoteOpen(_ profile: Profile, _ minutes: Int) {
+        let (allowed, capLeft) = giftAllowance(for: profile, wanting: minutes)
+        guard allowed > 0 else {
+            Haptic.warning()
+            remoteGrantMsg = "הִגַּעְתֶּם לַמַּקְסִימוּם לְהַיּוֹם: אֶפְשָׁר לָתֵת עַד \(ProgressStore.minutesUntilMidnight()) דַּקּוֹת (עַד חֲצוֹת) — וּכְבָר נָתַתֶּם אֶת כֻּלָּן. מָחָר אֶפְשָׁר שׁוּב."
+            return
+        }
         Haptic.success()
-        household.grantRemoteScreenTime(toChildID: profile.id, minutes: minutes)
-        let label = minutes % 60 == 0 ? "\(minutes / 60) שָׁעוֹת" : "\(minutes) דַּקּוֹת"
-        let connected = (household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
-        remoteGrantMsg = connected
-            ? "פָּתַחְתָּ לְ\(profile.name) \(label) שֶׁל זְמַן מָסָךְ. זֶה יִפָּתַח בַּמַּכְשִׁיר שֶׁלּוֹ מִיָּד (אוֹ בָּרֶגַע שֶׁיִּפְתַּח אֶת טוֹפִּי)."
-            : "אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַפְּתִיחָה תֻּחַל בָּרֶגַע שֶׁיִּתְחַבֵּר."
+        remote.giftChildMinutes(childID: profile.id, minutes: allowed)
+        refreshTrigger &+= 1
+        let label = allowed % 60 == 0 ? "\(allowed / 60) שָׁעוֹת" : "\(allowed) דַּקּוֹת"
+        var msg = "נָתַתֶּם לְ\(profile.name) \(label) בְּמַתָּנָה 💝. \(profile.gender == .girl ? "הִיא תִּפְתַּח" : "הוּא יִפְתַּח") אוֹתָן מִכָּל מַכְשִׁיר, מָתַי שֶׁ\(profile.gender == .girl ? "תִּרְצֶה" : "יִרְצֶה")."
+        if allowed < minutes {
+            msg += " (בִּקַּשְׁתֶּם \(minutes) — זֶה הַמַּקְסִימוּם שֶׁנִּשְׁאַר לְהַיּוֹם, עַד חֲצוֹת.)"
+        }
+        remoteGrantMsg = msg
+    }
+
+    /// How much of `wanting` may still be given today: min(wanting, minutes-until-
+    /// midnight − already-given-today). Uses the synced counter + gifts in flight.
+    private func giftAllowance(for profile: Profile, wanting: Int) -> (allowed: Int, capLeft: Int) {
+        let snap = remote.remoteSnapshots[profile.id] ?? ProgressVault.shared.snapshot(for: profile.id)
+        let givenToday: Int = {
+            guard let d = snap.giftGivenDate, Calendar.current.isDateInToday(d) else { return 0 }
+            return snap.giftGivenToday ?? 0
+        }() + remote.pendingGifts[profile.id, default: 0]
+        let capLeft = max(0, ProgressStore.minutesUntilMidnight() - givenToday)
+        return (min(wanting, capLeft), capLeft)
     }
 
     private func remoteLock(_ profile: Profile) {
@@ -2091,9 +2119,7 @@ struct ParentDashboardView: View {
     /// 💝 Give minutes — into the child's separate GIFT pocket (never the earned
     /// wallet). Cloud delta-command; the child's device applies it.
     private func quickGift(profile: Profile, minutes: Int) {
-        Haptic.light()
-        remote.giftChildMinutes(childID: profile.id, minutes: minutes)
-        refreshTrigger &+= 1
+        remoteOpen(profile, minutes)   // one path, one cap, one message
     }
 
     private func quickAdjust(profile: Profile, deltaMinutes: Int) {
