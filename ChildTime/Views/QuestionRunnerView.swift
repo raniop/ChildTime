@@ -78,6 +78,9 @@ struct QuestionRunnerView: View {
     /// Questions the child got wrong this session — re-asked later (the only
     /// allowed repeat). Deduped by prompt.
     @State private var reAskQueue: [Question] = []
+    /// 📖 Remaining questions of the current reading passage — served
+    /// back-to-back so the child reads once and answers everything about it.
+    @State private var readingQueue: [Question] = []
     @State private var questionShownAt: Date? = nil
     @State private var hadMistakeThisQuestion: Bool = false
     /// Whether the child leaned on a hint for the current question — fed to the
@@ -285,6 +288,7 @@ struct QuestionRunnerView: View {
         case "science_lab":     FloatingOrbs.scienceWorld()
         case "history_museum":  FloatingOrbs.historyWorld()
         case "geo_journey":     FloatingOrbs.geographyWorld()
+        case "story_forest":    FloatingOrbs.readingWorld()
         default:                FloatingOrbs.home()
         }
     }
@@ -483,7 +487,10 @@ struct QuestionRunnerView: View {
                                bg: AppColor.companionGlow.opacity(0.9),
                                glow: AppColor.companionGlow.opacity(0.5)) {
                     Haptic.light()
-                    SpeechReader.shared.readQuestion(prompt: q.readAloudText, options: q.options)
+                    // For a passage question, read the passage first — one
+                    // utterance, so the two don't cut each other off.
+                    let spokenPrompt = (q.passage.map { $0 + ". " } ?? "") + q.readAloudText
+                    SpeechReader.shared.readQuestion(prompt: spokenPrompt, options: q.options)
                 }
                 Spacer(minLength: 4)
                 HStack(spacing: 8) {
@@ -515,6 +522,32 @@ struct QuestionRunnerView: View {
                 }
             }
             .padding(.horizontal, AppSpacing.lg)
+
+            // 📖 The passage card — the child reads here, then answers below.
+            // Scrolls inside its own frame so a long passage can never squeeze
+            // the answers off-screen.
+            if let passage = q.passage {
+                ScrollView {
+                    Text(passage)
+                        .font(.system(size: isCompact ? 17 : 21, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(AppSpacing.md)
+                }
+                .frame(maxHeight: isCompact ? 170 : 240)
+                .background(
+                    RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                        .fill(.white.opacity(0.10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                                .stroke(.white.opacity(0.25), lineWidth: 1)
+                        )
+                )
+                .padding(.horizontal, AppSpacing.lg)
+                .environment(\.layoutDirection, .rightToLeft)   // Hebrew passage reads right-to-left
+            }
 
             // Early-reader visual questions carry the instruction in `spoken` (the
             // prompt itself is pictures). Show it as a written line ABOVE the
@@ -909,6 +942,23 @@ struct QuestionRunnerView: View {
         lastBandByTopic[topic] = band
         // Early readers (age 4) get picture-based questions instead of text ones.
         let preReader = isPreReader
+        // 📖 Reading: the unit is a PASSAGE — pop the next question about the
+        // current passage; fetch a fresh passage when the group is done. Falls
+        // through to the generic path (single passage question) only if the
+        // whole pool was filtered out.
+        if topic == .reading, !preReader, !bonus {
+            if readingQueue.isEmpty {
+                readingQueue = ReadingContent.nextGroup(target: effective)
+                    .filter { !QuestionReporter.shared.isHidden($0.prompt) }
+            }
+            if !readingQueue.isEmpty {
+                let rq = readingQueue.removeFirst()
+                QuestionMemory.shared.markServedThisSession(sessionKey(rq))
+                current = rq
+                questionShownAt = Date()
+                return
+            }
+        }
         func makeQuestion() -> Question {
             if bonus { return QuestionGenerator.generateBonus(topic: topic) }
             return preReader

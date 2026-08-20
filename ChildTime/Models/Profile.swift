@@ -42,6 +42,11 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// parent who turns off English hides that world and stops English questions.
     /// Synced via `ChildRecord`. Default: every topic enabled (opt-out per child).
     var enabledTopics: Set<Topic>
+    /// Version stamp for `enabledTopics`. Data written before הבנת הנקרא shipped
+    /// (version 1 / missing) can't tell "parent disabled reading" from "reading
+    /// didn't exist yet" — so v1 data gets the new topic enabled once on decode,
+    /// and every write from this build stamps 2, preserving the parent's choice.
+    var topicsVersion: Int = 2
     /// The child's OWN 4-digit "protect my time" code. When set, redeeming/
     /// resuming play minutes on the child's device asks for this code — so a
     /// sibling/friend holding the device can't burn the minutes the child
@@ -67,6 +72,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         difficultyByTopic: [String: String] = [:],
         dailyCapMinutes: Int? = nil,
         enabledTopics: Set<Topic> = Set(Topic.allCases),
+        topicsVersion: Int = 2,
         playPIN: String? = nil
     ) {
         self.id = id
@@ -83,6 +89,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.difficultyByTopic = difficultyByTopic
         self.dailyCapMinutes = dailyCapMinutes
         self.enabledTopics = enabledTopics
+        self.topicsVersion = topicsVersion
         self.playPIN = playPIN
     }
 
@@ -91,6 +98,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     enum CodingKeys: String, CodingKey {
         case id, name, gender, age, photoData, avatarPresetID, character3DID, createdAt
         case grade, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
+        case topicsVersion
         case playPIN
     }
 
@@ -110,7 +118,24 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.difficultyByTopic = try c.decodeIfPresent([String: String].self, forKey: .difficultyByTopic) ?? [:]
         self.dailyCapMinutes = try c.decodeIfPresent(Int.self, forKey: .dailyCapMinutes)
         // Older profiles (pre per-child topics) decode to "everything enabled".
-        self.enabledTopics = try c.decodeIfPresent(Set<Topic>.self, forKey: .enabledTopics) ?? Set(Topic.allCases)
+        // LENIENT on the values: an unknown topic rawValue (data written by a
+        // NEWER build that added a topic) silently drops instead of failing the
+        // whole profile decode — ProfileStore.loadProfiles() try?-decodes the
+        // entire array, so one strict failure would wipe every profile.
+        let rawTopics = (try? c.decodeIfPresent([String].self, forKey: .enabledTopics)) ?? nil
+        if let rawTopics {
+            let parsed = Set(rawTopics.compactMap(Topic.init(rawValue:)))
+            self.enabledTopics = parsed.isEmpty ? Set(Topic.allCases) : parsed
+        } else {
+            self.enabledTopics = Set(Topic.allCases)
+        }
+        // v1 data predates הבנת הנקרא — enable it once (except preK, who can't
+        // read yet); a version-2 write means the set reflects the parent's choice.
+        self.topicsVersion = (try? c.decodeIfPresent(Int.self, forKey: .topicsVersion)) ?? nil ?? 1
+        if topicsVersion < 2 {
+            if age != .preK { enabledTopics.insert(.reading) }
+            topicsVersion = 2
+        }
         self.playPIN = try c.decodeIfPresent(String.self, forKey: .playPIN)
     }
 

@@ -82,6 +82,21 @@ struct BossBattleView: View {
             Spacer()
 
             if let q = question {
+                // 📖 Reading-world boss: the passage scrolls above the question.
+                if let passage = q.passage {
+                    ScrollView {
+                        Text(passage)
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(12)
+                    }
+                    .frame(maxHeight: 150)
+                    .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .padding(.horizontal, 18)
+                }
                 Text(q.prompt)
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .multilineTextAlignment(.center)

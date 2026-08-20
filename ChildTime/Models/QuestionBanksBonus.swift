@@ -14,6 +14,7 @@ enum BonusQuestionBank {
     static func pool(for topic: Topic) -> [BankQuestion] {
         switch topic {
         case .math:      return []   // procedural — see QuestionGenerator.makeBonusMath
+        case .reading:   return []   // falls back to a hard passage via generate(.reading)
         case .english:   return english
         case .hebrew:    return hebrew
         case .logic:     return logic

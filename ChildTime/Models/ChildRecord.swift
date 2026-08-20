@@ -120,6 +120,9 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// Topics (worlds) the parent enabled for this child (topic.rawValues).
     /// nil → all topics enabled (also the backward-compatible default).
     var enabledTopics: [String]?
+    /// See `Profile.topicsVersion` — nil marks a record written before הבנת
+    /// הנקרא existed, whose topic set therefore gets the new topic on rehydrate.
+    var topicsVersion: Int?
     /// The child's own "protect my time" code (see `Profile.playPIN` — stored
     /// in the clear on purpose so the parent dashboard can SHOW it). Child-
     /// editable (like `character3DID`); the parent dashboard may clear it if
@@ -146,6 +149,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.enabledTopics = profile.enabledTopics.count >= Topic.allCases.count
             ? nil
             : profile.enabledTopics.map { $0.rawValue }.sorted()
+        self.topicsVersion = profile.topicsVersion
         self.playPIN = profile.playPIN
     }
 
@@ -153,6 +157,12 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// avatar picked on the child's device shows up on the parent's device too.
     func toProfile() -> Profile? {
         guard let uuid = UUID(uuidString: id) else { return nil }
+        var topics = enabledTopics.map { Set($0.compactMap(Topic.init(rawValue:))) } ?? Set(Topic.allCases)
+        // Pre-reading record → the narrowed set predates the topic; enable it
+        // (except preK). A version-2 record reflects the parent's real choice.
+        if (topicsVersion ?? 1) < 2, ChildAge(rawValue: age) ?? .grade1 != .preK {
+            topics.insert(.reading)
+        }
         return Profile(
             id: uuid,
             name: name,
@@ -167,7 +177,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             learningLevel: LearningLevel(rawValue: learningLevel) ?? .developing,
             difficultyByTopic: difficultyByTopic ?? [:],
             dailyCapMinutes: dailyCapMinutes,
-            enabledTopics: enabledTopics.map { Set($0.compactMap(Topic.init(rawValue:))) } ?? Set(Topic.allCases),
+            enabledTopics: topics,
+            topicsVersion: 2,
             playPIN: playPIN
         )
     }

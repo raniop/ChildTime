@@ -174,7 +174,8 @@ struct MatchPairsView: View {
 
     private func deal() {
         matched = []; pickedLeft = nil; pickedRight = nil; mistakes = 0; wrongFlash = false; revealStep = 0
-        let topics = Array(profiles.active?.enabledTopics ?? Set(Topic.allCases))
+        // Reading passages don't fit the prompt↔answer pair format — skip them here.
+        let topics = Array(profiles.active?.enabledTopics ?? Set(Topic.allCases)).filter { $0 != .reading }
         var pairs: [(prompt: String, answer: String)] = []
         var seenAnswers = Set<String>()
         var seenPrompts = Set<String>()

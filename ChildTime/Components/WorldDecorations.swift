@@ -18,6 +18,8 @@ struct WorldDecorations: View {
             return ["🏛️", "⏳", "📜", "🗿", "⚔️", "🏺"]
         case "geo_journey":
             return ["🌍", "🗺️", "🧭", "🏔️", "🌊", "🌋"]
+        case "story_forest":
+            return ["📖", "📚", "🌙", "🦉", "🕯️", "✨"]
         default:
             return ["✨", "⭐", "🌟"]
         }

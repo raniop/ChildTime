@@ -251,7 +251,8 @@ struct TrueFalseRaceView: View {
     }
 
     private func makeItem() -> TFItem {
-        let topics = Array(profiles.active?.enabledTopics ?? Set(Topic.allCases))
+        // Reading passages don't fit the single-candidate format — skip them here.
+        let topics = Array(profiles.active?.enabledTopics ?? Set(Topic.allCases)).filter { $0 != .reading }
         // Skip set-dependent questions: a "מי לא שיך?" / odd-one-out prompt only
         // makes sense when the whole group is visible, but the True/False race
         // shows a single candidate — so the prompt alone is unanswerable. Retry

@@ -325,10 +325,10 @@ final class ParentSettings: ObservableObject {
         if let raw = d.stringArray(forKey: Key.enabledTopics) {
             let parsed = Set(raw.compactMap(Topic.init(rawValue:)))
             self.enabledTopics = parsed.isEmpty
-                ? [.math, .hebrew, .english, .logic, .science]
+                ? [.math, .hebrew, .english, .logic, .science, .reading]
                 : parsed
         } else {
-            self.enabledTopics = [.math, .hebrew, .english, .logic, .science]
+            self.enabledTopics = [.math, .hebrew, .english, .logic, .science, .reading]
         }
 
 

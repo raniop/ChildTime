@@ -6,6 +6,8 @@ struct QuestionGenerator {
         switch topic {
         case .math:
             return makeMath(difficulty: difficulty)
+        case .reading:
+            return ReadingContent.singleQuestion(target: difficulty)
         case .english, .hebrew, .logic, .science, .history, .geography, .money:
             return makeFromBank(topic: topic, difficulty: difficulty)
         }

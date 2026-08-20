@@ -215,6 +215,7 @@ enum QuestionBanks {
         case .geography: return geography + QuestionBanksExpanded.geography + QuestionBanksWorkflow.geography + QuestionBanksWorkflow2.geography + QuestionBanksWorkflow3.geography
         case .money:     return money     + QuestionBanksWorkflow.money     + QuestionBanksWorkflow2.money     + QuestionBanksWorkflow3.money
         case .math:      return nil  // generated algorithmically
+        case .reading:   return nil  // passage-based — served by ReadingContent
         }
     }
 }

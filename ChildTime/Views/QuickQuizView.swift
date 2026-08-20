@@ -199,7 +199,8 @@ struct QuickQuizView: View {
     // MARK: - Logic
 
     private func loadNext() {
-        let topics = Array(profiles.active?.enabledTopics ?? Set(Topic.allCases))
+        // Reading passages don't fit the quick one-liner format — skip them here.
+        let topics = Array(profiles.active?.enabledTopics ?? Set(Topic.allCases)).filter { $0 != .reading }
         let topic = topics.randomElement() ?? .math
         let base = profiles.active?.difficulty(for: topic) ?? .easy
         let level = progress.adaptiveLevel(for: topic, base: base)

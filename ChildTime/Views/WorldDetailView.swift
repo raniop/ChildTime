@@ -236,6 +236,7 @@ struct WorldDetailView: View {
         case "science_lab":     FloatingOrbs.scienceWorld()
         case "history_museum":  FloatingOrbs.historyWorld()
         case "geo_journey":     FloatingOrbs.geographyWorld()
+        case "story_forest":    FloatingOrbs.readingWorld()
         default:                FloatingOrbs.home()
         }
     }

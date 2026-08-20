@@ -9,6 +9,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
     case history    // היסטוריה
     case geography  // גיאוגרפיה
     case money      // כסף וחיים — חינוך פיננסי בסיסי
+    case reading    // הבנת הנקרא — קטע קריאה + שאלות עליו
 
     var id: String { rawValue }
 
@@ -22,6 +23,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         case .history:   return "הִיסְטוֹרְיָה"
         case .geography: return "גֵּאוֹגְרַפְיָה"
         case .money:     return "כֶּסֶף וְחַיִּים"
+        case .reading:   return "הֲבָנַת הַנִּקְרָא"
         }
     }
 
@@ -35,6 +37,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         case .history:   return "🏛️"
         case .geography: return "🌍"
         case .money:     return "💰"
+        case .reading:   return "📖"
         }
     }
 }

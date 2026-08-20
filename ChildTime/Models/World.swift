@@ -13,6 +13,7 @@ struct World: Identifiable, Hashable {
     enum AppGradientKey: String {
         case castle, tower, valley, galaxy, dreamy, gold
         case englishWorld, logicWorld, scienceWorld, historyWorld, geographyWorld
+        case readingWorld
 
         var gradient: LinearGradient {
             switch self {
@@ -27,6 +28,7 @@ struct World: Identifiable, Hashable {
             case .scienceWorld: return AppGradient.scienceWorld
             case .historyWorld: return AppGradient.historyWorld
             case .geographyWorld: return AppGradient.geographyWorld
+            case .readingWorld: return AppGradient.readingWorld
             }
         }
     }
@@ -113,6 +115,16 @@ enum Worlds {
             rooms: 10,
             gradient: .gold,
             glowColor: Color(hex: "43A047")
+        ),
+        World(
+            id: "story_forest",
+            name: "יַעַר הַסִּפּוּרִים",
+            emoji: "📖",
+            topic: .reading,
+            starsToUnlock: 0,
+            rooms: 10,
+            gradient: .readingWorld,
+            glowColor: Color(hex: "AB47BC")
         )
     ]
 

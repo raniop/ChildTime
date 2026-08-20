@@ -10,6 +10,10 @@ struct Question: Identifiable, Equatable {
     /// `prompt` is pictures, so the spoken instruction lives here. nil → speak
     /// the prompt itself.
     var spoken: String? = nil
+    /// 📖 Reading-comprehension: the passage this question is about, rendered as
+    /// a scrollable card above the prompt. Attached to EVERY question of the
+    /// passage so the text is always available, even after interleaving/re-asks.
+    var passage: String? = nil
 
     var correctAnswer: String { options[correctIndex] }
     /// The line the read-aloud / auto-read should speak.
@@ -23,6 +27,9 @@ struct Question: Identifiable, Equatable {
     /// still match. Note: "...שיכת לקבוצה: תפוח, בננה, אגס?" lists the group inline
     /// and stays self-contained — only the group-less "לא שיך" family is excluded.
     var isSelfContainedPrompt: Bool {
+        // A passage question is meaningless without its passage — keep it out of
+        // the single-prompt game modes (True/False race, Match Pairs).
+        if passage != nil { return false }
         let p = Question.stripNiqqud(prompt)
         if p.contains("לא שיך") || p.contains("לא שייך") { return false }
         return true

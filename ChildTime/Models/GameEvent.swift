@@ -17,7 +17,7 @@ enum GameEvent: Equatable {
         if weekday == 6 || weekday == 7 { return .doubleDiamonds }   // Fri / Sat
         // Deterministic topic-of-the-day from the day-of-year, over the
         // knowledge topics (math is always present, so spotlight the others).
-        let pool: [Topic] = [.english, .hebrew, .logic, .science, .history, .geography, .money]
+        let pool: [Topic] = [.english, .hebrew, .logic, .science, .history, .geography, .money, .reading]
         let doy = calendar.ordinality(of: .day, in: .year, for: date) ?? 1
         return .featuredTopic(pool[doy % pool.count])
     }

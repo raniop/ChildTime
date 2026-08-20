@@ -89,6 +89,12 @@ enum AppGradient {
         startPoint: .topLeading, endPoint: .bottomTrailing
     )
 
+    /// 📖 הבנת הנקרא — a bedtime-story feel: deep violet into warm amber.
+    static let readingWorld = LinearGradient(
+        colors: [Color(hex: "5E35B1"), Color(hex: "AB47BC"), Color(hex: "FF8A65")],
+        startPoint: .topLeading, endPoint: .bottomTrailing
+    )
+
     static let gold = LinearGradient(
         colors: [AppColor.starGold, AppColor.companionGlow],
         startPoint: .topLeading, endPoint: .bottomTrailing

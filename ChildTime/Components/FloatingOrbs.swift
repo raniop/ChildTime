@@ -176,6 +176,13 @@ extension FloatingOrbs {
             count: 5
         )
     }
+
+    static func readingWorld() -> FloatingOrbs {
+        FloatingOrbs(
+            colors: [Color(hex: "5E35B1"), Color(hex: "AB47BC"), Color(hex: "FF8A65"), Color(hex: "FFE082")],
+            count: 5
+        )
+    }
 }
 
 #Preview {

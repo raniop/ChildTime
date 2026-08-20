@@ -125,7 +125,7 @@ struct PaywallView: View {
 
     private var benefitsCard: some View {
         VStack(spacing: 14) {
-            benefitRow("🧠", "כל הנושאים", "חשבון, עברית, אנגלית, לוגיקה, מדע, היסטוריה, גיאוגרפיה, כסף")
+            benefitRow("🧠", "כל הנושאים", "חשבון, עברית, אנגלית, הבנת הנקרא, לוגיקה, מדע, היסטוריה, גיאוגרפיה, כסף")
             divider
             benefitRow("🌍", "כל העולמות", "ממלכת החשבון, שוק הכסף, ועוד")
             divider
