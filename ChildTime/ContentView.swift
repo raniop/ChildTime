@@ -183,6 +183,9 @@ struct ContentView: View {
            (json["provider"] as? String)?.isEmpty == false {
             return
         }
+        // Guest trial (parent playing without an account) has NO cached user at
+        // all — same signature as a child device. Don't hijack it into one.
+        if UserDefaults.standard.bool(forKey: "isGuestMode") { return }
         TofyLink("healLostChildRole: role was unset but child \(raw.prefix(8)) is active locally → restoring child role + binding")
         settings.joinedChildID = raw
         settings.deviceRole = .child

@@ -315,6 +315,11 @@ final class AuthManager: ObservableObject {
         if let p = user.providerData.first?.providerID {
             if p.contains("apple") { provider = .apple }
             else if p.contains("google") { provider = .google }
+            // Firebase reports email/password as "password". Without this the
+            // cached user carries provider=nil — indistinguishable from an
+            // anonymous (child-device) session, which broke the parent-device
+            // detection in healLostChildRoleIfNeeded.
+            else if p.contains("password") { provider = .emailPassword }
         }
         cacheUser()
         // Defer + pass the uid explicitly. Two layers of defense against

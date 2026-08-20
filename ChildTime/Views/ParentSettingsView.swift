@@ -559,6 +559,11 @@ struct ParentSettingsView: View {
                 settings.joinedChildID = nil
                 settings.pendingJoinPayload = nil
                 settings.justDisconnected = false
+                // Also clear the active profile: it lives in the STANDARD defaults
+                // and is the evidence healLostChildRoleIfNeeded uses to restore a
+                // child role. Left set, the heal would instantly revert this
+                // deliberate switch and bounce the device straight back to play.
+                ProfileStore.shared.signOutCurrentProfile()
                 settings.deviceRole = .unset
                 dismiss()
             }
