@@ -443,6 +443,7 @@ struct WorldMapView: View {
         .shadow(color: .black.opacity(0.3), radius: 10, y: 5)
         .frame(maxWidth: 520)
         .environment(\.layoutDirection, .rightToLeft)
+        .eraseToAnyView()
     }
 
     /// Slim "exit Kid Mode" bar shown UNDER the top-bar buttons while the parent's
@@ -465,6 +466,7 @@ struct WorldMapView: View {
         .buttonStyle(.juicy)
         .padding(.top, 12)
         .frame(maxWidth: .infinity)
+        .eraseToAnyView()
     }
 
     // MARK: - Top bar
@@ -501,6 +503,7 @@ struct WorldMapView: View {
         .padding(isCompact ? 14 : 18)
         .background(glassCard)
         .padding(.top, AppSpacing.sm)
+        .eraseToAnyView()
     }
 
     /// Daily challenge: answer N questions today → collect a reward, and keep the
@@ -562,6 +565,7 @@ struct WorldMapView: View {
         }
         .buttonStyle(.plain)
         .environment(\.layoutDirection, .rightToLeft)
+        .eraseToAnyView()
     }
 
     /// Claim the daily-challenge prize (called from the explainer's CTA).
@@ -679,6 +683,7 @@ struct WorldMapView: View {
                                            startPoint: .top, endPoint: .bottom), lineWidth: 1.2)
             )
             .shadow(color: .black.opacity(0.25), radius: 22, y: 12)
+            .eraseToAnyView()
     }
 
     /// Avatar + name (tap → edit the child's profile) and a level badge
@@ -723,6 +728,7 @@ struct WorldMapView: View {
                 .buttonStyle(.plain)
             }
         }
+        .eraseToAnyView()
     }
 
     private func navButtonsRow(size: CGFloat) -> some View {
@@ -747,6 +753,7 @@ struct WorldMapView: View {
                 showingParentGate = true
             }
         }
+        .eraseToAnyView()
     }
 
     private func navButton(icon: String, color: Color, label: String, badge: Bool,
@@ -790,6 +797,7 @@ struct WorldMapView: View {
                 .minimumScaleFactor(0.6)
                 .frame(width: size + (isCompact ? 8 : 16))
         }
+        .eraseToAnyView()
     }
 
     /// The stats panel: 💎 diamonds (left) · big time card (center, with progress
@@ -821,6 +829,7 @@ struct WorldMapView: View {
                 .presentationDetents([.height(stat == .minutes ? 460 : 380)])
                 .presentationDragIndicator(.visible)
         }
+        .eraseToAnyView()
     }
 
     private func statColumn(emoji: String, value: String, label: String, iconTrailing: Bool) -> some View {
@@ -879,6 +888,7 @@ struct WorldMapView: View {
         .frame(maxWidth: .infinity)
         .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.white.opacity(0.13)))
         .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.18), lineWidth: 1))
+        .eraseToAnyView()
     }
 
     // MARK: - Stat info popovers
@@ -1061,6 +1071,7 @@ struct WorldMapView: View {
                 .environment(\.layoutDirection, .rightToLeft)
                 .presentationDetents([.medium])
         }
+        .eraseToAnyView()
     }
 
     private var levelInfoSheet: some View {
@@ -1458,4 +1469,14 @@ private extension VerticalAlignment {
         static func defaultValue(in d: ViewDimensions) -> CGFloat { d[VerticalAlignment.center] }
     }
     static let headerIcon = VerticalAlignment(HeaderIconID.self)
+}
+
+/// Type-erasure boundary for the header/scaffold builders above. NOT cosmetic:
+/// without it, the fully-inlined generic type of body (topBar → navButtonsRow →
+/// navButton → …) is so deep that a DEBUG build EXC_BAD_ACCESSes inside the Swift
+/// runtime's metadata instantiation (buildDescriptorPath) on a physical device —
+/// the main thread there has a 1MB stack vs 8MB in the simulator, which is why it
+/// only crashed on-device. AnyView at each builder caps the nesting depth.
+private extension View {
+    func eraseToAnyView() -> AnyView { AnyView(self) }
 }
