@@ -205,7 +205,8 @@ struct QuickQuizView: View {
         let base = profiles.active?.difficulty(for: topic) ?? .easy
         let level = progress.adaptiveLevel(for: topic, base: base)
         let diff = AdaptiveDifficultyEngine.sampledDifficulty(forLevel: level, base: base)
-        question = QuestionGenerator.generate(topic: topic, difficulty: diff)
+        question = QuestionGenerator.generate(topic: topic, difficulty: diff,
+                                              grade: profiles.active?.effectiveGrade)
         picked = nil; locked = false; questionStart = Date(); now = Date()
     }
 

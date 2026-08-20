@@ -2,14 +2,20 @@ import Foundation
 
 struct QuestionGenerator {
 
-    static func generate(topic: Topic, difficulty: Difficulty) -> Question {
+    /// `grade` (Profile.effectiveGrade) aligns content to משרד החינוך: math
+    /// routes to the curriculum engine, banks prefer grade-tagged items. nil →
+    /// legacy behavior (e.g. the live quiz, where players span families).
+    static func generate(topic: Topic, difficulty: Difficulty, grade: Int? = nil) -> Question {
         switch topic {
         case .math:
+            if let grade, grade >= 1 {
+                return CurriculumMath.generate(grade: grade, difficulty: difficulty)
+            }
             return makeMath(difficulty: difficulty)
         case .reading:
-            return ReadingContent.singleQuestion(target: difficulty)
+            return ReadingContent.singleQuestion(target: difficulty, grade: grade)
         case .english, .hebrew, .logic, .science, .history, .geography, .money:
-            return makeFromBank(topic: topic, difficulty: difficulty)
+            return makeFromBank(topic: topic, difficulty: difficulty, grade: grade)
         }
     }
 
@@ -141,8 +147,19 @@ struct QuestionGenerator {
 
     // MARK: - Bank-based questions
 
-    private static func makeFromBank(topic: Topic, difficulty: Difficulty) -> Question {
-        let bank = QuestionBanks.bank(for: topic) ?? []
+    private static func makeFromBank(topic: Topic, difficulty: Difficulty, grade: Int? = nil) -> Question {
+        var bank = QuestionBanks.bank(for: topic) ?? []
+        if let g = grade {
+            // 🎓 Curriculum window: never serve items tagged for OTHER grades;
+            // prefer items tagged for THIS grade (70%) over legacy untagged.
+            let tagged = bank.filter { $0.grades?.contains(g) == true }
+            let untagged = bank.filter { $0.grades == nil }
+            if tagged.isEmpty {
+                if !untagged.isEmpty { bank = untagged }
+            } else {
+                bank = Double.random(in: 0...1) < 0.7 ? tagged : tagged + untagged
+            }
+        }
         guard let item = QuestionMemory.shared.pickFresh(bank, for: topic, target: difficulty) else {
             return Question(
                 topic: topic,

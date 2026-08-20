@@ -19,9 +19,48 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     var createdAt: Date
 
     // MARK: - Learning identity (Parent Platform)
-    /// School grade (1–12), if the parent specified one. Independent of the
-    /// coarse `age` bracket used for difficulty defaults.
+    /// School grade the parent picked. Scale: -1 = גן טרום־חובה, 0 = גן חובה,
+    /// 1–12 = כיתות א׳–יב׳. Independent of the coarse `age` bracket.
     var grade: Int?
+    /// The Israeli SCHOOL YEAR (see `Profile.schoolYear(for:)`) in which the
+    /// parent set `grade`. Every September 1st the child auto-advances one
+    /// grade per school year elapsed — computed, so it needs no background job
+    /// and works offline. nil (legacy data) → treated as set "now" (no jump).
+    var gradeSchoolYear: Int?
+
+    /// Israeli school-year index for a date: the year of its September 1st
+    /// (e.g. 2026-08-20 → 2025; 2026-09-01 → 2026).
+    static func schoolYear(for date: Date = Date(), calendar: Calendar = .current) -> Int {
+        let y = calendar.component(.year, from: date)
+        return calendar.component(.month, from: date) >= 9 ? y : y - 1
+    }
+
+    /// The grade the CONTENT engines should target (משרד החינוך alignment):
+    /// the parent-set grade auto-advanced by school years elapsed since it was
+    /// set; else derived from the age bracket. ≤0 = גן (pre-reader mode).
+    var effectiveGrade: Int {
+        if let grade, (-1...12).contains(grade) {
+            let advance = Swift.max(0, Profile.schoolYear() - (gradeSchoolYear ?? Profile.schoolYear()))
+            return Swift.min(12, grade + advance)
+        }
+        switch age {
+        case .preK:   return 0
+        case .grade1: return 1
+        case .grade3: return 3
+        case .older:  return 5
+        }
+    }
+
+    /// Kid-facing name for a grade value on our scale.
+    static func gradeDisplayName(_ g: Int) -> String {
+        switch g {
+        case ..<0: return "גַּן טְרוֹם־חוֹבָה"
+        case 0:    return "גַּן חוֹבָה"
+        default:
+            let letters = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳", "ט׳", "י׳", "יא׳", "יב׳"]
+            return "כִּתָּה \(letters[Swift.min(g, 12) - 1])"
+        }
+    }
     /// Interest tags the parent picked at setup (see `InterestCatalog`). Seed
     /// the Smart Feed's topic affinity toward what the child already likes.
     var interests: [String]
@@ -67,6 +106,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         character3DID: String? = nil,
         createdAt: Date = .now,
         grade: Int? = nil,
+        gradeSchoolYear: Int? = nil,
         interests: [String] = [],
         learningLevel: LearningLevel = .developing,
         difficultyByTopic: [String: String] = [:],
@@ -84,6 +124,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.character3DID = character3DID
         self.createdAt = createdAt
         self.grade = grade
+        self.gradeSchoolYear = gradeSchoolYear
         self.interests = interests
         self.learningLevel = learningLevel
         self.difficultyByTopic = difficultyByTopic
@@ -97,7 +138,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     // shipped won't have grade / interests / learningLevel keys.
     enum CodingKeys: String, CodingKey {
         case id, name, gender, age, photoData, avatarPresetID, character3DID, createdAt
-        case grade, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
+        case grade, gradeSchoolYear, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
         case topicsVersion
         case playPIN
     }
@@ -113,6 +154,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.character3DID = try c.decodeIfPresent(String.self, forKey: .character3DID)
         self.createdAt = try c.decode(Date.self, forKey: .createdAt)
         self.grade = try c.decodeIfPresent(Int.self, forKey: .grade)
+        self.gradeSchoolYear = try c.decodeIfPresent(Int.self, forKey: .gradeSchoolYear)
         self.interests = try c.decodeIfPresent([String].self, forKey: .interests) ?? []
         self.learningLevel = try c.decodeIfPresent(LearningLevel.self, forKey: .learningLevel) ?? .developing
         self.difficultyByTopic = try c.decodeIfPresent([String: String].self, forKey: .difficultyByTopic) ?? [:]

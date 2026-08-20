@@ -102,6 +102,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     var avatarPresetID: String
     var character3DID: String?     // chosen 3D character — syncs to co-parents
     var grade: Int?
+    /// School year the grade was set (auto-advance anchor — see Profile.gradeSchoolYear).
+    var gradeSchoolYear: Int?
     var interests: [String]
     var learningLevel: String      // LearningLevel.rawValue
     var createdAt: Date
@@ -139,6 +141,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.avatarPresetID = profile.avatarPresetID
         self.character3DID = profile.character3DID
         self.grade = profile.grade
+        self.gradeSchoolYear = profile.gradeSchoolYear
         self.interests = profile.interests
         self.learningLevel = profile.learningLevel.rawValue
         self.createdAt = profile.createdAt
@@ -173,6 +176,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             character3DID: character3DID,
             createdAt: createdAt,
             grade: grade,
+            gradeSchoolYear: gradeSchoolYear,
             interests: interests,
             learningLevel: LearningLevel(rawValue: learningLevel) ?? .developing,
             difficultyByTopic: difficultyByTopic ?? [:],

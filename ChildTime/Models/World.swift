@@ -43,7 +43,7 @@ enum Worlds {
     static let all: [World] = [
         World(
             id: "math_kingdom",
-            name: "מַמְלֶכֶת הַחֶשְׁבּוֹן",
+            name: "מַמְלֶכֶת הַמָּתֵמָטִיקָה",
             emoji: "🧮",
             topic: .math,
             starsToUnlock: 0,
@@ -83,7 +83,7 @@ enum Worlds {
         ),
         World(
             id: "science_lab",
-            name: "מַעְבְּדַת הַמַּדָּע",
+            name: "מַעְבְּדַת הַמַּדָּעִים",
             emoji: "🔬",
             topic: .science,
             starsToUnlock: 0,

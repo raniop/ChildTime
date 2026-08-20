@@ -271,7 +271,8 @@ struct TrueFalseRaceView: View {
         let base = profiles.active?.difficulty(for: topic) ?? .easy
         let level = progress.adaptiveLevel(for: topic, base: base)
         let diff = AdaptiveDifficultyEngine.sampledDifficulty(forLevel: level, base: base)
-        return QuestionGenerator.generate(topic: topic, difficulty: diff)
+        return QuestionGenerator.generate(topic: topic, difficulty: diff,
+                                          grade: profiles.active?.effectiveGrade)
     }
 
 

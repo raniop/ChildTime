@@ -184,7 +184,8 @@ struct MatchPairsView: View {
             tries += 1
             let topic = topics.randomElement() ?? .math
             let base = profiles.active?.difficulty(for: topic) ?? .easy
-            let q = QuestionGenerator.generate(topic: topic, difficulty: base)
+            let q = QuestionGenerator.generate(topic: topic, difficulty: base,
+                                               grade: profiles.active?.effectiveGrade)
             let ans = q.correctAnswer
             // Skip odd-one-out prompts (group lives only in the hidden options) and
             // any repeated prompt — two identical prompts can't be matched unambiguously.

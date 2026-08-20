@@ -15,14 +15,16 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .math:      return "חֶשְׁבּוֹן"
+        // Aligned to the official משרד החינוך subject names (Rani) — logic has
+        // no school subject and keeps its game name.
+        case .math:      return "מָתֵמָטִיקָה"
         case .english:   return "אַנְגְּלִית"
         case .hebrew:    return "עִבְרִית"
         case .logic:     return "לוֹגִיקָה"
-        case .science:   return "מַדָּע"
+        case .science:   return "מַדָּעִים"
         case .history:   return "הִיסְטוֹרְיָה"
         case .geography: return "גֵּאוֹגְרַפְיָה"
-        case .money:     return "כֶּסֶף וְחַיִּים"
+        case .money:     return "חִנּוּךְ פִינַנְסִי"
         case .reading:   return "הֲבָנַת הַנִּקְרָא"
         }
     }

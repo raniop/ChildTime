@@ -40,7 +40,13 @@ struct ProfileEditorView: View {
         if case .edit(let p) = mode { return p.id }
         return nil
     }
-    private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty }
+    /// A grade/gan choice is REQUIRED (Rani): it drives the curriculum-aligned
+    /// content and the automatic September promotion. Only when the parent is
+    /// the one editing — a child device can't edit learning fields anyway.
+    private var canSave: Bool {
+        !name.trimmingCharacters(in: .whitespaces).isEmpty
+            && (!canEditLearning || grade != nil)
+    }
 
     /// Age + learning level are difficulty-affecting → editable only from a real
     /// PARENT device, never on a child device or while the parent's phone is in
@@ -69,6 +75,8 @@ struct ProfileEditorView: View {
                         // so a kid can't lower their own age to get easier questions.
                         if canEditLearning {
                             ageRow
+
+                            gradeRow
 
                             learningLevelRow
                         }
@@ -227,6 +235,12 @@ struct ProfileEditorView: View {
             Haptic.light()
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 age = a
+                // Keep the grade choice consistent with the bracket: a gan pick
+                // makes no sense for an older child and vice versa.
+                if let g = grade {
+                    if a == .preK && g > 0 { grade = nil }
+                    if a != .preK && g < 1 { grade = nil }
+                }
             }
         } label: {
             VStack(spacing: 4) {
@@ -236,6 +250,59 @@ struct ProfileEditorView: View {
                     .foregroundStyle(.white)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, AppSpacing.sm)
+            .background(.white.opacity(selected ? 0.26 : 0.10), in: RoundedRectangle(cornerRadius: AppRadius.medium))
+            .overlay(
+                RoundedRectangle(cornerRadius: AppRadius.medium)
+                    .stroke(selected ? AppColor.successMint : .white.opacity(0.18),
+                            lineWidth: selected ? 2.2 : 1)
+            )
+        }
+        .buttonStyle(.juicy)
+    }
+
+    /// REQUIRED grade picker (drives curriculum content + the automatic
+    /// September promotion). preK → gan types; otherwise כיתות א׳–ח׳.
+    private var gradeRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(age == .preK ? "בְּאֵיזֶה גַּן?" : "בְּאֵיזוֹ כִּתָּה?")
+                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+            if age == .preK {
+                HStack(spacing: 6) {
+                    gradeOption(-1, label: "טְרוֹם־חוֹבָה", emoji: "🧸")
+                    gradeOption(0, label: "גַּן חוֹבָה", emoji: "🎒")
+                }
+            } else {
+                let letters = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"]
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 6) {
+                    ForEach(1...8, id: \.self) { g in
+                        gradeOption(g, label: letters[g - 1], emoji: nil)
+                    }
+                }
+            }
+            if grade == nil {
+                Text("חוֹבָה לִבְחֹר — כָּךְ טוֹפִי מַתְאִים אֶת הַשְּׁאֵלוֹת לַתָּכְנִית שֶׁל מִשְׂרַד הַחִנּוּךְ, וְכָל 1 בְּסֶפְּטֶמְבֶּר עוֹלִים כִּתָּה אוֹטוֹמָטִית 🎉")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundStyle(AppColor.starGold)
+            }
+        }
+    }
+
+    private func gradeOption(_ g: Int, label: String, emoji: String?) -> some View {
+        let selected = grade == g
+        return Button {
+            Haptic.light()
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { grade = g }
+        } label: {
+            VStack(spacing: 3) {
+                if let emoji { Text(emoji).font(.system(size: 22)) }
+                Text(label)
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.7)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, AppSpacing.sm)
@@ -400,7 +467,9 @@ struct ProfileEditorView: View {
             photoData = p.photoData
             avatarPresetID = p.avatarPresetID
             character3DID = p.character3DID
-            grade = p.grade
+            // Show the AUTO-ADVANCED grade (a year may have passed since it was
+            // stored) — saving re-stamps the school-year anchor with this value.
+            grade = p.grade != nil ? p.effectiveGrade : nil
             interests = Set(p.interests)
             learningLevel = p.learningLevel
         } else {
@@ -411,7 +480,7 @@ struct ProfileEditorView: View {
 
     private func save() {
         guard canSave else { return }
-        let p = Profile(
+        var p = Profile(
             id: existingID ?? UUID(),
             name: name.trimmingCharacters(in: .whitespaces),
             gender: gender,
@@ -421,9 +490,27 @@ struct ProfileEditorView: View {
             character3DID: character3DID,
             createdAt: .now,
             grade: grade,
+            // Anchor the September auto-advance to the year this grade was picked.
+            gradeSchoolYear: grade != nil ? Profile.schoolYear() : nil,
             interests: Array(interests),
             learningLevel: learningLevel
         )
+        // PRESERVE everything this editor doesn't edit — building a fresh
+        // Profile used to silently reset the parent's topic choices, per-topic
+        // difficulty, daily cap and the child's play code on EVERY edit.
+        if case .edit(let original) = mode {
+            p.createdAt = original.createdAt
+            p.difficultyByTopic = original.difficultyByTopic
+            p.dailyCapMinutes = original.dailyCapMinutes
+            p.enabledTopics = original.enabledTopics
+            p.topicsVersion = original.topicsVersion
+            p.playPIN = original.playPIN
+            // A child device (no learning fields shown) keeps the stored grade.
+            if !canEditLearning {
+                p.grade = original.grade
+                p.gradeSchoolYear = original.gradeSchoolYear
+            }
+        }
         Haptic.success()
         SoundPlayer.shared.play(.companionCheer)
         onSave(p)

@@ -13,8 +13,20 @@ import Foundation
 struct ReadingPassage {
     let id: String
     let tier: Difficulty
+    /// 🎓 Curriculum window (1=א׳ … 6=ו׳). nil → inferred from tier
+    /// (easy≈א׳–ב׳, medium≈ב׳–ד׳, hard≈ד׳–ו׳).
+    var grades: ClosedRange<Int>? = nil
     let text: String
     let questions: [BankQuestion]   // prompts + answers about `text`
+
+    var gradeWindow: ClosedRange<Int> {
+        if let grades { return grades }
+        switch tier {
+        case .easy:   return 1...2
+        case .medium: return 2...4
+        case .hard:   return 4...6
+        }
+    }
 }
 
 enum ReadingContent {
@@ -24,8 +36,8 @@ enum ReadingContent {
     /// All questions of ONE fresh passage, shuffled options, passage attached —
     /// the sequential flow for the reading world / smart feed. (Parent-reported
     /// prompts are filtered by the caller, where QuestionReporter is reachable.)
-    static func nextGroup(target: Difficulty) -> [Question] {
-        guard let passage = pickPassage(target: target) else { return [] }
+    static func nextGroup(target: Difficulty, grade: Int? = nil) -> [Question] {
+        guard let passage = pickPassage(target: target, grade: grade) else { return [] }
         markUsed(passage.id)
         return passage.questions.map { item in
             let options = ([item.correctAnswer] + item.distractors).shuffled()
@@ -41,8 +53,8 @@ enum ReadingContent {
 
     /// One passage question (random question of a fresh passage) — for generic
     /// single-question callers like the boss battle.
-    static func singleQuestion(target: Difficulty) -> Question {
-        if let q = nextGroup(target: target).randomElement() { return q }
+    static func singleQuestion(target: Difficulty, grade: Int? = nil) -> Question {
+        if let q = nextGroup(target: target, grade: grade).randomElement() { return q }
         return Question(
             topic: .reading,
             prompt: "אוֹפְּס... אֵין קְטָעִים חֲדָשִׁים כָּרֶגַע",
@@ -54,23 +66,30 @@ enum ReadingContent {
     /// Prefer the target tier, then drift easier before harder (same spirit as
     /// QuestionMemory's tier preference); within a tier avoid recently-used
     /// passages, relaxing only when the whole tier was seen.
-    private static func pickPassage(target: Difficulty) -> ReadingPassage? {
+    private static func pickPassage(target: Difficulty, grade: Int? = nil) -> ReadingPassage? {
         let order: [Difficulty]
         switch target {
         case .easy:   order = [.easy, .medium, .hard]
         case .medium: order = [.medium, .easy, .hard]
         case .hard:   order = [.hard, .medium, .easy]
         }
+        // 🎓 Curriculum window first; fall back to the whole pool rather than
+        // serve nothing when a grade has no matching passages yet.
+        var universe = passages
+        if let g = grade {
+            let inWindow = passages.filter { $0.gradeWindow.contains(g) }
+            if !inWindow.isEmpty { universe = inWindow }
+        }
         let recent = recentIDs()
         for tier in order {
-            let pool = passages.filter { $0.tier == tier }
+            let pool = universe.filter { $0.tier == tier }
             if let fresh = pool.filter({ !recent.contains($0.id) }).randomElement() { return fresh }
         }
         // Everything was seen recently — recycle the least-recently-used tier match.
         for tier in order {
-            if let any = passages.filter({ $0.tier == tier }).randomElement() { return any }
+            if let any = universe.filter({ $0.tier == tier }).randomElement() { return any }
         }
-        return nil
+        return universe.randomElement()
     }
 
     // MARK: - Anti-repeat (persisted, ~60% of the pool)
@@ -256,4 +275,6 @@ enum ReadingContent {
                 BankQuestion(prompt: "אֵיזֶה פְּרָס קִבֵּל נֹעַם?", correctAnswer: "\"הַגָּבוֹהַּ בְּיוֹתֵר\"", distractors: ["\"הַיָּפֶה בְּיוֹתֵר\"", "\"הַמָּהִיר בְּיוֹתֵר\"", "\"הַגָּדוֹל בְּיוֹתֵר\""], tier: .hard),
             ]),
     ]
+    // 🎓 Grade-tagged curriculum passages live in their own authored file.
+    + CurriculumHebrewBank.readingPassages
 }

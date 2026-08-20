@@ -11,6 +11,10 @@ struct BankQuestion {
     /// falls back to the side-map (`QuestionDifficultyTags`) so the original
     /// hand-graded questions keep working unchanged.
     var tier: Difficulty? = nil
+    /// 🎓 Curriculum window (משרד החינוך): the school grades this item suits
+    /// (1=א׳ … 6=ו׳; 0=גן חובה). nil → legacy untagged, served to every grade.
+    /// Serving prefers items tagged for the child's grade (see makeFromBank).
+    var grades: ClosedRange<Int>? = nil
 }
 
 enum QuestionBanks {
@@ -207,13 +211,13 @@ enum QuestionBanks {
     /// Original + expanded — call sites get the full combined pool.
     static func bank(for topic: Topic) -> [BankQuestion]? {
         switch topic {
-        case .english:   return english   + QuestionBanksExpanded.english   + QuestionBanksWorkflow.english   + QuestionBanksWorkflow2.english   + QuestionBanksWorkflow3.english
-        case .hebrew:    return hebrew    + QuestionBanksWorkflow.hebrew    + QuestionBanksWorkflow2.hebrew    + QuestionBanksWorkflow3.hebrew
+        case .english:   return english   + QuestionBanksExpanded.english   + QuestionBanksWorkflow.english   + QuestionBanksWorkflow2.english   + QuestionBanksWorkflow3.english   + CurriculumEnglishScienceBank.english
+        case .hebrew:    return hebrew    + QuestionBanksWorkflow.hebrew    + QuestionBanksWorkflow2.hebrew    + QuestionBanksWorkflow3.hebrew    + CurriculumHebrewBank.hebrew
         case .logic:     return logic     + QuestionBanksExpanded.logic     + QuestionBanksWorkflow.logic     + QuestionBanksWorkflow2.logic     + QuestionBanksWorkflow3.logic
-        case .science:   return science   + QuestionBanksExpanded.science   + QuestionBanksWorkflow.science   + QuestionBanksWorkflow2.science   + QuestionBanksWorkflow3.science
-        case .history:   return history   + QuestionBanksExpanded.history   + QuestionBanksWorkflow.history   + QuestionBanksWorkflow2.history   + QuestionBanksWorkflow3.history
-        case .geography: return geography + QuestionBanksExpanded.geography + QuestionBanksWorkflow.geography + QuestionBanksWorkflow2.geography + QuestionBanksWorkflow3.geography
-        case .money:     return money     + QuestionBanksWorkflow.money     + QuestionBanksWorkflow2.money     + QuestionBanksWorkflow3.money
+        case .science:   return science   + QuestionBanksExpanded.science   + QuestionBanksWorkflow.science   + QuestionBanksWorkflow2.science   + QuestionBanksWorkflow3.science   + CurriculumEnglishScienceBank.science
+        case .history:   return history   + QuestionBanksExpanded.history   + QuestionBanksWorkflow.history   + QuestionBanksWorkflow2.history   + QuestionBanksWorkflow3.history   + CurriculumHumanitiesBank.history
+        case .geography: return geography + QuestionBanksExpanded.geography + QuestionBanksWorkflow.geography + QuestionBanksWorkflow2.geography + QuestionBanksWorkflow3.geography + CurriculumHumanitiesBank.geography
+        case .money:     return money     + QuestionBanksWorkflow.money     + QuestionBanksWorkflow2.money     + QuestionBanksWorkflow3.money     + CurriculumHumanitiesBank.money
         case .math:      return nil  // generated algorithmically
         case .reading:   return nil  // passage-based — served by ReadingContent
         }

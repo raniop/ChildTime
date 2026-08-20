@@ -24,6 +24,8 @@ struct WorldMapView: View {
     private enum InfoSheet: Int, Identifiable { case dailyChallenge, event; var id: Int { rawValue } }
     @State private var showingParentGate = false
     @State private var showingDemo = false
+    /// 🎒 September 1st "you moved up a grade!" party (once per school year).
+    @State private var showSchoolYearParty = false
     @State private var showingShop = false
     @State private var showingWheel = false
     @State private var showingGames = false
@@ -203,6 +205,10 @@ struct WorldMapView: View {
         }
         .onAppear {
             lastSeenStars = progress.stars
+            // 🎒 September 1st: the child advanced a grade — celebrate once.
+            if let p = profiles.active, SchoolYearCelebration.shouldCelebrate(p) {
+                showSchoolYearParty = true
+            }
             // Keep my friends-board score live during play (even with the board
             // closed), so friends always see my current stars.
             FriendsManager.shared.beginScoreSync()
@@ -404,6 +410,14 @@ struct WorldMapView: View {
                 }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .rightToLeft)
+            }
+        }
+        .fullScreenCover(isPresented: $showSchoolYearParty) {
+            if let p = profiles.active {
+                SchoolYearCelebrationView(
+                    gradeName: Profile.gradeDisplayName(p.effectiveGrade),
+                    childName: p.name
+                ) { showSchoolYearParty = false }
             }
         }
         .fullScreenCover(isPresented: $showingDemo) {

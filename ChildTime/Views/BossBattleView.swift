@@ -210,7 +210,8 @@ struct BossBattleView: View {
             let pool = Array(ProfileStore.shared.active?.enabledTopics ?? Set(Topic.allCases))
             question = QuestionGenerator.generateBonus(topic: pool.randomElement() ?? .logic)
         } else {
-            question = QuestionGenerator.generate(topic: world.topic, difficulty: .hard)
+            question = QuestionGenerator.generate(topic: world.topic, difficulty: .hard,
+                                                  grade: ProfileStore.shared.active?.effectiveGrade)
         }
         picked = nil
         locked = false

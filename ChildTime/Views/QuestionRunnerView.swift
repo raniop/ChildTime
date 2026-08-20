@@ -960,7 +960,7 @@ struct QuestionRunnerView: View {
         // whole pool was filtered out.
         if topic == .reading, !preReader, !bonus, !isBonusArena {
             if readingQueue.isEmpty {
-                readingQueue = ReadingContent.nextGroup(target: effective)
+                readingQueue = ReadingContent.nextGroup(target: effective, grade: profiles.active?.effectiveGrade)
                     .filter { !QuestionReporter.shared.isHidden($0.prompt) }
             }
             if !readingQueue.isEmpty {
@@ -971,11 +971,12 @@ struct QuestionRunnerView: View {
                 return
             }
         }
+        let childGrade = profiles.active?.effectiveGrade
         func makeQuestion() -> Question {
             if bonus || isBonusArena { return QuestionGenerator.generateBonus(topic: topic) }
             return preReader
                 ? PreReaderContent.generate(topic: topic)
-                : QuestionGenerator.generate(topic: topic, difficulty: effective)
+                : QuestionGenerator.generate(topic: topic, difficulty: effective, grade: childGrade)
         }
         var q = makeQuestion()
         // Generated questions (math + every pre-reader visual) can repeat — re-roll
@@ -1001,8 +1002,13 @@ struct QuestionRunnerView: View {
         if preReader { SpeechReader.shared.speak(q.readAloudText) }
     }
 
-    /// The active child is in the pre-reader (age 4) picture mode.
-    private var isPreReader: Bool { profiles.active?.age == .preK }
+    /// The active child is in the pre-reader (גן) picture mode — driven by the
+    /// effective grade (auto-advancing), so a גן חובה kid graduates to real
+    /// questions the September they start כיתה א׳.
+    private var isPreReader: Bool {
+        guard let p = profiles.active else { return false }
+        return p.effectiveGrade < 1
+    }
 
     /// 💫 This session is the bonus arena: every question comes from the
     /// extra-hard pool, minutes pay double, no random special events.
