@@ -22,6 +22,10 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// School grade the parent picked. Scale: -1 = גן טרום־חובה, 0 = גן חובה,
     /// 1–12 = כיתות א׳–יב׳. Independent of the coarse `age` bracket.
     var grade: Int?
+    /// True when the CHILD picked their own grade (the friendly picker shown on
+    /// a child device that has no grade yet). The parent dashboard flags it so
+    /// the parent verifies; a parent-side save clears it.
+    var gradeSetByChild: Bool = false
     /// The Israeli SCHOOL YEAR (see `Profile.schoolYear(for:)`) in which the
     /// parent set `grade`. Every September 1st the child auto-advances one
     /// grade per school year elapsed — computed, so it needs no background job
@@ -138,7 +142,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     // shipped won't have grade / interests / learningLevel keys.
     enum CodingKeys: String, CodingKey {
         case id, name, gender, age, photoData, avatarPresetID, character3DID, createdAt
-        case grade, gradeSchoolYear, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
+        case grade, gradeSchoolYear, gradeSetByChild, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
         case topicsVersion
         case playPIN
     }
@@ -155,6 +159,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.createdAt = try c.decode(Date.self, forKey: .createdAt)
         self.grade = try c.decodeIfPresent(Int.self, forKey: .grade)
         self.gradeSchoolYear = try c.decodeIfPresent(Int.self, forKey: .gradeSchoolYear)
+        self.gradeSetByChild = try c.decodeIfPresent(Bool.self, forKey: .gradeSetByChild) ?? false
         self.interests = try c.decodeIfPresent([String].self, forKey: .interests) ?? []
         self.learningLevel = try c.decodeIfPresent(LearningLevel.self, forKey: .learningLevel) ?? .developing
         self.difficultyByTopic = try c.decodeIfPresent([String: String].self, forKey: .difficultyByTopic) ?? [:]

@@ -26,6 +26,8 @@ struct WorldMapView: View {
     @State private var showingDemo = false
     /// 🎒 September 1st "you moved up a grade!" party (once per school year).
     @State private var showSchoolYearParty = false
+    /// 🎓 Kid-facing grade picker, when the profile has no grade yet.
+    @State private var showChildGradePicker = false
     @State private var showingShop = false
     @State private var showingWheel = false
     @State private var showingGames = false
@@ -205,8 +207,13 @@ struct WorldMapView: View {
         }
         .onAppear {
             lastSeenStars = progress.stars
+            // 🎓 No grade yet (families from before grades existed): the kid
+            // picks their own — synced to the parent flagged for verification.
+            if let p = profiles.active, p.grade == nil {
+                showChildGradePicker = true
+            }
             // 🎒 September 1st: the child advanced a grade — celebrate once.
-            if let p = profiles.active, SchoolYearCelebration.shouldCelebrate(p) {
+            else if let p = profiles.active, SchoolYearCelebration.shouldCelebrate(p) {
                 showSchoolYearParty = true
             }
             // Keep my friends-board score live during play (even with the board
@@ -410,6 +417,18 @@ struct WorldMapView: View {
                 }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .rightToLeft)
+            }
+        }
+        .fullScreenCover(isPresented: $showChildGradePicker) {
+            if let p = profiles.active {
+                ChildGradePickerView(profile: p) { g in
+                    var updated = p
+                    updated.grade = g
+                    updated.gradeSchoolYear = Profile.schoolYear()
+                    updated.gradeSetByChild = true
+                    profiles.update(updated)
+                    showChildGradePicker = false
+                }
             }
         }
         .fullScreenCover(isPresented: $showSchoolYearParty) {

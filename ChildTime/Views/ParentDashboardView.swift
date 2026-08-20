@@ -823,6 +823,34 @@ struct ParentDashboardView: View {
                     Text("\(profile.age.label) • \(profile.gender?.displayName ?? "לא צוין")")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                    // 🎓 The grade drives ALL curriculum content — always visible
+                    // here so the parent knows it's right, tappable to change.
+                    // Flagged when the CHILD picked it (the kid-side picker).
+                    Button { editProfile = profile } label: {
+                        HStack(spacing: 4) {
+                            Text("🎓").font(.system(size: 10))
+                            if profile.grade != nil {
+                                Text(Profile.gradeDisplayName(profile.effectiveGrade))
+                                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                if profile.gradeSetByChild {
+                                    Text("· נבחרה ע\"י הילד — בדקו")
+                                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                                }
+                            } else {
+                                Text("כיתה לא הוגדרה — הגדירו")
+                                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            }
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 8, weight: .bold))
+                        }
+                        .foregroundStyle(profile.grade == nil || profile.gradeSetByChild
+                                         ? AppColor.flameOrange : Color.secondary)
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .background(Capsule().fill(
+                            (profile.grade == nil || profile.gradeSetByChild
+                             ? AppColor.flameOrange : Color.secondary).opacity(0.12)))
+                    }
+                    .buttonStyle(.plain)
                     if let status {
                         Text(status.text)
                             .font(.system(size: 11, weight: .heavy, design: .rounded))

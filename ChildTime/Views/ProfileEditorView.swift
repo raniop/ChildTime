@@ -509,7 +509,11 @@ struct ProfileEditorView: View {
             if !canEditLearning {
                 p.grade = original.grade
                 p.gradeSchoolYear = original.gradeSchoolYear
+                p.gradeSetByChild = original.gradeSetByChild
             }
+            // A parent-side save is a confirmation — clears the "child picked
+            // this" flag the dashboard warns about. (Fresh Profile defaults it
+            // to false, so nothing to do — noted for clarity.)
         }
         Haptic.success()
         SoundPlayer.shared.play(.companionCheer)

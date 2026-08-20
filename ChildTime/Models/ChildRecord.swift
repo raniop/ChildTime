@@ -104,6 +104,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     var grade: Int?
     /// School year the grade was set (auto-advance anchor — see Profile.gradeSchoolYear).
     var gradeSchoolYear: Int?
+    /// True when the child picked their own grade (parent should verify).
+    var gradeSetByChild: Bool?
     var interests: [String]
     var learningLevel: String      // LearningLevel.rawValue
     var createdAt: Date
@@ -142,6 +144,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.character3DID = profile.character3DID
         self.grade = profile.grade
         self.gradeSchoolYear = profile.gradeSchoolYear
+        self.gradeSetByChild = profile.gradeSetByChild ? true : nil
         self.interests = profile.interests
         self.learningLevel = profile.learningLevel.rawValue
         self.createdAt = profile.createdAt
@@ -166,7 +169,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         if (topicsVersion ?? 1) < 2, ChildAge(rawValue: age) ?? .grade1 != .preK {
             topics.insert(.reading)
         }
-        return Profile(
+        var p = Profile(
             id: uuid,
             name: name,
             gender: gender.flatMap(ChildGender.init(rawValue:)),
@@ -185,6 +188,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             topicsVersion: 2,
             playPIN: playPIN
         )
+        p.gradeSetByChild = gradeSetByChild ?? false
+        return p
     }
 
     /// Downscale + JPEG-compress a photo so it's safe to store in a Firestore
