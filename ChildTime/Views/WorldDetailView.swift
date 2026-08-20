@@ -175,8 +175,13 @@ struct WorldDetailView: View {
 
     private var missionCard: some View {
         VStack(spacing: AppSpacing.md) {
-            rewardRow("🎁", "\(settings.questionsPerSession) שְׁאֵלוֹת → קוּפְסַת הַפְתָּעָה")
-            rewardRow("🎮", "כָּל \(settings.batchAnswers) נְכוֹנוֹת = \(settings.batchMinutes) דַּקּוֹת מִשְׂחָק")
+            if world.isBonusWorld {
+                rewardRow("💪", "רַק שְׁאֵלוֹת עֲנָק — קָשׁוֹת בִּמְיוּחָד, מִכָּל הַנּוֹשְׂאִים!")
+                rewardRow("🎮", "דַּקּוֹת כְּפוּלוֹת: כָּל \(max(1, settings.batchAnswers / 2)) נְכוֹנוֹת = \(settings.batchMinutes) דַּקּוֹת מִשְׂחָק")
+            } else {
+                rewardRow("🎁", "\(settings.questionsPerSession) שְׁאֵלוֹת → קוּפְסַת הַפְתָּעָה")
+                rewardRow("🎮", "כָּל \(settings.batchAnswers) נְכוֹנוֹת = \(settings.batchMinutes) דַּקּוֹת מִשְׂחָק")
+            }
         }
         .padding(AppSpacing.lg)
         .frame(maxWidth: .infinity)
@@ -237,6 +242,7 @@ struct WorldDetailView: View {
         case "history_museum":  FloatingOrbs.historyWorld()
         case "geo_journey":     FloatingOrbs.geographyWorld()
         case "story_forest":    FloatingOrbs.readingWorld()
+        case "bonus_arena":     FloatingOrbs.bonusWorld()
         default:                FloatingOrbs.home()
         }
     }

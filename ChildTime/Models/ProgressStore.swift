@@ -648,7 +648,7 @@ final class ProgressStore: ObservableObject {
     /// Continuously updates the per-topic learning signals after each answer.
     /// Called from `recordCorrect` / `recordWrong`.
     private func updateLearningSignals(topic: Topic, correct: Bool, responseMs: Double,
-                                       hintUsed: Bool = false) {
+                                       hintUsed: Bool = false, affectsAdaptive: Bool = true) {
         let key = topic.rawValue
         // Rolling response time (only when we have a real measurement).
         var fast = false
@@ -668,9 +668,13 @@ final class ProgressStore: ObservableObject {
         let current = affinity(for: topic)
         topicAffinity[key] = min(1, max(0, current + delta))
 
-        // Nudge the adaptive difficulty level from this answer's signals.
-        adjustAdaptiveLevel(topic: topic, correct: correct, fast: fast,
-                            hintUsed: hintUsed, abandoned: false)
+        // Nudge the adaptive difficulty level from this answer's signals —
+        // except in the bonus arena, where EVERYTHING is deliberately extra-hard
+        // and must not distort the child's regular per-topic level.
+        if affectsAdaptive {
+            adjustAdaptiveLevel(topic: topic, correct: correct, fast: fast,
+                                hintUsed: hintUsed, abandoned: false)
+        }
     }
 
     // MARK: - Recording
@@ -690,7 +694,9 @@ final class ProgressStore: ObservableObject {
                        responseMs: Double = 0,
                        hadMistakeThisQuestion: Bool = false,
                        hintUsed: Bool = false,
-                       grantsScreenTime: Bool = true) -> Int {
+                       grantsScreenTime: Bool = true,
+                       cycleMultiplier: Double = 1,
+                       affectsAdaptive: Bool = true) -> Int {
         totalAnswered += 1
         totalCorrect += 1
         _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
@@ -760,7 +766,9 @@ final class ProgressStore: ObservableObject {
             // fills, bank batchMinutes into the spendable balance.
             let target = Double(bonusTargetSeconds)
             let perSec = target / Double(cycleQuestionsTotal)
-            cycleSeconds += perSec
+            // 💫 Bonus arena pays DOUBLE (cycleMultiplier 2): every correct
+            // answer adds two shares, so batches bank twice as fast.
+            cycleSeconds += perSec * max(1, cycleMultiplier)
             while cycleSeconds >= target - 0.01 {
                 let granted = grantMinutesCapped(max(1, ParentSettings.shared.batchMinutes))
                 sessionMinutesEarned += granted
@@ -770,7 +778,8 @@ final class ProgressStore: ObservableObject {
         }
         xp += RewardEngine.xpPerCorrect
         updateTopicStat(topic: ctx.topic, correct: true)
-        updateLearningSignals(topic: ctx.topic, correct: true, responseMs: responseMs, hintUsed: hintUsed)
+        updateLearningSignals(topic: ctx.topic, correct: true, responseMs: responseMs,
+                              hintUsed: hintUsed, affectsAdaptive: affectsAdaptive)
         wheelProgressCount += 1
 
         // Per-sitting analytics for the sessionEnd summary.
@@ -1023,7 +1032,7 @@ final class ProgressStore: ObservableObject {
     /// back (Risk & Recovery loop). Returns the minutes deducted this tick.
     @discardableResult
     func recordWrong(topic: Topic, minutesPerCorrect: Int, hintUsed: Bool = false,
-                     grantsScreenTime: Bool = true) -> Int {
+                     grantsScreenTime: Bool = true, affectsAdaptive: Bool = true) -> Int {
         AppAnalytics.questionAnswered(topic: topic.rawValue, correct: false)
         totalAnswered += 1
         _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
@@ -1038,9 +1047,13 @@ final class ProgressStore: ObservableObject {
         sittingXP += RewardEngine.xpPerQuestion
         var stW = sittingTopics[topic.displayName] ?? SittingTopic()
         stW.q += 1; sittingTopics[topic.displayName] = stW
-        // A miss eases the adaptive level for this topic (gentle, capped).
-        adjustAdaptiveLevel(topic: topic, correct: false, fast: false,
-                            hintUsed: hintUsed, abandoned: false)
+        // A miss eases the adaptive level for this topic (gentle, capped) — but
+        // NOT in the bonus arena, where missing extra-hard questions is expected
+        // and must not lower the child's regular level.
+        if affectsAdaptive {
+            adjustAdaptiveLevel(topic: topic, correct: false, fast: false,
+                                hintUsed: hintUsed, abandoned: false)
+        }
 
         // Gentle affinity nudge down (no exposure/response bump — those are
         // counted once per question when it's finally answered correctly).

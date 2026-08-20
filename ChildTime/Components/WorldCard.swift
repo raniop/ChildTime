@@ -89,7 +89,7 @@ struct WorldCard: View {
                         .padding(.horizontal, 10)
 
                     // Topic subtitle (fixed zone)
-                    Text(world.topic.displayName)
+                    Text(world.isBonusWorld ? "כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת" : world.topic.displayName)
                         .font(.system(size: labelSize, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                         .multilineTextAlignment(.center)

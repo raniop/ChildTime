@@ -65,7 +65,12 @@ struct WorldMapView: View {
     /// and the Smart Feed won't serve its questions either.
     private var enabledWorlds: [World] {
         let allowed = profiles.active?.enabledTopics ?? Set(Topic.allCases)
-        return Worlds.all.filter { allowed.contains($0.topic) }
+        return Worlds.all.filter { world in
+            // 💫 The arena isn't a topic — always on, except for pre-readers
+            // (the extra-hard pool is text-based).
+            if world.isBonusWorld { return profiles.active?.age != .preK }
+            return allowed.contains(world.topic)
+        }
     }
 
     /// Total width cap for the world grid (so the 3 cards stay centered on iPad

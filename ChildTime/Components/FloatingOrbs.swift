@@ -183,6 +183,13 @@ extension FloatingOrbs {
             count: 5
         )
     }
+
+    static func bonusWorld() -> FloatingOrbs {
+        FloatingOrbs(
+            colors: [Color(hex: "4A148C"), Color(hex: "D81B60"), Color(hex: "FFB300"), Color(hex: "FFF176")],
+            count: 6
+        )
+    }
 }
 
 #Preview {

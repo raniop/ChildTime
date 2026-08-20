@@ -289,6 +289,7 @@ struct QuestionRunnerView: View {
         case "history_museum":  FloatingOrbs.historyWorld()
         case "geo_journey":     FloatingOrbs.geographyWorld()
         case "story_forest":    FloatingOrbs.readingWorld()
+        case "bonus_arena":     FloatingOrbs.bonusWorld()
         default:                FloatingOrbs.home()
         }
     }
@@ -499,6 +500,10 @@ struct QuestionRunnerView: View {
                         Text("💫 שְׁאֵלַת עֲנָק! +\(RewardEngine.bonusQuestionMinutes) דַּקּוֹת")
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                             .foregroundStyle(AppColor.starGold).glow(AppColor.starGold, radius: 10)
+                    } else if isBonusArena {
+                        Text("💫 \(q.topic.emoji) דַּקּוֹת כְּפוּלוֹת!")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundStyle(AppColor.starGold).glow(AppColor.starGold, radius: 10)
                     } else if isSuperQuestion {
                         Text("⭐ שְׁאֵלַת זָהָב!")
                             .font(.system(size: 22, weight: .bold, design: .rounded))
@@ -577,12 +582,12 @@ struct QuestionRunnerView: View {
                         .fill(.white.opacity(0.12))
                         .overlay(
                             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                                .stroke((isSuperQuestion || isBonusQuestion) ? AppColor.starGold : .white.opacity(0.2),
-                                        lineWidth: (isSuperQuestion || isBonusQuestion) ? 3 : 1)
+                                .stroke((isSuperQuestion || isBonusQuestion || isBonusArena) ? AppColor.starGold : .white.opacity(0.2),
+                                        lineWidth: (isSuperQuestion || isBonusQuestion || isBonusArena) ? 3 : 1)
                         )
                 )
-                .glow((isSuperQuestion || isBonusQuestion) ? AppColor.starGold : .clear,
-                      radius: (isSuperQuestion || isBonusQuestion) ? 16 : 0)
+                .glow((isSuperQuestion || isBonusQuestion || isBonusArena) ? AppColor.starGold : .clear,
+                      radius: (isSuperQuestion || isBonusQuestion || isBonusArena) ? 16 : 0)
                 .padding(.horizontal, AppSpacing.lg)
         }
     }
@@ -848,7 +853,9 @@ struct QuestionRunnerView: View {
         // Decide special events. A cooldown keeps at least 3 normal questions
         // between bonuses so they never fire several-in-a-row (which read as a bug
         // and made the bonus feel cheap).
-        let bonusCooldownOK = (questionIndex - lastBonusIndex) >= 3
+        // No random special events inside the bonus arena — every question there
+        // is already the hard pool with doubled minutes.
+        let bonusCooldownOK = !isBonusArena && (questionIndex - lastBonusIndex) >= 3
         // 💫 Bonus question first — it's the rarest and pays real minutes, so it
         // must not be crowded out by the cheaper events. Minutes only exist in
         // earn mode, and the pool is text-based → not for pre-readers.
@@ -887,6 +894,11 @@ struct QuestionRunnerView: View {
     private func pickTopic() -> Topic {
         switch mode {
         case .world(let w):
+            if w.isBonusWorld {
+                // 💫 The arena mixes ALL the child's enabled topics.
+                let pool = Array(profiles.active?.enabledTopics ?? Set(Topic.allCases))
+                return pool.randomElement() ?? .logic
+            }
             return w.topic
         case .smartFeed:
             let profile = LearningProfile(store: progress, settings: settings)
@@ -946,7 +958,7 @@ struct QuestionRunnerView: View {
         // current passage; fetch a fresh passage when the group is done. Falls
         // through to the generic path (single passage question) only if the
         // whole pool was filtered out.
-        if topic == .reading, !preReader, !bonus {
+        if topic == .reading, !preReader, !bonus, !isBonusArena {
             if readingQueue.isEmpty {
                 readingQueue = ReadingContent.nextGroup(target: effective)
                     .filter { !QuestionReporter.shared.isHidden($0.prompt) }
@@ -960,7 +972,7 @@ struct QuestionRunnerView: View {
             }
         }
         func makeQuestion() -> Question {
-            if bonus { return QuestionGenerator.generateBonus(topic: topic) }
+            if bonus || isBonusArena { return QuestionGenerator.generateBonus(topic: topic) }
             return preReader
                 ? PreReaderContent.generate(topic: topic)
                 : QuestionGenerator.generate(topic: topic, difficulty: effective)
@@ -991,6 +1003,13 @@ struct QuestionRunnerView: View {
 
     /// The active child is in the pre-reader (age 4) picture mode.
     private var isPreReader: Bool { profiles.active?.age == .preK }
+
+    /// 💫 This session is the bonus arena: every question comes from the
+    /// extra-hard pool, minutes pay double, no random special events.
+    private var isBonusArena: Bool {
+        if case .world(let w) = mode { return w.isBonusWorld }
+        return false
+    }
 
     /// Dedup key matching QuestionMemory's (prompt + correct answer).
     private func sessionKey(_ q: Question) -> String {
@@ -1152,7 +1171,9 @@ struct QuestionRunnerView: View {
             responseMs: responseMs,
             hadMistakeThisQuestion: hadMistakeThisQuestion,
             hintUsed: usedHintThisQuestion,
-            grantsScreenTime: earnsTime
+            grantsScreenTime: earnsTime,
+            cycleMultiplier: isBonusArena ? 2 : 1,   // 💫 arena: double minutes
+            affectsAdaptive: !isBonusArena
         )
         earnedThisSession += earned
         if receivedHelpThisQuestion {
@@ -1174,9 +1195,11 @@ struct QuestionRunnerView: View {
         )
         reportLiveEvents(for: q)
 
-        // Immediate per-question reward: "+24 שניות" rising into the timer.
+        // Immediate per-question reward: "+24 שניות" rising into the timer
+        // (doubled in the bonus arena).
         if earnsTime, !cappedBefore {
-            flashSeconds("+\(progress.secondsPerCorrect) שְׁנִיּוֹת", positive: true)
+            let secs = progress.secondsPerCorrect * (isBonusArena ? 2 : 1)
+            flashSeconds("+\(secs) שְׁנִיּוֹת", positive: true)
         }
         // "+X דקות" popup — only when a full bonus was banked this answer.
         if minutesGranted > 0 {
@@ -1289,7 +1312,8 @@ struct QuestionRunnerView: View {
             topic: q.topic,
             minutesPerCorrect: settings.minutesPerCorrectAnswer,
             hintUsed: usedHintThisQuestion,
-            grantsScreenTime: purpose.grantsScreenTime
+            grantsScreenTime: purpose.grantsScreenTime,
+            affectsAdaptive: !isBonusArena   // arena misses never lower the level
         )
         LearningHistoryStore.shared.recordAnswer(
             topic: q.topic, correct: false, responseMs: 0,

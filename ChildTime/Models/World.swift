@@ -9,11 +9,15 @@ struct World: Identifiable, Hashable {
     let rooms: Int           // # of rooms in the world (default 10)
     let gradient: AppGradientKey
     let glowColor: Color
+    /// 💫 זירת הענקים — mixes ALL the child's topics and serves ONLY the
+    /// extra-hard bonus pool, paying double minutes. `topic` is nominal for
+    /// such a world (theming/fallbacks only) — never used to pick questions.
+    var isBonusWorld: Bool = false
 
     enum AppGradientKey: String {
         case castle, tower, valley, galaxy, dreamy, gold
         case englishWorld, logicWorld, scienceWorld, historyWorld, geographyWorld
-        case readingWorld
+        case readingWorld, bonusWorld
 
         var gradient: LinearGradient {
             switch self {
@@ -29,6 +33,7 @@ struct World: Identifiable, Hashable {
             case .historyWorld: return AppGradient.historyWorld
             case .geographyWorld: return AppGradient.geographyWorld
             case .readingWorld: return AppGradient.readingWorld
+            case .bonusWorld: return AppGradient.bonusWorld
             }
         }
     }
@@ -125,6 +130,17 @@ enum Worlds {
             rooms: 10,
             gradient: .readingWorld,
             glowColor: Color(hex: "AB47BC")
+        ),
+        World(
+            id: "bonus_arena",
+            name: "זִירַת הָעֲנָקִים",
+            emoji: "💫",
+            topic: .logic,   // nominal — the arena mixes ALL topics (isBonusWorld)
+            starsToUnlock: 0,
+            rooms: 10,
+            gradient: .bonusWorld,
+            glowColor: AppColor.flameOrange,
+            isBonusWorld: true
         )
     ]
 

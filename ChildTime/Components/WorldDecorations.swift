@@ -20,6 +20,8 @@ struct WorldDecorations: View {
             return ["🌍", "🗺️", "🧭", "🏔️", "🌊", "🌋"]
         case "story_forest":
             return ["📖", "📚", "🌙", "🦉", "🕯️", "✨"]
+        case "bonus_arena":
+            return ["💫", "🏆", "⚡", "🔥", "👑", "🎯"]
         default:
             return ["✨", "⭐", "🌟"]
         }

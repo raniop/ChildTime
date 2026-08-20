@@ -26,7 +26,9 @@ struct ChildWorldsView: View {
                 }
 
                 Section {
-                    ForEach(Worlds.all) { world in
+                    // The bonus arena isn't a topic toggle — it mixes whatever
+                    // topics are enabled here, so it has no row of its own.
+                    ForEach(Worlds.all.filter { !$0.isBonusWorld }) { world in
                         Toggle(isOn: binding(for: world)) {
                             HStack(spacing: 10) {
                                 Text(world.emoji).font(.title3)
