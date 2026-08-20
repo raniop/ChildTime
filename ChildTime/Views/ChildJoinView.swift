@@ -25,7 +25,7 @@ struct ChildJoinView: View {
             // child device that was disconnected: it must never expose a one-tap
             // path to becoming a parent device. (A parent repurposes a device from
             // the parent-gated Settings instead.)
-            if !settings.justDisconnected {
+            if settings.joinedChildID == nil && !settings.justDisconnected {
                 VStack {
                     HStack {
                         Button {

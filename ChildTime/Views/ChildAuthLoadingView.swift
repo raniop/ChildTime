@@ -43,15 +43,21 @@ struct ChildAuthLoadingView: View {
                     }
                     .buttonStyle(.juicy)
 
-                    Button {
-                        Haptic.light()
-                        settings.deviceRole = .unset   // back to the device-type picker
-                    } label: {
-                        Text("הַחְלִיפוּ סוּג מַכְשִׁיר")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.85))
-                            .padding(.horizontal, 20).padding(.vertical, 10)
-                            .background(.white.opacity(0.16), in: Capsule())
+                    // Escape to the role picker — ONLY for a device that never
+                    // bound to a child. A bound/disconnected child device must
+                    // not offer a path out of the child role (this exact button
+                    // sent offline kids to the role picker).
+                    if settings.joinedChildID == nil && !settings.justDisconnected {
+                        Button {
+                            Haptic.light()
+                            settings.deviceRole = .unset   // back to the device-type picker
+                        } label: {
+                            Text("הַחְלִיפוּ סוּג מַכְשִׁיר")
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.85))
+                                .padding(.horizontal, 20).padding(.vertical, 10)
+                                .background(.white.opacity(0.16), in: Capsule())
+                        }
                     }
                 } else {
                     ProgressView()

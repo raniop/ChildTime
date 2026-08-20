@@ -28,7 +28,16 @@ struct ContentView: View {
                 // Choose the device's role FIRST: a child's play device (joins by
                 // scanning a QR — no sign-in) or a parent's monitoring device
                 // (needs an account). This steers the whole flow.
+                //
+                // SELF-HEAL first: settings live in the APP-GROUP defaults while
+                // profiles live in STANDARD defaults. If the group container is
+                // ever wiped/unavailable (iOS update, restore, container glitch),
+                // the role+binding vanish while the child's profile survives —
+                // and an established CHILD device suddenly showed the role
+                // picker. If the evidence says "this was a bound child device",
+                // restore the role+binding instead of asking a kid to choose.
                 RolePickerView()
+                    .onAppear { healLostChildRoleIfNeeded() }
             } else if settings.deviceRole == .child {
                 childFlow
             } else {
@@ -108,13 +117,20 @@ struct ContentView: View {
     /// profile just because the account already has children.
     @ViewBuilder
     private var childFlow: some View {
-        if !auth.isSignedIn {
-            // Signing in anonymously — brief, automatic, no UI to fill in.
+        // A device already BOUND to a child whose profile is here locally plays
+        // OFFLINE-FIRST: auth/network are only needed for sync and joining, so a
+        // dead connection (or a lost anonymous session) must never strand the kid
+        // on a "connecting" screen — that screen's escape hatch is how kids ended
+        // up on the role picker. Auth heals in the background; sync catches up.
+        if let joined = settings.joinedChildID, let cid = UUID(uuidString: joined),
+           profiles.profiles.contains(where: { $0.id == cid }) {
+            childPlay(cid: cid)
+                .task { auth.signInAnonymouslyIfNeeded() }
+        } else if !auth.isSignedIn {
+            // Not bound (or profile not local yet) — joining requires a uid.
             ChildAuthLoadingView()
-        } else if let joined = settings.joinedChildID, let cid = UUID(uuidString: joined) {
-            if profiles.profiles.contains(where: { $0.id == cid }) {
-                childPlay(cid: cid)
-            } else if household.isLoading {
+        } else if let joined = settings.joinedChildID, UUID(uuidString: joined) != nil {
+            if household.isLoading {
                 familyLoadingView
             } else {
                 // The bound child isn't here (removed / not synced) → re-scan.
@@ -149,6 +165,27 @@ struct ContentView: View {
                     gender: p.gender?.rawValue)
             }
         }
+    }
+
+    /// The app-group settings said "no role", but the STANDARD-domain profile
+    /// store says a child was active here and no real parent account is cached —
+    /// that's a bound child device whose group container got wiped. Restore it.
+    /// A parent device (real sign-in cached) is left alone: they can re-pick
+    /// parent and their cached account signs them right back in.
+    private func healLostChildRoleIfNeeded() {
+        guard settings.deviceRole == .unset, settings.joinedChildID == nil else { return }
+        guard let raw = UserDefaults.standard.string(forKey: "profiles.activeID"),
+              let id = UUID(uuidString: raw),
+              profiles.profiles.contains(where: { $0.id == id }) else { return }
+        // A cached REAL account (Apple/Google/email) marks a parent device.
+        if let data = UserDefaults.standard.data(forKey: "auth.cachedUser"),
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           (json["provider"] as? String)?.isEmpty == false {
+            return
+        }
+        TofyLink("healLostChildRole: role was unset but child \(raw.prefix(8)) is active locally → restoring child role + binding")
+        settings.joinedChildID = raw
+        settings.deviceRole = .child
     }
 
     private var familyLoadingView: some View {
