@@ -2014,7 +2014,7 @@ struct ParentDashboardView: View {
             case "🎮":
                 return "דקות משחק שהילד/ה הרוויח/ה מלמידה ועוד לא פתח/ה (הארנק המורווח). דקות שאתם נותנים (💝 מתנה) נשמרות בנפרד ולא נספרות כאן. כשיש חלון פתוח — רואים ספירה לאחור. \"—\" = אין דקות ממתינות."
             case "💝":
-                return "דקות שאתם נתתם במתנה ועוד לא נפתחו — נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, אותו מספר בכל מכשיר. הילד/ה פותח/ת אותן מתי שרוצה. אפשר לתת ביום עד מה שנשאר עד חצות; מה שלא נוצל נשאר למחר."
+                return "דקות שאתם נתתם במתנה ועוד לא נפתחו — נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, אותו מספר בכל מכשיר. הילד/ה פותח/ת אותן מתי שרוצה. בכל נתינה אפשר לתת עד מה שנשאר עד חצות; מה שלא נוצל נשאר למחר."
             default:
                 return "נתון מסכם על הפעילות של הילד/ה בטופי."
             }
@@ -2033,8 +2033,9 @@ struct ParentDashboardView: View {
     private func remoteOpen(_ profile: Profile, _ minutes: Int) {
         let (allowed, capLeft) = giftAllowance(for: profile, wanting: minutes)
         guard allowed > 0 else {
+            // Only reachable in the last minute before midnight (capLeft == 0).
             Haptic.warning()
-            remoteGrantMsg = "הִגַּעְתֶּם לַמַּקְסִימוּם לְהַיּוֹם: אֶפְשָׁר לָתֵת עַד \(ProgressStore.minutesUntilMidnight()) דַּקּוֹת (עַד חֲצוֹת) — וּכְבָר נָתַתֶּם אֶת כֻּלָּן. מָחָר אֶפְשָׁר שׁוּב."
+            remoteGrantMsg = "עוֹד רֶגַע חֲצוֹת — אֵין מַה לָּתֵת לְהַיּוֹם. מִיָּד אַחֲרֵי חֲצוֹת אֶפְשָׁר לָתֵת שׁוּב."
             return
         }
         Haptic.success()
@@ -2048,15 +2049,13 @@ struct ParentDashboardView: View {
         remoteGrantMsg = msg
     }
 
-    /// How much of `wanting` may still be given today: min(wanting, minutes-until-
-    /// midnight − already-given-today). Uses the synced counter + gifts in flight.
+    /// How much of `wanting` may be given RIGHT NOW: each single give is capped
+    /// at the minutes left until midnight (22:30 + "שעתיים" → 90), nothing more.
+    /// Deliberately NO daily accumulator: the synced given-today counter plus
+    /// gifts still in flight to an offline device once summed to a full day and
+    /// locked the button while the child had 0 minutes (Rani, 20.8).
     private func giftAllowance(for profile: Profile, wanting: Int) -> (allowed: Int, capLeft: Int) {
-        let snap = remote.remoteSnapshots[profile.id] ?? ProgressVault.shared.snapshot(for: profile.id)
-        let givenToday: Int = {
-            guard let d = snap.giftGivenDate, Calendar.current.isDateInToday(d) else { return 0 }
-            return snap.giftGivenToday ?? 0
-        }() + remote.pendingGifts[profile.id, default: 0]
-        let capLeft = max(0, ProgressStore.minutesUntilMidnight() - givenToday)
+        let capLeft = ProgressStore.minutesUntilMidnight()
         return (min(wanting, capLeft), capLeft)
     }
 

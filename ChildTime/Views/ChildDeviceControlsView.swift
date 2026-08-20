@@ -214,14 +214,14 @@ struct ChildDeviceControlsView: View {
     private var quickOpenCard: some View {
         // Same rule as the parent dashboard: a parent GIVES 💝 minutes into the
         // child's synced gift pocket — never a surprise unlock. The child opens
-        // them when they choose (from any device). Capped per day at what's left
-        // until midnight; unused gift carries over.
-        let capLeft = max(0, ProgressStore.minutesUntilMidnight() - progress.giftGivenTodayResolved)
+        // them when they choose (from any device). Each give is capped at what's
+        // left until midnight (no daily accumulator — see giftAllowance).
+        let capLeft = ProgressStore.minutesUntilMidnight()
         return controlCard(tint: AppColor.starGold) {
             sectionHead("תֵּן דַּקּוֹת מַתָּנָה 💝",
                         capLeft > 0
                             ? "נִכְנָס לַכִּיס 💝 שֶׁל הַיֶּלֶד — \(profileName) \(isGirl ? "פּוֹתַחַת" : "פּוֹתֵחַ") מָתַי שֶׁ\(isGirl ? "תִּרְצֶה" : "יִרְצֶה"), מִכָּל מַכְשִׁיר. אֶפְשָׁר לָתֵת עוֹד עַד \(capLeft) דַּקּוֹת הַיּוֹם (עַד חֲצוֹת)."
-                            : "הִגַּעְתֶּם לַמַּקְסִימוּם לְהַיּוֹם (עַד חֲצוֹת). מָחָר אֶפְשָׁר שׁוּב.",
+                            : "עוֹד רֶגַע חֲצוֹת — מִיָּד אַחֲרֵי חֲצוֹת אֶפְשָׁר לָתֵת שׁוּב.",
                         icon: "gift.fill", tint: AppColor.starGold)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                 durationPill("10 דַּקּוֹת", minutes: 10, capLeft: capLeft)
