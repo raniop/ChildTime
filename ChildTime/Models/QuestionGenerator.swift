@@ -11,6 +11,53 @@ struct QuestionGenerator {
         }
     }
 
+    /// 💫 A BONUS question — served only when the rare bonus event fires. Pulls
+    /// from the dedicated really-hard pool (BonusQuestionBank); math is generated
+    /// as a two-step expression. Falls back to a regular hard question if the
+    /// pool for this topic is exhausted this session.
+    static func generateBonus(topic: Topic) -> Question {
+        if topic == .math { return makeBonusMath() }
+        let pool = BonusQuestionBank.pool(for: topic)
+        guard let item = QuestionMemory.shared.pickFresh(pool, for: topic, target: .hard) else {
+            return generate(topic: topic, difficulty: .hard)
+        }
+        let allOptions = ([item.correctAnswer] + item.distractors).shuffled()
+        return Question(
+            topic: topic,
+            prompt: item.prompt,
+            options: allOptions,
+            correctIndex: allOptions.firstIndex(of: item.correctAnswer) ?? 0
+        )
+    }
+
+    /// Bonus math: a TWO-step expression (e.g. "7 × 6 + 13 = ?") — a real jump
+    /// over the regular hard tier, matching the "really really hard" bonus pool.
+    private static func makeBonusMath() -> Question {
+        let a = Int.random(in: 3...12)
+        let b = Int.random(in: 3...12)
+        let prompt: String
+        let answer: Int
+        switch Int.random(in: 0...3) {
+        case 0:
+            let c = Int.random(in: 5...30)
+            prompt = "\(a) × \(b) + \(c) = ?"
+            answer = a * b + c
+        case 1:
+            let c = Int.random(in: 1..<(a * b))
+            prompt = "\(a) × \(b) − \(c) = ?"
+            answer = a * b - c
+        case 2:
+            let x = Int.random(in: 120...480), y = Int.random(in: 120...480)
+            prompt = "\(x) + \(y) = ?"
+            answer = x + y
+        default:
+            let x = Int.random(in: 250...900), y = Int.random(in: 100..<250)
+            prompt = "\(x) − \(y) = ?"
+            answer = x - y
+        }
+        return makeNumericQuestion(prompt: prompt, answer: answer, topic: .math)
+    }
+
     // MARK: - Math (combines addition/subtraction and multiplication/division)
 
     private static func makeMath(difficulty: Difficulty) -> Question {

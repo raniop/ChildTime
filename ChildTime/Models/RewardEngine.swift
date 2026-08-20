@@ -30,9 +30,16 @@ enum RewardEngine {
         }
     }
 
+    /// 💫 Minutes a correct BONUS QUESTION pays (Rani: a really hard question is
+    /// worth a real prize). Granted via grantBonusMinutes — respects the daily
+    /// cap and banks any overflow for tomorrow.
+    static let bonusQuestionMinutes = 7
+
     /// Stars granted for a correct answer. Mystery/super are flat bonuses; a
     /// normal answer scales with the combo multiplier so long streaks pay off.
-    static func starsForCorrect(combo: Int, isSuperQuestion: Bool, isMysteryPortal: Bool) -> Int {
+    static func starsForCorrect(combo: Int, isSuperQuestion: Bool, isMysteryPortal: Bool,
+                                isBonusQuestion: Bool = false) -> Int {
+        if isBonusQuestion { return 5 * starMultiplier }
         if isMysteryPortal { return 3 * starMultiplier }
         if isSuperQuestion { return 5 * starMultiplier }
         return comboMultiplier(streak: combo) * starMultiplier
@@ -41,7 +48,9 @@ enum RewardEngine {
     /// 💎 diamonds for a correct answer — the SPENDABLE shop wallet. Earned at a
     /// deliberately slower pace than ⭐ stars (roughly ~1 per answer) so the shop
     /// keeps its value: a long streak / super / mystery still pays a little more.
-    static func diamondsForCorrect(combo: Int, isSuperQuestion: Bool, isMysteryPortal: Bool) -> Int {
+    static func diamondsForCorrect(combo: Int, isSuperQuestion: Bool, isMysteryPortal: Bool,
+                                   isBonusQuestion: Bool = false) -> Int {
+        if isBonusQuestion { return 5 }
         if isMysteryPortal { return 3 }
         if isSuperQuestion { return 5 }
         switch combo {
@@ -95,11 +104,12 @@ enum RewardEngine {
         combo: Int,
         isSuperQuestion: Bool,
         isMysteryPortal: Bool,
-        difficulty: Difficulty
+        difficulty: Difficulty,
+        isBonusQuestion: Bool = false
     ) -> Int {
         var base = pointsPerCorrect
-        // Difficulty bump
-        switch difficulty {
+        // Difficulty bump (a bonus question is by definition the hard pool)
+        switch isBonusQuestion ? .hard : difficulty {
         case .easy:   base += 0
         case .medium: base += 5
         case .hard:   base += 10
@@ -109,6 +119,7 @@ enum RewardEngine {
         else if combo >= 5 { base += 5 }
         else if combo >= 3 { base += 2 }
         // Event multipliers (compound)
+        if isBonusQuestion { base *= 5 }
         if isSuperQuestion { base *= 5 }
         if isMysteryPortal { base *= 3 }
         return base

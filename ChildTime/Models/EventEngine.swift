@@ -14,6 +14,14 @@ enum EventEngine {
         return Double.random(in: 0...1) < 0.07
     }
 
+    /// Bonus Question — a REALLY hard question from the dedicated bonus pool,
+    /// worth real minutes (RewardEngine.bonusQuestionMinutes). Deliberately the
+    /// rarest event: it pays ~2 regular batches, so it must stay a jackpot.
+    static func shouldFireBonusQuestion(questionIndex: Int, totalQuestions: Int) -> Bool {
+        guard questionIndex >= 2 && questionIndex < totalQuestions - 1 else { return false }
+        return Double.random(in: 0...1) < 0.06
+    }
+
     /// Big combo celebration trigger — fires at exactly 3 and 5 in a row.
     static func shouldFireComboEvent(streak: Int) -> Bool {
         streak == 3 || streak == 5 || streak == 10

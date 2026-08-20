@@ -52,6 +52,9 @@ struct QuestionRunnerView: View {
     @State private var isSuperQuestion: Bool = false
     @State private var isInPortal: Bool = false
     @State private var showPortalIntro: Bool = false
+    /// 💫 The rare REALLY-hard question worth real minutes (bonus pool).
+    @State private var isBonusQuestion: Bool = false
+    @State private var showBonusIntro: Bool = false
     /// Index of the last bonus event (super question / mystery portal). Enforces a
     /// cooldown so bonuses never cluster several-in-a-row — they stay special.
     @State private var lastBonusIndex: Int = -100
@@ -203,6 +206,9 @@ struct QuestionRunnerView: View {
             }
 
             // Portal overlay
+            if showBonusIntro {
+                bonusIntro
+            }
             if showPortalIntro {
                 portalIntro
             }
@@ -482,7 +488,11 @@ struct QuestionRunnerView: View {
                 Spacer(minLength: 4)
                 HStack(spacing: 8) {
                     Text(q.topic.emoji).font(.system(size: topicEmojiSize))
-                    if isSuperQuestion {
+                    if isBonusQuestion {
+                        Text("💫 שְׁאֵלַת עֲנָק! +\(RewardEngine.bonusQuestionMinutes) דַּקּוֹת")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundStyle(AppColor.starGold).glow(AppColor.starGold, radius: 10)
+                    } else if isSuperQuestion {
                         Text("⭐ שְׁאֵלַת זָהָב!")
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundStyle(AppColor.starGold).glow(AppColor.starGold, radius: 8)
@@ -534,11 +544,12 @@ struct QuestionRunnerView: View {
                         .fill(.white.opacity(0.12))
                         .overlay(
                             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                                .stroke(isSuperQuestion ? AppColor.starGold : .white.opacity(0.2),
-                                        lineWidth: isSuperQuestion ? 3 : 1)
+                                .stroke((isSuperQuestion || isBonusQuestion) ? AppColor.starGold : .white.opacity(0.2),
+                                        lineWidth: (isSuperQuestion || isBonusQuestion) ? 3 : 1)
                         )
                 )
-                .glow(isSuperQuestion ? AppColor.starGold : .clear, radius: isSuperQuestion ? 16 : 0)
+                .glow((isSuperQuestion || isBonusQuestion) ? AppColor.starGold : .clear,
+                      radius: (isSuperQuestion || isBonusQuestion) ? 16 : 0)
                 .padding(.horizontal, AppSpacing.lg)
         }
     }
@@ -673,6 +684,48 @@ struct QuestionRunnerView: View {
         .transition(.scale.combined(with: .opacity))
     }
 
+    // MARK: - Bonus-question intro animation
+
+    /// 💫 Full-screen announcement before the rare really-hard bonus question —
+    /// same theatrical beat as the portal, but the promise here is MINUTES.
+    private var bonusIntro: some View {
+        ZStack {
+            AppGradient.gold.ignoresSafeArea()
+            FloatingOrbs(
+                colors: [AppColor.starGold, AppColor.flameOrange, .white],
+                count: 6, maxSize: 260, opacity: 0.4
+            )
+            SparkleField(count: 30, size: 15)
+
+            VStack(spacing: AppSpacing.lg) {
+                Text("💫")
+                    .font(.system(size: portalEmojiSize))
+                    .scaleEffect(showBonusIntro ? 1.15 : 0.9)
+                    .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: showBonusIntro)
+                    .glow(AppColor.starGold, radius: 30)
+                    .shadow(color: .black.opacity(0.3), radius: 10, y: 6)
+
+                Text("שְׁאֵלַת עֲנָק!")
+                    .font(.system(size: portalTitleSize, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .glow(AppColor.flameOrange, radius: 16)
+
+                Text("🎮 +\(RewardEngine.bonusQuestionMinutes) דַּקּוֹת")
+                    .font(.system(size: isCompact ? 34 : 44, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 24).padding(.vertical, 10)
+                    .background(Capsule().fill(.black.opacity(0.25)))
+
+                Text("שְׁאֵלָה קָשָׁה בִּמְיוּחָד — עֲנוּ נָכוֹן וְקַבְּלוּ אֶת כָּל הַדַּקּוֹת!")
+                    .font(.system(size: isCompact ? 18 : 24, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, AppSpacing.xl)
+        }
+        .transition(.opacity)
+    }
+
     // MARK: - Portal intro animation
 
     private var portalIntro: some View {
@@ -763,11 +816,26 @@ struct QuestionRunnerView: View {
         // between bonuses so they never fire several-in-a-row (which read as a bug
         // and made the bonus feel cheap).
         let bonusCooldownOK = (questionIndex - lastBonusIndex) >= 3
-        let mystery = bonusCooldownOK && EventEngine.shouldFireMysteryPortal(questionIndex: questionIndex, totalQuestions: totalQuestions)
-        let superQ = bonusCooldownOK && !mystery && EventEngine.shouldFireSuperQuestion(questionIndex: questionIndex, totalQuestions: totalQuestions)
-        if mystery || superQ { lastBonusIndex = questionIndex }
+        // 💫 Bonus question first — it's the rarest and pays real minutes, so it
+        // must not be crowded out by the cheaper events. Minutes only exist in
+        // earn mode, and the pool is text-based → not for pre-readers.
+        let bonusQ = bonusCooldownOK && purpose.grantsScreenTime && !isPreReader
+            && !progress.atDailyCap   // never promise minutes the cap won't allow today
+            && EventEngine.shouldFireBonusQuestion(questionIndex: questionIndex, totalQuestions: totalQuestions)
+        let mystery = bonusCooldownOK && !bonusQ && EventEngine.shouldFireMysteryPortal(questionIndex: questionIndex, totalQuestions: totalQuestions)
+        let superQ = bonusCooldownOK && !bonusQ && !mystery && EventEngine.shouldFireSuperQuestion(questionIndex: questionIndex, totalQuestions: totalQuestions)
+        if bonusQ || mystery || superQ { lastBonusIndex = questionIndex }
 
-        if mystery {
+        if bonusQ {
+            isInPortal = false
+            showBonusIntro = true
+            SoundPlayer.shared.play(.portalAppear)
+            companion.wow("שְׁאֵלַת עֲנָק! 💫 שָׁוָה \(RewardEngine.bonusQuestionMinutes) דַּקּוֹת")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                withAnimation { showBonusIntro = false }
+                createQuestion(super: false, bonus: true)
+            }
+        } else if mystery {
             isInPortal = true
             showPortalIntro = true
             SoundPlayer.shared.play(.portalAppear)
@@ -794,8 +862,9 @@ struct QuestionRunnerView: View {
         }
     }
 
-    private func createQuestion(super isSuper: Bool) {
+    private func createQuestion(super isSuper: Bool, bonus: Bool = false) {
         isSuperQuestion = isSuper
+        isBonusQuestion = bonus
         selectedIndex = nil
         feedbackForIndex = [:]
         showFeedback = false
@@ -807,7 +876,7 @@ struct QuestionRunnerView: View {
 
         // Re-ask a previously-wrong question every few questions (spaced out) —
         // the only repeat we allow.
-        if !isSuper, questionIndex > 0, questionIndex % 3 == 0, !reAskQueue.isEmpty {
+        if !isSuper, !bonus, questionIndex > 0, questionIndex % 3 == 0, !reAskQueue.isEmpty {
             let requeued = reAskQueue.removeFirst()
             currentTopic = requeued.topic
             current = requeued
@@ -841,7 +910,8 @@ struct QuestionRunnerView: View {
         // Early readers (age 4) get picture-based questions instead of text ones.
         let preReader = isPreReader
         func makeQuestion() -> Question {
-            preReader
+            if bonus { return QuestionGenerator.generateBonus(topic: topic) }
+            return preReader
                 ? PreReaderContent.generate(topic: topic)
                 : QuestionGenerator.generate(topic: topic, difficulty: effective)
         }
@@ -1014,7 +1084,8 @@ struct QuestionRunnerView: View {
             topic: q.topic,
             combo: progress.currentStreak,
             isSuperQuestion: isSuperQuestion,
-            isMysteryPortal: isInPortal
+            isMysteryPortal: isInPortal,
+            isBonusQuestion: isBonusQuestion
         )
         // Was the child already at their daily maximum *before* this answer?
         // If so, they keep playing & learning but earn no more minutes.
@@ -1036,6 +1107,12 @@ struct QuestionRunnerView: View {
         earnedThisSession += earned
         if receivedHelpThisQuestion {
             AppAnalytics.log("parent_help_success", ["topic": q.topic.rawValue])
+        }
+        // 💫 Bonus question pays its minutes on top of the regular cycle —
+        // BEFORE the delta below, so the "+X דקות" popup shows the full prize.
+        // grantBonusMinutes fills today up to the cap and banks any overflow.
+        if isBonusQuestion, earnsTime {
+            _ = progress.grantBonusMinutes(RewardEngine.bonusQuestionMinutes)
         }
         let minutesGranted = max(0, progress.pendingMinutes - minutesBefore)
 
@@ -1066,7 +1143,13 @@ struct QuestionRunnerView: View {
         }
         // Already past the max — gentle, occasional reminder (no minutes now).
         if cappedBefore {
-            companion.cheer(["יָפֶה! לוֹמְדִים בִּשְׁבִיל הַכֵּיף 🌟", "כֹּל הַכָּבוֹד! עוֹד נְקוּדּוֹת וְכוֹכָבִים", "\(Gendered.g("אַלּוּף", "אַלּוּפָה"))! מַמְשִׁיכִים לְהִתְקַדֵּם"].randomElement()!)
+            if isBonusQuestion {
+                // The promised bonus minutes were banked — say so, never silence a prize.
+                companion.wow("אַלּוּפִים! 💫 הַדַּקּוֹת נִשְׁמְרוּ לְמָחָר 🏦")
+                confettiTrigger += 1
+            } else {
+                companion.cheer(["יָפֶה! לוֹמְדִים בִּשְׁבִיל הַכֵּיף 🌟", "כֹּל הַכָּבוֹד! עוֹד נְקוּדּוֹת וְכוֹכָבִים", "\(Gendered.g("אַלּוּף", "אַלּוּפָה"))! מַמְשִׁיכִים לְהִתְקַדֵּם"].randomElement()!)
+            }
             return
         }
 
@@ -1090,7 +1173,12 @@ struct QuestionRunnerView: View {
         }
 
         // Companion reaction
-        if isSuperQuestion {
+        if isBonusQuestion {
+            companion.wow("עֲנָקִים! 💫 +\(RewardEngine.bonusQuestionMinutes) דַּקּוֹת!")
+            confettiTrigger += 1
+            rumbleTrigger += 1
+            SoundPlayer.shared.play(.levelUp)
+        } else if isSuperQuestion {
             companion.wow("שְׁאֵלַת זָהָב! ⭐")
             confettiTrigger += 1
         } else if isInPortal {

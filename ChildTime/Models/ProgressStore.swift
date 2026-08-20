@@ -680,6 +680,8 @@ final class ProgressStore: ObservableObject {
         let combo: Int
         let isSuperQuestion: Bool
         let isMysteryPortal: Bool
+        /// 💫 The rare extra-hard question worth real minutes.
+        var isBonusQuestion: Bool = false
     }
 
     @discardableResult
@@ -706,7 +708,8 @@ final class ProgressStore: ObservableObject {
         let earned = RewardEngine.starsForCorrect(
             combo: currentStreak,
             isSuperQuestion: ctx.isSuperQuestion,
-            isMysteryPortal: ctx.isMysteryPortal
+            isMysteryPortal: ctx.isMysteryPortal,
+            isBonusQuestion: ctx.isBonusQuestion
         )
         stars += earned
         // 💎 spendable wallet — earned alongside ⭐, but at a slower rate so the
@@ -716,7 +719,8 @@ final class ProgressStore: ObservableObject {
         let earnedDiamonds = RewardEngine.diamondsForCorrect(
             combo: currentStreak,
             isSuperQuestion: ctx.isSuperQuestion,
-            isMysteryPortal: ctx.isMysteryPortal
+            isMysteryPortal: ctx.isMysteryPortal,
+            isBonusQuestion: ctx.isBonusQuestion
         ) * eventMult
         diamonds += earnedDiamonds
         sessionDiamondsEarned += earnedDiamonds
@@ -741,7 +745,8 @@ final class ProgressStore: ObservableObject {
             combo: ctx.combo,
             isSuperQuestion: ctx.isSuperQuestion,
             isMysteryPortal: ctx.isMysteryPortal,
-            difficulty: topicDifficulty
+            difficulty: topicDifficulty,
+            isBonusQuestion: ctx.isBonusQuestion
         )
         totalScore += pts
         sessionScore += pts
