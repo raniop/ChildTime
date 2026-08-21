@@ -252,7 +252,13 @@ struct ParentGateView<Content: View>: View {
         if settings.deviceRole == .child {
             LiveEventReporter.report(.parentGateOpened)
         }
-        settings.sessionUnlocked = true
+        // Persist the session unlock ONLY where the parent holds the device.
+        // On a child device (or the parent's phone in Kid Mode) the kid holds
+        // it — a lingering unlock would let them re-open any session-respecting
+        // gate after the parent used it once.
+        if settings.deviceRole != .child && !KidModeManager.shared.active {
+            settings.sessionUnlocked = true
+        }
         authorized = true
         onAuthorized?()
     }

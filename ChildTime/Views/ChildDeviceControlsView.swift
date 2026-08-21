@@ -224,10 +224,10 @@ struct ChildDeviceControlsView: View {
                             : "עוֹד רֶגַע חֲצוֹת — מִיָּד אַחֲרֵי חֲצוֹת אֶפְשָׁר לָתֵת שׁוּב.",
                         icon: "gift.fill", tint: AppColor.starGold)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                durationPill("10 דַּקּוֹת", minutes: 10, capLeft: capLeft)
                 durationPill("חֲצִי שָׁעָה", minutes: 30, capLeft: capLeft)
                 durationPill("שָׁעָה", minutes: 60, capLeft: capLeft)
-                durationPill("עַד סוֹף הַיּוֹם", minutes: capLeft, capLeft: capLeft)
+                durationPill("שְׁעָתַיִם", minutes: 120, capLeft: capLeft)
+                durationPill("4 שָׁעוֹת", minutes: 240, capLeft: capLeft)
             }
             if progress.parentGiftMinutes > 0 {
                 Text("בַּכִּיס עַכְשָׁיו: 💝 \(progress.parentGiftMinutes) דַּקּוֹת")

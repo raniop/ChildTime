@@ -737,10 +737,10 @@ struct ParentDashboardView: View {
                         }
                     }
                     Menu {
-                        Button("10 דַּקּוֹת") { remoteOpen(profile, 10) }
                         Button("חֲצִי שָׁעָה") { remoteOpen(profile, 30) }
                         Button("שָׁעָה") { remoteOpen(profile, 60) }
                         Button("שְׁעָתַיִם") { remoteOpen(profile, 120) }
+                        Button("4 שָׁעוֹת") { remoteOpen(profile, 240) }
                     } label: {
                         Label("תֵּן דַּקּוֹת מַתָּנָה 💝", systemImage: "gift.fill")
                     }
@@ -1202,10 +1202,10 @@ struct ParentDashboardView: View {
     private func gridCardMenu(_ profile: Profile) -> some View {
         Menu {
             Menu {
-                Button("10 דַּקּוֹת") { remoteOpen(profile, 10) }
                 Button("חֲצִי שָׁעָה") { remoteOpen(profile, 30) }
                 Button("שָׁעָה") { remoteOpen(profile, 60) }
                 Button("שְׁעָתַיִם") { remoteOpen(profile, 120) }
+                Button("4 שָׁעוֹת") { remoteOpen(profile, 240) }
             } label: {
                 Label("תֵּן דַּקּוֹת מַתָּנָה 💝", systemImage: "gift.fill")
             }

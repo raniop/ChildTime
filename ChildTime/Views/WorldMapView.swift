@@ -291,8 +291,11 @@ struct WorldMapView: View {
         .sheet(isPresented: $showingParentGate) {
             // On the child device the gate opens ONLY the device-local parent
             // controls (app-lock + manual unlock) — everything else is on the
-            // parent's own device.
-            ParentGateView {
+            // parent's own device. respectSession:false — THE DEVICE IS IN THE
+            // KID'S HANDS: after the parent used the controls once and left,
+            // the next gear tap must ask for the code again (reported: it
+            // walked straight back in off the session unlock).
+            ParentGateView(respectSession: false) {
                 ChildDeviceControlsView()
                     .environment(\.layoutDirection, .rightToLeft)
             }
