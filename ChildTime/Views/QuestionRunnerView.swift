@@ -130,9 +130,17 @@ struct QuestionRunnerView: View {
                 topBar
                 if let q = current {
                     Spacer(minLength: 0)
+                    // .id(q.id): each question gets a FRESH subtree, so a new
+                    // prompt can never render above the previous question's
+                    // option cards (the reused position-keyed views used to
+                    // linger mid-transition — and a tap on a stale card was
+                    // judged against the NEW question. Reported on-device in
+                    // the bonus arena; must never happen).
                     questionHeader(q)
+                        .id("question-\(q.id)")
                     Spacer(minLength: 0)
                     answersBlock(q)
+                        .id("answers-\(q.id)")
                     Spacer(minLength: AppSpacing.xxl)   // breathing room above the companion
                 } else {
                     Spacer()
@@ -1062,6 +1070,10 @@ struct QuestionRunnerView: View {
     // MARK: - Picking
 
     private func pickOption(_ idx: Int, q: Question) {
+        // A tap must belong to the question ON SCREEN. If a stale option view
+        // (mid-removal during the question swap) fires its captured closure,
+        // ignore it — never judge one question's tap against another.
+        guard q.id == current?.id else { return }
         // showFeedback only locks the grid AFTER the correct answer is found.
         // Wrong picks just dim that single option and let the kid keep trying
         // — this is essential for learning ("don't move on, change the choices").
@@ -1115,6 +1127,7 @@ struct QuestionRunnerView: View {
     // MARK: - Hint
 
     private func useHint(q: Question) {
+        guard q.id == current?.id else { return }   // stale view — see pickOption
         guard canUseHint(q) else { return }
         // Spend the minutes (0 for a free legendary/mythic helper → always true).
         guard progress.spendPendingMinutes(hintCost) else { return }

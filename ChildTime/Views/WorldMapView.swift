@@ -171,9 +171,12 @@ struct WorldMapView: View {
                     .padding(.horizontal, homeHPad)
                     // Breathing room between the header card and the world grid.
                     .padding(.top, isCompact ? AppSpacing.sm : AppSpacing.xxxl)
-                    // Big bottom inset on iPhone so the cards aren't hidden
-                    // by the floating daily-chest CTA + companion.
-                    .padding(.bottom, isCompact ? 360 : 260)
+                    // Bottom inset just tall enough for the floating CTA panel
+                    // (two pills + the protect-code line ≈ 180pt) with a small
+                    // margin — 360 left a huge dead gap after the last row
+                    // (Rani, on-device). The companion floats and never needs
+                    // scroll room of its own.
+                    .padding(.bottom, isCompact ? 220 : 190)
                 }
             }
 
