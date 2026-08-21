@@ -31,6 +31,8 @@ struct WorldMapView: View {
     /// Limited-time event SPLASH (💎×2 etc.) — a full pop-up like the lucky
     /// wheel, once a day; the kid closes it or jumps straight in.
     @State private var showEventSplash = false
+    /// Drives the daily-challenge card's living flame/gift pulse.
+    @State private var challengePulse = false
     @State private var showingShop = false
     @State private var showingWheel = false
     @State private var showingGames = false
@@ -599,57 +601,132 @@ struct WorldMapView: View {
         let done = progress.dailyChallengeProgress
         let ready = progress.dailyChallengeRewardReady
         let claimed = progress.dailyChallengeClaimed
+        let frac = CGFloat(min(done, target)) / CGFloat(max(1, target))
         return Button {
             Haptic.light()
             infoSheet = .dailyChallenge
         } label: {
-            VStack(spacing: 8) {
-                HStack(spacing: 8) {
-                    Text("🔥").font(.system(size: 20))
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text("אֶתְגָּר יוֹמִי")
-                            .font(.system(size: 14, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                        Text(progress.dayStreak > 0 ? "\(progress.dayStreak) יָמִים בְּרֶצֶף" : "מַתְחִילִים רֶצֶף חָדָשׁ!")
-                            .font(.system(size: 11, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.7))
+            VStack(spacing: 10) {
+                HStack(spacing: 10) {
+                    // A living flame in a fiery ring — the streak count rides it.
+                    ZStack(alignment: .bottomTrailing) {
+                        Circle()
+                            .fill(LinearGradient(colors: [Color(hex: "FFB347"), Color(hex: "FF5E3A")],
+                                                 startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .frame(width: 46, height: 46)
+                            .overlay(Circle().stroke(.white.opacity(0.55), lineWidth: 1.5))
+                            .glow(AppColor.flameOrange, radius: challengePulse ? 12 : 5)
+                        Text("🔥")
+                            .font(.system(size: 25))
+                            .scaleEffect(challengePulse ? 1.15 : 0.95)
+                            .frame(width: 46, height: 46)
+                        if progress.dayStreak > 0 {
+                            Text("\(progress.dayStreak)")
+                                .font(.system(size: 11, weight: .black, design: .rounded))
+                                .foregroundStyle(AppColor.textOnLight)
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(Capsule().fill(.white))
+                                .overlay(Capsule().stroke(AppColor.flameOrange, lineWidth: 1.2))
+                                .offset(x: 5, y: 5)
+                        }
                     }
-                    Spacer()
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("אֶתְגָּר יוֹמִי")
+                            .font(.system(size: 16, weight: .black, design: .rounded))
+                            .foregroundStyle(.white)
+                            .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+                        let left = max(0, target - done)
+                        let leftText = left == 1 ? "עוֹד תְּשׁוּבָה אַחַת!" : "עוֹד \(left) תְּשׁוּבוֹת!"
+                        Text(claimed ? "כָּל הַכָּבוֹד! נִפְגָּשִׁים מָחָר 🌙"
+                             : ready ? "הַפְּרָס מְחַכֶּה לְךָ! ✨"
+                             : progress.dayStreak > 0
+                                ? "\(progress.dayStreak) יָמִים בְּרֶצֶף · \(leftText)"
+                                : "\(leftText.dropLast()) לַפְּרָס!")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.88))
+                            .lineLimit(1).minimumScaleFactor(0.65)
+                    }
+                    Spacer(minLength: 6)
+
                     if claimed {
-                        Text("✓ הוּשְׁלַם הַיּוֹם")
-                            .font(.system(size: 12, weight: .heavy, design: .rounded))
-                            .foregroundStyle(AppColor.successMint)
+                        ZStack {
+                            Circle().fill(AppColor.successMint.opacity(0.25)).frame(width: 38, height: 38)
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 17, weight: .black))
+                                .foregroundStyle(AppColor.successMint)
+                        }
                     } else if ready {
-                        Text("מוּכָן! 🎁")
-                            .font(.system(size: 13, weight: .heavy, design: .rounded))
-                            .foregroundStyle(AppColor.textOnLight)
-                            .padding(.horizontal, 12).padding(.vertical, 6)
-                            .background(AppGradient.gold, in: Capsule())
+                        HStack(spacing: 6) {
+                            Text("🎁").font(.system(size: 18))
+                                .scaleEffect(challengePulse ? 1.22 : 1)
+                                .rotationEffect(.degrees(challengePulse ? 8 : -8))
+                            Text("פִּתְחוּ!")
+                                .font(.system(size: 15, weight: .black, design: .rounded))
+                                .foregroundStyle(AppColor.textOnLight)
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 8)
+                        .background(AppGradient.gold, in: Capsule())
+                        .overlay(Capsule().stroke(.white.opacity(0.7), lineWidth: 1.2))
+                        .glow(AppColor.starGold, radius: challengePulse ? 15 : 7)
                     } else {
-                        HStack(spacing: 4) {
-                            Text("\(done)/\(target)")
-                                .font(.system(size: 14, weight: .heavy, design: .rounded))
-                                .foregroundStyle(.white)
-                            Image(systemName: "chevron.backward")
-                                .font(.system(size: 12, weight: .heavy)).foregroundStyle(.white.opacity(0.7))
+                        Text("\(done)/\(target)")
+                            .font(.system(size: 15, weight: .black, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 11).padding(.vertical, 6)
+                            .background(Capsule().fill(.white.opacity(0.16)))
+                            .overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: 1))
+                    }
+                }
+
+                // Chunky glowing progress track — a star (then trophy) rides the tip.
+                GeometryReader { geo in
+                    let fullW = geo.size.width
+                    let w = (ready || claimed) ? fullW : max(done > 0 ? 18 : 0, fullW * frac)
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.white.opacity(0.14))
+                        if w > 0 {
+                            Capsule()
+                                .fill(ready || claimed
+                                      ? AnyShapeStyle(LinearGradient(colors: [AppColor.successMint, Color(hex: "06D6A0")],
+                                                                     startPoint: .leading, endPoint: .trailing))
+                                      : AnyShapeStyle(LinearGradient(colors: [Color(hex: "FFD23F"), AppColor.flameOrange],
+                                                                     startPoint: .leading, endPoint: .trailing)))
+                                .frame(width: w)
+                                .glow(ready || claimed ? AppColor.successMint : AppColor.starGold, radius: 5)
+                                .overlay(alignment: .trailing) {
+                                    Text(ready || claimed ? "🏆" : "⭐️")
+                                        .font(.system(size: 16))
+                                        .shadow(color: .black.opacity(0.3), radius: 2)
+                                        .offset(y: -1)
+                                }
                         }
                     }
                 }
-                // Progress bar of today's answers toward the goal.
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(Color.white.opacity(0.15))
-                        Capsule().fill(ready || claimed ? AnyShapeStyle(AppColor.successMint) : AnyShapeStyle(AppGradient.gold))
-                            .frame(width: geo.size.width * CGFloat(done) / CGFloat(max(1, target)))
-                    }
-                }
-                .frame(height: 8)
+                .frame(height: 13)
             }
-            .padding(isCompact ? 10 : 12)
-            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.white.opacity(0.07)))
+            .padding(isCompact ? 12 : 14)
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(LinearGradient(colors: [Color(hex: "FF5E7E").opacity(0.50),
+                                                  Color(hex: "FF9E2C").opacity(0.35),
+                                                  Color(hex: "7C4DFF").opacity(0.45)],
+                                         startPoint: .topTrailing, endPoint: .bottomLeading))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(LinearGradient(colors: [AppColor.starGold.opacity(0.75), .white.opacity(0.2)],
+                                           startPoint: .top, endPoint: .bottom), lineWidth: 1.5)
+            )
+            .shadow(color: AppColor.flameOrange.opacity(0.25), radius: 10, y: 4)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.juicy)
         .environment(\.layoutDirection, .rightToLeft)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
+                challengePulse = true
+            }
+        }
         .eraseToAnyView()
     }
 
