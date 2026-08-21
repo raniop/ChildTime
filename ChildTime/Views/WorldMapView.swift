@@ -112,10 +112,11 @@ struct WorldMapView: View {
                     VStack(spacing: AppSpacing.lg) {
                         // The brand + "בחר עולם" line live UNDER the daily
                         // challenge, heading the world grid (Rani tried it as a
-                        // top masthead and preferred it back here).
+                        // top masthead and preferred it back here). No extra top
+                        // padding — the gap above טופי should match the gap
+                        // between the subtitle and the cards below.
                         if isCompact {
                             heroTitle
-                                .padding(.top, AppSpacing.sm)
                         }
                         LazyVGrid(
                             columns: worldGridColumns,
@@ -176,8 +177,10 @@ struct WorldMapView: View {
                     .frame(maxWidth: worldGridMaxWidth)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.horizontal, homeHPad)
-                    // Breathing room between the header card and the world grid.
-                    .padding(.top, isCompact ? AppSpacing.sm : AppSpacing.xxxl)
+                    // Breathing room between the header card and the world grid
+                    // (compact: none — the grid VStack's own spacing already
+                    // matches the subtitle→cards gap, so טופי sits evenly).
+                    .padding(.top, isCompact ? 0 : AppSpacing.xxxl)
                     // Bottom inset just tall enough for the floating CTA panel
                     // (two pills + the protect-code line ≈ 180pt) with a small
                     // margin — 360 left a huge dead gap after the last row
