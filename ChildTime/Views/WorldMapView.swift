@@ -28,6 +28,9 @@ struct WorldMapView: View {
     @State private var showSchoolYearParty = false
     /// 🎓 Kid-facing grade picker, when the profile has no grade yet.
     @State private var showChildGradePicker = false
+    /// Limited-time event SPLASH (💎×2 etc.) — a full pop-up like the lucky
+    /// wheel, once a day; the kid closes it or jumps straight in.
+    @State private var showEventSplash = false
     @State private var showingShop = false
     @State private var showingWheel = false
     @State private var showingGames = false
@@ -100,12 +103,14 @@ struct WorldMapView: View {
                         .frame(maxWidth: worldGridMaxWidth)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.horizontal, homeHPad)
-                    eventBanner
-                        .frame(maxWidth: worldGridMaxWidth)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.horizontal, homeHPad)
+                    // (The limited-time event banner is now a transient TOAST —
+                    // see eventToastOverlay — instead of a permanent row here
+                    // that ate a full line of the map all day.)
                     if kidMode.active { kidExitBar }
                     VStack(spacing: AppSpacing.lg) {
+                        // The brand + "בחר עולם" line live UNDER the daily
+                        // challenge, heading the world grid (Rani tried it as a
+                        // top masthead and preferred it back here).
                         if isCompact {
                             heroTitle
                                 .padding(.top, AppSpacing.sm)
@@ -188,6 +193,7 @@ struct WorldMapView: View {
                     .padding(.bottom, AppSpacing.md)
             }
 
+
             // Companion wanders the screen and is also draggable.
             // On iPhone we keep the wander zone tighter so it doesn't park
             // on top of world cards in the middle of the grid.
@@ -229,6 +235,20 @@ struct WorldMapView: View {
                 heroAppeared = true
             }
             checkWorldUnlocks()
+            // Event splash: announce today's event ONCE a day as a full pop-up
+            // (like the lucky wheel) — it used to be a permanent row eating map
+            // space. Never on top of the grade picker / school-year party.
+            if GameEvent.current() != nil, !showChildGradePicker, !showSchoolYearParty {
+                let day = Calendar.current.component(.year, from: Date()) * 1000
+                    + (Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0)
+                let key = "eventSplash.lastShownDay"
+                if UserDefaults.standard.integer(forKey: key) != day {
+                    UserDefaults.standard.set(day, forKey: key)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                        showEventSplash = true
+                    }
+                }
+            }
             // Returning after being away earns a "welcome back" spin.
             progress.grantComebackWheelIfReturning()
             // Wheel pops when we return to the map after earning a free spin.
@@ -423,6 +443,27 @@ struct WorldMapView: View {
                 }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .rightToLeft)
+            }
+        }
+        .fullScreenCover(isPresented: $showEventSplash) {
+            // The daily event as a real MOMENT (Rani): full pop-up like the
+            // lucky wheel — big emoji, one "let's go", easy close.
+            if let event = GameEvent.current() {
+                let copy = eventCopy(event)
+                ChallengeInfoView(
+                    emoji: event.emoji,
+                    title: copy.title,
+                    message: copy.message,
+                    ctaTitle: "יַאלְלָה, בּוֹאוּ נַאֲסֹף! 🚀",
+                    onCTA: {
+                        showEventSplash = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { showingSmartFeed = true }
+                    },
+                    onClose: { showEventSplash = false }
+                )
+                .environment(\.layoutDirection, .rightToLeft)
+            } else {
+                Color.clear.onAppear { showEventSplash = false }
             }
         }
         .fullScreenCover(isPresented: $showChildGradePicker) {
@@ -683,36 +724,6 @@ struct WorldMapView: View {
         } else {
             // Event lapsed while open — nothing to show; just dismiss.
             Color.clear.onAppear { infoSheet = nil }
-        }
-    }
-
-    /// Limited-time event banner (e.g. weekend 💎×2 / topic-of-the-day). Driven
-    /// purely by GameEvent.current() so it appears/disappears with the date.
-    @ViewBuilder private var eventBanner: some View {
-        if let event = GameEvent.current() {
-            Button {
-                Haptic.light()
-                infoSheet = .event
-            } label: {
-                HStack(spacing: 8) {
-                    Spacer(minLength: 0)
-                    Text(event.emoji).font(.system(size: 18))
-                    Text(event.bannerText)
-                        .font(.system(size: 13, weight: .heavy, design: .rounded))
-                        .foregroundStyle(AppColor.textOnLight)
-                        .lineLimit(2).minimumScaleFactor(0.8)
-                        .multilineTextAlignment(.center)
-                    Spacer(minLength: 0)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 14).padding(.vertical, 10)
-                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
-                .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
-            }
-            .buttonStyle(.juicy)
-            .padding(.top, 10)
-            .environment(\.layoutDirection, .rightToLeft)
         }
     }
 

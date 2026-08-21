@@ -699,6 +699,28 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    /// Parent action: open a short "allow app deletion" window on the child's
+    /// device FROM AFAR (Rani: no need to hold the kid's device). Writes an
+    /// `appRemovalUnlockAt` stamp onto the child's device rows; the device
+    /// applies it once — 5 minutes of deletion allowed, then auto-relock.
+    func allowAppRemovalRemotely(toChildID childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        guard let hh = household else { return }
+        let cid = childID.uuidString
+        let stamp = Date().timeIntervalSince1970
+        Task {
+            let snap = try? await db.collection("childDevices")
+                .whereField("householdID", isEqualTo: hh.id)
+                .whereField("childID", isEqualTo: cid)
+                .getDocuments()
+            for doc in snap?.documents ?? [] {
+                try? await doc.reference.updateData(["appRemovalUnlockAt": stamp])
+            }
+            await MainActor.run { AppAnalytics.log("remote_app_removal_window", [:]) }
+        }
+        #endif
+    }
+
     /// Remove a connected device from a child. TOMBSTONES the doc (`removed:true`)
     /// instead of deleting it, so the device itself notices and resets to a fresh
     /// install — otherwise it would just re-register on its next heartbeat.
@@ -732,12 +754,39 @@ final class HouseholdManager: ObservableObject {
                 }
                 self.applyRemoteUnlockIfNeeded(data)
                 self.applyRemoteLockIfNeeded(data)
+                self.applyRemoteAppRemovalIfNeeded(data)
             }
         #endif
     }
 
     private let lastRemoteUnlockKey = "lastRemoteUnlockAt"
     private let lastRemoteLockKey = "lastRemoteLockAt"
+    private let lastRemoteAppRemovalKey = "lastRemoteAppRemovalAt"
+
+    /// A parent opened an app-deletion window from afar. Apply exactly once per
+    /// command and only while fresh: 5 minutes of deletion allowed, then the
+    /// lock returns by itself (the shield resync re-locks once the window
+    /// passes; the timer below covers the app staying open the whole time).
+    @MainActor
+    private func applyRemoteAppRemovalIfNeeded(_ data: [String: Any]) {
+        #if canImport(FirebaseFirestore)
+        guard let at = data["appRemovalUnlockAt"] as? Double else { return }
+        let last = UserDefaults.standard.double(forKey: lastRemoteAppRemovalKey)
+        let now = Date().timeIntervalSince1970
+        guard at > last, now - at < Self.remoteUnlockFreshness else { return }   // unseen + fresh
+        UserDefaults.standard.set(at, forKey: lastRemoteAppRemovalKey)
+        let windowSeconds: TimeInterval = 5 * 60
+        ParentSettings.shared.appRemovalUnlockedUntil = Date().addingTimeInterval(windowSeconds)
+        ShieldManager.shared.setAppRemovalLocked(false)
+        Haptic.light()
+        DispatchQueue.main.asyncAfter(deadline: .now() + windowSeconds + 1) {
+            let s = ParentSettings.shared
+            if (s.appRemovalUnlockedUntil ?? .distantPast) <= Date() {
+                ShieldManager.shared.setAppRemovalLocked(s.deviceRole == .child)
+            }
+        }
+        #endif
+    }
 
     /// A parent RE-LOCKED this child's device from afar. Apply exactly once per
     /// command (`at > last`) and only when fresh. Ends any open window + re-shields.

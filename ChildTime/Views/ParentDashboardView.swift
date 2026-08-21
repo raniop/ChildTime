@@ -755,6 +755,11 @@ struct ParentDashboardView: View {
                         Label("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה", systemImage: "gift.circle")
                     }
                     Button {
+                        allowAppRemoval(profile)
+                    } label: {
+                        Label("אַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת (5 דַּק')", systemImage: "trash")
+                    }
+                    Button {
                         editProfile = profile
                     } label: {
                         Label("ערוך פרופיל (שם, גיל)", systemImage: "pencil")
@@ -2085,6 +2090,17 @@ struct ParentDashboardView: View {
     private func giftAllowance(for profile: Profile, wanting: Int) -> (allowed: Int, capLeft: Int) {
         let capLeft = ProgressStore.minutesUntilMidnight()
         return (min(wanting, capLeft), capLeft)
+    }
+
+    /// Open a 5-minute app-deletion window on the child's device from afar —
+    /// deletion is normally hard-blocked there (Screen Time denyAppRemoval).
+    private func allowAppRemoval(_ profile: Profile) {
+        Haptic.medium()
+        household.allowAppRemovalRemotely(toChildID: profile.id)
+        let connected = (household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
+        remoteGrantMsg = connected
+            ? "נִפְתָּח חַלּוֹן שֶׁל 5 דַּקּוֹת לִמְחִיקַת אַפְּלִיקַצְיוֹת בַּמַּכְשִׁיר שֶׁל \(profile.name) — מִיָּדִי כְּשֶׁטּוֹפִי פָּתוּחַ שָׁם. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד."
+            : "אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַחַלּוֹן יִפָּתַח בָּרֶגַע שֶׁהַמַּכְשִׁיר יִתְחַבֵּר."
     }
 
     private func remoteLock(_ profile: Profile) {
