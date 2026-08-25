@@ -44,6 +44,10 @@ struct ChildDevice: Codable, Identifiable, Equatable {
     var remoteLockAppliedAt: Double?
     var remoteUnlockAppliedAt: Double?
     var appRemovalAppliedAt: Double?
+    /// THIS device's FCM token — lets Cloud Functions target exactly the right
+    /// child's device(s) (e.g. the visible remote-lock push) instead of blasting
+    /// every kid device in the household via the account-level token list.
+    var fcmToken: String?
 
     var sfSymbol: String {
         switch kind {

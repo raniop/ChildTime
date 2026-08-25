@@ -11,10 +11,15 @@ import SwiftUI
 /// no device connected at all. If the ack arrives after the parent left, the
 /// Cloud Function's "בוצע" push closes the loop — the sheet says so.
 struct RemoteCommandStatusRequest: Identifiable {
+    enum Kind {
+        /// Remote lock; `includesGiftRevoke` = "נעל ואפס דקות מתנה".
+        case lock(includesGiftRevoke: Bool)
+        /// 💝 gift-minutes send; `note` = extra info line (e.g. the midnight cap).
+        case gift(minutes: Int, note: String?)
+    }
     let id = UUID()
     let profile: Profile
-    /// The action also wipes all parent-given minutes ("נעל ואפס דקות מתנה").
-    let includesGiftRevoke: Bool
+    let kind: Kind
 }
 
 struct RemoteCommandStatusSheet: View {
@@ -38,42 +43,66 @@ struct RemoteCommandStatusSheet: View {
         }
     }
 
+    private var title: String {
+        switch request.kind {
+        case .lock: return "🔒 נעילה מרחוק — \(profile.name)"
+        case .gift(let minutes, _):
+            let label = minutes % 60 == 0 ? "\(minutes / 60) שעות" : "\(minutes) דקות"
+            return "💝 מתנה ל\(profile.name) — \(label)"
+        }
+    }
+
+    private var closingHint: String {
+        switch request.kind {
+        case .lock: return "אפשר לסגור — אם האישור יגיע אחר כך, תקבלו התראה ברגע שהמכשיר יינעל."
+        case .gift: return "אפשר לסגור — המתנה שמורה בענן, ו\(profile.gender == .girl ? "היא תפתח" : "הוא יפתח") אותה מכל מכשיר, מתי שירצו."
+        }
+    }
+
     private var content: some View {
         let tracker = household.commandTracker[profile.id.uuidString]
         let revoke = remote.giftRevokeTracker[profile.id]
+        let giftSend = remote.giftSendTracker[profile.id]
         let devices = household.devicesByChild[profile.id.uuidString] ?? []
 
         return VStack(spacing: 18) {
             Capsule().fill(Color.secondary.opacity(0.35)).frame(width: 40, height: 5)
                 .padding(.top, 8)
 
-            Text("🔒 נעילה מרחוק — \(profile.name)")
+            Text(title)
                 .font(.title3.bold())
                 .multilineTextAlignment(.center)
 
             VStack(spacing: 12) {
-                cloudRow(tracker: tracker, revoke: revoke)
-
-                if let tracker {
-                    if tracker.targetDeviceIDs.isEmpty {
-                        statusRow(icon: "iphone.slash", tint: .orange,
-                                  title: "אין מכשיר מחובר ל\(profile.name)",
-                                  detail: "הנעילה תחול ברגע שמכשיר יתחבר לילד.")
-                    } else {
-                        ForEach(tracker.targetDeviceIDs, id: \.self) { deviceID in
-                            deviceRow(deviceID: deviceID, tracker: tracker, devices: devices)
+                switch request.kind {
+                case .lock(let includesGiftRevoke):
+                    cloudRow(tracker: tracker, revoke: revoke)
+                    if let tracker {
+                        if tracker.targetDeviceIDs.isEmpty {
+                            statusRow(icon: "iphone.slash", tint: .orange,
+                                      title: "אין מכשיר מחובר ל\(profile.name)",
+                                      detail: "הנעילה תחול ברגע שמכשיר יתחבר לילד.")
+                        } else {
+                            ForEach(tracker.targetDeviceIDs, id: \.self) { deviceID in
+                                deviceRow(deviceID: deviceID, tracker: tracker, devices: devices)
+                            }
                         }
                     }
-                }
-
-                if request.includesGiftRevoke {
-                    giftRow(revoke: revoke)
+                    if includesGiftRevoke {
+                        giftRow(revoke: revoke)
+                    }
+                case .gift(_, let note):
+                    giftSendCloudRow(giftSend: giftSend)
+                    giftSendDeviceRow(giftSend: giftSend, devices: devices)
+                    if let note {
+                        statusRow(icon: "info.circle", tint: .secondary, title: note, detail: nil)
+                    }
                 }
             }
             .padding(16)
             .background(RoundedRectangle(cornerRadius: 18).fill(Color(.secondarySystemBackground)))
 
-            Text("אפשר לסגור — אם האישור יגיע אחר כך, תקבלו התראה ברגע שהמכשיר יינעל.")
+            Text(closingHint)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -156,6 +185,49 @@ struct RemoteCommandStatusSheet: View {
             statusRow(icon: "gift", tint: .orange,
                       title: "מחיקת דקות המתנה ממתינה למכשיר",
                       detail: "תתבצע ברגע שהמכשיר של \(profile.name) יתחבר.")
+        }
+    }
+
+    /// 💝 send, hop 1: did the gift reach the cloud (or is the PARENT offline)?
+    /// Once it's in the cloud the gift is SAFE — the kid redeems it from any
+    /// device — so this row alone is already "success", device ack is a bonus.
+    @ViewBuilder
+    private func giftSendCloudRow(giftSend: RemoteSyncManager.GiftRevokeTracker?) -> some View {
+        let elapsed = Date().timeIntervalSince(giftSend?.sentAt ?? Date())
+
+        if giftSend?.reachedCloud == true {
+            statusRow(icon: "checkmark.icloud.fill", tint: .green,
+                      title: "המתנה נשלחה ונשמרה",
+                      detail: "גם אם המכשיר כבוי עכשיו — המתנה מחכה בענן.")
+        } else if elapsed < Self.cloudTimeout {
+            spinnerRow(title: "שולח מתנה…")
+        } else {
+            statusRow(icon: "wifi.slash", tint: .orange,
+                      title: "אין חיבור אינטרנט במכשיר שלך",
+                      detail: "המתנה שמורה ותישלח אוטומטית ברגע שיחזור החיבור — אין צורך ללחוץ שוב.")
+        }
+    }
+
+    /// 💝 send, hop 2: has a device of the child actually received it?
+    @ViewBuilder
+    private func giftSendDeviceRow(giftSend: RemoteSyncManager.GiftRevokeTracker?,
+                                   devices: [ChildDevice]) -> some View {
+        let elapsed = Date().timeIntervalSince(giftSend?.sentAt ?? Date())
+
+        if giftSend?.applied == true {
+            statusRow(icon: "gift.fill", tint: .green,
+                      title: "המתנה הגיעה למכשיר של \(profile.name) ✓",
+                      detail: "ה-💝 כבר מופיע אצל\(profile.gender == .girl ? "ה" : "ו").")
+        } else if devices.isEmpty {
+            statusRow(icon: "iphone.slash", tint: .orange,
+                      title: "אין כרגע מכשיר מחובר ל\(profile.name)",
+                      detail: "המתנה תופיע ברגע שמכשיר יתחבר.")
+        } else if elapsed < Self.deviceTimeout {
+            spinnerRow(title: "ממתין למכשיר של \(profile.name)…")
+        } else {
+            statusRow(icon: "moon.zzz.fill", tint: .orange,
+                      title: "המכשיר של \(profile.name) לא מחובר כרגע",
+                      detail: "נראה לאחרונה \(relativeLastSeen(devices.first?.lastSeenAt)). המתנה תופיע ברגע שיתחבר — ואז תקבלו התראה.")
         }
     }
 

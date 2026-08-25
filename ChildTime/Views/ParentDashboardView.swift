@@ -2081,12 +2081,14 @@ struct ParentDashboardView: View {
         Haptic.success()
         remote.giftChildMinutes(childID: profile.id, minutes: allowed)
         refreshTrigger &+= 1
-        let label = allowed % 60 == 0 ? "\(allowed / 60) שָׁעוֹת" : "\(allowed) דַּקּוֹת"
-        var msg = "נָתַתֶּם לְ\(profile.name) \(label) בְּמַתָּנָה 💝. \(profile.gender == .girl ? "הִיא תִּפְתַּח" : "הוּא יִפְתַּח") אוֹתָן מִכָּל מַכְשִׁיר, מָתַי שֶׁ\(profile.gender == .girl ? "תִּרְצֶה" : "יִרְצֶה")."
-        if allowed < minutes {
-            msg += " (בִּקַּשְׁתֶּם \(minutes) — זֶה הַמַּקְסִימוּם שֶׁנִּשְׁאַר לְהַיּוֹם, עַד חֲצוֹת.)"
-        }
-        remoteGrantMsg = msg
+        // Live status sheet: cloud-commit + device-ack for the gift, honestly —
+        // replaces the optimistic alert that claimed success before anything
+        // actually happened.
+        let note = allowed < minutes
+            ? "ביקשתם \(minutes) — זה המקסימום שנשאר להיום, עד חצות."
+            : nil
+        commandStatus = RemoteCommandStatusRequest(profile: profile,
+                                                   kind: .gift(minutes: allowed, note: note))
     }
 
     /// How much of `wanting` may be given RIGHT NOW: each single give is capped
@@ -2115,7 +2117,7 @@ struct ParentDashboardView: View {
         household.lockRemoteScreenTime(toChildID: profile.id)
         // Live status sheet instead of an optimistic alert: shows the real
         // send → cloud → device-ack chain, and admits honestly when a hop stalls.
-        commandStatus = RemoteCommandStatusRequest(profile: profile, includesGiftRevoke: false)
+        commandStatus = RemoteCommandStatusRequest(profile: profile, kind: .lock(includesGiftRevoke: false))
     }
 
     /// "נעל ואפס דקות מתנה": remote-lock the child's device(s) AND revoke every
@@ -2132,7 +2134,7 @@ struct ParentDashboardView: View {
         remote.revokeChildGift(childID: profile.id)
         household.lockRemoteScreenTime(toChildID: profile.id)
         // Live status sheet: lock ack per device + the gift-wipe ack, honestly.
-        commandStatus = RemoteCommandStatusRequest(profile: profile, includesGiftRevoke: true)
+        commandStatus = RemoteCommandStatusRequest(profile: profile, kind: .lock(includesGiftRevoke: true))
         refreshTrigger &+= 1
     }
 

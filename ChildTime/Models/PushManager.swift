@@ -117,6 +117,15 @@ final class PushManager: NSObject, ObservableObject {
         let ref = Firestore.firestore().collection("parents").document(uid)
         ref.setData([mine: FieldValue.arrayUnion([token])], merge: true)
         ref.updateData([other: FieldValue.arrayRemove([token])])   // move if role changed
+        // ALSO stamp the token on this device's own childDevices row, so Cloud
+        // Functions can target THIS child's device(s) precisely (the account-level
+        // childFcmTokens list is family-wide — a lock push through it reached
+        // siblings' devices too).
+        if isChild, let cid = ParentSettings.shared.joinedChildID {
+            let docID = "\(cid)_\(DeviceIdentity.installID)"
+            Firestore.firestore().collection("childDevices").document(docID)
+                .setData(["fcmToken": token], merge: true)
+        }
         #endif
     }
 }

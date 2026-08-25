@@ -169,12 +169,26 @@ final class RemoteSyncManager: ObservableObject {
     /// 💝 Parent GIVES minutes — into the child's separate GIFT pocket, never the
     /// earned wallet (so "you earned 30" and "mom gave 10" stay distinct). Same
     /// delta-command mechanics as `adjustChildMinutes`, on its own field.
+    /// Live status of the last 💝 gift sent per child (same shape as the revoke
+    /// tracker): reachedCloud on backend commit, applied when the child's device
+    /// echoes `giftSentAt` back as `giftAppliedAt` in the consume transaction.
+    @Published var giftSendTracker: [UUID: GiftRevokeTracker] = [:]
+
     func giftChildMinutes(childID: UUID, minutes: Int) {
         #if canImport(FirebaseFirestore)
         guard minutes != 0 else { return }
         pendingGifts[childID, default: 0] += minutes
+        let stamp = Date().timeIntervalSince1970
+        giftSendTracker[childID] = GiftRevokeTracker(stamp: stamp, sentAt: Date(),
+                                                     reachedCloud: false, appliedAt: nil)
+        var fields: [String: Any] = ["pendingGiftAdjustment": FieldValue.increment(Int64(minutes)),
+                                     "giftSentAt": stamp]
+        if let uid = AuthManager.shared.userID { fields["giftCommandBy"] = uid }
         db.collection("children").document(childID.uuidString)
-            .setData(["pendingGiftAdjustment": FieldValue.increment(Int64(minutes))], merge: true)
+            .setData(fields, merge: true) { [weak self] error in
+                guard error == nil else { return }
+                Task { @MainActor in self?.giftSendTracker[childID]?.reachedCloud = true }
+            }
         #endif
     }
 
@@ -188,7 +202,16 @@ final class RemoteSyncManager: ObservableObject {
         db.runTransaction({ txn, _ -> Any? in
             let doc = try? txn.getDocument(ref)
             let adj = (doc?.data()?["pendingGiftAdjustment"] as? Int) ?? 0
-            if adj != 0 { txn.updateData(["pendingGiftAdjustment": 0], forDocument: ref) }
+            if adj != 0 {
+                // Consume + ACK atomically: echo the send stamp back as
+                // `giftAppliedAt` so the parent's "💝 נשלח" flips to "✅ הגיע"
+                // (and a Cloud Function pushes them if it landed late).
+                var update: [String: Any] = ["pendingGiftAdjustment": 0]
+                if let sentAt = doc?.data()?["giftSentAt"] as? Double {
+                    update["giftAppliedAt"] = sentAt
+                }
+                txn.updateData(update, forDocument: ref)
+            }
             return adj
         }) { [weak self] result, _ in
             let adj = (result as? Int) ?? 0
@@ -267,10 +290,11 @@ final class RemoteSyncManager: ObservableObject {
         // Plain unix-seconds stamp — NOT FieldValue.serverTimestamp(): a
         // FIRTimestamp on the child doc is a known decoding hazard here (see
         // removeChildDevice), and a plain Double is enough for a one-shot command.
+        var fields: [String: Any] = ["revokeGiftAt": stamp,
+                                     "pendingGiftAdjustment": 0]   // cancel any in-flight "+10"
+        if let uid = AuthManager.shared.userID { fields["giftCommandBy"] = uid }
         db.collection("children").document(childID.uuidString)
-            .setData(["revokeGiftAt": stamp,
-                      "pendingGiftAdjustment": 0],   // cancel any in-flight "+10"
-                     merge: true) { [weak self] error in
+            .setData(fields, merge: true) { [weak self] error in
                 // Completion fires only on BACKEND commit → honest "reached cloud".
                 guard error == nil else { return }
                 Task { @MainActor in self?.giftRevokeTracker[childID]?.reachedCloud = true }
@@ -538,6 +562,7 @@ final class RemoteSyncManager: ObservableObject {
                     let adj = (doc?.data()?["pendingMinuteAdjustment"] as? Int) ?? 0
                     let gift = (doc?.data()?["pendingGiftAdjustment"] as? Int) ?? 0
                     let revokeAck = doc?.data()?["revokeGiftAppliedAt"] as? Double
+                    let giftAck = doc?.data()?["giftAppliedAt"] as? Double
                     Task { @MainActor in
                         if adj != 0 { self.pendingAdjustments[profile.id] = adj }
                         else { self.pendingAdjustments.removeValue(forKey: profile.id) }
@@ -549,6 +574,12 @@ final class RemoteSyncManager: ObservableObject {
                            revokeAck >= t.stamp, t.appliedAt != revokeAck {
                             t.appliedAt = revokeAck
                             self.giftRevokeTracker[profile.id] = t
+                        }
+                        // 💝 send ack: the child's device consumed the gift.
+                        if let giftAck, var t = self.giftSendTracker[profile.id],
+                           giftAck >= t.stamp, t.appliedAt != giftAck {
+                            t.appliedAt = giftAck
+                            self.giftSendTracker[profile.id] = t
                         }
                     }
                     // Consume the grant on whatever device is currently BEING this

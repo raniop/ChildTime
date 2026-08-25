@@ -246,14 +246,50 @@ async function wakeChildDevices(householdID, reason) {
   } catch (e) { console.error("[wake] failed", e && e.message); }
 }
 
+// One-shot claim: create() fails if the doc exists, so exactly ONE function
+// invocation wins per key. Vital because a command is written onto EVERY device
+// row of the child — N rows → N invocations → N duplicate pushes without this
+// (the "מלא נוטיפיקיישנים" bug).
+async function claimOnce(key) {
+  try {
+    await db.collection("pushDedup").doc(key)
+      .create({ at: admin.firestore.FieldValue.serverTimestamp() });
+    return true;
+  } catch (e) { return false; }
+}
+
+// Tokens of THIS child's devices only — from the fcmToken each device stamps on
+// its own childDevices row. Precise: no siblings, no parents. Falls back to the
+// household-wide childFcmTokens list (STRICT — child tokens only, never the
+// legacy parent list: that fallback used to push kid-facing notifications to
+// PARENT devices) for installs that haven't uploaded a per-row token yet.
+async function tokensForChildOwnDevices(childID, householdID) {
+  try {
+    const snap = await db.collection("childDevices")
+      .where("childID", "==", String(childID || "")).get();
+    const tokens = snap.docs.map((d) => d.data())
+      .filter((d) => d.removed !== true && d.fcmToken)
+      .map((d) => d.fcmToken);
+    if (tokens.length) return [...new Set(tokens)];
+  } catch (e) { /* fall through */ }
+  const hh = await db.collection("households").doc(String(householdID || "")).get();
+  if (!hh.exists) return [];
+  const tokens = [];
+  for (const uid of hh.data().parentUIDs || []) {
+    const p = await db.collection("parents").doc(uid).get();
+    if (p.exists && Array.isArray(p.data().childFcmTokens)) tokens.push(...p.data().childFcmTokens);
+  }
+  return [...new Set(tokens)];
+}
+
 // A remote LOCK gets a stronger delivery than the throttleable silent wake: a
 // VISIBLE high-priority push (gentle Hebrew, per the "never a failure" tone) that
 // iOS delivers far more reliably. mutable-content lets the app's notification
 // service extension apply the shield THE MOMENT the push arrives — even if Tofy
 // itself was killed — and content-available still wakes the app when possible.
-async function sendLockPushToChildDevices(householdID) {
+async function sendLockPushToChildDevices(householdID, childID) {
   if (!householdID) return;
-  const tokens = await childTokensForHousehold(householdID);
+  const tokens = await tokensForChildOwnDevices(childID, householdID);
   if (!tokens.length) return;
   try {
     const res = await admin.messaging().sendEachForMulticast({
@@ -286,7 +322,9 @@ function newAck(before, after, field) {
 }
 
 async function notifyParentsAckApplied(householdID, title, body) {
-  const tokens = await tokensForHousehold(householdID);   // ALL parents
+  // ALL parents, including the sender: a late ack means the sender long left the
+  // live status sheet — this push IS the promised "נעדכן אותך כשזה יקרה".
+  const tokens = await tokensForHousehold(householdID);
   if (!tokens.length) return;
   try {
     await admin.messaging().sendEachForMulticast({
@@ -312,14 +350,23 @@ exports.wakeOnChildCommand = onDocumentWritten("children/{childID}", async (even
   if (commandChanged(before, after, COMMAND_FIELDS_CHILD)) {
     await wakeChildDevices(after.householdID, "child-command");
   }
-  // Gift-revoke ACK from the child's device → tell the parent it REALLY happened
-  // (only when it landed late; an instant ack already showed live in the sheet).
-  const ack = newAck(before, after, "revokeGiftAppliedAt");
-  if (ack && Date.now() / 1000 - ack > ACK_LATE_SECONDS) {
+  // ACKs from the child's device → push the parents, but only when the ack
+  // landed LATE (an instant ack already showed live in the dashboard sheet).
+  const revokeAck = newAck(before, after, "revokeGiftAppliedAt");
+  if (revokeAck && Date.now() / 1000 - revokeAck > ACK_LATE_SECONDS
+      && await claimOnce(`revokeack_${event.params.childID}_${revokeAck}`)) {
     const name = await childNameFor(event.params.childID, after.name || "הילד/ה");
     await notifyParentsAckApplied(after.householdID,
       "💝 דקות המתנה נמחקו",
       `המכשיר של ${name} אישר עכשיו את מחיקת דקות המתנה.`);
+  }
+  const giftAck = newAck(before, after, "giftAppliedAt");
+  if (giftAck && Date.now() / 1000 - giftAck > ACK_LATE_SECONDS
+      && await claimOnce(`giftack_${event.params.childID}_${giftAck}`)) {
+    const name = await childNameFor(event.params.childID, after.name || "הילד/ה");
+    await notifyParentsAckApplied(after.householdID,
+      "💝 המתנה הגיעה",
+      `המכשיר של ${name} התחבר וקיבל את דקות המתנה.`);
   }
 });
 
@@ -328,16 +375,26 @@ exports.wakeOnDeviceCommand = onDocumentWritten("childDevices/{id}", async (even
   const after = event.data.after.exists ? event.data.after.data() : null;
   if (!after) return;
   if (commandChanged(before, after, COMMAND_FIELDS_DEVICE)) {
-    // A lock rides a reliable visible push; everything else keeps the silent wake.
+    // A lock rides a reliable visible push; everything else keeps the silent
+    // wake. Both dedup per (child, stamp): the command lands on EVERY device row
+    // of the child, and without the claim each row's invocation sent its own
+    // copy to every device — the notification-flood bug.
     if (commandChanged(before, after, ["remoteLockAt"])) {
-      await sendLockPushToChildDevices(after.householdID);
+      if (await claimOnce(`lock_${after.childID}_${after.remoteLockAt}`)) {
+        await sendLockPushToChildDevices(after.householdID, after.childID);
+      }
     } else {
-      await wakeChildDevices(after.householdID, "device-command");
+      const stamp = after.remoteUnlockAt || after.appRemovalUnlockAt || 0;
+      if (await claimOnce(`wake_${after.childID}_${stamp}`)) {
+        await wakeChildDevices(after.householdID, "device-command");
+      }
     }
   }
   // Lock ACK from the device → close the loop for a parent who already left.
+  // Late-only (instant acks show live in the sheet), sender's devices excluded.
   const ack = newAck(before, after, "remoteLockAppliedAt");
-  if (ack && Date.now() / 1000 - ack > ACK_LATE_SECONDS) {
+  if (ack && Date.now() / 1000 - ack > ACK_LATE_SECONDS
+      && await claimOnce(`lockack_${event.params.id}_${ack}`)) {
     const name = await childNameFor(after.childID, "הילד/ה");
     const device = after.name ? ` (${after.name})` : "";
     await notifyParentsAckApplied(after.householdID,

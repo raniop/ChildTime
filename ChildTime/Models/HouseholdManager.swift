@@ -411,6 +411,10 @@ final class HouseholdManager: ObservableObject {
             kind: DeviceIdentity.kind, systemVersion: DeviceIdentity.systemVersion,
             joinedAt: now, lastSeenAt: now
         )
+        // Include the push token when it's already known, so Cloud Functions can
+        // target this child's device precisely from the very first registration
+        // (uploadFCMToken keeps it fresh afterwards).
+        device.fcmToken = PushManager.shared.currentToken
         do {
             // Don't clobber the original joinedAt on relaunch.
             let existing = try? await db.collection("childDevices").document(docID).getDocument()
@@ -720,6 +724,10 @@ final class HouseholdManager: ObservableObject {
     private func sendDeviceCommand(childID cid: String, householdID: String,
                                    kind: RemoteCommandTracker.Kind, stamp: Double,
                                    fields: [String: Any]) async {
+        // Tag the sender so Cloud Functions can skip the acting parent's own
+        // devices when pushing the "בוצע" confirmation (they saw it live).
+        var fields = fields
+        if let uid { fields["commandBy"] = uid }
         // Target list from the LIVE listener first (works offline); fall back to a query.
         var targets = (devicesByChild[cid] ?? []).map { $0.id }
         if targets.isEmpty {
