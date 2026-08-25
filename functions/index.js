@@ -218,7 +218,9 @@ exports.blockTombstonedChild = onDocumentCreated("children/{childID}", async (ev
 // (content-available) to the household's child devices; iOS wakes the app for a
 // few seconds, the listener fires, the command applies. No banner, no sound.
 const COMMAND_FIELDS_CHILD = ["pendingMinuteAdjustment", "pendingGiftAdjustment", "resetRequestedAt", "revokeGiftAt"];
-const COMMAND_FIELDS_DEVICE = ["remoteLockAt", "remoteUnlockAt"];
+// appRemovalUnlockAt was MISSING here — the "allow app deletion" window never
+// woke the child's device and only applied when the kid reopened Tofy.
+const COMMAND_FIELDS_DEVICE = ["remoteLockAt", "remoteUnlockAt", "appRemovalUnlockAt"];
 
 function commandChanged(before, after, fields) {
   return fields.some((f) => {
@@ -244,20 +246,104 @@ async function wakeChildDevices(householdID, reason) {
   } catch (e) { console.error("[wake] failed", e && e.message); }
 }
 
+// A remote LOCK gets a stronger delivery than the throttleable silent wake: a
+// VISIBLE high-priority push (gentle Hebrew, per the "never a failure" tone) that
+// iOS delivers far more reliably. mutable-content lets the app's notification
+// service extension apply the shield THE MOMENT the push arrives — even if Tofy
+// itself was killed — and content-available still wakes the app when possible.
+async function sendLockPushToChildDevices(householdID) {
+  if (!householdID) return;
+  const tokens = await childTokensForHousehold(householdID);
+  if (!tokens.length) return;
+  try {
+    const res = await admin.messaging().sendEachForMulticast({
+      tokens,
+      data: { type: "remote-lock" },
+      apns: {
+        headers: { "apns-priority": "10", "apns-push-type": "alert" },
+        payload: {
+          aps: {
+            alert: { title: "טופי 💙", body: "זמן המסך נסגר עכשיו. אפשר להרוויח עוד דקות בטופי! 🌟" },
+            "content-available": 1,
+            "mutable-content": 1,
+          },
+        },
+      },
+    });
+    console.log("[lock-push] sent", res.successCount, "/", tokens.length);
+  } catch (e) { console.error("[lock-push] failed", e && e.message); }
+}
+
+// The parent's dashboard shows the ack live while it's open. This push closes
+// the loop for the parent who already left: when a device acks a command LATE
+// (it was offline/asleep when the parent tapped), tell the parent it happened.
+const ACK_LATE_SECONDS = 25;
+
+function newAck(before, after, field) {
+  const a = after ? Number(after[field] || 0) : 0;
+  const b = before ? Number(before[field] || 0) : 0;
+  return a > b ? a : 0;   // the ack stamp == the command's own stamp
+}
+
+async function notifyParentsAckApplied(householdID, title, body) {
+  const tokens = await tokensForHousehold(householdID);   // ALL parents
+  if (!tokens.length) return;
+  try {
+    await admin.messaging().sendEachForMulticast({
+      tokens,
+      notification: { title, body },
+      apns: { payload: { aps: { sound: "default" } } },
+    });
+  } catch (e) { console.error("[ack-push] failed", e && e.message); }
+}
+
+async function childNameFor(childID, fallback) {
+  try {
+    const c = await db.collection("children").doc(String(childID || "")).get();
+    if (c.exists && c.data().name) return c.data().name;
+  } catch (e) { /* fall through */ }
+  return fallback;
+}
+
 exports.wakeOnChildCommand = onDocumentWritten("children/{childID}", async (event) => {
   const before = event.data.before.exists ? event.data.before.data() : null;
   const after = event.data.after.exists ? event.data.after.data() : null;
   if (!after) return;
-  if (!commandChanged(before, after, COMMAND_FIELDS_CHILD)) return;
-  await wakeChildDevices(after.householdID, "child-command");
+  if (commandChanged(before, after, COMMAND_FIELDS_CHILD)) {
+    await wakeChildDevices(after.householdID, "child-command");
+  }
+  // Gift-revoke ACK from the child's device → tell the parent it REALLY happened
+  // (only when it landed late; an instant ack already showed live in the sheet).
+  const ack = newAck(before, after, "revokeGiftAppliedAt");
+  if (ack && Date.now() / 1000 - ack > ACK_LATE_SECONDS) {
+    const name = await childNameFor(event.params.childID, after.name || "הילד/ה");
+    await notifyParentsAckApplied(after.householdID,
+      "💝 דקות המתנה נמחקו",
+      `המכשיר של ${name} אישר עכשיו את מחיקת דקות המתנה.`);
+  }
 });
 
 exports.wakeOnDeviceCommand = onDocumentWritten("childDevices/{id}", async (event) => {
   const before = event.data.before.exists ? event.data.before.data() : null;
   const after = event.data.after.exists ? event.data.after.data() : null;
   if (!after) return;
-  if (!commandChanged(before, after, COMMAND_FIELDS_DEVICE)) return;
-  await wakeChildDevices(after.householdID, "device-command");
+  if (commandChanged(before, after, COMMAND_FIELDS_DEVICE)) {
+    // A lock rides a reliable visible push; everything else keeps the silent wake.
+    if (commandChanged(before, after, ["remoteLockAt"])) {
+      await sendLockPushToChildDevices(after.householdID);
+    } else {
+      await wakeChildDevices(after.householdID, "device-command");
+    }
+  }
+  // Lock ACK from the device → close the loop for a parent who already left.
+  const ack = newAck(before, after, "remoteLockAppliedAt");
+  if (ack && Date.now() / 1000 - ack > ACK_LATE_SECONDS) {
+    const name = await childNameFor(after.childID, "הילד/ה");
+    const device = after.name ? ` (${after.name})` : "";
+    await notifyParentsAckApplied(after.householdID,
+      "✅ הנעילה בוצעה",
+      `המכשיר של ${name}${device} התחבר וננעל עכשיו.`);
+  }
 });
 
 // ---- 1b) Live friends-quiz invite ------------------------------------------

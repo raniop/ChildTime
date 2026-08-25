@@ -44,6 +44,8 @@ struct ParentDashboardView: View {
     @State private var screenTimeProfile: Profile?
     @State private var editProfile: Profile?
     @State private var remoteGrantMsg: String?
+    /// Live remote-lock status sheet — real send/ack progress, not a static alert.
+    @State private var commandStatus: RemoteCommandStatusRequest?
     @State private var worldsProfile: Profile?
     @State private var showingFeedback = false
     @State private var showingTransferRequests = false
@@ -1424,6 +1426,11 @@ struct ParentDashboardView: View {
         } message: { p in
             Text(revokeGiftMessage(p))
         }
+        // Live status for remote lock / lock+revoke — real send→cloud→device-ack
+        // progress. A sheet (not an alert) so it can keep updating while shown.
+        .sheet(item: $commandStatus) { req in
+            RemoteCommandStatusSheet(request: req)
+        }
         // Remote open/lock confirmation on the ROOT — the grid-card ⋯ menu
         // fires these without opening the child's page.
         .alert("שְׁלִיטָה מֵרָחוֹק", isPresented: Binding(
@@ -2106,10 +2113,9 @@ struct ParentDashboardView: View {
     private func remoteLock(_ profile: Profile) {
         Haptic.warning()
         household.lockRemoteScreenTime(toChildID: profile.id)
-        let connected = (household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
-        remoteGrantMsg = connected
-            ? "נָעַלְתָּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name) מֵרָחוֹק. הַנְּעִילָה תֻּחַל מִיָּד (אוֹ בָּרֶגַע שֶׁיִּפְתַּח אֶת טוֹפִּי)."
-            : "אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַנְּעִילָה תֻּחַל בָּרֶגַע שֶׁיִּתְחַבֵּר."
+        // Live status sheet instead of an optimistic alert: shows the real
+        // send → cloud → device-ack chain, and admits honestly when a hop stalls.
+        commandStatus = RemoteCommandStatusRequest(profile: profile, includesGiftRevoke: false)
     }
 
     /// "נעל ואפס דקות מתנה": remote-lock the child's device(s) AND revoke every
@@ -2125,10 +2131,8 @@ struct ParentDashboardView: View {
         Haptic.warning()
         remote.revokeChildGift(childID: profile.id)
         household.lockRemoteScreenTime(toChildID: profile.id)
-        let connected = (household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
-        remoteGrantMsg = connected
-            ? "נָעַלְתָּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name) וּבִטַּלְתָּ אֶת דַּקּוֹת הַמַּתָּנָה. הַדַּקּוֹת שֶׁ\(profile.gender == .girl ? "הִיא הִרְוִיחָה" : "הוּא הִרְוִיחַ") נִשְׁאֲרוּ."
-            : "אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַנְּעִילָה וְהָאִפּוּס יָחוּלוּ בָּרֶגַע שֶׁיִּתְחַבֵּר."
+        // Live status sheet: lock ack per device + the gift-wipe ack, honestly.
+        commandStatus = RemoteCommandStatusRequest(profile: profile, includesGiftRevoke: true)
         refreshTrigger &+= 1
     }
 

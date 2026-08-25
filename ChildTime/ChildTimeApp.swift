@@ -55,7 +55,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                      didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         let type = userInfo["type"] as? String ?? ""
-        guard type == "wake" else { completionHandler(.noData); return }
+        // "wake" = silent command wake. "remote-lock" = the visible lock push
+        // (its content-available also lands here when the app is backgrounded);
+        // the NSE already applied the shield — this drain lets the Firestore
+        // listener consume `remoteLockAt`, close the play window, and ACK.
+        guard type == "wake" || type == "remote-lock" else { completionHandler(.noData); return }
         Task { @MainActor in
             TofyLink("silent wake push (\(userInfo["reason"] as? String ?? "")) — letting listeners drain")
             // Firestore delivers pending snapshots on wake; give them a moment.

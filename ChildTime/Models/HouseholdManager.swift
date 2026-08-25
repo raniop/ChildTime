@@ -47,6 +47,48 @@ final class HouseholdManager: ObservableObject {
     /// see which/how many devices each child plays on.
     @Published private(set) var devicesByChild: [String: [ChildDevice]] = [:]
 
+    /// PARENT-side live tracking of the last remote command sent per child, so
+    /// the dashboard can show the truth instead of an optimistic "it worked":
+    /// sending → reached cloud → ⏳ waiting for the device → ✅ applied (via the
+    /// device's `…AppliedAt` ack on its row). Survives only in memory — the
+    /// pushed "בוצע" notification (Cloud Function) covers the parent who left.
+    struct RemoteCommandTracker: Equatable {
+        enum Kind: Equatable { case lock, unlock, appRemoval }
+        var kind: Kind
+        var stamp: Double              // the command stamp written to the device rows
+        var targetDeviceIDs: [String]  // childDevices doc IDs the command was written to
+        var sentAt: Date               // when the parent tapped
+        var reachedCloud: Bool         // the server actually committed the write
+    }
+    @Published var commandTracker: [String: RemoteCommandTracker] = [:]   // childID →
+
+    /// The ack field on a device row that matches a tracked command kind.
+    static func ackField(for kind: RemoteCommandTracker.Kind) -> String {
+        switch kind {
+        case .lock:       return "remoteLockAppliedAt"
+        case .unlock:     return "remoteUnlockAppliedAt"
+        case .appRemoval: return "appRemovalAppliedAt"
+        }
+    }
+
+    /// How many of a tracked command's target devices have acked it (their row
+    /// carries an `…AppliedAt` >= the command stamp).
+    func appliedCount(childID: String) -> (applied: Int, total: Int)? {
+        guard let cmd = commandTracker[childID] else { return nil }
+        let rows = devicesByChild[childID] ?? []
+        let applied = cmd.targetDeviceIDs.filter { target in
+            guard let row = rows.first(where: { $0.id == target }) else { return false }
+            let ack: Double?
+            switch cmd.kind {
+            case .lock:       ack = row.remoteLockAppliedAt
+            case .unlock:     ack = row.remoteUnlockAppliedAt
+            case .appRemoval: ack = row.appRemovalAppliedAt
+            }
+            return (ack ?? 0) >= cmd.stamp
+        }.count
+        return (applied, cmd.targetDeviceIDs.count)
+    }
+
     /// DEMO_SCREEN=dashboard only: fake a live iPad play window for the active
     /// child so the "playing now" banner can be seen in screenshots.
     func seedDemoLiveWindow(childID: UUID) {
@@ -662,20 +704,52 @@ final class HouseholdManager: ObservableObject {
         let cid = childID.uuidString
         let stamp = Date().timeIntervalSince1970
         Task {
-            let snap = try? await db.collection("childDevices")
-                .whereField("householdID", isEqualTo: hh.id)
-                .whereField("childID", isEqualTo: cid)
-                .getDocuments()
-            for doc in snap?.documents ?? [] {
-                try? await doc.reference.updateData([
-                    "remoteUnlockMinutes": minutes,
-                    "remoteUnlockAt": stamp,
-                ])
-            }
+            await sendDeviceCommand(childID: cid, householdID: hh.id, kind: .unlock, stamp: stamp,
+                                    fields: ["remoteUnlockMinutes": minutes, "remoteUnlockAt": stamp])
             await MainActor.run { AppAnalytics.log("remote_screentime_granted", ["minutes": "\(minutes)"]) }
         }
         #endif
     }
+
+    #if canImport(FirebaseFirestore)
+    /// Shared send path for per-device remote commands: writes `fields` onto every
+    /// device row of the child and keeps `commandTracker` honest along the way —
+    /// `reachedCloud` flips only when the server COMMITS the write (Firestore's
+    /// async updateData resolves on backend commit, not on local queueing), which
+    /// is exactly the difference between "נשלח" and "אין אינטרנט, יישלח כשיחזור".
+    private func sendDeviceCommand(childID cid: String, householdID: String,
+                                   kind: RemoteCommandTracker.Kind, stamp: Double,
+                                   fields: [String: Any]) async {
+        // Target list from the LIVE listener first (works offline); fall back to a query.
+        var targets = (devicesByChild[cid] ?? []).map { $0.id }
+        if targets.isEmpty {
+            let snap = try? await db.collection("childDevices")
+                .whereField("householdID", isEqualTo: householdID)
+                .whereField("childID", isEqualTo: cid)
+                .getDocuments()
+            targets = snap?.documents.map { $0.documentID } ?? []
+        }
+        await MainActor.run {
+            commandTracker[cid] = RemoteCommandTracker(kind: kind, stamp: stamp,
+                                                       targetDeviceIDs: targets,
+                                                       sentAt: Date(), reachedCloud: false)
+        }
+        guard !targets.isEmpty else { return }
+        // setData(merge:) not updateData: a row deleted-and-recreated mid-flight
+        // must still receive the command rather than throw NOT_FOUND. The awaits
+        // resolve on BACKEND commit — that's what makes `reachedCloud` honest.
+        var committedAny = false
+        for id in targets {
+            do {
+                try await db.collection("childDevices").document(id).setData(fields, merge: true)
+                committedAny = true
+            } catch { /* offline: stays queued locally; reachedCloud stays false */ }
+        }
+        if committedAny {
+            await MainActor.run { commandTracker[cid]?.reachedCloud = true }
+        }
+    }
+    #endif
 
     /// Parent action: RE-LOCK the child's device now, from afar. Writes a
     /// `remoteLockAt` stamp onto the child's device rows; the device applies it
@@ -687,13 +761,8 @@ final class HouseholdManager: ObservableObject {
         let cid = childID.uuidString
         let stamp = Date().timeIntervalSince1970
         Task {
-            let snap = try? await db.collection("childDevices")
-                .whereField("householdID", isEqualTo: hh.id)
-                .whereField("childID", isEqualTo: cid)
-                .getDocuments()
-            for doc in snap?.documents ?? [] {
-                try? await doc.reference.updateData(["remoteLockAt": stamp])
-            }
+            await sendDeviceCommand(childID: cid, householdID: hh.id, kind: .lock, stamp: stamp,
+                                    fields: ["remoteLockAt": stamp])
             await MainActor.run { AppAnalytics.log("remote_screentime_locked", [:]) }
         }
         #endif
@@ -709,13 +778,8 @@ final class HouseholdManager: ObservableObject {
         let cid = childID.uuidString
         let stamp = Date().timeIntervalSince1970
         Task {
-            let snap = try? await db.collection("childDevices")
-                .whereField("householdID", isEqualTo: hh.id)
-                .whereField("childID", isEqualTo: cid)
-                .getDocuments()
-            for doc in snap?.documents ?? [] {
-                try? await doc.reference.updateData(["appRemovalUnlockAt": stamp])
-            }
+            await sendDeviceCommand(childID: cid, householdID: hh.id, kind: .appRemoval, stamp: stamp,
+                                    fields: ["appRemovalUnlockAt": stamp])
             await MainActor.run { AppAnalytics.log("remote_app_removal_window", [:]) }
         }
         #endif
@@ -752,10 +816,33 @@ final class HouseholdManager: ObservableObject {
                     self.resetAsRemovedDevice()
                     return
                 }
-                self.applyRemoteUnlockIfNeeded(data)
-                self.applyRemoteLockIfNeeded(data)
-                self.applyRemoteAppRemovalIfNeeded(data)
+                // Lock vs unlock: apply in STAMP order so the NEWER command wins.
+                // A device that was offline can wake up to both at once — the old
+                // `unlock-then-lock` fixed order let a stale lock override a newer
+                // grant (and vice versa the freshness window silently dropped locks).
+                let lockAt = data["remoteLockAt"] as? Double ?? 0
+                let unlockAt = data["remoteUnlockAt"] as? Double ?? 0
+                if lockAt <= unlockAt {
+                    self.applyRemoteLockIfNeeded(data, docID: docID)
+                    self.applyRemoteUnlockIfNeeded(data, docID: docID)
+                } else {
+                    self.applyRemoteUnlockIfNeeded(data, docID: docID)
+                    self.applyRemoteLockIfNeeded(data, docID: docID)
+                }
+                self.applyRemoteAppRemovalIfNeeded(data, docID: docID)
             }
+        #endif
+    }
+
+    /// ACK a consumed device command: write the command's own stamp back onto our
+    /// device row (`…AppliedAt`), so the parent's dashboard flips "⏳ ממתין" to
+    /// "✅ בוצע" — and a Cloud Function pushes the parent if the ack came late.
+    /// Also HEALS a missing ack for a command we already applied before an ack
+    /// write ever made it out (offline crash, pre-ack build).
+    private func ackDeviceCommand(docID: String, field: String, stamp: Double) {
+        #if canImport(FirebaseFirestore)
+        db.collection("childDevices").document(docID)
+            .setData([field: stamp], merge: true)
         #endif
     }
 
@@ -768,13 +855,17 @@ final class HouseholdManager: ObservableObject {
     /// lock returns by itself (the shield resync re-locks once the window
     /// passes; the timer below covers the app staying open the whole time).
     @MainActor
-    private func applyRemoteAppRemovalIfNeeded(_ data: [String: Any]) {
+    private func applyRemoteAppRemovalIfNeeded(_ data: [String: Any], docID: String) {
         #if canImport(FirebaseFirestore)
         guard let at = data["appRemovalUnlockAt"] as? Double else { return }
         let last = UserDefaults.standard.double(forKey: lastRemoteAppRemovalKey)
         let now = Date().timeIntervalSince1970
+        if at <= last, (data["appRemovalAppliedAt"] as? Double ?? 0) < at {
+            ackDeviceCommand(docID: docID, field: "appRemovalAppliedAt", stamp: at)   // heal lost ack
+        }
         guard at > last, now - at < Self.remoteUnlockFreshness else { return }   // unseen + fresh
         UserDefaults.standard.set(at, forKey: lastRemoteAppRemovalKey)
+        ackDeviceCommand(docID: docID, field: "appRemovalAppliedAt", stamp: at)
         let windowSeconds: TimeInterval = 5 * 60
         ParentSettings.shared.appRemovalUnlockedUntil = Date().addingTimeInterval(windowSeconds)
         ShieldManager.shared.setAppRemovalLocked(false)
@@ -789,15 +880,23 @@ final class HouseholdManager: ObservableObject {
     }
 
     /// A parent RE-LOCKED this child's device from afar. Apply exactly once per
-    /// command (`at > last`) and only when fresh. Ends any open window + re-shields.
+    /// command (`at > last`). Ends any open window + re-shields.
+    ///
+    /// Deliberately NO freshness window: a lock is the safe-side command, and the
+    /// old 6-hour cutoff meant a device that was off/offline for half a day just
+    /// never locked — the parent's #1 "it didn't work" report. Ordering against a
+    /// NEWER unlock is handled by the caller (stamp-ordered application).
     @MainActor
-    private func applyRemoteLockIfNeeded(_ data: [String: Any]) {
+    private func applyRemoteLockIfNeeded(_ data: [String: Any], docID: String) {
         #if canImport(FirebaseFirestore)
         guard let at = data["remoteLockAt"] as? Double else { return }
         let last = UserDefaults.standard.double(forKey: lastRemoteLockKey)
-        let now = Date().timeIntervalSince1970
-        guard at > last, now - at < Self.remoteUnlockFreshness else { return }   // unseen + fresh
+        if at <= last, (data["remoteLockAppliedAt"] as? Double ?? 0) < at {
+            ackDeviceCommand(docID: docID, field: "remoteLockAppliedAt", stamp: at)   // heal lost ack
+        }
+        guard at > last else { return }   // unseen only — locks never expire
         UserDefaults.standard.set(at, forKey: lastRemoteLockKey)
+        ackDeviceCommand(docID: docID, field: "remoteLockAppliedAt", stamp: at)
         Task { @MainActor in
             // Close the window but SAVE the leftover — a remote lock is "not
             // now", not a punishment: earned minutes bank back to the child's
@@ -822,13 +921,17 @@ final class HouseholdManager: ObservableObject {
     /// A parent opened screen time for this child from afar. Apply it exactly once
     /// per command (`at > last`), as long as it's still within the freshness window.
     @MainActor
-    private func applyRemoteUnlockIfNeeded(_ data: [String: Any]) {
+    private func applyRemoteUnlockIfNeeded(_ data: [String: Any], docID: String) {
         guard let at = data["remoteUnlockAt"] as? Double,
               let minutes = data["remoteUnlockMinutes"] as? Int, minutes > 0 else { return }
         let last = UserDefaults.standard.double(forKey: lastRemoteUnlockKey)
         let now = Date().timeIntervalSince1970
+        if at <= last, (data["remoteUnlockAppliedAt"] as? Double ?? 0) < at {
+            ackDeviceCommand(docID: docID, field: "remoteUnlockAppliedAt", stamp: at)   // heal lost ack
+        }
         guard at > last, now - at < Self.remoteUnlockFreshness else { return }   // unseen + fresh
         UserDefaults.standard.set(at, forKey: lastRemoteUnlockKey)
+        ackDeviceCommand(docID: docID, field: "remoteUnlockAppliedAt", stamp: at)
         Task { @MainActor in
             await ShieldManager.shared.requestAuthorizationIfNeeded()
             ShieldManager.shared.cancelScheduledReshield()

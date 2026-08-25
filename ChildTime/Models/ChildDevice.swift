@@ -37,6 +37,13 @@ struct ChildDevice: Codable, Identifiable, Equatable {
     var windowEndsAt: Double?
     var frozenSeconds: Int?
     var windowIsManual: Bool?
+    /// Command ACKNOWLEDGMENTS — the device writes back the command's own stamp
+    /// the moment it actually applies it, so the parent dashboard can show the
+    /// truth ("✅ ננעל") instead of an optimistic guess. Each holds the unix stamp
+    /// of the LAST command of that kind this device executed.
+    var remoteLockAppliedAt: Double?
+    var remoteUnlockAppliedAt: Double?
+    var appRemovalAppliedAt: Double?
 
     var sfSymbol: String {
         switch kind {

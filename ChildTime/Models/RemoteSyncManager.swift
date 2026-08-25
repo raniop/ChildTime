@@ -247,15 +247,34 @@ final class RemoteSyncManager: ObservableObject {
     /// (gift pocket + frozen leftover + an open parent window). A command on the
     /// child doc, consumed by the device that IS this child (like reset/±). The
     /// lock itself is sent separately via HouseholdManager.lockRemoteScreenTime.
+    /// Live status of the last "מחק דקות מתנה" per child, mirroring
+    /// HouseholdManager.commandTracker: reachedCloud = the server committed the
+    /// command; appliedAt = the child's device acked it (`revokeGiftAppliedAt`).
+    struct GiftRevokeTracker: Equatable {
+        var stamp: Double
+        var sentAt: Date
+        var reachedCloud: Bool
+        var appliedAt: Double?
+        var applied: Bool { (appliedAt ?? 0) >= stamp }
+    }
+    @Published var giftRevokeTracker: [UUID: GiftRevokeTracker] = [:]
+
     func revokeChildGift(childID: UUID) {
         #if canImport(FirebaseFirestore)
+        let stamp = Date().timeIntervalSince1970
+        giftRevokeTracker[childID] = GiftRevokeTracker(stamp: stamp, sentAt: Date(),
+                                                       reachedCloud: false, appliedAt: nil)
         // Plain unix-seconds stamp — NOT FieldValue.serverTimestamp(): a
         // FIRTimestamp on the child doc is a known decoding hazard here (see
         // removeChildDevice), and a plain Double is enough for a one-shot command.
         db.collection("children").document(childID.uuidString)
-            .setData(["revokeGiftAt": Date().timeIntervalSince1970,
+            .setData(["revokeGiftAt": stamp,
                       "pendingGiftAdjustment": 0],   // cancel any in-flight "+10"
-                     merge: true)
+                     merge: true) { [weak self] error in
+                // Completion fires only on BACKEND commit → honest "reached cloud".
+                guard error == nil else { return }
+                Task { @MainActor in self?.giftRevokeTracker[childID]?.reachedCloud = true }
+            }
         // Optimistic local mirror so the parent's 💝 tile drops to 0 at once.
         pendingGifts.removeValue(forKey: childID)
         if var snap = remoteSnapshots[childID] {
@@ -272,14 +291,18 @@ final class RemoteSyncManager: ObservableObject {
         let ref = db.collection("children").document(childID.uuidString)
         db.runTransaction({ txn, _ -> Any? in
             let doc = try? txn.getDocument(ref)
-            let requested = doc?.data()?["revokeGiftAt"] != nil
+            guard let stamp = doc?.data()?["revokeGiftAt"] as? Double else { return nil }
             // Only clear the command. A non-zero pendingGiftAdjustment seen
             // alongside it is a NEWER "+10" (revokeChildGift zeroed the field
             // atomically with the stamp) — it must survive and apply after.
-            if requested { txn.updateData(["revokeGiftAt": FieldValue.delete()], forDocument: ref) }
-            return requested
+            // The ACK (`revokeGiftAppliedAt` = the command's own stamp) rides the
+            // same transaction, so "consumed" and "confirmed to the parent" can
+            // never diverge.
+            txn.updateData(["revokeGiftAt": FieldValue.delete(),
+                            "revokeGiftAppliedAt": stamp], forDocument: ref)
+            return stamp
         }) { [weak self] result, _ in
-            guard (result as? Bool) == true else { return }
+            guard result is Double else { return }
             Task { @MainActor in
                 TofyLink("applyPendingGiftRevoke: parent revoked gift for \(childID.uuidString.prefix(8))")
                 let closed = ProgressStore.shared.revokeAllParentTime()
@@ -514,11 +537,19 @@ final class RemoteSyncManager: ObservableObject {
                     guard let self else { return }
                     let adj = (doc?.data()?["pendingMinuteAdjustment"] as? Int) ?? 0
                     let gift = (doc?.data()?["pendingGiftAdjustment"] as? Int) ?? 0
+                    let revokeAck = doc?.data()?["revokeGiftAppliedAt"] as? Double
                     Task { @MainActor in
                         if adj != 0 { self.pendingAdjustments[profile.id] = adj }
                         else { self.pendingAdjustments.removeValue(forKey: profile.id) }
                         if gift != 0 { self.pendingGifts[profile.id] = gift }
                         else { self.pendingGifts.removeValue(forKey: profile.id) }
+                        // PARENT: the child's device acked our gift-revoke — flip
+                        // the live status to "✅ נמחקו".
+                        if let revokeAck, var t = self.giftRevokeTracker[profile.id],
+                           revokeAck >= t.stamp, t.appliedAt != revokeAck {
+                            t.appliedAt = revokeAck
+                            self.giftRevokeTracker[profile.id] = t
+                        }
                     }
                     // Consume the grant on whatever device is currently BEING this
                     // child: its own bound play device, or the parent's phone while
