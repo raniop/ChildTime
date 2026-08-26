@@ -721,7 +721,11 @@ struct ParentDashboardView: View {
 
     private func profileCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
         let isActive = profile.id == profiles.activeID
-        let liveSecs = liveWindow(profile)?.secondsLeft ?? 0
+        let live = liveWindow(profile)
+        let liveSecs = live?.secondsLeft ?? 0
+        // A GIFT window's countdown belongs to 💝, not 🎮 — otherwise a kid
+        // playing pure gift time looks like he's burning minutes he earned.
+        let liveIsGift = live?.isManual ?? false
         let lp = LearningProfile(snapshot: s, enabledTopics: profile.enabledTopics, age: profile.age)
         let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: profile.id), profile: lp)
         let status = overallStatus(engine: engine, lp: lp, hasData: s.totalAnswered >= 4)
@@ -889,16 +893,18 @@ struct ParentDashboardView: View {
                 // parent GAVE. Same split as the kid's own home screen.
                 statGroup("דַּקּוֹת מִשְׂחָק") {
                     // 🎮 = EARNED wallet only (or the live countdown of an open
-                    // window). Frozen parent time is NOT here — it's parent
-                    // time, counted once, under 💝.
+                    // EARNED window). A GIFT window's countdown ticks under 💝 —
+                    // each pocket shows its own open time, never the other's.
+                    let earnedLive = liveSecs > 0 && !liveIsGift
+                    let giftLive = liveSecs > 0 && liveIsGift
                     statCell(emoji: "🎮",
-                             value: liveSecs > 0 ? formatTime(liveSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"),
-                             label: liveSecs > 0
+                             value: earnedLive ? formatTime(liveSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"),
+                             label: earnedLive
                                 ? "זמן מסך פתוח"
                                 : (profile.gender == .girl ? "דק' שהרוויחה" : "דק' שהרוויח"))
                     statCell(emoji: "💝",
-                             value: giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—",
-                             label: "דק' מתנה מכם")
+                             value: giftLive ? formatTime(liveSecs) : (giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—"),
+                             label: giftLive ? "זמן מתנה פתוח" : "דק' מתנה מכם")
                 }
                 statGroup("הִתְקַדְּמוּת") {
                     statCell(emoji: "🔥", value: "\(s.dayStreak)", label: "רצף ימים")
@@ -1157,12 +1163,15 @@ struct ParentDashboardView: View {
         let cap = profile.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
         let timeToday = cap.enabled ? "\(s.minutesEarnedToday)/\(cap.minutes)" : "\(s.minutesEarnedToday)"
         let success = s.answeredToday > 0 ? "\(Int((Double(s.correctToday) / Double(s.answeredToday)) * 100))%" : "—"
-        // Show the parent's just-opened window first (a live countdown of the time
-        // they granted); fall back to the child's banked wallet.
-        // 🎮 shows the EARNED wallet, or the live countdown while a window is
-        // open. Frozen parent time belongs to 💝 (counted once, there).
-        let liveSecs = liveWindow(profile)?.secondsLeft ?? 0
-        let available = liveSecs > 0 ? formatTime(liveSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—")
+        // 🎮 shows the EARNED wallet, or the live countdown of an open EARNED
+        // window. A GIFT window's countdown ticks under 💝 instead — a kid
+        // playing gift time must never look like he's burning earned minutes.
+        let live = liveWindow(profile)
+        let liveSecs = live?.secondsLeft ?? 0
+        let liveIsGift = live?.isManual ?? false
+        let earnedLive = liveSecs > 0 && !liveIsGift
+        let giftLive = liveSecs > 0 && liveIsGift
+        let available = earnedLive ? formatTime(liveSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—")
         return VStack(spacing: 8) {
             ZStack(alignment: .topTrailing) {
                 ProfileAvatarView(profile: profile, size: 62)
@@ -1182,11 +1191,12 @@ struct ParentDashboardView: View {
                 HStack(spacing: 6) { miniStat("⭐", s.stars.currencyShort); miniStat("💎", s.diamonds.currencyShort) }
                 // Green ONLY while a window is actually open — frozen time shows
                 // its static number in neutral (it isn't ticking or burning).
-                HStack(spacing: 6) { miniStat("🎮", available, live: liveSecs > 0); miniStat("🔥", "\(s.dayStreak)") }
+                HStack(spacing: 6) { miniStat("🎮", available, live: earnedLive); miniStat("🔥", "\(s.dayStreak)") }
                 // 💝 Parent gift pocket — kept apart from earned (🎮) even here.
+                // An open GIFT window ticks down HERE, green, not under 🎮.
                 HStack(spacing: 6) {
                     let gift = giftShownFor(profile, s)
-                    miniStat("💝", gift > 0 ? "\(gift)" : "—")
+                    miniStat("💝", giftLive ? formatTime(liveSecs) : (gift > 0 ? "\(gift)" : "—"), live: giftLive)
                     Color.clear.frame(maxWidth: .infinity).frame(height: 1)
                 }
             }
@@ -1275,9 +1285,12 @@ struct ParentDashboardView: View {
         guard !theRows.isEmpty else { return nil }
         func g(_ p: Profile, _ m: String, _ f: String) -> String { p.gender == .girl ? f : m }
 
-        // 1. Someone has a screen-time window OPEN right now (minutes burning).
-        if let win = theRows.first(where: { liveWindow($0.profile) != nil }) {
-            return "\(win.profile.name) \(g(win.profile, "פָּתַח", "פָּתְחָה")) זְמַן מָסָךְ עַכְשָׁיו 🎮"
+        // 1. Someone has a screen-time window OPEN right now (minutes burning) —
+        //    named by its source: gift time (💝) is never dressed up as earned (🎮).
+        if let (p, w) = theRows.lazy.compactMap({ r in liveWindow(r.profile).map { (r.profile, $0) } }).first {
+            return w.isManual
+                ? "\(p.name) \(g(p, "פָּתַח", "פָּתְחָה")) דַּקּוֹת מַתָּנָה עַכְשָׁיו 💝"
+                : "\(p.name) \(g(p, "פָּתַח", "פָּתְחָה")) זְמַן מָסָךְ עַכְשָׁיו 🎮"
         }
         // 1b. Someone is inside Tofy right now (learning).
         if let live = theRows.first(where: { isChildPlayingNow($0.profile) }) {
@@ -1330,8 +1343,8 @@ struct ParentDashboardView: View {
         // Gendered — we know each child's gender, so never "משחק/ת".
         let girl = profile.gender == .girl
         let text: String = {
-            // No countdown here — the 🎮 stat below already ticks in green.
-            if live != nil { return "🎮 זְמַן מָסָךְ פָּתוּחַ" }
+            // No countdown here — the 🎮/💝 stat below already ticks in green.
+            if let live { return live.isManual ? "💝 זְמַן מַתָּנָה פָּתוּחַ" : "🎮 זְמַן מָסָךְ פָּתוּחַ" }
             if isChildPlayingNow(profile) { return "בְּטוֹפִי עַכְשָׁיו · \(girl ? "לוֹמֶדֶת" : "לוֹמֵד") 📚" }
             return "לֹא בְּטוֹפִי כָּרֶגַע"
         }()
@@ -1370,12 +1383,16 @@ struct ParentDashboardView: View {
             HStack(spacing: 8) {
                 LivePulseDot()
                 if compact {
-                    Text("🎮 זְמַן מָסָךְ פָּתוּחַ · \(formatTime(live.secondsLeft))")
+                    Text(live.isManual
+                         ? "💝 זְמַן מַתָּנָה פָּתוּחַ · \(formatTime(live.secondsLeft))"
+                         : "🎮 זְמַן מָסָךְ פָּתוּחַ · \(formatTime(live.secondsLeft))")
                         .font(.system(size: 11.5, weight: .heavy, design: .rounded))
                         .lineLimit(1).minimumScaleFactor(0.7)
                 } else {
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("\(profile.name) \(profile.gender == .girl ? "פָּתְחָה" : "פָּתַח") זְמַן מָסָךְ \(deviceLabel) 🎮")
+                        Text(live.isManual
+                             ? "\(profile.name) \(profile.gender == .girl ? "פָּתְחָה" : "פָּתַח") דַּקּוֹת מַתָּנָה \(deviceLabel) 💝"
+                             : "\(profile.name) \(profile.gender == .girl ? "פָּתְחָה" : "פָּתַח") זְמַן מָסָךְ \(deviceLabel) 🎮")
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                         Text("נִשְׁאֲרוּ \(formatTime(live.secondsLeft)) דַּקּוֹת · \(source)")
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
@@ -2052,9 +2069,9 @@ struct ParentDashboardView: View {
             case "💎":
                 return "יהלומים = הארנק של החנות. מרוויחים לאט יותר מכוכבים (בערך 1 לתשובה), ומוציאים אותם על דמויות ופריטים בחנות. יורדים כשקונים — זה תקין."
             case "🎮":
-                return "דקות משחק שהילד/ה הרוויח/ה מלמידה ועוד לא פתח/ה (הארנק המורווח). דקות שאתם נותנים (💝 מתנה) נשמרות בנפרד ולא נספרות כאן. כשיש חלון פתוח — רואים ספירה לאחור. \"—\" = אין דקות ממתינות."
+                return "דקות משחק שהילד/ה הרוויח/ה מלמידה ועוד לא פתח/ה (הארנק המורווח). דקות שאתם נותנים (💝 מתנה) נשמרות בנפרד ולא נספרות כאן. כשיש חלון פתוח של זמן מורווח — רואים כאן ספירה לאחור (חלון של מתנה סופר תחת 💝). \"—\" = אין דקות ממתינות."
             case "💝":
-                return "דקות שאתם נתתם במתנה ועוד לא נפתחו — נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, אותו מספר בכל מכשיר. הילד/ה פותח/ת אותן מתי שרוצה. בכל נתינה אפשר לתת עד מה שנשאר עד חצות; מה שלא נוצל נשאר למחר."
+                return "דקות שאתם נתתם במתנה ועוד לא נפתחו — נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, אותו מספר בכל מכשיר. הילד/ה פותח/ת אותן מתי שרוצה, וכשהמתנה פתוחה — הספירה לאחור מופיעה כאן (ולא ב-🎮). בכל נתינה אפשר לתת עד מה שנשאר עד חצות; מה שלא נוצל נשאר למחר."
             default:
                 return "נתון מסכם על הפעילות של הילד/ה בטופי."
             }
