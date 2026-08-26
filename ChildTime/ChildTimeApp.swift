@@ -202,6 +202,15 @@ struct ChildTimeApp: App {
                     // nothing was played. NOT fired per-adventure, which spammed the parent.
                     if phase == .background, Self.demoScreen == nil {
                         progress.endSittingAndReport()
+                        // Flush the debounced (~3s) snapshot upload BEFORE iOS
+                        // suspends us: a kid who stops play and immediately leaves
+                        // Tofy otherwise keeps the parent's dashboard stale (a
+                        // frozen 💝 leftover showed "—" until Tofy's next launch).
+                        // Same role guard as the debounced path — a parent monitor
+                        // device must never push its own local state.
+                        if ParentSettings.shared.deviceRole != .parent || KidModeManager.shared.active {
+                            RemoteSyncManager.shared.pushNow()
+                        }
                         // Re-lock the parent gate when the app leaves the foreground.
                         ParentSettings.shared.sessionUnlocked = false
                         WidgetBridge.refreshKid()

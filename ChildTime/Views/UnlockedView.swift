@@ -196,6 +196,10 @@ struct UnlockedView: View {
             // Child chose to stop early — tell the parent (+ minutes banked back).
             LiveEventReporter.report(.screenTimeEnd, extra: ["minutes": remaining])
         }
+        // Upload the pocket change NOW (not after the ~3s debounce): the "stopped
+        // playing" push races the snapshot — the parent must see the frozen 💝 /
+        // banked 🎮 leftover, not a stale "—", even if the kid leaves right away.
+        RemoteSyncManager.shared.pushNow()
     }
 }
 
