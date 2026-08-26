@@ -265,19 +265,27 @@ extension PushManager {
 }
 
 extension PushManager: UNUserNotificationCenterDelegate {
+    // completionHandler-based variants (NOT the async ones) so WE control which
+    // thread the system's completion runs on. The async versions resume the
+    // bridged completion on a Swift-Concurrency pool thread, and right after a
+    // notification TAP UIKit runs snapshot/state-restoration work in it
+    // (_performBlockAfterCATransactionCommitSynchronizing) that ASSERTS main
+    // thread — crashing the app on every tapped push (iOS 26/27).
+
     // Show notifications even when the parent has the app in the foreground.
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                            willPresent notification: UNNotification) async
-        -> UNNotificationPresentationOptions {
-        [.banner, .sound]
+                                            willPresent notification: UNNotification,
+                                            withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        DispatchQueue.main.async { completionHandler([.banner, .sound]) }
     }
 
-    // Handle a tapped action button (e.g. "כן, העלו רמה").
+    // Handle a tapped notification / action button (e.g. "כן, העלו רמה").
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                            didReceive response: UNNotificationResponse) async {
+                                            didReceive response: UNNotificationResponse,
+                                            withCompletionHandler completionHandler: @escaping () -> Void) {
         let actionID = response.actionIdentifier
         let info = response.notification.request.content.userInfo
-        await MainActor.run {
+        Task { @MainActor in
             PushManager.shared.handleLevelUpDecision(actionID, userInfo: info)
             // A tapped live-game invite → remember the game id; the home screen
             // joins it as soon as the app is active.
@@ -285,11 +293,12 @@ extension PushManager: UNUserNotificationCenterDelegate {
                let gameID = info["gameID"] as? String {
                 LiveGameManager.shared.pendingGameID = gameID
             }
+            // Awaited (not fire-and-forget) so the Firestore write-back completes
+            // before iOS suspends the briefly-woken background app — otherwise the
+            // child's listener never sees the parent's answer.
+            await PushManager.shared.handleParentHelpDecision(actionID, userInfo: info)
+            completionHandler()   // on main — UIKit's post-tap snapshot work requires it
         }
-        // Awaited (not fire-and-forget) so the Firestore write-back completes
-        // before iOS suspends the briefly-woken background app — otherwise the
-        // child's listener never sees the parent's answer.
-        await PushManager.shared.handleParentHelpDecision(actionID, userInfo: info)
     }
 }
 
