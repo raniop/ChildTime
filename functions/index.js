@@ -1129,7 +1129,11 @@ exports.adminFamiliesOverview = onCall(
     const parentInfo = {};
     parentsSnap.forEach((p) => {
       const d = p.data();
-      parentInfo[p.id] = { email: d.email || null, name: d.displayName || null };
+      parentInfo[p.id] = {
+        email: d.email || null,
+        name: d.displayName || null,
+        updatedAt: p.updateTime ? p.updateTime.toMillis() / 1000 : null,
+      };
     });
     const kidsByHH = {};
     kidsSnap.forEach((k) => {
@@ -1183,9 +1187,11 @@ exports.adminFamiliesOverview = onCall(
         };
       }).sort((a, b) => (b.lastActiveAt || 0) - (a.lastActiveAt || 0));
       const parents = (d.parentUIDs || []).map((uid) => ({
+        uid,   // admin page needs it for unlink actions
         name: (d.parentNames || {})[uid] || parentInfo[uid]?.name || null,
         email: parentInfo[uid]?.email || null,
         anonymous: !parentInfo[uid]?.email,
+        lastUpdateAt: parentInfo[uid]?.updatedAt || null,
       }));
       families.push({
         id: h.id.slice(0, 8),
@@ -1277,6 +1283,40 @@ exports.adminDeleteHousehold = onCall(
     console.log("[adminDeleteHousehold]", email, "deleted empty household", hhID,
       `(invites: ${invites.size}, unlinked parents: ${linkedParents.size})`);
     return { ok: true, invitesDeleted: invites.size, parentsUnlinked: linkedParents.size };
+  }
+);
+
+// Unlink an ANONYMOUS uid (a child device's account) from a household's
+// parentUIDs — replaced devices' accounts linger there forever, inflating the
+// family's "child devices" count. Guarded: an account WITH an email (a real
+// parent) can never be unlinked here. Inherently safe for live devices too:
+// a still-active child device re-adds its own uid on next launch (the
+// preferredHousehold self-heal in ensureHousehold).
+exports.adminUnlinkParentUID = onCall(
+  { timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    const email = (request.auth && request.auth.token && request.auth.token.email || "").toLowerCase();
+    if (!email || !ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(email)) {
+      throw new HttpsError("permission-denied", "Not an authorized admin.");
+    }
+    const hhID = String(request.data && request.data.householdID || "");
+    const uid = String(request.data && request.data.uid || "");
+    if (!/^[0-9A-Fa-f-]{36}$/.test(hhID) || !/^[A-Za-z0-9]{10,128}$/.test(uid)) {
+      throw new HttpsError("invalid-argument", "householdID (UUID) and uid required.");
+    }
+    const pDoc = await db.collection("parents").doc(uid).get();
+    if (pDoc.exists && String(pDoc.data().email || "").trim()) {
+      throw new HttpsError("failed-precondition", "That uid belongs to a REAL parent account — refusing to unlink.");
+    }
+    await db.collection("households").doc(hhID).update({
+      parentUIDs: admin.firestore.FieldValue.arrayRemove(uid),
+      [`parentNames.${uid}`]: admin.firestore.FieldValue.delete(),
+    });
+    if (pDoc.exists) {
+      await pDoc.ref.update({ householdIDs: admin.firestore.FieldValue.arrayRemove(hhID) }).catch(() => {});
+    }
+    console.log("[adminUnlinkParentUID]", email, "unlinked anonymous uid", uid.slice(0, 8), "from", hhID);
+    return { ok: true };
   }
 );
 

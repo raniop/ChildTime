@@ -259,7 +259,9 @@ function render() {
         </div>
         <div class="fmeta">
           <span class="chip mint">${f.children.length} ילדים</span>
-          ${anon ? `<span class="chip dim">${anon} מכשירי ילד</span>` : ""}
+          ${anon ? `<button class="chip dim" style="border:0;cursor:pointer;font-family:inherit"
+              title="חשבונות אנונימיים של מכשירי ילד — לחצו לפירוט וניקוי"
+              onclick="event.stopPropagation(); this.closest('.family').querySelector('.anonlist').hidden ^= 1">${anon} מכשירי ילד ▾</button>` : ""}
           ${f.tombstones ? `<span class="chip pink">🪦 ${f.tombstones}</span>` : ""}
           <span class="chip gold">${ago(f.lastActiveAt)}</span>
           <button class="chip dim" style="border:0;cursor:pointer;font-family:inherit"
@@ -271,6 +273,16 @@ function render() {
               title="משפחה ללא שם, כל הילדים רדומים 30+ יום"
               onclick="event.stopPropagation(); deleteDormant('${f.fullId}', this)">🗑 מחק רדומה</button>` : ""}
         </div>
+      </div>
+      <div class="anonlist" hidden style="padding:8px 18px 12px; border-top:1px solid rgba(255,255,255,.08)">
+        ${f.parents.filter((p) => p.anonymous).map((p) => {
+          const stale = !p.lastUpdateAt || (Date.now()/1000 - p.lastUpdateAt) > 86400*30;
+          return `<span class="chip ${stale ? "dim" : "mint"}" style="margin:3px">
+            🔑 ${p.uid.slice(0,8)} · עודכן ${ago(p.lastUpdateAt)}
+            <button style="border:0;background:none;color:inherit;cursor:pointer;font-family:inherit;font-weight:900"
+              title="נתק חשבון מכשיר ילד (מכשיר פעיל מתחבר מחדש לבד)"
+              onclick="event.stopPropagation(); unlinkUID('${f.fullId}', '${p.uid}', this)">✕</button></span>`;
+        }).join("") || "—"}
       </div>
       ${f.children.length ? `
       <div class="tblwrap">
@@ -330,6 +342,21 @@ window.deleteDormant = async (fullId, btn) => {
   } catch (e) {
     btn.disabled = false; btn.textContent = "🗑 מחק רדומה";
     alert("המחיקה נדחתה: " + (e.message || e.code));
+  }
+};
+
+window.unlinkUID = async (fullId, uid, btn) => {
+  if (!confirm("לנתק את חשבון מכשיר הילד הזה מהמשפחה? מכשיר שעדיין חי מתחבר מחדש לבד בהפעלה הבאה — רק חשבונות של מכשירים ישנים נעלמים. (חשבון הורה אמיתי — השרת מסרב.)")) return;
+  btn.disabled = true; btn.textContent = "…";
+  try {
+    const call = fns.httpsCallable(functionsI, "adminUnlinkParentUID");
+    await call({ householdID: fullId, uid });
+    const f = DATA.families.find((x) => x.fullId === fullId);
+    if (f) f.parents = f.parents.filter((p) => p.uid !== uid);
+    render();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = "✕";
+    alert("הניתוק נדחה: " + (e.message || e.code));
   }
 };
 
