@@ -300,6 +300,14 @@ final class HouseholdManager: ObservableObject {
                 TofyLink("children snapshot: \(records.count) child(ren) [\(records.map { "\($0.name):\($0.id.prefix(8))" }.joined(separator: ", "))]; bound=\(s0.joinedChildID ?? "nil") present=\(boundPresent.map(String.init) ?? "n/a")")
                 TofyLink("LOCAL profiles: [\(ProfileStore.shared.profiles.map { "\($0.name):\($0.id.uuidString.prefix(8))" }.joined(separator: ", "))]")
                 ProfileStore.shared.mergeRemoteChildren(records)
+                // Ghost cleanup: with an authoritative SERVER snapshot (never
+                // cache — a cold cache is partial), drop local profiles the
+                // household no longer contains. Months of "merge but never
+                // remove" left devices with phantom kids (a deleted duplicate
+                // still showing, family stats counting 9 children of 4).
+                if !snap.metadata.isFromCache {
+                    ProfileStore.shared.pruneLocalGhosts(cloudIDs: Set(records.map { $0.id }))
+                }
                 // First reply from the cloud → the family has finished loading.
                 if !self.didReceiveChildren {
                     self.didReceiveChildren = true
@@ -571,7 +579,18 @@ final class HouseholdManager: ObservableObject {
         // that "kept coming back"). Only PARENT devices heal missing cloud records.
         guard ParentSettings.shared.deviceRole != .child else { return }
         for profile in ProfileStore.shared.profiles where !tombstoned.contains(profile.id) {
-            upsertChild(profile)
+            // Resurrection guard: heal ONLY children the cloud household already
+            // lists, or kids genuinely created on THIS device. A stale local copy
+            // of any other UUID (months-old roster leftovers, legacy per-device
+            // migrations) must never be pushed back up — that is the engine that
+            // kept re-creating "duplicate children" in the day-one families.
+            let cloudKnown = hh.childIDs.contains(profile.id.uuidString)
+            let mine = ProfileStore.shared.wasCreatedHere(profile.id)
+            if cloudKnown || mine {
+                upsertChild(profile)
+            } else {
+                TofyLink("reconcile: SKIP \(profile.name):\(profile.id.uuidString.prefix(8)) — not in cloud household and not created on this device")
+            }
         }
     }
 
@@ -1195,6 +1214,14 @@ final class HouseholdManager: ObservableObject {
             var childIDs: [String] = []
             for p in profiles {
                 let id = p.id.uuidString
+                // Never move a TOMBSTONED (deleted) child into the new family —
+                // the whole-roster push was the second resurrection path for
+                // duplicate children. Skip and log instead.
+                if let tomb = try? await db.collection("deletedChildren").document(id).getDocument(),
+                   tomb.exists {
+                    TofyLink("approveChildLink: SKIP tombstoned child \(id.prefix(8))")
+                    continue
+                }
                 childIDs.append(id)
                 let record = ChildRecord(profile: p, householdID: req.fromHouseholdID)
                 try await db.collection("children").document(id)

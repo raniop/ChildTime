@@ -18,7 +18,20 @@ final class ProfileStore: ObservableObject {
         static let profiles = "profiles.list"
         static let activeID = "profiles.activeID"
         static let didMigrate = "profiles.didMigrateLegacyKid"
+        static let createdHere = "profiles.createdHereIDs"
     }
+
+    /// IDs of profiles genuinely CREATED on this device (vs merged from the
+    /// cloud). Only these (plus cloud-known ids) may ever be (re)uploaded by
+    /// the reconcile sweep — a stale local copy of a child that lives (or
+    /// died) elsewhere must never be pushed back up. This is what let old
+    /// UUIDs resurrect as "duplicate children" in the day-one families.
+    private var createdHereIDs: Set<String> {
+        get { Set(defaults.stringArray(forKey: Key.createdHere) ?? []) }
+        set { defaults.set(Array(newValue), forKey: Key.createdHere) }
+    }
+
+    func wasCreatedHere(_ id: UUID) -> Bool { createdHereIDs.contains(id.uuidString) }
 
     @Published private(set) var profiles: [Profile] = [] {
         didSet { saveProfiles() }
@@ -76,6 +89,7 @@ final class ProfileStore: ObservableObject {
 
     func add(_ profile: Profile) {
         guard canAddMore else { return }
+        createdHereIDs.insert(profile.id.uuidString)
         profiles.append(profile)
         // If this is the first profile, make it active automatically.
         if activeID == nil { activeID = profile.id }
@@ -85,7 +99,7 @@ final class ProfileStore: ObservableObject {
     func remove(_ profile: Profile) {
         profiles.removeAll { $0.id == profile.id }
         if activeID == profile.id {
-            activeID = profiles.first?.id
+            activeID = fallbackActiveID()
         }
         HouseholdManager.shared.deleteChild(profile.id)
     }
@@ -96,7 +110,16 @@ final class ProfileStore: ObservableObject {
     func removeLocalOnly(_ id: UUID) {
         guard profiles.contains(where: { $0.id == id }) else { return }
         profiles.removeAll { $0.id == id }
-        if activeID == id { activeID = profiles.first?.id }
+        if activeID == id { activeID = fallbackActiveID() }
+    }
+
+    /// Replacement identity after the active profile disappears. A PARENT device
+    /// may fall back to the first profile (dashboard convenience, no identity at
+    /// stake). A CHILD device must NEVER guess — the roster order is arbitrary,
+    /// and guessing is exactly how Yoav's iPad silently became his sibling. nil
+    /// routes the kid to the explicit selection / rescan screen instead.
+    private func fallbackActiveID() -> UUID? {
+        ParentSettings.shared.deviceRole == .child ? nil : profiles.first?.id
     }
 
     func update(_ profile: Profile) {
@@ -124,7 +147,13 @@ final class ProfileStore: ObservableObject {
         if let p = profiles.first(where: { $0.id == id }) {
             setActive(p)
         } else {
-            activeID = id   // profile will arrive via mergeRemoteChildren
+            // Not local yet (arrives via mergeRemoteChildren). Park the vault
+            // on the NEW id FIRST — save the outgoing kid, load the (blank)
+            // incoming snapshot — so the sync can never capture the PREVIOUS
+            // kid's live points under the new id (the "duplicate child with
+            // the sibling's stars" incident, 36502FEA).
+            ProgressVault.shared.switchTo(profileID: id)
+            activeID = id
         }
     }
 
@@ -163,7 +192,31 @@ final class ProfileStore: ObservableObject {
         }
         if changed {
             profiles = working
-            if activeID == nil { activeID = profiles.first?.id }
+            // Auto-pick a default ONLY where no identity is at stake (parent
+            // dashboard). On a CHILD device the identity is the joinedChildID
+            // binding — "first in the list" once bound Yoav's iPad to a sibling.
+            if activeID == nil, ParentSettings.shared.deviceRole != .child {
+                activeID = profiles.first?.id
+            }
+        }
+    }
+
+    /// Remove local profiles the cloud household no longer contains — ghosts
+    /// accumulated over months of merges (Shlomo's device showed a deleted
+    /// duplicate + counted 9 kids). Called only with an authoritative SERVER
+    /// children snapshot (never cache). Never touches the bound child
+    /// (joinedChildID) or a profile created on this device that may not have
+    /// reached the cloud yet.
+    func pruneLocalGhosts(cloudIDs: Set<String>) {
+        guard !cloudIDs.isEmpty else { return }   // empty snapshot → don't judge
+        let joined = ParentSettings.shared.joinedChildID
+        let ghosts = profiles.filter { p in
+            let id = p.id.uuidString
+            return !cloudIDs.contains(id) && id != joined && !wasCreatedHere(p.id)
+        }
+        for g in ghosts {
+            TofyLink("pruneLocalGhosts: dropping \(g.name):\(g.id.uuidString.prefix(8)) — absent from cloud household")
+            removeLocalOnly(g.id)
         }
     }
 

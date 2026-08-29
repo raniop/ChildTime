@@ -186,6 +186,52 @@ exports.sendLiveEvent = onDocumentCreated("children/{childID}/events/{eventID}",
   await send(tokens, msg, { childID: event.params.childID, type: data.type });
 });
 
+// ---- 1a-pre) Duplicate-child detector ---------------------------------------
+// The day-one families kept getting "duplicate children" (a stale local UUID
+// re-uploaded with the real kid's live points — e.g. 36502FEA with Yoav's
+// stars at revision 178). Client-side guards now block the known paths; this
+// is the early-warning net for anything they miss: alert the household's
+// parents the moment a suspicious child doc appears, BEFORE the family is
+// confused by it. Detection only — never deletes anything.
+exports.detectDuplicateChild = onDocumentCreated("children/{childID}", async (event) => {
+  const data = event.data && event.data.data();
+  if (!data || !data.householdID || !data.name) return;
+  const same = await db.collection("children")
+    .where("householdID", "==", data.householdID)
+    .where("name", "==", data.name).get();
+  const others = same.docs.filter((d) => d.id !== event.params.childID);
+  if (!others.length) return;
+  console.error("[dupDetector] duplicate child name:", data.name,
+    "new=", event.params.childID, "existing=", others.map((d) => d.id).join(","),
+    "hh=", data.householdID);
+  const tokens = await tokensForHousehold(data.householdID, null);
+  await send(tokens, {
+    title: "⚠️ יתכן שנוצר ילד כפול",
+    body: `נוצר עכשיו ילד חדש בשם "${data.name}" למרות שכבר קיים ילד בשם הזה במשפחה. אם לא יצרתם אותו בכוונה — אל תמחקו כלום, פנו לתמיכה.`,
+  }, { type: "dupAlert", childID: event.params.childID });
+});
+
+// A freshly-created state doc with MANY stars but a LOW revision is the exact
+// fingerprint of the contamination bug (a new UUID inheriting a real kid's
+// live points). Log + alert so it's caught in minutes, not weeks.
+exports.detectSuspiciousState = onDocumentCreated("children/{childID}/state/{stateID}", async (event) => {
+  const s = event.data && event.data.data();
+  if (!s) return;
+  const stars = Number(s.stars) || 0;
+  const rev = Number(s.revision) || 0;
+  if (!(stars > 3000 && rev < 500)) return;
+  console.error("[dupDetector] suspicious state: child=", event.params.childID,
+    "stars=", stars, "revision=", rev, "device=", s.deviceID || "?");
+  const child = await db.collection("children").doc(event.params.childID).get();
+  const hh = child.exists ? child.data().householdID : null;
+  if (!hh) return;
+  const tokens = await tokensForHousehold(hh, null);
+  await send(tokens, {
+    title: "⚠️ נתוני התקדמות חשודים",
+    body: `זוהה פרופיל חדש עם ${stars} כוכבים — יתכן שכפול של ילד קיים. אל תמחקו כלום, פנו לתמיכה.`,
+  }, { type: "dupAlert", childID: event.params.childID });
+});
+
 // ---- 1a) Tombstone enforcement — deleted children can't come back -----------
 // A child is deleted on one device, but OTHER devices in the household still
 // hold it locally and re-upload it on next launch (so it "kept coming back").

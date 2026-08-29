@@ -63,13 +63,22 @@ final class ProgressVault {
 
     /// Save the currently-active profile's state, then load `profile`'s
     /// state into the live `ProgressStore`.
-    func switchTo(_ profile: Profile) {
+    func switchTo(_ profile: Profile) { switchTo(profileID: profile.id) }
+
+    /// Same handoff by ID ONLY — for adopting a profile that hasn't streamed
+    /// down from the cloud yet (child-device rebind). The incoming snapshot is
+    /// whatever the vault holds for that id (usually .blank); the cloud
+    /// listener fills in the real state when it arrives. Without this, the
+    /// caller flipped `activeID` with the PREVIOUS kid's data still live in
+    /// ProgressStore — and the sync uploaded those points under the new id
+    /// (the "duplicate child with the sibling's stars" incident, 36502FEA).
+    func switchTo(profileID: UUID) {
         // 0. Device-local play state (open window / frozen parent time) belongs
         //    to the OUTGOING kid — save it into their wallet/freezer, then clear,
         //    so it can't leak onto the incoming profile. ONLY on a real switch
         //    (first bind and same-profile re-selects leave the live value alone —
         //    restoring there wiped frozen time on every launch of a 1-kid device).
-        let switching = boundProfileID != nil && boundProfileID != profile.id
+        let switching = boundProfileID != nil && boundProfileID != profileID
         if switching, let outgoing = boundProfileID {
             let hadWindow = ProgressStore.shared.isUnlocked
             ProgressStore.shared.stopAndSaveCurrentUnlock()
@@ -90,22 +99,22 @@ final class ProgressVault {
             if switching { RemoteSyncManager.shared.pushNow() }
         }
         // 2. Apply incoming snapshot
-        let incoming = snapshot(for: profile.id)
+        let incoming = snapshot(for: profileID)
         ProgressStore.shared.apply(incoming)
         // 3. Bind
-        boundProfileID = profile.id
+        boundProfileID = profileID
         // 3b. Restore the incoming kid's own frozen parent time (if any) —
         //     only on a real switch (see step 0)…
-        if switching { ProgressStore.shared.restoreDeviceLocalPlayState(for: profile.id) }
+        if switching { ProgressStore.shared.restoreDeviceLocalPlayState(for: profileID) }
         //     …then fold ANY device-local frozen time (live or stashed) into the
         //     synced gift pocket — frozen time is no longer device-local. Persist
         //     right away so a kill before the next autosave can't lose it.
-        if ProgressStore.shared.migrateFrozenIntoGiftPocket(for: profile.id) {
-            write(ProgressStore.shared.captureSnapshot(), for: profile.id)
+        if ProgressStore.shared.migrateFrozenIntoGiftPocket(for: profileID) {
+            write(ProgressStore.shared.captureSnapshot(), for: profileID)
         }
         // 4. Reset live caches that don't belong to the new profile
         QuestionMemory.shared.reloadForActiveProfile()
-        LearningHistoryStore.shared.bind(to: profile.id)
+        LearningHistoryStore.shared.bind(to: profileID)
         observeAndAutoSave()
     }
 
