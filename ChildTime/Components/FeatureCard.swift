@@ -9,6 +9,9 @@ struct FeatureCard: View {
     let subtitle: String
     let gradient: LinearGradient
     let glowColor: Color
+    /// Optional footer badge (fills the otherwise-empty badge slot) — e.g. the
+    /// games warm-up progress "3/10 ✅". nil keeps the slot empty as before.
+    var badge: String? = nil
     let onTap: () -> Void
 
     @Environment(\.horizontalSizeClass) private var hsc
@@ -77,8 +80,19 @@ struct FeatureCard: View {
                     // Footer matches WorldCard's: an (empty) badge slot above a
                     // decorative bar, so the bars line up between tiles.
                     VStack(spacing: 4) {
-                        Color.clear
-                            .frame(height: HomeTileLayout.badgeZone(labelSize))
+                        Group {
+                            if let badge {
+                                Text(badge)
+                                    .font(.system(size: labelSize - 2, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 2)
+                                    .background(Capsule().fill(.black.opacity(0.25)))
+                            } else {
+                                Color.clear
+                            }
+                        }
+                        .frame(height: HomeTileLayout.badgeZone(labelSize))
                         Capsule()
                             .fill(LinearGradient(
                                 colors: [glowColor, Color.white.opacity(0.7), glowColor],

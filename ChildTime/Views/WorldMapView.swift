@@ -139,13 +139,25 @@ struct WorldMapView: View {
                             FeatureCard(
                                 emoji: "🎮",
                                 title: "מִשְׂחָקִים",
-                                subtitle: "מֵרוֹץ נָכוֹן/לֹא · הַתְאָמַת זוּגוֹת",
+                                // Daily warm-up gate: games open after a few CORRECT
+                                // answers of real learning (Rani). Framed as a goal,
+                                // never a lock — no grey-out, no failure language.
+                                subtitle: gamesUnlockedToday
+                                    ? "מֵרוֹץ נָכוֹן/לֹא · הַתְאָמַת זוּגוֹת"
+                                    : "עוֹנִים \(gamesGateTarget) נְכוֹנוֹת — וְנִפְתָּח! 💪",
                                 gradient: LinearGradient(colors: [Color(hex: "EF476F"), Color(hex: "9B5DE5")],
                                                          startPoint: .topLeading, endPoint: .bottomTrailing),
-                                glowColor: Color(hex: "EF476F")
+                                glowColor: Color(hex: "EF476F"),
+                                badge: gamesUnlockedToday
+                                    ? nil
+                                    : "\(min(progress.correctToday, gamesGateTarget))/\(gamesGateTarget) ✅"
                             ) {
                                 Haptic.light()
-                                showingGames = true
+                                if gamesUnlockedToday {
+                                    showingGames = true
+                                } else {
+                                    companion.cheer("עוֹד \(gamesGateRemaining) תְּשׁוּבוֹת נְכוֹנוֹת וְהַמִּשְׂחָקִים נִפְתָּחִים! 🎮")
+                                }
                             }
                             .frame(maxWidth: .infinity)
 
@@ -219,8 +231,15 @@ struct WorldMapView: View {
                 horizontalInset: AppSpacing.lg
             )
         }
+        // Returning from the smart adventure with the warm-up freshly completed →
+        // celebrate the games opening (the map's onAppear doesn't re-fire under
+        // a dismissed fullScreenCover, so listen to the cover's flag directly).
+        .onChangeCompat(of: showingSmartFeed) { _, showing in
+            if !showing { celebrateGamesUnlockIfNeeded() }
+        }
         .onAppear {
             lastSeenStars = progress.stars
+            celebrateGamesUnlockIfNeeded()
             // 🎓 No grade yet (families from before grades existed): the kid
             // picks their own — synced to the parent flagged for verification.
             if let p = profiles.active, p.grade == nil {
@@ -1483,6 +1502,30 @@ struct WorldMapView: View {
     }
 
     // MARK: - Actions
+
+    // MARK: - 🎮 Games warm-up gate (learning first, games after)
+
+    /// Correct answers needed today before the mini-games open. One reward
+    /// batch (10) for readers; 5 for גן kids (10 is a lot pre-reading).
+    private var gamesGateTarget: Int {
+        (profiles.active?.effectiveGrade ?? 1) <= 0 ? 5 : 10
+    }
+    private var gamesGateRemaining: Int { max(0, gamesGateTarget - progress.correctToday) }
+    /// `correctToday` resets at midnight, so the warm-up is a fresh daily goal.
+    private var gamesUnlockedToday: Bool { gamesGateRemaining == 0 }
+
+    /// One celebratory line the first time the games open each day.
+    private func celebrateGamesUnlockIfNeeded() {
+        guard gamesUnlockedToday else { return }
+        let key = "gamesUnlockCelebratedDate"
+        if let d = UserDefaults.standard.object(forKey: key) as? Date,
+           Calendar.current.isDateInToday(d) { return }
+        UserDefaults.standard.set(Date(), forKey: key)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            companion.hype(Gendered.g("פָּתַחְתָּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨",
+                                      "פָּתַחְתְּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨"))
+        }
+    }
 
     private func greetIfNeeded() {
         if progress.dayStreak == 0 {
