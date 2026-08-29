@@ -1007,13 +1007,22 @@ struct ParentDashboardView: View {
             // Daily cap line (if enabled) — earned-out-of-max + any minutes banked
             // for tomorrow (bonus overflow once the daily cap was full).
             if cap.enabled {
+                let maxedOut = s.minutesEarnedToday >= cap.minutes
                 HStack(spacing: 6) {
-                    Image(systemName: "timer")
-                        .foregroundStyle(.secondary)
-                    Text("נצבר היום: \(s.minutesEarnedToday) / \(cap.minutes) דק'"
-                         + ((s.carryOverMinutes ?? 0) > 0 ? "  ·  🎁 \(s.carryOverMinutes ?? 0) למחר" : ""))
+                    Image(systemName: maxedOut ? "flag.checkered" : "timer")
+                        .foregroundStyle(maxedOut ? AppColor.flameOrange : .secondary)
+                    // When the day's allowance is fully earned, SAY so — a
+                    // parent seeing 🎮 "—" next to 240/240 read it as minutes
+                    // gone missing. Spell out where new earnings go (tomorrow)
+                    // and that the 💝 gift pocket stays open today.
+                    Text(maxedOut
+                         ? "\(profile.gender == .girl ? "הגיעה" : "הגיע") לתקרה היומית (\(cap.minutes) דק') — מה \(profile.gender == .girl ? "שתרוויח" : "שירוויח") עכשיו נשמר למחר"
+                           + ((s.carryOverMinutes ?? 0) > 0 ? " · 🎁 כבר \(s.carryOverMinutes ?? 0)" : "")
+                           + (giftShownFor(profile, s) > 0 ? " · 💝 המתנה פתוחה גם היום" : "")
+                         : "נצבר היום: \(s.minutesEarnedToday) / \(cap.minutes) דק'"
+                           + ((s.carryOverMinutes ?? 0) > 0 ? "  ·  🎁 \(s.carryOverMinutes ?? 0) למחר" : ""))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(maxedOut ? .primary : .secondary)
                     Spacer()
                 }
             }
@@ -2057,7 +2066,7 @@ struct ParentDashboardView: View {
             }
             switch emoji {
             case "⏱":
-                return "כמה דקות זמן מסך הילד/ה הרוויח/ה היום, מתוך התקרה היומית שקבעתם (המספר אחרי הקו). כל 10 תשובות נכונות = 4 דקות. כשמגיעים לתקרה — שאר הדקות נשמרות למחר."
+                return "כמה דקות זמן מסך הילד/ה הרוויח/ה היום, מתוך התקרה היומית שקבעתם (המספר אחרי הקו). כל 10 תשובות נכונות = 4 דקות. כשהתקרה מתמלאת (למשל 240/240) — הילד/ה ממשיך/ה ללמוד, אבל דקות חדשות נשמרות למחר (🎁), ו-🎮 יציג \"—\" אם הארנק כבר נוצל. דקות מתנה 💝 אינן כפופות לתקרה."
             case "❓":
                 return "כמה שאלות הילד/ה ענה/תה היום — בכל העולמות, במשחקים ובהרפתקה החכמה. מתאפס בחצות."
             case "🎯":

@@ -1161,6 +1161,16 @@ struct WorldMapView: View {
             } else if progress.pendingMinutes > 0 {
                 // Has some, but below the 15-min minimum we can open.
                 lines.append("יֵשׁ לְךָ \(progress.pendingMinutes) דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-\(progress.minimumUnlockMinutes) דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊")
+            } else if cap.enabled, progress.minutesEarnedToday >= cap.max {
+                // Earned the WHOLE day's allowance and spent it — a win, not a
+                // lack ("עדיין אין דקות" here read as failure and invited more
+                // answering "to earn", when today's earning is over). Point at
+                // what IS possible now: tomorrow's bank + the gift pocket.
+                lines.append("וָאוּ — נִצַּלְתָּ אֶת כָּל \(cap.max) הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆")
+                lines.append("כָּל מַה שֶּׁתַּרְוִיחַ עַכְשָׁיו נִשְׁמָר לְמָחָר.")
+                if progress.parentGiftMinutes > 0 {
+                    lines.append("וְיֵשׁ לְךָ \(progress.parentGiftMinutes) דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!")
+                }
             } else {
                 lines.append("עֲדַיִן אֵין דַּקּוֹת. עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק! 🎮")
             }
