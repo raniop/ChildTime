@@ -1189,7 +1189,8 @@ exports.adminFamiliesOverview = onCall(
       }));
       families.push({
         id: h.id.slice(0, 8),
-        fullId: h.id,     // needed by the admin delete action (admin-only page)
+        fullId: h.id,     // needed by the admin actions (admin-only page)
+        familyLabel: d.familyLabel || null,   // admin-set display label
         parents,
         tombstones: tombsByHH[h.id] || 0,
         children: kids,
@@ -1232,14 +1233,37 @@ exports.adminDeleteHousehold = onCall(
     const hh = await ref.get();
     if (!hh.exists) throw new HttpsError("not-found", "Household not found.");
     const d = hh.data();
-    // SERVER-SIDE safety re-check — never trust the caller's view.
-    const kids = await db.collection("children").where("householdID", "==", hhID).limit(1).get();
-    if (!kids.empty) {
-      throw new HttpsError("failed-precondition", "Household has children — refusing to delete.");
-    }
+    // SERVER-SIDE safety re-checks — never trust the caller's view.
     const named = Object.values(d.parentNames || {}).filter((n) => String(n || "").trim());
     if (named.length) {
       throw new HttpsError("failed-precondition", `Household has a named parent (${named[0]}) — refusing to delete.`);
+    }
+    const kids = await db.collection("children").where("householdID", "==", hhID).get();
+    if (!kids.empty) {
+      // A NAMELESS household that still holds children (an abandoned guest /
+      // pre-signup family) may be removed ONLY with the explicit withChildren
+      // flag AND when every child has been inactive for 30+ days. Children are
+      // deleted through the full tombstone flow so no device resurrects them.
+      if (!(request.data && request.data.withChildren)) {
+        throw new HttpsError("failed-precondition", "Household has children — pass withChildren to delete a dormant nameless family.");
+      }
+      const cutoff = Date.now() - 30 * 86400 * 1000;
+      for (const k of kids.docs) {
+        const st = await db.collection("children").doc(k.id).collection("state").doc("current").get();
+        const lastMs = Math.max(st.exists ? st.updateTime.toMillis() : 0, k.updateTime.toMillis());
+        if (lastMs > cutoff) {
+          throw new HttpsError("failed-precondition",
+            `Child "${k.data().name || k.id.slice(0, 8)}" was active in the last 30 days — refusing to delete.`);
+        }
+      }
+      for (const k of kids.docs) {
+        await db.collection("deletedChildren").doc(k.id).set({
+          householdID: hhID, deletedAt: Date.now() / 1000, reason: "admin-nameless-family-cleanup",
+        });
+        await db.recursiveDelete(db.collection("children").doc(k.id));
+        await db.collection("friendCards").doc(k.id).delete().catch(() => {});
+      }
+      console.log("[adminDeleteHousehold]", email, "tombstoned+deleted", kids.size, "dormant children of", hhID);
     }
     // Cleanup: invites for this household, and unlink from parents docs.
     const invites = await db.collection("invites").where("householdID", "==", hhID).get();
@@ -1253,6 +1277,29 @@ exports.adminDeleteHousehold = onCall(
     console.log("[adminDeleteHousehold]", email, "deleted empty household", hhID,
       `(invites: ${invites.size}, unlinked parents: ${linkedParents.size})`);
     return { ok: true, invitesDeleted: invites.size, parentsUnlinked: linkedParents.size };
+  }
+);
+
+// Set / clear the admin-facing display label of a household (shown on the
+// families page — e.g. naming a family whose parents have no account name).
+exports.adminSetFamilyLabel = onCall(
+  { timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    const email = (request.auth && request.auth.token && request.auth.token.email || "").toLowerCase();
+    if (!email || !ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(email)) {
+      throw new HttpsError("permission-denied", "Not an authorized admin.");
+    }
+    const hhID = String(request.data && request.data.householdID || "");
+    if (!/^[0-9A-Fa-f-]{36}$/.test(hhID)) {
+      throw new HttpsError("invalid-argument", "householdID must be a UUID.");
+    }
+    const label = String(request.data && request.data.label || "").trim().slice(0, 60);
+    const ref = db.collection("households").doc(hhID);
+    if (!(await ref.get()).exists) throw new HttpsError("not-found", "Household not found.");
+    if (label) await ref.update({ familyLabel: label });
+    else await ref.update({ familyLabel: admin.firestore.FieldValue.delete() });
+    console.log("[adminSetFamilyLabel]", email, hhID, "→", label || "(cleared)");
+    return { ok: true, label: label || null };
   }
 );
 

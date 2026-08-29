@@ -192,7 +192,16 @@ final class HouseholdManager: ObservableObject {
     private func bootstrap(uid: String, email: String?, displayName: String?) async {
         do {
             try await ensureParentDoc(uid: uid, email: email, displayName: displayName)
-            let hh = try await ensureHousehold(uid: uid)
+            // Only a REAL, named account may mint a new cloud household. An
+            // anonymous uid (child device before its join-scan, or a guest
+            // trial) creating one is exactly where the nameless empty families
+            // came from; their kids stay local until they join / sign up.
+            let realAccount = (email?.isEmpty == false) || (displayName?.isEmpty == false)
+            guard let hh = try await ensureHousehold(uid: uid, canCreate: realAccount) else {
+                TofyLink("bootstrap: anonymous uid with no household — NOT creating one (joins later)")
+                markLoaded()
+                return
+            }
             self.household = hh
             listenToTombstones(in: hh.id)
             // Reconcile must not race the tombstone LISTENER (its first snapshot
@@ -228,8 +237,9 @@ final class HouseholdManager: ObservableObject {
     }
 
     /// Returns the parent's household, creating one (with this uid as the sole
-    /// parent) if they have none.
-    private func ensureHousehold(uid: String) async throws -> Household {
+    /// parent) if they have none — but ONLY when `canCreate` (a real, named
+    /// account). Anonymous uids find/adopt but never mint (→ nil).
+    private func ensureHousehold(uid: String, canCreate: Bool = true) async throws -> Household? {
         // SELF-HEAL: if we previously adopted a household (a child device that
         // joined a parent), make sure we're STILL a member. A child device whose
         // (anonymous) uid changed would otherwise lose access — writes to the
@@ -254,7 +264,9 @@ final class HouseholdManager: ObservableObject {
         if let doc = results.documents.first, let hh = Self.decodeHousehold(id: doc.documentID, doc.data()) {
             return hh
         }
-        // None — create a fresh household owned by this parent.
+        // None — create a fresh household owned by this parent (real accounts
+        // only; an anonymous device waits to JOIN one instead).
+        guard canCreate else { return nil }
         let hh = Household(parentUIDs: [uid], createdBy: uid)
         try await db.collection("households").document(hh.id).setData(Self.encode(hh))
         try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([hh.id])])

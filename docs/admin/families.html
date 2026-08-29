@@ -219,7 +219,8 @@ function render() {
     f.children.some((k) => (k.name||"").toLowerCase().includes(q));
 
   const rows = DATA.families.filter(match).map((f) => {
-    const pnames = f.parents.filter((p) => p.name).map((p) => esc(p.name)).join(", ")
+    const pnames = (f.familyLabel ? "🏷 " + esc(f.familyLabel) : "")
+      || f.parents.filter((p) => p.name).map((p) => esc(p.name)).join(", ")
       || (f.children.length ? "משפחה ללא שם" : "הרשמה ללא משפחה");
     const pmails = f.parents.filter((p) => p.email).map((p) => esc(p.email)).join(" · ");
     const anon = f.parents.filter((p) => p.anonymous).length;
@@ -261,8 +262,14 @@ function render() {
           ${anon ? `<span class="chip dim">${anon} מכשירי ילד</span>` : ""}
           ${f.tombstones ? `<span class="chip pink">🪦 ${f.tombstones}</span>` : ""}
           <span class="chip gold">${ago(f.lastActiveAt)}</span>
+          <button class="chip dim" style="border:0;cursor:pointer;font-family:inherit"
+              title="ערוך שם משפחה (תווית ניהול)"
+              onclick="event.stopPropagation(); editLabel('${f.fullId}', this)">✏️</button>
           ${isDeletable(f) ? `<button class="chip pink" style="border:0;cursor:pointer;font-family:inherit"
               onclick="event.stopPropagation(); deleteHousehold('${f.fullId}', this)">🗑 מחק</button>` : ""}
+          ${isDormantNameless(f) ? `<button class="chip pink" style="border:0;cursor:pointer;font-family:inherit"
+              title="משפחה ללא שם, כל הילדים רדומים 30+ יום"
+              onclick="event.stopPropagation(); deleteDormant('${f.fullId}', this)">🗑 מחק רדומה</button>` : ""}
         </div>
       </div>
       ${f.children.length ? `
@@ -286,6 +293,45 @@ function render() {
 function isDeletable(f) {
   return f.children.length === 0 && !f.parents.some((p) => (p.name || "").trim());
 }
+
+// Dormant nameless = has children but NO named parent AND no activity for 30+
+// days (abandoned guest / pre-signup family). The server re-verifies per child.
+function isDormantNameless(f) {
+  return f.children.length > 0 && !f.familyLabel &&
+    !f.parents.some((p) => (p.name || "").trim()) &&
+    (!f.lastActiveAt || (Date.now()/1000 - f.lastActiveAt) > 86400*30);
+}
+
+window.editLabel = async (fullId, btn) => {
+  const f = DATA.families.find((x) => x.fullId === fullId);
+  const label = prompt("שם משפחה (תווית ניהול — ריק כדי למחוק):", f?.familyLabel || "");
+  if (label === null) return;
+  try {
+    const call = fns.httpsCallable(functionsI, "adminSetFamilyLabel");
+    const res = await call({ householdID: fullId, label });
+    if (f) f.familyLabel = res.data.label;
+    render();
+  } catch (e) { alert("שמירת השם נכשלה: " + (e.message || e.code)); }
+};
+
+window.deleteDormant = async (fullId, btn) => {
+  const f = DATA.families.find((x) => x.fullId === fullId);
+  const names = (f?.children || []).map((k) => k.name).join(", ");
+  if (!confirm(`למחוק משפחה רדומה ללא שם עם ${f?.children.length} ילדים (${names})?\n` +
+    "השרת מוודא שאין הורה רשום ושכל ילד רדום 30+ יום — ילד פעיל יגרום לדחייה.\n" +
+    "הילדים יימחקו עם מצבות (לא יוכלו לחזור).")) return;
+  btn.disabled = true; btn.textContent = "מוחק…";
+  try {
+    const call = fns.httpsCallable(functionsI, "adminDeleteHousehold");
+    await call({ householdID: fullId, withChildren: true });
+    DATA.families = DATA.families.filter((x) => x.fullId !== fullId);
+    DATA.totals.families--;
+    render();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = "🗑 מחק רדומה";
+    alert("המחיקה נדחתה: " + (e.message || e.code));
+  }
+};
 
 window.deleteDevice = async (docID, btn) => {
   if (!confirm("למחוק את שורת המכשיר הזו? מכשיר שעדיין פעיל יירשם מחדש לבד תוך דקות — רק מכשירים מתים נעלמים לתמיד.")) return;
