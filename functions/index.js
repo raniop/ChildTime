@@ -1142,7 +1142,7 @@ exports.adminFamiliesOverview = onCall(
       const cid = dv.id.split("_")[0];
       const d = dv.data();
       (devsByChild[cid] = devsByChild[cid] || [])
-        .push({ lastSeenAt: d.lastSeenAt || 0, kind: d.deviceKind || null, name: d.deviceName || null });
+        .push({ docID: dv.id, lastSeenAt: d.lastSeenAt || 0, kind: d.deviceKind || null, name: d.deviceName || null });
     });
     const tombsByHH = {};
     tombSnap.forEach((t) => { const h = t.data().householdID; tombsByHH[h] = (tombsByHH[h] || 0) + 1; });
@@ -1176,6 +1176,9 @@ exports.adminFamiliesOverview = onCall(
           revision: s ? (s.data.revision || 0) : 0,
           lastActiveAt: s ? s.updatedAt : null,
           devices: devs.length,
+          deviceRows: devs
+            .sort((a, b) => (b.lastSeenAt || 0) - (a.lastSeenAt || 0))
+            .map((x) => ({ docID: x.docID, kind: x.kind, name: x.name, lastSeenAt: x.lastSeenAt || null })),
           lastSeenAt: devs.reduce((m, x) => Math.max(m, x.lastSeenAt || 0), 0) || null,
         };
       }).sort((a, b) => (b.lastActiveAt || 0) - (a.lastActiveAt || 0));
@@ -1250,6 +1253,46 @@ exports.adminDeleteHousehold = onCall(
     console.log("[adminDeleteHousehold]", email, "deleted empty household", hhID,
       `(invites: ${invites.size}, unlinked parents: ${linkedParents.size})`);
     return { ok: true, invitesDeleted: invites.size, parentsUnlinked: linkedParents.size };
+  }
+);
+
+// Delete a single childDevices row from the admin families page (a replaced /
+// retired device that lingers in the list). SAFE by nature: an ACTIVE device
+// re-creates its own row on its next heartbeat, so even a mistaken delete
+// self-heals within minutes; only truly-dead devices stay gone.
+exports.adminDeleteChildDevice = onCall(
+  { timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    const email = (request.auth && request.auth.token && request.auth.token.email || "").toLowerCase();
+    if (!email || !ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(email)) {
+      throw new HttpsError("permission-denied", "Not an authorized admin.");
+    }
+    const docID = String(request.data && request.data.docID || "");
+    if (!/^[0-9A-Fa-f-]{36}_[0-9A-Fa-f-]{36}$/.test(docID)) {
+      throw new HttpsError("invalid-argument", "docID must be childID_installID.");
+    }
+    await db.collection("childDevices").doc(docID).delete();
+    console.log("[adminDeleteChildDevice]", email, "deleted device row", docID);
+    return { ok: true };
+  }
+);
+
+// Nightly hygiene: drop childDevices rows silent for 60+ days — replaced or
+// wiped devices whose rows otherwise linger forever (Dan showed 7 devices
+// with 2 real). Active devices refresh lastSeenAt constantly, so they are
+// never touched; a false positive would self-heal on the device's next
+// heartbeat anyway.
+exports.pruneStaleChildDevices = onSchedule(
+  { schedule: "every day 03:30", timeZone: "Asia/Jerusalem", timeoutSeconds: 120 },
+  async () => {
+    const cutoff = Date.now() / 1000 - 60 * 86400;
+    const snap = await db.collection("childDevices").get();
+    let pruned = 0;
+    for (const dv of snap.docs) {
+      const seen = dv.data().lastSeenAt || 0;
+      if (seen && seen < cutoff) { await dv.ref.delete(); pruned++; }
+    }
+    if (pruned) console.log(`[pruneStaleChildDevices] pruned ${pruned} rows silent for 60+ days`);
   }
 );
 

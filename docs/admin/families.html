@@ -224,7 +224,17 @@ function render() {
     const pmails = f.parents.filter((p) => p.email).map((p) => esc(p.email)).join(" · ");
     const anon = f.parents.filter((p) => p.anonymous).length;
     const stale = !f.lastActiveAt || (Date.now()/1000 - f.lastActiveAt) > 86400*14;
-    const kidRows = f.children.map((k) => `
+    const kidRows = f.children.map((k) => {
+      const devList = (k.deviceRows || []).map((d) => {
+        const stale = !d.lastSeenAt || (Date.now()/1000 - d.lastSeenAt) > 86400*7;
+        const kindEmoji = d.kind === "ipad" ? "📲" : "📱";
+        return `<span class="chip ${stale ? "dim" : "mint"}" style="margin:3px">
+          ${kindEmoji} ${esc(d.name || d.docID.split("_")[1].slice(0,8))} · ${ago(d.lastSeenAt)}
+          <button style="border:0;background:none;color:inherit;cursor:pointer;font-family:inherit;font-weight:900"
+            title="מחק שורת מכשיר (מכשיר פעיל יירשם מחדש לבד)"
+            onclick="event.stopPropagation(); deleteDevice('${d.docID}', this)">✕</button></span>`;
+      }).join("");
+      return `
       <tr>
         <td class="kid">${esc(k.name)} <small>${k.id}</small></td>
         <td>${gradeName(k.grade)}</td>
@@ -233,9 +243,12 @@ function render() {
         <td class="num">🎮 ${nf.format(k.pendingMinutes)}</td>
         <td class="num">💝 ${nf.format(k.giftMinutes)}</td>
         <td class="num">❓ ${nf.format(k.answered)}</td>
-        <td class="num">📱 ${k.devices}</td>
+        <td class="num">${k.devices ? `<button style="border:0;background:none;color:inherit;cursor:pointer;font-family:inherit;font-weight:800"
+            onclick="event.stopPropagation(); this.closest('tr').nextElementSibling.hidden ^= 1">📱 ${k.devices} ▾</button>` : "📱 0"}</td>
         <td>${ago(Math.max(k.lastActiveAt||0, k.lastSeenAt||0) || null)}</td>
-      </tr>`).join("");
+      </tr>
+      <tr hidden><td colspan="9" style="white-space:normal">${devList || "—"}</td></tr>`;
+    }).join("");
     return `
     <div class="family${stale ? " stale" : ""}">
       <div class="fhead" onclick="this.parentElement.querySelector('.tblwrap,.empty').hidden ^= 1">
@@ -273,6 +286,24 @@ function render() {
 function isDeletable(f) {
   return f.children.length === 0 && !f.parents.some((p) => (p.name || "").trim());
 }
+
+window.deleteDevice = async (docID, btn) => {
+  if (!confirm("למחוק את שורת המכשיר הזו? מכשיר שעדיין פעיל יירשם מחדש לבד תוך דקות — רק מכשירים מתים נעלמים לתמיד.")) return;
+  btn.disabled = true; btn.textContent = "…";
+  try {
+    const call = fns.httpsCallable(functionsI, "adminDeleteChildDevice");
+    await call({ docID });
+    // Remove locally + re-render.
+    for (const f of DATA.families) for (const k of f.children) {
+      const i = (k.deviceRows || []).findIndex((d) => d.docID === docID);
+      if (i >= 0) { k.deviceRows.splice(i, 1); k.devices--; }
+    }
+    render();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = "✕";
+    alert("המחיקה נכשלה: " + (e.message || e.code));
+  }
+};
 
 window.deleteHousehold = async (fullId, btn) => {
   if (!confirm("למחוק את הרישום הריק הזה? (בלי ילדים ובלי הורה רשום — השרת מוודא שוב לפני המחיקה)")) return;
