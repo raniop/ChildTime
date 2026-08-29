@@ -47,6 +47,11 @@ struct WorldMapView: View {
     @State private var pendingUnlockAction: (() -> Void)? = nil
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
+    // 🔒→🔓 Window transfer ("נעל באייפד ופתח כאן"): when THIS child's window is
+    // open on another device, the kid can ask to lock it there and continue
+    // here. We open here only AFTER the other device confirms (row cleared).
+    @State private var transferRequestedAt: Date? = nil
+    @State private var transferTimedOut = false
     @State private var showLevelInfo = false
 
     private var isCompact: Bool { hsc == .compact }
@@ -239,6 +244,11 @@ struct WorldMapView: View {
         // a dismissed fullScreenCover, so listen to the cover's flag directly).
         .onChangeCompat(of: showingSmartFeed) { _, showing in
             if !showing { celebrateGamesUnlockIfNeeded() }
+        }
+        // Window transfer completion: the other device's row updates live; the
+        // moment its window is confirmed gone we finish the handoff.
+        .onChangeCompat(of: household.devicesByChild) { _, _ in
+            completeWindowTransferIfReady()
         }
         .onAppear {
             lastSeenStars = progress.stars
@@ -1331,11 +1341,43 @@ struct WorldMapView: View {
             }
 
             // Another device of THIS child has the window open — say so instead of
-            // showing a "redeem" button that would be refused on tap.
+            // showing a "redeem" button that would be refused on tap, and offer
+            // the TRANSFER: lock it THERE (stop-and-save, nothing lost), wait for
+            // the honest confirmation, then the regular open buttons return here.
             if let other = household.otherDeviceOpenWindow(forChildID: profiles.activeID ?? UUID()) {
                 let mins = max(1, (other.secondsLeft + 59) / 60)
                 let where_ = other.device.kind == "ipad" ? "בָּאַיְפֵּד" : (other.device.kind == "iphone" ? "בָּאַיְפוֹן" : "בְּמַכְשִׁיר אַחֵר")
-                bottomHint("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו \(where_) — עוֹד \(mins) דַּקּוֹת")
+                VStack(spacing: 10) {
+                    bottomHint("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו \(where_) — עוֹד \(mins) דַּקּוֹת")
+                    if transferRequestedAt != nil {
+                        bottomHint("🔒 נוֹעֲלִים \(where_)… רֶגַע אֶחָד ⏳")
+                    } else {
+                        if transferTimedOut {
+                            bottomHint("לֹא הִצְלַחְנוּ לִנְעֹל \(where_) עַכְשָׁיו — אוּלַי הוּא כָּבוּי. אֶפְשָׁר לְנַסּוֹת שׁוּב 😊")
+                        }
+                        Button {
+                            startWindowTransfer(other: other.device)
+                        } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "lock.arrow.circlepath")
+                                    .font(.system(size: 20, weight: .bold))
+                                Text("נַעֲלוּ \(where_) וּפִתְחוּ כָּאן")
+                                    .font(.system(size: 19, weight: .heavy, design: .rounded))
+                                    .minimumScaleFactor(0.7).lineLimit(1)
+                            }
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, AppSpacing.xl)
+                            .padding(.vertical, 15)
+                            .frame(maxWidth: .infinity)
+                            .background(LinearGradient(colors: [Color(hex: "5B6CFF"), Color(hex: "9B5DE5")],
+                                                       startPoint: .leading, endPoint: .trailing))
+                            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                            .glow(Color(hex: "5B6CFF"), radius: 14)
+                        }
+                        .buttonStyle(.juicy)
+                        .frame(maxWidth: 480)
+                    }
+                }
             } else if progress.canRedeemNow {
                 Button {
                     requestUnlock { redeemMinutes() }
@@ -1515,6 +1557,48 @@ struct WorldMapView: View {
     }
 
     // MARK: - Actions
+
+    // MARK: - 🔒→🔓 Window transfer between the child's own devices
+
+    /// Ask the OTHER device (holding the open window) to lock: it stops-and-
+    /// saves (earned → wallet, gift → 💝 pocket — nothing lost), acks, and
+    /// uploads the refreshed balance. We do NOT open here yet — completion is
+    /// detected in `completeWindowTransferIfReady` only when the other row's
+    /// window is truly gone (the honest confirmation Rani asked for).
+    private func startWindowTransfer(other: ChildDevice) {
+        Haptic.medium()
+        transferTimedOut = false
+        transferRequestedAt = Date()
+        household.lockOtherDeviceWindow(deviceRowID: other.id)
+        // Honest timeout: the other device may be off/offline. Give it 30s;
+        // the command stays queued in the cloud and will still apply when it
+        // wakes — but we stop holding the kid here waiting.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+            if transferRequestedAt != nil,
+               household.otherDeviceOpenWindow(forChildID: profiles.activeID ?? UUID()) != nil {
+                transferRequestedAt = nil
+                transferTimedOut = true
+                Haptic.warning()
+            }
+        }
+    }
+
+    /// Called when the live device rows change: if a transfer is in flight and
+    /// the other window is CONFIRMED closed, pull the freshest cloud balance
+    /// (the locked device just pushed it) and hand back the regular open flow.
+    private func completeWindowTransferIfReady() {
+        guard transferRequestedAt != nil, let cid = profiles.activeID,
+              household.otherDeviceOpenWindow(forChildID: cid) == nil else { return }
+        transferRequestedAt = nil
+        Task { @MainActor in
+            if let cloud = await RemoteSyncManager.shared.fetchSnapshot(for: cid),
+               cloud.revision > progress.revision {
+                ProgressStore.shared.apply(cloud)
+            }
+            Haptic.success()
+            companion.hype("נָעוּל שָׁם! ✅ הַדַּקּוֹת חָזְרוּ — אֶפְשָׁר לִפְתּוֹחַ כָּאן 🎉")
+        }
+    }
 
     // MARK: - 🎮 Games warm-up gate (learning first, games after)
 

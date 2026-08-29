@@ -840,6 +840,18 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    /// CHILD device: window transfer ("נעל באייפד ופתח כאן") — lock the SAME
+    /// child's OTHER device by stamping remoteLockAt on THAT row only. The
+    /// target stops-and-saves (nothing is lost), acks, clears its windowEndsAt,
+    /// and pushes the refreshed wallet; the caller watches the row and opens
+    /// here only AFTER the window there is confirmed gone.
+    func lockOtherDeviceWindow(deviceRowID: String) {
+        #if canImport(FirebaseFirestore)
+        db.collection("childDevices").document(deviceRowID)
+            .setData(["remoteLockAt": Date().timeIntervalSince1970], merge: true)
+        #endif
+    }
+
     /// Remove a connected device from a child. TOMBSTONES the doc (`removed:true`)
     /// instead of deleting it, so the device itself notices and resets to a fresh
     /// install — otherwise it would just re-register on its next heartbeat.
@@ -958,6 +970,10 @@ final class HouseholdManager: ObservableObject {
             // wallet, a parent gift/grant freezes for later. (endUnlock() alone
             // silently burned whatever was left.)
             ProgressStore.shared.stopAndSaveCurrentUnlock()
+            // Upload the banked/frozen leftover NOW — the child's OTHER device
+            // may be waiting on it to open a transferred window ("נעל באייפד
+            // ופתח באייפון"), and the ~3s debounce can outlive the wake window.
+            RemoteSyncManager.shared.pushNow()
             ShieldManager.shared.cancelScheduledReshield()
             ShieldManager.shared.relockBaseline()    // re-lock now
             Haptic.warning()
