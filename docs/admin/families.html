@@ -118,6 +118,7 @@
     <div class="toolbar">
       <input id="search" type="search" placeholder="🔎 חיפוש הורה, אימייל או ילד…">
       <button id="refreshBtn">↻ רענן</button>
+      <button id="cleanBtn" hidden style="background:rgba(255,107,157,.25)">🧹 נקה ריקות</button>
       <span class="stamp" id="stamp"></span>
     </div>
 
@@ -247,6 +248,8 @@ function render() {
           ${anon ? `<span class="chip dim">${anon} מכשירי ילד</span>` : ""}
           ${f.tombstones ? `<span class="chip pink">🪦 ${f.tombstones}</span>` : ""}
           <span class="chip gold">${ago(f.lastActiveAt)}</span>
+          ${isDeletable(f) ? `<button class="chip pink" style="border:0;cursor:pointer;font-family:inherit"
+              onclick="event.stopPropagation(); deleteHousehold('${f.fullId}', this)">🗑 מחק</button>` : ""}
         </div>
       </div>
       ${f.children.length ? `
@@ -259,7 +262,49 @@ function render() {
     </div>`;
   });
   $("list").innerHTML = rows.join("") || `<div class="empty">לא נמצאו תוצאות עבור "${esc(q)}"</div>`;
+
+  const cleanable = DATA.families.filter(isDeletable);
+  $("cleanBtn").hidden = cleanable.length === 0;
+  $("cleanBtn").textContent = `🧹 נקה ${cleanable.length} ריקות`;
 }
+
+// Deletable = truly empty: no children AND no named parent. The server
+// re-verifies both before deleting, so a real family can never go this way.
+function isDeletable(f) {
+  return f.children.length === 0 && !f.parents.some((p) => (p.name || "").trim());
+}
+
+window.deleteHousehold = async (fullId, btn) => {
+  if (!confirm("למחוק את הרישום הריק הזה? (בלי ילדים ובלי הורה רשום — השרת מוודא שוב לפני המחיקה)")) return;
+  btn.disabled = true; btn.textContent = "מוחק…";
+  try {
+    const call = fns.httpsCallable(functionsI, "adminDeleteHousehold");
+    await call({ householdID: fullId });
+    DATA.families = DATA.families.filter((f) => f.fullId !== fullId);
+    DATA.totals.families--;
+    render();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = "🗑 מחק";
+    alert("המחיקה נדחתה: " + (e.message || e.code));
+  }
+};
+
+$("cleanBtn").onclick = async () => {
+  const cleanable = DATA.families.filter(isDeletable);
+  if (!cleanable.length) return;
+  if (!confirm(`למחוק ${cleanable.length} רישומים ריקים? (בלי ילדים ובלי הורה רשום — השרת מוודא כל אחד בנפרד)`)) return;
+  $("cleanBtn").disabled = true;
+  const call = fns.httpsCallable(functionsI, "adminDeleteHousehold");
+  let done = 0, failed = 0;
+  for (const f of cleanable) {
+    $("cleanBtn").textContent = `🧹 מוחק… ${done + failed + 1}/${cleanable.length}`;
+    try { await call({ householdID: f.fullId }); done++; }
+    catch (e) { console.error("delete refused", f.fullId, e); failed++; }
+  }
+  $("cleanBtn").disabled = false;
+  alert(`נמחקו ${done} רישומים ריקים` + (failed ? `, ${failed} נדחו ע"י השרת` : ""));
+  load();
+};
 </script>
 </body>
 </html>

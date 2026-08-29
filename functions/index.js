@@ -1186,6 +1186,7 @@ exports.adminFamiliesOverview = onCall(
       }));
       families.push({
         id: h.id.slice(0, 8),
+        fullId: h.id,     // needed by the admin delete action (admin-only page)
         parents,
         tombstones: tombsByHH[h.id] || 0,
         children: kids,
@@ -1204,6 +1205,51 @@ exports.adminFamiliesOverview = onCall(
       },
       families,
     };
+  }
+);
+
+// Delete an EMPTY household from the admin families page. Defense in depth:
+// admin-gated AND the server re-verifies emptiness itself — a household with
+// any children docs or any NAMED parent is refused no matter what the client
+// sent. Cleans the invites that pointed at it and unlinks it from parents
+// docs so an abandoned anonymous uid re-bootstraps cleanly. A real family can
+// NEVER be deleted through this path.
+exports.adminDeleteHousehold = onCall(
+  { timeoutSeconds: 60, memory: "256MiB" },
+  async (request) => {
+    const email = (request.auth && request.auth.token && request.auth.token.email || "").toLowerCase();
+    if (!email || !ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(email)) {
+      throw new HttpsError("permission-denied", "Not an authorized admin.");
+    }
+    const hhID = String(request.data && request.data.householdID || "");
+    if (!/^[0-9A-Fa-f-]{36}$/.test(hhID)) {
+      throw new HttpsError("invalid-argument", "householdID must be a UUID.");
+    }
+    const ref = db.collection("households").doc(hhID);
+    const hh = await ref.get();
+    if (!hh.exists) throw new HttpsError("not-found", "Household not found.");
+    const d = hh.data();
+    // SERVER-SIDE safety re-check — never trust the caller's view.
+    const kids = await db.collection("children").where("householdID", "==", hhID).limit(1).get();
+    if (!kids.empty) {
+      throw new HttpsError("failed-precondition", "Household has children — refusing to delete.");
+    }
+    const named = Object.values(d.parentNames || {}).filter((n) => String(n || "").trim());
+    if (named.length) {
+      throw new HttpsError("failed-precondition", `Household has a named parent (${named[0]}) — refusing to delete.`);
+    }
+    // Cleanup: invites for this household, and unlink from parents docs.
+    const invites = await db.collection("invites").where("householdID", "==", hhID).get();
+    for (const inv of invites.docs) await inv.ref.delete();
+    const linkedParents = await db.collection("parents")
+      .where("householdIDs", "array-contains", hhID).get();
+    for (const p of linkedParents.docs) {
+      await p.ref.update({ householdIDs: admin.firestore.FieldValue.arrayRemove(hhID) });
+    }
+    await ref.delete();
+    console.log("[adminDeleteHousehold]", email, "deleted empty household", hhID,
+      `(invites: ${invites.size}, unlinked parents: ${linkedParents.size})`);
+    return { ok: true, invitesDeleted: invites.size, parentsUnlinked: linkedParents.size };
   }
 );
 
