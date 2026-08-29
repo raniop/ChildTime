@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#5E60CE">
+<title>טופי — המשפחות</title>
+<link rel="icon" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --indigo:#5E60CE; --teal:#48BFE3; --gold:#FFD23F; --purple:#9B5DE5;
+    --pink:#FF6B9D; --mint:#06D6A0;
+    --card:rgba(255,255,255,.10); --brd:rgba(255,255,255,.16); --muted:rgba(255,255,255,.66);
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:"Heebo",-apple-system,BlinkMacSystemFont,Arial,sans-serif; color:#fff; min-height:100vh;
+    line-height:1.5; background:linear-gradient(160deg,#5E60CE 0%,#6A4BD0 38%,#48BFE3 100%); background-attachment:fixed;}
+  a{color:var(--gold)}
+  .wrap{max-width:1200px; margin:0 auto; padding:0 22px 80px}
+  header{position:sticky; top:0; z-index:30; backdrop-filter:blur(12px);
+    background:rgba(75,46,158,.40); border-bottom:1px solid var(--brd)}
+  header .wrap{display:flex; align-items:center; justify-content:space-between; height:66px; padding-bottom:0}
+  .brand{display:flex; align-items:center; gap:11px; font-weight:900; font-size:22px}
+  .brand img{width:36px; height:36px; border-radius:9px}
+  .brand small{font-weight:600; font-size:13px; opacity:.7}
+  .who{display:flex; align-items:center; gap:12px; font-size:14px}
+  .who button, .who a.btn{font-family:inherit; cursor:pointer; font-weight:700; font-size:13px; border:1px solid var(--brd);
+    background:rgba(255,255,255,.10); color:#fff; border-radius:999px; padding:7px 14px; text-decoration:none}
+  .who button:hover, .who a.btn:hover{background:rgba(255,255,255,.18)}
+
+  /* Gate */
+  .gate{max-width:420px; margin:12vh auto 0; text-align:center; background:var(--card);
+    border:1px solid var(--brd); border-radius:24px; padding:38px 30px}
+  .gate h1{font-size:24px; font-weight:900; margin-bottom:6px}
+  .gate p{color:var(--muted); font-size:14px; margin-bottom:22px}
+  .gate button{font-family:inherit; cursor:pointer; font-weight:800; font-size:16px; border:0; border-radius:999px;
+    padding:13px 30px; background:var(--gold); color:#3a2c00}
+  .msg{margin-top:16px; font-size:13px; color:var(--muted); min-height:20px}
+  .msg.err{color:var(--pink); font-weight:700}
+  .spin{display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,.35);
+    border-top-color:#fff; border-radius:50%; animation:sp 1s linear infinite; vertical-align:-2px; margin-inline-end:6px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  [hidden]{display:none !important}
+
+  /* Totals strip */
+  .totals{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-top:22px}
+  .tot{background:var(--card); border:1px solid var(--brd); border-radius:18px; padding:16px 18px}
+  .tot b{display:block; font-size:34px; font-weight:900; line-height:1.1}
+  .tot span{font-size:13px; color:var(--muted); font-weight:600}
+
+  /* Toolbar */
+  .toolbar{display:flex; gap:12px; align-items:center; margin:20px 0 6px; flex-wrap:wrap}
+  .toolbar input{flex:1; min-width:220px; font-family:inherit; font-size:15px; color:#fff; border:1px solid var(--brd);
+    background:rgba(255,255,255,.10); border-radius:999px; padding:10px 18px; outline:none}
+  .toolbar input::placeholder{color:rgba(255,255,255,.5)}
+  .toolbar button{font-family:inherit; cursor:pointer; font-weight:800; font-size:13px; border:1px solid var(--brd);
+    background:rgba(255,255,255,.12); color:#fff; border-radius:999px; padding:9px 18px}
+  .stamp{font-size:12px; color:var(--muted)}
+
+  /* Family cards */
+  .family{background:var(--card); border:1px solid var(--brd); border-radius:20px; margin-top:16px; overflow:hidden}
+  .family.stale{opacity:.72}
+  .fhead{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 18px; cursor:pointer; flex-wrap:wrap}
+  .fhead:hover{background:rgba(255,255,255,.05)}
+  .fname{font-size:17px; font-weight:900}
+  .fname small{font-weight:600; font-size:12px; color:var(--muted); margin-inline-start:8px}
+  .fmail{font-size:12.5px; color:var(--muted)}
+  .fmeta{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+  .chip{font-size:12px; font-weight:800; border-radius:999px; padding:3px 11px; background:rgba(0,0,0,.20)}
+  .chip.mint{background:rgba(6,214,160,.22); color:#9ff5dd}
+  .chip.gold{background:rgba(255,210,63,.20); color:#ffe58a}
+  .chip.pink{background:rgba(255,107,157,.22); color:#ffc0d6}
+  .chip.dim{color:var(--muted)}
+  table{width:100%; border-collapse:collapse; font-size:14px}
+  thead th{font-size:12px; font-weight:800; color:var(--muted); text-align:right; padding:8px 14px;
+    border-top:1px solid var(--brd); border-bottom:1px solid var(--brd); background:rgba(0,0,0,.10)}
+  tbody td{padding:9px 14px; border-bottom:1px solid rgba(255,255,255,.07); white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  td.kid{font-weight:800}
+  td.kid small{font-weight:600; color:var(--muted); margin-inline-start:6px; font-size:11px}
+  .num{font-variant-numeric:tabular-nums}
+  .tblwrap{overflow-x:auto}
+  .empty{padding:14px 18px; font-size:13.5px; color:var(--muted)}
+  .loading{margin:60px auto; text-align:center; font-weight:700}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand"><img src="../lion.png" alt=""><span>טופי <small>· המשפחות</small></span></div>
+    <div class="who">
+      <a class="btn" href="index.html">📊 לוח בקרה</a>
+      <span id="whoName" hidden></span>
+      <button id="logoutBtn" hidden>התנתק</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- Sign-in gate: Google account + the server-side admin allowlist. The
+       function refuses any non-allow-listed account, so the page is inert
+       for anyone else even if they reach the URL. -->
+  <div class="gate" id="gate" hidden>
+    <h1>🔐 כניסת מנהל המוצר</h1>
+    <p>הכניסה עם חשבון Google מורשה בלבד. כל שאר החשבונות נדחים בצד השרת.</p>
+    <button id="loginBtn">התחבר עם Google</button>
+    <div class="msg" id="gateMsg"></div>
+  </div>
+
+  <div id="app" hidden>
+    <div class="totals" id="totals"></div>
+
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="🔎 חיפוש הורה, אימייל או ילד…">
+      <button id="refreshBtn">↻ רענן</button>
+      <span class="stamp" id="stamp"></span>
+    </div>
+
+    <div id="list"></div>
+  </div>
+
+  <div class="loading" id="loading" hidden><span class="spin"></span> טוען את המשפחות…</div>
+</div>
+
+<script type="module">
+const CONFIG = {
+  firebase: {
+    apiKey: "AIzaSyDDpR6wr2COh0hzOJmoBUt5BshJv7cbKcE",
+    authDomain: "childtime-86e98.firebaseapp.com",
+    projectId: "childtime-86e98",
+  },
+  adminEmails: ["ranioph@gmail.com", "amitgolans@gmail.com"],
+};
+
+const $ = (id) => document.getElementById(id);
+let DATA = null;
+
+const [{initializeApp}, auth, fns] = await Promise.all([
+  import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+  import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"),
+  import("https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js"),
+]);
+const fbApp = initializeApp(CONFIG.firebase);
+const authI = auth.getAuth(fbApp);
+const functionsI = fns.getFunctions(fbApp);
+
+const provider = new auth.GoogleAuthProvider();
+$("loginBtn").onclick = async () => {
+  $("gateMsg").className = "msg"; $("gateMsg").innerHTML = '<span class="spin"></span> מתחבר…';
+  try { await auth.signInWithPopup(authI, provider); }
+  catch (e) { $("gateMsg").className = "msg err"; $("gateMsg").textContent = "ההתחברות נכשלה: " + e.code; }
+};
+$("logoutBtn").onclick = () => auth.signOut(authI);
+
+auth.onAuthStateChanged(authI, async (user) => {
+  if (!user) { $("gate").hidden = false; $("app").hidden = true; $("loading").hidden = true;
+    $("whoName").hidden = true; $("logoutBtn").hidden = true; return; }
+  const email = (user.email || "").toLowerCase();
+  if (!CONFIG.adminEmails.map((e) => e.toLowerCase()).includes(email)) {
+    $("gateMsg").className = "msg err"; $("gateMsg").textContent = "החשבון " + email + " אינו מורשה.";
+    await auth.signOut(authI); return;
+  }
+  $("gate").hidden = true; $("whoName").textContent = user.email; $("whoName").hidden = false;
+  $("logoutBtn").hidden = false;
+  load();
+});
+
+async function load() {
+  $("loading").hidden = false; $("app").hidden = true;
+  try {
+    const call = fns.httpsCallable(functionsI, "adminFamiliesOverview");
+    const res = await call();
+    DATA = res.data;
+    render();
+    $("app").hidden = false;
+  } catch (e) {
+    $("loading").innerHTML = "שגיאה בטעינה: " + (e.message || e.code);
+    return;
+  }
+  $("loading").hidden = true;
+}
+$("refreshBtn").onclick = load;
+$("search").oninput = () => render();
+
+const gradeName = (g) => g == null ? "—" : g < 0 ? "טרום־חובה" : g === 0 ? "גן חובה"
+  : "כיתה " + (["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ז׳","ח׳","ט׳","י׳","יא׳","יב׳"][Math.min(g,12)-1] || g);
+const nf = new Intl.NumberFormat("he-IL");
+function ago(ts) {
+  if (!ts) return "—";
+  const s = Date.now()/1000 - ts;
+  if (s < 90) return "עכשיו 🟢";
+  if (s < 3600) return "לפני " + Math.round(s/60) + " ד׳";
+  if (s < 86400) return "לפני " + Math.round(s/3600) + " שע׳";
+  if (s < 86400*2) return "אתמול";
+  if (s < 86400*30) return "לפני " + Math.round(s/86400) + " ימים";
+  return new Date(ts*1000).toLocaleDateString("he-IL");
+}
+const esc = (s) => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+function render() {
+  if (!DATA) return;
+  const q = $("search").value.trim().toLowerCase();
+  const t = DATA.totals;
+  $("totals").innerHTML = `
+    <div class="tot"><b>${nf.format(t.families)}</b><span>משפחות נרשמו</span></div>
+    <div class="tot"><b>${nf.format(t.familiesWithKids)}</b><span>משפחות עם ילדים</span></div>
+    <div class="tot"><b>${nf.format(t.children)}</b><span>ילדים</span></div>
+    <div class="tot"><b>${nf.format(t.activeToday)}</b><span>פעילות היום</span></div>`;
+  $("stamp").textContent = "עודכן " + new Date(DATA.generatedAt*1000).toLocaleTimeString("he-IL");
+
+  const match = (f) => !q ||
+    f.parents.some((p) => (p.name||"").toLowerCase().includes(q) || (p.email||"").toLowerCase().includes(q)) ||
+    f.children.some((k) => (k.name||"").toLowerCase().includes(q));
+
+  const rows = DATA.families.filter(match).map((f) => {
+    const pnames = f.parents.filter((p) => p.name).map((p) => esc(p.name)).join(", ")
+      || (f.children.length ? "משפחה ללא שם" : "הרשמה ללא משפחה");
+    const pmails = f.parents.filter((p) => p.email).map((p) => esc(p.email)).join(" · ");
+    const anon = f.parents.filter((p) => p.anonymous).length;
+    const stale = !f.lastActiveAt || (Date.now()/1000 - f.lastActiveAt) > 86400*14;
+    const kidRows = f.children.map((k) => `
+      <tr>
+        <td class="kid">${esc(k.name)} <small>${k.id}</small></td>
+        <td>${gradeName(k.grade)}</td>
+        <td class="num">⭐ ${nf.format(k.stars)}</td>
+        <td class="num">💎 ${nf.format(k.diamonds)}</td>
+        <td class="num">🎮 ${nf.format(k.pendingMinutes)}</td>
+        <td class="num">💝 ${nf.format(k.giftMinutes)}</td>
+        <td class="num">❓ ${nf.format(k.answered)}</td>
+        <td class="num">📱 ${k.devices}</td>
+        <td>${ago(Math.max(k.lastActiveAt||0, k.lastSeenAt||0) || null)}</td>
+      </tr>`).join("");
+    return `
+    <div class="family${stale ? " stale" : ""}">
+      <div class="fhead" onclick="this.parentElement.querySelector('.tblwrap,.empty').hidden ^= 1">
+        <div>
+          <div class="fname">👨‍👩‍👧 ${pnames} <small>${f.id}</small></div>
+          ${pmails ? `<div class="fmail">${pmails}</div>` : ""}
+        </div>
+        <div class="fmeta">
+          <span class="chip mint">${f.children.length} ילדים</span>
+          ${anon ? `<span class="chip dim">${anon} מכשירי ילד</span>` : ""}
+          ${f.tombstones ? `<span class="chip pink">🪦 ${f.tombstones}</span>` : ""}
+          <span class="chip gold">${ago(f.lastActiveAt)}</span>
+        </div>
+      </div>
+      ${f.children.length ? `
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>ילד/ה</th><th>כיתה</th><th>כוכבים</th><th>יהלומים</th><th>דק׳ שהרוויח</th><th>דק׳ מתנה</th><th>תשובות</th><th>מכשירים</th><th>פעילות</th></tr></thead>
+          <tbody>${kidRows}</tbody>
+        </table>
+      </div>` : `<div class="empty">אין ילדים במשפחה הזו (הרשמה שלא הושלמה)</div>`}
+    </div>`;
+  });
+  $("list").innerHTML = rows.join("") || `<div class="empty">לא נמצאו תוצאות עבור "${esc(q)}"</div>`;
+}
+</script>
+</body>
+</html>

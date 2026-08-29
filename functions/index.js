@@ -1108,6 +1108,105 @@ exports.recomputeAdminStats = onCall(
   }
 );
 
+// Full families overview for the founder's product page (/admin/families.html):
+// every household with its parents, children, progress and devices. READ-ONLY,
+// aggregated server-side (no broad client read rules), admin-gated like
+// recomputeAdminStats. First-party founder tooling — no third-party analytics.
+exports.adminFamiliesOverview = onCall(
+  { timeoutSeconds: 120, memory: "512MiB" },
+  async (request) => {
+    const email = (request.auth && request.auth.token && request.auth.token.email || "").toLowerCase();
+    if (!email || !ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(email)) {
+      throw new HttpsError("permission-denied", "Not an authorized admin.");
+    }
+    const [hhSnap, kidsSnap, devsSnap, tombSnap, parentsSnap] = await Promise.all([
+      db.collection("households").get(),
+      db.collection("children").get(),
+      db.collection("childDevices").get(),
+      db.collection("deletedChildren").get(),
+      db.collection("parents").get(),
+    ]);
+    const parentInfo = {};
+    parentsSnap.forEach((p) => {
+      const d = p.data();
+      parentInfo[p.id] = { email: d.email || null, name: d.displayName || null };
+    });
+    const kidsByHH = {};
+    kidsSnap.forEach((k) => {
+      const d = k.data();
+      (kidsByHH[d.householdID] = kidsByHH[d.householdID] || [])
+        .push({ id: k.id, createdAt: k.createTime ? k.createTime.toMillis() / 1000 : null, ...d });
+    });
+    const devsByChild = {};
+    devsSnap.forEach((dv) => {
+      const cid = dv.id.split("_")[0];
+      const d = dv.data();
+      (devsByChild[cid] = devsByChild[cid] || [])
+        .push({ lastSeenAt: d.lastSeenAt || 0, kind: d.deviceKind || null, name: d.deviceName || null });
+    });
+    const tombsByHH = {};
+    tombSnap.forEach((t) => { const h = t.data().householdID; tombsByHH[h] = (tombsByHH[h] || 0) + 1; });
+
+    // Per-child progress — read state/current in parallel; use the doc's own
+    // server updateTime as "last active" (the payload's lastModifiedAt is a
+    // Swift reference-date number, not unix).
+    const states = {};
+    await Promise.all(kidsSnap.docs.map(async (k) => {
+      const st = await db.collection("children").doc(k.id).collection("state").doc("current").get();
+      if (st.exists) states[k.id] = { data: st.data(), updatedAt: st.updateTime.toMillis() / 1000 };
+    }));
+
+    const families = [];
+    hhSnap.forEach((h) => {
+      const d = h.data();
+      const kids = (kidsByHH[h.id] || []).map((k) => {
+        const s = states[k.id];
+        const devs = devsByChild[k.id] || [];
+        return {
+          id: k.id.slice(0, 8),
+          name: k.name || "?",
+          grade: (k.grade === 0 || k.grade) ? k.grade : null,
+          gender: k.gender || null,
+          createdAt: k.createdAt,
+          stars: s ? (s.data.stars || 0) : 0,
+          diamonds: s ? (s.data.diamonds || 0) : 0,
+          pendingMinutes: s ? (s.data.pendingMinutes || 0) : 0,
+          giftMinutes: s ? (s.data.parentGiftMinutes || 0) : 0,
+          answered: s ? (s.data.totalAnswered || 0) : 0,
+          revision: s ? (s.data.revision || 0) : 0,
+          lastActiveAt: s ? s.updatedAt : null,
+          devices: devs.length,
+          lastSeenAt: devs.reduce((m, x) => Math.max(m, x.lastSeenAt || 0), 0) || null,
+        };
+      }).sort((a, b) => (b.lastActiveAt || 0) - (a.lastActiveAt || 0));
+      const parents = (d.parentUIDs || []).map((uid) => ({
+        name: (d.parentNames || {})[uid] || parentInfo[uid]?.name || null,
+        email: parentInfo[uid]?.email || null,
+        anonymous: !parentInfo[uid]?.email,
+      }));
+      families.push({
+        id: h.id.slice(0, 8),
+        parents,
+        tombstones: tombsByHH[h.id] || 0,
+        children: kids,
+        lastActiveAt: kids.reduce((m, k) => Math.max(m, k.lastActiveAt || 0, k.lastSeenAt || 0), 0) || null,
+      });
+    });
+    families.sort((a, b) => (b.lastActiveAt || 0) - (a.lastActiveAt || 0));
+    const now = Date.now() / 1000;
+    return {
+      generatedAt: now,
+      totals: {
+        families: families.length,
+        familiesWithKids: families.filter((f) => f.children.length).length,
+        children: kidsSnap.size,
+        activeToday: families.filter((f) => f.lastActiveAt && now - f.lastActiveAt < 86400).length,
+      },
+      families,
+    };
+  }
+);
+
 // Manual trigger / first backfill — guarded by a shared token (secret). Returns
 // the aggregate only to the token holder; otherwise 403.
 exports.runAdminStats = onRequest(
