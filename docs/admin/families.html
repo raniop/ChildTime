@@ -276,9 +276,16 @@ function render() {
       </div>
       <div class="anonlist" hidden style="padding:8px 18px 12px; border-top:1px solid rgba(255,255,255,.08)">
         ${f.parents.filter((p) => p.anonymous).map((p) => {
-          const stale = !p.lastUpdateAt || (Date.now()/1000 - p.lastUpdateAt) > 86400*30;
-          return `<span class="chip ${stale ? "dim" : "mint"}" style="margin:3px">
-            🔑 ${p.uid.slice(0,8)} · עודכן ${ago(p.lastUpdateAt)}
+          // Prefer the device-link signal (hasLiveDevice, from ownerUID-stamped
+          // rows): true = owns a live device, false = provably dead. Old data
+          // (null) falls back to the parents-doc update time.
+          const dead = p.hasLiveDevice === false ||
+            (p.hasLiveDevice === null && (!p.lastUpdateAt || (Date.now()/1000 - p.lastUpdateAt) > 86400*30));
+          const tag = p.hasLiveDevice === true ? "📱 מכשיר חי"
+            : p.hasLiveDevice === false ? "📵 ללא מכשיר"
+            : "עודכן " + ago(p.lastUpdateAt);
+          return `<span class="chip ${dead ? "dim" : "mint"}" style="margin:3px">
+            🔑 ${p.uid.slice(0,8)} · ${tag}
             <button style="border:0;background:none;color:inherit;cursor:pointer;font-family:inherit;font-weight:900"
               title="נתק חשבון מכשיר ילד (מכשיר פעיל מתחבר מחדש לבד)"
               onclick="event.stopPropagation(); unlinkUID('${f.fullId}', '${p.uid}', this)">✕</button></span>`;

@@ -123,8 +123,10 @@ final class PushManager: NSObject, ObservableObject {
         // siblings' devices too).
         if isChild, let cid = ParentSettings.shared.joinedChildID {
             let docID = "\(cid)_\(DeviceIdentity.installID)"
+            // ownerUID: additive metadata tying this row to the device's auth
+            // account (see ChildDevice.ownerUID) — refreshed on every launch.
             Firestore.firestore().collection("childDevices").document(docID)
-                .setData(["fcmToken": token], merge: true)
+                .setData(["fcmToken": token, "ownerUID": uid], merge: true)
         }
         #endif
     }

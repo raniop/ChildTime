@@ -435,6 +435,9 @@ final class HouseholdManager: ObservableObject {
         // target this child's device precisely from the very first registration
         // (uploadFCMToken keeps it fresh afterwards).
         device.fcmToken = PushManager.shared.currentToken
+        // Stamp this device's auth uid so admin tooling can tell which of the
+        // household's anonymous accounts still owns a LIVE device.
+        device.ownerUID = uid
         do {
             // Don't clobber the original joinedAt on relaunch.
             let existing = try? await db.collection("childDevices").document(docID).getDocument()

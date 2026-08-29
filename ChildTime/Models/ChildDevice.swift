@@ -48,6 +48,11 @@ struct ChildDevice: Codable, Identifiable, Equatable {
     /// child's device(s) (e.g. the visible remote-lock push) instead of blasting
     /// every kid device in the household via the account-level token list.
     var fcmToken: String?
+    /// The (anonymous) auth uid this device signs in with. Purely additive
+    /// metadata: lets the admin tooling tie the household's parentUIDs entries
+    /// to live device rows, so dead device ACCOUNTS can be told apart from live
+    /// ones. Optional — older rows/builds simply don't have it.
+    var ownerUID: String?
 
     var sfSymbol: String {
         switch kind {

@@ -1142,9 +1142,18 @@ exports.adminFamiliesOverview = onCall(
         .push({ id: k.id, createdAt: k.createTime ? k.createTime.toMillis() / 1000 : null, ...d });
     });
     const devsByChild = {};
+    // uids that own a device row seen in the last 14 days ("live account").
+    // Rows from builds before the ownerUID stamp have no uid — tri-state below.
+    const liveUIDs = new Set();
+    let anyRowHasUID = false;
     devsSnap.forEach((dv) => {
       const cid = dv.id.split("_")[0];
       const d = dv.data();
+      if (d.ownerUID) {
+        anyRowHasUID = true;
+        const seen = typeof d.lastSeenAt === "number" ? d.lastSeenAt : 0;
+        if (seen > Date.now() / 1000 - 14 * 86400) liveUIDs.add(d.ownerUID);
+      }
       (devsByChild[cid] = devsByChild[cid] || [])
         .push({ docID: dv.id, lastSeenAt: d.lastSeenAt || 0, kind: d.deviceKind || null, name: d.deviceName || null });
     });
@@ -1192,6 +1201,10 @@ exports.adminFamiliesOverview = onCall(
         email: parentInfo[uid]?.email || null,
         anonymous: !parentInfo[uid]?.email,
         lastUpdateAt: parentInfo[uid]?.updatedAt || null,
+        // true = owns a device row seen <14d; false = uid-stamped rows exist
+        // but none is this uid's (dead account); null = no stamp data yet
+        // (old builds) — the page falls back to the update-time signal.
+        hasLiveDevice: anyRowHasUID ? liveUIDs.has(uid) : null,
       }));
       families.push({
         id: h.id.slice(0, 8),
@@ -1370,7 +1383,7 @@ exports.adminDeleteChildDevice = onCall(
 // never touched; a false positive would self-heal on the device's next
 // heartbeat anyway.
 exports.pruneStaleChildDevices = onSchedule(
-  { schedule: "every day 03:30", timeZone: "Asia/Jerusalem", timeoutSeconds: 120 },
+  { schedule: "every day 03:30", timeZone: "Asia/Jerusalem", timeoutSeconds: 300 },
   async () => {
     const cutoff = Date.now() / 1000 - 60 * 86400;
     const snap = await db.collection("childDevices").get();
@@ -1380,6 +1393,33 @@ exports.pruneStaleChildDevices = onSchedule(
       if (seen && seen < cutoff) { await dv.ref.delete(); pruned++; }
     }
     if (pruned) console.log(`[pruneStaleChildDevices] pruned ${pruned} rows silent for 60+ days`);
+
+    // Also unlink ORPHAN anonymous accounts from households: no email (never a
+    // real parent) AND their parents doc untouched for 60+ days. A live child
+    // device bumps its parents doc on EVERY app launch (token upload), so 60
+    // quiet days = dead device — and even a false positive self-heals: the
+    // device re-adds its own uid on next launch (ensureHousehold). Deliberately
+    // does NOT depend on the new ownerUID stamp, so it's correct from day one.
+    const cutoffMs = Date.now() - 60 * 86400 * 1000;
+    const parentsSnap = await db.collection("parents").get();
+    let unlinked = 0;
+    for (const p of parentsSnap.docs) {
+      const d = p.data();
+      if (String(d.email || "").trim()) continue;                 // real parent — never
+      if (String(d.displayName || "").trim()) continue;           // named — never
+      if (p.updateTime.toMillis() > cutoffMs) continue;           // recently alive
+      const hhs = Array.isArray(d.householdIDs) ? d.householdIDs : [];
+      for (const hhID of hhs) {
+        await db.collection("households").doc(hhID).update({
+          parentUIDs: admin.firestore.FieldValue.arrayRemove(p.id),
+        }).catch(() => {});
+      }
+      if (hhs.length) {
+        await p.ref.update({ householdIDs: [] }).catch(() => {});
+        unlinked++;
+      }
+    }
+    if (unlinked) console.log(`[pruneStaleChildDevices] unlinked ${unlinked} orphan anonymous accounts (60+ days quiet)`);
   }
 );
 
