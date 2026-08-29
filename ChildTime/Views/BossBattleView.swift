@@ -210,8 +210,18 @@ struct BossBattleView: View {
             let pool = Array(ProfileStore.shared.active?.enabledTopics ?? Set(Topic.allCases))
             question = QuestionGenerator.generateBonus(topic: pool.randomElement() ?? .logic)
         } else {
+            // A boss must BITE. Curriculum content stays within the child's
+            // grade, so a kid whose adaptive level already maxed the topic
+            // (Dan, end of grade 1) breezed through "hard". When the adaptive
+            // engine says they're at the top band (level ≥ 1.75 of 0–2), the
+            // boss draws from ONE GRADE UP (the generators cap the range).
+            let profile = ProfileStore.shared.active
+            let base = profile?.difficulty(for: world.topic) ?? .easy
+            let level = ProgressStore.shared.adaptiveLevel(for: world.topic, base: base)
+            var grade = profile?.effectiveGrade
+            if let g = grade, level >= 1.75 { grade = g + 1 }
             question = QuestionGenerator.generate(topic: world.topic, difficulty: .hard,
-                                                  grade: ProfileStore.shared.active?.effectiveGrade)
+                                                  grade: grade)
         }
         picked = nil
         locked = false

@@ -760,20 +760,42 @@ final class ProgressStore: ObservableObject {
 
         // Time reward — ONLY in Earn-to-Unlock sessions. In Free Learning mode
         // the reward is in-game progression (XP/coins/levels), never minutes.
+        // 🌈 Topic balance counts every earn-mode correct answer per topic/day.
+        let topicCountToday = grantsScreenTime ? bumpTopicAnsweredToday(ctx.topic) : 0
         if grantsScreenTime {
             // Fractional reward: each correct answer adds its share of seconds to
             // the cycle (e.g. 24s of a 4-min/10-question bonus). When the cycle
             // fills, bank batchMinutes into the spendable balance.
             let target = Double(bonusTargetSeconds)
             let perSec = target / Double(cycleQuestionsTotal)
+            // 🌈 A) Diminishing returns: past the daily soft cap in ONE topic,
+            // that topic earns at HALF rate — grinding a single favorite all
+            // day stops paying; other topics stay at full rate. The companion
+            // nudges (positively) the moment the cap is reached.
+            let balanceFactor: Double = topicCountToday > Self.sameTopicSoftCap ? 0.5 : 1.0
+            if topicCountToday == Self.sameTopicSoftCap { topicBalanceNudgeTopic = ctx.topic }
             // 💫 Bonus arena pays DOUBLE (cycleMultiplier 2): every correct
             // answer adds two shares, so batches bank twice as fast.
-            cycleSeconds += perSec * max(1, cycleMultiplier)
+            cycleSeconds += perSec * max(1, cycleMultiplier) * balanceFactor
             while cycleSeconds >= target - 0.01 {
                 let granted = grantMinutesCapped(max(1, ParentSettings.shared.batchMinutes))
                 sessionMinutesEarned += granted
                 sittingMinutes += granted
                 cycleSeconds -= target
+            }
+            // 🌈 B) Variety bonus — once per day, playing enough in 3 different
+            // topics grants extra minutes (the carrot beside A's gentle brake).
+            if !varietyBonusGrantedToday {
+                let varied = topicCountsToday().values.filter { $0 >= Self.varietyMinAnswersPerTopic }.count
+                if varied >= Self.varietyTopicsNeeded {
+                    defaults.set(Date(), forKey: "varietyBonusDate")
+                    let granted = grantMinutesCapped(Self.varietyBonusMinutes)
+                    if granted > 0 {
+                        sessionMinutesEarned += granted
+                        sittingMinutes += granted
+                        varietyBonusJustEarned = granted
+                    }
+                }
             }
         }
         xp += RewardEngine.xpPerCorrect
@@ -1170,6 +1192,45 @@ final class ProgressStore: ObservableObject {
     func advanceRoom(in worldID: String) {
         let current = progress(in: worldID)
         worldProgress[worldID] = min(current + 1, 9)
+    }
+
+    // MARK: - 🌈 Topic balance (A: diminishing returns, B: variety bonus)
+
+    /// Rani: kids grind ONE favorite topic (e.g. math) all day to earn time.
+    /// A) After `sameTopicSoftCap` answers in the same topic in one day, that
+    ///    topic's minute-earning rate halves (positive nudge, no blocking).
+    /// B) Answering ≥`varietyMinAnswersPerTopic` in ≥`varietyTopicsNeeded`
+    ///    different topics in a day grants a one-time daily bonus.
+    /// Counters are device-local (play happens on one device at a sitting).
+    static let sameTopicSoftCap = 30
+    static let varietyBonusMinutes = 10
+    static let varietyTopicsNeeded = 3
+    static let varietyMinAnswersPerTopic = 5
+
+    /// One-shot flags for the runner's companion lines — consumer resets them.
+    @Published var topicBalanceNudgeTopic: Topic? = nil
+    @Published var varietyBonusJustEarned: Int = 0
+
+    private func topicCountsToday() -> [String: Int] {
+        guard let d = defaults.object(forKey: "topicAnsweredDate") as? Date,
+              Calendar.current.isDateInToday(d),
+              let dict = defaults.dictionary(forKey: "topicAnsweredToday") as? [String: Int]
+        else { return [:] }
+        return dict
+    }
+
+    /// Count a correct answer for `topic` today; returns the new count.
+    private func bumpTopicAnsweredToday(_ topic: Topic) -> Int {
+        var counts = topicCountsToday()
+        counts[topic.rawValue, default: 0] += 1
+        defaults.set(counts, forKey: "topicAnsweredToday")
+        defaults.set(Date(), forKey: "topicAnsweredDate")
+        return counts[topic.rawValue] ?? 1
+    }
+
+    private var varietyBonusGrantedToday: Bool {
+        (defaults.object(forKey: "varietyBonusDate") as? Date)
+            .map { Calendar.current.isDateInToday($0) } ?? false
     }
 
     // MARK: - Spending pending minutes

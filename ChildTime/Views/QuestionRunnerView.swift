@@ -1109,17 +1109,33 @@ struct QuestionRunnerView: View {
                 questionIndex += 1
                 nextQuestion()
             }
-        } else {
-            // Wrong: flash that option red briefly, then dim it (eliminated).
-            // Do NOT reveal the correct answer. Do NOT advance.
+        } else if isBonusQuestion {
+            // 💫 Bonus: the rare event is its own challenge — flash the pick red,
+            // dim it, and let the kid keep trying on THIS question (old behavior).
             feedbackForIndex[idx] = .wrong
             handleWrong(q: q)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-                // After the brief red flash, settle into the dimmed state so
-                // the kid can't pick it again. Other options stay tappable.
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                     feedbackForIndex[idx] = .dimmed
                 }
+            }
+        } else {
+            // Wrong: flash red briefly, then MOVE ON to a different question —
+            // the missed one returns fresh a few questions later (the existing
+            // spaced re-ask queue). Grinding one stuck question was frustrating;
+            // coming back to it after a breather teaches better (Rani).
+            // Do NOT reveal the correct answer.
+            feedbackForIndex[idx] = .wrong
+            handleWrong(q: q)
+            if !reAskQueue.contains(where: { $0.prompt == q.prompt }) {
+                reAskQueue.append(q)
+            }
+            companion.cheer("נַחְזֹר לָזוֹ עוֹד מְעַט 💪")
+            showFeedback = true   // lock the grid during the short transition
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                guard q.id == current?.id else { return }   // already moved on
+                questionIndex += 1
+                nextQuestion()
             }
         }
     }
@@ -1195,6 +1211,17 @@ struct QuestionRunnerView: View {
             affectsAdaptive: !isBonusArena
         )
         earnedThisSession += earned
+        // 🌈 Topic balance — celebrate the variety bonus, or nudge (positively)
+        // toward other worlds when one topic hit its daily soft cap. One-shot
+        // flags set synchronously by recordCorrect just above.
+        if progress.varietyBonusJustEarned > 0 {
+            companion.hype("קֶסֶם הַגִּוּוּן! 🌈 +\(progress.varietyBonusJustEarned) דַּקּוֹת בּוֹנוּס!")
+            progress.varietyBonusJustEarned = 0
+        } else if progress.topicBalanceNudgeTopic != nil {
+            companion.cheer(Gendered.g("אַלּוּף בָּזֶה! 🌟 בּוֹא נְגַלֶּה גַּם עוֹלָם אַחֵר — יֵשׁ בּוֹנוּס גִּוּוּן 🌈",
+                                       "אַלּוּפָה בָּזֶה! 🌟 בּוֹאִי נְגַלֶּה גַּם עוֹלָם אַחֵר — יֵשׁ בּוֹנוּס גִּוּוּן 🌈"))
+            progress.topicBalanceNudgeTopic = nil
+        }
         if receivedHelpThisQuestion {
             AppAnalytics.log("parent_help_success", ["topic": q.topic.rawValue])
         }

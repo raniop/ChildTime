@@ -517,7 +517,11 @@ final class HouseholdManager: ObservableObject {
 
     // MARK: - Children CRUD (mirrors to Firestore)
 
-    func upsertChild(_ profile: Profile) {
+    /// `onlyIfMissing: true` = HEAL mode (reconcile): create the cloud doc if
+    /// it's gone, but never overwrite an existing one — a sign-in sweep with a
+    /// stale local copy used to clobber fresher fields (the kid's character
+    /// pick reverting to an old one). Explicit edits keep the default (false).
+    func upsertChild(_ profile: Profile, onlyIfMissing: Bool = false) {
         #if canImport(FirebaseFirestore)
         guard !Self.skipsCloudSync else { return }   // never sync in demo/test builds
         guard let hh = household else { return }
@@ -532,6 +536,13 @@ final class HouseholdManager: ObservableObject {
                     TofyLink("upsertChild: \(record.id.prefix(8)) is TOMBSTONED → dropping locally, not uploading")
                     await MainActor.run { ProfileStore.shared.removeLocalOnly(profile.id) }
                     return
+                }
+                if onlyIfMissing {
+                    let existing = try? await db.collection("children").document(record.id).getDocument()
+                    if existing?.exists == true {
+                        TofyLink("upsertChild(heal): \(record.id.prefix(8)) already in cloud — not overwriting")
+                        return
+                    }
                 }
                 try await db.collection("children").document(record.id).setData(Self.encode(record), merge: true)
                 try await db.collection("households").document(hh.id)
@@ -587,7 +598,9 @@ final class HouseholdManager: ObservableObject {
             let cloudKnown = hh.childIDs.contains(profile.id.uuidString)
             let mine = ProfileStore.shared.wasCreatedHere(profile.id)
             if cloudKnown || mine {
-                upsertChild(profile)
+                // HEAL mode: create a missing doc, never overwrite a live one —
+                // this sweep runs with possibly weeks-stale local copies.
+                upsertChild(profile, onlyIfMissing: true)
             } else {
                 TofyLink("reconcile: SKIP \(profile.name):\(profile.id.uuidString.prefix(8)) — not in cloud household and not created on this device")
             }

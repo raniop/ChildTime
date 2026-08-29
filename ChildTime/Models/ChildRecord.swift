@@ -101,6 +101,9 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     var gender: String?            // ChildGender.rawValue
     var avatarPresetID: String
     var character3DID: String?     // chosen 3D character — syncs to co-parents
+    /// Freshness stamp of the character pick (see Profile.characterUpdatedAt) —
+    /// merges keep the NEWER side so a stale device can't revert the kid's pick.
+    var characterUpdatedAt: Date?
     var grade: Int?
     /// School year the grade was set (auto-advance anchor — see Profile.gradeSchoolYear).
     var gradeSchoolYear: Int?
@@ -142,6 +145,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.gender = profile.gender?.rawValue
         self.avatarPresetID = profile.avatarPresetID
         self.character3DID = profile.character3DID
+        self.characterUpdatedAt = profile.characterUpdatedAt
         self.grade = profile.grade
         self.gradeSchoolYear = profile.gradeSchoolYear
         self.gradeSetByChild = profile.gradeSetByChild ? true : nil
@@ -189,6 +193,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             playPIN: playPIN
         )
         p.gradeSetByChild = gradeSetByChild ?? false
+        p.characterUpdatedAt = characterUpdatedAt
         return p
     }
 

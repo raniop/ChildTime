@@ -169,6 +169,9 @@ final class ProfileStore: ObservableObject {
     func mergeRemoteChildren(_ records: [ChildRecord]) {
         var working = profiles
         var changed = false
+        // Profiles whose LOCAL character pick is fresher than the cloud's —
+        // pushed back up after the merge so the cloud converges to the pick.
+        var localCharacterWinners: [Profile] = []
         for record in records {
             guard let remote = record.toProfile() else { continue }
             if let idx = working.firstIndex(where: { $0.id == remote.id }) {
@@ -177,9 +180,22 @@ final class ProfileStore: ObservableObject {
                 // here); fall back to the existing local photo when the remote
                 // has none — e.g. legacy profiles or a preset-face child.
                 merged.photoData = remote.photoData ?? working[idx].photoData
-                // Same idea for the chosen 3D character — keep the local pick if
-                // the remote record predates this field.
-                merged.character3DID = remote.character3DID ?? working[idx].character3DID
+                // Character: the FRESHER pick wins (characterUpdatedAt stamp) —
+                // "remote always wins" let a parent device's stale roster upload
+                // revert the kid's new pick (hedgehog → rabbit). nil stamp =
+                // distant past, so legacy data loses to any stamped pick.
+                let localCharStamp = working[idx].characterUpdatedAt ?? .distantPast
+                let remoteCharStamp = remote.characterUpdatedAt ?? .distantPast
+                if localCharStamp > remoteCharStamp {
+                    merged.character3DID = working[idx].character3DID ?? remote.character3DID
+                    merged.characterUpdatedAt = working[idx].characterUpdatedAt
+                    // This device holds the newer pick — heal the stale cloud doc
+                    // (the pick's own upsert may have been raced over). Converges:
+                    // once the cloud carries this stamp, local never wins again.
+                    localCharacterWinners.append(merged)
+                } else {
+                    merged.character3DID = remote.character3DID ?? working[idx].character3DID
+                }
                 // Play-protection code: a MISSING remote field (pre-field doc /
                 // stale writer) must not wipe a code the child just set locally —
                 // but an EMPTY string is a deliberate clear (parent reset), and
@@ -198,6 +214,9 @@ final class ProfileStore: ObservableObject {
             if activeID == nil, ParentSettings.shared.deviceRole != .child {
                 activeID = profiles.first?.id
             }
+        }
+        for winner in localCharacterWinners {
+            HouseholdManager.shared.upsertChild(winner)
         }
     }
 

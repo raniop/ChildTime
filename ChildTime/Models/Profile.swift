@@ -16,6 +16,11 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// The chosen 3D character's id (see Character3DCatalog). nil → default.
     /// Lives on the profile so it syncs to co-parents' devices via ChildRecord.
     var character3DID: String?
+    /// When the character was last PICKED (kid's shop / editor). Freshness
+    /// stamp for cross-device merges: without it, a parent device's stale
+    /// roster re-upload silently reverted the kid's new pick (hedgehog →
+    /// rabbit). nil (legacy data) = distant past — any stamped pick wins.
+    var characterUpdatedAt: Date? = nil
     var createdAt: Date
 
     // MARK: - Learning identity (Parent Platform)
@@ -141,7 +146,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     // Backward-compatible decoding: profiles stored before the Parent Platform
     // shipped won't have grade / interests / learningLevel keys.
     enum CodingKeys: String, CodingKey {
-        case id, name, gender, age, photoData, avatarPresetID, character3DID, createdAt
+        case id, name, gender, age, photoData, avatarPresetID, character3DID, characterUpdatedAt, createdAt
         case grade, gradeSchoolYear, gradeSetByChild, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
         case topicsVersion
         case playPIN
@@ -156,6 +161,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.photoData = try c.decodeIfPresent(Data.self, forKey: .photoData)
         self.avatarPresetID = try c.decode(String.self, forKey: .avatarPresetID)
         self.character3DID = try c.decodeIfPresent(String.self, forKey: .character3DID)
+        self.characterUpdatedAt = try? c.decodeIfPresent(Date.self, forKey: .characterUpdatedAt)
         self.createdAt = try c.decode(Date.self, forKey: .createdAt)
         self.grade = try c.decodeIfPresent(Int.self, forKey: .grade)
         self.gradeSchoolYear = try c.decodeIfPresent(Int.self, forKey: .gradeSchoolYear)

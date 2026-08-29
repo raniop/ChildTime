@@ -150,6 +150,7 @@ struct CharacterCollectionView: View {
         Haptic.light()
         if var p = profiles.profiles.first(where: { $0.id == profileID }) {
             p.character3DID = character.id
+            p.characterUpdatedAt = .now   // freshness stamp — merges keep the newer pick
             profiles.update(p)   // syncs to co-parents
         }
         onPicked?()
