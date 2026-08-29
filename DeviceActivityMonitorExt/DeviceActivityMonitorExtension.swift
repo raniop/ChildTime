@@ -48,7 +48,17 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
 
         // Keep app DELETION blocked on every background re-lock — deleting
         // ChildTime would wipe the shield and unlock every app.
-        store.application.denyAppRemoval = true
+        // EXCEPTION: honor a parent's short "allow deletion" window (opened in
+        // the app to legitimately uninstall Tofy). Without this check, any
+        // background re-lock landing inside the window silently re-blocked the
+        // deletion the parent just enabled (Yoav's iPad).
+        let removalWindow = defaults.object(forKey: "appRemovalUnlockedUntil") as? Date
+        if let removalWindow, removalWindow > Date() {
+            monitorLog.notice("ext: parent delete-window active → NOT re-locking app removal")
+            store.application.denyAppRemoval = nil
+        } else {
+            store.application.denyAppRemoval = true
+        }
 
         // Block-all-except-allowlist mode — only when an allowlist actually exists
         // (otherwise we'd shield ChildTime itself and brick the device). Mirrors

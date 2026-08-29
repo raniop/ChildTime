@@ -400,6 +400,9 @@ struct ChildDeviceControlsView: View {
             Button {
                 Haptic.medium()
                 settings.appRemovalUnlockedUntil = Date().addingTimeInterval(5 * 60)
+                // Disarm any armed background monitor — its re-lock used to
+                // instantly re-block the deletion this button just allowed.
+                shields.cancelScheduledReshield()
                 shields.setAppRemovalLocked(false)
                 removalNote = "נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת. צְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד."
             } label: {

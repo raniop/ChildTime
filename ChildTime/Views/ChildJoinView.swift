@@ -264,6 +264,10 @@ private struct AppRemovalUnlockView: View {
                     Button {
                         Haptic.medium()
                         ParentSettings.shared.appRemovalUnlockedUntil = Date().addingTimeInterval(5 * 60)
+                        // Disarm any still-armed background monitor first — its
+                        // re-lock used to instantly re-block the deletion this
+                        // button just allowed (Yoav's iPad).
+                        ShieldManager.shared.cancelScheduledReshield()
                         ShieldManager.shared.setAppRemovalLocked(false)
                         withAnimation { opened = true }
                     } label: {

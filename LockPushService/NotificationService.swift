@@ -61,7 +61,15 @@ class NotificationService: UNNotificationServiceExtension {
         defaults.removeObject(forKey: "unlockEndsAt")
 
         // Keep app DELETION blocked — deleting Tofy would wipe the shield.
-        store.application.denyAppRemoval = true
+        // EXCEPTION: honor a parent's short "allow deletion" window (see the
+        // monitor extension) — a late-arriving lock push must not silently
+        // re-block an uninstall the parent just enabled.
+        let removalWindow = defaults.object(forKey: "appRemovalUnlockedUntil") as? Date
+        if let removalWindow, removalWindow > Date() {
+            store.application.denyAppRemoval = nil
+        } else {
+            store.application.denyAppRemoval = true
+        }
 
         // Block-all-except-allowlist mode — only when an allowlist actually exists
         // (otherwise we'd shield Tofy itself and brick the device).
