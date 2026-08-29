@@ -136,6 +136,33 @@ struct WorldMapView: View {
                             }
                             .frame(maxWidth: .infinity)
 
+                            ForEach(enabledWorlds) { world in
+                                WorldCard(
+                                    // Premium unlocks every world (that's what the
+                                    // subscription buys). Stars are now a spendable
+                                    // currency, so they no longer gate worlds —
+                                    // otherwise buying cosmetics could re-lock them.
+                                    world: world,
+                                    isUnlocked: subs.isPremium,
+                                    currentRoom: progress.progress(in: world.id),
+                                    starsHeld: progress.stars,
+                                    subscriptionLocked: !subs.isPremium
+                                ) {
+                                    if subs.isPremium {
+                                        selectedWorld = world
+                                    } else {
+                                        // Until they subscribe, only "הרפתקה חכמה"
+                                        // is playable — the worlds open the paywall.
+                                        Haptic.light()
+                                        showingPaywall = true
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+
+                            // 🎮 Games LAST in the grid (Rani): learning worlds
+                            // come first in the child's choice order; the arcade
+                            // is the dessert at the end.
                             FeatureCard(
                                 emoji: "🎮",
                                 title: "מִשְׂחָקִים",
@@ -160,30 +187,6 @@ struct WorldMapView: View {
                                 }
                             }
                             .frame(maxWidth: .infinity)
-
-                            ForEach(enabledWorlds) { world in
-                                WorldCard(
-                                    // Premium unlocks every world (that's what the
-                                    // subscription buys). Stars are now a spendable
-                                    // currency, so they no longer gate worlds —
-                                    // otherwise buying cosmetics could re-lock them.
-                                    world: world,
-                                    isUnlocked: subs.isPremium,
-                                    currentRoom: progress.progress(in: world.id),
-                                    starsHeld: progress.stars,
-                                    subscriptionLocked: !subs.isPremium
-                                ) {
-                                    if subs.isPremium {
-                                        selectedWorld = world
-                                    } else {
-                                        // Until they subscribe, only "הרפתקה חכמה"
-                                        // is playable — the worlds open the paywall.
-                                        Haptic.light()
-                                        showingPaywall = true
-                                    }
-                                }
-                                .frame(maxWidth: .infinity)
-                            }
                         }
                     }
                     .frame(maxWidth: worldGridMaxWidth)
