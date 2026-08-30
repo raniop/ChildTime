@@ -33,6 +33,15 @@ final class ProfileStore: ObservableObject {
 
     func wasCreatedHere(_ id: UUID) -> Bool { createdHereIDs.contains(id.uuidString) }
 
+    /// Wipe every local trace of a DEMO-seeded profile (see ChildTimeApp.seedDemo)
+    /// so a normal launch can never sync it into a real production family:
+    /// the profile row, its createdHere mark (reconcile bait), and its vault snapshot.
+    func purgeDemoProfile(_ id: UUID) {
+        removeLocalOnly(id)
+        var s = createdHereIDs; s.remove(id.uuidString); createdHereIDs = s
+        AppGroup.defaults.removeObject(forKey: "progressSnapshot.\(id.uuidString)")
+    }
+
     @Published private(set) var profiles: [Profile] = [] {
         didSet { saveProfiles() }
     }

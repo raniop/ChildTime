@@ -28,6 +28,9 @@ enum LiveEventReporter {
 
     static func report(_ type: EventType, value: String? = nil, topic: Topic? = nil,
                        extra: [String: Any] = [:]) {
+        // Demo / screenshot / automated-test runs must never write live events
+        // (or analytics) into production — same kill-switch as HouseholdManager.
+        guard !HouseholdManager.skipsCloudSync else { return }
         // Mirror the main funnel to Google Analytics (no PII — counts only).
         switch type {
         case .sessionStart:

@@ -218,7 +218,7 @@ function render() {
     f.parents.some((p) => (p.name||"").toLowerCase().includes(q) || (p.email||"").toLowerCase().includes(q)) ||
     f.children.some((k) => (k.name||"").toLowerCase().includes(q));
 
-  const rows = DATA.families.filter(match).map((f) => {
+  const renderFamily = (f) => {
     const pnames = (f.familyLabel ? "🏷 " + esc(f.familyLabel) : "")
       || f.parents.filter((p) => p.name).map((p) => esc(p.name)).join(", ")
       || (f.children.length ? "משפחה ללא שם" : "הרשמה ללא משפחה");
@@ -267,11 +267,12 @@ function render() {
           <button class="chip dim" style="border:0;cursor:pointer;font-family:inherit"
               title="ערוך שם משפחה (תווית ניהול)"
               onclick="event.stopPropagation(); editLabel('${f.fullId}', this)">✏️</button>
+          ${f.isDemo ? `<span class="chip" style="background:rgba(155,93,229,.35)">🧪 דמו</span>` : ""}
           ${isDeletable(f) ? `<button class="chip pink" style="border:0;cursor:pointer;font-family:inherit"
               onclick="event.stopPropagation(); deleteHousehold('${f.fullId}', this)">🗑 מחק</button>` : ""}
-          ${isDormantNameless(f) ? `<button class="chip pink" style="border:0;cursor:pointer;font-family:inherit"
-              title="משפחה ללא שם, כל הילדים רדומים 30+ יום"
-              onclick="event.stopPropagation(); deleteDormant('${f.fullId}', this)">🗑 מחק רדומה</button>` : ""}
+          ${(isDormantNameless(f) || (f.isDemo && f.children.length > 0)) ? `<button class="chip pink" style="border:0;cursor:pointer;font-family:inherit"
+              title="${f.isDemo ? "משפחת דמו — מחיקה מיידית מותרת" : "משפחה ללא שם, כל הילדים רדומים 30+ יום"}"
+              onclick="event.stopPropagation(); deleteDormant('${f.fullId}', this)">${f.isDemo ? "🗑 מחק דמו" : "🗑 מחק רדומה"}</button>` : ""}
         </div>
       </div>
       <div class="anonlist" hidden style="padding:8px 18px 12px; border-top:1px solid rgba(255,255,255,.08)">
@@ -299,8 +300,23 @@ function render() {
         </table>
       </div>` : `<div class="empty">אין ילדים במשפחה הזו (הרשמה שלא הושלמה)</div>`}
     </div>`;
-  });
-  $("list").innerHTML = rows.join("") || `<div class="empty">לא נמצאו תוצאות עבור "${esc(q)}"</div>`;
+  };
+
+  // 🧪 Demo families render in their own section at the bottom — production
+  // families stay clean. isDemo comes from the server (🧪 label or the
+  // DEMO_SCREEN child-name signature); mark any other family with a 🧪 label
+  // (the ✏️ button) to move it here.
+  const real = DATA.families.filter((f) => match(f) && !f.isDemo).map(renderFamily);
+  const demo = DATA.families.filter((f) => match(f) && f.isDemo).map(renderFamily);
+  const demoSection = demo.length ? `
+    <div style="margin-top:34px; padding-top:10px; border-top:2px dashed rgba(255,255,255,.25)">
+      <div style="font-size:17px; font-weight:900; margin:8px 2px">🧪 פרופילי דמו ובדיקות (${demo.length})</div>
+      <div style="font-size:12.5px; color:var(--muted); margin:0 2px 4px">
+        משפחות שסומנו 🧪 או זוהו כהדלפת דמו (דנה/יואב). מחיקה מותרת גם בלי המתנת 30 יום.
+        כדי להעביר משפחה לכאן — תנו לה תווית עם 🧪 בכפתור ✏️.</div>
+      ${demo.join("")}
+    </div>` : "";
+  $("list").innerHTML = (real.join("") || `<div class="empty">לא נמצאו תוצאות עבור "${esc(q)}"</div>`) + demoSection;
 
   const cleanable = DATA.families.filter(isDeletable);
   $("cleanBtn").hidden = cleanable.length === 0;

@@ -110,6 +110,7 @@ final class PushManager: NSObject, ObservableObject {
     func uploadFCMToken(_ token: String) {
         currentToken = token
         #if canImport(FirebaseFirestore) && canImport(FirebaseMessaging)
+        guard !HouseholdManager.skipsCloudSync else { return }   // demo/test: no token writes
         guard let uid = AuthManager.shared.userID else { return }
         let isChild = ParentSettings.shared.deviceRole == .child
         let mine  = isChild ? "childFcmTokens" : "fcmTokens"

@@ -421,6 +421,7 @@ final class HouseholdManager: ObservableObject {
     /// fresh "last seen". Idempotent — keyed by the install ID.
     func registerDevice(forChildID childID: UUID) async {
         #if canImport(FirebaseFirestore)
+        guard !Self.skipsCloudSync else { return }   // demo/test: no device rows
         guard let hh = household, uid != nil else { return }
         let cid = childID.uuidString
         let docID = "\(cid)_\(DeviceIdentity.installID)"

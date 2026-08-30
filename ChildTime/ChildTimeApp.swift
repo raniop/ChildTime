@@ -123,6 +123,11 @@ struct ChildTimeApp: App {
         // intent — the root view's .task never runs then. Register here so the
         // request is applied immediately (apps re-lock) instead of on next open.
         if Self.demoScreen == nil {
+            // A previous DEMO run seeded fake profiles/progress into local
+            // storage. A NORMAL launch on the same install must wipe them
+            // BEFORE any sync starts — this is exactly how demo "דנה/יואב"
+            // once leaked into a production household.
+            Self.purgeDemoLeftoversIfNeeded()
             StopAndSaveBridge.start()
             StopAndSaveBridge.applyIfRequested()
         }
@@ -132,6 +137,10 @@ struct ChildTimeApp: App {
     /// Activated only via the DEMO_SCREEN launch env var; never in production.
     static var demoScreen: String? { ProcessInfo.processInfo.environment["DEMO_SCREEN"] }
 
+    /// Profiles seeded by a DEMO_SCREEN run — recorded so the next NORMAL
+    /// launch on this install wipes them before any sync starts.
+    private static let demoSeededIDsKey = "demo.seededProfileIDs"
+
     private static func seedDemo() {
         if ProfileStore.shared.profiles.isEmpty {
             let dana = Profile(name: "דָּנָה", gender: .girl, age: .grade1)
@@ -139,9 +148,25 @@ struct ChildTimeApp: App {
             let yoav = Profile(name: "יוֹאָב", gender: .boy, age: .grade1)
             ProfileStore.shared.add(yoav)
             ProfileStore.shared.setActive(dana)
+            UserDefaults.standard.set([dana.id.uuidString, yoav.id.uuidString],
+                                      forKey: demoSeededIDsKey)
         }
         ProgressStore.shared.seedForDemo()
         if Self.demoScreen == "leaderboard" { FriendsManager.shared.seedDemo() }
+    }
+
+    /// A previous DEMO run left fake profiles + progress in local storage; a
+    /// normal launch would otherwise sync them into a REAL production family
+    /// (the leaked "דנה/יואב" household). Runs before any cloud sync starts.
+    private static func purgeDemoLeftoversIfNeeded() {
+        let d = UserDefaults.standard
+        guard let raw = d.stringArray(forKey: demoSeededIDsKey), !raw.isEmpty else { return }
+        NSLog("[Demo] purging %d demo-seeded profiles left by a DEMO_SCREEN run", raw.count)
+        for r in raw {
+            if let id = UUID(uuidString: r) { ProfileStore.shared.purgeDemoProfile(id) }
+        }
+        ProgressStore.shared.resetAll()   // demo run seeds only on an EMPTY device
+        d.removeObject(forKey: demoSeededIDsKey)
     }
 
     var body: some Scene {

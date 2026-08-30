@@ -84,6 +84,13 @@ final class RemoteSyncManager: ObservableObject {
             SyncLog.error("start: NO signed-in user — sync inactive. If this is a child device, enable Anonymous Auth in the Firebase console.")
             return
         }
+        // Demo / screenshot / automated-test runs must never upload snapshots
+        // to (or listen against) production — same kill-switch as HouseholdManager.
+        guard !HouseholdManager.skipsCloudSync else {
+            SyncLog.log("start: SKIPPED — demo/test run, sync stays local")
+            isActive = false
+            return
+        }
         isActive = true
         lastError = nil
         SyncLog.log("start: active uid=\(resolvedUID.prefix(6))… role=\(ParentSettings.shared.deviceRole) device=\(ProgressSnapshot.thisDeviceID.prefix(8))")

@@ -1206,10 +1206,19 @@ exports.adminFamiliesOverview = onCall(
         // (old builds) — the page falls back to the update-time signal.
         hasLiveDevice: anyRowHasUID ? liveUIDs.has(uid) : null,
       }));
+      // 🧪 Demo detection: an admin-marked family (label contains 🧪), or a
+      // NAMELESS one whose children are exactly the DEMO_SCREEN seed names
+      // (דנה/יואב, niqqud-stripped) — the signature of a leaked demo run.
+      const strip = (s) => String(s || "").normalize("NFD").replace(/[֑-ׇ]/g, "").trim();
+      const demoNames = new Set(["דנה", "יואב"]);
+      const named = Object.values(d.parentNames || {}).filter((n) => String(n || "").trim());
+      const isDemo = (d.familyLabel || "").includes("🧪") ||
+        (named.length === 0 && kids.length > 0 && kids.every((k) => demoNames.has(strip(k.name))));
       families.push({
         id: h.id.slice(0, 8),
         fullId: h.id,     // needed by the admin actions (admin-only page)
         familyLabel: d.familyLabel || null,   // admin-set display label
+        isDemo,
         parents,
         tombstones: tombsByHH[h.id] || 0,
         children: kids,
@@ -1266,13 +1275,22 @@ exports.adminDeleteHousehold = onCall(
       if (!(request.data && request.data.withChildren)) {
         throw new HttpsError("failed-precondition", "Household has children — pass withChildren to delete a dormant nameless family.");
       }
-      const cutoff = Date.now() - 30 * 86400 * 1000;
-      for (const k of kids.docs) {
-        const st = await db.collection("children").doc(k.id).collection("state").doc("current").get();
-        const lastMs = Math.max(st.exists ? st.updateTime.toMillis() : 0, k.updateTime.toMillis());
-        if (lastMs > cutoff) {
-          throw new HttpsError("failed-precondition",
-            `Child "${k.data().name || k.id.slice(0, 8)}" was active in the last 30 days — refusing to delete.`);
+      // 🧪 A confirmed DEMO family (admin 🧪 label, or nameless with exactly
+      // the DEMO_SCREEN seed child names) skips the 30-day dormancy rule —
+      // it was never a real family. Everything else must be truly dormant.
+      const strip = (s) => String(s || "").normalize("NFD").replace(/[֑-ׇ]/g, "").trim();
+      const demoNames = new Set(["דנה", "יואב"]);
+      const isDemo = (d.familyLabel || "").includes("🧪") ||
+        kids.docs.every((k) => demoNames.has(strip(k.data().name)));
+      if (!isDemo) {
+        const cutoff = Date.now() - 30 * 86400 * 1000;
+        for (const k of kids.docs) {
+          const st = await db.collection("children").doc(k.id).collection("state").doc("current").get();
+          const lastMs = Math.max(st.exists ? st.updateTime.toMillis() : 0, k.updateTime.toMillis());
+          if (lastMs > cutoff) {
+            throw new HttpsError("failed-precondition",
+              `Child "${k.data().name || k.id.slice(0, 8)}" was active in the last 30 days — refusing to delete.`);
+          }
         }
       }
       for (const k of kids.docs) {

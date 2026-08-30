@@ -417,6 +417,7 @@ final class FriendsManager: ObservableObject {
     /// not just the value from the last time I opened my own board. Debounced to
     /// avoid hammering Firestore; only writes once I actually have a card.
     func beginScoreSync() {
+        guard !HouseholdManager.skipsCloudSync else { return }   // demo/test: no card writes
         guard scoreSyncCancellable == nil else { return }   // idempotent
         scoreSyncCancellable = ProgressStore.shared.$stars
             .dropFirst()
@@ -476,6 +477,7 @@ final class FriendsManager: ObservableObject {
     }
 
     private func upsertMyCard(id: String) async {
+        guard !HouseholdManager.skipsCloudSync else { return }   // demo/test: no card writes
         let profile = ProfileStore.shared.active
         let card = FriendCard(
             id: id,
