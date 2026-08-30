@@ -63,6 +63,16 @@ struct ParentGateView<Content: View>: View {
     // asks to ENTER it — not create a new one.
     private var isSetupMode: Bool { !settings.hasSetParentPIN && household.householdPIN == nil }
 
+    // Signed-in device that hasn't finished loading the family yet (or has no
+    // network — simulator errno 50 caught this live): we CANNOT yet tell "new
+    // family, create a code" apart from "existing family, enter the code". The
+    // setup keypad here let a returning parent mint a NEW code that would
+    // overwrite the family's real one once the network came back. Wait instead.
+    private var householdStillLoading: Bool {
+        !settings.hasSetParentPIN && household.householdPIN == nil
+            && household.household == nil && AuthManager.shared.isSignedIn
+    }
+
     private var canUseFaceID: Bool {
         useFaceID && settings.faceIDForParentGate && PINManager.shared.biometryAvailable
             && !isSetupMode
@@ -72,6 +82,8 @@ struct ParentGateView<Content: View>: View {
         Group {
             if authorized || (respectSession && settings.sessionUnlocked) {
                 content()
+            } else if householdStillLoading {
+                familyLoadingGate
             } else if isSetupMode && !allowSetup {
                 // No parent code exists on this device (yet) and this gate must
                 // not offer to create one — that would let whoever HOLDS the
@@ -92,6 +104,26 @@ struct ParentGateView<Content: View>: View {
                 authorized = false
             }
         }
+    }
+
+    /// Shown while the family is still streaming down: neither the setup keypad
+    /// (could mint a code over the family's real one) nor the entry keypad
+    /// (nothing to verify against yet) is safe to show.
+    private var familyLoadingGate: some View {
+        ZStack {
+            AppGradient.dreamy.ignoresSafeArea()
+            SparkleField(count: 14, size: 12)
+            VStack(spacing: AppSpacing.lg) {
+                ProgressView().scaleEffect(1.5).tint(.white)
+                Text("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…")
+                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("אִם זֶה נִמְשָׁךְ — בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט.")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+        }
+        .onAppear { household.refreshHouseholdNow() }
     }
 
     /// Shown instead of the keypad when `allowSetup == false` and no parent code
