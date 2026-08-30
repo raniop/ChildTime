@@ -340,7 +340,18 @@ struct ParentDashboardView: View {
                 remote.refreshNow()   // pull fresh child state on open
                 rescheduleInsights()
                 WidgetBridge.writeFamily(rows)   // keep the family home-screen widget fresh
-                Task { await push.refreshAuthorizationStatus() }
+                Task {
+                    // Parents NEED push — live events and reports are the core
+                    // value. Ask AUTOMATICALLY, but only once there's a child to
+                    // hear about (context beats a cold login-screen popup, and
+                    // the empty dashboard stays prompt-free). iOS shows this
+                    // dialog once ever; decliners keep the red banner as the
+                    // manual path.
+                    if !rows.isEmpty {
+                        await PushManager.shared.requestAuthorizationIfNotDetermined()
+                    }
+                    await push.refreshAuthorizationStatus()
+                }
             }
             .onChangeCompat(of: settings.parentInsightFrequency) { _, freq in
                 if freq != .off {
