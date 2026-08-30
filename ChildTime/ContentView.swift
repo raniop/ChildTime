@@ -13,7 +13,6 @@ struct ContentView: View {
 
     /// Guests (no account) can answer this many questions before registration
     /// is required.
-    static let guestQuestionLimit = 30
 
     var body: some View {
         Group {
@@ -88,15 +87,15 @@ struct ContentView: View {
         }
     }
 
-    /// Parent device → account required (or guest trial), consent, then the
-    /// family control center.
+    /// Parent device → account REQUIRED, consent, then the family control
+    /// center. Guest mode was removed (Rani, 2026-08-30): Tofy has exactly one
+    /// trial — 30 days of טופי+ AFTER signing up. An existing guest install
+    /// (legacy isGuest=true) lands back on the login gate; the kids' local
+    /// data survives and uploads to the new family on sign-in (createdHere).
     @ViewBuilder
     private var parentFlow: some View {
-        if !auth.isSignedIn && !auth.isGuest {
-            LoginGateView()
-        } else if auth.isGuest && !auth.isSignedIn
-                    && progress.totalAnswered >= Self.guestQuestionLimit {
-            LoginGateView(allowGuest: false, limitBanner: true)
+        if !auth.isSignedIn {
+            LoginGateView(limitBanner: auth.isGuest)
         } else if !settings.hasConsented {
             ConsentView()
         } else if settings.pendingJoinFamily && auth.isSignedIn {

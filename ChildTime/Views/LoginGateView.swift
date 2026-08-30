@@ -10,7 +10,6 @@ import AuthenticationServices
 struct LoginGateView: View {
     /// When false, hides the "play without an account" button (e.g. after the
     /// free-trial limit is reached — registration is now required).
-    var allowGuest: Bool = true
     /// Shows the "you've used your 30 free questions" banner.
     var limitBanner: Bool = false
 
@@ -253,19 +252,8 @@ struct LoginGateView: View {
                         .stroke(.white.opacity(0.28), lineWidth: 1))
             }
 
-            // Try without an account (capped at 30 questions).
-            if allowGuest {
-                Button {
-                    Haptic.light()
-                    auth.continueAsGuest()
-                } label: {
-                    Text("שַׂחֵק בְּלִי חֶשְׁבּוֹן")
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.9))
-                        .underline()
-                        .padding(.top, 2)
-                }
-            }
+            // Guest mode REMOVED (Rani): no using Tofy without an account. The
+            // only trial is 30 days of טופי+ after signing up.
 
             if let err = auth.lastError {
                 Text(err)

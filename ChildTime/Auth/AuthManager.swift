@@ -34,7 +34,9 @@ final class AuthManager: ObservableObject {
     }
 
     /// Enter the local trial. No cloud account, data stays on-device.
-    func continueAsGuest() { isGuest = true }
+    // continueAsGuest() removed (Rani, 2026-08-30) — no account, no Tofy.
+    // `isGuest` stays readable so legacy guest installs route back to the
+    // login gate and their local data migrates up on first real sign-in.
 
     /// A child's device joins by scanning the parent's QR — it never sees a
     /// sign-in screen. To still get a uid (needed to join the family + sync), we
