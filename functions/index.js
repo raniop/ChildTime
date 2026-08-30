@@ -1439,32 +1439,13 @@ exports.pruneStaleChildDevices = onSchedule(
     }
     if (pruned) console.log(`[pruneStaleChildDevices] pruned ${pruned} rows silent for 60+ days`);
 
-    // Also unlink ORPHAN anonymous accounts from households: no email (never a
-    // real parent) AND their parents doc untouched for 60+ days. A live child
-    // device bumps its parents doc on EVERY app launch (token upload), so 60
-    // quiet days = dead device — and even a false positive self-heals: the
-    // device re-adds its own uid on next launch (ensureHousehold). Deliberately
-    // does NOT depend on the new ownerUID stamp, so it's correct from day one.
-    const cutoffMs = Date.now() - 60 * 86400 * 1000;
-    const parentsSnap = await db.collection("parents").get();
-    let unlinked = 0;
-    for (const p of parentsSnap.docs) {
-      const d = p.data();
-      if (String(d.email || "").trim()) continue;                 // real parent — never
-      if (String(d.displayName || "").trim()) continue;           // named — never
-      if (p.updateTime.toMillis() > cutoffMs) continue;           // recently alive
-      const hhs = Array.isArray(d.householdIDs) ? d.householdIDs : [];
-      for (const hhID of hhs) {
-        await db.collection("households").doc(hhID).update({
-          parentUIDs: admin.firestore.FieldValue.arrayRemove(p.id),
-        }).catch(() => {});
-      }
-      if (hhs.length) {
-        await p.ref.update({ householdIDs: [] }).catch(() => {});
-        unlinked++;
-      }
-    }
-    if (unlinked) console.log(`[pruneStaleChildDevices] unlinked ${unlinked} orphan anonymous accounts (60+ days quiet)`);
+    // NOTE: automatic orphan-ACCOUNT unlinking was removed 2026-08-30 after it
+    // stripped the anonymous parent uid off two REAL guest families on its
+    // first run. The "parents doc untouched for 60 days" signal is wrong for
+    // devices that declined notifications (they never rewrite their doc after
+    // creation). Account cleanup stays MANUAL via the admin families page,
+    // where the ✕ per-uid button shows context first. Only the device-ROW
+    // prune above remains — that one is genuinely self-healing.
   }
 );
 
