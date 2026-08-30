@@ -501,16 +501,18 @@ struct ParentDashboardView: View {
                 Image(systemName: "bell.badge.fill")
                     .font(.title3)
                     .foregroundStyle(.white)
-                VStack(alignment: .trailing, spacing: 2) {
+                // CENTERED between the icons — the right-hugging text left a
+                // lopsided empty gap on the left (Rani, live E2E).
+                VStack(alignment: .center, spacing: 2) {
                     Text("הַהַתְרָאוֹת כָּבוּיוֹת")
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                     Text("הַפְעִילוּ כְּדֵי לְקַבֵּל עֲדְכּוּנִים עַל הַיֶּלֶד")
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.9))
-                        .multilineTextAlignment(.trailing)
+                        .multilineTextAlignment(.center)
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: .center)
                 Image(systemName: "chevron.left").font(.caption.weight(.bold)).foregroundStyle(.white.opacity(0.8))
             }
             .padding(AppSpacing.md)
