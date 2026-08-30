@@ -12,6 +12,7 @@ struct EmailAuthView: View {
     @State private var name = ""
     @State private var email = ""
     @State private var password = ""
+    @State private var showPassword = false
     @State private var working = false
 
     private var canSubmit: Bool {
@@ -39,7 +40,28 @@ struct EmailAuthView: View {
                         .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    SecureField("סיסמה (לפחות 6 תווים)", text: $password)
+                    // Password row: pinned LTR like the email field (in the RTL
+                    // form the secure dots drifted to the RIGHT — Rani), with an
+                    // 👁 reveal toggle so users can verify what they typed.
+                    HStack {
+                        Group {
+                            if showPassword {
+                                TextField("סיסמה (לפחות 6 תווים)", text: $password)
+                                    .textInputAutocapitalization(.never)
+                                    .autocorrectionDisabled()
+                            } else {
+                                SecureField("סיסמה (לפחות 6 תווים)", text: $password)
+                            }
+                        }
+                        .environment(\.layoutDirection, .leftToRight)
+                        .multilineTextAlignment(.leading)
+                        Button { showPassword.toggle() } label: {
+                            Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel(showPassword ? "הסתר סיסמה" : "הצג סיסמה")
+                    }
                 }
 
                 if mode == .signIn {
