@@ -205,9 +205,12 @@ struct ChildTimeApp: App {
                     AppAnalytics.setSubscribed(subs.isPremium)
                     // Screen Time (Family Controls) is only needed where apps get
                     // shielded: a CHILD device. A parent's own phone must not be
-                    // prompted for it on every launch — the parent flows that DO
-                    // need it (Kid Mode, remote quick-open) request it themselves.
-                    if settings.deviceRole != .parent {
+                    // prompted — and neither may a FRESH install still on the
+                    // role picker (role .unset counted as "not parent" and the
+                    // scary system dialog popped before the family chose
+                    // anything). Prompt ONLY on an actual child device; parent
+                    // flows that need it (Kid Mode, quick-open) ask themselves.
+                    if settings.deviceRole == .child {
                         await shields.requestAuthorizationIfNeeded()
                     } else {
                         shields.refreshStatus()

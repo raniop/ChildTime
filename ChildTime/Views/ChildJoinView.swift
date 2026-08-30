@@ -110,6 +110,28 @@ struct ChildJoinView: View {
                             .multilineTextAlignment(.center)
                     }
 
+                    // First-time families who started on the KID's device used to
+                    // hit a dead end here ("scan a code" — what code?). Give them
+                    // the roadmap + a one-tap way to send Tofy to the parent.
+                    VStack(spacing: 6) {
+                        Text("עוֹד אֵין לָכֶם טוֹפִי אֵצֶל הַהוֹרֶה?")
+                            .font(.system(size: 14.5, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                        Text("1️⃣ מוֹרִידִים אֶת טוֹפִי בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה\n2️⃣ נִרְשָׁמִים וְיוֹצְרִים שָׁם אֶת הַיְלָדִים\n3️⃣ חוֹזְרִים לְכָאן וְסוֹרְקִים אֶת הַקּוֹד")
+                            .font(.system(size: 13.5, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.85))
+                            .multilineTextAlignment(.center)
+                        ShareLink(item: URL(string: "https://tofyapp.com")!) {
+                            Label("שִׁלְחוּ אֶת טוֹפִי לַמַּכְשִׁיר שֶׁל הַהוֹרֶה", systemImage: "square.and.arrow.up")
+                                .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 14).padding(.vertical, 8)
+                                .background(.white.opacity(0.14), in: Capsule())
+                        }
+                        .padding(.top, 2)
+                    }
+                    .padding(.top, 6)
+
                     // Escape hatch: a child device blocks app deletion, so a device
                     // stranded HERE (can't reach the in-app parent controls) would be
                     // impossible to uninstall. This lets a parent — with the code —

@@ -39,7 +39,10 @@ struct RolePickerView: View {
                         roleCard(
                             emoji: "🧒",
                             title: "הַמַּכְשִׁיר שֶׁל הַיֶּלֶד",
-                            subtitle: "לְשַׂחֵק וְלִלְמוֹד",
+                            // First-install guidance (Rani): families who start
+                            // on the KID's device hit a scan screen with no code
+                            // to scan — say up front that the parent goes first.
+                            subtitle: "לְשַׂחֵק וְלִלְמוֹד · מַתְחִילִים קֹדֶם בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה",
                             glow: AppColor.companionGlow
                         ) { choose(.child) }
 
@@ -107,11 +110,11 @@ struct RolePickerView: View {
         Haptic.medium()
         settings.deviceRole = role
         AppAnalytics.roleChosen(role == .parent ? "parent" : "child")
-        // A parent's device wants live events + reports, so ask for notification
-        // permission right here (the iOS "Allow Notifications" prompt).
-        if role == .parent {
-            Task { await PushManager.shared.requestAuthorization() }
-        }
+        // NO permission prompts here (E2E test with Rani, 2026-08-30): asking
+        // for notifications at role-pick landed the iOS dialog ON the login
+        // screen — before the app showed any value, the moment users tap
+        // "Don't Allow". The parent dashboard asks when the parent is already
+        // inside; a child device asks in its own flow.
     }
 }
 
