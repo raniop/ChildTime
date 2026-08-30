@@ -1212,8 +1212,11 @@ exports.adminFamiliesOverview = onCall(
       const strip = (s) => String(s || "").normalize("NFD").replace(/[֑-ׇ]/g, "").trim();
       const demoNames = new Set(["דנה", "יואב"]);
       const named = Object.values(d.parentNames || {}).filter((n) => String(n || "").trim());
-      const isDemo = (d.familyLabel || "").includes("🧪") ||
-        (named.length === 0 && kids.length > 0 && kids.every((k) => demoNames.has(strip(k.name))));
+      // Explicit admin flag wins in BOTH directions; auto-detection (🧪 label
+      // or the seed-name signature) only applies when no flag was set.
+      const isDemo = d.demo === true ? true : d.demo === false ? false :
+        ((d.familyLabel || "").includes("🧪") ||
+         (named.length === 0 && kids.length > 0 && kids.every((k) => demoNames.has(strip(k.name)))));
       families.push({
         id: h.id.slice(0, 8),
         fullId: h.id,     // needed by the admin actions (admin-only page)
@@ -1280,7 +1283,7 @@ exports.adminDeleteHousehold = onCall(
       // it was never a real family. Everything else must be truly dormant.
       const strip = (s) => String(s || "").normalize("NFD").replace(/[֑-ׇ]/g, "").trim();
       const demoNames = new Set(["דנה", "יואב"]);
-      const isDemo = (d.familyLabel || "").includes("🧪") ||
+      const isDemo = d.demo === true || (d.familyLabel || "").includes("🧪") ||
         kids.docs.every((k) => demoNames.has(strip(k.data().name)));
       if (!isDemo) {
         const cutoff = Date.now() - 30 * 86400 * 1000;
@@ -1348,6 +1351,30 @@ exports.adminUnlinkParentUID = onCall(
     }
     console.log("[adminUnlinkParentUID]", email, "unlinked anonymous uid", uid.slice(0, 8), "from", hhID);
     return { ok: true };
+  }
+);
+
+// Flag / unflag a household as DEMO (shown in the admin page's 🧪 section).
+// Explicit flag overrides auto-detection both ways. Display-only power: the
+// delete path STILL refuses any household with a named parent, so flagging a
+// real family as demo cannot make it deletable.
+exports.adminSetDemoFlag = onCall(
+  { timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    const email = (request.auth && request.auth.token && request.auth.token.email || "").toLowerCase();
+    if (!email || !ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(email)) {
+      throw new HttpsError("permission-denied", "Not an authorized admin.");
+    }
+    const hhID = String(request.data && request.data.householdID || "");
+    if (!/^[0-9A-Fa-f-]{36}$/.test(hhID)) {
+      throw new HttpsError("invalid-argument", "householdID must be a UUID.");
+    }
+    const demo = request.data && request.data.demo === true;
+    const ref = db.collection("households").doc(hhID);
+    if (!(await ref.get()).exists) throw new HttpsError("not-found", "Household not found.");
+    await ref.update({ demo });
+    console.log("[adminSetDemoFlag]", email, hhID, "→ demo:", demo);
+    return { ok: true, demo };
   }
 );
 

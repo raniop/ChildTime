@@ -267,7 +267,9 @@ function render() {
           <button class="chip dim" style="border:0;cursor:pointer;font-family:inherit"
               title="ערוך שם משפחה (תווית ניהול)"
               onclick="event.stopPropagation(); editLabel('${f.fullId}', this)">✏️</button>
-          ${f.isDemo ? `<span class="chip" style="background:rgba(155,93,229,.35)">🧪 דמו</span>` : ""}
+          <button class="chip ${f.isDemo ? "" : "dim"}" style="border:0;cursor:pointer;font-family:inherit;${f.isDemo ? "background:rgba(155,93,229,.45)" : ""}"
+              title="${f.isDemo ? "החזר את המשפחה לרשימה הרגילה" : "העבר את המשפחה למקטע הדמו"}"
+              onclick="event.stopPropagation(); toggleDemo('${f.fullId}', ${f.isDemo ? "false" : "true"}, this)">${f.isDemo ? "🧪 דמו ↩️" : "🧪 לדמו"}</button>
           ${isDeletable(f) ? `<button class="chip pink" style="border:0;cursor:pointer;font-family:inherit"
               onclick="event.stopPropagation(); deleteHousehold('${f.fullId}', this)">🗑 מחק</button>` : ""}
           ${(isDormantNameless(f) || (f.isDemo && f.children.length > 0)) ? `<button class="chip pink" style="border:0;cursor:pointer;font-family:inherit"
@@ -336,6 +338,20 @@ function isDormantNameless(f) {
     !f.parents.some((p) => (p.name || "").trim()) &&
     (!f.lastActiveAt || (Date.now()/1000 - f.lastActiveAt) > 86400*30);
 }
+
+window.toggleDemo = async (fullId, makeDemo, btn) => {
+  btn.disabled = true;
+  try {
+    const call = fns.httpsCallable(functionsI, "adminSetDemoFlag");
+    await call({ householdID: fullId, demo: makeDemo });
+    const f = DATA.families.find((x) => x.fullId === fullId);
+    if (f) f.isDemo = makeDemo;
+    render();
+  } catch (e) {
+    btn.disabled = false;
+    alert("הפעולה נכשלה: " + (e.message || e.code));
+  }
+};
 
 window.editLabel = async (fullId, btn) => {
   const f = DATA.families.find((x) => x.fullId === fullId);
