@@ -328,6 +328,12 @@ struct ParentGateView<Content: View>: View {
                 : "הַזִּינוּ שׁוּב אֶת הַקּוֹד לְאִשּׁוּר"
         }
         if let reason = gateReason { return reason }
+        // A co-parent's FIRST entry on this device: the family code exists in
+        // the cloud but was never typed here — and nobody told them a code
+        // exists. Point them at the person who knows it (Rani).
+        if !settings.hasSetParentPIN, household.householdPIN != nil {
+            return "זֶהוּ קוֹד הַהוֹרֶה הַמִּשְׁפַּחְתִּי · בַּקְּשׁוּ אוֹתוֹ מֵהַהוֹרֶה שֶׁהִזְמִין אֶתְכֶם"
+        }
         return "הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת"
     }
 

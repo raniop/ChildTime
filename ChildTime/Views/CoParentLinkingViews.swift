@@ -60,6 +60,10 @@ struct AddParentView: View {
             "הַתְקִינוּ אֶת אַפְּלִיקַצְיַת טוֹפִי",
             "בְּמָסַךְ הַפְּתִיחָה הַקִּישׁוּ \u{201C}כְּבָר יֵשׁ לָכֶם מִשְׁפָּחָה? הִצְטָרְפוּ\u{201D}",
             "הִתְחַבְּרוּ, וְסִרְקוּ אֶת הַקּוֹד שֶׁכָּאן (אוֹ הַקְלִידוּ אוֹתוֹ)",
+            // The joiner hits the parent-code gate right after — and nobody
+            // told them a code exists. Say it here, to the person who KNOWS it
+            // (verbally — a gate code doesn't belong in a WhatsApp message).
+            "בַּכְּנִיסָה יִתְבַּקֵּשׁ קוֹד הַהוֹרֶה — מִסְרוּ לוֹ אֶת הַקּוֹד שֶׁלָּכֶם בְּעַל־פֶּה 🔑",
         ])
 
         codeCard

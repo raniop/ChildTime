@@ -1237,6 +1237,12 @@ struct ParentDashboardView: View {
                 }
             }
             .padding(.top, 4)
+            // Room for the overlaid "connect a device" pill (see the grid) — a
+            // child with NO device is a family stuck mid-onboarding; the next
+            // step should come to them, not hide in the detail page (Rani).
+            if (household.devicesByChild[profile.id.uuidString] ?? []).isEmpty {
+                Color.clear.frame(height: 34)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16).padding(.horizontal, 12)
@@ -1531,6 +1537,27 @@ struct ParentDashboardView: View {
                     .overlay(alignment: .topTrailing) {
                         gridCardMenu(row.profile)
                             .padding(8)
+                    }
+                    // 📱 No device connected yet → the next onboarding step is a
+                    // tap away, right on the card. Overlaid (not inside the
+                    // NavigationLink) so the tap isn't swallowed by navigation.
+                    .overlay(alignment: .bottom) {
+                        if isRoot, (household.devicesByChild[row.profile.id.uuidString] ?? []).isEmpty {
+                            Button {
+                                Haptic.light()
+                                qrCode = nil
+                                qrChild = row.profile
+                            } label: {
+                                Label("חַבְּרוּ מַכְשִׁיר", systemImage: "qrcode")
+                                    .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 12).padding(.vertical, 7)
+                                    .background(AppGradient.purpleDream, in: Capsule())
+                                    .glow(AppColor.gemPurple, radius: 6)
+                            }
+                            .buttonStyle(.borderless)
+                            .padding(.bottom, 12)
+                        }
                     }
                     .contextMenu {
                         Button {
