@@ -625,11 +625,25 @@ struct ParentDashboardView: View {
                         ProgressView().tint(.white).scaleEffect(1.3).frame(height: 230)
                     }
 
-                    Text("בַּמַּכְשִׁיר שֶׁל \(child.name): פִּתְחוּ אֶת טוֹפִּי, בַּחֲרוּ \"הַמַּכְשִׁיר שֶׁל הַיֶּלֶד\", וְסִרְקוּ אֶת הַקּוֹד — וְהוּא יִכָּנֵס יְשִׁירוֹת לְשַׂחֵק.")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, AppSpacing.lg)
+                    // Numbered steps — parents missed that Tofy must be
+                    // DOWNLOADED on the kid's device first (Rani, live E2E).
+                    VStack(alignment: .trailing, spacing: 5) {
+                        Text("1️⃣  הוֹרִידוּ אֶת טוֹפִי מֵה־App Store בַּמַּכְשִׁיר שֶׁל \(child.name) (אַיְפֵּד אוֹ אַיְפוֹן)")
+                        Text("2️⃣  פִּתְחוּ שָׁם אֶת טוֹפִי וּבַחֲרוּ \"הַמַּכְשִׁיר שֶׁל הַיֶּלֶד\"")
+                        Text("3️⃣  סִרְקוּ אֶת הַקּוֹד — וְ\(child.name) נִכְנָס יְשִׁירוֹת לְשַׂחֵק 🎉")
+                    }
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .multilineTextAlignment(.trailing)
+                    .padding(.horizontal, AppSpacing.lg)
+
+                    ShareLink(item: URL(string: "https://tofyapp.com")!) {
+                        Label("שִׁלְחוּ אֶת טוֹפִי לַמַּכְשִׁיר שֶׁל \(child.name)", systemImage: "square.and.arrow.up")
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16).padding(.vertical, 9)
+                            .background(.white.opacity(0.16), in: Capsule())
+                    }
 
                     Button("סְגוֹר") { closeQRSheet() }
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
