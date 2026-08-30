@@ -219,11 +219,14 @@ function render() {
     f.children.some((k) => (k.name||"").toLowerCase().includes(q));
 
   const renderFamily = (f) => {
+    const guest = f.parents.find((p) => p.isGuestParent);
     const pnames = (f.familyLabel ? "🏷 " + esc(f.familyLabel) : "")
       || f.parents.filter((p) => p.name).map((p) => esc(p.name)).join(", ")
-      || (f.children.length ? "משפחה ללא שם" : "הרשמה ללא משפחה");
+      || (guest ? "מִשְׁפַּחַת אוֹרֵחַ — הוֹרֶה לְלֹא הַרְשָׁמָה"
+                : (f.children.length ? "משפחה ללא שם" : "הרשמה ללא משפחה"));
     const pmails = f.parents.filter((p) => p.email).map((p) => esc(p.email)).join(" · ");
-    const anon = f.parents.filter((p) => p.anonymous).length;
+    // Child-device accounts only — the guest PARENT is not a "child device".
+    const anon = f.parents.filter((p) => p.anonymous && !p.isGuestParent).length;
     const stale = !f.lastActiveAt || (Date.now()/1000 - f.lastActiveAt) > 86400*14;
     const kidRows = f.children.map((k) => {
       const devList = (k.deviceRows || []).map((d) => {
@@ -258,6 +261,8 @@ function render() {
           ${pmails ? `<div class="fmail">${pmails}</div>` : ""}
         </div>
         <div class="fmeta">
+          ${guest ? `<span class="chip" style="background:rgba(255,210,63,.25)"
+              title="ההורה משתמש בטופי בלי חשבון רשום — זה החשבון האנונימי שלו">👤 הורה אורח · ${guest.uid.slice(0,8)}</span>` : ""}
           <span class="chip mint">${f.children.length} ילדים</span>
           ${anon ? `<button class="chip dim" style="border:0;cursor:pointer;font-family:inherit"
               title="חשבונות אנונימיים של מכשירי ילד — לחצו לפירוט וניקוי"
@@ -278,7 +283,7 @@ function render() {
         </div>
       </div>
       <div class="anonlist" hidden style="padding:8px 18px 12px; border-top:1px solid rgba(255,255,255,.08)">
-        ${f.parents.filter((p) => p.anonymous).map((p) => {
+        ${f.parents.filter((p) => p.anonymous && !p.isGuestParent).map((p) => {
           // Prefer the device-link signal (hasLiveDevice, from ownerUID-stamped
           // rows): true = owns a live device, false = provably dead. Old data
           // (null) falls back to the parents-doc update time.

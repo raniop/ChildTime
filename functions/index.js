@@ -1200,6 +1200,9 @@ exports.adminFamiliesOverview = onCall(
         name: (d.parentNames || {})[uid] || parentInfo[uid]?.name || null,
         email: parentInfo[uid]?.email || null,
         anonymous: !parentInfo[uid]?.email,
+        // The household CREATOR with an anonymous account is a GUEST PARENT
+        // (using Tofy without signing up) — not a child device's account.
+        isGuestParent: uid === d.createdBy && !parentInfo[uid]?.email,
         lastUpdateAt: parentInfo[uid]?.updatedAt || null,
         // true = owns a device row seen <14d; false = uid-stamped rows exist
         // but none is this uid's (dead account); null = no stamp data yet
