@@ -843,6 +843,11 @@ struct ParentDashboardView: View {
                         Label("ערוך פרופיל (שם, גיל)", systemImage: "pencil")
                     }
                     Button {
+                        choresProfile = profile
+                    } label: {
+                        Label("מטלות הבית 🧹", systemImage: "checklist")
+                    }
+                    Button {
                         difficultyProfile = profile
                     } label: {
                         Label("רמת קושי", systemImage: "slider.horizontal.3")
