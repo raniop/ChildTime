@@ -148,10 +148,10 @@ struct LoginGateView: View {
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.3), radius: 3)
 
-            VStack(spacing: 8) {
-                bullet("📚", "לומדים — ומרוויחים זמן מסך")
-                bullet("👀", "רואים הכל, מכל מכשיר")
-                bullet("🔒", "פרטי לגמרי, רק שלכם")
+            VStack(spacing: 9) {
+                bullet("📚", "לומדים ומרוויחים", "תשובה = דקות מסך")
+                bullet("👀", "רואים הכל", "התקדמות חיה, מכל מכשיר")
+                bullet("🔒", "פרטי לגמרי", "הנתונים נשארים אצלכם")
             }
             .padding(AppSpacing.md)
             .frame(maxWidth: 360)   // match the sign-in buttons' width
@@ -168,15 +168,22 @@ struct LoginGateView: View {
         .offset(y: ctaAppear ? 0 : 14)
     }
 
-    private func bullet(_ emoji: String, _ text: String) -> some View {
-        // CENTERED (Rani) — the equal-length lines read as one tidy block.
-        HStack(spacing: 8) {
+    // Right-aligned rows (Rani's final direction): a short BOLD lead, then a
+    // lighter explainer that fills the line — all three rows balanced to the
+    // same visual length so the card reads as one tidy block.
+    private func bullet(_ emoji: String, _ lead: String, _ rest: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
             Text(emoji).font(.system(size: 20))
-            Text(text)
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white)
+            (Text(lead)
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundColor(.white)
+             + Text(" — \(rest)")
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundColor(.white.opacity(0.82)))
+                .frame(maxWidth: .infinity, alignment: .leading)   // RTL → right
+                .lineLimit(1)                    // one tidy line per row, always
+                .minimumScaleFactor(0.8)
         }
-        .frame(maxWidth: .infinity, alignment: .center)
     }
 
     private var limitBannerView: some View {
