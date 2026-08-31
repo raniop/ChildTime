@@ -73,12 +73,14 @@ struct LoginGateView: View {
                             settings.pendingJoinFamily = false
                             settings.deviceRole = .unset
                         } label: {
-                            Label("חֲזָרָה", systemImage: "chevron.backward")
-                                .font(.system(size: 15, weight: .bold, design: .rounded))
+                            // Icon-only (Rani): the chevron says it all.
+                            Image(systemName: "chevron.backward")
+                                .font(.system(size: 16, weight: .bold))
                                 .foregroundStyle(.white)
-                                .padding(.horizontal, 14).padding(.vertical, 8)
-                                .background(.white.opacity(0.16), in: Capsule())
+                                .frame(width: 40, height: 40)
+                                .background(.white.opacity(0.16), in: Circle())
                         }
+                        .accessibilityLabel("חזרה")
                         Spacer()
                     }
                     Spacer()
@@ -143,9 +145,12 @@ struct LoginGateView: View {
                 .shadow(color: .black.opacity(0.3), radius: 3)
 
             VStack(spacing: 8) {
-                bullet("👨‍👩‍👧‍👦", "עד 4 פרופילים לילדים, נשמרים בענן")
-                bullet("📱", "אותה התקדמות ב-iPad וב-iPhone")
-                bullet("🔒", "פרטי בלבד — רק אתם ולא משותף")
+                // Benefit-first (Rani picked option B): remind the parent WHY
+                // they're here, right before the commitment of signing up —
+                // not a dry feature/spec list ("עד 4 פרופילים").
+                bullet("📚", "הילד לומד ומרוויח זמן מסך — מהרגע הראשון")
+                bullet("👀", "אתם רואים הכל — מכל מכשיר, בזמן אמת")
+                bullet("🔒", "פרטי לחלוטין — נתוני הילדים שלכם בלבד")
             }
             .padding(AppSpacing.md)
             .frame(maxWidth: 360)   // match the sign-in buttons' width
