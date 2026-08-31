@@ -86,7 +86,9 @@ struct LoginGateView: View {
                     Spacer()
                 }
                 .padding(.horizontal, AppSpacing.md)
-                .padding(.top, AppSpacing.sm)
+                // Vertically centered against the "היי! אני טופי" bubble
+                // (Rani) — the two share the same top band.
+                .padding(.top, 22)
             }
         }
         .onAppear { runEntranceSequence() }
@@ -137,6 +139,8 @@ struct LoginGateView: View {
 
     // MARK: - Value props
 
+    // Benefit-first card (Rani settled on B) — three SHORT lines of matching
+    // length, so the card reads as a tidy block instead of a ragged list.
     private var valueProps: some View {
         VStack(spacing: 10) {
             Text("היכנסו כדי להתחיל")
@@ -145,12 +149,9 @@ struct LoginGateView: View {
                 .shadow(color: .black.opacity(0.3), radius: 3)
 
             VStack(spacing: 8) {
-                // Benefit-first (Rani picked option B): remind the parent WHY
-                // they're here, right before the commitment of signing up —
-                // not a dry feature/spec list ("עד 4 פרופילים").
-                bullet("📚", "הילד לומד ומרוויח זמן מסך — מהרגע הראשון")
-                bullet("👀", "אתם רואים הכל — מכל מכשיר, בזמן אמת")
-                bullet("🔒", "פרטי לחלוטין — נתוני הילדים שלכם בלבד")
+                bullet("📚", "לומדים — ומרוויחים זמן מסך")
+                bullet("👀", "רואים הכל, מכל מכשיר")
+                bullet("🔒", "פרטי לגמרי, רק שלכם")
             }
             .padding(AppSpacing.md)
             .frame(maxWidth: 360)   // match the sign-in buttons' width
@@ -168,13 +169,14 @@ struct LoginGateView: View {
     }
 
     private func bullet(_ emoji: String, _ text: String) -> some View {
-        HStack(spacing: 10) {
-            Text(emoji).font(.system(size: 22))
+        // CENTERED (Rani) — the equal-length lines read as one tidy block.
+        HStack(spacing: 8) {
+            Text(emoji).font(.system(size: 20))
             Text(text)
                 .font(.system(size: 15, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 
     private var limitBannerView: some View {
