@@ -227,6 +227,32 @@ final class RemoteSyncManager: ObservableObject {
         #endif
     }
 
+    /// One-shot sweep of the child DOC's pending parent commands (gift, ±minutes,
+    /// reset, gift-revoke). The doc listener consumes commands only on CHANGE
+    /// events while this device is already being the child — so a command issued
+    /// BEFORE that (parent gives 💝 60, then enters Kid Mode) sat pending
+    /// forever. Kid Mode entry calls this to catch up; the read+zero transactions
+    /// inside the apply helpers keep everything exactly-once even if the child's
+    /// own device consumes concurrently.
+    func consumePendingCommandsNow(for childID: UUID) async {
+        #if canImport(FirebaseFirestore)
+        let s = ParentSettings.shared
+        let isBoundChildDevice = s.deviceRole == .child && s.joinedChildID == childID.uuidString
+        let isKidModeForThis = KidModeManager.shared.active && KidModeManager.shared.childID == childID
+        guard isBoundChildDevice || isKidModeForThis else { return }
+        guard let doc = try? await db.collection("children").document(childID.uuidString).getDocument(),
+              let d = doc.data() else { return }
+        TofyLink("consumePendingCommandsNow: child=\(childID.uuidString.prefix(8)) adj=\(d["pendingMinuteAdjustment"] ?? 0) gift=\(d["pendingGiftAdjustment"] ?? 0) reset=\(d["resetRequestedAt"] != nil) revoke=\(d["revokeGiftAt"] != nil)")
+        if ((d["pendingMinuteAdjustment"] as? Int) ?? 0) != 0 { applyPendingMinuteGrant(childID: childID) }
+        let revokeRequested = d["revokeGiftAt"] != nil
+        if ((d["pendingGiftAdjustment"] as? Int) ?? 0) != 0 && !revokeRequested {
+            applyPendingGift(childID: childID)   // else: applied after the revoke
+        }
+        if d["resetRequestedAt"] != nil { applyPendingReset(childID: childID) }
+        if revokeRequested { applyPendingGiftRevoke(childID: childID) }
+        #endif
+    }
+
     /// PARENT: reset a child's progress everywhere.
     ///
     /// Why not just push a blank snapshot? Uploads are RATCHET-merged (they can

@@ -78,6 +78,10 @@ final class KidModeManager: ObservableObject {
 
         ShieldManager.shared.applyLockAllExcept(allowedSelection)
         active = true
+        // Commands issued BEFORE this moment (💝 gift, ± minutes, reset) were
+        // skipped by the doc listener — it only consumes while the device is
+        // already being this child. Sweep them now that Kid Mode is on.
+        await RemoteSyncManager.shared.consumePendingCommandsNow(for: id)
         Haptic.success()
     }
 
