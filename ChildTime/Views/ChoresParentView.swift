@@ -19,6 +19,31 @@ struct ChoresParentView: View {
 
     private static let emojiOptions = ["🧹", "🛏", "🍽", "🗑", "👕", "🐕", "🪴", "🎒", "🧸", "🛒"]
 
+    /// 💡 Ready-made chore ideas — one tap fills the form (the parent still
+    /// picks the rewards). Ideas already on the child's list are hidden.
+    private static let presets: [(emoji: String, title: String)] = [
+        ("🛏", "לסדר את המיטה"),
+        ("🧸", "לאסוף את הצעצועים"),
+        ("🍽", "לפנות את הצלחת מהשולחן"),
+        ("🍴", "לערוך את השולחן לארוחה"),
+        ("🎒", "להכין את התיק לבית הספר"),
+        ("👕", "לשים בגדים בסל הכביסה"),
+        ("🧺", "לעזור בקיפול כביסה"),
+        ("🗑", "להוריד את הזבל"),
+        ("🐕", "להאכיל את חיית המחמד"),
+        ("🪴", "להשקות את העציצים"),
+        ("🧹", "לטאטא את החדר"),
+        ("📚", "לסדר את שולחן הכתיבה"),
+        ("👟", "לסדר את הנעליים בכניסה"),
+        ("🛒", "לעזור בסידור הקניות"),
+        ("🍳", "לעזור בהכנת ארוחה"),
+    ]
+
+    private var unusedPresets: [(emoji: String, title: String)] {
+        let existing = Set(myChores.map(\.title))
+        return Self.presets.filter { !existing.contains($0.title) }
+    }
+
     private var myChores: [Chore] { choreStore.chores(forChild: profile.id) }
     private var pending: [Chore] { myChores.filter { $0.isPendingApproval } }
     private var rest: [Chore] { myChores.filter { !$0.isPendingApproval } }
@@ -71,6 +96,32 @@ struct ChoresParentView: View {
                         .onDelete { idx in
                             idx.map { rest[$0] }.forEach { choreStore.deleteChore($0) }
                         }
+                }
+
+                if !unusedPresets.isEmpty {
+                    Section("רעיונות למטלות 💡") {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(unusedPresets, id: \.title) { preset in
+                                    Button {
+                                        newTitle = preset.title
+                                        newEmoji = preset.emoji
+                                        Haptic.light()
+                                    } label: {
+                                        Text("\(preset.emoji) \(preset.title)")
+                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 8)
+                                            .background(Color.accentColor.opacity(0.12), in: Capsule())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
+                        Text("לחיצה על רעיון ממלאת את הטופס למטה — נשאר רק לבחור פרסים ולהוסיף.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
                 }
 
                 Section("מטלה חדשה ➕") {
