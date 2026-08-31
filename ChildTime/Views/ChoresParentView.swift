@@ -7,9 +7,23 @@ import SwiftUI
 /// settles the 🪙 money pocket, retunes any chore's rewards, hides catalog
 /// chores or adds custom ones.
 struct ChoresParentView: View {
-    let profile: Profile
+    /// The child the screen opened on — a segmented picker switches between
+    /// ALL the kids without leaving the screen (Rani: "אין לי דרך לראות מטלות
+    /// של כל הילדים").
+    let initialProfile: Profile
     @StateObject private var choreStore = ChoreStore.shared
+    @StateObject private var profilesStore = ProfileStore.shared
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedID: UUID
+
+    init(profile: Profile) {
+        self.initialProfile = profile
+        _selectedID = State(initialValue: profile.id)
+    }
+
+    private var profile: Profile {
+        profilesStore.profiles.first { $0.id == selectedID } ?? initialProfile
+    }
 
     // Add/edit form. `editing` non-nil → the form edits that chore.
     @State private var editing: Chore?
@@ -34,6 +48,20 @@ struct ChoresParentView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if profilesStore.profiles.count > 1 {
+                    Section {
+                        Picker("ילד/ה", selection: $selectedID) {
+                            ForEach(profilesStore.profiles) { p in
+                                // 🕐 marks a kid with a chore waiting for approval.
+                                Text(choreStore.chores(forChild: p.id).contains(where: { $0.isPendingApproval })
+                                     ? "\(p.name) 🕐" : p.name)
+                                    .tag(p.id)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                }
+
                 if !pending.isEmpty {
                     Section("מחכה לאישור שלכם 🕐") {
                         ForEach(pending) { chore in pendingRow(chore) }
@@ -147,6 +175,7 @@ struct ChoresParentView: View {
                 ToolbarItem(placement: .topBarLeading) { Button("סגור") { dismiss() } }
             }
             .onAppear { choreStore.startIfNeeded() }
+            .onChangeCompat(of: selectedID) { _, _ in clearForm() }
         }
     }
 

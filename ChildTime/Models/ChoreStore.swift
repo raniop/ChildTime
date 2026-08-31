@@ -168,8 +168,8 @@ final class ChoreStore: ObservableObject {
         ("preset-laundry",   "🧺", "לעזור בקיפול כביסה",       20, 10, 1),
         ("preset-groceries", "🛒", "לעזור בסידור הקניות",      20, 10, 1),
         ("preset-cooking",   "🍳", "לעזור בהכנת ארוחה",        20, 10, 1),
-        ("preset-sibling",   "👫", "לשחק עם אח או אחות",       10,  5, 2),
-        ("preset-outfit",    "🎽", "לסדר תלבושת לבית הספר",     5,  2, 1),
+        ("preset-sibling",   "🎲", "לשחק עם אח או אחות",       10,  5, 2),
+        ("preset-outfit",    "👔", "לסדר תלבושת לבית הספר",     5,  2, 1),
         ("preset-closet",    "🧥", "לסדר את הארון",            15,  7, 1),
     ]
 
