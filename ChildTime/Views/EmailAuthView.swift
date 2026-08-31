@@ -74,6 +74,9 @@ struct EmailAuthView: View {
                     }
                 }
 
+                if let info = auth.infoMessage {
+                    Section { Text(info).foregroundStyle(.green).font(.caption) }
+                }
                 if let err = auth.lastError {
                     Section { Text(err).foregroundStyle(.red).font(.caption) }
                 }

@@ -215,6 +215,7 @@ final class AuthManager: ObservableObject {
     // MARK: - Email / password
 
     func signUpWithEmail(_ email: String, password: String, displayName: String?) async {
+        infoMessage = nil
         #if canImport(FirebaseAuth)
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
@@ -236,6 +237,7 @@ final class AuthManager: ObservableObject {
 
     func signInWithEmail(_ email: String, password: String) async {
         #if canImport(FirebaseAuth)
+        infoMessage = nil
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             apply(firebaseUser: result.user)
@@ -249,11 +251,18 @@ final class AuthManager: ObservableObject {
         #endif
     }
 
+    /// Positive feedback line (e.g. "reset link sent") — the auth sheet shows
+    /// it in green. Cleared on every new attempt.
+    @Published var infoMessage: String?
+
     func sendPasswordReset(to email: String) async {
         #if canImport(FirebaseAuth)
+        infoMessage = nil
         do {
             try await Auth.auth().sendPasswordReset(withEmail: email)
             lastError = nil
+            // The button used to "do nothing" visibly (Rani) — say what happened.
+            infoMessage = "שלחנו קישור לאיפוס הסיסמה אל \(email) — בדקו את המייל (גם בספאם)"
         } catch {
             lastError = mapAuthError(error)
         }
@@ -263,12 +272,20 @@ final class AuthManager: ObservableObject {
     private func mapAuthError(_ error: Error) -> String {
         let ns = error as NSError
         switch ns.code {
-        case 17007: return "האימייל כבר רשום"
-        case 17008: return "כתובת אימייל לא תקינה"
-        case 17009: return "סיסמה שגויה"
-        case 17011: return "לא נמצא משתמש עם אימייל זה"
-        case 17026: return "הסיסמה חלשה מדי (לפחות 6 תווים)"
-        default:    return "שגיאת התחברות: \(ns.localizedDescription)"
+        case 17004,        // ERROR_INVALID_CREDENTIAL — what modern Firebase
+                           // returns for a wrong email/password combo (it no
+                           // longer says WHICH is wrong). Raw English leaked
+                           // here ("supplied auth credential is malformed").
+             17009,        // wrong password (legacy)
+             17011:        // user not found (legacy)
+            return "האימייל או הסיסמה לא נכונים — נסו שוב, או הקישו \"שכחתי סיסמה\""
+        case 17007: return "כבר קיים חשבון עם האימייל הזה — עברו ללשונית \"כניסה\""
+        case 17008: return "כתובת האימייל לא תקינה — בדקו אותה שוב"
+        case 17026: return "הסיסמה קצרה מדי — לפחות 6 תווים"
+        case 17010: return "יותר מדי ניסיונות — המתינו דקה ונסו שוב"
+        case 17020: return "אין חיבור לאינטרנט — בדקו את הרשת ונסו שוב"
+        case 17005: return "החשבון הזה הושבת — פנו אלינו לתמיכה"
+        default:    return "משהו השתבש בהתחברות — נסו שוב בעוד רגע"
         }
     }
 
