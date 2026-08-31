@@ -167,25 +167,6 @@ struct WorldMapView: View {
                                 .frame(maxWidth: .infinity)
                             }
 
-                            // 🧹 Chores — only when the parent actually defined
-                            // some for this child; helping at home earns minutes
-                            // or pocket money (the KID picks which).
-                            if let cid = profiles.activeID, !choreStore.chores(forChild: cid).isEmpty {
-                                FeatureCard(
-                                    emoji: "🧹",
-                                    title: "מַטְלוֹת הַבַּיִת",
-                                    subtitle: choresSubtitle(for: cid),
-                                    gradient: LinearGradient(colors: [Color(hex: "F4A261"), Color(hex: "E76F51")],
-                                                             startPoint: .topLeading, endPoint: .bottomTrailing),
-                                    glowColor: Color(hex: "F4A261"),
-                                    badge: choresBadge(for: cid)
-                                ) {
-                                    Haptic.light()
-                                    showingChores = true
-                                }
-                                .frame(maxWidth: .infinity)
-                            }
-
                             // 🎮 Games LAST in the grid (Rani): learning worlds
                             // come first in the child's choice order; the arcade
                             // is the dessert at the end.
@@ -647,7 +628,12 @@ struct WorldMapView: View {
                 }
             }
             statsPanel
-            dailyChallengeCard
+            // אתגר יומי squeezed LEFT, מטלות הבית on its RIGHT (Rani) — the
+            // chores entry lives up here with the daily loop, not as a world.
+            HStack(spacing: 10) {
+                dailyChallengeCard
+                choresTopCard
+            }
         }
         .environment(\.layoutDirection, .leftToRight)
         .padding(isCompact ? 14 : 18)
@@ -656,119 +642,91 @@ struct WorldMapView: View {
         .eraseToAnyView()
     }
 
-    /// Daily challenge: answer N questions today → collect a reward, and keep the
-    /// 🔥 day-streak alive. The "don't break the streak" loop that brings kids back
-    /// every day. Forced RTL inside the LTR header so the Hebrew reads correctly.
+    /// Daily challenge — a compact vertical card, the exact TWIN of
+    /// `choresTopCard` (Rani: same size, side by side). Icon ring → title →
+    /// one status line → progress track. Tap → the explainer sheet.
     private var dailyChallengeCard: some View {
         let target = ProgressStore.dailyChallengeTarget
         let done = progress.dailyChallengeProgress
         let ready = progress.dailyChallengeRewardReady
         let claimed = progress.dailyChallengeClaimed
-        let frac = CGFloat(min(done, target)) / CGFloat(max(1, target))
+        let frac = (ready || claimed) ? 1 : CGFloat(min(done, target)) / CGFloat(max(1, target))
         return Button {
             Haptic.light()
             infoSheet = .dailyChallenge
         } label: {
-            VStack(spacing: 10) {
-                HStack(spacing: 10) {
-                    // A living flame in a fiery ring — the streak count rides it.
-                    ZStack(alignment: .bottomTrailing) {
-                        Circle()
-                            .fill(LinearGradient(colors: [Color(hex: "FFB347"), Color(hex: "FF5E3A")],
-                                                 startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .frame(width: 46, height: 46)
-                            .overlay(Circle().stroke(.white.opacity(0.55), lineWidth: 1.5))
-                            .glow(AppColor.flameOrange, radius: challengePulse ? 12 : 5)
-                        Text("🔥")
-                            .font(.system(size: 25))
-                            .scaleEffect(challengePulse ? 1.15 : 0.95)
-                            .frame(width: 46, height: 46)
-                        if progress.dayStreak > 0 {
-                            Text("\(progress.dayStreak)")
-                                .font(.system(size: 11, weight: .black, design: .rounded))
-                                .foregroundStyle(AppColor.textOnLight)
-                                .padding(.horizontal, 6).padding(.vertical, 2)
-                                .background(Capsule().fill(.white))
-                                .overlay(Capsule().stroke(AppColor.flameOrange, lineWidth: 1.2))
-                                .offset(x: 5, y: 5)
-                        }
+            VStack(spacing: 6) {
+                // A living flame in a fiery ring — the streak count rides it.
+                ZStack(alignment: .bottomTrailing) {
+                    Circle()
+                        .fill(LinearGradient(colors: [Color(hex: "FFB347"), Color(hex: "FF5E3A")],
+                                             startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .frame(width: 44, height: 44)
+                        .overlay(Circle().stroke(.white.opacity(0.55), lineWidth: 1.5))
+                        .glow(AppColor.flameOrange, radius: challengePulse ? 12 : 5)
+                    Text("🔥")
+                        .font(.system(size: 24))
+                        .scaleEffect(challengePulse ? 1.12 : 0.95)
+                        .frame(width: 44, height: 44)
+                    if progress.dayStreak > 0 {
+                        Text("\(progress.dayStreak)")
+                            .font(.system(size: 11, weight: .black, design: .rounded))
+                            .foregroundStyle(AppColor.textOnLight)
+                            .padding(.horizontal, 6).padding(.vertical, 2)
+                            .background(Capsule().fill(.white))
+                            .overlay(Capsule().stroke(AppColor.flameOrange, lineWidth: 1.2))
+                            .offset(x: 6, y: 4)
                     }
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("אֶתְגָּר יוֹמִי")
-                            .font(.system(size: 16, weight: .black, design: .rounded))
-                            .foregroundStyle(.white)
-                            .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
-                        let left = max(0, target - done)
-                        let leftText = left == 1 ? "עוֹד תְּשׁוּבָה אַחַת!" : "עוֹד \(left) תְּשׁוּבוֹת!"
-                        Text(claimed ? "כָּל הַכָּבוֹד! נִפְגָּשִׁים מָחָר 🌙"
-                             : ready ? "הַפְּרָס מְחַכֶּה לְךָ! ✨"
-                             : progress.dayStreak > 0
-                                ? "\(progress.dayStreak) יָמִים בְּרֶצֶף · \(leftText)"
-                                : "\(leftText.dropLast()) לַפְּרָס!")
-                            .font(.system(size: 12, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.88))
-                            .lineLimit(1).minimumScaleFactor(0.65)
-                    }
-                    Spacer(minLength: 6)
-
+                }
+                Text("אֶתְגָּר יוֹמִי")
+                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+                Group {
                     if claimed {
-                        ZStack {
-                            Circle().fill(AppColor.successMint.opacity(0.25)).frame(width: 38, height: 38)
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 17, weight: .black))
-                                .foregroundStyle(AppColor.successMint)
-                        }
+                        Text("כָּל הַכָּבוֹד! נִפְגָּשִׁים מָחָר 🌙")
+                            .font(.system(size: 11.5, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.88))
+                            .lineLimit(1).minimumScaleFactor(0.6)
                     } else if ready {
-                        HStack(spacing: 6) {
-                            Text("🎁").font(.system(size: 18))
-                                .scaleEffect(challengePulse ? 1.22 : 1)
+                        HStack(spacing: 4) {
+                            Text("🎁").font(.system(size: 14))
+                                .scaleEffect(challengePulse ? 1.18 : 1)
                                 .rotationEffect(.degrees(challengePulse ? 8 : -8))
                             Text("פִּתְחוּ!")
-                                .font(.system(size: 15, weight: .black, design: .rounded))
+                                .font(.system(size: 13, weight: .black, design: .rounded))
                                 .foregroundStyle(AppColor.textOnLight)
+                                .lineLimit(1).fixedSize()
                         }
-                        .padding(.horizontal, 14).padding(.vertical, 8)
+                        .padding(.horizontal, 12).padding(.vertical, 5)
                         .background(AppGradient.gold, in: Capsule())
                         .overlay(Capsule().stroke(.white.opacity(0.7), lineWidth: 1.2))
-                        .glow(AppColor.starGold, radius: challengePulse ? 15 : 7)
+                        .glow(AppColor.starGold, radius: challengePulse ? 12 : 6)
                     } else {
-                        Text("\(done)/\(target)")
-                            .font(.system(size: 15, weight: .black, design: .rounded))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 11).padding(.vertical, 6)
-                            .background(Capsule().fill(.white.opacity(0.16)))
-                            .overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: 1))
+                        let left = max(0, target - done)
+                        Text(left == 1 ? "עוֹד תְּשׁוּבָה אַחַת! · \(done)/\(target)"
+                                       : "עוֹד \(left) תְּשׁוּבוֹת · \(done)/\(target)")
+                            .font(.system(size: 11.5, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.88))
+                            .lineLimit(1).minimumScaleFactor(0.6)
                     }
                 }
+                .frame(height: 26)
 
-                // Chunky glowing progress track — a star (then trophy) rides the tip.
-                GeometryReader { geo in
-                    let fullW = geo.size.width
-                    let w = (ready || claimed) ? fullW : max(done > 0 ? 18 : 0, fullW * frac)
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(Color.white.opacity(0.14))
-                        if w > 0 {
-                            Capsule()
-                                .fill(ready || claimed
-                                      ? AnyShapeStyle(LinearGradient(colors: [AppColor.successMint, Color(hex: "06D6A0")],
-                                                                     startPoint: .leading, endPoint: .trailing))
-                                      : AnyShapeStyle(LinearGradient(colors: [Color(hex: "FFD23F"), AppColor.flameOrange],
-                                                                     startPoint: .leading, endPoint: .trailing)))
-                                .frame(width: w)
-                                .glow(ready || claimed ? AppColor.successMint : AppColor.starGold, radius: 5)
-                                .overlay(alignment: .trailing) {
-                                    Text(ready || claimed ? "🏆" : "⭐️")
-                                        .font(.system(size: 16))
-                                        .shadow(color: .black.opacity(0.3), radius: 2)
-                                        .offset(y: -1)
-                                }
-                        }
-                    }
-                }
-                .frame(height: 13)
+                headerTrack(frac: frac,
+                            fill: ready || claimed
+                                ? LinearGradient(colors: [AppColor.successMint, Color(hex: "06D6A0")],
+                                                 startPoint: .leading, endPoint: .trailing)
+                                : LinearGradient(colors: [Color(hex: "FFD23F"), AppColor.flameOrange],
+                                                 startPoint: .leading, endPoint: .trailing),
+                            glowColor: ready || claimed ? AppColor.successMint : AppColor.starGold,
+                            tip: frac > 0 ? (ready || claimed ? "🏆" : "⭐️") : nil)
             }
-            .padding(isCompact ? 12 : 14)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .frame(height: Self.headerCardHeight)
             .background(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .fill(LinearGradient(colors: [Color(hex: "FF5E7E").opacity(0.50),
@@ -791,6 +749,34 @@ struct WorldMapView: View {
             }
         }
         .eraseToAnyView()
+    }
+
+    /// Both header cards are exactly this tall — they must read as twins.
+    private static let headerCardHeight: CGFloat = 148
+
+    /// The shared progress track at the foot of both header cards.
+    private func headerTrack(frac: CGFloat, fill: LinearGradient, glowColor: Color, tip: String?) -> some View {
+        GeometryReader { geo in
+            let w = frac <= 0 ? 0 : max(16, geo.size.width * min(frac, 1))
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.white.opacity(0.14))
+                if w > 0 {
+                    Capsule()
+                        .fill(fill)
+                        .frame(width: w)
+                        .glow(glowColor, radius: 4)
+                        .overlay(alignment: .trailing) {
+                            if let tip {
+                                Text(tip)
+                                    .font(.system(size: 13))
+                                    .shadow(color: .black.opacity(0.3), radius: 2)
+                                    .offset(y: -1)
+                            }
+                        }
+                }
+            }
+        }
+        .frame(height: 10)
     }
 
     /// Claim the daily-challenge prize (called from the explainer's CTA).
@@ -1637,17 +1623,82 @@ struct WorldMapView: View {
     }
     private var gamesGateRemaining: Int { max(0, gamesGateTarget - progress.correctToday) }
 
-    // MARK: - 🧹 Chores tile helpers
+    // MARK: - 🧹 Chores (header card, twin of the daily challenge)
 
-    private func choresSubtitle(for cid: UUID) -> String {
-        let pending = choreStore.chores(forChild: cid).filter { $0.isPendingApproval }.count
-        if pending > 0 { return "מְחַכִּים לְאִשּׁוּר שֶׁל הַהוֹרִים 🕐" }
-        return "עוֹזְרִים בַּבַּיִת — מַרְוִיחִים פְּרָס"
-    }
+    /// Compact chores entry beside אתגר יומי — identical size and anatomy:
+    /// broom ring (available-count badge) → title → live line → today's-progress
+    /// track (approved chores out of the day's list).
+    private var choresTopCard: some View {
+        let all = profiles.activeID.map { choreStore.chores(forChild: $0) } ?? []
+        let available = all.filter { $0.isAvailable }.count
+        let pending = all.filter { $0.isPendingApproval }.count
+        let doneToday = all.filter { $0.approvedToday }.count
+        let frac = all.isEmpty ? 0 : CGFloat(doneToday) / CGFloat(all.count)
+        return Button {
+            Haptic.light()
+            showingChores = true
+        } label: {
+            VStack(spacing: 6) {
+                ZStack(alignment: .bottomTrailing) {
+                    ZStack {
+                        Circle()
+                            .fill(LinearGradient(colors: [Color(hex: "F4A261"), Color(hex: "E76F51")],
+                                                 startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .frame(width: 44, height: 44)
+                            .overlay(Circle().stroke(.white.opacity(0.55), lineWidth: 1.5))
+                        Text("🧹").font(.system(size: 23))
+                    }
+                    if available > 0 {
+                        Text("\(available)")
+                            .font(.system(size: 11, weight: .black, design: .rounded))
+                            .foregroundStyle(AppColor.textOnLight)
+                            .padding(.horizontal, 6).padding(.vertical, 2)
+                            .background(Capsule().fill(.white))
+                            .overlay(Capsule().stroke(Color(hex: "E76F51"), lineWidth: 1.2))
+                            .offset(x: 6, y: 4)
+                    }
+                }
+                Text("מַטְלוֹת הַבַּיִת")
+                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+                Group {
+                    Text(pending > 0 ? "מְחַכֶּה לְאִשּׁוּר 🕐"
+                         : doneToday > 0 ? "\(doneToday) הֻשְׁלְמוּ הַיּוֹם! 💪"
+                         : "עוֹזְרִים — וּבוֹחֲרִים פְּרָס!")
+                        .font(.system(size: 11.5, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.88))
+                        .lineLimit(1).minimumScaleFactor(0.6)
+                }
+                .frame(height: 26)
 
-    private func choresBadge(for cid: UUID) -> String? {
-        let available = choreStore.chores(forChild: cid).filter { $0.isAvailable }.count
-        return available > 0 ? "\(available) 🧹" : nil
+                headerTrack(frac: frac,
+                            fill: LinearGradient(colors: [Color(hex: "FFD23F"), Color(hex: "F4A261")],
+                                                 startPoint: .leading, endPoint: .trailing),
+                            glowColor: Color(hex: "F4A261"),
+                            tip: frac > 0 ? "🧹" : nil)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .frame(height: Self.headerCardHeight)
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(LinearGradient(colors: [Color(hex: "F4A261").opacity(0.50),
+                                                  Color(hex: "E76F51").opacity(0.40),
+                                                  Color(hex: "7C4DFF").opacity(0.30)],
+                                         startPoint: .topTrailing, endPoint: .bottomLeading))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(LinearGradient(colors: [Color(hex: "F4A261").opacity(0.8), .white.opacity(0.2)],
+                                           startPoint: .top, endPoint: .bottom), lineWidth: 1.5)
+            )
+            .shadow(color: Color(hex: "F4A261").opacity(0.25), radius: 10, y: 4)
+        }
+        .buttonStyle(.juicy)
+        .environment(\.layoutDirection, .rightToLeft)
     }
     /// `correctToday` resets at midnight, so the warm-up is a fresh daily goal.
     private var gamesUnlockedToday: Bool { gamesGateRemaining == 0 }
