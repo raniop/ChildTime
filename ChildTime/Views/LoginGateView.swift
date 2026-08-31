@@ -232,25 +232,10 @@ struct LoginGateView: View {
                     .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
             }
 
-            // Co-parent joining an existing family (with an invite code).
-            Button {
-                Haptic.light()
-                settings.pendingJoinFamily.toggle()
-            } label: {
-                Label(settings.pendingJoinFamily
-                        ? "✓ מִצְטָרְפִים לְמִשְׁפָּחָה קַיֶּמֶת"
-                        : "כְּבָר יֵשׁ לָכֶם מִשְׁפָּחָה? הִצְטָרְפוּ",
-                      systemImage: "person.2.badge.plus.fill")
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: 360).frame(height: 48)
-                    .background(settings.pendingJoinFamily
-                                ? AnyShapeStyle(AppColor.successMint.opacity(0.4))
-                                : AnyShapeStyle(.white.opacity(0.10)),
-                                in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(.white.opacity(0.28), lineWidth: 1))
-            }
+            // "כבר יש לכם משפחה? הצטרפו" REMOVED (Rani): the post-sign-in fork
+            // (FamilyChoiceView) now asks new-vs-join at the right moment for
+            // anyone without a family, and email invites skip even that — the
+            // login screen stays minimal: just pick how to sign in.
 
             // Guest mode REMOVED (Rani): no using Tofy without an account. The
             // only trial is 30 days of טופי+ after signing up.
