@@ -80,11 +80,6 @@ struct ProgressSnapshot: Codable, Equatable {
     /// to — enforces the daily cap "no more than until midnight". LWW.
     var giftGivenToday: Int? = nil
     var giftGivenDate: Date? = nil
-    /// 🪙 Chore money pocket, in whole shekels — a TRACKER of what the parent
-    /// owes for approved chores, settled by hand outside the app (no real money
-    /// moves in-app — Kids Category). Spendable-style (goes down on settle), so
-    /// LWW like diamonds/parentGiftMinutes. Optional so older snapshots decode.
-    var moneyCoins: Int? = nil
     /// Bumped each time the device writes the snapshot — Firestore listeners
     /// use this to skip echoes of their own writes.
     var revision: Int = 0
@@ -128,7 +123,6 @@ extension ProgressSnapshot {
         case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
         case hourlyAnswered, hourlyCorrect
         case wheelProgressCount, recoveryPot, ownedCharacterIDs, parentGiftMinutes, giftGivenToday, giftGivenDate
-        case moneyCoins
         case revision, lastModifiedAt, deviceID
     }
     private enum LegacyCodingKeys: String, CodingKey { case gems }
@@ -183,7 +177,6 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .parentGiftMinutes)) ?? nil { parentGiftMinutes = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .giftGivenToday)) ?? nil { giftGivenToday = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .giftGivenDate)) ?? nil { giftGivenDate = v }
-        if let v = (try? c.decodeIfPresent(Int.self, forKey: .moneyCoins)) ?? nil { moneyCoins = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .revision)) ?? nil { revision = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastModifiedAt)) ?? nil { lastModifiedAt = v }
         if let v = (try? c.decodeIfPresent(String.self, forKey: .deviceID)) ?? nil { deviceID = v }

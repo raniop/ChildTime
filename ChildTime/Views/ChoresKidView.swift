@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 /// 🧹 The kid's chores screen: the parent defined the chores, the kid does one,
 /// taps "עשיתי!" and CHOOSES the reward — ⏰ play minutes or 🪙 money. The
@@ -13,11 +14,22 @@ struct ChoresKidView: View {
 
     /// The chore the kid just tapped "עשיתי" on — reward picker is showing.
     @State private var choosingFor: Chore?
+    /// Reward picked → offering an optional 📸 proof photo before sending.
+    @State private var pendingSend: (chore: Chore, reward: String)?
+    @State private var showPhotoOffer = false
+    @State private var showCamera = false
+    @State private var libraryPickerPresented = false
+    @State private var libraryItem: PhotosPickerItem?
     @State private var justSent: Set<String> = []
 
     private var myChores: [Chore] {
         guard let id = profiles.activeID else { return [] }
         return choreStore.chores(forChild: id)
+    }
+
+    /// 🪙 unpaid balance from the increment-only ledger (earned − paid).
+    private var moneyBalance: Int {
+        profiles.activeID.map { choreStore.moneyBalance(forChild: $0) } ?? 0
     }
 
     var body: some View {
@@ -30,7 +42,7 @@ struct ChoresKidView: View {
                 ScrollView {
                     VStack(spacing: AppSpacing.md) {
                         totalsCard
-                        if progress.moneyCoins > 0 { moneyPocketCard }
+                        if moneyBalance > 0 { moneyPocketCard }
                         if myChores.isEmpty {
                             emptyState
                         } else {
@@ -58,12 +70,42 @@ struct ChoresKidView: View {
         ), titleVisibility: .visible) {
             if let chore = choosingFor {
                 if chore.rewardMinutes > 0 {
-                    Button("⏰ \(chore.rewardMinutes) דַּקּוֹת מִשְׂחָק") { send(chore, reward: "minutes") }
+                    Button("⏰ \(chore.rewardMinutes) דַּקּוֹת מִשְׂחָק") { offerPhoto(chore, reward: "minutes") }
                 }
                 if chore.rewardCoins > 0 {
-                    Button("🪙 \(chore.rewardCoins) שְׁקָלִים לַקֻּפָּה") { send(chore, reward: "coins") }
+                    Button("🪙 \(chore.rewardCoins) שְׁקָלִים לַקֻּפָּה") { offerPhoto(chore, reward: "coins") }
                 }
                 Button("רֶגַע, עוֹד לֹא", role: .cancel) { choosingFor = nil }
+            }
+        }
+        // 📸 Optional proof photo — a picture beats a debate about whether the
+        // room is really tidy (Rani).
+        .confirmationDialog("רוֹצִים לְצָרֵף תְּמוּנָה שֶׁל מָה שֶׁעֲשִׂיתֶם? 📸", isPresented: $showPhotoOffer,
+                            titleVisibility: .visible) {
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                Button("📸 לְצַלֵּם עַכְשָׁיו") { showCamera = true }
+            }
+            Button("🖼 לִבְחֹר תְּמוּנָה") { libraryPickerPresented = true }
+            Button("לִשְׁלֹחַ בְּלִי תְּמוּנָה") { finishSend(photo: nil) }
+            Button("בִּטּוּל", role: .cancel) { pendingSend = nil }
+        }
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraPicker { image in
+                showCamera = false
+                finishSend(photo: image.flatMap(compressProof))
+            }
+            .ignoresSafeArea()
+        }
+        .photosPicker(isPresented: $libraryPickerPresented, selection: $libraryItem, matching: .images)
+        .onChangeCompat(of: libraryItem) { _, item in
+            guard let item else { return }
+            Task {
+                let data = try? await item.loadTransferable(type: Data.self)
+                let photo = data.flatMap(UIImage.init(data:)).flatMap(compressProof)
+                await MainActor.run {
+                    libraryItem = nil
+                    finishSend(photo: photo)
+                }
             }
         }
     }
@@ -101,7 +143,7 @@ struct ChoresKidView: View {
     /// 🏆 Lifetime earnings from chores — "how much have I made, ever".
     @ViewBuilder
     private var totalsCard: some View {
-        let totals = profiles.activeID.map { choreStore.totals(forChild: $0) } ?? (minutes: 0, coins: 0)
+        let totals = profiles.activeID.map { choreStore.totals(forChild: $0) } ?? (minutes: 0, coins: 0, paid: 0)
         if totals.minutes > 0 || totals.coins > 0 {
             HStack(spacing: AppSpacing.md) {
                 Text("🏆").font(.system(size: 30))
@@ -141,7 +183,7 @@ struct ChoresKidView: View {
         HStack(spacing: AppSpacing.md) {
             Text("🪙").font(.system(size: 34))
             VStack(alignment: .trailing, spacing: 2) {
-                Text("\(progress.moneyCoins) שְׁקָלִים בַּקֻּפָּה!")
+                Text("\(moneyBalance) שְׁקָלִים בַּקֻּפָּה!")
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                 Text("אַבָּא אוֹ אִמָּא יִתְּנוּ לְךָ בַּיָּד 💛")
@@ -255,8 +297,31 @@ struct ChoresKidView: View {
             .background(.white.opacity(0.18), in: Capsule())
     }
 
-    private func send(_ chore: Chore, reward: String) {
-        choreStore.markDone(chore, reward: reward)
+    private func offerPhoto(_ chore: Chore, reward: String) {
+        pendingSend = (chore, reward)
+        choosingFor = nil
+        showPhotoOffer = true
+    }
+
+    private func finishSend(photo: Data?) {
+        guard let p = pendingSend else { return }
+        pendingSend = nil
+        send(p.chore, reward: p.reward, photo: photo)
+    }
+
+    /// ~900px JPEG ≈ 100-200KB — comfortably inside the 1MB Firestore doc cap.
+    private func compressProof(_ image: UIImage) -> Data? {
+        let maxEdge: CGFloat = 900
+        let scale = min(1, maxEdge / max(image.size.width, image.size.height))
+        let newSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let resized = UIGraphicsImageRenderer(size: newSize).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+        }
+        return resized.jpegData(compressionQuality: 0.55)
+    }
+
+    private func send(_ chore: Chore, reward: String, photo: Data?) {
+        choreStore.markDone(chore, reward: reward, photo: photo)
         // Latency bridge only — the listener flips isPendingApproval within a
         // beat; if we never dropped this, an APPROVED chore would keep showing
         // "מחכים לאישור" for the rest of the session.
@@ -265,5 +330,27 @@ struct ChoresKidView: View {
         Haptic.success()
         SoundPlayer.shared.play(.portalAppear)
         choosingFor = nil
+    }
+}
+
+/// Minimal camera sheet for the chore proof photo (PhotosPicker has no camera).
+private struct CameraPicker: UIViewControllerRepresentable {
+    let onImage: (UIImage?) -> Void
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let p = UIImagePickerController()
+        p.sourceType = .camera
+        p.delegate = context.coordinator
+        return p
+    }
+    func updateUIViewController(_: UIImagePickerController, context: Context) {}
+    func makeCoordinator() -> Coordinator { Coordinator(onImage: onImage) }
+    final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let onImage: (UIImage?) -> Void
+        init(onImage: @escaping (UIImage?) -> Void) { self.onImage = onImage }
+        func imagePickerController(_ picker: UIImagePickerController,
+                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            onImage(info[.originalImage] as? UIImage)
+        }
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) { onImage(nil) }
     }
 }

@@ -53,7 +53,6 @@ final class ProgressStore: ObservableObject {
         static let lastComebackWheelAt = "lastComebackWheelAt"
         static let recoveryPot = "recoveryPot"
         static let parentGiftMinutes = "parentGiftMinutes"
-        static let moneyCoins = "moneyCoins"
         static let giftGivenToday = "giftGivenToday"
         static let giftGivenDate = "giftGivenDate"
         static let revision = "progress.revision"
@@ -354,11 +353,6 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var parentGiftMinutes: Int {
         didSet { defaults.set(parentGiftMinutes, forKey: Key.parentGiftMinutes) }
     }
-    /// 🪙 Chore money pocket (whole ₪) — what the parent owes for approved
-    /// chores. A tracker only; the parent pays by hand and taps "שילמתי".
-    @Published private(set) var moneyCoins: Int {
-        didSet { defaults.set(moneyCoins, forKey: Key.moneyCoins) }
-    }
     /// 💝 given TODAY (for the "until midnight" daily cap) + which day.
     @Published private(set) var giftGivenToday: Int {
         didSet { defaults.set(giftGivenToday, forKey: Key.giftGivenToday) }
@@ -446,7 +440,6 @@ final class ProgressStore: ObservableObject {
         self.lastComebackWheelAt = d.object(forKey: Key.lastComebackWheelAt) as? Date
         self.recoveryPot = d.integer(forKey: Key.recoveryPot)
         self.parentGiftMinutes = d.integer(forKey: Key.parentGiftMinutes)
-        self.moneyCoins = d.integer(forKey: Key.moneyCoins)
         self.giftGivenToday = d.integer(forKey: Key.giftGivenToday)
         self.giftGivenDate = d.object(forKey: Key.giftGivenDate) as? Date
 
@@ -469,7 +462,6 @@ final class ProgressStore: ObservableObject {
             // 💝 gift pocket is SYNCED state — a gift/revoke must bump the
             // revision or the upload ratchet keeps the stale cloud value.
             $parentGiftMinutes.dropFirst().map { _ in () }.eraseToAnyPublisher(),
-            $moneyCoins.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $giftGivenToday.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $totalCorrect.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $totalAnswered.dropFirst().map { _ in () }.eraseToAnyPublisher(),
@@ -1385,13 +1377,6 @@ final class ProgressStore: ObservableObject {
         }
     }
 
-    /// 🪙 Chore money: +N on an approved money-reward chore, −N when the parent
-    /// settles ("שילמתי"). Clamped ≥0 — a stale settle can never go negative.
-    func addMoneyCoins(_ delta: Int) {
-        guard delta != 0 else { return }
-        moneyCoins = max(0, moneyCoins + delta)
-    }
-
     /// 💝 given today, day-aware (0 if the counter is from a previous day).
     var giftGivenTodayResolved: Int {
         guard let d = giftGivenDate, Calendar.current.isDateInToday(d) else { return 0 }
@@ -1711,7 +1696,6 @@ final class ProgressStore: ObservableObject {
         s.wheelProgressCount  = wheelProgressCount
         s.recoveryPot         = recoveryPot
         s.parentGiftMinutes   = parentGiftMinutes
-        s.moneyCoins          = moneyCoins
         s.giftGivenToday      = giftGivenToday
         s.giftGivenDate       = giftGivenDate
         s.ownedCharacterIDs   = Array(ownedCharacterIDs)
@@ -1773,7 +1757,6 @@ final class ProgressStore: ObservableObject {
         wheelProgressCount  = s.wheelProgressCount
         recoveryPot         = s.recoveryPot
         parentGiftMinutes   = s.parentGiftMinutes ?? 0
-        moneyCoins          = s.moneyCoins ?? 0
         giftGivenToday      = s.giftGivenToday ?? 0
         giftGivenDate       = s.giftGivenDate
         // Replace (not union) — apply() also runs on profile switch, so merging

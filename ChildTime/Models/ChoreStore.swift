@@ -33,6 +33,10 @@ struct Chore: Identifiable, Equatable {
     /// "minutes" | "coins" — the KID's pick, made when marking done.
     var chosenReward: String?
     var lastApprovedAt: Double?
+    /// 📸 Optional proof photo the kid attached when marking done (compressed
+    /// JPEG, well under the 1MB doc cap). Cleared on approve/return so chore
+    /// docs stay small.
+    var photoData: Data?
     /// Rolling same-day approval counter (paired with its date).
     var approvedTodayCount: Int
     var approvedTodayAt: Double?
@@ -67,6 +71,7 @@ struct Chore: Identifiable, Equatable {
                      markedDoneAt: data["markedDoneAt"] as? Double,
                      chosenReward: data["chosenReward"] as? String,
                      lastApprovedAt: data["lastApprovedAt"] as? Double,
+                     photoData: data["photoData"] as? Data,
                      approvedTodayCount: data["approvedTodayCount"] as? Int ?? 0,
                      approvedTodayAt: data["approvedTodayAt"] as? Double,
                      archived: data["archived"] as? Bool ?? false)
@@ -82,10 +87,13 @@ final class ChoreStore: ObservableObject {
     static let shared = ChoreStore()
 
     @Published private(set) var chores: [Chore] = []
-    /// Lifetime chore earnings per child (uuid-string → totals), mirrored from
-    /// `households/{id}/choreStats/{childID}` — bumped on every approval so the
-    /// kid can see "how much have I earned from chores, ever".
-    @Published private(set) var stats: [String: (minutes: Int, coins: Int)] = [:]
+    /// Per-child chore money ledger (uuid-string → totals), mirrored from
+    /// `households/{id}/choreStats/{childID}`. THE source of truth for money:
+    /// balance = coinsTotal − coinsPaid. Written only with FieldValue.increment,
+    /// so a device on an older build can never strip it (unlike a snapshot
+    /// field, which an old build\'s full-state push silently erases — that\'s
+    /// how Noni\'s first ₪7 vanished).
+    @Published private(set) var stats: [String: (minutes: Int, coins: Int, paid: Int)] = [:]
 
     #if canImport(FirebaseFirestore)
     private var db: Firestore { Firestore.firestore() }
@@ -116,10 +124,11 @@ final class ChoreStore: ObservableObject {
         statsListener = db.collection("households").document(hh).collection("choreStats")
             .addSnapshotListener { [weak self] snap, _ in
                 guard let self, let snap else { return }
-                var parsed: [String: (minutes: Int, coins: Int)] = [:]
+                var parsed: [String: (minutes: Int, coins: Int, paid: Int)] = [:]
                 for d in snap.documents {
                     parsed[d.documentID] = (d.data()["minutesTotal"] as? Int ?? 0,
-                                            d.data()["coinsTotal"] as? Int ?? 0)
+                                            d.data()["coinsTotal"] as? Int ?? 0,
+                                            d.data()["coinsPaid"] as? Int ?? 0)
                 }
                 Task { @MainActor in self.stats = parsed }
             }
@@ -159,6 +168,9 @@ final class ChoreStore: ObservableObject {
         ("preset-laundry",   "🧺", "לעזור בקיפול כביסה",       20, 10, 1),
         ("preset-groceries", "🛒", "לעזור בסידור הקניות",      20, 10, 1),
         ("preset-cooking",   "🍳", "לעזור בהכנת ארוחה",        20, 10, 1),
+        ("preset-sibling",   "👫", "לשחק עם אח או אחות",       10,  5, 2),
+        ("preset-outfit",    "🎽", "לסדר תלבושת לבית הספר",     5,  2, 1),
+        ("preset-closet",    "🧥", "לסדר את הארון",            15,  7, 1),
     ]
 
     /// The child's full list: the built-in catalog (overridden per-child by any
@@ -178,7 +190,8 @@ final class ChoreStore: ObservableObject {
                                  rewardMinutes: preset.minutes, rewardCoins: preset.coins,
                                  isDaily: true, timesPerDay: preset.timesPerDay, createdAt: 0,
                                  markedDoneAt: nil, chosenReward: nil,
-                                 lastApprovedAt: nil, approvedTodayCount: 0, approvedTodayAt: nil,
+                                 lastApprovedAt: nil, photoData: nil,
+                                 approvedTodayCount: 0, approvedTodayAt: nil,
                                  archived: false))
             }
         }
@@ -187,8 +200,14 @@ final class ChoreStore: ObservableObject {
     }
 
     /// Lifetime chore earnings for one child.
-    func totals(forChild id: UUID) -> (minutes: Int, coins: Int) {
-        stats[id.uuidString] ?? (0, 0)
+    func totals(forChild id: UUID) -> (minutes: Int, coins: Int, paid: Int) {
+        stats[id.uuidString] ?? (0, 0, 0)
+    }
+
+    /// 🪙 What the parents still owe: earned − already paid by hand.
+    func moneyBalance(forChild id: UUID) -> Int {
+        let t = totals(forChild: id)
+        return max(0, t.coins - t.paid)
     }
 
     /// A catalog chore (vs. a custom one the family added). "Deleting" a preset
@@ -285,14 +304,16 @@ final class ChoreStore: ObservableObject {
         #if canImport(FirebaseFirestore)
         guard let hh = listeningHousehold, let cid = UUID(uuidString: chore.childID) else { return }
         let coins = chore.chosenReward == "coins" && chore.rewardCoins > 0
-        if coins {
-            RemoteSyncManager.shared.adjustChildMoney(childID: cid, deltaCoins: chore.rewardCoins)
-        } else if chore.rewardMinutes > 0 {
+        // Minutes ride the proven earned-wallet command; money lives ONLY in
+        // the increment-based ledger below (see `stats` — snapshot fields die
+        // under old-build pushes).
+        if !coins && chore.rewardMinutes > 0 {
             RemoteSyncManager.shared.adjustChildMinutes(childID: cid, deltaMinutes: chore.rewardMinutes)
         }
         let now = Date().timeIntervalSince1970
         var update: [String: Any] = ["markedDoneAt": FieldValue.delete(),
                                      "chosenReward": FieldValue.delete(),
+                                     "photoData": FieldValue.delete(),
                                      "lastApprovedAt": now,
                                      // same-day repeat counter ("לפנות את הצלחת"
                                      // can legitimately happen every meal — Rani)
@@ -301,7 +322,7 @@ final class ChoreStore: ObservableObject {
         if !chore.isDaily { update["archived"] = true }
         db.collection("households").document(hh).collection("chores").document(chore.id)
             .updateData(update)
-        // Lifetime earnings ledger — what the kid sees as "הרווחתי ממטלות".
+        // Money + lifetime-earnings ledger — what the kid sees as "הרווחתי".
         db.collection("households").document(hh).collection("choreStats").document(chore.childID)
             .setData([coins ? "coinsTotal" : "minutesTotal":
                       FieldValue.increment(Int64(coins ? chore.rewardCoins : chore.rewardMinutes))],
@@ -317,15 +338,19 @@ final class ChoreStore: ObservableObject {
         db.collection("households").document(hh).collection("chores").document(chore.id)
             .updateData(["markedDoneAt": FieldValue.delete(),
                          "chosenReward": FieldValue.delete(),
+                         "photoData": FieldValue.delete(),
                          "returnedAt": Date().timeIntervalSince1970])
         #endif
     }
 
-    /// Parent paid the pocket by hand → subtract what was just paid (a delta
-    /// command like everything else; the child-side pocket clamps at ≥0).
+    /// Parent paid the kid by hand → record it in the ledger (increment-only,
+    /// old-build-proof). Balance shown everywhere = coinsTotal − coinsPaid.
     func settleMoney(childID: UUID, amount: Int) {
-        guard amount > 0 else { return }
-        RemoteSyncManager.shared.adjustChildMoney(childID: childID, deltaCoins: -amount)
+        #if canImport(FirebaseFirestore)
+        guard amount > 0, let hh = listeningHousehold else { return }
+        db.collection("households").document(hh).collection("choreStats").document(childID.uuidString)
+            .setData(["coinsPaid": FieldValue.increment(Int64(amount))], merge: true)
+        #endif
     }
 
     // MARK: - Kid action
@@ -333,20 +358,23 @@ final class ChoreStore: ObservableObject {
     /// The kid marks the chore done AND picks the reward they want. A catalog
     /// chore may not have a doc yet — setData(merge) materializes it with its
     /// current (default or overridden) values in the same write.
-    func markDone(_ chore: Chore, reward: String) {
+    func markDone(_ chore: Chore, reward: String, photo: Data? = nil) {
         #if canImport(FirebaseFirestore)
         guard let hh = listeningHousehold else { return }
+        var fields: [String: Any] = ["childID": chore.childID,
+                                     "title": chore.title,
+                                     "emoji": chore.emoji,
+                                     "rewardMinutes": chore.rewardMinutes,
+                                     "rewardCoins": chore.rewardCoins,
+                                     "isDaily": chore.isDaily,
+                                     "timesPerDay": chore.timesPerDay,
+                                     "createdAt": chore.createdAt > 0 ? chore.createdAt : Date().timeIntervalSince1970,
+                                     "markedDoneAt": Date().timeIntervalSince1970,
+                                     "chosenReward": reward]
+        // 📸 proof photo — replace or clear any stale one from a previous round.
+        fields["photoData"] = photo ?? FieldValue.delete()
         db.collection("households").document(hh).collection("chores").document(chore.id)
-            .setData(["childID": chore.childID,
-                      "title": chore.title,
-                      "emoji": chore.emoji,
-                      "rewardMinutes": chore.rewardMinutes,
-                      "rewardCoins": chore.rewardCoins,
-                      "isDaily": chore.isDaily,
-                      "timesPerDay": chore.timesPerDay,
-                      "createdAt": chore.createdAt > 0 ? chore.createdAt : Date().timeIntervalSince1970,
-                      "markedDoneAt": Date().timeIntervalSince1970,
-                      "chosenReward": reward], merge: true)
+            .setData(fields, merge: true)
         #endif
     }
 }

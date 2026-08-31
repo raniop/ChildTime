@@ -9,7 +9,6 @@ import SwiftUI
 struct ChoresParentView: View {
     let profile: Profile
     @StateObject private var choreStore = ChoreStore.shared
-    @StateObject private var remote = RemoteSyncManager.shared
     @Environment(\.dismiss) private var dismiss
 
     // Add/edit form. `editing` non-nil → the form edits that chore.
@@ -28,11 +27,9 @@ struct ChoresParentView: View {
     private var rest: [Chore] { myChores.filter { !$0.isPendingApproval } }
     private var hidden: [Chore] { choreStore.hiddenPresets(forChild: profile.id) }
 
-    /// 🪙 what the family owes the kid right now (synced pocket + in-flight).
-    private var moneyBalance: Int {
-        max(0, (remote.remoteSnapshots[profile.id]?.moneyCoins ?? 0)
-            + remote.pendingMoney[profile.id, default: 0])
-    }
+    /// 🪙 what the family owes the kid right now — pure ledger arithmetic
+    /// (earned − paid), immune to old-build snapshot pushes.
+    private var moneyBalance: Int { choreStore.moneyBalance(forChild: profile.id) }
 
     var body: some View {
         NavigationStack {
@@ -163,6 +160,14 @@ struct ChoresParentView: View {
                      ? "🪙 בחר/ה ₪\(chore.rewardCoins)"
                      : "⏰ בחר/ה \(chore.rewardMinutes) דק׳")
                     .font(.caption).foregroundStyle(.secondary)
+            }
+            if let data = chore.photoData, let img = UIImage(data: data) {
+                Image(uiImage: img)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 160)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             HStack(spacing: 10) {
                 Button {

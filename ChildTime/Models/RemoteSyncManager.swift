@@ -51,9 +51,6 @@ final class RemoteSyncManager: ObservableObject {
     /// `pendingGiftAdjustment` field). Shown by the dashboard on top of the
     /// synced gift pocket.
     @Published private(set) var pendingGifts: [UUID: Int] = [:]
-    /// 🪙 Chore-money adjustments still in flight to the child's device (the
-    /// `pendingMoneyAdjustment` field) — approved chores add, "שילמתי" subtracts.
-    @Published private(set) var pendingMoney: [UUID: Int] = [:]
 
     private var cancellables: Set<AnyCancellable> = []
     private var saveDebounce: Task<Void, Never>? = nil
@@ -202,19 +199,6 @@ final class RemoteSyncManager: ObservableObject {
         #endif
     }
 
-    /// 🪙 Chore money — same delta-command mechanics, on its own field. Positive
-    /// on an approved money-reward chore; negative when the parent settles the
-    /// pocket by hand ("שילמתי"). The child's device consumes it into
-    /// `moneyCoins` (clamped ≥0 there, so an over-settle is safe).
-    func adjustChildMoney(childID: UUID, deltaCoins: Int) {
-        #if canImport(FirebaseFirestore)
-        guard deltaCoins != 0 else { return }
-        pendingMoney[childID, default: 0] += deltaCoins
-        db.collection("children").document(childID.uuidString)
-            .setData(["pendingMoneyAdjustment": FieldValue.increment(Int64(deltaCoins))], merge: true)
-        #endif
-    }
-
     /// CHILD device: consume a parent's gift command exactly once (read + zero
     /// in a transaction), then add it to the GIFT pocket.
     private func applyPendingGift(childID: UUID) {
@@ -243,23 +227,6 @@ final class RemoteSyncManager: ObservableObject {
         #endif
     }
 
-    /// CHILD device: consume a chore-money command exactly once (read + zero in
-    /// a transaction), then move it into the 🪙 money pocket.
-    private func applyPendingMoney(childID: UUID) {
-        #if canImport(FirebaseFirestore)
-        let ref = db.collection("children").document(childID.uuidString)
-        db.runTransaction({ txn, _ -> Any? in
-            let doc = try? txn.getDocument(ref)
-            let adj = (doc?.data()?["pendingMoneyAdjustment"] as? Int) ?? 0
-            if adj != 0 { txn.updateData(["pendingMoneyAdjustment": 0], forDocument: ref) }
-            return adj
-        }) { result, _ in
-            let adj = (result as? Int) ?? 0
-            if adj != 0 { ProgressStore.shared.addMoneyCoins(adj) }
-        }
-        #endif
-    }
-
     /// One-shot sweep of the child DOC's pending parent commands (gift, ±minutes,
     /// reset, gift-revoke). The doc listener consumes commands only on CHANGE
     /// events while this device is already being the child — so a command issued
@@ -277,7 +244,6 @@ final class RemoteSyncManager: ObservableObject {
               let d = doc.data() else { return }
         TofyLink("consumePendingCommandsNow: child=\(childID.uuidString.prefix(8)) adj=\(d["pendingMinuteAdjustment"] ?? 0) gift=\(d["pendingGiftAdjustment"] ?? 0) reset=\(d["resetRequestedAt"] != nil) revoke=\(d["revokeGiftAt"] != nil)")
         if ((d["pendingMinuteAdjustment"] as? Int) ?? 0) != 0 { applyPendingMinuteGrant(childID: childID) }
-        if ((d["pendingMoneyAdjustment"] as? Int) ?? 0) != 0 { applyPendingMoney(childID: childID) }
         let revokeRequested = d["revokeGiftAt"] != nil
         if ((d["pendingGiftAdjustment"] as? Int) ?? 0) != 0 && !revokeRequested {
             applyPendingGift(childID: childID)   // else: applied after the revoke
@@ -628,7 +594,6 @@ final class RemoteSyncManager: ObservableObject {
                     guard let self else { return }
                     let adj = (doc?.data()?["pendingMinuteAdjustment"] as? Int) ?? 0
                     let gift = (doc?.data()?["pendingGiftAdjustment"] as? Int) ?? 0
-                    let money = (doc?.data()?["pendingMoneyAdjustment"] as? Int) ?? 0
                     let revokeAck = doc?.data()?["revokeGiftAppliedAt"] as? Double
                     let giftAck = doc?.data()?["giftAppliedAt"] as? Double
                     Task { @MainActor in
@@ -636,8 +601,6 @@ final class RemoteSyncManager: ObservableObject {
                         else { self.pendingAdjustments.removeValue(forKey: profile.id) }
                         if gift != 0 { self.pendingGifts[profile.id] = gift }
                         else { self.pendingGifts.removeValue(forKey: profile.id) }
-                        if money != 0 { self.pendingMoney[profile.id] = money }
-                        else { self.pendingMoney.removeValue(forKey: profile.id) }
                         // PARENT: the child's device acked our gift-revoke — flip
                         // the live status to "✅ נמחקו".
                         if let revokeAck, var t = self.giftRevokeTracker[profile.id],
@@ -666,9 +629,6 @@ final class RemoteSyncManager: ObservableObject {
                     let revokePending = doc?.data()?["revokeGiftAt"] != nil
                     if gift != 0 && !revokePending && (isBoundChildDevice || isKidModeForThis) {
                         self.applyPendingGift(childID: profile.id)   // else: applied after the revoke
-                    }
-                    if money != 0 && (isBoundChildDevice || isKidModeForThis) {
-                        self.applyPendingMoney(childID: profile.id)
                     }
                     // A parent's "reset progress" — consumed the same way, by the
                     // device that IS this child right now.
