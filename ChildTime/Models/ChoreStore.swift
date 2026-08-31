@@ -172,6 +172,7 @@ final class ChoreStore: ObservableObject {
         ("preset-outfit",    "👔", "לסדר תלבושת לבית הספר",     5,  2, 1),
         ("preset-closet",    "🧥", "לסדר את הארון",            15,  7, 1),
         ("preset-homework",  "📝", "להכין שיעורי בית",         30, 20, 1),
+        ("preset-reading",   "📖", "לקרוא ספר",                60, 50, 1),
     ]
 
     /// The child's full list: the built-in catalog (overridden per-child by any
