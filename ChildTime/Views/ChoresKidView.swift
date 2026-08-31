@@ -7,6 +7,7 @@ import SwiftUI
 struct ChoresKidView: View {
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var progress: ProgressStore
+    @Environment(\.horizontalSizeClass) private var hSize
     @StateObject private var choreStore = ChoreStore.shared
     let onClose: () -> Void
 
@@ -32,14 +33,19 @@ struct ChoresKidView: View {
                         if myChores.isEmpty {
                             emptyState
                         } else {
-                            ForEach(myChores) { chore in
-                                choreCard(chore)
+                            // 2 across on iPhone, 3 on iPad (Rani).
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: AppSpacing.md),
+                                                     count: hSize == .regular ? 3 : 2),
+                                      spacing: AppSpacing.md) {
+                                ForEach(myChores) { chore in
+                                    choreCard(chore)
+                                }
                             }
                         }
                     }
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.vertical, AppSpacing.lg)
-                    .frame(maxWidth: 560)
+                    .frame(maxWidth: hSize == .regular ? 860 : 560)
                     .frame(maxWidth: .infinity)
                 }
             }
@@ -129,58 +135,46 @@ struct ChoresKidView: View {
 
     @ViewBuilder
     private func choreCard(_ chore: Chore) -> some View {
-        VStack(spacing: AppSpacing.sm) {
-            HStack(spacing: AppSpacing.md) {
-                Text(chore.emoji).font(.system(size: 40))
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(chore.title)
-                        .font(.system(size: 18, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                    HStack(spacing: 6) {
-                        if chore.rewardMinutes > 0 {
-                            rewardChip("⏰ \(chore.rewardMinutes) דַּק׳")
-                        }
-                        if chore.rewardMinutes > 0 && chore.rewardCoins > 0 {
-                            Text("אוֹ")
-                                .font(.system(size: 12, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.7))
-                        }
-                        if chore.rewardCoins > 0 {
-                            rewardChip("🪙 \(chore.rewardCoins) ₪")
-                        }
-                        if chore.isDaily {
-                            rewardChip("כָּל יוֹם 🔁")
-                        }
-                    }
+        VStack(spacing: 8) {
+            Text(chore.emoji).font(.system(size: 38))
+            Text(chore.title)
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+                .frame(minHeight: 38)
+            HStack(spacing: 4) {
+                if chore.rewardMinutes > 0 {
+                    rewardChip("⏰ \(chore.rewardMinutes) דַּק׳")
                 }
-                Spacer()
+                if chore.rewardMinutes > 0 && chore.rewardCoins > 0 {
+                    Text("אוֹ")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+                if chore.rewardCoins > 0 {
+                    rewardChip("🪙 ₪\(chore.rewardCoins)")
+                }
             }
 
             if chore.isPendingApproval || justSent.contains(chore.id) {
-                Label("מְחַכִּים לְאִשּׁוּר שֶׁל אַבָּא אוֹ אִמָּא 🕐", systemImage: "hourglass")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(.white.opacity(0.16), in: Capsule())
+                statusCapsule("מְחַכִּים לְאִשּׁוּר 🕐", background: .white.opacity(0.16))
             } else if chore.isDaily && chore.approvedToday {
-                Label(Gendered.g("סִיַּמְתָּ לְהַיּוֹם — אַלּוּף! 🏆", "סִיַּמְתְּ לְהַיּוֹם — אַלּוּפָה! 🏆"),
-                      systemImage: "checkmark.seal.fill")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(Color(hex: "06D6A0").opacity(0.45), in: Capsule())
+                statusCapsule(Gendered.g("סִיַּמְתָּ לְהַיּוֹם! 🏆", "סִיַּמְתְּ לְהַיּוֹם! 🏆"),
+                              background: Color(hex: "06D6A0").opacity(0.45))
             } else {
                 Button {
                     Haptic.success()
                     choosingFor = chore
                 } label: {
                     Text("עָשִׂיתִי! ✅")
-                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
+                        .padding(.vertical, 10)
                         .background(
                             LinearGradient(colors: [Color(hex: "06D6A0"), Color(hex: "48BFE3")],
                                            startPoint: .leading, endPoint: .trailing),
@@ -189,7 +183,8 @@ struct ChoresKidView: View {
                 }
             }
         }
-        .padding(AppSpacing.md)
+        .padding(AppSpacing.sm)
+        .frame(maxWidth: .infinity)
         .background(.white.opacity(0.13), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
@@ -197,11 +192,23 @@ struct ChoresKidView: View {
         )
     }
 
+    private func statusCapsule(_ text: String, background: some ShapeStyle) -> some View {
+        Text(text)
+            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .foregroundStyle(.white)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(background, in: Capsule())
+    }
+
     private func rewardChip(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 12, weight: .bold, design: .rounded))
+            .font(.system(size: 11, weight: .bold, design: .rounded))
             .foregroundStyle(.white)
-            .padding(.horizontal, 8)
+            .lineLimit(1)
+            .padding(.horizontal, 7)
             .padding(.vertical, 4)
             .background(.white.opacity(0.18), in: Capsule())
     }
