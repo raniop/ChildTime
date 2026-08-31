@@ -4,7 +4,7 @@ import SwiftUI
 /// every child automatically has ~15 house chores with rewards scaled to the
 /// chore's size, and the kid picks which reward they want (a little trade with
 /// the parent). Here the parent: approves/returns what the kid marked done,
-/// settles the 🪙 money pocket, retunes any chore's rewards, hides catalog
+/// settles the 💰 money pocket, retunes any chore's rewards, hides catalog
 /// chores or adds custom ones.
 struct ChoresParentView: View {
     /// The child the screen opened on — a segmented picker switches between
@@ -41,7 +41,7 @@ struct ChoresParentView: View {
     private var rest: [Chore] { myChores.filter { !$0.isPendingApproval } }
     private var hidden: [Chore] { choreStore.hiddenPresets(forChild: profile.id) }
 
-    /// 🪙 what the family owes the kid right now — pure ledger arithmetic
+    /// 💰 what the family owes the kid right now — pure ledger arithmetic
     /// (earned − paid), immune to old-build snapshot pushes.
     private var moneyBalance: Int { choreStore.moneyBalance(forChild: profile.id) }
 
@@ -68,7 +68,7 @@ struct ChoresParentView: View {
                     }
                 }
 
-                Section("קופת הכסף 🪙") {
+                Section("קופת הכסף 💰") {
                     HStack {
                         Text("\(profile.name) \(profile.gender == .girl ? "צברה" : "צבר")")
                         Spacer()
@@ -92,7 +92,7 @@ struct ChoresParentView: View {
                     }
                     let totals = choreStore.totals(forChild: profile.id)
                     if totals.minutes > 0 || totals.coins > 0 {
-                        Text("סה\"כ מהמטלות עד היום: ⏰ \(totals.minutes) דק׳ · 🪙 ₪\(totals.coins)")
+                        Text("סה\"כ מהמטלות עד היום: 🎮 \(totals.minutes) דק׳ · 💰 ₪\(totals.coins)")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
@@ -156,8 +156,8 @@ struct ChoresParentView: View {
                             }
                         }
                     }
-                    Stepper("⏰ פרס דקות משחק: \(formMinutes)", value: $formMinutes, in: 0...120, step: 5)
-                    Stepper("🪙 פרס כסף: ₪\(formCoins)", value: $formCoins, in: 0...100)
+                    Stepper("🎮 פרס דקות משחק: \(formMinutes)", value: $formMinutes, in: 0...120, step: 5)
+                    Stepper("💰 פרס כסף: ₪\(formCoins)", value: $formCoins, in: 0...100)
                     Stepper(formTimesPerDay == 1 ? "🔁 פעם אחת ביום" : "🔁 עד \(formTimesPerDay) פעמים ביום",
                             value: $formTimesPerDay, in: 1...6)
                     Button {
@@ -186,8 +186,8 @@ struct ChoresParentView: View {
                 Text("\(chore.emoji) \(chore.title)").bold()
                 Spacer()
                 Text(chore.chosenReward == "coins"
-                     ? "🪙 בחר/ה ₪\(chore.rewardCoins)"
-                     : "⏰ בחר/ה \(chore.rewardMinutes) דק׳")
+                     ? "💰 בחר/ה ₪\(chore.rewardCoins)"
+                     : "🎮 בחר/ה \(chore.rewardMinutes) דק׳")
                     .font(.caption).foregroundStyle(.secondary)
             }
             if let data = chore.photoData, let img = UIImage(data: data) {
@@ -231,9 +231,9 @@ struct ChoresParentView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(chore.title).foregroundStyle(.primary)
                     HStack(spacing: 6) {
-                        if chore.rewardMinutes > 0 { Text("⏰ \(chore.rewardMinutes) דק׳") }
+                        if chore.rewardMinutes > 0 { Text("🎮 \(chore.rewardMinutes) דק׳") }
                         if chore.rewardMinutes > 0 && chore.rewardCoins > 0 { Text("או") }
-                        if chore.rewardCoins > 0 { Text("🪙 ₪\(chore.rewardCoins)") }
+                        if chore.rewardCoins > 0 { Text("💰 ₪\(chore.rewardCoins)") }
                         if chore.timesPerDay > 1 { Text("🔁 עד \(chore.timesPerDay) ביום") }
                     if chore.isDaily && chore.doneToday > 0 {
                         Text(chore.approvedToday ? "✅ הושלמה להיום" : "✅ \(chore.doneToday)/\(chore.timesPerDay) היום")

@@ -2,7 +2,7 @@ import SwiftUI
 import PhotosUI
 
 /// 🧹 The kid's chores screen: the parent defined the chores, the kid does one,
-/// taps "עשיתי!" and CHOOSES the reward — ⏰ play minutes or 🪙 money. The
+/// taps "עשיתי!" and CHOOSES the reward — 🎮 play minutes or 💰 money. The
 /// reward lands only after the parent approves. No failure language anywhere:
 /// a returned chore just shows up as available again.
 struct ChoresKidView: View {
@@ -27,7 +27,7 @@ struct ChoresKidView: View {
         return choreStore.chores(forChild: id)
     }
 
-    /// 🪙 unpaid balance from the increment-only ledger (earned − paid).
+    /// 💰 unpaid balance from the increment-only ledger (earned − paid).
     private var moneyBalance: Int {
         profiles.activeID.map { choreStore.moneyBalance(forChild: $0) } ?? 0
     }
@@ -70,10 +70,10 @@ struct ChoresKidView: View {
         ), titleVisibility: .visible) {
             if let chore = choosingFor {
                 if chore.rewardMinutes > 0 {
-                    Button("⏰ \(chore.rewardMinutes) דַּקּוֹת מִשְׂחָק") { offerPhoto(chore, reward: "minutes") }
+                    Button("🎮 \(chore.rewardMinutes) דַּקּוֹת מִשְׂחָק") { offerPhoto(chore, reward: "minutes") }
                 }
                 if chore.rewardCoins > 0 {
-                    Button("🪙 \(chore.rewardCoins) שְׁקָלִים לַקֻּפָּה") { offerPhoto(chore, reward: "coins") }
+                    Button("💰 \(chore.rewardCoins) שְׁקָלִים לַקֻּפָּה") { offerPhoto(chore, reward: "coins") }
                 }
                 Button("רֶגַע, עוֹד לֹא", role: .cancel) { choosingFor = nil }
             }
@@ -153,7 +153,7 @@ struct ChoresKidView: View {
                         .foregroundStyle(.white.opacity(0.85))
                     HStack(spacing: 8) {
                         if totals.minutes > 0 {
-                            Text("⏰ \(totals.minutes) דַּקּוֹת")
+                            Text("🎮 \(totals.minutes) דַּקּוֹת")
                                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
                         }
@@ -161,7 +161,7 @@ struct ChoresKidView: View {
                             Text("·").foregroundStyle(.white.opacity(0.6))
                         }
                         if totals.coins > 0 {
-                            Text("🪙 \(totals.coins) שְׁקָלִים")
+                            Text("💰 \(totals.coins) שְׁקָלִים")
                                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
                         }
@@ -178,10 +178,10 @@ struct ChoresKidView: View {
         }
     }
 
-    /// 🪙 the kid's money pocket — what mom/dad still owe in real life.
+    /// 💰 the kid's money pocket — what mom/dad still owe in real life.
     private var moneyPocketCard: some View {
         HStack(spacing: AppSpacing.md) {
-            Text("🪙").font(.system(size: 34))
+            Text("💰").font(.system(size: 34))
             VStack(alignment: .trailing, spacing: 2) {
                 Text("\(moneyBalance) שְׁקָלִים בַּקֻּפָּה!")
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
@@ -227,7 +227,7 @@ struct ChoresKidView: View {
                 .frame(minHeight: 38)
             HStack(spacing: 4) {
                 if chore.rewardMinutes > 0 {
-                    rewardChip("⏰ \(chore.rewardMinutes) דַּק׳")
+                    rewardChip("🎮 \(chore.rewardMinutes) דַּק׳")
                 }
                 if chore.rewardMinutes > 0 && chore.rewardCoins > 0 {
                     Text("אוֹ")
@@ -235,7 +235,7 @@ struct ChoresKidView: View {
                         .foregroundStyle(.white.opacity(0.7))
                 }
                 if chore.rewardCoins > 0 {
-                    rewardChip("🪙 ₪\(chore.rewardCoins)")
+                    rewardChip("💰 ₪\(chore.rewardCoins)")
                 }
                 if chore.timesPerDay > 1 {
                     rewardChip("\(chore.doneToday)/\(chore.timesPerDay) הַיּוֹם")
