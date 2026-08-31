@@ -18,6 +18,10 @@ struct Household: Codable, Identifiable, Equatable {
     /// Family-wide parent gate code as a salted hash ("salt:hash") so the same
     /// code works on every device in the household — never the plain code.
     var parentPinHash: String?
+    /// Emails (lowercased) pre-invited as co-parents: when such an email signs
+    /// in with no family, it gets a one-tap "המשפחה מחכה לך" join instead of a
+    /// lost empty account. Optional so older docs decode.
+    var invitedParentEmails: [String]?
     /// The parent's chosen display order of the children on the dashboard
     /// (child UUID strings). nil / missing ids → alphabetical fallback. Lives on
     /// the household so both parents see the same order. Optional so older

@@ -56,7 +56,12 @@ struct AddParentView: View {
                 .multilineTextAlignment(.center)
         }
 
-        StepsCard(title: "בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה הַשֵּׁנִי:", steps: [
+        // ✉️ The friction-free path: pre-invite the co-parent's EMAIL — when
+        // that email signs in (Apple/Google/email, whatever), it gets a
+        // one-tap "המשפחה מחכה לך" join. No QR, no prior knowledge (Rani).
+        emailInviteCard
+
+        StepsCard(title: "אוֹ — בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה הַשֵּׁנִי:", steps: [
             "הַתְקִינוּ אֶת אַפְּלִיקַצְיַת טוֹפִי",
             "בְּמָסַךְ הַפְּתִיחָה הַקִּישׁוּ \u{201C}כְּבָר יֵשׁ לָכֶם מִשְׁפָּחָה? הִצְטָרְפוּ\u{201D}",
             "הִתְחַבְּרוּ, וְסִרְקוּ אֶת הַקּוֹד שֶׁכָּאן (אוֹ הַקְלִידוּ אוֹתוֹ)",
@@ -104,6 +109,63 @@ struct AddParentView: View {
         .padding(AppSpacing.lg)
         .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(.white.opacity(0.10)))
         .environment(\.layoutDirection, .leftToRight)
+    }
+
+    @State private var inviteEmail = ""
+    @State private var inviteSent = false
+    @State private var inviting = false
+
+    private var emailInviteCard: some View {
+        VStack(spacing: AppSpacing.sm) {
+            Text("✉️ הַדֶּרֶךְ הַקַּלָּה: הַזְמִינוּ בְּאִימֵּיְל")
+                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            Text("הַהוֹרֶה הַשֵּׁנִי פָּשׁוּט יִתְחַבֵּר עִם הָאִימֵּיְל הַזֶּה — וְהַמִּשְׁפָּחָה תְּחַכֶּה לוֹ שָׁם, בְּלִי קוֹדִים.")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.8))
+                .multilineTextAlignment(.center)
+            if inviteSent {
+                Label("הַהַזְמָנָה נִשְׁמְרָה! אֶפְשָׁר לְהַזְמִין עוֹד אִימֵּיְל", systemImage: "checkmark.circle.fill")
+                    .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                    .foregroundStyle(AppColor.successMint)
+            }
+            HStack(spacing: 8) {
+                TextField("אִימֵּיְל שֶׁל הַהוֹרֶה הַשֵּׁנִי", text: $inviteEmail)
+                    .keyboardType(.emailAddress)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .font(.system(size: 15))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12).padding(.vertical, 10)
+                    .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: 12))
+                    .environment(\.layoutDirection, .leftToRight)
+                Button {
+                    guard !inviting else { return }
+                    inviting = true
+                    inviteSent = false
+                    Task {
+                        let ok = await HouseholdManager.shared.inviteParentByEmail(inviteEmail)
+                        inviting = false
+                        if ok { inviteSent = true; inviteEmail = ""; Haptic.success() }
+                        else { Haptic.warning() }
+                    }
+                } label: {
+                    if inviting { ProgressView().tint(.white) }
+                    else {
+                        Text("הַזְמִינוּ")
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                    }
+                }
+                .padding(.horizontal, 16).padding(.vertical, 10)
+                .background(AppGradient.gold, in: Capsule())
+                .disabled(!inviteEmail.contains("@"))
+                .opacity(inviteEmail.contains("@") ? 1 : 0.5)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(AppSpacing.lg)
+        .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(.white.opacity(0.10)))
     }
 
     private var joinedBanner: some View {

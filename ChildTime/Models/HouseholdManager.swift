@@ -192,32 +192,136 @@ final class HouseholdManager: ObservableObject {
     private func bootstrap(uid: String, email: String?, displayName: String?) async {
         do {
             try await ensureParentDoc(uid: uid, email: email, displayName: displayName)
-            // Only a REAL, named account may mint a new cloud household. An
-            // anonymous uid (child device before its join-scan, or a guest
-            // trial) creating one is exactly where the nameless empty families
-            // came from; their kids stay local until they join / sign up.
+            // NOBODY gets a silently-created household anymore (Rani):
+            //  • found an existing membership → load it (veterans feel nothing).
+            //  • real account + a pending EMAIL INVITE → "המשפחה מחכה לך" screen.
+            //  • real account, nothing found → explicit new-vs-join choice screen.
+            //  • anonymous (child device / pre-signup) → nothing, joins later.
             let realAccount = (email?.isEmpty == false) || (displayName?.isEmpty == false)
-            guard let hh = try await ensureHousehold(uid: uid, canCreate: realAccount) else {
+            if let hh = try await ensureHousehold(uid: uid, canCreate: false) {
+                TofyLink("bootstrap: household \(hh.id.prefix(8)) loaded — pin=\(hh.parentPinHash != nil) kids=\(hh.childIDs.count)")
+                finishBootstrap(hh)
+                return
+            }
+            guard realAccount else {
                 TofyLink("bootstrap: anonymous uid with no household — NOT creating one (joins later)")
                 markLoaded()
                 return
             }
-            self.household = hh
-            listenToTombstones(in: hh.id)
+            if let email, let invite = await findEmailInvite(email: email) {
+                TofyLink("bootstrap: email invite found → household \(invite.id.prefix(8))")
+                pendingEmailInvite = invite
+                markLoaded()
+                return
+            }
+            TofyLink("bootstrap: real account with no household — showing the new-vs-join choice")
+            needsFamilyChoice = true
+            markLoaded()
+        } catch {
+            lastError = error.localizedDescription
+            markLoaded()   // sync failed (e.g. rules not deployed) — let the UI proceed
+        }
+    }
+
+    /// Shared wiring once a household is known — found at sign-in, explicitly
+    /// created, or joined via an email invite.
+    private func finishBootstrap(_ hh: Household) {
+        self.household = hh
+        needsFamilyChoice = false
+        pendingEmailInvite = nil
+        listenToTombstones(in: hh.id)
+        Task {
             // Reconcile must not race the tombstone LISTENER (its first snapshot
             // is async): fetch the tombstones NOW, drop those kids locally, and
             // only then re-upload what's left. Otherwise a device that was closed
             // during a delete on another device re-pushed the deleted child on
             // its next launch — and every other device pulled the kid back.
             let tombstoned = await fetchTombstonedChildIDs(in: hh.id)
-            for id in tombstoned { ProfileStore.shared.removeLocalOnly(id) }
-            reconcileLocalChildren(into: hh, skipping: tombstoned)
-            listenToHousehold(hh.id)
-            listenToChildren(in: hh.id); listenToChildDevices(in: hh.id)
-        } catch {
-            lastError = error.localizedDescription
-            markLoaded()   // sync failed (e.g. rules not deployed) — let the UI proceed
+            await MainActor.run {
+                for id in tombstoned { ProfileStore.shared.removeLocalOnly(id) }
+                self.reconcileLocalChildren(into: hh, skipping: tombstoned)
+                self.listenToHousehold(hh.id)
+                self.listenToChildren(in: hh.id); self.listenToChildDevices(in: hh.id)
+            }
         }
+    }
+
+    /// A signed-in account with NO family yet must explicitly choose (published
+    /// for ContentView routing). Cleared the moment a household exists.
+    @Published var needsFamilyChoice = false
+    /// A household whose invitedParentEmails lists this account's email —
+    /// "משפחת X מחכה לך" one-tap join.
+    @Published var pendingEmailInvite: Household? = nil
+
+    /// Find a household that pre-invited this email (see inviteParentByEmail).
+    private func findEmailInvite(email: String) async -> Household? {
+        #if canImport(FirebaseFirestore)
+        let snap = try? await db.collection("households")
+            .whereField("invitedParentEmails", arrayContains: email.lowercased())
+            .limit(to: 1).getDocuments()
+        guard let doc = snap?.documents.first else { return nil }
+        return Self.decodeHousehold(id: doc.documentID, doc.data())
+        #else
+        return nil
+        #endif
+    }
+
+    /// Explicit "צרו משפחה חדשה" from the choice screen — the ONLY way a new
+    /// cloud household is ever minted now.
+    func createOwnHousehold() async {
+        #if canImport(FirebaseFirestore)
+        guard let uid else { return }
+        do {
+            let hh = Household(parentUIDs: [uid], createdBy: uid)
+            try await db.collection("households").document(hh.id).setData(Self.encode(hh))
+            try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([hh.id])])
+            TofyLink("createOwnHousehold: \(hh.id.prefix(8))")
+            finishBootstrap(hh)
+        } catch { lastError = error.localizedDescription }
+        #endif
+    }
+
+    /// One-tap accept of an email invite: add MY uid (the self-add the rules
+    /// allow), adopt the household, then tidy my email off the invite list.
+    func acceptEmailInvite() async {
+        #if canImport(FirebaseFirestore)
+        guard let uid, let invite = pendingEmailInvite else { return }
+        do {
+            try await db.collection("households").document(invite.id)
+                .updateData(["parentUIDs": FieldValue.arrayUnion([uid])])
+            try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([invite.id])])
+            UserDefaults.standard.set(invite.id, forKey: preferredHouseholdKey)
+            if let mail = email {
+                try? await db.collection("households").document(invite.id)
+                    .updateData(["invitedParentEmails": FieldValue.arrayRemove([mail.lowercased()])])
+            }
+            // Re-read now that we're a member (fresh data incl. our uid).
+            let doc = try await db.collection("households").document(invite.id).getDocument()
+            if let data = doc.data(), let hh = Self.decodeHousehold(id: invite.id, data) {
+                TofyLink("acceptEmailInvite: joined \(hh.id.prefix(8))")
+                finishBootstrap(hh)
+                recordMyParentName(in: hh)
+            }
+        } catch { lastError = error.localizedDescription }
+        #endif
+    }
+
+    /// Owner-side: pre-invite the co-parent by email — when THAT email signs
+    /// in, it gets the "המשפחה מחכה לך" screen instead of a lost empty account.
+    func inviteParentByEmail(_ rawEmail: String) async -> Bool {
+        #if canImport(FirebaseFirestore)
+        guard let hh = household else { return false }
+        let mail = rawEmail.trimmingCharacters(in: .whitespaces).lowercased()
+        guard mail.contains("@"), mail.contains(".") else { return false }
+        do {
+            try await db.collection("households").document(hh.id)
+                .updateData(["invitedParentEmails": FieldValue.arrayUnion([mail])])
+            TofyLink("inviteParentByEmail: \(mail) invited to \(hh.id.prefix(8))")
+            return true
+        } catch { lastError = error.localizedDescription; return false }
+        #else
+        return false
+        #endif
     }
 
     private func parentRef(_ uid: String) -> DocumentReference {

@@ -102,6 +102,13 @@ struct ContentView: View {
             // Co-parent who chose "join an existing family" → a focused, guided
             // join screen BEFORE the dashboard (clears the flag on join/skip).
             JoinFamilyFlowView()
+        } else if household.household == nil, household.pendingEmailInvite != nil {
+            // This email was pre-invited by the family owner — one-tap join.
+            EmailInviteWelcomeView()
+        } else if household.household == nil, household.needsFamilyChoice {
+            // Signed-in account with NO family: explicit new-vs-join fork —
+            // nobody gets a silently-created empty household (Rani).
+            FamilyChoiceView()
         } else {
             // The control center is locked behind the parent code + Face ID.
             ParentGateView(allowClose: false) {
