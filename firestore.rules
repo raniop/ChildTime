@@ -52,6 +52,12 @@ service cloud.firestore {
         request.resource.data.parentUIDs.hasOnly(resource.data.parentUIDs.concat([request.auth.uid]))
       );
       allow delete: if signedIn() && request.auth.uid in resource.data.parentUIDs;
+
+      // 🧹 House chores — shared family docs: parents create/approve, the
+      // child's device (its uid is also on parentUIDs) marks them done.
+      match /chores/{choreID} {
+        allow read, write: if householdHasMe(hid);
+      }
     }
 
     // Children — gated on the household. Reads/updates/deletes use the EXISTING

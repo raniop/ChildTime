@@ -41,6 +41,8 @@ struct ParentDashboardView: View {
     @State private var showingKidMode = false
     @State private var friendsProfile: Profile?
     @State private var difficultyProfile: Profile?
+    @State private var choresProfile: Profile?    // 🧹 chores sheet
+    @StateObject private var choreStore = ChoreStore.shared
     @State private var screenTimeProfile: Profile?
     @State private var editProfile: Profile?
     @State private var remoteGrantMsg: String?
@@ -109,6 +111,7 @@ struct ParentDashboardView: View {
                         VStack(spacing: 14) {
                             if isRoot {
                                 if !push.authorized { notificationsBanner }
+                                if !choreStore.pendingApproval.isEmpty { choresApprovalBanner }
                                 familySummaryCard
                                 // The two primary actions side by side (iPhone and
                                 // iPad alike) — stacking wasted a whole row. RTL
@@ -283,6 +286,10 @@ struct ParentDashboardView: View {
                 ChildFriendsView(childID: p.id.uuidString, childName: p.name)
                     .environment(\.layoutDirection, .rightToLeft)
             }
+            .sheet(item: $choresProfile) { p in
+                ChoresParentView(profile: p)
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
             .sheet(item: $difficultyProfile) { p in
                 ChildDifficultyView(profileID: p.id)
                     .environmentObject(profiles)
@@ -338,6 +345,7 @@ struct ParentDashboardView: View {
                 refreshTrigger &+= 1
                 lastRefreshed = .now
                 remote.refreshNow()   // pull fresh child state on open
+                choreStore.startIfNeeded()   // 🧹 live chores + approval banner
                 rescheduleInsights()
                 WidgetBridge.writeFamily(rows)   // keep the family home-screen widget fresh
                 Task {
@@ -499,6 +507,43 @@ struct ParentDashboardView: View {
 
     /// Shown on the parent control screen when notifications are off — taps
     /// re-prompt (if possible) or open iOS Settings.
+    /// 🧹 A kid marked a chore done — surface it front-and-center so the
+    /// approval (and the reward) doesn't wait for the parent to dig in menus.
+    private var choresApprovalBanner: some View {
+        let items = choreStore.pendingApproval
+        return Button {
+            if let first = items.first,
+               let p = profiles.profiles.first(where: { $0.id.uuidString == first.childID }) {
+                choresProfile = p
+            }
+        } label: {
+            HStack(spacing: 10) {
+                Text("🧹").font(.system(size: 28))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(items.count == 1 ? "מטלה מחכה לאישור שלכם!" : "\(items.count) מטלות מחכות לאישור שלכם!")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    if let first = items.first,
+                       let p = profiles.profiles.first(where: { $0.id.uuidString == first.childID }) {
+                        Text("\(p.name): \(first.emoji) \(first.title)")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .opacity(0.85)
+                    }
+                }
+                Spacer()
+                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+            }
+            .foregroundStyle(.white)
+            .padding(12)
+            .background(
+                LinearGradient(colors: [Color(hex: "F4A261"), Color(hex: "E76F51")],
+                               startPoint: .topLeading, endPoint: .bottomTrailing),
+                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+            )
+        }
+        .buttonStyle(.plain)
+        .frame(maxWidth: 460)
+    }
+
     private var notificationsBanner: some View {
         Button {
             Task {
@@ -1282,6 +1327,9 @@ struct ParentDashboardView: View {
             Button {
                 navPath.append(profile.id)
             } label: { Label("פתח כרטיס", systemImage: "rectangle.portrait.and.arrow.right") }
+            Button {
+                choresProfile = profile
+            } label: { Label("מַטְלוֹת הַבַּיִת 🧹", systemImage: "checklist") }
             if rows.count >= 2 {
                 Button {
                     showingReorder = true
@@ -1563,6 +1611,9 @@ struct ParentDashboardView: View {
                         Button {
                             navPath.append(row.profile.id)
                         } label: { Label("פתח כרטיס", systemImage: "rectangle.portrait.and.arrow.right") }
+                        Button {
+                            choresProfile = row.profile
+                        } label: { Label("מַטְלוֹת הַבַּיִת 🧹", systemImage: "checklist") }
                         if rows.count >= 2 {
                             Button {
                                 showingReorder = true

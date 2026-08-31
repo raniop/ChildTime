@@ -263,7 +263,7 @@ exports.blockTombstonedChild = onDocumentCreated("children/{childID}", async (ev
 // exactly the wrong moment. So: on any command write, send a SILENT push
 // (content-available) to the household's child devices; iOS wakes the app for a
 // few seconds, the listener fires, the command applies. No banner, no sound.
-const COMMAND_FIELDS_CHILD = ["pendingMinuteAdjustment", "pendingGiftAdjustment", "resetRequestedAt", "revokeGiftAt"];
+const COMMAND_FIELDS_CHILD = ["pendingMinuteAdjustment", "pendingGiftAdjustment", "pendingMoneyAdjustment", "resetRequestedAt", "revokeGiftAt"];
 // appRemovalUnlockAt was MISSING here — the "allow app deletion" window never
 // woke the child's device and only applied when the kid reopened Tofy.
 const COMMAND_FIELDS_DEVICE = ["remoteLockAt", "remoteUnlockAt", "appRemovalUnlockAt"];
@@ -556,6 +556,57 @@ exports.onTimeTransferWritten = onDocumentWritten("timeTransfers/{id}", async (e
 // interactive notification (category PARENT_HELP) whose two buttons are the
 // answer options — rendered with real text by the HelpContentExtension. The
 // parent's tap is handled in the app (background) and written back to the doc.
+
+// 🧹 Chores: push the PARENTS when a kid marks a chore done (approval needed),
+// and the child's own device when the parent approved (the reward landed).
+exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{choreID}", async (event) => {
+  const before = event.data.before.exists ? event.data.before.data() : null;
+  const after = event.data.after.exists ? event.data.after.data() : null;
+  if (!after) return;
+  const hhID = event.params.householdID;
+
+  let name = "הילד/ה"; let doneVerb = "סיים/ה";
+  try {
+    const c = await db.collection("children").doc(String(after.childID || "")).get();
+    if (c.exists) {
+      name = c.data().name || name;
+      doneVerb = c.data().gender === "girl" ? "סיימה" : "סיים";
+    }
+  } catch (e) { /* keep fallbacks */ }
+  const choreLabel = `${after.emoji || "🧹"} ${after.title || "מטלה"}`;
+
+  // Kid marked it done → the parents get an approve nudge.
+  const markedNow = after.markedDoneAt && (!before || before.markedDoneAt !== after.markedDoneAt);
+  if (markedNow) {
+    const tokens = await tokensForHousehold(hhID);
+    if (!tokens.length) return;
+    const reward = after.chosenReward === "coins"
+      ? `🪙 ₪${after.rewardCoins || 0}` : `⏰ ${after.rewardMinutes || 0} דק׳`;
+    await admin.messaging().sendEachForMulticast({
+      tokens,
+      notification: { title: `🧹 ${name} ${doneVerb} מטלה!`,
+                      body: `${choreLabel} — מחכה לאישור שלכם (${reward})` },
+      apns: { payload: { aps: { sound: "default" } } },
+    });
+    return;
+  }
+
+  // Parent approved → celebrate on the kid's device. (chosenReward is cleared
+  // by the approval write, so read the kid's pick from BEFORE.)
+  const approvedNow = after.lastApprovedAt && (!before || before.lastApprovedAt !== after.lastApprovedAt);
+  if (approvedNow) {
+    const tokens = await tokensForChildOwnDevices(after.childID, hhID);
+    if (!tokens.length) return;
+    const reward = (before && before.chosenReward === "coins")
+      ? `🪙 ₪${after.rewardCoins || 0} נכנסו לקופה!`
+      : `⏰ ${after.rewardMinutes || 0} דקות משחק נוספו!`;
+    await admin.messaging().sendEachForMulticast({
+      tokens,
+      notification: { title: "🎉 המטלה אושרה!", body: `${choreLabel} — ${reward}` },
+      apns: { payload: { aps: { sound: "default" } } },
+    });
+  }
+});
 
 exports.onHelpRequest = onDocumentCreated("helpRequests/{id}", async (event) => {
   const data = event.data && event.data.data();

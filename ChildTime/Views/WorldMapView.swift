@@ -36,6 +36,8 @@ struct WorldMapView: View {
     @State private var showingShop = false
     @State private var showingWheel = false
     @State private var showingGames = false
+    @State private var showingChores = false
+    @StateObject private var choreStore = ChoreStore.shared
     @State private var showingLeaderboard = false
     @State private var showingSmartFeed = false
     @State private var showingChildSettings = false
@@ -165,6 +167,25 @@ struct WorldMapView: View {
                                 .frame(maxWidth: .infinity)
                             }
 
+                            // 🧹 Chores — only when the parent actually defined
+                            // some for this child; helping at home earns minutes
+                            // or pocket money (the KID picks which).
+                            if let cid = profiles.activeID, !choreStore.chores(forChild: cid).isEmpty {
+                                FeatureCard(
+                                    emoji: "🧹",
+                                    title: "מַטְלוֹת הַבַּיִת",
+                                    subtitle: choresSubtitle(for: cid),
+                                    gradient: LinearGradient(colors: [Color(hex: "F4A261"), Color(hex: "E76F51")],
+                                                             startPoint: .topLeading, endPoint: .bottomTrailing),
+                                    glowColor: Color(hex: "F4A261"),
+                                    badge: choresBadge(for: cid)
+                                ) {
+                                    Haptic.light()
+                                    showingChores = true
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+
                             // 🎮 Games LAST in the grid (Rani): learning worlds
                             // come first in the child's choice order; the arcade
                             // is the dessert at the end.
@@ -253,6 +274,7 @@ struct WorldMapView: View {
         .onAppear {
             lastSeenStars = progress.stars
             celebrateGamesUnlockIfNeeded()
+            ChoreStore.shared.startIfNeeded()   // 🧹 live chores for the tile
             // 🎓 No grade yet (families from before grades existed): the kid
             // picks their own — synced to the parent flagged for verification.
             if let p = profiles.active, p.grade == nil {
@@ -444,6 +466,12 @@ struct WorldMapView: View {
         }
         .fullScreenCover(isPresented: $showingGames) {
             GamesMenuView { showingGames = false }
+        }
+        .fullScreenCover(isPresented: $showingChores) {
+            ChoresKidView { showingChores = false }
+                .environmentObject(profiles)
+                .environmentObject(progress)
+                .environment(\.layoutDirection, .rightToLeft)
         }
         .fullScreenCover(isPresented: $showingWheel) {
             LuckyWheelView { showingWheel = false }
@@ -1608,6 +1636,19 @@ struct WorldMapView: View {
         (profiles.active?.effectiveGrade ?? 1) <= 0 ? 5 : 10
     }
     private var gamesGateRemaining: Int { max(0, gamesGateTarget - progress.correctToday) }
+
+    // MARK: - 🧹 Chores tile helpers
+
+    private func choresSubtitle(for cid: UUID) -> String {
+        let pending = choreStore.chores(forChild: cid).filter { $0.isPendingApproval }.count
+        if pending > 0 { return "מְחַכִּים לְאִשּׁוּר שֶׁל הַהוֹרִים 🕐" }
+        return "עוֹזְרִים בַּבַּיִת — מַרְוִיחִים פְּרָס"
+    }
+
+    private func choresBadge(for cid: UUID) -> String? {
+        let available = choreStore.chores(forChild: cid).filter { $0.isAvailable }.count
+        return available > 0 ? "\(available) 🧹" : nil
+    }
     /// `correctToday` resets at midnight, so the warm-up is a fresh daily goal.
     private var gamesUnlockedToday: Bool { gamesGateRemaining == 0 }
 
