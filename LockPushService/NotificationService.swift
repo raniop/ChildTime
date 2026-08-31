@@ -42,7 +42,36 @@ class NotificationService: UNNotificationServiceExtension {
                 .set(Date().timeIntervalSince1970, forKey: "nseLockAppliedAt")
         }
 
+        // 🧹📸 Chore-done push with a proof photo — fetch it (token-gated URL,
+        // served by the chorePhoto function) and attach, so the parent sees the
+        // tidy room right in the notification. Any failure falls back to the
+        // plain text push; serviceExtensionTimeWillExpire covers a hung fetch.
+        if let urlString = request.content.userInfo["photoURL"] as? String,
+           let url = URL(string: urlString) {
+            attachPhoto(from: url, to: request)
+            return
+        }
+
         contentHandler(bestAttempt ?? request.content)
+    }
+
+    private func attachPhoto(from url: URL, to request: UNNotificationRequest) {
+        URLSession.shared.downloadTask(with: url) { [weak self] tmpURL, _, _ in
+            guard let self, let handler = self.contentHandler else { return }
+            defer { handler(self.bestAttempt ?? request.content) }
+            guard let tmpURL else { return }
+            // UNNotificationAttachment needs a file the system can claim, with a
+            // type-revealing extension.
+            let dest = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString + ".jpg")
+            do {
+                try FileManager.default.moveItem(at: tmpURL, to: dest)
+                let attachment = try UNNotificationAttachment(identifier: "chorePhoto", url: dest)
+                self.bestAttempt?.attachments = [attachment]
+            } catch {
+                lockLog.error("nse: chore photo attach failed: \(error.localizedDescription)")
+            }
+        }.resume()
     }
 
     override func serviceExtensionTimeWillExpire() {

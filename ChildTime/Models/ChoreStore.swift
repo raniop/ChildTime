@@ -173,6 +173,7 @@ final class ChoreStore: ObservableObject {
         ("preset-closet",    "🧥", "לסדר את הארון",            15,  7, 1),
         ("preset-homework",  "📝", "להכין שיעורי בית",         30, 20, 1),
         ("preset-reading",   "📖", "לקרוא ספר",                60, 50, 1),
+        ("preset-leaves",    "🍂", "לאסוף עלים מהגינה",        30, 20, 1),
     ]
 
     /// The child's full list: the built-in catalog (overridden per-child by any
@@ -326,6 +327,42 @@ final class ChoreStore: ObservableObject {
             .updateData(update)
         // Money + lifetime-earnings ledger — what the kid sees as "הרווחתי".
         db.collection("households").document(hh).collection("choreStats").document(chore.childID)
+            .setData([coins ? "coinsTotal" : "minutesTotal":
+                      FieldValue.increment(Int64(coins ? chore.rewardCoins : chore.rewardMinutes))],
+                     merge: true)
+        #endif
+    }
+
+    /// 🔔 Approve straight from the notification button — the app is awake only
+    /// briefly in the background, so every write is AWAITED (a queued-but-unsent
+    /// write would vanish when iOS suspends us). Self-contained: takes the
+    /// household from the push payload (the store's listener may never have
+    /// started in this cold background launch).
+    func approveFromPush(householdID: String, choreID: String) async {
+        #if canImport(FirebaseFirestore)
+        let choreRef = db.collection("households").document(householdID)
+            .collection("chores").document(choreID)
+        guard let doc = try? await choreRef.getDocument(),
+              let chore = Chore.from(id: choreID, data: doc.data() ?? [:]),
+              chore.isPendingApproval else { return }   // already handled elsewhere
+        let coins = chore.chosenReward == "coins" && chore.rewardCoins > 0
+        if !coins && chore.rewardMinutes > 0 {
+            try? await db.collection("children").document(chore.childID)
+                .setData(["pendingMinuteAdjustment": FieldValue.increment(Int64(chore.rewardMinutes))],
+                         merge: true)
+        }
+        let now = Date().timeIntervalSince1970
+        var update: [String: Any] = ["markedDoneAt": FieldValue.delete(),
+                                     "chosenReward": FieldValue.delete(),
+                                     "photoData": FieldValue.delete(),
+                                     "photoToken": FieldValue.delete(),
+                                     "lastApprovedAt": now,
+                                     "approvedTodayCount": chore.doneToday + 1,
+                                     "approvedTodayAt": now]
+        if !chore.isDaily { update["archived"] = true }
+        try? await choreRef.updateData(update)
+        try? await db.collection("households").document(householdID)
+            .collection("choreStats").document(chore.childID)
             .setData([coins ? "coinsTotal" : "minutesTotal":
                       FieldValue.increment(Int64(coins ? chore.rewardCoins : chore.rewardMinutes))],
                      merge: true)

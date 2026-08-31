@@ -575,18 +575,36 @@ exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{cho
   } catch (e) { /* keep fallbacks */ }
   const choreLabel = `${after.emoji || "🧹"} ${after.title || "מטלה"}`;
 
-  // Kid marked it done → the parents get an approve nudge.
+  // Kid marked it done → the parents get an approve nudge. Interactive:
+  // category CHORE_APPROVAL carries a "בוצע — אשרו" button the app handles in
+  // the background (no launch), and mutable-content lets the notification
+  // service extension attach the kid's proof photo, served by `chorePhoto`
+  // behind an unguessable per-mark token.
   const markedNow = after.markedDoneAt && (!before || before.markedDoneAt !== after.markedDoneAt);
   if (markedNow) {
     const tokens = await tokensForHousehold(hhID);
     if (!tokens.length) return;
     const reward = after.chosenReward === "coins"
-      ? `🪙 ₪${after.rewardCoins || 0}` : `⏰ ${after.rewardMinutes || 0} דק׳`;
+      ? `💰 ₪${after.rewardCoins || 0}` : `🎮 ${after.rewardMinutes || 0} דק׳`;
+    const data = {
+      type: "choreApproval",
+      householdID: String(hhID),
+      choreID: String(event.params.choreID),
+    };
+    if (after.photoData) {
+      const token = require("crypto").randomBytes(16).toString("hex");
+      await event.data.after.ref.update({ photoToken: token });
+      data.photoURL = `https://us-central1-childtime-86e98.cloudfunctions.net/chorePhoto` +
+        `?hh=${encodeURIComponent(hhID)}&chore=${encodeURIComponent(event.params.choreID)}&token=${token}`;
+    }
     await admin.messaging().sendEachForMulticast({
       tokens,
       notification: { title: `🧹 ${name} ${doneVerb} מטלה!`,
                       body: `${choreLabel} — מחכה לאישור שלכם (${reward})` },
-      apns: { payload: { aps: { sound: "default" } } },
+      data,
+      apns: { payload: { aps: { "sound": "default",
+                                "category": "CHORE_APPROVAL",
+                                "mutable-content": 1 } } },
     });
     return;
   }
@@ -598,8 +616,8 @@ exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{cho
     const tokens = await tokensForChildOwnDevices(after.childID, hhID);
     if (!tokens.length) return;
     const reward = (before && before.chosenReward === "coins")
-      ? `🪙 ₪${after.rewardCoins || 0} נכנסו לקופה!`
-      : `⏰ ${after.rewardMinutes || 0} דקות משחק נוספו!`;
+      ? `💰 ₪${after.rewardCoins || 0} נכנסו לקופה!`
+      : `🎮 ${after.rewardMinutes || 0} דקות משחק נוספו!`;
     await admin.messaging().sendEachForMulticast({
       tokens,
       notification: { title: "🎉 המטלה אושרה!", body: `${choreLabel} — ${reward}` },
@@ -936,6 +954,28 @@ exports.onWaitlistSignup = onDocumentCreated(
 // raw child data ever reaches the browser. Refreshed every 6h, and triggerable
 // on demand via runAdminStats (token-guarded) for the first backfill.
 const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
+
+// 📸 Serves a chore's proof photo to the notification service extension —
+// gated by the random per-mark token minted in onChoreWritten. The photo (and
+// with it this URL) dies when the parent approves/returns the chore.
+exports.chorePhoto = onRequest(async (req, res) => {
+  const { hh, chore, token } = req.query;
+  if (!hh || !chore || !token) { res.status(400).send("bad request"); return; }
+  try {
+    const doc = await db.collection("households").doc(String(hh))
+      .collection("chores").doc(String(chore)).get();
+    const d = doc.exists ? doc.data() : null;
+    if (!d || !d.photoToken || d.photoToken !== token || !d.photoData) {
+      res.status(404).send("not found"); return;
+    }
+    res.set("Content-Type", "image/jpeg");
+    res.set("Cache-Control", "private, max-age=600");
+    res.send(Buffer.from(d.photoData));
+  } catch (e) {
+    console.error("[chorePhoto]", e && e.message);
+    res.status(500).send("error");
+  }
+});
 const ADMIN_TASK_TOKEN = defineSecret("ADMIN_TASK_TOKEN");
 const DAY = 24 * 3600;
 // Who may trigger an on-demand recompute from the signed-in /admin dashboard.

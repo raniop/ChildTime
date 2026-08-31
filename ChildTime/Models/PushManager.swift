@@ -143,6 +143,9 @@ extension PushManager {
         /// options as buttons (rendered by HelpContentExtension). Must match the
         /// extension's `UNNotificationExtensionCategory`.
         static let parentHelp = "PARENT_HELP"
+        /// 🧹 A kid finished a chore — one-tap approve straight from the
+        /// notification, no app launch.
+        static let choreApproval = "CHORE_APPROVAL"
     }
     enum Action {
         static let levelUpYes = "LEVELUP_YES"
@@ -150,6 +153,8 @@ extension PushManager {
         /// The parent kept option A / option B from a help notification.
         static let helpOptionA = "HELP_OPT_A"
         static let helpOptionB = "HELP_OPT_B"
+        /// The parent approved the chore from the notification button.
+        static let choreApprove = "CHORE_APPROVE"
     }
 
     /// Register interactive notification categories so the strength-insight push
@@ -181,7 +186,32 @@ extension PushManager {
             intentIdentifiers: [],
             options: [])
 
-        UNUserNotificationCenter.current().setNotificationCategories([cat, helpCat])
+        // Chore approval: one background button. `.authenticationRequired` so a
+        // kid holding the parent's locked phone can't approve their own chore
+        // from the lock screen. Not `.foreground` — the reward fires without
+        // opening the app.
+        let choreApprove = UNNotificationAction(
+            identifier: Action.choreApprove,
+            title: "✅ בוצע — אשרו",
+            options: [.authenticationRequired])
+        let choreCat = UNNotificationCategory(
+            identifier: Category.choreApproval,
+            actions: [choreApprove],
+            intentIdentifiers: [],
+            options: [])
+
+        UNUserNotificationCenter.current().setNotificationCategories([cat, helpCat, choreCat])
+    }
+
+    /// 🧹 Approve a chore straight from the notification button. MUST be awaited
+    /// from `didReceive` (same rule as the help decision): the app is only
+    /// briefly awake in the background, and a fire-and-forget write could be
+    /// dropped before it reaches the server.
+    func handleChoreApproval(_ actionID: String, userInfo: [AnyHashable: Any]) async {
+        guard actionID == Action.choreApprove,
+              let hh = userInfo["householdID"] as? String,
+              let choreID = userInfo["choreID"] as? String else { return }
+        await ChoreStore.shared.approveFromPush(householdID: hh, choreID: choreID)
     }
 
     /// Apply the parent's tapped answer: the option they kept stays on the child's
@@ -300,6 +330,7 @@ extension PushManager: UNUserNotificationCenterDelegate {
             // before iOS suspends the briefly-woken background app — otherwise the
             // child's listener never sees the parent's answer.
             await PushManager.shared.handleParentHelpDecision(actionID, userInfo: info)
+            await PushManager.shared.handleChoreApproval(actionID, userInfo: info)
             completionHandler()   // on main — UIKit's post-tap snapshot work requires it
         }
     }
