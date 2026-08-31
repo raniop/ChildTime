@@ -106,9 +106,56 @@ final class ChoreStore: ObservableObject {
         chores = []
     }
 
+    /// 🗂 Built-in catalog — EVERY child gets these automatically, no parent
+    /// setup needed (Rani). Default rewards scale with chore size: small 5דק'/₪2,
+    /// medium 10/5, bigger 15-20/7-10. The kid picks the chore AND the reward —
+    /// a little trade with the parent; the parent can retune or hide any of
+    /// them (an override doc with the same deterministic id takes precedence).
+    static let catalog: [(key: String, emoji: String, title: String, minutes: Int, coins: Int)] = [
+        ("preset-bed",       "🛏", "לסדר את המיטה",            5,  2),
+        ("preset-clothes",   "👕", "לשים בגדים בסל הכביסה",     5,  2),
+        ("preset-plate",     "🍽", "לפנות את הצלחת מהשולחן",    5,  2),
+        ("preset-shoes",     "👟", "לסדר את הנעליים בכניסה",    5,  2),
+        ("preset-toys",      "🧸", "לאסוף את הצעצועים",        10,  5),
+        ("preset-table",     "🍴", "לערוך את השולחן לארוחה",   10,  5),
+        ("preset-bag",       "🎒", "להכין את התיק לבית הספר",  10,  5),
+        ("preset-plants",    "🪴", "להשקות את העציצים",        10,  5),
+        ("preset-pet",       "🐕", "להאכיל את חיית המחמד",     10,  5),
+        ("preset-trash",     "🗑", "להוריד את הזבל",           10,  5),
+        ("preset-desk",      "📚", "לסדר את שולחן הכתיבה",     15,  7),
+        ("preset-sweep",     "🧹", "לטאטא את החדר",            20, 10),
+        ("preset-laundry",   "🧺", "לעזור בקיפול כביסה",       20, 10),
+        ("preset-groceries", "🛒", "לעזור בסידור הקניות",      20, 10),
+        ("preset-cooking",   "🍳", "לעזור בהכנת ארוחה",        20, 10),
+    ]
+
+    /// The child's full list: the built-in catalog (overridden per-child by any
+    /// doc with the matching deterministic id — retuned rewards, hidden, or
+    /// in-progress state) plus the family's custom chores. All daily.
     func chores(forChild id: UUID) -> [Chore] {
-        chores.filter { $0.childID == id.uuidString && !$0.archived }
+        let docs = chores.filter { $0.childID == id.uuidString }
+        var byID = Dictionary(uniqueKeysWithValues: docs.map { ($0.id, $0) })
+        var out: [Chore] = []
+        for preset in Self.catalog {
+            let docID = "\(preset.key)_\(id.uuidString)"
+            if let doc = byID.removeValue(forKey: docID) {
+                if !doc.archived { out.append(doc) }   // archived = hidden by the parent
+            } else {
+                out.append(Chore(id: docID, childID: id.uuidString,
+                                 title: preset.title, emoji: preset.emoji,
+                                 rewardMinutes: preset.minutes, rewardCoins: preset.coins,
+                                 isDaily: true, createdAt: 0,
+                                 markedDoneAt: nil, chosenReward: nil,
+                                 lastApprovedAt: nil, archived: false))
+            }
+        }
+        out += byID.values.filter { !$0.archived }.sorted { $0.createdAt < $1.createdAt }
+        return out
     }
+
+    /// A catalog chore (vs. a custom one the family added). "Deleting" a preset
+    /// only hides it — it must be possible to bring it back.
+    static func isPreset(_ chore: Chore) -> Bool { chore.id.hasPrefix("preset-") }
 
     /// Chores across the family waiting for a parent's approval.
     var pendingApproval: [Chore] {
@@ -136,6 +183,57 @@ final class ChoreStore: ObservableObject {
         #if canImport(FirebaseFirestore)
         guard let hh = listeningHousehold else { return }
         db.collection("households").document(hh).collection("chores").document(chore.id).delete()
+        #endif
+    }
+
+    /// Parent retunes a chore's rewards (or renames a custom one) — for catalog
+    /// chores this writes/updates the per-child override doc.
+    func updateChore(_ chore: Chore, title: String, emoji: String,
+                     rewardMinutes: Int, rewardCoins: Int) {
+        #if canImport(FirebaseFirestore)
+        guard let hh = listeningHousehold else { return }
+        db.collection("households").document(hh).collection("chores").document(chore.id)
+            .setData(["childID": chore.childID,
+                      "title": title,
+                      "emoji": emoji,
+                      "rewardMinutes": rewardMinutes,
+                      "rewardCoins": rewardCoins,
+                      "isDaily": chore.isDaily,
+                      "createdAt": chore.createdAt > 0 ? chore.createdAt : Date().timeIntervalSince1970],
+                     merge: true)
+        #endif
+    }
+
+    /// Parent hides a catalog chore for this child (custom chores get deleted
+    /// outright via deleteChore).
+    func hideChore(_ chore: Chore) {
+        #if canImport(FirebaseFirestore)
+        guard let hh = listeningHousehold else { return }
+        db.collection("households").document(hh).collection("chores").document(chore.id)
+            .setData(["childID": chore.childID,
+                      "title": chore.title,
+                      "emoji": chore.emoji,
+                      "rewardMinutes": chore.rewardMinutes,
+                      "rewardCoins": chore.rewardCoins,
+                      "isDaily": chore.isDaily,
+                      "createdAt": chore.createdAt > 0 ? chore.createdAt : Date().timeIntervalSince1970,
+                      "archived": true,
+                      "markedDoneAt": FieldValue.delete(),
+                      "chosenReward": FieldValue.delete()], merge: true)
+        #endif
+    }
+
+    /// Hidden catalog chores for this child — so the parent can bring one back.
+    func hiddenPresets(forChild id: UUID) -> [Chore] {
+        chores.filter { $0.childID == id.uuidString && $0.archived && Self.isPreset($0) }
+    }
+
+    /// Un-hide a previously hidden catalog chore.
+    func restoreChore(_ chore: Chore) {
+        #if canImport(FirebaseFirestore)
+        guard let hh = listeningHousehold else { return }
+        db.collection("households").document(hh).collection("chores").document(chore.id)
+            .updateData(["archived": false])
         #endif
     }
 
@@ -180,13 +278,22 @@ final class ChoreStore: ObservableObject {
 
     // MARK: - Kid action
 
-    /// The kid marks the chore done AND picks the reward they want.
+    /// The kid marks the chore done AND picks the reward they want. A catalog
+    /// chore may not have a doc yet — setData(merge) materializes it with its
+    /// current (default or overridden) values in the same write.
     func markDone(_ chore: Chore, reward: String) {
         #if canImport(FirebaseFirestore)
         guard let hh = listeningHousehold else { return }
         db.collection("households").document(hh).collection("chores").document(chore.id)
-            .updateData(["markedDoneAt": Date().timeIntervalSince1970,
-                         "chosenReward": reward])
+            .setData(["childID": chore.childID,
+                      "title": chore.title,
+                      "emoji": chore.emoji,
+                      "rewardMinutes": chore.rewardMinutes,
+                      "rewardCoins": chore.rewardCoins,
+                      "isDaily": chore.isDaily,
+                      "createdAt": chore.createdAt > 0 ? chore.createdAt : Date().timeIntervalSince1970,
+                      "markedDoneAt": Date().timeIntervalSince1970,
+                      "chosenReward": reward], merge: true)
         #endif
     }
 }
