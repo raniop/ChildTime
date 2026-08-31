@@ -225,22 +225,21 @@ struct ChoresKidView: View {
                 .lineLimit(2)
                 .minimumScaleFactor(0.75)
                 .frame(minHeight: 38)
-            HStack(spacing: 4) {
-                if chore.rewardMinutes > 0 {
-                    rewardChip("🎮 \(chore.rewardMinutes) דַּק׳")
-                }
-                if chore.rewardMinutes > 0 && chore.rewardCoins > 0 {
-                    Text("אוֹ")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.7))
-                }
-                if chore.rewardCoins > 0 {
-                    rewardChip("💰 ₪\(chore.rewardCoins)")
-                }
-                if chore.timesPerDay > 1 {
-                    rewardChip("\(chore.doneToday)/\(chore.timesPerDay) הַיּוֹם")
-                }
-            }
+            // ONE reward line — three separate chips + "אוֹ" overflowed the
+            // 2-up grid card and truncated into "…5" (Rani caught it live).
+            Text(rewardLine(chore))
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1).minimumScaleFactor(0.55)
+                .padding(.horizontal, 9).padding(.vertical, 4)
+                .background(.white.opacity(0.16), in: Capsule())
+            // Same-day repeat counter — reserved even when absent so every
+            // card in a grid row keeps the same height.
+            Text(chore.timesPerDay > 1 ? "הַיּוֹם: \(chore.doneToday)/\(chore.timesPerDay) ✔️" : " ")
+                .font(.system(size: 10.5, weight: .bold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.8))
+                .lineLimit(1)
+                .frame(height: 13)
 
             if chore.isPendingApproval || justSent.contains(chore.id) {
                 statusCapsule("מְחַכִּים לְאִשּׁוּר 🕐", background: .white.opacity(0.16))
@@ -287,14 +286,11 @@ struct ChoresKidView: View {
             .background(background, in: Capsule())
     }
 
-    private func rewardChip(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 11, weight: .bold, design: .rounded))
-            .foregroundStyle(.white)
-            .lineLimit(1)
-            .padding(.horizontal, 7)
-            .padding(.vertical, 4)
-            .background(.white.opacity(0.18), in: Capsule())
+    private func rewardLine(_ c: Chore) -> String {
+        var parts: [String] = []
+        if c.rewardMinutes > 0 { parts.append("🎮 \(c.rewardMinutes) דַּק׳") }
+        if c.rewardCoins > 0 { parts.append("💰 \(c.rewardCoins) ₪") }
+        return parts.joined(separator: " אוֹ ")
     }
 
     private func offerPhoto(_ chore: Chore, reward: String) {
