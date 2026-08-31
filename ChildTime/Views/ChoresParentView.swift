@@ -18,6 +18,7 @@ struct ChoresParentView: View {
     @State private var formEmoji = "🧹"
     @State private var formMinutes = 10
     @State private var formCoins = 5
+    @State private var formTimesPerDay = 1
     @State private var settleConfirm = false
 
     private static let emojiOptions = ["🧹", "🛏", "🍽", "🗑", "👕", "🐕", "🪴", "🎒", "🧸", "🛒", "🍳", "🧺"]
@@ -62,6 +63,11 @@ struct ChoresParentView: View {
                             }
                     } else {
                         Text("כשמאשרים מטלה עם פרס כסף — הסכום נרשם כאן, ואתם נותנים ביד.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    let totals = choreStore.totals(forChild: profile.id)
+                    if totals.minutes > 0 || totals.coins > 0 {
+                        Text("סה\"כ מהמטלות עד היום: ⏰ \(totals.minutes) דק׳ · 🪙 ₪\(totals.coins)")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
@@ -127,6 +133,8 @@ struct ChoresParentView: View {
                     }
                     Stepper("⏰ פרס דקות משחק: \(formMinutes)", value: $formMinutes, in: 0...120, step: 5)
                     Stepper("🪙 פרס כסף: ₪\(formCoins)", value: $formCoins, in: 0...100)
+                    Stepper(formTimesPerDay == 1 ? "🔁 פעם אחת ביום" : "🔁 עד \(formTimesPerDay) פעמים ביום",
+                            value: $formTimesPerDay, in: 1...6)
                     Button {
                         saveForm()
                     } label: {
@@ -192,7 +200,10 @@ struct ChoresParentView: View {
                         if chore.rewardMinutes > 0 { Text("⏰ \(chore.rewardMinutes) דק׳") }
                         if chore.rewardMinutes > 0 && chore.rewardCoins > 0 { Text("או") }
                         if chore.rewardCoins > 0 { Text("🪙 ₪\(chore.rewardCoins)") }
-                        if chore.isDaily && chore.approvedToday { Text("✅ אושרה היום") }
+                        if chore.timesPerDay > 1 { Text("🔁 עד \(chore.timesPerDay) ביום") }
+                    if chore.isDaily && chore.doneToday > 0 {
+                        Text(chore.approvedToday ? "✅ הושלמה להיום" : "✅ \(chore.doneToday)/\(chore.timesPerDay) היום")
+                    }
                     }
                     .font(.caption).foregroundStyle(.secondary)
                 }
@@ -210,6 +221,7 @@ struct ChoresParentView: View {
         formEmoji = chore.emoji
         formMinutes = chore.rewardMinutes
         formCoins = chore.rewardCoins
+        formTimesPerDay = chore.timesPerDay
         Haptic.light()
     }
 
@@ -219,6 +231,7 @@ struct ChoresParentView: View {
         formEmoji = "🧹"
         formMinutes = 10
         formCoins = 5
+        formTimesPerDay = 1
     }
 
     private func saveForm() {
@@ -228,14 +241,16 @@ struct ChoresParentView: View {
                                    title: keepName ? chore.title : formTitle.trimmingCharacters(in: .whitespaces),
                                    emoji: keepName ? chore.emoji : formEmoji,
                                    rewardMinutes: formMinutes,
-                                   rewardCoins: formCoins)
+                                   rewardCoins: formCoins,
+                                   timesPerDay: formTimesPerDay)
         } else {
             choreStore.addChore(childID: profile.id,
                                 title: formTitle.trimmingCharacters(in: .whitespaces),
                                 emoji: formEmoji,
                                 rewardMinutes: formMinutes,
                                 rewardCoins: formCoins,
-                                isDaily: true)
+                                isDaily: true,
+                                timesPerDay: formTimesPerDay)
         }
         clearForm()
         Haptic.success()

@@ -111,7 +111,6 @@ struct ParentDashboardView: View {
                         VStack(spacing: 14) {
                             if isRoot {
                                 if !push.authorized { notificationsBanner }
-                                if !choreStore.pendingApproval.isEmpty { choresApprovalBanner }
                                 familySummaryCard
                                 // The two primary actions side by side (iPhone and
                                 // iPad alike) — stacking wasted a whole row. RTL
@@ -123,6 +122,10 @@ struct ParentDashboardView: View {
                                         kidModeButton
                                         linkButton
                                     }
+                                    // 🧹 Standing chores row — ALWAYS here, right
+                                    // under the two primary buttons (Rani), so
+                                    // approvals never hide in a menu.
+                                    choresApprovalBanner
                                 } else {
                                     linkCallout
                                 }
@@ -507,41 +510,61 @@ struct ParentDashboardView: View {
 
     /// Shown on the parent control screen when notifications are off — taps
     /// re-prompt (if possible) or open iOS Settings.
-    /// 🧹 A kid marked a chore done — surface it front-and-center so the
-    /// approval (and the reward) doesn't wait for the parent to dig in menus.
+    /// 🧹 Standing chores row under the two primary buttons — urgent orange
+    /// when a kid is waiting for an approval, calm glass otherwise. Always
+    /// visible (Rani) so the chores world is one tap away.
     private var choresApprovalBanner: some View {
         let items = choreStore.pendingApproval
+        let urgent = !items.isEmpty
         return Button {
-            if let first = items.first,
-               let p = profiles.profiles.first(where: { $0.id.uuidString == first.childID }) {
-                choresProfile = p
-            }
+            // Jump straight to the child who's waiting; otherwise the first child.
+            let target = items.first.flatMap { first in
+                profiles.profiles.first(where: { $0.id.uuidString == first.childID })
+            } ?? rows.first?.profile
+            if let target { choresProfile = target }
         } label: {
             HStack(spacing: 10) {
-                Text("🧹").font(.system(size: 28))
+                Text("🧹").font(.system(size: 26))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(items.count == 1 ? "מטלה מחכה לאישור שלכם!" : "\(items.count) מטלות מחכות לאישור שלכם!")
+                    Text(urgent
+                         ? (items.count == 1 ? "מטלה מחכה לאישור שלכם!" : "\(items.count) מטלות מחכות לאישור שלכם!")
+                         : "מטלות הבית")
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    if let first = items.first,
+                    if urgent, let first = items.first,
                        let p = profiles.profiles.first(where: { $0.id.uuidString == first.childID }) {
                         Text("\(p.name): \(first.emoji) \(first.title)")
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .opacity(0.85)
+                    } else if !urgent {
+                        Text("אין בקשות ממתינות · ניהול מטלות ופרסים")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .opacity(0.8)
                     }
                 }
                 Spacer()
                 Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                    .opacity(urgent ? 1 : 0.6)
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(urgent ? .white : .primary)
             .padding(12)
             .background(
-                LinearGradient(colors: [Color(hex: "F4A261"), Color(hex: "E76F51")],
-                               startPoint: .topLeading, endPoint: .bottomTrailing),
-                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+                Group {
+                    if urgent {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(LinearGradient(colors: [Color(hex: "F4A261"), Color(hex: "E76F51")],
+                                                 startPoint: .topLeading, endPoint: .bottomTrailing))
+                    } else {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                    }
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(urgent ? Color.white.opacity(0.35) : Color(hex: "F4A261").opacity(0.45), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
-        .frame(maxWidth: 460)
     }
 
     private var notificationsBanner: some View {

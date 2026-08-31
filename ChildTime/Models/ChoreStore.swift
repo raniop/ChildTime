@@ -25,18 +25,28 @@ struct Chore: Identifiable, Equatable {
     var rewardCoins: Int
     /// true → comes back every day after approval; false → one-time.
     var isDaily: Bool
+    /// How many times it can be done (and rewarded) per day — e.g. clearing
+    /// the plate happens every meal (Rani). Daily chores only.
+    var timesPerDay: Int
     var createdAt: Double
     var markedDoneAt: Double?
     /// "minutes" | "coins" — the KID's pick, made when marking done.
     var chosenReward: String?
     var lastApprovedAt: Double?
+    /// Rolling same-day approval counter (paired with its date).
+    var approvedTodayCount: Int
+    var approvedTodayAt: Double?
     var archived: Bool
 
     var isPendingApproval: Bool { markedDoneAt != nil }
-    var approvedToday: Bool {
-        guard let t = lastApprovedAt else { return false }
-        return Calendar.current.isDateInToday(Date(timeIntervalSince1970: t))
+    /// How many approvals landed TODAY (0 if the counter is from another day).
+    var doneToday: Int {
+        guard let t = approvedTodayAt,
+              Calendar.current.isDateInToday(Date(timeIntervalSince1970: t)) else { return 0 }
+        return approvedTodayCount
     }
+    /// Finished for today — did it as many times as the day allows.
+    var approvedToday: Bool { isDaily && doneToday >= max(1, timesPerDay) }
     /// The kid can do it now.
     var isAvailable: Bool {
         !archived && !isPendingApproval && !(isDaily && approvedToday)
@@ -52,10 +62,13 @@ struct Chore: Identifiable, Equatable {
                      rewardMinutes: data["rewardMinutes"] as? Int ?? 0,
                      rewardCoins: data["rewardCoins"] as? Int ?? 0,
                      isDaily: data["isDaily"] as? Bool ?? false,
+                     timesPerDay: data["timesPerDay"] as? Int ?? 1,
                      createdAt: data["createdAt"] as? Double ?? 0,
                      markedDoneAt: data["markedDoneAt"] as? Double,
                      chosenReward: data["chosenReward"] as? String,
                      lastApprovedAt: data["lastApprovedAt"] as? Double,
+                     approvedTodayCount: data["approvedTodayCount"] as? Int ?? 0,
+                     approvedTodayAt: data["approvedTodayAt"] as? Double,
                      archived: data["archived"] as? Bool ?? false)
     }
 }
@@ -69,10 +82,15 @@ final class ChoreStore: ObservableObject {
     static let shared = ChoreStore()
 
     @Published private(set) var chores: [Chore] = []
+    /// Lifetime chore earnings per child (uuid-string → totals), mirrored from
+    /// `households/{id}/choreStats/{childID}` — bumped on every approval so the
+    /// kid can see "how much have I earned from chores, ever".
+    @Published private(set) var stats: [String: (minutes: Int, coins: Int)] = [:]
 
     #if canImport(FirebaseFirestore)
     private var db: Firestore { Firestore.firestore() }
     private var listener: ListenerRegistration?
+    private var statsListener: ListenerRegistration?
     private var listeningHousehold: String?
     #endif
 
@@ -94,6 +112,17 @@ final class ChoreStore: ObservableObject {
                     .sorted { $0.createdAt < $1.createdAt }
                 Task { @MainActor in self.chores = parsed }
             }
+        statsListener?.remove()
+        statsListener = db.collection("households").document(hh).collection("choreStats")
+            .addSnapshotListener { [weak self] snap, _ in
+                guard let self, let snap else { return }
+                var parsed: [String: (minutes: Int, coins: Int)] = [:]
+                for d in snap.documents {
+                    parsed[d.documentID] = (d.data()["minutesTotal"] as? Int ?? 0,
+                                            d.data()["coinsTotal"] as? Int ?? 0)
+                }
+                Task { @MainActor in self.stats = parsed }
+            }
         #endif
     }
 
@@ -101,9 +130,12 @@ final class ChoreStore: ObservableObject {
         #if canImport(FirebaseFirestore)
         listener?.remove()
         listener = nil
+        statsListener?.remove()
+        statsListener = nil
         listeningHousehold = nil
         #endif
         chores = []
+        stats = [:]
     }
 
     /// 🗂 Built-in catalog — EVERY child gets these automatically, no parent
@@ -111,22 +143,22 @@ final class ChoreStore: ObservableObject {
     /// medium 10/5, bigger 15-20/7-10. The kid picks the chore AND the reward —
     /// a little trade with the parent; the parent can retune or hide any of
     /// them (an override doc with the same deterministic id takes precedence).
-    static let catalog: [(key: String, emoji: String, title: String, minutes: Int, coins: Int)] = [
-        ("preset-bed",       "🛏", "לסדר את המיטה",            5,  2),
-        ("preset-clothes",   "👕", "לשים בגדים בסל הכביסה",     5,  2),
-        ("preset-plate",     "🍽", "לפנות את הצלחת מהשולחן",    5,  2),
-        ("preset-shoes",     "👟", "לסדר את הנעליים בכניסה",    5,  2),
-        ("preset-toys",      "🧸", "לאסוף את הצעצועים",        10,  5),
-        ("preset-table",     "🍴", "לערוך את השולחן לארוחה",   10,  5),
-        ("preset-bag",       "🎒", "להכין את התיק לבית הספר",  10,  5),
-        ("preset-plants",    "🪴", "להשקות את העציצים",        10,  5),
-        ("preset-pet",       "🐕", "להאכיל את חיית המחמד",     10,  5),
-        ("preset-trash",     "🗑", "להוריד את הזבל",           10,  5),
-        ("preset-desk",      "📚", "לסדר את שולחן הכתיבה",     15,  7),
-        ("preset-sweep",     "🧹", "לטאטא את החדר",            20, 10),
-        ("preset-laundry",   "🧺", "לעזור בקיפול כביסה",       20, 10),
-        ("preset-groceries", "🛒", "לעזור בסידור הקניות",      20, 10),
-        ("preset-cooking",   "🍳", "לעזור בהכנת ארוחה",        20, 10),
+    static let catalog: [(key: String, emoji: String, title: String, minutes: Int, coins: Int, timesPerDay: Int)] = [
+        ("preset-bed",       "🛏", "לסדר את המיטה",            5,  2, 1),
+        ("preset-clothes",   "👕", "לשים בגדים בסל הכביסה",     5,  2, 2),
+        ("preset-plate",     "🍽", "לפנות את הצלחת מהשולחן",    5,  2, 3),
+        ("preset-shoes",     "👟", "לסדר את הנעליים בכניסה",    5,  2, 1),
+        ("preset-toys",      "🧸", "לאסוף את הצעצועים",        10,  5, 1),
+        ("preset-table",     "🍴", "לערוך את השולחן לארוחה",   10,  5, 3),
+        ("preset-bag",       "🎒", "להכין את התיק לבית הספר",  10,  5, 1),
+        ("preset-plants",    "🪴", "להשקות את העציצים",        10,  5, 1),
+        ("preset-pet",       "🐕", "להאכיל את חיית המחמד",     10,  5, 2),
+        ("preset-trash",     "🗑", "להוריד את הזבל",           10,  5, 1),
+        ("preset-desk",      "📚", "לסדר את שולחן הכתיבה",     15,  7, 1),
+        ("preset-sweep",     "🧹", "לטאטא את החדר",            20, 10, 1),
+        ("preset-laundry",   "🧺", "לעזור בקיפול כביסה",       20, 10, 1),
+        ("preset-groceries", "🛒", "לעזור בסידור הקניות",      20, 10, 1),
+        ("preset-cooking",   "🍳", "לעזור בהכנת ארוחה",        20, 10, 1),
     ]
 
     /// The child's full list: the built-in catalog (overridden per-child by any
@@ -144,13 +176,19 @@ final class ChoreStore: ObservableObject {
                 out.append(Chore(id: docID, childID: id.uuidString,
                                  title: preset.title, emoji: preset.emoji,
                                  rewardMinutes: preset.minutes, rewardCoins: preset.coins,
-                                 isDaily: true, createdAt: 0,
+                                 isDaily: true, timesPerDay: preset.timesPerDay, createdAt: 0,
                                  markedDoneAt: nil, chosenReward: nil,
-                                 lastApprovedAt: nil, archived: false))
+                                 lastApprovedAt: nil, approvedTodayCount: 0, approvedTodayAt: nil,
+                                 archived: false))
             }
         }
         out += byID.values.filter { !$0.archived }.sorted { $0.createdAt < $1.createdAt }
         return out
+    }
+
+    /// Lifetime chore earnings for one child.
+    func totals(forChild id: UUID) -> (minutes: Int, coins: Int) {
+        stats[id.uuidString] ?? (0, 0)
     }
 
     /// A catalog chore (vs. a custom one the family added). "Deleting" a preset
@@ -165,7 +203,7 @@ final class ChoreStore: ObservableObject {
     // MARK: - Parent actions
 
     func addChore(childID: UUID, title: String, emoji: String,
-                  rewardMinutes: Int, rewardCoins: Int, isDaily: Bool) {
+                  rewardMinutes: Int, rewardCoins: Int, isDaily: Bool, timesPerDay: Int = 1) {
         #if canImport(FirebaseFirestore)
         guard let hh = listeningHousehold ?? HouseholdManager.shared.household?.id else { return }
         db.collection("households").document(hh).collection("chores").document()
@@ -175,6 +213,7 @@ final class ChoreStore: ObservableObject {
                       "rewardMinutes": rewardMinutes,
                       "rewardCoins": rewardCoins,
                       "isDaily": isDaily,
+                      "timesPerDay": max(1, timesPerDay),
                       "createdAt": Date().timeIntervalSince1970])
         #endif
     }
@@ -189,7 +228,7 @@ final class ChoreStore: ObservableObject {
     /// Parent retunes a chore's rewards (or renames a custom one) — for catalog
     /// chores this writes/updates the per-child override doc.
     func updateChore(_ chore: Chore, title: String, emoji: String,
-                     rewardMinutes: Int, rewardCoins: Int) {
+                     rewardMinutes: Int, rewardCoins: Int, timesPerDay: Int) {
         #if canImport(FirebaseFirestore)
         guard let hh = listeningHousehold else { return }
         db.collection("households").document(hh).collection("chores").document(chore.id)
@@ -199,6 +238,7 @@ final class ChoreStore: ObservableObject {
                       "rewardMinutes": rewardMinutes,
                       "rewardCoins": rewardCoins,
                       "isDaily": chore.isDaily,
+                      "timesPerDay": max(1, timesPerDay),
                       "createdAt": chore.createdAt > 0 ? chore.createdAt : Date().timeIntervalSince1970],
                      merge: true)
         #endif
@@ -216,6 +256,7 @@ final class ChoreStore: ObservableObject {
                       "rewardMinutes": chore.rewardMinutes,
                       "rewardCoins": chore.rewardCoins,
                       "isDaily": chore.isDaily,
+                      "timesPerDay": chore.timesPerDay,
                       "createdAt": chore.createdAt > 0 ? chore.createdAt : Date().timeIntervalSince1970,
                       "archived": true,
                       "markedDoneAt": FieldValue.delete(),
@@ -243,17 +284,28 @@ final class ChoreStore: ObservableObject {
     func approve(_ chore: Chore) {
         #if canImport(FirebaseFirestore)
         guard let hh = listeningHousehold, let cid = UUID(uuidString: chore.childID) else { return }
-        if chore.chosenReward == "coins", chore.rewardCoins > 0 {
+        let coins = chore.chosenReward == "coins" && chore.rewardCoins > 0
+        if coins {
             RemoteSyncManager.shared.adjustChildMoney(childID: cid, deltaCoins: chore.rewardCoins)
         } else if chore.rewardMinutes > 0 {
             RemoteSyncManager.shared.adjustChildMinutes(childID: cid, deltaMinutes: chore.rewardMinutes)
         }
+        let now = Date().timeIntervalSince1970
         var update: [String: Any] = ["markedDoneAt": FieldValue.delete(),
                                      "chosenReward": FieldValue.delete(),
-                                     "lastApprovedAt": Date().timeIntervalSince1970]
+                                     "lastApprovedAt": now,
+                                     // same-day repeat counter ("לפנות את הצלחת"
+                                     // can legitimately happen every meal — Rani)
+                                     "approvedTodayCount": chore.doneToday + 1,
+                                     "approvedTodayAt": now]
         if !chore.isDaily { update["archived"] = true }
         db.collection("households").document(hh).collection("chores").document(chore.id)
             .updateData(update)
+        // Lifetime earnings ledger — what the kid sees as "הרווחתי ממטלות".
+        db.collection("households").document(hh).collection("choreStats").document(chore.childID)
+            .setData([coins ? "coinsTotal" : "minutesTotal":
+                      FieldValue.increment(Int64(coins ? chore.rewardCoins : chore.rewardMinutes))],
+                     merge: true)
         #endif
     }
 
@@ -291,6 +343,7 @@ final class ChoreStore: ObservableObject {
                       "rewardMinutes": chore.rewardMinutes,
                       "rewardCoins": chore.rewardCoins,
                       "isDaily": chore.isDaily,
+                      "timesPerDay": chore.timesPerDay,
                       "createdAt": chore.createdAt > 0 ? chore.createdAt : Date().timeIntervalSince1970,
                       "markedDoneAt": Date().timeIntervalSince1970,
                       "chosenReward": reward], merge: true)

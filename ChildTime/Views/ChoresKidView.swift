@@ -29,6 +29,7 @@ struct ChoresKidView: View {
                 header
                 ScrollView {
                     VStack(spacing: AppSpacing.md) {
+                        totalsCard
                         if progress.moneyCoins > 0 { moneyPocketCard }
                         if myChores.isEmpty {
                             emptyState
@@ -97,6 +98,44 @@ struct ChoresKidView: View {
         .padding(.bottom, AppSpacing.sm)
     }
 
+    /// 🏆 Lifetime earnings from chores — "how much have I made, ever".
+    @ViewBuilder
+    private var totalsCard: some View {
+        let totals = profiles.activeID.map { choreStore.totals(forChild: $0) } ?? (minutes: 0, coins: 0)
+        if totals.minutes > 0 || totals.coins > 0 {
+            HStack(spacing: AppSpacing.md) {
+                Text("🏆").font(.system(size: 30))
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(Gendered.g("סַךְ הַכֹּל הִרְוַחְתָּ מִמַּטְלוֹת:", "סַךְ הַכֹּל הִרְוַחְתְּ מִמַּטְלוֹת:"))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                    HStack(spacing: 8) {
+                        if totals.minutes > 0 {
+                            Text("⏰ \(totals.minutes) דַּקּוֹת")
+                                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                        }
+                        if totals.minutes > 0 && totals.coins > 0 {
+                            Text("·").foregroundStyle(.white.opacity(0.6))
+                        }
+                        if totals.coins > 0 {
+                            Text("🪙 \(totals.coins) שְׁקָלִים")
+                                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                }
+                Spacer()
+            }
+            .padding(AppSpacing.md)
+            .background(.white.opacity(0.13), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(.white.opacity(0.18), lineWidth: 1)
+            )
+        }
+    }
+
     /// 🪙 the kid's money pocket — what mom/dad still owe in real life.
     private var moneyPocketCard: some View {
         HStack(spacing: AppSpacing.md) {
@@ -155,6 +194,9 @@ struct ChoresKidView: View {
                 }
                 if chore.rewardCoins > 0 {
                     rewardChip("🪙 ₪\(chore.rewardCoins)")
+                }
+                if chore.timesPerDay > 1 {
+                    rewardChip("\(chore.doneToday)/\(chore.timesPerDay) הַיּוֹם")
                 }
             }
 
@@ -215,7 +257,11 @@ struct ChoresKidView: View {
 
     private func send(_ chore: Chore, reward: String) {
         choreStore.markDone(chore, reward: reward)
+        // Latency bridge only — the listener flips isPendingApproval within a
+        // beat; if we never dropped this, an APPROVED chore would keep showing
+        // "מחכים לאישור" for the rest of the session.
         justSent.insert(chore.id)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { justSent.remove(chore.id) }
         Haptic.success()
         SoundPlayer.shared.play(.portalAppear)
         choosingFor = nil

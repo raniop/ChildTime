@@ -58,6 +58,11 @@ service cloud.firestore {
       match /chores/{choreID} {
         allow read, write: if householdHasMe(hid);
       }
+
+      // 🧹 Lifetime chore-earnings ledger per child (minutesTotal/coinsTotal).
+      match /choreStats/{childID} {
+        allow read, write: if householdHasMe(hid);
+      }
     }
 
     // Children — gated on the household. Reads/updates/deletes use the EXISTING
