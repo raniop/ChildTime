@@ -523,9 +523,14 @@ struct ParentDashboardView: View {
             } ?? rows.first?.profile
             if let target { choresProfile = target }
         } label: {
+            // The dashboard container is forced LTR (cards author .trailing ==
+            // right) — so: chevron on the LEFT edge, text block right-aligned,
+            // 🧹 on the RIGHT edge, like every other card here.
             HStack(spacing: 10) {
-                Text("🧹").font(.system(size: 26))
-                VStack(alignment: .leading, spacing: 2) {
+                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                    .opacity(urgent ? 1 : 0.6)
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
                     Text(urgent
                          ? (items.count == 1 ? "מטלה מחכה לאישור שלכם!" : "\(items.count) מטלות מחכות לאישור שלכם!")
                          : "מטלות הבית")
@@ -541,9 +546,8 @@ struct ParentDashboardView: View {
                             .opacity(0.8)
                     }
                 }
-                Spacer()
-                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
-                    .opacity(urgent ? 1 : 0.6)
+                .multilineTextAlignment(.trailing)
+                Text("🧹").font(.system(size: 26))
             }
             .foregroundStyle(urgent ? .white : .primary)
             .padding(12)
