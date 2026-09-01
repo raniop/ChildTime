@@ -10,7 +10,11 @@ struct ChoresKidView: View {
     @EnvironmentObject var progress: ProgressStore
     @Environment(\.horizontalSizeClass) private var hSize
     @StateObject private var choreStore = ChoreStore.shared
+    @StateObject private var householdMgr = HouseholdManager.shared
     let onClose: () -> Void
+
+    /// 💰 family policy — may the kid earn money on chores, or only 🎮 minutes?
+    private var moneyEnabled: Bool { householdMgr.choresMoneyEnabled }
 
     /// The chore the kid just tapped "עשיתי" on — reward picker is showing.
     @State private var choosingFor: Chore?
@@ -47,7 +51,7 @@ struct ChoresKidView: View {
                 ScrollView {
                     VStack(spacing: AppSpacing.md) {
                         totalsCard
-                        if moneyBalance > 0 { moneyPocketCard }
+                        if moneyBalance > 0 && moneyEnabled { moneyPocketCard }
                         if myChores.isEmpty {
                             emptyState
                         } else {
@@ -77,7 +81,7 @@ struct ChoresKidView: View {
                 if chore.rewardMinutes > 0 {
                     Button("🎮 \(chore.rewardMinutes) דַּקּוֹת מִשְׂחָק") { offerPhoto(chore, reward: "minutes") }
                 }
-                if chore.rewardCoins > 0 {
+                if chore.rewardCoins > 0 && moneyEnabled {
                     Button("💰 \(chore.rewardCoins) שְׁקָלִים לַקֻּפָּה") { offerPhoto(chore, reward: "coins") }
                 }
                 Button("רֶגַע, עוֹד לֹא", role: .cancel) { choosingFor = nil }
@@ -157,7 +161,8 @@ struct ChoresKidView: View {
     @ViewBuilder
     private var totalsCard: some View {
         let totals = profiles.activeID.map { choreStore.totals(forChild: $0) } ?? (minutes: 0, coins: 0, paid: 0)
-        if totals.minutes > 0 || totals.coins > 0 {
+        let showCoins = totals.coins > 0 && moneyEnabled
+        if totals.minutes > 0 || showCoins {
             HStack(spacing: AppSpacing.md) {
                 Text("🏆").font(.system(size: 30))
                 VStack(alignment: .trailing, spacing: 2) {
@@ -170,10 +175,10 @@ struct ChoresKidView: View {
                                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
                         }
-                        if totals.minutes > 0 && totals.coins > 0 {
+                        if totals.minutes > 0 && showCoins {
                             Text("·").foregroundStyle(.white.opacity(0.6))
                         }
-                        if totals.coins > 0 {
+                        if showCoins {
                             Text("💰 \(totals.coins) שְׁקָלִים")
                                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
@@ -264,7 +269,7 @@ struct ChoresKidView: View {
             } else {
                 Button {
                     Haptic.success()
-                    choosingFor = chore
+                    tapDone(chore)
                 } label: {
                     Text("עָשִׂיתִי! ✅")
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
@@ -306,6 +311,26 @@ struct ChoresKidView: View {
         if c.rewardMinutes > 0 { parts.append("🎮 \(c.rewardMinutes) דַּק׳") }
         if c.rewardCoins > 0 { parts.append("💰 \(c.rewardCoins) ₪") }
         return parts.joined(separator: " אוֹ ")
+    }
+
+    /// Decide the reward flow when the kid taps "עשיתי". With BOTH options open,
+    /// show the picker (the little trade). With only one — because the family
+    /// disabled 💰 money, or the chore offers just one — skip straight to the
+    /// photo offer so the kid never sees a pointless one-button dialog.
+    private func tapDone(_ chore: Chore) {
+        let minutesOK = chore.rewardMinutes > 0
+        let coinsOK = chore.rewardCoins > 0 && moneyEnabled
+        if minutesOK && coinsOK {
+            choosingFor = chore
+        } else if minutesOK {
+            offerPhoto(chore, reward: "minutes")
+        } else if chore.rewardCoins > 0 {
+            // Only a money reward exists (a money-only custom chore). Even if the
+            // family "disabled" money, there's nothing else to give — honor it.
+            offerPhoto(chore, reward: "coins")
+        } else {
+            offerPhoto(chore, reward: "minutes")
+        }
     }
 
     private func offerPhoto(_ chore: Chore, reward: String) {

@@ -13,6 +13,7 @@ struct ChoresParentView: View {
     let initialProfile: Profile
     @StateObject private var choreStore = ChoreStore.shared
     @StateObject private var profilesStore = ProfileStore.shared
+    @StateObject private var householdMgr = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var selectedID: UUID
 
@@ -66,6 +67,18 @@ struct ChoresParentView: View {
                     Section(pending.count == 1 ? "מחכה לאישור שלכם 🕐" : "מחכות לאישור שלכם 🕐") {
                         ForEach(pending) { chore in pendingRow(chore) }
                     }
+                }
+
+                Section {
+                    Toggle(isOn: Binding(
+                        get: { householdMgr.choresMoneyEnabled },
+                        set: { householdMgr.setChoresMoneyEnabled($0) })) {
+                        Label("לאפשר להרוויח כסף על מטלות", systemImage: "banknote")
+                    }
+                } footer: {
+                    Text(householdMgr.choresMoneyEnabled
+                         ? "הילדים בוחרים בעצמם אם לקבל דקות משחק או כסף על כל מטלה."
+                         : "כרגע הילדים מקבלים רק דקות משחק על מטלות — לא כסף. (מה שכבר הרוויחו בכסף עדיין שמור לתשלום.)")
                 }
 
                 Section("קופת הכסף 💰") {
@@ -157,7 +170,9 @@ struct ChoresParentView: View {
                         }
                     }
                     Stepper("🎮 פרס דקות משחק: \(formMinutes)", value: $formMinutes, in: 0...120, step: 5)
-                    Stepper("💰 פרס כסף: ₪\(formCoins)", value: $formCoins, in: 0...100)
+                    if householdMgr.choresMoneyEnabled {
+                        Stepper("💰 פרס כסף: ₪\(formCoins)", value: $formCoins, in: 0...100)
+                    }
                     Stepper(formTimesPerDay == 1 ? "🔁 פעם אחת ביום" : "🔁 עד \(formTimesPerDay) פעמים ביום",
                             value: $formTimesPerDay, in: 1...6)
                     Button {
@@ -166,7 +181,7 @@ struct ChoresParentView: View {
                         HStack { Spacer(); Text(editing == nil ? "הוסיפו מטלה" : "שמרו שינויים").bold(); Spacer() }
                     }
                     .disabled((editing == nil && formTitle.trimmingCharacters(in: .whitespaces).isEmpty)
-                              || (formMinutes == 0 && formCoins == 0))
+                              || (formMinutes == 0 && (formCoins == 0 || !householdMgr.choresMoneyEnabled)))
                 }
             }
             .navigationTitle("מטלות הבית · \(profile.name)")

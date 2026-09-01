@@ -33,6 +33,11 @@ struct Household: Codable, Identifiable, Equatable {
     /// Apple ID is signed in there (no dependence on Apple Family Sharing).
     /// Far-future date = lifetime. Optional so older docs decode.
     var premiumUntil: Date? = nil
+    /// 💰 Family policy: may kids earn MONEY on chores, or only 🎮 play-minutes?
+    /// Some parents don't want to hand out cash (Rani). nil / missing = enabled
+    /// (default, so no existing family changes). Set only by a parent; read by
+    /// the kid's device to hide the money option. Optional so older docs decode.
+    var choresMoneyEnabled: Bool? = nil
 
     init(id: String = UUID().uuidString,
          parentUIDs: [String],

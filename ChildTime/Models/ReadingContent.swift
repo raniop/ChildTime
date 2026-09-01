@@ -291,6 +291,7 @@ enum ReadingContent {
                 BankQuestion(prompt: "אֵיזֶה פְּרָס קִבֵּל נֹעַם?", correctAnswer: "\"הַגָּבוֹהַּ בְּיוֹתֵר\"", distractors: ["\"הַיָּפֶה בְּיוֹתֵר\"", "\"הַמָּהִיר בְּיוֹתֵר\"", "\"הַגָּדוֹל בְּיוֹתֵר\""], tier: .hard, grades: 4...6),
             ]),
     ]
-    // 🎓 Grade-tagged curriculum passages live in their own authored file.
+    // 🎓 Grade-tagged curriculum passages live in their own authored files.
     + CurriculumHebrewBank.readingPassages
+    + ReadingExpandedBank.passages
 }
