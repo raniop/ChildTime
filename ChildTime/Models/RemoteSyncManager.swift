@@ -415,10 +415,14 @@ final class RemoteSyncManager: ObservableObject {
             .collection("state").document("current")
         let localRev = ProgressStore.shared.revision
         db.runTransaction({ txn, _ -> Any? in
-            let cloudRev = (try? txn.getDocument(ref))?.data()
-                .flatMap({ Self.decode($0) })?.revision ?? 0
+            let cloudSnap = (try? txn.getDocument(ref))?.data().flatMap({ Self.decode($0) })
+            let cloudRev = cloudSnap?.revision ?? 0
+            let cloudEpoch = cloudSnap?.resetEpoch ?? 0
             var blank = ProgressSnapshot.blank
             blank.revision = max(cloudRev, localRev) + 1
+            // 🧹 higher epoch = authoritative wipe that survives the ratchet on
+            // EVERY device, incl. a second device that never saw the command.
+            blank.resetEpoch = max(cloudEpoch, ProgressStore.shared.resetEpoch) + 1
             blank.lastModifiedAt = Date()
             blank.deviceID = ProgressSnapshot.thisDeviceID
             if let data = Self.encode(blank) { txn.setData(data, forDocument: ref) }   // NOT merge
@@ -507,6 +511,27 @@ final class RemoteSyncManager: ObservableObject {
     }
 
     #if canImport(FirebaseFirestore)
+    /// Ratchet-upload a specific profile's snapshot (used to flush offline
+    /// progress the parent-cache/vault held for a NON-active profile). Same
+    /// merge-transaction contract as uploadActiveProfile — never lowers cloud.
+    private func uploadSnapshot(_ local: ProgressSnapshot, for pid: UUID) {
+        let ref = db.collection("children").document(pid.uuidString)
+            .collection("state").document("current")
+        db.runTransaction({ txn, _ -> Any? in
+            guard let cloud = (try? txn.getDocument(ref))?.data().flatMap({ Self.decode($0) }) else {
+                if let data = Self.encode(local) { txn.setData(data, forDocument: ref, merge: true) }
+                return nil
+            }
+            var merged = ProgressSnapshot.ratchetMerged(local: local, remote: cloud)
+            if ProgressSnapshot.sameProgressData(merged, cloud) { return nil }
+            merged.revision = max(local.revision, cloud.revision) + 1
+            merged.lastModifiedAt = Date()
+            merged.deviceID = ProgressSnapshot.thisDeviceID
+            if let data = Self.encode(merged) { txn.setData(data, forDocument: ref, merge: true) }
+            return nil
+        }) { _, _ in }
+    }
+
     private func uploadActiveProfile() {
         guard let pid = ProfileStore.shared.activeID else { return }
         // Capture local state on the calling (main) thread, then MERGE it into the
@@ -668,9 +693,20 @@ final class RemoteSyncManager: ObservableObject {
         // than what we have locally, apply it (so a reset on the parent's
         // phone propagates to the kid's iPad in real time).
         guard profileID == ProfileStore.shared.activeID else {
-            // For non-active profiles, mirror into the vault so the
-            // dashboard reflects the latest cloud state immediately.
-            ProgressVault.shared.write(snap, for: profileID)
+            // Non-active profile (parent dashboard cache, or a sibling on a
+            // shared device). MERGE against the existing vault copy instead of
+            // blindly overwriting — a shared device can hold offline-earned
+            // progress for this profile that hasn't uploaded yet, and a stale
+            // cloud echo used to wipe it. ratchetMerged also lets a reset
+            // (higher resetEpoch) win wholesale.
+            let vaultCopy = ProgressVault.shared.snapshot(for: profileID)
+            let merged = ProgressSnapshot.ratchetMerged(local: vaultCopy, remote: snap)
+            ProgressVault.shared.write(merged, for: profileID)
+            // If the vault led (we hold more than the cloud), push it up so the
+            // peer converges — otherwise that offline progress never leaves.
+            if !ProgressSnapshot.sameProgressData(merged, snap) {
+                uploadSnapshot(merged, for: profileID)
+            }
             return
         }
         // Don't re-apply our OWN echo to the live in-memory store (it would fight

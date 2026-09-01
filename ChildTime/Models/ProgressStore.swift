@@ -39,6 +39,7 @@ final class ProgressStore: ObservableObject {
         static let minutesUnlockedToday = "minutesUnlockedToday"
         static let dailyEarnedDate = "dailyEarnedDate"
         static let carryOverMinutes = "carryOverMinutes"
+        static let resetEpoch = "resetEpoch"
         static let answeredToday = "answeredToday"
         static let correctToday = "correctToday"
         static let bestStreak = "bestStreak"
@@ -373,6 +374,10 @@ final class ProgressStore: ObservableObject {
     private(set) var revision: Int {
         didSet { defaults.set(revision, forKey: Key.revision) }
     }
+    /// 🧹 Reset generation (see ProgressSnapshot.resetEpoch). Persisted.
+    private(set) var resetEpoch: Int {
+        didSet { defaults.set(resetEpoch, forKey: Key.resetEpoch) }
+    }
     /// Wall-clock of the last real local change to the active profile. Tiebreaker
     /// when two devices land on the same `revision`.
     private(set) var lastModifiedAt: Date {
@@ -443,6 +448,7 @@ final class ProgressStore: ObservableObject {
         self.giftGivenToday = d.integer(forKey: Key.giftGivenToday)
         self.giftGivenDate = d.object(forKey: Key.giftGivenDate) as? Date
 
+        self.resetEpoch = d.integer(forKey: Key.resetEpoch)
         self.revision = d.integer(forKey: Key.revision)
         self.lastModifiedAt = (d.object(forKey: Key.lastModifiedAt) as? Date) ?? .distantPast
 
@@ -1714,6 +1720,7 @@ final class ProgressStore: ObservableObject {
         // Carry the REAL version forward. Stamping `.now` here (the old bug) made
         // every capture look freshly-modified, so a remote snapshot's older
         // timestamp could never win the comparison and cross-device sync was dead.
+        s.resetEpoch          = resetEpoch
         s.revision            = revision
         s.lastModifiedAt      = lastModifiedAt
         s.deviceID            = ProgressSnapshot.thisDeviceID
@@ -1729,6 +1736,7 @@ final class ProgressStore: ObservableObject {
         isApplyingSnapshot = true
         defer {
             isApplyingSnapshot = false
+            resetEpoch = s.resetEpoch
             revision = s.revision
             lastModifiedAt = s.lastModifiedAt
         }

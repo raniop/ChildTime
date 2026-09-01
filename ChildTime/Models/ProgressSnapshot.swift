@@ -80,6 +80,11 @@ struct ProgressSnapshot: Codable, Equatable {
     /// to — enforces the daily cap "no more than until midnight". LWW.
     var giftGivenToday: Int? = nil
     var giftGivenDate: Date? = nil
+    /// 🧹 Reset generation. A wipe writes a blank state with a HIGHER resetEpoch;
+    /// in ratchetMerged the higher-epoch side wins WHOLESALE (no max-merge), so a
+    /// second device holding stale full progress can't ratchet it back over the
+    /// reset. Optional-safe: older snapshots decode as 0.
+    var resetEpoch: Int = 0
     /// Bumped each time the device writes the snapshot — Firestore listeners
     /// use this to skip echoes of their own writes.
     var revision: Int = 0
@@ -123,6 +128,7 @@ extension ProgressSnapshot {
         case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
         case hourlyAnswered, hourlyCorrect
         case wheelProgressCount, recoveryPot, ownedCharacterIDs, parentGiftMinutes, giftGivenToday, giftGivenDate
+        case resetEpoch
         case revision, lastModifiedAt, deviceID
     }
     private enum LegacyCodingKeys: String, CodingKey { case gems }
@@ -177,6 +183,7 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .parentGiftMinutes)) ?? nil { parentGiftMinutes = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .giftGivenToday)) ?? nil { giftGivenToday = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .giftGivenDate)) ?? nil { giftGivenDate = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .resetEpoch)) ?? nil { resetEpoch = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .revision)) ?? nil { revision = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastModifiedAt)) ?? nil { lastModifiedAt = v }
         if let v = (try? c.decodeIfPresent(String.self, forKey: .deviceID)) ?? nil { deviceID = v }
@@ -191,6 +198,11 @@ extension ProgressSnapshot {
     /// fields come from the (revision, lastModifiedAt) winner. Version metadata is
     /// left as the winner's — callers finalize `revision` as needed.
     static func ratchetMerged(local: ProgressSnapshot, remote: ProgressSnapshot) -> ProgressSnapshot {
+        // 🧹 A reset (higher resetEpoch) wins WHOLESALE — never max-merge across
+        // a wipe, or a stale device would resurrect the old progress.
+        if remote.resetEpoch != local.resetEpoch {
+            return remote.resetEpoch > local.resetEpoch ? remote : local
+        }
         let remoteWins = remote.revision > local.revision ||
             (remote.revision == local.revision && remote.lastModifiedAt > local.lastModifiedAt)
         var m = remoteWins ? remote : local
