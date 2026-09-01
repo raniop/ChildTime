@@ -96,7 +96,7 @@ struct SchoolYearCelebrationView: View {
 
     private var goldBackground: some View {
         ZStack {
-            LinearGradient(colors: [Color(hex: "2D1B69"), Color(hex: "7C4DFF"), Color(hex: "FF9E2C")],
+            LinearGradient(colors: [Color(hex: "3A7BD5"), Color(hex: "48BFE3"), Color(hex: "8EEBFF")],
                            startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             SparkleField(count: 36, size: 14)
