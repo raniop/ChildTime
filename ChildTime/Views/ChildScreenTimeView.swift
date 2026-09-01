@@ -111,6 +111,14 @@ struct ChildScreenTimeView: View {
     private func save() {
         guard var p = profile else { return }
         let value = limited ? clamped(minutes) : 0
+        // If this child was INHERITING the global cap (dailyCapMinutes == nil)
+        // and the shown value still equals that inherited value, don't write —
+        // otherwise merely opening+closing this sheet froze the child onto a
+        // per-child override and future global changes stopped affecting them.
+        if p.dailyCapMinutes == nil {
+            let inherited = settings.dailyCapEnabled ? settings.maxMinutesPerDay : 0
+            if value == inherited { return }
+        }
         guard p.dailyCapMinutes != value else { return }
         p.dailyCapMinutes = value
         profiles.update(p)

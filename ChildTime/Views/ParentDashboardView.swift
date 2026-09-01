@@ -319,7 +319,9 @@ struct ParentDashboardView: View {
                 ProfileEditorView(mode: .edit(p)) { updated in
                     profiles.update(updated)
                 } onDelete: { profile in
+                    editProfile = nil          // close the editor sheet
                     profiles.remove(profile)
+                    navPath = []  // pop the (now-deleted) detail page
                 }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .rightToLeft)
@@ -387,15 +389,19 @@ struct ParentDashboardView: View {
                 }
                 rescheduleInsights()
             }
-            // Tick every 5s so 'minutes remaining' counts down live.
-            .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect()) { _ in
-                refreshTrigger &+= 1
-                lastRefreshed = .now
-            }
-            // Safety net every 20s: re-attach any dropped Firestore listeners and
-            // re-fetch, so live child updates can't "suddenly stop" until reopened.
-            .onReceive(Timer.publish(every: 20, on: .main, in: .common).autoconnect()) { _ in
-                remote.refreshNow()
+            // One stable ticker (a .task, not body-recreated Timer publishers):
+            // 5s → live 'minutes remaining' countdown; every 20s → re-attach any
+            // dropped Firestore listeners so live updates can't silently stall.
+            .task(id: isRoot) {
+                var elapsed = 0
+                while !Task.isCancelled {
+                    try? await Task.sleep(nanoseconds: 5_000_000_000)
+                    if Task.isCancelled { break }
+                    refreshTrigger &+= 1
+                    lastRefreshed = .now
+                    elapsed += 5
+                    if elapsed % 20 == 0 { remote.refreshNow() }
+                }
             }
         }
     }
@@ -811,7 +817,7 @@ struct ParentDashboardView: View {
         // Tappable — the family tiles explain themselves like the per-child stats.
         Button {
             Haptic.light()
-            statExplain = StatExplain(emoji: emoji, label: label, value: value)
+            statExplain = StatExplain(emoji: emoji, label: label, value: value, isFamily: true)
         } label: {
             VStack(spacing: 3) {
                 Text(emoji).font(.system(size: 22))
@@ -2187,12 +2193,14 @@ struct ParentDashboardView: View {
         let emoji: String
         let label: String
         let value: String
-        var id: String { label }
+        var isFamily: Bool = false   // family-summary tile vs a per-child stat
+        var id: String { (isFamily ? "family." : "child.") + label }
 
         /// Plain-Hebrew explanation of what the number means and how it's earned.
         var text: String {
             // Family-level tiles (top of the dashboard) — keyed by label because
             // they share emojis with the per-child stats but sum the whole family.
+            if isFamily {
             switch label {
             case "דק' מסך היום":
                 return "סך כל דקות זמן המסך שכל הילדים הרוויחו היום ביחד (מכל המכשירים). מתאפס בחצות. לפירוט לכל ילד — פתחו את הכרטיס שלו."
@@ -2201,6 +2209,7 @@ struct ParentDashboardView: View {
             case "ילדים פעילים":
                 return "כמה מהילדים כבר ענו לפחות על שאלה אחת היום, מתוך כלל הילדים במשפחה. 1/2 = ילד אחד מתוך שניים שיחק היום."
             default: break
+            }
             }
             switch emoji {
             case "⏱":
