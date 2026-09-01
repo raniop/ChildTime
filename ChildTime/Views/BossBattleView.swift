@@ -255,8 +255,21 @@ struct BossBattleView: View {
 
     private func win() {
         phase = .won
-        earnedMinutes = 5
-        progress.applyChestReward(ChestReward(stars: 20, diamonds: 30, minutes: earnedMinutes))
+        // Full jackpot only ONCE per boss per day — otherwise "עוד סיבוב 🔁"
+        // farmed 20⭐+30💎 endlessly. Replays give a small practice reward.
+        let dayKey = "boss.won.\(world.id)"
+        let alreadyToday: Bool = {
+            guard let d = UserDefaults.standard.object(forKey: dayKey) as? Date else { return false }
+            return Calendar.current.isDateInToday(d)
+        }()
+        if alreadyToday {
+            earnedMinutes = 0
+            progress.applyChestReward(ChestReward(stars: 2, diamonds: 0, minutes: 0))
+        } else {
+            earnedMinutes = 5
+            progress.applyChestReward(ChestReward(stars: 20, diamonds: 30, minutes: earnedMinutes))
+            UserDefaults.standard.set(Date(), forKey: dayKey)
+        }
         SoundPlayer.shared.play(.worldUnlock)
         Haptic.success()
         confetti += 1

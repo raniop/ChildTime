@@ -12,6 +12,11 @@ struct GamesMenuView: View {
     @State private var showingMemory = false
     @State private var appeared = false
 
+    /// Pre-readers (גן, effectiveGrade < 1) can't read the text-based games —
+    /// hide them and keep only the visual memory game, so a young child never
+    /// hits a wall of unreadable text with a timer.
+    private var isPreReader: Bool { (ProfileStore.shared.active?.effectiveGrade ?? 1) < 1 }
+
     var body: some View {
         ZStack {
             LinearGradient(colors: [Color(hex: "5B6CFF"), Color(hex: "9B5DE5"), Color(hex: "EF476F")],
@@ -24,26 +29,28 @@ struct GamesMenuView: View {
                 header
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
-                        gameCard(
-                            emoji: "⚡️",
-                            title: "מֵרוֹץ נָכוֹן/לֹא נָכוֹן",
-                            subtitle: "מַהֵר! נָכוֹן אוֹ לֹא? בּוֹנוּס עַל מְהִירוּת 🔥",
-                            colors: [Color(hex: "EF476F"), Color(hex: "FF8A5B")]
-                        ) { showingTrueFalse = true }
+                        if !isPreReader {
+                            gameCard(
+                                emoji: "⚡️",
+                                title: "מֵרוֹץ נָכוֹן/לֹא נָכוֹן",
+                                subtitle: "מַהֵר! נָכוֹן אוֹ לֹא? בּוֹנוּס עַל מְהִירוּת 🔥",
+                                colors: [Color(hex: "EF476F"), Color(hex: "FF8A5B")]
+                            ) { showingTrueFalse = true }
 
-                        gameCard(
-                            emoji: "🎯",
-                            title: "חִידוֹן בָּזָק",
-                            subtitle: "אַרְבַּע תְּשׁוּבוֹת — בְּחַר אֶת הַנְּכוֹנָה מַהֵר!",
-                            colors: [Color(hex: "118AB2"), Color(hex: "5B6CFF")]
-                        ) { showingQuiz = true }
+                            gameCard(
+                                emoji: "🎯",
+                                title: "חִידוֹן בָּזָק",
+                                subtitle: "אַרְבַּע תְּשׁוּבוֹת — בְּחַר אֶת הַנְּכוֹנָה מַהֵר!",
+                                colors: [Color(hex: "118AB2"), Color(hex: "5B6CFF")]
+                            ) { showingQuiz = true }
 
-                        gameCard(
-                            emoji: "🧩",
-                            title: "הַתְאָמַת זוּגוֹת",
-                            subtitle: "הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וְזִכּוּ בְּפַרְסִים",
-                            colors: [Color(hex: "06D6A0"), Color(hex: "118AB2")]
-                        ) { showingMatch = true }
+                            gameCard(
+                                emoji: "🧩",
+                                title: "הַתְאָמַת זוּגוֹת",
+                                subtitle: "הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וְזִכּוּ בְּפַרְסִים",
+                                colors: [Color(hex: "06D6A0"), Color(hex: "118AB2")]
+                            ) { showingMatch = true }
+                        }
 
                         gameCard(
                             emoji: "🧠",

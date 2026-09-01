@@ -1761,6 +1761,10 @@ struct WorldMapView: View {
     }
 
     private func redeemMinutes() {
+        // Re-check (a fast double-tap with the 💝 button could open a manual
+        // window first; without this guard startUnlock would overwrite it and
+        // the gift window's banked leftover would be lost).
+        guard !progress.isUnlocked else { return }
         // Cap a single unlock to today's remaining screen-time allowance; the
         // accumulated wallet beyond the daily cap stays for future days.
         let minutes = progress.consumeMinutesForUnlock()
