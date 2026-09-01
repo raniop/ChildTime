@@ -403,7 +403,7 @@ struct AddFriendView: View {
                 }
                 .transition(.scale.combined(with: .opacity))
             }
-            Confetti(trigger: confettiTrigger)
+            FancyConfetti(trigger: confettiTrigger)
                 .allowsHitTesting(false)
         }
         .environment(\.layoutDirection, .rightToLeft)
@@ -723,7 +723,7 @@ struct FriendRequestsView: View {
                 }
                 .transition(.scale.combined(with: .opacity))
             }
-            Confetti(trigger: confettiTrigger).allowsHitTesting(false)
+            FancyConfetti(trigger: confettiTrigger).allowsHitTesting(false)
         }
         .environment(\.layoutDirection, .rightToLeft)
         .task { await friends.startLive() }

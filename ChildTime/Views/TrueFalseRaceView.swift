@@ -60,7 +60,7 @@ struct TrueFalseRaceView: View {
             }
 
             StarBurst(count: 12, color: AppColor.starGold, trigger: burst)
-            Confetti(trigger: confetti)
+            FancyConfetti(trigger: confetti)
 
             VStack {
                 HStack {

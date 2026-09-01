@@ -30,7 +30,7 @@ struct PaywallView: View {
             )
             SparkleField(count: 24, size: 14)
             StarBurst(count: 14, color: AppColor.starGold, trigger: burst)
-            Confetti(trigger: successConfetti)
+            FancyConfetti(trigger: successConfetti)
 
             ScrollView {
                 VStack(spacing: AppSpacing.lg) {

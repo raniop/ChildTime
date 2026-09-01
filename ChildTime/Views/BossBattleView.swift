@@ -41,7 +41,7 @@ struct BossBattleView: View {
             }
 
             StarBurst(count: 14, color: AppColor.starGold, trigger: burst)
-            Confetti(trigger: confetti)
+            FancyConfetti(trigger: confetti)
 
             VStack {
                 HStack {

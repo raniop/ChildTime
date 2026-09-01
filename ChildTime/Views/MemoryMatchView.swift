@@ -43,7 +43,7 @@ struct MemoryMatchView: View {
             if won { summary } else { board }
 
             StarBurst(count: 12, color: AppColor.successMint, trigger: burst)
-            Confetti(trigger: confetti)
+            FancyConfetti(trigger: confetti)
 
             VStack {
                 HStack {

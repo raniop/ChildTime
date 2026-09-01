@@ -32,7 +32,7 @@ struct DemoView: View {
 
             // Overlays
             StarBurst(trigger: burstTrigger)
-            Confetti(trigger: confettiTrigger)
+            FancyConfetti(trigger: confettiTrigger)
         }
         .rumble(trigger: rumbleTrigger)
         .environment(\.layoutDirection, .rightToLeft)

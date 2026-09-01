@@ -65,7 +65,7 @@ struct ChildGradePickerView: View {
                 Spacer()
             }
 
-            Confetti(trigger: confetti)
+            FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .rightToLeft)
     }

@@ -121,7 +121,7 @@ struct RewardScreenView: View {
                         .onTapGesture { tapChest() }
                 }
 
-                Confetti(trigger: confettiTrigger)
+                FancyConfetti(trigger: confettiTrigger)
             }
         }
         .onAppear { startSequence() }

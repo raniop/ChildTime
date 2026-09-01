@@ -46,7 +46,7 @@ struct LiveGameView: View {
                 quitOverlay
             }
 
-            Confetti(trigger: confetti).allowsHitTesting(false)
+            FancyConfetti(trigger: confetti).allowsHitTesting(false)
         }
         .environment(\.layoutDirection, .rightToLeft)
         .confirmationDialog("לָצֵאת מֵהַמִּשְׂחָק?", isPresented: $showQuit, titleVisibility: .visible) {

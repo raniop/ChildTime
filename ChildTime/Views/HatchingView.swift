@@ -47,7 +47,7 @@ struct HatchingView: View {
             .ignoresSafeArea()
 
             SparkleField(count: 32, size: 16)
-            Confetti(trigger: confettiTrigger)
+            FancyConfetti(trigger: confettiTrigger)
             StarBurst(count: 18, color: AppColor.starGold, trigger: burstTrigger)
 
             VStack(spacing: AppSpacing.lg) {

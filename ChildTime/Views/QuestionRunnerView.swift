@@ -189,7 +189,7 @@ struct QuestionRunnerView: View {
 
             // Effects overlays
             StarBurst(color: AppColor.starGold, trigger: burstTrigger)
-            Confetti(trigger: confettiTrigger)
+            FancyConfetti(trigger: confettiTrigger)
 
             // Earned-minutes popup (pops at center, then flies up to the timer)
             VStack {

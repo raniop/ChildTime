@@ -29,7 +29,7 @@ struct DailyChestView: View {
         ZStack {
             AppGradient.portal.ignoresSafeArea()
             SparkleField(count: 30, size: 16)
-            Confetti(trigger: confettiTrigger)
+            FancyConfetti(trigger: confettiTrigger)
 
             // Celebratory content scrolls; the "המשך" button is pinned to the
             // bottom (outside the scroll) so it's always visible — even on a short

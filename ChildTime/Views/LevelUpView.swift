@@ -25,7 +25,7 @@ struct LevelUpView: View {
                 )
                 .ignoresSafeArea()
                 SparkleField(count: 40, size: 16)
-                Confetti(trigger: confettiTrigger)
+                FancyConfetti(trigger: confettiTrigger)
 
                 ScrollView {
                     VStack(spacing: AppSpacing.xl) {

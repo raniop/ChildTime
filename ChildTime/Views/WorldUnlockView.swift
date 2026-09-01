@@ -19,7 +19,7 @@ struct WorldUnlockView: View {
             ZStack {
                 world.gradient.gradient.ignoresSafeArea()
                 SparkleField(count: 50, size: 16)
-                Confetti(trigger: confettiTrigger)
+                FancyConfetti(trigger: confettiTrigger)
 
                 ScrollView {
                     VStack(spacing: AppSpacing.xl) {

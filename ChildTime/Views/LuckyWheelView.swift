@@ -35,7 +35,7 @@ struct LuckyWheelView: View {
                     count: 6, maxSize: 280, opacity: 0.45
                 )
                 SparkleField(count: 30, size: 14)
-                Confetti(trigger: confetti)
+                FancyConfetti(trigger: confetti)
                 StarBurst(count: 14, color: AppColor.starGold, trigger: stars)
 
                 if landscape {

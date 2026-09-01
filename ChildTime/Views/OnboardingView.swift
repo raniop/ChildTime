@@ -88,7 +88,7 @@ struct OnboardingView: View {
                 opacity: 0.5
             )
             SparkleField(count: 40, size: 16)
-            Confetti(trigger: welcomeConfettiTrigger)
+            FancyConfetti(trigger: welcomeConfettiTrigger)
             StarBurst(count: 14, color: AppColor.starGold, trigger: welcomeBurstTrigger)
 
             VStack(spacing: AppSpacing.lg) {
