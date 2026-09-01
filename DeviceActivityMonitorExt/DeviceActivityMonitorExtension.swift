@@ -60,6 +60,23 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             store.application.denyAppRemoval = true
         }
 
+        // 👶 Kid Mode (parent phone): the baseline is lock-all-EXCEPT the
+        // kid-mode allow-list. Must be checked BEFORE the normal block modes,
+        // or a background window-end would fall through to the (empty) parent
+        // block-list and leave the whole phone open for the kid.
+        let kidModeActive = (defaults.object(forKey: "kidModeActive") as? Bool) ?? false
+        if kidModeActive,
+           let kmData = defaults.data(forKey: "kidModeAllowedData"),
+           let kmAllowed = try? decoder.decode(FamilyActivitySelection.self, from: kmData) {
+            store.shield.applications = nil
+            store.shield.applicationCategories = .all(except: kmAllowed.applicationTokens)
+            store.shield.webDomains = nil
+            store.shield.webDomainCategories = .all(except: kmAllowed.webDomainTokens)
+            store.application.denyAppRemoval = true
+            monitorLog.notice("ext: re-applied KID-MODE lock-all-except")
+            return
+        }
+
         // Block-all-except-allowlist mode — only when an allowlist actually exists
         // (otherwise we'd shield ChildTime itself and brick the device). Mirrors
         // ParentSettings.blockAllActive + ShieldManager.applyLockAllExcept.

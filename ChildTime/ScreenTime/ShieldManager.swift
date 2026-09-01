@@ -201,6 +201,15 @@ final class ShieldManager: ObservableObject {
     func unlock(minutes: Int) {
         clearShield()
         let s = ParentSettings.shared
+        // Kid Mode (parent phone) baseline is lock-all-except-allowlist — same
+        // shape as block-all — so there's NO concrete blocked set to usage-meter.
+        // Use the wall-clock backstop; without this, unlock() left the phone wide
+        // open with no re-lock scheduled and the kid could roam the whole device.
+        if KidModeManager.shared.active {
+            screenTimeLog.notice("unlock(\(minutes, privacy: .public) min) mode=kid-mode → wall-clock reshield")
+            scheduleWallClockReshield(after: minutes)
+            return
+        }
         screenTimeLog.notice("unlock(\(minutes, privacy: .public) min) mode=\(s.blockAllActive ? "block-all" : "block-list", privacy: .public)")
         if s.blockAllActive {
             // Block-all has no concrete blocked-token set to usage-meter, so the

@@ -20,14 +20,20 @@ final class KidModeManager: ObservableObject {
     }
 
     @Published private(set) var active: Bool {
-        didSet { defaults.set(active, forKey: Key.active) }
+        didSet {
+            defaults.set(active, forKey: Key.active)
+            AppGroup.defaults.set(active, forKey: "kidModeActive")   // extension reads this
+        }
     }
     @Published private(set) var childID: UUID? {
         didSet { defaults.set(childID?.uuidString, forKey: Key.childID) }
     }
     /// Separate allow-list for kid mode (apps the kid may open on the parent's phone).
     @Published var allowedData: Data? {
-        didSet { defaults.set(allowedData, forKey: Key.allowed) }
+        didSet {
+            defaults.set(allowedData, forKey: Key.allowed)
+            AppGroup.defaults.set(allowedData, forKey: "kidModeAllowedData")   // extension reads this
+        }
     }
     /// Flipped by the home-screen Quick Action so the UI presents the entry flow.
     @Published var pendingEntry = false
@@ -42,6 +48,9 @@ final class KidModeManager: ObservableObject {
         active = defaults.bool(forKey: Key.active)
         if let s = defaults.string(forKey: Key.childID) { childID = UUID(uuidString: s) }
         allowedData = defaults.data(forKey: Key.allowed)
+        // Re-mirror to the app group in case it drifted (first launch after update).
+        AppGroup.defaults.set(active, forKey: "kidModeActive")
+        AppGroup.defaults.set(allowedData, forKey: "kidModeAllowedData")
     }
 
     /// Enter kid mode for `child`: pull the child's full progress from the cloud,
