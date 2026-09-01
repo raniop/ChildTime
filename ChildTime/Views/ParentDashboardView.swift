@@ -363,6 +363,7 @@ struct ParentDashboardView: View {
                 }
                 rescheduleInsights()
                 WidgetBridge.writeFamily(rows)   // keep the family home-screen widget fresh
+                pushWatchGlance()                // ⌚️ and the Apple Watch app
                 Task {
                     // Parents NEED push — live events and reports are the core
                     // value. Ask AUTOMATICALLY, but only once there's a child to
@@ -1391,6 +1392,26 @@ struct ParentDashboardView: View {
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
+    }
+
+    /// ⌚️ Send the per-child glance to the paired Apple Watch (no-op without
+    /// one). Playing-now == an open screen-time window right now.
+    private func pushWatchGlance() {
+        let glances = rows.map { row -> WatchBridge.ChildGlance in
+            let s = row.snapshot
+            let playing = (s.unlockEndsAt ?? .distantPast) > Date()
+            let pending = choreStore.chores(forChild: row.profile.id)
+                .filter { $0.isPendingApproval }.count
+            return WatchBridge.ChildGlance(
+                id: row.profile.id.uuidString,
+                name: row.profile.name,
+                emoji: row.profile.gender == .girl ? "👧" : "👦",
+                earnedToday: s.minutesEarnedToday,
+                playingNow: playing,
+                pendingChores: pending,
+                moneyBalance: choreStore.moneyBalance(forChild: row.profile.id))
+        }
+        WatchBridge.shared.pushFamilyGlance(glances)
     }
 
     // MARK: - Personal greeting (title area)

@@ -17,6 +17,7 @@
 		713AF44EC71C867D5C9A459A /* DeviceActivityMonitorExt.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 03195E464CE1DCA50D39531A /* DeviceActivityMonitorExt.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7A110C4E00000000000000A2 /* LockPushService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 7A110C4E00000000000000A1 /* LockPushService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7A110C4E00000000000000AE /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F8B28F12FCF432400295103 /* UserNotifications.framework */; };
+		7B110C4E00000000000000BB /* TofyWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 7B110C4E00000000000000B2 /* TofyWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A9B6D6EA231E9A0445A876B5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CBA173C4588B868B8087E73A /* Foundation.framework */; };
 		AA0000000000000000001001 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000002001 /* FirebaseAuth */; };
 		AA0000000000000000001002 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000002002 /* FirebaseFirestore */; };
@@ -62,6 +63,13 @@
 			remoteGlobalIDString = 7A110C4E00000000000000A7;
 			remoteInfo = LockPushService;
 		};
+		7B110C4E00000000000000BD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4FD27B792FC70B4400909B38 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7B110C4E00000000000000B1;
+			remoteInfo = TofyWatch;
+		};
 		F123DBFFD0C6FBB4AB93F3E5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4FD27B792FC70B4400909B38 /* Project object */;
@@ -86,6 +94,17 @@
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7B110C4E00000000000000BA /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				7B110C4E00000000000000BB /* TofyWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -101,6 +120,7 @@
 		4FD27B932FC70B4700909B38 /* ChildTimeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChildTimeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FD27B9D2FC70B4700909B38 /* ChildTimeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChildTimeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A110C4E00000000000000A1 /* LockPushService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LockPushService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		7B110C4E00000000000000B2 /* TofyWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TofyWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF85E1C4DBB972D75EDDF8BB /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CBA173C4588B868B8087E73A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		FCE5B1972704D3335DBFF6B3 /* DeviceActivityMonitorExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceActivityMonitorExtension.swift; sourceTree = "<group>"; };
@@ -188,6 +208,11 @@
 			path = LockPushService;
 			sourceTree = "<group>";
 		};
+		7B110C4E00000000000000B6 /* TofyWatch */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TofyWatch;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -252,6 +277,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7B110C4E00000000000000B4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -274,6 +306,7 @@
 				4F8401CF2FCD64020076E20B /* PlayTimeWidget */,
 				4F8B28F52FCF432400295103 /* HelpContentExtension */,
 				7A110C4E00000000000000A5 /* LockPushService */,
+				7B110C4E00000000000000B6 /* TofyWatch */,
 				4FD27B822FC70B4400909B38 /* Products */,
 				64430A789AE674FF9A3F857D /* Frameworks */,
 				3AE5479DF6FCC1ACB0E2F2D2 /* DeviceActivityMonitorExt */,
@@ -290,6 +323,7 @@
 				4F8401CA2FCD64020076E20B /* PlayTimeWidgetExtension.appex */,
 				4F8B28F02FCF432400295103 /* HelpContentExtension.appex */,
 				7A110C4E00000000000000A1 /* LockPushService.appex */,
+				7B110C4E00000000000000B2 /* TofyWatch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -369,6 +403,7 @@
 				4FD27B7E2FC70B4400909B38 /* Frameworks */,
 				4FD27B7F2FC70B4400909B38 /* Resources */,
 				6BC7B6E455B921B5C2E71170 /* Embed App Extensions */,
+				7B110C4E00000000000000BA /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
@@ -377,6 +412,7 @@
 				4F8401DC2FCD64030076E20B /* PBXTargetDependency */,
 				4F8B28FD2FCF432400295103 /* PBXTargetDependency */,
 				7A110C4E00000000000000A4 /* PBXTargetDependency */,
+				7B110C4E00000000000000BC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4FD27B832FC70B4400909B38 /* ChildTime */,
@@ -458,6 +494,28 @@
 			productReference = 7A110C4E00000000000000A1 /* LockPushService.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		7B110C4E00000000000000B1 /* TofyWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7B110C4E00000000000000B7 /* Build configuration list for PBXNativeTarget "TofyWatch" */;
+			buildPhases = (
+				7B110C4E00000000000000B3 /* Sources */,
+				7B110C4E00000000000000B4 /* Frameworks */,
+				7B110C4E00000000000000B5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				7B110C4E00000000000000B6 /* TofyWatch */,
+			);
+			name = TofyWatch;
+			packageProductDependencies = (
+			);
+			productName = TofyWatch;
+			productReference = 7B110C4E00000000000000B2 /* TofyWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
 		87147760746831E82EA8F2CA /* DeviceActivityMonitorExt */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8D692E8AD35845A2B657C793 /* Build configuration list for PBXNativeTarget "DeviceActivityMonitorExt" */;
@@ -532,6 +590,7 @@
 				4F8401C92FCD64020076E20B /* PlayTimeWidgetExtension */,
 				4F8B28EF2FCF432400295103 /* HelpContentExtension */,
 				7A110C4E00000000000000A7 /* LockPushService */,
+				7B110C4E00000000000000B1 /* TofyWatch */,
 			);
 		};
 /* End PBXProject section */
@@ -573,6 +632,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		7A110C4E00000000000000AA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7B110C4E00000000000000B5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -639,6 +705,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7B110C4E00000000000000B3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -666,6 +739,11 @@
 			isa = PBXTargetDependency;
 			target = 7A110C4E00000000000000A7 /* LockPushService */;
 			targetProxy = 7A110C4E00000000000000A3 /* PBXContainerItemProxy */;
+		};
+		7B110C4E00000000000000BC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7B110C4E00000000000000B1 /* TofyWatch */;
+			targetProxy = 7B110C4E00000000000000BD /* PBXContainerItemProxy */;
 		};
 		8C285B3D1D2ADE421407E9B6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1147,6 +1225,62 @@
 			};
 			name = Release;
 		};
+		7B110C4E00000000000000B8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 129;
+				DEVELOPMENT_TEAM = TFG2H9C76N;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "טופי";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.rani.ChildTime;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rani.ChildTime.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		7B110C4E00000000000000B9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 129;
+				DEVELOPMENT_TEAM = TFG2H9C76N;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "טופי";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.rani.ChildTime;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rani.ChildTime.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
 		83698258C5A8D15070CFAD61 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1236,6 +1370,15 @@
 			buildConfigurations = (
 				7A110C4E00000000000000AC /* Debug */,
 				7A110C4E00000000000000AD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7B110C4E00000000000000B7 /* Build configuration list for PBXNativeTarget "TofyWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7B110C4E00000000000000B8 /* Debug */,
+				7B110C4E00000000000000B9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
