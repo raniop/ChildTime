@@ -458,6 +458,14 @@ struct JoinConfirmView: View {
                     secondaryButton("בִּטּוּל") { coord.dismiss() }
                 }
             }
+        } else if settings.deviceRole == .child {
+            // ⚠️ THE MIRROR ACCIDENT: a CHILD device scanned a PARENT family code
+            // (e.g. from the co-parent share). Joining as a parent would put the
+            // child's anonymous uid on parentUIDs and stream strangers' kids.
+            panel(emoji: "🛑", title: "זֶה קוֹד שֶׁל הוֹרֶה",
+                  body: "הַמַּכְשִׁיר הַזֶּה הוּא מַכְשִׁיר שֶׁל יֶלֶד. כְּדֵי לְחַבֵּר אוֹתוֹ לַמִּשְׁפָּחָה — בַּקְּשׁוּ מֵהַהוֹרֶה קוֹד יֶלֶד מֵהַדַּשְׁבּוֹרְד.") {
+                secondaryButton("הֵבַנְתִּי") { coord.dismiss() }
+            }
         } else {
             // CO-PARENT family code.
             panel(emoji: "👨‍👩‍👧‍👦", title: "לְהִצְטָרֵף לַמִּשְׁפָּחָה כְּהוֹרֶה?",

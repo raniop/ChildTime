@@ -44,7 +44,14 @@ final class AuthManager: ObservableObject {
     /// provider to be enabled in the Firebase console (Authentication → Sign-in).
     func signInAnonymouslyIfNeeded() {
         #if canImport(FirebaseAuth)
-        guard userID == nil else { return }
+        // Check the LIVE Firebase session, not just the cached userID: a child
+        // device with a cached uid but NO live session (keychain reset, device
+        // restore) would otherwise skip sign-in and get permission-denied on
+        // every Firestore call forever, silently killing the child's sync.
+        guard Auth.auth().currentUser == nil else {
+            if userID == nil, let u = Auth.auth().currentUser { apply(firebaseUser: u) }
+            return
+        }
         Auth.auth().signInAnonymously { [weak self] result, error in
             Task { @MainActor in
                 if let user = result?.user {

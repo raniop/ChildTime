@@ -1437,7 +1437,17 @@ final class HouseholdManager: ObservableObject {
                     .collection("state").document("current").delete()
                 try? await deleteSubcollection("children/\(childID)/dailyStats")
                 try? await db.collection("children").document(childID).delete()
+                // Public leaderboard card (a CHILD's name lives here — must not
+                // linger after a full account deletion, GDPR + Kids Category).
+                try? await db.collection("friendCards").document(childID).delete()
+                // This child's device rows (device names + FCM tokens).
+                let devs = try? await db.collection("childDevices")
+                    .whereField("childID", isEqualTo: childID).getDocuments()
+                for d in devs?.documents ?? [] { try? await d.reference.delete() }
             }
+            // Family chores + earnings ledger.
+            try? await deleteSubcollection("households/\(hh.id)/chores")
+            try? await deleteSubcollection("households/\(hh.id)/choreStats")
             try? await db.collection("households").document(hh.id).delete()
             try? await parentRef(uid).delete()
         }
