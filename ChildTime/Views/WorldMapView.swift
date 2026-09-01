@@ -84,7 +84,7 @@ struct WorldMapView: View {
         return Worlds.all.filter { world in
             // 💫 The arena isn't a topic — always on, except for pre-readers
             // (the extra-hard pool is text-based).
-            if world.isBonusWorld { return profiles.active?.age != .preK }
+            if world.isBonusWorld { return (profiles.active?.effectiveGrade ?? 1) >= 1 }
             return allowed.contains(world.topic)
         }
     }

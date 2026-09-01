@@ -38,7 +38,12 @@ enum ReadingContent {
     /// prompts are filtered by the caller, where QuestionReporter is reachable.)
     static func nextGroup(target: Difficulty, grade: Int? = nil) -> [Question] {
         guard let passage = pickPassage(target: target, grade: grade) else { return [] }
-        markUsed(passage.id)
+        let universeCount: Int = {
+            guard let g = grade else { return passages.count }
+            let inWindow = passages.filter { $0.gradeWindow.contains(g) }
+            return inWindow.isEmpty ? passages.count : inWindow.count
+        }()
+        markUsed(passage.id, universeCount: universeCount)
         return passage.questions.map { item in
             let options = ([item.correctAnswer] + item.distractors).shuffled()
             return Question(
@@ -85,25 +90,36 @@ enum ReadingContent {
             let pool = universe.filter { $0.tier == tier }
             if let fresh = pool.filter({ !recent.contains($0.id) }).randomElement() { return fresh }
         }
-        // Everything was seen recently — recycle the least-recently-used tier match.
+        // Everything was seen recently — recycle the LEAST-recently-used (its id
+        // sits earliest in `recent`), so we never repeat a passage back-to-back.
+        let lru: (ReadingPassage) -> Int = { recent.firstIndex(of: $0.id) ?? -1 }
         for tier in order {
-            if let any = universe.filter({ $0.tier == tier }).randomElement() { return any }
+            let pool = universe.filter { $0.tier == tier }
+            if let oldest = pool.min(by: { lru($0) < lru($1) }) { return oldest }
         }
-        return universe.randomElement()
+        return universe.min(by: { lru($0) < lru($1) }) ?? universe.randomElement()
     }
 
     // MARK: - Anti-repeat (persisted, ~60% of the pool)
 
-    private static let recentKey = "reading.recentPassageIDs"
+    // Per-profile so siblings on one device don't share reading recency, and
+    // (below) the cap is computed from the FILTERED universe, not all passages —
+    // grade א'-ב' has only ~8 easy passages, so a global 60%-of-24 cap (=14)
+    // meant everything was "recent" forever and the recycle path went random.
+    private static var recentKey: String {
+        "reading.recentPassageIDs" + (ProfileStore.shared.activeID.map { ".\($0.uuidString)" } ?? "")
+    }
 
     private static func recentIDs() -> [String] {
         UserDefaults.standard.stringArray(forKey: recentKey) ?? []
     }
 
-    private static func markUsed(_ id: String) {
+    private static func markUsed(_ id: String, universeCount: Int) {
         var ids = recentIDs().filter { $0 != id }
         ids.append(id)
-        let cap = max(1, (passages.count * 6) / 10)
+        // Cap at ~60% of the CURRENT universe (min 1, and never the whole set −1
+        // so at least one fresh passage always exists).
+        let cap = max(1, min((universeCount * 6) / 10, universeCount - 1))
         if ids.count > cap { ids.removeFirst(ids.count - cap) }
         UserDefaults.standard.set(ids, forKey: recentKey)
     }

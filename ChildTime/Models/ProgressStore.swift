@@ -794,7 +794,7 @@ final class ProgressStore: ObservableObject {
             if !varietyBonusGrantedToday {
                 let varied = topicCountsToday().values.filter { $0 >= Self.varietyMinAnswersPerTopic }.count
                 if varied >= Self.varietyTopicsNeeded {
-                    defaults.set(Date(), forKey: "varietyBonusDate")
+                    defaults.set(Date(), forKey: varietyBonusDateKey)
                     let granted = grantMinutesCapped(Self.varietyBonusMinutes)
                     if granted > 0 {
                         sessionMinutesEarned += granted
@@ -1229,10 +1229,18 @@ final class ProgressStore: ObservableObject {
     @Published var topicBalanceNudgeTopic: Topic? = nil
     @Published var varietyBonusJustEarned: Int = 0
 
+    /// Per-profile suffix so two siblings on ONE shared device don't share the
+    /// daily topic-balance counters (sibling A's 30 math answers used to start
+    /// sibling B at half-rate).
+    private var balanceKeySuffix: String { ProfileStore.shared.activeID.map { ".\($0.uuidString)" } ?? "" }
+    private var topicAnsweredKey: String { "topicAnsweredToday" + balanceKeySuffix }
+    private var topicAnsweredDateKey: String { "topicAnsweredDate" + balanceKeySuffix }
+    private var varietyBonusDateKey: String { "varietyBonusDate" + balanceKeySuffix }
+
     private func topicCountsToday() -> [String: Int] {
-        guard let d = defaults.object(forKey: "topicAnsweredDate") as? Date,
+        guard let d = defaults.object(forKey: topicAnsweredDateKey) as? Date,
               Calendar.current.isDateInToday(d),
-              let dict = defaults.dictionary(forKey: "topicAnsweredToday") as? [String: Int]
+              let dict = defaults.dictionary(forKey: topicAnsweredKey) as? [String: Int]
         else { return [:] }
         return dict
     }
@@ -1241,13 +1249,13 @@ final class ProgressStore: ObservableObject {
     private func bumpTopicAnsweredToday(_ topic: Topic) -> Int {
         var counts = topicCountsToday()
         counts[topic.rawValue, default: 0] += 1
-        defaults.set(counts, forKey: "topicAnsweredToday")
-        defaults.set(Date(), forKey: "topicAnsweredDate")
+        defaults.set(counts, forKey: topicAnsweredKey)
+        defaults.set(Date(), forKey: topicAnsweredDateKey)
         return counts[topic.rawValue] ?? 1
     }
 
     private var varietyBonusGrantedToday: Bool {
-        (defaults.object(forKey: "varietyBonusDate") as? Date)
+        (defaults.object(forKey: varietyBonusDateKey) as? Date)
             .map { Calendar.current.isDateInToday($0) } ?? false
     }
 

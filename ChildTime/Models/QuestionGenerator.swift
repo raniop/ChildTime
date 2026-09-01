@@ -35,14 +35,17 @@ struct QuestionGenerator {
             // bonus questions returned every session. Top up with the nearest
             // windows instead. shuffled() first so equal-distance ties don't
             // always pick the same declaration-order items.
-            if inWindow.count >= 8 {
+            if inWindow.count >= 5 {
                 pool = inWindow
             } else {
+                // Pools are small (~10) — take the nearest-window items so a
+                // 1st-grader doesn't get a ה'-ו' bonus. min() keeps it a real
+                // filter instead of "prefix(12) of 10" = the whole pool.
                 pool = Array(pool.shuffled().sorted {
                     let d0 = $0.grades.contains(g) ? 0 : min(abs($0.grades.lowerBound - g), abs($0.grades.upperBound - g))
                     let d1 = $1.grades.contains(g) ? 0 : min(abs($1.grades.lowerBound - g), abs($1.grades.upperBound - g))
                     return d0 < d1
-                }.prefix(12))
+                }.prefix(min(6, pool.count)))
             }
         }
         guard let item = QuestionMemory.shared.pickFresh(pool, for: topic, target: .hard) else {

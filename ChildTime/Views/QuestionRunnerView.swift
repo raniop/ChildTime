@@ -938,6 +938,19 @@ struct QuestionRunnerView: View {
             return
         }
 
+        // 📖 Finish the CURRENT reading passage before choosing a new topic —
+        // otherwise the anti-repeat topic picker diverts the passage's later
+        // questions and the kid has to re-read it.
+        if !isSuper, !bonus, !isPreReader, !readingQueue.isEmpty {
+            let rq = readingQueue.removeFirst()
+            currentTopic = .reading
+            topicHistory.append(.reading)
+            QuestionMemory.shared.markServedThisSession(sessionKey(rq))
+            current = rq
+            questionShownAt = Date()
+            return
+        }
+
         let topic = pickTopic()
         currentTopic = topic
         topicHistory.append(topic)
