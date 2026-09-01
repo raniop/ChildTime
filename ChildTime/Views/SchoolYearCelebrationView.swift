@@ -2,52 +2,62 @@ import SwiftUI
 
 /// 🎒 September 1st — the first day of school! Shown ONCE per school year on
 /// the child's device when their grade auto-advances (see
-/// `Profile.effectiveGrade`): confetti, the new grade, and off we go.
+/// `Profile.effectiveGrade`). Two celebration designs (Rani asked for WOW):
+/// 1 = "מדליית זהב" — sunburst rays behind a giant gold grade medal.
+/// 2 = "בלוני שמיים" — a sky full of rising balloons.
 struct SchoolYearCelebrationView: View {
     let gradeName: String
     let childName: String
+    var gender: ChildGender? = nil
+    var variant: Int = 1
     let onDone: () -> Void
 
     @State private var confetti = 0
     @State private var appeared = false
+    @State private var stage = 0     // staged entrance: 0 → 3
+
+    /// "עוֹלֶה" / "עוֹלָה" by the child's gender (the old slash-both was a bug).
+    private var risesVerb: String { gender == .girl ? "עוֹלָה" : "עוֹלֶה" }
 
     var body: some View {
         ZStack {
-            AppGradient.gold.ignoresSafeArea()
-            FloatingOrbs(
-                colors: [AppColor.starGold, AppColor.flameOrange, .white, AppColor.successMint],
-                count: 7, maxSize: 260, opacity: 0.4
-            )
-            SparkleField(count: 30, size: 14)
+            if variant == 2 { skyBackground } else { goldBackground }
 
-            VStack(spacing: AppSpacing.lg) {
-                Spacer()
+            VStack(spacing: AppSpacing.md) {
+                Spacer(minLength: 20)
 
-                Text("🎒")
-                    .font(.system(size: 110))
-                    .rotationEffect(.degrees(appeared ? 8 : -8))
-                    .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: appeared)
-                    .shadow(color: .black.opacity(0.25), radius: 12, y: 8)
+                if variant == 2 {
+                    bouncingBackpack
+                } else {
+                    medal
+                }
 
-                Text("יוֹם רִאשׁוֹן לַלִּמּוּדִים!")
-                    .font(.system(size: 30, weight: .heavy, design: .rounded))
+                Text("יוֹם רִאשׁוֹן לַלִּמּוּדִים! 🎒")
+                    .font(.system(size: 28, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
+                    .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
                     .multilineTextAlignment(.center)
+                    .opacity(stage >= 1 ? 1 : 0)
+                    .offset(y: stage >= 1 ? 0 : 18)
 
-                Text("\(childName) עוֹלֶה/עוֹלָה לְ\(gradeName)! 🎉")
-                    .font(.system(size: 24, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
+                (Text("\(childName) ")
+                    .foregroundColor(Color(hex: "FFD23F"))
+                 + Text("\(risesVerb) לְ\(gradeName)!")
+                    .foregroundColor(.white))
+                    .font(.system(size: 34, weight: .black, design: .rounded))
+                    .shadow(color: .black.opacity(0.35), radius: 5, y: 3)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24).padding(.vertical, 12)
-                    .background(.black.opacity(0.22), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    .scaleEffect(appeared ? 1 : 0.6)
-                    .animation(.spring(response: 0.5, dampingFraction: 0.6), value: appeared)
+                    .padding(.horizontal, 24)
+                    .scaleEffect(stage >= 2 ? 1 : 0.4)
+                    .opacity(stage >= 2 ? 1 : 0)
 
-                Text("טוֹפִי כְּבָר הֵכִין שְׁאֵלוֹת חֲדָשׁוֹת בְּדִיּוּק בִּשְׁבִילְךָ — בְּהַצְלָחָה בַּשָּׁנָה הַחֲדָשָׁה!")
+                Text("שָׁנָה חֲדָשָׁה, הַרְפַּתְקָה חֲדָשָׁה — טוֹפִי כְּבָר הֵכִין\nשְׁאֵלוֹת חֲדָשׁוֹת בְּדִיּוּק בִּשְׁבִילְךָ! 🚀")
                     .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.95))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, AppSpacing.xl)
+                    .opacity(stage >= 3 ? 1 : 0)
+                    .offset(y: stage >= 3 ? 0 : 12)
 
                 Spacer()
 
@@ -60,12 +70,16 @@ struct SchoolYearCelebrationView: View {
                         .foregroundStyle(AppColor.textOnLight)
                         .frame(maxWidth: 420)
                         .padding(.vertical, 16)
-                        .background(.white, in: Capsule())
-                        .glow(.white, radius: 14)
+                        .background(
+                            LinearGradient(colors: [.white, Color(hex: "FFE9A3")],
+                                           startPoint: .top, endPoint: .bottom),
+                            in: Capsule())
+                        .glow(Color(hex: "FFD23F"), radius: 16)
                 }
                 .buttonStyle(.juicy)
                 .padding(.horizontal, AppSpacing.xl)
                 .padding(.bottom, AppSpacing.xxl)
+                .opacity(stage >= 3 ? 1 : 0)
             }
 
             Confetti(trigger: confetti)
@@ -73,10 +87,147 @@ struct SchoolYearCelebrationView: View {
         .environment(\.layoutDirection, .rightToLeft)
         .onAppear {
             appeared = true
-            confetti += 1
             SoundPlayer.shared.play(.levelUp)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { confetti += 1 }
+            confetti += 1
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(0.15)) { stage = 1 }
+            withAnimation(.spring(response: 0.55, dampingFraction: 0.55).delay(0.55)) { stage = 2 }
+            withAnimation(.easeOut(duration: 0.4).delay(1.0)) { stage = 3 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { confetti += 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) { confetti += 1 }
         }
+    }
+
+    // MARK: - Variant 1 · gold medal
+
+    private var goldBackground: some View {
+        ZStack {
+            LinearGradient(colors: [Color(hex: "2D1B69"), Color(hex: "7C4DFF"), Color(hex: "FF9E2C")],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+            SparkleField(count: 36, size: 14)
+            // (No 🎆/🎇 corner emojis — iOS renders those as framed photos.)
+        }
+    }
+
+    /// Giant gold medal with the new grade, slow-spinning sunburst behind it.
+    private var medal: some View {
+        ZStack {
+            Starburst()
+                .fill(LinearGradient(colors: [Color(hex: "FFD23F").opacity(0.55), .clear],
+                                     startPoint: .center, endPoint: .top))
+                .frame(width: 340, height: 340)
+                .rotationEffect(.degrees(appeared ? 360 : 0))
+                .animation(.linear(duration: 24).repeatForever(autoreverses: false), value: appeared)
+
+            Circle()
+                .fill(LinearGradient(colors: [Color(hex: "FFE9A3"), Color(hex: "FFB347")],
+                                     startPoint: .topLeading, endPoint: .bottomTrailing))
+                .frame(width: 172, height: 172)
+                .overlay(Circle().stroke(.white.opacity(0.85), lineWidth: 5))
+                .glow(Color(hex: "FFD23F"), radius: appeared ? 26 : 10)
+                .shadow(color: .black.opacity(0.3), radius: 14, y: 8)
+
+            VStack(spacing: 0) {
+                Text("🎒").font(.system(size: 42))
+                Text(gradeName)
+                    .font(.system(size: 36, weight: .black, design: .rounded))
+                    .foregroundStyle(Color(hex: "6B3B00"))
+                    .lineLimit(1).minimumScaleFactor(0.5)
+                    .padding(.horizontal, 16)
+            }
+            .frame(width: 165)
+        }
+        .frame(height: 300)
+        .scaleEffect(stage >= 1 ? 1 : 0.2)
+        .animation(.spring(response: 0.6, dampingFraction: 0.55), value: stage)
+    }
+
+    // MARK: - Variant 2 · balloons
+
+    private var skyBackground: some View {
+        ZStack {
+            LinearGradient(colors: [Color(hex: "3A7BD5"), Color(hex: "48BFE3"), Color(hex: "8EEBFF")],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+            SparkleField(count: 18, size: 12)
+            BalloonField()
+        }
+    }
+
+    private var bouncingBackpack: some View {
+        Text("🎒")
+            .font(.system(size: 120))
+            .rotationEffect(.degrees(appeared ? 7 : -7))
+            .offset(y: appeared ? -8 : 8)
+            .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: appeared)
+            .shadow(color: .black.opacity(0.25), radius: 12, y: 8)
+            .scaleEffect(stage >= 1 ? 1 : 0.2)
+            .animation(.spring(response: 0.6, dampingFraction: 0.55), value: stage)
+    }
+}
+
+/// 12-ray sunburst behind the medal.
+private struct Starburst: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        let c = CGPoint(x: rect.midX, y: rect.midY)
+        let rOuter = min(rect.width, rect.height) / 2
+        let rInner = rOuter * 0.22
+        let rays = 12
+        for i in 0..<rays {
+            let a0 = (Double(i) / Double(rays)) * 2 * .pi
+            let a1 = a0 + (2 * .pi / Double(rays)) * 0.45
+            let mid = (a0 + a1) / 2
+            p.move(to: CGPoint(x: c.x + rInner * cos(a0), y: c.y + rInner * sin(a0)))
+            p.addLine(to: CGPoint(x: c.x + rOuter * cos(mid), y: c.y + rOuter * sin(mid)))
+            p.addLine(to: CGPoint(x: c.x + rInner * cos(a1), y: c.y + rInner * sin(a1)))
+            p.closeSubpath()
+        }
+        return p
+    }
+}
+
+/// A loop of balloons drifting up the screen forever.
+private struct BalloonField: View {
+    private static let balloons: [(emoji: String, x: CGFloat, size: CGFloat, duration: Double, delay: Double)] = [
+        ("🎈", 0.10, 52, 7.0, 0.0), ("🎈", 0.85, 44, 8.5, 1.2),
+        ("🟡", 0.30, 0,  0,   0),   // spacer entry never rendered (size 0)
+        ("🎈", 0.55, 60, 6.2, 2.1), ("🎈", 0.22, 38, 9.0, 3.0),
+        ("🎉", 0.72, 40, 7.6, 0.8), ("⭐️", 0.42, 30, 8.2, 2.6),
+        ("🎈", 0.93, 48, 6.8, 3.6), ("🎊", 0.05, 36, 7.9, 1.9),
+    ]
+
+    var body: some View {
+        GeometryReader { geo in
+            ForEach(Array(Self.balloons.enumerated()), id: \.offset) { _, b in
+                if b.size > 0 {
+                    RisingEmoji(emoji: b.emoji, size: b.size,
+                                x: geo.size.width * b.x,
+                                screenH: geo.size.height,
+                                duration: b.duration, delay: b.delay)
+                }
+            }
+        }
+        .allowsHitTesting(false)
+        .ignoresSafeArea()
+    }
+}
+
+private struct RisingEmoji: View {
+    let emoji: String
+    let size: CGFloat
+    let x: CGFloat
+    let screenH: CGFloat
+    let duration: Double
+    let delay: Double
+    @State private var up = false
+
+    var body: some View {
+        Text(emoji)
+            .font(.system(size: size))
+            .position(x: x, y: up ? -80 : screenH + 80)
+            .animation(.linear(duration: duration).repeatForever(autoreverses: false).delay(delay), value: up)
+            .onAppear { up = true }
     }
 }
 

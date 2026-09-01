@@ -528,7 +528,8 @@ struct WorldMapView: View {
             if let p = profiles.active {
                 SchoolYearCelebrationView(
                     gradeName: Profile.gradeDisplayName(p.effectiveGrade),
-                    childName: p.name
+                    childName: p.name,
+                    gender: p.gender
                 ) { showSchoolYearParty = false }
             }
         }

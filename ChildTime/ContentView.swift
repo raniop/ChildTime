@@ -63,6 +63,15 @@ struct ContentView: View {
             KidModeEntryView()
                 .environment(\.layoutDirection, .rightToLeft)
         }
+        // DEBUG design preview: `simctl launch ... -SchoolYearPreviewVariant N`
+        // overlays the September party for screenshots (Rani reviews variants).
+        .overlay {
+            let v = UserDefaults.standard.integer(forKey: "SchoolYearPreviewVariant")
+            if v > 0 {
+                SchoolYearCelebrationView(gradeName: "כִּתָּה ב'", childName: "דן המלך",
+                                          gender: .boy, variant: v, onDone: {})
+            }
+        }
         // Any scanned/typed family-or-child code → detect type + confirm first.
         .fullScreenCover(isPresented: $joinCoord.active) {
             JoinConfirmView()
