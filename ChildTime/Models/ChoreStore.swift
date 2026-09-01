@@ -101,14 +101,28 @@ final class ChoreStore: ObservableObject {
     private var statsListener: ListenerRegistration?
     private var listeningHousehold: String?
     #endif
+    private var householdSub: AnyCancellable?
 
     private init() {}
 
     /// Idempotent — (re)attach the listener to the current household. Views call
     /// this on appear; it re-binds automatically if the family changed.
+    ///
+    /// RACE FIX (Rani, on-device): the dashboard's onAppear often fires BEFORE
+    /// the household finishes loading — the guard below bailed, nothing ever
+    /// re-attached, and the chores banner stayed stale until the user happened
+    /// to open the chores screen. Now the first call also subscribes to
+    /// household changes, so the listener attaches the moment the family loads.
     func startIfNeeded() {
         #if canImport(FirebaseFirestore)
         guard !HouseholdManager.skipsCloudSync else { return }
+        if householdSub == nil {
+            householdSub = HouseholdManager.shared.$household
+                .compactMap { $0?.id }
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] _ in self?.startIfNeeded() }
+        }
         guard let hh = HouseholdManager.shared.household?.id else { return }
         guard hh != listeningHousehold else { return }
         listener?.remove()

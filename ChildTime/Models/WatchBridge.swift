@@ -20,6 +20,10 @@ final class WatchBridge: NSObject, WCSessionDelegate {
     }
 
     private var started = false
+    /// The most recent glance — held so a payload built BEFORE the session
+    /// finished activating isn't lost (Rani's watch showed the empty state
+    /// forever: the dashboard's one push raced activation and was dropped).
+    private var lastPayload: [String: Any]?
 
     func startIfNeeded() {
         guard WCSession.isSupported(), !started else { return }
@@ -31,10 +35,7 @@ final class WatchBridge: NSObject, WCSessionDelegate {
     func pushFamilyGlance(_ rows: [ChildGlance]) {
         guard WCSession.isSupported() else { return }
         startIfNeeded()
-        let session = WCSession.default
-        guard session.activationState == .activated,
-              session.isPaired, session.isWatchAppInstalled else { return }
-        let payload: [String: Any] = [
+        lastPayload = [
             "sentAt": Date().timeIntervalSince1970,
             "children": rows.map { ["id": $0.id,
                                     "name": $0.name,
@@ -44,6 +45,14 @@ final class WatchBridge: NSObject, WCSessionDelegate {
                                     "pendingChores": $0.pendingChores,
                                     "moneyBalance": $0.moneyBalance] },
         ]
+        flush()
+    }
+
+    private func flush() {
+        let session = WCSession.default
+        guard session.activationState == .activated,
+              session.isPaired, session.isWatchAppInstalled,
+              let payload = lastPayload else { return }
         try? session.updateApplicationContext(payload)
     }
 
@@ -51,7 +60,12 @@ final class WatchBridge: NSObject, WCSessionDelegate {
 
     nonisolated func session(_ session: WCSession,
                              activationDidCompleteWith activationState: WCSessionActivationState,
-                             error: Error?) {}
+                             error: Error?) {
+        // Activation is async — deliver the glance that may have raced it.
+        DispatchQueue.main.async { WatchBridge.shared.flushAfterActivation() }
+    }
+
+    func flushAfterActivation() { flush() }
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
     nonisolated func sessionDidDeactivate(_ session: WCSession) { session.activate() }
 }

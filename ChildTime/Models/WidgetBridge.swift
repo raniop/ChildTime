@@ -126,6 +126,20 @@ enum WidgetBridge {
                 }
                 guard !rows.isEmpty else { return }
                 writeFamily(rows)
+                // ⌚️ same trigger keeps the Apple Watch glance fresh.
+                let glances = rows.map { row -> WatchBridge.ChildGlance in
+                    let s = row.snapshot
+                    return WatchBridge.ChildGlance(
+                        id: row.profile.id.uuidString,
+                        name: row.profile.name,
+                        emoji: row.profile.gender == .girl ? "👧" : "👦",
+                        earnedToday: s.minutesEarnedToday,
+                        playingNow: (s.unlockEndsAt ?? .distantPast) > Date(),
+                        pendingChores: ChoreStore.shared.chores(forChild: row.profile.id)
+                            .filter(\.isPendingApproval).count,
+                        moneyBalance: ChoreStore.shared.moneyBalance(forChild: row.profile.id))
+                }
+                WatchBridge.shared.pushFamilyGlance(glances)
             }
         }
         familyRefreshWork = work
