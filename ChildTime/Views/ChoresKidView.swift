@@ -41,6 +41,22 @@ struct ChoresKidView: View {
         profiles.activeID.map { choreStore.moneyBalance(forChild: $0) } ?? 0
     }
 
+    /// A chore is "handled for today" if it's been sent, is waiting for a
+    /// parent, or was already approved today. Everything else is still to-do.
+    private func isHandled(_ c: Chore) -> Bool {
+        sending.contains(c.id) || justSent.contains(c.id)
+            || c.isPendingApproval || (c.isDaily && c.approvedToday)
+    }
+    /// The main grid: only chores the kid can DO right now (clean action button).
+    private var todoChores: [Chore] { myChores.filter { !isHandled($0) } }
+    /// The "בוצעו היום" bucket: sent / waiting-for-approval / approved-today.
+    private var doneChores: [Chore] { myChores.filter { isHandled($0) } }
+
+    private var gridColumns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: AppSpacing.md),
+              count: hSize == .regular ? 3 : 2)
+    }
+
     var body: some View {
         ZStack {
             AppGradient.dreamy.ignoresSafeArea()
@@ -55,14 +71,19 @@ struct ChoresKidView: View {
                         if myChores.isEmpty {
                             emptyState
                         } else {
-                            // 2 across on iPhone, 3 on iPad (Rani).
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: AppSpacing.md),
-                                                     count: hSize == .regular ? 3 : 2),
-                                      spacing: AppSpacing.md) {
-                                ForEach(myChores) { chore in
-                                    choreCard(chore)
+                            // Only actionable chores in the main grid — a clean
+                            // "עשיתי!" call to action, never mixed with "done"
+                            // badges (Rani: the mix was confusing).
+                            if !todoChores.isEmpty {
+                                LazyVGrid(columns: gridColumns, spacing: AppSpacing.md) {
+                                    ForEach(todoChores) { chore in activeCard(chore) }
                                 }
+                            } else {
+                                allDoneBanner
                             }
+                            // Everything finished today drops into its own
+                            // friendly "בוצעו היום" section below.
+                            if !doneChores.isEmpty { doneSection }
                         }
                     }
                     .padding(.horizontal, AppSpacing.lg)
@@ -232,8 +253,10 @@ struct ChoresKidView: View {
         .padding(.top, 60)
     }
 
+    /// A chore the kid can DO now — emoji, name, reward, and the one clear
+    /// action button. No status badges here (those live in the done section).
     @ViewBuilder
-    private func choreCard(_ chore: Chore) -> some View {
+    private func activeCard(_ chore: Chore) -> some View {
         VStack(spacing: 8) {
             Text(chore.emoji).font(.system(size: 38))
             Text(chore.title)
@@ -259,31 +282,22 @@ struct ChoresKidView: View {
                 .lineLimit(1)
                 .frame(height: 13)
 
-            if sending.contains(chore.id) {
-                statusCapsule("שׁוֹלְחִים… 📨", background: .white.opacity(0.16))
-            } else if chore.isPendingApproval || justSent.contains(chore.id) {
-                statusCapsule("מְחַכִּים לְאִשּׁוּר 🕐", background: .white.opacity(0.16))
-            } else if chore.isDaily && chore.approvedToday {
-                statusCapsule(Gendered.g("סִיַּמְתָּ לְהַיּוֹם! 🏆", "סִיַּמְתְּ לְהַיּוֹם! 🏆"),
-                              background: Color(hex: "06D6A0").opacity(0.45))
-            } else {
-                Button {
-                    Haptic.success()
-                    tapDone(chore)
-                } label: {
-                    Text("עָשִׂיתִי! ✅")
-                        .font(.system(size: 15, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(
-                            LinearGradient(colors: [Color(hex: "06D6A0"), Color(hex: "48BFE3")],
-                                           startPoint: .leading, endPoint: .trailing),
-                            in: Capsule()
-                        )
-                }
+            Button {
+                Haptic.success()
+                tapDone(chore)
+            } label: {
+                Text("עָשִׂיתִי! ✅")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        LinearGradient(colors: [Color(hex: "06D6A0"), Color(hex: "48BFE3")],
+                                       startPoint: .leading, endPoint: .trailing),
+                        in: Capsule()
+                    )
             }
         }
         .padding(AppSpacing.sm)
@@ -292,6 +306,69 @@ struct ChoresKidView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .stroke(.white.opacity(0.18), lineWidth: 1)
+        )
+    }
+
+    /// 🎉 "בוצעו היום" — a compact, celebratory card for a chore already handled
+    /// today: sent, waiting for a parent, or approved. Clear status, no button.
+    @ViewBuilder
+    private func doneCard(_ chore: Chore) -> some View {
+        let approved = chore.isDaily && chore.approvedToday
+        let waiting = !approved && !sending.contains(chore.id)
+        VStack(spacing: 6) {
+            Text(chore.emoji).font(.system(size: 30)).opacity(approved ? 0.95 : 1)
+            Text(chore.title)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .lineLimit(1).minimumScaleFactor(0.7)
+            if sending.contains(chore.id) {
+                statusCapsule("שׁוֹלְחִים… 📨", background: .white.opacity(0.18))
+            } else if waiting {
+                statusCapsule("מְחַכִּים לְאִשּׁוּר 🕐", background: Color(hex: "F4A261").opacity(0.55))
+            } else {
+                statusCapsule(Gendered.g("סִיַּמְתָּ! ✅", "סִיַּמְתְּ! ✅"),
+                              background: Color(hex: "06D6A0").opacity(0.55))
+            }
+        }
+        .padding(AppSpacing.sm)
+        .frame(maxWidth: .infinity)
+        .background(.white.opacity(0.09), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(.white.opacity(0.14), lineWidth: 1)
+        )
+    }
+
+    /// The "בוצעו היום 🎉" section under the to-do grid.
+    private var doneSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            Text("בּוֹצְעוּ הַיּוֹם 🎉")
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.9))
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, AppSpacing.sm)
+            LazyVGrid(columns: gridColumns, spacing: AppSpacing.md) {
+                ForEach(doneChores) { chore in doneCard(chore) }
+            }
+        }
+    }
+
+    /// Shown when there's nothing left to do but chores WERE done today.
+    private var allDoneBanner: some View {
+        VStack(spacing: 8) {
+            Text("🎉").font(.system(size: 46))
+            Text(Gendered.g("כָּל הַכָּבוֹד! סִיַּמְתָּ הַכֹּל לְהַיּוֹם", "כָּל הַכָּבוֹד! סִיַּמְתְּ הַכֹּל לְהַיּוֹם"))
+                .font(.system(size: 18, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+        }
+        .padding(AppSpacing.lg)
+        .frame(maxWidth: .infinity)
+        .background(
+            LinearGradient(colors: [Color(hex: "06D6A0").opacity(0.5), Color(hex: "48BFE3").opacity(0.5)],
+                           startPoint: .topLeading, endPoint: .bottomTrailing),
+            in: RoundedRectangle(cornerRadius: 22, style: .continuous)
         )
     }
 
