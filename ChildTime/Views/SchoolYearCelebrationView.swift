@@ -2,14 +2,13 @@ import SwiftUI
 
 /// 🎒 September 1st — the first day of school! Shown ONCE per school year on
 /// the child's device when their grade auto-advances (see
-/// `Profile.effectiveGrade`). Two celebration designs (Rani asked for WOW):
-/// 1 = "מדליית זהב" — sunburst rays behind a giant gold grade medal.
-/// 2 = "בלוני שמיים" — a sky full of rising balloons.
+/// `Profile.effectiveGrade`). Design: Rani's chosen COMBO of the two variants
+/// he reviewed — the spinning-sunburst gold medal carrying the new grade, over
+/// a sky of endlessly rising balloons.
 struct SchoolYearCelebrationView: View {
     let gradeName: String
     let childName: String
     var gender: ChildGender? = nil
-    var variant: Int = 1
     let onDone: () -> Void
 
     @State private var confetti = 0
@@ -21,16 +20,12 @@ struct SchoolYearCelebrationView: View {
 
     var body: some View {
         ZStack {
-            if variant == 2 { skyBackground } else { goldBackground }
+            goldBackground
 
             VStack(spacing: AppSpacing.md) {
                 Spacer(minLength: 20)
 
-                if variant == 2 {
-                    bouncingBackpack
-                } else {
-                    medal
-                }
+                medal
 
                 Text("יוֹם רִאשׁוֹן לַלִּמּוּדִים! 🎒")
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
@@ -97,7 +92,7 @@ struct SchoolYearCelebrationView: View {
         }
     }
 
-    // MARK: - Variant 1 · gold medal
+    // MARK: - Background: sunrise sky full of rising balloons
 
     private var goldBackground: some View {
         ZStack {
@@ -105,6 +100,7 @@ struct SchoolYearCelebrationView: View {
                            startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             SparkleField(count: 36, size: 14)
+            BalloonField()
             // (No 🎆/🎇 corner emojis — iOS renders those as framed photos.)
         }
     }
@@ -142,28 +138,6 @@ struct SchoolYearCelebrationView: View {
         .animation(.spring(response: 0.6, dampingFraction: 0.55), value: stage)
     }
 
-    // MARK: - Variant 2 · balloons
-
-    private var skyBackground: some View {
-        ZStack {
-            LinearGradient(colors: [Color(hex: "3A7BD5"), Color(hex: "48BFE3"), Color(hex: "8EEBFF")],
-                           startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
-            SparkleField(count: 18, size: 12)
-            BalloonField()
-        }
-    }
-
-    private var bouncingBackpack: some View {
-        Text("🎒")
-            .font(.system(size: 120))
-            .rotationEffect(.degrees(appeared ? 7 : -7))
-            .offset(y: appeared ? -8 : 8)
-            .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: appeared)
-            .shadow(color: .black.opacity(0.25), radius: 12, y: 8)
-            .scaleEffect(stage >= 1 ? 1 : 0.2)
-            .animation(.spring(response: 0.6, dampingFraction: 0.55), value: stage)
-    }
 }
 
 /// 12-ray sunburst behind the medal.
