@@ -24,6 +24,24 @@ enum WhatsNewContent {
     /// Release notes per build. Builds without an entry show nothing.
     static func items(for build: String) -> [Item]? {
         switch build {
+        case "134":
+            // Folds in build 133's highlights too — 133 was the FIRST build to
+            // carry this popup, so it self-suppressed and testers never saw its
+            // notes (see `shouldShow`). Catch everyone up here.
+            return [
+                Item(emoji: "🧹", title: "מטלות הבית",
+                     line: "הילדים עוזרים בבית ובוחרים פרס — דקות משחק או כסף לקופה. אתם מאשרים (אפשר ישר מההתראה, עם תמונה!)"),
+                Item(emoji: "💰", title: "מטלות — עם כסף או בלי",
+                     line: "חדש: אפשר לבחור אם הילדים מרוויחים כסף על מטלות, או רק דקות משחק. הכול בהגדרות המטלות"),
+                Item(emoji: "📖", title: "עשרות קטעי קריאה חדשים",
+                     line: "קטעי הבנת הנקרא לכל הכיתות, מותאמים לחומר הנלמד בבית הספר — עם הרבה פחות חזרות"),
+                Item(emoji: "🎓", title: "שאלות מותאמות לכיתה",
+                     line: "כל שאלה באפליקציה מתויגת לפי תוכנית הלימודים — כל ילד מקבל בדיוק את הרמה שלו"),
+                Item(emoji: "⌚️", title: "טופי על ה-Apple Watch וּווידג'טים",
+                     line: "מבט מהיר על המשפחה מהיד, התראות מטלה עם תמונה, וווידג'טים חדשים למסך הבית והנעילה"),
+                Item(emoji: "✅", title: "מטלה שבוצעה — מגיעה אליכם, תמיד",
+                     line: "כשילד מסמן שסיים מטלה, זה מגיע אליכם בוודאות. ואם משהו לא נשלח — תדעו מיד"),
+            ]
         case "133":
             return [
                 Item(emoji: "🧹", title: "מטלות הבית",
