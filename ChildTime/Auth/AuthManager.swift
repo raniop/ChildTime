@@ -65,6 +65,12 @@ final class AuthManager: ObservableObject {
 
     var isSignedIn: Bool { userID != nil }
 
+    /// A REAL parent account (Apple/Google/email) — NOT an anonymous child-device
+    /// session. Anonymous sign-in sets userID but leaves `provider` nil, so an
+    /// anonymous session used to pass `isSignedIn` and strand a would-be parent
+    /// on the endless "loading family" screen with no way to actually log in.
+    var isRealAccount: Bool { userID != nil && provider != nil }
+
     /// Apple sign-in nonce (used to verify the ID token).
     private var currentNonce: String?
 

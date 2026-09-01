@@ -111,7 +111,7 @@ struct ContentView: View {
     /// data survives and uploads to the new family on sign-in (createdHere).
     @ViewBuilder
     private var parentFlow: some View {
-        if !auth.isSignedIn {
+        if !auth.isRealAccount {
             LoginGateView(limitBanner: auth.isGuest)
         } else if !settings.hasConsented {
             ConsentView()

@@ -33,6 +33,17 @@ final class ProfileStore: ObservableObject {
 
     func wasCreatedHere(_ id: UUID) -> Bool { createdHereIDs.contains(id.uuidString) }
 
+    /// Full local wipe — clears the in-memory roster, the active id, and the
+    /// createdHere set, so a device reset followed by signing into a DIFFERENT
+    /// account (without killing the app) can't re-upload the previous family's
+    /// children into the new one. This was the resurrection engine behind the
+    /// duplicate-children / cross-family-leak incidents.
+    func wipeAllInMemory() {
+        defaults.removeObject(forKey: Key.createdHere)
+        activeID = nil
+        profiles = []
+    }
+
     /// Wipe every local trace of a DEMO-seeded profile (see ChildTimeApp.seedDemo)
     /// so a normal launch can never sync it into a real production family:
     /// the profile row, its createdHere mark (reconcile bait), and its vault snapshot.

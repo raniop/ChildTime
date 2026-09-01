@@ -74,9 +74,14 @@ enum DataExporter {
             group.removeObject(forKey: "learningHistory.\(id)")
         }
         for key in ["profiles.list", "profiles.activeID", "profiles.didMigrateLegacyKid",
-                    "household.didMigrate", "auth.cachedUser"] {
+                    "profiles.createdHereIDs", "household.didMigrate", "auth.cachedUser"] {
             standard.removeObject(forKey: key)
             group.removeObject(forKey: key)
         }
+        // CRITICAL: also clear the IN-MEMORY roster + createdHere set. Deleting
+        // only the defaults left ProfileStore.shared holding the old family's
+        // children, and signing into another account without killing the app
+        // re-uploaded them into the new family (the duplicate-children engine).
+        ProfileStore.shared.wipeAllInMemory()
     }
 }
