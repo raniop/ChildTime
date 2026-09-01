@@ -43,6 +43,7 @@ struct ParentDashboardView: View {
     @State private var difficultyProfile: Profile?
     @State private var choresProfile: Profile?    // 🧹 chores sheet
     @State private var showSchoolYearParty = false
+    @State private var showWhatsNew = false
     @StateObject private var choreStore = ChoreStore.shared
     @State private var screenTimeProfile: Profile?
     @State private var editProfile: Profile?
@@ -290,6 +291,12 @@ struct ParentDashboardView: View {
                 ChildFriendsView(childID: p.id.uuidString, childName: p.name)
                     .environment(\.layoutDirection, .rightToLeft)
             }
+            .sheet(isPresented: $showWhatsNew, onDismiss: { WhatsNewContent.markShown() }) {
+                WhatsNewView {
+                    WhatsNewContent.markShown()
+                    showWhatsNew = false
+                }
+            }
             .fullScreenCover(isPresented: $showSchoolYearParty) {
                 ParentSchoolYearPartyView(profiles: rows.map(\.profile)) {
                     SchoolYearCelebration.markParentGreeted()
@@ -360,6 +367,9 @@ struct ParentDashboardView: View {
                 // parent side too (Rani) — once per school year.
                 if isRoot, SchoolYearCelebration.shouldGreetParent, !rows.isEmpty {
                     showSchoolYearParty = true
+                } else if isRoot, WhatsNewContent.shouldShow {
+                    // ✨ Once per app UPDATE: what's new, in parent language.
+                    showWhatsNew = true
                 }
                 rescheduleInsights()
                 WidgetBridge.writeFamily(rows)   // keep the family home-screen widget fresh
