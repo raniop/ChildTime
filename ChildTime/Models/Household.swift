@@ -27,6 +27,12 @@ struct Household: Codable, Identifiable, Equatable {
     /// the household so both parents see the same order. Optional so older
     /// household docs still decode.
     var childOrder: [String]?
+    /// 💎 Family-wide premium: written by whichever device holds the StoreKit
+    /// entitlement (the paying parent), read by EVERY device bound to the
+    /// family — so the kid's iPad/iPhone unlock premium regardless of which
+    /// Apple ID is signed in there (no dependence on Apple Family Sharing).
+    /// Far-future date = lifetime. Optional so older docs decode.
+    var premiumUntil: Date? = nil
 
     init(id: String = UUID().uuidString,
          parentUIDs: [String],

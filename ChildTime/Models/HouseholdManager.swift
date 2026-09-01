@@ -1491,6 +1491,30 @@ final class HouseholdManager: ObservableObject {
             return nil   // drop FieldValue sentinels / unknown Firestore types
         }
     }
+    /// 💎 True when the FAMILY holds premium (written by the paying device),
+    /// independent of this device's own Apple ID / StoreKit.
+    var householdPremiumActive: Bool {
+        guard let until = household?.premiumUntil else { return false }
+        return until > Date()
+    }
+
+    /// Publish premium to the family doc so every bound device unlocks it.
+    /// `until` = expiry (far-future for lifetime); nil clears it. Only writes
+    /// when the value actually changes, and only from a household member.
+    func publishPremium(until: Date?) {
+        #if canImport(FirebaseFirestore)
+        guard !Self.skipsCloudSync, let hh = household?.id else { return }
+        let current = household?.premiumUntil
+        // Never DOWNGRADE from the cloud on a transient local read: only write
+        // when extending/among-equal or clearing after a real lapse we detect.
+        if let until {
+            if let current, current >= until { return }   // cloud already >= ours
+            db.collection("households").document(hh)
+                .setData(["premiumUntil": until.timeIntervalSince1970], merge: true)
+        }
+        #endif
+    }
+
     private static func decodeHousehold(id: String, _ raw: [String: Any]) -> Household? {
         var r = raw; r["id"] = id; return decode(Household.self, r)
     }

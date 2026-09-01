@@ -53,7 +53,14 @@ service cloud.firestore {
       // parents — cross-family account takeover. `== concat([uid])` matches
       // exactly what arrayUnion produces for a genuine join.
       allow update: if signedIn() && (
-        request.auth.uid in resource.data.parentUIDs ||
+        (
+          request.auth.uid in resource.data.parentUIDs
+          // Changing premiumUntil requires a REAL (non-anonymous) account —
+          // a child device (anonymous) is a member but must not grant itself
+          // paid premium.
+          && (request.resource.data.get('premiumUntil', 0) == resource.data.get('premiumUntil', 0)
+              || request.auth.token.firebase.sign_in_provider != 'anonymous')
+        ) ||
         request.resource.data.parentUIDs == resource.data.parentUIDs.concat([request.auth.uid])
       );
       allow delete: if signedIn() && request.auth.uid in resource.data.parentUIDs;

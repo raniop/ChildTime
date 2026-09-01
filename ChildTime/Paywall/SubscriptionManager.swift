@@ -45,7 +45,11 @@ final class SubscriptionManager: ObservableObject {
     var isPremium: Bool {
         switch subscriptionState {
         case .inTrial, .active: return true
-        default: return false
+        default:
+            // Family-wide premium: another device in the family (the paying
+            // parent) holds the entitlement and published it to the household —
+            // so this device unlocks premium even with a different Apple ID.
+            return HouseholdManager.shared.householdPremiumActive
         }
     }
 
@@ -178,6 +182,16 @@ final class SubscriptionManager: ObservableObject {
             }
         }
         subscriptionState = newState
+        // Mirror a locally-held entitlement to the family doc so the kid's
+        // devices unlock premium too (independent of Apple Family Sharing).
+        switch newState {
+        case .active(let expires, _):
+            HouseholdManager.shared.publishPremium(until: expires ?? Date(timeIntervalSince1970: 4_102_444_800)) // lifetime → year 2100
+        case .inTrial(let expires):
+            HouseholdManager.shared.publishPremium(until: expires)
+        default:
+            break
+        }
     }
 
     /// Lifetime > active > trial > expired > notSubscribed > unknown.
