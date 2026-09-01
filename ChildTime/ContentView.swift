@@ -76,6 +76,9 @@ struct ContentView: View {
                 // launch splash — matching how the real fullScreenCover attaches.
                 DelayedPartyPreview()
             }
+            if UserDefaults.standard.bool(forKey: "WhatsNewPreview") {
+                WhatsNewView(onDone: {})
+            }
         }
         // Any scanned/typed family-or-child code → detect type + confirm first.
         .fullScreenCover(isPresented: $joinCoord.active) {
