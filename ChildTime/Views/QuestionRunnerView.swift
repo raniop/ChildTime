@@ -1208,7 +1208,7 @@ struct QuestionRunnerView: View {
             hintUsed: usedHintThisQuestion,
             grantsScreenTime: earnsTime,
             cycleMultiplier: isBonusArena ? 2 : 1,   // 💫 arena: double minutes
-            affectsAdaptive: !isBonusArena
+            affectsAdaptive: !isBonusArena && !isBonusQuestion
         )
         earnedThisSession += earned
         // 🌈 Topic balance — celebrate the variety bonus, or nudge (positively)
@@ -1359,7 +1359,10 @@ struct QuestionRunnerView: View {
             minutesPerCorrect: settings.minutesPerCorrectAnswer,
             hintUsed: usedHintThisQuestion,
             grantsScreenTime: purpose.grantsScreenTime,
-            affectsAdaptive: !isBonusArena   // arena misses never lower the level
+            // Neither the arena NOR a 💫 bonus question (deliberately extra-hard)
+            // may lower the adaptive level — a hard-by-design miss isn't a signal
+            // the kid is over-leveled.
+            affectsAdaptive: !isBonusArena && !isBonusQuestion
         )
         LearningHistoryStore.shared.recordAnswer(
             topic: q.topic, correct: false, responseMs: 0,

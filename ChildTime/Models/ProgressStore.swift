@@ -935,25 +935,37 @@ final class ProgressStore: ObservableObject {
         return result
     }
 
-    /// Returns the amount actually granted (may be less than `amount` if
-    /// the cap clips it).
+    /// Grant earned play-minutes, respecting the daily cap. What fits under
+    /// today's cap becomes playable now; the OVERFLOW is banked for tomorrow
+    /// (up to `maxCarryOverMinutes`), so the parent dashboard's promise —
+    /// "מה שירוויח עכשיו נשמר למחר" — is actually kept for regular earning,
+    /// not just for wheel/chest bonuses. Returns the amount added to TODAY's
+    /// playable pool (0 when the cap is full — the rest is banked).
     @discardableResult
     func grantMinutesCapped(_ amount: Int) -> Int {
         guard amount > 0 else { return 0 }
         _ = minutesEarnedTodayRespectingDate()
-        let allowed: Int = {
-            let cap = dailyCap
-            guard cap.enabled else { return amount }
-            let remaining = max(0, cap.max - minutesEarnedToday)
-            return min(amount, remaining)
-        }()
-        guard allowed > 0 else { return 0 }
-        pendingMinutes += allowed
-        minutesEarnedToday += allowed
-        if dailyEarnedDate == nil {
-            dailyEarnedDate = Calendar.current.startOfDay(for: Date())
+        let cap = dailyCap
+        guard cap.enabled else {
+            pendingMinutes += amount
+            return amount
         }
-        return allowed
+        let remaining = max(0, cap.max - minutesEarnedToday)
+        let toToday = min(amount, remaining)
+        if toToday > 0 {
+            pendingMinutes += toToday
+            minutesEarnedToday += toToday
+            if dailyEarnedDate == nil {
+                dailyEarnedDate = Calendar.current.startOfDay(for: Date())
+            }
+        }
+        // Bank the overflow for tomorrow — capped, like grantBonusMinutes.
+        let overflow = amount - toToday
+        if overflow > 0 {
+            let bankRoom = max(0, Self.maxCarryOverMinutes - carryOverMinutes)
+            if bankRoom > 0 { carryOverMinutes += min(overflow, bankRoom) }
+        }
+        return toToday
     }
 
     /// Seed pleasant demo numbers for App Store screenshots (DEMO_SCREEN only).
