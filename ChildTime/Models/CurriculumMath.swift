@@ -119,7 +119,9 @@ enum CurriculumMath {
         let answer = "\(eaten)/\(parts)"
         var distractors = Set<String>()
         for p in [2, 3, 4, 5, 6, 8] {
-            for e in 1..<p where "\(e)/\(p)" != answer { distractors.insert("\(e)/\(p)") }
+            // Compare VALUES, not strings — "2/4" is the same fraction as "1/2"
+            // and used to slip in as a second correct answer.
+            for e in 1..<p where e * parts != eaten * p { distractors.insert("\(e)/\(p)") }
         }
         return mcq(prompt: "🍕 חִלַּקְנוּ פִּיצָה לְ־\(parts) חֲלָקִים שָׁוִים וְאָכַלְנוּ \(eaten). אֵיזֶה שֶׁבֶר אָכַלְנוּ?",
                    answer: answer,
@@ -244,8 +246,10 @@ enum CurriculumMath {
     private static func grade6(_ d: Difficulty) -> Question {
         switch Int.random(in: 0...3) {
         case 0:
+            // Only pairs whose result is WHOLE — 150×25% used to show "37"
+            // (37.5 truncated), failing kids who computed correctly.
             let base = [60, 120, 150, 200, 300].randomElement()!
-            let pct = [10, 20, 25, 30, 50, 75].randomElement()!
+            let pct = [10, 20, 25, 30, 50, 75].filter { base * $0 % 100 == 0 }.randomElement()!
             return numericMCQ(prompt: "כַּמָּה הֵם \(pct)% מִ־\(base)?", answer: base * pct / 100)
         case 1:  return orderOfOperations(hard: d == .hard)
         case 2:  return ratio()
@@ -267,7 +271,10 @@ enum CurriculumMath {
     private static func ratio() -> Question {
         let unit = Int.random(in: 2...6)
         let x = Int.random(in: 2...5), y = Int.random(in: 2...5)
-        guard x != y else { return ratio() }
+        // x:y must already be fully reduced — (2,4) used to present "2:4" as the
+        // "reduced" answer while the real reduction 1:2 wasn't even offered.
+        func gcd(_ a: Int, _ b: Int) -> Int { b == 0 ? a : gcd(b, a % b) }
+        guard x != y, gcd(x, y) == 1 else { return ratio() }
         let answer = "\(x):\(y)"
         let distractors = ["\(y):\(x)", "\(x * unit):\(y)", "\(x + 1):\(y)"].filter { $0 != answer }
         return mcq(prompt: "בַּכִּתָּה \(x * unit) בָּנִים וְ־\(y * unit) בָּנוֹת. מָה הַיַּחַס בֵּין בָּנִים לְבָנוֹת בְּצוּרָה מְצֻמְצֶמֶת?",

@@ -108,7 +108,7 @@ enum QuestionBanks {
         BankQuestion(prompt: "🫓\nבְּאֵיזֶה חַג אוֹכְלִים מַצּוֹת?", correctAnswer: "פֶּסַח", distractors: ["חֲנוּכָּה", "רֹאשׁ הַשָּׁנָה", "שָׁבוּעוֹת"]),
         BankQuestion(prompt: "🎭\nבְּאֵיזֶה חַג מִתְחַפְּשִׂים?", correctAnswer: "פּוּרִים", distractors: ["סוּכּוֹת", "חֲנוּכָּה", "פֶּסַח"]),
         BankQuestion(prompt: "🌳\nבְּאֵיזֶה חַג שׁוֹתְלִים עֵצִים?", correctAnswer: "ט\"וּ בִּשְׁבָט", distractors: ["יוֹם הָעַצְמָאוּת", "שָׁבוּעוֹת", "ל\"ג בָּעוֹמֶר"]),
-        BankQuestion(prompt: "🇮🇱\nאֵיךְ קוֹרְאִים לַדֶּגֶל שֶׁל יִשְׂרָאֵל?", correctAnswer: "מָגֵן דָּוִד", distractors: ["סַהַר", "צְלָב", "כּוֹכָב"]),
+        BankQuestion(prompt: "🇮🇱\nמָה הַסֵּמֶל שֶׁבְּמֶרְכַּז דֶּגֶל יִשְׂרָאֵל?", correctAnswer: "מָגֵן דָּוִד", distractors: ["סַהַר", "צְלָב", "כּוֹכָב"]),
         BankQuestion(prompt: "📜\nמָה כָּתוּב בִּמְגִילַּת הָעַצְמָאוּת?", correctAnswer: "הֲקָמַת מְדִינַת יִשְׂרָאֵל", distractors: ["סִיפּוּר פֶּסַח", "מַתְכּוֹן", "שִׁיר"]),
         BankQuestion(prompt: "👑\nמִי הָיָה הַמֶּלֶךְ הָרִאשׁוֹן שֶׁל יִשְׂרָאֵל?", correctAnswer: "שָׁאוּל", distractors: ["דָּוִד", "שְׁלֹמֹה", "אַבְרָהָם"]),
         BankQuestion(prompt: "🏛️\nמִי בָּנָה אֶת בֵּית הַמִּקְדָּשׁ הָרִאשׁוֹן?", correctAnswer: "שְׁלֹמֹה", distractors: ["דָּוִד", "מֹשֶׁה", "שָׁאוּל"]),
