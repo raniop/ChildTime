@@ -113,10 +113,18 @@ final class RemoteSyncManager: ObservableObject {
         #if canImport(FirebaseFirestore)
         for (_, listener) in listeners { listener.remove() }
         listeners.removeAll()
+        // Also tear down the child-DOC listeners — stop() only removed the
+        // state-listeners, so a device that left a family kept listening to its
+        // child docs and start() re-added a SECOND listener per child (leak +
+        // double command-application attempts).
+        for (_, listener) in childDocListeners { listener.remove() }
+        childDocListeners.removeAll()
         #endif
         isActive = false
         remoteSnapshots = [:]
         resetPending = [:]
+        pendingAdjustments = [:]
+        pendingGifts = [:]
     }
 
     /// Force-write the current active profile's snapshot now (used after

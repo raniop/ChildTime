@@ -31,6 +31,10 @@ final class SubscriptionManager: ObservableObject {
     @Published private(set) var subscriptionState: SubscriptionState = .unknown
     @Published private(set) var isLoadingProducts = false
     @Published private(set) var isPurchasing = false
+    /// StoreKit intro-offer eligibility for the yearly plan. The paywall must not
+    /// promise "7 ימים חינם" to a returning/lapsed subscriber who'd be charged
+    /// immediately (dishonest, and a Kids-Category concern).
+    @Published private(set) var yearlyIntroEligible = false
     @Published var lastError: String?
 
     enum SubscriptionState: Equatable {
@@ -79,6 +83,9 @@ final class SubscriptionManager: ObservableObject {
             // Sort: monthly → yearly → lifetime (matches the paywall layout)
             products = fetched.sorted { lhs, rhs in
                 Self.sortKey(for: lhs.id) < Self.sortKey(for: rhs.id)
+            }
+            if let yearly = products.first(where: { $0.id == Self.yearlyID }) {
+                yearlyIntroEligible = await yearly.subscription?.isEligibleForIntroOffer ?? false
             }
             lastError = nil
         } catch {

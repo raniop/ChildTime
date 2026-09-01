@@ -237,7 +237,7 @@ struct PaywallView: View {
                     Text(product.pricePerPeriod)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
-                    if isYearly {
+                    if isYearly, subs.yearlyIntroEligible {
                         Text("כולל ניסיון 7 ימים חינם")
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(AppColor.starGold)
@@ -316,7 +316,7 @@ struct PaywallView: View {
 
     private var primaryCTA: some View {
         let isYearlySelected = (selectedID == SubscriptionManager.yearlyID)
-        let cta = isYearlySelected ? "התחל ניסיון 7 ימים חינם" : "המשך לתשלום"
+        let cta = (isYearlySelected && subs.yearlyIntroEligible) ? "התחל ניסיון 7 ימים חינם" : "המשך לתשלום"
         let isDisabled = subs.products.isEmpty || subs.isPurchasing
 
         return VStack(spacing: 6) {
@@ -341,7 +341,9 @@ struct PaywallView: View {
 
             if isYearlySelected,
                let yearly = subs.products.first(where: { $0.id == SubscriptionManager.yearlyID }) {
-                Text("בתום הניסיון: \(yearly.displayPrice) / שנה — ניתן לבטל בכל עת בהגדרות Apple ID")
+                Text(subs.yearlyIntroEligible
+                     ? "בתום הניסיון: \(yearly.displayPrice) / שנה — ניתן לבטל בכל עת בהגדרות Apple ID"
+                     : "\(yearly.displayPrice) / שנה — ניתן לבטל בכל עת בהגדרות Apple ID")
                     .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
