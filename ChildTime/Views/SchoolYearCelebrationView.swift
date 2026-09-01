@@ -207,7 +207,11 @@ private struct RisingEmoji: View {
 
 enum SchoolYearCelebration {
     /// The school year already celebrated (or acknowledged) for a profile.
-    private static func key(_ id: UUID) -> String { "schoolYear.celebrated.\(id.uuidString)" }
+    /// ".v2" — Sep 2026: the party was redesigned on the morning of Sep 1,
+    /// AFTER some kids had already seen (and burned) the old one. The one-time
+    /// migration below re-shows the new design for exactly those kids.
+    private static func key(_ id: UUID) -> String { "schoolYear.celebrated.v2.\(id.uuidString)" }
+    private static func legacyKey(_ id: UUID) -> String { "schoolYear.celebrated.\(id.uuidString)" }
 
     /// Whether to show the party for this profile now — and keep the stored
     /// year in sync. First sighting of a profile just records the current year
@@ -219,6 +223,19 @@ enum SchoolYearCelebration {
         let current = Profile.schoolYear(for: now)
         let d = UserDefaults.standard
         guard let stored = d.object(forKey: key(profile.id)) as? Int else {
+            // MIGRATION (kill after Oct 2026): a legacy record that already
+            // equals the CURRENT school year means this device celebrated on
+            // the morning of Sep 1 2026 with the old design — re-run the
+            // (new) party once. Any other legacy value carries over normally.
+            let comps = Calendar.current.dateComponents([.year, .month], from: now)
+            if let legacy = d.object(forKey: legacyKey(profile.id)) as? Int {
+                d.set(current, forKey: key(profile.id))
+                if legacy == current, comps.year == 2026, comps.month == 9 || comps.month == 10 {
+                    return true   // Rani: everyone who saw this morning's party — reset
+                }
+                if current > legacy, comps.month == 9 || comps.month == 10 { return true }
+                return false
+            }
             d.set(current, forKey: key(profile.id))
             return false
         }
