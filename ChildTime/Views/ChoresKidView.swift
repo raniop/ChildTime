@@ -16,6 +16,18 @@ struct ChoresKidView: View {
     /// 💰 family policy — may the kid earn money on chores, or only 🎮 minutes?
     private var moneyEnabled: Bool { householdMgr.choresMoneyEnabled }
 
+    /// 👦👧 Gendered accent: the action button + the "done" trophy card take the
+    /// child's own colours — blue-teal for a boy, pink-purple for a girl (Rani).
+    private var accentColors: [Color] {
+        switch profiles.active?.gender {
+        case .girl: return [Color(hex: "FF5FA2"), Color(hex: "B15EFF")]
+        case .boy:  return [Color(hex: "3A86FF"), Color(hex: "00C2CB")]
+        default:    return [Color(hex: "06D6A0"), Color(hex: "48BFE3")]
+        }
+    }
+    /// Single accent (for tints) — the first stop of the gendered pair.
+    private var accentColor: Color { accentColors.first ?? Color(hex: "06D6A0") }
+
     /// The chore the kid just tapped "עשיתי" on — reward picker is showing.
     @State private var choosingFor: Chore?
     /// Reward picked → offering an optional 📸 proof photo before sending.
@@ -294,7 +306,7 @@ struct ChoresKidView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
                     .background(
-                        LinearGradient(colors: [Color(hex: "06D6A0"), Color(hex: "48BFE3")],
+                        LinearGradient(colors: accentColors,
                                        startPoint: .leading, endPoint: .trailing),
                         in: Capsule()
                     )
@@ -309,14 +321,16 @@ struct ChoresKidView: View {
         )
     }
 
-    /// 🎉 "בוצעו היום" — a compact, celebratory card for a chore already handled
-    /// today: sent, waiting for a parent, or approved. Clear status, no button.
+    /// 🎉 "בוצעו היום" card. APPROVED chores become a gendered "champion" card —
+    /// the child's own colour, a 👑, and a personal cheer ("אלוף!" / "אלופה!").
+    /// Still-in-flight ones (sent / waiting for a parent) keep a plain status so
+    /// the crown means "really done", not "maybe".
     @ViewBuilder
     private func doneCard(_ chore: Chore) -> some View {
         let approved = chore.isDaily && chore.approvedToday
         let waiting = !approved && !sending.contains(chore.id)
         VStack(spacing: 6) {
-            Text(chore.emoji).font(.system(size: 30)).opacity(approved ? 0.95 : 1)
+            Text(approved ? "👑" : chore.emoji).font(.system(size: 30))
             Text(chore.title)
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
@@ -327,16 +341,21 @@ struct ChoresKidView: View {
             } else if waiting {
                 statusCapsule("מְחַכִּים לְאִשּׁוּר 🕐", background: Color(hex: "F4A261").opacity(0.55))
             } else {
-                statusCapsule(Gendered.g("סִיַּמְתָּ! ✅", "סִיַּמְתְּ! ✅"),
-                              background: Color(hex: "06D6A0").opacity(0.55))
+                Text(Gendered.g("כָּל הַכָּבוֹד, אַלּוּף! 🎉", "כָּל הַכָּבוֹד, אַלּוּפָה! 🎉"))
+                    .font(.system(size: 11.5, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.6)
             }
         }
         .padding(AppSpacing.sm)
         .frame(maxWidth: .infinity)
-        .background(.white.opacity(0.09), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        // Approved → the child's gendered colour fills the card; otherwise the
+        // neutral translucent look.
+        .background(approved ? accentColor.opacity(0.28) : .white.opacity(0.09),
+                    in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(.white.opacity(0.14), lineWidth: 1)
+                .stroke(approved ? accentColor.opacity(0.6) : .white.opacity(0.14), lineWidth: 1)
         )
     }
 

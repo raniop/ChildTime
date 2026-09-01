@@ -105,6 +105,30 @@ final class ChoreStore: ObservableObject {
 
     private init() {}
 
+    /// Seed a mix of chore states for a DEMO_SCREEN screenshot run (no Firestore):
+    /// a few to-do, one waiting-for-approval, one approved (the 👑 champion card).
+    func seedDemo(childID: UUID) {
+        let cid = childID.uuidString
+        let now = Date().timeIntervalSince1970
+        var docs: [Chore] = Self.catalog.dropFirst(3).map { p in
+            Chore(id: "\(p.key)_\(cid)", childID: cid, title: p.title, emoji: p.emoji,
+                  rewardMinutes: p.minutes, rewardCoins: p.coins, isDaily: true,
+                  timesPerDay: p.timesPerDay, createdAt: 0, markedDoneAt: nil, chosenReward: nil,
+                  lastApprovedAt: nil, photoData: nil, approvedTodayCount: 0, approvedTodayAt: nil,
+                  archived: true)
+        }
+        docs.append(Chore(id: "demo-approved_\(cid)", childID: cid, title: "לְהַשְׁקוֹת אֶת הָעֲצִיצִים",
+                          emoji: "🪴", rewardMinutes: 10, rewardCoins: 5, isDaily: true, timesPerDay: 1,
+                          createdAt: 1, markedDoneAt: nil, chosenReward: nil, lastApprovedAt: now,
+                          photoData: nil, approvedTodayCount: 1, approvedTodayAt: now, archived: false))
+        docs.append(Chore(id: "demo-waiting_\(cid)", childID: cid, title: "לְטַאטֵא אֶת הַחֶדֶר",
+                          emoji: "🧹", rewardMinutes: 20, rewardCoins: 10, isDaily: true, timesPerDay: 1,
+                          createdAt: 2, markedDoneAt: now, chosenReward: "minutes", lastApprovedAt: nil,
+                          photoData: nil, approvedTodayCount: 0, approvedTodayAt: nil, archived: false))
+        self.chores = docs
+        self.stats = [cid: (minutes: 45, coins: 30, paid: 0)]
+    }
+
     /// Idempotent — (re)attach the listener to the current household. Views call
     /// this on appear; it re-binds automatically if the family changed.
     ///

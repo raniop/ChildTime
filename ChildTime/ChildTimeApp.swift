@@ -296,6 +296,15 @@ struct ChildTimeApp: App {
         case "leaderboard": LeaderboardView()   // DEMO_SCREEN=leaderboard
         case "livegame": LiveGameDemoHost()      // DEMO_SCREEN=livegame — live quiz setup/flow
         case "gameinvite": WorldMapView().onAppear { LiveGameManager.shared.seedDemoInvite() }  // invite banner
+        case "choreskid":                                  // DEMO_SCREEN=choreskid (+ DEMO_GENDER=boy)
+            ChoresKidView(onClose: {})
+                .onAppear {
+                    if ProcessInfo.processInfo.environment["DEMO_GENDER"] == "boy",
+                       let boy = ProfileStore.shared.profiles.first(where: { $0.gender == .boy }) {
+                        ProfileStore.shared.setActive(boy)
+                    }
+                    if let id = ProfileStore.shared.activeID { ChoreStore.shared.seedDemo(childID: id) }
+                }
         case "devicecontrols": ChildDeviceControlsView()   // parent controls on child device
         case "joinguard":                                  // parent-scans-child-code block dialog
             JoinConfirmView().environmentObject(ParentSettings.shared)
