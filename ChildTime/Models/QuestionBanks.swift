@@ -72,7 +72,7 @@ enum QuestionBanks {
         BankQuestion(prompt: "מָה דּוֹמֶה?\n🍎 🍌 🍇 🐶", correctAnswer: "🐶 לֹא דּוֹמֶה", distractors: ["🍎 לֹא דּוֹמֶה", "🍌 לֹא דּוֹמֶה", "🍇 לֹא דּוֹמֶה"], grades: 0...2),
         BankQuestion(prompt: "אִם הַיּוֹם שְׁלִישִׁי, מָה הָיָה אֶתְמוֹל?", correctAnswer: "שֵׁנִי", distractors: ["רְבִיעִי", "רִאשׁוֹן", "חֲמִישִׁי"], grades: 1...3),
         BankQuestion(prompt: "אִם 5 צִיפּוֹרִים עַל עֵץ וְ-2 עָפוּ, כַּמָּה נִשְׁאֲרוּ?", correctAnswer: "3", distractors: ["7", "2", "4"], grades: 0...2),
-        BankQuestion(prompt: "מָה בָּא אַחֲרֵי?\nA, B, C, ?", correctAnswer: "D", distractors: ["E", "A", "C"], grades: 2...4),
+        BankQuestion(prompt: "מָה בָּא אַחֲרֵי?\nA, B, C, ?", correctAnswer: "D", distractors: ["E", "A", "C"], grades: 3...5),
         BankQuestion(prompt: "בְּאֵיזוֹ צוּרָה אֵין פִּינּוֹת?", correctAnswer: "⚪", distractors: ["🔺", "⬛", "⬢"], grades: 0...2)
     ]
 
@@ -98,7 +98,7 @@ enum QuestionBanks {
         BankQuestion(prompt: "🌊\nמָה גּוֹרֵם לְגַלִּים בַּיָּם?", correctAnswer: "רוּחַ", distractors: ["דָּגִים", "הַשֶּׁמֶשׁ", "אֲבָנִים"], grades: 2...4),
         BankQuestion(prompt: "🦷\nאֵיךְ נִקְרָא הַחוֹמֶר הַקָּשֶׁה שֶׁמְּכַסֶּה אֶת הַשֵּׁן?", correctAnswer: "אֱמַייְל", distractors: ["סוּכָּר", "סִיד", "בַּרְזֶל"], grades: 4...6),
         BankQuestion(prompt: "🚀\nאֵיךְ נִקְרָא הַכּוֹכָב הָאָדוֹם?", correctAnswer: "מַאְדִּים", distractors: ["צֶדֶק", "שַׁבְּתַאי", "נוֹגַהּ"], grades: 4...6),
-        BankQuestion(prompt: "🧠\nאֵיזֶה אֵיבָר עוֹזֵר לָנוּ לַחְשׁוֹב?", correctAnswer: "הַמּוֹחַ", distractors: ["הַלֵּב", "הַקֵּבָה", "הָרֵאוֹת"], grades: 2...4)
+        BankQuestion(prompt: "🧠\nאֵיזֶה אֵיבָר עוֹזֵר לָנוּ לַחְשׁוֹב?", correctAnswer: "הַמּוֹחַ", distractors: ["הַלֵּב", "הַקֵּבָה", "הָרֵאוֹת"], grades: 0...2)
     ]
 
     // MARK: - היסטוריה

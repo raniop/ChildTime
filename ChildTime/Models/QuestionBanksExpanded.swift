@@ -134,7 +134,7 @@ enum QuestionBanksExpanded {
         BankQuestion(prompt: "100, 90, 80, ?", correctAnswer: "70", distractors: ["75", "60", "85"], grades: 2...4),
         BankQuestion(prompt: "1, 3, 5, 7, ?", correctAnswer: "9", distractors: ["8", "10", "11"], grades: 2...4),
         BankQuestion(prompt: "10, 20, 40, 80, ?", correctAnswer: "160", distractors: ["100", "120", "200"], grades: 4...6),
-        BankQuestion(prompt: "A, C, E, G, ?", correctAnswer: "I", distractors: ["H", "J", "K"], grades: 2...4),
+        BankQuestion(prompt: "A, C, E, G, ?", correctAnswer: "I", distractors: ["H", "J", "K"], grades: 3...5),
         BankQuestion(prompt: "ב, ד, ו, ?", correctAnswer: "ח", distractors: ["ז", "ט", "י"], grades: 2...4),
         BankQuestion(prompt: "🔴🔵🔴🔵🔴?", correctAnswer: "🔵", distractors: ["🔴", "🟢", "🟡"], grades: 0...2),
 

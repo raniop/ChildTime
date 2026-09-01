@@ -117,11 +117,19 @@ enum CurriculumMath {
         let parts = [2, 3, 4].randomElement()!
         let eaten = parts == 2 ? 1 : Int.random(in: 1..<parts)
         let answer = "\(eaten)/\(parts)"
-        var distractors = Set<String>()
-        for p in [2, 3, 4, 5, 6, 8] {
-            // Compare VALUES, not strings — "2/4" is the same fraction as "1/2"
-            // and used to slip in as a second correct answer.
-            for e in 1..<p where e * parts != eaten * p { distractors.insert("\(e)/\(p)") }
+        // Compare VALUES, not strings — "2/4" is the same fraction as "1/2" and
+        // used to slip in as a second correct answer; the same rule also keeps
+        // two equal-valued distractors ("1/3" and "2/6") from appearing together.
+        var distractors: [String] = []
+        var seenValues: Set<Int> = [eaten * 840 / parts]   // 840 = lcm(2...8)
+        for p in [2, 3, 4, 5, 6, 8].shuffled() {
+            for e in (1..<p).shuffled() {
+                let value = e * 840 / p
+                if !seenValues.contains(value) {
+                    seenValues.insert(value)
+                    distractors.append("\(e)/\(p)")
+                }
+            }
         }
         return mcq(prompt: "🍕 חִלַּקְנוּ פִּיצָה לְ־\(parts) חֲלָקִים שָׁוִים וְאָכַלְנוּ \(eaten). אֵיזֶה שֶׁבֶר אָכַלְנוּ?",
                    answer: answer,

@@ -44,9 +44,9 @@ enum BonusQuestionBank {
 
     static let hebrew: [BankQuestion] = [
         BankQuestion(prompt: "מָה צוּרַת הָרַבִּים שֶׁל \"אֲרִי\"?", correctAnswer: "אֲרָיוֹת", distractors: ["אֲרִיִּים", "אוֹרִים", "אֲרָיִים"], tier: .hard, grades: 1...3),
-        BankQuestion(prompt: "מָה צוּרַת הָרַבִּים שֶׁל \"חַלּוֹן\"?", correctAnswer: "חַלּוֹנוֹת", distractors: ["חַלּוֹנִים", "חֲלוֹנוֹת", "חַלּוֹנֵי"], tier: .hard, grades: 1...3),
+        BankQuestion(prompt: "מָה צוּרַת הָרַבִּים שֶׁל \"חַלּוֹן\"?", correctAnswer: "חַלּוֹנוֹת", distractors: ["חַלּוֹנִים", "חֲלוֹנוֹת", "חַלּוֹנֵי"], tier: .hard, grades: 1...2),
         BankQuestion(prompt: "מָה הַהֵפֶךְ שֶׁל \"נָדִיב\"?", correctAnswer: "קַמְצָן", distractors: ["עָשִׁיר", "חָזָק", "עָצוּב"], tier: .hard, grades: 2...4),
-        BankQuestion(prompt: "אֵיזוֹ מִלָּה קְרוֹבָה בְּמַשְׁמָעוּת לְ\"שָׂמֵחַ\"?", correctAnswer: "עַלִּיז", distractors: ["עָיֵף", "רָגוּעַ", "מֻפְתָּע"], tier: .hard, grades: 2...4),
+        BankQuestion(prompt: "אֵיזוֹ מִלָּה קְרוֹבָה בְּמַשְׁמָעוּת לְ\"שָׂמֵחַ\"?", correctAnswer: "עַלִּיז", distractors: ["עָיֵף", "רָגוּעַ", "מֻפְתָּע"], tier: .hard, grades: 2...3),
         BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "מִצְטַעֵר", distractors: ["מִסְטַעֵר", "מִצְתַּעֵר", "מִזְטַעֵר"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "הִתְרַגַּשְׁתִּי", distractors: ["הִתְרַגַּשְׁתִי", "הִתְרַגָּשְׁתִּי", "הִתְרַקַּשְׁתִּי"], tier: .hard, grades: 4...6),
         BankQuestion(prompt: "מִי אָמַר? \"הַצִּפּוֹר שָׁרָה שִׁיר יָפֶה\" — מָה הַנּוֹשֵׂא בַּמִּשְׁפָּט?", correctAnswer: "הַצִּפּוֹר", distractors: ["שָׁרָה", "שִׁיר", "יָפֶה"], tier: .hard, grades: 4...6),
@@ -67,7 +67,7 @@ enum BonusQuestionBank {
         BankQuestion(prompt: "שָׁעוֹן מַרְאֶה 3:00. מָה תַּרְאֶה הַשָּׁעָה בְּעוֹד 50 דַּקּוֹת?", correctAnswer: "3:50", distractors: ["4:00", "3:40", "4:10"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "אֲנִי מִסְפָּר. אִם תַּכְפִּילוּ אוֹתִי בְּ־3 וְתוֹסִיפוּ 1 תְּקַבְּלוּ 22. מִי אֲנִי?", correctAnswer: "7", distractors: ["6", "8", "9"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "מָה לֹא שַׁיָּךְ לַקְּבוּצָה: מְשֻׁלָּשׁ, רִבּוּעַ, עִגּוּל, מַלְבֵּן?", correctAnswer: "עִגּוּל", distractors: ["מְשֻׁלָּשׁ", "רִבּוּעַ", "מַלְבֵּן"], tier: .hard, grades: 1...3),
-        BankQuestion(prompt: "אַבָּא שֶׁל דָּנָה גָּדוֹל מִסַּבָּא שֶׁל דָּנָה?", correctAnswer: "לֹא — סַבָּא הוּא אַבָּא שֶׁל אַבָּא", distractors: ["כֵּן, תָּמִיד", "הֵם בְּאוֹתוֹ גִּיל", "אִי אֶפְשָׁר לָדַעַת בִּכְלָל"], tier: .hard, grades: 1...3),
+        BankQuestion(prompt: "הַאִם אַבָּא שֶׁל דָּנָה צָעִיר מִסַּבָּא שֶׁל דָּנָה מִצַּד אַבָּא?", correctAnswer: "לֹא — סַבָּא הוּא אַבָּא שֶׁל אַבָּא", distractors: ["כֵּן, תָּמִיד", "הֵם בְּאוֹתוֹ גִּיל", "אִי אֶפְשָׁר לָדַעַת בִּכְלָל"], tier: .hard, grades: 1...3),
     ]
 
     // MARK: - מדע
@@ -96,7 +96,7 @@ enum BonusQuestionBank {
         BankQuestion(prompt: "מִי הִמְצִיא אֶת הַנּוּרָה הַחַשְׁמַלִּית?", correctAnswer: "תּוֹמָס אֶדִיסוֹן", distractors: ["אַלְבֶּרְט אַיְנְשְׁטַיְן", "אִיסָק נְיוּטוֹן", "לֵאוֹנַרְדּוֹ דָּה וִינְצִ'י"], tier: .hard, grades: 5...6),
         BankQuestion(prompt: "אֵיזוֹ עִיר עַתִּיקָה נִקְבְּרָה תַּחַת הִתְפָּרְצוּת הַר גַּעַשׁ?", correctAnswer: "פּוֹמְפֵּיִי", distractors: ["אַתּוּנָה", "רוֹמָא", "יְרוּשָׁלַיִם"], tier: .hard, grades: 5...6),
         BankQuestion(prompt: "מִי צִיֵּר אֶת הַמּוֹנָה לִיזָה?", correctAnswer: "לֵאוֹנַרְדּוֹ דָּה וִינְצִ'י", distractors: ["פִּיקָאסוֹ", "וָן גּוֹךְ", "מִיכֶלְאַנְגֶ'לוֹ"], tier: .hard, grades: 4...6),
-        BankQuestion(prompt: "עַל מָה מְסַפֵּר חַג הַחֲנֻכָּה?", correctAnswer: "נִצְחוֹן הַמַּכַּבִּים וְנֵס פַּךְ הַשֶּׁמֶן", distractors: ["יְצִיאַת מִצְרַיִם", "הַצָּלַת הַיְּהוּדִים בְּפָרַס", "קַבָּלַת הַתּוֹרָה"], tier: .hard, grades: 2...4),
+        BankQuestion(prompt: "עַל מָה מְסַפֵּר חַג הַחֲנֻכָּה?", correctAnswer: "נִצְחוֹן הַמַּכַּבִּים וְנֵס פַּךְ הַשֶּׁמֶן", distractors: ["יְצִיאַת מִצְרַיִם", "הַצָּלַת הַיְּהוּדִים בְּפָרַס", "קַבָּלַת הַתּוֹרָה"], tier: .hard, grades: 0...2),
         BankQuestion(prompt: "מִי הָיְתָה רֹאשׁ הַמֶּמְשָׁלָה הָאִשָּׁה הָרִאשׁוֹנָה שֶׁל יִשְׂרָאֵל?", correctAnswer: "גּוֹלְדָּה מֵאִיר", distractors: ["צִפִּי לִבְנִי", "שׁוּלַמִּית אַלּוֹנִי", "מִרְיָם הַנְּבִיאָה"], tier: .hard, grades: 4...6),
     ]
 
@@ -121,7 +121,7 @@ enum BonusQuestionBank {
         BankQuestion(prompt: "צַעֲצוּעַ עוֹלֶה 45 שְׁקָלִים. שִׁלַּמְתֶּם בְּשֵׁטָר שֶׁל 50. כַּמָּה עֹדֶף תְּקַבְּלוּ?", correctAnswer: "5 שְׁקָלִים", distractors: ["10 שְׁקָלִים", "15 שְׁקָלִים", "45 שְׁקָלִים"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "גְּלִידָה עוֹלָה 12 שְׁקָלִים. כַּמָּה יַעֲלוּ 3 גְּלִידוֹת?", correctAnswer: "36 שְׁקָלִים", distractors: ["24 שְׁקָלִים", "30 שְׁקָלִים", "42 שְׁקָלִים"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "יֵשׁ לָכֶם 100 שְׁקָלִים. קְנִיתֶם סֵפֶר בְּ־35 וּמִשְׂחָק בְּ־40. כַּמָּה נִשְׁאַר?", correctAnswer: "25 שְׁקָלִים", distractors: ["35 שְׁקָלִים", "15 שְׁקָלִים", "30 שְׁקָלִים"], tier: .hard, grades: 3...5),
-        BankQuestion(prompt: "מָה זֶה \"חִסָּכוֹן\"?", correctAnswer: "כֶּסֶף שֶׁשּׁוֹמְרִים לֶעָתִיד בִּמְקוֹם לְבַזְבֵּז", distractors: ["כֶּסֶף שֶׁמּוֹצִיאִים מַהֵר", "מַתָּנָה מֵחֲבֵרִים", "סוּג שֶׁל מַטְבֵּעַ"], tier: .hard, grades: 2...4),
+        BankQuestion(prompt: "מָה זֶה \"חִסָּכוֹן\"?", correctAnswer: "כֶּסֶף שֶׁשּׁוֹמְרִים לֶעָתִיד בִּמְקוֹם לְבַזְבֵּז", distractors: ["כֶּסֶף שֶׁמּוֹצִיאִים מַהֵר", "מַתָּנָה מֵחֲבֵרִים", "סוּג שֶׁל מַטְבֵּעַ"], tier: .hard, grades: 0...2),
         BankQuestion(prompt: "אִם חוֹסְכִים 10 שְׁקָלִים כָּל שָׁבוּעַ, כַּמָּה יִהְיֶה אַחֲרֵי חֹדֶשׁ (4 שָׁבוּעוֹת)?", correctAnswer: "40 שְׁקָלִים", distractors: ["10 שְׁקָלִים", "30 שְׁקָלִים", "50 שְׁקָלִים"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "מָה זֶה \"מְחִיר מִבְצָע\"?", correctAnswer: "מְחִיר זוֹל מֵהָרָגִיל לִזְמַן מֻגְבָּל", distractors: ["הַמְּחִיר הַיָּקָר בְּיוֹתֵר", "מְחִיר שֶׁל מִבְצָע צְבָאִי", "מְחִיר שֶׁמְּשַׁלְּמִים רַק בַּקַּיִץ"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "חֻלְצָה עָלְתָה 60 שְׁקָלִים וְעַכְשָׁיו בַּחֲצִי מְחִיר. כַּמָּה הִיא עוֹלָה?", correctAnswer: "30 שְׁקָלִים", distractors: ["20 שְׁקָלִים", "40 שְׁקָלִים", "55 שְׁקָלִים"], tier: .hard, grades: 2...4),

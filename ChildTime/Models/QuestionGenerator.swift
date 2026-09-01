@@ -24,24 +24,31 @@ struct QuestionGenerator {
     /// as a two-step expression. Falls back to a regular hard question if the
     /// pool for this topic is exhausted this session.
     static func generateBonus(topic: Topic, grade: Int? = nil) -> Question {
-        if topic == .math { return makeBonusMath() }
+        if topic == .math { return makeBonusMath(grade: grade) }
         var pool = BonusQuestionBank.pool(for: topic)
         // 💫 Bonus stays HARD but age-fair: with the whole bank grade-tagged,
         // filter to the child's window (nearest items when the window is thin).
         if let g = grade {
             let inWindow = pool.filter { $0.grades.contains(g) }
-            if inWindow.count >= 3 {
+            // Threshold 8 (not 3): a 3-item pool is smaller than QuestionMemory's
+            // recency window, which killed the anti-repeat — the same three
+            // bonus questions returned every session. Top up with the nearest
+            // windows instead. shuffled() first so equal-distance ties don't
+            // always pick the same declaration-order items.
+            if inWindow.count >= 8 {
                 pool = inWindow
             } else {
-                pool = Array(pool.sorted {
+                pool = Array(pool.shuffled().sorted {
                     let d0 = $0.grades.contains(g) ? 0 : min(abs($0.grades.lowerBound - g), abs($0.grades.upperBound - g))
                     let d1 = $1.grades.contains(g) ? 0 : min(abs($1.grades.lowerBound - g), abs($1.grades.upperBound - g))
                     return d0 < d1
-                }.prefix(10))
+                }.prefix(12))
             }
         }
         guard let item = QuestionMemory.shared.pickFresh(pool, for: topic, target: .hard) else {
-            return generate(topic: topic, difficulty: .hard)
+            // Keep the grade — this fallback used to hand a 1st-grader an
+            // untargeted hard question (e.g. a ד'-ו' reading passage).
+            return generate(topic: topic, difficulty: .hard, grade: grade)
         }
         let allOptions = ([item.correctAnswer] + item.distractors).shuffled()
         return Question(
@@ -54,7 +61,12 @@ struct QuestionGenerator {
 
     /// Bonus math: a TWO-step expression (e.g. "7 × 6 + 13 = ?") — a real jump
     /// over the regular hard tier, matching the "really really hard" bonus pool.
-    private static func makeBonusMath() -> Question {
+    private static func makeBonusMath(grade: Int? = nil) -> Question {
+        // Young kids get a REAL but fair jump: one grade up at hard, instead of
+        // the universal two-step "7×6+13" they haven't learned yet.
+        if let g = grade, g <= 2 {
+            return CurriculumMath.generate(grade: min(6, g + 1), difficulty: .hard)
+        }
         let a = Int.random(in: 3...12)
         let b = Int.random(in: 3...12)
         let prompt: String
@@ -179,8 +191,10 @@ struct QuestionGenerator {
             if tagged.count >= 5 {
                 bank = tagged
             } else {
-                let nearest = bank.sorted { windowDistance($0) < windowDistance($1) }
-                bank = Array(nearest.prefix(max(20, tagged.count)))
+                // shuffled() first: equal-distance ties otherwise resolve by
+                // declaration order and the same 20 items get served forever.
+                let nearest = bank.shuffled().sorted { windowDistance($0) < windowDistance($1) }
+                bank = Array(nearest.prefix(20))
             }
         }
         guard let item = QuestionMemory.shared.pickFresh(bank, for: topic, target: difficulty) else {

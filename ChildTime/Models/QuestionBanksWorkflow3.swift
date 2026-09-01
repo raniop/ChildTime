@@ -329,7 +329,7 @@ enum QuestionBanksWorkflow3 {
         BankQuestion(prompt: "יָד לְכַפְפָה כְּמוֹ רֶגֶל ל___?", correctAnswer: "גֶּרֶב", distractors: ["כּוֹבַע", "צָעִיף", "חֻלְצָה"], tier: .easy, grades: 1...3),
         BankQuestion(prompt: "מָה בָּא לִפְנֵי הַמִּסְפָּר 8?", correctAnswer: "7", distractors: ["9", "6", "10"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "מִי לֹא שַׁיָּךְ לַקְּבוּצָה?", correctAnswer: "כֶּלֶב", distractors: ["אוֹפַנַּיִם", "מְכוֹנִית", "אוֹטוֹבּוּס"], tier: .easy, grades: 0...2),
-        BankQuestion(prompt: "מָה הַמִּסְפָּר הַבָּא? 2, 4, 8, ?", correctAnswer: "16", distractors: ["10", "12", "14"], tier: .easy, grades: 2...4),
+        BankQuestion(prompt: "מָה הַמִּסְפָּר הַבָּא? 2, 4, 8, ?", correctAnswer: "16", distractors: ["10", "12", "14"], tier: .easy, grades: 4...6),
         BankQuestion(prompt: "מָה בָּא אַחֲרֵי הָעוֹנָה אָבִיב?", correctAnswer: "קַיִץ", distractors: ["חֹרֶף", "סְתָו", "גֶּשֶׁם"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "מִי לֹא שַׁיָּךְ לַקְּבוּצָה?", correctAnswer: "פִּיל", distractors: ["שֻׁלְחָן", "כִּסֵּא", "אֲרוֹן"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "אֵם לְבֵן כְּמוֹ אַבָּא ל___?", correctAnswer: "בַּת", distractors: ["דּוֹד", "סָבָא", "אָח"], tier: .easy, grades: 1...3),
