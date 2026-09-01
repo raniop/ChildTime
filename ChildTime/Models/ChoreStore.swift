@@ -334,9 +334,14 @@ final class ChoreStore: ObservableObject {
     /// UI can show an honest "try again" instead of the reward silently never
     /// landing while the chore just sits pending.
     @Published var lastActionFailed = false
+    /// Chores whose approval is in flight (awaiting the server transaction) — the
+    /// button shows "מאשר…" instead of feeling dead for the ~2s round-trip.
+    @Published var approvingIDs: Set<String> = []
 
     func approve(_ chore: Chore) {
         guard let hh = listeningHousehold else { return }
+        guard !approvingIDs.contains(chore.id) else { return }   // ignore double-taps
+        approvingIDs.insert(chore.id)
         Task {
             var r = await Self.performApproval(householdID: hh, choreID: chore.id)
             // Only a genuine FAILURE warrants a self-heal + retry. `.alreadyResolved`
@@ -346,6 +351,7 @@ final class ChoreStore: ObservableObject {
                 r = await Self.performApproval(householdID: hh, choreID: chore.id)
             }
             if r == .failed { self.lastActionFailed = true }
+            self.approvingIDs.remove(chore.id)
         }
     }
 

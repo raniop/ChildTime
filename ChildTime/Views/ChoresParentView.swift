@@ -203,16 +203,21 @@ struct ChoresParentView: View {
                     .frame(height: 160)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
+            let approving = choreStore.approvingIDs.contains(chore.id)
             HStack(spacing: 10) {
                 Button {
-                    choreStore.approve(chore)
                     Haptic.success()
+                    choreStore.approve(chore)
                 } label: {
-                    Text("בוצע — אשרו ✅").bold()
-                        .frame(maxWidth: .infinity)
+                    HStack(spacing: 6) {
+                        if approving { ProgressView().controlSize(.small).tint(.white) }
+                        Text(approving ? "מאשר…" : "בוצע — אשרו ✅").bold()
+                    }
+                    .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
+                .disabled(approving)
                 Button {
                     choreStore.returnChore(chore)
                     Haptic.light()
@@ -221,6 +226,7 @@ struct ChoresParentView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
+                .disabled(approving)
             }
         }
         .padding(.vertical, 2)
