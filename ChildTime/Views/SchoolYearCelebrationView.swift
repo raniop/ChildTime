@@ -87,8 +87,10 @@ struct SchoolYearCelebrationView: View {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(0.15)) { stage = 1 }
             withAnimation(.spring(response: 0.55, dampingFraction: 0.55).delay(0.55)) { stage = 2 }
             withAnimation(.easeOut(duration: 0.4).delay(1.0)) { stage = 3 }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { confetti += 1 }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) { confetti += 1 }
+            // Second burst only AFTER the first fully lands+fades (~2.4s) — an
+            // earlier re-trigger RESETS pieces mid-fall, which read as the
+            // confetti stuttering on/off (Rani caught it on the parent screen).
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) { confetti += 1 }
         }
     }
 
@@ -368,8 +370,10 @@ struct ParentSchoolYearPartyView: View {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(0.15)) { stage = 1 }
             withAnimation(.spring(response: 0.55, dampingFraction: 0.55).delay(0.55)) { stage = 2 }
             withAnimation(.easeOut(duration: 0.4).delay(1.0)) { stage = 3 }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { confetti += 1 }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) { confetti += 1 }
+            // Second burst only AFTER the first fully lands+fades (~2.4s) — an
+            // earlier re-trigger RESETS pieces mid-fall, which read as the
+            // confetti stuttering on/off (Rani caught it on the parent screen).
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) { confetti += 1 }
         }
     }
 }
