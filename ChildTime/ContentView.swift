@@ -71,6 +71,15 @@ struct ContentView: View {
                 SchoolYearCelebrationView(gradeName: "כִּתָּה ב'", childName: "דן המלך",
                                           gender: .boy, onDone: {})
             }
+            if UserDefaults.standard.bool(forKey: "ParentGreetingPreview") {
+                ZStack {
+                    AppGradient.dreamy.ignoresSafeArea()
+                    ParentSchoolYearCard(profiles: profiles.profiles) {}
+                        .frame(maxWidth: 460)
+                        .padding(20)
+                        .environment(\.layoutDirection, .leftToRight)
+                }
+            }
         }
         // Any scanned/typed family-or-child code → detect type + confirm first.
         .fullScreenCover(isPresented: $joinCoord.active) {

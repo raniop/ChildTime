@@ -42,6 +42,7 @@ struct ParentDashboardView: View {
     @State private var friendsProfile: Profile?
     @State private var difficultyProfile: Profile?
     @State private var choresProfile: Profile?    // 🧹 chores sheet
+    @State private var schoolYearGreetingDismissed = false
     @StateObject private var choreStore = ChoreStore.shared
     @State private var screenTimeProfile: Profile?
     @State private var editProfile: Profile?
@@ -111,6 +112,15 @@ struct ParentDashboardView: View {
                         VStack(spacing: 14) {
                             if isRoot {
                                 if !push.authorized { notificationsBanner }
+                                // ☀️ September: wish the kids a great school year
+                                // on the parent side too (Rani) — dismissible.
+                                if !schoolYearGreetingDismissed, SchoolYearCelebration.shouldGreetParent, !rows.isEmpty {
+                                    ParentSchoolYearCard(profiles: rows.map(\.profile)) {
+                                        SchoolYearCelebration.markParentGreeted()
+                                        withAnimation { schoolYearGreetingDismissed = true }
+                                    }
+                                    .frame(maxWidth: 460)
+                                }
                                 familySummaryCard
                                 // The two primary actions side by side (iPhone and
                                 // iPad alike) — stacking wasted a whole row. RTL

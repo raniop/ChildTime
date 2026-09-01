@@ -245,3 +245,90 @@ enum SchoolYearCelebration {
         return month == 9 || month == 10
     }
 }
+
+// MARK: - Parent-side September greeting
+
+/// ☀️ A warm once-a-school-year card on the PARENT dashboard: wishes the kids
+/// a great new year and shows each child's new grade. Dismissible; September
+/// only. (Authored trailing-aligned — the dashboard container is forced LTR,
+/// so .trailing == the right edge.)
+struct ParentSchoolYearCard: View {
+    let profiles: [Profile]
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 10) {
+            HStack(spacing: 10) {
+                Button {
+                    Haptic.light()
+                    onDismiss()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(.white.opacity(0.75))
+                }
+                .buttonStyle(.plain)
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("שֶׁתִּהְיֶה שְׁנַת לִמּוּדִים נִפְלָאָה! 🎉")
+                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1).minimumScaleFactor(0.6)
+                    Text("א' בספטמבר — יום ראשון ללימודים")
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+                ZStack {
+                    Circle()
+                        .fill(LinearGradient(colors: [Color(hex: "FFE9A3"), Color(hex: "FFB347")],
+                                             startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .frame(width: 44, height: 44)
+                        .overlay(Circle().stroke(.white.opacity(0.8), lineWidth: 2))
+                    Text("🎒").font(.system(size: 22))
+                }
+            }
+            VStack(alignment: .trailing, spacing: 4) {
+                ForEach(profiles) { p in
+                    if let g = p.grade {
+                        Text("\(p.name) \(p.gender == .girl ? "עוֹלָה" : "עוֹלֶה") לְ\(Profile.gradeDisplayName(p.effectiveGrade == g ? g : p.effectiveGrade)) ⭐️")
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.trailing)
+                    }
+                }
+            }
+            Text("שנה של סקרנות, ביטחון והמון רגעים טובים — טופי כבר מחכה להם עם שאלות חדשות 💛")
+                .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.9))
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(LinearGradient(colors: [Color(hex: "3A7BD5"), Color(hex: "48BFE3")],
+                                     startPoint: .topTrailing, endPoint: .bottomLeading))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(LinearGradient(colors: [Color(hex: "FFD23F").opacity(0.9), .white.opacity(0.25)],
+                                       startPoint: .top, endPoint: .bottom), lineWidth: 1.5)
+        )
+        .shadow(color: Color(hex: "3A7BD5").opacity(0.35), radius: 10, y: 4)
+    }
+}
+
+extension SchoolYearCelebration {
+    private static var parentKey: String { "parentSchoolYearGreeted.\(Profile.schoolYear())" }
+
+    /// Show the parent card through September, until dismissed.
+    @MainActor
+    static var shouldGreetParent: Bool {
+        Calendar.current.component(.month, from: Date()) == 9
+            && !UserDefaults.standard.bool(forKey: parentKey)
+    }
+
+    @MainActor
+    static func markParentGreeted() {
+        UserDefaults.standard.set(true, forKey: parentKey)
+    }
+}
