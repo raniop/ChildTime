@@ -109,11 +109,16 @@ final class KidModeManager: ObservableObject {
         // (Non-destructive stash; switchTo below may stash again with 0 → no-op.)
         if let kid = childID { ProgressStore.shared.stashDeviceLocalPlayState(for: kid) }
         ProgressStore.shared.clearDeviceLocalPlayState()
+        // Flip the flag OFF first — it mirrors kidModeActive=false to the app
+        // group, so a DeviceActivity callback already in flight in the extension
+        // process can't read kidModeActive==true and re-lock right after we
+        // cleared the shield. (Self-heals on next foreground either way, but the
+        // ordering avoids a transient re-lock flash.)
+        active = false
+        ShieldManager.shared.cancelScheduledReshield()
         ShieldManager.shared.clearShield()
         // Parent's phone returns to normal → allow deleting apps again.
         ShieldManager.shared.setAppRemovalLocked(false)
-        ShieldManager.shared.cancelScheduledReshield()
-        active = false
         // Restore whoever the parent had selected before (best effort).
         if let s = defaults.string(forKey: Key.prevID), let id = UUID(uuidString: s) {
             ProfileStore.shared.setActiveID(id)

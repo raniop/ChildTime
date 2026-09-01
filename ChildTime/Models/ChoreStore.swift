@@ -127,6 +127,12 @@ final class ChoreStore: ObservableObject {
         guard hh != listeningHousehold else { return }
         listener?.remove()
         listeningHousehold = hh
+        // Proactively re-assert this device's membership the moment we bind a
+        // family. A child device whose anonymous uid drifted out of parentUIDs
+        // would otherwise only self-heal AFTER a write is denied — which never
+        // fires while offline. Healing up front means even an offline-queued
+        // chore write is made under a valid membership and delivers on reconnect.
+        Task { await HouseholdManager.shared.reassertMembership() }
         listener = db.collection("households").document(hh).collection("chores")
             .addSnapshotListener { [weak self] snap, _ in
                 guard let self, let snap else { return }
@@ -332,24 +338,27 @@ final class ChoreStore: ObservableObject {
     func approve(_ chore: Chore) {
         guard let hh = listeningHousehold else { return }
         Task {
-            var ok = await Self.performApproval(householdID: hh, choreID: chore.id)
-            if !ok {
-                // Membership may have drifted (same self-heal as markDone) — or
-                // it was already claimed by another approver (then this returns
-                // false but the chore is genuinely done, so re-check).
+            var r = await Self.performApproval(householdID: hh, choreID: chore.id)
+            // Only a genuine FAILURE warrants a self-heal + retry. `.alreadyResolved`
+            // means another approver won — the chore is done; never alert on it.
+            if r == .failed {
                 await HouseholdManager.shared.reassertMembership()
-                ok = await Self.performApproval(householdID: hh, choreID: chore.id)
+                r = await Self.performApproval(householdID: hh, choreID: chore.id)
             }
-            if !ok, self.chores.first(where: { $0.id == chore.id })?.isPendingApproval == true {
-                self.lastActionFailed = true   // still pending AND we failed → real problem
-            }
+            if r == .failed { self.lastActionFailed = true }
         }
     }
 
+    /// Outcome of an approval attempt — the caller must tell a genuine failure
+    /// (offline/permission/txn error → show "try again") apart from LOSING the
+    /// claim to another approver (`.alreadyResolved` → the chore WAS approved,
+    /// stay silent), otherwise a concurrent second-parent/notification approve
+    /// pops a false "approval failed" on a chore that was in fact paid.
+    enum ApprovalResult { case won, alreadyResolved, failed }
+
     /// The transactional core, shared with the notification-button path.
-    /// Returns true when THIS call won the claim and granted the reward.
     @discardableResult
-    static func performApproval(householdID: String, choreID: String) async -> Bool {
+    static func performApproval(householdID: String, choreID: String) async -> ApprovalResult {
         #if canImport(FirebaseFirestore)
         let db = Firestore.firestore()
         let choreRef = db.collection("households").document(householdID)
@@ -395,12 +404,15 @@ final class ChoreStore: ObservableObject {
                                 forDocument: childRef, merge: true)
                 }
                 return true
-            }) { result, _ in
-                cont.resume(returning: (result as? Bool) ?? false)
+            }) { result, error in
+                // error != nil → the transaction itself couldn't commit
+                // (offline — transactions don't queue — / permission / conflict).
+                if error != nil { cont.resume(returning: .failed) }
+                else { cont.resume(returning: (result as? Bool) == true ? .won : .alreadyResolved) }
             }
         }
         #else
-        return false
+        return .failed
         #endif
     }
 

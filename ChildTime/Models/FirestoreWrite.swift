@@ -34,7 +34,11 @@ func confirmedMerge(_ ref: DocumentReference,
             assumeQueued.cancel()
             guard latch.fire() else { return }
             if let err = err as NSError? {
-                cont.resume(returning: err.code == 7 /* permissionDenied */ ? .denied : .error)
+                // Domain-check so a future non-Firestore NSError with code 7
+                // can't be misread as a permission-denied and trigger a needless
+                // self-heal + retry.
+                let denied = err.domain == FirestoreErrorDomain && err.code == 7 /* permissionDenied */
+                cont.resume(returning: denied ? .denied : .error)
             } else {
                 cont.resume(returning: .ok)
             }

@@ -703,12 +703,15 @@ final class HouseholdManager: ObservableObject {
                 ])
                 try await db.collection("households").document(hh.id)
                     .updateData(["childIDs": FieldValue.arrayRemove([id])])
-                try await db.collection("children").document(id).delete()
+                // Delete the subcollection state AND the public leaderboard card
+                // BEFORE the parent `children/{id}` doc — both their rules gate on
+                // that doc's householdID, so deleting it first would leave the
+                // progress doc orphaned and the child's name+stars lingering on
+                // the public friends board (the delete would be silently denied).
                 try await db.collection("children").document(id)
                     .collection("state").document("current").delete()
-                // Remove the public leaderboard card too (otherwise the deleted kid
-                // lingers on the friends board).
                 try? await db.collection("friendCards").document(id).delete()
+                try await db.collection("children").document(id).delete()
             } catch { lastError = error.localizedDescription }
         }
         #endif
@@ -1453,10 +1456,12 @@ final class HouseholdManager: ObservableObject {
                 try? await db.collection("children").document(childID)
                     .collection("state").document("current").delete()
                 try? await deleteSubcollection("children/\(childID)/dailyStats")
-                try? await db.collection("children").document(childID).delete()
                 // Public leaderboard card (a CHILD's name lives here — must not
                 // linger after a full account deletion, GDPR + Kids Category).
+                // BEFORE the parent doc: the card's delete rule gates on the
+                // child's householdID, so the `children/{id}` doc must still exist.
                 try? await db.collection("friendCards").document(childID).delete()
+                try? await db.collection("children").document(childID).delete()
                 // This child's device rows (device names + FCM tokens).
                 let devs = try? await db.collection("childDevices")
                     .whereField("childID", isEqualTo: childID).getDocuments()
@@ -1531,6 +1536,12 @@ final class HouseholdManager: ObservableObject {
     func publishPremium(until: Date?) {
         #if canImport(FirebaseFirestore)
         guard !Self.skipsCloudSync, let hh = household?.id else { return }
+        // The rules require a NON-anonymous account to change premiumUntil (a
+        // child device must not grant itself paid premium). On an anonymous
+        // device the write is denied and the self-heal is futile (it IS a
+        // member — anonymity is the block), so skip it: a real parent device
+        // holding the same entitlement republishes on its next refresh.
+        guard AuthManager.shared.isRealAccount else { return }
         let current = household?.premiumUntil
         // Never DOWNGRADE from the cloud on a transient local read: only write
         // when extending/among-equal or clearing after a real lapse we detect.

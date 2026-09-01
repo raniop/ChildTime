@@ -90,7 +90,7 @@ enum QuestionBanks {
         BankQuestion(prompt: "🦷\nכַּמָּה שִׁנַּיִם יֵשׁ לְאָדָם מְבוּגָּר?", correctAnswer: "32", distractors: ["20", "28", "40"], grades: 2...4),
         BankQuestion(prompt: "🦴\nכַּמָּה יָמִים יֵשׁ בַּשָּׁנָה?", correctAnswer: "365", distractors: ["360", "350", "400"], grades: 2...4),
         BankQuestion(prompt: "🌙\nכַּמָּה זְמַן לוֹקֵחַ לַיָּרֵחַ לְהַקִּיף אֶת כַּדּוּר הָאָרֶץ?", correctAnswer: "כְּחוֹדֶשׁ", distractors: ["יוֹם", "שָׁנָה", "שָׁבוּעַ"], grades: 4...6),
-        BankQuestion(prompt: "☀️\nמָה הַכּוֹכָב הַקָּרוֹב בְּיוֹתֵר לְכַדּוּר הָאָרֶץ?", correctAnswer: "הַשֶּׁמֶשׁ", distractors: ["הַיָּרֵחַ", "מַאְדִּים", "צֶדֶק"], grades: 4...6),
+        BankQuestion(prompt: "☀️\nמָהוּ הַכּוֹכָב (שֶׁמֵּפִיק אוֹר מִשֶּׁלּוֹ) הַקָּרוֹב בְּיוֹתֵר לְכַדּוּר הָאָרֶץ?", correctAnswer: "הַשֶּׁמֶשׁ", distractors: ["הַיָּרֵחַ", "מַאְדִּים", "צֶדֶק"], grades: 4...6),
         BankQuestion(prompt: "🐠\nאֵיפֹה דָּגִים נוֹשְׁמִים?", correctAnswer: "בַּמַּיִם", distractors: ["בָּאֲוִיר", "בָּאֲדָמָה", "בָּעֵץ"], grades: 0...2),
         BankQuestion(prompt: "🦋\nמִמָּה הוֹפֵךְ זַחַל?", correctAnswer: "לְפַרְפַּר", distractors: ["לִדְבוֹרָה", "לְצִיפּוֹר", "לְעַכָּבִישׁ"], grades: 0...2),
         BankQuestion(prompt: "🌋\nמָה יוֹצֵא מֵהַר גַּעַשׁ?", correctAnswer: "לָבָה", distractors: ["מַיִם", "שֶׁלֶג", "חוֹל"], grades: 2...4),

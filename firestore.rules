@@ -109,6 +109,11 @@ service cloud.firestore {
     match /deletedChildren/{childID} {
       allow read:   if householdHasMe(resource.data.householdID);
       allow create: if householdHasMe(request.resource.data.householdID);
+      // Re-tombstoning the same child (a second delete) is an overwrite → update;
+      // allow it for a member preserving the household, so it doesn't silently
+      // fail. Harmless (already tombstoned) but shouldn't be denied.
+      allow update: if householdHasMe(resource.data.householdID)
+                    && householdHasMe(request.resource.data.householdID);
       allow delete: if householdHasMe(resource.data.householdID);
     }
 
@@ -194,6 +199,16 @@ service cloud.firestore {
       allow update: if signedIn() && (
         resource.data.ownerUID == request.auth.uid ||
         householdHasMe(get(/databases/$(database)/documents/children/$(childID)).data.householdID)
+      );
+      // Deleting a child (or the whole account) must remove the public card too,
+      // or the child's first name + stars linger on the leaderboard (a privacy /
+      // Kids-Category concern). The owning device may delete its own card; a
+      // parent on the child's household may delete it — the `exists` guard lets
+      // the owner-branch still work if the `children/{id}` doc is already gone.
+      allow delete: if signedIn() && (
+        resource.data.ownerUID == request.auth.uid ||
+        (exists(/databases/$(database)/documents/children/$(childID))
+         && householdHasMe(get(/databases/$(database)/documents/children/$(childID)).data.householdID))
       );
 
       // Pending friend REQUESTS dropped into this card's inbox. Unlike a QR/code

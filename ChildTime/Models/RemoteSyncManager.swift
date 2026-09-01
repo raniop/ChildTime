@@ -125,6 +125,12 @@ final class RemoteSyncManager: ObservableObject {
         resetPending = [:]
         pendingAdjustments = [:]
         pendingGifts = [:]
+        // Command status trackers too — otherwise a stale red "לא נשלח" / gift
+        // status from the previous family can bleed across a profile/account
+        // switch. In-flight rollback Tasks also bail on !isActive (below).
+        commandFailed = []
+        giftSendTracker = [:]
+        giftRevokeTracker = [:]
     }
 
     /// Force-write the current active profile's snapshot now (used after
@@ -202,12 +208,18 @@ final class RemoteSyncManager: ObservableObject {
         let fields: [String: Any] = ["pendingMinuteAdjustment": FieldValue.increment(Int64(deltaMinutes))]
         Task { @MainActor in
             let outcome = await self.sendChildCommandConfirmed(childID, fields)
+            guard self.isActive else { return }   // manager torn down mid-flight — don't touch published state
             // Permanent rejection → roll back the optimistic bump and tell the
             // parent, instead of leaving a +N that will never reach the child.
             if outcome == .denied || outcome == .error {
-                self.pendingAdjustments[childID, default: 0] -= deltaMinutes
-                if (self.pendingAdjustments[childID] ?? 0) == 0 {
-                    self.pendingAdjustments.removeValue(forKey: childID)
+                // Roll back the exact optimistic contribution — but ONLY if the
+                // key still holds it. If the child-doc listener already
+                // reconciled (removed or zeroed) the key in the meantime,
+                // subtracting would strand a phantom negative pending value.
+                if let cur = self.pendingAdjustments[childID], cur != 0 {
+                    let restored = cur - deltaMinutes
+                    if restored == 0 { self.pendingAdjustments.removeValue(forKey: childID) }
+                    else { self.pendingAdjustments[childID] = restored }
                 }
                 self.commandFailed.insert(childID)
             }
@@ -235,6 +247,7 @@ final class RemoteSyncManager: ObservableObject {
         if let uid = AuthManager.shared.userID { fields["giftCommandBy"] = uid }
         Task { @MainActor in
             let outcome = await self.sendChildCommandConfirmed(childID, fields)
+            guard self.isActive else { return }   // manager torn down mid-flight — don't touch published state
             switch outcome {
             case .ok:
                 // Server committed → the gift is SAFE in the cloud.
@@ -355,9 +368,16 @@ final class RemoteSyncManager: ObservableObject {
         //    optimistic zeros back and tell the parent — never leave fake zeros.
         Task { @MainActor in
             let outcome = await self.sendChildCommandConfirmed(childID, fields)
+            guard self.isActive else { return }   // manager torn down mid-flight — don't touch published state
             if outcome == .denied || outcome == .error {
-                self.resetPending.removeValue(forKey: childID)
-                self.remoteSnapshots[childID] = prev
+                // Undo the optimistic zeros — but ONLY if nothing newer landed
+                // during the confirm window. If the child was actively playing
+                // and uploaded a fresher snapshot (revision > blank), restoring
+                // the stale `prev` would clobber real current progress.
+                if self.remoteSnapshots[childID]?.revision == blank.revision {
+                    self.resetPending.removeValue(forKey: childID)
+                    self.remoteSnapshots[childID] = prev
+                }
                 self.commandFailed.insert(childID)
             }
         }
@@ -403,6 +423,7 @@ final class RemoteSyncManager: ObservableObject {
         let prevGiftMinutes = remoteSnapshots[childID]?.parentGiftMinutes
         Task { @MainActor in
             let outcome = await self.sendChildCommandConfirmed(childID, fields)
+            guard self.isActive else { return }   // manager torn down mid-flight — don't touch published state
             switch outcome {
             case .ok:
                 self.giftRevokeTracker[childID]?.reachedCloud = true
@@ -511,11 +532,16 @@ final class RemoteSyncManager: ObservableObject {
             blank.lastModifiedAt = Date()
             blank.deviceID = ProgressSnapshot.thisDeviceID
             if let data = Self.encode(blank) { txn.setData(data, forDocument: ref) }   // NOT merge
-            return blank.revision
+            return ["rev": blank.revision, "epoch": blank.resetEpoch]
         }) { result, err in
             if let err { TofyLink("writeBlankCloudState FAILED: \(err.localizedDescription)"); return }
-            if let rev = result as? Int {
-                Task { @MainActor in ProgressStore.shared.adoptRevision(rev) }
+            if let r = result as? [String: Int], let rev = r["rev"], let epoch = r["epoch"] {
+                Task { @MainActor in
+                    ProgressStore.shared.adoptRevision(rev)
+                    // Adopt the epoch too — else this device is left behind the
+                    // cloud it wrote and its post-reset progress never syncs.
+                    ProgressStore.shared.adoptResetEpoch(epoch)
+                }
             }
         }
         #endif

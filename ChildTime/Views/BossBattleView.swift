@@ -205,6 +205,16 @@ struct BossBattleView: View {
     // MARK: - Logic
 
     private func newQuestion() {
+        // Pre-readers (גן, effectiveGrade < 1) can't read — route them to the
+        // text-free visual path, exactly like the main runner does. Without this
+        // the boss served reading-dependent bank questions to a child who can't
+        // read (the math-world boss was already safe via symbolic generation).
+        if (ProfileStore.shared.active?.effectiveGrade ?? 1) < 1 {
+            question = PreReaderContent.generate(topic: world.topic)
+            picked = nil
+            locked = false
+            return
+        }
         if world.isBonusWorld {
             // 💫 Arena boss: extra-hard bonus questions across ALL enabled topics.
             let pool = Array(ProfileStore.shared.active?.enabledTopics ?? Set(Topic.allCases))

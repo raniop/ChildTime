@@ -100,6 +100,24 @@ class NotificationService: UNNotificationServiceExtension {
             store.application.denyAppRemoval = true
         }
 
+        // 👶 Kid Mode (parent phone): baseline is lock-all-EXCEPT the kid-mode
+        // allow-list. Must be checked BEFORE the block modes, mirroring the
+        // monitor extension — otherwise a remote-lock push on a parent phone in
+        // kid mode falls through to the (empty) parent block-list and either
+        // leaves the phone open or hits the no-selection guard and no-ops.
+        let kidModeActive = (defaults.object(forKey: "kidModeActive") as? Bool) ?? false
+        if kidModeActive,
+           let kmData = defaults.data(forKey: "kidModeAllowedData"),
+           let kmAllowed = try? decoder.decode(FamilyActivitySelection.self, from: kmData) {
+            store.shield.applications = nil
+            store.shield.applicationCategories = .all(except: kmAllowed.applicationTokens)
+            store.shield.webDomains = nil
+            store.shield.webDomainCategories = .all(except: kmAllowed.webDomainTokens)
+            store.application.denyAppRemoval = true
+            lockLog.notice("nse: re-applied KID-MODE lock-all-except")
+            return
+        }
+
         // Block-all-except-allowlist mode — only when an allowlist actually exists
         // (otherwise we'd shield Tofy itself and brick the device).
         let blockAll = (defaults.object(forKey: "blockAllExceptAllowed") as? Bool) ?? true

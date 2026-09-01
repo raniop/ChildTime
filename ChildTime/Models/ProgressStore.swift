@@ -1871,6 +1871,16 @@ final class ProgressStore: ObservableObject {
         lastModifiedAt = .now
     }
 
+    /// After an authoritative cloud wipe (reset), adopt the resetEpoch we just
+    /// published to the cloud. Without this the resetting device stays an epoch
+    /// BEHIND the blank it wrote: its post-reset earnings then ratchet-merge
+    /// against the higher-epoch cloud blank (higher epoch wins wholesale) and
+    /// never upload — the child keeps playing but the parent/siblings stay
+    /// frozen at zero, and a peer at the higher epoch can wipe the earnings.
+    func adoptResetEpoch(_ e: Int) {
+        resetEpoch = max(resetEpoch, e)
+    }
+
     func resetAll() {
         let nextRevision = revision + 1
         apply(.blank)                  // zeroes the data (and adopts blank's rev 0)
