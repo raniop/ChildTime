@@ -72,11 +72,9 @@ struct ContentView: View {
                                           gender: .boy, onDone: {})
             }
             if UserDefaults.standard.bool(forKey: "ParentGreetingPreview") {
-                ParentSchoolYearPartyView(profiles: [
-                    Profile(name: "דן המלך", gender: .boy, grade: 2, gradeSchoolYear: Profile.schoolYear()),
-                    Profile(name: "נוני", gender: .girl, grade: 4, gradeSchoolYear: Profile.schoolYear()),
-                    Profile(name: "יהלי", gender: .girl, grade: 1, gradeSchoolYear: Profile.schoolYear()),
-                ], onDone: {})
+                // Delayed so the party (and its confetti burst) starts AFTER the
+                // launch splash — matching how the real fullScreenCover attaches.
+                DelayedPartyPreview()
             }
         }
         // Any scanned/typed family-or-child code → detect type + confirm first.
@@ -223,6 +221,23 @@ struct ContentView: View {
                     .foregroundStyle(.white)
             }
         }
+    }
+}
+
+/// Design-review helper: attaches the party 5s in, like a real presentation.
+private struct DelayedPartyPreview: View {
+    @State private var show = false
+    var body: some View {
+        ZStack {
+            if show {
+                ParentSchoolYearPartyView(profiles: [
+                    Profile(name: "דן המלך", gender: .boy, grade: 2, gradeSchoolYear: Profile.schoolYear()),
+                    Profile(name: "נוני", gender: .girl, grade: 4, gradeSchoolYear: Profile.schoolYear()),
+                    Profile(name: "יהלי", gender: .girl, grade: 1, gradeSchoolYear: Profile.schoolYear()),
+                ], onDone: {})
+            }
+        }
+        .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 5) { show = true } }
     }
 }
 

@@ -77,6 +77,13 @@ struct SchoolYearCelebrationView: View {
             }
 
         }
+        .overlay {
+            // 🎊 Gentle popper confetti — launched from the bottom, arcs up,
+            // drifts slowly down and fades (Rani's real-confetti spec).
+            FancyConfetti()
+                .allowsHitTesting(false)
+                .ignoresSafeArea()
+        }
         .environment(\.layoutDirection, .rightToLeft)
         .onAppear {
             appeared = true
@@ -354,6 +361,13 @@ struct ParentSchoolYearPartyView: View {
                 .opacity(stage >= 3 ? 1 : 0)
             }
 
+        }
+        .overlay {
+            // 🎊 Gentle popper confetti — launched from the bottom, arcs up,
+            // drifts slowly down and fades (Rani's real-confetti spec).
+            FancyConfetti()
+                .allowsHitTesting(false)
+                .ignoresSafeArea()
         }
         .environment(\.layoutDirection, .rightToLeft)
         .onAppear {
