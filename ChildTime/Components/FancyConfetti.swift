@@ -82,13 +82,30 @@ private struct LaunchedPiece: View {
     }
 
     private func launch() {
-        // Two party poppers at the SIDE edges, ~30% up from the bottom (Rani) —
-        // even pieces fire from the left, odd from the right, arcing inward.
-        let fromLeft = index % 2 == 0
-        let startX: CGFloat = fromLeft ? -24 : canvas.width + 24
-        let startY = canvas.height * (0.60 + 0.18 * rnd(14))
-        let apexX = canvas.width * (fromLeft ? 0.18 + 0.52 * rnd(2)
-                                             : 0.82 - 0.52 * rnd(2))
+        // FOUR party poppers (Rani): two at the side edges ~30% up from the
+        // bottom arcing inward, and two on the bottom edge (¼ and ¾ width)
+        // shooting upward. index % 4 assigns each piece its popper.
+        let startX: CGFloat
+        let startY: CGFloat
+        let apexX: CGFloat
+        switch index % 4 {
+        case 0:   // left edge → inward
+            startX = -24
+            startY = canvas.height * (0.60 + 0.18 * rnd(14))
+            apexX = canvas.width * (0.18 + 0.52 * rnd(2))
+        case 1:   // right edge → inward
+            startX = canvas.width + 24
+            startY = canvas.height * (0.60 + 0.18 * rnd(14))
+            apexX = canvas.width * (0.82 - 0.52 * rnd(2))
+        case 2:   // bottom-left quarter → up
+            startX = canvas.width * 0.25
+            startY = canvas.height + 24
+            apexX = canvas.width * (0.10 + 0.55 * rnd(2))
+        default:  // bottom-right quarter → up
+            startX = canvas.width * 0.75
+            startY = canvas.height + 24
+            apexX = canvas.width * (0.90 - 0.55 * rnd(2))
+        }
         let apexY = canvas.height * (0.10 + 0.38 * rnd(3))
         let endX = apexX + CGFloat(rnd(4) - 0.5) * 110
         let launchDelay = rnd(5) * 1.3
