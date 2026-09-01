@@ -72,13 +72,11 @@ struct ContentView: View {
                                           gender: .boy, onDone: {})
             }
             if UserDefaults.standard.bool(forKey: "ParentGreetingPreview") {
-                ZStack {
-                    AppGradient.dreamy.ignoresSafeArea()
-                    ParentSchoolYearCard(profiles: profiles.profiles) {}
-                        .frame(maxWidth: 460)
-                        .padding(20)
-                        .environment(\.layoutDirection, .leftToRight)
-                }
+                ParentSchoolYearPartyView(profiles: [
+                    Profile(name: "דן המלך", gender: .boy, grade: 2, gradeSchoolYear: Profile.schoolYear()),
+                    Profile(name: "נוני", gender: .girl, grade: 4, gradeSchoolYear: Profile.schoolYear()),
+                    Profile(name: "יהלי", gender: .girl, grade: 1, gradeSchoolYear: Profile.schoolYear()),
+                ], onDone: {})
             }
         }
         // Any scanned/typed family-or-child code → detect type + confirm first.

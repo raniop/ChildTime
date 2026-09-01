@@ -248,72 +248,129 @@ enum SchoolYearCelebration {
 
 // MARK: - Parent-side September greeting
 
-/// ☀️ A warm once-a-school-year card on the PARENT dashboard: wishes the kids
-/// a great new year and shows each child's new grade. Dismissible; September
-/// only. (Authored trailing-aligned — the dashboard container is forced LTR,
-/// so .trailing == the right edge.)
-struct ParentSchoolYearCard: View {
+/// ☀️ Full-screen September party on the PARENT device (Rani: "מסך יפה כמו
+/// שיש לילדים") — same visual language as the kid celebration: sun-medal,
+/// rising balloons, confetti — wishing every child a great new school year.
+struct ParentSchoolYearPartyView: View {
     let profiles: [Profile]
-    let onDismiss: () -> Void
+    let onDone: () -> Void
+
+    @State private var confetti = 0
+    @State private var appeared = false
+    @State private var stage = 0
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: 10) {
-            HStack(spacing: 10) {
-                Button {
-                    Haptic.light()
-                    onDismiss()
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 22))
-                        .foregroundStyle(.white.opacity(0.75))
-                }
-                .buttonStyle(.plain)
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("שֶׁתִּהְיֶה שְׁנַת לִמּוּדִים נִפְלָאָה! 🎉")
-                        .font(.system(size: 16, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .lineLimit(1).minimumScaleFactor(0.6)
-                    Text("א' בספטמבר — יום ראשון ללימודים")
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
-                }
+        ZStack {
+            LinearGradient(colors: [Color(hex: "3A7BD5"), Color(hex: "48BFE3"), Color(hex: "8EEBFF")],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+            SparkleField(count: 30, size: 13)
+            BalloonField()
+
+            VStack(spacing: AppSpacing.md) {
+                Spacer(minLength: 16)
+
+                // The sun-medal — here it carries the backpack + the wish.
                 ZStack {
+                    Starburst()
+                        .fill(LinearGradient(colors: [Color(hex: "FFD23F").opacity(0.55), .clear],
+                                             startPoint: .center, endPoint: .top))
+                        .frame(width: 320, height: 320)
+                        .rotationEffect(.degrees(appeared ? 360 : 0))
+                        .animation(.linear(duration: 24).repeatForever(autoreverses: false), value: appeared)
                     Circle()
                         .fill(LinearGradient(colors: [Color(hex: "FFE9A3"), Color(hex: "FFB347")],
                                              startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .frame(width: 44, height: 44)
-                        .overlay(Circle().stroke(.white.opacity(0.8), lineWidth: 2))
-                    Text("🎒").font(.system(size: 22))
+                        .frame(width: 160, height: 160)
+                        .overlay(Circle().stroke(.white.opacity(0.85), lineWidth: 5))
+                        .glow(Color(hex: "FFD23F"), radius: appeared ? 24 : 10)
+                        .shadow(color: .black.opacity(0.25), radius: 14, y: 8)
+                    VStack(spacing: 2) {
+                        Text("🎒").font(.system(size: 44))
+                        Text("שָׁנָה חֲדָשָׁה!")
+                            .font(.system(size: 20, weight: .black, design: .rounded))
+                            .foregroundStyle(Color(hex: "6B3B00"))
+                            .lineLimit(1).minimumScaleFactor(0.6)
+                            .padding(.horizontal, 12)
+                    }
+                    .frame(width: 150)
                 }
-            }
-            VStack(alignment: .trailing, spacing: 4) {
-                ForEach(profiles) { p in
-                    if let g = p.grade {
-                        Text("\(p.name) \(p.gender == .girl ? "עוֹלָה" : "עוֹלֶה") לְ\(Profile.gradeDisplayName(p.effectiveGrade == g ? g : p.effectiveGrade)) ⭐️")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .multilineTextAlignment(.trailing)
+                .frame(height: 280)
+                .scaleEffect(stage >= 1 ? 1 : 0.2)
+                .animation(.spring(response: 0.6, dampingFraction: 0.55), value: stage)
+
+                Text("שֶׁתִּהְיֶה שְׁנַת לִמּוּדִים נִפְלָאָה!")
+                    .font(.system(size: 27, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .padding(.horizontal, 20)
+                    .opacity(stage >= 1 ? 1 : 0)
+                    .offset(y: stage >= 1 ? 0 : 18)
+
+                VStack(spacing: 6) {
+                    ForEach(profiles) { p in
+                        if p.grade != nil {
+                            (Text("\(p.name) ")
+                                .foregroundColor(Color(hex: "FFD23F"))
+                             + Text("\(p.gender == .girl ? "עוֹלָה" : "עוֹלֶה") לְ\(Profile.gradeDisplayName(p.effectiveGrade))! ⭐️")
+                                .foregroundColor(.white))
+                                .font(.system(size: 23, weight: .black, design: .rounded))
+                                .shadow(color: .black.opacity(0.35), radius: 5, y: 3)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(1).minimumScaleFactor(0.6)
+                                .padding(.horizontal, 24)
+                        }
                     }
                 }
+                .scaleEffect(stage >= 2 ? 1 : 0.4)
+                .opacity(stage >= 2 ? 1 : 0)
+
+                Text("שָׁנָה שֶׁל סַקְרָנוּת, בִּטָּחוֹן וְהַמוֹן רְגָעִים טוֹבִים —\nטוֹפִי כְּבָר מְחַכֶּה לָהֶם עִם שְׁאֵלוֹת חֲדָשׁוֹת 💛")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.95))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, AppSpacing.xl)
+                    .opacity(stage >= 3 ? 1 : 0)
+                    .offset(y: stage >= 3 ? 0 : 12)
+
+                Spacer()
+
+                Button {
+                    Haptic.success()
+                    onDone()
+                } label: {
+                    Text("לְשָׁנָה מֻצְלַחַת! 💛")
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        .foregroundStyle(AppColor.textOnLight)
+                        .frame(maxWidth: 420)
+                        .padding(.vertical, 16)
+                        .background(
+                            LinearGradient(colors: [.white, Color(hex: "FFE9A3")],
+                                           startPoint: .top, endPoint: .bottom),
+                            in: Capsule())
+                        .glow(Color(hex: "FFD23F"), radius: 16)
+                }
+                .buttonStyle(.juicy)
+                .padding(.horizontal, AppSpacing.xl)
+                .padding(.bottom, AppSpacing.xxl)
+                .opacity(stage >= 3 ? 1 : 0)
             }
-            Text("שנה של סקרנות, ביטחון והמון רגעים טובים — טופי כבר מחכה להם עם שאלות חדשות 💛")
-                .font(.system(size: 12.5, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.9))
-                .multilineTextAlignment(.trailing)
+
+            Confetti(trigger: confetti)
         }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(LinearGradient(colors: [Color(hex: "3A7BD5"), Color(hex: "48BFE3")],
-                                     startPoint: .topTrailing, endPoint: .bottomLeading))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(LinearGradient(colors: [Color(hex: "FFD23F").opacity(0.9), .white.opacity(0.25)],
-                                       startPoint: .top, endPoint: .bottom), lineWidth: 1.5)
-        )
-        .shadow(color: Color(hex: "3A7BD5").opacity(0.35), radius: 10, y: 4)
+        .environment(\.layoutDirection, .rightToLeft)
+        .onAppear {
+            appeared = true
+            SoundPlayer.shared.play(.levelUp)
+            confetti += 1
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(0.15)) { stage = 1 }
+            withAnimation(.spring(response: 0.55, dampingFraction: 0.55).delay(0.55)) { stage = 2 }
+            withAnimation(.easeOut(duration: 0.4).delay(1.0)) { stage = 3 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { confetti += 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) { confetti += 1 }
+        }
     }
 }
 
