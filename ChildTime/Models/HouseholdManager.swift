@@ -340,6 +340,23 @@ final class HouseholdManager: ObservableObject {
         }
     }
 
+    /// Re-assert THIS device's membership in the current (or last-adopted)
+    /// household — arrayUnion its uid into `parentUIDs`. The rules let a
+    /// non-member add ONLY itself, so a child device whose anonymous uid drifted
+    /// out of the list (or was pruned) self-heals here instead of silently
+    /// getting "permission denied" on every chore/progress write for the rest of
+    /// the session. Cheap and idempotent (a no-op arrayUnion if already a
+    /// member). Returns true once the re-grant write has been attempted.
+    @discardableResult
+    func reassertMembership() async -> Bool {
+        guard let uid else { return false }
+        guard let hid = household?.id
+                ?? UserDefaults.standard.string(forKey: preferredHouseholdKey) else { return false }
+        try? await db.collection("households").document(hid)
+            .updateData(["parentUIDs": FieldValue.arrayUnion([uid])])
+        return true
+    }
+
     /// Returns the parent's household, creating one (with this uid as the sole
     /// parent) if they have none — but ONLY when `canCreate` (a real, named
     /// account). Anonymous uids find/adopt but never mint (→ nil).

@@ -21,6 +21,11 @@ struct ChoresKidView: View {
     @State private var libraryPickerPresented = false
     @State private var libraryItem: PhotosPickerItem?
     @State private var justSent: Set<String> = []
+    /// Chores whose "done" write is in flight (awaiting the server's ack).
+    @State private var sending: Set<String> = []
+    /// Set when a send couldn't reach the parent — a gentle "let's try again"
+    /// (never failure language for a kid). The chore stays available.
+    @State private var retryChoreID: String?
 
     private var myChores: [Chore] {
         guard let id = profiles.activeID else { return [] }
@@ -107,6 +112,14 @@ struct ChoresKidView: View {
                     finishSend(photo: photo)
                 }
             }
+        }
+        // Gentle recovery — the send didn't reach the parent. No blame, no
+        // "failed"; the chore is still there to tap again.
+        .alert("רֶגַע! ✨", isPresented: Binding(
+            get: { retryChoreID != nil }, set: { if !$0 { retryChoreID = nil } })) {
+            Button("אוֹקֵיי") { retryChoreID = nil }
+        } message: {
+            Text("לֹא הִסְפַּקְנוּ לִשְׁלֹחַ לְאַבָּא אוֹ אִמָּא. נַסּוּ שׁוּב עוֹד רֶגַע 🙂")
         }
     }
 
@@ -241,7 +254,9 @@ struct ChoresKidView: View {
                 .lineLimit(1)
                 .frame(height: 13)
 
-            if chore.isPendingApproval || justSent.contains(chore.id) {
+            if sending.contains(chore.id) {
+                statusCapsule("שׁוֹלְחִים… 📨", background: .white.opacity(0.16))
+            } else if chore.isPendingApproval || justSent.contains(chore.id) {
                 statusCapsule("מְחַכִּים לְאִשּׁוּר 🕐", background: .white.opacity(0.16))
             } else if chore.isDaily && chore.approvedToday {
                 statusCapsule(Gendered.g("סִיַּמְתָּ לְהַיּוֹם! 🏆", "סִיַּמְתְּ לְהַיּוֹם! 🏆"),
@@ -317,20 +332,31 @@ struct ChoresKidView: View {
     }
 
     private func send(_ chore: Chore, reward: String, photo: Data?) {
-        guard choreStore.markDone(chore, reward: reward, photo: photo) else {
-            // Family not loaded yet — no fake "sent" celebration for a write
-            // that never left the device; the kid can simply tap again.
-            Haptic.light()
-            return
-        }
-        // Latency bridge only — the listener flips isPendingApproval within a
-        // beat; if we never dropped this, an APPROVED chore would keep showing
-        // "מחכים לאישור" for the rest of the session.
-        justSent.insert(chore.id)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { justSent.remove(chore.id) }
-        Haptic.success()
-        SoundPlayer.shared.play(.portalAppear)
         choosingFor = nil
+        // Show "שולחים…" while we WAIT for the server to confirm — no fake
+        // celebration for a write that might not have reached the parent (Noa's
+        // bug: chores marked done that never arrived). markDone self-heals a
+        // drifted membership and retries, so this is honest, not slow-by-default.
+        sending.insert(chore.id)
+        Task {
+            let result = await choreStore.markDone(chore, reward: reward, photo: photo)
+            sending.remove(chore.id)
+            switch result {
+            case .sent, .queued:
+                // Latency bridge only — the listener flips isPendingApproval
+                // within a beat; without this an APPROVED chore would keep
+                // showing "מחכים לאישור" for the rest of the session.
+                justSent.insert(chore.id)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 4) { justSent.remove(chore.id) }
+                Haptic.success()
+                SoundPlayer.shared.play(.portalAppear)
+            case .failed, .notReady:
+                // Never failure language for a kid (safe-negative-experience) —
+                // a gentle "let's try again" and the chore stays available.
+                retryChoreID = chore.id
+                Haptic.light()
+            }
+        }
     }
 }
 

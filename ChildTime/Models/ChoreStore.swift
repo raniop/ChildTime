@@ -431,32 +431,115 @@ final class ChoreStore: ObservableObject {
 
     // MARK: - Kid action
 
+    /// The outcome of a kid marking a chore done. Anything but `.failed`/
+    /// `.notReady` means the parent WILL be told (`.queued` = accepted into the
+    /// durable offline queue, delivers the moment the network returns).
+    enum SendResult { case sent, queued, notReady, failed }
+
     /// The kid marks the chore done AND picks the reward they want. A catalog
     /// chore may not have a doc yet — setData(merge) materializes it with its
     /// current (default or overridden) values in the same write.
-    /// Returns false when the family isn't loaded yet — the caller must NOT
-    /// play the "נשלח" celebration for a write that never left the device.
+    ///
+    /// CERTAINTY (Rani — "I need to KNOW it reached me, like gift minutes"):
+    /// this awaits the server's acknowledgement instead of firing-and-forgetting.
+    /// The old version returned `true` the instant it queued the write, so a
+    /// rules rejection (a child device whose anonymous uid drifted out of the
+    /// household — Noa) or a too-big photo doc silently vanished and the parent
+    /// got NOTHING, while the kid saw a fake "נשלח!". Now:
+    ///   • permission-denied → re-assert this device's membership and retry once;
+    ///   • any other error with a photo attached (most likely the 1MB doc cap) →
+    ///     retry WITHOUT the photo so the done-signal still lands (the parent is
+    ///     notified; only the picture is dropped);
+    ///   • no ack within the window → `.queued` (Firestore's durable local queue
+    ///     guarantees eventual delivery — safe to celebrate).
+    /// Returns `.notReady` only when the family truly isn't loaded yet.
     @discardableResult
-    func markDone(_ chore: Chore, reward: String, photo: Data? = nil) -> Bool {
+    func markDone(_ chore: Chore, reward: String, photo: Data? = nil) async -> SendResult {
         #if canImport(FirebaseFirestore)
-        guard let hh = listeningHousehold ?? HouseholdManager.shared.household?.id else { return false }
-        var fields: [String: Any] = ["childID": chore.childID,
-                                     "title": chore.title,
-                                     "emoji": chore.emoji,
-                                     "rewardMinutes": chore.rewardMinutes,
-                                     "rewardCoins": chore.rewardCoins,
-                                     "isDaily": chore.isDaily,
-                                     "timesPerDay": chore.timesPerDay,
-                                     "createdAt": chore.createdAt > 0 ? chore.createdAt : Date().timeIntervalSince1970,
-                                     "markedDoneAt": Date().timeIntervalSince1970,
-                                     "chosenReward": reward]
-        // 📸 proof photo — replace or clear any stale one from a previous round.
-        fields["photoData"] = photo ?? FieldValue.delete()
-        db.collection("households").document(hh).collection("chores").document(chore.id)
-            .setData(fields, merge: true)
-        return true
+        guard let hh = listeningHousehold ?? HouseholdManager.shared.household?.id else { return .notReady }
+        let ref = db.collection("households").document(hh).collection("chores").document(chore.id)
+        var base: [String: Any] = ["childID": chore.childID,
+                                    "title": chore.title,
+                                    "emoji": chore.emoji,
+                                    "rewardMinutes": chore.rewardMinutes,
+                                    "rewardCoins": chore.rewardCoins,
+                                    "isDaily": chore.isDaily,
+                                    "timesPerDay": chore.timesPerDay,
+                                    "createdAt": chore.createdAt > 0 ? chore.createdAt : Date().timeIntervalSince1970,
+                                    "markedDoneAt": Date().timeIntervalSince1970,
+                                    "chosenReward": reward]
+        // Clear any stale photo/token from a previous round by default.
+        base["photoData"] = FieldValue.delete()
+        base["photoToken"] = FieldValue.delete()
+        var full = base
+        if let photo, !photo.isEmpty { full["photoData"] = photo }
+
+        // 1) Try the full write (photo included so the push can carry it).
+        var outcome = await Self.writeConfirmed(ref, full)
+        // 2) Membership drifted → re-grant this device and retry once.
+        if outcome == .denied {
+            await HouseholdManager.shared.reassertMembership()
+            outcome = await Self.writeConfirmed(ref, full)
+        }
+        // 3) Non-permission error with a photo → almost certainly the 1MB doc
+        //    cap. Land the done-signal photo-less rather than lose it entirely.
+        if outcome == .error, photo != nil {
+            outcome = await Self.writeConfirmed(ref, base)
+            if outcome == .denied {
+                await HouseholdManager.shared.reassertMembership()
+                outcome = await Self.writeConfirmed(ref, base)
+            }
+        }
+        switch outcome {
+        case .ok:     return .sent
+        case .queued: return .queued
+        default:      return .failed
+        }
         #else
-        return false
+        return .notReady
         #endif
+    }
+
+    #if canImport(FirebaseFirestore)
+    private enum WriteOutcome { case ok, queued, denied, error }
+
+    /// One `setData(merge:)` that reports what actually happened. Firestore's
+    /// completion handler fires only when the write reaches the SERVER — while
+    /// offline it never fires (the write sits in the durable local queue and
+    /// delivers later), so we treat "no ack within the window" as `.queued`
+    /// (guaranteed eventual delivery) and only a real server error as a problem
+    /// to react to. permission-denied is surfaced distinctly so the caller can
+    /// self-heal membership.
+    private static func writeConfirmed(_ ref: DocumentReference, _ fields: [String: Any]) async -> WriteOutcome {
+        await withCheckedContinuation { (cont: CheckedContinuation<WriteOutcome, Never>) in
+            let done = Atomic(false)
+            let assumeQueued = DispatchWorkItem {
+                if done.swap(true) == false { cont.resume(returning: .queued) }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: assumeQueued)
+            ref.setData(fields, merge: true) { err in
+                assumeQueued.cancel()
+                guard done.swap(true) == false else { return }
+                if let err = err as NSError? {
+                    cont.resume(returning: err.code == 7 /* permissionDenied */ ? .denied : .error)
+                } else {
+                    cont.resume(returning: .ok)
+                }
+            }
+        }
+    }
+    #endif
+}
+
+/// Tiny thread-safe latch so the ack callback and the timeout can't both resume
+/// the continuation.
+private final class Atomic<T> {
+    private var value: T
+    private let lock = NSLock()
+    init(_ v: T) { value = v }
+    /// Set the new value, returning the OLD one — atomically.
+    func swap(_ new: T) -> T {
+        lock.lock(); defer { lock.unlock() }
+        let old = value; value = new; return old
     }
 }
