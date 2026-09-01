@@ -65,15 +65,26 @@ service cloud.firestore {
       );
       allow delete: if signedIn() && request.auth.uid in resource.data.parentUIDs;
 
-      // 🧹 House chores — shared family docs: parents create/approve, the
-      // child's device (its uid is also on parentUIDs) marks them done.
+      // 🧹 House chores — a child device (anonymous, but a household member)
+      // may mark a chore done / pick a reward, but must NOT stamp the approval
+      // (lastApprovedAt): approving grants real screen-time/coins and requires
+      // a REAL (non-anonymous) parent account.
       match /chores/{choreID} {
-        allow read, write: if householdHasMe(hid);
+        allow read: if householdHasMe(hid);
+        allow write: if householdHasMe(hid) && (
+          request.auth.token.firebase.sign_in_provider != 'anonymous'
+          || request.resource.data.get('lastApprovedAt', 0)
+             == (resource != null ? resource.data.get('lastApprovedAt', 0) : 0)
+        );
       }
 
-      // 🧹 Lifetime chore-earnings ledger per child (minutesTotal/coinsTotal).
+      // 🧹 Lifetime chore-earnings ledger per child (minutesTotal/coinsTotal/
+      // coinsPaid). Read by any member; WRITTEN only by a real parent account
+      // (the approve/settle transaction) — a child device can't inflate coins.
       match /choreStats/{childID} {
-        allow read, write: if householdHasMe(hid);
+        allow read:  if householdHasMe(hid);
+        allow write: if householdHasMe(hid)
+                     && request.auth.token.firebase.sign_in_provider != 'anonymous';
       }
     }
 
