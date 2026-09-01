@@ -104,7 +104,7 @@ struct SchoolYearCelebrationView: View {
                            startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             SparkleField(count: 36, size: 14)
-            BalloonField()
+            BalloonField(startDelay: 7)
             // (No 🎆/🎇 corner emojis — iOS renders those as framed photos.)
         }
     }
@@ -165,8 +165,11 @@ private struct Starburst: Shape {
     }
 }
 
-/// A loop of balloons drifting up the screen forever.
+/// A loop of balloons drifting up the screen forever. `startDelay` holds the
+/// whole show back — the September parties let the confetti burst play out
+/// ALONE first, and only then the balloons begin (Rani's sequencing).
 private struct BalloonField: View {
+    var startDelay: Double = 0
     private static let balloons: [(emoji: String, x: CGFloat, size: CGFloat, duration: Double, delay: Double)] = [
         ("🎈", 0.10, 52, 7.0, 0.0), ("🎈", 0.85, 44, 8.5, 1.2),
         ("🟡", 0.30, 0,  0,   0),   // spacer entry never rendered (size 0)
@@ -182,7 +185,7 @@ private struct BalloonField: View {
                     RisingEmoji(emoji: b.emoji, size: b.size,
                                 x: geo.size.width * b.x,
                                 screenH: geo.size.height,
-                                duration: b.duration, delay: b.delay)
+                                duration: b.duration, delay: b.delay + startDelay)
                 }
             }
         }
@@ -268,7 +271,7 @@ struct ParentSchoolYearPartyView: View {
                            startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             SparkleField(count: 30, size: 13)
-            BalloonField()
+            BalloonField(startDelay: 7)
 
             VStack(spacing: AppSpacing.md) {
                 Spacer(minLength: 16)
