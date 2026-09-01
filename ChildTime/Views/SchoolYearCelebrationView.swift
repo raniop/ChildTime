@@ -27,7 +27,7 @@ struct SchoolYearCelebrationView: View {
 
                 medal
 
-                Text("יוֹם רִאשׁוֹן לַלִּמּוּדִים! 🎒")
+                Text("יוֹם רִאשׁוֹן לַלִּמּוּדִים!")
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
