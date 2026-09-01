@@ -171,13 +171,47 @@ final class RemoteSyncManager: ObservableObject {
     /// "didn't work". The child's device consumes this command additively
     /// (`applyPendingMinuteGrant`), so grants always land and even compose, and
     /// nothing else (stars / diamonds) is touched.
+    /// Children whose last parent→child command was PERMANENTLY rejected
+    /// (permission-denied even after a self-heal) — the dashboard shows an
+    /// honest error instead of the command silently never landing.
+    @Published var commandFailed: Set<UUID> = []
+
+    #if canImport(FirebaseFirestore)
+    /// Confirmed write to a child command doc, with the same Noa-class self-heal
+    /// the chore path uses: permission-denied → re-assert this device's
+    /// household membership and retry ONCE (safe — a denied write never
+    /// committed, so a `FieldValue.increment` can't double-count). Returns the
+    /// final outcome so the caller can honestly reconcile optimistic UI. Only
+    /// `.denied` is retried; `.queued` (offline) is a genuine success (durable).
+    private func sendChildCommandConfirmed(_ childID: UUID, _ fields: [String: Any]) async -> ConfirmedWriteOutcome {
+        let ref = db.collection("children").document(childID.uuidString)
+        var outcome = await confirmedMerge(ref, fields)
+        if outcome == .denied {
+            await HouseholdManager.shared.reassertMembership()
+            outcome = await confirmedMerge(ref, fields)
+        }
+        return outcome
+    }
+    #endif
+
     func adjustChildMinutes(childID: UUID, deltaMinutes: Int) {
         #if canImport(FirebaseFirestore)
         // Optimistic local bump so the parent sees it immediately (reconciles when
         // the child device applies it and `pendingMinuteAdjustment` returns to 0).
         pendingAdjustments[childID, default: 0] += deltaMinutes
-        db.collection("children").document(childID.uuidString)
-            .setData(["pendingMinuteAdjustment": FieldValue.increment(Int64(deltaMinutes))], merge: true)
+        let fields: [String: Any] = ["pendingMinuteAdjustment": FieldValue.increment(Int64(deltaMinutes))]
+        Task { @MainActor in
+            let outcome = await self.sendChildCommandConfirmed(childID, fields)
+            // Permanent rejection → roll back the optimistic bump and tell the
+            // parent, instead of leaving a +N that will never reach the child.
+            if outcome == .denied || outcome == .error {
+                self.pendingAdjustments[childID, default: 0] -= deltaMinutes
+                if (self.pendingAdjustments[childID] ?? 0) == 0 {
+                    self.pendingAdjustments.removeValue(forKey: childID)
+                }
+                self.commandFailed.insert(childID)
+            }
+        }
         #endif
     }
 
@@ -199,11 +233,25 @@ final class RemoteSyncManager: ObservableObject {
         var fields: [String: Any] = ["pendingGiftAdjustment": FieldValue.increment(Int64(minutes)),
                                      "giftSentAt": stamp]
         if let uid = AuthManager.shared.userID { fields["giftCommandBy"] = uid }
-        db.collection("children").document(childID.uuidString)
-            .setData(fields, merge: true) { [weak self] error in
-                guard error == nil else { return }
-                Task { @MainActor in self?.giftSendTracker[childID]?.reachedCloud = true }
+        Task { @MainActor in
+            let outcome = await self.sendChildCommandConfirmed(childID, fields)
+            switch outcome {
+            case .ok:
+                // Server committed → the gift is SAFE in the cloud.
+                self.giftSendTracker[childID]?.reachedCloud = true
+            case .queued:
+                // Offline but durably queued — the existing "saved, will
+                // auto-send" message is now TRUE. Leave the tracker as-is.
+                break
+            case .denied, .error:
+                // Permanent rejection (the Noa-class uid drift, now on a PARENT
+                // device) — roll back the optimistic pocket and tell the parent
+                // honestly, instead of the old false "saved offline".
+                self.pendingGifts[childID, default: 0] -= minutes
+                if (self.pendingGifts[childID] ?? 0) <= 0 { self.pendingGifts.removeValue(forKey: childID) }
+                self.giftSendTracker[childID]?.failed = true
             }
+        }
         #endif
     }
 
@@ -284,15 +332,17 @@ final class RemoteSyncManager: ObservableObject {
         //    reached the kid before the command, mergeRemote ratchet-maxed stars
         //    back over it and re-uploaded them, and no later push could lower the
         //    cloud again. So: command only; the child wipes + pushes.)
-        db.collection("children").document(id)
-            .setData(["resetRequestedAt": Date().timeIntervalSince1970,
-                      "pendingMinuteAdjustment": 0,
-                      "pendingGiftAdjustment": 0], merge: true)
+        let fields: [String: Any] = ["resetRequestedAt": Date().timeIntervalSince1970,
+                                     "pendingMinuteAdjustment": 0,
+                                     "pendingGiftAdjustment": 0]
         // 2. Parent-side mirror: show zeros NOW and keep showing them until the
         //    child's post-reset snapshot arrives (a stale, pre-reset cloud echo
-        //    must not flip the tile back).
+        //    must not flip the tile back). Stash the prior snapshot so a
+        //    permanent command rejection can UNDO the fake zeros — the old code
+        //    painted zeros for a full 24h even when the reset never went through.
+        let prev = remoteSnapshots[childID]
         var blank = ProgressSnapshot.blank
-        blank.revision = (remoteSnapshots[childID]?.revision ?? 0) + 1
+        blank.revision = (prev?.revision ?? 0) + 1
         blank.lastModifiedAt = Date()
         remoteSnapshots[childID] = blank
         // Gate by REVISION (clock skew between devices is real), with a TTL so a
@@ -300,6 +350,17 @@ final class RemoteSyncManager: ObservableObject {
         resetPending[childID] = (minRevision: blank.revision, until: Date().addingTimeInterval(24 * 3600))
         pendingAdjustments.removeValue(forKey: childID)
         pendingGifts.removeValue(forKey: childID)
+        // 3. Confirm the AUTHORITATIVE command reached the cloud; self-heal a
+        //    drifted membership and retry. On a permanent rejection, roll the
+        //    optimistic zeros back and tell the parent — never leave fake zeros.
+        Task { @MainActor in
+            let outcome = await self.sendChildCommandConfirmed(childID, fields)
+            if outcome == .denied || outcome == .error {
+                self.resetPending.removeValue(forKey: childID)
+                self.remoteSnapshots[childID] = prev
+                self.commandFailed.insert(childID)
+            }
+        }
         #endif
     }
 
@@ -319,6 +380,10 @@ final class RemoteSyncManager: ObservableObject {
         var sentAt: Date
         var reachedCloud: Bool
         var appliedAt: Double?
+        /// The command was PERMANENTLY rejected (permission-denied even after a
+        /// membership self-heal) — NOT merely offline. The status UI shows an
+        /// honest "try again" instead of the false "saved, will auto-send".
+        var failed: Bool = false
         var applied: Bool { (appliedAt ?? 0) >= stamp }
     }
     @Published var giftRevokeTracker: [UUID: GiftRevokeTracker] = [:]
@@ -334,12 +399,24 @@ final class RemoteSyncManager: ObservableObject {
         var fields: [String: Any] = ["revokeGiftAt": stamp,
                                      "pendingGiftAdjustment": 0]   // cancel any in-flight "+10"
         if let uid = AuthManager.shared.userID { fields["giftCommandBy"] = uid }
-        db.collection("children").document(childID.uuidString)
-            .setData(fields, merge: true) { [weak self] error in
-                // Completion fires only on BACKEND commit → honest "reached cloud".
-                guard error == nil else { return }
-                Task { @MainActor in self?.giftRevokeTracker[childID]?.reachedCloud = true }
+        // Snapshot the pre-revoke gift so a permanent rejection can be undone.
+        let prevGiftMinutes = remoteSnapshots[childID]?.parentGiftMinutes
+        Task { @MainActor in
+            let outcome = await self.sendChildCommandConfirmed(childID, fields)
+            switch outcome {
+            case .ok:
+                self.giftRevokeTracker[childID]?.reachedCloud = true
+            case .queued:
+                break   // durable — will deliver
+            case .denied, .error:
+                // Undo the optimistic "dropped to 0" — the time was NOT revoked.
+                self.giftRevokeTracker[childID]?.failed = true
+                if let prevGiftMinutes, var snap = self.remoteSnapshots[childID] {
+                    snap.parentGiftMinutes = prevGiftMinutes
+                    self.remoteSnapshots[childID] = snap
+                }
             }
+        }
         // Optimistic local mirror so the parent's 💝 tile drops to 0 at once.
         pendingGifts.removeValue(forKey: childID)
         if var snap = remoteSnapshots[childID] {

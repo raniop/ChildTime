@@ -176,6 +176,11 @@ struct ChoresParentView: View {
             }
             .onAppear { choreStore.startIfNeeded() }
             .onChangeCompat(of: selectedID) { _, _ in clearForm() }
+            .alert("האישור לא נשלח", isPresented: $choreStore.lastActionFailed) {
+                Button("הבנתי", role: .cancel) { }
+            } message: {
+                Text("לא הצלחנו לאשר את המטלה כרגע. בדקו את החיבור לאינטרנט ונסו שוב.")
+            }
         }
     }
 

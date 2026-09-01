@@ -175,7 +175,11 @@ struct RemoteCommandStatusSheet: View {
     private func giftRow(revoke: RemoteSyncManager.GiftRevokeTracker?) -> some View {
         let elapsed = Date().timeIntervalSince(revoke?.sentAt ?? Date())
 
-        if revoke?.applied == true {
+        if revoke?.failed == true {
+            statusRow(icon: "exclamationmark.triangle.fill", tint: .red,
+                      title: "המחיקה לא נשלחה",
+                      detail: "משהו חסם את השליחה. נסו שוב עוד רגע.")
+        } else if revoke?.applied == true {
             statusRow(icon: "gift.fill", tint: .green,
                       title: "דקות המתנה נמחקו ✓",
                       detail: "המכשיר של \(profile.name) אישר את המחיקה.")
@@ -195,7 +199,13 @@ struct RemoteCommandStatusSheet: View {
     private func giftSendCloudRow(giftSend: RemoteSyncManager.GiftRevokeTracker?) -> some View {
         let elapsed = Date().timeIntervalSince(giftSend?.sentAt ?? Date())
 
-        if giftSend?.reachedCloud == true {
+        if giftSend?.failed == true {
+            // Permanent rejection — the honest state that used to be mislabeled
+            // as "saved offline, will auto-send".
+            statusRow(icon: "exclamationmark.triangle.fill", tint: .red,
+                      title: "המתנה לא נשלחה",
+                      detail: "משהו חסם את השליחה. נסו שוב עוד רגע.")
+        } else if giftSend?.reachedCloud == true {
             statusRow(icon: "checkmark.icloud.fill", tint: .green,
                       title: "המתנה נשלחה ונשמרה",
                       detail: "גם אם המכשיר כבוי עכשיו — המתנה מחכה בענן.")

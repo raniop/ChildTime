@@ -1536,8 +1536,17 @@ final class HouseholdManager: ObservableObject {
         // when extending/among-equal or clearing after a real lapse we detect.
         if let until {
             if let current, current >= until { return }   // cloud already >= ours
-            db.collection("households").document(hh)
-                .setData(["premiumUntil": until.timeIntervalSince1970], merge: true)
+            let ref = db.collection("households").document(hh)
+            Task {
+                // Confirm + self-heal: a paid family whose device uid drifted out
+                // of parentUIDs would otherwise silently fail to broadcast
+                // premium, leaving co-parent/child devices locked after payment.
+                var outcome = await confirmedMerge(ref, ["premiumUntil": until.timeIntervalSince1970])
+                if outcome == .denied {
+                    await self.reassertMembership()
+                    outcome = await confirmedMerge(ref, ["premiumUntil": until.timeIntervalSince1970])
+                }
+            }
         }
         #endif
     }

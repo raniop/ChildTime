@@ -1600,6 +1600,16 @@ struct ParentDashboardView: View {
         } message: { s in
             Text(s.text)
         }
+        // A parent→child command (±דקות / איפוס) was permanently rejected — tell
+        // the parent honestly instead of leaving an optimistic change that never
+        // reached the child.
+        .alert("הפעולה לא נשלחה", isPresented: Binding(
+            get: { !remote.commandFailed.isEmpty },
+            set: { if !$0 { remote.commandFailed.removeAll() } })) {
+            Button("הבנתי", role: .cancel) { remote.commandFailed.removeAll() }
+        } message: {
+            Text("לא הצלחנו לשלוח את העדכון למכשיר של הילד/ה. בדקו את החיבור לאינטרנט ונסו שוב.")
+        }
     }
 
     /// The children grid (pulled out of `body` — the type-checker choked on the

@@ -324,9 +324,26 @@ final class ChoreStore: ObservableObject {
     /// — so two approvers (second parent, the notification button, a double
     /// tap) can never pay twice, and a partial failure can never leave a
     /// paid-but-still-pending chore.
+    /// Set when an approval couldn't commit (permission/offline) so the parent
+    /// UI can show an honest "try again" instead of the reward silently never
+    /// landing while the chore just sits pending.
+    @Published var lastActionFailed = false
+
     func approve(_ chore: Chore) {
         guard let hh = listeningHousehold else { return }
-        Task { await Self.performApproval(householdID: hh, choreID: chore.id) }
+        Task {
+            var ok = await Self.performApproval(householdID: hh, choreID: chore.id)
+            if !ok {
+                // Membership may have drifted (same self-heal as markDone) — or
+                // it was already claimed by another approver (then this returns
+                // false but the chore is genuinely done, so re-check).
+                await HouseholdManager.shared.reassertMembership()
+                ok = await Self.performApproval(householdID: hh, choreID: chore.id)
+            }
+            if !ok, self.chores.first(where: { $0.id == chore.id })?.isPendingApproval == true {
+                self.lastActionFailed = true   // still pending AND we failed → real problem
+            }
+        }
     }
 
     /// The transactional core, shared with the notification-button path.
@@ -475,19 +492,19 @@ final class ChoreStore: ObservableObject {
         if let photo, !photo.isEmpty { full["photoData"] = photo }
 
         // 1) Try the full write (photo included so the push can carry it).
-        var outcome = await Self.writeConfirmed(ref, full)
+        var outcome = await confirmedMerge(ref, full)
         // 2) Membership drifted → re-grant this device and retry once.
         if outcome == .denied {
             await HouseholdManager.shared.reassertMembership()
-            outcome = await Self.writeConfirmed(ref, full)
+            outcome = await confirmedMerge(ref, full)
         }
         // 3) Non-permission error with a photo → almost certainly the 1MB doc
         //    cap. Land the done-signal photo-less rather than lose it entirely.
         if outcome == .error, photo != nil {
-            outcome = await Self.writeConfirmed(ref, base)
+            outcome = await confirmedMerge(ref, base)
             if outcome == .denied {
                 await HouseholdManager.shared.reassertMembership()
-                outcome = await Self.writeConfirmed(ref, base)
+                outcome = await confirmedMerge(ref, base)
             }
         }
         switch outcome {
@@ -498,48 +515,5 @@ final class ChoreStore: ObservableObject {
         #else
         return .notReady
         #endif
-    }
-
-    #if canImport(FirebaseFirestore)
-    private enum WriteOutcome { case ok, queued, denied, error }
-
-    /// One `setData(merge:)` that reports what actually happened. Firestore's
-    /// completion handler fires only when the write reaches the SERVER — while
-    /// offline it never fires (the write sits in the durable local queue and
-    /// delivers later), so we treat "no ack within the window" as `.queued`
-    /// (guaranteed eventual delivery) and only a real server error as a problem
-    /// to react to. permission-denied is surfaced distinctly so the caller can
-    /// self-heal membership.
-    private static func writeConfirmed(_ ref: DocumentReference, _ fields: [String: Any]) async -> WriteOutcome {
-        await withCheckedContinuation { (cont: CheckedContinuation<WriteOutcome, Never>) in
-            let done = Atomic(false)
-            let assumeQueued = DispatchWorkItem {
-                if done.swap(true) == false { cont.resume(returning: .queued) }
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: assumeQueued)
-            ref.setData(fields, merge: true) { err in
-                assumeQueued.cancel()
-                guard done.swap(true) == false else { return }
-                if let err = err as NSError? {
-                    cont.resume(returning: err.code == 7 /* permissionDenied */ ? .denied : .error)
-                } else {
-                    cont.resume(returning: .ok)
-                }
-            }
-        }
-    }
-    #endif
-}
-
-/// Tiny thread-safe latch so the ack callback and the timeout can't both resume
-/// the continuation.
-private final class Atomic<T> {
-    private var value: T
-    private let lock = NSLock()
-    init(_ v: T) { value = v }
-    /// Set the new value, returning the OLD one — atomically.
-    func swap(_ new: T) -> T {
-        lock.lock(); defer { lock.unlock() }
-        let old = value; value = new; return old
     }
 }
