@@ -23,9 +23,23 @@ struct QuestionGenerator {
     /// from the dedicated really-hard pool (BonusQuestionBank); math is generated
     /// as a two-step expression. Falls back to a regular hard question if the
     /// pool for this topic is exhausted this session.
-    static func generateBonus(topic: Topic) -> Question {
+    static func generateBonus(topic: Topic, grade: Int? = nil) -> Question {
         if topic == .math { return makeBonusMath() }
-        let pool = BonusQuestionBank.pool(for: topic)
+        var pool = BonusQuestionBank.pool(for: topic)
+        // 💫 Bonus stays HARD but age-fair: with the whole bank grade-tagged,
+        // filter to the child's window (nearest items when the window is thin).
+        if let g = grade {
+            let inWindow = pool.filter { $0.grades.contains(g) }
+            if inWindow.count >= 3 {
+                pool = inWindow
+            } else {
+                pool = Array(pool.sorted {
+                    let d0 = $0.grades.contains(g) ? 0 : min(abs($0.grades.lowerBound - g), abs($0.grades.upperBound - g))
+                    let d1 = $1.grades.contains(g) ? 0 : min(abs($1.grades.lowerBound - g), abs($1.grades.upperBound - g))
+                    return d0 < d1
+                }.prefix(10))
+            }
+        }
         guard let item = QuestionMemory.shared.pickFresh(pool, for: topic, target: .hard) else {
             return generate(topic: topic, difficulty: .hard)
         }
@@ -150,14 +164,23 @@ struct QuestionGenerator {
     private static func makeFromBank(topic: Topic, difficulty: Difficulty, grade: Int? = nil) -> Question {
         var bank = QuestionBanks.bank(for: topic) ?? []
         if let g = grade {
-            // 🎓 Curriculum window: never serve items tagged for OTHER grades;
-            // prefer items tagged for THIS grade (70%) over legacy untagged.
-            let tagged = bank.filter { $0.grades?.contains(g) == true }
-            let untagged = bank.filter { $0.grades == nil }
-            if tagged.isEmpty {
-                if !untagged.isEmpty { bank = untagged }
+            // 🎓 Curriculum window (the whole bank is now grade-tagged): serve
+            // ONLY items whose window contains this grade. When the pool is
+            // sparse or absent (English before ג׳, geography in גן — deliberate
+            // curriculum gaps), borrow the CLOSEST-grade items instead of the
+            // whole range, so a kindergartner gets the easiest material rather
+            // than world capitals.
+            func windowDistance(_ item: BankQuestion) -> Int {
+                let r = item.grades
+                if r.contains(g) { return 0 }
+                return min(abs(r.lowerBound - g), abs(r.upperBound - g))
+            }
+            let tagged = bank.filter { $0.grades.contains(g) }
+            if tagged.count >= 5 {
+                bank = tagged
             } else {
-                bank = Double.random(in: 0...1) < 0.7 ? tagged : tagged + untagged
+                let nearest = bank.sorted { windowDistance($0) < windowDistance($1) }
+                bank = Array(nearest.prefix(max(20, tagged.count)))
             }
         }
         guard let item = QuestionMemory.shared.pickFresh(bank, for: topic, target: difficulty) else {
