@@ -23,8 +23,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         if FirebaseApp.app() == nil { FirebaseApp.configure() }
         #endif
         // Own notification handling from the very start so tapped action buttons
-        // (e.g. "כן, העלו רמה") are delivered even on a cold launch.
-        Task { @MainActor in
+        // (e.g. "כן, העלו רמה" / "✅ בוצע — אשרו") are delivered even on a cold
+        // launch FROM the action. didFinishLaunching is already on the main
+        // actor, so set the delegate SYNCHRONOUSLY — a deferred Task could let
+        // the action be delivered before the delegate exists and get dropped.
+        MainActor.assumeIsolated {
             UNUserNotificationCenter.current().delegate = PushManager.shared
             PushManager.shared.configureCategories()
         }

@@ -1373,7 +1373,7 @@ struct ParentDashboardView: View {
     private func pushWatchGlance() {
         let glances = rows.map { row -> WatchBridge.ChildGlance in
             let s = row.snapshot
-            let playing = (s.unlockEndsAt ?? .distantPast) > Date()
+            let playing = liveWindow(row.profile) != nil
             let pending = choreStore.chores(forChild: row.profile.id)
                 .filter { $0.isPendingApproval }.count
             return WatchBridge.ChildGlance(
