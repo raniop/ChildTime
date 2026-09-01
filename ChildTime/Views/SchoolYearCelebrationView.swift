@@ -11,7 +11,6 @@ struct SchoolYearCelebrationView: View {
     var gender: ChildGender? = nil
     let onDone: () -> Void
 
-    @State private var confetti = 0
     @State private var appeared = false
     @State private var stage = 0     // staged entrance: 0 → 3
 
@@ -77,20 +76,16 @@ struct SchoolYearCelebrationView: View {
                 .opacity(stage >= 3 ? 1 : 0)
             }
 
-            Confetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .rightToLeft)
         .onAppear {
             appeared = true
             SoundPlayer.shared.play(.levelUp)
-            confetti += 1
+            // No confetti here (Rani) — the endlessly rising balloons ARE the
+            // celebration; confetti on top was noise.
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(0.15)) { stage = 1 }
             withAnimation(.spring(response: 0.55, dampingFraction: 0.55).delay(0.55)) { stage = 2 }
             withAnimation(.easeOut(duration: 0.4).delay(1.0)) { stage = 3 }
-            // Second burst only AFTER the first fully lands+fades (~2.4s) — an
-            // earlier re-trigger RESETS pieces mid-fall, which read as the
-            // confetti stuttering on/off (Rani caught it on the parent screen).
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) { confetti += 1 }
         }
     }
 
@@ -252,12 +247,11 @@ enum SchoolYearCelebration {
 
 /// ☀️ Full-screen September party on the PARENT device (Rani: "מסך יפה כמו
 /// שיש לילדים") — same visual language as the kid celebration: sun-medal,
-/// rising balloons, confetti — wishing every child a great new school year.
+/// rising balloons — wishing every child a great new school year.
 struct ParentSchoolYearPartyView: View {
     let profiles: [Profile]
     let onDone: () -> Void
 
-    @State private var confetti = 0
     @State private var appeared = false
     @State private var stage = 0
 
@@ -360,20 +354,16 @@ struct ParentSchoolYearPartyView: View {
                 .opacity(stage >= 3 ? 1 : 0)
             }
 
-            Confetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .rightToLeft)
         .onAppear {
             appeared = true
             SoundPlayer.shared.play(.levelUp)
-            confetti += 1
+            // No confetti here (Rani) — the endlessly rising balloons ARE the
+            // celebration; confetti on top was noise.
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(0.15)) { stage = 1 }
             withAnimation(.spring(response: 0.55, dampingFraction: 0.55).delay(0.55)) { stage = 2 }
             withAnimation(.easeOut(duration: 0.4).delay(1.0)) { stage = 3 }
-            // Second burst only AFTER the first fully lands+fades (~2.4s) — an
-            // earlier re-trigger RESETS pieces mid-fall, which read as the
-            // confetti stuttering on/off (Rani caught it on the parent screen).
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) { confetti += 1 }
         }
     }
 }
