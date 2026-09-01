@@ -208,7 +208,8 @@ struct BossBattleView: View {
         if world.isBonusWorld {
             // 💫 Arena boss: extra-hard bonus questions across ALL enabled topics.
             let pool = Array(ProfileStore.shared.active?.enabledTopics ?? Set(Topic.allCases))
-            question = QuestionGenerator.generateBonus(topic: pool.randomElement() ?? .logic)
+            question = QuestionGenerator.generateBonus(topic: pool.randomElement() ?? .logic,
+                                                       grade: ProfileStore.shared.active?.effectiveGrade)
         } else {
             // A boss must BITE. Curriculum content stays within the child's
             // grade, so a kid whose adaptive level already maxed the topic

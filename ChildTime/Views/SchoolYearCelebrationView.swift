@@ -45,7 +45,7 @@ struct SchoolYearCelebrationView: View {
                     .scaleEffect(stage >= 2 ? 1 : 0.4)
                     .opacity(stage >= 2 ? 1 : 0)
 
-                Text("שָׁנָה חֲדָשָׁה, הַרְפַּתְקָה חֲדָשָׁה — טוֹפִי כְּבָר הֵכִין\nשְׁאֵלוֹת חֲדָשׁוֹת בְּדִיּוּק בִּשְׁבִילְךָ! 🚀")
+                Text("שָׁנָה חֲדָשָׁה, הַרְפַּתְקָה חֲדָשָׁה — טוֹפִי כְּבָר הֵכִין\nשְׁאֵלוֹת חֲדָשׁוֹת בְּדִיּוּק \(gender == .girl ? "בִּשְׁבִילֵךְ" : "בִּשְׁבִילְךָ")! 🚀")
                     .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.95))
                     .multilineTextAlignment(.center)
@@ -333,7 +333,7 @@ struct ParentSchoolYearPartyView: View {
                 .scaleEffect(stage >= 2 ? 1 : 0.4)
                 .opacity(stage >= 2 ? 1 : 0)
 
-                Text("שָׁנָה שֶׁל סַקְרָנוּת, בִּטָּחוֹן וְהַמוֹן רְגָעִים טוֹבִים —\nטוֹפִי כְּבָר מְחַכֶּה לָהֶם עִם שְׁאֵלוֹת חֲדָשׁוֹת 💛")
+                Text("שָׁנָה שֶׁל סַקְרָנוּת, בִּטָּחוֹן וְהָמוֹן רְגָעִים טוֹבִים —\nטוֹפִי כְּבָר מְחַכֶּה לָהֶם עִם שְׁאֵלוֹת חֲדָשׁוֹת 💛")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.95))
                     .multilineTextAlignment(.center)

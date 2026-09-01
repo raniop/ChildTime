@@ -64,7 +64,7 @@ struct ChoresKidView: View {
             }
         }
         .onAppear { choreStore.startIfNeeded() }
-        .confirmationDialog("אֵיזֶה פְּרָס מַגִּיעַ לְךָ?", isPresented: Binding(
+        .confirmationDialog(Gendered.g("אֵיזֶה פְּרָס מַגִּיעַ לְךָ?", "אֵיזֶה פְּרָס מַגִּיעַ לָךְ?"), isPresented: Binding(
             get: { choosingFor != nil },
             set: { if !$0 { choosingFor = nil } }
         ), titleVisibility: .visible) {
@@ -80,10 +80,10 @@ struct ChoresKidView: View {
         }
         // 📸 Optional proof photo — a picture beats a debate about whether the
         // room is really tidy (Rani).
-        .confirmationDialog("רוֹצִים לְצָרֵף תְּמוּנָה שֶׁל מָה שֶׁעֲשִׂיתֶם? 📸", isPresented: $showPhotoOffer,
+        .confirmationDialog("רוֹצִים לְצָרֵף תְּמוּנָה שֶׁל מַה שֶּׁעֲשִׂיתֶם? 📸", isPresented: $showPhotoOffer,
                             titleVisibility: .visible) {
             if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                Button("📸 לְצַלֵּם עַכְשָׁיו") { showCamera = true }
+                Button("📸 לְצַלֵּם עַכְשָׁו") { showCamera = true }
             }
             Button("🖼 לִבְחֹר תְּמוּנָה") { libraryPickerPresented = true }
             Button("לִשְׁלֹחַ בְּלִי תְּמוּנָה") { finishSend(photo: nil) }
@@ -148,7 +148,7 @@ struct ChoresKidView: View {
             HStack(spacing: AppSpacing.md) {
                 Text("🏆").font(.system(size: 30))
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(Gendered.g("סַךְ הַכֹּל הִרְוַחְתָּ מִמַּטְלוֹת:", "סַךְ הַכֹּל הִרְוַחְתְּ מִמַּטְלוֹת:"))
+                    Text(Gendered.g("סַךְ הַכֹּל הִרְוַחְתָּ מֵהַמַּטְלוֹת:", "סַךְ הַכֹּל הִרְוַחְתְּ מֵהַמַּטְלוֹת:"))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                     HStack(spacing: 8) {
@@ -186,7 +186,7 @@ struct ChoresKidView: View {
                 Text("\(moneyBalance) שְׁקָלִים בַּקֻּפָּה!")
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("אַבָּא אוֹ אִמָּא יִתְּנוּ לְךָ בַּיָּד 💛")
+                Text(Gendered.g("אַבָּא אוֹ אִמָּא יִתְּנוּ לְךָ בַּיָּד 💛", "אַבָּא אוֹ אִמָּא יִתְּנוּ לָךְ בַּיָּד 💛"))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
             }

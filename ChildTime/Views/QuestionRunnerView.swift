@@ -981,7 +981,7 @@ struct QuestionRunnerView: View {
         }
         let childGrade = profiles.active?.effectiveGrade
         func makeQuestion() -> Question {
-            if bonus || isBonusArena { return QuestionGenerator.generateBonus(topic: topic) }
+            if bonus || isBonusArena { return QuestionGenerator.generateBonus(topic: topic, grade: childGrade) }
             return preReader
                 ? PreReaderContent.generate(topic: topic)
                 : QuestionGenerator.generate(topic: topic, difficulty: effective, grade: childGrade)

@@ -63,7 +63,7 @@ struct ChoresParentView: View {
                 }
 
                 if !pending.isEmpty {
-                    Section("מחכה לאישור שלכם 🕐") {
+                    Section(pending.count == 1 ? "מחכה לאישור שלכם 🕐" : "מחכות לאישור שלכם 🕐") {
                         ForEach(pending) { chore in pendingRow(chore) }
                     }
                 }
@@ -108,7 +108,7 @@ struct ChoresParentView: View {
                 } header: {
                     Text("המטלות של \(profile.name)")
                 } footer: {
-                    Text("כל המטלות זמינות אוטומטית, והפרסים מוצעים לפי גודל המטלה. לחיצה על מטלה — עריכת הפרסים; החלקה — הסתרה. \(profile.gender == .girl ? "היא בוחרת" : "הוא בוחר") בעצמו אם לקבל דקות או כסף.")
+                    Text("כל המטלות זמינות אוטומטית, והפרסים מוצעים לפי גודל המטלה. לחיצה על מטלה — עריכת הפרסים; החלקה — הסתרה. \(profile.gender == .girl ? "היא בוחרת בעצמה" : "הוא בוחר בעצמו") אם לקבל דקות או כסף.")
                 }
 
                 if !hidden.isEmpty {
@@ -186,8 +186,8 @@ struct ChoresParentView: View {
                 Text("\(chore.emoji) \(chore.title)").bold()
                 Spacer()
                 Text(chore.chosenReward == "coins"
-                     ? "💰 בחר/ה ₪\(chore.rewardCoins)"
-                     : "🎮 בחר/ה \(chore.rewardMinutes) דק׳")
+                     ? "💰 \(profile.gender == .girl ? "בחרה" : "בחר") ₪\(chore.rewardCoins)"
+                     : "🎮 \(profile.gender == .girl ? "בחרה" : "בחר") \(chore.rewardMinutes) דק׳")
                     .font(.caption).foregroundStyle(.secondary)
             }
             if let data = chore.photoData, let img = UIImage(data: data) {
