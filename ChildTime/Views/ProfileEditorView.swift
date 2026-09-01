@@ -83,7 +83,10 @@ struct ProfileEditorView: View {
 
                         interestsSection
 
-                        if isEdit, let id = existingID {
+                        // Delete is PARENT-ONLY (canEditLearning) — a kid tapping
+                        // their own avatar must never be able to wipe the account,
+                        // incl. real-money diamonds and purchased characters.
+                        if isEdit, canEditLearning, let id = existingID {
                             Button(role: .destructive) {
                                 showDeleteConfirm = true
                             } label: {

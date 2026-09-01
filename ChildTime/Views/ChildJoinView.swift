@@ -121,14 +121,9 @@ struct ChildJoinView: View {
                             .font(.system(size: 13.5, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
                             .multilineTextAlignment(.center)
-                        ShareLink(item: URL(string: "https://tofyapp.com")!) {
-                            Label("שִׁלְחוּ אֶת טוֹפִי לַמַּכְשִׁיר שֶׁל הַהוֹרֶה", systemImage: "square.and.arrow.up")
-                                .font(.system(size: 13.5, weight: .heavy, design: .rounded))
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 14).padding(.vertical, 8)
-                                .background(.white.opacity(0.14), in: Capsule())
-                        }
-                        .padding(.top, 2)
+                        // (No ShareLink here — a share sheet leaves the app,
+                        // which the Kids Category forbids, 1.3. The 1-2-3 steps
+                        // above already say what to do.)
                     }
                     .padding(.top, 6)
 

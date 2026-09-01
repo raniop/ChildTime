@@ -35,7 +35,9 @@ final class PushManager: NSObject, ObservableObject {
         configureCategories()
         let granted = (try? await center.requestAuthorization(options: [.alert, .badge, .sound])) ?? false
         authorized = granted
-        guard granted else { return }
+        // Register for APNs REGARDLESS of the alert grant: the parent's remote
+        // lock rides a silent/mutable-content push (NSE), which needs only the
+        // device token — a kid who declined notifications must still be lockable.
         UIApplication.shared.registerForRemoteNotifications()
     }
 
@@ -59,7 +61,9 @@ final class PushManager: NSObject, ObservableObject {
             authorized = true
             UIApplication.shared.registerForRemoteNotifications()   // refresh token
         default:
-            authorized = false                           // .denied → respect it
+            // .denied → still register for APNs so silent/lock pushes work.
+            authorized = false
+            UIApplication.shared.registerForRemoteNotifications()
         }
     }
 

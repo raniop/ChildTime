@@ -299,7 +299,9 @@ final class ChoreStore: ObservableObject {
                       "createdAt": chore.createdAt > 0 ? chore.createdAt : Date().timeIntervalSince1970,
                       "archived": true,
                       "markedDoneAt": FieldValue.delete(),
-                      "chosenReward": FieldValue.delete()], merge: true)
+                      "chosenReward": FieldValue.delete(),
+                      "photoData": FieldValue.delete(),
+                      "photoToken": FieldValue.delete()], merge: true)
         #endif
     }
 
@@ -317,36 +319,71 @@ final class ChoreStore: ObservableObject {
         #endif
     }
 
-    /// Parent confirms the chore was fully done → fire the reward the KID chose
-    /// as a delta command (exactly-once consumption on the child's device), then
-    /// reset/archive the chore doc.
+    /// Parent confirms the chore was fully done. ONE Firestore transaction
+    /// claims the chore (fails if it's no longer pending) and grants the reward
+    /// — so two approvers (second parent, the notification button, a double
+    /// tap) can never pay twice, and a partial failure can never leave a
+    /// paid-but-still-pending chore.
     func approve(_ chore: Chore) {
+        guard let hh = listeningHousehold else { return }
+        Task { await Self.performApproval(householdID: hh, choreID: chore.id) }
+    }
+
+    /// The transactional core, shared with the notification-button path.
+    /// Returns true when THIS call won the claim and granted the reward.
+    @discardableResult
+    static func performApproval(householdID: String, choreID: String) async -> Bool {
         #if canImport(FirebaseFirestore)
-        guard let hh = listeningHousehold, let cid = UUID(uuidString: chore.childID) else { return }
-        let coins = chore.chosenReward == "coins" && chore.rewardCoins > 0
-        // Minutes ride the proven earned-wallet command; money lives ONLY in
-        // the increment-based ledger below (see `stats` — snapshot fields die
-        // under old-build pushes).
-        if !coins && chore.rewardMinutes > 0 {
-            RemoteSyncManager.shared.adjustChildMinutes(childID: cid, deltaMinutes: chore.rewardMinutes)
+        let db = Firestore.firestore()
+        let choreRef = db.collection("households").document(householdID)
+            .collection("chores").document(choreID)
+        return await withCheckedContinuation { cont in
+            db.runTransaction({ txn, errorPointer -> Any? in
+                guard let doc = try? txn.getDocument(choreRef), let d = doc.data(),
+                      d["markedDoneAt"] != nil else {
+                    return false   // already approved/returned elsewhere — lose gracefully
+                }
+                let childID = d["childID"] as? String ?? ""
+                let rewardMinutes = d["rewardMinutes"] as? Int ?? 0
+                let rewardCoins = d["rewardCoins"] as? Int ?? 0
+                let coins = (d["chosenReward"] as? String) == "coins" && rewardCoins > 0
+                let isDaily = d["isDaily"] as? Bool ?? false
+                // Same-day repeat counter — safe to compute here: the txn serializes.
+                let now = Date().timeIntervalSince1970
+                var doneToday = 0
+                if let t = d["approvedTodayAt"] as? Double,
+                   Calendar.current.isDateInToday(Date(timeIntervalSince1970: t)) {
+                    doneToday = d["approvedTodayCount"] as? Int ?? 0
+                }
+                var update: [String: Any] = ["markedDoneAt": FieldValue.delete(),
+                                             "chosenReward": FieldValue.delete(),
+                                             "photoData": FieldValue.delete(),
+                                             "photoToken": FieldValue.delete(),
+                                             "lastApprovedAt": now,
+                                             "approvedTodayCount": doneToday + 1,
+                                             "approvedTodayAt": now]
+                if !isDaily { update["archived"] = true }
+                txn.updateData(update, forDocument: choreRef)
+                // Reward INSIDE the same transaction: money → increment ledger;
+                // minutes → earned-wallet command (consumed exactly-once by the
+                // kid's device).
+                let statsRef = db.collection("households").document(householdID)
+                    .collection("choreStats").document(childID)
+                txn.setData([coins ? "coinsTotal" : "minutesTotal":
+                             FieldValue.increment(Int64(coins ? rewardCoins : rewardMinutes))],
+                            forDocument: statsRef, merge: true)
+                if !coins && rewardMinutes > 0 && !childID.isEmpty {
+                    let childRef = db.collection("children").document(childID)
+                    txn.setData(["pendingMinuteAdjustment": FieldValue.increment(Int64(rewardMinutes))],
+                                forDocument: childRef, merge: true)
+                }
+                return true
+            }) { result, _ in
+                cont.resume(returning: (result as? Bool) ?? false)
+            }
         }
-        let now = Date().timeIntervalSince1970
-        var update: [String: Any] = ["markedDoneAt": FieldValue.delete(),
-                                     "chosenReward": FieldValue.delete(),
-                                     "photoData": FieldValue.delete(),
-                                     "lastApprovedAt": now,
-                                     // same-day repeat counter ("לפנות את הצלחת"
-                                     // can legitimately happen every meal — Rani)
-                                     "approvedTodayCount": chore.doneToday + 1,
-                                     "approvedTodayAt": now]
-        if !chore.isDaily { update["archived"] = true }
-        db.collection("households").document(hh).collection("chores").document(chore.id)
-            .updateData(update)
-        // Money + lifetime-earnings ledger — what the kid sees as "הרווחתי".
-        db.collection("households").document(hh).collection("choreStats").document(chore.childID)
-            .setData([coins ? "coinsTotal" : "minutesTotal":
-                      FieldValue.increment(Int64(coins ? chore.rewardCoins : chore.rewardMinutes))],
-                     merge: true)
+        #else
+        return false
         #endif
     }
 
@@ -356,34 +393,9 @@ final class ChoreStore: ObservableObject {
     /// household from the push payload (the store's listener may never have
     /// started in this cold background launch).
     func approveFromPush(householdID: String, choreID: String) async {
-        #if canImport(FirebaseFirestore)
-        let choreRef = db.collection("households").document(householdID)
-            .collection("chores").document(choreID)
-        guard let doc = try? await choreRef.getDocument(),
-              let chore = Chore.from(id: choreID, data: doc.data() ?? [:]),
-              chore.isPendingApproval else { return }   // already handled elsewhere
-        let coins = chore.chosenReward == "coins" && chore.rewardCoins > 0
-        if !coins && chore.rewardMinutes > 0 {
-            try? await db.collection("children").document(chore.childID)
-                .setData(["pendingMinuteAdjustment": FieldValue.increment(Int64(chore.rewardMinutes))],
-                         merge: true)
-        }
-        let now = Date().timeIntervalSince1970
-        var update: [String: Any] = ["markedDoneAt": FieldValue.delete(),
-                                     "chosenReward": FieldValue.delete(),
-                                     "photoData": FieldValue.delete(),
-                                     "photoToken": FieldValue.delete(),
-                                     "lastApprovedAt": now,
-                                     "approvedTodayCount": chore.doneToday + 1,
-                                     "approvedTodayAt": now]
-        if !chore.isDaily { update["archived"] = true }
-        try? await choreRef.updateData(update)
-        try? await db.collection("households").document(householdID)
-            .collection("choreStats").document(chore.childID)
-            .setData([coins ? "coinsTotal" : "minutesTotal":
-                      FieldValue.increment(Int64(coins ? chore.rewardCoins : chore.rewardMinutes))],
-                     merge: true)
-        #endif
+        // Same claim-transaction as the in-app path — a race between the
+        // notification button and another approver pays exactly once.
+        await Self.performApproval(householdID: householdID, choreID: choreID)
     }
 
     /// Parent says "not quite done yet" — the chore simply returns to the kid's
@@ -395,17 +407,25 @@ final class ChoreStore: ObservableObject {
             .updateData(["markedDoneAt": FieldValue.delete(),
                          "chosenReward": FieldValue.delete(),
                          "photoData": FieldValue.delete(),
+                         "photoToken": FieldValue.delete(),
                          "returnedAt": Date().timeIntervalSince1970])
         #endif
     }
 
-    /// Parent paid the kid by hand → record it in the ledger (increment-only,
-    /// old-build-proof). Balance shown everywhere = coinsTotal − coinsPaid.
+    /// Parent paid the kid by hand → settle the WHOLE balance transactionally
+    /// (coinsPaid = server-side coinsTotal). Two parents tapping "שילמתי"
+    /// together used to double-increment and silently swallow future earnings.
     func settleMoney(childID: UUID, amount: Int) {
         #if canImport(FirebaseFirestore)
         guard amount > 0, let hh = listeningHousehold else { return }
-        db.collection("households").document(hh).collection("choreStats").document(childID.uuidString)
-            .setData(["coinsPaid": FieldValue.increment(Int64(amount))], merge: true)
+        let ref = db.collection("households").document(hh)
+            .collection("choreStats").document(childID.uuidString)
+        db.runTransaction({ txn, _ -> Any? in
+            let d = (try? txn.getDocument(ref))?.data() ?? [:]
+            let total = d["coinsTotal"] as? Int ?? 0
+            txn.setData(["coinsPaid": total], forDocument: ref, merge: true)
+            return nil
+        }) { _, _ in }
         #endif
     }
 
@@ -414,9 +434,12 @@ final class ChoreStore: ObservableObject {
     /// The kid marks the chore done AND picks the reward they want. A catalog
     /// chore may not have a doc yet — setData(merge) materializes it with its
     /// current (default or overridden) values in the same write.
-    func markDone(_ chore: Chore, reward: String, photo: Data? = nil) {
+    /// Returns false when the family isn't loaded yet — the caller must NOT
+    /// play the "נשלח" celebration for a write that never left the device.
+    @discardableResult
+    func markDone(_ chore: Chore, reward: String, photo: Data? = nil) -> Bool {
         #if canImport(FirebaseFirestore)
-        guard let hh = listeningHousehold else { return }
+        guard let hh = listeningHousehold ?? HouseholdManager.shared.household?.id else { return false }
         var fields: [String: Any] = ["childID": chore.childID,
                                      "title": chore.title,
                                      "emoji": chore.emoji,
@@ -431,6 +454,9 @@ final class ChoreStore: ObservableObject {
         fields["photoData"] = photo ?? FieldValue.delete()
         db.collection("households").document(hh).collection("chores").document(chore.id)
             .setData(fields, merge: true)
+        return true
+        #else
+        return false
         #endif
     }
 }

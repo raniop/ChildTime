@@ -47,9 +47,14 @@ service cloud.firestore {
       );
       allow create: if signedIn() && request.auth.uid in request.resource.data.parentUIDs;
       // Members can update; a non-member may join by adding ONLY their own uid.
+      // Members update freely; a NON-member may only JOIN by appending ONLY
+      // their own uid while preserving every existing parent (arrayUnion). The
+      // old `hasOnly` let anyone send parentUIDs=[me] and delete the real
+      // parents — cross-family account takeover. `== concat([uid])` matches
+      // exactly what arrayUnion produces for a genuine join.
       allow update: if signedIn() && (
         request.auth.uid in resource.data.parentUIDs ||
-        request.resource.data.parentUIDs.hasOnly(resource.data.parentUIDs.concat([request.auth.uid]))
+        request.resource.data.parentUIDs == resource.data.parentUIDs.concat([request.auth.uid])
       );
       allow delete: if signedIn() && request.auth.uid in resource.data.parentUIDs;
 
@@ -124,9 +129,16 @@ service cloud.firestore {
     // Invites — readable by any signed-in user (to redeem by code), creatable by
     // the household owner, updatable to stamp redeemedBy.
     match /invites/{code} {
-      allow read:   if signedIn();
+      // GET-by-code only — never LIST (listing exposed every household id and
+      // was the first link in the takeover chain).
+      allow get:    if signedIn();
       allow create: if signedIn() && request.auth.uid == request.resource.data.createdBy;
-      allow update: if signedIn();
+      // A redeemer may only stamp redeemedBy with their own uid; the target
+      // householdID/createdBy are immutable (was fully open to tampering).
+      allow update: if signedIn()
+                    && request.resource.data.householdID == resource.data.householdID
+                    && request.resource.data.createdBy == resource.data.createdBy
+                    && request.resource.data.redeemedBy == request.auth.uid;
     }
 
     // Child-link requests — a parent asks to absorb a child who registered with

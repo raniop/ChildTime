@@ -317,7 +317,12 @@ struct ChoresKidView: View {
     }
 
     private func send(_ chore: Chore, reward: String, photo: Data?) {
-        choreStore.markDone(chore, reward: reward, photo: photo)
+        guard choreStore.markDone(chore, reward: reward, photo: photo) else {
+            // Family not loaded yet — no fake "sent" celebration for a write
+            // that never left the device; the kid can simply tap again.
+            Haptic.light()
+            return
+        }
         // Latency bridge only — the listener flips isPendingApproval within a
         // beat; if we never dropped this, an APPROVED chore would keep showing
         // "מחכים לאישור" for the rest of the session.
