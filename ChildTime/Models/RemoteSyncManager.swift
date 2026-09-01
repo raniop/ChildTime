@@ -663,6 +663,7 @@ final class RemoteSyncManager: ObservableObject {
         // grant). Skipping our own writes here is what made the parent's view
         // stop updating after it edited a child.
         remoteSnapshots[profileID] = snap
+        WidgetBridge.refreshFamilySoon()   // keep the parent widget live
         // If this is the ACTIVE profile and the remote snapshot is newer
         // than what we have locally, apply it (so a reset on the parent's
         // phone propagates to the kid's iPad in real time).

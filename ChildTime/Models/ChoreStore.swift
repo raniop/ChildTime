@@ -118,7 +118,10 @@ final class ChoreStore: ObservableObject {
                 guard let self, let snap else { return }
                 let parsed = snap.documents.compactMap { Chore.from(id: $0.documentID, data: $0.data()) }
                     .sorted { $0.createdAt < $1.createdAt }
-                Task { @MainActor in self.chores = parsed }
+                Task { @MainActor in
+                    self.chores = parsed
+                    WidgetBridge.refreshFamilySoon()   // 🧹 counts live on the widget
+                }
             }
         statsListener?.remove()
         statsListener = db.collection("households").document(hh).collection("choreStats")

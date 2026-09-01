@@ -21,10 +21,13 @@ struct KidSnapshot: Codable {
     var correctToday = 0
     var goalToday = 10
     var playMinutes = 0
+    /// 🧹/💰 — optional so JSON written by older app builds still decodes.
+    var choresAvailable: Int? = nil
+    var money: Int? = nil
 
     var accuracyToday: Int { answeredToday > 0 ? Int((Double(correctToday) / Double(answeredToday)) * 100) : 0 }
 
-    static let sample = KidSnapshot(name: "דָּן", stars: 4823, diamonds: 302, dayStreak: 5, answeredToday: 7, correctToday: 5, goalToday: 10, playMinutes: 42)
+    static let sample = KidSnapshot(name: "דָּן", stars: 4823, diamonds: 302, dayStreak: 5, answeredToday: 7, correctToday: 5, goalToday: 10, playMinutes: 42, choresAvailable: 3, money: 12)
 
     static func load() -> KidSnapshot {
         guard let d = WidgetStore.defaults.data(forKey: WidgetStore.kidKey),
@@ -40,11 +43,15 @@ struct FamilyChildSnapshot: Codable, Identifiable {
     var answeredToday: Int
     var accuracy: Int
     var playedToday: Bool
+    /// Newer fields — optional so JSON from older app builds still decodes.
+    var playingNow: Bool? = nil
+    var pendingChores: Int? = nil
+    var money: Int? = nil
     var id: String { name }
 
     static let sample: [FamilyChildSnapshot] = [
-        .init(name: "דָּן", stars: 4823, dayStreak: 5, answeredToday: 61, accuracy: 73, playedToday: true),
-        .init(name: "שִׁפִי", stars: 1290, dayStreak: 3, answeredToday: 18, accuracy: 81, playedToday: true),
+        .init(name: "דָּן", stars: 4823, dayStreak: 5, answeredToday: 61, accuracy: 73, playedToday: true, playingNow: true, pendingChores: 1, money: 7),
+        .init(name: "שִׁפִי", stars: 1290, dayStreak: 3, answeredToday: 18, accuracy: 81, playedToday: true, pendingChores: 0, money: 12),
         .init(name: "אוּרִי", stars: 940, dayStreak: 0, answeredToday: 0, accuracy: 0, playedToday: false),
     ]
 
@@ -66,6 +73,12 @@ private extension View {
     @ViewBuilder func tofyBackground() -> some View {
         if #available(iOS 17.0, *) { containerBackground(for: .widget) { tofyGradient } }
         else { background(tofyGradient) }
+    }
+    /// Accessory (lock-screen) widgets get the system's vibrant treatment —
+    /// just satisfy the container-background requirement with clear.
+    @ViewBuilder func lockScreenBackground() -> some View {
+        if #available(iOS 17.0, *) { containerBackground(for: .widget) { Color.clear } }
+        else { self }
     }
 }
 
@@ -133,11 +146,48 @@ struct KidWidgetView: View {
     private let gold = Color(red: 1.00, green: 0.82, blue: 0.30)   // stars
 
     var body: some View {
-        Group {
-            if family == .systemSmall { small } else { medium }
+        switch family {
+        case .accessoryCircular: accessoryCircle
+        case .accessoryRectangular: accessoryRect
+        case .systemSmall:
+            small.environment(\.layoutDirection, .rightToLeft).tofyBackground()
+        default:
+            medium.environment(\.layoutDirection, .rightToLeft).tofyBackground()
         }
+    }
+
+    // Lock-screen circle: the number the kid cares about — minutes to play.
+    private var accessoryCircle: some View {
+        ZStack {
+            AccessoryWidgetBackground()
+            VStack(spacing: 0) {
+                Text("🎮").font(.system(size: 13))
+                Text("\(kid.playMinutes)")
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .minimumScaleFactor(0.5).lineLimit(1)
+            }
+        }
+        .lockScreenBackground()
+    }
+
+    // Lock-screen row: minutes + streak + chores at a glance.
+    private var accessoryRect: some View {
+        VStack(alignment: .trailing, spacing: 1) {
+            Text(kid.name)
+                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                .lineLimit(1)
+            Text("🎮 \(kid.playMinutes) דַּק׳ · 🔥 \(kid.dayStreak)")
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .lineLimit(1).minimumScaleFactor(0.7)
+            if let chores = kid.choresAvailable, chores > 0 {
+                Text("🧹 \(chores) מַטְלוֹת מְחַכּוֹת")
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .lineLimit(1).minimumScaleFactor(0.7)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
         .environment(\.layoutDirection, .rightToLeft)
-        .tofyBackground()
+        .lockScreenBackground()
     }
 
     private var header: some View {
@@ -150,16 +200,27 @@ struct KidWidgetView: View {
     }
 
     private var medium: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             header
             HStack(spacing: 9) {
                 rewardTile("⏱️", "\(kid.playMinutes)", "דַּקּוֹת לְשַׂחֵק", mint)
                 rewardTile("💎", kid.diamonds.formatted(), "יַהֲלוֹמִים", cyan)
                 rewardTile("⭐", kid.stars.formatted(), "כּוֹכָבִים", gold)
             }
+            // 🧹/💰 — the chores world at a glance (only when there's something).
+            HStack(spacing: 8) {
+                if let chores = kid.choresAvailable, chores > 0 {
+                    Pill(icon: "🧹", value: "\(chores) מַטְלוֹת")
+                }
+                if let money = kid.money, money > 0 {
+                    Pill(icon: "💰", value: "₪\(money)")
+                }
+                Spacer(minLength: 0)
+                Pill(icon: "✅", value: "\(min(kid.correctToday, kid.goalToday))/\(kid.goalToday)")
+            }
             Spacer(minLength: 0)
         }
-        .padding(14)
+        .padding(13)
     }
 
     // Small: play minutes is the hero (what the kid wants most); ⭐/💎 below.
@@ -209,8 +270,8 @@ struct TofyKidWidget: Widget {
             KidWidgetView(kid: entry.kid, avatar: entry.avatar)
         }
         .configurationDisplayName("טופי שלי")
-        .description("דקות המשחק, היהלומים והכוכבים שלך.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .description("דקות המשחק, היהלומים, הכוכבים והמטלות שלך.")
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular, .accessoryRectangular])
     }
 }
 
@@ -298,17 +359,61 @@ struct FamilyWidgetView: View {
     let kids: [FamilyChildSnapshot]
     var body: some View {
         Group {
-            if kids.isEmpty { empty }
-            else {
-                switch family {
-                case .systemSmall: small
-                case .systemLarge: large
-                default: medium
+            switch family {
+            case .accessoryRectangular:
+                familyAccessoryRect
+            case .accessoryCircular:
+                familyAccessoryCircle
+            default:
+                Group {
+                    if kids.isEmpty { empty }
+                    else {
+                        switch family {
+                        case .systemSmall: small
+                        case .systemLarge: large
+                        default: medium
+                        }
+                    }
                 }
+                .environment(\.layoutDirection, .rightToLeft)
+                .tofyBackground()
             }
         }
+    }
+
+    /// Lock-screen circle: 🧹 chores waiting for the parent's approval.
+    private var familyAccessoryCircle: some View {
+        let pending = kids.reduce(0) { $0 + ($1.pendingChores ?? 0) }
+        return ZStack {
+            AccessoryWidgetBackground()
+            VStack(spacing: 0) {
+                Text("🧹").font(.system(size: 13))
+                Text("\(pending)")
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+            }
+        }
+        .lockScreenBackground()
+    }
+
+    /// Lock-screen row: who's playing right now + what waits for approval.
+    private var familyAccessoryRect: some View {
+        let playing = kids.filter { $0.playingNow ?? false }.map(\.name)
+        let pending = kids.reduce(0) { $0 + ($1.pendingChores ?? 0) }
+        return VStack(alignment: .trailing, spacing: 1) {
+            Text("טופי · המשפחה")
+                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                .lineLimit(1)
+            Text(playing.isEmpty ? "אף אחד לא משחק כרגע"
+                                 : "🟢 \(playing.joined(separator: ", ")) עכשיו")
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .lineLimit(1).minimumScaleFactor(0.7)
+            Text(pending > 0 ? "🧹 \(pending) מטלות מחכות לאישור" : "🧹 אין מטלות ממתינות")
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .lineLimit(1).minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
         .environment(\.layoutDirection, .rightToLeft)
-        .tofyBackground()
+        .lockScreenBackground()
     }
 
     private var header: some View {
@@ -347,9 +452,20 @@ struct FamilyWidgetView: View {
             header
             ForEach(kids.prefix(4)) { kid in
                 HStack(spacing: 8) {
-                    Circle().fill(kid.playedToday ? Color(red: 0.2, green: 0.86, blue: 0.6) : .white.opacity(0.25)).frame(width: 8, height: 8)
+                    // 🟢 solid = playing RIGHT NOW; dim ring = played today.
+                    Circle()
+                        .fill((kid.playingNow ?? false) ? Color(red: 0.2, green: 0.86, blue: 0.6)
+                              : kid.playedToday ? Color(red: 0.2, green: 0.86, blue: 0.6).opacity(0.4)
+                              : .white.opacity(0.25))
+                        .frame(width: 8, height: 8)
                     Text(kid.name).font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(.white).lineLimit(1)
                     Spacer(minLength: 4)
+                    if let n = kid.pendingChores, n > 0 {
+                        Text("🧹\(n)").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white)
+                    }
+                    if let m = kid.money, m > 0 {
+                        Text("💰\(m)").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white)
+                    }
                     Text("⭐\(kid.stars)").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.95))
                     Text("🔥\(kid.dayStreak)").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.95))
                     Text("\(kid.answeredToday) ש'").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
@@ -380,6 +496,12 @@ struct FamilyWidgetView: View {
                         Text("🔥\(kid.dayStreak)").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.95))
                     }
                     HStack(spacing: 8) {
+                        if let n = kid.pendingChores, n > 0 {
+                            Text("🧹\(n)").font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(.white)
+                        }
+                        if let m = kid.money, m > 0 {
+                            Text("💰₪\(m)").font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(.white)
+                        }
                         Text("\(kid.answeredToday) שאלות").font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
                         GeometryReader { geo in
                             ZStack(alignment: .leading) {
@@ -407,7 +529,7 @@ struct TofyFamilyWidget: Widget {
             FamilyWidgetView(kids: entry.kids)
         }
         .configurationDisplayName("מבט על המשפחה")
-        .description("סיכום יומי לכל ילד — כוכבים, רצף ושאלות.")
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .description("מי משחק עכשיו, מטלות ממתינות, קופה — וכל הסטטים.")
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryCircular, .accessoryRectangular])
     }
 }

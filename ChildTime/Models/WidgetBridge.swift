@@ -20,6 +20,8 @@ enum WidgetBridge {
         var correctToday: Int
         var goalToday: Int
         var playMinutes: Int   // earned screen-time minutes ready to spend
+        var choresAvailable: Int   // 🧹 chores the kid can do right now
+        var money: Int             // 💰 unpaid chore-money balance (₪)
     }
 
     private struct FamilyChild: Codable {
@@ -29,11 +31,16 @@ enum WidgetBridge {
         var answeredToday: Int
         var accuracy: Int
         var playedToday: Bool
+        var playingNow: Bool       // 🟢 an open screen-time window right now
+        var pendingChores: Int     // 🧹 marked done, waiting for approval
+        var money: Int             // 💰 unpaid chore-money balance (₪)
     }
 
     /// Refresh the KID widget from the active child's live progress (kid device).
+    @MainActor
     static func refreshKid() {
         let p = ProgressStore.shared
+        let activeID = ProfileStore.shared.activeID
         let snap = KidSnapshot(
             name: ProfileStore.shared.active?.name ?? "טופי",
             stars: p.stars,
@@ -42,7 +49,9 @@ enum WidgetBridge {
             answeredToday: p.answeredToday,
             correctToday: p.correctToday,
             goalToday: kidGoalPerDay,
-            playMinutes: p.pendingMinutes)
+            playMinutes: p.pendingMinutes,
+            choresAvailable: activeID.map { ChoreStore.shared.chores(forChild: $0).filter(\.isAvailable).count } ?? 0,
+            money: activeID.map { ChoreStore.shared.moneyBalance(forChild: $0) } ?? 0)
         if let data = try? JSONEncoder().encode(snap) {
             AppGroup.defaults.set(data, forKey: kidKey)
         }
@@ -74,6 +83,7 @@ enum WidgetBridge {
     }
 
     /// Refresh the FAMILY widget from the parent dashboard's per-child rows.
+    @MainActor
     static func writeFamily(_ rows: [(profile: Profile, snapshot: ProgressSnapshot)]) {
         let kids = rows.prefix(6).map { row -> FamilyChild in
             let s = row.snapshot
@@ -84,11 +94,41 @@ enum WidgetBridge {
                 dayStreak: s.dayStreak,
                 answeredToday: s.answeredToday,
                 accuracy: acc,
-                playedToday: s.answeredToday > 0)
+                playedToday: s.answeredToday > 0,
+                playingNow: (s.unlockEndsAt ?? .distantPast) > Date(),
+                pendingChores: ChoreStore.shared.chores(forChild: row.profile.id)
+                    .filter(\.isPendingApproval).count,
+                money: ChoreStore.shared.moneyBalance(forChild: row.profile.id))
         }
         if let data = try? JSONEncoder().encode(Array(kids)) {
             AppGroup.defaults.set(data, forKey: familyKey)
         }
         WidgetCenter.shared.reloadTimelines(ofKind: "TofyFamilyWidget")
+    }
+
+    // MARK: - Freshness (Rani: the family widget lagged until the app was opened)
+
+    private static var familyRefreshWork: DispatchWorkItem?
+
+    /// Rebuild the family widget straight from the live stores — called whenever
+    /// a remote child snapshot or a chore doc changes (which is exactly when a
+    /// silent/visible push wakes the app), debounced against listener bursts.
+    /// The dashboard no longer has to be OPENED for the widget to be fresh.
+    @MainActor
+    static func refreshFamilySoon() {
+        guard ParentSettings.shared.deviceRole == .parent else { return }
+        familyRefreshWork?.cancel()
+        let work = DispatchWorkItem {
+            Task { @MainActor in
+                let rows = ProfileStore.shared.profiles.compactMap { p -> (profile: Profile, snapshot: ProgressSnapshot)? in
+                    guard let snap = RemoteSyncManager.shared.remoteSnapshots[p.id] else { return nil }
+                    return (p, snap)
+                }
+                guard !rows.isEmpty else { return }
+                writeFamily(rows)
+            }
+        }
+        familyRefreshWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: work)
     }
 }
