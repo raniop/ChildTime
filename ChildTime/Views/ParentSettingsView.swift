@@ -45,7 +45,6 @@ struct ParentSettingsView: View {
                 syncSection
                 notificationsSection
                 rewardSection
-                siblingTransferSection
                 smartFeedSection
                 penaltySection
                 soundsSection
@@ -391,23 +390,6 @@ struct ParentSettingsView: View {
             Text("תגמול")
         } footer: {
             Text("הילד מרוויח \(settings.batchMinutes) דקות משחק על כל \(settings.batchAnswers) תשובות נכונות. אפשר לשנות את שני המספרים. ברירת המחדל: 10 תשובות = 4 דקות.")
-        }
-    }
-
-    private var siblingTransferSection: some View {
-        Section {
-            Toggle("אֶפְשָׁר הַעֲבָרַת זְמַן בֵּין אַחִים", isOn: $settings.siblingTransferEnabled)
-            if settings.siblingTransferEnabled {
-                Stepper(
-                    "מְחִיר: \(settings.diamondsPerMinute) 💎 לְכָל דַּקָּה",
-                    value: $settings.diamondsPerMinute,
-                    in: 1...100
-                )
-            }
-        } header: {
-            Text("העברת זמן בין אחים")
-        } footer: {
-            Text("ילד יכול לקנות דקות משחק מאח/ות תמורת יהלומים 💎. כל בקשה ממתינה לאישור שלך בלוח ההורה. הדקות שמתקבלות עדיין כפופות לתקרת זמן-המסך היומית — אי אפשר לעקוף את המגבלה. כוכבים (דירוג) לא מושפעים.")
         }
     }
 

@@ -241,7 +241,6 @@ struct ChildJoinView: View {
                 TofyLink("JOIN: NO cloud snapshot for \(cid.uuidString.prefix(8)) — profile will show empty until sync delivers one")
             }
             RemoteSyncManager.shared.start()   // ensure live sync now follows this child
-            TimeTransferManager.shared.start()
             AppAnalytics.deviceJoined(kind: DeviceIdentity.kind)
             message = "הִתְחַבַּרְתֶּם! 🎉"
             working = false

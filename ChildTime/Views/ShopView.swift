@@ -11,7 +11,6 @@ struct ShopView: View {
 
     @State private var showingProfileEditor = false
     @State private var showStarShop = false
-    @State private var showSiblingTime = false
 
     private var isCompact: Bool { hsc == .compact }
     private var avatarSize: CGFloat { isCompact ? 140 : 180 }
@@ -31,9 +30,6 @@ struct ShopView: View {
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
                         hero
-                        if ParentSettings.shared.siblingTransferEnabled && profiles.profiles.count > 1 {
-                            siblingTimeEntry
-                        }
                         if let active = profiles.active {
                             CharacterCollectionView(profileID: active.id,
                                                     showStarShop: $showStarShop)
@@ -45,9 +41,6 @@ struct ShopView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-        }
-        .fullScreenCover(isPresented: $showSiblingTime) {
-            SiblingTimeShopView { showSiblingTime = false }
         }
         .sheet(isPresented: $showStarShop) {
             // Kids Category (guideline 1.3): real-money packs MUST sit behind a
@@ -79,35 +72,6 @@ struct ShopView: View {
     }
 
     // MARK: - Sibling time entry
-
-    private var siblingTimeEntry: some View {
-        Button {
-            Haptic.light(); showSiblingTime = true
-        } label: {
-            HStack(spacing: 14) {
-                Text("🛒").font(.system(size: 40))
-                    .frame(width: 64, height: 64)
-                    .background(Circle().fill(.white.opacity(0.18)))
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("זְמַן מֵאָח")
-                        .font(.system(size: 20, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                    Text("קְנֵה דַּקּוֹת מִשְׂחָק 💎 אוֹ תֵּן בְּמַתָּנָה 🎁")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.85))
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                Image(systemName: "chevron.backward")
-                    .font(.system(size: 16, weight: .heavy)).foregroundStyle(.white.opacity(0.7))
-            }
-            .padding(16)
-            .background(RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(LinearGradient(colors: [Color(hex: "06D6A0"), Color(hex: "118AB2")],
-                                     startPoint: .topLeading, endPoint: .bottomTrailing)))
-            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(.white.opacity(0.4), lineWidth: 1.5))
-        }
-        .buttonStyle(.juicy)
-        .environment(\.layoutDirection, .rightToLeft)
-    }
 
     // MARK: - Top bar
 

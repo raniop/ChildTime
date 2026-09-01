@@ -20,7 +20,6 @@ struct ParentDashboardView: View {
     @StateObject private var remote = RemoteSyncManager.shared
     @ObservedObject private var push = PushManager.shared
     @ObservedObject private var household = HouseholdManager.shared
-    @ObservedObject private var transfers = TimeTransferManager.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
@@ -52,7 +51,6 @@ struct ParentDashboardView: View {
     @State private var commandStatus: RemoteCommandStatusRequest?
     @State private var worldsProfile: Profile?
     @State private var showingFeedback = false
-    @State private var showingTransferRequests = false
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
     /// After creating a child we offer to connect their device right away.
@@ -158,7 +156,6 @@ struct ParentDashboardView: View {
                             insightNotificationsCard
 
                             // Time-transfer requests live BELOW the children.
-                            if !transfers.allTransfers.isEmpty { transferRequestsEntry }
 
                             if rows.count >= 2 { familyComparison(rows) }
 
@@ -335,9 +332,6 @@ struct ParentDashboardView: View {
             .sheet(isPresented: $showingFeedback) {
                 ParentFeedbackView()
                     .environment(\.layoutDirection, .rightToLeft)
-            }
-            .sheet(isPresented: $showingTransferRequests) {
-                TimeTransferRequestsView()
             }
             .sheet(isPresented: $showingCreateChild, onDismiss: {
                 // Next step after creating: connect that child's device (skippable).
@@ -1213,42 +1207,6 @@ struct ParentDashboardView: View {
     /// Side-by-side family view: each child's top strength + interest + trend.
     /// Deliberately NO ranking or sibling competition — just helping the parent
     /// see each child individually.
-    /// Compact entry to the sibling time-transfer requests screen (kept off the
-    /// dashboard itself so it doesn't grow into an endless scroll). Badges the
-    /// number of requests still awaiting approval.
-    private var transferRequestsEntry: some View {
-        let pendingCount = transfers.pendingForParent.count
-        return Button { showingTransferRequests = true } label: {
-            // Authored LTR like the rest of the dashboard, so `.trailing` == RIGHT.
-            // Icons on the left, the Hebrew text flush to the RIGHT edge.
-            HStack(spacing: 12) {
-                Image(systemName: "chevron.backward")
-                    .font(.system(size: 14, weight: .heavy)).foregroundStyle(.white.opacity(0.6))
-                if pendingCount > 0 {
-                    Text("\(pendingCount)")
-                        .font(.system(size: 13, weight: .heavy, design: .rounded)).foregroundStyle(AppColor.textOnLight)
-                        .frame(minWidth: 24, minHeight: 24)
-                        .background(Circle().fill(AppColor.starGold))
-                }
-                Text("🛒").font(.system(size: 28))
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("בַּקָּשׁוֹת הַעֲבָרַת זְמַן")
-                        .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                    Text(pendingCount > 0 ? "\(pendingCount) מַמְתִּינוֹת לְאִשּׁוּר" : "אֵין בַּקָּשׁוֹת חֲדָשׁוֹת")
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(pendingCount > 0 ? AppColor.starGold : .white.opacity(0.7))
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                }
-            }
-            .padding(AppSpacing.md)
-            .frame(maxWidth: .infinity)
-            .background(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).fill(.white.opacity(0.10)))
-            .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
-        }
-        .buttonStyle(.plain)
-    }
-
     private func familyComparison(_ rows: [(profile: Profile, snapshot: ProgressSnapshot)]) -> some View {
         VStack(alignment: .trailing, spacing: 12) {
             Text("הַשְׁוָאָה מִשְׁפַּחְתִּית")
