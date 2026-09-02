@@ -1,11 +1,10 @@
 import SwiftUI
 
 /// 🧹 Parent-side chores screen for ONE child. The chores catalog is BUILT-IN —
-/// every child automatically has ~15 house chores with rewards scaled to the
-/// chore's size, and the kid picks which reward they want (a little trade with
-/// the parent). Here the parent: approves/returns what the kid marked done,
-/// settles the 💰 money pocket, retunes any chore's rewards, hides catalog
-/// chores or adds custom ones.
+/// every child automatically has ~15 house chores rewarding 🎮 play-minutes
+/// scaled to the chore's size. Here the parent: approves/returns what the kid
+/// marked done, retunes any chore's minutes, hides catalog chores or adds
+/// custom ones. (Money rewards were removed — Rani.)
 struct ChoresParentView: View {
     /// The child the screen opened on — a segmented picker switches between
     /// ALL the kids without leaving the screen (Rani: "אין לי דרך לראות מטלות
@@ -13,7 +12,6 @@ struct ChoresParentView: View {
     let initialProfile: Profile
     @StateObject private var choreStore = ChoreStore.shared
     @StateObject private var profilesStore = ProfileStore.shared
-    @StateObject private var householdMgr = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var selectedID: UUID
 
@@ -31,9 +29,7 @@ struct ChoresParentView: View {
     @State private var formTitle = ""
     @State private var formEmoji = "🧹"
     @State private var formMinutes = 10
-    @State private var formCoins = 5
     @State private var formTimesPerDay = 1
-    @State private var settleConfirm = false
 
     private static let emojiOptions = ["🧹", "🛏", "🍽", "🗑", "👕", "🐕", "🪴", "🎒", "🧸", "🛒", "🍳", "🧺"]
 
@@ -41,10 +37,6 @@ struct ChoresParentView: View {
     private var pending: [Chore] { myChores.filter { $0.isPendingApproval } }
     private var rest: [Chore] { myChores.filter { !$0.isPendingApproval } }
     private var hidden: [Chore] { choreStore.hiddenPresets(forChild: profile.id) }
-
-    /// 💰 what the family owes the kid right now — pure ledger arithmetic
-    /// (earned − paid), immune to old-build snapshot pushes.
-    private var moneyBalance: Int { choreStore.moneyBalance(forChild: profile.id) }
 
     var body: some View {
         NavigationStack {
@@ -69,43 +61,9 @@ struct ChoresParentView: View {
                     }
                 }
 
-                Section {
-                    Toggle(isOn: Binding(
-                        get: { householdMgr.choresMoneyEnabled },
-                        set: { householdMgr.setChoresMoneyEnabled($0) })) {
-                        Label("לאפשר להרוויח כסף על מטלות", systemImage: "banknote")
-                    }
-                } footer: {
-                    Text(householdMgr.choresMoneyEnabled
-                         ? "הילדים בוחרים בעצמם אם לקבל דקות משחק או כסף על כל מטלה."
-                         : "כרגע הילדים מקבלים רק דקות משחק על מטלות — לא כסף. (מה שכבר הרוויחו בכסף עדיין שמור לתשלום.)")
-                }
-
-                Section("קופת הכסף 💰") {
-                    HStack {
-                        Text("\(profile.name) \(profile.gender == .girl ? "צברה" : "צבר")")
-                        Spacer()
-                        Text("₪\(moneyBalance)")
-                            .font(.system(.body, design: .rounded)).bold()
-                            .foregroundStyle(moneyBalance > 0 ? .orange : .secondary)
-                    }
-                    if moneyBalance > 0 {
-                        Button("שילמתי ביד — אפסו את הקופה ✅") { settleConfirm = true }
-                            .confirmationDialog("נתתם ל\(profile.name) ₪\(moneyBalance) ביד?",
-                                                isPresented: $settleConfirm, titleVisibility: .visible) {
-                                Button("כן, שילמתי — אפסו") {
-                                    choreStore.settleMoney(childID: profile.id, amount: moneyBalance)
-                                    Haptic.success()
-                                }
-                                Button("ביטול", role: .cancel) {}
-                            }
-                    } else {
-                        Text("כשמאשרים מטלה עם פרס כסף — הסכום נרשם כאן, ואתם נותנים ביד.")
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
-                    let totals = choreStore.totals(forChild: profile.id)
-                    if totals.minutes > 0 || totals.coins > 0 {
-                        Text("סה\"כ מהמטלות עד היום: 🎮 \(totals.minutes) דק׳ · 💰 ₪\(totals.coins)")
+                if choreStore.totals(forChild: profile.id).minutes > 0 {
+                    Section {
+                        Text("סה\"כ הרוויח\(profile.gender == .girl ? "ה" : "") מהמטלות: 🎮 \(choreStore.totals(forChild: profile.id).minutes) דקות משחק")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
@@ -121,7 +79,7 @@ struct ChoresParentView: View {
                 } header: {
                     Text("המטלות של \(profile.name)")
                 } footer: {
-                    Text("כל המטלות זמינות אוטומטית, והפרסים מוצעים לפי גודל המטלה. לחיצה על מטלה — עריכת הפרסים; החלקה — הסתרה. \(profile.gender == .girl ? "היא בוחרת בעצמה" : "הוא בוחר בעצמו") אם לקבל דקות או כסף.")
+                    Text("כל המטלות זמינות אוטומטית, ופרס דקות המשחק מוצע לפי גודל המטלה. לחיצה על מטלה — עריכת הפרס; החלקה — הסתרה.")
                 }
 
                 if !hidden.isEmpty {
@@ -169,10 +127,7 @@ struct ChoresParentView: View {
                             }
                         }
                     }
-                    Stepper("🎮 פרס דקות משחק: \(formMinutes)", value: $formMinutes, in: 0...120, step: 5)
-                    if householdMgr.choresMoneyEnabled {
-                        Stepper("💰 פרס כסף: ₪\(formCoins)", value: $formCoins, in: 0...100)
-                    }
+                    Stepper("🎮 פרס דקות משחק: \(formMinutes)", value: $formMinutes, in: 5...120, step: 5)
                     Stepper(formTimesPerDay == 1 ? "🔁 פעם אחת ביום" : "🔁 עד \(formTimesPerDay) פעמים ביום",
                             value: $formTimesPerDay, in: 1...6)
                     Button {
@@ -181,7 +136,7 @@ struct ChoresParentView: View {
                         HStack { Spacer(); Text(editing == nil ? "הוסיפו מטלה" : "שמרו שינויים").bold(); Spacer() }
                     }
                     .disabled((editing == nil && formTitle.trimmingCharacters(in: .whitespaces).isEmpty)
-                              || (formMinutes == 0 && (formCoins == 0 || !householdMgr.choresMoneyEnabled)))
+                              || formMinutes == 0)
                 }
             }
             .navigationTitle("מטלות הבית · \(profile.name)")
@@ -205,9 +160,7 @@ struct ChoresParentView: View {
             HStack {
                 Text("\(chore.emoji) \(chore.title)").bold()
                 Spacer()
-                Text(chore.chosenReward == "coins"
-                     ? "💰 \(profile.gender == .girl ? "בחרה" : "בחר") ₪\(chore.rewardCoins)"
-                     : "🎮 \(profile.gender == .girl ? "בחרה" : "בחר") \(chore.rewardMinutes) דק׳")
+                Text("🎮 \(chore.rewardMinutes) דק׳ משחק")
                     .font(.caption).foregroundStyle(.secondary)
             }
             if let data = chore.photoData, let img = UIImage(data: data) {
@@ -257,9 +210,7 @@ struct ChoresParentView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(chore.title).foregroundStyle(.primary)
                     HStack(spacing: 6) {
-                        if chore.rewardMinutes > 0 { Text("🎮 \(chore.rewardMinutes) דק׳") }
-                        if chore.rewardMinutes > 0 && chore.rewardCoins > 0 { Text("או") }
-                        if chore.rewardCoins > 0 { Text("💰 ₪\(chore.rewardCoins)") }
+                        Text("🎮 \(chore.rewardMinutes) דק׳")
                         if chore.timesPerDay > 1 { Text("🔁 עד \(chore.timesPerDay) ביום") }
                     if chore.isDaily && chore.doneToday > 0 {
                         Text(chore.approvedToday ? "✅ הושלמה להיום" : "✅ \(chore.doneToday)/\(chore.timesPerDay) היום")
@@ -280,7 +231,6 @@ struct ChoresParentView: View {
         formTitle = chore.title
         formEmoji = chore.emoji
         formMinutes = chore.rewardMinutes
-        formCoins = chore.rewardCoins
         formTimesPerDay = chore.timesPerDay
         Haptic.light()
     }
@@ -290,7 +240,6 @@ struct ChoresParentView: View {
         formTitle = ""
         formEmoji = "🧹"
         formMinutes = 10
-        formCoins = 5
         formTimesPerDay = 1
     }
 
@@ -301,14 +250,14 @@ struct ChoresParentView: View {
                                    title: keepName ? chore.title : formTitle.trimmingCharacters(in: .whitespaces),
                                    emoji: keepName ? chore.emoji : formEmoji,
                                    rewardMinutes: formMinutes,
-                                   rewardCoins: formCoins,
+                                   rewardCoins: 0,
                                    timesPerDay: formTimesPerDay)
         } else {
             choreStore.addChore(childID: profile.id,
                                 title: formTitle.trimmingCharacters(in: .whitespaces),
                                 emoji: formEmoji,
                                 rewardMinutes: formMinutes,
-                                rewardCoins: formCoins,
+                                rewardCoins: 0,
                                 isDaily: true,
                                 timesPerDay: formTimesPerDay)
         }

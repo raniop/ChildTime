@@ -1,20 +1,16 @@
 import SwiftUI
 import PhotosUI
 
-/// 🧹 The kid's chores screen: the parent defined the chores, the kid does one,
-/// taps "עשיתי!" and CHOOSES the reward — 🎮 play minutes or 💰 money. The
-/// reward lands only after the parent approves. No failure language anywhere:
+/// 🧹 The kid's chores screen: the parent defined the chores, the kid does one
+/// and taps "עשיתי!". The reward is always 🎮 play minutes (money was removed —
+/// Rani), landing only after the parent approves. No failure language anywhere:
 /// a returned chore just shows up as available again.
 struct ChoresKidView: View {
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var progress: ProgressStore
     @Environment(\.horizontalSizeClass) private var hSize
     @StateObject private var choreStore = ChoreStore.shared
-    @StateObject private var householdMgr = HouseholdManager.shared
     let onClose: () -> Void
-
-    /// 💰 family policy — may the kid earn money on chores, or only 🎮 minutes?
-    private var moneyEnabled: Bool { householdMgr.choresMoneyEnabled }
 
     /// 👦👧 Gendered accent: the action button + the "done" trophy card take the
     /// child's own colours — blue-teal for a boy, pink-purple for a girl (Rani).
@@ -28,8 +24,6 @@ struct ChoresKidView: View {
     /// Single accent (for tints) — the first stop of the gendered pair.
     private var accentColor: Color { accentColors.first ?? Color(hex: "06D6A0") }
 
-    /// The chore the kid just tapped "עשיתי" on — reward picker is showing.
-    @State private var choosingFor: Chore?
     /// Reward picked → offering an optional 📸 proof photo before sending.
     @State private var pendingSend: (chore: Chore, reward: String)?
     @State private var showPhotoOffer = false
@@ -46,11 +40,6 @@ struct ChoresKidView: View {
     private var myChores: [Chore] {
         guard let id = profiles.activeID else { return [] }
         return choreStore.chores(forChild: id)
-    }
-
-    /// 💰 unpaid balance from the increment-only ledger (earned − paid).
-    private var moneyBalance: Int {
-        profiles.activeID.map { choreStore.moneyBalance(forChild: $0) } ?? 0
     }
 
     /// A chore is "handled for today" if it's been sent, is waiting for a
@@ -79,7 +68,6 @@ struct ChoresKidView: View {
                 ScrollView {
                     VStack(spacing: AppSpacing.md) {
                         totalsCard
-                        if moneyBalance > 0 && moneyEnabled { moneyPocketCard }
                         if myChores.isEmpty {
                             emptyState
                         } else {
@@ -106,20 +94,6 @@ struct ChoresKidView: View {
             }
         }
         .onAppear { choreStore.startIfNeeded() }
-        .confirmationDialog(Gendered.g("אֵיזֶה פְּרָס מַגִּיעַ לְךָ?", "אֵיזֶה פְּרָס מַגִּיעַ לָךְ?"), isPresented: Binding(
-            get: { choosingFor != nil },
-            set: { if !$0 { choosingFor = nil } }
-        ), titleVisibility: .visible) {
-            if let chore = choosingFor {
-                if chore.rewardMinutes > 0 {
-                    Button("🎮 \(chore.rewardMinutes) דַּקּוֹת מִשְׂחָק") { offerPhoto(chore, reward: "minutes") }
-                }
-                if chore.rewardCoins > 0 && moneyEnabled {
-                    Button("💰 \(chore.rewardCoins) שְׁקָלִים לַקֻּפָּה") { offerPhoto(chore, reward: "coins") }
-                }
-                Button("רֶגַע, עוֹד לֹא", role: .cancel) { choosingFor = nil }
-            }
-        }
         // 📸 Optional proof photo — a picture beats a debate about whether the
         // room is really tidy (Rani).
         .confirmationDialog("רוֹצִים לְצָרֵף תְּמוּנָה שֶׁל מַה שֶּׁעֲשִׂיתֶם? 📸", isPresented: $showPhotoOffer,
@@ -194,29 +168,16 @@ struct ChoresKidView: View {
     @ViewBuilder
     private var totalsCard: some View {
         let totals = profiles.activeID.map { choreStore.totals(forChild: $0) } ?? (minutes: 0, coins: 0, paid: 0)
-        let showCoins = totals.coins > 0 && moneyEnabled
-        if totals.minutes > 0 || showCoins {
+        if totals.minutes > 0 {
             HStack(spacing: AppSpacing.md) {
                 Text("🏆").font(.system(size: 30))
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(Gendered.g("סַךְ הַכֹּל הִרְוַחְתָּ מֵהַמַּטְלוֹת:", "סַךְ הַכֹּל הִרְוַחְתְּ מֵהַמַּטְלוֹת:"))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
-                    HStack(spacing: 8) {
-                        if totals.minutes > 0 {
-                            Text("🎮 \(totals.minutes) דַּקּוֹת")
-                                .font(.system(size: 16, weight: .heavy, design: .rounded))
-                                .foregroundStyle(.white)
-                        }
-                        if totals.minutes > 0 && showCoins {
-                            Text("·").foregroundStyle(.white.opacity(0.6))
-                        }
-                        if showCoins {
-                            Text("💰 \(totals.coins) שְׁקָלִים")
-                                .font(.system(size: 16, weight: .heavy, design: .rounded))
-                                .foregroundStyle(.white)
-                        }
-                    }
+                    Text("🎮 \(totals.minutes) דַּקּוֹת מִשְׂחָק")
+                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
                 }
                 Spacer()
             }
@@ -227,28 +188,6 @@ struct ChoresKidView: View {
                     .stroke(.white.opacity(0.18), lineWidth: 1)
             )
         }
-    }
-
-    /// 💰 the kid's money pocket — what mom/dad still owe in real life.
-    private var moneyPocketCard: some View {
-        HStack(spacing: AppSpacing.md) {
-            Text("💰").font(.system(size: 34))
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("\(moneyBalance) שְׁקָלִים בַּקֻּפָּה!")
-                    .font(.system(size: 18, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                Text(Gendered.g("אַבָּא אוֹ אִמָּא יִתְּנוּ לְךָ בַּיָּד 💛", "אַבָּא אוֹ אִמָּא יִתְּנוּ לָךְ בַּיָּד 💛"))
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-            }
-            Spacer()
-        }
-        .padding(AppSpacing.md)
-        .background(
-            LinearGradient(colors: [Color(hex: "F4A261"), Color(hex: "E9C46A")],
-                           startPoint: .topLeading, endPoint: .bottomTrailing),
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-        )
     }
 
     private var emptyState: some View {
@@ -403,35 +342,18 @@ struct ChoresKidView: View {
     }
 
     private func rewardLine(_ c: Chore) -> String {
-        var parts: [String] = []
-        if c.rewardMinutes > 0 { parts.append("🎮 \(c.rewardMinutes) דַּק׳") }
-        if c.rewardCoins > 0 { parts.append("💰 \(c.rewardCoins) ₪") }
-        return parts.joined(separator: " אוֹ ")
+        "🎮 \(max(c.rewardMinutes, 0)) דַּקּוֹת מִשְׂחָק"
     }
 
-    /// Decide the reward flow when the kid taps "עשיתי". With BOTH options open,
-    /// show the picker (the little trade). With only one — because the family
-    /// disabled 💰 money, or the chore offers just one — skip straight to the
-    /// photo offer so the kid never sees a pointless one-button dialog.
+    /// The kid tapped "עשיתי" — reward is always play-minutes; go to the photo
+    /// offer (no picker, since money was removed).
     private func tapDone(_ chore: Chore) {
-        let minutesOK = chore.rewardMinutes > 0
-        let coinsOK = chore.rewardCoins > 0 && moneyEnabled
-        if minutesOK && coinsOK {
-            choosingFor = chore
-        } else if minutesOK {
-            offerPhoto(chore, reward: "minutes")
-        } else if chore.rewardCoins > 0 {
-            // Only a money reward exists (a money-only custom chore). Even if the
-            // family "disabled" money, there's nothing else to give — honor it.
-            offerPhoto(chore, reward: "coins")
-        } else {
-            offerPhoto(chore, reward: "minutes")
-        }
+        // Reward is always play-minutes now (money removed) — no picker needed.
+        offerPhoto(chore, reward: "minutes")
     }
 
     private func offerPhoto(_ chore: Chore, reward: String) {
         pendingSend = (chore, reward)
-        choosingFor = nil
         showPhotoOffer = true
     }
 
@@ -453,7 +375,6 @@ struct ChoresKidView: View {
     }
 
     private func send(_ chore: Chore, reward: String, photo: Data?) {
-        choosingFor = nil
         // Show "שולחים…" while we WAIT for the server to confirm — no fake
         // celebration for a write that might not have reached the parent (Noa's
         // bug: chores marked done that never arrived). markDone self-heals a

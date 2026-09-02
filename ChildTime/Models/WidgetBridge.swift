@@ -51,7 +51,7 @@ enum WidgetBridge {
             goalToday: kidGoalPerDay,
             playMinutes: p.pendingMinutes,
             choresAvailable: activeID.map { ChoreStore.shared.chores(forChild: $0).filter(\.isAvailable).count } ?? 0,
-            money: activeID.map { ChoreStore.shared.moneyBalance(forChild: $0) } ?? 0)
+            money: 0)
         if let data = try? JSONEncoder().encode(snap) {
             AppGroup.defaults.set(data, forKey: kidKey)
         }
@@ -98,7 +98,7 @@ enum WidgetBridge {
                 playingNow: (s.unlockEndsAt ?? .distantPast) > Date(),
                 pendingChores: ChoreStore.shared.chores(forChild: row.profile.id)
                     .filter(\.isPendingApproval).count,
-                money: ChoreStore.shared.moneyBalance(forChild: row.profile.id))
+                money: 0)
         }
         if let data = try? JSONEncoder().encode(Array(kids)) {
             AppGroup.defaults.set(data, forKey: familyKey)
@@ -137,7 +137,7 @@ enum WidgetBridge {
                         playingNow: (s.unlockEndsAt ?? .distantPast) > Date(),
                         pendingChores: ChoreStore.shared.chores(forChild: row.profile.id)
                             .filter(\.isPendingApproval).count,
-                        moneyBalance: ChoreStore.shared.moneyBalance(forChild: row.profile.id))
+                        moneyBalance: 0)
                 }
                 WatchBridge.shared.pushFamilyGlance(glances)
             }

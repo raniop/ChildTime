@@ -1530,28 +1530,6 @@ final class HouseholdManager: ObservableObject {
         return until > Date()
     }
 
-    /// 💰 Family policy — may kids earn money on chores (vs. only play-minutes)?
-    /// Defaults to true (enabled) for any family that never set it.
-    var choresMoneyEnabled: Bool { household?.choresMoneyEnabled ?? true }
-
-    /// Parent flips the chores-money policy for the whole family. Synced so the
-    /// kid's device hides the 💰 option too. Confirmed + self-healing like the
-    /// other family-critical writes.
-    func setChoresMoneyEnabled(_ on: Bool) {
-        #if canImport(FirebaseFirestore)
-        guard let hh = household?.id else { return }
-        household?.choresMoneyEnabled = on   // optimistic; @Published → UI updates now
-        let ref = db.collection("households").document(hh)
-        Task {
-            var outcome = await confirmedMerge(ref, ["choresMoneyEnabled": on])
-            if outcome == .denied {
-                await self.reassertMembership()
-                outcome = await confirmedMerge(ref, ["choresMoneyEnabled": on])
-            }
-        }
-        #endif
-    }
-
     /// Publish premium to the family doc so every bound device unlocks it.
     /// `until` = expiry (far-future for lifetime); nil clears it. Only writes
     /// when the value actually changes, and only from a household member.

@@ -112,21 +112,21 @@ final class ChoreStore: ObservableObject {
         let now = Date().timeIntervalSince1970
         var docs: [Chore] = Self.catalog.dropFirst(3).map { p in
             Chore(id: "\(p.key)_\(cid)", childID: cid, title: p.title, emoji: p.emoji,
-                  rewardMinutes: p.minutes, rewardCoins: p.coins, isDaily: true,
+                  rewardMinutes: p.minutes, rewardCoins: 0, isDaily: true,
                   timesPerDay: p.timesPerDay, createdAt: 0, markedDoneAt: nil, chosenReward: nil,
                   lastApprovedAt: nil, photoData: nil, approvedTodayCount: 0, approvedTodayAt: nil,
                   archived: true)
         }
         docs.append(Chore(id: "demo-approved_\(cid)", childID: cid, title: "לְהַשְׁקוֹת אֶת הָעֲצִיצִים",
-                          emoji: "🪴", rewardMinutes: 10, rewardCoins: 5, isDaily: true, timesPerDay: 1,
+                          emoji: "🪴", rewardMinutes: 10, rewardCoins: 0, isDaily: true, timesPerDay: 1,
                           createdAt: 1, markedDoneAt: nil, chosenReward: nil, lastApprovedAt: now,
                           photoData: nil, approvedTodayCount: 1, approvedTodayAt: now, archived: false))
         docs.append(Chore(id: "demo-waiting_\(cid)", childID: cid, title: "לְטַאטֵא אֶת הַחֶדֶר",
-                          emoji: "🧹", rewardMinutes: 20, rewardCoins: 10, isDaily: true, timesPerDay: 1,
+                          emoji: "🧹", rewardMinutes: 20, rewardCoins: 0, isDaily: true, timesPerDay: 1,
                           createdAt: 2, markedDoneAt: now, chosenReward: "minutes", lastApprovedAt: nil,
                           photoData: nil, approvedTodayCount: 0, approvedTodayAt: nil, archived: false))
         self.chores = docs
-        self.stats = [cid: (minutes: 45, coins: 30, paid: 0)]
+        self.stats = [cid: (minutes: 45, coins: 0, paid: 0)]
     }
 
     /// Idempotent — (re)attach the listener to the current household. Views call
@@ -195,10 +195,11 @@ final class ChoreStore: ObservableObject {
     }
 
     /// 🗂 Built-in catalog — EVERY child gets these automatically, no parent
-    /// setup needed (Rani). Default rewards scale with chore size: small 5דק'/₪2,
-    /// medium 10/5, bigger 15-20/7-10. The kid picks the chore AND the reward —
-    /// a little trade with the parent; the parent can retune or hide any of
-    /// them (an override doc with the same deterministic id takes precedence).
+    /// setup needed (Rani). The 🎮 play-minutes reward scales with chore size
+    /// (small 5, medium 10, bigger 15-20). The `coins` column is legacy/unused —
+    /// money rewards were removed; it stays only for tuple/back-compat shape.
+    /// The parent can retune the minutes or hide any chore (an override doc with
+    /// the same deterministic id takes precedence).
     static let catalog: [(key: String, emoji: String, title: String, minutes: Int, coins: Int, timesPerDay: Int)] = [
         ("preset-bed",       "🛏", "לסדר את המיטה",            5,  2, 1),
         ("preset-clothes",   "👕", "לשים בגדים בסל הכביסה",     5,  2, 2),
@@ -237,7 +238,7 @@ final class ChoreStore: ObservableObject {
             } else {
                 out.append(Chore(id: docID, childID: id.uuidString,
                                  title: preset.title, emoji: preset.emoji,
-                                 rewardMinutes: preset.minutes, rewardCoins: preset.coins,
+                                 rewardMinutes: preset.minutes, rewardCoins: 0,
                                  isDaily: true, timesPerDay: preset.timesPerDay, createdAt: 0,
                                  markedDoneAt: nil, chosenReward: nil,
                                  lastApprovedAt: nil, photoData: nil,
@@ -249,15 +250,10 @@ final class ChoreStore: ObservableObject {
         return out
     }
 
-    /// Lifetime chore earnings for one child.
+    /// Lifetime chore earnings for one child (only `minutes` is surfaced now —
+    /// money rewards were removed).
     func totals(forChild id: UUID) -> (minutes: Int, coins: Int, paid: Int) {
         stats[id.uuidString] ?? (0, 0, 0)
-    }
-
-    /// 🪙 What the parents still owe: earned − already paid by hand.
-    func moneyBalance(forChild id: UUID) -> Int {
-        let t = totals(forChild: id)
-        return max(0, t.coins - t.paid)
     }
 
     /// A catalog chore (vs. a custom one the family added). "Deleting" a preset
@@ -468,23 +464,6 @@ final class ChoreStore: ObservableObject {
                          "photoData": FieldValue.delete(),
                          "photoToken": FieldValue.delete(),
                          "returnedAt": Date().timeIntervalSince1970])
-        #endif
-    }
-
-    /// Parent paid the kid by hand → settle the WHOLE balance transactionally
-    /// (coinsPaid = server-side coinsTotal). Two parents tapping "שילמתי"
-    /// together used to double-increment and silently swallow future earnings.
-    func settleMoney(childID: UUID, amount: Int) {
-        #if canImport(FirebaseFirestore)
-        guard amount > 0, let hh = listeningHousehold else { return }
-        let ref = db.collection("households").document(hh)
-            .collection("choreStats").document(childID.uuidString)
-        db.runTransaction({ txn, _ -> Any? in
-            let d = (try? txn.getDocument(ref))?.data() ?? [:]
-            let total = d["coinsTotal"] as? Int ?? 0
-            txn.setData(["coinsPaid": total], forDocument: ref, merge: true)
-            return nil
-        }) { _, _ in }
         #endif
     }
 

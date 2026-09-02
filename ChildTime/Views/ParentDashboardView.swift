@@ -1383,7 +1383,7 @@ struct ParentDashboardView: View {
                 earnedToday: s.minutesEarnedToday,
                 playingNow: playing,
                 pendingChores: pending,
-                moneyBalance: choreStore.moneyBalance(forChild: row.profile.id))
+                moneyBalance: 0)
         }
         WatchBridge.shared.pushFamilyGlance(glances)
     }
