@@ -638,14 +638,14 @@ struct PlayWindowLeaseTests {
         let p = ProgressStore.shared
         p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 20, parentGiftMinutes: 0,
                                            minutesUnlockedToday: 0, secondsCarry: 0, revision: 50))
-        let base = p.revision
-        p.addPendingMinutes(15)                      // the chore lands → 35, revision moves
-        #expect(p.revision != base)
+        let base = p.localEditSeq
+        p.addPendingMinutes(15)                      // the chore lands → 35
+        #expect(p.localEditSeq != base)              // revision would NOT have moved here
         #expect(p.pendingMinutes == 35)
 
         p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 20, parentGiftMinutes: 0,
                                            minutesUnlockedToday: 0, secondsCarry: 0, revision: 51,
-                                           basedOnRevision: base,
+                                           basedOnEditSeq: base,
                                            deltaSeconds: 10 * 60, deltaIsGift: false))
         #expect(p.pendingMinutes == 45)              // 35 + the 10 it refunded
     }

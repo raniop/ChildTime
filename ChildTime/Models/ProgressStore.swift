@@ -576,8 +576,16 @@ final class ProgressStore: ObservableObject {
             .store(in: &versionCancellables)
     }
 
+    /// Monotonic count of local edits, in memory only — never persisted, never
+    /// synced. `revision` cannot serve this purpose: it is a causal GENERATION,
+    /// so a whole burst of local edits deliberately lands on ONE number and then
+    /// stays there. Something that needs to know "did the store change since I
+    /// looked?" must use this.
+    private(set) var localEditSeq: Int = 0
+
     private func markLocalChange() {
         guard !isApplyingSnapshot else { return }
+        localEditSeq &+= 1
         // `revision` is a causal GENERATION, not an activity counter. It used to be
         // `+= 1` on every published field — ~10 bumps per answered question — so the
         // device the child played on most had a permanently higher number and won
@@ -1489,7 +1497,7 @@ final class ProgressStore: ObservableObject {
         // transaction actually MOVED instead, relative to what we hold now, and
         // leave the rest alone; the cloud value still arrives through the listener
         // and merges by revision.
-        if w.basedOnRevision != 0, revision != w.basedOnRevision {
+        if w.basedOnEditSeq != 0, localEditSeq != w.basedOnEditSeq {
             if w.deltaSeconds > 0 {
                 creditRefundLocally(seconds: w.deltaSeconds, manual: w.deltaIsGift)
             } else if w.deltaSeconds < 0 {

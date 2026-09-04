@@ -129,9 +129,10 @@ struct ClaimedWallet: Equatable {
     /// Sub-minute remainder left after the transaction spent/refunded (0…59).
     let secondsCarry: Int
     let revision: Int
-    /// The local generation this result was computed on. If the store has moved
-    /// past it, the absolute numbers above are a photograph of the past.
-    var basedOnRevision: Int = 0
+    /// The local edit count this result was computed on. If the store has moved
+    /// past it, the absolute numbers above are a photograph of the past. NOT the
+    /// revision — that is a generation and deliberately does not move per edit.
+    var basedOnEditSeq: Int = 0
     /// What the transaction actually moved, in seconds: negative spent, positive
     /// refunded. Lets a stale result still be applied RELATIVELY, so it neither
     /// erases what landed meanwhile nor loses the child's time.
@@ -344,6 +345,7 @@ final class PlayWindowLeaseManager: ObservableObject {
         let candidate = UUID().uuidString
         // Captured BEFORE the transaction — the block may re-run.
         let local = ProgressStore.shared.captureSnapshot()
+        let baseSeq = ProgressStore.shared.localEditSeq
         let minSeconds = ProgressStore.shared.minimumUnlockMinutes * 60
         let wRef = windowRef(cid), sRef = stateRef(cid)
         let kindRaw = kind.rawValue
@@ -363,7 +365,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                             "seconds": held.remainingSeconds(now: now),
                             "wPending": cur.pendingMinutes, "wGiftPocket": cur.parentGiftMinutes ?? 0,
                             "wToday": cur.minutesUnlockedToday, "wCarry": cur.secondsCarry ?? 0,
-                            "wRev": cur.revision, "wBase": local.revision, "wDelta": 0,
+                            "wRev": cur.revision, "wBase": baseSeq, "wDelta": 0,
                             "wGift": false]
                 }
                 // 2. Someone else is genuinely playing → refuse. THE invariant.
@@ -445,7 +447,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                 return ["ok": true, "leaseID": candidate, "seconds": grant,
                         "wPending": merged.pendingMinutes, "wGiftPocket": merged.parentGiftMinutes ?? 0,
                         "wToday": merged.minutesUnlockedToday, "wCarry": merged.secondsCarry ?? 0,
-                        "wRev": merged.revision, "wBase": local.revision,
+                        "wRev": merged.revision, "wBase": baseSeq,
                         "wDelta": (policy == .adoptLocal || kind == .grant) ? 0 : -grant,
                         "wGift": kind == .gift]
             }) { result, err in
@@ -464,7 +466,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                                            minutesUnlockedToday: r["wToday"] as? Int ?? 0,
                                            secondsCarry: r["wCarry"] as? Int ?? 0,
                                            revision: rev,
-                                           basedOnRevision: r["wBase"] as? Int ?? 0,
+                                           basedOnEditSeq: r["wBase"] as? Int ?? 0,
                                            deltaSeconds: r["wDelta"] as? Int ?? 0,
                                            deltaIsGift: r["wGift"] as? Bool ?? false)
                 }
@@ -487,6 +489,7 @@ final class PlayWindowLeaseManager: ObservableObject {
         let localRevision = ProgressStore.shared.revision
         // Captured BEFORE the transaction — the block may re-run.
         let local = ProgressStore.shared.captureSnapshot()
+        let baseSeq = ProgressStore.shared.localEditSeq
 
         return await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
             db.runTransaction({ txn, _ -> Any? in
@@ -548,7 +551,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                 ], forDocument: wRef, merge: true)
                 return ["wPending": cloud.pendingMinutes, "wGiftPocket": cloud.parentGiftMinutes ?? 0,
                         "wToday": cloud.minutesUnlockedToday, "wCarry": cloud.secondsCarry ?? 0,
-                        "wRev": cloud.revision, "wBase": local.revision,
+                        "wRev": cloud.revision, "wBase": baseSeq,
                         "wDelta": held.kind == .grant ? 0 : refund,
                         "wGift": held.kind == .gift]
             }) { result, err in
@@ -562,7 +565,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                                           minutesUnlockedToday: r["wToday"] as? Int ?? 0,
                                           secondsCarry: r["wCarry"] as? Int ?? 0,
                                           revision: rev,
-                                          basedOnRevision: r["wBase"] as? Int ?? 0,
+                                          basedOnEditSeq: r["wBase"] as? Int ?? 0,
                                           deltaSeconds: r["wDelta"] as? Int ?? 0,
                                           deltaIsGift: r["wGift"] as? Bool ?? false)
                     Task { @MainActor in
