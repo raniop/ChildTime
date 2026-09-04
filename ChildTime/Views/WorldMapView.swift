@@ -259,6 +259,8 @@ struct WorldMapView: View {
             lastSeenStars = progress.stars
             celebrateGamesUnlockIfNeeded()
             ChoreStore.shared.startIfNeeded()   // 🧹 live chores for the tile
+            // 🔐 live view of the child's single authoritative play window.
+            if let cid = profiles.activeID { PlayWindowLeaseManager.shared.startIfNeeded(childID: cid) }
             // 🎓 No grade yet (families from before grades existed): the kid
             // picks their own — synced to the parent flagged for verification.
             if let p = profiles.active, p.grade == nil {
@@ -1770,7 +1772,41 @@ struct WorldMapView: View {
         }
     }
 
+    /// Open earned minutes. With the lease ON, the CLAIM commits first (wallet
+    /// debit + lease write in one transaction) and the shield only opens on a
+    /// granted claim — never unshield before the claim is durable.
     private func redeemMinutes() {
+        guard !progress.isUnlocked else { return }
+        guard PlayWindowLeaseManager.isEnabled, let cid = profiles.activeID else {
+            legacyRedeemMinutes(); return
+        }
+        let want = progress.redeemableMinutesNow
+        guard want > 0 else { return }
+        Task { @MainActor in
+            let outcome = await PlayWindowLeaseManager.shared.claim(
+                childID: cid, kind: .earned, requestedSeconds: want * 60)
+            switch outcome {
+            case .granted(let leaseID, let seconds):
+                let mins = seconds / 60
+                guard mins > 0 else { return }
+                shields.unlock(minutes: mins)
+                progress.startUnlock(minutes: mins, leaseID: leaseID)
+                LearningHistoryStore.shared.recordMinutesUsed(mins)
+                LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins])
+            case .heldElsewhere:
+                // The lease listener drives the "open on your iPad" card + transfer.
+                Haptic.warning()
+            case .insufficient:
+                Haptic.light()
+            case .offline:
+                // Transactions don't queue offline. Fall back to the bounded local
+                // window so a kid with no network is never stranded.
+                legacyRedeemMinutes()
+            }
+        }
+    }
+
+    private func legacyRedeemMinutes() {
         // Re-check (a fast double-tap with the 💝 button could open a manual
         // window first; without this guard startUnlock would overwrite it and
         // the gift window's banked leftover would be lost).
@@ -1800,6 +1836,30 @@ struct WorldMapView: View {
     /// any frozen leftover. Outside the daily cap; leftover freezes again on
     /// stop-and-save (so nothing a parent gave is ever wasted).
     private func redeemGift() {
+        guard !progress.isUnlocked else { return }
+        guard PlayWindowLeaseManager.isEnabled, let cid = profiles.activeID,
+              progress.parentGiftMinutes > 0 else { legacyRedeemGift(); return }
+        let want = progress.parentGiftMinutes
+        Task { @MainActor in
+            let outcome = await PlayWindowLeaseManager.shared.claim(
+                childID: cid, kind: .gift, requestedSeconds: want * 60)
+            switch outcome {
+            case .granted(let leaseID, let seconds):
+                let mins = seconds / 60
+                guard mins > 0 else { return }
+                // Keep the local pocket in step with the cloud debit we just made.
+                _ = progress.consumeParentGiftForUnlock()
+                shields.unlock(minutes: mins)
+                progress.startUnlock(minutes: mins, manual: true, leaseID: leaseID)
+                LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins, "gift": true])
+            case .heldElsewhere: Haptic.warning()
+            case .insufficient:  Haptic.light()
+            case .offline:       legacyRedeemGift()
+            }
+        }
+    }
+
+    private func legacyRedeemGift() {
         guard !progress.isUnlocked else { return }   // re-check: PIN cover runs us later
         let gift = progress.consumeParentGiftForUnlock()
         // Frozen seconds resume as their own manual window; fold the gift on top.

@@ -366,3 +366,21 @@ extension ProgressSnapshot {
         }
     }
 }
+
+// MARK: - Firestore codec
+//
+// Shared by RemoteSyncManager and the play-window lease, so a snapshot written
+// inside a lease transaction is byte-identical to one written by the normal sync.
+extension ProgressSnapshot {
+    static func toFirestore(_ snap: ProgressSnapshot) -> [String: Any]? {
+        guard let data = try? JSONEncoder().encode(snap),
+              let any = try? JSONSerialization.jsonObject(with: data),
+              let dict = any as? [String: Any] else { return nil }
+        return dict
+    }
+    static func fromFirestore(_ raw: [String: Any]) -> ProgressSnapshot? {
+        guard let data = try? JSONSerialization.data(withJSONObject: raw),
+              let snap = try? JSONDecoder().decode(ProgressSnapshot.self, from: data) else { return nil }
+        return snap
+    }
+}

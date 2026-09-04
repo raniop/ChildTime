@@ -18,6 +18,7 @@ final class ProgressStore: ObservableObject {
         static let unlockGrantedSeconds = "unlockGrantedSeconds"
         static let unlockStartedAt = "unlockStartedAt"
         static let unlockStartedUptime = "unlockStartedUptime"
+        static let activeLeaseID = "activeLeaseID"
         static let stars = "stars"
         static let diamonds = "diamonds"
         static let xp = "xp"
@@ -122,6 +123,15 @@ final class ProgressStore: ObservableObject {
     }
     private var unlockStartedUptime: Double {
         didSet { defaults.set(unlockStartedUptime, forKey: Key.unlockStartedUptime) }
+    }
+    /// The cloud lease this OPEN window was granted under (nil for a legacy or
+    /// offline-provisional window). Releasing quotes it so the settlement is
+    /// exactly-once.
+    private(set) var activeLeaseID: String? {
+        didSet {
+            if let v = activeLeaseID { defaults.set(v, forKey: Key.activeLeaseID) }
+            else { defaults.removeObject(forKey: Key.activeLeaseID) }
+        }
     }
 
     /// Seconds elapsed since the window opened, measured monotonically when
@@ -459,6 +469,7 @@ final class ProgressStore: ObservableObject {
         self.unlockGrantedSeconds = d.integer(forKey: Key.unlockGrantedSeconds)
         self.unlockStartedAt = d.object(forKey: Key.unlockStartedAt) as? Date
         self.unlockStartedUptime = d.double(forKey: Key.unlockStartedUptime)
+        self.activeLeaseID = d.string(forKey: Key.activeLeaseID)
         self.stars = d.integer(forKey: Key.stars)
         self.ownedCharacterIDs = Set(d.stringArray(forKey: Key.ownedCharacters) ?? [])
         self.diamonds = d.integer(forKey: Key.diamonds)
@@ -1543,7 +1554,7 @@ final class ProgressStore: ObservableObject {
         return amount
     }
 
-    func startUnlock(minutes: Int, manual: Bool = false) {
+    func startUnlock(minutes: Int, manual: Bool = false, leaseID: String? = nil) {
         // Never silently overwrite an OPEN EARNED window with a parent/manual one —
         // bank its leftover back to the wallet first (pocket integrity).
         if isUnlocked && !unlockIsManual { _ = endUnlockAndReturnRemainingMinutes() }
@@ -1561,6 +1572,7 @@ final class ProgressStore: ObservableObject {
         unlockGrantedSeconds = minutes * 60 + extraSeconds
         unlockStartedAt = Date()
         unlockStartedUptime = ProcessInfo.processInfo.systemUptime
+        if let leaseID { activeLeaseID = leaseID }
         // Lock-screen / Dynamic Island countdown of the remaining play time.
         PlayTimeLiveActivity.start(endsAt: end,
                                    characterName: ProfileStore.shared.active?.character.name ?? "")
@@ -1588,6 +1600,7 @@ final class ProgressStore: ObservableObject {
         unlockGrantedSeconds = 0
         unlockStartedAt = nil
         unlockStartedUptime = 0
+        activeLeaseID = nil
         PlayTimeLiveActivity.end()
     }
 
@@ -1632,8 +1645,23 @@ final class ProgressStore: ObservableObject {
     /// (play screen + Live Activity button).
     func stopAndSaveCurrentUnlock() {
         guard isUnlocked else { return }
+        // Capture what the lease needs BEFORE the local stop clears it. Every stop
+        // path in the app funnels through here (timer end, Live Activity button,
+        // remote lock, Kid Mode exit, profile switch), so this is the single place
+        // the cloud lease is released.
+        let leaseID = activeLeaseID
+        let remaining = refundableUnlockSeconds
+        let childID = ProfileStore.shared.activeID
         if unlockIsManual { pauseManualUnlock() }
         else { _ = endUnlockAndReturnRemainingMinutes() }
+        // The local wallet was already credited optimistically above so the kid
+        // sees their minutes instantly; the release transaction is authoritative
+        // and converges via LWW (it bumps the revision above ours).
+        if PlayWindowLeaseManager.isEnabled, let leaseID, let childID {
+            Task { await PlayWindowLeaseManager.shared.release(childID: childID,
+                                                               leaseID: leaseID,
+                                                               localRemainingSeconds: remaining) }
+        }
     }
 
     /// Child stopped mid-play on a parent's MANUAL grant — FREEZE the exact leftover
