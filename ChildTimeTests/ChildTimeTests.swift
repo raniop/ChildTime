@@ -434,3 +434,103 @@ struct ChildTimeTests {
         }
     }
 }
+
+// MARK: - 🔒 Play-window lease
+//
+// The single-window invariant is what stops a child opening the same 60 gift
+// minutes on the iPhone AND the iPad. These lock the pure parts of it.
+
+@MainActor
+@Suite("Play window lease")
+struct PlayWindowLeaseTests {
+
+    private func lease(owner: String, granted: Int, startedSecondsAgo: Double,
+                       state: PlayWindowLease.State = .open,
+                       kind: PlayWindowLease.Kind = .gift) -> PlayWindowLease {
+        var l = PlayWindowLease()
+        l.state = state
+        l.leaseID = "L1"
+        l.ownerDeviceID = owner
+        l.kind = kind
+        l.grantedSeconds = granted
+        l.startedAt = Date().addingTimeInterval(-startedSecondsAgo)
+        return l
+    }
+
+    @Test("a live window on the other device blocks a second one")
+    func heldElsewhereBlocks() {
+        let l = lease(owner: "other-ipad", granted: 3600, startedSecondsAgo: 60)
+        #expect(l.isHeld)
+        #expect(!l.isMine)
+        #expect(l.isHeldElsewhere())
+    }
+
+    @Test("our own window never blocks us — a retried claim is idempotent")
+    func ownWindowDoesNotBlock() {
+        let l = lease(owner: DeviceIdentity.installID, granted: 3600, startedSecondsAgo: 60)
+        #expect(l.isMine)
+        #expect(!l.isHeldElsewhere())
+    }
+
+    @Test("remaining time is derived from the SERVER start, not stored")
+    func remainingIsDerived() {
+        let l = lease(owner: "other", granted: 600, startedSecondsAgo: 200)
+        #expect(abs(l.remainingSeconds() - 400) <= 1)
+    }
+
+    @Test("remaining never goes negative")
+    func remainingFloorsAtZero() {
+        let l = lease(owner: "other", granted: 600, startedSecondsAgo: 5000)
+        #expect(l.remainingSeconds() == 0)
+    }
+
+    @Test("a dead lease stops blocking, so a crashed device can't hold the window hostage")
+    func expiredLeaseReleases() {
+        let past = 600 + PlayWindowLease.expiryGraceSeconds + 10
+        let l = lease(owner: "other", granted: 600, startedSecondsAgo: Double(past))
+        #expect(l.isExpired())
+        #expect(!l.isHeldElsewhere())
+    }
+
+    @Test("the grace period keeps a just-finished window from being stolen on clock skew")
+    func graceProtectsAgainstSkew() {
+        let l = lease(owner: "other", granted: 600, startedSecondsAgo: 640)
+        #expect(!l.isExpired())
+        #expect(l.isHeldElsewhere())
+    }
+
+    @Test("an idle lease is not held even if stale fields linger")
+    func idleIsNotHeld() {
+        var l = lease(owner: "other", granted: 600, startedSecondsAgo: 10, state: .idle)
+        #expect(!l.isHeld)
+        #expect(!l.isHeldElsewhere())
+        l.state = .releasing
+        #expect(l.isHeld)   // still playing until it confirms closed
+    }
+
+    @Test("round-trips through Firestore without losing the fields the refund needs")
+    func firestoreRoundTrip() {
+        let started = Date().addingTimeInterval(-120)
+        let parsed = PlayWindowLease.from([
+            "state": "open", "leaseID": "abc", "ownerDeviceID": "dev-1",
+            "ownerKind": "iPad", "ownerName": "האייפד של נועה",
+            "kind": "gift", "grantedSeconds": 3600,
+            "startedAt": started,
+            "lastReleasedLeaseID": "zzz",
+        ])
+        #expect(parsed.state == .open)
+        #expect(parsed.leaseID == "abc")
+        #expect(parsed.kind == .gift)
+        #expect(parsed.grantedSeconds == 3600)
+        #expect(parsed.ownerName == "האייפד של נועה")
+        #expect(parsed.lastReleasedLeaseID == "zzz")
+        #expect(abs(parsed.remainingSeconds() - 3480) <= 2)
+    }
+
+    @Test("an unparseable lease doc reads as idle — never as someone else holding it")
+    func garbageReadsAsIdle() {
+        let parsed = PlayWindowLease.from(["state": "🤷", "grantedSeconds": "lots"])
+        #expect(parsed.state == .idle)
+        #expect(!parsed.isHeld)
+    }
+}

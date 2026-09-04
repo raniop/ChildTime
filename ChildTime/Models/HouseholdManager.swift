@@ -1223,7 +1223,8 @@ final class HouseholdManager: ObservableObject {
             }
             ShieldManager.shared.unlock(minutes: minutes)
             // Manual = fixed window, not drawn from the child's earned/banked pool.
-            ProgressStore.shared.startUnlock(minutes: minutes, manual: true, leaseID: leaseID)
+            ProgressStore.shared.startUnlock(minutes: minutes, manual: true, leaseID: leaseID,
+                                             leaseKind: "grant")
             Haptic.success()
         }
     }

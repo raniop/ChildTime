@@ -84,7 +84,7 @@ struct PlayWindowLease: Equatable {
         l.kind = Kind(rawValue: d["kind"] as? String ?? "") ?? .earned
         l.grantedSeconds = d["grantedSeconds"] as? Int ?? 0
         #if canImport(FirebaseFirestore)
-        l.startedAt = (d["startedAt"] as? Timestamp)?.dateValue()
+        l.startedAt = (d["startedAt"] as? Timestamp)?.dateValue() ?? d["startedAt"] as? Date
         #endif
         l.releaseRequestedBy = d["releaseRequestedBy"] as? String
         l.lastReleasedLeaseID = d["lastReleasedLeaseID"] as? String
@@ -107,6 +107,12 @@ enum ClaimPolicy {
     case normal           // the child tapping "open my minutes"
     case parentOverride   // a parent's remote grant outranks a sibling device
     case force            // takeover after an unanswered release request
+    /// Retro-claim for a window this device ALREADY opened offline. The wallet
+    /// was debited locally and that debit rides up with the snapshot, so the
+    /// transaction must NOT debit a second time — it only publishes the fact
+    /// that this device owns the window, and still refuses if a sibling
+    /// legitimately holds one.
+    case adoptLocal
 }
 
 @MainActor
@@ -117,9 +123,12 @@ final class PlayWindowLeaseManager: ObservableObject {
     @Published private(set) var lease = PlayWindowLease()
 
     /// Kill switch — the whole lease path can be disabled without a build, and
-    /// the app falls back to the previous behaviour verbatim.
+    /// the app falls back to the previous behaviour verbatim. ON by default from
+    /// build 138: every failure mode degrades to exactly the old behaviour (a
+    /// claim that cannot run returns `.offline` and the caller takes the legacy
+    /// path), so the worst case of leaving it on is what shipped before it.
     static var isEnabled: Bool {
-        UserDefaults.standard.object(forKey: "playWindowLease.enabled") as? Bool ?? false
+        UserDefaults.standard.object(forKey: "playWindowLease.enabled") as? Bool ?? true
     }
 
     #if canImport(FirebaseFirestore)
@@ -127,6 +136,7 @@ final class PlayWindowLeaseManager: ObservableObject {
     private var listener: ListenerRegistration?
     #endif
     private var listeningChild: String?
+    private var reconciling = false
 
     private init() {}
 
@@ -182,6 +192,40 @@ final class PlayWindowLeaseManager: ObservableObject {
                                   secondsLeft: lease.remainingSeconds())
         }
         return await claim(childID: childID, kind: kind, requestedSeconds: requestedSeconds)
+    }
+
+    /// RECONNECT SWEEP. A window opened while Firestore was unreachable has no
+    /// lease (transactions never queue offline), so the sibling device sees an
+    /// idle lease and could legitimately open a second window — the exact
+    /// double-spend this whole design exists to kill. On every wake, if we are
+    /// playing WITHOUT a lease, retro-claim one for the time we have left.
+    ///
+    /// `.adoptLocal` does not debit: the minutes were already taken out of the
+    /// local wallet and that debit rides up with the snapshot. If a sibling
+    /// genuinely holds the window we simply do not get the lease — we let this
+    /// window run out rather than confiscating time from a child who did nothing
+    /// wrong, and the invariant in `enforceShieldStateIfNeeded` only ever locks a
+    /// device that DOES hold a lease, so nothing is yanked mid-play.
+    func reconcileOfflineWindowIfNeeded(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        guard Self.isEnabled, !HouseholdManager.skipsCloudSync else { return }
+        let progress = ProgressStore.shared
+        guard progress.isUnlocked, progress.activeLeaseID == nil else { return }
+        let left = progress.unlockSecondsRemaining
+        guard left > 30 else { return }   // about to end anyway — not worth a write
+        let kind = PlayWindowLease.Kind(rawValue: progress.unlockKind) ?? .earned
+        guard !reconciling else { return }
+        reconciling = true
+        Task { @MainActor in
+            defer { self.reconciling = false }
+            let out = await self.claim(childID: childID, kind: kind,
+                                       requestedSeconds: left, policy: .adoptLocal)
+            if case .granted(let lid, _) = out {
+                progress.adoptLeaseID(lid)
+                TofyLink("lease: adopted offline window \(lid) (\(left)s left)")
+            }
+        }
+        #endif
     }
 
     /// Settle a lease the MONITOR EXTENSION closed. The extension has no Firebase,
@@ -243,7 +287,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                     return ["ok": true, "leaseID": held.leaseID ?? "", "seconds": held.remainingSeconds(now: now)]
                 }
                 // 2. Someone else is genuinely playing → refuse. THE invariant.
-                if held.isHeldElsewhere(now: now), policy == .normal {
+                if held.isHeldElsewhere(now: now), policy == .normal || policy == .adoptLocal {
                     return ["held": true, "kind": held.ownerKind ?? "other",
                             "seconds": held.remainingSeconds(now: now)]
                 }
@@ -269,21 +313,26 @@ final class PlayWindowLeaseManager: ObservableObject {
                 // 4. Merge our local state up (never lowers the cloud), then debit.
                 var merged = ProgressSnapshot.ratchetMerged(local: local, remote: cloud)
                 var grant = 0
-                switch kind {
-                case .earned:
-                    let capLeft = max(0, merged.pendingMinutes)
-                    grant = min(requestedSeconds / 60, capLeft) * 60
-                    guard grant >= minSeconds else { return ["insufficient": true] }
-                    merged.pendingMinutes -= grant / 60
-                    merged.minutesUnlockedToday += grant / 60
-                case .gift:
-                    let pocket = merged.parentGiftMinutes ?? 0
-                    grant = min(requestedSeconds / 60, pocket) * 60
-                    guard grant > 0 else { return ["insufficient": true] }
-                    merged.parentGiftMinutes = max(0, pocket - grant / 60)
-                case .grant:
-                    // A parent's remote grant is MINTED, not spent from a pocket.
+                if policy == .adoptLocal {
+                    // Already paid for locally — publish ownership, touch no pocket.
                     grant = requestedSeconds
+                } else {
+                    switch kind {
+                    case .earned:
+                        let capLeft = max(0, merged.pendingMinutes)
+                        grant = min(requestedSeconds / 60, capLeft) * 60
+                        guard grant >= minSeconds else { return ["insufficient": true] }
+                        merged.pendingMinutes -= grant / 60
+                        merged.minutesUnlockedToday += grant / 60
+                    case .gift:
+                        let pocket = merged.parentGiftMinutes ?? 0
+                        grant = min(requestedSeconds / 60, pocket) * 60
+                        guard grant > 0 else { return ["insufficient": true] }
+                        merged.parentGiftMinutes = max(0, pocket - grant / 60)
+                    case .grant:
+                        // A parent's remote grant is MINTED, not spent from a pocket.
+                        grant = requestedSeconds
+                    }
                 }
                 merged.revision = max(local.revision, cloud.revision) + 1
                 merged.lastModifiedAt = Date()

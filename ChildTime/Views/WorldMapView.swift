@@ -1646,7 +1646,8 @@ struct WorldMapView: View {
                 let mins = seconds / 60
                 guard mins > 0 else { return }
                 shields.unlock(minutes: mins)
-                progress.startUnlock(minutes: mins, manual: kind == .gift, leaseID: leaseID)
+                progress.startUnlock(minutes: mins, manual: kind == .gift, leaseID: leaseID,
+                                     leaseKind: kind.rawValue)
                 LiveEventReporter.report(.screenTimeMoved, extra: ["fromKind": transferFromKind])
                 Haptic.success()
                 companion.hype("נָעוּל שָׁם! ✅ אֶפְשָׁר לְשַׂחֵק כָּאן 🎉")
@@ -1675,7 +1676,8 @@ struct WorldMapView: View {
                 let mins = seconds / 60
                 guard mins > 0 else { return }
                 shields.unlock(minutes: mins)
-                progress.startUnlock(minutes: mins, manual: kind == .gift, leaseID: leaseID)
+                progress.startUnlock(minutes: mins, manual: kind == .gift, leaseID: leaseID,
+                                     leaseKind: kind.rawValue)
                 transferTimedOut = false
                 Haptic.success()
                 companion.hype("פָּתוּחַ כָּאן! 🎉")
@@ -1889,8 +1891,9 @@ struct WorldMapView: View {
             case .granted(let leaseID, let seconds):
                 let mins = seconds / 60
                 guard mins > 0 else { return }
+                progress.applyClaimedDebit(minutes: mins, gift: false)
                 shields.unlock(minutes: mins)
-                progress.startUnlock(minutes: mins, leaseID: leaseID)
+                progress.startUnlock(minutes: mins, leaseID: leaseID, leaseKind: "earned")
                 LearningHistoryStore.shared.recordMinutesUsed(mins)
                 LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins])
             case .heldElsewhere:
@@ -1948,9 +1951,9 @@ struct WorldMapView: View {
                 let mins = seconds / 60
                 guard mins > 0 else { return }
                 // Keep the local pocket in step with the cloud debit we just made.
-                _ = progress.consumeParentGiftForUnlock()
+                progress.applyClaimedDebit(minutes: mins, gift: true)
                 shields.unlock(minutes: mins)
-                progress.startUnlock(minutes: mins, manual: true, leaseID: leaseID)
+                progress.startUnlock(minutes: mins, manual: true, leaseID: leaseID, leaseKind: "gift")
                 LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins, "gift": true])
             case .heldElsewhere: Haptic.warning()
             case .insufficient:  Haptic.light()
@@ -1968,7 +1971,7 @@ struct WorldMapView: View {
         guard total > 0 else { return }
         if gift > 0 {
             if frozenMinutes > 0 { progress.extendUnlock(minutes: gift) }
-            else { progress.startUnlock(minutes: gift, manual: true) }
+            else { progress.startUnlock(minutes: gift, manual: true, leaseKind: "gift") }
         }
         shields.unlock(minutes: total)
         LiveEventReporter.report(.screenTimeStart, extra: ["minutes": total, "gift": true])

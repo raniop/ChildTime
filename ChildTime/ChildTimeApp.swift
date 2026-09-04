@@ -351,6 +351,7 @@ struct ChildTimeApp: App {
         // background (that process has no Firebase and cannot release it).
         if PlayWindowLeaseManager.isEnabled, let cid = ProfileStore.shared.activeID {
             PlayWindowLeaseManager.shared.drainExtensionReleaseIfNeeded(childID: cid)
+            PlayWindowLeaseManager.shared.reconcileOfflineWindowIfNeeded(childID: cid)
             let lease = PlayWindowLeaseManager.shared.lease
             if progress.isUnlocked, progress.activeLeaseID != nil, lease.isHeldElsewhere() {
                 ShieldManager.shared.relockBaseline()

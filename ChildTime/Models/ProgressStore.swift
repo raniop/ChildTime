@@ -19,6 +19,7 @@ final class ProgressStore: ObservableObject {
         static let unlockStartedAt = "unlockStartedAt"
         static let unlockStartedUptime = "unlockStartedUptime"
         static let activeLeaseID = "activeLeaseID"
+        static let unlockKind = "unlockKind"
         static let stars = "stars"
         static let diamonds = "diamonds"
         static let xp = "xp"
@@ -127,6 +128,13 @@ final class ProgressStore: ObservableObject {
     /// The cloud lease this OPEN window was granted under (nil for a legacy or
     /// offline-provisional window). Releasing quotes it so the settlement is
     /// exactly-once.
+    /// Which pocket the OPEN window was paid from ("earned" / "gift" / "grant").
+    /// Needed to retro-claim a lease for a window that was opened while offline —
+    /// the refund side reads the kind off the lease doc, but a claim has to write it.
+    private(set) var unlockKind: String {
+        didSet { defaults.set(unlockKind, forKey: Key.unlockKind) }
+    }
+
     private(set) var activeLeaseID: String? {
         didSet {
             if let v = activeLeaseID {
@@ -475,6 +483,7 @@ final class ProgressStore: ObservableObject {
         self.unlockStartedAt = d.object(forKey: Key.unlockStartedAt) as? Date
         self.unlockStartedUptime = d.double(forKey: Key.unlockStartedUptime)
         self.activeLeaseID = d.string(forKey: Key.activeLeaseID)
+        self.unlockKind = d.string(forKey: Key.unlockKind) ?? "earned"
         self.stars = d.integer(forKey: Key.stars)
         self.ownedCharacterIDs = Set(d.stringArray(forKey: Key.ownedCharacters) ?? [])
         self.diamonds = d.integer(forKey: Key.diamonds)
@@ -1457,6 +1466,22 @@ final class ProgressStore: ObservableObject {
     /// Returns the granted amount; any leftover stays in `pendingMinutes` for a
     /// later day so a large wallet can't be cashed in past the daily cap at once.
     @discardableResult
+    /// Mirror a debit the CLOUD lease transaction already made, so the child's
+    /// wallet updates instantly instead of lagging until the snapshot comes back.
+    /// The cloud value is authoritative and converges over this within a beat.
+    /// Attach a lease we won retroactively for an already-open window.
+    func adoptLeaseID(_ id: String) { if isUnlocked { activeLeaseID = id } }
+
+    func applyClaimedDebit(minutes: Int, gift: Bool) {
+        guard minutes > 0 else { return }
+        if gift {
+            parentGiftMinutes = max(0, parentGiftMinutes - minutes)
+        } else {
+            pendingMinutes = max(0, pendingMinutes - minutes)
+            minutesUnlockedToday += minutes
+        }
+    }
+
     func consumeMinutesForUnlock() -> Int {
         _ = minutesEarnedTodayRespectingDate()   // roll the day over first if needed
         var amount = redeemableMinutesNow
@@ -1559,7 +1584,8 @@ final class ProgressStore: ObservableObject {
         return amount
     }
 
-    func startUnlock(minutes: Int, manual: Bool = false, leaseID: String? = nil) {
+    func startUnlock(minutes: Int, manual: Bool = false, leaseID: String? = nil,
+                     leaseKind: String? = nil) {
         // Never silently overwrite an OPEN EARNED window with a parent/manual one —
         // bank its leftover back to the wallet first (pocket integrity).
         if isUnlocked && !unlockIsManual { _ = endUnlockAndReturnRemainingMinutes() }
@@ -1577,6 +1603,7 @@ final class ProgressStore: ObservableObject {
         unlockGrantedSeconds = minutes * 60 + extraSeconds
         unlockStartedAt = Date()
         unlockStartedUptime = ProcessInfo.processInfo.systemUptime
+        unlockKind = leaseKind ?? (manual ? "grant" : "earned")
         if let leaseID { activeLeaseID = leaseID }
         // Lock-screen / Dynamic Island countdown of the remaining play time.
         PlayTimeLiveActivity.start(endsAt: end,
@@ -1590,7 +1617,7 @@ final class ProgressStore: ObservableObject {
         // start a fresh manual one instead (startUnlock banks the earned leftover) —
         // gift minutes must never be folded into the earned pocket.
         guard minutes > 0, let end = unlockEndsAt, end > Date(), unlockIsManual else {
-            startUnlock(minutes: minutes, manual: true); return
+            startUnlock(minutes: minutes, manual: true, leaseKind: "gift"); return
         }
         let newEnd = end.addingTimeInterval(TimeInterval(minutes * 60))
         unlockEndsAt = newEnd
