@@ -470,6 +470,8 @@ final class PlayWindowLeaseManager: ObservableObject {
         let cid = childID.uuidString
         let wRef = windowRef(cid), sRef = stateRef(cid)
         let localRevision = ProgressStore.shared.revision
+        // Captured BEFORE the transaction — the block may re-run.
+        let local = ProgressStore.shared.captureSnapshot()
 
         return await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
             db.runTransaction({ txn, _ -> Any? in
@@ -481,9 +483,18 @@ final class PlayWindowLeaseManager: ObservableObject {
                 let held = PlayWindowLease.from(wData)
                 let elapsed = held.startedAt.map { max(0, Int(Date().timeIntervalSince($0))) } ?? 0
                 let refund = max(0, min(localRemainingSeconds, held.grantedSeconds - elapsed))
-                // Credit the CLOUD's own value (not a merge of our local copy —
-                // which may already carry the optimistic credit, which would double).
-                var cloud = (try? txn.getDocument(sRef))?.data().flatMap(ProgressSnapshot.fromFirestore) ?? .blank
+                // Merge our local state up, THEN add the refund.
+                //
+                // This used to read the cloud alone, to stop the local optimistic
+                // credit being counted twice. That credit is gone now (the stop
+                // path no longer pays — see stopAndSaveCurrentUnlock), so merging
+                // is safe again — and NOT merging is a hazard in its own right:
+                // the transaction would write a snapshot from before anything that
+                // had just landed locally (a 💝 gift consumed from a command,
+                // minutes earned mid-window, an approved chore), and adopting that
+                // result would erase it.
+                let remote = (try? txn.getDocument(sRef))?.data().flatMap(ProgressSnapshot.fromFirestore) ?? .blank
+                var cloud = ProgressSnapshot.ratchetMerged(local: local, remote: remote)
                 // Seconds-exact: give back every second, whole minutes to the
                 // pocket and the remainder to the carry. Flooring here is what
                 // used to shave up to 59 seconds off every hand-off.
