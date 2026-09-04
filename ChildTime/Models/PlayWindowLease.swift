@@ -555,11 +555,17 @@ final class PlayWindowLeaseManager: ObservableObject {
                         "wDelta": held.kind == .grant ? 0 : refund,
                         "wGift": held.kind == .gift]
             }) { result, err in
-                // Same rule as a claim: the SERVER-clamped refund is the truth. The
-                // local credit was optimistic (so the child sees their minutes the
-                // instant they stop) and may be a minute off; leaving it to fight
-                // this write through LWW is exactly how a transfer re-mints time.
-                if let r = result as? [String: Any], let rev = r["wRev"] as? Int {
+                // Same rule as a claim: the SERVER-clamped refund is the truth.
+                //
+                // `err == nil` is NOT optional here. The block's return value can
+                // come back alongside an error for an attempt that never committed,
+                // and adopting it would also adopt its REVISION — putting this
+                // device at a generation the cloud never reached. Every genuine
+                // cloud snapshot then carries a lower revision, loses the merge,
+                // and the device is frozen on stale numbers for good: one iPad
+                // showing 15 minutes and no gift while the iPhone correctly shows
+                // 20 and 30.
+                if err == nil, let r = result as? [String: Any], let rev = r["wRev"] as? Int {
                     let w = ClaimedWallet(pendingMinutes: r["wPending"] as? Int ?? 0,
                                           parentGiftMinutes: r["wGiftPocket"] as? Int ?? 0,
                                           minutesUnlockedToday: r["wToday"] as? Int ?? 0,
