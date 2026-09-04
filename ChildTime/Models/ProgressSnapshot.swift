@@ -89,6 +89,12 @@ struct ProgressSnapshot: Codable, Equatable {
     /// in ratchetMerged the higher-epoch side wins WHOLESALE (no max-merge), so a
     /// second device holding stale full progress can't ratchet it back over the
     /// reset. Optional-safe: older snapshots decode as 0.
+    /// 🎡 Daily bonus stamps that grant REAL minutes. They used to live only in
+    /// device-local defaults, so the comeback wheel and the 10-minute variety
+    /// bonus were each claimable once per device per day. Synced and merged with
+    /// `laterDate`, exactly like the daily chest.
+    var lastComebackWheelAt: Date? = nil
+    var varietyBonusDate: Date? = nil
     var resetEpoch: Int = 0
     /// Bumped each time the device writes the snapshot — Firestore listeners
     /// use this to skip echoes of their own writes.
@@ -133,6 +139,7 @@ extension ProgressSnapshot {
         case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
         case hourlyAnswered, hourlyCorrect
         case wheelProgressCount, recoveryPot, ownedCharacterIDs, parentGiftMinutes, giftGivenToday, giftGivenDate
+        case lastComebackWheelAt, varietyBonusDate
         case resetEpoch
         case revision, lastModifiedAt, deviceID
     }
@@ -189,6 +196,8 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .parentGiftMinutes)) ?? nil { parentGiftMinutes = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .giftGivenToday)) ?? nil { giftGivenToday = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .giftGivenDate)) ?? nil { giftGivenDate = v }
+        if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastComebackWheelAt)) ?? nil { lastComebackWheelAt = v }
+        if let v = (try? c.decodeIfPresent(Date.self, forKey: .varietyBonusDate)) ?? nil { varietyBonusDate = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .resetEpoch)) ?? nil { resetEpoch = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .revision)) ?? nil { revision = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastModifiedAt)) ?? nil { lastModifiedAt = v }
@@ -291,6 +300,8 @@ extension ProgressSnapshot {
         m.lastSessionDate = laterDate(local.lastSessionDate, remote.lastSessionDate)
         m.lastDailyChestDate = laterDate(local.lastDailyChestDate, remote.lastDailyChestDate)
         m.lastDailyChallengeDate = laterDate(local.lastDailyChallengeDate, remote.lastDailyChallengeDate)
+        m.lastComebackWheelAt = laterDate(local.lastComebackWheelAt, remote.lastComebackWheelAt)
+        m.varietyBonusDate = laterDate(local.varietyBonusDate, remote.varietyBonusDate)
         m.hourlyAnswered = mergeHourly(local.hourlyAnswered, remote.hourlyAnswered)
         m.hourlyCorrect  = mergeHourly(local.hourlyCorrect, remote.hourlyCorrect)
         return m

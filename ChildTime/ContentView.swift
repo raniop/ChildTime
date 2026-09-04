@@ -47,13 +47,15 @@ struct ContentView: View {
         // refresh "last seen" every 15s so the parent sees "משחק עכשיו" live —
         // not just while inside a question.
         .onReceive(Timer.publish(every: 15, on: .main, in: .common).autoconnect()) { _ in
-            if settings.deviceRole == .child, auth.isSignedIn, let cid = profiles.activeID {
+            // Kid Mode counts as a play device for the child being played as —
+            // otherwise its open window is invisible to the child's own devices.
+            if auth.isSignedIn, let cid = kidMode.active ? kidMode.childID : (settings.deviceRole == .child ? profiles.activeID : nil) {
                 Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
             }
         }
         // …and an immediate beat the moment a child device appears (no 15s wait).
         .task {
-            if settings.deviceRole == .child, auth.isSignedIn, let cid = profiles.activeID {
+            if auth.isSignedIn, let cid = kidMode.active ? kidMode.childID : (settings.deviceRole == .child ? profiles.activeID : nil) {
                 await HouseholdManager.shared.registerDevice(forChildID: cid)
             }
         }

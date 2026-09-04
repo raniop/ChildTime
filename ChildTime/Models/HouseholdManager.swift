@@ -634,7 +634,11 @@ final class HouseholdManager: ObservableObject {
     /// live countdown from `windowEndsAt` locally).
     func startReportingTimeState(childID: UUID) {
         #if canImport(FirebaseFirestore)
-        guard ParentSettings.shared.deviceRole == .child else { return }
+        // Kid Mode on a PARENT's phone is a real play device for this child: it
+        // opens windows and spends the same wallet. It used to publish nothing, so
+        // the child's own iPad was structurally blind to it — the double-spend
+        // guard could never see that window, and the transfer was never offered.
+        guard ParentSettings.shared.deviceRole == .child || KidModeManager.shared.active else { return }
         timeStateCancellables.removeAll()
         let p = ProgressStore.shared
         Publishers.MergeMany([
@@ -1020,8 +1024,31 @@ final class HouseholdManager: ObservableObject {
     /// here only AFTER the window there is confirmed gone.
     func lockOtherDeviceWindow(deviceRowID: String) {
         #if canImport(FirebaseFirestore)
-        db.collection("childDevices").document(deviceRowID)
-            .setData(["remoteLockAt": Date().timeIntervalSince1970], merge: true)
+        // Confirmed + self-healing: a silently-denied write left the child staring
+        // at "נועלים שם…" until the 30s timeout with no honest failure
+        // ([[command-delivery-certainty]]).
+        let ref = db.collection("childDevices").document(deviceRowID)
+        let fields: [String: Any] = ["remoteLockAt": Date().timeIntervalSince1970]
+        Task {
+            var outcome = await confirmedMerge(ref, fields)
+            if outcome == .denied {
+                await self.reassertMembership()
+                outcome = await confirmedMerge(ref, fields)
+            }
+            if outcome == .denied || outcome == .error {
+                TofyLink("lockOtherDeviceWindow FAILED for \(deviceRowID.prefix(12))")
+            }
+        }
+        #endif
+    }
+
+    /// Kid Mode ending on a parent's phone → drop the temporary device row so the
+    /// family doesn't keep seeing a phantom device for this child.
+    func removeKidModeDeviceRow(forChildID childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        guard !Self.skipsCloudSync else { return }
+        let docID = "\(childID.uuidString)_\(DeviceIdentity.installID)"
+        db.collection("childDevices").document(docID).delete()
         #endif
     }
 

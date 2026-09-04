@@ -1443,11 +1443,31 @@ final class ProgressStore: ObservableObject {
     @discardableResult
     func consumeMinutesForUnlock() -> Int {
         _ = minutesEarnedTodayRespectingDate()   // roll the day over first if needed
-        let amount = redeemableMinutesNow
+        var amount = redeemableMinutesNow
         guard amount > 0 else { return 0 }
+        // ✈️ OFFLINE BOUND: the debit and the "is another device already playing?"
+        // check are both cloud round-trips. In airplane mode neither happens, so a
+        // child could open the FULL wallet on the iPad and then the full wallet
+        // again on the iPhone. We can't verify while offline — but we can bound the
+        // damage: an unverified device may open at most one minimum window at a
+        // time, instead of everything the wallet holds. Play still works with no
+        // network (a kid on a plane is not stranded); it just can't be duplicated
+        // wholesale. The debit is still recorded locally and reconciles on sync.
+        if !cloudStateIsFresh {
+            amount = min(amount, minimumUnlockMinutes)
+        }
         pendingMinutes -= amount
         minutesUnlockedToday += amount
         return amount
+    }
+
+    /// Have we exchanged state with the cloud recently enough to trust the wallet
+    /// and the cross-device "someone else is playing" guard? Conservative: any
+    /// doubt counts as stale.
+    private var cloudStateIsFresh: Bool {
+        let sync = RemoteSyncManager.shared
+        guard sync.isActive, let last = sync.lastUploadAt else { return false }
+        return Date().timeIntervalSince(last) < 120   // 2 minutes
     }
 
     /// `manual: true` marks a parent's one-time "quick open" grant — a fixed
@@ -1815,6 +1835,8 @@ final class ProgressStore: ObservableObject {
         s.cycleSeconds        = cycleSeconds
         s.wrongStreak         = wrongStreak
         s.totalScore          = totalScore
+        s.lastComebackWheelAt = lastComebackWheelAt
+        s.varietyBonusDate    = defaults.object(forKey: varietyBonusDateKey) as? Date
         s.minutesEarnedToday  = minutesEarnedToday
         s.minutesUnlockedToday = minutesUnlockedToday
         s.dailyEarnedDate     = dailyEarnedDate
@@ -1880,6 +1902,12 @@ final class ProgressStore: ObservableObject {
         cycleSeconds        = s.cycleSeconds
         wrongStreak         = s.wrongStreak
         totalScore          = s.totalScore
+        lastComebackWheelAt = s.lastComebackWheelAt
+        // Keep the family-wide variety-bonus day; never move it backwards.
+        if let d = s.varietyBonusDate,
+           d > ((defaults.object(forKey: varietyBonusDateKey) as? Date) ?? .distantPast) {
+            defaults.set(d, forKey: varietyBonusDateKey)
+        }
         minutesEarnedToday  = s.minutesEarnedToday
         minutesUnlockedToday = s.minutesUnlockedToday
         dailyEarnedDate     = s.dailyEarnedDate

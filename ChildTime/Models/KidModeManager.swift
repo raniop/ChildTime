@@ -115,6 +115,8 @@ final class KidModeManager: ObservableObject {
         // cleared the shield. (Self-heals on next foreground either way, but the
         // ordering avoids a transient re-lock flash.)
         active = false
+        // Drop the temporary device row published while Kid Mode was on.
+        if let kid = childID { HouseholdManager.shared.removeKidModeDeviceRow(forChildID: kid) }
         ShieldManager.shared.cancelScheduledReshield()
         ShieldManager.shared.clearShield()
         // Parent's phone returns to normal → allow deleting apps again.
