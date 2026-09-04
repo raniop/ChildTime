@@ -188,14 +188,16 @@ struct UnlockedView: View {
         // A manual (parent) grant now FREEZES its leftover so it isn't wasted — the
         // child can resume it later from the home screen. An earned window refunds
         // its unused minutes to the wallet as before.
-        if progress.unlockIsManual {
-            progress.pauseManualUnlock()
-            LiveEventReporter.report(.screenTimeEnd, extra: ["minutes": 0])
-        } else {
-            let remaining = progress.endUnlockAndReturnRemainingMinutes()
-            // Child chose to stop early — tell the parent (+ minutes banked back).
-            LiveEventReporter.report(.screenTimeEnd, extra: ["minutes": remaining])
-        }
+        // MUST go through stopAndSaveCurrentUnlock — it is the one place that also
+        // RELEASES the family's play-window lease. Calling pauseManualUnlock /
+        // endUnlockAndReturnRemainingMinutes directly (as this did) closed the
+        // window locally while the cloud still said this device was playing: the
+        // sibling kept showing "פתוח במכשיר השני" forever, and its transfer
+        // request could never be honoured because this device was no longer
+        // unlocked and had nothing left to stop.
+        let banked = progress.stopAndSaveCurrentUnlock()
+        // Child chose to stop early — tell the parent (+ minutes banked back).
+        LiveEventReporter.report(.screenTimeEnd, extra: ["minutes": banked])
         // Upload the pocket change NOW (not after the ~3s debounce): the "stopped
         // playing" push races the snapshot — the parent must see the frozen 💝 /
         // banked 🎮 leftover, not a stale "—", even if the kid leaves right away.

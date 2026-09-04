@@ -1570,8 +1570,17 @@ final class ProgressStore: ObservableObject {
         parentGiftMinutes = 0
         manualPausedSeconds = 0
         guard isUnlocked else { return false }
+        let leaseID = activeLeaseID
+        let childID = ProfileStore.shared.activeID
         if unlockIsManual { endUnlock() }                       // parent time → gone
         else { _ = endUnlockAndReturnRemainingMinutes() }      // earned → banked
+        // Hand the family's ONE window back. Refund 0 — whatever was owed was
+        // already settled locally above (or deliberately revoked).
+        if PlayWindowLeaseManager.isEnabled, let leaseID, let childID {
+            Task { await PlayWindowLeaseManager.shared.release(childID: childID,
+                                                               leaseID: leaseID,
+                                                               localRemainingSeconds: 0) }
+        }
         return true
     }
 
@@ -1678,8 +1687,9 @@ final class ProgressStore: ObservableObject {
     /// manual grant (resume later), or BANK it to the wallet for earned time. Does
     /// NOT re-apply the shield — the caller does. Used by the "עצור ושמור" action
     /// (play screen + Live Activity button).
-    func stopAndSaveCurrentUnlock() {
-        guard isUnlocked else { return }
+    @discardableResult
+    func stopAndSaveCurrentUnlock() -> Int {
+        guard isUnlocked else { return 0 }
         // Capture what the lease needs BEFORE the local stop clears it. Every stop
         // path in the app funnels through here (timer end, Live Activity button,
         // remote lock, Kid Mode exit, profile switch), so this is the single place
@@ -1687,8 +1697,9 @@ final class ProgressStore: ObservableObject {
         let leaseID = activeLeaseID
         let remaining = refundableUnlockSeconds
         let childID = ProfileStore.shared.activeID
+        var banked = 0
         if unlockIsManual { pauseManualUnlock() }
-        else { _ = endUnlockAndReturnRemainingMinutes() }
+        else { banked = endUnlockAndReturnRemainingMinutes() }
         // The local wallet was already credited optimistically above so the kid
         // sees their minutes instantly; the release transaction is authoritative
         // and converges via LWW (it bumps the revision above ours).
@@ -1697,6 +1708,7 @@ final class ProgressStore: ObservableObject {
                                                                leaseID: leaseID,
                                                                localRemainingSeconds: remaining) }
         }
+        return banked
     }
 
     /// Child stopped mid-play on a parent's MANUAL grant — FREEZE the exact leftover

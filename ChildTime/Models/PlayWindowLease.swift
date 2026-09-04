@@ -119,7 +119,11 @@ enum ClaimOutcome: Equatable {
 enum ClaimPolicy {
     case normal           // the child tapping "open my minutes"
     case parentOverride   // a parent's remote grant outranks a sibling device
-    case force            // takeover after an unanswered release request
+    // NOTE: there is deliberately no `force` takeover. Rani: an "open anyway"
+    // override re-opens the very hole this design closes. A stuck window now
+    // resolves honestly — the owner hands the lease back when it stops, the
+    // wake-up sweep hands it back if it already stopped, and a truly dead lease
+    // expires on the server's clock.
     /// Retro-claim for a window this device ALREADY opened offline. The wallet
     /// was debited locally and that debit rides up with the snapshot, so the
     /// transaction must NOT debit a second time — it only publishes the fact
@@ -181,7 +185,21 @@ final class PlayWindowLeaseManager: ObservableObject {
         guard l.isMine, l.state == .releasing,
               l.releaseRequestedBy != DeviceIdentity.installID else { return }
         ShieldManager.shared.relockBaseline()
-        ProgressStore.shared.stopAndSaveCurrentUnlock()
+        if ProgressStore.shared.isUnlocked {
+            ProgressStore.shared.stopAndSaveCurrentUnlock()
+            return
+        }
+        // We hold the lease but are NOT playing — the window was closed by a path
+        // that missed the release (an older build, a crash, a revoke). Without
+        // this branch stopAndSaveCurrentUnlock returns at its `guard isUnlocked`
+        // and NOBODY ever lets go: this device holds the child's only window
+        // hostage until it expires and the sibling can never open. Refund 0 —
+        // whatever was owed was already banked locally when it closed.
+        #if canImport(FirebaseFirestore)
+        if let lid = l.leaseID, let cid = ProfileStore.shared.activeID {
+            Task { await self.release(childID: cid, leaseID: lid, localRemainingSeconds: 0) }
+        }
+        #endif
     }
 
     /// CLAIMANT SIDE of Rani's flow: ask the owner to let go, ring its doorbell,
@@ -223,6 +241,14 @@ final class PlayWindowLeaseManager: ObservableObject {
         #if canImport(FirebaseFirestore)
         guard Self.isEnabled, !HouseholdManager.skipsCloudSync else { return }
         let progress = ProgressStore.shared
+        // MIRROR IMAGE, and the one that self-heals a stuck family: we hold the
+        // lease but are not playing. Let go without waiting to be asked — the
+        // sibling's "פתוח במכשיר השני" card is driven by this lease, so until it
+        // clears the child simply cannot open anywhere.
+        if lease.isMine, lease.isHeld, !progress.isUnlocked, let lid = lease.leaseID {
+            Task { await self.release(childID: childID, leaseID: lid, localRemainingSeconds: 0) }
+            return
+        }
         guard progress.isUnlocked, progress.activeLeaseID == nil else { return }
         let left = progress.unlockSecondsRemaining
         guard left > 30 else { return }   // about to end anyway — not worth a write

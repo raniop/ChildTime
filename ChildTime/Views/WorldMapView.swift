@@ -1373,24 +1373,18 @@ struct WorldMapView: View {
                     if transferRequestedAt != nil {
                         bottomHint("🔒 נוֹעֲלִים \(where_)… רֶגַע אֶחָד ⏳")
                     } else {
+                        // NO "open anyway" escape hatch (Rani). An override that
+                        // opens a window while another device may still hold one
+                        // is the exact hole this whole design closes — and it is
+                        // no longer needed: a device that stopped playing hands
+                        // the lease back on its own (honorReleaseRequestIfNeeded,
+                        // and the wake-up sweep), and a genuinely dead lease
+                        // expires. So the honest answer here is "try again".
                         if transferTimedOut {
                             bottomHint("לֹא הִצְלַחְנוּ לִנְעֹל \(where_) עַכְשָׁיו — אוּלַי הוּא כָּבוּי. אֶפְשָׁר לְנַסּוֹת שׁוּב 😊")
-                            // A child must never be stuck behind a sibling's
-                            // powered-off device. Taking over SETTLES the
-                            // remainder at the server's clock, so it can never
-                            // mint time — only ever spend it once.
-                            if PlayWindowLeaseManager.isEnabled {
-                                Button { forceOpenHere() } label: {
-                                    Text("פִּתְחוּ בְּכָל זֹאת 🔓")
-                                        .font(.system(size: 16, weight: .heavy, design: .rounded))
-                                        .foregroundStyle(.white)
-                                        .padding(.horizontal, AppSpacing.lg).padding(.vertical, 11)
-                                        .background(.white.opacity(0.22), in: Capsule())
-                                }
-                            }
                         }
                         Button {
-                            transferWindowHere(rowID: other.rowID)
+                            transferWindowHere(rowID: other.rowID, peerSecondsLeft: other.secondsLeft)
                         } label: {
                             HStack(spacing: 10) {
                                 Image(systemName: "lock.arrow.circlepath")
@@ -1624,7 +1618,7 @@ struct WorldMapView: View {
     /// that proves it closed, then claim — the refunded minutes are already in the
     /// wallet the claim reads. Falls back to the legacy row-watching flow while
     /// the lease is off or the peer is on an old build.
-    private func transferWindowHere(rowID: String?) {
+    private func transferWindowHere(rowID: String?, peerSecondsLeft: Int) {
         guard PlayWindowLeaseManager.isEnabled, let cid = profiles.activeID else {
             if let rowID, let dev = (household.devicesByChild[cid_ns] ?? []).first(where: { $0.id == rowID }) {
                 startWindowTransfer(other: dev)
@@ -1637,7 +1631,12 @@ struct WorldMapView: View {
         transferFromKind = leaseMgr.lease.ownerKind ?? ""
         Task { @MainActor in
             let kind = leaseMgr.lease.kind
-            let want = max(progress.redeemableMinutesNow, leaseMgr.lease.remainingSeconds() / 60)
+            // Ask for what the CHILD is looking at. Reading only the lease made
+            // this a dead end whenever the card came from the old device-row
+            // inference instead: the lease is idle there, so `want` was 0 and the
+            // claim came back `.insufficient` — the button visibly did nothing.
+            let want = max(progress.redeemableMinutesNow,
+                           max(leaseMgr.lease.remainingSeconds(), peerSecondsLeft) / 60)
             let outcome = await leaseMgr.transferHere(childID: cid, ownerDeviceRowID: rowID,
                                                       kind: kind, requestedSeconds: want * 60)
             transferRequestedAt = nil
@@ -1653,37 +1652,12 @@ struct WorldMapView: View {
                 Haptic.success()
                 companion.hype("נָעוּל שָׁם! ✅ אֶפְשָׁר לְשַׂחֵק כָּאן 🎉")
             case .heldElsewhere:
-                transferTimedOut = true      // owner never answered → offer "open anyway"
+                transferTimedOut = true      // owner never answered → "try again"
                 Haptic.warning()
             case .insufficient, .offline:
                 transferTimedOut = true
                 Haptic.warning()
             }
-        }
-    }
-
-    /// Take the window over after the owner never answered. Server-clamped
-    /// settlement means the sibling's remainder returns to the wallet rather than
-    /// being burned, and the other device self-locks on its next foreground.
-    private func forceOpenHere() {
-        guard let cid = profiles.activeID else { return }
-        Haptic.medium()
-        Task { @MainActor in
-            let kind = leaseMgr.lease.kind
-            let want = max(progress.redeemableMinutesNow, leaseMgr.lease.remainingSeconds() / 60)
-            let outcome = await leaseMgr.claim(childID: cid, kind: kind,
-                                               requestedSeconds: want * 60, policy: .force)
-            if case .granted(let leaseID, let seconds, let wallet) = outcome {
-                let mins = seconds / 60
-                guard mins > 0 else { return }
-                if let wallet { progress.applyClaimedWallet(wallet) }
-                shields.unlock(minutes: mins)
-                progress.startUnlock(minutes: mins, manual: kind == .gift, leaseID: leaseID,
-                                     leaseKind: kind.rawValue)
-                transferTimedOut = false
-                Haptic.success()
-                companion.hype("פָּתוּחַ כָּאן! 🎉")
-            } else { Haptic.warning() }
         }
     }
 
