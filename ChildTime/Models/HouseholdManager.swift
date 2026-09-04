@@ -1219,7 +1219,10 @@ final class HouseholdManager: ObservableObject {
                 let outcome = await PlayWindowLeaseManager.shared.claim(
                     childID: childID, kind: .grant,
                     requestedSeconds: minutes * 60, policy: .parentOverride)
-                if case .granted(let id, _) = outcome { leaseID = id }
+                if case .granted(let id, _, let wallet) = outcome {
+                    leaseID = id
+                    if let wallet { ProgressStore.shared.applyClaimedWallet(wallet) }
+                }
             }
             ShieldManager.shared.unlock(minutes: minutes)
             // Manual = fixed window, not drawn from the child's earned/banked pool.

@@ -527,6 +527,29 @@ struct PlayWindowLeaseTests {
         #expect(abs(parsed.remainingSeconds() - 3480) <= 2)
     }
 
+    @Test("a claimed wallet is ADOPTED, not subtracted — a transfer can't re-mint minutes")
+    func claimedWalletIsAdoptedNotSubtracted() {
+        let p = ProgressStore.shared
+        // The receiving device's pocket is stale by construction: the minutes it is
+        // about to spend were refunded into the cloud by the OTHER device. Whatever
+        // it holds locally must be replaced by the transaction's own result — an
+        // arithmetic "debit" here is what grew a 60-minute gift into 228.
+        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 0, parentGiftMinutes: 60,
+                                           minutesUnlockedToday: 0, revision: 10))
+        #expect(p.parentGiftMinutes == 60)
+
+        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 0, parentGiftMinutes: 0,
+                                           minutesUnlockedToday: 58, revision: 11))
+        #expect(p.parentGiftMinutes == 0)          // debited to the cloud's value
+        #expect(p.minutesUnlockedToday == 58)
+        #expect(p.revision >= 11)                  // and we sit at its generation
+
+        // The next local edit must land ABOVE the adopted generation, or this
+        // device's stale pocket wins the next merge and the debit is undone.
+        p.addPendingMinutes(1)
+        #expect(p.revision > 11)
+    }
+
     @Test("an unparseable lease doc reads as idle — never as someone else holding it")
     func garbageReadsAsIdle() {
         let parsed = PlayWindowLease.from(["state": "🤷", "grantedSeconds": "lots"])

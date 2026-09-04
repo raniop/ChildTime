@@ -1462,26 +1462,29 @@ final class ProgressStore: ObservableObject {
         dailyCap.enabled && !canRedeemNow && pendingMinutes > redeemableMinutesNow
     }
 
+    /// Attach a lease we won retroactively for an already-open window.
+    func adoptLeaseID(_ id: String) { if isUnlocked { activeLeaseID = id } }
+
+    /// Adopt the wallet EXACTLY as the lease transaction left it in the cloud.
+    ///
+    /// Not a local "debit": on the receiving side of a transfer this device's own
+    /// pocket is stale by construction — the minutes it is spending were refunded
+    /// into the cloud by the OTHER device a moment earlier — so subtracting from
+    /// the local copy leaves a wrong number that then pushes back up under a newer
+    /// revision and un-does the debit. Taking the transaction's own result, and
+    /// adopting its generation so the next local edit sits ABOVE it, is the only
+    /// version that cannot re-mint minutes across a transfer.
+    func applyClaimedWallet(_ w: ClaimedWallet) {
+        pendingMinutes = w.pendingMinutes
+        parentGiftMinutes = w.parentGiftMinutes
+        minutesUnlockedToday = w.minutesUnlockedToday
+        adoptRevision(w.revision)
+    }
+
     /// Consume up to today's remaining allowance from the wallet for an unlock.
     /// Returns the granted amount; any leftover stays in `pendingMinutes` for a
     /// later day so a large wallet can't be cashed in past the daily cap at once.
     @discardableResult
-    /// Mirror a debit the CLOUD lease transaction already made, so the child's
-    /// wallet updates instantly instead of lagging until the snapshot comes back.
-    /// The cloud value is authoritative and converges over this within a beat.
-    /// Attach a lease we won retroactively for an already-open window.
-    func adoptLeaseID(_ id: String) { if isUnlocked { activeLeaseID = id } }
-
-    func applyClaimedDebit(minutes: Int, gift: Bool) {
-        guard minutes > 0 else { return }
-        if gift {
-            parentGiftMinutes = max(0, parentGiftMinutes - minutes)
-        } else {
-            pendingMinutes = max(0, pendingMinutes - minutes)
-            minutesUnlockedToday += minutes
-        }
-    }
-
     func consumeMinutesForUnlock() -> Int {
         _ = minutesEarnedTodayRespectingDate()   // roll the day over first if needed
         var amount = redeemableMinutesNow

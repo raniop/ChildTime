@@ -1642,9 +1642,10 @@ struct WorldMapView: View {
                                                       kind: kind, requestedSeconds: want * 60)
             transferRequestedAt = nil
             switch outcome {
-            case .granted(let leaseID, let seconds):
+            case .granted(let leaseID, let seconds, let wallet):
                 let mins = seconds / 60
                 guard mins > 0 else { return }
+                if let wallet { progress.applyClaimedWallet(wallet) }
                 shields.unlock(minutes: mins)
                 progress.startUnlock(minutes: mins, manual: kind == .gift, leaseID: leaseID,
                                      leaseKind: kind.rawValue)
@@ -1672,9 +1673,10 @@ struct WorldMapView: View {
             let want = max(progress.redeemableMinutesNow, leaseMgr.lease.remainingSeconds() / 60)
             let outcome = await leaseMgr.claim(childID: cid, kind: kind,
                                                requestedSeconds: want * 60, policy: .force)
-            if case .granted(let leaseID, let seconds) = outcome {
+            if case .granted(let leaseID, let seconds, let wallet) = outcome {
                 let mins = seconds / 60
                 guard mins > 0 else { return }
+                if let wallet { progress.applyClaimedWallet(wallet) }
                 shields.unlock(minutes: mins)
                 progress.startUnlock(minutes: mins, manual: kind == .gift, leaseID: leaseID,
                                      leaseKind: kind.rawValue)
@@ -1888,10 +1890,10 @@ struct WorldMapView: View {
             let outcome = await PlayWindowLeaseManager.shared.claim(
                 childID: cid, kind: .earned, requestedSeconds: want * 60)
             switch outcome {
-            case .granted(let leaseID, let seconds):
+            case .granted(let leaseID, let seconds, let wallet):
                 let mins = seconds / 60
                 guard mins > 0 else { return }
-                progress.applyClaimedDebit(minutes: mins, gift: false)
+                if let wallet { progress.applyClaimedWallet(wallet) }
                 shields.unlock(minutes: mins)
                 progress.startUnlock(minutes: mins, leaseID: leaseID, leaseKind: "earned")
                 LearningHistoryStore.shared.recordMinutesUsed(mins)
@@ -1947,11 +1949,10 @@ struct WorldMapView: View {
             let outcome = await PlayWindowLeaseManager.shared.claim(
                 childID: cid, kind: .gift, requestedSeconds: want * 60)
             switch outcome {
-            case .granted(let leaseID, let seconds):
+            case .granted(let leaseID, let seconds, let wallet):
                 let mins = seconds / 60
                 guard mins > 0 else { return }
-                // Keep the local pocket in step with the cloud debit we just made.
-                progress.applyClaimedDebit(minutes: mins, gift: true)
+                if let wallet { progress.applyClaimedWallet(wallet) }
                 shields.unlock(minutes: mins)
                 progress.startUnlock(minutes: mins, manual: true, leaseID: leaseID, leaseKind: "gift")
                 LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins, "gift": true])

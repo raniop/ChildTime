@@ -92,9 +92,22 @@ struct PlayWindowLease: Equatable {
     }
 }
 
+/// The wallet EXACTLY as the claim transaction left it in the cloud. The caller
+/// adopts this verbatim instead of guessing at a local debit: the claimant's own
+/// copy is stale by construction (the refund it is spending was published by the
+/// OTHER device moments earlier), and a stale pocket pushed back up under a newer
+/// revision silently un-does the debit — which is how a 60-minute gift grew to 228
+/// across a few transfers.
+struct ClaimedWallet: Equatable {
+    let pendingMinutes: Int
+    let parentGiftMinutes: Int
+    let minutesUnlockedToday: Int
+    let revision: Int
+}
+
 /// What a claim attempt produced.
 enum ClaimOutcome: Equatable {
-    case granted(leaseID: String, seconds: Int)
+    case granted(leaseID: String, seconds: Int, wallet: ClaimedWallet?)
     /// Another device holds a live window — offer the transfer.
     case heldElsewhere(ownerKind: String, secondsLeft: Int)
     case insufficient
@@ -220,7 +233,7 @@ final class PlayWindowLeaseManager: ObservableObject {
             defer { self.reconciling = false }
             let out = await self.claim(childID: childID, kind: kind,
                                        requestedSeconds: left, policy: .adoptLocal)
-            if case .granted(let lid, _) = out {
+            if case .granted(let lid, _, _) = out {
                 progress.adoptLeaseID(lid)
                 TofyLink("lease: adopted offline window \(lid) (\(left)s left)")
             }
@@ -284,7 +297,11 @@ final class PlayWindowLeaseManager: ObservableObject {
                 // 1. We already hold it → same answer, NO second debit (a retried
                 //    claim must be idempotent).
                 if held.isHeld, held.isMine, !held.isExpired(now: now) {
-                    return ["ok": true, "leaseID": held.leaseID ?? "", "seconds": held.remainingSeconds(now: now)]
+                    let cur = (try? txn.getDocument(sRef))?.data().flatMap(ProgressSnapshot.fromFirestore) ?? .blank
+                    return ["ok": true, "leaseID": held.leaseID ?? "",
+                            "seconds": held.remainingSeconds(now: now),
+                            "wPending": cur.pendingMinutes, "wGift": cur.parentGiftMinutes ?? 0,
+                            "wToday": cur.minutesUnlockedToday, "wRev": cur.revision]
                 }
                 // 2. Someone else is genuinely playing → refuse. THE invariant.
                 if held.isHeldElsewhere(now: now), policy == .normal || policy == .adoptLocal {
@@ -351,7 +368,9 @@ final class PlayWindowLeaseManager: ObservableObject {
                     "startedAt": FieldValue.serverTimestamp(),
                     "lastReleasedLeaseID": held.leaseID ?? wData["lastReleasedLeaseID"] as Any,
                 ], forDocument: wRef)
-                return ["ok": true, "leaseID": candidate, "seconds": grant]
+                return ["ok": true, "leaseID": candidate, "seconds": grant,
+                        "wPending": merged.pendingMinutes, "wGift": merged.parentGiftMinutes ?? 0,
+                        "wToday": merged.minutesUnlockedToday, "wRev": merged.revision]
             }) { result, err in
                 if err != nil { cont.resume(returning: .offline); return }
                 guard let r = result as? [String: Any] else { cont.resume(returning: .offline); return }
@@ -361,8 +380,16 @@ final class PlayWindowLeaseManager: ObservableObject {
                                                           secondsLeft: r["seconds"] as? Int ?? 0))
                     return
                 }
+                var wallet: ClaimedWallet?
+                if let rev = r["wRev"] as? Int {
+                    wallet = ClaimedWallet(pendingMinutes: r["wPending"] as? Int ?? 0,
+                                           parentGiftMinutes: r["wGift"] as? Int ?? 0,
+                                           minutesUnlockedToday: r["wToday"] as? Int ?? 0,
+                                           revision: rev)
+                }
                 cont.resume(returning: .granted(leaseID: r["leaseID"] as? String ?? "",
-                                                seconds: r["seconds"] as? Int ?? 0))
+                                                seconds: r["seconds"] as? Int ?? 0,
+                                                wallet: wallet))
             }
         }
     }
@@ -421,8 +448,22 @@ final class PlayWindowLeaseManager: ObservableObject {
                     "lastReleasedAt": FieldValue.serverTimestamp(),
                     "refundedSeconds": refund,
                 ], forDocument: wRef, merge: true)
-                return true
-            }) { _, err in cont.resume(returning: err == nil) }
+                return ["wPending": cloud.pendingMinutes, "wGift": cloud.parentGiftMinutes ?? 0,
+                        "wToday": cloud.minutesUnlockedToday, "wRev": cloud.revision]
+            }) { result, err in
+                // Same rule as a claim: the SERVER-clamped refund is the truth. The
+                // local credit was optimistic (so the child sees their minutes the
+                // instant they stop) and may be a minute off; leaving it to fight
+                // this write through LWW is exactly how a transfer re-mints time.
+                if let r = result as? [String: Any], let rev = r["wRev"] as? Int {
+                    let w = ClaimedWallet(pendingMinutes: r["wPending"] as? Int ?? 0,
+                                          parentGiftMinutes: r["wGift"] as? Int ?? 0,
+                                          minutesUnlockedToday: r["wToday"] as? Int ?? 0,
+                                          revision: rev)
+                    Task { @MainActor in ProgressStore.shared.applyClaimedWallet(w) }
+                }
+                cont.resume(returning: err == nil)
+            }
         }
     }
 
