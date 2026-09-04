@@ -79,6 +79,61 @@ struct ChildTimeTests {
         #expect(out.contains("אֵיזֶה"))
     }
 
+    /// REGRESSION (the bug Rani reproduced): a child opened the parent's 60 gift
+    /// minutes on the iPhone; the iPad still showed 60 and opened a SECOND window.
+    /// Cause: `revision` was a per-device ACTIVITY counter, so the busier device
+    /// won every merge regardless of who wrote last, kept its stale balance and
+    /// re-uploaded it — resurrecting the spend. At the SAME generation, recency
+    /// must decide.
+    @Test func merge_spendWinsOverBusierPeerAtSameGeneration() {
+        let now = Date()
+        let earlier = now.addingTimeInterval(-120)
+        // The spender wrote LAST; the peer merely played more (same generation).
+        var spender = ProgressSnapshot()
+        spender.parentGiftMinutes = 0; spender.pendingMinutes = 0; spender.diamonds = 40
+        spender.revision = 7; spender.lastModifiedAt = now
+        var busyPeer = ProgressSnapshot()
+        busyPeer.parentGiftMinutes = 60; busyPeer.pendingMinutes = 60; busyPeer.diamonds = 100
+        busyPeer.revision = 7; busyPeer.lastModifiedAt = earlier
+
+        let a = ProgressSnapshot.ratchetMerged(local: busyPeer, remote: spender)
+        #expect(a.parentGiftMinutes == 0)
+        #expect(a.pendingMinutes == 0)
+        #expect(a.diamonds == 40)
+        // …and the same answer from the other direction (order must not matter).
+        let b = ProgressSnapshot.ratchetMerged(local: spender, remote: busyPeer)
+        #expect(b.parentGiftMinutes == 0)
+        #expect(b.pendingMinutes == 0)
+        #expect(b.diamonds == 40)
+    }
+
+    /// A causally LATER write must beat a tampered clock: a device whose date was
+    /// pushed a year forward must not override state from a newer generation.
+    @Test func merge_causalGenerationBeatsSkewedClock() {
+        var newer = ProgressSnapshot()          // descends from later cloud state
+        newer.pendingMinutes = 0; newer.revision = 9
+        newer.lastModifiedAt = Date().addingTimeInterval(-3600)
+        var skewed = ProgressSnapshot()         // clock set a year ahead
+        skewed.pendingMinutes = 90; skewed.revision = 8
+        skewed.lastModifiedAt = Date().addingTimeInterval(365 * 24 * 3600)
+        #expect(ProgressSnapshot.ratchetMerged(local: skewed, remote: newer).pendingMinutes == 0)
+        #expect(ProgressSnapshot.ratchetMerged(local: newer, remote: skewed).pendingMinutes == 0)
+    }
+
+    /// The comparator must be a TOTAL order — both devices must agree on the
+    /// winner. On an exact (revision, lastModifiedAt) tie the old code let each
+    /// side think the other lost, so both considered themselves ahead and
+    /// re-uploaded forever.
+    @Test func merge_isTotalOrderOnTies() {
+        let t = Date()
+        var x = ProgressSnapshot(); x.pendingMinutes = 10; x.revision = 5; x.lastModifiedAt = t; x.deviceID = "AAA"
+        var y = ProgressSnapshot(); y.pendingMinutes = 20; y.revision = 5; y.lastModifiedAt = t; y.deviceID = "BBB"
+        let m1 = ProgressSnapshot.ratchetMerged(local: x, remote: y)
+        let m2 = ProgressSnapshot.ratchetMerged(local: y, remote: x)
+        #expect(m1.pendingMinutes == m2.pendingMinutes)   // same winner either way
+        #expect(m1.pendingMinutes == 20)                  // higher deviceID breaks the tie
+    }
+
     /// REGRESSION (trust-critical): the daily screen-time cap counter must be
     /// SYNCED and merged as a MAX within the same day. It used to be device-local,
     /// so a child with two devices got `cap × devices` — open 60 on the iPad, then

@@ -228,12 +228,28 @@ exports.detectSuspiciousState = onDocumentCreated("children/{childID}/state/{sta
   const s = event.data && event.data.data();
   if (!s) return;
   const stars = Number(s.stars) || 0;
-  const rev = Number(s.revision) || 0;
-  if (!(stars > 3000 && rev < 500)) return;
-  console.error("[dupDetector] suspicious state: child=", event.params.childID,
-    "stars=", stars, "revision=", rev, "device=", s.deviceID || "?");
+  if (stars <= 3000) return;
   const child = await db.collection("children").doc(event.params.childID).get();
-  const hh = child.exists ? child.data().householdID : null;
+  if (!child.exists) return;
+  // The duplication fingerprint is a BRAND-NEW child whose very first state doc
+  // already carries thousands of stars. An established child re-creating its
+  // state doc (restore, resync, reset) is normal — never alarm that family.
+  //
+  // We deliberately no longer key on `revision < 500`. That worked only because
+  // `revision` doubled as an activity counter (~10 bumps per answered question),
+  // so a legitimate heavy account sat above 500. `revision` is now a causal
+  // GENERATION that stays small for everyone, which would have turned this into a
+  // false-alarm machine pushing "⚠️ נתוני התקדמות חשודים" at real families.
+  const raw = child.data().createdAt;
+  const createdMs = raw && typeof raw.toMillis === "function" ? raw.toMillis()
+    : (typeof raw === "number" ? (raw > 1e12 ? raw : raw * 1000)
+      : (typeof raw === "string" ? Date.parse(raw) : NaN));
+  if (!Number.isFinite(createdMs)) return;                 // can't judge → stay quiet
+  const ageHours = (Date.now() - createdMs) / 3600000;
+  if (ageHours < 0 || ageHours > 48) return;               // not a new child
+  console.error("[dupDetector] suspicious state: child=", event.params.childID,
+    "stars=", stars, "ageHours=", Math.round(ageHours), "device=", s.deviceID || "?");
+  const hh = child.data().householdID;
   if (!hh) return;
   const tokens = await tokensForHousehold(hh, null);
   await send(tokens, {

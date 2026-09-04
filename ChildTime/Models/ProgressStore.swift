@@ -14,6 +14,7 @@ final class ProgressStore: ObservableObject {
         static let totalAnswered = "totalAnswered"
         static let unlockEndsAt = "unlockEndsAt"
         static let unlockIsManual = "unlockIsManual"
+        static let baseRevision = "progress.baseRevision"
         static let unlockGrantedSeconds = "unlockGrantedSeconds"
         static let unlockStartedAt = "unlockStartedAt"
         static let unlockStartedUptime = "unlockStartedUptime"
@@ -101,6 +102,15 @@ final class ProgressStore: ObservableObject {
     /// against these so moving the device clock backwards can never mint minutes.
     /// (Before this, rolling the clock back 12h and tapping "סיימתי לשחק" banked
     /// 735 minutes from a 15-minute window, over and over.)
+    /// The last cloud generation this device ADOPTED. `revision` is now a causal
+    /// generation ("what cloud state does this edit descend from?"), not a count
+    /// of local activity — see `markLocalChange`. Device-local on purpose: adding
+    /// it to ProgressSnapshot would make every device look perpetually "ahead"
+    /// and re-upload forever (the a50317e ping-pong).
+    private var baseRevision: Int {
+        didSet { defaults.set(baseRevision, forKey: Key.baseRevision) }
+    }
+
     private(set) var unlockGrantedSeconds: Int {
         didSet { defaults.set(unlockGrantedSeconds, forKey: Key.unlockGrantedSeconds) }
     }
@@ -445,6 +455,7 @@ final class ProgressStore: ObservableObject {
         self.totalAnswered = d.integer(forKey: Key.totalAnswered)
         self.unlockEndsAt = d.object(forKey: Key.unlockEndsAt) as? Date
         self.unlockIsManual = d.bool(forKey: Key.unlockIsManual)
+        self.baseRevision = d.integer(forKey: Key.baseRevision)
         self.unlockGrantedSeconds = d.integer(forKey: Key.unlockGrantedSeconds)
         self.unlockStartedAt = d.object(forKey: Key.unlockStartedAt) as? Date
         self.unlockStartedUptime = d.double(forKey: Key.unlockStartedUptime)
@@ -542,8 +553,23 @@ final class ProgressStore: ObservableObject {
 
     private func markLocalChange() {
         guard !isApplyingSnapshot else { return }
-        revision += 1
+        // `revision` is a causal GENERATION, not an activity counter. It used to be
+        // `+= 1` on every published field — ~10 bumps per answered question — so the
+        // device the child played on most had a permanently higher number and won
+        // EVERY cross-device merge, regardless of who wrote last. That is what let
+        // a spend on one device be overwritten (and re-uploaded) by the other,
+        // resurrecting gift/earned minutes and diamonds. Now a burst of local edits
+        // lands on ONE generation above the cloud state we last saw, so two devices
+        // editing concurrently sit at the SAME generation and `lastModifiedAt`
+        // decides — recency, not play volume.
+        revision = max(revision, baseRevision + 1)
         lastModifiedAt = .now
+    }
+
+    /// Remember the cloud generation we just adopted, so the next local edit is
+    /// exactly one generation above it.
+    private func noteAdoptedGeneration(_ r: Int) {
+        baseRevision = max(baseRevision, r)
     }
 
     // MARK: - Derived
@@ -1654,7 +1680,25 @@ final class ProgressStore: ObservableObject {
         // monitor may re-lock EARLIER (usage-based), but if it never fires we must
         // NOT leave apps open past the granted window — a present-but-expired key
         // is treated as spent so the baseline lock re-applies.
-        return end > Date()
+        if end <= Date() { return false }
+        // …and a MONOTONIC backstop the child cannot touch. Moving the wall clock
+        // backwards used to resurrect an expired window, and every Tofy foreground
+        // then cleared the shield again for the whole rollback. `systemUptime`
+        // cannot be changed from Settings, so once the granted budget has really
+        // elapsed the window is over no matter what the clock says.
+        return !unlockBudgetExhausted
+    }
+
+    /// The open window's GRANTED budget has really elapsed, measured monotonically.
+    /// False when we can't judge (no grant record, or the device rebooted and
+    /// uptime restarted) — never fail closed on a legitimate window.
+    var unlockBudgetExhausted: Bool {
+        let granted = defaults.integer(forKey: Key.unlockGrantedSeconds)
+        let startUp = defaults.double(forKey: Key.unlockStartedUptime)
+        guard granted > 0, startUp > 0 else { return false }
+        let up = ProcessInfo.processInfo.systemUptime
+        guard up >= startUp else { return false }        // rebooted — uptime reset
+        return (up - startUp) >= Double(granted)
     }
 
     /// Re-sync the unlock deadline from the shared app group (the monitor
@@ -1664,10 +1708,12 @@ final class ProgressStore: ObservableObject {
         let shared = defaults.object(forKey: Key.unlockEndsAt) as? Date
         if shared == nil {
             if unlockEndsAt != nil { endUnlock() }   // extension spent/ended it
-        } else if shared! <= Date() {
+        } else if shared! <= Date() || unlockBudgetExhausted {
             // Window elapsed but the monitor never cleared it (e.g. the extension
-            // didn't fire). Fail CLOSED — end the grant so the baseline lock
-            // re-applies. Apps must never stay open past the granted window.
+            // didn't fire), OR the granted budget is monotonically spent while the
+            // wall clock claims otherwise (clock moved backwards). Fail CLOSED —
+            // end the grant so the baseline lock re-applies. Apps must never stay
+            // open past the granted window.
             endUnlock()
         } else if shared != unlockEndsAt {
             unlockEndsAt = shared
@@ -1808,6 +1854,7 @@ final class ProgressStore: ObservableObject {
             isApplyingSnapshot = false
             resetEpoch = s.resetEpoch
             revision = s.revision
+            noteAdoptedGeneration(s.revision)
             lastModifiedAt = s.lastModifiedAt
         }
         pendingMinutes      = s.pendingMinutes
@@ -1910,6 +1957,7 @@ final class ProgressStore: ObservableObject {
         // SILENTLY (revision/lastModifiedAt aren't @Published, so this fires no
         // upload loop) and let the caller push once. Otherwise we're converged.
         if aheadOfRemote {
+            noteAdoptedGeneration(remote.revision)
             revision = max(local.revision, remote.revision) + 1
             lastModifiedAt = .now
             return true
@@ -1931,7 +1979,10 @@ final class ProgressStore: ObservableObject {
     /// next local edit outranks the wipe and our own echo is skipped.
     func adoptRevision(_ r: Int) {
         revision = max(revision, r)
-        lastModifiedAt = .now
+        noteAdoptedGeneration(r)
+        // NOTE: deliberately does NOT restamp `lastModifiedAt`. Under a
+        // recency-aware comparator that would be a free "I am newest" token for
+        // whoever last adopted a revision.
     }
 
     /// After an authoritative cloud wipe (reset), adopt the resetEpoch we just

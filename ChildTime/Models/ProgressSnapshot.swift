@@ -209,8 +209,21 @@ extension ProgressSnapshot {
         if remote.resetEpoch != local.resetEpoch {
             return remote.resetEpoch > local.resetEpoch ? remote : local
         }
-        let remoteWins = remote.revision > local.revision ||
-            (remote.revision == local.revision && remote.lastModifiedAt > local.lastModifiedAt)
+        // TOTAL order: generation first (causality), then recency among concurrent
+        // writes at the same generation, then a stable id so BOTH sides always
+        // agree on the winner. Previously two snapshots that tied on
+        // (revision, lastModifiedAt) each considered the OTHER the loser, so both
+        // thought they were ahead and re-uploaded. A bad device clock can now only
+        // decide between genuinely concurrent edits — it can never override a
+        // causally later one.
+        let remoteWins: Bool
+        if remote.revision != local.revision {
+            remoteWins = remote.revision > local.revision
+        } else if remote.lastModifiedAt != local.lastModifiedAt {
+            remoteWins = remote.lastModifiedAt > local.lastModifiedAt
+        } else {
+            remoteWins = remote.deviceID > local.deviceID
+        }
         var m = remoteWins ? remote : local
         m.stars         = max(local.stars, remote.stars)
         // 💎 diamonds are a SPENDABLE wallet — they go DOWN when the child buys in
