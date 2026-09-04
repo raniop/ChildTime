@@ -81,6 +81,14 @@ struct ProgressSnapshot: Codable, Equatable {
     /// parent's decision). Opened as a fixed `manual` window, like a remote grant.
     /// LWW like pendingMinutes. Optional so older snapshots decode (nil → 0).
     var parentGiftMinutes: Int? = nil
+
+    /// Sub-minute play time the child still owns (0…59). The wallets are whole
+    /// minutes, so a window closed at 38:50 used to refund 38 and silently drop
+    /// the 50 seconds — a real loss on every hand-off between devices. Carried
+    /// here so a transfer resumes at the exact second it left off. LWW with the
+    /// snapshot: the lease transactions write it together with the pocket it was
+    /// split from, so the two can never disagree. Optional → old builds decode.
+    var secondsCarry: Int? = nil
     /// 💝 Gift minutes the parents GAVE today (any device) + the day it refers
     /// to — enforces the daily cap "no more than until midnight". LWW.
     var giftGivenToday: Int? = nil
@@ -139,6 +147,7 @@ extension ProgressSnapshot {
         case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
         case hourlyAnswered, hourlyCorrect
         case wheelProgressCount, recoveryPot, ownedCharacterIDs, parentGiftMinutes, giftGivenToday, giftGivenDate
+        case secondsCarry
         case lastComebackWheelAt, varietyBonusDate
         case resetEpoch
         case revision, lastModifiedAt, deviceID
@@ -194,6 +203,7 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .recoveryPot)) ?? nil { recoveryPot = v }
         if let v = (try? c.decodeIfPresent([String].self, forKey: .ownedCharacterIDs)) ?? nil { ownedCharacterIDs = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .parentGiftMinutes)) ?? nil { parentGiftMinutes = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .secondsCarry)) ?? nil { secondsCarry = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .giftGivenToday)) ?? nil { giftGivenToday = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .giftGivenDate)) ?? nil { giftGivenDate = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastComebackWheelAt)) ?? nil { lastComebackWheelAt = v }

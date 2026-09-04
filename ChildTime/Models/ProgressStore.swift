@@ -1478,6 +1478,7 @@ final class ProgressStore: ObservableObject {
         pendingMinutes = w.pendingMinutes
         parentGiftMinutes = w.parentGiftMinutes
         minutesUnlockedToday = w.minutesUnlockedToday
+        pendingSecondsCarry = max(0, min(59, w.secondsCarry))
         adoptRevision(w.revision)
     }
 
@@ -1596,16 +1597,20 @@ final class ProgressStore: ObservableObject {
         return amount
     }
 
+    /// `extraSeconds` overrides the device-local carry: with the lease on, the
+    /// sub-minute remainder was already spent inside the claim transaction and
+    /// comes back in the grant, so folding the local carry in again would hand
+    /// the child those seconds twice.
     func startUnlock(minutes: Int, manual: Bool = false, leaseID: String? = nil,
-                     leaseKind: String? = nil) {
+                     leaseKind: String? = nil, extraSeconds overrideSeconds: Int? = nil) {
         // Never silently overwrite an OPEN EARNED window with a parent/manual one —
         // bank its leftover back to the wallet first (pocket integrity).
         if isUnlocked && !unlockIsManual { _ = endUnlockAndReturnRemainingMinutes() }
         // Fold any banked sub-minute carry into a real (non-manual) window so the
         // kid resumes at the exact leftover (e.g. 58 min wallet + 50 s carry →
         // 58:50). A parent's manual quick-open is a fixed window — it ignores carry.
-        let extraSeconds = manual ? 0 : pendingSecondsCarry
-        if !manual { pendingSecondsCarry = 0 }
+        let extraSeconds = overrideSeconds ?? (manual ? 0 : pendingSecondsCarry)
+        if overrideSeconds == nil, !manual { pendingSecondsCarry = 0 }
         let end = Date().addingTimeInterval(TimeInterval(minutes * 60 + extraSeconds))
         NSLog("[ScreenTime] startUnlock(minutes: %d, manual: %@) → window %d min + %ds carry", minutes, manual ? "true" : "false", minutes, extraSeconds)
         unlockIsManual = manual
@@ -1937,6 +1942,7 @@ final class ProgressStore: ObservableObject {
         s.revision            = revision
         s.lastModifiedAt      = lastModifiedAt
         s.deviceID            = ProgressSnapshot.thisDeviceID
+        s.secondsCarry        = pendingSecondsCarry
         return s
     }
 
@@ -1957,6 +1963,7 @@ final class ProgressStore: ObservableObject {
         pendingMinutes      = s.pendingMinutes
         totalCorrect        = s.totalCorrect
         totalAnswered       = s.totalAnswered
+        if let c = s.secondsCarry { pendingSecondsCarry = max(0, min(59, c)) }
         // unlockEndsAt deliberately NOT applied from sync (per-device — see captureSnapshot).
         stars               = s.stars
         diamonds            = s.diamonds

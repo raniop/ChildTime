@@ -995,6 +995,11 @@ final class HouseholdManager: ObservableObject {
         Task {
             await sendDeviceCommand(childID: cid, householdID: hh.id, kind: .lock, stamp: stamp,
                                     fields: ["remoteLockAt": stamp])
+            // Rani: a dead device must not strand the child. The command above
+            // needs the device to wake up and obey; this settles the family's play
+            // window server-side regardless, so the child can immediately open on
+            // their other device.
+            await PlayWindowLeaseManager.shared.parentRelease(childID: childID)
             await MainActor.run { AppAnalytics.log("remote_screentime_locked", [:]) }
         }
         #endif

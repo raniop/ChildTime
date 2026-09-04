@@ -535,19 +535,70 @@ struct PlayWindowLeaseTests {
         // it holds locally must be replaced by the transaction's own result — an
         // arithmetic "debit" here is what grew a 60-minute gift into 228.
         p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 0, parentGiftMinutes: 60,
-                                           minutesUnlockedToday: 0, revision: 10))
+                                           minutesUnlockedToday: 0, secondsCarry: 0, revision: 10))
         #expect(p.parentGiftMinutes == 60)
 
         p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 0, parentGiftMinutes: 0,
-                                           minutesUnlockedToday: 58, revision: 11))
+                                           minutesUnlockedToday: 58, secondsCarry: 50, revision: 11))
         #expect(p.parentGiftMinutes == 0)          // debited to the cloud's value
         #expect(p.minutesUnlockedToday == 58)
+        #expect(p.pendingSecondsCarry == 50)   // the odd seconds survive the hand-off
         #expect(p.revision >= 11)                  // and we sit at its generation
 
         // The next local edit must land ABOVE the adopted generation, or this
         // device's stale pocket wins the next merge and the debit is undone.
         p.addPendingMinutes(1)
         #expect(p.revision > 11)
+    }
+
+    @Test("a hand-off resumes at the exact second, not a rounded minute")
+    func handoffKeepsTheSeconds() {
+        // 38:50 left → the whole thing moves across.
+        let spend = WalletSeconds.spend(want: 38 * 60 + 50, minutes: 38, carry: 50)
+        #expect(spend.granted == 38 * 60 + 50)
+        #expect(spend.minutesOut == 38)
+        #expect(spend.carryLeft == 0)
+    }
+
+    @Test("time is neither minted nor lost across a full transfer round trip")
+    func transferConservesTime() {
+        // Start: 60 whole minutes, nothing odd. Open it all, play 70 seconds,
+        // hand off, and repeat — the total the child owns must never drift.
+        var minutes = 60, carry = 0
+        var granted = 0
+        for _ in 0..<12 {
+            let s = WalletSeconds.spend(want: minutes * 60 + carry, minutes: minutes, carry: carry)
+            granted = s.granted
+            minutes -= s.minutesOut
+            carry = s.carryLeft
+            #expect(minutes >= 0)
+            // 70 seconds actually played, the rest comes back.
+            let left = max(0, granted - 70)
+            let r = WalletSeconds.refund(seconds: left, carry: carry)
+            minutes += r.minutesIn
+            carry = r.carryLeft
+        }
+        // 12 hand-offs × 70s played = 840s spent, out of 3600s.
+        #expect(minutes * 60 + carry == 3600 - 840)
+    }
+
+    @Test("spending never exceeds what the child actually has")
+    func spendIsBounded() {
+        let s = WalletSeconds.spend(want: 99 * 60, minutes: 3, carry: 20)
+        #expect(s.granted == 3 * 60 + 20)
+        #expect(s.minutesOut == 3)
+        #expect(s.carryLeft == 0)
+    }
+
+    @Test("a part-minute withdrawal is charged, not given away free")
+    func partialMinuteIsCharged() {
+        // Wants 30s, holds 5 minutes and no carry: a whole minute leaves the
+        // pocket and the unused 30s land in the carry — total unchanged.
+        let s = WalletSeconds.spend(want: 30, minutes: 5, carry: 0)
+        #expect(s.granted == 30)
+        #expect(s.minutesOut == 1)
+        #expect(s.carryLeft == 30)
+        #expect((5 * 60 + 0) == (5 - s.minutesOut) * 60 + s.carryLeft + s.granted)
     }
 
     @Test("an unparseable lease doc reads as idle — never as someone else holding it")

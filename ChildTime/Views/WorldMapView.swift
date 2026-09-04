@@ -1366,10 +1366,19 @@ struct WorldMapView: View {
             // the TRANSFER: lock it THERE (stop-and-save, nothing lost), wait for
             // the honest confirmation, then the regular open buttons return here.
             if let other = peerWindow {
-                let mins = max(1, (other.secondsLeft + 59) / 60)
                 let where_ = other.kindLabel == "ipad" ? "בָּאַיְפֵּד" : (other.kindLabel == "iphone" ? "בָּאַיְפוֹן" : "בְּמַכְשִׁיר אַחֵר")
                 VStack(spacing: 10) {
-                    bottomHint("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו \(where_) — עוֹד \(mins) דַּקּוֹת")
+                    // Rani: the child must watch the OTHER device's time tick down
+                    // here, live. Nothing extra is sent for this — the lease already
+                    // carries `startedAt` + `grantedSeconds`, so the exact remainder
+                    // is derived locally; it just has to be re-rendered each second
+                    // instead of freezing until the next document change. Shown to
+                    // the second, because that is exactly what moves across on a
+                    // transfer.
+                    TimelineView(.periodic(from: .now, by: 1)) { _ in
+                        let left = max(0, peerWindow?.secondsLeft ?? 0)
+                        bottomHint("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו \(where_) — נִשְׁאֲרוּ \(left / 60):\(String(format: "%02d", left % 60))")
+                    }
                     if transferRequestedAt != nil {
                         bottomHint("🔒 נוֹעֲלִים \(where_)… רֶגַע אֶחָד ⏳")
                     } else {
@@ -1643,11 +1652,11 @@ struct WorldMapView: View {
             switch outcome {
             case .granted(let leaseID, let seconds, let wallet):
                 let mins = seconds / 60
-                guard mins > 0 else { return }
+                guard seconds > 0 else { return }
                 if let wallet { progress.applyClaimedWallet(wallet) }
-                shields.unlock(minutes: mins)
+                shields.unlock(minutes: max(1, (seconds + 59) / 60))
                 progress.startUnlock(minutes: mins, manual: kind == .gift, leaseID: leaseID,
-                                     leaseKind: kind.rawValue)
+                                     leaseKind: kind.rawValue, extraSeconds: seconds % 60)
                 LiveEventReporter.report(.screenTimeMoved, extra: ["fromKind": transferFromKind])
                 Haptic.success()
                 companion.hype("נָעוּל שָׁם! ✅ אֶפְשָׁר לְשַׂחֵק כָּאן 🎉")
@@ -1868,8 +1877,9 @@ struct WorldMapView: View {
                 let mins = seconds / 60
                 guard mins > 0 else { return }
                 if let wallet { progress.applyClaimedWallet(wallet) }
-                shields.unlock(minutes: mins)
-                progress.startUnlock(minutes: mins, leaseID: leaseID, leaseKind: "earned")
+                shields.unlock(minutes: max(1, (seconds + 59) / 60))
+                progress.startUnlock(minutes: mins, leaseID: leaseID, leaseKind: "earned",
+                                     extraSeconds: seconds % 60)
                 LearningHistoryStore.shared.recordMinutesUsed(mins)
                 LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins])
             case .heldElsewhere:
@@ -1927,8 +1937,9 @@ struct WorldMapView: View {
                 let mins = seconds / 60
                 guard mins > 0 else { return }
                 if let wallet { progress.applyClaimedWallet(wallet) }
-                shields.unlock(minutes: mins)
-                progress.startUnlock(minutes: mins, manual: true, leaseID: leaseID, leaseKind: "gift")
+                shields.unlock(minutes: max(1, (seconds + 59) / 60))
+                progress.startUnlock(minutes: mins, manual: true, leaseID: leaseID, leaseKind: "gift",
+                                     extraSeconds: seconds % 60)
                 LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins, "gift": true])
             case .heldElsewhere: Haptic.warning()
             case .insufficient:  Haptic.light()

@@ -92,6 +92,30 @@ struct PlayWindowLease: Equatable {
     }
 }
 
+/// Seconds-exact wallet arithmetic, extracted from the lease transactions so the
+/// conservation invariant can be tested without Firestore.
+///
+/// The wallets hold whole minutes; the odd seconds live in a 0…59 carry. The one
+/// rule both directions must obey: **time is neither minted nor lost**. Spending
+/// rounds the pocket withdrawal UP and hands the unspent part back to the carry,
+/// so repeated hand-offs cannot shave (or grow) a child's balance.
+enum WalletSeconds {
+    /// Spend up to `want` seconds from `minutes` whole minutes plus `carry`.
+    static func spend(want: Int, minutes: Int, carry: Int) -> (granted: Int, minutesOut: Int, carryLeft: Int) {
+        let carry = max(0, min(59, carry))
+        let minutes = max(0, minutes)
+        let granted = max(0, min(want, minutes * 60 + carry))
+        let minutesOut = (max(0, granted - carry) + 59) / 60
+        return (granted, minutesOut, minutesOut * 60 + carry - granted)
+    }
+
+    /// Give `seconds` back, folding them into `carry` and overflowing to minutes.
+    static func refund(seconds: Int, carry: Int) -> (minutesIn: Int, carryLeft: Int) {
+        let total = max(0, seconds) + max(0, min(59, carry))
+        return (total / 60, total % 60)
+    }
+}
+
 /// The wallet EXACTLY as the claim transaction left it in the cloud. The caller
 /// adopts this verbatim instead of guessing at a local debit: the claimant's own
 /// copy is stale by construction (the refund it is spending was published by the
@@ -102,6 +126,8 @@ struct ClaimedWallet: Equatable {
     let pendingMinutes: Int
     let parentGiftMinutes: Int
     let minutesUnlockedToday: Int
+    /// Sub-minute remainder left after the transaction spent/refunded (0…59).
+    let secondsCarry: Int
     let revision: Int
 }
 
@@ -327,7 +353,8 @@ final class PlayWindowLeaseManager: ObservableObject {
                     return ["ok": true, "leaseID": held.leaseID ?? "",
                             "seconds": held.remainingSeconds(now: now),
                             "wPending": cur.pendingMinutes, "wGift": cur.parentGiftMinutes ?? 0,
-                            "wToday": cur.minutesUnlockedToday, "wRev": cur.revision]
+                            "wToday": cur.minutesUnlockedToday, "wCarry": cur.secondsCarry ?? 0,
+                            "wRev": cur.revision]
                 }
                 // 2. Someone else is genuinely playing → refuse. THE invariant.
                 if held.isHeldElsewhere(now: now), policy == .normal || policy == .adoptLocal {
@@ -340,7 +367,10 @@ final class PlayWindowLeaseManager: ObservableObject {
                 //    the sibling's remainder is never silently burned. Guarded by
                 //    lastReleasedLeaseID so two racing stealers can't both refund.
                 if held.isHeld, let hid = held.leaseID, held.lastReleasedLeaseID != hid {
-                    let refundMin = held.remainingSeconds(now: now) / 60
+                    let r = WalletSeconds.refund(seconds: held.remainingSeconds(now: now),
+                                                 carry: cloud.secondsCarry ?? 0)
+                    let refundMin = r.minutesIn
+                    if held.kind != .grant { cloud.secondsCarry = r.carryLeft }
                     if refundMin > 0 {
                         switch held.kind {
                         case .earned:
@@ -360,18 +390,26 @@ final class PlayWindowLeaseManager: ObservableObject {
                     // Already paid for locally — publish ownership, touch no pocket.
                     grant = requestedSeconds
                 } else {
+                    // Seconds-exact (Rani: a hand-off at 38:50 resumes at 38:50,
+                    // not 38:00). The pockets are whole minutes, so the odd
+                    // seconds live in `secondsCarry` and are spent FIRST.
+                    let carry = max(0, min(59, merged.secondsCarry ?? 0))
                     switch kind {
                     case .earned:
-                        let capLeft = max(0, merged.pendingMinutes)
-                        grant = min(requestedSeconds / 60, capLeft) * 60
+                        let r = WalletSeconds.spend(want: requestedSeconds,
+                                                    minutes: merged.pendingMinutes, carry: carry)
+                        grant = r.granted
                         guard grant >= minSeconds else { return ["insufficient": true] }
-                        merged.pendingMinutes -= grant / 60
-                        merged.minutesUnlockedToday += grant / 60
+                        merged.pendingMinutes = max(0, merged.pendingMinutes - r.minutesOut)
+                        merged.minutesUnlockedToday += r.minutesOut
+                        merged.secondsCarry = r.carryLeft
                     case .gift:
                         let pocket = merged.parentGiftMinutes ?? 0
-                        grant = min(requestedSeconds / 60, pocket) * 60
+                        let r = WalletSeconds.spend(want: requestedSeconds, minutes: pocket, carry: carry)
+                        grant = r.granted
                         guard grant > 0 else { return ["insufficient": true] }
-                        merged.parentGiftMinutes = max(0, pocket - grant / 60)
+                        merged.parentGiftMinutes = max(0, pocket - r.minutesOut)
+                        merged.secondsCarry = r.carryLeft
                     case .grant:
                         // A parent's remote grant is MINTED, not spent from a pocket.
                         grant = requestedSeconds
@@ -396,7 +434,8 @@ final class PlayWindowLeaseManager: ObservableObject {
                 ], forDocument: wRef)
                 return ["ok": true, "leaseID": candidate, "seconds": grant,
                         "wPending": merged.pendingMinutes, "wGift": merged.parentGiftMinutes ?? 0,
-                        "wToday": merged.minutesUnlockedToday, "wRev": merged.revision]
+                        "wToday": merged.minutesUnlockedToday, "wCarry": merged.secondsCarry ?? 0,
+                        "wRev": merged.revision]
             }) { result, err in
                 if err != nil { cont.resume(returning: .offline); return }
                 guard let r = result as? [String: Any] else { cont.resume(returning: .offline); return }
@@ -411,6 +450,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                     wallet = ClaimedWallet(pendingMinutes: r["wPending"] as? Int ?? 0,
                                            parentGiftMinutes: r["wGift"] as? Int ?? 0,
                                            minutesUnlockedToday: r["wToday"] as? Int ?? 0,
+                                           secondsCarry: r["wCarry"] as? Int ?? 0,
                                            revision: rev)
                 }
                 cont.resume(returning: .granted(leaseID: r["leaseID"] as? String ?? "",
@@ -441,19 +481,25 @@ final class PlayWindowLeaseManager: ObservableObject {
                 let held = PlayWindowLease.from(wData)
                 let elapsed = held.startedAt.map { max(0, Int(Date().timeIntervalSince($0))) } ?? 0
                 let refund = max(0, min(localRemainingSeconds, held.grantedSeconds - elapsed))
-                let refundMin = refund / 60
-
                 // Credit the CLOUD's own value (not a merge of our local copy —
                 // which may already carry the optimistic credit, which would double).
                 var cloud = (try? txn.getDocument(sRef))?.data().flatMap(ProgressSnapshot.fromFirestore) ?? .blank
-                if refundMin > 0 {
-                    switch held.kind {
-                    case .earned:
-                        cloud.pendingMinutes += refundMin
-                        cloud.minutesUnlockedToday = max(0, cloud.minutesUnlockedToday - refundMin)
-                    case .gift:
-                        cloud.parentGiftMinutes = (cloud.parentGiftMinutes ?? 0) + refundMin
-                    case .grant: break   // a parent's fixed grant refunds nothing
+                // Seconds-exact: give back every second, whole minutes to the
+                // pocket and the remainder to the carry. Flooring here is what
+                // used to shave up to 59 seconds off every hand-off.
+                if refund > 0, held.kind != .grant {
+                    let r = WalletSeconds.refund(seconds: refund, carry: cloud.secondsCarry ?? 0)
+                    let refundMin = r.minutesIn
+                    cloud.secondsCarry = r.carryLeft
+                    if refundMin > 0 {
+                        switch held.kind {
+                        case .earned:
+                            cloud.pendingMinutes += refundMin
+                            cloud.minutesUnlockedToday = max(0, cloud.minutesUnlockedToday - refundMin)
+                        case .gift:
+                            cloud.parentGiftMinutes = (cloud.parentGiftMinutes ?? 0) + refundMin
+                        case .grant: break
+                        }
                     }
                 }
                 cloud.revision = max(localRevision, cloud.revision) + 1
@@ -475,7 +521,8 @@ final class PlayWindowLeaseManager: ObservableObject {
                     "refundedSeconds": refund,
                 ], forDocument: wRef, merge: true)
                 return ["wPending": cloud.pendingMinutes, "wGift": cloud.parentGiftMinutes ?? 0,
-                        "wToday": cloud.minutesUnlockedToday, "wRev": cloud.revision]
+                        "wToday": cloud.minutesUnlockedToday, "wCarry": cloud.secondsCarry ?? 0,
+                        "wRev": cloud.revision]
             }) { result, err in
                 // Same rule as a claim: the SERVER-clamped refund is the truth. The
                 // local credit was optimistic (so the child sees their minutes the
@@ -485,12 +532,38 @@ final class PlayWindowLeaseManager: ObservableObject {
                     let w = ClaimedWallet(pendingMinutes: r["wPending"] as? Int ?? 0,
                                           parentGiftMinutes: r["wGift"] as? Int ?? 0,
                                           minutesUnlockedToday: r["wToday"] as? Int ?? 0,
+                                          secondsCarry: r["wCarry"] as? Int ?? 0,
                                           revision: rev)
-                    Task { @MainActor in ProgressStore.shared.applyClaimedWallet(w) }
+                    Task { @MainActor in
+                        // ONLY when this device is currently being that child. A
+                        // parent closing a child's window remotely runs the very
+                        // same transaction — writing that child's wallet into the
+                        // parent's ProgressStore would corrupt whoever is active.
+                        guard ProfileStore.shared.activeID == childID else { return }
+                        ProgressStore.shared.applyClaimedWallet(w)
+                    }
                 }
                 cont.resume(returning: err == nil)
             }
         }
+    }
+
+    /// PARENT closes the child's window from afar, with no cooperation from the
+    /// device that holds it. The remote-lock command already in place asks the
+    /// child's device to stop — useless when that device is dead or off, which is
+    /// exactly when a child is stranded: the lease stays held and they cannot
+    /// open on their other device. This settles it directly instead, refunding
+    /// the remainder at the SERVER's clock so nothing is burned.
+    func parentRelease(childID: UUID) async {
+        #if canImport(FirebaseFirestore)
+        guard Self.isEnabled else { return }
+        let snap = try? await windowRef(childID.uuidString).getDocument()
+        let l = PlayWindowLease.from(snap?.data() ?? [:])
+        guard l.isHeld, let lid = l.leaseID else { return }
+        // Int.max: the parent has no view of the device's local clock, so let the
+        // transaction's own `granted − elapsed` clamp decide the refund.
+        await release(childID: childID, leaseID: lid, localRemainingSeconds: .max)
+        #endif
     }
 
     // MARK: - TRANSFER (ask the owner to let go)
