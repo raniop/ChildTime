@@ -128,6 +128,8 @@ struct ClaimedWallet: Equatable {
     let minutesUnlockedToday: Int
     /// Sub-minute remainder left after the transaction spent/refunded (0…59).
     let secondsCarry: Int
+    /// Which pocket that remainder belongs to.
+    var carryIsGift: Bool = false
     let revision: Int
     /// The local edit count this result was computed on. If the store has moved
     /// past it, the absolute numbers above are a photograph of the past. NOT the
@@ -364,7 +366,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                     return ["ok": true, "leaseID": held.leaseID ?? "",
                             "seconds": held.remainingSeconds(now: now),
                             "wPending": cur.pendingMinutes, "wGiftPocket": cur.parentGiftMinutes ?? 0,
-                            "wToday": cur.minutesUnlockedToday, "wCarry": cur.secondsCarry ?? 0,
+                            "wToday": cur.minutesUnlockedToday, "wCarry": cur.secondsCarry ?? 0, "wCarryGift": cur.carryIsGift ?? false,
                             "wRev": cur.revision, "wBase": baseSeq, "wDelta": 0,
                             "wGift": false]
                 }
@@ -379,10 +381,14 @@ final class PlayWindowLeaseManager: ObservableObject {
                 //    the sibling's remainder is never silently burned. Guarded by
                 //    lastReleasedLeaseID so two racing stealers can't both refund.
                 if held.isHeld, let hid = held.leaseID, held.lastReleasedLeaseID != hid {
+                    let same = (cloud.carryIsGift ?? false) == (held.kind == .gift)
                     let r = WalletSeconds.refund(seconds: held.remainingSeconds(now: now),
-                                                 carry: cloud.secondsCarry ?? 0)
+                                                 carry: same ? (cloud.secondsCarry ?? 0) : 0)
                     let refundMin = r.minutesIn
-                    if held.kind != .grant { cloud.secondsCarry = r.carryLeft }
+                    if held.kind != .grant {
+                        cloud.secondsCarry = r.carryLeft
+                        cloud.carryIsGift = held.kind == .gift
+                    }
                     if refundMin > 0 {
                         switch held.kind {
                         case .earned:
@@ -405,7 +411,9 @@ final class PlayWindowLeaseManager: ObservableObject {
                     // Seconds-exact (Rani: a hand-off at 38:50 resumes at 38:50,
                     // not 38:00). The pockets are whole minutes, so the odd
                     // seconds live in `secondsCarry` and are spent FIRST.
-                    let carry = max(0, min(59, merged.secondsCarry ?? 0))
+                    // Only spend the carry if it came out of THIS pocket.
+                    let carry = (merged.carryIsGift ?? false) == (kind == .gift)
+                        ? max(0, min(59, merged.secondsCarry ?? 0)) : 0
                     switch kind {
                     case .earned:
                         let r = WalletSeconds.spend(want: requestedSeconds,
@@ -415,6 +423,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                         merged.pendingMinutes = max(0, merged.pendingMinutes - r.minutesOut)
                         merged.minutesUnlockedToday += r.minutesOut
                         merged.secondsCarry = r.carryLeft
+                        merged.carryIsGift = false
                     case .gift:
                         let pocket = merged.parentGiftMinutes ?? 0
                         let r = WalletSeconds.spend(want: requestedSeconds, minutes: pocket, carry: carry)
@@ -422,6 +431,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                         guard grant > 0 else { return ["insufficient": true] }
                         merged.parentGiftMinutes = max(0, pocket - r.minutesOut)
                         merged.secondsCarry = r.carryLeft
+                        merged.carryIsGift = true
                     case .grant:
                         // A parent's remote grant is MINTED, not spent from a pocket.
                         grant = requestedSeconds
@@ -446,7 +456,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                 ], forDocument: wRef)
                 return ["ok": true, "leaseID": candidate, "seconds": grant,
                         "wPending": merged.pendingMinutes, "wGiftPocket": merged.parentGiftMinutes ?? 0,
-                        "wToday": merged.minutesUnlockedToday, "wCarry": merged.secondsCarry ?? 0,
+                        "wToday": merged.minutesUnlockedToday, "wCarry": merged.secondsCarry ?? 0, "wCarryGift": merged.carryIsGift ?? false,
                         "wRev": merged.revision, "wBase": baseSeq,
                         "wDelta": (policy == .adoptLocal || kind == .grant) ? 0 : -grant,
                         "wGift": kind == .gift]
@@ -465,6 +475,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                                            parentGiftMinutes: r["wGiftPocket"] as? Int ?? 0,
                                            minutesUnlockedToday: r["wToday"] as? Int ?? 0,
                                            secondsCarry: r["wCarry"] as? Int ?? 0,
+                                           carryIsGift: r["wCarryGift"] as? Bool ?? false,
                                            revision: rev,
                                            basedOnEditSeq: r["wBase"] as? Int ?? 0,
                                            deltaSeconds: r["wDelta"] as? Int ?? 0,
@@ -517,9 +528,12 @@ final class PlayWindowLeaseManager: ObservableObject {
                 // pocket and the remainder to the carry. Flooring here is what
                 // used to shave up to 59 seconds off every hand-off.
                 if refund > 0, held.kind != .grant {
-                    let r = WalletSeconds.refund(seconds: refund, carry: cloud.secondsCarry ?? 0)
+                    let samePocket = (cloud.carryIsGift ?? false) == (held.kind == .gift)
+                    let r = WalletSeconds.refund(seconds: refund,
+                                                 carry: samePocket ? (cloud.secondsCarry ?? 0) : 0)
                     let refundMin = r.minutesIn
                     cloud.secondsCarry = r.carryLeft
+                    cloud.carryIsGift = held.kind == .gift
                     if refundMin > 0 {
                         switch held.kind {
                         case .earned:
@@ -550,7 +564,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                     "refundedSeconds": refund,
                 ], forDocument: wRef, merge: true)
                 return ["wPending": cloud.pendingMinutes, "wGiftPocket": cloud.parentGiftMinutes ?? 0,
-                        "wToday": cloud.minutesUnlockedToday, "wCarry": cloud.secondsCarry ?? 0,
+                        "wToday": cloud.minutesUnlockedToday, "wCarry": cloud.secondsCarry ?? 0, "wCarryGift": cloud.carryIsGift ?? false,
                         "wRev": cloud.revision, "wBase": baseSeq,
                         "wDelta": held.kind == .grant ? 0 : refund,
                         "wGift": held.kind == .gift]
@@ -570,6 +584,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                                           parentGiftMinutes: r["wGiftPocket"] as? Int ?? 0,
                                           minutesUnlockedToday: r["wToday"] as? Int ?? 0,
                                           secondsCarry: r["wCarry"] as? Int ?? 0,
+                                          carryIsGift: r["wCarryGift"] as? Bool ?? false,
                                           revision: rev,
                                           basedOnEditSeq: r["wBase"] as? Int ?? 0,
                                           deltaSeconds: r["wDelta"] as? Int ?? 0,

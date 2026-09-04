@@ -89,6 +89,11 @@ struct ProgressSnapshot: Codable, Equatable {
     /// snapshot: the lease transactions write it together with the pocket it was
     /// split from, so the two can never disagree. Optional → old builds decode.
     var secondsCarry: Int? = nil
+
+    /// Which pocket `secondsCarry` belongs to. Only one window exists family-wide,
+    /// so a single carry is enough — but it has to be attributable, or the seconds
+    /// show up on the wrong button and get spent from the wrong wallet.
+    var carryIsGift: Bool? = nil
     /// 💝 Gift minutes the parents GAVE today (any device) + the day it refers
     /// to — enforces the daily cap "no more than until midnight". LWW.
     var giftGivenToday: Int? = nil
@@ -147,7 +152,7 @@ extension ProgressSnapshot {
         case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
         case hourlyAnswered, hourlyCorrect
         case wheelProgressCount, recoveryPot, ownedCharacterIDs, parentGiftMinutes, giftGivenToday, giftGivenDate
-        case secondsCarry
+        case secondsCarry, carryIsGift
         case lastComebackWheelAt, varietyBonusDate
         case resetEpoch
         case revision, lastModifiedAt, deviceID
@@ -204,6 +209,7 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent([String].self, forKey: .ownedCharacterIDs)) ?? nil { ownedCharacterIDs = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .parentGiftMinutes)) ?? nil { parentGiftMinutes = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .secondsCarry)) ?? nil { secondsCarry = v }
+        if let v = (try? c.decodeIfPresent(Bool.self, forKey: .carryIsGift)) ?? nil { carryIsGift = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .giftGivenToday)) ?? nil { giftGivenToday = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .giftGivenDate)) ?? nil { giftGivenDate = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastComebackWheelAt)) ?? nil { lastComebackWheelAt = v }

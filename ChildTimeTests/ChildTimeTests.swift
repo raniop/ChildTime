@@ -650,6 +650,32 @@ struct PlayWindowLeaseTests {
         #expect(p.pendingMinutes == 45)              // 35 + the 10 it refunded
     }
 
+    @Test("locking at 29:40 gives back 29:40 — and re-opens at 29:40")
+    func lockAndReopenKeepsTheSeconds() {
+        let p = ProgressStore.shared
+        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 0, parentGiftMinutes: 0,
+                                           minutesUnlockedToday: 0, secondsCarry: 0,
+                                           carryIsGift: false, revision: 70))
+        // A 30-minute gift window is locked after 20 seconds.
+        p.creditRefundLocally(seconds: 29 * 60 + 40, manual: true)
+        #expect(p.parentGiftMinutes == 29)
+        #expect(p.pendingSecondsCarry == 40)
+        // What the button offers, and what opening asks for, is the WHOLE thing —
+        // not 29 minutes with the seconds stranded out of reach.
+        #expect(p.openableSeconds(gift: true) == 29 * 60 + 40)
+    }
+
+    @Test("the carry belongs to one pocket and never leaks into the other")
+    func carryDoesNotLeakBetweenPockets() {
+        let p = ProgressStore.shared
+        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 5, parentGiftMinutes: 5,
+                                           minutesUnlockedToday: 0, secondsCarry: 0,
+                                           carryIsGift: false, revision: 71))
+        p.creditRefundLocally(seconds: 45, manual: true)      // 45s into the GIFT pocket
+        #expect(p.openableSeconds(gift: true) == 5 * 60 + 45)
+        #expect(p.openableSeconds(gift: false) == 5 * 60)     // earned side sees none of it
+    }
+
     @Test("an unparseable lease doc reads as idle — never as someone else holding it")
     func garbageReadsAsIdle() {
         let parsed = PlayWindowLease.from(["state": "🤷", "grantedSeconds": "lots"])

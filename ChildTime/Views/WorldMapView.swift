@@ -1911,12 +1911,19 @@ struct WorldMapView: View {
         LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes])
     }
 
-    /// "מַתָּנָה מֵהַהוֹרִים · 10 דַּקּוֹת + ❄️ 8 שְׁמוּרוֹת" — whatever parts exist.
+    /// "מַתָּנָה מֵהַהוֹרִים · 29:40 + ❄️ 8 שְׁמוּרוֹת" — whatever parts exist.
+    /// Shows the odd seconds when there are any: a child who locked at 29:40 and
+    /// is told "30 דקות" (or "29") has been quietly rounded, which is exactly the
+    /// kind of small lie about their time that costs trust.
     private var giftButtonTitle: String {
-        let gift = progress.parentGiftMinutes
+        let seconds = progress.openableSeconds(gift: true)
         let frozen = progress.pausedManualMinutes
         var parts: [String] = []
-        if gift > 0 { parts.append("\(gift) דַּקּוֹת") }
+        if seconds > 0 {
+            parts.append(seconds % 60 == 0
+                         ? "\(seconds / 60) דַּקּוֹת"
+                         : "\(seconds / 60):\(String(format: "%02d", seconds % 60)) דַּקּוֹת")
+        }
         if frozen > 0 { parts.append("❄️ \(frozen) שְׁמוּרוֹת") }
         return "מַתָּנָה מֵהַהוֹרִים · " + parts.joined(separator: " + ")
     }
@@ -1928,10 +1935,13 @@ struct WorldMapView: View {
         guard !progress.isUnlocked else { return }
         guard PlayWindowLeaseManager.isEnabled, let cid = profiles.activeID,
               progress.parentGiftMinutes > 0 else { legacyRedeemGift(); return }
-        let want = progress.parentGiftMinutes
+        // Seconds included. Asking for `minutes * 60` stranded the carry: a window
+        // locked at 29:40 re-opened at 29:00 and those 40 seconds could never be
+        // spent — they just accumulated out of reach.
+        let want = progress.openableSeconds(gift: true)
         Task { @MainActor in
             let outcome = await PlayWindowLeaseManager.shared.claim(
-                childID: cid, kind: .gift, requestedSeconds: want * 60)
+                childID: cid, kind: .gift, requestedSeconds: want)
             switch outcome {
             case .granted(let leaseID, let seconds, let wallet):
                 let mins = seconds / 60

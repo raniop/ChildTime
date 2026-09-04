@@ -20,6 +20,7 @@ final class ProgressStore: ObservableObject {
         static let unlockStartedUptime = "unlockStartedUptime"
         static let activeLeaseID = "activeLeaseID"
         static let unlockKind = "unlockKind"
+        static let carryIsGift = "carryIsGift"
         static let stars = "stars"
         static let diamonds = "diamonds"
         static let xp = "xp"
@@ -133,6 +134,11 @@ final class ProgressStore: ObservableObject {
     /// the refund side reads the kind off the lease doc, but a claim has to write it.
     private(set) var unlockKind: String {
         didSet { defaults.set(unlockKind, forKey: Key.unlockKind) }
+    }
+
+    /// Which pocket `pendingSecondsCarry` came out of — see ProgressSnapshot.
+    private(set) var carryIsGift: Bool {
+        didSet { defaults.set(carryIsGift, forKey: Key.carryIsGift) }
     }
 
     private(set) var activeLeaseID: String? {
@@ -484,6 +490,7 @@ final class ProgressStore: ObservableObject {
         self.unlockStartedUptime = d.double(forKey: Key.unlockStartedUptime)
         self.activeLeaseID = d.string(forKey: Key.activeLeaseID)
         self.unlockKind = d.string(forKey: Key.unlockKind) ?? "earned"
+        self.carryIsGift = d.bool(forKey: Key.carryIsGift)
         self.stars = d.integer(forKey: Key.stars)
         self.ownedCharacterIDs = Set(d.stringArray(forKey: Key.ownedCharacters) ?? [])
         self.diamonds = d.integer(forKey: Key.diamonds)
@@ -1470,6 +1477,14 @@ final class ProgressStore: ObservableObject {
         dailyCap.enabled && !canRedeemNow && pendingMinutes > redeemableMinutesNow
     }
 
+    /// Seconds this pocket can open RIGHT NOW — the whole minutes plus the odd
+    /// seconds, but only when the carry actually belongs to it. Opening from
+    /// `minutes * 60` stranded the carry: a window locked at 29:40 re-opened at
+    /// 29:00 and the 40 seconds could never be spent.
+    func openableSeconds(gift: Bool) -> Int {
+        (gift ? parentGiftMinutes : pendingMinutes) * 60 + (carryIsGift == gift ? pendingSecondsCarry : 0)
+    }
+
     /// Attach a lease we won retroactively for an already-open window.
     func adoptLeaseID(_ id: String) { if isUnlocked { activeLeaseID = id } }
 
@@ -1509,6 +1524,7 @@ final class ProgressStore: ObservableObject {
         parentGiftMinutes = w.parentGiftMinutes
         minutesUnlockedToday = w.minutesUnlockedToday
         pendingSecondsCarry = max(0, min(59, w.secondsCarry))
+        carryIsGift = w.carryIsGift
         adoptRevision(w.revision)
     }
 
@@ -1773,8 +1789,9 @@ final class ProgressStore: ObservableObject {
         guard seconds > 0 else { return }
         let r = WalletSeconds.spend(want: seconds,
                                     minutes: gift ? parentGiftMinutes : pendingMinutes,
-                                    carry: pendingSecondsCarry)
+                                    carry: carryIsGift == gift ? pendingSecondsCarry : 0)
         pendingSecondsCarry = r.carryLeft
+        carryIsGift = gift
         if gift {
             parentGiftMinutes = max(0, parentGiftMinutes - r.minutesOut)
         } else {
@@ -1788,8 +1805,9 @@ final class ProgressStore: ObservableObject {
     /// so an offline stop and an online one leave the child with the same balance.
     func creditRefundLocally(seconds: Int, manual: Bool) {
         guard seconds > 0 else { return }
-        let r = WalletSeconds.refund(seconds: seconds, carry: pendingSecondsCarry)
+        let r = WalletSeconds.refund(seconds: seconds, carry: carryIsGift == manual ? pendingSecondsCarry : 0)
         pendingSecondsCarry = r.carryLeft
+        carryIsGift = manual
         guard r.minutesIn > 0 else { return }
         if manual {
             parentGiftMinutes += r.minutesIn
@@ -2026,6 +2044,7 @@ final class ProgressStore: ObservableObject {
         s.lastModifiedAt      = lastModifiedAt
         s.deviceID            = ProgressSnapshot.thisDeviceID
         s.secondsCarry        = pendingSecondsCarry
+        s.carryIsGift         = carryIsGift
         return s
     }
 
@@ -2047,6 +2066,7 @@ final class ProgressStore: ObservableObject {
         totalCorrect        = s.totalCorrect
         totalAnswered       = s.totalAnswered
         if let c = s.secondsCarry { pendingSecondsCarry = max(0, min(59, c)) }
+        if let g = s.carryIsGift { carryIsGift = g }
         // unlockEndsAt deliberately NOT applied from sync (per-device — see captureSnapshot).
         stars               = s.stars
         diamonds            = s.diamonds
