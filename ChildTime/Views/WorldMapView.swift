@@ -7,6 +7,7 @@ struct WorldMapView: View {
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var subs: SubscriptionManager
     @ObservedObject private var household = HouseholdManager.shared
+    @ObservedObject private var leaseMgr = PlayWindowLeaseManager.shared
     @Environment(\.horizontalSizeClass) private var hsc
 
     @ObservedObject private var friends = FriendsManager.shared
@@ -1336,7 +1337,7 @@ struct WorldMapView: View {
             // ושמור"). Both are parent time — never blurred with earned minutes.
             // Opens both together as one fixed manual window (outside the cap).
             if (progress.parentGiftMinutes > 0 || progress.hasPausedManualTime) && !progress.isUnlocked
-                && household.otherDeviceOpenWindow(forChildID: profiles.activeID ?? UUID()) == nil {
+                && peerWindow == nil {
                 Button {
                     requestUnlock { redeemGift() }
                 } label: {
@@ -1364,9 +1365,9 @@ struct WorldMapView: View {
             // showing a "redeem" button that would be refused on tap, and offer
             // the TRANSFER: lock it THERE (stop-and-save, nothing lost), wait for
             // the honest confirmation, then the regular open buttons return here.
-            if let other = household.otherDeviceOpenWindow(forChildID: profiles.activeID ?? UUID()) {
+            if let other = peerWindow {
                 let mins = max(1, (other.secondsLeft + 59) / 60)
-                let where_ = other.device.kind == "ipad" ? "בָּאַיְפֵּד" : (other.device.kind == "iphone" ? "בָּאַיְפוֹן" : "בְּמַכְשִׁיר אַחֵר")
+                let where_ = other.kindLabel == "ipad" ? "בָּאַיְפֵּד" : (other.kindLabel == "iphone" ? "בָּאַיְפוֹן" : "בְּמַכְשִׁיר אַחֵר")
                 VStack(spacing: 10) {
                     bottomHint("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו \(where_) — עוֹד \(mins) דַּקּוֹת")
                     if transferRequestedAt != nil {
@@ -1374,9 +1375,22 @@ struct WorldMapView: View {
                     } else {
                         if transferTimedOut {
                             bottomHint("לֹא הִצְלַחְנוּ לִנְעֹל \(where_) עַכְשָׁיו — אוּלַי הוּא כָּבוּי. אֶפְשָׁר לְנַסּוֹת שׁוּב 😊")
+                            // A child must never be stuck behind a sibling's
+                            // powered-off device. Taking over SETTLES the
+                            // remainder at the server's clock, so it can never
+                            // mint time — only ever spend it once.
+                            if PlayWindowLeaseManager.isEnabled {
+                                Button { forceOpenHere() } label: {
+                                    Text("פִּתְחוּ בְּכָל זֹאת 🔓")
+                                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, AppSpacing.lg).padding(.vertical, 11)
+                                        .background(.white.opacity(0.22), in: Capsule())
+                                }
+                            }
                         }
                         Button {
-                            startWindowTransfer(other: other.device)
+                            transferWindowHere(rowID: other.rowID)
                         } label: {
                             HStack(spacing: 10) {
                                 Image(systemName: "lock.arrow.circlepath")
@@ -1585,6 +1599,92 @@ struct WorldMapView: View {
     /// uploads the refreshed balance. We do NOT open here yet — completion is
     /// detected in `completeWindowTransferIfReady` only when the other row's
     /// window is truly gone (the honest confirmation Rani asked for).
+    /// Is the child's ONE play window held by another of their devices right now?
+    /// The lease is authoritative when it's on; the old device-row inference is
+    /// consulted only while the lease doc is idle, which is what lets a new build
+    /// interoperate with a peer still on the old build.
+    private var peerWindow: (kindLabel: String, secondsLeft: Int, rowID: String?)? {
+        if PlayWindowLeaseManager.isEnabled {
+            let l = leaseMgr.lease
+            if l.isHeldElsewhere() {
+                let row = (household.devicesByChild[profiles.activeID?.uuidString ?? ""] ?? [])
+                    .first { $0.deviceID == l.ownerDeviceID }?.id
+                return (l.ownerKind ?? "other", l.remainingSeconds(), row)
+            }
+            if l.isHeld { return nil }          // it's ours — nobody else
+        }
+        if let other = household.otherDeviceOpenWindow(forChildID: profiles.activeID ?? UUID()) {
+            return (other.device.kind, other.secondsLeft, other.device.id)
+        }
+        return nil
+    }
+
+    /// "נעלו שם ופתחו כאן". With the lease ON this is one honest handshake:
+    /// ask the owner to release, ring its doorbell, wait for the ONE atomic fact
+    /// that proves it closed, then claim — the refunded minutes are already in the
+    /// wallet the claim reads. Falls back to the legacy row-watching flow while
+    /// the lease is off or the peer is on an old build.
+    private func transferWindowHere(rowID: String?) {
+        guard PlayWindowLeaseManager.isEnabled, let cid = profiles.activeID else {
+            if let rowID, let dev = (household.devicesByChild[cid_ns] ?? []).first(where: { $0.id == rowID }) {
+                startWindowTransfer(other: dev)
+            }
+            return
+        }
+        Haptic.medium()
+        transferTimedOut = false
+        transferRequestedAt = Date()
+        transferFromKind = leaseMgr.lease.ownerKind ?? ""
+        Task { @MainActor in
+            let kind = leaseMgr.lease.kind
+            let want = max(progress.redeemableMinutesNow, leaseMgr.lease.remainingSeconds() / 60)
+            let outcome = await leaseMgr.transferHere(childID: cid, ownerDeviceRowID: rowID,
+                                                      kind: kind, requestedSeconds: want * 60)
+            transferRequestedAt = nil
+            switch outcome {
+            case .granted(let leaseID, let seconds):
+                let mins = seconds / 60
+                guard mins > 0 else { return }
+                shields.unlock(minutes: mins)
+                progress.startUnlock(minutes: mins, manual: kind == .gift, leaseID: leaseID)
+                LiveEventReporter.report(.screenTimeMoved, extra: ["fromKind": transferFromKind])
+                Haptic.success()
+                companion.hype("נָעוּל שָׁם! ✅ אֶפְשָׁר לְשַׂחֵק כָּאן 🎉")
+            case .heldElsewhere:
+                transferTimedOut = true      // owner never answered → offer "open anyway"
+                Haptic.warning()
+            case .insufficient, .offline:
+                transferTimedOut = true
+                Haptic.warning()
+            }
+        }
+    }
+
+    /// Take the window over after the owner never answered. Server-clamped
+    /// settlement means the sibling's remainder returns to the wallet rather than
+    /// being burned, and the other device self-locks on its next foreground.
+    private func forceOpenHere() {
+        guard let cid = profiles.activeID else { return }
+        Haptic.medium()
+        Task { @MainActor in
+            let kind = leaseMgr.lease.kind
+            let want = max(progress.redeemableMinutesNow, leaseMgr.lease.remainingSeconds() / 60)
+            let outcome = await leaseMgr.claim(childID: cid, kind: kind,
+                                               requestedSeconds: want * 60, policy: .force)
+            if case .granted(let leaseID, let seconds) = outcome {
+                let mins = seconds / 60
+                guard mins > 0 else { return }
+                shields.unlock(minutes: mins)
+                progress.startUnlock(minutes: mins, manual: kind == .gift, leaseID: leaseID)
+                transferTimedOut = false
+                Haptic.success()
+                companion.hype("פָּתוּחַ כָּאן! 🎉")
+            } else { Haptic.warning() }
+        }
+    }
+
+    private var cid_ns: String { profiles.activeID?.uuidString ?? "" }
+
     private func startWindowTransfer(other: ChildDevice) {
         Haptic.medium()
         transferTimedOut = false

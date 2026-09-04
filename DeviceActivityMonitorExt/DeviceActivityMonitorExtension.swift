@@ -130,5 +130,12 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     private func clearUnlockEnd() {
         let defaults = UserDefaults(suiteName: appGroupID) ?? .standard
         defaults.removeObject(forKey: "unlockEndsAt")
+        // This process has no Firebase, so it cannot release the cloud play-window
+        // lease. Hand the app the leaseID to settle on its next wake — otherwise a
+        // window that simply RAN OUT (the most common ending of all) would leave
+        // the lease "open" and block the child's other device until it expires.
+        if let lease = defaults.string(forKey: "activeLeaseID") {
+            defaults.set(lease, forKey: "leaseNeedsRelease")
+        }
     }
 }

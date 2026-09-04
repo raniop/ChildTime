@@ -129,8 +129,13 @@ final class ProgressStore: ObservableObject {
     /// exactly-once.
     private(set) var activeLeaseID: String? {
         didSet {
-            if let v = activeLeaseID { defaults.set(v, forKey: Key.activeLeaseID) }
-            else { defaults.removeObject(forKey: Key.activeLeaseID) }
+            if let v = activeLeaseID {
+                defaults.set(v, forKey: Key.activeLeaseID)
+                AppGroup.defaults.set(v, forKey: Key.activeLeaseID)   // the extension reads this
+            } else {
+                defaults.removeObject(forKey: Key.activeLeaseID)
+                AppGroup.defaults.removeObject(forKey: Key.activeLeaseID)
+            }
         }
     }
 

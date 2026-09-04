@@ -344,6 +344,21 @@ struct ChildTimeApp: App {
             return
         }
 
+        // 🔐 A window may only stay open while WE hold the lease. If the child moved
+        // play to their other device (or a takeover happened), this device closes
+        // itself on the next foreground — this is what makes a wrong takeover
+        // harmless, and it settles a lease the monitor extension closed in the
+        // background (that process has no Firebase and cannot release it).
+        if PlayWindowLeaseManager.isEnabled, let cid = ProfileStore.shared.activeID {
+            PlayWindowLeaseManager.shared.drainExtensionReleaseIfNeeded(childID: cid)
+            let lease = PlayWindowLeaseManager.shared.lease
+            if progress.isUnlocked, progress.activeLeaseID != nil, lease.isHeldElsewhere() {
+                ShieldManager.shared.relockBaseline()
+                progress.stopAndSaveCurrentUnlock()
+                return
+            }
+        }
+
         // Re-sync with the DeviceActivity monitor, which clears the shared grant
         // ONLY when it's truly spent (real usage reached the limit, or the long
         // safety backstop ended) — NOT when the iPad was merely locked/idle.

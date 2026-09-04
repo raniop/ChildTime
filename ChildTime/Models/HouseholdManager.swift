@@ -1203,12 +1203,27 @@ final class HouseholdManager: ObservableObject {
         guard at > last, now - at < Self.remoteUnlockFreshness else { return }   // unseen + fresh
         UserDefaults.standard.set(at, forKey: lastRemoteUnlockKey)
         ackDeviceCommand(docID: docID, field: "remoteUnlockAppliedAt", stamp: at)
+        let childID = (data["childID"] as? String).flatMap(UUID.init(uuidString:))
         Task { @MainActor in
             await ShieldManager.shared.requestAuthorizationIfNeeded()
             ShieldManager.shared.cancelScheduledReshield()
+            // A parent's remote grant used to open a window with NO wallet
+            // interaction and NO cross-device awareness at all — so a parent
+            // granting time while the child was mid-session on their other device
+            // opened a SECOND concurrent window, leaking straight through the
+            // invariant via the parent's own button. Route it through the lease:
+            // `.grant` mints the minutes (they aren't spent from a pocket) and
+            // `.parentOverride` outranks a sibling device holding the window.
+            var leaseID: String? = nil
+            if PlayWindowLeaseManager.isEnabled, let childID {
+                let outcome = await PlayWindowLeaseManager.shared.claim(
+                    childID: childID, kind: .grant,
+                    requestedSeconds: minutes * 60, policy: .parentOverride)
+                if case .granted(let id, _) = outcome { leaseID = id }
+            }
             ShieldManager.shared.unlock(minutes: minutes)
             // Manual = fixed window, not drawn from the child's earned/banked pool.
-            ProgressStore.shared.startUnlock(minutes: minutes, manual: true)
+            ProgressStore.shared.startUnlock(minutes: minutes, manual: true, leaseID: leaseID)
             Haptic.success()
         }
     }

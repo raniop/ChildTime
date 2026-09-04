@@ -143,8 +143,58 @@ final class PlayWindowLeaseManager: ObservableObject {
             guard let self else { return }
             if let err { TofyLink("lease listener error: \(err.localizedDescription)"); return }
             let parsed = PlayWindowLease.from(snap?.data() ?? [:])
-            Task { @MainActor in self.lease = parsed }
+            Task { @MainActor in
+                self.lease = parsed
+                self.honorReleaseRequestIfNeeded(parsed)
+            }
         }
+        #endif
+    }
+
+    /// OWNER SIDE of the transfer: the child's other device asked for the window.
+    /// Let go immediately — re-lock, then stop-and-save, which fires the release
+    /// transaction that publishes the refund and the "it's closed" fact together.
+    private func honorReleaseRequestIfNeeded(_ l: PlayWindowLease) {
+        guard l.isMine, l.state == .releasing,
+              l.releaseRequestedBy != DeviceIdentity.installID else { return }
+        ShieldManager.shared.relockBaseline()
+        ProgressStore.shared.stopAndSaveCurrentUnlock()
+    }
+
+    /// CLAIMANT SIDE of Rani's flow: ask the owner to let go, ring its doorbell,
+    /// wait for the ONE atomic fact that proves it closed (the lease reaching
+    /// `idle`), then claim — the refunded minutes are already in the wallet the
+    /// claim reads, so there is no separate fetch-and-merge step.
+    func transferHere(childID: UUID, ownerDeviceRowID: String?,
+                      kind: PlayWindowLease.Kind, requestedSeconds: Int) async -> ClaimOutcome {
+        guard await requestRelease(childID: childID) else {
+            return await claim(childID: childID, kind: kind, requestedSeconds: requestedSeconds)
+        }
+        // Wake the owner (push). Purely a doorbell — correctness lives in the lease.
+        if let row = ownerDeviceRowID { HouseholdManager.shared.lockOtherDeviceWindow(deviceRowID: row) }
+        // Wait for the honest confirmation, bounded.
+        for _ in 0..<60 {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            if !lease.isHeld || lease.isMine || lease.isExpired() { break }
+        }
+        guard !lease.isHeldElsewhere() else {
+            return .heldElsewhere(ownerKind: lease.ownerKind ?? "other",
+                                  secondsLeft: lease.remainingSeconds())
+        }
+        return await claim(childID: childID, kind: kind, requestedSeconds: requestedSeconds)
+    }
+
+    /// Settle a lease the MONITOR EXTENSION closed. The extension has no Firebase,
+    /// so a window that ran out in the background leaves the lease open; this
+    /// drains that hand-off on the next app wake. Refund 0 — the window genuinely
+    /// ran to its end, there is nothing left to give back.
+    func drainExtensionReleaseIfNeeded(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        guard Self.isEnabled else { return }
+        let d = AppGroup.defaults
+        guard let leaseID = d.string(forKey: "leaseNeedsRelease") else { return }
+        d.removeObject(forKey: "leaseNeedsRelease")
+        Task { await self.release(childID: childID, leaseID: leaseID, localRemainingSeconds: 0) }
         #endif
     }
 
