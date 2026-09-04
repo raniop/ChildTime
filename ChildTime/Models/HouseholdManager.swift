@@ -573,9 +573,14 @@ final class HouseholdManager: ObservableObject {
                 .setData(Self.encode(device), merge: true)
             // Live-disconnect if the parent removes it later this session.
             watchOwnDeviceRemoval(childID: childID)
-            // Report the real play-time state so the parent sees the truth.
-            startReportingTimeState(childID: childID)
         } catch { lastError = error.localizedDescription }
+        // Report the real play-time state so the parent sees the truth AND the
+        // child's other device can offer the window transfer. Deliberately
+        // OUTSIDE the do/catch: it used to sit after the registration write, so
+        // a single failed/denied registration meant this device never published
+        // `windowEndsAt` for the rest of the session — and the "נעלו שם ופתחו
+        // כאן" button silently never appeared on the sibling device.
+        startReportingTimeState(childID: childID)
         #endif
     }
 
@@ -622,10 +627,17 @@ final class HouseholdManager: ObservableObject {
 
     private func reportTimeState(childID: UUID) {
         #if canImport(FirebaseFirestore)
-        guard household != nil else { return }
+        guard let hh = household else { return }
         let docID = "\(childID.uuidString)_\(DeviceIdentity.installID)"
         let p = ProgressStore.shared
-        var data: [String: Any] = ["frozenSeconds": p.manualPausedSeconds]
+        // Always carry childID/householdID: a merge onto a row that doesn't exist
+        // yet (registration lost the race, or was denied) would otherwise create
+        // a doc with no householdID — unreadable by the family and invisible to
+        // the sibling device's transfer check.
+        var data: [String: Any] = ["frozenSeconds": p.manualPausedSeconds,
+                                   "childID": childID.uuidString,
+                                   "householdID": hh.id,
+                                   "deviceID": DeviceIdentity.installID]
         if let end = p.unlockEndsAt, end > Date() {
             data["windowEndsAt"] = end.timeIntervalSince1970
             data["windowIsManual"] = p.unlockIsManual
@@ -633,7 +645,20 @@ final class HouseholdManager: ObservableObject {
             data["windowEndsAt"] = FieldValue.delete()
             data["windowIsManual"] = FieldValue.delete()
         }
-        db.collection("childDevices").document(docID).setData(data, merge: true)
+        // CONFIRMED + self-healing: this row is what makes the sibling device
+        // offer "נעלו שם ופתחו כאן". A silently-denied fire-and-forget write here
+        // meant the button never appeared and nobody knew ([[command-delivery-certainty]]).
+        let ref = db.collection("childDevices").document(docID)
+        Task {
+            var outcome = await confirmedMerge(ref, data)
+            if outcome == .denied {
+                await self.reassertMembership()
+                outcome = await confirmedMerge(ref, data)
+            }
+            if outcome == .denied || outcome == .error {
+                TofyLink("reportTimeState FAILED for \(docID.prefix(12)) — window transfer may not be offered")
+            }
+        }
         #endif
     }
 
