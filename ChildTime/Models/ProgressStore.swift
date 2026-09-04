@@ -1955,6 +1955,12 @@ final class ProgressStore: ObservableObject {
     @discardableResult
     func mergeRemote(_ remote: ProgressSnapshot) -> Bool {
         let local = captureSnapshot()
+        // Record the cloud generation we just SAW, on every path — including the
+        // fully-converged one. Without this, a device that is in sync but whose
+        // stored `revision` is an old inflated number never learns the cloud's
+        // generation, so its next local edit stays BELOW the cloud and loses the
+        // merge: minutes the child just earned would silently vanish.
+        noteAdoptedGeneration(remote.revision)
 
         // LWW fields come from the winner; the mergeable fields ratchet up over
         // both (shared with the merge-on-upload path so neither can lose data).
