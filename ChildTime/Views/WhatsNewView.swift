@@ -24,7 +24,7 @@ enum WhatsNewContent {
     /// Release notes per build. Builds without an entry show nothing.
     static func items(for build: String) -> [Item]? {
         switch build {
-        case "137":
+        case "138", "137":
             return [
                 Item(emoji: "🔒", title: "חלון משחק אחד — בכל המכשירים יחד",
                      line: "כשהילד פותח דקות באייפון, האייפד מראה שהחלון פתוח שם ומציע להעביר אותו לכאן. אותן דקות לא נפתחות פעמיים, והמגבלה היומית נספרת פעם אחת לכל הילד"),
