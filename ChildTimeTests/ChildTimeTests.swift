@@ -601,6 +601,34 @@ struct PlayWindowLeaseTests {
         #expect((5 * 60 + 0) == (5 - s.minutesOut) * 60 + s.carryLeft + s.granted)
     }
 
+    @Test("the offline refund credits exactly what the cloud transaction would have")
+    func offlineRefundMatchesTheCloud() {
+        // When the release transaction cannot run, the device pays the refund
+        // itself. It MUST land on the same number the cloud would have written,
+        // or an offline stop and an online one leave different balances — and the
+        // two then fight through LWW.
+        let p = ProgressStore.shared
+        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 10, parentGiftMinutes: 0,
+                                           minutesUnlockedToday: 30, secondsCarry: 20, revision: 40))
+        p.creditRefundLocally(seconds: 5 * 60 + 50, manual: false)   // 5:50 back
+
+        let cloud = WalletSeconds.refund(seconds: 5 * 60 + 50, carry: 20)
+        #expect(p.pendingMinutes == 10 + cloud.minutesIn)
+        #expect(p.pendingSecondsCarry == cloud.carryLeft)
+        // Earned time given back also un-counts against today's cap.
+        #expect(p.minutesUnlockedToday == 30 - cloud.minutesIn)
+    }
+
+    @Test("a gift refund goes back to the gift pocket, never the earned wallet")
+    func giftRefundStaysInItsPocket() {
+        let p = ProgressStore.shared
+        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 7, parentGiftMinutes: 4,
+                                           minutesUnlockedToday: 0, secondsCarry: 0, revision: 41))
+        p.creditRefundLocally(seconds: 120, manual: true)
+        #expect(p.parentGiftMinutes == 6)
+        #expect(p.pendingMinutes == 7)     // untouched
+    }
+
     @Test("an unparseable lease doc reads as idle — never as someone else holding it")
     func garbageReadsAsIdle() {
         let parsed = PlayWindowLease.from(["state": "🤷", "grantedSeconds": "lots"])

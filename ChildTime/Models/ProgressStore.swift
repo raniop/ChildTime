@@ -1702,18 +1702,56 @@ final class ProgressStore: ObservableObject {
         let leaseID = activeLeaseID
         let remaining = refundableUnlockSeconds
         let childID = ProfileStore.shared.activeID
+        let wasManual = unlockIsManual
         var banked = 0
-        if unlockIsManual { pauseManualUnlock() }
-        else { banked = endUnlockAndReturnRemainingMinutes() }
-        // The local wallet was already credited optimistically above so the kid
-        // sees their minutes instantly; the release transaction is authoritative
-        // and converges via LWW (it bumps the revision above ours).
+
+        // EXACTLY ONE path may credit this refund.
+        //
+        // Crediting locally AND in the release transaction double-pays: this same
+        // stop path calls pushNow(), so the locally-credited wallet can reach the
+        // cloud BEFORE the transaction reads it — and the transaction then adds
+        // the refund on top of a value that already contains it. Every stop
+        // doubled the child's time.
+        //
+        // So when the lease is going to settle this, the local stop closes the
+        // window WITHOUT paying, and the transaction's own result comes back
+        // through applyClaimedWallet. The cost is that the wallet lags by one
+        // round trip; the benefit is that the number is right.
         if PlayWindowLeaseManager.isEnabled, let leaseID, let childID {
-            Task { await PlayWindowLeaseManager.shared.release(childID: childID,
-                                                               leaseID: leaseID,
-                                                               localRemainingSeconds: remaining) }
+            banked = remaining / 60
+            endUnlock()
+            Task {
+                let ok = await PlayWindowLeaseManager.shared.release(childID: childID,
+                                                                     leaseID: leaseID,
+                                                                     localRemainingSeconds: remaining)
+                // The cloud could not take it (offline — transactions never queue).
+                // Pay locally instead, or the child just lost the leftover.
+                if !ok {
+                    await MainActor.run { self.creditRefundLocally(seconds: remaining, manual: wasManual) }
+                }
+            }
+        } else if wasManual {
+            pauseManualUnlock()
+        } else {
+            banked = endUnlockAndReturnRemainingMinutes()
         }
         return banked
+    }
+
+    /// Credit a refund the CLOUD could not take. Mirrors the release transaction's
+    /// arithmetic exactly — whole minutes to the pocket, odd seconds to the carry —
+    /// so an offline stop and an online one leave the child with the same balance.
+    func creditRefundLocally(seconds: Int, manual: Bool) {
+        guard seconds > 0 else { return }
+        let r = WalletSeconds.refund(seconds: seconds, carry: pendingSecondsCarry)
+        pendingSecondsCarry = r.carryLeft
+        guard r.minutesIn > 0 else { return }
+        if manual {
+            parentGiftMinutes += r.minutesIn
+        } else {
+            pendingMinutes += r.minutesIn
+            minutesUnlockedToday = max(0, minutesUnlockedToday - r.minutesIn)
+        }
     }
 
     /// Child stopped mid-play on a parent's MANUAL grant — FREEZE the exact leftover
