@@ -629,6 +629,27 @@ struct PlayWindowLeaseTests {
         #expect(p.pendingMinutes == 7)     // untouched
     }
 
+    @Test("a stale transaction result is applied relatively — it never erases what just landed")
+    func staleWalletAppliesAsDelta() {
+        // The transaction was built on generation 50 and refunds 10 minutes. By
+        // the time it returns, an approved chore has paid 15 minutes in. Adopting
+        // the absolute numbers would snap the balance back to the pre-chore value —
+        // the "it goes up and then reverts" report.
+        let p = ProgressStore.shared
+        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 20, parentGiftMinutes: 0,
+                                           minutesUnlockedToday: 0, secondsCarry: 0, revision: 50))
+        let base = p.revision
+        p.addPendingMinutes(15)                      // the chore lands → 35, revision moves
+        #expect(p.revision != base)
+        #expect(p.pendingMinutes == 35)
+
+        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 20, parentGiftMinutes: 0,
+                                           minutesUnlockedToday: 0, secondsCarry: 0, revision: 51,
+                                           basedOnRevision: base,
+                                           deltaSeconds: 10 * 60, deltaIsGift: false))
+        #expect(p.pendingMinutes == 45)              // 35 + the 10 it refunded
+    }
+
     @Test("an unparseable lease doc reads as idle — never as someone else holding it")
     func garbageReadsAsIdle() {
         let parsed = PlayWindowLease.from(["state": "🤷", "grantedSeconds": "lots"])

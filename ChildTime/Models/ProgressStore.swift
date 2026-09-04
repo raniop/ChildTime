@@ -1474,7 +1474,29 @@ final class ProgressStore: ObservableObject {
     /// revision and un-does the debit. Taking the transaction's own result, and
     /// adopting its generation so the next local edit sits ABOVE it, is the only
     /// version that cannot re-mint minutes across a transfer.
+    /// `expectedRevision` is the generation the transaction was built on. If the
+    /// store has moved on since — a chore approval paid out, a 💝 gift command was
+    /// consumed, the child answered a question — the transaction's wallet is a
+    /// photograph of the past, and adopting it wholesale visibly ERASES whatever
+    /// just landed (the number jumps up, then snaps back a second later). In that
+    /// case we skip: the cloud value still arrives through the normal listener and
+    /// merges by revision, which is the path that knows how to combine them.
     func applyClaimedWallet(_ w: ClaimedWallet) {
+        // STALE: something landed locally between the transaction's read and now —
+        // a chore approval paid out, a 💝 gift command was consumed, the child
+        // answered a question. Adopting the absolute numbers would visibly erase
+        // it (the balance jumps, then snaps back a second later). Apply what the
+        // transaction actually MOVED instead, relative to what we hold now, and
+        // leave the rest alone; the cloud value still arrives through the listener
+        // and merges by revision.
+        if w.basedOnRevision != 0, revision != w.basedOnRevision {
+            if w.deltaSeconds > 0 {
+                creditRefundLocally(seconds: w.deltaSeconds, manual: w.deltaIsGift)
+            } else if w.deltaSeconds < 0 {
+                debitSpendLocally(seconds: -w.deltaSeconds, gift: w.deltaIsGift)
+            }
+            return
+        }
         pendingMinutes = w.pendingMinutes
         parentGiftMinutes = w.parentGiftMinutes
         minutesUnlockedToday = w.minutesUnlockedToday
@@ -1736,6 +1758,21 @@ final class ProgressStore: ObservableObject {
             banked = endUnlockAndReturnRemainingMinutes()
         }
         return banked
+    }
+
+    /// Mirror of `creditRefundLocally` for a spend the cloud already made.
+    func debitSpendLocally(seconds: Int, gift: Bool) {
+        guard seconds > 0 else { return }
+        let r = WalletSeconds.spend(want: seconds,
+                                    minutes: gift ? parentGiftMinutes : pendingMinutes,
+                                    carry: pendingSecondsCarry)
+        pendingSecondsCarry = r.carryLeft
+        if gift {
+            parentGiftMinutes = max(0, parentGiftMinutes - r.minutesOut)
+        } else {
+            pendingMinutes = max(0, pendingMinutes - r.minutesOut)
+            minutesUnlockedToday += r.minutesOut
+        }
     }
 
     /// Credit a refund the CLOUD could not take. Mirrors the release transaction's

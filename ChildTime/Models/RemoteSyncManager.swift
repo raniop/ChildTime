@@ -560,7 +560,14 @@ final class RemoteSyncManager: ObservableObject {
             return adj
         }) { [weak self] result, _ in
             let adj = (result as? Int) ?? 0
-            if adj != 0 { ProgressStore.shared.addPendingMinutes(adj) }
+            guard adj != 0 else { return }
+            ProgressStore.shared.addPendingMinutes(adj)
+            // Publish immediately, not after the ~3s debounce. The command has
+            // ALREADY been zeroed (exactly-once), so until this credit reaches the
+            // cloud it exists only on this device — and any other write that lands
+            // in that gap under a higher revision takes it away for good. This is
+            // the reward for an approved chore; it must not be racy.
+            self?.pushNow()
         }
         #endif
     }

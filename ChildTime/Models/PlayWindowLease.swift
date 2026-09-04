@@ -129,6 +129,15 @@ struct ClaimedWallet: Equatable {
     /// Sub-minute remainder left after the transaction spent/refunded (0…59).
     let secondsCarry: Int
     let revision: Int
+    /// The local generation this result was computed on. If the store has moved
+    /// past it, the absolute numbers above are a photograph of the past.
+    var basedOnRevision: Int = 0
+    /// What the transaction actually moved, in seconds: negative spent, positive
+    /// refunded. Lets a stale result still be applied RELATIVELY, so it neither
+    /// erases what landed meanwhile nor loses the child's time.
+    var deltaSeconds: Int = 0
+    /// Which pocket that delta belongs to.
+    var deltaIsGift: Bool = false
 }
 
 /// What a claim attempt produced.
@@ -352,9 +361,10 @@ final class PlayWindowLeaseManager: ObservableObject {
                     let cur = (try? txn.getDocument(sRef))?.data().flatMap(ProgressSnapshot.fromFirestore) ?? .blank
                     return ["ok": true, "leaseID": held.leaseID ?? "",
                             "seconds": held.remainingSeconds(now: now),
-                            "wPending": cur.pendingMinutes, "wGift": cur.parentGiftMinutes ?? 0,
+                            "wPending": cur.pendingMinutes, "wGiftPocket": cur.parentGiftMinutes ?? 0,
                             "wToday": cur.minutesUnlockedToday, "wCarry": cur.secondsCarry ?? 0,
-                            "wRev": cur.revision]
+                            "wRev": cur.revision, "wBase": local.revision, "wDelta": 0,
+                            "wGift": false]
                 }
                 // 2. Someone else is genuinely playing → refuse. THE invariant.
                 if held.isHeldElsewhere(now: now), policy == .normal || policy == .adoptLocal {
@@ -433,9 +443,11 @@ final class PlayWindowLeaseManager: ObservableObject {
                     "lastReleasedLeaseID": held.leaseID ?? wData["lastReleasedLeaseID"] as Any,
                 ], forDocument: wRef)
                 return ["ok": true, "leaseID": candidate, "seconds": grant,
-                        "wPending": merged.pendingMinutes, "wGift": merged.parentGiftMinutes ?? 0,
+                        "wPending": merged.pendingMinutes, "wGiftPocket": merged.parentGiftMinutes ?? 0,
                         "wToday": merged.minutesUnlockedToday, "wCarry": merged.secondsCarry ?? 0,
-                        "wRev": merged.revision]
+                        "wRev": merged.revision, "wBase": local.revision,
+                        "wDelta": (policy == .adoptLocal || kind == .grant) ? 0 : -grant,
+                        "wGift": kind == .gift]
             }) { result, err in
                 if err != nil { cont.resume(returning: .offline); return }
                 guard let r = result as? [String: Any] else { cont.resume(returning: .offline); return }
@@ -448,10 +460,13 @@ final class PlayWindowLeaseManager: ObservableObject {
                 var wallet: ClaimedWallet?
                 if let rev = r["wRev"] as? Int {
                     wallet = ClaimedWallet(pendingMinutes: r["wPending"] as? Int ?? 0,
-                                           parentGiftMinutes: r["wGift"] as? Int ?? 0,
+                                           parentGiftMinutes: r["wGiftPocket"] as? Int ?? 0,
                                            minutesUnlockedToday: r["wToday"] as? Int ?? 0,
                                            secondsCarry: r["wCarry"] as? Int ?? 0,
-                                           revision: rev)
+                                           revision: rev,
+                                           basedOnRevision: r["wBase"] as? Int ?? 0,
+                                           deltaSeconds: r["wDelta"] as? Int ?? 0,
+                                           deltaIsGift: r["wGift"] as? Bool ?? false)
                 }
                 cont.resume(returning: .granted(leaseID: r["leaseID"] as? String ?? "",
                                                 seconds: r["seconds"] as? Int ?? 0,
@@ -531,9 +546,11 @@ final class PlayWindowLeaseManager: ObservableObject {
                     "lastReleasedAt": FieldValue.serverTimestamp(),
                     "refundedSeconds": refund,
                 ], forDocument: wRef, merge: true)
-                return ["wPending": cloud.pendingMinutes, "wGift": cloud.parentGiftMinutes ?? 0,
+                return ["wPending": cloud.pendingMinutes, "wGiftPocket": cloud.parentGiftMinutes ?? 0,
                         "wToday": cloud.minutesUnlockedToday, "wCarry": cloud.secondsCarry ?? 0,
-                        "wRev": cloud.revision]
+                        "wRev": cloud.revision, "wBase": local.revision,
+                        "wDelta": held.kind == .grant ? 0 : refund,
+                        "wGift": held.kind == .gift]
             }) { result, err in
                 // Same rule as a claim: the SERVER-clamped refund is the truth. The
                 // local credit was optimistic (so the child sees their minutes the
@@ -541,10 +558,13 @@ final class PlayWindowLeaseManager: ObservableObject {
                 // this write through LWW is exactly how a transfer re-mints time.
                 if let r = result as? [String: Any], let rev = r["wRev"] as? Int {
                     let w = ClaimedWallet(pendingMinutes: r["wPending"] as? Int ?? 0,
-                                          parentGiftMinutes: r["wGift"] as? Int ?? 0,
+                                          parentGiftMinutes: r["wGiftPocket"] as? Int ?? 0,
                                           minutesUnlockedToday: r["wToday"] as? Int ?? 0,
                                           secondsCarry: r["wCarry"] as? Int ?? 0,
-                                          revision: rev)
+                                          revision: rev,
+                                          basedOnRevision: r["wBase"] as? Int ?? 0,
+                                          deltaSeconds: r["wDelta"] as? Int ?? 0,
+                                          deltaIsGift: r["wGift"] as? Bool ?? false)
                     Task { @MainActor in
                         // ONLY when this device is currently being that child. A
                         // parent closing a child's window remotely runs the very
