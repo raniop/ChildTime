@@ -519,12 +519,35 @@ final class HouseholdManager: ObservableObject {
             }
     }
 
+    /// Guards the one-shot self-heal retry below (per household binding) so a
+    /// permanently-denied listener can't spin in a re-attach loop.
+    private var childDevicesHealAttempted = false
+
     private func listenToChildDevices(in householdID: String) {
         childDevicesListener?.remove()
         childDevicesListener = db.collection("childDevices")
             .whereField("householdID", isEqualTo: householdID)
-            .addSnapshotListener { [weak self] snap, _ in
-                guard let self, let snap else { return }
+            .addSnapshotListener { [weak self] snap, err in
+                guard let self else { return }
+                // The error was previously discarded (`snap, _`). A permission-
+                // denied listener leaves `devicesByChild` EMPTY and every feature
+                // reading it silently dies — including the child's "נעלו שם
+                // ופתחו כאן" window transfer, which simply never appeared.
+                // Self-heal a drifted uid once, then re-attach.
+                if let err = err as NSError? {
+                    TofyLink("childDevices listener ERROR: \(err.localizedDescription)")
+                    if err.domain == FirestoreErrorDomain, err.code == 7,
+                       !self.childDevicesHealAttempted {
+                        self.childDevicesHealAttempted = true
+                        Task { @MainActor in
+                            await self.reassertMembership()
+                            self.listenToChildDevices(in: householdID)
+                        }
+                    }
+                    return
+                }
+                guard let snap else { return }
+                self.childDevicesHealAttempted = false   // healthy again
                 let devices = snap.documents.compactMap {
                     Self.decode(ChildDevice.self, $0.data())
                 }.filter { $0.removed != true }   // hide removed devices from the parent
