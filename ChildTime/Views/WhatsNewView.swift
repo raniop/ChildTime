@@ -3,12 +3,22 @@ import SwiftUI
 /// ✨ "מה חדש" — a once-per-update popup on the PARENT dashboard (Rani: every
 /// release should tell parents what's new, in simple friendly Hebrew).
 ///
-/// How it works: `items(for:)` maps the CURRENT build number to its release
-/// notes. On dashboard appear, if this build hasn't been shown yet (and it's
-/// not a fresh install), the sheet pops once and the build is marked seen.
+/// How it works: `items(for:)` maps the MARKETING version to its release notes.
+/// On dashboard appear, if this version hasn't been shown yet (and it's not a
+/// fresh install), the sheet pops once and the version is marked seen.
 ///
-/// ⚠️ RELEASE CHECKLIST: when bumping CURRENT_PROJECT_VERSION, add a case here
-/// with that build's highlights — otherwise the popup silently skips.
+/// Keyed on the marketing version, NOT the build number: a release goes through
+/// many internal builds, and parents should see one set of notes for the release
+/// they actually received — not a popup on every TestFlight upload, and not a
+/// meaningless "141".
+///
+/// Versions read `YYYY.M.N` — year, month, release within that month (2026.9.1).
+/// It stays valid for Apple (≤3 integers), always sorts forward (2026.10 > 2026.9,
+/// 2027.1 > 2026.12), and tells a parent at a glance how fresh their app is.
+///
+/// ⚠️ RELEASE CHECKLIST: when bumping MARKETING_VERSION, add a case here with
+/// that version's highlights — otherwise the popup silently skips. Bumping only
+/// CURRENT_PROJECT_VERSION (a new build of the same release) needs nothing.
 enum WhatsNewContent {
     struct Item: Identifiable {
         let id = UUID()
@@ -17,14 +27,13 @@ enum WhatsNewContent {
         let line: String
     }
 
-    static var currentBuild: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "0"
-    }
+    /// What the parent sees, e.g. "2026.9.1". See `AppInfo` for the scheme.
+    static var currentVersion: String { AppInfo.version }
 
-    /// Release notes per build. Builds without an entry show nothing.
-    static func items(for build: String) -> [Item]? {
-        switch build {
-        case "141", "140", "139", "138", "137":
+    /// Release notes per marketing version. Versions without an entry show nothing.
+    static func items(for version: String) -> [Item]? {
+        switch version {
+        case "2026.9.1":
             return [
                 Item(emoji: "🔒", title: "חלון משחק אחד — בכל המכשירים יחד",
                      line: "כשהילד פותח דקות באייפון, האייפד מראה שהחלון פתוח שם ומציע להעביר אותו לכאן. אותן דקות לא נפתחות פעמיים, והמגבלה היומית נספרת פעם אחת לכל הילד"),
@@ -45,88 +54,30 @@ enum WhatsNewContent {
                 Item(emoji: "💛", title: "יציב יותר, בטוח יותר",
                      line: "המון שיפורים שקטים לשמירה על ההתקדמות, הפרטיות והפרסים של הילדים בכל המכשירים"),
             ]
-        case "136":
-            return [
-                Item(emoji: "🧹", title: "מסך מטלות חדש וצבעוני",
-                     line: "לילדים: כפתור 'עשיתי!' בצבע שלהם, כתר וברכת 'אלוף/אלופה' על מה שסיימו, וקטגוריה נפרדת של 'בוצעו היום'. הפרס תמיד דקות משחק"),
-                Item(emoji: "📖", title: "עשרות קטעי קריאה חדשים",
-                     line: "קטעי הבנת הנקרא לכל הכיתות, מותאמים לחומר הנלמד בבית הספר — עם הרבה פחות חזרות"),
-                Item(emoji: "🎓", title: "שאלות מותאמות לכיתה",
-                     line: "כל שאלה באפליקציה מתויגת לפי תוכנית הלימודים — כל ילד מקבל בדיוק את הרמה שלו"),
-                Item(emoji: "✅", title: "מטלה שבוצעה — מגיעה אליכם, תמיד",
-                     line: "כשילד מסמן שסיים מטלה, זה מגיע אליכם בוודאות. ואם משהו לא נשלח — תדעו מיד"),
-                Item(emoji: "💛", title: "יציב יותר, בטוח יותר",
-                     line: "המון שיפורים שקטים לשמירה על ההתקדמות, הפרטיות והפרסים של הילדים בכל המכשירים"),
-            ]
-        case "135":
-            return [
-                Item(emoji: "🧹", title: "מסך מטלות מסודר מחדש",
-                     line: "לילדים: כפתור 'עשיתי!' ברור, ומה שכבר בוצע עובר לקטגוריה נפרדת של 'בוצעו היום'"),
-                Item(emoji: "💰", title: "מטלות — עם כסף או בלי",
-                     line: "אפשר לבחור אם הילדים מרוויחים כסף על מטלות, או רק דקות משחק. הכול בהגדרות המטלות"),
-                Item(emoji: "📖", title: "עשרות קטעי קריאה חדשים",
-                     line: "קטעי הבנת הנקרא לכל הכיתות, מותאמים לחומר הנלמד בבית הספר — עם הרבה פחות חזרות"),
-                Item(emoji: "🎓", title: "שאלות מותאמות לכיתה",
-                     line: "כל שאלה באפליקציה מתויגת לפי תוכנית הלימודים — כל ילד מקבל בדיוק את הרמה שלו"),
-                Item(emoji: "✅", title: "מטלה שבוצעה — מגיעה אליכם, תמיד",
-                     line: "כשילד מסמן שסיים מטלה, זה מגיע אליכם בוודאות. ואם משהו לא נשלח — תדעו מיד"),
-                Item(emoji: "💛", title: "יציב יותר, בטוח יותר",
-                     line: "המון שיפורים שקטים לשמירה על ההתקדמות, הפרטיות והפרסים של הילדים בכל המכשירים"),
-            ]
-        case "134":
-            // Folds in build 133's highlights too — 133 was the FIRST build to
-            // carry this popup, so it self-suppressed and testers never saw its
-            // notes (see `shouldShow`). Catch everyone up here.
-            return [
-                Item(emoji: "🧹", title: "מטלות הבית",
-                     line: "הילדים עוזרים בבית ובוחרים פרס — דקות משחק או כסף לקופה. אתם מאשרים (אפשר ישר מההתראה, עם תמונה!)"),
-                Item(emoji: "💰", title: "מטלות — עם כסף או בלי",
-                     line: "חדש: אפשר לבחור אם הילדים מרוויחים כסף על מטלות, או רק דקות משחק. הכול בהגדרות המטלות"),
-                Item(emoji: "📖", title: "עשרות קטעי קריאה חדשים",
-                     line: "קטעי הבנת הנקרא לכל הכיתות, מותאמים לחומר הנלמד בבית הספר — עם הרבה פחות חזרות"),
-                Item(emoji: "🎓", title: "שאלות מותאמות לכיתה",
-                     line: "כל שאלה באפליקציה מתויגת לפי תוכנית הלימודים — כל ילד מקבל בדיוק את הרמה שלו"),
-                Item(emoji: "⌚️", title: "טופי על ה-Apple Watch וּווידג'טים",
-                     line: "מבט מהיר על המשפחה מהיד, התראות מטלה עם תמונה, וווידג'טים חדשים למסך הבית והנעילה"),
-                Item(emoji: "✅", title: "מטלה שבוצעה — מגיעה אליכם, תמיד",
-                     line: "כשילד מסמן שסיים מטלה, זה מגיע אליכם בוודאות. ואם משהו לא נשלח — תדעו מיד"),
-            ]
-        case "133":
-            return [
-                Item(emoji: "🧹", title: "מטלות הבית",
-                     line: "הילדים עוזרים בבית ובוחרים פרס — דקות משחק או כסף לקופה. אתם מאשרים (אפשר ישר מההתראה, עם תמונה!)"),
-                Item(emoji: "⌚️", title: "טופי על ה-Apple Watch",
-                     line: "מבט מהיר על המשפחה מהיד, והתראות מטלה עם תמונת ההוכחה"),
-                Item(emoji: "🎓", title: "שאלות מותאמות לכיתה",
-                     line: "כל שאלה באפליקציה מתויגת עכשיו לפי תוכנית הלימודים — כל ילד מקבל בדיוק את הרמה שלו"),
-                Item(emoji: "🎒", title: "חגיגת שנה חדשה",
-                     line: "מסך חגיגי לילדים ולכם לכבוד העלייה לכיתה החדשה"),
-                Item(emoji: "🧩", title: "ווידג'טים משודרגים",
-                     line: "מטלות וקופת כסף בווידג'טים, ווידג'טים חדשים למסך הנעילה, ועדכון חי"),
-                Item(emoji: "💪", title: "ותיקוני באגים רבים",
-                     line: "מתנות שמגיעות תמיד, התראות ברורות יותר, ועוד המון ליטושים"),
-            ]
         default:
             return nil
         }
     }
 
+    // Deliberately the SAME key as when this was build-keyed: an existing install
+    // holds a build number there, which can never equal a version string, so the
+    // first launch after updating shows the notes exactly once — which is right.
     private static let seenKey = "whatsNew.shownForBuild"
 
-    /// Show once per build — and never on a fresh install (nothing is "new").
+    /// Show once per version — and never on a fresh install (nothing is "new").
     @MainActor
     static var shouldShow: Bool {
         let d = UserDefaults.standard
         guard let seen = d.string(forKey: seenKey) else {
-            d.set(currentBuild, forKey: seenKey)   // fresh install → just record
+            d.set(currentVersion, forKey: seenKey)   // fresh install → just record
             return false
         }
-        return seen != currentBuild && items(for: currentBuild) != nil
+        return seen != currentVersion && items(for: currentVersion) != nil
     }
 
     @MainActor
     static func markShown() {
-        UserDefaults.standard.set(currentBuild, forKey: seenKey)
+        UserDefaults.standard.set(currentVersion, forKey: seenKey)
     }
 }
 
@@ -147,13 +98,21 @@ struct WhatsNewView: View {
                     Text("הנה מה שהוספנו בעדכון האחרון")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
+                    // The version itself, so a parent can say WHICH Tofy they have.
+                    Text("גרסה \(WhatsNewContent.currentVersion)")
+                        .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(.white.opacity(0.75))
+                        .padding(.horizontal, 12).padding(.vertical, 4)
+                        .background(.white.opacity(0.15), in: Capsule())
+                        .padding(.top, 4)
                 }
                 .padding(.top, 28)
                 .padding(.bottom, 18)
 
                 ScrollView {
                     VStack(spacing: 10) {
-                        ForEach(WhatsNewContent.items(for: WhatsNewContent.currentBuild) ?? []) { item in
+                        ForEach(WhatsNewContent.items(for: WhatsNewContent.currentVersion) ?? []) { item in
                             HStack(alignment: .top, spacing: 12) {
                                 Text(item.emoji).font(.system(size: 28))
                                 VStack(alignment: .leading, spacing: 2) {

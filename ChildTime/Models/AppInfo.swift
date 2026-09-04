@@ -1,8 +1,15 @@
 import Foundation
 
 /// App version info, read straight from the bundle so it always reflects the
-/// real shipped build — never hardcoded. `version` is the marketing version
-/// (CFBundleShortVersionString, e.g. "1.0"); `build` is CFBundleVersion ("33").
+/// real shipped build — never hardcoded.
+///
+/// `version` is the marketing version — the one a PARENT sees — and reads
+/// `YYYY.M.N`: year, month, release within that month (e.g. "2026.9.1"). It says
+/// at a glance how fresh the app is, stays valid for Apple (≤3 integers), and
+/// always sorts forward (2026.10 > 2026.9, 2027.1 > 2026.12).
+///
+/// `build` is CFBundleVersion ("141") — an internal counter Apple requires to
+/// increase on every upload. Never show it on its own to a parent.
 enum AppInfo {
     static var version: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
@@ -10,6 +17,6 @@ enum AppInfo {
     static var build: String {
         Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
     }
-    /// Hebrew one-liner, e.g. "גרסה 1.0 (33)".
+    /// Hebrew one-liner, e.g. "גרסה 2026.9.1 (141)".
     static var versionLine: String { "גרסה \(version) (\(build))" }
 }
