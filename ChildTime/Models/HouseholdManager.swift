@@ -996,9 +996,10 @@ final class HouseholdManager: ObservableObject {
             await sendDeviceCommand(childID: cid, householdID: hh.id, kind: .lock, stamp: stamp,
                                     fields: ["remoteLockAt": stamp])
             // Rani: a dead device must not strand the child. The command above
-            // needs the device to wake up and obey; this settles the family's play
-            // window server-side regardless, so the child can immediately open on
-            // their other device.
+            // needs the device to wake up and obey — so we give it a short grace
+            // to do exactly that, and only take the window away ourselves if it
+            // never answers. Closing early would free the lease while the child's
+            // device is still unshielded, which is its own double-window hole.
             await PlayWindowLeaseManager.shared.parentRelease(childID: childID)
             await MainActor.run { AppAnalytics.log("remote_screentime_locked", [:]) }
         }

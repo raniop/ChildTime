@@ -554,15 +554,39 @@ final class PlayWindowLeaseManager: ObservableObject {
     /// exactly when a child is stranded: the lease stays held and they cannot
     /// open on their other device. This settles it directly instead, refunding
     /// the remainder at the SERVER's clock so nothing is burned.
-    func parentRelease(childID: UUID) async {
+    /// Grace before the parent stops asking and starts telling. A live device
+    /// answers the remote-lock push in a second or two; this only ever elapses
+    /// when the device genuinely cannot answer.
+    static let parentReleaseGraceSeconds = 15
+
+    func parentRelease(childID: UUID, afterGrace: Bool = true) async {
         #if canImport(FirebaseFirestore)
         guard Self.isEnabled else { return }
-        let snap = try? await windowRef(childID.uuidString).getDocument()
+        let ref = windowRef(childID.uuidString)
+
+        // GIVE THE DEVICE THE FIRST WORD (Rani). Settling the lease the instant
+        // the parent taps would open a gap: the lease is free again while the
+        // child's device is still unshielded and has not yet noticed — long
+        // enough for them to walk to the other device and open a SECOND window.
+        // A device that is alive releases the lease itself as part of obeying the
+        // remote lock, and that release is the honest proof it has re-locked.
+        if afterGrace {
+            for _ in 0..<(Self.parentReleaseGraceSeconds / 3) {
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                let snap = try? await ref.getDocument()
+                if !PlayWindowLease.from(snap?.data() ?? [:]).isHeld { return }   // it obeyed
+            }
+        }
+
+        // It never answered — it is off, offline, or stuck. Settle it ourselves
+        // so the child is not stranded behind a device that cannot let go.
+        let snap = try? await ref.getDocument()
         let l = PlayWindowLease.from(snap?.data() ?? [:])
         guard l.isHeld, let lid = l.leaseID else { return }
         // Int.max: the parent has no view of the device's local clock, so let the
         // transaction's own `granted − elapsed` clamp decide the refund.
         await release(childID: childID, leaseID: lid, localRemainingSeconds: .max)
+        TofyLink("lease: parent force-closed \(lid.prefix(8)) — device never answered")
         #endif
     }
 
