@@ -54,6 +54,9 @@ struct WorldMapView: View {
     // here. We open here only AFTER the other device confirms (row cleared).
     @State private var transferRequestedAt: Date? = nil
     @State private var transferTimedOut = false
+    /// Which device kind the window was taken FROM — so the parent's push can
+    /// say "מהאייפד לאייפון".
+    @State private var transferFromKind = ""
     @State private var showLevelInfo = false
 
     private var isCompact: Bool { hsc == .compact }
@@ -1584,6 +1587,7 @@ struct WorldMapView: View {
         Haptic.medium()
         transferTimedOut = false
         transferRequestedAt = Date()
+        transferFromKind = other.kind ?? ""
         household.lockOtherDeviceWindow(deviceRowID: other.id)
         // Honest timeout: the other device may be off/offline. Give it 30s;
         // the command stays queued in the cloud and will still apply when it
@@ -1605,6 +1609,9 @@ struct WorldMapView: View {
         guard transferRequestedAt != nil, let cid = profiles.activeID,
               household.otherDeviceOpenWindow(forChildID: cid) == nil else { return }
         transferRequestedAt = nil
+        // Tell the parents the play window moved between the child's devices —
+        // they asked to know (Rani), and the lock there was already applied.
+        LiveEventReporter.report(.screenTimeMoved, extra: ["fromKind": transferFromKind])
         Task { @MainActor in
             if let cloud = await RemoteSyncManager.shared.fetchSnapshot(for: cid),
                cloud.revision > progress.revision {

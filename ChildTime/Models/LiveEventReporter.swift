@@ -22,6 +22,7 @@ enum LiveEventReporter {
         case assistRequest      // child asked a parent for help
         case screenTimeStart    // child opened earned screen-time (unlocked apps)
         case screenTimeEnd      // child finished / closed the screen-time window
+        case screenTimeMoved    // child moved the open play window to another device
         case parentGateOpened   // someone entered the parent code/Face ID on a CHILD device
         case playPINForgot      // child tapped "I forgot my play-protection code"
     }

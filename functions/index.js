@@ -96,6 +96,16 @@ function liveMessage(event) {
       const tail = mins > 0 ? ` · נשארו ${mins} דק'` : "";
       return { title: g("סיים זמן מסך ⏹️", "סיימה זמן מסך ⏹️"), body: `${name} ${g("סיים", "סיימה")} את זמן המשחק${dev}${tail}.` };
     }
+    case "screenTimeMoved": {
+      // The child moved their OPEN play window between their own devices — the
+      // source device was locked (stop-and-save, nothing lost) and play resumed
+      // on the destination. `deviceKind` on the event is the device it moved TO.
+      const kindLabel = (k) => (k === "ipad" ? "אייפד" : (k === "iphone" ? "אייפון" : "מכשיר אחר"));
+      const from = kindLabel(event.fromKind);
+      const to = kindLabel(event.deviceKind);
+      return { title: g("העביר זמן משחק 🔄", "העבירה זמן משחק 🔄"),
+               body: `${name} ${g("העביר", "העבירה")} את זמן המשחק מה${from} ל${to}. ה${from} ננעל 🔒` };
+    }
     case "assistRequest":return { title: "בקשת עזרה 💌", body: `${name} ${g("ביקש", "ביקשה")} את עזרתכם בשאלה${dev}.` };
     case "parentGateOpened": return { title: "🔐 נכנסו להגדרות ההורה", body: `מישהו פתח את הגדרות ההורה במכשיר של ${name}${dev}.` };
     // Deliberately does NOT include the code itself — lock-screen previews are
