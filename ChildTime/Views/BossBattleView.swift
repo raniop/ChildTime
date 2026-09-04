@@ -269,8 +269,7 @@ struct BossBattleView: View {
         // farmed 20⭐+30💎 endlessly. Replays give a small practice reward.
         let dayKey = "boss.won.\(world.id)"
         let alreadyToday: Bool = {
-            guard let d = UserDefaults.standard.object(forKey: dayKey) as? Date else { return false }
-            return Calendar.current.isDateInToday(d)
+            return DayGate.usedToday(UserDefaults.standard.object(forKey: dayKey) as? Date)
         }()
         if alreadyToday {
             earnedMinutes = 0

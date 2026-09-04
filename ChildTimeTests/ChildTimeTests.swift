@@ -79,6 +79,49 @@ struct ChildTimeTests {
         #expect(out.contains("אֵיזֶה"))
     }
 
+    /// REGRESSION (trust-critical): the daily screen-time cap counter must be
+    /// SYNCED and merged as a MAX within the same day. It used to be device-local,
+    /// so a child with two devices got `cap × devices` — open 60 on the iPad, then
+    /// 60 more on the iPhone — with no race and no bug required.
+    @Test func minutesUnlockedToday_mergesAsMaxWithinSameDay() {
+        let today = Date()
+        var a = ProgressSnapshot(); a.dailyEarnedDate = today; a.minutesUnlockedToday = 60; a.revision = 10
+        var b = ProgressSnapshot(); b.dailyEarnedDate = today; b.minutesUnlockedToday = 45; b.revision = 99
+        // Even though b "wins" the LWW race, the cap counter takes the max.
+        #expect(ProgressSnapshot.ratchetMerged(local: a, remote: b).minutesUnlockedToday == 60)
+        #expect(ProgressSnapshot.ratchetMerged(local: b, remote: a).minutesUnlockedToday == 60)
+    }
+
+    /// REGRESSION: a FUTURE-dated day is never legitimate — it means the clock was
+    /// moved forward (Settings → Date & Time). Adopting it froze both daily caps
+    /// family-wide forever, because a future date never reads as "today".
+    @Test func dailyEarnedDate_futureDatedPeerIsNotAdopted() {
+        let future = Calendar.current.date(byAdding: .day, value: 400, to: Date())!
+        var local = ProgressSnapshot(); local.dailyEarnedDate = Date(); local.minutesUnlockedToday = 30
+        var evil  = ProgressSnapshot(); evil.dailyEarnedDate = future; evil.minutesUnlockedToday = 0
+        evil.revision = 9_999
+        let merged = ProgressSnapshot.ratchetMerged(local: local, remote: evil)
+        let day = merged.dailyEarnedDate.map { Calendar.current.startOfDay(for: $0) }
+        #expect(day == nil || day! <= Calendar.current.startOfDay(for: Date()))
+    }
+
+    /// REGRESSION: every once-per-day gate must treat a stamp dated TODAY **or
+    /// later** as already used. Treating a future stamp as "not today" is what let
+    /// one forward clock jump permanently unlock the daily chest, the daily
+    /// challenge, boss jackpots and the variety bonus.
+    @Test func dayGate_futureStampCountsAsAlreadyUsed() {
+        #expect(DayGate.usedToday(nil) == false)
+        #expect(DayGate.usedToday(Date()) == true)
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+        let nextYear = Calendar.current.date(byAdding: .year, value: 1, to: Date())!
+        #expect(DayGate.usedToday(tomorrow) == true)      // must NOT re-open the reward
+        #expect(DayGate.usedToday(nextYear) == true)
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        #expect(DayGate.usedToday(yesterday) == false)    // a real new day still works
+        #expect(DayGate.isFutureDay(tomorrow) == true)
+        #expect(DayGate.isFutureDay(Date()) == false)
+    }
+
     /// REGRESSION: diamonds are a SPENDABLE wallet. They were wrongly max-merged
     /// like ⭐ stars, so a shop purchase (diamonds go DOWN) was never written to
     /// Firestore and got reverted on the next pull. Diamonds must be LWW (the

@@ -45,8 +45,7 @@ struct Chore: Identifiable, Equatable {
     var isPendingApproval: Bool { markedDoneAt != nil }
     /// How many approvals landed TODAY (0 if the counter is from another day).
     var doneToday: Int {
-        guard let t = approvedTodayAt,
-              Calendar.current.isDateInToday(Date(timeIntervalSince1970: t)) else { return 0 }
+        guard let t = approvedTodayAt, DayGate.usedToday(unixSeconds: t) else { return 0 }
         return approvedTodayCount
     }
     /// Finished for today — did it as many times as the day allows.
@@ -403,8 +402,7 @@ final class ChoreStore: ObservableObject {
                 // Same-day repeat counter — safe to compute here: the txn serializes.
                 let now = Date().timeIntervalSince1970
                 var doneToday = 0
-                if let t = d["approvedTodayAt"] as? Double,
-                   Calendar.current.isDateInToday(Date(timeIntervalSince1970: t)) {
+                if let t = d["approvedTodayAt"] as? Double, DayGate.usedToday(unixSeconds: t) {
                     doneToday = d["approvedTodayCount"] as? Int ?? 0
                 }
                 var update: [String: Any] = ["markedDoneAt": FieldValue.delete(),

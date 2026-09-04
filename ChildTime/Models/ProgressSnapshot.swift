@@ -31,6 +31,11 @@ struct ProgressSnapshot: Codable, Equatable {
     var wrongStreak: Int = 0
     var totalScore: Int = 0
     var minutesEarnedToday: Int = 0
+    /// Minutes ALREADY OPENED today, against the parent's daily screen-time cap.
+    /// Was device-local, which made the cap worth `cap × number of devices` (open
+    /// 60 on the iPad, then 60 more on the iPhone) and reset it on any reinstall.
+    /// Now synced and merged as a max within the same `dailyEarnedDate` day.
+    var minutesUnlockedToday: Int = 0
     var dailyEarnedDate: Date? = nil
     /// Questions answered / correct TODAY — synced so the parent's dashboard
     /// shows today's activity even though the full learning history is local.
@@ -123,7 +128,7 @@ extension ProgressSnapshot {
         case pendingMinutes, totalCorrect, totalAnswered, unlockEndsAt, stars, diamonds, xp
         case currentStreak, dayStreak, lastSessionDate, lastDailyChestDate, lastDailyChallengeDate
         case unlockedWorlds, worldProgress, topicAccuracy, topicAnswered, topicCorrect
-        case batchCounter, wrongStreak, totalScore, minutesEarnedToday, dailyEarnedDate
+        case batchCounter, wrongStreak, totalScore, minutesEarnedToday, minutesUnlockedToday, dailyEarnedDate
         case answeredToday, correctToday, carryOverMinutes, bestStreak, cycleSeconds
         case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
         case hourlyAnswered, hourlyCorrect
@@ -164,6 +169,7 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .wrongStreak)) ?? nil { wrongStreak = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .totalScore)) ?? nil { totalScore = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .minutesEarnedToday)) ?? nil { minutesEarnedToday = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .minutesUnlockedToday)) ?? nil { minutesUnlockedToday = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .dailyEarnedDate)) ?? nil { dailyEarnedDate = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .answeredToday)) ?? nil { answeredToday = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .correctToday)) ?? nil { correctToday = v }
@@ -241,17 +247,33 @@ extension ProgressSnapshot {
         // banked carry-over into the wallet and flips `minutesUnlockedToday` to 0,
         // making the "open X minutes" number jump around. Same day → keep the larger
         // earned count; otherwise take the later-dated side.
-        let lDay = local.dailyEarnedDate ?? .distantPast
-        let rDay = remote.dailyEarnedDate ?? .distantPast
+        // …but a FUTURE-dated day is never legitimate (a peer whose clock was moved
+        // forward). Adopting it froze both daily caps family-wide, so clamp each
+        // side to at most today before comparing.
+        let cal = Calendar.current
+        let todayStart = cal.startOfDay(for: Date())
+        func sane(_ d: Date?) -> Date? {
+            guard let d else { return nil }
+            return cal.startOfDay(for: d) > todayStart ? nil : d
+        }
+        let localDay = sane(local.dailyEarnedDate)
+        let remoteDay = sane(remote.dailyEarnedDate)
+        let lDay = localDay ?? .distantPast
+        let rDay = remoteDay ?? .distantPast
         if Calendar.current.isDate(lDay, inSameDayAs: rDay) {
-            m.dailyEarnedDate = local.dailyEarnedDate ?? remote.dailyEarnedDate
+            m.dailyEarnedDate = localDay ?? remoteDay
             m.minutesEarnedToday = max(local.minutesEarnedToday, remote.minutesEarnedToday)
+            // MAX, never the winner's value: the daily cap must count what BOTH
+            // devices already opened today, or two devices are worth two caps.
+            m.minutesUnlockedToday = max(local.minutesUnlockedToday, remote.minutesUnlockedToday)
         } else if rDay > lDay {
-            m.dailyEarnedDate = remote.dailyEarnedDate
+            m.dailyEarnedDate = remoteDay
             m.minutesEarnedToday = remote.minutesEarnedToday
+            m.minutesUnlockedToday = remote.minutesUnlockedToday
         } else {
-            m.dailyEarnedDate = local.dailyEarnedDate
+            m.dailyEarnedDate = localDay
             m.minutesEarnedToday = local.minutesEarnedToday
+            m.minutesUnlockedToday = local.minutesUnlockedToday
         }
         m.lastSessionDate = laterDate(local.lastSessionDate, remote.lastSessionDate)
         m.lastDailyChestDate = laterDate(local.lastDailyChestDate, remote.lastDailyChestDate)

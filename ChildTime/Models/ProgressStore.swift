@@ -14,6 +14,9 @@ final class ProgressStore: ObservableObject {
         static let totalAnswered = "totalAnswered"
         static let unlockEndsAt = "unlockEndsAt"
         static let unlockIsManual = "unlockIsManual"
+        static let unlockGrantedSeconds = "unlockGrantedSeconds"
+        static let unlockStartedAt = "unlockStartedAt"
+        static let unlockStartedUptime = "unlockStartedUptime"
         static let stars = "stars"
         static let diamonds = "diamonds"
         static let xp = "xp"
@@ -92,6 +95,47 @@ final class ProgressStore: ObservableObject {
             if let d = unlockEndsAt { defaults.set(d, forKey: Key.unlockEndsAt) }
             else { defaults.removeObject(forKey: Key.unlockEndsAt) }
         }
+    }
+    /// 🕐 What the CURRENT window was actually GRANTED, plus when it started —
+    /// both by wall clock and by the MONOTONIC system uptime. Refunds are clamped
+    /// against these so moving the device clock backwards can never mint minutes.
+    /// (Before this, rolling the clock back 12h and tapping "סיימתי לשחק" banked
+    /// 735 minutes from a 15-minute window, over and over.)
+    private(set) var unlockGrantedSeconds: Int {
+        didSet { defaults.set(unlockGrantedSeconds, forKey: Key.unlockGrantedSeconds) }
+    }
+    private var unlockStartedAt: Date? {
+        didSet {
+            if let d = unlockStartedAt { defaults.set(d, forKey: Key.unlockStartedAt) }
+            else { defaults.removeObject(forKey: Key.unlockStartedAt) }
+        }
+    }
+    private var unlockStartedUptime: Double {
+        didSet { defaults.set(unlockStartedUptime, forKey: Key.unlockStartedUptime) }
+    }
+
+    /// Seconds elapsed since the window opened, measured monotonically when
+    /// possible (`systemUptime` cannot be changed from Settings). Falls back to
+    /// wall clock only after a reboot, which resets uptime.
+    private var elapsedSinceUnlockStart: Int {
+        let up = ProcessInfo.processInfo.systemUptime
+        if unlockStartedUptime > 0, up >= unlockStartedUptime {
+            return Int(up - unlockStartedUptime)
+        }
+        if let started = unlockStartedAt {
+            return max(0, Int(Date().timeIntervalSince(started)))
+        }
+        return 0
+    }
+
+    /// Seconds still legitimately owed from the open window: never more than the
+    /// wall-clock remainder, and never more than (granted − actually elapsed).
+    private var refundableUnlockSeconds: Int {
+        // Windows opened by an older build have no grant record — fall back to the
+        // old behaviour rather than refusing the child their leftover.
+        guard unlockGrantedSeconds > 0 else { return unlockSecondsRemaining }
+        let owed = max(0, unlockGrantedSeconds - elapsedSinceUnlockStart)
+        return min(unlockSecondsRemaining, owed)
     }
     /// True when the CURRENT window is a parent's one-time manual grant ("quick
     /// open") — a fixed wall-clock window that must NOT bank its leftover minutes
@@ -401,6 +445,9 @@ final class ProgressStore: ObservableObject {
         self.totalAnswered = d.integer(forKey: Key.totalAnswered)
         self.unlockEndsAt = d.object(forKey: Key.unlockEndsAt) as? Date
         self.unlockIsManual = d.bool(forKey: Key.unlockIsManual)
+        self.unlockGrantedSeconds = d.integer(forKey: Key.unlockGrantedSeconds)
+        self.unlockStartedAt = d.object(forKey: Key.unlockStartedAt) as? Date
+        self.unlockStartedUptime = d.double(forKey: Key.unlockStartedUptime)
         self.stars = d.integer(forKey: Key.stars)
         self.ownedCharacterIDs = Set(d.stringArray(forKey: Key.ownedCharacters) ?? [])
         self.diamonds = d.integer(forKey: Key.diamonds)
@@ -526,8 +573,7 @@ final class ProgressStore: ObservableObject {
     }
 
     var dailyChestAvailable: Bool {
-        guard let last = lastDailyChestDate else { return true }
-        return !Calendar.current.isDateInToday(last)
+        return !DayGate.usedToday(lastDailyChestDate)
     }
 
     func accuracy(for topic: Topic) -> Double {
@@ -602,8 +648,7 @@ final class ProgressStore: ObservableObject {
         guard let last = lastSessionDate else { return }   // brand-new child → no comeback
         let hoursAway = -last.timeIntervalSinceNow / 3600
         guard hoursAway >= 20 else { return }
-        let cal = Calendar.current
-        if let granted = lastComebackWheelAt, cal.isDate(granted, inSameDayAs: Date()) { return }
+        if DayGate.usedToday(lastComebackWheelAt) { return }
         lastComebackWheelAt = Date()
         grantBonusWheel()
     }
@@ -866,12 +911,22 @@ final class ProgressStore: ObservableObject {
     private func minutesEarnedTodayRespectingDate() -> Int {
         let today = Calendar.current.startOfDay(for: Date())
         // Roll over ONLY when the stored date is a genuinely PAST day. A same-day
-        // (or, due to sync/clock-skew, a future-dated) value must NOT trigger a
-        // rollover — a spurious rollover re-releases banked carry-over minutes and
-        // zeroes the daily counters, which made the redeemable minutes jump around.
-        if let last = dailyEarnedDate.map({ Calendar.current.startOfDay(for: $0) }),
-           last >= today {
-            return minutesEarnedToday
+        // value must NOT trigger a rollover — a spurious rollover re-releases
+        // banked carry-over minutes and zeroes the daily counters, which made the
+        // redeemable minutes jump around.
+        if let last = dailyEarnedDate.map({ Calendar.current.startOfDay(for: $0) }) {
+            if last == today { return minutesEarnedToday }
+            if last > today {
+                // FUTURE-dated: the clock was moved forward (Settings → Date &
+                // Time), or a peer merged a future-dated snapshot. The old code
+                // took the `last >= today` branch FOREVER, which permanently
+                // froze both daily caps — `minutesUnlockedTodayResolved` then read
+                // 0 and the child could re-open a full cap all day, on every
+                // device. Pin the record to today and KEEP the counters (so the
+                // caps still bite); never release carry-over on a future stamp.
+                dailyEarnedDate = today
+                return minutesEarnedToday
+            }
         }
         // New day — first, yesterday's banked bonus minutes become playable.
         if carryOverMinutes > 0 {
@@ -1168,8 +1223,7 @@ final class ProgressStore: ObservableObject {
 
     /// Today's reward was already collected.
     var dailyChallengeClaimed: Bool {
-        guard let last = lastDailyChallengeDate else { return false }
-        return Calendar.current.isDateInToday(last)
+        return DayGate.usedToday(lastDailyChallengeDate)
     }
 
     /// Goal met AND not yet claimed today → the card shows a "collect" button.
@@ -1239,7 +1293,7 @@ final class ProgressStore: ObservableObject {
 
     private func topicCountsToday() -> [String: Int] {
         guard let d = defaults.object(forKey: topicAnsweredDateKey) as? Date,
-              Calendar.current.isDateInToday(d),
+              DayGate.usedToday(d),
               let dict = defaults.dictionary(forKey: topicAnsweredKey) as? [String: Int]
         else { return [:] }
         return dict
@@ -1255,8 +1309,7 @@ final class ProgressStore: ObservableObject {
     }
 
     private var varietyBonusGrantedToday: Bool {
-        (defaults.object(forKey: varietyBonusDateKey) as? Date)
-            .map { Calendar.current.isDateInToday($0) } ?? false
+        DayGate.usedToday(defaults.object(forKey: varietyBonusDateKey) as? Date)
     }
 
     // MARK: - Spending pending minutes
@@ -1337,8 +1390,7 @@ final class ProgressStore: ObservableObject {
     /// hasn't run yet (e.g. the app stayed foreground across midnight). Read-only:
     /// the real reset still happens in `minutesEarnedTodayRespectingDate()`.
     private var minutesUnlockedTodayResolved: Int {
-        guard let d = dailyEarnedDate,
-              Calendar.current.isDate(d, inSameDayAs: Date()) else { return 0 }
+        guard DayGate.usedToday(dailyEarnedDate) else { return 0 }
         return minutesUnlockedToday
     }
 
@@ -1394,7 +1446,7 @@ final class ProgressStore: ObservableObject {
         // Count what was GIVEN today (for the "until midnight" cap). Roll the
         // counter when the day changed. Unused gift itself carries over (Rani).
         if delta > 0 {
-            if let d = giftGivenDate, Calendar.current.isDateInToday(d) {
+            if DayGate.usedToday(giftGivenDate) {
                 giftGivenToday += delta
             } else {
                 giftGivenToday = delta
@@ -1405,7 +1457,7 @@ final class ProgressStore: ObservableObject {
 
     /// 💝 given today, day-aware (0 if the counter is from a previous day).
     var giftGivenTodayResolved: Int {
-        guard let d = giftGivenDate, Calendar.current.isDateInToday(d) else { return 0 }
+        guard DayGate.usedToday(giftGivenDate) else { return 0 }
         return giftGivenToday
     }
 
@@ -1458,6 +1510,11 @@ final class ProgressStore: ObservableObject {
         NSLog("[ScreenTime] startUnlock(minutes: %d, manual: %@) → window %d min + %ds carry", minutes, manual ? "true" : "false", minutes, extraSeconds)
         unlockIsManual = manual
         unlockEndsAt = end
+        // Record what we actually granted + a monotonic start, so the refund can
+        // be clamped no matter what the clock does afterwards.
+        unlockGrantedSeconds = minutes * 60 + extraSeconds
+        unlockStartedAt = Date()
+        unlockStartedUptime = ProcessInfo.processInfo.systemUptime
         // Lock-screen / Dynamic Island countdown of the remaining play time.
         PlayTimeLiveActivity.start(endsAt: end,
                                    characterName: ProfileStore.shared.active?.character.name ?? "")
@@ -1474,6 +1531,7 @@ final class ProgressStore: ObservableObject {
         }
         let newEnd = end.addingTimeInterval(TimeInterval(minutes * 60))
         unlockEndsAt = newEnd
+        unlockGrantedSeconds += minutes * 60
         PlayTimeLiveActivity.start(endsAt: newEnd,
                                    characterName: ProfileStore.shared.active?.character.name ?? "")
     }
@@ -1481,6 +1539,9 @@ final class ProgressStore: ObservableObject {
     func endUnlock() {
         unlockEndsAt = nil
         unlockIsManual = false
+        unlockGrantedSeconds = 0
+        unlockStartedAt = nil
+        unlockStartedUptime = 0
         PlayTimeLiveActivity.end()
     }
 
@@ -1534,7 +1595,7 @@ final class ProgressStore: ObservableObject {
     /// re-applies the shield. No-op for an earned window (that banks to the wallet).
     func pauseManualUnlock() {
         guard unlockIsManual else { return }
-        let remaining = unlockSecondsRemaining
+        let remaining = refundableUnlockSeconds
         // The leftover of a PARENT window goes back to the SYNCED gift pocket
         // (whole minutes, rounded UP so the child never loses a partial minute)
         // — not to a device-local freezer. Rani: "חייב להיות אותו דבר בשני
@@ -1621,7 +1682,7 @@ final class ProgressStore: ObservableObject {
         // A parent's one-time manual grant is a fixed window — its leftover time is
         // NOT the child's to keep. End it without banking anything back.
         if unlockIsManual { endUnlock(); return 0 }
-        let remainingSeconds = unlockSecondsRemaining
+        let remainingSeconds = refundableUnlockSeconds
         // Bank the EXACT leftover time, to the second. Neither floor it (which wasted
         // the partial minute: 58:50 → 58) nor round the minute up (which invented
         // time: 58:50 → 59). Instead split into whole minutes + a sub-minute carry,
@@ -1709,6 +1770,7 @@ final class ProgressStore: ObservableObject {
         s.wrongStreak         = wrongStreak
         s.totalScore          = totalScore
         s.minutesEarnedToday  = minutesEarnedToday
+        s.minutesUnlockedToday = minutesUnlockedToday
         s.dailyEarnedDate     = dailyEarnedDate
         s.answeredToday       = answeredToday
         s.correctToday        = correctToday
@@ -1772,6 +1834,7 @@ final class ProgressStore: ObservableObject {
         wrongStreak         = s.wrongStreak
         totalScore          = s.totalScore
         minutesEarnedToday  = s.minutesEarnedToday
+        minutesUnlockedToday = s.minutesUnlockedToday
         dailyEarnedDate     = s.dailyEarnedDate
         answeredToday       = s.answeredToday
         correctToday        = s.correctToday

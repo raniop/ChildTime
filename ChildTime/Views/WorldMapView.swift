@@ -1613,9 +1613,13 @@ struct WorldMapView: View {
         // they asked to know (Rani), and the lock there was already applied.
         LiveEventReporter.report(.screenTimeMoved, extra: ["fromKind": transferFromKind])
         Task { @MainActor in
-            if let cloud = await RemoteSyncManager.shared.fetchSnapshot(for: cid),
-               cloud.revision > progress.revision {
-                ProgressStore.shared.apply(cloud)
+            // MERGE, never a wholesale apply gated on `revision`: that gate used a
+            // per-device counter, so the busier device ignored the balance the
+            // locked device had just banked (opening its own stale wallet — a
+            // double-spend caused by the very feature meant to prevent one), and
+            // when it did apply it could lower local accumulators outright.
+            if let cloud = await RemoteSyncManager.shared.fetchSnapshot(for: cid) {
+                _ = ProgressStore.shared.mergeRemote(cloud)
             }
             Haptic.success()
             companion.hype("נָעוּל שָׁם! ✅ הַדַּקּוֹת חָזְרוּ — אֶפְשָׁר לִפְתּוֹחַ כָּאן 🎉")
@@ -1715,8 +1719,7 @@ struct WorldMapView: View {
     private func celebrateGamesUnlockIfNeeded() {
         guard gamesUnlockedToday else { return }
         let key = "gamesUnlockCelebratedDate"
-        if let d = UserDefaults.standard.object(forKey: key) as? Date,
-           Calendar.current.isDateInToday(d) { return }
+        if DayGate.usedToday(UserDefaults.standard.object(forKey: key) as? Date) { return }
         UserDefaults.standard.set(Date(), forKey: key)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             companion.hype(Gendered.g("פָּתַחְתָּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨",
