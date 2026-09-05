@@ -21,10 +21,8 @@ struct LeaderboardView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            FloatingOrbs(colors: [AppColor.starGold, AppColor.gemPurple, AppColor.companionGlow],
-                         count: 6, maxSize: 260, opacity: 0.35)
-            SparkleField(count: 22, size: 14)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             VStack(spacing: 0) {
                 header
@@ -77,33 +75,19 @@ struct LeaderboardView: View {
     }
 
     private var header: some View {
-        ZStack {
-            Text("לוּחַ הַחֲבֵרִים")
-                .font(.system(size: 24, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
-            HStack {
-                Button { dismiss() } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
-                        .frame(width: 38, height: 38).background(.white.opacity(0.18), in: Circle())
-                }
+        VStack(spacing: 10) {
+            HStack(spacing: 8) {
+                Button { dismiss() } label: { headerCircle("xmark") }
                 Spacer()
                 Button {
                     // Start a live game with friends — hand off to the home screen,
                     // which presents the setup + game over the world map.
                     LiveGameManager.shared.wantsNewGame = true
                     dismiss()
-                } label: {
-                    Image(systemName: "gamecontroller.fill")
-                        .font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
-                        .frame(width: 38, height: 38).background(AppColor.gemPurple.opacity(0.9), in: Circle())
-                }
+                } label: { headerCircle("gamecontroller.fill") }
                 Button { showRequests = true } label: {
                     ZStack(alignment: .topTrailing) {
-                        Image(systemName: "tray.fill")
-                            .font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
-                            .frame(width: 38, height: 38).background(.white.opacity(0.18), in: Circle())
+                        headerCircle("tray.fill")
                         if !friends.incomingRequests.isEmpty {
                             Text("\(friends.incomingRequests.count)")
                                 .font(.system(size: 11, weight: .black, design: .rounded))
@@ -115,15 +99,23 @@ struct LeaderboardView: View {
                         }
                     }
                 }
-                Button { showAdd = true } label: {
-                    Image(systemName: "person.badge.plus")
-                        .font(.system(size: 17, weight: .bold)).foregroundStyle(.white)
-                        .frame(width: 38, height: 38).background(AppColor.starGold.opacity(0.9), in: Circle())
-                }
+                Button { showAdd = true } label: { headerCircle("person.badge.plus") }
             }
             .environment(\.layoutDirection, .leftToRight)
+            Text("לוּחַ הַחֲבֵרִים")
+                .font(.system(size: 26, weight: .black, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
         }
-        .padding(.horizontal, AppSpacing.lg).padding(.vertical, AppSpacing.md)
+        .padding(.horizontal, AppSpacing.lg).padding(.vertical, AppSpacing.sm)
+    }
+
+    private func headerCircle(_ system: String) -> some View {
+        Image(systemName: system)
+            .font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
+            .frame(width: 40, height: 40)
+            .background(.white.opacity(0.22), in: Circle())
+            .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
     }
 
     // Two tabs: my friends vs. everyone in the app.
@@ -133,7 +125,7 @@ struct LeaderboardView: View {
             tabButton("כָּל הַשַּׂחְקָנִים", .global)
         }
         .padding(4)
-        .background(Capsule().fill(.white.opacity(0.12)))
+        .glassInset(radius: 14)
         .padding(.horizontal, AppSpacing.lg)
         .padding(.bottom, AppSpacing.sm)
     }
@@ -146,9 +138,9 @@ struct LeaderboardView: View {
         } label: {
             Text(title)
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
+                .foregroundStyle(active ? Color(hex: "4B3FBF") : .white)
                 .frame(maxWidth: .infinity).padding(.vertical, 9)
-                .background(Capsule().fill(active ? AppColor.starGold.opacity(0.9) : .clear))
+                .background(RoundedRectangle(cornerRadius: 11, style: .continuous).fill(active ? .white.opacity(0.92) : .clear))
         }
     }
 
@@ -207,8 +199,7 @@ struct LeaderboardView: View {
                     .foregroundStyle(AppColor.starGold)
             }
             .frame(maxWidth: .infinity).padding(AppSpacing.md)
-            .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(AppColor.starGold.opacity(0.18)))
-            .overlay(RoundedRectangle(cornerRadius: AppRadius.large).stroke(AppColor.starGold.opacity(0.5), lineWidth: 1.5))
+            .glassPane(radius: 22, tint: Color(hex: "FFD23F"))
             .padding(.top, AppSpacing.sm)
         }
     }
@@ -262,13 +253,18 @@ struct LeaderboardView: View {
             Text(card.name).font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).lineLimit(1)
             starsPill(card.stars)
+            // Glass steps — gold glows through the winner's, softer for 2 and 3.
             ZStack(alignment: .top) {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(LinearGradient(colors: [AppColor.starGold, Color(hex: "FFB84D")],
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(.white.opacity(0.14))
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(LinearGradient(colors: [Color(hex: "FFD23F").opacity(rank == 1 ? 0.55 : 0.25), .clear],
                                          startPoint: .top, endPoint: .bottom))
-                    .frame(height: podiumH)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(.white.opacity(0.4), lineWidth: 1)
                 Text(medal).font(.system(size: 26)).padding(.top, 6)
             }
+            .frame(height: podiumH)
         }
         .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
@@ -299,10 +295,13 @@ struct LeaderboardView: View {
             starsPill(card.stars)
         }
         .padding(.horizontal, 14).padding(.vertical, 10)
-        .background(RoundedRectangle(cornerRadius: AppRadius.large)
-            .fill(isMe ? AppColor.starGold.opacity(0.22) : .white.opacity(0.10)))
-        .overlay(RoundedRectangle(cornerRadius: AppRadius.large)
-            .stroke(isMe ? AppColor.starGold : .clear, lineWidth: 2))
+        .glassPane(radius: 20, tint: isMe ? Color(hex: "FFD23F") : nil)
+        .overlay {
+            if isMe {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .strokeBorder(AppColor.starGold.opacity(0.8), lineWidth: 1.5)
+            }
+        }
         .contentShape(Rectangle())
         .onTapGesture { Haptic.light(); selectedCard = card }
         .contextMenu { if removable { removeMenu(for: card, isMe: isMe) } }
@@ -314,7 +313,8 @@ struct LeaderboardView: View {
             Text("\(n)").font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
         }
         .padding(.horizontal, 10).padding(.vertical, 5)
-        .background(Capsule().fill(.white.opacity(0.16)))
+        .background(Capsule().fill(.white.opacity(0.14)))
+        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
     }
 
     private var emptyState: some View {
@@ -329,9 +329,9 @@ struct LeaderboardView: View {
                 .padding(.horizontal, AppSpacing.xl)
             Button { showAdd = true } label: {
                 Label("הוֹסִיפוּ חָבֵר", systemImage: "person.badge.plus")
-                    .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(Color(hex: "4B3FBF"))
                     .padding(.horizontal, AppSpacing.xl).padding(.vertical, 14)
-                    .background(AppGradient.gold, in: Capsule()).glow(AppColor.starGold, radius: 12)
+                    .background(Capsule().fill(.white.opacity(0.92)))
             }
             .padding(.top, 6)
             Spacer(); Spacer()
@@ -357,8 +357,8 @@ struct AddFriendView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 16, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
             VStack(spacing: 0) {
                 ZStack {
                     Text("הוֹסָפַת חָבֵר").font(.system(size: 22, weight: .heavy, design: .rounded))
@@ -586,8 +586,8 @@ struct FriendProfileView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.galaxy.ignoresSafeArea()
-            SparkleField(count: 12, size: 10)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             // A fixed dismiss bar over a scrollable body, so the action button is
             // always reachable — even at the .medium detent on a short screen.
@@ -695,8 +695,8 @@ struct FriendRequestsView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 16, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
             VStack(spacing: 0) {
                 header
                 if friends.incomingRequests.isEmpty {
