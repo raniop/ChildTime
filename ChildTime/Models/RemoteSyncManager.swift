@@ -275,23 +275,51 @@ final class RemoteSyncManager: ObservableObject {
         // No in-flight guard: the transaction reads+zeroes atomically, so a second
         // event just finds 0 — whereas a guard could STRAND a fast second "+10".
         let ref = db.collection("children").document(childID.uuidString)
+        let stateRef = ref.collection("state").document("current")
         db.runTransaction({ txn, _ -> Any? in
             let doc = try? txn.getDocument(ref)
             let adj = (doc?.data()?["pendingGiftAdjustment"] as? Int) ?? 0
-            if adj != 0 {
-                // Consume + ACK atomically: echo the send stamp back as
-                // `giftAppliedAt` so the parent's "💝 נשלח" flips to "✅ הגיע"
-                // (and a Cloud Function pushes them if it landed late).
-                var update: [String: Any] = ["pendingGiftAdjustment": 0]
-                if let sentAt = doc?.data()?["giftSentAt"] as? Double {
-                    update["giftAppliedAt"] = sentAt
+            guard adj != 0 else { return 0 }
+            // Consume + ACK atomically: echo the send stamp back as
+            // `giftAppliedAt` so the parent's "💝 נשלח" flips to "✅ הגיע"
+            // (and a Cloud Function pushes them if it landed late).
+            var update: [String: Any] = ["pendingGiftAdjustment": 0]
+            if let sentAt = doc?.data()?["giftSentAt"] as? Double {
+                update["giftAppliedAt"] = sentAt
+            }
+            txn.updateData(update, forDocument: ref)
+
+            // AND credit the CLOUD wallet in the same transaction.
+            //
+            // This used to credit only the local store and rely on the ordinary
+            // debounced upload to carry it. That upload ratchet-MERGES, and the
+            // wallet is last-write-wins on the whole snapshot — so whenever the
+            // cloud copy won, the gift was silently discarded and gone for good.
+            // The parent's panel and the child's open button both read the cloud,
+            // which is why a child could see the minutes on their device while
+            // the dashboard showed 0 and nothing could be opened.
+            //
+            // Consuming the command and paying it out are now the same atomic
+            // act: exactly-once still holds, and the minutes cannot be lost to a
+            // merge because they never travel through one.
+            if var cloud = (try? txn.getDocument(stateRef))?.data()
+                .flatMap(ProgressSnapshot.fromFirestore) {
+                cloud.parentGiftMinutes = max(0, (cloud.parentGiftMinutes ?? 0) + adj)
+                cloud.revision += 1
+                cloud.lastModifiedAt = Date()
+                cloud.deviceID = ProgressSnapshot.thisDeviceID
+                if let enc = ProgressSnapshot.toFirestore(cloud) {
+                    txn.setData(enc, forDocument: stateRef, merge: true)
                 }
-                txn.updateData(update, forDocument: ref)
             }
             return adj
-        }) { [weak self] result, _ in
+        }) { result, _ in
             let adj = (result as? Int) ?? 0
-            if adj != 0 { ProgressStore.shared.addParentGiftMinutes(adj) }
+            guard adj != 0 else { return }
+            // Mirror it locally so the child sees it instantly. The cloud value is
+            // authoritative and arrives via the listener a beat later; both hold
+            // the same number, so there is nothing to reconcile.
+            Task { @MainActor in ProgressStore.shared.addParentGiftMinutes(adj) }
         }
         #endif
     }
@@ -553,10 +581,25 @@ final class RemoteSyncManager: ObservableObject {
     private func applyPendingMinuteGrant(childID: UUID) {
         #if canImport(FirebaseFirestore)
         let ref = db.collection("children").document(childID.uuidString)
+        let stateRef = ref.collection("state").document("current")
         db.runTransaction({ txn, _ -> Any? in
             let doc = try? txn.getDocument(ref)
             let adj = (doc?.data()?["pendingMinuteAdjustment"] as? Int) ?? 0
-            if adj != 0 { txn.updateData(["pendingMinuteAdjustment": 0], forDocument: ref) }
+            guard adj != 0 else { return 0 }
+            txn.updateData(["pendingMinuteAdjustment": 0], forDocument: ref)
+            // Same rule as the gift: pay it into the CLOUD wallet in the very
+            // transaction that consumes the command, so an approved chore's
+            // minutes can never be lost to a merge on the way up.
+            if var cloud = (try? txn.getDocument(stateRef))?.data()
+                .flatMap(ProgressSnapshot.fromFirestore) {
+                cloud.pendingMinutes = max(0, cloud.pendingMinutes + adj)
+                cloud.revision += 1
+                cloud.lastModifiedAt = Date()
+                cloud.deviceID = ProgressSnapshot.thisDeviceID
+                if let enc = ProgressSnapshot.toFirestore(cloud) {
+                    txn.setData(enc, forDocument: stateRef, merge: true)
+                }
+            }
             return adj
         }) { [weak self] result, _ in
             let adj = (result as? Int) ?? 0
