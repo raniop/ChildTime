@@ -289,6 +289,18 @@ exports.blockTombstonedChild = onDocumentCreated("children/{childID}", async (ev
 // exactly the wrong moment. So: on any command write, send a SILENT push
 // (content-available) to the household's child devices; iOS wakes the app for a
 // few seconds, the listener fires, the command applies. No banner, no sound.
+
+/** Balance a child actually has, in whole minutes. Counters first; the legacy
+ *  minute field only for documents written before the counters existed. */
+function walletMinutes(d, pocket) {
+  const inKey = pocket === "gift" ? "giftSecondsIn" : "earnedSecondsIn";
+  const outKey = pocket === "gift" ? "giftSecondsOut" : "earnedSecondsOut";
+  if (typeof d[inKey] === "number" || typeof d[outKey] === "number") {
+    return Math.max(0, (d[inKey] || 0) - (d[outKey] || 0)) / 60 | 0;
+  }
+  return (pocket === "gift" ? d.parentGiftMinutes : d.pendingMinutes) || 0;
+}
+
 const COMMAND_FIELDS_CHILD = ["pendingMinuteAdjustment", "pendingGiftAdjustment", "pendingMoneyAdjustment", "resetRequestedAt", "revokeGiftAt"];
 // appRemovalUnlockAt was MISSING here — the "allow app deletion" window never
 // woke the child's device and only applied when the kid reopened Tofy.
@@ -1300,8 +1312,11 @@ exports.adminFamiliesOverview = onCall(
           createdAt: k.createdAt,
           stars: s ? (s.data.stars || 0) : 0,
           diamonds: s ? (s.data.diamonds || 0) : 0,
-          pendingMinutes: s ? (s.data.pendingMinutes || 0) : 0,
-          giftMinutes: s ? (s.data.parentGiftMinutes || 0) : 0,
+          // Prefer the wallet COUNTERS (in - out, in seconds). The legacy minute
+          // fields are a last-write-wins mirror that a device whose counters are
+          // behind can win, so reading them showed 0 next to a real balance.
+          pendingMinutes: s ? walletMinutes(s.data, "earned") : 0,
+          giftMinutes: s ? walletMinutes(s.data, "gift") : 0,
           answered: s ? (s.data.totalAnswered || 0) : 0,
           revision: s ? (s.data.revision || 0) : 0,
           lastActiveAt: s ? s.updatedAt : null,

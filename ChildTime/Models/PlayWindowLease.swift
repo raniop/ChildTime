@@ -405,30 +405,19 @@ final class PlayWindowLeaseManager: ObservableObject {
                     // Already paid for locally — publish ownership, touch no pocket.
                     grant = requestedSeconds
                 } else {
-                    // Seconds-exact (Rani: a hand-off at 38:50 resumes at 38:50,
-                    // not 38:00). The pockets are whole minutes, so the odd
-                    // seconds live in `secondsCarry` and are spent FIRST.
-                    // Only spend the carry if it came out of THIS pocket.
-                    let carry = (merged.carryIsGift ?? false) == (kind == .gift)
-                        ? max(0, min(59, merged.secondsCarry ?? 0)) : 0
+                    // Spend from the COUNTERS. Everything is already in seconds,
+                    // so a hand-off at 38:50 resumes at 38:50 with no rounding and
+                    // no carry to keep track of.
                     switch kind {
                     case .earned:
-                        let r = WalletSeconds.spend(want: requestedSeconds,
-                                                    minutes: merged.pendingMinutes, carry: carry)
-                        grant = r.granted
+                        grant = min(requestedSeconds, merged.earnedSecondsAvailable)
                         guard grant >= minSeconds else { return ["insufficient": true] }
-                        merged.pendingMinutes = max(0, merged.pendingMinutes - r.minutesOut)
-                        merged.minutesUnlockedToday += r.minutesOut
-                        merged.secondsCarry = r.carryLeft
-                        merged.carryIsGift = false
+                        merged.earnedSecondsOut = (merged.earnedSecondsOut ?? 0) + grant
+                        merged.minutesUnlockedToday += grant / 60
                     case .gift:
-                        let pocket = merged.parentGiftMinutes ?? 0
-                        let r = WalletSeconds.spend(want: requestedSeconds, minutes: pocket, carry: carry)
-                        grant = r.granted
+                        grant = min(requestedSeconds, merged.giftSecondsAvailable)
                         guard grant > 0 else { return ["insufficient": true] }
-                        merged.parentGiftMinutes = max(0, pocket - r.minutesOut)
-                        merged.secondsCarry = r.carryLeft
-                        merged.carryIsGift = true
+                        merged.giftSecondsOut = (merged.giftSecondsOut ?? 0) + grant
                     case .grant:
                         // A parent's remote grant is MINTED, not spent from a pocket.
                         grant = requestedSeconds

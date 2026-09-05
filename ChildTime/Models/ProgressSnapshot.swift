@@ -124,6 +124,19 @@ struct ProgressSnapshot: Codable, Equatable {
         parentGiftMinutes = max(0, (giftSecondsIn ?? 0) - (giftSecondsOut ?? 0)) / 60
     }
 
+    /// The balance to SHOW anywhere. Always prefers the counters; the legacy
+    /// minute fields are consulted only for a snapshot written before they
+    /// existed. Every reader must use these — reading the raw mirror is what let
+    /// a dashboard display 0 while the counters beside it held 30 minutes.
+    var walletMinutesShown: Int {
+        (earnedSecondsIn == nil && earnedSecondsOut == nil)
+            ? pendingMinutes : earnedSecondsAvailable / 60
+    }
+    var giftMinutesShown: Int {
+        (giftSecondsIn == nil && giftSecondsOut == nil)
+            ? (parentGiftMinutes ?? 0) : giftSecondsAvailable / 60
+    }
+
     var earnedSecondsAvailable: Int { max(0, (earnedSecondsIn ?? 0) - (earnedSecondsOut ?? 0)) }
     var giftSecondsAvailable: Int { max(0, (giftSecondsIn ?? 0) - (giftSecondsOut ?? 0)) }
 

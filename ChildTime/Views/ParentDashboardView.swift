@@ -76,7 +76,7 @@ struct ParentDashboardView: View {
             // Fold in any parent minute grant still in flight to the child's device,
             // so a +10/−5 shows immediately and doesn't appear to "revert".
             let adj = remote.pendingAdjustments[row.profile.id, default: 0]
-            if adj != 0 { snap.pendingMinutes = max(0, snap.pendingMinutes + adj) }
+            if adj != 0 { snap.pendingMinutes = max(0, snap.walletMinutesShown + adj) }
             return (row.profile, snap)
         }
         // Stable order so the grid never reshuffles when a child starts/stops
@@ -1036,7 +1036,7 @@ struct ParentDashboardView: View {
                     let earnedLive = liveSecs > 0 && !liveIsGift
                     let giftLive = liveSecs > 0 && liveIsGift
                     statCell(emoji: "🎮",
-                             value: earnedLive ? formatTime(liveSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—"),
+                             value: earnedLive ? formatTime(liveSecs) : (s.walletMinutesShown > 0 ? "\(s.walletMinutesShown)" : "—"),
                              label: earnedLive
                                 ? "זמן מסך פתוח"
                                 : (profile.gender == .girl ? "דק' שהרוויחה" : "דק' שהרוויח"))
@@ -1171,7 +1171,7 @@ struct ParentDashboardView: View {
             HStack(spacing: 6) {
                 Image(systemName: "wallet.pass")
                     .foregroundStyle(.secondary)
-                Text("🎮 \(s.pendingMinutes) דק' \(profile.gender == .girl ? "הרוויחה" : "הרוויח") מלמידה  ·  💝 \(giftShown) דק' מתנה מכם")
+                Text("🎮 \(s.walletMinutesShown) דק' \(profile.gender == .girl ? "הרוויחה" : "הרוויח") מלמידה  ·  💝 \(giftShown) דק' מתנה מכם")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -1282,7 +1282,7 @@ struct ParentDashboardView: View {
         let liveIsGift = live?.isManual ?? false
         let earnedLive = liveSecs > 0 && !liveIsGift
         let giftLive = liveSecs > 0 && liveIsGift
-        let available = earnedLive ? formatTime(liveSecs) : (s.pendingMinutes > 0 ? "\(s.pendingMinutes)" : "—")
+        let available = earnedLive ? formatTime(liveSecs) : (s.walletMinutesShown > 0 ? "\(s.walletMinutesShown)" : "—")
         return VStack(spacing: 8) {
             ZStack(alignment: .topTrailing) {
                 ProfileAvatarView(profile: profile, size: 62)
@@ -2356,7 +2356,7 @@ struct ParentDashboardView: View {
         // frozenSeconds is NOT added — a stale row from a device that hasn't
         // updated/come online would otherwise double-count or haunt the tile
         // (Dan: 29 real + a phantom 121 from an old-build phone).
-        max(0, (s.parentGiftMinutes ?? 0) + remote.pendingGifts[profile.id, default: 0])
+        max(0, s.giftMinutesShown + remote.pendingGifts[profile.id, default: 0])
     }
 
     /// 💝 Give minutes — into the child's separate GIFT pocket (never the earned
