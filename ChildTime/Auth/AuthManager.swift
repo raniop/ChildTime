@@ -42,6 +42,41 @@ final class AuthManager: ObservableObject {
     /// sign-in screen. To still get a uid (needed to join the family + sync), we
     /// sign it in ANONYMOUSLY in the background. Requires the "Anonymous"
     /// provider to be enabled in the Firebase console (Authentication → Sign-in).
+    /// Marks that this INSTALL has been set up. Lives in UserDefaults, which app
+    /// deletion clears — unlike the Keychain, where Firebase keeps the signed-in
+    /// user. Their difference is the whole point: see `dropSessionIfReinstalled`.
+    private static let installMarkKey = "auth.installMarked"
+
+    /// Deleting the app does NOT sign the device out.
+    ///
+    /// Firebase persists the account in the Keychain, and iOS leaves the Keychain
+    /// alone when an app is deleted — so a "fresh install" silently signs back in
+    /// as the same anonymous user and is placed in whatever family that account
+    /// belongs to. A device wiped and handed to a different child came back up
+    /// inside a DIFFERENT family, bound to a child nobody chose. Deleting the app
+    /// was, perversely, less thorough than the in-app "התנתק ומחק מהמכשיר".
+    ///
+    /// So: no local marker + a live session means the app was reinstalled. Drop
+    /// the session and let the device be set up from scratch, which is what
+    /// deleting an app is universally understood to mean.
+    func dropSessionIfReinstalled() async {
+        #if canImport(FirebaseAuth)
+        let d = UserDefaults.standard
+        guard !d.bool(forKey: Self.installMarkKey) else { return }
+        d.set(true, forKey: Self.installMarkKey)
+        guard let user = Auth.auth().currentUser else { return }
+        // Only an ANONYMOUS session is dropped. A parent signed in with Apple or
+        // Google reinstalled the app expecting to find their family waiting.
+        guard user.isAnonymous else { return }
+        TofyLink("reinstall detected — leaving the old family and dropping the session")
+        // Clean up in the CLOUD first, while we still have permission to: leave
+        // the household and delete this install's device rows. Otherwise the
+        // family keeps listing a member that no longer exists anywhere.
+        await HouseholdManager.shared.leaveAllHouseholdsForThisAccount()
+        signOut()
+        #endif
+    }
+
     func signInAnonymouslyIfNeeded() {
         #if canImport(FirebaseAuth)
         // Check the LIVE Firebase session, not just the cached userID: a child

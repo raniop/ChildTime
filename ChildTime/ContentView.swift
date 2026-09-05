@@ -161,7 +161,13 @@ struct ContentView: View {
         if let joined = settings.joinedChildID, let cid = UUID(uuidString: joined),
            profiles.profiles.contains(where: { $0.id == cid }) {
             childPlay(cid: cid)
-                .task { auth.signInAnonymouslyIfNeeded() }
+                .task {
+                    // Before signing in: if the app was deleted and reinstalled,
+                    // the Keychain still holds the old anonymous account and would
+                    // put this device straight back into its previous family.
+                    await auth.dropSessionIfReinstalled()
+                    auth.signInAnonymouslyIfNeeded()
+                }
         } else if !auth.isSignedIn {
             // Not bound (or profile not local yet) — joining requires a uid.
             ChildAuthLoadingView()

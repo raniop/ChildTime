@@ -66,20 +66,36 @@ enum WhatsNewContent {
     // first launch after updating shows the notes exactly once — which is right.
     private static let seenKey = "whatsNew.shownForBuild"
 
+    /// A TestFlight build carries a sandbox receipt; the App Store one does not.
+    private static var isTestFlight: Bool {
+        Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+    }
+
+    /// What "already seen" is measured against.
+    ///
+    /// Real parents should see the notes once per RELEASE — not on every internal
+    /// upload, which is why this moved off the build number. But a release goes
+    /// through a dozen TestFlight builds while it is being tested, and whoever is
+    /// testing needs to see the sheet on each of them. So: per build on
+    /// TestFlight, per version on the App Store.
+    static var seenToken: String {
+        isTestFlight ? "\(currentVersion) (\(AppInfo.build))" : currentVersion
+    }
+
     /// Show once per version — and never on a fresh install (nothing is "new").
     @MainActor
     static var shouldShow: Bool {
         let d = UserDefaults.standard
         guard let seen = d.string(forKey: seenKey) else {
-            d.set(currentVersion, forKey: seenKey)   // fresh install → just record
+            d.set(seenToken, forKey: seenKey)   // fresh install → just record
             return false
         }
-        return seen != currentVersion && items(for: currentVersion) != nil
+        return seen != seenToken && items(for: currentVersion) != nil
     }
 
     @MainActor
     static func markShown() {
-        UserDefaults.standard.set(currentVersion, forKey: seenKey)
+        UserDefaults.standard.set(seenToken, forKey: seenKey)
     }
 }
 

@@ -1316,6 +1316,35 @@ final class HouseholdManager: ObservableObject {
     /// code (Keychain), drop the binding → RolePicker — WITHOUT deleting the cloud
     /// family (sign back in to restore). For "start this device over" without
     /// nuking everyone, unlike `deleteEverything()`.
+    /// Leave every household this device's account belongs to, and drop its
+    /// device rows — while still signed in, because after signing out we have no
+    /// permission to clean up after ourselves.
+    ///
+    /// Without this, dropping the session on reinstall only fixes THIS device:
+    /// the account stays listed in the family's `parentUIDs` and its device rows
+    /// linger, so the family keeps showing a member that no longer exists.
+    func leaveAllHouseholdsForThisAccount() async {
+        #if canImport(FirebaseFirestore)
+        guard let uid else { return }
+        do {
+            let mine = try await db.collection("households")
+                .whereField("parentUIDs", arrayContains: uid).getDocuments()
+            for doc in mine.documents {
+                try? await doc.reference.updateData([
+                    "parentUIDs": FieldValue.arrayRemove([uid]),
+                ])
+                TofyLink("left household \(doc.documentID.prefix(8)) on reinstall")
+            }
+            // …and this install's own device rows, child and parent alike.
+            let rows = try await db.collection("childDevices")
+                .whereField("deviceID", isEqualTo: DeviceIdentity.installID).getDocuments()
+            for r in rows.documents { try? await r.reference.delete() }
+        } catch {
+            TofyLink("leaveAllHouseholdsForThisAccount failed: \(error.localizedDescription)")
+        }
+        #endif
+    }
+
     func resetThisDevice() {
         let s = ParentSettings.shared
         #if canImport(FirebaseFirestore)
