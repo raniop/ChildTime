@@ -380,6 +380,17 @@ extension ProgressSnapshot {
         m.varietyBonusDate = laterDate(local.varietyBonusDate, remote.varietyBonusDate)
         m.hourlyAnswered = mergeHourly(local.hourlyAnswered, remote.hourlyAnswered)
         m.hourlyCorrect  = mergeHourly(local.hourlyCorrect, remote.hourlyCorrect)
+        // The legacy minute fields are LWW, so a device whose counters are behind
+        // can win them and publish a balance that contradicts the counters — and
+        // the parent dashboard reads exactly those fields. Re-derive them from the
+        // merged counters so the mirror can never disagree with the truth.
+        //
+        // Only once a counter exists: a snapshot from before this model has none,
+        // and deriving from nothing would wipe a real balance.
+        if m.earnedSecondsIn != nil || m.earnedSecondsOut != nil
+            || m.giftSecondsIn != nil || m.giftSecondsOut != nil {
+            m.syncWalletMirrors()
+        }
         return m
     }
 

@@ -125,7 +125,7 @@ final class ProgressStore: ObservableObject {
         giftSecondsIn = max(0, giftMinutes) * 60
     }
 
-    private func recomputeWallets() {
+    func recomputeWallets() {
         guard !isRecomputingWallets else { return }
         isRecomputingWallets = true
         pendingMinutes = earnedSecondsAvailable / 60
@@ -2196,6 +2196,12 @@ final class ProgressStore: ObservableObject {
             revision = s.revision
             noteAdoptedGeneration(s.revision)
             lastModifiedAt = s.lastModifiedAt
+            // LAST word: the balance comes from the counters, never from the
+            // snapshot's legacy minute fields. Those are a mirror written by
+            // whoever last won a last-write-wins field, so a device whose counters
+            // are behind can publish a balance that contradicts them — which is
+            // how a 30-minute gift landed in the counters and still showed 0.
+            if s.earnedSecondsIn != nil || s.giftSecondsIn != nil { recomputeWallets() }
         }
         pendingMinutes      = s.pendingMinutes
         totalCorrect        = s.totalCorrect
