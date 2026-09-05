@@ -123,7 +123,15 @@ final class ProgressVault {
             // debounced upload would fire later for the NEW active kid, leaving the
             // outgoing kid's just-banked leftover only in the vault (where the next
             // cloud echo overwrites it).
-            if switching { RemoteSyncManager.shared.pushNow() }
+            // …but never from a parent's MONITOR device. A parent tapping between
+            // children in the dashboard switches profiles constantly, and each
+            // switch would upload that device's cached copy of the outgoing child.
+            // The cache is a view, not a source of truth — if it is ever wrong,
+            // this is a second door for it to escape through. Deliberate parent
+            // actions (±minutes, gift, reset) push through their own paths.
+            let mayPush = ParentSettings.shared.deviceRole != .parent
+                || KidModeManager.shared.active
+            if switching, mayPush { RemoteSyncManager.shared.pushNow() }
         }
         // 2. Apply incoming snapshot
         let incoming = snapshot(for: profileID)
