@@ -89,8 +89,15 @@ final class ProgressVault {
             }
             ProgressStore.shared.stashDeviceLocalPlayState(for: outgoing)
         }
-        // 1. Save the outgoing profile
-        if let outgoing = boundProfileID {
+        // 1. Save the outgoing profile — but ONLY if the live store really is
+        //    holding their data. If a previous switch was interrupted, or the
+        //    store was rebound elsewhere, `captureSnapshot()` returns some OTHER
+        //    child's progress, and writing it under `outgoing` copies one child
+        //    onto another. Accumulators merge by `max`, so that copy then
+        //    ratchets the sibling's stars up permanently and cannot be undone
+        //    from the cloud. Skipping the save loses at most the last few seconds;
+        //    writing the wrong child's data is unrecoverable.
+        if let outgoing = boundProfileID, ProgressStore.shared.holdsData(for: outgoing) {
             write(ProgressStore.shared.captureSnapshot(), for: outgoing)
             // …and push it NOW while `activeID` is still the outgoing kid: the
             // debounced upload would fire later for the NEW active kid, leaving the
@@ -101,7 +108,9 @@ final class ProgressVault {
         // 2. Apply incoming snapshot
         let incoming = snapshot(for: profileID)
         ProgressStore.shared.apply(incoming)
-        // 3. Bind
+        // 3. Bind — the store now holds THIS child's data, and says so. Every
+        //    path that writes it out (vault save, cloud upload) checks this.
+        ProgressStore.shared.bind(to: profileID)
         boundProfileID = profileID
         // 3b. Restore the incoming kid's own frozen parent time (if any) —
         //     only on a real switch (see step 0)…

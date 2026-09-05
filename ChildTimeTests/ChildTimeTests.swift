@@ -742,3 +742,35 @@ struct WorldOrderTests {
         #expect(a != b)
     }
 }
+
+
+// MARK: - 🧬 Child data ownership
+//
+// A real family had one child's stars written into their sibling's document.
+// Accumulators merge by `max`, so the sibling's numbers ratcheted up permanently
+// and no cloud-side restore could bring them down. The store now carries its
+// owner, and every write-out checks it.
+
+@MainActor
+@Suite("Child data ownership")
+struct DataOwnershipTests {
+
+    @Test("a bound store only ever claims to hold that child's data")
+    func bindingIsExclusive() {
+        let a = UUID(), b = UUID()
+        let p = ProgressStore.shared
+        p.bind(to: a)
+        #expect(p.holdsData(for: a))
+        #expect(!p.holdsData(for: b))   // the write to b's document is refused
+        p.bind(to: b)
+        #expect(p.holdsData(for: b))
+        #expect(!p.holdsData(for: a))
+    }
+
+    @Test("an unbound store refuses every child — it holds someone else's leftovers")
+    func unboundRefuses() {
+        let p = ProgressStore.shared
+        p.bind(to: nil)
+        #expect(!p.holdsData(for: UUID()))
+    }
+}

@@ -652,6 +652,17 @@ final class RemoteSyncManager: ObservableObject {
 
     private func uploadActiveProfile() {
         guard let pid = ProfileStore.shared.activeID else { return }
+        // THE path comes from ProfileStore and THE payload from ProgressStore —
+        // two separate globals, read at two different moments, with a 3-second
+        // debounce in between. Whenever they disagree, this writes one child's
+        // progress into another child's document; because accumulators merge by
+        // `max`, the sibling's stars are then raised permanently and no cloud-side
+        // restore can bring them back down. Refuse instead: the correct child's
+        // own edits will schedule their own upload.
+        guard ProgressStore.shared.holdsData(for: pid) else {
+            SyncLog.error("upload REFUSED: store holds \(ProgressStore.shared.belongsTo?.uuidString.prefix(8) ?? "nothing") but active is \(pid.uuidString.prefix(8))")
+            return
+        }
         // Capture local state on the calling (main) thread, then MERGE it into the
         // cloud doc inside a transaction. A plain setData(merge:) was a BLIND
         // overwrite — a stale local push (e.g. the `pushNow()` on launch, before

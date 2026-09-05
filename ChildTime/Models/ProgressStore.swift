@@ -1485,6 +1485,37 @@ final class ProgressStore: ObservableObject {
         (gift ? parentGiftMinutes : pendingMinutes) * 60 + (carryIsGift == gift ? pendingSecondsCarry : 0)
     }
 
+    /// WHICH CHILD the live data in this store belongs to.
+    ///
+    /// Everything here is one global mutable store, and the code that decides
+    /// WHERE to write (`ProfileStore.activeID`, or a `for:` argument) is separate
+    /// from the code that decides WHAT to write (`captureSnapshot()`). Those two
+    /// are read at different moments, so any gap between them — a profile switch,
+    /// a Kid Mode entry, a debounced upload firing late, a switch interrupted
+    /// half-way — can write one child's progress into another child's document.
+    ///
+    /// That is not hypothetical: it happened to a real family, and because
+    /// accumulators merge by `max`, the sibling's stars ratcheted up permanently
+    /// and could not be undone from the cloud.
+    ///
+    /// So the data carries its owner. Every path that writes this store OUT must
+    /// check `belongsTo` first and refuse when it does not match.
+    private(set) var belongsTo: UUID? = {
+        // On launch the live store holds whatever was persisted for the profile
+        // that was active when the app last ran — `profiles.activeID` records
+        // exactly who that was. Binding to it here matters: `ProfileStore` only
+        // calls `switchTo` on the NEXT main-loop turn, and until then an unbound
+        // store would refuse every upload and sync would silently die.
+        UserDefaults.standard.string(forKey: "profiles.activeID").flatMap(UUID.init(uuidString:))
+    }()
+
+    func bind(to profileID: UUID?) { belongsTo = profileID }
+
+    /// True when this store's live data really is `id`'s, and may be written to
+    /// `id`'s document. Refuses when nothing is bound — a store that has never
+    /// been bound holds whatever the last profile left behind.
+    func holdsData(for id: UUID) -> Bool { belongsTo == id }
+
     /// Attach a lease we won retroactively for an already-open window.
     func adoptLeaseID(_ id: String) { if isUnlocked { activeLeaseID = id } }
 
