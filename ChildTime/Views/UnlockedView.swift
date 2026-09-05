@@ -17,8 +17,8 @@ struct UnlockedView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 14, size: 14)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             VStack(spacing: AppSpacing.xl) {
                 Spacer()
@@ -26,28 +26,32 @@ struct UnlockedView: View {
                 Text("🎮")
                     .font(.system(size: heroEmojiSize))
                     .float()
-                    .glow(AppColor.successMint, radius: 24)
+                    .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
 
                 Text("זְמַן מִשְׂחָק!")
-                    .font(.system(size: titleSize, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .glow(AppColor.successMint, radius: 14)
+                    .font(.system(size: titleSize, weight: .black, design: .rounded))
+                    .foregroundStyle(GlassInk.primary)
+                    .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
 
+                // The countdown on one glass pane (the same glass as every screen).
                 VStack(spacing: AppSpacing.md) {
                     Text("נוֹתְרוּ")
-                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.7))
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
                     timerRow
                 }
                 .padding(.horizontal, AppSpacing.lg)
-                .padding(.vertical, AppSpacing.xl)
-                .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.huge, style: .continuous))
+                .padding(.vertical, AppSpacing.lg)
+                .frame(maxWidth: 480)
+                .glassPane(radius: 28)
 
                 Text("עַכְשָׁיו אֶפְשָׁר לַעֲבוֹר לָאַפְּלִיקַצְיָה שֶׁ\(Gendered.g("אַתָּה רוֹצֶה", "אַתְּ רוֹצָה")) לְשַׂחֵק בָּהּ 🚀")
-                    .font(.system(size: 20, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
+                    .font(.system(size: 14.5, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.horizontal, AppSpacing.lg).padding(.vertical, 10)
+                    .frame(maxWidth: 480)
+                    .glassInset(radius: 16)
 
                 Spacer()
 
@@ -59,13 +63,16 @@ struct UnlockedView: View {
                     endEarly()
                 } label: {
                     Text(progress.unlockIsManual ? "עֲצֹר וּשְׁמֹר אֶת הַזְּמַן 💝" : "סִיַּמְתִּי לְשַׂחֵק")
-                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, AppSpacing.xl)
-                        .padding(.vertical, AppSpacing.md)
-                        .background(.white.opacity(0.18), in: Capsule())
+                        .padding(.vertical, 16)
+                        .frame(maxWidth: .infinity)
+                        .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
                 }
                 .buttonStyle(.juicy)
+                .frame(maxWidth: 480)
+                .padding(.horizontal, AppSpacing.lg)
                 .padding(.bottom, AppSpacing.xxl)
             }
 
@@ -136,15 +143,15 @@ struct UnlockedView: View {
     private func timeColumn(_ value: Int, _ label: String) -> some View {
         VStack(spacing: 4) {
             Text(String(format: "%02d", value))
-                .font(.system(size: timerSize, weight: .bold, design: .monospaced))
-                .foregroundStyle(.white)
-                .glow(AppColor.starGold, radius: 12)
+                .font(.system(size: timerSize, weight: .black, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .monospacedDigit()
                 .contentTransition(.numericText())
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
             Text(label)
-                .font(.system(size: isCompact ? 15 : 18, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.7))
+                .font(.system(size: isCompact ? 13 : 15, weight: .semibold, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
@@ -154,8 +161,8 @@ struct UnlockedView: View {
     /// up with the numbers, not the unit labels below them.
     private var timerColon: some View {
         Text(":")
-            .font(.system(size: timerSize, weight: .bold, design: .monospaced))
-            .foregroundStyle(.white.opacity(0.8))
+            .font(.system(size: timerSize, weight: .black, design: .rounded))
+            .foregroundStyle(GlassInk.secondary)
             .lineLimit(1)
             .minimumScaleFactor(0.5)
     }
