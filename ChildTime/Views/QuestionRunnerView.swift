@@ -315,6 +315,11 @@ struct QuestionRunnerView: View {
                 .buttonStyle(.plain)
                 Spacer(minLength: 0)
                 quizChip {
+                    Text("💎 \(progress.diamonds.currencyShort)")
+                        .foregroundStyle(AppColor.diamondBlue)
+                        .numericTextTransition(Double(progress.diamonds))
+                }
+                quizChip {
                     Text("⭐ \(progress.stars.currencyShort)")
                         .foregroundStyle(AppColor.starGold)
                         .numericTextTransition(Double(progress.stars))
@@ -355,7 +360,7 @@ struct QuestionRunnerView: View {
         let secs = min(target, Int(progress.cycleSeconds.rounded()))
         let frac = target > 0 ? min(1, Double(secs) / Double(target)) : 0
         HStack(spacing: 10) {
-            Text("🎮").font(.system(size: 15))
+            Image(systemName: "timer").font(.system(size: 15, weight: .bold)).foregroundStyle(.white.opacity(0.9))
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule().fill(.white.opacity(0.18))
@@ -367,7 +372,7 @@ struct QuestionRunnerView: View {
                 }
             }
             .frame(height: 8)
-            Text(timeString(secs))
+            Text("+\(secs) שְׁנִ׳")
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .monospacedDigit()
@@ -489,15 +494,6 @@ struct QuestionRunnerView: View {
         // controls at its ends), the passage / prompt, "בחרו תשובה אחת".
         VStack(spacing: 12) {
             HStack(spacing: 8) {
-                cardIconButton(system: "speaker.wave.2.fill",
-                               fg: .white,
-                               bg: .white.opacity(0.22)) {
-                    Haptic.light()
-                    // For a passage question, read the passage first — one
-                    // utterance, so the two don't cut each other off.
-                    let spokenPrompt = (q.passage.map { $0 + ". " } ?? "") + q.readAloudText
-                    SpeechReader.shared.readQuestion(prompt: spokenPrompt, options: q.options)
-                }
                 Spacer(minLength: 4)
                 HStack(spacing: 8) {
                     Text(q.topic.emoji).font(.system(size: topicEmojiSize))
@@ -525,11 +521,6 @@ struct QuestionRunnerView: View {
                 }
                 .lineLimit(1).minimumScaleFactor(0.7)
                 Spacer(minLength: 4)
-                cardIconButton(system: "flag",
-                               fg: .white.opacity(0.7),
-                               bg: .white.opacity(0.14)) {
-                    showReportConfirm = true
-                }
             }
 
             // 📖 The passage card — the child reads here, then answers below.
@@ -611,25 +602,50 @@ struct QuestionRunnerView: View {
         VStack(spacing: AppSpacing.md) {
             optionsGrid(for: q)
 
-            // Mockup `.streak`: "🔥 3 ברצף" in gold under the answers.
+            // Mockup `.streak`: "🔥 3 ברצף · עוד 2 ובונוס!" in gold under the answers.
             if progress.currentStreak >= 2 {
-                Text("🔥 \(progress.currentStreak) בְּרֶצֶף!")
+                let left = max(0, progress.cycleQuestionsTotal - progress.cycleQuestionsDone)
+                Text("🔥 \(progress.currentStreak) בְּרֶצֶף" + (earnsTime && left > 0 ? " · עוֹד \(left) וּבוֹנוּס!" : "!"))
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
                     .contentTransition(.numericText())
+            }
+            // Mockup `.hint`: what a right answer is worth, as a glass line.
+            if earnsTime {
+                Text("💡 כָּל תְּשׁוּבָה נְכוֹנָה = \(progress.secondsPerCorrect) שְׁנִיּוֹת שֶׁל מִשְׂחָק")
+                    .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 9).padding(.horizontal, 12)
+                    .glassInset(radius: 14)
+                    .padding(.horizontal, AppSpacing.md)
             }
 
             // Hint shows whenever it's payable; wand only after 2 wrong picks.
             // Fixed height so the layout never jumps when these appear/disappear
             // (e.g. the hint hides the moment the answer is locked in).
             HStack(spacing: AppSpacing.md) {
+                cardIconButton(system: "flag", fg: .white.opacity(0.7), bg: .white.opacity(0.14)) {
+                    showReportConfirm = true
+                }
+                Spacer(minLength: 0)
                 if !showFeedback {
                     hintButton(for: q)
                 }
                 if consecutiveWrong >= 2 && !showFeedback {
                     magicWandButton
                 }
+                Spacer(minLength: 0)
+                cardIconButton(system: "speaker.wave.2.fill", fg: .white, bg: .white.opacity(0.22)) {
+                    Haptic.light()
+                    // For a passage question, read the passage first — one
+                    // utterance, so the two don't cut each other off.
+                    let spokenPrompt = (q.passage.map { $0 + ". " } ?? "") + q.readAloudText
+                    SpeechReader.shared.readQuestion(prompt: spokenPrompt, options: q.options)
+                }
             }
+            .padding(.horizontal, AppSpacing.md)
             .frame(maxWidth: .infinity)
             .frame(height: 56)
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: consecutiveWrong)

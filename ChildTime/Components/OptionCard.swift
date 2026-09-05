@@ -50,7 +50,7 @@ struct OptionCard: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                Text(text)
+                Text((feedback == .correct || feedback == .revealed ? "✓ " : "") + text)
                     .font(.system(size: fontSize, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)   // tidy 2-word answers that wrap
@@ -60,9 +60,9 @@ struct OptionCard: View {
                     .frame(maxWidth: .infinity, minHeight: minHeight)
                     .padding(.horizontal, 12)
 
-                // Number badge (1-4) — so the read-aloud can say "answer 2" and
-                // the child knows which tile to tap. Top-leading corner.
-                VStack {
+                // Number badge (1-4) — kept for the read-aloud ("answer 2"), but
+                // not drawn: the approved glass answers are clean panes.
+                if false { VStack {
                     HStack {
                         Text("\(index + 1)")
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
@@ -74,7 +74,7 @@ struct OptionCard: View {
                     }
                     Spacer()
                 }
-                .padding(8)
+                .padding(8) }
 
                 // Hint badge — only on eliminated options. Top-TRAILING corner so
                 // it never sits on top of the number badge.
