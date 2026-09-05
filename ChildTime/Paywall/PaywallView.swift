@@ -35,12 +35,8 @@ struct PaywallView: View {
 
     private var paywallBody: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            FloatingOrbs(
-                colors: [AppColor.starGold, AppColor.companionGlow, AppColor.gemPurple],
-                count: 6, maxSize: 280, opacity: 0.4
-            )
-            SparkleField(count: 24, size: 14)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
             StarBurst(count: 14, color: AppColor.starGold, trigger: burst)
             FancyConfetti(trigger: successConfetti)
 
@@ -88,9 +84,9 @@ struct PaywallView: View {
                 Image(systemName: "xmark")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
-                    .frame(width: 38, height: 38)
-                    .background(.white.opacity(0.18), in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
+                    .frame(width: 40, height: 40)
+                    .background(.white.opacity(0.22), in: Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
             }
             .environment(\.layoutDirection, .leftToRight)
             Spacer()
@@ -113,23 +109,16 @@ struct PaywallView: View {
             .padding(.top, isCompact ? 10 : 24)
 
             Text("טופי+")
-                .font(.system(size: isCompact ? 52 : 72, weight: .heavy, design: .rounded))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FFE082")],
-                        startPoint: .top, endPoint: .bottom
-                    )
-                )
-                .shadow(color: AppColor.starGold.opacity(0.6), radius: 16)
-                .shadow(color: .black.opacity(0.25), radius: 3, y: 2)
+                .font(.system(size: isCompact ? 44 : 60, weight: .black, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .shadow(color: .black.opacity(0.2), radius: 8, y: 3)
                 .scaleEffect(headerAppeared ? 1 : 0.5)
                 .opacity(headerAppeared ? 1 : 0)
 
             Text("חוויה מלאה — לכל הילדים בבית")
                 .font(.system(size: isCompact ? 17 : 20, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.9))
+                .foregroundStyle(GlassInk.secondary)
                 .multilineTextAlignment(.center)
-                .shadow(color: .black.opacity(0.25), radius: 3)
                 .opacity(headerAppeared ? 1 : 0)
                 .offset(y: headerAppeared ? 0 : 12)
         }
@@ -151,15 +140,7 @@ struct PaywallView: View {
         }
         .padding(.vertical, AppSpacing.md)
         .padding(.horizontal, AppSpacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .fill(.white.opacity(0.12))
-                .overlay(
-                    RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                        .stroke(.white.opacity(0.22), lineWidth: 1)
-                )
-        )
-        .shadow(color: .black.opacity(0.18), radius: 14, y: 4)
+        .glassPane(radius: 22)
     }
 
     private func benefitRow(_ emoji: String, _ title: String, _ subtitle: String) -> some View {
@@ -259,18 +240,13 @@ struct PaywallView: View {
             }
             .padding(.horizontal, AppSpacing.md)
             .padding(.vertical, AppSpacing.md)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                    .fill(.white.opacity(isSelected ? 0.20 : 0.10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                            .stroke(
-                                isSelected ? AppColor.successMint : .white.opacity(0.20),
-                                lineWidth: isSelected ? 2.5 : 1
-                            )
-                    )
-            )
-            .glow(isSelected ? AppColor.successMint : .clear, radius: isSelected ? 12 : 0)
+            .glassPane(radius: 22, strength: isSelected ? 0.18 : 0.10, tint: isSelected ? Color(hex: "8CFFC4") : nil)
+            .overlay {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .strokeBorder(Color(hex: "8CFFC4").opacity(0.9), lineWidth: 2)
+                }
+            }
         }
         .buttonStyle(.juicy)
     }
@@ -303,7 +279,7 @@ struct PaywallView: View {
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 16).padding(.vertical, 8)
-                        .background(.white.opacity(0.18), in: Capsule())
+                        .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
                 .padding(.top, 4)
             }
@@ -318,10 +294,7 @@ struct PaywallView: View {
         }
         .frame(maxWidth: .infinity, minHeight: 120)
         .padding(.vertical, AppSpacing.sm)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .fill(.white.opacity(0.10))
-        )
+        .glassPane(radius: 22)
     }
 
     // MARK: - Primary CTA
@@ -332,7 +305,7 @@ struct PaywallView: View {
         let isDisabled = subs.products.isEmpty || subs.isPurchasing
 
         return VStack(spacing: 6) {
-            JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
+            Button {
                 if let product = subs.products.first(where: { $0.id == selectedID }) {
                     Task { await subs.purchase(product) }
                 }
@@ -340,14 +313,21 @@ struct PaywallView: View {
                 HStack(spacing: 8) {
                     if subs.isPurchasing {
                         ProgressView()
-                            .tint(.white)
+                            .tint(Color(hex: "4B3FBF"))
                     } else {
                         Image(systemName: "sparkles")
                         Text(cta)
                     }
                 }
-                .font(.system(size: 22, weight: .heavy, design: .rounded))
+                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color(hex: "4B3FBF"))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.white.opacity(0.92)))
+                .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
             }
+            .buttonStyle(.juicy)
+            .frame(maxWidth: 480)
             .opacity(isDisabled ? 0.55 : 1)
             .disabled(isDisabled)
 
