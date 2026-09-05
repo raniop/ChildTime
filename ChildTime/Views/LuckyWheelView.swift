@@ -147,6 +147,7 @@ struct LuckyWheelView: View {
                 .frame(width: wheelSize * 0.18, height: wheelSize * 0.18)
                 .overlay(Circle().stroke(.white.opacity(0.7), lineWidth: 2))
                 .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
+                .overlay(Text("🎡").font(.system(size: wheelSize * 0.10)))
 
             // Indicator arrow at the top of the wheel
             VStack {

@@ -39,8 +39,9 @@ enum LuckyWheelCatalog {
         WheelPrize(kind: .stars(150),        label: "+150 כּוֹכָבִים!", emoji: "🌟", color: Color(hex: "F59E0B")),
         WheelPrize(kind: .rareItem("hat_crown"),
                                               label: "כֶּתֶר זָהָב!",     emoji: "👑", color: Color(hex: "FFD166")),
-        WheelPrize(kind: .rareItem("hat_unicorn"),
-                                              label: "קֶרֶן חַד-קֶרֶן!", emoji: "🦄", color: Color(hex: "9B5DE5")),
+        // (The unicorn-horn cosmetic left the wheel — Rani: a kid should win
+        // something real here. The big diamond jackpot took its wedge.)
+        WheelPrize(kind: .diamonds(100),     label: "100 יַהֲלוֹמִים!", emoji: "💎", color: Color(hex: "9B5DE5")),
 
         // 💎 Diamonds — the spendable shop wallet (kids buy characters with these).
         WheelPrize(kind: .diamonds(10),      label: "10 יַהֲלוֹמִים",   emoji: "💎", color: Color(hex: "4CC9F0")),
