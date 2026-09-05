@@ -34,12 +34,14 @@ struct ChildDifficultyView: View {
                                 applyToAll(d)
                             } label: {
                                 Text(d.displayName)
-                                    .font(.subheadline.weight(.semibold))
+                                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.white)
                                     .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 8)
+                                    .padding(.vertical, 9)
+                                    .background(Capsule().fill(.white.opacity(0.14)))
+                                    .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                             }
-                            .buttonStyle(.bordered)
-                            .tint(.accentColor)
+                            .buttonStyle(.plain)
                         }
                     }
                 } header: {

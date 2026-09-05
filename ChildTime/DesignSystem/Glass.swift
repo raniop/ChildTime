@@ -91,7 +91,8 @@ extension View {
             )
             .background(GlassBackdrop())
             .environment(\.colorScheme, .dark)
-            .tint(.white)
+            // Mint controls: a white toggle "on" was indistinguishable from the pane.
+            .tint(GlassInk.good)
     }
 
     /// Legacy card subtrees: glass shell + dark scheme so their `.secondary`
