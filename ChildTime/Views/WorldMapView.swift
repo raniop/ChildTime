@@ -716,27 +716,29 @@ struct WorldMapView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        let avatarSize: CGFloat = isCompact ? 46 : 54
-        let btnSize: CGFloat = isCompact ? 42 : 46
+        let avatarSize: CGFloat = isCompact ? 52 : 60
+        let btnSize: CGFloat = isCompact ? 44 : 50
         // ONE glass pane holds the whole header (the approved "זכוכית" design):
         // identity + round glass nav buttons, the 4-stat strip, then the two
         // twin insets (daily challenge · chores). Forced LTR so the avatar sits
         // on the left and the buttons on the right, matching the mockup.
-        return VStack(spacing: 12) {
+        return VStack(spacing: 14) {
             HStack(alignment: .center, spacing: 10) {
                 identityBlock(avatar: avatarSize)
                 Spacer(minLength: 4)
                 navButtonsRow(size: btnSize)
             }
             statsPanel
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 dailyChallengeCard
                 choresTopCard
             }
             .fixedSize(horizontal: false, vertical: true)   // twins: same height, from content
         }
-        .environment(\.layoutDirection, .leftToRight)
-        .padding(14)
+        // RTL like the mockup (Rani): avatar + name on the RIGHT, the round
+        // buttons on the left with ⚙️ the leftmost; אתגר יומי right, מטלות left.
+        .environment(\.layoutDirection, .rightToLeft)
+        .padding(16)
         .glassPane(radius: 24)
         .padding(.top, AppSpacing.sm)
         .eraseToAnyView()
@@ -770,7 +772,7 @@ struct WorldMapView: View {
                         .frame(width: 44, height: 44)
                 }
                 Text("אֶתְגָּר יוֹמִי")
-                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .font(.system(size: 15.5, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(1).minimumScaleFactor(0.7)
                     .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
@@ -796,7 +798,7 @@ struct WorldMapView: View {
                         .glow(AppColor.starGold, radius: challengePulse ? 12 : 6)
                     } else {
                         Text("\(done) מִתּוֹךְ \(target) נְכוֹנוֹת")
-                            .font(.system(size: 11.5, weight: .bold, design: .rounded))
+                            .font(.system(size: 12.5, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.88))
                             .lineLimit(1).minimumScaleFactor(0.6)
                     }
@@ -807,7 +809,7 @@ struct WorldMapView: View {
                             glowColor: .clear, tip: nil)
             }
             .padding(.horizontal, 10)
-            .padding(.vertical, 10)
+            .padding(.vertical, 14)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .glassInset(radius: 18)
         }
@@ -945,7 +947,7 @@ struct WorldMapView: View {
                     Haptic.light(); showingChildSettings = true
                 } label: {
                     Text((profiles.active?.name ?? "טוֹפִי").split(separator: " ").first.map(String.init) ?? "טוֹפִי")
-                        .font(.system(size: isCompact ? 16 : 18, weight: .black, design: .rounded))
+                        .font(.system(size: isCompact ? 19 : 22, weight: .black, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .lineLimit(1).minimumScaleFactor(0.6)
                 }
@@ -958,7 +960,7 @@ struct WorldMapView: View {
                     // the sheet this line opens.
                     Text(Profile.gradeDisplayName(profiles.active?.effectiveGrade ?? 1)
                          + (progress.dayStreak > 0 ? " · 🔥 \(progress.dayStreak) יָמִים" : ""))
-                        .font(.system(size: 11.5, weight: .bold, design: .rounded))
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .lineLimit(1).minimumScaleFactor(0.7)
                 }
@@ -1035,7 +1037,7 @@ struct WorldMapView: View {
             statColumn(value: "\(progress.correctToday)", label: "✅ נְכוֹנוֹת", action: nil)
         }
         .environment(\.layoutDirection, .rightToLeft)
-        .padding(.vertical, 10)
+        .padding(.vertical, 13)
         .padding(.horizontal, 4)
         .glassInset(radius: 18)
         // One clean bottom sheet for the stat explanations (a popover floated
@@ -1050,7 +1052,7 @@ struct WorldMapView: View {
     }
 
     private var statDivider: some View {
-        Rectangle().fill(.white.opacity(0.16)).frame(width: 1, height: 30)
+        Rectangle().fill(.white.opacity(0.16)).frame(width: 1, height: 36)
     }
 
     private func statColumn(value: String, suffix: String? = nil, label: String,
@@ -1058,18 +1060,18 @@ struct WorldMapView: View {
         let content = VStack(spacing: 2) {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 Text(value)
-                    .font(.system(size: isCompact ? 17 : 21, weight: .black, design: .rounded))
+                    .font(.system(size: isCompact ? 20 : 24, weight: .black, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
                 if let suffix {
                     Text(suffix)
-                        .font(.system(size: isCompact ? 12 : 14, weight: .heavy, design: .rounded))
+                        .font(.system(size: isCompact ? 14 : 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(GlassInk.tertiary)
                 }
             }
             .monospacedDigit()
             .lineLimit(1).minimumScaleFactor(0.6)
             Text(label)
-                .font(.system(size: isCompact ? 10.5 : 12, weight: .bold, design: .rounded))
+                .font(.system(size: isCompact ? 12 : 13.5, weight: .bold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
                 .lineLimit(1).minimumScaleFactor(0.7)
         }
@@ -1747,7 +1749,7 @@ struct WorldMapView: View {
                     }
                 }
                 Text("מַטְלוֹת הַבַּיִת")
-                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .font(.system(size: 15.5, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(1).minimumScaleFactor(0.7)
                     .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
@@ -1755,7 +1757,7 @@ struct WorldMapView: View {
                     Text(pending > 0 ? (pending == 1 ? "אַחַת מְחַכָּה לְאִשּׁוּר" : "\(pending) מְחַכּוֹת לְאִשּׁוּר")
                          : doneToday > 0 ? "\(doneToday) הֻשְׁלְמוּ הַיּוֹם! 💪"
                          : "עוֹזְרִים — וּבוֹחֲרִים פְּרָס!")
-                        .font(.system(size: 11.5, weight: .bold, design: .rounded))
+                        .font(.system(size: 12.5, weight: .bold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.88))
                         .lineLimit(1).minimumScaleFactor(0.6)
                 }
@@ -1765,7 +1767,7 @@ struct WorldMapView: View {
                             glowColor: .clear, tip: nil)
             }
             .padding(.horizontal, 10)
-            .padding(.vertical, 10)
+            .padding(.vertical, 14)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .glassInset(radius: 18)
         }
