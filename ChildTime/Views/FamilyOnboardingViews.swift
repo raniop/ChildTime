@@ -11,8 +11,8 @@ struct FamilyChoiceView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 18, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
             VStack(spacing: AppSpacing.xl) {
                 VStack(spacing: AppSpacing.sm) {
                     Text("👋").font(.system(size: 54))
@@ -91,12 +91,7 @@ struct FamilyChoiceView: View {
                 }
             }
             .padding(AppSpacing.lg)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                    .fill(.white.opacity(0.14))
-                    .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                        .stroke(glow.opacity(0.55), lineWidth: 2))
-            )
+            .glassPane(radius: AppRadius.large)
         }
         .buttonStyle(.juicy)
     }
@@ -116,8 +111,8 @@ struct EmailInviteWelcomeView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 22, size: 13)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
             VStack(spacing: AppSpacing.xl) {
                 Text("🎉").font(.system(size: 64))
                 Text("\(familyName) מְחַכָּה לָכֶם!")
@@ -147,8 +142,7 @@ struct EmailInviteWelcomeView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    .glow(AppColor.starGold, radius: 14)
+                    .glassFill(AppGradient.gold, radius: 22)
                 }
                 .buttonStyle(.juicy)
                 .frame(maxWidth: 420)

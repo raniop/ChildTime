@@ -49,8 +49,8 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            background.ignoresSafeArea()
-            SparkleField(count: 20, size: 14)
+            background
+            SparkleField(count: 12, size: 11)
 
             switch step {
             case .welcome: welcomeView
@@ -72,22 +72,14 @@ struct OnboardingView: View {
         }
     }
 
-    private var background: LinearGradient {
-        AppGradient.dreamy
-    }
+    private var background: some View { GlassBackdrop() }
 
     // MARK: - Welcome
 
     private var welcomeView: some View {
         ZStack {
             // Extra magical background layers
-            FloatingOrbs(
-                colors: [AppColor.starGold, AppColor.companionGlow, AppColor.gemPurple, AppColor.dreamyTeal],
-                count: 7,
-                maxSize: 300,
-                opacity: 0.5
-            )
-            SparkleField(count: 40, size: 16)
+            SparkleField(count: 12, size: 11)
             FancyConfetti(trigger: welcomeConfettiTrigger)
             StarBurst(count: 14, color: AppColor.starGold, trigger: welcomeBurstTrigger)
 
@@ -111,12 +103,7 @@ struct OnboardingView: View {
                 VStack(spacing: 0) {
                     Text("טופי")
                         .font(.system(size: welcomeTitleSize, weight: .heavy, design: .rounded))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FFE082")],
-                                startPoint: .top, endPoint: .bottom
-                            )
-                        )
+                        .foregroundStyle(GlassInk.primary).shadow(color: .black.opacity(0.2), radius: 8, y: 3)
                         .shadow(color: AppColor.starGold.opacity(0.7), radius: 18)
                         .shadow(color: .black.opacity(0.25), radius: 4, y: 4)
                 }
@@ -226,7 +213,7 @@ struct OnboardingView: View {
                 )
             }
             .padding(.vertical, AppSpacing.sm)
-            .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: AppRadius.large))
+            .glassPane(radius: AppRadius.large, shadow: false)
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.large)
                     .stroke(.white.opacity(0.18), lineWidth: 1)
@@ -265,7 +252,6 @@ struct OnboardingView: View {
                     .font(.system(size: 26))
             }
             .frame(width: 52, height: 52)
-            .glow(tint, radius: 8)
 
             // In RTL, .leading = right edge — so the title text sits next to the icon
             VStack(alignment: .leading, spacing: 2) {
@@ -349,7 +335,7 @@ struct OnboardingView: View {
                         .foregroundStyle(.white.opacity(0.85))
                         .padding(.horizontal, AppSpacing.md)
                         .padding(.vertical, 6)
-                        .background(.white.opacity(0.18), in: Capsule())
+                        .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
             } else {
                 JuicyButton(gradient: AppGradient.castle, glowColor: AppColor.flameOrange) {
@@ -382,7 +368,7 @@ struct OnboardingView: View {
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 44, height: 44)
-                .background(.white.opacity(0.18), in: Circle())
+                .background(.white.opacity(0.22), in: Circle()).overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                 .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
         }
         .buttonStyle(.juicy)
@@ -405,7 +391,7 @@ struct OnboardingView: View {
         }
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, 10)
-        .background(.white.opacity(0.15), in: Capsule())
+        .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
         .overlay(Capsule().stroke(color.opacity(0.5), lineWidth: 1.5))
     }
 
@@ -490,7 +476,7 @@ struct OnboardingView: View {
             .font(.system(size: iconSize))
             .foregroundStyle(.white)
             .padding(AppSpacing.md)
-            .background(.white.opacity(0.18), in: Circle())
+            .background(.white.opacity(0.22), in: Circle()).overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
     }
 
     private func bulletItem(_ emoji: String, _ text: String) -> some View {
@@ -512,7 +498,7 @@ struct OnboardingView: View {
             .font(.system(size: 28, weight: .bold, design: .monospaced))
             .foregroundStyle(.white)
             .padding()
-            .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.medium))
+            .glassPane(radius: AppRadius.medium, shadow: false)
     }
 
     private func stepperButton(symbol: String, action: @escaping () -> Void) -> some View {
@@ -524,7 +510,7 @@ struct OnboardingView: View {
                 .font(.system(size: 32, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 80, height: 80)
-                .background(.white.opacity(0.18), in: Circle())
+                .background(.white.opacity(0.22), in: Circle()).overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
         }
         .buttonStyle(.juicy)
     }

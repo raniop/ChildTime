@@ -17,7 +17,7 @@ func rgb(_ hex: UInt32, _ a: CGFloat = 1) -> CGColor {
 
 // 1. gradient (#7A5CFF → #5E60CE → #3E8BF0), top-right → bottom-left
 let grad = CGGradient(colorsSpace: cs, colors: [rgb(0x7A5CFF), rgb(0x5E60CE), rgb(0x3E8BF0)] as CFArray, locations: [0, 0.45, 1])!
-ctx.drawLinearGradient(grad, start: CGPoint(x: S * 0.62, y: S), end: CGPoint(x: S * 0.38, y: 0), options: [])
+ctx.drawLinearGradient(grad, start: CGPoint(x: S * 0.62, y: S), end: CGPoint(x: S * 0.38, y: 0), options: [.drawsBeforeStartLocation, .drawsAfterEndLocation])   // paint the corners too
 
 // 2. orbs (radial, soft) — pink upper-left, teal lower-right
 func orb(_ c: UInt32, cx: CGFloat, cy: CGFloat, r: CGFloat, a: CGFloat) {
@@ -28,9 +28,11 @@ orb(0xFF7BD3, cx: S * 0.18, cy: S * 0.72, r: S * 0.55, a: 0.85)
 orb(0x37E2D5, cx: S * 0.85, cy: S * 0.15, r: S * 0.6, a: 0.85)
 
 // 3. glass pane — inset rounded square, white 14 %, top highlight, light edge
-let inset: CGFloat = S * 0.11
+// Rani: the glass spreads to the very edge — iOS applies its own rounded mask,
+// so the whole icon IS the pane (highlight + edge run right to the border).
+let inset: CGFloat = 0
 let pane = CGRect(x: inset, y: inset, width: S - 2 * inset, height: S - 2 * inset)
-let radius: CGFloat = S * 0.2
+let radius: CGFloat = inset == 0 ? 0 : S * 0.2   // full-bleed: no rounded clip (black corners otherwise)
 let panePath = CGPath(roundedRect: pane, cornerWidth: radius, cornerHeight: radius, transform: nil)
 ctx.saveGState()
 ctx.addPath(panePath); ctx.clip()
@@ -62,7 +64,7 @@ let lw = CGFloat(lionImg.width), lh = CGFloat(lionImg.height)
 let targetH = S * 1.18
 let scale = targetH / lh
 let dw = lw * scale, dh = lh * scale
-let lionRect = CGRect(x: (S - dw) / 2 + S * 0.02, y: pane.maxY - S * 0.05 - dh, width: dw, height: dh)
+let lionRect = CGRect(x: (S - dw) / 2 + S * 0.02, y: pane.maxY - S * 0.12 - dh, width: dw, height: dh)
 ctx.saveGState()
 ctx.addPath(panePath); ctx.clip()
 ctx.setShadow(offset: CGSize(width: 0, height: -S * 0.02), blur: S * 0.05, color: rgb(0x000000, 0.35))

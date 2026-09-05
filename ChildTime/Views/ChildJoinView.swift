@@ -16,9 +16,8 @@ struct ChildJoinView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            FloatingOrbs.home()
-            SparkleField(count: 22, size: 14)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             // Back to device-role choice — ONLY during first-time setup (in case
             // "child" was tapped by mistake). HIDDEN once this is an established
@@ -36,7 +35,7 @@ struct ChildJoinView: View {
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 14).padding(.vertical, 8)
-                                .background(.white.opacity(0.16), in: Capsule())
+                                .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                         }
                         Spacer()
                     }
@@ -80,8 +79,7 @@ struct ChildJoinView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-                            .glow(AppColor.starGold, radius: 12)
+                            .glassFill(AppGradient.gold, radius: 22)
                     }
                     .buttonStyle(.juicy)
 
@@ -93,7 +91,7 @@ struct ChildJoinView: View {
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
                             .padding(.vertical, 12)
-                            .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: 14))
+                            .glassPane(radius: 14, shadow: false)
                         Button { JoinCoordinator.shared.present(code) } label: {
                             Text("הִתְחַבְּרוּ")
                                 .font(.system(size: 16, weight: .heavy, design: .rounded))
@@ -113,18 +111,34 @@ struct ChildJoinView: View {
                     // First-time families who started on the KID's device used to
                     // hit a dead end here ("scan a code" — what code?). Give them
                     // the roadmap + a one-tap way to send Tofy to the parent.
-                    VStack(spacing: 6) {
+                    // Steps flush to one edge, numbers in a column (Rani: "1 2 3
+                    // צריכים להיות באותו קו") — on a glass inset.
+                    VStack(alignment: .leading, spacing: 6) {
                         Text("עוֹד אֵין לָכֶם טוֹפִי אֵצֶל הַהוֹרֶה?")
                             .font(.system(size: 14.5, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
-                        Text("1️⃣ מוֹרִידִים אֶת טוֹפִי בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה\n2️⃣ נִרְשָׁמִים וְיוֹצְרִים שָׁם אֶת הַיְלָדִים\n3️⃣ חוֹזְרִים לְכָאן וְסוֹרְקִים אֶת הַקּוֹד")
-                            .font(.system(size: 13.5, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.85))
-                            .multilineTextAlignment(.center)
+                        ForEach(Array(["מוֹרִידִים אֶת טוֹפִי בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה",
+                                       "נִרְשָׁמִים וְיוֹצְרִים שָׁם אֶת הַיְלָדִים",
+                                       "חוֹזְרִים לְכָאן וְסוֹרְקִים אֶת הַקּוֹד"].enumerated()), id: \.offset) { i, step in
+                            HStack(alignment: .top, spacing: 8) {
+                                Text("\(i + 1)")
+                                    .font(.system(size: 12, weight: .black, design: .rounded))
+                                    .foregroundStyle(Color(hex: "4B3FBF"))
+                                    .frame(width: 22, height: 22)
+                                    .background(Circle().fill(.white.opacity(0.92)))
+                                Text(step)
+                                    .font(.system(size: 13.5, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(.white.opacity(0.9))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
                         // (No ShareLink here — a share sheet leaves the app,
                         // which the Kids Category forbids, 1.3. The 1-2-3 steps
                         // above already say what to do.)
                     }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .glassInset(radius: 16)
                     .padding(.top, 6)
 
                     // Escape hatch: a child device blocks app deletion, so a device
@@ -136,7 +150,7 @@ struct ChildJoinView: View {
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.75))
                             .padding(.horizontal, 14).padding(.vertical, 9)
-                            .background(.white.opacity(0.10), in: Capsule())
+                            .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                     .padding(.top, 8)
@@ -259,12 +273,11 @@ private struct AppRemovalUnlockView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 14, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
             VStack(spacing: 20) {
                 Image(systemName: "trash.circle.fill")
                     .font(.system(size: 64)).foregroundStyle(AppColor.flameOrange)
-                    .glow(AppColor.flameOrange, radius: 12)
                 Text("מְחִיקַת הָאַפְּלִיקַצְיָה")
                     .font(.system(size: 26, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 Text(opened
@@ -277,7 +290,7 @@ private struct AppRemovalUnlockView: View {
                     Button { onDone() } label: {
                         Text("סְגִירָה").font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
-                            .background(.white.opacity(0.18), in: Capsule())
+                            .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }.buttonStyle(.juicy).padding(.horizontal, 40)
                 } else {
                     Button {

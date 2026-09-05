@@ -156,3 +156,24 @@ extension View {
         if #available(iOS 17, *) { self.listRowSpacing(spacing) } else { self }
     }
 }
+
+extension View {
+    /// A coloured button/card fill in the glass language: dark base, white pane,
+    /// the gradient glowing through at ~60 %, top highlight, light edge.
+    func glassFill(_ gradient: LinearGradient, radius: CGFloat = 22) -> some View {
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        return self
+            .background {
+                ZStack {
+                    shape.fill(Color(hex: "2A1E5C").opacity(0.2))
+                    shape.fill(.white.opacity(0.12))
+                    shape.fill(gradient).opacity(0.85)
+                    shape.fill(LinearGradient(colors: [.white.opacity(0.35), .clear],
+                                              startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.55)))
+                }
+            }
+            .overlay(shape.strokeBorder(LinearGradient(colors: [.white.opacity(0.75), .white.opacity(0.3)],
+                                                       startPoint: .top, endPoint: .bottom), lineWidth: 1.2))
+            .clipShape(shape)
+    }
+}

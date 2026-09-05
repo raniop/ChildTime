@@ -64,11 +64,7 @@ struct SchoolYearCelebrationView: View {
                         .foregroundStyle(AppColor.textOnLight)
                         .frame(maxWidth: 420)
                         .padding(.vertical, 16)
-                        .background(
-                            LinearGradient(colors: [.white, Color(hex: "FFE9A3")],
-                                           startPoint: .top, endPoint: .bottom),
-                            in: Capsule())
-                        .glow(Color(hex: "FFD23F"), radius: 16)
+                        .background(Capsule().fill(.white.opacity(0.92)))
                 }
                 .buttonStyle(.juicy)
                 .padding(.horizontal, AppSpacing.xl)
@@ -100,10 +96,8 @@ struct SchoolYearCelebrationView: View {
 
     private var goldBackground: some View {
         ZStack {
-            LinearGradient(colors: [Color(hex: "3A7BD5"), Color(hex: "48BFE3"), Color(hex: "8EEBFF")],
-                           startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
-            SparkleField(count: 36, size: 14)
+            GlassBackdrop()
+            SparkleField(count: 14, size: 11)
             BalloonField(startDelay: 7)
             // (No 🎆/🎇 corner emojis — iOS renders those as framed photos.)
         }
@@ -120,11 +114,10 @@ struct SchoolYearCelebrationView: View {
                 .animation(.linear(duration: 24).repeatForever(autoreverses: false), value: appeared)
 
             Circle()
-                .fill(LinearGradient(colors: [Color(hex: "FFE9A3"), Color(hex: "FFB347")],
+                .fill(LinearGradient(colors: [Color(hex: "FFE9A3").opacity(0.55), Color(hex: "FFB347").opacity(0.45)],
                                      startPoint: .topLeading, endPoint: .bottomTrailing))
                 .frame(width: 172, height: 172)
                 .overlay(Circle().stroke(.white.opacity(0.85), lineWidth: 5))
-                .glow(Color(hex: "FFD23F"), radius: appeared ? 26 : 10)
                 .shadow(color: .black.opacity(0.3), radius: 14, y: 8)
 
             VStack(spacing: 0) {
@@ -267,10 +260,8 @@ struct ParentSchoolYearPartyView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color(hex: "3A7BD5"), Color(hex: "48BFE3"), Color(hex: "8EEBFF")],
-                           startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
-            SparkleField(count: 30, size: 13)
+            GlassBackdrop()
+            SparkleField(count: 14, size: 11)
             BalloonField(startDelay: 7)
 
             VStack(spacing: AppSpacing.md) {
@@ -285,11 +276,10 @@ struct ParentSchoolYearPartyView: View {
                         .rotationEffect(.degrees(appeared ? 360 : 0))
                         .animation(.linear(duration: 24).repeatForever(autoreverses: false), value: appeared)
                     Circle()
-                        .fill(LinearGradient(colors: [Color(hex: "FFE9A3"), Color(hex: "FFB347")],
+                        .fill(LinearGradient(colors: [Color(hex: "FFE9A3").opacity(0.55), Color(hex: "FFB347").opacity(0.45)],
                                              startPoint: .topLeading, endPoint: .bottomTrailing))
                         .frame(width: 160, height: 160)
                         .overlay(Circle().stroke(.white.opacity(0.85), lineWidth: 5))
-                        .glow(Color(hex: "FFD23F"), radius: appeared ? 24 : 10)
                         .shadow(color: .black.opacity(0.25), radius: 14, y: 8)
                     VStack(spacing: 2) {
                         Text("🎒").font(.system(size: 44))
@@ -352,11 +342,7 @@ struct ParentSchoolYearPartyView: View {
                         .foregroundStyle(AppColor.textOnLight)
                         .frame(maxWidth: 420)
                         .padding(.vertical, 16)
-                        .background(
-                            LinearGradient(colors: [.white, Color(hex: "FFE9A3")],
-                                           startPoint: .top, endPoint: .bottom),
-                            in: Capsule())
-                        .glow(Color(hex: "FFD23F"), radius: 16)
+                        .background(Capsule().fill(.white.opacity(0.92)))
                 }
                 .buttonStyle(.juicy)
                 .padding(.horizontal, AppSpacing.xl)

@@ -14,9 +14,8 @@ struct WelcomeIntroView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            FloatingOrbs.home()
-            SparkleField(count: 24, size: 14)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             GeometryReader { proxy in
                 ScrollView {
@@ -48,10 +47,7 @@ struct WelcomeIntroView: View {
                 .frame(width: isCompact ? 104 : 148, height: isCompact ? 104 : 148)
             Text("טופי")
                 .font(.system(size: isCompact ? 42 : 58, weight: .heavy, design: .rounded))
-                .foregroundStyle(
-                    LinearGradient(colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FFE082")],
-                                   startPoint: .top, endPoint: .bottom)
-                )
+                .foregroundStyle(GlassInk.primary).shadow(color: .black.opacity(0.2), radius: 8, y: 3)
                 .shadow(color: AppColor.starGold.opacity(0.5), radius: 12)
             Text("לוֹמְדִים, מַרְוִיחִים זְמַן מָסָךְ —\nוְהַהוֹרִים תָּמִיד בַּתְּמוּנָה.")
                 .font(.system(size: isCompact ? 16 : 18, weight: .semibold, design: .rounded))
@@ -78,12 +74,7 @@ struct WelcomeIntroView: View {
                  "דּוּחוֹת, חוֹזֶק וְחוּלְשָׁה, וְהַתְרָאוֹת — בְּמַכְשִׁיר נִפְרָד.")
         }
         .padding(AppSpacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .fill(.white.opacity(0.12))
-                .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                    .stroke(.white.opacity(0.18), lineWidth: 1))
-        )
+        .glassPane(radius: AppRadius.large)
     }
 
     private var divider: some View {
@@ -101,7 +92,6 @@ struct WelcomeIntroView: View {
                                        startPoint: .topLeading, endPoint: .bottomTrailing)
                     )
                 )
-                .glow(tint, radius: 8)
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
@@ -158,8 +148,7 @@ struct WelcomeIntroView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, isCompact ? 15 : 17)
-                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .glow(AppColor.starGold, radius: 14)
+                .glassFill(AppGradient.gold, radius: 24)
         }
         .buttonStyle(.juicy)
     }

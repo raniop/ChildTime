@@ -21,10 +21,9 @@ struct SplashScreenView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            FloatingOrbs.home()
+            GlassBackdrop()
                 .opacity(bgIn ? 1 : 0)
-            SparkleField(count: 26, size: 14)
+            SparkleField(count: 12, size: 11)
                 .opacity(bgIn ? 1 : 0)
 
             VStack(spacing: AppSpacing.lg) {
@@ -34,7 +33,7 @@ struct SplashScreenView: View {
                     // Expanding celebratory rings behind the mascot.
                     ForEach(0..<3, id: \.self) { i in
                         Circle()
-                            .stroke(AppColor.starGold.opacity(0.5), lineWidth: 3)
+                            .stroke(.white.opacity(0.5), lineWidth: 3)
                             .frame(width: 150, height: 150)
                             .scaleEffect(showRings ? 2.6 : 0.2)
                             .opacity(showRings ? 0 : 0.8)
@@ -56,13 +55,9 @@ struct SplashScreenView: View {
                     // gradient) so the two "טופי" match exactly — the niqqud version
                     // read as a different, thinner font.
                     Text("טופי")
-                        .font(.system(size: 64, weight: .heavy, design: .rounded))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [AppColor.starGold, AppColor.companionGlow, .white],
-                                startPoint: .leading, endPoint: .trailing)
-                        )
-                        .glow(AppColor.starGold, radius: 14)
+                        .font(.system(size: 64, weight: .black, design: .rounded))
+                        .foregroundStyle(GlassInk.primary)
+                        .shadow(color: .black.opacity(0.2), radius: 10, y: 4)
                         .scaleEffect(showWordmark ? 1 : 0.7)
                         .opacity(showWordmark ? 1 : 0)
                         .offset(y: showWordmark ? 0 : 20)

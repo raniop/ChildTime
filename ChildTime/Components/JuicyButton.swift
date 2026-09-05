@@ -32,15 +32,29 @@ struct JuicyButton<Label: View>: View {
             Haptic.light()
             action()
         } label: {
+            let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
             label()
-                .font(.system(size: 22, weight: .heavy, design: .rounded))
-                .foregroundStyle(AppColor.textPrimary)
-                .padding(.vertical, 14)
+                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .padding(.vertical, 15)
                 .padding(.horizontal, 28)
                 .frame(maxWidth: maxWidth ?? .infinity)
-                .background(gradient)
-                .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
-                .glow(glowColor, radius: 14)
+                // Glass, like every big button in the app: a faint dark base, a
+                // white pane, the button's own gradient glowing through it at
+                // ~60 %, a top highlight and a light edge — never an opaque slab.
+                .background {
+                    ZStack {
+                        shape.fill(Color(hex: "2A1E5C").opacity(0.2))
+                        shape.fill(.white.opacity(0.12))
+                        shape.fill(gradient).opacity(0.85)
+                        shape.fill(LinearGradient(colors: [.white.opacity(0.35), .clear],
+                                                  startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.55)))
+                    }
+                }
+                .overlay(shape.strokeBorder(LinearGradient(colors: [.white.opacity(0.75), .white.opacity(0.3)],
+                                                           startPoint: .top, endPoint: .bottom), lineWidth: 1.2))
+                .clipShape(shape)
+                .shadow(color: .black.opacity(0.3), radius: 16, y: 8)
         }
         .buttonStyle(.juicy)
     }

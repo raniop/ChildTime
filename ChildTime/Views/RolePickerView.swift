@@ -13,12 +13,8 @@ struct RolePickerView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            FloatingOrbs(
-                colors: [AppColor.starGold, AppColor.companionGlow, AppColor.gemPurple],
-                count: 6, maxSize: 280, opacity: 0.4
-            )
-            SparkleField(count: 22, size: 14)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             ScrollView {
                 VStack(spacing: AppSpacing.xl) {
@@ -95,13 +91,7 @@ struct RolePickerView: View {
             }
             .padding(AppSpacing.lg)
             .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                    .fill(.white.opacity(0.14))
-                    .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                        .stroke(glow.opacity(0.6), lineWidth: 2))
-            )
-            .glow(glow, radius: 14)
+            .glassPane(radius: AppRadius.large)
         }
         .buttonStyle(.juicy)
     }

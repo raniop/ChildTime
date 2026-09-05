@@ -298,6 +298,13 @@ struct ChildTimeApp: App {
         case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
         case "shop": ShopView()   // DEMO_SCREEN=shop — the kid's character shop
         case "parentsettings": ParentSettingsView()   // DEMO_SCREEN=parentsettings
+        case "splash": SplashScreenView { }             // DEMO_SCREEN=splash
+        case "welcome": WelcomeIntroView()              // DEMO_SCREEN=welcome
+        case "rolepicker": RolePickerView()             // DEMO_SCREEN=rolepicker
+        case "onboarding": OnboardingView()             // DEMO_SCREEN=onboarding — parent sign-up
+        case "childjoin": ChildJoinView()               // DEMO_SCREEN=childjoin
+        case "familychoice": FamilyChoiceView()         // DEMO_SCREEN=familychoice
+        case "applock": ChildAppLockSetupView()         // DEMO_SCREEN=applock
         case "choresparent":                            // DEMO_SCREEN=choresparent — the parent's chores manager
             if let p = ProfileStore.shared.active { ChoresParentView(profile: p).onAppear { ChoreStore.shared.seedDemo(childID: p.id) } }
         case "childdifficulty": if let id = ProfileStore.shared.activeID { ChildDifficultyView(profileID: id) }
