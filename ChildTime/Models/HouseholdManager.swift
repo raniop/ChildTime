@@ -593,6 +593,7 @@ final class HouseholdManager: ObservableObject {
         )
         var data = Self.encode(device)
         data["role"] = "parent"
+        data["appVersion"] = AppInfo.versionLine
         data["kidModeChildID"] = KidModeManager.shared.active
             ? (KidModeManager.shared.childID?.uuidString ?? "") : FieldValue.delete()
         do {
@@ -646,6 +647,10 @@ final class HouseholdManager: ObservableObject {
         // a single failed/denied registration meant this device never published
         // `windowEndsAt` for the rest of the session — and the "נעלו שם ופתחו
         // כאן" button silently never appeared on the sibling device.
+        // Stamp the build this device runs, so "which version is this phone on?"
+        // is answerable from the dashboard instead of by asking.
+        try? await db.collection("childDevices").document(docID)
+            .setData(["appVersion": AppInfo.versionLine], merge: true)
         startReportingTimeState(childID: childID)
         #endif
     }

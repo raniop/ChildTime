@@ -29,6 +29,13 @@ struct ChildDevice: Codable, Identifiable, Equatable {
     /// Registering and labelling them turns "which device is doing this?" from an
     /// hour of guesswork into a line in the dashboard.
     var role: String?
+    /// The app version this device is running ("2026.9.1 (148)").
+    ///
+    /// Diagnosing anything cross-device without this means guessing which build
+    /// each phone is on — which cost most of a day: a bug was blamed on a stale
+    /// build that turned out to be current, and a current build was blamed for a
+    /// bug that only existed in an old one.
+    var appVersion: String?
     /// Set while this parent device is acting as a child (Kid Mode).
     var kidModeChildID: String?
     /// The parent's last remote screen-time grant to this device — how many minutes

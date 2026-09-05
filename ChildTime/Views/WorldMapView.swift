@@ -55,6 +55,13 @@ struct WorldMapView: View {
     // here. We open here only AFTER the other device confirms (row cleared).
     @State private var transferRequestedAt: Date? = nil
     @State private var transferTimedOut = false
+    /// True while a claim transaction is in flight. Opening has to ask the cloud
+    /// whether any other device holds the child's one window — that round trip is
+    /// a second or two, and with no feedback the button looks broken and gets
+    /// tapped again. Rani: "אני מכניס קוד, הוא חוזר למסך הראשי, ורק אחרי 2 שניות
+    /// פותח". The wait is real and cannot be skipped; being silent about it is
+    /// what made it feel wrong.
+    @State private var isOpening = false
     /// Which device kind the window was taken FROM — so the parent's push can
     /// say "מהאייפד לאייפון".
     @State private var transferFromKind = ""
@@ -1379,10 +1386,16 @@ struct WorldMapView: View {
                     requestUnlock { redeemGift() }
                 } label: {
                     HStack(spacing: 10) {
-                        Text("💝").font(.system(size: 22))
-                        Text(giftButtonTitle)
-                            .font(.system(size: 20, weight: .heavy, design: .rounded))
-                            .minimumScaleFactor(0.7).lineLimit(1)
+                        if isOpening {
+                            ProgressView().tint(.white).scaleEffect(0.9)
+                            Text("פּוֹתְחִים לְךָ… ✨")
+                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        } else {
+                            Text("💝").font(.system(size: 22))
+                            Text(giftButtonTitle)
+                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                .minimumScaleFactor(0.7).lineLimit(1)
+                        }
                     }
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl)
@@ -1906,7 +1919,9 @@ struct WorldMapView: View {
         }
         let want = progress.redeemableMinutesNow
         guard want > 0 else { return }
+        isOpening = true
         Task { @MainActor in
+            defer { isOpening = false }
             let outcome = await PlayWindowLeaseManager.shared.claim(
                 childID: cid, kind: .earned, requestedSeconds: want * 60)
             switch outcome {
@@ -1976,7 +1991,9 @@ struct WorldMapView: View {
         // locked at 29:40 re-opened at 29:00 and those 40 seconds could never be
         // spent — they just accumulated out of reach.
         let want = progress.openableSeconds(gift: true)
+        isOpening = true
         Task { @MainActor in
+            defer { isOpening = false }
             let outcome = await PlayWindowLeaseManager.shared.claim(
                 childID: cid, kind: .gift, requestedSeconds: want)
             switch outcome {

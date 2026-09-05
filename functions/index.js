@@ -1287,6 +1287,7 @@ exports.adminFamiliesOverview = onCall(
           docID: dv.id, lastSeenAt: d.lastSeenAt || 0,
           kind: d.deviceKind || d.kind || null,
           name: d.deviceName || d.name || null,
+          appVersion: d.appVersion || null,
           kidModeChildID: d.kidModeChildID || null,
         });
         return;
@@ -1297,7 +1298,8 @@ exports.adminFamiliesOverview = onCall(
         if (seen > Date.now() / 1000 - 14 * 86400) liveUIDs.add(d.ownerUID);
       }
       (devsByChild[cid] = devsByChild[cid] || [])
-        .push({ docID: dv.id, lastSeenAt: d.lastSeenAt || 0, kind: d.deviceKind || null, name: d.deviceName || null });
+        .push({ docID: dv.id, lastSeenAt: d.lastSeenAt || 0, kind: d.deviceKind || null,
+                name: d.deviceName || null, appVersion: d.appVersion || null });
     });
     const tombsByHH = {};
     tombSnap.forEach((t) => { const h = t.data().householdID; tombsByHH[h] = (tombsByHH[h] || 0) + 1; });
@@ -1306,9 +1308,27 @@ exports.adminFamiliesOverview = onCall(
     // server updateTime as "last active" (the payload's lastModifiedAt is a
     // Swift reference-date number, not unix).
     const states = {};
+    const windows = {};
     await Promise.all(kidsSnap.docs.map(async (k) => {
-      const st = await db.collection("children").doc(k.id).collection("state").doc("current").get();
+      const stateRef = db.collection("children").doc(k.id).collection("state");
+      const [st, win] = await Promise.all([stateRef.doc("current").get(),
+                                           stateRef.doc("window").get()]);
       if (st.exists) states[k.id] = { data: st.data(), updatedAt: st.updateTime.toMillis() / 1000 };
+      // The OPEN play window. While a child is playing their wallet reads 0 —
+      // the minutes are held by the lease, not the pocket — so a dashboard that
+      // only shows the balance says "0" about a child who is playing right now.
+      // The lease carries a server-stamped start and a length, so the remaining
+      // time is derivable and can tick live in the browser.
+      const w = win.exists ? win.data() : null;
+      if (w && w.state === "open" && w.startedAt && w.grantedSeconds) {
+        const startedAt = typeof w.startedAt.toMillis === "function"
+          ? w.startedAt.toMillis() / 1000 : Number(w.startedAt) || 0;
+        if (startedAt) {
+          windows[k.id] = { endsAt: startedAt + Number(w.grantedSeconds),
+                            kind: w.kind || "earned",
+                            ownerName: w.ownerName || null };
+        }
+      }
     }));
 
     const families = [];
@@ -1323,6 +1343,7 @@ exports.adminFamiliesOverview = onCall(
           grade: (k.grade === 0 || k.grade) ? k.grade : null,
           gender: k.gender || null,
           createdAt: k.createdAt,
+          liveWindow: windows[k.id] || null,
           stars: s ? (s.data.stars || 0) : 0,
           diamonds: s ? (s.data.diamonds || 0) : 0,
           // Prefer the wallet COUNTERS (in - out, in seconds). The legacy minute
@@ -1336,7 +1357,8 @@ exports.adminFamiliesOverview = onCall(
           devices: devs.length,
           deviceRows: devs
             .sort((a, b) => (b.lastSeenAt || 0) - (a.lastSeenAt || 0))
-            .map((x) => ({ docID: x.docID, kind: x.kind, name: x.name, lastSeenAt: x.lastSeenAt || null })),
+            .map((x) => ({ docID: x.docID, kind: x.kind, name: x.name,
+                           appVersion: x.appVersion || null, lastSeenAt: x.lastSeenAt || null })),
           lastSeenAt: devs.reduce((m, x) => Math.max(m, x.lastSeenAt || 0), 0) || null,
         };
       }).sort((a, b) => (b.lastActiveAt || 0) - (a.lastActiveAt || 0));

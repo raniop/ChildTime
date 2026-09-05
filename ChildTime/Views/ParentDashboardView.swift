@@ -1465,11 +1465,26 @@ struct ParentDashboardView: View {
     private func liveWindow(_ profile: Profile) -> (secondsLeft: Int, device: ChildDevice, isManual: Bool)? {
         _ = refreshTrigger   // recompute on the 5s tick
         let now = Date().timeIntervalSince1970
-        let open = (household.devicesByChild[profile.id.uuidString] ?? [])
-            .compactMap { d -> (Int, ChildDevice, Bool)? in
-                guard let end = d.windowEndsAt, end > now else { return nil }
-                return (Int(end - now), d, d.windowIsManual ?? false)
+        let rows = household.devicesByChild[profile.id.uuidString] ?? []
+
+        // THE LEASE FIRST. It is written atomically with the claim and carries a
+        // server-stamped start, so it cannot lag. The device-row report is a
+        // separate best-effort write with its own timing, which is why the live
+        // countdown used to appear "sometimes" — it depended on that write having
+        // landed rather than on the fact that a window is open.
+        if let lease = remote.openWindows[profile.id], lease.isHeld, !lease.isExpired() {
+            let left = lease.remainingSeconds()
+            if left > 0 {
+                let owner = rows.first { $0.deviceID == lease.ownerDeviceID } ?? rows.first
+                if let owner {
+                    return (left, owner, lease.kind == .gift || lease.kind == .grant)
+                }
             }
+        }
+        let open = rows.compactMap { d -> (Int, ChildDevice, Bool)? in
+            guard let end = d.windowEndsAt, end > now else { return nil }
+            return (Int(end - now), d, d.windowIsManual ?? false)
+        }
         return open.max(by: { $0.0 < $1.0 })
     }
 

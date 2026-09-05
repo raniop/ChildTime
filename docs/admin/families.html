@@ -46,6 +46,7 @@
   [hidden]{display:none !important}
 
   /* Totals strip */
+  .live{color:#7CFFB2; font-weight:800; font-variant-numeric:tabular-nums}
   .totals{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-top:22px}
   .tot{background:var(--card); border:1px solid var(--brd); border-radius:18px; padding:16px 18px}
   .tot b{display:block; font-size:34px; font-weight:900; line-height:1.1}
@@ -140,6 +141,20 @@ const CONFIG = {
 
 const $ = (id) => document.getElementById(id);
 let DATA = null;
+
+// A playing child's wallet reads 0 — the minutes are held by the open lease, not
+// the pocket — so the balance alone says "0" about a child who is mid-session.
+// The lease gives a server-stamped end, so the remaining time ticks here without
+// any extra reads.
+setInterval(() => {
+  const now = Date.now() / 1000;
+  document.querySelectorAll(".live[data-ends]").forEach((el) => {
+    const left = Math.max(0, Math.round(Number(el.dataset.ends) - now));
+    el.textContent = left
+      ? `▶︎ ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`
+      : "▶︎ 0:00";
+  });
+}, 1000);
 
 const [{initializeApp}, auth, fns] = await Promise.all([
   import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
@@ -258,7 +273,7 @@ function render() {
         const stale = !d.lastSeenAt || (Date.now()/1000 - d.lastSeenAt) > 86400*7;
         const kindEmoji = d.kind === "ipad" ? "📲" : "📱";
         return `<span class="chip ${stale ? "dim" : "mint"}" style="margin:3px">
-          ${kindEmoji} ${esc(d.name || d.docID.split("_")[1].slice(0,8))} · ${ago(d.lastSeenAt)}
+          ${kindEmoji} ${esc(d.name || d.docID.split("_")[1].slice(0,8))} · ${ago(d.lastSeenAt)}${d.appVersion ? " · " + esc(d.appVersion) : ""}
           <button style="border:0;background:none;color:inherit;cursor:pointer;font-family:inherit;font-weight:900"
             title="מחק שורת מכשיר (מכשיר פעיל יירשם מחדש לבד)"
             onclick="event.stopPropagation(); deleteDevice('${d.docID}', this)">✕</button></span>`;
@@ -269,7 +284,9 @@ function render() {
         <td>${gradeName(k.grade)}</td>
         <td class="num">⭐ ${nf.format(k.stars)}</td>
         <td class="num">💎 ${nf.format(k.diamonds)}</td>
-        <td class="num">🎮 ${nf.format(k.pendingMinutes)}</td>
+        <td class="num">${k.liveWindow
+            ? `<span class="live" data-ends="${k.liveWindow.endsAt}" title="${k.liveWindow.kind === "gift" ? "זמן מתנה פתוח" : "זמן שהרוויח פתוח"}${k.liveWindow.ownerName ? " · " + esc(k.liveWindow.ownerName) : ""}">▶︎ —</span>`
+            : `🎮 ${nf.format(k.pendingMinutes)}`}</td>
         <td class="num">💝 ${nf.format(k.giftMinutes)}</td>
         <td class="num">❓ ${nf.format(k.answered)}</td>
         <td class="num">${k.devices ? `<button style="border:0;background:none;color:inherit;cursor:pointer;font-family:inherit;font-weight:800"
@@ -294,7 +311,7 @@ function render() {
               onclick="event.stopPropagation(); this.closest('.family').querySelector('.anonlist').hidden ^= 1">${anon} חשבונות ילד ▾</button>` : ""}
           ${deviceIDs.size ? `<span class="chip" title="מכשירים פיזיים שונים (מכשיר משותף נספר פעם אחת)">${deviceIDs.size} מכשירים 📱</span>` : ""}
           ${(f.parentDevices || []).length ? `<span class="chip" style="background:rgba(255,210,63,.30)"
-              title="${(f.parentDevices || []).map((d) => (d.name || "?") + " · " + ago(d.lastSeenAt)).join(" | ")}"
+              title="${(f.parentDevices || []).map((d) => (d.name || "?") + " · " + ago(d.lastSeenAt) + (d.appVersion ? " · " + d.appVersion : "")).join(" | ")}"
               >${f.parentDevices.length} מכשירי הורה 👪</span>` : ""}
           ${f.tombstones ? `<span class="chip pink">🪦 ${f.tombstones}</span>` : ""}
           <span class="chip gold">${ago(f.lastActiveAt)}</span>

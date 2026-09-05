@@ -42,6 +42,10 @@ final class RemoteSyncManager: ObservableObject {
     /// Snapshots pulled from Firestore for non-active profiles, keyed by
     /// profile UUID. The dashboard merges these in.
     @Published private(set) var remoteSnapshots: [UUID: ProgressSnapshot] = [:]
+    /// Each child's OPEN play window, straight from the lease. Authoritative and
+    /// server-stamped — the dashboard no longer depends on the child device
+    /// separately reporting that it is playing.
+    @Published private(set) var openWindows: [UUID: PlayWindowLease] = [:]
     /// Parent minute grants still WAITING to be applied on the child's device,
     /// keyed by child UUID (the `pendingMinuteAdjustment` field on the child doc).
     /// The dashboard adds this to the shown balance so a +10/-5 reflects instantly
@@ -58,7 +62,8 @@ final class RemoteSyncManager: ObservableObject {
     #if canImport(FirebaseFirestore)
     private var db: Firestore { Firestore.firestore() }
     private var listeners: [String: ListenerRegistration] = [:]   // keyed by profileID
-    private var childDocListeners: [String: ListenerRegistration] = [:]   // child doc (for minute grants)
+    private var childDocListeners: [String: ListenerRegistration] = [:]
+    private var windowListeners: [String: ListenerRegistration] = [:]   // child doc (for minute grants)
     #endif
 
     private init() {}
@@ -277,42 +282,35 @@ final class RemoteSyncManager: ObservableObject {
         let ref = db.collection("children").document(childID.uuidString)
         let stateRef = ref.collection("state").document("current")
         db.runTransaction({ txn, _ -> Any? in
+            // EVERY read first. Firestore rejects a read that follows a write in
+            // the same transaction, and `try?` swallowed that failure — so the
+            // wallet credit was skipped while the command was still consumed and
+            // acknowledged. That is why a gift could be "delivered" and still not
+            // exist. Reading both documents up front is the whole fix.
             let doc = try? txn.getDocument(ref)
+            let stateDoc = try? txn.getDocument(stateRef)
             let adj = (doc?.data()?["pendingGiftAdjustment"] as? Int) ?? 0
             guard adj != 0 else { return 0 }
-            // Consume + ACK atomically: echo the send stamp back as
-            // `giftAppliedAt` so the parent's "💝 נשלח" flips to "✅ הגיע"
-            // (and a Cloud Function pushes them if it landed late).
+            // If the wallet cannot be credited, do NOT consume the command —
+            // better to deliver it again than to acknowledge minutes that were
+            // never paid.
+            guard var cloud = stateDoc?.data().flatMap(ProgressSnapshot.fromFirestore) else {
+                return 0
+            }
             var update: [String: Any] = ["pendingGiftAdjustment": 0]
             if let sentAt = doc?.data()?["giftSentAt"] as? Double {
                 update["giftAppliedAt"] = sentAt
             }
             txn.updateData(update, forDocument: ref)
 
-            // AND credit the CLOUD wallet in the same transaction.
-            //
-            // This used to credit only the local store and rely on the ordinary
-            // debounced upload to carry it. That upload ratchet-MERGES, and the
-            // wallet is last-write-wins on the whole snapshot — so whenever the
-            // cloud copy won, the gift was silently discarded and gone for good.
-            // The parent's panel and the child's open button both read the cloud,
-            // which is why a child could see the minutes on their device while
-            // the dashboard showed 0 and nothing could be opened.
-            //
-            // Consuming the command and paying it out are now the same atomic
-            // act: exactly-once still holds, and the minutes cannot be lost to a
-            // merge because they never travel through one.
-            if var cloud = (try? txn.getDocument(stateRef))?.data()
-                .flatMap(ProgressSnapshot.fromFirestore) {
-                if adj > 0 { cloud.giftSecondsIn = (cloud.giftSecondsIn ?? 0) + adj * 60 }
-                else { cloud.giftSecondsOut = (cloud.giftSecondsOut ?? 0) + min(-adj * 60, cloud.giftSecondsAvailable) }
-                cloud.syncWalletMirrors()
-                cloud.revision += 1
-                cloud.lastModifiedAt = Date()
-                cloud.deviceID = ProgressSnapshot.thisDeviceID
-                if let enc = ProgressSnapshot.toFirestore(cloud) {
-                    txn.setData(enc, forDocument: stateRef, merge: true)
-                }
+            if adj > 0 { cloud.giftSecondsIn = (cloud.giftSecondsIn ?? 0) + adj * 60 }
+            else { cloud.giftSecondsOut = (cloud.giftSecondsOut ?? 0) + min(-adj * 60, cloud.giftSecondsAvailable) }
+            cloud.syncWalletMirrors()
+            cloud.revision += 1
+            cloud.lastModifiedAt = Date()
+            cloud.deviceID = ProgressSnapshot.thisDeviceID
+            if let enc = ProgressSnapshot.toFirestore(cloud) {
+                txn.setData(enc, forDocument: stateRef, merge: true)
             }
             return adj
         }) { result, _ in
@@ -585,24 +583,23 @@ final class RemoteSyncManager: ObservableObject {
         let ref = db.collection("children").document(childID.uuidString)
         let stateRef = ref.collection("state").document("current")
         db.runTransaction({ txn, _ -> Any? in
+            // Reads before writes — see applyPendingGift.
             let doc = try? txn.getDocument(ref)
+            let stateDoc = try? txn.getDocument(stateRef)
             let adj = (doc?.data()?["pendingMinuteAdjustment"] as? Int) ?? 0
             guard adj != 0 else { return 0 }
+            guard var cloud = stateDoc?.data().flatMap(ProgressSnapshot.fromFirestore) else {
+                return 0          // don't consume what we cannot pay
+            }
             txn.updateData(["pendingMinuteAdjustment": 0], forDocument: ref)
-            // Same rule as the gift: pay it into the CLOUD wallet in the very
-            // transaction that consumes the command, so an approved chore's
-            // minutes can never be lost to a merge on the way up.
-            if var cloud = (try? txn.getDocument(stateRef))?.data()
-                .flatMap(ProgressSnapshot.fromFirestore) {
-                if adj > 0 { cloud.earnedSecondsIn = (cloud.earnedSecondsIn ?? 0) + adj * 60 }
-                else { cloud.earnedSecondsOut = (cloud.earnedSecondsOut ?? 0) + min(-adj * 60, cloud.earnedSecondsAvailable) }
-                cloud.syncWalletMirrors()
-                cloud.revision += 1
-                cloud.lastModifiedAt = Date()
-                cloud.deviceID = ProgressSnapshot.thisDeviceID
-                if let enc = ProgressSnapshot.toFirestore(cloud) {
-                    txn.setData(enc, forDocument: stateRef, merge: true)
-                }
+            if adj > 0 { cloud.earnedSecondsIn = (cloud.earnedSecondsIn ?? 0) + adj * 60 }
+            else { cloud.earnedSecondsOut = (cloud.earnedSecondsOut ?? 0) + min(-adj * 60, cloud.earnedSecondsAvailable) }
+            cloud.syncWalletMirrors()
+            cloud.revision += 1
+            cloud.lastModifiedAt = Date()
+            cloud.deviceID = ProgressSnapshot.thisDeviceID
+            if let enc = ProgressSnapshot.toFirestore(cloud) {
+                txn.setData(enc, forDocument: stateRef, merge: true)
             }
             return adj
         }) { [weak self] result, _ in
@@ -767,6 +764,8 @@ final class RemoteSyncManager: ObservableObject {
         for (id, listener) in listeners where !localIDs.contains(id) {
             listener.remove()
             listeners.removeValue(forKey: id)
+            windowListeners[id]?.remove()
+            windowListeners.removeValue(forKey: id)
             childDocListeners[id]?.remove()
             childDocListeners.removeValue(forKey: id)
             if let uuid = UUID(uuidString: id) {
@@ -777,6 +776,24 @@ final class RemoteSyncManager: ObservableObject {
         // Add listeners for new ones — household-owned `children` docs.
         for profile in ProfileStore.shared.profiles {
             let id = profile.id.uuidString
+            // The child's PLAY WINDOW. The dashboard used to learn about an open
+            // window only from the child device's own `windowEndsAt` report — a
+            // separate best-effort write with its own timing, so the live
+            // countdown appeared "sometimes". The lease is written atomically with
+            // the claim and carries a SERVER-stamped start, so it cannot lag or be
+            // missed.
+            if windowListeners[id] == nil {
+                windowListeners[id] = db.collection("children").document(id)
+                    .collection("state").document("window")
+                    .addSnapshotListener { [weak self] snap, _ in
+                        guard let self, let pid = UUID(uuidString: id) else { return }
+                        let lease = PlayWindowLease.from(snap?.data() ?? [:])
+                        Task { @MainActor in
+                            if lease.isHeld, !lease.isExpired() { self.openWindows[pid] = lease }
+                            else { self.openWindows.removeValue(forKey: pid) }
+                        }
+                    }
+            }
             if listeners[id] != nil { continue }
             let listener = db.collection("children").document(id)
                 .collection("state").document("current")
