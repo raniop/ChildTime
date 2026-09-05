@@ -50,6 +50,8 @@ struct ParentGateView<Content: View>: View {
     @EnvironmentObject var settings: ParentSettings
     @ObservedObject private var household = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
+    @State private var loadingTimedOut = false
+    @State private var loadingToken = UUID()
     @Environment(\.scenePhase) private var scenePhase
     @State private var entered: String = ""
     @State private var shake: Bool = false
@@ -114,17 +116,45 @@ struct ParentGateView<Content: View>: View {
             GlassBackdrop()
             SparkleField(count: 12, size: 11)
             VStack(spacing: AppSpacing.md) {
-                ProgressView().scaleEffect(1.4).tint(.white)
-                Text("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…")
-                    .font(.system(size: 20, weight: .heavy, design: .rounded))
-                    .foregroundStyle(GlassInk.primary)
-                Text("אִם זֶה נִמְשָׁךְ — בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט.")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary)
+                if loadingTimedOut {
+                    // Rani: after a while this must SAY what is wrong, not spin.
+                    Text("📡").font(.system(size: 44))
+                    Text("הַמַּכְשִׁיר לֹא הִצְלִיחַ לְהִתְחַבֵּר לַמִּשְׁפָּחָה")
+                        .font(.system(size: 19, weight: .heavy, design: .rounded))
+                        .foregroundStyle(GlassInk.primary)
+                        .multilineTextAlignment(.center)
+                    Text("בִּדְקוּ שֶׁיֵּשׁ אִינְטֶרְנֶט, וְשֶׁהַמַּכְשִׁיר עֲדַיִן מְקֻשָּׁר לַמִּשְׁפָּחָה בְּלוּחַ הַהוֹרִים.")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .multilineTextAlignment(.center)
+                    Button {
+                        Haptic.light()
+                        loadingTimedOut = false
+                        household.refreshHouseholdNow()
+                        armLoadingTimeout()
+                    } label: {
+                        Text("נַסּוּ שׁוּב")
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundStyle(Color(hex: "4B3FBF"))
+                            .padding(.horizontal, 22).padding(.vertical, 10)
+                            .background(Capsule().fill(.white.opacity(0.92)))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 4)
+                } else {
+                    ProgressView().scaleEffect(1.4).tint(.white)
+                    Text("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…")
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        .foregroundStyle(GlassInk.primary)
+                    Text("רֶגַע אֶחָד…")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                }
             }
             .padding(24)
             .frame(maxWidth: 360)
             .glassPane(radius: 24)
+            .animation(.easeInOut(duration: 0.25), value: loadingTimedOut)
             // Never a dead end: the child (or parent) can always back out while
             // the family is still streaming down (Rani hit this in the shop).
             if allowClose {
@@ -146,7 +176,16 @@ struct ParentGateView<Content: View>: View {
                 }
             }
         }
-        .onAppear { household.refreshHouseholdNow() }
+        .onAppear { household.refreshHouseholdNow(); armLoadingTimeout() }
+    }
+
+    /// Ten seconds of spinner, then an honest message with a retry.
+    private func armLoadingTimeout() {
+        let token = UUID()
+        loadingToken = token
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+            if loadingToken == token && householdStillLoading { loadingTimedOut = true }
+        }
     }
 
     /// Shown instead of the keypad when `allowSetup == false` and no parent code
