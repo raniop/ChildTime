@@ -46,6 +46,21 @@ final class RemoteSyncManager: ObservableObject {
     /// server-stamped — the dashboard no longer depends on the child device
     /// separately reporting that it is playing.
     @Published private(set) var openWindows: [UUID: PlayWindowLease] = [:]
+    /// Children who tapped "בקש מאבא או אמא" on the Tofy+ screen, by request time.
+    /// Shown as a banner on the parent's home; cleared once the family is premium.
+    @Published private(set) var premiumRequests: [UUID: Double] = [:]
+
+    /// Family went premium (or the parent dismissed) — take the request down on
+    /// every child so no device keeps nagging.
+    func clearPremiumRequests() {
+        #if canImport(FirebaseFirestore)
+        for (id, _) in premiumRequests {
+            db.collection("children").document(id.uuidString)
+                .setData(["premiumRequestedAt": FieldValue.delete()], merge: true)
+        }
+        premiumRequests.removeAll()
+        #endif
+    }
     /// Parent minute grants still WAITING to be applied on the child's device,
     /// keyed by child UUID (the `pendingMinuteAdjustment` field on the child doc).
     /// The dashboard adds this to the shown balance so a +10/-5 reflects instantly
@@ -814,7 +829,11 @@ final class RemoteSyncManager: ObservableObject {
                     let gift = (doc?.data()?["pendingGiftAdjustment"] as? Int) ?? 0
                     let revokeAck = doc?.data()?["revokeGiftAppliedAt"] as? Double
                     let giftAck = doc?.data()?["giftAppliedAt"] as? Double
+                    let premiumReq = doc?.data()?["premiumRequestedAt"] as? Double
                     Task { @MainActor in
+                        // 👑 The child asked for Tofy+ from their device.
+                        if let premiumReq { self.premiumRequests[profile.id] = premiumReq }
+                        else { self.premiumRequests.removeValue(forKey: profile.id) }
                         if adj != 0 { self.pendingAdjustments[profile.id] = adj }
                         else { self.pendingAdjustments.removeValue(forKey: profile.id) }
                         if gift != 0 { self.pendingGifts[profile.id] = gift }

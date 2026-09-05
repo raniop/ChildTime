@@ -43,6 +43,8 @@ struct ParentDashboardView: View {
     @State private var choresProfile: Profile?    // 🧹 chores sheet
     @State private var showSchoolYearParty = false
     @State private var showWhatsNew = false
+    @State private var showingPaywall = false
+    @ObservedObject private var subs = SubscriptionManager.shared
     @State private var insightsProfile: Profile? = nil
     @StateObject private var choreStore = ChoreStore.shared
     @State private var screenTimeProfile: Profile?
@@ -127,6 +129,9 @@ struct ParentDashboardView: View {
                                     // under the two primary buttons (Rani), so
                                     // approvals never hide in a menu.
                                     choresApprovalBanner
+                                    if !subs.isPremium, !remote.premiumRequests.isEmpty {
+                                        premiumRequestBanner
+                                    }
                                 } else {
                                     linkCallout
                                 }
@@ -552,6 +557,44 @@ struct ParentDashboardView: View {
     /// 🧹 Standing chores row under the two primary buttons — urgent orange
     /// when a kid is waiting for an approval, calm glass otherwise. Always
     /// visible (Rani) so the chores world is one tap away.
+
+    /// 👑 "יואב רוצה טופי+" — the child tapped ask-a-parent on their device. The
+    /// subscription is per family and bought here, once; this is the doorway.
+    private var premiumRequestBanner: some View {
+        let names = profiles.profiles
+            .filter { remote.premiumRequests[$0.id] != nil }
+            .map(\.name)
+        return Button {
+            Haptic.light()
+            showingPaywall = true
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(names.count == 1 ? "\(names[0]) רוצה טופי+ 👑" : "\(names.joined(separator: " ו")) רוצים טופי+ 👑")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    Text("מנוי אחד לכל המשפחה — נפתח מכאן, בטלפון שלכם")
+                        .font(.system(size: 12.5, weight: .medium, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                }
+                Text("👑").font(.system(size: 26))
+            }
+            .foregroundStyle(GlassInk.primary)
+            .padding(14)
+            .glassPane(radius: 20, strength: 0.18, tint: AppColor.starGold)
+        }
+        .buttonStyle(.plain)
+        .overlay(alignment: .topLeading) {
+            Button { Haptic.light(); remote.clearPremiumRequests() } label: {
+                Image(systemName: "xmark").font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(GlassInk.secondary).padding(8)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("סגור את הבקשה")
+        }
+    }
+
     private var choresApprovalBanner: some View {
         let items = choreStore.pendingApproval
         let urgent = !items.isEmpty
@@ -1632,6 +1675,23 @@ struct ParentDashboardView: View {
         Color.clear
             .frame(width: 0, height: 0)
             .allowsHitTesting(false)
+        // 👑 Family subscription, bought here behind the parent gate (Kids
+        // Category: commerce is always gated), reached from the child's request.
+        .fullScreenCover(isPresented: $showingPaywall) {
+            ParentGateView(allowClose: true, gateTitle: "אֵזוֹר הוֹרִים",
+                           gateReason: "כְּדֵי לִפְתּוֹחַ אֶת הַמִּנּוּי לַמִּשְׁפָּחָה — הַזִּינוּ אֶת הַקּוֹד",
+                           useFaceID: true, respectSession: false) {
+                PaywallView()
+                    .environmentObject(subs)
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .environmentObject(settings)
+            .environment(\.layoutDirection, .rightToLeft)
+        }
+        // The family went premium → the children's requests are answered.
+        .onChange(of: subs.isPremium) { _, premium in
+            if premium { remote.clearPremiumRequests() }
+        }
         // "Lock + revoke gift" confirmation — a real consequence, so it asks.
         // Presented from either menu (root grid ⋯ / detail ⋯).
         .alert(

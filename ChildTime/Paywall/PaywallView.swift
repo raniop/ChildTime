@@ -22,6 +22,18 @@ struct PaywallView: View {
     private var isCompact: Bool { hsc == .compact }
 
     var body: some View {
+        // Family subscription: bought ONCE on a parent's phone, unlocking every
+        // child device through the household. A child device therefore never
+        // shows prices or StoreKit — it asks a parent instead (Rani; and Kids
+        // Category keeps commerce off the child's surface).
+        if ParentSettings.shared.deviceRole == .child {
+            AskParentView(onClose: { dismiss() })
+        } else {
+            paywallBody
+        }
+    }
+
+    private var paywallBody: some View {
         ZStack {
             AppGradient.dreamy.ignoresSafeArea()
             FloatingOrbs(

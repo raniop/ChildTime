@@ -530,6 +530,13 @@ struct WorldMapView: View {
         // parental gate that can't be bypassed. respectSession:false so this ALWAYS
         // re-authenticates — an earlier unlock this session must not open the store.
         .fullScreenCover(isPresented: $showingPaywall) {
+            if settings.deviceRole == .child {
+                // Nothing to buy here — the family subscribes from a parent's
+                // phone. So no gate, no code typed in front of the kid: just
+                // "ask a parent", which reaches the parent's phone directly.
+                AskParentView(onClose: { showingPaywall = false })
+                    .environmentObject(settings)
+            } else {
             ParentGateView(allowClose: true,
                            gateTitle: "אֵזוֹר הוֹרִים",
                            gateReason: "כְּדֵי לִרְאוֹת אֶת הַמִּנּוּי בְּתַשְׁלוּם — בַּקְּשׁוּ מֵהוֹרֶה לְהַזִּין אֶת הַקּוֹד",
@@ -541,6 +548,7 @@ struct WorldMapView: View {
             }
             .environmentObject(settings)
             .environment(\.layoutDirection, .rightToLeft)
+            }
         }
         .sheet(isPresented: $showingChildSettings) {
             if let active = profiles.active {

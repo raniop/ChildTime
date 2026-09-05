@@ -301,6 +301,33 @@ function walletMinutes(d, pocket) {
   return (pocket === "gift" ? d.parentGiftMinutes : d.pendingMinutes) || 0;
 }
 
+
+// ---- 👑 A child asked for Tofy+ -------------------------------------------------
+// The subscription is per FAMILY, bought once on a parent's phone. A child device
+// never sells anything; it stamps `premiumRequestedAt` on its own child doc. Tell
+// the parents — visibly, so it lands even if Tofy is force-quit on their phone.
+exports.onPremiumRequest = onDocumentWritten("children/{childID}", async (event) => {
+  const before = event.data.before && event.data.before.data ? event.data.before.data() : null;
+  const after = event.data.after && event.data.after.data ? event.data.after.data() : null;
+  if (!after) return;
+  const stamp = after.premiumRequestedAt;
+  if (!stamp || (before && before.premiumRequestedAt === stamp)) return;   // unchanged
+  const hhID = after.householdID;
+  if (!hhID) return;
+  // One push per request: claim a dedup doc first (see PUSH-DEDUP INVARIANT).
+  const key = `premiumreq_${event.params.childID}_${Math.round(stamp)}`;
+  try { await db.collection("pushDedup").doc(key).create({ at: Date.now() }); }
+  catch (e) { return; }
+  const tokens = await tokensForHousehold(hhID);
+  if (!tokens.length) return;
+  const name = after.name || "הילד";
+  const girl = after.gender === "girl";
+  await send(tokens,
+    { title: `👑 ${name} ${girl ? "רוצה" : "רוצה"} טופי+`,
+       body: `${name} ${girl ? "ביקשה" : "ביקש"} לפתוח את המשחקים והעולמות. המנוי הוא לכל המשפחה — פותחים פעם אחת מהטלפון שלכם.` },
+    { type: "premium-request", childID: event.params.childID });
+});
+
 const COMMAND_FIELDS_CHILD = ["pendingMinuteAdjustment", "pendingGiftAdjustment", "pendingMoneyAdjustment", "resetRequestedAt", "revokeGiftAt"];
 // appRemovalUnlockAt was MISSING here — the "allow app deletion" window never
 // woke the child's device and only applied when the kid reopened Tofy.
