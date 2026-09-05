@@ -138,8 +138,8 @@ struct ChildJoinView: View {
                         // above already say what to do.)
                     }
                     .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .glassInset(radius: 16)
-                    .frame(maxWidth: .infinity, alignment: .center)   // the block centred, its lines in a column
                     .padding(.top, 6)
 
                     // Escape hatch: a child device blocks app deletion, so a device
@@ -158,7 +158,9 @@ struct ChildJoinView: View {
                 }
                 .padding(.horizontal, AppSpacing.lg)
                 .padding(.vertical, AppSpacing.xl)
-                .frame(maxWidth: 460)
+                // One column width for the QR button, the code field and the steps
+                // box (Rani: "הכפתורים תתאים לגודל התאים למטה").
+                .frame(maxWidth: 340)
                 .frame(maxWidth: .infinity)
             }
         }
