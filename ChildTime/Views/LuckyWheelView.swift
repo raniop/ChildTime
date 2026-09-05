@@ -140,21 +140,19 @@ struct LuckyWheelView: View {
                 .onTapGesture { spin() }
 
             // Center hub
+            // Glass hub
             Circle()
-                .fill(LinearGradient(
-                    colors: [.white, Color(hex: "FFD166")],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                ))
+                .fill(.white.opacity(0.26))
                 .frame(width: wheelSize * 0.18, height: wheelSize * 0.18)
-                .overlay(Circle().stroke(AppColor.starGold, lineWidth: 3))
-                .shadow(color: .black.opacity(0.3), radius: 6)
+                .overlay(Circle().stroke(.white.opacity(0.7), lineWidth: 2))
+                .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
                 .overlay(Text("🎁").font(.system(size: wheelSize * 0.09)))
 
             // Indicator arrow at the top of the wheel
             VStack {
                 Triangle()
-                    .fill(AppColor.starGold)
-                    .frame(width: 28, height: 32)
+                    .fill(.white)
+                    .frame(width: 26, height: 30)
                     .shadow(color: .black.opacity(0.4), radius: 3, y: 2)
                     .offset(y: 8)
                 Spacer()
@@ -205,7 +203,7 @@ struct LuckyWheelView: View {
                 .padding(.horizontal, AppSpacing.xl)
                 .padding(.vertical, 16)
                 .frame(maxWidth: .infinity)
-                .ctaGlass(Color(hex: "FFB347"), Color(hex: "FF9F1C"))
+                .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
         }
         .buttonStyle(.juicy)
         .frame(maxWidth: 480)
@@ -303,15 +301,17 @@ private struct WheelShape: View {
         let labelRotation = midDeg + (flip ? 180 : 0)
 
         return ZStack {
+            // Glass wedge: a translucent pane with the prize colour glowing
+            // through it (same idea as the world tiles), white seams between.
+            WedgePath(startAngle: startAngle, endAngle: endAngle)
+                .fill(.white.opacity(0.12))
             WedgePath(startAngle: startAngle, endAngle: endAngle)
                 .fill(LinearGradient(
-                    colors: [prize.color, prize.color.opacity(0.7)],
+                    colors: [prize.color.opacity(0.62), prize.color.opacity(0.32)],
                     startPoint: .topLeading, endPoint: .bottomTrailing
                 ))
-                .overlay(
-                    WedgePath(startAngle: startAngle, endAngle: endAngle)
-                        .stroke(.white.opacity(0.5), lineWidth: 2)
-                )
+            WedgePath(startAngle: startAngle, endAngle: endAngle)
+                .stroke(.white.opacity(0.55), lineWidth: 1.5)
 
             // Wedge content — emoji + short label, centered on the wedge bisector.
             VStack(spacing: 3) {
