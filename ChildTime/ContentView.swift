@@ -52,11 +52,22 @@ struct ContentView: View {
             if auth.isSignedIn, let cid = kidMode.active ? kidMode.childID : (settings.deviceRole == .child ? profiles.activeID : nil) {
                 Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
             }
+            // A PARENT's phone registers too, from the moment it has a household —
+            // not only while Kid Mode is on. Without this a parent device is
+            // invisible in the dashboard even though it reads and writes the
+            // children's data, which is why "which device is doing this?" took an
+            // hour to answer instead of a glance.
+            if auth.isSignedIn, settings.deviceRole != .child {
+                Task { await HouseholdManager.shared.registerParentDevice() }
+            }
         }
         // …and an immediate beat the moment a child device appears (no 15s wait).
         .task {
             if auth.isSignedIn, let cid = kidMode.active ? kidMode.childID : (settings.deviceRole == .child ? profiles.activeID : nil) {
                 await HouseholdManager.shared.registerDevice(forChildID: cid)
+            }
+            if auth.isSignedIn, settings.deviceRole != .child {
+                await HouseholdManager.shared.registerParentDevice()
             }
         }
         // Home-screen Quick Action → present the Kid Mode entry flow.

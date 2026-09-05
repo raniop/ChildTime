@@ -243,6 +243,15 @@ function render() {
     const pmails = f.parents.filter((p) => p.email).map((p) => esc(p.email)).join(" · ");
     // Child-device accounts only — the guest PARENT is not a "child device".
     const anon = f.parents.filter((p) => p.anonymous && !p.isGuestParent).length;
+    // DISTINCT physical devices. A device shared by two children has one row per
+    // child, so counting rows over-reports; and the chip beside this one counts
+    // anonymous ACCOUNTS, which is a different number again — that mismatch is
+    // what made "3 מכשירי ילד" sit above four device chips.
+    const deviceIDs = new Set();
+    f.children.forEach((k) => (k.deviceRows || []).forEach((d) => {
+      const parts = String(d.docID || "").split("_");
+      if (parts[1]) deviceIDs.add(parts[1]);
+    }));
     const stale = !f.lastActiveAt || (Date.now()/1000 - f.lastActiveAt) > 86400*14;
     const kidRows = f.children.map((k) => {
       const devList = (k.deviceRows || []).map((d) => {
@@ -282,7 +291,11 @@ function render() {
           <span class="chip mint">${f.children.length} ילדים</span>
           ${anon ? `<button class="chip dim" style="border:0;cursor:pointer;font-family:inherit"
               title="חשבונות אנונימיים של מכשירי ילד — לחצו לפירוט וניקוי"
-              onclick="event.stopPropagation(); this.closest('.family').querySelector('.anonlist').hidden ^= 1">${anon} מכשירי ילד ▾</button>` : ""}
+              onclick="event.stopPropagation(); this.closest('.family').querySelector('.anonlist').hidden ^= 1">${anon} חשבונות ילד ▾</button>` : ""}
+          ${deviceIDs.size ? `<span class="chip" title="מכשירים פיזיים שונים (מכשיר משותף נספר פעם אחת)">${deviceIDs.size} מכשירים 📱</span>` : ""}
+          ${(f.parentDevices || []).length ? `<span class="chip" style="background:rgba(255,210,63,.30)"
+              title="${(f.parentDevices || []).map((d) => (d.name || "?") + " · " + ago(d.lastSeenAt)).join(" | ")}"
+              >${f.parentDevices.length} מכשירי הורה 👪</span>` : ""}
           ${f.tombstones ? `<span class="chip pink">🪦 ${f.tombstones}</span>` : ""}
           <span class="chip gold">${ago(f.lastActiveAt)}</span>
           <button class="chip dim" style="border:0;cursor:pointer;font-family:inherit"

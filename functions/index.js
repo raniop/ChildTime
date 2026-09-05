@@ -1274,10 +1274,23 @@ exports.adminFamiliesOverview = onCall(
     // uids that own a device row seen in the last 14 days ("live account").
     // Rows from builds before the ownerUID stamp have no uid — tri-state below.
     const liveUIDs = new Set();
+    const parentDevsByHH = {};      // householdID -> the PARENT phones
     let anyRowHasUID = false;
     devsSnap.forEach((dv) => {
       const cid = dv.id.split("_")[0];
       const d = dv.data();
+      // A parent's phone registers in the same collection with role:"parent" and
+      // no childID, so it must not be grouped under a child — it is not one of
+      // the child's play devices and is never part of the window checks.
+      if (d.role === "parent" || !d.childID) {
+        (parentDevsByHH[d.householdID] = parentDevsByHH[d.householdID] || []).push({
+          docID: dv.id, lastSeenAt: d.lastSeenAt || 0,
+          kind: d.deviceKind || d.kind || null,
+          name: d.deviceName || d.name || null,
+          kidModeChildID: d.kidModeChildID || null,
+        });
+        return;
+      }
       if (d.ownerUID) {
         anyRowHasUID = true;
         const seen = typeof d.lastSeenAt === "number" ? d.lastSeenAt : 0;
@@ -1352,7 +1365,10 @@ exports.adminFamiliesOverview = onCall(
       const isDemo = d.demo === true ? true : d.demo === false ? false :
         ((d.familyLabel || "").includes("🧪") ||
          (named.length === 0 && kids.length > 0 && kids.every((k) => demoNames.has(strip(k.name)))));
+      const parentDevs = (parentDevsByHH[h.id] || [])
+        .sort((a, b) => (b.lastSeenAt || 0) - (a.lastSeenAt || 0));
       families.push({
+        parentDevices: parentDevs,
         id: h.id.slice(0, 8),
         fullId: h.id,     // needed by the admin actions (admin-only page)
         familyLabel: d.familyLabel || null,   // admin-set display label

@@ -46,6 +46,9 @@ final class HouseholdManager: ObservableObject {
     /// Devices connected per child (childID string → devices), so the parent can
     /// see which/how many devices each child plays on.
     @Published private(set) var devicesByChild: [String: [ChildDevice]] = [:]
+    /// The PARENT phones in this household — who they are and when each was last
+    /// seen. Without this there is no way to tell a parent's device from a child's.
+    @Published private(set) var parentDevices: [ChildDevice] = []
 
     /// PARENT-side live tracking of the last remote command sent per child, so
     /// the dashboard can show the truth instead of an optimistic "it worked":
@@ -552,12 +555,52 @@ final class HouseholdManager: ObservableObject {
                     Self.decode(ChildDevice.self, $0.data())
                 }.filter { $0.removed != true }   // hide removed devices from the parent
                 var grouped: [String: [ChildDevice]] = [:]
-                for d in devices { grouped[d.childID, default: []].append(d) }
+                var parents: [ChildDevice] = []
+                for d in devices {
+                    // Parent devices carry no childID — keep them out of the
+                    // per-child lists (they are not the child's play devices and
+                    // must never be counted by the cross-device window checks).
+                    if d.role == "parent" || d.childID.isEmpty { parents.append(d) }
+                    else { grouped[d.childID, default: []].append(d) }
+                }
+                self.parentDevices = parents.sorted { $0.lastSeenAt > $1.lastSeenAt }
                 for key in grouped.keys {
                     grouped[key]?.sort { $0.lastSeenAt > $1.lastSeenAt }
                 }
                 self.devicesByChild = grouped
             }
+    }
+
+    /// Register THIS device as a PARENT device of the household.
+    ///
+    /// Rani: "מכשיר הורה חייב להירשם ישירות שיוצרים משפחה". It lives in the same
+    /// `childDevices` collection so the existing listener and security rules pick
+    /// it up unchanged — the rules gate on householdID alone — with a doc id that
+    /// cannot collide with a child's (`parent_<install>` vs `<childID>_<install>`)
+    /// and an empty childID so it never groups under a real child.
+    func registerParentDevice() async {
+        #if canImport(FirebaseFirestore)
+        guard !Self.skipsCloudSync, let hh = household, uid != nil else { return }
+        guard ParentSettings.shared.deviceRole != .child else { return }
+        let now = Date()
+        let device = ChildDevice(
+            id: "parent_\(DeviceIdentity.installID)", childID: "",
+            householdID: hh.id, deviceID: DeviceIdentity.installID,
+            name: DeviceIdentity.friendlyName, kind: DeviceIdentity.kind,
+            systemVersion: DeviceIdentity.systemVersion,
+            joinedAt: now, lastSeenAt: now,
+            removed: nil, remoteUnlockMinutes: nil, remoteUnlockAt: nil
+        )
+        var data = Self.encode(device)
+        data["role"] = "parent"
+        data["kidModeChildID"] = KidModeManager.shared.active
+            ? (KidModeManager.shared.childID?.uuidString ?? "") : FieldValue.delete()
+        do {
+            try await db.collection("childDevices")
+                .document("parent_\(DeviceIdentity.installID)")
+                .setData(data, merge: true)
+        } catch { TofyLink("registerParentDevice failed: \(error.localizedDescription)") }
+        #endif
     }
 
     /// Register / refresh THIS device under a child (called when a child device

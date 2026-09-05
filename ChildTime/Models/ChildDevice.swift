@@ -21,6 +21,16 @@ struct ChildDevice: Codable, Identifiable, Equatable {
     /// resets to a fresh install (instead of silently re-registering). Optional so
     /// older docs without the key still decode.
     var removed: Bool?
+    /// "parent" for a PARENT's phone, nil/"child" for a child's device.
+    ///
+    /// A parent device used to appear here only when Kid Mode was on, looking
+    /// exactly like a child's iPad — so when four different installs were writing
+    /// one child's progress there was no way to tell which of them was a parent.
+    /// Registering and labelling them turns "which device is doing this?" from an
+    /// hour of guesswork into a line in the dashboard.
+    var role: String?
+    /// Set while this parent device is acting as a child (Kid Mode).
+    var kidModeChildID: String?
     /// The parent's last remote screen-time grant to this device — how many minutes
     /// and when (unix seconds). Written by `grantRemoteScreenTime`; lets the parent
     /// dashboard show a live countdown of the window they opened (the child's own
