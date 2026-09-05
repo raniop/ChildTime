@@ -2039,12 +2039,18 @@ extension View {
         return self
             .background {
                 ZStack {
-                    shape.fill(.ultraThinMaterial)
-                    shape.fill(LinearGradient(colors: [a.opacity(0.85), b.opacity(0.85)],
+                    // Glass first, colour second: a white pane with the gradient
+                    // glowing through it at ~60 %, and the top highlight every
+                    // pane has — so the button reads as glass, not a slab (Rani).
+                    shape.fill(.white.opacity(0.16))
+                    shape.fill(LinearGradient(colors: [a.opacity(0.62), b.opacity(0.58)],
                                               startPoint: .leading, endPoint: .trailing))
+                    shape.fill(LinearGradient(colors: [.white.opacity(0.35), .clear],
+                                              startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.55)))
                 }
             }
-            .overlay(shape.strokeBorder(.white.opacity(0.45), lineWidth: 1))
+            .overlay(shape.strokeBorder(LinearGradient(colors: [.white.opacity(0.75), .white.opacity(0.3)],
+                                                       startPoint: .top, endPoint: .bottom), lineWidth: 1.2))
             .clipShape(shape)
             .shadow(color: .black.opacity(0.3), radius: 16, y: 8)
     }
