@@ -60,8 +60,8 @@ struct ChoresKidView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 18, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             VStack(spacing: 0) {
                 header
@@ -144,17 +144,19 @@ struct ChoresKidView: View {
                     .font(.system(size: 17, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: 40, height: 40)
-                    .background(.white.opacity(0.18), in: Circle())
+                    .background(.white.opacity(0.22), in: Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
             }
             .accessibilityLabel("חזרה")
             Spacer()
             VStack(spacing: 2) {
                 Text("מַטְלוֹת הַבַּיִת 🧹")
-                    .font(.system(size: 22, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
+                    .font(.system(size: 24, weight: .black, design: .rounded))
+                    .foregroundStyle(GlassInk.primary)
+                    .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
                 Text("עוֹזְרִים בַּבַּיִת — וּבוֹחֲרִים פְּרָס!")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
+                    .font(.system(size: 13.5, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
             }
             Spacer()
             Color.clear.frame(width: 40, height: 40)
@@ -182,11 +184,7 @@ struct ChoresKidView: View {
                 Spacer()
             }
             .padding(AppSpacing.md)
-            .background(.white.opacity(0.13), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(.white.opacity(0.18), lineWidth: 1)
-            )
+            .glassPane(radius: 22, tint: Color(hex: "FFD23F"))
         }
     }
 
@@ -224,7 +222,8 @@ struct ChoresKidView: View {
                 .foregroundStyle(.white)
                 .lineLimit(1).minimumScaleFactor(0.55)
                 .padding(.horizontal, 9).padding(.vertical, 4)
-                .background(.white.opacity(0.16), in: Capsule())
+                .background(.white.opacity(0.14), in: Capsule())
+                .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
             // Same-day repeat counter — reserved even when absent so every
             // card in a grid row keeps the same height.
             Text(chore.timesPerDay > 1 ? "הַיּוֹם: \(chore.doneToday)/\(chore.timesPerDay) ✔️" : " ")
@@ -239,25 +238,17 @@ struct ChoresKidView: View {
             } label: {
                 Text("עָשִׂיתִי! ✅")
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(hex: "4B3FBF"))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
-                    .background(
-                        LinearGradient(colors: accentColors,
-                                       startPoint: .leading, endPoint: .trailing),
-                        in: Capsule()
-                    )
+                    .background(Capsule().fill(.white.opacity(0.92)))
             }
         }
         .padding(AppSpacing.sm)
         .frame(maxWidth: .infinity)
-        .background(.white.opacity(0.13), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(.white.opacity(0.18), lineWidth: 1)
-        )
+        .glassPane(radius: 22, tint: Color(hex: "48BFE3"))
     }
 
     /// 🎉 "בוצעו היום" card. APPROVED chores become a gendered "champion" card —
@@ -278,7 +269,7 @@ struct ChoresKidView: View {
             if sending.contains(chore.id) {
                 statusCapsule("שׁוֹלְחִים… 📨", background: .white.opacity(0.18))
             } else if waiting {
-                statusCapsule("מְחַכִּים לְאִשּׁוּר 🕐", background: Color(hex: "F4A261").opacity(0.55))
+                statusCapsule("מְחַכִּים לְאִשּׁוּר 🕐", background: Color(hex: "FFD98A").opacity(0.35))
             } else {
                 Text(Gendered.g("כָּל הַכָּבוֹד, אַלּוּף! 🎉", "כָּל הַכָּבוֹד, אַלּוּפָה! 🎉"))
                     .font(.system(size: 11.5, weight: .heavy, design: .rounded))
@@ -290,12 +281,7 @@ struct ChoresKidView: View {
         .frame(maxWidth: .infinity)
         // Approved → the child's gendered colour fills the card; otherwise the
         // neutral translucent look.
-        .background(approved ? accentColor.opacity(0.28) : .white.opacity(0.09),
-                    in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(approved ? accentColor.opacity(0.6) : .white.opacity(0.14), lineWidth: 1)
-        )
+        .glassPane(radius: 18, strength: approved ? 0.14 : 0.09, tint: approved ? accentColor : nil)
     }
 
     /// The "בוצעו היום 🎉" section under the to-do grid.
@@ -323,11 +309,7 @@ struct ChoresKidView: View {
         }
         .padding(AppSpacing.lg)
         .frame(maxWidth: .infinity)
-        .background(
-            LinearGradient(colors: [Color(hex: "06D6A0").opacity(0.5), Color(hex: "48BFE3").opacity(0.5)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing),
-            in: RoundedRectangle(cornerRadius: 22, style: .continuous)
-        )
+        .glassPane(radius: 22, tint: Color(hex: "8CFFC4"))
     }
 
     private func statusCapsule(_ text: String, background: some ShapeStyle) -> some View {
