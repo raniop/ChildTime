@@ -147,7 +147,6 @@ struct LuckyWheelView: View {
                 .frame(width: wheelSize * 0.18, height: wheelSize * 0.18)
                 .overlay(Circle().stroke(.white.opacity(0.7), lineWidth: 2))
                 .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
-                .overlay(Text("🎁").font(.system(size: wheelSize * 0.09)))
 
             // Indicator arrow at the top of the wheel
             VStack {
@@ -161,6 +160,12 @@ struct LuckyWheelView: View {
             .frame(width: wheelSize, height: wheelSize)
         }
         .frame(width: wheelSize, height: wheelSize)
+        // The wheel is GEOMETRY: in the app's RTL environment SwiftUI mirrors
+        // `rotationEffect`, so the wheel spun counter-clockwise and stopped one
+        // wedge away from the prize it had actually granted (Rani: "החץ על חד-קרן
+        // ורושם 50 יהלומים"). Drawn LTR, the landing maths and the pointer agree,
+        // and the labels' counter-rotation keeps them upright.
+        .environment(\.layoutDirection, .leftToRight)
     }
 
     private func winnerCard(_ prize: WheelPrize) -> some View {
