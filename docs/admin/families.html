@@ -206,12 +206,28 @@ const esc = (s) => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").re
 function render() {
   if (!DATA) return;
   const q = $("search").value.trim().toLowerCase();
-  const t = DATA.totals;
+  // Rani: the demo families are noise in the headline numbers — he wants to see
+  // the real business. Computed here from `isDemo`, which the client already has
+  // per family, rather than from DATA.totals (which counts everything) so it
+  // needs no server change and stays correct the moment a family is toggled.
+  const real = DATA.families.filter((f) => !f.isDemo);
+  const dayAgo = (Date.now() / 1000) - 86400;
+  const t = {
+    families: real.length,
+    familiesWithKids: real.filter((f) => f.children.length > 0).length,
+    children: real.reduce((n, f) => n + f.children.length, 0),
+    activeToday: real.reduce((n, f) =>
+      n + f.children.filter((k) => Math.max(k.lastActiveAt || 0, k.lastSeenAt || 0) >= dayAgo).length, 0),
+  };
+  const demoKids = DATA.families.filter((f) => f.isDemo)
+    .reduce((n, f) => n + f.children.length, 0);
   $("totals").innerHTML = `
     <div class="tot"><b>${nf.format(t.families)}</b><span>משפחות נרשמו</span></div>
     <div class="tot"><b>${nf.format(t.familiesWithKids)}</b><span>משפחות עם ילדים</span></div>
     <div class="tot"><b>${nf.format(t.children)}</b><span>ילדים</span></div>
-    <div class="tot"><b>${nf.format(t.activeToday)}</b><span>פעילות היום</span></div>`;
+    <div class="tot"><b>${nf.format(t.activeToday)}</b><span>ילדים פעילים היום</span></div>`
+    + (demoKids ? `<div class="stamp" style="margin-top:8px">
+         לא כולל ${nf.format(demoKids)} ילדי דמו · ${nf.format(DATA.families.length - real.length)} משפחות דמו</div>` : "");
   $("stamp").textContent = "עודכן " + new Date(DATA.generatedAt*1000).toLocaleTimeString("he-IL");
 
   const match = (f) => !q ||
