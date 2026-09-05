@@ -30,6 +30,7 @@ struct EmailAuthView: View {
                     }
                     .pickerStyle(.segmented)
                 }
+                .glassRows()
 
                 Section("פרטי החשבון") {
                     if mode == .signUp {
@@ -63,6 +64,7 @@ struct EmailAuthView: View {
                         .accessibilityLabel(showPassword ? "הסתר סיסמה" : "הצג סיסמה")
                     }
                 }
+                .glassRows()
 
                 if mode == .signIn {
                     Section {
@@ -72,13 +74,16 @@ struct EmailAuthView: View {
                         .disabled(!email.contains("@"))
                         .font(.caption)
                     }
+                    .glassRows()
                 }
 
                 if let info = auth.infoMessage {
                     Section { Text(info).foregroundStyle(.green).font(.caption) }
+                    .glassRows()
                 }
                 if let err = auth.lastError {
                     Section { Text(err).foregroundStyle(.red).font(.caption) }
+                    .glassRows()
                 }
 
                 Section {
@@ -94,6 +99,7 @@ struct EmailAuthView: View {
                     }
                     .disabled(!canSubmit || working)
                 }
+                .glassRows()
             }
             .glassForm()
             .scrollDismissesKeyboard(.interactively)

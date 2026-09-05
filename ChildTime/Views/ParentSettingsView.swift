@@ -127,6 +127,7 @@ struct ParentSettingsView: View {
             }
             .buttonStyle(.plain)
         }
+        .glassRows()
     }
 
     private var premiumSection: some View {
@@ -191,6 +192,7 @@ struct ParentSettingsView: View {
                 EmptyView()
             }
         }
+        .glassRows()
     }
 
     private var premiumStatusSubtitle: String {
@@ -255,7 +257,9 @@ struct ParentSettingsView: View {
                 }
             }
         }
+        .glassRows()
         }
+        .glassRows()
     }
 
     /// Moved here from the parent home (the home is now the approved glass
@@ -273,6 +277,7 @@ struct ParentSettingsView: View {
         } footer: {
             Text("עדכונים קצרים ואישיים על כל ילד — במה השתפר, איפה התקשה ומה לתרגל.")
         }
+        .glassRows()
     }
 
     private func freqShortLabel(_ f: ParentSettings.InsightFrequency) -> String {
@@ -359,6 +364,7 @@ struct ParentSettingsView: View {
                     .foregroundStyle(.red)
             }
         }
+        .glassRows()
     }
 
     @StateObject private var push = PushManager.shared
@@ -390,7 +396,9 @@ struct ParentSettingsView: View {
         } footer: {
             Text("קבלו עדכון כשהילד מתחיל ומסיים לשחק, פותח רצף, זוכה בגלגל מזל או מגלה תחום חדש — וגם דוח שבועי. ההתראות נשלחות בין המכשירים בבית. \"שלח התראת בדיקה\" שולח התראה אליכם עכשיו כדי לוודא שהכול עובד.")
         }
+        .glassRows()
         .task { await push.refreshAuthorizationStatus() }
+        .glassRows()
     }
 
     private var rewardSection: some View {
@@ -422,6 +430,7 @@ struct ParentSettingsView: View {
         } footer: {
             Text("הילד מרוויח \(settings.batchMinutes) דקות משחק על כל \(settings.batchAnswers) תשובות נכונות. אפשר לשנות את שני המספרים. ברירת המחדל: 10 תשובות = 4 דקות.")
         }
+        .glassRows()
     }
 
     private var smartFeedSection: some View {
@@ -437,6 +446,7 @@ struct ParentSettingsView: View {
         } footer: {
             Text("ב\"טופי טיים\" המערכת בונה לכל ילד פיד אישי: 80% מהנושאים שהוא אוהב ו-20% תחומים חדשים לגילוי. הפיד משתפר אחרי כל שאלה. כל \(settings.questionsPerWheel) שאלות הילד מרוויח סיבוב חינם בגלגל המזל.")
         }
+        .glassRows()
     }
 
 
@@ -451,6 +461,7 @@ struct ParentSettingsView: View {
                 ? "כל טעות מורידה \(perMistake) דק' (חצי מתגמול תשובה נכונה) — אבל הילד יכול להחזיר את הזמן מיד: תשובה נכונה ונקייה בשאלה הבאה מחזירה את כל הזמן שירד. אף פעם לא מוצג לילד \"טעית\" או \"הפסדת\"."
                 : "כבוי. הילד לא יאבד זמן גם אם יטעה הרבה.")
         }
+        .glassRows()
     }
 
     private var soundsSection: some View {
@@ -461,6 +472,7 @@ struct ParentSettingsView: View {
         } footer: {
             Text("הצלילים באפליקציה רכים ומשמשים כפידבק על תשובות נכונות / שגויות. ניתן לכבות אותם לגמרי.")
         }
+        .glassRows()
     }
 
     private var appsSection: some View {
@@ -535,6 +547,7 @@ struct ParentSettingsView: View {
                  ? "כל האפליקציות ייחסמו עד שהילד מרוויח זמן — חוץ מהאפליקציות שתבחרו כ\"מותרות\". חובה לכלול את ChildTime ברשימה."
                  : "רק האפליקציות שתבחרו ייחסמו. כל השאר נשארות פתוחות.")
         }
+        .glassRows()
     }
 
     /// Device-level escape hatches a parent may need from any device: send this
@@ -566,6 +579,7 @@ struct ParentSettingsView: View {
         } footer: {
             Text("\"הַחְלֵף תַּפְקִיד\" מַחֲזִיר אֶת הַמַּכְשִׁיר לְמָסַךְ \"מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר?\" — לְמָשָׁל לְהָפֹךְ מַכְשִׁיר הוֹרֶה בַּחֲזָרָה לְמַכְשִׁיר יֶלֶד. בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה; הַכַּפְתּוֹר פּוֹתֵחַ חַלּוֹן קָצָר לְהָסָרָה אֲמִתִּית.")
         }
+        .glassRows()
         .confirmationDialog("לַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד?",
                             isPresented: $showRolePickerConfirm, titleVisibility: .visible) {
             Button("חֲזֹר לִבְחִירָה") {
@@ -587,6 +601,7 @@ struct ParentSettingsView: View {
         } message: {
             Text("הַמַּכְשִׁיר יַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד. הַנְּתוּנִים בֶּעָנָן נִשְׁמָרִים — אֶפְשָׁר לִבְחֹר יֶלֶד וְלִסְרֹק שׁוּב, אוֹ לְהִשָּׁאֵר הוֹרֶה.")
         }
+        .glassRows()
     }
 
     private var privacySection: some View {
@@ -622,6 +637,7 @@ struct ParentSettingsView: View {
         } footer: {
             Text("ייצוא מפיק קובץ JSON עם כל הפרופילים, ההתקדמות וההיסטוריה.\n\n‏\"אפס מכשיר זה\" מנקה את המכשיר לגמרי (מנותק, בלי קוד, בלי נתונים מקומיים) אבל משאיר את המשפחה בענן.\n\n‏\"מחק את כל הנתונים\" מוחק לצמיתות גם מהמכשיר וגם מהענן — לא ניתן לשחזר.")
         }
+        .glassRows()
         .confirmationDialog("לאפס את המכשיר הזה?",
                             isPresented: $showResetDeviceConfirm, titleVisibility: .visible) {
             Button("אפס מכשיר", role: .destructive) {
@@ -639,6 +655,7 @@ struct ParentSettingsView: View {
         } message: {
             Text("פעולה זו תמחק את כל הילדים, ההתקדמות וההיסטוריה מהמכשיר ומהענן, ותנתק את החשבון. לא ניתן לבטל.")
         }
+        .glassRows()
     }
 
     private func deleteEverything() async {
@@ -678,6 +695,7 @@ struct ParentSettingsView: View {
         } footer: {
             Text("הקוד נשמר מוצפן (hash) במכשיר ולא בטקסט גלוי.")
         }
+        .glassRows()
     }
 
     private var versionSection: some View {
@@ -706,9 +724,11 @@ struct ParentSettingsView: View {
             .padding(.vertical, 6)
             .listRowBackground(Color.clear)
         }
+        .glassRows()
         .sheet(isPresented: $showWhatsNew) {
             WhatsNewView(onDone: { showWhatsNew = false })
         }
+        .glassRows()
     }
 }
 
@@ -728,13 +748,16 @@ struct ChangePINView: View {
                     SecureField("אמת קוד", text: $confirmPIN)
                         .keyboardType(.numberPad)
                 }
+                .glassRows()
                 if let error = error {
                     Section { Text(error).foregroundStyle(.red) }
+                    .glassRows()
                 }
                 Section {
                     Button("שמור") { save() }
                         .disabled(newPIN.count != 4 || confirmPIN.count != 4)
                 }
+                .glassRows()
             }
             .glassForm()
             .navigationTitle("שינוי קוד הורה")

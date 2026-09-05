@@ -127,3 +127,23 @@ struct GlassBackdrop: View {
         .ignoresSafeArea()
     }
 }
+
+/// Glass row for `Form`/`List` sections. `.listRowBackground` only takes effect
+/// on the rows/sections it is attached to — attached to the Form itself it does
+/// nothing (the rows came out as black system pills). Chain `.glassRows()` on
+/// each `Section`.
+struct GlassRowBackground: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .fill(Color.white.opacity(0.14))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Color.white.opacity(0.22), lineWidth: 1))
+    }
+}
+
+extension View {
+    func glassRows() -> some View {
+        self.listRowBackground(GlassRowBackground())
+            .listRowSeparatorTint(Color.white.opacity(0.18))
+    }
+}

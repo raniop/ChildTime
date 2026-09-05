@@ -24,6 +24,7 @@ struct ChildWorldsView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
+                .glassRows()
 
                 Section {
                     // The bonus arena isn't a topic toggle — it mixes whatever
@@ -46,6 +47,7 @@ struct ChildWorldsView: View {
                 } footer: {
                     Text("\"טוֹפִי טַיים\" תָּמִיד פְּתוּחָה וּמַגִּישָׁה רַק מֵהַנּוֹשְׂאִים הַפְּעִילִים. חַיָּב לְהִשָּׁאֵר לְפָחוֹת עוֹלָם אֶחָד פָּתוּחַ.")
                 }
+                .glassRows()
             }
             .glassForm()
             .navigationTitle("עוֹלָמוֹת פְּעִילִים")

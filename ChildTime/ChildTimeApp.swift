@@ -297,6 +297,7 @@ struct ChildTimeApp: App {
             }
         case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
         case "shop": ShopView()   // DEMO_SCREEN=shop — the kid's character shop
+        case "parentsettings": ParentSettingsView()   // DEMO_SCREEN=parentsettings
         case "kidhome":                                     // DEMO_SCREEN=kidhome — the child's home
             WorldMapView()   // (+ DEMO_GIFT_MINUTES=30 to show the 💝 button)
                 .onAppear {

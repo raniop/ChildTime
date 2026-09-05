@@ -53,12 +53,14 @@ struct ChoresParentView: View {
                         }
                         .pickerStyle(.segmented)
                     }
+                    .glassRows()
                 }
 
                 if !pending.isEmpty {
                     Section(pending.count == 1 ? "מחכה לאישור שלכם 🕐" : "מחכות לאישור שלכם 🕐") {
                         ForEach(pending) { chore in pendingRow(chore) }
                     }
+                    .glassRows()
                 }
 
                 if choreStore.totals(forChild: profile.id).minutes > 0 {
@@ -66,6 +68,7 @@ struct ChoresParentView: View {
                         Text("סה\"כ הרוויח\(profile.gender == .girl ? "ה" : "") מהמטלות: 🎮 \(choreStore.totals(forChild: profile.id).minutes) דקות משחק")
                             .font(.caption).foregroundStyle(.secondary)
                     }
+                    .glassRows()
                 }
 
                 Section {
@@ -81,6 +84,7 @@ struct ChoresParentView: View {
                 } footer: {
                     Text("כל המטלות זמינות אוטומטית, ופרס דקות המשחק מוצע לפי גודל המטלה. לחיצה על מטלה — עריכת הפרס; החלקה — הסתרה.")
                 }
+                .glassRows()
 
                 if !hidden.isEmpty {
                     Section("מטלות שהוסתרו 🙈") {
@@ -94,6 +98,7 @@ struct ChoresParentView: View {
                             }
                         }
                     }
+                    .glassRows()
                 }
 
                 Section(editing == nil ? "מטלה חדשה ➕" : "עריכת מטלה ✏️") {
@@ -138,6 +143,7 @@ struct ChoresParentView: View {
                     .disabled((editing == nil && formTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                               || formMinutes == 0)
                 }
+                .glassRows()
             }
             .glassForm()
             .navigationTitle("מטלות הבית · \(profile.name)")

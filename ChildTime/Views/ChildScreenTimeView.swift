@@ -31,6 +31,7 @@ struct ChildScreenTimeView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
+                .glassRows()
 
                 Section {
                     Toggle("הַגְבָּלַת זְמַן יוֹמִית", isOn: $limited)
@@ -65,6 +66,7 @@ struct ChildScreenTimeView: View {
                 } footer: {
                     Text("הַיֶּלֶד מַרְוִיחַ עַד הַתִּקְרָה הַזּוֹ בִּלְמִידָה. בּוֹנוּסִים מֵהַגַּלְגַּל/קוּפְסָה נִשְׁמָרִים לְמָחָר כְּשֶׁמַּגִּיעִים לַתִּקְרָה.")
                 }
+                .glassRows()
             }
             .glassForm()
             .navigationTitle("זְמַן מָסָךְ יוֹמִי")

@@ -25,6 +25,7 @@ struct ChildDifficultyView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
+                .glassRows()
 
                 Section {
                     HStack(spacing: 8) {
@@ -44,6 +45,7 @@ struct ChildDifficultyView: View {
                 } header: {
                     Text("הַחֵל עַל כָּל הַנּוֹשְׂאִים")
                 }
+                .glassRows()
 
                 Section {
                     ForEach(Topic.allCases) { topic in
@@ -64,6 +66,7 @@ struct ChildDifficultyView: View {
                 } header: {
                     Text("לְפִי נוֹשֵׂא")
                 }
+                .glassRows()
             }
             .glassForm()
             .navigationTitle("רָמַת קוֹשִׁי")

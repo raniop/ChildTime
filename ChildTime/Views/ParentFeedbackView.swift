@@ -46,6 +46,7 @@ struct ParentFeedbackView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
+            .glassRows()
             Section("הַהוֹדָעָה שֶׁלָּכֶם") {
                 TextEditor(text: $text)
                     .frame(minHeight: 140)
@@ -60,6 +61,7 @@ struct ParentFeedbackView: View {
                         }
                     }
             }
+            .glassRows()
             Section {
                 Button {
                     send()
@@ -73,6 +75,7 @@ struct ParentFeedbackView: View {
                 }
                 .disabled(!canSend)
             }
+            .glassRows()
         }
             .glassForm()
         .onAppear { focused = true }
