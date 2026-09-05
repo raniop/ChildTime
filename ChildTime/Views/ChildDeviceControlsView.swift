@@ -35,9 +35,8 @@ struct ChildDeviceControlsView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            FloatingOrbs.home()
-            SparkleField(count: 16, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             ScrollView {
                 VStack(spacing: AppSpacing.lg) {
@@ -65,7 +64,8 @@ struct ChildDeviceControlsView: View {
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
                             .padding(.horizontal, 28).padding(.vertical, 12)
-                            .background(.white.opacity(0.12), in: Capsule())
+                            .background(Capsule().fill(.white.opacity(0.14)))
+                            .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }
                 }
                 .padding(.horizontal, AppSpacing.lg)
@@ -103,12 +103,13 @@ struct ChildDeviceControlsView: View {
     private var header: some View {
         VStack(spacing: AppSpacing.sm) {
             Image(systemName: "slider.horizontal.3")
-                .font(.system(size: 48))
-                .foregroundStyle(AppColor.starGold)
-                .glow(AppColor.starGold, radius: 12)
-            Text("בַּקָּרַת הַמַּכְשִׁיר")
-                .font(.system(size: 28, weight: .heavy, design: .rounded))
+                .font(.system(size: 44, weight: .semibold))
                 .foregroundStyle(.white)
+                .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+            Text("בַּקָּרַת הַמַּכְשִׁיר")
+                .font(.system(size: 28, weight: .black, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
         }
     }
 
@@ -128,8 +129,7 @@ struct ChildDeviceControlsView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 15)
-                .background(AppColor.flameOrange, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .glow(AppColor.flameOrange.opacity(0.6), radius: 8)
+                .ctaGlass(AppColor.flameOrange, Color(hex: "FF9F1C"), colour: 0.7)
         }
         .buttonStyle(.juicy)
     }
@@ -142,8 +142,7 @@ struct ChildDeviceControlsView: View {
         VStack(alignment: .leading, spacing: AppSpacing.md) { content() }
             .padding(AppSpacing.lg)
             .frame(maxWidth: .infinity)
-            .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(tint.opacity(0.45), lineWidth: 1))
+            .glassPane(radius: 22, tint: tint == .white ? nil : tint)
     }
 
     private func sectionHead(_ title: String, _ subtitle: String, icon: String, tint: Color) -> some View {
@@ -196,17 +195,15 @@ struct ChildDeviceControlsView: View {
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 14).padding(.vertical, 8)
-                        .background(AppColor.flameOrange.opacity(0.9), in: Capsule())
+                        .background(Capsule().fill(AppColor.flameOrange.opacity(0.55)))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.4), lineWidth: 1))
                 }
                 .buttonStyle(.juicy)
             }
         }
         .padding(.horizontal, AppSpacing.lg).padding(.vertical, 14)
         .frame(maxWidth: .infinity)
-        .background((open ? AppColor.successMint : AppColor.starGold).opacity(0.16),
-                    in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
-            .stroke((open ? AppColor.successMint : AppColor.starGold).opacity(0.5), lineWidth: 1))
+        .glassPane(radius: 18, tint: open ? AppColor.successMint : Color(hex: "FFD23F"))
     }
 
     // MARK: - Quick open (manual, all apps)
@@ -249,10 +246,10 @@ struct ChildDeviceControlsView: View {
         } label: {
             Text(title)
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
-                .foregroundStyle(AppColor.textOnLight)
+                .foregroundStyle(Color(hex: "4B3FBF"))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
         }
         .buttonStyle(.juicy)
         .disabled(allowed <= 0)
@@ -279,8 +276,8 @@ struct ChildDeviceControlsView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.28), lineWidth: 1))
+                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.14)))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
             }
             .buttonStyle(.juicy)
 
@@ -303,13 +300,10 @@ struct ChildDeviceControlsView: View {
         } label: {
             Text(title)
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(hex: "4B3FBF"))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(
-                    LinearGradient(colors: [AppColor.successMint, Color(hex: "06A57E")],
-                                   startPoint: .top, endPoint: .bottom),
-                    in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
         }
         .buttonStyle(.juicy)
     }
@@ -339,13 +333,11 @@ struct ChildDeviceControlsView: View {
                 Label(selectedCount > 0 ? "עֲרִיכַת הָרְשִׁימָה" : "בְּחִירַת אַפְּלִיקַצְיוֹת",
                       systemImage: "app.badge.fill")
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(hex: "4B3FBF"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 13)
-                    .background(
-                        LinearGradient(colors: [AppColor.successMint, Color(hex: "06A57E")],
-                                       startPoint: .top, endPoint: .bottom),
-                        in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
+                    .foregroundStyle(Color(hex: "4B3FBF"))
             }
             .buttonStyle(.juicy)
         }
@@ -373,8 +365,8 @@ struct ChildDeviceControlsView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.28), lineWidth: 1))
+                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.14)))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
             }
             .buttonStyle(.juicy)
         }
@@ -410,7 +402,8 @@ struct ChildDeviceControlsView: View {
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 13)
-                    .background(AppColor.flameOrange.opacity(0.9), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(AppColor.flameOrange.opacity(0.55)))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.4), lineWidth: 1))
             }
             .buttonStyle(.juicy)
             if let removalNote {
@@ -431,8 +424,7 @@ struct ChildDeviceControlsView: View {
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.flameOrange)
                 .frame(maxWidth: .infinity).padding(.vertical, 13)
-                .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(AppColor.flameOrange.opacity(0.5), lineWidth: 1))
+                .glassInset(radius: 14)
         }
         .buttonStyle(.juicy)
     }
