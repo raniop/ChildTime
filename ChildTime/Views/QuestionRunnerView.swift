@@ -851,7 +851,7 @@ struct QuestionRunnerView: View {
         reAskQueue = []
         QuestionMemory.shared.beginSession()   // no repeats within this session
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            companion.cheer(mode.isFeed ? "טוֹפִי טַיְם — קָדִימָה! 🧠" : "מוּכָן? קָדִימָה!")
+            companion.cheer(mode.isFeed ? "טוֹפִי טַיים — קָדִימָה! 🧠" : "מוּכָן? קָדִימָה!")
         }
         nextQuestion()
     }

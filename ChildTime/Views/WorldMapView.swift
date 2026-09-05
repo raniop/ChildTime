@@ -219,7 +219,7 @@ struct WorldMapView: View {
                                 case .tofyTime:
                                     FeatureCard(
                                         emoji: "🎲",
-                                        title: "טוֹפִי טַיְם",
+                                        title: "טוֹפִי טַיים",
                                         subtitle: "שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ",
                                         gradient: AppGradient.portal,
                                         glowColor: AppColor.companionGlow
@@ -270,8 +270,8 @@ struct WorldMapView: View {
                                 gradient: LinearGradient(colors: [Color(hex: "EF476F"), Color(hex: "9B5DE5")],
                                                          startPoint: .topLeading, endPoint: .bottomTrailing),
                                 glowColor: Color(hex: "EF476F"),
-                                badge: gamesUnlockedToday
-                                    ? nil
+                                badge: !subs.isPremium ? "👑 טוֹפִי+"
+                                    : gamesUnlockedToday ? nil
                                     : "\(min(progress.correctToday, gamesGateTarget))/\(gamesGateTarget) ✅",
                                 foot: gamesUnlockedToday ? "🎮 פָּתוּחַ הַיּוֹם" : "חִמּוּם יוֹמִי",
                                 footFrac: gamesUnlockedToday ? nil
@@ -733,6 +733,7 @@ struct WorldMapView: View {
                 dailyChallengeCard
                 choresTopCard
             }
+            .fixedSize(horizontal: false, vertical: true)   // twins: same height, from content
         }
         .environment(\.layoutDirection, .leftToRight)
         .padding(14)
@@ -800,7 +801,6 @@ struct WorldMapView: View {
                             .lineLimit(1).minimumScaleFactor(0.6)
                     }
                 }
-                .frame(height: 26)
 
                 headerTrack(frac: frac,
                             fill: LinearGradient(colors: [.white, .white], startPoint: .leading, endPoint: .trailing),
@@ -808,8 +808,7 @@ struct WorldMapView: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 10)
-            .frame(maxWidth: .infinity)
-            .frame(height: Self.headerCardHeight)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .glassInset(radius: 18)
         }
         .buttonStyle(.juicy)
@@ -1357,7 +1356,7 @@ struct WorldMapView: View {
                     .padding(.horizontal, AppSpacing.xl)
                     .padding(.vertical, 16)
                     .frame(maxWidth: .infinity)
-                    .ctaGlass(Color(hex: "FF6FAE"), Color(hex: "FFB347"))
+                    .ctaGlass(Color(hex: "FF5FA8"), Color(hex: "FFA53A"), colour: 0.82)
                 }
                 .buttonStyle(.juicy)
                 .frame(maxWidth: 480)
@@ -1760,7 +1759,6 @@ struct WorldMapView: View {
                         .foregroundStyle(.white.opacity(0.88))
                         .lineLimit(1).minimumScaleFactor(0.6)
                 }
-                .frame(height: 26)
 
                 headerTrack(frac: frac,
                             fill: LinearGradient(colors: [.white, .white], startPoint: .leading, endPoint: .trailing),
@@ -1768,8 +1766,7 @@ struct WorldMapView: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 10)
-            .frame(maxWidth: .infinity)
-            .frame(height: Self.headerCardHeight)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .glassInset(radius: 18)
         }
         .buttonStyle(.juicy)
@@ -2025,7 +2022,7 @@ struct SeededRandom {
 extension View {
     /// The kid's big action buttons on glass: the brand gradient at 85 % over a
     /// blur, a light edge, a soft drop shadow — never an opaque slab (Rani).
-    func ctaGlass(_ a: Color, _ b: Color) -> some View {
+    func ctaGlass(_ a: Color, _ b: Color, colour: Double = 0.6) -> some View {
         let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
         return self
             .background {
@@ -2037,7 +2034,7 @@ extension View {
                     // reading through the label.
                     shape.fill(Color(hex: "2A1E5C").opacity(0.35))
                     shape.fill(.white.opacity(0.16))
-                    shape.fill(LinearGradient(colors: [a.opacity(0.62), b.opacity(0.58)],
+                    shape.fill(LinearGradient(colors: [a.opacity(colour + 0.02), b.opacity(colour - 0.02)],
                                               startPoint: .leading, endPoint: .trailing))
                     shape.fill(LinearGradient(colors: [.white.opacity(0.35), .clear],
                                               startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.55)))
