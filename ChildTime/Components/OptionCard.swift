@@ -62,9 +62,9 @@ struct OptionCard: View {
                     .frame(maxWidth: .infinity, minHeight: minHeight)
                     .padding(.horizontal, 12)
 
-                // Number badge (1-4) — kept for the read-aloud ("answer 2"), but
-                // not drawn: the approved glass answers are clean panes.
-                if false { VStack {
+                // Number badge (1-4) — a glass chip in the corner (Rani wanted the
+                // numbers back); the read-aloud says "answer 2" to match.
+                VStack {
                     HStack {
                         Text("\(index + 1)")
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
@@ -76,7 +76,7 @@ struct OptionCard: View {
                     }
                     Spacer()
                 }
-                .padding(8) }
+                .padding(8)
 
                 // Hint badge — only on eliminated options. Top-TRAILING corner so
                 // it never sits on top of the number badge.
