@@ -1070,6 +1070,7 @@ struct WorldMapView: View {
             }
             .monospacedDigit()
             .lineLimit(1).minimumScaleFactor(0.6)
+            .environment(\.layoutDirection, .leftToRight)   // "60/90" is a number: reads LTR
             Text(label)
                 .font(.system(size: isCompact ? 12 : 13.5, weight: .bold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)

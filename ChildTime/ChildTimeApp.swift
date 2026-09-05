@@ -303,6 +303,11 @@ struct ChildTimeApp: App {
                     // A previous DEMO_SCREEN=unlocked run leaves a fake open window
                     // behind; the home must start closed.
                     if ProgressStore.shared.isUnlocked { ProgressStore.shared.endUnlock() }
+                    // Demo only: a daily cap, so the strip reads "60/90" like the mockup.
+                    if !ParentSettings.shared.dailyCapEnabled {
+                        ParentSettings.shared.dailyCapEnabled = true
+                        ParentSettings.shared.maxMinutesPerDay = 90
+                    }
                 }
         case "askparent": AskParentView(onClose: {})   // DEMO_SCREEN=askparent — what a CHILD device shows instead of the paywall
         case "paywall":  PaywallView()    // DEMO_SCREEN=paywall — the "טופי+" subscription screen (App Review proof)
