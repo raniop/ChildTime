@@ -307,6 +307,7 @@ struct ParentDashboardView: View {
             // Root-level alerts hosted on an invisible overlay — keeps the main
             // modifier chain small enough for the type-checker.
             .overlay(rootAlertsHost)
+            .overlay(paywallHost)
             .sheet(isPresented: $showingKidMode) {
                 KidModeEntryView()
                     .environment(\.layoutDirection, .rightToLeft)
@@ -1671,27 +1672,37 @@ struct ParentDashboardView: View {
     /// Invisible host for the root-level alerts (revoke-gift confirm, remote
     /// open/lock confirm, family-tile explanations). Splitting them off the
     /// main body's modifier chain keeps the type-checker happy.
+    /// 👑 Family subscription host — its own zero-size view so the paywall cover
+    /// and the premium watcher never land on `body` or `rootAlertsHost`, both of
+    /// which already sit at the type-checker's limit.
+    private var paywallHost: some View {
+        Color.clear
+            .frame(width: 0, height: 0)
+            .allowsHitTesting(false)
+            .fullScreenCover(isPresented: $showingPaywall) { gatedPaywall }
+            .onChange(of: subs.isPremium) { premium in
+                if premium { remote.clearPremiumRequests() }
+            }
+    }
+
+    /// Bought here, behind the parent gate — Kids Category: commerce is always gated.
+    private var gatedPaywall: some View {
+        ParentGateView(allowClose: true, gateTitle: "אֵזוֹר הוֹרִים",
+                       gateReason: "כְּדֵי לִפְתּוֹחַ אֶת הַמִּנּוּי לַמִּשְׁפָּחָה — הַזִּינוּ אֶת הַקּוֹד",
+                       useFaceID: true, respectSession: false) {
+            PaywallView()
+                .environmentObject(subs)
+                .environment(\.layoutDirection, .rightToLeft)
+        }
+        .environmentObject(settings)
+        .environment(\.layoutDirection, .rightToLeft)
+    }
+
     private var rootAlertsHost: some View {
         Color.clear
             .frame(width: 0, height: 0)
             .allowsHitTesting(false)
-        // 👑 Family subscription, bought here behind the parent gate (Kids
-        // Category: commerce is always gated), reached from the child's request.
-        .fullScreenCover(isPresented: $showingPaywall) {
-            ParentGateView(allowClose: true, gateTitle: "אֵזוֹר הוֹרִים",
-                           gateReason: "כְּדֵי לִפְתּוֹחַ אֶת הַמִּנּוּי לַמִּשְׁפָּחָה — הַזִּינוּ אֶת הַקּוֹד",
-                           useFaceID: true, respectSession: false) {
-                PaywallView()
-                    .environmentObject(subs)
-                    .environment(\.layoutDirection, .rightToLeft)
-            }
-            .environmentObject(settings)
-            .environment(\.layoutDirection, .rightToLeft)
-        }
-        // The family went premium → the children's requests are answered.
-        .onChange(of: subs.isPremium) { _, premium in
-            if premium { remote.clearPremiumRequests() }
-        }
+
         // "Lock + revoke gift" confirmation — a real consequence, so it asks.
         // Presented from either menu (root grid ⋯ / detail ⋯).
         .alert(
