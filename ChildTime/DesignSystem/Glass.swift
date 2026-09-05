@@ -63,3 +63,31 @@ enum GlassInk {
     static let warn = Color(hex: "FFD98A")
     static let weak = Color(hex: "FF9AA0")
 }
+
+
+extension View {
+    /// A `Form`/`List` on the brand gradient with glass rows. Forces the dark
+    /// colour scheme for the subtree so `.primary/.secondary` (and every stock
+    /// control) resolve to light ink on the gradient — the cheapest correct way
+    /// to move a hundred-line settings screen to glass without touching each row.
+    func glassForm() -> some View {
+        self
+            .scrollContentBackground(.hidden)
+            .listRowBackground(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.white.opacity(0.12))
+                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
+                    .padding(.vertical, 2)
+            )
+            .background(AppGradient.dreamy.ignoresSafeArea())
+            .environment(\.colorScheme, .dark)
+            .tint(.white)
+    }
+
+    /// Legacy card subtrees: glass shell + dark scheme so their `.secondary`
+    /// text turns light. Use where re-inking every label isn't worth it.
+    func legacyGlassCard(radius: CGFloat = 22) -> some View {
+        self.environment(\.colorScheme, .dark).glassPane(radius: radius)
+    }
+}

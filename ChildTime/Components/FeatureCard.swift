@@ -29,13 +29,14 @@ struct FeatureCard: View {
     var body: some View {
         Button(action: onTap) {
             ZStack {
-                gradient
-
-                RadialGradient(
-                    colors: [Color.white.opacity(0.20), .clear],
-                    center: UnitPoint(x: 0.8, y: 0.15),
-                    startRadius: 0, endRadius: 160
-                )
+                // Glass over the feature's gradient — see WorldCard.background.
+                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                gradient.opacity(0.42)
+                RadialGradient(colors: [glowColor.opacity(0.55), .clear],
+                               center: UnitPoint(x: 0.25, y: 0.15), startRadius: 0, endRadius: 200)
+                LinearGradient(colors: [.white.opacity(0.22), .white.opacity(0.06)],
+                               startPoint: .topLeading, endPoint: .bottomTrailing)
 
                 LinearGradient(colors: [.clear, .white.opacity(0.16), .clear],
                                startPoint: .top, endPoint: .bottom)

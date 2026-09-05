@@ -106,14 +106,10 @@ struct TrueFalseRaceView: View {
                             .foregroundStyle(.white.opacity(0.7))
                         Text(item.candidate)
                             .font(.system(size: 34, weight: .heavy, design: .rounded))
-                            .foregroundStyle(AppColor.textOnLight)
+                            .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 28).padding(.vertical, 18)
-                            .background(
-                                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                    .fill(.white)
-                                    .shadow(color: .black.opacity(0.2), radius: 12, y: 6)
-                            )
+                            .glassPane(radius: 24, strength: 0.18)
                             .overlay(feedbackRing)
                             .scaleEffect(cardPop ? 1.06 : 1)
                     }

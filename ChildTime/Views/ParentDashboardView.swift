@@ -465,10 +465,7 @@ struct ParentDashboardView: View {
                 .font(.title3)
         }
         .padding(AppSpacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
-        )
+        .legacyGlassCard(radius: AppRadius.medium)
     }
 
     private var insightNotificationsCard: some View {
@@ -499,10 +496,7 @@ struct ParentDashboardView: View {
         }
         .padding(AppSpacing.md)
         .frame(maxWidth: .infinity, alignment: .trailing)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
-        )
+        .legacyGlassCard(radius: AppRadius.medium)
     }
 
     /// Compact labels for the 4-segment frequency control so Hebrew text
@@ -1229,10 +1223,7 @@ struct ParentDashboardView: View {
             }
         }
         .padding(AppSpacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
-        )
+        .legacyGlassCard(radius: AppRadius.large)
         .overlay(
             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                 .stroke(isActive ? AppColor.successMint.opacity(0.6) : .clear, lineWidth: 2)
@@ -1962,10 +1953,7 @@ struct ParentDashboardView: View {
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(AppSpacing.sm)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                    .fill(Color(.systemBackground).opacity(0.5))
-            )
+            .glassInset(radius: AppRadius.medium)
         }
     }
 
@@ -2223,10 +2211,7 @@ struct ParentDashboardView: View {
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
         .padding(AppSpacing.sm)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                .fill(Color(.systemBackground).opacity(0.5))
-        )
+        .glassInset(radius: AppRadius.medium)
     }
 
     /// True when any of the child's devices sent a heartbeat in the last ~75s
@@ -2273,11 +2258,7 @@ struct ParentDashboardView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.05), radius: 3, y: 1)
-            )
+            .glassInset(radius: AppRadius.medium)
         }
         .buttonStyle(.plain)
         .foregroundStyle(.primary)

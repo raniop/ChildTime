@@ -174,22 +174,26 @@ struct WorldCard: View {
         }
     }
 
+    /// Liquid glass with the world's own colour glowing behind it. The gradient
+    /// used to BE the tile; now it is a tint under a translucent pane, so every
+    /// world still reads as itself (math cool, money gold) without any tile
+    /// falling back to an opaque block — the glass stays glass (Rani).
     private var background: some View {
         ZStack {
-            world.gradient.gradient
-
-            // Inner radial highlight from top-right
-            RadialGradient(
-                colors: [Color.white.opacity(0.20), .clear],
-                center: UnitPoint(x: 0.8, y: 0.15),
-                startRadius: 0,
-                endRadius: 160
-            )
-
-            if !isUnlocked {
-                Color.black.opacity(0.42)
-            }
+            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                .fill(.ultraThinMaterial)
+            world.gradient.gradient.opacity(showsLocked ? 0.22 : 0.42)
+            RadialGradient(colors: [world.glowColor.opacity(showsLocked ? 0.25 : 0.55), .clear],
+                           center: UnitPoint(x: 0.25, y: 0.15), startRadius: 0, endRadius: 200)
+            LinearGradient(colors: [.white.opacity(0.22), .white.opacity(0.06)],
+                           startPoint: .topLeading, endPoint: .bottomTrailing)
+            if !isUnlocked { Color.black.opacity(0.28) }
         }
+        .overlay(
+            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                .strokeBorder(LinearGradient(colors: [.white.opacity(0.6), .white.opacity(0.14)],
+                                             startPoint: .top, endPoint: .bottom), lineWidth: 1)
+        )
     }
 
     private var progressValue: Double {

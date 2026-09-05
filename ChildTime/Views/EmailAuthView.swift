@@ -95,6 +95,7 @@ struct EmailAuthView: View {
                     .disabled(!canSubmit || working)
                 }
             }
+            .glassForm()
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("חשבון הורה")
             .navigationBarTitleDisplayMode(.inline)

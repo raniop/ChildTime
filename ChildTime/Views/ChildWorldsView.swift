@@ -47,6 +47,7 @@ struct ChildWorldsView: View {
                     Text("\"הַרְפַּתְקָה חֲכָמָה\" תָּמִיד פְּתוּחָה וּמַגִּישָׁה רַק מֵהַנּוֹשְׂאִים הַפְּעִילִים. חַיָּב לְהִשָּׁאֵר לְפָחוֹת עוֹלָם אֶחָד פָּתוּחַ.")
                 }
             }
+            .glassForm()
             .navigationTitle("עוֹלָמוֹת פְּעִילִים")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

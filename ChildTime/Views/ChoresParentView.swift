@@ -139,6 +139,7 @@ struct ChoresParentView: View {
                               || formMinutes == 0)
                 }
             }
+            .glassForm()
             .navigationTitle("מטלות הבית · \(profile.name)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

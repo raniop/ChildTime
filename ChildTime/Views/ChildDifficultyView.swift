@@ -65,6 +65,7 @@ struct ChildDifficultyView: View {
                     Text("לְפִי נוֹשֵׂא")
                 }
             }
+            .glassForm()
             .navigationTitle("רָמַת קוֹשִׁי")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

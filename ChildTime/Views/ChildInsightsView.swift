@@ -63,7 +63,8 @@ struct ChildInsightsView: View {
             // Hebrew still flows RTL within each label.
             .environment(\.layoutDirection, .leftToRight)
         }
-        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .background(AppGradient.dreamy.ignoresSafeArea())
+        .environment(\.colorScheme, .dark)
         .navigationTitle(profile.name)
         .navigationBarTitleDisplayMode(.inline)
         .task {
@@ -179,8 +180,7 @@ struct ChildInsightsView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(RoundedRectangle(cornerRadius: 14, style: .continuous)
-            .fill(Color(.secondarySystemGroupedBackground)))
+        .glassPane(radius: 14, shadow: false)
     }
 
     @ViewBuilder
@@ -318,7 +318,6 @@ struct ChildInsightsView: View {
         }
         .padding(AppSpacing.md)
         .frame(maxWidth: .infinity)
-        .background(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-            .fill(Color(.secondarySystemGroupedBackground)))
+        .glassPane(radius: AppRadius.large)
     }
 }

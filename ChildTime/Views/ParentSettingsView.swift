@@ -55,6 +55,7 @@ struct ParentSettingsView: View {
                 privacySection
                 versionSection
             }
+            .glassForm()
             .navigationTitle("הגדרות הורה")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -706,6 +707,7 @@ struct ChangePINView: View {
                         .disabled(newPIN.count != 4 || confirmPIN.count != 4)
                 }
             }
+            .glassForm()
             .navigationTitle("שינוי קוד הורה")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -90,6 +90,16 @@ struct WorldMapView: View {
     /// Worlds the parent enabled for the active child (all topics if unset). A
     /// disabled topic is hidden entirely — the child never sees that world card,
     /// and the Smart Feed won't serve its questions either.
+
+    /// Everything on the kid's home except הרפתקה חכמה is Tofy+. One gate, so a
+    /// new tile can never be added without it (Rani found games, the arena and
+    /// chores reachable for free). Never a lock icon or failure language for the
+    /// child — the paywall itself is the parent-facing, parent-gated screen.
+    private func requirePremium(_ action: () -> Void) {
+        if subs.isPremium { action() }
+        else { Haptic.light(); showingPaywall = true }
+    }
+
     private var enabledWorlds: [World] {
         let allowed = profiles.active?.enabledTopics ?? Set(Topic.allCases)
         let shown = Worlds.all.filter { world in
@@ -235,10 +245,12 @@ struct WorldMapView: View {
                                     : "\(min(progress.correctToday, gamesGateTarget))/\(gamesGateTarget) ✅"
                             ) {
                                 Haptic.light()
-                                if gamesUnlockedToday {
-                                    showingGames = true
-                                } else {
-                                    companion.cheer("עוֹד \(gamesGateRemaining) תְּשׁוּבוֹת נְכוֹנוֹת וְהַמִּשְׂחָקִים נִפְתָּחִים! 🎮")
+                                requirePremium {
+                                    if gamesUnlockedToday {
+                                        showingGames = true
+                                    } else {
+                                        companion.cheer("עוֹד \(gamesGateRemaining) תְּשׁוּבוֹת נְכוֹנוֹת וְהַמִּשְׂחָקִים נִפְתָּחִים! 🎮")
+                                    }
                                 }
                             }
                             .frame(maxWidth: .infinity)
@@ -704,7 +716,7 @@ struct WorldMapView: View {
         let frac = (ready || claimed) ? 1 : CGFloat(min(done, target)) / CGFloat(max(1, target))
         return Button {
             Haptic.light()
-            infoSheet = .dailyChallenge
+            requirePremium { infoSheet = .dailyChallenge }
         } label: {
             VStack(spacing: 6) {
                 // A living flame in a fiery ring — the streak count rides it.
@@ -968,16 +980,16 @@ struct WorldMapView: View {
             navButton(icon: "gamecontroller.fill", color: AppColor.gemPurple,
                       label: "טוּרְנִיר", badge: !liveGame.invites.isEmpty, size: size) {
                 Haptic.light()
-                if let invite = liveGame.invites.first { Task { await liveGame.joinGame(invite.id) } }
-                else { liveGame.openSetup() }
+                requirePremium { if let invite = liveGame.invites.first { Task { await liveGame.joinGame(invite.id) } }
+                else { liveGame.openSetup() } }
             }
             navButton(icon: "trophy.fill", color: Color(hex: "10B981"),
                       label: "דֵּירוּג", badge: false, size: size) {
-                Haptic.light(); showingLeaderboard = true
+                Haptic.light(); requirePremium { showingLeaderboard = true }
             }
             navButton(icon: "storefront.fill", color: Color(hex: "F59E0B"),
                       label: "חֲנוּת", badge: false, size: size) {
-                Haptic.light(); showingShop = true
+                Haptic.light(); requirePremium { showingShop = true }
             }
             navButton(icon: "gearshape.fill", color: AppColor.gemPurple,
                       label: "הַגְדָּרוֹת", badge: false, size: size, neutral: true,
@@ -1787,7 +1799,7 @@ struct WorldMapView: View {
         let frac = all.isEmpty ? 0 : CGFloat(doneToday) / CGFloat(all.count)
         return Button {
             Haptic.light()
-            showingChores = true
+            requirePremium { showingChores = true }
         } label: {
             VStack(spacing: 6) {
                 ZStack(alignment: .bottomTrailing) {

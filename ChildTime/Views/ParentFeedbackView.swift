@@ -74,6 +74,7 @@ struct ParentFeedbackView: View {
                 .disabled(!canSend)
             }
         }
+            .glassForm()
         .onAppear { focused = true }
     }
 
