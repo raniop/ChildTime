@@ -103,9 +103,7 @@ struct ParentDashboardView: View {
         NavigationStack(path: $navPath) {
             ZStack {
                 // A real, branded control center — vibrant, not a grey list.
-                AppGradient.dreamy.ignoresSafeArea()
-                FloatingOrbs.home()
-                SparkleField(count: 20, size: 12)
+                GlassBackdrop()
 
                 if profiles.profiles.isEmpty {
                     emptyState
@@ -113,57 +111,19 @@ struct ParentDashboardView: View {
                     ScrollView {
                         VStack(spacing: 14) {
                             if isRoot {
+                                // The approved glass design, one to one (Rani): a
+                                // greeting, one card per child, the version line.
+                                // No family totals, no big buttons — banners only
+                                // when something actually needs the parent.
+                                homeHeader
+                                homeActionsRow
                                 if !push.authorized { notificationsBanner }
-                                familySummaryCard
-                                // The two primary actions side by side (iPhone and
-                                // iPad alike) — stacking wasted a whole row. RTL
-                                // priority: "create child" on the RIGHT, "let the
-                                // child play" on the left. Text scales down on
-                                // narrow phones (both buttons allow it).
-                                if !profiles.profiles.isEmpty {
-                                    HStack(spacing: 10) {
-                                        kidModeButton
-                                        linkButton
-                                    }
-                                    // 🧹 Standing chores row — ALWAYS here, right
-                                    // under the two primary buttons (Rani), so
-                                    // approvals never hide in a menu.
-                                    choresApprovalBanner
-                                    if !subs.isPremium, !remote.premiumRequests.isEmpty {
-                                        premiumRequestBanner
-                                    }
-                                } else {
-                                    linkCallout
+                                if !choreStore.pendingApproval.isEmpty { choresApprovalBanner }
+                                if !subs.isPremium, !remote.premiumRequests.isEmpty {
+                                    premiumRequestBanner
                                 }
                             }
                             childrenGrid
-
-                            // Manual order — a discreet entry under the grid (also in
-                            // each card's long-press menu). Only meaningful with 2+.
-                            if rows.count >= 2 {
-                                Button {
-                                    Haptic.light()
-                                    showingReorder = true
-                                } label: {
-                                    Label("סַדְּרוּ אֶת הַיְלָדִים", systemImage: "arrow.up.arrow.down")
-                                        .font(.system(size: 13.5, weight: .bold, design: .rounded))
-                                        .foregroundStyle(.white.opacity(0.85))
-                                        .padding(.horizontal, 14).padding(.vertical, 8)
-                                        .background(.white.opacity(0.12), in: Capsule())
-                                }
-                                .buttonStyle(.plain)
-                            }
-
-                            // Secondary status/settings cards live BELOW the
-                            // children — the kids are what the parent opens the
-                            // dashboard for; sync + insight-notification settings
-                            // are glance-and-forget.
-                            syncStatusCard
-                            insightNotificationsCard
-
-                            // Time-transfer requests live BELOW the children.
-
-                            if rows.count >= 2 { familyComparison(rows) }
 
                             // Feedback to the team — a plain button BELOW everything
                             // (replaces the floating bubble that overlapped a child
@@ -171,12 +131,9 @@ struct ParentDashboardView: View {
                             if isRoot {
                                 Button { showingFeedback = true } label: {
                                     Label("פִידְבֵּק וְהַצָּעוֹת", systemImage: "text.bubble.fill")
-                                        .font(.system(size: 15, weight: .heavy, design: .rounded))
-                                        .foregroundStyle(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 13)
-                                        .background(.white.opacity(0.14), in: Capsule())
-                                        .overlay(Capsule().stroke(.white.opacity(0.25), lineWidth: 1))
+                                        .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(.white.opacity(0.75))
+                                        .padding(.vertical, 4)
                                 }
                                 .buttonStyle(.plain)
                                 .padding(.top, AppSpacing.sm)
@@ -242,24 +199,10 @@ struct ParentDashboardView: View {
             // a translucent system material strip behind the inline title the moment
             // the page scrolls — which clashes badly with the gradient on iPad.
             .toolbarBackground(.hidden, for: .navigationBar)
+            // Root: no bar at all — the greeting + ⚙️ are in the page (mockup), and
+            // an empty bar only pushed the content down. Pushed pages turn it back on.
+            .toolbar(isRoot ? .hidden : .visible, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    // A personal hello instead of a static title: time-of-day
-                    // greeting + first name, and one live line that shows the app
-                    // actually knows this family (from real data, rotates on entry).
-                    VStack(spacing: 1) {
-                        Text(greetingLine)
-                            .font(.system(size: 19, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .lineLimit(1).minimumScaleFactor(0.7)
-                        if let sub = familyMomentLine {
-                            Text(sub)
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.85))
-                                .lineLimit(1).minimumScaleFactor(0.7)
-                        }
-                    }
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     if isRoot {
                         Button { showingSettings = true } label: {
@@ -435,88 +378,6 @@ struct ParentDashboardView: View {
     }
 
     // MARK: - Sub-views
-
-    private var syncStatusCard: some View {
-        let synced = auth.isSignedIn && remote.isActive
-        return HStack(spacing: 12) {
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(synced ? "סנכרון בין מכשירים פעיל" : "מצב מקומי בלבד")
-                    .font(.system(size: 14, weight: .heavy, design: .rounded))
-                if synced {
-                    if let when = remote.lastUploadAt {
-                        Text("סנכרון אחרון: \(relativeTime(when))")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text("מסנכרן… (מכשירים אחרים יקבלו עדכון תוך שניות)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                } else {
-                    Text("כדי לראות את הילד ממכשיר אחר, התחבר ב-Parent Settings → סנכרון בין מכשירים.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.trailing)
-                }
-                if let err = remote.lastError, synced {
-                    Text(err)
-                        .font(.caption2)
-                        .foregroundStyle(.red.opacity(0.85))
-                        .multilineTextAlignment(.trailing)
-                }
-            }
-            Image(systemName: synced ? "checkmark.icloud.fill" : "icloud.slash")
-                .foregroundStyle(synced ? AppColor.successMint : .secondary)
-                .font(.title3)
-        }
-        .padding(AppSpacing.md)
-        .legacyGlassCard(radius: AppRadius.medium)
-    }
-
-    private var insightNotificationsCard: some View {
-        VStack(alignment: .trailing, spacing: 10) {
-            HStack(spacing: 8) {
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("התראות תובנות להורה")
-                        .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    Text("עדכונים קצרים ואישיים על כל ילד — במה השתפר, איפה התקשה ומה לתרגל.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.trailing)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Image(systemName: "bell.badge.fill")
-                    .font(.title3)
-                    .foregroundStyle(AppColor.gemPurple)
-            }
-
-            Picker("תדירות", selection: $settings.parentInsightFrequency) {
-                ForEach(ParentSettings.InsightFrequency.allCases) { f in
-                    Text(freqShortLabel(f)).tag(f)
-                }
-            }
-            .pickerStyle(.segmented)
-            .environment(\.layoutDirection, .rightToLeft)
-        }
-        .padding(AppSpacing.md)
-        .frame(maxWidth: .infinity, alignment: .trailing)
-        .legacyGlassCard(radius: AppRadius.medium)
-    }
-
-    /// Compact labels for the 4-segment frequency control so Hebrew text
-    /// doesn't truncate (the full names live in `displayName`). "ביום" is
-    /// implied by the card title above.
-    private func freqShortLabel(_ f: ParentSettings.InsightFrequency) -> String {
-        switch f {
-        case .off:    return "כבוי"
-        case .once:   return "פעם"
-        case .twice:  return "פעמיים"
-        case .thrice: return "3 פעמים"
-        }
-    }
-
     private func rescheduleInsights() {
         InsightNotificationScheduler.reschedule(
             rows: rows,
@@ -524,15 +385,6 @@ struct ParentDashboardView: View {
             frequency: settings.parentInsightFrequency
         )
     }
-
-    private func relativeTime(_ when: Date) -> String {
-        let elapsed = Int(-when.timeIntervalSinceNow)
-        if elapsed < 5 { return "ממש עכשיו" }
-        if elapsed < 60 { return "לפני \(elapsed) שניות" }
-        if elapsed < 3600 { return "לפני \(elapsed / 60) דק'" }
-        return "לפני \(elapsed / 3600) שעות"
-    }
-
     private var emptyState: some View {
         VStack(spacing: AppSpacing.lg) {
             Text("👨‍👩‍👧‍👦")
@@ -714,48 +566,9 @@ struct ParentDashboardView: View {
         .buttonStyle(.juicy)
         .frame(maxWidth: 460)
     }
-
-    private var linkCallout: some View { linkButton }
-
-    /// Hand the phone to a child: lock it to ChildTime + approved apps until the
-    /// parent exits with their code.
-    private var kidModeButton: some View {
-        Button {
-            Haptic.light()
-            showingKidMode = true
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "lock.shield.fill")
-                Text("תֵּן לַיֶּלֶד לְשַׂחֵק")
-                    .font(.system(size: 18, weight: .heavy, design: .rounded))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .foregroundStyle(.white)
-            .padding(.horizontal, AppSpacing.md)
-            .padding(.vertical, 15)
-            .frame(maxWidth: .infinity)
-            // Same size as "צרו ילד/ה" — prominence comes from a vivid lime→emerald
-            // green (distinct from the muted sync teal) plus a brighter glow + border.
-            .background(
-                LinearGradient(colors: [Color(hex: "3BE36E"), AppColor.successMint],
-                               startPoint: .topLeading, endPoint: .bottomTrailing),
-                in: RoundedRectangle(cornerRadius: 22, style: .continuous)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .stroke(.white.opacity(0.4), lineWidth: 1.5)
-            )
-            .glow(AppColor.successMint, radius: 16)
-        }
-        .buttonStyle(.juicy)
-        .frame(maxWidth: 460)
-    }
-
-    /// Per-child QR + code for setting up that child's own device.
     private func childQRSheet(for child: Profile) -> some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
+            GlassBackdrop()
             SparkleField(count: 16, size: 12)
 
             if childDeviceLinked {
@@ -852,55 +665,6 @@ struct ParentDashboardView: View {
     /// Quick family-wide summary for today — minutes earned, questions answered,
     /// and how many kids were active. Only meaningful when kids are linked.
     @ViewBuilder
-    private var familySummaryCard: some View {
-        let theRows = rows
-        if !theRows.isEmpty {
-            // Use the synced snapshot counts so this reflects the kid's other
-            // device (local learning history doesn't sync).
-            let questionsPerKid = theRows.map { $0.snapshot.answeredToday }
-            let minutesToday = theRows.reduce(0) { $0 + $1.snapshot.minutesEarnedToday }
-            let questionsToday = questionsPerKid.reduce(0, +)
-            let activeKids = questionsPerKid.filter { $0 > 0 }.count
-
-            HStack(spacing: 10) {
-                summaryTile("⏱", "\(minutesToday)", "דק' מסך היום")
-                summaryTile("❓", "\(questionsToday)", "שאלות היום")
-                summaryTile("🔥", "\(activeKids)/\(theRows.count)", "ילדים פעילים")
-            }
-            // Read right-to-left like the rest of the Hebrew UI (the dashboard
-            // body is forced LTR for the .trailing-authored cards).
-            .environment(\.layoutDirection, .rightToLeft)
-        }
-    }
-
-    private func summaryTile(_ emoji: String, _ value: String, _ label: String) -> some View {
-        // Tappable — the family tiles explain themselves like the per-child stats.
-        Button {
-            Haptic.light()
-            statExplain = StatExplain(emoji: emoji, label: label, value: value, isFamily: true)
-        } label: {
-            VStack(spacing: 3) {
-                Text(emoji).font(.system(size: 22))
-                Text(value)
-                    .font(.system(size: 24, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineLimit(1).minimumScaleFactor(0.6)
-                Text(label)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, AppSpacing.md)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                    .fill(.white.opacity(0.15))
-                    .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                        .stroke(.white.opacity(0.25), lineWidth: 1))
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
     private func profileCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
         let isActive = profile.id == profiles.activeID
         let live = liveWindow(profile)
@@ -1275,57 +1039,6 @@ struct ParentDashboardView: View {
     }
 
     // MARK: - Child collection tile + per-child detail page
-
-    /// One child as a 2-up collection tile: big avatar, name, mini glance.
-    /// Tapping it pushes the full child page.
-    /// Side-by-side family view: each child's top strength + interest + trend.
-    /// Deliberately NO ranking or sibling competition — just helping the parent
-    /// see each child individually.
-    private func familyComparison(_ rows: [(profile: Profile, snapshot: ProgressSnapshot)]) -> some View {
-        VStack(alignment: .trailing, spacing: 12) {
-            Text("הַשְׁוָאָה מִשְׁפַּחְתִּית")
-                .font(.system(size: 17, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-            Text("חוֹזְקָה וְעִנְיָן שֶׁל כָּל יֶלֶד — בְּלִי דֵּירוּג וְתַחֲרוּת")
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundStyle(.white.opacity(0.7))
-                .frame(maxWidth: .infinity, alignment: .trailing)
-            ForEach(rows, id: \.profile.id) { row in
-                let lp = LearningProfile(snapshot: row.snapshot, enabledTopics: row.profile.enabledTopics, age: row.profile.age)
-                let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: row.profile.id), profile: lp)
-                let strength = engine.strengths.first ?? engine.confidenceByTopic.first?.topic
-                let interest = engine.gainedInterest.first ?? lp.favorites.first
-                HStack(spacing: 8) {
-                    Spacer(minLength: 0)
-                    Text(engine.learningTrend.label)
-                        .font(.system(size: 11, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                    if let interest { compChip("עִנְיָן", interest) }
-                    if let strength { compChip("חוֹזְקָה", strength) }
-                    Text(row.profile.name)
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .frame(minWidth: 56, alignment: .trailing)
-                }
-                .padding(.vertical, 4)
-            }
-        }
-        .padding(AppSpacing.md)
-        .frame(maxWidth: .infinity)
-        .background(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).fill(.white.opacity(0.10)))
-        .overlay(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
-    }
-
-    private func compChip(_ label: String, _ topic: Topic) -> some View {
-        Text("\(topic.emoji) \(topic.displayName)")
-            .font(.system(size: 11, weight: .semibold, design: .rounded))
-            .foregroundStyle(.white)
-            .padding(.horizontal, 8).padding(.vertical, 3)
-            .background(Capsule().fill(.white.opacity(0.14)))
-            .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
-    }
-
     private func childCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
         // Rani: the overview answers ONE question per child — "is my kid using it
         // and learning?" — in a few seconds. Minutes of the daily max, questions,
@@ -1337,11 +1050,11 @@ struct ParentDashboardView: View {
         let liveSecs = live?.secondsLeft ?? 0
         let playing = liveSecs > 0
         let pct = s.answeredToday > 0 ? Int((Double(s.correctToday) / Double(s.answeredToday) * 100).rounded()) : nil
-        let hasDevice = !(household.devicesByChild[profile.id.uuidString] ?? []).isEmpty
+        let hasDevice = childHasDevice(profile)
         let state: String = {
             if playing { return "\(girl ? "מְשַׂחֶקֶת" : "מְשַׂחֵק") עַכְשָׁיו · נִשְׁאֲרוּ \(formatTime(liveSecs))" }
             if isChildPlayingNow(profile) { return "בְּטוֹפִי עַכְשָׁיו · \(girl ? "לוֹמֶדֶת" : "לוֹמֵד")" }
-            if !hasDevice { return "עוֹד לֹא חֻבַּר מַכְשִׁיר" }
+            if !hasDevice { return "עוֹד לֹא \(girl ? "הִתְחִילָה" : "הִתְחִיל")" }
             return s.answeredToday > 0 ? "\(girl ? "לָמְדָה" : "לָמַד") הַיּוֹם" : "לֹא בְּטוֹפִי הַיּוֹם"
         }()
         return VStack(spacing: 12) {
@@ -1366,32 +1079,144 @@ struct ParentDashboardView: View {
                     .monospacedDigit()
                     .foregroundStyle(pct == nil ? GlassInk.tertiary : (pct! >= 85 ? GlassInk.good : pct! >= 65 ? GlassInk.warn : GlassInk.weak))
             }
-            HStack(spacing: 8) {
-                overviewStat(value: cap.enabled ? "\(s.minutesEarnedToday)" : "\(s.minutesEarnedToday)",
-                             suffix: cap.enabled ? "/\(cap.minutes)" : nil,
-                             label: "דַּקּוֹת הַיּוֹם",
-                             progress: cap.enabled ? min(1, Double(s.minutesEarnedToday) / Double(max(cap.minutes, 1))) : nil)
-                overviewStat(value: "\(s.answeredToday)", suffix: nil, label: "שְׁאֵלוֹת הַיּוֹם", progress: nil)
-                overviewStat(value: "\(s.correctToday)", suffix: nil, label: "נְכוֹנוֹת", progress: nil)
+            if hasDevice {
+                HStack(spacing: 8) {
+                    overviewStat(value: "\(s.minutesEarnedToday)",
+                                 suffix: cap.enabled ? "/\(cap.minutes)" : nil,
+                                 label: "דַּקּוֹת הַיּוֹם",
+                                 progress: cap.enabled ? min(1, Double(s.minutesEarnedToday) / Double(max(cap.minutes, 1))) : nil)
+                    overviewStat(value: "\(s.answeredToday)", suffix: nil, label: "שְׁאֵלוֹת הַיּוֹם", progress: nil)
+                    overviewStat(value: "\(s.correctToday)", suffix: nil, label: "נְכוֹנוֹת", progress: nil)
+                }
+                HStack(spacing: 8) {
+                    // The whole card is a NavigationLink; this echoes it as the
+                    // primary control. The ⚡ menu is overlaid by the grid into
+                    // the reserved slot on its left (a Menu inside a link would
+                    // swallow the tap).
+                    homePrimaryLabel("מֵידָע נוֹסָף ←")
+                    Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
+                }
+            } else {
+                // No device yet → the soft card: one line, and "+ חברו מכשיר"
+                // overlaid by the grid at the end of it.
+                HStack(spacing: 6) {
+                    Text("\(Profile.gradeDisplayName(profile.effectiveGrade)) · אֵין עֲדַיִן מַכְשִׁיר מְחֻבָּר.")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    Spacer(minLength: 0)
+                    Color.clear.frame(width: 112, height: 18)
+                }
             }
-            HStack(spacing: 8) {
-                // The whole card is a NavigationLink; this echoes it as a clear
-                // primary control so nobody has to guess the card is tappable.
-                Label("מֵידָע נוֹסָף", systemImage: "chevron.left")
-                    .labelStyle(.titleAndIcon)
-                    .font(.system(size: 13.5, weight: .heavy, design: .rounded))
-                    .foregroundStyle(AppColor.dreamyIndigo)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                Color.clear.frame(width: 118, height: 1)   // room for the ⚡ menu overlaid by the grid
-            }
-            if !hasDevice && isRoot { Color.clear.frame(height: 30) }   // the "connect" pill lives here
         }
         .padding(14)
         .foregroundStyle(GlassInk.primary)
-        .glassPane(radius: AppRadius.large)
+        .glassPane(radius: AppRadius.large, strength: hasDevice ? 0.14 : 0.09)
         .environment(\.layoutDirection, .rightToLeft)
+    }
+
+    private static let actionsMenuWidth: CGFloat = 112
+
+    private func childHasDevice(_ profile: Profile) -> Bool {
+        !(household.devicesByChild[profile.id.uuidString] ?? []).isEmpty
+    }
+
+    /// `.btn.primary` from the mockup: white pill, indigo ink.
+    private func homePrimaryLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+            .foregroundStyle(Color(hex: "4B3FBF"))
+            .lineLimit(1).minimumScaleFactor(0.8)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+    }
+
+    /// `.btn.ghost` from the mockup: stronger glass, white ink.
+    private func homeGhostLabel(_ text: String, width: CGFloat? = nil) -> some View {
+        Text(text)
+            .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+            .foregroundStyle(GlassInk.primary)
+            .lineLimit(1).minimumScaleFactor(0.65)
+            .frame(width: width)
+            .frame(maxWidth: width == nil ? .infinity : nil)
+            .padding(.vertical, 10)
+            .padding(.horizontal, width == nil ? 8 : 0)
+            .background(Color.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
+    }
+
+    /// Right under the greeting (Rani: "תן לילד לשחק / צור ילד / מטלות — איפה?"):
+    /// the three things a parent does that aren't about one child's card.
+    private var homeActionsRow: some View {
+        HStack(spacing: 8) {
+            Button { Haptic.light(); showingCreateChild = true } label: { homeGhostLabel("＋ צְרוּ יֶלֶד/ה") }
+                .buttonStyle(.plain)
+            Button { Haptic.light(); showingKidMode = true } label: { homeGhostLabel("🧒 תְּנוּ לַיֶּלֶד לְשַׂחֵק") }
+                .buttonStyle(.plain)
+            Button {
+                Haptic.light()
+                let items = choreStore.pendingApproval
+                let target = items.first.flatMap { first in
+                    profiles.profiles.first(where: { $0.id.uuidString == first.childID })
+                } ?? rows.first?.profile
+                if let target { choresProfile = target }
+            } label: { homeGhostLabel("🧹 מַטְלוֹת") }
+                .buttonStyle(.plain)
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+    }
+
+    /// "שלום עמית 👋" and one true line about the family — in the page, like the mockup.
+    private var homeHeader: some View {
+        HStack(alignment: .top, spacing: 12) {
+            // ⚙️ on the far left (the container is LTR), a glass circle like the
+            // kid's nav buttons.
+            Button { Haptic.light(); showingSettings = true } label: {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 40, height: 40)
+                    .background(Circle().fill(Color.white.opacity(0.22)))
+                    .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("הגדרות")
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(greetingLine)
+                    .font(.system(size: 24, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                Text(homeSubtitle)
+                    .font(.system(size: 13.5, weight: .medium, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .multilineTextAlignment(.trailing)
+        }
+        .padding(.horizontal, 6)
+        .padding(.top, 8)
+    }
+
+    /// "שבת · שלושה ילדים · יואב משחק עכשיו"
+    private var homeSubtitle: String {
+        let f = DateFormatter(); f.locale = Locale(identifier: "he_IL"); f.dateFormat = "EEEE"
+        let day = f.string(from: Date()).replacingOccurrences(of: "יום ", with: "")
+        return [day, childrenCountLabel, familyMomentLine].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    private var childrenCountLabel: String? {
+        let ps = profiles.profiles
+        guard !ps.isEmpty else { return nil }
+        let fem = ps.allSatisfy { $0.gender == .girl }
+        switch ps.count {
+        case 1: return fem ? "יַלְדָּה אַחַת" : "יֶלֶד אֶחָד"
+        case 2: return fem ? "שְׁתֵּי יְלָדוֹת" : "שְׁנֵי יְלָדִים"
+        case 3: return fem ? "שָׁלוֹשׁ יְלָדוֹת" : "שְׁלוֹשָׁה יְלָדִים"
+        case 4: return fem ? "אַרְבַּע יְלָדוֹת" : "אַרְבָּעָה יְלָדִים"
+        default: return fem ? "\(ps.count) יְלָדוֹת" : "\(ps.count) יְלָדִים"
+        }
     }
 
     private func overviewStat(value: String, suffix: String?, label: String, progress: Double?) -> some View {
@@ -1455,20 +1280,7 @@ struct ParentDashboardView: View {
                 gridDeleteProfile = profile
             } label: { Label("מחק ילד/ה", systemImage: "trash") }
         } label: {
-            Label("⚡ פְּעֻלּוֹת", systemImage: "")
-                .labelStyle(.titleOnly)
-                .font(.system(size: 13.5, weight: .heavy, design: .rounded))
-                .foregroundStyle(GlassInk.primary)
-                .frame(width: 118)
-                .padding(.vertical, 10)
-                .glassInset(radius: 12)
-                .hidden()   // real label below keeps the old anchor size logic intact
-            Image(systemName: "ellipsis.circle.fill")
-                .font(.system(size: 22))
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(.secondary)
-                .frame(width: 34, height: 34)
-                .contentShape(Circle())
+            homeGhostLabel("⚡ פְּעֻלּוֹת", width: Self.actionsMenuWidth)
         }
         .buttonStyle(.plain)
     }
@@ -1498,18 +1310,9 @@ struct ParentDashboardView: View {
     /// "בוקר טוב, רני ☀️" — time-of-day + the parent's first name (or a plain
     /// hello for a guest / no name).
     private var greetingLine: String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        let (greet, emoji): (String, String) = {
-            switch hour {
-            case 5..<12:  return ("בֹּקֶר טוֹב", "☀️")
-            case 12..<17: return ("צָהֳרַיִם טוֹבִים", "🌤️")
-            case 17..<21: return ("עֶרֶב טוֹב", "🌆")
-            default:      return ("לַיְלָה טוֹב", "🌙")
-            }
-        }()
         let first = (auth.displayName ?? "")
             .split(separator: " ").first.map(String.init) ?? ""
-        return first.isEmpty ? "\(greet)! \(emoji)" : "\(greet), \(first) \(emoji)"
+        return first.isEmpty ? "שָׁלוֹם 👋" : "שָׁלוֹם \(first) 👋"
     }
 
     /// One short line from real family data — picked by priority so it's always
@@ -1777,29 +1580,29 @@ struct ParentDashboardView: View {
                     // (not inside it) so the tap isn't swallowed.
                     // The grid is forced RTL, so "leading" = right; the ⋯ belongs
                     // on the LEFT corner (away from the avatar's status dot).
-                    .overlay(alignment: .topTrailing) {
-                        gridCardMenu(row.profile)
-                            .padding(8)
+                    // ⚡ quick actions overlaid INTO the slot the card reserves
+                    // (a Menu inside the NavigationLink would swallow the tap).
+                    // The grid is RTL, so `.bottomTrailing` is the bottom-LEFT.
+                    .overlay(alignment: .bottomTrailing) {
+                        if childHasDevice(row.profile) {
+                            gridCardMenu(row.profile).padding(14)
+                        }
                     }
-                    // 📱 No device connected yet → the next onboarding step is a
-                    // tap away, right on the card. Overlaid (not inside the
-                    // NavigationLink) so the tap isn't swallowed by navigation.
-                    .overlay(alignment: .bottom) {
-                        if isRoot, (household.devicesByChild[row.profile.id.uuidString] ?? []).isEmpty {
+                    // 📱 No device yet → "+ חברו מכשיר" closes the card's one line.
+                    .overlay(alignment: .bottomTrailing) {
+                        if isRoot, !childHasDevice(row.profile) {
                             Button {
                                 Haptic.light()
                                 qrCode = nil
                                 qrChild = row.profile
                             } label: {
-                                Label("חַבְּרוּ מַכְשִׁיר", systemImage: "qrcode")
-                                    .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                                Text("+ חַבְּרוּ מַכְשִׁיר")
+                                    .font(.system(size: 13, weight: .heavy, design: .rounded))
                                     .foregroundStyle(.white)
-                                    .padding(.horizontal, 12).padding(.vertical, 7)
-                                    .background(AppGradient.purpleDream, in: Capsule())
-                                    .glow(AppColor.gemPurple, radius: 6)
+                                    .frame(width: 112, alignment: .leading)
                             }
                             .buttonStyle(.borderless)
-                            .padding(.bottom, 12)
+                            .padding(.horizontal, 14).padding(.bottom, 14)
                         }
                     }
                     .contextMenu {
@@ -1826,32 +1629,6 @@ struct ParentDashboardView: View {
             .animation(.spring(response: 0.5, dampingFraction: 0.85),
                        value: rows.map(\.profile.id))
     }
-
-    /// One compact stat in a grid card: emoji + value (⏱ time · 🎯 success ·
-    /// ⭐ stars · 💎 diamonds · 🎮 available min · 🔥 streak).
-    private func miniStat(_ emoji: String, _ value: String, live: Bool = false) -> some View {
-        HStack(spacing: 4) {
-            Text(emoji).font(.system(size: 13))
-            Text(value).font(.system(size: 13, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(live ? Color(hex: "15803D") : .primary)
-                .lineLimit(1).minimumScaleFactor(0.6)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 6)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(live ? Color(hex: "22C55E").opacity(0.18) : Color.primary.opacity(0.05))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(live ? Color(hex: "22C55E").opacity(0.7) : .clear, lineWidth: 1)
-        )
-    }
-
-    /// The full per-child page (all stats, insights, settings menu) pushed when a
-    /// card is tapped. Reuses the existing `profileCard` and looks the snapshot up
-    /// live from `rows`, so it keeps refreshing while open and handles deletion.
     @ViewBuilder
     private func childDetailScreen(for id: UUID) -> some View {
         if let row = rows.first(where: { $0.profile.id == id }) {
@@ -1884,6 +1661,7 @@ struct ParentDashboardView: View {
             .environment(\.layoutDirection, .leftToRight)
             .background(AppGradient.dreamy.ignoresSafeArea())
             .navigationTitle(row.profile.name)
+            .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
             // These dialogs live on the DETAIL page (not the root) so they present
             // IN-CONTEXT — at the root they only popped up after navigating back.

@@ -15,29 +15,36 @@ struct GlassPane: ViewModifier {
     var tint: Color? = nil
     var shadow: Bool = true
 
+    // Rani (comparing the build to the approved mockup): "הזכוכית ממש לא נראית
+    // כמו שהצגת". The system material was the culprit — in light mode
+    // `.ultraThinMaterial` is a milky white frost that washes the gradient out,
+    // so every pane read as a pale grey slab. The mockup's glass is exactly
+    // `rgba(255,255,255,.14)` over the vivid gradient with a light edge and a
+    // 1-px top highlight — so that is what this draws, with no material at all.
+    // The backdrop is a smooth gradient + soft orbs, so a blur adds nothing
+    // visible there and costs the saturation the design lives on.
     func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         content
             .background {
                 ZStack {
-                    RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .fill(.ultraThinMaterial)
+                    shape.fill(.white.opacity(strength))
                     if let tint {
-                        RoundedRectangle(cornerRadius: radius, style: .continuous)
-                            .fill(RadialGradient(colors: [tint.opacity(0.55), .clear],
-                                                 center: .topLeading, startRadius: 0, endRadius: 220))
+                        shape.fill(RadialGradient(colors: [tint.opacity(0.55), .clear],
+                                                  center: UnitPoint(x: 0.3, y: 0.2),
+                                                  startRadius: 0, endRadius: 230))
                     }
-                    RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .fill(LinearGradient(colors: [.white.opacity(strength + 0.06), .white.opacity(strength - 0.04)],
-                                             startPoint: .topLeading, endPoint: .bottomTrailing))
+                    // Inset top highlight — the sheet catches light from above.
+                    shape.fill(LinearGradient(colors: [.white.opacity(0.28), .clear],
+                                              startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.12)))
                 }
             }
             .overlay {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .strokeBorder(LinearGradient(colors: [.white.opacity(0.55), .white.opacity(0.14)],
-                                                 startPoint: .top, endPoint: .bottom), lineWidth: 1)
+                shape.strokeBorder(LinearGradient(colors: [.white.opacity(0.5), .white.opacity(0.22)],
+                                                  startPoint: .top, endPoint: .bottom), lineWidth: 1)
             }
-            .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
-            .shadow(color: shadow ? .black.opacity(0.22) : .clear, radius: 18, y: 10)
+            .clipShape(shape)
+            .shadow(color: shadow ? .black.opacity(0.28) : .clear, radius: 14, y: 8)
     }
 }
 
@@ -80,7 +87,7 @@ extension View {
                         .strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
                     .padding(.vertical, 2)
             )
-            .background(AppGradient.dreamy.ignoresSafeArea())
+            .background(GlassBackdrop())
             .environment(\.colorScheme, .dark)
             .tint(.white)
     }
@@ -89,5 +96,32 @@ extension View {
     /// text turns light. Use where re-inking every label isn't worth it.
     func legacyGlassCard(radius: CGFloat = 22) -> some View {
         self.environment(\.colorScheme, .dark).glassPane(radius: radius)
+    }
+}
+
+/// The backdrop from the approved mockups, one to one: the brand gradient
+/// (#7A5CFF → #5E60CE → #3E8BF0, top-right to bottom-left) with a pink orb
+/// glowing at the upper-left and a teal one at the lower-right, both heavily
+/// blurred. Every glass screen sits on this — the panes are 14 % white, so
+/// THIS is what gives them their colour.
+struct GlassBackdrop: View {
+    var body: some View {
+        GeometryReader { g in
+            ZStack {
+                LinearGradient(colors: [Color(hex: "7A5CFF"), Color(hex: "5E60CE"), Color(hex: "3E8BF0")],
+                               startPoint: UnitPoint(x: 0.62, y: 0), endPoint: UnitPoint(x: 0.38, y: 1))
+                Circle().fill(Color(hex: "FF7BD3"))
+                    .frame(width: 280, height: 280)
+                    .blur(radius: 44)
+                    .opacity(0.8)
+                    .position(x: 40, y: 250)
+                Circle().fill(Color(hex: "37E2D5"))
+                    .frame(width: 320, height: 320)
+                    .blur(radius: 44)
+                    .opacity(0.8)
+                    .position(x: g.size.width - 30, y: g.size.height - 200)
+            }
+        }
+        .ignoresSafeArea()
     }
 }

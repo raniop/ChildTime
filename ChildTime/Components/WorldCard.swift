@@ -1,227 +1,121 @@
 import SwiftUI
 
-/// Shared sizing constants so every home tile (WorldCard + FeatureCard) lays
-/// out its emoji, title, subtitle, and footer in exactly the same vertical
-/// positions, regardless of how much content each card carries.
-enum HomeTileLayout {
-    static let rowSpacing: CGFloat = 6
-    static func emojiZone(_ size: CGFloat) -> CGFloat { size }
-    static func titleZone(_ size: CGFloat) -> CGFloat { size * 2.1 }    // up to 2 lines
-    static func subtitleZone(_ size: CGFloat) -> CGFloat { size * 1.4 }
-    static func badgeZone(_ size: CGFloat) -> CGFloat { size + 4 }
-}
-
+/// Compact glass tile for a learning world — the approved "מסך הילד — זכוכית"
+/// look: a translucent pane with a whisper of the world's own colour glowing
+/// behind it (math cool, money gold), emoji → title → topic → a footer with the
+/// room count and a progress track. Right-aligned, like everything Hebrew.
+///
+/// Subscription-gated worlds stay tappable (the tap opens the parent-gated
+/// paywall) and wear a small "👑 טופי+" badge — never a lock or grey-out.
 struct WorldCard: View {
     let world: World
     let isUnlocked: Bool
     let currentRoom: Int
     let starsHeld: Int
-    /// When true the world is gated behind the monthly subscription. The card
-    /// stays tappable (tapping opens the paywall) but shows a "טופי+" badge.
     var subscriptionLocked: Bool = false
     let onTap: () -> Void
 
     @Environment(\.horizontalSizeClass) private var hsc
-
-    @State private var float: CGFloat = 0
-    @State private var shimmer: Bool = false
-
     private var isCompact: Bool { hsc == .compact }
-    /// Whether the card should render with the dimmed "locked" treatment —
-    /// either it hasn't been unlocked by stars yet, or it's behind the paywall.
-    private var showsLocked: Bool { !isUnlocked || subscriptionLocked }
-    private var emojiSize: CGFloat { isCompact ? 64 : 84 }
-    private var titleSize: CGFloat { isCompact ? 22 : 26 }
-    private var labelSize: CGFloat { isCompact ? 15 : 17 }
-    /// Fixed tile height (shared verbatim with FeatureCard) so every home tile
-    /// has an identical footprint regardless of how much content it holds.
-    /// Tall enough that the emoji/title/subtitle/footer never overflow & clip.
-    private var tileHeight: CGFloat { isCompact ? 224 : 284 }
 
     var body: some View {
         Button(action: onTap) {
-            ZStack {
-                // Layered background
-                background
-
-                // Themed decorations behind everything else
-                WorldDecorations(world: world)
-                    .opacity(showsLocked ? 0.2 : 0.55)
-                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
-
-                // Subtle shimmer sweep (only when unlocked)
-                if !showsLocked {
-                    LinearGradient(
-                        colors: [.clear, .white.opacity(0.16), .clear],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(height: 70)
-                    .offset(y: shimmer ? 200 : -200)
-                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
-                }
-
-                // Foreground content — shared rhythm with FeatureCard so the
-                // emoji / title / subtitle / footer line up across every tile.
-                VStack(spacing: HomeTileLayout.rowSpacing) {
-                    Spacer(minLength: 0)
-
-                    // Big emoji centered (fixed zone)
-                    Text(world.emoji)
-                        .font(.system(size: emojiSize))
-                        .offset(y: float)
-                        .shadow(color: world.glowColor.opacity(0.8), radius: 22)
-                        .shadow(color: .black.opacity(0.25), radius: 4, y: 4)
-                        .opacity(showsLocked ? 0.35 : 1)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .frame(height: HomeTileLayout.emojiZone(emojiSize))
-
-                    // Title (fixed zone)
-                    Text(world.name)
-                        .font(.system(size: titleSize, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .shadow(color: .black.opacity(0.4), radius: 4, y: 2)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.7)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .frame(height: HomeTileLayout.titleZone(titleSize))
-                        .padding(.horizontal, 10)
-
-                    // Topic subtitle (fixed zone)
-                    Text(world.isBonusWorld ? "כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת" : world.topic.displayName)
-                        .font(.system(size: labelSize, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
-                        .multilineTextAlignment(.center)
-                        .lineLimit(1)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .frame(height: HomeTileLayout.subtitleZone(labelSize))
-
-                    Spacer(minLength: 0)
-
-                    // Footer (fixed zone): badge slot on top, progress bar pinned
-                    // to the bottom — identical to FeatureCard so bars align.
-                    VStack(spacing: 4) {
-                        Group {
-                            if subscriptionLocked {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "crown.fill")
-                                    Text("טוֹפִּי+")
-                                        .fontWeight(.heavy)
-                                }
-                                .foregroundStyle(AppColor.starGold)
-                            } else if !isUnlocked {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "lock.fill")
-                                    Text("\(world.starsToUnlock) ⭐")
-                                        .fontWeight(.semibold)
-                                }
-                                .foregroundStyle(.white.opacity(0.85))
-                            } else {
-                                Color.clear
-                            }
-                        }
-                        .font(.system(size: labelSize - 1, weight: .semibold, design: .rounded))
-                        .frame(height: HomeTileLayout.badgeZone(labelSize))
-                        .frame(maxWidth: .infinity, alignment: .center)
-
-                        // Subscription-locked worlds show a decorative gold bar
-                        // (a star-unlock bar would be meaningless there); every
-                        // other state shows the real progress bar.
-                        Group {
-                            if subscriptionLocked {
-                                Capsule()
-                                    .fill(LinearGradient(
-                                        colors: [AppColor.starGold, .white.opacity(0.7), AppColor.starGold],
-                                        startPoint: .leading, endPoint: .trailing))
-                                    .frame(height: 8)
-                                    .glow(AppColor.starGold, radius: 6)
-                            } else {
-                                progressBar
-                            }
-                        }
-                        .padding(.horizontal, 14)
-                    }
-                }
-                .padding(.vertical, 14)
+            VStack(alignment: .leading, spacing: 0) {
+                HomeTileHeader(emoji: world.emoji,
+                               badge: subscriptionLocked ? "👑 טוֹפִי+" : nil)
+                HomeTileText(title: world.name,
+                             subtitle: world.isBonusWorld ? "כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת" : world.topic.displayName)
+                Spacer(minLength: 6)
+                HomeTileFoot(label: "חֶדֶר \(max(1, min(currentRoom + 1, world.rooms)))/\(world.rooms)",
+                             frac: Double(currentRoom) / Double(max(1, world.rooms)))
             }
-            .frame(maxWidth: 270)
-            .frame(height: tileHeight)
-            .clipShape(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                    .stroke(subscriptionLocked ? AppColor.starGold.opacity(0.6)
-                                                : .white.opacity(showsLocked ? 0.12 : 0.35),
-                            lineWidth: 2)
-            )
-            // Subscription-locked cards keep a gold glow to read as "premium";
-            // star-locked ones stay flat. Footprint is identical in every state.
-            .glow(subscriptionLocked ? AppColor.starGold : world.glowColor,
-                  radius: showsLocked && !subscriptionLocked ? 0 : 18)
-            .opacity(showsLocked ? 0.9 : 1)
+            .homeTileChrome(tint: world.glowColor, compact: isCompact)
         }
         .buttonStyle(.juicy)
         // Star-locked worlds are inert; subscription-locked ones stay tappable so
         // the tap can open the paywall.
         .disabled(!isUnlocked && !subscriptionLocked)
-        .onAppear {
-            withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
-                float = -4
-            }
-            withAnimation(.linear(duration: 4).repeatForever(autoreverses: false).delay(1)) {
-                shimmer = true
+    }
+}
+
+// MARK: - Shared tile pieces (WorldCard + FeatureCard read as one family)
+
+struct HomeTileHeader: View {
+    let emoji: String
+    var badge: String? = nil
+    @Environment(\.horizontalSizeClass) private var hsc
+    var body: some View {
+        HStack(alignment: .top) {
+            Text(emoji)
+                .font(.system(size: hsc == .compact ? 34 : 40))
+                .shadow(color: .black.opacity(0.25), radius: 5, y: 4)
+            Spacer(minLength: 0)
+            if let badge {
+                Text(badge)
+                    .font(.system(size: 10.5, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(Capsule().fill(.white.opacity(0.24)))
+                    .overlay(Capsule().strokeBorder(.white.opacity(0.32), lineWidth: 1))
             }
         }
     }
+}
 
-    /// Liquid glass with the world's own colour glowing behind it. The gradient
-    /// used to BE the tile; now it is a tint under a translucent pane, so every
-    /// world still reads as itself (math cool, money gold) without any tile
-    /// falling back to an opaque block — the glass stays glass (Rani).
-    private var background: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .fill(.ultraThinMaterial)
-            world.gradient.gradient.opacity(showsLocked ? 0.22 : 0.42)
-            RadialGradient(colors: [world.glowColor.opacity(showsLocked ? 0.25 : 0.55), .clear],
-                           center: UnitPoint(x: 0.25, y: 0.15), startRadius: 0, endRadius: 200)
-            LinearGradient(colors: [.white.opacity(0.22), .white.opacity(0.06)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
-            if !isUnlocked { Color.black.opacity(0.28) }
+struct HomeTileText: View {
+    let title: String
+    let subtitle: String
+    @Environment(\.horizontalSizeClass) private var hsc
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.system(size: hsc == .compact ? 15 : 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .lineLimit(2).minimumScaleFactor(0.8)
+                .multilineTextAlignment(.leading)
+            Text(subtitle)
+                .font(.system(size: hsc == .compact ? 11 : 12.5, weight: .semibold, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
+                .lineLimit(2).minimumScaleFactor(0.8)
+                .multilineTextAlignment(.leading)
         }
-        .overlay(
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .strokeBorder(LinearGradient(colors: [.white.opacity(0.6), .white.opacity(0.14)],
-                                             startPoint: .top, endPoint: .bottom), lineWidth: 1)
-        )
+        .padding(.top, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
+}
 
-    private var progressValue: Double {
-        if isUnlocked {
-            return Double(currentRoom) / Double(world.rooms)
-        } else {
-            return min(1, Double(starsHeld) / Double(max(1, world.starsToUnlock)))
-        }
-    }
-
-    private var progressBar: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(.black.opacity(0.25))
-                Capsule()
-                    .fill(
-                        LinearGradient(
-                            colors: [world.glowColor, Color.white.opacity(0.7), world.glowColor],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .frame(width: max(8, geo.size.width * progressValue))
-                    .glow(world.glowColor, radius: 6)
+/// Footer: a short label and a thin white track (frac 0…1). `frac == nil`
+/// draws a full decorative track — for tiles that have no progress of their own.
+struct HomeTileFoot: View {
+    let label: String
+    var frac: Double? = 0
+    var body: some View {
+        HStack(spacing: 8) {
+            Text(label)
+                .font(.system(size: 10.5, weight: .bold, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
+                .lineLimit(1).minimumScaleFactor(0.7)
+                .layoutPriority(1)
+            GeometryReader { g in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.white.opacity(0.18))
+                    Capsule().fill(.white)
+                        .frame(width: frac == nil ? g.size.width : max(0, g.size.width * min(1, max(0, frac ?? 0))))
+                }
             }
+            .frame(height: 5)
         }
-        .frame(height: 8)
+    }
+}
+
+extension View {
+    /// The tile's glass shell — fixed height so every tile in the grid is a twin.
+    func homeTileChrome(tint: Color, compact: Bool) -> some View {
+        self
+            .padding(.horizontal, 12).padding(.top, 14).padding(.bottom, 12)
+            .frame(maxWidth: .infinity)
+            .frame(height: compact ? 150 : 176)
+            .glassPane(radius: 22, tint: tint)
     }
 }
 
@@ -229,13 +123,9 @@ struct WorldCard: View {
     ZStack {
         AppGradient.dreamy.ignoresSafeArea()
         FloatingOrbs.home()
-        LazyVGrid(
-            columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)],
-            spacing: 14
-        ) {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
             WorldCard(world: Worlds.all[0], isUnlocked: true,  currentRoom: 4, starsHeld: 47, onTap: {})
-            WorldCard(world: Worlds.all[1], isUnlocked: true,  currentRoom: 0, starsHeld: 47, onTap: {})
-            WorldCard(world: Worlds.all[2], isUnlocked: false, currentRoom: 0, starsHeld: 47, onTap: {})
+            WorldCard(world: Worlds.all[1], isUnlocked: true,  currentRoom: 0, starsHeld: 47, subscriptionLocked: true, onTap: {})
         }
         .padding()
     }

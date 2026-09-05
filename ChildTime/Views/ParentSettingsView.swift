@@ -215,6 +215,8 @@ struct ParentSettingsView: View {
     }
 
     private var authorizationSection: some View {
+        Group {
+        insightNotificationsSection
         Section("הרשאות") {
             HStack {
                 Image(systemName: shields.isAuthorized ? "checkmark.shield.fill" : "exclamationmark.shield.fill")
@@ -252,6 +254,33 @@ struct ParentSettingsView: View {
                     .disabled(requestingShield)
                 }
             }
+        }
+        }
+    }
+
+    /// Moved here from the parent home (the home is now the approved glass
+    /// design: greeting, child cards, version — nothing else).
+    private var insightNotificationsSection: some View {
+        Section {
+            Picker("תְּדִירוּת", selection: $settings.parentInsightFrequency) {
+                ForEach(ParentSettings.InsightFrequency.allCases) { f in
+                    Text(freqShortLabel(f)).tag(f)
+                }
+            }
+            .pickerStyle(.segmented)
+        } header: {
+            Text("התראות תובנות להורה")
+        } footer: {
+            Text("עדכונים קצרים ואישיים על כל ילד — במה השתפר, איפה התקשה ומה לתרגל.")
+        }
+    }
+
+    private func freqShortLabel(_ f: ParentSettings.InsightFrequency) -> String {
+        switch f {
+        case .off:    return "כבוי"
+        case .once:   return "פעם"
+        case .twice:  return "פעמיים"
+        case .thrice: return "3 פעמים"
         }
     }
 

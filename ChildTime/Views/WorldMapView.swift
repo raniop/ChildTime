@@ -69,8 +69,8 @@ struct WorldMapView: View {
 
     private var isCompact: Bool { hsc == .compact }
     private var companionSize: CGFloat { isCompact ? 90 : 120 }
-    // iPad shows the title inside the header row, so it's smaller there.
-    private var heroTitleSize: CGFloat { isCompact ? 46 : 54 }
+    // Glass look: a modest brand line heading the grid, not a poster.
+    private var heroTitleSize: CGFloat { isCompact ? 30 : 36 }
 
     @State private var infoStat: StatInfo? = nil
 
@@ -190,9 +190,8 @@ struct WorldMapView: View {
     var body: some View {
         ZStack {
             // Layered background
-            AppGradient.dreamy.ignoresSafeArea()
-            FloatingOrbs.home()
-            SparkleField(count: 25, size: 14)
+            GlassBackdrop()
+            SparkleField(count: 14, size: 11)
 
             ScrollView {
                 VStack(spacing: 0) {
@@ -210,9 +209,7 @@ struct WorldMapView: View {
                         // top masthead and preferred it back here). No extra top
                         // padding — the gap above טופי should match the gap
                         // between the subtitle and the cards below.
-                        if isCompact {
-                            heroTitle
-                        }
+                        heroTitle
                         LazyVGrid(
                             columns: worldGridColumns,
                             spacing: AppSpacing.md
@@ -275,7 +272,10 @@ struct WorldMapView: View {
                                 glowColor: Color(hex: "EF476F"),
                                 badge: gamesUnlockedToday
                                     ? nil
-                                    : "\(min(progress.correctToday, gamesGateTarget))/\(gamesGateTarget) ✅"
+                                    : "\(min(progress.correctToday, gamesGateTarget))/\(gamesGateTarget) ✅",
+                                foot: gamesUnlockedToday ? "🎮 פָּתוּחַ הַיּוֹם" : "חִמּוּם יוֹמִי",
+                                footFrac: gamesUnlockedToday ? nil
+                                    : Double(min(progress.correctToday, gamesGateTarget)) / Double(max(1, gamesGateTarget))
                             ) {
                                 Haptic.light()
                                 requirePremium {
@@ -295,7 +295,7 @@ struct WorldMapView: View {
                     // Breathing room between the header card and the world grid
                     // (compact: none — the grid VStack's own spacing already
                     // matches the subtitle→cards gap, so טופי sits evenly).
-                    .padding(.top, isCompact ? 0 : AppSpacing.xxxl)
+                    .padding(.top, AppSpacing.md)
                     // Bottom inset just tall enough for the floating CTA panel
                     // (two pills + the protect-code line ≈ 180pt) with a small
                     // margin — 360 left a huge dead gap after the last row
@@ -709,39 +709,25 @@ struct WorldMapView: View {
     private var topBar: some View {
         let avatarSize: CGFloat = isCompact ? 46 : 54
         let btnSize: CGFloat = isCompact ? 42 : 46
-        return VStack(spacing: isCompact ? 12 : 16) {
-            // Row 1 — identity on the left, round nav buttons on the right. A custom
-            // alignment puts the avatar, the name and every button CIRCLE on one
-            // line (the button captions hang below without shifting it). Forced LTR
-            // so it matches the design even though the app root is RTL.
-            ZStack {
-                HStack(alignment: .headerIcon, spacing: isCompact ? 6 : 14) {
-                    identityBlock(avatar: avatarSize)
-                        .alignmentGuide(.headerIcon) { $0[VerticalAlignment.center] }
-                    Spacer(minLength: 2)
-                    navButtonsRow(size: btnSize)
-                        .alignmentGuide(.headerIcon) { _ in btnSize / 2 }
-                }
-                // On iPad the "טופי" title is centered over the whole row (= screen
-                // center, since the card is centered). Capped narrower than the gap
-                // between identity and the (smaller) nav buttons so it can't overlap.
-                if !isCompact {
-                    heroTitle
-                        .frame(maxWidth: 300)
-                        .allowsHitTesting(false)
-                }
+        // ONE glass pane holds the whole header (the approved "זכוכית" design):
+        // identity + round glass nav buttons, the 4-stat strip, then the two
+        // twin insets (daily challenge · chores). Forced LTR so the avatar sits
+        // on the left and the buttons on the right, matching the mockup.
+        return VStack(spacing: 12) {
+            HStack(alignment: .center, spacing: 10) {
+                identityBlock(avatar: avatarSize)
+                Spacer(minLength: 4)
+                navButtonsRow(size: btnSize)
             }
             statsPanel
-            // אתגר יומי squeezed LEFT, מטלות הבית on its RIGHT (Rani) — the
-            // chores entry lives up here with the daily loop, not as a world.
             HStack(spacing: 10) {
                 dailyChallengeCard
                 choresTopCard
             }
         }
         .environment(\.layoutDirection, .leftToRight)
-        .padding(isCompact ? 14 : 18)
-        .background(glassCard)
+        .padding(14)
+        .glassPane(radius: 24)
         .padding(.top, AppSpacing.sm)
         .eraseToAnyView()
     }
@@ -831,19 +817,7 @@ struct WorldMapView: View {
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity)
             .frame(height: Self.headerCardHeight)
-            .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(LinearGradient(colors: [Color(hex: "FF5E7E").opacity(0.50),
-                                                  Color(hex: "FF9E2C").opacity(0.35),
-                                                  Color(hex: "7C4DFF").opacity(0.45)],
-                                         startPoint: .topTrailing, endPoint: .bottomLeading))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(LinearGradient(colors: [AppColor.starGold.opacity(0.75), .white.opacity(0.2)],
-                                           startPoint: .top, endPoint: .bottom), lineWidth: 1.5)
-            )
-            .shadow(color: AppColor.flameOrange.opacity(0.25), radius: 10, y: 4)
+            .glassInset(radius: 18)
         }
         .buttonStyle(.juicy)
         .environment(\.layoutDirection, .rightToLeft)
@@ -856,7 +830,7 @@ struct WorldMapView: View {
     }
 
     /// Both header cards are exactly this tall — they must read as twins.
-    private static let headerCardHeight: CGFloat = 148
+    private static let headerCardHeight: CGFloat = 136
 
     /// The shared progress track at the foot of both header cards.
     private func headerTrack(frac: CGFloat, fill: LinearGradient, glowColor: Color, tip: String?) -> some View {
@@ -957,24 +931,10 @@ struct WorldMapView: View {
         }
     }
 
-    /// Frosted translucent card so the dreamy background glows through.
-    private var glassCard: some View {
-        RoundedRectangle(cornerRadius: 30, style: .continuous)
-            .fill(LinearGradient(colors: [Color.white.opacity(0.18), Color.white.opacity(0.06)],
-                                 startPoint: .topLeading, endPoint: .bottomTrailing))
-            .overlay(
-                RoundedRectangle(cornerRadius: 30, style: .continuous)
-                    .stroke(LinearGradient(colors: [.white.opacity(0.5), .white.opacity(0.12)],
-                                           startPoint: .top, endPoint: .bottom), lineWidth: 1.2)
-            )
-            .shadow(color: .black.opacity(0.25), radius: 22, y: 12)
-            .eraseToAnyView()
-    }
-
-    /// Avatar + name (tap → edit the child's profile) and a level badge
-    /// (tap → the "רָמַת טוֹפִי" level info). The name is centered over the badge.
+    /// Avatar in a glass ring + name (tap → the child's profile) with a small
+    /// line under it: the Tofy level (tap → level info) and the day streak.
     private func identityBlock(avatar: CGFloat) -> some View {
-        HStack(spacing: 9) {
+        HStack(spacing: 10) {
             Button {
                 Haptic.light(); showingChildSettings = true
             } label: {
@@ -982,20 +942,19 @@ struct WorldMapView: View {
                               ?? Character3DCatalog.find(Character3DCatalog.defaultID),
                               portrait: true)
                     .frame(width: avatar, height: avatar)
-                    .background(Circle().fill(Color.white.opacity(0.18)))
+                    .background(Circle().fill(Color.white.opacity(0.22)))
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.85), lineWidth: 2.5))
-                    .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
+                    .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 1))
             }
             .buttonStyle(.plain)
 
-            VStack(alignment: .center, spacing: 3) {
+            VStack(alignment: .leading, spacing: 2) {
                 Button {
                     Haptic.light(); showingChildSettings = true
                 } label: {
                     Text(profiles.active?.name ?? "טוֹפִי")
-                        .font(.system(size: avatar * 0.40, weight: .black, design: .rounded))
-                        .foregroundStyle(.white)
+                        .font(.system(size: isCompact ? 16 : 18, weight: .black, design: .rounded))
+                        .foregroundStyle(GlassInk.primary)
                         .lineLimit(1).minimumScaleFactor(0.6)
                 }
                 .buttonStyle(.plain)
@@ -1003,109 +962,89 @@ struct WorldMapView: View {
                 Button {
                     Haptic.light(); showLevelInfo = true
                 } label: {
-                    Text("רָמָה \(progress.companionLevel)")
-                        .font(.system(size: 12, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 9).padding(.vertical, 3)
-                        .background(Capsule().fill(AppColor.gemPurple))
-                        .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
+                    Text(progress.dayStreak > 0
+                         ? "רָמָה \(progress.companionLevel) · 🔥 \(progress.dayStreak) יָמִים"
+                         : "רָמָה \(progress.companionLevel)")
+                        .font(.system(size: 11.5, weight: .bold, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .lineLimit(1).minimumScaleFactor(0.7)
                 }
                 .buttonStyle(.plain)
             }
+            .environment(\.layoutDirection, .rightToLeft)
         }
         .eraseToAnyView()
     }
 
+    /// Round glass buttons, no captions (the approved mockup) — emoji say it all.
+    /// Order (LTR): 🎮 tournament · 🏆 leaderboard · 🛍️ shop · ⚙️ settings.
     private func navButtonsRow(size: CGFloat) -> some View {
-        HStack(spacing: isCompact ? 5 : 9) {
-            navButton(icon: "gamecontroller.fill", color: AppColor.gemPurple,
-                      label: "טוּרְנִיר", badge: !liveGame.invites.isEmpty, size: size) {
+        HStack(spacing: isCompact ? 6 : 9) {
+            navButton("🎮", badge: !liveGame.invites.isEmpty, size: size) {
                 Haptic.light()
                 requirePremium { if let invite = liveGame.invites.first { Task { await liveGame.joinGame(invite.id) } }
                 else { liveGame.openSetup() } }
             }
-            navButton(icon: "trophy.fill", color: Color(hex: "10B981"),
-                      label: "דֵּירוּג", badge: false, size: size) {
+            navButton("🏆", badge: false, size: size) {
                 Haptic.light(); requirePremium { showingLeaderboard = true }
             }
-            navButton(icon: "storefront.fill", color: Color(hex: "F59E0B"),
-                      label: "חֲנוּת", badge: false, size: size) {
+            navButton("🛍️", badge: false, size: size) {
                 Haptic.light(); requirePremium { showingShop = true }
             }
-            navButton(icon: "gearshape.fill", color: AppColor.gemPurple,
-                      label: "הַגְדָּרוֹת", badge: false, size: size, neutral: true,
-                      longPress: { showingDemo = true }) {
+            navButton("⚙️", badge: false, size: size, longPress: { showingDemo = true }) {
                 showingParentGate = true
             }
         }
         .eraseToAnyView()
     }
 
-    private func navButton(icon: String, color: Color, label: String, badge: Bool,
-                           size: CGFloat, neutral: Bool = false, longPress: (() -> Void)? = nil,
+    private func navButton(_ emoji: String, badge: Bool, size: CGFloat,
+                           longPress: (() -> Void)? = nil,
                            action: @escaping () -> Void) -> some View {
         let circle = Button(action: action) {
             ZStack(alignment: .topTrailing) {
-                Image(systemName: icon)
-                    .font(.system(size: size * 0.42, weight: .bold))
-                    .foregroundStyle(.white)
+                Text(emoji)
+                    .font(.system(size: size * 0.44))
                     .frame(width: size, height: size)
-                    .background(
-                        Circle().fill(neutral
-                            ? AnyShapeStyle(Color.white.opacity(0.16))
-                            : AnyShapeStyle(LinearGradient(colors: [color, color.opacity(0.8)],
-                                                           startPoint: .top, endPoint: .bottom)))
-                    )
-                    .overlay(Circle().stroke(.white.opacity(neutral ? 0.4 : 0.9), lineWidth: neutral ? 1.5 : 2))
-                    .shadow(color: neutral ? .clear : color.opacity(0.45), radius: 6, y: 3)
+                    .background(Circle().fill(Color.white.opacity(0.24)))
+                    .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                 if badge {
                     Circle().fill(AppColor.flameOrange).frame(width: 12, height: 12)
-                        .overlay(Circle().stroke(.white, lineWidth: 2)).offset(x: 3, y: -3)
+                        .overlay(Circle().stroke(.white, lineWidth: 2)).offset(x: 2, y: -2)
                 }
             }
         }
         .buttonStyle(.plain)
 
-        return VStack(spacing: 5) {
+        return Group {
             if let longPress {
                 circle.onLongPressGesture(minimumDuration: 1.5, perform: longPress)
             } else {
                 circle
             }
-            Text(label)
-                .font(.system(size: isCompact ? 10 : 11, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white.opacity(0.85))
-                .lineLimit(1)
-                // Keep each caption within its button column so a long word (e.g.
-                // "מִשְׂחָקִים") can't spill over and collide with the neighbour's
-                // caption. Shrink-to-fit instead of truncating to "…".
-                .minimumScaleFactor(0.6)
-                .frame(width: size + (isCompact ? 8 : 16))
         }
         .eraseToAnyView()
     }
 
-    /// The stats panel: 💎 diamonds (left) · big time card (center, with progress
-    /// bar) · ⭐ stars (right). The "time earned today" lives ONLY here.
+    /// The 4-stat strip (RTL): 💎 diamonds · ⭐ stars · ⏱ minutes today · ✅
+    /// correct today. Each is tappable for its explainer sheet.
     private var statsPanel: some View {
-        HStack(spacing: isCompact ? 8 : 12) {
-            Button { Haptic.light(); infoStat = .diamonds } label: {
-                statColumn(emoji: "💎", value: progress.diamonds.currencyShort,
-                           label: "יַהֲלוֹמִים", iconTrailing: false)
-            }
-            .buttonStyle(.plain)
-
-            Button { Haptic.light(); infoStat = .minutes } label: { timeCenterCard }
-                .buttonStyle(.plain)
-
-            Button { Haptic.light(); infoStat = .stars } label: {
-                statColumn(emoji: "⭐", value: progress.stars.currencyShort,
-                           label: "כּוֹכָבִים", iconTrailing: true)
-            }
-            .buttonStyle(.plain)
+        let cap = progress.dailyCap
+        let minutes = cap.enabled ? "\(progress.minutesEarnedToday)" : "\(progress.pendingMinutes)"
+        let minutesMax: String? = cap.enabled ? "/\(cap.max)" : nil
+        return HStack(spacing: 0) {
+            statColumn(value: progress.diamonds.currencyShort, label: "💎 יַהֲלוֹמִים") { infoStat = .diamonds }
+            statDivider
+            statColumn(value: progress.stars.currencyShort, label: "⭐ כּוֹכָבִים") { infoStat = .stars }
+            statDivider
+            statColumn(value: minutes, suffix: minutesMax, label: "⏱ דַּקּוֹת הַיּוֹם") { infoStat = .minutes }
+            statDivider
+            statColumn(value: "\(progress.correctToday)", label: "✅ נְכוֹנוֹת", action: nil)
         }
-        .padding(isCompact ? 8 : 10)
-        .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Color.white.opacity(0.07)))
+        .environment(\.layoutDirection, .rightToLeft)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 4)
+        .glassInset(radius: 18)
         // One clean bottom sheet for the stat explanations (a popover floated
         // awkwardly over the header on iPhone).
         .sheet(item: $infoStat) { stat in
@@ -1117,62 +1056,38 @@ struct WorldMapView: View {
         .eraseToAnyView()
     }
 
-    private func statColumn(emoji: String, value: String, label: String, iconTrailing: Bool) -> some View {
-        HStack(spacing: 7) {
-            if !iconTrailing { Text(emoji).font(.system(size: isCompact ? 22 : 28)) }
-            VStack(spacing: 1) {
-                Text(value)
-                    .font(.system(size: isCompact ? 22 : 30, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineLimit(1).minimumScaleFactor(0.6)
-                Text(label)
-                    .font(.system(size: isCompact ? 11 : 13, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.75))
-                    .lineLimit(1).minimumScaleFactor(0.7)
-            }
-            if iconTrailing { Text(emoji).font(.system(size: isCompact ? 22 : 28)) }
-        }
-        .padding(.horizontal, 4)
+    private var statDivider: some View {
+        Rectangle().fill(.white.opacity(0.16)).frame(width: 1, height: 30)
     }
 
-    private var timeCenterCard: some View {
-        let cap = progress.dailyCap
-        let earned = progress.minutesEarnedToday
-        let frac: Double = cap.enabled
-            ? min(1, Double(earned) / Double(max(1, cap.max)))
-            : (progress.pendingMinutes > 0 ? 1 : 0)
-        let value = cap.enabled ? "\(earned)/\(cap.max)" : "\(progress.pendingMinutes)"
-        return VStack(spacing: isCompact ? 4 : 6) {
-            HStack(spacing: 5) {
-                Image(systemName: "gamecontroller.fill")
-                    .font(.system(size: isCompact ? 10 : 12, weight: .bold))
-                Text("זְמַן שֶׁהִרְוַחְתִּי הַיּוֹם")
-                    .font(.system(size: isCompact ? 10 : 12, weight: .heavy, design: .rounded))
-                    .lineLimit(1).minimumScaleFactor(0.6)
-            }
-            .foregroundStyle(.white.opacity(0.85))
-
-            Text(value)
-                .font(.system(size: isCompact ? 26 : 34, weight: .black, design: .rounded))
-                .foregroundStyle(.white).monospacedDigit()
-                .lineLimit(1).minimumScaleFactor(0.5)
-
-            GeometryReader { g in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.20))
-                    Capsule()
-                        .fill(LinearGradient(colors: [AppColor.successMint, AppColor.diamondBlue, AppColor.gemPurple],
-                                             startPoint: .leading, endPoint: .trailing))
-                        .frame(width: max(6, g.size.width * frac))
+    private func statColumn(value: String, suffix: String? = nil, label: String,
+                            action: (() -> Void)?) -> some View {
+        let content = VStack(spacing: 2) {
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                Text(value)
+                    .font(.system(size: isCompact ? 17 : 21, weight: .black, design: .rounded))
+                    .foregroundStyle(GlassInk.primary)
+                if let suffix {
+                    Text(suffix)
+                        .font(.system(size: isCompact ? 12 : 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(GlassInk.tertiary)
                 }
             }
-            .frame(height: 7)
+            .monospacedDigit()
+            .lineLimit(1).minimumScaleFactor(0.6)
+            Text(label)
+                .font(.system(size: isCompact ? 10.5 : 12, weight: .bold, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
+                .lineLimit(1).minimumScaleFactor(0.7)
         }
-        .padding(.horizontal, isCompact ? 10 : 16)
-        .padding(.vertical, isCompact ? 8 : 10)
         .frame(maxWidth: .infinity)
-        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.white.opacity(0.13)))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.18), lineWidth: 1))
+        return Group {
+            if let action {
+                Button { Haptic.light(); action() } label: { content }.buttonStyle(.plain)
+            } else {
+                content
+            }
+        }
         .eraseToAnyView()
     }
 
@@ -1340,22 +1255,16 @@ struct WorldMapView: View {
         VStack(spacing: 4) {
             // Premium subscribers see the "+" brand — matches the paywall / settings.
             Text(subs.isPremium ? "טופי+" : "טופי")
-                .font(.system(size: heroTitleSize, weight: .heavy, design: .rounded))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [AppColor.starGold, AppColor.companionGlow, .white],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .glow(AppColor.starGold, radius: 14)
+                .font(.system(size: heroTitleSize, weight: .black, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
                 .lineLimit(1).minimumScaleFactor(0.5)
                 .scaleEffect(heroAppeared ? 1 : 0.5)
                 .opacity(heroAppeared ? 1 : 0)
 
-            Text("בְּחַר עוֹלָם וְהַתְחֵל הַרְפַּתְקָה!")
-                .font(.system(size: isCompact ? 16 : 22, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.75))
+            Text("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨")
+                .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
                 .lineLimit(1).minimumScaleFactor(0.6)
                 .opacity(heroAppeared ? 1 : 0)
             // (The "רָמַת טוֹפִי" XP pill was removed — the level now lives in the
@@ -1454,10 +1363,7 @@ struct WorldMapView: View {
                     .padding(.horizontal, AppSpacing.xl)
                     .padding(.vertical, 16)
                     .frame(maxWidth: .infinity)
-                    .background(LinearGradient(colors: [Color(hex: "FF6FAE"), Color(hex: "FFB347")],
-                                               startPoint: .leading, endPoint: .trailing))
-                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    .glow(Color(hex: "FF6FAE"), radius: 16)
+                    .ctaGlass(Color(hex: "FF6FAE"), Color(hex: "FFB347"))
                 }
                 .buttonStyle(.juicy)
                 .frame(maxWidth: 480)
@@ -1509,10 +1415,7 @@ struct WorldMapView: View {
                             .padding(.horizontal, AppSpacing.xl)
                             .padding(.vertical, 15)
                             .frame(maxWidth: .infinity)
-                            .background(LinearGradient(colors: [Color(hex: "5B6CFF"), Color(hex: "9B5DE5")],
-                                                       startPoint: .leading, endPoint: .trailing))
-                            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                            .glow(Color(hex: "5B6CFF"), radius: 14)
+                            .ctaGlass(Color(hex: "5B6CFF"), Color(hex: "9B5DE5"))
                         }
                         .buttonStyle(.juicy)
                         .frame(maxWidth: 480)
@@ -1526,15 +1429,14 @@ struct WorldMapView: View {
                         Image(systemName: "gamecontroller.fill")
                             .font(.system(size: 24))
                         Text("פִּתְחוּ לִי \(progress.redeemableMinutesNow) דַּקּוֹת לְשַׂחֵק")
-                            .font(.system(size: 22, weight: .heavy, design: .rounded))
+                            .font(.system(size: 20, weight: .heavy, design: .rounded))
+                            .minimumScaleFactor(0.7).lineLimit(1)
                     }
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl)
                     .padding(.vertical, 16)
                     .frame(maxWidth: .infinity)
-                    .background(AppGradient.castle)
-                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    .glow(AppColor.flameOrange, radius: 16)
+                    .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
                 }
                 .buttonStyle(.juicy)
                 .frame(maxWidth: 480)
@@ -1580,18 +1482,15 @@ struct WorldMapView: View {
     /// grant — so the area is never silently blank.
     private func bottomHint(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 17, weight: .heavy, design: .rounded))
-            // Dark text on a LIGHT pill — readable, and the 🎮 emoji (dark) shows
-            // up too. The dark pill made the controller emoji invisible.
-            .foregroundStyle(Color(hex: "2A1E5C"))
+            .font(.system(size: 14, weight: .heavy, design: .rounded))
+            .foregroundStyle(GlassInk.primary)
             .multilineTextAlignment(.center)
-            .padding(.horizontal, AppSpacing.xl).padding(.vertical, 14)
+            .padding(.horizontal, AppSpacing.lg).padding(.vertical, 12)
             .frame(maxWidth: .infinity)
-            .background(.white.opacity(0.92),
-                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(AppColor.starGold.opacity(0.7), lineWidth: 2))
-            .shadow(color: .black.opacity(0.18), radius: 8, y: 3)
+            // Floats over the scrolling grid, so it needs a darker body than a
+            // pane on the bare gradient — otherwise tile titles read through it.
+            .background(Color(hex: "2A1E5C").opacity(0.55), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .glassPane(radius: 16, strength: 0.16)
             .frame(maxWidth: 480)
     }
 
@@ -1887,19 +1786,7 @@ struct WorldMapView: View {
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity)
             .frame(height: Self.headerCardHeight)
-            .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(LinearGradient(colors: [Color(hex: "F4A261").opacity(0.50),
-                                                  Color(hex: "E76F51").opacity(0.40),
-                                                  Color(hex: "7C4DFF").opacity(0.30)],
-                                         startPoint: .topTrailing, endPoint: .bottomLeading))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(LinearGradient(colors: [Color(hex: "F4A261").opacity(0.8), .white.opacity(0.2)],
-                                           startPoint: .top, endPoint: .bottom), lineWidth: 1.5)
-            )
-            .shadow(color: Color(hex: "F4A261").opacity(0.25), radius: 10, y: 4)
+            .glassInset(radius: 18)
         }
         .buttonStyle(.juicy)
         .environment(\.layoutDirection, .rightToLeft)
@@ -2141,5 +2028,24 @@ struct SeededRandom {
         z = (z ^ (z >> 30)) &* 0xBF58476D1CE4E5B9
         z = (z ^ (z >> 27)) &* 0x94D049BB133111EB
         return z ^ (z >> 31)
+    }
+}
+
+extension View {
+    /// The kid's big action buttons on glass: the brand gradient at 85 % over a
+    /// blur, a light edge, a soft drop shadow — never an opaque slab (Rani).
+    func ctaGlass(_ a: Color, _ b: Color) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+        return self
+            .background {
+                ZStack {
+                    shape.fill(.ultraThinMaterial)
+                    shape.fill(LinearGradient(colors: [a.opacity(0.85), b.opacity(0.85)],
+                                              startPoint: .leading, endPoint: .trailing))
+                }
+            }
+            .overlay(shape.strokeBorder(.white.opacity(0.45), lineWidth: 1))
+            .clipShape(shape)
+            .shadow(color: .black.opacity(0.3), radius: 16, y: 8)
     }
 }
