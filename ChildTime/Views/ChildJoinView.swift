@@ -84,7 +84,8 @@ struct ChildJoinView: View {
                     .buttonStyle(.juicy)
 
                     VStack(spacing: 8) {
-                        TextField("אוֹ הַקְלִידוּ אֶת הַקּוֹד", text: $code)
+                        TextField("", text: $code,
+                                  prompt: Text("אוֹ הַקְלִידוּ אֶת הַקּוֹד").foregroundColor(.white.opacity(0.75)))   // visible on glass
                             .textInputAutocapitalization(.characters)
                             .autocorrectionDisabled()
                             .font(.system(.title3, design: .monospaced))
@@ -137,8 +138,8 @@ struct ChildJoinView: View {
                         // above already say what to do.)
                     }
                     .padding(14)
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .glassInset(radius: 16)
+                    .frame(maxWidth: .infinity, alignment: .center)   // the block centred, its lines in a column
                     .padding(.top, 6)
 
                     // Escape hatch: a child device blocks app deletion, so a device
