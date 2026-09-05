@@ -136,6 +136,58 @@ final class LearningHistoryStore: ObservableObject {
         sync(stat, childID: childID)
     }
 
+    // MARK: - Demo
+
+    /// DEMO_SCREEN only: 30 days of believable history for screenshots — the
+    /// exact picture on the approved parent mockup (money ≈100 %, reading 89,
+    /// hebrew 86, geography 85, logic 73, english 60, math 39 with fractions
+    /// the gap and multiplication / addition strong). Never runs in production.
+    func seedDemo(childID: UUID) {
+        var out: [String: DailyStat] = [:]
+        let cal = Calendar.current
+        // topic → (questions per day, accuracy now, accuracy 30 days ago)
+        let plan: [(Topic, Int, Double, Double)] = [
+            (.money, 12, 1.0, 0.92), (.reading, 9, 0.89, 0.80), (.hebrew, 14, 0.86, 0.78),
+            (.geography, 13, 0.85, 0.75), (.logic, 11, 0.73, 0.55), (.english, 10, 0.60, 0.58),
+            (.math, 18, 0.39, 0.46)]
+        let mathSkills: [(String, Int, Double)] = [("fractions", 9, 0.22), ("mul", 5, 0.71), ("addSub", 4, 0.86)]
+        for back in 0..<30 {
+            guard let day = cal.date(byAdding: .day, value: -back, to: Date()) else { continue }
+            if back % 6 == 4 { continue }                       // a quiet day now and then
+            let key = Self.dayKey(day)
+            var stat = DailyStat(date: key)
+            let t = 1 - Double(back) / 30                        // 0 = a month ago, 1 = today
+            let load = back == 0 ? 1.0 : (0.35 + 0.5 * Double((back * 7) % 10) / 10)
+            for (topic, perDay, now, then) in plan {
+                let n = max(1, Int((Double(perDay) * load).rounded()))
+                let acc = then + (now - then) * t
+                let c = Int((Double(n) * acc).rounded())
+                var td = DailyStat.TopicDay(answered: n, correct: c, responseMsTotal: Double(n) * 6200)
+                if topic == .math {
+                    var map: [String: DailyStat.SkillDay] = [:]
+                    var left = n
+                    for (i, (skill, share, sacc)) in mathSkills.enumerated() {
+                        let sn = i == mathSkills.count - 1 ? left : min(left, max(1, Int((Double(n) * Double(share) / 18).rounded())))
+                        left -= sn
+                        map[skill] = .init(answered: sn, correct: Int((Double(sn) * sacc).rounded()))
+                    }
+                    td.perSkill = map
+                }
+                stat.perTopic[topic.rawValue] = td
+                stat.questionsAnswered += n; stat.correct += c; stat.wrong += n - c
+                stat.learningSeconds += n * 6
+            }
+            stat.sessions = 2; stat.earnSessions = 1; stat.freeSessions = 1
+            stat.minutesEarned = min(90, stat.correct * 2 / 3)
+            stat.minutesUsed = back == 0 ? 40 : max(0, stat.minutesEarned - 8 - (back % 3) * 6)
+            stat.longestStreak = 5 + back % 4
+            out[key] = stat
+        }
+        if let data = try? JSONEncoder().encode(out) { defaults.set(data, forKey: storageKey(childID)) }
+        if childID == boundChildID { days = out }
+        objectWillChange.send()
+    }
+
     // MARK: - Persistence
 
     private func storageKey(_ childID: UUID) -> String {

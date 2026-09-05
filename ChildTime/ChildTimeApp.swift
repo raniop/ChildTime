@@ -289,7 +289,12 @@ struct ChildTimeApp: App {
         case "question": QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
         case "wheel":    LuckyWheelView(onClose: {})
         case "dashboard": ParentDashboardView(isRoot: true)
-            .onAppear { if let id = ProfileStore.shared.activeID { HouseholdManager.shared.seedDemoLiveWindow(childID: id) } }
+            .onAppear {
+                if let id = ProfileStore.shared.activeID {
+                    HouseholdManager.shared.seedDemoLiveWindow(childID: id)
+                    LearningHistoryStore.shared.seedDemo(childID: id)
+                }
+            }
         case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
         case "kidhome": WorldMapView()   // DEMO_SCREEN=kidhome — the child's home, as is
         case "askparent": AskParentView(onClose: {})   // DEMO_SCREEN=askparent — what a CHILD device shows instead of the paywall
@@ -297,7 +302,12 @@ struct ChildTimeApp: App {
         case "unlocked": UnlockedView().onAppear { ProgressStore.shared.startUnlock(minutes: 670, manual: false) }  // DEMO_SCREEN=unlocked — game-time countdown
         case "whatsnew": WhatsNewView(onDone: {})   // DEMO_SCREEN=whatsnew — the release-notes sheet
         case "parenthome": ParentDashboardView(isRoot: true)   // DEMO_SCREEN=parenthome — the redesigned overview
-            .onAppear { if let id = ProfileStore.shared.activeID { HouseholdManager.shared.seedDemoLiveWindow(childID: id) } }
+            .onAppear {
+                if let id = ProfileStore.shared.activeID {
+                    HouseholdManager.shared.seedDemoLiveWindow(childID: id)
+                    LearningHistoryStore.shared.seedDemo(childID: id)
+                }
+            }
         case "leaderboard": LeaderboardView()   // DEMO_SCREEN=leaderboard
         case "livegame": LiveGameDemoHost()      // DEMO_SCREEN=livegame — live quiz setup/flow
         case "gameinvite": WorldMapView().onAppear { LiveGameManager.shared.seedDemoInvite() }  // invite banner

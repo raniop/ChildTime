@@ -48,8 +48,9 @@ struct TopicReport: Identifiable {
     /// we say nothing rather than label a kid "weak" off two misses.
     var verdict: Verdict {
         guard answered >= 6 else { return .tooFew }
-        if accuracy >= 0.85 { return .strong }
-        if accuracy >= 0.65 { return .ok }
+        // Matches the approved report: 85 % reads "חזק", 60–73 % "בסדר", 39 % "דורש חיזוק".
+        if accuracy >= 0.845 { return .strong }
+        if accuracy >= 0.55 { return .ok }
         return .weak
     }
 }

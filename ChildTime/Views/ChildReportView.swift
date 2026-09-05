@@ -26,6 +26,7 @@ struct ChildReportView: View {
     @ObservedObject private var historyStore = LearningHistoryStore.shared
     @State private var period: ReportPeriod = .today
     @State private var expandedTopic: Topic? = nil
+    @State private var autoCollapsed = false
     @State private var isRefreshing = false
 
     private var engine: InsightsEngine {
@@ -49,16 +50,6 @@ struct ChildReportView: View {
             screenTimeCard
             masteryCards
             devicesCard
-            Button(action: onFullInsights) {
-                Label("תּוֹבָנוֹת מְלֵאוֹת וְסִגְנוֹן לְמִידָה", systemImage: "sparkles")
-                    .font(.system(size: 14.5, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(.white.opacity(0.14), in: Capsule())
-                    .overlay(Capsule().stroke(.white.opacity(0.25), lineWidth: 1))
-            }
-            .buttonStyle(.plain)
         }
         .environment(\.layoutDirection, .rightToLeft)
         .task(id: profile.id) {
@@ -86,12 +77,14 @@ struct ChildReportView: View {
                     Text(profile.name)
                         .font(.system(size: 24, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
+                    // "כיתה ג׳ · משחק עכשיו באייפד" — grade, then where the window is open.
                     HStack(spacing: 6) {
+                        Text(Profile.gradeDisplayName(profile.effectiveGrade))
                         if liveSecondsLeft > 0 {
+                            Text("·")
                             LivePulseDot()
-                            Text("\(g("מְשַׂחֵק", "מְשַׂחֶקֶת")) עַכְשָׁיו · נִשְׁאֲרוּ \(mmss(liveSecondsLeft))")
-                        } else {
-                            Text(Profile.gradeDisplayName(profile.effectiveGrade))
+                            let kind = devices.first?.kind ?? ""
+                            Text("\(g("מְשַׂחֵק", "מְשַׂחֶקֶת")) עַכְשָׁיו" + (kind == "ipad" ? " בָּאַיְפֵּד" : kind == "iphone" ? " בָּאַיְפוֹן" : ""))
                         }
                     }
                     .font(.system(size: 13.5, weight: .semibold, design: .rounded))
@@ -150,7 +143,7 @@ struct ChildReportView: View {
 
     private func insightCard(_ i: DailyInsight) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("\(i.emoji) \(i.title)")
+            Text("💡 תּוֹבְנַת \(period == .today ? "הַיּוֹם" : period == .week ? "הַשָּׁבוּעַ" : "הַחֹדֶשׁ")")
                 .font(.system(size: 14.5, weight: .heavy, design: .rounded))
             Text(i.body)
                 .font(.system(size: 13.5, weight: .medium, design: .rounded))
@@ -165,7 +158,13 @@ struct ChildReportView: View {
         .foregroundStyle(GlassInk.primary)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .glassPane(radius: 22, strength: 0.16, tint: Color(hex: "FFC94A"))
+        // The one WARM pane on the page (mockup `.insight`): gold glass so it leads the eye.
+        .background(LinearGradient(colors: [Color(hex: "FFE082").opacity(0.66), Color(hex: "FFB840").opacity(0.52)],
+                                   startPoint: .topLeading, endPoint: .bottomTrailing),
+                    in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
+            .strokeBorder(Color(hex: "FFEBAA").opacity(0.7), lineWidth: 1))
+        .shadow(color: .black.opacity(0.22), radius: 14, y: 8)
     }
 
     // MARK: - Topics
@@ -176,10 +175,15 @@ struct ChildReportView: View {
             if topics.isEmpty {
                 empty("עוֹד לֹא נֶעֶנוּ שְׁאֵלוֹת \(period.title.lowercased()).")
             } else {
+                // The weakest topic opens on its own (the mockup shows math's
+                // sub-skills right there); any row toggles on tap.
+                let weakest = topics.reversed().first(where: { $0.verdict == .weak && !engine.skillReports($0.topic, period).isEmpty })
+                    ?? topics.first(where: { $0.verdict == .weak })
+                let open = expandedTopic ?? (autoCollapsed ? nil : weakest?.topic)
                 VStack(spacing: 0) {
                     ForEach(topics) { t in
-                        topicRow(t)
-                        if expandedTopic == t.topic {
+                        topicRow(t, open: open == t.topic)
+                        if open == t.topic {
                             let skills = engine.skillReports(t.topic, period)
                             if skills.isEmpty {
                                 Text("אֵין עֲדַיִן פֵּרוּט לְפִי מְיֻמָּנוּת בְּנוֹשֵׂא זֶה.")
@@ -191,17 +195,14 @@ struct ChildReportView: View {
                                     HStack {
                                         Text(sk.name)
                                         Spacer()
-                                        Text("\(sk.correct)/\(sk.answered)")
-                                            .foregroundStyle(GlassInk.secondary).monospacedDigit()
                                         Text(pct(sk.accuracy))
                                             .fontWeight(.heavy).monospacedDigit()
-                                            .foregroundStyle(verdictColor(sk.accuracy >= 0.85 ? .strong : sk.accuracy >= 0.65 ? .ok : .weak))
-                                            .frame(minWidth: 44, alignment: .leading)
+                                            .foregroundStyle(sk.accuracy >= 0.65 ? GlassInk.good : GlassInk.weak)
                                     }
-                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                                    .padding(.vertical, 7).padding(.horizontal, 10)
-                                    .glassInset(radius: 10)
-                                    .padding(.leading, 44).padding(.top, 4)
+                                    .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                                    .padding(.vertical, 8).padding(.horizontal, 10)
+                                    .glassInset(radius: 11)
+                                    .padding(.leading, 44).padding(.top, 6)
                                 }
                             }
                         }
@@ -212,11 +213,11 @@ struct ChildReportView: View {
         }
     }
 
-    private func topicRow(_ t: TopicReport) -> some View {
+    private func topicRow(_ t: TopicReport, open: Bool) -> some View {
         Button {
             Haptic.light()
             withAnimation(.easeInOut(duration: 0.2)) {
-                expandedTopic = expandedTopic == t.topic ? nil : t.topic
+                if open { expandedTopic = nil; autoCollapsed = true } else { expandedTopic = t.topic }
             }
         } label: {
             HStack(spacing: 10) {
@@ -230,8 +231,6 @@ struct ChildReportView: View {
                 }
                 Spacer()
                 verdictPill(t)
-                Image(systemName: expandedTopic == t.topic ? "chevron.up" : "chevron.down")
-                    .font(.system(size: 11, weight: .bold)).foregroundStyle(GlassInk.tertiary)
             }
             .foregroundStyle(GlassInk.primary)
         }

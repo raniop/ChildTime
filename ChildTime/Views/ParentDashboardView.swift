@@ -31,6 +31,7 @@ struct ParentDashboardView: View {
     @State private var revokeGiftProfile: Profile? = nil
     @State private var navPath: [UUID] = []   // pushed child-detail pages (pop on delete)
     @State private var gridDeleteProfile: Profile? = nil   // long-press delete from the grid
+    @State private var showLegacyChildCard = false
     @State private var showingReorder = false               // manual child order sheet
     @State private var statExplain: StatExplain? = nil      // tapped-stat explanation
     @State private var refreshTrigger = 0
@@ -202,6 +203,7 @@ struct ParentDashboardView: View {
             // Root: no bar at all — the greeting + ⚙️ are in the page (mockup), and
             // an empty bar only pushed the content down. Pushed pages turn it back on.
             .toolbar(isRoot ? .hidden : .visible, for: .navigationBar)
+            .navigationTitle("כָּל הַיְלָדִים")   // hidden here; it becomes the pushed page's back label
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     if isRoot {
@@ -1647,8 +1649,20 @@ struct ParentDashboardView: View {
                         onFullInsights: { insightsProfile = row.profile }
                     )
                     // Everything the old card offered (chores, worlds, difficulty,
-                    // PIN, edit, delete…) stays here, below the report, unchanged.
-                    profileCard(profile: row.profile, snapshot: row.snapshot)
+                    // PIN, edit, delete…) is a tap away, folded under the report so
+                    // the page itself is the approved design.
+                    HStack(spacing: 8) {
+                        Button { Haptic.light(); insightsProfile = row.profile } label: {
+                            homeGhostLabel("✨ תּוֹבָנוֹת מְלֵאוֹת")
+                        }.buttonStyle(.plain)
+                        Button { Haptic.light(); withAnimation(.easeInOut(duration: 0.2)) { showLegacyChildCard.toggle() } } label: {
+                            homeGhostLabel(showLegacyChildCard ? "⚙️ סְגֹר הַגְדָּרוֹת" : "⚙️ הַגְדָּרוֹת שֶׁל \(row.profile.name)")
+                        }.buttonStyle(.plain)
+                    }
+                    .environment(\.layoutDirection, .rightToLeft)
+                    if showLegacyChildCard {
+                        profileCard(profile: row.profile, snapshot: row.snapshot)
+                    }
                 }
                 .padding(AppSpacing.lg)
                 .frame(maxWidth: 720)
@@ -1659,8 +1673,8 @@ struct ParentDashboardView: View {
             }
             .noHorizontalBounce()
             .environment(\.layoutDirection, .leftToRight)
-            .background(AppGradient.dreamy.ignoresSafeArea())
-            .navigationTitle(row.profile.name)
+            .background(GlassBackdrop())
+            .navigationTitle("")
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
             // These dialogs live on the DETAIL page (not the root) so they present
