@@ -29,12 +29,8 @@ struct LuckyWheelView: View {
                                 proxy.size.height * (landscape ? 0.80 : 0.48),
                                 proxy.size.width * (landscape ? 0.46 : 0.92))
             ZStack {
-                AppGradient.dreamy.ignoresSafeArea()
-                FloatingOrbs(
-                    colors: [AppColor.gemPurple, AppColor.starGold, AppColor.companionGlow],
-                    count: 6, maxSize: 280, opacity: 0.45
-                )
-                SparkleField(count: 30, size: 14)
+                GlassBackdrop()
+                SparkleField(count: 14, size: 11)
                 FancyConfetti(trigger: confetti)
                 StarBurst(count: 14, color: AppColor.starGold, trigger: stars)
 
@@ -109,18 +105,13 @@ struct LuckyWheelView: View {
             Text("🎡")
                 .font(.system(size: isCompact ? 44 : 56))
             Text("גַּלְגַּל מַזָּל!")
-                .font(.system(size: isCompact ? 32 : 44, weight: .heavy, design: .rounded))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FFE082")],
-                        startPoint: .top, endPoint: .bottom
-                    )
-                )
-                .shadow(color: AppColor.starGold.opacity(0.7), radius: 10)
+                .font(.system(size: isCompact ? 30 : 40, weight: .black, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
             if winner == nil {
                 Text("הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב")
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
+                    .font(.system(size: 13.5, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
             }
         }
     }
@@ -193,18 +184,9 @@ struct LuckyWheelView: View {
         }
         .padding(AppSpacing.lg)
         .frame(maxWidth: 420)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .fill(.white.opacity(0.12))
-                .overlay(
-                    RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                        .stroke(prize.isPenalty
-                                ? AppColor.companionGlow.opacity(0.5)
-                                : AppColor.starGold.opacity(0.7),
-                                lineWidth: 2)
-                )
-        )
-        .glow(prize.isPenalty ? AppColor.companionGlow : AppColor.starGold, radius: 14)
+        // The prize pane: glass with a whisper of gold (or the softer glow for a
+        // "next time" spin) — the one warm pane on the screen.
+        .glassPane(radius: 22, tint: prize.isPenalty ? AppColor.companionGlow : Color(hex: "FFD23F"))
     }
 
     private var primaryButton: some View {
@@ -213,12 +195,20 @@ struct LuckyWheelView: View {
             if isSpinning   { return "מִסְתּוֹבֵב…" }
             return "סוֹבֵב!"
         }()
-        return JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
+        return Button {
             if winner != nil { onClose() }
             else { spin() }
         } label: {
-            Text(label).font(.system(size: 22, weight: .heavy, design: .rounded))
+            Text(label)
+                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .padding(.horizontal, AppSpacing.xl)
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
+                .ctaGlass(Color(hex: "FFB347"), Color(hex: "FF9F1C"))
         }
+        .buttonStyle(.juicy)
+        .frame(maxWidth: 480)
         .disabled(isSpinning && winner == nil)
         .opacity(isSpinning && winner == nil ? 0.6 : 1)
     }
@@ -229,9 +219,11 @@ struct LuckyWheelView: View {
             onClose()
         } label: {
             Text(winner == nil ? "דַּלֵּג הַפַּעַם" : "סְגוֹר")
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.75))
-                .underline()
+                .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .padding(.horizontal, 16).padding(.vertical, 9)
+                .background(Capsule().fill(.white.opacity(0.14)))
+                .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
         }
         .padding(.top, 4)
     }
@@ -288,12 +280,12 @@ private struct WheelShape: View {
                 wedgeView(at: idx, prize: prize)
             }
             // Rim
+            // Glass rim: a light edge, not a gold band — the wedges are the colour.
             Circle()
-                .stroke(LinearGradient(
-                    colors: [AppColor.starGold, .white, AppColor.starGold],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                ), lineWidth: 6)
+                .stroke(LinearGradient(colors: [.white.opacity(0.85), .white.opacity(0.35)],
+                                       startPoint: .top, endPoint: .bottom), lineWidth: 5)
                 .frame(width: size, height: size)
+                .shadow(color: .black.opacity(0.25), radius: 16, y: 10)
         }
         .frame(width: size, height: size)
     }
