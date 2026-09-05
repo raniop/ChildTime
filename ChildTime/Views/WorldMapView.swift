@@ -91,7 +91,7 @@ struct WorldMapView: View {
     /// disabled topic is hidden entirely — the child never sees that world card,
     /// and the Smart Feed won't serve its questions either.
 
-    /// Everything on the kid's home except הרפתקה חכמה is Tofy+. One gate, so a
+    /// Everything on the kid's home except טופי טיים is Tofy+. One gate, so a
     /// new tile can never be added without it (Rani found games, the arena and
     /// chores reachable for free). Never a lock icon or failure language for the
     /// child — the paywall itself is the parent-facing, parent-gated screen.
@@ -188,8 +188,8 @@ struct WorldMapView: View {
                             spacing: AppSpacing.md
                         ) {
                             FeatureCard(
-                                emoji: "🧠",
-                                title: "הַרְפַּתְקָה חֲכָמָה",
+                                emoji: "🎲",
+                                title: "טוֹפִי טַיְם",
                                 subtitle: "שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ",
                                 gradient: AppGradient.portal,
                                 glowColor: AppColor.companionGlow
@@ -216,7 +216,7 @@ struct WorldMapView: View {
                                     if subs.isPremium {
                                         selectedWorld = world
                                     } else {
-                                        // Until they subscribe, only "הרפתקה חכמה"
+                                        // Until they subscribe, only "טופי טיים"
                                         // is playable — the worlds open the paywall.
                                         Haptic.light()
                                         showingPaywall = true
