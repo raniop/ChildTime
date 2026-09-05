@@ -135,6 +135,36 @@ struct WorldMapView: View {
         return worlds.map { $0.isBonusWorld ? $0 : (next.next() ?? $0) }
     }
 
+    /// A tile on the kid's home grid — the free path or a world.
+    enum HomeTile: Identifiable {
+        case tofyTime
+        case world(World)
+        var id: String { switch self { case .tofyTime: return "tofy_time"; case .world(let w): return w.id } }
+    }
+
+    private var homeTiles: [HomeTile] {
+        Self.homeOrder(worlds: enabledWorlds, childID: profiles.activeID, premium: subs.isPremium)
+    }
+
+    /// Where טופי טיים sits among the worlds. Rani: the categories move once a
+    /// day — but without Tofy+ it is the ONLY thing the child can open, so it
+    /// stays first, always, rather than hiding behind seven locked tiles. With
+    /// Tofy+ it takes its turn in the same daily shuffle as everything else.
+    /// `worlds` arrive already in today's order (`orderForToday`).
+    static func homeOrder(worlds: [World], childID: UUID?, premium: Bool, on date: Date = Date()) -> [HomeTile] {
+        var tiles: [HomeTile] = worlds.map { .world($0) }
+        guard premium, !tiles.isEmpty else { tiles.insert(.tofyTime, at: 0); return tiles }
+        // Same seed family as the worlds, stepped once so the slot isn't
+        // correlated with the first world's shuffle draw.
+        var rng = SeededRandom(seed: daySeed(childID: childID, on: date) &+ 0x51ED)
+        _ = rng.next()
+        // Never after the arena (it keeps the last slot) — pick among the topic slots.
+        let lastTopic = tiles.lastIndex { if case .world(let w) = $0 { return !w.isBonusWorld } else { return false } } ?? 0
+        let slot = Int(rng.next() % UInt64(lastTopic + 2))   // 0…lastTopic+1 inclusive
+        tiles.insert(.tofyTime, at: min(slot, tiles.count))
+        return tiles
+    }
+
     /// Stable across processes and devices. Deliberately NOT `hashValue` — Swift
     /// seeds that randomly per launch, so the order would change on every app
     /// start and differ between a child's two devices.
@@ -187,42 +217,45 @@ struct WorldMapView: View {
                             columns: worldGridColumns,
                             spacing: AppSpacing.md
                         ) {
-                            FeatureCard(
-                                emoji: "🎲",
-                                title: "טוֹפִי טַיְם",
-                                subtitle: "שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ",
-                                gradient: AppGradient.portal,
-                                glowColor: AppColor.companionGlow
-                            ) {
-                                // No companion line here — we leave this screen
-                                // immediately, so a bubble would only flash & clip.
-                                Haptic.light()
-                                showingSmartFeed = true
-                            }
-                            .frame(maxWidth: .infinity)
-
-                            ForEach(enabledWorlds) { world in
-                                WorldCard(
-                                    // Premium unlocks every world (that's what the
-                                    // subscription buys). Stars are now a spendable
-                                    // currency, so they no longer gate worlds —
-                                    // otherwise buying cosmetics could re-lock them.
-                                    world: world,
-                                    isUnlocked: subs.isPremium,
-                                    currentRoom: progress.progress(in: world.id),
-                                    starsHeld: progress.stars,
-                                    subscriptionLocked: !subs.isPremium
-                                ) {
-                                    if subs.isPremium {
-                                        selectedWorld = world
-                                    } else {
-                                        // Until they subscribe, only "טופי טיים"
-                                        // is playable — the worlds open the paywall.
+                            ForEach(homeTiles) { tile in
+                                switch tile {
+                                case .tofyTime:
+                                    FeatureCard(
+                                        emoji: "🎲",
+                                        title: "טוֹפִי טַיְם",
+                                        subtitle: "שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ",
+                                        gradient: AppGradient.portal,
+                                        glowColor: AppColor.companionGlow
+                                    ) {
+                                        // No companion line here — we leave this screen
+                                        // immediately, so a bubble would only flash & clip.
                                         Haptic.light()
-                                        showingPaywall = true
+                                        showingSmartFeed = true
                                     }
+                                    .frame(maxWidth: .infinity)
+                                case .world(let world):
+                                    WorldCard(
+                                        // Premium unlocks every world (that's what the
+                                        // subscription buys). Stars are now a spendable
+                                        // currency, so they no longer gate worlds —
+                                        // otherwise buying cosmetics could re-lock them.
+                                        world: world,
+                                        isUnlocked: subs.isPremium,
+                                        currentRoom: progress.progress(in: world.id),
+                                        starsHeld: progress.stars,
+                                        subscriptionLocked: !subs.isPremium
+                                    ) {
+                                        if subs.isPremium {
+                                            selectedWorld = world
+                                        } else {
+                                            // Until they subscribe, only "טופי טיים"
+                                            // is playable — the worlds open the paywall.
+                                            Haptic.light()
+                                            showingPaywall = true
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity)
                                 }
-                                .frame(maxWidth: .infinity)
                             }
 
                             // 🎮 Games LAST in the grid (Rani): learning worlds

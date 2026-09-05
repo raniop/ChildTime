@@ -642,6 +642,34 @@ struct WorldOrderTests {
         }
     }
 
+    @Test("without Tofy+ Tofy Time is always first — it is the only thing the child can open")
+    func tofyTimePinnedWithoutPremium() {
+        for d in 0..<30 {
+            let day = Date().addingTimeInterval(Double(d) * 86_400)
+            let tiles = WorldMapView.homeOrder(worlds: WorldMapView.orderForToday(worlds, childID: kid, on: day),
+                                               childID: kid, premium: false, on: day)
+            if case .tofyTime = tiles[0] {} else { Issue.record("day \(d): Tofy Time not first") }
+            #expect(tiles.count == worlds.count + 1)
+        }
+    }
+
+    @Test("with Tofy+ Tofy Time takes its turn in the daily shuffle, never after the arena")
+    func tofyTimeMovesWithPremium() {
+        var positions = Set<Int>()
+        for d in 0..<30 {
+            let day = Date().addingTimeInterval(Double(d) * 86_400)
+            let tiles = WorldMapView.homeOrder(worlds: WorldMapView.orderForToday(worlds, childID: kid, on: day),
+                                               childID: kid, premium: true, on: day)
+            let i = tiles.firstIndex { if case .tofyTime = $0 { return true } else { return false } }!
+            positions.insert(i)
+            if let arena = tiles.firstIndex(where: { if case .world(let w) = $0 { return w.isBonusWorld } else { return false } }) {
+                #expect(i < arena)
+            }
+            #expect(tiles.count == worlds.count + 1)
+        }
+        #expect(positions.count >= 2)   // it actually moves across the month
+    }
+
     @Test("two children get different orders on the same day")
     func differsPerChild() {
         let a = WorldMapView.orderForToday(worlds, childID: UUID(), on: Date()).map(\.id)
