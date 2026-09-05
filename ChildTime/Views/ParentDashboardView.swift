@@ -1317,11 +1317,11 @@ struct ParentDashboardView: View {
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .lineLimit(1).minimumScaleFactor(0.7)
                     HStack(spacing: 6) {
-                        Circle().fill(playing || isChildPlayingNow(profile) ? AppColor.successMint : Color.secondary.opacity(0.35))
+                        Circle().fill(playing || isChildPlayingNow(profile) ? Color(hex: "5CFF9D") : Color.white.opacity(0.35))
                             .frame(width: 8, height: 8)
                         Text(state)
                             .font(.system(size: 12.5, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.secondary).monospacedDigit()
+                            .foregroundStyle(GlassInk.secondary).monospacedDigit()
                             .lineLimit(1).minimumScaleFactor(0.8)
                     }
                 }
@@ -1329,7 +1329,7 @@ struct ParentDashboardView: View {
                 Text(pct.map { "\($0)%" } ?? "—")
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .monospacedDigit()
-                    .foregroundStyle(pct == nil ? .secondary : (pct! >= 85 ? Color(hex: "22A06B") : pct! >= 65 ? Color(hex: "9A6A00") : AppColor.flameOrange))
+                    .foregroundStyle(pct == nil ? GlassInk.tertiary : (pct! >= 85 ? GlassInk.good : pct! >= 65 ? GlassInk.warn : GlassInk.weak))
             }
             HStack(spacing: 8) {
                 overviewStat(value: cap.enabled ? "\(s.minutesEarnedToday)" : "\(s.minutesEarnedToday)",
@@ -1345,19 +1345,17 @@ struct ParentDashboardView: View {
                 Label("מֵידָע נוֹסָף", systemImage: "chevron.left")
                     .labelStyle(.titleAndIcon)
                     .font(.system(size: 13.5, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(AppColor.dreamyIndigo)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
-                    .background(AppColor.dreamyIndigo, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 Color.clear.frame(width: 118, height: 1)   // room for the ⚡ menu overlaid by the grid
             }
             if !hasDevice && isRoot { Color.clear.frame(height: 30) }   // the "connect" pill lives here
         }
         .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
-        )
+        .foregroundStyle(GlassInk.primary)
+        .glassPane(radius: AppRadius.large)
         .environment(\.layoutDirection, .rightToLeft)
     }
 
@@ -1365,15 +1363,15 @@ struct ParentDashboardView: View {
         VStack(spacing: 3) {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 Text(value).font(.system(size: 17, weight: .heavy, design: .rounded))
-                if let suffix { Text(suffix).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.secondary) }
+                if let suffix { Text(suffix).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(GlassInk.tertiary) }
             }
             .monospacedDigit()
-            Text(label).font(.system(size: 10.5, weight: .semibold, design: .rounded)).foregroundStyle(.secondary)
+            Text(label).font(.system(size: 10.5, weight: .semibold, design: .rounded)).foregroundStyle(GlassInk.secondary)
             if let progress {
                 GeometryReader { g in
                     ZStack(alignment: .leading) {
-                        Capsule().fill(Color.secondary.opacity(0.15))
-                        Capsule().fill(AppColor.dreamyIndigo).frame(width: g.size.width * progress)
+                        Capsule().fill(Color.white.opacity(0.18))
+                        Capsule().fill(Color.white).frame(width: g.size.width * progress)
                     }
                 }
                 .frame(height: 5)
@@ -1381,7 +1379,7 @@ struct ParentDashboardView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8).padding(.horizontal, 6)
-        .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .glassInset(radius: 12)
     }
 
     /// ⋯ on a grid card: remote open / lock now (the two things a parent reaches
@@ -1425,10 +1423,10 @@ struct ParentDashboardView: View {
             Label("⚡ פְּעֻלּוֹת", systemImage: "")
                 .labelStyle(.titleOnly)
                 .font(.system(size: 13.5, weight: .heavy, design: .rounded))
-                .foregroundStyle(.primary)
+                .foregroundStyle(GlassInk.primary)
                 .frame(width: 118)
                 .padding(.vertical, 10)
-                .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .glassInset(radius: 12)
                 .hidden()   // real label below keeps the old anchor size logic intact
             Image(systemName: "ellipsis.circle.fill")
                 .font(.system(size: 22))

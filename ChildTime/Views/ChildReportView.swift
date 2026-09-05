@@ -109,7 +109,7 @@ struct ChildReportView: View {
                 snap("\(snapshot.dayStreak)", "יְמֵי רֶצֶף")
             }
             .padding(.vertical, 10)
-            .background(.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .glassPane(radius: 16, shadow: false)
             // Period filter — drives every card below.
             HStack(spacing: 4) {
                 ForEach(ReportPeriod.allCases) { p in
@@ -121,7 +121,7 @@ struct ChildReportView: View {
                             .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 8)
-                            .background(period == p ? Color.white : .clear,
+                            .background(period == p ? Color.white.opacity(0.92) : .clear,
                                         in: RoundedRectangle(cornerRadius: 9, style: .continuous))
                             .foregroundStyle(period == p ? AppColor.dreamyIndigo : .white)
                     }
@@ -129,7 +129,7 @@ struct ChildReportView: View {
                 }
             }
             .padding(3)
-            .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .glassPane(radius: 12, shadow: false)
         }
     }
 
@@ -156,18 +156,16 @@ struct ChildReportView: View {
                 .font(.system(size: 13.5, weight: .medium, design: .rounded))
                 .fixedSize(horizontal: false, vertical: true)
             if let rec = i.recommendation {
-                Divider().overlay(Color(hex: "4A3B0A").opacity(0.18))
+                Divider().overlay(Color.white.opacity(0.35))
                 Text("מֻמְלָץ: \(rec)")
                     .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .foregroundStyle(Color(hex: "3B2E05"))
+        .foregroundStyle(GlassInk.primary)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(LinearGradient(colors: [Color(hex: "FFF6D9"), Color(hex: "FFEFC2")],
-                                   startPoint: .topLeading, endPoint: .bottomTrailing),
-                    in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .glassPane(radius: 22, strength: 0.16, tint: Color(hex: "FFC94A"))
     }
 
     // MARK: - Topics
@@ -186,7 +184,7 @@ struct ChildReportView: View {
                             if skills.isEmpty {
                                 Text("אֵין עֲדַיִן פֵּרוּט לְפִי מְיֻמָּנוּת בְּנוֹשֵׂא זֶה.")
                                     .font(.system(size: 12.5, weight: .medium, design: .rounded))
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(GlassInk.secondary)
                                     .padding(.vertical, 6)
                             } else {
                                 ForEach(skills) { sk in
@@ -194,7 +192,7 @@ struct ChildReportView: View {
                                         Text(sk.name)
                                         Spacer()
                                         Text("\(sk.correct)/\(sk.answered)")
-                                            .foregroundStyle(.secondary).monospacedDigit()
+                                            .foregroundStyle(GlassInk.secondary).monospacedDigit()
                                         Text(pct(sk.accuracy))
                                             .fontWeight(.heavy).monospacedDigit()
                                             .foregroundStyle(verdictColor(sk.accuracy >= 0.85 ? .strong : sk.accuracy >= 0.65 ? .ok : .weak))
@@ -202,13 +200,12 @@ struct ChildReportView: View {
                                     }
                                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                                     .padding(.vertical, 7).padding(.horizontal, 10)
-                                    .background(Color(.tertiarySystemGroupedBackground),
-                                                in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                    .glassInset(radius: 10)
                                     .padding(.leading, 44).padding(.top, 4)
                                 }
                             }
                         }
-                        if t.id != topics.last?.id { Divider().padding(.vertical, 8) }
+                        if t.id != topics.last?.id { Divider().overlay(Color.white.opacity(0.16)).padding(.vertical, 8) }
                     }
                 }
             }
@@ -229,14 +226,14 @@ struct ChildReportView: View {
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                     Text("\(t.answered) שְׁאֵלוֹת · \(t.correct) נְכוֹנוֹת" + (t.wrong > 0 ? " · \(t.wrong) טְעֻיּוֹת" : ""))
                         .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundStyle(.secondary).monospacedDigit()
+                        .foregroundStyle(GlassInk.secondary).monospacedDigit()
                 }
                 Spacer()
                 verdictPill(t)
                 Image(systemName: expandedTopic == t.topic ? "chevron.up" : "chevron.down")
-                    .font(.system(size: 11, weight: .bold)).foregroundStyle(.tertiary)
+                    .font(.system(size: 11, weight: .bold)).foregroundStyle(GlassInk.tertiary)
             }
-            .foregroundStyle(.primary)
+            .foregroundStyle(GlassInk.primary)
         }
         .buttonStyle(.plain)
     }
@@ -247,7 +244,7 @@ struct ChildReportView: View {
             case .strong: return (t.accuracy >= 0.95 ? "חָזָק מְאוֹד" : "חָזָק", verdictColor(.strong))
             case .ok:     return ("בְּסֵדֶר", verdictColor(.ok))
             case .weak:   return ("דּוֹרֵשׁ חִזּוּק", verdictColor(.weak))
-            case .tooFew: return ("עוֹד מְעַט", Color.secondary)
+            case .tooFew: return ("עוֹד מְעַט", GlassInk.tertiary)
             }
         }()
         return Text("\(pct(t.accuracy)) · \(label)")
@@ -255,15 +252,16 @@ struct ChildReportView: View {
             .monospacedDigit()
             .foregroundStyle(color)
             .padding(.horizontal, 9).padding(.vertical, 5)
-            .background(color.opacity(0.14), in: Capsule())
+            .background(Color.white.opacity(0.12), in: Capsule())
+            .overlay(Capsule().strokeBorder(Color.white.opacity(0.18), lineWidth: 1))
     }
 
     private func verdictColor(_ v: TopicReport.Verdict) -> Color {
         switch v {
-        case .strong: return Color(hex: "22A06B")
-        case .ok:     return Color(hex: "9A6A00")
-        case .weak:   return AppColor.flameOrange
-        case .tooFew: return .secondary
+        case .strong: return GlassInk.good
+        case .ok:     return GlassInk.warn
+        case .weak:   return GlassInk.weak
+        case .tooFew: return GlassInk.tertiary
         }
     }
 
@@ -279,7 +277,7 @@ struct ChildReportView: View {
                         let up = o >= 0
                         Text("\(up ? "📈" : "📉") \(up ? g("הִשְׁתַּפֵּר", "הִשְׁתַּפְּרָה") : "יָרַד קְצָת") בְּ-\(Int(abs(o).rounded()))% \(period == .week ? "הַשָּׁבוּעַ" : "הַחֹדֶשׁ")")
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
-                            .foregroundStyle(up ? Color(hex: "22A06B") : AppColor.flameOrange)
+                            .foregroundStyle(up ? GlassInk.good : GlassInk.weak)
                     }
                     HStack(spacing: 16) {
                         if let best = deltas.first, best.deltaPoints > 0 {
@@ -296,12 +294,12 @@ struct ChildReportView: View {
 
     private func trendChip(_ label: String, _ topic: String, _ delta: Double) -> some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text(label).font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(.secondary)
+            Text(label).font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(GlassInk.secondary)
             HStack(spacing: 4) {
                 Text(topic).font(.system(size: 13.5, weight: .heavy, design: .rounded))
                 Text("\(delta >= 0 ? "↑" : "↓")\(Int(abs(delta).rounded()))%")
                     .font(.system(size: 13.5, weight: .heavy, design: .rounded)).monospacedDigit()
-                    .foregroundStyle(delta >= 0 ? Color(hex: "22A06B") : AppColor.flameOrange)
+                    .foregroundStyle(delta >= 0 ? GlassInk.good : GlassInk.weak)
             }
         }
     }
@@ -318,7 +316,7 @@ struct ChildReportView: View {
             } else {
                 LearningTrendChart(points: points)
                     .frame(height: 130)
-                legend([("שְׁאֵלוֹת", Color(hex: "D9D2FF")), ("אֲחוּז הַצְלָחָה", AppColor.dreamyIndigo)])
+                legend([("שְׁאֵלוֹת", Color.white.opacity(0.4)), ("אֲחוּז הַצְלָחָה", .white)])
             }
         }
     }
@@ -331,7 +329,7 @@ struct ChildReportView: View {
             } else {
                 ScreenTimeChart(points: points)
                     .frame(height: 120)
-                legend([(g("הִרְוִיחַ", "הִרְוִיחָה"), Color(hex: "B7ABFF")), (g("נִצֵּל", "נִצְּלָה"), AppColor.dreamyTeal)])
+                legend([(g("הִרְוִיחַ", "הִרְוִיחָה"), Color.white.opacity(0.4)), (g("נִצֵּל", "נִצְּלָה"), Color(hex: "7CF3FF"))])
             }
         }
     }
@@ -346,7 +344,7 @@ struct ChildReportView: View {
             }
         }
         .font(.system(size: 11.5, weight: .medium, design: .rounded))
-        .foregroundStyle(.secondary)
+        .foregroundStyle(GlassInk.secondary)
         .padding(.top, 4)
     }
 
@@ -375,11 +373,11 @@ struct ChildReportView: View {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(items[i].name).font(.system(size: 13, weight: .heavy, design: .rounded))
                     Text(items[i].detail).font(.system(size: 11.5, weight: .medium, design: .rounded))
-                        .foregroundStyle(.secondary).monospacedDigit()
+                        .foregroundStyle(GlassInk.secondary).monospacedDigit()
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 6).padding(.horizontal, 9)
-                .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .glassInset(radius: 10)
             }
         }
     }
@@ -397,7 +395,7 @@ struct ChildReportView: View {
                         deviceStatus(d)
                     }
                     .padding(.vertical, 8)
-                    if d.id != devices.last?.id { Divider() }
+                    if d.id != devices.last?.id { Divider().overlay(Color.white.opacity(0.16)) }
                 }
                 if devices.isEmpty {
                     empty("עוֹד לֹא חֻבַּר מַכְשִׁיר.")
@@ -405,12 +403,12 @@ struct ChildReportView: View {
                 Button(action: onAddDevice) {
                     Label("חַבְּרוּ מַכְשִׁיר נוֹסָף", systemImage: "qrcode")
                         .font(.system(size: 13.5, weight: .heavy, design: .rounded))
-                        .foregroundStyle(AppColor.dreamyIndigo)
+                        .foregroundStyle(GlassInk.primary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
                         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
                             .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
-                            .foregroundStyle(AppColor.dreamyIndigo.opacity(0.5)))
+                            .foregroundStyle(Color.white.opacity(0.45)))
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 8)
@@ -423,11 +421,11 @@ struct ChildReportView: View {
         let recent = Date().timeIntervalSince(d.lastSeenAt) < 120
         return Group {
             if live && recent {
-                Text("● \(g("מְשַׂחֵק", "מְשַׂחֶקֶת")) עַכְשָׁיו").foregroundStyle(Color(hex: "22A06B"))
+                Text("● \(g("מְשַׂחֵק", "מְשַׂחֶקֶת")) עַכְשָׁיו").foregroundStyle(GlassInk.good)
             } else if recent {
-                Text("● מְחֻבָּר").foregroundStyle(Color(hex: "22A06B"))
+                Text("● מְחֻבָּר").foregroundStyle(GlassInk.good)
             } else {
-                Text("נִרְאָה \(relative(d.lastSeenAt))").foregroundStyle(.secondary)
+                Text("נִרְאָה \(relative(d.lastSeenAt))").foregroundStyle(GlassInk.secondary)
             }
         }
         .font(.system(size: 12, weight: .heavy, design: .rounded))
@@ -442,21 +440,21 @@ struct ChildReportView: View {
                 Text(title).font(.system(size: 15, weight: .heavy, design: .rounded))
                 Spacer()
                 if let detail {
-                    Text(detail).font(.system(size: 12, weight: .medium, design: .rounded)).foregroundStyle(.secondary)
+                    Text(detail).font(.system(size: 12, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
                 }
             }
             content()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color(.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .foregroundStyle(GlassInk.primary)
+        .glassPane(radius: 22)
     }
 
     private func empty(_ text: String) -> some View {
         Text(text)
             .font(.system(size: 13, weight: .medium, design: .rounded))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(GlassInk.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 
@@ -492,14 +490,14 @@ struct LearningTrendChart: View {
                     Path { p in
                         let y = topPad + plotH * (1 - f)
                         p.move(to: CGPoint(x: 0, y: y)); p.addLine(to: CGPoint(x: w, y: y))
-                    }.stroke(Color.primary.opacity(0.07), lineWidth: 1)
+                    }.stroke(Color.white.opacity(0.18), lineWidth: 1)
                 }
                 // bars
                 ForEach(points.indices, id: \.self) { i in
                     let p = points[i]
                     let bh = plotH * CGFloat(p.questions) / CGFloat(maxQ)
                     RoundedRectangle(cornerRadius: 4, style: .continuous)
-                        .fill(Color(hex: "D9D2FF"))
+                        .fill(Color.white.opacity(0.30))
                         .frame(width: barW, height: max(bh, p.questions > 0 ? 3 : 0))
                         .position(x: slot * (CGFloat(i) + 0.5), y: topPad + plotH - bh / 2)
                 }
@@ -513,20 +511,20 @@ struct LearningTrendChart: View {
                             k == 0 ? path.move(to: pt) : path.addLine(to: pt)
                         }
                     }
-                    .stroke(AppColor.dreamyIndigo, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                    .stroke(Color.white, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
                 }
                 if let last = active.last {
                     let pt = CGPoint(x: slot * (CGFloat(last) + 0.5),
                                      y: topPad + plotH * (1 - CGFloat(points[last].accuracy)))
-                    Circle().fill(AppColor.dreamyIndigo.opacity(0.18)).frame(width: 16, height: 16).position(pt)
-                    Circle().fill(AppColor.dreamyIndigo).frame(width: 8, height: 8).position(pt)
+                    Circle().fill(Color.white.opacity(0.25)).frame(width: 16, height: 16).position(pt)
+                    Circle().fill(Color.white).frame(width: 8, height: 8).position(pt)
                 }
                 // weekday labels (only every ~4th on a 30-day view)
                 ForEach(points.indices, id: \.self) { i in
                     if points.count <= 7 || i % 4 == 3 || i == points.count - 1 {
                         Text(points[i].weekday)
                             .font(.system(size: 9.5, weight: i == points.count - 1 ? .heavy : .medium, design: .rounded))
-                            .foregroundStyle(i == points.count - 1 ? .primary : .secondary)
+                            .foregroundStyle(i == points.count - 1 ? GlassInk.primary : GlassInk.secondary)
                             .position(x: slot * (CGFloat(i) + 0.5), y: h - labelH / 2)
                     }
                 }
@@ -554,23 +552,23 @@ struct ScreenTimeChart: View {
                     Path { p in
                         let y = topPad + plotH * (1 - f)
                         p.move(to: CGPoint(x: 0, y: y)); p.addLine(to: CGPoint(x: w, y: y))
-                    }.stroke(Color.primary.opacity(0.07), lineWidth: 1)
+                    }.stroke(Color.white.opacity(0.18), lineWidth: 1)
                 }
                 ForEach(points.indices, id: \.self) { i in
                     let p = points[i]
                     let cx = slot * (CGFloat(i) + 0.5)
                     let eh = plotH * CGFloat(p.earned) / CGFloat(maxM)
                     let uh = plotH * CGFloat(p.used) / CGFloat(maxM)
-                    RoundedRectangle(cornerRadius: 3, style: .continuous).fill(Color(hex: "B7ABFF"))
+                    RoundedRectangle(cornerRadius: 3, style: .continuous).fill(Color.white.opacity(0.38))
                         .frame(width: barW, height: max(eh, p.earned > 0 ? 3 : 0))
                         .position(x: cx - barW * 0.6, y: topPad + plotH - eh / 2)
-                    RoundedRectangle(cornerRadius: 3, style: .continuous).fill(AppColor.dreamyTeal)
+                    RoundedRectangle(cornerRadius: 3, style: .continuous).fill(Color(hex: "7CF3FF"))
                         .frame(width: barW, height: max(uh, p.used > 0 ? 3 : 0))
                         .position(x: cx + barW * 0.6, y: topPad + plotH - uh / 2)
                     if points.count <= 7 || i % 4 == 3 || i == points.count - 1 {
                         Text(p.weekday)
                             .font(.system(size: 9.5, weight: i == points.count - 1 ? .heavy : .medium, design: .rounded))
-                            .foregroundStyle(i == points.count - 1 ? .primary : .secondary)
+                            .foregroundStyle(i == points.count - 1 ? GlassInk.primary : GlassInk.secondary)
                             .position(x: cx, y: h - labelH / 2)
                     }
                 }
