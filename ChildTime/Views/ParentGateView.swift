@@ -111,16 +111,39 @@ struct ParentGateView<Content: View>: View {
     /// (nothing to verify against yet) is safe to show.
     private var familyLoadingGate: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 14, size: 12)
-            VStack(spacing: AppSpacing.lg) {
-                ProgressView().scaleEffect(1.5).tint(.white)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
+            VStack(spacing: AppSpacing.md) {
+                ProgressView().scaleEffect(1.4).tint(.white)
                 Text("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…")
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(GlassInk.primary)
                 Text("אִם זֶה נִמְשָׁךְ — בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט.")
                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(GlassInk.secondary)
+            }
+            .padding(24)
+            .frame(maxWidth: 360)
+            .glassPane(radius: 24)
+            // Never a dead end: the child (or parent) can always back out while
+            // the family is still streaming down (Rani hit this in the shop).
+            if allowClose {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button { Haptic.light(); dismiss() } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(.white)
+                                .frame(width: 40, height: 40)
+                                .background(.white.opacity(0.22), in: Circle())
+                                .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                        .padding(AppSpacing.md)
+                    }
+                    Spacer()
+                }
             }
         }
         .onAppear { household.refreshHouseholdNow() }
