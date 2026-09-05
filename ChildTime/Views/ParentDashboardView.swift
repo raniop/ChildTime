@@ -590,21 +590,35 @@ struct ParentDashboardView: View {
             } else {
                 VStack(spacing: AppSpacing.lg) {
                     Text("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(child.name)")
-                        .font(.system(size: 22, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
+                        .font(.system(size: 24, weight: .black, design: .rounded))
+                        .foregroundStyle(GlassInk.primary)
+                        .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
                         .multilineTextAlignment(.center)
 
-                    if let code = qrCode {
-                        // Encode a Universal Link so the iPhone's native Camera
-                        // can scan it and open Tofy straight into joining.
-                        QRCodeView(text: JoinLink.url(forPayload: code), size: 230)
-                        Text(String(code.split(separator: "|").first ?? ""))
-                            .font(.system(size: 26, weight: .heavy, design: .monospaced))
-                            .kerning(4)
-                            .foregroundStyle(.white)
-                    } else {
-                        ProgressView().tint(.white).scaleEffect(1.3).frame(height: 230)
+                    // The QR on a white card (a scanner needs contrast), the code
+                    // in a glass chip under it.
+                    VStack(spacing: 12) {
+                        if let code = qrCode {
+                            // Encode a Universal Link so the iPhone's native Camera
+                            // can scan it and open Tofy straight into joining.
+                            QRCodeView(text: JoinLink.url(forPayload: code), size: 210)
+                                .padding(12)
+                                .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.white))
+                            Text(String(code.split(separator: "|").first ?? ""))
+                                .font(.system(size: 26, weight: .heavy, design: .monospaced))
+                                .kerning(4)
+                                .foregroundStyle(GlassInk.primary)
+                                .padding(.horizontal, 16).padding(.vertical, 6)
+                                .background(Capsule().fill(.white.opacity(0.14)))
+                                .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        } else {
+                            // Same footprint as the QR card, so the pane doesn't
+                            // collapse into a narrow pill while the code loads.
+                            ProgressView().tint(.white).scaleEffect(1.3).frame(width: 234, height: 234)
+                        }
                     }
+                    .padding(16)
+                    .glassPane(radius: 24)
 
                     // Numbered steps — parents missed that Tofy must be
                     // DOWNLOADED on the kid's device first (Rani, live E2E).
@@ -614,27 +628,30 @@ struct ParentDashboardView: View {
                         Text("3️⃣  סִרְקוּ אֶת הַקּוֹד — וְ\(child.name) נִכְנָס יְשִׁירוֹת לְשַׂחֵק 🎉")
                     }
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.9))
+                    .foregroundStyle(GlassInk.primary)
                     .multilineTextAlignment(.trailing)
-                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(14)
+                    .frame(maxWidth: .infinity)
+                    .glassInset(radius: 16)
 
                     ShareLink(item: URL(string: "https://tofyapp.com")!) {
                         Label("שִׁלְחוּ אֶת טוֹפִי לַמַּכְשִׁיר שֶׁל \(child.name)", systemImage: "square.and.arrow.up")
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 16).padding(.vertical, 9)
-                            .background(.white.opacity(0.16), in: Capsule())
+                            .background(Capsule().fill(.white.opacity(0.14)))
+                            .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }
 
                     Button("סְגוֹר") { closeQRSheet() }
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 24).padding(.vertical, 12)
-                        .background(.white.opacity(0.18), in: Capsule())
+                        .foregroundStyle(Color(hex: "4B3FBF"))
+                        .padding(.horizontal, 28).padding(.vertical, 12)
+                        .background(Capsule().fill(.white.opacity(0.92)))
 
                     Text("אֶפְשָׁר לְדַלֵּג וּלְחַבֵּר אֶת הַמַּכְשִׁיר אַחַר כָּךְ — מֵהַמָּסָךְ הָרָאשִׁי.")
                         .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.7))
+                        .foregroundStyle(GlassInk.secondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(AppSpacing.xl)

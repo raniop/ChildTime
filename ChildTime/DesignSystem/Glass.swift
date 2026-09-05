@@ -82,14 +82,14 @@ extension View {
     func glassForm() -> some View {
         self
             .scrollContentBackground(.hidden)
-            .listRowBackground(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.white.opacity(0.12))
-                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
-                    .padding(.vertical, 2)
+            // Forms are text-heavy: a soft dark scrim over the backdrop lifts the
+            // contrast of the grey section headers / footers (Rani: "קשה לקרוא").
+            .background(
+                ZStack {
+                    GlassBackdrop()
+                    Color(hex: "2A1E5C").opacity(0.32).ignoresSafeArea()
+                }
             )
-            .background(GlassBackdrop())
             .environment(\.colorScheme, .dark)
             // Mint controls: a white toggle "on" was indistinguishable from the pane.
             .tint(GlassInk.good)
@@ -136,9 +136,9 @@ struct GlassBackdrop: View {
 struct GlassRowBackground: View {
     var body: some View {
         RoundedRectangle(cornerRadius: 14, style: .continuous)
-            .fill(Color.white.opacity(0.14))
+            .fill(Color.white.opacity(0.16))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.22), lineWidth: 1))
+                .strokeBorder(Color.white.opacity(0.24), lineWidth: 1))
     }
 }
 
