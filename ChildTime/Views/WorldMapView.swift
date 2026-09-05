@@ -767,15 +767,6 @@ struct WorldMapView: View {
                         .font(.system(size: 24))
                         .scaleEffect(challengePulse ? 1.12 : 0.95)
                         .frame(width: 44, height: 44)
-                    if progress.dayStreak > 0 {
-                        Text("\(progress.dayStreak)")
-                            .font(.system(size: 11, weight: .black, design: .rounded))
-                            .foregroundStyle(AppColor.textOnLight)
-                            .padding(.horizontal, 6).padding(.vertical, 2)
-                            .background(Capsule().fill(.white))
-                            .overlay(Capsule().stroke(AppColor.flameOrange, lineWidth: 1.2))
-                            .offset(x: 6, y: 4)
-                    }
                 }
                 Text("אֶתְגָּר יוֹמִי")
                     .font(.system(size: 14, weight: .black, design: .rounded))
@@ -803,9 +794,7 @@ struct WorldMapView: View {
                         .overlay(Capsule().stroke(.white.opacity(0.7), lineWidth: 1.2))
                         .glow(AppColor.starGold, radius: challengePulse ? 12 : 6)
                     } else {
-                        let left = max(0, target - done)
-                        Text(left == 1 ? "עוֹד תְּשׁוּבָה אַחַת! · \(done)/\(target)"
-                                       : "עוֹד \(left) תְּשׁוּבוֹת · \(done)/\(target)")
+                        Text("\(done) מִתּוֹךְ \(target) נְכוֹנוֹת")
                             .font(.system(size: 11.5, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.88))
                             .lineLimit(1).minimumScaleFactor(0.6)
@@ -814,13 +803,8 @@ struct WorldMapView: View {
                 .frame(height: 26)
 
                 headerTrack(frac: frac,
-                            fill: ready || claimed
-                                ? LinearGradient(colors: [AppColor.successMint, Color(hex: "06D6A0")],
-                                                 startPoint: .leading, endPoint: .trailing)
-                                : LinearGradient(colors: [Color(hex: "FFD23F"), AppColor.flameOrange],
-                                                 startPoint: .leading, endPoint: .trailing),
-                            glowColor: ready || claimed ? AppColor.successMint : AppColor.starGold,
-                            tip: frac > 0 ? (ready || claimed ? "🏆" : "⭐️") : nil)
+                            fill: LinearGradient(colors: [.white, .white], startPoint: .leading, endPoint: .trailing),
+                            glowColor: .clear, tip: nil)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 10)
@@ -961,7 +945,7 @@ struct WorldMapView: View {
                 Button {
                     Haptic.light(); showingChildSettings = true
                 } label: {
-                    Text(profiles.active?.name ?? "טוֹפִי")
+                    Text((profiles.active?.name ?? "טוֹפִי").split(separator: " ").first.map(String.init) ?? "טוֹפִי")
                         .font(.system(size: isCompact ? 16 : 18, weight: .black, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .lineLimit(1).minimumScaleFactor(0.6)
@@ -971,9 +955,10 @@ struct WorldMapView: View {
                 Button {
                     Haptic.light(); showLevelInfo = true
                 } label: {
-                    Text(progress.dayStreak > 0
-                         ? "רָמָה \(progress.companionLevel) · 🔥 \(progress.dayStreak) יָמִים"
-                         : "רָמָה \(progress.companionLevel)")
+                    // Mockup: the grade, then the day streak — the level lives in
+                    // the sheet this line opens.
+                    Text(Profile.gradeDisplayName(profiles.active?.effectiveGrade ?? 1)
+                         + (progress.dayStreak > 0 ? " · 🔥 \(progress.dayStreak) יָמִים" : ""))
                         .font(.system(size: 11.5, weight: .bold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .lineLimit(1).minimumScaleFactor(0.7)
@@ -989,16 +974,16 @@ struct WorldMapView: View {
     /// Order (LTR): 🎮 tournament · 🏆 leaderboard · 🛍️ shop · ⚙️ settings.
     private func navButtonsRow(size: CGFloat) -> some View {
         HStack(spacing: isCompact ? 6 : 9) {
-            navButton("🎮", badge: !liveGame.invites.isEmpty, size: size) {
-                Haptic.light()
-                requirePremium { if let invite = liveGame.invites.first { Task { await liveGame.joinGame(invite.id) } }
-                else { liveGame.openSetup() } }
+            navButton("🛍️", badge: false, size: size) {
+                Haptic.light(); requirePremium { showingShop = true }
             }
             navButton("🏆", badge: false, size: size) {
                 Haptic.light(); requirePremium { showingLeaderboard = true }
             }
-            navButton("🛍️", badge: false, size: size) {
-                Haptic.light(); requirePremium { showingShop = true }
+            navButton("👥", badge: !liveGame.invites.isEmpty, size: size) {
+                Haptic.light()
+                requirePremium { if let invite = liveGame.invites.first { Task { await liveGame.joinGame(invite.id) } }
+                else { liveGame.openSetup() } }
             }
             navButton("⚙️", badge: false, size: size, longPress: { showingDemo = true }) {
                 showingParentGate = true
@@ -1743,7 +1728,6 @@ struct WorldMapView: View {
     /// track (approved chores out of the day's list).
     private var choresTopCard: some View {
         let all = profiles.activeID.map { choreStore.chores(forChild: $0) } ?? []
-        let available = all.filter { $0.isAvailable }.count
         let pending = all.filter { $0.isPendingApproval }.count
         let doneToday = all.filter { $0.approvedToday }.count
         let frac = all.isEmpty ? 0 : CGFloat(doneToday) / CGFloat(all.count)
@@ -1755,20 +1739,12 @@ struct WorldMapView: View {
                 ZStack(alignment: .bottomTrailing) {
                     ZStack {
                         Circle()
-                            .fill(LinearGradient(colors: [Color(hex: "F4A261"), Color(hex: "E76F51")],
+                            .fill(LinearGradient(colors: [Color(hex: "48BFE3"), Color(hex: "5E60CE")],
                                                  startPoint: .topLeading, endPoint: .bottomTrailing))
                             .frame(width: 44, height: 44)
                             .overlay(Circle().stroke(.white.opacity(0.55), lineWidth: 1.5))
+                            .shadow(color: Color(hex: "48BFE3").opacity(0.55), radius: 9)
                         Text("🧹").font(.system(size: 23))
-                    }
-                    if available > 0 {
-                        Text("\(available)")
-                            .font(.system(size: 11, weight: .black, design: .rounded))
-                            .foregroundStyle(AppColor.textOnLight)
-                            .padding(.horizontal, 6).padding(.vertical, 2)
-                            .background(Capsule().fill(.white))
-                            .overlay(Capsule().stroke(Color(hex: "E76F51"), lineWidth: 1.2))
-                            .offset(x: 6, y: 4)
                     }
                 }
                 Text("מַטְלוֹת הַבַּיִת")
@@ -1777,7 +1753,7 @@ struct WorldMapView: View {
                     .lineLimit(1).minimumScaleFactor(0.7)
                     .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
                 Group {
-                    Text(pending > 0 ? "מְחַכֶּה לְאִשּׁוּר 🕐"
+                    Text(pending > 0 ? (pending == 1 ? "אַחַת מְחַכָּה לְאִשּׁוּר" : "\(pending) מְחַכּוֹת לְאִשּׁוּר")
                          : doneToday > 0 ? "\(doneToday) הֻשְׁלְמוּ הַיּוֹם! 💪"
                          : "עוֹזְרִים — וּבוֹחֲרִים פְּרָס!")
                         .font(.system(size: 11.5, weight: .bold, design: .rounded))
@@ -1787,10 +1763,8 @@ struct WorldMapView: View {
                 .frame(height: 26)
 
                 headerTrack(frac: frac,
-                            fill: LinearGradient(colors: [Color(hex: "FFD23F"), Color(hex: "F4A261")],
-                                                 startPoint: .leading, endPoint: .trailing),
-                            glowColor: Color(hex: "F4A261"),
-                            tip: frac > 0 ? "🧹" : nil)
+                            fill: LinearGradient(colors: [.white, .white], startPoint: .leading, endPoint: .trailing),
+                            glowColor: .clear, tip: nil)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 10)

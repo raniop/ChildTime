@@ -30,9 +30,11 @@ struct GlassPane: ViewModifier {
                 ZStack {
                     shape.fill(.white.opacity(strength))
                     if let tint {
-                        shape.fill(RadialGradient(colors: [tint.opacity(0.55), .clear],
+                        // A whisper of the colour (Rani: "הם שקופות" — the mockup's
+                        // tiles are glass first; the tint only hints at the world).
+                        shape.fill(RadialGradient(colors: [tint.opacity(0.30), .clear],
                                                   center: UnitPoint(x: 0.3, y: 0.2),
-                                                  startRadius: 0, endRadius: 230))
+                                                  startRadius: 0, endRadius: 190))
                     }
                     // Inset top highlight — the sheet catches light from above.
                     shape.fill(LinearGradient(colors: [.white.opacity(0.28), .clear],
