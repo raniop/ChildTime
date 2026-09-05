@@ -74,15 +74,15 @@ struct CharacterCollectionView: View {
                 .allowsHitTesting(false)
                 .padding(.vertical, 8)
             .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.large)
-                    .fill(selected ? AppColor.starGold.opacity(0.28) : tColor.opacity(0.12))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: AppRadius.large)
-                    .stroke(selected ? AppColor.starGold : tColor.opacity(0.85),
-                            lineWidth: selected ? 3 : 2)
-            )
+            // Glass tile with the tier colour glowing through; the equipped one
+            // wears gold (same vocabulary as the home's world tiles).
+            .glassPane(radius: 22, tint: selected ? Color(hex: "FFD23F") : tColor)
+            .overlay {
+                if selected {
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .strokeBorder(AppColor.starGold.opacity(0.9), lineWidth: 2)
+                }
+            }
             .overlay(alignment: .topLeading) { tierBadge(character.tier, color: tColor) }
             .overlay(alignment: .topTrailing) {
                 if selected {
@@ -106,23 +106,22 @@ struct CharacterCollectionView: View {
             .foregroundStyle(.white)
             .padding(.horizontal, 9)
             .padding(.vertical, 4)
-            .background(Capsule().fill(color))
-            .overlay(Capsule().stroke(.white.opacity(0.5), lineWidth: 1))
+            .background(Capsule().fill(color.opacity(0.75)))
+            .overlay(Capsule().strokeBorder(.white.opacity(0.45), lineWidth: 1))
             .padding(8)
     }
 
     private func priceBadge(_ price: Int, affordable: Bool) -> some View {
+        // A price tag, never a lock (Rani: no lock language for the child).
         HStack(spacing: 4) {
-            Image(systemName: "lock.fill").font(.system(size: 10, weight: .bold))
             Text("\(price)").font(.system(size: 15, weight: .heavy, design: .rounded))
             Text("💎").font(.system(size: 12))
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(affordable ? Color(hex: "4B3FBF") : .white)
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(
-            Capsule().fill(affordable ? AppColor.gemPurple.opacity(0.95) : Color.black.opacity(0.5))
-        )
+        .background(Capsule().fill(affordable ? .white.opacity(0.92) : .white.opacity(0.18)))
+        .overlay(Capsule().strokeBorder(.white.opacity(0.35), lineWidth: 1))
         .padding(.bottom, 12)
     }
 

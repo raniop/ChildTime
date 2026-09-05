@@ -11,8 +11,8 @@ struct StarShopView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 18, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             VStack(spacing: 0) {
                 header
@@ -55,17 +55,18 @@ struct StarShopView: View {
     private var header: some View {
         ZStack {
             Text("חֲנוּת יַהֲלוֹמִים")
-                .font(.system(size: 24, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
+                .font(.system(size: 24, weight: .black, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
             HStack {
                 Spacer()
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(.white)
-                        .frame(width: 38, height: 38)
-                        .background(.white.opacity(0.18), in: Circle())
+                        .frame(width: 40, height: 40)
+                        .background(.white.opacity(0.22), in: Circle())
+                        .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                 }
                 .environment(\.layoutDirection, .leftToRight)
             }
@@ -88,7 +89,7 @@ struct StarShopView: View {
         }
         .padding(.vertical, AppSpacing.md)
         .frame(maxWidth: .infinity)
-        .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(.white.opacity(0.12)))
+        .glassPane(radius: 22)
     }
 
     // Demo-only static row (no StoreKit product) for screenshots.
@@ -113,15 +114,12 @@ struct StarShopView: View {
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 16).padding(.vertical, 9)
-                .background(Capsule().fill(AppColor.gemPurple))
+                .background(Capsule().fill(.white.opacity(0.92)))
+                .foregroundStyle(Color(hex: "4B3FBF"))
         }
         .padding(AppSpacing.md)
         .frame(maxWidth: .infinity)
-        .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(.white.opacity(0.10)))
-        .overlay(
-            RoundedRectangle(cornerRadius: AppRadius.large)
-                .stroke(best ? AppColor.starGold : .white.opacity(0.2), lineWidth: best ? 2.5 : 1.5)
-        )
+        .glassPane(radius: 22, tint: best ? Color(hex: "FFD23F") : nil)
     }
 
     private func packRow(_ product: Product) -> some View {
@@ -148,20 +146,13 @@ struct StarShopView: View {
                 Spacer()
                 Text(product.displayPrice)
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(hex: "4B3FBF"))
                     .padding(.horizontal, 16).padding(.vertical, 9)
-                    .background(Capsule().fill(AppColor.gemPurple))
+                    .background(Capsule().fill(.white.opacity(0.92)))
             }
             .padding(AppSpacing.md)
             .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.large)
-                    .fill(.white.opacity(0.10))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: AppRadius.large)
-                    .stroke(best ? AppColor.starGold : .white.opacity(0.2), lineWidth: best ? 2.5 : 1.5)
-            )
+            .glassPane(radius: 22, tint: best ? Color(hex: "FFD23F") : nil)
         }
         .buttonStyle(.plain)
         .disabled(store.isPurchasing)

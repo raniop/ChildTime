@@ -296,6 +296,7 @@ struct ChildTimeApp: App {
                 }
             }
         case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
+        case "shop": ShopView()   // DEMO_SCREEN=shop — the kid's character shop
         case "kidhome": WorldMapView()   // DEMO_SCREEN=kidhome — the child's home, as is
         case "askparent": AskParentView(onClose: {})   // DEMO_SCREEN=askparent — what a CHILD device shows instead of the paywall
         case "paywall":  PaywallView()    // DEMO_SCREEN=paywall — the "טופי+" subscription screen (App Review proof)

@@ -17,13 +17,8 @@ struct ShopView: View {
 
     var body: some View {
         ZStack {
-            // Magical purple — distinct from the blue leaderboard / world map.
-            AppGradient.purpleDream.ignoresSafeArea()
-            FloatingOrbs(
-                colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FF6B9D")],
-                count: 6, maxSize: 280, opacity: 0.30
-            )
-            SparkleField(count: 22, size: 14)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             VStack(spacing: 0) {
                 topBar
@@ -78,9 +73,9 @@ struct ShopView: View {
     private var topBar: some View {
         ZStack {
             Text("חֲנוּת הַדְּמוּיוֹת")
-                .font(.system(size: isCompact ? 20 : 26, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
+                .font(.system(size: isCompact ? 22 : 28, weight: .black, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
                 .frame(maxWidth: .infinity)
 
             HStack {
@@ -90,9 +85,9 @@ struct ShopView: View {
                     Image(systemName: "xmark")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(.white)
-                        .frame(width: 38, height: 38)
-                        .background(.white.opacity(0.18), in: Circle())
-                        .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
+                        .frame(width: 40, height: 40)
+                        .background(.white.opacity(0.22), in: Circle())
+                        .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                 }
                 .environment(\.layoutDirection, .leftToRight)
 
@@ -115,9 +110,9 @@ struct ShopView: View {
                             .foregroundStyle(.white)
                     }
                     .padding(.horizontal, 12)
-                    .padding(.vertical, 7)
-                    .background(Capsule().fill(AppColor.gemPurple.opacity(0.4)))
-                    .overlay(Capsule().stroke(AppColor.gemPurple, lineWidth: 1.5))
+                    .padding(.vertical, 8)
+                    .background(Capsule().fill(.white.opacity(0.14)))
+                    .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
             }
@@ -163,9 +158,9 @@ struct ShopView: View {
             }
             .foregroundStyle(.white)
             .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(.white.opacity(0.18), in: Capsule())
-            .overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: 1))
+            .padding(.vertical, 9)
+            .background(.white.opacity(0.14), in: Capsule())
+            .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
         }
         .buttonStyle(.plain)
     }
