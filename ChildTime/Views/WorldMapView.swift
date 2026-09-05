@@ -305,12 +305,21 @@ struct WorldMapView: View {
                 }
             }
 
-            // Bottom CTAs floating panel
+            // Bottom CTAs floating panel — over a soft scrim, so the tiles
+            // scrolling underneath fade out instead of showing through the glass.
             VStack {
                 Spacer()
                 bottomCTAs
                     .padding(.horizontal, AppSpacing.lg)
+                    .padding(.top, 48)
                     .padding(.bottom, AppSpacing.md)
+                    .background(
+                        LinearGradient(stops: [.init(color: .clear, location: 0),
+                                               .init(color: Color(hex: "2A1E5C").opacity(0.72), location: 0.35),
+                                               .init(color: Color(hex: "2A1E5C").opacity(0.9), location: 1)],
+                                       startPoint: .top, endPoint: .bottom)
+                            .ignoresSafeArea(edges: .bottom)
+                    )
             }
 
 
@@ -1469,7 +1478,8 @@ struct WorldMapView: View {
                         .font(.system(size: 13.5, weight: .bold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                         .padding(.horizontal, 14).padding(.vertical, 8)
-                        .background(.white.opacity(0.12), in: Capsule())
+                        .background(Capsule().fill(.white.opacity(0.16)))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 2)
@@ -2042,6 +2052,9 @@ extension View {
                     // Glass first, colour second: a white pane with the gradient
                     // glowing through it at ~60 %, and the top highlight every
                     // pane has — so the button reads as glass, not a slab (Rani).
+                    // A faint dark base keeps whatever scrolls beneath from
+                    // reading through the label.
+                    shape.fill(Color(hex: "2A1E5C").opacity(0.35))
                     shape.fill(.white.opacity(0.16))
                     shape.fill(LinearGradient(colors: [a.opacity(0.62), b.opacity(0.58)],
                                               startPoint: .leading, endPoint: .trailing))
