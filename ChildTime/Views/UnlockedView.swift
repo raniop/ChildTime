@@ -23,7 +23,9 @@ struct UnlockedView: View {
             VStack(spacing: AppSpacing.xl) {
                 Spacer()
 
-                Text("🎮")
+                // Gift time from the parents wears the gift heart, never the
+                // controller — the two pockets are never blurred (Rani).
+                Text(progress.unlockIsManual ? "💝" : "🎮")
                     .font(.system(size: heroEmojiSize))
                     .float()
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
@@ -35,14 +37,14 @@ struct UnlockedView: View {
 
                 // The countdown on one glass pane (the same glass as every screen).
                 VStack(spacing: AppSpacing.md) {
-                    Text("נוֹתְרוּ")
+                    Text(progress.unlockIsManual ? "מַתָּנָה מֵאַבָּא וְאִמָּא 💝 · נוֹתְרוּ" : "נוֹתְרוּ")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                     timerRow
                 }
                 .padding(.horizontal, AppSpacing.lg)
                 .padding(.vertical, AppSpacing.lg)
-                .frame(maxWidth: 480)
+                .frame(maxWidth: 420)
                 .glassPane(radius: 28)
 
                 Text("עַכְשָׁיו אֶפְשָׁר לַעֲבוֹר לָאַפְּלִיקַצְיָה שֶׁ\(Gendered.g("אַתָּה רוֹצֶה", "אַתְּ רוֹצָה")) לְשַׂחֵק בָּהּ 🚀")
@@ -72,9 +74,10 @@ struct UnlockedView: View {
                 }
                 .buttonStyle(.juicy)
                 .frame(maxWidth: 480)
-                .padding(.horizontal, AppSpacing.lg)
                 .padding(.bottom, AppSpacing.xxl)
             }
+            // Side margins like the home cards — the panes never touch the edges.
+            .padding(.horizontal, 28)
 
             // Sleepy companion
             VStack {
