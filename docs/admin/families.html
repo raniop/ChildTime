@@ -284,10 +284,17 @@ function render() {
         <td>${gradeName(k.grade)}</td>
         <td class="num">⭐ ${nf.format(k.stars)}</td>
         <td class="num">💎 ${nf.format(k.diamonds)}</td>
-        <td class="num">${k.liveWindow
-            ? `<span class="live" data-ends="${k.liveWindow.endsAt}" title="${k.liveWindow.kind === "gift" ? "זמן מתנה פתוח" : "זמן שהרוויח פתוח"}${k.liveWindow.ownerName ? " · " + esc(k.liveWindow.ownerName) : ""}">▶︎ —</span>`
-            : `🎮 ${nf.format(k.pendingMinutes)}`}</td>
-        <td class="num">💝 ${nf.format(k.giftMinutes)}</td>
+        ${(() => {
+          // The countdown belongs to the pocket that is PAYING for the window —
+          // a gift window ticking under 🎮 reads as the child burning minutes they
+          // earned. Same rule as the parent app's own tiles.
+          const w = k.liveWindow;
+          const live = (label, owner) => `<span class="live" data-ends="${w.endsAt}" title="${label}${owner ? " · " + esc(owner) : ""}">▶︎ —</span>`;
+          const giftLive = w && w.kind !== "earned";
+          const earnedCell = w && !giftLive ? live("זמן שהרוויח פתוח", w.ownerName) : `🎮 ${nf.format(k.pendingMinutes)}`;
+          const giftCell = giftLive ? live("זמן מתנה פתוח", w.ownerName) : `💝 ${nf.format(k.giftMinutes)}`;
+          return `<td class="num">${earnedCell}</td><td class="num">${giftCell}</td>`;
+        })()}
         <td class="num">❓ ${nf.format(k.answered)}</td>
         <td class="num">${k.devices ? `<button style="border:0;background:none;color:inherit;cursor:pointer;font-family:inherit;font-weight:800"
             onclick="event.stopPropagation(); this.closest('tr').nextElementSibling.hidden ^= 1">📱 ${k.devices} ▾</button>` : "📱 0"}</td>
