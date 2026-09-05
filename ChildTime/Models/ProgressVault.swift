@@ -46,6 +46,26 @@ final class ProgressVault {
         }
     }
 
+    /// Throw away this device's cached copy of `profileID`, so the next cloud
+    /// snapshot is adopted wholesale instead of being merged with it.
+    ///
+    /// This is the ONLY cure for a poisoned cache. Accumulators merge by `max`,
+    /// which ignores revision entirely, so a cached copy holding numbers that are
+    /// too high — another child's, say — re-raises them on every sync and no
+    /// cloud-side restore can hold. Until this existed the only answer for a real
+    /// family was "delete and reinstall the app", which they cannot be expected
+    /// to diagnose, and which our own app-removal lock can even prevent.
+    ///
+    /// Refuses to purge the profile currently bound: that data is live, not a
+    /// cache, and dropping it would discard whatever the child just did.
+    @discardableResult
+    func purgeCache(for profileID: UUID) -> Bool {
+        guard profileID != boundProfileID else { return false }
+        defaults.removeObject(forKey: key(for: profileID))
+        TofyLink("vault: purged cached copy of \(profileID.uuidString.prefix(8))")
+        return true
+    }
+
     /// All persisted snapshots — used by the parent dashboard.
     func allSnapshots(for profiles: [Profile]) -> [(profile: Profile, snapshot: ProgressSnapshot)] {
         profiles.map { profile in

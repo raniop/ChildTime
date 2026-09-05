@@ -94,6 +94,14 @@ struct ProgressSnapshot: Codable, Equatable {
     /// so a single carry is enough — but it has to be attributable, or the seconds
     /// show up on the wrong button and get spent from the wrong wallet.
     var carryIsGift: Bool? = nil
+
+    /// Parent-triggered "throw away your cached copy of this child" stamp.
+    ///
+    /// Rides the snapshot rather than the command doc on purpose: a device that
+    /// merely CACHES this child (a sibling's device, a shared iPad) never consumes
+    /// their commands, but it does listen to this document — and it is exactly the
+    /// device whose cache needs clearing. See `ProgressVault.purgeCache`.
+    var purgeCacheAt: Double? = nil
     /// 💝 Gift minutes the parents GAVE today (any device) + the day it refers
     /// to — enforces the daily cap "no more than until midnight". LWW.
     var giftGivenToday: Int? = nil
@@ -152,7 +160,7 @@ extension ProgressSnapshot {
         case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
         case hourlyAnswered, hourlyCorrect
         case wheelProgressCount, recoveryPot, ownedCharacterIDs, parentGiftMinutes, giftGivenToday, giftGivenDate
-        case secondsCarry, carryIsGift
+        case secondsCarry, carryIsGift, purgeCacheAt
         case lastComebackWheelAt, varietyBonusDate
         case resetEpoch
         case revision, lastModifiedAt, deviceID
@@ -210,6 +218,7 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .parentGiftMinutes)) ?? nil { parentGiftMinutes = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .secondsCarry)) ?? nil { secondsCarry = v }
         if let v = (try? c.decodeIfPresent(Bool.self, forKey: .carryIsGift)) ?? nil { carryIsGift = v }
+        if let v = (try? c.decodeIfPresent(Double.self, forKey: .purgeCacheAt)) ?? nil { purgeCacheAt = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .giftGivenToday)) ?? nil { giftGivenToday = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .giftGivenDate)) ?? nil { giftGivenDate = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastComebackWheelAt)) ?? nil { lastComebackWheelAt = v }

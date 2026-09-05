@@ -801,6 +801,33 @@ final class RemoteSyncManager: ObservableObject {
         }
     }
 
+    /// Last purge stamp this device has honoured for a child — so one parent tap
+    /// clears the cache once, not on every snapshot that follows.
+    private func appliedPurge(for id: UUID) -> Double {
+        UserDefaults.standard.double(forKey: "vault.purgedAt.\(id.uuidString)")
+    }
+    private func setAppliedPurge(_ stamp: Double, for id: UUID) {
+        UserDefaults.standard.set(stamp, forKey: "vault.purgedAt.\(id.uuidString)")
+    }
+
+    /// PARENT: tell every device in the family to throw away its cached copy of
+    /// this child and take the cloud as-is. The repair for a device that is
+    /// re-uploading corrupted numbers — previously only fixable by deleting and
+    /// reinstalling the app, which a family cannot diagnose and which our own
+    /// app-removal lock can prevent outright.
+    func purgeChildCaches(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        let ref = db.collection("children").document(childID.uuidString)
+            .collection("state").document("current")
+        Task {
+            let outcome = await confirmedMerge(ref, ["purgeCacheAt": Date().timeIntervalSince1970])
+            if outcome == .denied || outcome == .error {
+                TofyLink("purgeChildCaches FAILED for \(childID.uuidString.prefix(8))")
+            }
+        }
+        #endif
+    }
+
     private func handleRemoteSnapshot(_ snap: ProgressSnapshot, profileID: UUID) {
         // Parent tapped reset and the child hasn't echoed the wipe yet: drop
         // pre-reset snapshots so the dashboard doesn't flip back to old numbers.
@@ -828,6 +855,18 @@ final class RemoteSyncManager: ObservableObject {
             // progress for this profile that hasn't uploaded yet, and a stale
             // cloud echo used to wipe it. ratchetMerged also lets a reset
             // (higher resetEpoch) win wholesale.
+            // The parent asked every device to drop its cached copy of this
+            // child. Honour it BEFORE merging — merging is the whole problem:
+            // accumulators go by `max`, so a cache holding numbers that are too
+            // high (a sibling's, after a cross-child write) re-raises them on
+            // every sync and no cloud-side restore can ever hold.
+            if let stamp = snap.purgeCacheAt, stamp > appliedPurge(for: profileID) {
+                ProgressVault.shared.purgeCache(for: profileID)
+                setAppliedPurge(stamp, for: profileID)
+                ProgressVault.shared.write(snap, for: profileID)   // adopt wholesale
+                WidgetBridge.refreshFamilySoon()
+                return
+            }
             let vaultCopy = ProgressVault.shared.snapshot(for: profileID)
             let merged = ProgressSnapshot.ratchetMerged(local: vaultCopy, remote: snap)
             ProgressVault.shared.write(merged, for: profileID)

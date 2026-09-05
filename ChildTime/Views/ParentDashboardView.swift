@@ -887,6 +887,17 @@ struct ParentDashboardView: View {
                     } label: {
                         Label("אַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת (5 דַּק')", systemImage: "trash")
                     }
+                    // Repair for a device that keeps re-uploading wrong numbers:
+                    // tell every device to drop its cached copy and take the cloud
+                    // as-is. Before this the only fix was deleting and reinstalling
+                    // the app — which a parent cannot diagnose, and which our own
+                    // app-removal lock can block outright.
+                    Button {
+                        Haptic.warning()
+                        RemoteSyncManager.shared.purgeChildCaches(childID: profile.id)
+                    } label: {
+                        Label("רַעֲנֵן נְתוּנִים בְּכָל הַמַּכְשִׁירִים", systemImage: "arrow.triangle.2.circlepath")
+                    }
                     Button {
                         editProfile = profile
                     } label: {
