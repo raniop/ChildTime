@@ -25,9 +25,9 @@ struct LuckyWheelView: View {
         GeometryReader { proxy in
             let landscape = proxy.size.width > proxy.size.height
             // Fit the wheel to the space — never let it crowd out the prize/buttons.
-            let wheelSize = min(isCompact ? 340 : 460,
-                                proxy.size.height * (landscape ? 0.80 : 0.50),
-                                proxy.size.width * (landscape ? 0.46 : 0.92))
+            let wheelSize = min(isCompact ? 380 : 480,
+                                proxy.size.height * (landscape ? 0.80 : 0.56),
+                                proxy.size.width * (landscape ? 0.46 : 0.98))
             ZStack {
                 GlassBackdrop()
                 SparkleField(count: 14, size: 11)
@@ -102,20 +102,19 @@ struct LuckyWheelView: View {
     // MARK: - Sections
 
     private var header: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text("גַּלְגַּל מַזָּל!")
-                    .font(.system(size: isCompact ? 24 : 30, weight: .black, design: .rounded))
-                    .foregroundStyle(GlassInk.primary)
-                Text(winner == nil ? "הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨" : "אֵיזֶה כֵּיף! 🎉")
-                    .font(.system(size: 13.5, weight: .semibold, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary)
-            }
-            Spacer(minLength: 0)
+        // Centered title + one line, straight on the backdrop (Rani: no box).
+        VStack(spacing: 4) {
+            Text("גַּלְגַּל מַזָּל!")
+                .font(.system(size: isCompact ? 30 : 40, weight: .black, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
+            Text(winner == nil ? "הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨" : "אֵיזֶה כֵּיף! 🎉")
+                .font(.system(size: 13.5, weight: .semibold, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
         }
-        .padding(14)
-        .glassPane(radius: 24)
-        .environment(\.layoutDirection, .rightToLeft)
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+        .padding(.top, 8)
     }
 
     /// The header + prize + buttons column (used beside the wheel in landscape).
@@ -134,7 +133,7 @@ struct LuckyWheelView: View {
     private func wheelStack(size wheelSize: CGFloat) -> some View {
         ZStack {
             // The wheel
-            WheelShape(wedges: wedges, size: wheelSize)
+            WheelShape(wedges: wedges, size: wheelSize, rotation: rotation)
                 .rotationEffect(.degrees(rotation))
                 .animation(.easeOut(duration: 3.4), value: rotation)
                 .shadow(color: .black.opacity(0.3), radius: 14, y: 4)
@@ -272,6 +271,9 @@ struct LuckyWheelView: View {
 private struct WheelShape: View {
     let wedges: [WheelPrize]
     let size: CGFloat
+    /// The wheel's current spin — each label counter-rotates by it so the
+    /// words stay upright and readable wherever the wheel stops.
+    var rotation: Double = 0
 
     var body: some View {
         ZStack {
@@ -333,16 +335,17 @@ private struct WheelShape: View {
                     .foregroundStyle(.white)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
-                    .frame(width: size * 0.27)
+                    .frame(width: size * 0.25)
                     .minimumScaleFactor(0.6)
             }
             .shadow(color: .black.opacity(0.35), radius: 3, y: 1)
             // Upright, never rotated: a radially rotated Hebrew label turns into
             // mirror-writing on the far half of the wheel.
             .environment(\.layoutDirection, .rightToLeft)   // the Hebrew label itself
+            .rotationEffect(.degrees(-rotation))              // upright at rest AND while spinning
             .offset(
-                x: cos(midAngle.radians) * size * 0.32,
-                y: sin(midAngle.radians) * size * 0.32
+                x: cos(midAngle.radians) * size * 0.33,
+                y: sin(midAngle.radians) * size * 0.33
             )
             .frame(width: size, height: size)
     }
