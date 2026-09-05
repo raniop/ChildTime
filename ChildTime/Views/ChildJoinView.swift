@@ -79,7 +79,7 @@ struct ChildJoinView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .glassFill(AppGradient.gold, radius: 22)
+                            .glassFill(AppGradient.gold, radius: 16)   // same rounding as the field and the steps box
                     }
                     .buttonStyle(.juicy)
 
