@@ -1336,7 +1336,7 @@ struct WorldMapView: View {
             // any frozen leftover of an earlier parent window (the kid tapped "עצור
             // ושמור"). Both are parent time — never blurred with earned minutes.
             // Opens both together as one fixed manual window (outside the cap).
-            if (progress.openableSeconds(gift: true) > 0 || progress.hasPausedManualTime) && !progress.isUnlocked
+            if (giftOpenableSeconds > 0 || progress.hasPausedManualTime) && !progress.isUnlocked
                 && peerWindow == nil {
                 Button {
                     requestUnlock { redeemGift() }
@@ -1891,8 +1891,15 @@ struct WorldMapView: View {
     /// Shows the odd seconds when there are any: a child who locked at 29:40 and
     /// is told "30 דקות" (or "29") has been quietly rounded, which is exactly the
     /// kind of small lie about their time that costs trust.
+    /// The gift pocket as the button sees it. DEMO_GIFT_MINUTES (screenshots
+    /// only — the cloud snapshot would wipe a locally seeded pocket) overrides.
+    private var giftOpenableSeconds: Int {
+        if let m = ProcessInfo.processInfo.environment["DEMO_GIFT_MINUTES"].flatMap(Int.init) { return m * 60 }
+        return progress.openableSeconds(gift: true)
+    }
+
     private var giftButtonTitle: String {
-        let seconds = progress.openableSeconds(gift: true)
+        let seconds = giftOpenableSeconds
         let frozen = progress.pausedManualMinutes
         var parts: [String] = []
         if seconds > 0 {

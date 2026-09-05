@@ -297,7 +297,13 @@ struct ChildTimeApp: App {
             }
         case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
         case "shop": ShopView()   // DEMO_SCREEN=shop — the kid's character shop
-        case "kidhome": WorldMapView()   // DEMO_SCREEN=kidhome — the child's home, as is
+        case "kidhome":                                     // DEMO_SCREEN=kidhome — the child's home
+            WorldMapView()   // (+ DEMO_GIFT_MINUTES=30 to show the 💝 button)
+                .onAppear {
+                    // A previous DEMO_SCREEN=unlocked run leaves a fake open window
+                    // behind; the home must start closed.
+                    if ProgressStore.shared.isUnlocked { ProgressStore.shared.endUnlock() }
+                }
         case "askparent": AskParentView(onClose: {})   // DEMO_SCREEN=askparent — what a CHILD device shows instead of the paywall
         case "paywall":  PaywallView()    // DEMO_SCREEN=paywall — the "טופי+" subscription screen (App Review proof)
         case "unlocked": UnlockedView().onAppear { ProgressStore.shared.startUnlock(minutes: 670, manual: false) }  // DEMO_SCREEN=unlocked — game-time countdown
