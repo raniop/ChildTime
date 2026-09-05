@@ -95,6 +95,38 @@ struct ProgressSnapshot: Codable, Equatable {
     /// show up on the wrong button and get spent from the wrong wallet.
     var carryIsGift: Bool? = nil
 
+    // MARK: - 💰 The wallets, as counters that only ever go UP
+    //
+    // A balance stored as a NUMBER cannot be merged safely. When two devices
+    // disagree, "60" and "0" are equally valid and the winner simply REPLACES the
+    // loser — and nothing distinguishes "the child spent it all" from "I am a
+    // stale device that never saw them earn it". That is how real children lost
+    // real minutes: a lagging copy overwrote a full wallet with an empty one.
+    //
+    // So the balance is not stored at all. Each pocket keeps two lifetime totals,
+    // both monotonic, both merged by `max`: a device that is behind holds SMALLER
+    // numbers and therefore always loses. There is no write anywhere that lowers a
+    // total, so minutes cannot be destroyed by accident — while a parent taking
+    // minutes away still works, because that is an INCREASE to the "out" counter.
+    //
+    // Counted in SECONDS, which also retires the whole `secondsCarry` mechanism:
+    // nothing is ever rounded to a minute, so nothing has to be carried.
+    var earnedSecondsIn: Int? = nil
+    var earnedSecondsOut: Int? = nil
+    var giftSecondsIn: Int? = nil
+    var giftSecondsOut: Int? = nil
+
+    /// Keep the legacy minute fields in step with the counters. They are no longer
+    /// the truth, but the parent dashboard and any device on an older build still
+    /// read them, so every write that moves a counter refreshes them.
+    mutating func syncWalletMirrors() {
+        pendingMinutes = max(0, (earnedSecondsIn ?? 0) - (earnedSecondsOut ?? 0)) / 60
+        parentGiftMinutes = max(0, (giftSecondsIn ?? 0) - (giftSecondsOut ?? 0)) / 60
+    }
+
+    var earnedSecondsAvailable: Int { max(0, (earnedSecondsIn ?? 0) - (earnedSecondsOut ?? 0)) }
+    var giftSecondsAvailable: Int { max(0, (giftSecondsIn ?? 0) - (giftSecondsOut ?? 0)) }
+
     /// Parent-triggered "throw away your cached copy of this child" stamp.
     ///
     /// Rides the snapshot rather than the command doc on purpose: a device that
@@ -161,6 +193,7 @@ extension ProgressSnapshot {
         case hourlyAnswered, hourlyCorrect
         case wheelProgressCount, recoveryPot, ownedCharacterIDs, parentGiftMinutes, giftGivenToday, giftGivenDate
         case secondsCarry, carryIsGift, purgeCacheAt
+        case earnedSecondsIn, earnedSecondsOut, giftSecondsIn, giftSecondsOut
         case lastComebackWheelAt, varietyBonusDate
         case resetEpoch
         case revision, lastModifiedAt, deviceID
@@ -219,6 +252,10 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .secondsCarry)) ?? nil { secondsCarry = v }
         if let v = (try? c.decodeIfPresent(Bool.self, forKey: .carryIsGift)) ?? nil { carryIsGift = v }
         if let v = (try? c.decodeIfPresent(Double.self, forKey: .purgeCacheAt)) ?? nil { purgeCacheAt = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .earnedSecondsIn)) ?? nil { earnedSecondsIn = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .earnedSecondsOut)) ?? nil { earnedSecondsOut = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .giftSecondsIn)) ?? nil { giftSecondsIn = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .giftSecondsOut)) ?? nil { giftSecondsOut = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .giftGivenToday)) ?? nil { giftGivenToday = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .giftGivenDate)) ?? nil { giftGivenDate = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastComebackWheelAt)) ?? nil { lastComebackWheelAt = v }
@@ -237,6 +274,14 @@ extension ProgressSnapshot {
     /// sets union, "latest" dates take the later, and the remaining LWW/spendable
     /// fields come from the (revision, lastModifiedAt) winner. Version metadata is
     /// left as the winner's — callers finalize `revision` as needed.
+    /// `max` over two optionals, staying nil only when BOTH are nil — so a build
+    /// that has never written a counter cannot erase one that has.
+    static func maxOpt(_ a: Int?, _ b: Int?) -> Int? {
+        guard let a else { return b }
+        guard let b else { return a }
+        return max(a, b)
+    }
+
     static func ratchetMerged(local: ProgressSnapshot, remote: ProgressSnapshot) -> ProgressSnapshot {
         // 🧹 A reset (higher resetEpoch) wins WHOLESALE — never max-merge across
         // a wipe, or a stale device would resurrect the old progress.
@@ -259,6 +304,12 @@ extension ProgressSnapshot {
             remoteWins = remote.deviceID > local.deviceID
         }
         var m = remoteWins ? remote : local
+        // 💰 The wallet counters: max on every one. This is the whole point — a
+        // device that is behind can never lower another's, in either direction.
+        m.earnedSecondsIn  = Self.maxOpt(local.earnedSecondsIn,  remote.earnedSecondsIn)
+        m.earnedSecondsOut = Self.maxOpt(local.earnedSecondsOut, remote.earnedSecondsOut)
+        m.giftSecondsIn    = Self.maxOpt(local.giftSecondsIn,    remote.giftSecondsIn)
+        m.giftSecondsOut   = Self.maxOpt(local.giftSecondsOut,   remote.giftSecondsOut)
         m.stars         = max(local.stars, remote.stars)
         // 💎 diamonds are a SPENDABLE wallet — they go DOWN when the child buys in
         // the shop. Max-merging them (like the never-decreasing ⭐ rank) made every

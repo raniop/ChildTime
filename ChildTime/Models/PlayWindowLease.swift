@@ -381,21 +381,18 @@ final class PlayWindowLeaseManager: ObservableObject {
                 //    the sibling's remainder is never silently burned. Guarded by
                 //    lastReleasedLeaseID so two racing stealers can't both refund.
                 if held.isHeld, let hid = held.leaseID, held.lastReleasedLeaseID != hid {
-                    let same = (cloud.carryIsGift ?? false) == (held.kind == .gift)
-                    let r = WalletSeconds.refund(seconds: held.remainingSeconds(now: now),
-                                                 carry: same ? (cloud.secondsCarry ?? 0) : 0)
-                    let refundMin = r.minutesIn
-                    if held.kind != .grant {
-                        cloud.secondsCarry = r.carryLeft
-                        cloud.carryIsGift = held.kind == .gift
-                    }
-                    if refundMin > 0 {
+                    // Settle the dead lease by RAISING the "in" total — never by
+                    // lowering "out". Both counters only climb, so this can be
+                    // neither undone by a stale device nor applied twice below the
+                    // value it already reached.
+                    let owed = held.remainingSeconds(now: now)
+                    if owed > 0 {
                         switch held.kind {
                         case .earned:
-                            cloud.pendingMinutes += refundMin
-                            cloud.minutesUnlockedToday = max(0, cloud.minutesUnlockedToday - refundMin)
+                            cloud.earnedSecondsIn = (cloud.earnedSecondsIn ?? 0) + owed
+                            cloud.minutesUnlockedToday = max(0, cloud.minutesUnlockedToday - owed / 60)
                         case .gift:
-                            cloud.parentGiftMinutes = (cloud.parentGiftMinutes ?? 0) + refundMin
+                            cloud.giftSecondsIn = (cloud.giftSecondsIn ?? 0) + owed
                         case .grant: break
                         }
                     }
@@ -437,6 +434,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                         grant = requestedSeconds
                     }
                 }
+                merged.syncWalletMirrors()
                 merged.revision = max(local.revision, cloud.revision) + 1
                 merged.lastModifiedAt = Date()
                 merged.deviceID = ProgressSnapshot.thisDeviceID
@@ -528,23 +526,17 @@ final class PlayWindowLeaseManager: ObservableObject {
                 // pocket and the remainder to the carry. Flooring here is what
                 // used to shave up to 59 seconds off every hand-off.
                 if refund > 0, held.kind != .grant {
-                    let samePocket = (cloud.carryIsGift ?? false) == (held.kind == .gift)
-                    let r = WalletSeconds.refund(seconds: refund,
-                                                 carry: samePocket ? (cloud.secondsCarry ?? 0) : 0)
-                    let refundMin = r.minutesIn
-                    cloud.secondsCarry = r.carryLeft
-                    cloud.carryIsGift = held.kind == .gift
-                    if refundMin > 0 {
-                        switch held.kind {
-                        case .earned:
-                            cloud.pendingMinutes += refundMin
-                            cloud.minutesUnlockedToday = max(0, cloud.minutesUnlockedToday - refundMin)
-                        case .gift:
-                            cloud.parentGiftMinutes = (cloud.parentGiftMinutes ?? 0) + refundMin
-                        case .grant: break
-                        }
+                    // Give it back by RAISING "in", never by lowering "out".
+                    switch held.kind {
+                    case .earned:
+                        cloud.earnedSecondsIn = (cloud.earnedSecondsIn ?? 0) + refund
+                        cloud.minutesUnlockedToday = max(0, cloud.minutesUnlockedToday - refund / 60)
+                    case .gift:
+                        cloud.giftSecondsIn = (cloud.giftSecondsIn ?? 0) + refund
+                    case .grant: break
                     }
                 }
+                cloud.syncWalletMirrors()
                 cloud.revision = max(localRevision, cloud.revision) + 1
                 cloud.lastModifiedAt = Date()
                 cloud.deviceID = ProgressSnapshot.thisDeviceID

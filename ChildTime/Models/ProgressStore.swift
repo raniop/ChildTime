@@ -8,6 +8,10 @@ final class ProgressStore: ObservableObject {
 
     private enum Key {
         static let pendingMinutes = "pendingMinutes"
+        static let earnedSecondsIn = "wallet.earnedSecondsIn"
+        static let earnedSecondsOut = "wallet.earnedSecondsOut"
+        static let giftSecondsIn = "wallet.giftSecondsIn"
+        static let giftSecondsOut = "wallet.giftSecondsOut"
         static let pendingSecondsCarry = "pendingSecondsCarry"
         static let manualPausedSeconds = "manualPausedSeconds"
         static let totalCorrect = "totalCorrect"
@@ -68,6 +72,67 @@ final class ProgressStore: ObservableObject {
     }
 
     // MARK: - Currencies & progression
+
+    // MARK: - 💰 The wallets
+    //
+    // SOURCE OF TRUTH: four lifetime totals in SECONDS that only ever increase.
+    // `pendingMinutes` / `parentGiftMinutes` below are DERIVED mirrors, kept only
+    // because the whole UI and the sync triggers already publish on them — never
+    // assign to them directly, or the mirror and the truth drift apart.
+    //
+    // Why counters: a stored balance cannot be merged. "60" and "0" are equally
+    // valid, so the winner replaces the loser and nothing tells "spent it all"
+    // apart from "never saw them earn it". Counters merge by `max`, so a device
+    // that is behind holds smaller numbers and always loses — minutes cannot be
+    // destroyed by accident, while a parent deliberately taking them away still
+    // works, because that is an increase to the "out" total.
+    @Published private(set) var earnedSecondsIn: Int {
+        didSet { defaults.set(earnedSecondsIn, forKey: Key.earnedSecondsIn); recomputeWallets() }
+    }
+    @Published private(set) var earnedSecondsOut: Int {
+        didSet { defaults.set(earnedSecondsOut, forKey: Key.earnedSecondsOut); recomputeWallets() }
+    }
+    @Published private(set) var giftSecondsIn: Int {
+        didSet { defaults.set(giftSecondsIn, forKey: Key.giftSecondsIn); recomputeWallets() }
+    }
+    @Published private(set) var giftSecondsOut: Int {
+        didSet { defaults.set(giftSecondsOut, forKey: Key.giftSecondsOut); recomputeWallets() }
+    }
+
+    /// Seconds actually available right now, to the second.
+    var earnedSecondsAvailable: Int { max(0, earnedSecondsIn - earnedSecondsOut) }
+    var giftSecondsAvailable: Int { max(0, giftSecondsIn - giftSecondsOut) }
+
+    func creditEarned(seconds: Int) { guard seconds > 0 else { return }; earnedSecondsIn += seconds }
+    func debitEarned(seconds: Int) {
+        guard seconds > 0 else { return }
+        earnedSecondsOut += min(seconds, earnedSecondsAvailable)
+    }
+    func creditGift(seconds: Int) { guard seconds > 0 else { return }; giftSecondsIn += seconds }
+    func debitGift(seconds: Int) {
+        guard seconds > 0 else { return }
+        giftSecondsOut += min(seconds, giftSecondsAvailable)
+    }
+
+    /// Wipe both pockets — only for an authoritative reset (which travels with a
+    /// higher `resetEpoch` and therefore wins wholesale) and for demo seeding.
+    /// Never use this to "correct" a balance: that is what the counters exist to
+    /// make unnecessary.
+    func resetWallets(earnedMinutes: Int = 0, giftMinutes: Int = 0) {
+        earnedSecondsOut = 0
+        giftSecondsOut = 0
+        earnedSecondsIn = max(0, earnedMinutes) * 60
+        giftSecondsIn = max(0, giftMinutes) * 60
+    }
+
+    private func recomputeWallets() {
+        guard !isRecomputingWallets else { return }
+        isRecomputingWallets = true
+        pendingMinutes = earnedSecondsAvailable / 60
+        parentGiftMinutes = giftSecondsAvailable / 60
+        isRecomputingWallets = false
+    }
+    private var isRecomputingWallets = false
 
     @Published private(set) var pendingMinutes: Int {
         didSet { defaults.set(pendingMinutes, forKey: Key.pendingMinutes) }
@@ -478,6 +543,10 @@ final class ProgressStore: ObservableObject {
     private init() {
         let d = AppGroup.defaults
         self.pendingMinutes = d.integer(forKey: Key.pendingMinutes)
+        self.earnedSecondsIn = d.integer(forKey: Key.earnedSecondsIn)
+        self.earnedSecondsOut = d.integer(forKey: Key.earnedSecondsOut)
+        self.giftSecondsIn = d.integer(forKey: Key.giftSecondsIn)
+        self.giftSecondsOut = d.integer(forKey: Key.giftSecondsOut)
         self.pendingSecondsCarry = d.integer(forKey: Key.pendingSecondsCarry)
         self.manualPausedSeconds = d.integer(forKey: Key.manualPausedSeconds)
         self.totalCorrect = d.integer(forKey: Key.totalCorrect)
@@ -937,7 +1006,7 @@ final class ProgressStore: ObservableObject {
                 // This question contributed to the pot — carry it forward.
             } else if recoveryPot > 0 {
                 let refund = recoveryPot
-                pendingMinutes += refund
+                creditEarned(seconds: refund * 60)
                 recoveryPot = 0
                 lastRecoveredMinutes = refund
             }
@@ -996,7 +1065,7 @@ final class ProgressStore: ObservableObject {
         }
         // New day — first, yesterday's banked bonus minutes become playable.
         if carryOverMinutes > 0 {
-            pendingMinutes += carryOverMinutes
+            creditEarned(seconds: carryOverMinutes * 60)
             carryOverMinutes = 0
         }
         // Reset the daily counters together.
@@ -1040,7 +1109,7 @@ final class ProgressStore: ObservableObject {
         guard amount > 0 else { return BonusGrant() }
         let cap = dailyCap
         guard cap.enabled else {
-            pendingMinutes += amount
+            creditEarned(seconds: amount * 60)
             return BonusGrant(addedToday: amount)
         }
         _ = minutesEarnedTodayRespectingDate()
@@ -1048,7 +1117,7 @@ final class ProgressStore: ObservableObject {
         let todayRoom = max(0, cap.max - minutesEarnedToday)
         let toToday = min(amount, todayRoom)
         if toToday > 0 {
-            pendingMinutes += toToday
+            creditEarned(seconds: toToday * 60)
             minutesEarnedToday += toToday
             result.addedToday = toToday
         }
@@ -1074,13 +1143,13 @@ final class ProgressStore: ObservableObject {
         _ = minutesEarnedTodayRespectingDate()
         let cap = dailyCap
         guard cap.enabled else {
-            pendingMinutes += amount
+            creditEarned(seconds: amount * 60)
             return amount
         }
         let remaining = max(0, cap.max - minutesEarnedToday)
         let toToday = min(amount, remaining)
         if toToday > 0 {
-            pendingMinutes += toToday
+            creditEarned(seconds: toToday * 60)
             minutesEarnedToday += toToday
             if dailyEarnedDate == nil {
                 dailyEarnedDate = Calendar.current.startOfDay(for: Date())
@@ -1098,8 +1167,7 @@ final class ProgressStore: ObservableObject {
     /// Seed pleasant demo numbers for App Store screenshots (DEMO_SCREEN only).
     func seedForDemo() {
         stars = 213
-        pendingMinutes = 12
-        parentGiftMinutes = 10        // 💝 a parent gift, shown apart from earned
+        resetWallets(earnedMinutes: 12, giftMinutes: 10)   // 💝 gift shown apart from earned
         cycleSeconds = 144            // 6/10 toward the 4-min bonus
         currentStreak = 5
         bestStreak = 9
@@ -1125,7 +1193,7 @@ final class ProgressStore: ObservableObject {
         if ProcessInfo.processInfo.environment["DEMO_BIG"] != nil {
             stars = 1284500      // → "1.3M"
             diamonds = 2500      // → "2.5K"
-            pendingMinutes = 1280
+            resetWallets(earnedMinutes: 1280, giftMinutes: giftSecondsAvailable / 60)
         }
     }
 
@@ -1386,7 +1454,7 @@ final class ProgressStore: ObservableObject {
     func spendPendingMinutes(_ count: Int) -> Bool {
         guard count > 0 else { return true }
         guard pendingMinutes >= count else { return false }
-        pendingMinutes -= count
+        debitEarned(seconds: count * 60)
         return true
     }
 
@@ -1436,7 +1504,7 @@ final class ProgressStore: ObservableObject {
 
     func consumePendingMinutes() -> Int {
         let m = pendingMinutes
-        pendingMinutes = 0
+        resetWallets()
         return m
     }
 
@@ -1481,14 +1549,34 @@ final class ProgressStore: ObservableObject {
     /// seconds, but only when the carry actually belongs to it. Opening from
     /// `minutes * 60` stranded the carry: a window locked at 29:40 re-opened at
     /// 29:00 and the 40 seconds could never be spent.
-    func openableSeconds(gift: Bool) -> Int {
-        let settled = (gift ? parentGiftMinutes : pendingMinutes) * 60
-            + (carryIsGift == gift ? pendingSecondsCarry : 0)
-        // Include a refund the cloud has not confirmed yet: it is genuinely the
-        // child's, and making them wait a network round trip to see their own
-        // minutes come back is exactly the delay this exists to remove.
-        return settled + (inFlightRefundIsGift == gift ? inFlightRefundSeconds : 0)
+    /// Seconds handed back by a stop that the cloud has not confirmed yet, shown
+    /// to the child IMMEDIATELY so the open button returns the instant they stop.
+    ///
+    /// DISPLAY ONLY, and that is the whole point. Crediting the real wallet here
+    /// is what double-paid every stop: the same path calls `pushNow()`, so the
+    /// optimistic credit reached the cloud before the release transaction read it,
+    /// and the transaction added the refund on top of a value that already held
+    /// it. This never enters `captureSnapshot()`, never syncs, and is dropped the
+    /// moment the authoritative number arrives.
+    @Published private(set) var inFlightRefundSeconds: Int = 0
+    private(set) var inFlightRefundIsGift = false
+
+    private func beginInFlightRefund(seconds: Int, gift: Bool) {
+        guard seconds > 0 else { return }
+        inFlightRefundSeconds = seconds
+        inFlightRefundIsGift = gift
+        // Safety net: if the transaction never answers (killed app, lost network
+        // with no error), the child must not be left staring at time they cannot
+        // actually open.
+        let token = seconds
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 12_000_000_000)
+            guard let self, self.inFlightRefundSeconds == token else { return }
+            self.inFlightRefundSeconds = 0
+        }
     }
+
+    func clearInFlightRefund() { inFlightRefundSeconds = 0 }
 
     /// WHICH CHILD the live data in this store belongs to.
     ///
@@ -1521,34 +1609,13 @@ final class ProgressStore: ObservableObject {
     /// been bound holds whatever the last profile left behind.
     func holdsData(for id: UUID) -> Bool { belongsTo == id }
 
-    /// Seconds handed back by a stop that the cloud has not confirmed yet, shown
-    /// to the child IMMEDIATELY so the open button returns the instant they stop.
-    ///
-    /// DISPLAY ONLY, and that is the whole point. Crediting the real wallet here
-    /// is what double-paid every stop: the same path calls `pushNow()`, so the
-    /// optimistic credit reached the cloud before the release transaction read it,
-    /// and the transaction added the refund on top of a value that already held
-    /// it. This never enters `captureSnapshot()`, never syncs, and is dropped the
-    /// moment the authoritative number arrives.
-    @Published private(set) var inFlightRefundSeconds: Int = 0
-    private(set) var inFlightRefundIsGift = false
-
-    private func beginInFlightRefund(seconds: Int, gift: Bool) {
-        guard seconds > 0 else { return }
-        inFlightRefundSeconds = seconds
-        inFlightRefundIsGift = gift
-        // Safety net: if the transaction never answers (killed app, lost network
-        // with no error), the child must not be left staring at time they cannot
-        // actually open.
-        let token = seconds
-        Task { @MainActor [weak self] in
-            try? await Task.sleep(nanoseconds: 12_000_000_000)
-            guard let self, self.inFlightRefundSeconds == token else { return }
-            self.inFlightRefundSeconds = 0
-        }
+    func openableSeconds(gift: Bool) -> Int {
+        let settled = gift ? giftSecondsAvailable : earnedSecondsAvailable
+        // Include a refund the cloud has not confirmed yet: it is genuinely the
+        // child's, and making them wait a network round trip to see their own
+        // minutes come back is exactly the delay this exists to remove.
+        return settled + (inFlightRefundIsGift == gift ? inFlightRefundSeconds : 0)
     }
-
-    func clearInFlightRefund() { inFlightRefundSeconds = 0 }
 
     /// Attach a lease we won retroactively for an already-open window.
     func adoptLeaseID(_ id: String) { if isUnlocked { activeLeaseID = id } }
@@ -1557,40 +1624,25 @@ final class ProgressStore: ObservableObject {
     ///
     /// Not a local "debit": on the receiving side of a transfer this device's own
     /// pocket is stale by construction — the minutes it is spending were refunded
-    /// into the cloud by the OTHER device a moment earlier — so subtracting from
-    /// the local copy leaves a wrong number that then pushes back up under a newer
-    /// revision and un-does the debit. Taking the transaction's own result, and
-    /// adopting its generation so the next local edit sits ABOVE it, is the only
-    /// version that cannot re-mint minutes across a transfer.
-    /// `expectedRevision` is the generation the transaction was built on. If the
-    /// store has moved on since — a chore approval paid out, a 💝 gift command was
-    /// consumed, the child answered a question — the transaction's wallet is a
-    /// photograph of the past, and adopting it wholesale visibly ERASES whatever
-    /// just landed (the number jumps up, then snaps back a second later). In that
-    /// case we skip: the cloud value still arrives through the normal listener and
-    /// merges by revision, which is the path that knows how to combine them.
+    /// Apply what a lease transaction moved, to this device's own counters.
+    ///
+    /// Counters make this trivial where the old value-based wallet made it hard.
+    /// The transaction incremented the CLOUD's totals; incrementing ours by the
+    /// same amount lands on the same number, and because the merge takes `max`
+    /// per counter, doing it on both sides converges rather than double-counting.
+    /// Every "is this result stale?" question the old code had to answer — and got
+    /// wrong twice today — simply does not arise: a stale result carries smaller
+    /// totals and loses.
     func applyClaimedWallet(_ w: ClaimedWallet) {
         clearInFlightRefund()   // the authoritative number is here
-        // STALE: something landed locally between the transaction's read and now —
-        // a chore approval paid out, a 💝 gift command was consumed, the child
-        // answered a question. Adopting the absolute numbers would visibly erase
-        // it (the balance jumps, then snaps back a second later). Apply what the
-        // transaction actually MOVED instead, relative to what we hold now, and
-        // leave the rest alone; the cloud value still arrives through the listener
-        // and merges by revision.
-        if w.basedOnEditSeq != 0, localEditSeq != w.basedOnEditSeq {
-            if w.deltaSeconds > 0 {
-                creditRefundLocally(seconds: w.deltaSeconds, manual: w.deltaIsGift)
-            } else if w.deltaSeconds < 0 {
-                debitSpendLocally(seconds: -w.deltaSeconds, gift: w.deltaIsGift)
-            }
-            return
+        if w.deltaSeconds > 0 {
+            if w.deltaIsGift { creditGift(seconds: w.deltaSeconds) }
+            else { creditEarned(seconds: w.deltaSeconds) }
+        } else if w.deltaSeconds < 0 {
+            if w.deltaIsGift { debitGift(seconds: -w.deltaSeconds) }
+            else { debitEarned(seconds: -w.deltaSeconds) }
         }
-        pendingMinutes = w.pendingMinutes
-        parentGiftMinutes = w.parentGiftMinutes
-        minutesUnlockedToday = w.minutesUnlockedToday
-        pendingSecondsCarry = max(0, min(59, w.secondsCarry))
-        carryIsGift = w.carryIsGift
+        minutesUnlockedToday = max(minutesUnlockedToday, w.minutesUnlockedToday)
         adoptRevision(w.revision)
     }
 
@@ -1613,7 +1665,7 @@ final class ProgressStore: ObservableObject {
         if !cloudStateIsFresh {
             amount = min(amount, minimumUnlockMinutes)
         }
-        pendingMinutes -= amount
+        debitEarned(seconds: amount * 60)
         minutesUnlockedToday += amount
         return amount
     }
@@ -1636,7 +1688,7 @@ final class ProgressStore: ObservableObject {
     /// consumes a `pendingMinuteAdjustment` command.
     func addPendingMinutes(_ delta: Int) {
         guard delta != 0 else { return }
-        pendingMinutes = max(0, pendingMinutes + delta)
+        if delta > 0 { creditEarned(seconds: delta * 60) } else { debitEarned(seconds: -delta * 60) }
     }
 
     // MARK: - 💝 Parent gift pocket (separate from the earned wallet)
@@ -1645,7 +1697,7 @@ final class ProgressStore: ObservableObject {
     /// Never touches `pendingMinutes` — the earned wallet stays the child's own.
     func addParentGiftMinutes(_ delta: Int) {
         guard delta != 0 else { return }
-        parentGiftMinutes = max(0, parentGiftMinutes + delta)
+        if delta > 0 { creditGift(seconds: delta * 60) } else { debitGift(seconds: -delta * 60) }
         // Count what was GIVEN today (for the "until midnight" cap). Roll the
         // counter when the day changed. Unused gift itself carries over (Rani).
         if delta > 0 {
@@ -1680,7 +1732,7 @@ final class ProgressStore: ObservableObject {
     /// Returns true if an open window was closed (caller re-shields).
     @discardableResult
     func revokeAllParentTime() -> Bool {
-        parentGiftMinutes = 0
+        debitGift(seconds: giftSecondsAvailable)
         manualPausedSeconds = 0
         guard isUnlocked else { return false }
         let leaseID = activeLeaseID
@@ -1705,7 +1757,7 @@ final class ProgressStore: ObservableObject {
     func consumeParentGiftForUnlock() -> Int {
         let amount = parentGiftMinutes
         guard amount > 0 else { return 0 }
-        parentGiftMinutes = 0
+        debitGift(seconds: giftSecondsAvailable)
         return amount
     }
 
@@ -1854,15 +1906,20 @@ final class ProgressStore: ObservableObject {
     /// Mirror of `creditRefundLocally` for a spend the cloud already made.
     func debitSpendLocally(seconds: Int, gift: Bool) {
         guard seconds > 0 else { return }
+        if gift { debitGift(seconds: seconds) } else { debitEarned(seconds: seconds) }
+    }
+
+    private func debitSpendLocally_unused(seconds: Int, gift: Bool) {
+        guard seconds > 0 else { return }
         let r = WalletSeconds.spend(want: seconds,
                                     minutes: gift ? parentGiftMinutes : pendingMinutes,
                                     carry: carryIsGift == gift ? pendingSecondsCarry : 0)
         pendingSecondsCarry = r.carryLeft
         carryIsGift = gift
         if gift {
-            parentGiftMinutes = max(0, parentGiftMinutes - r.minutesOut)
+            debitGift(seconds: r.minutesOut * 60)
         } else {
-            pendingMinutes = max(0, pendingMinutes - r.minutesOut)
+            debitEarned(seconds: r.minutesOut * 60)
             minutesUnlockedToday += r.minutesOut
         }
     }
@@ -1873,14 +1930,19 @@ final class ProgressStore: ObservableObject {
     func creditRefundLocally(seconds: Int, manual: Bool) {
         clearInFlightRefund()   // this IS the credit now — don't show it twice
         guard seconds > 0 else { return }
+        if manual { creditGift(seconds: seconds) } else { creditEarned(seconds: seconds) }
+    }
+
+    private func creditRefundLocally_unused(seconds: Int, manual: Bool) {
+        guard seconds > 0 else { return }
         let r = WalletSeconds.refund(seconds: seconds, carry: carryIsGift == manual ? pendingSecondsCarry : 0)
         pendingSecondsCarry = r.carryLeft
         carryIsGift = manual
         guard r.minutesIn > 0 else { return }
         if manual {
-            parentGiftMinutes += r.minutesIn
+            creditGift(seconds: r.minutesIn * 60)
         } else {
-            pendingMinutes += r.minutesIn
+            creditEarned(seconds: r.minutesIn * 60)
             minutesUnlockedToday = max(0, minutesUnlockedToday - r.minutesIn)
         }
     }
@@ -1898,7 +1960,7 @@ final class ProgressStore: ObservableObject {
         // and be able to resume from either. `manualPausedSeconds` stays as a
         // legacy field (always 0 from now on; old stashes are migrated below).
         // FLOOR to whole minutes (a round-up let a kid replay <60s chunks forever).
-        if remaining > 0 { parentGiftMinutes += remaining / 60 }
+        if remaining > 0 { creditGift(seconds: remaining) }
         endUnlock()
     }
 
@@ -2006,7 +2068,7 @@ final class ProgressStore: ObservableObject {
         let remainingMinutes = totalSeconds / 60
         pendingSecondsCarry = totalSeconds % 60
         if remainingMinutes > 0 {
-            pendingMinutes += remainingMinutes
+            creditEarned(seconds: remainingMinutes * 60)
             // These minutes were returned unused — they don't count against today's
             // unlocked allowance, so the kid can re-open them later today.
             minutesUnlockedToday = max(0, minutesUnlockedToday - remainingMinutes)
@@ -2111,6 +2173,11 @@ final class ProgressStore: ObservableObject {
         s.revision            = revision
         s.lastModifiedAt      = lastModifiedAt
         s.deviceID            = ProgressSnapshot.thisDeviceID
+        s.syncWalletMirrors()
+        s.earnedSecondsIn     = earnedSecondsIn
+        s.earnedSecondsOut    = earnedSecondsOut
+        s.giftSecondsIn       = giftSecondsIn
+        s.giftSecondsOut      = giftSecondsOut
         s.secondsCarry        = pendingSecondsCarry
         s.carryIsGift         = carryIsGift
         return s
@@ -2133,6 +2200,10 @@ final class ProgressStore: ObservableObject {
         pendingMinutes      = s.pendingMinutes
         totalCorrect        = s.totalCorrect
         totalAnswered       = s.totalAnswered
+        earnedSecondsIn  = max(earnedSecondsIn,  s.earnedSecondsIn  ?? 0)
+        earnedSecondsOut = max(earnedSecondsOut, s.earnedSecondsOut ?? 0)
+        giftSecondsIn    = max(giftSecondsIn,    s.giftSecondsIn    ?? 0)
+        giftSecondsOut   = max(giftSecondsOut,   s.giftSecondsOut   ?? 0)
         if let c = s.secondsCarry { pendingSecondsCarry = max(0, min(59, c)) }
         if let g = s.carryIsGift { carryIsGift = g }
         // unlockEndsAt deliberately NOT applied from sync (per-device — see captureSnapshot).

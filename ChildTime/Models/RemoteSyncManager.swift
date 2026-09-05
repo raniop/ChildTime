@@ -304,7 +304,9 @@ final class RemoteSyncManager: ObservableObject {
             // merge because they never travel through one.
             if var cloud = (try? txn.getDocument(stateRef))?.data()
                 .flatMap(ProgressSnapshot.fromFirestore) {
-                cloud.parentGiftMinutes = max(0, (cloud.parentGiftMinutes ?? 0) + adj)
+                if adj > 0 { cloud.giftSecondsIn = (cloud.giftSecondsIn ?? 0) + adj * 60 }
+                else { cloud.giftSecondsOut = (cloud.giftSecondsOut ?? 0) + min(-adj * 60, cloud.giftSecondsAvailable) }
+                cloud.syncWalletMirrors()
                 cloud.revision += 1
                 cloud.lastModifiedAt = Date()
                 cloud.deviceID = ProgressSnapshot.thisDeviceID
@@ -592,7 +594,9 @@ final class RemoteSyncManager: ObservableObject {
             // minutes can never be lost to a merge on the way up.
             if var cloud = (try? txn.getDocument(stateRef))?.data()
                 .flatMap(ProgressSnapshot.fromFirestore) {
-                cloud.pendingMinutes = max(0, cloud.pendingMinutes + adj)
+                if adj > 0 { cloud.earnedSecondsIn = (cloud.earnedSecondsIn ?? 0) + adj * 60 }
+                else { cloud.earnedSecondsOut = (cloud.earnedSecondsOut ?? 0) + min(-adj * 60, cloud.earnedSecondsAvailable) }
+                cloud.syncWalletMirrors()
                 cloud.revision += 1
                 cloud.lastModifiedAt = Date()
                 cloud.deviceID = ProgressSnapshot.thisDeviceID

@@ -527,30 +527,7 @@ struct PlayWindowLeaseTests {
         #expect(abs(parsed.remainingSeconds() - 3480) <= 2)
     }
 
-    @Test("a claimed wallet is ADOPTED, not subtracted — a transfer can't re-mint minutes")
-    func claimedWalletIsAdoptedNotSubtracted() {
-        let p = ProgressStore.shared
-        // The receiving device's pocket is stale by construction: the minutes it is
-        // about to spend were refunded into the cloud by the OTHER device. Whatever
-        // it holds locally must be replaced by the transaction's own result — an
-        // arithmetic "debit" here is what grew a 60-minute gift into 228.
-        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 0, parentGiftMinutes: 60,
-                                           minutesUnlockedToday: 0, secondsCarry: 0, revision: 10))
-        #expect(p.parentGiftMinutes == 60)
-
-        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 0, parentGiftMinutes: 0,
-                                           minutesUnlockedToday: 58, secondsCarry: 50, revision: 11))
-        #expect(p.parentGiftMinutes == 0)          // debited to the cloud's value
-        #expect(p.minutesUnlockedToday == 58)
-        #expect(p.pendingSecondsCarry == 50)   // the odd seconds survive the hand-off
-        #expect(p.revision >= 11)                  // and we sit at its generation
-
-        // The next local edit must land ABOVE the adopted generation, or this
-        // device's stale pocket wins the next merge and the debit is undone.
-        p.addPendingMinutes(1)
-        #expect(p.revision > 11)
-    }
-
+    
     @Test("a hand-off resumes at the exact second, not a rounded minute")
     func handoffKeepsTheSeconds() {
         // 38:50 left → the whole thing moves across.
@@ -601,81 +578,11 @@ struct PlayWindowLeaseTests {
         #expect((5 * 60 + 0) == (5 - s.minutesOut) * 60 + s.carryLeft + s.granted)
     }
 
-    @Test("the offline refund credits exactly what the cloud transaction would have")
-    func offlineRefundMatchesTheCloud() {
-        // When the release transaction cannot run, the device pays the refund
-        // itself. It MUST land on the same number the cloud would have written,
-        // or an offline stop and an online one leave different balances — and the
-        // two then fight through LWW.
-        let p = ProgressStore.shared
-        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 10, parentGiftMinutes: 0,
-                                           minutesUnlockedToday: 30, secondsCarry: 20, revision: 40))
-        p.creditRefundLocally(seconds: 5 * 60 + 50, manual: false)   // 5:50 back
-
-        let cloud = WalletSeconds.refund(seconds: 5 * 60 + 50, carry: 20)
-        #expect(p.pendingMinutes == 10 + cloud.minutesIn)
-        #expect(p.pendingSecondsCarry == cloud.carryLeft)
-        // Earned time given back also un-counts against today's cap.
-        #expect(p.minutesUnlockedToday == 30 - cloud.minutesIn)
-    }
-
-    @Test("a gift refund goes back to the gift pocket, never the earned wallet")
-    func giftRefundStaysInItsPocket() {
-        let p = ProgressStore.shared
-        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 7, parentGiftMinutes: 4,
-                                           minutesUnlockedToday: 0, secondsCarry: 0, revision: 41))
-        p.creditRefundLocally(seconds: 120, manual: true)
-        #expect(p.parentGiftMinutes == 6)
-        #expect(p.pendingMinutes == 7)     // untouched
-    }
-
-    @Test("a stale transaction result is applied relatively — it never erases what just landed")
-    func staleWalletAppliesAsDelta() {
-        // The transaction was built on generation 50 and refunds 10 minutes. By
-        // the time it returns, an approved chore has paid 15 minutes in. Adopting
-        // the absolute numbers would snap the balance back to the pre-chore value —
-        // the "it goes up and then reverts" report.
-        let p = ProgressStore.shared
-        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 20, parentGiftMinutes: 0,
-                                           minutesUnlockedToday: 0, secondsCarry: 0, revision: 50))
-        let base = p.localEditSeq
-        p.addPendingMinutes(15)                      // the chore lands → 35
-        #expect(p.localEditSeq != base)              // revision would NOT have moved here
-        #expect(p.pendingMinutes == 35)
-
-        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 20, parentGiftMinutes: 0,
-                                           minutesUnlockedToday: 0, secondsCarry: 0, revision: 51,
-                                           basedOnEditSeq: base,
-                                           deltaSeconds: 10 * 60, deltaIsGift: false))
-        #expect(p.pendingMinutes == 45)              // 35 + the 10 it refunded
-    }
-
-    @Test("locking at 29:40 gives back 29:40 — and re-opens at 29:40")
-    func lockAndReopenKeepsTheSeconds() {
-        let p = ProgressStore.shared
-        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 0, parentGiftMinutes: 0,
-                                           minutesUnlockedToday: 0, secondsCarry: 0,
-                                           carryIsGift: false, revision: 70))
-        // A 30-minute gift window is locked after 20 seconds.
-        p.creditRefundLocally(seconds: 29 * 60 + 40, manual: true)
-        #expect(p.parentGiftMinutes == 29)
-        #expect(p.pendingSecondsCarry == 40)
-        // What the button offers, and what opening asks for, is the WHOLE thing —
-        // not 29 minutes with the seconds stranded out of reach.
-        #expect(p.openableSeconds(gift: true) == 29 * 60 + 40)
-    }
-
-    @Test("the carry belongs to one pocket and never leaks into the other")
-    func carryDoesNotLeakBetweenPockets() {
-        let p = ProgressStore.shared
-        p.applyClaimedWallet(ClaimedWallet(pendingMinutes: 5, parentGiftMinutes: 5,
-                                           minutesUnlockedToday: 0, secondsCarry: 0,
-                                           carryIsGift: false, revision: 71))
-        p.creditRefundLocally(seconds: 45, manual: true)      // 45s into the GIFT pocket
-        #expect(p.openableSeconds(gift: true) == 5 * 60 + 45)
-        #expect(p.openableSeconds(gift: false) == 5 * 60)     // earned side sees none of it
-    }
-
+    
+    
+    
+    
+    
     @Test("an unparseable lease doc reads as idle — never as someone else holding it")
     func garbageReadsAsIdle() {
         let parsed = PlayWindowLease.from(["state": "🤷", "grantedSeconds": "lots"])
@@ -772,5 +679,120 @@ struct DataOwnershipTests {
         let p = ProgressStore.shared
         p.bind(to: nil)
         #expect(!p.holdsData(for: UUID()))
+    }
+}
+
+
+// MARK: - 💰 Wallet counters
+//
+// The balance is no longer stored. Each pocket keeps two lifetime totals that only
+// ever rise, merged by `max`. These lock the one promise that matters: a device
+// holding an out-of-date copy can never reduce a child's minutes, while a parent
+// deliberately taking minutes away still works.
+
+@MainActor
+@Suite("Wallet counters")
+struct WalletCounterTests {
+
+    private func fresh() -> ProgressStore {
+        let p = ProgressStore.shared
+        p.resetWallets()
+        return p
+    }
+
+    @Test("earning and spending are exact to the second")
+    func exactToTheSecond() {
+        let p = fresh()
+        p.creditEarned(seconds: 29 * 60 + 40)
+        #expect(p.earnedSecondsAvailable == 29 * 60 + 40)
+        p.debitEarned(seconds: 40)
+        #expect(p.earnedSecondsAvailable == 29 * 60)
+    }
+
+    @Test("a device that is BEHIND can never reduce the wallet")
+    func staleDeviceCannotDestroyMinutes() {
+        // The exact shape of the bug that cost real children real minutes: one
+        // device credits 120, another still holds nothing, and they sync.
+        var ahead = ProgressSnapshot()
+        ahead.earnedSecondsIn = 120 * 60
+        ahead.earnedSecondsOut = 0
+        ahead.revision = 5
+
+        var behind = ProgressSnapshot()
+        behind.earnedSecondsIn = 0          // never saw the credit
+        behind.earnedSecondsOut = 0
+        behind.revision = 99                // …and is "newer" by generation
+
+        // The stale copy wins the revision comparison and STILL cannot win here.
+        let merged = ProgressSnapshot.ratchetMerged(local: behind, remote: ahead)
+        #expect(merged.earnedSecondsAvailable == 120 * 60)
+    }
+
+    @Test("a parent taking minutes away survives a sync with a stale device")
+    func deliberateRemovalSurvives() {
+        var afterRemoval = ProgressSnapshot()
+        afterRemoval.earnedSecondsIn = 120 * 60
+        afterRemoval.earnedSecondsOut = 10 * 60     // parent removed 10
+        afterRemoval.revision = 5
+
+        var stale = ProgressSnapshot()
+        stale.earnedSecondsIn = 120 * 60
+        stale.earnedSecondsOut = 0                  // has not seen the removal
+        stale.revision = 99
+
+        let merged = ProgressSnapshot.ratchetMerged(local: stale, remote: afterRemoval)
+        #expect(merged.earnedSecondsAvailable == 110 * 60)   // the removal holds
+    }
+
+    @Test("the two pockets never leak into each other")
+    func pocketsAreSeparate() {
+        let p = fresh()
+        p.creditGift(seconds: 45)
+        #expect(p.giftSecondsAvailable == 45)
+        #expect(p.earnedSecondsAvailable == 0)
+        p.creditEarned(seconds: 5 * 60)
+        #expect(p.giftSecondsAvailable == 45)
+    }
+
+    @Test("spending is bounded by what the child actually has")
+    func cannotOverspend() {
+        let p = fresh()
+        p.creditGift(seconds: 100)
+        p.debitGift(seconds: 999)
+        #expect(p.giftSecondsAvailable == 0)
+        #expect(p.giftSecondsOut == 100)      // never more than went in
+    }
+
+    @Test("a full open-and-refund round trip conserves time exactly")
+    func roundTripConserves() {
+        let p = fresh()
+        p.creditGift(seconds: 30 * 60)
+        for _ in 0..<10 {
+            let before = p.giftSecondsAvailable
+            p.debitGift(seconds: before)          // open the whole thing
+            #expect(p.giftSecondsAvailable == 0)
+            p.creditGift(seconds: before - 70)    // stop after 70 seconds of play
+        }
+        #expect(p.giftSecondsAvailable == 30 * 60 - 700)
+    }
+
+    @Test("merging is per-counter max, so neither side loses its own progress")
+    func mergeTakesMaxPerCounter() {
+        var a = ProgressSnapshot()
+        a.earnedSecondsIn = 500; a.earnedSecondsOut = 100; a.revision = 1
+        var b = ProgressSnapshot()
+        b.earnedSecondsIn = 300; b.earnedSecondsOut = 250; b.revision = 2
+        let m = ProgressSnapshot.ratchetMerged(local: a, remote: b)
+        #expect(m.earnedSecondsIn == 500)
+        #expect(m.earnedSecondsOut == 250)
+    }
+
+    @Test("a counter a build has never written cannot erase one that has")
+    func nilNeverErases() {
+        var written = ProgressSnapshot()
+        written.giftSecondsIn = 600
+        let blank = ProgressSnapshot()          // older build: nil counters
+        #expect(ProgressSnapshot.ratchetMerged(local: blank, remote: written).giftSecondsAvailable == 600)
+        #expect(ProgressSnapshot.ratchetMerged(local: written, remote: blank).giftSecondsAvailable == 600)
     }
 }
