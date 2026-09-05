@@ -14,6 +14,10 @@ struct Question: Identifiable, Equatable {
     /// a scrollable card above the prompt. Attached to EVERY question of the
     /// passage so the text is always available, even after interleaving/re-asks.
     var passage: String? = nil
+    /// Fine-grained skill inside the topic ("fractions", "mul", …) — see
+    /// `SkillCatalog`. Lets the parent report say "strong in multiplication,
+    /// struggling with fractions" instead of just "math 61%". nil = untagged.
+    var skill: String? = nil
 
     var correctAnswer: String { options[correctIndex] }
     /// The line the read-aloud / auto-read should speak.

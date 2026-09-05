@@ -294,6 +294,8 @@ struct ChildTimeApp: App {
         case "paywall":  PaywallView()    // DEMO_SCREEN=paywall — the "טופי+" subscription screen (App Review proof)
         case "unlocked": UnlockedView().onAppear { ProgressStore.shared.startUnlock(minutes: 670, manual: false) }  // DEMO_SCREEN=unlocked — game-time countdown
         case "whatsnew": WhatsNewView(onDone: {})   // DEMO_SCREEN=whatsnew — the release-notes sheet
+        case "parenthome": ParentDashboardView(isRoot: true)   // DEMO_SCREEN=parenthome — the redesigned overview
+            .onAppear { if let id = ProfileStore.shared.activeID { HouseholdManager.shared.seedDemoLiveWindow(childID: id) } }
         case "leaderboard": LeaderboardView()   // DEMO_SCREEN=leaderboard
         case "livegame": LiveGameDemoHost()      // DEMO_SCREEN=livegame — live quiz setup/flow
         case "gameinvite": WorldMapView().onAppear { LiveGameManager.shared.seedDemoInvite() }  // invite banner

@@ -12,6 +12,12 @@ import Foundation
 /// material until middle-school content exists.
 enum CurriculumMath {
 
+    /// Stamp a generated question with the skill it exercises, so the parent
+    /// report can tell "strong in multiplication" from "struggling with fractions".
+    private static func tagged(_ q: Question, _ skill: String) -> Question {
+        var q = q; q.skill = skill; return q
+    }
+
     static func generate(grade: Int, difficulty: Difficulty) -> Question {
         let g = max(1, min(6, grade))
         if difficulty == .hard, g < 6, Double.random(in: 0...1) < 0.2 {
@@ -31,9 +37,9 @@ enum CurriculumMath {
 
     private static func grade1(_ d: Difficulty) -> Question {
         switch Int.random(in: 0...3) {
-        case 0:  return addSub(max: d == .easy ? 10 : 20)
-        case 1:  return completeToTen()
-        case 2:  return biggestNumber(max: d == .easy ? 10 : 20)
+        case 0:  return tagged(addSub(max: d == .easy ? 10 : 20), "addSub")
+        case 1:  return tagged(completeToTen(), "completeTen")
+        case 2:  return tagged(biggestNumber(max: d == .easy ? 10 : 20), "compare")
         default: return wordProblemAddSub(max: d == .easy ? 10 : 20)
         }
     }
@@ -65,9 +71,9 @@ enum CurriculumMath {
 
     private static func grade2(_ d: Difficulty) -> Question {
         switch Int.random(in: 0...3) {
-        case 0:  return addSub(max: d == .easy ? 50 : 100)
-        case 1:  return mulIntro()
-        case 2:  return evenOdd(max: d == .easy ? 20 : 100)
+        case 0:  return tagged(addSub(max: d == .easy ? 50 : 100), "addSub")
+        case 1:  return tagged(mulIntro(), "mul")
+        case 2:  return tagged(evenOdd(max: d == .easy ? 20 : 100), "evenOdd")
         default: return wordProblemAddSub(max: d == .easy ? 50 : 100)
         }
     }
@@ -99,16 +105,16 @@ enum CurriculumMath {
         case 0:
             let a = Int.random(in: 2...(d == .easy ? 6 : 10))
             let b = Int.random(in: 2...(d == .easy ? 6 : 10))
-            return numericMCQ(prompt: "\(a) × \(b) = ?", answer: a * b)
+            return tagged(numericMCQ(prompt: "\(a) × \(b) = ?", answer: a * b), "mul")
         case 1:
             let a = Int.random(in: 2...(d == .easy ? 6 : 10))
             let b = Int.random(in: 2...(d == .easy ? 6 : 10))
-            return numericMCQ(prompt: "\(a * b) ÷ \(a) = ?", answer: b)
+            return tagged(numericMCQ(prompt: "\(a * b) ÷ \(a) = ?", answer: b), "div")
         case 2:
             let a = Int.random(in: 2...9), b = Int.random(in: 2...9), c = Int.random(in: 3...20)
-            return numericMCQ(prompt: "\(a) × \(b) + \(c) = ?", answer: a * b + c)
-        case 3:  return fractionOfShape()
-        default: return wordProblemMultiply(maxFactor: d == .easy ? 5 : 9)
+            return tagged(numericMCQ(prompt: "\(a) × \(b) + \(c) = ?", answer: a * b + c), "mixedOps")
+        case 3:  return tagged(fractionOfShape(), "fractions")
+        default: return tagged(wordProblemMultiply(maxFactor: d == .easy ? 5 : 9), "wordProblem")
         }
     }
 
@@ -140,17 +146,17 @@ enum CurriculumMath {
 
     private static func grade4(_ d: Difficulty) -> Question {
         switch Int.random(in: 0...5) {
-        case 0:  return fractionAddSameDen()
-        case 1:  return fractionCompare()
+        case 0:  return tagged(fractionAddSameDen(), "fractions")
+        case 1:  return tagged(fractionCompare(), "fractions")
         case 2:
             let a = Int.random(in: 500...(d == .easy ? 2000 : 8000))
             let b = Int.random(in: 100...1900)
-            return numericMCQ(prompt: "\(a) + \(b) = ?", answer: a + b)
+            return tagged(numericMCQ(prompt: "\(a) + \(b) = ?", answer: a + b), "addSub")
         case 3:
             let a = Int.random(in: 12...(d == .easy ? 20 : 40)), b = Int.random(in: 3...9)
-            return numericMCQ(prompt: "\(a) × \(b) = ?", answer: a * b)
-        case 4:  return divisionWithRemainder()
-        default: return rectanglePerimeterArea()
+            return tagged(numericMCQ(prompt: "\(a) × \(b) = ?", answer: a * b), "mul")
+        case 4:  return tagged(divisionWithRemainder(), "divRemainder")
+        default: return tagged(rectanglePerimeterArea(), "geometry")
         }
     }
 
@@ -205,10 +211,10 @@ enum CurriculumMath {
 
     private static func grade5(_ d: Difficulty) -> Question {
         switch Int.random(in: 0...3) {
-        case 0:  return decimalAddSub(easy: d == .easy)
-        case 1:  return fractionToDecimal()
-        case 2:  return average()
-        default: return percentIntro()
+        case 0:  return tagged(decimalAddSub(easy: d == .easy), "decimals")
+        case 1:  return tagged(fractionToDecimal(), "fractions")
+        case 2:  return tagged(average(), "average")
+        default: return tagged(percentIntro(), "percent")
         }
     }
 

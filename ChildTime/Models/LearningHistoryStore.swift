@@ -32,6 +32,13 @@ struct DailyStat: Codable, Equatable {
         var answered: Int = 0
         var correct: Int = 0
         var responseMsTotal: Double = 0
+        /// skill key → tallies, for the "what exactly to practise" breakdown.
+        /// Optional so days recorded before skills existed still decode.
+        var perSkill: [String: SkillDay]? = nil
+    }
+    struct SkillDay: Codable, Equatable {
+        var answered: Int = 0
+        var correct: Int = 0
     }
 }
 
@@ -73,7 +80,8 @@ final class LearningHistoryStore: ObservableObject {
     }
 
     func recordAnswer(topic: Topic, correct: Bool, responseMs: Double,
-                      earnedMinutes: Int, streak: Int, voluntary: Bool = false) {
+                      earnedMinutes: Int, streak: Int, voluntary: Bool = false,
+                      skill: String? = nil) {
         mutateToday { stat in
             stat.questionsAnswered += 1
             if correct { stat.correct += 1 } else { stat.wrong += 1 }
@@ -85,6 +93,14 @@ final class LearningHistoryStore: ObservableObject {
             t.answered += 1
             if correct { t.correct += 1 }
             t.responseMsTotal += responseMs
+            if let skill {
+                var sk = t.perSkill?[skill] ?? .init()
+                sk.answered += 1
+                if correct { sk.correct += 1 }
+                var map = t.perSkill ?? [:]
+                map[skill] = sk
+                t.perSkill = map
+            }
             stat.perTopic[topic.rawValue] = t
         }
     }

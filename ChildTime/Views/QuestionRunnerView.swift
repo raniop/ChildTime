@@ -1250,7 +1250,8 @@ struct QuestionRunnerView: View {
             topic: q.topic, correct: true, responseMs: responseMs,
             earnedMinutes: minutesGranted,
             streak: progress.currentStreak,
-            voluntary: cappedBefore   // learning past the max = voluntary
+            voluntary: cappedBefore,   // learning past the max = voluntary
+            skill: q.skill
         )
         reportLiveEvents(for: q)
 
@@ -1379,7 +1380,7 @@ struct QuestionRunnerView: View {
         )
         LearningHistoryStore.shared.recordAnswer(
             topic: q.topic, correct: false, responseMs: 0,
-            earnedMinutes: 0, streak: 0
+            earnedMinutes: 0, streak: 0, skill: q.skill
         )
         if lostSeconds > 0 {
             // Gentle: small seconds dip + a "you can win it right back" message.

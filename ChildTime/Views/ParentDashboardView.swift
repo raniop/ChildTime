@@ -43,6 +43,7 @@ struct ParentDashboardView: View {
     @State private var choresProfile: Profile?    // 🧹 chores sheet
     @State private var showSchoolYearParty = false
     @State private var showWhatsNew = false
+    @State private var insightsProfile: Profile? = nil
     @StateObject private var choreStore = ChoreStore.shared
     @State private var screenTimeProfile: Profile?
     @State private var editProfile: Profile?
@@ -175,6 +176,27 @@ struct ParentDashboardView: View {
                                 .buttonStyle(.plain)
                                 .padding(.top, AppSpacing.sm)
                                 .accessibilityLabel("שליחת פידבק לצוות")
+
+                                // Rani: the version, visible, and a tap away from
+                                // "what changed in it". The What's New sheet pops
+                                // once per version on its own; this is the way back.
+                                Button {
+                                    Haptic.light()
+                                    showWhatsNew = true
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "sparkles").font(.system(size: 11, weight: .bold))
+                                        Text("טוֹפִי · \(AppInfo.versionLine)")
+                                            .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                                            .monospacedDigit()
+                                        Text("· מָה חָדָשׁ?").font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                                    }
+                                    .foregroundStyle(.white.opacity(0.75))
+                                    .padding(.vertical, 6)
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(WhatsNewContent.items(for: WhatsNewContent.currentVersion) == nil)
+                                .accessibilityLabel("גרסת האפליקציה — הצג מה חדש")
                             }
                         }
                         .padding(AppSpacing.lg)
@@ -1270,65 +1292,96 @@ struct ParentDashboardView: View {
     }
 
     private func childCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
-        let isActive = profile.id == profiles.activeID
+        // Rani: the overview answers ONE question per child — "is my kid using it
+        // and learning?" — in a few seconds. Minutes of the daily max, questions,
+        // correct, and the live state. No stars/diamonds/flames here; those are
+        // the child's, on the child's screen.
         let cap = profile.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
-        let timeToday = cap.enabled ? "\(s.minutesEarnedToday)/\(cap.minutes)" : "\(s.minutesEarnedToday)"
-        let success = s.answeredToday > 0 ? "\(Int((Double(s.correctToday) / Double(s.answeredToday)) * 100))%" : "—"
-        // 🎮 shows the EARNED wallet, or the live countdown of an open EARNED
-        // window. A GIFT window's countdown ticks under 💝 instead — a kid
-        // playing gift time must never look like he's burning earned minutes.
+        let girl = profile.gender == .girl
         let live = liveWindow(profile)
         let liveSecs = live?.secondsLeft ?? 0
-        let liveIsGift = live?.isManual ?? false
-        let earnedLive = liveSecs > 0 && !liveIsGift
-        let giftLive = liveSecs > 0 && liveIsGift
-        let available = earnedLive ? formatTime(liveSecs) : (s.walletMinutesShown > 0 ? "\(s.walletMinutesShown)" : "—")
-        return VStack(spacing: 8) {
-            ZStack(alignment: .topTrailing) {
-                ProfileAvatarView(profile: profile, size: 62)
-                if isChildPlayingNow(profile) {
-                    Circle().fill(AppColor.successMint)
-                        .frame(width: 14, height: 14)
-                        .overlay(Circle().stroke(.white, lineWidth: 2))
-                        .offset(x: 2, y: -2)
+        let playing = liveSecs > 0
+        let pct = s.answeredToday > 0 ? Int((Double(s.correctToday) / Double(s.answeredToday) * 100).rounded()) : nil
+        let hasDevice = !(household.devicesByChild[profile.id.uuidString] ?? []).isEmpty
+        let state: String = {
+            if playing { return "\(girl ? "מְשַׂחֶקֶת" : "מְשַׂחֵק") עַכְשָׁיו · נִשְׁאֲרוּ \(formatTime(liveSecs))" }
+            if isChildPlayingNow(profile) { return "בְּטוֹפִי עַכְשָׁיו · \(girl ? "לוֹמֶדֶת" : "לוֹמֵד")" }
+            if !hasDevice { return "עוֹד לֹא חֻבַּר מַכְשִׁיר" }
+            return s.answeredToday > 0 ? "\(girl ? "לָמְדָה" : "לָמַד") הַיּוֹם" : "לֹא בְּטוֹפִי הַיּוֹם"
+        }()
+        return VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                ProfileAvatarView(profile: profile, size: 52)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(profile.name)
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    HStack(spacing: 6) {
+                        Circle().fill(playing || isChildPlayingNow(profile) ? AppColor.successMint : Color.secondary.opacity(0.35))
+                            .frame(width: 8, height: 8)
+                        Text(state)
+                            .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.secondary).monospacedDigit()
+                            .lineLimit(1).minimumScaleFactor(0.8)
+                    }
                 }
+                Spacer(minLength: 4)
+                Text(pct.map { "\($0)%" } ?? "—")
+                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(pct == nil ? .secondary : (pct! >= 85 ? Color(hex: "22A06B") : pct! >= 65 ? Color(hex: "9A6A00") : AppColor.flameOrange))
             }
-            Text(profile.name)
-                .font(.system(size: 16, weight: .heavy, design: .rounded))
-                .foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.7)
-            gridStatusStrip(profile)
-            VStack(spacing: 6) {
-                HStack(spacing: 6) { miniStat("⏱", timeToday); miniStat("🎯", success) }
-                HStack(spacing: 6) { miniStat("⭐", s.stars.currencyShort); miniStat("💎", s.diamonds.currencyShort) }
-                // Green ONLY while a window is actually open — frozen time shows
-                // its static number in neutral (it isn't ticking or burning).
-                HStack(spacing: 6) { miniStat("🎮", available, live: earnedLive); miniStat("🔥", "\(s.dayStreak)") }
-                // 💝 Parent gift pocket — kept apart from earned (🎮) even here.
-                // An open GIFT window ticks down HERE, green, not under 🎮.
-                HStack(spacing: 6) {
-                    let gift = giftShownFor(profile, s)
-                    miniStat("💝", giftLive ? formatTime(liveSecs) : (gift > 0 ? "\(gift)" : "—"), live: giftLive)
-                    Color.clear.frame(maxWidth: .infinity).frame(height: 1)
-                }
+            HStack(spacing: 8) {
+                overviewStat(value: cap.enabled ? "\(s.minutesEarnedToday)" : "\(s.minutesEarnedToday)",
+                             suffix: cap.enabled ? "/\(cap.minutes)" : nil,
+                             label: "דַּקּוֹת הַיּוֹם",
+                             progress: cap.enabled ? min(1, Double(s.minutesEarnedToday) / Double(max(cap.minutes, 1))) : nil)
+                overviewStat(value: "\(s.answeredToday)", suffix: nil, label: "שְׁאֵלוֹת הַיּוֹם", progress: nil)
+                overviewStat(value: "\(s.correctToday)", suffix: nil, label: "נְכוֹנוֹת", progress: nil)
             }
-            .padding(.top, 4)
-            // Room for the overlaid "connect a device" pill (see the grid) — a
-            // child with NO device is a family stuck mid-onboarding; the next
-            // step should come to them, not hide in the detail page (Rani).
-            if (household.devicesByChild[profile.id.uuidString] ?? []).isEmpty {
-                Color.clear.frame(height: 34)
+            HStack(spacing: 8) {
+                // The whole card is a NavigationLink; this echoes it as a clear
+                // primary control so nobody has to guess the card is tappable.
+                Label("מֵידָע נוֹסָף", systemImage: "chevron.left")
+                    .labelStyle(.titleAndIcon)
+                    .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(AppColor.dreamyIndigo, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                Color.clear.frame(width: 118, height: 1)   // room for the ⚡ menu overlaid by the grid
             }
+            if !hasDevice && isRoot { Color.clear.frame(height: 30) }   // the "connect" pill lives here
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16).padding(.horizontal, 12)
+        .padding(14)
         .background(
             RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                 .fill(Color(.secondarySystemGroupedBackground))
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .stroke(isActive ? AppColor.successMint.opacity(0.6) : .clear, lineWidth: 2)
-        )
+        .environment(\.layoutDirection, .rightToLeft)
+    }
+
+    private func overviewStat(value: String, suffix: String?, label: String, progress: Double?) -> some View {
+        VStack(spacing: 3) {
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                Text(value).font(.system(size: 17, weight: .heavy, design: .rounded))
+                if let suffix { Text(suffix).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.secondary) }
+            }
+            .monospacedDigit()
+            Text(label).font(.system(size: 10.5, weight: .semibold, design: .rounded)).foregroundStyle(.secondary)
+            if let progress {
+                GeometryReader { g in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.secondary.opacity(0.15))
+                        Capsule().fill(AppColor.dreamyIndigo).frame(width: g.size.width * progress)
+                    }
+                }
+                .frame(height: 5)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8).padding(.horizontal, 6)
+        .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     /// ⋯ on a grid card: remote open / lock now (the two things a parent reaches
@@ -1369,6 +1422,14 @@ struct ParentDashboardView: View {
                 gridDeleteProfile = profile
             } label: { Label("מחק ילד/ה", systemImage: "trash") }
         } label: {
+            Label("⚡ פְּעֻלּוֹת", systemImage: "")
+                .labelStyle(.titleOnly)
+                .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                .foregroundStyle(.primary)
+                .frame(width: 118)
+                .padding(.vertical, 10)
+                .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .hidden()   // real label below keeps the old anchor size logic intact
             Image(systemName: "ellipsis.circle.fill")
                 .font(.system(size: 22))
                 .symbolRenderingMode(.hierarchical)
@@ -1642,8 +1703,7 @@ struct ParentDashboardView: View {
     /// full inline expression).
     private var childrenGrid: some View {
             LazyVGrid(
-                columns: [GridItem(.flexible(), spacing: 12),
-                          GridItem(.flexible(), spacing: 12)],
+                columns: [GridItem(.flexible(), spacing: 12)],
                 spacing: 12
             ) {
                 ForEach(rows, id: \.profile.id) { row in
@@ -1736,10 +1796,29 @@ struct ParentDashboardView: View {
     private func childDetailScreen(for id: UUID) -> some View {
         if let row = rows.first(where: { $0.profile.id == id }) {
             ScrollView {
-                profileCard(profile: row.profile, snapshot: row.snapshot)
-                    .padding(AppSpacing.lg)
-                    .frame(maxWidth: 720)
-                    .containerWidthLock()
+                VStack(spacing: 14) {
+                    ChildReportView(
+                        profile: row.profile,
+                        snapshot: row.snapshot,
+                        liveSecondsLeft: liveWindow(row.profile)?.secondsLeft ?? 0,
+                        liveIsGift: liveWindow(row.profile)?.isManual ?? false,
+                        devices: household.devicesByChild[row.profile.id.uuidString] ?? [],
+                        onGift: { remoteOpen(row.profile, $0) },
+                        onLock: { remoteLock(row.profile) },
+                        onLockAndRevoke: { revokeGiftProfile = row.profile },
+                        onAddDevice: { qrCode = nil; qrChild = row.profile },
+                        onFullInsights: { insightsProfile = row.profile }
+                    )
+                    // Everything the old card offered (chores, worlds, difficulty,
+                    // PIN, edit, delete…) stays here, below the report, unchanged.
+                    profileCard(profile: row.profile, snapshot: row.snapshot)
+                }
+                .padding(AppSpacing.lg)
+                .frame(maxWidth: 720)
+                .containerWidthLock()
+            }
+            .sheet(item: $insightsProfile) { p in
+                NavigationStack { ChildInsightsView(profile: p, snapshot: row.snapshot) }
             }
             .noHorizontalBounce()
             .environment(\.layoutDirection, .leftToRight)
