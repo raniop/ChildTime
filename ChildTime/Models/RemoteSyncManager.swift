@@ -872,7 +872,19 @@ final class RemoteSyncManager: ObservableObject {
             ProgressVault.shared.write(merged, for: profileID)
             // If the vault led (we hold more than the cloud), push it up so the
             // peer converges — otherwise that offline progress never leaves.
-            if !ProgressSnapshot.sameProgressData(merged, snap) {
+            //
+            // But NEVER from a parent's monitor device. Its cache is a VIEW of the
+            // children, not a source of truth: it holds no offline play of its own
+            // to rescue, and if that view is ever wrong it re-uploads the wrong
+            // numbers forever — accumulators merge by `max`, so no correction can
+            // win against it. This is not hypothetical: with every child device
+            // disconnected, a parent's phone alone kept restoring one child's
+            // stars onto her sibling, defeating repeated restores from backup.
+            // `uploadActiveProfileSoon` already refuses for exactly this reason;
+            // this path was simply never given the same guard.
+            let mayPush = ParentSettings.shared.deviceRole != .parent
+                || KidModeManager.shared.active
+            if mayPush, !ProgressSnapshot.sameProgressData(merged, snap) {
                 uploadSnapshot(merged, for: profileID)
             }
             return

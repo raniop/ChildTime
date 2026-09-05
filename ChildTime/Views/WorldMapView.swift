@@ -1373,7 +1373,7 @@ struct WorldMapView: View {
             // any frozen leftover of an earlier parent window (the kid tapped "עצור
             // ושמור"). Both are parent time — never blurred with earned minutes.
             // Opens both together as one fixed manual window (outside the cap).
-            if (progress.parentGiftMinutes > 0 || progress.hasPausedManualTime) && !progress.isUnlocked
+            if (progress.openableSeconds(gift: true) > 0 || progress.hasPausedManualTime) && !progress.isUnlocked
                 && peerWindow == nil {
                 Button {
                     requestUnlock { redeemGift() }
@@ -1971,7 +1971,7 @@ struct WorldMapView: View {
     private func redeemGift() {
         guard !progress.isUnlocked else { return }
         guard PlayWindowLeaseManager.isEnabled, let cid = profiles.activeID,
-              progress.parentGiftMinutes > 0 else { legacyRedeemGift(); return }
+              progress.openableSeconds(gift: true) > 0 else { legacyRedeemGift(); return }
         // Seconds included. Asking for `minutes * 60` stranded the carry: a window
         // locked at 29:40 re-opened at 29:00 and those 40 seconds could never be
         // spent — they just accumulated out of reach.

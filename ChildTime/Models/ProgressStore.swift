@@ -1482,7 +1482,12 @@ final class ProgressStore: ObservableObject {
     /// `minutes * 60` stranded the carry: a window locked at 29:40 re-opened at
     /// 29:00 and the 40 seconds could never be spent.
     func openableSeconds(gift: Bool) -> Int {
-        (gift ? parentGiftMinutes : pendingMinutes) * 60 + (carryIsGift == gift ? pendingSecondsCarry : 0)
+        let settled = (gift ? parentGiftMinutes : pendingMinutes) * 60
+            + (carryIsGift == gift ? pendingSecondsCarry : 0)
+        // Include a refund the cloud has not confirmed yet: it is genuinely the
+        // child's, and making them wait a network round trip to see their own
+        // minutes come back is exactly the delay this exists to remove.
+        return settled + (inFlightRefundIsGift == gift ? inFlightRefundSeconds : 0)
     }
 
     /// WHICH CHILD the live data in this store belongs to.
@@ -1516,6 +1521,35 @@ final class ProgressStore: ObservableObject {
     /// been bound holds whatever the last profile left behind.
     func holdsData(for id: UUID) -> Bool { belongsTo == id }
 
+    /// Seconds handed back by a stop that the cloud has not confirmed yet, shown
+    /// to the child IMMEDIATELY so the open button returns the instant they stop.
+    ///
+    /// DISPLAY ONLY, and that is the whole point. Crediting the real wallet here
+    /// is what double-paid every stop: the same path calls `pushNow()`, so the
+    /// optimistic credit reached the cloud before the release transaction read it,
+    /// and the transaction added the refund on top of a value that already held
+    /// it. This never enters `captureSnapshot()`, never syncs, and is dropped the
+    /// moment the authoritative number arrives.
+    @Published private(set) var inFlightRefundSeconds: Int = 0
+    private(set) var inFlightRefundIsGift = false
+
+    private func beginInFlightRefund(seconds: Int, gift: Bool) {
+        guard seconds > 0 else { return }
+        inFlightRefundSeconds = seconds
+        inFlightRefundIsGift = gift
+        // Safety net: if the transaction never answers (killed app, lost network
+        // with no error), the child must not be left staring at time they cannot
+        // actually open.
+        let token = seconds
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 12_000_000_000)
+            guard let self, self.inFlightRefundSeconds == token else { return }
+            self.inFlightRefundSeconds = 0
+        }
+    }
+
+    func clearInFlightRefund() { inFlightRefundSeconds = 0 }
+
     /// Attach a lease we won retroactively for an already-open window.
     func adoptLeaseID(_ id: String) { if isUnlocked { activeLeaseID = id } }
 
@@ -1536,6 +1570,7 @@ final class ProgressStore: ObservableObject {
     /// case we skip: the cloud value still arrives through the normal listener and
     /// merges by revision, which is the path that knows how to combine them.
     func applyClaimedWallet(_ w: ClaimedWallet) {
+        clearInFlightRefund()   // the authoritative number is here
         // STALE: something landed locally between the transaction's read and now —
         // a chore approval paid out, a 💝 gift command was consumed, the child
         // answered a question. Adopting the absolute numbers would visibly erase
@@ -1797,6 +1832,7 @@ final class ProgressStore: ObservableObject {
         if PlayWindowLeaseManager.isEnabled, let leaseID, let childID {
             banked = remaining / 60
             endUnlock()
+            beginInFlightRefund(seconds: remaining, gift: wasManual)
             Task {
                 let ok = await PlayWindowLeaseManager.shared.release(childID: childID,
                                                                      leaseID: leaseID,
@@ -1835,6 +1871,7 @@ final class ProgressStore: ObservableObject {
     /// arithmetic exactly — whole minutes to the pocket, odd seconds to the carry —
     /// so an offline stop and an online one leave the child with the same balance.
     func creditRefundLocally(seconds: Int, manual: Bool) {
+        clearInFlightRefund()   // this IS the credit now — don't show it twice
         guard seconds > 0 else { return }
         let r = WalletSeconds.refund(seconds: seconds, carry: carryIsGift == manual ? pendingSecondsCarry : 0)
         pendingSecondsCarry = r.carryLeft
