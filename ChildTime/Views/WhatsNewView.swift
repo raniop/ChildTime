@@ -112,25 +112,27 @@ struct WhatsNewView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 16, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             VStack(spacing: 0) {
                 VStack(spacing: 6) {
                     Text("✨").font(.system(size: 44))
                     Text("מה חדש בטופי?")
-                        .font(.system(size: 26, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
+                        .font(.system(size: 26, weight: .black, design: .rounded))
+                        .foregroundStyle(GlassInk.primary)
+                        .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
                     Text("הנה מה שהוספנו בעדכון האחרון")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
+                        .foregroundStyle(GlassInk.secondary)
                     // The version itself, so a parent can say WHICH Tofy they have.
                     Text("גרסה \(WhatsNewContent.currentVersion)")
                         .font(.system(size: 12.5, weight: .heavy, design: .rounded))
                         .monospacedDigit()
                         .foregroundStyle(.white.opacity(0.75))
-                        .padding(.horizontal, 12).padding(.vertical, 4)
-                        .background(.white.opacity(0.15), in: Capsule())
+                        .padding(.horizontal, 12).padding(.vertical, 5)
+                        .background(Capsule().fill(.white.opacity(0.14)))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                         .padding(.top, 4)
                 }
                 .padding(.top, 28)
@@ -153,7 +155,7 @@ struct WhatsNewView: View {
                                 Spacer(minLength: 0)
                             }
                             .padding(12)
-                            .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .glassPane(radius: 16, shadow: false)
                         }
                     }
                     .padding(.horizontal, 20)
@@ -165,14 +167,11 @@ struct WhatsNewView: View {
                 } label: {
                     Text("מעולה, תודה! 💛")
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
-                        .foregroundStyle(AppColor.textOnLight)
+                        .foregroundStyle(Color(hex: "4B3FBF"))
                         .frame(maxWidth: 420)
                         .padding(.vertical, 15)
-                        .background(
-                            LinearGradient(colors: [.white, Color(hex: "FFE9A3")],
-                                           startPoint: .top, endPoint: .bottom),
-                            in: Capsule())
-                        .glow(Color(hex: "FFD23F"), radius: 12)
+                        .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.white.opacity(0.92)))
+                        .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
                 }
                 .buttonStyle(.juicy)
                 .padding(.horizontal, 24)

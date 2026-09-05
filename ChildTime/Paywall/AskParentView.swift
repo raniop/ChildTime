@@ -23,9 +23,8 @@ struct AskParentView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            FloatingOrbs.home()
-            SparkleField(count: 18, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             VStack(spacing: 18) {
                 HStack {
@@ -33,18 +32,20 @@ struct AskParentView: View {
                         Image(systemName: "xmark")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(.white)
-                            .frame(width: 38, height: 38)
-                            .glassPane(radius: 19, shadow: false)
+                            .frame(width: 40, height: 40)
+                            .background(.white.opacity(0.22), in: Circle())
+                            .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                     }
                     Spacer()
                 }
                 Spacer(minLength: 0)
 
                 Text("👑").font(.system(size: 72))
-                    .shadow(color: AppColor.starGold.opacity(0.7), radius: 24)
+                    .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
                 Text("טוֹפִי+")
                     .font(.system(size: 34, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(GlassInk.primary)
+                    .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
                 Text("הַמִּשְׂחָקִים, הַזִּירָה, הַמַּטְלוֹת וְכָל הָעוֹלָמוֹת נִפְתָּחִים לְכָל הַמִּשְׁפָּחָה — וְאַבָּא אוֹ אִמָּא פּוֹתְחִים אֶת זֶה מֵהַטֶּלֶפוֹן שֶׁלָּהֶם.")
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.9))
@@ -76,18 +77,17 @@ struct AskParentView: View {
                         Text(sent ? "נִשְׁלַח לְאַבָּא וּלְאִמָּא ✅" : "\(g("בַּקֵּשׁ", "בַּקְּשִׁי")) מֵאַבָּא אוֹ אִמָּא 💌")
                             .font(.system(size: 19, weight: .heavy, design: .rounded))
                     }
-                    .foregroundStyle(AppColor.textOnLight)
+                    .foregroundStyle(Color(hex: "4B3FBF"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(LinearGradient(colors: [.white, Color(hex: "FFE9A3")],
-                                               startPoint: .top, endPoint: .bottom), in: Capsule())
-                    .glow(AppColor.starGold, radius: 14)
+                    .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.white.opacity(0.92)))
+                    .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
                 }
                 .buttonStyle(.juicy)
                 .disabled(sent)
                 Text(sent ? "הֵם יְקַבְּלוּ הוֹדָעָה בַּטֶּלֶפוֹן 📱" : "הַבַּקָּשָׁה מַגִּיעָה יָשָׁר לַטֶּלֶפוֹן שֶׁל הַהוֹרֶה")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(GlassInk.secondary)
             }
             .padding(AppSpacing.lg)
             .frame(maxWidth: 520)
