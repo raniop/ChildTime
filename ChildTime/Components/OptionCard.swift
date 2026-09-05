@@ -43,6 +43,8 @@ struct OptionCard: View {
     /// read-aloud identify a tile by COLOR ("יָרוֹק, 4") when the answers are
     /// numbers — otherwise "1, 4" reads as two confusing numbers.
     static let colorNames = ["יָרוֹק", "סָגוֹל", "כָּתוֹם", "כָּחוֹל"]
+    /// Glass tints per tile, in the same order as `colorNames`: mint, lavender, gold, cyan.
+    static let tints: [Color] = [Color(hex: "8CFFC4"), Color(hex: "B7ABFF"), Color(hex: "FFD23F"), Color(hex: "7CF3FF")]
     static func colorName(for index: Int) -> String {
         colorNames[((index % colorNames.count) + colorNames.count) % colorNames.count]
     }
@@ -121,6 +123,12 @@ struct OptionCard: View {
         let shape = RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
         ZStack {
             shape.fill(.white.opacity(feedback == .dimmed ? 0.06 : 0.14))
+            // Each answer keeps its own palette colour as a glow through the
+            // glass (Rani: "תשובות בצבעים שונים שמתאימים לפלטה").
+            if feedback == .normal || feedback == .eliminated {
+                shape.fill(RadialGradient(colors: [Self.tints[index % Self.tints.count].opacity(0.55), .clear],
+                                          center: UnitPoint(x: 0.3, y: 0.2), startRadius: 0, endRadius: 220))
+            }
             shape.fill(LinearGradient(colors: [.white.opacity(0.22), .clear],
                                       startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.2)))
             switch feedback {

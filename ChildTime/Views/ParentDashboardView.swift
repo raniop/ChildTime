@@ -1093,10 +1093,13 @@ struct ParentDashboardView: View {
                     }
                 }
                 Spacer(minLength: 4)
-                Text(pct.map { "\($0)%" } ?? "—")
+                Text("\(pct ?? 0)%")   // Rani: a zero is a zero, never a dash
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .monospacedDigit()
-                    .foregroundStyle(pct == nil ? GlassInk.tertiary : (pct! >= 85 ? GlassInk.good : pct! >= 65 ? GlassInk.warn : GlassInk.weak))
+                    // Green from 80 %, amber 60–79, warm below — and plain white until
+                    // there are 6 answers to judge by (2/3 is not "red").
+                    .foregroundStyle(s.answeredToday < 6 ? GlassInk.primary
+                                     : (pct ?? 0) >= 80 ? GlassInk.good : (pct ?? 0) >= 60 ? GlassInk.warn : GlassInk.weak)
             }
             if hasDevice {
                 HStack(spacing: 8) {
@@ -1245,6 +1248,7 @@ struct ParentDashboardView: View {
                 if let suffix { Text(suffix).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(GlassInk.tertiary) }
             }
             .monospacedDigit()
+            .environment(\.layoutDirection, .leftToRight)   // "60/90" is a number — it rendered as "/900" in RTL
             Text(label).font(.system(size: 10.5, weight: .semibold, design: .rounded)).foregroundStyle(GlassInk.secondary)
             if let progress {
                 GeometryReader { g in

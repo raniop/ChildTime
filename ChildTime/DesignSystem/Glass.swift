@@ -82,6 +82,7 @@ extension View {
     func glassForm() -> some View {
         self
             .scrollContentBackground(.hidden)
+            .rowSpacingCompat(8)            // air between glass rows (Rani: "צפוף")
             // Forms are text-heavy: a soft dark scrim over the backdrop lifts the
             // contrast of the grey section headers / footers (Rani: "קשה לקרוא").
             .background(
@@ -146,5 +147,12 @@ extension View {
     func glassRows() -> some View {
         self.listRowBackground(GlassRowBackground())
             .listRowSeparatorTint(Color.white.opacity(0.18))
+    }
+}
+
+extension View {
+    /// `listRowSpacing` is iOS 17+; the app still runs on 16.2.
+    @ViewBuilder func rowSpacingCompat(_ spacing: CGFloat) -> some View {
+        if #available(iOS 17, *) { self.listRowSpacing(spacing) } else { self }
     }
 }

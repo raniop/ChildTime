@@ -97,7 +97,7 @@ struct ChildReportView: View {
             // The four numbers that answer "is my kid using it and learning?"
             HStack(spacing: 0) {
                 snap("\(s.questions)", "שְׁאֵלוֹת")
-                snap(s.questions > 0 ? pct(s.accuracy) : "—", "הַצְלָחָה")
+                snap(s.questions > 0 ? pct(s.accuracy) : "0%", "הַצְלָחָה")
                 snap(minutes, "דַּקּוֹת")
                 snap("\(snapshot.dayStreak)", "יְמֵי רֶצֶף")
             }
@@ -477,20 +477,34 @@ struct LearningTrendChart: View {
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width, h = geo.size.height
-            let labelH: CGFloat = 18, topPad: CGFloat = 8
+            let labelH: CGFloat = 18, topPad: CGFloat = 8, axisW: CGFloat = 36
             let plotH = h - labelH - topPad
+            let plotX0 = axisW, plotW = w - 2 * axisW
             let n = max(points.count, 1)
-            let slot = w / CGFloat(n)
+            let slot = plotW / CGFloat(n)
             let barW = min(22, slot * 0.55)
             let maxQ = max(points.map(\.questions).max() ?? 1, 1)
+            let xAt: (Int) -> CGFloat = { i in plotX0 + slot * (CGFloat(i) + 0.5) }
             ZStack(alignment: .topLeading) {
-                // grid at 50 / 75 / 100 %
+                // grid at 50 / 75 / 100 % with the numbers on the axes (Rani:
+                // "להוסיף מספרים על הצירים") — % on one side, questions on the other.
                 ForEach([0.5, 0.75, 1.0], id: \.self) { f in
-                    Path { p in
-                        let y = topPad + plotH * (1 - f)
-                        p.move(to: CGPoint(x: 0, y: y)); p.addLine(to: CGPoint(x: w, y: y))
-                    }.stroke(Color.white.opacity(0.18), lineWidth: 1)
+                    let y = topPad + plotH * (1 - f)
+                    Path { p in p.move(to: CGPoint(x: plotX0, y: y)); p.addLine(to: CGPoint(x: plotX0 + plotW, y: y)) }
+                        .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                    Text("\(Int(f * 100))%")
+                        .font(.system(size: 9.5, weight: .bold, design: .rounded)).monospacedDigit()
+                        .foregroundStyle(GlassInk.primary)
+                        .position(x: w - axisW / 2, y: y)
+                    Text("\(Int((Double(maxQ) * f).rounded()))")
+                        .font(.system(size: 9.5, weight: .bold, design: .rounded)).monospacedDigit()
+                        .foregroundStyle(GlassInk.secondary)
+                        .position(x: axisW / 2, y: y)
                 }
+                Text("שְׁאֵלוֹת").font(.system(size: 8.5, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary).position(x: axisW / 2, y: topPad + plotH + labelH / 2)
+                Text("הַצְלָחָה").font(.system(size: 8.5, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.primary).position(x: w - axisW / 2, y: topPad + plotH + labelH / 2)
                 // bars
                 ForEach(points.indices, id: \.self) { i in
                     let p = points[i]
@@ -498,25 +512,27 @@ struct LearningTrendChart: View {
                     RoundedRectangle(cornerRadius: 4, style: .continuous)
                         .fill(Color.white.opacity(0.30))
                         .frame(width: barW, height: max(bh, p.questions > 0 ? 3 : 0))
-                        .position(x: slot * (CGFloat(i) + 0.5), y: topPad + plotH - bh / 2)
+                        .position(x: xAt(i), y: topPad + plotH - bh / 2)
                 }
                 // accuracy line over days that have answers
                 let active = points.indices.filter { points[$0].questions > 0 }
                 if active.count >= 2 {
                     Path { path in
                         for (k, i) in active.enumerated() {
-                            let pt = CGPoint(x: slot * (CGFloat(i) + 0.5),
-                                             y: topPad + plotH * (1 - CGFloat(points[i].accuracy)))
+                            let pt = CGPoint(x: xAt(i), y: topPad + plotH * (1 - CGFloat(points[i].accuracy)))
                             k == 0 ? path.move(to: pt) : path.addLine(to: pt)
                         }
                     }
                     .stroke(Color.white, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
                 }
                 if let last = active.last {
-                    let pt = CGPoint(x: slot * (CGFloat(last) + 0.5),
-                                     y: topPad + plotH * (1 - CGFloat(points[last].accuracy)))
+                    let pt = CGPoint(x: xAt(last), y: topPad + plotH * (1 - CGFloat(points[last].accuracy)))
                     Circle().fill(Color.white.opacity(0.25)).frame(width: 16, height: 16).position(pt)
                     Circle().fill(Color.white).frame(width: 8, height: 8).position(pt)
+                    Text("\(Int((points[last].accuracy * 100).rounded()))%")
+                        .font(.system(size: 10, weight: .heavy, design: .rounded)).monospacedDigit()
+                        .foregroundStyle(GlassInk.primary)
+                        .position(x: xAt(last), y: max(8, pt.y - 14))
                 }
                 // weekday labels (only every ~4th on a 30-day view)
                 ForEach(points.indices, id: \.self) { i in
@@ -524,7 +540,7 @@ struct LearningTrendChart: View {
                         Text(points[i].weekday)
                             .font(.system(size: 9.5, weight: i == points.count - 1 ? .heavy : .medium, design: .rounded))
                             .foregroundStyle(i == points.count - 1 ? GlassInk.primary : GlassInk.secondary)
-                            .position(x: slot * (CGFloat(i) + 0.5), y: h - labelH / 2)
+                            .position(x: xAt(i), y: h - labelH / 2)
                     }
                 }
             }
@@ -540,22 +556,32 @@ struct ScreenTimeChart: View {
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width, h = geo.size.height
-            let labelH: CGFloat = 18, topPad: CGFloat = 8
+            let labelH: CGFloat = 18, topPad: CGFloat = 8, axisW: CGFloat = 36
             let plotH = h - labelH - topPad
+            let plotX0 = axisW, plotW = w - axisW
             let n = max(points.count, 1)
-            let slot = w / CGFloat(n)
+            let slot = plotW / CGFloat(n)
             let barW = min(11, slot * 0.28)
             let maxM = max(points.map { max($0.earned, $0.used) }.max() ?? 1, 1)
+            let xAt: (Int) -> CGFloat = { i in plotX0 + slot * (CGFloat(i) + 0.5) }
             ZStack(alignment: .topLeading) {
-                ForEach([0.5, 1.0], id: \.self) { f in
-                    Path { p in
-                        let y = topPad + plotH * (1 - f)
-                        p.move(to: CGPoint(x: 0, y: y)); p.addLine(to: CGPoint(x: w, y: y))
-                    }.stroke(Color.white.opacity(0.18), lineWidth: 1)
+                ForEach([0.0, 0.5, 1.0], id: \.self) { f in
+                    let y = topPad + plotH * (1 - f)
+                    if f > 0 {
+                        Path { p in p.move(to: CGPoint(x: plotX0, y: y)); p.addLine(to: CGPoint(x: w, y: y)) }
+                            .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                    }
+                    // minutes on the axis (this side is the visual LEFT under RTL)
+                    Text("\(Int((Double(maxM) * f).rounded()))")
+                        .font(.system(size: 9.5, weight: .bold, design: .rounded)).monospacedDigit()
+                        .foregroundStyle(GlassInk.primary)
+                        .position(x: axisW / 2, y: y)
                 }
+                Text("דַּקּוֹת").font(.system(size: 8.5, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary).position(x: axisW / 2, y: h - labelH / 2)
                 ForEach(points.indices, id: \.self) { i in
                     let p = points[i]
-                    let cx = slot * (CGFloat(i) + 0.5)
+                    let cx = xAt(i)
                     let eh = plotH * CGFloat(p.earned) / CGFloat(maxM)
                     let uh = plotH * CGFloat(p.used) / CGFloat(maxM)
                     RoundedRectangle(cornerRadius: 3, style: .continuous).fill(Color.white.opacity(0.38))
