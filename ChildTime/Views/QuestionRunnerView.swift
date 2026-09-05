@@ -129,7 +129,9 @@ struct QuestionRunnerView: View {
             VStack(spacing: AppSpacing.md) {
                 topBar
                 if let q = current {
-                    Spacer(minLength: 0)
+                    // Mockup order, top-down: chips · timer · question card ·
+                    // answers · hint — no centring gap between the timer and the card.
+                    Spacer().frame(height: 6)
                     // .id(q.id): each question gets a FRESH subtree, so a new
                     // prompt can never render above the previous question's
                     // option cards (the reused position-keyed views used to
@@ -138,7 +140,7 @@ struct QuestionRunnerView: View {
                     // the bonus arena; must never happen).
                     questionHeader(q)
                         .id("question-\(q.id)")
-                    Spacer(minLength: 0)
+                    Spacer().frame(height: 10)
                     answersBlock(q)
                         .id("answers-\(q.id)")
                     Spacer(minLength: AppSpacing.xxl)   // breathing room above the companion
@@ -275,15 +277,11 @@ struct QuestionRunnerView: View {
 
     @ViewBuilder
     private var background: some View {
+        // The approved glass quiz: the same brand backdrop as the home, every
+        // element a pane of glass on it. (World gradients + decorations retired.)
         ZStack {
-            (isInPortal ? AppGradient.portal : themeWorld.gradient.gradient)
-                .ignoresSafeArea()
-                .animation(.easeInOut(duration: 0.5), value: themeWorld.id)
-            if !isInPortal {
-                themedOrbs
-                WorldDecorations(world: themeWorld).opacity(0.18)
-            }
-            SparkleField(count: 12, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 10, size: 11)
         }
     }
 
@@ -305,25 +303,41 @@ struct QuestionRunnerView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        // Slim progress row + a tidy row of the two things the child collects:
-        // game-minutes and stars (the single currency).
-        VStack(spacing: 8) {
-            HStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.md) {
-                closeButton(size: isCompact ? 26 : 32)
-                progressIndicator
-                StreakMeter(streak: progress.currentStreak)
-            }
-            HStack(spacing: isCompact ? 6 : 10) {
+        // Mockup `.q-top`: ✕ · ⭐ stars · "🧮 שאלה 4/10" as glass chips, then the
+        // glass timer row.
+        let total = max(1, totalQuestions)
+        let done = min(questionIndex + 1, total)
+        return VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Button { dismiss() } label: {
+                    quizChip { Image(systemName: "xmark").font(.system(size: 13, weight: .heavy)) }
+                }
+                .buttonStyle(.plain)
                 Spacer(minLength: 0)
-                statChip("🎮", progress.pendingMinutes, AppColor.successMint)   // game minutes
-                statChip("⭐", progress.stars, AppColor.starGold)               // stars (rank)
-                statChip("💎", progress.diamonds, AppColor.diamondBlue)         // diamonds (shop)
+                quizChip {
+                    Text("⭐ \(progress.stars.currencyShort)")
+                        .foregroundStyle(AppColor.starGold)
+                        .numericTextTransition(Double(progress.stars))
+                }
+                quizChip {
+                    Text("\(current?.topic.emoji ?? themeWorld.emoji) שְׁאֵלָה \(done)/\(total)")
+                }
             }
-            // Live earned-time bar — fills a little after every correct answer.
+            .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+            .foregroundStyle(.white)
+            .monospacedDigit()
             if earnsTime { earnedTimeBar }
         }
         .padding(.horizontal, AppSpacing.md)
         .padding(.top, AppSpacing.sm)
+    }
+
+    private func quizChip<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        content()
+            .lineLimit(1).minimumScaleFactor(0.7)
+            .padding(.horizontal, 12).padding(.vertical, 8)
+            .background(Capsule().fill(.white.opacity(0.14)))
+            .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
     }
 
     /// Only Earn-to-Unlock sessions grow play-time.
@@ -340,42 +354,27 @@ struct QuestionRunnerView: View {
         let target = progress.bonusTargetSeconds
         let secs = min(target, Int(progress.cycleSeconds.rounded()))
         let frac = target > 0 ? min(1, Double(secs) / Double(target)) : 0
-        VStack(spacing: 5) {
-            HStack(spacing: 6) {
-                Text("🎮").font(.system(size: 14))
-                Text("זְמַן שֶׁהִרְוַחְתָּ")
-                    .font(.system(size: 12, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-                Spacer()
-                Text(timeString(secs))
-                    .font(.system(size: 19, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-            }
+        HStack(spacing: 10) {
+            Text("🎮").font(.system(size: 15))
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    Capsule().fill(.white.opacity(0.2))
+                    Capsule().fill(.white.opacity(0.18))
                     Capsule()
-                        .fill(AppGradient.success)
+                        .fill(LinearGradient(colors: [Color(hex: "FFD23F"), Color(hex: "FF9F1C")],
+                                             startPoint: .leading, endPoint: .trailing))
                         .frame(width: max(6, geo.size.width * frac))
-                        .glow(AppColor.successMint, radius: 4)
                         .animation(.spring(response: 0.5, dampingFraction: 0.7), value: progress.cycleSeconds)
                 }
             }
             .frame(height: 8)
-            HStack {
-                Text("שְׁאֵלָה \(min(progress.cycleQuestionsDone, progress.cycleQuestionsTotal)) מִתּוֹךְ \(progress.cycleQuestionsTotal)")
-                Spacer()
-                Text("\(timeString(secs)) מִתּוֹךְ \(timeString(target))")
-            }
-            .font(.system(size: 10, weight: .semibold, design: .rounded))
-            .foregroundStyle(.white.opacity(0.7))
-            .monospacedDigit()
+            Text(timeString(secs))
+                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .monospacedDigit()
+                .contentTransition(.numericText())
         }
-        .padding(.horizontal, 12).padding(.vertical, 8)
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.12)))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(AppColor.successMint.opacity(0.4), lineWidth: 1))
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        .glassPane(radius: 16, shadow: false)
     }
 
     /// A small currency pill (emoji + value), animating its number on change.
@@ -486,15 +485,13 @@ struct QuestionRunnerView: View {
     /// Topic indicator + the prompt card (the upper block).
     @ViewBuilder
     private func questionHeader(_ q: Question) -> some View {
-        VStack(spacing: AppSpacing.md) {
-            // Control + topic row. Read-aloud (right) and report (left) live HERE,
-            // outside the prompt card, so they never cover the question text — and
-            // the two buttons are the same size.
+        // Mockup `.qcard`: ONE glass card — topic line (with the two small
+        // controls at its ends), the passage / prompt, "בחרו תשובה אחת".
+        VStack(spacing: 12) {
             HStack(spacing: 8) {
                 cardIconButton(system: "speaker.wave.2.fill",
                                fg: .white,
-                               bg: AppColor.companionGlow.opacity(0.9),
-                               glow: AppColor.companionGlow.opacity(0.5)) {
+                               bg: .white.opacity(0.22)) {
                     Haptic.light()
                     // For a passage question, read the passage first — one
                     // utterance, so the two don't cut each other off.
@@ -520,21 +517,20 @@ struct QuestionRunnerView: View {
                         Text("🌀 בּוֹנוּס ×3 כּוֹכָבִים!")
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                             .foregroundStyle(.white).glow(AppColor.gemPurple, radius: 10)
-                    } else if mode.isFeed {
-                        Text(q.topic.displayName)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.85))
+                    } else {
+                        Text(q.topic.displayName + (q.skill.map { " · \(SkillCatalog.name($0))" } ?? ""))
+                            .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                            .foregroundStyle(GlassInk.secondary)
                     }
                 }
                 .lineLimit(1).minimumScaleFactor(0.7)
                 Spacer(minLength: 4)
                 cardIconButton(system: "flag",
-                               fg: .white.opacity(0.6),
-                               bg: .white.opacity(0.15)) {
+                               fg: .white.opacity(0.7),
+                               bg: .white.opacity(0.14)) {
                     showReportConfirm = true
                 }
             }
-            .padding(.horizontal, AppSpacing.lg)
 
             // 📖 The passage card — the child reads here, then answers below.
             // Scrolls inside its own frame so a long passage can never squeeze
@@ -550,15 +546,7 @@ struct QuestionRunnerView: View {
                         .padding(AppSpacing.md)
                 }
                 .frame(maxHeight: isCompact ? 170 : 240)
-                .background(
-                    RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                        .fill(.white.opacity(0.10))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                                .stroke(.white.opacity(0.25), lineWidth: 1)
-                        )
-                )
-                .padding(.horizontal, AppSpacing.lg)
+                .glassInset(radius: 16)
                 .environment(\.layoutDirection, .rightToLeft)   // Hebrew passage reads right-to-left
             }
 
@@ -577,27 +565,27 @@ struct QuestionRunnerView: View {
             }
 
             Text(q.prompt)
-                .font(.system(size: questionFontSize(for: q.prompt), weight: .heavy, design: .rounded))
+                .font(.system(size: min(questionFontSize(for: q.prompt), isCompact ? 30 : 38), weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.4)
                 .fixedSize(horizontal: false, vertical: true)   // never truncate the question
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, AppSpacing.lg)
-                .padding(.vertical, AppSpacing.lg)
-                .background(
-                    RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                        .fill(.white.opacity(0.12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                                .stroke((isSuperQuestion || isBonusQuestion || isBonusArena) ? AppColor.starGold : .white.opacity(0.2),
-                                        lineWidth: (isSuperQuestion || isBonusQuestion || isBonusArena) ? 3 : 1)
-                        )
-                )
-                .glow((isSuperQuestion || isBonusQuestion || isBonusArena) ? AppColor.starGold : .clear,
-                      radius: (isSuperQuestion || isBonusQuestion || isBonusArena) ? 16 : 0)
-                .padding(.horizontal, AppSpacing.lg)
+                .padding(.horizontal, AppSpacing.sm)
+
+            Text("בַּחֲרוּ תְּשׁוּבָה אַחַת")
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
         }
+        .padding(.horizontal, 14).padding(.top, 12).padding(.bottom, 16)
+        .glassPane(radius: 22)
+        .overlay {
+            if isSuperQuestion || isBonusQuestion || isBonusArena {
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .strokeBorder(AppColor.starGold.opacity(0.9), lineWidth: 2)
+            }
+        }
+        .padding(.horizontal, AppSpacing.sm)
     }
 
     /// A consistent round icon button for the question's control row (read-aloud,
@@ -620,8 +608,16 @@ struct QuestionRunnerView: View {
     /// The answers grid + the hint / magic-wand row (the lower block).
     @ViewBuilder
     private func answersBlock(_ q: Question) -> some View {
-        VStack(spacing: AppSpacing.lg) {
+        VStack(spacing: AppSpacing.md) {
             optionsGrid(for: q)
+
+            // Mockup `.streak`: "🔥 3 ברצף" in gold under the answers.
+            if progress.currentStreak >= 2 {
+                Text("🔥 \(progress.currentStreak) בְּרֶצֶף!")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(AppColor.starGold)
+                    .contentTransition(.numericText())
+            }
 
             // Hint shows whenever it's payable; wand only after 2 wrong picks.
             // Fixed height so the layout never jumps when these appear/disappear
@@ -679,15 +675,9 @@ struct QuestionRunnerView: View {
             }
             .padding(.horizontal, AppSpacing.lg)
             .padding(.vertical, AppSpacing.sm)
-            .background(
-                LinearGradient(
-                    colors: [AppColor.starGold, Color(hex: "FFB84D")],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                ),
-                in: Capsule()
-            )
-            .glow(AppColor.starGold, radius: enabled ? 10 : 0)
-            .opacity(enabled ? 1.0 : 0.4)
+            .background(Capsule().fill(.white.opacity(0.14)))
+            .overlay(Capsule().strokeBorder(AppColor.starGold.opacity(enabled ? 0.7 : 0.3), lineWidth: 1))
+            .opacity(enabled ? 1.0 : 0.45)
         }
         .buttonStyle(.juicy)
         .disabled(!enabled)
@@ -724,7 +714,8 @@ struct QuestionRunnerView: View {
             .foregroundStyle(.white)
             .padding(.horizontal, AppSpacing.lg)
             .padding(.vertical, AppSpacing.sm)
-            .background(.white.opacity(0.2), in: Capsule())
+            .background(Capsule().fill(.white.opacity(0.14)))
+            .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
         }
         .buttonStyle(.juicy)
         .transition(.scale.combined(with: .opacity))

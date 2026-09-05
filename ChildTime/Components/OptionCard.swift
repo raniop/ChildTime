@@ -25,7 +25,7 @@ struct OptionCard: View {
         if longest >= 11      { return isCompact ? 19 : 26 }
         else if longest >= 8  { return isCompact ? 25 : 33 }
         else if text.count >= 16 { return isCompact ? 23 : 30 }
-        return isCompact ? 34 : 44
+        return isCompact ? 30 : 40
     }
 
     private let palette: [LinearGradient] = [
@@ -68,8 +68,8 @@ struct OptionCard: View {
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(width: 26, height: 26)
-                            .background(Circle().fill(.black.opacity(0.28)))
-                            .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 1))
+                            .background(Circle().fill(.white.opacity(0.22)))
+                            .overlay(Circle().stroke(.white.opacity(0.35), lineWidth: 1))
                         Spacer()
                     }
                     Spacer()
@@ -112,37 +112,45 @@ struct OptionCard: View {
         .disabled(feedback != .normal)
     }
 
+    /// Glass answers (the approved quiz mockup `.opt`): every option is a pane of
+    /// the same glass; the right one turns mint, a miss turns warm — no four
+    /// opaque colours fighting the question. (`palette` still names the tiles
+    /// for the read-aloud.)
     @ViewBuilder
     private var backgroundStyle: some View {
-        switch feedback {
-        case .normal:
-            palette[index % palette.count]
-        case .correct, .revealed:
-            AppGradient.success
-        case .wrong:
-            AppGradient.almost
-        case .dimmed:
-            Color.gray.opacity(0.4)
-        case .eliminated:
-            // Keep the original tile color but heavily desaturated so the
-            // 💡 badge + strikethrough read as the source of truth.
-            palette[index % palette.count]
+        let shape = RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+        ZStack {
+            shape.fill(.white.opacity(feedback == .dimmed ? 0.06 : 0.14))
+            shape.fill(LinearGradient(colors: [.white.opacity(0.22), .clear],
+                                      startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.2)))
+            switch feedback {
+            case .correct, .revealed:
+                shape.fill(LinearGradient(colors: [Color(hex: "06D6A0").opacity(0.55), Color(hex: "5CFF9D").opacity(0.35)],
+                                          startPoint: .topLeading, endPoint: .bottomTrailing))
+            case .wrong:
+                shape.fill(LinearGradient(colors: [Color(hex: "FF6B6B").opacity(0.5), Color(hex: "FF9AA0").opacity(0.3)],
+                                          startPoint: .topLeading, endPoint: .bottomTrailing))
+            case .eliminated:
+                shape.fill(Color(hex: "FFD23F").opacity(0.12))
+            default:
+                EmptyView()
+            }
         }
     }
 
     private var borderColor: Color {
         switch feedback {
-        case .correct, .revealed: return AppColor.successMint
-        case .wrong:              return AppColor.almostWarm
-        case .eliminated:         return AppColor.starGold
-        default:                  return .white.opacity(0.2)
+        case .correct, .revealed: return Color(hex: "8CFFC4").opacity(0.9)
+        case .wrong:              return Color(hex: "FF9AA0").opacity(0.9)
+        case .eliminated:         return AppColor.starGold.opacity(0.8)
+        default:                  return .white.opacity(0.32)
         }
     }
 
     private var borderWidth: CGFloat {
         switch feedback {
-        case .correct, .wrong, .revealed: return 3
-        case .eliminated:                  return 2.5
+        case .correct, .wrong, .revealed: return 2
+        case .eliminated:                  return 1.5
         default:                            return 1
         }
     }
