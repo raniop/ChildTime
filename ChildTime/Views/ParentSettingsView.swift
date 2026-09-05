@@ -16,6 +16,7 @@ struct ParentSettingsView: View {
     @State private var showAllowedPicker = false
     @State private var allowedSelection = FamilyActivitySelection()
     @State private var showChangePIN = false
+    @State private var showWhatsNew = false
     @State private var showSignIn = false
     @State private var showPaywall = false
     @State private var showDashboard = false
@@ -651,6 +652,18 @@ struct ParentSettingsView: View {
 
     private var versionSection: some View {
         Section {
+            // Rani: "מה חדש" pops once per version and is gone. A parent who
+            // dismissed it while busy had no way back to it — so it lives here,
+            // next to the version it describes, and can be re-opened any time.
+            Button {
+                Haptic.light()
+                showWhatsNew = true
+            } label: {
+                Label("מָה חָדָשׁ בַּגִּרְסָה הַזּוֹ ✨", systemImage: "sparkles")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+            }
+            .disabled(WhatsNewContent.items(for: WhatsNewContent.currentVersion) == nil)
+
             VStack(spacing: 3) {
                 Text("טופי")
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
@@ -662,6 +675,9 @@ struct ParentSettingsView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 6)
             .listRowBackground(Color.clear)
+        }
+        .sheet(isPresented: $showWhatsNew) {
+            WhatsNewView(onDone: { showWhatsNew = false })
         }
     }
 }

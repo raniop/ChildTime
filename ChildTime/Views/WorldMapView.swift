@@ -85,12 +85,49 @@ struct WorldMapView: View {
     /// and the Smart Feed won't serve its questions either.
     private var enabledWorlds: [World] {
         let allowed = profiles.active?.enabledTopics ?? Set(Topic.allCases)
-        return Worlds.all.filter { world in
+        let shown = Worlds.all.filter { world in
             // 💫 The arena isn't a topic — always on, except for pre-readers
             // (the extra-hard pool is text-based).
             if world.isBonusWorld { return (profiles.active?.effectiveGrade ?? 1) >= 1 }
             return allowed.contains(world.topic)
         }
+        return Self.orderForToday(shown, childID: profiles.activeID)
+    }
+
+    /// Rani: the category cards shouldn't sit in the same spot forever — a child
+    /// learns the grid by POSITION and taps the same corner every day, which is
+    /// the opposite of the variety the topic balancing is trying to encourage.
+    ///
+    /// Reordered once a DAY, and deliberately not per render or per visit: a card
+    /// that moves while a child is reaching for it is far worse than one that never
+    /// moves — they would land on a topic they didn't choose. Being derived from
+    /// (day, child) rather than random makes the order stable for the whole day,
+    /// identical on the iPhone and the iPad, and unchanged by a relaunch — while
+    /// still being different tomorrow.
+    ///
+    /// The 💫 arena keeps its slot: it is not a category, and a special card that
+    /// wanders is just noise.
+    static func orderForToday(_ worlds: [World], childID: UUID?, on date: Date = Date()) -> [World] {
+        var topics = worlds.filter { !$0.isBonusWorld }
+        guard topics.count > 1 else { return worlds }
+        var rng = SeededRandom(seed: daySeed(childID: childID, on: date))
+        for i in stride(from: topics.count - 1, to: 0, by: -1) {
+            topics.swapAt(i, Int(rng.next() % UInt64(i + 1)))
+        }
+        var next = topics.makeIterator()
+        return worlds.map { $0.isBonusWorld ? $0 : (next.next() ?? $0) }
+    }
+
+    /// Stable across processes and devices. Deliberately NOT `hashValue` — Swift
+    /// seeds that randomly per launch, so the order would change on every app
+    /// start and differ between a child's two devices.
+    private static func daySeed(childID: UUID?, on date: Date) -> UInt64 {
+        let day = Int(Calendar.current.startOfDay(for: date).timeIntervalSinceReferenceDate / 86_400)
+        var h: UInt64 = 0xCBF29CE484222325                      // FNV-1a
+        for b in (childID?.uuidString ?? "-").utf8 {
+            h = (h ^ UInt64(b)) &* 0x100000001B3
+        }
+        return h ^ UInt64(bitPattern: Int64(day &* 0x9E3779B1))
     }
 
     /// Total width cap for the world grid (so the 3 cards stay centered on iPad
@@ -2020,4 +2057,19 @@ private extension VerticalAlignment {
 /// only crashed on-device. AnyView at each builder caps the nesting depth.
 private extension View {
     func eraseToAnyView() -> AnyView { AnyView(self) }
+}
+
+
+/// Small deterministic PRNG (SplitMix64) — enough to shuffle a handful of cards
+/// reproducibly, without pulling in a dependency or touching the system RNG.
+struct SeededRandom {
+    private var state: UInt64
+    init(seed: UInt64) { state = seed }
+    mutating func next() -> UInt64 {
+        state &+= 0x9E3779B97F4A7C15
+        var z = state
+        z = (z ^ (z >> 30)) &* 0xBF58476D1CE4E5B9
+        z = (z ^ (z >> 27)) &* 0x94D049BB133111EB
+        return z ^ (z >> 31)
+    }
 }

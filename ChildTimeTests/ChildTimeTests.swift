@@ -683,3 +683,62 @@ struct PlayWindowLeaseTests {
         #expect(!parsed.isHeld)
     }
 }
+
+
+// MARK: - 🗺️ Category card order
+//
+// The kid's topic cards move once a day so a child stops tapping the same corner
+// out of habit. What must NOT happen: cards moving mid-session (a child lands on
+// a topic they didn't pick), a card vanishing, or the two devices disagreeing.
+
+@MainActor
+@Suite("Category card order")
+struct WorldOrderTests {
+    private let kid = UUID(uuidString: "C3C8CA83-7412-4B78-9E1A-0CC52D18D0F5")!
+    private var worlds: [World] { Worlds.all }
+
+    @Test("the same child on the same day always gets the same order")
+    func stableWithinTheDay() {
+        let day = Date()
+        let a = WorldMapView.orderForToday(worlds, childID: kid, on: day)
+        let b = WorldMapView.orderForToday(worlds, childID: kid, on: day.addingTimeInterval(3600))
+        #expect(a.map(\.id) == b.map(\.id))
+    }
+
+    @Test("the order does change across days")
+    func variesAcrossDays() {
+        let base = WorldMapView.orderForToday(worlds, childID: kid).map(\.id)
+        let changed = (1...7).contains { d in
+            let later = Date().addingTimeInterval(Double(d) * 86_400)
+            return WorldMapView.orderForToday(worlds, childID: kid, on: later).map(\.id) != base
+        }
+        #expect(changed)
+    }
+
+    @Test("no card is ever lost or duplicated")
+    func everyCardSurvives() {
+        for d in 0..<30 {
+            let day = Date().addingTimeInterval(Double(d) * 86_400)
+            let out = WorldMapView.orderForToday(worlds, childID: kid, on: day)
+            #expect(out.count == worlds.count)
+            #expect(Set(out.map(\.id)) == Set(worlds.map(\.id)))
+        }
+    }
+
+    @Test("the 💫 arena keeps its slot — a special card must not wander")
+    func bonusWorldStaysPut() {
+        guard let fixed = worlds.firstIndex(where: { $0.isBonusWorld }) else { return }
+        for d in 0..<30 {
+            let day = Date().addingTimeInterval(Double(d) * 86_400)
+            let out = WorldMapView.orderForToday(worlds, childID: kid, on: day)
+            #expect(out[fixed].isBonusWorld)
+        }
+    }
+
+    @Test("two children get different orders on the same day")
+    func differsPerChild() {
+        let a = WorldMapView.orderForToday(worlds, childID: UUID(), on: Date()).map(\.id)
+        let b = WorldMapView.orderForToday(worlds, childID: UUID(), on: Date()).map(\.id)
+        #expect(a != b)
+    }
+}
