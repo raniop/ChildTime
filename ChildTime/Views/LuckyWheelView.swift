@@ -25,8 +25,8 @@ struct LuckyWheelView: View {
         GeometryReader { proxy in
             let landscape = proxy.size.width > proxy.size.height
             // Fit the wheel to the space — never let it crowd out the prize/buttons.
-            let wheelSize = min(isCompact ? 300 : 440,
-                                proxy.size.height * (landscape ? 0.80 : 0.48),
+            let wheelSize = min(isCompact ? 340 : 460,
+                                proxy.size.height * (landscape ? 0.80 : 0.50),
                                 proxy.size.width * (landscape ? 0.46 : 0.92))
             ZStack {
                 GlassBackdrop()
@@ -55,12 +55,13 @@ struct LuckyWheelView: View {
                                     .transition(.scale.combined(with: .opacity))
                             }
                             primaryButton
-                            skipButton
+                            if winner == nil { skipButton }
                         }
-                        .padding(.horizontal, AppSpacing.lg)
-                        .padding(.vertical, AppSpacing.xl)
+                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.top, AppSpacing.sm)
+                        .padding(.bottom, AppSpacing.xl)
                         .frame(maxWidth: 720)
-                        .frame(maxWidth: .infinity, minHeight: proxy.size.height, alignment: .center)
+                        .frame(maxWidth: .infinity, alignment: .top)
                     }
                     .scrollIndicators(.hidden)
                 }
@@ -101,19 +102,20 @@ struct LuckyWheelView: View {
     // MARK: - Sections
 
     private var header: some View {
-        VStack(spacing: 4) {
-            Text("🎡")
-                .font(.system(size: isCompact ? 44 : 56))
-            Text("גַּלְגַּל מַזָּל!")
-                .font(.system(size: isCompact ? 30 : 40, weight: .black, design: .rounded))
-                .foregroundStyle(GlassInk.primary)
-                .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
-            if winner == nil {
-                Text("הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב")
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("גַּלְגַּל מַזָּל!")
+                    .font(.system(size: isCompact ? 24 : 30, weight: .black, design: .rounded))
+                    .foregroundStyle(GlassInk.primary)
+                Text(winner == nil ? "הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨" : "אֵיזֶה כֵּיף! 🎉")
                     .font(.system(size: 13.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
             }
+            Spacer(minLength: 0)
         }
+        .padding(14)
+        .glassPane(radius: 24)
+        .environment(\.layoutDirection, .rightToLeft)
     }
 
     /// The header + prize + buttons column (used beside the wheel in landscape).
@@ -125,7 +127,7 @@ struct LuckyWheelView: View {
                     .transition(.scale.combined(with: .opacity))
             }
             primaryButton
-            skipButton
+            if winner == nil { skipButton }
         }
     }
 
@@ -273,67 +275,76 @@ private struct WheelShape: View {
 
     var body: some View {
         ZStack {
-            // Wedges
+            // Wedges first, then EVERY label above ALL the fills — a label that
+            // sat inside its own wedge's ZStack was covered by the next wedge's
+            // translucent fill and read washed-out (Rani: "לא רואים ברור").
             ForEach(Array(wedges.enumerated()), id: \.offset) { idx, prize in
-                wedgeView(at: idx, prize: prize)
+                wedgeFill(at: idx, prize: prize)
+            }
+            ForEach(Array(wedges.enumerated()), id: \.offset) { idx, prize in
+                wedgeLabel(at: idx, prize: prize)
             }
             // Rim
             // Glass rim: a light edge, not a gold band — the wedges are the colour.
             Circle()
-                .stroke(LinearGradient(colors: [.white.opacity(0.85), .white.opacity(0.35)],
-                                       startPoint: .top, endPoint: .bottom), lineWidth: 5)
+                .stroke(LinearGradient(colors: [.white.opacity(0.95), .white.opacity(0.5)],
+                                       startPoint: .top, endPoint: .bottom), lineWidth: 7)
                 .frame(width: size, height: size)
-                .shadow(color: .black.opacity(0.25), radius: 16, y: 10)
+                .shadow(color: .black.opacity(0.28), radius: 18, y: 10)
         }
         .frame(width: size, height: size)
+        // Geometry, not text: the wheel is drawn LTR so `.offset(x:)` puts each
+        // label on ITS wedge — in the app's RTL environment the offsets mirrored
+        // and every label landed on the opposite wedge.
+        .environment(\.layoutDirection, .leftToRight)
     }
 
-    private func wedgeView(at index: Int, prize: WheelPrize) -> some View {
-        let count = wedges.count
-        let degreesPerWedge = 360.0 / Double(count)
-        let startAngle = Angle.degrees(Double(index) * degreesPerWedge - 90)
-        let endAngle = Angle.degrees(Double(index + 1) * degreesPerWedge - 90)
-        let midDeg = Double(index) * degreesPerWedge + degreesPerWedge / 2 - 90
-        let midAngle = Angle.degrees(midDeg)
-        // Align each label with its wedge bisector so they read radially and sit
-        // symmetrically; flip 180° on the lower half so text never goes upside-down.
-        let flip = midDeg > 90 || midDeg < -90
-        let labelRotation = midDeg + (flip ? 180 : 0)
+    private func wedgeAngles(_ index: Int) -> (start: Angle, end: Angle, mid: Angle) {
+        let per = 360.0 / Double(wedges.count)
+        return (Angle.degrees(Double(index) * per - 90),
+                Angle.degrees(Double(index + 1) * per - 90),
+                Angle.degrees(Double(index) * per + per / 2 - 90))
+    }
 
+    private func wedgeFill(at index: Int, prize: WheelPrize) -> some View {
+        let (startAngle, endAngle, _) = wedgeAngles(index)
         return ZStack {
             // Glass wedge: a translucent pane with the prize colour glowing
             // through it (same idea as the world tiles), white seams between.
             WedgePath(startAngle: startAngle, endAngle: endAngle)
-                .fill(.white.opacity(0.12))
+                .fill(.white.opacity(0.16))
             WedgePath(startAngle: startAngle, endAngle: endAngle)
-                .fill(LinearGradient(
-                    colors: [prize.color.opacity(0.62), prize.color.opacity(0.32)],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                ))
+                .fill(RadialGradient(colors: [prize.color.opacity(0.85), prize.color.opacity(0.45)],
+                                     center: .center, startRadius: size * 0.1, endRadius: size * 0.5))
             WedgePath(startAngle: startAngle, endAngle: endAngle)
-                .stroke(.white.opacity(0.55), lineWidth: 1.5)
+                .stroke(.white.opacity(0.75), lineWidth: 2)
+        }
+        .frame(width: size, height: size)
+    }
 
-            // Wedge content — emoji + short label, centered on the wedge bisector.
-            VStack(spacing: 3) {
+    private func wedgeLabel(at index: Int, prize: WheelPrize) -> some View {
+        let midAngle = wedgeAngles(index).mid
+        // Wedge content — emoji + short label, centered on the wedge bisector.
+        return VStack(spacing: 4) {
                 Text(prize.emoji)
-                    .font(.system(size: size * 0.075))
+                    .font(.system(size: size * 0.09))
                 Text(prize.label)
-                    .font(.system(size: size * 0.036, weight: .heavy, design: .rounded))
+                    .font(.system(size: size * 0.038, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
-                    .frame(width: size * 0.26)
+                    .frame(width: size * 0.27)
                     .minimumScaleFactor(0.6)
             }
-            .shadow(color: .black.opacity(0.45), radius: 2, y: 1)
-            // Rotate in place to follow the wedge, THEN push out along its radius.
-            .rotationEffect(.degrees(labelRotation))
+            .shadow(color: .black.opacity(0.35), radius: 3, y: 1)
+            // Upright, never rotated: a radially rotated Hebrew label turns into
+            // mirror-writing on the far half of the wheel.
+            .environment(\.layoutDirection, .rightToLeft)   // the Hebrew label itself
             .offset(
                 x: cos(midAngle.radians) * size * 0.32,
                 y: sin(midAngle.radians) * size * 0.32
             )
-        }
-        .frame(width: size, height: size)
+            .frame(width: size, height: size)
     }
 }
 
