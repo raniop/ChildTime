@@ -49,6 +49,8 @@ struct ParentDashboardView: View {
     @State private var showingPaywall = false
     /// ⚽ A question pack page (parent-side purchase flow).
     @State private var packToShow: QuestionPack? = nil
+    /// The child whose request opened the pack page (preselected there).
+    @State private var packRequestChild: Profile? = nil
     @ObservedObject private var subs = SubscriptionManager.shared
     @State private var insightsProfile: Profile? = nil
     @StateObject private var choreStore = ChoreStore.shared
@@ -129,6 +131,7 @@ struct ParentDashboardView: View {
                                 if !subs.isPremium, !remote.premiumRequests.isEmpty {
                                     premiumRequestBanner
                                 }
+                                ForEach(packRequestRows, id: \.child.id) { row in packRequestBanner(row.child, row.pack) }
                             }
                             childrenGrid
 
@@ -421,6 +424,47 @@ struct ParentDashboardView: View {
 
     /// 👑 "יואב רוצה טופי+" — the child tapped ask-a-parent on their device. The
     /// subscription is per family and bought here, once; this is the doorway.
+    /// ⚽ Children asking for a pack (from their device), with the pack resolved.
+    private var packRequestRows: [(child: Profile, pack: QuestionPack)] {
+        profiles.profiles.compactMap { p in
+            guard let id = remote.packRequests[p.id], let pack = QuestionPacks.find(id), !p.owns(pack) else { return nil }
+            return (p, pack)
+        }
+    }
+
+    private func packRequestBanner(_ child: Profile, _ pack: QuestionPack) -> some View {
+        Button {
+            Haptic.light()
+            packRequestChild = child
+            packToShow = pack
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("\(child.name) \(child.gender == .girl ? "מְבַקֶּשֶׁת" : "מְבַקֵּשׁ") אֶת \(pack.name) \(pack.emoji)")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    Text("שְׁאֵלוֹן חָדָשׁ · תּוֹסֶפֶת · נִפְתָּח מִכָּאן, בַּטֶּלֶפוֹן שֶׁלָּכֶם")
+                        .font(.system(size: 12.5, weight: .medium, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                }
+                Text(pack.emoji).font(.system(size: 26))
+            }
+            .foregroundStyle(GlassInk.primary)
+            .padding(14)
+            .glassPane(radius: 20, strength: 0.18, tint: Color(hex: "8CFFC4"))
+        }
+        .buttonStyle(.plain)
+        .overlay(alignment: .topLeading) {
+            Button { Haptic.light(); remote.clearPackRequest(childID: child.id) } label: {
+                Image(systemName: "xmark").font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(GlassInk.secondary).padding(8)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("סגור את הבקשה")
+        }
+    }
+
     private var premiumRequestBanner: some View {
         let names = profiles.profiles
             .filter { remote.premiumRequests[$0.id] != nil }
@@ -1588,7 +1632,7 @@ struct ParentDashboardView: View {
             .allowsHitTesting(false)
             .fullScreenCover(isPresented: $showingPaywall) { gatedPaywall }
             .fullScreenCover(item: $packToShow) { pack in
-                PackDetailView(pack: pack) { packToShow = nil }
+                PackDetailView(pack: pack, preselected: packRequestChild?.id) { packToShow = nil; packRequestChild = nil }
                     .environmentObject(profiles)
             }
             .onChange(of: subs.isPremium) { premium in

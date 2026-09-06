@@ -13,6 +13,11 @@ struct WorldCard: View {
     let currentRoom: Int
     let starsHeld: Int
     var subscriptionLocked: Bool = false
+    /// e.g. "✨ חָדָשׁ!" on a pack the child hasn't opened yet (wins over 👑).
+    var badgeOverride: String? = nil
+    /// First-day glow on a freshly gifted pack — the border and badge breathe.
+    var pulse: Bool = false
+    @State private var glow = false
     let onTap: () -> Void
 
     @Environment(\.horizontalSizeClass) private var hsc
@@ -22,16 +27,29 @@ struct WorldCard: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 0) {
                 HomeTileHeader(emoji: world.emoji,
-                               badge: subscriptionLocked ? "👑 טוֹפִי+" : nil)
+                               badge: badgeOverride ?? (subscriptionLocked ? "👑 טוֹפִי+" : nil))
                 HomeTileText(title: world.name,
-                             subtitle: world.isBonusWorld ? "כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת" : world.topic.displayName)
+                             subtitle: world.isBonusWorld ? "כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת"
+                                : (world.topic.pack?.tagline ?? world.topic.displayName))
                 Spacer(minLength: 6)
                 HomeTileFoot(label: "חֶדֶר \(max(1, min(currentRoom + 1, world.rooms)))/\(world.rooms)",
                              frac: Double(currentRoom) / Double(max(1, world.rooms)))
             }
             .homeTileChrome(tint: world.glowColor, compact: isCompact)
+            .overlay {
+                if pulse {
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .strokeBorder(Color(hex: "FFD23F").opacity(glow ? 0.95 : 0.25), lineWidth: 2.5)
+                }
+            }
+            .shadow(color: Color(hex: "FFD23F").opacity(pulse ? (glow ? 0.7 : 0.15) : 0), radius: glow ? 22 : 8)
+            .scaleEffect(pulse && glow ? 1.03 : 1)
         }
         .buttonStyle(.juicy)
+        .onAppear {
+            guard pulse else { return }
+            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) { glow = true }
+        }
         // Star-locked worlds are inert; subscription-locked ones stay tappable so
         // the tap can open the paywall.
         .disabled(!isUnlocked && !subscriptionLocked)

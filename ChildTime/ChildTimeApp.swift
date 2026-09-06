@@ -313,6 +313,41 @@ struct ChildTimeApp: App {
             PackDetailView(pack: QuestionPacks.all[0], onClose: {})
                 .environmentObject(ProfileStore.shared)
                 .onAppear { ParentSettings.shared.deviceRole = .parent; PINManager.shared.setPIN("1234"); ParentSettings.shared.hasSetParentPIN = true }
+        case "packreveal":                              // DEMO_SCREEN=packreveal — kid home: 🎁 the pack just arrived
+            WorldMapView()
+                .onAppear {
+                    if ProgressStore.shared.isUnlocked { ProgressStore.shared.endUnlock() }
+                    if var p = ProfileStore.shared.active {
+                        PackKidState.reset(childID: p.id)
+                        p.ownedPacks.insert("soccer"); ProfileStore.shared.update(p)
+                    }
+                }
+        case "packnew":                                 // DEMO_SCREEN=packnew — kid home: revealed, "חדש!" tile pinned first
+            WorldMapView()
+                .onAppear {
+                    if ProgressStore.shared.isUnlocked { ProgressStore.shared.endUnlock() }
+                    if var p = ProfileStore.shared.active {
+                        PackKidState.reset(childID: p.id); PackKidState.markRevealed("soccer", childID: p.id)
+                        p.ownedPacks.insert("soccer"); ProfileStore.shared.update(p)
+                    }
+                }
+        case "packask":                                 // DEMO_SCREEN=packask — kid: "בקש מאבא או אמא" for a pack
+            PackAskParentView(pack: QuestionPacks.all[0], onClose: {})
+        case "packoffer":                               // DEMO_SCREEN=packoffer — kid home with the 🎁 offer tile (not owned)
+            WorldMapView()
+                .onAppear {
+                    if ProgressStore.shared.isUnlocked { ProgressStore.shared.endUnlock() }
+                    if var p = ProfileStore.shared.active { p.ownedPacks.remove("soccer"); ProfileStore.shared.update(p) }
+                }
+        case "packrequest":                             // DEMO_SCREEN=packrequest — parent home: a child asked for a pack
+            ParentDashboardView(isRoot: true)
+                .onAppear {
+                    if var p = ProfileStore.shared.profiles.first {
+                        p.ownedPacks.remove("soccer"); ProfileStore.shared.update(p)
+                        RemoteSyncManager.shared.seedDemoPackRequest(childID: p.id, packID: "soccer")
+                        HouseholdManager.shared.seedDemoLiveWindow(childID: p.id)
+                    }
+                }
         case "packowned":                               // DEMO_SCREEN=packowned — parent home after a purchase
             ParentDashboardView(isRoot: true)
                 .onAppear {

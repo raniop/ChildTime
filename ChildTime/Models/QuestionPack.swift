@@ -29,6 +29,8 @@ struct QuestionPack: Identifiable, Hashable {
     /// The App Store Connect price (₪), for the DEBUG demo only — the real
     /// label always comes from StoreKit.
     let plannedPriceLabel: String
+    /// The bare subject for "רוצה ללמוד על …?" ("כַּדּוּרֶגֶל").
+    let shortSubject: String
 
     /// "כיתות ב׳–ו׳"
     var gradesLabel: String {
@@ -65,7 +67,8 @@ enum QuestionPacks {
             productID: "com.rani.ChildTime.pack.soccer",
             siblingProductID: "com.rani.ChildTime.pack.soccer.sibling",
             heroColors: [Color(hex: "8CFFC4"), Color(hex: "37E2D5")],
-            plannedPriceLabel: "₪14.90"
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "כַּדּוּרֶגֶל"
         ),
     ]
 
@@ -73,5 +76,43 @@ enum QuestionPacks {
     static func pack(for topic: Topic) -> QuestionPack? { all.first { $0.topic == topic } }
     static var allProductIDs: Set<String> {
         Set(all.flatMap { [$0.productID, $0.siblingProductID] })
+    }
+}
+
+/// Per-child, per-device memory of the pack "moments" on the KID's screen:
+/// the 🎁 reveal (shown once) and the first open (the "חדש!" badge lives until
+/// then). Local on purpose — a surprise should play on the device the child is
+/// holding, not be consumed by the parent's phone syncing first.
+enum PackKidState {
+    private static func key(_ what: String, _ childID: UUID) -> String { "packs.\(what).\(childID.uuidString)" }
+    private static func set(_ what: String, _ childID: UUID) -> Set<String> {
+        Set(UserDefaults.standard.stringArray(forKey: key(what, childID)) ?? [])
+    }
+    private static func mark(_ what: String, _ childID: UUID, _ packID: String) {
+        var s = set(what, childID); s.insert(packID)
+        UserDefaults.standard.set(Array(s), forKey: key(what, childID))
+    }
+    static func isRevealed(_ packID: String, childID: UUID) -> Bool { set("revealed", childID).contains(packID) }
+    static func isOpened(_ packID: String, childID: UUID) -> Bool { set("opened", childID).contains(packID) }
+    static func markRevealed(_ packID: String, childID: UUID) {
+        mark("revealed", childID, packID)
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: key("revealedAt.\(packID)", childID))
+    }
+    /// Rani: the new world sits next to טופי טיים and BLINKS on its first day.
+    /// True for 24 h after the reveal (whether or not the child opened it yet).
+    static func isFirstDay(_ packID: String, childID: UUID) -> Bool {
+        let at = UserDefaults.standard.double(forKey: key("revealedAt.\(packID)", childID))
+        return at > 0 && Date().timeIntervalSince1970 - at < 86_400
+    }
+    static func markOpened(_ packID: String, childID: UUID) { mark("opened", childID, packID) }
+    /// Demo/test: forget everything for this child.
+    static func reset(childID: UUID) {
+        UserDefaults.standard.removeObject(forKey: key("revealed", childID))
+        UserDefaults.standard.removeObject(forKey: key("opened", childID))
+        for p in QuestionPacks.all { UserDefaults.standard.removeObject(forKey: key("revealedAt.\(p.id)", childID)) }
+    }
+    /// The first owned pack this child hasn't been shown the 🎁 for yet.
+    static func pendingReveal(for profile: Profile) -> QuestionPack? {
+        QuestionPacks.all.first { profile.owns($0) && !isRevealed($0.id, childID: profile.id) }
     }
 }

@@ -328,6 +328,34 @@ exports.onPremiumRequest = onDocumentWritten("children/{childID}", async (event)
     { type: "premium-request", childID: event.params.childID });
 });
 
+// ⚽ A child asked for a question pack from their device ("בקש מאבא או אמא").
+// Same shape as the Tofy+ request: one push per request, to the parents only.
+exports.onPackRequest = onDocumentWritten("children/{childID}", async (event) => {
+  const before = event.data.before && event.data.before.data ? event.data.before.data() : null;
+  const after = event.data.after && event.data.after.data ? event.data.after.data() : null;
+  if (!after) return;
+  const stamp = after.packRequestedAt;
+  if (!stamp || (before && before.packRequestedAt === stamp)) return;   // unchanged
+  const hhID = after.householdID;
+  if (!hhID) return;
+  const key = `packreq_${event.params.childID}_${Math.round(stamp)}`;
+  try { await db.collection("pushDedup").doc(key).create({ at: Date.now() }); }
+  catch (e) { return; }
+  const tokens = await tokensForHousehold(hhID);
+  if (!tokens.length) return;
+  const name = after.name || "הילד";
+  const girl = after.gender === "girl";
+  const packID = after.packRequestedID || "";
+  const packName = PACK_NAMES[packID] || "שאלון חדש";
+  await send(tokens,
+    { title: `${PACK_EMOJI[packID] || "✨"} ${name} ${girl ? "מבקשת" : "מבקש"} את ${packName}`,
+      body: `${name} ${girl ? "רוצה" : "רוצה"} ללמוד ${packName}. השאלון הוא תוספת חד-פעמית — פותחים מהטלפון שלכם.` },
+    { type: "pack-request", childID: event.params.childID, packID });
+});
+// Pack names for push copy — keep in sync with QuestionPacks (iOS).
+const PACK_NAMES = { soccer: "עולם הכדורגל" };
+const PACK_EMOJI = { soccer: "⚽" };
+
 const COMMAND_FIELDS_CHILD = ["pendingMinuteAdjustment", "pendingGiftAdjustment", "pendingMoneyAdjustment", "resetRequestedAt", "revokeGiftAt"];
 // appRemovalUnlockAt was MISSING here — the "allow app deletion" window never
 // woke the child's device and only applied when the kid reopened Tofy.

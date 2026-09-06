@@ -17,6 +17,11 @@ struct WorldMapView: View {
     @State private var showKidExit = false
     @StateObject private var companion = CompanionController()
     @State private var selectedWorld: World?
+    /// ⚽ 🎁 A pack the parent just bought — shown once, then the world opens.
+    @State private var packReveal: QuestionPack? = nil
+    /// A pack the family doesn't have: the child can ask a parent (never buy).
+    @State private var packOffer: QuestionPack? = nil
+    @ObservedObject private var packStore = PackStore.shared
     @State private var showDailyChest = false
     @State private var challengeCelebration: String? = nil
     @State private var infoSheet: InfoSheet? = nil
@@ -108,7 +113,19 @@ struct WorldMapView: View {
             if world.isBonusWorld { return (profiles.active?.effectiveGrade ?? 1) >= 1 }
             return allowed.contains(world.topic)
         }
-        return Self.orderForToday(shown, childID: profiles.activeID)
+        let ordered = Self.orderForToday(shown, childID: profiles.activeID)
+        // ⚽ A pack the child hasn't opened yet sits FIRST, with its "חדש!" badge,
+        // until the first open — then it joins the daily shuffle like any world.
+        guard let cid = profiles.activeID else { return ordered }
+        let fresh = ordered.filter { w in w.topic.pack.map { !PackKidState.isOpened($0.id, childID: cid) } ?? false }
+        return fresh + ordered.filter { w in !fresh.contains(w) }
+    }
+
+    /// Live packs this family hasn't bought for this child — one quiet tile
+    /// each, at the END of the grid; the tap explains and lets the child ask.
+    private var packOffers: [QuestionPack] {
+        guard let p = profiles.active else { return [] }
+        return packStore.visiblePacks.filter { !p.owns($0) }
     }
 
     /// Rani: the category cards shouldn't sit in the same spot forever — a child
@@ -143,7 +160,19 @@ struct WorldMapView: View {
     }
 
     private var homeTiles: [HomeTile] {
-        Self.homeOrder(worlds: enabledWorlds, childID: profiles.activeID, premium: subs.isPremium)
+        var tiles = Self.homeOrder(worlds: enabledWorlds, childID: profiles.activeID, premium: subs.isPremium)
+        // ⚽ A freshly gifted pack sits RIGHT NEXT to טופי טיים (Rani) — wherever
+        // Tofy Time landed today — until the child opens it for the first time.
+        guard let cid = profiles.activeID else { return tiles }
+        let fresh = tiles.filter { t in
+            if case .world(let w) = t, let p = w.topic.pack { return !PackKidState.isOpened(p.id, childID: cid) }
+            return false
+        }
+        guard !fresh.isEmpty else { return tiles }
+        tiles.removeAll { t in fresh.contains { $0.id == t.id } }
+        let after = (tiles.firstIndex { if case .tofyTime = $0 { return true } else { return false } } ?? -1) + 1
+        tiles.insert(contentsOf: fresh, at: min(after, tiles.count))
+        return tiles
     }
 
     /// Where טופי טיים sits among the worlds. Rani: the categories move once a
@@ -163,6 +192,16 @@ struct WorldMapView: View {
         let slot = Int(rng.next() % UInt64(lastTopic + 2))   // 0…lastTopic+1 inclusive
         tiles.insert(.tofyTime, at: min(slot, tiles.count))
         return tiles
+    }
+
+    /// 🎁 The first open after a parent bought a pack: one reveal, on the
+    /// child's own device, before anything else pops (wheel, chest, events).
+    private func maybeRevealPack() {
+        guard packReveal == nil, selectedWorld == nil, !showingSmartFeed,
+              let p = profiles.active, let pack = PackKidState.pendingReveal(for: p) else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            if packReveal == nil, PackKidState.pendingReveal(for: p) != nil { packReveal = pack }
+        }
     }
 
     /// Stable across processes and devices. Deliberately NOT `hashValue` — Swift
@@ -231,18 +270,27 @@ struct WorldMapView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                 case .world(let world):
+                                    // ⚽ A bought pack opens with or without Tofy+ — the
+                                    // parent paid for it on its own (Rani).
+                                    let pack = world.topic.pack
+                                    let packNew = pack.map { p in profiles.activeID.map { !PackKidState.isOpened(p.id, childID: $0) } ?? false } ?? false
                                     WorldCard(
                                         // Premium unlocks every world (that's what the
                                         // subscription buys). Stars are now a spendable
                                         // currency, so they no longer gate worlds —
                                         // otherwise buying cosmetics could re-lock them.
                                         world: world,
-                                        isUnlocked: subs.isPremium,
+                                        isUnlocked: subs.isPremium || pack != nil,
                                         currentRoom: progress.progress(in: world.id),
                                         starsHeld: progress.stars,
-                                        subscriptionLocked: !subs.isPremium
+                                        subscriptionLocked: !subs.isPremium && pack == nil,
+                                        badgeOverride: packNew ? "✨ חָדָשׁ!" : nil,
+                                        pulse: pack.map { p in profiles.activeID.map { PackKidState.isFirstDay(p.id, childID: $0) } ?? false } ?? false
                                     ) {
-                                        if subs.isPremium {
+                                        if let pack, let cid = profiles.activeID {
+                                            PackKidState.markOpened(pack.id, childID: cid)
+                                            selectedWorld = world
+                                        } else if subs.isPremium {
                                             selectedWorld = world
                                         } else {
                                             // Until they subscribe, only "טופי טיים"
@@ -253,6 +301,24 @@ struct WorldMapView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                 }
+                            }
+
+                            // ⚽ Packs the family doesn't have yet — a quiet "ask a parent"
+                            // tile per pack (no price, no store on a child's device).
+                            ForEach(packOffers) { pack in
+                                FeatureCard(
+                                    emoji: pack.emoji,
+                                    title: pack.name,
+                                    subtitle: pack.tagline,
+                                    gradient: pack.heroGradient,
+                                    glowColor: Color(hex: "2ECC71"),
+                                    badge: "🎁 חָדָשׁ בְּטוֹפִי",
+                                    foot: "בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא 💌"
+                                ) {
+                                    Haptic.light()
+                                    packOffer = pack
+                                }
+                                .frame(maxWidth: .infinity)
                             }
 
                             // 🎮 Games LAST in the grid (Rani): learning worlds
@@ -435,6 +501,26 @@ struct WorldMapView: View {
         .fullScreenCover(item: $selectedWorld) { world in
             WorldDetailView(world: world)
         }
+        .fullScreenCover(item: $packReveal) { pack in
+            PackRevealView(pack: pack, onStart: {
+                if let cid = profiles.activeID {
+                    PackKidState.markRevealed(pack.id, childID: cid)
+                    PackKidState.markOpened(pack.id, childID: cid)
+                }
+                packReveal = nil
+                if let world = Worlds.all.first(where: { $0.topic == pack.topic }) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { selectedWorld = world }
+                }
+            }, onSkip: {
+                if let cid = profiles.activeID { PackKidState.markRevealed(pack.id, childID: cid) }
+                packReveal = nil
+            })
+        }
+        .fullScreenCover(item: $packOffer) { pack in
+            PackAskParentView(pack: pack) { packOffer = nil }
+        }
+        .onAppear { maybeRevealPack() }
+        .onChangeCompat(of: profiles.active?.ownedPacks.count ?? 0) { _, _ in maybeRevealPack() }
         .fullScreenCover(isPresented: $showDailyChest) {
             DailyChestView()
         }

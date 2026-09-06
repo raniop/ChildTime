@@ -49,6 +49,23 @@ final class RemoteSyncManager: ObservableObject {
     /// Children who tapped "בקש מאבא או אמא" on the Tofy+ screen, by request time.
     /// Shown as a banner on the parent's home; cleared once the family is premium.
     @Published private(set) var premiumRequests: [UUID: Double] = [:]
+    /// ⚽ Children who tapped "בקש מאבא או אמא" on a pack: child → pack id.
+    @Published private(set) var packRequests: [UUID: String] = [:]
+
+    /// Demo harness only — pinned so the live child-doc listener can't clear it.
+    private var demoPackRequestIDs: Set<UUID> = []
+    func seedDemoPackRequest(childID: UUID, packID: String) {
+        demoPackRequestIDs.insert(childID); packRequests[childID] = packID
+    }
+
+    /// The parent bought it or dismissed the banner — take the request down.
+    func clearPackRequest(childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        db.collection("children").document(childID.uuidString)
+            .setData(["packRequestedAt": FieldValue.delete(), "packRequestedID": FieldValue.delete()], merge: true)
+        #endif
+        packRequests.removeValue(forKey: childID)
+    }
 
     /// Family went premium (or the parent dismissed) — take the request down on
     /// every child so no device keeps nagging.
@@ -830,7 +847,12 @@ final class RemoteSyncManager: ObservableObject {
                     let revokeAck = doc?.data()?["revokeGiftAppliedAt"] as? Double
                     let giftAck = doc?.data()?["giftAppliedAt"] as? Double
                     let premiumReq = doc?.data()?["premiumRequestedAt"] as? Double
+                    let packReqAt = doc?.data()?["packRequestedAt"] as? Double
+                    let packReqID = doc?.data()?["packRequestedID"] as? String
                     Task { @MainActor in
+                        // ⚽ The child asked for a question pack from their device.
+                        if packReqAt != nil, let packReqID { self.packRequests[profile.id] = packReqID }
+                        else if !self.demoPackRequestIDs.contains(profile.id) { self.packRequests.removeValue(forKey: profile.id) }
                         // 👑 The child asked for Tofy+ from their device.
                         if let premiumReq { self.premiumRequests[profile.id] = premiumReq }
                         else { self.premiumRequests.removeValue(forKey: profile.id) }

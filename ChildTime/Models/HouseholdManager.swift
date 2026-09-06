@@ -994,7 +994,8 @@ final class HouseholdManager: ObservableObject {
         Task {
             for cid in childIDs {
                 let ref = db.collection("children").document(cid)
-                let fields: [String: Any] = ["packs": FieldValue.arrayUnion([pack.id])]
+                let fields: [String: Any] = ["packs": FieldValue.arrayUnion([pack.id]),
+                                             "packRequestedAt": FieldValue.delete(), "packRequestedID": FieldValue.delete()]
                 var outcome = await confirmedMerge(ref, fields)
                 if outcome == .denied { await reassertMembership(); outcome = await confirmedMerge(ref, fields) }
                 if outcome == .denied || outcome == .error { TofyLink("grantPack: child \(cid.prefix(8)) write FAILED (\(outcome))") }
