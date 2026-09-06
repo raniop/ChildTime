@@ -1110,6 +1110,7 @@ struct ParentDashboardView: View {
                     overviewStat(value: "\(s.answeredToday)", suffix: nil, label: "שְׁאֵלוֹת הַיּוֹם", progress: nil)
                     overviewStat(value: "\(s.correctToday)", suffix: nil, label: "נְכוֹנוֹת", progress: nil)
                 }
+                .fixedSize(horizontal: false, vertical: true)   // all three tiles as tall as the one with the bar (Rani)
                 HStack(spacing: 8) {
                     // The whole card is a NavigationLink; this echoes it as the
                     // primary control. The ⚡ menu is overlaid by the grid into
@@ -1260,7 +1261,7 @@ struct ParentDashboardView: View {
                 .frame(height: 5)
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.vertical, 8).padding(.horizontal, 6)
         .glassInset(radius: 12)
     }
