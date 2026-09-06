@@ -156,7 +156,7 @@ struct QuestionRunnerView: View {
                 HStack(alignment: .bottom) {
                     // Bubble sits ABOVE the avatar with its tail pointing down at
                     // it — readable, attached, and never covering the character.
-                    ZStack(alignment: .bottomLeading) {
+                    ZStack(alignment: .bottomTrailing) {
                         // The buddy is the child's own character, floating free
                         // (no circle crop / ring) — falls back to the Tofy face.
                         Group {
@@ -172,21 +172,21 @@ struct QuestionRunnerView: View {
                             // The companion section is pinned RTL (below), so the
                             // avatar sits under the bubble's RIGHT edge — point the
                             // tail there so it lands straight on the character.
-                            BubbleSpeech(text: bubble, tailInsetFromRight: companionSize * 0.5)
+                            BubbleSpeech(text: bubble, tailInsetFromLeft: companionSize * 0.5)
                                 .fixedSize()
                                 .offset(y: -(companionSize + 8))
                                 .transition(.scale.combined(with: .opacity))
                         }
                     }
-                    .padding(.leading, AppSpacing.md)
+                    .padding(.leading, AppSpacing.sm)
                     Spacer()
                 }
             }
-            .padding(.bottom, AppSpacing.lg)
-            // Pin RTL so the avatar+bubble always sit on the same (trailing) side
-            // and the tail lands on the character regardless of how this screen
-            // was presented (fullScreenCover can arrive LTR).
-            .environment(\.layoutDirection, .rightToLeft)
+            .padding(.bottom, AppSpacing.sm)
+            // Pinned LTR: the buddy lives in the bottom-LEFT corner, away from the
+            // 🔊 read-aloud button on the right (Rani: it covered the speaker and
+            // could not be moved). The tail points down-left onto the character.
+            .environment(\.layoutDirection, .leftToRight)
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
 
             // Effects overlays
@@ -625,9 +625,18 @@ struct QuestionRunnerView: View {
             // Hint shows whenever it's payable; wand only after 2 wrong picks.
             // Fixed height so the layout never jumps when these appear/disappear
             // (e.g. the hint hides the moment the answer is locked in).
+            // RTL row: hint in the middle, 🔊 + 🚩 together on the right; the
+            // left end stays empty for the buddy.
             HStack(spacing: AppSpacing.md) {
                 cardIconButton(system: "flag", fg: .white.opacity(0.7), bg: .white.opacity(0.14)) {
                     showReportConfirm = true
+                }
+                cardIconButton(system: "speaker.wave.2.fill", fg: .white, bg: .white.opacity(0.22)) {
+                    Haptic.light()
+                    // For a passage question, read the passage first — one
+                    // utterance, so the two don't cut each other off.
+                    let spokenPrompt = (q.passage.map { $0 + ". " } ?? "") + q.readAloudText
+                    SpeechReader.shared.readQuestion(prompt: spokenPrompt, options: q.options)
                 }
                 Spacer(minLength: 0)
                 if !showFeedback {
@@ -637,13 +646,7 @@ struct QuestionRunnerView: View {
                     magicWandButton
                 }
                 Spacer(minLength: 0)
-                cardIconButton(system: "speaker.wave.2.fill", fg: .white, bg: .white.opacity(0.22)) {
-                    Haptic.light()
-                    // For a passage question, read the passage first — one
-                    // utterance, so the two don't cut each other off.
-                    let spokenPrompt = (q.passage.map { $0 + ". " } ?? "") + q.readAloudText
-                    SpeechReader.shared.readQuestion(prompt: spokenPrompt, options: q.options)
-                }
+                Color.clear.frame(width: companionSize * 0.7, height: 1)   // room for the buddy
             }
             .padding(.horizontal, AppSpacing.md)
             .frame(maxWidth: .infinity)
@@ -923,6 +926,7 @@ struct QuestionRunnerView: View {
     }
 
     private func createQuestion(super isSuper: Bool, bonus: Bool = false) {
+        SpeechReader.shared.stop()
         isSuperQuestion = isSuper
         isBonusQuestion = bonus
         selectedIndex = nil
@@ -1090,6 +1094,7 @@ struct QuestionRunnerView: View {
     // MARK: - Picking
 
     private func pickOption(_ idx: Int, q: Question) {
+        SpeechReader.shared.stop()   // the child answered — don't keep reading a question that's gone
         // A tap must belong to the question ON SCREEN. If a stale option view
         // (mid-removal during the question swap) fires its captured closure,
         // ignore it — never judge one question's tap against another.
