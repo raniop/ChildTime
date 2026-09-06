@@ -30,6 +30,7 @@ final class PushManager: NSObject, ObservableObject {
 
     /// Ask the parent for notification permission, then register with APNs.
     func requestAuthorization() async {
+        if AppInfo.isDemoRun { return }   // never a system prompt over a demo screen
         let center = UNUserNotificationCenter.current()
         center.delegate = self
         configureCategories()
@@ -51,6 +52,7 @@ final class PushManager: NSObject, ObservableObject {
     /// ever asked gets the system prompt now, an already-authorized device just
     /// re-registers its token, and anyone who declined is left alone (no nagging).
     func requestAuthorizationIfNotDetermined() async {
+        if AppInfo.isDemoRun { return }   // never a system prompt over a demo screen
         let center = UNUserNotificationCenter.current()
         center.delegate = self
         let status = await center.notificationSettings().authorizationStatus

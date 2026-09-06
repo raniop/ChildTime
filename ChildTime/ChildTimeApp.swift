@@ -146,14 +146,16 @@ struct ChildTimeApp: App {
 
     private static func seedDemo() {
         if ProfileStore.shared.profiles.isEmpty {
-            let dana = Profile(name: "דָּנָה", gender: .girl, age: .grade1)
+            // Grades set, so the kid-facing grade picker never covers a demo screen.
+            let dana = Profile(name: "דָּנָה", gender: .girl, age: .grade1, grade: 3)
             ProfileStore.shared.add(dana)
-            let yoav = Profile(name: "יוֹאָב", gender: .boy, age: .grade1)
+            let yoav = Profile(name: "יוֹאָב", gender: .boy, age: .grade1, grade: 1)
             ProfileStore.shared.add(yoav)
             ProfileStore.shared.setActive(dana)
             UserDefaults.standard.set([dana.id.uuidString, yoav.id.uuidString],
                                       forKey: demoSeededIDsKey)
         }
+        for var p in ProfileStore.shared.profiles where p.grade == nil { p.grade = 3; ProfileStore.shared.update(p) }
         ProgressStore.shared.seedForDemo()
         if Self.demoScreen == "leaderboard" { FriendsManager.shared.seedDemo() }
     }
@@ -413,6 +415,10 @@ struct ChildTimeApp: App {
                     // A previous DEMO_SCREEN=unlocked run leaves a fake open window
                     // behind; the home must start closed.
                     if ProgressStore.shared.isUnlocked { ProgressStore.shared.endUnlock() }
+                    // …and a pack/pass from another demo would pop the 🎁 reveal here.
+                    if var p = ProfileStore.shared.active, !p.ownedPacks.isEmpty {
+                        p.ownedPacks = []; p.packExpiry = [:]; ProfileStore.shared.update(p)
+                    }
                     // Demo only: a daily cap, so the strip reads "60/90" like the mockup.
                     if !ParentSettings.shared.dailyCapEnabled {
                         ParentSettings.shared.dailyCapEnabled = true

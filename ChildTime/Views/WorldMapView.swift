@@ -215,7 +215,10 @@ struct WorldMapView: View {
         guard packReveal == nil, selectedWorld == nil, !showingSmartFeed,
               let p = profiles.active, let pack = PackKidState.pendingReveal(for: p) else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            if packReveal == nil, PackKidState.pendingReveal(for: p) != nil { packReveal = pack }
+            // Re-read the profile: a demo/cloud change in the meantime must win.
+            guard packReveal == nil, let fresh = profiles.active,
+                  let still = PackKidState.pendingReveal(for: fresh), still.id == pack.id else { return }
+            packReveal = still
         }
     }
 
@@ -456,7 +459,7 @@ struct WorldMapView: View {
                 showChildGradePicker = true
             }
             // 🎒 September 1st: the child advanced a grade — celebrate once.
-            else if let p = profiles.active, SchoolYearCelebration.shouldCelebrate(p) {
+            else if let p = profiles.active, SchoolYearCelebration.shouldCelebrate(p), !AppInfo.isDemoRun {
                 showSchoolYearParty = true
             }
             // Keep my friends-board score live during play (even with the board
@@ -479,7 +482,7 @@ struct WorldMapView: View {
                 if UserDefaults.standard.integer(forKey: key) != day {
                     UserDefaults.standard.set(day, forKey: key)
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-                        showEventSplash = true
+                        if !AppInfo.isDemoRun { showEventSplash = true }
                     }
                 }
             }

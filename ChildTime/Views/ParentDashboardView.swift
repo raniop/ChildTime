@@ -346,7 +346,9 @@ struct ParentDashboardView: View {
                 choreStore.startIfNeeded()   // 🧹 live chores + approval banner
                 // ☀️ September: a full-screen "great school year" party on the
                 // parent side too (Rani) — once per school year.
-                if isRoot, SchoolYearCelebration.shouldGreetParent, !rows.isEmpty {
+                if AppInfo.isDemoRun {
+                    // screenshots / review: nothing pops over the screen
+                } else if isRoot, SchoolYearCelebration.shouldGreetParent, !rows.isEmpty {
                     showSchoolYearParty = true
                 } else if isRoot, WhatsNewContent.shouldShow {
                     // ✨ Once per app UPDATE: what's new, in parent language.

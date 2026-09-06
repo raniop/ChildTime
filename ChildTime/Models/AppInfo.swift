@@ -14,6 +14,10 @@ enum AppInfo {
     static var version: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
     }
+    /// A DEMO_SCREEN run (screenshots, design review): no once-a-day pop-ups,
+    /// no system permission prompts — the screen being reviewed must be visible.
+    static let isDemoRun = ProcessInfo.processInfo.environment["DEMO_SCREEN"] != nil
+
     static var build: String {
         Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
     }
