@@ -716,6 +716,10 @@ struct QuestionRunnerView: View {
             }
         }
         .padding(.horizontal, AppSpacing.md)
+        // Answers always number right-to-left — 1 top-right, 2 top-left, 3, 4 —
+        // no matter how the screen was presented (a fullScreenCover can arrive
+        // LTR, and on Rani's phone 1 landed top-left).
+        .environment(\.layoutDirection, .rightToLeft)
     }
 
     private var magicWandButton: some View {
