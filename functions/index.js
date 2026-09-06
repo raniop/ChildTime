@@ -1427,7 +1427,7 @@ exports.adminFamiliesOverview = onCall(
         const s = states[k.id];
         const devs = devsByChild[k.id] || [];
         return {
-          id: k.id.slice(0, 8),
+          id: k.id.slice(0, 8), fullId: k.id,
           name: k.name || "?",
           grade: (k.grade === 0 || k.grade) ? k.grade : null,
           gender: k.gender || null,
@@ -1762,7 +1762,8 @@ exports.runAdminStats = onRequest(
 
 function requireAdmin(request) {
   const email = (request.auth && request.auth.token && request.auth.token.email || "").toLowerCase();
-  if (!email || !ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(email)) {
+  const verified = !!(request.auth && request.auth.token && request.auth.token.email_verified);
+  if (!email || !verified || !ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(email)) {
     throw new HttpsError("permission-denied", "Not an authorized admin.");
   }
   return email;
@@ -1805,8 +1806,8 @@ async function resolveAudience(audience) {
   const now = Date.now() / 1000;
   const parents = {}; parentsSnap.forEach((p) => { parents[p.id] = p.data() || {}; });
   const kidsByHH = {}; kidsSnap.forEach((k) => { const d = k.data() || {}; (kidsByHH[d.householdID] = kidsByHH[d.householdID] || []).push({ id: k.id, ...d }); });
-  const devsByKid = {}; devsSnap.forEach((dv) => { const d = dv.data() || {}; if (d.childID) (devsByKid[d.childID] = devsByKid[d.childID] || []).push(d); });
-  const childTokenSet = new Set(); devsSnap.forEach((dv) => { const t = (dv.data() || {}).fcmToken; if (t) childTokenSet.add(t); });
+  const devsByKid = {}; devsSnap.forEach((dv) => { const d = dv.data() || {}; if (d.childID && d.removed !== true && d.fcmToken) (devsByKid[d.childID] = devsByKid[d.childID] || []).push({ ...d, docID: dv.id }); });
+  const childTokenSet = new Set(); devsSnap.forEach((dv) => { const d = dv.data() || {}; if (d.fcmToken && d.removed !== true) childTokenSet.add(d.fcmToken); });
 
   const wantParents = audience.roles.includes("parents"), wantChildren = audience.roles.includes("children");
   const parentTokens = new Set(), childTokens = new Set();
@@ -1847,7 +1848,7 @@ async function resolveAudience(audience) {
         const toks = (devsByKid[k.id] || []).map((d) => d.fcmToken).filter(Boolean);
         if (!toks.length) continue;
         childrenN += 1;
-        toks.forEach((t) => { childTokens.add(t); owners[t] = { householdID: h.id, family, kind: "child", who: k.name || "ילד" }; });
+        (devsByKid[k.id] || []).forEach((d) => { childTokens.add(d.fcmToken); owners[d.fcmToken] = { householdID: h.id, family, kind: "child", who: k.name || "ילד", deviceDocID: d.docID }; });
       }
     }
   });
@@ -1888,12 +1889,10 @@ async function pruneDeadTokens(results, owners) {
   const dead = results.filter((r) => !r.ok && /not-registered|invalid-registration|invalid-argument/.test(r.error));
   for (const r of dead) {
     const o = owners && owners[r.token];
-    if (!o || !o.uid) continue;
+    if (!o) continue;
     try {
-      await db.collection("parents").doc(o.uid).update({
-        fcmTokens: admin.firestore.FieldValue.arrayRemove(r.token),
-        childFcmTokens: admin.firestore.FieldValue.arrayRemove(r.token),
-      });
+      if (o.uid) await db.collection("parents").doc(o.uid).update({ fcmTokens: admin.firestore.FieldValue.arrayRemove(r.token), childFcmTokens: admin.firestore.FieldValue.arrayRemove(r.token) });
+      if (o.deviceDocID) await db.collection("childDevices").doc(o.deviceDocID).update({ fcmToken: admin.firestore.FieldValue.delete() });
     } catch (e) { /* best effort */ }
   }
   return dead.length;
@@ -1908,8 +1907,8 @@ exports.worldPassReminders = onSchedule(
     const now = Date.now() / 1000;
     const lo = now + 2 * 86400, hi = now + 3 * 86400 + 3600;
     const kids = await db.collection("children").get();
-    const WORLD_HE = { math: "המתמטיקה 🧮", english: "האנגלית 🇬🇧", hebrew: "העברית ✍️", logic: "הלוגיקה 🧩", science: "המדעים 🔬",
-                       history: "ההיסטוריה 🏛️", geography: "הגיאוגרפיה 🌍", money: "החינוך הפיננסי 💰", reading: "הבנת הנקרא 📖" };
+    const WORLD_HE = { math: "המתמטיקה 🧮 נגמרת", english: "האנגלית 🇬🇧 נגמרת", hebrew: "העברית ✍️ נגמרת", logic: "הלוגיקה 🧩 נגמרת", science: "המדעים 🔬 נגמרים",
+                       history: "ההיסטוריה 🏛️ נגמרת", geography: "הגיאוגרפיה 🌍 נגמרת", money: "החינוך הפיננסי 💰 נגמר", reading: "הבנת הנקרא 📖 נגמרת" };
     let sent = 0;
     for (const k of kids.docs) {
       const d = k.data() || {}; const exp = d.packExpiry || {};
@@ -1922,7 +1921,7 @@ exports.worldPassReminders = onSchedule(
         const name = d.name || "הילד";
         const day = new Date(Number(at) * 1000).toLocaleDateString("he-IL", { weekday: "long", timeZone: "Asia/Jerusalem" });
         await send(tokens,
-          { title: `${WORLD_HE[packID]} של ${name} ${d.gender === "girl" ? "נגמרת" : "נגמרת"} ב${day}`,
+          { title: `${WORLD_HE[packID].replace(/ (נגמר\S*)$/, "")} של ${name} ${WORLD_HE[packID].split(" ").pop()} ב${day}`,
             body: `30 הימים מסתיימים. אפשר לפתוח עוד 30 יום, או טופי+ לכל המשפחה — מהטלפון שלכם. ההתקדמות נשמרת.` },
           { type: "pass-ending", childID: k.id, packID });
         sent += 1;
@@ -1938,11 +1937,10 @@ exports.pruneChorePhotos = onSchedule(
   { schedule: "every day 04:10", timeZone: "Asia/Jerusalem", timeoutSeconds: 300, memory: "512MiB" },
   async () => {
     const cutoff = Date.now() / 1000 - 7 * 86400;
-    const snap = await db.collectionGroup("chores").where("markedDoneAt", "<=", cutoff).get();
+    const snap = await db.collectionGroup("chores").where("markedDoneAt", "<=", cutoff).select("photoToken").get();
     let pruned = 0;
     for (const doc of snap.docs) {
-      const d = doc.data() || {};
-      if (!d.photoData && !d.photoToken) continue;
+      if (!(doc.data() || {}).photoToken) continue;
       await doc.ref.update({ photoData: admin.firestore.FieldValue.delete(), photoToken: admin.firestore.FieldValue.delete() });
       pruned += 1;
     }
@@ -1960,9 +1958,9 @@ exports.adminSaveCampaign = onCall({ timeoutSeconds: 30, memory: "256MiB" }, asy
   if (existing && existing.exists && ["sending", "sent"].includes(existing.data().status)) {
     throw new HttpsError("failed-precondition", "A sent campaign can't be edited.");
   }
-  const base = existing && existing.exists ? {} : { createdAt: Date.now(), createdBy: email,
+  const base = existing && existing.exists ? {} : { createdAt: Date.now(), createdBy: request.auth.uid,
     stats: Object.fromEntries(CAMPAIGN_STAT_KEYS.map((k) => [k, 0])) };
-  await ref.set({ ...base, ...c, updatedAt: Date.now(), updatedBy: email }, { merge: true });
+  await ref.set({ ...base, ...c, updatedAt: Date.now(), updatedBy: request.auth.uid }, { merge: true });
   console.log("[adminSaveCampaign]", email, ref.id, c.status, c.title);
   return { ok: true, id: ref.id };
 });
@@ -2014,7 +2012,9 @@ exports.adminDeleteCampaign = onCall({ timeoutSeconds: 30, memory: "256MiB" }, a
   const email = requireAdmin(request);
   const id = String(request.data && request.data.id || "");
   if (!id) throw new HttpsError("invalid-argument", "id required");
-  await db.collection("campaigns").doc(id).delete();
+  const ref = db.collection("campaigns").doc(id); const snap = await ref.get();
+  if (snap.exists && snap.data().status === "sending") throw new HttpsError("failed-precondition", "sending");
+  await db.recursiveDelete(ref);
   console.log("[adminDeleteCampaign]", email, id);
   return { ok: true };
 });
@@ -2027,8 +2027,8 @@ exports.adminSetPackEnabled = onCall({ timeoutSeconds: 30, memory: "256MiB" }, a
   const enabled = !!(request.data && request.data.enabled);
   const ref = db.collection("packs").doc(id);
   const before = (await ref.get()).data() || {};
-  await ref.set({ enabled, updatedAt: Date.now(), updatedBy: email,
-    ...(enabled ? { launchedAt: admin.firestore.FieldValue.serverTimestamp() } : {}) }, { merge: true });
+  await ref.set({ enabled, updatedAt: Date.now(), updatedBy: request.auth.uid,
+    ...(enabled && !before.launchedAt ? { launchedAt: admin.firestore.FieldValue.serverTimestamp() } : {}) }, { merge: true });
   // First switch-on → the launch push to every family, once (re-toggling never re-sends).
   let campaignID = before.launchCampaignID || null;
   if (enabled && !campaignID) {
@@ -2135,17 +2135,20 @@ const TOPIC_LABEL = { math: "🧮 מתמטיקה", english: "🇬🇧 אנגלי
 async function computeJourney() {
   const cfg = await conversionConfig();
   const nowMs = Date.now(), nowS = nowMs / 1000;
-  const dayKey = (d) => { const x = new Date(d); return `${x.getUTCFullYear()}-${String(x.getUTCMonth() + 1).padStart(2, "0")}-${String(x.getUTCDate()).padStart(2, "0")}`; };
   // Day keys in Israel time (the app writes dayKey in device-local time; close enough).
-  const il = (ms) => dayKey(ms + 3 * 3600 * 1000);
+  const il = (ms) => new Date(ms).toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
   const todayKey = il(nowMs);
   const last14 = Array.from({ length: 14 }, (_, i) => il(nowMs - (13 - i) * 86400000));
-  const [hhSnap, kidsSnap, devSnap, parentsSnap, salesSnap, reportsSnap, feedbackSnap] = await Promise.all([
-    db.collection("households").get(), db.collection("children").get(), db.collection("childDevices").get(),
+  const [hhSnap, kidsSnap, parentsSnap, salesSnap, reportsSnap, feedbackSnap, packsSnap] = await Promise.all([
+    db.collection("households").get(), db.collection("children").get(),
     db.collection("parents").get(), db.collection("packPurchases").get(),
-    db.collection("questionReports").where("status", "!=", "resolved").get().catch(() => ({ size: 0 })),
-    db.collection("parentFeedback").get().catch(() => ({ size: 0 })),
+    db.collection("questionReports").select("status").get().catch(() => ({ docs: [] })),
+    db.collection("parentFeedback").select("status").get().catch(() => ({ docs: [] })),
+    db.collection("packs").get().catch(() => ({ docs: [] })),
   ]);
+  const openReports = (reportsSnap.docs || []).filter((d) => ((d.data() || {}).status || "open") === "open").length;
+  const openFeedback = (feedbackSnap.docs || []).filter((d) => ((d.data() || {}).status || "open") === "open").length;
+  const packsOn = (packsSnap.docs || []).filter((d) => (d.data() || {}).enabled).length;
   const parents = {}; parentsSnap.forEach((p) => { parents[p.id] = p.data() || {}; });
   const kids = kidsSnap.docs.filter((k) => !(k.data() || {}).deletedAt);
   // dailyStats per child (≤ 30 docs each), in chunks
@@ -2153,7 +2156,8 @@ async function computeJourney() {
   const CHUNK = 20;
   for (let i = 0; i < kids.length; i += CHUNK) {
     const slice = kids.slice(i, i + CHUNK);
-    const snaps = await Promise.all(slice.map((k) => k.ref.collection("dailyStats").get().catch(() => ({ docs: [] }))));
+    // Bounded: the app keeps writing one doc per day forever — 120 days is plenty for every panel.
+    const snaps = await Promise.all(slice.map((k) => k.ref.collection("dailyStats").orderBy("date", "desc").limit(120).get().catch(() => ({ docs: [] }))));
     snaps.forEach((snap, j) => {
       const k = slice[j], d = k.data() || {};
       const days = snap.docs.map((x) => x.data() || {}).filter((x) => x.date);
@@ -2211,7 +2215,11 @@ async function computeJourney() {
     if (kidsOf.some((c) => c.questions30 >= 20 && c.activeDays30 >= 2)) funnel.valued += 1;
     if (hh.paywallViews) funnel.paywall += 1;
     if (hh.purchaseStarted) funnel.purchaseStarted += 1;
-    if (premium && !gift) { funnel.purchased += 1; premiumN += 1; if (daysLeft > 60) { yearlyN += 1; mrr += 199 / 12; } else { monthlyN += 1; mrr += 24.9; } }
+    if (premium && !gift) {
+      funnel.purchased += 1; premiumN += 1;
+      const yearly = /yearly/.test(hh.premiumProduct || "") || (hh.premiumProduct ? false : daysLeft > 45) || premiumUntil > nowS + 400 * 86400;
+      if (yearly) { yearlyN += 1; mrr += 199 / 12; } else { monthlyN += 1; mrr += 24.9; }
+    }
     if (hh.renewedAt) funnel.renewed += 1;
     households[h.id] = { state, premium, gift, daysLeft, premiumUntil, activated, played, lastActive, familyName: hh.familyName || hh.familyLabel || null,
       plan: premium && !gift ? (daysLeft > 60 ? "yearly" : "monthly") : null, purchaseSource: hh.purchaseSource || null, kids: kidsOf.map((c) => c.id) };
@@ -2232,16 +2240,18 @@ async function computeJourney() {
     overview: { activeFamilies30: active30, childrenToday, questionsToday, accuracyToday: questionsToday ? Math.round(100 * correctToday / questionsToday) : 0,
       minutesToday, mrr: Math.round(mrr), premiumFamilies: premiumN, yearlyShare: premiumN ? Math.round(100 * yearlyN / premiumN) : 0,
       activatedToPaid30: funnel.activated ? Math.round(1000 * funnel.purchased / funnel.activated) / 10 : 0,
-      openReports: reportsSnap.size || 0, feedbackCount: feedbackSnap.size || 0, packSales: sales.length, packRevenue: Math.round(packRevenue),
+      openReports, openFeedback, packsOn, packsReady: Object.keys(PACK_META).length - packsOn, packSales: sales.length, packRevenue: Math.round(packRevenue),
       activeSeries, activeSeriesDays: last14, worldsToday: Object.entries(worldsToday).map(([t, v]) => ({ topic: t, label: TOPIC_LABEL[t] || t, ...v, accuracy: v.q ? Math.round(100 * v.c / v.q) : 0 })).sort((a, b) => b.q - a.q).slice(0, 8) },
-    states, funnel, households, children: perChild,
+    states, funnel, households,
+    // Compact per-child copy (the 1 MB doc limit): the panels and the engine need only these.
+    children: Object.fromEntries(Object.entries(perChild).map(([id, c]) => [id, { name: c.name, householdID: c.householdID, grade: c.grade, gender: c.gender,
+      activeDays30: c.activeDays30, questions30: c.questions30, everQuestions: c.everQuestions, everActiveDays: c.everActiveDays, lastActive: c.lastActive,
+      today: c.today, activated: c.activated, favorite: c.favorite, packs: c.packs }])),
   };
-  // Firestore document limit is 1 MB — keep children compact if the roster grows.
   await db.collection("adminStats").doc("journey").set(journey);
   return journey;
 }
 
-exports.refreshJourney = onSchedule({ schedule: "every 60 minutes", timeZone: "Asia/Jerusalem", timeoutSeconds: 540, memory: "1GiB" }, async () => { await computeJourney(); });
 
 exports.adminJourney = onCall({ timeoutSeconds: 300, memory: "1GiB" }, async (request) => {
   requireAdmin(request);
@@ -2260,14 +2270,14 @@ exports.adminActivity = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (
     db.collection("campaigns").where("status", "==", "sent").orderBy("sentAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
     db.collection("questionReports").orderBy("createdAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
     db.collection("parentFeedback").orderBy("createdAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
-    db.collectionGroup("chores").where("markedDoneAt", ">", Date.now() / 1000 - 86400).limit(10).get().catch(() => ({ docs: [] })),
+    db.collectionGroup("chores").where("markedDoneAt", ">", Date.now() / 1000 - 86400).orderBy("markedDoneAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
   ]);
   const hhName = async (id) => { if (!id) return "משפחה"; const h = await db.collection("households").doc(id).get(); const d = h.exists ? h.data() : {}; return d.familyName || d.familyLabel || "משפחה " + String(id).slice(0, 4); };
   for (const s of sales.docs) { const d = s.data(); push(Number(d.at) * 1000, "sale", `💎 ${await hhName(d.householdID)} רכשה ${PACK_META[d.packID]?.emoji || ""} ${PACK_META[d.packID]?.name || d.packID}${d.campaignID ? " · מקור: הודעה" : ""}`, { householdID: d.householdID }); }
   for (const c of camps.docs) { const d = c.data(); push(d.sentAt, "campaign", `📣 נשלחה הודעה "${d.emoji ? d.emoji + " " : ""}${d.title}" ל־${d.stats?.sent || 0} מכשירים`); }
   for (const r of reports.docs) { const d = r.data(); push(Number(d.createdAt) * (Number(d.createdAt) > 1e12 ? 1 : 1000), "report", `🚩 דיווח על שאלה: "${String(d.prompt || d.question || "").replace(/\n/g, " ").slice(0, 60)}" · ${TOPIC_LABEL[d.topic] || d.topic || ""}`); }
   for (const f of feedback.docs) { const d = f.data(); push(Number(d.createdAt) * (Number(d.createdAt) > 1e12 ? 1 : 1000), "feedback", `💬 פידבק מהורה: "${String(d.message || "").slice(0, 80)}"`); }
-  for (const ch of chores.docs) { const d = ch.data(); push(Number(d.markedDoneAt) * 1000, "chore", `🧹${d.photoToken ? "📸" : ""} מטלה "${d.title || ""}" סומנה כבוצעה · ממתינה לאישור`); }
+  for (const ch of chores.docs) { const d = ch.data(); if (Number(d.lastApprovedAt || 0) >= Number(d.markedDoneAt || 0)) continue; push(Number(d.markedDoneAt) * 1000, "chore", `🧹${d.photoToken ? "📸" : ""} מטלה "${d.title || ""}" סומנה כבוצעה · ממתינה לאישור`); }
   items.sort((a, b) => b.at - a.at);
   return { items: items.slice(0, 30) };
 });
@@ -2308,8 +2318,16 @@ exports.adminSetConfig = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async 
   const email = requireAdmin(request);
   const patch = request.data && request.data.config || {};
   const allowed = Object.keys(CONVERSION_DEFAULTS);
-  const clean = {}; for (const k of allowed) if (patch[k] !== undefined) clean[k] = patch[k];
-  await db.collection("config").doc("conversion").set({ ...clean, updatedAt: Date.now(), updatedBy: email }, { merge: true });
+  const clean = {};
+  for (const k of allowed) {
+    if (patch[k] === undefined) continue;
+    const def = CONVERSION_DEFAULTS[k];
+    if (typeof def === "number") { const n = Number(patch[k]); if (!Number.isFinite(n)) throw new HttpsError("invalid-argument", k); clean[k] = n; }
+    else if (typeof def === "boolean") clean[k] = !!patch[k];
+    else if (Array.isArray(def)) { if (!Array.isArray(patch[k])) throw new HttpsError("invalid-argument", k); clean[k] = patch[k].map((x) => typeof def[0] === "number" ? Number(x) : String(x)).filter((x) => typeof x === "number" ? Number.isFinite(x) : x); }
+    else clean[k] = String(patch[k]).slice(0, 400);
+  }
+  await db.collection("config").doc("conversion").set({ ...clean, updatedAt: Date.now(), updatedBy: request.auth.uid }, { merge: true });
   return { ok: true, config: await conversionConfig() };
 });
 
@@ -2321,7 +2339,7 @@ exports.adminSetPackMeta = onCall({ timeoutSeconds: 30, memory: "256MiB" }, asyn
   const patch = {};
   if (request.data.reviewed !== undefined) patch.reviewed = !!request.data.reviewed;
   if (request.data.launchAt !== undefined) patch.launchAt = request.data.launchAt ? Number(request.data.launchAt) : admin.firestore.FieldValue.delete();
-  await db.collection("packs").doc(id).set({ ...patch, updatedAt: Date.now(), updatedBy: email }, { merge: true });
+  await db.collection("packs").doc(id).set({ ...patch, updatedAt: Date.now(), updatedBy: request.auth.uid }, { merge: true });
   return { ok: true };
 });
 // A scheduled launch fires the same path as the manual switch.
@@ -2345,7 +2363,7 @@ exports.adminGiftHousehold = onCall({ timeoutSeconds: 30, memory: "256MiB" }, as
   const ref = db.collection("households").doc(hhID); const h = await ref.get(); if (!h.exists) throw new HttpsError("not-found", "household");
   const now = Date.now() / 1000; const base = Math.max(Number(h.data().premiumUntil || 0), now);
   const until = base + days * 86400;
-  await ref.set({ premiumUntil: until, premiumSource: "gift", giftStartedAt: h.data().giftStartedAt || now, giftBy: email }, { merge: true });
+  await ref.set({ premiumUntil: until, premiumSource: "gift", giftUntil: until, giftStartedAt: h.data().giftStartedAt || now, giftBy: request.auth.uid }, { merge: true });
   console.log("[adminGiftHousehold]", email, hhID, "+", days, "days");
   return { ok: true, premiumUntil: until };
 });
@@ -2374,16 +2392,16 @@ async function runConversionEngine() {
     const snap = await ref.get(); if (!snap.exists) continue;
     const hh = snap.data() || {};
     const premiumUntil = Number(hh.premiumUntil || 0);
-    const kids = (h.kids || []).map((id) => ({ id, ...(journey.children[id] || {}) }));
+    const kids = (h.kids || []).map((id) => ({ id, ...((journey.children || {})[id] || {}) }));
     const star = kids.filter((k) => k.everQuestions > 0).sort((a, b) => b.questions30 - a.questions30)[0];
     const name = star ? star.name : "הילד"; const girl = star && star.gender === "girl";
     const totalQ = kids.reduce((s, k) => s + (k.questions30 || 0), 0);
     const fav = star && star.favorite;
     const vars = { "שם": name, "שאלות": totalQ, "ימים": cfg.giftDays, "עולם אהוב": fav ? fav.label : "העולם האהוב", "חזרות": fav ? fav.days : 0, "מחיר חודשי בשנתי": "₪16.60" };
     // 1. activation → gift (only families that never had a gift and are not paying)
-    if (h.activated && premiumUntil <= now && !hh.giftStartedAt && !hh.giftEndedAt) {
+    if (h.activated && premiumUntil <= now && !hh.giftStartedAt && !hh.giftEndedAt && !hh.purchasedAt && hh.premiumSource !== "paid") {
       const until = now + cfg.giftDays * 86400;
-      await ref.set({ premiumUntil: until, premiumSource: "gift", giftStartedAt: now, giftDays: cfg.giftDays }, { merge: true });
+      await ref.set({ premiumUntil: until, premiumSource: "gift", giftUntil: until, giftStartedAt: now, giftDays: cfg.giftDays }, { merge: true });
       gifted += 1;
       if (await onceKey(`gift_start_${hhID}`)) {
         const tokens = await tokensForHousehold(hhID);
@@ -2392,16 +2410,18 @@ async function runConversionEngine() {
       continue;
     }
     // 2. during a gift: the day-based pushes (parents only), at the configured hour
-    if (hh.premiumSource === "gift" && premiumUntil > now && hh.giftStartedAt && hour === Number(cfg.giftPushHour || 17)) {
+    if (hh.premiumSource === "gift" && premiumUntil > now && hh.giftStartedAt && hour >= Number(cfg.giftPushHour || 17)) {
       const day = Math.floor((now - Number(hh.giftStartedAt)) / 86400) + 1;
       const daysLeft = Math.ceil((premiumUntil - now) / 86400);
-      if ((cfg.giftPushDays || []).includes(day) && await onceKey(`gift_day${day}_${hhID}`)) {
+      const dedup = db.collection("pushDedup").doc(`gift_day${day}_${hhID}`);
+      if ((cfg.giftPushDays || []).includes(day) && !(await dedup.get()).exists) {
         let msg = null;
         if (daysLeft <= 1) msg = { title: `היום מסתיימת מתנת טופי+ של ${name}`, body: `${name} ${girl ? "תמשיך" : "ימשיך"} ללמוד ולהרוויח זמן בחינם כרגיל. כדי להשאיר את ${fav ? fav.label.replace(/^\S+\s/, "") + " ו" : ""}שאר העולמות פתוחים: המשיכו עם טופי+.` };
         else if (daysLeft <= 2) msg = { title: `⏰ נשארו יומיים לטופי+ של ${name}`, body: fill(cfg.copyTwoDays, vars).replace(/^⏰[^·]*·\s*/, "") };
         else if (day <= 5) msg = fav ? { title: `❤️ נראה ש${name} ${girl ? "מצאה" : "מצא"} משהו ש${girl ? "היא אוהבת" : "הוא אוהב"}`, body: `${fav.label} הוא המקום ש${girl ? "היא חוזרת" : "הוא חוזר"} אליו הכי הרבה בטופי: ${fav.days} ימים, ${fav.questions} שאלות.` } : null;
         else msg = { title: `${name} ${girl ? "גילתה" : "גילה"} ${kids.reduce((s, k) => s + Object.keys(k.topicsToday || {}).length, 0) || "כמה"} עולמות 🌎`, body: `${totalQ} שאלות בחודש האחרון${fav ? " · האהוב: " + fav.label : ""}. המתנה מסתיימת ב${ilWeekday(premiumUntil)}. השאירו את כל העולמות פתוחים.` };
         if (msg) { const tokens = await tokensForHousehold(hhID); if (tokens.length) { await send(tokens, msg, { type: "gift-day", householdID: hhID, day: String(day) }); pushed += 1; } }
+        await dedup.set({ at: Date.now() });   // after the send, so a failed run retries next hour
       }
     }
     // 3. gift ended without a purchase → back to free (the app sees premiumUntil in the past)
@@ -2412,7 +2432,7 @@ async function runConversionEngine() {
   console.log("[conversionEngine] gifted", gifted, "pushed", pushed, "ended", ended);
   return { gifted, pushed, ended };
 }
-exports.conversionEngine = onSchedule({ schedule: "every 60 minutes", timeZone: "Asia/Jerusalem", timeoutSeconds: 540, memory: "1GiB" }, async () => { await computeJourney(); await runConversionEngine(); });
+exports.conversionEngine = onSchedule({ schedule: "0 * * * *", timeZone: "Asia/Jerusalem", timeoutSeconds: 540, memory: "1GiB" }, async () => { await computeJourney(); await runConversionEngine(); });
 exports.adminRunConversionEngine = onCall({ timeoutSeconds: 300, memory: "1GiB" }, async (request) => { requireAdmin(request); await computeJourney(); return await runConversionEngine(); });
 
 // A real purchase lands as a NEW premiumUntil written by the parent's device
@@ -2425,13 +2445,13 @@ exports.onHouseholdPremiumWritten = onDocumentWritten("households/{hid}", async 
   const b = Number(before && before.premiumUntil || 0), a = Number(after.premiumUntil || 0);
   if (a <= b) return;                                       // not a new/longer entitlement
   const now = Date.now() / 1000;
-  const giftEnd = Number(after.giftStartedAt || 0) + Number(after.giftDays || 14) * 86400;
+  const giftEnd = Number(after.giftUntil || 0) || (Number(after.giftStartedAt || 0) + Number(after.giftDays || 14) * 86400);
   const wasGift = after.premiumSource === "gift";
-  // A gift grant itself is written by the engine (source gift) — skip it; a paid
-  // entitlement extends well beyond the gift window (≥ 25 days from now).
-  if (wasGift && a <= giftEnd + 86400) return;
-  if (a < now + 25 * 86400) return;
-  if (after.premiumSource === "paid" && after.purchasedAt) return;
+  // A gift grant/extension is written by the server (giftUntil) — skip it; a paid
+  // entitlement reaches more than a week past whatever the gift covered.
+  if (wasGift && a <= giftEnd + 60) return;
+  if (a - Math.max(now, giftEnd) < 8 * 86400) return;
+  if (after.premiumSource === "paid" && after.purchasedAt) { await event.data.after.ref.set({ renewedAt: now }, { merge: true }); return; }
   await event.data.after.ref.set({ premiumSource: "paid", purchasedAt: now, purchaseSource: after.lastPaywallSource || (after.packRequestedFlag ? "child_request" : "card"),
     ...(wasGift ? { giftConvertedAt: now } : {}) }, { merge: true });
   console.log("[premium] paid conversion", event.params.hid, wasGift ? "from gift" : "direct");

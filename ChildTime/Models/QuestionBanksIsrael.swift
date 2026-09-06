@@ -58,7 +58,7 @@ enum QuestionBanksIsrael {
         BankQuestion(prompt: "🧭\nבְּאֵיזֶה צַד שֶׁל יִשְׂרָאֵל נִמְצָא יַם הַמֶּלַח?", correctAnswer: "בַּמִּזְרָח", distractors: ["בַּמַּעֲרָב", "בַּצָּפוֹן", "בַּדָּרוֹם"], tier: .medium, grades: 3...5),
         BankQuestion(prompt: "🏞️\nאֵיךְ קוֹרְאִים לַנָּהָר שֶׁזּוֹרֵם מֵהַכִּנֶּרֶת אֶל יַם הַמֶּלַח?", correctAnswer: "הַיַּרְדֵּן", distractors: ["הַיַּרְקוֹן", "הַקִּישׁוֹן", "הַנִּילוּס"], tier: .medium, grades: 3...5),
         BankQuestion(prompt: "📉\nאֵיזֶה מָקוֹם בְּיִשְׂרָאֵל הוּא הַנָּמוּךְ בְּיוֹתֵר בָּעוֹלָם עַל פְּנֵי הַיַּבָּשָׁה?", correctAnswer: "יַם הַמֶּלַח", distractors: ["הַכִּנֶּרֶת", "הַנֶּגֶב", "אֵילַת"], tier: .medium, grades: 3...5),
-        BankQuestion(prompt: "🏔️\nמַהוּ הָהָר הַגָּבוֹהַּ בְּיוֹתֵר בְּיִשְׂרָאֵל?", correctAnswer: "הַחֶרְמוֹן", distractors: ["הַכַּרְמֶל", "הַר מֵירוֹן", "הַר תָּבוֹר"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🏔️\nמַהוּ הָהָר הַגָּבוֹהַּ בְּיוֹתֵר בְּיִשְׂרָאֵל?", correctAnswer: "הַחֶרְמוֹן", distractors: ["הַכַּרְמֶל", "הַר הַגִּלְבֹּעַ", "הַר תָּבוֹר"], tier: .medium, grades: 3...5),
         BankQuestion(prompt: "🌍\nבְּאֵיזוֹ יַבֶּשֶׁת נִמְצֵאת יִשְׂרָאֵל?", correctAnswer: "אַסְיָה", distractors: ["אֵירוֹפָּה", "אַפְרִיקָה", "אָמֵרִיקָה"], tier: .medium, grades: 3...5),
         BankQuestion(prompt: "🍯\nאֶרֶץ יִשְׂרָאֵל מְכֻנָּה \"אֶרֶץ זָבַת…\" — מָה?", correctAnswer: "חָלָב וּדְבַשׁ", distractors: ["מַיִם וְיַיִן", "לֶחֶם וּמֶלַח", "שֶׁמֶן וְזֵיתִים"], tier: .medium, grades: 3...5),
 

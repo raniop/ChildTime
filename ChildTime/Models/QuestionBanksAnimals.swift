@@ -49,7 +49,7 @@ enum QuestionBanksAnimals {
         BankQuestion(prompt: "🦘\nאֵיפֹה נוֹשֵׂאת אִמָּא קֶנְגּוּרוּ אֶת הַגּוּר שֶׁלָּהּ?", correctAnswer: "בְּכִיס עַל הַבֶּטֶן", distractors: ["עַל הַגַּב", "בַּפֶּה", "בַּזָּנָב"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "🐟\nבְּעֶזְרַת מָה נוֹשְׁמִים הַדָּגִים מִתַּחַת לַמַּיִם?", correctAnswer: "זִימִים", distractors: ["רֵאוֹת", "אַף", "סְנַפִּירִים"], tier: .medium, grades: 2...4),
         BankQuestion(prompt: "🦒\nלָמָּה יֵשׁ לַגִּ'ירָפָה צַוָּאר אָרֹךְ?", correctAnswer: "כְּדֵי לְהַגִּיעַ לָעָלִים בְּרֹאשׁ הָעֵצִים", distractors: ["כְּדֵי לִשְׂחוֹת מַהֵר", "כְּדֵי לָעוּף", "כְּדֵי לַחְפֹּר בָּאֲדָמָה"], tier: .medium, grades: 1...3),
-        BankQuestion(prompt: "🦎\nאֵיזוֹ חַיָּה מְשַׁנָּה אֶת הַצֶּבַע שֶׁל הָעוֹר שֶׁלָּהּ?", correctAnswer: "זִקִּית", distractors: ["צָב", "נָחָשׁ", "צְפַרְדֵּעַ"], tier: .medium, grades: 1...3),
+        BankQuestion(prompt: "🦎\nאֵיזוֹ חַיָּה מְשַׁנָּה אֶת הַצֶּבַע שֶׁל הָעוֹר שֶׁלָּהּ?", correctAnswer: "זִקִּית", distractors: ["צָב", "נָחָשׁ", "אַרְנָב"], tier: .medium, grades: 1...3),
 
         // ── קְבוּצוֹת: יוֹנְקִים, עוֹפוֹת, זוֹחֲלִים, דָּגִים, חֲרָקִים ──
         BankQuestion(prompt: "🐧\nאֵיזוֹ צִפּוֹר לֹא יוֹדַעַת לָעוּף, אֲבָל שׂוֹחָה מְצֻיָּן?", correctAnswer: "פִּינְגְּוִין", distractors: ["יוֹנָה", "נֶשֶׁר", "דְּרוֹר"], tier: .easy, grades: 0...2),

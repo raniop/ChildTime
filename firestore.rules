@@ -60,8 +60,13 @@ service cloud.firestore {
           // paid premium.
           && (request.resource.data.get('premiumUntil', 0) == resource.data.get('premiumUntil', 0)
               || request.auth.token.firebase.sign_in_provider != 'anonymous')
+          // Server-only journey fields: the conversion engine and the admin write these.
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(
+               ['premiumSource', 'giftStartedAt', 'giftEndedAt', 'giftDays', 'giftUntil', 'purchasedAt', 'purchaseSource', 'giftConvertedAt', 'giftBy', 'renewedAt'])
         ) ||
-        request.resource.data.parentUIDs == resource.data.parentUIDs.concat([request.auth.uid])
+        // A join may touch ONLY parentUIDs.
+        (request.resource.data.parentUIDs == resource.data.parentUIDs.concat([request.auth.uid])
+         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['parentUIDs']))
       );
       allow delete: if signedIn() && request.auth.uid in resource.data.parentUIDs;
 

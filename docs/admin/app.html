@@ -20,18 +20,20 @@
   .main{padding:18px 22px;max-width:1160px}
   .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
   .top h3{font:800 18px Rubik,sans-serif;margin:0} .stamp{font-size:12px;color:var(--muted)}
-  .filters{display:flex;gap:6px;flex-wrap:wrap} .chip{border:1px solid var(--line);border-radius:99px;padding:5px 11px;font:700 12.5px Rubik,sans-serif;color:var(--muted);background:var(--card);cursor:pointer} .chip.on{background:var(--indigo);color:#fff;border-color:transparent}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center} .chip{border:1px solid var(--line);border-radius:99px;padding:5px 11px;font:700 12.5px Rubik,sans-serif;color:var(--muted);background:var(--card);cursor:pointer} .chip.on{background:var(--indigo);color:#fff;border-color:transparent}
   .chip.mint{background:rgba(14,158,114,.15);color:var(--good);border-color:transparent;cursor:default} .chip.gold{background:rgba(245,184,0,.18);color:#7a5a00;border-color:transparent;cursor:default} .chip.pink{background:rgba(255,107,157,.18);color:#a1244e;border-color:transparent;cursor:default} .chip.dim{color:var(--muted);cursor:default}
+  .chip.search{padding:0} .chip.search input{font-family:inherit;font-size:12.5px;font-weight:700;border:0;background:transparent;color:var(--ink);padding:5px 11px;width:150px;outline:none}
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
   .kpi{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px} .kpi b{display:block;font:900 26px Rubik,sans-serif;line-height:1.1} .kpi span{font-size:12px;color:var(--muted)} .kpi i{font-style:normal;font-size:12px;font-weight:800;color:var(--good)} .kpi i.d{color:var(--warn)}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px} @media (max-width:900px){.grid2{grid-template-columns:1fr}.shell{grid-template-columns:1fr}.side{position:static;height:auto}}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:900px){.grid2{grid-template-columns:1fr}.shell{grid-template-columns:1fr}.side{position:static;height:auto;padding:12px}.nav{display:flex;gap:4px;overflow-x:auto}.nav a{white-space:nowrap}.nav small{display:none}.side .who{display:none}}
   .card{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
   .card h4{font:800 13.5px Rubik,sans-serif;margin:0 0 8px;color:var(--muted)}
   table{width:100%;border-collapse:collapse;font-size:13px} th{font:700 12px Rubik,sans-serif;color:var(--muted);text-align:right;padding:7px 9px;border-bottom:1px solid var(--line)} td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top} tr:last-child td{border-bottom:0}
   .tblwrap{overflow-x:auto}
   .bar{height:10px;border-radius:5px;background:linear-gradient(90deg,#7A5CFF,#3E8BF0)} .barw{background:var(--line);border-radius:5px}
   .spark{display:flex;align-items:flex-end;gap:2px;height:38px} .spark i{flex:1;background:#7A5CFF;border-radius:2px 2px 0 0;opacity:.85;min-height:2px}
-  .btn{display:inline-block;border-radius:10px;padding:8px 14px;font:800 13px Rubik,sans-serif;background:var(--indigo);color:#fff;border:0;cursor:pointer;font-family:Rubik,sans-serif} .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)} .btn.danger{background:rgba(255,107,157,.2);color:#a1244e} .btn:disabled{opacity:.5}
+  .btn{display:inline-block;border-radius:10px;padding:8px 14px;font:800 13px Rubik,sans-serif;background:var(--indigo);color:#fff;border:0;cursor:pointer;font-family:Rubik,sans-serif;text-decoration:none} .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)} .btn.danger{background:rgba(255,107,157,.2);color:#a1244e} .btn:disabled{opacity:.5}
   .sw{display:inline-block;width:38px;height:22px;border-radius:99px;background:var(--line);position:relative;vertical-align:middle;cursor:pointer} .sw::after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s} .sw.on{background:var(--good)} .sw.on::after{inset-inline-start:18px}
   .money{color:var(--good);font-weight:800}
   .fam{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
@@ -40,9 +42,10 @@
   .fam .acts{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
   .state{font:800 11px Rubik,sans-serif;border-radius:99px;padding:3px 9px;background:var(--soft);border:1px solid var(--line)}
   .funnel .f{display:grid;grid-template-columns:170px 1fr 60px 50px;gap:8px;align-items:center;font-size:12.5px;margin:4px 0} .funnel .f .n{font:800 12.5px Rubik,sans-serif;text-align:left} .funnel .f .p{color:var(--muted);text-align:left}
+  .src div{display:grid;grid-template-columns:150px 1fr 50px;gap:8px;align-items:center;font-size:13px;margin:4px 0} .src .bar{height:14px;border-radius:5px;background:#FFB840}
   .knobs{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
   .knob{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px} .knob label{display:block;font:700 12px Rubik,sans-serif;color:var(--muted);margin-bottom:4px} .knob b{font-family:Rubik,sans-serif}
-  .knob input,.knob select,textarea{font-family:inherit;font-size:13px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:5px 8px;width:100%} .knob input[type=number]{width:70px;display:inline-block} textarea{min-height:60px;margin-top:4px}
+  .knob input,.knob select,textarea{font-family:inherit;font-size:13px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:5px 8px;width:100%} .knob input[type=number]{width:64px;display:inline-block} textarea{min-height:60px;margin-top:4px}
   .q{font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);margin-bottom:6px} .q b{font-family:Rubik,sans-serif} .q .m{color:var(--muted);font-size:12px} .q u{cursor:pointer;color:var(--indigo);margin-inline-end:8px}
   .feed div.i{display:grid;grid-template-columns:52px 1fr;gap:8px;font-size:12.5px;padding:6px 0;border-bottom:1px dashed var(--line)} .feed span{color:var(--muted);font-size:11.5px}
   .empty{color:var(--muted);font-size:13px;padding:8px 0}
@@ -51,7 +54,6 @@
   .msg{margin-top:16px;font-size:13px;color:var(--muted);min-height:20px} .msg.err{color:#a1244e;font-weight:700}
   .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--indigo);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-2px;margin-inline-end:6px} @keyframes sp{to{transform:rotate(360deg)}}
   .toast{position:fixed;bottom:22px;inset-inline-start:50%;transform:translateX(-50%);background:#1b1440;color:#fff;border-radius:999px;padding:10px 18px;font-weight:800;font-size:13.5px;z-index:50}
-  .tag{font:800 10px Rubik,sans-serif;border-radius:99px;padding:1px 7px;background:rgba(14,158,114,.15);color:var(--good)}
 </style>
 </head>
 <body>
@@ -77,14 +79,21 @@
 
 <script type="module">
 const CONFIG = { firebase: { apiKey: "AIzaSyCjZFUZFXwsbNrDA8Icw_ZZ-bPGARCLMLI", authDomain: "childtime-86e98.firebaseapp.com", projectId: "childtime-86e98" }, adminEmails: ["ranioph@gmail.com", "amitgolans@gmail.com"] };
-const PACKS = { soccer:{name:"עולם הכדורגל",emoji:"⚽"}, dinosaurs:{name:"דינוזאורים",emoji:"🦖"}, space:{name:"חלל וכוכבים",emoji:"🚀"}, animals:{name:"עולם החיות",emoji:"🐾"}, sea:{name:"מעמקי הים",emoji:"🌊"}, gifted:{name:"הכנה למחוננים",emoji:"🧠"}, food:{name:"מטבח ומדע של אוכל",emoji:"🍳"}, israel:{name:"ישראל שלי",emoji:"🏛️"}, music:{name:"מוזיקה",emoji:"🎵"}, body:{name:"גוף האדם",emoji:"🧍"}, vehicles:{name:"כלי רכב ותחבורה",emoji:"🚗"}, flags:{name:"דגלים ומדינות",emoji:"🌍"} };
-const PACK_Q = { soccer:82, dinosaurs:70, space:70, animals:70, sea:70, gifted:70, food:70, israel:70, music:70, body:70, vehicles:70, flags:70 };
+const PACKS = { soccer:{name:"עולם הכדורגל",emoji:"⚽",q:82}, dinosaurs:{name:"דינוזאורים",emoji:"🦖",q:70}, space:{name:"חלל וכוכבים",emoji:"🚀",q:70}, animals:{name:"עולם החיות",emoji:"🐾",q:70}, sea:{name:"מעמקי הים",emoji:"🌊",q:70}, gifted:{name:"הכנה למחוננים",emoji:"🧠",q:70}, food:{name:"מטבח ומדע של אוכל",emoji:"🍳",q:70}, israel:{name:"ישראל שלי",emoji:"🏛️",q:70}, music:{name:"מוזיקה",emoji:"🎵",q:70}, body:{name:"גוף האדם",emoji:"🧍",q:70}, vehicles:{name:"כלי רכב ותחבורה",emoji:"🚗",q:70}, flags:{name:"דגלים ומדינות",emoji:"🌍",q:70} };
+const PACK_PRICE = 14.9;
 const BASE = { math:"🧮 ממלכת המתמטיקה", english:"🔤 ארץ אנגלית", hebrew:"✍️ ארץ העברית", logic:"🧩 חידות הלוגיקה", science:"🔬 מעבדת המדעים", history:"🏛️ מוזיאון ההיסטוריה", geography:"🌍 מסע סביב העולם", money:"💰 שוק הכסף", reading:"📖 יער הסיפורים" };
+const TOPIC = { math:"מתמטיקה", english:"אנגלית", hebrew:"עברית", logic:"לוגיקה", science:"מדעים", history:"היסטוריה", geography:"גיאוגרפיה", money:"חינוך פיננסי", reading:"הבנת הנקרא", ...Object.fromEntries(Object.entries(PACKS).map(([k, p]) => [k, p.name])) };
+const SOURCE = { child_request:"בקשה של ילד", expiring_push:"פוש \"המתנה מסתיימת\"", paywall:"הפייוול האישי", new_world:"עולם חדש", card:"ישר מהכרטיס" };
 const STATE = { free_new:["חינם · לפני הפעלה",""], free_activated:["חינם · מופעלת",""], gift:["🎁 במתנה","mint"], gift_expiring:["מתנה מסתיימת","pink"], plus:["👑 טופי+","gold"], returned:["חזרו לחינם",""], inactive:["לא פעילה",""] };
 const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
-const fmt = (n) => Number(n || 0).toLocaleString("he-IL");
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+const fmt = (n) => typeof n === "number" ? n.toLocaleString("he-IL") : (n ?? "—");
 const when = (ms) => ms ? new Date(ms).toLocaleString("he-IL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+const dateShort = (s) => s ? new Date(s * 1000).toLocaleDateString("he-IL", { day: "numeric", month: "numeric", year: "2-digit" }) : "";
+const days = (n) => n <= 0 ? "היום" : n === 1 ? "מחר" : n === 2 ? "בעוד יומיים" : `בעוד ${n} ימים`;
+const daysLeft = (n) => n === 1 ? "עוד יום" : n === 2 ? "עוד יומיים" : `עוד ${n} ימים`;
+const shortMail = (e) => e ? e.replace(/@.*/, "@…") : "";
+const gradeName = (g) => ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"][g] ?? g;
 const toast = (t) => { const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); };
 
 const [{initializeApp}, auth, fns] = await Promise.all([
@@ -107,43 +116,50 @@ auth.onAuthStateChanged(authI, async (user) => {
   await loadJourney(false); route();
 });
 $("refreshBtn").onclick = async () => { $("stamp").innerHTML = '<span class="spin"></span>'; await loadJourney(true); route(); toast("עודכן"); };
+const ov = () => Object.assign({ activeFamilies30: 0, childrenToday: 0, questionsToday: 0, accuracyToday: 0, minutesToday: 0, mrr: 0, premiumFamilies: 0, yearlyShare: 0, activatedToPaid30: 0, openReports: 0, openFeedback: 0, packsOn: 0, packsReady: Object.keys(PACKS).length, activeSeries: [], worldsToday: [] }, (J && J.overview) || {});
 async function loadJourney(recompute) {
   try { J = await call("adminJourney", { recompute }); } catch (e) { J = null; toast("טעינה נכשלה: " + (e.message || e)); }
-  if (J) { $("stamp").textContent = "עודכן " + when(J.computedAt); const st = J.states || {};
-    $("navFamilies").textContent = fmt(J.overview.activeFamilies30) + " פעילות"; $("navContent").textContent = J.overview.openReports ? J.overview.openReports + " דיווחים חדשים" : ""; }
+  if (J) { const o = ov(); $("stamp").textContent = "עודכן " + when(J.computedAt);
+    $("navFamilies").textContent = fmt(o.activeFamilies30) + " פעילות";
+    $("navWorlds").textContent = `${o.packsOn} דלוקים · ${o.packsReady} מוכנים`;
+    $("navContent").textContent = o.openReports ? o.openReports + " דיווחים חדשים" : "";
+    $("navSupport").textContent = o.openFeedback ? o.openFeedback + " פתוחות" : ""; }
 }
 window.addEventListener("hashchange", route);
+const PAGES = { dashboard, families, funnel, campaigns, worlds, content, support, settings };
 function route() {
-  const p = (location.hash || "#dashboard").slice(1);
+  let p = (location.hash || "#dashboard").slice(1); if (!PAGES[p]) p = "dashboard";
   document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", a.dataset.p === p));
-  ({ dashboard, families, funnel, campaigns, worlds, content, support, settings }[p] || dashboard)();
+  PAGES[p]();
 }
-const kpi = (v, l, delta) => `<div class="kpi"><b>${v}</b><span>${l}</span> ${delta ? `<i class="${delta.startsWith("-") ? "d" : ""}">${delta}</i>` : ""}</div>`;
-const funnelRow = (label, n, base, prev) => `<div class="f"><span>${label}</span><div class="barw"><div class="bar" style="width:${base ? Math.max(1, Math.round(100 * n / base)) : 0}%"></div></div><span class="n">${fmt(n)}</span><span class="p">${prev ? Math.round(100 * n / prev) + "%" : ""}</span></div>`;
+const kpi = (v, l, delta, cls) => `<div class="kpi"><b>${v}</b><span>${l}</span> ${delta ? `<i class="${cls || ""}">${delta}</i>` : ""}</div>`;
+const funnelRow = (label, n, base, prev) => `<div class="f"><span>${label}</span><div class="barw"><div class="bar" style="width:${typeof n === "number" && base ? Math.max(1, Math.round(100 * n / base)) : 0}%"></div></div><span class="n">${fmt(n)}</span><span class="p">${typeof n === "number" && prev ? Math.round(100 * n / prev) + "%" : ""}</span></div>`;
 
 // ---------------- 1 · dashboard ----------------
 async function dashboard() {
   if (!J) return $("main").innerHTML = '<div class="empty">אין נתונים.</div>';
-  const o = J.overview, st = J.states, f = J.funnel; const total = Object.values(st).reduce((a, b) => a + b, 0) || 1;
-  const today = new Date().toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "numeric" });
+  const o = ov(), st = J.states || {}, series = o.activeSeries.length ? o.activeSeries : [0];
+  const free = (st.free_new || 0) + (st.free_activated || 0) + (st.inactive || 0);
+  const total = free + (st.gift || 0) + (st.gift_expiring || 0) + (st.plus || 0) + (st.returned || 0) || 1;
+  const d = new Date(); const today = d.toLocaleDateString("he-IL", { weekday: "long" }).replace(/^יום /, "") + " " + d.getDate() + "." + (d.getMonth() + 1);
   $("main").innerHTML = `
-    <div class="top"><h3>היום, ${today}</h3><span class="stamp">חושב כל שעה · <u id="recompute" style="cursor:pointer">חשב עכשיו</u></span></div>
+    <div class="top"><h3>היום, ${today}</h3><div class="filters"><span class="chip on">היום</span><span class="chip dim">7 ימים</span><span class="chip dim">30 ימים</span><span class="stamp">מחושב כל שעה · <u id="recompute" style="cursor:pointer">חשב עכשיו</u></span></div></div>
     <div class="kpis">
       ${kpi(fmt(o.activeFamilies30), "משפחות פעילות (30 יום)")}
       ${kpi(fmt(o.childrenToday), "ילדים שיחקו היום")}
       ${kpi(fmt(o.questionsToday), "שאלות היום · " + o.accuracyToday + "% נכונות")}
       ${kpi(fmt(o.minutesToday), "דקות משחק שהורווחו היום")}
-      ${kpi('<span class="money">₪' + fmt(o.mrr) + '</span>', "MRR (הערכה לפי מועדי חידוש)")}
+      ${kpi('<span class="money" title="הערכה לפי מועדי החידוש">₪' + fmt(o.mrr) + '</span>', "MRR")}
       ${kpi(fmt(o.premiumFamilies), "משפחות טופי+ · " + o.yearlyShare + "% שנתי")}
       ${kpi(o.activatedToPaid30 + "%", "מופעלות → משלמות (30 יום)")}
-      ${kpi(fmt(o.openReports), "דיווחי שאלות פתוחים", o.openReports ? "טפל" : "")}
+      ${kpi(fmt(o.openReports), "דיווחי שאלות פתוחים", o.openReports ? "טפל" : "", "d")}
     </div>
     <div class="grid2">
-      <div class="card"><h4>ילדים פעילים ב־14 הימים האחרונים</h4><div class="spark">${o.activeSeries.map((v) => `<i title="${v}" style="height:${Math.max(4, Math.round(100 * v / Math.max(1, ...o.activeSeries)))}%"></i>`).join("")}</div><div class="stamp" style="margin-top:4px">שיא: ${Math.max(...o.activeSeries)} · היום ${o.activeSeries.at(-1)} · ממוצע ${Math.round(o.activeSeries.reduce((a, b) => a + b, 0) / o.activeSeries.length)}</div></div>
+      <div class="card"><h4>ילדים פעילים ב־14 הימים האחרונים</h4><div class="spark">${series.map((v) => `<i title="${v}" style="height:${Math.max(4, Math.round(100 * v / Math.max(1, ...series)))}%"></i>`).join("")}</div><div class="stamp" style="margin-top:4px">שיא: ${Math.max(...series)} · היום ${series.at(-1)} · ממוצע ${Math.round(series.reduce((a, b) => a + b, 0) / series.length)}</div></div>
       <div class="card"><h4>איפה המשפחות במסע</h4><div class="funnel">
-        ${funnelRow("חינם, לפני הפעלה", st.free_new, total)}${funnelRow("חינם, מופעלות", st.free_activated, total)}${funnelRow("במתנה", st.gift, total)}${funnelRow("מתנה מסתיימת (≤3 ימים)", st.gift_expiring, total)}${funnelRow("טופי+", st.plus, total)}${funnelRow("חזרו לחינם", st.returned, total)}${funnelRow("לא פעילות (14 יום)", st.inactive, total)}
+        ${funnelRow("חינם, לפני הפעלה", free, total, total)}${funnelRow("במתנה", st.gift || 0, total, total)}${funnelRow("מתנה מסתיימת (≤3 ימים)", st.gift_expiring || 0, total, total)}${funnelRow("טופי+", st.plus || 0, total, total)}${funnelRow("חזרו לחינם", st.returned || 0, total, total)}
       </div></div>
-      <div class="card"><h4>עולמות היום</h4><div class="tblwrap"><table><tr><th>עולם</th><th>שאלות</th><th>נכונות</th><th>ילדים</th></tr>${o.worldsToday.length ? o.worldsToday.map((w) => `<tr><td>${esc(w.label)}${PACKS[w.topic] ? ' <span class="tag">חדש</span>' : ""}</td><td>${fmt(w.q)}</td><td>${w.accuracy}%</td><td>${w.kids}</td></tr>`).join("") : '<tr><td colspan="4" class="empty">עוד לא שיחקו היום</td></tr>'}</table></div></div>
+      <div class="card"><h4>עולמות היום</h4><div class="tblwrap"><table><tr><th>עולם</th><th>שאלות</th><th>נכונות</th><th>ילדים</th></tr>${o.worldsToday.length ? o.worldsToday.map((w) => `<tr><td>${esc(w.label)}${PACKS[w.topic] ? ' <span class="chip mint" style="padding:1px 7px;font-size:10px">חדש</span>' : ""}</td><td>${fmt(w.q)}</td><td>${w.accuracy}%</td><td>${w.kids}</td></tr>`).join("") : '<tr><td colspan="4" class="empty">עוד לא שיחקו היום</td></tr>'}</table></div></div>
       <div class="card"><h4>קורה עכשיו</h4><div class="feed" id="feed"><span class="spin"></span></div></div>
     </div>`;
   $("recompute").onclick = async () => { $("recompute").innerHTML = '<span class="spin"></span>'; await loadJourney(true); dashboard(); };
@@ -151,108 +167,133 @@ async function dashboard() {
 }
 
 // ---------------- 2 · families ----------------
-let famFilter = "all";
+let famFilter = "all", famQuery = "";
+const FILTERS = [["all", "הכל"], ["gift", "במתנה"], ["gift_expiring", "מסתיימת"], ["plus", "טופי+"], ["returned", "חזרו לחינם"], ["inactive", "לא פעילות"]];
 async function families() {
-  $("main").innerHTML = '<div class="empty"><span class="spin"></span> טוען משפחות…</div>';
-  if (!FAM) { try { FAM = await call("adminFamiliesOverview"); } catch (e) { return $("main").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; } }
-  const fams = (FAM.families || []).map((f) => ({ ...f, j: (J && J.households[f.householdID || f.id]) || {} }));
-  const counts = { all: fams.length }; for (const f of fams) counts[f.j.state || "free_new"] = (counts[f.j.state || "free_new"] || 0) + 1;
-  const chips = [["all", "הכל"], ["free_new", "לפני הפעלה"], ["free_activated", "מופעלות"], ["gift", "במתנה"], ["gift_expiring", "מסתיימת"], ["plus", "טופי+"], ["returned", "חזרו לחינם"], ["inactive", "לא פעילות"]];
-  const shown = fams.filter((f) => famFilter === "all" || (f.j.state || "free_new") === famFilter).sort((a, b) => (b.j.lastActive || "").localeCompare(a.j.lastActive || ""));
+  if (!FAM) { $("main").innerHTML = '<div class="empty"><span class="spin"></span> טוען משפחות…</div>'; try { FAM = await call("adminFamiliesOverview"); } catch (e) { return $("main").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; } }
+  const fams = (FAM.families || []).map((f) => ({ ...f, hh: f.fullId || f.householdID || f.id, j: (J && J.households && J.households[f.fullId || f.householdID || f.id]) || {} }));
+  const q = famQuery.trim();
+  const hay = (f) => [f.familyName, f.label, f.name, ...(f.parents || []).map((p) => (p.email || "") + " " + (p.name || "")), ...(f.children || []).map((k) => k.name)].join(" ");
+  const shown = fams.filter((f) => famFilter === "all" || (f.j.state || "free_new") === famFilter).filter((f) => !q || hay(f).includes(q)).sort((a, b) => (b.j.lastActive || "").localeCompare(a.j.lastActive || ""));
   $("main").innerHTML = `
-    <div class="top"><h3>משפחות · ${fmt(fams.length)}</h3><div class="filters">${chips.map(([k, l]) => `<span class="chip ${famFilter === k ? "on" : ""}" data-f="${k}">${l}${counts[k] ? " · " + counts[k] : ""}</span>`).join("")}<input id="famSearch" placeholder="🔎 חיפוש" style="font-family:inherit;border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:var(--card);color:var(--ink)"></div></div>
+    <div class="top"><h3>משפחות · ${fmt(fams.length)}</h3><div class="filters">${FILTERS.map(([k, l]) => `<span class="chip ${famFilter === k ? "on" : ""}" data-f="${k}">${l}</span>`).join("")}<span class="chip search">🔎 <input id="famSearch" placeholder="חיפוש" value="${esc(famQuery)}"></span></div></div>
     <div id="famList">${shown.map(famCard).join("") || '<div class="empty">אין משפחות בסינון הזה.</div>'}</div>`;
   document.querySelectorAll("[data-f]").forEach((c) => c.onclick = () => { famFilter = c.dataset.f; families(); });
-  $("famSearch").oninput = (e) => { const q = e.target.value.trim(); $("famList").innerHTML = shown.filter((f) => !q || JSON.stringify(f).includes(q)).map(famCard).join(""); wireFam(); };
+  const inp = $("famSearch"); inp.oninput = () => { famQuery = inp.value; const list = fams.filter((f) => famFilter === "all" || (f.j.state || "free_new") === famFilter).filter((f) => !famQuery.trim() || hay(f).includes(famQuery.trim())); $("famList").innerHTML = list.map(famCard).join("") || '<div class="empty">אין משפחות בסינון הזה.</div>'; wireFam(); };
   wireFam();
 }
 function famCard(f) {
-  const j = f.j || {}, [label, cls] = STATE[j.state || "free_new"] || STATE.free_new;
-  const kids = (f.children || []).map((k) => { const c = (J && J.children[k.id]) || {}; const t = c.today || {};
-    return `<span>${esc(k.emoji || "🧒")} ${esc(k.name)}${k.grade != null ? " · " + gradeName(k.grade) : ""}${t.questions ? ` · היום ${t.questions} שאלות · ${Math.round(100 * (t.correct || 0) / t.questions)}%` : c.lastActive ? " · " + esc(c.lastActive.slice(5)) : " · עוד לא שיחק/ה"}${c.favorite ? " · אוהב/ת: " + c.favorite.label.split(" ")[0] : ""}</span>`; }).join("");
-  const devs = (f.devices || []).map((d) => `<span>📱 ${esc(d.label || d.name || "מכשיר")}${d.version ? " · " + esc(d.version) : ""}</span>`).join("");
-  const extra = j.state === "plus" ? ` <span class="state">${j.plan === "yearly" ? "שנתי" : "חודשי"} · מתחדש ${new Date(j.premiumUntil * 1000).toLocaleDateString("he-IL")}</span>` : j.gift ? ` <span class="state">עוד ${j.daysLeft} ימים</span>` : "";
-  return `<div class="fam" data-hh="${f.householdID || f.id}"><div class="h"><div><b>👪 ${esc(f.familyName || f.label || f.name || "משפחה ללא שם")}</b> <span class="chip ${cls}" style="padding:2px 8px;font-size:11px">${label}</span>${extra}</div><div class="m">${esc((f.parents || []).map((p) => p.email || p.name).filter(Boolean).join(" · "))}${f.createdAt ? " · הצטרפו " + new Date(f.createdAt * (f.createdAt > 1e12 ? 1 : 1000)).toLocaleDateString("he-IL") : ""}${j.purchaseSource ? " · מקור המנוי: " + esc(j.purchaseSource) : ""}</div></div>
+  const j = f.j || {}, state = j.state || "free_new";
+  let chip = "", extra = "";
+  if (state === "plus") { chip = `<span class="chip gold" style="padding:2px 8px;font-size:11px">👑 טופי+ ${j.plan === "yearly" ? "שנתי" : "חודשי"}</span>`; extra = `<span class="state">מתחדש ${dateShort(j.premiumUntil)}</span>`; }
+  else if (state === "gift") chip = `<span class="chip mint" style="padding:2px 8px;font-size:11px">🎁 במתנה · ${daysLeft(j.daysLeft)}</span>`;
+  else if (state === "gift_expiring") chip = `<span class="chip pink" style="padding:2px 8px;font-size:11px">מתנה מסתיימת ${days(j.daysLeft)}</span>`;
+  else { const [l] = STATE[state] || STATE.free_new; chip = `<span class="state">${l}</span>`; }
+  const parents = (f.parents || []).filter((p) => !p.anonymous || p.isGuestParent);
+  const kids = (f.children || []).map((k) => { const c = (J && J.children && J.children[k.fullId || k.id]) || {}; const t = c.today || {}; const girl = (k.gender || c.gender) === "girl";
+    const act = t.questions ? `היום ${t.questions} שאלות · ${Math.round(100 * (t.correct || 0) / t.questions)}%` : c.lastActive ? c.lastActive.slice(5).replace("-", ".") : (girl ? "עוד לא שיחקה" : "עוד לא שיחק");
+    return `<span>🧒 ${esc(k.name)}${k.grade != null ? " · " + gradeName(k.grade) : ""} · ${act}${c.favorite ? ` · ${girl ? "אוהבת" : "אוהב"}: ${esc(c.favorite.label.split(" ")[0])}` : ""}</span>`; }).join("");
+  const devs = (f.children || []).flatMap((k) => (k.deviceRows || []).map((d) => `<span>📱 ${esc(k.name)} · ${d.kind === "ipad" ? "אייפד" : d.kind === "iphone" ? "אייפון" : esc(d.name || "מכשיר")}${d.lastSeenAt ? " · " + (Date.now() / 1000 - d.lastSeenAt < 86400 ? "פעיל" : "לפני " + Math.round((Date.now() / 1000 - d.lastSeenAt) / 86400) + " ימים") : ""}${d.appVersion ? " · " + esc(String(d.appVersion).replace(/^.*\((\d+)\)$/, "$1")) : ""}</span>`)).join("");
+  const joined = Math.min(...(f.children || []).map((k) => k.createdAt || Infinity).concat([Infinity]));
+  const meta = [parents.map((p) => shortMail(p.email) || p.name || "אורח").slice(0, 2).join(" · "), parents.length ? `${parents.length === 1 ? "הורה אחד" : parents.length + " הורים"}` : "", isFinite(joined) ? "הצטרפו " + dateShort(joined) : "", j.purchaseSource ? "מקור המנוי: " + (SOURCE[j.purchaseSource] || j.purchaseSource) : ""].filter(Boolean).join(" · ");
+  return `<div class="fam" data-hh="${esc(f.hh)}"><div class="h"><div><b>👪 ${esc(f.familyName || f.label || f.name || "משפחה ללא שם")}</b> ${chip} ${extra}</div><div class="m">${esc(meta)}</div></div>
     <div class="kids">${kids}${devs}</div>
-    <div class="acts"><button class="btn ghost" data-gift="${f.householdID || f.id}">🎁 מתנה / הארכה</button><a class="btn ghost" href="notifications.html">📣 שלח הודעה</a><a class="btn ghost" href="families.html">פרטים מלאים</a></div></div>`;
+    <div class="acts"><a class="btn ghost" href="families.html">פרטי הילדים</a><button class="btn ghost" data-gift="${esc(f.hh)}">🎁 הארך מתנה</button><a class="btn ghost" href="notifications.html">📣 שלח הודעה</a><button class="btn ghost" data-label="${esc(f.hh)}" data-cur="${esc(f.label || "")}">🏷 תווית</button><button class="btn danger" data-del="${esc(f.hh)}" data-name="${esc(f.familyName || f.label || f.name || "")}">🗑 מחק</button></div></div>`;
 }
-function gradeName(g) { return ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"][g] || g; }
-function wireFam() { document.querySelectorAll("[data-gift]").forEach((b) => b.onclick = async () => { const days = Number(prompt("כמה ימי טופי+ במתנה? (מוסיף על מה שיש)", "14")); if (!days) return; try { await call("adminGiftHousehold", { householdID: b.dataset.gift, days }); toast("המתנה נפתחה ל־" + days + " ימים"); await loadJourney(true); FAM = null; families(); } catch (e) { toast("נכשל: " + e.message); } }); }
+function wireFam() {
+  document.querySelectorAll("[data-gift]").forEach((b) => b.onclick = async () => { const n = Number(prompt("כמה ימי טופי+ במתנה? (מוסיף על מה שיש)", "14")); if (!n) return; try { await call("adminGiftHousehold", { householdID: b.dataset.gift, days: n }); toast("המתנה נפתחה ל־" + n + " ימים"); await loadJourney(true); FAM = null; families(); } catch (e) { toast("נכשל: " + e.message); } });
+  document.querySelectorAll("[data-label]").forEach((b) => b.onclick = async () => { const v = prompt("תווית למשפחה (ריק = למחוק)", b.dataset.cur); if (v === null) return; try { await call("adminSetFamilyLabel", { householdID: b.dataset.label, label: v }); toast("התווית נשמרה"); FAM = null; families(); } catch (e) { toast("נכשל: " + e.message); } });
+  document.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => { if (!confirm(`למחוק את המשפחה "${b.dataset.name || b.dataset.del}" על כל הילדים והנתונים? אי אפשר לבטל.`)) return; try { await call("adminDeleteHousehold", { householdID: b.dataset.del }); toast("המשפחה נמחקה"); FAM = null; await loadJourney(true); families(); } catch (e) { toast("נכשל: " + e.message); } });
+}
 
 // ---------------- 3 · funnel ----------------
 function funnel() {
   if (!J) return $("main").innerHTML = '<div class="empty">אין נתונים.</div>';
-  const f = J.funnel, o = J.overview;
-  const valuedPct = f.gift ? Math.round(100 * f.valued / f.gift) : (f.activated ? Math.round(100 * f.valued / f.activated) : 0);
+  const f = Object.assign({ registered: 0, childPlayed: 0, activated: 0, gift: 0, valued: 0, paywall: 0, purchaseStarted: 0, purchased: 0, renewed: 0 }, J.funnel || {}), o = ov(), cfg = J.config || {};
+  const valuedBase = f.gift || f.activated; const valuedPct = valuedBase ? Math.min(100, Math.round(100 * f.valued / valuedBase)) : 0;
   const renewPct = f.purchased ? Math.round(100 * f.renewed / f.purchased) : 0;
   $("main").innerHTML = `
-    <div class="top"><h3>משפך ההמרה</h3><div class="filters"><span class="chip on">30 ימים</span><span class="chip dim">גיל ▾</span><span class="chip dim">ילדים ▾</span><span class="chip dim">ניסוי: בסיס</span></div></div>
-    <div class="kpis">${kpi(o.activatedToPaid30 + "%", "מופעלות → משלמות תוך 30 יום")}${kpi(valuedPct + "%", "ילדים שחוו ערך (2+ ימים, 20+ שאלות)")}${kpi(renewPct + "%", "חידוש ראשון")}</div>
-    <div class="card"><h4>המשפך המלא</h4><div class="funnel">
-      ${funnelRow("התקנות (App Store)", "—", 0)}${funnelRow("הורה נרשם", f.registered, f.registered)}${funnelRow("ילד שיחק", f.childPlayed, f.registered, f.registered)}${funnelRow("הפעלה (" + J.config.activationDays + " ימים + " + J.config.activationQuestions + ")", f.activated, f.registered, f.childPlayed)}${funnelRow("מתנה", f.gift, f.registered, f.activated)}${funnelRow("חוו ערך", f.valued, f.registered, f.gift || f.activated)}${funnelRow("הורה ראה פייוול אישי", f.paywall, f.registered, f.valued)}${funnelRow("התחיל רכישה", f.purchaseStarted, f.registered, f.paywall)}${funnelRow("רכש", f.purchased, f.registered, f.purchaseStarted || f.activated)}${funnelRow("חידש", f.renewed, f.registered, f.purchased)}
-    </div><div class="stamp" style="margin-top:6px">התקנות מגיעות מ־App Store Connect (בקרוב). שלבי המתנה, הפייוול והחידוש מתמלאים כשמנוע ההמרה עולה.</div></div>
+    <div class="top"><h3>משפך ההמרה</h3><div class="filters"><span class="chip dim">7 ימים</span><span class="chip on">30 ימים</span><span class="chip dim">90 ימים</span><span class="chip dim">שנה</span><span class="chip dim">גיל: הכל ▾</span><span class="chip dim">ילדים במשפחה: הכל ▾</span><span class="chip dim">ניסוי: בסיס ▾</span></div></div>
+    <div class="kpis">${kpi(o.activatedToPaid30 + "%", "משפחות מופעלות → משלמות תוך 30 יום")}${kpi(valuedPct + "%", "ילדים שחוו ערך של טופי+ (2+ מפגשים, 20+ שאלות בעולמות)")}${kpi(renewPct + "%", "חידוש ראשון")}</div>
+    <div class="card"><h4>המשפך</h4><div class="funnel">
+      ${funnelRow("התקנות (App Store)", "—", 0)}${funnelRow("הורה נרשם", f.registered, f.registered)}${funnelRow("ילד נוצר ושיחק", f.childPlayed, f.registered, f.registered)}${funnelRow(`הפעלה (${cfg.activationDays || 3} ימים + ${cfg.activationQuestions || 40})`, f.activated, f.registered, f.childPlayed)}${funnelRow("מתנה התחילה", f.gift, f.registered, f.activated)}${funnelRow("חוו ערך של טופי+", f.valued, f.registered, f.gift || f.activated)}${funnelRow("הורה ראה פייוול אישי", f.paywall, f.registered, f.valued)}${funnelRow("התחיל רכישה", f.purchaseStarted, f.registered, f.paywall)}${funnelRow("רכש", f.purchased, f.registered, f.purchaseStarted || f.activated)}${funnelRow("חידש", f.renewed, f.registered, f.purchased)}
+    </div><div class="stamp" style="margin-top:6px">התקנות יגיעו מ־App Store Connect. שלבי הפייוול והרכישה מתמלאים עם הגרסה הבאה של האפליקציה.</div></div>
     <div class="grid2">
-      <div class="card"><h4>מאיפה הגיעה הרכישה</h4>${sources()}<h4 style="margin-top:14px">אחרי שהמתנה נגמרה בלי רכישה</h4><div class="empty">יתמלא עם מנוע ההמרה.</div></div>
-      <div class="card"><h4>פוש → רכישה</h4><div class="tblwrap" id="pushTbl"><span class="spin"></span></div><h4 style="margin-top:14px">משפך בקשות הילד</h4><div id="reqFunnel" class="empty">מחושב מבקשות "בקש מאבא או אמא" ומרכישות שבאו אחריהן (בקרוב).</div></div>
+      <div class="card"><h4>מאיפה הגיעה הרכישה</h4><div class="src">${sources()}</div><h4 style="margin-top:14px">אחרי שהמתנה נגמרה בלי רכישה</h4><div class="empty">יתמלא עם המשפחות הראשונות שיסיימו מתנה.</div></div>
+      <div class="card"><h4>פוש → רכישה</h4><div class="tblwrap" id="pushTbl"><span class="spin"></span></div><h4 style="margin-top:14px">משפך בקשות הילד</h4><div class="empty">יתמלא עם הגרסה הבאה של האפליקציה (ספירת לחיצות על עולם נעול).</div></div>
     </div>`;
-  call("adminListCampaigns").then((r) => { const rows = (r.campaigns || []).filter((c) => c.status === "sent"); $("pushTbl").innerHTML = rows.length ? `<table><tr><th>פוש</th><th>נשלח</th><th>נפתח</th><th>עמוד</th><th>רכשו</th><th>הכנסה</th></tr>${rows.map((c) => { const s = c.stats || {}; const p = c.action?.packID; return `<tr><td>${esc((c.emoji ? c.emoji + " " : "") + c.title)}</td><td>${fmt(s.sent)}</td><td>${fmt(s.opened)}</td><td>${fmt(s.page)}</td><td>${fmt(s.purchased)}</td><td class="money">${p && s.purchased ? "₪" + fmt(Math.round(s.purchased * 14.9)) : "—"}</td></tr>`; }).join("")}</table>` : '<div class="empty">עוד לא נשלחו הודעות.</div>'; }).catch((e) => $("pushTbl").textContent = e.message);
+  call("adminListCampaigns").then((r) => { const rows = (r.campaigns || []).filter((c) => c.status === "sent"); $("pushTbl").innerHTML = rows.length ? `<table><tr><th>פוש</th><th>נשלח</th><th>נפתח</th><th>פייוול</th><th>רכשו</th><th>הכנסה</th></tr>${rows.map((c) => { const s = c.stats || {}; const p = c.action?.packID; return `<tr><td>${esc((c.emoji ? c.emoji + " " : "") + c.title)}</td><td>${fmt(s.sent || 0)}</td><td>${fmt(s.opened || 0)}</td><td>${fmt(s.page || 0)}</td><td>${fmt(s.purchased || 0)}</td><td class="money">${p && s.purchased ? "₪" + fmt(Math.round(s.purchased * PACK_PRICE)) : "—"}</td></tr>`; }).join("")}</table>` : '<div class="empty">עוד לא נשלחו הודעות.</div>'; }).catch((e) => $("pushTbl").textContent = e.message);
 }
-function sources() { const hh = Object.values(J.households).filter((h) => h.state === "plus"); const by = {}; for (const h of hh) { const k = h.purchaseSource || "לא ידוע"; by[k] = (by[k] || 0) + 1; } const total = hh.length || 1;
-  const labels = { child_request: "בקשה של ילד", expiring_push: "פוש \"המתנה מסתיימת\"", paywall: "הפייוול האישי", new_world: "עולם חדש", card: "ישר מהכרטיס" };
-  return Object.entries(by).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<div class="f" style="display:grid;grid-template-columns:150px 1fr 50px;gap:8px;align-items:center;font-size:13px;margin:4px 0"><span>${esc(labels[k] || k)}</span><div class="barw"><div class="bar" style="width:${Math.round(100 * n / total)}%;background:#FFB840"></div></div><b>${Math.round(100 * n / total)}%</b></div>`).join("") || '<div class="empty">אין עדיין רכישות מנוי.</div>'; }
+function sources() { const hh = Object.values(J.households || {}).filter((h) => h.state === "plus"); const by = {}; for (const h of hh) { const k = h.purchaseSource || "card"; by[k] = (by[k] || 0) + 1; } const total = hh.length || 1;
+  return Object.entries(by).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<div><span>${esc(SOURCE[k] || k)}</span><div class="barw"><div class="bar" style="width:${Math.round(100 * n / total)}%"></div></div><b>${Math.round(100 * n / total)}%</b></div>`).join("") || '<div class="empty">אין עדיין רכישות מנוי.</div>'; }
 
 // ---------------- 4 · campaigns ----------------
 async function campaigns() {
-  $("main").innerHTML = `<div class="top"><h3>הודעות ועדכונים</h3><a class="btn" href="notifications.html">📣 הודעה חדשה</a></div><div class="card"><h4>היסטוריה ומדידה</h4><div class="tblwrap" id="campTbl"><span class="spin"></span></div><div class="stamp" style="margin-top:6px">הפושים של מנוע ההמרה יופיעו כאן כשורות אוטומטיות, עם אותו משפך.</div></div>`;
+  $("main").innerHTML = `<div class="top"><h3>הודעות ועדכונים</h3><a class="btn" href="notifications.html">📣 הודעה חדשה</a></div><div class="card"><h4>היסטוריה ומדידה</h4><div class="tblwrap" id="campTbl"><span class="spin"></span></div><div class="stamp" style="margin-top:6px">הפושים של מנוע ההמרה (הפעלה, אהבה, סיום) מופיעים כאן כשורות אוטומטיות, עם אותו משפך, כדי לראות מה באמת מוכר.</div></div>`;
   const STATUS = { draft: ["טיוטה", ""], scheduled: ["מתוזמן", "gold"], sending: ["נשלח עכשיו…", "gold"], sent: ["נשלח", "mint"], failed: ["נכשל", "pink"] };
   try { const r = await call("adminListCampaigns"); const rows = r.campaigns || [];
     $("campTbl").innerHTML = rows.length ? `<table><tr><th>הודעה</th><th>מועד</th><th>קהל</th><th>סטטוס</th><th>משפך</th><th>הכנסה</th></tr>${rows.map((c) => { const s = c.stats || {}, [l, cls] = STATUS[c.status] || [c.status, ""]; const aud = (c.audience?.roles || []).map((x) => x === "parents" ? "הורים" : "ילדים").join(" + "); const p = c.action?.packID;
-      return `<tr><td>${esc((c.emoji ? c.emoji + " " : "") + c.title)}${c.source === "launch" ? ' <span class="chip dim" style="padding:1px 7px;font-size:10px">השקה אוטומטית</span>' : ""}</td><td>${when(c.scheduledAt)}</td><td>${esc(aud)}${c.audience?.excludeOwners ? " · בלי בעלים" : ""}</td><td><span class="chip ${cls}" style="padding:1px 7px;font-size:11px">${l}</span></td><td>${c.status === "sent" ? `${fmt(s.sent)} נשלח → ${fmt(s.opened)} נפתח → ${fmt(s.page)} עמוד → ${fmt(s.purchaseStarted)} התחילו → ${fmt(s.purchased)} רכשו` : "—"}</td><td class="money">${p && s.purchased ? "₪" + fmt(Math.round(s.purchased * 14.9)) : "—"}</td></tr>`; }).join("")}</table>` : '<div class="empty">עוד לא נשלחה הודעה.</div>';
+      return `<tr><td>${esc((c.emoji ? c.emoji + " " : "") + c.title)}${c.source === "launch" ? ' <span class="chip dim" style="padding:1px 7px;font-size:10px">השקה אוטומטית</span>' : ""}</td><td>${when(c.scheduledAt)}</td><td>${esc(aud)}${c.audience?.excludeOwners ? " · בלי בעלים" : ""}</td><td><span class="chip ${cls}" style="padding:1px 7px;font-size:11px">${l}</span></td><td>${c.status === "sent" ? `${fmt(s.sent || 0)} נשלח → ${fmt(s.opened || 0)} נפתח → ${fmt(s.page || 0)} עמוד → ${fmt(s.purchaseStarted || 0)} התחילו → ${fmt(s.purchased || 0)} רכשו` : "—"}</td><td class="money">${p && s.purchased ? "₪" + fmt(Math.round(s.purchased * PACK_PRICE)) : "—"}</td></tr>`; }).join("")}</table>` : '<div class="empty">עוד לא נשלחה הודעה.</div>';
   } catch (e) { $("campTbl").textContent = e.message; }
 }
 
 // ---------------- 5 · worlds ----------------
+let worldsTab = "new";
 async function worlds() {
-  $("main").innerHTML = '<div class="empty"><span class="spin"></span> טוען עולמות…</div>';
-  try { PACKSTATE = await call("adminListPacks"); } catch (e) { return $("main").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; }
-  const cfg = (J && J.config) || {}; const guests = (cfg.guestTopics || []).map((t) => BASE[t] || t).join(" ");
-  const worldsToday = Object.fromEntries(((J && J.overview.worldsToday) || []).map((w) => [w.topic, w]));
+  if (!PACKSTATE) { $("main").innerHTML = '<div class="empty"><span class="spin"></span> טוען עולמות…</div>'; try { PACKSTATE = await call("adminListPacks"); } catch (e) { return $("main").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; } }
+  const cfg = (J && J.config) || {}; const guests = (cfg.guestTopics || []).map((t) => (BASE[t] || t).split(" ")[0]).join(" ");
+  const worldsToday = Object.fromEntries((ov().worldsToday || []).map((w) => [w.topic, w]));
   const rows = Object.entries(PACKS).map(([id, p]) => { const st = (PACKSTATE.packs || {})[id] || {}; const s = (PACKSTATE.sales || {})[id] || { purchases: 0, children: 0, revenue: 0 }; const wt = worldsToday[id];
     const review = st.reviewed ? '<span class="chip mint" style="padding:1px 7px;font-size:11px">אושר</span>' : '<span class="chip gold" style="padding:1px 7px;font-size:11px">ממתין להגהה</span>';
-    const launch = st.enabled ? `${st.launchedAt ? new Date(st.launchedAt._seconds ? st.launchedAt._seconds * 1000 : st.launchedAt).toLocaleDateString("he-IL") : "דלוק"}${st.launchCampaignID ? " · פוש נשלח" : ""}` : st.launchAt ? "מתוזמן " + when(st.launchAt) : "—";
-    return `<tr><td>${p.emoji} ${esc(p.name)}</td><td>${PACK_Q[id]}</td><td>${review} <u style="cursor:pointer;color:var(--indigo);font-size:12px" data-review="${id}" data-val="${st.reviewed ? 0 : 1}">${st.reviewed ? "בטל" : "אשר"}</u></td><td>${launch} ${!st.enabled ? `<u style="cursor:pointer;color:var(--indigo);font-size:12px" data-sched="${id}">תזמן</u>` : ""}</td><td>${wt ? wt.kids : "—"}</td><td>${s.purchases ? `${s.purchases} (${s.children} ילדים)` : "—"}</td><td class="money">${s.revenue ? "₪" + fmt(Math.round(s.revenue)) : "—"}</td><td><span class="sw ${st.enabled ? "on" : ""}" data-pack="${id}"></span></td></tr>`; }).join("");
+    const launchedAt = st.launchedAt ? (st.launchedAt._seconds ? st.launchedAt._seconds * 1000 : new Date(st.launchedAt).getTime()) : null;
+    const launch = st.enabled ? `${launchedAt ? new Date(launchedAt).toLocaleDateString("he-IL", { day: "numeric", month: "numeric" }) : "דלוק"}${st.launchCampaignID ? " · פוש נשלח" : ""}` : st.launchAt ? "מתוזמן " + when(st.launchAt) : "—";
+    return `<tr><td>${p.emoji} ${esc(p.name)}</td><td>${p.q}</td><td>${review} <u style="cursor:pointer;color:var(--indigo);font-size:12px" data-review="${id}" data-val="${st.reviewed ? 0 : 1}">${st.reviewed ? "בטל" : "אשר"}</u></td><td>${launch}</td><td>${wt ? wt.kids : "—"}</td><td>${s.purchases ? `${s.purchases} (${s.children} ילדים)` : "—"}</td><td class="money">${s.revenue ? "₪" + fmt(Math.round(s.revenue)) : "—"}</td><td><span class="sw ${st.enabled ? "on" : ""}" data-pack="${id}"></span></td></tr>`; }).join("");
   $("main").innerHTML = `
-    <div class="top"><h3>עולמות · 9 בסיס + ${Object.keys(PACKS).length} חדשים</h3><div class="filters"><span class="chip on">חדשים</span><span class="chip dim">בסיס</span><span class="chip dim">אורחי השבוע: ${esc(guests)}</span></div></div>
-    <div class="card"><div class="tblwrap"><table><tr><th>עולם</th><th>שאלות</th><th>הגהה</th><th>השקה</th><th>ילדים ששיחקו היום</th><th>רכישות</th><th>הכנסה</th><th>מצב</th></tr>${rows}</table></div>
-      <div class="stamp" style="margin-top:8px">הדלקה = גלוי לכל המשפחות + פוש ההשקה יוצא פעם אחת תוך 5 דקות. לחיצה על "תזמן" מדליקה אוטומטית במועד. אורחי השבוע נקבעים בהגדרות.</div></div>
-    <div class="card"><h4>בסיס</h4><div class="tblwrap"><table><tr><th>עולם</th><th>ילדים ששיחקו היום</th><th>שאלות היום</th><th>נכונות</th></tr>${Object.entries(BASE).map(([t, l]) => { const w = worldsToday[t]; return `<tr><td>${l}</td><td>${w ? w.kids : "—"}</td><td>${w ? fmt(w.q) : "—"}</td><td>${w ? w.accuracy + "%" : "—"}</td></tr>`; }).join("")}</table></div></div>`;
-  document.querySelectorAll("[data-pack]").forEach((sw) => sw.onclick = async () => { const on = !sw.classList.contains("on"); const st = (PACKSTATE.packs || {})[sw.dataset.pack] || {};
-    if (on && !st.reviewed && !confirm(`"${PACKS[sw.dataset.pack].name}" עוד לא סומן כמוגה. להדליק בכל זאת?`)) return;
-    if (on && !confirm(`להדליק את "${PACKS[sw.dataset.pack].name}" לכל המשפחות?\n\nפוש ההשקה יישלח לכל ההורים תוך 5 דקות (פעם אחת בלבד).`)) return;
-    try { const r = await call("adminSetPackEnabled", { packID: sw.dataset.pack, enabled: on }); toast(on ? (r.launched ? "השאלון דלוק ✅ · פוש ההשקה יוצא תוך 5 דקות" : "השאלון דלוק ✅") : "השאלון כבוי"); worlds(); } catch (e) { toast("נכשל: " + e.message); } });
-  document.querySelectorAll("[data-review]").forEach((u) => u.onclick = async () => { await call("adminSetPackMeta", { packID: u.dataset.review, reviewed: u.dataset.val === "1" }); worlds(); });
-  document.querySelectorAll("[data-sched]").forEach((u) => u.onclick = async () => { const v = prompt("מתי להדליק? (YYYY-MM-DD HH:MM, שעון ישראל)", new Date(Date.now() + 86400000 * 3).toISOString().slice(0, 10) + " 09:30"); if (!v) return; const ms = new Date(v.replace(" ", "T") + ":00+03:00").getTime(); if (!ms) return toast("תאריך לא תקין"); await call("adminSetPackMeta", { packID: u.dataset.sched, launchAt: ms }); toast("תוזמן"); worlds(); });
+    <div class="top"><h3>עולמות · 9 בסיס + ${Object.keys(PACKS).length} חדשים</h3><div class="filters"><span class="chip ${worldsTab === "new" ? "on" : ""}" data-wt="new">חדשים</span><span class="chip ${worldsTab === "base" ? "on" : ""}" data-wt="base">בסיס</span><span class="chip dim">אורחי השבוע: ${esc(guests)}</span></div></div>
+    <div class="card" ${worldsTab !== "new" ? "hidden" : ""}><div class="tblwrap"><table><tr><th>עולם</th><th>שאלות</th><th>הגהה</th><th>השקה</th><th>ילדים ששיחקו</th><th>רכישות</th><th>הכנסה</th><th>מצב</th></tr>${rows}</table></div>
+      <div class="stamp" style="margin-top:8px">הדלקה = העולם גלוי לכל המשפחות, ופוש ההשקה יוצא פעם אחת תוך 5 דקות.</div>
+      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost" id="schedBtn">📅 תזמן השקה</button><a class="btn ghost" href="#settings">🌟 קבע אורחי השבוע</a><a class="btn ghost" href="#settings">✏️ ערוך נוסח פוש ההשקה</a></div></div>
+    <div class="card" ${worldsTab !== "base" ? "hidden" : ""}><h4>בסיס</h4><div class="tblwrap"><table><tr><th>עולם</th><th>ילדים ששיחקו היום</th><th>שאלות היום</th><th>נכונות</th></tr>${Object.entries(BASE).map(([t, l]) => { const w = worldsToday[t]; return `<tr><td>${l}</td><td>${w ? w.kids : "—"}</td><td>${w ? fmt(w.q) : "—"}</td><td>${w ? w.accuracy + "%" : "—"}</td></tr>`; }).join("")}</table></div></div>`;
+  document.querySelectorAll("[data-wt]").forEach((c) => c.onclick = () => { worldsTab = c.dataset.wt; worlds(); });
+  document.querySelectorAll("[data-pack]").forEach((sw) => sw.onclick = async () => { const on = !sw.classList.contains("on"); const st = (PACKSTATE.packs || {})[sw.dataset.pack] || {}; const name = PACKS[sw.dataset.pack].name;
+    if (on && !confirm(`להדליק את "${name}" לכל המשפחות?${st.reviewed ? "" : "\n\n⚠️ העולם עוד לא סומן כמוגה."}\n\nפוש ההשקה יישלח לכל ההורים תוך 5 דקות (פעם אחת בלבד).`)) return;
+    try { const r = await call("adminSetPackEnabled", { packID: sw.dataset.pack, enabled: on }); toast(on ? (r.launched ? "העולם דלוק ✅ · פוש ההשקה יוצא תוך 5 דקות" : "העולם דלוק ✅") : "העולם כבוי"); PACKSTATE = null; await loadJourney(true); worlds(); } catch (e) { toast("נכשל: " + e.message); } });
+  document.querySelectorAll("[data-review]").forEach((u) => u.onclick = async () => { await call("adminSetPackMeta", { packID: u.dataset.review, reviewed: u.dataset.val === "1" }); PACKSTATE = null; worlds(); });
+  $("schedBtn").onclick = async () => { const off = Object.entries(PACKS).filter(([id]) => !((PACKSTATE.packs || {})[id] || {}).enabled); if (!off.length) return toast("כל העולמות כבר דלוקים");
+    const pick = prompt("איזה עולם לתזמן?\n" + off.map(([id, p], i) => `${i + 1}. ${p.emoji} ${p.name}`).join("\n"), "1"); const idx = Number(pick) - 1; if (!off[idx]) return;
+    const v = prompt("מתי להדליק? (YYYY-MM-DD HH:MM, שעון ישראל)", new Date(Date.now() + 86400000 * 3).toISOString().slice(0, 10) + " 09:30"); if (!v) return; const ms = new Date(v.replace(" ", "T") + ":00+03:00").getTime(); if (!ms) return toast("תאריך לא תקין");
+    await call("adminSetPackMeta", { packID: off[idx][0], launchAt: ms }); toast("ההשקה תוזמנה"); PACKSTATE = null; worlds(); };
 }
 
 // ---------------- 6 · content ----------------
+let contentTab = "reports";
 async function content() {
-  $("main").innerHTML = `<div class="top"><h3>תוכן ושאלות</h3><div class="filters"><span class="chip on">דיווחים</span><span class="chip dim">הכי קשות</span><span class="chip dim">לפי כיתה</span></div></div>
+  $("main").innerHTML = `<div class="top"><h3>תוכן ושאלות</h3><div class="filters"><span class="chip on" id="repChip">דיווחים</span><span class="chip dim">הכי קשות</span><span class="chip dim">הכי קלות</span><span class="chip dim">לפי כיתה</span></div></div>
     <div class="grid2"><div class="card"><h4>דיווחים מהמכשירים (🚩 בכפתור הדגל בשאלה)</h4><div id="reports"><span class="spin"></span></div></div>
-    <div class="card"><h4>איפה ילדים נופלים (30 יום)</h4><div class="empty">דורש ספירה לכל שאלה במכשיר. נוסף בבילד הבא; עד אז הדיוק לפי עולם וכיתה נמצא ב"סטטיסטיקה מלאה".</div><div class="stamp">מתחת ל־35% = כנראה בעיה בשאלה, לא בילדים. מעל 97% = משעממת.</div></div></div>`;
-  try { const r = await call("adminListReports"); const rows = r.reports || []; const open = rows.filter((x) => (x.status || "open") === "open");
-    $("reports").innerHTML = rows.length ? [...open, ...rows.filter((x) => (x.status || "open") !== "open")].slice(0, 60).map((x) => `<div class="q"><b>${esc(String(x.prompt || x.question || "").replace(/\n/g, " "))}</b> · ${esc(x.topic || "")}${x.grade != null ? " · " + gradeName(x.grade) : ""} <span class="chip ${(x.status || "open") === "open" ? "gold" : "mint"}" style="padding:1px 7px;font-size:10px">${(x.status || "open") === "open" ? "פתוח" : x.status === "disabled" ? "הושבתה" : "טופל"}</span><div class="m">${esc(x.reason || x.note || x.message || "")} · ${when(Number(x.createdAt) * (Number(x.createdAt) > 1e12 ? 1 : 1000))} ${(x.status || "open") === "open" ? `· <u data-rs="${x.id}" data-st="resolved">סמן כטופל</u><u data-rs="${x.id}" data-st="disabled">השבת שאלה</u>` : ""}</div></div>`).join("") : '<div class="empty">אין דיווחים. 🎉</div>';
-    document.querySelectorAll("[data-rs]").forEach((u) => u.onclick = async () => { await call("adminSetReportStatus", { id: u.dataset.rs, status: u.dataset.st }); content(); });
+    <div class="card"><h4>איפה ילדים נופלים (30 יום)</h4><div class="tblwrap"><table><tr><th>שאלה</th><th>עולם</th><th>ניסיונות</th><th>נכון</th></tr><tr><td colspan="4" class="empty">דורש ספירה לכל שאלה במכשיר · יתווסף בגרסה הבאה של האפליקציה</td></tr></table></div><div class="stamp" style="margin-top:6px">מתחת ל־35% = כנראה בעיה בשאלה, לא בילדים. מעל 97% = משעממת.</div></div></div>`;
+  try { const r = await call("adminListReports"); const rows = r.reports || [];
+    const groups = {}; for (const x of rows) { const key = String(x.prompt || x.question || x.id).replace(/\n/g, " "); (groups[key] = groups[key] || { key, items: [], topic: x.topic, grade: x.grade }).items.push(x); }
+    const list = Object.values(groups).sort((a, b) => (b.items.some((i) => (i.status || "open") === "open") ? 1 : 0) - (a.items.some((i) => (i.status || "open") === "open") ? 1 : 0));
+    const openN = rows.filter((x) => (x.status || "open") === "open").length; $("repChip").textContent = `דיווחים (${openN})`;
+    $("reports").innerHTML = list.length ? list.slice(0, 60).map((g) => { const open = g.items.filter((i) => (i.status || "open") === "open"); const st = open.length ? ["פתוח", "gold"] : g.items.some((i) => i.status === "disabled") ? ["השאלה מושבתת", ""] : ["טופל", "mint"]; const last = g.items[0];
+      return `<div class="q"><b>${esc(g.key)}</b> · ${esc(TOPIC[g.topic] || g.topic || "")}${g.grade != null ? " · כיתה " + gradeName(g.grade) : ""} <span class="chip ${st[1]}" style="padding:1px 7px;font-size:10px">${st[0]}</span><div class="m">${g.items.length} ${g.items.length === 1 ? "דיווח" : "דיווחים"} · "${esc(last.reason || last.note || last.message || "")}" · ${when(Number(last.createdAt) * (Number(last.createdAt) > 1e12 ? 1 : 1000))}${open.length ? ` · <u data-open="${esc(g.key)}">פתח</u><u data-rs="${open.map((i) => i.id).join(",")}" data-st="disabled">השבת שאלה</u><u data-rs="${open.map((i) => i.id).join(",")}" data-st="resolved">סמן כתקין</u>` : ""}</div><div class="m" hidden data-detail="${esc(g.key)}">${g.items.map((i) => `• ${esc(i.reason || i.note || i.message || "")} · ${when(Number(i.createdAt) * (Number(i.createdAt) > 1e12 ? 1 : 1000))}${i.chosen ? " · ענה/תה: " + esc(i.chosen) : ""}`).join("<br>")}</div></div>`; }).join("") : '<div class="empty">אין דיווחים. 🎉</div>';
+    document.querySelectorAll("[data-open]").forEach((u) => u.onclick = () => { const d = document.querySelector(`[data-detail="${CSS.escape(u.dataset.open)}"]`); if (d) d.hidden = !d.hidden; });
+    document.querySelectorAll("[data-rs]").forEach((u) => u.onclick = async () => { for (const id of u.dataset.rs.split(",")) await call("adminSetReportStatus", { id, status: u.dataset.st }); await loadJourney(false); content(); });
   } catch (e) { $("reports").textContent = e.message; }
 }
 
 // ---------------- 7 · support ----------------
+let supTab = "open";
 async function support() {
-  $("main").innerHTML = `<div class="top"><h3>תמיכה</h3><div class="filters" id="supFilters"><span class="chip on" data-s="open">פתוחות</span><span class="chip" data-s="done">נענו</span><span class="chip dim" id="wl">רשימת המתנה</span></div></div><div class="card"><div class="tblwrap" id="supTbl"><span class="spin"></span></div></div>`;
-  try { const r = await call("adminListSupport"); $("wl").textContent = "רשימת המתנה (" + r.waitlist + ")"; $("navSupport").textContent = r.items.filter((i) => i.status === "open").length + " פתוחות";
-    const render = (which) => { const rows = r.items.filter((i) => which === "open" ? i.status === "open" : i.status !== "open");
-      $("supTbl").innerHTML = rows.length ? `<table><tr><th>מתי</th><th>משפחה</th><th>סוג</th><th>תוכן</th><th>גרסה</th><th></th></tr>${rows.map((i) => `<tr><td>${when(i.at)}</td><td>${esc(i.family || "—")}</td><td>💬 פידבק</td><td style="white-space:normal;max-width:420px">${esc(i.text)}</td><td>${esc(i.device)}</td><td>${i.status === "open" ? `<button class="btn ghost" data-done="${i.id}">סמן כנענה</button>` : "✓"}</td></tr>`).join("")}</table>` : '<div class="empty">אין פניות.</div>';
-      document.querySelectorAll("[data-done]").forEach((b) => b.onclick = async () => { await call("adminSetSupportStatus", { id: b.dataset.done, status: "done" }); support(); }); };
-    render("open"); document.querySelectorAll("#supFilters [data-s]").forEach((c) => c.onclick = () => { document.querySelectorAll("#supFilters [data-s]").forEach((x) => x.classList.toggle("on", x === c)); render(c.dataset.s); });
+  $("main").innerHTML = `<div class="top"><h3 id="supH">תמיכה</h3><div class="filters" id="supFilters"><span class="chip ${supTab === "open" ? "on" : ""}" data-s="open">פתוחות</span><span class="chip ${supTab === "done" ? "on" : ""}" data-s="done">נענו</span><span class="chip ${supTab === "feedback" ? "on" : ""}" data-s="feedback">פידבק</span><span class="chip dim" id="wl">רשימת המתנה</span></div></div><div class="card"><div class="tblwrap" id="supTbl"><span class="spin"></span></div></div>`;
+  try { const r = await call("adminListSupport"); $("wl").textContent = "רשימת המתנה (" + r.waitlist + ")"; const openN = r.items.filter((i) => i.status === "open").length; $("supH").textContent = openN ? `תמיכה · ${openN} פתוחות` : "תמיכה"; $("navSupport").textContent = openN ? openN + " פתוחות" : "";
+    const famOf = (i) => (FAM && (FAM.families || []).find((f) => (f.fullId || f.householdID || f.id) === i.householdID)) || null;
+    const rows = r.items.filter((i) => supTab === "open" ? i.status === "open" : supTab === "done" ? i.status !== "open" : i.kind === "feedback");
+    $("supTbl").innerHTML = rows.length ? `<table><tr><th>מתי</th><th>משפחה</th><th>סוג</th><th>תוכן</th><th>מכשיר · גרסה</th><th></th></tr>${rows.map((i) => { const f = famOf(i); const mail = f && (f.parents || []).map((p) => p.email).find(Boolean);
+      return `<tr><td>${when(i.at)}</td><td>${esc(i.family || (f && (f.familyName || f.label)) || "—")}</td><td>💬 פידבק</td><td style="white-space:normal;max-width:420px">${esc(i.text)}</td><td>${esc(i.device)}</td><td style="white-space:nowrap">${mail ? `<a class="btn ghost" href="mailto:${esc(mail)}?subject=${encodeURIComponent("טופי — תשובה לפנייה שלך")}">ענה במייל</a> ` : ""}${i.householdID ? `<a class="btn ghost" href="#families" data-fam="${esc(i.householdID)}">פתח משפחה</a> ` : ""}${i.status === "open" ? `<button class="btn ghost" data-done="${i.id}">סמן כנענה</button>` : "✓"}</td></tr>`; }).join("")}</table>` : '<div class="empty">אין פניות.</div>';
+    document.querySelectorAll("[data-done]").forEach((b) => b.onclick = async () => { await call("adminSetSupportStatus", { id: b.dataset.done, status: "done" }); support(); });
+    document.querySelectorAll("[data-fam]").forEach((a) => a.onclick = () => { famFilter = "all"; famQuery = ""; });
+    document.querySelectorAll("#supFilters [data-s]").forEach((c) => c.onclick = () => { supTab = c.dataset.s; support(); });
   } catch (e) { $("supTbl").textContent = e.message; }
 }
 
@@ -266,11 +307,11 @@ async function settings() {
     <div class="card"><h4>מנוע ההמרה</h4><div class="knobs">
       <div class="knob"><label>הפעלה</label>${num("activationDays")} ימים פעילים + ${num("activationQuestions")} שאלות</div>
       <div class="knob"><label>אורך המתנה</label>${num("giftDays")} ימים · אפשר להאריך ידנית ממשפחות</div>
-      <div class="knob"><label>עולמות אורחים בחינם</label>${num("guestWorlds", 50)} · מתחלפים כל ${num("guestRotateDays", 50)} ימים<br><select id="k_guestTopics" multiple size="4" style="margin-top:6px">${Object.entries(BASE).map(([t, l]) => `<option value="${t}" ${(cfg.guestTopics || []).includes(t) ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+      <div class="knob"><label>עולמות אורחים בחינם</label>${num("guestWorlds", 50)} · מתחלפים כל ${num("guestRotateDays", 50)} ימים · בחירה: אוטומטי לפי כיתה<br><select id="k_guestTopics" multiple size="4" style="margin-top:6px" title="ברירת המחדל לשבוע הראשון">${Object.entries(BASE).map(([t, l]) => `<option value="${t}" ${(cfg.guestTopics || []).includes(t) ? "selected" : ""}>${l}</option>`).join("")}</select></div>
       <div class="knob"><label>עולמות נעולים מוצגים</label>${num("lockedShown", 50)} · מתחלפים כל ${num("lockedRotateDays", 50)} ימים</div>
-      <div class="knob"><label>ימי הפושים במתנה</label><input id="k_giftPushDays" value="${(cfg.giftPushDays || []).join(" · ")}"> שעה ${num("giftPushHour", 50)}</div>
+      <div class="knob"><label>ימי הפושים במתנה</label><input id="k_giftPushDays" value="${(cfg.giftPushDays || []).join(" · ")}"> שעה ${num("giftPushHour", 50)}:00</div>
       <div class="knob"><label>מסלול בלי מנוי</label><select id="k_oneTimeAfterGiftOnly"><option value="true" ${cfg.oneTimeAfterGiftOnly ? "selected" : ""}>מופיע אחרי סוף המתנה</option><option value="false" ${!cfg.oneTimeAfterGiftOnly ? "selected" : ""}>מופיע תמיד</option></select></div>
-      <div class="knob"><label>פייוול</label><select id="k_paywall"><option value="personal" ${cfg.paywall === "personal" ? "selected" : ""}>אישי · שנתי מודגש</option><option value="generic" ${cfg.paywall === "generic" ? "selected" : ""}>גנרי</option></select></div>
+      <div class="knob"><label>פייוול</label><select id="k_paywall"><option value="personal" ${cfg.paywall === "personal" ? "selected" : ""}>אישי · שנתי מודגש</option><option value="generic" ${cfg.paywall === "generic" ? "selected" : ""}>גנרי (ניסוי, כבוי)</option></select></div>
       <div class="knob"><label>ניסיון StoreKit</label><select id="k_storeKitTrial"><option value="false" ${!cfg.storeKitTrial ? "selected" : ""}>כבוי (המתנה במקום)</option><option value="true" ${cfg.storeKitTrial ? "selected" : ""}>דלוק</option></select></div>
     </div></div>
     <div class="card"><h4>ניסויים (אחד בכל פעם, 50/50, לפי משפחה)</h4><div class="tblwrap"><table><tr><th>ניסוי</th><th>א׳</th><th>ב׳</th><th>מדד</th><th>מצב</th></tr>

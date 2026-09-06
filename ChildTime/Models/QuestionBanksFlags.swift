@@ -15,11 +15,11 @@ enum QuestionBanksFlags {
         BankQuestion(prompt: "🇨🇦\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל עִם הֶעָלֶה הָאָדֹם?", correctAnswer: "קָנָדָה", distractors: ["אַרְצוֹת הַבְּרִית", "שְׁוַיְץ", "יַפָּן"], tier: .easy, grades: 3...4),
         BankQuestion(prompt: "🇧🇷\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל הַיָּרֹק־צָהֹב הַזֶּה?", correctAnswer: "בְּרָזִיל", distractors: ["פּוֹרְטוּגָל", "אַרְגֶּנְטִינָה", "מֶקְסִיקוֹ"], tier: .easy, grades: 3...4),
         BankQuestion(prompt: "🇬🇧\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל הַזֶּה?", correctAnswer: "הַמַּמְלָכָה הַמְּאֻחֶדֶת (בְּרִיטַנְיָה)", distractors: ["צָרְפַת", "נוֹרְבֶגְיָה", "אַרְצוֹת הַבְּרִית"], tier: .easy, grades: 3...4),
-        BankQuestion(prompt: "🇩🇪\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל הַשָּׁחֹר־אָדֹם־צָהֹב הַזֶּה?", correctAnswer: "גֶּרְמַנְיָה", distractors: ["בֶּלְגְּיָה", "אוֹסְטְרִיָּה", "סְפָרַד"], tier: .easy, grades: 3...4),
+        BankQuestion(prompt: "🇩🇪\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל הַשָּׁחֹר־אָדֹם־צָהֹב הַזֶּה?", correctAnswer: "גֶּרְמַנְיָה", distractors: ["הוֹלַנְד", "אוֹסְטְרִיָּה", "סְפָרַד"], tier: .easy, grades: 3...4),
 
         // ── קַל · אֲתָרִים מְפֻרְסָמִים ──
         BankQuestion(prompt: "🗼\nבְּאֵיזוֹ מְדִינָה נִמְצָא מִגְדַּל אַיְפֶל?", correctAnswer: "צָרְפַת", distractors: ["אִיטַלְיָה", "אַנְגְּלִיָּה", "סְפָרַד"], tier: .easy, grades: 3...4),
-        BankQuestion(prompt: "🐪\nבְּאֵיזוֹ מְדִינָה נִמְצָאוֹת הַפִּירָמִידוֹת הַמְּפֻרְסָמוֹת?", correctAnswer: "מִצְרַיִם", distractors: ["יָוָן", "מֶקְסִיקוֹ", "טוּרְקִיָּה"], tier: .easy, grades: 3...4),
+        BankQuestion(prompt: "🐪\nבְּאֵיזוֹ מְדִינָה נִמְצָאוֹת הַפִּירָמִידוֹת הַמְּפֻרְסָמוֹת?", correctAnswer: "מִצְרַיִם", distractors: ["יָוָן", "מָרוֹקוֹ", "טוּרְקִיָּה"], tier: .easy, grades: 3...4),
         BankQuestion(prompt: "🗽\nבְּאֵיזוֹ מְדִינָה נִמְצָא פֶּסֶל הַחֵרוּת?", correctAnswer: "אַרְצוֹת הַבְּרִית", distractors: ["צָרְפַת", "קָנָדָה", "בְּרָזִיל"], tier: .easy, grades: 3...4),
         BankQuestion(prompt: "🧱\nבְּאֵיזוֹ מְדִינָה נִמְצֵאת הַחוֹמָה הַגְּדוֹלָה, שֶׁאָרְכָּהּ אַלְפֵי קִילוֹמֶטְרִים?", correctAnswer: "סִין", distractors: ["יַפָּן", "הֹדּוּ", "רוּסְיָה"], tier: .easy, grades: 3...4),
         BankQuestion(prompt: "🕰️\nבְּאֵיזוֹ מְדִינָה נִמְצָא \"בִּיג בֶּן\"?", correctAnswer: "אַנְגְּלִיָּה", distractors: ["צָרְפַת", "גֶּרְמַנְיָה", "אִיטַלְיָה"], tier: .easy, grades: 3...4),
@@ -32,8 +32,8 @@ enum QuestionBanksFlags {
 
         // ── קַל · יַבָּשׁוֹת וְאוֹקְיָנוֹסִים ──
         BankQuestion(prompt: "🌏\nבְּאֵיזוֹ יַבֶּשֶׁת נִמְצֵאת יִשְׂרָאֵל?", correctAnswer: "אַסְיָה", distractors: ["אֵירוֹפָּה", "אַפְרִיקָה", "אַמֶרִיקָה"], tier: .easy, grades: 3...4),
-        BankQuestion(prompt: "🌍\nכַּמָּה יַבָּשׁוֹת יֵשׁ בָּעוֹלָם?", correctAnswer: "7", distractors: ["5", "6", "9"], tier: .easy, grades: 3...4),
-        BankQuestion(prompt: "🌊\nכַּמָּה אוֹקְיָנוֹסִים יֵשׁ בָּעוֹלָם?", correctAnswer: "5", distractors: ["3", "4", "7"], tier: .easy, grades: 3...4),
+        BankQuestion(prompt: "🌍\nכַּמָּה יַבָּשׁוֹת נוֹהֲגִים לְלַמֵּד שֶׁיֵּשׁ בָּעוֹלָם?", correctAnswer: "7", distractors: ["5", "6", "9"], tier: .easy, grades: 3...4),
+        BankQuestion(prompt: "🌊\nכַּמָּה אוֹקְיָנוֹסִים, כּוֹלֵל הָאוֹקְיָנוֹס הַדְּרוֹמִי, יֵשׁ בָּעוֹלָם?", correctAnswer: "5", distractors: ["3", "4", "7"], tier: .easy, grades: 3...4),
         BankQuestion(prompt: "🌍\nבְּאֵיזוֹ יַבֶּשֶׁת נִמְצֵאת צָרְפַת?", correctAnswer: "אֵירוֹפָּה", distractors: ["אַסְיָה", "אַפְרִיקָה", "אוֹסְטְרַלְיָה"], tier: .easy, grades: 3...4),
         BankQuestion(prompt: "🌍\nבְּאֵיזוֹ יַבֶּשֶׁת נִמְצֵאת מִצְרַיִם?", correctAnswer: "אַפְרִיקָה", distractors: ["אַסְיָה", "אֵירוֹפָּה", "דְּרוֹם אַמֶרִיקָה"], tier: .easy, grades: 3...4),
 
@@ -53,7 +53,7 @@ enum QuestionBanksFlags {
         BankQuestion(prompt: "🇦🇷\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל הַתְּכֵלֶת־לָבָן עִם הַשֶּׁמֶשׁ?", correctAnswer: "אַרְגֶּנְטִינָה", distractors: ["בְּרָזִיל", "מֶקְסִיקוֹ", "פּוֹרְטוּגָל"], tier: .medium, grades: 4...5),
         BankQuestion(prompt: "🇬🇷\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל הַכָּחֹל־לָבָן עִם הַפַּסִּים וְהַצְּלָב?", correctAnswer: "יָוָן", distractors: ["טוּרְקִיָּה", "אִיטַלְיָה", "סְפָרַד"], tier: .medium, grades: 4...5),
         BankQuestion(prompt: "🇹🇷\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל הָאָדֹם עִם הַסַּהַר וְהַכּוֹכָב?", correctAnswer: "טוּרְקִיָּה", distractors: ["יָוָן", "מָרוֹקוֹ", "מִצְרַיִם"], tier: .medium, grades: 4...5),
-        BankQuestion(prompt: "🇷🇺\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל הַלָּבָן־כָּחֹל־אָדֹם הַזֶּה?", correctAnswer: "רוּסְיָה", distractors: ["צָרְפַת", "פּוֹלִין", "יָוָן"], tier: .medium, grades: 4...5),
+        BankQuestion(prompt: "🇷🇺\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל הַלָּבָן־כָּחֹל־אָדֹם הַזֶּה?", correctAnswer: "רוּסְיָה", distractors: ["פּוֹרְטוּגָל", "פּוֹלִין", "יָוָן"], tier: .medium, grades: 4...5),
         BankQuestion(prompt: "🇰🇷\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל עִם הָעִגּוּל הָאָדֹם־כָּחֹל?", correctAnswer: "דְּרוֹם קוֹרֵיאָה", distractors: ["יַפָּן", "סִין", "תָּאִילַנְד"], tier: .medium, grades: 4...5),
         BankQuestion(prompt: "🇮🇳\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל הַכָּתֹם־לָבָן־יָרֹק עִם הַגַּלְגַּל?", correctAnswer: "הֹדּוּ", distractors: ["סִין", "יַפָּן", "מִצְרַיִם"], tier: .medium, grades: 4...5),
         BankQuestion(prompt: "🇨🇭\nשֶׁל אֵיזוֹ מְדִינָה הַדֶּגֶל הָאָדֹם עִם הַצְּלָב הַלָּבָן?", correctAnswer: "שְׁוַיְץ", distractors: ["שְׁוֶדְיָה", "בֶּלְגְּיָה", "פּוֹלִין"], tier: .medium, grades: 4...5),
