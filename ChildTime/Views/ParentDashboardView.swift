@@ -536,10 +536,8 @@ struct ParentDashboardView: View {
                 Image(systemName: "chevron.left").font(.caption.weight(.bold)).foregroundStyle(.white.opacity(0.8))
             }
             .padding(AppSpacing.md)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                    .fill(AppColor.flameOrange.opacity(0.9))
-            )
+            // Glass with a warm whisper — a notice, not a red slab.
+            .glassPane(radius: 18, tint: AppColor.flameOrange)
         }
         .buttonStyle(.plain)
     }
