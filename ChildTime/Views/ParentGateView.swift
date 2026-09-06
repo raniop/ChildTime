@@ -166,7 +166,7 @@ struct ParentGateView<Content: View>: View {
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundStyle(.white)
                                 .frame(width: 40, height: 40)
-                                .background(.white.opacity(0.22), in: Circle())
+                                .background(.white.opacity(0.22), in: Circle()).overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                                 .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                         }
                         .buttonStyle(.plain)
@@ -192,13 +192,12 @@ struct ParentGateView<Content: View>: View {
     /// is available on this device: explain + gentle exit, never a create-flow.
     private var setupUnavailable: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 14, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
             VStack(spacing: AppSpacing.lg) {
                 Image(systemName: "lock.badge.clock")
                     .font(.system(size: 56))
                     .foregroundStyle(AppColor.starGold)
-                    .glow(AppColor.starGold, radius: 14)
                 Text("קוֹד הַהוֹרֶה לֹא זָמִין כָּאן")
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
@@ -216,7 +215,7 @@ struct ParentGateView<Content: View>: View {
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 34).padding(.vertical, 13)
-                            .background(.white.opacity(0.16), in: Capsule())
+                            .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }
                     .buttonStyle(.juicy)
                 }
@@ -227,8 +226,8 @@ struct ParentGateView<Content: View>: View {
 
     private var gate: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 18, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             VStack(spacing: 0) {
                 HStack {
@@ -240,7 +239,7 @@ struct ParentGateView<Content: View>: View {
                                 .font(.system(size: 18, weight: .bold))
                                 .foregroundStyle(.white.opacity(0.85))
                                 .frame(width: 40, height: 40)
-                                .background(.white.opacity(0.15), in: Circle())
+                                .background(.white.opacity(0.22), in: Circle()).overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                         }
                     } else if isSetupMode {
                         // Root gate during FIRST-TIME setup (no parent code exists
@@ -256,7 +255,7 @@ struct ParentGateView<Content: View>: View {
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 14).padding(.vertical, 8)
-                                .background(.white.opacity(0.16), in: Capsule())
+                                .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                         }
                     }
                     Spacer()
@@ -266,9 +265,9 @@ struct ParentGateView<Content: View>: View {
                 // big empty middle.
                 VStack(spacing: 16) {
                     Image(systemName: "lock.fill")
-                        .font(.system(size: 56))
-                        .foregroundStyle(AppColor.starGold)
-                        .glow(AppColor.starGold, radius: 14)
+                        .font(.system(size: 52, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
 
                     Text(isSetupMode ? "בְּחֲרוּ קוֹד הוֹרֶה" : (gateTitle ?? "הַגְדָּרוֹת הוֹרֶה"))
                         .font(.system(size: 30, weight: .heavy, design: .rounded))
@@ -284,7 +283,7 @@ struct ParentGateView<Content: View>: View {
                             Circle()
                                 .stroke(.white.opacity(0.7), lineWidth: 2)
                                 .background(
-                                    Circle().fill(i < entered.count ? AppColor.starGold : Color.clear)
+                                    Circle().fill(i < entered.count ? Color.white : Color.clear)
                                 )
                                 .frame(width: 26, height: 26)
                         }
@@ -302,7 +301,7 @@ struct ParentGateView<Content: View>: View {
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 8)
-                                .background(.white.opacity(0.15), in: Capsule())
+                                .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                         }
                         .padding(.top, 6)
                     }
@@ -395,7 +394,7 @@ struct ParentGateView<Content: View>: View {
                     }
                     .foregroundStyle(.white)
                     .frame(width: 76, height: 76)
-                    .background(.white.opacity(0.15), in: Circle())
+                    .background(.white.opacity(0.22), in: Circle()).overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                     .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
                 }
                 .buttonStyle(.plain)

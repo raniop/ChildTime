@@ -21,8 +21,8 @@ struct KidModeEntryView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 16, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
 
             VStack(spacing: 0) {
                 header
@@ -69,7 +69,7 @@ struct KidModeEntryView: View {
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 38, height: 38)
-                        .background(.white.opacity(0.18), in: Circle())
+                        .background(.white.opacity(0.22), in: Circle()).overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                 }
                 .environment(\.layoutDirection, .leftToRight)
             }
@@ -126,7 +126,7 @@ struct KidModeEntryView: View {
                 Image(systemName: "chevron.left").foregroundStyle(.white.opacity(0.6))
             }
             .padding(AppSpacing.md)
-            .background(RoundedRectangle(cornerRadius: AppRadius.large).fill(.white.opacity(0.10)))
+            .glassPane(radius: AppRadius.large)
         }
         .buttonStyle(.plain)
     }
@@ -159,8 +159,7 @@ struct KidModeEntryView: View {
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(AppGradient.gold, in: Capsule())
-            .glow(AppColor.starGold, radius: 12)
+            .glassFill(AppGradient.gold, radius: 30)
         }
         .buttonStyle(.plain)
         .disabled(selectedChild == nil || requesting)
@@ -174,8 +173,8 @@ struct KidModeExitView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            SparkleField(count: 14, size: 12)
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
             VStack(spacing: AppSpacing.lg) {
                 Text("🔓").font(.system(size: 72))
                 Text("לָצֵאת מִמַּצַּב יֶלֶד?")
@@ -191,7 +190,7 @@ struct KidModeExitView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 15)
-                        .background(AppGradient.success, in: Capsule())
+                        .glassFill(AppGradient.success, radius: 30)
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 4)

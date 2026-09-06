@@ -58,8 +58,8 @@ struct ProfileEditorView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppGradient.dreamy.ignoresSafeArea()
-                SparkleField(count: 16, size: 12)
+                GlassBackdrop()
+                SparkleField(count: 12, size: 11)
 
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
@@ -175,7 +175,7 @@ struct ProfileEditorView: View {
                 .frame(height: 28)
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.vertical, AppSpacing.sm)
-                .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: AppRadius.medium))
+                .glassPane(radius: AppRadius.medium, shadow: false)
         }
     }
 
@@ -208,13 +208,12 @@ struct ProfileEditorView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, AppSpacing.sm)
-            .background(.white.opacity(selected ? 0.28 : 0.12), in: RoundedRectangle(cornerRadius: AppRadius.medium))
+            .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.medium)
                     .stroke(selected ? AppColor.successMint : .white.opacity(0.2),
                             lineWidth: selected ? 2.5 : 1)
             )
-            .glow(selected ? AppColor.successMint : .clear, radius: selected ? 8 : 0)
         }
         .buttonStyle(.juicy)
     }
@@ -256,7 +255,7 @@ struct ProfileEditorView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, AppSpacing.sm)
-            .background(.white.opacity(selected ? 0.26 : 0.10), in: RoundedRectangle(cornerRadius: AppRadius.medium))
+            .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.medium)
                     .stroke(selected ? AppColor.successMint : .white.opacity(0.18),
@@ -309,7 +308,7 @@ struct ProfileEditorView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, AppSpacing.sm)
-            .background(.white.opacity(selected ? 0.26 : 0.10), in: RoundedRectangle(cornerRadius: AppRadius.medium))
+            .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.medium)
                     .stroke(selected ? AppColor.successMint : .white.opacity(0.18),
@@ -340,7 +339,7 @@ struct ProfileEditorView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, AppSpacing.sm)
-                        .background(.white.opacity(selected ? 0.26 : 0.10), in: RoundedRectangle(cornerRadius: AppRadius.medium))
+                        .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
                         .overlay(RoundedRectangle(cornerRadius: AppRadius.medium)
                             .stroke(selected ? AppColor.successMint : .white.opacity(0.18), lineWidth: selected ? 2.2 : 1))
                     }
@@ -372,7 +371,7 @@ struct ProfileEditorView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
-                        .background(.white.opacity(selected ? 0.26 : 0.10), in: Capsule())
+                        .background(Capsule().fill(.white.opacity(selected ? 0.30 : 0.12)))
                         .overlay(Capsule().stroke(selected ? AppColor.starGold : .white.opacity(0.18),
                                                   lineWidth: selected ? 2 : 1))
                     }
@@ -420,7 +419,6 @@ struct ProfileEditorView: View {
                 )
             )
             .scaleEffect(selected ? 1.08 : 1.0)
-            .glow(selected ? AppColor.starGold : .clear, radius: selected ? 10 : 0)
         }
         .buttonStyle(.juicy)
     }
@@ -440,7 +438,7 @@ struct ProfileEditorView: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, AppSpacing.md)
                         .padding(.vertical, 10)
-                        .background(.white.opacity(0.18), in: Capsule())
+                        .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
                 .buttonStyle(.juicy)
                 if photoData != nil {

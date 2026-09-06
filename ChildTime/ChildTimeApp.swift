@@ -305,6 +305,9 @@ struct ChildTimeApp: App {
         case "childjoin": ChildJoinView()               // DEMO_SCREEN=childjoin
         case "familychoice": FamilyChoiceView()         // DEMO_SCREEN=familychoice
         case "applock": ChildAppLockSetupView()         // DEMO_SCREEN=applock
+        case "createchild": ProfileEditorView(mode: .create) { _ in } onDelete: { _ in }   // DEMO_SCREEN=createchild
+        case "kidmode": KidModeEntryView()              // DEMO_SCREEN=kidmode
+        case "gate": ParentGateView(allowClose: true, respectSession: false) { Text("OK") }   // DEMO_SCREEN=gate
         case "choresparent":                            // DEMO_SCREEN=choresparent — the parent's chores manager
             if let p = ProfileStore.shared.active { ChoresParentView(profile: p).onAppear { ChoreStore.shared.seedDemo(childID: p.id) } }
         case "childdifficulty": if let id = ProfileStore.shared.activeID { ChildDifficultyView(profileID: id) }
