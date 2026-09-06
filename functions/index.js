@@ -1421,6 +1421,7 @@ exports.adminFamiliesOverview = onCall(
         id: h.id.slice(0, 8),
         fullId: h.id,     // needed by the admin actions (admin-only page)
         familyLabel: d.familyLabel || null,   // admin-set display label
+        familyName: d.familyName || null,   // the parent-set name (Settings → שם המשפחה)
         isDemo,
         parents,
         tombstones: tombsByHH[h.id] || 0,

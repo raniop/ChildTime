@@ -1224,7 +1224,8 @@ struct ParentDashboardView: View {
     private var homeSubtitle: String {
         let f = DateFormatter(); f.locale = Locale(identifier: "he_IL"); f.dateFormat = "EEEE"
         let day = f.string(from: Date()).replacingOccurrences(of: "יום ", with: "")
-        return [day, childrenCountLabel, familyMomentLine].compactMap { $0 }.joined(separator: " · ")
+        let family = household.household?.familyName
+        return [family, day, childrenCountLabel, familyMomentLine].compactMap { $0 }.joined(separator: " · ")
     }
 
     private var childrenCountLabel: String? {

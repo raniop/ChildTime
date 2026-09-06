@@ -947,6 +947,17 @@ final class HouseholdManager: ObservableObject {
     /// PARENT: save the dashboard's manual child order (family-wide, so a
     /// co-parent's dashboard matches). Applies locally at once for a snappy
     /// drag-and-drop; the household listener echoes the same value back.
+    /// The parent names the family ("משפחת גולן"). Empty clears it.
+    func setFamilyName(_ raw: String) {
+        let name = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        household?.familyName = name.isEmpty ? nil : name
+        #if canImport(FirebaseFirestore)
+        guard let hh = household else { return }
+        Task { try? await db.collection("households").document(hh.id)
+            .updateData(["familyName": name.isEmpty ? FieldValue.delete() : name]) }
+        #endif
+    }
+
     func setChildOrder(_ ids: [UUID]) {
         let order = ids.map { $0.uuidString }
         localChildOrder = order

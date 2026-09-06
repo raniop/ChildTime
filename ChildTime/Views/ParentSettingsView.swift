@@ -35,6 +35,7 @@ struct ParentSettingsView: View {
         NavigationStack {
             Form {
                 premiumSection
+                familySection
                 dashboardSection
                 // Screen Time authorization matters where apps get shielded (a
                 // child device / Kid Mode). On the parent's own monitoring phone
@@ -102,6 +103,36 @@ struct ParentSettingsView: View {
                     .environment(\.layoutDirection, .rightToLeft)
             }
         }
+    }
+
+    /// "משפחת גולן" — one name for the whole household (Rani: the dashboard
+    /// listed each parent by name; a family deserves a name of its own).
+    @State private var familyNameDraft: String = HouseholdManager.shared.household?.familyName ?? ""
+    private var familySection: some View {
+        Section {
+            HStack {
+                Text("👪")
+                TextField("", text: $familyNameDraft,
+                          prompt: Text("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן").foregroundColor(.white.opacity(0.6)))
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .submitLabel(.done)
+                    .onSubmit { household.setFamilyName(familyNameDraft) }
+                if familyNameDraft != (household.household?.familyName ?? "") {
+                    Button("שִׁמְרוּ") { household.setFamilyName(familyNameDraft) }
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "4B3FBF"))
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(Capsule().fill(.white.opacity(0.92)))
+                        .buttonStyle(.plain)
+                }
+            }
+        } header: {
+            Text("שֵׁם הַמִּשְׁפָּחָה")
+        } footer: {
+            Text("מוֹפִיעַ בְּמָסָךְ הַהוֹרִים וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה.")
+        }
+        .glassRows()
     }
 
     private var dashboardSection: some View {

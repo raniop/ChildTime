@@ -27,6 +27,10 @@ struct Household: Codable, Identifiable, Equatable {
     /// the household so both parents see the same order. Optional so older
     /// household docs still decode.
     var childOrder: [String]?
+    /// The family's own name, set by a parent in Settings ("משפחת גולן") —
+    /// shown on the parent home and in the founder dashboard instead of a
+    /// list of parent names. Optional so older docs decode.
+    var familyName: String?
     /// 💎 Family-wide premium: written by whichever device holds the StoreKit
     /// entitlement (the paying parent), read by EVERY device bound to the
     /// family — so the kid's iPad/iPhone unlock premium regardless of which

@@ -251,7 +251,8 @@ function render() {
 
   const renderFamily = (f) => {
     const guest = f.parents.find((p) => p.isGuestParent);
-    const pnames = (f.familyLabel ? "🏷 " + esc(f.familyLabel) : "")
+    // The family's OWN name (parent-set) leads; the admin label rides along.
+    const pnames = [f.familyName ? "👪 " + esc(f.familyName) : "", f.familyLabel ? "🏷 " + esc(f.familyLabel) : ""].filter(Boolean).join(" · ")
       || f.parents.filter((p) => p.name).map((p) => esc(p.name)).join(", ")
       || (guest ? "מִשְׁפַּחַת אוֹרֵחַ — הוֹרֶה לְלֹא הַרְשָׁמָה"
                 : (f.children.length ? "משפחה ללא שם" : "הרשמה ללא משפחה"));
