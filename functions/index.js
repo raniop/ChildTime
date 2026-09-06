@@ -1921,6 +1921,24 @@ exports.worldPassReminders = onSchedule(
   }
 );
 
+// 🧹📸 A chore photo the parent never approved/archived must not linger —
+// privacy policy: deleted at approval, and after 7 days at most.
+exports.pruneChorePhotos = onSchedule(
+  { schedule: "every day 04:10", timeZone: "Asia/Jerusalem", timeoutSeconds: 300, memory: "512MiB" },
+  async () => {
+    const cutoff = Date.now() / 1000 - 7 * 86400;
+    const snap = await db.collectionGroup("chores").where("markedDoneAt", "<=", cutoff).get();
+    let pruned = 0;
+    for (const doc of snap.docs) {
+      const d = doc.data() || {};
+      if (!d.photoData && !d.photoToken) continue;
+      await doc.ref.update({ photoData: admin.firestore.FieldValue.delete(), photoToken: admin.firestore.FieldValue.delete() });
+      pruned += 1;
+    }
+    console.log("[pruneChorePhotos] pruned", pruned, "of", snap.size);
+  }
+);
+
 exports.adminSaveCampaign = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const email = requireAdmin(request);
   const id = String(request.data && request.data.id || "").trim();

@@ -118,7 +118,7 @@ struct LeaderboardView: View {
                     dismiss()
                 } label: {
                     HStack(spacing: 10) {
-                        Text("🎮").font(.system(size: 24))
+                        Text("🔔").font(.system(size: 24))
                         VStack(alignment: .leading, spacing: 1) {
                             // No verb — we don't know the HOST's gender.
                             Text("הַזְמָנָה לְטוּרְנִיר מֵ\(invite.hostName)!")

@@ -12,6 +12,9 @@
 - **חשבון הורה:** כתובת אימייל ושם (דרך Sign in with Apple, Google, או אימייל). הסיסמה
   מנוהלת ע"י ספק ההתחברות ואינה נשמרת אצלנו.
 - **פרופיל הילד/ה:** שם פרטי או כינוי, גיל משוער, ותמונת פרופיל — אם תבחרו להוסיף.
+- **צילום מטלה (אופציונלי):** ילד/ה יכול/ה לצרף צילום כהוכחה שמטלת בית בוצעה. הצילום נשמר
+  על המטלה עצמה, נראה רק להורים של אותה משפחה, ונמחק אוטומטית כשההורה מאשר או מארכב את
+  המטלה — ולכל היותר אחרי 7 ימים. אינו משמש לזיהוי פנים, לפרסום או לכל מטרה אחרת.
 - **התקדמות למידה:** שאלות שנענו, הצלחות, כוכבים ודקות שנצברו.
 - **מזהה משתמש טכני** (Firebase) לצורך סנכרון בין מכשירי המשפחה.
 - **נתוני אבחון/קריסות** (אם מופעלים) לשיפור היציבות.
@@ -30,7 +33,7 @@
 
 ## הרשאות מכשיר
 - **התראות:** לעדכוני הורה (אופציונלי, בהסכמתכם).
-- **מצלמה:** לסריקת קוד QR לחיבור מכשיר הילד, ולצילום תמונת פרופיל (אופציונלי).
+- **מצלמה:** לסריקת קוד QR לחיבור מכשיר הילד, לצילום תמונת פרופיל, ולצילום הוכחה למטלת בית (הכול אופציונלי).
 - **Screen Time / Family Controls:** לחסימת אפליקציות שאתם בוחרים, עד שהילד/ה מרוויח/ה
   זמן. ההגדרה נשארת על המכשיר.
 
@@ -68,8 +71,11 @@ marketing. There are no ads and no cross-app tracking.
 
 Data is stored in Google Firebase; access is limited to members of the same
 family. The parent code is stored hashed on-device. Permissions: notifications
-(optional), camera (QR scan + optional profile photo), and Screen Time/Family
-Controls (to block parent-selected apps). Parents can export or delete all data
+(optional), camera (QR scan, optional profile photo, optional chore-proof photo), and
+Screen Time/Family Controls (to block parent-selected apps). A chore photo a child
+attaches is stored on that chore, visible only to the parents of the same family,
+never used for face recognition or advertising, and deleted automatically when the
+parent approves or archives the chore — and after 7 days at most. Parents can export or delete all data
 from Parent Settings. The app is intended for family use under parental guidance.
 
 Contact: [support email].
