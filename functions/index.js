@@ -2106,3 +2106,246 @@ exports.dispatchCampaigns = onSchedule(
     }
   }
 );
+
+// ============================================================================
+// 🛠 Admin app (docs/admin/app.html) — journey, overview, activity, content,
+// support, config. Everything first-party from Firestore; precomputed hourly
+// into adminStats/journey so the panels open instantly.
+// ============================================================================
+
+const CONVERSION_DEFAULTS = {
+  activationDays: 3, activationQuestions: 40, giftDays: 14,
+  guestWorlds: 2, guestRotateDays: 7, lockedShown: 3, lockedRotateDays: 3,
+  giftPushDays: [4, 9, 12, 13, 14], giftPushHour: 17,
+  oneTimeAfterGiftOnly: true, paywall: "personal", storeKitTrial: false,
+  guestTopics: ["math", "reading"],
+  copyActivation: "🎁 פתחנו ל{שם} את טופי+ במתנה · {שם} עבר/ה {שאלות} שאלות, אז ל־{ימים} הימים הקרובים כל העולמות פתוחים. בלי כרטיס, לא מתחדש. מסתיים ב־{תאריך}.",
+  copyTwoDays: "⏰ נשארו יומיים לטופי+ של {שם} · {עולם אהוב}: {חזרות} חזרות השבוע. השאירו את כל העולמות פתוחים, {מחיר חודשי בשנתי} לחודש.",
+};
+async function conversionConfig() {
+  const d = await db.collection("config").doc("conversion").get();
+  return { ...CONVERSION_DEFAULTS, ...(d.exists ? d.data() : {}) };
+}
+
+const TOPIC_LABEL = { math: "🧮 מתמטיקה", english: "🇬🇧 אנגלית", hebrew: "✍️ עברית", logic: "🧩 לוגיקה", science: "🔬 מדעים", history: "🏛️ היסטוריה",
+  geography: "🌍 גיאוגרפיה", money: "💰 חינוך פיננסי", reading: "📖 הבנת הנקרא", soccer: "⚽ כדורגל", dinosaurs: "🦖 דינוזאורים", space: "🚀 חלל", animals: "🐾 חיות",
+  sea: "🌊 ים", gifted: "🧠 מחוננים", food: "🍳 מטבח", israel: "🏛️ ישראל שלי", music: "🎵 מוזיקה", body: "🧍 גוף האדם", vehicles: "🚗 כלי רכב", flags: "🌍 דגלים" };
+
+// The whole family journey from raw data. Runs hourly (and on demand).
+async function computeJourney() {
+  const cfg = await conversionConfig();
+  const nowMs = Date.now(), nowS = nowMs / 1000;
+  const dayKey = (d) => { const x = new Date(d); return `${x.getUTCFullYear()}-${String(x.getUTCMonth() + 1).padStart(2, "0")}-${String(x.getUTCDate()).padStart(2, "0")}`; };
+  // Day keys in Israel time (the app writes dayKey in device-local time; close enough).
+  const il = (ms) => dayKey(ms + 3 * 3600 * 1000);
+  const todayKey = il(nowMs);
+  const last14 = Array.from({ length: 14 }, (_, i) => il(nowMs - (13 - i) * 86400000));
+  const [hhSnap, kidsSnap, devSnap, parentsSnap, salesSnap, reportsSnap, feedbackSnap] = await Promise.all([
+    db.collection("households").get(), db.collection("children").get(), db.collection("childDevices").get(),
+    db.collection("parents").get(), db.collection("packPurchases").get(),
+    db.collection("questionReports").where("status", "!=", "resolved").get().catch(() => ({ size: 0 })),
+    db.collection("parentFeedback").get().catch(() => ({ size: 0 })),
+  ]);
+  const parents = {}; parentsSnap.forEach((p) => { parents[p.id] = p.data() || {}; });
+  const kids = kidsSnap.docs.filter((k) => !(k.data() || {}).deletedAt);
+  // dailyStats per child (≤ 30 docs each), in chunks
+  const perChild = {};
+  const CHUNK = 20;
+  for (let i = 0; i < kids.length; i += CHUNK) {
+    const slice = kids.slice(i, i + CHUNK);
+    const snaps = await Promise.all(slice.map((k) => k.ref.collection("dailyStats").get().catch(() => ({ docs: [] }))));
+    snaps.forEach((snap, j) => {
+      const k = slice[j], d = k.data() || {};
+      const days = snap.docs.map((x) => x.data() || {}).filter((x) => x.date);
+      const cut30 = il(nowMs - 30 * 86400000);
+      const recent = days.filter((x) => x.date >= cut30);
+      const activeDays = recent.filter((x) => (x.questionsAnswered || 0) > 0);
+      const questions30 = recent.reduce((s, x) => s + (x.questionsAnswered || 0), 0);
+      const today = days.find((x) => x.date === todayKey) || {};
+      const topicTotals = {};
+      for (const x of recent) for (const [t, v] of Object.entries(x.perTopic || {})) { topicTotals[t] = topicTotals[t] || { q: 0, c: 0, days: 0 }; topicTotals[t].q += v.answered || 0; topicTotals[t].c += v.correct || 0; topicTotals[t].days += 1; }
+      const fav = Object.entries(topicTotals).sort((a, b) => b[1].q - a[1].q)[0];
+      const everQ = days.reduce((s, x) => s + (x.questionsAnswered || 0), 0);
+      const everDays = days.filter((x) => (x.questionsAnswered || 0) > 0).length;
+      perChild[k.id] = {
+        name: d.name || "", householdID: d.householdID, grade: (d.grade === 0 || d.grade) ? d.grade : null, gender: d.gender || null,
+        activeDays30: activeDays.length, questions30, everQuestions: everQ, everActiveDays: everDays,
+        lastActive: activeDays.map((x) => x.date).sort().slice(-1)[0] || null,
+        today: { questions: today.questionsAnswered || 0, correct: today.correct || 0, minutesEarned: today.minutesEarned || 0, minutesUsed: today.minutesUsed || 0 },
+        series14: last14.map((dk) => { const x = days.find((y) => y.date === dk); return x && (x.questionsAnswered || 0) > 0 ? 1 : 0; }),
+        activated: everDays >= cfg.activationDays && everQ >= cfg.activationQuestions,
+        favorite: fav ? { topic: fav[0], label: TOPIC_LABEL[fav[0]] || fav[0], questions: fav[1].q, days: fav[1].days, accuracy: fav[1].q ? Math.round(100 * fav[1].c / fav[1].q) : 0 } : null,
+        topicsToday: Object.fromEntries(Object.entries(today.perTopic || {}).map(([t, v]) => [t, { q: v.answered || 0, c: v.correct || 0 }])),
+        packs: d.packs || [], packExpiry: d.packExpiry || {},
+      };
+    });
+  }
+  // households → journey state
+  const households = {};
+  const funnel = { registered: 0, childPlayed: 0, activated: 0, gift: 0, valued: 0, paywall: 0, purchaseStarted: 0, purchased: 0, renewed: 0 };
+  const states = { free_new: 0, free_activated: 0, gift: 0, gift_expiring: 0, plus: 0, returned: 0, inactive: 0 };
+  let mrr = 0, monthlyN = 0, yearlyN = 0, premiumN = 0;
+  hhSnap.forEach((h) => {
+    const hh = h.data() || {};
+    const kidsOf = Object.entries(perChild).filter(([, c]) => c.householdID === h.id).map(([id, c]) => ({ id, ...c }));
+    const realParent = (hh.parentUIDs || []).some((u) => parents[u] && (parents[u].email || parents[u].displayName));
+    const played = kidsOf.some((c) => c.everQuestions > 0);
+    const activated = kidsOf.some((c) => c.activated);
+    const premiumUntil = Number(hh.premiumUntil || 0);
+    const premium = premiumUntil > nowS;
+    const gift = premium && hh.premiumSource === "gift";
+    const daysLeft = premium ? Math.ceil((premiumUntil - nowS) / 86400) : 0;
+    const lastActive = kidsOf.map((c) => c.lastActive).filter(Boolean).sort().slice(-1)[0] || null;
+    const inactive = !lastActive || lastActive < il(nowMs - 14 * 86400000);
+    let state = "free_new";
+    if (premium && gift) state = daysLeft <= 3 ? "gift_expiring" : "gift";
+    else if (premium) state = "plus";
+    else if (hh.giftEndedAt) state = "returned";
+    else if (activated) state = "free_activated";
+    if (!premium && inactive && played) state = "inactive";
+    states[state] += 1;
+    if (realParent || played) funnel.registered += 1;
+    if (played) funnel.childPlayed += 1;
+    if (activated) funnel.activated += 1;
+    if (gift || hh.giftEndedAt || hh.giftStartedAt) funnel.gift += 1;
+    if (kidsOf.some((c) => c.questions30 >= 20 && c.activeDays30 >= 2)) funnel.valued += 1;
+    if (hh.paywallViews) funnel.paywall += 1;
+    if (hh.purchaseStarted) funnel.purchaseStarted += 1;
+    if (premium && !gift) { funnel.purchased += 1; premiumN += 1; if (daysLeft > 60) { yearlyN += 1; mrr += 199 / 12; } else { monthlyN += 1; mrr += 24.9; } }
+    if (hh.renewedAt) funnel.renewed += 1;
+    households[h.id] = { state, premium, gift, daysLeft, premiumUntil, activated, played, lastActive, familyName: hh.familyName || hh.familyLabel || null,
+      plan: premium && !gift ? (daysLeft > 60 ? "yearly" : "monthly") : null, purchaseSource: hh.purchaseSource || null, kids: kidsOf.map((c) => c.id) };
+  });
+  // today + series
+  const childrenToday = Object.values(perChild).filter((c) => c.today.questions > 0).length;
+  const questionsToday = Object.values(perChild).reduce((s, c) => s + c.today.questions, 0);
+  const correctToday = Object.values(perChild).reduce((s, c) => s + c.today.correct, 0);
+  const minutesToday = Object.values(perChild).reduce((s, c) => s + c.today.minutesEarned, 0);
+  const activeSeries = last14.map((_, i) => Object.values(perChild).filter((c) => c.series14[i]).length);
+  const worldsToday = {};
+  for (const c of Object.values(perChild)) for (const [t, v] of Object.entries(c.topicsToday)) { worldsToday[t] = worldsToday[t] || { q: 0, c: 0, kids: 0 }; worldsToday[t].q += v.q; worldsToday[t].c += v.c; if (v.q) worldsToday[t].kids += 1; }
+  const active30 = Object.values(households).filter((h) => h.lastActive && h.lastActive >= il(nowMs - 30 * 86400000)).length;
+  const sales = salesSnap.docs.map((s) => s.data() || {});
+  const packRevenue = sales.reduce((s, x) => s + Number(x.price || 0), 0);
+  const journey = {
+    computedAt: nowMs, config: cfg,
+    overview: { activeFamilies30: active30, childrenToday, questionsToday, accuracyToday: questionsToday ? Math.round(100 * correctToday / questionsToday) : 0,
+      minutesToday, mrr: Math.round(mrr), premiumFamilies: premiumN, yearlyShare: premiumN ? Math.round(100 * yearlyN / premiumN) : 0,
+      activatedToPaid30: funnel.activated ? Math.round(1000 * funnel.purchased / funnel.activated) / 10 : 0,
+      openReports: reportsSnap.size || 0, feedbackCount: feedbackSnap.size || 0, packSales: sales.length, packRevenue: Math.round(packRevenue),
+      activeSeries, activeSeriesDays: last14, worldsToday: Object.entries(worldsToday).map(([t, v]) => ({ topic: t, label: TOPIC_LABEL[t] || t, ...v, accuracy: v.q ? Math.round(100 * v.c / v.q) : 0 })).sort((a, b) => b.q - a.q).slice(0, 8) },
+    states, funnel, households, children: perChild,
+  };
+  // Firestore document limit is 1 MB — keep children compact if the roster grows.
+  await db.collection("adminStats").doc("journey").set(journey);
+  return journey;
+}
+
+exports.refreshJourney = onSchedule({ schedule: "every 60 minutes", timeZone: "Asia/Jerusalem", timeoutSeconds: 540, memory: "1GiB" }, async () => { await computeJourney(); });
+
+exports.adminJourney = onCall({ timeoutSeconds: 300, memory: "1GiB" }, async (request) => {
+  requireAdmin(request);
+  if (request.data && request.data.recompute) return await computeJourney();
+  const d = await db.collection("adminStats").doc("journey").get();
+  return d.exists ? d.data() : await computeJourney();
+});
+
+// Recent things worth a glance on the dashboard.
+exports.adminActivity = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (request) => {
+  requireAdmin(request);
+  const items = [];
+  const push = (at, kind, text, ref) => { if (at) items.push({ at, kind, text, ref: ref || null }); };
+  const [sales, camps, reports, feedback, chores] = await Promise.all([
+    db.collection("packPurchases").orderBy("at", "desc").limit(15).get().catch(() => ({ docs: [] })),
+    db.collection("campaigns").where("status", "==", "sent").orderBy("sentAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
+    db.collection("questionReports").orderBy("createdAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
+    db.collection("parentFeedback").orderBy("createdAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
+    db.collectionGroup("chores").where("markedDoneAt", ">", Date.now() / 1000 - 86400).limit(10).get().catch(() => ({ docs: [] })),
+  ]);
+  const hhName = async (id) => { if (!id) return "משפחה"; const h = await db.collection("households").doc(id).get(); const d = h.exists ? h.data() : {}; return d.familyName || d.familyLabel || "משפחה " + String(id).slice(0, 4); };
+  for (const s of sales.docs) { const d = s.data(); push(Number(d.at) * 1000, "sale", `💎 ${await hhName(d.householdID)} רכשה ${PACK_META[d.packID]?.emoji || ""} ${PACK_META[d.packID]?.name || d.packID}${d.campaignID ? " · מקור: הודעה" : ""}`, { householdID: d.householdID }); }
+  for (const c of camps.docs) { const d = c.data(); push(d.sentAt, "campaign", `📣 נשלחה הודעה "${d.emoji ? d.emoji + " " : ""}${d.title}" ל־${d.stats?.sent || 0} מכשירים`); }
+  for (const r of reports.docs) { const d = r.data(); push(Number(d.createdAt) * (Number(d.createdAt) > 1e12 ? 1 : 1000), "report", `🚩 דיווח על שאלה: "${String(d.prompt || d.question || "").replace(/\n/g, " ").slice(0, 60)}" · ${TOPIC_LABEL[d.topic] || d.topic || ""}`); }
+  for (const f of feedback.docs) { const d = f.data(); push(Number(d.createdAt) * (Number(d.createdAt) > 1e12 ? 1 : 1000), "feedback", `💬 פידבק מהורה: "${String(d.message || "").slice(0, 80)}"`); }
+  for (const ch of chores.docs) { const d = ch.data(); push(Number(d.markedDoneAt) * 1000, "chore", `🧹${d.photoToken ? "📸" : ""} מטלה "${d.title || ""}" סומנה כבוצעה · ממתינה לאישור`); }
+  items.sort((a, b) => b.at - a.at);
+  return { items: items.slice(0, 30) };
+});
+
+exports.adminListReports = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (request) => {
+  requireAdmin(request);
+  const snap = await db.collection("questionReports").orderBy("createdAt", "desc").limit(200).get().catch(() => ({ docs: [] }));
+  return { reports: snap.docs.map((d) => ({ id: d.id, ...d.data() })) };
+});
+exports.adminSetReportStatus = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const id = String(request.data?.id || ""), status = String(request.data?.status || "");
+  if (!id || !["open", "resolved", "disabled"].includes(status)) throw new HttpsError("invalid-argument", "id/status");
+  await db.collection("questionReports").doc(id).set({ status, resolvedBy: email, resolvedAt: Date.now() }, { merge: true });
+  return { ok: true };
+});
+
+exports.adminListSupport = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (request) => {
+  requireAdmin(request);
+  const [fb, wl] = await Promise.all([
+    db.collection("parentFeedback").orderBy("createdAt", "desc").limit(100).get().catch(() => ({ docs: [] })),
+    db.collection("waitlist").get().catch(() => ({ size: 0 })),
+  ]);
+  const items = [];
+  for (const d of fb.docs) { const x = d.data(); let family = null; if (x.householdID) { const h = await db.collection("households").doc(x.householdID).get(); family = h.exists ? (h.data().familyName || h.data().familyLabel || null) : null; }
+    items.push({ id: d.id, kind: "feedback", at: Number(x.createdAt) * (Number(x.createdAt) > 1e12 ? 1 : 1000), family, householdID: x.householdID || null, text: x.message || "", device: x.appVersion || "", status: x.status || "open" }); }
+  return { items, waitlist: wl.size || 0 };
+});
+exports.adminSetSupportStatus = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const id = String(request.data?.id || ""), status = String(request.data?.status || "open");
+  await db.collection("parentFeedback").doc(id).set({ status, handledBy: email, handledAt: Date.now() }, { merge: true });
+  return { ok: true };
+});
+
+exports.adminGetConfig = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => { requireAdmin(request); return { config: await conversionConfig(), defaults: CONVERSION_DEFAULTS }; });
+exports.adminSetConfig = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const patch = request.data && request.data.config || {};
+  const allowed = Object.keys(CONVERSION_DEFAULTS);
+  const clean = {}; for (const k of allowed) if (patch[k] !== undefined) clean[k] = patch[k];
+  await db.collection("config").doc("conversion").set({ ...clean, updatedAt: Date.now(), updatedBy: email }, { merge: true });
+  return { ok: true, config: await conversionConfig() };
+});
+
+// Pack meta from the worlds panel: proofread flag, scheduled launch.
+exports.adminSetPackMeta = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const id = String(request.data?.packID || "");
+  if (!/^[a-z0-9_-]{2,40}$/.test(id)) throw new HttpsError("invalid-argument", "packID");
+  const patch = {};
+  if (request.data.reviewed !== undefined) patch.reviewed = !!request.data.reviewed;
+  if (request.data.launchAt !== undefined) patch.launchAt = request.data.launchAt ? Number(request.data.launchAt) : admin.firestore.FieldValue.delete();
+  await db.collection("packs").doc(id).set({ ...patch, updatedAt: Date.now(), updatedBy: email }, { merge: true });
+  return { ok: true };
+});
+// A scheduled launch fires the same path as the manual switch.
+exports.launchScheduledPacks = onSchedule({ schedule: "every 15 minutes", timeZone: "Asia/Jerusalem", timeoutSeconds: 120, memory: "256MiB" }, async () => {
+  const snap = await db.collection("packs").where("launchAt", "<=", Date.now()).get();
+  for (const d of snap.docs) {
+    const p = d.data() || {}; if (p.enabled) { await d.ref.update({ launchAt: admin.firestore.FieldValue.delete() }); continue; }
+    await d.ref.set({ enabled: true, launchedAt: admin.firestore.FieldValue.serverTimestamp(), launchAt: admin.firestore.FieldValue.delete() }, { merge: true });
+    if (!p.launchCampaignID) { const c = launchCampaignFor(d.id); if (c) { const cref = db.collection("campaigns").doc();
+      await cref.set({ ...c, scheduledAt: Date.now(), status: "scheduled", source: "launch", packID: d.id, createdAt: Date.now(), createdBy: "scheduler", stats: Object.fromEntries(CAMPAIGN_STAT_KEYS.map((k) => [k, 0])) });
+      await d.ref.set({ launchCampaignID: cref.id }, { merge: true }); } }
+    console.log("[launchScheduledPacks] launched", d.id);
+  }
+});
+
+// 🎁 Give / extend Tofy+ to one family from the admin (marked as a gift).
+exports.adminGiftHousehold = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const hhID = String(request.data?.householdID || ""); const days = Math.max(1, Math.min(365, Number(request.data?.days || 14)));
+  if (!/^[0-9A-Fa-f-]{36}$/.test(hhID)) throw new HttpsError("invalid-argument", "householdID");
+  const ref = db.collection("households").doc(hhID); const h = await ref.get(); if (!h.exists) throw new HttpsError("not-found", "household");
+  const now = Date.now() / 1000; const base = Math.max(Number(h.data().premiumUntil || 0), now);
+  const until = base + days * 86400;
+  await ref.set({ premiumUntil: until, premiumSource: "gift", giftStartedAt: h.data().giftStartedAt || now, giftBy: email }, { merge: true });
+  console.log("[adminGiftHousehold]", email, hhID, "+", days, "days");
+  return { ok: true, premiumUntil: until };
+});

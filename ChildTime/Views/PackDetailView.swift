@@ -284,13 +284,13 @@ struct PackDetailView: View {
         .glassPane(radius: 22, strength: 0.09)
     }
 
-    /// "₪19.90 / חודש" from StoreKit (planned price in the DEBUG demo).
+    /// "₪24.90 / חודש" from StoreKit (planned price in the DEBUG demo).
     /// One currency on the page: both from StoreKit (the user's storefront), or —
     /// in the DEBUG demo without products — both planned in ₪. Never mixed.
     private var tofyPlusPrice: String {
         if store.allLoaded, let m = subs.products.first(where: { $0.id == SubscriptionManager.monthlyID }) { return m.pricePerPeriod }
         #if DEBUG
-        return "₪19.90 / חוֹדֶשׁ"
+        return "₪24.90 / חוֹדֶשׁ"
         #else
         return subs.products.first(where: { $0.id == SubscriptionManager.monthlyID })?.pricePerPeriod ?? ""
         #endif

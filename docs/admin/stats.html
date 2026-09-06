@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#5E60CE">
+<title>טופי — לוח בקרה</title>
+<link rel="icon" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  /* ===== טופי — Admin Dashboard. 4 שכבות: Growth / Engagement / Learning / Economy.
+     ערוך בחופשיות — כל הצבעים/הכרטיסים כאן. ===== */
+  :root{
+    --indigo:#5E60CE; --teal:#48BFE3; --gold:#FFD23F; --purple:#9B5DE5;
+    --pink:#FF6B9D; --mint:#06D6A0; --glow:#FFB84D;
+    --card:rgba(255,255,255,.10); --brd:rgba(255,255,255,.16); --muted:rgba(255,255,255,.66);
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:"Heebo",-apple-system,BlinkMacSystemFont,Arial,sans-serif; color:#fff; min-height:100vh;
+    line-height:1.5; background:linear-gradient(160deg,#5E60CE 0%,#6A4BD0 38%,#48BFE3 100%); background-attachment:fixed;}
+  a{color:var(--gold)}
+  .wrap{max-width:1200px; margin:0 auto; padding:0 22px 80px}
+  header{position:sticky; top:0; z-index:30; backdrop-filter:blur(12px);
+    background:rgba(75,46,158,.40); border-bottom:1px solid var(--brd)}
+  header .wrap{display:flex; align-items:center; justify-content:space-between; height:66px; padding-bottom:0}
+  .brand{display:flex; align-items:center; gap:11px; font-weight:900; font-size:22px}
+  .brand img{width:36px; height:36px; border-radius:9px}
+  .brand small{font-weight:600; font-size:13px; opacity:.7}
+  .who{display:flex; align-items:center; gap:12px; font-size:14px}
+  .who button{font-family:inherit; cursor:pointer; font-weight:700; font-size:13px; border:1px solid var(--brd);
+    background:rgba(255,255,255,.10); color:#fff; border-radius:999px; padding:7px 14px}
+  .who button:hover{background:rgba(255,255,255,.18)}
+
+  .banner{margin:18px 0 0; border-radius:14px; padding:11px 16px; font-weight:600; font-size:14px;
+    border:1px solid var(--brd); display:flex; align-items:center; gap:10px}
+  .banner.demo{background:rgba(255,210,63,.16); border-color:rgba(255,210,63,.4)}
+  .banner.live{background:rgba(6,214,160,.14); border-color:rgba(6,214,160,.4)}
+  .banner.err{background:rgba(255,107,157,.16); border-color:rgba(255,107,157,.45)}
+  .banner .tag{font-weight:900; letter-spacing:.5px; font-size:12px; padding:2px 9px; border-radius:999px; background:rgba(0,0,0,.18)}
+  /* LIVE — bright green pill with a soft pulsing halo so it stands out */
+  .banner.live .tag{background:#06d6a0; color:#04231b; padding:3px 12px; display:inline-flex; align-items:center; gap:6px;
+    box-shadow:0 2px 10px rgba(6,214,160,.45); animation:livePulse 1.8s ease-in-out infinite}
+  .banner.live .tag::before{content:""; width:7px; height:7px; border-radius:50%; background:#04231b; opacity:.85}
+  @keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(6,214,160,.55), 0 2px 10px rgba(6,214,160,.4)}
+    50%{box-shadow:0 0 0 7px rgba(6,214,160,0), 0 2px 10px rgba(6,214,160,.4)}}
+
+  /* hero KPI */
+  .hero{margin-top:20px; border-radius:24px; padding:26px 28px; position:relative; overflow:hidden;
+    background:linear-gradient(120deg, rgba(255,210,63,.20), rgba(155,93,229,.18));
+    border:1px solid rgba(255,210,63,.35); box-shadow:0 14px 40px rgba(20,10,60,.25)}
+  .hero .eyebrow{font-size:14px; font-weight:800; color:var(--gold); letter-spacing:.5px}
+  .hero .title{font-size:16px; font-weight:700; opacity:.9; margin-top:2px}
+  .hero .big{font-size:64px; font-weight:900; line-height:1; margin-top:10px; letter-spacing:-1px}
+  .hero .big small{font-size:24px; font-weight:800; opacity:.8}
+  .hero .row{display:flex; gap:26px; margin-top:14px; flex-wrap:wrap}
+  .hero .row div{font-size:14px; color:rgba(255,255,255,.85)}
+  .hero .row b{font-size:20px; font-weight:900; display:block}
+  .hero .cap{font-size:13px; color:rgba(255,255,255,.82); margin-top:14px; line-height:1.55; max-width:700px}
+  .hero .cap b{color:#fff}
+
+  .layer{margin-top:34px}
+  .layer h2{font-size:13px; font-weight:900; letter-spacing:.6px; text-transform:uppercase; opacity:.7; margin:0 4px 4px}
+  .layer .q{font-size:18px; font-weight:800; margin:0 4px 14px}
+  .grid{display:grid; gap:14px}
+  .g5{grid-template-columns:repeat(5,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:1.5fr 1fr}
+  @media(max-width:900px){.g5,.g4,.g3,.g2{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.g5,.g4,.g3,.g2{grid-template-columns:1fr}}
+
+  .tile{border-radius:16px; padding:16px 16px 14px; background:var(--card); border:1px solid var(--brd);
+    box-shadow:0 8px 24px rgba(20,10,60,.16)}
+  .tile .lbl{font-size:13px; color:var(--muted); font-weight:600}
+  .tile .val{font-size:30px; font-weight:900; line-height:1.1; margin-top:4px; letter-spacing:-.5px}
+  .tile .val small{font-size:15px; font-weight:700; opacity:.7}
+  .tile .sub{font-size:12px; color:var(--muted); margin-top:5px}
+  .tile.accent{background:linear-gradient(135deg, rgba(72,191,227,.18), var(--card))}
+
+  .card{border-radius:18px; padding:18px 20px 20px; background:var(--card); border:1px solid var(--brd);
+    box-shadow:0 8px 24px rgba(20,10,60,.16)}
+  .card h3{font-size:15px; font-weight:800; margin-bottom:2px}
+  .card p.hint{font-size:12px; color:var(--muted); margin-bottom:12px}
+  .chart-box{position:relative; height:240px}
+  table{width:100%; border-collapse:collapse; font-size:14px}
+  th,td{text-align:start; padding:9px 6px; border-bottom:1px solid rgba(255,255,255,.10)}
+  th{font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); font-weight:800}
+  .bar{height:7px; border-radius:999px; background:rgba(255,255,255,.14); overflow:hidden; min-width:50px}
+  .bar>i{display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--gold),var(--glow))}
+  .pill{display:inline-block; font-size:12px; font-weight:800; padding:3px 10px; border-radius:999px}
+  .pill.up{background:rgba(6,214,160,.18); color:#9bf6cf} .pill.down{background:rgba(255,107,157,.18); color:#ffb3c9}
+  .empty{font-size:13px; color:var(--muted); padding:14px 4px; font-style:italic}
+  .pending{margin-top:30px; border-radius:14px; padding:14px 18px; background:rgba(255,255,255,.06); border:1px dashed var(--brd); font-size:13px; color:var(--muted)}
+  .pending b{color:#fff}
+  .updated{margin-top:24px; text-align:center; font-size:12px; color:var(--muted)}
+
+  .gate{position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(160deg,#5E60CE,#48BFE3); padding:24px}
+  .gate .box{max-width:380px; width:100%; text-align:center; background:rgba(255,255,255,.10); border:1px solid var(--brd);
+    border-radius:24px; padding:38px 30px; box-shadow:0 24px 60px rgba(20,10,60,.4); backdrop-filter:blur(8px)}
+  .gate img{width:84px; height:84px; border-radius:20px; margin-bottom:14px}
+  .gate h1{font-size:24px; font-weight:900; margin-bottom:6px}
+  .gate p{font-size:14px; color:var(--muted); margin-bottom:22px}
+  .gate button{font-family:inherit; cursor:pointer; width:100%; font-weight:800; font-size:16px; border:none;
+    border-radius:14px; padding:14px; color:#3a2a00; background:linear-gradient(180deg,var(--gold),#F2A93B); box-shadow:0 10px 26px rgba(255,184,77,.45)}
+  .gate button:hover{transform:translateY(-2px)} .gate .msg{margin-top:16px; font-size:13.5px; font-weight:700; min-height:20px}
+  .gate .msg.err{color:#ffb3c9}
+  .hidden{display:none !important}
+  .spin{display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:rot .7s linear infinite; vertical-align:-3px}
+  @keyframes rot{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- Shown while Firebase restores the session, so the login box never flashes
+     on refresh for an already-signed-in admin. -->
+<div class="gate" id="loader"><span class="spin" style="width:34px;height:34px;border-width:4px"></span></div>
+
+<div class="gate hidden" id="gate">
+  <div class="box">
+    <img src="../lion.png" alt="טופי">
+    <h1>לוח בקרה — טופי</h1>
+    <p>גישה למייסדים בלבד. התחבר עם חשבון Google המורשה.</p>
+    <button id="loginBtn">התחבר עם Google</button>
+    <div class="msg" id="gateMsg"></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header><div class="wrap">
+    <div class="brand"><img src="../lion.png" alt="">טופי <small>· לוח בקרה</small></div>
+    <div class="who"><a href="notifications.html" style="font-weight:700;font-size:13px;border:1px solid var(--brd);background:rgba(255,255,255,.10);color:#fff;border-radius:999px;padding:7px 14px;text-decoration:none">📣 הודעות</a><a href="families.html" style="font-weight:700;font-size:13px;border:1px solid var(--brd);background:rgba(255,255,255,.10);color:#fff;border-radius:999px;padding:7px 14px;text-decoration:none">👨‍👩‍👧 המשפחות</a><a href="app.html" style="font-weight:700;font-size:13px;border:1px solid var(--brd);background:rgba(255,255,255,.10);color:#fff;border-radius:999px;padding:7px 14px;text-decoration:none">🛠 ממשק הניהול</a><span id="whoEmail"></span><button id="logoutBtn">התנתק</button></div>
+  </div></header>
+
+  <div class="wrap">
+    <div class="banner demo" id="banner"><span class="tag">DEMO</span><span id="bannerText">נתוני דוגמה.</span></div>
+
+    <!-- HERO KPI -->
+    <div class="hero">
+      <div class="eyebrow">⭐ ה-KPI המרכזי</div>
+      <div class="title">Learning Minutes Generated · דקות מסך שנוצרו דרך למידה</div>
+      <div class="big" id="heroBig">—</div>
+      <div class="row">
+        <div>🎮 הומרו למשחק<b id="heroUsed">—</b></div>
+        <div>💚 נחסכו · לא נוצל<b id="heroSaved">—</b></div>
+        <div>📅 החודש<b id="heroMonth">—</b></div>
+      </div>
+      <div class="cap" id="heroCap"></div>
+    </div>
+
+    <!-- LAYER 1: GROWTH -->
+    <div class="layer">
+      <h2>שכבה 1 · Growth</h2><div class="q">האם האפליקציה גדלה?</div>
+      <div class="grid g5" id="growthTiles"></div>
+      <div class="grid g3" style="margin-top:14px" id="retentionTiles"></div>
+      <div class="card" style="margin-top:14px">
+        <h3>פעילות לאורך זמן</h3><p class="hint">ילדים פעילים ודקות שנוצרו ליום (30 ימים)</p>
+        <div class="chart-box"><canvas id="growthChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- LAYER 2: ENGAGEMENT -->
+    <div class="layer">
+      <h2>שכבה 2 · Engagement</h2><div class="q">האם הילדים אוהבים את המוצר?</div>
+      <div class="grid g4" id="engageTiles"></div>
+    </div>
+
+    <!-- LAYER 3: LEARNING -->
+    <div class="layer">
+      <h2>שכבה 3 · Learning</h2><div class="q">האם הילדים באמת לומדים?</div>
+      <div class="grid g4" id="accuracyTiles"></div>
+      <div class="grid g2" style="margin-top:14px">
+        <div class="card">
+          <h3>נושאים פופולריים</h3><p class="hint">לפי מספר סבבים (7 ימים)</p>
+          <table id="topicTable"><thead><tr><th>נושא</th><th>שאלות</th><th>דיוק</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="card">
+          <h3>חזקים / לחיזוק</h3><p class="hint">לפי אחוז הצלחה</p>
+          <div id="strongWeak"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LAYER 4: ECONOMY -->
+    <div class="layer">
+      <h2>שכבה 4 · Economy</h2><div class="q">האם מנגנון המשחק עובד?</div>
+      <div class="grid g3" id="econTiles"></div>
+    </div>
+
+    <div class="pending" id="pending"></div>
+    <div class="updated" id="updated"></div>
+  </div>
+</div>
+
+<script type="module">
+/* ===== 1) הגדרות ===== */
+const CONFIG = {
+  firebase: {
+    apiKey: "AIzaSyCjZFUZFXwsbNrDA8Icw_ZZ-bPGARCLMLI",
+    authDomain: "childtime-86e98.firebaseapp.com",
+    projectId: "childtime-86e98",
+    storageBucket: "childtime-86e98.firebasestorage.app",
+    messagingSenderId: "870781732446",
+    appId: "1:870781732446:web:64a55e0d7b9a03757d96cf",
+    // measurementId הושמט בכוונה — לא טוענים Analytics (תאימות Kids/הצהרת אפל)
+  },
+  adminEmails: ["ranioph@gmail.com", "amitgolans@gmail.com"],
+};
+
+/* ===== 2) נתוני דוגמה (מבנה זהה ל-adminStats/summary) ===== */
+const SAMPLE = {
+  updatedAt: "נתוני דוגמה",
+  totals: { parents: 5, children: 14, households: 5, devices: 12 },
+  headline: { learningMinutes: { today: 92, week: 851, month: 3120 } },
+  growth: { dau: 7, wau: 14, mau: 14, newChildren7d: 6, newFamilies7d: 2,
+    retention: { d1: 0.61, d7: 0.44, d30: null, cohort: { d1: 13, d7: 9, d30: 0 } } },
+  engagement: { avgMinPerChildDay: 26, avgSessionLengthMin: 3.7, sessionsPerActiveChildDay: 7,
+    questionsPerDay: 531, questionsPerSession: 11.8, totalQuestions: 3721, sessionsToday: 26, sessions7d: 316 },
+  learning: { accuracy: { today: 0.75, week: 0.94, month: 0.93 }, avgResponseSec: 4.8,
+    topicsPopular: [{topic:"חיבור וחיסור",sessions:120,avgAccuracy:.82},{topic:"איות",sessions:88,avgAccuracy:.74}],
+    topicsStrong: [{topic:"חיבור וחיסור",sessions:120,avgAccuracy:.82}],
+    topicsWeak: [{topic:"כפל וחילוק",sessions:40,avgAccuracy:.66}] },
+  economy: { minutesEarned: { today: 92, week: 851, month: 3120 }, minutesUsed7: 609, minutesUnused7: 242,
+    xp: { today: 480, week: 4200, month: 15800 }, wheelSpins7: 73, mystery7: 41 },
+  daily: [...Array(30)].map((_,i)=>({date:`${i+1}/6`, activeChildren:Math.max(0,Math.round(6+Math.sin(i/2)*4)), sessions:Math.round(20+Math.sin(i/3)*12), minutes:Math.round(60+Math.sin(i/3)*40)})),
+  notTracked: ["responseTimePerQuestion","xp","wheelOfFortune","mysteryBox","minutesLostToMistakes"],
+};
+
+/* ===== 4) פורמט ===== */
+const NF = new Intl.NumberFormat("he-IL");
+const fmt = n => (n==null||isNaN(n)) ? "—" : NF.format(Math.round(n));
+const fmt1 = n => (n==null||isNaN(n)) ? "—" : NF.format(Math.round(n*10)/10);
+const pct = n => (n==null||isNaN(n)) ? "—" : Math.round(n*100)+"%";
+Chart.defaults.color="rgba(255,255,255,.75)"; Chart.defaults.font.family="Heebo, sans-serif"; Chart.defaults.borderColor="rgba(255,255,255,.10)";
+
+const tile = (lbl,val,sub) => `<div class="tile"><div class="lbl">${lbl}</div><div class="val">${val}</div>${sub?`<div class="sub">${sub}</div>`:""}</div>`;
+
+function render(state){
+  const d = state.data;
+  const b=document.getElementById("banner"), bt=document.getElementById("bannerText");
+  if(state.mode==="live"){ b.className="banner live"; b.querySelector(".tag").textContent="LIVE"; bt.textContent="נתונים חיים מ-Firestore (משתמשים אמיתיים בלבד)"+(d.updatedAt?` · עודכן ${d.updatedAt}`:"")+"."; }
+  else if(state.mode==="empty"){ b.className="banner demo"; b.querySelector(".tag").textContent="ממתין"; bt.textContent="אין עדיין adminStats — נתוני דוגמה."; }
+  else if(state.mode==="error"){ b.className="banner err"; b.querySelector(".tag").textContent="שגיאה"; bt.textContent="שגיאת קריאה — נתוני דוגמה."; }
+
+  // HERO
+  const lm = d.headline?.learningMinutes || {}; const ec0 = d.economy || {};
+  document.getElementById("heroBig").innerHTML = `${fmt(lm.week)} <small>דק' השבוע</small>`;
+  document.getElementById("heroUsed").textContent = fmt(ec0.minutesUsed7);
+  document.getElementById("heroSaved").textContent = fmt(ec0.minutesUnused7);
+  document.getElementById("heroMonth").textContent = fmt(lm.month);
+  const savedPct = (lm.week>0 && ec0.minutesUnused7!=null) ? Math.round(ec0.minutesUnused7/lm.week*100) : null;
+  document.getElementById("heroCap").innerHTML = (ec0.minutesUsed7!=null)
+    ? `השבוע הילדים באפליקציה הרוויחו יחד <b>${fmt(lm.week)}</b> דק' משחק דרך למידה, מימשו <b>${fmt(ec0.minutesUsed7)}</b> בפועל${savedPct!=null?`, ו-<b>${fmt(ec0.minutesUnused7)}</b> דק' (${savedPct}%) <b>נחסכו</b> — זמן מסך שלא בוזבז על משחקים אחרים`:""}.`
+    : "";
+
+  // GROWTH
+  const g=d.growth||{};
+  document.getElementById("growthTiles").innerHTML =
+    tile("DAU · פעילים היום", fmt(g.dau)) +
+    tile("WAU · פעילים השבוע", fmt(g.wau)) +
+    tile("MAU · פעילים החודש", fmt(g.mau)) +
+    tile("ילדים חדשים", fmt(g.newChildren7d), "7 ימים אחרונים") +
+    tile("משפחות חדשות", fmt(g.newFamilies7d), "7 ימים אחרונים");
+  const ret=g.retention||{cohort:{}};
+  const rt=(lbl,v,c)=>tile(lbl, pct(v), c!=null?`קבוצה: ${c} ילדים`:"");
+  document.getElementById("retentionTiles").innerHTML =
+    rt("Retention D1 · חזרו תוך יום", ret.d1, ret.cohort?.d1) +
+    rt("Retention D7 · חזרו תוך שבוע", ret.d7, ret.cohort?.d7) +
+    rt("Retention D30 · חזרו תוך חודש", ret.d30, ret.cohort?.d30);
+
+  // ENGAGEMENT
+  const e=d.engagement||{};
+  document.getElementById("engageTiles").innerHTML =
+    tile("זמן ממוצע לילד/יום", `${fmt1(e.avgMinPerChildDay)} <small>דק'</small>`) +
+    tile("אורך סשן ממוצע", `${fmt1(e.avgSessionLengthMin)} <small>דק'</small>`) +
+    tile("סשנים לילד/יום", fmt1(e.sessionsPerActiveChildDay)) +
+    tile("שאלות לסשן", fmt1(e.questionsPerSession)) +
+    tile("שאלות ליום", fmt(e.questionsPerDay)) +
+    tile("סשנים השבוע", fmt(e.sessions7d)) +
+    tile("סשנים היום", fmt(e.sessionsToday)) +
+    tile("סה״כ שאלות שנענו", fmt(e.totalQuestions));
+
+  // LEARNING
+  const acc=(d.learning?.accuracy)||{};
+  const rtSec = d.learning?.avgResponseSec;
+  document.getElementById("accuracyTiles").innerHTML =
+    tile("אחוז הצלחה · היום", pct(acc.today)) +
+    tile("אחוז הצלחה · השבוע", pct(acc.week)) +
+    tile("אחוז הצלחה · החודש", pct(acc.month)) +
+    tile("זמן תגובה ממוצע", rtSec!=null ? `${fmt1(rtSec)} <small>שנ'</small>` : "—", "לשאלה");
+  const tp=d.learning?.topicsPopular||[];
+  const tb=document.querySelector("#topicTable tbody");
+  if(tp.length){ const max=Math.max(1,...tp.map(t=>t.sessions));
+    tb.innerHTML = tp.map(t=>`<tr><td>${t.topic}</td><td style="min-width:120px"><div class="bar"><i style="width:${Math.round(t.sessions/max*100)}%"></i></div><span style="font-size:12px;opacity:.7">${fmt(t.sessions)}</span></td><td><b>${pct(t.avgAccuracy)}</b></td></tr>`).join(""); }
+  else tb.innerHTML = `<tr><td colspan="3"><div class="empty">ממתין ל-tracking לפי נושא (נוסף בבילד הבא)</div></td></tr>`;
+  const sw=d.learning;
+  const list=(arr,cls)=> (arr&&arr.length)? arr.map(t=>`<div style="display:flex;justify-content:space-between;padding:7px 2px;border-bottom:1px solid rgba(255,255,255,.08)"><span>${t.topic}</span><span class="pill ${cls}">${pct(t.avgAccuracy)}</span></div>`).join("") : `<div class="empty">ממתין לנתונים</div>`;
+  document.getElementById("strongWeak").innerHTML =
+    `<div style="font-size:12px;font-weight:800;opacity:.7;margin:4px 0">💪 הכי חזקים</div>${list(sw?.topicsStrong,"up")}`+
+    `<div style="font-size:12px;font-weight:800;opacity:.7;margin:12px 0 4px">🎯 דורשים חיזוק</div>${list(sw?.topicsWeak,"down")}`;
+
+  // ECONOMY
+  const ec=d.economy||{}; const em=ec.minutesEarned||{}; const xp=ec.xp||{};
+  document.getElementById("econTiles").innerHTML =
+    tile("דקות שנוצרו · השבוע", `${fmt(em.week)} <small>דק'</small>`, `היום ${fmt(em.today)} · החודש ${fmt(em.month)}`) +
+    tile("הומרו למשחק · השבוע", `${fmt(ec.minutesUsed7)} <small>דק'</small>`, "זמן ששוחק בפועל") +
+    tile("נחסכו · לא נוצל · השבוע", `${fmt(ec.minutesUnused7)} <small>דק'</small>`, "לא בוזבז על משחקים אחרים") +
+    tile("XP · השבוע", fmt(xp.week), `היום ${fmt(xp.today)} · החודש ${fmt(xp.month)}`) +
+    tile("גלגל מזל · סיבובים", fmt(ec.wheelSpins7), "7 ימים אחרונים") +
+    tile("Mystery · פורטלים", fmt(ec.mystery7), "7 ימים אחרונים");
+
+  // pending / not tracked
+  const labels={responseTimePerQuestion:"זמן תשובה לשאלה",xp:"XP",wheelOfFortune:"גלגל מזל",mysteryBox:"Mystery Box",minutesLostToMistakes:"דקות שאבדו מטעויות"};
+  const nt=(d.notTracked||[]).map(k=>labels[k]||k);
+  let html = `ℹ️ <b>מדדים חדשים</b> (נושאים · זמן תגובה · XP · גלגל מזל · Mystery) מתחילים להיאסף מהבילד הבא — יתמלאו תוך כמה ימי שימוש.`;
+  if(nt.length) html += `<br>🛠️ עדיין דורש tracking: ${nt.join(" · ")}`;
+  document.getElementById("pending").innerHTML = html;
+
+  drawChart(d.daily||[]);
+  document.getElementById("updated").textContent = "עודכן לאחרונה: " + (d.updatedAt||"—");
+}
+
+let chart;
+function drawChart(daily){
+  const ctx=document.getElementById("growthChart"); if(chart) chart.destroy();
+  const grad=ctx.getContext("2d").createLinearGradient(0,0,0,240);
+  grad.addColorStop(0,"rgba(255,210,63,.5)"); grad.addColorStop(1,"rgba(255,210,63,0)");
+  chart=new Chart(ctx,{data:{labels:daily.map(x=>x.date),datasets:[
+    {type:"bar", label:"דקות שנוצרו", data:daily.map(x=>x.minutes), backgroundColor:grad, borderColor:"var(--gold)", borderRadius:5, maxBarThickness:16, yAxisID:"y"},
+    {type:"line", label:"ילדים פעילים", data:daily.map(x=>x.activeChildren), borderColor:"rgb(72,191,227)", backgroundColor:"rgba(72,191,227,.1)", tension:.38, pointRadius:0, borderWidth:3, yAxisID:"y1"},
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+    plugins:{legend:{labels:{boxWidth:12,font:{size:12}}}},
+    scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8}},
+      y:{position:"right",beginAtZero:true,ticks:{maxTicksLimit:5},title:{display:true,text:"דקות"}},
+      y1:{position:"left",beginAtZero:true,grid:{display:false},ticks:{maxTicksLimit:5},title:{display:true,text:"ילדים"}}}}});
+}
+
+/* ===== 5) Auth ===== */
+const gate=document.getElementById("gate"), app=document.getElementById("app"), loader=document.getElementById("loader");
+const gateMsg=document.getElementById("gateMsg"), loginBtn=document.getElementById("loginBtn");
+function showApp(email){ document.getElementById("whoEmail").textContent=email||""; loader.classList.add("hidden"); gate.classList.add("hidden"); app.classList.remove("hidden"); }
+function showGate(){ loader.classList.add("hidden"); app.classList.add("hidden"); gate.classList.remove("hidden"); }
+async function boot(){
+  // ?demo=1 — מציג את העיצוב עם נתוני דוגמה בלבד (בלי התחברות, בלי נתונים אמיתיים).
+  if(new URLSearchParams(location.search).has("demo") || !CONFIG.firebase.apiKey){
+    showApp("מצב הדגמה"); render({mode:"demo",data:SAMPLE}); return; }
+  const [{initializeApp}, auth, fs, fns] = await Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js"),
+  ]);
+  const fbApp=initializeApp(CONFIG.firebase); const authI=auth.getAuth(fbApp); const db=fs.getFirestore(fbApp);
+  const functionsI=fns.getFunctions(fbApp);
+  const provider=new auth.GoogleAuthProvider();
+  loginBtn.onclick=async()=>{ gateMsg.className="msg"; gateMsg.innerHTML='<span class="spin"></span> מתחבר…';
+    try{ await auth.signInWithPopup(authI,provider); }catch(e){ gateMsg.className="msg err"; gateMsg.textContent="ההתחברות נכשלה: "+e.code; } };
+  document.getElementById("logoutBtn").onclick=()=>auth.signOut(authI);
+  auth.onAuthStateChanged(authI, async user=>{
+    if(!user){ showGate(); loginBtn.disabled=false; return; }
+    const email=(user.email||"").toLowerCase();
+    if(!CONFIG.adminEmails.map(e=>e.toLowerCase()).includes(email)){
+      gateMsg.className="msg err"; gateMsg.textContent="החשבון "+email+" אינו מורשה."; await auth.signOut(authI); return; }
+    showApp(user.email); startLive(db, fs, functionsI, fns);
+  });
+}
+
+/* ===== 5) עדכון חי ===== */
+// LISTEN: re-render the instant adminStats/summary changes (scheduled refresh,
+// or our own on-demand recompute below). POLL: every 10s, while the tab is
+// visible, ask the backend to recompute — its write fires the listener, so the
+// numbers refresh on screen without a manual reload.
+const REFRESH_MS = 10000;
+function startLive(db, fs, functionsI, fns){
+  fs.onSnapshot(fs.doc(db,"adminStats","summary"),
+    snap => render(snap.exists() ? {mode:"live", data:snap.data()} : {mode:"empty", data:SAMPLE}),
+    err  => { console.error(err); render({mode:"error", data:SAMPLE, error:err.message}); });
+  const recompute = fns.httpsCallable(functionsI, "recomputeAdminStats");
+  let busy = false;
+  const tick = async () => {
+    if(document.hidden || busy) return;
+    busy = true;
+    try{ await recompute(); }catch(e){ console.error("recompute failed", e); }
+    finally{ busy = false; }
+  };
+  tick();
+  setInterval(tick, REFRESH_MS);
+}
+boot();
+</script>
+</body>
+</html>

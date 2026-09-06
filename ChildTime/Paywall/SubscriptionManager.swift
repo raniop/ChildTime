@@ -17,8 +17,8 @@ final class SubscriptionManager: ObservableObject {
     // Flat family pricing — one plan covers all the family's children.
     // Configure these EXACT IDs in App Store Connect → Subscriptions:
     //   • Group:   "tofi_premium" (auto-renewable subscription group)
-    //   • Monthly: com.rani.ChildTime.premium.monthly  (₪19.90)
-    //   • Yearly:  com.rani.ChildTime.premium.yearly   (₪149, with 7-day intro free trial)
+    //   • Monthly: com.rani.ChildTime.premium.monthly  (₪24.90)
+    //   • Yearly:  com.rani.ChildTime.premium.yearly   (₪199 — ₪16.60/month, 33% off)
 
     static let monthlyID  = "com.rani.ChildTime.premium.monthly"
     static let yearlyID   = "com.rani.ChildTime.premium.yearly"
