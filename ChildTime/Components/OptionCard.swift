@@ -60,7 +60,11 @@ struct OptionCard: View {
                     .minimumScaleFactor(0.45)          // shrink, don't break, long words
                     .strikethrough(feedback == .eliminated, color: .white.opacity(0.8))
                     .frame(maxWidth: .infinity, minHeight: minHeight)
-                    .padding(.horizontal, 12)
+                    // Keep the words clear of the corner badge — a long answer used
+                    // to run under the number (Rani).
+                    .padding(.horizontal, 14)
+                    .padding(.top, 18)
+                    .padding(.bottom, 6)
 
                 // Number badge (1-4) — a glass chip in the corner (Rani wanted the
                 // numbers back); the read-aloud says "answer 2" to match.
