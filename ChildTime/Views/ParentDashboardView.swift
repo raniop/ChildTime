@@ -32,6 +32,8 @@ struct ParentDashboardView: View {
     @State private var navPath: [UUID] = []   // pushed child-detail pages (pop on delete)
     @State private var gridDeleteProfile: Profile? = nil   // long-press delete from the grid
     @State private var showLegacyChildCard = false
+    @State private var showFamilyNameEditor = false
+    @State private var familyNameDraft = ""
     @State private var showingReorder = false               // manual child order sheet
     @State private var statExplain: StatExplain? = nil      // tapped-stat explanation
     @State private var refreshTrigger = 0
@@ -118,6 +120,7 @@ struct ParentDashboardView: View {
                                 // when something actually needs the parent.
                                 homeHeader
                                 homeActionsRow
+                                tofyPlusCard
                                 if !push.authorized { notificationsBanner }
                                 if !choreStore.pendingApproval.isEmpty { choresApprovalBanner }
                                 if !subs.isPremium, !remote.premiumRequests.isEmpty {
@@ -1188,6 +1191,59 @@ struct ParentDashboardView: View {
         .environment(\.layoutDirection, .rightToLeft)
     }
 
+    /// 👑 Tofy+ lives on the home (Rani) — the one warm pane: the family offer
+    /// until they subscribe, a quiet status line once they have. The only way
+    /// into the (parent-gated) paywall.
+    @ViewBuilder private var tofyPlusCard: some View {
+        if subs.isPremium {
+            Button { Haptic.light(); showingPaywall = true } label: {
+                HStack {
+                    Text("👑 טוֹפִי+ פָּעִיל")
+                        .font(.system(size: 14.5, weight: .heavy, design: .rounded))
+                    Spacer()
+                    Text("לְכָל הַמִּשְׁפָּחָה · נִהוּל")
+                        .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                }
+                .foregroundStyle(GlassInk.primary)
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .frame(maxWidth: .infinity)
+                .glassPane(radius: 16, tint: Color(hex: "FFD23F"), shadow: false)
+            }
+            .buttonStyle(.plain)
+            .environment(\.layoutDirection, .rightToLeft)
+        } else {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("👑 טוֹפִי+ לְכָל הַמִּשְׁפָּחָה")
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                Text("כָּל הָעוֹלָמוֹת, הַמִּשְׂחָקִים וְהַמַּטְלוֹת — לְכָל הַיְלָדִים, בְּכָל הַמַּכְשִׁירִים. קוֹנִים פַּעַם אַחַת, כָּאן.")
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button { Haptic.light(); showingPaywall = true } label: {
+                    Text(subs.yearlyIntroEligible ? "הַתְחִילוּ 7 יָמִים חִנָּם" : "לְכָל הַפְּרָטִים")
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "4B3FBF"))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.92)))
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
+            }
+            .foregroundStyle(GlassInk.primary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(14)
+            .background(LinearGradient(colors: [Color(hex: "FFE082").opacity(0.62), Color(hex: "FFB840").opacity(0.5)],
+                                       startPoint: .topLeading, endPoint: .bottomTrailing),
+                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .strokeBorder(Color(hex: "FFEBAA").opacity(0.7), lineWidth: 1))
+            .shadow(color: .black.opacity(0.22), radius: 14, y: 8)
+            .environment(\.layoutDirection, .rightToLeft)
+        }
+    }
+
     /// "שלום עמית 👋" and one true line about the family — in the page, like the mockup.
     private var homeHeader: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -1204,10 +1260,28 @@ struct ParentDashboardView: View {
             .buttonStyle(.plain)
             .accessibilityLabel("הגדרות")
             VStack(alignment: .trailing, spacing: 4) {
-                Text(greetingLine)
-                    .font(.system(size: 24, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineLimit(1).minimumScaleFactor(0.7)
+                // The family's name IS the title (Rani); tap to name / rename.
+                Button {
+                    Haptic.light()
+                    familyNameDraft = household.familyNameShown ?? ""
+                    showFamilyNameEditor = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Text("✏️").font(.system(size: 14)).opacity(0.7)
+                        Text(household.familyNameShown.map { "\($0) 👋" } ?? greetingLine)
+                            .font(.system(size: 24, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                    }
+                }
+                .buttonStyle(.plain)
+                .alert("שֵׁם הַמִּשְׁפָּחָה", isPresented: $showFamilyNameEditor) {
+                    TextField("מִשְׁפַּחַת גּוֹלָן", text: $familyNameDraft)
+                    Button("שִׁמְרוּ") { household.setFamilyName(familyNameDraft) }
+                    Button("בִּטּוּל", role: .cancel) {}
+                } message: {
+                    Text("מוֹפִיעַ כָּאן וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה.")
+                }
                 Text(homeSubtitle)
                     .font(.system(size: 13.5, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
@@ -1224,8 +1298,12 @@ struct ParentDashboardView: View {
     private var homeSubtitle: String {
         let f = DateFormatter(); f.locale = Locale(identifier: "he_IL"); f.dateFormat = "EEEE"
         let day = f.string(from: Date()).replacingOccurrences(of: "יום ", with: "")
-        let family = household.household?.familyName
-        return [family, day, childrenCountLabel, familyMomentLine].compactMap { $0 }.joined(separator: " · ")
+        // With a family name in the title, the greeting moves down here; without
+        // one, a nudge to name the family takes its place.
+        let lead: String? = household.familyNameShown != nil
+            ? greetingLine.replacingOccurrences(of: " 👋", with: "")
+            : "תְּנוּ שֵׁם לַמִּשְׁפָּחָה ✏️"
+        return [lead, day, childrenCountLabel, familyMomentLine].compactMap { $0 }.joined(separator: " · ")
     }
 
     private var childrenCountLabel: String? {

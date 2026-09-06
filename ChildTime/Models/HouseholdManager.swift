@@ -947,9 +947,17 @@ final class HouseholdManager: ObservableObject {
     /// PARENT: save the dashboard's manual child order (family-wide, so a
     /// co-parent's dashboard matches). Applies locally at once for a snappy
     /// drag-and-drop; the household listener echoes the same value back.
+    /// The family name as shown: the cloud value, else what this device last
+    /// set (so the title updates before the household round-trips — and on a
+    /// device whose household hasn't streamed down yet).
+    var familyNameShown: String? { household?.familyName ?? localFamilyName }
+    @Published private(set) var localFamilyName: String? = UserDefaults.standard.string(forKey: "family.name")
+
     /// The parent names the family ("משפחת גולן"). Empty clears it.
     func setFamilyName(_ raw: String) {
         let name = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        localFamilyName = name.isEmpty ? nil : name
+        UserDefaults.standard.set(localFamilyName, forKey: "family.name")
         household?.familyName = name.isEmpty ? nil : name
         #if canImport(FirebaseFirestore)
         guard let hh = household else { return }

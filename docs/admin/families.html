@@ -323,6 +323,7 @@ function render() {
               title="חשבונות אנונימיים של מכשירי ילד — לחצו לפירוט וניקוי"
               onclick="event.stopPropagation(); this.closest('.family').querySelector('.anonlist').hidden ^= 1">${anon} חשבונות ילד ▾</button>` : ""}
           ${deviceIDs.size ? `<span class="chip" title="מכשירים פיזיים שונים (מכשיר משותף נספר פעם אחת)">${deviceIDs.size} מכשירים 📱</span>` : ""}
+          ${f.premiumUntil ? `<span class="chip ${f.premiumUntil * 1000 > Date.now() ? "mint" : "dim"}" title="טופי+ משפחתי — עד ${new Date(f.premiumUntil * 1000).toLocaleString("he-IL")}">👑 טופי+ ${f.premiumUntil * 1000 > Date.now() ? "פעיל" : "פג"} · ${new Date(f.premiumUntil * 1000).toLocaleDateString("he-IL")}</span>` : ""}
           ${(f.parentDevices || []).length ? `<span class="chip" style="background:rgba(255,210,63,.30)"
               title="${(f.parentDevices || []).map((d) => (d.name || "?") + " · " + ago(d.lastSeenAt) + (d.appVersion ? " · " + d.appVersion : "")).join(" | ")}"
               >${f.parentDevices.length} מכשירי הורה 👪</span>` : ""}

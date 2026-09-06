@@ -33,31 +33,38 @@ struct ParentSettingsView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                premiumSection
-                familySection
-                dashboardSection
-                // Screen Time authorization matters where apps get shielded (a
-                // child device / Kid Mode). On the parent's own monitoring phone
-                // it's noise — and an unfixable "only one app at a time" error
-                // there just alarms the parent. Show it only when relevant.
-                if settings.deviceRole != .parent || shields.isAuthorized {
-                    authorizationSection
+            // Five doors, each with a one-line summary (Rani: the old single
+            // form was "a pile nobody would open"). Tofy+ lives on the home.
+            ScrollView {
+                VStack(spacing: 12) {
+                    menuRow("👪", "הַמִּשְׁפָּחָה", familySummary) {
+                        subScreen("הַמִּשְׁפָּחָה") { familySection; syncSection }
+                    }
+                    menuRow("🎮", "זְמַן מָסָךְ וּפְרָסִים", rewardsSummary) {
+                        subScreen("זְמַן מָסָךְ וּפְרָסִים") { rewardSection; penaltySection; smartFeedSection }
+                    }
+                    menuRow("🔔", "הַתְרָאוֹת", notificationsSummary) {
+                        subScreen("הַתְרָאוֹת") { notificationsSection; insightNotificationsSection }
+                    }
+                    menuRow("🔐", "קוֹד הוֹרֶה", pinSummary) {
+                        subScreen("קוֹד הוֹרֶה") { pinSection }
+                    }
+                    menuRow("📱", "אַפְּלִיקַצְיוֹת וּנְעִילָה", devicesSummary, soft: true) {
+                        subScreen("אַפְּלִיקַצְיוֹת וּנְעִילָה") {
+                            if settings.deviceRole != .parent || shields.isAuthorized { authorizationSection }
+                            appsSection; soundsSection; deviceSection
+                        }
+                    }
+                    menuRow("ℹ️", "אוֹדוֹת וּפְרָטִיּוּת", "\(AppInfo.versionLine) · יִצּוּא, מְחִיקָה", soft: true) {
+                        subScreen("אוֹדוֹת וּפְרָטִיּוּת") { versionSection; privacySection }
+                    }
                 }
-                syncSection
-                notificationsSection
-                rewardSection
-                smartFeedSection
-                penaltySection
-                soundsSection
-                appsSection
-                pinSection
-                deviceSection
-                privacySection
-                versionSection
+                .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.sm).padding(.bottom, AppSpacing.xxl)
+                .frame(maxWidth: 560).frame(maxWidth: .infinity)
             }
-            .glassForm()
-            .navigationTitle("הגדרות הורה")
+            .background(GlassBackdrop())
+            .environment(\.colorScheme, .dark)
+            .navigationTitle("הַגְדָּרוֹת")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -86,20 +93,8 @@ struct ParentSettingsView: View {
                     .environmentObject(auth)
                     .environment(\.layoutDirection, .rightToLeft)
             }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
-                    .environmentObject(subs)
-                    .environment(\.layoutDirection, .rightToLeft)
-            }
             .sheet(isPresented: $showFamilyLinking) {
                 AddParentView()
-                    .environment(\.layoutDirection, .rightToLeft)
-            }
-            .sheet(isPresented: $showDashboard) {
-                ParentDashboardView()
-                    .environmentObject(profiles)
-                    .environmentObject(settings)
-                    .environmentObject(auth)
                     .environment(\.layoutDirection, .rightToLeft)
             }
         }
@@ -107,7 +102,7 @@ struct ParentSettingsView: View {
 
     /// "משפחת גולן" — one name for the whole household (Rani: the dashboard
     /// listed each parent by name; a family deserves a name of its own).
-    @State private var familyNameDraft: String = HouseholdManager.shared.household?.familyName ?? ""
+    @State private var familyNameDraft: String = HouseholdManager.shared.familyNameShown ?? ""
     private var familySection: some View {
         Section {
             HStack {
@@ -118,7 +113,7 @@ struct ParentSettingsView: View {
                     .foregroundStyle(.white)
                     .submitLabel(.done)
                     .onSubmit { household.setFamilyName(familyNameDraft) }
-                if familyNameDraft != (household.household?.familyName ?? "") {
+                if familyNameDraft != (household.familyNameShown ?? "") {
                     Button("שִׁמְרוּ") { household.setFamilyName(familyNameDraft) }
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
@@ -133,6 +128,58 @@ struct ParentSettingsView: View {
             Text("מוֹפִיעַ בְּמָסָךְ הַהוֹרִים וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה.")
         }
         .glassRows()
+    }
+
+    // MARK: - Menu
+
+    private func menuRow<D: View>(_ emoji: String, _ title: String, _ summary: String, soft: Bool = false,
+                                  @ViewBuilder destination: @escaping () -> D) -> some View {
+        NavigationLink { destination() } label: {
+            HStack(spacing: 12) {
+                Text(emoji).font(.system(size: 22))
+                    .frame(width: 44, height: 44)
+                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.22)))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
+                    Text(summary).font(.system(size: 12.5, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
+                        .lineLimit(2).minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold)).foregroundStyle(GlassInk.tertiary)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity)
+            .glassPane(radius: 22, strength: soft ? 0.09 : 0.14)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func subScreen<C: View>(_ title: String, @ViewBuilder _ content: () -> C) -> some View {
+        Form { content() }
+            .glassForm()
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var familySummary: String {
+        let parents = household.linkedParentSummaries.isEmpty
+            ? (auth.displayName ?? "הוֹרֶה") : household.linkedParentSummaries.joined(separator: ", ")
+        let kids = profiles.profiles.count
+        return "\(parents) · \(kids == 1 ? "יֶלֶד אֶחָד" : "\(kids) יְלָדִים")"
+    }
+    private var rewardsSummary: String {
+        var t = "\(settings.batchAnswers) תְּשׁוּבוֹת = \(settings.batchMinutes) דַּקּוֹת"
+        if settings.dailyCapEnabled { t += " · מַקְסִימוּם \(settings.maxMinutesPerDay) דַּק׳ בְּיוֹם" }
+        return t
+    }
+    private var notificationsSummary: String {
+        let push = PushManager.shared.authorized ? "פּוֹעֲלוֹת" : "כְּבוּיוֹת"
+        return "\(push) · תּוֹבָנוֹת \(freqShortLabel(settings.parentInsightFrequency)) בְּיוֹם"
+    }
+    private var pinSummary: String { settings.faceIDForParentGate ? "Face ID פָּעִיל · שִׁנּוּי קוֹד" : "קוֹד בִּלְבַד · שִׁנּוּי קוֹד" }
+    private var devicesSummary: String {
+        settings.deviceRole == .parent ? "מֻגְדָּר בַּמַּכְשִׁיר שֶׁל כָּל יֶלֶד" : "אֵילוּ אַפְּלִיקַצְיוֹת נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה"
     }
 
     private var dashboardSection: some View {
