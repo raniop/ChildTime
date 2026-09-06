@@ -67,9 +67,9 @@ struct OptionCard: View {
                 VStack {
                     HStack {
                         Text("\(index + 1)")
-                            .font(.system(size: 15, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .frame(width: 26, height: 26)
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.9))
+                            .frame(width: 20, height: 20)
                             .background(Circle().fill(.white.opacity(0.22)))
                             .overlay(Circle().stroke(.white.opacity(0.35), lineWidth: 1))
                         Spacer()
