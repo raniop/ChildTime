@@ -24,33 +24,55 @@ final class SpeechReader {
         try? session.setActive(true)
         synth.stopSpeaking(at: .immediate)
         let u = AVSpeechUtterance(string: trimmed)
-        // Hebrew voice; AVSpeech falls back to a default if he-IL isn't installed.
-        u.voice = AVSpeechSynthesisVoice(language: "he-IL")
+        u.voice = Self.bestHebrewVoice()
         u.rate = AVSpeechUtteranceDefaultSpeechRate * 0.9   // a touch slower for kids
         u.pitchMultiplier = 1.05
         u.preUtteranceDelay = 0.05
         synth.speak(u)
     }
 
-    /// Read a question, then each answer. Normally "<number>, <answer>"
-    /// (e.g. "1, קטן. 2, קטנות") so a non-reader can pick by number.
+    /// Read a question, then each answer — always the NUMBER first, then the
+    /// answer, with a full stop between them so the voice pauses:
+    /// "מִסְפָּר 1. קָטָן. מִסְפָּר 2. קְטַנּוֹת" — the numbers match the tags on the tiles,
+    /// so a non-reader can pick by number.
     ///
-    /// BUT when every answer is itself a NUMBER, "1, 4" reads as two numbers and
-    /// confuses — so the tile is identified by its COLOR instead: "יָרוֹק, 4.
-    /// סָגוֹל, 2" (colors match OptionCard's palette order).
+    /// When every answer is itself a NUMBER, "מספר 1. 4" reads as two numbers and
+    /// confuses — so the tile is named by its ORDER instead: "תְּשׁוּבָה רִאשׁוֹנָה. 4.
+    /// תְּשׁוּבָה שְׁנִיָּה. 2".
     func readQuestion(prompt: String, options: [String]) {
+        speak(Self.spokenScript(prompt: prompt, options: options))
+    }
+
+    static let ordinals = ["רִאשׁוֹנָה", "שְׁנִיָּה", "שְׁלִישִׁית", "רְבִיעִית", "חֲמִישִׁית", "שִׁשִּׁית"]
+
+    /// The full read-aloud script (question + numbered answers). Pure, for tests.
+    static func spokenScript(prompt: String, options: [String]) -> String {
         let numericAnswers = !options.isEmpty && options.allSatisfy {
             Int($0.trimmingCharacters(in: .whitespaces)) != nil
         }
         var parts = [prompt]
         for (i, opt) in options.enumerated() {
-            let label = numericAnswers ? OptionCard.colorName(for: i) : "\(i + 1)"
-            parts.append("\(label), \(opt)")
+            let label = numericAnswers
+                ? "תְּשׁוּבָה \(ordinals[min(i, ordinals.count - 1)])"
+                : "מִסְפָּר \(i + 1)"
+            parts.append(label)
+            parts.append(opt)
         }
-        speak(parts.joined(separator: ". "))
+        return parts.joined(separator: ". ")
     }
 
     func stop() { synth.stopSpeaking(at: .immediate) }
+
+    /// The most natural Hebrew voice INSTALLED on this device: premium > enhanced
+    /// > the compact default. iOS ships only the compact "Carmit"; the enhanced one
+    /// is a free download (Settings → Accessibility → Spoken Content → Voices →
+    /// Hebrew) and is picked up here automatically. Falls back to the system default
+    /// when no he-IL voice exists at all.
+    static func bestHebrewVoice() -> AVSpeechSynthesisVoice? {
+        let hebrew = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix("he") }
+        let ranked = hebrew.sorted { $0.quality.rawValue > $1.quality.rawValue }
+        return ranked.first ?? AVSpeechSynthesisVoice(language: "he-IL")
+    }
 
     /// Clean text for the Hebrew voice: drop emoji (it reads their names), turn
     /// math symbols into spoken words (`−`/`=`/`×`/`÷` are otherwise SILENT, so

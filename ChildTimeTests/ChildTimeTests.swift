@@ -49,6 +49,14 @@ struct ChildTimeTests {
 
     /// The exact re-wipe scenario: a device with stale local 153★ uploading over a
     /// freshly-restored cloud 4100★. The merge-on-upload must NEVER lower the cloud.
+    @MainActor @Test func readAloudSaysNumberBeforeEachAnswer() {
+        let script = SpeechReader.spokenScript(prompt: "מִי קָטָן?", options: ["קָטָן", "קְטַנּוֹת"])
+        #expect(script == "מִי קָטָן?. מִסְפָּר 1. קָטָן. מִסְפָּר 2. קְטַנּוֹת")
+        // Numeric answers: "מספר 1. 4" would read as two numbers — use the order instead.
+        let numeric = SpeechReader.spokenScript(prompt: "כַּמָּה?", options: ["4", "2"])
+        #expect(numeric == "כַּמָּה?. תְּשׁוּבָה רִאשׁוֹנָה. 4. תְּשׁוּבָה שְׁנִיָּה. 2")
+    }
+
     @Test func ratchetMerge_neverLowersCloudStars() {
         var local = ProgressSnapshot(); local.stars = 153;  local.revision = 197; local.diamonds = 34
         var cloud = ProgressSnapshot(); cloud.stars = 4100; cloud.revision = 198; cloud.diamonds = 34
