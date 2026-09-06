@@ -358,9 +358,26 @@ exports.onPackRequest = onDocumentWritten("children/{childID}", async (event) =>
       body: `${name} ${girl ? "רוצה" : "רוצה"} ללמוד ${packName}. השאלון הוא תוספת חד-פעמית — פותחים מהטלפון שלכם.` },
     { type: "pack-request", childID: event.params.childID, packID });
 });
-// Pack names for push copy — keep in sync with QuestionPacks (iOS).
-const PACK_NAMES = { soccer: "עולם הכדורגל" };
-const PACK_EMOJI = { soccer: "⚽" };
+// Pack copy for pushes — keep in sync with QuestionPacks (iOS) and PACKS in
+// docs/admin/notifications.html.
+const PACK_META = {
+  soccer: { name: "עולם הכדורגל", emoji: "⚽", subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות" },
+};
+const PACK_NAMES = Object.fromEntries(Object.entries(PACK_META).map(([k, v]) => [k, v.name]));
+const PACK_EMOJI = Object.fromEntries(Object.entries(PACK_META).map(([k, v]) => [k, v.emoji]));
+
+// The agreed launch message (Rani, 2026-09-06): the moment a pack is switched
+// on, every family's parents get this — "we found a new world", never "buy".
+function launchCampaignFor(packID) {
+  const p = PACK_META[packID]; if (!p) return null;
+  return {
+    title: `עולם חדש בטופי: ${p.name}`, emoji: p.emoji,
+    body: `גילינו עולם חדש בשביל הילדים: ${p.tagline}. על כל תשובה נכונה מרוויחים דקות משחק. שולחים לילד מהטלפון שלכם.`,
+    childTitle: `רוצה ללמוד על ${p.subject}?`, childBody: `${p.tagline} — בקש מאבא או אמא`,
+    audience: { roles: ["parents"], gradeMin: 0, gradeMax: 6, premium: "any", topics: [], excludeOwners: true },
+    action: { type: "pack", packID }, showPopup: true,
+  };
+}
 
 const COMMAND_FIELDS_CHILD = ["pendingMinuteAdjustment", "pendingGiftAdjustment", "pendingMoneyAdjustment", "resetRequestedAt", "revokeGiftAt"];
 // appRemovalUnlockAt was MISSING here — the "allow app deletion" window never
@@ -1946,10 +1963,25 @@ exports.adminSetPackEnabled = onCall({ timeoutSeconds: 30, memory: "256MiB" }, a
   const id = String(request.data && request.data.packID || "").trim();
   if (!/^[a-z0-9_-]{2,40}$/.test(id)) throw new HttpsError("invalid-argument", "packID");
   const enabled = !!(request.data && request.data.enabled);
-  await db.collection("packs").doc(id).set({ enabled, updatedAt: Date.now(), updatedBy: email,
+  const ref = db.collection("packs").doc(id);
+  const before = (await ref.get()).data() || {};
+  await ref.set({ enabled, updatedAt: Date.now(), updatedBy: email,
     ...(enabled ? { launchedAt: admin.firestore.FieldValue.serverTimestamp() } : {}) }, { merge: true });
-  console.log("[adminSetPackEnabled]", email, id, enabled);
-  return { ok: true };
+  // First switch-on → the launch push to every family, once (re-toggling never re-sends).
+  let campaignID = before.launchCampaignID || null;
+  if (enabled && !campaignID) {
+    const c = launchCampaignFor(id);
+    if (c) {
+      const cref = db.collection("campaigns").doc();
+      await cref.set({ ...c, scheduledAt: Date.now(), status: "scheduled", source: "launch", packID: id,
+        createdAt: Date.now(), createdBy: email, updatedAt: Date.now(), updatedBy: email,
+        stats: Object.fromEntries(CAMPAIGN_STAT_KEYS.map((k) => [k, 0])) });
+      campaignID = cref.id;
+      await ref.set({ launchCampaignID: campaignID }, { merge: true });
+    }
+  }
+  console.log("[adminSetPackEnabled]", email, id, enabled, campaignID || "(no launch push)");
+  return { ok: true, campaignID, launched: enabled && !before.launchCampaignID && !!campaignID };
 });
 
 exports.adminListPacks = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {

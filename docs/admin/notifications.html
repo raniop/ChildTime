@@ -423,11 +423,13 @@ async function loadPacks() {
   try {
     const r = await call("adminListPacks", {});
     $("packs").innerHTML = Object.entries(PACKS).map(([id, p]) => { const st = (r.packs || {})[id] || {}; const s = (r.sales || {})[id] || { purchases: 0, children: 0, revenue: 0 };
-      return `<div class="packrow"><span style="font-size:28px">${p.emoji}</span><div class="n">${p.name}<small>₪${p.price} · ילד נוסף ₪${p.sibling} · ${s.purchases} רכישות · ${s.children} ילדים · <span class="money">₪${Math.round(s.revenue)}</span></small></div>
+      return `<div class="packrow"><span style="font-size:28px">${p.emoji}</span><div class="n">${p.name}<small>₪${p.price} · ילד נוסף ₪${p.sibling} · ${s.purchases} רכישות · ${s.children} ילדים · <span class="money">₪${Math.round(s.revenue)}</span></small>
+        <small style="margin-top:4px">${st.launchCampaignID ? "📣 פוש ההשקה נשלח" : `📣 בהדלקה יישלח לכל ההורים: <b style="color:#fff">${p.emoji} עולם חדש בטופי: ${p.name}</b> — גילינו עולם חדש בשביל הילדים: ${p.tagline}. על כל תשובה נכונה מרוויחים דקות משחק. שולחים לילד מהטלפון שלכם.`}</small></div>
         <span class="chip ${st.enabled ? "mint" : "dim"}">${st.enabled ? "פעיל למשפחות" : "כבוי"}</span><div class="switch ${st.enabled ? "on" : ""}" data-pack="${id}" title="הדלקה/כיבוי"></div></div>`; }).join("");
     $("packs").querySelectorAll(".switch").forEach((sw) => sw.onclick = async () => { const on = !sw.classList.contains("on");
-      if (on && !confirm(`להדליק את "${PACKS[sw.dataset.pack].name}" לכל המשפחות?`)) return;
-      await call("adminSetPackEnabled", { packID: sw.dataset.pack, enabled: on }); toast(on ? "השאלון דלוק ✅" : "השאלון כבוי"); loadPacks(); });
+      if (on && !confirm(`להדליק את "${PACKS[sw.dataset.pack].name}" לכל המשפחות?\n\nפוש ההשקה יישלח לכל ההורים תוך 5 דקות (פעם אחת בלבד).`)) return;
+      const r = await call("adminSetPackEnabled", { packID: sw.dataset.pack, enabled: on });
+      toast(on ? (r.launched ? "השאלון דלוק ✅ · פוש ההשקה יוצא תוך 5 דקות" : "השאלון דלוק ✅") : "השאלון כבוי"); loadPacks(); loadHistory(); });
   } catch (e) { $("packs").innerHTML = `<div class="msg err">${esc(e.message || String(e))}</div>`; }
 }
 
@@ -439,7 +441,7 @@ function previewCall(name, data) {
     { id: "c", emoji: "🎒", title: "שנה חדשה — טופי מוכן", body: "הכיתה התעדכנה לבד. בהצלחה!", scheduledAt: Date.now() + 3600e3 * 20, status: "scheduled", audience: { roles: ["parents", "children"], gradeMin: 0, gradeMax: 6, premium: "any", topics: [] }, action: { type: "none" }, stats: {} },
   ] };
   const map = { adminListCampaigns: sample, adminCampaignEstimate: { households: 812, parents: 1240, parentTokens: 1031, children: 412, childTokens: 390 },
-    adminListPacks: { packs: { soccer: { enabled: true } }, sales: { soccer: { purchases: 97, children: 104, revenue: 1445 } } },
+    adminListPacks: { packs: { soccer: { enabled: false } }, sales: { soccer: { purchases: 97, children: 104, revenue: 1445 } } },
     adminSaveCampaign: { ok: true, id: "new" }, adminSendCampaignTest: { ok: true, sent: 1, failed: 0, targeted: 1, devices: [{ kind: "הורה", n: 1, ok: true }] }, adminDeleteCampaign: { ok: true }, adminSetPackEnabled: { ok: true },
     adminCampaignDeliveries: { deliveries: [{ householdID: "1", family: "משפחת גולן", parentsOK: 2, parentsFailed: 0, childrenOK: 1, childrenFailed: 0, who: ["👤 רני ✓", "👤 עמית ✓", "🧒 יואב ✓"] }, { householdID: "2", family: "משפחת לוי", parentsOK: 1, parentsFailed: 1, childrenOK: 0, childrenFailed: 0, who: ["👤 דנה ✓", "👤 הורה ✗"] }] } };
   return Promise.resolve(map[name]);
