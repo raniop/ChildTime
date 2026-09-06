@@ -388,7 +388,10 @@ struct ChildReportView: View {
             VStack(spacing: 0) {
                 ForEach(devices) { d in
                     HStack {
-                        Text("\(d.kind == "ipad" ? "📲" : "📱") \(d.name)")
+                        // "אייפד של נועה" — the kind + the child (iOS names every phone
+                        // just "iPhone"); a custom device name rides along.
+                        Text("\(d.kind == "ipad" ? "📲" : "📱") \(d.kind == "ipad" ? "אַיְפֵּד" : "אַיְפוֹן") שֶׁל \(profile.name)"
+                             + (["אייפד", "אייפון", "iPhone", "iPad", ""].contains(d.name) ? "" : " · \(d.name)"))
                             .font(.system(size: 13.5, weight: .semibold, design: .rounded))
                         Spacer()
                         deviceStatus(d)

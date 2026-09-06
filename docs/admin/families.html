@@ -272,8 +272,13 @@ function render() {
       const devList = (k.deviceRows || []).map((d) => {
         const stale = !d.lastSeenAt || (Date.now()/1000 - d.lastSeenAt) > 86400*7;
         const kindEmoji = d.kind === "ipad" ? "📲" : "📱";
-        return `<span class="chip ${stale ? "dim" : "mint"}" style="margin:3px">
-          ${kindEmoji} ${esc(d.name || d.docID.split("_")[1].slice(0,8))} · ${ago(d.lastSeenAt)}${d.appVersion ? " · " + esc(d.appVersion) : ""}
+        // "נוני · אייפד" — the child + the kind, so a row reads as a real device
+        // (Rani); iOS 16+ names every phone just "iPhone", so the raw name is
+        // only a tooltip.
+        const kindHe = d.kind === "ipad" ? "אייפד" : d.kind === "iphone" ? "אייפון" : "מכשיר";
+        const rawName = d.name || d.docID.split("_")[1].slice(0,8);
+        return `<span class="chip ${stale ? "dim" : "mint"}" style="margin:3px" title="${esc(rawName)} · ${esc(d.docID)}">
+          ${kindEmoji} ${esc(k.name)} · ${kindHe} · ${ago(d.lastSeenAt)}${d.appVersion ? " · " + esc(d.appVersion) : ""}
           <button style="border:0;background:none;color:inherit;cursor:pointer;font-family:inherit;font-weight:900"
             title="מחק שורת מכשיר (מכשיר פעיל יירשם מחדש לבד)"
             onclick="event.stopPropagation(); deleteDevice('${d.docID}', this)">✕</button></span>`;
