@@ -8,14 +8,14 @@ enum QuestionBanksBody {
     static let body: [BankQuestion] = [
         // ── קַל · אֵיבָרִים וְחוּשִׁים ──
         BankQuestion(prompt: "❤️\nאֵיזֶה אֵיבָר מַזְרִים אֶת הַדָּם בַּגּוּף?", correctAnswer: "הַלֵּב", distractors: ["הָרֵאוֹת", "הַמֹּחַ", "הַקֵּבָה"], tier: .easy, grades: 2...3),
-        BankQuestion(prompt: "🫁\nעִם אֵיזֶה אֵיבָר אֲנַחְנוּ נוֹשְׁמִים?", correctAnswer: "הָרֵאוֹת", distractors: ["הַלֵּב", "הַקֵּבָה", "הָעוֹר"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "🫁\nבְּעֶזְרַת אֵילוּ אֵיבָרִים אֲנַחְנוּ נוֹשְׁמִים?", correctAnswer: "הָרֵאוֹת", distractors: ["הַלֵּב", "הַקֵּבָה", "הָעוֹר"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🧠\nאֵיזֶה אֵיבָר עוֹזֵר לָנוּ לַחְשֹׁב וְלִזְכֹּר?", correctAnswer: "הַמֹּחַ", distractors: ["הַלֵּב", "הָרֵאוֹת", "הַכָּבֵד"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "👀\nעִם אֵיזֶה אֵיבָר אֲנַחְנוּ רוֹאִים?", correctAnswer: "הָעֵינַיִם", distractors: ["הָאָזְנַיִם", "הָאַף", "הַפֶּה"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "👂\nעִם אֵיזֶה אֵיבָר אֲנַחְנוּ שׁוֹמְעִים?", correctAnswer: "הָאָזְנַיִם", distractors: ["הָעֵינַיִם", "הָאַף", "הַיָּדַיִם"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "👃\nעִם אֵיזֶה אֵיבָר אֲנַחְנוּ מְרִיחִים?", correctAnswer: "הָאַף", distractors: ["הַפֶּה", "הָאָזְנַיִם", "הָעֵינַיִם"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "👅\nעִם אֵיזֶה אֵיבָר אֲנַחְנוּ טוֹעֲמִים?", correctAnswer: "הַלָּשׁוֹן", distractors: ["הָאַף", "הַשִּׁנַּיִם", "הָאָזְנַיִם"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🤲\nעִם אֵיזֶה חוּשׁ מַרְגִּישִׁים שֶׁמַּשֶּׁהוּ חַם אוֹ קַר?", correctAnswer: "חוּשׁ הַמִּשּׁוּשׁ", distractors: ["חוּשׁ הָרְאִיָּה", "חוּשׁ הַשְּׁמִיעָה", "חוּשׁ הָרֵיחַ"], tier: .easy, grades: 2...3),
-        BankQuestion(prompt: "🖐️\nכַּמָּה חוּשִׁים יֵשׁ לָנוּ?", correctAnswer: "5", distractors: ["3", "4", "6"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "🖐️\nכַּמָּה חוּשִׁים עִקָּרִיִּים נוֹהֲגִים לְלַמֵּד?", correctAnswer: "5", distractors: ["3", "4", "6"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "✋\nכַּמָּה אֶצְבָּעוֹת יֵשׁ בִּשְׁתֵּי הַיָּדַיִם יַחַד?", correctAnswer: "10", distractors: ["5", "8", "12"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🦶\nכַּמָּה אֶצְבָּעוֹת יֵשׁ בְּכַף רֶגֶל אַחַת?", correctAnswer: "5", distractors: ["4", "6", "10"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🦷\nמָה עוֹזֵר לָנוּ לִלְעֹס אֶת הָאֹכֶל?", correctAnswer: "הַשִּׁנַּיִם", distractors: ["הָאַף", "הָאָזְנַיִם", "הָעֵינַיִם"], tier: .easy, grades: 2...3),
@@ -57,7 +57,7 @@ enum QuestionBanksBody {
         BankQuestion(prompt: "🩸\nאֵיזֶה מֵהַשֵּׁמוֹת הָאֵלֶּה הוּא שֵׁם שֶׁל סוּג דָּם?", correctAnswer: "סוּג O", distractors: ["סוּג X", "סוּג Z", "סוּג Q"], tier: .medium, grades: 3...5),
         BankQuestion(prompt: "🫁\nכַּמָּה רֵאוֹת יֵשׁ לְאָדָם?", correctAnswer: "2", distractors: ["1", "3", "4"], tier: .medium, grades: 3...5),
         BankQuestion(prompt: "🫁\nאֵיזֶה גַּז אֲנַחְנוּ שׁוֹאֲפִים מֵהָאֲוִיר, וְהַגּוּף צָרִיךְ אוֹתוֹ?", correctAnswer: "חַמְצָן", distractors: ["פַּחְמָן דּוּ־חַמְצָנִי", "הֶלְיוּם", "מֵימָן"], tier: .medium, grades: 3...5),
-        BankQuestion(prompt: "🌬️\nאֵיזֶה גַּז אֲנַחְנוּ נוֹשְׁפִים הַחוּצָה?", correctAnswer: "פַּחְמָן דּוּ־חַמְצָנִי", distractors: ["חַמְצָן", "הֶלְיוּם", "מֵימָן"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🌬️\nאֵיזֶה גַּז הַגּוּף מוֹסִיף לָאֲוִיר שֶׁאֲנַחְנוּ נוֹשְׁפִים הַחוּצָה?", correctAnswer: "פַּחְמָן דּוּ־חַמְצָנִי", distractors: ["חַמְצָן", "הֶלְיוּם", "מֵימָן"], tier: .medium, grades: 3...5),
         BankQuestion(prompt: "🌡️\nמַהוּ חֹם הַגּוּף הַתַּקִּין שֶׁל אָדָם, בְּעֵרֶךְ?", correctAnswer: "37 מַעֲלוֹת", distractors: ["20 מַעֲלוֹת", "50 מַעֲלוֹת", "100 מַעֲלוֹת"], tier: .medium, grades: 3...5),
 
         // ── בֵּינוֹנִי · מֹחַ, חוּשִׁים וְעִכּוּל ──

@@ -25,7 +25,7 @@ enum QuestionBanksFood {
         BankQuestion(prompt: "🥕\nגֶּזֶר הוּא…", correctAnswer: "יָרָק", distractors: ["פְּרִי", "דָּג", "עוּגָה"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "🍌\nאֵיזֶה צֶבַע יֵשׁ לְבָנָנָה בְּשֵׁלָה?", correctAnswer: "צָהֹב", distractors: ["כָּחֹל", "סָגֹל", "שָׁחֹר"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "🍊\nאֵיזֶה צֶבַע יֵשׁ לְתַפּוּז?", correctAnswer: "כָּתֹם", distractors: ["כָּחֹל", "לָבָן", "וָרֹד"], tier: .easy, grades: 1...2),
-        BankQuestion(prompt: "🍎\nמָה כְּדַאי לֶאֱכֹל הַרְבֵּה בְּכָל יוֹם?", correctAnswer: "פֵּרוֹת וִירָקוֹת", distractors: ["סֻכָּרִיּוֹת", "שׁוֹקוֹלָד", "צִ'יפְּס"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🍎\nמָה כְּדַאי לֶאֱכֹל בְּכָל יוֹם?", correctAnswer: "פֵּרוֹת וִירָקוֹת", distractors: ["סֻכָּרִיּוֹת", "שׁוֹקוֹלָד", "צִ'יפְּס"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "💧\nמָה הֲכִי טוֹב לִשְׁתּוֹת כְּשֶׁצְּמֵאִים?", correctAnswer: "מַיִם", distractors: ["שֶׁמֶן", "חֹמֶץ", "קֶטְשׁוֹפּ"], tier: .easy, grades: 1...2),
 
         // ── קַל · מַדָּע קָטָן וּבְטִיחוּת בַּמִּטְבָּח ──
@@ -48,13 +48,13 @@ enum QuestionBanksFood {
         BankQuestion(prompt: "🥛\nאֵיךְ הוֹפְכִים חָלָב לְיוֹגוּרְט?", correctAnswer: "מוֹסִיפִים חַיְדַּקִּים טוֹבִים", distractors: ["מַקְפִּיאִים אוֹתוֹ", "מוֹסִיפִים סֻכָּר", "מְסַנְּנִים אוֹתוֹ"], tier: .medium, grades: 3...4),
         BankQuestion(prompt: "🍞\nמָה גּוֹרֵם לַבָּצֵק שֶׁל הַלֶּחֶם לִתְפֹּחַ?", correctAnswer: "שְׁמָרִים", distractors: ["מֶלַח", "מַיִם קָרִים", "אֲבָקַת קָקָאוֹ"], tier: .medium, grades: 2...4),
         BankQuestion(prompt: "🌾\nמֵאֵיזֶה צֶמַח מְכִינִים בְּדֶרֶךְ כְּלָל אֶת הַקֶּמַח לְלֶחֶם?", correctAnswer: "חִטָּה", distractors: ["כֻּתְנָה", "גֶּזֶר", "תַּפּוּז"], tier: .medium, grades: 2...3),
-        BankQuestion(prompt: "🍚\nאֵיפֹה גָּדֵל אֹרֶז?", correctAnswer: "בְּשָׂדוֹת מוּצָפִים בְּמַיִם", distractors: ["עַל עֵצִים גְּבוֹהִים", "בְּתוֹךְ הַיָּם", "בַּמִּדְבָּר הַיָּבֵשׁ"], tier: .medium, grades: 3...4),
+        BankQuestion(prompt: "🍚\nאֵיפֹה מְגַדְּלִים סוּגִים רַבִּים שֶׁל אֹרֶז?", correctAnswer: "בְּשָׂדוֹת מוּצָפִים בְּמַיִם", distractors: ["עַל עֵצִים גְּבוֹהִים", "בְּתוֹךְ הַיָּם", "בַּמִּדְבָּר הַיָּבֵשׁ"], tier: .medium, grades: 3...4),
         BankQuestion(prompt: "🍓\nאֵיפֹה גָּדֵל תּוּת שָׂדֶה?", correctAnswer: "עַל צֶמַח נָמוּךְ קָרוֹב לָאֲדָמָה", distractors: ["עַל עֵץ גָּבוֹהַּ", "מִתַּחַת לָאֲדָמָה", "בְּתוֹךְ הַמַּיִם"], tier: .medium, grades: 2...4),
         BankQuestion(prompt: "🥜\nאֵיפֹה גְּדֵלִים בֹּטְנִים?", correctAnswer: "מִתַּחַת לָאֲדָמָה", distractors: ["עַל עֵץ", "עַל גֶּפֶן", "בַּמַּיִם"], tier: .medium, grades: 3...4),
         BankQuestion(prompt: "🍇\nעַל מָה גְּדֵלִים עֲנָבִים?", correctAnswer: "עַל גֶּפֶן", distractors: ["עַל עֵץ תַּפּוּחַ", "עַל שִׂיחַ וְרָדִים", "עַל דֶּקֶל"], tier: .medium, grades: 2...4),
         BankQuestion(prompt: "🌴\nאֵיזֶה פְּרִי גָּדֵל עַל דֶּקֶל?", correctAnswer: "תָּמָר", distractors: ["תַּפּוּחַ", "אַגָּס", "דֻּבְדְּבָן"], tier: .medium, grades: 2...4),
         BankQuestion(prompt: "🧂\nמֵאֵיפֹה מְקַבְּלִים מֶלַח?", correctAnswer: "מִמֵּי הַיָּם וּמִמִּכְרוֹת", distractors: ["מֵעֵצִים", "מִפָּרוֹת", "מִבֵּיצִים"], tier: .medium, grades: 3...4),
-        BankQuestion(prompt: "🍯\nלָמָּה הַדְּבַשׁ מָתוֹק?", correctAnswer: "הַדְּבוֹרִים מְכִינוֹת אוֹתוֹ מִצּוּף הַפְּרָחִים", distractors: ["מוֹסִיפִים לוֹ סֻכָּר בַּמִּפְעָל", "הוּא עָשׂוּי מֵחָלָב", "הוּא גָּדֵל עַל עֵצִים"], tier: .medium, grades: 2...4),
+        BankQuestion(prompt: "🍯\nלָמָּה הַדְּבַשׁ מָתוֹק?", correctAnswer: "כִּי יֵשׁ בּוֹ הַרְבֵּה סֻכָּרִים טִבְעִיִּים", distractors: ["מוֹסִיפִים לוֹ סֻכָּר בַּמִּפְעָל", "הוּא עָשׂוּי מֵחָלָב", "הוּא גָּדֵל עַל עֵצִים"], tier: .medium, grades: 2...4),
 
         // ── בֵּינוֹנִי · קְבוּצוֹת מָזוֹן ──
         BankQuestion(prompt: "🥬\nאֵיזֶה מֵהָאֵלֶּה שַׁיָּךְ לִקְבוּצַת הַיְּרָקוֹת?", correctAnswer: "חַסָּה", distractors: ["לֶחֶם", "גְּבִינָה", "בֵּיצָה"], tier: .medium, grades: 2...3),
@@ -71,8 +71,8 @@ enum QuestionBanksFood {
         BankQuestion(prompt: "⏲️\nהָעוּגָה צְרִיכָה לְהֵאָפוֹת 40 דַּקּוֹת. הִכְנַסְנוּ אוֹתָהּ לַתַּנּוּר בְּ־4:00. מָתַי מוֹצִיאִים?", correctAnswer: "4:40", distractors: ["4:20", "4:30", "5:00"], tier: .medium, grades: 3...4),
 
         // ── בֵּינוֹנִי · מַדָּע בַּמִּטְבָּח ──
-        BankQuestion(prompt: "🔥\nבְּאֵיזוֹ טֶמְפֶּרָטוּרָה מַיִם רוֹתְחִים?", correctAnswer: "100 מַעֲלוֹת", distractors: ["10 מַעֲלוֹת", "50 מַעֲלוֹת", "200 מַעֲלוֹת"], tier: .medium, grades: 3...4),
-        BankQuestion(prompt: "🧊\nבְּאֵיזוֹ טֶמְפֶּרָטוּרָה מַיִם הוֹפְכִים לְקֶרַח?", correctAnswer: "0 מַעֲלוֹת", distractors: ["10 מַעֲלוֹת", "50 מַעֲלוֹת", "100 מַעֲלוֹת"], tier: .medium, grades: 3...4),
+        BankQuestion(prompt: "🔥\nבְּאֵיזוֹ טֶמְפֶּרָטוּרָה מַיִם רוֹתְחִים?", correctAnswer: "100 מַעֲלוֹת צֶלְזְיוּס", distractors: ["10 מַעֲלוֹת צֶלְזְיוּס", "50 מַעֲלוֹת צֶלְזְיוּס", "200 מַעֲלוֹת צֶלְזְיוּס"], tier: .medium, grades: 3...4),
+        BankQuestion(prompt: "🧊\nבְּאֵיזוֹ טֶמְפֶּרָטוּרָה מַיִם הוֹפְכִים לְקֶרַח?", correctAnswer: "0 מַעֲלוֹת צֶלְזְיוּס", distractors: ["10 מַעֲלוֹת צֶלְזְיוּס", "50 מַעֲלוֹת צֶלְזְיוּס", "100 מַעֲלוֹת צֶלְזְיוּס"], tier: .medium, grades: 3...4),
         BankQuestion(prompt: "♨️\nאֵיךְ קוֹרְאִים לָאֵדִים שֶׁעוֹלִים מִסִּיר שֶׁל מַיִם רוֹתְחִים?", correctAnswer: "קִיטוֹר", distractors: ["עָשָׁן", "עָנָן", "שֶׁלֶג"], tier: .medium, grades: 3...4),
         BankQuestion(prompt: "🥚\nמָה קוֹרֶה לַחֶלְבּוֹן הַשָּׁקוּף כְּשֶׁמְּבַשְּׁלִים בֵּיצָה?", correctAnswer: "הוּא נִהְיֶה לָבָן וּמוּצָק", distractors: ["הוּא נֶעְלָם", "הוּא נִהְיֶה כָּחֹל", "הוּא הוֹפֵךְ לְמַיִם"], tier: .medium, grades: 2...4),
         BankQuestion(prompt: "🍽️\nהָאֹכֶל בַּצַּלַּחַת חַם מִדַּי. מָה עוֹשִׂים לִפְנֵי שֶׁטּוֹעֲמִים?", correctAnswer: "מְחַכִּים שֶׁיִּתְקָרֵר קְצָת", distractors: ["אוֹכְלִים מַהֵר", "שָׂמִים אוֹתוֹ בַּמַּקְפִּיא לְשָׁעָה", "שׁוֹפְכִים עָלָיו מַיִם"], tier: .medium, grades: 2...3),

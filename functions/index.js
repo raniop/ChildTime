@@ -2349,3 +2349,90 @@ exports.adminGiftHousehold = onCall({ timeoutSeconds: 30, memory: "256MiB" }, as
   console.log("[adminGiftHousehold]", email, hhID, "+", days, "days");
   return { ok: true, premiumUntil: until };
 });
+
+// ============================================================================
+// 🎁 Conversion engine (server only — no app change needed)
+// Free → activated → gift → expiring → paid / returned. Runs hourly from the
+// precomputed journey; pushes go to PARENTS only; every step is deduped.
+// ============================================================================
+
+function fill(tpl, vars) { return String(tpl || "").replace(/\{([^}]+)\}/g, (m, k) => (vars[k] !== undefined && vars[k] !== null ? String(vars[k]) : m)); }
+const ilDate = (s) => new Date(s * 1000).toLocaleDateString("he-IL", { day: "numeric", month: "numeric", timeZone: "Asia/Jerusalem" });
+const ilWeekday = (s) => new Date(s * 1000).toLocaleDateString("he-IL", { weekday: "long", timeZone: "Asia/Jerusalem" });
+
+async function onceKey(key) { try { await db.collection("pushDedup").doc(key).create({ at: Date.now() }); return true; } catch (e) { return false; } }
+
+async function runConversionEngine() {
+  const cfg = await conversionConfig();
+  const jdoc = await db.collection("adminStats").doc("journey").get();
+  const journey = jdoc.exists ? jdoc.data() : await computeJourney();
+  const now = Date.now() / 1000;
+  const hour = Number(new Date().toLocaleString("en-US", { hour: "numeric", hour12: false, timeZone: "Asia/Jerusalem" }));
+  let gifted = 0, pushed = 0, ended = 0;
+  for (const [hhID, h] of Object.entries(journey.households || {})) {
+    const ref = db.collection("households").doc(hhID);
+    const snap = await ref.get(); if (!snap.exists) continue;
+    const hh = snap.data() || {};
+    const premiumUntil = Number(hh.premiumUntil || 0);
+    const kids = (h.kids || []).map((id) => ({ id, ...(journey.children[id] || {}) }));
+    const star = kids.filter((k) => k.everQuestions > 0).sort((a, b) => b.questions30 - a.questions30)[0];
+    const name = star ? star.name : "הילד"; const girl = star && star.gender === "girl";
+    const totalQ = kids.reduce((s, k) => s + (k.questions30 || 0), 0);
+    const fav = star && star.favorite;
+    const vars = { "שם": name, "שאלות": totalQ, "ימים": cfg.giftDays, "עולם אהוב": fav ? fav.label : "העולם האהוב", "חזרות": fav ? fav.days : 0, "מחיר חודשי בשנתי": "₪16.60" };
+    // 1. activation → gift (only families that never had a gift and are not paying)
+    if (h.activated && premiumUntil <= now && !hh.giftStartedAt && !hh.giftEndedAt) {
+      const until = now + cfg.giftDays * 86400;
+      await ref.set({ premiumUntil: until, premiumSource: "gift", giftStartedAt: now, giftDays: cfg.giftDays }, { merge: true });
+      gifted += 1;
+      if (await onceKey(`gift_start_${hhID}`)) {
+        const tokens = await tokensForHousehold(hhID);
+        if (tokens.length) { await send(tokens, { title: `🎁 פתחנו ל${name} את טופי+ במתנה`, body: fill(cfg.copyActivation, { ...vars, "תאריך": ilDate(until) }).replace(/^🎁[^·]*·\s*/, "") }, { type: "gift-start", householdID: hhID }); pushed += 1; }
+      }
+      continue;
+    }
+    // 2. during a gift: the day-based pushes (parents only), at the configured hour
+    if (hh.premiumSource === "gift" && premiumUntil > now && hh.giftStartedAt && hour === Number(cfg.giftPushHour || 17)) {
+      const day = Math.floor((now - Number(hh.giftStartedAt)) / 86400) + 1;
+      const daysLeft = Math.ceil((premiumUntil - now) / 86400);
+      if ((cfg.giftPushDays || []).includes(day) && await onceKey(`gift_day${day}_${hhID}`)) {
+        let msg = null;
+        if (daysLeft <= 1) msg = { title: `היום מסתיימת מתנת טופי+ של ${name}`, body: `${name} ${girl ? "תמשיך" : "ימשיך"} ללמוד ולהרוויח זמן בחינם כרגיל. כדי להשאיר את ${fav ? fav.label.replace(/^\S+\s/, "") + " ו" : ""}שאר העולמות פתוחים: המשיכו עם טופי+.` };
+        else if (daysLeft <= 2) msg = { title: `⏰ נשארו יומיים לטופי+ של ${name}`, body: fill(cfg.copyTwoDays, vars).replace(/^⏰[^·]*·\s*/, "") };
+        else if (day <= 5) msg = fav ? { title: `❤️ נראה ש${name} ${girl ? "מצאה" : "מצא"} משהו ש${girl ? "היא אוהבת" : "הוא אוהב"}`, body: `${fav.label} הוא המקום ש${girl ? "היא חוזרת" : "הוא חוזר"} אליו הכי הרבה בטופי: ${fav.days} ימים, ${fav.questions} שאלות.` } : null;
+        else msg = { title: `${name} ${girl ? "גילתה" : "גילה"} ${kids.reduce((s, k) => s + Object.keys(k.topicsToday || {}).length, 0) || "כמה"} עולמות 🌎`, body: `${totalQ} שאלות בחודש האחרון${fav ? " · האהוב: " + fav.label : ""}. המתנה מסתיימת ב${ilWeekday(premiumUntil)}. השאירו את כל העולמות פתוחים.` };
+        if (msg) { const tokens = await tokensForHousehold(hhID); if (tokens.length) { await send(tokens, msg, { type: "gift-day", householdID: hhID, day: String(day) }); pushed += 1; } }
+      }
+    }
+    // 3. gift ended without a purchase → back to free (the app sees premiumUntil in the past)
+    if (hh.premiumSource === "gift" && premiumUntil <= now && hh.giftStartedAt && !hh.giftEndedAt) {
+      await ref.set({ giftEndedAt: now }, { merge: true }); ended += 1;
+    }
+  }
+  console.log("[conversionEngine] gifted", gifted, "pushed", pushed, "ended", ended);
+  return { gifted, pushed, ended };
+}
+exports.conversionEngine = onSchedule({ schedule: "every 60 minutes", timeZone: "Asia/Jerusalem", timeoutSeconds: 540, memory: "1GiB" }, async () => { await computeJourney(); await runConversionEngine(); });
+exports.adminRunConversionEngine = onCall({ timeoutSeconds: 300, memory: "1GiB" }, async (request) => { requireAdmin(request); await computeJourney(); return await runConversionEngine(); });
+
+// A real purchase lands as a NEW premiumUntil written by the parent's device
+// (publishPremium). If the family was on a gift, that write is the conversion:
+// mark it paid, remember when and from where.
+exports.onHouseholdPremiumWritten = onDocumentWritten("households/{hid}", async (event) => {
+  const before = event.data.before && event.data.before.exists ? event.data.before.data() : null;
+  const after = event.data.after && event.data.after.exists ? event.data.after.data() : null;
+  if (!after) return;
+  const b = Number(before && before.premiumUntil || 0), a = Number(after.premiumUntil || 0);
+  if (a <= b) return;                                       // not a new/longer entitlement
+  const now = Date.now() / 1000;
+  const giftEnd = Number(after.giftStartedAt || 0) + Number(after.giftDays || 14) * 86400;
+  const wasGift = after.premiumSource === "gift";
+  // A gift grant itself is written by the engine (source gift) — skip it; a paid
+  // entitlement extends well beyond the gift window (≥ 25 days from now).
+  if (wasGift && a <= giftEnd + 86400) return;
+  if (a < now + 25 * 86400) return;
+  if (after.premiumSource === "paid" && after.purchasedAt) return;
+  await event.data.after.ref.set({ premiumSource: "paid", purchasedAt: now, purchaseSource: after.lastPaywallSource || (after.packRequestedFlag ? "child_request" : "card"),
+    ...(wasGift ? { giftConvertedAt: now } : {}) }, { merge: true });
+  console.log("[premium] paid conversion", event.params.hid, wasGift ? "from gift" : "direct");
+});

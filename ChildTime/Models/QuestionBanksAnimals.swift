@@ -32,7 +32,7 @@ enum QuestionBanksAnimals {
         BankQuestion(prompt: "🕷️\nכַּמָּה רַגְלַיִם יֵשׁ לָעַכָּבִישׁ?", correctAnswer: "8", distractors: ["6", "4", "10"], tier: .medium, grades: 1...3),
 
         // ── שִׂיאִים ──
-        BankQuestion(prompt: "🐘\nמִי הַחַיָּה הַגְּדוֹלָה בְּיוֹתֵר שֶׁחַיָּה עַל הַיַּבָּשָׁה?", correctAnswer: "הַפִּיל", distractors: ["הַסּוּס", "הַפָּרָה", "הַגָּמָל"], tier: .easy, grades: 0...2),
+        BankQuestion(prompt: "🐘\nמִי הַחַיָּה הַגְּדוֹלָה בְּיוֹתֵר שֶׁחַיָּה כַּיּוֹם עַל הַיַּבָּשָׁה?", correctAnswer: "הַפִּיל", distractors: ["הַסּוּס", "הַפָּרָה", "הַגָּמָל"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "🐋\nמִי הַחַיָּה הַגְּדוֹלָה בְּיוֹתֵר בָּעוֹלָם כֻּלּוֹ?", correctAnswer: "הַלִּוְיָתָן הַכָּחֹל", distractors: ["הַפִּיל", "הַכָּרִישׁ", "הַגִּ'ירָפָה"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "🦒\nמִי הַחַיָּה הַגְּבוֹהָה בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "הַגִּ'ירָפָה", distractors: ["הַפִּיל", "הַגָּמָל", "הַדֹּב"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "🐆\nמִי הַחַיָּה הַמְּהִירָה בְּיוֹתֵר עַל הַיַּבָּשָׁה?", correctAnswer: "הַבַּרְדְּלָס", distractors: ["הַסּוּס", "הָאַרְנָב", "הָאַרְיֵה"], tier: .easy, grades: 1...2),
@@ -48,7 +48,7 @@ enum QuestionBanksAnimals {
         BankQuestion(prompt: "🐢\nאֵיזוֹ חַיָּה נוֹשֵׂאת אֶת הַבַּיִת שֶׁלָּהּ עַל הַגַּב?", correctAnswer: "הַצָּב", distractors: ["הָאַרְנָב", "הַצְּפַרְדֵּעַ", "הַתּוּכִּי"], tier: .easy, grades: 0...1),
         BankQuestion(prompt: "🦘\nאֵיפֹה נוֹשֵׂאת אִמָּא קֶנְגּוּרוּ אֶת הַגּוּר שֶׁלָּהּ?", correctAnswer: "בְּכִיס עַל הַבֶּטֶן", distractors: ["עַל הַגַּב", "בַּפֶּה", "בַּזָּנָב"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "🐟\nבְּעֶזְרַת מָה נוֹשְׁמִים הַדָּגִים מִתַּחַת לַמַּיִם?", correctAnswer: "זִימִים", distractors: ["רֵאוֹת", "אַף", "סְנַפִּירִים"], tier: .medium, grades: 2...4),
-        BankQuestion(prompt: "🦒\nלָמָּה יֵשׁ לַגִּ'ירָפָה צַוָּאר אָרֹךְ?", correctAnswer: "כְּדֵי לְהַגִּיעַ לֶעָלִים בְּרֹאשׁ הָעֵצִים", distractors: ["כְּדֵי לִשְׂחוֹת מַהֵר", "כְּדֵי לָעוּף", "כְּדֵי לַחְפֹּר בָּאֲדָמָה"], tier: .medium, grades: 1...3),
+        BankQuestion(prompt: "🦒\nלָמָּה יֵשׁ לַגִּ'ירָפָה צַוָּאר אָרֹךְ?", correctAnswer: "כְּדֵי לְהַגִּיעַ לָעָלִים בְּרֹאשׁ הָעֵצִים", distractors: ["כְּדֵי לִשְׂחוֹת מַהֵר", "כְּדֵי לָעוּף", "כְּדֵי לַחְפֹּר בָּאֲדָמָה"], tier: .medium, grades: 1...3),
         BankQuestion(prompt: "🦎\nאֵיזוֹ חַיָּה מְשַׁנָּה אֶת הַצֶּבַע שֶׁל הָעוֹר שֶׁלָּהּ?", correctAnswer: "זִקִּית", distractors: ["צָב", "נָחָשׁ", "צְפַרְדֵּעַ"], tier: .medium, grades: 1...3),
 
         // ── קְבוּצוֹת: יוֹנְקִים, עוֹפוֹת, זוֹחֲלִים, דָּגִים, חֲרָקִים ──
