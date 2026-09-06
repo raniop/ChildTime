@@ -1,116 +1,146 @@
 {
-  "identifier" : "A1B2C3D4-0000-0000-0000-000000000001",
-  "nonRenewingSubscriptions" : [],
-  "products" : [
+  "identifier": "A1B2C3D4-0000-0000-0000-000000000001",
+  "nonRenewingSubscriptions": [],
+  "products": [
     {
-      "displayPrice" : "9.90",
-      "familyShareable" : false,
-      "internalID" : "50000001",
-      "localizations" : [
+      "displayPrice": "9.90",
+      "familyShareable": false,
+      "internalID": "50000001",
+      "localizations": [
         {
-          "description" : "300 כוכבים לחנות הדמויות.",
-          "displayName" : "300 כוכבים",
-          "locale" : "he_IL"
+          "description": "300 כוכבים לחנות הדמויות.",
+          "displayName": "300 כוכבים",
+          "locale": "he_IL"
         }
       ],
-      "productID" : "com.rani.ChildTime.stars.small",
-      "referenceName" : "Stars 300",
-      "type" : "Consumable"
+      "productID": "com.rani.ChildTime.stars.small",
+      "referenceName": "Stars 300",
+      "type": "Consumable"
     },
     {
-      "displayPrice" : "24.90",
-      "familyShareable" : false,
-      "internalID" : "50000002",
-      "localizations" : [
+      "displayPrice": "24.90",
+      "familyShareable": false,
+      "internalID": "50000002",
+      "localizations": [
         {
-          "description" : "1000 כוכבים לחנות הדמויות. הכי משתלם.",
-          "displayName" : "1000 כוכבים",
-          "locale" : "he_IL"
+          "description": "1000 כוכבים לחנות הדמויות. הכי משתלם.",
+          "displayName": "1000 כוכבים",
+          "locale": "he_IL"
         }
       ],
-      "productID" : "com.rani.ChildTime.stars.medium",
-      "referenceName" : "Stars 1000",
-      "type" : "Consumable"
+      "productID": "com.rani.ChildTime.stars.medium",
+      "referenceName": "Stars 1000",
+      "type": "Consumable"
     },
     {
-      "displayPrice" : "49.90",
-      "familyShareable" : false,
-      "internalID" : "50000003",
-      "localizations" : [
+      "displayPrice": "49.90",
+      "familyShareable": false,
+      "internalID": "50000003",
+      "localizations": [
         {
-          "description" : "2500 כוכבים לחנות הדמויות.",
-          "displayName" : "2500 כוכבים",
-          "locale" : "he_IL"
+          "description": "2500 כוכבים לחנות הדמויות.",
+          "displayName": "2500 כוכבים",
+          "locale": "he_IL"
         }
       ],
-      "productID" : "com.rani.ChildTime.stars.large",
-      "referenceName" : "Stars 2500",
-      "type" : "Consumable"
+      "productID": "com.rani.ChildTime.stars.large",
+      "referenceName": "Stars 2500",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "14.90",
+      "familyShareable": false,
+      "internalID": "50000010",
+      "localizations": [
+        {
+          "description": "שאלון עולם הכדורגל לילד אחד.",
+          "displayName": "עולם הכדורגל",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.pack.soccer",
+      "referenceName": "Pack Soccer",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "7.90",
+      "familyShareable": false,
+      "internalID": "50000011",
+      "localizations": [
+        {
+          "description": "עולם הכדורגל לילד נוסף במשפחה.",
+          "displayName": "עולם הכדורגל · ילד נוסף",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.pack.soccer.sibling",
+      "referenceName": "Pack Soccer Sibling",
+      "type": "Consumable"
     }
   ],
-  "settings" : {
-    "_failTransactionsEnabled" : false,
-    "_locale" : "he_IL",
-    "_storefront" : "ISR",
-    "_storeKitErrors" : []
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_locale": "he_IL",
+    "_storefront": "ISR",
+    "_storeKitErrors": []
   },
-  "subscriptionGroups" : [
+  "subscriptionGroups": [
     {
-      "id" : "20000000",
-      "localizations" : [],
-      "name" : "tofi_premium",
-      "subscriptions" : [
+      "id": "20000000",
+      "localizations": [],
+      "name": "tofi_premium",
+      "subscriptions": [
         {
-          "adHocOffers" : [],
-          "codeOffers" : [],
-          "displayPrice" : "19.90",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "30000001",
-          "introductoryOffer" : null,
-          "localizations" : [
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "19.90",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "30000001",
+          "introductoryOffer": null,
+          "localizations": [
             {
-              "description" : "מנוי חודשי — גישה לכל העולמות, לכל הילדים במשפחה.",
-              "displayName" : "טופי+ חודשי",
-              "locale" : "he_IL"
+              "description": "מנוי חודשי — גישה לכל העולמות, לכל הילדים במשפחה.",
+              "displayName": "טופי+ חודשי",
+              "locale": "he_IL"
             }
           ],
-          "productID" : "com.rani.ChildTime.premium.monthly",
-          "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Tofy Plus Monthly",
-          "subscriptionGroupID" : "20000000",
-          "type" : "RecurringSubscription"
+          "productID": "com.rani.ChildTime.premium.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Tofy Plus Monthly",
+          "subscriptionGroupID": "20000000",
+          "type": "RecurringSubscription"
         },
         {
-          "adHocOffers" : [],
-          "codeOffers" : [],
-          "displayPrice" : "149.00",
-          "familyShareable" : false,
-          "groupNumber" : 2,
-          "internalID" : "30000002",
-          "introductoryOffer" : {
-            "internalID" : "40000001",
-            "paymentMode" : "free",
-            "subscriptionPeriod" : "P1W"
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "149.00",
+          "familyShareable": false,
+          "groupNumber": 2,
+          "internalID": "30000002",
+          "introductoryOffer": {
+            "internalID": "40000001",
+            "paymentMode": "free",
+            "subscriptionPeriod": "P1W"
           },
-          "localizations" : [
+          "localizations": [
             {
-              "description" : "מנוי שנתי — חיסכון משמעותי, לכל הילדים. שבוע ניסיון חינם.",
-              "displayName" : "טופי+ שנתי",
-              "locale" : "he_IL"
+              "description": "מנוי שנתי — חיסכון משמעותי, לכל הילדים. שבוע ניסיון חינם.",
+              "displayName": "טופי+ שנתי",
+              "locale": "he_IL"
             }
           ],
-          "productID" : "com.rani.ChildTime.premium.yearly",
-          "recurringSubscriptionPeriod" : "P1Y",
-          "referenceName" : "Tofy Plus Yearly",
-          "subscriptionGroupID" : "20000000",
-          "type" : "RecurringSubscription"
+          "productID": "com.rani.ChildTime.premium.yearly",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Tofy Plus Yearly",
+          "subscriptionGroupID": "20000000",
+          "type": "RecurringSubscription"
         }
       ]
     }
   ],
-  "version" : {
-    "major" : 3,
-    "minor" : 0
+  "version": {
+    "major": 3,
+    "minor": 0
   }
 }

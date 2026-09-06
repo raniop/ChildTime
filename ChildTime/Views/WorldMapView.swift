@@ -101,7 +101,7 @@ struct WorldMapView: View {
     }
 
     private var enabledWorlds: [World] {
-        let allowed = profiles.active?.enabledTopics ?? Set(Topic.allCases)
+        let allowed = profiles.active?.playableTopics ?? Set(Topic.core)
         let shown = Worlds.all.filter { world in
             // 💫 The arena isn't a topic — always on, except for pre-readers
             // (the extra-hard pool is text-based).

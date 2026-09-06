@@ -96,6 +96,9 @@ enum AppGradient {
     )
 
     /// 💫 זירת הענקים — championship heat: midnight violet into magenta and gold.
+    static let soccerWorld = LinearGradient(
+        colors: [Color(hex: "1B8A5A"), Color(hex: "2ECC71")],
+        startPoint: .topLeading, endPoint: .bottomTrailing)
     static let bonusWorld = LinearGradient(
         colors: [Color(hex: "4A148C"), Color(hex: "D81B60"), Color(hex: "FFB300")],
         startPoint: .topLeading, endPoint: .bottomTrailing

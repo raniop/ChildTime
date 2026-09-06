@@ -856,7 +856,7 @@ struct LiveGameSetupSheet: View {
                     LazyVGrid(columns: columns, spacing: 14) {
                         // No reading here: the live game syncs only prompt+options,
                         // so a passage question would arrive without its passage.
-                        ForEach(Topic.allCases.filter { $0 != .reading }) { t in topicTile(t) }
+                        ForEach(Topic.core.filter { $0 != .reading }) { t in topicTile(t) }
                     }
                     .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.sm)
                     .padding(.bottom, AppSpacing.xxxl)

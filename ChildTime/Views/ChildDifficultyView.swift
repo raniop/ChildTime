@@ -50,7 +50,7 @@ struct ChildDifficultyView: View {
                 .glassRows()
 
                 Section {
-                    ForEach(Topic.allCases) { topic in
+                    ForEach(Topic.allCases.filter { !$0.isPack || profile?.allows($0) == true }) { topic in
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Text(topic.emoji)

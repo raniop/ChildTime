@@ -116,6 +116,7 @@ struct CoachingEngine {
         case .geography: return "הסתכלו יחד על מפה ובחרו מדינה ללמוד עליה."
         case .money:     return "תנו ל\(name) לספור כסף קטן בחנות, או לדבר על חיסכון לצעצוע."
         case .reading:   return "קראו יחד סיפור קצר ושאלו את \(name) מה קרה בו ולמה."
+        case .soccer:    return "צפו יחד במשחק ובקשו מ\(name) להסביר לכם חוק אחד שראיתם."
         }
     }
 }

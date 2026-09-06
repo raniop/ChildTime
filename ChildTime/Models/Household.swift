@@ -42,6 +42,10 @@ struct Household: Codable, Identifiable, Equatable {
     /// (default, so no existing family changes). Set only by a parent; read by
     /// the kid's device to hide the money option. Optional so older docs decode.
     var choresMoneyEnabled: Bool? = nil
+    /// ⚽ Question packs this family has bought at least once (QuestionPack ids)
+    /// — drives the sibling price. Which CHILD has a pack lives on the child
+    /// doc (`ChildRecord.packs`). Optional so older docs decode.
+    var ownedPacks: [String]? = nil
 
     init(id: String = UUID().uuidString,
          parentUIDs: [String],

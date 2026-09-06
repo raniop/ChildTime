@@ -966,6 +966,57 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    // MARK: - ⚽ Question packs (paid add-ons)
+
+    func householdOwnsPack(_ packID: String) -> Bool {
+        (household?.ownedPacks ?? []).contains(packID)
+            || ProfileStore.shared.profiles.contains { $0.ownedPacks.contains(packID) }
+    }
+
+    func childOwnsPack(_ packID: String, childID: String) -> Bool {
+        ProfileStore.shared.profiles.first { $0.id.uuidString == childID }?.ownedPacks.contains(packID) ?? false
+    }
+
+    /// A verified purchase → the pack lands on each child (local first, so the
+    /// parent sees "✓ נשלח" immediately; then the cloud, confirmed + self-healing
+    /// like every parent→child write), the family is marked as owning it (sibling
+    /// price from now on), and the sale is logged for the founder dashboard.
+    func grantPack(_ pack: QuestionPack, childIDs: [String], productID: String, price: Decimal?, transactionID: String) {
+        let store = ProfileStore.shared
+        for cid in childIDs {
+            if var p = store.profiles.first(where: { $0.id.uuidString == cid }), !p.ownedPacks.contains(pack.id) {
+                p.ownedPacks.insert(pack.id)
+                store.update(p)          // also upserts the whole record (merge)
+            }
+        }
+        #if canImport(FirebaseFirestore)
+        guard !Self.skipsCloudSync, let hh = household else { return }
+        Task {
+            for cid in childIDs {
+                let ref = db.collection("children").document(cid)
+                let fields: [String: Any] = ["packs": FieldValue.arrayUnion([pack.id])]
+                var outcome = await confirmedMerge(ref, fields)
+                if outcome == .denied { await reassertMembership(); outcome = await confirmedMerge(ref, fields) }
+                if outcome == .denied || outcome == .error { TofyLink("grantPack: child \(cid.prefix(8)) write FAILED (\(outcome))") }
+            }
+            _ = await confirmedMerge(db.collection("households").document(hh.id),
+                                     ["ownedPacks": FieldValue.arrayUnion([pack.id])])
+            // First-party sales ledger (no third-party analytics — Kids Category).
+            var sale: [String: Any] = [
+                "householdID": hh.id, "packID": pack.id, "productID": productID,
+                "childIDs": childIDs, "transactionID": transactionID,
+                "at": Date().timeIntervalSince1970, "build": AppInfo.build,
+            ]
+            if let price { sale["price"] = NSDecimalNumber(decimal: price).doubleValue }
+            if let uid { sale["parentUID"] = uid }
+            if let campaign = UserDefaults.standard.string(forKey: "packs.attributionCampaign") {
+                sale["campaignID"] = campaign
+            }
+            try? await db.collection("packPurchases").document(transactionID).setData(sale, merge: true)
+        }
+        #endif
+    }
+
     func setChildOrder(_ ids: [UUID]) {
         let order = ids.map { $0.uuidString }
         localChildOrder = order

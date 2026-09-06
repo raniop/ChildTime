@@ -918,7 +918,7 @@ struct QuestionRunnerView: View {
         case .world(let w):
             if w.isBonusWorld {
                 // 💫 The arena mixes ALL the child's enabled topics.
-                let pool = Array(profiles.active?.enabledTopics ?? Set(Topic.allCases))
+                let pool = Array(profiles.active?.playableTopics ?? Set(Topic.core))
                 return pool.randomElement() ?? .logic
             }
             return w.topic

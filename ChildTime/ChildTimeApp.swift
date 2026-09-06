@@ -309,6 +309,19 @@ struct ChildTimeApp: App {
             ProfileEditorView(mode: .create) { _ in } onDelete: { _ in }
                 .onAppear { ParentSettings.shared.deviceRole = .parent }   // demo: age / grade rows are parent-only
         case "kidmode": KidModeEntryView()              // DEMO_SCREEN=kidmode
+        case "packdetail":                              // DEMO_SCREEN=packdetail — ⚽ pack page (parent)
+            PackDetailView(pack: QuestionPacks.all[0], onClose: {})
+                .environmentObject(ProfileStore.shared)
+                .onAppear { ParentSettings.shared.deviceRole = .parent; PINManager.shared.setPIN("1234"); ParentSettings.shared.hasSetParentPIN = true }
+        case "packowned":                               // DEMO_SCREEN=packowned — parent home after a purchase
+            ParentDashboardView(isRoot: true)
+                .onAppear {
+                    if var p = ProfileStore.shared.profiles.first {
+                        p.ownedPacks.insert("soccer"); ProfileStore.shared.update(p)
+                        LearningHistoryStore.shared.seedDemo(childID: p.id, packTopic: .soccer)
+                        HouseholdManager.shared.seedDemoLiveWindow(childID: p.id)
+                    }
+                }
         case "gate":                                    // DEMO_SCREEN=gate — the parent-code keypad
             ParentGateView(allowClose: true, respectSession: false) { Text("OK") }
                 .onAppear {

@@ -27,7 +27,7 @@ struct LearningProfile {
         self.age = settings.childAge
         // The active child's own enabled set drives the feed (falls back to the
         // device-global set only if there's no active profile).
-        self.enabledTopics = ProfileStore.shared.active?.enabledTopics ?? settings.enabledTopics
+        self.enabledTopics = ProfileStore.shared.active?.playableTopics ?? settings.enabledTopics
 
         var acc: [Topic: Double] = [:]
         var ans: [Topic: Int] = [:]

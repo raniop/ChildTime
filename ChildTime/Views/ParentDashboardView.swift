@@ -47,6 +47,8 @@ struct ParentDashboardView: View {
     @State private var showSchoolYearParty = false
     @State private var showWhatsNew = false
     @State private var showingPaywall = false
+    /// ⚽ A question pack page (parent-side purchase flow).
+    @State private var packToShow: QuestionPack? = nil
     @ObservedObject private var subs = SubscriptionManager.shared
     @State private var insightsProfile: Profile? = nil
     @StateObject private var choreStore = ChoreStore.shared
@@ -121,6 +123,7 @@ struct ParentDashboardView: View {
                                 homeHeader
                                 homeActionsRow
                                 tofyPlusCard
+                                PacksHomeSection { packToShow = $0 }
                                 if !push.authorized { notificationsBanner }
                                 if !choreStore.pendingApproval.isEmpty { choresApprovalBanner }
                                 if !subs.isPremium, !remote.premiumRequests.isEmpty {
@@ -692,7 +695,7 @@ struct ParentDashboardView: View {
         // A GIFT window's countdown belongs to 💝, not 🎮 — otherwise a kid
         // playing pure gift time looks like he's burning minutes he earned.
         let liveIsGift = live?.isManual ?? false
-        let lp = LearningProfile(snapshot: s, enabledTopics: profile.enabledTopics, age: profile.age)
+        let lp = LearningProfile(snapshot: s, enabledTopics: profile.playableTopics, age: profile.age)
         let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: profile.id), profile: lp)
         let status = overallStatus(engine: engine, lp: lp, hasData: s.totalAnswered >= 4)
         // This child's effective daily screen-time cap (per-child override, else global).
@@ -1216,7 +1219,7 @@ struct ParentDashboardView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("👑 טוֹפִי+ לְכָל הַמִּשְׁפָּחָה")
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
-                Text("כָּל הָעוֹלָמוֹת, הַמִּשְׂחָקִים וְהַמַּטְלוֹת — לְכָל הַיְלָדִים, בְּכָל הַמַּכְשִׁירִים. קוֹנִים פַּעַם אַחַת, כָּאן.")
+                Text("כָּל הָעוֹלָמוֹת הַבְּסִיסִיִּים, הַמִּשְׂחָקִים וְהַמַּטְלוֹת — לְכָל הַיְלָדִים, בְּכָל הַמַּכְשִׁירִים. קוֹנִים פַּעַם אַחַת, כָּאן.")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1584,6 +1587,10 @@ struct ParentDashboardView: View {
             .frame(width: 0, height: 0)
             .allowsHitTesting(false)
             .fullScreenCover(isPresented: $showingPaywall) { gatedPaywall }
+            .fullScreenCover(item: $packToShow) { pack in
+                PackDetailView(pack: pack) { packToShow = nil }
+                    .environmentObject(profiles)
+            }
             .onChange(of: subs.isPremium) { premium in
                 if premium { remote.clearPremiumRequests() }
             }
@@ -1887,7 +1894,7 @@ struct ParentDashboardView: View {
 
     @ViewBuilder
     private func learningProfileCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
-        let lp = LearningProfile(snapshot: s, enabledTopics: profile.enabledTopics, age: profile.age)
+        let lp = LearningProfile(snapshot: s, enabledTopics: profile.playableTopics, age: profile.age)
         let favorites = Array(lp.favorites.prefix(3))
         let strong = Array(lp.strong.prefix(3))
         let weak = Array(lp.weak.prefix(3))
@@ -1926,7 +1933,7 @@ struct ParentDashboardView: View {
     private func adaptiveDifficultyCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
         let levels = s.topicAdaptiveLevel ?? [:]
         // Topics the child has actually practiced, most-practiced first.
-        let topics = profile.enabledTopics
+        let topics = profile.playableTopics
             .filter { (s.topicAnswered[$0.rawValue] ?? 0) >= 1 }
             .sorted { (s.topicAnswered[$0.rawValue] ?? 0) > (s.topicAnswered[$1.rawValue] ?? 0) }
             .prefix(6)
@@ -2033,7 +2040,7 @@ struct ParentDashboardView: View {
     /// tips. Only appears once the kid has played enough to have signal.
     @ViewBuilder
     private func coachingCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
-        let lp = LearningProfile(snapshot: s, enabledTopics: profile.enabledTopics, age: profile.age)
+        let lp = LearningProfile(snapshot: s, enabledTopics: profile.playableTopics, age: profile.age)
         let history = LearningHistoryStore.shared.history(for: profile.id)
         let engine = InsightsEngine(history: history, profile: lp)
         let coach = CoachingEngine(childName: profile.name, insights: engine, profile: lp, isGirl: profile.gender == .girl)

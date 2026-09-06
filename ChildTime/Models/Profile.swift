@@ -104,6 +104,11 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// The child sets/changes it on their device; the parent can see it and
     /// reset it from the dashboard.
     var playPIN: String?
+    /// Paid question packs the parent bought for THIS child (QuestionPack ids).
+    /// A pack topic is playable only when it's here — `enabledTopics` never
+    /// gates packs (see `allows`). Synced via `ChildRecord.packs`; merges take
+    /// the UNION so a purchase can't be undone by a stale device.
+    var ownedPacks: Set<String> = []
 
     init(
         id: UUID = UUID(),
@@ -120,9 +125,10 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         learningLevel: LearningLevel = .developing,
         difficultyByTopic: [String: String] = [:],
         dailyCapMinutes: Int? = nil,
-        enabledTopics: Set<Topic> = Set(Topic.allCases),
+        enabledTopics: Set<Topic> = Set(Topic.core),
         topicsVersion: Int = 2,
-        playPIN: String? = nil
+        playPIN: String? = nil,
+        ownedPacks: Set<String> = []
     ) {
         self.id = id
         self.name = name
@@ -141,6 +147,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.enabledTopics = enabledTopics
         self.topicsVersion = topicsVersion
         self.playPIN = playPIN
+        self.ownedPacks = ownedPacks
     }
 
     // Backward-compatible decoding: profiles stored before the Parent Platform
@@ -150,6 +157,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         case grade, gradeSchoolYear, gradeSetByChild, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
         case topicsVersion
         case playPIN
+        case ownedPacks
     }
 
     init(from decoder: Decoder) throws {
@@ -178,9 +186,9 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         let rawTopics = (try? c.decodeIfPresent([String].self, forKey: .enabledTopics)) ?? nil
         if let rawTopics {
             let parsed = Set(rawTopics.compactMap(Topic.init(rawValue:)))
-            self.enabledTopics = parsed.isEmpty ? Set(Topic.allCases) : parsed
+            self.enabledTopics = parsed.isEmpty ? Set(Topic.core) : parsed
         } else {
-            self.enabledTopics = Set(Topic.allCases)
+            self.enabledTopics = Set(Topic.core)
         }
         // v1 data predates הבנת הנקרא — enable it once (except preK, who can't
         // read yet); a version-2 write means the set reflects the parent's choice.
@@ -190,10 +198,21 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
             topicsVersion = 2
         }
         self.playPIN = try c.decodeIfPresent(String.self, forKey: .playPIN)
+        self.ownedPacks = Set((try? c.decodeIfPresent([String].self, forKey: .ownedPacks)) ?? nil ?? [])
     }
 
-    /// Whether the parent allows this topic for the child.
-    func allows(_ topic: Topic) -> Bool { enabledTopics.contains(topic) }
+    /// Whether this child may play the topic: a base topic the parent hasn't
+    /// turned off, or a paid pack the parent bought for this child.
+    func allows(_ topic: Topic) -> Bool {
+        if let pack = topic.pack { return ownedPacks.contains(pack.id) }
+        return enabledTopics.contains(topic)
+    }
+
+    /// Every topic the child can actually play right now — the pool for the
+    /// smart feed, the mixed game modes and the home grid.
+    var playableTopics: Set<Topic> { Set(Topic.allCases.filter(allows)) }
+
+    func owns(_ pack: QuestionPack) -> Bool { ownedPacks.contains(pack.id) }
 
     /// Resolved daily screen-time cap for this child. A per-child value overrides
     /// the device-global setting; nil → inherit the global; ≤0 → unlimited.

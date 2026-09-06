@@ -10,8 +10,19 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
     case geography  // גיאוגרפיה
     case money      // כסף וחיים — חינוך פיננסי בסיסי
     case reading    // הבנת הנקרא — קטע קריאה + שאלות עליו
+    // ── Paid question packs (add-ons on top of Tofy+; see QuestionPack) ──
+    case soccer     // ⚽ עולם הכדורגל
 
     var id: String { rawValue }
+
+    /// The base curriculum — every topic that is NOT a paid pack. This is what
+    /// "all topics" means for a new child, the parent's world toggles, the live
+    /// quiz picker, etc. Pack topics join a child only when the pack is bought.
+    static let core: [Topic] = allCases.filter { $0.pack == nil }
+
+    /// The paid pack this topic belongs to, if any (nil for the base topics).
+    var pack: QuestionPack? { QuestionPacks.pack(for: self) }
+    var isPack: Bool { pack != nil }
 
     var displayName: String {
         switch self {
@@ -26,6 +37,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         case .geography: return "גֵּאוֹגְרַפְיָה"
         case .money:     return "חִנּוּךְ פִינַנְסִי"
         case .reading:   return "הֲבָנַת הַנִּקְרָא"
+        case .soccer:    return "עוֹלַם הַכַּדּוּרֶגֶל"
         }
     }
 
@@ -40,6 +52,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         case .geography: return "🌍"
         case .money:     return "💰"
         case .reading:   return "📖"
+        case .soccer:    return "⚽"
         }
     }
 }

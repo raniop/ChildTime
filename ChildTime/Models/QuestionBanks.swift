@@ -220,6 +220,7 @@ enum QuestionBanks {
         case .history:   return history   + QuestionBanksExpanded.history   + QuestionBanksWorkflow.history   + QuestionBanksWorkflow2.history   + QuestionBanksWorkflow3.history   + CurriculumHumanitiesBank.history
         case .geography: return geography + QuestionBanksExpanded.geography + QuestionBanksWorkflow.geography + QuestionBanksWorkflow2.geography + QuestionBanksWorkflow3.geography + CurriculumHumanitiesBank.geography
         case .money:     return money     + QuestionBanksWorkflow.money     + QuestionBanksWorkflow2.money     + QuestionBanksWorkflow3.money     + CurriculumHumanitiesBank.money
+        case .soccer:    return QuestionBanksSoccer.soccer   // ⚽ paid pack
         case .math:      return nil  // generated algorithmically
         case .reading:   return nil  // passage-based — served by ReadingContent
         }

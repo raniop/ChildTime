@@ -221,6 +221,8 @@ final class ProfileStore: ObservableObject {
                 // but an EMPTY string is a deliberate clear (parent reset), and
                 // must win. (See Profile.playPIN.)
                 merged.playPIN = remote.playPIN ?? working[idx].playPIN
+                // A bought pack is never lost to a stale writer — union.
+                merged.ownedPacks = remote.ownedPacks.union(working[idx].ownedPacks)
                 if working[idx] != merged { working[idx] = merged; changed = true }
             } else {
                 working.append(remote); changed = true

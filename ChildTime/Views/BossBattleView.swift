@@ -217,7 +217,7 @@ struct BossBattleView: View {
         }
         if world.isBonusWorld {
             // 💫 Arena boss: extra-hard bonus questions across ALL enabled topics.
-            let pool = Array(ProfileStore.shared.active?.enabledTopics ?? Set(Topic.allCases))
+            let pool = Array(ProfileStore.shared.active?.playableTopics ?? Set(Topic.core))
             question = QuestionGenerator.generateBonus(topic: pool.randomElement() ?? .logic,
                                                        grade: ProfileStore.shared.active?.effectiveGrade)
         } else {

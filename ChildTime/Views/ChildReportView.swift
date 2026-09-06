@@ -32,7 +32,7 @@ struct ChildReportView: View {
     private var engine: InsightsEngine {
         InsightsEngine(history: historyStore.history(for: profile.id),
                        profile: LearningProfile(snapshot: snapshot,
-                                                enabledTopics: profile.enabledTopics,
+                                                enabledTopics: profile.playableTopics,
                                                 age: profile.age))
     }
     private var isGirl: Bool { profile.gender == .girl }

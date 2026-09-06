@@ -136,6 +136,9 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// the child forgot the code ("" sentinel). Optional so docs created
     /// before this field existed still decode.
     var playPIN: String?
+    /// Paid packs bought for this child (QuestionPack ids). nil when none —
+    /// written with arrayUnion by the purchase, so a stale upsert never removes one.
+    var packs: [String]?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -156,18 +159,21 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.difficultyByTopic = profile.difficultyByTopic.isEmpty ? nil : profile.difficultyByTopic
         self.dailyCapMinutes = profile.dailyCapMinutes
         // Store only when the parent narrowed it (all-enabled stays nil → smaller doc).
-        self.enabledTopics = profile.enabledTopics.count >= Topic.allCases.count
+        // Only base topics are stored (packs are gated by `packs`, not here).
+        let base = profile.enabledTopics.filter { !$0.isPack }
+        self.enabledTopics = base.count >= Topic.core.count
             ? nil
-            : profile.enabledTopics.map { $0.rawValue }.sorted()
+            : base.map { $0.rawValue }.sorted()
         self.topicsVersion = profile.topicsVersion
         self.playPIN = profile.playPIN
+        self.packs = profile.ownedPacks.isEmpty ? nil : profile.ownedPacks.sorted()
     }
 
     /// Rehydrate a local `Profile`. The photo now syncs (compressed), so a custom
     /// avatar picked on the child's device shows up on the parent's device too.
     func toProfile() -> Profile? {
         guard let uuid = UUID(uuidString: id) else { return nil }
-        var topics = enabledTopics.map { Set($0.compactMap(Topic.init(rawValue:))) } ?? Set(Topic.allCases)
+        var topics = enabledTopics.map { Set($0.compactMap(Topic.init(rawValue:))) } ?? Set(Topic.core)
         // Pre-reading record → the narrowed set predates the topic; enable it
         // (except preK). A version-2 record reflects the parent's real choice.
         if (topicsVersion ?? 1) < 2, ChildAge(rawValue: age) ?? .grade1 != .preK {
@@ -190,7 +196,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             dailyCapMinutes: dailyCapMinutes,
             enabledTopics: topics,
             topicsVersion: 2,
-            playPIN: playPIN
+            playPIN: playPIN,
+            ownedPacks: Set(packs ?? [])
         )
         p.gradeSetByChild = gradeSetByChild ?? false
         p.characterUpdatedAt = characterUpdatedAt

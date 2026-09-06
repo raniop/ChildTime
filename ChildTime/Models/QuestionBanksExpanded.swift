@@ -372,6 +372,7 @@ enum QuestionBanksExpanded {
         case .money:     return []
         case .math:      return []
         case .reading:   return []
+        case .soccer:    return []
         }
     }
 }

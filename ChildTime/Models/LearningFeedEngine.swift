@@ -21,7 +21,7 @@ struct LearningFeedEngine {
     /// enabled set, so parental control is never bypassed.
     private var universe: [Topic] {
         let enabled = Array(profile.enabledTopics)
-        return enabled.isEmpty ? Topic.allCases : enabled
+        return enabled.isEmpty ? Topic.core : enabled
     }
 
     // MARK: - Public API

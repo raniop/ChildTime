@@ -142,7 +142,7 @@ final class LearningHistoryStore: ObservableObject {
     /// exact picture on the approved parent mockup (money ≈100 %, reading 89,
     /// hebrew 86, geography 85, logic 73, english 60, math 39 with fractions
     /// the gap and multiplication / addition strong). Never runs in production.
-    func seedDemo(childID: UUID) {
+    func seedDemo(childID: UUID, packTopic: Topic? = nil) {
         var out: [String: DailyStat] = [:]
         let cal = Calendar.current
         // topic → (questions per day, accuracy now, accuracy 30 days ago)
@@ -176,6 +176,12 @@ final class LearningHistoryStore: ObservableObject {
                 stat.perTopic[topic.rawValue] = td
                 stat.questionsAnswered += n; stat.correct += c; stat.wrong += n - c
                 stat.learningSeconds += n * 6
+            }
+            // ⚽ A pack bought two days ago: 18 questions so far at 83 %.
+            if let packTopic, back <= 2 {
+                let n = [6, 8, 4][back], c = [5, 7, 3][back]
+                stat.perTopic[packTopic.rawValue] = .init(answered: n, correct: c, responseMsTotal: Double(n) * 5800)
+                stat.questionsAnswered += n; stat.correct += c; stat.wrong += n - c
             }
             stat.sessions = 2; stat.earnSessions = 1; stat.freeSessions = 1
             stat.minutesEarned = min(90, stat.correct * 2 / 3)

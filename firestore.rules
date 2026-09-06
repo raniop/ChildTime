@@ -127,6 +127,20 @@ service cloud.firestore {
     }
 
     // Test-push trigger — a parent writes their own uid to fire a self-test push.
+    // ⚽ Question-pack launch switches ({enabled: true}) — readable by every
+    // signed-in device; written only from the console / admin functions.
+    match /packs/{id} {
+      allow read: if signedIn();
+    }
+    // ⚽ First-party sales ledger for the founder dashboard. A REAL parent
+    // account writes its own purchase once; nobody reads it from the app.
+    match /packPurchases/{id} {
+      allow create: if signedIn()
+                    && request.auth.token.firebase.sign_in_provider != 'anonymous'
+                    && request.resource.data.parentUID == request.auth.uid;
+      allow update: if signedIn() && resource.data.parentUID == request.auth.uid;
+    }
+
     match /pushTests/{id} {
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
       allow read, delete: if signedIn() && resource.data.uid == request.auth.uid;

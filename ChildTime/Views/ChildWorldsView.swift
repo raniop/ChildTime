@@ -29,7 +29,7 @@ struct ChildWorldsView: View {
                 Section {
                     // The bonus arena isn't a topic toggle — it mixes whatever
                     // topics are enabled here, so it has no row of its own.
-                    ForEach(Worlds.all.filter { !$0.isBonusWorld }) { world in
+                    ForEach(Worlds.all.filter { !$0.isBonusWorld && (!$0.topic.isPack || profile?.allows($0.topic) == true) }) { world in
                         Toggle(isOn: binding(for: world)) {
                             HStack(spacing: 10) {
                                 Text(world.emoji).font(.title3)
@@ -62,9 +62,9 @@ struct ChildWorldsView: View {
 
     private func binding(for world: World) -> Binding<Bool> {
         Binding(
-            get: { (profile?.enabledTopics ?? Set(Topic.allCases)).contains(world.topic) },
+            get: { profile?.allows(world.topic) ?? !world.topic.isPack },
             set: { on in
-                guard var p = profile else { return }
+                guard var p = profile, !world.topic.isPack else { return }   // a bought pack stays on
                 if on {
                     p.enabledTopics.insert(world.topic)
                     profiles.update(p)

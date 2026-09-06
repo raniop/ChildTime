@@ -17,7 +17,7 @@ struct World: Identifiable, Hashable {
     enum AppGradientKey: String {
         case castle, tower, valley, galaxy, dreamy, gold
         case englishWorld, logicWorld, scienceWorld, historyWorld, geographyWorld
-        case readingWorld, bonusWorld
+        case readingWorld, bonusWorld, soccerWorld
 
         var gradient: LinearGradient {
             switch self {
@@ -34,6 +34,7 @@ struct World: Identifiable, Hashable {
             case .geographyWorld: return AppGradient.geographyWorld
             case .readingWorld: return AppGradient.readingWorld
             case .bonusWorld: return AppGradient.bonusWorld
+            case .soccerWorld: return AppGradient.soccerWorld
             }
         }
     }
@@ -130,6 +131,17 @@ enum Worlds {
             rooms: 10,
             gradient: .readingWorld,
             glowColor: Color(hex: "AB47BC")
+        ),
+        // ⚽ Paid pack — shown only to a child whose parent bought it (Profile.allows).
+        World(
+            id: "soccer_world",
+            name: "עוֹלַם הַכַּדּוּרֶגֶל",
+            emoji: "⚽",
+            topic: .soccer,
+            starsToUnlock: 0,
+            rooms: 10,
+            gradient: .soccerWorld,
+            glowColor: Color(hex: "2ECC71")
         ),
         World(
             id: "bonus_arena",
