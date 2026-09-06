@@ -1783,6 +1783,8 @@ async function resolveAudience(audience) {
   const wantParents = audience.roles.includes("parents"), wantChildren = audience.roles.includes("children");
   const parentTokens = new Set(), childTokens = new Set();
   let parentsN = 0, childrenN = 0, householdsN = 0;
+  // Per-household detail for the delivery report ("למי נשלח"): token → who.
+  const owners = {};   // token → { householdID, family, kind: "parent"|"child", who }
   const kidMatches = (k) => {
     const g = (k.grade === 0 || k.grade) ? Number(k.grade) : null;
     if (g != null && (g < audience.gradeMin || g > audience.gradeMax)) return false;
@@ -1802,23 +1804,26 @@ async function resolveAudience(audience) {
     const matching = kids.filter(kidMatches);
     if (!matching.length && (audience.topics.length || audience.gradeMin > 0 || audience.gradeMax < 6)) return;
     householdsN += 1;
+    const family = hh.familyName || hh.familyLabel || (kids.map((k) => k.name).filter(Boolean).join(", ") || h.id.slice(0, 8));
     if (wantParents) {
       for (const uid of hh.parentUIDs || []) {
         const p = parents[uid]; if (!p) continue;
         const toks = (p.fcmTokens || []).filter((t) => !childTokenSet.has(t));
         if (!toks.length) continue;
-        parentsN += 1; toks.forEach((t) => parentTokens.add(t));
+        parentsN += 1;
+        toks.forEach((t) => { parentTokens.add(t); owners[t] = { householdID: h.id, family, kind: "parent", who: (hh.parentNames || {})[uid] || p.displayName || p.email || "הורה", uid }; });
       }
     }
     if (wantChildren) {
       for (const k of matching) {
         const toks = (devsByKid[k.id] || []).map((d) => d.fcmToken).filter(Boolean);
         if (!toks.length) continue;
-        childrenN += 1; toks.forEach((t) => childTokens.add(t));
+        childrenN += 1;
+        toks.forEach((t) => { childTokens.add(t); owners[t] = { householdID: h.id, family, kind: "child", who: k.name || "ילד" }; });
       }
     }
   });
-  return { parentTokens: [...parentTokens], childTokens: [...childTokens], parentsN, childrenN, householdsN };
+  return { parentTokens: [...parentTokens], childTokens: [...childTokens], parentsN, childrenN, householdsN, owners };
 }
 
 function campaignPayload(c, forChild) {
@@ -1833,15 +1838,37 @@ function campaignPayload(c, forChild) {
 
 async function sendCampaignTo(tokens, c, forChild) {
   let sent = 0, failed = 0;
+  const results = [];   // { token, ok, error }
   const payload = campaignPayload(c, forChild);
   for (let i = 0; i < tokens.length; i += 500) {
     const chunk = tokens.slice(i, i + 500);
     try {
       const res = await admin.messaging().sendEachForMulticast({ tokens: chunk, ...payload });
       sent += res.successCount; failed += res.failureCount;
-    } catch (e) { console.error("[campaign] send failed", c.id, e && e.message); failed += chunk.length; }
+      res.responses.forEach((r, j) => results.push({ token: chunk[j], ok: r.success, error: r.success ? "" : (r.error && r.error.code || "error") }));
+    } catch (e) {
+      console.error("[campaign] send failed", c.id, e && e.message); failed += chunk.length;
+      chunk.forEach((t) => results.push({ token: t, ok: false, error: String(e && e.message || e) }));
+    }
   }
-  return { sent, failed };
+  return { sent, failed, results };
+}
+
+// A token FCM says is dead ("not registered") belongs to a deleted install —
+// drop it from the parents doc so the next count is honest.
+async function pruneDeadTokens(results, owners) {
+  const dead = results.filter((r) => !r.ok && /not-registered|invalid-registration|invalid-argument/.test(r.error));
+  for (const r of dead) {
+    const o = owners && owners[r.token];
+    if (!o || !o.uid) continue;
+    try {
+      await db.collection("parents").doc(o.uid).update({
+        fcmTokens: admin.firestore.FieldValue.arrayRemove(r.token),
+        childFcmTokens: admin.firestore.FieldValue.arrayRemove(r.token),
+      });
+    } catch (e) { /* best effort */ }
+  }
+  return dead.length;
 }
 
 exports.adminSaveCampaign = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
@@ -1877,15 +1904,31 @@ exports.adminSendCampaignTest = onCall({ timeoutSeconds: 30, memory: "256MiB" },
   const d = p.exists ? p.data() : {};
   const parentToks = [...new Set(d.fcmTokens || [])];
   const childToks = [...new Set(d.childFcmTokens || [])];
-  const a = c.audience.roles.includes("parents") ? await sendCampaignTo(parentToks, c, false) : { sent: 0, failed: 0 };
-  const b = c.audience.roles.includes("children") ? await sendCampaignTo(childToks, c, true) : { sent: 0, failed: 0 };
-  return { ok: true, sent: a.sent + b.sent, failed: a.failed + b.failed, devices: parentToks.length + childToks.length };
+  const wantP = c.audience.roles.includes("parents"), wantC = c.audience.roles.includes("children");
+  const a = wantP ? await sendCampaignTo(parentToks, c, false) : { sent: 0, failed: 0, results: [] };
+  const b = wantC ? await sendCampaignTo(childToks, c, true) : { sent: 0, failed: 0, results: [] };
+  const owners = {}; parentToks.forEach((t) => owners[t] = { uid: request.auth.uid }); childToks.forEach((t) => owners[t] = { uid: request.auth.uid });
+  const pruned = await pruneDeadTokens([...a.results, ...b.results], owners);
+  const devices = [
+    ...a.results.map((r, i) => ({ kind: "הורה", n: i + 1, ok: r.ok, error: r.error })),
+    ...b.results.map((r, i) => ({ kind: "ילד", n: i + 1, ok: r.ok, error: r.error })),
+  ];
+  return { ok: true, sent: a.sent + b.sent, failed: a.failed + b.failed, targeted: devices.length,
+           skippedParents: wantP ? 0 : parentToks.length, skippedChildren: wantC ? 0 : childToks.length, pruned, devices };
 });
 
 exports.adminListCampaigns = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   requireAdmin(request);
   const snap = await db.collection("campaigns").orderBy("scheduledAt", "desc").limit(100).get();
   return { campaigns: snap.docs.map((d) => ({ id: d.id, ...d.data() })) };
+});
+
+exports.adminCampaignDeliveries = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  requireAdmin(request);
+  const id = String(request.data && request.data.id || "");
+  if (!id) throw new HttpsError("invalid-argument", "id required");
+  const snap = await db.collection("campaigns").doc(id).collection("deliveries").limit(500).get();
+  return { deliveries: snap.docs.map((d) => ({ householdID: d.id, ...d.data() })) };
 });
 
 exports.adminDeleteCampaign = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
@@ -1937,8 +1980,24 @@ exports.dispatchCampaigns = onSchedule(
       const c = { id: doc.id, ...doc.data() };
       try {
         const aud = await resolveAudience({ ...c.audience, packID: (c.action || {}).packID });
-        const a = c.audience.roles.includes("parents") ? await sendCampaignTo(aud.parentTokens, c, false) : { sent: 0, failed: 0 };
-        const b = c.audience.roles.includes("children") ? await sendCampaignTo(aud.childTokens, c, true) : { sent: 0, failed: 0 };
+        const a = c.audience.roles.includes("parents") ? await sendCampaignTo(aud.parentTokens, c, false) : { sent: 0, failed: 0, results: [] };
+        const b = c.audience.roles.includes("children") ? await sendCampaignTo(aud.childTokens, c, true) : { sent: 0, failed: 0, results: [] };
+        const results = [...a.results, ...b.results];
+        await pruneDeadTokens(results, aud.owners);
+        // "למי נשלח" — one row per household: who got it, who didn't.
+        const byHH = {};
+        for (const r of results) {
+          const o = aud.owners[r.token]; if (!o) continue;
+          const row = byHH[o.householdID] = byHH[o.householdID] || { family: o.family, parentsOK: 0, parentsFailed: 0, childrenOK: 0, childrenFailed: 0, who: [] };
+          if (o.kind === "parent") { r.ok ? row.parentsOK++ : row.parentsFailed++; } else { r.ok ? row.childrenOK++ : row.childrenFailed++; }
+          row.who.push(`${o.kind === "parent" ? "👤" : "🧒"} ${o.who}${r.ok ? " ✓" : " ✗"}`);
+        }
+        let batch = db.batch(), n = 0;
+        for (const [hid, row] of Object.entries(byHH)) {
+          batch.set(doc.ref.collection("deliveries").doc(hid), { ...row, who: [...new Set(row.who)].slice(0, 12), at: Date.now() });
+          if (++n % 400 === 0) { await batch.commit(); batch = db.batch(); }
+        }
+        if (n % 400) await batch.commit();
         await doc.ref.update({
           status: "sent", sentAt: Date.now(),
           "stats.targeted": aud.parentsN + aud.childrenN,

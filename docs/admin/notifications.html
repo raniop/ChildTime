@@ -332,7 +332,17 @@ $("estBtn").onclick = async () => {
 };
 $("testBtn").onclick = async () => {
   $("testBtn").disabled = true;
-  try { const r = await call("adminSendCampaignTest", form()); toast(r.devices ? `נשלח ל־${r.sent} מתוך ${r.devices} המכשירים שלך` : "אין לך מכשיר רשום לפוש — פתח את טופי בטלפון שלך קודם"); }
+  try {
+    const r = await call("adminSendCampaignTest", form());
+    if (!r.targeted && !r.skippedParents && !r.skippedChildren) { toast("אין לך מכשיר רשום לפוש — פתח את טופי בטלפון שלך קודם"); }
+    else {
+      const lines = (r.devices || []).map((d) => `${d.kind} ${d.n}: ${d.ok ? "נשלח ✓" : "נכשל ✗ (" + (d.error || "") + ")"}`);
+      if (r.skippedParents) lines.push(`${r.skippedParents} מכשירי הורה לא נכללו — הקהל לא כולל הורים`);
+      if (r.skippedChildren) lines.push(`${r.skippedChildren} מכשירי ילד לא נכללו — הקהל לא כולל ילדים`);
+      if (r.pruned) lines.push(`${r.pruned} מכשירים ישנים נמחקו מהרשימה (הופיעו כ"לא רשומים" ב-Apple)`);
+      alert("בדיקה:\n" + lines.join("\n"));
+    }
+  }
   catch (e) { toast("נכשל: " + (e.message || e)); }
   $("testBtn").disabled = false;
 };
@@ -376,11 +386,22 @@ async function loadHistory() {
       <td class="num">${fmtDate(c.scheduledAt)}</td>
       <td style="white-space:normal;max-width:180px">${esc(audienceLabel(c.audience || { roles: [] }))}</td>
       <td><span class="st ${c.status}">${STATUS[c.status] || c.status}</span></td>
-      <td>${c.status === "sent" ? funnel(c) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${c.status === "sent" ? funnel(c) + `<button class="btn" data-who="${c.id}" style="padding:3px 10px;font-size:12px;margin-top:6px">👥 למי נשלח</button>` : '<span style="color:var(--muted)">—</span>'}</td>
       <td class="money">${c.status === "sent" ? revenue(c) : "—"}</td>
       <td style="white-space:nowrap">${["draft", "scheduled"].includes(c.status) ? `<button class="btn" data-edit="${c.id}" style="padding:5px 11px">✏️</button> ` : ""}<button class="btn danger" data-del="${c.id}" style="padding:5px 11px">🗑</button></td>
     </tr>`);
     $("hist").innerHTML = rows.length ? rows.join("") : '<tr><td colspan="7" style="color:var(--muted)">עוד לא נשלחה הודעה.</td></tr>';
+    $("hist").querySelectorAll("[data-who]").forEach((b) => b.onclick = async () => {
+      b.disabled = true;
+      try { const d = await call("adminCampaignDeliveries", { id: b.dataset.who });
+        const rows = (d.deliveries || []).sort((x, y) => (y.parentsOK + y.childrenOK) - (x.parentsOK + x.childrenOK));
+        const html = rows.length ? `<table><thead><tr><th>משפחה</th><th>הורים</th><th>ילדים</th><th>מי</th></tr></thead><tbody>${rows.map((r) => `<tr><td><b>${esc(r.family || r.householdID)}</b></td><td class="num">${r.parentsOK} ✓${r.parentsFailed ? ` · ${r.parentsFailed} ✗` : ""}</td><td class="num">${r.childrenOK} ✓${r.childrenFailed ? ` · ${r.childrenFailed} ✗` : ""}</td><td style="white-space:normal;color:var(--muted)">${esc((r.who || []).join(" · "))}</td></tr>`).join("")}</tbody></table>` : '<div class="msg">אין נתוני מסירה (נשלח לפני שהדוח נוסף).</div>';
+        const tr = b.closest("tr"); const next = tr.nextElementSibling;
+        if (next && next.classList.contains("whoRow")) { next.remove(); }
+        else { const row = document.createElement("tr"); row.className = "whoRow"; row.innerHTML = `<td colspan="7" style="background:rgba(0,0,0,.12)">${html}</td>`; tr.after(row); }
+      } catch (e) { toast("נכשל: " + (e.message || e)); }
+      b.disabled = false;
+    });
     $("hist").querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => { if (!confirm("למחוק את ההודעה?")) return; await call("adminDeleteCampaign", { id: b.dataset.del }); loadHistory(); });
     $("hist").querySelectorAll("[data-edit]").forEach((b) => b.onclick = () => { const c = (r.campaigns || []).find((x) => x.id === b.dataset.edit); if (c) fill(c); window.scrollTo({ top: 0, behavior: "smooth" }); });
   } catch (e) { $("hist").innerHTML = `<tr><td colspan="7" class="msg err">${esc(e.message || String(e))}</td></tr>`; }
@@ -419,7 +440,8 @@ function previewCall(name, data) {
   ] };
   const map = { adminListCampaigns: sample, adminCampaignEstimate: { households: 812, parents: 1240, parentTokens: 1031, children: 412, childTokens: 390 },
     adminListPacks: { packs: { soccer: { enabled: true } }, sales: { soccer: { purchases: 97, children: 104, revenue: 1445 } } },
-    adminSaveCampaign: { ok: true, id: "new" }, adminSendCampaignTest: { ok: true, sent: 1, devices: 1 }, adminDeleteCampaign: { ok: true }, adminSetPackEnabled: { ok: true } };
+    adminSaveCampaign: { ok: true, id: "new" }, adminSendCampaignTest: { ok: true, sent: 1, failed: 0, targeted: 1, devices: [{ kind: "הורה", n: 1, ok: true }] }, adminDeleteCampaign: { ok: true }, adminSetPackEnabled: { ok: true },
+    adminCampaignDeliveries: { deliveries: [{ householdID: "1", family: "משפחת גולן", parentsOK: 2, parentsFailed: 0, childrenOK: 1, childrenFailed: 0, who: ["👤 רני ✓", "👤 עמית ✓", "🧒 יואב ✓"] }, { householdID: "2", family: "משפחת לוי", parentsOK: 1, parentsFailed: 1, childrenOK: 0, childrenFailed: 0, who: ["👤 דנה ✓", "👤 הורה ✗"] }] } };
   return Promise.resolve(map[name]);
 }
 </script>
