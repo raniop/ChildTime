@@ -63,24 +63,8 @@ struct OptionCard: View {
                     // Keep the words clear of the corner badge — a long answer used
                     // to run under the number (Rani).
                     .padding(.horizontal, 14)
-                    .padding(.top, 18)
-                    .padding(.bottom, 6)
+                    .padding(.vertical, 8)
 
-                // Number badge (1-4) — a glass chip in the corner (Rani wanted the
-                // numbers back); the read-aloud says "answer 2" to match.
-                VStack {
-                    HStack {
-                        Text("\(index + 1)")
-                            .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.9))
-                            .frame(width: 20, height: 20)
-                            .background(Circle().fill(.white.opacity(0.22)))
-                            .overlay(Circle().stroke(.white.opacity(0.35), lineWidth: 1))
-                        Spacer()
-                    }
-                    Spacer()
-                }
-                .padding(8)
 
                 // Hint badge — only on eliminated options. Top-TRAILING corner so
                 // it never sits on top of the number badge.
@@ -109,6 +93,17 @@ struct OptionCard: View {
                 RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                     .stroke(borderColor, lineWidth: borderWidth)
             )
+            // Number tag (1-4) riding the tile's top edge, centred — outside the
+            // clip, so the words inside stay untouched however long the answer.
+            .overlay(alignment: .top) {
+                Text("\(index + 1)")
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color(hex: "4B3FBF"))
+                    .frame(width: 22, height: 22)
+                    .background(Circle().fill(.white.opacity(0.92)))
+                    .shadow(color: .black.opacity(0.18), radius: 4, y: 2)
+                    .offset(y: -11)
+            }
             .glow(glowColor, radius: glowRadius)
             .scaleEffect(scale)
             .opacity(feedback == .eliminated ? 0.55 : 1.0)
