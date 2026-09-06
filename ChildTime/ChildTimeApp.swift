@@ -431,7 +431,7 @@ struct ChildTimeApp: App {
                     LearningHistoryStore.shared.seedDemo(childID: id)
                 }
             }
-        case "leaderboard": LeaderboardView()   // DEMO_SCREEN=leaderboard
+        case "leaderboard": LeaderboardView().onAppear { LiveGameManager.shared.seedDemoInvite() }   // DEMO_SCREEN=leaderboard (+ a waiting invite)
         case "livegame": LiveGameDemoHost()      // DEMO_SCREEN=livegame — live quiz setup/flow
         case "gameinvite": WorldMapView().onAppear { LiveGameManager.shared.seedDemoInvite() }  // invite banner
         case "choreskid":                                  // DEMO_SCREEN=choreskid (+ DEMO_GENDER=boy)

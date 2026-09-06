@@ -7,6 +7,7 @@ import SwiftUI
 /// highlighted. "Add friend" opens the QR / link / code flow.
 struct LeaderboardView: View {
     @ObservedObject private var friends = FriendsManager.shared
+    @ObservedObject private var liveGame = LiveGameManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var showAdd = false
     @State private var friendToRemove: FriendCard?
@@ -79,12 +80,6 @@ struct LeaderboardView: View {
             HStack(spacing: 8) {
                 Button { dismiss() } label: { headerCircle("xmark") }
                 Spacer()
-                Button {
-                    // Start a live game with friends — hand off to the home screen,
-                    // which presents the setup + game over the world map.
-                    LiveGameManager.shared.wantsNewGame = true
-                    dismiss()
-                } label: { headerCircle("gamecontroller.fill") }
                 Button { showRequests = true } label: {
                     ZStack(alignment: .topTrailing) {
                         headerCircle("tray.fill")
@@ -102,12 +97,78 @@ struct LeaderboardView: View {
                 Button { showAdd = true } label: { headerCircle("person.badge.plus") }
             }
             .environment(\.layoutDirection, .leftToRight)
-            Text("לוּחַ הַחֲבֵרִים")
+            Text("הַחֲבֵרִים")
                 .font(.system(size: 26, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
+            tournamentBlock
         }
         .padding(.horizontal, AppSpacing.lg).padding(.vertical, AppSpacing.sm)
+    }
+
+    /// 🎮 The live tournament lives INSIDE the friends screen (Rani, 2026-09-06:
+    /// three home buttons, not four): one big button to start a game, and every
+    /// waiting invite as a row the child can join in one tap.
+    private var tournamentBlock: some View {
+        VStack(spacing: 8) {
+            ForEach(liveGame.invites) { invite in
+                Button {
+                    Haptic.success()
+                    liveGame.wantsJoinGameID = invite.id
+                    dismiss()
+                } label: {
+                    HStack(spacing: 10) {
+                        Text("🎮").font(.system(size: 24))
+                        VStack(alignment: .leading, spacing: 1) {
+                            // No verb — we don't know the HOST's gender.
+                            Text("הַזְמָנָה לְטוּרְנִיר מֵ\(invite.hostName)!")
+                                .font(.system(size: 14.5, weight: .heavy, design: .rounded))
+                                .lineLimit(1).minimumScaleFactor(0.8)
+                            Text("הַמִּשְׂחָק מַתְחִיל עַכְשָׁו — לַחֲצוּ לְהִצְטָרֵף")
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .foregroundStyle(GlassInk.secondary)
+                        }
+                        Spacer(minLength: 4)
+                        Text("הִצְטָרְפוּ")
+                            .font(.system(size: 13, weight: .heavy, design: .rounded))
+                            .foregroundStyle(Color(hex: "4B3FBF"))
+                            .padding(.horizontal, 12).padding(.vertical, 8)
+                            .background(Capsule().fill(.white.opacity(0.92)))
+                    }
+                    .foregroundStyle(GlassInk.primary)
+                    .padding(12)
+                    .glassPane(radius: 18, strength: 0.18, tint: Color(hex: "5CFF9D"), shadow: false)
+                }
+                .buttonStyle(.plain)
+            }
+            Button {
+                // Start a live game with friends — hand off to the home screen,
+                // which presents the setup + game over the world map.
+                Haptic.light()
+                LiveGameManager.shared.wantsNewGame = true
+                dismiss()
+            } label: {
+                HStack(spacing: 10) {
+                    Text("🎮").font(.system(size: 26))
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("טוּרְנִיר חַי עִם חֲבֵרִים")
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        Text("מַזְמִינִים, כֻּלָּם עוֹנִים בְּאוֹתוֹ זְמַן — מִי הֲכִי מָהִיר?")
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(GlassInk.secondary)
+                            .lineLimit(1).minimumScaleFactor(0.8)
+                    }
+                    Spacer(minLength: 4)
+                    Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                }
+                .foregroundStyle(GlassInk.primary)
+                .padding(12)
+                .frame(maxWidth: .infinity)
+                .ctaGlass(Color(hex: "EF476F"), Color(hex: "9B5DE5"), colour: 0.55)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.top, 2)
     }
 
     private func headerCircle(_ system: String) -> some View {

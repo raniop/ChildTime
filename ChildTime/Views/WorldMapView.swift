@@ -627,6 +627,12 @@ struct WorldMapView: View {
             liveGame.wantsNewGame = false
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { liveGame.openSetup() }
         }
+        // …and its "join" on a waiting invite — same beat, then join.
+        .onChangeCompat(of: liveGame.wantsJoinGameID) { _, id in
+            guard let id else { return }
+            liveGame.wantsJoinGameID = nil
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { Task { await liveGame.joinGame(id) } }
+        }
         .onAppear {
             if friends.pendingFriendCode != nil { showingLeaderboard = true }
             if let id = liveGame.pendingGameID { liveGame.pendingGameID = nil; Task { await liveGame.joinGame(id) } }
@@ -1085,19 +1091,18 @@ struct WorldMapView: View {
     }
 
     /// Round glass buttons, no captions (the approved mockup) — emoji say it all.
-    /// Order (LTR): 🎮 tournament · 🏆 leaderboard · 🛍️ shop · ⚙️ settings.
+    /// Three, not four (Rani, 2026-09-06): 🛍️ shop · 🏆 friends (leaderboard +
+    /// the live tournament live inside it; a waiting invite lights the badge) ·
+    /// ⚙️ the parent's corner. Order (LTR): 🛍️ · 🏆 · ⚙️.
     private func navButtonsRow(size: CGFloat) -> some View {
         HStack(spacing: isCompact ? 6 : 9) {
+            // Rani (2026-09-06): the shop and the friends screen are NOT behind
+            // Tofy+ — a child can always spend diamonds and see their friends.
             navButton("🛍️", badge: false, size: size) {
-                Haptic.light(); requirePremium { showingShop = true }
+                Haptic.light(); showingShop = true
             }
-            navButton("🏆", badge: false, size: size) {
-                Haptic.light(); requirePremium { showingLeaderboard = true }
-            }
-            navButton("👥", badge: !liveGame.invites.isEmpty, size: size) {
-                Haptic.light()
-                requirePremium { if let invite = liveGame.invites.first { Task { await liveGame.joinGame(invite.id) } }
-                else { liveGame.openSetup() } }
+            navButton("🏆", badge: !liveGame.invites.isEmpty, size: size) {
+                Haptic.light(); showingLeaderboard = true
             }
             navButton("⚙️", badge: false, size: size, longPress: { showingDemo = true }) {
                 showingParentGate = true

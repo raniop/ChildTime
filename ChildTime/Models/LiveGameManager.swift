@@ -138,6 +138,9 @@ final class LiveGameManager: ObservableObject {
     @Published private(set) var game: LiveGame?
     @Published private(set) var players: [LiveGamePlayer] = []   // roster, sorted by score
     @Published private(set) var invites: [LiveGameInvite] = []   // in-app "join" prompts
+    /// The leaderboard tapped a waiting invite — the home joins it after the
+    /// cover dismisses (mirrors `wantsNewGame`).
+    @Published var wantsJoinGameID: String? = nil
     /// My chosen option for the current question (nil = not answered yet).
     @Published private(set) var myChoiceIndex: Int?
     /// Set from a game deep link / push tap; consumed by the home screen.
