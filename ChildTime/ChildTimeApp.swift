@@ -305,9 +305,18 @@ struct ChildTimeApp: App {
         case "childjoin": ChildJoinView()               // DEMO_SCREEN=childjoin
         case "familychoice": FamilyChoiceView()         // DEMO_SCREEN=familychoice
         case "applock": ChildAppLockSetupView()         // DEMO_SCREEN=applock
-        case "createchild": ProfileEditorView(mode: .create) { _ in } onDelete: { _ in }   // DEMO_SCREEN=createchild
+        case "createchild":                             // DEMO_SCREEN=createchild — as the PARENT sees it
+            ProfileEditorView(mode: .create) { _ in } onDelete: { _ in }
+                .onAppear { ParentSettings.shared.deviceRole = .parent }   // demo: age / grade rows are parent-only
         case "kidmode": KidModeEntryView()              // DEMO_SCREEN=kidmode
-        case "gate": ParentGateView(allowClose: true, respectSession: false) { Text("OK") }   // DEMO_SCREEN=gate
+        case "gate":                                    // DEMO_SCREEN=gate — the parent-code keypad
+            ParentGateView(allowClose: true, respectSession: false) { Text("OK") }
+                .onAppear {
+                    // Demo only: a local code exists, so the keypad shows (not the
+                    // "loading your family" wait).
+                    PINManager.shared.setPIN("1234")
+                    ParentSettings.shared.hasSetParentPIN = true
+                }
         case "choresparent":                            // DEMO_SCREEN=choresparent — the parent's chores manager
             if let p = ProfileStore.shared.active { ChoresParentView(profile: p).onAppear { ChoreStore.shared.seedDemo(childID: p.id) } }
         case "childdifficulty": if let id = ProfileStore.shared.activeID { ChildDifficultyView(profileID: id) }
