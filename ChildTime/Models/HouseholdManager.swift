@@ -983,19 +983,33 @@ final class HouseholdManager: ObservableObject {
     /// price from now on), and the sale is logged for the founder dashboard.
     func grantPack(_ pack: QuestionPack, childIDs: [String], productID: String, price: Decimal?, transactionID: String) {
         let store = ProfileStore.shared
+        let now = Date().timeIntervalSince1970
+        var newExpiry: [String: Double] = [:]   // childID → expiry (passes only)
         for cid in childIDs {
-            if var p = store.profiles.first(where: { $0.id.uuidString == cid }), !p.ownedPacks.contains(pack.id) {
-                p.ownedPacks.insert(pack.id)
-                store.update(p)          // also upserts the whole record (merge)
+            guard var p = store.profiles.first(where: { $0.id.uuidString == cid }) else { continue }
+            var changed = false
+            if !p.ownedPacks.contains(pack.id) { p.ownedPacks.insert(pack.id); changed = true }
+            if let days = pack.durationDays {
+                // A renewal stacks on the time left; an expired pass restarts now.
+                let base = max(p.packExpiry[pack.id] ?? 0, now)
+                p.packExpiry[pack.id] = base + Double(days) * 86_400
+                newExpiry[cid] = p.packExpiry[pack.id]
+                changed = true
             }
+            if changed { store.update(p) }   // also upserts the whole record (merge)
         }
         #if canImport(FirebaseFirestore)
         guard !Self.skipsCloudSync, let hh = household else { return }
         Task {
             for cid in childIDs {
                 let ref = db.collection("children").document(cid)
-                let fields: [String: Any] = ["packs": FieldValue.arrayUnion([pack.id]),
+                var fields: [String: Any] = ["packs": FieldValue.arrayUnion([pack.id]),
                                              "packRequestedAt": FieldValue.delete(), "packRequestedID": FieldValue.delete()]
+                if let exp = newExpiry[cid] {
+                    fields["packExpiry"] = [pack.id: exp]
+                    // The child asked for this world with Tofy+ — the pass answers it.
+                    fields["premiumRequestedAt"] = FieldValue.delete(); fields["premiumRequestedTopic"] = FieldValue.delete()
+                }
                 var outcome = await confirmedMerge(ref, fields)
                 if outcome == .denied { await reassertMembership(); outcome = await confirmedMerge(ref, fields) }
                 if outcome == .denied || outcome == .error { TofyLink("grantPack: child \(cid.prefix(8)) write FAILED (\(outcome))") }

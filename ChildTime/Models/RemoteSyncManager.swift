@@ -54,6 +54,12 @@ final class RemoteSyncManager: ObservableObject {
     /// ⚽ Children who tapped "בקש מאבא או אמא" on a pack: child → pack id.
     @Published private(set) var packRequests: [UUID: String] = [:]
 
+    /// Demo harness only.
+    func seedDemoPremiumRequest(childID: UUID, topic: String) {
+        demoPackRequestIDs.insert(childID)
+        premiumRequests[childID] = Date().timeIntervalSince1970; premiumRequestTopics[childID] = topic
+    }
+
     /// Demo harness only — pinned so the live child-doc listener can't clear it.
     private var demoPackRequestIDs: Set<UUID> = []
     func seedDemoPackRequest(childID: UUID, packID: String) {
@@ -858,9 +864,9 @@ final class RemoteSyncManager: ObservableObject {
                         else if !self.demoPackRequestIDs.contains(profile.id) { self.packRequests.removeValue(forKey: profile.id) }
                         // 👑 The child asked for Tofy+ from their device.
                         if let premiumReq { self.premiumRequests[profile.id] = premiumReq }
-                        else { self.premiumRequests.removeValue(forKey: profile.id) }
+                        else if !self.demoPackRequestIDs.contains(profile.id) { self.premiumRequests.removeValue(forKey: profile.id) }
                         if premiumReq != nil, let premiumTopic { self.premiumRequestTopics[profile.id] = premiumTopic }
-                        else { self.premiumRequestTopics.removeValue(forKey: profile.id) }
+                        else if !self.demoPackRequestIDs.contains(profile.id) { self.premiumRequestTopics.removeValue(forKey: profile.id) }
                         if adj != 0 { self.pendingAdjustments[profile.id] = adj }
                         else { self.pendingAdjustments.removeValue(forKey: profile.id) }
                         if gift != 0 { self.pendingGifts[profile.id] = gift }

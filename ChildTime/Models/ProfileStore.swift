@@ -223,6 +223,7 @@ final class ProfileStore: ObservableObject {
                 merged.playPIN = remote.playPIN ?? working[idx].playPIN
                 // A bought pack is never lost to a stale writer — union.
                 merged.ownedPacks = remote.ownedPacks.union(working[idx].ownedPacks)
+                merged.packExpiry = remote.packExpiry.merging(working[idx].packExpiry) { max($0, $1) }
                 if working[idx] != merged { working[idx] = merged; changed = true }
             } else {
                 working.append(remote); changed = true

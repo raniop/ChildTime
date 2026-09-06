@@ -31,6 +31,14 @@ struct QuestionPack: Identifiable, Hashable {
     let plannedPriceLabel: String
     /// The bare subject for "רוצה ללמוד על …?" ("כַּדּוּרֶגֶל").
     let shortSubject: String
+    /// nil → bought once, forever (a real pack). 30 → a "world pass": one base
+    /// world for one child for 30 days, no auto-renew (Rani: a single world
+    /// must not make Tofy+ pointless).
+    var durationDays: Int? = nil
+
+    var isPass: Bool { durationDays != nil }
+    /// "30 יום" / "לתמיד"
+    var durationLabel: String { durationDays.map { "\($0) יוֹם" } ?? "לְתָמִיד" }
 
     /// "כיתות ב׳–ו׳"
     var gradesLabel: String {
@@ -40,8 +48,10 @@ struct QuestionPack: Identifiable, Hashable {
         return grades.lowerBound == grades.upperBound ? "כִּתָּה \(lo)" : "כִּתּוֹת \(lo)–\(hi)"
     }
 
-    /// Questions bundled for this pack (the compiler-checked bank).
+    /// Questions bundled for this pack (the compiler-checked bank). 0 for the
+    /// generated/passage topics (math, reading) — the UI says "מתחדשות".
     var questionCount: Int { QuestionBanks.bank(for: topic)?.count ?? 0 }
+    var questionsLabel: String { questionCount > 0 ? "\(questionCount) שְׁאֵלוֹת · 3 רָמוֹת" : "שְׁאֵלוֹת מִתְחַדְּשׁוֹת · 3 רָמוֹת" }
 
     var heroGradient: LinearGradient {
         LinearGradient(colors: heroColors, startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -72,10 +82,56 @@ enum QuestionPacks {
         ),
     ]
 
-    static func find(_ id: String) -> QuestionPack? { all.first { $0.id == id } }
+    /// A pack OR a world pass by id ("soccer", "math").
+    static func find(_ id: String) -> QuestionPack? { all.first { $0.id == id } ?? WorldPasses.find(id) }
+    /// Real packs only (a base world is never "a pack" — see Topic.core).
     static func pack(for topic: Topic) -> QuestionPack? { all.first { $0.topic == topic } }
     static var allProductIDs: Set<String> {
-        Set(all.flatMap { [$0.productID, $0.siblingProductID] })
+        Set((all + WorldPasses.all).flatMap { [$0.productID, $0.siblingProductID] })
+    }
+}
+
+/// 🌍 World passes — every BASE world sold for 30 days per child, next to
+/// Tofy+ (Rani, 2026-09-06: "יש כאלה שירצו לשלם חד פעמי"). Same purchase
+/// machinery as packs; ownership carries an expiry (`Profile.packExpiry`).
+enum WorldPasses {
+    static let all: [QuestionPack] = Worlds.all.filter { !$0.isBonusWorld && !$0.topic.isPack }.map { w in
+        QuestionPack(
+            id: w.topic.rawValue, topic: w.topic, name: w.name, emoji: w.emoji,
+            tagline: tagline(w.topic),
+            description: description(w.topic),
+            learns: learns(w.topic),
+            grades: w.topic == .reading ? 1...6 : 0...6,
+            productID: "com.rani.ChildTime.world.\(w.topic.rawValue).30d",
+            siblingProductID: "com.rani.ChildTime.world.\(w.topic.rawValue).30d.sibling",
+            heroColors: [w.glowColor, w.glowColor.opacity(0.6)],
+            plannedPriceLabel: "₪6.90",
+            shortSubject: w.topic.displayName,
+            durationDays: 30
+        )
+    }
+    static func find(_ id: String) -> QuestionPack? { all.first { $0.id == id } }
+    static func pass(for topic: Topic) -> QuestionPack? { all.first { $0.topic == topic } }
+
+    private static func tagline(_ t: Topic) -> String {
+        switch t {
+        case .math:      return "חִבּוּר, חִסּוּר, כֶּפֶל, חִלּוּק וּבְעָיוֹת מִלּוּלִיּוֹת"
+        case .english:   return "מִלִּים, מִשְׁפָּטִים וְשִׂיחָה בְּאַנְגְּלִית"
+        case .hebrew:    return "כְּתִיב נָכוֹן, מִלִּים וְדִקְדּוּק"
+        case .logic:     return "חִידוֹת, סְדָרוֹת וַחֲשִׁיבָה"
+        case .science:   return "גּוּף, טֶבַע, חַיּוֹת וְנִסּוּיִים"
+        case .history:   return "אֲנָשִׁים, תְּקוּפוֹת וְסִפּוּרִים מֵהֶעָבָר"
+        case .geography: return "מְדִינוֹת, יַבָּשׁוֹת, יַמִּים וּדְגָלִים"
+        case .money:     return "כֶּסֶף, חִסָּכוֹן וּבְחִירוֹת חֲכָמוֹת"
+        case .reading:   return "קְטָעִים קְצָרִים וּשְׁאֵלוֹת עֲלֵיהֶם"
+        case .soccer:    return ""
+        }
+    }
+    private static func description(_ t: Topic) -> String {
+        "\(tagline(t)) — לְפִי תָּכְנִית הַלִּמּוּדִים שֶׁל הַכִּתָּה שֶׁל הַיֶּלֶד, בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן. עַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק."
+    }
+    private static func learns(_ t: Topic) -> [String] {
+        ["שְׁאֵלוֹת לְפִי הַכִּתָּה וְהָרָמָה שֶׁל הַיֶּלֶד", "דּוּחַ לַהוֹרִים: בַּמֶּה חָזָק, מָה לְתַרְגֵּל", "רְמָזִים וְהַקְרָאָה לְמִי שֶׁעוֹד לֹא קוֹרֵא", "30 יוֹם · לְיֶלֶד אֶחָד · בְּלִי חִדּוּשׁ אוֹטוֹמָטִי"]
     }
 }
 
@@ -111,8 +167,8 @@ enum PackKidState {
         UserDefaults.standard.removeObject(forKey: key("opened", childID))
         for p in QuestionPacks.all { UserDefaults.standard.removeObject(forKey: key("revealedAt.\(p.id)", childID)) }
     }
-    /// The first owned pack this child hasn't been shown the 🎁 for yet.
+    /// The first owned pack / world pass this child hasn't been shown the 🎁 for yet.
     static func pendingReveal(for profile: Profile) -> QuestionPack? {
-        QuestionPacks.all.first { profile.owns($0) && !isRevealed($0.id, childID: profile.id) }
+        (QuestionPacks.all + WorldPasses.all).first { profile.owns($0) && !isRevealed($0.id, childID: profile.id) }
     }
 }

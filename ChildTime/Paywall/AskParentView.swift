@@ -44,7 +44,10 @@ struct AskParentView: View {
 
                 Text(world?.emoji ?? "👑").font(.system(size: 72))
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
-                Text(world.map { "\(g("רוֹצֶה", "רוֹצָה")) לִלְמֹד \($0.topic.displayName)?" } ?? "טוֹפִי+")
+                Text(world.map { w in
+                        let ended = WorldPasses.pass(for: w.topic).map { child?.passExpired($0) ?? false } ?? false
+                        return ended ? "\(g("רוֹצֶה", "רוֹצָה")) לְהַמְשִׁיךְ לִלְמֹד \(w.topic.displayName)?" : "\(g("רוֹצֶה", "רוֹצָה")) לִלְמֹד \(w.topic.displayName)?"
+                     } ?? "טוֹפִי+")
                     .font(.system(size: world == nil ? 34 : 27, weight: .black, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
                     .shadow(color: .black.opacity(0.18), radius: 7, y: 2)

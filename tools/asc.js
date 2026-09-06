@@ -102,8 +102,70 @@ async function createPack([productId, kind, nameHe, descHe, priceILS, screenshot
   console.log("state:", fresh.data.attributes.state);
 }
 
+// 🌍 A base world as a 30-day pass: two consumables (first child / extra child).
+async function createWorld([topic, nameHe, nameEn, price, siblingPrice, screenshot]) {
+  const app = await appID();
+  const existing = await all(`/v1/apps/${app}/inAppPurchasesV2?limit=200`);
+  const variants = [
+    { productId: `com.rani.ChildTime.world.${topic}.30d`, he: `${nameHe} · 30 יום`, en: `${nameEn} · 30 days`, price, descHe: `${nameHe} לילד אחד ל-30 יום.`, descEn: "One world, one child, 30 days." },
+    { productId: `com.rani.ChildTime.world.${topic}.30d.sibling`, he: `${nameHe} · ילד נוסף`, en: `${nameEn} · 30 days · sibling`, price: siblingPrice, descHe: `${nameHe} לילד נוסף ל-30 יום.`, descEn: "The same world for another child, 30 days." },
+  ];
+  for (const v of variants) {
+    let iap = existing.find((x) => x.attributes.productId === v.productId);
+    if (iap) console.log("exists:", v.productId, iap.attributes.state);
+    else {
+      iap = (await api("POST", "/v2/inAppPurchases", { data: { type: "inAppPurchases",
+        attributes: { name: v.he, productId: v.productId, inAppPurchaseType: "CONSUMABLE",
+          reviewNote: "30-day access to one base learning world for one child, bought by a PARENT behind the parental gate (no auto-renew; the family subscription Tofy+ includes all worlds). Consumable so it can be renewed and bought for another child. Never shown with a price on a child device." },
+        relationships: { app: { data: { type: "apps", id: app } } } } })).data;
+      console.log("created:", v.productId, iap.id);
+    }
+    const locs = await all(`/v2/inAppPurchases/${iap.id}/inAppPurchaseLocalizations`);
+    for (const [locale, name, description] of [["he", v.he, v.descHe], ["en-US", v.en, v.descEn]]) {
+      if (locs.find((l) => l.attributes.locale === locale)) continue;
+      await api("POST", "/v1/inAppPurchaseLocalizations", { data: { type: "inAppPurchaseLocalizations", attributes: { locale, name, description },
+        relationships: { inAppPurchaseV2: { data: { type: "inAppPurchases", id: iap.id } } } } });
+    }
+    const points = await all(`/v2/inAppPurchases/${iap.id}/pricePoints?filter[territory]=ISR&limit=8000`);
+    const target = Number(v.price);
+    const best = points.map((p) => ({ id: p.id, price: Number(p.attributes.customerPrice) })).sort((a, b) => Math.abs(a.price - target) - Math.abs(b.price - target))[0];
+    try {
+      await api("POST", "/v1/inAppPurchasePriceSchedules", { data: { type: "inAppPurchasePriceSchedules",
+        relationships: { inAppPurchase: { data: { type: "inAppPurchases", id: iap.id } }, baseTerritory: { data: { type: "territories", id: "ISR" } },
+          manualPrices: { data: [{ type: "inAppPurchasePrices", id: "${price1}" }] } } },
+        included: [{ type: "inAppPurchasePrices", id: "${price1}", attributes: { startDate: null },
+          relationships: { inAppPurchasePricePoint: { data: { type: "inAppPurchasePricePoints", id: best.id } } } }] });
+    } catch (e) { console.log("price:", e.message.slice(0, 120)); }
+    try {
+      const terr = await all("/v1/territories?limit=200");
+      await api("POST", "/v1/inAppPurchaseAvailabilities", { data: { type: "inAppPurchaseAvailabilities", attributes: { availableInNewTerritories: true },
+        relationships: { inAppPurchase: { data: { type: "inAppPurchases", id: iap.id } }, availableTerritories: { data: terr.map((t) => ({ type: "territories", id: t.id })) } } } });
+    } catch (e) { console.log("availability:", e.message.slice(0, 120)); }
+    if (screenshot) {
+      try {
+        const have = await api("GET", `/v2/inAppPurchases/${iap.id}/appStoreReviewScreenshot`).catch(() => null);
+        if (!(have && have.data)) {
+          const buf = fs.readFileSync(screenshot);
+          const r = await api("POST", "/v1/inAppPurchaseAppStoreReviewScreenshots", { data: { type: "inAppPurchaseAppStoreReviewScreenshots",
+            attributes: { fileName: path.basename(screenshot), fileSize: buf.length },
+            relationships: { inAppPurchaseV2: { data: { type: "inAppPurchases", id: iap.id } } } } });
+          for (const op of r.data.attributes.uploadOperations) {
+            const h = {}; for (const x of op.requestHeaders) h[x.name] = x.value;
+            const up = await fetch(op.url, { method: op.method, headers: h, body: buf.subarray(op.offset, op.offset + op.length) });
+            if (!up.ok) throw new Error("upload part failed " + up.status);
+          }
+          await api("PATCH", `/v1/inAppPurchaseAppStoreReviewScreenshots/${r.data.id}`, { data: { type: "inAppPurchaseAppStoreReviewScreenshots", id: r.data.id,
+            attributes: { uploaded: true, sourceFileChecksum: crypto.createHash("md5").update(buf).digest("hex") } } });
+        }
+      } catch (e) { console.log("screenshot:", e.message.slice(0, 160)); }
+    }
+    console.log("done:", v.productId, "₪" + (best && best.price));
+  }
+}
+
 (async () => {
   const [cmd, ...args] = process.argv.slice(2);
+  if (cmd === "create-world") { await createWorld(args); return; }
   if (cmd === "apps") { const j = await api("GET", "/v1/apps?limit=50"); for (const a of j.data) console.log(a.id, a.attributes.bundleId, a.attributes.name); }
   else if (cmd === "iaps") { const app = await appID(); for (const x of await all(`/v1/apps/${app}/inAppPurchasesV2?limit=200`)) console.log(x.id, x.attributes.productId, x.attributes.inAppPurchaseType, x.attributes.state); }
   else if (cmd === "create-pack") await createPack(args);

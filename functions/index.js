@@ -1888,6 +1888,39 @@ async function pruneDeadTokens(results, owners) {
   return dead.length;
 }
 
+// 🌍 World passes end after 30 days — 3 days before, the parents hear about
+// it once ("המתמטיקה של נועה נגמרת ביום שלישי"), so the child never meets a
+// closed world by surprise. Runs daily; dedup per child+pack+expiry.
+exports.worldPassReminders = onSchedule(
+  { schedule: "every day 17:30", timeZone: "Asia/Jerusalem", timeoutSeconds: 300, memory: "512MiB" },
+  async () => {
+    const now = Date.now() / 1000;
+    const lo = now + 2 * 86400, hi = now + 3 * 86400 + 3600;
+    const kids = await db.collection("children").get();
+    const WORLD_HE = { math: "המתמטיקה 🧮", english: "האנגלית 🇬🇧", hebrew: "העברית ✍️", logic: "הלוגיקה 🧩", science: "המדעים 🔬",
+                       history: "ההיסטוריה 🏛️", geography: "הגיאוגרפיה 🌍", money: "החינוך הפיננסי 💰", reading: "הבנת הנקרא 📖" };
+    let sent = 0;
+    for (const k of kids.docs) {
+      const d = k.data() || {}; const exp = d.packExpiry || {};
+      for (const [packID, at] of Object.entries(exp)) {
+        if (!(Number(at) >= lo && Number(at) <= hi) || !WORLD_HE[packID]) continue;
+        const key = `passend_${k.id}_${packID}_${Math.round(Number(at))}`;
+        try { await db.collection("pushDedup").doc(key).create({ at: Date.now() }); } catch (e) { continue; }
+        const tokens = await tokensForHousehold(d.householdID);
+        if (!tokens.length) continue;
+        const name = d.name || "הילד";
+        const day = new Date(Number(at) * 1000).toLocaleDateString("he-IL", { weekday: "long", timeZone: "Asia/Jerusalem" });
+        await send(tokens,
+          { title: `${WORLD_HE[packID]} של ${name} ${d.gender === "girl" ? "נגמרת" : "נגמרת"} ב${day}`,
+            body: `30 הימים מסתיימים. אפשר לפתוח עוד 30 יום, או טופי+ לכל המשפחה — מהטלפון שלכם. ההתקדמות נשמרת.` },
+          { type: "pass-ending", childID: k.id, packID });
+        sent += 1;
+      }
+    }
+    console.log("[worldPassReminders] sent", sent);
+  }
+);
+
 exports.adminSaveCampaign = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const email = requireAdmin(request);
   const id = String(request.data && request.data.id || "").trim();

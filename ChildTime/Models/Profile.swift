@@ -109,6 +109,10 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// gates packs (see `allows`). Synced via `ChildRecord.packs`; merges take
     /// the UNION so a purchase can't be undone by a stale device.
     var ownedPacks: Set<String> = []
+    /// 🌍 World passes: pack id → unix expiry. A pass is bought for 30 days; a
+    /// renewal extends the SAME entry. Merges keep the later date. Absent for
+    /// a permanent pack.
+    var packExpiry: [String: Double] = [:]
 
     init(
         id: UUID = UUID(),
@@ -150,6 +154,23 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.ownedPacks = ownedPacks
     }
 
+    /// Does the child have this pack / pass RIGHT NOW? (A pass past its expiry
+    /// stays in `ownedPacks` for history/progress, but no longer opens.)
+    func owns(_ pack: QuestionPack) -> Bool {
+        guard ownedPacks.contains(pack.id) else { return false }
+        guard pack.isPass else { return true }
+        return (packExpiry[pack.id] ?? 0) > Date().timeIntervalSince1970
+    }
+    /// A pass this child HAD and lost — "רוצה להמשיך?" instead of "רוצה ללמוד?".
+    func passExpired(_ pack: QuestionPack) -> Bool {
+        pack.isPass && ownedPacks.contains(pack.id) && !owns(pack)
+    }
+    /// Whole days left on a pass (nil when not a pass / not owned).
+    func passDaysLeft(_ pack: QuestionPack) -> Int? {
+        guard pack.isPass, let exp = packExpiry[pack.id] else { return nil }
+        return max(0, Int(ceil((exp - Date().timeIntervalSince1970) / 86_400)))
+    }
+
     // Backward-compatible decoding: profiles stored before the Parent Platform
     // shipped won't have grade / interests / learningLevel keys.
     enum CodingKeys: String, CodingKey {
@@ -157,7 +178,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         case grade, gradeSchoolYear, gradeSetByChild, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
         case topicsVersion
         case playPIN
-        case ownedPacks
+        case ownedPacks, packExpiry
     }
 
     init(from decoder: Decoder) throws {
@@ -199,6 +220,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         }
         self.playPIN = try c.decodeIfPresent(String.self, forKey: .playPIN)
         self.ownedPacks = Set((try? c.decodeIfPresent([String].self, forKey: .ownedPacks)) ?? nil ?? [])
+        self.packExpiry = (try? c.decodeIfPresent([String: Double].self, forKey: .packExpiry)) ?? nil ?? [:]
     }
 
     /// Whether this child may play the topic: a base topic the parent hasn't
@@ -212,7 +234,6 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// smart feed, the mixed game modes and the home grid.
     var playableTopics: Set<Topic> { Set(Topic.allCases.filter(allows)) }
 
-    func owns(_ pack: QuestionPack) -> Bool { ownedPacks.contains(pack.id) }
 
     /// Resolved daily screen-time cap for this child. A per-child value overrides
     /// the device-global setting; nil → inherit the global; ≤0 → unlimited.

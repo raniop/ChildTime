@@ -139,6 +139,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// Paid packs bought for this child (QuestionPack ids). nil when none —
     /// written with arrayUnion by the purchase, so a stale upsert never removes one.
     var packs: [String]?
+    /// 🌍 World-pass expiry per pack id (unix seconds). Merged field by field.
+    var packExpiry: [String: Double]?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -167,6 +169,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.topicsVersion = profile.topicsVersion
         self.playPIN = profile.playPIN
         self.packs = profile.ownedPacks.isEmpty ? nil : profile.ownedPacks.sorted()
+        self.packExpiry = profile.packExpiry.isEmpty ? nil : profile.packExpiry
     }
 
     /// Rehydrate a local `Profile`. The photo now syncs (compressed), so a custom
@@ -199,6 +202,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             playPIN: playPIN,
             ownedPacks: Set(packs ?? [])
         )
+        p.packExpiry = packExpiry ?? [:]
         p.gradeSetByChild = gradeSetByChild ?? false
         p.characterUpdatedAt = characterUpdatedAt
         return p

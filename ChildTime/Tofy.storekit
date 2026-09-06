@@ -76,6 +76,276 @@
       "productID": "com.rani.ChildTime.pack.soccer.sibling",
       "referenceName": "Pack Soccer Sibling",
       "type": "Consumable"
+    },
+    {
+      "displayPrice": "6.90",
+      "familyShareable": false,
+      "internalID": "500000101",
+      "localizations": [
+        {
+          "description": "ממלכת המתמטיקה לילד אחד ל-30 יום.",
+          "displayName": "ממלכת המתמטיקה · 30 יום",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.math.30d",
+      "referenceName": "World math 30d",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "3.90",
+      "familyShareable": false,
+      "internalID": "500000102",
+      "localizations": [
+        {
+          "description": "ממלכת המתמטיקה לילד אחד ל-30 יום.",
+          "displayName": "ממלכת המתמטיקה · 30 יום · ילד נוסף",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.math.30d.sibling",
+      "referenceName": "World math 30d.sibling",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "6.90",
+      "familyShareable": false,
+      "internalID": "500000103",
+      "localizations": [
+        {
+          "description": "ארץ אנגלית לילד אחד ל-30 יום.",
+          "displayName": "ארץ אנגלית · 30 יום",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.english.30d",
+      "referenceName": "World english 30d",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "3.90",
+      "familyShareable": false,
+      "internalID": "500000104",
+      "localizations": [
+        {
+          "description": "ארץ אנגלית לילד אחד ל-30 יום.",
+          "displayName": "ארץ אנגלית · 30 יום · ילד נוסף",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.english.30d.sibling",
+      "referenceName": "World english 30d.sibling",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "6.90",
+      "familyShareable": false,
+      "internalID": "500000105",
+      "localizations": [
+        {
+          "description": "ארץ העברית לילד אחד ל-30 יום.",
+          "displayName": "ארץ העברית · 30 יום",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.hebrew.30d",
+      "referenceName": "World hebrew 30d",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "3.90",
+      "familyShareable": false,
+      "internalID": "500000106",
+      "localizations": [
+        {
+          "description": "ארץ העברית לילד אחד ל-30 יום.",
+          "displayName": "ארץ העברית · 30 יום · ילד נוסף",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.hebrew.30d.sibling",
+      "referenceName": "World hebrew 30d.sibling",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "6.90",
+      "familyShareable": false,
+      "internalID": "500000107",
+      "localizations": [
+        {
+          "description": "חידות הלוגיקה לילד אחד ל-30 יום.",
+          "displayName": "חידות הלוגיקה · 30 יום",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.logic.30d",
+      "referenceName": "World logic 30d",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "3.90",
+      "familyShareable": false,
+      "internalID": "500000108",
+      "localizations": [
+        {
+          "description": "חידות הלוגיקה לילד אחד ל-30 יום.",
+          "displayName": "חידות הלוגיקה · 30 יום · ילד נוסף",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.logic.30d.sibling",
+      "referenceName": "World logic 30d.sibling",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "6.90",
+      "familyShareable": false,
+      "internalID": "500000109",
+      "localizations": [
+        {
+          "description": "מעבדת המדעים לילד אחד ל-30 יום.",
+          "displayName": "מעבדת המדעים · 30 יום",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.science.30d",
+      "referenceName": "World science 30d",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "3.90",
+      "familyShareable": false,
+      "internalID": "500000110",
+      "localizations": [
+        {
+          "description": "מעבדת המדעים לילד אחד ל-30 יום.",
+          "displayName": "מעבדת המדעים · 30 יום · ילד נוסף",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.science.30d.sibling",
+      "referenceName": "World science 30d.sibling",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "6.90",
+      "familyShareable": false,
+      "internalID": "500000111",
+      "localizations": [
+        {
+          "description": "מוזיאון ההיסטוריה לילד אחד ל-30 יום.",
+          "displayName": "מוזיאון ההיסטוריה · 30 יום",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.history.30d",
+      "referenceName": "World history 30d",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "3.90",
+      "familyShareable": false,
+      "internalID": "500000112",
+      "localizations": [
+        {
+          "description": "מוזיאון ההיסטוריה לילד אחד ל-30 יום.",
+          "displayName": "מוזיאון ההיסטוריה · 30 יום · ילד נוסף",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.history.30d.sibling",
+      "referenceName": "World history 30d.sibling",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "6.90",
+      "familyShareable": false,
+      "internalID": "500000113",
+      "localizations": [
+        {
+          "description": "מסע סביב העולם לילד אחד ל-30 יום.",
+          "displayName": "מסע סביב העולם · 30 יום",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.geography.30d",
+      "referenceName": "World geography 30d",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "3.90",
+      "familyShareable": false,
+      "internalID": "500000114",
+      "localizations": [
+        {
+          "description": "מסע סביב העולם לילד אחד ל-30 יום.",
+          "displayName": "מסע סביב העולם · 30 יום · ילד נוסף",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.geography.30d.sibling",
+      "referenceName": "World geography 30d.sibling",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "6.90",
+      "familyShareable": false,
+      "internalID": "500000115",
+      "localizations": [
+        {
+          "description": "שוק הכסף לילד אחד ל-30 יום.",
+          "displayName": "שוק הכסף · 30 יום",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.money.30d",
+      "referenceName": "World money 30d",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "3.90",
+      "familyShareable": false,
+      "internalID": "500000116",
+      "localizations": [
+        {
+          "description": "שוק הכסף לילד אחד ל-30 יום.",
+          "displayName": "שוק הכסף · 30 יום · ילד נוסף",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.money.30d.sibling",
+      "referenceName": "World money 30d.sibling",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "6.90",
+      "familyShareable": false,
+      "internalID": "500000117",
+      "localizations": [
+        {
+          "description": "יער הסיפורים לילד אחד ל-30 יום.",
+          "displayName": "יער הסיפורים · 30 יום",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.reading.30d",
+      "referenceName": "World reading 30d",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "3.90",
+      "familyShareable": false,
+      "internalID": "500000118",
+      "localizations": [
+        {
+          "description": "יער הסיפורים לילד אחד ל-30 יום.",
+          "displayName": "יער הסיפורים · 30 יום · ילד נוסף",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.world.reading.30d.sibling",
+      "referenceName": "World reading 30d.sibling",
+      "type": "Consumable"
     }
   ],
   "settings": {

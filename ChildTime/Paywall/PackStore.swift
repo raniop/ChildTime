@@ -78,13 +78,33 @@ final class PackStore: ObservableObject {
 
     // MARK: - Pricing
 
+    /// Every pack/pass product came back from StoreKit. Prices are shown only
+    /// as ONE set — all from the store, or (DEBUG demo) all planned in ₪ —
+    /// never a mix of currencies on one screen (Rani).
+    var allLoaded: Bool { QuestionPacks.allProductIDs.allSatisfy { products[$0] != nil } }
+
+    /// The price to show on a card: the store's, or the planned ₪ in a DEBUG
+    /// demo without products, or nothing.
+    func displayPrice(for pack: QuestionPack) -> String? {
+        if allLoaded { return products[pack.productID]?.displayPrice }
+        #if DEBUG
+        return pack.plannedPriceLabel
+        #else
+        return nil
+        #endif
+    }
+
     /// What this family pays for `pack` for `childIDs`: the first child in the
     /// family at full price, every further child (now or later) at the sibling
     /// price. Returns the products to buy, in order, with quantities.
     func priceLines(for pack: QuestionPack, childIDs: [String]) -> [(product: Product, quantity: Int)] {
-        let newKids = childIDs.filter { !HouseholdManager.shared.childOwnsPack(pack.id, childID: $0) }
+        // A pass can always be bought again (renewal); a permanent pack only for
+        // children who don't have it.
+        let newKids = pack.isPass ? childIDs : childIDs.filter { !HouseholdManager.shared.childOwnsPack(pack.id, childID: $0) }
         guard !newKids.isEmpty else { return [] }
-        let familyOwns = HouseholdManager.shared.householdOwnsPack(pack.id)
+        // Pass: full price per child-month, the sibling price only for extra
+        // children in the same purchase. Pack: the family pays full once.
+        let familyOwns = pack.isPass ? false : HouseholdManager.shared.householdOwnsPack(pack.id)
         var lines: [(Product, Int)] = []
         var remaining = newKids.count
         if !familyOwns, let full = products[pack.productID] {
@@ -102,7 +122,7 @@ final class PackStore: ObservableObject {
         #if DEBUG
         // The demo harness runs without Xcode's StoreKit test config — show the
         // planned price so the screen can be reviewed (never in release).
-        if lines.isEmpty, products.isEmpty, !childIDs.isEmpty { return pack.plannedPriceLabel }
+        if !childIDs.isEmpty, !allLoaded { return pack.plannedPriceLabel }
         #endif
         guard !lines.isEmpty else { return nil }
         let total = lines.reduce(Decimal(0)) { $0 + $1.product.price * Decimal($1.quantity) }

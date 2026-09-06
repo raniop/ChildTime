@@ -488,29 +488,40 @@ struct ParentDashboardView: View {
     }
 
     /// "נועה רוצה ללמוד מתמטיקה 🧮 — טופי+" when she tapped a world; else the generic line.
-    private func premiumRequestTitle(_ names: [String]) -> String {
-        if names.count == 1, let p = profiles.profiles.first(where: { $0.name == names[0] }),
+    private func premiumRequestTitle(_ askers: [Profile]) -> String {
+        let names = askers.map(\.name)
+        if askers.count == 1, let p = askers.first,
            let raw = remote.premiumRequestTopics[p.id], let topic = Topic(rawValue: raw) {
-            return "\(p.name) \(p.gender == .girl ? "רוצה" : "רוצה") ללמוד \(topic.displayName) \(topic.emoji) — טופי+"
+            let ended = WorldPasses.pass(for: topic).map { p.passExpired($0) } ?? false
+            return "\(p.name) \(p.gender == .girl ? "רוצה" : "רוצה") \(ended ? "להמשיך" : "ללמוד") \(topic.displayName) \(topic.emoji)"
         }
         return names.count == 1 ? "\(names[0]) רוצה טופי+ 👑" : "\(names.joined(separator: " ו")) רוצים טופי+ 👑"
     }
 
     private var premiumRequestBanner: some View {
-        let names = profiles.profiles
-            .filter { remote.premiumRequests[$0.id] != nil }
-            .map(\.name)
+        let askers = profiles.profiles.filter { remote.premiumRequests[$0.id] != nil }
+        let names = askers.map(\.name)
         return Button {
             Haptic.light()
-            showingPaywall = true
+            // One child asked for ONE world → its page (30 days, or Tofy+).
+            if askers.count == 1, let p = askers.first,
+               let raw = remote.premiumRequestTopics[p.id], let topic = Topic(rawValue: raw),
+               let pass = WorldPasses.pass(for: topic) {
+                packRequestChild = p
+                packToShow = pass
+            } else {
+                showingPaywall = true
+            }
         } label: {
             HStack(spacing: 10) {
                 Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(premiumRequestTitle(names))
+                    Text(premiumRequestTitle(askers))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    Text("מנוי אחד לכל המשפחה — נפתח מכאן, בטלפון שלכם")
+                    Text(askers.count == 1 && remote.premiumRequestTopics[askers[0].id] != nil
+                         ? "עולם בודד ל־30 יום, או טופי+ לכל המשפחה — מכאן, בטלפון שלכם"
+                         : "מנוי אחד לכל המשפחה — נפתח מכאן, בטלפון שלכם")
                         .font(.system(size: 12.5, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                 }

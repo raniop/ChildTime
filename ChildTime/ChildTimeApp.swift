@@ -352,6 +352,30 @@ struct ChildTimeApp: App {
                     if var p = ProfileStore.shared.active { p.ownedPacks.remove("soccer"); ProfileStore.shared.update(p) }
                     CampaignTracker.shared.seedDemoPopup(Campaign(sampleFor: "soccer"))
                 }
+        case "worldpass":                               // DEMO_SCREEN=worldpass — parent page of a base world (30 days / Tofy+)
+            PackDetailView(pack: WorldPasses.pass(for: .math)!, onClose: {})
+                .environmentObject(ProfileStore.shared)
+                .onAppear { ParentSettings.shared.deviceRole = .parent; PINManager.shared.setPIN("1234"); ParentSettings.shared.hasSetParentPIN = true }
+        case "worldshelf":                              // DEMO_SCREEN=worldshelf — parent home (no Tofy+) with the worlds shelf + a request
+            ParentDashboardView(isRoot: true)
+                .onAppear {
+                    let ps = ProfileStore.shared.profiles
+                    if var a = ps.first { a.ownedPacks.insert("reading"); a.packExpiry["reading"] = Date().timeIntervalSince1970 + 12 * 86_400; ProfileStore.shared.update(a) }
+                    if let b = ps.dropFirst().first {
+                        HouseholdManager.shared.seedDemoLiveWindow(childID: b.id)
+                        RemoteSyncManager.shared.seedDemoPremiumRequest(childID: b.id, topic: "math")
+                    }
+                }
+        case "kidpass":                                 // DEMO_SCREEN=kidpass — kid home: a 30-day math pass just arrived
+            WorldMapView()
+                .onAppear {
+                    if ProgressStore.shared.isUnlocked { ProgressStore.shared.endUnlock() }
+                    if var p = ProfileStore.shared.active {
+                        PackKidState.reset(childID: p.id); PackKidState.markRevealed("math", childID: p.id)
+                        p.ownedPacks.insert("math"); p.packExpiry["math"] = Date().timeIntervalSince1970 + 30 * 86_400
+                        p.ownedPacks.remove("soccer"); ProfileStore.shared.update(p)
+                    }
+                }
         case "packrequest":                             // DEMO_SCREEN=packrequest — parent home: a child asked for a pack
             ParentDashboardView(isRoot: true)
                 .onAppear {

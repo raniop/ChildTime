@@ -120,7 +120,9 @@ struct WorldMapView: View {
         // ⚽ A pack the child hasn't opened yet sits FIRST, with its "חדש!" badge,
         // until the first open — then it joins the daily shuffle like any world.
         guard let cid = profiles.activeID else { return ordered }
-        let fresh = ordered.filter { w in w.topic.pack.map { !PackKidState.isOpened($0.id, childID: cid) } ?? false }
+        let fresh = ordered.filter { w in
+            (w.topic.pack ?? WorldPasses.pass(for: w.topic)).map { profiles.active?.owns($0) == true && !PackKidState.isOpened($0.id, childID: cid) } ?? false
+        }
         return fresh + ordered.filter { w in !fresh.contains(w) }
     }
 
@@ -168,7 +170,8 @@ struct WorldMapView: View {
         // Tofy Time landed today — until the child opens it for the first time.
         guard let cid = profiles.activeID else { return tiles }
         let fresh = tiles.filter { t in
-            if case .world(let w) = t, let p = w.topic.pack { return !PackKidState.isOpened(p.id, childID: cid) }
+            if case .world(let w) = t, let p = w.topic.pack ?? WorldPasses.pass(for: w.topic),
+               profiles.active?.owns(p) == true { return !PackKidState.isOpened(p.id, childID: cid) }
             return false
         }
         guard !fresh.isEmpty else { return tiles }
@@ -284,7 +287,11 @@ struct WorldMapView: View {
                                 case .world(let world):
                                     // ⚽ A bought pack opens with or without Tofy+ — the
                                     // parent paid for it on its own (Rani).
-                                    let pack = world.topic.pack
+                                    // A real pack, or a 30-day pass on a base world — either is
+                                    // "the parent bought this world for this child".
+                                    let item = world.topic.pack ?? WorldPasses.pass(for: world.topic)
+                                    let owned = item.map { profiles.active?.owns($0) ?? false } ?? false
+                                    let pack: QuestionPack? = owned ? item : nil
                                     let packNew = pack.map { p in profiles.activeID.map { !PackKidState.isOpened(p.id, childID: $0) } ?? false } ?? false
                                     WorldCard(
                                         // Premium unlocks every world (that's what the
