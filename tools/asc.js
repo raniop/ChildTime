@@ -166,6 +166,23 @@ async function createWorld([topic, nameHe, nameEn, price, siblingPrice, screensh
 (async () => {
   const [cmd, ...args] = process.argv.slice(2);
   if (cmd === "create-world") { await createWorld(args); return; }
+  // Submit every READY_TO_SUBMIT pack/world product for review (Apple reviews
+  // IAPs on their own once the app has a live version).
+  if (cmd === "submit-iaps") {
+    const app = await appID();
+    const filter = args[0] || "";   // substring of productId, e.g. "pack." or "world."
+    for (const x of await all(`/v1/apps/${app}/inAppPurchasesV2?limit=200`)) {
+      const pid = x.attributes.productId;
+      if (filter && !pid.includes(filter)) continue;
+      if (x.attributes.state !== "READY_TO_SUBMIT") { console.log("skip", pid, x.attributes.state); continue; }
+      try {
+        await api("POST", "/v1/inAppPurchaseSubmissions", { data: { type: "inAppPurchaseSubmissions",
+          relationships: { inAppPurchaseV2: { data: { type: "inAppPurchases", id: x.id } } } } });
+        console.log("submitted", pid);
+      } catch (e) { console.log("FAILED", pid, e.message.slice(0, 260)); }
+    }
+    return;
+  }
   if (cmd === "apps") { const j = await api("GET", "/v1/apps?limit=50"); for (const a of j.data) console.log(a.id, a.attributes.bundleId, a.attributes.name); }
   else if (cmd === "iaps") { const app = await appID(); for (const x of await all(`/v1/apps/${app}/inAppPurchasesV2?limit=200`)) console.log(x.id, x.attributes.productId, x.attributes.inAppPurchaseType, x.attributes.state); }
   else if (cmd === "create-pack") await createPack(args);
