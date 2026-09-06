@@ -20,7 +20,7 @@ struct CampaignPopupView: View {
     private var cta: String {
         if isChild { return pack != nil ? "בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא 💌" : "סַבָּבָּה! 👍" }
         switch campaign.action.type {
-        case "pack":     return "שִׁלְחוּ לַיֶּלֶד שֶׁלִּי"
+        case "pack":     return SubscriptionManager.shared.isPremium ? "מְעוּלֶה, כְּבָר פָּתוּחַ לַיְלָדִים 👍" : "שִׁלְחוּ לַיֶּלֶד שֶׁלִּי"
         case "tofyPlus": return "לְכָל הַפְּרָטִים"
         default:         return "הֵבַנְתִּי"
         }
@@ -56,7 +56,7 @@ struct CampaignPopupView: View {
                     HStack(spacing: 6) {
                         chip("מֻמְלָץ \(pack.gradesLabel)")
                         chip("\(pack.questionCount) שְׁאֵלוֹת")
-                        chip("תּוֹסֶפֶת · לֹא כָּלוּל בְּטוֹפִי+")
+                        chip(SubscriptionManager.shared.isPremium ? "כָּלוּל בְּטוֹפִי+ ✓" : "כָּלוּל בְּטוֹפִי+ · אוֹ חַד־פַּעֲמִי")
                     }
                 }
                 Button { Haptic.light(); onAct() } label: {

@@ -20,6 +20,8 @@ final class PackStore: ObservableObject {
     /// questions ship with the build; this is the launch switch. Debug builds
     /// (and the demo harness) show every bundled pack.
     @Published private(set) var liveIDs: Set<String> = []
+    /// packs/{id}.launchedAt — the offer tile sparkles for the first day.
+    @Published private(set) var launchedAt: [String: Date] = [:]
     #if canImport(FirebaseFirestore)
     private var liveListener: ListenerRegistration?
     #endif
@@ -45,6 +47,15 @@ final class PackStore: ObservableObject {
     }
     deinit { updates?.cancel() }
 
+    /// A pack switched on within the last day — "new" for the child too.
+    func isFirstDay(_ pack: QuestionPack) -> Bool {
+        #if DEBUG
+        if AppInfo.isDemoRun { return true }
+        #endif
+        guard let at = launchedAt[pack.id] else { return false }
+        return Date().timeIntervalSince(at) < 86_400
+    }
+
     /// Packs the parent can see and buy right now, in catalog order.
     var visiblePacks: [QuestionPack] {
         #if DEBUG
@@ -60,7 +71,9 @@ final class PackStore: ObservableObject {
         liveListener = Firestore.firestore().collection("packs").whereField("enabled", isEqualTo: true)
             .addSnapshotListener { [weak self] snap, _ in
                 guard let self, let docs = snap?.documents else { return }
-                Task { @MainActor in self.liveIDs = Set(docs.map(\.documentID)) }
+                var launched: [String: Date] = [:]
+                for d in docs { if let ts = d.data()["launchedAt"] as? Timestamp { launched[d.documentID] = ts.dateValue() } }
+                Task { @MainActor in self.liveIDs = Set(docs.map(\.documentID)); self.launchedAt = launched }
             }
         #endif
     }
@@ -81,7 +94,10 @@ final class PackStore: ObservableObject {
     /// Every pack/pass product came back from StoreKit. Prices are shown only
     /// as ONE set — all from the store, or (DEBUG demo) all planned in ₪ —
     /// never a mix of currencies on one screen (Rani).
-    var allLoaded: Bool { QuestionPacks.allProductIDs.allSatisfy { products[$0] != nil } }
+    var allLoaded: Bool {
+        if AppInfo.isDemoRun { return false }   // screenshots/design review: the planned ₪ prices, never a test-store currency
+        return QuestionPacks.allProductIDs.allSatisfy { products[$0] != nil }
+    }
 
     /// The price to show on a card: the store's, or the planned ₪ in a DEBUG
     /// demo without products, or nothing.

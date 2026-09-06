@@ -1307,7 +1307,7 @@ struct ParentDashboardView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("👑 טוֹפִי+ לְכָל הַמִּשְׁפָּחָה")
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
-                Text("כָּל הָעוֹלָמוֹת הַבְּסִיסִיִּים, הַמִּשְׂחָקִים וְהַמַּטְלוֹת — לְכָל הַיְלָדִים, בְּכָל הַמַּכְשִׁירִים. קוֹנִים פַּעַם אַחַת, כָּאן.")
+                Text("כָּל הָעוֹלָמוֹת — כּוֹלֵל כָּל עוֹלָם חָדָשׁ שֶׁנּוֹסִיף — הַמִּשְׂחָקִים וְהַמַּטְלוֹת, לְכָל הַיְלָדִים, בְּכָל הַמַּכְשִׁירִים. קוֹנִים פַּעַם אַחַת, כָּאן.")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .fixedSize(horizontal: false, vertical: true)

@@ -135,6 +135,20 @@ enum WorldPasses {
     }
 }
 
+/// Who can play a pack RIGHT NOW. Rani (2026-09-06): every pack is open to a
+/// Tofy+ family the moment it launches; a family without Tofy+ buys it once
+/// per child (or a base world for 30 days).
+@MainActor
+enum PackAccess {
+    static func has(_ profile: Profile, _ pack: QuestionPack) -> Bool {
+        if SubscriptionManager.shared.isPremium { return true }
+        return profile.owns(pack)
+    }
+    /// A Tofy+ family didn't BUY it — the kid's reveal says "a new world
+    /// arrived", not "mom and dad sent you a gift".
+    static func isGift(_ profile: Profile, _ pack: QuestionPack) -> Bool { profile.owns(pack) }
+}
+
 /// Per-child, per-device memory of the pack "moments" on the KID's screen:
 /// the 🎁 reveal (shown once) and the first open (the "חדש!" badge lives until
 /// then). Local on purpose — a surprise should play on the device the child is
@@ -167,8 +181,12 @@ enum PackKidState {
         UserDefaults.standard.removeObject(forKey: key("opened", childID))
         for p in QuestionPacks.all { UserDefaults.standard.removeObject(forKey: key("revealedAt.\(p.id)", childID)) }
     }
-    /// The first owned pack / world pass this child hasn't been shown the 🎁 for yet.
+    /// The first pack / world pass this child can play and hasn't been shown the
+    /// 🎁 for yet — bought for them, or (Tofy+) a pack that just launched.
     static func pendingReveal(for profile: Profile) -> QuestionPack? {
-        (QuestionPacks.all + WorldPasses.all).first { profile.owns($0) && !isRevealed($0.id, childID: profile.id) }
+        let bought = (QuestionPacks.all + WorldPasses.all).first { profile.owns($0) && !isRevealed($0.id, childID: profile.id) }
+        if let bought { return bought }
+        guard SubscriptionManager.shared.isPremium else { return nil }
+        return PackStore.shared.visiblePacks.first { PackStore.shared.isFirstDay($0) && !isRevealed($0.id, childID: profile.id) }
     }
 }

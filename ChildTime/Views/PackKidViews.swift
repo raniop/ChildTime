@@ -9,6 +9,8 @@ import FirebaseFirestore
 /// springs in and floats, the title slams in, the button pulses.
 struct PackRevealView: View {
     let pack: QuestionPack
+    /// true → mom and dad bought it; false → it opened with Tofy+ ("a new world arrived").
+    var isGift: Bool = true
     let onStart: () -> Void
     /// ✕ / "אולי אחר כך" — the surprise is seen once, the world keeps its "חדש!" badge.
     let onSkip: () -> Void
@@ -84,7 +86,7 @@ struct PackRevealView: View {
                         .multilineTextAlignment(.center)
                         .scaleEffect(titleIn ? 1 : 0.3)
                         .opacity(titleIn ? 1 : 0)
-                    Text("אַבָּא וְאִמָּא שָׁלְחוּ לְךָ עוֹלָם חָדָשׁ! 🎉")
+                    Text(isGift ? "אַבָּא וְאִמָּא שָׁלְחוּ לְךָ עוֹלָם חָדָשׁ! 🎉" : "עוֹלָם חָדָשׁ הִגִּיעַ לְטוֹפִי — וּפָתוּחַ בִּשְׁבִילְךָ! 👑")
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white.opacity(0.92))
                         .multilineTextAlignment(.center)
@@ -97,11 +99,11 @@ struct PackRevealView: View {
                     }
                     .padding(.top, 4)
                 } else {
-                    Text("יֵשׁ לְךָ מַתָּנָה!")
+                    Text(isGift ? "יֵשׁ לְךָ מַתָּנָה!" : "יֵשׁ לְךָ הַפְתָּעָה!")
                         .font(.system(size: 36, weight: .black, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
-                    Text("מֵאַבָּא וְאִמָּא 💝")
+                    Text(isGift ? "מֵאַבָּא וְאִמָּא 💝" : "עוֹלָם חָדָשׁ נִפְתַּח 🌍")
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white.opacity(0.92))
                     Text("👆 \(g("לְחַץ", "לַחֲצִי")) עַל הַמַּתָּנָה כְּדֵי לִפְתֹּחַ")

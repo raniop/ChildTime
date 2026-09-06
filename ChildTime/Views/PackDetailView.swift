@@ -32,7 +32,8 @@ struct PackDetailView: View {
             ScrollView {
                 VStack(spacing: 12) {
                     header
-                    if granted.isEmpty { chooser } else { success }
+                    if subs.isPremium && !pack.isPass { includedInTofyPlus }
+                    else if granted.isEmpty { chooser } else { success }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
@@ -78,7 +79,7 @@ struct PackDetailView: View {
                 }
                 .buttonStyle(.plain)
                 Spacer()
-                Text(pack.isPass ? "עוֹלָם בְּסִיסִי · כָּלוּל בְּטוֹפִי+" : "תּוֹסֶפֶת · לֹא כָּלוּל בְּטוֹפִי+")
+                Text(pack.isPass ? "עוֹלָם בְּסִיסִי · כָּלוּל בְּטוֹפִי+" : "כָּלוּל בְּטוֹפִי+ · אוֹ רְכִישָׁה חַד־פַּעֲמִית")
                     .font(.system(size: 11.5, weight: .bold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .padding(.horizontal, 10).padding(.vertical, 5)
@@ -131,6 +132,33 @@ struct PackDetailView: View {
             .background(Capsule().fill(.white.opacity(0.10)))
             .overlay(Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 1))
             .lineLimit(1).minimumScaleFactor(0.8)
+    }
+
+    /// A Tofy+ family: nothing to buy — it's already open for every child.
+    private var includedInTofyPlus: some View {
+        VStack(spacing: 8) {
+            Text("👑").font(.system(size: 40))
+            Text("כָּלוּל בְּטוֹפִי+ — כְּבָר פָּתוּחַ לְכָל הַיְלָדִים")
+                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .multilineTextAlignment(.center)
+            Text("הָעוֹלָם מְחַכֶּה בַּמָּסָךְ הָרָאשִׁי שֶׁל כָּל יֶלֶד, עִם סִימוּן \"חָדָשׁ\".")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
+                .multilineTextAlignment(.center)
+            Button { Haptic.light(); onClose() } label: {
+                Text("מְעוּלֶה")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color(hex: "4B3FBF"))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.92)))
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 4)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(16)
+        .glassPane(radius: 22)
     }
 
     private var chooser: some View {
@@ -407,7 +435,7 @@ struct PacksHomeSection: View {
     }
 
     private func card(_ pack: QuestionPack) -> some View {
-        let owners = profiles.profiles.filter { $0.owns(pack) }
+        let owners = profiles.profiles.filter { PackAccess.has($0, pack) }
         return HStack(spacing: 12) {
             Text(pack.emoji)
                 .font(.system(size: 30))
@@ -439,7 +467,7 @@ struct PacksHomeSection: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 4)
-            Text(pack.isPass ? (owners.isEmpty ? "30 יוֹם" : "חַדְּשׁוּ") : (owners.count == profiles.profiles.count && !owners.isEmpty ? "✓" : "שִׁלְחוּ לַיֶּלֶד"))
+            Text(pack.isPass ? (owners.isEmpty ? "30 יוֹם" : "חַדְּשׁוּ") : (subs.isPremium ? "✓ פָּתוּחַ" : (owners.count == profiles.profiles.count && !owners.isEmpty ? "✓" : "שִׁלְחוּ לַיֶּלֶד")))
                 .font(.system(size: 12.5, weight: .heavy, design: .rounded))
                 .foregroundStyle(Color(hex: "4B3FBF"))
                 .padding(.horizontal, 12).padding(.vertical, 8)
@@ -464,6 +492,11 @@ struct PacksHomeSection: View {
             return [pack.gradesLabel, price].compactMap { $0 }.joined(separator: " · ")
         }
         let first = owners[0]
+        if subs.isPremium, !pack.isPass {
+            let days = LearningHistoryStore.shared.history(for: first.id)
+            let answered = days.reduce(0) { $0 + ($1.perTopic[pack.topic.rawValue]?.answered ?? 0) }
+            return answered > 0 ? "כָּלוּל בְּטוֹפִי+ · \(first.name) \(first.gender == .girl ? "הִתְחִילָה" : "הִתְחִיל") · \(answered) שְׁאֵלוֹת" : "כָּלוּל בְּטוֹפִי+ · פָּתוּחַ לְכָל הַיְלָדִים"
+        }
         if pack.isPass {
             let parts = owners.map { o in "\(o.name)\(o.passDaysLeft(pack).map { " · עוֹד \($0) יוֹם" } ?? "")" }
             return "✓ פָּתוּחַ לְ\(parts.joined(separator: ", "))"

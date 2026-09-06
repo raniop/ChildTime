@@ -121,7 +121,7 @@ struct WorldMapView: View {
         // until the first open — then it joins the daily shuffle like any world.
         guard let cid = profiles.activeID else { return ordered }
         let fresh = ordered.filter { w in
-            (w.topic.pack ?? WorldPasses.pass(for: w.topic)).map { profiles.active?.owns($0) == true && !PackKidState.isOpened($0.id, childID: cid) } ?? false
+            (w.topic.pack ?? WorldPasses.pass(for: w.topic)).map { item in profiles.active.map { p in PackAccess.has(p, item) } == true && !PackKidState.isOpened(item.id, childID: cid) } ?? false
         }
         return fresh + ordered.filter { w in !fresh.contains(w) }
     }
@@ -130,7 +130,7 @@ struct WorldMapView: View {
     /// each, at the END of the grid; the tap explains and lets the child ask.
     private var packOffers: [QuestionPack] {
         guard let p = profiles.active else { return [] }
-        return packStore.visiblePacks.filter { !p.owns($0) }
+        return packStore.visiblePacks.filter { !PackAccess.has(p, $0) }
     }
 
     /// Rani: the category cards shouldn't sit in the same spot forever — a child
@@ -157,11 +157,19 @@ struct WorldMapView: View {
         return worlds.map { $0.isBonusWorld ? $0 : (next.next() ?? $0) }
     }
 
-    /// A tile on the kid's home grid — the free path or a world.
+    /// A tile on the kid's home grid — the free path, a world, or a new pack
+    /// the family doesn't have yet (the child can only ask a parent).
     enum HomeTile: Identifiable {
         case tofyTime
         case world(World)
-        var id: String { switch self { case .tofyTime: return "tofy_time"; case .world(let w): return w.id } }
+        case packOffer(QuestionPack)
+        var id: String {
+            switch self {
+            case .tofyTime: return "tofy_time"
+            case .world(let w): return w.id
+            case .packOffer(let p): return "offer_\(p.id)"
+            }
+        }
     }
 
     private var homeTiles: [HomeTile] {
@@ -171,14 +179,36 @@ struct WorldMapView: View {
         guard let cid = profiles.activeID else { return tiles }
         let fresh = tiles.filter { t in
             if case .world(let w) = t, let p = w.topic.pack ?? WorldPasses.pass(for: w.topic),
-               profiles.active?.owns(p) == true { return !PackKidState.isOpened(p.id, childID: cid) }
+               profiles.active.map({ PackAccess.has($0, p) }) == true { return !PackKidState.isOpened(p.id, childID: cid) }
             return false
         }
-        guard !fresh.isEmpty else { return tiles }
+        // Rani: a NEW pack the family doesn't have yet is also news for the child —
+        // it sits up top next to טופי טיים too, sparkling on its launch day.
+        let offers: [HomeTile] = packOffers.map { .packOffer($0) }
+        guard !fresh.isEmpty || !offers.isEmpty else { return tiles }
         tiles.removeAll { t in fresh.contains { $0.id == t.id } }
         let after = (tiles.firstIndex { if case .tofyTime = $0 { return true } else { return false } } ?? -1) + 1
-        tiles.insert(contentsOf: fresh, at: min(after, tiles.count))
+        tiles.insert(contentsOf: fresh + offers, at: min(after, tiles.count))
         return tiles
+    }
+
+    /// ⚽ A new pack the family doesn't have — "ask a parent" (no price, no
+    /// store on a child's device), sparkling on its launch day.
+    private func offerTile(_ pack: QuestionPack) -> some View {
+        FeatureCard(
+            emoji: pack.emoji,
+            title: pack.name,
+            subtitle: pack.tagline,
+            gradient: pack.heroGradient,
+            glowColor: Color(hex: "2ECC71"),
+            badge: "✨ חָדָשׁ בְּטוֹפִי",
+            foot: "בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא 💌"
+        ) {
+            Haptic.light()
+            packOffer = pack
+        }
+        .frame(maxWidth: .infinity)
+        .firstDayGlow(packStore.isFirstDay(pack))
     }
 
     /// Where טופי טיים sits among the worlds. Rani: the categories move once a
@@ -205,7 +235,7 @@ struct WorldMapView: View {
     private func consumeCampaignLanding() {
         guard let pid = CampaignTracker.shared.pendingPackID else { return }
         CampaignTracker.shared.pendingPackID = nil
-        guard let pack = QuestionPacks.find(pid), let p = profiles.active, !p.owns(pack) else { return }
+        guard let pack = QuestionPacks.find(pid), let p = profiles.active, !PackAccess.has(p, pack) else { return }
         packOffer = pack
     }
 
@@ -287,13 +317,15 @@ struct WorldMapView: View {
                                         showingSmartFeed = true
                                     }
                                     .frame(maxWidth: .infinity)
+                                case .packOffer(let pack):
+                                    offerTile(pack)
                                 case .world(let world):
                                     // ⚽ A bought pack opens with or without Tofy+ — the
                                     // parent paid for it on its own (Rani).
                                     // A real pack, or a 30-day pass on a base world — either is
                                     // "the parent bought this world for this child".
                                     let item = world.topic.pack ?? WorldPasses.pass(for: world.topic)
-                                    let owned = item.map { profiles.active?.owns($0) ?? false } ?? false
+                                    let owned = item.map { it in profiles.active.map { p in PackAccess.has(p, it) } ?? false } ?? false
                                     let pack: QuestionPack? = owned ? item : nil
                                     let packNew = pack.map { p in profiles.activeID.map { !PackKidState.isOpened(p.id, childID: $0) } ?? false } ?? false
                                     WorldCard(
@@ -328,24 +360,6 @@ struct WorldMapView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                 }
-                            }
-
-                            // ⚽ Packs the family doesn't have yet — a quiet "ask a parent"
-                            // tile per pack (no price, no store on a child's device).
-                            ForEach(packOffers) { pack in
-                                FeatureCard(
-                                    emoji: pack.emoji,
-                                    title: pack.name,
-                                    subtitle: pack.tagline,
-                                    gradient: pack.heroGradient,
-                                    glowColor: Color(hex: "2ECC71"),
-                                    badge: "🎁 חָדָשׁ בְּטוֹפִי",
-                                    foot: "בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא 💌"
-                                ) {
-                                    Haptic.light()
-                                    packOffer = pack
-                                }
-                                .frame(maxWidth: .infinity)
                             }
 
                             // 🎮 Games LAST in the grid (Rani): learning worlds
@@ -529,7 +543,7 @@ struct WorldMapView: View {
             WorldDetailView(world: world)
         }
         .fullScreenCover(item: $packReveal) { pack in
-            PackRevealView(pack: pack, onStart: {
+            PackRevealView(pack: pack, isGift: profiles.active.map { PackAccess.isGift($0, pack) } ?? true, onStart: {
                 if let cid = profiles.activeID {
                     PackKidState.markRevealed(pack.id, childID: cid)
                     PackKidState.markOpened(pack.id, childID: cid)
@@ -2143,6 +2157,30 @@ struct SeededRandom {
     }
 }
 
+/// The gold "new today" breathing border used by a freshly gifted world and a
+/// just-launched pack on the kid's home.
+private struct FirstDayGlow: ViewModifier {
+    let on: Bool
+    @State private var glow = false
+    func body(content: Content) -> some View {
+        content
+            .overlay {
+                if on {
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .strokeBorder(Color(hex: "FFD23F").opacity(glow ? 0.95 : 0.25), lineWidth: 2.5)
+                }
+            }
+            .shadow(color: Color(hex: "FFD23F").opacity(on ? (glow ? 0.7 : 0.15) : 0), radius: glow ? 22 : 8)
+            .scaleEffect(on && glow ? 1.03 : 1)
+            .onAppear {
+                guard on else { return }
+                withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) { glow = true }
+            }
+    }
+}
+extension View {
+    func firstDayGlow(_ on: Bool) -> some View { modifier(FirstDayGlow(on: on)) }
+}
 extension View {
     /// The kid's big action buttons on glass: the brand gradient at 85 % over a
     /// blur, a light edge, a soft drop shadow — never an opaque slab (Rani).

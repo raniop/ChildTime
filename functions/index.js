@@ -372,7 +372,7 @@ function launchCampaignFor(packID) {
   const p = PACK_META[packID]; if (!p) return null;
   return {
     title: `עולם חדש בטופי: ${p.name}`, emoji: p.emoji,
-    body: `גילינו עולם חדש בשביל הילדים: ${p.tagline}. על כל תשובה נכונה מרוויחים דקות משחק. שולחים לילד מהטלפון שלכם.`,
+    body: `גילינו עולם חדש בשביל הילדים: ${p.tagline}. על כל תשובה נכונה מרוויחים דקות משחק. למנויי טופי+ הוא כבר פתוח; אחרת שולחים לילד מהטלפון שלכם.`,
     childTitle: `רוצה ללמוד על ${p.subject}?`, childBody: `${p.tagline} — בקש מאבא או אמא`,
     audience: { roles: ["parents"], gradeMin: 0, gradeMax: 6, premium: "any", topics: [], excludeOwners: true },
     action: { type: "pack", packID }, showPopup: true,
