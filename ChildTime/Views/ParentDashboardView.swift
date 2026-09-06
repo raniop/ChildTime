@@ -487,6 +487,15 @@ struct ParentDashboardView: View {
         }
     }
 
+    /// "נועה רוצה ללמוד מתמטיקה 🧮 — טופי+" when she tapped a world; else the generic line.
+    private func premiumRequestTitle(_ names: [String]) -> String {
+        if names.count == 1, let p = profiles.profiles.first(where: { $0.name == names[0] }),
+           let raw = remote.premiumRequestTopics[p.id], let topic = Topic(rawValue: raw) {
+            return "\(p.name) \(p.gender == .girl ? "רוצה" : "רוצה") ללמוד \(topic.displayName) \(topic.emoji) — טופי+"
+        }
+        return names.count == 1 ? "\(names[0]) רוצה טופי+ 👑" : "\(names.joined(separator: " ו")) רוצים טופי+ 👑"
+    }
+
     private var premiumRequestBanner: some View {
         let names = profiles.profiles
             .filter { remote.premiumRequests[$0.id] != nil }
@@ -499,7 +508,7 @@ struct ParentDashboardView: View {
                 Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(names.count == 1 ? "\(names[0]) רוצה טופי+ 👑" : "\(names.joined(separator: " ו")) רוצים טופי+ 👑")
+                    Text(premiumRequestTitle(names))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                     Text("מנוי אחד לכל המשפחה — נפתח מכאן, בטלפון שלכם")
                         .font(.system(size: 12.5, weight: .medium, design: .rounded))

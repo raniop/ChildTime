@@ -49,6 +49,8 @@ struct WorldMapView: View {
     @State private var showingSmartFeed = false
     @State private var showingChildSettings = false
     @State private var showingPaywall = false
+    /// The locked world the child tapped → "רוצה ללמוד X? בקש מאבא או אמא".
+    @State private var askWorld: World? = nil
     @State private var showingAppLockSetup = false
     /// The child's "protect my time" code flow. `pendingUnlockAction` remembers
     /// which unlock the kid tapped, to run right after a successful verify.
@@ -302,6 +304,11 @@ struct WorldMapView: View {
                                             selectedWorld = world
                                         } else if subs.isPremium {
                                             selectedWorld = world
+                                        } else if true {
+                                            // Rani: the kid screen never sells — a
+                                            // locked world asks a parent for THAT world.
+                                            Haptic.light()
+                                            askWorld = world
                                         } else {
                                             // Until they subscribe, only "טופי טיים"
                                             // is playable — the worlds open the paywall.
@@ -680,25 +687,16 @@ struct WorldMapView: View {
         // parental gate that can't be bypassed. respectSession:false so this ALWAYS
         // re-authenticates — an earlier unlock this session must not open the store.
         .fullScreenCover(isPresented: $showingPaywall) {
-            if settings.deviceRole == .child {
-                // Nothing to buy here — the family subscribes from a parent's
-                // phone. So no gate, no code typed in front of the kid: just
-                // "ask a parent", which reaches the parent's phone directly.
-                AskParentView(onClose: { showingPaywall = false })
-                    .environmentObject(settings)
-            } else {
-            ParentGateView(allowClose: true,
-                           gateTitle: "אֵזוֹר הוֹרִים",
-                           gateReason: "כְּדֵי לִרְאוֹת אֶת הַמִּנּוּי בְּתַשְׁלוּם — בַּקְּשׁוּ מֵהוֹרֶה לְהַזִּין אֶת הַקּוֹד",
-                           useFaceID: true,
-                           respectSession: false) {
-                PaywallView()
-                    .environmentObject(subs)
-                    .environment(\.layoutDirection, .rightToLeft)
-            }
-            .environmentObject(settings)
-            .environment(\.layoutDirection, .rightToLeft)
-            }
+            // Rani (2026-09-06): everything is bought from the PARENT's home —
+            // the kid screen never shows a gate or a price, on any device. So
+            // a locked tile just asks a parent; the request lands on their
+            // phone (banner + push) and opens Tofy+ there.
+            AskParentView(onClose: { showingPaywall = false })
+                .environmentObject(settings)
+        }
+        .fullScreenCover(item: $askWorld) { world in
+            AskParentView(world: world, onClose: { askWorld = nil })
+                .environmentObject(settings)
         }
         .sheet(isPresented: $showingChildSettings) {
             if let active = profiles.active {

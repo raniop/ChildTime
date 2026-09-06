@@ -395,6 +395,7 @@ struct ChildTimeApp: App {
                         ParentSettings.shared.maxMinutesPerDay = 90
                     }
                 }
+        case "askworld": AskParentView(world: Worlds.all[0], onClose: {})   // DEMO_SCREEN=askworld — kid tapped a locked world
         case "askparent": AskParentView(onClose: {})   // DEMO_SCREEN=askparent — what a CHILD device shows instead of the paywall
         case "paywall":  PaywallView()    // DEMO_SCREEN=paywall — the "טופי+" subscription screen (App Review proof)
         case "unlocked": UnlockedView().onAppear { ProgressStore.shared.startUnlock(minutes: 670, manual: false) }  // DEMO_SCREEN=unlocked — game-time countdown

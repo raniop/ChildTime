@@ -49,6 +49,8 @@ final class RemoteSyncManager: ObservableObject {
     /// Children who tapped "בקש מאבא או אמא" on the Tofy+ screen, by request time.
     /// Shown as a banner on the parent's home; cleared once the family is premium.
     @Published private(set) var premiumRequests: [UUID: Double] = [:]
+    /// The world a child asked for with Tofy+ (topic rawValue), when they tapped one.
+    @Published private(set) var premiumRequestTopics: [UUID: String] = [:]
     /// ⚽ Children who tapped "בקש מאבא או אמא" on a pack: child → pack id.
     @Published private(set) var packRequests: [UUID: String] = [:]
 
@@ -847,6 +849,7 @@ final class RemoteSyncManager: ObservableObject {
                     let revokeAck = doc?.data()?["revokeGiftAppliedAt"] as? Double
                     let giftAck = doc?.data()?["giftAppliedAt"] as? Double
                     let premiumReq = doc?.data()?["premiumRequestedAt"] as? Double
+                    let premiumTopic = doc?.data()?["premiumRequestedTopic"] as? String
                     let packReqAt = doc?.data()?["packRequestedAt"] as? Double
                     let packReqID = doc?.data()?["packRequestedID"] as? String
                     Task { @MainActor in
@@ -856,6 +859,8 @@ final class RemoteSyncManager: ObservableObject {
                         // 👑 The child asked for Tofy+ from their device.
                         if let premiumReq { self.premiumRequests[profile.id] = premiumReq }
                         else { self.premiumRequests.removeValue(forKey: profile.id) }
+                        if premiumReq != nil, let premiumTopic { self.premiumRequestTopics[profile.id] = premiumTopic }
+                        else { self.premiumRequestTopics.removeValue(forKey: profile.id) }
                         if adj != 0 { self.pendingAdjustments[profile.id] = adj }
                         else { self.pendingAdjustments.removeValue(forKey: profile.id) }
                         if gift != 0 { self.pendingGifts[profile.id] = gift }

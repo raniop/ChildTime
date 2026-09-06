@@ -322,9 +322,15 @@ exports.onPremiumRequest = onDocumentWritten("children/{childID}", async (event)
   if (!tokens.length) return;
   const name = after.name || "הילד";
   const girl = after.gender === "girl";
+  const TOPIC_HE = { math: "מתמטיקה 🧮", english: "אנגלית 🇬🇧", hebrew: "עברית ✍️", logic: "לוגיקה 🧩", science: "מדעים 🔬",
+                     history: "היסטוריה 🏛️", geography: "גיאוגרפיה 🌍", money: "חינוך פיננסי 💰", reading: "הבנת הנקרא 📖" };
+  const topic = TOPIC_HE[after.premiumRequestedTopic || ""];
   await send(tokens,
-    { title: `👑 ${name} ${girl ? "רוצה" : "רוצה"} טופי+`,
-       body: `${name} ${girl ? "ביקשה" : "ביקש"} לפתוח את המשחקים והעולמות. המנוי הוא לכל המשפחה — פותחים פעם אחת מהטלפון שלכם.` },
+    topic
+      ? { title: `${name} ${girl ? "רוצה" : "רוצה"} ללמוד ${topic}`,
+          body: `${name} ${girl ? "לחצה" : "לחץ"} על העולם הזה בטופי. הוא נפתח עם טופי+ — מנוי אחד לכל המשפחה, מהטלפון שלכם.` }
+      : { title: `👑 ${name} ${girl ? "רוצה" : "רוצה"} טופי+`,
+          body: `${name} ${girl ? "ביקשה" : "ביקש"} לפתוח את המשחקים והעולמות. המנוי הוא לכל המשפחה — פותחים פעם אחת מהטלפון שלכם.` },
     { type: "premium-request", childID: event.params.childID });
 });
 

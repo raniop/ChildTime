@@ -13,6 +13,8 @@ import FirebaseFirestore
 ///
 /// Kids Category: this also keeps commerce entirely off the child's surface.
 struct AskParentView: View {
+    /// The world the child tapped (nil → a generic Tofy+ ask, e.g. from games).
+    var world: World? = nil
     let onClose: () -> Void
     @State private var sent = false
     @State private var sending = false
@@ -40,13 +42,16 @@ struct AskParentView: View {
                 }
                 Spacer(minLength: 0)
 
-                Text("👑").font(.system(size: 72))
+                Text(world?.emoji ?? "👑").font(.system(size: 72))
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
-                Text("טוֹפִי+")
-                    .font(.system(size: 34, weight: .black, design: .rounded))
+                Text(world.map { "\(g("רוֹצֶה", "רוֹצָה")) לִלְמֹד \($0.topic.displayName)?" } ?? "טוֹפִי+")
+                    .font(.system(size: world == nil ? 34 : 27, weight: .black, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
                     .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
-                Text("הַמִּשְׂחָקִים, הַזִּירָה, הַמַּטְלוֹת וְכָל הָעוֹלָמוֹת נִפְתָּחִים לְכָל הַמִּשְׁפָּחָה — וְאַבָּא אוֹ אִמָּא פּוֹתְחִים אֶת זֶה מֵהַטֶּלֶפוֹן שֶׁלָּהֶם.")
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(world.map { "\($0.name) וְכָל הָעוֹלָמוֹת נִפְתָּחִים עִם טוֹפִי+ לְכָל הַמִּשְׁפָּחָה — וְאַבָּא אוֹ אִמָּא פּוֹתְחִים אֶת זֶה מֵהַטֶּלֶפוֹן שֶׁלָּהֶם." }
+                     ?? "הַמִּשְׂחָקִים, הַזִּירָה, הַמַּטְלוֹת וְכָל הָעוֹלָמוֹת נִפְתָּחִים לְכָל הַמִּשְׁפָּחָה — וְאַבָּא אוֹ אִמָּא פּוֹתְחִים אֶת זֶה מֵהַטֶּלֶפוֹן שֶׁלָּהֶם.")
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
@@ -111,8 +116,11 @@ struct AskParentView: View {
         #if canImport(FirebaseFirestore)
         guard let id = child?.id else { return }
         let ref = Firestore.firestore().collection("children").document(id.uuidString)
-        _ = await confirmedMerge(ref, ["premiumRequestedAt": Date().timeIntervalSince1970,
-                                       "premiumRequestedBy": DeviceIdentity.friendlyName])
+        var fields: [String: Any] = ["premiumRequestedAt": Date().timeIntervalSince1970,
+                                     "premiumRequestedBy": DeviceIdentity.friendlyName]
+        // Which world the child wanted — the parent's banner and push say it.
+        fields["premiumRequestedTopic"] = world?.topic.rawValue ?? FieldValue.delete()
+        _ = await confirmedMerge(ref, fields)
         #endif
     }
 }
