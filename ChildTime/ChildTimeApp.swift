@@ -339,6 +339,19 @@ struct ChildTimeApp: App {
                     if ProgressStore.shared.isUnlocked { ProgressStore.shared.endUnlock() }
                     if var p = ProfileStore.shared.active { p.ownedPacks.remove("soccer"); ProfileStore.shared.update(p) }
                 }
+        case "campaignpopup":                           // DEMO_SCREEN=campaignpopup — parent home with the in-app pop-up
+            ParentDashboardView(isRoot: true)
+                .onAppear {
+                    if var p = ProfileStore.shared.profiles.first { p.ownedPacks.remove("soccer"); ProfileStore.shared.update(p) }
+                    CampaignTracker.shared.seedDemoPopup(Campaign(sampleFor: "soccer"))
+                }
+        case "campaignpopupkid":                        // DEMO_SCREEN=campaignpopupkid — kid home with the child pop-up
+            WorldMapView()
+                .onAppear {
+                    if ProgressStore.shared.isUnlocked { ProgressStore.shared.endUnlock() }
+                    if var p = ProfileStore.shared.active { p.ownedPacks.remove("soccer"); ProfileStore.shared.update(p) }
+                    CampaignTracker.shared.seedDemoPopup(Campaign(sampleFor: "soccer"))
+                }
         case "packrequest":                             // DEMO_SCREEN=packrequest — parent home: a child asked for a pack
             ParentDashboardView(isRoot: true)
                 .onAppear {

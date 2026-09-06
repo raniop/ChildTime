@@ -22,6 +22,7 @@ struct WorldMapView: View {
     /// A pack the family doesn't have: the child can ask a parent (never buy).
     @State private var packOffer: QuestionPack? = nil
     @ObservedObject private var packStore = PackStore.shared
+    @ObservedObject private var campaignTracker = CampaignTracker.shared
     @State private var showDailyChest = false
     @State private var challengeCelebration: String? = nil
     @State private var infoSheet: InfoSheet? = nil
@@ -528,7 +529,18 @@ struct WorldMapView: View {
         .fullScreenCover(item: $packOffer) { pack in
             PackAskParentView(pack: pack) { packOffer = nil }
         }
-        .onAppear { maybeRevealPack(); consumeCampaignLanding() }
+        .onAppear {
+            maybeRevealPack(); consumeCampaignLanding()
+            CampaignTracker.shared.checkPopup(role: "child", profiles: profiles.active.map { [$0] } ?? [], premium: subs.isPremium)
+        }
+        .overlay {
+            if let c = campaignTracker.popup, packReveal == nil {
+                CampaignPopupView(campaign: c, isChild: true, onAct: {
+                    campaignTracker.popup = nil
+                    campaignTracker.popupTapped(c)   // → the ask-a-parent page via consumeCampaignLanding
+                }, onLater: { campaignTracker.popup = nil })
+            }
+        }
         .onChangeCompat(of: CampaignTracker.shared.pendingPackID) { _, _ in consumeCampaignLanding() }
         .onChangeCompat(of: profiles.active?.ownedPacks.count ?? 0) { _, _ in maybeRevealPack() }
         .fullScreenCover(isPresented: $showDailyChest) {

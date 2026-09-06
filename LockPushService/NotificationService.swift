@@ -46,7 +46,9 @@ class NotificationService: UNNotificationServiceExtension {
         // served by the chorePhoto function) and attach, so the parent sees the
         // tidy room right in the notification. Any failure falls back to the
         // plain text push; serviceExtensionTimeWillExpire covers a hung fetch.
-        if let urlString = request.content.userInfo["photoURL"] as? String,
+        // 📣 A campaign push with an image uses the same path (imageURL).
+        if let urlString = (request.content.userInfo["photoURL"] as? String)
+                            ?? (request.content.userInfo["imageURL"] as? String),
            let url = URL(string: urlString) {
             attachPhoto(from: url, to: request)
             return
@@ -62,8 +64,9 @@ class NotificationService: UNNotificationServiceExtension {
             guard let tmpURL else { return }
             // UNNotificationAttachment needs a file the system can claim, with a
             // type-revealing extension.
+            let ext = ["png", "gif", "jpeg", "jpg"].first { url.pathExtension.lowercased() == $0 } ?? "jpg"
             let dest = FileManager.default.temporaryDirectory
-                .appendingPathComponent(UUID().uuidString + ".jpg")
+                .appendingPathComponent(UUID().uuidString + "." + ext)
             do {
                 try FileManager.default.moveItem(at: tmpURL, to: dest)
                 let attachment = try UNNotificationAttachment(identifier: "chorePhoto", url: dest)

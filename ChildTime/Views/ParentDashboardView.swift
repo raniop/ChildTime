@@ -204,6 +204,8 @@ struct ParentDashboardView: View {
                     // matching the container fixes it so it scrolls vertically only.
                     .environment(\.layoutDirection, .leftToRight)
                 }
+                // 📣 The in-app campaign pop-up — a sheet over the dimmed home.
+                if isRoot, let c = campaigns.popup { campaignPopupHost(c) }
             }
             .navigationBarTitleDisplayMode(.inline)
             // Keep the title floating over the app gradient. Without this, iOS pops
@@ -425,6 +427,13 @@ struct ParentDashboardView: View {
 
     /// 👑 "יואב רוצה טופי+" — the child tapped ask-a-parent on their device. The
     /// subscription is per family and bought here, once; this is the doorway.
+    private func campaignPopupHost(_ c: Campaign) -> some View {
+        CampaignPopupView(campaign: c, isChild: false, onAct: {
+            campaigns.popup = nil
+            campaigns.popupTapped(c)
+        }, onLater: { campaigns.popup = nil })
+    }
+
     /// 📣 A tapped campaign push lands the parent on the pack page / paywall.
     private func consumeCampaignLanding() {
         if let pid = campaigns.pendingPackID, let pack = QuestionPacks.find(pid) {
@@ -1644,7 +1653,11 @@ struct ParentDashboardView: View {
             .frame(width: 0, height: 0)
             .allowsHitTesting(false)
             .fullScreenCover(isPresented: $showingPaywall) { gatedPaywall }
-            .onAppear { consumeCampaignLanding() }
+            .onAppear {
+                consumeCampaignLanding()
+                campaigns.checkPopup(role: "parent", profiles: profiles.profiles, premium: subs.isPremium)
+            }
+
             .onChangeCompat(of: campaigns.pendingPackID) { _, _ in consumeCampaignLanding() }
             .onChangeCompat(of: campaigns.pendingScreen) { _, _ in consumeCampaignLanding() }
             .fullScreenCover(item: $packToShow) { pack in
