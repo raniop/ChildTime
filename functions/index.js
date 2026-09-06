@@ -1715,3 +1715,235 @@ exports.runAdminStats = onRequest(
     } catch (e) { console.error(e); res.status(500).json({ error: e && e.message }); }
   }
 );
+
+// ============================================================================
+// 📣 Campaigns — "הודעות ועדכונים" (admin push + in-app announcements)
+// ============================================================================
+// A campaign is one message to one audience at one time. The admin page
+// composes it (adminSaveCampaign), estimates who it reaches
+// (adminCampaignEstimate), sends itself a test (adminSendCampaignTest), and
+// the scheduler delivers due campaigns (dispatchCampaigns). Every step of the
+// funnel is counted in OUR Firestore by the app (campaigns/{id}.stats.*) —
+// no third-party analytics (Kids Category).
+
+function requireAdmin(request) {
+  const email = (request.auth && request.auth.token && request.auth.token.email || "").toLowerCase();
+  if (!email || !ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(email)) {
+    throw new HttpsError("permission-denied", "Not an authorized admin.");
+  }
+  return email;
+}
+
+const CAMPAIGN_STAT_KEYS = ["targeted", "sent", "failed", "opened", "page", "purchaseStarted", "purchased", "sentToChild", "popup"];
+
+function cleanCampaign(input) {
+  const d = input || {};
+  const s = (v, n) => String(v == null ? "" : v).trim().slice(0, n);
+  const aud = d.audience || {};
+  const roles = Array.isArray(aud.roles) ? aud.roles.filter((r) => r === "parents" || r === "children") : ["parents"];
+  const gradeMin = Number.isFinite(Number(aud.gradeMin)) ? Math.max(0, Math.min(6, Number(aud.gradeMin))) : 0;
+  const gradeMax = Number.isFinite(Number(aud.gradeMax)) ? Math.max(0, Math.min(6, Number(aud.gradeMax))) : 6;
+  const premium = ["any", "with", "without"].includes(aud.premium) ? aud.premium : "any";
+  const topics = Array.isArray(aud.topics) ? aud.topics.map((t) => s(t, 24)).filter(Boolean).slice(0, 12) : [];
+  const act = d.action || {};
+  const actionType = ["none", "pack", "parentHome", "kidHome", "tofyPlus"].includes(act.type) ? act.type : "none";
+  const packID = actionType === "pack" ? s(act.packID, 40) : "";
+  const scheduledAt = Number(d.scheduledAt) > 0 ? Number(d.scheduledAt) : Date.now();
+  const status = ["draft", "scheduled"].includes(d.status) ? d.status : "draft";
+  return {
+    title: s(d.title, 80), body: s(d.body, 240), emoji: s(d.emoji, 8), imageURL: s(d.imageURL, 400),
+    childTitle: s(d.childTitle, 80), childBody: s(d.childBody, 240),
+    audience: { roles: roles.length ? roles : ["parents"], gradeMin, gradeMax, premium, topics,
+                excludeOwners: aud.excludeOwners !== false },
+    action: { type: actionType, packID },
+    scheduledAt, status, showPopup: d.showPopup !== false,
+  };
+}
+
+// Everyone the audience describes: parent tokens + child-device tokens, and
+// the counts the admin page shows. One pass over the family data (like
+// adminFamiliesOverview) — fine at our scale, and it runs once per campaign.
+async function resolveAudience(audience) {
+  const [hhSnap, kidsSnap, devsSnap, parentsSnap] = await Promise.all([
+    db.collection("households").get(), db.collection("children").get(),
+    db.collection("childDevices").get(), db.collection("parents").get(),
+  ]);
+  const now = Date.now() / 1000;
+  const parents = {}; parentsSnap.forEach((p) => { parents[p.id] = p.data() || {}; });
+  const kidsByHH = {}; kidsSnap.forEach((k) => { const d = k.data() || {}; (kidsByHH[d.householdID] = kidsByHH[d.householdID] || []).push({ id: k.id, ...d }); });
+  const devsByKid = {}; devsSnap.forEach((dv) => { const d = dv.data() || {}; if (d.childID) (devsByKid[d.childID] = devsByKid[d.childID] || []).push(d); });
+  const childTokenSet = new Set(); devsSnap.forEach((dv) => { const t = (dv.data() || {}).fcmToken; if (t) childTokenSet.add(t); });
+
+  const wantParents = audience.roles.includes("parents"), wantChildren = audience.roles.includes("children");
+  const parentTokens = new Set(), childTokens = new Set();
+  let parentsN = 0, childrenN = 0, householdsN = 0;
+  const kidMatches = (k) => {
+    const g = (k.grade === 0 || k.grade) ? Number(k.grade) : null;
+    if (g != null && (g < audience.gradeMin || g > audience.gradeMax)) return false;
+    if (audience.topics.length) {
+      const interests = new Set([...(k.interests || []), ...Object.keys(k.difficultyByTopic || {}), ...(k.enabledTopics || [])]);
+      if (!audience.topics.some((t) => interests.has(t))) return false;
+    }
+    return true;
+  };
+  hhSnap.forEach((h) => {
+    const hh = h.data() || {};
+    const premiumOn = Number(hh.premiumUntil || 0) > now;
+    if (audience.premium === "with" && !premiumOn) return;
+    if (audience.premium === "without" && premiumOn) return;
+    const kids = (kidsByHH[h.id] || []).filter((k) => !k.deletedAt);
+    if (audience.excludeOwners && audience.packID && kids.length && kids.every((k) => (k.packs || []).includes(audience.packID))) return;
+    const matching = kids.filter(kidMatches);
+    if (!matching.length && (audience.topics.length || audience.gradeMin > 0 || audience.gradeMax < 6)) return;
+    householdsN += 1;
+    if (wantParents) {
+      for (const uid of hh.parentUIDs || []) {
+        const p = parents[uid]; if (!p) continue;
+        const toks = (p.fcmTokens || []).filter((t) => !childTokenSet.has(t));
+        if (!toks.length) continue;
+        parentsN += 1; toks.forEach((t) => parentTokens.add(t));
+      }
+    }
+    if (wantChildren) {
+      for (const k of matching) {
+        const toks = (devsByKid[k.id] || []).map((d) => d.fcmToken).filter(Boolean);
+        if (!toks.length) continue;
+        childrenN += 1; toks.forEach((t) => childTokens.add(t));
+      }
+    }
+  });
+  return { parentTokens: [...parentTokens], childTokens: [...childTokens], parentsN, childrenN, householdsN };
+}
+
+function campaignPayload(c, forChild) {
+  const title = forChild ? (c.childTitle || c.title) : c.title;
+  const body = forChild ? (c.childBody || c.body) : c.body;
+  const notification = { title: (c.emoji ? c.emoji + " " : "") + title, body };
+  const data = { type: "campaign", campaignID: c.id, action: c.action.type, packID: c.action.packID || "", role: forChild ? "child" : "parent" };
+  const apns = { payload: { aps: { sound: "default", "mutable-content": 1 } } };
+  if (c.imageURL) { data.imageURL = c.imageURL; apns.fcmOptions = { imageURL: c.imageURL }; }
+  return { notification, data, apns };
+}
+
+async function sendCampaignTo(tokens, c, forChild) {
+  let sent = 0, failed = 0;
+  const payload = campaignPayload(c, forChild);
+  for (let i = 0; i < tokens.length; i += 500) {
+    const chunk = tokens.slice(i, i + 500);
+    try {
+      const res = await admin.messaging().sendEachForMulticast({ tokens: chunk, ...payload });
+      sent += res.successCount; failed += res.failureCount;
+    } catch (e) { console.error("[campaign] send failed", c.id, e && e.message); failed += chunk.length; }
+  }
+  return { sent, failed };
+}
+
+exports.adminSaveCampaign = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const id = String(request.data && request.data.id || "").trim();
+  const c = cleanCampaign(request.data);
+  if (!c.title) throw new HttpsError("invalid-argument", "title required");
+  const ref = id ? db.collection("campaigns").doc(id) : db.collection("campaigns").doc();
+  const existing = id ? await ref.get() : null;
+  if (existing && existing.exists && ["sending", "sent"].includes(existing.data().status)) {
+    throw new HttpsError("failed-precondition", "A sent campaign can't be edited.");
+  }
+  const base = existing && existing.exists ? {} : { createdAt: Date.now(), createdBy: email,
+    stats: Object.fromEntries(CAMPAIGN_STAT_KEYS.map((k) => [k, 0])) };
+  await ref.set({ ...base, ...c, updatedAt: Date.now(), updatedBy: email }, { merge: true });
+  console.log("[adminSaveCampaign]", email, ref.id, c.status, c.title);
+  return { ok: true, id: ref.id };
+});
+
+exports.adminCampaignEstimate = onCall({ timeoutSeconds: 120, memory: "512MiB" }, async (request) => {
+  requireAdmin(request);
+  const c = cleanCampaign(request.data);
+  const r = await resolveAudience({ ...c.audience, packID: c.action.packID });
+  return { parents: r.parentsN, children: r.childrenN, households: r.householdsN,
+           parentTokens: r.parentTokens.length, childTokens: r.childTokens.length };
+});
+
+// The admin's OWN devices only (their parents doc) — never the real audience.
+exports.adminSendCampaignTest = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  requireAdmin(request);
+  const c = { ...cleanCampaign(request.data), id: "test" };
+  const p = await db.collection("parents").doc(request.auth.uid).get();
+  const d = p.exists ? p.data() : {};
+  const parentToks = [...new Set(d.fcmTokens || [])];
+  const childToks = [...new Set(d.childFcmTokens || [])];
+  const a = c.audience.roles.includes("parents") ? await sendCampaignTo(parentToks, c, false) : { sent: 0, failed: 0 };
+  const b = c.audience.roles.includes("children") ? await sendCampaignTo(childToks, c, true) : { sent: 0, failed: 0 };
+  return { ok: true, sent: a.sent + b.sent, failed: a.failed + b.failed, devices: parentToks.length + childToks.length };
+});
+
+exports.adminListCampaigns = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  requireAdmin(request);
+  const snap = await db.collection("campaigns").orderBy("scheduledAt", "desc").limit(100).get();
+  return { campaigns: snap.docs.map((d) => ({ id: d.id, ...d.data() })) };
+});
+
+exports.adminDeleteCampaign = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const id = String(request.data && request.data.id || "");
+  if (!id) throw new HttpsError("invalid-argument", "id required");
+  await db.collection("campaigns").doc(id).delete();
+  console.log("[adminDeleteCampaign]", email, id);
+  return { ok: true };
+});
+
+// ⚽ The launch switch for a question pack (packs/{id}.enabled).
+exports.adminSetPackEnabled = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const id = String(request.data && request.data.packID || "").trim();
+  if (!/^[a-z0-9_-]{2,40}$/.test(id)) throw new HttpsError("invalid-argument", "packID");
+  const enabled = !!(request.data && request.data.enabled);
+  await db.collection("packs").doc(id).set({ enabled, updatedAt: Date.now(), updatedBy: email,
+    ...(enabled ? { launchedAt: admin.firestore.FieldValue.serverTimestamp() } : {}) }, { merge: true });
+  console.log("[adminSetPackEnabled]", email, id, enabled);
+  return { ok: true };
+});
+
+exports.adminListPacks = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  requireAdmin(request);
+  const snap = await db.collection("packs").get();
+  const sales = await db.collection("packPurchases").get();
+  const byPack = {};
+  sales.forEach((s) => { const d = s.data() || {}; const b = byPack[d.packID] = byPack[d.packID] || { purchases: 0, children: 0, revenue: 0 };
+    b.purchases += 1; b.children += (d.childIDs || []).length; b.revenue += Number(d.price || 0); });
+  return { packs: Object.fromEntries(snap.docs.map((d) => [d.id, d.data()])), sales: byPack };
+});
+
+// Every 5 minutes: deliver campaigns whose time has come. Claims the doc
+// (scheduled → sending) in a transaction so two runs can never double-send.
+exports.dispatchCampaigns = onSchedule(
+  { schedule: "every 5 minutes", timeZone: "Asia/Jerusalem", timeoutSeconds: 540, memory: "512MiB" },
+  async () => {
+    const due = await db.collection("campaigns").where("status", "==", "scheduled")
+      .where("scheduledAt", "<=", Date.now()).get();
+    for (const doc of due.docs) {
+      const claimed = await db.runTransaction(async (tx) => {
+        const fresh = await tx.get(doc.ref);
+        if (!fresh.exists || fresh.data().status !== "scheduled") return false;
+        tx.update(doc.ref, { status: "sending", sendingAt: Date.now() });
+        return true;
+      });
+      if (!claimed) continue;
+      const c = { id: doc.id, ...doc.data() };
+      try {
+        const aud = await resolveAudience({ ...c.audience, packID: (c.action || {}).packID });
+        const a = c.audience.roles.includes("parents") ? await sendCampaignTo(aud.parentTokens, c, false) : { sent: 0, failed: 0 };
+        const b = c.audience.roles.includes("children") ? await sendCampaignTo(aud.childTokens, c, true) : { sent: 0, failed: 0 };
+        await doc.ref.update({
+          status: "sent", sentAt: Date.now(),
+          "stats.targeted": aud.parentsN + aud.childrenN,
+          "stats.sent": a.sent + b.sent, "stats.failed": a.failed + b.failed,
+          reach: { parents: aud.parentsN, children: aud.childrenN, households: aud.householdsN },
+        });
+        console.log("[dispatchCampaigns]", c.id, c.title, "sent", a.sent + b.sent, "failed", a.failed + b.failed);
+      } catch (e) {
+        console.error("[dispatchCampaigns] failed", c.id, e && e.message);
+        await doc.ref.update({ status: "failed", error: String(e && e.message || e) });
+      }
+    }
+  }
+);

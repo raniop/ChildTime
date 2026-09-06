@@ -1010,8 +1010,10 @@ final class HouseholdManager: ObservableObject {
             ]
             if let price { sale["price"] = NSDecimalNumber(decimal: price).doubleValue }
             if let uid { sale["parentUID"] = uid }
-            if let campaign = UserDefaults.standard.string(forKey: "packs.attributionCampaign") {
+            if let campaign = CampaignTracker.shared.currentCampaignID {
                 sale["campaignID"] = campaign
+                CampaignTracker.shared.record("purchased", campaignID: campaign)
+                CampaignTracker.shared.record("sentToChild", campaignID: campaign)
             }
             try? await db.collection("packPurchases").document(transactionID).setData(sale, merge: true)
         }

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#5E60CE">
+<title>טופי — הודעות ועדכונים</title>
+<link rel="icon" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --indigo:#5E60CE; --teal:#48BFE3; --gold:#FFD23F; --purple:#9B5DE5;
+    --pink:#FF6B9D; --mint:#06D6A0;
+    --card:rgba(255,255,255,.10); --brd:rgba(255,255,255,.16); --muted:rgba(255,255,255,.66);
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:"Heebo",-apple-system,BlinkMacSystemFont,Arial,sans-serif; color:#fff; min-height:100vh;
+    line-height:1.5; background:linear-gradient(160deg,#5E60CE 0%,#6A4BD0 38%,#48BFE3 100%); background-attachment:fixed;}
+  a{color:var(--gold)}
+  .wrap{max-width:1200px; margin:0 auto; padding:0 22px 80px}
+  header{position:sticky; top:0; z-index:30; backdrop-filter:blur(12px);
+    background:rgba(75,46,158,.40); border-bottom:1px solid var(--brd)}
+  header .wrap{display:flex; align-items:center; justify-content:space-between; height:66px; padding-bottom:0}
+  .brand{display:flex; align-items:center; gap:11px; font-weight:900; font-size:22px}
+  .brand img{width:36px; height:36px; border-radius:9px}
+  .brand small{font-weight:600; font-size:13px; opacity:.7}
+  .who{display:flex; align-items:center; gap:12px; font-size:14px}
+  .who button, .who a.btn{font-family:inherit; cursor:pointer; font-weight:700; font-size:13px; border:1px solid var(--brd);
+    background:rgba(255,255,255,.10); color:#fff; border-radius:999px; padding:7px 14px; text-decoration:none}
+  .who button:hover, .who a.btn:hover{background:rgba(255,255,255,.18)}
+  .gate{max-width:420px; margin:12vh auto 0; text-align:center; background:var(--card);
+    border:1px solid var(--brd); border-radius:24px; padding:38px 30px}
+  .gate h1{font-size:24px; font-weight:900; margin-bottom:6px}
+  .gate p{color:var(--muted); font-size:14px; margin-bottom:22px}
+  .gate button{font-family:inherit; cursor:pointer; font-weight:800; font-size:16px; border:0; border-radius:999px;
+    padding:13px 30px; background:var(--gold); color:#3a2c00}
+  .msg{margin-top:16px; font-size:13px; color:var(--muted); min-height:20px}
+  .msg.err{color:var(--pink); font-weight:700}
+  .spin{display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,.35);
+    border-top-color:#fff; border-radius:50%; animation:sp 1s linear infinite; vertical-align:-2px; margin-inline-end:6px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  [hidden]{display:none !important}
+
+  h2{font-size:18px; font-weight:900; margin:26px 0 10px}
+  h2 small{font-weight:600; font-size:12.5px; color:var(--muted); margin-inline-start:8px}
+  .card{background:var(--card); border:1px solid var(--brd); border-radius:20px; padding:18px 20px}
+  .split{display:grid; grid-template-columns:1.15fr .85fr; gap:16px; align-items:start}
+  @media (max-width:900px){.split{grid-template-columns:1fr}}
+  label.f{display:block; font-size:12.5px; font-weight:800; color:var(--muted); margin:12px 0 5px}
+  input[type=text], input[type=url], input[type=datetime-local], textarea, select{width:100%; font-family:inherit; font-size:14.5px; color:#fff;
+    border:1px solid var(--brd); background:rgba(255,255,255,.10); border-radius:12px; padding:10px 13px; outline:none}
+  textarea{min-height:74px; resize:vertical}
+  input::placeholder, textarea::placeholder{color:rgba(255,255,255,.45)}
+  select option{color:#222}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
+  .chips{display:flex; flex-wrap:wrap; gap:6px}
+  .chip{font-size:12.5px; font-weight:800; border-radius:999px; padding:5px 12px; background:rgba(0,0,0,.20); cursor:pointer; user-select:none; border:1px solid transparent}
+  .chip.on{background:var(--gold); color:#3a2c00}
+  .chip.mint{background:rgba(6,214,160,.22); color:#9ff5dd; cursor:default}
+  .chip.dim{color:var(--muted); cursor:default}
+  .est{font-size:13.5px; color:var(--muted); margin-top:8px; min-height:22px}
+  .est b{color:#fff}
+  .actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px}
+  .btn{font-family:inherit; cursor:pointer; font-weight:800; font-size:13.5px; border:1px solid var(--brd);
+    background:rgba(255,255,255,.12); color:#fff; border-radius:999px; padding:10px 18px}
+  .btn.primary{background:var(--gold); color:#3a2c00; border-color:transparent}
+  .btn.danger{background:rgba(255,107,157,.25)}
+  .btn:disabled{opacity:.5; cursor:default}
+  .note{font-size:12.5px; color:var(--muted); margin-top:8px}
+
+  /* preview */
+  .pcap{font-size:12.5px; font-weight:800; color:var(--muted); margin:0 0 8px}
+  .iphone{background:#000; border-radius:26px; padding:34px 10px 12px; margin-bottom:16px; color:#111}
+  .lock{color:#fff; text-align:center; font:600 13px -apple-system,Heebo,sans-serif; margin:0 0 8px}
+  .push{background:rgba(245,245,247,.96); border-radius:18px; padding:10px 12px; display:grid; grid-template-columns:40px 1fr; gap:10px; align-items:start}
+  .push .app{width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg,#7A5CFF,#3E8BF0); display:grid; place-items:center; font-size:20px}
+  .push b{display:block; font:700 14px -apple-system,Heebo,sans-serif} .push p{margin:2px 0 0; font-size:13px; color:#333; line-height:1.35} .push small{float:left; color:#888; font-size:11px}
+  .push img{grid-column:1/-1; width:100%; border-radius:10px; margin-top:6px; max-height:140px; object-fit:cover}
+  .inapp{background:linear-gradient(165deg,#7A5CFF 0%,#5E60CE 45%,#3E8BF0 100%); border-radius:22px; padding:12px}
+  .g{background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.32); border-radius:20px; padding:12px 14px; box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
+  .hero{height:110px; border-radius:16px; display:grid; place-items:center; font-size:52px; background:linear-gradient(135deg,rgba(140,255,196,.45),rgba(124,243,255,.35)); border:1px solid rgba(255,255,255,.32)}
+  .t{font-weight:800; font-size:17px; margin:8px 0 2px} .m{font-size:12.5px; color:rgba(255,255,255,.8); line-height:1.45}
+  .primary{display:block; text-align:center; background:rgba(255,255,255,.92); color:#4B3FBF; border-radius:13px; padding:11px; font-weight:800; font-size:14px; margin-top:8px}
+  .ghost{display:block; text-align:center; background:rgba(255,255,255,.22); border:1px solid rgba(255,255,255,.32); border-radius:13px; padding:10px; font-weight:700; font-size:13px; margin-top:6px}
+
+  /* history */
+  table{width:100%; border-collapse:collapse; font-size:13.5px}
+  thead th{font-size:12px; font-weight:800; color:var(--muted); text-align:right; padding:8px 12px; border-bottom:1px solid var(--brd)}
+  tbody td{padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.07); vertical-align:top}
+  .tblwrap{overflow-x:auto}
+  .funnel{display:flex; align-items:center; gap:5px; flex-wrap:wrap; font-size:12px}
+  .funnel span{background:rgba(0,0,0,.18); border-radius:8px; padding:3px 7px; white-space:nowrap} .funnel b{font-weight:900; font-size:12.5px} .funnel i{color:var(--muted); font-style:normal}
+  .money{color:#9ff5dd; font-weight:900; white-space:nowrap}
+  .st{font-size:11.5px; font-weight:800; border-radius:999px; padding:2px 9px; background:rgba(0,0,0,.2)}
+  .st.sent{background:rgba(6,214,160,.22); color:#9ff5dd} .st.scheduled{background:rgba(255,210,63,.2); color:#ffe58a} .st.failed{background:rgba(255,107,157,.25)}
+  .packrow{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.07)}
+  .packrow:last-child{border-bottom:0}
+  .packrow .n{font-weight:900; flex:1} .packrow .n small{display:block; font-weight:600; color:var(--muted); font-size:12px}
+  .switch{width:46px; height:26px; border-radius:999px; background:rgba(0,0,0,.28); position:relative; cursor:pointer; border:1px solid var(--brd)}
+  .switch::after{content:""; position:absolute; top:2px; inset-inline-start:2px; width:20px; height:20px; border-radius:50%; background:#fff; transition:.2s}
+  .switch.on{background:var(--mint)} .switch.on::after{inset-inline-start:22px}
+  .loading{margin:60px auto; text-align:center; font-weight:700}
+  .toast{position:fixed; bottom:22px; inset-inline-start:50%; transform:translateX(-50%); background:#1b1440; border:1px solid var(--brd); border-radius:999px; padding:10px 18px; font-weight:800; font-size:13.5px; z-index:50}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand"><img src="../lion.png" alt=""><span>טופי <small>· הודעות ועדכונים</small></span></div>
+    <div class="who">
+      <a class="btn" href="index.html">📊 לוח בקרה</a>
+      <a class="btn" href="families.html">👨‍👩‍👧 המשפחות</a>
+      <span id="whoName" hidden></span>
+      <button id="logoutBtn" hidden>התנתק</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="gate" id="gate" hidden>
+    <h1>🔐 כניסת מנהל המוצר</h1>
+    <p>הכניסה עם חשבון Google מורשה בלבד. כל שאר החשבונות נדחים בצד השרת.</p>
+    <button id="loginBtn">התחבר עם Google</button>
+    <div class="msg" id="gateMsg"></div>
+  </div>
+
+  <div id="app" hidden>
+    <h2>📣 הודעה חדשה <small>פוש לטלפון + פופ־אפ בכניסה הבאה לטופי. הילדים לעולם לא רואים מחיר.</small></h2>
+    <div class="split">
+      <div class="card">
+        <input type="hidden" id="cid">
+        <label class="f">כותרת</label>
+        <div class="row" style="grid-template-columns:72px 1fr">
+          <input type="text" id="emoji" placeholder="⚽" maxlength="4">
+          <input type="text" id="title" placeholder="חדש בטופי: עולם הכדורגל" maxlength="80">
+        </div>
+        <label class="f">טקסט קצר</label>
+        <textarea id="body" maxlength="240" placeholder="עזרו לילד שלכם להכיר שחקנים, קבוצות, תחרויות ועובדות מעניינות מעולם הכדורגל."></textarea>
+        <div class="row">
+          <div><label class="f">תמונה (קישור, לא חובה)</label><input type="url" id="imageURL" placeholder="https://tofyapp.com/img/soccer.png"></div>
+          <div><label class="f">פעולה בלחיצה</label>
+            <select id="action">
+              <option value="none">פותח את טופי</option>
+              <option value="pack">עמוד שאלון — לרכישה (הורה) / בקשה (ילד)</option>
+              <option value="tofyPlus">עמוד טופי+</option>
+            </select></div>
+        </div>
+        <div id="packRow" hidden><label class="f">איזה שאלון</label><select id="packID"></select></div>
+
+        <label class="f">קהל יעד</label>
+        <div class="chips" id="roles">
+          <span class="chip on" data-v="parents">👨‍👩‍👧 הורים</span>
+          <span class="chip" data-v="children">🧒 ילדים</span>
+        </div>
+        <div class="row3" style="margin-top:10px">
+          <div><label class="f" style="margin-top:0">מכיתה</label><select id="gradeMin"></select></div>
+          <div><label class="f" style="margin-top:0">עד כיתה</label><select id="gradeMax"></select></div>
+          <div><label class="f" style="margin-top:0">טופי+</label>
+            <select id="premium"><option value="any">כולם</option><option value="with">רק עם טופי+</option><option value="without">רק בלי טופי+</option></select></div>
+        </div>
+        <label class="f">נושאים שהילד לומד (ריק = כולם)</label>
+        <div class="chips" id="topics"></div>
+        <label class="f"><input type="checkbox" id="excludeOwners" checked> לא לשלוח למשפחה שכבר יש לה את השאלון</label>
+        <div class="est" id="est">לחצו "כמה זה מגיע?" לאומדן.</div>
+
+        <div id="childCopy" hidden>
+          <label class="f">גרסת הילד (אוטומטית, אפשר לערוך — בלי מחיר!)</label>
+          <input type="text" id="childTitle" maxlength="80" placeholder="רוצה ללמוד על כדורגל?">
+          <textarea id="childBody" maxlength="240" placeholder="שחקנים, קבוצות ותחרויות — בקש מאבא או אמא" style="margin-top:6px;min-height:52px"></textarea>
+        </div>
+
+        <div class="row">
+          <div><label class="f">מועד שליחה</label>
+            <select id="when"><option value="now">עכשיו (תוך 5 דק׳)</option><option value="later">מתוזמן…</option></select></div>
+          <div><label class="f">תאריך ושעה</label><input type="datetime-local" id="whenAt" disabled></div>
+        </div>
+        <label class="f"><input type="checkbox" id="showPopup" checked> להציג גם כפופ־אפ בתוך טופי בכניסה הבאה</label>
+
+        <div class="actions">
+          <button class="btn" id="estBtn">👥 כמה זה מגיע?</button>
+          <button class="btn" id="testBtn">📱 שלח לי לבדיקה</button>
+          <button class="btn" id="draftBtn">💾 שמור כטיוטה</button>
+          <button class="btn primary" id="sendBtn">🚀 תזמן שליחה</button>
+          <button class="btn" id="resetBtn">✨ חדש</button>
+        </div>
+        <div class="note">שליחה "עכשיו" יוצאת בריצה הבאה של המתזמן (עד 5 דקות). המשפך נספר אצלנו בלבד — פתיחה, עמוד, רכישה — בלי צד שלישי.</div>
+      </div>
+
+      <div>
+        <div class="card">
+          <p class="pcap">כך זה ייראה על האייפון של ההורה</p>
+          <div class="iphone"><p class="lock" id="pvTime">יום שני 09:30</p>
+            <div class="push"><div class="app">🦁</div><div><b><span id="pvTitle">חדש בטופי</span> <small>עכשיו</small></b><p id="pvBody">…</p></div><img id="pvImg" hidden alt=""></div>
+          </div>
+          <p class="pcap">ובתוך טופי (פופ־אפ בכניסה הבאה)</p>
+          <div class="inapp"><div class="g"><div class="hero" id="pvEmoji">🦁</div><div class="t" id="pvTitle2">חדש בטופי</div><div class="m" id="pvBody2">…</div><span class="primary" id="pvCta">הבנתי</span><span class="ghost">אולי אחר כך</span></div></div>
+          <p class="pcap" style="margin-top:14px" id="pvChildCap" hidden>גרסת הילד</p>
+          <div class="inapp" id="pvChild" hidden><div class="g"><div class="hero" id="pvChildEmoji">🦁</div><div class="t" id="pvChildTitle"></div><div class="m" id="pvChildBody"></div><span class="primary">בקש מאבא או אמא 💌</span><span class="ghost">אולי אחר כך</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <h2>⚽ שאלונים <small>המתג שמדליק שאלון לכל המשפחות — השאלות עצמן מגיעות עם הבילד</small></h2>
+    <div class="card" id="packs"></div>
+
+    <h2>📈 היסטוריה ומדידה <small>כל הודעה עם המשפך שלה</small></h2>
+    <div class="card tblwrap">
+      <table>
+        <thead><tr><th>הודעה</th><th>מועד</th><th>קהל</th><th>סטטוס</th><th>משפך</th><th>הכנסה</th><th></th></tr></thead>
+        <tbody id="hist"><tr><td colspan="7" style="color:var(--muted)">טוען…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="loading" id="loading" hidden><span class="spin"></span> טוען…</div>
+</div>
+
+<script type="module">
+const CONFIG = {
+  firebase: { apiKey: "AIzaSyCjZFUZFXwsbNrDA8Icw_ZZ-bPGARCLMLI", authDomain: "childtime-86e98.firebaseapp.com", projectId: "childtime-86e98" },
+  adminEmails: ["ranioph@gmail.com", "amitgolans@gmail.com"],
+};
+// Keep in sync with QuestionPacks (iOS) — name, emoji, App Store price.
+const PACKS = { soccer: { name: "עולם הכדורגל", emoji: "⚽", price: 14.9, sibling: 7.9, subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות" } };
+const TOPICS = { math: "🧮 מתמטיקה", english: "🇬🇧 אנגלית", hebrew: "✍️ עברית", logic: "🧩 לוגיקה", science: "🔬 מדעים", history: "🏛️ היסטוריה", geography: "🌍 גיאוגרפיה", money: "💰 חינוך פיננסי", reading: "📖 הבנת הנקרא" };
+const GRADES = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"];
+const PREVIEW = new URLSearchParams(location.search).get("preview") === "1";
+
+const $ = (id) => document.getElementById(id);
+const fmtDate = (ms) => new Date(ms).toLocaleString("he-IL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
+const toast = (t) => { const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); };
+
+// ---- form wiring ----------------------------------------------------------
+for (const [i, g] of GRADES.entries()) { $("gradeMin").add(new Option(g, i)); $("gradeMax").add(new Option(g, i)); }
+$("gradeMax").value = 6;
+for (const [k, v] of Object.entries(TOPICS)) { const c = document.createElement("span"); c.className = "chip"; c.dataset.v = k; c.textContent = v; c.onclick = () => { c.classList.toggle("on"); }; $("topics").appendChild(c); }
+for (const [k, v] of Object.entries(PACKS)) $("packID").add(new Option(`${v.emoji} ${v.name} · ₪${v.price}`, k));
+$("roles").querySelectorAll(".chip").forEach((c) => c.onclick = () => { c.classList.toggle("on"); if (![...$("roles").querySelectorAll(".chip.on")].length) c.classList.add("on"); render(); });
+$("action").onchange = () => { $("packRow").hidden = $("action").value !== "pack"; if ($("action").value === "pack") { const p = PACKS[$("packID").value]; if (!$("title").value) $("title").value = `חדש בטופי: ${p.name}`; if (!$("emoji").value) $("emoji").value = p.emoji; } render(); };
+$("packID").onchange = render;
+$("when").onchange = () => { $("whenAt").disabled = $("when").value !== "later"; if (!$("whenAt").disabled && !$("whenAt").value) { const d = new Date(Date.now() + 3600e3); d.setMinutes(0); $("whenAt").value = d.toISOString().slice(0, 16); } };
+["emoji", "title", "body", "imageURL", "childTitle", "childBody"].forEach((id) => $(id).oninput = render);
+$("resetBtn").onclick = () => { $("cid").value = ""; ["emoji", "title", "body", "imageURL", "childTitle", "childBody"].forEach((id) => $(id).value = ""); $("action").value = "none"; $("packRow").hidden = true; render(); };
+
+function roles() { return [...$("roles").querySelectorAll(".chip.on")].map((c) => c.dataset.v); }
+function childDefaults() {
+  const p = PACKS[$("packID").value];
+  if ($("action").value === "pack" && p) return { title: `רוצה ללמוד על ${p.subject}?`, body: `${p.tagline} — בקש מאבא או אמא` };
+  return { title: $("title").value, body: $("body").value };
+}
+function form() {
+  const when = $("when").value === "later" && $("whenAt").value ? new Date($("whenAt").value).getTime() : Date.now();
+  const cd = childDefaults();
+  return {
+    id: $("cid").value || undefined,
+    emoji: $("emoji").value.trim(), title: $("title").value.trim(), body: $("body").value.trim(), imageURL: $("imageURL").value.trim(),
+    childTitle: ($("childTitle").value || cd.title).trim(), childBody: ($("childBody").value || cd.body).trim(),
+    audience: { roles: roles(), gradeMin: +$("gradeMin").value, gradeMax: +$("gradeMax").value, premium: $("premium").value,
+                topics: [...$("topics").querySelectorAll(".chip.on")].map((c) => c.dataset.v), excludeOwners: $("excludeOwners").checked },
+    action: { type: $("action").value, packID: $("action").value === "pack" ? $("packID").value : "" },
+    scheduledAt: when, showPopup: $("showPopup").checked,
+  };
+}
+function render() {
+  const f = form();
+  const head = (f.emoji ? f.emoji + " " : "") + (f.title || "חדש בטופי");
+  $("pvTitle").textContent = head; $("pvTitle2").textContent = head;
+  $("pvBody").textContent = f.body || "…"; $("pvBody2").textContent = f.body || "…";
+  $("pvEmoji").textContent = f.emoji || "🦁";
+  $("pvImg").hidden = !f.imageURL; if (f.imageURL) $("pvImg").src = f.imageURL;
+  $("pvCta").textContent = f.action.type === "pack" ? "שלחו לילד שלי" : f.action.type === "tofyPlus" ? "לכל הפרטים" : "הבנתי";
+  const kids = f.audience.roles.includes("children");
+  $("childCopy").hidden = !kids; $("pvChildCap").hidden = !kids; $("pvChild").hidden = !kids;
+  const cd = childDefaults(); $("childTitle").placeholder = cd.title; $("childBody").placeholder = cd.body;
+  $("pvChildEmoji").textContent = f.emoji || "🦁"; $("pvChildTitle").textContent = f.childTitle; $("pvChildBody").textContent = f.childBody;
+  $("pvTime").textContent = new Date(f.scheduledAt).toLocaleString("he-IL", { weekday: "long", hour: "2-digit", minute: "2-digit" });
+}
+render();
+
+// ---- firebase --------------------------------------------------------------
+const [{initializeApp}, auth, fns] = await Promise.all([
+  import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+  import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"),
+  import("https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js"),
+]);
+const fbApp = initializeApp(CONFIG.firebase);
+const authI = auth.getAuth(fbApp);
+const functionsI = fns.getFunctions(fbApp);
+const call = (name, data) => PREVIEW ? previewCall(name, data) : fns.httpsCallable(functionsI, name)(data).then((r) => r.data);
+
+const provider = new auth.GoogleAuthProvider();
+$("loginBtn").onclick = async () => {
+  $("gateMsg").className = "msg"; $("gateMsg").innerHTML = '<span class="spin"></span> מתחבר…';
+  try { await auth.signInWithPopup(authI, provider); }
+  catch (e) { $("gateMsg").className = "msg err"; $("gateMsg").textContent = "ההתחברות נכשלה: " + e.code; }
+};
+$("logoutBtn").onclick = () => auth.signOut(authI);
+
+if (PREVIEW) {
+  // Design review: the sample soccer campaign, pre-filled.
+  $("action").value = "pack"; $("action").onchange();
+  $("emoji").value = "⚽"; $("title").value = "חדש בטופי: עולם הכדורגל";
+  $("body").value = "עזרו לילד שלכם להכיר שחקנים, קבוצות, תחרויות ועובדות מעניינות מעולם הכדורגל בישראל ובעולם.";
+  document.querySelector("#roles .chip[data-v=children]").classList.add("on");
+  document.querySelector("#topics .chip[data-v=geography]").classList.add("on");
+  $("gradeMin").value = 2; $("when").value = "later"; $("when").onchange(); render();
+  $("app").hidden = false; loadAll(); $("estBtn").click();
+}
+auth.onAuthStateChanged(authI, async (user) => {
+  if (PREVIEW) return;
+  if (!user) { $("gate").hidden = false; $("app").hidden = true; $("whoName").hidden = true; $("logoutBtn").hidden = true; return; }
+  const email = (user.email || "").toLowerCase();
+  if (!CONFIG.adminEmails.map((e) => e.toLowerCase()).includes(email)) {
+    $("gateMsg").className = "msg err"; $("gateMsg").textContent = "החשבון " + email + " אינו מורשה."; await auth.signOut(authI); return;
+  }
+  $("gate").hidden = true; $("whoName").textContent = user.email; $("whoName").hidden = false; $("logoutBtn").hidden = false;
+  $("app").hidden = false; loadAll();
+});
+
+async function loadAll() { await Promise.all([loadHistory(), loadPacks()]); }
+
+// ---- actions ---------------------------------------------------------------
+$("estBtn").onclick = async () => {
+  $("est").innerHTML = '<span class="spin"></span> סופרים…';
+  try { const r = await call("adminCampaignEstimate", form());
+    $("est").innerHTML = `מגיע ל־<b>${r.households}</b> משפחות · <b>${r.parents}</b> הורים (${r.parentTokens} מכשירים) · <b>${r.children}</b> מכשירי ילד`;
+  } catch (e) { $("est").textContent = "האומדן נכשל: " + (e.message || e); }
+};
+$("testBtn").onclick = async () => {
+  $("testBtn").disabled = true;
+  try { const r = await call("adminSendCampaignTest", form()); toast(r.devices ? `נשלח ל־${r.sent} מתוך ${r.devices} המכשירים שלך` : "אין לך מכשיר רשום לפוש — פתח את טופי בטלפון שלך קודם"); }
+  catch (e) { toast("נכשל: " + (e.message || e)); }
+  $("testBtn").disabled = false;
+};
+async function save(status) {
+  const f = form(); if (!f.title) { toast("חסרה כותרת"); return; }
+  if (status === "scheduled" && !f.body) { toast("חסר טקסט"); return; }
+  const btn = status === "scheduled" ? $("sendBtn") : $("draftBtn"); btn.disabled = true;
+  try { const r = await call("adminSaveCampaign", { ...f, status }); $("cid").value = r.id;
+    toast(status === "scheduled" ? "תוזמן ✅" : "נשמר כטיוטה"); await loadHistory(); }
+  catch (e) { toast("נכשל: " + (e.message || e)); }
+  btn.disabled = false;
+}
+$("draftBtn").onclick = () => save("draft");
+$("sendBtn").onclick = () => save("scheduled");
+
+// ---- history ---------------------------------------------------------------
+function audienceLabel(a) {
+  const parts = [];
+  parts.push(a.roles.map((r) => r === "parents" ? "הורים" : "ילדים").join(" + "));
+  if (a.gradeMin > 0 || a.gradeMax < 6) parts.push(`${GRADES[a.gradeMin]}–${GRADES[a.gradeMax]}`);
+  if (a.premium === "with") parts.push("עם טופי+"); if (a.premium === "without") parts.push("בלי טופי+");
+  if (a.topics && a.topics.length) parts.push(a.topics.map((t) => (TOPICS[t] || t).replace(/^\S+\s/, "")).join(", "));
+  return parts.join(" · ");
+}
+function funnel(c) {
+  const s = c.stats || {};
+  const steps = [["sent", "נשלח"], ["opened", "נפתח"], ["popup", "פופ־אפ"]];
+  if ((c.action || {}).type === "pack") steps.push(["page", "עמוד"], ["purchaseStarted", "התחילו"], ["purchased", "רכשו"], ["sentToChild", "נשלח לילד"]);
+  return `<div class="funnel">${steps.map(([k, l]) => `<span><b>${s[k] || 0}</b> <i>${l}</i></span>`).join("→")}</div>`;
+}
+function revenue(c) {
+  const p = PACKS[(c.action || {}).packID]; const n = (c.stats || {}).purchased || 0;
+  return p && n ? `₪${(n * p.price).toLocaleString("he-IL", { maximumFractionDigits: 0 })}` : "—";
+}
+const STATUS = { draft: "טיוטה", scheduled: "מתוזמן", sending: "נשלח עכשיו…", sent: "נשלח", failed: "נכשל" };
+async function loadHistory() {
+  try {
+    const r = await call("adminListCampaigns", {});
+    const rows = (r.campaigns || []).map((c) => `<tr>
+      <td><b>${(c.emoji ? c.emoji + " " : "")}${esc(c.title)}</b><div style="color:var(--muted);font-size:12px;max-width:260px;white-space:normal">${esc(c.body || "")}</div></td>
+      <td class="num">${fmtDate(c.scheduledAt)}</td>
+      <td style="white-space:normal;max-width:180px">${esc(audienceLabel(c.audience || { roles: [] }))}</td>
+      <td><span class="st ${c.status}">${STATUS[c.status] || c.status}</span></td>
+      <td>${c.status === "sent" ? funnel(c) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td class="money">${c.status === "sent" ? revenue(c) : "—"}</td>
+      <td style="white-space:nowrap">${["draft", "scheduled"].includes(c.status) ? `<button class="btn" data-edit="${c.id}" style="padding:5px 11px">✏️</button> ` : ""}<button class="btn danger" data-del="${c.id}" style="padding:5px 11px">🗑</button></td>
+    </tr>`);
+    $("hist").innerHTML = rows.length ? rows.join("") : '<tr><td colspan="7" style="color:var(--muted)">עוד לא נשלחה הודעה.</td></tr>';
+    $("hist").querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => { if (!confirm("למחוק את ההודעה?")) return; await call("adminDeleteCampaign", { id: b.dataset.del }); loadHistory(); });
+    $("hist").querySelectorAll("[data-edit]").forEach((b) => b.onclick = () => { const c = (r.campaigns || []).find((x) => x.id === b.dataset.edit); if (c) fill(c); window.scrollTo({ top: 0, behavior: "smooth" }); });
+  } catch (e) { $("hist").innerHTML = `<tr><td colspan="7" class="msg err">${esc(e.message || String(e))}</td></tr>`; }
+}
+function fill(c) {
+  $("cid").value = c.id; $("emoji").value = c.emoji || ""; $("title").value = c.title || ""; $("body").value = c.body || ""; $("imageURL").value = c.imageURL || "";
+  $("childTitle").value = c.childTitle || ""; $("childBody").value = c.childBody || "";
+  $("action").value = (c.action || {}).type || "none"; $("packRow").hidden = $("action").value !== "pack"; if ((c.action || {}).packID) $("packID").value = c.action.packID;
+  const a = c.audience || {}; $("roles").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", (a.roles || []).includes(x.dataset.v)));
+  $("gradeMin").value = a.gradeMin ?? 0; $("gradeMax").value = a.gradeMax ?? 6; $("premium").value = a.premium || "any"; $("excludeOwners").checked = a.excludeOwners !== false;
+  $("topics").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", (a.topics || []).includes(x.dataset.v)));
+  $("when").value = "later"; $("whenAt").disabled = false; $("whenAt").value = new Date(c.scheduledAt - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  $("showPopup").checked = c.showPopup !== false; render();
+}
+const esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+
+// ---- packs -----------------------------------------------------------------
+async function loadPacks() {
+  try {
+    const r = await call("adminListPacks", {});
+    $("packs").innerHTML = Object.entries(PACKS).map(([id, p]) => { const st = (r.packs || {})[id] || {}; const s = (r.sales || {})[id] || { purchases: 0, children: 0, revenue: 0 };
+      return `<div class="packrow"><span style="font-size:28px">${p.emoji}</span><div class="n">${p.name}<small>₪${p.price} · ילד נוסף ₪${p.sibling} · ${s.purchases} רכישות · ${s.children} ילדים · <span class="money">₪${Math.round(s.revenue)}</span></small></div>
+        <span class="chip ${st.enabled ? "mint" : "dim"}">${st.enabled ? "פעיל למשפחות" : "כבוי"}</span><div class="switch ${st.enabled ? "on" : ""}" data-pack="${id}" title="הדלקה/כיבוי"></div></div>`; }).join("");
+    $("packs").querySelectorAll(".switch").forEach((sw) => sw.onclick = async () => { const on = !sw.classList.contains("on");
+      if (on && !confirm(`להדליק את "${PACKS[sw.dataset.pack].name}" לכל המשפחות?`)) return;
+      await call("adminSetPackEnabled", { packID: sw.dataset.pack, enabled: on }); toast(on ? "השאלון דלוק ✅" : "השאלון כבוי"); loadPacks(); });
+  } catch (e) { $("packs").innerHTML = `<div class="msg err">${esc(e.message || String(e))}</div>`; }
+}
+
+// ---- preview mode (no backend) — sample data for design review only --------
+function previewCall(name, data) {
+  const sample = { campaigns: [
+    { id: "a", emoji: "⚽", title: "חדש בטופי: עולם הכדורגל", body: "עזרו לילד שלכם להכיר שחקנים, קבוצות, תחרויות ועובדות מעניינות.", scheduledAt: Date.now() - 86400e3 * 5, status: "sent", audience: { roles: ["parents"], gradeMin: 2, gradeMax: 6, premium: "any", topics: ["geography"] }, action: { type: "pack", packID: "soccer" }, stats: { sent: 1031, opened: 612, popup: 388, page: 388, purchaseStarted: 131, purchased: 97, sentToChild: 97 } },
+    { id: "b", emoji: "👑", title: "טופי+ — 7 ימים חינם", body: "כל העולמות הבסיסיים והמשחקים לכל המשפחה.", scheduledAt: Date.now() - 86400e3 * 12, status: "sent", audience: { roles: ["parents"], gradeMin: 0, gradeMax: 6, premium: "without", topics: [] }, action: { type: "tofyPlus" }, stats: { sent: 2204, opened: 901, popup: 340 } },
+    { id: "c", emoji: "🎒", title: "שנה חדשה — טופי מוכן", body: "הכיתה התעדכנה לבד. בהצלחה!", scheduledAt: Date.now() + 3600e3 * 20, status: "scheduled", audience: { roles: ["parents", "children"], gradeMin: 0, gradeMax: 6, premium: "any", topics: [] }, action: { type: "none" }, stats: {} },
+  ] };
+  const map = { adminListCampaigns: sample, adminCampaignEstimate: { households: 812, parents: 1240, parentTokens: 1031, children: 412, childTokens: 390 },
+    adminListPacks: { packs: { soccer: { enabled: true } }, sales: { soccer: { purchases: 97, children: 104, revenue: 1445 } } },
+    adminSaveCampaign: { ok: true, id: "new" }, adminSendCampaignTest: { ok: true, sent: 1, devices: 1 }, adminDeleteCampaign: { ok: true }, adminSetPackEnabled: { ok: true } };
+  return Promise.resolve(map[name]);
+}
+</script>
+</body>
+</html>

@@ -194,6 +194,15 @@ struct WorldMapView: View {
         return tiles
     }
 
+    /// 📣 A tapped discovery push on a CHILD device → the "ask a parent" page
+    /// (or nothing, when the child already has the pack).
+    private func consumeCampaignLanding() {
+        guard let pid = CampaignTracker.shared.pendingPackID else { return }
+        CampaignTracker.shared.pendingPackID = nil
+        guard let pack = QuestionPacks.find(pid), let p = profiles.active, !p.owns(pack) else { return }
+        packOffer = pack
+    }
+
     /// 🎁 The first open after a parent bought a pack: one reveal, on the
     /// child's own device, before anything else pops (wheel, chest, events).
     private func maybeRevealPack() {
@@ -519,7 +528,8 @@ struct WorldMapView: View {
         .fullScreenCover(item: $packOffer) { pack in
             PackAskParentView(pack: pack) { packOffer = nil }
         }
-        .onAppear { maybeRevealPack() }
+        .onAppear { maybeRevealPack(); consumeCampaignLanding() }
+        .onChangeCompat(of: CampaignTracker.shared.pendingPackID) { _, _ in consumeCampaignLanding() }
         .onChangeCompat(of: profiles.active?.ownedPacks.count ?? 0) { _, _ in maybeRevealPack() }
         .fullScreenCover(isPresented: $showDailyChest) {
             DailyChestView()

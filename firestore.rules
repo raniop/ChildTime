@@ -141,6 +141,14 @@ service cloud.firestore {
       allow update: if signedIn() && resource.data.parentUID == request.auth.uid;
     }
 
+    // 📣 Campaigns: the app reads them (in-app announcement) and may only bump
+    // its own funnel counters (stats.*) — content is written by admin functions.
+    match /campaigns/{id} {
+      allow read: if signedIn();
+      allow update: if signedIn()
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stats']);
+    }
+
     match /pushTests/{id} {
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
       allow read, delete: if signedIn() && resource.data.uid == request.auth.uid;

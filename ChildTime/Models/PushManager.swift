@@ -330,6 +330,8 @@ extension PushManager: UNUserNotificationCenterDelegate {
                let gameID = info["gameID"] as? String {
                 LiveGameManager.shared.pendingGameID = gameID
             }
+            // 📣 A campaign push: count the open, remember where to land.
+            if info["type"] as? String == "campaign" { CampaignTracker.shared.handleOpen(info) }
             // Awaited (not fire-and-forget) so the Firestore write-back completes
             // before iOS suspends the briefly-woken background app — otherwise the
             // child's listener never sees the parent's answer.

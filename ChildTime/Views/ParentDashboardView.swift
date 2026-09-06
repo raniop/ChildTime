@@ -51,6 +51,7 @@ struct ParentDashboardView: View {
     @State private var packToShow: QuestionPack? = nil
     /// The child whose request opened the pack page (preselected there).
     @State private var packRequestChild: Profile? = nil
+    @ObservedObject private var campaigns = CampaignTracker.shared
     @ObservedObject private var subs = SubscriptionManager.shared
     @State private var insightsProfile: Profile? = nil
     @StateObject private var choreStore = ChoreStore.shared
@@ -424,6 +425,18 @@ struct ParentDashboardView: View {
 
     /// 👑 "יואב רוצה טופי+" — the child tapped ask-a-parent on their device. The
     /// subscription is per family and bought here, once; this is the doorway.
+    /// 📣 A tapped campaign push lands the parent on the pack page / paywall.
+    private func consumeCampaignLanding() {
+        if let pid = campaigns.pendingPackID, let pack = QuestionPacks.find(pid) {
+            campaigns.pendingPackID = nil
+            packRequestChild = nil
+            packToShow = pack
+        } else if campaigns.pendingScreen == "tofyPlus" {
+            campaigns.pendingScreen = nil
+            showingPaywall = true
+        }
+    }
+
     /// ⚽ Children asking for a pack (from their device), with the pack resolved.
     private var packRequestRows: [(child: Profile, pack: QuestionPack)] {
         profiles.profiles.compactMap { p in
@@ -1631,6 +1644,9 @@ struct ParentDashboardView: View {
             .frame(width: 0, height: 0)
             .allowsHitTesting(false)
             .fullScreenCover(isPresented: $showingPaywall) { gatedPaywall }
+            .onAppear { consumeCampaignLanding() }
+            .onChangeCompat(of: campaigns.pendingPackID) { _, _ in consumeCampaignLanding() }
+            .onChangeCompat(of: campaigns.pendingScreen) { _, _ in consumeCampaignLanding() }
             .fullScreenCover(item: $packToShow) { pack in
                 PackDetailView(pack: pack, preselected: packRequestChild?.id) { packToShow = nil; packRequestChild = nil }
                     .environmentObject(profiles)

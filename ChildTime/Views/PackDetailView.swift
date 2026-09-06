@@ -36,6 +36,7 @@ struct PackDetailView: View {
         .environment(\.layoutDirection, .rightToLeft)
         .foregroundStyle(GlassInk.primary)
         .onAppear {
+            CampaignTracker.shared.record("page")
             if let preselected { selected = [preselected.uuidString] }
             else if let first = kids.first(where: { !$0.owns(pack) }) { selected = [first.id.uuidString] }
         }
@@ -171,6 +172,7 @@ struct PackDetailView: View {
             }
             Button {
                 Haptic.light()
+                CampaignTracker.shared.record("purchaseStarted")
                 gateOpen = true
             } label: {
                 Text(ctaTitle)
