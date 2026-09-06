@@ -80,6 +80,138 @@ enum QuestionPacks {
             plannedPriceLabel: "₪14.90",
             shortSubject: "כַּדּוּרֶגֶל"
         ),
+        QuestionPack(
+            id: "dinosaurs", topic: .dinosaurs, name: "דִּינוֹזָאוּרִים", emoji: "🦖",
+            tagline: "מִינִים, גֹּדֶל, מָה אָכְלוּ, וְאֵיךְ מְגַלִּים מְאֻבָּנִים",
+            description: "מִינִים, גֹּדֶל, מָה אָכְלוּ, וְאֵיךְ מְגַלִּים מְאֻבָּנִים — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["מִינֵי דִּינוֹזָאוּרִים וּמָה הֵם אָכְלוּ", "מְאֻבָּנִים וְאֵיךְ מוֹצְאִים אוֹתָם", "לָמָּה נֶעֶלְמוּ הַדִּינוֹזָאוּרִים", "חֶשְׁבּוֹן שֶׁל רַגְלַיִם, בֵּיצִים וְאֹרֶךְ"],
+            grades: 0...4,
+            productID: "com.rani.ChildTime.pack.dinosaurs",
+            siblingProductID: "com.rani.ChildTime.pack.dinosaurs.sibling",
+            heroColors: [Color(hex: "8CFFC4"), Color(hex: "2ECC71")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "דִּינוֹזָאוּרִים"
+        ),
+        QuestionPack(
+            id: "space", topic: .space, name: "חָלָל וְכוֹכָבִים", emoji: "🚀",
+            tagline: "כּוֹכְבֵי לֶכֶת, יָרֵחַ, אַסְטְרוֹנָאוּטִים וְשֶׁמֶשׁ",
+            description: "כּוֹכְבֵי לֶכֶת, יָרֵחַ, אַסְטְרוֹנָאוּטִים וְשֶׁמֶשׁ — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["שְׁמוֹנָה כּוֹכְבֵי הַלֶּכֶת וְהַסֵּדֶר שֶׁלָּהֶם", "הַיָּרֵחַ, הַשֶּׁמֶשׁ, יוֹם וְלַיְלָה", "אַסְטְרוֹנָאוּטִים, טִילִים וְיִשְׂרָאֵל בֶּחָלָל", "טֶלֶסְקוֹפִּים, כּוֹכָבִים וְשָׁבִיטִים"],
+            grades: 1...6,
+            productID: "com.rani.ChildTime.pack.space",
+            siblingProductID: "com.rani.ChildTime.pack.space.sibling",
+            heroColors: [Color(hex: "B7ABFF"), Color(hex: "5E60CE")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "חָלָל"
+        ),
+        QuestionPack(
+            id: "animals", topic: .animals, name: "עוֹלַם הַחַיּוֹת", emoji: "🐾",
+            tagline: "יַבָּשׁוֹת, חַיּוֹת בְּסַכָּנָה וְשִׂיאִים",
+            description: "יַבָּשׁוֹת, חַיּוֹת בְּסַכָּנָה וְשִׂיאִים — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["מִי הֲכִי מָהִיר, גָּדוֹל וְגָבוֹהַּ", "חַיּוֹת לְפִי יַבָּשׁוֹת וּבָתֵּי גִּדּוּל", "גּוּרִים, קוֹלוֹת וּמָה חַיּוֹת אוֹכְלוֹת", "חַיּוֹת יִשְׂרָאֵל וְלָמָּה שׁוֹמְרִים עֲלֵיהֶן"],
+            grades: 0...4,
+            productID: "com.rani.ChildTime.pack.animals",
+            siblingProductID: "com.rani.ChildTime.pack.animals.sibling",
+            heroColors: [Color(hex: "FFD23F"), Color(hex: "FF8C42")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "חַיּוֹת"
+        ),
+        QuestionPack(
+            id: "sea", topic: .sea, name: "מַעֲמַקֵּי הַיָּם", emoji: "🌊",
+            tagline: "כְּרִישִׁים, לִוְיְתָנִים, שׁוּנִיּוֹת, וּמִי חַי אֵיפֹה",
+            description: "כְּרִישִׁים, לִוְיְתָנִים, שׁוּנִיּוֹת, וּמִי חַי אֵיפֹה — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["כְּרִישִׁים, לִוְיְתָנִים וְדוֹלְפִינִים", "תַּמְנוּן, מֶדוּזָה וְצַבֵּי יָם", "יַם הַמֶּלַח, הַכִּנֶּרֶת וְהָאוֹקְיָנוֹסִים", "צוֹלְלוֹת, צוֹלְלָנִים וְעוֹלַם הַמַּיִם"],
+            grades: 0...5,
+            productID: "com.rani.ChildTime.pack.sea",
+            siblingProductID: "com.rani.ChildTime.pack.sea.sibling",
+            heroColors: [Color(hex: "7CF3FF"), Color(hex: "3E8BF0")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "הַיָּם"
+        ),
+        QuestionPack(
+            id: "gifted", topic: .gifted, name: "הֲכָנָה לִמְחוֹנָנִים", emoji: "🧠",
+            tagline: "חֲשִׁיבָה, סְדָרוֹת, הֶקֵּשִׁים וּתְפִיסָה מֶרְחָבִית",
+            description: "חֲשִׁיבָה, סְדָרוֹת, הֶקֵּשִׁים וּתְפִיסָה מֶרְחָבִית — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["סְדָרוֹת מִסְפָּרִים וְתַבְנִיּוֹת", "אָנָלוֹגְיוֹת וּמִי לֹא שַׁיָּךְ", "חִידוֹת הִגָּיוֹן וּתְפִיסָה מֶרְחָבִית", "בְּעָיוֹת מִלּוּלִיּוֹת בִּשְׁנֵי שְׁלַבִּים"],
+            grades: 2...5,
+            productID: "com.rani.ChildTime.pack.gifted",
+            siblingProductID: "com.rani.ChildTime.pack.gifted.sibling",
+            heroColors: [Color(hex: "FF7BD3"), Color(hex: "9B5DE5")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "חֲשִׁיבָה"
+        ),
+        QuestionPack(
+            id: "food", topic: .food, name: "מִטְבָּח וּמַדָּע שֶׁל אֹכֶל", emoji: "🍳",
+            tagline: "מֵאַיִן מַגִּיעַ אֹכֶל, מְדִידוֹת וּמַתְכּוֹנִים בְּחֶשְׁבּוֹן",
+            description: "מֵאַיִן מַגִּיעַ אֹכֶל, מְדִידוֹת וּמַתְכּוֹנִים בְּחֶשְׁבּוֹן — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["מֵאַיִן מַגִּיעִים חָלָב, לֶחֶם, דְּבַשׁ וְשׁוֹקוֹלָד", "כּוֹסוֹת, כַּפּוֹת, גְּרָמִים וְלִיטְרִים", "מַתְכּוֹנִים בְּחֶשְׁבּוֹן: כָּפוּל וָחֵצִי", "לָמָּה הַלֶּחֶם תּוֹפֵחַ וְהַמַּיִם רוֹתְחִים"],
+            grades: 1...5,
+            productID: "com.rani.ChildTime.pack.food",
+            siblingProductID: "com.rani.ChildTime.pack.food.sibling",
+            heroColors: [Color(hex: "FFD98A"), Color(hex: "FF8C42")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "אֹכֶל"
+        ),
+        QuestionPack(
+            id: "israel", topic: .israel, name: "יִשְׂרָאֵל שֶׁלִּי", emoji: "🏛️",
+            tagline: "עָרִים, סְמָלִים, חַגִּים, דְּמֻיּוֹת וְטֶבַע",
+            description: "עָרִים, סְמָלִים, חַגִּים, דְּמֻיּוֹת וְטֶבַע — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["עָרִים, יַמִּים וַהֲרֵי יִשְׂרָאֵל", "הַדֶּגֶל, הַסֵּמֶל וְהַהִמְנוֹן", "חַגִּים וְהַסְּמָלִים שֶׁלָּהֶם", "הַמְצָאוֹת וּדְמֻיּוֹת מִיִּשְׂרָאֵל"],
+            grades: 2...6,
+            productID: "com.rani.ChildTime.pack.israel",
+            siblingProductID: "com.rani.ChildTime.pack.israel.sibling",
+            heroColors: [Color(hex: "8CFFC4"), Color(hex: "37E2D5")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "יִשְׂרָאֵל"
+        ),
+        QuestionPack(
+            id: "music", topic: .music, name: "מוּזִיקָה", emoji: "🎵",
+            tagline: "כְּלֵי נְגִינָה, קֶצֶב, מַלְחִינִים וְשִׁירֵי יְלָדִים",
+            description: "כְּלֵי נְגִינָה, קֶצֶב, מַלְחִינִים וְשִׁירֵי יְלָדִים — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["כְּלֵי נְגִינָה וְהַמִּשְׁפָּחוֹת שֶׁלָּהֶם", "שִׁבְעַת הַתָּוִים, קֶצֶב וְטֶמְפּוֹ", "מַלְחִינִים מְפֻרְסָמִים בְּמִשְׁפָּט אֶחָד", "תִּזְמֹרֶת, מַקְהֵלָה וּמְנַצֵּחַ"],
+            grades: 0...4,
+            productID: "com.rani.ChildTime.pack.music",
+            siblingProductID: "com.rani.ChildTime.pack.music.sibling",
+            heroColors: [Color(hex: "B7ABFF"), Color(hex: "FF7BD3")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "מוּזִיקָה"
+        ),
+        QuestionPack(
+            id: "body", topic: .body, name: "גּוּף הָאָדָם", emoji: "🧍",
+            tagline: "עֲצָמוֹת, לֵב, נְשִׁימָה וּבְרִיאוּת",
+            description: "עֲצָמוֹת, לֵב, נְשִׁימָה וּבְרִיאוּת — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["עֲצָמוֹת, שְׁרִירִים וּמִפְרָקִים", "הַלֵּב, הָרֵאוֹת וְהַדָּם", "חֲמֵשֶׁת הַחוּשִׁים וְהַמֹּחַ", "הֶרְגֵּלִים בְּרִיאִים: שֵׁנָה, צִחְצוּחַ, מַיִם"],
+            grades: 2...6,
+            productID: "com.rani.ChildTime.pack.body",
+            siblingProductID: "com.rani.ChildTime.pack.body.sibling",
+            heroColors: [Color(hex: "FF9AA0"), Color(hex: "FF7BD3")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "גּוּף הָאָדָם"
+        ),
+        QuestionPack(
+            id: "vehicles", topic: .vehicles, name: "כְּלֵי רֶכֶב וְתַחְבּוּרָה", emoji: "🚗",
+            tagline: "מְכוֹנִיּוֹת, רַכָּבוֹת, מְטוֹסִים, וְאֵיךְ זֶה עוֹבֵד",
+            description: "מְכוֹנִיּוֹת, רַכָּבוֹת, מְטוֹסִים, וְאֵיךְ זֶה עוֹבֵד — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["מָה נוֹסֵעַ עַל פַּסִּים, בַּמַּיִם וּבָאֲוִיר", "מִי נוֹהֵג, מַטִּיס וּמְנַוֵּט", "רַמְזוֹר וּבְטִיחוּת בַּדֶּרֶךְ", "גַּלְגַּלִּים בְּחֶשְׁבּוֹן"],
+            grades: 0...3,
+            productID: "com.rani.ChildTime.pack.vehicles",
+            siblingProductID: "com.rani.ChildTime.pack.vehicles.sibling",
+            heroColors: [Color(hex: "7CF3FF"), Color(hex: "5E60CE")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "כְּלֵי רֶכֶב"
+        ),
+        QuestionPack(
+            id: "flags", topic: .flags, name: "דְּגָלִים וּמְדִינוֹת", emoji: "🌍",
+            tagline: "דְּגָלִים, בִּירוֹת וְיַבָּשׁוֹת",
+            description: "דְּגָלִים, בִּירוֹת וְיַבָּשׁוֹת — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["דְּגָלִים שֶׁל מְדִינוֹת מֻכָּרוֹת", "בִּירוֹת וְיַבָּשׁוֹת", "אֲתָרִים מְפֻרְסָמִים בָּעוֹלָם", "הַשְּׁכֵנוֹת שֶׁל יִשְׂרָאֵל"],
+            grades: 3...6,
+            productID: "com.rani.ChildTime.pack.flags",
+            siblingProductID: "com.rani.ChildTime.pack.flags.sibling",
+            heroColors: [Color(hex: "FFD23F"), Color(hex: "8CFFC4")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "דְּגָלִים וּמְדִינוֹת"
+        ),
     ]
 
     /// A pack OR a world pass by id ("soccer", "math").
@@ -124,7 +256,7 @@ enum WorldPasses {
         case .geography: return "מְדִינוֹת, יַבָּשׁוֹת, יַמִּים וּדְגָלִים"
         case .money:     return "כֶּסֶף, חִסָּכוֹן וּבְחִירוֹת חֲכָמוֹת"
         case .reading:   return "קְטָעִים קְצָרִים וּשְׁאֵלוֹת עֲלֵיהֶם"
-        case .soccer:    return ""
+        case .soccer, .dinosaurs, .space, .animals, .sea, .gifted, .food, .israel, .music, .body, .vehicles, .flags: return ""
         }
     }
     private static func description(_ t: Topic) -> String {

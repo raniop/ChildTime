@@ -15,7 +15,7 @@ enum BonusQuestionBank {
         switch topic {
         case .math:      return []   // procedural — see QuestionGenerator.makeBonusMath
         case .reading:   return []   // falls back to a hard passage via generate(.reading)
-        case .soccer:    return []   // pack — its hard tier serves as bonus
+        case .soccer, .dinosaurs, .space, .animals, .sea, .gifted, .food, .israel, .music, .body, .vehicles, .flags: return []   // packs — their hard tier serves as bonus
         case .english:   return english
         case .hebrew:    return hebrew
         case .logic:     return logic

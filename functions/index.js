@@ -362,6 +362,17 @@ exports.onPackRequest = onDocumentWritten("children/{childID}", async (event) =>
 // docs/admin/notifications.html.
 const PACK_META = {
   soccer: { name: "עולם הכדורגל", emoji: "⚽", subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות" },
+  dinosaurs: { name: "דינוזאורים", emoji: "🦖", subject: "דינוזאורים", tagline: "מינים, גדל, מה אכלו, ואיך מגלים מאבנים" },
+  space: { name: "חלל וכוכבים", emoji: "🚀", subject: "חלל", tagline: "כוכבי לכת, ירח, אסטרונאוטים ושמש" },
+  animals: { name: "עולם החיות", emoji: "🐾", subject: "חיות", tagline: "יבשות, חיות בסכנה ושיאים" },
+  sea: { name: "מעמקי הים", emoji: "🌊", subject: "הים", tagline: "כרישים, לויתנים, שוניות, ומי חי איפה" },
+  gifted: { name: "הכנה למחוננים", emoji: "🧠", subject: "חשיבה", tagline: "חשיבה, סדרות, הקשים ותפיסה מרחבית" },
+  food: { name: "מטבח ומדע של אכל", emoji: "🍳", subject: "אכל", tagline: "מאין מגיע אכל, מדידות ומתכונים בחשבון" },
+  israel: { name: "ישראל שלי", emoji: "🏛️", subject: "ישראל", tagline: "ערים, סמלים, חגים, דמיות וטבע" },
+  music: { name: "מוזיקה", emoji: "🎵", subject: "מוזיקה", tagline: "כלי נגינה, קצב, מלחינים ושירי ילדים" },
+  body: { name: "גוף האדם", emoji: "🧍", subject: "גוף האדם", tagline: "עצמות, לב, נשימה ובריאות" },
+  vehicles: { name: "כלי רכב ותחבורה", emoji: "🚗", subject: "כלי רכב", tagline: "מכוניות, רכבות, מטוסים, ואיך זה עובד" },
+  flags: { name: "דגלים ומדינות", emoji: "🌍", subject: "דגלים ומדינות", tagline: "דגלים, בירות ויבשות" },
 };
 const PACK_NAMES = Object.fromEntries(Object.entries(PACK_META).map(([k, v]) => [k, v.name]));
 const PACK_EMOJI = Object.fromEntries(Object.entries(PACK_META).map(([k, v]) => [k, v.emoji]));

@@ -372,7 +372,7 @@ enum QuestionBanksExpanded {
         case .money:     return []
         case .math:      return []
         case .reading:   return []
-        case .soccer:    return []
+        case .soccer, .dinosaurs, .space, .animals, .sea, .gifted, .food, .israel, .music, .body, .vehicles, .flags: return []
         }
     }
 }

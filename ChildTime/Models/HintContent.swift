@@ -18,6 +18,9 @@ enum HintContent {
         case .money:     return "חֲשׁוֹב כַּמָּה זֶה עוֹלֶה 💰"
         case .reading:   return "קְרָא שׁוּב אֶת הַקֶּטַע לְאַט 📖"
         case .soccer:    return "תַּחְשֹׁב עַל מִשְׂחָק שֶׁרָאִיתָ ⚽"
+        case .gifted:    return "חַפֵּשׂ אֶת הַחֹק שֶׁחוֹזֵר 🧠"
+        case .dinosaurs, .space, .animals, .sea, .food, .israel, .music, .body, .vehicles, .flags:
+            return "תַּחְשֹׁב עַל מַה שֶּׁרָאִיתָ אוֹ שָׁמַעְתָּ עַל זֶה 💡"
         }
     }
 
@@ -34,6 +37,9 @@ enum HintContent {
         case .money:     return "סְפוֹר אֶת הַמַּטְבְּעוֹת בְּיַחַד וּבְדוֹק כַּמָּה יֵשׁ סַךְ הַכֹּל."
         case .reading:   return "הַתְּשׁוּבָה מִתְחַבֵּאת בַּקֶּטַע — חַפֵּשׂ בּוֹ אֶת הַמִּלִּים מֵהַשְּׁאֵלָה."
         case .soccer:    return "דַּמְיֵן אֶת הַמִּגְרָשׁ: אֵיפֹה עוֹמֵד כָּל שַׂחְקָן וּמָה מֻתָּר לוֹ לַעֲשׂוֹת."
+        case .gifted:    return "קְרָא שׁוּב לְאַט, וּבְדֹק אֵיזֶה חֹק מַתְאִים לְכָל הָאֵיבָרִים בַּסִּדְרָה."
+        case .dinosaurs, .space, .animals, .sea, .food, .israel, .music, .body, .vehicles, .flags:
+            return "הוֹרִידוּ קֹדֶם אֶת הַתְּשׁוּבוֹת שֶׁבֶּטַח לֹא נְכוֹנוֹת — וּבַחֲרוּ מִמַּה שֶּׁנִּשְׁאַר."
         }
     }
 }

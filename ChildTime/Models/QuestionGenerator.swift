@@ -14,7 +14,7 @@ struct QuestionGenerator {
             return makeMath(difficulty: difficulty)
         case .reading:
             return ReadingContent.singleQuestion(target: difficulty, grade: grade)
-        case .english, .hebrew, .logic, .science, .history, .geography, .money, .soccer:
+        case .english, .hebrew, .logic, .science, .history, .geography, .money, .soccer, .dinosaurs, .space, .animals, .sea, .gifted, .food, .israel, .music, .body, .vehicles, .flags:
             return makeFromBank(topic: topic, difficulty: difficulty, grade: grade)
         }
     }

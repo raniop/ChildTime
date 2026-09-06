@@ -221,6 +221,17 @@ enum QuestionBanks {
         case .geography: return geography + QuestionBanksExpanded.geography + QuestionBanksWorkflow.geography + QuestionBanksWorkflow2.geography + QuestionBanksWorkflow3.geography + CurriculumHumanitiesBank.geography
         case .money:     return money     + QuestionBanksWorkflow.money     + QuestionBanksWorkflow2.money     + QuestionBanksWorkflow3.money     + CurriculumHumanitiesBank.money
         case .soccer:    return QuestionBanksSoccer.soccer   // ⚽ paid pack
+        case .dinosaurs: return QuestionBanksDinosaurs.dinosaurs
+        case .space: return QuestionBanksSpace.space
+        case .animals: return QuestionBanksAnimals.animals
+        case .sea: return QuestionBanksSea.sea
+        case .gifted: return QuestionBanksGifted.gifted
+        case .food: return QuestionBanksFood.food
+        case .israel: return QuestionBanksIsrael.israel
+        case .music: return QuestionBanksMusic.music
+        case .body: return QuestionBanksBody.body
+        case .vehicles: return QuestionBanksVehicles.vehicles
+        case .flags: return QuestionBanksFlags.flags
         case .math:      return nil  // generated algorithmically
         case .reading:   return nil  // passage-based — served by ReadingContent
         }

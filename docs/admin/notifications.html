@@ -225,7 +225,20 @@ const CONFIG = {
   adminEmails: ["ranioph@gmail.com", "amitgolans@gmail.com"],
 };
 // Keep in sync with QuestionPacks (iOS) — name, emoji, App Store price.
-const PACKS = { soccer: { name: "עולם הכדורגל", emoji: "⚽", price: 14.9, sibling: 7.9, subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות" } };
+const PACKS = {
+  soccer: { name: "עולם הכדורגל", emoji: "⚽", price: 14.9, sibling: 7.9, subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות" },
+  dinosaurs: { name: "דינוזאורים", emoji: "🦖", price: 14.9, sibling: 7.9, subject: "דינוזאורים", tagline: "מינים, גדל, מה אכלו, ואיך מגלים מאבנים" },
+  space: { name: "חלל וכוכבים", emoji: "🚀", price: 14.9, sibling: 7.9, subject: "חלל", tagline: "כוכבי לכת, ירח, אסטרונאוטים ושמש" },
+  animals: { name: "עולם החיות", emoji: "🐾", price: 14.9, sibling: 7.9, subject: "חיות", tagline: "יבשות, חיות בסכנה ושיאים" },
+  sea: { name: "מעמקי הים", emoji: "🌊", price: 14.9, sibling: 7.9, subject: "הים", tagline: "כרישים, לויתנים, שוניות, ומי חי איפה" },
+  gifted: { name: "הכנה למחוננים", emoji: "🧠", price: 14.9, sibling: 7.9, subject: "חשיבה", tagline: "חשיבה, סדרות, הקשים ותפיסה מרחבית" },
+  food: { name: "מטבח ומדע של אכל", emoji: "🍳", price: 14.9, sibling: 7.9, subject: "אכל", tagline: "מאין מגיע אכל, מדידות ומתכונים בחשבון" },
+  israel: { name: "ישראל שלי", emoji: "🏛️", price: 14.9, sibling: 7.9, subject: "ישראל", tagline: "ערים, סמלים, חגים, דמיות וטבע" },
+  music: { name: "מוזיקה", emoji: "🎵", price: 14.9, sibling: 7.9, subject: "מוזיקה", tagline: "כלי נגינה, קצב, מלחינים ושירי ילדים" },
+  body: { name: "גוף האדם", emoji: "🧍", price: 14.9, sibling: 7.9, subject: "גוף האדם", tagline: "עצמות, לב, נשימה ובריאות" },
+  vehicles: { name: "כלי רכב ותחבורה", emoji: "🚗", price: 14.9, sibling: 7.9, subject: "כלי רכב", tagline: "מכוניות, רכבות, מטוסים, ואיך זה עובד" },
+  flags: { name: "דגלים ומדינות", emoji: "🌍", price: 14.9, sibling: 7.9, subject: "דגלים ומדינות", tagline: "דגלים, בירות ויבשות" },
+};
 const TOPICS = { math: "🧮 מתמטיקה", english: "🇬🇧 אנגלית", hebrew: "✍️ עברית", logic: "🧩 לוגיקה", science: "🔬 מדעים", history: "🏛️ היסטוריה", geography: "🌍 גיאוגרפיה", money: "💰 חינוך פיננסי", reading: "📖 הבנת הנקרא" };
 const GRADES = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"];
 const PREVIEW = new URLSearchParams(location.search).get("preview") === "1";

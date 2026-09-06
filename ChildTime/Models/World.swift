@@ -41,7 +41,8 @@ struct World: Identifiable, Hashable {
 }
 
 enum Worlds {
-    static let all: [World] = [
+    /// The hand-written base worlds (+ the arena).
+    static let base: [World] = [
         World(
             id: "math_kingdom",
             name: "מַמְלֶכֶת הַמָּתֵמָטִיקָה",
@@ -132,17 +133,6 @@ enum Worlds {
             gradient: .readingWorld,
             glowColor: Color(hex: "AB47BC")
         ),
-        // ⚽ Paid pack — shown only to a child whose parent bought it (Profile.allows).
-        World(
-            id: "soccer_world",
-            name: "עוֹלַם הַכַּדּוּרֶגֶל",
-            emoji: "⚽",
-            topic: .soccer,
-            starsToUnlock: 0,
-            rooms: 10,
-            gradient: .soccerWorld,
-            glowColor: Color(hex: "2ECC71")
-        ),
         World(
             id: "bonus_arena",
             name: "זִירַת הָעֲנָקִים",
@@ -155,6 +145,19 @@ enum Worlds {
             isBonusWorld: true
         )
     ]
+
+    /// ⚽🦖🚀 One world per question pack — shown only to a child who can play
+    /// it (PackAccess). Generated from the catalog so a new pack never needs a
+    /// hand-written tile.
+    static let packWorlds: [World] = QuestionPacks.all.map { p in
+        World(id: "\(p.id)_world", name: p.name, emoji: p.emoji, topic: p.topic,
+              starsToUnlock: 0, rooms: 10, gradient: .soccerWorld, glowColor: p.heroColors.first ?? Color(hex: "2ECC71"))
+    }
+    /// Base worlds + pack worlds (the arena stays last).
+    static let all: [World] = {
+        let arena = base.filter { $0.isBonusWorld }
+        return base.filter { !$0.isBonusWorld } + packWorlds + arena
+    }()
 
     static func find(_ id: String) -> World? {
         all.first { $0.id == id }

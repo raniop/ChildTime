@@ -12,6 +12,17 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
     case reading    // הבנת הנקרא — קטע קריאה + שאלות עליו
     // ── Paid question packs (add-ons on top of Tofy+; see QuestionPack) ──
     case soccer     // ⚽ עולם הכדורגל
+    case dinosaurs
+    case space
+    case animals
+    case sea
+    case gifted
+    case food
+    case israel
+    case music
+    case body
+    case vehicles
+    case flags
 
     var id: String { rawValue }
 
@@ -38,6 +49,17 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         case .money:     return "חִנּוּךְ פִינַנְסִי"
         case .reading:   return "הֲבָנַת הַנִּקְרָא"
         case .soccer:    return "עוֹלַם הַכַּדּוּרֶגֶל"
+        case .dinosaurs: return "דִּינוֹזָאוּרִים"
+        case .space: return "חָלָל וְכוֹכָבִים"
+        case .animals: return "עוֹלַם הַחַיּוֹת"
+        case .sea: return "מַעֲמַקֵּי הַיָּם"
+        case .gifted: return "הֲכָנָה לִמְחוֹנָנִים"
+        case .food: return "מִטְבָּח וּמַדָּע שֶׁל אֹכֶל"
+        case .israel: return "יִשְׂרָאֵל שֶׁלִּי"
+        case .music: return "מוּזִיקָה"
+        case .body: return "גּוּף הָאָדָם"
+        case .vehicles: return "כְּלֵי רֶכֶב וְתַחְבּוּרָה"
+        case .flags: return "דְּגָלִים וּמְדִינוֹת"
         }
     }
 
@@ -53,6 +75,17 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         case .money:     return "💰"
         case .reading:   return "📖"
         case .soccer:    return "⚽"
+        case .dinosaurs: return "🦖"
+        case .space: return "🚀"
+        case .animals: return "🐾"
+        case .sea: return "🌊"
+        case .gifted: return "🧠"
+        case .food: return "🍳"
+        case .israel: return "🏛️"
+        case .music: return "🎵"
+        case .body: return "🧍"
+        case .vehicles: return "🚗"
+        case .flags: return "🌍"
         }
     }
 }
