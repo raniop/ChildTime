@@ -126,7 +126,18 @@ enum RewardEngine {
     }
 
     /// XP thresholds for each level.
+    /// 30 levels. The first eleven are the original curve; from there every level
+    /// costs 500 more XP than the one before — a child who plays daily keeps
+    /// levelling for the whole school year instead of parking at 11.
     static let levelThresholds: [Int] = [0, 10, 25, 50, 100, 200, 350, 550, 800, 1100, 1500]
+        + (1...19).map { 1500 + $0 * 500 }
+
+    /// 💎 Level-up bonus (Rani: the level must mean something): ten diamonds per
+    /// level reached — 20 at level 2, 100 at level 10.
+    static func levelUpDiamonds(_ level: Int) -> Int { max(10, 10 * level) }
+
+    /// The avatar's ring tier for a level: bronze from 5, silver from 10, gold from 20.
+    static func levelTier(_ level: Int) -> Int { level >= 20 ? 3 : level >= 10 ? 2 : level >= 5 ? 1 : 0 }
 
     static func level(forXP xp: Int) -> Int {
         var lvl = 1

@@ -50,6 +50,11 @@ struct LevelUpView: View {
                                     .foregroundStyle(.white)
                                     .transition(.scale.combined(with: .opacity))
 
+                                Text("+\(RewardEngine.levelUpDiamonds(newLevel)) 💎 בּוֹנוּס לַחֲנוּת!")
+                                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(AppColor.starGold)
+                                    .padding(.top, AppSpacing.sm)
+                                    .transition(.scale.combined(with: .opacity))
                                 if let perk = perkForLevel(newLevel) {
                                     Text(perk)
                                         .font(.system(size: 22, weight: .medium, design: .rounded))
@@ -101,9 +106,9 @@ struct LevelUpView: View {
 
     private func perkForLevel(_ lvl: Int) -> String? {
         switch lvl {
-        case 5: return "🎩 כּוֹבַע נִפְתָּח!"
-        case 10: return "✨ כְּנָפַיִם נִפְתָּחוֹת!"
-        case 20: return "🌈 צְבָעִים נְדִירִים!"
+        case 5: return "🥉 מִסְגֶּרֶת בְּרוֹנְזָה לָאַוָּטָאר!"
+        case 10: return "🥈 מִסְגֶּרֶת כֶּסֶף לָאַוָּטָאר!"
+        case 20: return "🥇 מִסְגֶּרֶת זָהָב לָאַוָּטָאר!"
         default: return nil
         }
     }

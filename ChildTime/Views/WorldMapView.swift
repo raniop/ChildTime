@@ -1247,13 +1247,18 @@ struct WorldMapView: View {
             Button {
                 Haptic.light(); showingChildSettings = true
             } label: {
+                // The ring says the level tier: bronze from 5, silver from 10, gold
+                // from 20 (Rani: the level must mean something the child can see).
+                let tier = RewardEngine.levelTier(progress.companionLevel)
+                let ring: Color = [Color.white.opacity(0.5), Color(hex: "CD7F32"), Color(hex: "D9D9E3"), Color(hex: "FFD23F")][tier]
                 CharacterView(character: profiles.active?.character
                               ?? Character3DCatalog.find(Character3DCatalog.defaultID),
                               portrait: true)
                     .frame(width: avatar, height: avatar)
                     .background(Circle().fill(Color.white.opacity(0.22)))
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 1))
+                    .overlay(Circle().stroke(ring, lineWidth: tier == 0 ? 1 : 2.5))
+                    .shadow(color: tier == 0 ? .clear : ring.opacity(0.7), radius: tier == 0 ? 0 : 6)
             }
             .buttonStyle(.plain)
 
@@ -1592,7 +1597,7 @@ struct WorldMapView: View {
                 Text("רָמַת טוֹפִי")
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("כָּל תְּשׁוּבָה נְכוֹנָה נוֹתֶנֶת נְקוּדּוֹת. כְּשֶׁהַפַּס מִתְמַלֵּא — טוֹפִי עוֹלֶה רָמָה, וְאַתֶּם פּוֹתְחִים עוֹלָמוֹת וְהַפְתָּעוֹת חֲדָשׁוֹת!")
+                Text("כָּל תְּשׁוּבָה נְכוֹנָה נוֹתֶנֶת נְקוּדּוֹת. כְּשֶׁהַפַּס מִתְמַלֵּא עוֹלִים רָמָה — וּמְקַבְּלִים 💎 בּוֹנוּס לַחֲנוּת (10 עַל כָּל רָמָה). מֵרָמָה 5 הָאַוָּטָאר מְקַבֵּל מִסְגֶּרֶת בְּרוֹנְזָה, מֵ־10 כֶּסֶף, וּמֵ־20 זָהָב!")
                     .font(.system(size: 17, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.92))
                     .multilineTextAlignment(.center)

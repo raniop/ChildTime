@@ -382,6 +382,10 @@ struct RewardScreenView: View {
     private func proceedAfterReward() {
         // Level up?
         if progress.companionLevel > startedLevel {
+            // Every level reached pays its 💎 bonus (a two-level jump pays both).
+            for lvl in (startedLevel + 1)...progress.companionLevel {
+                progress.addDiamonds(RewardEngine.levelUpDiamonds(lvl))
+            }
             goLevelUp = true
             return
         }

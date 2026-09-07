@@ -153,41 +153,23 @@ struct QuestionRunnerView: View {
             // Companion in corner
             VStack {
                 Spacer()
-                HStack(alignment: .bottom) {
-                    // Bubble sits ABOVE the avatar with its tail pointing down at
-                    // it — readable, attached, and never covering the character.
-                    ZStack(alignment: .bottomTrailing) {
-                        // The buddy is the child's own character, floating free
-                        // (no circle crop / ring) — falls back to the Tofy face.
-                        Group {
-                            if let profile = profiles.active {
-                                CharacterView(character: profile.character)
-                                    .frame(width: companionSize, height: companionSize)
-                                    .shadow(color: .black.opacity(0.22), radius: 5, y: 3)
-                            } else {
-                                CompanionView(controller: companion, size: companionSize)
-                            }
-                        }
-                        if let bubble = companion.bubbleText {
-                            // The companion section is pinned RTL (below), so the
-                            // avatar sits under the bubble's RIGHT edge — point the
-                            // tail there so it lands straight on the character.
-                            BubbleSpeech(text: bubble, tailInsetFromLeft: companionSize * 0.5)
-                                .fixedSize()
-                                .offset(y: -(companionSize + 8))
-                                .transition(.scale.combined(with: .opacity))
-                        }
-                    }
-                    .padding(.leading, AppSpacing.sm)
-                    Spacer()
-                }
             }
             .padding(.bottom, AppSpacing.sm)
-            // Pinned LTR: the buddy lives in the bottom-LEFT corner, away from the
-            // 🔊 read-aloud button on the right (Rani: it covered the speaker and
-            // could not be moved). The tail points down-left onto the character.
-            .environment(\.layoutDirection, .leftToRight)
-            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
+
+            // The buddy wanders and can be dragged, exactly like on the home
+            // (Rani, 2026-09-07) — kept to the strip under the answers so it never
+            // parks on a choice or on the 🔊 button.
+            GeometryReader { geo in
+                FloatingCompanion(
+                    controller: companion,
+                    profile: profiles.active,
+                    size: companionSize,
+                    topInset: max(120, geo.size.height - companionSize - 150),
+                    bottomInset: 28,
+                    horizontalInset: AppSpacing.md
+                )
+            }
+            .allowsHitTesting(true)
 
             // Effects overlays
             StarBurst(color: AppColor.starGold, trigger: burstTrigger)
