@@ -11,6 +11,8 @@ struct KidModeEntryView: View {
 
     @State private var selectedChild: UUID?
     @State private var showPicker = false
+    /// Opened from a child's ⚡ menu → that child is already chosen (Rani).
+    init(preselected: UUID? = nil) { _selectedChild = State(initialValue: preselected) }
     @State private var selection = FamilyActivitySelection()
     @State private var requesting = false
     @State private var authFailed = false

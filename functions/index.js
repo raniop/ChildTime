@@ -1423,6 +1423,7 @@ exports.adminFamiliesOverview = onCall(
     const families = [];
     hhSnap.forEach((h) => {
       const d = h.data();
+      if (isDemoHousehold(d, parentInfo, kidsByHH[h.id] || [])) return;   // demo families stay out (Rani)
       const kids = (kidsByHH[h.id] || []).map((k) => {
         const s = states[k.id];
         const devs = devsByChild[k.id] || [];
@@ -2331,6 +2332,7 @@ async function computeJourney() {
   hhSnap.forEach((h) => {
     const hh = h.data() || {};
     const kidsOf = Object.entries(perChild).filter(([, c]) => c.householdID === h.id).map(([id, c]) => ({ id, ...c }));
+    if (isDemoHousehold(hh, parents, kidsOf)) { for (const k of kidsOf) delete perChild[k.id]; return; }
     const realParent = (hh.parentUIDs || []).some((u) => parents[u] && (parents[u].email || parents[u].displayName));
     const played = kidsOf.some((c) => c.everQuestions > 0);
     const activated = kidsOf.some((c) => c.activated);
@@ -2409,6 +2411,15 @@ exports.adminJourney = onCall({ timeoutSeconds: 300, memory: "1GiB" }, async (re
   const d = await db.collection("adminStats").doc("journey").get();
   return d.exists ? d.data() : await computeJourney();
 });
+
+// Demo / test families never belong in the founder's numbers (Rani): a parent
+// whose email is a demo account, or a child literally named "ילד דמו".
+function isDemoHousehold(hh, parentsByUID, kids) {
+  const mails = (hh.parentUIDs || []).map((u) => ((parentsByUID[u] || {}).email || "").toLowerCase());
+  if (mails.some((m) => /^demo|demo-test|test@|@example\./.test(m))) return true;
+  if ((kids || []).some((k) => /דמו|demo/i.test(k.name || ""))) return true;
+  return /demo/i.test(hh.familyName || hh.familyLabel || "");
+}
 
 // Recent things worth a glance on the dashboard.
 exports.adminActivity = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (request) => {

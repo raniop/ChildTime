@@ -226,7 +226,14 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// Whether this child may play the topic: a base topic the parent hasn't
     /// turned off, or a paid pack the parent bought for this child.
     func allows(_ topic: Topic) -> Bool {
-        if let pack = topic.pack { return ownedPacks.contains(pack.id) }
+        // A pack world is playable when the family has it — bought for this
+        // child, OR included in Tofy+ (every pack is; Rani) — and the founder
+        // has switched the pack on. `ownedPacks` alone hid every unbought pack
+        // from Tofy+ families: Noa (Tofy+ gift, build 166) had no soccer world
+        // while Dan (165, premium not yet synced) still saw the offer tile.
+        if let pack = topic.pack {
+            return PackAccess.has(self, pack) && PackStore.shared.visiblePacks.contains { $0.id == pack.id }
+        }
         return enabledTopics.contains(topic)
     }
 

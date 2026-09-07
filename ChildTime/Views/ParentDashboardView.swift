@@ -41,6 +41,8 @@ struct ParentDashboardView: View {
     @State private var showingSettings = false
     @State private var showingCreateChild = false
     @State private var showingKidMode = false
+    /// Kid Mode straight for one child (from the card's ⚡ menu).
+    @State private var kidModeChild: Profile? = nil
     @State private var friendsProfile: Profile?
     @State private var difficultyProfile: Profile?
     @State private var choresProfile: Profile?    // 🧹 chores sheet
@@ -283,6 +285,10 @@ struct ParentDashboardView: View {
             .overlay(paywallHost)
             .sheet(isPresented: $showingKidMode) {
                 KidModeEntryView()
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+            .sheet(item: $kidModeChild) { p in
+                KidModeEntryView(preselected: p.id)
                     .environment(\.layoutDirection, .rightToLeft)
             }
             .sheet(item: $friendsProfile) { p in
@@ -1309,8 +1315,8 @@ struct ParentDashboardView: View {
         HStack(spacing: 8) {
             Button { Haptic.light(); showingCreateChild = true } label: { homeGhostLabel("＋ צְרוּ יֶלֶד/ה") }
                 .buttonStyle(.plain)
-            Button { Haptic.light(); showingKidMode = true } label: { homeGhostLabel("🧒 תְּנוּ לַיֶּלֶד לְשַׂחֵק") }
-                .buttonStyle(.plain)
+            // "תנו לילד לשחק" moved into each child's ⚡ menu (Rani, 2026-09-07):
+            // it opens Kid Mode for THAT child, no picker.
             Button {
                 Haptic.light()
                 let items = choreStore.pendingApproval
@@ -1605,6 +1611,10 @@ struct ParentDashboardView: View {
     /// for from the overview), plus open card / reorder / delete.
     private func gridCardMenu(_ profile: Profile) -> some View {
         Menu {
+            Button {
+                kidModeChild = profile
+            } label: { Label("תְּנוּ לְ\(profile.name) לְשַׂחֵק כָּאן 🧒", systemImage: "iphone.and.arrow.forward") }
+            Divider()
             Menu {
                 Button("חֲצִי שָׁעָה") { remoteOpen(profile, 30) }
                 Button("שָׁעָה") { remoteOpen(profile, 60) }

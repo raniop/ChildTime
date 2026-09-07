@@ -400,9 +400,18 @@ struct PacksHomeSection: View {
 
     @ObservedObject private var subs = SubscriptionManager.shared
     @State private var worldsExpanded = false
+    /// ✕ on the shelf (Rani): once seen, it stays hidden until a pack NEWER
+    /// than the dismissal launches.
+    @AppStorage("packsShelf.dismissedAt") private var dismissedAt: Double = 0
+
+    private var packsToShow: [QuestionPack] {
+        let packs = store.visiblePacks
+        guard dismissedAt > 0 else { return packs }
+        return packs.filter { (store.launchedAt[$0.id]?.timeIntervalSince1970 ?? 0) > dismissedAt }
+    }
 
     var body: some View {
-        let packs = store.visiblePacks
+        let packs = packsToShow
         VStack(alignment: .leading, spacing: 8) {
             // 🌍 Without Tofy+: every base world, 30 days per child. (A family
             // with Tofy+ already has them all — the shelf disappears.)
@@ -429,11 +438,23 @@ struct PacksHomeSection: View {
                 }
             }
             if !packs.isEmpty {
-                Text("✨ שְׁאֵלוֹנִים חֲדָשִׁים לַיְלָדִים")
-                    .font(.system(size: 14, weight: .heavy, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary)
-                    .padding(.horizontal, 4)
-                    .padding(.top, subs.isPremium ? 0 : 6)
+                HStack {
+                    Text("✨ שְׁאֵלוֹנִים חֲדָשִׁים לַיְלָדִים")
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                    Spacer()
+                    Button {
+                        Haptic.light()
+                        withAnimation(.easeInOut(duration: 0.2)) { dismissedAt = Date().timeIntervalSince1970 }
+                    } label: {
+                        Image(systemName: "xmark").font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(GlassInk.secondary).padding(8)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("הסתר עד לשאלון הבא")
+                }
+                .padding(.horizontal, 4)
+                .padding(.top, subs.isPremium ? 0 : 6)
                 ForEach(packs) { pack in
                     Button { Haptic.light(); onOpen(pack) } label: { card(pack) }
                         .buttonStyle(.plain)
