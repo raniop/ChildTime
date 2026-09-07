@@ -9,7 +9,12 @@ import StoreKit
 /// 3. Be honest about the trial — no dark patterns.
 /// 4. Be beautiful — this is the revenue screen, polish converts.
 struct PaywallView: View {
+    /// Where the parent came from (card, gift_card, child_request, new_world);
+    /// a gift push tapped within the hour overrides it as expiring_push.
+    var source: String = "card"
     @EnvironmentObject var subs: SubscriptionManager
+    @ObservedObject private var household = HouseholdManager.shared
+    @ObservedObject private var remote = RemoteSyncManager.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hsc
 
@@ -44,9 +49,11 @@ struct PaywallView: View {
                 VStack(spacing: AppSpacing.lg) {
                     closeRow
                     hero
+                    if let pitch { personalCard(pitch) }
                     benefitsCard
                     planPicker
                     primaryCTA
+                    if let pitch { freeForeverLine(pitch) }
                     footerLinks
                 }
                 .padding(.horizontal, AppSpacing.lg)
@@ -57,6 +64,9 @@ struct PaywallView: View {
         }
         .onAppear {
             AppAnalytics.paywallView()
+            let tapped = UserDefaults.standard.double(forKey: "paywall.pushTapAt")
+            let fromPush = tapped > 0 && Date().timeIntervalSince1970 - tapped < 3_600
+            household.notePaywallSource(fromPush ? "expiring_push" : source)
             withAnimation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.1)) {
                 headerAppeared = true
             }
@@ -74,6 +84,97 @@ struct PaywallView: View {
             if case .active = newState { celebrateAndDismiss() }
             if case .inTrial = newState { celebrateAndDismiss() }
         }
+    }
+
+    // MARK: - 🎁 The personal pitch (approved mockup): the child's own data
+    // above the prices, shown while the gift is ending or after it ended.
+
+    private struct Pitch {
+        let name: String; let girl: Bool
+        let favorite: (world: World, questions: Int, accuracy: Int)?
+        let others: [World]
+        let worlds: Int; let questions: Int; let accuracy: Int
+        let ending: String
+    }
+
+    private var pitch: Pitch? {
+        guard let hh = household.household else { return nil }
+        let until = hh.giftUntil ?? hh.premiumUntil
+        let giftActive = hh.premiumSource == "gift" && (until.map { $0 > .now } ?? false)
+        guard giftActive || hh.giftEndedAt != nil else { return nil }
+        let snaps = ProfileStore.shared.profiles.map { p in
+            (p, remote.remoteSnapshots[p.id] ?? ProgressVault.shared.snapshot(for: p.id)) }
+        guard let star = snaps.max(by: { $0.1.totalAnswered < $1.1.totalAnswered }), star.1.totalAnswered > 0 else { return nil }
+        let (p, snap) = star
+        let ranked = snap.topicAnswered.filter { $0.value > 0 }.sorted { $0.value > $1.value }
+            .compactMap { pair -> (World, Int, Int)? in
+                guard let t = Topic(rawValue: pair.key), let w = Worlds.all.first(where: { $0.topic == t }) else { return nil }
+                let c = snap.topicCorrect[pair.key] ?? 0
+                return (w, pair.value, Int((Double(c) / Double(pair.value) * 100).rounded())) }
+        let ending: String
+        if giftActive, let until {
+            let d = max(0, Int(ceil(until.timeIntervalSinceNow / 86_400)))
+            ending = d == 0 ? "הַמַּתָּנָה מִסְתַּיֶּמֶת הַיּוֹם" : d == 1 ? "הַמַּתָּנָה מִסְתַּיֶּמֶת מָחָר"
+                : d == 2 ? "הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד יוֹמַיִם" : "הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד \(d) יָמִים"
+        } else {
+            ending = "הַמַּתָּנָה הִסְתַּיְּמָה · הַהִתְקַדְּמוּת שֶׁל \(p.name) שְׁמוּרָה"
+        }
+        return Pitch(name: p.name, girl: p.gender == .girl,
+                     favorite: ranked.first.map { (world: $0.0, questions: $0.1, accuracy: $0.2) },
+                     others: ranked.dropFirst().prefix(2).map(\.0),
+                     worlds: ranked.count, questions: snap.totalAnswered,
+                     accuracy: Int((Double(snap.totalCorrect) / Double(max(1, snap.totalAnswered)) * 100).rounded()),
+                     ending: ending)
+    }
+
+    private func personalCard(_ p: Pitch) -> some View {
+        VStack(alignment: .trailing, spacing: 8) {
+            if let fav = p.favorite {
+                Text("\(fav.world.emoji) \(p.name) \(p.girl ? "מָצְאָה" : "מָצָא") עוֹלָם שֶׁ\(p.girl ? "הִיא אוֹהֶבֶת" : "הוּא אוֹהֵב")")
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                Text("\(p.girl ? "הִיא עָנְתָה" : "הוּא עָנָה") בְּ\(fav.world.name) עַל \(fav.questions) שְׁאֵלוֹת, בְּ\(fav.accuracy)% הַצְלָחָה."
+                     + (p.others.isEmpty ? "" : " גַּם \(p.others.map(\.name).joined(separator: " וְ")) בִּפְנִים."))
+                    .font(.system(size: 13.5, weight: .medium, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text("🎉 \(p.name) כְּבָר \(p.girl ? "עָנְתָה" : "עָנָה") עַל \(p.questions) שְׁאֵלוֹת בְּטוֹפִי+")
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+            }
+            HStack(spacing: 8) {
+                pitchStat("\(p.worlds)", p.worlds == 1 ? "עוֹלָם" : "עוֹלָמוֹת")
+                pitchStat("\(p.questions)", "שְׁאֵלוֹת")
+                pitchStat("\(p.accuracy)%", "הַצְלָחָה")
+            }
+            Text(p.ending)
+                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                .foregroundStyle(AppColor.starGold)
+        }
+        .foregroundStyle(GlassInk.primary)
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .multilineTextAlignment(.trailing)
+        .padding(16)
+        .glassPane(radius: 22)
+        .environment(\.layoutDirection, .rightToLeft)
+    }
+
+    private func pitchStat(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value).font(.system(size: 20, weight: .heavy, design: .rounded)).monospacedDigit()
+            Text(label).font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(GlassInk.secondary)
+        }
+        .frame(maxWidth: .infinity).padding(.vertical, 8)
+        .glassInset(radius: 12)
+    }
+
+    /// What stays free, in one honest line (approved mockup).
+    private func freeForeverLine(_ p: Pitch) -> some View {
+        Text("טוֹפִי טַיים וְהַזְּמַן שֶׁ\(p.name) \(p.girl ? "מַרְוִיחָה" : "מַרְוִיחַ") נִשְׁאָרִים חִנָּם תָּמִיד. מָה שֶׁנִּסְגָּר: הָעוֹלָמוֹת, הַמִּשְׂחָקִים, הַזִּירָה וְהַמַּטְלוֹת.")
+            .font(.system(size: 12.5, weight: .medium, design: .rounded))
+            .foregroundStyle(.white.opacity(0.8))
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, AppSpacing.md)
     }
 
     // MARK: - Sub-views
@@ -307,6 +408,7 @@ struct PaywallView: View {
         return VStack(spacing: 6) {
             Button {
                 if let product = subs.products.first(where: { $0.id == selectedID }) {
+                    household.notePurchaseStarted()
                     Task { await subs.purchase(product) }
                 }
             } label: {

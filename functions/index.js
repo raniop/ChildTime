@@ -2210,6 +2210,8 @@ async function computeJourney() {
   // households → journey state
   const households = {};
   const funnel = { registered: 0, childPlayed: 0, activated: 0, gift: 0, valued: 0, paywall: 0, purchaseStarted: 0, purchased: 0, renewed: 0 };
+  // The child-request funnel: counters the devices bump on households/{id}.funnel.
+  const childRequests = { lockedSeen: 0, lockedTapped: 0, asked: 0, parentOpened: 0, paywall: 0, purchaseStarted: 0, purchased: 0 };
   const states = { free_new: 0, free_activated: 0, gift: 0, gift_expiring: 0, plus: 0, returned: 0, inactive: 0 };
   let mrr = 0, monthlyN = 0, yearlyN = 0, premiumN = 0;
   hhSnap.forEach((h) => {
@@ -2244,6 +2246,8 @@ async function computeJourney() {
       if (yearly) { yearlyN += 1; mrr += 199 / 12; } else { monthlyN += 1; mrr += 24.9; }
     }
     if (hh.renewedAt) funnel.renewed += 1;
+    for (const k of Object.keys(childRequests)) if (k !== "purchased") childRequests[k] += Number((hh.funnel || {})[k] || 0);
+    if (hh.purchaseSource === "child_request" && hh.purchasedAt) childRequests.purchased += 1;
     households[h.id] = { state, premium, gift, daysLeft, premiumUntil, activated, played, lastActive, familyName: hh.familyName || hh.familyLabel || null,
       activeDays: Math.max(0, ...kidsOf.map((c) => c.everActiveDays || 0)), questions: Math.max(0, ...kidsOf.map((c) => c.everQuestions || 0)),
       plan: premium && !gift ? (daysLeft > 60 ? "yearly" : "monthly") : null, purchaseSource: hh.purchaseSource || null, kids: kidsOf.map((c) => c.id) };
@@ -2260,7 +2264,7 @@ async function computeJourney() {
   const sales = salesSnap.docs.map((s) => s.data() || {});
   const packRevenue = sales.reduce((s, x) => s + Number(x.price || 0), 0);
   const journey = {
-    computedAt: nowMs, config: cfg,
+    computedAt: nowMs, config: cfg, childRequests,
     overview: { activeFamilies30: active30, childrenToday, questionsToday, accuracyToday: questionsToday ? Math.round(100 * correctToday / questionsToday) : 0,
       minutesToday, mrr: Math.round(mrr), premiumFamilies: premiumN, yearlyShare: premiumN ? Math.round(100 * yearlyN / premiumN) : 0,
       activatedToPaid30: funnel.activated ? Math.round(1000 * funnel.purchased / funnel.activated) / 10 : 0,
@@ -2460,7 +2464,7 @@ async function runConversionEngine() {
         let msg = null;
         if (daysLeft <= 1) msg = { title: `היום מסתיימת מתנת טופי+ של ${name}`, body: `${name} ${girl ? "תמשיך" : "ימשיך"} ללמוד ולהרוויח זמן בחינם כרגיל. כדי להשאיר את ${fav ? fav.label.replace(/^\S+\s/, "") + " ו" : ""}שאר העולמות פתוחים: המשיכו עם טופי+.` };
         else if (daysLeft <= 2) msg = { title: `⏰ נשארו יומיים לטופי+ של ${name}`, body: fill(cfg.copyTwoDays, vars).replace(/^⏰[^·]*·\s*/, "") };
-        else if (day <= 5) msg = fav ? { title: `❤️ נראה ש${name} ${girl ? "מצאה" : "מצא"} משהו ש${girl ? "היא אוהבת" : "הוא אוהב"}`, body: `${fav.label} הוא המקום ש${girl ? "היא חוזרת" : "הוא חוזר"} אליו הכי הרבה בטופי: ${fav.days} ימים, ${fav.questions} שאלות.` } : null;
+        else if (day <= 9) msg = fav ? { title: `❤️ נראה ש${name} ${girl ? "מצאה" : "מצא"} משהו ש${girl ? "היא אוהבת" : "הוא אוהב"}`, body: `${fav.label} הוא המקום ש${girl ? "היא חוזרת" : "הוא חוזר"} אליו הכי הרבה בטופי: ${fav.days} ימים, ${fav.questions} שאלות.` } : null;
         else msg = { title: `${name} ${girl ? "גילתה" : "גילה"} ${kids.reduce((s, k) => s + Object.keys(k.topicsToday || {}).length, 0) || "כמה"} עולמות 🌎`, body: `${totalQ} שאלות בחודש האחרון${fav ? " · האהוב: " + fav.label : ""}. המתנה מסתיימת ב${ilWeekday(premiumUntil)}. השאירו את כל העולמות פתוחים.` };
         if (msg) { const tokens = await tokensForHousehold(hhID); if (tokens.length) { await send(tokens, msg, { type: "gift-day", householdID: hhID, day: String(day) }); pushed += 1; } }
         await dedup.set({ at: Date.now() });   // after the send, so a failed run retries next hour

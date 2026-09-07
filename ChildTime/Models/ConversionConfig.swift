@@ -23,6 +23,10 @@ final class ConversionConfig: ObservableObject {
     @Published private(set) var guestRotateDays: Int
     /// Fixed guest topics (raw values); empty = automatic by grade.
     @Published private(set) var guestTopics: [String]
+    /// The one-time "just this world" door shows only after a gift ended.
+    @Published private(set) var oneTimeAfterGiftOnly: Bool
+    /// The StoreKit free trial is OFF under the gift model — never advertise it.
+    @Published private(set) var storeKitTrial: Bool
 
     private let defaults = UserDefaults.standard
     #if canImport(FirebaseFirestore)
@@ -36,6 +40,8 @@ final class ConversionConfig: ObservableObject {
         guestWorlds = d.object(forKey: "conv.guestWorlds") as? Int ?? 0
         guestRotateDays = d.object(forKey: "conv.guestRotateDays") as? Int ?? 7
         guestTopics = d.stringArray(forKey: "conv.guestTopics") ?? []
+        oneTimeAfterGiftOnly = d.object(forKey: "conv.oneTimeAfterGiftOnly") as? Bool ?? true
+        storeKitTrial = d.object(forKey: "conv.storeKitTrial") as? Bool ?? false
     }
 
     /// Idempotent; safe to call from every screen that cares.
@@ -61,6 +67,10 @@ final class ConversionConfig: ObservableObject {
         guestWorlds = int("guestWorlds", guestWorlds)
         guestRotateDays = max(1, int("guestRotateDays", guestRotateDays))
         guestTopics = (data["guestTopics"] as? [String]) ?? guestTopics
+        oneTimeAfterGiftOnly = (data["oneTimeAfterGiftOnly"] as? Bool) ?? oneTimeAfterGiftOnly
+        storeKitTrial = (data["storeKitTrial"] as? Bool) ?? storeKitTrial
+        defaults.set(oneTimeAfterGiftOnly, forKey: "conv.oneTimeAfterGiftOnly")
+        defaults.set(storeKitTrial, forKey: "conv.storeKitTrial")
         defaults.set(lockedShown, forKey: "conv.lockedShown")
         defaults.set(lockedRotateDays, forKey: "conv.lockedRotateDays")
         defaults.set(guestWorlds, forKey: "conv.guestWorlds")

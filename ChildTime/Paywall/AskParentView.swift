@@ -124,6 +124,7 @@ struct AskParentView: View {
         // Which world the child wanted — the parent's banner and push say it.
         fields["premiumRequestedTopic"] = world?.topic.rawValue ?? FieldValue.delete()
         _ = await confirmedMerge(ref, fields)
+        await MainActor.run { HouseholdManager.shared.bumpFunnel("asked") }
         #endif
     }
 }

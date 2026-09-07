@@ -230,10 +230,13 @@ function funnel() {
     </div><div class="stamp" style="margin-top:6px">התקנות יגיעו מ־App Store Connect. שלבי הפייוול והרכישה מתמלאים עם הגרסה הבאה של האפליקציה.</div></div>
     <div class="grid2">
       <div class="card"><h4>מאיפה הגיעה הרכישה</h4><div class="src">${sources()}</div><h4 style="margin-top:14px">אחרי שהמתנה נגמרה בלי רכישה</h4><div class="empty">יתמלא עם המשפחות הראשונות שיסיימו מתנה.</div></div>
-      <div class="card"><h4>פוש → רכישה</h4><div class="tblwrap" id="pushTbl"><span class="spin"></span></div><h4 style="margin-top:14px">משפך בקשות הילד</h4><div class="empty">יתמלא עם הגרסה הבאה של האפליקציה (ספירת לחיצות על עולם נעול).</div></div>
+      <div class="card"><h4>פוש → רכישה</h4><div class="tblwrap" id="pushTbl"><span class="spin"></span></div><h4 style="margin-top:14px">משפך בקשות הילד</h4><div class="stamp">${childReqLine()}</div></div>
     </div>`;
   call("adminListCampaigns").then((r) => { const rows = (r.campaigns || []).filter((c) => c.status === "sent"); $("pushTbl").innerHTML = rows.length ? `<table><tr><th>פוש</th><th>נשלח</th><th>נפתח</th><th>פייוול</th><th>רכשו</th><th>הכנסה</th></tr>${rows.map((c) => { const s = c.stats || {}; const p = c.action?.packID; return `<tr><td>${esc((c.emoji ? c.emoji + " " : "") + c.title)}</td><td>${fmt(s.sent || 0)}</td><td>${fmt(s.opened || 0)}</td><td>${fmt(s.page || 0)}</td><td>${fmt(s.purchased || 0)}</td><td class="money">${p && s.purchased ? "₪" + fmt(Math.round(s.purchased * PACK_PRICE)) : "—"}</td></tr>`; }).join("")}</table>` : '<div class="empty">עוד לא נשלחו הודעות.</div>'; }).catch((e) => $("pushTbl").textContent = e.message);
 }
+function childReqLine() { const c = Object.assign({ lockedSeen: 0, lockedTapped: 0, asked: 0, parentOpened: 0, paywall: 0, purchaseStarted: 0, purchased: 0 }, (J && J.childRequests) || {});
+  if (!c.lockedSeen && !c.asked) return "יתמלא כשילדים יראו עולמות נעולים בגרסה הבאה.";
+  return `${fmt(c.lockedSeen)} ראו עולם נעול → ${fmt(c.lockedTapped)} לחצו → ${fmt(c.asked)} ביקשו → ${fmt(c.parentOpened)} הורים פתחו → ${fmt(c.paywall)} פייוול → ${fmt(c.purchased)} רכשו`; }
 function sources() { const hh = Object.values(J.households || {}).filter((h) => h.state === "plus"); const by = {}; for (const h of hh) { const k = h.purchaseSource || "card"; by[k] = (by[k] || 0) + 1; } const total = hh.length || 1;
   return Object.entries(by).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<div><span>${esc(SOURCE[k] || k)}</span><div class="barw"><div class="bar" style="width:${Math.round(100 * n / total)}%"></div></div><b>${Math.round(100 * n / total)}%</b></div>`).join("") || '<div class="empty">אין עדיין רכישות מנוי.</div>'; }
 

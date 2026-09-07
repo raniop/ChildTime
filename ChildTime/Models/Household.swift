@@ -43,6 +43,7 @@ struct Household: Codable, Identifiable, Equatable {
     var premiumSource: String? = nil
     var giftUntil: Date? = nil
     var giftStartedAt: Date? = nil
+    var giftEndedAt: Date? = nil
     /// Progress toward the activation gift ("עוד יום פעיל אחד…"), refreshed
     /// hourly by the engine while the family is still on the free tier.
     var activation: ActivationProgress? = nil

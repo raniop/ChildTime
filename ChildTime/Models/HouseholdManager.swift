@@ -984,6 +984,50 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    // MARK: - 📈 Conversion funnel (first-party, aggregate only)
+
+    /// One step of the child-request funnel, counted on the household doc
+    /// (`funnel.<step>`): lockedSeen → lockedTapped → asked → parentOpened →
+    /// paywall → purchaseStarted. Read by the founder dashboard in aggregate;
+    /// never per-child analytics, never a third party.
+    func bumpFunnel(_ step: String) {
+        #if canImport(FirebaseFirestore)
+        guard let hh = household, !AppInfo.isDemoRun else { return }
+        db.collection("households").document(hh.id)
+            .setData(["funnel": [step: FieldValue.increment(Int64(1))]], merge: true)
+        #endif
+    }
+
+    /// Once a day per device: the child saw locked worlds on the home.
+    func noteLockedSeen() {
+        let key = "funnel.lockedSeen.day"
+        let today = Int(Date().timeIntervalSince1970 / 86_400)
+        guard UserDefaults.standard.integer(forKey: key) != today else { return }
+        UserDefaults.standard.set(today, forKey: key)
+        bumpFunnel("lockedSeen")
+    }
+
+    /// Where the parent came from when the paywall opened — the server stamps
+    /// it as `purchaseSource` when a purchase lands (child_request,
+    /// expiring_push, paywall_card, new_world, card).
+    func notePaywallSource(_ source: String) {
+        #if canImport(FirebaseFirestore)
+        guard let hh = household, !AppInfo.isDemoRun else { return }
+        db.collection("households").document(hh.id)
+            .setData(["lastPaywallSource": source, "paywallViews": FieldValue.increment(Int64(1)),
+                      "funnel": ["paywall": FieldValue.increment(Int64(1))]], merge: true)
+        #endif
+    }
+
+    func notePurchaseStarted() {
+        #if canImport(FirebaseFirestore)
+        guard let hh = household, !AppInfo.isDemoRun else { return }
+        db.collection("households").document(hh.id)
+            .setData(["purchaseStarted": Date().timeIntervalSince1970,
+                      "funnel": ["purchaseStarted": FieldValue.increment(Int64(1))]], merge: true)
+        #endif
+    }
+
     // MARK: - ⚽ Question packs (paid add-ons)
 
     func householdOwnsPack(_ packID: String) -> Bool {

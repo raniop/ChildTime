@@ -47,6 +47,7 @@ struct ParentDashboardView: View {
     @State private var showSchoolYearParty = false
     @State private var showWhatsNew = false
     @State private var showingPaywall = false
+    @State private var paywallSource = "card"
     /// ⚽ A question pack page (parent-side purchase flow).
     @State private var packToShow: QuestionPack? = nil
     /// The child whose request opened the pack page (preselected there).
@@ -506,6 +507,22 @@ struct ParentDashboardView: View {
     }
 
     /// "נועה רוצה ללמוד מתמטיקה 🧮 — טופי+" when she tapped a world; else the generic line.
+    /// The second line: after a gift, the child's own history in that world
+    /// ("בתקופת המתנה היא ענתה שם על 72 שאלות ב־91%") — approved mockup.
+    private func premiumRequestLine(_ askers: [Profile]) -> String {
+        if askers.count == 1, let p = askers.first, let raw = remote.premiumRequestTopics[p.id] {
+            if household.household?.giftEndedAt != nil,
+               let snap = remote.remoteSnapshots[p.id], let n = snap.topicAnswered[raw], n > 0 {
+                let c = snap.topicCorrect[raw] ?? 0
+                let acc = Int((Double(c) / Double(n) * 100).rounded())
+                let g = p.gender == .girl
+                return "בתקופת המתנה \(g ? "היא ענתה" : "הוא ענה") שם על \(n) שאלות ב־\(acc)%. ההתקדמות \(g ? "שלה" : "שלו") שמורה."
+            }
+            return "עולם בודד ל־30 יום, או טופי+ לכל המשפחה — מכאן, בטלפון שלכם"
+        }
+        return "מנוי אחד לכל המשפחה — נפתח מכאן, בטלפון שלכם"
+    }
+
     private func premiumRequestTitle(_ askers: [Profile]) -> String {
         let names = askers.map(\.name)
         if askers.count == 1, let p = askers.first,
@@ -521,6 +538,8 @@ struct ParentDashboardView: View {
         let names = askers.map(\.name)
         return Button {
             Haptic.light()
+            household.bumpFunnel("parentOpened")
+            paywallSource = "child_request"
             // One child asked for ONE world → its page (30 days, or Tofy+).
             if askers.count == 1, let p = askers.first,
                let raw = remote.premiumRequestTopics[p.id], let topic = Topic(rawValue: raw),
@@ -537,9 +556,7 @@ struct ParentDashboardView: View {
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(premiumRequestTitle(askers))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    Text(askers.count == 1 && remote.premiumRequestTopics[askers[0].id] != nil
-                         ? "עולם בודד ל־30 יום, או טופי+ לכל המשפחה — מכאן, בטלפון שלכם"
-                         : "מנוי אחד לכל המשפחה — נפתח מכאן, בטלפון שלכם")
+                    Text(premiumRequestLine(askers))
                         .font(.system(size: 12.5, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                 }
@@ -1368,7 +1385,7 @@ struct ParentDashboardView: View {
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                 }
-                Button { Haptic.light(); showingPaywall = true } label: {
+                Button { Haptic.light(); paywallSource = "gift_card"; showingPaywall = true } label: {
                     Text("הַשְׁאִירוּ \(who) אֶת כָּל הָעוֹלָמוֹת פְּתוּחִים")
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
@@ -1839,7 +1856,7 @@ struct ParentDashboardView: View {
         ParentGateView(allowClose: true, gateTitle: "אֵזוֹר הוֹרִים",
                        gateReason: "כְּדֵי לִפְתּוֹחַ אֶת הַמִּנּוּי לַמִּשְׁפָּחָה — הַזִּינוּ אֶת הַקּוֹד",
                        useFaceID: true, respectSession: false) {
-            PaywallView()
+            PaywallView(source: paywallSource)
                 .environmentObject(subs)
                 .environment(\.layoutDirection, .rightToLeft)
         }

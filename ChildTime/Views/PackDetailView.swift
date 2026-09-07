@@ -21,6 +21,13 @@ struct PackDetailView: View {
     /// the subscription is for the whole family.
     @State private var choosingTofyPlus = false
     @ObservedObject private var subs = SubscriptionManager.shared
+    @ObservedObject private var conv = ConversionConfig.shared
+    @ObservedObject private var household = HouseholdManager.shared
+    /// The "just this world" door is a fallback for a family that will not
+    /// subscribe — it appears only once their gift has ended (founder knob).
+    private var oneTimeDoorAllowed: Bool {
+        !pack.isPass || !conv.oneTimeAfterGiftOnly || household.household?.giftEndedAt != nil
+    }
 
     private var kids: [Profile] { profiles.profiles }
     private var selectedIDs: [String] { kids.filter { selected.contains($0.id.uuidString) }.map { $0.id.uuidString } }
@@ -58,9 +65,11 @@ struct PackDetailView: View {
             ParentGateView(allowClose: true, gateTitle: "אֵזוֹר הוֹרִים",
                            gateReason: "כְּדֵי לִפְתּוֹחַ אֶת הַמִּנּוּי לַמִּשְׁפָּחָה — הַזִּינוּ אֶת הַקּוֹד",
                            useFaceID: true, respectSession: false) {
-                PaywallView().environmentObject(subs).environment(\.layoutDirection, .rightToLeft)
+                PaywallView(source: pack.isPass ? "child_request" : "new_world")
+                    .environmentObject(subs).environment(\.layoutDirection, .rightToLeft)
             }
         }
+        .onAppear { if pack.isPass, !oneTimeDoorAllowed { choosingTofyPlus = true } }
         .alert("הָרְכִישָׁה לֹא הֻשְׁלְמָה", isPresented: Binding(get: { purchaseFailed != nil }, set: { if !$0 { purchaseFailed = nil } })) {
             Button("סָגוּר", role: .cancel) {}
         } message: { Text(purchaseFailed ?? "") }
@@ -163,7 +172,7 @@ struct PackDetailView: View {
 
     private var chooser: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if pack.isPass {
+            if pack.isPass, oneTimeDoorAllowed {
                 // 🌍 Two doors: this world for 30 days, or Tofy+ for everything.
                 Text("אֵיךְ לִפְתֹּחַ?")
                     .font(.system(size: 15, weight: .heavy, design: .rounded))

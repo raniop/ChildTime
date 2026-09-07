@@ -85,7 +85,10 @@ final class SubscriptionManager: ObservableObject {
                 Self.sortKey(for: lhs.id) < Self.sortKey(for: rhs.id)
             }
             if let yearly = products.first(where: { $0.id == Self.yearlyID }) {
-                yearlyIntroEligible = await yearly.subscription?.isEligibleForIntroOffer ?? false
+                // Under the gift model the StoreKit trial is OFF (config knob):
+                // never promise "7 ימים חינם" on top of a 14-day gift.
+                let eligible = await yearly.subscription?.isEligibleForIntroOffer ?? false
+                yearlyIntroEligible = eligible && ConversionConfig.shared.storeKitTrial
             }
             lastError = nil
         } catch {

@@ -432,6 +432,7 @@ struct WorldMapView: View {
                                             // Rani: the kid screen never sells — a
                                             // locked world asks a parent for THAT world.
                                             Haptic.light()
+                                            HouseholdManager.shared.bumpFunnel("lockedTapped")
                                             askWorld = world
                                         } else {
                                             // Until they subscribe, only "טופי טיים"
@@ -596,6 +597,8 @@ struct WorldMapView: View {
             if settings.deviceRole == .child, let cid = profiles.activeID {
                 Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
                 RemoteSyncManager.shared.pushNow()
+                // 📈 The child saw locked worlds today (funnel step 1, once a day).
+                if !subs.isPremium, !freeTier.locked.isEmpty { HouseholdManager.shared.noteLockedSeen() }
                 // A registered child device needs notification permission too (for
                 // live-game invites + parent live events). We never asked on the
                 // child side before — prompt now, but ONLY if undecided, so it also
