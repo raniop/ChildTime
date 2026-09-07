@@ -18,6 +18,10 @@ struct LuckyWheelView: View {
     @State private var confetti = 0
     @State private var stars = 0
     @State private var pulse = false
+    /// 👆 Finger spin (Rani): the wheel follows the finger while dragging, and a
+    /// flick launches the real spin — the button still works too.
+    @State private var dragOffset: Double = 0
+    @State private var dragStartAngle: Double? = nil
 
     private var isCompact: Bool { hsc == .compact }
 
@@ -133,12 +137,34 @@ struct LuckyWheelView: View {
     private func wheelStack(size wheelSize: CGFloat) -> some View {
         ZStack {
             // The wheel
-            WheelShape(wedges: wedges, size: wheelSize, rotation: rotation)
-                .rotationEffect(.degrees(rotation))
+            WheelShape(wedges: wedges, size: wheelSize, rotation: rotation + dragOffset)
+                .rotationEffect(.degrees(rotation + dragOffset))
                 .animation(.easeOut(duration: 3.4), value: rotation)
+                .animation(nil, value: dragOffset)
                 .shadow(color: .black.opacity(0.3), radius: 14, y: 4)
                 .scaleEffect(pulse && winner == nil && !isSpinning ? 1.02 : 1.0)
                 .onTapGesture { spin() }
+                .gesture(
+                    DragGesture(minimumDistance: 6)
+                        .onChanged { v in
+                            guard !isSpinning, winner == nil else { return }
+                            let c = wheelSize / 2
+                            let a = atan2(v.location.y - c, v.location.x - c) * 180 / .pi
+                            if let s0 = dragStartAngle {
+                                var d = a - s0; if d > 180 { d -= 360 }; if d < -180 { d += 360 }
+                                dragOffset = d
+                            } else { dragStartAngle = a }
+                        }
+                        .onEnded { v in
+                            let flick = hypot(v.predictedEndTranslation.width - v.translation.width,
+                                              v.predictedEndTranslation.height - v.translation.height)
+                            let turned = abs(dragOffset)
+                            dragStartAngle = nil
+                            withAnimation(.easeOut(duration: 0.25)) { dragOffset = 0 }
+                            // A real flick, or a decent pull — spin. A tiny nudge just settles back.
+                            if flick > 80 || turned > 40 { spin() }
+                        }
+                )
 
             // Center hub
             // Glass hub

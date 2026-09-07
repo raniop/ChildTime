@@ -26,6 +26,9 @@ struct ChoresParentView: View {
 
     // Add/edit form. `editing` non-nil → the form edits that chore.
     @State private var editing: Chore?
+    /// Editing opens IN PLACE as a sheet (Rani: nobody found the editor at the
+    /// bottom of the list). The bottom section is for a NEW chore only.
+    @State private var showEditor = false
     @State private var formTitle = ""
     @State private var formEmoji = "🧹"
     @State private var formMinutes = 10
@@ -101,17 +104,49 @@ struct ChoresParentView: View {
                     .glassRows()
                 }
 
-                Section(editing == nil ? "מטלה חדשה ➕" : "עריכת מטלה ✏️") {
-                    if let e = editing {
-                        HStack {
-                            Text("עורכים: \(e.emoji) \(e.title)")
-                                .font(.caption).foregroundStyle(.secondary)
-                            Spacer()
-                            Button("ביטול") { clearForm() }
-                                .font(.caption)
-                                .buttonStyle(.borderless)
+                Section("מטלה חדשה ➕") {
+                    formFields
+                }
+                .glassRows()
+            }
+            .glassForm()
+            .sheet(isPresented: $showEditor, onDismiss: { clearForm() }) {
+                NavigationStack {
+                    Form {
+                        if let e = editing {
+                            Section("עריכת מטלה ✏️") {
+                                Text("\(e.emoji) \(e.title)").font(.headline)
+                                formFields
+                            }
+                            .glassRows()
                         }
                     }
+                    .glassForm()
+                    .navigationTitle("עריכת מטלה")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar { ToolbarItem(placement: .cancellationAction) { Button("ביטול") { showEditor = false } } }
+                }
+                .environment(\.layoutDirection, .rightToLeft)
+                .presentationDetents([.medium, .large])
+            }
+            .navigationTitle("מטלות הבית · \(profile.name)")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) { Button("סגור") { dismiss() } }
+            }
+            .onAppear { choreStore.startIfNeeded() }
+            .onChangeCompat(of: selectedID) { _, _ in clearForm() }
+            .alert("האישור לא נשלח", isPresented: $choreStore.lastActionFailed) {
+                Button("הבנתי", role: .cancel) { }
+            } message: {
+                Text("לא הצלחנו לאשר את המטלה כרגע. בדקו את החיבור לאינטרנט ונסו שוב.")
+            }
+        }
+    }
+
+    /// The shared fields: name + emoji for a custom chore, then the reward knobs
+    /// and the save button. Used by the "new" section and the edit sheet.
+    @ViewBuilder private var formFields: some View {
                     // A catalog chore keeps its name — only the rewards retune.
                     if editing == nil || !ChoreStore.isPreset(editing!) {
                         RTLTextField(placeholder: "מה המטלה? (למשל: לשטוף את האוטו)", text: $formTitle)
@@ -142,23 +177,6 @@ struct ChoresParentView: View {
                     }
                     .disabled((editing == nil && formTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                               || formMinutes == 0)
-                }
-                .glassRows()
-            }
-            .glassForm()
-            .navigationTitle("מטלות הבית · \(profile.name)")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) { Button("סגור") { dismiss() } }
-            }
-            .onAppear { choreStore.startIfNeeded() }
-            .onChangeCompat(of: selectedID) { _, _ in clearForm() }
-            .alert("האישור לא נשלח", isPresented: $choreStore.lastActionFailed) {
-                Button("הבנתי", role: .cancel) { }
-            } message: {
-                Text("לא הצלחנו לאשר את המטלה כרגע. בדקו את החיבור לאינטרנט ונסו שוב.")
-            }
-        }
     }
 
     @ViewBuilder
@@ -239,6 +257,7 @@ struct ChoresParentView: View {
         formEmoji = chore.emoji
         formMinutes = chore.rewardMinutes
         formTimesPerDay = chore.timesPerDay
+        showEditor = true
         Haptic.light()
     }
 
@@ -268,6 +287,7 @@ struct ChoresParentView: View {
                                 isDaily: true,
                                 timesPerDay: formTimesPerDay)
         }
+        showEditor = false
         clearForm()
         Haptic.success()
     }
