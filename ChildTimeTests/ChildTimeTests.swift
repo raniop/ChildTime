@@ -146,6 +146,33 @@ struct ChildTimeTests {
     /// SYNCED and merged as a MAX within the same day. It used to be device-local,
     /// so a child with two devices got `cap × devices` — open 60 on the iPad, then
     /// 60 more on the iPhone — with no race and no bug required.
+    /// REGRESSION: the parent's "questions today / correct today" froze while
+    /// stars and minutes kept climbing. Both counters were the last per-day
+    /// fields still merged by last-write-wins, and the cloud's generation runs
+    /// one ahead of the child after every upload — so the cloud "won" every
+    /// merge and the child's fresh counts were dropped before the write. Within
+    /// the same day they must ratchet up like `minutesEarnedToday`; across days
+    /// the later day's counts win outright.
+    @Test func todayQuestionCounters_mergeAsMaxWithinSameDay() {
+        let today = Date()
+        var child = ProgressSnapshot(); child.dailyEarnedDate = today
+        child.answeredToday = 7; child.correctToday = 7; child.revision = 36_000
+        var cloud = ProgressSnapshot(); cloud.dailyEarnedDate = today
+        cloud.answeredToday = 3; cloud.correctToday = 3; cloud.revision = 36_001   // cloud "wins" LWW
+        let up = ProgressSnapshot.ratchetMerged(local: child, remote: cloud)
+        #expect(up.answeredToday == 7 && up.correctToday == 7)
+        let down = ProgressSnapshot.ratchetMerged(local: cloud, remote: child)
+        #expect(down.answeredToday == 7 && down.correctToday == 7)
+
+        // A stale copy from YESTERDAY must not resurrect its counts into today.
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
+        var stale = ProgressSnapshot(); stale.dailyEarnedDate = yesterday
+        stale.answeredToday = 40; stale.correctToday = 39; stale.revision = 99_999
+        let merged = ProgressSnapshot.ratchetMerged(local: child, remote: stale)
+        #expect(merged.answeredToday == 7 && merged.correctToday == 7)
+        #expect(Calendar.current.isDate(merged.dailyEarnedDate ?? .distantPast, inSameDayAs: today))
+    }
+
     @Test func minutesUnlockedToday_mergesAsMaxWithinSameDay() {
         let today = Date()
         var a = ProgressSnapshot(); a.dailyEarnedDate = today; a.minutesUnlockedToday = 60; a.revision = 10
@@ -762,6 +789,25 @@ struct WalletCounterTests {
         // The stale copy wins the revision comparison and STILL cannot win here.
         let merged = ProgressSnapshot.ratchetMerged(local: behind, remote: ahead)
         #expect(merged.earnedSecondsAvailable == 120 * 60)
+    }
+
+    /// REGRESSION: after an upload the cloud sits at `max(local, cloud) + 1`, the
+    /// echo of that write is skipped as our own, and the next local edit landed
+    /// on `baseRevision + 1` — the number we were ALREADY on. So the child sat
+    /// one generation below the cloud forever and lost every LWW merge. The
+    /// landed generation must be adopted, and edits made while the upload was in
+    /// flight must outrank it.
+    @Test("after an upload lands, the next local edit outranks the cloud")
+    func uploadGenerationIsAdopted() {
+        let p = fresh()
+        let landed = p.revision + 1_000
+        p.adoptUploadedGeneration(landed, editedSince: false)
+        #expect(p.revision == landed)
+        p.creditEarned(seconds: 60)                 // a real local edit
+        #expect(p.revision == landed + 1)           // ABOVE the cloud, not stuck at it
+        let landed2 = p.revision + 1_000
+        p.adoptUploadedGeneration(landed2, editedSince: true)
+        #expect(p.revision == landed2 + 1)          // in-flight edits win the next merge
     }
 
     @Test("a parent taking minutes away survives a sync with a stale device")

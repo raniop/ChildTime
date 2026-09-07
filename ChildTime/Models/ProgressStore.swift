@@ -2349,6 +2349,20 @@ final class ProgressStore: ObservableObject {
         // whoever last adopted a revision.
     }
 
+    /// After OUR upload landed at cloud generation `r`, track it. Without this
+    /// the child sat one generation BELOW the cloud forever: the upload writes
+    /// `max(local, cloud) + 1`, the echo of that write is skipped as our own,
+    /// and the next local edit lands on `baseRevision + 1` — which is where we
+    /// already were. So every following merge let the cloud win the LWW fields
+    /// and the child's newest values were dropped before the write.
+    /// `editedSince` = the store changed between the capture that was uploaded
+    /// and now; those edits must OUTRANK the generation we just wrote, or the
+    /// next merge discards them the same way.
+    func adoptUploadedGeneration(_ r: Int, editedSince: Bool) {
+        noteAdoptedGeneration(r)
+        revision = max(revision, editedSince ? r + 1 : r)
+    }
+
     /// After an authoritative cloud wipe (reset), adopt the resetEpoch we just
     /// published to the cloud. Without this the resetting device stays an epoch
     /// BEHIND the blank it wrote: its post-reset earnings then ratchet-merge

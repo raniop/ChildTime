@@ -32,6 +32,11 @@ enum SyncLog {
 ///
 /// Without FirebaseFirestore in the build (e.g. SDK not added yet),
 /// every method is a no-op so the app still compiles and runs.
+/// Box for the cloud generation an upload transaction lands on, so the
+/// completion (main thread) can adopt what the transaction body (Firestore's
+/// queue) computed. A class, not a var: the closure captures it by reference.
+private final class SyncGeneration: @unchecked Sendable { var revision: Int? }
+
 @MainActor
 final class RemoteSyncManager: ObservableObject {
     static let shared = RemoteSyncManager()
@@ -687,6 +692,11 @@ final class RemoteSyncManager: ObservableObject {
             store.$diamonds.map { _ in () }.eraseToAnyPublisher(),
             store.$unlockEndsAt.map { _ in () }.eraseToAnyPublisher(),
             store.$minutesEarnedToday.map { _ in () }.eraseToAnyPublisher(),
+            // A WRONG answer changes none of the above, so a session that ended
+            // on mistakes never scheduled an upload and the parent's "questions
+            // today" lagged behind "correct today".
+            store.$answeredToday.map { _ in () }.eraseToAnyPublisher(),
+            store.$correctToday.map { _ in () }.eraseToAnyPublisher(),
         ]
         Publishers.MergeMany(triggers)
             .dropFirst()
@@ -704,10 +714,15 @@ final class RemoteSyncManager: ObservableObject {
         // EXCEPTION: in Kid Mode the parent's phone IS the child's session, so it
         // must upload the child's real play (otherwise it never syncs back).
         guard ParentSettings.shared.deviceRole != .parent || KidModeManager.shared.active else { return }
-        saveDebounce?.cancel()
+        // Coalesce, don't restart: cancelling and re-arming on every change meant
+        // a child answering faster than one question per 3 s starved the upload
+        // for the whole session. One pending task is enough — it captures the
+        // store when it fires, so it carries every edit made in the meantime.
+        if let pending = saveDebounce, !pending.isCancelled { return }
         saveDebounce = Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 3_000_000_000)
             guard let self, !Task.isCancelled else { return }
+            self.saveDebounce = nil
             self.uploadActiveProfile()
         }
     }
@@ -755,22 +770,29 @@ final class RemoteSyncManager: ObservableObject {
         // back to a device's local 153★). Ratchet-merging with the cloud means an
         // upload can only ever raise accumulators, never lower them.
         let local = ProgressStore.shared.captureSnapshot()
+        let editSeqAtCapture = ProgressStore.shared.localEditSeq
         let ref = db.collection("children").document(pid.uuidString)
             .collection("state").document("current")
+        // The generation this upload leaves the cloud at (written, or merely
+        // confirmed when the cloud already held everything). Adopted below so
+        // the child stops sitting one generation behind its own writes.
+        let landed = SyncGeneration()
         db.runTransaction({ txn, _ -> Any? in
             guard let cloud = (try? txn.getDocument(ref))?.data().flatMap({ Self.decode($0) }) else {
                 // No cloud doc yet → first write is just our local state.
                 if let data = Self.encode(local) { txn.setData(data, forDocument: ref, merge: true) }
+                landed.revision = local.revision
                 return nil
             }
             var merged = ProgressSnapshot.ratchetMerged(local: local, remote: cloud)
             // Cloud already holds everything we have → don't write (no churn, and
             // never lowers the cloud with a stale push).
-            if ProgressSnapshot.sameProgressData(merged, cloud) { return nil }
+            if ProgressSnapshot.sameProgressData(merged, cloud) { landed.revision = cloud.revision; return nil }
             merged.revision = max(local.revision, cloud.revision) + 1
             merged.lastModifiedAt = Date()
             merged.deviceID = ProgressSnapshot.thisDeviceID
             if let data = Self.encode(merged) { txn.setData(data, forDocument: ref, merge: true) }
+            landed.revision = merged.revision
             return nil
         }) { [weak self] _, err in
             if let err {
@@ -779,7 +801,13 @@ final class RemoteSyncManager: ObservableObject {
             } else {
                 self?.lastUploadAt = .now
                 self?.lastError = nil
-                SyncLog.log("upload OK (merge) for \(pid.uuidString.prefix(8)) stars=\(local.stars) min=\(local.pendingMinutes)")
+                // Only while the store still holds THIS child — a profile switch
+                // in the meantime must not stamp a sibling with our generation.
+                if let r = landed.revision, ProgressStore.shared.holdsData(for: pid) {
+                    let edited = ProgressStore.shared.localEditSeq != editSeqAtCapture
+                    ProgressStore.shared.adoptUploadedGeneration(r, editedSince: edited)
+                }
+                SyncLog.log("upload OK (merge) for \(pid.uuidString.prefix(8)) stars=\(local.stars) min=\(local.pendingMinutes) rev=\(landed.revision ?? -1)")
             }
         }
     }
@@ -1015,7 +1043,14 @@ final class RemoteSyncManager: ObservableObject {
         // neither device loses progress. It returns true when WE still held
         // something the remote lacked — push it so the peer converges too.
         let needsUpload = ProgressStore.shared.mergeRemote(snap)
-        if needsUpload {
+        // Same guard as the non-active branch and the debounced path: a parent
+        // MONITOR must never push. On a parent device the first child is the
+        // "active profile", so this path ran for it unguarded — and after the
+        // parent's own midnight rollover zeroed today's counters in ITS copy,
+        // it re-uploaded those zeros with a winning revision.
+        let mayPushActive = ParentSettings.shared.deviceRole != .parent
+            || KidModeManager.shared.active
+        if needsUpload, mayPushActive {
             SyncLog.log("merge: local was ahead — re-uploading merged snapshot for \(profileID.uuidString.prefix(8))")
             uploadActiveProfile()
         }

@@ -220,12 +220,20 @@ struct ChildTimeApp: App {
                     } else {
                         shields.refreshStatus()
                     }
-                    progress.applyDailyRolloverIfNeeded()   // release minutes banked for "tomorrow"
+                    // A parent MONITOR device holds a VIEW of a child, not that
+                    // child's play: rolling ITS copy over at midnight zeroed the
+                    // child's today-counters (and re-released the carry-over
+                    // bank) in a copy that could then win the merge.
+                    if settings.deviceRole != .parent || KidModeManager.shared.active {
+                        progress.applyDailyRolloverIfNeeded()   // release minutes banked for "tomorrow"
+                    }
                     enforceShieldStateIfNeeded()
                 }
                 .onChangeCompat(of: scenePhase) { _, phase in
                     if phase == .active, Self.demoScreen == nil {
-                        progress.applyDailyRolloverIfNeeded()
+                        if settings.deviceRole != .parent || KidModeManager.shared.active {
+                            progress.applyDailyRolloverIfNeeded()
+                        }
                         StopAndSaveBridge.applyIfRequested()   // Live Activity "עצור ושמור" fallback
                         enforceShieldStateIfNeeded()
                         WidgetBridge.refreshKid()

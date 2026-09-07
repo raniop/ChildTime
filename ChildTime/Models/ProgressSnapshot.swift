@@ -377,14 +377,27 @@ extension ProgressSnapshot {
             // MAX, never the winner's value: the daily cap must count what BOTH
             // devices already opened today, or two devices are worth two caps.
             m.minutesUnlockedToday = max(local.minutesUnlockedToday, remote.minutesUnlockedToday)
+            // Today's question counters are same-day counters exactly like
+            // `minutesEarnedToday`, and they were the ONLY per-day fields left to
+            // LWW. The cloud's generation runs one ahead of the child's after
+            // every upload (the child never adopts its own echo), so the cloud
+            // "won" every merge and the child's fresh counts were thrown away
+            // before the write: the parent's card froze on the first upload of
+            // the day while stars and minutes (max-merged) kept climbing.
+            m.answeredToday = max(local.answeredToday, remote.answeredToday)
+            m.correctToday  = max(local.correctToday,  remote.correctToday)
         } else if rDay > lDay {
             m.dailyEarnedDate = remoteDay
             m.minutesEarnedToday = remote.minutesEarnedToday
             m.minutesUnlockedToday = remote.minutesUnlockedToday
+            m.answeredToday = remote.answeredToday
+            m.correctToday  = remote.correctToday
         } else {
             m.dailyEarnedDate = localDay
             m.minutesEarnedToday = local.minutesEarnedToday
             m.minutesUnlockedToday = local.minutesUnlockedToday
+            m.answeredToday = local.answeredToday
+            m.correctToday  = local.correctToday
         }
         m.lastSessionDate = laterDate(local.lastSessionDate, remote.lastSessionDate)
         m.lastDailyChestDate = laterDate(local.lastDailyChestDate, remote.lastDailyChestDate)
