@@ -29,7 +29,14 @@ struct ChildWorldsView: View {
                 Section {
                     // The bonus arena isn't a topic toggle — it mixes whatever
                     // topics are enabled here, so it has no row of its own.
-                    ForEach(Worlds.all.filter { !$0.isBonusWorld && (!$0.topic.isPack || profile?.allows($0.topic) == true) }) { world in
+                    // Base worlds always; a pack world when the family HAS it (bought or
+                    // Tofy+) and the founder switched it on — even if this child's switch is off.
+                    ForEach(Worlds.all.filter { w in
+                        guard !w.isBonusWorld else { return false }
+                        guard let pack = w.topic.pack else { return true }
+                        return profile.map { PackAccess.has($0, pack) } == true
+                            && PackStore.shared.visiblePacks.contains { $0.id == pack.id }
+                    }) { world in
                         Toggle(isOn: binding(for: world)) {
                             HStack(spacing: 10) {
                                 Text(world.emoji).font(.title3)
@@ -64,7 +71,12 @@ struct ChildWorldsView: View {
         Binding(
             get: { profile?.allows(world.topic) ?? !world.topic.isPack },
             set: { on in
-                guard var p = profile, !world.topic.isPack else { return }   // a bought pack stays on
+                guard var p = profile else { return }
+                if let pack = world.topic.pack {
+                    // A pack: the parent's per-child switch (the family keeps the pack).
+                    if on { p.disabledPacks.remove(pack.id) } else { p.disabledPacks.insert(pack.id) }
+                    profiles.update(p); Haptic.light(); return
+                }
                 if on {
                     p.enabledTopics.insert(world.topic)
                     profiles.update(p)

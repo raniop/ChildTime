@@ -224,6 +224,7 @@ final class ProfileStore: ObservableObject {
                 // A bought pack is never lost to a stale writer — union.
                 merged.ownedPacks = remote.ownedPacks.union(working[idx].ownedPacks)
                 merged.packExpiry = remote.packExpiry.merging(working[idx].packExpiry) { max($0, $1) }
+                merged.disabledPacks = remote.disabledPacks   // the parent's switch, as written
                 if working[idx] != merged { working[idx] = merged; changed = true }
             } else {
                 working.append(remote); changed = true

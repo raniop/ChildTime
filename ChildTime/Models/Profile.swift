@@ -109,6 +109,10 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// gates packs (see `allows`). Synced via `ChildRecord.packs`; merges take
     /// the UNION so a purchase can't be undone by a stale device.
     var ownedPacks: Set<String> = []
+    /// Packs the PARENT switched off for this child (the "עולמות" toggles).
+    /// A family with Tofy+ has every pack; this is how a parent still decides
+    /// which child gets which world (Rani, 2026-09-07).
+    var disabledPacks: Set<String> = []
     /// 🌍 World passes: pack id → unix expiry. A pass is bought for 30 days; a
     /// renewal extends the SAME entry. Merges keep the later date. Absent for
     /// a permanent pack.
@@ -178,7 +182,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         case grade, gradeSchoolYear, gradeSetByChild, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
         case topicsVersion
         case playPIN
-        case ownedPacks, packExpiry
+        case ownedPacks, packExpiry, disabledPacks
     }
 
     init(from decoder: Decoder) throws {
@@ -221,6 +225,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.playPIN = try c.decodeIfPresent(String.self, forKey: .playPIN)
         self.ownedPacks = Set((try? c.decodeIfPresent([String].self, forKey: .ownedPacks)) ?? nil ?? [])
         self.packExpiry = (try? c.decodeIfPresent([String: Double].self, forKey: .packExpiry)) ?? nil ?? [:]
+        self.disabledPacks = Set((try? c.decodeIfPresent([String].self, forKey: .disabledPacks)) ?? nil ?? [])
     }
 
     /// Whether this child may play the topic: a base topic the parent hasn't
@@ -232,7 +237,8 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         // from Tofy+ families: Noa (Tofy+ gift, build 166) had no soccer world
         // while Dan (165, premium not yet synced) still saw the offer tile.
         if let pack = topic.pack {
-            return PackAccess.has(self, pack) && PackStore.shared.visiblePacks.contains { $0.id == pack.id }
+            return PackAccess.has(self, pack) && !disabledPacks.contains(pack.id)
+                && PackStore.shared.visiblePacks.contains { $0.id == pack.id }
         }
         return enabledTopics.contains(topic)
     }

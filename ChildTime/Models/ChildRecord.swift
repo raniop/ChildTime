@@ -141,6 +141,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     var packs: [String]?
     /// 🌍 World-pass expiry per pack id (unix seconds). Merged field by field.
     var packExpiry: [String: Double]?
+    /// Packs the parent switched off for this child. nil = none.
+    var disabledPacks: [String]?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -170,6 +172,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.playPIN = profile.playPIN
         self.packs = profile.ownedPacks.isEmpty ? nil : profile.ownedPacks.sorted()
         self.packExpiry = profile.packExpiry.isEmpty ? nil : profile.packExpiry
+        self.disabledPacks = profile.disabledPacks.isEmpty ? nil : profile.disabledPacks.sorted()
     }
 
     /// Rehydrate a local `Profile`. The photo now syncs (compressed), so a custom
@@ -203,6 +206,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             ownedPacks: Set(packs ?? [])
         )
         p.packExpiry = packExpiry ?? [:]
+        p.disabledPacks = Set(disabledPacks ?? [])
         p.gradeSetByChild = gradeSetByChild ?? false
         p.characterUpdatedAt = characterUpdatedAt
         return p
