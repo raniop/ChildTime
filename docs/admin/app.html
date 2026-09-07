@@ -256,6 +256,28 @@ function funnel() {
 function childReqLine() { const c = Object.assign({ lockedSeen: 0, lockedTapped: 0, asked: 0, parentOpened: 0, paywall: 0, purchaseStarted: 0, purchased: 0 }, (J && J.childRequests) || {});
   if (!c.lockedSeen && !c.asked) return "יתמלא כשילדים יראו עולמות נעולים בגרסה הבאה.";
   return `${fmt(c.lockedSeen)} ראו עולם נעול → ${fmt(c.lockedTapped)} לחצו → ${fmt(c.asked)} ביקשו → ${fmt(c.parentOpened)} הורים פתחו → ${fmt(c.paywall)} פייוול → ${fmt(c.purchased)} רכשו`; }
+function eventIdeas() {
+  const E = [
+    ["🍎", "ראש השנה", "12–13.9.2026", "1.9", "סמלי החג, ברכות, שופר, מנהגים מכל העולם"],
+    ["🕍", "יום כיפור", "21.9.2026", "14.9", "סליחה, חברות, מה עושים כשטעינו"],
+    ["🌿", "סוכות ושמחת תורה", "26.9–3.10.2026", "19.9", "ארבעת המינים, סוכה, מסעות במדבר"],
+    ["🕎", "חנוכה + פסטיגל", "5–12.12.2026", "22.11", "נסים, סביבון, שירי חנוכה, המופע של פסטיגל"],
+    ["🌳", "ט״ו בשבט", "23.1.2027", "10.1", "עצים, פירות ארץ ישראל, טבע"],
+    ["🎭", "פורים", "23.3.2027", "9.3", "המגילה, תחפושות, אוזני המן"],
+    ["🍞", "פסח", "22–29.4.2027", "8.4", "יציאת מצרים, ההגדה, עשר המכות"],
+    ["🇮🇱", "יום הזיכרון ויום העצמאות", "11–12.5.2027", "28.4", "ישראל, סמלי המדינה, ההמנון (מכבד ורגיש)"],
+    ["🎤", "אירוויזיון", "מאי 2027", "שבועיים לפני", "מדינות אירופה, דגלים, מוזיקה"],
+    ["🔥", "ל״ג בעומר", "25.5.2027", "11.5", "מדורות, בטיחות, רבי שמעון"],
+    ["🌾", "שבועות", "11.6.2027", "28.5", "חלב, ביכורים, חקלאות"],
+    ["🏖️", "החופש הגדול", "1.7–31.8.2027", "20.6", "ים, בטיחות בשמש, טיולים בארץ"],
+    ["🎒", "חזרה לבית הספר", "1.9.2027", "20.8", "ריענון: חשבון, קריאה, אנגלית לפי כיתה"],
+    ["⚽", "משחקי הנבחרת / ליגת האלופות", "לפי לוח המשחקים", "שבוע לפני", "עולם הכדורגל: מהדורה של הטורניר"],
+    ["🏅", "אליפויות ספורט גדולות", "לפי לוח", "שבועיים לפני", "ענפים, מדליות, ספורטאים ישראלים"],
+    ["🚀", "שבוע החלל הישראלי", "ינואר–פברואר", "שבועיים לפני", "אילן רמון, לוויינים, בראשית"],
+    ["📚", "שבוע הספר", "יוני", "שבועיים לפני", "סופרים ישראליים לילדים, הבנת הנקרא"],
+  ];
+  return E.map(([emoji, name, when, launch, idea]) => ({ emoji, name, when, launch, idea }));
+}
 function sources() { const hh = Object.values(J.households || {}).filter((h) => h.state === "plus"); const by = {}; for (const h of hh) { const k = h.purchaseSource || "card"; by[k] = (by[k] || 0) + 1; } const total = hh.length || 1;
   return Object.entries(by).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<div><span>${esc(SOURCE[k] || k)}</span><div class="barw"><div class="bar" style="width:${Math.round(100 * n / total)}%"></div></div><b>${Math.round(100 * n / total)}%</b></div>`).join("") || '<div class="empty">אין עדיין רכישות מנוי.</div>'; }
 
@@ -285,6 +307,7 @@ async function worlds() {
     <div class="card" ${worldsTab !== "new" ? "hidden" : ""}><div class="tblwrap"><table><tr><th>עולם</th><th>שאלות</th><th>הגהה</th><th>השקה</th><th>ילדים ששיחקו</th><th>רכישות</th><th>הכנסה</th><th>מצב</th></tr>${rows}</table></div>
       <div class="stamp" style="margin-top:8px">הדלקה = העולם גלוי לכל המשפחות, ופוש ההשקה יוצא פעם אחת תוך 5 דקות.</div>
       <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost" id="schedBtn">📅 תזמן השקה</button><a class="btn ghost" href="#settings">🌟 קבע אורחי השבוע</a><a class="btn ghost" href="#settings">✏️ ערוך נוסח פוש ההשקה</a></div></div>
+    <div class="card"><h4>🗓️ אירועים שכדאי לבנות להם עולם</h4><div class="stamp" style="margin-bottom:8px">לוח ראשוני של אירועים בישראל שילדים חיים אותם. השקה כשבועיים לפני, פוש ביום עצמו. תאריכים לשנת תשפ״ז.</div><div class="tblwrap"><table><tr><th>אירוע</th><th>מתי</th><th>להשיק</th><th>רעיון לעולם</th><th></th></tr>${eventIdeas().map((e) => `<tr><td>${e.emoji} ${esc(e.name)}</td><td>${esc(e.when)}</td><td>${esc(e.launch)}</td><td>${esc(e.idea)}</td><td><a class="btn ghost" href="notifications.html" style="padding:5px 10px;font-size:12px">📣 תזמן</a></td></tr>`).join("")}</table></div><div class="stamp" style="margin-top:6px">רוצה הצעות אוטומטיות מעבר ללוח? זה דורש מפתח API לבינה מלאכותית בשרת; היום הלוח ידני ומדויק.</div></div>
     <div class="card" ${worldsTab !== "base" ? "hidden" : ""}><h4>בסיס</h4><div class="tblwrap"><table><tr><th>עולם</th><th>ילדים ששיחקו היום</th><th>שאלות היום</th><th>נכונות</th></tr>${Object.entries(BASE).map(([t, l]) => { const w = worldsToday[t]; return `<tr><td>${l}</td><td>${w ? w.kids : "—"}</td><td>${w ? fmt(w.q) : "—"}</td><td>${w ? pct(w.accuracy) : "—"}</td></tr>`; }).join("")}</table></div></div>`;
   document.querySelectorAll("[data-wt]").forEach((c) => c.onclick = () => { worldsTab = c.dataset.wt; worlds(); });
   document.querySelectorAll("[data-pack]").forEach((sw) => sw.onclick = async () => { const on = !sw.classList.contains("on"); const st = (PACKSTATE.packs || {})[sw.dataset.pack] || {}; const name = PACKS[sw.dataset.pack].name;
@@ -305,10 +328,12 @@ async function content() {
     <div class="card"><h4>איפה ילדים נופלים (30 יום)</h4><div class="tblwrap"><table><tr><th>שאלה</th><th>עולם</th><th>ניסיונות</th><th>נכון</th></tr><tr><td colspan="4" class="empty">דורש ספירה לכל שאלה במכשיר · יתווסף בגרסה הבאה של האפליקציה</td></tr></table></div><div class="stamp" style="margin-top:6px">מתחת ל־35% = כנראה בעיה בשאלה, לא בילדים. מעל 97% = משעממת.</div></div></div>`;
   try { const r = await call("adminListReports"); const rows = r.reports || [];
     const groups = {}; for (const x of rows) { const key = String(x.prompt || x.question || x.id).replace(/\n/g, " "); (groups[key] = groups[key] || { key, items: [], topic: x.topic, grade: x.grade }).items.push(x); }
-    const list = Object.values(groups).sort((a, b) => (b.items.some((i) => (i.status || "open") === "open") ? 1 : 0) - (a.items.some((i) => (i.status || "open") === "open") ? 1 : 0));
+    // Most-flagged first (Rani): the question many families tripped on is the one to fix now; open before handled.
+    const openN_ = (g) => g.items.filter((i) => (i.status || "open") === "open").length;
+    const list = Object.values(groups).sort((a, b) => (openN_(b) - openN_(a)) || (b.items.length - a.items.length));
     const openN = rows.filter((x) => (x.status || "open") === "open").length; $("repChip").textContent = `דיווחים (${openN})`;
     $("reports").innerHTML = list.length ? list.slice(0, 60).map((g) => { const open = g.items.filter((i) => (i.status || "open") === "open"); const st = open.length ? ["פתוח", "gold"] : g.items.some((i) => i.status === "disabled") ? ["השאלה מושבתת", ""] : ["טופל", "mint"]; const last = g.items[0];
-      return `<div class="q"><b>${esc(g.key)}</b> · ${esc(TOPIC[g.topic] || g.topic || "")}${g.grade != null ? " · כיתה " + gradeName(g.grade) : ""} <span class="chip ${st[1]}" style="padding:1px 7px;font-size:10px">${st[0]}</span><div class="m">${g.items.length} ${g.items.length === 1 ? "דיווח" : "דיווחים"} · "${esc(last.reason || last.note || last.message || "")}" · ${when(Number(last.createdAt) * (Number(last.createdAt) > 1e12 ? 1 : 1000))}${open.length ? ` · <u data-open="${esc(g.key)}">פתח</u><u data-rs="${open.map((i) => i.id).join(",")}" data-st="disabled">השבת שאלה</u><u data-rs="${open.map((i) => i.id).join(",")}" data-st="resolved">סמן כתקין</u>` : ""}</div><div class="m" hidden data-detail="${esc(g.key)}">${g.items.map((i) => `• ${esc(i.reason || i.note || i.message || "")} · ${when(Number(i.createdAt) * (Number(i.createdAt) > 1e12 ? 1 : 1000))}${i.chosen ? " · ענה/תה: " + esc(i.chosen) : ""}`).join("<br>")}</div></div>`; }).join("") : '<div class="empty">אין דיווחים. 🎉</div>';
+      return `<div class="q"><span class="chip ${g.items.length >= 3 ? "pink" : "dim"}" style="padding:1px 8px;font-size:11px">🚩 ${g.items.length}</span> <b>${esc(g.key)}</b> · ${esc(TOPIC[g.topic] || g.topic || "")}${g.grade != null ? " · כיתה " + gradeName(g.grade) : ""} <span class="chip ${st[1]}" style="padding:1px 7px;font-size:10px">${st[0]}</span><div class="m">${g.items.length} ${g.items.length === 1 ? "דיווח" : "דיווחים"} · "${esc(last.reason || last.note || last.message || "")}" · ${when(Number(last.createdAt) * (Number(last.createdAt) > 1e12 ? 1 : 1000))}${open.length ? ` · <u data-open="${esc(g.key)}">פתח</u><u data-rs="${open.map((i) => i.id).join(",")}" data-st="disabled">השבת שאלה</u><u data-rs="${open.map((i) => i.id).join(",")}" data-st="resolved">סמן כתקין</u>` : ""}</div><div class="m" hidden data-detail="${esc(g.key)}">${g.items.map((i) => `• ${esc(i.reason || i.note || i.message || "")} · ${when(Number(i.createdAt) * (Number(i.createdAt) > 1e12 ? 1 : 1000))}${i.chosen ? " · ענה/תה: " + esc(i.chosen) : ""}`).join("<br>")}</div></div>`; }).join("") : '<div class="empty">אין דיווחים. 🎉</div>';
     document.querySelectorAll("[data-open]").forEach((u) => u.onclick = () => { const d = document.querySelector(`[data-detail="${CSS.escape(u.dataset.open)}"]`); if (d) d.hidden = !d.hidden; });
     document.querySelectorAll("[data-rs]").forEach((u) => u.onclick = async () => { for (const id of u.dataset.rs.split(",")) await call("adminSetReportStatus", { id, status: u.dataset.st }); await loadJourney(false); content(); });
   } catch (e) { $("reports").textContent = e.message; }
