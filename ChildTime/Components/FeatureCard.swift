@@ -10,6 +10,7 @@ struct FeatureCard: View {
     let glowColor: Color
     /// Optional corner badge — e.g. the games warm-up "3/10 ✅".
     var badge: String? = nil
+    var badgeTint: Color? = nil
     /// Footer line; a nil `footFrac` draws a full decorative track.
     var foot: String = "✨ מֻתְאָם לְךָ"
     var footFrac: Double? = nil
@@ -20,7 +21,7 @@ struct FeatureCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 0) {
-                HomeTileHeader(emoji: emoji, badge: badge)
+                HomeTileHeader(emoji: emoji, badge: badge, badgeTint: badgeTint)
                 HomeTileText(title: title, subtitle: subtitle)
                 Spacer(minLength: 6)
                 HomeTileFoot(label: foot, frac: footFrac)

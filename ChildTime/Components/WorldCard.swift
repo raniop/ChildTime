@@ -64,6 +64,8 @@ struct WorldCard: View {
 struct HomeTileHeader: View {
     let emoji: String
     var badge: String? = nil
+    /// A coloured badge (the mint "חינם" on טופי טיים) instead of the glass one.
+    var badgeTint: Color? = nil
     @Environment(\.horizontalSizeClass) private var hsc
     var body: some View {
         HStack(alignment: .top) {
@@ -72,12 +74,23 @@ struct HomeTileHeader: View {
                 .shadow(color: .black.opacity(0.25), radius: 5, y: 4)
             Spacer(minLength: 0)
             if let badge {
-                Text(badge)
-                    .font(.system(size: 10.5, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 8).padding(.vertical, 4)
-                    .background(Capsule().fill(.white.opacity(0.24)))
-                    .overlay(Capsule().strokeBorder(.white.opacity(0.32), lineWidth: 1))
+                if let badgeTint {
+                    Text(badge)
+                        .font(.system(size: 10.5, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "0B3D2A"))
+                        .padding(.horizontal, 9).padding(.vertical, 4)
+                        .background(Capsule().fill(LinearGradient(colors: [badgeTint, badgeTint.opacity(0.8)],
+                                                                  startPoint: .top, endPoint: .bottom)))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.7), lineWidth: 1))
+                        .shadow(color: badgeTint.opacity(0.6), radius: 6, y: 2)
+                } else {
+                    Text(badge)
+                        .font(.system(size: 10.5, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8).padding(.vertical, 4)
+                        .background(Capsule().fill(.white.opacity(0.24)))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.32), lineWidth: 1))
+                }
             }
         }
     }

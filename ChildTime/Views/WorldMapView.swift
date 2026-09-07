@@ -79,7 +79,7 @@ struct WorldMapView: View {
     private var isCompact: Bool { hsc == .compact }
     private var companionSize: CGFloat { isCompact ? 90 : 120 }
     // Glass look: a modest brand line heading the grid, not a poster.
-    private var heroTitleSize: CGFloat { isCompact ? 30 : 36 }
+    private var heroTitleSize: CGFloat { isCompact ? 34 : 40 }
 
     @State private var infoStat: StatInfo? = nil
 
@@ -394,7 +394,11 @@ struct WorldMapView: View {
                                         title: "טוֹפִי טַיים",
                                         subtitle: "שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ",
                                         gradient: AppGradient.portal,
-                                        glowColor: AppColor.companionGlow
+                                        glowColor: AppColor.companionGlow,
+                                        // Free, always (Rani): the one thing on this screen that
+                                        // is never behind Tofy+ says so, in mint.
+                                        badge: subs.isPremium ? nil : "✨ חִנָּם",
+                                        badgeTint: Color(hex: "8CFFC4")
                                     ) {
                                         // No companion line here — we leave this screen
                                         // immediately, so a bubble would only flash & clip.
@@ -995,9 +999,18 @@ struct WorldMapView: View {
                     .opacity(heroAppeared ? 1 : 0)
                 // Our own lion — the one from the app icon, waving — not an emoji (Rani).
                 if let lion = Character2DImages.image("lion") {
+                    // Head and waving paw only, the way Rani cut it: the top of the
+                    // full-body PNG, transparent, the body fading out under the scarf.
+                    // As tall as the wordmark's letters, no taller (Rani).
+                    let d: CGFloat = isCompact ? 32 : 38
                     Image(uiImage: lion)
-                        .resizable().scaledToFit()
-                        .frame(height: isCompact ? 46 : 56)
+                        .resizable().scaledToFill()
+                        .frame(width: d, height: d * 1.22, alignment: .top)   // head + the whole paw
+                        .clipped()
+                        .mask(LinearGradient(stops: [.init(color: .black, location: 0),
+                                                     .init(color: .black, location: 0.84),
+                                                     .init(color: .clear, location: 1)],
+                                             startPoint: .top, endPoint: .bottom))
                         .shadow(color: .black.opacity(0.3), radius: 6, y: 4)
                 } else {
                     Text("🦁").font(.system(size: isCompact ? 32 : 38))
