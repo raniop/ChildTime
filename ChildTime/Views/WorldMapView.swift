@@ -151,7 +151,10 @@ struct WorldMapView: View {
             .sorted { progress.progress(in: $0.id) > progress.progress(in: $1.id) }
         let rest = Self.rotated(pool.filter { p in !played.contains { $0.id == p.id } },
                                 childID: profiles.activeID, everyDays: conv.lockedRotateDays, salt: 1)
-        tier.locked = Array((played + rest).prefix(conv.lockedShown))
+        // Six tiles in all, טופי טיים included (Rani): a pack pinned as "new this
+        // week" takes one of the locked slots rather than adding a seventh.
+        let slots = max(0, conv.lockedShown - packOffers.count)
+        tier.locked = Array((played + rest).prefix(slots))
         return tier
     }
 
@@ -990,9 +993,15 @@ struct WorldMapView: View {
                     .lineLimit(1).minimumScaleFactor(0.6)
                     .scaleEffect(heroAppeared ? 1 : 0.5)
                     .opacity(heroAppeared ? 1 : 0)
-                Text("🦁")
-                    .font(.system(size: isCompact ? 32 : 38))
-                    .shadow(color: .black.opacity(0.3), radius: 6, y: 4)
+                // Our own lion — the one from the app icon, waving — not an emoji (Rani).
+                if let lion = Character2DImages.image("lion") {
+                    Image(uiImage: lion)
+                        .resizable().scaledToFit()
+                        .frame(height: isCompact ? 46 : 56)
+                        .shadow(color: .black.opacity(0.3), radius: 6, y: 4)
+                } else {
+                    Text("🦁").font(.system(size: isCompact ? 32 : 38))
+                }
             }
             Spacer(minLength: 6)
             navButtonsRow(size: isCompact ? 44 : 50)
