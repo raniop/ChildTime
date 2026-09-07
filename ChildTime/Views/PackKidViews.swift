@@ -236,12 +236,13 @@ struct PackAskParentView: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 8)
+                // The list sits centred as a block (Rani), its lines still
+                // aligned to the right of the ✓ like a checklist.
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(pack.learns, id: \.self) { line in
                         HStack(spacing: 12) {
                             Text("✓").font(.system(size: 16, weight: .heavy)).foregroundStyle(GlassInk.good)
                             Text(line).font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                            Spacer(minLength: 0)
                         }
                     }
                 }

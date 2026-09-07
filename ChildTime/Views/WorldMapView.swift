@@ -397,7 +397,7 @@ struct WorldMapView: View {
                                         glowColor: AppColor.companionGlow,
                                         // Free, always (Rani): the one thing on this screen that
                                         // is never behind Tofy+ says so, in mint.
-                                        badge: subs.isPremium ? nil : "✨ חִנָּם",
+                                        badge: subs.isPremium ? nil : "✨ חינם",
                                         badgeTint: Color(hex: "8CFFC4")
                                     ) {
                                         // No companion line here — we leave this screen
