@@ -353,6 +353,14 @@ struct ParentDashboardView: View {
                 } else if isRoot, WhatsNewContent.shouldShow {
                     // ✨ Once per app UPDATE: what's new, in parent language.
                     showWhatsNew = true
+                } else if isRoot, !rows.isEmpty, household.household != nil,
+                          household.familyNameShown == nil,
+                          !UserDefaults.standard.bool(forKey: "family.namePromptShown") {
+                    // 👪 Families from before the onboarding asked: one nudge,
+                    // pre-filled, never repeated (the ✏️ title stays as the way in).
+                    UserDefaults.standard.set(true, forKey: "family.namePromptShown")
+                    familyNameDraft = household.suggestedFamilyName ?? ""
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { showFamilyNameEditor = true }
                 }
                 rescheduleInsights()
                 WidgetBridge.writeFamily(rows)   // keep the family home-screen widget fresh
@@ -1188,10 +1196,12 @@ struct ParentDashboardView: View {
                 Text("\(pct ?? 0)%")   // Rani: a zero is a zero, never a dash
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .monospacedDigit()
-                    // Green from 80 %, amber 60–79, warm below — and plain white until
-                    // there are 6 answers to judge by (2/3 is not "red").
-                    .foregroundStyle(s.answeredToday < 6 ? GlassInk.primary
-                                     : (pct ?? 0) >= 80 ? GlassInk.good : (pct ?? 0) >= 60 ? GlassInk.warn : GlassInk.weak)
+                    // Green from 80 % at ANY count (Rani: 100 % must read green),
+                    // amber 60–79, warm below — but those two only once there are
+                    // 6 answers to judge by (2/3 is not "red"); until then plain white.
+                    .foregroundStyle((pct ?? 0) >= 80 && s.answeredToday > 0 ? GlassInk.good
+                                     : s.answeredToday < 6 ? GlassInk.primary
+                                     : (pct ?? 0) >= 60 ? GlassInk.warn : GlassInk.weak)
             }
             if hasDevice {
                 HStack(spacing: 8) {

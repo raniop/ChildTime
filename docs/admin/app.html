@@ -95,7 +95,7 @@ const daysLeft = (n) => n === 1 ? "עוד יום" : n === 2 ? "עוד יומיי
 const shortMail = (e) => e ? e.replace(/@.*/, "@…") : "";
 const famName = (f) => f.familyName || f.label || f.name || ((f.children || []).map((k) => k.name).filter(Boolean).length ? "המשפחה של " + (f.children || []).map((k) => k.name).filter(Boolean).slice(0, 4).join(", ") : ((f.parents || []).map((p) => p.email).find(Boolean) ? "משפחת " + (f.parents || []).map((p) => p.email).find(Boolean).split("@")[0] : "משפחה ללא שם"));
 const gradeName = (g) => ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"][g] ?? g;
-const pct = (n) => `<span class="pct ${n >= 90 ? "hi" : n < 50 ? "lo" : ""}">${n}%</span>`;
+const pct = (n) => `<span class="pct ${n >= 80 ? "hi" : n < 50 ? "lo" : ""}">${n}%</span>`;
 const toast = (t) => { const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); };
 
 const [{initializeApp}, auth, fns] = await Promise.all([

@@ -391,7 +391,10 @@ final class HouseholdManager: ObservableObject {
         // None — create a fresh household owned by this parent (real accounts
         // only; an anonymous device waits to JOIN one instead).
         guard canCreate else { return nil }
-        let hh = Household(parentUIDs: [uid], createdBy: uid)
+        var hh = Household(parentUIDs: [uid], createdBy: uid)
+        // The name chosen during onboarding (before any household existed) is
+        // born with the household, so the dashboard never shows a nameless family.
+        hh.familyName = localFamilyName
         try await db.collection("households").document(hh.id).setData(Self.encode(hh))
         try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([hh.id])])
         return hh
@@ -404,6 +407,12 @@ final class HouseholdManager: ObservableObject {
                 guard let self, let doc, let data = doc.data(),
                       let hh = Self.decodeHousehold(id: doc.documentID, data) else { return }
                 self.household = hh
+                // A name this device chose while the household was still on its
+                // way (onboarding) belongs in the cloud, not only in UserDefaults.
+                if hh.familyName == nil, let local = self.localFamilyName, !local.isEmpty {
+                    Task { try? await self.db.collection("households").document(hh.id)
+                        .updateData(["familyName": local]) }
+                }
                 self.recordMyParentName(in: hh)
                 self.refreshLinkedParentSummaries(from: hh)
             }
@@ -952,6 +961,15 @@ final class HouseholdManager: ObservableObject {
     /// device whose household hasn't streamed down yet).
     var familyNameShown: String? { household?.familyName ?? localFamilyName }
     @Published private(set) var localFamilyName: String? = UserDefaults.standard.string(forKey: "family.name")
+
+    /// A ready-made suggestion for the family name, from the signed-in parent's
+    /// display name ("Rani Ophir" → "משפחת Ophir"). Nil when there is nothing
+    /// sensible to suggest — the field then shows its placeholder.
+    var suggestedFamilyName: String? {
+        let words = (displayName ?? "").split(separator: " ").map(String.init).filter { !$0.isEmpty }
+        guard let last = words.last, words.count >= 2 else { return nil }
+        return "משפחת " + last
+    }
 
     /// The parent names the family ("משפחת גולן"). Empty clears it.
     func setFamilyName(_ raw: String) {

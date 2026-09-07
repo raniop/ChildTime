@@ -14,6 +14,10 @@ struct OnboardingView: View {
     @State private var confirmPIN: String = ""
     @State private var pinError: String?
     @State private var minutesPerAnswer: Int = 2
+    /// 👪 The family's name, asked for right at the start (Rani: every family
+    /// must have one, or the dashboard fills up with nameless families).
+    @State private var familyName: String = HouseholdManager.shared.familyNameShown
+        ?? HouseholdManager.shared.suggestedFamilyName ?? ""
 
     // Welcome animation state
     @StateObject private var welcomeCompanion = CompanionController()
@@ -222,9 +226,30 @@ struct OnboardingView: View {
             .frame(maxWidth: 560)
             .padding(.horizontal, AppSpacing.lg)
 
+            // 👪 One line, pre-filled from the account name, so it costs a glance.
+            HStack(spacing: 10) {
+                Text("👪").font(.system(size: 22))
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("איך קוראים למשפחה?")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.8))
+                    TextField("", text: $familyName,
+                              prompt: Text("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן").foregroundColor(.white.opacity(0.55)))
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.trailing)
+                        .submitLabel(.done)
+                }
+            }
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .glassPane(radius: AppRadius.large, shadow: false)
+            .frame(maxWidth: 560)
+            .padding(.horizontal, AppSpacing.lg)
+
             Spacer()
 
             JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
+                HouseholdManager.shared.setFamilyName(familyName)
                 step = .familyControls
             } label: {
                 Text("המשך")
