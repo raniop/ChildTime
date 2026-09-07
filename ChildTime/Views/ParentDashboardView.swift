@@ -135,13 +135,20 @@ struct ParentDashboardView: View {
                                     activationCard
                                     tofyPlusCard
                                 }
-                                PacksHomeSection { packToShow = $0 }
-                                if !push.authorized { notificationsBanner }
-                                if !choreStore.pendingApproval.isEmpty { choresApprovalBanner }
+                                // A child's request comes FIRST (approved mockup) — it is
+                                // the reason the parent opened the app.
                                 if !subs.isPremium, !remote.premiumRequests.isEmpty {
                                     premiumRequestBanner
                                 }
                                 ForEach(packRequestRows, id: \.child.id) { row in packRequestBanner(row.child, row.pack) }
+                                // The one-time doors (30-day worlds, packs) are the fallback
+                                // for a family that will not subscribe — shown only once the
+                                // gift has ended (founder knob), never beside it.
+                                if subs.isPremium || !ConversionConfig.shared.oneTimeAfterGiftOnly || household.household?.giftEndedAt != nil {
+                                    PacksHomeSection { packToShow = $0 }
+                                }
+                                if !push.authorized { notificationsBanner }
+                                if !choreStore.pendingApproval.isEmpty { choresApprovalBanner }
                             }
                             childrenGrid
 

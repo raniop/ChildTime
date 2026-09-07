@@ -104,6 +104,29 @@ final class HouseholdManager: ObservableObject {
                               frozenSeconds: nil, windowIsManual: false)
         devicesByChild[childID.uuidString] = [dev]
     }
+    /// Demo harness: put the family at a point of the gift journey so the
+    /// parent home / paywall render that state for screenshots and review.
+    /// `daysLeft` > 0 = a gift with that many days left; 0 = the gift ended;
+    /// `activation` = still free, this far toward the gift.
+    func seedDemoJourney(daysLeft: Int? = nil, activation: (days: Int, questions: Int)? = nil) {
+        var hh = household ?? Household(parentUIDs: ["demo"], createdBy: "demo")
+        let now = Date()
+        if let daysLeft {
+            if daysLeft > 0 {
+                let until = now.addingTimeInterval(Double(daysLeft) * 86_400 + 3_600)
+                hh.premiumUntil = until; hh.premiumSource = "gift"; hh.giftUntil = until
+                hh.giftStartedAt = until.addingTimeInterval(-14 * 86_400)
+            } else {
+                hh.premiumUntil = now.addingTimeInterval(-86_400); hh.premiumSource = "gift"
+                hh.giftUntil = hh.premiumUntil; hh.giftStartedAt = now.addingTimeInterval(-15 * 86_400)
+                hh.giftEndedAt = now.addingTimeInterval(-86_400)
+            }
+        }
+        if let a = activation {
+            hh.activation = ActivationProgress(days: a.days, questions: a.questions, needDays: 3, needQuestions: 40)
+        }
+        household = hh
+    }
     private var didReceiveChildren = false
 
     private func markLoaded() { isLoading = false }

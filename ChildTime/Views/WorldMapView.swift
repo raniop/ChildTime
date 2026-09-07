@@ -198,11 +198,14 @@ struct WorldMapView: View {
         guard let p = profiles.active else { return [] }
         // Only a pack launched THIS WEEK is news pinned next to טופי טיים; an
         // older one takes its turn among the rotating locked worlds instead.
-        return packStore.visiblePacks.filter { pack in
+        let offers = packStore.visiblePacks.filter { pack in
             guard !PackAccess.has(p, pack) else { return false }
             if packStore.isFirstDay(pack) { return true }
             return packStore.launchedAt[pack.id].map { Date().timeIntervalSince($0) < 7 * 86_400 } ?? false
         }
+        // Screenshot/demo runs treat every pack as launched today — show ONE
+        // so the free-tier home reads like a real family's.
+        return AppInfo.isDemoRun ? Array(offers.prefix(1)) : offers
     }
 
     /// Rani: the category cards shouldn't sit in the same spot forever — a child

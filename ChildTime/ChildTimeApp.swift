@@ -446,6 +446,20 @@ struct ChildTimeApp: App {
                     LearningHistoryStore.shared.seedDemo(childID: id)
                 }
             }
+        // 🎁 The conversion journey on the parent home (approved mockups):
+        case "activation": ParentDashboardView(isRoot: true)   // free, one active day from the gift
+            .onAppear { HouseholdManager.shared.seedDemoJourney(activation: (days: 2, questions: 64)) }
+        case "giftearly": ParentDashboardView(isRoot: true)    // gift, 11 days left
+            .onAppear { HouseholdManager.shared.seedDemoJourney(daysLeft: 11) }
+        case "giftlate": ParentDashboardView(isRoot: true)     // gift ending in 3 days → personal card
+            .onAppear { HouseholdManager.shared.seedDemoJourney(daysLeft: 3) }
+        case "giftended": ParentDashboardView(isRoot: true)    // gift over, child asked for a world
+            .onAppear {
+                HouseholdManager.shared.seedDemoJourney(daysLeft: 0)
+                if let id = ProfileStore.shared.activeID { RemoteSyncManager.shared.seedDemoPremiumRequest(childID: id, topic: "soccer") }
+            }
+        case "paywallgift": PaywallView()                      // the personal paywall, 2 days left
+            .onAppear { HouseholdManager.shared.seedDemoJourney(daysLeft: 2) }
         case "leaderboard": LeaderboardView().onAppear { LiveGameManager.shared.seedDemoInvite() }   // DEMO_SCREEN=leaderboard (+ a waiting invite)
         case "livegame": LiveGameDemoHost()      // DEMO_SCREEN=livegame — live quiz setup/flow
         case "gameinvite": WorldMapView().onAppear { LiveGameManager.shared.seedDemoInvite() }  // invite banner
