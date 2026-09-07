@@ -47,8 +47,14 @@ async function createPack([productId, kind, nameHe, descHe, priceILS, screenshot
   }
   // Localizations (he + en-US)
   const locs = await all(`/v2/inAppPurchases/${iap.id}/inAppPurchaseLocalizations`);
+  // English name per pack (the first version hard-coded "Soccer World" for all).
+  const EN = { soccer: "Soccer World", dinosaurs: "Dinosaurs", space: "Space & Stars", animals: "Animal World", sea: "Deep Sea",
+    gifted: "Gifted Prep", food: "Kitchen & Food Science", israel: "My Israel", music: "Music", body: "The Human Body",
+    vehicles: "Vehicles & Transport", flags: "Flags & Countries" };
+  const packKey = (productId.match(/\.pack\.([a-z]+)/) || [])[1];
+  const nameEn = EN[packKey] || nameHe;
   const want = [["he", kind === "sibling" ? `${nameHe} · ילד נוסף` : nameHe, descHe],
-                ["en-US", kind === "sibling" ? "Soccer World · another child" : "Soccer World", "Soccer question pack for one child (add-on)."]];
+                ["en-US", kind === "sibling" ? `${nameEn} · sibling` : nameEn, `${nameEn} pack, one child.`]];
   for (const [locale, name, description] of want) {
     if (locs.find((l) => l.attributes.locale === locale)) { console.log("loc exists", locale); continue; }
     await api("POST", "/v1/inAppPurchaseLocalizations", { data: { type: "inAppPurchaseLocalizations", attributes: { locale, name, description },
