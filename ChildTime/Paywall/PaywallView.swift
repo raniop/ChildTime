@@ -128,7 +128,7 @@ struct PaywallView: View {
     }
 
     private func personalCard(_ p: Pitch) -> some View {
-        VStack(alignment: .trailing, spacing: 8) {
+        VStack(alignment: .leading, spacing: 8) {
             if let fav = p.favorite {
                 Text("\(fav.world.emoji) \(p.name) \(p.girl ? "מָצְאָה" : "מָצָא") עוֹלָם שֶׁ\(p.girl ? "הִיא אוֹהֶבֶת" : "הוּא אוֹהֵב")")
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
@@ -151,8 +151,8 @@ struct PaywallView: View {
                 .foregroundStyle(AppColor.starGold)
         }
         .foregroundStyle(GlassInk.primary)
-        .frame(maxWidth: .infinity, alignment: .trailing)
-        .multilineTextAlignment(.trailing)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .multilineTextAlignment(.leading)
         .padding(16)
         .glassPane(radius: 22)
         .environment(\.layoutDirection, .rightToLeft)

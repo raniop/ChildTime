@@ -1379,7 +1379,7 @@ struct ParentDashboardView: View {
             let worlds = s.map { $0.topicAnswered.values.filter { $0 > 0 }.count } ?? 0
             let questions = s?.totalAnswered ?? 0
             let accuracy = (s?.totalAnswered ?? 0) > 0 ? Int((Double(s!.totalCorrect) / Double(s!.totalAnswered) * 100).rounded()) : 0
-            VStack(alignment: .trailing, spacing: 10) {
+            VStack(alignment: .leading, spacing: 10) {
                 Text("🎁 הַמַּתָּנָה מִסְתַּיֶּמֶת \(weekdayName(gift.until))")
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                 HStack(spacing: 8) {
@@ -1403,7 +1403,7 @@ struct ParentDashboardView: View {
                 .buttonStyle(.plain)
             }
             .foregroundStyle(GlassInk.primary)
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
             .background(LinearGradient(colors: [Color(hex: "FFE082").opacity(0.62), Color(hex: "FFB840").opacity(0.5)],
                                        startPoint: .topLeading, endPoint: .bottomTrailing),
@@ -1438,15 +1438,15 @@ struct ParentDashboardView: View {
     }
 
     private func journeyCard(title: String, body: String, button: String?, gold: Bool) -> some View {
-        VStack(alignment: .trailing, spacing: 6) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(title).font(.system(size: 15.5, weight: .heavy, design: .rounded))
             Text(body).font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .foregroundStyle(GlassInk.primary)
-        .frame(maxWidth: .infinity, alignment: .trailing)
-        .multilineTextAlignment(.trailing)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .multilineTextAlignment(.leading)
         .padding(14)
         .glassPane(radius: 22, tint: gold ? Color(hex: "FFD23F") : nil, shadow: false)
         .environment(\.layoutDirection, .rightToLeft)
