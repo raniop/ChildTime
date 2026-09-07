@@ -173,6 +173,25 @@ struct ChildTimeTests {
         #expect(Calendar.current.isDate(merged.dailyEarnedDate ?? .distantPast, inSameDayAs: today))
     }
 
+    /// The free tier shows a child a few locked worlds that rotate every few
+    /// days: the pick must be the SAME on both of the child's devices and on
+    /// every relaunch inside a window, a permutation (nothing lost), and
+    /// different in the next window — and never a world above the child's grade.
+    @MainActor @Test func freeTierRotation_isStableWithinWindowAndPermutes() {
+        let worlds = Worlds.all.filter { !$0.isBonusWorld }
+        let kid = UUID()
+        let day0 = Calendar.current.startOfDay(for: Date())
+        let a = WorldMapView.rotated(worlds, childID: kid, everyDays: 3, salt: 1, on: day0)
+        let b = WorldMapView.rotated(worlds, childID: kid, everyDays: 3, salt: 1, on: day0.addingTimeInterval(3600))
+        #expect(a.map(\.id) == b.map(\.id))                       // same window → same order
+        #expect(Set(a.map(\.id)) == Set(worlds.map(\.id)))        // a permutation
+        let later = WorldMapView.rotated(worlds, childID: kid, everyDays: 3, salt: 1, on: day0.addingTimeInterval(30 * 86_400))
+        #expect(later.map(\.id) != a.map(\.id))                   // a later window rotates
+        #expect(WorldSuitability.suits(.math, grade: 0))
+        #expect(!WorldSuitability.suits(.history, grade: 0))
+        #expect(WorldSuitability.suits(.history, grade: 2))
+    }
+
     @Test func minutesUnlockedToday_mergesAsMaxWithinSameDay() {
         let today = Date()
         var a = ProgressSnapshot(); a.dailyEarnedDate = today; a.minutesUnlockedToday = 60; a.revision = 10

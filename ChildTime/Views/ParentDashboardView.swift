@@ -125,7 +125,15 @@ struct ParentDashboardView: View {
                                 // when something actually needs the parent.
                                 homeHeader
                                 homeActionsRow
-                                tofyPlusCard
+                                // 🎁 The conversion journey (approved mockups): a card for
+                                // where the family is — before the gift, inside it, near
+                                // its end — instead of one static Tofy+ card.
+                                if let gift = giftState {
+                                    giftCards(gift)
+                                } else {
+                                    activationCard
+                                    tofyPlusCard
+                                }
                                 PacksHomeSection { packToShow = $0 }
                                 if !push.authorized { notificationsBanner }
                                 if !choreStore.pendingApproval.isEmpty { choresApprovalBanner }
@@ -1295,6 +1303,131 @@ struct ParentDashboardView: View {
     /// 👑 Tofy+ lives on the home (Rani) — the one warm pane: the family offer
     /// until they subscribe, a quiet status line once they have. The only way
     /// into the (parent-gated) paywall.
+    // MARK: - 🎁 Conversion journey cards (parent home)
+
+    /// The family holds Tofy+ as the engine's gift — how many days remain.
+    private struct GiftState { let until: Date; let daysLeft: Int }
+    private var giftState: GiftState? {
+        guard subs.isPremium, let hh = household.household, hh.premiumSource == "gift",
+              let until = hh.giftUntil ?? hh.premiumUntil, until > .now else { return nil }
+        let days = Int(ceil(until.timeIntervalSinceNow / 86_400))
+        return GiftState(until: until, daysLeft: max(0, days))
+    }
+
+    /// The child with the most play — the one the copy talks about.
+    private var starRow: (profile: Profile, snapshot: ProgressSnapshot)? {
+        rows.max { $0.snapshot.totalAnswered < $1.snapshot.totalAnswered }
+    }
+    private func girl(_ p: Profile) -> Bool { p.gender == .girl }
+    private func favoriteWorld(_ s: ProgressSnapshot) -> (world: World, questions: Int)? {
+        guard let (key, n) = s.topicAnswered.filter({ $0.value > 0 }).max(by: { $0.value < $1.value }),
+              let topic = Topic(rawValue: key), let world = Worlds.all.first(where: { $0.topic == topic }) else { return nil }
+        return (world, n)
+    }
+    private func shortDate(_ d: Date) -> String {
+        let f = DateFormatter(); f.locale = Locale(identifier: "he_IL"); f.dateFormat = "d.M"; return f.string(from: d)
+    }
+    private func weekdayName(_ d: Date) -> String {
+        let cal = Calendar.current
+        if cal.isDateInToday(d) { return "הַיּוֹם" }
+        if cal.isDateInTomorrow(d) { return "מָחָר" }
+        let f = DateFormatter(); f.locale = Locale(identifier: "he_IL"); f.dateFormat = "EEEE"
+        return "בְּיוֹם " + f.string(from: d).replacingOccurrences(of: "יום ", with: "")
+    }
+
+    @ViewBuilder private func giftCards(_ gift: GiftState) -> some View {
+        let names = rows.map(\.profile.name)
+        let who = names.count == 1 ? "לְ\(names[0])" : "לַיְלָדִים"
+        let star = starRow
+        if gift.daysLeft > 7 {
+            // Days 1–7: the gift card in place of the Tofy+ card. No selling yet.
+            journeyCard(title: "🎁 טוֹפִי+ בְּמַתָּנָה · עוֹד \(gift.daysLeft) יָמִים",
+                        body: "כָּל הָעוֹלָמוֹת פְּתוּחִים \(who) עַד \(shortDate(gift.until)). בְּלִי כַּרְטִיס, לֹא מִתְחַדֵּשׁ. בֵּינְתַיִם תִּרְאוּ מָה \(names.count == 1 ? (girl(rows[0].profile) ? "הִיא אוֹהֶבֶת" : "הוּא אוֹהֵב") : "הֵם אוֹהֲבִים").",
+                        button: nil, gold: false)
+            if let star, let fav = favoriteWorld(star.snapshot), fav.questions >= 20 {
+                journeyCard(title: "❤️ נִרְאֶה שֶׁ\(star.profile.name) \(girl(star.profile) ? "מָצְאָה" : "מָצָא") מַשֶּׁהוּ שֶׁ\(girl(star.profile) ? "הִיא אוֹהֶבֶת" : "הוּא אוֹהֵב")",
+                            body: "\(fav.world.emoji) \(fav.world.name) הוּא הַמָּקוֹם שֶׁ\(girl(star.profile) ? "הִיא חוֹזֶרֶת" : "הוּא חוֹזֵר") אֵלָיו הֲכִי הַרְבֵּה: \(fav.questions) שְׁאֵלוֹת.",
+                            button: nil, gold: false)
+            }
+        } else {
+            // Days 8–14: the card turns personal and grows its one button.
+            let s = star?.snapshot
+            let worlds = s.map { $0.topicAnswered.values.filter { $0 > 0 }.count } ?? 0
+            let questions = s?.totalAnswered ?? 0
+            let accuracy = (s?.totalAnswered ?? 0) > 0 ? Int((Double(s!.totalCorrect) / Double(s!.totalAnswered) * 100).rounded()) : 0
+            VStack(alignment: .trailing, spacing: 10) {
+                Text("🎁 הַמַּתָּנָה מִסְתַּיֶּמֶת \(weekdayName(gift.until))")
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                HStack(spacing: 8) {
+                    journeyStat("\(worlds)", worlds == 1 ? "עוֹלָם" : "עוֹלָמוֹת")
+                    journeyStat("\(questions)", "שְׁאֵלוֹת")
+                    journeyStat("\(accuracy)%", "הַצְלָחָה")
+                }
+                if let star, let fav = favoriteWorld(star.snapshot) {
+                    Text("\(fav.world.emoji) הַתְּחוּם הָאָהוּב: \(fav.world.name) · \(fav.questions) שְׁאֵלוֹת")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                }
+                Button { Haptic.light(); showingPaywall = true } label: {
+                    Text("הַשְׁאִירוּ \(who) אֶת כָּל הָעוֹלָמוֹת פְּתוּחִים")
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "4B3FBF"))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.92)))
+                }
+                .buttonStyle(.plain)
+            }
+            .foregroundStyle(GlassInk.primary)
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(14)
+            .background(LinearGradient(colors: [Color(hex: "FFE082").opacity(0.62), Color(hex: "FFB840").opacity(0.5)],
+                                       startPoint: .topLeading, endPoint: .bottomTrailing),
+                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .strokeBorder(Color(hex: "FFEBAA").opacity(0.7), lineWidth: 1))
+            .shadow(color: .black.opacity(0.22), radius: 14, y: 8)
+            .environment(\.layoutDirection, .rightToLeft)
+        }
+    }
+
+    /// Before the gift: proof of value, and how close the family is to it.
+    @ViewBuilder private var activationCard: some View {
+        if !subs.isPremium, let hh = household.household, hh.giftStartedAt == nil,
+           let a = hh.activation, a.questions > 0, let star = starRow {
+            let name = star.profile.name, g = girl(star.profile)
+            let next: String = a.daysLeft > 0
+                ? "עוֹד \(a.daysLeft == 1 ? "יוֹם פָּעִיל אֶחָד" : "\(a.daysLeft) יָמִים פְּעִילִים") וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁"
+                : "עוֹד \(a.questionsLeft) שְׁאֵלוֹת וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁"
+            journeyCard(title: "🎉 \(name) כְּבָר \(g ? "עָנְתָה" : "עָנָה") עַל \(a.questions) שְׁאֵלוֹת",
+                        body: next, button: nil, gold: false)
+        }
+    }
+
+    private func journeyStat(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value).font(.system(size: 18, weight: .heavy, design: .rounded)).monospacedDigit()
+            Text(label).font(.system(size: 10.5, weight: .semibold, design: .rounded)).foregroundStyle(GlassInk.secondary)
+        }
+        .frame(maxWidth: .infinity).padding(.vertical, 8)
+        .glassInset(radius: 12)
+    }
+
+    private func journeyCard(title: String, body: String, button: String?, gold: Bool) -> some View {
+        VStack(alignment: .trailing, spacing: 6) {
+            Text(title).font(.system(size: 15.5, weight: .heavy, design: .rounded))
+            Text(body).font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(GlassInk.primary)
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .multilineTextAlignment(.trailing)
+        .padding(14)
+        .glassPane(radius: 22, tint: gold ? Color(hex: "FFD23F") : nil, shadow: false)
+        .environment(\.layoutDirection, .rightToLeft)
+    }
+
     @ViewBuilder private var tofyPlusCard: some View {
         if subs.isPremium {
             Button { Haptic.light(); showingPaywall = true } label: {

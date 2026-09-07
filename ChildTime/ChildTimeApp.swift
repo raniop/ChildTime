@@ -227,6 +227,7 @@ struct ChildTimeApp: App {
                     if settings.deviceRole != .parent || KidModeManager.shared.active {
                         progress.applyDailyRolloverIfNeeded()   // release minutes banked for "tomorrow"
                     }
+                    ConversionConfig.shared.start()   // what a free child sees (admin knobs)
                     enforceShieldStateIfNeeded()
                 }
                 .onChangeCompat(of: scenePhase) { _, phase in

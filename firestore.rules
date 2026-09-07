@@ -137,6 +137,11 @@ service cloud.firestore {
     match /packs/{id} {
       allow read: if signedIn();
     }
+    // The conversion knobs (how many locked worlds a free child sees, rotation).
+    // Read by every signed-in device; written only from the admin functions.
+    match /config/{id} {
+      allow read: if signedIn();
+    }
     // ⚽ First-party sales ledger for the founder dashboard. A REAL parent
     // account writes its own purchase once; nobody reads it from the app.
     match /packPurchases/{id} {

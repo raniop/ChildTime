@@ -1644,6 +1644,29 @@ exports.adminSetDemoFlag = onCall(
 
 // Set / clear the admin-facing display label of a household (shown on the
 // families page — e.g. naming a family whose parents have no account name).
+// 🌍 Open one world for a family's children — a pack or a base-world pass —
+// for N days (0 = forever), remotely, as a gift. Mirrors the client's
+// grantPack write so every device picks it up through the child doc.
+exports.adminGrantWorld = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const hhID = String(request.data?.householdID || ""), itemID = String(request.data?.itemID || "");
+  const days = Math.max(0, Math.min(3650, Number(request.data?.days || 0)));
+  if (!hhID || !itemID) throw new HttpsError("invalid-argument", "householdID/itemID");
+  const hh = await db.collection("households").doc(hhID).get();
+  if (!hh.exists) throw new HttpsError("not-found", "household");
+  const kids = Array.isArray(request.data?.childIDs) && request.data.childIDs.length ? request.data.childIDs : (hh.data().childIDs || []);
+  const now = Date.now() / 1000;
+  for (const cid of kids) {
+    const ref = db.collection("children").doc(String(cid)); const c = await ref.get(); if (!c.exists) continue;
+    const fields = { packs: admin.firestore.FieldValue.arrayUnion(itemID), packRequestedAt: admin.firestore.FieldValue.delete(), packRequestedID: admin.firestore.FieldValue.delete() };
+    if (days > 0) { const cur = Number(((c.data() || {}).packExpiry || {})[itemID] || 0); fields[`packExpiry.${itemID}`] = Math.max(cur, now) + days * 86400; }
+    else fields[`packExpiry.${itemID}`] = admin.firestore.FieldValue.delete();
+    await ref.update(fields);
+  }
+  console.log("[adminGrantWorld]", email, hhID, itemID, days ? days + "d" : "forever", kids.length, "kids");
+  return { ok: true, children: kids.length };
+});
+
 exports.adminSetFamilyLabel = onCall(
   { timeoutSeconds: 30, memory: "256MiB" },
   async (request) => {
@@ -2115,10 +2138,10 @@ exports.dispatchCampaigns = onSchedule(
 
 const CONVERSION_DEFAULTS = {
   activationDays: 3, activationQuestions: 40, giftDays: 14,
-  guestWorlds: 2, guestRotateDays: 7, lockedShown: 3, lockedRotateDays: 3,
+  guestWorlds: 0, guestRotateDays: 7, lockedShown: 5, lockedRotateDays: 3,
   giftPushDays: [4, 9, 12, 13, 14], giftPushHour: 17,
   oneTimeAfterGiftOnly: true, paywall: "personal", storeKitTrial: false,
-  guestTopics: ["math", "reading"],
+  guestTopics: [],
   copyActivation: "🎁 פתחנו ל{שם} את טופי+ במתנה · {שם} עבר/ה {שאלות} שאלות, אז ל־{ימים} הימים הקרובים כל העולמות פתוחים. בלי כרטיס, לא מתחדש. מסתיים ב־{תאריך}.",
   copyTwoDays: "⏰ נשארו יומיים לטופי+ של {שם} · {עולם אהוב}: {חזרות} חזרות השבוע. השאירו את כל העולמות פתוחים, {מחיר חודשי בשנתי} לחודש.",
 };
@@ -2222,6 +2245,7 @@ async function computeJourney() {
     }
     if (hh.renewedAt) funnel.renewed += 1;
     households[h.id] = { state, premium, gift, daysLeft, premiumUntil, activated, played, lastActive, familyName: hh.familyName || hh.familyLabel || null,
+      activeDays: Math.max(0, ...kidsOf.map((c) => c.everActiveDays || 0)), questions: Math.max(0, ...kidsOf.map((c) => c.everQuestions || 0)),
       plan: premium && !gift ? (daysLeft > 60 ? "yearly" : "monthly") : null, purchaseSource: hh.purchaseSource || null, kids: kidsOf.map((c) => c.id) };
   });
   // today + series
@@ -2410,6 +2434,12 @@ async function runConversionEngine() {
     const totalQ = kids.reduce((s, k) => s + (k.questions30 || 0), 0);
     const fav = star && star.favorite;
     const vars = { "שם": name, "שאלות": totalQ, "ימים": cfg.giftDays, "עולם אהוב": fav ? fav.label : "העולם האהוב", "חזרות": fav ? fav.days : 0, "מחיר חודשי בשנתי": "₪16.60" };
+    // 0. still on the free tier → keep the parent's "עוד יום פעיל אחד" card honest
+    if (!h.activated && !hh.giftStartedAt && !hh.purchasedAt && hh.premiumSource !== "paid") {
+      const a = { days: h.activeDays || 0, questions: h.questions || 0, needDays: cfg.activationDays, needQuestions: cfg.activationQuestions };
+      const cur = hh.activation || {};
+      if (["days", "questions", "needDays", "needQuestions"].some((k) => cur[k] !== a[k])) await ref.set({ activation: a }, { merge: true });
+    }
     // 1. activation → gift (only families that never had a gift and are not paying)
     if (h.activated && premiumUntil <= now && !hh.giftStartedAt && !hh.giftEndedAt && !hh.purchasedAt && hh.premiumSource !== "paid") {
       const until = now + cfg.giftDays * 86400;

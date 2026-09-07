@@ -37,6 +37,15 @@ struct Household: Codable, Identifiable, Equatable {
     /// Apple ID is signed in there (no dependence on Apple Family Sharing).
     /// Far-future date = lifetime. Optional so older docs decode.
     var premiumUntil: Date? = nil
+    /// 🎁 How the family got Tofy+: "gift" (the 14-day gift the conversion
+    /// engine opens after activation) or "paid". Written by the server only;
+    /// the parent home reads it to show the gift card instead of "פעיל".
+    var premiumSource: String? = nil
+    var giftUntil: Date? = nil
+    var giftStartedAt: Date? = nil
+    /// Progress toward the activation gift ("עוד יום פעיל אחד…"), refreshed
+    /// hourly by the engine while the family is still on the free tier.
+    var activation: ActivationProgress? = nil
     /// 💰 Family policy: may kids earn MONEY on chores, or only 🎮 play-minutes?
     /// Some parents don't want to hand out cash (Rani). nil / missing = enabled
     /// (default, so no existing family changes). Set only by a parent; read by
@@ -64,6 +73,16 @@ struct Household: Codable, Identifiable, Equatable {
         self.parentPinHash = parentPinHash
         self.childOrder = childOrder
     }
+}
+
+/// Server-computed progress toward the activation gift.
+struct ActivationProgress: Codable, Equatable {
+    var days: Int = 0
+    var questions: Int = 0
+    var needDays: Int = 3
+    var needQuestions: Int = 40
+    var daysLeft: Int { max(0, needDays - days) }
+    var questionsLeft: Int { max(0, needQuestions - questions) }
 }
 
 /// A parent's account-level record. Sensitive bits (PIN hash, 2FA secret) live

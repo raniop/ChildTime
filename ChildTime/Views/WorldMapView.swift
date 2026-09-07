@@ -22,6 +22,7 @@ struct WorldMapView: View {
     /// A pack the family doesn't have: the child can ask a parent (never buy).
     @State private var packOffer: QuestionPack? = nil
     @ObservedObject private var packStore = PackStore.shared
+    @ObservedObject private var conv = ConversionConfig.shared
     @ObservedObject private var campaignTracker = CampaignTracker.shared
     @State private var showDailyChest = false
     @State private var challengeCelebration: String? = nil
@@ -108,13 +109,78 @@ struct WorldMapView: View {
         else { Haptic.light(); showingPaywall = true }
     }
 
+    /// A world the parent bought for this child (a pack, or a 30-day pass on a
+    /// base world) — open with or without Tofy+.
+    private func isOwned(_ world: World) -> Bool {
+        guard let item = world.topic.pack ?? WorldPasses.pass(for: world.topic), let p = profiles.active else { return false }
+        return PackAccess.has(p, item)
+    }
+
+    /// What a family WITHOUT Tofy+ sees (Rani): טופי טיים is the only open
+    /// world. Worlds the parent bought stay. Of everything else the child sees
+    /// exactly `lockedShown` locked worlds — chosen for their grade, rotating
+    /// every few days so the home never goes stale — and the rest are not shown
+    /// at all. A world the child already played (a gift that ended) comes
+    /// first, so what they loved is one tap from asking. Guests (open for free)
+    /// exist only if the founder turns them on.
+    private struct FreeTier { var owned: [World] = []; var guests: [World] = []; var locked: [World] = []
+        var guestIDs: Set<String> { Set(guests.map(\.id)) } }
+
+    private var freeTier: FreeTier {
+        var tier = FreeTier()
+        guard !subs.isPremium else { return tier }
+        let allowed = profiles.active?.playableTopics ?? Set(Topic.core)
+        let grade = profiles.active?.effectiveGrade ?? 1
+        let offered = Set(packOffers.map(\.id))
+        let candidates = Worlds.all.filter { w in
+            guard !w.isBonusWorld, !isOwned(w), WorldSuitability.suits(w.topic, grade: grade) else { return false }
+            if let pack = w.topic.pack { return !offered.contains(pack.id) && packStore.visiblePacks.contains { $0.id == pack.id } }
+            return allowed.contains(w.topic)
+        }
+        tier.owned = Worlds.all.filter { !$0.isBonusWorld && isOwned($0) }
+        if conv.guestWorlds > 0 {
+            let base = candidates.filter { $0.topic.pack == nil }
+            let fixed = conv.guestTopics.compactMap(Topic.init(rawValue:))
+            let pick = fixed.isEmpty
+                ? Self.rotated(base, childID: profiles.activeID, everyDays: conv.guestRotateDays, salt: 2)
+                : base.filter { fixed.contains($0.topic) }
+            tier.guests = Array(pick.prefix(conv.guestWorlds))
+        }
+        let pool = candidates.filter { c in !tier.guests.contains { $0.id == c.id } }
+        let played = pool.filter { progress.progress(in: $0.id) > 0 }
+            .sorted { progress.progress(in: $0.id) > progress.progress(in: $1.id) }
+        let rest = Self.rotated(pool.filter { p in !played.contains { $0.id == p.id } },
+                                childID: profiles.activeID, everyDays: conv.lockedRotateDays, salt: 1)
+        tier.locked = Array((played + rest).prefix(conv.lockedShown))
+        return tier
+    }
+
+    /// A stable shuffle that changes only every `everyDays` days — the same on
+    /// the child's iPhone and iPad, unchanged by a relaunch.
+    static func rotated(_ worlds: [World], childID: UUID?, everyDays: Int, salt: UInt64, on date: Date = Date()) -> [World] {
+        guard worlds.count > 1 else { return worlds }
+        let window = Int(date.timeIntervalSinceReferenceDate / 86_400) / max(1, everyDays)
+        var h: UInt64 = 0xCBF29CE484222325
+        for b in (childID?.uuidString ?? "-").utf8 { h = (h ^ UInt64(b)) &* 0x100000001B3 }
+        var rng = SeededRandom(seed: h ^ UInt64(bitPattern: Int64(window &* 0x9E3779B1)) ^ (salt &* 0x9E3779B97F4A7C15))
+        var out = worlds
+        for i in stride(from: out.count - 1, to: 0, by: -1) { out.swapAt(i, Int(rng.next() % UInt64(i + 1))) }
+        return out
+    }
+
     private var enabledWorlds: [World] {
         let allowed = profiles.active?.playableTopics ?? Set(Topic.core)
-        let shown = Worlds.all.filter { world in
+        let grade = profiles.active?.effectiveGrade ?? 1
+        var shown = Worlds.all.filter { world in
             // 💫 The arena isn't a topic — always on, except for pre-readers
             // (the extra-hard pool is text-based).
-            if world.isBonusWorld { return (profiles.active?.effectiveGrade ?? 1) >= 1 }
+            if world.isBonusWorld { return grade >= 1 }
             return allowed.contains(world.topic)
+        }
+        if !subs.isPremium {
+            let tier = freeTier
+            let arena = shown.filter(\.isBonusWorld)
+            shown = tier.owned + tier.guests + tier.locked + arena
         }
         let ordered = Self.orderForToday(shown, childID: profiles.activeID)
         // ⚽ A pack the child hasn't opened yet sits FIRST, with its "חדש!" badge,
@@ -130,7 +196,13 @@ struct WorldMapView: View {
     /// each, at the END of the grid; the tap explains and lets the child ask.
     private var packOffers: [QuestionPack] {
         guard let p = profiles.active else { return [] }
-        return packStore.visiblePacks.filter { !PackAccess.has(p, $0) }
+        // Only a pack launched THIS WEEK is news pinned next to טופי טיים; an
+        // older one takes its turn among the rotating locked worlds instead.
+        return packStore.visiblePacks.filter { pack in
+            guard !PackAccess.has(p, pack) else { return false }
+            if packStore.isFirstDay(pack) { return true }
+            return packStore.launchedAt[pack.id].map { Date().timeIntervalSince($0) < 7 * 86_400 } ?? false
+        }
     }
 
     /// Rani: the category cards shouldn't sit in the same spot forever — a child
@@ -328,23 +400,33 @@ struct WorldMapView: View {
                                     let owned = item.map { it in profiles.active.map { p in PackAccess.has(p, it) } ?? false } ?? false
                                     let pack: QuestionPack? = owned ? item : nil
                                     let packNew = pack.map { p in profiles.activeID.map { !PackKidState.isOpened(p.id, childID: $0) } ?? false } ?? false
+                                    // 🌟 A free "guest" world (founder's knob) plays like Tofy+.
+                                    let isGuest = !subs.isPremium && pack == nil && freeTier.guestIDs.contains(world.id)
+                                    let locked = !subs.isPremium && pack == nil && !isGuest
+                                    let room = progress.progress(in: world.id)
+                                    // A locked world the child ALREADY played (their gift ended):
+                                    // progress kept, and the foot says so — no failure language.
+                                    let girl = profiles.active?.gender == .girl
+                                    let continueFoot: String? = locked && room > 0
+                                        ? "חֶדֶר \(max(1, min(room + 1, world.rooms)))/\(world.rooms) · \(girl ? "רוֹצָה" : "רוֹצֶה") לְהַמְשִׁיךְ?" : nil
                                     WorldCard(
                                         // Premium unlocks every world (that's what the
                                         // subscription buys). Stars are now a spendable
                                         // currency, so they no longer gate worlds —
                                         // otherwise buying cosmetics could re-lock them.
                                         world: world,
-                                        isUnlocked: subs.isPremium || pack != nil,
-                                        currentRoom: progress.progress(in: world.id),
+                                        isUnlocked: subs.isPremium || pack != nil || isGuest,
+                                        currentRoom: room,
                                         starsHeld: progress.stars,
-                                        subscriptionLocked: !subs.isPremium && pack == nil,
-                                        badgeOverride: packNew ? "✨ חָדָשׁ!" : nil,
+                                        subscriptionLocked: locked,
+                                        badgeOverride: packNew ? "✨ חָדָשׁ!" : (isGuest ? "🌟 אוֹרֵחַ הַשָּׁבוּעַ" : nil),
+                                        footOverride: continueFoot,
                                         pulse: pack.map { p in profiles.activeID.map { PackKidState.isFirstDay(p.id, childID: $0) } ?? false } ?? false
                                     ) {
                                         if let pack, let cid = profiles.activeID {
                                             PackKidState.markOpened(pack.id, childID: cid)
                                             selectedWorld = world
-                                        } else if subs.isPremium {
+                                        } else if subs.isPremium || isGuest {
                                             selectedWorld = world
                                         } else if true {
                                             // Rani: the kid screen never sells — a

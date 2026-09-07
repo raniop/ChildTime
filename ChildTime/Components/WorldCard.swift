@@ -15,6 +15,9 @@ struct WorldCard: View {
     var subscriptionLocked: Bool = false
     /// e.g. "✨ חָדָשׁ!" on a pack the child hasn't opened yet (wins over 👑).
     var badgeOverride: String? = nil
+    /// Replaces the "חֶדֶר N/10" foot — a locked world the child already played
+    /// ("חֶדֶר 6/10 · רוֹצֶה לְהַמְשִׁיךְ?") after a gift ended.
+    var footOverride: String? = nil
     /// First-day glow on a freshly gifted pack — the border and badge breathe.
     var pulse: Bool = false
     @State private var glow = false
@@ -32,7 +35,7 @@ struct WorldCard: View {
                              subtitle: world.isBonusWorld ? "כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת"
                                 : (world.topic.pack?.tagline ?? world.topic.displayName))
                 Spacer(minLength: 6)
-                HomeTileFoot(label: "חֶדֶר \(max(1, min(currentRoom + 1, world.rooms)))/\(world.rooms)",
+                HomeTileFoot(label: footOverride ?? "חֶדֶר \(max(1, min(currentRoom + 1, world.rooms)))/\(world.rooms)",
                              frac: Double(currentRoom) / Double(max(1, world.rooms)))
             }
             .homeTileChrome(tint: world.glowColor, compact: isCompact)
