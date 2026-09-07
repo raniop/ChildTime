@@ -50,7 +50,7 @@ async function createPack([productId, kind, nameHe, descHe, priceILS, screenshot
   // English name per pack (the first version hard-coded "Soccer World" for all).
   const EN = { soccer: "Soccer World", dinosaurs: "Dinosaurs", space: "Space & Stars", animals: "Animal World", sea: "Deep Sea",
     gifted: "Gifted Prep", food: "Kitchen & Food Science", israel: "My Israel", music: "Music", body: "The Human Body",
-    vehicles: "Vehicles & Transport", flags: "Flags & Countries" };
+    vehicles: "Vehicles & Transport", flags: "Flags & Countries", tishrei: "Tishrei Holidays" };
   const packKey = (productId.match(/\.pack\.([a-z]+)/) || [])[1];
   const nameEn = EN[packKey] || nameHe;
   const want = [["he", kind === "sibling" ? `${nameHe} · ילד נוסף` : nameHe, descHe],
