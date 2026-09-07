@@ -758,13 +758,21 @@ exports.onHelpRequest = onDocumentCreated("helpRequests/{id}", async (event) => 
   const data = event.data && event.data.data();
   if (!data || !data.parentUID) return;
 
-  const tokens = await tokensForUID(data.parentUID);
+  // "all" = the child had no named parent to pick → every parent device in the
+  // household (minus the asking device itself).
+  const tokens = data.parentUID === "all"
+    ? await tokensForHousehold(data.householdID, data.fromUID || null)
+    : await tokensForUID(data.parentUID);
   if (!tokens.length) return;
 
   const childName = data.childName || "הילד";
+  const f = data.gender === "girl";
+  // The body shows the two options too, so a parent who never expands the
+  // notification (no action buttons visible) still knows what is being asked.
+  const body = `${String(data.question || "")}\nא׳: ${String(data.optionA || "")} · ב׳: ${String(data.optionB || "")}`;
   await admin.messaging().sendEachForMulticast({
     tokens,
-    notification: { title: `🧠 ${childName} ביקש עזרה`, body: String(data.question || "") },
+    notification: { title: `🧠 ${childName} ${f ? "ביקשה" : "ביקש"} עזרה בשאלה`, body },
     data: {
       type: "parentHelp",
       helpRequestID: event.params.id,

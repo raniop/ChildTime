@@ -56,6 +56,7 @@ struct ParentDashboardView: View {
     @State private var packRequestChild: Profile? = nil
     @ObservedObject private var campaigns = CampaignTracker.shared
     @ObservedObject private var subs = SubscriptionManager.shared
+    @ObservedObject private var parentHelp = ParentHelpManager.shared
     @State private var insightsProfile: Profile? = nil
     @StateObject private var choreStore = ChoreStore.shared
     @State private var screenTimeProfile: Profile?
@@ -128,6 +129,9 @@ struct ParentDashboardView: View {
                                 // when something actually needs the parent.
                                 homeHeader
                                 homeActionsRow
+                                // 🧠 A child is stuck on a question RIGHT NOW — above
+                                // everything else; it is live and it is short.
+                                ForEach(parentHelp.pendingForParent) { req in helpRequestBanner(req) }
                                 // 🎁 The conversion journey (approved mockups): a card for
                                 // where the family is — before the gift, inside it, near
                                 // its end — instead of one static Tofy+ card.
@@ -361,11 +365,15 @@ struct ParentDashboardView: View {
             .sheet(item: $qrChild) { child in
                 childQRSheet(for: child)
             }
+            .sheet(item: $parentHelp.promptedRequest) { req in
+                ParentHelpAnswerView(request: req)
+            }
             .onAppear {
                 refreshTrigger &+= 1
                 lastRefreshed = .now
                 remote.refreshNow()   // pull fresh child state on open
                 choreStore.startIfNeeded()   // 🧹 live chores + approval banner
+                parentHelp.startParentListener(householdID: household.household?.id)   // 🧠 open help requests
                 // ☀️ September: a full-screen "great school year" party on the
                 // parent side too (Rani) — once per school year.
                 if AppInfo.isDemoRun {
@@ -544,6 +552,32 @@ struct ParentDashboardView: View {
             return "\(p.name) \(p.gender == .girl ? "רוצה" : "רוצה") \(ended ? "להמשיך" : "ללמוד") \(topic.displayName) \(topic.emoji)"
         }
         return names.count == 1 ? "\(names[0]) רוצה טופי+ 👑" : "\(names.joined(separator: " ו")) רוצים טופי+ 👑"
+    }
+
+    /// 🧠 "נועה מבקשת עזרה בשאלה" — tap opens the answer sheet.
+    private func helpRequestBanner(_ req: HelpRequest) -> some View {
+        Button {
+            Haptic.light()
+            parentHelp.promptedRequest = req
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(req.isGirl ? "\(req.childName) מבקשת עזרה בשאלה" : "\(req.childName) מבקש עזרה בשאלה")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    Text(req.question)
+                        .font(.system(size: 12.5, weight: .medium, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .lineLimit(2)
+                }
+                Text("🧠").font(.system(size: 26))
+            }
+            .foregroundStyle(GlassInk.primary)
+            .padding(14)
+            .glassPane(radius: 20, strength: 0.18, tint: Color(hex: "7A5CFF"))
+        }
+        .buttonStyle(.plain)
     }
 
     private var premiumRequestBanner: some View {

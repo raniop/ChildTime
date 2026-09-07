@@ -15,11 +15,7 @@ struct ChildGradePickerView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
-            FloatingOrbs(
-                colors: [AppColor.gemPurple, AppColor.dreamyTeal, AppColor.starGold],
-                count: 6, maxSize: 240, opacity: 0.4
-            )
+            GlassBackdrop()
             SparkleField(count: 20, size: 12)
 
             VStack(spacing: AppSpacing.lg) {

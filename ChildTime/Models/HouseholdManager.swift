@@ -781,6 +781,11 @@ final class HouseholdManager: ObservableObject {
             .filter { !$0.value.isEmpty }
             .map { (uid: $0.key, name: $0.value) }
             .sorted { $0.name < $1.name }
+        // 🧠 A parent device keeps an eye on open help requests as soon as the
+        // household is known (a cold launch from a tapped notification included).
+        if ParentSettings.shared.deviceRole == .parent {
+            ParentHelpManager.shared.startParentListener(householdID: hh.id)
+        }
     }
     #endif
 

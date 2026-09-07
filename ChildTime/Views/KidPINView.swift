@@ -51,7 +51,7 @@ struct KidPINView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
+            GlassBackdrop()
             SparkleField(count: 14, size: 12)
 
             VStack(spacing: 0) {
@@ -220,7 +220,7 @@ struct PlayPINForgotView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
+            GlassBackdrop()
             SparkleField(count: 12, size: 12)
 
             VStack(spacing: AppSpacing.lg) {
@@ -249,7 +249,7 @@ struct PlayPINForgotView: View {
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity).padding(.vertical, 15)
-                            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
                             .glow(AppColor.starGold, radius: 10)
                     }
                     .buttonStyle(.juicy)
@@ -305,7 +305,7 @@ struct PlayPINManageView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.dreamy.ignoresSafeArea()
+            GlassBackdrop()
             SparkleField(count: 12, size: 12)
 
             VStack(spacing: AppSpacing.lg) {
@@ -329,7 +329,7 @@ struct PlayPINManageView: View {
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity).padding(.vertical, 15)
-                            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
                             .glow(AppColor.starGold, radius: 10)
                     }
                     .buttonStyle(.juicy)

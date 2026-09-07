@@ -922,7 +922,9 @@ struct QuestionRunnerView: View {
         usedHintThisQuestion = false
         assistOfferedThisQuestion = false
         receivedHelpThisQuestion = false
-        parentHelp.stopListening()
+        // A request still open for the previous question is closed so the
+        // parent's banner doesn't offer help on a question that's gone.
+        parentHelp.expireActiveRequest()
 
         // Re-ask a previously-wrong question every few questions (spaced out) —
         // the only repeat we allow.
@@ -1044,8 +1046,14 @@ struct QuestionRunnerView: View {
     /// A parent answered the help notification. Remove the WRONG option of the
     /// two they were shown (never the correct answer — safety), and celebrate.
     private func applyParentHelp() {
-        guard let reply = parentHelp.lastReply, let q = current, !showFeedback else {
-            parentHelp.lastReply = nil; return
+        guard let reply = parentHelp.lastReply else { return }
+        // The parent answered after the kid already moved on (or already
+        // answered this one): say so warmly instead of silently dropping it.
+        guard let q = current, !showFeedback, parentHelp.activeQuestion == nil || parentHelp.activeQuestion == q.prompt else {
+            parentHelp.lastReply = nil
+            parentHelp.stopListening()
+            companion.wow("💌 הָעֶזְרָה הִגִּיעָה — אֲבָל כְּבָר הִתְקַדַּמְנוּ הָלְאָה!")
+            return
         }
         let correct = q.correctIndex < q.options.count ? q.options[q.correctIndex] : ""
         // The wrong one of the two shown to the parent (= whichever isn't correct).
@@ -1053,6 +1061,8 @@ struct QuestionRunnerView: View {
               let idx = q.options.firstIndex(of: toRemove),
               (feedbackForIndex[idx] ?? .normal) == .normal else {
             parentHelp.lastReply = nil
+            parentHelp.stopListening()
+            companion.wow("💌 הָעֶזְרָה הִגִּיעָה! הַתְּשׁוּבָה הַזֹּאת כְּבָר יְרוּקָה 😉")
             return
         }
         withAnimation(.spring(response: 0.45, dampingFraction: 0.65)) {

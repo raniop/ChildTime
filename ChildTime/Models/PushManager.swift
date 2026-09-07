@@ -238,21 +238,7 @@ extension PushManager {
         let kept = keptA ? optionA : optionB
         let removed = keptA ? optionB : optionA
         guard !kept.isEmpty, !removed.isEmpty else { return }
-
-        #if canImport(FirebaseFirestore)
-        do {
-            try await Firestore.firestore().collection("helpRequests").document(requestID).setData([
-                "keptOption": kept,
-                "removedOption": removed,
-                "status": "answered",
-                "respondedByUID": AuthManager.shared.userID ?? "",
-                "respondedAt": Date().timeIntervalSince1970,
-            ], merge: true)
-        } catch {
-            print("[ParentHelp] write-back failed: \(error.localizedDescription)")
-            return
-        }
-        #endif
+        guard await ParentHelpManager.shared.answer(requestID: requestID, kept: kept, removed: removed) else { return }
 
         // Quietly confirm to the parent.
         let childName = (userInfo["childName"] as? String) ?? "הילד"
@@ -338,6 +324,12 @@ extension PushManager: UNUserNotificationCenterDelegate {
             // attributed to it ("פוש → רכישה" in the founder dashboard).
             if let t = info["type"] as? String, t == "gift-day" || t == "gift-start" {
                 UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "paywall.pushTapAt")
+            }
+            // 🧠 The help notification itself was tapped (not one of its buttons):
+            // the parent lands in the app → show the answer sheet right away.
+            if info["type"] as? String == "parentHelp",
+               actionID == UNNotificationDefaultActionIdentifier {
+                ParentHelpManager.shared.prompt(fromPush: info)
             }
             // Awaited (not fire-and-forget) so the Firestore write-back completes
             // before iOS suspends the briefly-woken background app — otherwise the

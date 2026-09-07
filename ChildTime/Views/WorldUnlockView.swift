@@ -17,7 +17,8 @@ struct WorldUnlockView: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                world.gradient.gradient.ignoresSafeArea()
+                GlassBackdrop()
+                world.glowColor.opacity(0.22).ignoresSafeArea()   // a whisper of the world's colour
                 SparkleField(count: 50, size: 16)
                 FancyConfetti(trigger: confettiTrigger)
 
@@ -53,12 +54,16 @@ struct WorldUnlockView: View {
                         }
 
                         if stage >= 3 {
-                            JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-                                onContinue()
-                            } label: {
+                            Button { Haptic.light(); onContinue() } label: {
                                 Text("בּוֹא נַחְקוֹר!")
-                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
                             }
+                            .buttonStyle(.juicy)
+                            .frame(maxWidth: 420)
                             .padding(.horizontal, AppSpacing.lg)
                             .transition(.opacity)
                         }

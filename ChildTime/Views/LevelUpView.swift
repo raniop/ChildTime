@@ -18,12 +18,7 @@ struct LevelUpView: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                LinearGradient(
-                    colors: [Color.black, AppColor.gemPurple.opacity(0.7), .black],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                GlassBackdrop()
                 SparkleField(count: 40, size: 16)
                 FancyConfetti(trigger: confettiTrigger)
 
@@ -67,12 +62,16 @@ struct LevelUpView: View {
                             .padding(.horizontal, AppSpacing.lg)
                         }
 
-                        JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-                            onContinue()
-                        } label: {
+                        Button { Haptic.light(); onContinue() } label: {
                             Text("הַמְשֵׁךְ")
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .font(.system(size: 22, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
                         }
+                        .buttonStyle(.juicy)
+                        .frame(maxWidth: 420)
                         .padding(.horizontal, AppSpacing.lg)
                         .opacity(titleVisible ? 1 : 0)
                         .animation(.easeIn(duration: 0.4), value: titleVisible)

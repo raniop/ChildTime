@@ -458,6 +458,23 @@ struct ChildTimeApp: App {
                 HouseholdManager.shared.seedDemoJourney(daysLeft: 0)
                 if let id = ProfileStore.shared.activeID { RemoteSyncManager.shared.seedDemoPremiumRequest(childID: id, topic: "soccer") }
             }
+        case "dailychest": DailyChestView()                    // DEMO_SCREEN=dailychest — 🎁 the daily gift box
+        case "levelup": LevelUpView(newLevel: 5, onContinue: {})   // DEMO_SCREEN=levelup
+        case "worldunlock": WorldUnlockView(world: Worlds.all[1], onContinue: {})   // DEMO_SCREEN=worldunlock
+        case "gradepicker":                                    // DEMO_SCREEN=gradepicker
+            if let p = ProfileStore.shared.active { ChildGradePickerView(profile: p, onPicked: { _ in }) }
+        case "kidpin":                                         // DEMO_SCREEN=kidpin
+            if let p = ProfileStore.shared.active { KidPINView(profile: p, mode: .verify(title: "הַדַּקּוֹת שֶׁלִּי 🔒"), onSuccess: { _ in }, onCancel: {}) }
+        case "parentassist":                                   // DEMO_SCREEN=parentassist — the kid asks a parent
+            WorldMapView().sheet(isPresented: .constant(true)) {
+                ParentAssistView(question: Question(topic: .math, prompt: "כַּמָּה זֶה 7 + 8?", options: ["13", "15", "14", "16"], correctIndex: 1),
+                                 topic: .math, onContinue: {})
+                    .environment(\.layoutDirection, .rightToLeft)
+            }
+        case "parenthelp":                                     // DEMO_SCREEN=parenthelp — the parent answers
+            ParentDashboardView(isRoot: true).sheet(isPresented: .constant(true)) {
+                ParentHelpAnswerView(request: ParentHelpManager.demoRequest)
+            }
         case "paywallgift": PaywallView()                      // the personal paywall, 2 days left
             .onAppear { HouseholdManager.shared.seedDemoJourney(daysLeft: 2) }
         case "leaderboard": LeaderboardView().onAppear { LiveGameManager.shared.seedDemoInvite() }   // DEMO_SCREEN=leaderboard (+ a waiting invite)

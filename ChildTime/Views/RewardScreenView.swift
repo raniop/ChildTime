@@ -36,15 +36,9 @@ struct RewardScreenView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                // Backdrop — richer, more festive
-                world.gradient.gradient
-                    .ignoresSafeArea()
-                    .opacity(0.45)
-                Color.black.opacity(0.35).ignoresSafeArea()
-                FloatingOrbs(
-                    colors: [AppColor.starGold, AppColor.companionGlow, AppColor.gemPurple],
-                    count: 5, maxSize: 280, opacity: 0.35
-                )
+                // The glass backdrop, with a whisper of the world's colour.
+                GlassBackdrop()
+                world.glowColor.opacity(0.18).ignoresSafeArea()
                 SparkleField(count: 28, size: 16)
 
                 VStack(spacing: 0) {

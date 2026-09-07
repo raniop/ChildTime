@@ -1,9 +1,10 @@
 import SwiftUI
 
 /// Shown mid-session when a child is clearly stuck (2 wrong picks). The child
-/// picks a linked parent → an interactive push goes to that parent with the
-/// question and two answer buttons; one tap from the notification removes a
-/// wrong option from the child's screen. Warm, no-pressure, never shaming.
+/// picks a parent → that parent gets a push with the question and the two
+/// options (and the same request shows as a banner in the parent app); one tap
+/// removes a wrong option from the child's screen. Warm, no-pressure, never
+/// shaming. Glass design like the rest of the kid side.
 struct ParentAssistView: View {
     /// The question the child needs help with.
     let question: Question
@@ -14,48 +15,72 @@ struct ParentAssistView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var sent = false
 
-    var body: some View {
-        VStack(spacing: AppSpacing.lg) {
-            Text("🤔").font(.system(size: 72))
-            Text("רוֹצֶה עֶזְרָה בַּשְּׁאֵלָה הַזּוֹ?")
-                .font(.system(size: 24, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
+    private var isGirl: Bool { ProfileStore.shared.active?.gender == .girl }
 
-            if sent {
-                Text("שָׁלַחְנוּ בַּקָּשַׁת עֶזְרָה 💌")
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .foregroundStyle(AppColor.successMint)
-            } else if household.linkedParents.isEmpty {
-                // No linked parent on file — fall back to a general nudge.
-                assistButton("💌 בַּקֵּשׁ עֶזְרָה מֵהוֹרֶה") { askGeneral() }
-            } else {
+    var body: some View {
+        ZStack {
+            GlassBackdrop()
+            SparkleField(count: 14, size: 12)
+
+            VStack(spacing: AppSpacing.lg) {
+                VStack(spacing: 10) {
+                    Text("🤔").font(.system(size: 64))
+                    Text(isGirl ? "רוֹצָה עֶזְרָה בַּשְּׁאֵלָה הַזּוֹ?" : "רוֹצֶה עֶזְרָה בַּשְּׁאֵלָה הַזּוֹ?")
+                        .font(.system(size: 24, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                    Text(isGirl ? "אַבָּא אוֹ אִמָּא יוֹרִידוּ תְּשׁוּבָה אַחַת לֹא נְכוֹנָה — וְאַתְּ עוֹנָה 😉"
+                                : "אַבָּא אוֹ אִמָּא יוֹרִידוּ תְּשׁוּבָה אַחַת לֹא נְכוֹנָה — וְאַתָּה עוֹנֶה 😉")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
                 VStack(spacing: AppSpacing.sm) {
-                    ForEach(household.linkedParents, id: \.uid) { parent in
-                        assistButton("👨‍👩‍👧 בַּקֵּשׁ עֶזְרָה מ\(parent.name)") {
-                            askParent(uid: parent.uid)
+                    if sent {
+                        HStack(spacing: 8) {
+                            Text("💌")
+                            Text("שָׁלַחְנוּ בַּקָּשַׁת עֶזְרָה!")
+                        }
+                        .font(.system(size: 19, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .glassInset(radius: 18)
+                    } else if household.linkedParents.isEmpty {
+                        // No named parent on file — every parent device in the family
+                        // gets the same interactive request.
+                        assistButton("👨‍👩‍👧 בַּקֵּשׁ עֶזְרָה מֵאַבָּא אוֹ אִמָּא") { askParent(uid: "all") }
+                    } else {
+                        ForEach(household.linkedParents, id: \.uid) { parent in
+                            assistButton("👋 בַּקֵּשׁ עֶזְרָה מ\(parent.name)") { askParent(uid: parent.uid) }
                         }
                     }
                 }
-            }
 
-            Button {
-                onContinue(); dismiss()
-            } label: {
-                Text("🚀 אַמְשִׁיךְ לְבַד")
-                    .font(.system(size: 18, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(.white.opacity(0.18), in: Capsule())
+                Button {
+                    Haptic.light()
+                    onContinue(); dismiss()
+                } label: {
+                    Text("🚀 אַמְשִׁיךְ לְבַד")
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .glassInset(radius: 18)
+                }
+                .buttonStyle(.juicy)
+                .disabled(sent)
+                .opacity(sent ? 0.5 : 1)
             }
-            .buttonStyle(.juicy)
-            .padding(.top, AppSpacing.sm)
+            .padding(AppSpacing.lg)
+            .frame(maxWidth: 460)
+            .glassPane(radius: 28)
+            .padding(.horizontal, AppSpacing.lg)
         }
-        .padding(AppSpacing.xl)
-        .frame(maxWidth: 460)
-        .background(AppGradient.dreamy.ignoresSafeArea())
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 
     private func assistButton(_ title: String, _ action: @escaping () -> Void) -> some View {
@@ -64,9 +89,8 @@ struct ParentAssistView: View {
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(AppGradient.gold, in: Capsule())
-                .glow(AppColor.starGold, radius: 8)
+                .padding(.vertical, 15)
+                .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
         }
         .buttonStyle(.juicy)
     }
@@ -83,30 +107,136 @@ struct ParentAssistView: View {
             .randomElement() ?? ""
     }
 
+    /// `uid` = a specific linked parent, or "all" for every parent device.
     private func askParent(uid: String) {
         Haptic.light()
         guard let childID = ProfileStore.shared.activeID?.uuidString,
-              let householdID = household.household?.id else { askGeneral(); return }
-        let childName = ProfileStore.shared.active?.name ?? "הילד"
+              let householdID = household.household?.id else {
+            // No household at all (offline first run) — the legacy generic nudge.
+            LiveEventReporter.report(.assistRequest)
+            finish(); return
+        }
+        let active = ProfileStore.shared.active
         ParentHelpManager.shared.requestHelp(
-            childID: childID, childName: childName, parentUID: uid,
+            childID: childID, childName: active?.name ?? "הילד", parentUID: uid,
             householdID: householdID, topic: topic,
-            question: question.prompt, correctAnswer: correctAnswer, distractor: distractor)
-        finish()
-    }
-
-    /// Fallback when no specific parent is linked: the legacy "a parent device
-    /// gets a generic nudge" path (no interactive answer buttons).
-    private func askGeneral() {
-        Haptic.light()
-        LiveEventReporter.report(.assistRequest)
+            question: question.prompt, correctAnswer: correctAnswer, distractor: distractor,
+            gender: active?.gender == .girl ? "girl" : "boy")
         finish()
     }
 
     private func finish() {
         withAnimation { sent = true }
+        Haptic.success()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
             onContinue(); dismiss()
         }
+    }
+}
+
+/// 👨‍👩‍👧 PARENT side: the in-app answer sheet for a child's help request — the
+/// question and the two options as big buttons. The same request also arrives
+/// as a notification with buttons; this is for a parent who is already in the
+/// app, or who tapped the notification body instead of a button.
+struct ParentHelpAnswerView: View {
+    let request: HelpRequest
+    @ObservedObject private var parentHelp = ParentHelpManager.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var sending: String? = nil
+    @State private var done = false
+
+    private var childTitle: String {
+        request.isGirl ? "\(request.childName) מבקשת עזרה 🧠" : "\(request.childName) מבקש עזרה 🧠"
+    }
+
+    var body: some View {
+        ZStack {
+            GlassBackdrop()
+            VStack(spacing: 18) {
+                VStack(spacing: 6) {
+                    Text(childTitle)
+                        .font(.system(size: 22, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text("איזו תשובה נכונה? הלחיצה שלכם מורידה את התשובה השגויה מהמסך של \(request.childName).")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Text(request.question)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+                    .padding(16)
+                    .glassInset(radius: 20)
+
+                if done {
+                    Text("✅ נשלח! התשובה השגויה ירדה מהמסך")
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .glassInset(radius: 18)
+                } else {
+                    VStack(spacing: 10) {
+                        optionButton(request.optionA, other: request.optionB)
+                        optionButton(request.optionB, other: request.optionA)
+                    }
+                }
+
+                Button {
+                    Haptic.light()
+                    if !done { parentHelp.dismiss(requestID: request.id) }
+                    dismiss()
+                } label: {
+                    Text(done ? "סגור" : "לא עכשיו")
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.9))
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(AppSpacing.lg)
+            .frame(maxWidth: 460)
+            .glassPane(radius: 28)
+            .padding(.horizontal, AppSpacing.lg)
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private func optionButton(_ option: String, other: String) -> some View {
+        Button {
+            guard sending == nil else { return }
+            Haptic.light()
+            sending = option
+            Task {
+                let ok = request.parentUID == "demo"
+                    ? true
+                    : await parentHelp.answer(requestID: request.id, kept: option, removed: other)
+                sending = nil
+                if ok {
+                    Haptic.success()
+                    withAnimation { done = true }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { dismiss() }
+                }
+            }
+        } label: {
+            HStack(spacing: 8) {
+                if sending == option { ProgressView().tint(.white) }
+                Text(option)
+                    .font(.system(size: 19, weight: .heavy, design: .rounded))
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
+        }
+        .buttonStyle(.juicy)
+        .disabled(sending != nil)
     }
 }

@@ -27,7 +27,7 @@ struct DailyChestView: View {
 
     var body: some View {
         ZStack {
-            AppGradient.portal.ignoresSafeArea()
+            GlassBackdrop()
             SparkleField(count: 30, size: 16)
             FancyConfetti(trigger: confettiTrigger)
 
@@ -52,10 +52,24 @@ struct DailyChestView: View {
                             .frame(maxWidth: .infinity)
                             .glow(AppColor.gemPurple, radius: 12)
 
-                        ChestView(kind: .magic, stage: stage, size: chestSize,
-                                  nudge: taps, charge: Double(taps) / Double(tapsToOpen))
-                            .onTapGesture { tapChest() }
-                            .padding(.vertical, AppSpacing.md)
+                        // The chest floats on a soft golden halo inside a glass disc,
+                        // so it reads as the one precious object on the screen.
+                        ZStack {
+                            Circle()
+                                .fill(RadialGradient(colors: [AppColor.starGold.opacity(stage == .revealed ? 0.55 : 0.32), .clear],
+                                                     center: .center, startRadius: 0, endRadius: chestSize * 1.15))
+                                .frame(width: chestSize * 2.3, height: chestSize * 2.3)
+                                .scaleEffect(stage == .glowing ? 1.06 : 1)
+                                .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: stage == .glowing)
+                            Circle()
+                                .fill(.white.opacity(0.10))
+                                .overlay(Circle().stroke(.white.opacity(0.35), lineWidth: 1))
+                                .frame(width: chestSize * 1.9, height: chestSize * 1.9)
+                            ChestView(kind: .magic, stage: stage, size: chestSize,
+                                      nudge: taps, charge: Double(taps) / Double(tapsToOpen))
+                                .onTapGesture { tapChest() }
+                        }
+                        .padding(.vertical, AppSpacing.sm)
 
                         if stage == .glowing {
                             VStack(spacing: AppSpacing.md) {
@@ -116,12 +130,15 @@ struct DailyChestView: View {
                 }
 
                 if stage == .revealed {
-                    JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-                        dismiss()
-                    } label: {
+                    Button { Haptic.light(); dismiss() } label: {
                         Text("הַמְשֵׁךְ")
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .font(.system(size: 22, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
                     }
+                    .buttonStyle(.juicy)
                     .frame(maxWidth: isCompact ? .infinity : 360)
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.bottom, AppSpacing.lg)
@@ -185,8 +202,7 @@ struct DailyChestView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, AppSpacing.md)
-        .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: AppRadius.medium))
-        .glow(glow, radius: 8)
+        .glassPane(radius: 18, tint: glow, shadow: false)
     }
 
     /// A row of dots that fills as the kid taps, so they SEE the chest charging up.
