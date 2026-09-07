@@ -228,6 +228,7 @@ enum QuestionBanks {
         case .gifted: return QuestionBanksGifted.gifted
         case .food: return QuestionBanksFood.food
         case .israel: return QuestionBanksIsrael.israel
+        case .tishrei: return QuestionBanksTishrei.tishrei
         case .music: return QuestionBanksMusic.music
         case .body: return QuestionBanksBody.body
         case .vehicles: return QuestionBanksVehicles.vehicles

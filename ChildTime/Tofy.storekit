@@ -530,6 +530,36 @@
     {
       "displayPrice": "14.90",
       "familyShareable": false,
+      "internalID": "500000223",
+      "localizations": [
+        {
+          "description": "שאלון חגי תשרי לילד אחד.",
+          "displayName": "חגי תשרי",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.pack.tishrei",
+      "referenceName": "Pack tishrei",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "7.90",
+      "familyShareable": false,
+      "internalID": "500000224",
+      "localizations": [
+        {
+          "description": "שאלון חגי תשרי לילד נוסף.",
+          "displayName": "חגי תשרי · ילד נוסף",
+          "locale": "he_IL"
+        }
+      ],
+      "productID": "com.rani.ChildTime.pack.tishrei.sibling",
+      "referenceName": "Pack tishrei.sibling",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "14.90",
+      "familyShareable": false,
       "internalID": "500000213",
       "localizations": [
         {

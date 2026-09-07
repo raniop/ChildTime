@@ -165,6 +165,18 @@ enum QuestionPacks {
             shortSubject: "יִשְׂרָאֵל"
         ),
         QuestionPack(
+            id: "tishrei", topic: .tishrei, name: "חַגֵּי תִּשְׁרֵי", emoji: "🍎",
+            tagline: "רֹאשׁ הַשָּׁנָה, יוֹם כִּפּוּר, סֻכּוֹת וְשִׂמְחַת תּוֹרָה",
+            description: "הַסְּמָלִים, הַמַּאֲכָלִים וְהַמִּנְהָגִים שֶׁל חַגֵּי תִּשְׁרֵי — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
+            learns: ["תַּפּוּחַ בִּדְבַשׁ, רִמּוֹן וְהַסִּימָנִים", "קוֹלוֹת הַשּׁוֹפָר וְהַלּוּחַ הָעִבְרִי", "סְלִיחָה, צוֹם וּבְגָדִים לְבָנִים", "הַסֻּכָּה, אַרְבַּעַת הַמִּינִים וְהַהַקָּפוֹת"],
+            grades: 0...6,
+            productID: "com.rani.ChildTime.pack.tishrei",
+            siblingProductID: "com.rani.ChildTime.pack.tishrei.sibling",
+            heroColors: [Color(hex: "FFE08A"), Color(hex: "FF6B6B")],
+            plannedPriceLabel: "₪14.90",
+            shortSubject: "חַגֵּי תִּשְׁרֵי"
+        ),
+        QuestionPack(
             id: "music", topic: .music, name: "מוּזִיקָה", emoji: "🎵",
             tagline: "כְּלֵי נְגִינָה, קֶצֶב, מַלְחִינִים וְשִׁירֵי יְלָדִים",
             description: "כְּלֵי נְגִינָה, קֶצֶב, מַלְחִינִים וְשִׁירֵי יְלָדִים — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.",
@@ -256,7 +268,7 @@ enum WorldPasses {
         case .geography: return "מְדִינוֹת, יַבָּשׁוֹת, יַמִּים וּדְגָלִים"
         case .money:     return "כֶּסֶף, חִסָּכוֹן וּבְחִירוֹת חֲכָמוֹת"
         case .reading:   return "קְטָעִים קְצָרִים וּשְׁאֵלוֹת עֲלֵיהֶם"
-        case .soccer, .dinosaurs, .space, .animals, .sea, .gifted, .food, .israel, .music, .body, .vehicles, .flags: return ""
+        case .soccer, .dinosaurs, .space, .animals, .sea, .gifted, .food, .israel, .music, .body, .vehicles, .flags, .tishrei: return ""
         }
     }
     private static func description(_ t: Topic) -> String {

@@ -23,6 +23,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
     case body
     case vehicles
     case flags
+    case tishrei    // 🍎 חַגֵּי תִּשְׁרֵי — the first event world
 
     var id: String { rawValue }
 
@@ -60,6 +61,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         case .body: return "גּוּף הָאָדָם"
         case .vehicles: return "כְּלֵי רֶכֶב וְתַחְבּוּרָה"
         case .flags: return "דְּגָלִים וּמְדִינוֹת"
+        case .tishrei: return "חַגֵּי תִּשְׁרֵי"
         }
     }
 
@@ -86,6 +88,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         case .body: return "🧍"
         case .vehicles: return "🚗"
         case .flags: return "🌍"
+        case .tishrei: return "🍎"
         }
     }
 }

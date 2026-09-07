@@ -369,6 +369,7 @@ const PACK_META = {
   gifted: { name: "הכנה למחוננים", emoji: "🧠", subject: "חשיבה", tagline: "חשיבה, סדרות, הקשים ותפיסה מרחבית" },
   food: { name: "מטבח ומדע של אכל", emoji: "🍳", subject: "אכל", tagline: "מאין מגיע אכל, מדידות ומתכונים בחשבון" },
   israel: { name: "ישראל שלי", emoji: "🏛️", subject: "ישראל", tagline: "ערים, סמלים, חגים, דמיות וטבע" },
+  tishrei: { name: "חגי תשרי", emoji: "🍎", subject: "חגי תשרי", tagline: "ראש השנה, יום כיפור, סוכות ושמחת תורה" },
   music: { name: "מוזיקה", emoji: "🎵", subject: "מוזיקה", tagline: "כלי נגינה, קצב, מלחינים ושירי ילדים" },
   body: { name: "גוף האדם", emoji: "🧍", subject: "גוף האדם", tagline: "עצמות, לב, נשימה ובריאות" },
   vehicles: { name: "כלי רכב ותחבורה", emoji: "🚗", subject: "כלי רכב", tagline: "מכוניות, רכבות, מטוסים, ואיך זה עובד" },
@@ -2153,7 +2154,7 @@ async function conversionConfig() {
 
 const TOPIC_LABEL = { math: "🧮 מתמטיקה", english: "🇬🇧 אנגלית", hebrew: "✍️ עברית", logic: "🧩 לוגיקה", science: "🔬 מדעים", history: "🏛️ היסטוריה",
   geography: "🌍 גיאוגרפיה", money: "💰 חינוך פיננסי", reading: "📖 הבנת הנקרא", soccer: "⚽ כדורגל", dinosaurs: "🦖 דינוזאורים", space: "🚀 חלל", animals: "🐾 חיות",
-  sea: "🌊 ים", gifted: "🧠 מחוננים", food: "🍳 מטבח", israel: "🏛️ ישראל שלי", music: "🎵 מוזיקה", body: "🧍 גוף האדם", vehicles: "🚗 כלי רכב", flags: "🌍 דגלים" };
+  sea: "🌊 ים", gifted: "🧠 מחוננים", food: "🍳 מטבח", israel: "🏛️ ישראל שלי", music: "🎵 מוזיקה", body: "🧍 גוף האדם", vehicles: "🚗 כלי רכב", flags: "🌍 דגלים", tishrei: "🍎 חגי תשרי" };
 
 // 💰 Financials: who pays, why, who leaves, why — from the same raw data as
 // the journey. Everything here is a plain count or ratio over real families;
