@@ -1769,7 +1769,9 @@ struct WorldMapView: View {
                     Haptic.light()
                     playPINSheet = p.hasPlayPIN ? .manage : .setNew
                 } label: {
-                    Label(p.hasPlayPIN ? "הַזְּמַן שֶׁלְּךָ מוּגָן בְּקוֹד" : "הָגֵנּוּ עַל הַזְּמַן שֶׁלָּכֶם בְּקוֹד",
+                    // Rani (2026-09-07): "הגנו על הזמן שלכם בקוד" read like a parent
+                    // setting; this is the child's own secret code for their minutes.
+                    Label(p.hasPlayPIN ? "הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד" : "קוֹד סוֹדִי לַדַּקּוֹת שֶׁלִּי",
                           systemImage: p.hasPlayPIN ? "lock.fill" : "lock.open")
                         .font(.system(size: 13.5, weight: .bold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
