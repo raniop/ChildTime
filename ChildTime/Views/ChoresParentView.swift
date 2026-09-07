@@ -114,7 +114,7 @@ struct ChoresParentView: View {
                 NavigationStack {
                     Form {
                         if let e = editing {
-                            Section("עריכת מטלה ✏️") {
+                            Section {
                                 Text("\(e.emoji) \(e.title)").font(.headline)
                                 formFields
                             }
