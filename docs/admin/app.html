@@ -27,6 +27,23 @@
   .kpi{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px} .kpi b{display:block;font:900 26px Rubik,sans-serif;line-height:1.1} .kpi span{font-size:12px;color:var(--muted)} .kpi i{font-style:normal;font-size:12px;font-weight:800;color:var(--good)} .kpi i.d{color:var(--warn)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media (max-width:900px){.grid2{grid-template-columns:1fr}.shell{grid-template-columns:1fr}.side{position:static;height:auto;padding:12px}.nav{display:flex;gap:4px;overflow-x:auto}.nav a{white-space:nowrap}.nav small{display:none}.side .who{display:none}}
+  @media (max-width:640px){
+    body{font-size:13px} .main{padding:12px 12px 40px} .top{margin-bottom:10px} .top h3{font-size:16px}
+    .kpis{grid-template-columns:1fr 1fr;gap:8px} .kpi{padding:10px 12px} .kpi b{font-size:22px}
+    .filters{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;max-width:100%} .filters .chip{flex:none}
+    .chip.search input{width:110px}
+    .fam .h{flex-direction:column;align-items:flex-start} .fam .acts .btn{padding:7px 10px;font-size:12px}
+    .funnel .f{grid-template-columns:110px 1fr 46px 40px;gap:6px;font-size:12px} .src div{grid-template-columns:110px 1fr 44px}
+    .knobs{grid-template-columns:1fr} table{font-size:12px} th,td{padding:6px 7px}
+    .side{padding:10px 12px} .side .brand{margin-bottom:8px;font-size:16px} .nav a{padding:7px 10px;font-size:12.5px}
+    .fin-kpis{grid-template-columns:1fr 1fr}
+  }
+  .fin-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+  .fin-kpis .kpi b{font-size:30px} .fin-kpis .kpi.big{background:var(--card);border-color:var(--indigo)}
+  .tl{display:flex;gap:4px;flex-wrap:wrap} .tl span{font:700 10.5px Rubik,sans-serif;border-radius:99px;padding:2px 7px;background:var(--soft);border:1px solid var(--line);white-space:nowrap}
+  .tl .paid{background:rgba(14,158,114,.15);color:var(--good);border-color:transparent} .tl .cancelled{background:rgba(255,107,157,.18);color:#a1244e;border-color:transparent} .tl .gift{background:rgba(245,184,0,.18);color:#7a5a00;border-color:transparent}
+  .risk{font:800 11px Rubik,sans-serif;border-radius:99px;padding:2px 8px} .risk.high{background:rgba(255,107,157,.18);color:#a1244e} .risk.medium{background:rgba(245,184,0,.18);color:#7a5a00} .risk.low{background:rgba(14,158,114,.15);color:var(--good)}
+  .ins{display:grid;gap:6px} .ins div{padding:9px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:13.5px} .ins .warn{border-color:rgba(255,107,157,.5)} .ins .action{border-color:rgba(245,184,0,.6)}
   .card{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
   .card h4{font:800 13.5px Rubik,sans-serif;margin:0 0 8px;color:var(--muted)}
   table{width:100%;border-collapse:collapse;font-size:13px} th{font:700 12px Rubik,sans-serif;color:var(--muted);text-align:right;padding:7px 9px;border-bottom:1px solid var(--line)} td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top} tr:last-child td{border-bottom:0}
@@ -70,6 +87,7 @@
       <a href="#worlds" data-p="worlds">🌍 עולמות<small id="navWorlds"></small></a>
       <a href="#content" data-p="content">🧠 תוכן ושאלות<small id="navContent"></small></a>
       <a href="#support" data-p="support">💬 תמיכה<small id="navSupport"></small></a>
+      <a href="#financials" data-p="financials">💰 כספים<small id="navFin"></small></a>
       <a href="#settings" data-p="settings">⚙️ הגדרות וניסויים</a>
     </nav>
     <div class="who"><span id="whoName"></span><br><span id="stamp"></span> · <u id="refreshBtn">רענן</u> · <u id="logoutBtn">התנתק</u><br><a href="stats.html" style="color:rgba(255,255,255,.75)">סטטיסטיקה מלאה ←</a></div>
@@ -125,10 +143,11 @@ async function loadJourney(recompute) {
     $("navFamilies").textContent = fmt(o.activeFamilies30) + " פעילות";
     $("navWorlds").textContent = `${o.packsOn} דלוקים · ${o.packsReady} מוכנים`;
     $("navContent").textContent = o.openReports ? o.openReports + " דיווחים חדשים" : "";
-    $("navSupport").textContent = o.openFeedback ? o.openFeedback + " פתוחות" : ""; }
+    $("navSupport").textContent = o.openFeedback ? o.openFeedback + " פתוחות" : "";
+    const fk = (J.financials || {}).kpis || {}; $("navFin").textContent = fk.paying ? `${fk.paying} משלמות · ₪${fmt(fk.mrr)} MRR` : "אין משלמות עדיין"; }
 }
 window.addEventListener("hashchange", route);
-const PAGES = { dashboard, families, funnel, campaigns, worlds, content, support, settings };
+const PAGES = { dashboard, families, funnel, campaigns, worlds, content, support, settings, financials };
 function route() {
   let p = (location.hash || "#dashboard").slice(1); if (!PAGES[p]) p = "dashboard";
   document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", a.dataset.p === p));
@@ -308,6 +327,42 @@ async function support() {
     document.querySelectorAll("[data-fam]").forEach((a) => a.onclick = () => { famFilter = "all"; famQuery = ""; });
     document.querySelectorAll("#supFilters [data-s]").forEach((c) => c.onclick = () => { supTab = c.dataset.s; support(); });
   } catch (e) { $("supTbl").textContent = e.message; }
+}
+
+// ---------------- 9 · financials ----------------
+const nv = (x, suf = "", fallback = "—") => (x === null || x === undefined || Number.isNaN(x)) ? fallback : (typeof x === "number" ? x.toLocaleString("he-IL") : x) + suf;
+const pctOf = (a, b) => b ? Math.round(100 * a / b) + "%" : "—";
+function financials() {
+  if (!J || !J.financials) return $("main").innerHTML = '<div class="empty">אין נתונים עדיין. לחץ "חשב עכשיו" בלוח הבקרה.</div>';
+  const F = J.financials, k = F.kpis, small = k.everPaid < 5;
+  const kpiBig = (v, l, note) => `<div class="kpi big"><b>${v}</b><span>${l}</span>${note ? `<div class="stamp">${note}</div>` : ""}</div>`;
+  const TL = { joined: "", firstPlay: "", activated: "", gift: "gift", giftEnded: "gift", paid: "paid", renewed: "paid", cancelled: "cancelled" };
+  const dateS = (sec) => sec ? new Date(sec * 1000).toLocaleDateString("he-IL", { day: "numeric", month: "numeric", year: "2-digit" }) : "";
+  const STATE_L = { free_new: "חינם", free_activated: "חינם · מופעלת", gift: "במתנה", gift_expiring: "מתנה מסתיימת", plus: "טופי+", returned: "חזרו לחינם", inactive: "לא פעילה" };
+  $("main").innerHTML = `
+    <div class="top"><h3>כספים · מי משלם, למה, ומי עוזב</h3><span class="stamp">מחושב כל שעה · מחירים: ₪24.90 חודשי · ₪199 שנתי</span></div>
+    <div class="fin-kpis">
+      ${kpiBig(nv(k.freeToPaid, "%"), "חינם → משלמות", `${k.everPaid} מתוך ${k.families} משפחות`)}
+      ${kpiBig(nv(k.medianDaysToPay, " ימים"), "חציון ימים עד תשלום ראשון", small ? "מ־5 רכישות" : `ממוצע ${nv(k.avgDaysToPay)}`)}
+      ${kpiBig(nv(k.retentionM3, "%"), "שימור משלמות אחרי 3 חודשים", `M1 ${nv(k.retentionM1, "%")} · M2 ${nv(k.retentionM2, "%")} · M6 ${nv(k.retentionM6, "%")}`)}
+      ${kpiBig(k.ltv === null ? nv(k.arpu, "₪", "—") : "₪" + nv(k.ltv), k.ltv === null ? "הכנסה לחודש למשפחה משלמת" : "LTV למשפחה", k.ltv === null ? "LTV דורש צ׳רן נמדד" : `ARPU ₪${nv(k.arpu)} · צ׳רן ${nv(k.churn30, "%")}`)}
+      ${kpiBig(nv(k.churnPrecededByDrop, "%"), "ביטולים שקדמה להם ירידה בשימוש", `${k.cancelled} ביטולים בסך הכול`)}
+    </div>
+    <div class="kpis">
+      ${kpi(fmt(k.families), "משפחות")}${kpi(fmt(k.new30), "הצטרפו ב־30 יום")}${kpi(fmt(k.paying), "משלמות עכשיו")}${kpi('<span class="money">₪' + fmt(k.mrr) + '</span>', "MRR")}${kpi('<span class="money">₪' + fmt(k.newMrr30) + '</span>', "MRR חדש ב־30 יום")}${kpi(nv(k.churn30, "%"), "צ׳רן 30 יום · " + k.cancelled30 + " ביטולים")}
+    </div>
+    <div class="card"><h4>💡 תובנות</h4><div class="ins">${(F.insights || []).map((i) => `<div class="${i.kind}">${esc(i.text)}</div>`).join("") || '<div>אין עדיין.</div>'}</div></div>
+    <div class="grid2">
+      <div class="card"><h4>מאיפה מגיעה הרכישה</h4><div class="src">${F.drivers.length ? F.drivers.map((d) => `<div><span>${esc(d.label)}</span><div class="barw"><div class="bar" style="width:${Math.round(100 * d.n / Math.max(1, k.everPaid))}%"></div></div><b>${pctOf(d.n, k.everPaid)}</b></div>`).join("") : '<div class="empty">אין רכישות עדיין.</div>'}</div></div>
+      <div class="card"><h4>⚠️ סיכון צ׳רן במשלמות</h4><div class="stamp" style="margin-bottom:6px">גבוה ${F.risk.high} · בינוני ${F.risk.medium} · נמוך ${F.risk.low}</div>${F.risk.list.length ? F.risk.list.map((r) => `<div class="q"><b>${esc(r.name || "משפחה")}</b> <span class="risk ${r.risk}">${r.risk === "high" ? "גבוה" : "בינוני"}</span><div class="m">${esc(r.reasons.join(" · "))}</div></div>`).join("") : '<div class="empty">אין משפחה משלמת בסיכון.</div>'}<div class="stamp">כללים: 40%+ פחות שאלות בשבועיים · פחות מ־3 ימים פעילים בשבוע · 14 יום בלי משחק</div></div>
+      <div class="card"><h4>לפני הביטול</h4><table><tr><td>ביטולים</td><td><b>${F.preChurn.cancelled}</b></td></tr><tr><td>קדמה להם ירידה של 40%+ בשאלות</td><td><b>${F.preChurn.withDrop}</b></td></tr><tr><td>ירידה ממוצעת בשבועיים שלפני</td><td><b>${nv(F.preChurn.avgDrop, "%")}</b></td></tr><tr><td>ממשיכים בחינם אחרי הביטול</td><td><b>${F.preChurn.stillActiveFree}</b></td></tr><tr><td>נטשו את טופי</td><td><b>${F.preChurn.abandoned}</b></td></tr></table></div>
+      <div class="card"><h4>Win-back</h4><table><tr><td>ביטלו ב־30 יום</td><td><b>${F.winback.cancelled30}</b></td></tr><tr><td>עדיין משתמשים בחינם</td><td><b>${F.winback.stillUsing}</b></td></tr><tr><td>חזרו לטופי+</td><td><b>${F.winback.resubscribed}</b></td></tr></table><div class="stamp">שיעור חזרה: ${pctOf(F.winback.resubscribed, F.winback.cancelled30)}</div></div>
+    </div>
+    <div class="card"><h4>קוהורטים לפי חודש הצטרפות</h4><div class="tblwrap"><table><tr><th>חודש</th><th>הצטרפו</th><th>שילמו</th><th>תוך שבוע</th><th>תוך 30 יום</th><th>תוך 60</th><th>תוך 90</th><th>M1</th><th>M2</th><th>M3</th><th>M6</th><th>ביטלו</th><th>חינם ופעילות</th></tr>
+      ${F.cohorts.map((c) => `<tr><td>${c.month}</td><td>${c.joined}</td><td>${pctOf(c.paid, c.joined)}</td><td>${pctOf(c.paidW1, c.joined)}</td><td>${pctOf(c.paidD30, c.joined)}</td><td>${pctOf(c.paidD60, c.joined)}</td><td>${pctOf(c.paidD90, c.joined)}</td><td>${pctOf(c.paidM1, c.paid)}</td><td>${pctOf(c.paidM2, c.paid)}</td><td>${pctOf(c.paidM3, c.paid)}</td><td>${pctOf(c.paidM6, c.paid)}</td><td>${pctOf(c.churned, c.paid)}</td><td>${pctOf(c.stillActiveFree, c.joined)}</td></tr>`).join("") || '<tr><td colspan="13" class="empty">אין נתונים</td></tr>'}</table></div>
+      <div class="stamp" style="margin-top:6px">M1–M6: מתוך מי ששילמו, כמה עדיין משלמים אחרי N חודשים (רק משפחות שעברו את הגיל הזה). תוך שבוע/30/60/90: מתוך המצטרפים, כמה שילמו עד אז.</div></div>
+    <div class="card"><h4>ציר החיים של כל משפחה</h4><div class="tblwrap"><table><tr><th>משפחה</th><th>הצטרפה</th><th>מסע</th><th>מצב</th><th>ימים עד תשלום</th><th>מקור</th><th>שאלות 14 יום / 14 לפני</th><th>סיכון</th></tr>
+      ${F.families.map((f) => `<tr><td>${esc(f.name || "משפחה ללא שם")}${f.kids ? ` <span class="stamp">· ${f.kids} ילדים</span>` : ""}</td><td>${dateS(f.joined)}</td><td><div class="tl">${f.timeline.map((t) => `<span class="${TL[t.kind] || ""}" title="${dateS(t.at)}">${esc(t.label)}</span>`).join("")}</div></td><td>${STATE_L[f.state] || f.state}${f.stillActiveFree ? " · ממשיכה בחינם" : f.abandoned ? " · נטשה" : ""}</td><td>${nv(f.daysToPay)}</td><td>${f.purchaseSource ? esc((F.drivers.find((d) => d.key === f.purchaseSource) || {}).label || f.purchaseSource) : "—"}</td><td>${f.last14} / ${f.prev14}${f.drop !== null && f.drop >= 40 ? ' <span class="pct lo">↓' + f.drop + '%</span>' : ""}</td><td>${f.risk ? `<span class="risk ${f.risk}">${f.risk === "high" ? "גבוה" : f.risk === "medium" ? "בינוני" : "נמוך"}</span>` : "—"}</td></tr>`).join("")}</table></div></div>`;
 }
 
 // ---------------- 8 · settings ----------------

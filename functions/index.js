@@ -2154,6 +2154,113 @@ const TOPIC_LABEL = { math: "🧮 מתמטיקה", english: "🇬🇧 אנגלי
   geography: "🌍 גיאוגרפיה", money: "💰 חינוך פיננסי", reading: "📖 הבנת הנקרא", soccer: "⚽ כדורגל", dinosaurs: "🦖 דינוזאורים", space: "🚀 חלל", animals: "🐾 חיות",
   sea: "🌊 ים", gifted: "🧠 מחוננים", food: "🍳 מטבח", israel: "🏛️ ישראל שלי", music: "🎵 מוזיקה", body: "🧍 גוף האדם", vehicles: "🚗 כלי רכב", flags: "🌍 דגלים" };
 
+// 💰 Financials: who pays, why, who leaves, why — from the same raw data as
+// the journey. Everything here is a plain count or ratio over real families;
+// where N is too small to mean anything the client says so instead of
+// showing a number.
+const PRICE_MONTHLY = 24.9, PRICE_YEARLY = 199;
+function computeFinancials(households, perChild, nowS, il, cfg) {
+  const DAY = 86400, nowMs = nowS * 1000;
+  const monthKey = (sec) => sec ? new Date(sec * 1000).toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" }).slice(0, 7) : null;
+  const sumRange = (byDate, fromMs, toMs) => { let q = 0, d = 0; for (const [dk, n] of Object.entries(byDate || {})) { const t = Date.parse(dk + "T12:00:00+03:00"); if (t >= fromMs && t < toMs) { q += n; d += 1; } } return { q, d }; };
+  const fams = Object.entries(households).map(([id, h]) => {
+    const paid = !!h.purchasedAt || (h.premiumSource === "paid");
+    const payingNow = h.premium && !h.gift;
+    const cancelledAt = paid && !payingNow && h.premiumUntil ? Number(h.premiumUntil) : null;
+    const active14 = !!h.lastActive && h.lastActive >= il(nowMs - 14 * DAY * 1000);
+    const yearly = /yearly/.test(h.premiumProduct || "") || (payingNow && h.daysLeft > 60);
+    const monthly = payingNow ? (yearly ? PRICE_YEARLY / 12 : PRICE_MONTHLY) : 0;
+    const joined = h.createdAt || (h.firstActive ? Date.parse(h.firstActive + "T12:00:00+03:00") / 1000 : null);
+    const daysToPay = paid && h.purchasedAt && joined ? Math.max(0, (h.purchasedAt - joined) / DAY) : null;
+    const timeline = [
+      joined && { at: joined, kind: "joined", label: "הרשמה" },
+      h.firstActive && { at: Date.parse(h.firstActive + "T12:00:00+03:00") / 1000, kind: "firstPlay", label: "משחק ראשון" },
+      h.activatedOn && { at: Date.parse(h.activatedOn + "T12:00:00+03:00") / 1000, kind: "activated", label: "הפעלה" },
+      h.giftStartedAt && { at: h.giftStartedAt, kind: "gift", label: "תחילת מתנה" },
+      h.giftEndedAt && { at: h.giftEndedAt, kind: "giftEnded", label: "המתנה נגמרה" },
+      h.purchasedAt && { at: h.purchasedAt, kind: "paid", label: "תשלום ראשון" },
+      h.renewedAt && { at: h.renewedAt, kind: "renewed", label: "חידוש" },
+      cancelledAt && { at: cancelledAt, kind: "cancelled", label: "ביטול" },
+    ].filter(Boolean).sort((a, b) => a.at - b.at);
+    // Behaviour around the cancellation (or now, for a paying family): 14 days vs the 14 before.
+    const ref = cancelledAt ? cancelledAt * 1000 : nowMs;
+    const last14 = sumRange(h.byDate, ref - 14 * DAY * 1000, ref), prev14 = sumRange(h.byDate, ref - 28 * DAY * 1000, ref - 14 * DAY * 1000);
+    const drop = prev14.q ? Math.round(100 * (prev14.q - last14.q) / prev14.q) : null;   // % fewer questions
+    const last7 = sumRange(h.byDate, ref - 7 * DAY * 1000, ref);
+    let risk = null, reasons = [];
+    if (payingNow) {
+      let score = 0;
+      if (drop !== null && drop >= 40) { score += 2; reasons.push(`${drop}% פחות שאלות בשבועיים האחרונים`); }
+      if (last7.d < 3) { score += 1; reasons.push(`${last7.d} ימים פעילים בשבוע האחרון`); }
+      if (!active14) { score += 2; reasons.push("לא שיחקו 14 יום"); }
+      risk = score >= 3 ? "high" : score >= 1 ? "medium" : "low";
+    }
+    return { id, name: h.familyName || null, kids: h.childCount, joined, joinMonth: monthKey(joined), paid, payingNow, yearly, monthly, cancelledAt,
+      stillActiveFree: !!cancelledAt && active14, abandoned: !!cancelledAt && !active14, daysToPay, purchaseSource: h.purchaseSource, timeline,
+      drop, last14: last14.q, prev14: prev14.q, activeDays7: last7.d, risk, reasons, lastActive: h.lastActive, state: h.state, realParent: h.realParent };
+  }).filter((f) => f.realParent || f.joined);
+  const N = fams.length, paying = fams.filter((f) => f.payingNow), everPaid = fams.filter((f) => f.paid);
+  const cancelled = fams.filter((f) => f.cancelledAt), cancelled30 = cancelled.filter((f) => f.cancelledAt >= nowS - 30 * DAY);
+  const new30 = fams.filter((f) => f.joined && f.joined >= nowS - 30 * DAY);
+  const paid30 = everPaid.filter((f) => (households[f.id].purchasedAt || 0) >= nowS - 30 * DAY);
+  const mrr = paying.reduce((s, f) => s + f.monthly, 0);
+  const median = (xs) => { const a = xs.slice().sort((x, y) => x - y); return a.length ? (a.length % 2 ? a[(a.length - 1) / 2] : (a[a.length / 2 - 1] + a[a.length / 2]) / 2) : null; };
+  const dtp = everPaid.map((f) => f.daysToPay).filter((x) => x !== null);
+  const payingAtStart30 = paying.length + cancelled30.length;
+  const churn30 = payingAtStart30 ? cancelled30.length / payingAtStart30 : null;
+  const retention = (months) => { const elig = everPaid.filter((f) => households[f.id].purchasedAt && households[f.id].purchasedAt <= nowS - months * 30 * DAY); if (!elig.length) return null;
+    return Math.round(100 * elig.filter((f) => f.payingNow || (f.cancelledAt && f.cancelledAt >= households[f.id].purchasedAt + months * 30 * DAY)).length / elig.length); };
+  const arpu = paying.length ? mrr / paying.length : null;
+  const ltv = arpu !== null && churn30 ? arpu / churn30 : null;
+  const dropChurn = cancelled.filter((f) => f.drop !== null && f.drop >= 40).length;
+  // Cohorts by join month
+  const cohorts = {};
+  for (const f of fams) { if (!f.joinMonth) continue; const c = cohorts[f.joinMonth] = cohorts[f.joinMonth] || { month: f.joinMonth, joined: 0, paid: 0, paidM1: 0, paidM2: 0, paidM3: 0, paidM6: 0, churned: 0, stillActiveFree: 0, paidW1: 0, paidD30: 0, paidD60: 0, paidD90: 0 };
+    c.joined += 1; if (f.paid) c.paid += 1; if (f.cancelledAt) c.churned += 1; if (f.stillActiveFree) c.stillActiveFree += 1;
+    const p = households[f.id].purchasedAt;
+    if (p && f.joined) { const d = (p - f.joined) / DAY; if (d <= 7) c.paidW1 += 1; if (d <= 30) c.paidD30 += 1; if (d <= 60) c.paidD60 += 1; if (d <= 90) c.paidD90 += 1; }
+    const stillAt = (m) => p && (f.payingNow || (f.cancelledAt && f.cancelledAt >= p + m * 30 * DAY)) && (nowS >= p + m * 30 * DAY);
+    if (stillAt(1)) c.paidM1 += 1; if (stillAt(2)) c.paidM2 += 1; if (stillAt(3)) c.paidM3 += 1; if (stillAt(6)) c.paidM6 += 1; }
+  // Conversion drivers (purchase source)
+  const DRIVER = { child_request: "בקשה של ילד", expiring_push: "פוש המתנה מסתיימת", gift_card: "כרטיס המתנה האישי", paywall_card: "הפייוול", new_world: "עולם חדש", card: "ישר מהכרטיס" };
+  const drivers = {}; for (const f of everPaid) { const k = f.purchaseSource || "card"; drivers[k] = drivers[k] || { key: k, label: DRIVER[k] || k, n: 0 }; drivers[k].n += 1; }
+  // Win-back
+  const winback = { cancelled30: cancelled30.length, stillUsing: cancelled30.filter((f) => f.stillActiveFree).length,
+    resubscribed: cancelled.filter((f) => households[f.id].renewedAt && households[f.id].renewedAt > f.cancelledAt).length };
+  // Insights: only what the data can honestly say at this size.
+  const insights = [];
+  const MIN = 30;
+  if (N < MIN) insights.push({ kind: "info", text: `${N} משפחות בסך הכול · תובנות סטטיסטיות (קוהורטים, LTV, ניבוי צ׳רן) יופיעו מ־${MIN} משפחות משלמות` });
+  if (!paying.length) insights.push({ kind: "info", text: "עדיין אין משפחה משלמת. ההמרה הראשונה תופיע כאן עם המקור שלה." });
+  const giftsEnding = fams.filter((f) => households[f.id].state === "gift_expiring").length;
+  if (giftsEnding) insights.push({ kind: "action", text: `${giftsEnding} משפחות במתנה שמסתיימת תוך 3 ימים — הפייוול האישי שלהן פתוח עכשיו` });
+  const highRisk = paying.filter((f) => f.risk === "high");
+  if (highRisk.length) insights.push({ kind: "warn", text: `⚠️ ${highRisk.length} משפחות משלמות בסיכון צ׳רן גבוה` });
+  if (winback.stillUsing) insights.push({ kind: "action", text: `${winback.stillUsing} מתוך ${winback.cancelled30} שביטלו בחודש האחרון עדיין משתמשים בחינם — קהל ל־Win-back` });
+  if (everPaid.length >= 5 && dtp.length) insights.push({ kind: "info", text: `חציון הזמן עד תשלום: ${Math.round(median(dtp))} ימים` });
+  const top = Object.values(drivers).sort((a, b) => b.n - a.n)[0];
+  if (top && everPaid.length >= 5) insights.push({ kind: "info", text: `המקור המוביל לרכישה: ${top.label} (${Math.round(100 * top.n / everPaid.length)}%)` });
+  const pct = (a, b) => b ? Math.round(1000 * a / b) / 10 : null;
+  return {
+    kpis: { families: N, new30: new30.length, paying: paying.length, freeToPaid: pct(everPaid.length, N), medianDaysToPay: dtp.length ? Math.round(median(dtp)) : null,
+      avgDaysToPay: dtp.length ? Math.round(dtp.reduce((a, b) => a + b, 0) / dtp.length) : null, mrr: Math.round(mrr), newMrr30: Math.round(paid30.reduce((s, f) => s + (f.monthly || (f.yearly ? PRICE_YEARLY / 12 : PRICE_MONTHLY)), 0)),
+      churn30: churn30 === null ? null : Math.round(1000 * churn30) / 10, retentionM1: retention(1), retentionM2: retention(2), retentionM3: retention(3), retentionM6: retention(6),
+      arpu: arpu === null ? null : Math.round(arpu * 10) / 10, ltv: ltv === null ? null : Math.round(ltv), churnPrecededByDrop: cancelled.length ? Math.round(100 * dropChurn / cancelled.length) : null,
+      everPaid: everPaid.length, cancelled: cancelled.length, cancelled30: cancelled30.length, minN: MIN },
+    cohorts: Object.values(cohorts).sort((a, b) => a.month.localeCompare(b.month)),
+    drivers: Object.values(drivers).sort((a, b) => b.n - a.n),
+    preChurn: { cancelled: cancelled.length, withDrop: dropChurn,
+      avgDrop: cancelled.filter((f) => f.drop !== null).length ? Math.round(cancelled.filter((f) => f.drop !== null).reduce((s, f) => s + f.drop, 0) / cancelled.filter((f) => f.drop !== null).length) : null,
+      stillActiveFree: cancelled.filter((f) => f.stillActiveFree).length, abandoned: cancelled.filter((f) => f.abandoned).length },
+    risk: { high: highRisk.length, medium: paying.filter((f) => f.risk === "medium").length, low: paying.filter((f) => f.risk === "low").length,
+      list: paying.filter((f) => f.risk !== "low").map((f) => ({ id: f.id, name: f.name, risk: f.risk, reasons: f.reasons })) },
+    winback, insights,
+    families: fams.map((f) => ({ id: f.id, name: f.name, kids: f.kids, joined: f.joined, state: f.state, paid: f.paid, payingNow: f.payingNow, yearly: f.yearly,
+      daysToPay: f.daysToPay === null ? null : Math.round(f.daysToPay), purchaseSource: f.purchaseSource, cancelledAt: f.cancelledAt, stillActiveFree: f.stillActiveFree, abandoned: f.abandoned,
+      risk: f.risk, reasons: f.reasons, timeline: f.timeline, last14: f.last14, prev14: f.prev14, drop: f.drop })).sort((a, b) => (b.joined || 0) - (a.joined || 0)),
+  };
+}
+
 // The whole family journey from raw data. Runs hourly (and on demand).
 async function computeJourney() {
   const cfg = await conversionConfig();
@@ -2194,7 +2301,14 @@ async function computeJourney() {
       const fav = Object.entries(topicTotals).sort((a, b) => b[1].q - a[1].q)[0];
       const everQ = days.reduce((s, x) => s + (x.questionsAnswered || 0), 0);
       const everDays = days.filter((x) => (x.questionsAnswered || 0) > 0).length;
+      // Lifecycle inputs (financials): questions per day, first day played, and
+      // the day the activation threshold was crossed (cumulative, ascending).
+      const byDate = {}; for (const x of days) if ((x.questionsAnswered || 0) > 0) byDate[x.date] = (x.questionsAnswered || 0);
+      const asc = Object.keys(byDate).sort();
+      let cumQ = 0, cumD = 0, activatedOn = null;
+      for (const dk of asc) { cumQ += byDate[dk]; cumD += 1; if (!activatedOn && cumD >= cfg.activationDays && cumQ >= cfg.activationQuestions) activatedOn = dk; }
       perChild[k.id] = {
+        byDate, firstActive: asc[0] || null, activatedOn,
         name: d.name || "", householdID: d.householdID, grade: (d.grade === 0 || d.grade) ? d.grade : null, gender: d.gender || null,
         activeDays30: activeDays.length, questions30, everQuestions: everQ, everActiveDays: everDays,
         lastActive: activeDays.map((x) => x.date).sort().slice(-1)[0] || null,
@@ -2249,6 +2363,12 @@ async function computeJourney() {
     for (const k of Object.keys(childRequests)) if (k !== "purchased") childRequests[k] += Number((hh.funnel || {})[k] || 0);
     if (hh.purchaseSource === "child_request" && hh.purchasedAt) childRequests.purchased += 1;
     households[h.id] = { state, premium, gift, daysLeft, premiumUntil, activated, played, lastActive, familyName: hh.familyName || hh.familyLabel || null,
+      createdAt: Number(hh.createdAt || 0) || null, giftStartedAt: Number(hh.giftStartedAt || 0) || null, giftEndedAt: Number(hh.giftEndedAt || 0) || null,
+      purchasedAt: Number(hh.purchasedAt || 0) || null, renewedAt: Number(hh.renewedAt || 0) || null, premiumSource: hh.premiumSource || null,
+      premiumProduct: hh.premiumProduct || null, realParent, childCount: kidsOf.length,
+      firstActive: kidsOf.map((c) => c.firstActive).filter(Boolean).sort()[0] || null,
+      activatedOn: kidsOf.map((c) => c.activatedOn).filter(Boolean).sort()[0] || null,
+      byDate: kidsOf.reduce((m, c) => { for (const [d, q] of Object.entries(c.byDate || {})) m[d] = (m[d] || 0) + q; return m; }, {}),
       activeDays: Math.max(0, ...kidsOf.map((c) => c.everActiveDays || 0)), questions: Math.max(0, ...kidsOf.map((c) => c.everQuestions || 0)),
       plan: premium && !gift ? (daysLeft > 60 ? "yearly" : "monthly") : null, purchaseSource: hh.purchaseSource || null, kids: kidsOf.map((c) => c.id) };
   });
@@ -2263,8 +2383,10 @@ async function computeJourney() {
   const active30 = Object.values(households).filter((h) => h.lastActive && h.lastActive >= il(nowMs - 30 * 86400000)).length;
   const sales = salesSnap.docs.map((s) => s.data() || {});
   const packRevenue = sales.reduce((s, x) => s + Number(x.price || 0), 0);
+  const financials = computeFinancials(households, perChild, nowS, il, cfg);
+  for (const h of Object.values(households)) delete h.byDate;   // inputs only — not persisted
   const journey = {
-    computedAt: nowMs, config: cfg, childRequests,
+    computedAt: nowMs, config: cfg, childRequests, financials,
     overview: { activeFamilies30: active30, childrenToday, questionsToday, accuracyToday: questionsToday ? Math.round(100 * correctToday / questionsToday) : 0,
       minutesToday, mrr: Math.round(mrr), premiumFamilies: premiumN, yearlyShare: premiumN ? Math.round(100 * yearlyN / premiumN) : 0,
       activatedToPaid30: funnel.activated ? Math.round(1000 * funnel.purchased / funnel.activated) / 10 : 0,
