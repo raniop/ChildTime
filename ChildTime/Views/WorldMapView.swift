@@ -190,7 +190,7 @@ struct WorldMapView: View {
         // until the first open — then it joins the daily shuffle like any world.
         guard let cid = profiles.activeID else { return ordered }
         let fresh = ordered.filter { w in
-            (w.topic.pack ?? WorldPasses.pass(for: w.topic)).map { item in profiles.active.map { p in PackAccess.has(p, item) } == true && !PackKidState.isOpened(item.id, childID: cid) } ?? false
+            (w.topic.pack ?? WorldPasses.pass(for: w.topic)).map { item in profiles.active.map { p in PackAccess.has(p, item) } == true && isNewForChild(item, childID: cid) } ?? false
         }
         return fresh + ordered.filter { w in !fresh.contains(w) }
     }
@@ -250,14 +250,22 @@ struct WorldMapView: View {
         }
     }
 
+    /// ⚽ "New" for the child: the pack's launch week (Rani: it stays first with
+    /// its badge for a while, not only until the first tap), or never opened yet.
+    private func isNewForChild(_ pack: QuestionPack, childID: UUID) -> Bool {
+        if !PackKidState.isOpened(pack.id, childID: childID) { return true }
+        if let at = packStore.launchedAt[pack.id] { return Date().timeIntervalSince(at) < 7 * 86_400 }
+        return false
+    }
+
     private var homeTiles: [HomeTile] {
         var tiles = Self.homeOrder(worlds: enabledWorlds, childID: profiles.activeID, premium: subs.isPremium)
-        // ⚽ A freshly gifted pack sits RIGHT NEXT to טופי טיים (Rani) — wherever
-        // Tofy Time landed today — until the child opens it for the first time.
+        // ⚽ A new pack sits RIGHT NEXT to טופי טיים (Rani) — wherever Tofy Time
+        // landed today — for its launch week, and until the child opens it.
         guard let cid = profiles.activeID else { return tiles }
         let fresh = tiles.filter { t in
             if case .world(let w) = t, let p = w.topic.pack ?? WorldPasses.pass(for: w.topic),
-               profiles.active.map({ PackAccess.has($0, p) }) == true { return !PackKidState.isOpened(p.id, childID: cid) }
+               profiles.active.map({ PackAccess.has($0, p) }) == true { return isNewForChild(p, childID: cid) }
             return false
         }
         // Rani: a NEW pack the family doesn't have yet is also news for the child —
@@ -399,7 +407,7 @@ struct WorldMapView: View {
                                         glowColor: AppColor.companionGlow,
                                         // Free, always (Rani): the one thing on this screen that
                                         // is never behind Tofy+ says so, in mint.
-                                        badge: subs.isPremium ? nil : "✨ חינם",
+                                        badge: "✨ חינם",   // always — טופי טיים is free for everyone (Rani)
                                         badgeTint: Color(hex: "8CFFC4")
                                     ) {
                                         // No companion line here — we leave this screen
@@ -418,7 +426,8 @@ struct WorldMapView: View {
                                     let item = world.topic.pack ?? WorldPasses.pass(for: world.topic)
                                     let owned = item.map { it in profiles.active.map { p in PackAccess.has(p, it) } ?? false } ?? false
                                     let pack: QuestionPack? = owned ? item : nil
-                                    let packNew = pack.map { p in profiles.activeID.map { !PackKidState.isOpened(p.id, childID: $0) } ?? false } ?? false
+                                    let packNew = pack.map { p in profiles.activeID.map { isNewForChild(p, childID: $0) } ?? false } ?? false
+                                    let neverOpened = pack.map { p in profiles.activeID.map { !PackKidState.isOpened(p.id, childID: $0) } ?? false } ?? false
                                     // 🌟 A free "guest" world (founder's knob) plays like Tofy+.
                                     let isGuest = !subs.isPremium && pack == nil && freeTier.guestIDs.contains(world.id)
                                     let locked = !subs.isPremium && pack == nil && !isGuest
@@ -441,7 +450,7 @@ struct WorldMapView: View {
                                         badgeOverride: packNew ? "✨ חָדָשׁ!" : (isGuest ? "🌟 אוֹרֵחַ הַשָּׁבוּעַ" : nil),
                                         footOverride: continueFoot,
                                         // Glows on its launch day only until the child taps it (Rani).
-                                        pulse: packNew && (pack.map { p in profiles.activeID.map { PackKidState.isFirstDay(p.id, childID: $0) } ?? false } ?? false)
+                                        pulse: neverOpened && (pack.map { p in profiles.activeID.map { PackKidState.isFirstDay(p.id, childID: $0) } ?? false } ?? false)
                                     ) {
                                         if let pack, let cid = profiles.activeID {
                                             PackKidState.markOpened(pack.id, childID: cid)
