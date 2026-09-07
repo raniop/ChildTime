@@ -17,7 +17,7 @@
   .nav a{display:block;padding:9px 12px;border-radius:10px;font:700 13.5px Rubik,sans-serif;color:rgba(255,255,255,.8);margin:2px 0;text-decoration:none} .nav a.on{background:rgba(255,255,255,.18);color:#fff}
   .nav small{display:block;font:500 11px Heebo,sans-serif;color:rgba(255,255,255,.6)}
   .side .who{margin-top:24px;font-size:12px;color:rgba(255,255,255,.7);border-top:1px solid rgba(255,255,255,.2);padding-top:12px;word-break:break-all} .side .who u{cursor:pointer}
-  .main{padding:18px 22px;max-width:1160px}
+  .main{padding:18px 22px}
   .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
   .top h3{font:800 18px Rubik,sans-serif;margin:0} .stamp{font-size:12px;color:var(--muted)}
   .filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center} .chip{border:1px solid var(--line);border-radius:99px;padding:5px 11px;font:700 12.5px Rubik,sans-serif;color:var(--muted);background:var(--card);cursor:pointer} .chip.on{background:var(--indigo);color:#fff;border-color:transparent}
@@ -35,7 +35,7 @@
   .spark{display:flex;align-items:flex-end;gap:2px;height:38px} .spark i{flex:1;background:#7A5CFF;border-radius:2px 2px 0 0;opacity:.85;min-height:2px}
   .btn{display:inline-block;border-radius:10px;padding:8px 14px;font:800 13px Rubik,sans-serif;background:var(--indigo);color:#fff;border:0;cursor:pointer;font-family:Rubik,sans-serif;text-decoration:none} .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)} .btn.danger{background:rgba(255,107,157,.2);color:#a1244e} .btn:disabled{opacity:.5}
   .sw{display:inline-block;width:38px;height:22px;border-radius:99px;background:var(--line);position:relative;vertical-align:middle;cursor:pointer} .sw::after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s} .sw.on{background:var(--good)} .sw.on::after{inset-inline-start:18px}
-  .money{color:var(--good);font-weight:800}
+  .money{color:var(--good);font-weight:800} .pct.hi{color:var(--good);font-weight:800} .pct.lo{color:var(--warn);font-weight:800}
   .fam{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
   .fam .h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap} .fam b{font:800 14px Rubik,sans-serif} .fam .m{font-size:12px;color:var(--muted)}
   .fam .kids{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px} .fam .kids span{background:var(--soft);border:1px solid var(--line);border-radius:99px;padding:3px 9px;font-size:12px}
@@ -93,7 +93,9 @@ const dateShort = (s) => s ? new Date(s * 1000).toLocaleDateString("he-IL", { da
 const days = (n) => n <= 0 ? "היום" : n === 1 ? "מחר" : n === 2 ? "בעוד יומיים" : `בעוד ${n} ימים`;
 const daysLeft = (n) => n === 1 ? "עוד יום" : n === 2 ? "עוד יומיים" : `עוד ${n} ימים`;
 const shortMail = (e) => e ? e.replace(/@.*/, "@…") : "";
+const famName = (f) => f.familyName || f.label || f.name || ((f.children || []).map((k) => k.name).filter(Boolean).length ? "המשפחה של " + (f.children || []).map((k) => k.name).filter(Boolean).slice(0, 4).join(", ") : ((f.parents || []).map((p) => p.email).find(Boolean) ? "משפחת " + (f.parents || []).map((p) => p.email).find(Boolean).split("@")[0] : "משפחה ללא שם"));
 const gradeName = (g) => ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"][g] ?? g;
+const pct = (n) => `<span class="pct ${n >= 90 ? "hi" : n < 50 ? "lo" : ""}">${n}%</span>`;
 const toast = (t) => { const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); };
 
 const [{initializeApp}, auth, fns] = await Promise.all([
@@ -147,7 +149,7 @@ async function dashboard() {
     <div class="kpis">
       ${kpi(fmt(o.activeFamilies30), "משפחות פעילות (30 יום)")}
       ${kpi(fmt(o.childrenToday), "ילדים שיחקו היום")}
-      ${kpi(fmt(o.questionsToday), "שאלות היום · " + o.accuracyToday + "% נכונות")}
+      ${kpi(fmt(o.questionsToday), "שאלות היום · " + pct(o.accuracyToday) + " נכונות")}
       ${kpi(fmt(o.minutesToday), "דקות משחק שהורווחו היום")}
       ${kpi('<span class="money" title="הערכה לפי מועדי החידוש">₪' + fmt(o.mrr) + '</span>', "MRR")}
       ${kpi(fmt(o.premiumFamilies), "משפחות טופי+ · " + o.yearlyShare + "% שנתי")}
@@ -159,11 +161,14 @@ async function dashboard() {
       <div class="card"><h4>איפה המשפחות במסע</h4><div class="funnel">
         ${funnelRow("חינם, לפני הפעלה", free, total, total)}${funnelRow("במתנה", st.gift || 0, total, total)}${funnelRow("מתנה מסתיימת (≤3 ימים)", st.gift_expiring || 0, total, total)}${funnelRow("טופי+", st.plus || 0, total, total)}${funnelRow("חזרו לחינם", st.returned || 0, total, total)}
       </div></div>
-      <div class="card"><h4>עולמות היום</h4><div class="tblwrap"><table><tr><th>עולם</th><th>שאלות</th><th>נכונות</th><th>ילדים</th></tr>${o.worldsToday.length ? o.worldsToday.map((w) => `<tr><td>${esc(w.label)}${PACKS[w.topic] ? ' <span class="chip mint" style="padding:1px 7px;font-size:10px">חדש</span>' : ""}</td><td>${fmt(w.q)}</td><td>${w.accuracy}%</td><td>${w.kids}</td></tr>`).join("") : '<tr><td colspan="4" class="empty">עוד לא שיחקו היום</td></tr>'}</table></div></div>
+      <div class="card"><h4>עולמות היום</h4><div class="tblwrap"><table><tr><th>עולם</th><th>שאלות</th><th>נכונות</th><th>ילדים</th></tr>${o.worldsToday.length ? o.worldsToday.map((w) => `<tr><td>${esc(w.label)}${PACKS[w.topic] ? ' <span class="chip mint" style="padding:1px 7px;font-size:10px">חדש</span>' : ""}</td><td>${fmt(w.q)}</td><td>${pct(w.accuracy)}</td><td>${w.kids}</td></tr>`).join("") : '<tr><td colspan="4" class="empty">עוד לא שיחקו היום</td></tr>'}</table></div></div>
       <div class="card"><h4>קורה עכשיו</h4><div class="feed" id="feed"><span class="spin"></span></div></div>
     </div>`;
   $("recompute").onclick = async () => { $("recompute").innerHTML = '<span class="spin"></span>'; await loadJourney(true); dashboard(); };
-  try { const a = await call("adminActivity"); $("feed").innerHTML = a.items.length ? a.items.map((i) => `<div class="i"><span>${when(i.at)}</span><div>${esc(i.text)}</div></div>`).join("") : '<div class="empty">שקט כרגע.</div>'; } catch (e) { $("feed").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; }
+  try { const [a] = await Promise.all([call("adminActivity"), FAM ? Promise.resolve() : call("adminFamiliesOverview").then((r) => { FAM = r; }).catch(() => {})]);
+    const famById = Object.fromEntries((FAM?.families || []).map((f) => [f.fullId || f.householdID || f.id, f]));
+    const label = (i) => { let t = i.text; const f = i.ref?.householdID && famById[i.ref.householdID]; if (f) t = t.replace(/משפחה [0-9A-F]{4}/, famName(f)); const k = i.ref?.childID && (f?.children || []).find((c) => (c.fullId || c.id) === i.ref.childID); return (k && !t.includes(k.name) ? esc(k.name) + " · " : "") + esc(t) + (f ? ` <a href="#families" style="font-size:11px">פתח משפחה</a>` : ""); };
+    $("feed").innerHTML = a.items.length ? a.items.map((i) => `<div class="i"><span>${when(i.at)}</span><div>${label(i)}</div></div>`).join("") : '<div class="empty">שקט כרגע.</div>'; } catch (e) { $("feed").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; }
 }
 
 // ---------------- 2 · families ----------------
@@ -191,14 +196,14 @@ function famCard(f) {
   else { const [l] = STATE[state] || STATE.free_new; chip = `<span class="state">${l}</span>`; }
   const parents = (f.parents || []).filter((p) => !p.anonymous || p.isGuestParent);
   const kids = (f.children || []).map((k) => { const c = (J && J.children && J.children[k.fullId || k.id]) || {}; const t = c.today || {}; const girl = (k.gender || c.gender) === "girl";
-    const act = t.questions ? `היום ${t.questions} שאלות · ${Math.round(100 * (t.correct || 0) / t.questions)}%` : c.lastActive ? c.lastActive.slice(5).replace("-", ".") : (girl ? "עוד לא שיחקה" : "עוד לא שיחק");
+    const act = t.questions ? `היום ${t.questions} שאלות · ${pct(Math.round(100 * (t.correct || 0) / t.questions))}` : c.lastActive ? c.lastActive.slice(5).replace("-", ".") : (girl ? "עוד לא שיחקה" : "עוד לא שיחק");
     return `<span>🧒 ${esc(k.name)}${k.grade != null ? " · " + gradeName(k.grade) : ""} · ${act}${c.favorite ? ` · ${girl ? "אוהבת" : "אוהב"}: ${esc(c.favorite.label.split(" ")[0])}` : ""}</span>`; }).join("");
   const devs = (f.children || []).flatMap((k) => (k.deviceRows || []).map((d) => `<span>📱 ${esc(k.name)} · ${d.kind === "ipad" ? "אייפד" : d.kind === "iphone" ? "אייפון" : esc(d.name || "מכשיר")}${d.lastSeenAt ? " · " + (Date.now() / 1000 - d.lastSeenAt < 86400 ? "פעיל" : "לפני " + Math.round((Date.now() / 1000 - d.lastSeenAt) / 86400) + " ימים") : ""}${d.appVersion ? " · " + esc(String(d.appVersion).replace(/^.*\((\d+)\)$/, "$1")) : ""}</span>`)).join("");
   const joined = Math.min(...(f.children || []).map((k) => k.createdAt || Infinity).concat([Infinity]));
   const meta = [parents.map((p) => shortMail(p.email) || p.name || "אורח").slice(0, 2).join(" · "), parents.length ? `${parents.length === 1 ? "הורה אחד" : parents.length + " הורים"}` : "", isFinite(joined) ? "הצטרפו " + dateShort(joined) : "", j.purchaseSource ? "מקור המנוי: " + (SOURCE[j.purchaseSource] || j.purchaseSource) : ""].filter(Boolean).join(" · ");
-  return `<div class="fam" data-hh="${esc(f.hh)}"><div class="h"><div><b>👪 ${esc(f.familyName || f.label || f.name || "משפחה ללא שם")}</b> ${chip} ${extra}</div><div class="m">${esc(meta)}</div></div>
+  return `<div class="fam" data-hh="${esc(f.hh)}"><div class="h"><div><b>👪 ${esc(famName(f))}</b> ${chip} ${extra}</div><div class="m">${esc(meta)}</div></div>
     <div class="kids">${kids}${devs}</div>
-    <div class="acts"><a class="btn ghost" href="families.html">פרטי הילדים</a><button class="btn ghost" data-gift="${esc(f.hh)}">🎁 הארך מתנה</button><a class="btn ghost" href="notifications.html">📣 שלח הודעה</a><button class="btn ghost" data-label="${esc(f.hh)}" data-cur="${esc(f.label || "")}">🏷 תווית</button><button class="btn danger" data-del="${esc(f.hh)}" data-name="${esc(f.familyName || f.label || f.name || "")}">🗑 מחק</button></div></div>`;
+    <div class="acts"><a class="btn ghost" href="families.html">פרטי הילדים</a><button class="btn ghost" data-gift="${esc(f.hh)}">🎁 הארך מתנה</button><a class="btn ghost" href="notifications.html">📣 שלח הודעה</a><button class="btn ghost" data-label="${esc(f.hh)}" data-cur="${esc(f.label || "")}">🏷 תווית</button><button class="btn danger" data-del="${esc(f.hh)}" data-name="${esc(famName(f))}">🗑 מחק</button></div></div>`;
 }
 function wireFam() {
   document.querySelectorAll("[data-gift]").forEach((b) => b.onclick = async () => { const n = Number(prompt("כמה ימי טופי+ במתנה? (מוסיף על מה שיש)", "14")); if (!n) return; try { await call("adminGiftHousehold", { householdID: b.dataset.gift, days: n }); toast("המתנה נפתחה ל־" + n + " ימים"); await loadJourney(true); FAM = null; families(); } catch (e) { toast("נכשל: " + e.message); } });
@@ -253,7 +258,7 @@ async function worlds() {
     <div class="card" ${worldsTab !== "new" ? "hidden" : ""}><div class="tblwrap"><table><tr><th>עולם</th><th>שאלות</th><th>הגהה</th><th>השקה</th><th>ילדים ששיחקו</th><th>רכישות</th><th>הכנסה</th><th>מצב</th></tr>${rows}</table></div>
       <div class="stamp" style="margin-top:8px">הדלקה = העולם גלוי לכל המשפחות, ופוש ההשקה יוצא פעם אחת תוך 5 דקות.</div>
       <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost" id="schedBtn">📅 תזמן השקה</button><a class="btn ghost" href="#settings">🌟 קבע אורחי השבוע</a><a class="btn ghost" href="#settings">✏️ ערוך נוסח פוש ההשקה</a></div></div>
-    <div class="card" ${worldsTab !== "base" ? "hidden" : ""}><h4>בסיס</h4><div class="tblwrap"><table><tr><th>עולם</th><th>ילדים ששיחקו היום</th><th>שאלות היום</th><th>נכונות</th></tr>${Object.entries(BASE).map(([t, l]) => { const w = worldsToday[t]; return `<tr><td>${l}</td><td>${w ? w.kids : "—"}</td><td>${w ? fmt(w.q) : "—"}</td><td>${w ? w.accuracy + "%" : "—"}</td></tr>`; }).join("")}</table></div></div>`;
+    <div class="card" ${worldsTab !== "base" ? "hidden" : ""}><h4>בסיס</h4><div class="tblwrap"><table><tr><th>עולם</th><th>ילדים ששיחקו היום</th><th>שאלות היום</th><th>נכונות</th></tr>${Object.entries(BASE).map(([t, l]) => { const w = worldsToday[t]; return `<tr><td>${l}</td><td>${w ? w.kids : "—"}</td><td>${w ? fmt(w.q) : "—"}</td><td>${w ? pct(w.accuracy) : "—"}</td></tr>`; }).join("")}</table></div></div>`;
   document.querySelectorAll("[data-wt]").forEach((c) => c.onclick = () => { worldsTab = c.dataset.wt; worlds(); });
   document.querySelectorAll("[data-pack]").forEach((sw) => sw.onclick = async () => { const on = !sw.classList.contains("on"); const st = (PACKSTATE.packs || {})[sw.dataset.pack] || {}; const name = PACKS[sw.dataset.pack].name;
     if (on && !confirm(`להדליק את "${name}" לכל המשפחות?${st.reviewed ? "" : "\n\n⚠️ העולם עוד לא סומן כמוגה."}\n\nפוש ההשקה יישלח לכל ההורים תוך 5 דקות (פעם אחת בלבד).`)) return;

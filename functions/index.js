@@ -2272,12 +2272,24 @@ exports.adminActivity = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (
     db.collection("parentFeedback").orderBy("createdAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
     db.collectionGroup("chores").where("markedDoneAt", ">", Date.now() / 1000 - 86400).orderBy("markedDoneAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
   ]);
-  const hhName = async (id) => { if (!id) return "משפחה"; const h = await db.collection("households").doc(id).get(); const d = h.exists ? h.data() : {}; return d.familyName || d.familyLabel || "משפחה " + String(id).slice(0, 4); };
+  // Most families never set a name, so name them the way the founder recognises
+  // them: by their children, then by a parent's email — never by an id prefix.
+  const hhName = async (id) => {
+    if (!id) return "משפחה";
+    const h = await db.collection("households").doc(id).get(); const d = h.exists ? h.data() : {};
+    if (d.familyName || d.familyLabel) return d.familyName || d.familyLabel;
+    const kids = await Promise.all((d.childIDs || []).slice(0, 4).map((k) => db.collection("children").doc(k).get().catch(() => null)));
+    const names = kids.filter((k) => k && k.exists).map((k) => k.data().name).filter(Boolean);
+    if (names.length) return "המשפחה של " + names.join(", ");
+    for (const uid of (d.parentUIDs || []).slice(0, 3)) { try { const u = await admin.auth().getUser(uid); if (u.email) return "משפחת " + u.email.split("@")[0]; } catch (_) {} }
+    return "משפחה " + String(id).slice(0, 4);
+  };
+  const childName = async (id) => { if (!id) return null; const c = await db.collection("children").doc(String(id)).get().catch(() => null); return c && c.exists ? c.data().name : null; };
   for (const s of sales.docs) { const d = s.data(); push(Number(d.at) * 1000, "sale", `💎 ${await hhName(d.householdID)} רכשה ${PACK_META[d.packID]?.emoji || ""} ${PACK_META[d.packID]?.name || d.packID}${d.campaignID ? " · מקור: הודעה" : ""}`, { householdID: d.householdID }); }
   for (const c of camps.docs) { const d = c.data(); push(d.sentAt, "campaign", `📣 נשלחה הודעה "${d.emoji ? d.emoji + " " : ""}${d.title}" ל־${d.stats?.sent || 0} מכשירים`); }
   for (const r of reports.docs) { const d = r.data(); push(Number(d.createdAt) * (Number(d.createdAt) > 1e12 ? 1 : 1000), "report", `🚩 דיווח על שאלה: "${String(d.prompt || d.question || "").replace(/\n/g, " ").slice(0, 60)}" · ${TOPIC_LABEL[d.topic] || d.topic || ""}`); }
   for (const f of feedback.docs) { const d = f.data(); push(Number(d.createdAt) * (Number(d.createdAt) > 1e12 ? 1 : 1000), "feedback", `💬 פידבק מהורה: "${String(d.message || "").slice(0, 80)}"`); }
-  for (const ch of chores.docs) { const d = ch.data(); if (Number(d.lastApprovedAt || 0) >= Number(d.markedDoneAt || 0)) continue; push(Number(d.markedDoneAt) * 1000, "chore", `🧹${d.photoToken ? "📸" : ""} מטלה "${d.title || ""}" סומנה כבוצעה · ממתינה לאישור`); }
+  for (const ch of chores.docs) { const d = ch.data(); if (Number(d.lastApprovedAt || 0) >= Number(d.markedDoneAt || 0)) continue; const who = await childName(d.childID); const hm = ch.ref.path.match(/households\/([^/]+)/); push(Number(d.markedDoneAt) * 1000, "chore", `🧹${d.photoToken ? "📸" : ""} ${who ? who + " " : ""}${who ? "סימן/ה" : "סומנה"} מטלה "${d.title || ""}" כבוצעה · ממתינה לאישור`, { householdID: hm ? hm[1] : null, childID: d.childID || null }); }
   items.sort((a, b) => b.at - a.at);
   return { items: items.slice(0, 30) };
 });
