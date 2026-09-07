@@ -357,6 +357,13 @@ struct WorldMapView: View {
 
             ScrollView {
                 VStack(spacing: 0) {
+                    // The approved header (Rani, 2026-09-07): the gold "טופי" wordmark
+                    // with the lion on the right and the round buttons on the left,
+                    // ABOVE the glass pane — then the pane, then the worlds.
+                    brandRow
+                        .frame(maxWidth: worldGridMaxWidth)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.horizontal, homeHPad)
                     topBar
                         .frame(maxWidth: worldGridMaxWidth)
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -946,14 +953,15 @@ struct WorldMapView: View {
         // identity + round glass nav buttons, the 4-stat strip, then the two
         // twin insets (daily challenge · chores). Forced LTR so the avatar sits
         // on the left and the buttons on the right, matching the mockup.
-        return VStack(spacing: 14) {
+        _ = btnSize
+        return VStack(spacing: 12) {
             HStack(alignment: .center, spacing: 10) {
                 identityBlock(avatar: avatarSize)
-                Spacer(minLength: 4)
-                navButtonsRow(size: btnSize)
+                Spacer(minLength: 6)
+                walletStats
             }
             statsPanel
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 dailyChallengeCard
                 choresTopCard
             }
@@ -968,6 +976,92 @@ struct WorldMapView: View {
         .eraseToAnyView()
     }
 
+    /// The gold wordmark ("טופי", or "טופי +" for a Tofy+ family) with the
+    /// lion beside it, and the three round glass buttons on the other side.
+    private var brandRow: some View {
+        HStack(alignment: .center, spacing: 10) {
+            HStack(spacing: 8) {
+                Text(subs.isPremium ? "טופי +" : "טופי")
+                    .font(.system(size: heroTitleSize, weight: .black, design: .rounded))
+                    .foregroundStyle(LinearGradient(colors: [Color(hex: "FFF6C4"), Color(hex: "FFD23F"), Color(hex: "FFB347")],
+                                                    startPoint: .top, endPoint: .bottom))
+                    .shadow(color: Color(hex: "A05F0A").opacity(0.85), radius: 0, y: 2)
+                    .shadow(color: .black.opacity(0.3), radius: 8, y: 6)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .scaleEffect(heroAppeared ? 1 : 0.5)
+                    .opacity(heroAppeared ? 1 : 0)
+                Text("🦁")
+                    .font(.system(size: isCompact ? 32 : 38))
+                    .shadow(color: .black.opacity(0.3), radius: 6, y: 4)
+            }
+            Spacer(minLength: 6)
+            navButtonsRow(size: isCompact ? 44 : 50)
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+        .padding(.top, AppSpacing.sm)
+        .padding(.bottom, 2)
+        .eraseToAnyView()
+    }
+
+    /// ⭐ stars · 💎 diamonds beside the name (Rani): the number on the name's
+    /// line, the label on the grade's line. On iPad two more: 💝 gift minutes
+    /// and ⏱ minutes earned.
+    private var walletStats: some View {
+        HStack(spacing: isCompact ? 12 : 18) {
+            walletStat("⭐ " + progress.stars.currencyShort, "כּוֹכָבִים") { infoStat = .stars }
+            walletStat("💎 " + progress.diamonds.currencyShort, "יַהֲלוֹמִים") { infoStat = .diamonds }
+            if !isCompact {
+                walletStat("💝 \(progress.parentGiftMinutes)", "דַּקּ׳ מַתָּנָה") { infoStat = .minutes }
+                walletStat("⏱ \(progress.pendingMinutes)", "דַּקּ׳ שֶׁהִרְוִיחַ") { infoStat = .minutes }
+            }
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+        .eraseToAnyView()
+    }
+
+    /// Two fixed-height lines so every stat sits exactly on the name / grade lines.
+    private func walletStat(_ value: String, _ label: String, action: @escaping () -> Void) -> some View {
+        Button { Haptic.light(); action() } label: {
+            VStack(spacing: 2) {
+                Text(value)
+                    .font(.system(size: isCompact ? 14.5 : 16, weight: .black, design: .rounded))
+                    .foregroundStyle(GlassInk.primary)
+                    .monospacedDigit().lineLimit(1).minimumScaleFactor(0.7)
+                    .frame(height: isCompact ? 22 : 26)
+                Text(label)
+                    .font(.system(size: isCompact ? 11 : 12.5, weight: .bold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                    .frame(height: 16)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// One horizontal twin card: the ring on the right, the title, one status
+    /// line and the track — both header cards use it so they read as twins.
+    private func twinCard<Ring: View, Status: View>(ring: Ring, title: String, status: Status, frac: CGFloat) -> some View {
+        HStack(spacing: 10) {
+            ring.frame(width: 40, height: 40)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: isCompact ? 13.5 : 15, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                status
+                headerTrack(frac: frac,
+                            fill: LinearGradient(colors: [.white, .white], startPoint: .leading, endPoint: .trailing),
+                            glowColor: .clear, tip: nil)
+                    .padding(.top, 4)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .glassInset(radius: 16)
+    }
+
     /// Daily challenge — a compact vertical card, the exact TWIN of
     /// `choresTopCard` (Rani: same size, side by side). Icon ring → title →
     /// one status line → progress track. Tap → the explainer sheet.
@@ -977,65 +1071,40 @@ struct WorldMapView: View {
         let ready = progress.dailyChallengeRewardReady
         let claimed = progress.dailyChallengeClaimed
         let frac = (ready || claimed) ? 1 : CGFloat(min(done, target)) / CGFloat(max(1, target))
+        let ring = ZStack {
+            Circle()
+                .fill(LinearGradient(colors: [Color(hex: "FFB347"), Color(hex: "FF5E3A")],
+                                     startPoint: .topLeading, endPoint: .bottomTrailing))
+                .overlay(Circle().stroke(.white.opacity(0.55), lineWidth: 1.5))
+                .glow(AppColor.flameOrange, radius: challengePulse ? 12 : 5)
+            Text("🔥").font(.system(size: 21)).scaleEffect(challengePulse ? 1.12 : 0.95)
+        }
+        let status = Group {
+            if claimed {
+                Text("כָּל הַכָּבוֹד! נִפְגָּשִׁים מָחָר 🌙")
+                    .font(.system(size: 11.5, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.88)).lineLimit(1).minimumScaleFactor(0.6)
+            } else if ready {
+                HStack(spacing: 4) {
+                    Text("🎁").font(.system(size: 13)).scaleEffect(challengePulse ? 1.18 : 1)
+                    Text("פִּתְחוּ!").font(.system(size: 12, weight: .black, design: .rounded))
+                        .foregroundStyle(AppColor.textOnLight).lineLimit(1).fixedSize()
+                }
+                .padding(.horizontal, 10).padding(.vertical, 3)
+                .background(AppGradient.gold, in: Capsule())
+                .overlay(Capsule().stroke(.white.opacity(0.7), lineWidth: 1.2))
+                .glow(AppColor.starGold, radius: challengePulse ? 10 : 5)
+            } else {
+                Text("\(done) מִתּוֹךְ \(target)")
+                    .font(.system(size: 11.5, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.88)).lineLimit(1).minimumScaleFactor(0.6)
+            }
+        }
         return Button {
             Haptic.light()
             requirePremium { infoSheet = .dailyChallenge }
         } label: {
-            VStack(spacing: 6) {
-                // A living flame in a fiery ring — the streak count rides it.
-                ZStack(alignment: .bottomTrailing) {
-                    Circle()
-                        .fill(LinearGradient(colors: [Color(hex: "FFB347"), Color(hex: "FF5E3A")],
-                                             startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .frame(width: 44, height: 44)
-                        .overlay(Circle().stroke(.white.opacity(0.55), lineWidth: 1.5))
-                        .glow(AppColor.flameOrange, radius: challengePulse ? 12 : 5)
-                    Text("🔥")
-                        .font(.system(size: 24))
-                        .scaleEffect(challengePulse ? 1.12 : 0.95)
-                        .frame(width: 44, height: 44)
-                }
-                Text("אֶתְגָּר יוֹמִי")
-                    .font(.system(size: 15.5, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineLimit(1).minimumScaleFactor(0.7)
-                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
-                Group {
-                    if claimed {
-                        Text("כָּל הַכָּבוֹד! נִפְגָּשִׁים מָחָר 🌙")
-                            .font(.system(size: 11.5, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.88))
-                            .lineLimit(1).minimumScaleFactor(0.6)
-                    } else if ready {
-                        HStack(spacing: 4) {
-                            Text("🎁").font(.system(size: 14))
-                                .scaleEffect(challengePulse ? 1.18 : 1)
-                                .rotationEffect(.degrees(challengePulse ? 8 : -8))
-                            Text("פִּתְחוּ!")
-                                .font(.system(size: 13, weight: .black, design: .rounded))
-                                .foregroundStyle(AppColor.textOnLight)
-                                .lineLimit(1).fixedSize()
-                        }
-                        .padding(.horizontal, 12).padding(.vertical, 5)
-                        .background(AppGradient.gold, in: Capsule())
-                        .overlay(Capsule().stroke(.white.opacity(0.7), lineWidth: 1.2))
-                        .glow(AppColor.starGold, radius: challengePulse ? 12 : 6)
-                    } else {
-                        Text("\(done) מִתּוֹךְ \(target) נְכוֹנוֹת")
-                            .font(.system(size: 12.5, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.88))
-                            .lineLimit(1).minimumScaleFactor(0.6)
-                    }
-                }
-
-                headerTrack(frac: frac,
-                            fill: LinearGradient(colors: [.white, .white], startPoint: .leading, endPoint: .trailing),
-                            glowColor: .clear, tip: nil)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 14)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .glassInset(radius: 18)
+            twinCard(ring: ring, title: "אֶתְגָּר יוֹמִי", status: status, frac: frac)
         }
         .buttonStyle(.juicy)
         .environment(\.layoutDirection, .rightToLeft)
@@ -1171,9 +1240,10 @@ struct WorldMapView: View {
                     Haptic.light(); showingChildSettings = true
                 } label: {
                     Text((profiles.active?.name ?? "טוֹפִי").split(separator: " ").first.map(String.init) ?? "טוֹפִי")
-                        .font(.system(size: isCompact ? 19 : 22, weight: .black, design: .rounded))
+                        .font(.system(size: isCompact ? 17 : 20, weight: .black, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .lineLimit(1).minimumScaleFactor(0.6)
+                        .frame(height: isCompact ? 22 : 26)
                 }
                 .buttonStyle(.plain)
 
@@ -1184,9 +1254,10 @@ struct WorldMapView: View {
                     // the sheet this line opens.
                     Text(Profile.gradeDisplayName(profiles.active?.effectiveGrade ?? 1)
                          + (progress.dayStreak > 0 ? " · 🔥 \(progress.dayStreak) יָמִים" : ""))
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .font(.system(size: isCompact ? 12 : 13, weight: .bold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .lineLimit(1).minimumScaleFactor(0.7)
+                        .frame(height: 16)
                 }
                 .buttonStyle(.plain)
             }
@@ -1250,14 +1321,14 @@ struct WorldMapView: View {
         let cap = progress.dailyCap
         let minutes = cap.enabled ? "\(progress.minutesEarnedToday)" : "\(progress.pendingMinutes)"
         let minutesMax: String? = cap.enabled ? "/\(cap.max)" : nil
+        // The approved header: ⏱ minutes today · ✅ correct today · ⭐ level
+        // (stars and diamonds moved up beside the name).
         return HStack(spacing: 0) {
-            statColumn(value: progress.diamonds.currencyShort, label: "💎 יַהֲלוֹמִים") { infoStat = .diamonds }
-            statDivider
-            statColumn(value: progress.stars.currencyShort, label: "⭐ כּוֹכָבִים") { infoStat = .stars }
-            statDivider
             statColumn(value: minutes, suffix: minutesMax, label: "⏱ דַּקּוֹת הַיּוֹם") { infoStat = .minutes }
             statDivider
-            statColumn(value: "\(progress.correctToday)", label: "✅ נְכוֹנוֹת", action: nil)
+            statColumn(value: "\(progress.correctToday)", label: "✅ נְכוֹנוֹת הַיּוֹם", action: nil)
+            statDivider
+            statColumn(value: "\(progress.companionLevel)", label: "⭐ רָמָה") { showLevelInfo = true }
         }
         .environment(\.layoutDirection, .rightToLeft)
         .padding(.vertical, 13)
@@ -1472,15 +1543,8 @@ struct WorldMapView: View {
 
     private var heroTitle: some View {
         VStack(spacing: 4) {
-            // Premium subscribers see the "+" brand — matches the paywall / settings.
-            Text(subs.isPremium ? "טופי+" : "טופי")
-                .font(.system(size: heroTitleSize, weight: .black, design: .rounded))
-                .foregroundStyle(GlassInk.primary)
-                .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
-                .lineLimit(1).minimumScaleFactor(0.5)
-                .scaleEffect(heroAppeared ? 1 : 0.5)
-                .opacity(heroAppeared ? 1 : 0)
-
+            // The wordmark now heads the screen (brandRow); this line keeps its
+            // place over the worlds — the one the mockup kept (Rani).
             Text("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨")
                 .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
@@ -1956,44 +2020,24 @@ struct WorldMapView: View {
         let pending = all.filter { $0.isPendingApproval }.count
         let doneToday = all.filter { $0.approvedToday }.count
         let frac = all.isEmpty ? 0 : CGFloat(doneToday) / CGFloat(all.count)
+        let ring = ZStack {
+            Circle()
+                .fill(LinearGradient(colors: [Color(hex: "48BFE3"), Color(hex: "5E60CE")],
+                                     startPoint: .topLeading, endPoint: .bottomTrailing))
+                .overlay(Circle().stroke(.white.opacity(0.55), lineWidth: 1.5))
+                .shadow(color: Color(hex: "48BFE3").opacity(0.55), radius: 9)
+            Text("🧹").font(.system(size: 20))
+        }
+        let status = Text(pending > 0 ? (pending == 1 ? "אַחַת מְחַכָּה" : "\(pending) מְחַכּוֹת")
+                          : doneToday > 0 ? "\(doneToday) הֻשְׁלְמוּ הַיּוֹם! 💪"
+                          : "עוֹזְרִים — וּבוֹחֲרִים פְּרָס!")
+            .font(.system(size: 11.5, weight: .bold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.88)).lineLimit(1).minimumScaleFactor(0.6)
         return Button {
             Haptic.light()
             requirePremium { showingChores = true }
         } label: {
-            VStack(spacing: 6) {
-                ZStack(alignment: .bottomTrailing) {
-                    ZStack {
-                        Circle()
-                            .fill(LinearGradient(colors: [Color(hex: "48BFE3"), Color(hex: "5E60CE")],
-                                                 startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .frame(width: 44, height: 44)
-                            .overlay(Circle().stroke(.white.opacity(0.55), lineWidth: 1.5))
-                            .shadow(color: Color(hex: "48BFE3").opacity(0.55), radius: 9)
-                        Text("🧹").font(.system(size: 23))
-                    }
-                }
-                Text("מַטְלוֹת הַבַּיִת")
-                    .font(.system(size: 15.5, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineLimit(1).minimumScaleFactor(0.7)
-                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
-                Group {
-                    Text(pending > 0 ? (pending == 1 ? "אַחַת מְחַכָּה לְאִשּׁוּר" : "\(pending) מְחַכּוֹת לְאִשּׁוּר")
-                         : doneToday > 0 ? "\(doneToday) הֻשְׁלְמוּ הַיּוֹם! 💪"
-                         : "עוֹזְרִים — וּבוֹחֲרִים פְּרָס!")
-                        .font(.system(size: 12.5, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.88))
-                        .lineLimit(1).minimumScaleFactor(0.6)
-                }
-
-                headerTrack(frac: frac,
-                            fill: LinearGradient(colors: [.white, .white], startPoint: .leading, endPoint: .trailing),
-                            glowColor: .clear, tip: nil)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 14)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .glassInset(radius: 18)
+            twinCard(ring: ring, title: "מַטְלוֹת הַבַּיִת", status: status, frac: frac)
         }
         .buttonStyle(.juicy)
         .environment(\.layoutDirection, .rightToLeft)
