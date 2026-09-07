@@ -283,10 +283,12 @@ struct WorldMapView: View {
             foot: "בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא 💌"
         ) {
             Haptic.light()
+            // One tap is enough: the sparkle has done its job (Rani).
+            if let cid = profiles.activeID { PackKidState.markOpened(pack.id, childID: cid) }
             packOffer = pack
         }
         .frame(maxWidth: .infinity)
-        .firstDayGlow(packStore.isFirstDay(pack))
+        .firstDayGlow(packStore.isFirstDay(pack) && !(profiles.activeID.map { PackKidState.isOpened(pack.id, childID: $0) } ?? false))
     }
 
     /// Where טופי טיים sits among the worlds. Rani: the categories move once a
@@ -438,7 +440,8 @@ struct WorldMapView: View {
                                         subscriptionLocked: locked,
                                         badgeOverride: packNew ? "✨ חָדָשׁ!" : (isGuest ? "🌟 אוֹרֵחַ הַשָּׁבוּעַ" : nil),
                                         footOverride: continueFoot,
-                                        pulse: pack.map { p in profiles.activeID.map { PackKidState.isFirstDay(p.id, childID: $0) } ?? false } ?? false
+                                        // Glows on its launch day only until the child taps it (Rani).
+                                        pulse: packNew && (pack.map { p in profiles.activeID.map { PackKidState.isFirstDay(p.id, childID: $0) } ?? false } ?? false)
                                     ) {
                                         if let pack, let cid = profiles.activeID {
                                             PackKidState.markOpened(pack.id, childID: cid)
