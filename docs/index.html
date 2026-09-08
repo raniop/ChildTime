@@ -25,11 +25,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
-<link rel="stylesheet" href="glass.css">
+<link rel="stylesheet" href="glass.css?v=2">
 <style>
   /* ---------- hero ---------- */
   .hero{padding:60px 0 30px}
-  .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+  .hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,430px);gap:44px;align-items:center}
   .hero h1{font-size:clamp(38px,5.6vw,68px);font-weight:900;
     background:linear-gradient(180deg,#fff,#FFE9A8);-webkit-background-clip:text;background-clip:text;color:transparent}
   .hero .sub{font-size:clamp(17px,2.1vw,21px);color:var(--muted);margin:18px 0 8px;max-width:520px;font-weight:500}
@@ -37,18 +37,22 @@
   .pills{display:flex;flex-wrap:wrap;gap:9px;margin-top:26px}
   .pills span{font-size:14px;font-weight:700;padding:8px 15px;border-radius:999px;
     background:rgba(255,255,255,.12);border:1px solid var(--edge);color:var(--muted)}
-  .stage{position:relative;min-height:520px}
+  /* The kid's phone leads, the parent's sits behind it. Both are capped in
+     pixels so a mid-sized window never turns the hero into two giant phones. */
+  .stage{position:relative;width:100%;max-width:520px}
   .stage img{border-radius:30px;border:1px solid rgba(255,255,255,.2);box-shadow:0 30px 70px rgba(18,9,58,.45)}
-  .stage .front{width:70%;margin-inline-start:auto;animation:floaty 6s ease-in-out infinite}
-  .stage .back{position:absolute;bottom:0;inset-inline-start:0;width:52%;
+  .stage .front{position:relative;z-index:2;width:min(66%,300px);margin-inline-start:auto;
+    animation:floaty 6s ease-in-out infinite}
+  .stage .back{position:absolute;z-index:1;bottom:4%;inset-inline-start:0;width:min(50%,228px);
     animation:floaty 6s ease-in-out infinite;animation-delay:-3s}
-  @media(max-width:900px){
-    .hero .wrap{grid-template-columns:1fr;text-align:center}
+  @media(max-width:1040px){
+    .hero{padding-top:44px}
+    .hero .wrap{grid-template-columns:1fr;text-align:center;gap:26px}
     .hero .sub{margin-inline:auto}
     .hero .cta-row,.pills{justify-content:center}
-    .stage{min-height:0;max-width:440px;margin:8px auto 0}
-    .stage .front{width:64%}
-    .stage .back{width:48%;bottom:6%}
+    .stage{width:100%;max-width:420px;margin:6px auto 0}
+    .stage .front{width:min(64%,260px)}
+    .stage .back{width:min(48%,196px);bottom:6%}
   }
 
   /* ---------- steps ---------- */
@@ -311,11 +315,11 @@
   <h2 class="title reveal">מה שאין בטופי חשוב לא פחות</h2>
   <p class="lead reveal">טופי נמצא בקטגוריית הילדים של ה־App Store, ונבנה לפי הכללים שלה מהיום הראשון.</p>
   <div class="cards">
-    <div class="card pane reveal"><div class="ico">🚫</div><h3>אפס פרסומות</h3>
+    <div class="card pane reveal"><div class="ico">🚫</div><h3>בלי פרסומות</h3>
       <p>אין באנרים, אין סרטוני פרסומת, ואין קישורים שמוציאים את הילד מהאפליקציה.</p></div>
-    <div class="card pane reveal"><div class="ico">🕵️</div><h3>אפס מעקב</h3>
+    <div class="card pane reveal"><div class="ico">🕵️</div><h3>בלי מעקב</h3>
       <p>אין כלי אנליטיקה של צד שלישי, אין מזהה פרסומי ואין מעקב חוצה־אפליקציות. הנתונים משמשים רק להפעלת האפליקציה.</p></div>
-    <div class="card pane reveal"><div class="ico">💳</div><h3>אפס קניות אצל הילד</h3>
+    <div class="card pane reveal"><div class="ico">💳</div><h3>בלי קניות אצל הילד</h3>
       <p>במכשיר של הילד לא מוצגים מחירים ואי אפשר לקנות. כל תשלום נעשה אצלכם, מאחורי קוד הורה.</p></div>
   </div>
 </div></section>
