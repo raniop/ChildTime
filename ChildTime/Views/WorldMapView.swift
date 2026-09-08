@@ -64,6 +64,8 @@ struct WorldMapView: View {
     // here. We open here only AFTER the other device confirms (row cleared).
     @State private var transferRequestedAt: Date? = nil
     @State private var transferTimedOut = false
+    /// A transfer is in flight — the button says so instead of looking dead.
+    @State private var isTransferring = false
     /// True while a claim transaction is in flight. Opening has to ask the cloud
     /// whether any other device holds the child's one window — that round trip is
     /// a second or two, and with no feedback the button looks broken and gets
@@ -1688,6 +1690,7 @@ struct WorldMapView: View {
                     .ctaGlass(Color(hex: "FF5FA8"), Color(hex: "FFA53A"), colour: 0.82)
                 }
                 .buttonStyle(.juicy)
+                .disabled(isOpening)
                 .frame(maxWidth: 480)
                 .padding(.bottom, 6)
             }
@@ -1727,11 +1730,17 @@ struct WorldMapView: View {
                             transferWindowHere(rowID: other.rowID, peerSecondsLeft: other.secondsLeft)
                         } label: {
                             HStack(spacing: 10) {
-                                Image(systemName: "lock.arrow.circlepath")
-                                    .font(.system(size: 20, weight: .bold))
-                                Text("נַעֲלוּ \(where_) וּפִתְחוּ כָּאן")
-                                    .font(.system(size: 19, weight: .heavy, design: .rounded))
-                                    .minimumScaleFactor(0.7).lineLimit(1)
+                                if isTransferring {
+                                    ProgressView().tint(.white).scaleEffect(0.9)
+                                    Text("מַעֲבִירִים לְכָאן… ✨")
+                                        .font(.system(size: 19, weight: .heavy, design: .rounded))
+                                } else {
+                                    Image(systemName: "lock.arrow.circlepath")
+                                        .font(.system(size: 20, weight: .bold))
+                                    Text("נַעֲלוּ \(where_) וּפִתְחוּ כָּאן")
+                                        .font(.system(size: 19, weight: .heavy, design: .rounded))
+                                        .minimumScaleFactor(0.7).lineLimit(1)
+                                }
                             }
                             .foregroundStyle(.white)
                             .padding(.horizontal, AppSpacing.xl)
@@ -1740,6 +1749,7 @@ struct WorldMapView: View {
                             .ctaGlass(Color(hex: "5B6CFF"), Color(hex: "9B5DE5"))
                         }
                         .buttonStyle(.juicy)
+                        .disabled(isTransferring)
                         .frame(maxWidth: 480)
                     }
                 }
@@ -1748,11 +1758,19 @@ struct WorldMapView: View {
                     requestUnlock { redeemMinutes() }
                 } label: {
                     HStack(spacing: 10) {
-                        Image(systemName: "gamecontroller.fill")
-                            .font(.system(size: 24))
-                        Text("פִּתְחוּ לִי \(progress.redeemableMinutesNow) דַּקּוֹת לְשַׂחֵק")
-                            .font(.system(size: 20, weight: .heavy, design: .rounded))
-                            .minimumScaleFactor(0.7).lineLimit(1)
+                        // Claiming the lease is a round-trip to the server. Without
+                        // this the button looked dead for 2–3 seconds (Rani).
+                        if isOpening {
+                            ProgressView().tint(.white).scaleEffect(0.9)
+                            Text("פּוֹתְחִים לְךָ… ✨")
+                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        } else {
+                            Image(systemName: "gamecontroller.fill")
+                                .font(.system(size: 24))
+                            Text("פִּתְחוּ לִי \(progress.redeemableMinutesNow) דַּקּוֹת לְשַׂחֵק")
+                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                .minimumScaleFactor(0.7).lineLimit(1)
+                        }
                     }
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl)
@@ -1761,6 +1779,7 @@ struct WorldMapView: View {
                     .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
                 }
                 .buttonStyle(.juicy)
+                .disabled(isOpening)
                 .frame(maxWidth: 480)
             } else if progress.dailyScreenTimeMaxedOut {
                 // Wallet has minutes, but today's screen-time cap is used up — they
@@ -1837,6 +1856,8 @@ struct WorldMapView: View {
     /// hold it and ask for the code first.
     private func requestUnlock(_ action: @escaping () -> Void) {
         guard let p = profiles.active else { return }
+        guard !isOpening else { return }          // a claim is already in flight
+        Haptic.light()                            // the tap answers immediately
         // Family-wide double-spend guard: if THIS child's OTHER device already has
         // a play window open, don't open a second one here (the wallet drain
         // may not have synced yet — that's how 30 minutes became 60).
@@ -1962,10 +1983,13 @@ struct WorldMapView: View {
             return
         }
         Haptic.medium()
+        guard !isTransferring else { return }
         transferTimedOut = false
+        isTransferring = true
         transferRequestedAt = Date()
         transferFromKind = leaseMgr.lease.ownerKind ?? ""
         Task { @MainActor in
+            defer { isTransferring = false }
             let kind = leaseMgr.lease.kind
             // Ask for what the CHILD is looking at. Reading only the lease made
             // this a dead end whenever the card came from the old device-row
@@ -2150,7 +2174,7 @@ struct WorldMapView: View {
             legacyRedeemMinutes(); return
         }
         let want = progress.redeemableMinutesNow
-        guard want > 0 else { return }
+        guard want > 0, !isOpening else { return }
         isOpening = true
         Task { @MainActor in
             defer { isOpening = false }
@@ -2230,6 +2254,7 @@ struct WorldMapView: View {
         // locked at 29:40 re-opened at 29:00 and those 40 seconds could never be
         // spent — they just accumulated out of reach.
         let want = progress.openableSeconds(gift: true)
+        guard !isOpening else { return }
         isOpening = true
         Task { @MainActor in
             defer { isOpening = false }
