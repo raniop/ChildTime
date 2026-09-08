@@ -149,7 +149,7 @@ async function loadJourney(recompute) {
     $("navWorlds").textContent = `${o.packsOn} דלוקים · ${o.packsReady} מוכנים`;
     $("navContent").textContent = o.openReports ? o.openReports + " דיווחים חדשים" : "";
     $("navSupport").textContent = o.openFeedback ? o.openFeedback + " פתוחות" : "";
-    const fk = (J.financials || {}).kpis || {}; $("navFin").textContent = fk.paying ? `${fk.paying} משלמות · ₪${fmt(fk.mrr)} MRR` : "אין משלמות עדיין"; }
+    const fk = (J.financials || {}).kpis || {}; $("navFin").textContent = fk.paying ? `${fk.paying} משפחות משלמות · ₪${fmt(fk.mrr)} MRR` : "עדיין אין משפחות משלמות"; }
 }
 window.addEventListener("hashchange", route);
 // 📱 Phone: everything lives behind the ☰; a tap on a page closes it.
@@ -408,7 +408,7 @@ function financials() {
       ${kpiBig(nv(k.churnPrecededByDrop, "%"), "ביטולים שקדמה להם ירידה בשימוש", `${k.cancelled} ביטולים בסך הכול`)}
     </div>
     <div class="kpis">
-      ${kpi(fmt(k.families), "משפחות")}${kpi(fmt(k.new30), "הצטרפו ב־30 יום")}${kpi(fmt(k.paying), "משלמות עכשיו")}${kpi('<span class="money">₪' + fmt(k.mrr) + '</span>', "MRR")}${kpi('<span class="money">₪' + fmt(k.newMrr30) + '</span>', "MRR חדש ב־30 יום")}${kpi(nv(k.churn30, "%"), "צ׳רן 30 יום · " + k.cancelled30 + " ביטולים")}
+      ${kpi(fmt(k.families), "משפחות")}${kpi(fmt(k.new30), "הצטרפו ב־30 יום")}${kpi(fmt(k.paying), "משפחות משלמות")}${kpi('<span class="money">₪' + fmt(k.mrr) + '</span>', "MRR")}${kpi('<span class="money">₪' + fmt(k.newMrr30) + '</span>', "MRR חדש ב־30 יום")}${kpi(nv(k.churn30, "%"), "צ׳רן 30 יום · " + k.cancelled30 + " ביטולים")}
     </div>
     <div class="card"><h4>💡 תובנות</h4><div class="ins">${(F.insights || []).map((i) => `<div class="${i.kind}">${esc(i.text)}</div>`).join("") || '<div>אין עדיין.</div>'}</div></div>
     <div class="grid2">
