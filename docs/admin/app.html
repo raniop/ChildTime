@@ -350,8 +350,9 @@ async function content() {
 // ---------------- 7 · support ----------------
 let supTab = "open";
 async function support() {
-  $("main").innerHTML = `<div class="top"><h3 id="supH">תמיכה</h3><div class="filters" id="supFilters"><span class="chip ${supTab === "open" ? "on" : ""}" data-s="open">פתוחות</span><span class="chip ${supTab === "done" ? "on" : ""}" data-s="done">נענו</span><span class="chip ${supTab === "feedback" ? "on" : ""}" data-s="feedback">פידבק</span><span class="chip dim" id="wl">רשימת המתנה</span></div></div><div class="card"><div class="tblwrap" id="supTbl"><span class="spin"></span></div></div>`;
-  try { const r = await call("adminListSupport"); $("wl").textContent = "רשימת המתנה (" + r.waitlist + ")"; const openN = r.items.filter((i) => i.status === "open").length; $("supH").textContent = openN ? `תמיכה · ${openN} פתוחות` : "תמיכה"; $("navSupport").textContent = openN ? openN + " פתוחות" : "";
+  $("main").innerHTML = `<div class="top"><h3 id="supH">תמיכה</h3><div class="filters" id="supFilters"><span class="chip ${supTab === "open" ? "on" : ""}" data-s="open">פתוחות</span><span class="chip ${supTab === "done" ? "on" : ""}" data-s="done">נענו</span><span class="chip ${supTab === "feedback" ? "on" : ""}" data-s="feedback">פידבק</span><span class="chip ${supTab === "waitlist" ? "on" : ""}" data-s="waitlist" id="wl">רשימת המתנה</span></div></div><div class="card"><div class="tblwrap" id="supTbl"><span class="spin"></span></div></div>`;
+  try { const r = await call("adminListSupport"); $("wl").textContent = "רשימת המתנה (" + r.waitlist + ")"; const openN = r.items.filter((i) => i.status === "open").length;
+    if (supTab === "waitlist") { $("supH").textContent = "רשימת המתנה · " + r.waitlist; $("navSupport").textContent = openN ? openN + " פתוחות" : ""; waitlist(); document.querySelectorAll("#supFilters [data-s]").forEach((c) => c.onclick = () => { supTab = c.dataset.s; support(); }); return; } $("supH").textContent = openN ? `תמיכה · ${openN} פתוחות` : "תמיכה"; $("navSupport").textContent = openN ? openN + " פתוחות" : "";
     const famOf = (i) => (FAM && (FAM.families || []).find((f) => (f.fullId || f.householdID || f.id) === i.householdID)) || null;
     const rows = r.items.filter((i) => supTab === "open" ? i.status === "open" : supTab === "done" ? i.status !== "open" : i.kind === "feedback");
     $("supTbl").innerHTML = rows.length ? `<table><tr><th>מתי</th><th>משפחה</th><th>סוג</th><th>תוכן</th><th>מכשיר · גרסה</th><th></th></tr>${rows.map((i) => { const f = famOf(i); const mail = f && (f.parents || []).map((p) => p.email).find(Boolean);
@@ -359,6 +360,31 @@ async function support() {
     document.querySelectorAll("[data-done]").forEach((b) => b.onclick = async () => { await call("adminSetSupportStatus", { id: b.dataset.done, status: "done" }); support(); });
     document.querySelectorAll("[data-fam]").forEach((a) => a.onclick = () => { famFilter = "all"; famQuery = ""; });
     document.querySelectorAll("#supFilters [data-s]").forEach((c) => c.onclick = () => { supTab = c.dataset.s; support(); });
+  } catch (e) { $("supTbl").textContent = e.message; }
+}
+
+// everyone who left an email on tofyapp.com — newest first, with one click to
+// copy every address for the launch mail.
+async function waitlist() {
+  try {
+    const r = await call("adminListWaitlist");
+    const rows = r.items || [];
+    if (!rows.length) { $("supTbl").innerHTML = '<div class="empty">עוד אף אחד לא נרשם.</div>'; return; }
+    const mails = rows.map((i) => i.email).filter(Boolean);
+    $("supTbl").innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn ghost" id="wlCopy">העתקת ${mails.length} האימיילים</button>
+        <a class="btn ghost" id="wlCsv" download="tofy-waitlist.csv">הורדת CSV</a>
+      </div>
+      <table><tr><th>מתי</th><th>אימייל</th><th>שם</th><th>גיל הילד</th><th>מאיפה</th></tr>${rows.map((i) =>
+        `<tr><td>${when(i.at)}</td><td><a href="mailto:${esc(i.email)}">${esc(i.email)}</a></td><td>${esc(i.name || "—")}</td><td>${esc(i.childAge || "—")}</td><td>${esc(i.source || "—")}</td></tr>`).join("")}</table>`;
+    $("wlCopy").onclick = async () => {
+      try { await navigator.clipboard.writeText(mails.join(", ")); $("wlCopy").textContent = "הועתק ✓"; }
+      catch (e) { $("wlCopy").textContent = "ההעתקה נחסמה"; }
+    };
+    const csv = "email,name,childAge,source,date\n" + rows.map((i) =>
+      [i.email, i.name, i.childAge, i.source, i.at ? new Date(i.at).toISOString() : ""]
+        .map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(",")).join("\n");
+    $("wlCsv").href = "data:text/csv;charset=utf-8," + encodeURIComponent("\ufeff" + csv);
   } catch (e) { $("supTbl").textContent = e.message; }
 }
 

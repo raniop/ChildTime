@@ -2488,6 +2488,30 @@ exports.adminListSupport = onCall({ timeoutSeconds: 60, memory: "256MiB" }, asyn
     items.push({ id: d.id, kind: "feedback", at: Number(x.createdAt) * (Number(x.createdAt) > 1e12 ? 1 : 1000), family, householdID: x.householdID || null, text: x.message || "", device: x.appVersion || "", status: x.status || "open" }); }
   return { items, waitlist: wl.size || 0 };
 });
+exports.adminListWaitlist = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (request) => {
+  requireAdmin(request);
+  const snap = await db.collection("waitlist").get().catch(() => ({ docs: [] }));
+  const at = (v) => {
+    if (!v) return 0;
+    if (typeof v === "number") return v > 1e12 ? v : v * 1000;
+    if (typeof v.toMillis === "function") return v.toMillis();
+    const t = Date.parse(String(v));
+    return Number.isNaN(t) ? 0 : t;
+  };
+  const items = snap.docs.map((d) => {
+    const x = d.data();
+    return {
+      id: d.id,
+      email: String(x.email || ""),
+      name: String(x.name || ""),
+      childAge: String(x.childAge || ""),
+      source: String(x.source || ""),
+      at: at(x.createdAt),
+    };
+  }).sort((a, b) => b.at - a.at);
+  return { items };
+});
+
 exports.adminSetSupportStatus = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const email = requireAdmin(request);
   const id = String(request.data?.id || ""), status = String(request.data?.status || "open");
