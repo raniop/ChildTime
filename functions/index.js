@@ -2590,6 +2590,15 @@ exports.adminListWaitlist = onCall({ timeoutSeconds: 60, memory: "256MiB" }, asy
   return { items };
 });
 
+exports.adminDeleteWaitlistEntry = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const id = String(request.data?.id || "");
+  if (!id) throw new HttpsError("invalid-argument", "id");
+  await db.collection("waitlist").doc(id).delete();
+  console.log("[waitlist] entry", id, "deleted by", email);
+  return { ok: true };
+});
+
 exports.adminSetSupportStatus = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const email = requireAdmin(request);
   const id = String(request.data?.id || ""), status = String(request.data?.status || "open");

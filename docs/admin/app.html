@@ -375,8 +375,14 @@ async function waitlist() {
         <button class="btn ghost" id="wlCopy">העתקת ${mails.length} האימיילים</button>
         <a class="btn ghost" id="wlCsv" download="tofy-waitlist.csv">הורדת CSV</a>
       </div>
-      <table><tr><th>מתי</th><th>אימייל</th><th>שם</th><th>גיל הילד</th><th>מאיפה</th></tr>${rows.map((i) =>
-        `<tr><td>${when(i.at)}</td><td><a href="mailto:${esc(i.email)}">${esc(i.email)}</a></td><td>${esc(i.name || "—")}</td><td>${esc(i.childAge || "—")}</td><td>${esc(i.source || "—")}</td></tr>`).join("")}</table>`;
+      <table><tr><th>מתי</th><th>אימייל</th><th>שם</th><th>גיל הילד</th><th>מאיפה</th><th></th></tr>${rows.map((i) =>
+        `<tr><td>${when(i.at)}</td><td><a href="mailto:${esc(i.email)}">${esc(i.email)}</a></td><td>${esc(i.name || "—")}</td><td>${esc(i.childAge || "—")}</td><td>${esc(i.source || "—")}</td><td style="white-space:nowrap"><button class="btn ghost" data-wldel="${esc(i.id)}" data-wlmail="${esc(i.email)}">מחקו</button></td></tr>`).join("")}</table>`;
+    document.querySelectorAll("[data-wldel]").forEach((b) => b.onclick = async () => {
+      if (!confirm(`למחוק את ${b.dataset.wlmail} מרשימת ההמתנה?`)) return;
+      b.disabled = true; b.textContent = "מוחק…";
+      try { await call("adminDeleteWaitlistEntry", { id: b.dataset.wldel }); waitlist(); }
+      catch (e) { b.disabled = false; b.textContent = "מחקו"; alert(e.message); }
+    });
     $("wlCopy").onclick = async () => {
       try { await navigator.clipboard.writeText(mails.join(", ")); $("wlCopy").textContent = "הועתק ✓"; }
       catch (e) { $("wlCopy").textContent = "ההעתקה נחסמה"; }

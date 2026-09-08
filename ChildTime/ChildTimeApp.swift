@@ -438,6 +438,8 @@ struct ChildTimeApp: App {
         case "askparent": AskParentView(onClose: {})   // DEMO_SCREEN=askparent — what a CHILD device shows instead of the paywall
         case "paywall":  PaywallView()    // DEMO_SCREEN=paywall — the "טופי+" subscription screen (App Review proof)
         case "unlocked": UnlockedView().onAppear { ProgressStore.shared.startUnlock(minutes: 670, manual: false) }  // DEMO_SCREEN=unlocked — game-time countdown
+        case "kidflow":                                        // DEMO_SCREEN=kidflow — the real kid flow: home ↔ play screen
+            KidFlowDemo()
         case "opening":  UnlockedView().onAppear { ProgressStore.shared.beginOpeningWindow(gift: false) }           // DEMO_SCREEN=opening — the "we're opening it" state
         case "openinggift": UnlockedView().onAppear { ProgressStore.shared.beginOpeningWindow(gift: true) }         // DEMO_SCREEN=openinggift
         case "whatsnew": WhatsNewView(onDone: {})   // DEMO_SCREEN=whatsnew — the release-notes sheet
@@ -564,5 +566,16 @@ struct ChildTimeApp: App {
             settings.clearAllowException()
         }
         shields.applyDefaultLock()
+    }
+}
+
+/// DEMO_SCREEN=kidflow — home and play screen switching exactly as they do in
+/// the real app, so a screen recording can follow the whole loop end to end.
+private struct KidFlowDemo: View {
+    @StateObject private var progress = ProgressStore.shared
+    var body: some View {
+        Group {
+            if progress.isUnlocked || progress.isOpeningWindow { UnlockedView() } else { WorldMapView() }
+        }
     }
 }
