@@ -78,6 +78,40 @@
       gap:26px 22px;overflow:visible;padding-bottom:6px}
   }
 
+  /* a screenshot is a button: it opens the lightbox */
+  .rail .shot{padding:0;border:0;background:none;display:block;cursor:zoom-in;border-radius:26px;
+    transition:transform .18s ease}
+  .rail .shot:hover{transform:translateY(-4px)}
+  .rail .shot::after{content:"⤢";position:absolute;inset-block-start:10px;inset-inline-start:10px;
+    width:30px;height:30px;display:grid;place-items:center;border-radius:50%;font-size:14px;font-weight:800;
+    background:rgba(20,12,60,.55);border:1px solid rgba(255,255,255,.34);color:#fff;
+    opacity:0;transition:opacity .18s ease;pointer-events:none}
+  .rail figure{position:relative}
+  .rail .shot:hover::after,.rail .shot:focus-visible::after{opacity:1}
+  @media(hover:none){.rail .shot::after{opacity:.9}}
+
+  /* ---------- lightbox ---------- */
+  .lb{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:26px 16px;outline:none;
+    background:rgba(24,13,66,.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .lb figure{margin:0;text-align:center;max-width:min(94vw,460px)}
+  .lb img{width:100%;max-height:80vh;object-fit:contain;border-radius:34px;
+    border:1px solid rgba(255,255,255,.28);box-shadow:0 40px 90px rgba(10,4,40,.6)}
+  .lb figcaption{margin-top:14px;font-size:17px;font-weight:800;color:#fff}
+  .lb .count{margin-top:4px;font-size:14px;font-weight:600;color:var(--faint);
+    font-variant-numeric:tabular-nums;direction:ltr}
+  .lb button{position:absolute;background:rgba(255,255,255,.14);border:1px solid var(--edge);color:#fff;
+    width:52px;height:52px;border-radius:50%;font-size:24px;font-weight:800;cursor:pointer;font-family:inherit;
+    display:grid;place-items:center;transition:background .18s ease,transform .18s ease}
+  .lb button:hover{background:rgba(255,255,255,.26);transform:scale(1.06)}
+  .lb .close{inset-block-start:18px;inset-inline-end:18px;font-size:22px}
+  .lb .prev{inset-inline-start:14px;inset-block-start:50%;translate:0 -50%}
+  .lb .next{inset-inline-end:14px;inset-block-start:50%;translate:0 -50%}
+  @media(max-width:620px){
+    .lb .prev,.lb .next{inset-block-start:auto;inset-block-end:18px;translate:none;width:48px;height:48px}
+    .lb .prev{inset-inline-start:24px} .lb .next{inset-inline-end:24px}
+    .lb img{max-height:64vh}
+  }
+
   /* ---------- worlds ---------- */
   .worlds{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:900px;margin:0 auto}
   .world{font-size:15.5px;font-weight:700;padding:11px 18px;border-radius:999px;
@@ -213,12 +247,12 @@
     <h3>🧒 צד הילד</h3>
     <p class="side-sub">הרפתקה צבעונית: עונים על שאלות, אוספים כוכבים ויהלומים, מסדרים את החדר בבית — ומרוויחים דקות משחק אמיתיות.</p>
     <div class="rail">
-      <figure><img src="shots/kidhome.jpg" alt="מסך הבית של הילד" loading="lazy"><figcaption>🏠 בוחרים עולם</figcaption></figure>
-      <figure><img src="shots/question.jpg" alt="מסך שאלה" loading="lazy"><figcaption>🧠 שאלה לפי הכיתה</figcaption></figure>
-      <figure><img src="shots/choreskid.jpg" alt="מטלות הבית" loading="lazy"><figcaption>🧹 מטלות הבית</figcaption></figure>
-      <figure><img src="shots/wheel.jpg" alt="גלגל המזל" loading="lazy"><figcaption>🎡 גלגל המזל</figcaption></figure>
-      <figure><img src="shots/shop.jpg" alt="חנות הדמויות" loading="lazy"><figcaption>💎 חנות הדמויות</figcaption></figure>
-      <figure><img src="shots/leaderboard.jpg" alt="חברים ולוח מובילים" loading="lazy"><figcaption>🏆 חברים וחידון חי</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/kidhome.jpg" alt="מסך הבית של הילד" loading="lazy"></button><figcaption>🏠 בוחרים עולם</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/question.jpg" alt="מסך שאלה" loading="lazy"></button><figcaption>🧠 שאלה לפי הכיתה</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/choreskid.jpg" alt="מטלות הבית" loading="lazy"></button><figcaption>🧹 מטלות הבית</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/wheel.jpg" alt="גלגל המזל" loading="lazy"></button><figcaption>🎡 גלגל המזל</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/shop.jpg" alt="חנות הדמויות" loading="lazy"></button><figcaption>💎 חנות הדמויות</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/leaderboard.jpg" alt="חברים ולוח מובילים" loading="lazy"></button><figcaption>🏆 חברים וחידון חי</figcaption></figure>
     </div>
   </div>
 
@@ -226,12 +260,12 @@
     <h3>👨‍👩‍👧 צד ההורה</h3>
     <p class="side-sub">לוח בקרה נעול בקוד: כמה זמן מותר, אילו אפליקציות נחסמות, אילו עולמות פתוחים לכל ילד — ואישור מטלות בלחיצה.</p>
     <div class="rail">
-      <figure><img src="shots/devicecontrols.jpg" alt="בקרת המכשיר" loading="lazy"><figcaption>🔒 בקרת המכשיר</figcaption></figure>
-      <figure><img src="shots/childscreentime.jpg" alt="הגבלת זמן מסך יומית" loading="lazy"><figcaption>⏱ תקרה יומית</figcaption></figure>
-      <figure><img src="shots/childworlds.jpg" alt="עולמות פעילים לכל ילד" loading="lazy"><figcaption>🌍 עולם לכל ילד</figcaption></figure>
-      <figure><img src="shots/choresparent.jpg" alt="אישור מטלות" loading="lazy"><figcaption>✅ אישור מטלות</figcaption></figure>
-      <figure><img src="shots/childdifficulty.jpg" alt="רמת קושי לכל נושא" loading="lazy"><figcaption>🎯 רמה לכל נושא</figcaption></figure>
-      <figure><img src="shots/giftearly.jpg" alt="לוח הבקרה של ההורה" loading="lazy"><figcaption>👨‍👩‍👧 לוח המשפחה</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/devicecontrols.jpg" alt="בקרת המכשיר" loading="lazy"></button><figcaption>🔒 בקרת המכשיר</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/childscreentime.jpg" alt="הגבלת זמן מסך יומית" loading="lazy"></button><figcaption>⏱ תקרה יומית</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/childworlds.jpg" alt="עולמות פעילים לכל ילד" loading="lazy"></button><figcaption>🌍 עולם לכל ילד</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/choresparent.jpg" alt="אישור מטלות" loading="lazy"></button><figcaption>✅ אישור מטלות</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/childdifficulty.jpg" alt="רמת קושי לכל נושא" loading="lazy"></button><figcaption>🎯 רמה לכל נושא</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/giftearly.jpg" alt="לוח הבקרה של ההורה" loading="lazy"></button><figcaption>👨‍👩‍👧 לוח המשפחה</figcaption></figure>
     </div>
   </div>
 </div></section>
@@ -433,6 +467,17 @@
   <div style="opacity:.75">© 2026 Tofy · tofyapp.com</div>
 </div></footer>
 
+<div class="lb" id="lightbox" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="צילום מסך מוגדל">
+  <button class="close" id="lbClose" type="button" aria-label="סגירה">✕</button>
+  <button class="prev" id="lbPrev" type="button" aria-label="הצילום הקודם"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <button class="next" id="lbNext" type="button" aria-label="הצילום הבא"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <figure>
+    <img id="lbImg" src="" alt="">
+    <figcaption id="lbCap"></figcaption>
+    <div class="count" id="lbCount"></div>
+  </figure>
+</div>
+
 <script>
   /* The App Store link. The app is submitted but not yet listed publicly — the
      day it is approved, set STORE_URL and every badge on the site points there. */
@@ -471,6 +516,65 @@
     es.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
   }, { threshold: .12 });
   document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+
+  /* 🔍 Lightbox: any screenshot opens large, with ← → and Esc. */
+  (function(){
+    var shots = [].slice.call(document.querySelectorAll(".rail .shot"));
+    if (!shots.length) return;
+    var lb = document.getElementById("lightbox"),
+        img = document.getElementById("lbImg"),
+        cap = document.getElementById("lbCap"),
+        count = document.getElementById("lbCount"),
+        closeBtn = document.getElementById("lbClose"),
+        prevBtn = document.getElementById("lbPrev"),
+        nextBtn = document.getElementById("lbNext"),
+        index = 0, opener = null;
+
+    function show(i){
+      index = (i + shots.length) % shots.length;
+      var thumb = shots[index].querySelector("img");
+      img.src = thumb.src;
+      img.alt = thumb.alt;
+      cap.textContent = shots[index].parentNode.querySelector("figcaption").textContent;
+      count.textContent = (index + 1) + " / " + shots.length;
+    }
+    function open(i, from){
+      opener = from || null;
+      show(i);
+      lb.hidden = false;
+      document.body.style.overflow = "hidden";
+      lb.focus();
+    }
+    function close(){
+      lb.hidden = true;
+      document.body.style.overflow = "";
+      if (opener) opener.focus();
+    }
+
+    shots.forEach(function(btn, i){
+      btn.addEventListener("click", function(){ open(i, btn); });
+    });
+    closeBtn.addEventListener("click", close);
+    prevBtn.addEventListener("click", function(){ show(index - 1); });
+    nextBtn.addEventListener("click", function(){ show(index + 1); });
+    lb.addEventListener("click", function(e){ if (e.target === lb) close(); });
+    document.addEventListener("keydown", function(e){
+      if (lb.hidden) return;
+      if (e.key === "Escape") close();
+      // The rail reads right-to-left, so → walks back and ← walks forward.
+      else if (e.key === "ArrowRight") show(index - 1);
+      else if (e.key === "ArrowLeft") show(index + 1);
+    });
+    // A swipe on the enlarged image moves between screenshots.
+    var x0 = null;
+    img.addEventListener("touchstart", function(e){ x0 = e.changedTouches[0].clientX; }, {passive:true});
+    img.addEventListener("touchend", function(e){
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 45) show(index + (dx > 0 ? -1 : 1));
+      x0 = null;
+    }, {passive:true});
+  })();
 
   /* Waitlist → Firestore `waitlist` (REST, no SDK). Falls back to a pre-filled
      email so a lead is never lost if the write is blocked. */
