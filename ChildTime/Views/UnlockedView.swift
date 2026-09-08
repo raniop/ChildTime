@@ -8,6 +8,11 @@ struct UnlockedView: View {
     @State private var timer: Timer?
     @StateObject private var companion = CompanionController()
     @State private var greeted = false
+    /// Drives the three bouncing dots while the window is being opened.
+    @State private var dotPhase = 0
+
+    /// The claim is still in flight — show the warm "opening" state.
+    private var preparing: Bool { progress.isOpeningWindow && !progress.isUnlocked }
 
     private var isCompact: Bool { hsc == .compact }
     private var heroEmojiSize: CGFloat { isCompact ? 96 : 140 }
@@ -25,16 +30,48 @@ struct UnlockedView: View {
 
                 // Gift time from the parents wears the gift heart, never the
                 // controller — the two pockets are never blurred (Rani).
-                Text(progress.unlockIsManual ? "💝" : "🎮")
+                Text((preparing ? progress.openingIsGift : progress.unlockIsManual) ? "💝" : "🎮")
                     .font(.system(size: heroEmojiSize))
                     .float()
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
 
-                Text("זְמַן מִשְׂחָק!")
+                Text(preparing ? "פּוֹתְחִים לְךָ…" : "זְמַן מִשְׂחָק!")
                     .font(.system(size: titleSize, weight: .black, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
                     .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
+                    .contentTransition(.opacity)
 
+                if preparing {
+                    // The claim is a round-trip to the server. The child waits HERE,
+                    // on the screen the time is about to appear on, instead of on a
+                    // button that looks stuck (Rani).
+                    VStack(spacing: AppSpacing.md) {
+                        Text(progress.openingIsGift ? "מְשַׁחְרְרִים אֶת דַּקּוֹת הַמַּתָּנָה 💝" : "מְשַׁחְרְרִים אֶת הַדַּקּוֹת שֶׁהִרְוַחְתָּ ✨")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundStyle(GlassInk.secondary)
+                            .multilineTextAlignment(.center)
+                        HStack(spacing: 12) {
+                            ForEach(0..<3, id: \.self) { i in
+                                Circle()
+                                    .fill(.white.opacity(dotPhase == i ? 0.95 : 0.4))
+                                    .frame(width: 14, height: 14)
+                                    .scaleEffect(dotPhase == i ? 1.25 : 1)
+                                    .animation(.easeInOut(duration: 0.28), value: dotPhase)
+                            }
+                        }
+                        .frame(height: timerSize * 0.7)
+                    }
+                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.vertical, AppSpacing.lg)
+                    .frame(maxWidth: 420)
+                    .glassPane(radius: 28)
+                    .task {
+                        while !Task.isCancelled {
+                            try? await Task.sleep(nanoseconds: 280_000_000)
+                            dotPhase = (dotPhase + 1) % 3
+                        }
+                    }
+                } else {
                 // The countdown on one glass pane (the same glass as every screen).
                 VStack(spacing: AppSpacing.md) {
                     Text(progress.unlockIsManual ? "מַתָּנָה מֵאַבָּא וְאִמָּא 💝 · נוֹתְרוּ" : "נוֹתְרוּ")
@@ -54,6 +91,7 @@ struct UnlockedView: View {
                     .padding(.horizontal, AppSpacing.lg).padding(.vertical, 10)
                     .frame(maxWidth: 480)
                     .glassInset(radius: 16)
+                }
 
                 Spacer()
 
@@ -61,6 +99,7 @@ struct UnlockedView: View {
                 // grant traps the device on this screen with no exit. Earned time
                 // refunds its unused minutes; a manual grant just locks (nothing was
                 // spent from the earned pool, so there's nothing to bank back).
+                if !preparing {
                 Button {
                     endEarly()
                 } label: {
@@ -75,6 +114,7 @@ struct UnlockedView: View {
                 .buttonStyle(.juicy)
                 .frame(maxWidth: 480)
                 .padding(.bottom, AppSpacing.xxl)
+                }
             }
             // Side margins like the home cards — the panes never touch the edges.
             .padding(.horizontal, 28)
@@ -98,7 +138,7 @@ struct UnlockedView: View {
             // gate open behind them).
             ParentSettings.shared.sessionUnlocked = false
             startTimer()
-            if !greeted {
+            if !greeted, !preparing {
                 greeted = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     companion.cheer("\(Gendered.g("שִׂחַקְתָּ", "שִׂחַקְתְּ")) יָפֶה!")
@@ -109,6 +149,17 @@ struct UnlockedView: View {
             }
         }
         .onDisappear { timer?.invalidate() }
+        // The window landed while this screen was showing the opening state:
+        // start the clock and let the companion cheer now.
+        .onChangeCompat(of: progress.isUnlocked) { _, unlocked in
+            guard unlocked else { return }
+            startTimer()
+            if !greeted {
+                greeted = true
+                companion.cheer("\(Gendered.g("שִׂחַקְתָּ", "שִׂחַקְתְּ")) יָפֶה!")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { companion.state = .sleep }
+            }
+        }
         // Returning from another app (or the app switcher) pauses the Timer —
         // recompute from the absolute end time and restart so it's never frozen.
         .onChangeCompat(of: scenePhase) { _, phase in

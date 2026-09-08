@@ -72,7 +72,8 @@ struct WorldMapView: View {
     /// tapped again. Rani: "אני מכניס קוד, הוא חוזר למסך הראשי, ורק אחרי 2 שניות
     /// פותח". The wait is real and cannot be skipped; being silent about it is
     /// what made it feel wrong.
-    @State private var isOpening = false
+    /// Mirrors the store: a claim is in flight (the play screen shows it).
+    private var isOpening: Bool { progress.isOpeningWindow }
     /// Which device kind the window was taken FROM — so the parent's push can
     /// say "מהאייפד לאייפון".
     @State private var transferFromKind = ""
@@ -575,8 +576,14 @@ struct WorldMapView: View {
         .onChangeCompat(of: household.devicesByChild) { _, _ in
             completeWindowTransferIfReady()
         }
+        // 🎮 The open didn't happen — the child came back here, so say why in a
+        // way that never sounds like a failure.
+        .onChangeCompat(of: progress.openWindowMessage) { _, _ in
+            speakOpenWindowMessageIfNeeded()
+        }
         .onAppear {
             lastSeenStars = progress.stars
+            speakOpenWindowMessageIfNeeded()
             celebrateGamesUnlockIfNeeded()
             ChoreStore.shared.startIfNeeded()   // 🧹 live chores for the tile
             // 🔐 live view of the child's single authoritative play window.
@@ -1873,6 +1880,15 @@ struct WorldMapView: View {
         playPINSheet = .verifyUnlock
     }
 
+    /// Speak (once) the gentle line left behind by an open that couldn't happen.
+    private func speakOpenWindowMessageIfNeeded() {
+        guard let line = progress.openWindowMessage else { return }
+        progress.openWindowMessage = nil
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            companion.console(line)
+        }
+    }
+
     private func savePlayPIN(_ pin: String) {
         guard var p = profiles.active else { return }
         p.playPIN = pin
@@ -2175,29 +2191,35 @@ struct WorldMapView: View {
         }
         let want = progress.redeemableMinutesNow
         guard want > 0, !isOpening else { return }
-        isOpening = true
+        progress.beginOpeningWindow(gift: false)
         Task { @MainActor in
-            defer { isOpening = false }
             let outcome = await PlayWindowLeaseManager.shared.claim(
                 childID: cid, kind: .earned, requestedSeconds: want * 60)
             switch outcome {
             case .granted(let leaseID, let seconds, let wallet):
                 let mins = seconds / 60
-                guard mins > 0 else { return }
+                guard mins > 0 else {
+                    progress.endOpeningWindow(message: "רֶגַע, לֹא הִצְלַחְנוּ לִפְתֹּחַ עַכְשָׁיו — נְנַסֶּה שׁוּב 😊")
+                    return
+                }
                 if let wallet { progress.applyClaimedWallet(wallet) }
                 shields.unlock(minutes: max(1, (seconds + 59) / 60))
                 progress.startUnlock(minutes: mins, leaseID: leaseID, leaseKind: "earned",
                                      extraSeconds: seconds % 60)
                 LearningHistoryStore.shared.recordMinutesUsed(mins)
                 LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins])
+                progress.endOpeningWindow()          // the play screen takes over
             case .heldElsewhere:
                 // The lease listener drives the "open on your iPad" card + transfer.
                 Haptic.warning()
+                progress.endOpeningWindow(message: "הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")
             case .insufficient:
                 Haptic.light()
+                progress.endOpeningWindow(message: "עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לְךָ! 💪")
             case .offline:
                 // Transactions don't queue offline. Fall back to the bounded local
                 // window so a kid with no network is never stranded.
+                progress.endOpeningWindow()
                 legacyRedeemMinutes()
             }
         }
@@ -2255,23 +2277,32 @@ struct WorldMapView: View {
         // spent — they just accumulated out of reach.
         let want = progress.openableSeconds(gift: true)
         guard !isOpening else { return }
-        isOpening = true
+        progress.beginOpeningWindow(gift: true)
         Task { @MainActor in
-            defer { isOpening = false }
             let outcome = await PlayWindowLeaseManager.shared.claim(
                 childID: cid, kind: .gift, requestedSeconds: want)
             switch outcome {
             case .granted(let leaseID, let seconds, let wallet):
                 let mins = seconds / 60
-                guard mins > 0 else { return }
+                guard mins > 0 else {
+                    progress.endOpeningWindow(message: "רֶגַע, לֹא הִצְלַחְנוּ לִפְתֹּחַ עַכְשָׁיו — נְנַסֶּה שׁוּב 😊")
+                    return
+                }
                 if let wallet { progress.applyClaimedWallet(wallet) }
                 shields.unlock(minutes: max(1, (seconds + 59) / 60))
                 progress.startUnlock(minutes: mins, manual: true, leaseID: leaseID, leaseKind: "gift",
                                      extraSeconds: seconds % 60)
                 LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins, "gift": true])
-            case .heldElsewhere: Haptic.warning()
-            case .insufficient:  Haptic.light()
-            case .offline:       legacyRedeemGift()
+                progress.endOpeningWindow()
+            case .heldElsewhere:
+                Haptic.warning()
+                progress.endOpeningWindow(message: "הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")
+            case .insufficient:
+                Haptic.light()
+                progress.endOpeningWindow(message: "רֶגַע, אֵין כָּרֶגַע דַּקּוֹת מַתָּנָה לִפְתֹּחַ 💝")
+            case .offline:
+                progress.endOpeningWindow()
+                legacyRedeemGift()
             }
         }
     }

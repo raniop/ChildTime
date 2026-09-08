@@ -192,7 +192,7 @@ struct ContentView: View {
             // always show WorldMap, which hosts the live-game cover. Otherwise an
             // active screen-time window would land on UnlockedView and the tap
             // would never open the game.
-            if progress.isUnlocked && liveGame.pendingGameID == nil && liveGame.game == nil && !liveGame.isSettingUp {
+            if (progress.isUnlocked || progress.isOpeningWindow) && liveGame.pendingGameID == nil && liveGame.game == nil && !liveGame.isSettingUp {
                 UnlockedView()
             } else {
                 WorldMapView()

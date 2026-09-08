@@ -438,6 +438,8 @@ struct ChildTimeApp: App {
         case "askparent": AskParentView(onClose: {})   // DEMO_SCREEN=askparent — what a CHILD device shows instead of the paywall
         case "paywall":  PaywallView()    // DEMO_SCREEN=paywall — the "טופי+" subscription screen (App Review proof)
         case "unlocked": UnlockedView().onAppear { ProgressStore.shared.startUnlock(minutes: 670, manual: false) }  // DEMO_SCREEN=unlocked — game-time countdown
+        case "opening":  UnlockedView().onAppear { ProgressStore.shared.beginOpeningWindow(gift: false) }           // DEMO_SCREEN=opening — the "we're opening it" state
+        case "openinggift": UnlockedView().onAppear { ProgressStore.shared.beginOpeningWindow(gift: true) }         // DEMO_SCREEN=openinggift
         case "whatsnew": WhatsNewView(onDone: {})   // DEMO_SCREEN=whatsnew — the release-notes sheet
         case "parenthome": ParentDashboardView(isRoot: true)   // DEMO_SCREEN=parenthome — the redesigned overview
             .onAppear {

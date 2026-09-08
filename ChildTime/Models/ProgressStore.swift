@@ -248,6 +248,43 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var unlockIsManual: Bool {
         didSet { defaults.set(unlockIsManual, forKey: Key.unlockIsManual) }
     }
+    // MARK: - Opening a play window (transient, never persisted)
+
+    /// True from the tap on "פתחו לי דקות" until the server grants (or refuses)
+    /// the play window. The child is taken straight to the play screen, which
+    /// shows a warm "we're opening it" state instead of a button that looks
+    /// stuck for the 2–3 seconds the claim takes (Rani).
+    @Published private(set) var isOpeningWindow = false
+    /// Which pocket is being opened — the play screen wears 💝 for parent time.
+    @Published private(set) var openingIsGift = false
+    /// A gentle line for the child when the open could not happen. Never failure
+    /// language; the home screen speaks it through the companion and clears it.
+    @Published var openWindowMessage: String?
+
+    private var openingWatchdog: Task<Void, Never>?
+
+    func beginOpeningWindow(gift: Bool) {
+        openWindowMessage = nil
+        openingIsGift = gift
+        isOpeningWindow = true
+        // If a claim never answers (a stalled network), don't strand the child on
+        // the opening screen — come back with a kind line.
+        openingWatchdog?.cancel()
+        openingWatchdog = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 20_000_000_000)
+            guard let self, !Task.isCancelled, self.isOpeningWindow else { return }
+            self.endOpeningWindow(message: "רֶגַע, הָאִינְטֶרְנֶט קְצָת אִטִּי — נְנַסֶּה שׁוּב? 😊")
+        }
+    }
+
+    /// `message` is spoken on the home screen; pass nil when the window opened.
+    func endOpeningWindow(message: String? = nil) {
+        openingWatchdog?.cancel()
+        openingWatchdog = nil
+        isOpeningWindow = false
+        if let message { openWindowMessage = message }
+    }
+
     @Published private(set) var stars: Int {
         didSet { defaults.set(stars, forKey: Key.stars) }
     }
