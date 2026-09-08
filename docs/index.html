@@ -42,7 +42,8 @@
   /* The kid's phone leads, the parent's sits behind it. Both are capped in
      pixels so a mid-sized window never turns the hero into two giant phones. */
   .stage{position:relative;width:100%;max-width:520px}
-  .stage img{border-radius:30px;border:1px solid rgba(255,255,255,.2);box-shadow:0 30px 70px rgba(18,9,58,.45)}
+  .stage img,.stage video{border-radius:30px;border:1px solid rgba(255,255,255,.2);
+    box-shadow:0 30px 70px rgba(18,9,58,.45);display:block;max-width:100%;height:auto}
   .stage .front{position:relative;z-index:2;width:min(66%,300px);margin-inline-start:auto;
     animation:floaty 6s ease-in-out infinite}
   .stage .back{position:absolute;z-index:1;bottom:4%;inset-inline-start:0;width:min(50%,228px);
@@ -217,7 +218,11 @@
     </div>
   </div>
   <div class="stage">
-    <img class="front" src="shots/kidhome.jpg" alt="מסך הבית של הילד בטופי" width="820" height="1781" fetchpriority="high">
+    <!-- The hero plays the app itself: a silent, looping capture of a real
+         session. The poster is the first frame, so the layout never jumps. -->
+    <video class="front" src="video/hero-loop.mp4" poster="video/hero-poster.jpg"
+           width="820" height="1781" autoplay muted loop playsinline preload="metadata"
+           aria-label="הצצה לאפליקציה: הילד עונה על שאלה, צובר דקות ופותח זמן משחק"></video>
     <img class="back" src="shots/devicecontrols.jpg" alt="מסך בקרת המכשיר אצל ההורה" width="820" height="1781" loading="lazy">
   </div>
 </div></section>
