@@ -1,0 +1,154 @@
+/* ============================================================================
+   טופי · Tofy — the glass design system for tofyapp.com.
+   One stylesheet for every page: the app's own backdrop (#7A5CFF → #5E60CE →
+   #3E8BF0 with pink/teal orbs), white glass panes, and white pill buttons with
+   indigo ink. Kept deliberately single-look — the site should feel like the
+   app, on any device and in any theme.
+   ========================================================================== */
+
+:root{
+  --violet:#7A5CFF; --indigo:#5E60CE; --blue:#3E8BF0;
+  --pink:#FF6B9D;  --teal:#48BFE3;
+  --gold:#FFD23F;  --mint:#8CFFC4; --ink:#4B3FBF;
+  --pane:rgba(255,255,255,.13);
+  --pane-hi:rgba(255,255,255,.20);
+  --edge:rgba(255,255,255,.28);
+  --text:#fff;
+  --muted:rgba(255,255,255,.78);
+  --faint:rgba(255,255,255,.62);
+  --r-lg:28px; --r-md:22px; --r-sm:16px;
+  --wrap:1120px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:"Heebo",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  color:var(--text); background:#5E60CE; line-height:1.65;
+  overflow-x:hidden; font-size:16px; font-weight:500;
+  text-rendering:optimizeLegibility;
+}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+::selection{background:rgba(255,210,63,.35)}
+:focus-visible{outline:3px solid var(--gold); outline-offset:3px; border-radius:8px}
+
+/* ---------- the backdrop: gradient + two soft orbs, exactly like the app ---- */
+.backdrop{position:fixed; inset:0; z-index:-2;
+  background:linear-gradient(165deg,#7A5CFF 0%, #5E60CE 46%, #3E8BF0 100%);}
+.backdrop::before,.backdrop::after{content:"";position:absolute;border-radius:50%;filter:blur(90px)}
+.backdrop::before{width:52vmax;height:52vmax;top:-14vmax;inset-inline-start:-12vmax;
+  background:radial-gradient(circle,rgba(255,107,157,.55),transparent 68%)}
+.backdrop::after{width:56vmax;height:56vmax;bottom:-18vmax;inset-inline-end:-14vmax;
+  background:radial-gradient(circle,rgba(72,191,227,.5),transparent 68%)}
+.sparks{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.spark{position:absolute;opacity:.7;animation:tw 3.4s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.2;transform:scale(.65)}50%{opacity:.9;transform:scale(1.08)}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 22px}
+
+/* ---------- glass primitives ---------------------------------------------- */
+.pane{
+  background:var(--pane);
+  border:1px solid var(--edge);
+  border-radius:var(--r-md);
+  backdrop-filter:blur(16px) saturate(140%);
+  -webkit-backdrop-filter:blur(16px) saturate(140%);
+  box-shadow:0 18px 44px rgba(23,12,68,.22), inset 0 1px 0 rgba(255,255,255,.22);
+}
+.inset{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.20);border-radius:var(--r-sm)}
+
+/* ---------- buttons -------------------------------------------------------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  font-weight:800;font-size:17px;border:0;cursor:pointer;font-family:inherit;
+  border-radius:999px;padding:14px 28px;
+  background:linear-gradient(180deg,#fff,#EDEAFF);color:var(--ink);
+  box-shadow:0 12px 30px rgba(23,12,68,.28);
+  transition:transform .16s ease, box-shadow .16s ease}
+.btn:hover{transform:translateY(-2px);box-shadow:0 18px 38px rgba(23,12,68,.36)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid var(--edge);box-shadow:none}
+.btn.ghost:hover{background:rgba(255,255,255,.22)}
+.btn:disabled{opacity:.6;cursor:default;transform:none}
+
+/* App Store badge */
+.appstore{display:inline-flex;align-items:center;gap:12px;background:#0B0B10;color:#fff;
+  border:1px solid rgba(255,255,255,.22);border-radius:16px;padding:11px 22px;
+  box-shadow:0 14px 32px rgba(0,0,0,.34);transition:transform .16s, box-shadow .16s}
+.appstore:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(0,0,0,.44)}
+.appstore svg{width:29px;height:29px;flex:0 0 auto}
+.appstore .tx{display:flex;flex-direction:column;line-height:1.1;text-align:start}
+.appstore .tx small{font-size:12px;font-weight:600;opacity:.85}
+.appstore .tx b{font-size:22px;font-weight:800;letter-spacing:.2px}
+
+/* ---------- header --------------------------------------------------------- */
+.site-head{position:sticky;top:0;z-index:60;
+  background:rgba(70,54,160,.42);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(255,255,255,.14)}
+.site-head .wrap{display:flex;align-items:center;justify-content:space-between;gap:14px;height:66px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:25px;letter-spacing:.5px}
+.brand img{height:36px;width:auto}
+.brand span{background:linear-gradient(180deg,#FFE9A8,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.site-nav{display:flex;align-items:center;gap:20px}
+.site-nav a{font-weight:700;font-size:15.5px;color:var(--muted)}
+.site-nav a:hover{color:#fff}
+.site-nav .btn{font-size:15px;padding:11px 22px;color:var(--ink)}
+.menu-btn{display:none;background:rgba(255,255,255,.14);border:1px solid var(--edge);
+  color:#fff;border-radius:12px;width:44px;height:40px;font-size:19px;cursor:pointer}
+@media(max-width:860px){
+  .menu-btn{display:block}
+  .site-nav{position:absolute;top:66px;inset-inline:0;flex-direction:column;align-items:stretch;gap:0;
+    background:rgba(60,44,150,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--edge);
+    padding:8px 18px 18px;display:none}
+  .site-nav.open{display:flex}
+  .site-nav a{padding:13px 4px;border-bottom:1px solid rgba(255,255,255,.12);font-size:17px}
+  .site-nav .btn{margin-top:14px;border-bottom:0}
+}
+
+/* ---------- sections ------------------------------------------------------- */
+section{padding:74px 0;scroll-margin-top:84px}
+.eyebrow{text-align:center;font-weight:800;font-size:14.5px;letter-spacing:1px;color:var(--gold);margin-bottom:10px}
+h1,h2,h3{line-height:1.15;text-wrap:balance}
+h2.title{text-align:center;font-size:clamp(28px,4.6vw,44px);font-weight:900;margin-bottom:12px}
+.lead{text-align:center;max-width:660px;margin:0 auto 44px;color:var(--muted);font-size:18px}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease, transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ---------- footer --------------------------------------------------------- */
+.site-foot{padding:56px 0 46px;text-align:center;color:var(--faint);font-size:14.5px;
+  border-top:1px solid rgba(255,255,255,.12);margin-top:20px}
+.site-foot .links{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:center;margin:14px 0 18px}
+.site-foot .links a{font-weight:700;color:var(--muted)}
+.site-foot .links a:hover{color:#fff}
+
+/* ---------- document pages (privacy / terms / support / age) --------------- */
+.doc{max-width:860px;margin:0 auto;padding:36px 30px}
+.doc h1{font-size:clamp(26px,4.4vw,38px);font-weight:900;margin-bottom:6px}
+.doc h2{font-size:20px;font-weight:800;margin:30px 0 8px;color:#fff}
+.doc p,.doc li{color:var(--muted);font-size:16.5px}
+.doc p{margin-bottom:12px}
+.doc ul{margin:0 0 14px;padding-inline-start:22px}
+.doc li{margin-bottom:8px}
+.doc b{color:#fff;font-weight:800}
+.doc a{color:var(--gold);font-weight:700;text-decoration:underline}
+.doc .stamp{color:var(--faint);font-size:14.5px;margin-bottom:22px}
+.doc hr{border:0;border-top:1px solid rgba(255,255,255,.18);margin:34px 0}
+.doc .en{direction:ltr;text-align:left;margin-top:34px}
+.doc-head{text-align:center;padding:44px 0 8px}
+.doc-head .brand{justify-content:center;font-size:30px}
+
+/* ---------- a centred one-card page (friend / join / game) ----------------- */
+.mini{min-height:100dvh;display:grid;place-items:center;padding:28px 20px}
+.mini .card{max-width:460px;width:100%;text-align:center;padding:38px 28px}
+.mini h1{font-size:40px;font-weight:900;margin:6px 0 8px;
+  background:linear-gradient(180deg,#FFE9A8,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.mini p{color:var(--muted);font-size:17px;margin-bottom:12px}
+.mini .code{font-size:38px;font-weight:900;letter-spacing:10px;padding:14px 18px;margin:14px 0;
+  display:inline-block;background:rgba(255,255,255,.14);border:1px solid var(--edge);border-radius:18px}
+.mini .lion{width:118px;margin:0 auto;animation:floaty 4.5s ease-in-out infinite}

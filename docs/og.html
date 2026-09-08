@@ -1,37 +1,50 @@
 <!DOCTYPE html>
-<html lang="he">
+<html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@500;800;900&display=swap">
 <style>
+  /* The social card. Render at exactly 1200×630 → og-image.png. */
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:1200px;height:630px;overflow:hidden}
-  body{
-    font-family:"Heebo","Helvetica Neue","Arial Hebrew",Arial,sans-serif;
-    background:linear-gradient(135deg,#5E60CE 0%,#6A4BD0 45%,#48BFE3 100%);
-    color:#fff; display:flex; align-items:center; justify-content:center;
-    gap:56px; position:relative;
-  }
-  .lion{width:380px; height:auto; filter:drop-shadow(0 22px 44px rgba(0,0,0,.32))}
-  .txt{text-align:center}
-  .brand{
-    font-size:158px; font-weight:900; line-height:1;
-    background:linear-gradient(180deg,#FFF0BE,#FFD23F 55%,#F2A93B);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-    text-shadow:0 8px 34px rgba(255,210,63,.30);
-  }
-  .sub{font-size:48px; font-weight:800; margin-top:14px; opacity:.97}
-  .star{position:absolute; color:#FFD23F; opacity:.9}
+  body{font-family:"Heebo","Helvetica Neue",Arial,sans-serif;color:#fff;position:relative;
+    background:linear-gradient(150deg,#7A5CFF 0%,#5E60CE 48%,#3E8BF0 100%)}
+  .orb{position:absolute;border-radius:50%;filter:blur(80px)}
+  .orb.a{width:620px;height:620px;top:-200px;right:-120px;background:radial-gradient(circle,rgba(255,107,157,.6),transparent 68%)}
+  .orb.b{width:640px;height:640px;bottom:-240px;left:-140px;background:radial-gradient(circle,rgba(72,191,227,.55),transparent 68%)}
+  .row{position:relative;height:100%;display:flex;align-items:center;justify-content:center;gap:60px;padding:0 72px}
+  .txt{text-align:right;max-width:620px}
+  .brandline{display:flex;align-items:center;gap:14px;justify-content:flex-start;margin-bottom:14px}
+  .brandline img{height:86px;width:auto}
+  .brand{font-size:88px;font-weight:900;line-height:1;
+    background:linear-gradient(180deg,#FFF0BE,#FFD23F 60%,#F2A93B);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  h1{font-size:64px;font-weight:900;line-height:1.12;
+    background:linear-gradient(180deg,#fff,#FFE9A8);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:30px;font-weight:500;margin-top:18px;color:rgba(255,255,255,.86)}
+  .pills{display:flex;gap:12px;margin-top:26px}
+  .pills span{font-size:22px;font-weight:800;padding:10px 20px;border-radius:999px;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3)}
+  .shot{width:290px;border-radius:36px;border:1px solid rgba(255,255,255,.26);
+    box-shadow:0 36px 80px rgba(18,9,58,.5);transform:rotate(-4deg)}
+  .star{position:absolute;color:#FFD23F;opacity:.9}
 </style>
 </head>
 <body>
-  <img class="lion" src="lion.png" alt="">
-  <div class="txt">
-    <div class="brand">טופי</div>
-    <div class="sub">לומדים ומרוויחים זמן מסך</div>
+  <div class="orb a"></div><div class="orb b"></div>
+  <div class="row">
+    <div class="txt">
+      <div class="brandline"><img src="lion.png" alt=""><div class="brand">טופי</div></div>
+      <h1>זמן מסך<br>שמרוויחים בלמידה</h1>
+      <div class="sub">הילד לומד ועונה על שאלות — ומרוויח דקות משחק אמיתיות.</div>
+      <div class="pills"><span>👧 גילאי 5–12</span><span>🚫 בלי פרסומות</span><span>🔒 בלי מעקב</span></div>
+    </div>
+    <img class="shot" src="shots/kidhome.jpg" alt="">
   </div>
-  <div class="star" style="top:70px; left:560px; font-size:42px">✦</div>
-  <div class="star" style="top:150px; right:150px; font-size:30px; color:#fff">✦</div>
-  <div class="star" style="bottom:90px; left:150px; font-size:36px">✦</div>
-  <div class="star" style="bottom:150px; right:430px; font-size:24px; color:#fff">✦</div>
+  <div class="star" style="top:64px;left:520px;font-size:40px">✦</div>
+  <div class="star" style="top:150px;right:120px;font-size:28px;color:#fff">✦</div>
+  <div class="star" style="bottom:80px;left:120px;font-size:34px">✦</div>
+  <div class="star" style="bottom:170px;right:400px;font-size:22px;color:#fff">✦</div>
 </body>
 </html>

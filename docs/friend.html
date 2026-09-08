@@ -3,42 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#5E60CE">
 <title>הוספת חבר — טופי</title>
+<meta name="description" content="קישור להוספת חבר באפליקציית טופי.">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://tofyapp.com/friend.html">
 <link rel="icon" href="favicon.png">
-<style>
-  body{margin:0;font-family:-apple-system,"Heebo",Arial,sans-serif;color:#fff;text-align:center;
-       background:linear-gradient(160deg,#5E60CE,#48BFE3);min-height:100vh;display:grid;place-items:center}
-  .card{padding:36px 24px;max-width:420px}
-  h1{font-size:44px;margin:0 0 6px;color:#FFD23F}
-  p{font-size:18px;opacity:.95;line-height:1.6}
-  .code{font-size:40px;font-weight:800;letter-spacing:8px;background:rgba(255,255,255,.15);
-        border-radius:16px;padding:14px 18px;margin:14px 0;display:inline-block}
-  .btn{display:inline-block;margin-top:10px;font-weight:800;background:#000;color:#fff;
-       padding:14px 26px;border-radius:14px;text-decoration:none}
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
+<link rel="stylesheet" href="glass.css">
 </head>
 <body>
-  <div class="card">
-    <div style="font-size:64px">🤝</div>
+<div class="backdrop"></div>
+<div class="sparks" id="sparks"></div>
+
+<main class="mini">
+  <div class="card pane">
+    <div style="font-size:60px;line-height:1">🤝</div>
     <h1>טופי</h1>
     <p>חבר רוצה להתחבר אליכם!</p>
     <div id="codeBox" style="display:none">
-      <p style="opacity:.9;font-size:15px">פִּתחו את טופי → לוח החברים 🏆 → הוספת חבר, והקלידו את הקוד:</p>
+      <p style="font-size:15.5px">פתחו את טופי ← לוח החברים 🏆 ← הוספת חבר, והקלידו את הקוד:</p>
       <div class="code" id="code">······</div>
     </div>
-    <p style="opacity:.85;font-size:15px">אם טופי מותקן, היא תיפתח אוטומטית. אם לא — התקינו אותה ואז הקלידו את הקוד למעלה.</p>
-    <a class="btn" id="openBtn" href="#">פִּתחו את טופי</a>
+    <p style="font-size:15.5px">אם טופי מותקן, הוא ייפתח אוטומטית. אם לא — התקינו אותו ואז הקלידו את הקוד למעלה.</p>
+    <a class="btn" id="openBtn" href="#">פתחו את טופי</a>
   </div>
-  <script>
-    var f = new URLSearchParams(location.search).get('f');
-    if (f) {
-      document.getElementById('code').textContent = f;
-      document.getElementById('codeBox').style.display = 'block';
-      var deep = 'tofy://friend?f=' + encodeURIComponent(f);
-      document.getElementById('openBtn').href = deep;
-      // Try to bounce into the app automatically.
-      setTimeout(function(){ location.href = deep; }, 350);
+</main>
+
+<script>
+  (function(){
+    var c = document.getElementById("sparks");
+    for (var i = 0; i < 34; i++) {
+      var s = document.createElement("div");
+      s.className = "spark"; s.textContent = "\u2726";
+      s.style.left = (Math.random()*100) + "%";
+      s.style.top = (Math.random()*100) + "%";
+      s.style.fontSize = (6 + Math.random()*14) + "px";
+      s.style.color = Math.random() < .5 ? "#FFD23F" : "#fff";
+      s.style.animationDelay = (Math.random()*3.4) + "s";
+      c.appendChild(s);
     }
-  </script>
+  })();
+
+  var f = new URLSearchParams(location.search).get("f");
+  if (f) {
+    document.getElementById("code").textContent = f;
+    document.getElementById("codeBox").style.display = "block";
+    var deep = "tofy://friend?f=" + encodeURIComponent(f);
+    document.getElementById("openBtn").href = deep;
+    setTimeout(function(){ location.href = deep; }, 350);
+  }
+</script>
 </body>
 </html>
