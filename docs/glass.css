@@ -30,6 +30,7 @@ body{
 }
 a{color:inherit;text-decoration:none}
 img{max-width:100%;height:auto;display:block}
+[hidden]{display:none!important}
 ::selection{background:rgba(255,210,63,.35)}
 :focus-visible{outline:3px solid var(--gold); outline-offset:3px; border-radius:8px}
 
