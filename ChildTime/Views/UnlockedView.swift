@@ -8,8 +8,8 @@ struct UnlockedView: View {
     @State private var timer: Timer?
     @StateObject private var companion = CompanionController()
     @State private var greeted = false
-    /// Drives the three bouncing dots while the window is being opened.
-    @State private var dotPhase = 0
+    /// How full the opening bar is (0…1) while the window is being claimed.
+    @State private var openFill: CGFloat = 0
 
     /// The claim is still in flight — show the warm "opening" state.
     private var preparing: Bool { progress.isOpeningWindow && !progress.isUnlocked }
@@ -35,7 +35,7 @@ struct UnlockedView: View {
                     .float()
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
 
-                Text(preparing ? "פּוֹתְחִים לְךָ…" : "זְמַן מִשְׂחָק!")
+                Text(preparing ? "הַזְּמַן שֶׁלְּךָ בַּדֶּרֶךְ!" : "זְמַן מִשְׂחָק!")
                     .font(.system(size: titleSize, weight: .black, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
                     .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
@@ -44,32 +44,29 @@ struct UnlockedView: View {
                 if preparing {
                     // The claim is a round-trip to the server. The child waits HERE,
                     // on the screen the time is about to appear on, instead of on a
-                    // button that looks stuck (Rani).
+                    // button that looks stuck (Rani). A filling bar, because it reads
+                    // as "something is happening" without promising a countdown we
+                    // cannot honour — the claim can take half a second or five.
                     VStack(spacing: AppSpacing.md) {
-                        Text(progress.openingIsGift ? "מְשַׁחְרְרִים אֶת דַּקּוֹת הַמַּתָּנָה 💝" : "מְשַׁחְרְרִים אֶת הַדַּקּוֹת שֶׁהִרְוַחְתָּ ✨")
+                        Text(progress.openingIsGift
+                             ? "מְשַׁחְרְרִים אֶת דַּקּוֹת הַמַּתָּנָה 💝"
+                             : "מְשַׁחְרְרִים אֶת הַדַּקּוֹת שֶׁ\(Gendered.g("הִרְוַחְתָּ", "הִרְוַחְתְּ")) ✨")
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                             .multilineTextAlignment(.center)
-                        HStack(spacing: 12) {
-                            ForEach(0..<3, id: \.self) { i in
-                                Circle()
-                                    .fill(.white.opacity(dotPhase == i ? 0.95 : 0.4))
-                                    .frame(width: 14, height: 14)
-                                    .scaleEffect(dotPhase == i ? 1.25 : 1)
-                                    .animation(.easeInOut(duration: 0.28), value: dotPhase)
-                            }
-                        }
-                        .frame(height: timerSize * 0.7)
+                        openingBar
                     }
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.vertical, AppSpacing.lg)
                     .frame(maxWidth: 420)
                     .glassPane(radius: 28)
                     .task {
-                        while !Task.isCancelled {
-                            try? await Task.sleep(nanoseconds: 280_000_000)
-                            dotPhase = (dotPhase + 1) % 3
-                        }
+                        // Most of the bar fills fast, then it eases off and creeps —
+                        // so a slow network never looks stuck, and a fast one still
+                        // feels instant.
+                        withAnimation(.easeOut(duration: 1.5)) { openFill = 0.72 }
+                        try? await Task.sleep(nanoseconds: 1_500_000_000)
+                        withAnimation(.easeInOut(duration: 6)) { openFill = 0.95 }
                     }
                 } else {
                 // The countdown on one glass pane (the same glass as every screen).
@@ -168,6 +165,25 @@ struct UnlockedView: View {
                 startTimer()
             }
         }
+    }
+
+    /// The filling bar shown while the play window is being opened.
+    private var openingBar: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(.white.opacity(0.22))
+                Capsule()
+                    .fill(LinearGradient(colors: [AppColor.starGold, AppColor.successMint],
+                                         startPoint: .leading, endPoint: .trailing))
+                    .frame(width: max(14, geo.size.width * openFill))
+                    .shadow(color: AppColor.starGold.opacity(0.5), radius: 8)
+            }
+            // A bar always fills left→right, even in the RTL screen.
+            .environment(\.layoutDirection, .leftToRight)
+        }
+        .frame(height: 14)
+        .frame(maxWidth: 260)
+        .padding(.vertical, 10)
     }
 
     /// The countdown as labeled columns — each number sits above its unit
