@@ -41,6 +41,77 @@ function rtlBody(lines) {
   return `<div dir="rtl" style="text-align:right;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;">${html}</div>`;
 }
 
+// A real, designed HTML email — table-based and inline-styled, because that is
+// what Gmail/Apple Mail actually render. Used for the waitlist welcome.
+function brandEmail({ title, intro, bullets = [], ctaText, ctaHref, signoff, footer }) {
+  const li = bullets.map((b) => `
+              <tr>
+                <td style="padding:0 0 12px 0;">
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#F5F3FF;border:1px solid #E4DEFF;border-radius:14px;">
+                    <tr>
+                      <td style="padding:13px 16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#241C4F;">
+                        <span style="font-size:19px;">${b.emoji}</span>&nbsp;&nbsp;<b style="color:#1B1340;">${escapeHtml(b.title)}</b><br>
+                        <span style="color:#5B5480;">${escapeHtml(b.text)}</span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>`).join("");
+
+  return `<!DOCTYPE html>
+<html dir="rtl" lang="he"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#EFECFA;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(intro).slice(0, 90)}</div>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#EFECFA;padding:24px 12px;">
+    <tr><td align="center">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;max-width:600px;background:#FFFFFF;border-radius:22px;overflow:hidden;box-shadow:0 10px 30px rgba(30,18,80,.10);">
+
+        <!-- header -->
+        <tr>
+          <td bgcolor="#5E60CE" background="https://tofyapp.com/email-header.png" style="background-color:#5E60CE;background-image:linear-gradient(135deg,#7A5CFF 0%,#5E60CE 55%,#3E8BF0 100%);padding:30px 24px;text-align:center;">
+            <img src="https://tofyapp.com/apple-touch-icon.png" width="84" height="84" alt="טופי"
+                 style="display:block;margin:0 auto 12px auto;border-radius:22px;border:0;">
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:bold;color:#FFD23F;letter-spacing:.5px;">טופי</div>
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#EFEBFF;padding-top:4px;">זמן מסך שמרוויחים בלמידה</div>
+          </td>
+        </tr>
+
+        <!-- body -->
+        <tr>
+          <td style="padding:30px 26px 8px 26px;" dir="rtl" align="right">
+            <h1 style="margin:0 0 12px 0;font-family:Arial,Helvetica,sans-serif;font-size:23px;line-height:1.35;color:#1B1340;">${escapeHtml(title)}</h1>
+            <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.75;color:#463E70;">${escapeHtml(intro)}</p>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${li}</table>
+          </td>
+        </tr>
+
+        ${ctaText ? `<!-- cta -->
+        <tr>
+          <td align="center" style="padding:12px 26px 30px 26px;">
+            <a href="${ctaHref}" style="display:inline-block;background:#4B3FBF;color:#FFFFFF;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;text-decoration:none;padding:14px 34px;border-radius:999px;">${escapeHtml(ctaText)}</a>
+          </td>
+        </tr>` : ""}
+
+        <!-- signoff -->
+        <tr>
+          <td style="padding:0 26px 28px 26px;" dir="rtl" align="right">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;color:#463E70;">${escapeHtml(signoff).replace(/\n/g, "<br>")}</p>
+          </td>
+        </tr>
+
+        <!-- footer -->
+        <tr>
+          <td style="background:#F7F5FF;border-top:1px solid #E7E2FA;padding:18px 26px;text-align:center;">
+            <p style="margin:0 0 6px 0;font-family:Arial,Helvetica,sans-serif;font-size:12.5px;line-height:1.6;color:#8C86A8;">${escapeHtml(footer)}</p>
+            <a href="https://tofyapp.com" style="font-family:Arial,Helvetica,sans-serif;font-size:12.5px;color:#5E60CE;text-decoration:none;">tofyapp.com</a>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
 // ---- Helpers ---------------------------------------------------------------
 
 async function tokensForHousehold(householdID, excludeUID) {
@@ -1057,24 +1128,31 @@ exports.onWaitlistSignup = onDocumentCreated(
       //    address looks like a real email — never blast junk input).
       const signupEmail = String(w.email || "").trim();
       if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(signupEmail)) {
-        const hi = w.name ? `היי ${w.name}! 🎉` : "היי! 🎉";
-        const welcome = [
-          hi,
-          ``,
-          `תודה שנרשמתם לרשימת ההמתנה של טופי — אתם רשמית מהראשונים בתור! 🦁`,
-          ``,
-          `נעדכן אתכם ברגע שטופי עולה לאוויר, ותקבלו הטבת השקה מיוחדת ל־טופי+.`,
-          `בקרוב נלמד, נשחק, ונהפוך זמן מסך לפרס שמרוויחים. ✨`,
-          ``,
-          `נתראה בקרוב,`,
-          `צוות טופי 🦁`,
+        const first = String(w.name || "").trim().split(/\s+/)[0];
+        const title = first ? `היי ${first}, שמרנו לכם מקום 🎉` : "שמרנו לכם מקום 🎉";
+        const intro = "תודה שנרשמתם לטופי! נעדכן אתכם ביום שהאפליקציה עולה לאוויר — הודעה אחת, בלי ספאם. בינתיים, הנה מה שמחכה לכם.";
+        const bullets = [
+          { emoji: "🧠", title: "הילד לומד ומשחק", text: "שאלות לפי הכיתה בחשבון, עברית, אנגלית, מדעים ועוד — בתוך הרפתקה צבעונית." },
+          { emoji: "🎮", title: "ומרוויח דקות משחק", text: "כל תשובה נכונה שווה שניות משחק. האפליקציות שחסמתם נפתחות רק כשהוא הרוויח." },
+          { emoji: "💝", title: "שבועיים של טופי+ במתנה", text: "כשהילד באמת מתחיל ללמוד, אנחנו פותחים לכם את כל העולמות לשבועיים. בלי כרטיס אשראי." },
         ];
+        const signoff = "נתראה בקרוב,\nצוות טופי 🦁";
+        const html = brandEmail({
+          title, intro, bullets,
+          ctaText: "לאתר של טופי",
+          ctaHref: "https://tofyapp.com",
+          signoff,
+          footer: "קיבלתם את המייל הזה כי נרשמתם לעדכון ההשקה ב־tofyapp.com.",
+        });
+        const text = [title, "", intro, "",
+          ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`),
+          "", "tofyapp.com", "", signoff].join("\n");
         await transporter.sendMail({
           from: `טופי <${user}>`,
           to: signupEmail,
           subject: "ברוכים הבאים לטופי! 🦁 שמרנו לכם מקום",
-          text: welcome.join("\n"),
-          html: rtlBody(welcome),
+          text,
+          html,
         });
         console.log("[waitlist] welcome emailed to", signupEmail);
       }
