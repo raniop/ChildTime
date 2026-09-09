@@ -94,7 +94,7 @@ final class SubscriptionManager: ObservableObject {
         } catch {
             // Most common cause: products not yet configured in App Store Connect.
             // The paywall handles this gracefully (shows a placeholder + nudge).
-            lastError = error.localizedDescription
+            lastError = Self.friendlyMessage(for: error)
         }
     }
 
@@ -120,21 +120,29 @@ final class SubscriptionManager: ObservableObject {
             switch result {
             case .success(let verification):
                 let transaction = try Self.verify(verification)
-                await refreshSubscriptionStatus()
+                // Order matters. `Transaction.currentEntitlements` does not
+                // reliably contain a transaction that has not been finished yet
+                // (sandbox especially), so refreshing first read "not subscribed"
+                // right after a successful purchase and left the paywall up —
+                // the parent paid and the app acted as if nothing happened.
+                // Finish it, grant from the verified transaction we already hold,
+                // and only then re-read entitlements as confirmation.
                 await transaction.finish()
+                apply(transaction)
+                await refreshSubscriptionStatus()
                 AppAnalytics.subscribed(product.id)
                 lastError = nil
                 return true
             case .userCancelled:
                 return false
             case .pending:
-                lastError = "ההזמנה ממתינה לאישור (Ask to Buy)"
+                lastError = "הַהַזְמָנָה נִשְׁלְחָה לְאִשּׁוּר. הִיא תִּכָּנֵס לְתֹקֶף בָּרֶגַע שֶׁתְּאֻשַּׁר."
                 return false
             @unknown default:
                 return false
             }
         } catch {
-            lastError = error.localizedDescription
+            lastError = Self.friendlyMessage(for: error)
             return false
         }
     }
@@ -228,12 +236,54 @@ final class SubscriptionManager: ObservableObject {
     private func observeTransactionUpdates() async {
         for await update in Transaction.updates {
             guard case .verified(let transaction) = update else { continue }
-            await refreshSubscriptionStatus()
             await transaction.finish()
+            apply(transaction)
+            await refreshSubscriptionStatus()
+        }
+    }
+
+    /// Grant entitlement straight from a verified transaction, without waiting
+    /// for `Transaction.currentEntitlements` to catch up. Never downgrades.
+    private func apply(_ transaction: Transaction) {
+        guard Self.allProductIDs.contains(transaction.productID) else { return }
+        let candidate: SubscriptionState
+        if transaction.productType == .nonConsumable {
+            candidate = .active(expires: nil, willRenew: false)
+        } else if let expires = transaction.expirationDate, expires > Date() {
+            candidate = transaction.offerType == .introductory
+                ? .inTrial(expires: expires)
+                : .active(expires: expires, willRenew: transaction.revocationDate == nil)
+        } else {
+            return
+        }
+        subscriptionState = preferStronger(current: subscriptionState, candidate: candidate)
+        switch subscriptionState {
+        case .active(let expires, _):
+            HouseholdManager.shared.publishPremium(until: expires ?? Date(timeIntervalSince1970: 4_102_444_800))
+        case .inTrial(let expires):
+            HouseholdManager.shared.publishPremium(until: expires)
+        default:
+            break
         }
     }
 
     // MARK: - Verification
+
+    /// A parent should never see a raw StoreKit string (they are English and
+    /// developer-facing — App Review flagged exactly that).
+    static func friendlyMessage(for error: Error) -> String {
+        if let skError = error as? StoreKitError {
+            switch skError {
+            case .networkError:
+                return "אֵין חִבּוּר לָאִינְטֶרְנֶט. בִּדְקוּ אֶת הַחִבּוּר וְנַסּוּ שׁוּב."
+            case .userCancelled:
+                return ""
+            default:
+                break
+            }
+        }
+        return "לֹא הִצְלַחְנוּ לְהַשְׁלִים אֶת הָרְכִישָׁה כָּרֶגַע. נַסּוּ שׁוּב בְּעוֹד רֶגַע — לֹא חֻיַּבְתֶּם."
+    }
 
     private static func verify<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {

@@ -365,10 +365,10 @@ struct PaywallView: View {
             } else {
                 // Finished loading but got nothing — almost always an App Store
                 // setup issue, not an app bug. Give the parent a clear nudge.
-                Text("המַּסְלוּלִים עֲדַיִן לֹא זְמִינִים")
+                Text("הַמַּסְלוּלִים לֹא נִטְעֲנוּ")
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("ודאו שהמנויים ב-App Store Connect במצב \"Ready to Submit\", ושאתם מחוברים לחשבון Sandbox במכשיר.")
+                Text("בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב.")
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
@@ -384,14 +384,7 @@ struct PaywallView: View {
                 }
                 .padding(.top, 4)
             }
-            if let err = subs.lastError {
-                Text(err)
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(.white.opacity(0.5))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, AppSpacing.lg)
-                    .padding(.top, 4)
-            }
+
         }
         .frame(maxWidth: .infinity, minHeight: 120)
         .padding(.vertical, AppSpacing.sm)
@@ -446,8 +439,8 @@ struct PaywallView: View {
 
             if let err = subs.lastError, !err.isEmpty {
                 Text(err)
-                    .font(.system(size: 12, design: .rounded))
-                    .foregroundStyle(.red.opacity(0.9))
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color(hex: "FFD23F"))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, AppSpacing.md)
                     .padding(.top, 4)

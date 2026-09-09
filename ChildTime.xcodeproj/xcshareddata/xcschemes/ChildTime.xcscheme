@@ -47,7 +47,7 @@
       allowLocationSimulation = "YES"
       queueDebuggingEnableBacktraceRecording = "Yes">
       <StoreKitConfigurationFileReference
-         identifier = "ChildTime/Tofy.storekit">
+         identifier = "StoreKitConfig/Tofy.storekit">
       </StoreKitConfigurationFileReference>
       <BuildableProductRunnable
          runnableDebuggingMode = "0">

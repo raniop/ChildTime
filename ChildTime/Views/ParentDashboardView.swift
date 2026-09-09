@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import UIKit
+import StoreKit
 
 /// Dashboard the parent opens from Parent Settings — shows every profile
 /// (every kid in the family) with their current time / score / progress
@@ -49,6 +50,9 @@ struct ParentDashboardView: View {
     @State private var showSchoolYearParty = false
     @State private var showWhatsNew = false
     @State private var showingPaywall = false
+    /// Apple's own "manage subscription" sheet — where an existing subscriber
+    /// belongs, instead of being shown the purchase page again.
+    @State private var showingManageSubscription = false
     @State private var paywallSource = "card"
     /// ⚽ A question pack page (parent-side purchase flow).
     @State private var packToShow: QuestionPack? = nil
@@ -1494,7 +1498,7 @@ struct ParentDashboardView: View {
 
     @ViewBuilder private var tofyPlusCard: some View {
         if subs.isPremium {
-            Button { Haptic.light(); showingPaywall = true } label: {
+            Button { Haptic.light(); showingManageSubscription = true } label: {
                 HStack {
                     Text("👑 טוֹפִי+ פָּעִיל")
                         .font(.system(size: 14.5, weight: .heavy, design: .rounded))
@@ -1510,6 +1514,7 @@ struct ParentDashboardView: View {
             }
             .buttonStyle(.plain)
             .environment(\.layoutDirection, .rightToLeft)
+            .manageSubscriptionsSheet(isPresented: $showingManageSubscription)
         } else {
             VStack(alignment: .leading, spacing: 6) {
                 Text("👑 טוֹפִי+ לְכָל הַמִּשְׁפָּחָה")
