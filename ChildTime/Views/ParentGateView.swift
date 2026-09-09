@@ -50,6 +50,7 @@ struct ParentGateView<Content: View>: View {
     @EnvironmentObject var settings: ParentSettings
     @ObservedObject private var household = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
+    @State private var confirmDeviceReset = false
     @State private var loadingTimedOut = false
     @State private var loadingToken = UUID()
     @Environment(\.scenePhase) private var scenePhase
@@ -141,6 +142,26 @@ struct ParentGateView<Content: View>: View {
                     }
                     .buttonStyle(.plain)
                     .padding(.top, 4)
+                    // Never a dead end (Rani hit this): a device whose family is
+                    // gone — unlinked, deleted, or a reset that went wrong — must
+                    // have a way back to "who uses this device?" without the
+                    // owner deleting and reinstalling the app.
+                    Button { Haptic.light(); confirmDeviceReset = true } label: {
+                        Text("אַפְּסוּ אֶת הַמַּכְשִׁיר")
+                            .font(.system(size: 13.5, weight: .semibold, design: .rounded))
+                            .foregroundStyle(GlassInk.secondary)
+                            .underline()
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 2)
+                    .alert("לְאַפֵּס אֶת הַמַּכְשִׁיר?", isPresented: $confirmDeviceReset) {
+                        Button("אַפְּסוּ", role: .destructive) {
+                            HouseholdManager.shared.resetThisDevice()
+                        }
+                        Button("בִּטּוּל", role: .cancel) {}
+                    } message: {
+                        Text("הַמַּכְשִׁיר יַחֲזֹר לְמָסָךְ הַפְּתִיחָה וְיִשְׁאַל שׁוּב מִי מִשְׁתַּמֵּשׁ בּוֹ. הַמִּשְׁפָּחָה וְהַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמָרוֹת.")
+                    }
                 } else {
                     ProgressView().scaleEffect(1.4).tint(.white)
                     Text("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…")
