@@ -200,18 +200,22 @@ async function dashboard() {
 
 // ---------------- 2 · families ----------------
 let famFilter = "all", famQuery = "";
-const FILTERS = [["all", "הכל"], ["gift", "במתנה"], ["gift_expiring", "מסתיימת"], ["plus", "טופי+"], ["returned", "חזרו לחינם"], ["inactive", "לא פעילות"]];
+const FILTERS = [["all", "הכל"], ["gift", "במתנה"], ["gift_expiring", "מסתיימת"], ["plus", "טופי+"], ["returned", "חזרו לחינם"], ["inactive", "לא פעילות"], ["demo", "🧪 דמו"]];
 async function families() {
   if (!FAM) { $("main").innerHTML = '<div class="empty"><span class="spin"></span> טוען משפחות…</div>'; try { FAM = await call("adminFamiliesOverview"); } catch (e) { return $("main").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; } }
   const fams = (FAM.families || []).map((f) => ({ ...f, hh: f.fullId || f.householdID || f.id, j: (J && J.households && J.households[f.fullId || f.householdID || f.id]) || {} }));
   const q = famQuery.trim();
   const hay = (f) => [f.familyName, f.label, f.name, ...(f.parents || []).map((p) => (p.email || "") + " " + (p.name || "")), ...(f.children || []).map((k) => k.name)].join(" ");
-  const shown = fams.filter((f) => famFilter === "all" || (f.j.state || "free_new") === famFilter).filter((f) => !q || hay(f).includes(q)).sort((a, b) => (b.j.lastActive || "").localeCompare(a.j.lastActive || ""));
+  // 🧪 A family marked as demo never pollutes the real lists — it shows only
+  // under its own chip, where it can be un-marked.
+  const inFilter = (f) => famFilter === "demo" ? !!f.isDemo
+    : !f.isDemo && (famFilter === "all" || (f.j.state || "free_new") === famFilter);
+  const shown = fams.filter(inFilter).filter((f) => !q || hay(f).includes(q)).sort((a, b) => (b.j.lastActive || "").localeCompare(a.j.lastActive || ""));
   $("main").innerHTML = `
-    <div class="top"><h3>משפחות · ${fmt(fams.length)}</h3><div class="filters">${FILTERS.map(([k, l]) => `<span class="chip ${famFilter === k ? "on" : ""}" data-f="${k}">${l}</span>`).join("")}<span class="chip search">🔎 <input id="famSearch" placeholder="חיפוש" value="${esc(famQuery)}"></span></div></div>
+    <div class="top"><h3>משפחות · ${fmt(fams.filter((f) => !f.isDemo).length)}${fams.some((f) => f.isDemo) ? ` <span class="m" style="font-weight:400">· ${fmt(fams.filter((f) => f.isDemo).length)} דמו</span>` : ""}</h3><div class="filters">${FILTERS.map(([k, l]) => `<span class="chip ${famFilter === k ? "on" : ""}" data-f="${k}">${l}</span>`).join("")}<span class="chip search">🔎 <input id="famSearch" placeholder="חיפוש" value="${esc(famQuery)}"></span></div></div>
     <div id="famList">${shown.map(famCard).join("") || '<div class="empty">אין משפחות בסינון הזה.</div>'}</div>`;
   document.querySelectorAll("[data-f]").forEach((c) => c.onclick = () => { famFilter = c.dataset.f; families(); });
-  const inp = $("famSearch"); inp.oninput = () => { famQuery = inp.value; const list = fams.filter((f) => famFilter === "all" || (f.j.state || "free_new") === famFilter).filter((f) => !famQuery.trim() || hay(f).includes(famQuery.trim())); $("famList").innerHTML = list.map(famCard).join("") || '<div class="empty">אין משפחות בסינון הזה.</div>'; wireFam(); };
+  const inp = $("famSearch"); inp.oninput = () => { famQuery = inp.value; const list = fams.filter(inFilter).filter((f) => !famQuery.trim() || hay(f).includes(famQuery.trim())); $("famList").innerHTML = list.map(famCard).join("") || '<div class="empty">אין משפחות בסינון הזה.</div>'; wireFam(); };
   wireFam();
 }
 function famCard(f) {
@@ -228,12 +232,15 @@ function famCard(f) {
   const devs = (f.children || []).flatMap((k) => (k.deviceRows || []).map((d) => `<span>📱 ${esc(k.name)} · ${d.kind === "ipad" ? "אייפד" : d.kind === "iphone" ? "אייפון" : esc(d.name || "מכשיר")}${d.lastSeenAt ? " · " + (Date.now() / 1000 - d.lastSeenAt < 86400 ? "פעיל" : "לפני " + Math.round((Date.now() / 1000 - d.lastSeenAt) / 86400) + " ימים") : ""}${d.appVersion ? " · " + esc(String(d.appVersion).replace(/^.*\((\d+)\)$/, "$1")) : ""}</span>`)).join("");
   const joined = Math.min(...(f.children || []).map((k) => k.createdAt || Infinity).concat([Infinity]));
   const meta = [parents.map((p) => p.email || p.name || "אורח").slice(0, 3).join(" · "), parents.length ? `${parents.length === 1 ? "הורה אחד" : parents.length + " הורים"}` : "", isFinite(joined) ? "הצטרפו " + dateShort(joined) : "", j.purchaseSource ? "מקור המנוי: " + (SOURCE[j.purchaseSource] || j.purchaseSource) : ""].filter(Boolean).join(" · ");
-  return `<div class="fam" data-hh="${esc(f.hh)}"><div class="h"><div><b>👪 ${esc(famName(f))}</b> ${chip} ${extra}</div><div class="m">${esc(meta)}</div></div>
+  const demoChip = f.isDemo ? '<span class="chip" style="padding:2px 8px;font-size:11px">🧪 דמו</span>' : "";
+  return `<div class="fam" data-hh="${esc(f.hh)}"><div class="h"><div><b>👪 ${esc(famName(f))}</b> ${chip} ${demoChip} ${extra}</div><div class="m">${esc(meta)}</div></div>
     <div class="kids">${kids}${devs}</div>
-    <div class="acts"><a class="btn ghost" href="families.html">פרטי הילדים</a><button class="btn ghost" data-gift="${esc(f.hh)}">🎁 הארך מתנה</button><button class="btn ghost" data-world="${esc(f.hh)}">🌍 פתח עולם</button><a class="btn ghost" href="notifications.html">📣 שלח הודעה</a><button class="btn ghost" data-label="${esc(f.hh)}" data-cur="${esc(f.label || "")}">🏷 תווית</button><button class="btn danger" data-del="${esc(f.hh)}" data-name="${esc(famName(f))}">🗑 מחק</button></div></div>`;
+    <div class="acts"><a class="btn ghost" href="families.html">פרטי הילדים</a><button class="btn ghost" data-gift="${esc(f.hh)}">🎁 הארך מתנה</button><button class="btn ghost" data-endgift="${esc(f.hh)}">⏹ סיים מתנה</button><button class="btn ghost" data-world="${esc(f.hh)}">🌍 פתח עולם</button><a class="btn ghost" href="notifications.html">📣 שלח הודעה</a><button class="btn ghost" data-label="${esc(f.hh)}" data-cur="${esc(f.label || "")}">🏷 תווית</button><button class="btn ghost" data-demo="${esc(f.hh)}" data-on="${f.isDemo ? "1" : ""}">${f.isDemo ? "↩︎ בטל דמו" : "🧪 סמן כדמו"}</button><button class="btn danger" data-del="${esc(f.hh)}" data-name="${esc(famName(f))}">🗑 מחק</button></div></div>`;
 }
 function wireFam() {
   document.querySelectorAll("[data-gift]").forEach((b) => b.onclick = async () => { const n = Number(prompt("כמה ימי טופי+ במתנה? (מוסיף על מה שיש)", "14")); if (!n) return; try { await call("adminGiftHousehold", { householdID: b.dataset.gift, days: n }); toast("המתנה נפתחה ל־" + n + " ימים"); await loadJourney(true); FAM = null; families(); } catch (e) { toast("נכשל: " + e.message); } });
+  document.querySelectorAll("[data-endgift]").forEach((b) => b.onclick = async () => { if (!confirm("לסיים עכשיו את המתנה של המשפחה הזאת? טופי+ ייסגר להם מיד.")) return; try { await call("adminEndGift", { householdID: b.dataset.endgift }); toast("המתנה הסתיימה"); await loadJourney(true); FAM = null; families(); } catch (e) { toast("נכשל: " + e.message); } });
+  document.querySelectorAll("[data-demo]").forEach((b) => b.onclick = async () => { const on = !b.dataset.on; try { await call("adminSetDemoFlag", { householdID: b.dataset.demo, demo: on }); toast(on ? "סומנה כדמו" : "כבר לא דמו"); FAM = null; families(); } catch (e) { toast("נכשל: " + e.message); } });
   document.querySelectorAll("[data-world]").forEach((b) => b.onclick = async () => {
     const items = [...Object.entries(PACKS).map(([id, p]) => [id, p.emoji + " " + p.name]), ...Object.entries(BASE).map(([t, l]) => [t, l + " (עולם בסיס)"])];
     const pick = prompt("איזה עולם לפתוח לכל הילדים במשפחה?\n" + items.map(([, l], i) => `${i + 1}. ${l}`).join("\n"), "1"); const it = items[Number(pick) - 1]; if (!it) return;

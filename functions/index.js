@@ -1510,7 +1510,10 @@ exports.adminFamiliesOverview = onCall(
     const families = [];
     hhSnap.forEach((h) => {
       const d = h.data();
-      if (isDemoHousehold(d, parentInfo, kidsByHH[h.id] || [])) return;   // demo families stay out (Rani)
+      // Demo families used to be dropped here, which made an auto-detected one
+      // impossible to un-mark from the admin page. Keep them in the payload,
+      // flagged — the families tab hides them everywhere except the 🧪 chip.
+      const heuristicDemo = isDemoHousehold(d, parentInfo, kidsByHH[h.id] || []);
       const kids = (kidsByHH[h.id] || []).map((k) => {
         const s = states[k.id];
         const devs = devsByChild[k.id] || [];
@@ -1562,7 +1565,7 @@ exports.adminFamiliesOverview = onCall(
       // Explicit admin flag wins in BOTH directions; auto-detection (🧪 label
       // or the seed-name signature) only applies when no flag was set.
       const isDemo = d.demo === true ? true : d.demo === false ? false :
-        ((d.familyLabel || "").includes("🧪") ||
+        (heuristicDemo || (d.familyLabel || "").includes("🧪") ||
          (named.length === 0 && kids.length > 0 && kids.every((k) => demoNames.has(strip(k.name)))));
       const parentDevs = (parentDevsByHH[h.id] || [])
         .sort((a, b) => (b.lastSeenAt || 0) - (a.lastSeenAt || 0));
@@ -2659,6 +2662,25 @@ exports.adminGiftHousehold = onCall({ timeoutSeconds: 30, memory: "256MiB" }, as
   await ref.set({ premiumUntil: until, premiumSource: "gift", giftUntil: until, giftStartedAt: h.data().giftStartedAt || now, giftBy: request.auth.uid }, { merge: true });
   console.log("[adminGiftHousehold]", email, hhID, "+", days, "days");
   return { ok: true, premiumUntil: until };
+});
+
+// ⏹ End a family's gift NOW (Rani): the admin page could only ever extend.
+// Refuses on a PAID subscription — that entitlement is Apple's, not ours.
+exports.adminEndGift = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const hhID = String(request.data?.householdID || "");
+  if (!/^[0-9A-Fa-f-]{36}$/.test(hhID)) throw new HttpsError("invalid-argument", "householdID");
+  const ref = db.collection("households").doc(hhID);
+  const h = await ref.get();
+  if (!h.exists) throw new HttpsError("not-found", "household");
+  const d = h.data() || {};
+  if (d.premiumSource && d.premiumSource !== "gift") {
+    throw new HttpsError("failed-precondition", "This family pays for Tofy+ — a paid subscription cannot be ended from here.");
+  }
+  const now = Date.now() / 1000;
+  await ref.set({ premiumUntil: now - 1, giftUntil: now - 1, giftEndedAt: now, premiumSource: "gift" }, { merge: true });
+  console.log("[adminEndGift]", email, hhID);
+  return { ok: true };
 });
 
 // ============================================================================
