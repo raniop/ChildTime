@@ -108,9 +108,11 @@ final class HouseholdManager: ObservableObject {
     /// parent home / paywall render that state for screenshots and review.
     /// `daysLeft` > 0 = a gift with that many days left; 0 = the gift ended;
     /// `activation` = still free, this far toward the gift.
-    func seedDemoJourney(daysLeft: Int? = nil, activation: (days: Int, questions: Int)? = nil) {
+    func seedDemoJourney(daysLeft: Int? = nil, activation: (days: Int, questions: Int)? = nil,
+                         familyName: String? = nil) {
         var hh = household ?? Household(parentUIDs: ["demo"], createdBy: "demo")
         let now = Date()
+        if let familyName { hh.familyName = familyName }
         if let daysLeft {
             if daysLeft > 0 {
                 let until = now.addingTimeInterval(Double(daysLeft) * 86_400 + 3_600)

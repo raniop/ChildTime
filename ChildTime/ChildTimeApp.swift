@@ -454,7 +454,15 @@ struct ChildTimeApp: App {
         case "activation": ParentDashboardView(isRoot: true)   // free, one active day from the gift
             .onAppear { HouseholdManager.shared.seedDemoJourney(activation: (days: 2, questions: 64)) }
         case "giftearly": ParentDashboardView(isRoot: true)    // gift, 11 days left
-            .onAppear { HouseholdManager.shared.seedDemoJourney(daysLeft: 11) }
+            .onAppear {
+                HouseholdManager.shared.seedDemoJourney(daysLeft: 11, familyName: "מִשְׁפַּחַת גּוֹלָן")
+                // A family board worth showing: both kids with a device and a
+                // month of history, one of them mid-window.
+                for (i, p) in ProfileStore.shared.profiles.enumerated() {
+                    LearningHistoryStore.shared.seedDemo(childID: p.id)
+                    if i == 0 { HouseholdManager.shared.seedDemoLiveWindow(childID: p.id) }
+                }
+            }
         case "giftlate": ParentDashboardView(isRoot: true)     // gift ending in 3 days → personal card
             .onAppear { HouseholdManager.shared.seedDemoJourney(daysLeft: 3) }
         case "giftended": ParentDashboardView(isRoot: true)    // gift over, child asked for a world

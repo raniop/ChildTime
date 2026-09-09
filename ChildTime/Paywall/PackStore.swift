@@ -59,6 +59,12 @@ final class PackStore: ObservableObject {
     /// Packs the parent can see and buy right now, in catalog order.
     var visiblePacks: [QuestionPack] {
         #if DEBUG
+        // DEMO_PACKS=tishrei,soccer — a screenshot run pins the shelf to exactly
+        // these packs, so the family board isn't buried under the full catalog.
+        if let only = ProcessInfo.processInfo.environment["DEMO_PACKS"] {
+            let ids = Set(only.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) })
+            return QuestionPacks.all.filter { ids.contains($0.id) }
+        }
         return QuestionPacks.all
         #else
         return QuestionPacks.all.filter { liveIDs.contains($0.id) }
