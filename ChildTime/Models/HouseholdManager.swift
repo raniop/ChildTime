@@ -1548,6 +1548,15 @@ final class HouseholdManager: ObservableObject {
         s.hasSeenWelcome = false
         s.consentVersionAccepted = 0
         s.deviceRole = .unset                    // → "who uses this device?"
+        // A deliberate reset looks EXACTLY like a lost app-group container to
+        // healLostChildRoleIfNeeded, which would silently restore the child role
+        // and drop the parent back into the kid's app. Mark the intent; the role
+        // picker clears it the moment a role is actually chosen.
+        UserDefaults.standard.set(true, forKey: "device.deliberateReset")
+        // Belt and braces: the roster is wiped above, but a listener that fired
+        // mid-teardown could have written it back. Clear it once more now that
+        // sync is stopped.
+        DataExporter.wipeLocalData()
     }
 
     func stopWatchingInviteRedemption() {

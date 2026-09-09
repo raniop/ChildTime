@@ -99,6 +99,7 @@ struct RolePickerView: View {
     private func choose(_ role: ParentSettings.DeviceRole) {
         Haptic.medium()
         settings.deviceRole = role
+        UserDefaults.standard.removeObject(forKey: "device.deliberateReset")
         AppAnalytics.roleChosen(role == .parent ? "parent" : "child")
         // NO permission prompts here (E2E test with Rani, 2026-08-30): asking
         // for notifications at role-pick landed the iOS dialog ON the login

@@ -216,6 +216,10 @@ struct ContentView: View {
     /// parent and their cached account signs them right back in.
     private func healLostChildRoleIfNeeded() {
         guard settings.deviceRole == .unset, settings.joinedChildID == nil else { return }
+        // "התנתק ומחק מהמכשיר" produces the same signature as a lost container.
+        // Without this the reset bounced straight back into the child's app,
+        // bound to the old profile and unable to reach any family.
+        if UserDefaults.standard.bool(forKey: "device.deliberateReset") { return }
         guard let raw = UserDefaults.standard.string(forKey: "profiles.activeID"),
               let id = UUID(uuidString: raw),
               profiles.profiles.contains(where: { $0.id == id }) else { return }
