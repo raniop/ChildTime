@@ -236,6 +236,10 @@ struct ChildTimeApp: App {
                             progress.applyDailyRolloverIfNeeded()
                         }
                         StopAndSaveBridge.applyIfRequested()   // Live Activity "עצור ושמור" fallback
+                        // 🔑 Re-mint Screen Time tokens that iOS expired while we
+                        // were away — an expired token silently stops shielding
+                        // its app (iOS 26.5+; a no-op below that).
+                        TokenRefresher.shared.start()
                         enforceShieldStateIfNeeded()
                         WidgetBridge.refreshKid()
                     }
