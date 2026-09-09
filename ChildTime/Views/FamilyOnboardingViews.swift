@@ -8,12 +8,79 @@ struct FamilyChoiceView: View {
     @EnvironmentObject var settings: ParentSettings
     @StateObject private var household = HouseholdManager.shared
     @State private var creating = false
+    /// Naming the family was only ever reachable from the parent home title —
+    /// the sign-up flow never asked (OnboardingView, which had the field, is not
+    /// part of the real flow). Ask here, once, while creating the family.
+    @State private var namingNewFamily = false
+    @State private var familyName = ""
 
     var body: some View {
         ZStack {
             GlassBackdrop()
             SparkleField(count: 12, size: 11)
-            VStack(spacing: AppSpacing.xl) {
+            if namingNewFamily { namingView } else { choiceView }
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+    }
+
+    // MARK: - 👪 Name the family (new families only)
+
+    private var namingView: some View {
+        VStack(spacing: AppSpacing.xl) {
+            VStack(spacing: AppSpacing.sm) {
+                Text("👪").font(.system(size: 54))
+                Text("אֵיךְ נִקְרָא לַמִּשְׁפָּחָה?")
+                    .font(.system(size: 26, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                Text("הַשֵּׁם מוֹפִיעַ בַּמָּסָךְ הָרָאשִׁי וּבַהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה.")
+                    .font(.system(size: 14.5, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, AppSpacing.lg)
+            }
+
+            TextField("", text: $familyName,
+                      prompt: Text("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן").foregroundColor(.white.opacity(0.55)))
+                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .submitLabel(.done)
+                .padding(.horizontal, 16).padding(.vertical, 14)
+                .glassPane(radius: AppRadius.large)
+                .frame(maxWidth: 460)
+
+            VStack(spacing: AppSpacing.sm) {
+                JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
+                    createFamily(named: familyName)
+                } label: {
+                    if creating { ProgressView().tint(.white) } else { Text("צְרוּ אֶת הַמִּשְׁפָּחָה") }
+                }
+                .disabled(creating)
+                Button("אֶקְבַּע אֶת הַשֵּׁם אַחַר כָּךְ") { createFamily(named: "") }
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.75))
+                    .disabled(creating)
+            }
+            .frame(maxWidth: 460)
+        }
+        .padding(.horizontal, AppSpacing.lg)
+    }
+
+    private func createFamily(named name: String) {
+        guard !creating else { return }
+        creating = true
+        Haptic.medium()
+        Task {
+            await household.createOwnHousehold()
+            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { household.setFamilyName(trimmed) }
+            creating = false
+        }
+    }
+
+    private var choiceView: some View {
+        VStack(spacing: AppSpacing.xl) {
                 VStack(spacing: AppSpacing.sm) {
                     Text("👋").font(.system(size: 54))
                     Text("עוֹד אֵין לַחֶשְׁבּוֹן הַזֶּה מִשְׁפָּחָה")
@@ -34,12 +101,9 @@ struct FamilyChoiceView: View {
                         busy: creating
                     ) {
                         guard !creating else { return }
-                        creating = true
-                        Haptic.medium()
-                        Task {
-                            await household.createOwnHousehold()
-                            creating = false
-                        }
+                        Haptic.light()
+                        familyName = household.suggestedFamilyName ?? ""
+                        namingNewFamily = true
                     }
                     choiceCard(
                         emoji: "👨‍👩‍👧",
@@ -60,9 +124,7 @@ struct FamilyChoiceView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, AppSpacing.xl)
             }
-            .padding(.horizontal, AppSpacing.lg)
-        }
-        .environment(\.layoutDirection, .rightToLeft)
+        .padding(.horizontal, AppSpacing.lg)
     }
 
     private func choiceCard(emoji: String, title: String, subtitle: String,
