@@ -75,7 +75,7 @@ struct ChildDeviceControlsView: View {
             }
         }
         .environment(\.layoutDirection, .rightToLeft)
-        .familyActivityPicker(isPresented: $showAppPicker, selection: $selection)
+        .tofyActivityPicker(title: PickerCopy.blocked.title, header: PickerCopy.blocked.header, footer: PickerCopy.blocked.footer, isPresented: $showAppPicker, selection: $selection)
         .onChangeCompat(of: selection) { _, new in
             settings.activitySelectionData = SelectionStorage.encode(new)
             // Keep the live shield in sync only when the child isn't mid-unlock.
@@ -290,7 +290,7 @@ struct ChildDeviceControlsView: View {
                 }
             }
         }
-        .familyActivityPicker(isPresented: $showAllowPicker, selection: $allowSelection)
+        .tofyActivityPicker(title: PickerCopy.temporaryAllow.title, header: PickerCopy.temporaryAllow.header, footer: PickerCopy.temporaryAllow.footer, isPresented: $showAllowPicker, selection: $allowSelection)
     }
 
     private func allowDurationPill(_ title: String, minutes: Int) -> some View {
@@ -370,7 +370,7 @@ struct ChildDeviceControlsView: View {
             }
             .buttonStyle(.juicy)
         }
-        .familyActivityPicker(isPresented: $showAlwaysAllowPicker, selection: $alwaysAllowSelection)
+        .tofyActivityPicker(title: PickerCopy.alwaysAllowed.title, header: PickerCopy.alwaysAllowed.header, footer: PickerCopy.alwaysAllowed.footer, isPresented: $showAlwaysAllowPicker, selection: $alwaysAllowSelection)
         .onChangeCompat(of: alwaysAllowSelection) { _, new in
             settings.alwaysAllowedAppsData = SelectionStorage.encode(new)
             // Re-apply the locked baseline so the whitelist takes effect right away

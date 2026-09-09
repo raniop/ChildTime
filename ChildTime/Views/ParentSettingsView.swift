@@ -71,12 +71,12 @@ struct ParentSettingsView: View {
                     Button("סיום") { dismiss() }
                 }
             }
-            .familyActivityPicker(isPresented: $showAppPicker, selection: $pickerSelection)
+            .tofyActivityPicker(title: PickerCopy.blocked.title, header: PickerCopy.blocked.header, footer: PickerCopy.blocked.footer, isPresented: $showAppPicker, selection: $pickerSelection)
             .onChangeCompat(of: pickerSelection) { _, new in
                 settings.activitySelectionData = SelectionStorage.encode(new)
                 shields.applyDefaultLock()
             }
-            .familyActivityPicker(isPresented: $showAllowedPicker, selection: $allowedSelection)
+            .tofyActivityPicker(title: PickerCopy.allowList.title, header: PickerCopy.allowList.header, footer: PickerCopy.allowList.footer, isPresented: $showAllowedPicker, selection: $allowedSelection)
             .onChangeCompat(of: allowedSelection) { _, new in
                 settings.allowedAppsData = SelectionStorage.encode(new)
                 shields.applyDefaultLock()

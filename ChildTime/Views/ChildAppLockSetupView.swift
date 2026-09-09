@@ -128,7 +128,7 @@ struct ChildAppLockSetupView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .familyActivityPicker(isPresented: $showAppPicker, selection: $selection)
+        .tofyActivityPicker(title: PickerCopy.blocked.title, header: PickerCopy.blocked.header, footer: PickerCopy.blocked.footer, isPresented: $showAppPicker, selection: $selection)
         .onChangeCompat(of: selection) { _, new in
             settings.activitySelectionData = SelectionStorage.encode(new)
             shields.applyShield(from: new)
