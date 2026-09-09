@@ -221,6 +221,7 @@ struct PaywallView: View {
         VStack(spacing: isCompact ? 2 : AppSpacing.sm) {
             CompanionView(controller: companion, size: isCompact ? 76 : 140)
                 .padding(.top, isCompact ? 0 : 24)
+                .padding(.bottom, isCompact ? -14 : 0)
 
             Text("טופי+")
                 .font(.system(size: isCompact ? 34 : 60, weight: .black, design: .rounded))
