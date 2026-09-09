@@ -374,10 +374,13 @@ struct ParentSchoolYearPartyView: View {
 extension SchoolYearCelebration {
     private static var parentKey: String { "parentSchoolYearGreeted.\(Profile.schoolYear())" }
 
-    /// Show the parent card through September, until dismissed.
+    /// Only the first week of the school year, and only once (Rani): a card
+    /// that greeted the parent through all of September reappeared on every
+    /// launch until it happened to be dismissed the one way that marked it.
     @MainActor
     static var shouldGreetParent: Bool {
-        Calendar.current.component(.month, from: Date()) == 9
+        let c = Calendar.current.dateComponents([.month, .day], from: Date())
+        return c.month == 9 && (c.day ?? 32) <= 7
             && !UserDefaults.standard.bool(forKey: parentKey)
     }
 

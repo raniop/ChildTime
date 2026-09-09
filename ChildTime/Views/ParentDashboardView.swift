@@ -383,6 +383,10 @@ struct ParentDashboardView: View {
                 if AppInfo.isDemoRun {
                     // screenshots / review: nothing pops over the screen
                 } else if isRoot, SchoolYearCelebration.shouldGreetParent, !rows.isEmpty {
+                    // Mark on SHOW, not on dismiss: force-quitting (or any exit
+                    // that skipped the dismiss closure) left it unmarked and it
+                    // greeted again on the next launch.
+                    SchoolYearCelebration.markParentGreeted()
                     showSchoolYearParty = true
                 } else if isRoot, WhatsNewContent.shouldShow {
                     // ✨ Once per app UPDATE: what's new, in parent language.

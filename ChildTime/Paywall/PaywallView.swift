@@ -46,7 +46,7 @@ struct PaywallView: View {
             FancyConfetti(trigger: successConfetti)
 
             ScrollView {
-                VStack(spacing: AppSpacing.lg) {
+                VStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.lg) {
                     closeRow
                     hero
                     if let pitch { personalCard(pitch) }
@@ -57,7 +57,7 @@ struct PaywallView: View {
                     footerLinks
                 }
                 .padding(.horizontal, AppSpacing.lg)
-                .padding(.bottom, AppSpacing.xxxl)
+                .padding(.bottom, isCompact ? AppSpacing.md : AppSpacing.xxxl)
                 .frame(maxWidth: 720)
                 .frame(maxWidth: .infinity)
             }
@@ -196,28 +196,28 @@ struct PaywallView: View {
     }
 
     private var hero: some View {
-        VStack(spacing: AppSpacing.sm) {
+        VStack(spacing: isCompact ? 2 : AppSpacing.sm) {
             ZStack {
-                CompanionView(controller: companion, size: isCompact ? 110 : 140)
+                CompanionView(controller: companion, size: isCompact ? 76 : 140)
                 // Crown floating above
                 Text("👑")
-                    .font(.system(size: isCompact ? 42 : 54))
-                    .offset(y: -(isCompact ? 75 : 95))
+                    .font(.system(size: isCompact ? 30 : 54))
+                    .offset(y: -(isCompact ? 52 : 95))
                     .shadow(color: AppColor.starGold.opacity(0.7), radius: 10)
                     .scaleEffect(headerAppeared ? 1 : 0.3)
                     .rotationEffect(.degrees(headerAppeared ? 0 : -20))
             }
-            .padding(.top, isCompact ? 10 : 24)
+            .padding(.top, isCompact ? 0 : 24)
 
             Text("טופי+")
-                .font(.system(size: isCompact ? 44 : 60, weight: .black, design: .rounded))
+                .font(.system(size: isCompact ? 34 : 60, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.2), radius: 8, y: 3)
                 .scaleEffect(headerAppeared ? 1 : 0.5)
                 .opacity(headerAppeared ? 1 : 0)
 
             Text("חוויה מלאה — לכל הילדים בבית")
-                .font(.system(size: isCompact ? 17 : 20, weight: .semibold, design: .rounded))
+                .font(.system(size: isCompact ? 14.5 : 20, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
                 .multilineTextAlignment(.center)
                 .opacity(headerAppeared ? 1 : 0)
@@ -226,45 +226,46 @@ struct PaywallView: View {
     }
 
     private var benefitsCard: some View {
-        VStack(spacing: 14) {
-            benefitRow("🧠", "כל הנושאים", "מתמטיקה, עברית, אנגלית, הבנת הנקרא, לוגיקה, מדעים, היסטוריה, גיאוגרפיה, חינוך פיננסי")
+        VStack(spacing: isCompact ? 7 : 14) {
+            benefitRow("🧠", "כל הנושאים", "מתמטיקה, עברית, אנגלית, מדעים ועוד")
             divider
-            benefitRow("🌍", "כל העולמות — כולל החדשים", "ממלכת המתמטיקה, יער הסיפורים, זירת הענקים, ⚽ עולם הכדורגל וכל עולם חדש שנוסיף")
+            benefitRow("🌍", "כל העולמות", "כולל כל עולם חדש שנוסיף")
             divider
-            benefitRow("⏱", "זמן פרס על למידה", "כל תשובה נכונה מזכה בזמן משחק — בכל הנושאים")
+            benefitRow("⏱", "זמן פרס על למידה", "כל תשובה נכונה מזכה בזמן משחק")
             divider
-            benefitRow("👨‍👩‍👧‍👦", "כל הילדים במשפחה", "פרופיל לכל ילד עם התקדמות נפרדת")
+            benefitRow("👨‍👩‍👧‍👦", "כל הילדים במשפחה", "פרופיל והתקדמות לכל ילד")
             divider
-            benefitRow("📊", "דוחות הורה שבועיים", "בדיוק איפה הילד חזק, איפה צריך עזרה")
+            benefitRow("📊", "דוחות הורה שבועיים", "איפה הילד חזק, איפה צריך עזרה")
             divider
             benefitRow("☁️", "סנכרון בין מכשירים", "iPad + iPhone, אותה התקדמות")
         }
-        .padding(.vertical, AppSpacing.md)
-        .padding(.horizontal, AppSpacing.md)
+        .padding(.vertical, isCompact ? AppSpacing.sm : AppSpacing.md)
+        .padding(.horizontal, isCompact ? AppSpacing.sm : AppSpacing.md)
         .glassPane(radius: 22)
     }
 
     private func benefitRow(_ emoji: String, _ title: String, _ subtitle: String) -> some View {
-        HStack(spacing: AppSpacing.md) {
-            Text(emoji).font(.system(size: 26))
-                .frame(width: 36)
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(spacing: isCompact ? 10 : AppSpacing.md) {
+            Text(emoji).font(.system(size: isCompact ? 20 : 26))
+                .frame(width: isCompact ? 28 : 36)
+            VStack(alignment: .leading, spacing: 1) {
                 Text(title)
-                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    .font(.system(size: isCompact ? 15 : 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.8)
                 Text(subtitle)
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .font(.system(size: isCompact ? 11.5 : 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.75))
-                    .lineLimit(2)
+                    .lineLimit(1).minimumScaleFactor(0.75)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: "checkmark")
-                .font(.system(size: 14, weight: .bold))
+                .font(.system(size: isCompact ? 11 : 14, weight: .bold))
                 .foregroundStyle(AppColor.successMint)
-                .padding(6)
+                .padding(isCompact ? 4 : 6)
                 .background(AppColor.successMint.opacity(0.20), in: Circle())
         }
-        .padding(.horizontal, AppSpacing.sm)
+        .padding(.horizontal, isCompact ? 2 : AppSpacing.sm)
     }
 
     private var divider: some View {
