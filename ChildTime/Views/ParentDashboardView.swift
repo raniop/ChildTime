@@ -388,11 +388,13 @@ struct ParentDashboardView: View {
                     // ✨ Once per app UPDATE: what's new, in parent language.
                     showWhatsNew = true
                 } else if isRoot, !rows.isEmpty, household.household != nil,
-                          household.familyNameShown == nil,
-                          !UserDefaults.standard.bool(forKey: "family.namePromptShown") {
-                    // 👪 Families from before the onboarding asked: one nudge,
-                    // pre-filled, never repeated (the ✏️ title stays as the way in).
-                    UserDefaults.standard.set(true, forKey: "family.namePromptShown")
+                          household.familyNameShown == nil, shouldAskFamilyName {
+                    // 👪 Families created before sign-up asked for a name. Ask
+                    // again weekly while the family is still nameless — the old
+                    // once-per-install flag was usually spent on a launch where
+                    // What's New won the slot, so most parents never saw it.
+                    // Saving a name, or "not now", stops it for good.
+                    UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "family.namePromptAt")
                     familyNameDraft = household.suggestedFamilyName ?? ""
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { showFamilyNameEditor = true }
                 }
@@ -1581,7 +1583,9 @@ struct ParentDashboardView: View {
                 .alert("שֵׁם הַמִּשְׁפָּחָה", isPresented: $showFamilyNameEditor) {
                     TextField("מִשְׁפַּחַת גּוֹלָן", text: $familyNameDraft)
                     Button("שִׁמְרוּ") { household.setFamilyName(familyNameDraft) }
-                    Button("בִּטּוּל", role: .cancel) {}
+                    Button("לֹא עַכְשָׁו", role: .cancel) {
+                        UserDefaults.standard.set(true, forKey: "family.namePromptOff")
+                    }
                 } message: {
                     Text("מוֹפִיעַ כָּאן וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה.")
                 }
@@ -1595,6 +1599,20 @@ struct ParentDashboardView: View {
         }
         .padding(.horizontal, 6)
         .padding(.top, 8)
+    }
+
+    /// Ask about the family name at most once a week, and never again once the
+    /// parent has said "not now" (or named the family — the caller checks that).
+    private var shouldAskFamilyName: Bool {
+        let d = UserDefaults.standard
+        if d.bool(forKey: "family.namePromptOff") { return false }
+        let last = d.double(forKey: "family.namePromptAt")
+        if last == 0 && d.bool(forKey: "family.namePromptShown") {
+            // migrate the old one-shot flag: treat it as "asked just now"
+            d.set(Date().timeIntervalSince1970, forKey: "family.namePromptAt")
+            return false
+        }
+        return Date().timeIntervalSince1970 - last > 7 * 86_400
     }
 
     /// "שבת · שלושה ילדים · יואב משחק עכשיו"
