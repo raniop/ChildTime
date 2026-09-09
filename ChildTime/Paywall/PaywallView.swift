@@ -47,7 +47,7 @@ struct PaywallView: View {
 
             ScrollView {
                 VStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.lg) {
-                    closeRow
+                    if !isCompact { closeRow }
                     hero
                     if let pitch { personalCard(pitch) }
                     benefitsCard
@@ -57,9 +57,31 @@ struct PaywallView: View {
                     footerLinks
                 }
                 .padding(.horizontal, AppSpacing.lg)
+                .padding(.top, isCompact ? 6 : 0)
                 .padding(.bottom, isCompact ? AppSpacing.md : AppSpacing.xxxl)
                 .frame(maxWidth: 720)
                 .frame(maxWidth: .infinity)
+            }
+            // On a phone the ✕ floats over the top-left corner instead of taking
+            // a row of its own — that row pushed the whole offer down a screen.
+            if isCompact {
+                VStack {
+                    HStack {
+                        Button { dismiss() } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(.white)
+                                .frame(width: 40, height: 40)
+                                .background(.white.opacity(0.22), in: Circle())
+                                .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+                        }
+                        .environment(\.layoutDirection, .leftToRight)
+                        Spacer()
+                    }
+                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.top, AppSpacing.sm)
+                    Spacer()
+                }
             }
         }
         .onAppear {
