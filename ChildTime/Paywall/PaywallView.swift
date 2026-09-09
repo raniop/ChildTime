@@ -219,17 +219,8 @@ struct PaywallView: View {
 
     private var hero: some View {
         VStack(spacing: isCompact ? 2 : AppSpacing.sm) {
-            ZStack {
-                CompanionView(controller: companion, size: isCompact ? 76 : 140)
-                // Crown floating above
-                Text("👑")
-                    .font(.system(size: isCompact ? 30 : 54))
-                    .offset(y: -(isCompact ? 52 : 95))
-                    .shadow(color: AppColor.starGold.opacity(0.7), radius: 10)
-                    .scaleEffect(headerAppeared ? 1 : 0.3)
-                    .rotationEffect(.degrees(headerAppeared ? 0 : -20))
-            }
-            .padding(.top, isCompact ? 0 : 24)
+            CompanionView(controller: companion, size: isCompact ? 76 : 140)
+                .padding(.top, isCompact ? 0 : 24)
 
             Text("טופי+")
                 .font(.system(size: isCompact ? 34 : 60, weight: .black, design: .rounded))
