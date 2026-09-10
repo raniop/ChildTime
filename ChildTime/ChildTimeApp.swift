@@ -242,6 +242,7 @@ struct ChildTimeApp: App {
                         TokenRefresher.shared.start()
                         enforceShieldStateIfNeeded()
                         WidgetBridge.refreshKid()
+                        ShieldBridge.refresh()   // keep the locked-app screen truthful
                     }
                     // Child LEFT the app → send the single "finished playing" report
                     // now (covers all adventures this sitting). Self-guards: no-op if
@@ -260,6 +261,7 @@ struct ChildTimeApp: App {
                         // Re-lock the parent gate when the app leaves the foreground.
                         ParentSettings.shared.sessionUnlocked = false
                         WidgetBridge.refreshKid()
+                        ShieldBridge.refresh()   // keep the locked-app screen truthful
                     }
                 }
                 .onOpenURL { url in

@@ -14,10 +14,15 @@
 		4F8B28F22FCF432400295103 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F8B28F12FCF432400295103 /* UserNotifications.framework */; };
 		4F8B28F42FCF432400295103 /* UserNotificationsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F8B28F32FCF432400295103 /* UserNotificationsUI.framework */; };
 		4F8B28FE2FCF432400295103 /* HelpContentExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4F8B28F02FCF432400295103 /* HelpContentExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		50D8ECF8BCE4538ABC0A2DFD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CBA173C4588B868B8087E73A /* Foundation.framework */; };
+		5CD9130329609A34A8016F2F /* ShieldConfigurationExt.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D54D97703A325955B8A1C24F /* ShieldConfigurationExt.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		67EC340913487CF947C89D7E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0CA697BCFD827627A3D980B9 /* Assets.xcassets */; };
+		7032B13B15E66D8195A4C915 /* ShieldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873C358DCB5A2C2F44C51CDB /* ShieldState.swift */; };
 		713AF44EC71C867D5C9A459A /* DeviceActivityMonitorExt.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 03195E464CE1DCA50D39531A /* DeviceActivityMonitorExt.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7A110C4E00000000000000A2 /* LockPushService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 7A110C4E00000000000000A1 /* LockPushService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7A110C4E00000000000000AE /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F8B28F12FCF432400295103 /* UserNotifications.framework */; };
 		7B110C4E00000000000000BB /* TofyWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 7B110C4E00000000000000B2 /* TofyWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A74D4CE2F1968CEB7E0F1C2C /* ShieldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873C358DCB5A2C2F44C51CDB /* ShieldState.swift */; };
 		A9B6D6EA231E9A0445A876B5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CBA173C4588B868B8087E73A /* Foundation.framework */; };
 		AA0000000000000000001001 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000002001 /* FirebaseAuth */; };
 		AA0000000000000000001002 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000002002 /* FirebaseFirestore */; };
@@ -25,9 +30,17 @@
 		AA0000000000000000001004 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000002004 /* GoogleSignIn */; };
 		AA0000000000000000001005 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000002005 /* GoogleSignInSwift */; };
 		AA00000000000000000010F1 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000020F1 /* FirebaseMessaging */; };
+		E20C1E12CDDF39D6B9F10786 /* ShieldConfigurationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F3B5ED0AA76C9A122C43D7 /* ShieldConfigurationExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		18912C4FFDDDA313A8F5818E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4FD27B792FC70B4400909B38 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E68C017FA5456D291FA20D14;
+			remoteInfo = ShieldConfigurationExt;
+		};
 		4F8401DB2FCD64030076E20B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4FD27B792FC70B4400909B38 /* Project object */;
@@ -90,6 +103,7 @@
 				713AF44EC71C867D5C9A459A /* DeviceActivityMonitorExt.appex in Embed App Extensions */,
 				4F8401DD2FCD64030076E20B /* PlayTimeWidgetExtension.appex in Embed App Extensions */,
 				7A110C4E00000000000000A2 /* LockPushService.appex in Embed App Extensions */,
+				5CD9130329609A34A8016F2F /* ShieldConfigurationExt.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -109,7 +123,9 @@
 
 /* Begin PBXFileReference section */
 		03195E464CE1DCA50D39531A /* DeviceActivityMonitorExt.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DeviceActivityMonitorExt.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0CA697BCFD827627A3D980B9 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		21FA339BEBF141B64D9C4169 /* DeviceActivityMonitorExt.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = DeviceActivityMonitorExt.entitlements; sourceTree = "<group>"; };
+		3E699B1C801139D69155AB64 /* ShieldConfigurationExt.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = ShieldConfigurationExt.entitlements; sourceTree = "<group>"; };
 		4F8401CA2FCD64020076E20B /* PlayTimeWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PlayTimeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F8401CB2FCD64020076E20B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		4F8401CD2FCD64020076E20B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -119,10 +135,14 @@
 		4FD27B812FC70B4400909B38 /* ChildTime.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChildTime.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FD27B932FC70B4700909B38 /* ChildTimeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChildTimeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FD27B9D2FC70B4700909B38 /* ChildTimeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChildTimeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		51F3B5ED0AA76C9A122C43D7 /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
 		7A110C4E00000000000000A1 /* LockPushService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LockPushService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B110C4E00000000000000B2 /* TofyWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TofyWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		873C358DCB5A2C2F44C51CDB /* ShieldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldState.swift; sourceTree = "<group>"; };
 		AF85E1C4DBB972D75EDDF8BB /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CBA173C4588B868B8087E73A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		D54D97703A325955B8A1C24F /* ShieldConfigurationExt.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; name = ShieldConfigurationExt.appex; path = ShieldConfigurationExt.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E3AD695EC33940A27756C3CF /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FCE5B1972704D3335DBFF6B3 /* DeviceActivityMonitorExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceActivityMonitorExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -192,11 +212,15 @@
 		};
 		4FD27B962FC70B4700909B38 /* ChildTimeTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = ChildTimeTests;
 			sourceTree = "<group>";
 		};
 		4FD27BA02FC70B4700909B38 /* ChildTimeUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = ChildTimeUITests;
 			sourceTree = "<group>";
 		};
@@ -210,6 +234,8 @@
 		};
 		7B110C4E00000000000000B6 /* TofyWatch */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = TofyWatch;
 			sourceTree = "<group>";
 		};
@@ -284,9 +310,30 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		996586E5A02803624DBF1682 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				50D8ECF8BCE4538ABC0A2DFD /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		321CE6FFA5191015CE02583D /* ShieldConfigurationExt */ = {
+			isa = PBXGroup;
+			children = (
+				51F3B5ED0AA76C9A122C43D7 /* ShieldConfigurationExtension.swift */,
+				873C358DCB5A2C2F44C51CDB /* ShieldState.swift */,
+				0CA697BCFD827627A3D980B9 /* Assets.xcassets */,
+				E3AD695EC33940A27756C3CF /* Info.plist */,
+				3E699B1C801139D69155AB64 /* ShieldConfigurationExt.entitlements */,
+			);
+			name = ShieldConfigurationExt;
+			path = ShieldConfigurationExt;
+			sourceTree = "<group>";
+		};
 		3AE5479DF6FCC1ACB0E2F2D2 /* DeviceActivityMonitorExt */ = {
 			isa = PBXGroup;
 			children = (
@@ -310,6 +357,7 @@
 				4FD27B822FC70B4400909B38 /* Products */,
 				64430A789AE674FF9A3F857D /* Frameworks */,
 				3AE5479DF6FCC1ACB0E2F2D2 /* DeviceActivityMonitorExt */,
+				321CE6FFA5191015CE02583D /* ShieldConfigurationExt */,
 			);
 			sourceTree = "<group>";
 		};
@@ -324,6 +372,7 @@
 				4F8B28F02FCF432400295103 /* HelpContentExtension.appex */,
 				7A110C4E00000000000000A1 /* LockPushService.appex */,
 				7B110C4E00000000000000B2 /* TofyWatch.app */,
+				D54D97703A325955B8A1C24F /* ShieldConfigurationExt.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -367,8 +416,6 @@
 				4F8401CF2FCD64020076E20B /* PlayTimeWidget */,
 			);
 			name = PlayTimeWidgetExtension;
-			packageProductDependencies = (
-			);
 			productName = PlayTimeWidgetExtension;
 			productReference = 4F8401CA2FCD64020076E20B /* PlayTimeWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -389,8 +436,6 @@
 				4F8B28F52FCF432400295103 /* HelpContentExtension */,
 			);
 			name = HelpContentExtension;
-			packageProductDependencies = (
-			);
 			productName = HelpContentExtension;
 			productReference = 4F8B28F02FCF432400295103 /* HelpContentExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -413,6 +458,7 @@
 				4F8B28FD2FCF432400295103 /* PBXTargetDependency */,
 				7A110C4E00000000000000A4 /* PBXTargetDependency */,
 				7B110C4E00000000000000BC /* PBXTargetDependency */,
+				4D4E215E9FDF5154735F818E /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4FD27B832FC70B4400909B38 /* ChildTime */,
@@ -488,8 +534,6 @@
 				7A110C4E00000000000000A5 /* LockPushService */,
 			);
 			name = LockPushService;
-			packageProductDependencies = (
-			);
 			productName = LockPushService;
 			productReference = 7A110C4E00000000000000A1 /* LockPushService.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -510,8 +554,6 @@
 				7B110C4E00000000000000B6 /* TofyWatch */,
 			);
 			name = TofyWatch;
-			packageProductDependencies = (
-			);
 			productName = TofyWatch;
 			productReference = 7B110C4E00000000000000B2 /* TofyWatch.app */;
 			productType = "com.apple.product-type.application";
@@ -531,6 +573,23 @@
 			name = DeviceActivityMonitorExt;
 			productName = DeviceActivityMonitorExt;
 			productReference = 03195E464CE1DCA50D39531A /* DeviceActivityMonitorExt.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		E68C017FA5456D291FA20D14 /* ShieldConfigurationExt */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 15A5B522D860B5B0FC2766E4 /* Build configuration list for PBXNativeTarget "ShieldConfigurationExt" */;
+			buildPhases = (
+				FA60C9188E69EEF3EB8FEFA4 /* Sources */,
+				996586E5A02803624DBF1682 /* Frameworks */,
+				344D6D770BB2B90F4706D042 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ShieldConfigurationExt;
+			productName = ShieldConfigurationExt;
+			productReference = D54D97703A325955B8A1C24F /* ShieldConfigurationExt.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -591,11 +650,20 @@
 				4F8B28EF2FCF432400295103 /* HelpContentExtension */,
 				7A110C4E00000000000000A7 /* LockPushService */,
 				7B110C4E00000000000000B1 /* TofyWatch */,
+				E68C017FA5456D291FA20D14 /* ShieldConfigurationExt */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		344D6D770BB2B90F4706D042 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				67EC340913487CF947C89D7E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4F8401C82FCD64020076E20B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -681,6 +749,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7032B13B15E66D8195A4C915 /* ShieldState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -712,9 +781,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FA60C9188E69EEF3EB8FEFA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E20C1E12CDDF39D6B9F10786 /* ShieldConfigurationExtension.swift in Sources */,
+				A74D4CE2F1968CEB7E0F1C2C /* ShieldState.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4D4E215E9FDF5154735F818E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = ShieldConfigurationExt;
+			target = E68C017FA5456D291FA20D14 /* ShieldConfigurationExt */;
+			targetProxy = 18912C4FFDDDA313A8F5818E /* PBXContainerItemProxy */;
+		};
 		4F8401DC2FCD64030076E20B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4F8401C92FCD64020076E20B /* PlayTimeWidgetExtension */;
@@ -1308,9 +1392,61 @@
 			};
 			name = Release;
 		};
+		9115C4E64DBD6126B27E5889 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = ShieldConfigurationExt/ShieldConfigurationExt.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 170;
+				DEVELOPMENT_TEAM = TFG2H9C76N;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ShieldConfigurationExt/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				MARKETING_VERSION = 2026.9.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rani.ChildTime.ShieldConfigurationExt;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F9D35A5F1517565AA29353E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = ShieldConfigurationExt/ShieldConfigurationExt.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 170;
+				DEVELOPMENT_TEAM = TFG2H9C76N;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ShieldConfigurationExt/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				MARKETING_VERSION = 2026.9.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rani.ChildTime.ShieldConfigurationExt;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		15A5B522D860B5B0FC2766E4 /* Build configuration list for PBXNativeTarget "ShieldConfigurationExt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9D35A5F1517565AA29353E2 /* Release */,
+				9115C4E64DBD6126B27E5889 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4F8401DE2FCD64030076E20B /* Build configuration list for PBXNativeTarget "PlayTimeWidgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
