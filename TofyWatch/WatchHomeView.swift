@@ -19,6 +19,21 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
 
     override init() {
         super.init()
+        // WATCH_DEMO=1 — sample family for design review and screenshots. Never
+        // set in a shipping run; the watch has no other way to show a full
+        // screen without a paired phone pushing real data.
+        if ProcessInfo.processInfo.environment["WATCH_DEMO"] == "1" {
+            children = [
+                .init(id: "1", name: "דָּנָה", emoji: "🦊", earnedToday: 35,
+                      playingNow: true, pendingChores: 1, moneyBalance: 24),
+                .init(id: "2", name: "יוֹאָב", emoji: "🐨", earnedToday: 10,
+                      playingNow: false, pendingChores: 0, moneyBalance: 0),
+                .init(id: "3", name: "אוּרִי", emoji: "🐻", earnedToday: 0,
+                      playingNow: false, pendingChores: 2, moneyBalance: 7),
+            ]
+            updatedAt = Date()
+            return
+        }
         guard WCSession.isSupported() else { return }
         WCSession.default.delegate = self
         WCSession.default.activate()
@@ -54,61 +69,156 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
     }
 }
 
-/// ⌚️ The parent's glance: one card per child — playing-now, today's earned
-/// minutes, chores waiting for approval, and the 💰 pocket.
+/// ⌚️ Tofy on the wrist.
+///
+/// The old screen was a stock `List` of grey rows — everything the phone app is
+/// not. A watch glance is read in about a second, so this trades the list for
+/// pages the Digital Crown flicks through: the family first, then one page per
+/// child, each one big enough to read without looking twice.
 struct WatchHomeView: View {
     @StateObject private var model = WatchFamilyModel()
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if model.children.isEmpty {
-                    VStack(spacing: 8) {
-                        Text("🦁").font(.system(size: 40))
-                        Text("טופי")
-                            .font(.headline)
-                        Text("פתחו את טופי באייפון פעם אחת — והמשפחה תופיע כאן")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                } else {
-                    List {
-                        ForEach(model.children) { child in
-                            childRow(child)
-                        }
-                        if let t = model.updatedAt {
-                            Text("עודכן \(t.formatted(date: .omitted, time: .shortened))")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                                .listRowBackground(Color.clear)
-                        }
+        ZStack {
+            WatchBackdrop()
+            if model.children.isEmpty {
+                emptyState
+            } else {
+                TabView {
+                    familyPage
+                    ForEach(model.children) { child in
+                        childPage(child)
                     }
                 }
+                .tabViewStyle(.verticalPage)
             }
-            .navigationTitle("טופי 🦁")
         }
         .environment(\.layoutDirection, .rightToLeft)
     }
 
-    private func childRow(_ child: WatchChildGlance) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            HStack {
-                Text("\(child.emoji) \(child.name)")
-                    .font(.headline)
-                Spacer()
-                if child.playingNow {
-                    Circle().fill(.green).frame(width: 8, height: 8)
+    // MARK: - Family
+
+    private var playing: [WatchChildGlance] { model.children.filter(\.playingNow) }
+    private var minutesToday: Int { model.children.reduce(0) { $0 + $1.earnedToday } }
+    private var choresWaiting: Int { model.children.reduce(0) { $0 + $1.pendingChores } }
+
+    private var familyPage: some View {
+        VStack(spacing: 8) {
+            Text("🦁 טוֹפִי")
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+
+            Text(headline)
+                .font(.system(size: 12.5, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+                .multilineTextAlignment(.center)
+                .lineLimit(2).minimumScaleFactor(0.8)
+
+            HStack(spacing: 6) {
+                stat("\(minutesToday)", "דַּקּוֹת הַיּוֹם", tint: Tofy.mint)
+                if choresWaiting > 0 {
+                    stat("\(choresWaiting)", "מַטָּלוֹת", tint: Tofy.gold)
                 }
             }
-            HStack(spacing: 8) {
-                Text("🎮 \(child.earnedToday) דק׳")
-                if child.moneyBalance > 0 { Text("💰 ₪\(child.moneyBalance)") }
-                if child.pendingChores > 0 { Text("🧹 \(child.pendingChores) 🕐") }
+
+            if let t = model.updatedAt {
+                Text("עֻדְכַּן \(t.formatted(date: .omitted, time: .shortened))")
+                    .font(.system(size: 10.5, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.55))
             }
-            .font(.footnote)
-            .foregroundStyle(.secondary)
         }
-        .padding(.vertical, 2)
+        .padding(.horizontal, 6)
+    }
+
+    private var headline: String {
+        if let one = playing.first {
+            return playing.count == 1
+                ? "\(one.name) מְשַׂחֵק עַכְשָׁו"
+                : "\(playing.count) יְלָדִים מְשַׂחֲקִים עַכְשָׁו"
+        }
+        switch model.children.count {
+        case 1: return "יֶלֶד אֶחָד · אַף אֶחָד לֹא מְשַׂחֵק"
+        case 2: return "שְׁנֵי יְלָדִים · שֶׁקֶט עַכְשָׁו"
+        default: return "\(model.children.count) יְלָדִים · שֶׁקֶט עַכְשָׁו"
+        }
+    }
+
+    private func stat(_ value: String, _ label: String, tint: Color) -> some View {
+        VStack(spacing: 1) {
+            Text(value)
+                .font(.system(size: 22, weight: .heavy, design: .rounded))
+                .foregroundStyle(tint)
+                .monospacedDigit()
+            Text(label)
+                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.75))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 7)
+        .watchPane(radius: 12)
+    }
+
+    // MARK: - One child
+
+    private func childPage(_ c: WatchChildGlance) -> some View {
+        VStack(spacing: 7) {
+            Text(c.emoji).font(.system(size: 34))
+
+            HStack(spacing: 5) {
+                if c.playingNow {
+                    Circle().fill(Tofy.mint).frame(width: 7, height: 7)
+                }
+                Text(c.name)
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+            }
+
+            Text(c.playingNow ? "מְשַׂחֵק עַכְשָׁו" : "לֹא מְשַׂחֵק כָּרֶגַע")
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundStyle(c.playingNow ? Tofy.mint : .white.opacity(0.65))
+
+            VStack(spacing: 4) {
+                row("🎮", "\(c.earnedToday) דַּקּוֹת הַיּוֹם")
+                if c.pendingChores > 0 {
+                    row("🧹", c.pendingChores == 1 ? "מַטָּלָה מְחַכָּה לְאִשּׁוּר"
+                                                   : "\(c.pendingChores) מַטָּלוֹת מְחַכּוֹת")
+                }
+                if c.moneyBalance > 0 {
+                    row("💰", "₪\(c.moneyBalance) בַּקֻּפָּה")
+                }
+            }
+            .padding(.vertical, 8).padding(.horizontal, 9)
+            .watchPane(radius: 13, tint: c.playingNow ? Tofy.mint : nil)
+        }
+        .padding(.horizontal, 6)
+    }
+
+    private func row(_ emoji: String, _ text: String) -> some View {
+        HStack(spacing: 6) {
+            Text(emoji).font(.system(size: 13))
+            Text(text)
+                .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1).minimumScaleFactor(0.75)
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Nothing yet
+
+    private var emptyState: some View {
+        VStack(spacing: 7) {
+            Text("🦁").font(.system(size: 38))
+            Text("טוֹפִי")
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            Text("פִּתְחוּ אֶת טוֹפִי בָּאַיְפוֹן פַּעַם אַחַת — וְהַמִּשְׁפָּחָה תּוֹפִיעַ כָּאן")
+                .font(.system(size: 11.5, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.8))
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 10)
     }
 }
