@@ -95,5 +95,41 @@ enum QuestionBanksSoccer {
         BankQuestion(prompt: "🔢\nבְּלִיגָה 4 קְבוּצוֹת, וְכָל קְבוּצָה מְשַׂחֶקֶת נֶגֶד כָּל אַחַת מֵהָאֲחֵרוֹת פַּעַם אַחַת. כַּמָּה מִשְׂחָקִים יֵשׁ בְּסַךְ הַכֹּל?", correctAnswer: "6", distractors: ["4", "8", "12"], tier: .hard, grades: 5...6),
         BankQuestion(prompt: "🔢\nקְבוּצָה הִבְקִיעָה 2 שְׁעָרִים בְּכָל אֶחָד מִ־6 מִשְׂחָקִים. כַּמָּה שְׁעָרִים בְּסַךְ הַכֹּל?", correctAnswer: "12", distractors: ["8", "10", "14"], tier: .medium, grades: 3...5),
         BankQuestion(prompt: "⏱️\nהַשּׁוֹפֵט הוֹסִיף 4 דַּקּוֹת לַמַּחֲצִית הַשְּׁנִיָּה. כַּמָּה דַּקּוֹת נִמְשְׁכָה הַמַּחֲצִית?", correctAnswer: "49", distractors: ["45", "50", "94"], tier: .medium, grades: 3...5),
+
+        // ── כִּתָּה א׳ · יְסוֹדוֹת, צוּרוֹת, צְבָעִים וְחֶשְׁבּוֹן עַד 10 ──
+        // Rani, 2026-09-11: this world had ZERO items tagged for grade 1, so a
+        // first-grader was served the nearest (= easiest older) questions on a
+        // loop. Everything here is answerable at א׳: counting to 11, colours,
+        // shapes, and addition/subtraction inside 10.
+        BankQuestion(prompt: "⚽\nמָה הַצּוּרָה שֶׁל כַּדּוּר רֶגֶל?", correctAnswer: "עָגֹל", distractors: ["מְרֻבָּע", "מְשֻׁלָּשׁ", "לֵב"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🥅\nלְאָן צָרִיךְ לְהַכְנִיס אֶת הַכַּדּוּר?", correctAnswer: "לַשַּׁעַר", distractors: ["לַסַּל", "לַקֻּפְסָה", "לַבְּרֵכָה"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🦶\nבְּאֵיזֶה אֵיבָר בּוֹעֲטִים בַּכַּדּוּר?", correctAnswer: "בָּרֶגֶל", distractors: ["בָּאֹזֶן", "בָּאַף", "בַּבֶּטֶן"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🧤\nמִי שׁוֹמֵר עַל הַשַּׁעַר?", correctAnswer: "הַשּׁוֹעֵר", distractors: ["הַחָלוּץ", "הַמְּאַמֵּן", "הַקָּהָל"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "👕\nכַּמָּה קְבוּצוֹת מְשַׂחֲקוֹת בְּמִשְׂחָק אֶחָד?", correctAnswer: "2", distractors: ["1", "3", "4"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🥅\nכַּמָּה שְׁעָרִים יֵשׁ בְּמִגְרָשׁ כַּדּוּרֶגֶל?", correctAnswer: "2", distractors: ["1", "3", "4"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "⚽\nבְּכַמָּה כַּדּוּרִים מְשַׂחֲקִים בְּמִשְׂחָק אֶחָד?", correctAnswer: "בְּאֶחָד", distractors: ["בִּשְׁנַיִם", "בִּשְׁלוֹשָׁה", "בַּעֲשָׂרָה"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🟩\nמָה הַצֶּבַע שֶׁל הַדֶּשֶׁא בַּמִּגְרָשׁ?", correctAnswer: "יָרֹק", distractors: ["אָדֹם", "כָּחֹל", "סָגֹל"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "📣\nמִי שׁוֹרֵק בַּמִּשְׂחָק?", correctAnswer: "הַשּׁוֹפֵט", distractors: ["הַשּׁוֹעֵר", "הַקָּהָל", "הַמְּאַמֵּן"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🟨\nאֵיזֶה צֶבַע כַּרְטִיס הוּא אַזְהָרָה?", correctAnswer: "צָהֹב", distractors: ["כָּחֹל", "יָרֹק", "לָבָן"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🏟️\nאֵיךְ קוֹרְאִים לַמָּקוֹם שֶׁמְּשַׂחֲקִים בּוֹ כַּדּוּרֶגֶל?", correctAnswer: "מִגְרָשׁ", distractors: ["בְּרֵכָה", "כִּתָּה", "מִטְבָּח"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "👟\nמָה נוֹעֲלִים בָּרַגְלַיִם בַּמִּשְׂחָק?", correctAnswer: "נַעֲלַיִם", distractors: ["כְּפָפוֹת", "כּוֹבַע", "מִשְׁקָפַיִם"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "⏱️\nלְכַמָּה חֲלָקִים מְחֻלָּק מִשְׂחָק כַּדּוּרֶגֶל?", correctAnswer: "לִשְׁנַיִם", distractors: ["לְאֶחָד", "לִשְׁלוֹשָׁה", "לַעֲשָׂרָה"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🧤\nמִי חוֹבֵשׁ כְּפָפוֹת בַּמִּשְׂחָק?", correctAnswer: "הַשּׁוֹעֵר", distractors: ["הֶחָלוּץ", "הַשּׁוֹפֵט", "הַמְּאַמֵּן"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🏆\nמָה מְקַבֶּלֶת הַקְּבוּצָה שֶׁנִּצְּחָה בַּטּוּרְנִיר?", correctAnswer: "גָּבִיעַ", distractors: ["כַּדּוּר", "כַּרְטִיס", "שְׁרִיקָה"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🦵\nכַּמָּה רַגְלַיִם יֵשׁ לְשַׂחְקָן אֶחָד?", correctAnswer: "2", distractors: ["1", "3", "4"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "↩️\nמָה עוֹשִׂים כְּשֶׁהַכַּדּוּר יוֹצֵא מֵהַמִּגְרָשׁ?", correctAnswer: "זוֹרְקִים אוֹתוֹ פְּנִימָה", distractors: ["מְסַיְּמִים אֶת הַמִּשְׂחָק", "מְבִיאִים כַּדּוּר חָדָשׁ", "כֻּלָּם הוֹלְכִים הַבַּיְתָה"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🤝\nמָה יָפֶה לְהַגִּיד לַקְּבוּצָה שֶׁהִפְסִידָה?", correctAnswer: "כָּל הַכָּבוֹד", distractors: ["הִפְסַדְתֶּם", "לֹא שָׁוֶה", "לְכוּ הַבַּיְתָה"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "⚽\nקְבוּצָה הִבְקִיעָה גּוֹל אֶחָד וְעוֹד גּוֹל אֶחָד. כַּמָּה גּוֹלִים?", correctAnswer: "2", distractors: ["1", "3", "4"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "⚽\n2 גּוֹלִים וְעוֹד גּוֹל אֶחָד. כַּמָּה גּוֹלִים בְּסַךְ הַכֹּל?", correctAnswer: "3", distractors: ["2", "4", "5"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "⚽\n3 גּוֹלִים וְעוֹד 2 גּוֹלִים. כַּמָּה גּוֹלִים?", correctAnswer: "5", distractors: ["4", "6", "7"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "⚽\n4 גּוֹלִים וְעוֹד 3 גּוֹלִים. כַּמָּה גּוֹלִים?", correctAnswer: "7", distractors: ["6", "8", "9"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "⚽\n5 גּוֹלִים וְעוֹד 5 גּוֹלִים. כַּמָּה גּוֹלִים?", correctAnswer: "10", distractors: ["9", "11", "15"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🔢\nבַּמַּחֲצִית הָרִאשׁוֹנָה הָיוּ 6 גּוֹלִים, וּ־2 מֵהֶם נִפְסְלוּ. כַּמָּה נִשְׁאֲרוּ?", correctAnswer: "4", distractors: ["3", "5", "8"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🔢\nהָיוּ 5 כַּדּוּרִים בַּמִּגְרָשׁ וְ־3 הִתְגַּלְגְּלוּ הַחוּצָה. כַּמָּה נִשְׁאֲרוּ?", correctAnswer: "2", distractors: ["1", "3", "4"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🔢\n7 שַׂחְקָנִים הָיוּ בַּמִּגְרָשׁ וְ־4 יָצְאוּ לָנוּחַ. כַּמָּה נִשְׁאֲרוּ?", correctAnswer: "3", distractors: ["2", "4", "5"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🧮\n10 שַׂחְקָנִים בַּמִּגְרָשׁ וְעוֹד הַשּׁוֹעֵר. כַּמָּה שַׂחְקָנִים בַּקְּבוּצָה?", correctAnswer: "11", distractors: ["10", "12", "9"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🥇\nקְבוּצָה כְּחֻלָּה הִבְקִיעָה 3 וּקְבוּצָה אֲדֻמָּה הִבְקִיעָה 1. מִי נִצְּחָה?", correctAnswer: "הַכְּחֻלָּה", distractors: ["הָאֲדֻמָּה", "אַף אַחַת", "שְׁתֵּיהֶן"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🤷\nכָּל קְבוּצָה הִבְקִיעָה 2 גּוֹלִים. אֵיךְ קוֹרְאִים לַתּוֹצָאָה?", correctAnswer: "תֵּיקוּ", distractors: ["נִצָּחוֹן", "הֶפְסֵד", "פֶּנְדֶּל"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "👋\nמָה עוֹשִׂים הַשַּׂחְקָנִים בְּסוֹף הַמִּשְׂחָק?", correctAnswer: "לוֹחֲצִים יָדַיִם", distractors: ["רָבִים", "בּוֹרְחִים", "יְשֵׁנִים"], tier: .easy, grades: 1...2),
     ]
 }
