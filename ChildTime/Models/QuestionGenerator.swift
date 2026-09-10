@@ -176,6 +176,43 @@ struct QuestionGenerator {
 
     // MARK: - Bank-based questions
 
+    /// How many items a grade needs before the rotation stops feeling like a
+    /// loop. QuestionMemory remembers 85% of the pool, so a 12-item pool starts
+    /// repeating after 10 questions — which is exactly what a child notices.
+    static let minGradePool = 30
+
+    /// The pool a child of `grade` actually gets.
+    ///
+    /// The old rule took the grade's own items whenever there were 5 or more,
+    /// and otherwise the 20 nearest — so a grade with 11 tagged items served
+    /// those 11 forever, and a grade with none got a fixed 20 that were always
+    /// the easiest ones nearby. Both showed up as "the questions repeat" and
+    /// "they're too easy for him". Now the grade's own items always come first
+    /// and are TOPPED UP from the nearest grades until the pool is deep enough
+    /// to rotate.
+    static func gradePool(_ bank: [BankQuestion], grade: Int,
+                          distance: (BankQuestion) -> Int) -> [BankQuestion] {
+        let tagged = bank.filter { $0.grades.contains(grade) }
+        guard tagged.count < minGradePool else { return tagged }
+        // shuffled() first: equal-distance ties otherwise resolve by declaration
+        // order, and the same items get served forever.
+        let rest = bank.filter { !$0.grades.contains(grade) }
+            .shuffled()
+            .sorted { distance($0) < distance($1) }
+        return tagged + rest.prefix(max(0, minGradePool - tagged.count))
+    }
+
+    /// Test seam: the pool a grade really gets, for the rotation audit.
+    static func effectivePool(topic: Topic, grade: Int) -> [BankQuestion] {
+        let bank = QuestionBanks.bank(for: topic) ?? []
+        func d(_ item: BankQuestion) -> Int {
+            let r = item.grades
+            if r.contains(grade) { return 0 }
+            return min(abs(r.lowerBound - grade), abs(r.upperBound - grade))
+        }
+        return gradePool(bank, grade: grade, distance: d)
+    }
+
     private static func makeFromBank(topic: Topic, difficulty: Difficulty, grade: Int? = nil) -> Question {
         var bank = QuestionBanks.bank(for: topic) ?? []
         if let g = grade {
@@ -190,15 +227,7 @@ struct QuestionGenerator {
                 if r.contains(g) { return 0 }
                 return min(abs(r.lowerBound - g), abs(r.upperBound - g))
             }
-            let tagged = bank.filter { $0.grades.contains(g) }
-            if tagged.count >= 5 {
-                bank = tagged
-            } else {
-                // shuffled() first: equal-distance ties otherwise resolve by
-                // declaration order and the same 20 items get served forever.
-                let nearest = bank.shuffled().sorted { windowDistance($0) < windowDistance($1) }
-                bank = Array(nearest.prefix(20))
-            }
+            bank = gradePool(bank, grade: g, distance: windowDistance)
         }
         guard let item = QuestionMemory.shared.pickFresh(bank, for: topic, target: difficulty) else {
             return Question(
