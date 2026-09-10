@@ -100,3 +100,49 @@ final class QuestionRotationTests: XCTestCase {
         print("📋 grade-tag gaps (content backlog):\n" + gaps.joined(separator: "\n"))
     }
 }
+
+// MARK: - Coverage export
+
+extension QuestionRotationTests {
+
+    /// Writes the real per-topic / per-grade counts to `docs/admin/`, where the
+    /// founder dashboard renders them as a matrix. Run with
+    /// `EXPORT_COVERAGE=1` after touching any bank:
+    ///   xcodebuild test -only-testing:ChildTimeTests/QuestionRotationTests/testExportCoverage
+    func testExportCoverage() throws {
+        guard ProcessInfo.processInfo.environment["EXPORT_COVERAGE"] == "1",
+              let out = ProcessInfo.processInfo.environment["COVERAGE_OUT"] else {
+            throw XCTSkip("set EXPORT_COVERAGE=1 and COVERAGE_OUT=<path> to refresh the dashboard data")
+        }
+        var topicsOut: [[String: Any]] = []
+        for topic in topics {
+            guard let bank = QuestionBanks.bank(for: topic), !bank.isEmpty else { continue }
+            var grades: [[String: Any]] = []
+            for g in 0...6 {
+                grades.append([
+                    "grade": g,
+                    "tagged": bank.filter { $0.grades.contains(g) }.count,
+                    "pool": QuestionGenerator.effectivePool(topic: topic, grade: g).count,
+                ])
+            }
+            var tiers: [String: Int] = [:]
+            for q in bank { tiers[q.difficulty.rawValue, default: 0] += 1 }
+            topicsOut.append([
+                "topic": topic.rawValue,
+                "label": topic.displayName,
+                "emoji": topic.emoji,
+                "total": bank.count,
+                "tiers": tiers,
+                "grades": grades,
+            ])
+        }
+        let payload: [String: Any] = [
+            "generatedAt": ISO8601DateFormatter().string(from: Date()),
+            "minGradePool": QuestionGenerator.minGradePool,
+            "topics": topicsOut,
+        ]
+        let data = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys])
+        try data.write(to: URL(fileURLWithPath: out))
+        print("📊 coverage written to \(out)")
+    }
+}

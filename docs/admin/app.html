@@ -362,8 +362,38 @@ async function worlds() {
 
 // ---------------- 6 · content ----------------
 let contentTab = "reports";
+// 📊 How many questions each world really has for each grade. The banks live in
+// the iOS app, so a test exports the true counts to question-coverage.json and
+// this renders them — the founder sees the gaps before a child does.
+let COV = null;
+async function coverage() {
+  $("main").innerHTML = `<div class="top"><h3>כיסוי שאלות לפי כיתה</h3><div class="filters"><span class="chip" data-ct="reports">דיווחים</span><span class="chip on" data-ct="coverage">כיסוי לפי כיתה</span></div></div><div id="covBox"><span class="spin"></span></div>`;
+  wireContentTabs();
+  if (!COV) { try { COV = await (await fetch("question-coverage.json?v=" + Date.now())).json(); } catch (e) { return $("covBox").innerHTML = '<div class="empty">אין עדיין קובץ כיסוי. הריצו את testExportCoverage.</div>'; } }
+  const min = COV.minGradePool || 30;
+  const cell = (n) => {
+    const bg = n === 0 ? "var(--bad)" : n < 15 ? "#F0997B" : n < min ? "#FAC775" : "var(--good)";
+    const fg = n === 0 || n >= min ? "#fff" : "#4A1B0C";
+    return `<td style="text-align:center"><span style="display:inline-block;min-width:30px;padding:2px 6px;border-radius:6px;background:${bg};color:${fg};font-weight:700">${n}</span></td>`;
+  };
+  const rows = (COV.topics || []).slice().sort((a, b) => {
+    const gaps = (t) => t.grades.filter((g) => g.grade >= 1 && g.tagged < min).length;
+    return gaps(b) - gaps(a) || a.total - b.total;
+  });
+  const totalGaps = rows.reduce((n, t) => n + t.grades.filter((g) => g.grade >= 1 && g.tagged === 0).length, 0);
+  $("covBox").innerHTML = `
+    <div class="card"><div class="stamp" style="margin-bottom:8px">המספר = כמה שאלות מתויגות לכיתה הזאת. אדום = אין בכלל · כתום = מעט מדי · ירוק = ${min}+ ומספיק לסבב בלי חזרות.${totalGaps ? ` <b style="color:var(--bad)">${totalGaps} משבצות ריקות.</b>` : ""}</div>
+    <div class="tblwrap"><table><tr><th>עולם</th><th>סה״כ</th>${[1,2,3,4,5,6].map((g) => `<th style="text-align:center">כיתה ${g}</th>`).join("")}</tr>
+    ${rows.map((t) => `<tr><td>${t.emoji || ""} ${esc(t.label)}</td><td><b>${t.total}</b></td>${[1,2,3,4,5,6].map((g) => cell((t.grades.find((x) => x.grade === g) || {}).tagged || 0)).join("")}</tr>`).join("")}
+    </table></div>
+    <div class="stamp" style="margin-top:8px">עודכן ${COV.generatedAt ? new Date(COV.generatedAt).toLocaleString("he-IL") : "—"} · לרענון: הריצו את testExportCoverage באפליקציה.</div></div>`;
+}
+function wireContentTabs() {
+  document.querySelectorAll("[data-ct]").forEach((c) => c.onclick = () => (c.dataset.ct === "coverage" ? coverage() : content()));
+}
+
 async function content() {
-  $("main").innerHTML = `<div class="top"><h3>תוכן ושאלות</h3><div class="filters"><span class="chip on" id="repChip">דיווחים</span><span class="chip dim">הכי קשות</span><span class="chip dim">הכי קלות</span><span class="chip dim">לפי כיתה</span></div></div>
+  $("main").innerHTML = `<div class="top"><h3>תוכן ושאלות</h3><div class="filters"><span class="chip on" data-ct="reports" id="repChip">דיווחים</span><span class="chip" data-ct="coverage">כיסוי לפי כיתה</span></div></div>
     <div class="grid2"><div class="card"><h4>דיווחים מהמכשירים (🚩 בכפתור הדגל בשאלה)</h4><div id="reports"><span class="spin"></span></div></div>
     <div class="card"><h4>איפה ילדים נופלים (30 יום)</h4><div class="tblwrap"><table><tr><th>שאלה</th><th>עולם</th><th>ניסיונות</th><th>נכון</th></tr><tr><td colspan="4" class="empty">דורש ספירה לכל שאלה במכשיר · יתווסף בגרסה הבאה של האפליקציה</td></tr></table></div><div class="stamp" style="margin-top:6px">מתחת ל־35% = כנראה בעיה בשאלה, לא בילדים. מעל 97% = משעממת.</div></div></div>`;
   try { const r = await call("adminListReports"); const rows = r.reports || [];
@@ -377,6 +407,7 @@ async function content() {
     document.querySelectorAll("[data-open]").forEach((u) => u.onclick = () => { const d = document.querySelector(`[data-detail="${CSS.escape(u.dataset.open)}"]`); if (d) d.hidden = !d.hidden; });
     document.querySelectorAll("[data-rs]").forEach((u) => u.onclick = async () => { for (const id of u.dataset.rs.split(",")) await call("adminSetReportStatus", { id, status: u.dataset.st }); await loadJourney(false); content(); });
   } catch (e) { $("reports").textContent = e.message; }
+  wireContentTabs();
 }
 
 // ---------------- 7 · support ----------------
