@@ -31,7 +31,6 @@
 		AA0000000000000000001005 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000002005 /* GoogleSignInSwift */; };
 		AA00000000000000000010F1 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000020F1 /* FirebaseMessaging */; };
 		E20C1E12CDDF39D6B9F10786 /* ShieldConfigurationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F3B5ED0AA76C9A122C43D7 /* ShieldConfigurationExtension.swift */; };
-		ECA2C7A9E6408CD419C1885B /* ShieldBackdrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7141445F501B34CFDE37525 /* ShieldBackdrop.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -144,7 +143,6 @@
 		CBA173C4588B868B8087E73A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		D54D97703A325955B8A1C24F /* ShieldConfigurationExt.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; name = ShieldConfigurationExt.appex; path = ShieldConfigurationExt.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3AD695EC33940A27756C3CF /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F7141445F501B34CFDE37525 /* ShieldBackdrop.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldBackdrop.swift; sourceTree = "<group>"; };
 		FCE5B1972704D3335DBFF6B3 /* DeviceActivityMonitorExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceActivityMonitorExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -331,7 +329,6 @@
 				0CA697BCFD827627A3D980B9 /* Assets.xcassets */,
 				E3AD695EC33940A27756C3CF /* Info.plist */,
 				3E699B1C801139D69155AB64 /* ShieldConfigurationExt.entitlements */,
-				F7141445F501B34CFDE37525 /* ShieldBackdrop.swift */,
 			);
 			name = ShieldConfigurationExt;
 			path = ShieldConfigurationExt;
@@ -790,7 +787,6 @@
 			files = (
 				E20C1E12CDDF39D6B9F10786 /* ShieldConfigurationExtension.swift in Sources */,
 				A74D4CE2F1968CEB7E0F1C2C /* ShieldState.swift in Sources */,
-				ECA2C7A9E6408CD419C1885B /* ShieldBackdrop.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
