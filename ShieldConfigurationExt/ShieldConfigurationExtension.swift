@@ -19,7 +19,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
     // no blur at all it washes them out to near-white (which is how a white-on-
     // white screen happened). So feed it colours BRIGHTER than the target and let
     // the dark material bring them down to the brand purple.
-    private static let indigo = UIColor(red: 0.48, green: 0.36, blue: 1.00, alpha: 1)   // #7A5CFF → lands ~#4B3FBF
+    private static let indigo = UIColor(red: 0.42, green: 0.32, blue: 0.92, alpha: 1)   // #6B52EB
     private static let mint   = UIColor(red: 0.18, green: 0.84, blue: 0.63, alpha: 1)   // #2ED6A1 → lands ~#1D9E75
     private static let night  = UIColor(red: 0.37, green: 0.38, blue: 0.81, alpha: 1)   // #5E60CE → lands ~#3C3489
 
