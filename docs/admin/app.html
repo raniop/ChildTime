@@ -372,8 +372,10 @@ async function coverage() {
   if (!COV) { try { COV = await (await fetch("question-coverage.json?v=" + Date.now())).json(); } catch (e) { return $("covBox").innerHTML = '<div class="empty">אין עדיין קובץ כיסוי. הריצו את testExportCoverage.</div>'; } }
   const min = COV.minGradePool || 30;
   const cell = (n) => {
-    const bg = n === 0 ? "var(--bad)" : n < 15 ? "#F0997B" : n < min ? "#FAC775" : "var(--good)";
-    const fg = n === 0 || n >= min ? "#fff" : "#4A1B0C";
+    // Literal hexes: the admin has no --bad token, and a missing var renders as
+    // no background at all — white text on nothing.
+    const bg = n === 0 ? "#D6455B" : n < 15 ? "#E8845E" : n < min ? "#F5C049" : "#17A67B";
+    const fg = n === 0 || n >= min ? "#fff" : "#3A1B08";
     return `<td style="text-align:center"><span style="display:inline-block;min-width:30px;padding:2px 6px;border-radius:6px;background:${bg};color:${fg};font-weight:700">${n}</span></td>`;
   };
   const rows = (COV.topics || []).slice().sort((a, b) => {
@@ -382,7 +384,7 @@ async function coverage() {
   });
   const totalGaps = rows.reduce((n, t) => n + t.grades.filter((g) => g.grade >= 1 && g.tagged === 0).length, 0);
   $("covBox").innerHTML = `
-    <div class="card"><div class="stamp" style="margin-bottom:8px">המספר = כמה שאלות מתויגות לכיתה הזאת. אדום = אין בכלל · כתום = מעט מדי · ירוק = ${min}+ ומספיק לסבב בלי חזרות.${totalGaps ? ` <b style="color:var(--bad)">${totalGaps} משבצות ריקות.</b>` : ""}</div>
+    <div class="card"><div class="stamp" style="margin-bottom:8px">המספר = כמה שאלות מתויגות לכיתה הזאת. אדום = אין בכלל · כתום = מעט מדי · ירוק = ${min}+ ומספיק לסבב בלי חזרות.${totalGaps ? ` <b style="color:#D6455B">${totalGaps} משבצות ריקות.</b>` : ""}</div>
     <div class="tblwrap"><table><tr><th>עולם</th><th>סה״כ</th>${[1,2,3,4,5,6].map((g) => `<th style="text-align:center">כיתה ${g}</th>`).join("")}</tr>
     ${rows.map((t) => `<tr><td>${t.emoji || ""} ${esc(t.label)}</td><td><b>${t.total}</b></td>${[1,2,3,4,5,6].map((g) => cell((t.grades.find((x) => x.grade === g) || {}).tagged || 0)).join("")}</tr>`).join("")}
     </table></div>
