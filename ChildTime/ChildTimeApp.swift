@@ -243,6 +243,9 @@ struct ChildTimeApp: App {
                         enforceShieldStateIfNeeded()
                         WidgetBridge.refreshKid()
                         ShieldBridge.refresh()   // keep the locked-app screen truthful
+                        // Ask Apple again on every return: a subscription that
+                        // lapsed while the app was closed must stop unlocking.
+                        Task { await SubscriptionManager.shared.refreshSubscriptionStatus() }
                     }
                     // Child LEFT the app → send the single "finished playing" report
                     // now (covers all adventures this sitting). Self-guards: no-op if

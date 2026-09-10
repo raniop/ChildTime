@@ -1304,15 +1304,22 @@ struct ParentDashboardView: View {
                     Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
                 }
             } else {
-                // No device yet → the soft card: one line, and "+ חברו מכשיר"
-                // overlaid by the grid at the end of it.
+                // No device yet. This card used to end here — one dead line — so
+                // a child without a device had NO actions menu and no way into
+                // their page (Rani). That hid exactly the things a parent needs
+                // then: connect a device, or hand them the parent's own phone.
                 HStack(spacing: 6) {
                     Text("\(Profile.gradeDisplayName(profile.effectiveGrade)) · אֵין עֲדַיִן מַכְשִׁיר מְחֻבָּר.")
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .lineLimit(1).minimumScaleFactor(0.7)
                     Spacer(minLength: 0)
-                    Color.clear.frame(width: 112, height: 18)
+                }
+                // Same shape as a connected card: the primary control (here:
+                // connect a device) plus the slot the ⚡ menu is overlaid into.
+                HStack(spacing: 8) {
+                    Color.clear.frame(maxWidth: .infinity).frame(height: 38)
+                    Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
                 }
             }
         }
@@ -1671,10 +1678,18 @@ struct ParentDashboardView: View {
     /// ⋯ on a grid card: remote open / lock now (the two things a parent reaches
     /// for from the overview), plus open card / reorder / delete.
     private func gridCardMenu(_ profile: Profile) -> some View {
-        Menu {
+        let hasDevice = childHasDevice(profile)
+        return Menu {
+            if !hasDevice {
+                Button {
+                    Haptic.light(); qrCode = nil; qrChild = profile
+                } label: { Label("חַבְּרוּ מַכְשִׁיר לְ\(profile.name)", systemImage: "qrcode") }
+                Divider()
+            }
             Button {
                 kidModeChild = profile
             } label: { Label("תְּנוּ לְ\(profile.name) לְשַׂחֵק כָּאן 🧒", systemImage: "iphone.and.arrow.forward") }
+            if hasDevice {
             Divider()
             Menu {
                 Button("חֲצִי שָׁעָה") { remoteOpen(profile, 30) }
@@ -1694,6 +1709,7 @@ struct ParentDashboardView: View {
             } label: {
                 Label("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה", systemImage: "gift.circle")
             }
+            }   // remote controls need a device to reach
             Divider()
             Button {
                 navPath.append(profile.id)
@@ -2025,25 +2041,22 @@ struct ParentDashboardView: View {
                     // (a Menu inside the NavigationLink would swallow the tap).
                     // The grid is RTL, so `.bottomTrailing` is the bottom-LEFT.
                     .overlay(alignment: .bottomTrailing) {
-                        if childHasDevice(row.profile) {
-                            gridCardMenu(row.profile).padding(14)
-                        }
+                        gridCardMenu(row.profile).padding(14)
                     }
                     // 📱 No device yet → "+ חברו מכשיר" closes the card's one line.
-                    .overlay(alignment: .bottomTrailing) {
+                    .overlay(alignment: .bottomLeading) {
                         if isRoot, !childHasDevice(row.profile) {
                             Button {
                                 Haptic.light()
                                 qrCode = nil
                                 qrChild = row.profile
                             } label: {
-                                Text("+ חַבְּרוּ מַכְשִׁיר")
-                                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                                    .foregroundStyle(.white)
-                                    .frame(width: 112, alignment: .leading)
+                                homePrimaryLabel("+ חַבְּרוּ מַכְשִׁיר")
                             }
                             .buttonStyle(.borderless)
                             .padding(.horizontal, 14).padding(.bottom, 14)
+                            .padding(.trailing, Self.actionsMenuWidth + 8)
+                            .environment(\.layoutDirection, .rightToLeft)
                         }
                     }
                     .contextMenu {

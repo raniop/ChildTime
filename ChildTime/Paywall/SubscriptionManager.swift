@@ -208,7 +208,15 @@ final class SubscriptionManager: ObservableObject {
         case .inTrial(let expires):
             HouseholdManager.shared.publishPremium(until: expires)
         default:
-            break
+            // Nothing entitles this device any more. If OUR purchase is what put
+            // the family on premium, take it back — otherwise a lapsed
+            // subscription left every premium world open (Rani saw exactly this:
+            // Apple said "Expired", the app still said "טופי+ פעיל").
+            // Only after StoreKit actually answered, so a cold launch that has
+            // not synced yet cannot revoke a live subscription.
+            if !products.isEmpty {
+                HouseholdManager.shared.clearPremiumIfSelfPublished()
+            }
         }
     }
 

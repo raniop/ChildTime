@@ -1898,6 +1898,36 @@ final class HouseholdManager: ObservableObject {
     /// Publish premium to the family doc so every bound device unlocks it.
     /// `until` = expiry (far-future for lifetime); nil clears it. Only writes
     /// when the value actually changes, and only from a household member.
+    /// Remember that OUR entitlement is what put the family on premium, so this
+    /// device — and only this device — can take it back when the subscription
+    /// lapses. A co-parent's phone must never clear premium it did not grant.
+    private static let selfPublishedKey = "premium.publishedBySelfUntil"
+
+    /// The subscription behind our own `publishPremium` is gone. Clear the
+    /// family's premium so the children's devices lock again.
+    ///
+    /// Without this, `publishPremium` only ever extended: a family that let its
+    /// subscription lapse kept every premium world open until the stored date
+    /// passed — and a yearly plan stored a date a YEAR out, so cancelling did
+    /// nothing at all.
+    func clearPremiumIfSelfPublished() {
+        #if canImport(FirebaseFirestore)
+        let d = UserDefaults.standard
+        let mine = d.double(forKey: Self.selfPublishedKey)
+        guard mine > Date().timeIntervalSince1970 else { return }   // we never granted, or it already lapsed
+        guard !Self.skipsCloudSync, let hh = household?.id else { return }
+        guard AuthManager.shared.isRealAccount else { return }
+        // A gift is the family's, not ours — it expires on its own schedule.
+        guard household?.premiumSource != "gift" else {
+            d.removeObject(forKey: Self.selfPublishedKey); return
+        }
+        d.removeObject(forKey: Self.selfPublishedKey)
+        let ref = db.collection("households").document(hh)
+        Task { _ = await confirmedMerge(ref, ["premiumUntil": Date().timeIntervalSince1970 - 1]) }
+        TofyLink("clearPremiumIfSelfPublished: subscription lapsed → family premium cleared")
+        #endif
+    }
+
     func publishPremium(until: Date?) {
         #if canImport(FirebaseFirestore)
         guard !Self.skipsCloudSync, let hh = household?.id else { return }
@@ -1912,6 +1942,7 @@ final class HouseholdManager: ObservableObject {
         // when extending/among-equal or clearing after a real lapse we detect.
         if let until {
             if let current, current >= until { return }   // cloud already >= ours
+            UserDefaults.standard.set(until.timeIntervalSince1970, forKey: Self.selfPublishedKey)
             let ref = db.collection("households").document(hh)
             Task {
                 // Confirm + self-heal: a paid family whose device uid drifted out
