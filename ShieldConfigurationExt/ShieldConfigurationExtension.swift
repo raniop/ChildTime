@@ -15,9 +15,13 @@ import UIKit
 /// we only choose the colors, the image and the words.
 class ShieldConfigurationExtension: ShieldConfigurationDataSource {
 
-    private static let indigo = UIColor(red: 0.29, green: 0.25, blue: 0.75, alpha: 1)   // #4B3FBF
-    private static let mint   = UIColor(red: 0.11, green: 0.62, blue: 0.46, alpha: 1)   // #1D9E75
-    private static let night  = UIColor(red: 0.24, green: 0.20, blue: 0.54, alpha: 1)   // #3C3489
+    // iOS never paints these as given: over a dark blur it darkens them, and with
+    // no blur at all it washes them out to near-white (which is how a white-on-
+    // white screen happened). So feed it colours BRIGHTER than the target and let
+    // the dark material bring them down to the brand purple.
+    private static let indigo = UIColor(red: 0.48, green: 0.36, blue: 1.00, alpha: 1)   // #7A5CFF → lands ~#4B3FBF
+    private static let mint   = UIColor(red: 0.18, green: 0.84, blue: 0.63, alpha: 1)   // #2ED6A1 → lands ~#1D9E75
+    private static let night  = UIColor(red: 0.37, green: 0.38, blue: 0.81, alpha: 1)   // #5E60CE → lands ~#3C3489
 
     private func configuration() -> ShieldConfiguration {
         let s = ShieldState.load()
@@ -27,11 +31,11 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         switch s.mode {
         // ONE button, always. Apple lets a shield button do exactly one thing —
         // dismiss — so a second one that also dismisses is noise (Rani), and a
-        // label that promises to open minutes would be a lie. And no blur: it
-        // mixes the app behind into our colour and turns it muddy.
+        // label that promises to open minutes would be a lie.
         case .hasMinutes:
             let mins = max(1, s.availableMinutes)
             return ShieldConfiguration(
+                backgroundBlurStyle: .systemThinMaterialDark,
                 backgroundColor: Self.mint,
                 icon: icon,
                 title: .init(text: name.isEmpty ? "יֵשׁ לְךָ \(mins) דַּקּוֹת" : "\(name), יֵשׁ לָךְ \(mins) דַּקּוֹת",
@@ -44,6 +48,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
 
         case .dailyCapReached:
             return ShieldConfiguration(
+                backgroundBlurStyle: .systemThinMaterialDark,
                 backgroundColor: Self.night,
                 icon: icon,
                 title: .init(text: name.isEmpty ? "מַסְפִּיק לְהַיּוֹם" : "\(name), מַסְפִּיק לְהַיּוֹם", color: .white),
@@ -57,6 +62,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             let n = max(1, s.questionsToGo)
             let questions = n == 1 ? "עוֹד שְׁאֵלָה אַחַת" : "עוֹד \(n) שְׁאֵלוֹת"
             return ShieldConfiguration(
+                backgroundBlurStyle: .systemThinMaterialDark,
                 backgroundColor: Self.indigo,
                 icon: icon,
                 title: .init(text: name.isEmpty ? questions : "\(name), \(questions)", color: .white),
