@@ -14,10 +14,10 @@ struct ShieldState: Codable {
     var girl: Bool = false
     /// Minutes already earned and not yet opened (`hasMinutes`).
     var availableMinutes: Int = 0
-    /// Correct answers still needed for the next window (`needsQuestions`).
-    var questionsToGo: Int = 0
-    /// Minutes the next window is worth.
-    var minutesPerWindow: Int = 10
+    /// Minutes a single correct answer is worth — the ONE number that is true
+    /// about earning in Tofy. There is no "N questions to unlock": every correct
+    /// answer banks minutes, and a window opens with whatever is in the wallet.
+    var minutesPerCorrect: Int = 2
     var updatedAt: Double = 0
 
     static let key = "shield.state"

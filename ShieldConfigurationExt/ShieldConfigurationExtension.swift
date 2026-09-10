@@ -43,9 +43,13 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
                 backgroundBlurStyle: .systemThinMaterialDark,
                 backgroundColor: Self.mint,
                 icon: icon,
-                title: .init(text: name.isEmpty ? "יֵשׁ לְךָ \(mins) דַּקּוֹת" : "\(name), יֵשׁ לָךְ \(mins) דַּקּוֹת",
+                title: .init(text: {
+                    let have = s.girl ? "יֵשׁ לָךְ" : "יֵשׁ לְךָ"
+                    return name.isEmpty ? "\(have) \(mins) דַּקּוֹת" : "\(name), \(have) \(mins) דַּקּוֹת"
+                }(),
                              color: .white),
-                subtitle: .init(text: "הִרְוַחְתָּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי",
+                subtitle: .init(text: s.girl ? "הִרְוַחְתְּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי"
+                                            : "הִרְוַחְתָּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי",
                                 color: UIColor.white.withAlphaComponent(0.85)),
                 primaryButtonLabel: .init(text: "בּוֹאוּ נִפְתַּח אוֹתָן", color: Self.mint),
                 primaryButtonBackgroundColor: .white
@@ -57,21 +61,24 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
                 backgroundColor: Self.night,
                 icon: icon,
                 title: .init(text: name.isEmpty ? "מַסְפִּיק לְהַיּוֹם" : "\(name), מַסְפִּיק לְהַיּוֹם", color: .white),
-                subtitle: .init(text: "הִגַּעְתָּ לְכָל הַדַּקּוֹת שֶׁל הַיּוֹם.\nנִתְרָאֶה מָחָר בַּבֹּקֶר",
+                subtitle: .init(text: (s.girl ? "הִגַּעַתְּ" : "הִגַּעְתָּ") + " לְכָל הַדַּקּוֹת שֶׁל הַיּוֹם.\nנִתְרָאֶה מָחָר בַּבֹּקֶר",
                                 color: UIColor.white.withAlphaComponent(0.85)),
                 primaryButtonLabel: .init(text: "הֵבַנְתִּי", color: Self.night),
                 primaryButtonBackgroundColor: .white
             )
 
         case .needsQuestions:
-            let n = max(1, s.questionsToGo)
-            let questions = n == 1 ? "עוֹד שְׁאֵלָה אַחַת" : "עוֹד \(n) שְׁאֵלוֹת"
+            // The honest rule, and the only one Tofy actually has: a correct
+            // answer banks minutes. There is no question quota to reach.
+            let m = max(1, s.minutesPerCorrect)
+            let worth = m == 1 ? "דַּקָּה אַחַת" : "\(m) דַּקּוֹת"
+            let noMinutes = s.girl ? "עוֹד אֵין לָךְ דַּקּוֹת" : "עוֹד אֵין לְךָ דַּקּוֹת"
             return ShieldConfiguration(
                 backgroundBlurStyle: .systemThinMaterialDark,
                 backgroundColor: Self.indigo,
                 icon: icon,
-                title: .init(text: name.isEmpty ? questions : "\(name), \(questions)", color: .white),
-                subtitle: .init(text: "וְזֶה נִפְתָּח לְ־\(s.minutesPerWindow) דַּקּוֹת",
+                title: .init(text: name.isEmpty ? noMinutes : "\(name), \(noMinutes)", color: .white),
+                subtitle: .init(text: "כָּל תְּשׁוּבָה נְכוֹנָה בְּטוֹפִי = \(worth) מִשְׂחָק",
                                 color: UIColor.white.withAlphaComponent(0.85)),
                 primaryButtonLabel: .init(text: "בּוֹאוּ נַרְוִיחַ דַּקּוֹת", color: Self.indigo),
                 primaryButtonBackgroundColor: .white

@@ -19,7 +19,7 @@ enum ShieldBridge {
         state.childName = profile?.name ?? ""
         state.girl = profile?.gender == .girl
         state.availableMinutes = max(0, p.pendingMinutes)
-        state.minutesPerWindow = max(1, s.minutesPerCorrectAnswer * 5)
+        state.minutesPerCorrect = max(1, s.minutesPerCorrectAnswer)
         state.updatedAt = Date().timeIntervalSince1970
 
         // Order matters: the daily cap outranks everything (there is nothing the
@@ -30,8 +30,6 @@ enum ShieldBridge {
             state.mode = .hasMinutes
         } else {
             state.mode = .needsQuestions
-            let perAnswer = max(1, s.minutesPerCorrectAnswer)
-            state.questionsToGo = max(1, Int(ceil(Double(state.minutesPerWindow) / Double(perAnswer))))
         }
         state.save()
     }
