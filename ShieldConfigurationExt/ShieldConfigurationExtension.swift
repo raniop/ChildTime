@@ -25,49 +25,45 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         let name = s.childName.trimmingCharacters(in: .whitespaces)
 
         switch s.mode {
+        // ONE button, always. Apple lets a shield button do exactly one thing —
+        // dismiss — so a second one that also dismisses is noise (Rani), and a
+        // label that promises to open minutes would be a lie. And no blur: it
+        // mixes the app behind into our colour and turns it muddy.
         case .hasMinutes:
+            let mins = max(1, s.availableMinutes)
             return ShieldConfiguration(
-                backgroundBlurStyle: .systemThinMaterialDark,
                 backgroundColor: Self.mint,
                 icon: icon,
-                title: .init(text: "יֵשׁ לְךָ \(s.availableMinutes) דַּקּוֹת", color: .white),
-                subtitle: .init(text: name.isEmpty
-                                ? "הִרְוַחְתָּ אוֹתָן הַיּוֹם. רוֹצֶה לִפְתֹּחַ עַכְשָׁו?"
-                                : "\(name), הִרְוַחְתָּ אוֹתָן הַיּוֹם.\nרוֹצֶה לִפְתֹּחַ עַכְשָׁו?",
+                title: .init(text: name.isEmpty ? "יֵשׁ לְךָ \(mins) דַּקּוֹת" : "\(name), יֵשׁ לָךְ \(mins) דַּקּוֹת",
+                             color: .white),
+                subtitle: .init(text: "הִרְוַחְתָּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי",
                                 color: UIColor.white.withAlphaComponent(0.85)),
-                primaryButtonLabel: .init(text: "פִּתְחוּ לִי \(s.availableMinutes) דַּקּוֹת", color: Self.mint),
-                primaryButtonBackgroundColor: .white,
-                secondaryButtonLabel: .init(text: "אַחַר כָּךְ", color: UIColor.white.withAlphaComponent(0.8))
+                primaryButtonLabel: .init(text: "בּוֹאוּ נִפְתַּח אוֹתָן", color: Self.mint),
+                primaryButtonBackgroundColor: .white
             )
 
         case .dailyCapReached:
             return ShieldConfiguration(
-                backgroundBlurStyle: .systemThinMaterialDark,
                 backgroundColor: Self.night,
                 icon: icon,
-                title: .init(text: "מַסְפִּיק לְהַיּוֹם", color: .white),
+                title: .init(text: name.isEmpty ? "מַסְפִּיק לְהַיּוֹם" : "\(name), מַסְפִּיק לְהַיּוֹם", color: .white),
                 subtitle: .init(text: "הִגַּעְתָּ לְכָל הַדַּקּוֹת שֶׁל הַיּוֹם.\nנִתְרָאֶה מָחָר בַּבֹּקֶר",
                                 color: UIColor.white.withAlphaComponent(0.85)),
-                primaryButtonLabel: .init(text: "בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא", color: Self.night),
-                primaryButtonBackgroundColor: .white,
-                secondaryButtonLabel: .init(text: "סְגִירָה", color: UIColor.white.withAlphaComponent(0.8))
+                primaryButtonLabel: .init(text: "הֵבַנְתִּי", color: Self.night),
+                primaryButtonBackgroundColor: .white
             )
 
         case .needsQuestions:
             let n = max(1, s.questionsToGo)
             let questions = n == 1 ? "עוֹד שְׁאֵלָה אַחַת" : "עוֹד \(n) שְׁאֵלוֹת"
             return ShieldConfiguration(
-                backgroundBlurStyle: .systemThinMaterialDark,
                 backgroundColor: Self.indigo,
                 icon: icon,
-                title: .init(text: questions, color: .white),
-                subtitle: .init(text: name.isEmpty
-                                ? "עוֹד כַּמָּה תְּשׁוּבוֹת נְכוֹנוֹת וְזֶה נִפְתָּח לְ־\(s.minutesPerWindow) דַּקּוֹת"
-                                : "\(name), \(questions) נְכוֹנוֹת\nוְזֶה נִפְתָּח לְ־\(s.minutesPerWindow) דַּקּוֹת",
+                title: .init(text: name.isEmpty ? questions : "\(name), \(questions)", color: .white),
+                subtitle: .init(text: "וְזֶה נִפְתָּח לְ־\(s.minutesPerWindow) דַּקּוֹת",
                                 color: UIColor.white.withAlphaComponent(0.85)),
                 primaryButtonLabel: .init(text: "בּוֹאוּ נַרְוִיחַ דַּקּוֹת", color: Self.indigo),
-                primaryButtonBackgroundColor: .white,
-                secondaryButtonLabel: .init(text: "סְגִירָה", color: UIColor.white.withAlphaComponent(0.8))
+                primaryButtonBackgroundColor: .white
             )
         }
     }
