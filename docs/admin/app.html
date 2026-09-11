@@ -112,7 +112,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260911230009";
+const PAGE_STAMP = "20260911235156";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -556,6 +556,15 @@ async function loadBatches() {
   const T = Object.fromEntries(((COV && COV.topics) || []).map((t) => [t.topic, t]));
   const GN = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"];
   const batches = (idx.batches || []).filter((b) => (b.lang || "he") === QLANG);
+  // The server learned languages in the same change that added `en` counts to this
+  // summary. Without them, an English import would be saved as Hebrew and reach
+  // Hebrew-speaking children — so English import stays off until it's deployed.
+  const serverKnowsLanguages = Object.values(summary.topics || {}).some((t) => t && t.en);
+  if (QLANG === "en" && !serverKnowsLanguages) {
+    $("genBatches").innerHTML = `<div class="empty" style="color:#D6455B">ייבוא באנגלית ייפתח אחרי פריסת השרת (firebase deploy --only functions). עד אז שאלה באנגלית הייתה נשמרת כעברית ומגיעה לילדים בעברית.</div>`;
+    if ($("impGo")) $("impGo").disabled = true;
+    return;
+  }
   $("genBatches").innerHTML = batches.map((b) => { const t = T[b.topic] || {}; const all = ((summary.topics || {})[b.topic] || {}); const inCloud = QLANG === "en" ? (all.en || {}) : all; const have = (inCloud.approved || 0) + (inCloud.draft || 0);
     return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)">
       <div><b>${t.emoji || ""} ${esc(t.label || b.topic)}</b>${b.label === "english" ? " · 🇬🇧 אַנְגְּלִית בְּתוֹךְ הָעוֹלָם" : ""} · ${fmt(b.count)} שאלות<div class="stamp">${Object.entries(b.byGrade || {}).map(([g, n]) => `${GN[g] || g} ${n}`).join(" · ")}${have ? ` · בענן כבר ${fmt(have)}` : ""}</div></div>

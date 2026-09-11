@@ -28,14 +28,5 @@ for (const name of process.argv.slice(2)) {
   fs.writeFileSync(path.join(outDir, `${gen.topic}.json`), JSON.stringify(all, null, 2));
   console.log(`\n${gen.topic}: ${all.length} items`); console.log(report.join("\n"));
 }
-// index.json — what the admin page offers to import.
-const batches = fs.readdirSync(outDir).filter((f) => f.endsWith(".json") && f !== "index.json").map((f) => {
-  const items = JSON.parse(fs.readFileSync(path.join(outDir, f), "utf8"));
-  const byGrade = items.reduce((m, i) => (m[i.gradeLo] = (m[i.gradeLo] || 0) + 1, m), {});
-  const file = f;
-  // "soccer-english.json" belongs to the soccer world.
-  const topic = f.replace(/\.json$/, "").split("-")[0];
-  const label = f.includes("-") ? f.replace(/\.json$/, "").split("-").slice(1).join(" ") : "";
-  return { topic, file, label, count: items.length, byGrade, generatedAt: fs.statSync(path.join(outDir, f)).mtime.toISOString() };
-});
-fs.writeFileSync(path.join(outDir, "index.json"), JSON.stringify({ batches }, null, 2));
+// index.json — what the admin page offers to import (Hebrew + English batches).
+require("./index.js").writeIndex();
