@@ -12,6 +12,15 @@
       "generatedAt": "2026-09-11T07:18:47.804Z"
     },
     {
+      "topic": "geography",
+      "count": 387,
+      "byGrade": {
+        "7": 198,
+        "8": 189
+      },
+      "generatedAt": "2026-09-11T09:12:13.613Z"
+    },
+    {
       "topic": "history",
       "count": 393,
       "byGrade": {
