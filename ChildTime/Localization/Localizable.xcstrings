@@ -1,0 +1,2326 @@
+{
+  "sourceLanguage": "he",
+  "version": "1.0",
+  "strings": {
+    " · עוֹד %lld וּבוֹנוּס!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · %lld more for a bonus!"
+          }
+        }
+      }
+    },
+    " גַּם %@ בִּפְנִים.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " %@ is in too."
+          }
+        }
+      }
+    },
+    " וְ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " and "
+          }
+        }
+      }
+    },
+    "%@ %@ מָצְאָה עוֹלָם שֶׁהִיא אוֹהֶבֶת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ found a world she loves"
+          }
+        }
+      }
+    },
+    "%@ %@ מָצָא עוֹלָם שֶׁהוּא אוֹהֵב": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ found a world he loves"
+          }
+        }
+      }
+    },
+    "%@ / חודש": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ / month"
+          }
+        }
+      }
+    },
+    "%@ / שנה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ / year"
+          }
+        }
+      }
+    },
+    "%@ / שנה — ניתן לבטל בכל עת בהגדרות Apple ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ / year — cancel anytime in your Apple ID settings"
+          }
+        }
+      }
+    },
+    "%@ לְ%@ הָיוּ %lld %@, וְ%@ נָתַן/ה %lld לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ had %lld %@, and %@ gave %lld to a friend. How many are left?"
+          }
+        }
+      }
+    },
+    "%@ לְ%@ יֵשׁ %lld %@. %@ קִבֵּל/ה עוֹד %lld. כַּמָּה יֵשׁ עַכְשָׁיו?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ has %lld %@. %@ got %lld more. How many now?"
+          }
+        }
+      }
+    },
+    "%@ מבקש עזרה 🧠": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is asking for help 🧠"
+          }
+        }
+      }
+    },
+    "%@ מבקשת עזרה 🧠": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is asking for help 🧠"
+          }
+        }
+      }
+    },
+    "%@ שְׁאֵלָה %lld/%lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Question %lld/%lld"
+          }
+        }
+      }
+    },
+    "%lld/%lld דַּק' הַיּוֹם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld/%lld min today"
+          }
+        }
+      }
+    },
+    "(%lld דַּק')": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(%lld min)"
+          }
+        }
+      }
+    },
+    "(חִינָּם)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(free)"
+          }
+        }
+      }
+    },
+    "+%lld שְׁנִיּוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld seconds"
+          }
+        }
+      }
+    },
+    "+%lld שְׁנִ׳": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld sec"
+          }
+        }
+      }
+    },
+    "iPad + iPhone, אותה התקדמות": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad + iPhone, same progress"
+          }
+        }
+      }
+    },
+    "אֲחוּזִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Percents"
+          }
+        }
+      }
+    },
+    "אֵיזֶה מִסְפָּר אִי־זוּגִי?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Which number is odd?"
+          }
+        }
+      }
+    },
+    "אֵיזֶה מִסְפָּר הֲכִי גָּדוֹל?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Which number is the biggest?"
+          }
+        }
+      }
+    },
+    "אֵיזֶה מִסְפָּר זוּגִי?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Which number is even?"
+          }
+        }
+      }
+    },
+    "אֵין חִבּוּר לָאִינְטֶרְנֶט. בִּדְקוּ אֶת הַחִבּוּר וְנַסּוּ שׁוּב.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No internet connection. Check your connection and try again."
+          }
+        }
+      }
+    },
+    "אַבָּא אוֹ אִמָּא יוֹרִידוּ תְּשׁוּבָה אַחַת לֹא נְכוֹנָה — וְאַתְּ עוֹנָה 😉": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mom or Dad will remove one wrong answer — then you pick 😉"
+          }
+        }
+      }
+    },
+    "אַבָּא אוֹ אִמָּא יוֹרִידוּ תְּשׁוּבָה אַחַת לֹא נְכוֹנָה — וְאַתָּה עוֹנֶה 😉": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mom or Dad will remove one wrong answer — then you pick 😉"
+          }
+        }
+      }
+    },
+    "אַלּוּף בָּזֶה! 🌟 בּוֹא נְגַלֶּה גַּם עוֹלָם אַחֵר — יֵשׁ בּוֹנוּס גִּוּוּן 🌈": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're a champ at this! 🌟 Let's explore another world too — there's a variety bonus 🌈"
+          }
+        }
+      }
+    },
+    "אַלּוּף!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Champ!"
+          }
+        }
+      }
+    },
+    "אַלּוּף! מַמְשִׁיכִים לְהִתְקַדֵּם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Champ! Keep it going"
+          }
+        }
+      }
+    },
+    "אַלּוּפִים! 💫 הַדַּקּוֹת נִשְׁמְרוּ לְמָחָר 🏦": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amazing! 💫 Your minutes are saved for tomorrow 🏦"
+          }
+        }
+      }
+    },
+    "אַלּוּפָה בָּזֶה! 🌟 בּוֹאִי נְגַלֶּה גַּם עוֹלָם אַחֵר — יֵשׁ בּוֹנוּס גִּוּוּן 🌈": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're a champ at this! 🌟 Let's explore another world too — there's a variety bonus 🌈"
+          }
+        }
+      }
+    },
+    "אַלּוּפָה!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Champ!"
+          }
+        }
+      }
+    },
+    "אַלּוּפָה! מַמְשִׁיכִים לְהִתְקַדֵּם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Champ! Keep it going"
+          }
+        }
+      }
+    },
+    "אַנְגְּלִית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "English"
+          }
+        }
+      }
+    },
+    "איזו תשובה נכונה? הלחיצה שלכם מורידה את התשובה השגויה מהמסך של %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Which answer is right? Your tap removes the wrong answer from %@'s screen."
+          }
+        }
+      }
+    },
+    "איפה הילד חזק, איפה צריך עזרה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where your child shines, and where they need help"
+          }
+        }
+      }
+    },
+    "בְּעָיוֹת מִלּוּלִיוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Word problems"
+          }
+        }
+      }
+    },
+    "בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check your internet connection and try again."
+          }
+        }
+      }
+    },
+    "בִּטּוּיִים אַלְגֶּבְּרִיִּים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Algebraic expressions"
+          }
+        }
+      }
+    },
+    "בִּטּוּל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "בֵּינוֹנִי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        }
+      }
+    },
+    "בַּחֲרוּ תְּשׁוּבָה אַחַת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick one answer"
+          }
+        }
+      }
+    },
+    "בַּלּוֹנִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "balloons"
+          }
+        }
+      }
+    },
+    "בַּקָּשַׁת עֶזְרָה מֵהוֹרֶה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask a parent for help"
+          }
+        }
+      }
+    },
+    "בּוֹא נְנַסֶּה אַחֶרֶת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let's try a different one"
+          }
+        }
+      }
+    },
+    "בּוֹא נְנַסֶּה שׁוּב": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let's try again"
+          }
+        }
+      }
+    },
+    "בּוֹא נַעֲשֶׂה חִימּוּם קָטָן 🌟": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let's warm up a little 🌟"
+          }
+        }
+      }
+    },
+    "בתום הניסיון: %@ / שנה — ניתן לבטל בכל עת בהגדרות Apple ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After the trial: %@ / year — cancel anytime in your Apple ID settings"
+          }
+        }
+      }
+    },
+    "גֵּאוֹגְרַפְיָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geography"
+          }
+        }
+      }
+    },
+    "גּוּף הָאָדָם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Human Body"
+          }
+        }
+      }
+    },
+    "דְּגָלִים וּמְדִינוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flags and Countries"
+          }
+        }
+      }
+    },
+    "דִּוּוּחַ עַל הַשְּׁאֵלָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report this question"
+          }
+        }
+      }
+    },
+    "דִּינוֹזָאוּרִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dinosaurs"
+          }
+        }
+      }
+    },
+    "דַּוְּחוּ וְהַסִּירוּ אֶת הַשְּׁאֵלָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report and remove this question"
+          }
+        }
+      }
+    },
+    "דוחות הורה שבועיים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly parent reports"
+          }
+        }
+      }
+    },
+    "הֲבָנַת הַנִּקְרָא": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading"
+          }
+        }
+      }
+    },
+    "הֲכָנָה לִמְחוֹנָנִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gifted Prep"
+          }
+        }
+      }
+    },
+    "הִגַּעְתְּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You reached today's max! 🎉 You can keep learning — just without extra minutes"
+          }
+        }
+      }
+    },
+    "הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You reached today's max"
+          }
+        }
+      }
+    },
+    "הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You reached today's max! 🎉 You can keep learning — just without extra minutes"
+          }
+        }
+      }
+    },
+    "הִיא עָנְתָה בְּ%@ עַל %lld שְׁאֵלוֹת, בְּ%lld%% הַצְלָחָה.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "She answered %2$lld questions in %1$@, with %3$lld%% correct."
+          }
+        }
+      }
+    },
+    "הִיסְטוֹרְיָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "History"
+          }
+        }
+      }
+    },
+    "הִסְתַּבְּרוּת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probability"
+          }
+        }
+      }
+    },
+    "הֵסַרְתִּי אוֹפְּצְיָה. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I removed an option. %@"
+          }
+        }
+      }
+    },
+    "הֵסַרְתִּי לְךָ אוֹפְּצְיָה! אַתָּה יָכוֹל 💪": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I removed an option for you! You've got this 💪"
+          }
+        }
+      }
+    },
+    "הֶחְזַרְתְּ %lld דַּק'! ⭐": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You won back %lld min! ⭐"
+          }
+        }
+      }
+    },
+    "הֶחְזַרְתָּ %lld דַּק'! ⭐": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You won back %lld min! ⭐"
+          }
+        }
+      }
+    },
+    "הֶקֵּף וְשֶׁטַח": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perimeter and area"
+          }
+        }
+      }
+    },
+    "הַהַזְמָנָה נִשְׁלְחָה לְאִשּׁוּר. הִיא תִּכָּנֵס לְתֹקֶף בָּרֶגַע שֶׁתְּאֻשַּׁר.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your purchase was sent for approval. It'll take effect as soon as it's approved."
+          }
+        }
+      }
+    },
+    "הַחְלֵף שְׁאֵלָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap question"
+          }
+        }
+      }
+    },
+    "הַמַּסְלוּלִים לֹא נִטְעֲנוּ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The plans didn't load"
+          }
+        }
+      }
+    },
+    "הַמַּתָּנָה הִסְתַּיְּמָה · הַהִתְקַדְּמוּת שֶׁל %@ שְׁמוּרָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The gift has ended · %@'s progress is saved"
+          }
+        }
+      }
+    },
+    "הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד %lld יָמִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The gift ends in %lld days"
+          }
+        }
+      }
+    },
+    "הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד יוֹמַיִם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The gift ends in 2 days"
+          }
+        }
+      }
+    },
+    "הַמַּתָּנָה מִסְתַּיֶּמֶת הַיּוֹם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The gift ends today"
+          }
+        }
+      }
+    },
+    "הַמַּתָּנָה מִסְתַּיֶּמֶת מָחָר": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The gift ends tomorrow"
+          }
+        }
+      }
+    },
+    "הַצְלָחָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "correct"
+          }
+        }
+      }
+    },
+    "הַשְׁוָאַת מִסְפָּרִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comparing numbers"
+          }
+        }
+      }
+    },
+    "הַשְׁלָמָה לְעֶשֶׂר": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Making ten"
+          }
+        }
+      }
+    },
+    "הַשָּׂפָה מִשְׁתַּנָּה מִיָּד בְּכָל הָאַפְּלִיקַצְיָה: טְקְסְטִים, כִּוּוּן, הַקְרָאָה וּשְׁאֵלוֹת.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The language changes right away across the whole app: text, layout, read-aloud, and questions."
+          }
+        }
+      }
+    },
+    "הוּא עָנָה בְּ%@ עַל %lld שְׁאֵלוֹת, בְּ%lld%% הַצְלָחָה.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "He answered %2$lld questions in %1$@, with %3$lld%% correct."
+          }
+        }
+      }
+    },
+    "הילד": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your child"
+          }
+        }
+      }
+    },
+    "המשך לתשלום": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        }
+      }
+    },
+    "התחל ניסיון 7 ימים חינם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start 7-day free trial"
+          }
+        }
+      }
+    },
+    "וְעוֹד": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "plus"
+          }
+        }
+      }
+    },
+    "וָואוּ!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wow!"
+          }
+        }
+      }
+    },
+    "זָוִיּוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angles"
+          }
+        }
+      }
+    },
+    "זוּגִי וְאִי־זוּגִי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Even and odd"
+          }
+        }
+      }
+    },
+    "זמן פרס על למידה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Earn play time by learning"
+          }
+        }
+      }
+    },
+    "חֲמִישִׁית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "five"
+          }
+        }
+      }
+    },
+    "חִבּוּר וְחִסּוּר": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Addition and subtraction"
+          }
+        }
+      }
+    },
+    "חִלּוּק": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Division"
+          }
+        }
+      }
+    },
+    "חִלּוּק עִם שְׁאֵרִית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Division with remainders"
+          }
+        }
+      }
+    },
+    "חִנּוּךְ פִינַנְסִי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Money Skills"
+          }
+        }
+      }
+    },
+    "חֶזְקוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exponents"
+          }
+        }
+      }
+    },
+    "חֶלְקֵי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "divided by"
+          }
+        }
+      }
+    },
+    "חַגֵּי תִּשְׁרֵי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fall Holidays"
+          }
+        }
+      }
+    },
+    "חָלָל וְכוֹכָבִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Space and Stars"
+          }
+        }
+      }
+    },
+    "חודשי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monthly"
+          }
+        }
+      }
+    },
+    "חוויה מלאה — לכל הילדים בבית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The full experience — for every kid at home"
+          }
+        }
+      }
+    },
+    "חסוך 30%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save 30%"
+          }
+        }
+      }
+    },
+    "טוֹב!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nice!"
+          }
+        }
+      }
+    },
+    "טוֹעֵן מַסְלוּלִים…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading plans…"
+          }
+        }
+      }
+    },
+    "טוֹפִי טַיים וְהַזְּמַן שֶׁ%@ מַרְוִיחַ נִשְׁאָרִים חִנָּם תָּמִיד. מָה שֶׁנִּסְגָּר: הָעוֹלָמוֹת, הַמִּשְׂחָקִים, הַזִּירָה וְהַמַּטְלוֹת.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy Time and the minutes %@ earns stay free forever. What locks: the worlds, games, arena, and chores."
+          }
+        }
+      }
+    },
+    "טוֹפִי טַיים וְהַזְּמַן שֶׁ%@ מַרְוִיחָה נִשְׁאָרִים חִנָּם תָּמִיד. מָה שֶׁנִּסְגָּר: הָעוֹלָמוֹת, הַמִּשְׂחָקִים, הַזִּירָה וְהַמַּטְלוֹת.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy Time and the minutes %@ earns stay free forever. What locks: the worlds, games, arena, and chores."
+          }
+        }
+      }
+    },
+    "טוֹפִי טַיים — קָדִימָה! 🧠": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy Time — let's go! 🧠"
+          }
+        }
+      }
+    },
+    "טופי+": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy+"
+          }
+        }
+      }
+    },
+    "יִשְׂרָאֵל שֶׁלִּי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My Israel"
+          }
+        }
+      }
+    },
+    "יֵשׁ לְךָ %lld דַּקּוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have %lld minutes"
+          }
+        }
+      }
+    },
+    "יֵשׁ!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yes!"
+          }
+        }
+      }
+    },
+    "יַחַס וּפְרוֹפּוֹרְצְיָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ratios and proportions"
+          }
+        }
+      }
+    },
+    "יָפֶה! לוֹמְדִים בִּשְׁבִיל הַכֵּיף 🌟": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nice! Learning just for fun 🌟"
+          }
+        }
+      }
+    },
+    "יָרוֹק": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "green"
+          }
+        }
+      }
+    },
+    "יששש!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yesss!"
+          }
+        }
+      }
+    },
+    "כְּבָר קִבַּלְנוּ עֶזְרָה בַּשְּׁאֵלָה הַזֹּאת 💛": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We already got help on this question 💛"
+          }
+        }
+      }
+    },
+    "כְּלֵי רֶכֶב וְתַחְבּוּרָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vehicles and Transportation"
+          }
+        }
+      }
+    },
+    "כִּמְעַט!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almost!"
+          }
+        }
+      }
+    },
+    "כֵּן!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yes!"
+          }
+        }
+      }
+    },
+    "כֶּפֶל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multiplication"
+          }
+        }
+      }
+    },
+    "כַּדּוּרִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "balls"
+          }
+        }
+      }
+    },
+    "כַּמָּה זֶה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "equals what"
+          }
+        }
+      }
+    },
+    "כָּחוֹל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "blue"
+          }
+        }
+      }
+    },
+    "כָּפוּל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "times"
+          }
+        }
+      }
+    },
+    "כָּתוֹם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "orange"
+          }
+        }
+      }
+    },
+    "כֹּל הַכָּבוֹד! עוֹד נְקוּדּוֹת וְכוֹכָבִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Great job! More points and stars"
+          }
+        }
+      }
+    },
+    "כולל כל עולם חדש שנוסיף": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Including every new world we add"
+          }
+        }
+      }
+    },
+    "כולל ניסיון 7 ימים חינם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Includes a 7-day free trial"
+          }
+        }
+      }
+    },
+    "כל הילדים במשפחה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every kid in the family"
+          }
+        }
+      }
+    },
+    "כל הנושאים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All subjects"
+          }
+        }
+      }
+    },
+    "כל העולמות": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All worlds"
+          }
+        }
+      }
+    },
+    "כל תשובה נכונה מזכה בזמן משחק": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every right answer earns play time"
+          }
+        }
+      }
+    },
+    "לֹא הִצְלַחְנוּ לְהַשְׁלִים אֶת הָרְכִישָׁה כָּרֶגַע. נַסּוּ שׁוּב בְּעוֹד רֶגַע — לֹא חֻיַּבְתֶּם.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We couldn't complete the purchase right now. Try again in a moment — you weren't charged."
+          }
+        }
+      }
+    },
+    "לא עכשיו": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not now"
+          }
+        }
+      }
+    },
+    "לוֹגִיקָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logic"
+          }
+        }
+      }
+    },
+    "מְמֻצָּע": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Averages"
+          }
+        }
+      }
+    },
+    "מִטְבָּח וּמַדָּע שֶׁל אֹכֶל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kitchen and Food Science"
+          }
+        }
+      }
+    },
+    "מִסְפָּר %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Number %lld"
+          }
+        }
+      }
+    },
+    "מִסְפָּרִים מְכֻוָּנִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Negative numbers"
+          }
+        }
+      }
+    },
+    "מִסְפָּרִים עֶשְׂרוֹנִיִּים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decimals"
+          }
+        }
+      }
+    },
+    "מִשְׁוָאוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Equations"
+          }
+        }
+      }
+    },
+    "מִשְׁפַּט פִּיתָגוֹרַס": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Pythagorean theorem"
+          }
+        }
+      }
+    },
+    "מִתְקַדֵּם שָׁלָב! 🚀": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leveling up! 🚀"
+          }
+        }
+      }
+    },
+    "מִתְקַדֶּמֶת שָׁלָב! 🚀": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leveling up! 🚀"
+          }
+        }
+      }
+    },
+    "מַדָּעִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Science"
+          }
+        }
+      }
+    },
+    "מַמָּשׁ קָרוֹב": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "So close"
+          }
+        }
+      }
+    },
+    "מַעְגָּל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Circles"
+          }
+        }
+      }
+    },
+    "מַעֲמַקֵּי הַיָּם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep Sea"
+          }
+        }
+      }
+    },
+    "מָתֵמָטִיקָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Math"
+          }
+        }
+      }
+    },
+    "מדיניות פרטיות": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy Policy"
+          }
+        }
+      }
+    },
+    "מוּזִיקָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Music"
+          }
+        }
+      }
+    },
+    "מוּכָן? קָדִימָה!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready? Let's go!"
+          }
+        }
+      }
+    },
+    "מתמטיקה, עברית, אנגלית, מדעים ועוד": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Math, reading, science, and more"
+          }
+        }
+      }
+    },
+    "נְנַסֶּה אֶת הַבָּאָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On to the next one"
+          }
+        }
+      }
+    },
+    "נֶפַח": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volume"
+          }
+        }
+      }
+    },
+    "נַחְזֹר לָזוֹ עוֹד מְעַט 💪": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll come back to this one soon 💪"
+          }
+        }
+      }
+    },
+    "נַסּוּ שׁוּב": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try again"
+          }
+        }
+      }
+    },
+    "נָסִיר אֶת הַשְּׁאֵלָה הַזּוֹ וְלֹא נַצִּיג אוֹתָהּ שׁוּב, וְנִשְׁלַח עָלֶיהָ דִּוּוּחַ כְּדֵי שֶׁנְּשַׁפֵּר.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll remove this question, won't show it again, and send a report so we can improve it."
+          }
+        }
+      }
+    },
+    "סְפָרִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "books"
+          }
+        }
+      }
+    },
+    "סָגוֹל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "purple"
+          }
+        }
+      }
+    },
+    "סגור": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        }
+      }
+    },
+    "סנכרון בין מכשירים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync across devices"
+          }
+        }
+      }
+    },
+    "עֲנָקִים! 💫 +%lld דַּקּוֹת!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amazing! 💫 +%lld minutes!"
+          }
+        }
+      }
+    },
+    "עֲנוּ נָכוֹן וְקַבְּלוּ פִּי 3 כּוֹכָבִים!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer right to get 3× the stars!"
+          }
+        }
+      }
+    },
+    "עִבְרִית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hebrew"
+          }
+        }
+      }
+    },
+    "עוֹלַם הַחַיּוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animal World"
+          }
+        }
+      }
+    },
+    "עוֹלַם הַכַּדּוּרֶגֶל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soccer World"
+          }
+        }
+      }
+    },
+    "עוֹלָם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "world"
+          }
+        }
+      }
+    },
+    "עוֹלָמוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "worlds"
+          }
+        }
+      }
+    },
+    "פְּעֻלּוֹת מְשֻׁלָּבוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order of operations"
+          }
+        }
+      }
+    },
+    "פָּחוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "minus"
+          }
+        }
+      }
+    },
+    "פוּנְקְצִיָּה קַוִּית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linear functions"
+          }
+        }
+      }
+    },
+    "פרופיל והתקדמות לכל ילד": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A profile and progress for each child"
+          }
+        }
+      }
+    },
+    "צְבָעִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "crayons"
+          }
+        }
+      }
+    },
+    "צְדָפִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "seashells"
+          }
+        }
+      }
+    },
+    "קֶסֶם הַגִּוּוּן! 🌈 +%lld דַּקּוֹת בּוֹנוּס!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variety magic! 🌈 +%lld bonus minutes!"
+          }
+        }
+      }
+    },
+    "קַל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Easy"
+          }
+        }
+      }
+    },
+    "קָשֶׁה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hard"
+          }
+        }
+      }
+    },
+    "רְבִיעִית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "four"
+          }
+        }
+      }
+    },
+    "רִאשׁוֹנָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "one"
+          }
+        }
+      }
+    },
+    "רֶמֶז": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hint"
+          }
+        }
+      }
+    },
+    "רוֹצֶה עֶזְרָה בַּשְּׁאֵלָה הַזּוֹ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Want help with this question?"
+          }
+        }
+      }
+    },
+    "רוֹצָה עֶזְרָה בַּשְּׁאֵלָה הַזּוֹ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Want help with this question?"
+          }
+        }
+      }
+    },
+    "שְׁאֵלַת בּוֹנוּס — פִּי 3 כּוֹכָבִים! 🌀": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonus question — 3× the stars! 🌀"
+          }
+        }
+      }
+    },
+    "שְׁאֵלַת בּוֹנוּס!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonus question!"
+          }
+        }
+      }
+    },
+    "שְׁאֵלַת בּוֹנוּס! 🌟 פִּי 3 כּוֹכָבִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonus question! 🌟 3× the stars"
+          }
+        }
+      }
+    },
+    "שְׁאֵלַת זָהָב! ⭐": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Golden question! ⭐"
+          }
+        }
+      }
+    },
+    "שְׁאֵלַת עֲנָק!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giant question!"
+          }
+        }
+      }
+    },
+    "שְׁאֵלַת עֲנָק! 💫 שָׁוָה %lld דַּקּוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giant question! 💫 Worth %lld minutes"
+          }
+        }
+      }
+    },
+    "שְׁאֵלָה קָשָׁה בִּמְיוּחָד — עֲנוּ נָכוֹן וְקַבְּלוּ אֶת כָּל הַדַּקּוֹת!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An extra-hard question — get it right and win all the minutes!"
+          }
+        }
+      }
+    },
+    "שְׁאֵלוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "questions"
+          }
+        }
+      }
+    },
+    "שְׁבָרִים פְּשׁוּטִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fractions"
+          }
+        }
+      }
+    },
+    "שְׁלִישִׁית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "three"
+          }
+        }
+      }
+    },
+    "שְׁנִיָּה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "two"
+          }
+        }
+      }
+    },
+    "שִׁשִּׁית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "six"
+          }
+        }
+      }
+    },
+    "שִׂיא חָדָשׁ! 🏆 %lld בָּרֶצֶף!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New record! 🏆 %lld in a row!"
+          }
+        }
+      }
+    },
+    "שָׁוֶה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "equals"
+          }
+        }
+      }
+    },
+    "שָׁלַחְנוּ בַּקָּשַׁת עֶזְרָה!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help request sent!"
+          }
+        }
+      }
+    },
+    "שָׁלוֹם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hello"
+          }
+        }
+      }
+    },
+    "שָׁלוֹם, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hi, %@"
+          }
+        }
+      }
+    },
+    "שָׁפָה · Language": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language · שָׁפָה"
+          }
+        }
+      }
+    },
+    "שׁוֹרָשִׁים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Square roots"
+          }
+        }
+      }
+    },
+    "שחזר רכישה קיימת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore purchase"
+          }
+        }
+      }
+    },
+    "שנתי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yearly"
+          }
+        }
+      }
+    },
+    "תְּשׁוּבָה %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer %@"
+          }
+        }
+      }
+    },
+    "תַּפּוּחִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apples"
+          }
+        }
+      }
+    },
+    "תנאי שימוש": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terms of Use"
+          }
+        }
+      }
+    },
+    "−%lld שְׁנִיּוֹת · כִּמְעַט!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "−%lld seconds · almost!"
+          }
+        }
+      }
+    },
+    "⏳ עוֹד רֶגַע תּוּכְלִי לְבַקֵּשׁ שׁוּב — נַסִּי לְבַד בֵּינְתַיִם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏳ You can ask again in a moment — give it a try yourself"
+          }
+        }
+      }
+    },
+    "⏳ עוֹד רֶגַע תּוּכַל לְבַקֵּשׁ שׁוּב — נַסֵּה לְבַד בֵּינְתַיִם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏳ You can ask again in a moment — give it a try yourself"
+          }
+        }
+      }
+    },
+    "✅ נשלח! התשובה השגויה ירדה מהמסך": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✅ Sent! The wrong answer is gone from the screen"
+          }
+        }
+      }
+    },
+    "✨ קִבַּלְתָּ רֶמֶז מֵהוֹרֶה!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✨ You got a hint from a parent!"
+          }
+        }
+      }
+    },
+    "✨ קָרוֹב! אֶפְשָׁר לְהַחֲזִיר מִיָּד בַּשְּׁאֵלָה הַבָּאָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✨ Close! You can win it back on the next question"
+          }
+        }
+      }
+    },
+    "⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⭐ One more right answer and you're moving again"
+          }
+        }
+      }
+    },
+    "⭐ שְׁאֵלַת זָהָב!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⭐ Golden question!"
+          }
+        }
+      }
+    },
+    "🌀 בּוֹנוּס ×3 כּוֹכָבִים!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🌀 Bonus ×3 stars!"
+          }
+        }
+      }
+    },
+    "🎉 %@ כְּבָר עָנְתָה עַל %lld שְׁאֵלוֹת בְּטוֹפִי+": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🎉 %@ has already answered %lld questions with Tofy+"
+          }
+        }
+      }
+    },
+    "🎉 %@ כְּבָר עָנָה עַל %lld שְׁאֵלוֹת בְּטוֹפִי+": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🎉 %@ has already answered %lld questions with Tofy+"
+          }
+        }
+      }
+    },
+    "🎮 +%lld דַּקּוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🎮 +%lld minutes"
+          }
+        }
+      }
+    },
+    "👋 בַּקְּשִׁי עֶזְרָה מ%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "👋 Ask %@ for help"
+          }
+        }
+      }
+    },
+    "👋 בַּקֵּשׁ עֶזְרָה מ%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "👋 Ask %@ for help"
+          }
+        }
+      }
+    },
+    "👨‍👩‍👧 בַּקְּשִׁי עֶזְרָה מֵאַבָּא אוֹ אִמָּא": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "👨‍👩‍👧 Ask Mom or Dad for help"
+          }
+        }
+      }
+    },
+    "👨‍👩‍👧 בַּקֵּשׁ עֶזְרָה מֵאַבָּא אוֹ אִמָּא": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "👨‍👩‍👧 Ask Mom or Dad for help"
+          }
+        }
+      }
+    },
+    "💌 הַבַּקָּשָׁה בַּדֶּרֶךְ — אֶפְשָׁר לְהַמְשִׁיךְ לַחְשֹׁב בֵּינְתַיִם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💌 Your request is on its way — keep thinking in the meantime"
+          }
+        }
+      }
+    },
+    "💌 הָעֶזְרָה הִגִּיעָה — אֲבָל כְּבָר הִתְקַדַּמְנוּ הָלְאָה!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💌 Help arrived — but we've already moved on!"
+          }
+        }
+      }
+    },
+    "💌 הָעֶזְרָה הִגִּיעָה! הַתְּשׁוּבָה הַזֹּאת כְּבָר יְרוּקָה 😉": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💌 Help arrived! That answer is already green 😉"
+          }
+        }
+      }
+    },
+    "💡 כִּמְעַט! תְּשׁוּבָה נְכוֹנָה תַּחֲזִיר אֶת הַזְּמַן": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💡 Almost! A right answer wins the time back"
+          }
+        }
+      }
+    },
+    "💡 כָּל תְּשׁוּבָה נְכוֹנָה = %lld שְׁנִיּוֹת שֶׁל מִשְׂחָק": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💡 Every right answer = %lld seconds of play"
+          }
+        }
+      }
+    },
+    "💫 %@ דַּקּוֹת כְּפוּלוֹת!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💫 %@ Double minutes!"
+          }
+        }
+      }
+    },
+    "💫 שְׁאֵלַת עֲנָק! +%lld דַּקּוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💫 Giant question! +%lld minutes"
+          }
+        }
+      }
+    },
+    "🔥 %lld בְּרֶצֶף": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🔥 %lld in a row"
+          }
+        }
+      }
+    },
+    "🔥 %lld בָּרֶצֶף!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🔥 %lld in a row!"
+          }
+        }
+      }
+    },
+    "🚀 אַמְשִׁיךְ לְבַד": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🚀 I'll keep going on my own"
+          }
+        }
+      }
+    }
+  }
+}

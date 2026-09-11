@@ -92,6 +92,8 @@ struct ChildTimeApp: App {
     @StateObject private var auth: AuthManager
     @StateObject private var subs: SubscriptionManager
     @StateObject private var profiles: ProfileStore
+    /// 🌍 Changing it rebuilds the whole tree in the new language and direction.
+    @ObservedObject private var language = LanguageStore.shared
     @StateObject private var cosmetics: CosmeticStore
     @StateObject private var characters: CharacterStore
     @Environment(\.scenePhase) private var scenePhase
@@ -181,7 +183,8 @@ struct ChildTimeApp: App {
                 // screen + splash) so the first SwiftUI frame is the same blue
                 // backdrop — never a flat purple or white flash.
                 AppGradient.dreamy.ignoresSafeArea()
-                if let demo = Self.demoScreen { demoRoot(demo) } else { ContentView() }
+                Group { if let demo = Self.demoScreen { demoRoot(demo) } else { ContentView() } }
+                    .id(language.current)
 
                 // Animated welcome splash on top of the first frame, then it
                 // fades away to reveal the app.
@@ -191,7 +194,9 @@ struct ChildTimeApp: App {
                         .zIndex(10)
                 }
             }
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, language.current.layoutDirection)
+                // Hebrew keeps the device locale exactly as before; other languages bring their own.
+                .environment(\.locale, language.current == .he ? .current : language.current.locale)
                 .environmentObject(settings)
                 .environmentObject(progress)
                 .environmentObject(shields)

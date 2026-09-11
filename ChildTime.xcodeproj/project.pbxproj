@@ -618,9 +618,10 @@
 				};
 			};
 			buildConfigurationList = 4FD27B7C2FC70B4400909B38 /* Build configuration list for PBXProject "ChildTime" */;
-			developmentRegion = en;
+			developmentRegion = he;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				he,
 				en,
 				Base,
 			);

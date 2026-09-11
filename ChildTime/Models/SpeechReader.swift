@@ -24,7 +24,7 @@ final class SpeechReader {
         try? session.setActive(true)
         synth.stopSpeaking(at: .immediate)
         let u = AVSpeechUtterance(string: trimmed)
-        u.voice = Self.bestHebrewVoice()
+        u.voice = Self.bestVoice(for: LanguageStore.shared.current)
         u.rate = AVSpeechUtteranceDefaultSpeechRate * 0.9   // a touch slower for kids
         u.pitchMultiplier = 1.05
         u.preUtteranceDelay = 0.05
@@ -43,7 +43,7 @@ final class SpeechReader {
         speak(Self.spokenScript(prompt: prompt, options: options))
     }
 
-    static let ordinals = ["רִאשׁוֹנָה", "שְׁנִיָּה", "שְׁלִישִׁית", "רְבִיעִית", "חֲמִישִׁית", "שִׁשִּׁית"]
+    static var ordinals: [String] { [tr("רִאשׁוֹנָה"), tr("שְׁנִיָּה"), tr("שְׁלִישִׁית"), tr("רְבִיעִית"), tr("חֲמִישִׁית"), tr("שִׁשִּׁית")] }
 
     /// The full read-aloud script (question + numbered answers). Pure, for tests.
     static func spokenScript(prompt: String, options: [String]) -> String {
@@ -53,8 +53,8 @@ final class SpeechReader {
         var parts = [prompt]
         for (i, opt) in options.enumerated() {
             let label = numericAnswers
-                ? "תְּשׁוּבָה \(ordinals[min(i, ordinals.count - 1)])"
-                : "מִסְפָּר \(i + 1)"
+                ? tr("תְּשׁוּבָה \(ordinals[min(i, ordinals.count - 1)])")
+                : tr("מִסְפָּר \(i + 1)")
             parts.append(label)
             parts.append(opt)
         }
@@ -68,10 +68,14 @@ final class SpeechReader {
     /// is a free download (Settings → Accessibility → Spoken Content → Voices →
     /// Hebrew) and is picked up here automatically. Falls back to the system default
     /// when no he-IL voice exists at all.
-    static func bestHebrewVoice() -> AVSpeechSynthesisVoice? {
-        let hebrew = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix("he") }
-        let ranked = hebrew.sorted { $0.quality.rawValue > $1.quality.rawValue }
-        return ranked.first ?? AVSpeechSynthesisVoice(language: "he-IL")
+    static func bestHebrewVoice() -> AVSpeechSynthesisVoice? { bestVoice(for: .he) }
+
+    /// The best installed voice for a language — same ranking, any language.
+    static func bestVoice(for language: AppLanguage) -> AVSpeechSynthesisVoice? {
+        let region = AVSpeechSynthesisVoice.speechVoices().filter { $0.language == language.speechCode }
+        let anyRegion = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix(language.rawValue) }
+        let ranked = (region.isEmpty ? anyRegion : region).sorted { $0.quality.rawValue > $1.quality.rawValue }
+        return ranked.first ?? AVSpeechSynthesisVoice(language: language.speechCode)
     }
 
     /// Clean text for the Hebrew voice: drop emoji (it reads their names), turn
@@ -81,13 +85,13 @@ final class SpeechReader {
         // 1) Math symbols → words. The generator uses the dedicated −/×/÷ glyphs
         //    (never a plain hyphen), so this never touches ordinary text.
         var math = raw
-        math = math.replacingOccurrences(of: "= ?", with: " כַּמָּה זֶה ")
-        math = math.replacingOccurrences(of: "=?", with: " כַּמָּה זֶה ")
-        math = math.replacingOccurrences(of: "+", with: " וְעוֹד ")
-        math = math.replacingOccurrences(of: "\u{2212}", with: " פָּחוֹת ")   // − minus sign
-        math = math.replacingOccurrences(of: "\u{00D7}", with: " כָּפוּל ")   // × times
-        math = math.replacingOccurrences(of: "\u{00F7}", with: " חֶלְקֵי ")   // ÷ divide
-        math = math.replacingOccurrences(of: "=", with: " שָׁוֶה ")           // any other =
+        math = math.replacingOccurrences(of: "= ?", with: " \(tr("כַּמָּה זֶה")) ")
+        math = math.replacingOccurrences(of: "=?", with: " \(tr("כַּמָּה זֶה")) ")
+        math = math.replacingOccurrences(of: "+", with: " \(tr("וְעוֹד")) ")
+        math = math.replacingOccurrences(of: "\u{2212}", with: " \(tr("פָּחוֹת")) ")   // − minus sign
+        math = math.replacingOccurrences(of: "\u{00D7}", with: " \(tr("כָּפוּל")) ")   // × times
+        math = math.replacingOccurrences(of: "\u{00F7}", with: " \(tr("חֶלְקֵי")) ")   // ÷ divide
+        math = math.replacingOccurrences(of: "=", with: " \(tr("שָׁוֶה")) ")           // any other =
 
         let noEmoji = String(String.UnicodeScalarView(math.unicodeScalars.filter { s in
             switch s.value {

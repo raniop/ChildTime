@@ -25,12 +25,12 @@ struct ParentAssistView: View {
             VStack(spacing: AppSpacing.lg) {
                 VStack(spacing: 10) {
                     Text("🤔").font(.system(size: 64))
-                    Text(isGirl ? "רוֹצָה עֶזְרָה בַּשְּׁאֵלָה הַזּוֹ?" : "רוֹצֶה עֶזְרָה בַּשְּׁאֵלָה הַזּוֹ?")
+                    Text(isGirl ? tr("רוֹצָה עֶזְרָה בַּשְּׁאֵלָה הַזּוֹ?") : tr("רוֹצֶה עֶזְרָה בַּשְּׁאֵלָה הַזּוֹ?"))
                         .font(.system(size: 24, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
-                    Text(isGirl ? "אַבָּא אוֹ אִמָּא יוֹרִידוּ תְּשׁוּבָה אַחַת לֹא נְכוֹנָה — וְאַתְּ עוֹנָה 😉"
-                                : "אַבָּא אוֹ אִמָּא יוֹרִידוּ תְּשׁוּבָה אַחַת לֹא נְכוֹנָה — וְאַתָּה עוֹנֶה 😉")
+                    Text(isGirl ? tr("אַבָּא אוֹ אִמָּא יוֹרִידוּ תְּשׁוּבָה אַחַת לֹא נְכוֹנָה — וְאַתְּ עוֹנָה 😉")
+                                : tr("אַבָּא אוֹ אִמָּא יוֹרִידוּ תְּשׁוּבָה אַחַת לֹא נְכוֹנָה — וְאַתָּה עוֹנֶה 😉"))
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                         .multilineTextAlignment(.center)
@@ -41,7 +41,7 @@ struct ParentAssistView: View {
                     if sent {
                         HStack(spacing: 8) {
                             Text("💌")
-                            Text("שָׁלַחְנוּ בַּקָּשַׁת עֶזְרָה!")
+                            Text(tr("שָׁלַחְנוּ בַּקָּשַׁת עֶזְרָה!"))
                         }
                         .font(.system(size: 19, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
@@ -51,10 +51,10 @@ struct ParentAssistView: View {
                     } else if household.linkedParents.isEmpty {
                         // No named parent on file — every parent device in the family
                         // gets the same interactive request.
-                        assistButton(isGirl ? "👨‍👩‍👧 בַּקְּשִׁי עֶזְרָה מֵאַבָּא אוֹ אִמָּא" : "👨‍👩‍👧 בַּקֵּשׁ עֶזְרָה מֵאַבָּא אוֹ אִמָּא") { askParent(uid: "all") }
+                        assistButton(isGirl ? tr("👨‍👩‍👧 בַּקְּשִׁי עֶזְרָה מֵאַבָּא אוֹ אִמָּא") : tr("👨‍👩‍👧 בַּקֵּשׁ עֶזְרָה מֵאַבָּא אוֹ אִמָּא")) { askParent(uid: "all") }
                     } else {
                         ForEach(household.linkedParents, id: \.uid) { parent in
-                            assistButton((isGirl ? "👋 בַּקְּשִׁי עֶזְרָה מ" : "👋 בַּקֵּשׁ עֶזְרָה מ") + parent.name) { askParent(uid: parent.uid) }
+                            assistButton(isGirl ? tr("👋 בַּקְּשִׁי עֶזְרָה מ\(parent.name)") : tr("👋 בַּקֵּשׁ עֶזְרָה מ\(parent.name)")) { askParent(uid: parent.uid) }
                         }
                     }
                 }
@@ -63,7 +63,7 @@ struct ParentAssistView: View {
                     Haptic.light()
                     onContinue(); dismiss()
                 } label: {
-                    Text("🚀 אַמְשִׁיךְ לְבַד")
+                    Text(tr("🚀 אַמְשִׁיךְ לְבַד"))
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -118,7 +118,7 @@ struct ParentAssistView: View {
         }
         let active = ProfileStore.shared.active
         ParentHelpManager.shared.requestHelp(
-            childID: childID, childName: active?.name ?? "הילד", parentUID: uid,
+            childID: childID, childName: active?.name ?? tr("הילד"), parentUID: uid,
             householdID: householdID, topic: topic,
             question: question.prompt, correctAnswer: correctAnswer, distractor: distractor,
             gender: active?.gender == .girl ? "girl" : "boy")
@@ -146,7 +146,7 @@ struct ParentHelpAnswerView: View {
     @State private var done = false
 
     private var childTitle: String {
-        request.isGirl ? "\(request.childName) מבקשת עזרה 🧠" : "\(request.childName) מבקש עזרה 🧠"
+        request.isGirl ? tr("\(request.childName) מבקשת עזרה 🧠") : tr("\(request.childName) מבקש עזרה 🧠")
     }
 
     var body: some View {
@@ -157,7 +157,7 @@ struct ParentHelpAnswerView: View {
                     Text(childTitle)
                         .font(.system(size: 22, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text("איזו תשובה נכונה? הלחיצה שלכם מורידה את התשובה השגויה מהמסך של \(request.childName).")
+                    Text(tr("איזו תשובה נכונה? הלחיצה שלכם מורידה את התשובה השגויה מהמסך של \(request.childName)."))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                         .multilineTextAlignment(.center)
@@ -174,7 +174,7 @@ struct ParentHelpAnswerView: View {
                     .glassInset(radius: 20)
 
                 if done {
-                    Text("✅ נשלח! התשובה השגויה ירדה מהמסך")
+                    Text(tr("✅ נשלח! התשובה השגויה ירדה מהמסך"))
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -192,7 +192,7 @@ struct ParentHelpAnswerView: View {
                     if !done { parentHelp.dismiss(requestID: request.id) }
                     dismiss()
                 } label: {
-                    Text(done ? "סגור" : "לא עכשיו")
+                    Text(done ? tr("סגור") : tr("לא עכשיו"))
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .padding(.vertical, 8)
@@ -204,7 +204,7 @@ struct ParentHelpAnswerView: View {
             .glassPane(radius: 28)
             .padding(.horizontal, AppSpacing.lg)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
     }

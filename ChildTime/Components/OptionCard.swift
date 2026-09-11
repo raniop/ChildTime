@@ -42,7 +42,8 @@ struct OptionCard: View {
     /// Hebrew color name per tile, in the SAME order as `palette`. Lets the
     /// read-aloud identify a tile by COLOR ("יָרוֹק, 4") when the answers are
     /// numbers — otherwise "1, 4" reads as two confusing numbers.
-    static let colorNames = ["יָרוֹק", "סָגוֹל", "כָּתוֹם", "כָּחוֹל"]
+    /// Computed, not stored: a stored static would freeze the first language it saw.
+    static var colorNames: [String] { [tr("יָרוֹק"), tr("סָגוֹל"), tr("כָּתוֹם"), tr("כָּחוֹל")] }
     /// Glass tints per tile, in the same order as `colorNames`: mint, lavender, gold, cyan.
     static let tints: [Color] = [Color(hex: "8CFFC4"), Color(hex: "B7ABFF"), Color(hex: "FFD23F"), Color(hex: "7CF3FF")]
     static func colorName(for index: Int) -> String {

@@ -37,6 +37,28 @@ struct ParentSettingsView: View {
             // form was "a pile nobody would open"). Tofy+ lives on the home.
             ScrollView {
                 VStack(spacing: 12) {
+                    // 🌍 Written in both languages, so a parent who switched by
+                    // mistake can always find the way back.
+                    if LanguageStore.shared.available.count > 1 {
+                        NavigationLink { LanguagePickerView() } label: {
+                            HStack(spacing: 12) {
+                                Text("🌍").font(.system(size: 22))
+                                    .frame(width: 44, height: 44)
+                                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.22)))
+                                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("שָׁפָה · Language").font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
+                                    Text(LanguageStore.shared.current.nativeName).font(.system(size: 12.5, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
+                                }
+                                Spacer(minLength: 0)
+                                Image(systemName: "chevron.forward").font(.system(size: 14, weight: .bold)).foregroundStyle(GlassInk.tertiary)
+                            }
+                            .padding(14)
+                            .frame(maxWidth: .infinity)
+                            .glassPane(radius: 22, strength: 0.14)
+                        }
+                        .buttonStyle(.plain)
+                    }
                     menuRow("👪", "הַמִּשְׁפָּחָה", familySummary) {
                         subScreen("הַמִּשְׁפָּחָה") { familySection; syncSection }
                     }

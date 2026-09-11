@@ -4,35 +4,36 @@ import Foundation
 /// (`Question.skill`). Keys are stable identifiers written into `dailyStats`, so
 /// renaming here never breaks history. Unknown keys fall back to the key itself.
 enum SkillCatalog {
-    static let names: [String: String] = [
-        "addSub":       "חִבּוּר וְחִסּוּר",
-        "completeTen":  "הַשְׁלָמָה לְעֶשֶׂר",
-        "compare":      "הַשְׁוָאַת מִסְפָּרִים",
-        "evenOdd":      "זוּגִי וְאִי־זוּגִי",
-        "mul":          "כֶּפֶל",
-        "div":          "חִלּוּק",
-        "mixedOps":     "פְּעֻלּוֹת מְשֻׁלָּבוֹת",
-        "wordProblem":  "בְּעָיוֹת מִלּוּלִיוֹת",
-        "fractions":    "שְׁבָרִים פְּשׁוּטִים",
-        "divRemainder": "חִלּוּק עִם שְׁאֵרִית",
-        "geometry":     "הֶקֵּף וְשֶׁטַח",
-        "decimals":     "מִסְפָּרִים עֶשְׂרוֹנִיִּים",
-        "average":      "מְמֻצָּע",
-        "percent":      "אֲחוּזִים",
+    /// Computed so the names follow the app language (a stored static would freeze the first one).
+    static var names: [String: String] { [
+        "addSub":       tr("חִבּוּר וְחִסּוּר"),
+        "completeTen":  tr("הַשְׁלָמָה לְעֶשֶׂר"),
+        "compare":      tr("הַשְׁוָאַת מִסְפָּרִים"),
+        "evenOdd":      tr("זוּגִי וְאִי־זוּגִי"),
+        "mul":          tr("כֶּפֶל"),
+        "div":          tr("חִלּוּק"),
+        "mixedOps":     tr("פְּעֻלּוֹת מְשֻׁלָּבוֹת"),
+        "wordProblem":  tr("בְּעָיוֹת מִלּוּלִיוֹת"),
+        "fractions":    tr("שְׁבָרִים פְּשׁוּטִים"),
+        "divRemainder": tr("חִלּוּק עִם שְׁאֵרִית"),
+        "geometry":     tr("הֶקֵּף וְשֶׁטַח"),
+        "decimals":     tr("מִסְפָּרִים עֶשְׂרוֹנִיִּים"),
+        "average":      tr("מְמֻצָּע"),
+        "percent":      tr("אֲחוּזִים"),
         // ז׳–ח׳
-        "negatives":      "מִסְפָּרִים מְכֻוָּנִים",
-        "expressions":    "בִּטּוּיִים אַלְגֶּבְּרִיִּים",
-        "equations":      "מִשְׁוָאוֹת",
-        "powers":         "חֶזְקוֹת",
-        "roots":          "שׁוֹרָשִׁים",
-        "angles":         "זָוִיּוֹת",
-        "proportion":     "יַחַס וּפְרוֹפּוֹרְצְיָה",
-        "pythagoras":     "מִשְׁפַּט פִּיתָגוֹרַס",
-        "linearFunction": "פוּנְקְצִיָּה קַוִּית",
-        "volume":         "נֶפַח",
-        "probability":    "הִסְתַּבְּרוּת",
-        "circle":         "מַעְגָּל",
-    ]
+        "negatives":      tr("מִסְפָּרִים מְכֻוָּנִים"),
+        "expressions":    tr("בִּטּוּיִים אַלְגֶּבְּרִיִּים"),
+        "equations":      tr("מִשְׁוָאוֹת"),
+        "powers":         tr("חֶזְקוֹת"),
+        "roots":          tr("שׁוֹרָשִׁים"),
+        "angles":         tr("זָוִיּוֹת"),
+        "proportion":     tr("יַחַס וּפְרוֹפּוֹרְצְיָה"),
+        "pythagoras":     tr("מִשְׁפַּט פִּיתָגוֹרַס"),
+        "linearFunction": tr("פוּנְקְצִיָּה קַוִּית"),
+        "volume":         tr("נֶפַח"),
+        "probability":    tr("הִסְתַּבְּרוּת"),
+        "circle":         tr("מַעְגָּל"),
+    ] }
     static func name(_ key: String) -> String { names[key] ?? key }
 }
 

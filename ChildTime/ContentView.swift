@@ -74,7 +74,7 @@ struct ContentView: View {
         .sheet(isPresented: Binding(get: { kidMode.pendingEntry && !kidMode.active },
                                     set: { kidMode.pendingEntry = $0 })) {
             KidModeEntryView()
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
         }
         // DEBUG design preview: `simctl launch ... -SchoolYearPreviewVariant N`
         // overlays the September party for screenshots (Rani reviews variants).
@@ -97,7 +97,7 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $joinCoord.active) {
             JoinConfirmView()
                 .environmentObject(settings)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
         }
     }
 
@@ -274,5 +274,5 @@ private struct DelayedPartyPreview: View {
         .environmentObject(ShieldManager.shared)
         .environmentObject(ProfileStore.shared)
         .environmentObject(AuthManager.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

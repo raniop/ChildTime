@@ -67,7 +67,7 @@ enum CurriculumMath {
         while nums.count < 4 { nums.insert(Int.random(in: 1...max)) }
         let sorted = nums.sorted()
         let options = sorted.shuffled().map(String.init)
-        return mcq(prompt: "אֵיזֶה מִסְפָּר הֲכִי גָּדוֹל?",
+        return mcq(prompt: tr("אֵיזֶה מִסְפָּר הֲכִי גָּדוֹל?"),
                    answer: String(sorted.last!), options: options)
     }
 
@@ -98,7 +98,7 @@ enum CurriculumMath {
             let n = Int.random(in: 1...(max / 2)) * 2 - (wantEven ? 1 : 0)
             if n != answer { pool.insert(n) }
         }
-        return mcq(prompt: wantEven ? "אֵיזֶה מִסְפָּר זוּגִי?" : "אֵיזֶה מִסְפָּר אִי־זוּגִי?",
+        return mcq(prompt: wantEven ? tr("אֵיזֶה מִסְפָּר זוּגִי?") : tr("אֵיזֶה מִסְפָּר אִי־זוּגִי?"),
                    answer: String(answer), options: pool.map(String.init).shuffled())
     }
 
@@ -524,10 +524,16 @@ enum CurriculumMath {
 
     // MARK: - בעיות מילוליות (תבניות עם שמות מתחלפים)
 
-    private static let kids = ["דָּנָה", "יוֹסִי", "נֹעָה", "אִיתַי", "תָּמָר", "עוֹמֶר"]
-    private static let things: [(String, String)] = [("🎈", "בַּלּוֹנִים"), ("📚", "סְפָרִים"),
-                                                     ("🍎", "תַּפּוּחִים"), ("⚽", "כַּדּוּרִים"),
-                                                     ("🖍️", "צְבָעִים"), ("🐚", "צְדָפִים")]
+    // Names are content, not translations: an American word problem gets American names.
+    private static var kids: [String] {
+        LanguageStore.shared.current == .he
+            ? ["דָּנָה", "יוֹסִי", "נֹעָה", "אִיתַי", "תָּמָר", "עוֹמֶר"]
+            : ["Emma", "Liam", "Olivia", "Noah", "Ava", "Mason"]
+    }
+    private static var things: [(String, String)] {
+        [("🎈", tr("בַּלּוֹנִים")), ("📚", tr("סְפָרִים")), ("🍎", tr("תַּפּוּחִים")),
+         ("⚽", tr("כַּדּוּרִים")), ("🖍️", tr("צְבָעִים")), ("🐚", tr("צְדָפִים"))]
+    }
 
     private static func wordProblemAddSub(max: Int) -> Question {
         let name = kids.randomElement()!
@@ -535,11 +541,11 @@ enum CurriculumMath {
         let a = Int.random(in: 3...max)
         if Bool.random() {
             let b = Int.random(in: 2...max)
-            return numericMCQ(prompt: "\(emoji) לְ\(name) יֵשׁ \(a) \(item). \(name) קִבֵּל/ה עוֹד \(b). כַּמָּה יֵשׁ עַכְשָׁיו?",
+            return numericMCQ(prompt: tr("\(emoji) לְ\(name) יֵשׁ \(a) \(item). \(name) קִבֵּל/ה עוֹד \(b). כַּמָּה יֵשׁ עַכְשָׁיו?"),
                               answer: a + b)
         }
         let b = Int.random(in: 1..<a)
-        return numericMCQ(prompt: "\(emoji) לְ\(name) הָיוּ \(a) \(item), וְ\(name) נָתַן/ה \(b) לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?",
+        return numericMCQ(prompt: tr("\(emoji) לְ\(name) הָיוּ \(a) \(item), וְ\(name) נָתַן/ה \(b) לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?"),
                           answer: a - b)
     }
 
@@ -599,7 +605,8 @@ enum CurriculumMath {
     /// Hebrew line out left-to-right, words in reverse. The math itself stays
     /// left-to-right inside its `ltr` isolate.
     private static func rtlLines(_ s: String) -> String {
-        s.split(separator: "\n", omittingEmptySubsequences: false).map { "\u{200F}" + $0 }.joined(separator: "\n")
+        guard LanguageStore.shared.current == .he else { return s }   // only right-to-left languages need it
+        return s.split(separator: "\n", omittingEmptySubsequences: false).map { "\u{200F}" + $0 }.joined(separator: "\n")
     }
 
     /// −3 with a real minus sign, and parentheses around negatives inside an

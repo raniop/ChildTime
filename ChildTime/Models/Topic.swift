@@ -40,28 +40,28 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         switch self {
         // Aligned to the official משרד החינוך subject names (Rani) — logic has
         // no school subject and keeps its game name.
-        case .math:      return "מָתֵמָטִיקָה"
-        case .english:   return "אַנְגְּלִית"
-        case .hebrew:    return "עִבְרִית"
-        case .logic:     return "לוֹגִיקָה"
-        case .science:   return "מַדָּעִים"
-        case .history:   return "הִיסְטוֹרְיָה"
-        case .geography: return "גֵּאוֹגְרַפְיָה"
-        case .money:     return "חִנּוּךְ פִינַנְסִי"
-        case .reading:   return "הֲבָנַת הַנִּקְרָא"
-        case .soccer:    return "עוֹלַם הַכַּדּוּרֶגֶל"
-        case .dinosaurs: return "דִּינוֹזָאוּרִים"
-        case .space: return "חָלָל וְכוֹכָבִים"
-        case .animals: return "עוֹלַם הַחַיּוֹת"
-        case .sea: return "מַעֲמַקֵּי הַיָּם"
-        case .gifted: return "הֲכָנָה לִמְחוֹנָנִים"
-        case .food: return "מִטְבָּח וּמַדָּע שֶׁל אֹכֶל"
-        case .israel: return "יִשְׂרָאֵל שֶׁלִּי"
-        case .music: return "מוּזִיקָה"
-        case .body: return "גּוּף הָאָדָם"
-        case .vehicles: return "כְּלֵי רֶכֶב וְתַחְבּוּרָה"
-        case .flags: return "דְּגָלִים וּמְדִינוֹת"
-        case .tishrei: return "חַגֵּי תִּשְׁרֵי"
+        case .math:      return tr("מָתֵמָטִיקָה")
+        case .english:   return tr("אַנְגְּלִית")
+        case .hebrew:    return tr("עִבְרִית")
+        case .logic:     return tr("לוֹגִיקָה")
+        case .science:   return tr("מַדָּעִים")
+        case .history:   return tr("הִיסְטוֹרְיָה")
+        case .geography: return tr("גֵּאוֹגְרַפְיָה")
+        case .money:     return tr("חִנּוּךְ פִינַנְסִי")
+        case .reading:   return tr("הֲבָנַת הַנִּקְרָא")
+        case .soccer:    return tr("עוֹלַם הַכַּדּוּרֶגֶל")
+        case .dinosaurs: return tr("דִּינוֹזָאוּרִים")
+        case .space: return tr("חָלָל וְכוֹכָבִים")
+        case .animals: return tr("עוֹלַם הַחַיּוֹת")
+        case .sea: return tr("מַעֲמַקֵּי הַיָּם")
+        case .gifted: return tr("הֲכָנָה לִמְחוֹנָנִים")
+        case .food: return tr("מִטְבָּח וּמַדָּע שֶׁל אֹכֶל")
+        case .israel: return tr("יִשְׂרָאֵל שֶׁלִּי")
+        case .music: return tr("מוּזִיקָה")
+        case .body: return tr("גּוּף הָאָדָם")
+        case .vehicles: return tr("כְּלֵי רֶכֶב וְתַחְבּוּרָה")
+        case .flags: return tr("דְּגָלִים וּמְדִינוֹת")
+        case .tishrei: return tr("חַגֵּי תִּשְׁרֵי")
         }
     }
 
@@ -102,9 +102,9 @@ enum Difficulty: String, CaseIterable, Codable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .easy: return "קַל"
-        case .medium: return "בֵּינוֹנִי"
-        case .hard: return "קָשֶׁה"
+        case .easy: return tr("קַל")
+        case .medium: return tr("בֵּינוֹנִי")
+        case .hard: return tr("קָשֶׁה")
         }
     }
 }

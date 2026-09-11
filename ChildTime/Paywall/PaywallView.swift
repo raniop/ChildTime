@@ -75,7 +75,7 @@ struct PaywallView: View {
                                 .background(.white.opacity(0.22), in: Circle())
                                 .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                         }
-                        .environment(\.layoutDirection, .leftToRight)
+                        .environment(\.layoutDirection, .appMirrored)
                         Spacer()
                     }
                     .padding(.horizontal, AppSpacing.lg)
@@ -136,10 +136,10 @@ struct PaywallView: View {
         let ending: String
         if giftActive, let until {
             let d = max(0, Int(ceil(until.timeIntervalSinceNow / 86_400)))
-            ending = d == 0 ? "הַמַּתָּנָה מִסְתַּיֶּמֶת הַיּוֹם" : d == 1 ? "הַמַּתָּנָה מִסְתַּיֶּמֶת מָחָר"
-                : d == 2 ? "הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד יוֹמַיִם" : "הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד \(d) יָמִים"
+            ending = d == 0 ? tr("הַמַּתָּנָה מִסְתַּיֶּמֶת הַיּוֹם") : d == 1 ? tr("הַמַּתָּנָה מִסְתַּיֶּמֶת מָחָר")
+                : d == 2 ? tr("הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד יוֹמַיִם") : tr("הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד \(d) יָמִים")
         } else {
-            ending = "הַמַּתָּנָה הִסְתַּיְּמָה · הַהִתְקַדְּמוּת שֶׁל \(p.name) שְׁמוּרָה"
+            ending = tr("הַמַּתָּנָה הִסְתַּיְּמָה · הַהִתְקַדְּמוּת שֶׁל \(p.name) שְׁמוּרָה")
         }
         return Pitch(name: p.name, girl: p.gender == .girl,
                      favorite: ranked.first.map { (world: $0.0, questions: $0.1, accuracy: $0.2) },
@@ -152,21 +152,21 @@ struct PaywallView: View {
     private func personalCard(_ p: Pitch) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             if let fav = p.favorite {
-                Text("\(fav.world.emoji) \(p.name) \(p.girl ? "מָצְאָה" : "מָצָא") עוֹלָם שֶׁ\(p.girl ? "הִיא אוֹהֶבֶת" : "הוּא אוֹהֵב")")
+                Text(p.girl ? tr("\(fav.world.emoji) \(p.name) מָצְאָה עוֹלָם שֶׁהִיא אוֹהֶבֶת") : tr("\(fav.world.emoji) \(p.name) מָצָא עוֹלָם שֶׁהוּא אוֹהֵב"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
-                Text("\(p.girl ? "הִיא עָנְתָה" : "הוּא עָנָה") בְּ\(fav.world.name) עַל \(fav.questions) שְׁאֵלוֹת, בְּ\(fav.accuracy)% הַצְלָחָה."
-                     + (p.others.isEmpty ? "" : " גַּם \(p.others.map(\.name).joined(separator: " וְ")) בִּפְנִים."))
+                Text((p.girl ? tr("הִיא עָנְתָה בְּ\(fav.world.name) עַל \(fav.questions) שְׁאֵלוֹת, בְּ\(fav.accuracy)% הַצְלָחָה.") : tr("הוּא עָנָה בְּ\(fav.world.name) עַל \(fav.questions) שְׁאֵלוֹת, בְּ\(fav.accuracy)% הַצְלָחָה."))
+                     + (p.others.isEmpty ? "" : tr(" גַּם \(p.others.map(\.name).joined(separator: tr(" וְ"))) בִּפְנִים.")))
                     .font(.system(size: 13.5, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                Text("🎉 \(p.name) כְּבָר \(p.girl ? "עָנְתָה" : "עָנָה") עַל \(p.questions) שְׁאֵלוֹת בְּטוֹפִי+")
+                Text(p.girl ? tr("🎉 \(p.name) כְּבָר עָנְתָה עַל \(p.questions) שְׁאֵלוֹת בְּטוֹפִי+") : tr("🎉 \(p.name) כְּבָר עָנָה עַל \(p.questions) שְׁאֵלוֹת בְּטוֹפִי+"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
             }
             HStack(spacing: 8) {
-                pitchStat("\(p.worlds)", p.worlds == 1 ? "עוֹלָם" : "עוֹלָמוֹת")
-                pitchStat("\(p.questions)", "שְׁאֵלוֹת")
-                pitchStat("\(p.accuracy)%", "הַצְלָחָה")
+                pitchStat("\(p.worlds)", p.worlds == 1 ? tr("עוֹלָם") : tr("עוֹלָמוֹת"))
+                pitchStat("\(p.questions)", tr("שְׁאֵלוֹת"))
+                pitchStat("\(p.accuracy)%", tr("הַצְלָחָה"))
             }
             Text(p.ending)
                 .font(.system(size: 13, weight: .heavy, design: .rounded))
@@ -177,7 +177,7 @@ struct PaywallView: View {
         .multilineTextAlignment(.leading)
         .padding(16)
         .glassPane(radius: 22)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     private func pitchStat(_ value: String, _ label: String) -> some View {
@@ -191,7 +191,7 @@ struct PaywallView: View {
 
     /// What stays free, in one honest line (approved mockup).
     private func freeForeverLine(_ p: Pitch) -> some View {
-        Text("טוֹפִי טַיים וְהַזְּמַן שֶׁ\(p.name) \(p.girl ? "מַרְוִיחָה" : "מַרְוִיחַ") נִשְׁאָרִים חִנָּם תָּמִיד. מָה שֶׁנִּסְגָּר: הָעוֹלָמוֹת, הַמִּשְׂחָקִים, הַזִּירָה וְהַמַּטְלוֹת.")
+        Text(p.girl ? tr("טוֹפִי טַיים וְהַזְּמַן שֶׁ\(p.name) מַרְוִיחָה נִשְׁאָרִים חִנָּם תָּמִיד. מָה שֶׁנִּסְגָּר: הָעוֹלָמוֹת, הַמִּשְׂחָקִים, הַזִּירָה וְהַמַּטְלוֹת.") : tr("טוֹפִי טַיים וְהַזְּמַן שֶׁ\(p.name) מַרְוִיחַ נִשְׁאָרִים חִנָּם תָּמִיד. מָה שֶׁנִּסְגָּר: הָעוֹלָמוֹת, הַמִּשְׂחָקִים, הַזִּירָה וְהַמַּטְלוֹת."))
             .font(.system(size: 12.5, weight: .medium, design: .rounded))
             .foregroundStyle(.white.opacity(0.8))
             .multilineTextAlignment(.center)
@@ -211,7 +211,7 @@ struct PaywallView: View {
                     .background(.white.opacity(0.22), in: Circle())
                     .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
             }
-            .environment(\.layoutDirection, .leftToRight)
+            .environment(\.layoutDirection, .appMirrored)
             Spacer()
         }
         .padding(.top, AppSpacing.md)
@@ -223,14 +223,14 @@ struct PaywallView: View {
                 .padding(.top, isCompact ? 0 : 24)
                 .padding(.bottom, isCompact ? -14 : 0)
 
-            Text("טופי+")
+            Text(tr("טופי+"))
                 .font(.system(size: isCompact ? 34 : 60, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.2), radius: 8, y: 3)
                 .scaleEffect(headerAppeared ? 1 : 0.5)
                 .opacity(headerAppeared ? 1 : 0)
 
-            Text("חוויה מלאה — לכל הילדים בבית")
+            Text(tr("חוויה מלאה — לכל הילדים בבית"))
                 .font(.system(size: isCompact ? 14.5 : 20, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
                 .multilineTextAlignment(.center)
@@ -241,17 +241,17 @@ struct PaywallView: View {
 
     private var benefitsCard: some View {
         VStack(spacing: isCompact ? 7 : 14) {
-            benefitRow("🧠", "כל הנושאים", "מתמטיקה, עברית, אנגלית, מדעים ועוד")
+            benefitRow("🧠", tr("כל הנושאים"), tr("מתמטיקה, עברית, אנגלית, מדעים ועוד"))
             divider
-            benefitRow("🌍", "כל העולמות", "כולל כל עולם חדש שנוסיף")
+            benefitRow("🌍", tr("כל העולמות"), tr("כולל כל עולם חדש שנוסיף"))
             divider
-            benefitRow("⏱", "זמן פרס על למידה", "כל תשובה נכונה מזכה בזמן משחק")
+            benefitRow("⏱", tr("זמן פרס על למידה"), tr("כל תשובה נכונה מזכה בזמן משחק"))
             divider
-            benefitRow("👨‍👩‍👧‍👦", "כל הילדים במשפחה", "פרופיל והתקדמות לכל ילד")
+            benefitRow("👨‍👩‍👧‍👦", tr("כל הילדים במשפחה"), tr("פרופיל והתקדמות לכל ילד"))
             divider
-            benefitRow("📊", "דוחות הורה שבועיים", "איפה הילד חזק, איפה צריך עזרה")
+            benefitRow("📊", tr("דוחות הורה שבועיים"), tr("איפה הילד חזק, איפה צריך עזרה"))
             divider
-            benefitRow("☁️", "סנכרון בין מכשירים", "iPad + iPhone, אותה התקדמות")
+            benefitRow("☁️", tr("סנכרון בין מכשירים"), tr("iPad + iPhone, אותה התקדמות"))
         }
         .padding(.vertical, isCompact ? AppSpacing.sm : AppSpacing.md)
         .padding(.horizontal, isCompact ? AppSpacing.sm : AppSpacing.md)
@@ -347,7 +347,7 @@ struct PaywallView: View {
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                     if isYearly, subs.yearlyIntroEligible {
-                        Text("כולל ניסיון 7 ימים חינם")
+                        Text(tr("כולל ניסיון 7 ימים חינם"))
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(AppColor.starGold)
                     }
@@ -374,16 +374,16 @@ struct PaywallView: View {
                 ProgressView()
                     .tint(.white)
                     .padding(.vertical, AppSpacing.md)
-                Text("טוֹעֵן מַסְלוּלִים…")
+                Text(tr("טוֹעֵן מַסְלוּלִים…"))
                     .font(.system(size: 13, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
             } else {
                 // Finished loading but got nothing — almost always an App Store
                 // setup issue, not an app bug. Give the parent a clear nudge.
-                Text("הַמַּסְלוּלִים לֹא נִטְעֲנוּ")
+                Text(tr("הַמַּסְלוּלִים לֹא נִטְעֲנוּ"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב.")
+                Text(tr("בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב."))
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
@@ -391,7 +391,7 @@ struct PaywallView: View {
                 Button {
                     Task { await subs.loadProducts() }
                 } label: {
-                    Label("נַסּוּ שׁוּב", systemImage: "arrow.clockwise")
+                    Label(tr("נַסּוּ שׁוּב"), systemImage: "arrow.clockwise")
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 16).padding(.vertical, 8)
@@ -410,7 +410,7 @@ struct PaywallView: View {
 
     private var primaryCTA: some View {
         let isYearlySelected = (selectedID == SubscriptionManager.yearlyID)
-        let cta = (isYearlySelected && subs.yearlyIntroEligible) ? "התחל ניסיון 7 ימים חינם" : "המשך לתשלום"
+        let cta = (isYearlySelected && subs.yearlyIntroEligible) ? tr("התחל ניסיון 7 ימים חינם") : tr("המשך לתשלום")
         let isDisabled = subs.products.isEmpty || subs.isPurchasing
 
         return VStack(spacing: 6) {
@@ -444,8 +444,8 @@ struct PaywallView: View {
             if isYearlySelected,
                let yearly = subs.products.first(where: { $0.id == SubscriptionManager.yearlyID }) {
                 Text(subs.yearlyIntroEligible
-                     ? "בתום הניסיון: \(yearly.displayPrice) / שנה — ניתן לבטל בכל עת בהגדרות Apple ID"
-                     : "\(yearly.displayPrice) / שנה — ניתן לבטל בכל עת בהגדרות Apple ID")
+                     ? tr("בתום הניסיון: \(yearly.displayPrice) / שנה — ניתן לבטל בכל עת בהגדרות Apple ID")
+                     : tr("\(yearly.displayPrice) / שנה — ניתן לבטל בכל עת בהגדרות Apple ID"))
                     .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
@@ -471,17 +471,17 @@ struct PaywallView: View {
                 Haptic.light()
                 Task { await subs.restorePurchases() }
             } label: {
-                Text("שחזר רכישה קיימת")
+                Text(tr("שחזר רכישה קיימת"))
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .underline()
             }
 
             HStack(spacing: 18) {
-                Link("תנאי שימוש",
+                Link(tr("תנאי שימוש"),
                      destination: URL(string: "https://tofyapp.com/terms")!)
                 Text("•").foregroundStyle(.white.opacity(0.4))
-                Link("מדיניות פרטיות",
+                Link(tr("מדיניות פרטיות"),
                      destination: URL(string: "https://tofyapp.com/privacy")!)
             }
             .font(.system(size: 12, weight: .medium, design: .rounded))
@@ -493,7 +493,7 @@ struct PaywallView: View {
     private func celebrateAndDismiss() {
         successConfetti += 1
         burst += 1
-        companion.cheer("יששש!")
+        companion.cheer(tr("יששש!"))
         SoundPlayer.shared.play(.levelUp)
         Haptic.success()
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
@@ -505,5 +505,5 @@ struct PaywallView: View {
 #Preview {
     PaywallView()
         .environmentObject(SubscriptionManager.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

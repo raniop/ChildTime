@@ -140,7 +140,7 @@ final class SubscriptionManager: ObservableObject {
             case .userCancelled:
                 return false
             case .pending:
-                lastError = "הַהַזְמָנָה נִשְׁלְחָה לְאִשּׁוּר. הִיא תִּכָּנֵס לְתֹקֶף בָּרֶגַע שֶׁתְּאֻשַּׁר."
+                lastError = tr("הַהַזְמָנָה נִשְׁלְחָה לְאִשּׁוּר. הִיא תִּכָּנֵס לְתֹקֶף בָּרֶגַע שֶׁתְּאֻשַּׁר.")
                 return false
             @unknown default:
                 return false
@@ -289,14 +289,14 @@ final class SubscriptionManager: ObservableObject {
         if let skError = error as? StoreKitError {
             switch skError {
             case .networkError:
-                return "אֵין חִבּוּר לָאִינְטֶרְנֶט. בִּדְקוּ אֶת הַחִבּוּר וְנַסּוּ שׁוּב."
+                return tr("אֵין חִבּוּר לָאִינְטֶרְנֶט. בִּדְקוּ אֶת הַחִבּוּר וְנַסּוּ שׁוּב.")
             case .userCancelled:
                 return ""
             default:
                 break
             }
         }
-        return "לֹא הִצְלַחְנוּ לְהַשְׁלִים אֶת הָרְכִישָׁה כָּרֶגַע. נַסּוּ שׁוּב בְּעוֹד רֶגַע — לֹא חֻיַּבְתֶּם."
+        return tr("לֹא הִצְלַחְנוּ לְהַשְׁלִים אֶת הָרְכִישָׁה כָּרֶגַע. נַסּוּ שׁוּב בְּעוֹד רֶגַע — לֹא חֻיַּבְתֶּם.")
     }
 
     private static func verify<T>(_ result: VerificationResult<T>) throws -> T {
@@ -315,8 +315,8 @@ extension Product {
     /// Hebrew label for this product on the paywall.
     var hebrewName: String {
         switch id {
-        case SubscriptionManager.monthlyID:  return "חודשי"
-        case SubscriptionManager.yearlyID:   return "שנתי"
+        case SubscriptionManager.monthlyID:  return tr("חודשי")
+        case SubscriptionManager.yearlyID:   return tr("שנתי")
         default: return displayName
         }
     }
@@ -325,9 +325,9 @@ extension Product {
     var pricePerPeriod: String {
         switch id {
         case SubscriptionManager.monthlyID:
-            return "\(displayPrice) / חודש"
+            return tr("\(displayPrice) / חודש")
         case SubscriptionManager.yearlyID:
-            return "\(displayPrice) / שנה"
+            return tr("\(displayPrice) / שנה")
         default:
             return displayPrice
         }
@@ -336,6 +336,6 @@ extension Product {
     /// e.g. "חיסכון 30%" — only meaningful for the yearly plan.
     var savingsBadge: String? {
         guard id == SubscriptionManager.yearlyID else { return nil }
-        return "חסוך 30%"
+        return tr("חסוך 30%")
     }
 }

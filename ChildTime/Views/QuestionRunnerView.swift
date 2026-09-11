@@ -211,25 +211,25 @@ struct QuestionRunnerView: View {
         .sheet(isPresented: $showParentAssist) {
             if let q = current {
                 ParentAssistView(question: q, topic: currentTopic) { }
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
         }
         // The parent answered from their notification → remove the wrong option.
         .onChangeCompat(of: parentHelp.lastReply?.kept) { _, kept in
             if kept != nil { applyParentHelp() }
         }
-        .confirmationDialog("דִּוּוּחַ עַל הַשְּׁאֵלָה",
+        .confirmationDialog(tr("דִּוּוּחַ עַל הַשְּׁאֵלָה"),
                             isPresented: $showReportConfirm, titleVisibility: .visible) {
-            Button("דַּוְּחוּ וְהַסִּירוּ אֶת הַשְּׁאֵלָה", role: .destructive) {
+            Button(tr("דַּוְּחוּ וְהַסִּירוּ אֶת הַשְּׁאֵלָה"), role: .destructive) {
                 if let q = current {
                     QuestionReporter.shared.report(q)
                     Haptic.success()
                     createQuestion(super: false)   // replace with a fresh question
                 }
             }
-            Button("בִּטּוּל", role: .cancel) {}
+            Button(tr("בִּטּוּל"), role: .cancel) {}
         } message: {
-            Text("נָסִיר אֶת הַשְּׁאֵלָה הַזּוֹ וְלֹא נַצִּיג אוֹתָהּ שׁוּב, וְנִשְׁלַח עָלֶיהָ דִּוּוּחַ כְּדֵי שֶׁנְּשַׁפֵּר.")
+            Text(tr("נָסִיר אֶת הַשְּׁאֵלָה הַזּוֹ וְלֹא נַצִּיג אוֹתָהּ שׁוּב, וְנִשְׁלַח עָלֶיהָ דִּוּוּחַ כְּדֵי שֶׁנְּשַׁפֵּר."))
         }
         .onAppear { startSession() }
         // NOTE: the "child finished playing" report is NOT sent here — leaving an
@@ -306,7 +306,7 @@ struct QuestionRunnerView: View {
                         .numericTextTransition(Double(progress.stars))
                 }
                 quizChip {
-                    Text("\(current?.topic.emoji ?? themeWorld.emoji) שְׁאֵלָה \(done)/\(total)")
+                    Text(tr("\(current?.topic.emoji ?? themeWorld.emoji) שְׁאֵלָה \(done)/\(total)"))
                 }
             }
             .font(.system(size: 12.5, weight: .heavy, design: .rounded))
@@ -353,7 +353,7 @@ struct QuestionRunnerView: View {
                 }
             }
             .frame(height: 8)
-            Text("+\(secs) שְׁנִ׳")
+            Text(tr("+\(secs) שְׁנִ׳"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .monospacedDigit()
@@ -456,7 +456,7 @@ struct QuestionRunnerView: View {
             Image(systemName: atCap ? "timer.circle.fill" : "timer")
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(tint)
-            Text(atCap ? "הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי" : "\(earned)/\(cap) דַּק' הַיּוֹם")
+            Text(atCap ? tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי") : tr("\(earned)/\(cap) דַּק' הַיּוֹם"))
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
         }
@@ -479,19 +479,19 @@ struct QuestionRunnerView: View {
                 HStack(spacing: 8) {
                     Text(q.topic.emoji).font(.system(size: topicEmojiSize))
                     if isBonusQuestion {
-                        Text("💫 שְׁאֵלַת עֲנָק! +\(RewardEngine.bonusQuestionMinutes) דַּקּוֹת")
+                        Text(tr("💫 שְׁאֵלַת עֲנָק! +\(RewardEngine.bonusQuestionMinutes) דַּקּוֹת"))
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                             .foregroundStyle(AppColor.starGold).glow(AppColor.starGold, radius: 10)
                     } else if isBonusArena {
-                        Text("💫 \(q.topic.emoji) דַּקּוֹת כְּפוּלוֹת!")
+                        Text(tr("💫 \(q.topic.emoji) דַּקּוֹת כְּפוּלוֹת!"))
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                             .foregroundStyle(AppColor.starGold).glow(AppColor.starGold, radius: 10)
                     } else if isSuperQuestion {
-                        Text("⭐ שְׁאֵלַת זָהָב!")
+                        Text(tr("⭐ שְׁאֵלַת זָהָב!"))
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundStyle(AppColor.starGold).glow(AppColor.starGold, radius: 8)
                     } else if isInPortal {
-                        Text("🌀 בּוֹנוּס ×3 כּוֹכָבִים!")
+                        Text(tr("🌀 בּוֹנוּס ×3 כּוֹכָבִים!"))
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                             .foregroundStyle(.white).glow(AppColor.gemPurple, radius: 10)
                     } else {
@@ -522,7 +522,7 @@ struct QuestionRunnerView: View {
                 .frame(minHeight: isCompact ? 150 : 200, maxHeight: isCompact ? 210 : 280)
                 .layoutPriority(1)
                 .glassInset(radius: 16)
-                .environment(\.layoutDirection, .rightToLeft)   // Hebrew passage reads right-to-left
+                .environment(\.layoutDirection, .app)   // the passage reads in the language's direction
             }
 
             // Early-reader visual questions carry the instruction in `spoken` (the
@@ -549,7 +549,7 @@ struct QuestionRunnerView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, AppSpacing.sm)
 
-            Text("בַּחֲרוּ תְּשׁוּבָה אַחַת")
+            Text(tr("בַּחֲרוּ תְּשׁוּבָה אַחַת"))
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
         }
@@ -590,14 +590,14 @@ struct QuestionRunnerView: View {
             // Mockup `.streak`: "🔥 3 ברצף · עוד 2 ובונוס!" in gold under the answers.
             if progress.currentStreak >= 2 {
                 let left = max(0, progress.cycleQuestionsTotal - progress.cycleQuestionsDone)
-                Text("🔥 \(progress.currentStreak) בְּרֶצֶף" + (earnsTime && left > 0 ? " · עוֹד \(left) וּבוֹנוּס!" : "!"))
+                Text(tr("🔥 \(progress.currentStreak) בְּרֶצֶף") + (earnsTime && left > 0 ? tr(" · עוֹד \(left) וּבוֹנוּס!") : "!"))
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
                     .contentTransition(.numericText())
             }
             // Mockup `.hint`: what a right answer is worth, as a glass line.
             if earnsTime {
-                Text("💡 כָּל תְּשׁוּבָה נְכוֹנָה = \(progress.secondsPerCorrect) שְׁנִיּוֹת שֶׁל מִשְׂחָק")
+                Text(tr("💡 כָּל תְּשׁוּבָה נְכוֹנָה = \(progress.secondsPerCorrect) שְׁנִיּוֹת שֶׁל מִשְׂחָק"))
                     .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .lineLimit(1).minimumScaleFactor(0.7)
@@ -657,19 +657,19 @@ struct QuestionRunnerView: View {
                        glow: stuck ? AppColor.starGold : .clear) {
             let girl = profiles.active?.gender == .girl
             if waiting {
-                companion.console("💌 הַבַּקָּשָׁה בַּדֶּרֶךְ — אֶפְשָׁר לְהַמְשִׁיךְ לַחְשֹׁב בֵּינְתַיִם")
+                companion.console(tr("💌 הַבַּקָּשָׁה בַּדֶּרֶךְ — אֶפְשָׁר לְהַמְשִׁיךְ לַחְשֹׁב בֵּינְתַיִם"))
                 return
             }
             guard !showFeedback else { return }
             // One request per question — backing out of the sheet doesn't count.
             if receivedHelpThisQuestion {
-                companion.console("כְּבָר קִבַּלְנוּ עֶזְרָה בַּשְּׁאֵלָה הַזֹּאת 💛")
+                companion.console(tr("כְּבָר קִבַּלְנוּ עֶזְרָה בַּשְּׁאֵלָה הַזֹּאת 💛"))
                 return
             }
             let childID = profiles.activeID?.uuidString ?? ""
             if parentHelp.cooldownRemaining(childID: childID) > 0 {
-                companion.console(girl ? "⏳ עוֹד רֶגַע תּוּכְלִי לְבַקֵּשׁ שׁוּב — נַסִּי לְבַד בֵּינְתַיִם"
-                                        : "⏳ עוֹד רֶגַע תּוּכַל לְבַקֵּשׁ שׁוּב — נַסֵּה לְבַד בֵּינְתַיִם")
+                companion.console(girl ? tr("⏳ עוֹד רֶגַע תּוּכְלִי לְבַקֵּשׁ שׁוּב — נַסִּי לְבַד בֵּינְתַיִם")
+                                        : tr("⏳ עוֹד רֶגַע תּוּכַל לְבַקֵּשׁ שׁוּב — נַסֵּה לְבַד בֵּינְתַיִם"))
                 return
             }
             Haptic.light()
@@ -677,7 +677,7 @@ struct QuestionRunnerView: View {
         }
         .scaleEffect(stuck ? 1.08 : 1)
         .animation(stuck ? .easeInOut(duration: 0.7).repeatForever(autoreverses: true) : .default, value: stuck)
-        .accessibilityLabel("בַּקָּשַׁת עֶזְרָה מֵהוֹרֶה")
+        .accessibilityLabel(tr("בַּקָּשַׁת עֶזְרָה מֵהוֹרֶה"))
     }
 
     // Cost of one hint, in pending-minutes (the kid's banked play time).
@@ -710,10 +710,10 @@ struct QuestionRunnerView: View {
         } label: {
             HStack(spacing: 6) {
                 Text("💡")
-                Text("רֶמֶז")
+                Text(tr("רֶמֶז"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text(hintCost == 0 ? "(חִינָּם)" : "(\(hintCost) דַּק')")
+                Text(hintCost == 0 ? tr("(חִינָּם)") : tr("(\(hintCost) דַּק')"))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.75))
             }
@@ -747,19 +747,19 @@ struct QuestionRunnerView: View {
         // Answers always number right-to-left — 1 top-right, 2 top-left, 3, 4 —
         // no matter how the screen was presented (a fullScreenCover can arrive
         // LTR, and on Rani's phone 1 landed top-left).
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     private var magicWandButton: some View {
         Button {
-            companion.cheer("בּוֹא נְנַסֶּה אַחֶרֶת")
+            companion.cheer(tr("בּוֹא נְנַסֶּה אַחֶרֶת"))
             withAnimation(.spring()) {
                 regenerateQuestion()
             }
         } label: {
             HStack {
                 Text("🪄")
-                Text("הַחְלֵף שְׁאֵלָה")
+                Text(tr("הַחְלֵף שְׁאֵלָה"))
             }
             .font(.system(size: 18, weight: .semibold, design: .rounded))
             .foregroundStyle(.white)
@@ -793,18 +793,18 @@ struct QuestionRunnerView: View {
                     .glow(AppColor.starGold, radius: 30)
                     .shadow(color: .black.opacity(0.3), radius: 10, y: 6)
 
-                Text("שְׁאֵלַת עֲנָק!")
+                Text(tr("שְׁאֵלַת עֲנָק!"))
                     .font(.system(size: portalTitleSize, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .glow(AppColor.flameOrange, radius: 16)
 
-                Text("🎮 +\(RewardEngine.bonusQuestionMinutes) דַּקּוֹת")
+                Text(tr("🎮 +\(RewardEngine.bonusQuestionMinutes) דַּקּוֹת"))
                     .font(.system(size: isCompact ? 34 : 44, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 24).padding(.vertical, 10)
                     .background(Capsule().fill(.black.opacity(0.25)))
 
-                Text("שְׁאֵלָה קָשָׁה בִּמְיוּחָד — עֲנוּ נָכוֹן וְקַבְּלוּ אֶת כָּל הַדַּקּוֹת!")
+                Text(tr("שְׁאֵלָה קָשָׁה בִּמְיוּחָד — עֲנוּ נָכוֹן וְקַבְּלוּ אֶת כָּל הַדַּקּוֹת!"))
                     .font(.system(size: isCompact ? 18 : 24, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
@@ -835,7 +835,7 @@ struct QuestionRunnerView: View {
                     .glow(AppColor.gemPurple, radius: 30)
                     .shadow(color: .black.opacity(0.3), radius: 10, y: 6)
 
-                Text("שְׁאֵלַת בּוֹנוּס!")
+                Text(tr("שְׁאֵלַת בּוֹנוּס!"))
                     .font(.system(size: portalTitleSize, weight: .heavy, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(colors: [AppColor.starGold, AppColor.companionGlow, Color(hex: "FFE082")],
@@ -849,7 +849,7 @@ struct QuestionRunnerView: View {
                     }
                 }
 
-                Text("עֲנוּ נָכוֹן וְקַבְּלוּ פִּי 3 כּוֹכָבִים!")
+                Text(tr("עֲנוּ נָכוֹן וְקַבְּלוּ פִּי 3 כּוֹכָבִים!"))
                     .font(.system(size: isCompact ? 18 : 24, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
@@ -886,7 +886,7 @@ struct QuestionRunnerView: View {
         reAskQueue = []
         QuestionMemory.shared.beginSession()   // no repeats within this session
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            companion.cheer(mode.isFeed ? "טוֹפִי טַיים — קָדִימָה! 🧠" : "מוּכָן? קָדִימָה!")
+            companion.cheer(mode.isFeed ? tr("טוֹפִי טַיים — קָדִימָה! 🧠") : tr("מוּכָן? קָדִימָה!"))
         }
         nextQuestion()
     }
@@ -920,7 +920,7 @@ struct QuestionRunnerView: View {
             isInPortal = false
             showBonusIntro = true
             SoundPlayer.shared.play(.portalAppear)
-            companion.wow("שְׁאֵלַת עֲנָק! 💫 שָׁוָה \(RewardEngine.bonusQuestionMinutes) דַּקּוֹת")
+            companion.wow(tr("שְׁאֵלַת עֲנָק! 💫 שָׁוָה \(RewardEngine.bonusQuestionMinutes) דַּקּוֹת"))
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
                 withAnimation { showBonusIntro = false }
                 createQuestion(super: false, bonus: true)
@@ -929,7 +929,7 @@ struct QuestionRunnerView: View {
             isInPortal = true
             showPortalIntro = true
             SoundPlayer.shared.play(.portalAppear)
-            companion.wow("שְׁאֵלַת בּוֹנוּס! 🌟 פִּי 3 כּוֹכָבִים")
+            companion.wow(tr("שְׁאֵלַת בּוֹנוּס! 🌟 פִּי 3 כּוֹכָבִים"))
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 withAnimation { showPortalIntro = false }
                 createQuestion(super: false)
@@ -1011,9 +1011,9 @@ struct QuestionRunnerView: View {
         let band = Int(level.rounded())
         if let prev = lastBandByTopic[topic], prev != band {
             if band > prev {
-                companion.hype(Gendered.g("מִתְקַדֵּם שָׁלָב! 🚀", "מִתְקַדֶּמֶת שָׁלָב! 🚀"))
+                companion.hype(Gendered.g(tr("מִתְקַדֵּם שָׁלָב! 🚀"), tr("מִתְקַדֶּמֶת שָׁלָב! 🚀")))
             } else {
-                companion.cheer("בּוֹא נַעֲשֶׂה חִימּוּם קָטָן 🌟")
+                companion.cheer(tr("בּוֹא נַעֲשֶׂה חִימּוּם קָטָן 🌟"))
             }
         }
         lastBandByTopic[topic] = band
@@ -1097,7 +1097,7 @@ struct QuestionRunnerView: View {
         guard let q = current, !showFeedback, parentHelp.activeQuestion == nil || parentHelp.activeQuestion == q.prompt else {
             parentHelp.lastReply = nil
             parentHelp.stopListening()
-            companion.wow("💌 הָעֶזְרָה הִגִּיעָה — אֲבָל כְּבָר הִתְקַדַּמְנוּ הָלְאָה!")
+            companion.wow(tr("💌 הָעֶזְרָה הִגִּיעָה — אֲבָל כְּבָר הִתְקַדַּמְנוּ הָלְאָה!"))
             return
         }
         let correct = q.correctIndex < q.options.count ? q.options[q.correctIndex] : ""
@@ -1107,7 +1107,7 @@ struct QuestionRunnerView: View {
               (feedbackForIndex[idx] ?? .normal) == .normal else {
             parentHelp.lastReply = nil
             parentHelp.stopListening()
-            companion.wow("💌 הָעֶזְרָה הִגִּיעָה! הַתְּשׁוּבָה הַזֹּאת כְּבָר יְרוּקָה 😉")
+            companion.wow(tr("💌 הָעֶזְרָה הִגִּיעָה! הַתְּשׁוּבָה הַזֹּאת כְּבָר יְרוּקָה 😉"))
             return
         }
         withAnimation(.spring(response: 0.45, dampingFraction: 0.65)) {
@@ -1116,7 +1116,7 @@ struct QuestionRunnerView: View {
         SoundPlayer.shared.play(.streakUp)
         Haptic.success()
         burstTrigger += 1
-        companion.wow("✨ קִבַּלְתָּ רֶמֶז מֵהוֹרֶה!")
+        companion.wow(tr("✨ קִבַּלְתָּ רֶמֶז מֵהוֹרֶה!"))
         receivedHelpThisQuestion = true
         parentHelp.lastReply = nil
         parentHelp.stopListening()
@@ -1196,7 +1196,7 @@ struct QuestionRunnerView: View {
             if !reAskQueue.contains(where: { $0.prompt == q.prompt }) {
                 reAskQueue.append(q)
             }
-            companion.cheer("נַחְזֹר לָזוֹ עוֹד מְעַט 💪")
+            companion.cheer(tr("נַחְזֹר לָזוֹ עוֹד מְעַט 💪"))
             showFeedback = true   // lock the grid during the short transition
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 guard q.id == current?.id else { return }   // already moved on
@@ -1234,9 +1234,9 @@ struct QuestionRunnerView: View {
         // The character speaks — the smarter (pricier) it is, the more it helps.
         switch helperLevel {
         case .encourage:
-            companion.cheer("הֵסַרְתִּי לְךָ אוֹפְּצְיָה! אַתָּה יָכוֹל 💪")
+            companion.cheer(tr("הֵסַרְתִּי לְךָ אוֹפְּצְיָה! אַתָּה יָכוֹל 💪"))
         case .hint:
-            companion.cheer("הֵסַרְתִּי אוֹפְּצְיָה. \(HintContent.hint(q.topic))")
+            companion.cheer(tr("הֵסַרְתִּי אוֹפְּצְיָה. \(HintContent.hint(q.topic))"))
         case .explain:
             companion.cheer(HintContent.explain(q.topic))
         }
@@ -1281,11 +1281,11 @@ struct QuestionRunnerView: View {
         // toward other worlds when one topic hit its daily soft cap. One-shot
         // flags set synchronously by recordCorrect just above.
         if progress.varietyBonusJustEarned > 0 {
-            companion.hype("קֶסֶם הַגִּוּוּן! 🌈 +\(progress.varietyBonusJustEarned) דַּקּוֹת בּוֹנוּס!")
+            companion.hype(tr("קֶסֶם הַגִּוּוּן! 🌈 +\(progress.varietyBonusJustEarned) דַּקּוֹת בּוֹנוּס!"))
             progress.varietyBonusJustEarned = 0
         } else if progress.topicBalanceNudgeTopic != nil {
-            companion.cheer(Gendered.g("אַלּוּף בָּזֶה! 🌟 בּוֹא נְגַלֶּה גַּם עוֹלָם אַחֵר — יֵשׁ בּוֹנוּס גִּוּוּן 🌈",
-                                       "אַלּוּפָה בָּזֶה! 🌟 בּוֹאִי נְגַלֶּה גַּם עוֹלָם אַחֵר — יֵשׁ בּוֹנוּס גִּוּוּן 🌈"))
+            companion.cheer(Gendered.g(tr("אַלּוּף בָּזֶה! 🌟 בּוֹא נְגַלֶּה גַּם עוֹלָם אַחֵר — יֵשׁ בּוֹנוּס גִּוּוּן 🌈"),
+                                       tr("אַלּוּפָה בָּזֶה! 🌟 בּוֹאִי נְגַלֶּה גַּם עוֹלָם אַחֵר — יֵשׁ בּוֹנוּס גִּוּוּן 🌈")))
             progress.topicBalanceNudgeTopic = nil
         }
         if receivedHelpThisQuestion {
@@ -1312,7 +1312,7 @@ struct QuestionRunnerView: View {
         // (doubled in the bonus arena).
         if earnsTime, !cappedBefore {
             let secs = progress.secondsPerCorrect * (isBonusArena ? 2 : 1)
-            flashSeconds("+\(secs) שְׁנִיּוֹת", positive: true)
+            flashSeconds(tr("+\(secs) שְׁנִיּוֹת"), positive: true)
         }
         // "+X דקות" popup — only when a full bonus was banked this answer.
         if minutesGranted > 0 {
@@ -1323,7 +1323,7 @@ struct QuestionRunnerView: View {
         // that play continues for fun/learning without more minutes.
         if earnsTime, !cappedBefore, progress.atDailyCap, !capMessageShown {
             capMessageShown = true
-            companion.wow("\(Gendered.g("הִגַּעְתָּ", "הִגַּעְתְּ")) לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת")
+            companion.wow(Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת"), tr("הִגַּעְתְּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת")))
             confettiTrigger += 1
             return
         }
@@ -1331,10 +1331,10 @@ struct QuestionRunnerView: View {
         if cappedBefore {
             if isBonusQuestion {
                 // The promised bonus minutes were banked — say so, never silence a prize.
-                companion.wow("אַלּוּפִים! 💫 הַדַּקּוֹת נִשְׁמְרוּ לְמָחָר 🏦")
+                companion.wow(tr("אַלּוּפִים! 💫 הַדַּקּוֹת נִשְׁמְרוּ לְמָחָר 🏦"))
                 confettiTrigger += 1
             } else {
-                companion.cheer(["יָפֶה! לוֹמְדִים בִּשְׁבִיל הַכֵּיף 🌟", "כֹּל הַכָּבוֹד! עוֹד נְקוּדּוֹת וְכוֹכָבִים", "\(Gendered.g("אַלּוּף", "אַלּוּפָה"))! מַמְשִׁיכִים לְהִתְקַדֵּם"].randomElement()!)
+                companion.cheer([tr("יָפֶה! לוֹמְדִים בִּשְׁבִיל הַכֵּיף 🌟"), tr("כֹּל הַכָּבוֹד! עוֹד נְקוּדּוֹת וְכוֹכָבִים"), Gendered.g(tr("אַלּוּף! מַמְשִׁיכִים לְהִתְקַדֵּם"), tr("אַלּוּפָה! מַמְשִׁיכִים לְהִתְקַדֵּם"))].randomElement()!)
             }
             return
         }
@@ -1343,7 +1343,7 @@ struct QuestionRunnerView: View {
         if progress.lastRecoveredMinutes > 0 {
             let back = progress.lastRecoveredMinutes
             progress.lastRecoveredMinutes = 0
-            companion.wow("\(Gendered.g("הֶחְזַרְתָּ", "הֶחְזַרְתְּ")) \(back) דַּק'! ⭐")
+            companion.wow(Gendered.g(tr("הֶחְזַרְתָּ \(back) דַּק'! ⭐"), tr("הֶחְזַרְתְּ \(back) דַּק'! ⭐")))
             confettiTrigger += 1
             return
         }
@@ -1351,7 +1351,7 @@ struct QuestionRunnerView: View {
         // Personal-best streak — the headline celebration, takes priority.
         if progress.newStreakRecord {
             progress.newStreakRecord = false
-            companion.wow("שִׂיא חָדָשׁ! 🏆 \(progress.currentStreak) בָּרֶצֶף!")
+            companion.wow(tr("שִׂיא חָדָשׁ! 🏆 \(progress.currentStreak) בָּרֶצֶף!"))
             confettiTrigger += 1
             rumbleTrigger += 1
             SoundPlayer.shared.play(.levelUp)
@@ -1360,22 +1360,22 @@ struct QuestionRunnerView: View {
 
         // Companion reaction
         if isBonusQuestion {
-            companion.wow("עֲנָקִים! 💫 +\(RewardEngine.bonusQuestionMinutes) דַּקּוֹת!")
+            companion.wow(tr("עֲנָקִים! 💫 +\(RewardEngine.bonusQuestionMinutes) דַּקּוֹת!"))
             confettiTrigger += 1
             rumbleTrigger += 1
             SoundPlayer.shared.play(.levelUp)
         } else if isSuperQuestion {
-            companion.wow("שְׁאֵלַת זָהָב! ⭐")
+            companion.wow(tr("שְׁאֵלַת זָהָב! ⭐"))
             confettiTrigger += 1
         } else if isInPortal {
-            companion.wow("שְׁאֵלַת בּוֹנוּס — פִּי 3 כּוֹכָבִים! 🌀")
+            companion.wow(tr("שְׁאֵלַת בּוֹנוּס — פִּי 3 כּוֹכָבִים! 🌀"))
             confettiTrigger += 1
         } else if EventEngine.shouldFireComboEvent(streak: progress.currentStreak) {
-            companion.hype("🔥 \(progress.currentStreak) בָּרֶצֶף!")
+            companion.hype(tr("🔥 \(progress.currentStreak) בָּרֶצֶף!"))
             confettiTrigger += 1
             rumbleTrigger += 1
         } else {
-            companion.cheer(["יֵשׁ!", "טוֹב!", "כֵּן!", "וָואוּ!", "\(Gendered.g("אַלּוּף", "אַלּוּפָה"))!"].randomElement()!)
+            companion.cheer([tr("יֵשׁ!"), tr("טוֹב!"), tr("כֵּן!"), tr("וָואוּ!"), Gendered.g(tr("אַלּוּף!"), tr("אַלּוּפָה!"))].randomElement()!)
         }
     }
 
@@ -1435,19 +1435,19 @@ struct QuestionRunnerView: View {
         )
         if lostSeconds > 0 {
             // Gentle: small seconds dip + a "you can win it right back" message.
-            flashSeconds("−\(lostSeconds) שְׁנִיּוֹת · כִּמְעַט!", positive: false)
+            flashSeconds(tr("−\(lostSeconds) שְׁנִיּוֹת · כִּמְעַט!"), positive: false)
             // Safe negative experience: never accusatory, always a way back.
             companion.console([
-                "💡 כִּמְעַט! תְּשׁוּבָה נְכוֹנָה תַּחֲזִיר אֶת הַזְּמַן",
-                "✨ קָרוֹב! אֶפְשָׁר לְהַחֲזִיר מִיָּד בַּשְּׁאֵלָה הַבָּאָה",
-                "⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם"
+                tr("💡 כִּמְעַט! תְּשׁוּבָה נְכוֹנָה תַּחֲזִיר אֶת הַזְּמַן"),
+                tr("✨ קָרוֹב! אֶפְשָׁר לְהַחֲזִיר מִיָּד בַּשְּׁאֵלָה הַבָּאָה"),
+                tr("⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם")
             ].randomElement()!)
         } else {
             companion.console([
-                "כִּמְעַט!",
-                "מַמָּשׁ קָרוֹב",
-                "בּוֹא נְנַסֶּה שׁוּב",
-                "נְנַסֶּה אֶת הַבָּאָה"
+                tr("כִּמְעַט!"),
+                tr("מַמָּשׁ קָרוֹב"),
+                tr("בּוֹא נְנַסֶּה שׁוּב"),
+                tr("נְנַסֶּה אֶת הַבָּאָה")
             ].randomElement()!)
         }
     }
@@ -1458,5 +1458,5 @@ struct QuestionRunnerView: View {
         .environmentObject(ParentSettings.shared)
         .environmentObject(ProgressStore.shared)
         .environmentObject(ProfileStore.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }
