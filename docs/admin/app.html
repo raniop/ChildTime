@@ -395,12 +395,15 @@ async function coverage() {
   const cell = (t, g) => {
     if (g < (t.minGrade || 0)) return `<span class="cv off" title="העולם לא מוצג לכיתה הזאת">—</span>`;
     if (t.computed) return `<span class="cv" style="background:#17A67B;color:#fff" title="נוצר בקוד — אין סוף שאלות">∞</span>`;
+    // גן never reaches the banks: every world switches to picture questions read
+    // aloud (PreReaderContent), generated on the spot.
+    if (g === 0) return `<span class="cv" style="background:#17A67B;color:#fff" title="גן: שאלות תמונה שנוצרות בקוד ומוקראות בקול">🖼</span>`;
     const n = count(t, g), [bg, fg] = tone(n), c = cloudAt(t, g);
     const pass = t.topic === "reading" ? ` · ${((t.grades || []).find((x) => x.grade === g) || {}).passages || 0} קטעים` : "";
     return `<span class="cv" style="background:${bg};color:${fg}" title="${n} שאלות${c ? ` (☁️ ${c} מהענן)` : ""}${pass}">${n}</span>`;
   };
   const inScope = (t) => GRADES.filter((g) => g >= (t.minGrade || 0));
-  const gaps = (t) => t.computed ? 0 : inScope(t).filter((g) => count(t, g) < TARGET).length;
+  const gaps = (t) => t.computed ? 0 : inScope(t).filter((g) => g > 0 && count(t, g) < TARGET).length;
   const row = (t) => {
     const c = CLOUD[t.topic] || {};
     const total = t.computed ? "∞" : fmt((t.total || 0) + (c.approved || 0));
@@ -415,14 +418,15 @@ async function coverage() {
   const topics = (COV.topics || []).slice();
   const open = topics.filter(live).sort((a, b) => (a.pack - b.pack) || order(a, b));
   const closed = topics.filter((t) => !live(t)).sort(order);
-  const redCells = open.reduce((n, t) => n + (t.computed ? 0 : inScope(t).filter((g) => count(t, g) < MIN).length), 0);
+  const redCells = open.reduce((n, t) => n + (t.computed ? 0 : inScope(t).filter((g) => g > 0 && count(t, g) < MIN).length), 0);
   $("covBox").innerHTML = `
     <div class="card"><div class="stamp" style="margin-bottom:10px;line-height:1.7">המספר = שאלות שמתאימות לכיתה (מובנות באפליקציה + מאושרות בענן). יעד: <b>${TARGET}</b> לכל כיתה.<br>
       <span class="cv inl" style="background:#D6455B;color:#fff">0</span> אין ·
       <span class="cv inl" style="background:#E8845E;color:#fff">&lt;${MIN}</span> יחזרו על עצמן ·
       <span class="cv inl" style="background:#F5C049;color:#3A1B08">&lt;${TARGET}</span> מתחת ליעד ·
       <span class="cv inl" style="background:#17A67B;color:#fff">${TARGET}+</span> ביעד ·
-      <span class="cv inl off">—</span> לא מוצג לכיתה</div>
+      <span class="cv inl off">—</span> לא מוצג לכיתה ·
+      <span class="cv inl" style="background:#17A67B;color:#fff">🖼</span> גן: שאלות תמונה מוקראות</div>
       <h4 style="margin:4px 0 2px">🟢 פתוחים לילדים <span class="stamp">${open.length} עולמות${redCells ? ` · <b style="color:#D6455B">${redCells} משבצות שיחזרו על עצמן</b>` : ""}</span></h4>
       <div class="cov">${head}${open.map(row).join("")}</div>
       ${closed.length ? `<h4 style="margin:18px 0 2px">🔒 עוד לא פתוחים <span class="stamp">${closed.length} עולמות · נפתחים ב־🌍 עולמות</span></h4><div class="cov">${head}${closed.map(row).join("")}</div>` : ""}

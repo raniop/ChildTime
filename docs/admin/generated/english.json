@@ -1,0 +1,4802 @@
+[
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🥚\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "egg",
+    "distractors": [
+      "tea",
+      "pie",
+      "nut"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "x\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "X",
+    "distractors": [
+      "Y",
+      "V",
+      "W"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🦋 🦋 🦋 🦋 🦋\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "seven",
+      "six",
+      "eight"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🎈 🎈\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "four",
+      "three",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐝 🐝\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "one",
+      "five",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🪵\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "log",
+    "distractors": [
+      "bed",
+      "bow",
+      "map"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "k\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "K",
+    "distractors": [
+      "T",
+      "F",
+      "H"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "P\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "p",
+    "distractors": [
+      "b",
+      "d",
+      "q"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🎀\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bow",
+    "distractors": [
+      "hat",
+      "ice",
+      "web"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🟣\nמָה הַצֶּבַע בְּאַנְגְּלִית?",
+    "correctAnswer": "purple",
+    "distractors": [
+      "green",
+      "brown",
+      "red"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "2️⃣\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "zero",
+      "five",
+      "one"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🚐 van\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "v",
+    "distractors": [
+      "x",
+      "w",
+      "y"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🧊\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "ice",
+    "distractors": [
+      "cap",
+      "bow",
+      "box"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🦊 fox\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "f",
+    "distractors": [
+      "t",
+      "h",
+      "k"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🧢\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "cap",
+    "distractors": [
+      "bed",
+      "box",
+      "web"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🔟\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "ten",
+    "distractors": [
+      "nine",
+      "eight",
+      "twelve"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐱 🐱\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "five",
+      "one",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "f\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "F",
+    "distractors": [
+      "T",
+      "H",
+      "K"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🌸 🌸\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "five",
+      "three",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "A\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "a",
+    "distractors": [
+      "c",
+      "o",
+      "e"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐛 bug\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "b",
+    "distractors": [
+      "d",
+      "p",
+      "q"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐶 dog\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "d",
+    "distractors": [
+      "b",
+      "p",
+      "q"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "📦\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "box",
+    "distractors": [
+      "map",
+      "cap",
+      "fan"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⭐\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "four",
+      "two",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "q\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "Q",
+    "distractors": [
+      "D",
+      "P",
+      "B"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🥜 nut\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "n",
+    "distractors": [
+      "m",
+      "r",
+      "h"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "👂\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "ear",
+    "distractors": [
+      "eye",
+      "leg",
+      "hat"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "E\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "o",
+      "a",
+      "c"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🪭\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "fan",
+    "distractors": [
+      "bag",
+      "bed",
+      "cap"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "U\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "u",
+    "distractors": [
+      "m",
+      "n",
+      "h"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍪\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "four",
+      "three",
+      "two"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍌 🍌 🍌\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "four",
+      "one",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐀 rat\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "n",
+      "u",
+      "h"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⚽ ⚽ ⚽ ⚽ ⚽\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "four",
+      "eight",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🎈\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "four",
+      "three",
+      "two"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍪 🍪\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "three",
+      "one",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐷\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "pig",
+    "distractors": [
+      "cow",
+      "bug",
+      "owl"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "👜 bag\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "b",
+    "distractors": [
+      "q",
+      "p",
+      "d"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "C\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "c",
+    "distractors": [
+      "a",
+      "o",
+      "e"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🍵 tea\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "t",
+    "distractors": [
+      "f",
+      "h",
+      "k"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🔑 key\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "k",
+    "distractors": [
+      "f",
+      "t",
+      "h"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⭐ ⭐ ⭐ ⭐\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "three",
+      "two",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🔑\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "key",
+    "distractors": [
+      "hat",
+      "map",
+      "fan"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍪 🍪 🍪\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "one",
+      "four",
+      "two"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🚗 🚗 🚗 🚗\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "seven",
+      "two",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "H\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "h",
+    "distractors": [
+      "r",
+      "u",
+      "n"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🌸 🌸 🌸\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "six",
+      "five",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🖊️ pen\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "p",
+    "distractors": [
+      "b",
+      "d",
+      "q"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "👁️ eye\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "a",
+      "c",
+      "o"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "☀️\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "sun",
+    "distractors": [
+      "log",
+      "cap",
+      "key"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "6️⃣\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "six",
+    "distractors": [
+      "seven",
+      "nine",
+      "eight"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⚪\nמָה הַצֶּבַע בְּאַנְגְּלִית?",
+    "correctAnswer": "white",
+    "distractors": [
+      "brown",
+      "blue",
+      "black"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐜\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "ant",
+    "distractors": [
+      "cow",
+      "dog",
+      "rat"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐔\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "hen",
+    "distractors": [
+      "cow",
+      "owl",
+      "bug"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🚗 🚗 🚗\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "two",
+      "one",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🟡\nמָה הַצֶּבַע בְּאַנְגְּלִית?",
+    "correctAnswer": "yellow",
+    "distractors": [
+      "brown",
+      "black",
+      "blue"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "y\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "Y",
+    "distractors": [
+      "X",
+      "V",
+      "W"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🔴\nמָה הַצֶּבַע בְּאַנְגְּלִית?",
+    "correctAnswer": "red",
+    "distractors": [
+      "blue",
+      "black",
+      "green"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🦉 owl\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "o",
+    "distractors": [
+      "e",
+      "c",
+      "a"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐱 🐱 🐱\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "one",
+      "two",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "👂 ear\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "a",
+      "o",
+      "c"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⚫\nמָה הַצֶּבַע בְּאַנְגְּלִית?",
+    "correctAnswer": "black",
+    "distractors": [
+      "green",
+      "brown",
+      "orange"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🚗 car\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "c",
+    "distractors": [
+      "o",
+      "a",
+      "e"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🚗 🚗\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "one",
+      "five",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🚗\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "car",
+    "distractors": [
+      "bus",
+      "van",
+      "log"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐶\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "dog",
+    "distractors": [
+      "owl",
+      "bat",
+      "bug"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🌸 🌸 🌸 🌸 🌸\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "eight",
+      "seven",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🚐\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "van",
+    "distractors": [
+      "bus",
+      "car",
+      "map"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🕸️ web\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "w",
+    "distractors": [
+      "y",
+      "v",
+      "x"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "i\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "I",
+    "distractors": [
+      "J",
+      "T",
+      "N"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🦋 🦋\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "five",
+      "three",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🍵\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "tea",
+    "distractors": [
+      "egg",
+      "nut",
+      "pie"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐱 🐱 🐱 🐱 🐱\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "seven",
+      "eight",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "B\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "b",
+    "distractors": [
+      "q",
+      "d",
+      "p"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐜 ant\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "a",
+    "distractors": [
+      "e",
+      "o",
+      "c"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "v\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "V",
+    "distractors": [
+      "W",
+      "X",
+      "Y"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🖊️\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "pen",
+    "distractors": [
+      "hat",
+      "bow",
+      "sun"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "G\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "g",
+    "distractors": [
+      "q",
+      "j",
+      "y"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍎\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "four",
+      "two",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⭐ ⭐\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "four",
+      "one",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "Q\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "q",
+    "distractors": [
+      "d",
+      "p",
+      "b"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍌 🍌 🍌 🍌 🍌\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "four",
+      "seven",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍌 🍌 🍌 🍌\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "three",
+      "six",
+      "two"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐝\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bee",
+    "distractors": [
+      "hen",
+      "fox",
+      "bat"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐝\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "three",
+      "four",
+      "two"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🦇\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bat",
+    "distractors": [
+      "owl",
+      "cat",
+      "pig"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🦉\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "owl",
+    "distractors": [
+      "cow",
+      "bee",
+      "hen"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "V\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "v",
+    "distractors": [
+      "y",
+      "w",
+      "x"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "o\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "O",
+    "distractors": [
+      "A",
+      "C",
+      "E"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "K\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "k",
+    "distractors": [
+      "f",
+      "h",
+      "t"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "L\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "l",
+    "distractors": [
+      "h",
+      "p",
+      "i"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "5️⃣\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "seven",
+      "six",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "t\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "T",
+    "distractors": [
+      "F",
+      "H",
+      "K"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "r\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "R",
+    "distractors": [
+      "H",
+      "N",
+      "M"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🟠\nמָה הַצֶּבַע בְּאַנְגְּלִית?",
+    "correctAnswer": "orange",
+    "distractors": [
+      "yellow",
+      "red",
+      "brown"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🦋 🦋 🦋 🦋\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "three",
+      "five",
+      "two"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "👜\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bag",
+    "distractors": [
+      "map",
+      "hat",
+      "bed"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "7️⃣\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "seven",
+    "distractors": [
+      "ten",
+      "five",
+      "eight"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍌\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "three",
+      "four",
+      "two"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "📦 box\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "b",
+    "distractors": [
+      "d",
+      "q",
+      "p"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐝 bee\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "b",
+    "distractors": [
+      "d",
+      "p",
+      "q"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🎩\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "hat",
+    "distractors": [
+      "cap",
+      "sun",
+      "bed"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐱 🐱 🐱 🐱\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "six",
+      "two",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐝 🐝 🐝\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "six",
+      "two",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "z\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "Z",
+    "distractors": [
+      "C",
+      "S",
+      "R"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🟤\nמָה הַצֶּבַע בְּאַנְגְּלִית?",
+    "correctAnswer": "brown",
+    "distractors": [
+      "yellow",
+      "purple",
+      "black"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⚽ ⚽\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "four",
+      "three",
+      "one"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "b\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "B",
+    "distractors": [
+      "D",
+      "P",
+      "Q"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐷 pig\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "p",
+    "distractors": [
+      "d",
+      "q",
+      "b"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "R\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "n",
+      "m",
+      "h"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🛏️ bed\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "b",
+    "distractors": [
+      "d",
+      "p",
+      "q"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🌸 🌸 🌸 🌸\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "three",
+      "six",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "h\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "H",
+    "distractors": [
+      "R",
+      "U",
+      "N"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐔 hen\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "h",
+    "distractors": [
+      "m",
+      "u",
+      "n"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐱 cat\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "c",
+    "distractors": [
+      "a",
+      "o",
+      "e"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🥧 pie\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "p",
+    "distractors": [
+      "d",
+      "b",
+      "q"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "X\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "x",
+    "distractors": [
+      "y",
+      "v",
+      "w"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🥧\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "pie",
+    "distractors": [
+      "tea",
+      "nut",
+      "egg"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "1️⃣\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "four",
+      "zero",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🚌\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bus",
+    "distractors": [
+      "car",
+      "van",
+      "eye"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐟\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "three",
+      "two",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "J\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "j",
+    "distractors": [
+      "y",
+      "q",
+      "g"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🦊\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "fox",
+    "distractors": [
+      "bug",
+      "pig",
+      "bat"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "W\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "w",
+    "distractors": [
+      "x",
+      "y",
+      "v"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🦋 🦋 🦋\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "two",
+      "one",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "N\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "n",
+    "distractors": [
+      "r",
+      "m",
+      "u"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🕸️\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "web",
+    "distractors": [
+      "cap",
+      "key",
+      "fan"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "O\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "o",
+    "distractors": [
+      "e",
+      "a",
+      "c"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍎 🍎 🍎 🍎\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "two",
+      "six",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🎈 🎈 🎈 🎈 🎈\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "three",
+      "eight",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐄\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "cow",
+    "distractors": [
+      "hen",
+      "pig",
+      "cat"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🎈 🎈 🎈\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "four",
+      "one",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🥚 egg\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "a",
+      "o",
+      "c"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🎀 bow\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "b",
+    "distractors": [
+      "q",
+      "d",
+      "p"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍪 🍪 🍪 🍪\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "three",
+      "six",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "9️⃣\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "nine",
+    "distractors": [
+      "eleven",
+      "twelve",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐝 🐝 🐝 🐝\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "five",
+      "two",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍎 🍎\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "three",
+      "one",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐀\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "rat",
+    "distractors": [
+      "cow",
+      "pig",
+      "bug"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐝 🐝 🐝 🐝 🐝\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "three",
+      "eight",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "4️⃣\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "three",
+      "seven",
+      "two"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🗺️\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "map",
+    "distractors": [
+      "sun",
+      "ice",
+      "box"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐟 🐟 🐟 🐟\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "five",
+      "six",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "☀️ sun\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "s",
+    "distractors": [
+      "z",
+      "c",
+      "p"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "👁️\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "eye",
+    "distractors": [
+      "leg",
+      "ear",
+      "bus"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍎 🍎 🍎 🍎 🍎\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "seven",
+      "four",
+      "eight"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🚗\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "three",
+      "two",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "D\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "d",
+    "distractors": [
+      "p",
+      "q",
+      "b"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⭐ ⭐ ⭐ ⭐ ⭐\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "eight",
+      "three",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐛\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bug",
+    "distractors": [
+      "bee",
+      "hen",
+      "pig"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍌 🍌\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "one",
+      "five",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⭐ ⭐ ⭐\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "six",
+      "five",
+      "two"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "3️⃣\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "one",
+      "six",
+      "two"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "d\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "D",
+    "distractors": [
+      "B",
+      "Q",
+      "P"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐱\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "cat",
+    "distractors": [
+      "bee",
+      "owl",
+      "cow"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🐄 cow\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "c",
+    "distractors": [
+      "a",
+      "e",
+      "o"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "a\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "A",
+    "distractors": [
+      "C",
+      "E",
+      "O"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🚌 bus\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "b",
+    "distractors": [
+      "q",
+      "p",
+      "d"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🦵 leg\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "l",
+    "distractors": [
+      "w",
+      "p",
+      "k"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🎩 hat\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "h",
+    "distractors": [
+      "u",
+      "n",
+      "m"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⚽ ⚽ ⚽\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "two",
+      "four",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "m\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "M",
+    "distractors": [
+      "R",
+      "U",
+      "H"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍪 🍪 🍪 🍪 🍪\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "seven",
+      "eight",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "e\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "E",
+    "distractors": [
+      "O",
+      "A",
+      "C"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "c\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "C",
+    "distractors": [
+      "O",
+      "E",
+      "A"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "s\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "S",
+    "distractors": [
+      "Z",
+      "C",
+      "G"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🦇 bat\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "b",
+    "distractors": [
+      "q",
+      "p",
+      "d"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🔵\nמָה הַצֶּבַע בְּאַנְגְּלִית?",
+    "correctAnswer": "blue",
+    "distractors": [
+      "white",
+      "orange",
+      "brown"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "u\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "U",
+    "distractors": [
+      "N",
+      "M",
+      "H"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐟 🐟 🐟\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "four",
+      "five",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "T\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "t",
+    "distractors": [
+      "k",
+      "h",
+      "f"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "g\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "G",
+    "distractors": [
+      "Q",
+      "Y",
+      "J"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🧊 ice\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "i",
+    "distractors": [
+      "t",
+      "j",
+      "m"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "Z\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "z",
+    "distractors": [
+      "s",
+      "c",
+      "q"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "p\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "P",
+    "distractors": [
+      "Q",
+      "B",
+      "D"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🧢 cap\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "c",
+    "distractors": [
+      "o",
+      "a",
+      "e"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🦵\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "leg",
+    "distractors": [
+      "eye",
+      "ear",
+      "bat"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⚽\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "two",
+      "three",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🪵 log\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "l",
+    "distractors": [
+      "b",
+      "y",
+      "v"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "w\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "W",
+    "distractors": [
+      "X",
+      "V",
+      "Y"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🌸\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "two",
+      "four",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🍎 🍎 🍎\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "three",
+    "distractors": [
+      "four",
+      "two",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🪭 fan\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "f",
+    "distractors": [
+      "t",
+      "h",
+      "k"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "8️⃣\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "eight",
+    "distractors": [
+      "six",
+      "nine",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🎈 🎈 🎈 🎈\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "three",
+      "seven",
+      "two"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🗺️ map\nבְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?",
+    "correctAnswer": "m",
+    "distractors": [
+      "u",
+      "h",
+      "n"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🛏️\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bed",
+    "distractors": [
+      "sun",
+      "fan",
+      "pen"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "n\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "N",
+    "distractors": [
+      "U",
+      "M",
+      "H"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐟 🐟 🐟 🐟 🐟\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "eight",
+      "six",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "F\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "f",
+    "distractors": [
+      "k",
+      "t",
+      "h"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐱\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "two",
+      "three",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "S\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "s",
+    "distractors": [
+      "c",
+      "z",
+      "u"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🚗 🚗 🚗 🚗 🚗\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "five",
+    "distractors": [
+      "three",
+      "seven",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🟢\nמָה הַצֶּבַע בְּאַנְגְּלִית?",
+    "correctAnswer": "green",
+    "distractors": [
+      "blue",
+      "brown",
+      "yellow"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🦋\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "one",
+    "distractors": [
+      "three",
+      "two",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "M\nמָה הָאוֹת הַקְּטַנָּה?",
+    "correctAnswer": "m",
+    "distractors": [
+      "h",
+      "u",
+      "r"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "medium",
+    "prompt": "🥜\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "nut",
+    "distractors": [
+      "tea",
+      "egg",
+      "pie"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "⚽ ⚽ ⚽ ⚽\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "four",
+    "distractors": [
+      "three",
+      "two",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "j\nמָה הָאוֹת הַגְּדוֹלָה?",
+    "correctAnswer": "J",
+    "distractors": [
+      "Q",
+      "Y",
+      "G"
+    ]
+  },
+  {
+    "gradeLo": 1,
+    "gradeHi": 1,
+    "tier": "easy",
+    "prompt": "🐟 🐟\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "two",
+    "distractors": [
+      "three",
+      "one",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "plane\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "✈️",
+    "distractors": [
+      "🚚",
+      "🚂",
+      "🚲"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍌 🍌 🍌 🍌 🍌 🍌 🍌\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "seven",
+    "distractors": [
+      "nine",
+      "six",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "⏰ cloc_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "k",
+    "distractors": [
+      "c",
+      "f",
+      "w"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "👟 s_oe\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "h",
+    "distractors": [
+      "m",
+      "b",
+      "s"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🚲\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bike",
+    "distractors": [
+      "plane",
+      "truck",
+      "train"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "foot\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🦶",
+    "distractors": [
+      "🦷",
+      "✋",
+      "👄"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍎 🍎 🍎 🍎 🍎 🍎 🍎\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "seven",
+    "distractors": [
+      "five",
+      "ten",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🔥\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "fire",
+    "distractors": [
+      "star",
+      "snow",
+      "flower"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🚂 t_ain\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "d",
+      "k",
+      "f"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "chair\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🪑",
+    "distractors": [
+      "🥁",
+      "📱",
+      "⏰"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🚚 truc_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "k",
+    "distractors": [
+      "w",
+      "s",
+      "b"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🪁 kit_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "o",
+      "a",
+      "u"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "snake\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🐍",
+    "distractors": [
+      "🐯",
+      "🐰",
+      "🐻"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "tooth\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🦷",
+    "distractors": [
+      "👄",
+      "✋",
+      "🦶"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🧀 chee_e\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "s",
+    "distractors": [
+      "b",
+      "g",
+      "t"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🌙\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "moon",
+    "distractors": [
+      "flower",
+      "rain",
+      "star"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐝 🐝 🐝 🐝 🐝 🐝\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "six",
+    "distractors": [
+      "eight",
+      "nine",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🧀 chees_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "i",
+      "a",
+      "u"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🚗 🚗 🚗 🚗 🚗 🚗 🚗\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "seven",
+    "distractors": [
+      "eight",
+      "six",
+      "nine"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🚗 🚗 🚗 🚗 🚗 🚗\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "six",
+    "distractors": [
+      "four",
+      "nine",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐫\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "camel",
+    "distractors": [
+      "tiger",
+      "bear",
+      "fish"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "A B C _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "D",
+    "distractors": [
+      "F",
+      "E",
+      "B"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "shirt\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "👕",
+    "distractors": [
+      "👗",
+      "👟",
+      "🧥"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🪁 k_te\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "i",
+    "distractors": [
+      "a",
+      "o",
+      "u"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "rabbit\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🐰",
+    "distractors": [
+      "🐐",
+      "🐫",
+      "🦓"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "monkey\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🐵",
+    "distractors": [
+      "🐻",
+      "🐸",
+      "🐟"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "👃 n_se\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "o",
+    "distractors": [
+      "u",
+      "i",
+      "e"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🎁 gif_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "t",
+    "distractors": [
+      "p",
+      "r",
+      "h"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "📖 boo_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "k",
+    "distractors": [
+      "c",
+      "n",
+      "g"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🧥\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "coat",
+    "distractors": [
+      "shoe",
+      "dress",
+      "sock"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍌 🍌 🍌 🍌 🍌 🍌 🍌 🍌 🍌\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "nine",
+    "distractors": [
+      "seven",
+      "ten",
+      "eight"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🐑 shee_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "p",
+    "distractors": [
+      "b",
+      "w",
+      "t"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "✏️\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "pencil",
+    "distractors": [
+      "gift",
+      "ball",
+      "bell"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍌 🍌 🍌 🍌 🍌 🍌 🍌 🍌\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "eight",
+    "distractors": [
+      "seven",
+      "ten",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "bear\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🐻",
+    "distractors": [
+      "🐯",
+      "🐸",
+      "🐫"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🎈 🎈 🎈 🎈 🎈 🎈 🎈 🎈\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "eight",
+    "distractors": [
+      "six",
+      "nine",
+      "ten"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "cake\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🎂",
+    "distractors": [
+      "🍞",
+      "🍒",
+      "🍕"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍞\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bread",
+    "distractors": [
+      "lemon",
+      "cake",
+      "cookie"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐟 🐟 🐟 🐟 🐟 🐟 🐟\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "seven",
+    "distractors": [
+      "ten",
+      "five",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🚪 doo_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "s",
+      "f",
+      "d"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "bread\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🍞",
+    "distractors": [
+      "🥕",
+      "🍎",
+      "🧀"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "camel\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🐫",
+    "distractors": [
+      "🐭",
+      "🐦",
+      "🦁"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "ball\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "⚽",
+    "distractors": [
+      "🔔",
+      "🥁",
+      "📱"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🧦\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "sock",
+    "distractors": [
+      "coat",
+      "dress",
+      "shoe"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🥕 carr_t\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "o",
+    "distractors": [
+      "i",
+      "a",
+      "u"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "moon\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🌙",
+    "distractors": [
+      "☁️",
+      "🌸",
+      "❄️"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🌽 cor_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "n",
+    "distractors": [
+      "m",
+      "k",
+      "t"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐱 🐱 🐱 🐱 🐱 🐱 🐱 🐱 🐱\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "nine",
+    "distractors": [
+      "eight",
+      "ten",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍇 g_apes\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "n",
+      "m",
+      "k"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🚂 tra_n\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "i",
+    "distractors": [
+      "o",
+      "a",
+      "u"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "V W X _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "Y",
+    "distractors": [
+      "Z",
+      "W",
+      "G"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🎂\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "cake",
+    "distractors": [
+      "cherry",
+      "bread",
+      "cheese"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "⚽ ⚽ ⚽ ⚽ ⚽ ⚽ ⚽ ⚽ ⚽\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "nine",
+    "distractors": [
+      "eight",
+      "ten",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐱 🐱 🐱 🐱 🐱 🐱\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "six",
+    "distractors": [
+      "four",
+      "five",
+      "nine"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🎁 gi_t\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "f",
+    "distractors": [
+      "w",
+      "k",
+      "p"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍕\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "pizza",
+    "distractors": [
+      "apple",
+      "cake",
+      "cherry"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐭\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "mouse",
+    "distractors": [
+      "zebra",
+      "goat",
+      "rabbit"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "corn\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🌽",
+    "distractors": [
+      "🍒",
+      "🍪",
+      "🍌"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🐫 cam_l\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "u",
+      "a",
+      "o"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐍\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "snake",
+    "distractors": [
+      "camel",
+      "duck",
+      "tiger"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "☁️\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "cloud",
+    "distractors": [
+      "rain",
+      "fire",
+      "tree"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "carrot\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🥕",
+    "distractors": [
+      "🍕",
+      "🍋",
+      "🍞"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "⚽ ⚽ ⚽ ⚽ ⚽ ⚽ ⚽ ⚽\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "eight",
+    "distractors": [
+      "six",
+      "ten",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍞 b_ead\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "m",
+      "s",
+      "k"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🔔\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bell",
+    "distractors": [
+      "drum",
+      "clock",
+      "pencil"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "👕\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "shirt",
+    "distractors": [
+      "coat",
+      "shoe",
+      "sock"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍪 🍪 🍪 🍪 🍪 🍪 🍪\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "seven",
+    "distractors": [
+      "six",
+      "five",
+      "eight"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🎈 🎈 🎈 🎈 🎈 🎈 🎈 🎈 🎈 🎈\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "ten",
+    "distractors": [
+      "nine",
+      "eight",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "N O P _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "Q",
+    "distractors": [
+      "S",
+      "R",
+      "O"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "boat\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "⛵",
+    "distractors": [
+      "🚂",
+      "🚚",
+      "✈️"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🐰 r_bbit\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "a",
+    "distractors": [
+      "e",
+      "o",
+      "u"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🦶\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "foot",
+    "distractors": [
+      "tooth",
+      "mouth",
+      "hand"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🐫 came_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "l",
+    "distractors": [
+      "t",
+      "d",
+      "k"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "sheep\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🐑",
+    "distractors": [
+      "🐸",
+      "🐻",
+      "🐐"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "J K L _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "M",
+    "distractors": [
+      "N",
+      "O",
+      "K"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🧀 c_eese\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "h",
+    "distractors": [
+      "p",
+      "f",
+      "w"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "⏰\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "clock",
+    "distractors": [
+      "bell",
+      "gift",
+      "chair"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "✈️ plan_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "u",
+      "a",
+      "o"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🐯 ti_er\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "g",
+    "distractors": [
+      "k",
+      "m",
+      "h"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "17\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "seventeen",
+    "distractors": [
+      "twenty",
+      "sixteen",
+      "nineteen"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🌸 🌸 🌸 🌸 🌸 🌸 🌸 🌸 🌸\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "nine",
+    "distractors": [
+      "ten",
+      "eight",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "16\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "sixteen",
+    "distractors": [
+      "nineteen",
+      "seventeen",
+      "eighteen"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "👄\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "mouth",
+    "distractors": [
+      "tooth",
+      "hand",
+      "foot"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "Q R S _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "T",
+    "distractors": [
+      "V",
+      "R",
+      "U"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "snow\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "❄️",
+    "distractors": [
+      "☁️",
+      "⭐",
+      "🌧️"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐟 🐟 🐟 🐟 🐟 🐟 🐟 🐟\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "eight",
+    "distractors": [
+      "six",
+      "seven",
+      "nine"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐟 🐟 🐟 🐟 🐟 🐟\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "six",
+    "distractors": [
+      "five",
+      "seven",
+      "four"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "gift\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🎁",
+    "distractors": [
+      "✏️",
+      "🏠",
+      "🪁"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐌\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "snail",
+    "distractors": [
+      "lion",
+      "goat",
+      "frog"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍕 pi_za\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "z",
+    "distractors": [
+      "k",
+      "n",
+      "h"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🦁\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "lion",
+    "distractors": [
+      "goat",
+      "camel",
+      "bear"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "duck\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🦆",
+    "distractors": [
+      "🐍",
+      "🐸",
+      "🐳"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🌸\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "flower",
+    "distractors": [
+      "snow",
+      "tree",
+      "rain"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍇\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "grapes",
+    "distractors": [
+      "lemon",
+      "pizza",
+      "bread"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "eight",
+    "distractors": [
+      "ten",
+      "six",
+      "nine"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍋 l_mon\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "a",
+      "u",
+      "i"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "phone\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "📱",
+    "distractors": [
+      "⏰",
+      "🎁",
+      "✏️"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐯\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "tiger",
+    "distractors": [
+      "snake",
+      "monkey",
+      "fish"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🚗 🚗 🚗 🚗 🚗 🚗 🚗 🚗 🚗 🚗\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "ten",
+    "distractors": [
+      "eight",
+      "nine",
+      "one"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "snail\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🐌",
+    "distractors": [
+      "🦆",
+      "🐑",
+      "🐴"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🐵 monke_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "y",
+    "distractors": [
+      "c",
+      "t",
+      "h"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍌 banan_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "a",
+    "distractors": [
+      "o",
+      "i",
+      "e"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🦋 🦋 🦋 🦋 🦋 🦋 🦋 🦋 🦋\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "nine",
+    "distractors": [
+      "ten",
+      "seven",
+      "eight"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "👕 sh_rt\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "i",
+    "distractors": [
+      "e",
+      "o",
+      "a"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "P Q R _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "S",
+    "distractors": [
+      "U",
+      "Q",
+      "T"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🐯 tige_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "p",
+      "k",
+      "g"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍇 grap_s\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "u",
+      "i",
+      "a"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🏠 ho_se\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "u",
+    "distractors": [
+      "i",
+      "a",
+      "e"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "E F G _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "H",
+    "distractors": [
+      "F",
+      "J",
+      "M"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🦁 li_n\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "o",
+    "distractors": [
+      "i",
+      "e",
+      "a"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "whale\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🐳",
+    "distractors": [
+      "🐯",
+      "🐑",
+      "🐴"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🌸 f_ower\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "l",
+    "distractors": [
+      "n",
+      "t",
+      "p"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🚗 🚗 🚗 🚗 🚗 🚗 🚗 🚗 🚗\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "nine",
+    "distractors": [
+      "seven",
+      "eight",
+      "ten"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🦈 sha_k\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "b",
+      "m",
+      "t"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🚂\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "train",
+    "distractors": [
+      "bike",
+      "boat",
+      "truck"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍪\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "cookie",
+    "distractors": [
+      "grapes",
+      "apple",
+      "banana"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "R S T _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "U",
+    "distractors": [
+      "S",
+      "W",
+      "V"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍪 🍪 🍪 🍪 🍪 🍪 🍪 🍪 🍪\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "nine",
+    "distractors": [
+      "eight",
+      "seven",
+      "ten"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐦\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bird",
+    "distractors": [
+      "tiger",
+      "whale",
+      "frog"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "K L M _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "N",
+    "distractors": [
+      "L",
+      "P",
+      "O"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🦓\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "zebra",
+    "distractors": [
+      "tiger",
+      "mouse",
+      "snake"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "book\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "📖",
+    "distractors": [
+      "🪑",
+      "🪁",
+      "⏰"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "📱 p_one\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "h",
+    "distractors": [
+      "m",
+      "r",
+      "d"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🎈 🎈 🎈 🎈 🎈 🎈 🎈\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "seven",
+    "distractors": [
+      "eight",
+      "six",
+      "ten"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🐰 rabb_t\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "i",
+    "distractors": [
+      "u",
+      "o",
+      "a"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🔔 bel_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "l",
+    "distractors": [
+      "f",
+      "m",
+      "p"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "bell\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🔔",
+    "distractors": [
+      "🎁",
+      "✏️",
+      "📱"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐝 🐝 🐝 🐝 🐝 🐝 🐝 🐝 🐝 🐝\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "ten",
+    "distractors": [
+      "nine",
+      "eight",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "👕 shir_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "t",
+    "distractors": [
+      "m",
+      "b",
+      "p"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "fire\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🔥",
+    "distractors": [
+      "🌳",
+      "🌸",
+      "⭐"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "clock\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "⏰",
+    "distractors": [
+      "📱",
+      "🔔",
+      "🎁"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐝 🐝 🐝 🐝 🐝 🐝 🐝\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "seven",
+    "distractors": [
+      "five",
+      "ten",
+      "eight"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍒 cher_y\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "m",
+      "t",
+      "s"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🌸 🌸 🌸 🌸 🌸 🌸 🌸\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "seven",
+    "distractors": [
+      "five",
+      "ten",
+      "nine"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "⭐ ⭐ ⭐ ⭐ ⭐ ⭐\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "six",
+    "distractors": [
+      "four",
+      "five",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "✈️ p_ane\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "l",
+    "distractors": [
+      "h",
+      "w",
+      "r"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "drum\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🥁",
+    "distractors": [
+      "🏠",
+      "⏰",
+      "📖"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🐻 b_ar\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "o",
+      "u",
+      "i"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍌\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "banana",
+    "distractors": [
+      "pizza",
+      "cherry",
+      "cheese"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🦆\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "duck",
+    "distractors": [
+      "bird",
+      "monkey",
+      "sheep"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "door\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🚪",
+    "distractors": [
+      "🥁",
+      "⚽",
+      "🪑"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "train\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🚂",
+    "distractors": [
+      "✈️",
+      "🚲",
+      "⛵"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐱 🐱 🐱 🐱 🐱 🐱 🐱 🐱\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "eight",
+    "distractors": [
+      "seven",
+      "six",
+      "ten"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍌 🍌 🍌 🍌 🍌 🍌\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "six",
+    "distractors": [
+      "four",
+      "five",
+      "eight"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🌧️ rai_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "n",
+    "distractors": [
+      "g",
+      "h",
+      "d"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🦋 🦋 🦋 🦋 🦋 🦋 🦋 🦋 🦋 🦋\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "ten",
+    "distractors": [
+      "nine",
+      "eight",
+      "three"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "bird\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🐦",
+    "distractors": [
+      "🦈",
+      "🐑",
+      "🐳"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🚚\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "truck",
+    "distractors": [
+      "plane",
+      "train",
+      "bike"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🐳 wh_le\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "a",
+    "distractors": [
+      "u",
+      "o",
+      "e"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🌧️\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "rain",
+    "distractors": [
+      "cloud",
+      "tree",
+      "flower"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍌 🍌 🍌 🍌 🍌 🍌 🍌 🍌 🍌 🍌\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "ten",
+    "distractors": [
+      "nine",
+      "eight",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "sock\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🧦",
+    "distractors": [
+      "👟",
+      "🧥",
+      "👕"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "cherry\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🍒",
+    "distractors": [
+      "🥕",
+      "🍇",
+      "🍋"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐻\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "bear",
+    "distractors": [
+      "tiger",
+      "mouse",
+      "horse"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐟 🐟 🐟 🐟 🐟 🐟 🐟 🐟 🐟 🐟\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "ten",
+    "distractors": [
+      "nine",
+      "eight",
+      "six"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "❄️ s_ow\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "n",
+    "distractors": [
+      "g",
+      "d",
+      "f"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "11\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "eleven",
+    "distractors": [
+      "twelve",
+      "thirteen",
+      "ten"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "C D E _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "F",
+    "distractors": [
+      "G",
+      "D",
+      "H"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "fish\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🐟",
+    "distractors": [
+      "🦁",
+      "🐌",
+      "🐸"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🥕 carro_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "t",
+    "distractors": [
+      "p",
+      "b",
+      "m"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🦈\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "shark",
+    "distractors": [
+      "rabbit",
+      "zebra",
+      "snail"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐟 🐟 🐟 🐟 🐟 🐟 🐟 🐟 🐟\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "nine",
+    "distractors": [
+      "eight",
+      "ten",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🦈 s_ark\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "h",
+    "distractors": [
+      "s",
+      "b",
+      "n"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "15\nאֵיךְ קוֹרְאִים לַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "fifteen",
+    "distractors": [
+      "sixteen",
+      "seventeen",
+      "eighteen"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍪 🍪 🍪 🍪 🍪 🍪 🍪 🍪 🍪 🍪\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "ten",
+    "distractors": [
+      "eight",
+      "nine",
+      "five"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍞 br_ad\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "a",
+      "o",
+      "u"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "L M N _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "O",
+    "distractors": [
+      "Q",
+      "P",
+      "M"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "cheese\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🧀",
+    "distractors": [
+      "🍒",
+      "🍋",
+      "🌽"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🥕\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "carrot",
+    "distractors": [
+      "lemon",
+      "grapes",
+      "cheese"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "bike\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🚲",
+    "distractors": [
+      "✈️",
+      "🚚",
+      "🚂"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "B C D _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "E",
+    "distractors": [
+      "F",
+      "C",
+      "G"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🐳\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "whale",
+    "distractors": [
+      "fish",
+      "sheep",
+      "horse"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🌽 c_rn\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "o",
+    "distractors": [
+      "i",
+      "u",
+      "e"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍪 cooki_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "e",
+    "distractors": [
+      "i",
+      "o",
+      "a"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🌳\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "tree",
+    "distractors": [
+      "star",
+      "snow",
+      "rain"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "⚽ ⚽ ⚽ ⚽ ⚽ ⚽ ⚽\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "seven",
+    "distractors": [
+      "nine",
+      "six",
+      "eight"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "👕 shi_t\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "n",
+      "f",
+      "t"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🍪 🍪 🍪 🍪 🍪 🍪 🍪 🍪\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "eight",
+    "distractors": [
+      "seven",
+      "six",
+      "ten"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🦓 zeb_a\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "m",
+      "b",
+      "g"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "pencil\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "✏️",
+    "distractors": [
+      "📱",
+      "🥁",
+      "🔔"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "✋ han_\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "d",
+    "distractors": [
+      "t",
+      "r",
+      "b"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "grapes\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🍇",
+    "distractors": [
+      "🍎",
+      "🧀",
+      "🥕"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "dress\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "👗",
+    "distractors": [
+      "👟",
+      "🧥",
+      "👕"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🐰 ra_bit\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "b",
+    "distractors": [
+      "h",
+      "r",
+      "s"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "⚽\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "ball",
+    "distractors": [
+      "bell",
+      "kite",
+      "chair"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "star\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "⭐",
+    "distractors": [
+      "🔥",
+      "🌸",
+      "🌙"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "✋\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "hand",
+    "distractors": [
+      "nose",
+      "foot",
+      "mouth"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "✈️\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "plane",
+    "distractors": [
+      "train",
+      "boat",
+      "truck"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍕 p_zza\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "i",
+    "distractors": [
+      "e",
+      "o",
+      "a"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍒 che_ry\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "r",
+    "distractors": [
+      "s",
+      "h",
+      "d"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🎈 🎈 🎈 🎈 🎈 🎈 🎈 🎈 🎈\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "nine",
+    "distractors": [
+      "eight",
+      "ten",
+      "seven"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🦷\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "tooth",
+    "distractors": [
+      "nose",
+      "hand",
+      "mouth"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "📖\nמָה הַמִּלָּה בְּאַנְגְּלִית?",
+    "correctAnswer": "book",
+    "distractors": [
+      "phone",
+      "door",
+      "gift"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "truck\nאֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?",
+    "correctAnswer": "🚚",
+    "distractors": [
+      "✈️",
+      "🚂",
+      "⛵"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🍌 ban_na\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "a",
+    "distractors": [
+      "u",
+      "i",
+      "o"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "easy",
+    "prompt": "🦋 🦋 🦋 🦋 🦋 🦋\nסִפְרוּ: אֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?",
+    "correctAnswer": "six",
+    "distractors": [
+      "eight",
+      "seven",
+      "nine"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🦶 f_ot\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "o",
+    "distractors": [
+      "e",
+      "a",
+      "u"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "O P Q _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "R",
+    "distractors": [
+      "S",
+      "P",
+      "T"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "hard",
+    "prompt": "🚚 tr_ck\nאֵיזוֹ אוֹת חֲסֵרָה?",
+    "correctAnswer": "u",
+    "distractors": [
+      "i",
+      "o",
+      "a"
+    ]
+  },
+  {
+    "gradeLo": 2,
+    "gradeHi": 2,
+    "tier": "medium",
+    "prompt": "S T U _\nאֵיזוֹ אוֹת בָּאָה אַחַר כָּךְ?",
+    "correctAnswer": "V",
+    "distractors": [
+      "W",
+      "X",
+      "T"
+    ]
+  }
+]

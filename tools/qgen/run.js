@@ -9,6 +9,7 @@ for (const name of process.argv.slice(2)) {
   const gen = require(`./${name}`);
   const all = []; const report = [];
   for (let grade = 1; grade <= 6; grade++) {
+    if (!gen.byGrade[grade]) continue;   // a generator may cover only some grades
     const { items, rejected } = collect(gen.topic, grade, TARGET, gen.byGrade[grade]);
     all.push(...items);
     const tiers = items.reduce((m, i) => (m[i.tier] = (m[i.tier] || 0) + 1, m), {});
