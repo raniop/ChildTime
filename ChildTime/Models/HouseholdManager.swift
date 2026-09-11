@@ -329,6 +329,7 @@ final class HouseholdManager: ObservableObject {
                 TofyLink("acceptEmailInvite: joined \(hh.id.prefix(8))")
                 finishBootstrap(hh)
                 recordMyParentName(in: hh)
+                recordTimeZone(in: hh)
             }
         } catch { lastError = error.localizedDescription }
         #endif
@@ -439,8 +440,20 @@ final class HouseholdManager: ObservableObject {
                         .updateData(["familyName": local]) }
                 }
                 self.recordMyParentName(in: hh)
+                self.recordTimeZone(in: hh)
                 self.refreshLinkedParentSummaries(from: hh)
             }
+    }
+
+    /// 🌍 The family's time zone, so dates and hours in server notifications
+    /// ("the gift ends on Tuesday", the evening push) are the family's own —
+    /// not Israel's. Written only when it changed.
+    private func recordTimeZone(in hh: Household) {
+        let tz = TimeZone.current.identifier
+        guard uid != nil, hh.timeZone != tz else { return }
+        Task {
+            try? await db.collection("households").document(hh.id).updateData(["timeZone": tz])
+        }
     }
 
     /// Publish MY display name into the household (so co-parents can show it

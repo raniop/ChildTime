@@ -15,6 +15,8 @@ struct Household: Codable, Identifiable, Equatable {
     /// private docs (which the rules deny). Optional so older household docs
     /// (without this field) still decode.
     var parentNames: [String: String]?
+    /// 🌍 IANA time zone of the family (e.g. "America/New_York") — server pushes use it for dates and hours.
+    var timeZone: String?
     /// Family-wide parent gate code as a salted hash ("salt:hash") so the same
     /// code works on every device in the household — never the plain code.
     var parentPinHash: String?

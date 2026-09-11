@@ -660,7 +660,9 @@ struct WorldOrderTests {
 
     @Test("the same child on the same day always gets the same order")
     func stableWithinTheDay() {
-        let day = Date()
+        // 10:00 + 1 h stays on the same calendar day — `Date()` failed the test when
+        // it ran after 23:00 (the hour crossed midnight into the next day's order).
+        let day = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: Date())!
         let a = WorldMapView.orderForToday(worlds, childID: kid, on: day)
         let b = WorldMapView.orderForToday(worlds, childID: kid, on: day.addingTimeInterval(3600))
         #expect(a.map(\.id) == b.map(\.id))

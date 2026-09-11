@@ -33,6 +33,20 @@ final class LocalizationTests: XCTestCase {
         XCTAssertEqual(tr("תַּרְגִּיל \(math)"), "תַּרְגִּיל \u{2066}3 + 4\u{2069}", "the app's own math isolates stay")
     }
 
+    /// A brand-new install follows the iPhone; an Israeli English iPhone and every
+    /// install from before languages stay Hebrew.
+    func testFirstLaunchLanguage() {
+        let fresh = UserDefaults(suiteName: "test.firstLaunch.\(UUID().uuidString)")!
+        XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["en-US"], defaults: fresh), .en)
+        XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["en-GB"], defaults: fresh), .en)
+        XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["en-IL", "he-IL"], defaults: fresh), .he)
+        XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["he-IL"], defaults: fresh), .he)
+        XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["ru-IL"], defaults: fresh), .he)
+        let existing = UserDefaults(suiteName: "test.firstLaunch.\(UUID().uuidString)")!
+        existing.set(true, forKey: "onboardingCompleted")
+        XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["en-US"], defaults: existing), .he, "an existing family never flips to English")
+    }
+
     func testMissingTranslationFallsBackToHebrew() {
         LanguageStore.shared.setForTesting(.en)
         XCTAssertEqual(tr("מִשְׁפָּט שֶׁאֵין לוֹ תַּרְגּוּם"), "\u{2067}מִשְׁפָּט שֶׁאֵין לוֹ תַּרְגּוּם\u{2069}")

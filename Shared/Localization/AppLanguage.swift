@@ -55,21 +55,36 @@ final class LanguageStore: ObservableObject {
     @Published private(set) var current: AppLanguage
 
     private init() {
-        current = AppLanguage(rawValue: AppGroup.defaults.string(forKey: Self.defaultsKey) ?? "") ?? .he
+        if let saved = AppLanguage(rawValue: AppGroup.defaults.string(forKey: Self.defaultsKey) ?? "") {
+            current = saved
+        } else {
+            current = Self.firstLaunchLanguage()
+            // Only the app decides for good: an extension (widget, shield) can wake
+            // before the app's first launch, and must not settle the choice for it.
+            if Bundle.main.bundleIdentifier == "com.rani.ChildTime" {
+                AppGroup.defaults.set(current.rawValue, forKey: Self.defaultsKey)
+            }
+        }
         #if DEBUG
         // DEMO_LANG=en — screenshots in another language without touching the saved choice.
         if let demo = ProcessInfo.processInfo.environment["DEMO_LANG"].flatMap(AppLanguage.init(rawValue:)) { current = demo }
         #endif
     }
 
-    /// Languages offered in the picker. English is visible only to builds that
-    /// are testing it until its content is ready to launch.
-    var available: [AppLanguage] {
-        #if DEBUG
-        return AppLanguage.allCases
-        #else
-        return AppGroup.defaults.bool(forKey: "app.language.englishPreview") ? AppLanguage.allCases : [.he]
-        #endif
+    /// Languages offered in the picker.
+    var available: [AppLanguage] { AppLanguage.allCases }
+
+    /// No saved choice yet. Every install from before languages is Hebrew — it
+    /// already finished onboarding or picked a device role — and stays Hebrew.
+    /// A brand-new install follows the iPhone: English outside Israel starts in
+    /// English (an American family never lands on a Hebrew app); an English
+    /// iPhone set to Israel (en-IL) and everything else start in Hebrew.
+    static func firstLaunchLanguage(preferred: [String] = Locale.preferredLanguages, defaults: UserDefaults = AppGroup.defaults) -> AppLanguage {
+        if defaults.object(forKey: "onboardingCompleted") != nil || defaults.object(forKey: "deviceRole") != nil { return .he }
+        guard let first = preferred.first else { return .he }
+        let locale = Locale(identifier: first)
+        let region = locale.region?.identifier ?? Locale.current.region?.identifier
+        return locale.language.languageCode?.identifier == "en" && region != "IL" ? .en : .he
     }
 
     func set(_ language: AppLanguage) {
