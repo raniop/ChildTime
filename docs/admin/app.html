@@ -112,7 +112,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260912005214";
+const PAGE_STAMP = "20260912010202";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -559,10 +559,21 @@ async function loadBatches() {
   // English batches import with lang:"en" — the server learned languages in the
   // 2026-09-12 deploy. (A lock that waited for `en` counts stayed shut on a cloud
   // bank with no worlds yet, since an empty summary looks the same either way.)
-  const bulk = batches.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 0 10px">
+  // What is REALLY in the cloud right now — otherwise a bulk run looks like nothing happened.
+  const cloudTotals = (L) => Object.values(summary.topics || {}).reduce((m, t) => {
+    const v = (L === "en" ? (t || {}).en : t) || {};
+    return { approved: m.approved + (v.approved || 0), draft: m.draft + (v.draft || 0) };
+  }, { approved: 0, draft: 0 });
+  const he = cloudTotals("he"), en = cloudTotals("en");
+  const state = `<div id="bulkState" style="background:var(--soft);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:13px;line-height:1.7">
+      <b>בענן עכשיו:</b> 🇮🇱 ${fmt(he.approved)} מאושרות${he.draft ? ` · ${fmt(he.draft)} טיוטות` : ""}
+      · 🇺🇸 ${fmt(en.approved)} מאושרות${en.draft ? ` · ${fmt(en.draft)} טיוטות` : ""}
+      ${(QLANG === "en" ? en : he).approved === 0 ? `<br><span class="stamp">בשפה שנבחרה (${QLANG === "en" ? "🇺🇸 English" : "🇮🇱 עברית"}) עוד אין שאלות בענן — התחילו ב־📦 ייבוא הכל.</span>` : ""}
+      <div id="bulkResult" class="stamp" style="margin-top:6px"></div></div>`;
+  const bulk = batches.length ? state + `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 0 10px">
       <button class="btn" id="impAll">📦 ייבוא הכל · ${batches.length} אצוות · ${fmt(batches.reduce((n, b) => n + (b.count || 0), 0))} שאלות</button>
       <button class="btn" id="apprAll">✅ אישור כל הטיוטות</button>
-      <span class="stamp" id="bulkMsg"></span></div>` : "";
+      <span class="stamp" id="bulkMsg"></span></div>` : state;
   $("genBatches").innerHTML = bulk + batches.map((b) => { const t = T[b.topic] || {}; const all = ((summary.topics || {})[b.topic] || {}); const inCloud = QLANG === "en" ? (all.en || {}) : all; const have = (inCloud.approved || 0) + (inCloud.draft || 0);
     return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)">
       <div><b>${t.emoji || ""} ${esc(t.label || b.topic)}</b>${b.label === "english" ? " · 🇬🇧 אַנְגְּלִית בְּתוֹךְ הָעוֹלָם" : ""} · ${fmt(b.count)} שאלות<div class="stamp">${Object.entries(b.byGrade || {}).map(([g, n]) => `${GN[g] || g} ${n}`).join(" · ")}${have ? ` · בענן כבר ${fmt(have)}` : ""}</div></div>
@@ -584,7 +595,9 @@ async function loadBatches() {
       } catch (e) { failed++; console.error("import failed", b.file, e); }
     }
     msg.textContent = "";
-    toast(`✅ נוספו ${fmt(added)}${dup ? ` · ${fmt(dup)} כבר היו` : ""}${rejected ? ` · ${rejected} נדחו` : ""}${failed ? ` · ${failed} אצוות נכשלו` : ""}`);
+    const line = `📦 ייבוא (${QLANG === "en" ? "🇺🇸 English" : "🇮🇱 עברית"}): נוספו ${fmt(added)}${dup ? ` · ${fmt(dup)} כבר היו` : ""}${rejected ? ` · ${rejected} נדחו` : ""}${failed ? ` · ${failed} אצוות נכשלו` : ""}${approve ? " · אושרו מיד" : " · ממתינות לאישור"}`;
+    sessionStorage.setItem("admin.bulkResult", line);
+    toast(line);
     COV = null; importQuestions();
   };
   // ✅ Approve every draft in this language, world by world.
@@ -606,9 +619,13 @@ async function loadBatches() {
       } catch (e) { failed++; console.error("approve failed", topic, e); }
     }
     msg.textContent = "";
-    toast(`✅ אושרו ${fmt(approved)} שאלות${failed ? ` · ${failed} עולמות נכשלו` : ""}`);
+    const line = `✅ אישור (${QLANG === "en" ? "🇺🇸 English" : "🇮🇱 עברית"}): אושרו ${fmt(approved)} שאלות${failed ? ` · ${failed} עולמות נכשלו` : ""}${approved === 0 ? " — לא נמצאו טיוטות. אם עוד לא ייבאתם, התחילו ב־📦 ייבוא הכל." : ""}`;
+    sessionStorage.setItem("admin.bulkResult", line);
+    toast(line);
     COV = null; importQuestions();
   };
+  const last = sessionStorage.getItem("admin.bulkResult");
+  if (last && $("bulkResult")) $("bulkResult").textContent = last;
   document.querySelectorAll("[data-batch]").forEach((btn) => btn.onclick = async () => {
     const topic = btn.dataset.batch; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
     try {
@@ -772,12 +789,84 @@ async function settings() {
     <div class="card"><h4>נוסחים (עריכה בלי בילד)</h4>
       <div class="q"><b>פוש ההפעלה</b><textarea id="k_copyActivation">${esc(cfg.copyActivation)}</textarea></div>
       <div class="q"><b>48 שעות לפני</b><textarea id="k_copyTwoDays">${esc(cfg.copyTwoDays)}</textarea></div>
-      <div class="stamp">משתנים: {שם} {שאלות} {ימים} {תאריך} {עולם אהוב} {חזרות} {מחיר חודשי בשנתי}</div><div class="stamp">מכשירים שמוגדרים לאנגלית מקבלים נוסח אנגלי קבוע מהשרת, באותה משמעות (בלי מחיר) — העריכה כאן משנה רק את העברית.</div></div>`;
+      <div class="stamp">משתנים: {שם} {שאלות} {ימים} {תאריך} {עולם אהוב} {חזרות} {מחיר חודשי בשנתי}</div><div class="stamp">מכשירים שמוגדרים לאנגלית מקבלים נוסח אנגלי קבוע מהשרת, באותה משמעות (בלי מחיר) — העריכה כאן משנה רק את העברית.</div></div>
+    <div class="card" id="retBox"><h4>🗄️ שמירת נתונים ומחיקת משפחות לא פעילות</h4><div class="empty"><span class="spin"></span> טוען…</div></div>`;
   $("saveCfg").onclick = async () => { const v = (k) => document.getElementById("k_" + k).value;
     const config = { activationDays: +v("activationDays"), activationQuestions: +v("activationQuestions"), giftDays: +v("giftDays"), guestWorlds: +v("guestWorlds"), guestRotateDays: +v("guestRotateDays"), lockedShown: +v("lockedShown"), lockedRotateDays: +v("lockedRotateDays"),
       giftPushDays: v("giftPushDays").split(/[^0-9]+/).filter(Boolean).map(Number), giftPushHour: +v("giftPushHour"), oneTimeAfterGiftOnly: v("oneTimeAfterGiftOnly") === "true", paywall: v("paywall"), storeKitTrial: v("storeKitTrial") === "true",
       guestTopics: [...document.getElementById("k_guestTopics").selectedOptions].map((o) => o.value), copyActivation: v("copyActivation"), copyTwoDays: v("copyTwoDays") };
     $("saveCfg").disabled = true; try { await call("adminSetConfig", { config }); toast("נשמר ✅"); await loadJourney(true); } catch (e) { toast("נכשל: " + e.message); } $("saveCfg").disabled = false; };
+  retention();
+}
+
+// ---------------- 8b · שמירת נתונים (COPPA) ----------------
+// המחיקה אף פעם לא אוטומטית: השרת סורק, מדווח, ושולח הודעה אחת — ומחיקה קורית רק
+// בלחיצה כאן, אחרי שהשרת בודק מחדש כל סימן חיים של המשפחה.
+const RET_SIG = { childState: "התקדמות אחרונה של ילד", childDoc: "שינוי אחרון בפרופיל ילד", dailyStats: "יום למידה אחרון", friendCard: "כרטיס החברים", chores: "מטלות", devices: "מכשיר נראה לאחרונה", parentAuth: "כניסה אחרונה לחשבון הורה", parentDoc: "עדכון אחרון במסמך ההורה", purchase: "רכישה, מנוי או מתנה", household: "פתיחת המשפחה" };
+const RET_REASON = { noParentAccount: "אין חשבון הורה מקושר", "missing:state/current": "לילד אין מסמך התקדמות", "missing:authAccount": "חשבון ההורה לא נמצא", "missing:authActivity": "אין חותמת פעילות לחשבון ההורה", "missing:childDevices.lastSeenAt": "לרשומת מכשיר אין תאריך" };
+const retWhy = (r) => !r ? "" : RET_REASON[r] || (r.startsWith("unreadable:") ? "תאריך לא קריא ב־" + r.slice(11) : r.startsWith("missing:") ? "חסר נתון: " + r.slice(8) : r.startsWith("error:") ? "שגיאת קריאה: " + r.slice(6) : r);
+const retDays = (s) => Math.round((Date.now() / 1000 - s) / 86400);
+const retAgo = (s) => s ? `${dateShort(s)} · לפני ${fmt(retDays(s))} ימים` : "לא נמצאה פעילות";
+const retName = (r) => r.name || "משפחה " + String(r.householdID || "").slice(0, 4);
+const retWho = (r) => `${fmt(r.children || 0)} ילדים · ${fmt(r.parents || 0)} חשבונות הורה`;
+const retEvidence = (sig) => { const e = Object.entries(sig || {}).sort((a, b) => b[1] - a[1]); return e.length ? e.map(([k, v]) => `${RET_SIG[k] || k}: ${dateShort(v)}`).join(" · ") : "לא נמצאה שום פעילות"; };
+const retDelivery = (n) => !n ? "לא תועדה שליחה" : `הגיעה ל־${fmt(n.pushTokens || 0)} מכשירים ו־${fmt(n.emails || 0)} כתובות מייל${(n.pushError || n.emailError) ? " · הייתה תקלה בשליחה" : ""}${(!n.pushTokens && !n.emails) ? " ⚠️ לא הגיעה לאף אחד" : ""}`;
+const retLine = (x, tail) => `<div class="q"><b>${esc(retName(x))}</b> <span class="m">· ${esc(retWho(x))}</span>${tail ? ` <span class="chip dim" style="padding:1px 8px;font-size:11px">${esc(tail)}</span>` : ""}<div class="m">פעילות אחרונה: ${esc(retAgo(x.lastActivityAt))} · ${esc(retEvidence(x.signals))}</div></div>`;
+const retRow = (x) => `<div class="fam"><div class="h"><div><b>👪 ${esc(retName(x))}</b> <span class="state">${esc(retWho(x))}</span></div><div class="m">ההודעה נשלחה ${esc(dateShort(x.noticeAt))} · לפני ${fmt(retDays(x.noticeAt))} ימים · ${esc(retDelivery(x.notice))}</div></div>
+  <div class="m" style="margin-top:6px">פעילות אחרונה: ${esc(retAgo(x.lastActivityAt))}<br>ראיות: ${esc(retEvidence(x.signals))}</div>
+  <div class="acts"><button class="btn danger" data-retdel="${esc(x.householdID)}" data-retname="${esc(retName(x))}">🗑 מחק</button></div></div>`;
+async function retention(recompute) {
+  if (!$("retBox")) return;
+  const head = '<h4>🗄️ שמירת נתונים ומחיקת משפחות לא פעילות</h4>';
+  $("retBox").innerHTML = `${head}<div class="empty"><span class="spin"></span> ${recompute ? "סורק את כל המשפחות… זה יכול לקחת דקה" : "טוען…"}</div>`;
+  let r;
+  try { r = await call("adminRetention", recompute ? { recompute: true } : {}); }
+  catch (e) { if ($("retBox")) $("retBox").innerHTML = `${head}<div class="empty">${esc(e.message)}</div>`; return; }
+  const box = $("retBox"); if (!box) return;
+  const rep = r.report || {}, cfg = r.config || {}, p = rep.policy || {};
+  const scan = rep.scan || {}, c = scan.counts || {}, del = rep.deletion || {}, wl = rep.waitlist || {};
+  const rows = del.deletable || [], cand = scan.candidates || [], pend = scan.pending || [], und = scan.undetermined || [];
+  box.innerHTML = `${head}
+    <div class="stamp" style="line-height:1.9;margin-bottom:10px">
+      רשימת ההמתנה באתר נמחקת אוטומטית ${fmt(p.waitlistDays || 365)} יום אחרי ההרשמה ·
+      משפחה בלי שום פעילות ${Math.round((p.inactiveDays || 548) / 30.4)} חודשים מקבלת הודעה אחת (פוש למכשירי ההורים + מייל) ·
+      המחיקה ידנית בלבד, ${fmt(p.graceDays || 30)} יום אחרי ההודעה ואחרי בדיקה חוזרת של כל הסימנים ·
+      צילומי מטלות ${fmt(p.chorePhotoDays || 7)} ימים · רשומות מכשירים ${fmt(p.deviceRowDays || 60)} יום.<br>
+      כל פעילות במשפחה מבטלת את ההודעה. סימן חסר או לא קריא = המשפחה נחשבת פעילה ולא נוגעים בה.
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+      <span class="sw ${cfg.enabled ? "on" : ""}" id="retSw"></span>
+      <b>${cfg.enabled ? "שליחת הודעות מחיקה דלוקה" : "מצב יבש — לא נשלחות הודעות"}</b>
+      <span class="stamp">${cfg.enabled ? "משפחה שעברה את הסף מקבלת הודעה אחת, בשעה סבירה אצלה." : "הסריקה רצה ומדווחת מי היה מקבל הודעה, בלי לשלוח כלום."}</span>
+      <button class="btn ghost" id="retRun">חשב עכשיו</button>
+    </div>
+    <div class="kpis">
+      ${kpi(fmt(c.households ?? "—"), "משפחות שנסרקו")}
+      ${kpi(fmt(c.inactive ?? 0), "לא פעילות מעל הסף")}
+      ${kpi(fmt(c.noticed ?? 0), "קיבלו הודעה · " + fmt(c.waitingGrace ?? 0) + " בהמתנה")}
+      ${kpi(fmt((del.counts || c).deletable ?? 0), "מוכנות למחיקה")}
+      ${kpi(fmt(c.returned ?? 0), "חזרו לפעילות אחרי ההודעה")}
+      ${kpi(fmt(c.undetermined ?? 0), "חסר נתון — לא נוגעים")}
+    </div>
+    <div class="stamp" style="margin-bottom:12px">סריקה אחרונה: ${scan.at ? when(scan.at * 1000) : "—"}${scan.dryRun ? " · מצב יבש" : ""} · דוח המחיקה השבועי: ${del.at ? when(del.at * 1000) : "—"} · ניקוי רשימת ההמתנה: ${wl.at ? `${when(wl.at * 1000)} · נמחקו ${fmt(wl.deleted || 0)}, נשארו ${fmt(wl.kept || 0)}` : "—"}</div>
+    <h4>מוכנות למחיקה · ${fmt(rows.length)}</h4>
+    ${rows.length ? rows.map(retRow).join("") : '<div class="empty">אין משפחה שעברו לה 30 יום מההודעה והיא עדיין לא פעילה.</div>'}
+    ${cand.length ? `<h4 style="margin-top:16px">${cfg.enabled ? "ממתינות להודעה" : "היו מקבלות הודעה עכשיו"} · ${fmt(cand.length)}</h4>${cand.slice(0, 50).map((x) => retLine(x)).join("")}` : ""}
+    ${pend.length ? `<h4 style="margin-top:16px">בתוך 30 הימים שאחרי ההודעה · ${fmt(pend.length)}</h4>${pend.slice(0, 50).map((x) => retLine(x, `נשארו ${fmt(x.daysLeft || 0)} ימים`)).join("")}` : ""}
+    ${und.length ? `<h4 style="margin-top:16px">חסר נתון — לא ייכנסו למחיקה · ${fmt(c.undetermined || 0)}</h4>${und.slice(0, 30).map((x) => retLine(x, retWhy(x.reason))).join("")}` : ""}`;
+  $("retRun").onclick = () => retention(true);
+  $("retSw").onclick = async () => {
+    const on = !cfg.enabled;
+    if (on && !confirm("להדליק שליחת הודעות מחיקה?\n\nכל משפחה שאין בה שום פעילות כבר 18 חודשים תקבל הודעה אחת — פוש למכשירי ההורים ומייל — שהנתונים יימחקו בעוד 30 יום. כל פעילות מבטלת את ההודעה, והמחיקה עצמה נשארת ידנית לגמרי.")) return;
+    try { await call("adminSetRetentionEnabled", { enabled: on }); toast(on ? "הודעות המחיקה דלוקות" : "חזרנו למצב יבש"); retention(); }
+    catch (e) { toast("נכשל: " + e.message); }
+  };
+  document.querySelectorAll("[data-retdel]").forEach((b) => b.onclick = async () => {
+    if (!confirm(`למחוק לצמיתות את הנתונים של "${b.dataset.retname}"?\n\nכל הילדים, ההתקדמות, המטלות וחשבון המשפחה יימחקו. השרת בודק שוב לפני המחיקה שהמשפחה עדיין לא פעילה ושעברו 30 יום מההודעה. אי אפשר לבטל — שחזור אפשרי רק עד 7 ימים אחורה.`)) return;
+    b.disabled = true; b.innerHTML = '<span class="spin"></span>';
+    try { await call("adminDeleteHousehold", { householdID: b.dataset.retdel, retention: true }); toast("המשפחה נמחקה"); FAM = null; retention(); }
+    catch (e) { b.disabled = false; b.textContent = "🗑 מחק"; toast("נכשל: " + e.message); }
+  });
 }
 </script>
 </body>
