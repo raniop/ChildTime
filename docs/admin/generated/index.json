@@ -25,6 +25,17 @@
       "generatedAt": "2026-09-11T09:12:38.231Z"
     },
     {
+      "topic": "hebrew",
+      "file": "hebrew.json",
+      "label": "",
+      "count": 389,
+      "byGrade": {
+        "7": 199,
+        "8": 190
+      },
+      "generatedAt": "2026-09-11T09:51:32.877Z"
+    },
+    {
       "topic": "history",
       "file": "history.json",
       "label": "",
