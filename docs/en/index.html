@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#5E60CE">
+<title>Tofy — Screen time kids earn by learning</title>
+<meta name="description" content="Tofy turns screen time into something kids earn. Your child answers grade-level questions — math, reading, science, and more — and earns real play minutes in the apps you choose. No ads, no tracking.">
+<link rel="canonical" href="https://tofyapp.com/en/">
+<link rel="alternate" hreflang="en" href="https://tofyapp.com/en/">
+<link rel="alternate" hreflang="he" href="https://tofyapp.com/">
+<meta property="og:title" content="Tofy — Screen time kids earn by learning">
+<meta property="og:description" content="Your child learns, answers questions, and earns play minutes. You see everything and stay in control from your own phone. Grades K–8, no ads, no tracking.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tofy">
+<meta property="og:url" content="https://tofyapp.com/en/">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="he_IL">
+<meta property="og:image" content="https://tofyapp.com/og-image.jpg?v=6">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tofy — a learning and screen-time app for kids">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tofy — Screen time kids earn by learning">
+<meta name="twitter:description" content="Fun for kids, peace of mind for parents. Grades K–8.">
+<meta name="twitter:image" content="https://tofyapp.com/og-image.jpg?v=6">
+<link rel="icon" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
+<link rel="stylesheet" href="../glass.css?v=3">
+<style>
+  /* ---------- hero ---------- */
+  .hero{padding:60px 0 30px}
+  .hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,430px);gap:44px;align-items:center}
+  .hero h1{font-size:clamp(38px,5.6vw,68px);font-weight:900;
+    background:linear-gradient(180deg,#fff,#FFE9A8);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .sub{font-size:clamp(17px,2.1vw,21px);color:var(--muted);margin:18px 0 8px;max-width:520px;font-weight:500}
+  .hero .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
+  .pills{display:flex;flex-wrap:wrap;gap:9px;margin-top:26px}
+  .pills span{font-size:14px;font-weight:700;padding:8px 15px;border-radius:999px;
+    background:rgba(255,255,255,.12);border:1px solid var(--edge);color:var(--muted)}
+  /* The kid's phone leads, the parent's sits behind it. Both are capped in
+     pixels so a mid-sized window never turns the hero into two giant phones. */
+  .stage{position:relative;width:100%;max-width:520px}
+  .stage img,.stage video{border-radius:30px;border:1px solid rgba(255,255,255,.2);
+    box-shadow:0 30px 70px rgba(18,9,58,.45);display:block;max-width:100%;height:auto}
+  .stage .front{position:relative;z-index:2;width:min(66%,300px);margin-inline-start:auto;
+    animation:floaty 6s ease-in-out infinite}
+  .stage .back{position:absolute;z-index:1;bottom:4%;inset-inline-start:0;width:min(50%,228px);
+    animation:floaty 6s ease-in-out infinite;animation-delay:-3s}
+  @media(max-width:1040px){
+    .hero{padding-top:44px}
+    .hero .wrap{grid-template-columns:1fr;text-align:center;gap:26px}
+    .hero .sub{margin-inline:auto}
+    .hero .cta-row,.pills{justify-content:center}
+    .stage{width:100%;max-width:420px;margin:6px auto 0}
+    .stage .front{width:min(64%,260px)}
+    .stage .back{width:min(48%,196px);bottom:6%}
+  }
+
+  /* ---------- steps ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .step{padding:32px 24px;text-align:center}
+  .step .n{width:42px;height:42px;line-height:40px;border-radius:50%;margin:0 auto 14px;font-weight:900;
+    background:linear-gradient(180deg,#fff,#EDEAFF);color:var(--ink)}
+  .step .ico{font-size:44px;margin-bottom:10px;line-height:1}
+  .step h3{font-size:21px;font-weight:800;margin-bottom:8px}
+  .step p{color:var(--muted);font-size:15.5px}
+
+  /* ---------- screenshot rails ---------- */
+  .side{margin-top:40px}
+  .side h3{text-align:center;font-size:24px;font-weight:900;margin-bottom:6px}
+  .side .side-sub{text-align:center;max-width:620px;margin:0 auto 24px;color:var(--muted);font-size:16.5px}
+  .shots-note{text-align:center;color:var(--faint);font-size:14px;margin-top:-26px;margin-bottom:10px}
+  .rail{display:flex;gap:18px;overflow-x:auto;padding:10px 4px 22px;scroll-snap-type:x mandatory}
+  .rail figure{flex:0 0 auto;margin:0;text-align:center;scroll-snap-align:center;width:212px}
+  .rail img{width:212px;border-radius:26px;border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 20px 46px rgba(18,9,58,.4)}
+  .rail figcaption{margin-top:11px;font-size:14.5px;font-weight:700;color:var(--muted)}
+  @media(min-width:900px){
+    .rail{display:grid;grid-template-columns:repeat(3,212px);justify-content:center;
+      gap:26px 22px;overflow:visible;padding-bottom:6px}
+  }
+
+  /* a screenshot is a button: it opens the lightbox */
+  .rail .shot{padding:0;border:0;background:none;display:block;cursor:zoom-in;border-radius:26px;
+    transition:transform .18s ease}
+  .rail .shot:hover{transform:translateY(-4px)}
+  .rail .shot::after{content:"⤢";position:absolute;inset-block-start:10px;inset-inline-start:10px;
+    width:30px;height:30px;display:grid;place-items:center;border-radius:50%;font-size:14px;font-weight:800;
+    background:rgba(20,12,60,.55);border:1px solid rgba(255,255,255,.34);color:#fff;
+    opacity:0;transition:opacity .18s ease;pointer-events:none}
+  .rail figure{position:relative}
+  .rail .shot:hover::after,.rail .shot:focus-visible::after{opacity:1}
+  @media(hover:none){.rail .shot::after{opacity:.9}}
+
+  /* ---------- lightbox ---------- */
+  .lb[hidden]{display:none}
+  .lb{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:26px 16px;outline:none;
+    background:rgba(24,13,66,.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .lb figure{margin:0;text-align:center;max-width:min(94vw,460px)}
+  .lb img{width:100%;max-height:80vh;object-fit:contain;border-radius:34px;
+    border:1px solid rgba(255,255,255,.28);box-shadow:0 40px 90px rgba(10,4,40,.6)}
+  .lb figcaption{margin-top:14px;font-size:17px;font-weight:800;color:#fff}
+  .lb .count{margin-top:4px;font-size:14px;font-weight:600;color:var(--faint);
+    font-variant-numeric:tabular-nums;direction:ltr}
+  .lb button{position:absolute;background:rgba(255,255,255,.14);border:1px solid var(--edge);color:#fff;
+    width:52px;height:52px;border-radius:50%;font-size:24px;font-weight:800;cursor:pointer;font-family:inherit;
+    display:grid;place-items:center;transition:background .18s ease,transform .18s ease}
+  .lb button:hover{background:rgba(255,255,255,.26);transform:scale(1.06)}
+  .lb .close{inset-block-start:18px;inset-inline-end:18px;font-size:22px}
+  .lb .prev{inset-inline-start:14px;inset-block-start:50%;translate:0 -50%}
+  .lb .next{inset-inline-end:14px;inset-block-start:50%;translate:0 -50%}
+  @media(max-width:620px){
+    .lb .prev,.lb .next{inset-block-start:auto;inset-block-end:18px;translate:none;width:48px;height:48px}
+    .lb .prev{inset-inline-start:24px} .lb .next{inset-inline-end:24px}
+    .lb img{max-height:64vh}
+  }
+
+  /* ---------- worlds ---------- */
+  .worlds{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:900px;margin:0 auto}
+  .world{font-size:15.5px;font-weight:700;padding:11px 18px;border-radius:999px;
+    background:rgba(255,255,255,.12);border:1px solid var(--edge)}
+  .world.free{background:rgba(140,255,196,.18);border-color:rgba(140,255,196,.5)}
+  .worlds-note{text-align:center;color:var(--faint);font-size:15px;margin-top:22px}
+
+  /* ---------- feature cards ---------- */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .card{padding:28px 24px;transition:transform .2s ease, background .2s ease}
+  .card:hover{transform:translateY(-4px);background:var(--pane-hi)}
+  .card .ico{font-size:36px;margin-bottom:12px;line-height:1}
+  .card h3{font-size:19.5px;font-weight:800;margin-bottom:6px}
+  .card p{color:var(--muted);font-size:15.5px}
+  @media(max-width:820px){.steps,.cards{grid-template-columns:1fr}}
+
+  /* ---------- safety band ---------- */
+  .band{padding:48px 30px;text-align:center}
+  .band .list{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:26px}
+  .band .list li{list-style:none;font-weight:700;font-size:15.5px;padding:11px 18px;border-radius:14px;
+    background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.2)}
+
+  /* ---------- pricing ---------- */
+  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+  .plan{padding:30px 26px;display:flex;flex-direction:column}
+  .plan.best{border-color:rgba(255,210,63,.55);box-shadow:0 22px 50px rgba(18,9,58,.34), 0 0 0 1px rgba(255,210,63,.25)}
+  .plan .tag{display:inline-block;align-self:flex-start;font-size:13px;font-weight:800;padding:5px 12px;border-radius:999px;
+    background:rgba(255,210,63,.22);border:1px solid rgba(255,210,63,.5);color:#FFE9A8;margin-bottom:12px}
+  .plan h3{font-size:22px;font-weight:900;margin-bottom:4px}
+  .plan .price{font-size:34px;font-weight:900;margin:10px 0 2px}
+  .plan .price small{font-size:15px;font-weight:700;color:var(--muted)}
+  .plan .note{color:var(--faint);font-size:14.5px;margin-bottom:16px}
+  .plan ul{list-style:none;margin:0 0 20px;display:flex;flex-direction:column;gap:9px}
+  .plan li{color:var(--muted);font-size:15.5px;display:flex;gap:8px}
+  .plan li::before{content:"✓";color:var(--mint);font-weight:900;flex:0 0 auto}
+  .plan .foot{margin-top:auto;color:var(--faint);font-size:14px}
+  @media(max-width:900px){.plans{grid-template-columns:1fr}}
+
+  /* ---------- faq ---------- */
+  .faq{max-width:780px;margin:0 auto}
+  .faq details{padding:18px 22px;margin-bottom:12px}
+  .faq summary{font-weight:800;font-size:17.5px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:14px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";font-size:24px;color:var(--gold);line-height:1}
+  .faq details[open] summary::after{content:"−"}
+  .faq details p{margin-top:12px;color:var(--muted);font-size:16px}
+
+  /* ---------- waitlist ---------- */
+  .ef{display:flex;flex-direction:column;gap:12px;max-width:420px;margin:26px auto 0}
+  .ef input,.ef select{width:100%;font-family:inherit;font-size:16px;font-weight:600;color:#fff;
+    background:rgba(255,255,255,.12);border:1px solid var(--edge);border-radius:14px;padding:14px 16px;outline:none;
+    transition:border-color .2s, background .2s}
+  .ef input::placeholder{color:rgba(255,255,255,.6)}
+  .ef input:focus,.ef select:focus{border-color:var(--gold);background:rgba(255,255,255,.18)}
+  .ef select{appearance:none}
+  .ef option{color:#1b1340}
+  .ef-ok{font-weight:800;font-size:19px;color:var(--mint);margin-top:22px}
+  .ef-note{font-size:13.5px;color:var(--faint);margin-top:14px}
+  .ef-note a{color:var(--muted);text-decoration:underline}
+
+  .final{text-align:center}
+  .final img{width:96px;margin:0 auto 12px;animation:floaty 5s ease-in-out infinite}
+  .final h2{font-size:clamp(26px,4.4vw,40px);font-weight:900;margin-bottom:10px}
+  .final p{color:var(--muted);font-size:18px;margin-bottom:26px}
+</style>
+</head>
+<body>
+<div class="backdrop"></div>
+<div class="sparks" id="sparks"></div>
+
+<header class="site-head"><div class="wrap">
+  <a class="brand" href="./"><img src="../lion.png" alt=""><span>Tofy</span></a>
+  <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">☰</button>
+  <nav class="site-nav" id="nav">
+    <a href="#how">How it works</a>
+    <a href="#screens">Sneak peek</a>
+    <a href="#worlds">Worlds</a>
+    <a href="#parents">For parents</a>
+    <a href="#price">Pricing</a>
+    <a href="../" lang="he" hreflang="he">עברית</a>
+    <a class="btn" href="#early">Notify me at launch</a>
+  </nav>
+</div></header>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero"><div class="wrap">
+  <div>
+    <h1>Screen time<br>they earn by learning</h1>
+    <p class="sub">Your child answers grade-level questions — and earns real play minutes in the apps you choose. You see everything from your own phone.</p>
+    <div class="cta-row">
+      <a class="appstore" href="#early" data-store>
+        <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.1 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+        <span class="tx"><small data-store-small>Coming soon to the</small><b>App&nbsp;Store</b></span>
+      </a>
+      <a class="btn ghost" href="#how">How it works ↓</a>
+    </div>
+    <div class="pills">
+      <span>🎒 Grades K–8</span>
+      <span>🚫 No ads</span>
+      <span>🔒 No tracking</span>
+      <span>🇺🇸 Fully in English</span>
+    </div>
+  </div>
+  <div class="stage">
+    <!-- The hero plays the app itself: a silent, looping capture of a real
+         session. The poster is the first frame, so the layout never jumps. -->
+    <video class="front" src="../video/hero-loop.mp4" poster="../video/hero-poster.jpg"
+           width="820" height="1781" autoplay muted loop playsinline preload="metadata"
+           aria-label="A look inside the app: a child answers a question, collects minutes, and unlocks play time"></video>
+    <img class="back" src="../shots/giftearly.jpg" alt="The family board on a parent's phone" width="820" height="1781" loading="lazy">
+  </div>
+</div></section>
+
+<!-- ===================== HOW ===================== -->
+<section id="how"><div class="wrap">
+  <div class="eyebrow reveal">SIMPLE AND CLEAR</div>
+  <h2 class="title reveal">How it works</h2>
+  <p class="lead reveal">Instead of fighting over screens, turn them into a fair deal where everyone wins.</p>
+  <div class="steps">
+    <div class="step pane reveal"><div class="n">1</div><div class="ico">🧠</div>
+      <h3>Your child learns and plays</h3>
+      <p>Grade-level questions in math, reading, science, and more — inside a colorful adventure with a character, stars, and diamonds.</p></div>
+    <div class="step pane reveal"><div class="n">2</div><div class="ico">🎮</div>
+      <h3>Earns play minutes</h3>
+      <p>Every correct answer is worth seconds of play time, and they add up to minutes. Once there are enough, the apps you blocked really open.</p></div>
+    <div class="step pane reveal"><div class="n">3</div><div class="ico">📊</div>
+      <h3>You see it all and stay in control</h3>
+      <p>What they learned today, where they shine and where they need help, how much time is allowed, and which worlds are open — all behind a parent code.</p></div>
+  </div>
+</div></section>
+
+<!-- ===================== SCREENS ===================== -->
+<section id="screens"><div class="wrap">
+  <div class="eyebrow reveal">SNEAK PEEK</div>
+  <h2 class="title reveal">Tofy in action</h2>
+  <p class="lead reveal">Tofy has two sides: what your child sees and plays, and what you see and control — from a separate device.</p>
+  <p class="shots-note reveal">Screenshots are from the Hebrew edition of the app.</p>
+
+  <div class="side reveal">
+    <h3>🧒 Your child's side</h3>
+    <p class="side-sub">A colorful adventure: answer questions, collect stars and diamonds, help out around the house — and earn real play minutes.</p>
+    <div class="rail">
+      <figure><button class="shot" type="button"><img src="../shots/kidhome.jpg" alt="Your child's home screen" loading="lazy"></button><figcaption>🏠 Pick a world</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/question.jpg" alt="A question screen" loading="lazy"></button><figcaption>🧠 A grade-level question</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/choreskid.jpg" alt="House chores" loading="lazy"></button><figcaption>🧹 House chores</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/wheel.jpg" alt="The prize wheel" loading="lazy"></button><figcaption>🎡 Prize wheel</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/shop.jpg" alt="The character shop" loading="lazy"></button><figcaption>💎 Character shop</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/leaderboard.jpg" alt="Friends and leaderboard" loading="lazy"></button><figcaption>🏆 Friends and live quiz</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="side reveal">
+    <h3>👨‍👩‍👧 Your side</h3>
+    <p class="side-sub">Open the app and see all your kids on one screen: who's playing right now, how much time they have left, and whether they made progress today. From there, locked with a code — how much time is allowed, which apps are blocked, which worlds are open for each child, and one-tap chore approvals.</p>
+    <div class="rail">
+      <figure><button class="shot" type="button"><img src="../shots/giftearly.jpg" alt="The family board — all your kids on one screen" loading="lazy"></button><figcaption>👨‍👩‍👧 Family board</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/devicecontrols.jpg" alt="Device controls" loading="lazy"></button><figcaption>🔒 Device controls</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/childscreentime.jpg" alt="Daily screen time limit" loading="lazy"></button><figcaption>⏱ Daily limit</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/childworlds.jpg" alt="Active worlds for each child" loading="lazy"></button><figcaption>🌍 Worlds for each child</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/choresparent.jpg" alt="Chore approvals" loading="lazy"></button><figcaption>✅ Chore approvals</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/childdifficulty.jpg" alt="Difficulty level for each topic" loading="lazy"></button><figcaption>🎯 Level for each topic</figcaption></figure>
+    </div>
+  </div>
+</div></section>
+
+<!-- ===================== WORLDS ===================== -->
+<section id="worlds"><div class="wrap">
+  <div class="eyebrow reveal">CONTENT</div>
+  <h2 class="title reveal">A world for every child</h2>
+  <p class="lead reveal">Each world is a whole subject, with questions tagged by grade. You decide which worlds are open for each child.</p>
+  <div class="worlds reveal">
+    <span class="world free">✨ Tofy Time · always free</span>
+    <span class="world">🧮 Math</span>
+    <span class="world">📖 Reading</span>
+    <span class="world">✍️ English</span>
+    <span class="world">🧩 Logic</span>
+    <span class="world">🔬 Science</span>
+    <span class="world">🏛️ History</span>
+    <span class="world">🌍 Geography</span>
+    <span class="world">💰 Money Skills</span>
+    <span class="world">⚽ Soccer</span>
+    <span class="world">🦖 Dinosaurs</span>
+    <span class="world">🚀 Space and Stars</span>
+    <span class="world">🐾 Animal World</span>
+    <span class="world">🌊 Deep Sea</span>
+    <span class="world">🧠 Gifted Prep</span>
+    <span class="world">🍳 Kitchen and Food Science</span>
+    <span class="world">🎵 Music</span>
+    <span class="world">🧍 The Human Body</span>
+    <span class="world">🚗 Vehicles and Transportation</span>
+    <span class="world">🚩 Flags and Countries</span>
+  </div>
+  <p class="worlds-note reveal">And we keep adding seasonal worlds around holidays and special events.</p>
+</div></section>
+
+<!-- ===================== LEARNING ===================== -->
+<section id="learning"><div class="wrap">
+  <div class="eyebrow reveal">THE LEARNING ITSELF</div>
+  <h2 class="title reveal">It adapts to your child</h2>
+  <p class="lead reveal">Not just another quiz app. Tofy knows what grade your child is in, what they're good at, and when it's time to level up.</p>
+  <div class="cards">
+    <div class="card pane reveal"><div class="ico">🎒</div><h3>Grade by grade</h3>
+      <p>Every question is tagged to its grade, from kindergarten through 8th grade. Each September your child moves up a grade — and the questions move up with them.</p></div>
+    <div class="card pane reveal"><div class="ico">📈</div><h3>A level that adjusts itself</h3>
+      <p>The level is set separately for each topic, based on real results and centered on the level you chose. Too easy? It goes up. Too hard? It comes down.</p></div>
+    <div class="card pane reveal"><div class="ico">🔊</div><h3>Even for kids who can't read yet</h3>
+      <p>Questions and answers are read aloud, and the answers are numbered — so even the youngest kids can play on their own.</p></div>
+    <div class="card pane reveal"><div class="ico">💛</div><h3>A mistake isn't a failure</h3>
+      <p>A wrong answer gets a hint and an explanation — never language about failing. Kids can also ask Mom or Dad for help, and you answer right from your phone.</p></div>
+    <div class="card pane reveal"><div class="ico">🧹</div><h3>House chores, too</h3>
+      <p>Tidying their room or clearing the table can be worth play minutes. Your child marks a chore as done, and you approve it — sometimes with a photo.</p></div>
+    <div class="card pane reveal"><div class="ico">🏆</div><h3>Friends and a live quiz</h3>
+      <p>Kids who connect with a friend code can compete on a leaderboard and in a real-time live quiz. No chat and no messages — and you can see and remove any friend.</p></div>
+  </div>
+</div></section>
+
+<!-- ===================== PARENTS ===================== -->
+<section id="parents"><div class="wrap">
+  <div class="band pane reveal">
+    <div class="eyebrow">PEACE OF MIND</div>
+    <h2 class="title">Built for you, too</h2>
+    <p class="lead" style="margin-bottom:0">Apps are blocked through Apple's Screen Time and open only once your child has earned the time. You set a daily limit, unlock time manually from anywhere, and get a notification when your child starts, finishes, or asks for help.</p>
+    <ul class="list">
+      <li>⏱ A daily limit for each child</li>
+      <li>🎁 Unlock time remotely</li>
+      <li>🎯 Difficulty for each topic</li>
+      <li>🌍 Choose worlds for each child</li>
+      <li>🔔 Smart notifications</li>
+      <li>👨‍👩‍👧 Multiple parents, multiple kids</li>
+      <li>⌚️ On Apple Watch, too</li>
+      <li>🔐 Everything behind a parent code</li>
+    </ul>
+  </div>
+</div></section>
+
+<!-- ===================== SAFETY ===================== -->
+<section id="safety"><div class="wrap">
+  <div class="eyebrow reveal">SAFETY</div>
+  <h2 class="title reveal">What Tofy doesn't have matters just as much</h2>
+  <p class="lead reveal">Tofy is in the Kids category of the App Store and was built to its rules from day one.</p>
+  <div class="cards">
+    <div class="card pane reveal"><div class="ico">🚫</div><h3>No ads</h3>
+      <p>No banners, no video ads, and no links that take your child out of the app.</p></div>
+    <div class="card pane reveal"><div class="ico">🕵️</div><h3>No tracking</h3>
+      <p>No third-party analytics, no advertising identifier, and no cross-app tracking. Data is used only to run the app.</p></div>
+    <div class="card pane reveal"><div class="ico">💳</div><h3>No shopping for kids</h3>
+      <p>Your child's device never shows prices and can't make purchases. Every payment happens on your device, behind a parent code.</p></div>
+  </div>
+</div></section>
+
+<!-- ===================== PRICING ===================== -->
+<section id="price"><div class="wrap">
+  <div class="eyebrow reveal">PRICING</div>
+  <h2 class="title reveal">Start for free</h2>
+  <p class="lead reveal">You can use Tofy without paying a cent. One subscription unlocks everything for every child in the family.</p>
+  <div class="plans">
+    <div class="plan pane reveal">
+      <h3>Free</h3>
+      <div class="price">Free</div>
+      <div class="note">No credit card</div>
+      <ul>
+        <li>The Tofy Time world, always open</li>
+        <li>Earning play minutes and blocking apps</li>
+        <li>House chores with parent approval</li>
+        <li>A full parent dashboard</li>
+      </ul>
+      <div class="foot">Every now and then your child gets a peek at other worlds, so they know what's waiting.</div>
+    </div>
+    <div class="plan pane best reveal">
+      <span class="tag">Everything included</span>
+      <h3>Tofy+</h3>
+      <div class="price">Family <small>plan</small></div>
+      <div class="note">Monthly or yearly · the price is shown in the app, in your local currency</div>
+      <ul>
+        <li>Every world unlocked</li>
+        <li>For every child in the family, on every device</li>
+        <li>Every new world we add is included</li>
+        <li>Cancel anytime in your Apple ID settings</li>
+      </ul>
+      <div class="foot">Once your child really starts learning, we give you two weeks of Tofy+ as a gift. No credit card, and it doesn't renew.</div>
+    </div>
+    <div class="plan pane reveal">
+      <h3>Single world</h3>
+      <div class="price">One-time</div>
+      <div class="note">No subscription, no renewal</div>
+      <ul>
+        <li>Unlock just the world your child loves</li>
+        <li>Half price for a brother or sister</li>
+        <li>Perfect if you'd rather not subscribe</li>
+      </ul>
+      <div class="foot">The exact price and details are shown in the app, behind a parent code.</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ===================== FAQ ===================== -->
+<section id="faq"><div class="wrap">
+  <h2 class="title reveal">Frequently asked questions</h2>
+  <div class="faq" style="margin-top:32px">
+    <details class="pane reveal"><summary>What ages is Tofy for?</summary>
+      <p>Kindergarten through 8th grade. During setup you pick your child's grade, and questions are served right at that level. Younger kids who can't read yet can play too, with questions read aloud.</p></details>
+    <details class="pane reveal"><summary>How is screen time actually blocked?</summary>
+      <p>Through Apple's Screen Time (Family Controls). You choose which apps are locked, and they open only once your child has earned minutes. You can always unlock time manually from your phone.</p></details>
+    <details class="pane reveal"><summary>Do we need two devices?</summary>
+      <p>We recommend it: one device for your child and one for you. You can also connect several devices to the same child, and several parents to the same family — everything stays in sync.</p></details>
+    <details class="pane reveal"><summary>Can my child buy something on their own?</summary>
+      <p>No. Your child's device never shows prices. If they want a new world, they tap "Ask Mom or Dad" — and you decide.</p></details>
+    <details class="pane reveal"><summary>Are there ads or tracking?</summary>
+      <p>No. No ads, no advertising identifier, and no third-party analytics. Data is used only to save progress and sync between your family's devices. Read our <a href="privacy.html" style="text-decoration:underline">Privacy Policy</a>.</p></details>
+    <details class="pane reveal"><summary>What about siblings?</summary>
+      <p>One Tofy+ subscription unlocks every world for every child in the family. A single world is bought for one child, and it's half price for a brother or sister.</p></details>
+    <details class="pane reveal"><summary>How much does it cost?</summary>
+      <p>You can start for free. Tofy+ is a monthly or yearly family subscription; the price is shown in the app in your local currency, and you can cancel anytime from your Apple ID settings. Once your child really starts learning, we unlock Tofy+ for two weeks as a gift — no credit card and no automatic renewal.</p></details>
+  </div>
+</div></section>
+
+<!-- ===================== WAITLIST ===================== -->
+<section id="early"><div class="wrap">
+  <div class="band pane reveal">
+    <div class="eyebrow">COMING SOON</div>
+    <h2 class="title">Want to know when Tofy launches?</h2>
+    <p class="lead" style="margin-bottom:0">Leave your email and we'll let you know on launch day. One email, no spam. 🦁</p>
+    <form class="ef" id="earlyForm" onsubmit="return joinWaitlist(event)">
+      <input id="ef-name" type="text" placeholder="Your name" autocomplete="name">
+      <input id="ef-email" type="email" placeholder="Email" required autocomplete="email">
+      <select id="ef-age" aria-label="Your child's age">
+        <option value="">Your child's age (optional)</option>
+        <option>4–5</option><option>6–7</option><option>8–9</option><option>10+</option>
+      </select>
+      <button type="submit" class="btn" id="ef-btn">Notify me 🎉</button>
+    </form>
+    <div class="ef-ok" id="ef-ok" style="display:none">You're on the list! 🎉 We'll let you know the moment Tofy launches.</div>
+    <div class="ef-note">For parents. We use your email only to tell you about the launch. <a href="privacy.html">Privacy Policy</a></div>
+  </div>
+</div></section>
+
+<!-- ===================== FINAL ===================== -->
+<section id="download"><div class="wrap final reveal">
+  <img src="../lion.png" alt="Tofy" width="96" height="96">
+  <h2>Instead of fighting over screens —<br>kids earn them</h2>
+  <p>You set the rules, and Tofy makes sure they happen.</p>
+  <a class="appstore" href="#early" style="margin:0 auto" data-store>
+    <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.1 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+    <span class="tx"><small data-store-small>Coming soon to the</small><b>App&nbsp;Store</b></span>
+  </a>
+</div></section>
+
+<footer class="site-foot"><div class="wrap">
+  <div>Tofy · a learning and screen-time app for kids</div>
+  <div class="links">
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms of Use</a>
+    <a href="support.html">Support</a>
+    <a href="mailto:ranioph@gmail.com">Contact us</a>
+  </div>
+  <div style="opacity:.75">© 2026 Tofy · tofyapp.com</div>
+</div></footer>
+
+<div class="lb" id="lightbox" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="Enlarged screenshot">
+  <button class="close" id="lbClose" type="button" aria-label="Close">✕</button>
+  <button class="prev" id="lbPrev" type="button" aria-label="Previous screenshot"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <button class="next" id="lbNext" type="button" aria-label="Next screenshot"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <figure>
+    <img id="lbImg" src="" alt="">
+    <figcaption id="lbCap"></figcaption>
+    <div class="count" id="lbCount"></div>
+  </figure>
+</div>
+
+<script>
+  /* The App Store link — keep in sync with STORE_URL in ../index.html. The app
+     is submitted but not yet listed publicly; the day it is approved, set
+     STORE_URL and every badge on this page points there. */
+  var STORE_URL = "";
+  if (STORE_URL) {
+    document.querySelectorAll("[data-store]").forEach(function(a){ a.href = STORE_URL; });
+    document.querySelectorAll("[data-store-small]").forEach(function(s){ s.textContent = "Download on the"; });
+  }
+
+  /* twinkling sparks */
+  (function(){
+    var c = document.getElementById("sparks");
+    for (var i = 0; i < 55; i++) {
+      var s = document.createElement("div");
+      s.className = "spark"; s.textContent = "✦";
+      s.style.left = (Math.random()*100) + "%";
+      s.style.top = (Math.random()*100) + "%";
+      s.style.fontSize = (6 + Math.random()*15) + "px";
+      s.style.color = Math.random() < .5 ? "#FFD23F" : "#fff";
+      s.style.animationDelay = (Math.random()*3.4) + "s";
+      s.style.animationDuration = (2.4 + Math.random()*3) + "s";
+      c.appendChild(s);
+    }
+  })();
+
+  /* mobile menu */
+  var btn = document.getElementById("menuBtn"), nav = document.getElementById("nav");
+  btn.addEventListener("click", function(){
+    var open = nav.classList.toggle("open");
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  nav.addEventListener("click", function(e){ if (e.target.tagName === "A") nav.classList.remove("open"); });
+
+  /* scroll reveal */
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+  }, { threshold: .12 });
+  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+
+  /* Lightbox: any screenshot opens large, with ← → and Esc. */
+  (function(){
+    var shots = [].slice.call(document.querySelectorAll(".rail .shot"));
+    if (!shots.length) return;
+    var lb = document.getElementById("lightbox"),
+        img = document.getElementById("lbImg"),
+        cap = document.getElementById("lbCap"),
+        count = document.getElementById("lbCount"),
+        closeBtn = document.getElementById("lbClose"),
+        prevBtn = document.getElementById("lbPrev"),
+        nextBtn = document.getElementById("lbNext"),
+        index = 0, opener = null;
+
+    function show(i){
+      index = (i + shots.length) % shots.length;
+      var thumb = shots[index].querySelector("img");
+      img.src = thumb.src;
+      img.alt = thumb.alt;
+      cap.textContent = shots[index].parentNode.querySelector("figcaption").textContent;
+      count.textContent = (index + 1) + " / " + shots.length;
+    }
+    function open(i, from){
+      opener = from || null;
+      show(i);
+      lb.hidden = false;
+      document.body.style.overflow = "hidden";
+      lb.focus();
+    }
+    function close(){
+      lb.hidden = true;
+      document.body.style.overflow = "";
+      if (opener) opener.focus();
+    }
+
+    shots.forEach(function(btn, i){
+      btn.addEventListener("click", function(){ open(i, btn); });
+    });
+    closeBtn.addEventListener("click", close);
+    prevBtn.addEventListener("click", function(){ show(index - 1); });
+    nextBtn.addEventListener("click", function(){ show(index + 1); });
+    lb.addEventListener("click", function(e){ if (e.target === lb) close(); });
+    document.addEventListener("keydown", function(e){
+      if (lb.hidden) return;
+      if (e.key === "Escape") close();
+      // The rail reads left-to-right, so → walks forward and ← walks back.
+      else if (e.key === "ArrowRight") show(index + 1);
+      else if (e.key === "ArrowLeft") show(index - 1);
+    });
+    // A swipe on the enlarged image moves between screenshots.
+    var x0 = null;
+    img.addEventListener("touchstart", function(e){ x0 = e.changedTouches[0].clientX; }, {passive:true});
+    img.addEventListener("touchend", function(e){
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 45) show(index + (dx > 0 ? -1 : 1));
+      x0 = null;
+    }, {passive:true});
+  })();
+
+  /* Waitlist → Firestore `waitlist` (REST, no SDK), same collection as the
+     Hebrew page. `language: "en"` makes the welcome email go out in English.
+     Falls back to a pre-filled email so a lead is never lost. */
+  async function joinWaitlist(e){
+    e.preventDefault();
+    var email = document.getElementById("ef-email").value.trim();
+    var name  = document.getElementById("ef-name").value.trim();
+    var age   = document.getElementById("ef-age").value;
+    if (!email) return false;
+    var btn = document.getElementById("ef-btn"); btn.disabled = true; btn.textContent = "Sending…";
+    var PROJECT = "childtime-86e98";
+    var KEY = "AIzaSyB2sLDqhZsZ0gTFD2qUs9upO3JljuwV1Tw"; // public Firebase web key (secured by rules)
+    var url = "https://firestore.googleapis.com/v1/projects/" + PROJECT + "/databases/(default)/documents/waitlist?key=" + KEY;
+    var body = { fields: {
+      email:     { stringValue: email },
+      name:      { stringValue: name || "" },
+      childAge:  { stringValue: age || "" },
+      source:    { stringValue: "web-en" },
+      language:  { stringValue: "en" },
+      createdAt: { timestampValue: new Date().toISOString() }
+    }};
+    try {
+      var r = await fetch(url, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+      if (!r.ok) throw new Error("status " + r.status);
+      document.getElementById("earlyForm").style.display = "none";
+      document.getElementById("ef-ok").style.display = "block";
+    } catch (err) {
+      var subj = encodeURIComponent("Tofy - notify me at launch");
+      var bdy  = encodeURIComponent("Name: " + name + "\nEmail: " + email + "\nChild's age: " + age);
+      window.location.href = "mailto:ranioph@gmail.com?subject=" + subj + "&body=" + bdy;
+      btn.disabled = false; btn.textContent = "Notify me 🎉";
+    }
+    return false;
+  }
+</script>
+</body>
+</html>

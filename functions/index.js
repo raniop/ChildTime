@@ -2399,7 +2399,9 @@ exports.worldPassReminders = onSchedule(
         try { await db.collection("pushDedup").doc(key).create({ at: Date.now() }); } catch (e) { continue; }
         const tokens = await tokensForHousehold(d.householdID);
         if (!tokens.length) continue;
-        await sendLocalized(tokens, (lang) => worldPassMessage(d.name, packID, at, lang),
+        const hhDoc = d.householdID ? await db.collection("households").doc(d.householdID).get() : null;
+        const tz = tzOf(hhDoc && hhDoc.exists ? hhDoc.data() : null);
+        await sendLocalized(tokens, (lang) => worldPassMessage(d.name, packID, at, lang, tz),
           { type: "pass-ending", childID: k.id, packID });
         sent += 1;
       }
@@ -2412,15 +2414,15 @@ const WORLD_HE = { math: "המתמטיקה 🧮 נגמרת", english: "האנג�
                    history: "ההיסטוריה 🏛️ נגמרת", geography: "הגיאוגרפיה 🌍 נגמרת", money: "החינוך הפיננסי 💰 נגמר", reading: "הבנת הנקרא 📖 נגמרת" };
 
 // Parents: a world pass ends in ~3 days. rawName may be missing; `at` = expiry (epoch s).
-function worldPassMessage(rawName, packID, at, lang) {
+function worldPassMessage(rawName, packID, at, lang, tz = DEFAULT_TZ) {
   if (lang === "en") {
     const whose = rawName ? `${rawName}'s` : "Your child's";
-    const day = new Date(Number(at) * 1000).toLocaleDateString("en-US", { weekday: "long", timeZone: "Asia/Jerusalem" });
+    const day = new Date(Number(at) * 1000).toLocaleDateString("en-US", { weekday: "long", timeZone: tz });
     return { title: `${whose} ${TOPIC_EN[packID]} pass ends on ${day}`,
              body: "The 30 days are almost up. You can add another 30 days, or get Tofy+ for the whole family — from your phone. Progress is saved." };
   }
   const name = rawName || "הילד";
-  const day = new Date(Number(at) * 1000).toLocaleDateString("he-IL", { weekday: "long", timeZone: "Asia/Jerusalem" });
+  const day = new Date(Number(at) * 1000).toLocaleDateString("he-IL", { weekday: "long", timeZone: tz });
   return { title: `${WORLD_HE[packID].replace(/ (נגמר\S*)$/, "")} של ${name} ${WORLD_HE[packID].split(" ").pop()} ב${day}`,
            body: `30 הימים מסתיימים. אפשר לפתוח עוד 30 יום, או טופי+ לכל המשפחה — מהטלפון שלכם. ההתקדמות נשמרת.` };
 }
@@ -3265,8 +3267,17 @@ exports.adminEndGift = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (r
 // ============================================================================
 
 function fill(tpl, vars) { return String(tpl || "").replace(/\{([^}]+)\}/g, (m, k) => (vars[k] !== undefined && vars[k] !== null ? String(vars[k]) : m)); }
-const ilDate = (s) => new Date(s * 1000).toLocaleDateString("he-IL", { day: "numeric", month: "numeric", timeZone: "Asia/Jerusalem" });
-const ilWeekday = (s) => new Date(s * 1000).toLocaleDateString("he-IL", { weekday: "long", timeZone: "Asia/Jerusalem" });
+// 🌍 A family's own time zone (households/{id}.timeZone, written by the app), for
+// the dates and hours in its pushes. Families without one are in Israel.
+const DEFAULT_TZ = "Asia/Jerusalem";
+function tzOf(hh) {
+  const tz = hh && typeof hh.timeZone === "string" ? hh.timeZone : "";
+  if (!tz) return DEFAULT_TZ;
+  try { new Intl.DateTimeFormat("en-US", { timeZone: tz }); return tz; } catch (e) { return DEFAULT_TZ; }
+}
+const hourIn = (tz) => Number(new Date().toLocaleString("en-US", { hour: "numeric", hour12: false, timeZone: tz }));
+const ilDate = (s, tz = DEFAULT_TZ) => new Date(s * 1000).toLocaleDateString("he-IL", { day: "numeric", month: "numeric", timeZone: tz });
+const ilWeekday = (s, tz = DEFAULT_TZ) => new Date(s * 1000).toLocaleDateString("he-IL", { weekday: "long", timeZone: tz });
 
 async function onceKey(key) { try { await db.collection("pushDedup").doc(key).create({ at: Date.now() }); return true; } catch (e) { return false; } }
 
@@ -3286,8 +3297,8 @@ const TOPIC_LABEL_EN = { math: "🧮 Math", english: "🇬🇧 English", hebrew:
 // A favourite world for English copy: "🧮 Math"; a topic without a label reads as its id ("Weird").
 const favLabelEn = (fav) => TOPIC_LABEL_EN[fav.topic] || capFirst(String(fav.topic || "")) || "Their favorite world";
 const favNameEn = (fav) => (TOPIC_LABEL_EN[fav.topic] ? TOPIC_LABEL_EN[fav.topic].replace(/^\S+\s/, "") : favLabelEn(fav));
-const enDate = (s) => new Date(s * 1000).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "Asia/Jerusalem" });
-const enWeekday = (s) => new Date(s * 1000).toLocaleDateString("en-US", { weekday: "long", timeZone: "Asia/Jerusalem" });
+const enDate = (s, tz = DEFAULT_TZ) => new Date(s * 1000).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: tz });
+const enWeekday = (s, tz = DEFAULT_TZ) => new Date(s * 1000).toLocaleDateString("en-US", { weekday: "long", timeZone: tz });
 
 // ctx = { star, kids, totalQ, fav, cfg } for one household (see runConversionEngine).
 function conversionVars(ctx, lang) {
@@ -3305,10 +3316,10 @@ function giftStartMessage(ctx, until, lang) {
   const vars = conversionVars(ctx, lang);
   if (lang === "en") {
     return { title: `🎁 We opened Tofy+ for ${vars["שם"]} as a gift`,
-             body: capFirst(fill(CONVERSION_COPY_EN.copyActivation, { ...vars, "תאריך": enDate(until) }).replace(/^🎁[^·]*·\s*/, "")) };
+             body: capFirst(fill(CONVERSION_COPY_EN.copyActivation, { ...vars, "תאריך": enDate(until, ctx.tz) }).replace(/^🎁[^·]*·\s*/, "")) };
   }
   const name = vars["שם"];
-  return { title: `🎁 פתחנו ל${name} את טופי+ במתנה`, body: fill(ctx.cfg.copyActivation, { ...vars, "תאריך": ilDate(until) }).replace(/^🎁[^·]*·\s*/, "") };
+  return { title: `🎁 פתחנו ל${name} את טופי+ במתנה`, body: fill(ctx.cfg.copyActivation, { ...vars, "תאריך": ilDate(until, ctx.tz) }).replace(/^🎁[^·]*·\s*/, "") };
 }
 
 // One of the gift-day pushes, or null (a no-favourite family on days ≤ 9 hears nothing).
@@ -3332,14 +3343,14 @@ function giftDayMessage(ctx, day, daysLeft, premiumUntil, lang) {
                      body: `${favLabel} is where ${name} comes back most in Tofy: ${plural(fav.days, "day", "days")}, ${plural(fav.questions, "question", "questions")}.` } : null;
     }
     return { title: `${capFirst(name)} discovered ${worldsToday ? plural(worldsToday, "world", "worlds") : "a few worlds"} 🌎`,
-             body: `${plural(totalQ, "question", "questions")} in the last month${favLabel ? " · Favorite: " + favLabel : ""}. The gift ends on ${enWeekday(premiumUntil)}. Keep every world open.` };
+             body: `${plural(totalQ, "question", "questions")} in the last month${favLabel ? " · Favorite: " + favLabel : ""}. The gift ends on ${enWeekday(premiumUntil, ctx.tz)}. Keep every world open.` };
   }
   const name = vars["שם"]; const girl = star && star.gender === "girl";
   let msg = null;
   if (daysLeft <= 1) msg = { title: `היום מסתיימת מתנת טופי+ של ${name}`, body: `${name} ${girl ? "תמשיך" : "ימשיך"} ללמוד ולהרוויח זמן בחינם כרגיל. כדי להשאיר את ${fav ? fav.label.replace(/^\S+\s/, "") + " ו" : ""}שאר העולמות פתוחים: המשיכו עם טופי+.` };
   else if (daysLeft <= 2) msg = { title: `⏰ נשארו יומיים לטופי+ של ${name}`, body: fill(cfg.copyTwoDays, vars).replace(/^⏰[^·]*·\s*/, "") };
   else if (day <= 9) msg = fav ? { title: `❤️ נראה ש${name} ${girl ? "מצאה" : "מצא"} משהו ש${girl ? "היא אוהבת" : "הוא אוהב"}`, body: `${fav.label} הוא המקום ש${girl ? "היא חוזרת" : "הוא חוזר"} אליו הכי הרבה בטופי: ${fav.days} ימים, ${fav.questions} שאלות.` } : null;
-  else msg = { title: `${name} ${girl ? "גילתה" : "גילה"} ${worldsToday || "כמה"} עולמות 🌎`, body: `${totalQ} שאלות בחודש האחרון${fav ? " · האהוב: " + fav.label : ""}. המתנה מסתיימת ב${ilWeekday(premiumUntil)}. השאירו את כל העולמות פתוחים.` };
+  else msg = { title: `${name} ${girl ? "גילתה" : "גילה"} ${worldsToday || "כמה"} עולמות 🌎`, body: `${totalQ} שאלות בחודש האחרון${fav ? " · האהוב: " + fav.label : ""}. המתנה מסתיימת ב${ilWeekday(premiumUntil, ctx.tz)}. השאירו את כל העולמות פתוחים.` };
   return msg;
 }
 
@@ -3348,7 +3359,6 @@ async function runConversionEngine() {
   const jdoc = await db.collection("adminStats").doc("journey").get();
   const journey = jdoc.exists ? jdoc.data() : await computeJourney();
   const now = Date.now() / 1000;
-  const hour = Number(new Date().toLocaleString("en-US", { hour: "numeric", hour12: false, timeZone: "Asia/Jerusalem" }));
   let gifted = 0, pushed = 0, ended = 0;
   for (const [hhID, h] of Object.entries(journey.households || {})) {
     const ref = db.collection("households").doc(hhID);
@@ -3359,7 +3369,7 @@ async function runConversionEngine() {
     const star = kids.filter((k) => k.everQuestions > 0).sort((a, b) => b.questions30 - a.questions30)[0];
     const totalQ = kids.reduce((s, k) => s + (k.questions30 || 0), 0);
     const fav = star && star.favorite;
-    const ctx = { star, kids, totalQ, fav, cfg };
+    const ctx = { star, kids, totalQ, fav, cfg, tz: tzOf(hh) };
     // 0. still on the free tier → keep the parent's "עוד יום פעיל אחד" card honest
     if (!h.activated && !hh.giftStartedAt && !hh.purchasedAt && hh.premiumSource !== "paid") {
       const a = { days: h.activeDays || 0, questions: h.questions || 0, needDays: cfg.activationDays, needQuestions: cfg.activationQuestions };
@@ -3378,7 +3388,7 @@ async function runConversionEngine() {
       continue;
     }
     // 2. during a gift: the day-based pushes (parents only), at the configured hour
-    if (hh.premiumSource === "gift" && premiumUntil > now && hh.giftStartedAt && hour >= Number(cfg.giftPushHour || 17)) {
+    if (hh.premiumSource === "gift" && premiumUntil > now && hh.giftStartedAt && hourIn(ctx.tz) >= Number(cfg.giftPushHour || 17)) {
       const day = Math.floor((now - Number(hh.giftStartedAt)) / 86400) + 1;
       const daysLeft = Math.ceil((premiumUntil - now) / 86400);
       const dedup = db.collection("pushDedup").doc(`gift_day${day}_${hhID}`);
