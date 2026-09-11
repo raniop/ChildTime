@@ -1,0 +1,30 @@
+{
+  "sourceLanguage" : "he",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Watch app name under the icon — same rule as the iPhone app: Tofy in English, טופי in Hebrew and for English with an Israeli region (en-IL).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy"
+          }
+        },
+        "en-IL" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "טופי"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "טופי"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -7322,6 +7322,16 @@
         }
       }
     },
+    "הַמִּשְׂחָק הַזֶּה בְּשָׂפָה אַחֶרֶת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This game is in another language"
+          }
+        }
+      }
+    },
     "הַמִּשְׂחָק כְּבָר הִתְחִיל אוֹ הִסְתַּיֵּם": {
       "localizations": {
         "en": {

@@ -19,13 +19,14 @@ struct FriendCard: Codable, Identifiable, Equatable {
     var hiddenIDs: [String] = []   // friends removed by this child / their parent
     var updatedAt: Date = .now
     var demo: Bool = false         // test/diagnostic card — hidden from the global board
+    var language: String? = nil    // the app language on the child's device; nil = Hebrew (older cards)
 
     var character: Character3D { Character3DCatalog.find(character3DID) }
 }
 
 extension FriendCard {
     enum CodingKeys: String, CodingKey {
-        case id, name, character3DID, stars, code, ownerUID, friendIDs, hiddenIDs, updatedAt, demo
+        case id, name, character3DID, stars, code, ownerUID, friendIDs, hiddenIDs, updatedAt, demo, language
     }
     // Resilient decode: cards on the server may omit fields (e.g. friendIDs /
     // hiddenIDs are stripped on upsert; older docs lack ownerUID). Swift's default
@@ -43,6 +44,7 @@ extension FriendCard {
         hiddenIDs     = (try? c.decode([String].self, forKey: .hiddenIDs)) ?? []
         updatedAt     = (try? c.decode(Date.self, forKey: .updatedAt)) ?? .distantPast
         demo          = (try? c.decode(Bool.self, forKey: .demo)) ?? false
+        language      = try? c.decodeIfPresent(String.self, forKey: .language)
     }
 }
 
@@ -485,7 +487,8 @@ final class FriendsManager: ObservableObject {
             character3DID: profile?.character3DID,
             stars: ProgressStore.shared.stars,
             code: myCode,
-            ownerUID: AuthManager.shared.userID ?? ""
+            ownerUID: AuthManager.shared.userID ?? "",
+            language: LanguageStore.shared.current.rawValue
         )
         guard let data = try? JSONEncoder.firestore.encode(card),
               let dict = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { return }
@@ -639,12 +642,18 @@ final class FriendsManager: ObservableObject {
         // Make sure my own card exists & is fresh so I can appear in the ranking.
         if let id = myID { await upsertMyCard(id: id) }
         do {
-            let snap = try await db.collection("friendCards")
-                .order(by: "stars", descending: true)
-                .limit(to: 100)
-                .getDocuments()
+            // 🌍 One board per language. Hebrew keeps its original query (older cards
+            // have no language field) and drops English cards; other languages
+            // query their own cards only.
+            let language = LanguageStore.shared.current
+            let query: Query = language == .he
+                ? db.collection("friendCards").order(by: "stars", descending: true).limit(to: 100)
+                : db.collection("friendCards").whereField("language", isEqualTo: language.rawValue)
+                    .order(by: "stars", descending: true).limit(to: 100)
+            let snap = try await query.getDocuments()
             // Hide test/diagnostic cards from the public board.
-            var cards = snap.documents.compactMap { Self.decode($0.data()) }.filter { !$0.demo }
+            var cards = snap.documents.compactMap { Self.decode($0.data()) }
+                .filter { !$0.demo && ($0.language ?? AppLanguage.he.rawValue) == language.rawValue }
             // My row reflects my LIVE local stars (no Firestore round-trip lag).
             let myStars = ProgressStore.shared.stars
             if let id = myID, let idx = cards.firstIndex(where: { $0.id == id }) {
@@ -663,7 +672,11 @@ final class FriendsManager: ObservableObject {
     private func computeMyGlobalRank(myStars: Int) async {
         guard let id = myID else { myGlobalRank = nil; return }
         do {
-            let agg = try await db.collection("friendCards")
+            let language = LanguageStore.shared.current
+            let base: Query = language == .he
+                ? db.collection("friendCards")
+                : db.collection("friendCards").whereField("language", isEqualTo: language.rawValue)
+            let agg = try await base
                 .whereField("stars", isGreaterThan: myStars)
                 .count.getAggregation(source: .server)
             myGlobalRank = agg.count.intValue + 1

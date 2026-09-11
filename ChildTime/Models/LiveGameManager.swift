@@ -220,6 +220,9 @@ final class LiveGameManager: ObservableObject {
             "hostOwnerUID": uid,
             "state": LiveGameState.lobby.rawValue,
             "topic": topic.rawValue,
+            // 🌍 The questions are written in the host's language; only players
+            // showing the same language see the invite or can join.
+            "language": LanguageStore.shared.current.rawValue,
             "difficulty": difficulty.rawValue,
             "totalQuestions": wireQuestions.count,
             "currentIndex": -1,
@@ -260,6 +263,11 @@ final class LiveGameManager: ObservableObject {
               let state = snap.data()?["state"] as? String,
               state == LiveGameState.lobby.rawValue || state == LiveGameState.countdown.rawValue else {
             lastError = tr("הַמִּשְׂחָק כְּבָר הִתְחִיל אוֹ הִסְתַּיֵּם")
+            return
+        }
+        // Games created before languages have no field — they're Hebrew.
+        guard (snap.data()?["language"] as? String ?? AppLanguage.he.rawValue) == LanguageStore.shared.current.rawValue else {
+            lastError = tr("הַמִּשְׂחָק הַזֶּה בְּשָׂפָה אַחֶרֶת")
             return
         }
         isHost = false
@@ -584,6 +592,8 @@ final class LiveGameManager: ObservableObject {
                               let host = d["hostID"] as? String, host != myID else { return nil }
                         // Skip stale lobbies a host opened but never started.
                         if let created = (d["createdAt"] as? Timestamp)?.dateValue(), created < cutoff { return nil }
+                        // A game in another language would show questions this child can't read.
+                        guard (d["language"] as? String ?? AppLanguage.he.rawValue) == LanguageStore.shared.current.rawValue else { return nil }
                         return LiveGameInvite(id: doc.documentID, hostName: d["hostName"] as? String ?? tr("חָבֵר"))
                     }
                 }
