@@ -396,6 +396,7 @@ async function coverage() {
 // ☁️ Bulk import into the cloud bank, then review drafts. Imports land as DRAFTS
 // by default, so nothing reaches a child until someone reads it and approves.
 let IMP_TOPIC = "soccer";
+let DRAFT_GRADE = null;
 async function importQuestions() {
   const topics = (COV && COV.topics) || [];
   const opts = (topics.length ? topics : [{ topic: "soccer", label: "כדורגל", emoji: "⚽" }])
@@ -413,7 +414,7 @@ async function importQuestions() {
       <div class="card"><h4>טיוטות שממתינות לאישור</h4><div id="drafts"><span class="spin"></span></div></div>
     </div>`;
   wireContentTabs();
-  $("impTopic").onchange = () => { IMP_TOPIC = $("impTopic").value; loadDrafts(); };
+  $("impTopic").onchange = () => { IMP_TOPIC = $("impTopic").value; DRAFT_GRADE = null; loadDrafts(); };
   $("impGo").onclick = async () => {
     let items; try { items = JSON.parse($("impJson").value); } catch (e) { return $("impResult").innerHTML = `<div class="empty" style="color:#D6455B">JSON לא תקין: ${esc(e.message)}</div>`; }
     if (!Array.isArray(items)) items = [items];
@@ -432,11 +433,19 @@ async function loadDrafts() {
   const topic = $("impTopic") ? $("impTopic").value : IMP_TOPIC;
   try {
     const r = await call("adminQuestionBankSummary", { draftsFor: topic });
-    const d = r.drafts || [];
-    if (!d.length) return $("drafts").innerHTML = '<div class="empty">אין טיוטות לעולם הזה.</div>';
-    $("drafts").innerHTML = `<div style="display:flex;gap:6px;margin-bottom:8px"><button class="btn" id="drAll">בחר הכל</button><button class="btn" id="drApprove">✅ אשר נבחרות</button><button class="btn danger" id="drReject">🗑 דחה נבחרות</button></div>
+    const all = r.drafts || [];
+    if (!all.length) return $("drafts").innerHTML = '<div class="empty">אין טיוטות לעולם הזה.</div>';
+    // A generated batch is 200 drafts per grade — review grade by grade, not as one 1,200-row list.
+    const GR = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"];
+    const grades = [...new Set(all.map((q) => q.gradeLo))].sort((a, b) => a - b);
+    if (DRAFT_GRADE !== null && !grades.includes(DRAFT_GRADE)) DRAFT_GRADE = null;
+    const d = DRAFT_GRADE === null ? all : all.filter((q) => q.gradeLo === DRAFT_GRADE);
+    const gchip = (g, label, n) => `<span class="chip ${DRAFT_GRADE === g ? "on" : ""}" data-drg="${g === null ? "" : g}">${label} <b>${n}</b></span>`;
+    $("drafts").innerHTML = `<div class="filters" style="margin-bottom:8px">${gchip(null, "הכל", all.length)}${grades.map((g) => gchip(g, GR[g] || g, all.filter((q) => q.gradeLo === g).length)).join("")}</div>
+      <div style="display:flex;gap:6px;margin-bottom:8px"><button class="btn" id="drAll">בחר את כל ${d.length} המוצגות</button><button class="btn" id="drApprove">✅ אשר נבחרות</button><button class="btn danger" id="drReject">🗑 דחה נבחרות</button></div>
       ${d.map((q) => `<label class="q" style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line)"><input type="checkbox" data-dr="${esc(q.id)}"><div><div style="white-space:pre-line"><b>${esc(q.prompt)}</b></div><div style="font-size:12px">✔️ ${esc(q.correctAnswer)} · ✖️ ${esc((q.distractors || []).join(" · "))}</div><div class="stamp">כיתות ${q.gradeLo}–${q.gradeHi} · ${esc(q.tier || "")}</div></div></label>`).join("")}`;
     const picked = () => [...document.querySelectorAll("[data-dr]:checked")].map((x) => x.dataset.dr);
+    document.querySelectorAll("[data-drg]").forEach((c) => c.onclick = () => { DRAFT_GRADE = c.dataset.drg === "" ? null : Number(c.dataset.drg); loadDrafts(); });
     $("drAll").onclick = () => document.querySelectorAll("[data-dr]").forEach((x) => x.checked = true);
     const act = async (status) => { const ids = picked(); if (!ids.length) return toast("לא נבחרו שאלות"); if (status === "rejected" && !confirm(`למחוק ${ids.length} שאלות?`)) return; await call("adminSetQuestionStatus", { topic, ids, status }); toast(status === "approved" ? `אושרו ${ids.length}` : `נמחקו ${ids.length}`); COV = null; loadDrafts(); };
     $("drApprove").onclick = () => act("approved");
