@@ -241,7 +241,7 @@ const PACKS = {
   flags: { name: "דגלים ומדינות", emoji: "🌍", price: 14.9, sibling: 7.9, subject: "דגלים ומדינות", tagline: "דגלים, בירות ויבשות" },
 };
 const TOPICS = { math: "🧮 מתמטיקה", english: "🇬🇧 אנגלית", hebrew: "✍️ עברית", logic: "🧩 לוגיקה", science: "🔬 מדעים", history: "🏛️ היסטוריה", geography: "🌍 גיאוגרפיה", money: "💰 חינוך פיננסי", reading: "📖 הבנת הנקרא" };
-const GRADES = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"];
+const GRADES = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"];
 const PREVIEW = new URLSearchParams(location.search).get("preview") === "1";
 
 const $ = (id) => document.getElementById(id);
@@ -250,7 +250,7 @@ const toast = (t) => { const el = document.createElement("div"); el.className = 
 
 // ---- form wiring ----------------------------------------------------------
 for (const [i, g] of GRADES.entries()) { $("gradeMin").add(new Option(g, i)); $("gradeMax").add(new Option(g, i)); }
-$("gradeMax").value = 6;
+$("gradeMax").value = 8;
 for (const [k, v] of Object.entries(TOPICS)) { const c = document.createElement("span"); c.className = "chip"; c.dataset.v = k; c.textContent = v; c.onclick = () => { c.classList.toggle("on"); }; $("topics").appendChild(c); }
 for (const [k, v] of Object.entries(PACKS)) $("packID").add(new Option(`${v.emoji} ${v.name} · ₪${v.price}`, k));
 $("roles").querySelectorAll(".chip").forEach((c) => c.onclick = () => { c.classList.toggle("on"); if (![...$("roles").querySelectorAll(".chip.on")].length) c.classList.add("on"); render(); });
@@ -376,7 +376,7 @@ $("sendBtn").onclick = () => save("scheduled");
 function audienceLabel(a) {
   const parts = [];
   parts.push(a.roles.map((r) => r === "parents" ? "הורים" : "ילדים").join(" + "));
-  if (a.gradeMin > 0 || a.gradeMax < 6) parts.push(`${GRADES[a.gradeMin]}–${GRADES[a.gradeMax]}`);
+  if (a.gradeMin > 0 || a.gradeMax < (a.gradeScale || 6)) parts.push(`${GRADES[a.gradeMin]}–${GRADES[a.gradeMax]}`);
   if (a.premium === "with") parts.push("עם טופי+"); if (a.premium === "without") parts.push("בלי טופי+");
   if (a.topics && a.topics.length) parts.push(a.topics.map((t) => (TOPICS[t] || t).replace(/^\S+\s/, "")).join(", "));
   return parts.join(" · ");
@@ -425,7 +425,7 @@ function fill(c) {
   $("childTitle").value = c.childTitle || ""; $("childBody").value = c.childBody || "";
   $("action").value = (c.action || {}).type || "none"; $("packRow").hidden = $("action").value !== "pack"; if ((c.action || {}).packID) $("packID").value = c.action.packID;
   const a = c.audience || {}; $("roles").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", (a.roles || []).includes(x.dataset.v)));
-  $("gradeMin").value = a.gradeMin ?? 0; $("gradeMax").value = a.gradeMax ?? 6; $("premium").value = a.premium || "any"; $("excludeOwners").checked = a.excludeOwners !== false;
+  $("gradeMin").value = a.gradeMin ?? 0; $("gradeMax").value = !a.gradeScale && (a.gradeMax ?? 6) >= 6 ? 8 : (a.gradeMax ?? 8); $("premium").value = a.premium || "any"; $("excludeOwners").checked = a.excludeOwners !== false;
   $("topics").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", (a.topics || []).includes(x.dataset.v)));
   $("when").value = "later"; $("whenAt").disabled = false; $("whenAt").value = new Date(c.scheduledAt - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   $("showPopup").checked = c.showPopup !== false; render();

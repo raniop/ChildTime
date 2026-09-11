@@ -73,7 +73,7 @@ final class QuestionRotationTests: XCTestCase {
         var thin: [String] = []
         for topic in topics {
             guard let bank = QuestionBanks.bank(for: topic), !bank.isEmpty else { continue }
-            for grade in 1...6 {
+            for grade in 1...8 {
                 // The pool the child ACTUALLY gets, after the nearest-grade
                 // top-up — not the raw tag count.
                 let pool = QuestionGenerator.effectivePool(topic: topic, grade: grade)
@@ -93,7 +93,7 @@ final class QuestionRotationTests: XCTestCase {
         var gaps: [String] = []
         for topic in topics {
             guard let bank = QuestionBanks.bank(for: topic), !bank.isEmpty else { continue }
-            for grade in 1...6 where bank.filter({ $0.grades.contains(grade) }).count < 15 {
+            for grade in 1...8 where bank.filter({ $0.grades.contains(grade) }).count < 15 {
                 gaps.append("\(topic.rawValue) כיתה \(grade): \(bank.filter { $0.grades.contains(grade) }.count)")
             }
         }
@@ -118,7 +118,7 @@ extension QuestionRotationTests {
         for topic in topics {
             guard let bank = QuestionBanks.bank(for: topic), !bank.isEmpty else { continue }
             var grades: [[String: Any]] = []
-            for g in 0...6 {
+            for g in 0...8 {
                 grades.append([
                     "grade": g,
                     "tagged": bank.filter { $0.grades.contains(g) }.count,

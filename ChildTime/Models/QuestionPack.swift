@@ -19,7 +19,7 @@ struct QuestionPack: Identifiable, Hashable {
     let description: String
     /// Bullet points of what's inside.
     let learns: [String]
-    /// School grades the pack suits (1=א׳ … 6=ו׳).
+    /// School grades the pack suits (1=א׳ … 8=ח׳).
     let grades: ClosedRange<Int>
     /// Consumable StoreKit products: full price for the first child in the
     /// family, half price for every additional child ("הוסיפו גם ל…").
@@ -42,9 +42,9 @@ struct QuestionPack: Identifiable, Hashable {
 
     /// "כיתות ב׳–ו׳"
     var gradesLabel: String {
-        let names = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"]
-        let lo = names[max(0, min(6, grades.lowerBound))]
-        let hi = names[max(0, min(6, grades.upperBound))]
+        let names = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"]
+        let lo = names[max(0, min(names.count - 1, grades.lowerBound))]
+        let hi = names[max(0, min(names.count - 1, grades.upperBound))]
         return grades.lowerBound == grades.upperBound ? "כִּתָּה \(lo)" : "כִּתּוֹת \(lo)–\(hi)"
     }
 

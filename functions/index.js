@@ -457,7 +457,7 @@ function launchCampaignFor(packID) {
     title: `עולם חדש בטופי: ${p.name}`, emoji: p.emoji,
     body: `גילינו עולם חדש בשביל הילדים: ${p.tagline}. על כל תשובה נכונה מרוויחים דקות משחק. למנויי טופי+ הוא כבר פתוח; אחרת שולחים לילד מהטלפון שלכם.`,
     childTitle: `רוצה ללמוד על ${p.subject}?`, childBody: `${p.tagline} — בקש מאבא או אמא`,
-    audience: { roles: ["parents"], gradeMin: 0, gradeMax: 6, premium: "any", topics: [], excludeOwners: true },
+    audience: { roles: ["parents"], gradeMin: 0, gradeMax: 8, gradeScale: 8, premium: "any", topics: [], excludeOwners: true },
     action: { type: "pack", packID }, showPopup: true,
   };
 }
@@ -1896,14 +1896,20 @@ function requireAdmin(request) {
 }
 
 const CAMPAIGN_STAT_KEYS = ["targeted", "sent", "failed", "opened", "page", "purchaseStarted", "purchased", "sentToChild", "popup"];
+// The top school grade Tofy serves (ח׳). Picking it as "עד כיתה" means no upper
+// limit at all — a child the September advance moved past it still belongs.
+const TOP_GRADE = 8;
+// Campaigns saved before ז׳–ח׳ existed stored gradeMax 6 to mean "everyone";
+// only campaigns carrying gradeScale know the new top.
+const audienceTop = (a) => ((a.gradeScale ? a.gradeMax >= a.gradeScale : a.gradeMax >= 6) ? Infinity : a.gradeMax);
 
 function cleanCampaign(input) {
   const d = input || {};
   const s = (v, n) => String(v == null ? "" : v).trim().slice(0, n);
   const aud = d.audience || {};
   const roles = Array.isArray(aud.roles) ? aud.roles.filter((r) => r === "parents" || r === "children") : ["parents"];
-  const gradeMin = Number.isFinite(Number(aud.gradeMin)) ? Math.max(0, Math.min(6, Number(aud.gradeMin))) : 0;
-  const gradeMax = Number.isFinite(Number(aud.gradeMax)) ? Math.max(0, Math.min(6, Number(aud.gradeMax))) : 6;
+  const gradeMin = Number.isFinite(Number(aud.gradeMin)) ? Math.max(0, Math.min(TOP_GRADE, Number(aud.gradeMin))) : 0;
+  const gradeMax = Number.isFinite(Number(aud.gradeMax)) ? Math.max(0, Math.min(TOP_GRADE, Number(aud.gradeMax))) : TOP_GRADE;
   const premium = ["any", "with", "without"].includes(aud.premium) ? aud.premium : "any";
   const topics = Array.isArray(aud.topics) ? aud.topics.map((t) => s(t, 24)).filter(Boolean).slice(0, 12) : [];
   const act = d.action || {};
@@ -1914,7 +1920,7 @@ function cleanCampaign(input) {
   return {
     title: s(d.title, 80), body: s(d.body, 240), emoji: s(d.emoji, 8), imageURL: s(d.imageURL, 400),
     childTitle: s(d.childTitle, 80), childBody: s(d.childBody, 240),
-    audience: { roles: roles.length ? roles : ["parents"], gradeMin, gradeMax, premium, topics,
+    audience: { roles: roles.length ? roles : ["parents"], gradeMin, gradeMax, gradeScale: TOP_GRADE, premium, topics,
                 excludeOwners: aud.excludeOwners !== false },
     action: { type: actionType, packID },
     scheduledAt, status, showPopup: d.showPopup !== false,
@@ -1942,7 +1948,7 @@ async function resolveAudience(audience) {
   const owners = {};   // token → { householdID, family, kind: "parent"|"child", who }
   const kidMatches = (k) => {
     const g = (k.grade === 0 || k.grade) ? Number(k.grade) : null;
-    if (g != null && (g < audience.gradeMin || g > audience.gradeMax)) return false;
+    if (g != null && (g < audience.gradeMin || g > audienceTop(audience))) return false;
     if (audience.topics.length) {
       const interests = new Set([...(k.interests || []), ...Object.keys(k.difficultyByTopic || {}), ...(k.enabledTopics || [])]);
       if (!audience.topics.some((t) => interests.has(t))) return false;
@@ -1957,7 +1963,7 @@ async function resolveAudience(audience) {
     const kids = (kidsByHH[h.id] || []).filter((k) => !k.deletedAt);
     if (audience.excludeOwners && audience.packID && kids.length && kids.every((k) => (k.packs || []).includes(audience.packID))) return;
     const matching = kids.filter(kidMatches);
-    if (!matching.length && (audience.topics.length || audience.gradeMin > 0 || audience.gradeMax < 6)) return;
+    if (!matching.length && (audience.topics.length || audience.gradeMin > 0 || audienceTop(audience) !== Infinity)) return;
     householdsN += 1;
     const family = hh.familyName || hh.familyLabel || (kids.map((k) => k.name).filter(Boolean).join(", ") || h.id.slice(0, 8));
     if (wantParents) {
@@ -2737,7 +2743,7 @@ function qbProblems(q) {
   if (ds.includes(answer)) out.push("התשובה הנכונה מופיעה גם כמסיח");
   if (new Set(ds).size !== ds.length) out.push("מסיחים כפולים");
   const lo = Number(q.gradeLo), hi = Number(q.gradeHi);
-  if (!Number.isInteger(lo) || !Number.isInteger(hi) || lo < 0 || hi > 6 || lo > hi) out.push("טווח כיתות לא תקין");
+  if (!Number.isInteger(lo) || !Number.isInteger(hi) || lo < 0 || hi > 8 || lo > hi) out.push("טווח כיתות לא תקין");
   if (q.tier && !QB_TIERS.includes(q.tier)) out.push("רמה לא תקינה");
   // Hebrew content without a single niqqud mark is almost always an unreviewed
   // paste — the whole app is vocalised for young readers.
@@ -2834,10 +2840,10 @@ exports.adminQuestionBankSummary = onCall({ timeoutSeconds: 60, memory: "512MiB"
   snap.forEach((d) => {
     const items = d.data().items || [];
     const byGrade = {};
-    for (let g = 0; g <= 6; g++) byGrade[g] = { approved: 0, draft: 0 };
+    for (let g = 0; g <= 8; g++) byGrade[g] = { approved: 0, draft: 0 };
     for (const i of items) {
       const st = i.status === "draft" ? "draft" : "approved";
-      for (let g = Math.max(0, i.gradeLo); g <= Math.min(6, i.gradeHi); g++) byGrade[g][st]++;
+      for (let g = Math.max(0, i.gradeLo); g <= Math.min(8, i.gradeHi); g++) byGrade[g][st]++;
     }
     topics[d.id] = {
       version: d.data().version || 0,

@@ -8,9 +8,11 @@ import Foundation
 /// Difficulty stays WITHIN the grade (the adaptive engine keeps working): easy
 /// leans on the grade's entry modules, hard on its heaviest — and peeks one
 /// grade up 20% of the time (העשרה). Grade comes from `Profile.effectiveGrade`
-/// (parent-set grade, else derived from the age bracket); 7+ serves grade-6
-/// material until middle-school content exists.
+/// (parent-set grade, else derived from the age bracket). ז׳–ח׳ are middle
+/// school (Rani, 2026-09-11: "עד כיתה ח כולל"); 9+ serves ח׳ material.
 enum CurriculumMath {
+    /// The highest grade with its own material.
+    static let topGrade = 8
 
     /// Stamp a generated question with the skill it exercises, so the parent
     /// report can tell "strong in multiplication" from "struggling with fractions".
@@ -19,8 +21,8 @@ enum CurriculumMath {
     }
 
     static func generate(grade: Int, difficulty: Difficulty) -> Question {
-        let g = max(1, min(6, grade))
-        if difficulty == .hard, g < 6, Double.random(in: 0...1) < 0.2 {
+        let g = max(1, min(topGrade, grade))
+        if difficulty == .hard, g < topGrade, Double.random(in: 0...1) < 0.2 {
             return generate(grade: g + 1, difficulty: .medium)   // העשרה
         }
         switch g {
@@ -29,7 +31,9 @@ enum CurriculumMath {
         case 3:  return grade3(difficulty)
         case 4:  return grade4(difficulty)
         case 5:  return grade5(difficulty)
-        default: return grade6(difficulty)
+        case 6:  return grade6(difficulty)
+        case 7:  return grade7(difficulty)
+        default: return grade8(difficulty)
         }
     }
 
@@ -295,6 +299,229 @@ enum CurriculumMath {
                    answer: answer, options: ([answer] + distractors.prefix(3)).shuffled())
     }
 
+    // MARK: - כיתה ז׳ — מספרים מכוונים, ביטויים ומשוואות, חזקות, אחוזים, זוויות, פרופורציה
+
+    private static func grade7(_ d: Difficulty) -> Question {
+        switch Int.random(in: 0...7) {
+        case 0:  return tagged(signedArithmetic(hard: d == .hard), "negatives")
+        case 1:  return tagged(substitute(), "expressions")
+        case 2:  return tagged(oneVariableEquation(twoStep: d != .easy), "equations")
+        case 3:  return tagged(power(), "powers")
+        case 4:  return tagged(percentChange(), "percent")
+        case 5:  return tagged(angles(), "angles")
+        case 6:  return tagged(proportion(), "proportion")
+        default: return tagged(triangleArea(), "geometry")
+        }
+    }
+
+    /// (−7) + 4, 5 − 9, (−3) × (−6): the sign is the whole skill, so the planted
+    /// wrong answers are exactly the sign slips.
+    private static func signedArithmetic(hard: Bool) -> Question {
+        let a = Int.random(in: 2...12) * (Bool.random() ? -1 : 1)
+        let b = Int.random(in: 2...12) * (Bool.random() ? -1 : 1)
+        switch Int.random(in: 0...(hard ? 2 : 1)) {
+        case 0:
+            return signedMCQ(prompt: ltr("\(paren(a)) + \(paren(b)) = ?"), answer: a + b,
+                             plants: [-(a + b), abs(a) + abs(b), a - b])
+        case 1:
+            return signedMCQ(prompt: ltr("\(paren(a)) − \(paren(b)) = ?"), answer: a - b,
+                             plants: [-(a - b), a + b, abs(a) - abs(b)])
+        default:
+            let x = Int.random(in: 2...9) * (Bool.random() ? -1 : 1), y = Int.random(in: 2...9) * (Bool.random() ? -1 : 1)
+            return signedMCQ(prompt: ltr("\(paren(x)) × \(paren(y)) = ?"), answer: x * y,
+                             plants: [-(x * y), x + y])
+        }
+    }
+
+    /// "3x − 5 כש־x = 4" — plants: forgetting the multiplication (3+4−5) and
+    /// reading 3x as the digits "34".
+    private static func substitute() -> Question {
+        let k = Int.random(in: 2...9), x = Int.random(in: 2...9), c = Int.random(in: 1...12)
+        let plus = Bool.random()
+        let expr = plus ? "\(k)x + \(c)" : "\(k)x − \(c)"
+        let answer = plus ? k * x + c : k * x - c
+        return signedMCQ(prompt: "\(ltr(expr))\nמָה עֵרֶךְ הַבִּטּוּי כְּשֶׁ־\(ltr("x = \(x)"))?", answer: answer,
+                         plants: [plus ? k + x + c : k + x - c, plus ? k * 10 + x + c : k * 10 + x - c])
+    }
+
+    /// kx + c = r with a whole answer. Plant: stopping after subtracting c.
+    private static func oneVariableEquation(twoStep: Bool) -> Question {
+        let x = Int.random(in: -6...12), k = twoStep ? Int.random(in: 2...9) : 1
+        let c = Int.random(in: 1...15) * (Bool.random() ? -1 : 1)
+        let r = k * x + c
+        let left = "\(coef(k))x"
+        let eq = c >= 0 ? "\(left) + \(c) = \(signed(r))" : "\(left) − \(-c) = \(signed(r))"
+        return signedMCQ(prompt: "\(ltr(eq))\nמָה הָעֵרֶךְ שֶׁל x?", answer: x,
+                         plants: [r - c == x ? r + c : r - c, r + c, k > 1 ? r / k : r])
+    }
+
+    /// 2⁵, 7², 3⁴ — plant: base × exponent, the classic mix-up.
+    private static func power() -> Question {
+        let pairs = [(2, 3), (2, 4), (2, 5), (2, 6), (3, 2), (3, 3), (3, 4), (4, 2), (4, 3), (5, 2), (5, 3),
+                     (6, 2), (7, 2), (8, 2), (9, 2), (10, 3), (11, 2), (12, 2), (13, 2), (15, 2)]
+        let (b, e) = pairs.randomElement()!
+        return signedMCQ(prompt: ltr("\(b)\(superscript(e)) = ?"), answer: Int(pow(Double(b), Double(e))),
+                         plants: [b * e, b + e], allowNegative: false)
+    }
+
+    /// A price goes up or down by a whole percentage. Plants: the change alone,
+    /// and the opposite direction.
+    private static func percentChange() -> Question {
+        let base = [40, 60, 80, 120, 150, 200, 240, 300, 400].randomElement()!
+        let pct = [10, 20, 25, 30, 40, 50].filter { base * $0 % 100 == 0 }.randomElement()!
+        let change = base * pct / 100, up = Bool.random()
+        let answer = up ? base + change : base - change
+        return signedMCQ(prompt: "🏷️ מְחִיר שֶׁל \(base) ₪ \(up ? "עָלָה" : "יָרַד") בְּ־\(pct)%. מָה הַמְּחִיר הֶחָדָשׁ?",
+                         answer: answer, suffix: " ₪", plants: [change, up ? base - change : base + change],
+                         allowNegative: false)
+    }
+
+    /// The third angle of a triangle, or the angle next to one on a straight line.
+    private static func angles() -> Question {
+        if Bool.random() {
+            let a = Int.random(in: 3...12) * 5, b = Int.random(in: 3...(30 - a / 5)) * 5
+            let answer = 180 - a - b
+            guard answer > 0 else { return angles() }
+            return signedMCQ(prompt: "📐 בִּמְשֻׁלָּשׁ יֵשׁ זָוִית שֶׁל \(a)° וְזָוִית שֶׁל \(b)°. מָה גֹּדֶל הַזָּוִית הַשְּׁלִישִׁית?",
+                             answer: answer, suffix: "°", plants: [a + b, 360 - a - b, 90 - min(a, b) > 0 ? 90 - min(a, b) : a], allowNegative: false)
+        }
+        let a = Int.random(in: 4...32) * 5
+        return signedMCQ(prompt: "📐 שְׁתֵּי זָוִיּוֹת צְמוּדוֹת. אַחַת הִיא \(a)°. מָה גֹּדֶל הַשְּׁנִיָּה?",
+                         answer: 180 - a, suffix: "°", plants: [90 - a > 0 ? 90 - a : 360 - a, a], allowNegative: false)
+    }
+
+    /// n items cost p — how much do m cost? Plant: scaling by the difference.
+    private static func proportion() -> Question {
+        let unit = Int.random(in: 3...15), n = Int.random(in: 2...6)
+        var m = Int.random(in: 3...12)
+        if m == n { m += 1 }
+        return signedMCQ(prompt: "📒 \(n) מַחְבָּרוֹת עוֹלוֹת \(unit * n) ₪. כַּמָּה יַעֲלוּ \(m) מַחְבָּרוֹת?",
+                         answer: unit * m, suffix: " ₪", plants: [unit * n + (m - n), unit * n * m], allowNegative: false)
+    }
+
+    private static func triangleArea() -> Question {
+        let base = Int.random(in: 3...14), height = Int.random(in: 2...12)
+        guard base * height % 2 == 0 else { return triangleArea() }
+        return signedMCQ(prompt: "🔺 מְשֻׁלָּשׁ שֶׁבָּסִיסוֹ \(base) ס\"מ וְהַגֹּבַהּ אֵלָיו \(height) ס\"מ. מָה הַשֶּׁטַח שֶׁלּוֹ?",
+                         answer: base * height / 2, suffix: " סמ\"ר", plants: [base * height, base + height], allowNegative: false)
+    }
+
+    // MARK: - כיתה ח׳ — משוואות, פיתגורס, שורשים, פונקציה קווית, נפח, הסתברות, מעגל
+
+    private static func grade8(_ d: Difficulty) -> Question {
+        switch Int.random(in: 0...7) {
+        case 0:  return tagged(equationBothSides(brackets: d == .hard || Bool.random()), "equations")
+        case 1:  return tagged(pythagoras(), "pythagoras")
+        case 2:  return tagged(squareRoot(), "roots")
+        case 3:  return tagged(linearFunction(), "linearFunction")
+        case 4:  return tagged(boxVolume(), "volume")
+        case 5:  return tagged(powerLaws(), "powers")
+        case 6:  return tagged(probability(), "probability")
+        default: return tagged(d == .easy ? signedArithmetic(hard: true) : circle(), d == .easy ? "negatives" : "circle")
+        }
+    }
+
+    /// a(x + b) = r   or   ax + b = cx + e — always a whole x.
+    private static func equationBothSides(brackets: Bool) -> Question {
+        let x = Int.random(in: -5...10)
+        if brackets {
+            let a = Int.random(in: 2...6), b = Int.random(in: -6...9)
+            let r = a * (x + b)
+            let inner = b == 0 ? "x" : b > 0 ? "x + \(b)" : "x − \(-b)"
+            return signedMCQ(prompt: "\(ltr("\(a)(\(inner)) = \(signed(r))"))\nמָה הָעֵרֶךְ שֶׁל x?", answer: x,
+                             // Plants: opening only the first term (ax + b = r), and dividing then adding.
+                             plants: [(r - b) / a, r / a + b])
+        }
+        let a = Int.random(in: 3...9), c = Int.random(in: 1...(a - 1)), b = Int.random(in: -12...12)
+        let e = (a - c) * x + b
+        func side(_ k: Int, _ n: Int) -> String { n == 0 ? "\(coef(k))x" : n > 0 ? "\(coef(k))x + \(n)" : "\(coef(k))x − \(-n)" }
+        return signedMCQ(prompt: "\(ltr("\(side(a, b)) = \(side(c, e))"))\nמָה הָעֵרֶךְ שֶׁל x?", answer: x,
+                         // Plants: adding the x terms instead of subtracting, and a sign slip on the numbers.
+                         plants: [(e - b) / (a + c), (e + b) / (a - c)])
+    }
+
+    /// A right triangle from a Pythagorean triple — the hypotenuse or a leg.
+    private static func pythagoras() -> Question {
+        let triples = [(3, 4, 5), (6, 8, 10), (5, 12, 13), (8, 15, 17), (9, 12, 15), (7, 24, 25), (12, 16, 20), (9, 40, 41), (15, 20, 25)]
+        let (a, b, c) = triples.randomElement()!
+        if Bool.random() {
+            return signedMCQ(prompt: "📐 בִּמְשֻׁלָּשׁ יְשַׁר זָוִית אָרְכֵי הַנִּצָּבִים \(a) ס\"מ וְ־\(b) ס\"מ. מָה אֹרֶךְ הַיֶּתֶר?",
+                             answer: c, suffix: " ס\"מ", plants: [a + b, a * a + b * b], allowNegative: false)
+        }
+        return signedMCQ(prompt: "📐 בִּמְשֻׁלָּשׁ יְשַׁר זָוִית הַיֶּתֶר \(c) ס\"מ וְאַחַד הַנִּצָּבִים \(a) ס\"מ. מָה אֹרֶךְ הַנִּצָּב הַשֵּׁנִי?",
+                         answer: b, suffix: " ס\"מ", plants: [c - a, c + a], allowNegative: false)
+    }
+
+    private static func squareRoot() -> Question {
+        let r = Int.random(in: 4...20)
+        return signedMCQ(prompt: ltr("√\(r * r) = ?"), answer: r, plants: [r * r / 2, r * 2], allowNegative: false)
+    }
+
+    /// y = mx + b: its value at x, or its slope. Plants: the intercept for the
+    /// slope, and a sign slip.
+    private static func linearFunction() -> Question {
+        let m = Int.random(in: 1...6) * (Bool.random() ? -1 : 1), b = Int.random(in: -9...9)
+        let rule = b == 0 ? "y = \(coef(m))x" : (b > 0 ? "y = \(coef(m))x + \(b)" : "y = \(coef(m))x − \(-b)")
+        if Bool.random() {
+            let x = Int.random(in: -4...6)
+            return signedMCQ(prompt: "📈 \(ltr(rule))\nמָה הָעֵרֶךְ שֶׁל y כְּשֶׁ־\(ltr("x = \(x)"))?", answer: m * x + b,
+                             plants: [m * x - b, m + x + b])
+        }
+        return signedMCQ(prompt: "📈 \(ltr(rule))\nמָה הַשִּׁפּוּעַ שֶׁל הַיָּשָׁר?", answer: m,
+                         plants: [b == m ? -m : b, -m])
+    }
+
+    private static func boxVolume() -> Question {
+        let l = Int.random(in: 2...12), w = Int.random(in: 2...9), h = Int.random(in: 2...8)
+        return signedMCQ(prompt: "📦 תֵּבָה בְּאֹרֶךְ \(l) ס\"מ, רֹחַב \(w) ס\"מ וְגֹבַהּ \(h) ס\"מ. מָה הַנֶּפַח שֶׁלָּהּ?",
+                         answer: l * w * h, suffix: " סמ\"ק", plants: [l + w + h, 2 * (l * w + l * h + w * h)], allowNegative: false)
+    }
+
+    /// aᵐ · aⁿ = a^? — plant: multiplying the exponents.
+    private static func powerLaws() -> Question {
+        let a = [2, 3, 5, 7, 10].randomElement()!, m = Int.random(in: 2...6), n = Int.random(in: 2...6)
+        if Bool.random() {
+            return signedMCQ(prompt: "\(ltr("\(a)\(superscript(m)) · \(a)\(superscript(n)) = \(a)ⁿ"))\nמָה הָעֵרֶךְ שֶׁל n?",
+                             answer: m + n, plants: [m * n, abs(m - n)], allowNegative: false)
+        }
+        let big = m + n
+        return signedMCQ(prompt: "\(ltr("\(a)\(superscript(big)) : \(a)\(superscript(m)) = \(a)ⁿ"))\nמָה הָעֵרֶךְ שֶׁל n?",
+                         answer: n, plants: [big + m, max(1, big / m)], allowNegative: false)
+    }
+
+    /// Red and blue marbles: the chance of drawing red, as a reduced fraction.
+    private static func probability() -> Question {
+        let red = Int.random(in: 1...7), blue = Int.random(in: 1...9)
+        func gcd(_ x: Int, _ y: Int) -> Int { y == 0 ? x : gcd(y, x % y) }
+        func frac(_ n: Int, _ d: Int) -> String { let g = gcd(n, d); return ltr("\(n / g)/\(d / g)") }
+        let answer = frac(red, red + blue)
+        // Plants: red out of blue (not out of all), and the chance of blue.
+        var options = [answer]
+        for cand in [frac(red, blue), frac(blue, red + blue), frac(red + 1, red + blue + 1), frac(1, red + blue), frac(red, red + blue + 2)] {
+            if options.count < 4, !options.contains(cand) { options.append(cand) }
+        }
+        guard options.count == 4 else { return probability() }
+        let r = red == 1 ? "כַּדּוּר אָדֹם אֶחָד" : "\(red) כַּדּוּרִים אֲדֻמִּים"
+        let b = blue == 1 ? "כַּדּוּר כָּחֹל אֶחָד" : "\(blue) כַּדּוּרִים כְּחֻלִּים"
+        return mcq(prompt: rtlLines("🎲 בְּשַׂקִּית \(r) וְ־\(b). שׁוֹלְפִים כַּדּוּר אֶחָד בְּלִי לְהִסְתַּכֵּל. מָה הַסִּכּוּי שֶׁהוּא אָדֹם?"),
+                   answer: answer, options: options.shuffled())
+    }
+
+    /// Circumference or area with π = 3.14. Plants: the other formula, and πr.
+    private static func circle() -> Question {
+        let r = [1, 2, 3, 4, 5, 10].randomElement()!
+        let circumference = fmt(2 * 3.14 * Double(r)), area = fmt(3.14 * Double(r * r)), half = fmt(3.14 * Double(r))
+        let askArea = Bool.random()
+        let answer = askArea ? area : circumference
+        var options = [answer]
+        for cand in [askArea ? circumference : area, half, fmt(3.14 * Double(2 * r * 2 * r)), fmt(Double(2 * r) * 2)] {
+            if options.count < 4, !options.contains(cand) { options.append(cand) }
+        }
+        let unit = askArea ? " סמ\"ר" : " ס\"מ"
+        return mcq(prompt: rtlLines("⭕ מַעְגָּל שֶׁהָרַדְיוּס שֶׁלּוֹ \(r) ס\"מ. מָה \(askArea ? "הַשֶּׁטַח" : "הַהֶקֵּף") שֶׁלּוֹ? (\(ltr("π = 3.14")))"),
+                   answer: answer + unit, options: options.map { $0 + unit }.shuffled())
+    }
+
     // MARK: - בעיות מילוליות (תבניות עם שמות מתחלפים)
 
     private static let kids = ["דָּנָה", "יוֹסִי", "נֹעָה", "אִיתַי", "תָּמָר", "עוֹמֶר"]
@@ -356,6 +583,60 @@ enum CurriculumMath {
             topic: .math,
             prompt: prompt,
             options: shuffled.map { "\($0)\(suffix)" },
+            correctIndex: shuffled.firstIndex(of: answer) ?? 0
+        )
+    }
+
+    /// Keeps a math run left-to-right inside a Hebrew line, and in one piece.
+    /// Without the isolate "−3" can render as "3−" and "(−7) + 4 = ?" comes out
+    /// reversed; without the no-break spaces a wrap split "x = 0" across lines.
+    static func ltr(_ s: String) -> String {
+        "\u{2066}\(s.replacingOccurrences(of: " ", with: "\u{00A0}"))\u{2069}"
+    }
+
+    /// Start every line right-to-left. iOS takes the direction of the whole
+    /// prompt from its first letter, so "📈 y = −2x − 9\nמָה הַשִּׁפּוּעַ…" laid the
+    /// Hebrew line out left-to-right, words in reverse. The math itself stays
+    /// left-to-right inside its `ltr` isolate.
+    private static func rtlLines(_ s: String) -> String {
+        s.split(separator: "\n", omittingEmptySubsequences: false).map { "\u{200F}" + $0 }.joined(separator: "\n")
+    }
+
+    /// −3 with a real minus sign, and parentheses around negatives inside an
+    /// expression: "(−7) + 4".
+    private static func signed(_ n: Int) -> String { n < 0 ? "−\(-n)" : "\(n)" }
+    private static func paren(_ n: Int) -> String { n < 0 ? "(−\(-n))" : "\(n)" }
+    /// A coefficient in front of x: "x", "−x", "3x", "−3x" — never "1x".
+    private static func coef(_ k: Int) -> String { k == 1 ? "" : k == -1 ? "−" : signed(k) }
+
+    private static func superscript(_ n: Int) -> String {
+        let map: [Character: Character] = ["0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹"]
+        return String(String(n).map { map[$0] ?? $0 })
+    }
+
+    /// Numeric MCQ for middle school: answers may be negative, and `plants` are
+    /// the specific mistakes worth testing (sign slips, the wrong formula) —
+    /// they go in first, then near misses. `numericMCQ` never offers a negative
+    /// option, and with a negative answer it could loop forever.
+    private static func signedMCQ(prompt: String, answer: Int, suffix: String = "",
+                                  plants: [Int] = [], allowNegative: Bool = true) -> Question {
+        var options: [Int] = [answer]
+        func add(_ v: Int) { if options.count < 4, !options.contains(v), allowNegative || v >= 0 { options.append(v) } }
+        for p in plants.shuffled() { add(p) }
+        let spread = Swift.max(3, abs(answer) / 4 + 2)
+        var tries = 0
+        while options.count < 4 && tries < 200 {
+            tries += 1
+            let delta = Int.random(in: 1...spread)
+            add(Bool.random() ? answer + delta : answer - delta)
+        }
+        var k = 1
+        while options.count < 4 { add(answer + k); k += 1 }
+        let shuffled = options.shuffled()
+        return Question(
+            topic: .math,
+            prompt: rtlLines(prompt),
+            options: shuffled.map { ltr(signed($0)) + suffix },
             correctIndex: shuffled.firstIndex(of: answer) ?? 0
         )
     }

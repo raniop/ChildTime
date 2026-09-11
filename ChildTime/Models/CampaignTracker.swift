@@ -87,7 +87,18 @@ final class CampaignTracker: ObservableObject {
 /// functions). Only the fields the pop-up needs.
 struct Campaign: Identifiable, Equatable {
     struct Action: Equatable { var type: String; var packID: String }
-    struct Audience: Equatable { var roles: [String]; var gradeMin: Int; var gradeMax: Int; var premium: String; var topics: [String] }
+    struct Audience: Equatable {
+        var roles: [String]; var gradeMin: Int; var gradeMax: Int; var premium: String; var topics: [String]
+        /// The grade scale the campaign was written on (8 since ז׳–ח׳). nil = an
+        /// older campaign, whose top of 6 meant "every grade".
+        var gradeScale: Int? = nil
+        /// The highest grade included — the top of the scale means no limit, so a
+        /// child moved past it by the September advance is still in.
+        var effectiveMax: Int {
+            let top = gradeScale ?? 6
+            return gradeMax >= top ? Int.max : gradeMax
+        }
+    }
     let id: String
     var title: String
     var body: String
@@ -112,8 +123,9 @@ struct Campaign: Identifiable, Equatable {
         action = Action(type: a["type"] as? String ?? "none", packID: a["packID"] as? String ?? "")
         let au = data["audience"] as? [String: Any] ?? [:]
         audience = Audience(roles: au["roles"] as? [String] ?? ["parents"],
-                            gradeMin: (au["gradeMin"] as? Int) ?? 0, gradeMax: (au["gradeMax"] as? Int) ?? 6,
-                            premium: au["premium"] as? String ?? "any", topics: au["topics"] as? [String] ?? [])
+                            gradeMin: (au["gradeMin"] as? Int) ?? 0, gradeMax: (au["gradeMax"] as? Int) ?? 8,
+                            premium: au["premium"] as? String ?? "any", topics: au["topics"] as? [String] ?? [],
+                            gradeScale: au["gradeScale"] as? Int ?? (au["gradeMax"] == nil ? 8 : nil))
         sentAt = (data["sentAt"] as? Double) ?? (data["scheduledAt"] as? Double) ?? 0
         guard !title.isEmpty else { return nil }
     }
@@ -124,7 +136,7 @@ struct Campaign: Identifiable, Equatable {
         body = "עזרו לילד שלכם להכיר שחקנים, קבוצות, תחרויות ועובדות מעניינות מעולם הכדורגל בישראל ובעולם."
         childTitle = "רוצה ללמוד על כדורגל?"; childBody = "שחקנים, קבוצות, תחרויות ועובדות מפתיעות — בקש מאבא או אמא"
         action = Action(type: "pack", packID: packID)
-        audience = Audience(roles: ["parents", "children"], gradeMin: 0, gradeMax: 6, premium: "any", topics: [])
+        audience = Audience(roles: ["parents", "children"], gradeMin: 0, gradeMax: 8, premium: "any", topics: [], gradeScale: 8)
         sentAt = Date().timeIntervalSince1970 * 1000
     }
 
@@ -138,11 +150,11 @@ struct Campaign: Identifiable, Equatable {
         if audience.premium == "without", premium { return false }
         if action.type == "pack", !action.packID.isEmpty, !profiles.isEmpty,
            profiles.allSatisfy({ $0.ownedPacks.contains(action.packID) }) { return false }
-        let narrowed = audience.gradeMin > 0 || audience.gradeMax < 6 || !audience.topics.isEmpty
+        let narrowed = audience.gradeMin > 0 || audience.effectiveMax != Int.max || !audience.topics.isEmpty
         guard narrowed, !profiles.isEmpty else { return true }
         return profiles.contains { p in
             let g = p.effectiveGrade
-            if g < audience.gradeMin || g > audience.gradeMax { return false }
+            if g < audience.gradeMin || g > audience.effectiveMax { return false }
             if !audience.topics.isEmpty {
                 let mine = Set(p.interests + p.enabledTopics.map(\.rawValue) + p.difficultyByTopic.keys)
                 if !audience.topics.contains(where: { mine.contains($0) }) { return false }

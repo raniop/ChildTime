@@ -68,7 +68,7 @@ struct QuestionGenerator {
         // Young kids get a REAL but fair jump: one grade up at hard, instead of
         // the universal two-step "7×6+13" they haven't learned yet.
         if let g = grade, g <= 2 {
-            return CurriculumMath.generate(grade: min(6, g + 1), difficulty: .hard)
+            return CurriculumMath.generate(grade: min(CurriculumMath.topGrade, g + 1), difficulty: .hard)
         }
         let a = Int.random(in: 3...12)
         let b = Int.random(in: 3...12)

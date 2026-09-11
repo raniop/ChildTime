@@ -1,5 +1,5 @@
 {
-  "generatedAt" : "2026-09-11T05:58:31Z",
+  "generatedAt" : "2026-09-11T07:02:02Z",
   "minGradePool" : 30,
   "target" : 200,
   "topics" : [
@@ -39,6 +39,16 @@
         },
         {
           "grade" : 6,
+          "pool" : 0,
+          "tagged" : 0
+        },
+        {
+          "grade" : 7,
+          "pool" : 0,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
           "pool" : 0,
           "tagged" : 0
         }
@@ -86,6 +96,16 @@
           "grade" : 6,
           "pool" : 66,
           "tagged" : 66
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "אַנְגְּלִית",
@@ -136,6 +156,16 @@
           "grade" : 6,
           "pool" : 30,
           "tagged" : 29
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "עִבְרִית",
@@ -186,6 +216,16 @@
           "grade" : 6,
           "pool" : 47,
           "tagged" : 47
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "לוֹגִיקָה",
@@ -236,6 +276,16 @@
           "grade" : 6,
           "pool" : 65,
           "tagged" : 65
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "מַדָּעִים",
@@ -286,6 +336,16 @@
           "grade" : 6,
           "pool" : 78,
           "tagged" : 78
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "הִיסְטוֹרְיָה",
@@ -336,6 +396,16 @@
           "grade" : 6,
           "pool" : 183,
           "tagged" : 183
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "גֵּאוֹגְרַפְיָה",
@@ -386,6 +456,16 @@
           "grade" : 6,
           "pool" : 30,
           "tagged" : 24
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "חִנּוּךְ פִינַנְסִי",
@@ -443,6 +523,18 @@
           "passages" : 16,
           "pool" : 48,
           "tagged" : 48
+        },
+        {
+          "grade" : 7,
+          "passages" : 0,
+          "pool" : 0,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "passages" : 0,
+          "pool" : 0,
+          "tagged" : 0
         }
       ],
       "label" : "הֲבָנַת הַנִּקְרָא",
@@ -489,6 +581,16 @@
           "grade" : 6,
           "pool" : 49,
           "tagged" : 49
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "עוֹלַם הַכַּדּוּרֶגֶל",
@@ -539,6 +641,16 @@
           "grade" : 6,
           "pool" : 30,
           "tagged" : 11
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "דִּינוֹזָאוּרִים",
@@ -589,6 +701,16 @@
           "grade" : 6,
           "pool" : 30,
           "tagged" : 14
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "חָלָל וְכוֹכָבִים",
@@ -639,6 +761,16 @@
           "grade" : 6,
           "pool" : 30,
           "tagged" : 1
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "עוֹלַם הַחַיּוֹת",
@@ -687,6 +819,16 @@
         },
         {
           "grade" : 6,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
           "pool" : 30,
           "tagged" : 0
         }
@@ -739,6 +881,16 @@
           "grade" : 6,
           "pool" : 30,
           "tagged" : 0
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "הֲכָנָה לִמְחוֹנָנִים",
@@ -787,6 +939,16 @@
         },
         {
           "grade" : 6,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
           "pool" : 30,
           "tagged" : 0
         }
@@ -839,6 +1001,16 @@
           "grade" : 6,
           "pool" : 30,
           "tagged" : 14
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "יִשְׂרָאֵל שֶׁלִּי",
@@ -887,6 +1059,16 @@
         },
         {
           "grade" : 6,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
           "pool" : 30,
           "tagged" : 0
         }
@@ -939,6 +1121,16 @@
           "grade" : 6,
           "pool" : 30,
           "tagged" : 14
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "גּוּף הָאָדָם",
@@ -987,6 +1179,16 @@
         },
         {
           "grade" : 6,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
           "pool" : 30,
           "tagged" : 0
         }
@@ -1039,6 +1241,16 @@
           "grade" : 6,
           "pool" : 30,
           "tagged" : 14
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "דְּגָלִים וּמְדִינוֹת",
@@ -1089,6 +1301,16 @@
           "grade" : 6,
           "pool" : 30,
           "tagged" : 14
+        },
+        {
+          "grade" : 7,
+          "pool" : 30,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 30,
+          "tagged" : 0
         }
       ],
       "label" : "חַגֵּי תִּשְׁרֵי",

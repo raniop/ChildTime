@@ -38,11 +38,7 @@ enum ReadingContent {
     /// prompts are filtered by the caller, where QuestionReporter is reachable.)
     static func nextGroup(target: Difficulty, grade: Int? = nil) -> [Question] {
         guard let passage = pickPassage(target: target, grade: grade) else { return [] }
-        let universeCount: Int = {
-            guard let g = grade else { return passages.count }
-            let inWindow = passages.filter { $0.gradeWindow.contains(g) }
-            return inWindow.isEmpty ? passages.count : inWindow.count
-        }()
+        let universeCount = universe(for: grade).count
         markUsed(passage.id, universeCount: universeCount)
         return passage.questions.map { item in
             let options = ([item.correctAnswer] + item.distractors).shuffled()
@@ -68,6 +64,20 @@ enum ReadingContent {
         )
     }
 
+    /// 🎓 The passages a grade reads: its own window, else the NEAREST grade's.
+    /// The old fallback was the whole pool, so a ז׳ child (no passage reaches
+    /// past ו׳) could be handed a two-line א׳ story.
+    static func universe(for grade: Int?) -> [ReadingPassage] {
+        guard let g = grade else { return passages }
+        let inWindow = passages.filter { $0.gradeWindow.contains(g) }
+        if !inWindow.isEmpty { return inWindow }
+        let distance: (ReadingPassage) -> Int = { p in
+            min(abs(p.gradeWindow.lowerBound - g), abs(p.gradeWindow.upperBound - g))
+        }
+        guard let nearest = passages.map(distance).min() else { return passages }
+        return passages.filter { distance($0) == nearest }
+    }
+
     /// Prefer the target tier, then drift easier before harder (same spirit as
     /// QuestionMemory's tier preference); within a tier avoid recently-used
     /// passages, relaxing only when the whole tier was seen.
@@ -78,13 +88,7 @@ enum ReadingContent {
         case .medium: order = [.medium, .easy, .hard]
         case .hard:   order = [.hard, .medium, .easy]
         }
-        // 🎓 Curriculum window first; fall back to the whole pool rather than
-        // serve nothing when a grade has no matching passages yet.
-        var universe = passages
-        if let g = grade {
-            let inWindow = passages.filter { $0.gradeWindow.contains(g) }
-            if !inWindow.isEmpty { universe = inWindow }
-        }
+        let universe = universe(for: grade)
         let recent = recentIDs()
         for tier in order {
             let pool = universe.filter { $0.tier == tier }

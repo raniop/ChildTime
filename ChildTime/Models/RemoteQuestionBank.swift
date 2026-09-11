@@ -57,7 +57,7 @@ final class RemoteQuestionBank {
                 && ds.count >= 3
                 && !ds.contains(a)
                 && Set(ds).count == ds.count
-                && (0...6).contains(gradeLo) && (0...6).contains(gradeHi) && gradeLo <= gradeHi
+                && (0...8).contains(gradeLo) && (0...8).contains(gradeHi) && gradeLo <= gradeHi
         }
 
         var bankQuestion: BankQuestion {

@@ -36,12 +36,12 @@ struct CoverageExport {
                 // Generated per question by CurriculumMath — there is no bank to run out of.
                 row["computed"] = true
                 row["total"] = 0
-                row["grades"] = (0...6).map { ["grade": $0, "tagged": 0, "pool": 0] }
+                row["grades"] = (0...8).map { ["grade": $0, "tagged": 0, "pool": 0] }
             case .reading:
                 let passages = ReadingContent.passages
                 row["total"] = passages.reduce(0) { $0 + $1.questions.count }
                 row["passages"] = passages.count
-                row["grades"] = (0...6).map { g -> [String: Any] in
+                row["grades"] = (0...8).map { g -> [String: Any] in
                     let inWindow = passages.filter { $0.gradeWindow.contains(g) }
                     let q = inWindow.reduce(0) { $0 + $1.questions.count }
                     return ["grade": g, "tagged": q, "pool": q, "passages": inWindow.count]
@@ -52,7 +52,7 @@ struct CoverageExport {
                 var tiers: [String: Int] = [:]
                 for q in bank { tiers[q.difficulty.rawValue, default: 0] += 1 }
                 row["tiers"] = tiers
-                row["grades"] = (0...6).map { g -> [String: Any] in
+                row["grades"] = (0...8).map { g -> [String: Any] in
                     let tagged = bank.filter { $0.grades.contains(g) }.count
                     return ["grade": g, "tagged": tagged, "pool": max(tagged, min(minGradePool, bank.count))]
                 }

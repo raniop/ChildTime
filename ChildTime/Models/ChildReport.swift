@@ -19,6 +19,19 @@ enum SkillCatalog {
         "decimals":     "מִסְפָּרִים עֶשְׂרוֹנִיִּים",
         "average":      "מְמֻצָּע",
         "percent":      "אֲחוּזִים",
+        // ז׳–ח׳
+        "negatives":      "מִסְפָּרִים מְכֻוָּנִים",
+        "expressions":    "בִּטּוּיִים אַלְגֶּבְּרִיִּים",
+        "equations":      "מִשְׁוָאוֹת",
+        "powers":         "חֶזְקוֹת",
+        "roots":          "שׁוֹרָשִׁים",
+        "angles":         "זָוִיּוֹת",
+        "proportion":     "יַחַס וּפְרוֹפּוֹרְצְיָה",
+        "pythagoras":     "מִשְׁפַּט פִּיתָגוֹרַס",
+        "linearFunction": "פוּנְקְצִיָּה קַוִּית",
+        "volume":         "נֶפַח",
+        "probability":    "הִסְתַּבְּרוּת",
+        "circle":         "מַעְגָּל",
     ]
     static func name(_ key: String) -> String { names[key] ?? key }
 }

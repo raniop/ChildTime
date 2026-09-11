@@ -53,12 +53,12 @@
   .card h4{font:800 13.5px Rubik,sans-serif;margin:0 0 8px;color:var(--muted)}
   table{width:100%;border-collapse:collapse;font-size:13px} th{font:700 12px Rubik,sans-serif;color:var(--muted);text-align:right;padding:7px 9px;border-bottom:1px solid var(--line)} td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top} tr:last-child td{border-bottom:0}
   .tblwrap{overflow-x:auto}
-  .covrow{display:grid;grid-template-columns:minmax(150px,1.5fr) repeat(7,minmax(34px,1fr));gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)} .cov .covrow:last-child{border-bottom:0}
+  .covrow{display:grid;grid-template-columns:minmax(150px,1.5fr) repeat(9,minmax(34px,1fr));gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)} .cov .covrow:last-child{border-bottom:0}
   .covhead{font:700 12px Rubik,sans-serif;color:var(--muted);text-align:center;padding-top:6px;position:sticky;top:var(--covtop,0);z-index:5;background:var(--card)} .covhead .nm{text-align:right}
   .covrow .nm{min-width:0} .covrow .nm b{font-weight:700}
   .cv{display:block;text-align:center;padding:4px 0;border-radius:7px;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums} .cv.off{background:var(--soft);color:var(--muted);font-weight:500}
   .cv.inl{display:inline-block;min-width:34px;padding:1px 5px;font-size:11px}
-  @media (max-width:640px){ .covrow{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px} .covrow .nm{grid-column:1/-1} .covhead .nm{display:none} .covhead i{display:none} .cv{font-size:12px;padding:5px 0} }
+  @media (max-width:640px){ .covrow{grid-template-columns:repeat(9,minmax(0,1fr));gap:3px} .covrow .nm{grid-column:1/-1} .covhead .nm{display:none} .covhead i{display:none} .cv{font-size:11px;padding:5px 0;border-radius:6px} }
   .bar{height:10px;border-radius:5px;background:linear-gradient(90deg,#7A5CFF,#3E8BF0)} .barw{background:var(--line);border-radius:5px}
   .spark{display:flex;align-items:flex-end;gap:2px;height:38px} .spark i{flex:1;background:#7A5CFF;border-radius:2px 2px 0 0;opacity:.85;min-height:2px}
   .btn{display:inline-block;border-radius:10px;padding:8px 14px;font:800 13px Rubik,sans-serif;background:var(--indigo);color:#fff;border:0;cursor:pointer;font-family:Rubik,sans-serif;text-decoration:none} .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)} .btn.danger{background:rgba(255,107,157,.2);color:#a1244e} .btn:disabled{opacity:.5}
@@ -123,7 +123,7 @@ const days = (n) => n <= 0 ? "היום" : n === 1 ? "מחר" : n === 2 ? "בעו
 const daysLeft = (n) => n === 1 ? "עוד יום" : n === 2 ? "עוד יומיים" : `עוד ${n} ימים`;
 const shortMail = (e) => e ? e.replace(/@.*/, "@…") : "";
 const famName = (f) => f.familyName || f.label || f.name || ((f.children || []).map((k) => k.name).filter(Boolean).length ? "המשפחה של " + (f.children || []).map((k) => k.name).filter(Boolean).slice(0, 4).join(", ") : ((f.parents || []).map((p) => p.email).find(Boolean) ? "משפחת " + (f.parents || []).map((p) => p.email).find(Boolean).split("@")[0] : "משפחה ללא שם"));
-const gradeName = (g) => ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"][g] ?? g;
+const gradeName = (g) => g == null ? "—" : g < 0 ? "טרום־חובה" : (["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳", "ט׳", "י׳", "יא׳", "יב׳"][Math.min(g, 12)] ?? g);
 const pct = (n) => `<span class="pct ${n >= 80 ? "hi" : n < 50 ? "lo" : ""}">${n}%</span>`;
 const toast = (t) => { const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); };
 
@@ -385,8 +385,8 @@ async function coverage() {
   const CLOUD = cloudR.topics || {};
   const live = (t) => !t.pack || !!(((packsR || {}).packs || {})[t.topic] || {}).enabled;
   const TARGET = COV.target || 200, MIN = COV.minGradePool || 30;
-  const GRADES = [0, 1, 2, 3, 4, 5, 6];
-  const GNAME = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"];
+  const GRADES = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  const GNAME = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"];
   const at = (t, g) => ((t.grades || []).find((x) => x.grade === g) || {}).tagged || 0;
   const cloudAt = (t, g) => (((CLOUD[t.topic] || {}).byGrade || {})[g] || {}).approved || 0;
   const count = (t, g) => at(t, g) + cloudAt(t, g);
@@ -453,7 +453,7 @@ async function importQuestions() {
         <label style="display:flex;gap:6px;align-items:center;margin:8px 0"><input type="checkbox" id="impApprove"> לאשר מיד (בלי לעבור על טיוטות)</label>
         <button class="btn" id="impGo">בדיקה וייבוא</button>
         <div id="impResult" style="margin-top:10px"></div>
-        <div class="stamp" style="margin-top:8px">כל שאלה עוברת בדיקה אוטומטית: 3 מסיחים שונים, התשובה לא בין המסיחים, טווח כיתות 0–6, וניקוד בעברית. כפילויות מדולגות.</div>
+        <div class="stamp" style="margin-top:8px">כל שאלה עוברת בדיקה אוטומטית: 3 מסיחים שונים, התשובה לא בין המסיחים, טווח כיתות 0–8, וניקוד בעברית. כפילויות מדולגות.</div>
       </div>
       <div class="card"><h4>טיוטות שממתינות לאישור</h4><div id="drafts"><span class="spin"></span></div></div>
     </div>`;
@@ -479,7 +479,7 @@ async function loadBatches() {
   let idx; try { idx = await (await fetch("generated/index.json?v=" + Date.now())).json(); } catch (e) { return $("genBatches").innerHTML = '<div class="empty">אין שאלות מוכנות.</div>'; }
   const summary = await call("adminQuestionBankSummary").catch(() => ({}));
   const T = Object.fromEntries(((COV && COV.topics) || []).map((t) => [t.topic, t]));
-  const GN = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"];
+  const GN = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"];
   $("genBatches").innerHTML = (idx.batches || []).map((b) => { const t = T[b.topic] || {}; const inCloud = ((summary.topics || {})[b.topic] || {}); const have = (inCloud.approved || 0) + (inCloud.draft || 0);
     return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)">
       <div><b>${t.emoji || ""} ${esc(t.label || b.topic)}</b> · ${fmt(b.count)} שאלות<div class="stamp">${Object.entries(b.byGrade || {}).map(([g, n]) => `${GN[g] || g} ${n}`).join(" · ")}${have ? ` · בענן כבר ${fmt(have)}` : ""}</div></div>
@@ -501,7 +501,7 @@ async function loadDrafts() {
     const all = r.drafts || [];
     if (!all.length) return $("drafts").innerHTML = '<div class="empty">אין טיוטות לעולם הזה.</div>';
     // A generated batch is 200 drafts per grade — review grade by grade, not as one 1,200-row list.
-    const GR = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳"];
+    const GR = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"];
     const grades = [...new Set(all.map((q) => q.gradeLo))].sort((a, b) => a - b);
     if (DRAFT_GRADE !== null && !grades.includes(DRAFT_GRADE)) DRAFT_GRADE = null;
     const d = DRAFT_GRADE === null ? all : all.filter((q) => q.gradeLo === DRAFT_GRADE);
