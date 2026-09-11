@@ -1957,6 +1957,13 @@ exports.adminDeleteHousehold = onCall(
     const hh = await ref.get();
     if (!hh.exists) throw new HttpsError("not-found", "Household not found.");
     const d = hh.data();
+    // 🗄️ Retention path (the weekly report's 🗑 button): a family that was notified
+    // 30+ days ago and is STILL inactive. A real, NAMED family is exactly what this
+    // path is for, so the emptiness guards below don't apply — instead every signal
+    // of life is re-checked live, in deleteHouseholdForRetention, before anything goes.
+    if (request.data && request.data.retention === true) {
+      return await deleteHouseholdForRetention(hhID, hh, email);
+    }
     // SERVER-SIDE safety re-checks — never trust the caller's view.
     const named = Object.values(d.parentNames || {}).filter((n) => String(n || "").trim());
     if (named.length) {
@@ -3558,3 +3565,612 @@ exports.onHouseholdPremiumWritten = onDocumentWritten("households/{hid}", async 
     ...(wasGift ? { giftConvertedAt: now } : {}) }, { merge: true });
   console.log("[premium] paid conversion", event.params.hid, wasGift ? "from gift" : "direct");
 });
+
+// ============================================================================
+// 🗄️ Data retention (COPPA-style) — three separate mechanisms, on purpose:
+//   1. pruneWaitlist        — tofyapp.com sign-ups (a parent's email, no child data)
+//                             are deleted automatically 12 months after the sign-up.
+//   2. retentionNotices     — a family with NO activity at all for 18 months gets ONE
+//                             notice (push + email, in the parent's language) that its
+//                             data will be deleted in 30 days unless someone opens Tofy.
+//   3. retentionReport      — weekly: lists the families past notice + 30 days that are
+//                             STILL inactive, with their evidence. DELETING IS A HUMAN
+//                             CLICK in the admin app (adminDeleteHousehold with
+//                             retention:true), which re-checks every signal live first.
+//
+// Why deletion is never automatic: on 2026-08-30 an automatic cleanup that trusted a
+// single weak signal (parents/{uid}.updateTime — a device that declined notifications
+// never rewrites that doc) unlinked two REAL guest families and had to be restored from
+// a backup; point-in-time recovery only reaches back 7 days. So: many independent
+// signals, a MISSING or unreadable signal always means "not inactive", nameless/guest
+// families are treated exactly like named ones, and a person presses the button.
+// ============================================================================
+
+const RETENTION = {
+  waitlistDays: 365,          // website sign-ups: 12 months
+  inactiveDays: 548,          // ~18 months of complete silence before a notice
+  graceDays: 30,              // notice → earliest deletion
+  chorePhotoDays: 7,          // pruneChorePhotos (unchanged)
+  deviceRowDays: 60,          // pruneStaleChildDevices (unchanged)
+  noticeFrom: 9, noticeTo: 20, // local hours a notice may be sent in
+  rows: 300,                  // cap per list in the report doc (1 MB limit)
+};
+// Nothing in Tofy predates 2020. An "activity" timestamp before that is data we do not
+// understand (a Swift reference date, a broken import) — never proof that a family left.
+const RETENTION_FLOOR = Date.parse("2020-01-01T00:00:00Z") / 1000;
+
+async function retentionConfig() {
+  const d = await db.collection("config").doc("retention").get().catch(() => null);
+  const x = d && d.exists ? (d.data() || {}) : {};
+  return { enabled: x.enabled === true, updatedAt: x.updatedAt || null, updatedBy: x.updatedBy || null };
+}
+
+// A stored time → { at } in epoch seconds, { absent }, or { bad } (present but unreadable).
+function retentionTime(v) {
+  if (v === undefined || v === null || v === "" || v === 0) return { absent: true };
+  let s = NaN;
+  if (typeof v === "number") s = v > 1e12 ? v / 1000 : v;
+  else if (typeof v === "string") {
+    const t = v.trim();
+    s = /^\d+(\.\d+)?$/.test(t) ? (Number(t) > 1e12 ? Number(t) / 1000 : Number(t)) : Date.parse(t) / 1000;
+  } else if (v && typeof v.toMillis === "function") s = v.toMillis() / 1000;
+  else if (v && typeof v === "object" && Number.isFinite(Number(v._seconds))) s = Number(v._seconds);
+  if (!Number.isFinite(s) || s < RETENTION_FLOOR) return { bad: true };
+  return { at: s };
+}
+const retentionServerTime = (ts) => (ts && typeof ts.toMillis === "function" ? ts.toMillis() / 1000 : null);
+
+// Is this family inactive? `fam` comes from one of the loaders below.
+// → { householdID, status: "active" | "inactive" | "undetermined", reason, lastActivityAt, signals }
+// RULES: every signal that exists must be older than 18 months; ONE recent signal makes
+// the family active; anything missing or unreadable makes it "undetermined", which is
+// treated exactly like active everywhere (no notice, never deletable).
+async function evaluateRetention(fam, now) {
+  const cutoff = now - RETENTION.inactiveDays * DAY;
+  const signals = {};
+  let last = 0, missing = null;
+  const result = (status, reason) => ({ householdID: fam.id, status, reason: reason || null,
+    lastActivityAt: last || null, signals });
+  const saw = (cat, at) => { signals[cat] = Math.max(signals[cat] || 0, at); last = Math.max(last, at); return at >= cutoff; };
+  const field = (cat, v, what) => {
+    const t = retentionTime(v);
+    if (t.absent) return false;
+    if (t.bad) { missing = missing || `unreadable:${what}`; return false; }
+    return saw(cat, t.at);
+  };
+  const server = (cat, ts, what) => {
+    const s = retentionServerTime(ts);
+    if (s === null) { missing = missing || `missing:${what}`; return false; }
+    return saw(cat, s);
+  };
+  try {
+    const hh = fam.hh.data() || {};
+    // 1. the household itself — a family created less than 18 months ago is never inactive.
+    //    (households/{id}.updateTime is deliberately NOT a signal: this very job writes
+    //    retentionNoticeAt there, and so do the gift/premium jobs.)
+    if (server("household", fam.hh.createTime, "households.createTime")) return result("active", "household");
+    if (field("household", hh.createdAt, "households.createdAt")) return result("active", "household");
+
+    // 2. money: a paid subscription, a gift, or a pack purchase — never touch a family
+    //    that has (or recently had) any of them.
+    for (const k of ["premiumUntil", "giftUntil", "purchasedAt", "renewedAt", "giftStartedAt", "giftEndedAt",
+      "giftConvertedAt", "renewalOffAt", "expiredAt", "refundedAt", "billingIssueAt"]) {
+      if (field("purchase", hh[k], `households.${k}`)) return result("active", "purchase");
+    }
+    const store = hh.appStore || {};
+    if (field("purchase", store.lastAt, "appStore.lastAt")) return result("active", "purchase");
+    if (field("purchase", store.expiresAt, "appStore.expiresAt")) return result("active", "purchase");
+    // Apple says auto-renew is still on → the subscription may be live even if we never
+    // saw the renewal (a missed notification). Treat it as a paying family.
+    if (store.autoRenew === true && !hh.expiredAt && !hh.refundedAt) return result("active", "subscription");
+    for (const s of fam.sales) if (field("purchase", s.at, "packPurchases.at")) return result("active", "purchase");
+    for (const b of fam.billing) if (field("purchase", b.receivedAt, "billingEvents.receivedAt")) return result("active", "purchase");
+
+    // 3. devices. Rows silent for 60 days are pruned, so a row that still exists is by
+    //    itself proof of recent life; a row without a readable lastSeenAt blocks.
+    for (const dv of fam.devices) if (field("devices", dv.lastSeenAt, "childDevices.lastSeenAt")) return result("active", "devices");
+    for (const dv of fam.devices) if (retentionTime(dv.lastSeenAt).absent) missing = missing || "missing:childDevices.lastSeenAt";
+
+    // 4. the children documents themselves.
+    for (const k of fam.kids.values()) {
+      if (server("childDoc", k.updateTime, "children.updateTime")) return result("active", "childDoc");
+      if (server("childDoc", k.createTime, "children.createTime")) return result("active", "childDoc");
+      for (const v of Object.values((k.data() || {}).packExpiry || {})) {
+        if (field("purchase", v, "children.packExpiry")) return result("active", "purchase");
+      }
+    }
+
+    // 5. parents docs — a RECENT write is proof of life; an old one proves nothing
+    //    (that was the 2026-08-30 mistake), so a parent with no doc never blocks here.
+    const uids = [...new Set((hh.parentUIDs || []).filter((u) => typeof u === "string" && u))];
+    if (!uids.length) missing = missing || "noParentAccount";
+    for (const uid of uids) {
+      const p = fam.parentDocs[uid];
+      const at = p && p.exists ? retentionServerTime(p.updateTime) : null;
+      if (at !== null && saw("parentDoc", at)) return result("active", "parentDoc");
+    }
+
+    // 6. each child's progress, play window, learning history and friend card.
+    for (const k of fam.kids.values()) {
+      const [state, stats, card] = await Promise.all([
+        k.ref.collection("state").select().get(),
+        k.ref.collection("dailyStats").select().get(),
+        db.collection("friendCards").doc(k.id).get(),
+      ]);
+      // No progress document at all = a child we can't reason about. Not inactive.
+      if (!state.docs.some((d) => d.id === "current")) missing = missing || "missing:state/current";
+      for (const d of state.docs) if (server("childState", d.updateTime, "state.updateTime")) return result("active", "childState");
+      for (const d of stats.docs) if (server("dailyStats", d.updateTime, "dailyStats.updateTime")) return result("active", "dailyStats");
+      if (card.exists && server("friendCard", card.updateTime, "friendCards.updateTime")) return result("active", "friendCard");
+    }
+
+    // 7. chores (kids mark them, parents approve them).
+    const [chores, choreStats] = await Promise.all([
+      fam.hh.ref.collection("chores").select().get(),
+      fam.hh.ref.collection("choreStats").select().get(),
+    ]);
+    for (const d of [...chores.docs, ...choreStats.docs]) {
+      if (server("chores", d.updateTime, "chores.updateTime")) return result("active", "chores");
+    }
+
+    // 8. Firebase Auth: when each account last refreshed its sign-in. The app does this
+    //    whenever it is opened online — including guest/anonymous parents and child
+    //    devices, and including devices that declined notifications. This is the one
+    //    parent-side signal that is reliable in both directions.
+    for (let i = 0; i < uids.length; i += 100) {
+      const chunk = uids.slice(i, i + 100);
+      const res = await admin.auth().getUsers(chunk.map((uid) => ({ uid })));
+      const found = new Map((res.users || []).map((u) => [u.uid, u]));
+      for (const uid of chunk) {
+        const u = found.get(uid);
+        if (!u) { missing = missing || "missing:authAccount"; continue; }
+        const m = u.metadata || {};
+        const times = [m.lastRefreshTime, m.lastSignInTime, m.creationTime]
+          .map((x) => retentionTime(x)).filter((t) => t.at).map((t) => t.at);
+        if (!times.length) { missing = missing || "missing:authActivity"; continue; }
+        if (saw("parentAuth", Math.max(...times))) return result("active", "parentAuth");
+      }
+    }
+  } catch (e) {
+    // A read that failed is NOT evidence that a family is gone.
+    return result("undetermined", "error:" + String((e && e.message) || e).slice(0, 90));
+  }
+  if (missing) return result("undetermined", missing);
+  return result("inactive");
+}
+
+// ---- loaders ---------------------------------------------------------------
+// Everything the evaluator needs for EVERY household (the scheduled scans).
+async function loadRetentionFamilies() {
+  const [hhSnap, kidsSnap, devSnap, parentsSnap, salesSnap, billingSnap] = await Promise.all([
+    db.collection("households").get(),
+    db.collection("children").get(),
+    db.collection("childDevices").get(),
+    db.collection("parents").select().get(),
+    db.collection("packPurchases").select("householdID", "at").get().catch(() => ({ docs: [] })),
+    db.collection("billingEvents").select("householdID", "receivedAt").get().catch(() => ({ docs: [] })),
+  ]);
+  const kidByID = {}, kidsByHH = {};
+  kidsSnap.forEach((k) => {
+    kidByID[k.id] = k;
+    const h = (k.data() || {}).householdID;
+    if (h) (kidsByHH[h] = kidsByHH[h] || []).push(k);
+  });
+  const parentDocs = {};
+  parentsSnap.forEach((p) => { parentDocs[p.id] = p; });
+  const devByHH = {}, devByChild = {};
+  devSnap.forEach((dv) => {
+    const d = dv.data() || {};
+    const cid = d.childID || dv.id.split("_")[0];
+    if (d.householdID) (devByHH[d.householdID] = devByHH[d.householdID] || []).push([dv.id, d]);
+    if (cid) (devByChild[cid] = devByChild[cid] || []).push([dv.id, d]);
+  });
+  const byHH = (snap) => {
+    const m = {};
+    snap.docs.forEach((x) => { const d = x.data() || {}; if (d.householdID) (m[d.householdID] = m[d.householdID] || []).push(d); });
+    return m;
+  };
+  const sales = byHH(salesSnap), billing = byHH(billingSnap);
+  return hhSnap.docs.map((h) => {
+    const d = h.data() || {};
+    const kids = new Map((kidsByHH[h.id] || []).map((k) => [k.id, k]));
+    for (const id of Array.isArray(d.childIDs) ? d.childIDs : []) if (kidByID[id]) kids.set(id, kidByID[id]);
+    const rows = new Map(devByHH[h.id] || []);
+    for (const id of kids.keys()) for (const [rid, rd] of devByChild[id] || []) rows.set(rid, rd);
+    return { id: h.id, hh: h, kids, devices: [...rows.values()], parentDocs,
+      sales: sales[h.id] || [], billing: billing[h.id] || [] };
+  });
+}
+
+// The same shape for ONE household, read fresh (the live re-check before a deletion).
+async function loadRetentionFamily(hhID) {
+  const hh = await db.collection("households").doc(hhID).get();
+  if (!hh.exists) return null;
+  const d = hh.data() || {};
+  const kids = new Map();
+  (await db.collection("children").where("householdID", "==", hhID).get()).forEach((k) => kids.set(k.id, k));
+  for (const id of Array.isArray(d.childIDs) ? d.childIDs : []) {
+    if (kids.has(id) || typeof id !== "string" || !id) continue;
+    const k = await db.collection("children").doc(id).get();
+    if (k.exists) kids.set(k.id, k);
+  }
+  const rows = new Map();
+  const add = (snap) => snap.forEach((x) => rows.set(x.id, x.data() || {}));
+  add(await db.collection("childDevices").where("householdID", "==", hhID).get());
+  for (const id of kids.keys()) {
+    add(await db.collection("childDevices").where("childID", "==", id).get());
+    // Rows from builds before the childID field: the doc id is childID_installID.
+    add(await db.collection("childDevices").orderBy(admin.firestore.FieldPath.documentId())
+      .startAt(`${id}_`).endAt(`${id}_`).get());
+  }
+  const parentDocs = {};
+  for (const uid of new Set((d.parentUIDs || []).filter((u) => typeof u === "string" && u))) {
+    parentDocs[uid] = await db.collection("parents").doc(uid).get();
+  }
+  const list = async (name) => (await db.collection(name).where("householdID", "==", hhID).get()
+    .catch(() => ({ docs: [] }))).docs.map((x) => x.data() || {});
+  return { id: hhID, hh, kids, devices: [...rows.values()], parentDocs,
+    sales: await list("packPurchases"), billing: await list("billingEvents") };
+}
+
+// ---- the scan and its report ----------------------------------------------
+function retentionRow(fam, ev, extra) {
+  const d = fam.hh.data() || {};
+  const mine = [...fam.kids.values()].filter((k) => (k.data() || {}).householdID === fam.id);
+  const names = mine.map((k) => (k.data() || {}).name).filter(Boolean);
+  return {
+    householdID: fam.id,
+    name: d.familyName || d.familyLabel || (names.length ? "המשפחה של " + names.slice(0, 4).join(", ") : null),
+    children: mine.length,
+    parents: (d.parentUIDs || []).length,
+    lastActivityAt: ev.lastActivityAt, signals: ev.signals, reason: ev.reason,
+    noticeAt: retentionTime(d.retentionNoticeAt).at || null,
+    notice: d.retentionNotice || null,
+    ...(extra || {}),
+  };
+}
+
+async function scanRetention(now) {
+  const fams = await loadRetentionFamilies();
+  const out = [];
+  for (let i = 0; i < fams.length; i += 8) {
+    const chunk = fams.slice(i, i + 8);
+    const evs = await Promise.all(chunk.map((fam) => evaluateRetention(fam, now)));
+    chunk.forEach((fam, j) => out.push({ fam, ev: evs[j] }));
+  }
+  return out;
+}
+
+// What the dashboard shows, from one scan.
+function retentionSections(scanned, now) {
+  const counts = { households: scanned.length, active: 0, inactive: 0, undetermined: 0, noticed: 0, waitingGrace: 0, deletable: 0, returned: 0 };
+  const reasons = {};
+  const candidates = [], pending = [], deletable = [], returned = [], undetermined = [];
+  for (const { fam, ev } of scanned) {
+    counts[ev.status] += 1;
+    const d = fam.hh.data() || {};
+    const noticeAt = retentionTime(d.retentionNoticeAt).at || null;
+    if (ev.status === "undetermined") {
+      reasons[ev.reason || "unknown"] = (reasons[ev.reason || "unknown"] || 0) + 1;
+      if (undetermined.length < 100) undetermined.push(retentionRow(fam, ev));
+    }
+    if (noticeAt) {
+      counts.noticed += 1;
+      if (ev.status === "active") { counts.returned += 1; returned.push(retentionRow(fam, ev)); continue; }
+      if (ev.status !== "inactive") continue;
+      if (now - noticeAt >= RETENTION.graceDays * DAY && (ev.lastActivityAt || 0) < noticeAt) {
+        counts.deletable += 1;
+        if (deletable.length < RETENTION.rows) deletable.push(retentionRow(fam, ev));
+      } else {
+        counts.waitingGrace += 1;
+        if (pending.length < RETENTION.rows) {
+          pending.push(retentionRow(fam, ev, { daysLeft: Math.max(0, Math.ceil((noticeAt + RETENTION.graceDays * DAY - now) / DAY)) }));
+        }
+      }
+      continue;
+    }
+    if (ev.status === "inactive" && candidates.length < RETENTION.rows) candidates.push(retentionRow(fam, ev));
+  }
+  return { counts, reasons, candidates, pending, deletable, returned, undetermined };
+}
+
+const retentionReportRef = () => db.collection("adminStats").doc("retention");
+const RETENTION_POLICY = {
+  waitlistDays: RETENTION.waitlistDays, inactiveDays: RETENTION.inactiveDays, graceDays: RETENTION.graceDays,
+  chorePhotoDays: RETENTION.chorePhotoDays, deviceRowDays: RETENTION.deviceRowDays,
+};
+
+// ---- 1) the waitlist: 12 months, automatic ---------------------------------
+async function runWaitlistPrune() {
+  const now = Date.now() / 1000, cutoff = now - RETENTION.waitlistDays * DAY;
+  const snap = await db.collection("waitlist").get();
+  let deleted = 0, kept = 0, undated = 0;
+  let batch = db.batch(), n = 0;
+  for (const doc of snap.docs) {
+    const created = retentionServerTime(doc.createTime);
+    if (created === null) { undated += 1; continue; }          // no server time = don't touch
+    const times = [created, retentionServerTime(doc.updateTime)].filter((x) => Number.isFinite(x));
+    const own = retentionTime((doc.data() || {}).createdAt);
+    if (own.at && own.at <= now + DAY) times.push(own.at);
+    if (Math.max(...times) >= cutoff) { kept += 1; continue; }
+    batch.delete(doc.ref); deleted += 1;
+    if (++n % 400 === 0) { await batch.commit(); batch = db.batch(); }
+  }
+  if (n % 400) await batch.commit();
+  console.log(`[pruneWaitlist] deleted ${deleted} sign-ups older than ${RETENTION.waitlistDays} days · kept ${kept} · skipped ${undated} without a server date`);
+  const summary = { at: now, deleted, kept, undated };
+  await retentionReportRef().set({ policy: RETENTION_POLICY, waitlist: summary }, { mergeFields: ["policy", "waitlist"] });
+  return summary;
+}
+
+exports.pruneWaitlist = onSchedule(
+  { schedule: "every day 04:40", timeZone: "Asia/Jerusalem", timeoutSeconds: 300, memory: "256MiB" },
+  async () => { await runWaitlistPrune(); }
+);
+
+// ---- 2) the 18-month notice ------------------------------------------------
+// Parent-facing, in the parent's language. Never sent to a child device
+// (tokensForHousehold reads the PARENT token list).
+function retentionNoticeMessage(lang) {
+  if (lang === "en") {
+    return { title: "⏳ Your family's Tofy data will be deleted in 30 days",
+             body: "No one in your family has used Tofy for more than 18 months. To protect your children's privacy, their profiles and progress will be deleted in 30 days. To keep them, just open Tofy on any of your devices." };
+  }
+  return { title: "⏳ נתוני המשפחה בטופי יימחקו בעוד 30 יום",
+           body: "כבר שנה וחצי שאף אחד במשפחה לא השתמש בטופי. כדי לשמור על פרטיות הילדים — הפרופילים וההתקדמות יימחקו בעוד 30 יום. רוצים להשאיר אותם? פשוט פתחו את טופי באחד המכשירים." };
+}
+
+function retentionNoticeEmail(lang) {
+  if (lang === "en") {
+    const title = "Your family's Tofy data will be deleted in 30 days";
+    const intro = "No one in your family has used Tofy for more than 18 months. To protect children's privacy, we don't keep information about families who have stopped using the app.";
+    const bullets = [
+      { emoji: "🗓️", title: "What will be deleted", text: "Your children's profiles, their progress and learning history, the family's chores, and the records of connected devices — in 30 days." },
+      { emoji: "📱", title: "Want to keep it?", text: "Just open Tofy on any of your family's devices within the next 30 days, and everything stays exactly as it is." },
+      { emoji: "✉️", title: "Questions?", text: "Write to us at ranioph@gmail.com and we'll help." },
+    ];
+    const signoff = "The Tofy team 🦁";
+    const html = brandEmail({ title, intro, bullets, ctaText: "Our privacy policy",
+      ctaHref: "https://tofyapp.com/en/privacy.html", signoff,
+      footer: "You're getting this email because your parent account is connected to a family in Tofy.", lang: "en" });
+    const text = [title, "", intro, "", ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`), "", "tofyapp.com", "", signoff].join("\n");
+    return { fromName: "Tofy", subject: "Your family's Tofy data will be deleted in 30 days", text, html };
+  }
+  const title = "נתוני המשפחה בטופי יימחקו בעוד 30 יום";
+  const intro = "כבר שנה וחצי שאף אחד במשפחה לא השתמש בטופי. כדי לשמור על פרטיות הילדים, אנחנו לא שומרים מידע על משפחות שהפסיקו להשתמש באפליקציה.";
+  const bullets = [
+    { emoji: "🗓️", title: "מה יימחק", text: "פרופילי הילדים, ההתקדמות והיסטוריית הלמידה, המטלות של המשפחה והרשומות של המכשירים המחוברים — בעוד 30 יום." },
+    { emoji: "📱", title: "רוצים להשאיר את הנתונים?", text: "פשוט פתחו את טופי באחד ממכשירי המשפחה במהלך 30 הימים הקרובים, והכול יישאר בדיוק כמו שהוא." },
+    { emoji: "✉️", title: "יש שאלות?", text: "כתבו לנו ל־ranioph@gmail.com ונשמח לעזור." },
+  ];
+  const signoff = "צוות טופי 🦁";
+  const html = brandEmail({ title, intro, bullets, ctaText: "מדיניות הפרטיות שלנו",
+    ctaHref: "https://tofyapp.com/privacy.html", signoff,
+    footer: "קיבלתם את המייל הזה כי חשבון ההורה שלכם מחובר למשפחה בטופי." });
+  const text = [title, "", intro, "", ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`), "", "tofyapp.com", "", signoff].join("\n");
+  return { fromName: "טופי", subject: "נתוני המשפחה בטופי יימחקו בעוד 30 יום", text, html };
+}
+
+// One notice per family: a push to the parents' devices and an email to every parent
+// account with an address. Never throws — a family we could not reach is reported as
+// such, and the founder sees it before deleting anything.
+async function deliverRetentionNotice(fam) {
+  const d = fam.hh.data() || {};
+  const out = { pushTokens: 0, emails: 0 };
+  try {
+    const tokens = await tokensForHousehold(fam.id);
+    if (tokens.length) {
+      await sendLocalized(tokens, retentionNoticeMessage, { type: "retention-notice", householdID: fam.id });
+      out.pushTokens = tokens.length;
+    }
+  } catch (e) { out.pushError = String((e && e.message) || e).slice(0, 90); }
+  const recipients = [];
+  for (const uid of new Set((d.parentUIDs || []).filter((u) => typeof u === "string" && u))) {
+    const p = fam.parentDocs[uid] || (await db.collection("parents").doc(uid).get().catch(() => null));
+    const x = p && p.exists ? (p.data() || {}) : {};
+    const mail = String(x.email || "").trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) continue;
+    if (recipients.some((r) => r.email.toLowerCase() === mail.toLowerCase())) continue;
+    recipients.push({ email: mail, lang: normLang(x.language) });
+  }
+  if (!recipients.length) return out;
+  const user = GMAIL_USER.value(), pass = GMAIL_PASS.value();
+  if (!user || !pass) {
+    console.warn("[retention] GMAIL_USER/GMAIL_PASS not set — notice emailed to nobody for", fam.id);
+    out.emailSkipped = recipients.length;
+    return out;
+  }
+  const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
+  for (const r of recipients) {
+    try {
+      const mail = retentionNoticeEmail(r.lang);
+      await transporter.sendMail({ from: `${mail.fromName} <${user}>`, to: r.email,
+        subject: mail.subject, text: mail.text, html: mail.html });
+      out.emails += 1;
+    } catch (e) { out.emailError = String((e && e.message) || e).slice(0, 90); }
+  }
+  return out;
+}
+
+// `allowSend` false = always a dry run (the on-demand recompute from the dashboard).
+// Even with it true, nothing is sent unless config/retention.enabled === true.
+async function runRetentionNotices({ allowSend }) {
+  const cfg = await retentionConfig();
+  const live = !!allowSend && cfg.enabled;
+  const now = Date.now() / 1000;
+  const scanned = await scanRetention(now);
+  const sections = retentionSections(scanned, now);
+  const sent = [], cleared = [], deferred = [];
+  if (live) {
+    for (const { fam, ev } of scanned) {
+      const d = fam.hh.data() || {};
+      const noticeAt = retentionTime(d.retentionNoticeAt).at || null;
+      // Someone came back after the notice → the clock is forgotten entirely.
+      if (noticeAt && ev.status === "active") {
+        await fam.hh.ref.set({
+          retentionNoticeAt: admin.firestore.FieldValue.delete(),
+          retentionNotice: admin.firestore.FieldValue.delete(),
+          retentionNoticeClearedAt: now,
+        }, { merge: true });
+        cleared.push(retentionRow(fam, ev));
+        continue;
+      }
+      if (noticeAt || ev.status !== "inactive") continue;
+      const hour = hourIn(tzOf(d));
+      if (hour < RETENTION.noticeFrom || hour >= RETENTION.noticeTo) { deferred.push(fam.id); continue; }
+      // Claim first: a notice is sent at most once, even if two runs overlap.
+      const claimed = await db.runTransaction(async (tx) => {
+        const fresh = await tx.get(fam.hh.ref);
+        if (!fresh.exists || (fresh.data() || {}).retentionNoticeAt) return false;
+        tx.set(fam.hh.ref, { retentionNoticeAt: now }, { merge: true });
+        return true;
+      });
+      if (!claimed) continue;
+      const delivery = await deliverRetentionNotice(fam);
+      await fam.hh.ref.set({ retentionNotice: { at: now, ...delivery } }, { merge: true });
+      sent.push(retentionRow(fam, ev, { noticeAt: now, notice: { at: now, ...delivery } }));
+    }
+  }
+  const scan = { at: now, source: live ? "notices" : "dry-run", enabled: cfg.enabled, dryRun: !live,
+    counts: sections.counts, reasons: sections.reasons,
+    candidates: sections.candidates, pending: sections.pending, returned: sections.returned,
+    undetermined: sections.undetermined };
+  const lastRun = { at: now, enabled: cfg.enabled, dryRun: !live, sent: sent.length,
+    cleared: cleared.length, deferred: deferred.length, rows: sent.slice(0, 100), clearedRows: cleared.slice(0, 100) };
+  await retentionReportRef().set({ policy: RETENTION_POLICY, scan, lastNoticeRun: lastRun },
+    { mergeFields: ["policy", "scan", "lastNoticeRun"] });
+  console.log(`[retention] scanned ${sections.counts.households} households · inactive ${sections.counts.inactive} · undetermined ${sections.counts.undetermined} · notices ${live ? "sent " + sent.length : "DRY RUN (" + sections.counts.inactive + " would be notified)"} · cleared ${cleared.length} · deferred ${deferred.length}`);
+  return { scan, lastRun, scanned };
+}
+
+exports.retentionNotices = onSchedule(
+  { schedule: "every 4 hours", timeZone: "Asia/Jerusalem", timeoutSeconds: 540, memory: "1GiB",
+    secrets: [GMAIL_USER, GMAIL_PASS] },
+  async () => { await runRetentionNotices({ allowSend: true }); }
+);
+
+// ---- 3) the weekly deletion report (never deletes anything) ----------------
+async function runRetentionReport(scanned) {
+  const now = Date.now() / 1000;
+  const rows = scanned || await scanRetention(now);
+  const sections = retentionSections(rows, now);
+  const deletion = { at: now, counts: sections.counts, deletable: sections.deletable };
+  await retentionReportRef().set({ policy: RETENTION_POLICY, deletion }, { mergeFields: ["policy", "deletion"] });
+  console.log(`[retention] weekly report · ${sections.counts.deletable} household(s) past notice + ${RETENTION.graceDays} days and still inactive · ${sections.counts.waitingGrace} inside the grace period · ${sections.counts.returned} came back`);
+  return deletion;
+}
+
+exports.retentionReport = onSchedule(
+  { schedule: "every monday 06:20", timeZone: "Asia/Jerusalem", timeoutSeconds: 540, memory: "1GiB" },
+  async () => { await runRetentionReport(); }
+);
+
+// ---- the admin app ---------------------------------------------------------
+exports.adminRetention = onCall({ timeoutSeconds: 540, memory: "1GiB" }, async (request) => {
+  requireAdmin(request);
+  if (request.data && request.data.recompute) {
+    const { scanned } = await runRetentionNotices({ allowSend: false });   // never sends
+    await runRetentionReport(scanned);
+  }
+  const doc = await retentionReportRef().get();
+  return { report: doc.exists ? doc.data() : { policy: RETENTION_POLICY }, config: await retentionConfig() };
+});
+
+// The dry-run switch: with it off the notice job only reports who WOULD be notified.
+exports.adminSetRetentionEnabled = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const enabled = !!(request.data && request.data.enabled);
+  await db.collection("config").doc("retention").set({ enabled, updatedAt: Date.now(), updatedBy: email }, { merge: true });
+  console.log("[retention] notices", enabled ? "ENABLED" : "disabled", "by", email);
+  return { ok: true, config: await retentionConfig() };
+});
+
+// The retention deletion itself — reached only from adminDeleteHousehold with
+// retention:true, i.e. a founder pressing 🗑 on a row of the weekly report. Every
+// signal is re-checked LIVE here, so a family that came back between the report and
+// the click is refused.
+async function deleteHouseholdForRetention(hhID, hhDoc, email) {
+  const now = Date.now() / 1000;
+  const d = hhDoc.data() || {};
+  const notice = retentionTime(d.retentionNoticeAt);
+  if (!notice.at) throw new HttpsError("failed-precondition", "No retention notice was recorded for this family — refusing to delete.");
+  if (now - notice.at < RETENTION.graceDays * DAY) {
+    throw new HttpsError("failed-precondition", `The ${RETENTION.graceDays} days since the notice have not passed yet.`);
+  }
+  const fam = await loadRetentionFamily(hhID);
+  if (!fam) throw new HttpsError("not-found", "Household not found.");
+  const ev = await evaluateRetention(fam, now);
+  if (ev.status !== "inactive") {
+    throw new HttpsError("failed-precondition", `This family is not inactive right now (${ev.status}: ${ev.reason || "recent activity"}) — refusing to delete.`);
+  }
+  if ((ev.lastActivityAt || 0) >= notice.at) {
+    throw new HttpsError("failed-precondition", "There was activity after the notice — refusing to delete.");
+  }
+  // Children: the full tombstone flow, so no lingering device can resurrect them.
+  const kids = await db.collection("children").where("householdID", "==", hhID).get();
+  for (const k of kids.docs) {
+    await db.collection("deletedChildren").doc(k.id).set({
+      householdID: hhID, deletedAt: now, reason: "retention-inactive-18m",
+    });
+    await db.recursiveDelete(db.collection("children").doc(k.id));
+    await db.collection("friendCards").doc(k.id).delete().catch(() => {});
+    await db.recursiveDelete(db.collection("weeklyReports").doc(k.id)).catch(() => {});
+  }
+  // Device rows, invites, and the family-scoped request records.
+  let devices = 0;
+  const devRows = new Map();
+  const collect = (snap) => snap.forEach((x) => devRows.set(x.id, x.ref));
+  collect(await db.collection("childDevices").where("householdID", "==", hhID).get());
+  for (const k of kids.docs) {
+    collect(await db.collection("childDevices").where("childID", "==", k.id).get());
+    collect(await db.collection("childDevices").orderBy(admin.firestore.FieldPath.documentId())
+      .startAt(`${k.id}_`).endAt(`${k.id}_`).get());
+  }
+  for (const ref of devRows.values()) { await ref.delete().catch(() => {}); devices += 1; }
+  const invites = await db.collection("invites").where("householdID", "==", hhID).get();
+  for (const inv of invites.docs) await inv.ref.delete();
+  let records = 0;
+  for (const name of ["helpRequests", "timeTransfers"]) {
+    const snap = await db.collection(name).where("householdID", "==", hhID).get().catch(() => ({ docs: [] }));
+    for (const doc of snap.docs) { await db.recursiveDelete(doc.ref); records += 1; }
+  }
+  // Parent accounts: unlink, and delete the parents doc of an account that is left
+  // without any family at all (the same doc the app's own "delete all my data" removes).
+  const uids = new Set((d.parentUIDs || []).filter((u) => typeof u === "string" && u));
+  (await db.collection("parents").where("householdIDs", "array-contains", hhID).get()).forEach((p) => uids.add(p.id));
+  let parentsDeleted = 0, parentsUnlinked = 0;
+  for (const uid of uids) {
+    const pRef = db.collection("parents").doc(uid);
+    const p = await pRef.get();
+    if (!p.exists) continue;
+    const others = (await db.collection("households").where("parentUIDs", "array-contains", uid).get())
+      .docs.filter((x) => x.id !== hhID);
+    const linked = ((p.data() || {}).householdIDs || []).filter((x) => x !== hhID);
+    if (others.length || linked.length) {
+      await pRef.update({ householdIDs: admin.firestore.FieldValue.arrayRemove(hhID) }).catch(() => {});
+      parentsUnlinked += 1;
+    } else {
+      await db.recursiveDelete(pRef);
+      parentsDeleted += 1;
+    }
+  }
+  await db.recursiveDelete(hhDoc.ref);     // the household, its chores and choreStats
+  await db.collection("retentionDeletions").doc(hhID).set({
+    deletedAt: now, by: email, noticeAt: notice.at, lastActivityAt: ev.lastActivityAt,
+    children: kids.size, devices, invites: invites.size, records, parentsDeleted, parentsUnlinked,
+  });
+  // Keep the dashboard's list honest until the next weekly run.
+  try {
+    const doc = await retentionReportRef().get();
+    const del = doc.exists ? (doc.data() || {}).deletion : null;
+    if (del && Array.isArray(del.deletable)) {
+      del.deletable = del.deletable.filter((r) => r.householdID !== hhID);
+      del.counts = { ...(del.counts || {}), deletable: del.deletable.length };
+      await retentionReportRef().set({ deletion: del }, { mergeFields: ["deletion"] });
+    }
+  } catch (e) { /* the report refreshes weekly anyway */ }
+  console.log("[retention]", email, "deleted inactive household", hhID,
+    `(children: ${kids.size}, devices: ${devices}, parents deleted: ${parentsDeleted}, unlinked: ${parentsUnlinked})`);
+  return { ok: true, retention: true, childrenDeleted: kids.size, devicesDeleted: devices,
+    invitesDeleted: invites.size, recordsDeleted: records, parentsDeleted, parentsUnlinked };
+}
