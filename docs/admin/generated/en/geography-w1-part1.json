@@ -1,0 +1,10 @@
+[
+{"prompt": "🏘️\nYour neighborhood and your town are examples of what?", "correctAnswer": "A community", "distractors": ["A continent", "An ocean", "A planet"], "tier": "easy", "gradeLo": 1, "gradeHi": 2},
+{"prompt": "🏫\nWhich of these places is part of your community?", "correctAnswer": "Your school", "distractors": ["The Moon", "The South Pole", "The bottom of the ocean"], "tier": "easy", "gradeLo": 1, "gradeHi": 2},
+{"prompt": "🌍\nEarth has land and water. Which of these is land?", "correctAnswer": "A mountain", "distractors": ["A lake", "An ocean", "A river"], "tier": "easy", "gradeLo": 1, "gradeHi": 2},
+{"prompt": "💧\nEarth has land and water. Which of these is water?", "correctAnswer": "A river", "distractors": ["A hill", "A desert", "A valley"], "tier": "easy", "gradeLo": 1, "gradeHi": 2},
+{"prompt": "🔎\nWhat do we call land that is higher than the land around it, but not as tall as a mountain?", "correctAnswer": "A hill", "distractors": ["A valley", "A lake", "A beach"], "tier": "easy", "gradeLo": 1, "gradeHi": 2},
+{"prompt": "🧭\nWhat do we call a big hole in the side of a hill or under the ground?", "correctAnswer": "A cave", "distractors": ["A lake", "A bridge", "A beach"], "tier": "easy", "gradeLo": 1, "gradeHi": 2},
+{"prompt": "🚗\nWhat do people build so cars can go over a river?", "correctAnswer": "A bridge", "distractors": ["A fence", "A mailbox", "A chimney"], "tier": "easy", "gradeLo": 1, "gradeHi": 2},
+{"prompt": "🗺️\nA map of your town shows a little picture of a book. What place does it most likely stand for?", "correctAnswer": "A library", "distractors": ["A lake", "A farm", "A gas station"], "tier": "easy", "gradeLo": 1, "gradeHi": 2}
+]
