@@ -2516,12 +2516,14 @@ exports.adminActivity = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (
   requireAdmin(request);
   const items = [];
   const push = (at, kind, text, ref) => { if (at) items.push({ at, kind, text, ref: ref || null }); };
-  const [sales, camps, reports, feedback, chores] = await Promise.all([
+  const [sales, camps, reports, feedback, chores, households, billing] = await Promise.all([
     db.collection("packPurchases").orderBy("at", "desc").limit(15).get().catch(() => ({ docs: [] })),
     db.collection("campaigns").where("status", "==", "sent").orderBy("sentAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
     db.collection("questionReports").orderBy("createdAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
     db.collection("parentFeedback").orderBy("createdAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
     db.collectionGroup("chores").where("markedDoneAt", ">", Date.now() / 1000 - 86400).orderBy("markedDoneAt", "desc").limit(10).get().catch(() => ({ docs: [] })),
+    db.collection("households").get().catch(() => ({ docs: [] })),
+    db.collection("billingEvents").orderBy("receivedAt", "desc").limit(20).get().catch(() => ({ docs: [] })),
   ]);
   // Most families never set a name, so name them the way the founder recognises
   // them: by their children, then by a parent's email — never by an id prefix.
@@ -2541,8 +2543,41 @@ exports.adminActivity = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (
   for (const r of reports.docs) { const d = r.data(); push(Number(d.createdAt) * (Number(d.createdAt) > 1e12 ? 1 : 1000), "report", `🚩 דיווח על שאלה: "${String(d.prompt || d.question || "").replace(/\n/g, " ").slice(0, 60)}" · ${TOPIC_LABEL[d.topic] || d.topic || ""}`); }
   for (const f of feedback.docs) { const d = f.data(); push(Number(d.createdAt) * (Number(d.createdAt) > 1e12 ? 1 : 1000), "feedback", `💬 פידבק מהורה: "${String(d.message || "").slice(0, 80)}"`); }
   for (const ch of chores.docs) { const d = ch.data(); if (Number(d.lastApprovedAt || 0) >= Number(d.markedDoneAt || 0)) continue; const who = await childName(d.childID); const hm = ch.ref.path.match(/households\/([^/]+)/); push(Number(d.markedDoneAt) * 1000, "chore", `🧹${d.photoToken ? "📸" : ""} ${who ? who + " " : ""}${who ? "סימן/ה" : "סומנה"} מטלה "${d.title || ""}" כבוצעה · ממתינה לאישור`, { householdID: hm ? hm[1] : null, childID: d.childID || null }); }
+  // 🏠 The family journey: new families, gifts, Tofy+ — read from the household
+  // documents, where the conversion engine, the admin and Apple's notifications
+  // already stamp every step. Demo families stay out.
+  const nowS = Date.now() / 1000, since = nowS - 30 * 86400;
+  const inWindow = (t) => t && t >= since && t <= nowS + 60;
+  const sec = (v) => { const n = Number(v && v._seconds !== undefined ? v._seconds : v); return n > 1e12 ? n / 1000 : n; };
+  for (const doc of households.docs) {
+    const h = doc.data() || {};
+    if (h.demo === true || /דמו|demo/i.test(h.familyName || h.familyLabel || "")) continue;
+    const ev = [];
+    const test = h.appStore && h.appStore.env === "Sandbox" ? " · 🧪 רכישת בדיקה" : "";
+    if (inWindow(sec(h.createdAt))) ev.push([sec(h.createdAt), "family", (n) => `🏠 ${n} הצטרפה לטופי`]);
+    if (inWindow(sec(h.giftStartedAt))) ev.push([sec(h.giftStartedAt), "gift", (n) => `🎁 ${n} קיבלה ${h.giftDays || 14} ימי טופי+ במתנה${h.giftBy ? " (ממך)" : ""}`]);
+    if (inWindow(sec(h.giftEndedAt))) {
+      const planned = sec(h.giftStartedAt) + Number(h.giftDays || 14) * 86400;
+      const early = sec(h.giftEndedAt) < planned - 3600;
+      ev.push([sec(h.giftEndedAt), "gift", (n) => early ? `⏹ המתנה של ${n} הופסקה לפני הזמן` : `⌛ המתנה של ${n} הסתיימה${h.purchasedAt ? "" : " — עברו לחינם"}`]);
+    }
+    if (inWindow(sec(h.purchasedAt))) ev.push([sec(h.purchasedAt), "plus", (n) => `💳 ${n} רכשה טופי+${h.giftConvertedAt ? " אחרי המתנה" : ""}${test}`]);
+    if (inWindow(sec(h.renewedAt))) ev.push([sec(h.renewedAt), "plus", (n) => `🔁 טופי+ של ${n} חודש${test}`]);
+    if (inWindow(sec(h.renewalOffAt))) ev.push([sec(h.renewalOffAt), "plus", (n) => `🚫 ${n} ביטלה את החידוש של טופי+${Number(h.premiumUntil) > nowS ? ` · פעיל עד ${new Date(Number(h.premiumUntil) * 1000).toLocaleDateString("he-IL", { day: "numeric", month: "numeric", timeZone: "Asia/Jerusalem" })}` : ""}${test}`]);
+    if (inWindow(sec(h.billingIssueAt))) ev.push([sec(h.billingIssueAt), "plus", (n) => `⚠️ החיוב של טופי+ נכשל אצל ${n}${test}`]);
+    if (inWindow(sec(h.refundedAt))) ev.push([sec(h.refundedAt), "plus", (n) => `↩️ ${n} קיבלה החזר על טופי+${test}`]);
+    // A paid Tofy+ that ran out: Apple's EXPIRED if it came, else the date itself.
+    const lapsed = sec(h.expiredAt) || (h.premiumSource === "paid" && Number(h.premiumUntil) < nowS ? Number(h.premiumUntil) : 0);
+    if (inWindow(lapsed)) ev.push([lapsed, "plus", (n) => `⌛ טופי+ של ${n} נגמר ולא חודש${test}`]);
+    if (!ev.length) continue;
+    const name = await hhName(doc.id);
+    for (const [at, kind, text] of ev) push(at * 1000, kind, text(name), { householdID: doc.id });
+  }
+  // Apple notifications no family could be matched to — worth knowing about.
+  for (const b of billing.docs) { const d = b.data(); if (d.householdID) continue;
+    push(Number(d.receivedAt) * 1000, "plus", `📬 עדכון מאפל (${d.type}${d.subtype ? " · " + d.subtype : ""}) שלא שויך למשפחה${d.env === "Sandbox" ? " · 🧪 בדיקה" : ""}`); }
   items.sort((a, b) => b.at - a.at);
-  return { items: items.slice(0, 30) };
+  return { items: items.slice(0, 40) };
 });
 
 exports.adminListReports = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (request) => {
@@ -2894,6 +2929,134 @@ async function runConversionEngine() {
 }
 exports.conversionEngine = onSchedule({ schedule: "0 * * * *", timeZone: "Asia/Jerusalem", timeoutSeconds: 540, memory: "1GiB" }, async () => { await computeJourney(); await runConversionEngine(); });
 exports.adminRunConversionEngine = onCall({ timeoutSeconds: 300, memory: "1GiB" }, async (request) => { requireAdmin(request); await computeJourney(); return await runConversionEngine(); });
+
+// ============================================================================
+// 🍎 App Store Server Notifications V2 — Apple tells US about a subscription.
+// Until this, the server only learned about a purchase when a parent's device
+// opened the app and published premiumUntil, and it never learned about a
+// cancellation at all (Rani: "ביטלה את המנוי — למה זה לא רושם?"). Apple calls this
+// URL the moment a family subscribes, renews, turns auto-renew off, expires or is
+// refunded — even if nobody opens the app.
+//
+// Set in App Store Connect → App → App Information → App Store Server
+// Notifications (Production AND Sandbox URL, Version 2):
+//   https://us-central1-childtime-86e98.cloudfunctions.net/appStoreNotifications
+// ============================================================================
+const nodeCrypto = require("crypto");
+const APP_BUNDLE_ID = "com.rani.ChildTime";
+// SHA-256 of "Apple Root CA - G3" (read from macOS SystemRootCertificates.keychain).
+const APPLE_ROOT_G3_SHA256 = "63343ABFB89A6A03EBB57E9B3F5FA7BE7C4F5C756F3017B3A8C488C3653E9179";
+// Apple's marker extensions: the signing leaf and the WWDR intermediate.
+const OID_LEAF = Buffer.from("060a2a864886f76364060b01", "hex");        // 1.2.840.113635.100.6.11.1
+const OID_INTERMEDIATE = Buffer.from("060a2a864886f76364060201", "hex");  // 1.2.840.113635.100.6.2.1
+
+// Verify one of Apple's JWS strings and return its payload. Throws on anything
+// that isn't signed by Apple — this URL is public, so an unverified body is noise.
+function verifyAppleJWS(jws) {
+  const parts = String(jws || "").split(".");
+  if (parts.length !== 3) throw new Error("not a JWS");
+  const header = JSON.parse(Buffer.from(parts[0], "base64url").toString("utf8"));
+  if (header.alg !== "ES256" || !Array.isArray(header.x5c) || header.x5c.length < 3) throw new Error("bad header");
+  const [leaf, inter, root] = header.x5c.slice(0, 3).map((c) => new nodeCrypto.X509Certificate(Buffer.from(c, "base64")));
+  if (root.fingerprint256.replace(/:/g, "").toUpperCase() !== APPLE_ROOT_G3_SHA256) throw new Error("untrusted root");
+  if (!inter.checkIssued(root) || !inter.verify(root.publicKey)) throw new Error("intermediate not issued by Apple root");
+  if (!leaf.checkIssued(inter) || !leaf.verify(inter.publicKey)) throw new Error("leaf not issued by intermediate");
+  if (!leaf.raw.includes(OID_LEAF) || !inter.raw.includes(OID_INTERMEDIATE)) throw new Error("missing Apple extensions");
+  const now = Date.now();
+  for (const c of [leaf, inter, root]) if (Date.parse(c.validFrom) > now || Date.parse(c.validTo) < now) throw new Error("certificate out of date");
+  const ok = nodeCrypto.verify("sha256", Buffer.from(`${parts[0]}.${parts[1]}`),
+    { key: leaf.publicKey, dsaEncoding: "ieee-p1363" }, Buffer.from(parts[2], "base64url"));
+  if (!ok) throw new Error("bad signature");
+  return JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+}
+
+// Which family a notification belongs to: the appAccountToken the app attaches
+// to every purchase (the household id), else the original transaction id a
+// parent device published for purchases made before the token existed.
+async function householdForTransaction(tx) {
+  const token = String(tx.appAccountToken || "");
+  if (/^[0-9a-f-]{36}$/i.test(token)) {
+    for (const id of [token.toUpperCase(), token.toLowerCase()]) {
+      if ((await db.collection("households").doc(id).get()).exists) return id;
+    }
+  }
+  const orig = String(tx.originalTransactionId || "");
+  if (orig) {
+    const q = await db.collection("households").where("appStoreOriginalTxIDs", "array-contains", orig).limit(1).get();
+    if (!q.empty) return q.docs[0].id;
+  }
+  return null;
+}
+
+exports.appStoreNotifications = onRequest({ timeoutSeconds: 60, memory: "256MiB" }, async (req, res) => {
+  if (req.method !== "POST") return res.status(405).send("POST only");
+  let n;
+  try { n = verifyAppleJWS(req.body && req.body.signedPayload); } catch (e) {
+    console.warn("[appStore] rejected payload:", e.message);
+    return res.status(400).send("invalid");
+  }
+  const data = n.data || {};
+  if (data.bundleId && data.bundleId !== APP_BUNDLE_ID) return res.status(200).send("other app");
+  let tx = {}, renewal = {};
+  try {
+    if (data.signedTransactionInfo) tx = verifyAppleJWS(data.signedTransactionInfo);
+    if (data.signedRenewalInfo) renewal = verifyAppleJWS(data.signedRenewalInfo);
+  } catch (e) { console.warn("[appStore] rejected inner JWS:", e.message); return res.status(400).send("invalid"); }
+
+  // Apple retries until it gets a 200, so the same notification can arrive twice.
+  const evRef = db.collection("billingEvents").doc(String(n.notificationUUID || nodeCrypto.randomUUID()));
+  if ((await evRef.get()).exists) return res.status(200).send("duplicate");
+
+  const type = String(n.notificationType || ""), subtype = n.subtype ? String(n.subtype) : null;
+  const env = String(data.environment || "Production");
+  const hhID = await householdForTransaction(tx.originalTransactionId ? tx : renewal);
+  const nowS = Date.now() / 1000;
+  const expiresAt = tx.expiresDate ? Number(tx.expiresDate) / 1000 : null;
+  const autoRenew = renewal.autoRenewStatus === undefined ? null : Number(renewal.autoRenewStatus) === 1;
+  await evRef.set({
+    type, subtype, env, householdID: hhID, at: Number(n.signedDate || Date.now()) / 1000, receivedAt: nowS,
+    originalTransactionID: String(tx.originalTransactionId || renewal.originalTransactionId || "") || null,
+    productID: tx.productId || renewal.autoRenewProductId || null, expiresAt, autoRenew,
+  });
+  if (!hhID) { console.warn("[appStore]", type, subtype, env, "— no household for", tx.originalTransactionId); return res.status(200).send("unmatched"); }
+
+  const ref = db.collection("households").doc(hhID);
+  await db.runTransaction(async (t) => {
+    const h = (await t.get(ref)).data() || {};
+    const patch = {
+      appStore: { env, lastType: type, lastSubtype: subtype, lastAt: nowS, productID: tx.productId || null,
+        originalTransactionID: String(tx.originalTransactionId || "") || null, expiresAt, autoRenew },
+    };
+    const current = Number(h.premiumUntil || 0);
+    if (type === "SUBSCRIBED" || type === "DID_RENEW") {
+      // The entitlement reaches every device of the family now, not when the
+      // purchasing phone happens to open the app again.
+      if (expiresAt && expiresAt > current) patch.premiumUntil = expiresAt;
+      if (h.premiumSource !== "paid" || !h.purchasedAt) {
+        Object.assign(patch, { premiumSource: "paid", purchasedAt: h.purchasedAt || nowS, purchaseSource: h.purchaseSource || h.lastPaywallSource || "card" });
+        if (h.premiumSource === "gift") patch.giftConvertedAt = nowS;
+      } else if (type === "DID_RENEW") patch.renewedAt = nowS;
+      patch.renewalOffAt = admin.firestore.FieldValue.delete();
+      patch.expiredAt = admin.firestore.FieldValue.delete();
+    } else if (type === "DID_CHANGE_RENEWAL_STATUS") {
+      // Cancelling keeps access until the period ends — only the renewal stops.
+      if (subtype === "AUTO_RENEW_DISABLED") patch.renewalOffAt = nowS;
+      if (subtype === "AUTO_RENEW_ENABLED") patch.renewalOffAt = admin.firestore.FieldValue.delete();
+    } else if (type === "EXPIRED" || type === "GRACE_PERIOD_EXPIRED") {
+      patch.expiredAt = nowS;
+    } else if (type === "DID_FAIL_TO_RENEW") {
+      patch.billingIssueAt = nowS;
+    } else if (type === "REFUND" || type === "REVOKE") {
+      // Apple took the money back — the access goes with it. A gift is ours, not
+      // Apple's, so it is never touched here.
+      patch.refundedAt = nowS;
+      if (h.premiumSource === "paid" && current > nowS) patch.premiumUntil = nowS - 1;
+    }
+    t.set(ref, patch, { merge: true });
+  });
+  console.log("[appStore]", type, subtype || "", env, hhID);
+  return res.status(200).send("ok");
+});
 
 // A real purchase lands as a NEW premiumUntil written by the parent's device
 // (publishPremium). If the family was on a gift, that write is the conversion:
