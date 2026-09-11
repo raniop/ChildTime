@@ -4,7 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>טופי — ניהול</title>
 <link rel="icon" href="../favicon.png">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800;900&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../fonts/fonts.css">
 <style>
   :root{ --page:#EEEBFA; --ink:#1E1B3A; --muted:#6B6A8A; --line:#DDD9F0; --card:#fff; --soft:#F6F4FF; --indigo:#4B3FBF; --gold:#F5B800; --good:#0E9E72; --warn:#C2410C; --brand:linear-gradient(160deg,#5E60CE 0%,#6A4BD0 38%,#48BFE3 100%); }
   @media (prefers-color-scheme: dark){ :root{ --page:#100E22; --ink:#EEEBFB; --muted:#A9A5C6; --line:#2A2745; --card:#1A1730; --soft:#221E3D; --indigo:#A99CFF; --good:#5CE0B0; --gold:#FFD23F; --warn:#FF9A6B } }
@@ -112,7 +112,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260912010847";
+const PAGE_STAMP = "20260912014509";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -591,8 +591,40 @@ async function loadBatches() {
       ${rows ? `<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">פירוט לפי קובץ (${batches.length})</summary>${rows}</details>` : ""}
     </div>`;
   };
-  $("genBatches").innerHTML = LANGS.map(block).join("");
+  // 🤖 The hands-off mode: the server does the whole round by itself every hour.
+  const auto = summary.auto || {}; const lr = auto.lastRun || null;
+  const runLine = !lr ? "עוד לא רץ." :
+    `רץ לאחרונה ${when(lr.at)} · ${lr.files || 0} קבצים · נוספו ${fmt(lr.added || 0)} (🇮🇱 ${fmt((lr.byLang || {}).he || 0)} · 🇺🇸 ${fmt((lr.byLang || {}).en || 0)})` +
+    `${lr.approved ? ` · אושרו ${fmt(lr.approved)}` : ""}${lr.duplicates ? ` · ${fmt(lr.duplicates)} כבר היו` : ""}` +
+    `${lr.rejected ? ` · ${fmt(lr.rejected)} נדחו בבדיקה` : ""}${(lr.failed || []).length ? ` · ⚠️ ${lr.failed.length} כשלונות` : ""}`;
+  const autoCard = `<div class="card" style="margin-bottom:14px">
+    <h4>🤖 פרסום אוטומטי</h4>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0">
+      <span class="sw ${auto.autoPublish ? "on" : ""}" id="autoSw"></span>
+      <b>${auto.autoPublish ? "דלוק — אין מה ללחוץ" : "כבוי — צריך ללחוץ ידנית"}</b>
+      <button class="btn ghost" id="autoRun">הרץ עכשיו</button>
+    </div>
+    <div class="stamp" style="line-height:1.8">כל שעה השרת מושך את קבצי השאלות מהאתר, מעביר כל שאלה באותה בדיקה אוטומטית (3 מסיחים שונים, התשובה לא ביניהם, טווח כיתות תקין, ניקוד בעברית, אנגלית מלאה באנגלית), מדלג על כפילויות, ומאשר גם טיוטות שנשארו ממתינות. שאלה קיימת לא משתנה ושום דבר לא נמחק.</div>
+    <div class="stamp" style="margin-top:6px" id="autoLast">${runLine}</div>
+    ${(lr && (lr.samples || []).length) ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">שאלות שנדחו בבדיקה (${lr.samples.length} לדוגמה)</summary>${lr.samples.map((s) => `<div class="stamp" style="padding:6px 0;border-bottom:1px solid var(--line)">${s.lang === "en" ? "🇺🇸" : "🇮🇱"} <b>${esc(s.prompt || "")}</b> — ${esc((s.problems || []).join(", "))}</div>`).join("")}</details>` : ""}
+    ${(lr && (lr.failed || []).length) ? `<div class="stamp" style="margin-top:6px;color:#F5C049">${lr.failed.slice(0, 4).map(esc).join("<br>")}</div>` : ""}
+  </div>`;
+  $("genBatches").innerHTML = autoCard + LANGS.map(block).join("");
   LANGS.forEach((L) => { const saved = sessionStorage.getItem("admin.bulk." + L.id); if (saved && $("res-" + L.id)) $("res-" + L.id).textContent = saved; });
+
+  const autoBusy = (text) => { $("autoLast").innerHTML = `<span class="spin"></span> ${text}`; $("autoSw").style.pointerEvents = "none"; $("autoRun").disabled = true; };
+  $("autoSw").onclick = async () => {
+    const on = !auto.autoPublish;
+    if (on && !confirm("להדליק פרסום אוטומטי?\n\nכל שעה השרת יפרסם לילדים כל שאלה חדשה שנמצאת בקבצים באתר, בעברית ובאנגלית, אחרי שהיא עוברת את הבדיקה האוטומטית. שאלה שנכשלת בבדיקה לא מתפרסמת ומופיעה כאן. אפשר לכבות בכל רגע.")) return;
+    autoBusy(on ? "מדליק ומריץ סבב ראשון…" : "מכבה…");
+    try { const r = await call("adminSetAutoPublish", { enabled: on }); toast(on ? `פרסום אוטומטי דלוק · נוספו ${fmt((r.run || {}).added || 0)}` : "פרסום אוטומטי כבוי"); COV = null; importQuestions(); }
+    catch (e) { toast("נכשל: " + e.message); loadBatches(); }
+  };
+  $("autoRun").onclick = async () => {
+    autoBusy("מריץ סבב מלא — ייבוא, בדיקה ואישור…");
+    try { const r = await call("adminRunAutoPublish", {}); const x = r.run || {}; toast(`✅ נוספו ${fmt(x.added || 0)} · אושרו ${fmt(x.approved || 0)}${x.rejected ? ` · ${fmt(x.rejected)} נדחו` : ""}`); COV = null; importQuestions(); }
+    catch (e) { toast("נכשל: " + e.message); loadBatches(); }
+  };
 
   // 🚀 One button per language: import every file of that language, approved, then
   // sweep up anything imported earlier and left waiting.

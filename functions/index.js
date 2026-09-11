@@ -3151,6 +3151,15 @@ exports.adminImportQuestions = onCall({ timeoutSeconds: 120, memory: "512MiB" },
   // items carry lang: "en" and only reach devices showing English.
   const lang = request.data?.lang === "en" ? "en" : "he";
 
+  const result = await qbImportInto(topic, incoming, { approve, lang, by: email });
+  console.log("[adminImportQuestions]", email, topic, lang, "+" + result.added, "dup", result.duplicates, "rejected", result.rejected.length);
+  return result;
+});
+
+// The single door questions enter a bank through — the dashboard's import button
+// and the automatic job below both come through here, so the validation, the
+// duplicate check and the version bump are the same either way.
+async function qbImportInto(topic, incoming, { approve = false, lang = "he", by = "system" } = {}) {
   const ref = db.collection("questionBanks").doc(topic);
   const result = await db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
@@ -3173,7 +3182,7 @@ exports.adminImportQuestions = onCall({ timeoutSeconds: 120, memory: "512MiB" },
         tier: QB_TIERS.includes(raw.tier) ? raw.tier : "medium",
         gradeLo: Number(raw.gradeLo), gradeHi: Number(raw.gradeHi),
         status: approve ? "approved" : "draft",
-        createdAt: Date.now(), createdBy: email,
+        createdAt: Date.now(), createdBy: by,
         ...(lang === "en" ? { lang: "en" } : {}),
       });
     }
@@ -3182,9 +3191,32 @@ exports.adminImportQuestions = onCall({ timeoutSeconds: 120, memory: "512MiB" },
     return { added: added.length, duplicates: dup, rejected, version };
   });
   if (result.added) await qbBumpIndex(topic, result.version);
-  console.log("[adminImportQuestions]", email, topic, lang, "+" + result.added, "dup", result.duplicates, "rejected", result.rejected.length);
   return result;
-});
+}
+
+// Move every draft of one language in a world to approved. Returns how many moved.
+async function qbApproveDrafts(topic, lang, by) {
+  const ref = db.collection("questionBanks").doc(topic);
+  const moved = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return { count: 0, version: 0 };
+    const cur = snap.data() || {};
+    const items = Array.isArray(cur.items) ? cur.items : [];
+    let count = 0;
+    const next = items.map((i) => {
+      const l = i.lang === "en" ? "en" : "he";
+      if (i.status !== "draft" || l !== lang) return i;
+      count++;
+      return { ...i, status: "approved", approvedAt: Date.now(), approvedBy: by };
+    });
+    if (!count) return { count: 0, version: cur.version || 0 };
+    const version = (cur.version || 0) + 1;
+    tx.set(ref, { version, items: next, updatedAt: Date.now() });
+    return { count, version };
+  });
+  if (moved.count) await qbBumpIndex(topic, moved.version);
+  return moved.count;
+}
 
 // Approve, return to draft, or reject (delete) items by id.
 exports.adminSetQuestionStatus = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (request) => {
@@ -3245,7 +3277,96 @@ exports.adminQuestionBankSummary = onCall({ timeoutSeconds: 60, memory: "512MiB"
     };
     if (d.id === wantDrafts) drafts = items.filter((i) => i.status === "draft" && langOf(i) === draftsLang);
   });
-  return { topics, drafts };
+  return { topics, drafts, auto: await qbAutoConfig() };
+});
+
+// ============================================================================
+// 🤖 Auto-publish — the generated batches on tofyapp.com are the source of
+// truth, and this job carries them into the cloud bank on its own: every item
+// passes the same automatic gate as a manual import (3 distinct distractors,
+// the answer not among them, a valid grade range, niqqud in Hebrew, no Hebrew
+// inside an English item), duplicates are skipped, and anything left waiting
+// as a draft is approved. Nothing here ever deletes or rewrites a question.
+// ============================================================================
+const QB_SOURCE = "https://tofyapp.com/admin/generated";
+
+async function qbAutoConfig() {
+  const d = await db.collection("config").doc("questions").get().catch(() => null);
+  const c = (d && d.exists && d.data()) || {};
+  return { autoPublish: c.autoPublish === true, updatedBy: c.updatedBy || null, lastRun: c.lastRun || null };
+}
+
+const qbJSON = async (path) => {
+  const res = await fetch(`${QB_SOURCE}/${path}${path.includes("?") ? "&" : "?"}t=${Date.now()}`);
+  if (!res.ok) throw new Error(`${path} → HTTP ${res.status}`);
+  return res.json();
+};
+
+async function runAutoPublish({ force = false, by = "schedule" } = {}) {
+  const cfg = await qbAutoConfig();
+  if (!cfg.autoPublish && !force) return { skipped: "disabled" };
+  const run = { at: Date.now(), by, files: 0, added: 0, duplicates: 0, rejected: 0, approved: 0,
+    byLang: { he: 0, en: 0 }, failed: [], samples: [] };
+  let batches = [];
+  try {
+    const idx = await qbJSON("index.json");
+    batches = Array.isArray(idx.batches) ? idx.batches : [];
+  } catch (e) {
+    run.failed.push(`index.json: ${e.message}`);
+  }
+  for (const b of batches) {
+    const topic = String(b.topic || "");
+    if (!QB_TOPICS.includes(topic)) { run.failed.push(`${b.file}: unknown world "${topic}"`); continue; }
+    const lang = b.lang === "en" ? "en" : "he";
+    try {
+      const items = await qbJSON(b.file || `${topic}.json`);
+      const r = await qbImportInto(topic, Array.isArray(items) ? items : [items], { approve: true, lang, by: `auto:${by}` });
+      run.files++; run.added += r.added; run.duplicates += r.duplicates; run.rejected += r.rejected.length;
+      run.byLang[lang] += r.added;
+      // Keep the first few rejections, so a bad batch is visible in the dashboard
+      // instead of silently dropping questions every hour.
+      for (const x of r.rejected.slice(0, 3)) {
+        if (run.samples.length < 12) run.samples.push({ topic, lang, prompt: x.prompt, problems: x.problems });
+      }
+    } catch (e) { run.failed.push(`${b.file}: ${e.message}`); }
+  }
+  // Drafts from an earlier manual import are part of "everything is published".
+  for (const topic of QB_TOPICS) {
+    for (const lang of ["he", "en"]) {
+      try { run.approved += await qbApproveDrafts(topic, lang, `auto:${by}`); }
+      catch (e) { run.failed.push(`approve ${topic}/${lang}: ${e.message}`); }
+    }
+  }
+  await db.collection("config").doc("questions").set({ lastRun: run }, { merge: true });
+  console.log("[autoPublish]", by, `files ${run.files}/${batches.length}`, "+" + run.added,
+    `(he ${run.byLang.he} · en ${run.byLang.en})`, "dup", run.duplicates, "rejected", run.rejected,
+    "approved", run.approved, run.failed.length ? `FAILED ${run.failed.length}: ${run.failed[0]}` : "");
+  return run;
+}
+
+// Hourly is often enough: a push to the site is live within the hour, and a
+// run with nothing new to add costs one fetch per file and no writes.
+exports.autoPublishQuestions = onSchedule(
+  { schedule: "12 * * * *", timeZone: "Asia/Jerusalem", timeoutSeconds: 540, memory: "1GiB" },
+  async () => { await runAutoPublish(); }
+);
+
+// The founder's switch, and a "run it now" that works either way.
+exports.adminSetAutoPublish = onCall({ timeoutSeconds: 540, memory: "1GiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const enabled = !!(request.data && request.data.enabled);
+  await db.collection("config").doc("questions")
+    .set({ autoPublish: enabled, updatedAt: Date.now(), updatedBy: email }, { merge: true });
+  console.log("[autoPublish]", enabled ? "ENABLED" : "disabled", "by", email);
+  // Turning it on shouldn't mean waiting an hour to see it work.
+  const run = enabled ? await runAutoPublish({ by: email }) : null;
+  return { ok: true, auto: await qbAutoConfig(), run };
+});
+
+exports.adminRunAutoPublish = onCall({ timeoutSeconds: 540, memory: "1GiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const run = await runAutoPublish({ force: true, by: email });
+  return { ok: true, auto: await qbAutoConfig(), run };
 });
 
 // ⏹ End a family's gift NOW (Rani): the admin page could only ever extend.
