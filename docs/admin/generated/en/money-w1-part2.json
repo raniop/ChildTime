@@ -1,0 +1,6 @@
+[
+  {"prompt": "🧾\nA backpack costs $40 and is 25% off. What is the sale price?", "correctAnswer": "$30", "distractors": ["$15", "$35", "$10"], "tier": "medium", "gradeLo": 5, "gradeHi": 6},
+  {"prompt": "🥤\nA 6-pack of juice costs $4.20. What is the price of one juice?", "correctAnswer": "$0.70", "distractors": ["$0.60", "$1.20", "$0.42"], "tier": "medium", "gradeLo": 5, "gradeHi": 6},
+  {"prompt": "🐷\nMaya saves $6 every week. How many weeks until she has $54?", "correctAnswer": "9 weeks", "distractors": ["8 weeks", "6 weeks", "48 weeks"], "tier": "easy", "gradeLo": 5, "gradeHi": 6},
+  {"prompt": "🏪\nWhich is the better buy: 3 pencils for $0.90 or 5 pencils for $1.25?", "correctAnswer": "5 for $1.25", "distractors": ["3 for $0.90", "They cost the same per pencil", "You can't tell without the brand"], "tier": "medium", "gradeLo": 5, "gradeHi": 6}
+]
