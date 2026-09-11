@@ -111,11 +111,12 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260911131011";
+const PAGE_STAMP = "20260911131043";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
-    const m = fresh.match(/const PAGE_STAMP = "20260911131011"]+)"/);
+    // Built from parts so the pre-commit stamp (which rewrites the declaration line) can't touch it.
+    const m = fresh.match(new RegExp("^const PAGE_" + "STAMP = \"([^\"]+)\";", "m"));
     if (m && m[1] !== PAGE_STAMP && sessionStorage.getItem("admin.reloadedFor") !== m[1]) {
       sessionStorage.setItem("admin.reloadedFor", m[1]);
       location.replace(location.pathname + "?r=" + m[1] + location.hash);
