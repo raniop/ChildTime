@@ -36,6 +36,15 @@
       "generatedAt": "2026-09-11T07:13:56.869Z"
     },
     {
+      "topic": "science",
+      "count": 393,
+      "byGrade": {
+        "7": 194,
+        "8": 199
+      },
+      "generatedAt": "2026-09-11T08:36:37.775Z"
+    },
+    {
       "topic": "soccer",
       "count": 1600,
       "byGrade": {
