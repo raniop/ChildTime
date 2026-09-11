@@ -1,0 +1,1286 @@
+[
+ {
+  "prompt": "🛒\nWhich box of cereal costs the least per ounce?",
+  "correctAnswer": "18 ounces for $4.14",
+  "distractors": [
+   "10 ounces for $3.00",
+   "12 ounces for $3.00",
+   "20 ounces for $5.00"
+  ],
+  "tier": "hard",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🌶️\nWhich chemical makes chili peppers taste hot?",
+  "correctAnswer": "Capsaicin",
+  "distractors": [
+   "Caffeine",
+   "Chlorophyll",
+   "Citric acid"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "⚡\nWhich nutrient gives your body the most energy per gram?",
+  "correctAnswer": "Fat",
+  "distractors": [
+   "Protein",
+   "Carbohydrate",
+   "Fiber"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🧬\nProteins in food are made from smaller building blocks called…",
+  "correctAnswer": "Amino acids",
+  "distractors": [
+   "Fatty acids",
+   "Simple sugars",
+   "Minerals"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🥛\nWhich sugar is found naturally in milk?",
+  "correctAnswer": "Lactose",
+  "distractors": [
+   "Sucrose",
+   "Fructose",
+   "Maltose"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🥧\nA pie is cut into 8 equal slices. What percent of the pie is one slice?",
+  "correctAnswer": "12.5%",
+  "distractors": [
+   "8%",
+   "10%",
+   "15%"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🏷️\nOne serving of cereal gives 20% of the Daily Value for iron. How many servings would give 100%?",
+  "correctAnswer": "5",
+  "distractors": [
+   "4",
+   "10",
+   "20"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🍳\nOnly the bottom of a metal pan touches the hot burner, but the handle gets hot too. How did the heat travel through the metal?",
+  "correctAnswer": "Conduction",
+  "distractors": [
+   "Convection",
+   "Radiation",
+   "Evaporation"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🍲\nIn a pot of soup on the stove, hot liquid rises and cooler liquid sinks in a loop. What is this called?",
+  "correctAnswer": "Convection",
+  "distractors": [
+   "Conduction",
+   "Radiation",
+   "Condensation"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🏕️\nWhile roasting marshmallows, you feel a campfire's warmth on your face from several feet away. This heat reaches you mainly by…",
+  "correctAnswer": "Radiation",
+  "distractors": [
+   "Conduction",
+   "Evaporation",
+   "Condensation"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🥄\nWhy does a metal spoon in hot soup get hot faster than a wooden spoon?",
+  "correctAnswer": "Metal is a better conductor of heat",
+  "distractors": [
+   "Wood is heavier",
+   "Metal starts out colder",
+   "Wood soaks up the soup"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🧤\nWhy do thick oven mitts protect your hands from a hot pan?",
+  "correctAnswer": "They are poor conductors, so they insulate",
+  "distractors": [
+   "They are good conductors of heat",
+   "They make the pan colder",
+   "They reflect all light"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🍞\nYeast, which bakers use to make bread rise, is actually a…",
+  "correctAnswer": "Single-celled fungus",
+  "distractors": [
+   "Kind of bacteria",
+   "Tiny plant seed",
+   "Type of mineral"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🫙\nSauerkraut is made by fermenting which vegetable?",
+  "correctAnswer": "Cabbage",
+  "distractors": [
+   "Carrots",
+   "Potatoes",
+   "Corn"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🌿\nPlants make the sugars in fruits and grains through which process?",
+  "correctAnswer": "Photosynthesis",
+  "distractors": [
+   "Respiration",
+   "Fermentation",
+   "Digestion"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🍽️\nWhich organ makes a strong acid that helps break down the food you eat?",
+  "correctAnswer": "The stomach",
+  "distractors": [
+   "The liver",
+   "The small intestine",
+   "The large intestine"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🩺\nIn which organ are most nutrients from food absorbed into the blood?",
+  "correctAnswer": "The small intestine",
+  "distractors": [
+   "The stomach",
+   "The large intestine",
+   "The esophagus"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🧊\nWhy can a full, closed plastic bottle of water crack in the freezer?",
+  "correctAnswer": "Water expands when it freezes",
+  "distractors": [
+   "Ice is heavier than water",
+   "Cold air leaks into the bottle",
+   "The water turns into a gas"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🔥\nCaramelization happens when you heat which kind of food until it turns brown?",
+  "correctAnswer": "Sugar",
+  "distractors": [
+   "Salt",
+   "Water",
+   "Baking soda"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🌡️\nFood safety experts say perishable food shouldn't sit out between 40°F and 140°F for more than 2 hours. What is this range called?",
+  "correctAnswer": "The danger zone",
+  "distractors": [
+   "The freezing zone",
+   "The safe zone",
+   "The boiling zone"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🍗\nChicken is safe to eat when its inside reaches at least which temperature?",
+  "correctAnswer": "165°F",
+  "distractors": [
+   "100°F",
+   "120°F",
+   "140°F"
+  ],
+  "tier": "hard",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "❄️\nWhat is the safest way to thaw frozen food?",
+  "correctAnswer": "In the refrigerator",
+  "distractors": [
+   "On the counter overnight",
+   "In a sunny window",
+   "In a turned-off warm oven"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🔪\nWhy should you use a different cutting board for raw chicken than for salad vegetables?",
+  "correctAnswer": "So bacteria from the raw chicken don't spread to the salad",
+  "distractors": [
+   "So the salad cooks faster",
+   "So the chicken tastes sweeter",
+   "So the knife stays sharp"
+  ],
+  "tier": "easy",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🧂\nFor thousands of years, people have salted fish and meat to keep them from spoiling. How does salt help?",
+  "correctAnswer": "It pulls water out of microbes so they can't grow",
+  "distractors": [
+   "It freezes the food",
+   "It adds oxygen to the food",
+   "It makes the food heavier"
+  ],
+  "tier": "hard",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🍚\nRice is cooked with 2 cups of water for every 1 cup of rice. How much water do you need for 2 1/2 cups of rice?",
+  "correctAnswer": "5 cups",
+  "distractors": [
+   "4 cups",
+   "4 1/2 cups",
+   "6 cups"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🥤\nA punch recipe mixes juice and sparkling water in a 3:2 ratio. You want 10 cups of punch. How many cups of juice do you need?",
+  "correctAnswer": "6",
+  "distractors": [
+   "4",
+   "5",
+   "7"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🧃\nA 32-ounce bottle of juice costs $3.84. What is the price per ounce?",
+  "correctAnswer": "12 cents",
+  "distractors": [
+   "8 cents",
+   "10 cents",
+   "14 cents"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🥪\nA $5.00 sandwich is on sale for 20% off. What is the sale price?",
+  "correctAnswer": "$4.00",
+  "distractors": [
+   "$1.00",
+   "$3.00",
+   "$4.80"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🍽️\nA restaurant bill is $40. Your family leaves an 18% tip. How much is the tip?",
+  "correctAnswer": "$7.20",
+  "distractors": [
+   "$4.80",
+   "$7.00",
+   "$8.00"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🧈\nA recipe for 12 muffins uses 1/2 cup of butter. How much butter do you need for 30 muffins?",
+  "correctAnswer": "1 1/4 cups",
+  "distractors": [
+   "1 cup",
+   "1 1/2 cups",
+   "2 1/2 cups"
+  ],
+  "tier": "hard",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🧑‍🍳\nGluten, the protein that makes bread dough stretchy, is found in which of these grains?",
+  "correctAnswer": "Wheat",
+  "distractors": [
+   "Rice",
+   "Corn",
+   "Quinoa"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🍄\nMushrooms are not plants. Which kingdom do they belong to?",
+  "correctAnswer": "Fungi",
+  "distractors": [
+   "Protists",
+   "Animals",
+   "Bacteria"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🌾\nWheat is a producer. A person who eats bread made from that wheat is a…",
+  "correctAnswer": "Consumer",
+  "distractors": [
+   "Producer",
+   "Decomposer",
+   "Predator"
+  ],
+  "tier": "easy",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🥛\nA recipe for 8 servings uses 3 cups of milk. How much milk is that per serving?",
+  "correctAnswer": "3/8 cup",
+  "distractors": [
+   "1/3 cup",
+   "1/2 cup",
+   "2 2/3 cups"
+  ],
+  "tier": "hard",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🎂\nA cake recipe uses flour and sugar in a 3:2 ratio. You use 4 1/2 cups of flour. How much sugar do you need?",
+  "correctAnswer": "3 cups",
+  "distractors": [
+   "2 cups",
+   "2 1/2 cups",
+   "6 3/4 cups"
+  ],
+  "tier": "hard",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🧊\nFood safety experts recommend keeping a freezer at which temperature?",
+  "correctAnswer": "0°F",
+  "distractors": [
+   "32°F",
+   "40°F",
+   "50°F"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🌾\nPeople first farmed wheat about 10,000 years ago in which region?",
+  "correctAnswer": "The Fertile Crescent",
+  "distractors": [
+   "The Amazon rainforest",
+   "The Sahara Desert",
+   "Siberia"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🥫\nCanned food can stay good on a shelf for years because it was…",
+  "correctAnswer": "Sealed airtight and heated to kill microbes",
+  "distractors": [
+   "Frozen and then thawed",
+   "Mixed with baking soda",
+   "Kept in the dark"
+  ],
+  "tier": "medium",
+  "gradeLo": 6,
+  "gradeHi": 7
+ },
+ {
+  "prompt": "🥒\nPickles made by fermentation get their sour taste from which acid made by bacteria?",
+  "correctAnswer": "Lactic acid",
+  "distractors": [
+   "Citric acid",
+   "Carbonic acid",
+   "Hydrochloric acid"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "⛰️\nWhy does pasta take longer to cook in a high mountain town?",
+  "correctAnswer": "Water boils at a lower temperature there",
+  "distractors": [
+   "Water boils at a higher temperature there",
+   "There is more oxygen in the air there",
+   "Pasta is heavier up there"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍞\nThe browning of toast, cookies, and seared meat comes from a reaction between sugars and proteins called the…",
+  "correctAnswer": "Maillard reaction",
+  "distractors": [
+   "Fermentation reaction",
+   "Pasteurization reaction",
+   "Neutralization reaction"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🥪\nIn mayonnaise, tiny drops of oil stay spread through lemon juice instead of separating. What is this kind of mixture called?",
+  "correctAnswer": "An emulsion",
+  "distractors": [
+   "A solution",
+   "An alloy",
+   "A compound"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🫙\nIn homemade mayonnaise, which ingredient helps keep the oil and lemon juice from separating?",
+  "correctAnswer": "Egg yolk",
+  "distractors": [
+   "Salt",
+   "Sugar",
+   "Water"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍔\nGround beef is safe to eat when its inside reaches at least which temperature?",
+  "correctAnswer": "160°F",
+  "distractors": [
+   "100°F",
+   "125°F",
+   "140°F"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍪\nA recipe makes 24 cookies with 2 1/4 cups of flour. How much flour do you need for 36 cookies?",
+  "correctAnswer": "3 3/8 cups",
+  "distractors": [
+   "3 1/4 cups",
+   "3 1/2 cups",
+   "4 1/2 cups"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🏷️\nA soup label says one serving has 460 mg of sodium, which is 20% of the Daily Value. What is the full Daily Value for sodium?",
+  "correctAnswer": "2,300 mg",
+  "distractors": [
+   "920 mg",
+   "2,000 mg",
+   "4,600 mg"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍳\nWhen an egg cooks, heat makes its proteins unfold and change shape. What is this called?",
+  "correctAnswer": "Denaturation",
+  "distractors": [
+   "Evaporation",
+   "Photosynthesis",
+   "Condensation"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🥖\nWhy do bakers knead bread dough?",
+  "correctAnswer": "To build gluten so the dough gets stretchy",
+  "distractors": [
+   "To melt the sugar",
+   "To kill the yeast",
+   "To cool the dough"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🌽\nAbout 10% of energy passes from one level of a food chain to the next. If corn plants store 10,000 units of energy, about how much reaches a cow that eats them?",
+  "correctAnswer": "1,000 units",
+  "distractors": [
+   "100 units",
+   "5,000 units",
+   "10,000 units"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍨\nTo make ice cream in a bag, you pack ice with salt. Why does the salty ice get colder?",
+  "correctAnswer": "Salt lowers the freezing point, so the ice melts and absorbs heat",
+  "distractors": [
+   "Salt is naturally ice-cold",
+   "Salt blocks heat from the sun",
+   "Salt turns the ice into snow"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍚\nStarch in bread, rice, and potatoes is made of long chains of which simple sugar?",
+  "correctAnswer": "Glucose",
+  "distractors": [
+   "Fructose",
+   "Lactose",
+   "Sucrose"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "⚛️\nWhat is the chemical name of table salt?",
+  "correctAnswer": "Sodium chloride",
+  "distractors": [
+   "Sodium bicarbonate",
+   "Calcium carbonate",
+   "Potassium nitrate"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🧪\nWhat is the chemical name of baking soda?",
+  "correctAnswer": "Sodium bicarbonate",
+  "distractors": [
+   "Sodium chloride",
+   "Calcium carbonate",
+   "Citric acid"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🧪\nVinegar tastes sour because it contains which acid?",
+  "correctAnswer": "Acetic acid",
+  "distractors": [
+   "Citric acid",
+   "Lactic acid",
+   "Hydrochloric acid"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍋\nAbout what pH does lemon juice have?",
+  "correctAnswer": "About 2",
+  "distractors": [
+   "About 7",
+   "About 10",
+   "About 14"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "♨️\nWhy does a pressure cooker cook food faster than a regular pot?",
+  "correctAnswer": "Higher pressure raises the boiling point of water",
+  "distractors": [
+   "Higher pressure lowers the boiling point of water",
+   "It removes all the water from the food",
+   "It uses microwaves inside"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🧈\nFats that are solid at room temperature, like butter, are mostly which type?",
+  "correctAnswer": "Saturated fats",
+  "distractors": [
+   "Unsaturated fats",
+   "Monounsaturated fats",
+   "Polyunsaturated fats"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🥛\nPeople who get a stomachache from milk often don't make enough of which enzyme?",
+  "correctAnswer": "Lactase",
+  "distractors": [
+   "Amylase",
+   "Pepsin",
+   "Lipase"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "😋\nWhich enzyme in your saliva starts breaking down starch while you chew?",
+  "correctAnswer": "Amylase",
+  "distractors": [
+   "Lactase",
+   "Pepsin",
+   "Lipase"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍝\nA pasta recipe for 6 servings needs 1 1/2 pounds of pasta. How many pounds do you need for 20 servings?",
+  "correctAnswer": "5",
+  "distractors": [
+   "4 1/2",
+   "5 1/2",
+   "6"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🥑\nA store sells 3 avocados for $4. At that rate, how much do 12 avocados cost?",
+  "correctAnswer": "$16",
+  "distractors": [
+   "$12",
+   "$36",
+   "$48"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "📦\nA box of pasta went up in price from $2.00 to $2.50. By what percent did the price increase?",
+  "correctAnswer": "25%",
+  "distractors": [
+   "5%",
+   "20%",
+   "50%"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🛒\nYour groceries cost $24.00 before a 5% sales tax. What is the total with tax?",
+  "correctAnswer": "$25.20",
+  "distractors": [
+   "$24.05",
+   "$25.00",
+   "$29.00"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🔬\nWhich scientist showed that heating liquids kills harmful microbes, a process now named after him?",
+  "correctAnswer": "Louis Pasteur",
+  "distractors": [
+   "Isaac Newton",
+   "Charles Darwin",
+   "Galileo Galilei"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🏷️\nA snack has 5 g of fat, 20 g of carbohydrate, and 10 g of protein. Fat has 9 Calories per gram; carbs and protein have 4. How many Calories does it have?",
+  "correctAnswer": "165",
+  "distractors": [
+   "140",
+   "180",
+   "315"
+  ],
+  "tier": "hard",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🥚\nProtein has 4 Calories per gram. A large egg has about 6 grams of protein. About how many Calories come from that protein?",
+  "correctAnswer": "About 24",
+  "distractors": [
+   "About 6",
+   "About 10",
+   "About 54"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🏷️\nA package has 2.5 servings, and each serving has 180 Calories. How many Calories are in the whole package?",
+  "correctAnswer": "450",
+  "distractors": [
+   "360",
+   "400",
+   "540"
+  ],
+  "tier": "medium",
+  "gradeLo": 7,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🧁\nBaking powder labeled \"double-acting\" releases gas at two times. When?",
+  "correctAnswer": "Once when mixed with liquid and again when heated",
+  "distractors": [
+   "Once when frozen and again when thawed",
+   "Only when stirred twice",
+   "Once in the bag and again on the plate"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍫\nChocolate makers \"temper\" chocolate by heating and cooling it carefully. Why?",
+  "correctAnswer": "So the cocoa butter forms stable crystals that make it shiny and snappy",
+  "distractors": [
+   "To burn off extra sugar",
+   "To mix water into it",
+   "To make it melt faster in the box"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🥛\nIn homogenized whole milk, the cream doesn't rise to the top. Why?",
+  "correctAnswer": "The fat is broken into tiny droplets that stay spread out",
+  "distractors": [
+   "All the fat has been removed",
+   "Sugar is added to hold it down",
+   "The milk is kept frozen"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍞\nBread gets firm and stale after a few days, even in a sealed bag. What is the main cause?",
+  "correctAnswer": "Its starch slowly re-forms stiff crystals",
+  "distractors": [
+   "Yeast keeps growing inside it",
+   "It soaks up salt from the air",
+   "Its gluten melts away"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🌽\nOver thousands of years, farmers in Mexico turned a wild grass called teosinte into corn by planting seeds from their best plants. What is this called?",
+  "correctAnswer": "Selective breeding",
+  "distractors": [
+   "Fermentation",
+   "Pasteurization",
+   "Photosynthesis"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "💧\nA pot of water takes much longer to heat up than the empty metal pot would. Which property of water explains this?",
+  "correctAnswer": "Its high specific heat",
+  "distractors": [
+   "Its low density",
+   "Its low boiling point",
+   "Its high heat conductivity"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "♨️\nWhile water boils, its temperature stays at about 212°F even though the burner keeps heating it. Where does that energy go?",
+  "correctAnswer": "Into turning liquid water into steam",
+  "distractors": [
+   "Into making the pot heavier",
+   "Into cooling the kitchen",
+   "It disappears"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍆\nCooks sprinkle salt on eggplant slices, and soon water beads up on the surface. What process pulls the water out?",
+  "correctAnswer": "Osmosis",
+  "distractors": [
+   "Evaporation",
+   "Condensation",
+   "Conduction"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍚\nStarch and proteins are both polymers. What is a polymer?",
+  "correctAnswer": "A large molecule made of many repeating units",
+  "distractors": [
+   "A single atom",
+   "A mixture of salt and water",
+   "A type of metal"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "⚛️\nTable sugar (sucrose) is made of which two smaller sugars joined together?",
+  "correctAnswer": "Glucose and fructose",
+  "distractors": [
+   "Glucose and lactose",
+   "Fructose and lactose",
+   "Two lactose molecules"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "⚛️\nWhat is the chemical formula for glucose?",
+  "correctAnswer": "C6H12O6",
+  "distractors": [
+   "C12H22O11",
+   "CO2",
+   "NaCl"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🌿\nIn photosynthesis, a plant uses sunlight, carbon dioxide, and water to make glucose. Which gas does it give off?",
+  "correctAnswer": "Oxygen",
+  "distractors": [
+   "Nitrogen",
+   "Hydrogen",
+   "Helium"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🔋\nYour cells use oxygen to release the energy stored in glucose from food. What is this process called?",
+  "correctAnswer": "Cellular respiration",
+  "distractors": [
+   "Photosynthesis",
+   "Fermentation",
+   "Digestion"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🧁\nA bakery charges $2.50 per cupcake plus a $5 box fee. Which expression gives the cost of n cupcakes?",
+  "correctAnswer": "2.50n + 5",
+  "distractors": [
+   "5n + 2.50",
+   "7.50n",
+   "2.50(n + 5)"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍪\nA bakery charges $1.50 per cookie plus a $3 gift box fee. You spend $21. How many cookies did you buy?",
+  "correctAnswer": "12",
+  "distractors": [
+   "10",
+   "14",
+   "16"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍋\nA lemonade stand spent $18 on a pitcher and a sign. Each cup costs $0.60 to make and sells for $1.50. How many cups must it sell to earn back all its costs?",
+  "correctAnswer": "20",
+  "distractors": [
+   "12",
+   "18",
+   "30"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍊\nYou have 8 cups of a drink that is 50% orange juice. How many cups of pure orange juice must you add to make it 60% orange juice?",
+  "correctAnswer": "2",
+  "distractors": [
+   "1",
+   "3",
+   "4"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🌡️\nA recipe says to bake at 180°C. Using F = C × 9/5 + 32, what is that in Fahrenheit?",
+  "correctAnswer": "356°F",
+  "distractors": [
+   "324°F",
+   "380°F",
+   "392°F"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "⚖️\nA recipe uses 250 grams of flour. One ounce is about 28 grams. About how many ounces is that?",
+  "correctAnswer": "About 9",
+  "distractors": [
+   "About 6",
+   "About 12",
+   "About 25"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍝\nA sauce recipe for 6 servings uses 2/3 cup of olive oil. How much oil do you need for 15 servings?",
+  "correctAnswer": "1 2/3 cups",
+  "distractors": [
+   "1 1/2 cups",
+   "2 cups",
+   "2 1/2 cups"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍪\nYou scale a cookie recipe by a factor of 2/3. The original uses 1 1/2 cups of sugar. How much sugar do you use now?",
+  "correctAnswer": "1 cup",
+  "distractors": [
+   "3/4 cup",
+   "1 1/4 cups",
+   "2 1/4 cups"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "📈\nFlour costs the same per pound no matter how much you buy, and 5 pounds cost $3.75. Which equation gives the cost y for x pounds?",
+  "correctAnswer": "y = 0.75x",
+  "distractors": [
+   "y = 3.75x",
+   "y = 5x",
+   "y = x + 3.75"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🛒\nStore A sells 64 ounces of juice for $4.48. Store B sells 48 ounces for $3.60. How much less per ounce does Store A charge?",
+  "correctAnswer": "Half a cent",
+  "distractors": [
+   "1 cent",
+   "2 cents",
+   "7 cents"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🥑\nAn avocado's price rises from $1.25 to $1.50, then drops back to $1.25. By about what percent did it drop?",
+  "correctAnswer": "About 16.7%",
+  "distractors": [
+   "20%",
+   "25%",
+   "About 83.3%"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "💧\nSalt dissolves in water, but oil doesn't mix in. Why?",
+  "correctAnswer": "Water molecules are polar and oil molecules are nonpolar",
+  "distractors": [
+   "Oil is heavier than water",
+   "Salt is a liquid",
+   "Oil is colder than water"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🧼\nDish soap lifts grease off plates because each soap molecule has…",
+  "correctAnswer": "One end that attracts water and one end that attracts oil",
+  "distractors": [
+   "Two ends that both push oil away",
+   "A tiny magnet inside",
+   "Sharp edges that scrape the grease"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "📡\nA microwave oven heats food mainly by…",
+  "correctAnswer": "Making water molecules in the food move faster",
+  "distractors": [
+   "Heating the plate, which then heats the food",
+   "Burning a tiny flame inside",
+   "Blowing hot air over the food"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "❄️\nTo freeze-dry food, it is frozen and then the ice turns straight into water vapor without melting. What is this change called?",
+  "correctAnswer": "Sublimation",
+  "distractors": [
+   "Evaporation",
+   "Condensation",
+   "Melting"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🌶️\nChili peppers are important in Indian and Thai cooking. Where did chili peppers first come from?",
+  "correctAnswer": "The Americas",
+  "distractors": [
+   "India",
+   "Thailand",
+   "China"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍫\nThe Aztecs made a chocolate drink from cacao beans. What else did they use cacao beans as?",
+  "correctAnswer": "Money",
+  "distractors": [
+   "Building bricks",
+   "Paint for pyramids",
+   "Fuel for fires"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🏷️\nA granola bar has 200 Calories and 8 grams of fat. Fat has 9 Calories per gram. What percent of its Calories come from fat?",
+  "correctAnswer": "36%",
+  "distractors": [
+   "4%",
+   "8%",
+   "18%"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🥣\nWhy do egg whites whip up into a stiff, fluffy foam?",
+  "correctAnswer": "Their proteins unfold and form a film around air bubbles",
+  "distractors": [
+   "The yolk hardens around the air",
+   "Sugar freezes into crystals",
+   "The water inside boils away"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍋\nWhy does milk form clumps when you stir in lemon juice?",
+  "correctAnswer": "The acid makes the milk proteins clump together",
+  "distractors": [
+   "The lemon juice freezes the milk",
+   "The sugar in lemons turns to salt",
+   "The milk fat boils"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🌋\nMixing baking soda with vinegar makes lots of bubbles. What type of reaction is this?",
+  "correctAnswer": "An acid-base reaction",
+  "distractors": [
+   "A combustion reaction",
+   "A nuclear reaction",
+   "A photosynthesis reaction"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍞\nYeast breaks down glucose and gives off carbon dioxide. In this reaction, glucose is a ___ and carbon dioxide is a ___.",
+  "correctAnswer": "Reactant; product",
+  "distractors": [
+   "Product; reactant",
+   "Catalyst; reactant",
+   "Product; catalyst"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "⚖️\nYou mix 100 g of flour with 60 g of water and bake a flatbread. Afterward it weighs 140 g. What happened to the missing 20 g?",
+  "correctAnswer": "Water escaped as steam",
+  "distractors": [
+   "The mass was destroyed",
+   "It turned into heat",
+   "It sank into the pan"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍖\nA recipe says a roast cooks for t = 20w + 15 minutes, where w is its weight in pounds. How long does a 4-pound roast cook?",
+  "correctAnswer": "95 minutes",
+  "distractors": [
+   "80 minutes",
+   "99 minutes",
+   "140 minutes"
+  ],
+  "tier": "medium",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🎂\nYou bake the same cake in a 9-inch round pan instead of an 8-inch round pan, filled to the same depth. About how much more batter do you need?",
+  "correctAnswer": "About 27% more",
+  "distractors": [
+   "About 12% more",
+   "About 50% more",
+   "About 100% more"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🥫\nA can is a cylinder with a radius of 1.5 inches and a height of 4 inches. About what is its volume?",
+  "correctAnswer": "About 28 cubic inches",
+  "distractors": [
+   "About 19 cubic inches",
+   "About 38 cubic inches",
+   "About 113 cubic inches"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ },
+ {
+  "prompt": "🍕\nWhich order gives you the most pizza, if all the pizzas are round and equally thick?",
+  "correctAnswer": "One 16-inch pizza",
+  "distractors": [
+   "Two 10-inch pizzas",
+   "Three 8-inch pizzas",
+   "Four 7-inch pizzas"
+  ],
+  "tier": "hard",
+  "gradeLo": 8,
+  "gradeHi": 8
+ }
+]

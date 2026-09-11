@@ -1,0 +1,1406 @@
+[
+  {
+    "prompt": "🎨\nWhat color is the inside of most watermelons?",
+    "correctAnswer": "Red",
+    "distractors": [
+      "Blue",
+      "Black",
+      "Purple"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🐝\nBees make honey from the nectar of…",
+    "correctAnswer": "Flowers",
+    "distractors": [
+      "Rocks",
+      "Clouds",
+      "Sand"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🧈\nButter is made from the cream of…",
+    "correctAnswer": "Milk",
+    "distractors": [
+      "Oranges",
+      "Eggs",
+      "Honey"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🥚\nWhat is the yellow part of an egg called?",
+    "correctAnswer": "The yolk",
+    "distractors": [
+      "The shell",
+      "The peel",
+      "The crust"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🍌\nWhat do you take off a banana before you eat it?",
+    "correctAnswer": "The peel",
+    "distractors": [
+      "The pit",
+      "The shell",
+      "The core"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🍓\nWhere are the tiny seeds on a strawberry?",
+    "correctAnswer": "On the outside",
+    "distractors": [
+      "In a big pit in the middle",
+      "Inside the leaves",
+      "Under the ground"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🤔\nWhich fruit has a hard, hairy shell with water inside?",
+    "correctAnswer": "Coconut",
+    "distractors": [
+      "Banana",
+      "Grape",
+      "Peach"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🥐\nWhere can you buy bread fresh from the oven?",
+    "correctAnswer": "A bakery",
+    "distractors": [
+      "A library",
+      "A post office",
+      "A shoe store"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🥬\nWho grows the fruits and vegetables we eat?",
+    "correctAnswer": "Farmers",
+    "distractors": [
+      "Pilots",
+      "Firefighters",
+      "Mail carriers"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🍽️\nWhich of these is a drink?",
+    "correctAnswer": "Milk",
+    "distractors": [
+      "Bread",
+      "Cheese",
+      "Apple"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "👅\nWhich of these tastes sweet?",
+    "correctAnswer": "Honey",
+    "distractors": [
+      "Lemon",
+      "Salt",
+      "Pickle"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🧃\nWhich drink is made by squeezing oranges?",
+    "correctAnswer": "Orange juice",
+    "distractors": [
+      "Milk",
+      "Hot cocoa",
+      "Water"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🌶️\nHow do most chili peppers taste?",
+    "correctAnswer": "Spicy",
+    "distractors": [
+      "Sweet",
+      "Sour",
+      "Salty"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🥫\nTuna is a kind of…",
+    "correctAnswer": "Fish",
+    "distractors": [
+      "Bird",
+      "Fruit",
+      "Cheese"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🍏\nYou have 3 green apples and 2 red apples. How many apples do you have?",
+    "correctAnswer": "5",
+    "distractors": [
+      "4",
+      "6",
+      "1"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🥚\nA carton has 12 eggs. You use 2 eggs. How many eggs are left?",
+    "correctAnswer": "10",
+    "distractors": [
+      "8",
+      "11",
+      "14"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🍪\nYou have 10 cookies. You share them equally with a friend. How many cookies does each of you get?",
+    "correctAnswer": "5",
+    "distractors": [
+      "2",
+      "4",
+      "10"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🍦\nWhere do we keep ice cream so it stays frozen?",
+    "correctAnswer": "In the freezer",
+    "distractors": [
+      "In the oven",
+      "In the cupboard",
+      "On the table"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🧺\nWhich one is a fruit?",
+    "correctAnswer": "Pear",
+    "distractors": [
+      "Carrot",
+      "Broccoli",
+      "Potato"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🍞\nWhat do we call the outside part of a loaf of bread?",
+    "correctAnswer": "The crust",
+    "distractors": [
+      "The peel",
+      "The shell",
+      "The yolk"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🍴\nWhat do we call a bowl of lettuce, cucumbers, and tomatoes mixed together?",
+    "correctAnswer": "A salad",
+    "distractors": [
+      "A soup",
+      "A cake",
+      "A sandwich"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🐄\nWhich food is made from milk?",
+    "correctAnswer": "Yogurt",
+    "distractors": [
+      "Bread",
+      "Apple juice",
+      "Rice"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 1
+  },
+  {
+    "prompt": "🍎\nWhat do we call the middle part of an apple where the seeds are?",
+    "correctAnswer": "The core",
+    "distractors": [
+      "The peel",
+      "The stem",
+      "The crust"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🫖\nYou stir sugar into warm tea. What happens to the sugar?",
+    "correctAnswer": "It dissolves",
+    "distractors": [
+      "It turns into ice",
+      "It gets bigger",
+      "It turns into salt"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🍿\nWhat makes popcorn kernels pop?",
+    "correctAnswer": "Heating them",
+    "distractors": [
+      "Freezing them",
+      "Washing them",
+      "Salting them"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🍩\nThere are 2 rows of donuts with 5 donuts in each row. How many donuts are there?",
+    "correctAnswer": "10",
+    "distractors": [
+      "7",
+      "8",
+      "12"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🍓\nYou pick 7 strawberries and your sister picks 8. How many strawberries is that in all?",
+    "correctAnswer": "15",
+    "distractors": [
+      "13",
+      "14",
+      "16"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🥤\nA pitcher of lemonade fills 10 cups. You pour 4 cups. How many cups are left in the pitcher?",
+    "correctAnswer": "6",
+    "distractors": [
+      "4",
+      "5",
+      "14"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🕒\nLunch is at 12:00. It is 11:00 now. How long until lunch?",
+    "correctAnswer": "1 hour",
+    "distractors": [
+      "2 hours",
+      "10 minutes",
+      "11 hours"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🌱\nWhat does a plant need to grow and give us food?",
+    "correctAnswer": "Water and sunlight",
+    "distractors": [
+      "Candy and juice",
+      "Darkness and no water",
+      "Only ice"
+    ],
+    "tier": "easy",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "💵\nA muffin costs $2. You pay with a $5 bill. How much change do you get back?",
+    "correctAnswer": "$3",
+    "distractors": [
+      "$2",
+      "$4",
+      "$7"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🌱\nWhich of these foods is a seed?",
+    "correctAnswer": "A bean",
+    "distractors": [
+      "A carrot",
+      "A lettuce leaf",
+      "A potato"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🥖\nThe baguette, a long and thin bread, is a famous food from which country?",
+    "correctAnswer": "France",
+    "distractors": [
+      "Mexico",
+      "China",
+      "Japan"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🍣\nSushi is a famous food from which country?",
+    "correctAnswer": "Japan",
+    "distractors": [
+      "France",
+      "Italy",
+      "Mexico"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🌮\nTacos are a famous food from which country?",
+    "correctAnswer": "Mexico",
+    "distractors": [
+      "Japan",
+      "India",
+      "Norway"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🍝\nSpaghetti and pizza are famous foods from which country?",
+    "correctAnswer": "Italy",
+    "distractors": [
+      "China",
+      "Mexico",
+      "Brazil"
+    ],
+    "tier": "medium",
+    "gradeLo": 1,
+    "gradeHi": 2
+  },
+  {
+    "prompt": "🍽️\nMyPlate says to fill half your plate with which two food groups?",
+    "correctAnswer": "Fruits and vegetables",
+    "distractors": [
+      "Grains and dairy",
+      "Protein and grains",
+      "Dairy and protein"
+    ],
+    "tier": "easy",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🍳\nEggs, fish, chicken, and nuts belong to which MyPlate food group?",
+    "correctAnswer": "Protein",
+    "distractors": [
+      "Dairy",
+      "Grains",
+      "Fruits"
+    ],
+    "tier": "easy",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🍑\nWhat do we call the big, hard seed in the middle of a peach?",
+    "correctAnswer": "The pit",
+    "distractors": [
+      "The core",
+      "The peel",
+      "The yolk"
+    ],
+    "tier": "easy",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🥄\nHow many teaspoons are in 1 tablespoon?",
+    "correctAnswer": "3",
+    "distractors": [
+      "2",
+      "4",
+      "10"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🥛\nHow many cups are in 1 pint?",
+    "correctAnswer": "2",
+    "distractors": [
+      "3",
+      "4",
+      "8"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🥛\nHow many fluid ounces are in 1 cup?",
+    "correctAnswer": "8",
+    "distractors": [
+      "4",
+      "12",
+      "16"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🧃\nHow many quarts are in 1 gallon?",
+    "correctAnswer": "4",
+    "distractors": [
+      "2",
+      "8",
+      "16"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🍕\nA pizza is cut into 8 equal slices. You eat 2 slices. What fraction of the pizza did you eat?",
+    "correctAnswer": "2/8",
+    "distractors": [
+      "1/8",
+      "6/8",
+      "2/6"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🍫\nA chocolate bar has 12 equal pieces. You share it equally among 4 friends. How many pieces does each friend get?",
+    "correctAnswer": "3",
+    "distractors": [
+      "4",
+      "6",
+      "8"
+    ],
+    "tier": "easy",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🧁\nCupcakes come in boxes of 6. You need 24 cupcakes. How many boxes do you buy?",
+    "correctAnswer": "4",
+    "distractors": [
+      "3",
+      "6",
+      "18"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🍎\nApples cost 60 cents each. How much do 4 apples cost?",
+    "correctAnswer": "$2.40",
+    "distractors": [
+      "$2.00",
+      "$2.60",
+      "$1.40"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "💵\nYou buy a sandwich for $4.50 and pay with a $10 bill. How much change do you get?",
+    "correctAnswer": "$5.50",
+    "distractors": [
+      "$6.50",
+      "$5.00",
+      "$4.50"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⏲️\nCookies bake for 12 minutes. You put them in the oven at 2:55. When do they come out?",
+    "correctAnswer": "3:07",
+    "distractors": [
+      "3:05",
+      "3:12",
+      "3:17"
+    ],
+    "tier": "hard",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🌡️\nTo keep food fresh and safe, a refrigerator should be at or below which temperature?",
+    "correctAnswer": "40°F",
+    "distractors": [
+      "60°F",
+      "70°F",
+      "100°F"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🐝\nBesides making honey, how do bees help apple trees make apples?",
+    "correctAnswer": "They carry pollen from flower to flower",
+    "distractors": [
+      "They water the trees",
+      "They dig holes for the seeds",
+      "They make the apples turn red"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🍊\nOranges, lemons, and limes belong to which fruit family?",
+    "correctAnswer": "Citrus",
+    "distractors": [
+      "Berries",
+      "Melons",
+      "Stone fruits"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🍊\nOranges are famous for having lots of which vitamin?",
+    "correctAnswer": "Vitamin C",
+    "distractors": [
+      "Vitamin D",
+      "Vitamin K",
+      "Vitamin B12"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🦴\nWhich mineral in milk helps build strong bones and teeth?",
+    "correctAnswer": "Calcium",
+    "distractors": [
+      "Iron",
+      "Sodium",
+      "Potassium"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🥣\nGuacamole is made mainly from which fruit?",
+    "correctAnswer": "Avocado",
+    "distractors": [
+      "Banana",
+      "Mango",
+      "Kiwi"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🌏\nWhich grain is an everyday main food for more than half of the people in the world?",
+    "correctAnswer": "Rice",
+    "distractors": [
+      "Oats",
+      "Barley",
+      "Rye"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🧊\nJuice turns into an ice pop in the freezer. What is this change from liquid to solid called?",
+    "correctAnswer": "Freezing",
+    "distractors": [
+      "Melting",
+      "Boiling",
+      "Evaporating"
+    ],
+    "tier": "easy",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🍳\nWhat happens to a pat of butter in a hot pan?",
+    "correctAnswer": "It melts into a liquid",
+    "distractors": [
+      "It freezes",
+      "It gets harder",
+      "It turns into ice"
+    ],
+    "tier": "easy",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🔄\nWhich kitchen change can be undone?",
+    "correctAnswer": "Melting chocolate",
+    "distractors": [
+      "Baking a cake",
+      "Toasting bread",
+      "Frying an egg"
+    ],
+    "tier": "hard",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🥪\nA loaf of bread has 20 slices. Your family uses 4 slices a day. How many days will the loaf last?",
+    "correctAnswer": "5",
+    "distractors": [
+      "4",
+      "16",
+      "24"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🥞\nA recipe uses 1 egg for every 2 pancakes. How many eggs do you need for 10 pancakes?",
+    "correctAnswer": "5",
+    "distractors": [
+      "4",
+      "10",
+      "20"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🥣\nThere are 16 tablespoons in 1 cup. How many tablespoons are in half a cup?",
+    "correctAnswer": "8",
+    "distractors": [
+      "4",
+      "6",
+      "12"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🌾\nCorn, wheat, and rice all come from which kind of plant?",
+    "correctAnswer": "Grasses",
+    "distractors": [
+      "Trees",
+      "Vines",
+      "Ferns"
+    ],
+    "tier": "hard",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🥟\nDim sum, small dishes like dumplings served in little steamer baskets, comes from which country?",
+    "correctAnswer": "China",
+    "distractors": [
+      "Mexico",
+      "Italy",
+      "Brazil"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🍛\nWhich country is famous for foods like dal, naan bread, and many kinds of curry?",
+    "correctAnswer": "India",
+    "distractors": [
+      "Ireland",
+      "Canada",
+      "Norway"
+    ],
+    "tier": "medium",
+    "gradeLo": 3,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "🥔\nA potato grows underground, but it is not a root. It is a swollen part of which plant organ?",
+    "correctAnswer": "The stem",
+    "distractors": [
+      "The leaf",
+      "The flower",
+      "The fruit"
+    ],
+    "tier": "hard",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🧅\nWhen you eat an onion bulb, what are you mostly eating?",
+    "correctAnswer": "Thick, layered leaves",
+    "distractors": [
+      "A root",
+      "A fruit",
+      "A flower"
+    ],
+    "tier": "hard",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🍝\nWhich nutrient in bread, rice, and pasta is your body's main source of quick energy?",
+    "correctAnswer": "Carbohydrates",
+    "distractors": [
+      "Vitamins",
+      "Minerals",
+      "Water"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "💪\nWhich nutrient helps your body build and repair muscles?",
+    "correctAnswer": "Protein",
+    "distractors": [
+      "Fiber",
+      "Sugar",
+      "Salt"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🌾\nWhich part of whole grains, beans, and vegetables helps food move through your body but is not digested itself?",
+    "correctAnswer": "Fiber",
+    "distractors": [
+      "Protein",
+      "Fat",
+      "Calcium"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🧂\nYou stir salt into water until you can't see it anymore. What did you make?",
+    "correctAnswer": "A solution",
+    "distractors": [
+      "An emulsion",
+      "A suspension",
+      "A compound"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🥗\nWhy is a salad of lettuce, tomatoes, and cucumbers a mixture?",
+    "correctAnswer": "You can separate the parts again",
+    "distractors": [
+      "It is a brand-new substance",
+      "It is always a liquid",
+      "It has only one ingredient"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🍂\nApple peels in a compost pile break down into rich soil. Which living things do most of this work?",
+    "correctAnswer": "Decomposers like bacteria and fungi",
+    "distractors": [
+      "Producers like grass",
+      "Predators like hawks",
+      "Herbivores like deer"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🌽\nIn a food chain, corn plants are producers. Where do they get their energy?",
+    "correctAnswer": "From sunlight",
+    "distractors": [
+      "From the soil",
+      "From eating insects",
+      "From the wind"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🌱\nA growing plant gets most of the matter it uses to get bigger from…",
+    "correctAnswer": "Air and water",
+    "distractors": [
+      "The soil",
+      "Sunlight",
+      "Fertilizer"
+    ],
+    "tier": "hard",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🥛\nA recipe needs 3/4 cup of milk, but you only have a 1/4 cup measure. How many times do you fill it?",
+    "correctAnswer": "3",
+    "distractors": [
+      "2",
+      "4",
+      "12"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🍬\nA recipe needs 2/3 cup of sugar. You make the recipe 3 times. How much sugar do you need?",
+    "correctAnswer": "2 cups",
+    "distractors": [
+      "6 cups",
+      "1 2/3 cups",
+      "2 1/3 cups"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🎂\nA cake recipe needs 1 1/2 cups of flour. You double it. How much flour do you need?",
+    "correctAnswer": "3 cups",
+    "distractors": [
+      "2 cups",
+      "2 1/2 cups",
+      "4 cups"
+    ],
+    "tier": "easy",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🍫\nYou have 3/4 of a chocolate bar and eat half of that piece. What fraction of the whole bar did you eat?",
+    "correctAnswer": "3/8",
+    "distractors": [
+      "1/4",
+      "1/2",
+      "3/2"
+    ],
+    "tier": "hard",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🍎\nApples cost $1.25 per pound. How much do 4 pounds cost?",
+    "correctAnswer": "$5.00",
+    "distractors": [
+      "$4.25",
+      "$4.50",
+      "$5.25"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "⚖️\nA bag of flour weighs 5 pounds. How many ounces is that?",
+    "correctAnswer": "80",
+    "distractors": [
+      "50",
+      "60",
+      "500"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🥛\nHow many cups are in 1 gallon?",
+    "correctAnswer": "16",
+    "distractors": [
+      "4",
+      "8",
+      "12"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🌡️\nA recipe says to bake at 350°F. Your oven is at 275°F right now. How many more degrees does it need to heat up?",
+    "correctAnswer": "75",
+    "distractors": [
+      "65",
+      "85",
+      "125"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🥤\nDrops of water form on the outside of a cold glass of lemonade. What is this called?",
+    "correctAnswer": "Condensation",
+    "distractors": [
+      "Evaporation",
+      "Melting",
+      "Freezing"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🍞\nToasting bread is a chemical change. Which clue shows that?",
+    "correctAnswer": "The bread turns brown and smells toasty",
+    "distractors": [
+      "The bread is cut into slices",
+      "The bread gets cold",
+      "The bread is put on a plate"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🥚\nWhy does a fresh egg sink in plain water but float in very salty water?",
+    "correctAnswer": "Salty water is denser than plain water",
+    "distractors": [
+      "Salt makes the egg lighter",
+      "Salty water is warmer",
+      "Salt makes the shell softer"
+    ],
+    "tier": "hard",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🌍\nWhich food grew only in the Americas and was unknown in Europe before 1492?",
+    "correctAnswer": "Tomatoes",
+    "distractors": [
+      "Wheat",
+      "Grapes",
+      "Olives"
+    ],
+    "tier": "hard",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🍵\nPeople first grew tea plants and brewed tea in which country?",
+    "correctAnswer": "China",
+    "distractors": [
+      "England",
+      "Brazil",
+      "Mexico"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "☕\nCoffee plants first came from which continent?",
+    "correctAnswer": "Africa",
+    "distractors": [
+      "Europe",
+      "Australia",
+      "South America"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🍲\nA soup recipe serves 6 people and uses 3 cups of broth. How much broth do you need for 2 people?",
+    "correctAnswer": "1 cup",
+    "distractors": [
+      "1/2 cup",
+      "1 1/2 cups",
+      "2 cups"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 5
+  },
+  {
+    "prompt": "🏷️\nOn a Nutrition Facts label, what does \"serving size\" tell you?",
+    "correctAnswer": "The amount of food all the numbers on the label are for",
+    "distractors": [
+      "How many people must share the package",
+      "How much the package costs",
+      "How long the food stays fresh"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🥨\nA bag of pretzels has 4 servings. One serving has 110 Calories. How many Calories are in the whole bag?",
+    "correctAnswer": "440",
+    "distractors": [
+      "110",
+      "114",
+      "400"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🍪\nA label says one serving is 2 cookies with 8 grams of sugar. How many grams of sugar are in 6 cookies?",
+    "correctAnswer": "24",
+    "distractors": [
+      "12",
+      "16",
+      "48"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚡\nWhat does a food Calorie measure?",
+    "correctAnswer": "The energy food gives your body",
+    "distractors": [
+      "How heavy the food is",
+      "How hot the food is",
+      "How much water is in the food"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🍋\nLemonade uses 1 cup of lemon juice for every 4 cups of water. How much water goes with 3 cups of lemon juice?",
+    "correctAnswer": "12 cups",
+    "distractors": [
+      "7 cups",
+      "10 cups",
+      "16 cups"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🥜\nTrail mix uses 3 cups of nuts for every 2 cups of raisins. How many cups of raisins go with 9 cups of nuts?",
+    "correctAnswer": "6",
+    "distractors": [
+      "4",
+      "8",
+      "11"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🍓\nStrawberries cost $6 for 3 pounds. What is the price per pound?",
+    "correctAnswer": "$2",
+    "distractors": [
+      "$1.50",
+      "$3",
+      "$18"
+    ],
+    "tier": "easy",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🍕\nA pizza costs $12 and is cut into 8 slices. What is the cost per slice?",
+    "correctAnswer": "$1.50",
+    "distractors": [
+      "$1.25",
+      "$1.75",
+      "$2.00"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🥚\nA dozen eggs costs $3.60. How much does one egg cost?",
+    "correctAnswer": "30 cents",
+    "distractors": [
+      "25 cents",
+      "36 cents",
+      "40 cents"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🧀\nTo make cheese, milk proteins clump into solid curds. What is the watery liquid left over called?",
+    "correctAnswer": "Whey",
+    "distractors": [
+      "Cream",
+      "Broth",
+      "Syrup"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🧪\nWhich kitchen ingredient fizzes and bubbles when you mix it with baking soda?",
+    "correctAnswer": "Vinegar",
+    "distractors": [
+      "Water",
+      "Vegetable oil",
+      "Salt"
+    ],
+    "tier": "easy",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🍎\nA cut apple slowly turns brown. What causes this?",
+    "correctAnswer": "A reaction with oxygen in the air",
+    "distractors": [
+      "Germs from your hands",
+      "The apple getting too cold",
+      "Water soaking into it"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🍋\nWhy does squeezing lemon juice on apple slices keep them from browning as fast?",
+    "correctAnswer": "The acid slows down the browning reaction",
+    "distractors": [
+      "The lemon juice freezes them",
+      "It adds more oxygen",
+      "The juice paints them yellow"
+    ],
+    "tier": "hard",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🌾\nWhite flour is made from only part of the wheat grain. Which parts are removed?",
+    "correctAnswer": "The bran and the germ",
+    "distractors": [
+      "The endosperm",
+      "The starch",
+      "The protein and water"
+    ],
+    "tier": "hard",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🥕\nCarrots have beta-carotene, which your body turns into which vitamin?",
+    "correctAnswer": "Vitamin A",
+    "distractors": [
+      "Vitamin C",
+      "Vitamin D",
+      "Vitamin K"
+    ],
+    "tier": "hard",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "☀️\nWhich vitamin can your skin make in sunlight and is often added to milk?",
+    "correctAnswer": "Vitamin D",
+    "distractors": [
+      "Vitamin A",
+      "Vitamin C",
+      "Vitamin B12"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🥬\nBeans, spinach, and meat contain which mineral that helps your blood carry oxygen?",
+    "correctAnswer": "Iron",
+    "distractors": [
+      "Calcium",
+      "Sodium",
+      "Fluoride"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🌍\nPeople in Mexico first grew which crop thousands of years ago?",
+    "correctAnswer": "Corn",
+    "distractors": [
+      "Wheat",
+      "Rice",
+      "Barley"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⛰️\nWhich crop was first farmed in the Andes Mountains of South America?",
+    "correctAnswer": "Potatoes",
+    "distractors": [
+      "Rice",
+      "Wheat",
+      "Soybeans"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🍜\nPho, a noodle soup with herbs, is a famous dish from which country?",
+    "correctAnswer": "Vietnam",
+    "distractors": [
+      "Italy",
+      "Greece",
+      "Peru"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🧆\nFalafel, fried balls of ground chickpeas or fava beans, is a famous street food from which region?",
+    "correctAnswer": "The Middle East",
+    "distractors": [
+      "Scandinavia",
+      "South America",
+      "Australia"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🥘\nPaella, a rice dish cooked in a wide, flat pan, comes from which country?",
+    "correctAnswer": "Spain",
+    "distractors": [
+      "Japan",
+      "Kenya",
+      "Canada"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🌮\nIn Mexico, traditional tortillas are made from a dough of which grain?",
+    "correctAnswer": "Corn",
+    "distractors": [
+      "Rice",
+      "Oats",
+      "Barley"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🍣\nWhat is the dark green seaweed wrapped around many sushi rolls called?",
+    "correctAnswer": "Nori",
+    "distractors": [
+      "Tofu",
+      "Wasabi",
+      "Miso"
+    ],
+    "tier": "hard",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🫘\nTofu is made from the milk of which bean?",
+    "correctAnswer": "Soybeans",
+    "distractors": [
+      "Chickpeas",
+      "Lentils",
+      "Coffee beans"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🥣\nYou put a cold metal spoon into hot soup. Which way does the heat move?",
+    "correctAnswer": "From the soup into the spoon",
+    "distractors": [
+      "From the spoon into the soup",
+      "It doesn't move at all",
+      "Up into the air only"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "🍉\nAbout how much of a watermelon is water?",
+    "correctAnswer": "About 90%",
+    "distractors": [
+      "About 10%",
+      "About 30%",
+      "About 50%"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  }
+]
