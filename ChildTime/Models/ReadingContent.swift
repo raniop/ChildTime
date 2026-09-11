@@ -298,4 +298,5 @@ enum ReadingContent {
     // 🎓 Grade-tagged curriculum passages live in their own authored files.
     + CurriculumHebrewBank.readingPassages
     + ReadingExpandedBank.passages
+    + ReadingMiddleSchoolBank.passages   // ז׳–ח׳: plain passages, vowelled questions
 }

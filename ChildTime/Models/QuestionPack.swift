@@ -245,9 +245,9 @@ enum WorldPasses {
             tagline: tagline(w.topic),
             description: description(w.topic),
             learns: learns(w.topic),
-            // ז׳–ח׳ since 2026-09 (math generated; the other base worlds via the cloud bank).
-            // Reading stays at ו׳ until middle-school passages exist.
-            grades: w.topic == .reading ? 1...6 : 0...8,
+            // ז׳–ח׳ since 2026-09 (math generated; reading from ReadingMiddleSchoolBank;
+            // the other base worlds via the cloud bank).
+            grades: w.topic == .reading ? 1...8 : 0...8,
             productID: "com.rani.ChildTime.world.\(w.topic.rawValue).30d",
             siblingProductID: "com.rani.ChildTime.world.\(w.topic.rawValue).30d.sibling",
             heroColors: [w.glowColor, w.glowColor.opacity(0.6)],

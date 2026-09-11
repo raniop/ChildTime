@@ -91,13 +91,14 @@ final class MiddleSchoolMathTests: XCTestCase {
     }
 
     /// A ז׳ child used to get the WHOLE passage pool (א׳ stories included) because
-    /// no passage window reaches past ו׳.
+    /// no passage window reached past ו׳. Now ז׳ and ח׳ have their own.
     func testReadingFallsBackToNearestGrade() {
         for grade in 7...8 {
             let universe = ReadingContent.universe(for: grade)
             XCTAssertFalse(universe.isEmpty)
-            XCTAssertTrue(universe.allSatisfy { $0.gradeWindow.upperBound >= 6 },
+            XCTAssertTrue(universe.allSatisfy { $0.gradeWindow.contains(grade) },
                           "grade \(grade) got a passage for \(universe.map(\.gradeWindow))")
+            XCTAssertGreaterThanOrEqual(universe.count, 12, "ז׳–ח׳ should each have their own passages")
         }
     }
 

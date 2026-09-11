@@ -310,8 +310,8 @@ struct ChildTimeApp: App {
     private func demoRoot(_ name: String) -> some View {
         switch name {
         case "question": QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
-        case "mathgrade":                                   // DEMO_SCREEN=mathgrade DEMO_GRADE=8 — the math world at a grade
-            QuestionRunnerView(mode: .world(Worlds.all.first { $0.topic == .math } ?? Worlds.all[0]), purpose: .earnTime)
+        case "mathgrade":                                   // DEMO_SCREEN=mathgrade DEMO_GRADE=8 [DEMO_WORLD=reading] — a world at a grade
+            QuestionRunnerView(mode: .world(Worlds.all.first { $0.topic.rawValue == (ProcessInfo.processInfo.environment["DEMO_WORLD"] ?? "math") } ?? Worlds.all[0]), purpose: .earnTime)
                 .onAppear {
                     if var p = ProfileStore.shared.active {
                         p.grade = Int(ProcessInfo.processInfo.environment["DEMO_GRADE"] ?? "") ?? 8

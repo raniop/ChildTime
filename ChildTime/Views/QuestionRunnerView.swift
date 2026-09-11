@@ -517,7 +517,10 @@ struct QuestionRunnerView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(AppSpacing.md)
                 }
-                .frame(maxHeight: isCompact ? 170 : 240)
+                // A floor as well as a ceiling: the big question text used to squeeze
+                // the card down to two lines, and a ז׳–ח׳ passage was read through a slot.
+                .frame(minHeight: isCompact ? 150 : 200, maxHeight: isCompact ? 210 : 280)
+                .layoutPriority(1)
                 .glassInset(radius: 16)
                 .environment(\.layoutDirection, .rightToLeft)   // Hebrew passage reads right-to-left
             }
@@ -537,7 +540,8 @@ struct QuestionRunnerView: View {
             }
 
             Text(q.prompt)
-                .font(.system(size: min(questionFontSize(for: q.prompt), isCompact ? 30 : 38), weight: .heavy, design: .rounded))
+                // Under a passage the text is the star — the question steps down a size.
+                .font(.system(size: min(questionFontSize(for: q.prompt), q.passage != nil ? (isCompact ? 22 : 28) : (isCompact ? 30 : 38)), weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.4)

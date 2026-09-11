@@ -1,5 +1,5 @@
 {
-  "generatedAt" : "2026-09-11T07:29:04Z",
+  "generatedAt" : "2026-09-11T09:31:31Z",
   "minGradePool" : 30,
   "target" : 200,
   "topics" : [
@@ -526,23 +526,23 @@
         },
         {
           "grade" : 7,
-          "passages" : 0,
-          "pool" : 0,
-          "tagged" : 0
+          "passages" : 12,
+          "pool" : 48,
+          "tagged" : 48
         },
         {
           "grade" : 8,
-          "passages" : 0,
-          "pool" : 0,
-          "tagged" : 0
+          "passages" : 12,
+          "pool" : 48,
+          "tagged" : 48
         }
       ],
       "label" : "הֲבָנַת הַנִּקְרָא",
       "minGrade" : 1,
       "pack" : false,
-      "passages" : 51,
+      "passages" : 75,
       "topic" : "reading",
-      "total" : 141
+      "total" : 237
     },
     {
       "emoji" : "⚽",
