@@ -73,7 +73,7 @@ enum QuestionPacks {
                 "חֻקֵּי הַמִּשְׂחָק וְתַפְקִידִים בַּמִּגְרָשׁ",
                 "חֶשְׁבּוֹן שֶׁל תּוֹצָאוֹת, דַּקּוֹת וְשַׁעֲרִים",
             ],
-            grades: 2...6,
+            grades: 2...8,
             productID: "com.rani.ChildTime.pack.soccer",
             siblingProductID: "com.rani.ChildTime.pack.soccer.sibling",
             heroColors: [Color(hex: "8CFFC4"), Color(hex: "37E2D5")],
@@ -245,7 +245,9 @@ enum WorldPasses {
             tagline: tagline(w.topic),
             description: description(w.topic),
             learns: learns(w.topic),
-            grades: w.topic == .reading ? 1...6 : 0...6,
+            // ז׳–ח׳ since 2026-09 (math generated; the other base worlds via the cloud bank).
+            // Reading stays at ו׳ until middle-school passages exist.
+            grades: w.topic == .reading ? 1...6 : 0...8,
             productID: "com.rani.ChildTime.world.\(w.topic.rawValue).30d",
             siblingProductID: "com.rani.ChildTime.world.\(w.topic.rawValue).30d.sibling",
             heroColors: [w.glowColor, w.glowColor.opacity(0.6)],
