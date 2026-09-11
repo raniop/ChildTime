@@ -22,7 +22,13 @@ import GoogleSignIn
 final class AuthManager: ObservableObject {
     static let shared = AuthManager()
 
-    @Published var userID: String?
+    @Published var userID: String? {
+        didSet {
+            // ☁️ A fresh device can't read the cloud question bank until it has an
+            // identity (rules require sign-in). The moment one arrives, pull.
+            if userID != nil, oldValue == nil { RemoteQuestionBank.shared.syncIfNeeded(force: true) }
+        }
+    }
     @Published var displayName: String?
     @Published var email: String?
     @Published var provider: AuthProvider?

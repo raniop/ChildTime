@@ -2664,6 +2664,145 @@ exports.adminGiftHousehold = onCall({ timeoutSeconds: 30, memory: "256MiB" }, as
   return { ok: true, premiumUntil: until };
 });
 
+// ============================================================================
+// ☁️ Cloud question banks — new questions reach children without an app release.
+// questionBanks/{topic}      { version, items: [...] }   one doc per world
+// questionBankIndex/current  { topics: { soccer: 3, ... } }  what devices poll
+// Every write bumps the topic's version, so a device fetches only what moved.
+// ============================================================================
+
+const QB_TOPICS = ["english", "hebrew", "logic", "science", "history", "geography", "money",
+  "soccer", "dinosaurs", "space", "animals", "sea", "gifted", "food", "israel", "tishrei",
+  "music", "body", "vehicles", "flags"];
+const QB_TIERS = ["easy", "medium", "hard"];
+
+// The automated gate every item passes before it can reach a child. Returns the
+// reasons it fails, or [] when it is playable.
+function qbProblems(q) {
+  const out = [];
+  const t = (v) => String(v == null ? "" : v).trim();
+  const prompt = t(q.prompt), answer = t(q.correctAnswer);
+  const ds = Array.isArray(q.distractors) ? q.distractors.map(t).filter(Boolean) : [];
+  if (!prompt) out.push("אין שאלה");
+  if (prompt.length > 260) out.push("שאלה ארוכה מדי");
+  if (!answer) out.push("אין תשובה נכונה");
+  if (ds.length < 3) out.push("פחות מ-3 מסיחים");
+  if (ds.includes(answer)) out.push("התשובה הנכונה מופיעה גם כמסיח");
+  if (new Set(ds).size !== ds.length) out.push("מסיחים כפולים");
+  const lo = Number(q.gradeLo), hi = Number(q.gradeHi);
+  if (!Number.isInteger(lo) || !Number.isInteger(hi) || lo < 0 || hi > 6 || lo > hi) out.push("טווח כיתות לא תקין");
+  if (q.tier && !QB_TIERS.includes(q.tier)) out.push("רמה לא תקינה");
+  // Hebrew content without a single niqqud mark is almost always an unreviewed
+  // paste — the whole app is vocalised for young readers.
+  if (/[א-ת]/.test(prompt) && !/[ְ-ׇ]/.test(prompt)) out.push("שאלה בלי ניקוד");
+  return out;
+}
+
+function qbKey(q) { return `${String(q.prompt).trim()}|${String(q.correctAnswer).trim()}`; }
+
+async function qbBumpIndex(topic, version) {
+  await db.collection("questionBankIndex").doc("current")
+    .set({ topics: { [topic]: version }, updatedAt: Date.now() }, { merge: true });
+}
+
+// Import a batch into a world. New items land as DRAFTS unless `approve` is set,
+// so a bulk paste never goes straight to children. Invalid items are rejected
+// with their reasons; duplicates (same prompt + answer) are skipped.
+exports.adminImportQuestions = onCall({ timeoutSeconds: 120, memory: "512MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const topic = String(request.data?.topic || "");
+  if (!QB_TOPICS.includes(topic)) throw new HttpsError("invalid-argument", "topic");
+  const incoming = Array.isArray(request.data?.items) ? request.data.items : [];
+  if (!incoming.length) throw new HttpsError("invalid-argument", "items");
+  if (incoming.length > 2000) throw new HttpsError("invalid-argument", "max 2000 per import");
+  const approve = request.data?.approve === true;
+
+  const ref = db.collection("questionBanks").doc(topic);
+  const result = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const cur = snap.exists ? snap.data() : { version: 0, items: [] };
+    const items = Array.isArray(cur.items) ? cur.items : [];
+    const have = new Set(items.map(qbKey));
+    const rejected = [], added = [];
+    let dup = 0;
+    for (const raw of incoming) {
+      const problems = qbProblems(raw);
+      if (problems.length) { rejected.push({ prompt: String(raw.prompt || "").slice(0, 80), problems }); continue; }
+      const key = qbKey(raw);
+      if (have.has(key)) { dup++; continue; }
+      have.add(key);
+      added.push({
+        id: `${topic}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+        prompt: String(raw.prompt).trim(),
+        correctAnswer: String(raw.correctAnswer).trim(),
+        distractors: raw.distractors.map((d) => String(d).trim()).filter(Boolean).slice(0, 3),
+        tier: QB_TIERS.includes(raw.tier) ? raw.tier : "medium",
+        gradeLo: Number(raw.gradeLo), gradeHi: Number(raw.gradeHi),
+        status: approve ? "approved" : "draft",
+        createdAt: Date.now(), createdBy: email,
+      });
+    }
+    const version = (cur.version || 0) + (added.length ? 1 : 0);
+    if (added.length) tx.set(ref, { version, items: items.concat(added), updatedAt: Date.now() });
+    return { added: added.length, duplicates: dup, rejected, version };
+  });
+  if (result.added) await qbBumpIndex(topic, result.version);
+  console.log("[adminImportQuestions]", email, topic, "+" + result.added, "dup", result.duplicates, "rejected", result.rejected.length);
+  return result;
+});
+
+// Approve, return to draft, or reject (delete) items by id.
+exports.adminSetQuestionStatus = onCall({ timeoutSeconds: 60, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const topic = String(request.data?.topic || "");
+  if (!QB_TOPICS.includes(topic)) throw new HttpsError("invalid-argument", "topic");
+  const ids = new Set(Array.isArray(request.data?.ids) ? request.data.ids.map(String) : []);
+  const status = String(request.data?.status || "");
+  if (!ids.size || !["approved", "draft", "rejected"].includes(status)) throw new HttpsError("invalid-argument", "ids/status");
+  const ref = db.collection("questionBanks").doc(topic);
+  const version = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) throw new HttpsError("not-found", "topic");
+    const cur = snap.data();
+    let items = cur.items || [];
+    items = status === "rejected"
+      ? items.filter((i) => !ids.has(i.id))
+      : items.map((i) => (ids.has(i.id) ? { ...i, status, reviewedAt: Date.now(), reviewedBy: email } : i));
+    const v = (cur.version || 0) + 1;
+    tx.set(ref, { ...cur, items, version: v, updatedAt: Date.now() });
+    return v;
+  });
+  await qbBumpIndex(topic, version);
+  console.log("[adminSetQuestionStatus]", email, topic, ids.size, "→", status);
+  return { ok: true, version };
+});
+
+// Per world: counts by grade and status, plus the drafts waiting for review.
+exports.adminQuestionBankSummary = onCall({ timeoutSeconds: 60, memory: "512MiB" }, async (request) => {
+  requireAdmin(request);
+  const wantDrafts = String(request.data?.draftsFor || "");
+  const snap = await db.collection("questionBanks").get();
+  const topics = {};
+  let drafts = [];
+  snap.forEach((d) => {
+    const items = d.data().items || [];
+    const byGrade = {};
+    for (let g = 0; g <= 6; g++) byGrade[g] = { approved: 0, draft: 0 };
+    for (const i of items) {
+      const st = i.status === "draft" ? "draft" : "approved";
+      for (let g = Math.max(0, i.gradeLo); g <= Math.min(6, i.gradeHi); g++) byGrade[g][st]++;
+    }
+    topics[d.id] = {
+      version: d.data().version || 0,
+      approved: items.filter((i) => i.status !== "draft").length,
+      draft: items.filter((i) => i.status === "draft").length,
+      byGrade,
+    };
+    if (d.id === wantDrafts) drafts = items.filter((i) => i.status === "draft");
+  });
+  return { topics, drafts };
+});
+
 // ⏹ End a family's gift NOW (Rani): the admin page could only ever extend.
 // Refuses on a PAID subscription — that entitlement is Apple's, not ours.
 exports.adminEndGift = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {

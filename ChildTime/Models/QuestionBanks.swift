@@ -210,8 +210,22 @@ enum QuestionBanks {
         BankQuestion(prompt: "🪙🪙🪙\n3 מַטְבְּעוֹת שֶׁל 2 ₪ — כַּמָּה זֶה?", correctAnswer: "6 ₪", distractors: ["5 ₪", "8 ₪", "9 ₪"], grades: 2...3),
     ]
 
-    /// Original + expanded — call sites get the full combined pool.
+    /// Built-in + cloud — every call site gets the full combined pool.
+    ///
+    /// Cloud questions (RemoteQuestionBank) are added on top of what ships in the
+    /// binary, so new content reaches children without an app release. A cloud
+    /// item that repeats a built-in one (same prompt and answer) is dropped —
+    /// otherwise it would count twice and QuestionMemory would treat them as two.
     static func bank(for topic: Topic) -> [BankQuestion]? {
+        guard let builtIn = builtInBank(for: topic) else { return nil }
+        let cloud = RemoteQuestionBank.shared.questions(for: topic)
+        guard !cloud.isEmpty else { return builtIn }
+        var seen = Set(builtIn.map { "\($0.prompt)|\($0.correctAnswer)" })
+        return builtIn + cloud.filter { seen.insert("\($0.prompt)|\($0.correctAnswer)").inserted }
+    }
+
+    /// What ships inside the app — the offline seed.
+    static func builtInBank(for topic: Topic) -> [BankQuestion]? {
         switch topic {
         case .english:   return english   + QuestionBanksExpanded.english   + QuestionBanksWorkflow.english   + QuestionBanksWorkflow2.english   + QuestionBanksWorkflow3.english   + CurriculumEnglishScienceBank.english
         case .hebrew:    return hebrew    + QuestionBanksWorkflow.hebrew    + QuestionBanksWorkflow2.hebrew    + QuestionBanksWorkflow3.hebrew    + CurriculumHebrewBank.hebrew

@@ -367,9 +367,12 @@ let contentTab = "reports";
 // this renders them — the founder sees the gaps before a child does.
 let COV = null;
 async function coverage() {
-  $("main").innerHTML = `<div class="top"><h3>כיסוי שאלות לפי כיתה</h3><div class="filters"><span class="chip" data-ct="reports">דיווחים</span><span class="chip on" data-ct="coverage">כיסוי לפי כיתה</span></div></div><div id="covBox"><span class="spin"></span></div>`;
+  $("main").innerHTML = `<div class="top"><h3>כיסוי שאלות לפי כיתה</h3><div class="filters"><span class="chip" data-ct="reports">דיווחים</span><span class="chip on" data-ct="coverage">כיסוי לפי כיתה</span><span class="chip" data-ct="import">ייבוא ואישור</span></div></div><div id="covBox"><span class="spin"></span></div>`;
   wireContentTabs();
   if (!COV) { try { COV = await (await fetch("question-coverage.json?v=" + Date.now())).json(); } catch (e) { return $("covBox").innerHTML = '<div class="empty">אין עדיין קובץ כיסוי. הריצו את testExportCoverage.</div>'; } }
+  // ☁️ What the cloud adds on top of the binary — approved only, like devices see.
+  let CLOUD = {}; try { CLOUD = (await call("adminQuestionBankSummary")).topics || {}; } catch (e) { CLOUD = {}; }
+  const cloudAt = (topic, g) => ((CLOUD[topic] || {}).byGrade || {})[g] || { approved: 0, draft: 0 };
   const min = COV.minGradePool || 30;
   const cell = (n) => {
     // Literal hexes: the admin has no --bad token, and a missing var renders as
@@ -386,16 +389,66 @@ async function coverage() {
   $("covBox").innerHTML = `
     <div class="card"><div class="stamp" style="margin-bottom:8px">המספר = כמה שאלות מתויגות לכיתה הזאת. אדום = אין בכלל · כתום = מעט מדי · ירוק = ${min}+ ומספיק לסבב בלי חזרות.${totalGaps ? ` <b style="color:#D6455B">${totalGaps} משבצות ריקות.</b>` : ""}</div>
     <div class="tblwrap"><table><tr><th>עולם</th><th>סה״כ</th>${[1,2,3,4,5,6].map((g) => `<th style="text-align:center">כיתה ${g}</th>`).join("")}</tr>
-    ${rows.map((t) => `<tr><td>${t.emoji || ""} ${esc(t.label)}</td><td><b>${t.total}</b></td>${[1,2,3,4,5,6].map((g) => cell((t.grades.find((x) => x.grade === g) || {}).tagged || 0)).join("")}</tr>`).join("")}
+    ${rows.map((t) => { const c = CLOUD[t.topic] || {}; return `<tr><td>${t.emoji || ""} ${esc(t.label)}${c.draft ? ` <span class="chip gold" style="padding:0 6px;font-size:10px" title="ממתינות לאישור">${c.draft} טיוטות</span>` : ""}</td><td><b>${t.total + (c.approved || 0)}</b>${c.approved ? `<div class="stamp">☁️ +${c.approved}</div>` : ""}</td>${[1,2,3,4,5,6].map((g) => { const built = (t.grades.find((x) => x.grade === g) || {}).tagged || 0; return cell(built + cloudAt(t.topic, g).approved); }).join("")}</tr>`; }).join("")}
     </table></div>
     <div class="stamp" style="margin-top:8px">עודכן ${COV.generatedAt ? new Date(COV.generatedAt).toLocaleString("he-IL") : "—"} · לרענון: הריצו את testExportCoverage באפליקציה.</div></div>`;
 }
+// ☁️ Bulk import into the cloud bank, then review drafts. Imports land as DRAFTS
+// by default, so nothing reaches a child until someone reads it and approves.
+let IMP_TOPIC = "soccer";
+async function importQuestions() {
+  const topics = (COV && COV.topics) || [];
+  const opts = (topics.length ? topics : [{ topic: "soccer", label: "כדורגל", emoji: "⚽" }])
+    .map((t) => `<option value="${t.topic}" ${t.topic === IMP_TOPIC ? "selected" : ""}>${t.emoji || ""} ${esc(t.label)}</option>`).join("");
+  $("main").innerHTML = `<div class="top"><h3>ייבוא ואישור שאלות</h3><div class="filters"><span class="chip" data-ct="reports">דיווחים</span><span class="chip" data-ct="coverage">כיסוי לפי כיתה</span><span class="chip on" data-ct="import">ייבוא ואישור</span></div></div>
+    <div class="grid2">
+      <div class="card"><h4>ייבוא</h4>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><label>עולם</label><select id="impTopic">${opts}</select></div>
+        <textarea id="impJson" dir="ltr" style="width:100%;min-height:220px;font:12px ui-monospace,monospace" placeholder='[{"prompt":"⚽\\nכַּמָּה...","correctAnswer":"11","distractors":["9","10","12"],"tier":"easy","gradeLo":1,"gradeHi":3}]'></textarea>
+        <label style="display:flex;gap:6px;align-items:center;margin:8px 0"><input type="checkbox" id="impApprove"> לאשר מיד (בלי לעבור על טיוטות)</label>
+        <button class="btn" id="impGo">בדיקה וייבוא</button>
+        <div id="impResult" style="margin-top:10px"></div>
+        <div class="stamp" style="margin-top:8px">כל שאלה עוברת בדיקה אוטומטית: 3 מסיחים שונים, התשובה לא בין המסיחים, טווח כיתות 0–6, וניקוד בעברית. כפילויות מדולגות.</div>
+      </div>
+      <div class="card"><h4>טיוטות שממתינות לאישור</h4><div id="drafts"><span class="spin"></span></div></div>
+    </div>`;
+  wireContentTabs();
+  $("impTopic").onchange = () => { IMP_TOPIC = $("impTopic").value; loadDrafts(); };
+  $("impGo").onclick = async () => {
+    let items; try { items = JSON.parse($("impJson").value); } catch (e) { return $("impResult").innerHTML = `<div class="empty" style="color:#D6455B">JSON לא תקין: ${esc(e.message)}</div>`; }
+    if (!Array.isArray(items)) items = [items];
+    $("impGo").disabled = true; $("impResult").innerHTML = '<span class="spin"></span>';
+    try {
+      const r = await call("adminImportQuestions", { topic: $("impTopic").value, items, approve: $("impApprove").checked });
+      const rej = (r.rejected || []).map((x) => `<li><b>${esc(x.prompt)}</b> — ${esc(x.problems.join(", "))}</li>`).join("");
+      $("impResult").innerHTML = `<div>✅ נוספו <b>${r.added}</b> · ↺ כפילויות ${r.duplicates} · ❌ נדחו ${(r.rejected || []).length}</div>${rej ? `<ul style="margin:6px 0 0;padding-inline-start:18px;font-size:12px">${rej}</ul>` : ""}`;
+      COV = null; loadDrafts();
+    } catch (e) { $("impResult").innerHTML = `<div style="color:#D6455B">${esc(e.message)}</div>`; }
+    $("impGo").disabled = false;
+  };
+  loadDrafts();
+}
+async function loadDrafts() {
+  const topic = $("impTopic") ? $("impTopic").value : IMP_TOPIC;
+  try {
+    const r = await call("adminQuestionBankSummary", { draftsFor: topic });
+    const d = r.drafts || [];
+    if (!d.length) return $("drafts").innerHTML = '<div class="empty">אין טיוטות לעולם הזה.</div>';
+    $("drafts").innerHTML = `<div style="display:flex;gap:6px;margin-bottom:8px"><button class="btn" id="drAll">בחר הכל</button><button class="btn" id="drApprove">✅ אשר נבחרות</button><button class="btn danger" id="drReject">🗑 דחה נבחרות</button></div>
+      ${d.map((q) => `<label class="q" style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line)"><input type="checkbox" data-dr="${esc(q.id)}"><div><div style="white-space:pre-line"><b>${esc(q.prompt)}</b></div><div style="font-size:12px">✔️ ${esc(q.correctAnswer)} · ✖️ ${esc((q.distractors || []).join(" · "))}</div><div class="stamp">כיתות ${q.gradeLo}–${q.gradeHi} · ${esc(q.tier || "")}</div></div></label>`).join("")}`;
+    const picked = () => [...document.querySelectorAll("[data-dr]:checked")].map((x) => x.dataset.dr);
+    $("drAll").onclick = () => document.querySelectorAll("[data-dr]").forEach((x) => x.checked = true);
+    const act = async (status) => { const ids = picked(); if (!ids.length) return toast("לא נבחרו שאלות"); if (status === "rejected" && !confirm(`למחוק ${ids.length} שאלות?`)) return; await call("adminSetQuestionStatus", { topic, ids, status }); toast(status === "approved" ? `אושרו ${ids.length}` : `נמחקו ${ids.length}`); COV = null; loadDrafts(); };
+    $("drApprove").onclick = () => act("approved");
+    $("drReject").onclick = () => act("rejected");
+  } catch (e) { $("drafts").textContent = e.message; }
+}
 function wireContentTabs() {
-  document.querySelectorAll("[data-ct]").forEach((c) => c.onclick = () => (c.dataset.ct === "coverage" ? coverage() : content()));
+  document.querySelectorAll("[data-ct]").forEach((c) => c.onclick = () => (c.dataset.ct === "coverage" ? coverage() : c.dataset.ct === "import" ? importQuestions() : content()));
 }
 
 async function content() {
-  $("main").innerHTML = `<div class="top"><h3>תוכן ושאלות</h3><div class="filters"><span class="chip on" data-ct="reports" id="repChip">דיווחים</span><span class="chip" data-ct="coverage">כיסוי לפי כיתה</span></div></div>
+  $("main").innerHTML = `<div class="top"><h3>תוכן ושאלות</h3><div class="filters"><span class="chip on" data-ct="reports" id="repChip">דיווחים</span><span class="chip" data-ct="coverage">כיסוי לפי כיתה</span><span class="chip" data-ct="import">ייבוא ואישור</span></div></div>
     <div class="grid2"><div class="card"><h4>דיווחים מהמכשירים (🚩 בכפתור הדגל בשאלה)</h4><div id="reports"><span class="spin"></span></div></div>
     <div class="card"><h4>איפה ילדים נופלים (30 יום)</h4><div class="tblwrap"><table><tr><th>שאלה</th><th>עולם</th><th>ניסיונות</th><th>נכון</th></tr><tr><td colspan="4" class="empty">דורש ספירה לכל שאלה במכשיר · יתווסף בגרסה הבאה של האפליקציה</td></tr></table></div><div class="stamp" style="margin-top:6px">מתחת ל־35% = כנראה בעיה בשאלה, לא בילדים. מעל 97% = משעממת.</div></div></div>`;
   try { const r = await call("adminListReports"); const rows = r.reports || [];

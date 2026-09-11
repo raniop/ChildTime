@@ -137,6 +137,15 @@ service cloud.firestore {
     match /packs/{id} {
       allow read: if signedIn();
     }
+    // ☁️ Cloud question banks — read by every signed-in device (children are
+    // signed in anonymously), written ONLY by the admin functions through the
+    // Admin SDK. No client may write a question a child will see.
+    match /questionBankIndex/{id} {
+      allow read: if signedIn();
+    }
+    match /questionBanks/{topic} {
+      allow read: if signedIn();
+    }
     // The conversion knobs (how many locked worlds a free child sees, rotation).
     // Read by every signed-in device; written only from the admin functions.
     match /config/{id} {

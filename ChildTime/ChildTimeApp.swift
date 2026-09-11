@@ -240,6 +240,9 @@ struct ChildTimeApp: App {
                         // were away — an expired token silently stops shielding
                         // its app (iOS 26.5+; a no-op below that).
                         TokenRefresher.shared.start()
+                        // ☁️ Pull any question topics the admin changed since last
+                        // time (one tiny read; full topics only when versions move).
+                        RemoteQuestionBank.shared.syncIfNeeded()
                         enforceShieldStateIfNeeded()
                         WidgetBridge.refreshKid()
                         ShieldBridge.refresh()   // keep the locked-app screen truthful
