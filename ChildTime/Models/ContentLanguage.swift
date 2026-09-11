@@ -49,5 +49,5 @@ enum EnglishContent {
         .money: money, .geography: geography,
     ]
 
-    static var passages: [ReadingPassage] { readingPassages }
+    static var passages: [ReadingPassage] { readingPassages + readingPassages2 }
 }
