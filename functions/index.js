@@ -43,7 +43,9 @@ function rtlBody(lines) {
 
 // A real, designed HTML email — table-based and inline-styled, because that is
 // what Gmail/Apple Mail actually render. Used for the waitlist welcome.
-function brandEmail({ title, intro, bullets = [], ctaText, ctaHref, signoff, footer }) {
+// lang "en" → left-to-right layout and the English brand line.
+function brandEmail({ title, intro, bullets = [], ctaText, ctaHref, signoff, footer, lang }) {
+  const en = lang === "en";
   const li = bullets.map((b) => `
               <tr>
                 <td style="padding:0 0 12px 0;">
@@ -59,7 +61,7 @@ function brandEmail({ title, intro, bullets = [], ctaText, ctaHref, signoff, foo
               </tr>`).join("");
 
   return `<!DOCTYPE html>
-<html dir="rtl" lang="he"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+${en ? `<html dir="ltr" lang="en">` : `<html dir="rtl" lang="he">`}<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#EFECFA;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(intro).slice(0, 90)}</div>
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#EFECFA;padding:24px 12px;">
@@ -69,16 +71,16 @@ function brandEmail({ title, intro, bullets = [], ctaText, ctaHref, signoff, foo
         <!-- header -->
         <tr>
           <td bgcolor="#5E60CE" background="https://tofyapp.com/email-header.png" style="background-color:#5E60CE;background-image:linear-gradient(135deg,#7A5CFF 0%,#5E60CE 55%,#3E8BF0 100%);padding:30px 24px;text-align:center;">
-            <img src="https://tofyapp.com/apple-touch-icon.png" width="84" height="84" alt="טופי"
+            <img src="https://tofyapp.com/apple-touch-icon.png" width="84" height="84" alt="${en ? "Tofy" : "טופי"}"
                  style="display:block;margin:0 auto 12px auto;border-radius:22px;border:0;">
-            <div style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:bold;color:#FFD23F;letter-spacing:.5px;">טופי</div>
-            <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#EFEBFF;padding-top:4px;">זמן מסך שמרוויחים בלמידה</div>
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:bold;color:#FFD23F;letter-spacing:.5px;">${en ? "Tofy" : "טופי"}</div>
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#EFEBFF;padding-top:4px;">${en ? "Screen time earned by learning" : "זמן מסך שמרוויחים בלמידה"}</div>
           </td>
         </tr>
 
         <!-- body -->
         <tr>
-          <td style="padding:30px 26px 8px 26px;" dir="rtl" align="right">
+          <td style="padding:30px 26px 8px 26px;" ${en ? `dir="ltr" align="left"` : `dir="rtl" align="right"`}>
             <h1 style="margin:0 0 12px 0;font-family:Arial,Helvetica,sans-serif;font-size:23px;line-height:1.35;color:#1B1340;">${escapeHtml(title)}</h1>
             <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.75;color:#463E70;">${escapeHtml(intro)}</p>
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${li}</table>
@@ -94,7 +96,7 @@ function brandEmail({ title, intro, bullets = [], ctaText, ctaHref, signoff, foo
 
         <!-- signoff -->
         <tr>
-          <td style="padding:0 26px 28px 26px;" dir="rtl" align="right">
+          <td style="padding:0 26px 28px 26px;" ${en ? `dir="ltr" align="left"` : `dir="rtl" align="right"`}>
             <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;color:#463E70;">${escapeHtml(signoff).replace(/\n/g, "<br>")}</p>
           </td>
         </tr>
@@ -112,6 +114,35 @@ function brandEmail({ title, intro, bullets = [], ctaText, ctaHref, signoff, foo
 </body></html>`;
 }
 
+// ---- 🌍 Device language ----------------------------------------------------
+// Each device records the language it shows: parents/{uid}.tokenLanguages maps
+// FCM token → "he" | "en" (one account can run Hebrew AND English devices), and
+// childDevices/{id}.language sits next to that row's fcmToken. Missing = Hebrew
+// (every install from before the language picker).
+//
+// The token helpers below learn each token's language while they read those
+// docs anyway; the send helpers then split the tokens by language and build the
+// text once per language. Entries are only ever written from an explicit value
+// on a doc, so a warm instance reusing the map stays correct.
+const LANGS = ["he", "en"];
+const TOKEN_LANG = new Map();
+const normLang = (v) => (String(v || "").toLowerCase().startsWith("en") ? "en" : "he");
+function learnTokenLang(token, lang) {
+  if (token && typeof lang === "string" && lang) TOKEN_LANG.set(token, normLang(lang));
+}
+function learnParentLangs(d) {
+  const m = d && d.tokenLanguages;
+  if (!m || typeof m !== "object") return;
+  for (const [token, lang] of Object.entries(m)) learnTokenLang(token, lang);
+}
+const langOfToken = (token) => TOKEN_LANG.get(token) || "he";
+/** [[lang, tokens], …] — Hebrew first, each group keeping the original order. */
+function langGroups(tokens) {
+  return LANGS.map((lang) => [lang, tokens.filter((t) => langOfToken(t) === lang)]).filter(([, g]) => g.length);
+}
+const capFirst = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+const plural = (n, one, many) => `${n} ${Number(n) === 1 ? one : many}`;
+
 // ---- Helpers ---------------------------------------------------------------
 
 async function tokensForHousehold(householdID, excludeUID) {
@@ -121,6 +152,7 @@ async function tokensForHousehold(householdID, excludeUID) {
   const tokens = [];
   for (const uid of parentUIDs) {
     const p = await db.collection("parents").doc(uid).get();
+    if (p.exists) learnParentLangs(p.data());
     if (p.exists && Array.isArray(p.data().fcmTokens)) tokens.push(...p.data().fcmTokens);
   }
   return [...new Set(tokens)];
@@ -137,7 +169,18 @@ function deviceLabel(event) {
   return "";
 }
 
-function liveMessage(event) {
+// English: the same suffix, with English device-kind labels.
+function deviceLabelEn(event) {
+  const nm = (event.deviceName || "").trim();
+  const generic = ["מכשיר", "Device", "iPhone", "iPad", "iPod touch"];
+  if (nm && !generic.includes(nm)) return ` · ${nm}`;
+  if (event.deviceKind === "ipad") return " · iPad";
+  if (event.deviceKind === "iphone") return " · iPhone";
+  return "";
+}
+
+function liveMessage(event, lang) {
+  if (lang === "en") return liveMessageEn(event);
   const f = event.gender === "girl";                 // feminine forms?
   const name = event.childName || (f ? "הילדה" : "הילד");
   const g = (male, female) => (f ? female : male);   // pick by gender
@@ -190,8 +233,53 @@ function liveMessage(event) {
   }
 }
 
+// Parent-facing English for the same events. Gender collapses to the name (or
+// "your child"); returns null for exactly the types the Hebrew skips.
+function liveMessageEn(event) {
+  const name = event.childName || "Your child";
+  const whose = event.childName ? `${event.childName}'s` : "your child's";
+  const dev = deviceLabelEn(event);
+  switch (event.type) {
+    case "sessionStart": return { title: "Started playing 📱", body: `${name} just started playing and learning${dev}.` };
+    case "sessionEnd": {
+      const q = Number(event.questions) || 0;
+      const acc = Number(event.accuracy) || 0;
+      const mins = Number(event.minutes) || 0;
+      const stars = Number(event.stars) || 0;
+      const parts = [];
+      if (q > 0) parts.push(plural(q, "question", "questions"));
+      if (q > 0) parts.push(`${acc}% correct`);
+      if (mins > 0) parts.push(`${mins} min earned`);
+      if (stars > 0) parts.push(`${stars} ⭐`);
+      const summary = parts.length ? parts.join(" · ") : "finished the learning journey";
+      return { title: "Finished playing ✅", body: `${name}${dev}: ${summary}` };
+    }
+    case "screenTimeStart": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` (${mins} min)` : "";
+      return { title: "Started screen time 🎮", body: `${name} started play time${tail}${dev}.` };
+    }
+    case "screenTimeEnd": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` · ${mins} min left` : "";
+      return { title: "Ended screen time ⏹️", body: `${name} ended play time${dev}${tail}.` };
+    }
+    case "screenTimeMoved": {
+      const where = (k) => (k === "ipad" ? "the iPad" : (k === "iphone" ? "the iPhone" : "another device"));
+      const locked = (k) => (k === "ipad" ? "The iPad" : (k === "iphone" ? "The iPhone" : "The other device"));
+      return { title: "Moved play time 🔄",
+               body: `${name} moved play time from ${where(event.fromKind)} to ${where(event.deviceKind)}. ${locked(event.fromKind)} is now locked 🔒` };
+    }
+    case "assistRequest": return { title: "Help request 💌", body: `${name} asked for your help with a question${dev}.` };
+    case "parentGateOpened": return { title: "🔐 Parent settings opened", body: `Someone opened parent settings on ${whose} device${dev}.` };
+    case "playPINForgot": return { title: "🔒 Play time lock code forgotten", body: `${name} forgot the play time lock code${dev}. The code is on ${whose} card in the parent dashboard — you can reset it there, or right on your child's device with the parent code.` };
+    default: return null;
+  }
+}
+
 async function tokensForUID(uid) {
   const p = await db.collection("parents").doc(uid).get();
+  if (p.exists) learnParentLangs(p.data());
   if (p.exists && Array.isArray(p.data().fcmTokens)) return [...new Set(p.data().fcmTokens)];
   return [];
 }
@@ -203,6 +291,7 @@ async function childTokensForUID(uid) {
   const p = await db.collection("parents").doc(uid).get();
   if (!p.exists) return [];
   const d = p.data();
+  learnParentLangs(d);
   const child = Array.isArray(d.childFcmTokens) ? d.childFcmTokens : [];
   const legacy = Array.isArray(d.fcmTokens) ? d.fcmTokens : [];
   return [...new Set([...child, ...legacy])];
@@ -233,7 +322,7 @@ async function tokensForEmail(email) {
   if (!email) return [];
   const snap = await db.collection("parents").where("email", "==", email).get();
   const tokens = [];
-  snap.forEach((d) => { if (Array.isArray(d.data().fcmTokens)) tokens.push(...d.data().fcmTokens); });
+  snap.forEach((d) => { learnParentLangs(d.data()); if (Array.isArray(d.data().fcmTokens)) tokens.push(...d.data().fcmTokens); });
   return [...new Set(tokens)];
 }
 
@@ -245,6 +334,32 @@ async function send(tokens, notification, data) {
     data: data || {},
     apns: { payload: { aps: { sound: "default" } } },
   });
+}
+
+// `send`, once per device language: build(lang) → { title, body }, or null to
+// send that language nothing. Hebrew devices get exactly what `send` sent.
+async function sendLocalized(tokens, build, data) {
+  for (const [lang, group] of langGroups(tokens)) {
+    const notification = build(lang);
+    if (notification) await send(group, notification, data);
+  }
+}
+
+// The same split for call sites that shape the whole multicast payload (apns
+// categories, alerts in the aps dict, extra data): payloadFor(lang) → the payload
+// without `tokens`, or null to skip that language. Returns the combined result
+// with every response paired to its token, so per-token handling keeps working.
+async function sendEachLocalized(tokens, payloadFor) {
+  const out = { successCount: 0, failureCount: 0, skipped: 0, results: [] };
+  for (const [lang, group] of langGroups(tokens)) {
+    const payload = payloadFor(lang);
+    if (!payload) { out.skipped += group.length; continue; }
+    const res = await admin.messaging().sendEachForMulticast({ tokens: group, ...payload });
+    out.successCount += res.successCount;
+    out.failureCount += res.failureCount;
+    res.responses.forEach((r, i) => out.results.push({ token: group[i], response: r }));
+  }
+  return out;
 }
 
 // ---- 1) Live events --------------------------------------------------------
@@ -262,10 +377,31 @@ exports.sendLiveEvent = onDocumentCreated("children/{childID}/events/{eventID}",
   // push even when both devices share one account.
   let tokens = await tokensForHousehold(householdID, null);
   if (data.originToken) tokens = tokens.filter((t) => t !== data.originToken);
-  const msg = liveMessage(data);
-  if (!msg) return;
-  await send(tokens, msg, { childID: event.params.childID, type: data.type });
+  if (!liveMessage(data, "he")) return;
+  await sendLocalized(tokens, (lang) => liveMessage(data, lang), { childID: event.params.childID, type: data.type });
 });
+
+// ⚠️ Duplicate-child / suspicious-state alerts (parents).
+function dupChildMessage(name, lang) {
+  if (lang === "en") {
+    return { title: "⚠️ A duplicate child may have been created",
+             body: `A new child named "${name}" was just created, but your family already has a child with this name. If you didn't create it on purpose, don't delete anything — contact support.` };
+  }
+  return {
+    title: "⚠️ יתכן שנוצר ילד כפול",
+    body: `נוצר עכשיו ילד חדש בשם "${name}" למרות שכבר קיים ילד בשם הזה במשפחה. אם לא יצרתם אותו בכוונה — אל תמחקו כלום, פנו לתמיכה.`,
+  };
+}
+function suspiciousStateMessage(stars, lang) {
+  if (lang === "en") {
+    return { title: "⚠️ Unusual progress data",
+             body: `A new profile with ${stars} stars was detected — it may be a copy of an existing child. Don't delete anything; contact support.` };
+  }
+  return {
+    title: "⚠️ נתוני התקדמות חשודים",
+    body: `זוהה פרופיל חדש עם ${stars} כוכבים — יתכן שכפול של ילד קיים. אל תמחקו כלום, פנו לתמיכה.`,
+  };
+}
 
 // ---- 1a-pre) Duplicate-child detector ---------------------------------------
 // The day-one families kept getting "duplicate children" (a stale local UUID
@@ -286,10 +422,8 @@ exports.detectDuplicateChild = onDocumentCreated("children/{childID}", async (ev
     "new=", event.params.childID, "existing=", others.map((d) => d.id).join(","),
     "hh=", data.householdID);
   const tokens = await tokensForHousehold(data.householdID, null);
-  await send(tokens, {
-    title: "⚠️ יתכן שנוצר ילד כפול",
-    body: `נוצר עכשיו ילד חדש בשם "${data.name}" למרות שכבר קיים ילד בשם הזה במשפחה. אם לא יצרתם אותו בכוונה — אל תמחקו כלום, פנו לתמיכה.`,
-  }, { type: "dupAlert", childID: event.params.childID });
+  await sendLocalized(tokens, (lang) => dupChildMessage(data.name, lang),
+    { type: "dupAlert", childID: event.params.childID });
 });
 
 // A freshly-created state doc with MANY stars but a LOW revision is the exact
@@ -323,10 +457,8 @@ exports.detectSuspiciousState = onDocumentCreated("children/{childID}/state/{sta
   const hh = child.data().householdID;
   if (!hh) return;
   const tokens = await tokensForHousehold(hh, null);
-  await send(tokens, {
-    title: "⚠️ נתוני התקדמות חשודים",
-    body: `זוהה פרופיל חדש עם ${stars} כוכבים — יתכן שכפול של ילד קיים. אל תמחקו כלום, פנו לתמיכה.`,
-  }, { type: "dupAlert", childID: event.params.childID });
+  await sendLocalized(tokens, (lang) => suspiciousStateMessage(stars, lang),
+    { type: "dupAlert", childID: event.params.childID });
 });
 
 // ---- 1a) Tombstone enforcement — deleted children can't come back -----------
@@ -391,19 +523,35 @@ exports.onPremiumRequest = onDocumentWritten("children/{childID}", async (event)
   catch (e) { return; }
   const tokens = await tokensForHousehold(hhID);
   if (!tokens.length) return;
+  await sendLocalized(tokens, (lang) => premiumRequestMessage(after, lang),
+    { type: "premium-request", childID: event.params.childID });
+});
+
+// The base worlds, as parents read them in a push.
+const TOPIC_EN = { math: "Math 🧮", english: "English 🇬🇧", hebrew: "Hebrew ✍️", logic: "Logic 🧩", science: "Science 🔬",
+                   history: "History 🏛️", geography: "Geography 🌍", money: "Money Skills 💰", reading: "Reading 📖" };
+
+function premiumRequestMessage(after, lang) {
+  if (lang === "en") {
+    const name = after.name || "Your child";
+    const topic = TOPIC_EN[after.premiumRequestedTopic || ""];
+    return topic
+      ? { title: `${name} wants to learn ${topic}`,
+          body: `${name} tapped this world in Tofy. It opens with Tofy+ — one subscription for the whole family, from your phone.` }
+      : { title: `👑 ${name} wants Tofy+`,
+          body: `${name} asked to unlock the games and worlds. The subscription covers the whole family — unlock it once from your phone.` };
+  }
   const name = after.name || "הילד";
   const girl = after.gender === "girl";
   const TOPIC_HE = { math: "מתמטיקה 🧮", english: "אנגלית 🇬🇧", hebrew: "עברית ✍️", logic: "לוגיקה 🧩", science: "מדעים 🔬",
                      history: "היסטוריה 🏛️", geography: "גיאוגרפיה 🌍", money: "חינוך פיננסי 💰", reading: "הבנת הנקרא 📖" };
   const topic = TOPIC_HE[after.premiumRequestedTopic || ""];
-  await send(tokens,
-    topic
+  return topic
       ? { title: `${name} ${girl ? "רוצה" : "רוצה"} ללמוד ${topic}`,
           body: `${name} ${girl ? "לחצה" : "לחץ"} על העולם הזה בטופי. הוא נפתח עם טופי+ — מנוי אחד לכל המשפחה, מהטלפון שלכם.` }
       : { title: `👑 ${name} ${girl ? "רוצה" : "רוצה"} טופי+`,
-          body: `${name} ${girl ? "ביקשה" : "ביקש"} לפתוח את המשחקים והעולמות. המנוי הוא לכל המשפחה — פותחים פעם אחת מהטלפון שלכם.` },
-    { type: "premium-request", childID: event.params.childID });
-});
+          body: `${name} ${girl ? "ביקשה" : "ביקש"} לפתוח את המשחקים והעולמות. המנוי הוא לכל המשפחה — פותחים פעם אחת מהטלפון שלכם.` };
+}
 
 // ⚽ A child asked for a question pack from their device ("בקש מאבא או אמא").
 // Same shape as the Tofy+ request: one push per request, to the parents only.
@@ -420,43 +568,77 @@ exports.onPackRequest = onDocumentWritten("children/{childID}", async (event) =>
   catch (e) { return; }
   const tokens = await tokensForHousehold(hhID);
   if (!tokens.length) return;
-  const name = after.name || "הילד";
-  const girl = after.gender === "girl";
   const packID = after.packRequestedID || "";
-  const packName = PACK_NAMES[packID] || "שאלון חדש";
-  await send(tokens,
-    { title: `${PACK_EMOJI[packID] || "✨"} ${name} ${girl ? "מבקשת" : "מבקש"} את ${packName}`,
-      body: `${name} ${girl ? "רוצה" : "רוצה"} ללמוד ${packName}. השאלון הוא תוספת חד-פעמית — פותחים מהטלפון שלכם.` },
+  await sendLocalized(tokens, (lang) => packRequestMessage(after, lang),
     { type: "pack-request", childID: event.params.childID, packID });
 });
+
+function packRequestMessage(after, lang) {
+  const packID = after.packRequestedID || "";
+  if (lang === "en") {
+    const name = after.name || "Your child";
+    const p = PACK_META[packID];
+    return p
+      ? { title: `${p.emoji} ${name} is asking for ${p.nameEn}`,
+          body: `${name} wants to learn about ${p.subjectEn}. It's a one-time add-on — unlock it from your phone.` }
+      : { title: `✨ ${name} is asking for a new quiz`,
+          body: `${name} wants a new quiz. It's a one-time add-on — unlock it from your phone.` };
+  }
+  const name = after.name || "הילד";
+  const girl = after.gender === "girl";
+  const packName = PACK_NAMES[packID] || "שאלון חדש";
+  return { title: `${PACK_EMOJI[packID] || "✨"} ${name} ${girl ? "מבקשת" : "מבקש"} את ${packName}`,
+      body: `${name} ${girl ? "רוצה" : "רוצה"} ללמוד ${packName}. השאלון הוא תוספת חד-פעמית — פותחים מהטלפון שלכם.` };
+}
 // Pack copy for pushes — keep in sync with QuestionPacks (iOS) and PACKS in
-// docs/admin/notifications.html.
+// docs/admin/notifications.html. English names/taglines match the app's English
+// catalog; subjectEn completes "Want to learn about …?" (lowercase, mid-sentence).
 const PACK_META = {
-  soccer: { name: "עולם הכדורגל", emoji: "⚽", subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות" },
-  dinosaurs: { name: "דינוזאורים", emoji: "🦖", subject: "דינוזאורים", tagline: "מינים, גדל, מה אכלו, ואיך מגלים מאבנים" },
-  space: { name: "חלל וכוכבים", emoji: "🚀", subject: "חלל", tagline: "כוכבי לכת, ירח, אסטרונאוטים ושמש" },
-  animals: { name: "עולם החיות", emoji: "🐾", subject: "חיות", tagline: "יבשות, חיות בסכנה ושיאים" },
-  sea: { name: "מעמקי הים", emoji: "🌊", subject: "הים", tagline: "כרישים, לויתנים, שוניות, ומי חי איפה" },
-  gifted: { name: "הכנה למחוננים", emoji: "🧠", subject: "חשיבה", tagline: "חשיבה, סדרות, הקשים ותפיסה מרחבית" },
-  food: { name: "מטבח ומדע של אכל", emoji: "🍳", subject: "אכל", tagline: "מאין מגיע אכל, מדידות ומתכונים בחשבון" },
-  israel: { name: "ישראל שלי", emoji: "🏛️", subject: "ישראל", tagline: "ערים, סמלים, חגים, דמיות וטבע" },
-  tishrei: { name: "חגי תשרי", emoji: "🍎", subject: "חגי תשרי", tagline: "ראש השנה, יום כיפור, סוכות ושמחת תורה" },
-  music: { name: "מוזיקה", emoji: "🎵", subject: "מוזיקה", tagline: "כלי נגינה, קצב, מלחינים ושירי ילדים" },
-  body: { name: "גוף האדם", emoji: "🧍", subject: "גוף האדם", tagline: "עצמות, לב, נשימה ובריאות" },
-  vehicles: { name: "כלי רכב ותחבורה", emoji: "🚗", subject: "כלי רכב", tagline: "מכוניות, רכבות, מטוסים, ואיך זה עובד" },
-  flags: { name: "דגלים ומדינות", emoji: "🌍", subject: "דגלים ומדינות", tagline: "דגלים, בירות ויבשות" },
+  soccer: { name: "עולם הכדורגל", emoji: "⚽", subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות",
+    nameEn: "Soccer World", subjectEn: "soccer", taglineEn: "Players, teams, tournaments, and surprising facts" },
+  dinosaurs: { name: "דינוזאורים", emoji: "🦖", subject: "דינוזאורים", tagline: "מינים, גדל, מה אכלו, ואיך מגלים מאבנים",
+    nameEn: "Dinosaurs", subjectEn: "dinosaurs", taglineEn: "Species, size, what they ate, and how fossils are found" },
+  space: { name: "חלל וכוכבים", emoji: "🚀", subject: "חלל", tagline: "כוכבי לכת, ירח, אסטרונאוטים ושמש",
+    nameEn: "Space and Stars", subjectEn: "space", taglineEn: "Planets, the Moon, astronauts, and the Sun" },
+  animals: { name: "עולם החיות", emoji: "🐾", subject: "חיות", tagline: "יבשות, חיות בסכנה ושיאים",
+    nameEn: "Animal World", subjectEn: "animals", taglineEn: "Continents, endangered animals, and record-breakers" },
+  sea: { name: "מעמקי הים", emoji: "🌊", subject: "הים", tagline: "כרישים, לויתנים, שוניות, ומי חי איפה",
+    nameEn: "Deep Sea", subjectEn: "the ocean", taglineEn: "Sharks, whales, reefs, and who lives where" },
+  gifted: { name: "הכנה למחוננים", emoji: "🧠", subject: "חשיבה", tagline: "חשיבה, סדרות, הקשים ותפיסה מרחבית",
+    nameEn: "Gifted Prep", subjectEn: "thinking skills", taglineEn: "Thinking, sequences, inference, and spatial reasoning" },
+  food: { name: "מטבח ומדע של אכל", emoji: "🍳", subject: "אכל", tagline: "מאין מגיע אכל, מדידות ומתכונים בחשבון",
+    nameEn: "Kitchen and Food Science", subjectEn: "food", taglineEn: "Where food comes from, measuring, and recipe math" },
+  israel: { name: "ישראל שלי", emoji: "🏛️", subject: "ישראל", tagline: "ערים, סמלים, חגים, דמיות וטבע",
+    nameEn: "My Israel", subjectEn: "Israel", taglineEn: "Cities, symbols, holidays, famous people, and nature" },
+  tishrei: { name: "חגי תשרי", emoji: "🍎", subject: "חגי תשרי", tagline: "ראש השנה, יום כיפור, סוכות ושמחת תורה",
+    nameEn: "Fall Holidays", subjectEn: "the fall holidays", taglineEn: "Rosh Hashanah, Yom Kippur, Sukkot, and Simchat Torah" },
+  music: { name: "מוזיקה", emoji: "🎵", subject: "מוזיקה", tagline: "כלי נגינה, קצב, מלחינים ושירי ילדים",
+    nameEn: "Music", subjectEn: "music", taglineEn: "Instruments, rhythm, composers, and children's songs" },
+  body: { name: "גוף האדם", emoji: "🧍", subject: "גוף האדם", tagline: "עצמות, לב, נשימה ובריאות",
+    nameEn: "The Human Body", subjectEn: "the human body", taglineEn: "Bones, heart, breathing, and health" },
+  vehicles: { name: "כלי רכב ותחבורה", emoji: "🚗", subject: "כלי רכב", tagline: "מכוניות, רכבות, מטוסים, ואיך זה עובד",
+    nameEn: "Vehicles and Transportation", subjectEn: "vehicles", taglineEn: "Cars, trains, planes, and how they work" },
+  flags: { name: "דגלים ומדינות", emoji: "🌍", subject: "דגלים ומדינות", tagline: "דגלים, בירות ויבשות",
+    nameEn: "Flags and Countries", subjectEn: "flags and countries", taglineEn: "Flags, capitals, and continents" },
 };
 const PACK_NAMES = Object.fromEntries(Object.entries(PACK_META).map(([k, v]) => [k, v.name]));
 const PACK_EMOJI = Object.fromEntries(Object.entries(PACK_META).map(([k, v]) => [k, v.emoji]));
+// A tagline in the middle of a sentence ("…for your kids: planets, the Moon…"),
+// keeping a leading proper noun capitalised.
+const taglineMidEn = (t) => (/^(Rosh|Israel|The Moon)\b/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1));
 
 // The agreed launch message (Rani, 2026-09-06): the moment a pack is switched
 // on, every family's parents get this — "we found a new world", never "buy".
+// The *En fields are what English-language devices get (see campaignPayload).
 function launchCampaignFor(packID) {
   const p = PACK_META[packID]; if (!p) return null;
   return {
     title: `עולם חדש בטופי: ${p.name}`, emoji: p.emoji,
     body: `גילינו עולם חדש בשביל הילדים: ${p.tagline}. על כל תשובה נכונה מרוויחים דקות משחק. למנויי טופי+ הוא כבר פתוח; אחרת שולחים לילד מהטלפון שלכם.`,
     childTitle: `רוצה ללמוד על ${p.subject}?`, childBody: `${p.tagline} — בקש מאבא או אמא`,
+    titleEn: `New world in Tofy: ${p.nameEn}`,
+    bodyEn: `We found a new world for your kids: ${taglineMidEn(p.taglineEn)}. Every correct answer earns play minutes. It's already open for Tofy+ subscribers; otherwise, send it to your child from your phone.`,
+    childTitleEn: `Want to learn about ${p.subjectEn}?`, childBodyEn: `${p.taglineEn} — ask Mom or Dad`,
     audience: { roles: ["parents"], gradeMin: 0, gradeMax: 8, gradeScale: 8, premium: "any", topics: [], excludeOwners: true },
     action: { type: "pack", packID }, showPopup: true,
   };
@@ -514,7 +696,7 @@ async function tokensForChildOwnDevices(childID, householdID) {
       .where("childID", "==", String(childID || "")).get();
     const tokens = snap.docs.map((d) => d.data())
       .filter((d) => d.removed !== true && d.fcmToken)
-      .map((d) => d.fcmToken);
+      .map((d) => { learnTokenLang(d.fcmToken, d.language); return d.fcmToken; });
     if (tokens.length) return [...new Set(tokens)];
   } catch (e) { /* fall through */ }
   const hh = await db.collection("households").doc(String(householdID || "")).get();
@@ -522,9 +704,16 @@ async function tokensForChildOwnDevices(childID, householdID) {
   const tokens = [];
   for (const uid of hh.data().parentUIDs || []) {
     const p = await db.collection("parents").doc(uid).get();
+    if (p.exists) learnParentLangs(p.data());
     if (p.exists && Array.isArray(p.data().childFcmTokens)) tokens.push(...p.data().childFcmTokens);
   }
   return [...new Set(tokens)];
+}
+
+// Kid-facing: the gentle "screen time closed" alert on a remote lock.
+function lockPushAlert(lang) {
+  if (lang === "en") return { title: "Tofy 💙", body: "Screen time is over for now. You can earn more minutes in Tofy! 🌟" };
+  return { title: "טופי 💙", body: "זמן המסך נסגר עכשיו. אפשר להרוויח עוד דקות בטופי! 🌟" };
 }
 
 // A remote LOCK gets a stronger delivery than the throttleable silent wake: a
@@ -537,20 +726,19 @@ async function sendLockPushToChildDevices(householdID, childID) {
   const tokens = await tokensForChildOwnDevices(childID, householdID);
   if (!tokens.length) return;
   try {
-    const res = await admin.messaging().sendEachForMulticast({
-      tokens,
+    const res = await sendEachLocalized(tokens, (lang) => ({
       data: { type: "remote-lock" },
       apns: {
         headers: { "apns-priority": "10", "apns-push-type": "alert" },
         payload: {
           aps: {
-            alert: { title: "טופי 💙", body: "זמן המסך נסגר עכשיו. אפשר להרוויח עוד דקות בטופי! 🌟" },
+            alert: lockPushAlert(lang),
             "content-available": 1,
             "mutable-content": 1,
           },
         },
       },
-    });
+    }));
     console.log("[lock-push] sent", res.successCount, "/", tokens.length);
   } catch (e) { console.error("[lock-push] failed", e && e.message); }
 }
@@ -566,18 +754,36 @@ function newAck(before, after, field) {
   return a > b ? a : 0;   // the ack stamp == the command's own stamp
 }
 
-async function notifyParentsAckApplied(householdID, title, body) {
+async function notifyParentsAckApplied(householdID, build) {
   // ALL parents, including the sender: a late ack means the sender long left the
   // live status sheet — this push IS the promised "נעדכן אותך כשזה יקרה".
+  // build(lang) → { title, body }.
   const tokens = await tokensForHousehold(householdID);
   if (!tokens.length) return;
   try {
-    await admin.messaging().sendEachForMulticast({
-      tokens,
-      notification: { title, body },
-      apns: { payload: { aps: { sound: "default" } } },
+    await sendEachLocalized(tokens, (lang) => {
+      const { title, body } = build(lang);
+      return {
+        notification: { title, body },
+        apns: { payload: { aps: { sound: "default" } } },
+      };
     });
   } catch (e) { console.error("[ack-push] failed", e && e.message); }
+}
+
+// Late command acks (parents). `found` is the child's name, or null when unknown.
+function ackMessage(kind, found, deviceName, lang) {
+  if (lang === "en") {
+    const whose = found ? `${found}'s` : "Your child's";
+    if (kind === "revoke") return { title: "💝 Gift minutes removed", body: `${whose} device just confirmed the gift minutes were removed.` };
+    if (kind === "gift") return { title: "💝 The gift arrived", body: `${whose} device connected and received the gift minutes.` };
+    return { title: "✅ Device locked", body: `${whose} device${deviceName ? ` (${deviceName})` : ""} connected and is now locked.` };
+  }
+  const name = found || "הילד/ה";
+  if (kind === "revoke") return { title: "💝 דקות המתנה נמחקו", body: `המכשיר של ${name} אישר עכשיו את מחיקת דקות המתנה.` };
+  if (kind === "gift") return { title: "💝 המתנה הגיעה", body: `המכשיר של ${name} התחבר וקיבל את דקות המתנה.` };
+  const device = deviceName ? ` (${deviceName})` : "";
+  return { title: "✅ הנעילה בוצעה", body: `המכשיר של ${name}${device} התחבר וננעל עכשיו.` };
 }
 
 async function childNameFor(childID, fallback) {
@@ -600,18 +806,14 @@ exports.wakeOnChildCommand = onDocumentWritten("children/{childID}", async (even
   const revokeAck = newAck(before, after, "revokeGiftAppliedAt");
   if (revokeAck && Date.now() / 1000 - revokeAck > ACK_LATE_SECONDS
       && await claimOnce(`revokeack_${event.params.childID}_${revokeAck}`)) {
-    const name = await childNameFor(event.params.childID, after.name || "הילד/ה");
-    await notifyParentsAckApplied(after.householdID,
-      "💝 דקות המתנה נמחקו",
-      `המכשיר של ${name} אישר עכשיו את מחיקת דקות המתנה.`);
+    const found = await childNameFor(event.params.childID, after.name || null);
+    await notifyParentsAckApplied(after.householdID, (lang) => ackMessage("revoke", found, null, lang));
   }
   const giftAck = newAck(before, after, "giftAppliedAt");
   if (giftAck && Date.now() / 1000 - giftAck > ACK_LATE_SECONDS
       && await claimOnce(`giftack_${event.params.childID}_${giftAck}`)) {
-    const name = await childNameFor(event.params.childID, after.name || "הילד/ה");
-    await notifyParentsAckApplied(after.householdID,
-      "💝 המתנה הגיעה",
-      `המכשיר של ${name} התחבר וקיבל את דקות המתנה.`);
+    const found = await childNameFor(event.params.childID, after.name || null);
+    await notifyParentsAckApplied(after.householdID, (lang) => ackMessage("gift", found, null, lang));
   }
 });
 
@@ -640,11 +842,8 @@ exports.wakeOnDeviceCommand = onDocumentWritten("childDevices/{id}", async (even
   const ack = newAck(before, after, "remoteLockAppliedAt");
   if (ack && Date.now() / 1000 - ack > ACK_LATE_SECONDS
       && await claimOnce(`lockack_${event.params.id}_${ack}`)) {
-    const name = await childNameFor(after.childID, "הילד/ה");
-    const device = after.name ? ` (${after.name})` : "";
-    await notifyParentsAckApplied(after.householdID,
-      "✅ הנעילה בוצעה",
-      `המכשיר של ${name}${device} התחבר וננעל עכשיו.`);
+    const found = await childNameFor(after.childID, null);
+    await notifyParentsAckApplied(after.householdID, (lang) => ackMessage("lock", found, after.name, lang));
   }
 });
 
@@ -661,7 +860,6 @@ exports.onLiveGameInvite = onDocumentCreated("liveGames/{gameID}", async (event)
   if (!invited.length) return;
 
   const gameID = event.params.gameID;
-  const hostName = data.hostName || "חבר";
   const hostOwnerUID = data.hostOwnerUID || null;
   const hostTokens = hostOwnerUID ? await childTokensForUID(hostOwnerUID) : [];
 
@@ -677,12 +875,27 @@ exports.onLiveGameInvite = onDocumentCreated("liveGames/{gameID}", async (event)
   console.log(`onLiveGameInvite game=${gameID} invited=${invited.length} -> ${tokens.length} token(s)`);
   if (!tokens.length) return;
 
-  await send(
+  await sendLocalized(
     tokens,
-    { title: "🎮 הזמנה למשחק!", body: `${hostName} מזמין/ה אתכם למשחק חידון נגד חברים — מי הכי מהיר?` },
+    (lang) => liveGameInviteMessage("invite", data.hostName, lang),
     { type: "liveGameInvite", gameID, link: `tofy://game?g=${gameID}` },
   );
 });
+
+// Kid-facing live-game invites: "invite" (the game started) / "nudge" (the host
+// calls one friend from the lobby). hostName is the raw field (may be missing).
+function liveGameInviteMessage(kind, rawHostName, lang) {
+  if (lang === "en") {
+    const hostName = rawHostName || "A friend";
+    return kind === "nudge"
+      ? { title: "🎮 You're wanted in a game!", body: `${hostName} is inviting you to join right now — who's the fastest?` }
+      : { title: "🎮 Game invite!", body: `${hostName} invited you to a quiz game against friends — who's the fastest?` };
+  }
+  const hostName = rawHostName || "חבר";
+  return kind === "nudge"
+    ? { title: "🎮 קוראים לך למשחק!", body: `${hostName} מזמין/ה אותך להצטרף עכשיו — מי הכי מהיר?` }
+    : { title: "🎮 הזמנה למשחק!", body: `${hostName} מזמין/ה אתכם למשחק חידון נגד חברים — מי הכי מהיר?` };
+}
 
 // A direct invite to ONE friend, sent from the lobby ("הזמינו" button) so the
 // host can call a specific friend who hasn't joined yet.
@@ -691,7 +904,6 @@ exports.onLiveGameNudge = onDocumentCreated("liveGames/{gameID}/nudges/{nudgeID}
   if (!data || !data.targetID) return;
 
   const gameID = event.params.gameID;
-  const hostName = data.hostName || "חבר";
   const card = await db.collection("friendCards").doc(data.targetID).get();
   const ownerUID = card.exists ? card.data().ownerUID : null;
   if (!ownerUID) { console.log(`onLiveGameNudge: no friendCard/ownerUID for ${data.targetID}`); return; }
@@ -703,9 +915,9 @@ exports.onLiveGameNudge = onDocumentCreated("liveGames/{gameID}/nudges/{nudgeID}
   console.log(`onLiveGameNudge target=${data.targetID} owner=${ownerUID} targetTokens=${targetTokens.length} -> send ${tokens.length}`);
   if (!tokens.length) return;
 
-  await send(
+  await sendLocalized(
     tokens,
-    { title: "🎮 קוראים לך למשחק!", body: `${hostName} מזמין/ה אותך להצטרף עכשיו — מי הכי מהיר?` },
+    (lang) => liveGameInviteMessage("nudge", data.hostName, lang),
     { type: "liveGameInvite", gameID, link: `tofy://game?g=${gameID}` },
   );
 });
@@ -726,9 +938,9 @@ exports.onTimeTransferWritten = onDocumentWritten("timeTransfers/{id}", async (e
   if (after.status === "pendingSeller" && beforeStatus !== "pendingSeller") {
     const tokens = await childTokensForHousehold(after.householdID);
     if (tokens.length) {
-      await send(
+      await sendLocalized(
         tokens,
-        { title: "🛒 בקשה לקניית זמן", body: `${after.toName} רוצה לקנות ממך ${after.minutes} דקות תמורת ${after.diamondPrice} 💎` },
+        (lang) => timeTransferMessage("seller", after, lang),
         { type: "timeTransferSeller", id: event.params.id },
       );
     }
@@ -738,17 +950,34 @@ exports.onTimeTransferWritten = onDocumentWritten("timeTransfers/{id}", async (e
   if (after.status === "pendingParent" && beforeStatus !== "pendingParent") {
     const tokens = await tokensForHousehold(after.householdID, null);
     if (tokens.length) {
-      const body = (after.diamondPrice > 0)
-        ? `${after.toName} רוצה לקנות ${after.minutes} דקות מ${after.fromName} — צריך אישור`
-        : `${after.fromName} רוצה לתת ${after.minutes} דקות ל${after.toName} — צריך אישור`;
-      await send(
+      await sendLocalized(
         tokens,
-        { title: "⏳ בקשת העברת זמן לאישור", body },
+        (lang) => timeTransferMessage("parent", after, lang),
         { type: "timeTransferParent", id: event.params.id },
       );
     }
   }
 });
+
+// "seller" → the sibling's (kid) device; "parent" → the parents' final approval.
+function timeTransferMessage(kind, after, lang) {
+  if (lang === "en") {
+    if (kind === "seller") {
+      return { title: "🛒 Request to buy time", body: `${after.toName} wants to buy ${plural(after.minutes, "minute", "minutes")} from you for ${after.diamondPrice} 💎` };
+    }
+    const body = (after.diamondPrice > 0)
+      ? `${after.toName} wants to buy ${plural(after.minutes, "minute", "minutes")} from ${after.fromName} — needs your approval`
+      : `${after.fromName} wants to give ${plural(after.minutes, "minute", "minutes")} to ${after.toName} — needs your approval`;
+    return { title: "⏳ Time transfer needs approval", body };
+  }
+  if (kind === "seller") {
+    return { title: "🛒 בקשה לקניית זמן", body: `${after.toName} רוצה לקנות ממך ${after.minutes} דקות תמורת ${after.diamondPrice} 💎` };
+  }
+  const body = (after.diamondPrice > 0)
+    ? `${after.toName} רוצה לקנות ${after.minutes} דקות מ${after.fromName} — צריך אישור`
+    : `${after.fromName} רוצה לתת ${after.minutes} דקות ל${after.toName} — צריך אישור`;
+  return { title: "⏳ בקשת העברת זמן לאישור", body };
+}
 
 // ---- 1c) Parent quick-help -------------------------------------------------
 // A child asked a specific parent for help on a question. Push that parent an
@@ -764,15 +993,11 @@ exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{cho
   if (!after) return;
   const hhID = event.params.householdID;
 
-  let name = "הילד/ה"; let doneVerb = "סיים/ה";
+  let kid = null;   // the child doc, when it can be read
   try {
     const c = await db.collection("children").doc(String(after.childID || "")).get();
-    if (c.exists) {
-      name = c.data().name || name;
-      doneVerb = c.data().gender === "girl" ? "סיימה" : "סיים";
-    }
+    if (c.exists) kid = c.data();
   } catch (e) { /* keep fallbacks */ }
-  const choreLabel = `${after.emoji || "🧹"} ${after.title || "מטלה"}`;
 
   // Kid marked it done → the parents get an approve nudge. Interactive:
   // category CHORE_APPROVAL carries a "בוצע — אשרו" button the app handles in
@@ -783,8 +1008,6 @@ exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{cho
   if (markedNow) {
     const tokens = await tokensForHousehold(hhID);
     if (!tokens.length) return;
-    const reward = after.chosenReward === "coins"
-      ? `💰 ₪${after.rewardCoins || 0}` : `🎮 ${after.rewardMinutes || 0} דק׳`;
     const data = {
       type: "choreApproval",
       householdID: String(hhID),
@@ -796,15 +1019,13 @@ exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{cho
       data.photoURL = `https://us-central1-childtime-86e98.cloudfunctions.net/chorePhoto` +
         `?hh=${encodeURIComponent(hhID)}&chore=${encodeURIComponent(event.params.choreID)}&token=${token}`;
     }
-    await admin.messaging().sendEachForMulticast({
-      tokens,
-      notification: { title: `🧹 ${name} ${doneVerb} מטלה!`,
-                      body: `${choreLabel} — מחכה לאישור שלכם (${reward})` },
+    await sendEachLocalized(tokens, (lang) => ({
+      notification: choreMarkedMessage(after, kid, lang),
       data,
       apns: { payload: { aps: { "sound": "default",
                                 "category": "CHORE_APPROVAL",
                                 "mutable-content": 1 } } },
-    });
+    }));
     return;
   }
 
@@ -814,16 +1035,50 @@ exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{cho
   if (approvedNow) {
     const tokens = await tokensForChildOwnDevices(after.childID, hhID);
     if (!tokens.length) return;
-    const reward = (before && before.chosenReward === "coins")
-      ? `💰 ₪${after.rewardCoins || 0} נכנסו לקופה!`
-      : `🎮 ${after.rewardMinutes || 0} דקות משחק נוספו!`;
-    await admin.messaging().sendEachForMulticast({
-      tokens,
-      notification: { title: "🎉 המטלה אושרה!", body: `${choreLabel} — ${reward}` },
+    await sendEachLocalized(tokens, (lang) => ({
+      notification: choreApprovedMessage(before, after, lang),
       apns: { payload: { aps: { sound: "default" } } },
-    });
+    }));
   }
 });
+
+const choreLabelFor = (after, lang) => `${after.emoji || "🧹"} ${after.title || (lang === "en" ? "Chore" : "מטלה")}`;
+
+// Parents: a kid marked a chore done. `kid` = the child doc, or null.
+function choreMarkedMessage(after, kid, lang) {
+  const choreLabel = choreLabelFor(after, lang);
+  if (lang === "en") {
+    const reward = after.chosenReward === "coins"
+      ? `💰 $${after.rewardCoins || 0}` : `🎮 ${after.rewardMinutes || 0} min`;
+    return { title: `🧹 ${(kid && kid.name) || "Your child"} finished a chore!`,
+             body: `${choreLabel} — waiting for your approval (${reward})` };
+  }
+  let name = "הילד/ה"; let doneVerb = "סיים/ה";
+  if (kid) {
+    name = kid.name || name;
+    doneVerb = kid.gender === "girl" ? "סיימה" : "סיים";
+  }
+  const reward = after.chosenReward === "coins"
+    ? `💰 ₪${after.rewardCoins || 0}` : `🎮 ${after.rewardMinutes || 0} דק׳`;
+  return { title: `🧹 ${name} ${doneVerb} מטלה!`,
+           body: `${choreLabel} — מחכה לאישור שלכם (${reward})` };
+}
+
+// Kid-facing: the parent approved the chore.
+function choreApprovedMessage(before, after, lang) {
+  const choreLabel = choreLabelFor(after, lang);
+  const coins = before && before.chosenReward === "coins";
+  if (lang === "en") {
+    const reward = coins
+      ? `💰 $${after.rewardCoins || 0} added to your pocket money!`
+      : `🎮 ${plural(after.rewardMinutes || 0, "play minute", "play minutes")} added!`;
+    return { title: "🎉 Chore approved!", body: `${choreLabel} — ${reward}` };
+  }
+  const reward = coins
+    ? `💰 ₪${after.rewardCoins || 0} נכנסו לקופה!`
+    : `🎮 ${after.rewardMinutes || 0} דקות משחק נוספו!`;
+  return { title: "🎉 המטלה אושרה!", body: `${choreLabel} — ${reward}` };
+}
 
 exports.onHelpRequest = onDocumentCreated("helpRequests/{id}", async (event) => {
   const data = event.data && event.data.data();
@@ -848,35 +1103,44 @@ exports.onHelpRequest = onDocumentCreated("helpRequests/{id}", async (event) => 
     : await tokensForUID(data.parentUID);
   if (!tokens.length) return;
 
-  const childName = data.childName || "הילד";
-  const f = data.gender === "girl";
-  // The body shows the two options too, so a parent who never expands the
-  // notification (no action buttons visible) still knows what is being asked.
-  const body = `${String(data.question || "")}\nא׳: ${String(data.optionA || "")} · ב׳: ${String(data.optionB || "")}`;
-  await admin.messaging().sendEachForMulticast({
-    tokens,
-    notification: { title: `🧠 ${childName} ${f ? "ביקשה" : "ביקש"} עזרה בשאלה`, body },
-    data: {
-      type: "parentHelp",
-      helpRequestID: event.params.id,
-      optionA: String(data.optionA || ""),
-      optionB: String(data.optionB || ""),
-      correctAnswer: String(data.correctAnswer || ""),
-      childName: String(childName),
-      question: String(data.question || ""),
-      topic: String(data.topic || ""),
-    },
-    apns: {
-      payload: {
-        aps: {
-          category: "PARENT_HELP",
-          "mutable-content": 1,
-          sound: "default",
+  await sendEachLocalized(tokens, (lang) => {
+    const childName = data.childName || (lang === "en" ? "Your child" : "הילד");
+    return {
+      notification: helpRequestNotification(data, childName, lang),
+      data: {
+        type: "parentHelp",
+        helpRequestID: event.params.id,
+        optionA: String(data.optionA || ""),
+        optionB: String(data.optionB || ""),
+        correctAnswer: String(data.correctAnswer || ""),
+        childName: String(childName),
+        question: String(data.question || ""),
+        topic: String(data.topic || ""),
+      },
+      apns: {
+        payload: {
+          aps: {
+            category: "PARENT_HELP",
+            "mutable-content": 1,
+            sound: "default",
+          },
         },
       },
-    },
+    };
   });
 });
+
+// The body shows the two options too, so a parent who never expands the
+// notification (no action buttons visible) still knows what is being asked.
+function helpRequestNotification(data, childName, lang) {
+  if (lang === "en") {
+    const body = `${String(data.question || "")}\nA: ${String(data.optionA || "")} · B: ${String(data.optionB || "")}`;
+    return { title: `🧠 ${childName} asked for help with a question`, body };
+  }
+  const f = data.gender === "girl";
+  const body = `${String(data.question || "")}\nא׳: ${String(data.optionA || "")} · ב׳: ${String(data.optionB || "")}`;
+  return { title: `🧠 ${childName} ${f ? "ביקשה" : "ביקש"} עזרה בשאלה`, body };
+}
 
 // ---- 1b) Child-link requests ----------------------------------------------
 
@@ -888,9 +1152,7 @@ exports.onChildLinkRequest = onDocumentWritten("childLinkRequests/{id}", async (
   // Created → notify the child (the targeted email) to open & approve.
   if (!before && after.status === "pending") {
     const tokens = await tokensForEmail(after.toEmail);
-    await send(tokens,
-      { title: "בקשת צירוף למשפחה 👨‍👩‍👧",
-        body: `${after.fromParentName || "הורה"} מבקש/ת לצרף אותך למשפחה. פתחו את טופי כדי לאשר.` },
+    await sendLocalized(tokens, (lang) => childLinkMessage("request", after, lang),
       { kind: "childLinkRequest", requestID: event.params.id });
     return;
   }
@@ -898,12 +1160,25 @@ exports.onChildLinkRequest = onDocumentWritten("childLinkRequests/{id}", async (
   // Approved → notify the requesting parent that the child is now linked.
   if (before && before.status !== "approved" && after.status === "approved") {
     const tokens = await tokensForUID(after.fromParentUID);
-    await send(tokens,
-      { title: "הצירוף אושר! ✅",
-        body: "הילד/ה אישר/ה את הבקשה ומופיע/ה עכשיו במשפחה שלך." },
+    await sendLocalized(tokens, (lang) => childLinkMessage("approved", after, lang),
       { kind: "childLinkApproved", requestID: event.params.id });
   }
 });
+
+function childLinkMessage(kind, after, lang) {
+  if (lang === "en") {
+    return kind === "request"
+      ? { title: "Request to join a family 👨‍👩‍👧",
+          body: `${after.fromParentName || "A parent"} wants to add you to their family. Open Tofy to approve.` }
+      : { title: "Request approved! ✅",
+          body: "Your child approved the request and now appears in your family." };
+  }
+  return kind === "request"
+    ? { title: "בקשת צירוף למשפחה 👨‍👩‍👧",
+        body: `${after.fromParentName || "הורה"} מבקש/ת לצרף אותך למשפחה. פתחו את טופי כדי לאשר.` }
+    : { title: "הצירוף אושר! ✅",
+        body: "הילד/ה אישר/ה את הבקשה ומופיע/ה עכשיו במשפחה שלך." };
+}
 
 // ---- 2) Weekly report ------------------------------------------------------
 
@@ -913,7 +1188,6 @@ exports.weeklyReport = onSchedule({ schedule: "every monday 18:00", timeZone: "A
 
   for (const childDoc of childrenSnap.docs) {
     const childID = childDoc.id;
-    const name = childDoc.data().name || "הילד";
     const householdID = childDoc.data().householdID;
 
     const daysSnap = await childDoc.ref.collection("dailyStats").get();
@@ -935,12 +1209,22 @@ exports.weeklyReport = onSchedule({ schedule: "every monday 18:00", timeZone: "A
 
     if (questions === 0) continue;
     const tokens = await tokensForHousehold(householdID, null);
-    await send(tokens,
-      { title: `📊 דוח שבועי — ${name}`,
-        body: `${questions} שאלות · ${minutesEarned} דק' שנצברו · רצף ${longestStreak} · ${activeDays} ימי פעילות` },
+    const week7 = { name: childDoc.data().name, questions, minutesEarned, longestStreak, activeDays };
+    await sendLocalized(tokens, (lang) => weeklyReportMessage(week7, lang),
       { childID, kind: "weeklyReport" });
   }
 });
+
+// `name` is the raw child name (may be missing).
+function weeklyReportMessage({ name: rawName, questions, minutesEarned, longestStreak, activeDays }, lang) {
+  if (lang === "en") {
+    return { title: `📊 Weekly report — ${rawName || "your child"}`,
+             body: `${plural(questions, "question", "questions")} · ${minutesEarned} min earned · best streak ${longestStreak} · ${plural(activeDays, "active day", "active days")}` };
+  }
+  const name = rawName || "הילד";
+  return { title: `📊 דוח שבועי — ${name}`,
+           body: `${questions} שאלות · ${minutesEarned} דק' שנצברו · רצף ${longestStreak} · ${activeDays} ימי פעילות` };
+}
 
 // ---- Test push (self-check from Parent Settings) ---------------------------
 // The app writes pushTests/{id} with its own uid; we push a test notification
@@ -956,14 +1240,15 @@ exports.sendTestPush = onDocumentCreated("pushTests/{id}", async (event) => {
     return;
   }
   try {
-    const res = await admin.messaging().sendEachForMulticast({
-      tokens,
-      notification: { title: "טופי — בדיקת התראות ✅", body: "מעולה! ההתראות עובדות." },
+    const res = await sendEachLocalized(tokens, (lang) => ({
+      notification: lang === "en"
+        ? { title: "Tofy — notification test ✅", body: "Great! Notifications are working." }
+        : { title: "טופי — בדיקת התראות ✅", body: "מעולה! ההתראות עובדות." },
       apns: { payload: { aps: { sound: "default" } } },
-    });
+    }));
     console.log(`[testPush] sent: success=${res.successCount} failure=${res.failureCount}`);
-    res.responses.forEach((r, i) => {
-      if (!r.success) console.error(`[testPush] token#${i} FAILED: ${r.error && r.error.message}`);
+    res.results.forEach(({ token, response: r }) => {
+      if (!r.success) console.error(`[testPush] token#${tokens.indexOf(token)} FAILED: ${r.error && r.error.message}`);
     });
   } catch (e) {
     console.error("[testPush] send threw:", e && e.message);
@@ -1140,31 +1425,13 @@ exports.onWaitlistSignup = onDocumentCreated(
       //    address looks like a real email — never blast junk input).
       const signupEmail = String(w.email || "").trim();
       if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(signupEmail)) {
-        const first = String(w.name || "").trim().split(/\s+/)[0];
-        const title = first ? `היי ${first}, שמרנו לכם מקום 🎉` : "שמרנו לכם מקום 🎉";
-        const intro = "תודה שנרשמתם לטופי! נעדכן אתכם ביום שהאפליקציה עולה לאוויר — הודעה אחת, בלי ספאם. בינתיים, הנה מה שמחכה לכם.";
-        const bullets = [
-          { emoji: "🧠", title: "הילד לומד ומשחק", text: "שאלות לפי הכיתה בחשבון, עברית, אנגלית, מדעים ועוד — בתוך הרפתקה צבעונית." },
-          { emoji: "🎮", title: "מרוויח דקות משחק", text: "כל תשובה נכונה שווה שניות משחק. האפליקציות שחסמתם נפתחות רק כשהוא הרוויח." },
-          { emoji: "💝", title: "שבועיים של טופי+ במתנה", text: "כשהילד באמת מתחיל ללמוד, אנחנו פותחים לכם את כל העולמות לשבועיים. בלי כרטיס אשראי." },
-        ];
-        const signoff = "נתראה בקרוב,\nצוות טופי 🦁";
-        const html = brandEmail({
-          title, intro, bullets,
-          ctaText: "לאתר של טופי",
-          ctaHref: "https://tofyapp.com",
-          signoff,
-          footer: "קיבלתם את המייל הזה כי נרשמתם לעדכון ההשקה ב־tofyapp.com.",
-        });
-        const text = [title, "", intro, "",
-          ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`),
-          "", "tofyapp.com", "", signoff].join("\n");
+        const mail = waitlistWelcomeEmail(w, await signupLanguage(w, signupEmail));
         await transporter.sendMail({
-          from: `טופי <${user}>`,
+          from: `${mail.fromName} <${user}>`,
           to: signupEmail,
-          subject: "ברוכים הבאים לטופי! 🦁 שמרנו לכם מקום",
-          text,
-          html,
+          subject: mail.subject,
+          text: mail.text,
+          html: mail.html,
         });
         console.log("[waitlist] welcome emailed to", signupEmail);
       }
@@ -1173,6 +1440,65 @@ exports.onWaitlistSignup = onDocumentCreated(
     }
   }
 );
+
+// The signup's language: an explicit language on the waitlist doc, else the
+// language of a Tofy account with the same email, else Hebrew (the site is Hebrew).
+async function signupLanguage(w, email) {
+  if (w.language || w.lang) return normLang(w.language || w.lang);
+  try {
+    const snap = await db.collection("parents").where("email", "==", email).get();
+    const withLang = snap.docs.map((d) => d.data() || {}).find((d) => d.language);
+    if (withLang) return normLang(withLang.language);
+  } catch (e) { /* fall through */ }
+  return "he";
+}
+
+// The welcome email → { fromName, subject, text, html }.
+function waitlistWelcomeEmail(w, lang) {
+  if (lang === "en") {
+    const first = String(w.name || "").trim().split(/\s+/)[0];
+    const title = first ? `Hi ${first}, your spot is saved 🎉` : "Your spot is saved 🎉";
+    const intro = "Thanks for signing up for Tofy! We'll let you know the day the app launches — one email, no spam. In the meantime, here's what's waiting for you.";
+    const bullets = [
+      { emoji: "🧠", title: "Your child learns and plays", text: "Grade-level questions in math, reading, science, and more — inside a colorful adventure." },
+      { emoji: "🎮", title: "Earns play minutes", text: "Every correct answer is worth seconds of play time. The apps you blocked open only once your child has earned the time." },
+      { emoji: "💝", title: "Two weeks of Tofy+ as a gift", text: "Once your child really starts learning, we unlock every world for two weeks. No credit card." },
+    ];
+    const signoff = "See you soon,\nThe Tofy team 🦁";
+    const html = brandEmail({
+      title, intro, bullets,
+      ctaText: "Visit Tofy",
+      ctaHref: "https://tofyapp.com",
+      signoff,
+      footer: "You're getting this email because you signed up for launch updates at tofyapp.com.",
+      lang: "en",
+    });
+    const text = [title, "", intro, "",
+      ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`),
+      "", "tofyapp.com", "", signoff].join("\n");
+    return { fromName: "Tofy", subject: "Welcome to Tofy! 🦁 Your spot is saved", text, html };
+  }
+  const first = String(w.name || "").trim().split(/\s+/)[0];
+  const title = first ? `היי ${first}, שמרנו לכם מקום 🎉` : "שמרנו לכם מקום 🎉";
+  const intro = "תודה שנרשמתם לטופי! נעדכן אתכם ביום שהאפליקציה עולה לאוויר — הודעה אחת, בלי ספאם. בינתיים, הנה מה שמחכה לכם.";
+  const bullets = [
+    { emoji: "🧠", title: "הילד לומד ומשחק", text: "שאלות לפי הכיתה בחשבון, עברית, אנגלית, מדעים ועוד — בתוך הרפתקה צבעונית." },
+    { emoji: "🎮", title: "מרוויח דקות משחק", text: "כל תשובה נכונה שווה שניות משחק. האפליקציות שחסמתם נפתחות רק כשהוא הרוויח." },
+    { emoji: "💝", title: "שבועיים של טופי+ במתנה", text: "כשהילד באמת מתחיל ללמוד, אנחנו פותחים לכם את כל העולמות לשבועיים. בלי כרטיס אשראי." },
+  ];
+  const signoff = "נתראה בקרוב,\nצוות טופי 🦁";
+  const html = brandEmail({
+    title, intro, bullets,
+    ctaText: "לאתר של טופי",
+    ctaHref: "https://tofyapp.com",
+    signoff,
+    footer: "קיבלתם את המייל הזה כי נרשמתם לעדכון ההשקה ב־tofyapp.com.",
+  });
+  const text = [title, "", intro, "",
+    ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`),
+    "", "tofyapp.com", "", signoff].join("\n");
+  return { fromName: "טופי", subject: "ברוכים הבאים לטופי! 🦁 שמרנו לכם מקום", text, html };
+}
 
 // ---- 3) Founder analytics aggregator ---------------------------------------
 // Computes AGGREGATE, non-PII numbers from the family data and writes them to
@@ -1920,6 +2246,9 @@ function cleanCampaign(input) {
   return {
     title: s(d.title, 80), body: s(d.body, 240), emoji: s(d.emoji, 8), imageURL: s(d.imageURL, 400),
     childTitle: s(d.childTitle, 80), childBody: s(d.childBody, 240),
+    // Optional English copy. Without it, English-language devices get nothing.
+    titleEn: s(d.titleEn, 80), bodyEn: s(d.bodyEn, 240),
+    childTitleEn: s(d.childTitleEn, 80), childBodyEn: s(d.childBodyEn, 240),
     audience: { roles: roles.length ? roles : ["parents"], gradeMin, gradeMax, gradeScale: TOP_GRADE, premium, topics,
                 excludeOwners: aud.excludeOwners !== false },
     action: { type: actionType, packID },
@@ -1936,9 +2265,9 @@ async function resolveAudience(audience) {
     db.collection("childDevices").get(), db.collection("parents").get(),
   ]);
   const now = Date.now() / 1000;
-  const parents = {}; parentsSnap.forEach((p) => { parents[p.id] = p.data() || {}; });
+  const parents = {}; parentsSnap.forEach((p) => { parents[p.id] = p.data() || {}; learnParentLangs(parents[p.id]); });
   const kidsByHH = {}; kidsSnap.forEach((k) => { const d = k.data() || {}; (kidsByHH[d.householdID] = kidsByHH[d.householdID] || []).push({ id: k.id, ...d }); });
-  const devsByKid = {}; devsSnap.forEach((dv) => { const d = dv.data() || {}; if (d.childID && d.removed !== true && d.fcmToken) (devsByKid[d.childID] = devsByKid[d.childID] || []).push({ ...d, docID: dv.id }); });
+  const devsByKid = {}; devsSnap.forEach((dv) => { const d = dv.data() || {}; learnTokenLang(d.fcmToken, d.language); if (d.childID && d.removed !== true && d.fcmToken) (devsByKid[d.childID] = devsByKid[d.childID] || []).push({ ...d, docID: dv.id }); });
   const childTokenSet = new Set(); devsSnap.forEach((dv) => { const d = dv.data() || {}; if (d.fcmToken && d.removed !== true) childTokenSet.add(d.fcmToken); });
 
   const wantParents = audience.roles.includes("parents"), wantChildren = audience.roles.includes("children");
@@ -1987,9 +2316,26 @@ async function resolveAudience(audience) {
   return { parentTokens: [...parentTokens], childTokens: [...childTokens], parentsN, childrenN, householdsN, owners };
 }
 
-function campaignPayload(c, forChild) {
-  const title = forChild ? (c.childTitle || c.title) : c.title;
-  const body = forChild ? (c.childBody || c.body) : c.body;
+// A campaign's copy for one audience and language. Hebrew is the authored copy;
+// English uses the optional *En fields and returns null when they are missing —
+// an English device is never sent Hebrew. Kids fall back to the parent copy, as
+// in Hebrew. A campaign with a Hebrew body needs an English body too.
+function campaignCopy(c, forChild, lang) {
+  if (lang === "en") {
+    const t = (v) => String(v || "").trim();
+    const title = forChild ? (t(c.childTitleEn) || t(c.titleEn)) : t(c.titleEn);
+    const body = forChild ? (t(c.childBodyEn) || t(c.bodyEn)) : t(c.bodyEn);
+    const heBody = forChild ? (c.childBody || c.body) : c.body;
+    if (!title || (!body && heBody)) return null;
+    return { title, body };
+  }
+  return { title: forChild ? (c.childTitle || c.title) : c.title, body: forChild ? (c.childBody || c.body) : c.body };
+}
+
+function campaignPayload(c, forChild, lang) {
+  const copy = campaignCopy(c, forChild, lang);
+  if (!copy) return null;
+  const { title, body } = copy;
   const notification = { title: (c.emoji ? c.emoji + " " : "") + title, body };
   const data = { type: "campaign", campaignID: c.id, action: c.action.type, packID: c.action.packID || "", role: forChild ? "child" : "parent" };
   const apns = { payload: { aps: { sound: "default", "mutable-content": 1 } } };
@@ -1997,22 +2343,27 @@ function campaignPayload(c, forChild) {
   return { notification, data, apns };
 }
 
+// Per device language: Hebrew devices get the authored copy; English devices get
+// the English copy, or are skipped (counted in `skipped`) when there is none.
 async function sendCampaignTo(tokens, c, forChild) {
-  let sent = 0, failed = 0;
+  let sent = 0, failed = 0, skipped = 0;
   const results = [];   // { token, ok, error }
-  const payload = campaignPayload(c, forChild);
-  for (let i = 0; i < tokens.length; i += 500) {
-    const chunk = tokens.slice(i, i + 500);
-    try {
-      const res = await admin.messaging().sendEachForMulticast({ tokens: chunk, ...payload });
-      sent += res.successCount; failed += res.failureCount;
-      res.responses.forEach((r, j) => results.push({ token: chunk[j], ok: r.success, error: r.success ? "" : (r.error && r.error.code || "error") }));
-    } catch (e) {
-      console.error("[campaign] send failed", c.id, e && e.message); failed += chunk.length;
-      chunk.forEach((t) => results.push({ token: t, ok: false, error: String(e && e.message || e) }));
+  for (const [lang, group] of langGroups(tokens)) {
+    const payload = campaignPayload(c, forChild, lang);
+    if (!payload) { skipped += group.length; continue; }
+    for (let i = 0; i < group.length; i += 500) {
+      const chunk = group.slice(i, i + 500);
+      try {
+        const res = await admin.messaging().sendEachForMulticast({ tokens: chunk, ...payload });
+        sent += res.successCount; failed += res.failureCount;
+        res.responses.forEach((r, j) => results.push({ token: chunk[j], ok: r.success, error: r.success ? "" : (r.error && r.error.code || "error") }));
+      } catch (e) {
+        console.error("[campaign] send failed", c.id, e && e.message); failed += chunk.length;
+        chunk.forEach((t) => results.push({ token: t, ok: false, error: String(e && e.message || e) }));
+      }
     }
   }
-  return { sent, failed, results };
+  return { sent, failed, skipped, results };
 }
 
 // A token FCM says is dead ("not registered") belongs to a deleted install —
@@ -2039,8 +2390,6 @@ exports.worldPassReminders = onSchedule(
     const now = Date.now() / 1000;
     const lo = now + 2 * 86400, hi = now + 3 * 86400 + 3600;
     const kids = await db.collection("children").get();
-    const WORLD_HE = { math: "המתמטיקה 🧮 נגמרת", english: "האנגלית 🇬🇧 נגמרת", hebrew: "העברית ✍️ נגמרת", logic: "הלוגיקה 🧩 נגמרת", science: "המדעים 🔬 נגמרים",
-                       history: "ההיסטוריה 🏛️ נגמרת", geography: "הגיאוגרפיה 🌍 נגמרת", money: "החינוך הפיננסי 💰 נגמר", reading: "הבנת הנקרא 📖 נגמרת" };
     let sent = 0;
     for (const k of kids.docs) {
       const d = k.data() || {}; const exp = d.packExpiry || {};
@@ -2050,11 +2399,7 @@ exports.worldPassReminders = onSchedule(
         try { await db.collection("pushDedup").doc(key).create({ at: Date.now() }); } catch (e) { continue; }
         const tokens = await tokensForHousehold(d.householdID);
         if (!tokens.length) continue;
-        const name = d.name || "הילד";
-        const day = new Date(Number(at) * 1000).toLocaleDateString("he-IL", { weekday: "long", timeZone: "Asia/Jerusalem" });
-        await send(tokens,
-          { title: `${WORLD_HE[packID].replace(/ (נגמר\S*)$/, "")} של ${name} ${WORLD_HE[packID].split(" ").pop()} ב${day}`,
-            body: `30 הימים מסתיימים. אפשר לפתוח עוד 30 יום, או טופי+ לכל המשפחה — מהטלפון שלכם. ההתקדמות נשמרת.` },
+        await sendLocalized(tokens, (lang) => worldPassMessage(d.name, packID, at, lang),
           { type: "pass-ending", childID: k.id, packID });
         sent += 1;
       }
@@ -2062,6 +2407,23 @@ exports.worldPassReminders = onSchedule(
     console.log("[worldPassReminders] sent", sent);
   }
 );
+
+const WORLD_HE = { math: "המתמטיקה 🧮 נגמרת", english: "האנגלית 🇬🇧 נגמרת", hebrew: "העברית ✍️ נגמרת", logic: "הלוגיקה 🧩 נגמרת", science: "המדעים 🔬 נגמרים",
+                   history: "ההיסטוריה 🏛️ נגמרת", geography: "הגיאוגרפיה 🌍 נגמרת", money: "החינוך הפיננסי 💰 נגמר", reading: "הבנת הנקרא 📖 נגמרת" };
+
+// Parents: a world pass ends in ~3 days. rawName may be missing; `at` = expiry (epoch s).
+function worldPassMessage(rawName, packID, at, lang) {
+  if (lang === "en") {
+    const whose = rawName ? `${rawName}'s` : "Your child's";
+    const day = new Date(Number(at) * 1000).toLocaleDateString("en-US", { weekday: "long", timeZone: "Asia/Jerusalem" });
+    return { title: `${whose} ${TOPIC_EN[packID]} pass ends on ${day}`,
+             body: "The 30 days are almost up. You can add another 30 days, or get Tofy+ for the whole family — from your phone. Progress is saved." };
+  }
+  const name = rawName || "הילד";
+  const day = new Date(Number(at) * 1000).toLocaleDateString("he-IL", { weekday: "long", timeZone: "Asia/Jerusalem" });
+  return { title: `${WORLD_HE[packID].replace(/ (נגמר\S*)$/, "")} של ${name} ${WORLD_HE[packID].split(" ").pop()} ב${day}`,
+           body: `30 הימים מסתיימים. אפשר לפתוח עוד 30 יום, או טופי+ לכל המשפחה — מהטלפון שלכם. ההתקדמות נשמרת.` };
+}
 
 // 🧹📸 A chore photo the parent never approved/archived must not linger —
 // privacy policy: deleted at approval, and after 7 days at most.
@@ -2111,11 +2473,12 @@ exports.adminSendCampaignTest = onCall({ timeoutSeconds: 30, memory: "256MiB" },
   const c = { ...cleanCampaign(request.data), id: "test" };
   const p = await db.collection("parents").doc(request.auth.uid).get();
   const d = p.exists ? p.data() : {};
+  learnParentLangs(d);
   const parentToks = [...new Set(d.fcmTokens || [])];
   const childToks = [...new Set(d.childFcmTokens || [])];
   const wantP = c.audience.roles.includes("parents"), wantC = c.audience.roles.includes("children");
-  const a = wantP ? await sendCampaignTo(parentToks, c, false) : { sent: 0, failed: 0, results: [] };
-  const b = wantC ? await sendCampaignTo(childToks, c, true) : { sent: 0, failed: 0, results: [] };
+  const a = wantP ? await sendCampaignTo(parentToks, c, false) : { sent: 0, failed: 0, skipped: 0, results: [] };
+  const b = wantC ? await sendCampaignTo(childToks, c, true) : { sent: 0, failed: 0, skipped: 0, results: [] };
   const owners = {}; parentToks.forEach((t) => owners[t] = { uid: request.auth.uid }); childToks.forEach((t) => owners[t] = { uid: request.auth.uid });
   const pruned = await pruneDeadTokens([...a.results, ...b.results], owners);
   const devices = [
@@ -2123,7 +2486,8 @@ exports.adminSendCampaignTest = onCall({ timeoutSeconds: 30, memory: "256MiB" },
     ...b.results.map((r, i) => ({ kind: "ילד", n: i + 1, ok: r.ok, error: r.error })),
   ];
   return { ok: true, sent: a.sent + b.sent, failed: a.failed + b.failed, targeted: devices.length,
-           skippedParents: wantP ? 0 : parentToks.length, skippedChildren: wantC ? 0 : childToks.length, pruned, devices };
+           skippedParents: wantP ? 0 : parentToks.length, skippedChildren: wantC ? 0 : childToks.length, pruned, devices,
+           skippedLanguage: (a.skipped || 0) + (b.skipped || 0) };
 });
 
 exports.adminListCampaigns = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
@@ -2206,8 +2570,8 @@ exports.dispatchCampaigns = onSchedule(
       const c = { id: doc.id, ...doc.data() };
       try {
         const aud = await resolveAudience({ ...c.audience, packID: (c.action || {}).packID });
-        const a = c.audience.roles.includes("parents") ? await sendCampaignTo(aud.parentTokens, c, false) : { sent: 0, failed: 0, results: [] };
-        const b = c.audience.roles.includes("children") ? await sendCampaignTo(aud.childTokens, c, true) : { sent: 0, failed: 0, results: [] };
+        const a = c.audience.roles.includes("parents") ? await sendCampaignTo(aud.parentTokens, c, false) : { sent: 0, failed: 0, skipped: 0, results: [] };
+        const b = c.audience.roles.includes("children") ? await sendCampaignTo(aud.childTokens, c, true) : { sent: 0, failed: 0, skipped: 0, results: [] };
         const results = [...a.results, ...b.results];
         await pruneDeadTokens(results, aud.owners);
         // "למי נשלח" — one row per household: who got it, who didn't.
@@ -2229,6 +2593,8 @@ exports.dispatchCampaigns = onSchedule(
           "stats.targeted": aud.parentsN + aud.childrenN,
           "stats.sent": a.sent + b.sent, "stats.failed": a.failed + b.failed,
           reach: { parents: aud.parentsN, children: aud.childrenN, households: aud.householdsN },
+          // English-language devices left out because the campaign has no English copy.
+          ...(a.skipped + b.skipped ? { skippedLanguage: a.skipped + b.skipped } : {}),
         });
         console.log("[dispatchCampaigns]", c.id, c.title, "sent", a.sent + b.sent, "failed", a.failed + b.failed);
       } catch (e) {
@@ -2887,6 +3253,79 @@ const ilWeekday = (s) => new Date(s * 1000).toLocaleDateString("he-IL", { weekda
 
 async function onceKey(key) { try { await db.collection("pushDedup").doc(key).create({ at: Date.now() }); return true; } catch (e) { return false; } }
 
+// 🌍 English devices: the founder edits the Hebrew copy (cfg.copyActivation /
+// cfg.copyTwoDays) in the admin app; English devices get these built-in English
+// versions, filled with the same {variables}. Each keeps the "prefix · body"
+// shape the Hebrew has, since the prefix is stripped the same way.
+const CONVERSION_COPY_EN = {
+  copyActivation: "🎁 We opened Tofy+ for {שם} as a gift · {שם} answered {שאלות} questions, so every world is open for the next {ימים} days. No card needed, and it doesn't renew. Ends {תאריך}.",
+  copyTwoDays: "⏰ 2 days left of Tofy+ for {שם} · {עולם אהוב}: played on {חזרות} days in the last month. Keep every world open with Tofy+.",
+  // No favourite world yet — the sentence about it would read "their favorite world: played on 0 days".
+  copyTwoDaysNoFavorite: "⏰ 2 days left of Tofy+ for {שם} · Keep every world open with Tofy+.",
+};
+const TOPIC_LABEL_EN = { math: "🧮 Math", english: "🇬🇧 English", hebrew: "✍️ Hebrew", logic: "🧩 Logic", science: "🔬 Science", history: "🏛️ History",
+  geography: "🌍 Geography", money: "💰 Money Skills", reading: "📖 Reading", soccer: "⚽ Soccer", dinosaurs: "🦖 Dinosaurs", space: "🚀 Space", animals: "🐾 Animals",
+  sea: "🌊 Ocean", gifted: "🧠 Gifted Prep", food: "🍳 Food", israel: "🏛️ My Israel", music: "🎵 Music", body: "🧍 Human Body", vehicles: "🚗 Vehicles", flags: "🌍 Flags", tishrei: "🍎 Fall Holidays" };
+// A favourite world for English copy: "🧮 Math"; a topic without a label reads as its id ("Weird").
+const favLabelEn = (fav) => TOPIC_LABEL_EN[fav.topic] || capFirst(String(fav.topic || "")) || "Their favorite world";
+const favNameEn = (fav) => (TOPIC_LABEL_EN[fav.topic] ? TOPIC_LABEL_EN[fav.topic].replace(/^\S+\s/, "") : favLabelEn(fav));
+const enDate = (s) => new Date(s * 1000).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "Asia/Jerusalem" });
+const enWeekday = (s) => new Date(s * 1000).toLocaleDateString("en-US", { weekday: "long", timeZone: "Asia/Jerusalem" });
+
+// ctx = { star, kids, totalQ, fav, cfg } for one household (see runConversionEngine).
+function conversionVars(ctx, lang) {
+  const { star, totalQ, fav, cfg } = ctx;
+  if (lang === "en") {
+    const name = star && star.name ? star.name : "your child";
+    return { "שם": name, "שאלות": totalQ, "ימים": cfg.giftDays, "עולם אהוב": fav ? favLabelEn(fav) : "their favorite world", "חזרות": fav ? fav.days : 0, "מחיר חודשי בשנתי": "" };
+  }
+  const name = star ? star.name : "הילד";
+  return { "שם": name, "שאלות": totalQ, "ימים": cfg.giftDays, "עולם אהוב": fav ? fav.label : "העולם האהוב", "חזרות": fav ? fav.days : 0, "מחיר חודשי בשנתי": "₪16.60" };
+}
+
+// Gift started (activation → Tofy+ gift). `until` = gift end (epoch s).
+function giftStartMessage(ctx, until, lang) {
+  const vars = conversionVars(ctx, lang);
+  if (lang === "en") {
+    return { title: `🎁 We opened Tofy+ for ${vars["שם"]} as a gift`,
+             body: capFirst(fill(CONVERSION_COPY_EN.copyActivation, { ...vars, "תאריך": enDate(until) }).replace(/^🎁[^·]*·\s*/, "")) };
+  }
+  const name = vars["שם"];
+  return { title: `🎁 פתחנו ל${name} את טופי+ במתנה`, body: fill(ctx.cfg.copyActivation, { ...vars, "תאריך": ilDate(until) }).replace(/^🎁[^·]*·\s*/, "") };
+}
+
+// One of the gift-day pushes, or null (a no-favourite family on days ≤ 9 hears nothing).
+function giftDayMessage(ctx, day, daysLeft, premiumUntil, lang) {
+  const { star, kids, totalQ, fav, cfg } = ctx;
+  const vars = conversionVars(ctx, lang);
+  const worldsToday = kids.reduce((s, k) => s + Object.keys(k.topicsToday || {}).length, 0);
+  if (lang === "en") {
+    const name = vars["שם"];
+    const favLabel = fav ? favLabelEn(fav) : null;
+    if (daysLeft <= 1) {
+      const keep = fav ? `${favNameEn(fav)} and all the other worlds` : "all the worlds";
+      return { title: `Tofy+ gift for ${name} ends today`, body: `${capFirst(name)} will keep learning and earning play time for free, as usual. To keep ${keep} open, continue with Tofy+.` };
+    }
+    if (daysLeft <= 2) {
+      const tpl = fav ? CONVERSION_COPY_EN.copyTwoDays : CONVERSION_COPY_EN.copyTwoDaysNoFavorite;
+      return { title: `⏰ 2 days left of Tofy+ for ${name}`, body: capFirst(fill(tpl, vars).replace(/^⏰[^·]*·\s*/, "")) };
+    }
+    if (day <= 9) {
+      return fav ? { title: `❤️ Looks like ${name} found something they love`,
+                     body: `${favLabel} is where ${name} comes back most in Tofy: ${plural(fav.days, "day", "days")}, ${plural(fav.questions, "question", "questions")}.` } : null;
+    }
+    return { title: `${capFirst(name)} discovered ${worldsToday ? plural(worldsToday, "world", "worlds") : "a few worlds"} 🌎`,
+             body: `${plural(totalQ, "question", "questions")} in the last month${favLabel ? " · Favorite: " + favLabel : ""}. The gift ends on ${enWeekday(premiumUntil)}. Keep every world open.` };
+  }
+  const name = vars["שם"]; const girl = star && star.gender === "girl";
+  let msg = null;
+  if (daysLeft <= 1) msg = { title: `היום מסתיימת מתנת טופי+ של ${name}`, body: `${name} ${girl ? "תמשיך" : "ימשיך"} ללמוד ולהרוויח זמן בחינם כרגיל. כדי להשאיר את ${fav ? fav.label.replace(/^\S+\s/, "") + " ו" : ""}שאר העולמות פתוחים: המשיכו עם טופי+.` };
+  else if (daysLeft <= 2) msg = { title: `⏰ נשארו יומיים לטופי+ של ${name}`, body: fill(cfg.copyTwoDays, vars).replace(/^⏰[^·]*·\s*/, "") };
+  else if (day <= 9) msg = fav ? { title: `❤️ נראה ש${name} ${girl ? "מצאה" : "מצא"} משהו ש${girl ? "היא אוהבת" : "הוא אוהב"}`, body: `${fav.label} הוא המקום ש${girl ? "היא חוזרת" : "הוא חוזר"} אליו הכי הרבה בטופי: ${fav.days} ימים, ${fav.questions} שאלות.` } : null;
+  else msg = { title: `${name} ${girl ? "גילתה" : "גילה"} ${worldsToday || "כמה"} עולמות 🌎`, body: `${totalQ} שאלות בחודש האחרון${fav ? " · האהוב: " + fav.label : ""}. המתנה מסתיימת ב${ilWeekday(premiumUntil)}. השאירו את כל העולמות פתוחים.` };
+  return msg;
+}
+
 async function runConversionEngine() {
   const cfg = await conversionConfig();
   const jdoc = await db.collection("adminStats").doc("journey").get();
@@ -2901,10 +3340,9 @@ async function runConversionEngine() {
     const premiumUntil = Number(hh.premiumUntil || 0);
     const kids = (h.kids || []).map((id) => ({ id, ...((journey.children || {})[id] || {}) }));
     const star = kids.filter((k) => k.everQuestions > 0).sort((a, b) => b.questions30 - a.questions30)[0];
-    const name = star ? star.name : "הילד"; const girl = star && star.gender === "girl";
     const totalQ = kids.reduce((s, k) => s + (k.questions30 || 0), 0);
     const fav = star && star.favorite;
-    const vars = { "שם": name, "שאלות": totalQ, "ימים": cfg.giftDays, "עולם אהוב": fav ? fav.label : "העולם האהוב", "חזרות": fav ? fav.days : 0, "מחיר חודשי בשנתי": "₪16.60" };
+    const ctx = { star, kids, totalQ, fav, cfg };
     // 0. still on the free tier → keep the parent's "עוד יום פעיל אחד" card honest
     if (!h.activated && !hh.giftStartedAt && !hh.purchasedAt && hh.premiumSource !== "paid") {
       const a = { days: h.activeDays || 0, questions: h.questions || 0, needDays: cfg.activationDays, needQuestions: cfg.activationQuestions };
@@ -2918,7 +3356,7 @@ async function runConversionEngine() {
       gifted += 1;
       if (await onceKey(`gift_start_${hhID}`)) {
         const tokens = await tokensForHousehold(hhID);
-        if (tokens.length) { await send(tokens, { title: `🎁 פתחנו ל${name} את טופי+ במתנה`, body: fill(cfg.copyActivation, { ...vars, "תאריך": ilDate(until) }).replace(/^🎁[^·]*·\s*/, "") }, { type: "gift-start", householdID: hhID }); pushed += 1; }
+        if (tokens.length) { await sendLocalized(tokens, (lang) => giftStartMessage(ctx, until, lang), { type: "gift-start", householdID: hhID }); pushed += 1; }
       }
       continue;
     }
@@ -2928,12 +3366,8 @@ async function runConversionEngine() {
       const daysLeft = Math.ceil((premiumUntil - now) / 86400);
       const dedup = db.collection("pushDedup").doc(`gift_day${day}_${hhID}`);
       if ((cfg.giftPushDays || []).includes(day) && !(await dedup.get()).exists) {
-        let msg = null;
-        if (daysLeft <= 1) msg = { title: `היום מסתיימת מתנת טופי+ של ${name}`, body: `${name} ${girl ? "תמשיך" : "ימשיך"} ללמוד ולהרוויח זמן בחינם כרגיל. כדי להשאיר את ${fav ? fav.label.replace(/^\S+\s/, "") + " ו" : ""}שאר העולמות פתוחים: המשיכו עם טופי+.` };
-        else if (daysLeft <= 2) msg = { title: `⏰ נשארו יומיים לטופי+ של ${name}`, body: fill(cfg.copyTwoDays, vars).replace(/^⏰[^·]*·\s*/, "") };
-        else if (day <= 9) msg = fav ? { title: `❤️ נראה ש${name} ${girl ? "מצאה" : "מצא"} משהו ש${girl ? "היא אוהבת" : "הוא אוהב"}`, body: `${fav.label} הוא המקום ש${girl ? "היא חוזרת" : "הוא חוזר"} אליו הכי הרבה בטופי: ${fav.days} ימים, ${fav.questions} שאלות.` } : null;
-        else msg = { title: `${name} ${girl ? "גילתה" : "גילה"} ${kids.reduce((s, k) => s + Object.keys(k.topicsToday || {}).length, 0) || "כמה"} עולמות 🌎`, body: `${totalQ} שאלות בחודש האחרון${fav ? " · האהוב: " + fav.label : ""}. המתנה מסתיימת ב${ilWeekday(premiumUntil)}. השאירו את כל העולמות פתוחים.` };
-        if (msg) { const tokens = await tokensForHousehold(hhID); if (tokens.length) { await send(tokens, msg, { type: "gift-day", householdID: hhID, day: String(day) }); pushed += 1; } }
+        const msgFor = (lang) => giftDayMessage(ctx, day, daysLeft, premiumUntil, lang);
+        if (msgFor("he")) { const tokens = await tokensForHousehold(hhID); if (tokens.length) { await sendLocalized(tokens, msgFor, { type: "gift-day", householdID: hhID, day: String(day) }); pushed += 1; } }
         await dedup.set({ at: Date.now() });   // after the send, so a failed run retries next hour
       }
     }

@@ -140,6 +140,10 @@
         </div>
         <label class="f">טקסט קצר</label>
         <textarea id="body" maxlength="240" placeholder="עזרו לילד שלכם להכיר שחקנים, קבוצות, תחרויות ועובדות מעניינות מעולם הכדורגל."></textarea>
+        <label class="f">English (optional) · אנגלית, לא חובה</label>
+        <input type="text" id="titleEn" dir="ltr" maxlength="80" placeholder="New in Tofy: Soccer World">
+        <textarea id="bodyEn" dir="ltr" maxlength="240" placeholder="Help your child get to know players, teams, tournaments, and fun facts from the world of soccer." style="margin-top:6px;min-height:52px"></textarea>
+        <div class="note" style="margin-top:4px">בלי נוסח באנגלית, מכשירים שמוגדרים לאנגלית לא יקבלו את ההודעה (לעולם לא נשלח להם עברית).</div>
         <div class="row">
           <div><label class="f">תמונה (קישור, לא חובה)</label><input type="url" id="imageURL" placeholder="https://tofyapp.com/img/soccer.png"></div>
           <div><label class="f">פעולה בלחיצה</label>
@@ -171,6 +175,9 @@
           <label class="f">גרסת הילד (אוטומטית, אפשר לערוך — בלי מחיר!)</label>
           <input type="text" id="childTitle" maxlength="80" placeholder="רוצה ללמוד על כדורגל?">
           <textarea id="childBody" maxlength="240" placeholder="שחקנים, קבוצות ותחרויות — בקש מאבא או אמא" style="margin-top:6px;min-height:52px"></textarea>
+          <label class="f">Kids' version — English (optional) · גרסת הילד באנגלית</label>
+          <input type="text" id="childTitleEn" dir="ltr" maxlength="80" placeholder="Want to learn about soccer?">
+          <textarea id="childBodyEn" dir="ltr" maxlength="240" placeholder="Players, teams, tournaments, and surprising facts — ask Mom or Dad" style="margin-top:6px;min-height:52px"></textarea>
         </div>
 
         <div class="row">
@@ -195,6 +202,12 @@
           <p class="pcap">כך זה ייראה על האייפון של ההורה</p>
           <div class="iphone"><p class="lock" id="pvTime">יום שני 09:30</p>
             <div class="push"><div class="app">🦁</div><div><b><span id="pvTitle">חדש בטופי</span> <small>עכשיו</small></b><p id="pvBody">…</p></div><img id="pvImg" hidden alt=""></div>
+          </div>
+          <div id="pvEnWrap" hidden>
+            <p class="pcap">ובמכשיר שמוגדר לאנגלית</p>
+            <div class="iphone" dir="ltr" style="padding-top:12px"><div class="push" id="pvParentEn" style="text-align:left"><div class="app">🦁</div><div><b><span id="pvTitleEn"></span> <small style="float:right">now</small></b><p id="pvBodyEn"></p></div></div>
+              <div class="push" id="pvChildEn" style="text-align:left;margin-top:8px" hidden><div class="app">🧒</div><div><b id="pvChildTitleEn"></b><p id="pvChildBodyEn"></p></div></div>
+            </div>
           </div>
           <p class="pcap">ובתוך טופי (פופ־אפ בכניסה הבאה)</p>
           <div class="inapp"><div class="g"><div class="hero" id="pvEmoji">🦁</div><div class="t" id="pvTitle2">חדש בטופי</div><div class="m" id="pvBody2">…</div><span class="primary" id="pvCta">הבנתי</span><span class="ghost">אולי אחר כך</span></div></div>
@@ -224,21 +237,35 @@ const CONFIG = {
   firebase: { apiKey: "AIzaSyCjZFUZFXwsbNrDA8Icw_ZZ-bPGARCLMLI", authDomain: "childtime-86e98.firebaseapp.com", projectId: "childtime-86e98" },
   adminEmails: ["ranioph@gmail.com", "amitgolans@gmail.com"],
 };
-// Keep in sync with QuestionPacks (iOS) — name, emoji, App Store price.
+// Keep in sync with QuestionPacks (iOS) — name, emoji, App Store price — and the
+// English copy with PACK_META in functions/index.js.
 const PACKS = {
-  soccer: { name: "עולם הכדורגל", emoji: "⚽", price: 14.9, sibling: 7.9, subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות" },
-  dinosaurs: { name: "דינוזאורים", emoji: "🦖", price: 14.9, sibling: 7.9, subject: "דינוזאורים", tagline: "מינים, גדל, מה אכלו, ואיך מגלים מאבנים" },
-  space: { name: "חלל וכוכבים", emoji: "🚀", price: 14.9, sibling: 7.9, subject: "חלל", tagline: "כוכבי לכת, ירח, אסטרונאוטים ושמש" },
-  animals: { name: "עולם החיות", emoji: "🐾", price: 14.9, sibling: 7.9, subject: "חיות", tagline: "יבשות, חיות בסכנה ושיאים" },
-  sea: { name: "מעמקי הים", emoji: "🌊", price: 14.9, sibling: 7.9, subject: "הים", tagline: "כרישים, לויתנים, שוניות, ומי חי איפה" },
-  gifted: { name: "הכנה למחוננים", emoji: "🧠", price: 14.9, sibling: 7.9, subject: "חשיבה", tagline: "חשיבה, סדרות, הקשים ותפיסה מרחבית" },
-  food: { name: "מטבח ומדע של אכל", emoji: "🍳", price: 14.9, sibling: 7.9, subject: "אכל", tagline: "מאין מגיע אכל, מדידות ומתכונים בחשבון" },
-  israel: { name: "ישראל שלי", emoji: "🏛️", price: 14.9, sibling: 7.9, subject: "ישראל", tagline: "ערים, סמלים, חגים, דמיות וטבע" },
-  tishrei: { name: "חגי תשרי", emoji: "🍎", price: 14.9, sibling: 7.9, subject: "חגי תשרי", tagline: "ראש השנה, יום כיפור, סוכות ושמחת תורה" },
-  music: { name: "מוזיקה", emoji: "🎵", price: 14.9, sibling: 7.9, subject: "מוזיקה", tagline: "כלי נגינה, קצב, מלחינים ושירי ילדים" },
-  body: { name: "גוף האדם", emoji: "🧍", price: 14.9, sibling: 7.9, subject: "גוף האדם", tagline: "עצמות, לב, נשימה ובריאות" },
-  vehicles: { name: "כלי רכב ותחבורה", emoji: "🚗", price: 14.9, sibling: 7.9, subject: "כלי רכב", tagline: "מכוניות, רכבות, מטוסים, ואיך זה עובד" },
-  flags: { name: "דגלים ומדינות", emoji: "🌍", price: 14.9, sibling: 7.9, subject: "דגלים ומדינות", tagline: "דגלים, בירות ויבשות" },
+  soccer: { name: "עולם הכדורגל", emoji: "⚽", price: 14.9, sibling: 7.9, subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות",
+    nameEn: "Soccer World", subjectEn: "soccer", taglineEn: "Players, teams, tournaments, and surprising facts" },
+  dinosaurs: { name: "דינוזאורים", emoji: "🦖", price: 14.9, sibling: 7.9, subject: "דינוזאורים", tagline: "מינים, גדל, מה אכלו, ואיך מגלים מאבנים",
+    nameEn: "Dinosaurs", subjectEn: "dinosaurs", taglineEn: "Species, size, what they ate, and how fossils are found" },
+  space: { name: "חלל וכוכבים", emoji: "🚀", price: 14.9, sibling: 7.9, subject: "חלל", tagline: "כוכבי לכת, ירח, אסטרונאוטים ושמש",
+    nameEn: "Space and Stars", subjectEn: "space", taglineEn: "Planets, the Moon, astronauts, and the Sun" },
+  animals: { name: "עולם החיות", emoji: "🐾", price: 14.9, sibling: 7.9, subject: "חיות", tagline: "יבשות, חיות בסכנה ושיאים",
+    nameEn: "Animal World", subjectEn: "animals", taglineEn: "Continents, endangered animals, and record-breakers" },
+  sea: { name: "מעמקי הים", emoji: "🌊", price: 14.9, sibling: 7.9, subject: "הים", tagline: "כרישים, לויתנים, שוניות, ומי חי איפה",
+    nameEn: "Deep Sea", subjectEn: "the ocean", taglineEn: "Sharks, whales, reefs, and who lives where" },
+  gifted: { name: "הכנה למחוננים", emoji: "🧠", price: 14.9, sibling: 7.9, subject: "חשיבה", tagline: "חשיבה, סדרות, הקשים ותפיסה מרחבית",
+    nameEn: "Gifted Prep", subjectEn: "thinking skills", taglineEn: "Thinking, sequences, inference, and spatial reasoning" },
+  food: { name: "מטבח ומדע של אכל", emoji: "🍳", price: 14.9, sibling: 7.9, subject: "אכל", tagline: "מאין מגיע אכל, מדידות ומתכונים בחשבון",
+    nameEn: "Kitchen and Food Science", subjectEn: "food", taglineEn: "Where food comes from, measuring, and recipe math" },
+  israel: { name: "ישראל שלי", emoji: "🏛️", price: 14.9, sibling: 7.9, subject: "ישראל", tagline: "ערים, סמלים, חגים, דמיות וטבע",
+    nameEn: "My Israel", subjectEn: "Israel", taglineEn: "Cities, symbols, holidays, famous people, and nature" },
+  tishrei: { name: "חגי תשרי", emoji: "🍎", price: 14.9, sibling: 7.9, subject: "חגי תשרי", tagline: "ראש השנה, יום כיפור, סוכות ושמחת תורה",
+    nameEn: "Fall Holidays", subjectEn: "the fall holidays", taglineEn: "Rosh Hashanah, Yom Kippur, Sukkot, and Simchat Torah" },
+  music: { name: "מוזיקה", emoji: "🎵", price: 14.9, sibling: 7.9, subject: "מוזיקה", tagline: "כלי נגינה, קצב, מלחינים ושירי ילדים",
+    nameEn: "Music", subjectEn: "music", taglineEn: "Instruments, rhythm, composers, and children's songs" },
+  body: { name: "גוף האדם", emoji: "🧍", price: 14.9, sibling: 7.9, subject: "גוף האדם", tagline: "עצמות, לב, נשימה ובריאות",
+    nameEn: "The Human Body", subjectEn: "the human body", taglineEn: "Bones, heart, breathing, and health" },
+  vehicles: { name: "כלי רכב ותחבורה", emoji: "🚗", price: 14.9, sibling: 7.9, subject: "כלי רכב", tagline: "מכוניות, רכבות, מטוסים, ואיך זה עובד",
+    nameEn: "Vehicles and Transportation", subjectEn: "vehicles", taglineEn: "Cars, trains, planes, and how they work" },
+  flags: { name: "דגלים ומדינות", emoji: "🌍", price: 14.9, sibling: 7.9, subject: "דגלים ומדינות", tagline: "דגלים, בירות ויבשות",
+    nameEn: "Flags and Countries", subjectEn: "flags and countries", taglineEn: "Flags, capitals, and continents" },
 };
 const TOPICS = { math: "🧮 מתמטיקה", english: "🇬🇧 אנגלית", hebrew: "✍️ עברית", logic: "🧩 לוגיקה", science: "🔬 מדעים", history: "🏛️ היסטוריה", geography: "🌍 גיאוגרפיה", money: "💰 חינוך פיננסי", reading: "📖 הבנת הנקרא" };
 const GRADES = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"];
@@ -257,8 +284,9 @@ $("roles").querySelectorAll(".chip").forEach((c) => c.onclick = () => { c.classL
 $("action").onchange = () => { $("packRow").hidden = $("action").value !== "pack"; if ($("action").value === "pack") { const p = PACKS[$("packID").value]; if (!$("title").value) $("title").value = `חדש בטופי: ${p.name}`; if (!$("emoji").value) $("emoji").value = p.emoji; } render(); };
 $("packID").onchange = render;
 $("when").onchange = () => { $("whenAt").disabled = $("when").value !== "later"; if (!$("whenAt").disabled && !$("whenAt").value) { const d = new Date(Date.now() + 3600e3); d.setMinutes(0); $("whenAt").value = d.toISOString().slice(0, 16); } };
-["emoji", "title", "body", "imageURL", "childTitle", "childBody"].forEach((id) => $(id).oninput = render);
-$("resetBtn").onclick = () => { $("cid").value = ""; ["emoji", "title", "body", "imageURL", "childTitle", "childBody"].forEach((id) => $(id).value = ""); $("action").value = "none"; $("packRow").hidden = true; render(); };
+const COPY_FIELDS = ["emoji", "title", "body", "imageURL", "childTitle", "childBody", "titleEn", "bodyEn", "childTitleEn", "childBodyEn"];
+COPY_FIELDS.forEach((id) => $(id).oninput = render);
+$("resetBtn").onclick = () => { $("cid").value = ""; COPY_FIELDS.forEach((id) => $(id).value = ""); $("action").value = "none"; $("packRow").hidden = true; render(); };
 
 function roles() { return [...$("roles").querySelectorAll(".chip.on")].map((c) => c.dataset.v); }
 function childDefaults() {
@@ -266,13 +294,22 @@ function childDefaults() {
   if ($("action").value === "pack" && p) return { title: `רוצה ללמוד על ${p.subject}?`, body: `${p.tagline} — בקש מאבא או אמא` };
   return { title: $("title").value, body: $("body").value };
 }
+// English kids' copy defaults the same way — but only once there IS English copy.
+function childDefaultsEn() {
+  const p = PACKS[$("packID").value];
+  if ($("action").value === "pack" && p) return { title: `Want to learn about ${p.subjectEn}?`, body: `${p.taglineEn} — ask Mom or Dad` };
+  return { title: $("titleEn").value, body: $("bodyEn").value };
+}
 function form() {
   const when = $("when").value === "later" && $("whenAt").value ? new Date($("whenAt").value).getTime() : Date.now();
-  const cd = childDefaults();
+  const cd = childDefaults(), cdEn = childDefaultsEn();
   return {
     id: $("cid").value || undefined,
     emoji: $("emoji").value.trim(), title: $("title").value.trim(), body: $("body").value.trim(), imageURL: $("imageURL").value.trim(),
     childTitle: ($("childTitle").value || cd.title).trim(), childBody: ($("childBody").value || cd.body).trim(),
+    titleEn: $("titleEn").value.trim(), bodyEn: $("bodyEn").value.trim(),
+    childTitleEn: ($("childTitleEn").value || ($("titleEn").value.trim() ? cdEn.title : "")).trim(),
+    childBodyEn: ($("childBodyEn").value || ($("titleEn").value.trim() ? cdEn.body : "")).trim(),
     audience: { roles: roles(), gradeMin: +$("gradeMin").value, gradeMax: +$("gradeMax").value, premium: $("premium").value,
                 topics: [...$("topics").querySelectorAll(".chip.on")].map((c) => c.dataset.v), excludeOwners: $("excludeOwners").checked },
     action: { type: $("action").value, packID: $("action").value === "pack" ? $("packID").value : "" },
@@ -291,6 +328,12 @@ function render() {
   $("childCopy").hidden = !kids; $("pvChildCap").hidden = !kids; $("pvChild").hidden = !kids;
   const cd = childDefaults(); $("childTitle").placeholder = cd.title; $("childBody").placeholder = cd.body;
   $("pvChildEmoji").textContent = f.emoji || "🦁"; $("pvChildTitle").textContent = f.childTitle; $("pvChildBody").textContent = f.childBody;
+  const cdEn = childDefaultsEn(); $("childTitleEn").placeholder = cdEn.title || "Want to learn about soccer?"; $("childBodyEn").placeholder = cdEn.body || "Players, teams, tournaments, and surprising facts — ask Mom or Dad";
+  const en = f.audience.roles.includes("parents") && f.titleEn, enKids = kids && f.childTitleEn;
+  $("pvEnWrap").hidden = !(en || enKids);
+  $("pvTitleEn").textContent = (f.emoji ? f.emoji + " " : "") + (f.titleEn || "—"); $("pvBodyEn").textContent = f.bodyEn || "";
+  $("pvParentEn").hidden = !en;
+  $("pvChildEn").hidden = !enKids; $("pvChildTitleEn").textContent = (f.emoji ? f.emoji + " " : "") + (f.childTitleEn || ""); $("pvChildBodyEn").textContent = f.childBodyEn || "";
   $("pvTime").textContent = new Date(f.scheduledAt).toLocaleString("he-IL", { weekday: "long", hour: "2-digit", minute: "2-digit" });
 }
 render();
@@ -353,6 +396,7 @@ $("testBtn").onclick = async () => {
       const lines = (r.devices || []).map((d) => `${d.kind} ${d.n}: ${d.ok ? "נשלח ✓" : "נכשל ✗ (" + (d.error || "") + ")"}`);
       if (r.skippedParents) lines.push(`${r.skippedParents} מכשירי הורה לא נכללו — הקהל לא כולל הורים`);
       if (r.skippedChildren) lines.push(`${r.skippedChildren} מכשירי ילד לא נכללו — הקהל לא כולל ילדים`);
+      if (r.skippedLanguage) lines.push(`${r.skippedLanguage} מכשירים באנגלית לא קיבלו — אין נוסח באנגלית`);
       if (r.pruned) lines.push(`${r.pruned} מכשירים ישנים נמחקו מהרשימה (הופיעו כ"לא רשומים" ב-Apple)`);
       alert("בדיקה:\n" + lines.join("\n"));
     }
@@ -385,7 +429,8 @@ function funnel(c) {
   const s = c.stats || {};
   const steps = [["sent", "נשלח"], ["opened", "נפתח"], ["popup", "פופ־אפ"]];
   if ((c.action || {}).type === "pack") steps.push(["page", "עמוד"], ["purchaseStarted", "התחילו"], ["purchased", "רכשו"], ["sentToChild", "נשלח לילד"]);
-  return `<div class="funnel">${steps.map(([k, l]) => `<span><b>${s[k] || 0}</b> <i>${l}</i></span>`).join("→")}</div>`;
+  const skipped = c.skippedLanguage ? ` <span title="מכשירים שמוגדרים לאנגלית, ולהודעה אין נוסח באנגלית"><b>${c.skippedLanguage}</b> <i>דולגו (אין אנגלית)</i></span>` : "";
+  return `<div class="funnel">${steps.map(([k, l]) => `<span><b>${s[k] || 0}</b> <i>${l}</i></span>`).join("→")}${skipped}</div>`;
 }
 function revenue(c) {
   const p = PACKS[(c.action || {}).packID]; const n = (c.stats || {}).purchased || 0;
@@ -396,7 +441,7 @@ async function loadHistory() {
   try {
     const r = await call("adminListCampaigns", {});
     const rows = (r.campaigns || []).map((c) => `<tr>
-      <td><b>${(c.emoji ? c.emoji + " " : "")}${esc(c.title)}</b><div style="color:var(--muted);font-size:12px;max-width:260px;white-space:normal">${esc(c.body || "")}</div></td>
+      <td><b>${(c.emoji ? c.emoji + " " : "")}${esc(c.title)}</b>${c.titleEn ? ' <span class="st" title="' + esc(c.titleEn) + '">EN</span>' : ""}<div style="color:var(--muted);font-size:12px;max-width:260px;white-space:normal">${esc(c.body || "")}</div></td>
       <td class="num">${fmtDate(c.scheduledAt)}</td>
       <td style="white-space:normal;max-width:180px">${esc(audienceLabel(c.audience || { roles: [] }))}</td>
       <td><span class="st ${c.status}">${STATUS[c.status] || c.status}</span></td>
@@ -423,6 +468,7 @@ async function loadHistory() {
 function fill(c) {
   $("cid").value = c.id; $("emoji").value = c.emoji || ""; $("title").value = c.title || ""; $("body").value = c.body || ""; $("imageURL").value = c.imageURL || "";
   $("childTitle").value = c.childTitle || ""; $("childBody").value = c.childBody || "";
+  $("titleEn").value = c.titleEn || ""; $("bodyEn").value = c.bodyEn || ""; $("childTitleEn").value = c.childTitleEn || ""; $("childBodyEn").value = c.childBodyEn || "";
   $("action").value = (c.action || {}).type || "none"; $("packRow").hidden = $("action").value !== "pack"; if ((c.action || {}).packID) $("packID").value = c.action.packID;
   const a = c.audience || {}; $("roles").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", (a.roles || []).includes(x.dataset.v)));
   $("gradeMin").value = a.gradeMin ?? 0; $("gradeMax").value = !a.gradeScale && (a.gradeMax ?? 6) >= 6 ? 8 : (a.gradeMax ?? 8); $("premium").value = a.premium || "any"; $("excludeOwners").checked = a.excludeOwners !== false;
@@ -438,7 +484,7 @@ async function loadPacks() {
     const r = await call("adminListPacks", {});
     $("packs").innerHTML = Object.entries(PACKS).map(([id, p]) => { const st = (r.packs || {})[id] || {}; const s = (r.sales || {})[id] || { purchases: 0, children: 0, revenue: 0 };
       return `<div class="packrow"><span style="font-size:28px">${p.emoji}</span><div class="n">${p.name}<small>₪${p.price} · ילד נוסף ₪${p.sibling} · ${s.purchases} רכישות · ${s.children} ילדים · <span class="money">₪${Math.round(s.revenue)}</span></small>
-        <small style="margin-top:4px">${st.launchCampaignID ? "📣 פוש ההשקה נשלח" : `📣 בהדלקה יישלח לכל ההורים: <b style="color:#fff">${p.emoji} עולם חדש בטופי: ${p.name}</b> — גילינו עולם חדש בשביל הילדים: ${p.tagline}. על כל תשובה נכונה מרוויחים דקות משחק. שולחים לילד מהטלפון שלכם.`}</small></div>
+        <small style="margin-top:4px">${st.launchCampaignID ? "📣 פוש ההשקה נשלח" : `📣 בהדלקה יישלח לכל ההורים: <b style="color:#fff">${p.emoji} עולם חדש בטופי: ${p.name}</b> — גילינו עולם חדש בשביל הילדים: ${p.tagline}. על כל תשובה נכונה מרוויחים דקות משחק. שולחים לילד מהטלפון שלכם.<br>ובאנגלית: <b style="color:#fff" dir="ltr">${p.emoji} New world in Tofy: ${p.nameEn}</b>`}</small></div>
         <span class="chip ${st.enabled ? "mint" : "dim"}">${st.enabled ? "פעיל למשפחות" : "כבוי"}</span><div class="switch ${st.enabled ? "on" : ""}" data-pack="${id}" title="הדלקה/כיבוי"></div></div>`; }).join("");
     $("packs").querySelectorAll(".switch").forEach((sw) => sw.onclick = async () => { const on = !sw.classList.contains("on");
       if (on && !confirm(`להדליק את "${PACKS[sw.dataset.pack].name}" לכל המשפחות?\n\nפוש ההשקה יישלח לכל ההורים תוך 5 דקות (פעם אחת בלבד).`)) return;

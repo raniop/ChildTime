@@ -111,7 +111,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260911131043";
+const PAGE_STAMP = "20260911193515";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -682,7 +682,7 @@ async function settings() {
     <div class="card"><h4>נוסחים (עריכה בלי בילד)</h4>
       <div class="q"><b>פוש ההפעלה</b><textarea id="k_copyActivation">${esc(cfg.copyActivation)}</textarea></div>
       <div class="q"><b>48 שעות לפני</b><textarea id="k_copyTwoDays">${esc(cfg.copyTwoDays)}</textarea></div>
-      <div class="stamp">משתנים: {שם} {שאלות} {ימים} {תאריך} {עולם אהוב} {חזרות} {מחיר חודשי בשנתי}</div></div>`;
+      <div class="stamp">משתנים: {שם} {שאלות} {ימים} {תאריך} {עולם אהוב} {חזרות} {מחיר חודשי בשנתי}</div><div class="stamp">מכשירים שמוגדרים לאנגלית מקבלים נוסח אנגלי קבוע מהשרת, באותה משמעות (בלי מחיר) — העריכה כאן משנה רק את העברית.</div></div>`;
   $("saveCfg").onclick = async () => { const v = (k) => document.getElementById("k_" + k).value;
     const config = { activationDays: +v("activationDays"), activationQuestions: +v("activationQuestions"), giftDays: +v("giftDays"), guestWorlds: +v("guestWorlds"), guestRotateDays: +v("guestRotateDays"), lockedShown: +v("lockedShown"), lockedRotateDays: +v("lockedRotateDays"),
       giftPushDays: v("giftPushDays").split(/[^0-9]+/).filter(Boolean).map(Number), giftPushHour: +v("giftPushHour"), oneTimeAfterGiftOnly: v("oneTimeAfterGiftOnly") === "true", paywall: v("paywall"), storeKitTrial: v("storeKitTrial") === "true",
