@@ -44,7 +44,8 @@ struct LanguagePickerView: View {
                 WidgetCenter.shared.reloadAllTimelines()
                 ShieldBridge.refresh()
                 WatchBridge.shared.resendLastSnapshot()
-                // …and notifications sent from the server.
+                // …and notifications: their buttons, and what the server sends.
+                PushManager.shared.configureCategories()
                 if let token = PushManager.shared.currentToken { PushManager.shared.uploadFCMToken(token) }
             }
         } label: {

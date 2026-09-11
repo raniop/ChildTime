@@ -57,6 +57,22 @@ struct CoverageExport {
                     return ["grade": g, "tagged": tagged, "pool": max(tagged, min(minGradePool, bank.count))]
                 }
             }
+            // 🇺🇸 The English (US) catalog, counted the same way — hidden in the app
+            // until a world has at least ContentAvailability.minimumBank questions.
+            switch topic {
+            case .math: row["en"] = ["computed": true]
+            case .reading:
+                let passages = EnglishContent.passages
+                row["en"] = ["total": passages.reduce(0) { $0 + $1.questions.count }, "passages": passages.count,
+                             "grades": (0...8).map { g -> [String: Any] in
+                                 let inWindow = passages.filter { $0.gradeWindow.contains(g) }
+                                 return ["grade": g, "tagged": inWindow.reduce(0) { $0 + $1.questions.count }, "passages": inWindow.count]
+                             }]
+            default:
+                let bank = EnglishContent.bank(for: topic)
+                row["en"] = ["total": bank.count,
+                             "grades": (0...8).map { g in ["grade": g, "tagged": bank.filter { $0.grades.contains(g) }.count] }]
+            }
             topicsOut.append(row)
         }
         let payload: [String: Any] = [

@@ -231,6 +231,8 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// Whether this child may play the topic: a base topic the parent hasn't
     /// turned off, or a paid pack the parent bought for this child.
     func allows(_ topic: Topic) -> Bool {
+        // 🌍 A world with no questions in the app's language isn't offered at all.
+        guard ContentAvailability.hasContent(topic) else { return false }
         // A pack world is playable when the family has it — bought for this
         // child, OR included in Tofy+ (every pack is; Rani) — and the founder
         // has switched the pack on. `ownedPacks` alone hid every unbought pack

@@ -113,12 +113,22 @@ struct Campaign: Identifiable, Equatable {
     init?(id: String, data: [String: Any]) {
         guard (data["status"] as? String) == "sent", (data["showPopup"] as? Bool) ?? true else { return nil }
         self.id = id
-        title = data["title"] as? String ?? ""
-        body = data["body"] as? String ?? ""
+        // 🌍 Campaigns are written in Hebrew; English copy sits in the same doc
+        // as titleEn/bodyEn/… A campaign without it is never shown in English.
+        let suffix = LanguageStore.shared.current == .he ? "" : "En"
+        func copy(_ key: String) -> String { data[key + suffix] as? String ?? "" }
+        title = copy("title")
+        body = copy("body")
         emoji = data["emoji"] as? String ?? ""
         imageURL = data["imageURL"] as? String ?? ""
-        childTitle = data["childTitle"] as? String ?? ""
-        childBody = data["childBody"] as? String ?? ""
+        childTitle = copy("childTitle")
+        childBody = copy("childBody")
+        if !suffix.isEmpty {
+            // Same rules as the server's sendCampaignTo: English needs a body when
+            // the Hebrew has one, and a kids-only campaign may carry only child copy.
+            if !(data["body"] as? String ?? "").isEmpty, body.isEmpty { return nil }
+            if title.isEmpty { title = childTitle }
+        }
         let a = data["action"] as? [String: Any] ?? [:]
         action = Action(type: a["type"] as? String ?? "none", packID: a["packID"] as? String ?? "")
         let au = data["audience"] as? [String: Any] ?? [:]
@@ -148,6 +158,8 @@ struct Campaign: Identifiable, Equatable {
         guard audience.roles.contains(role == "child" ? "children" : "parents") else { return false }
         if audience.premium == "with", !premium { return false }
         if audience.premium == "without", premium { return false }
+        if action.type == "pack", let pack = QuestionPacks.find(action.packID),
+           !ContentAvailability.hasContent(pack.topic) { return false }
         if action.type == "pack", !action.packID.isEmpty, !profiles.isEmpty,
            profiles.allSatisfy({ $0.ownedPacks.contains(action.packID) }) { return false }
         let narrowed = audience.gradeMin > 0 || audience.effectiveMax != Int.max || !audience.topics.isEmpty

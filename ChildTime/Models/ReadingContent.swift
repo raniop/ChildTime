@@ -58,8 +58,8 @@ enum ReadingContent {
         if let q = nextGroup(target: target, grade: grade).randomElement() { return q }
         return Question(
             topic: .reading,
-            prompt: "אוֹפְּס... אֵין קְטָעִים חֲדָשִׁים כָּרֶגַע",
-            options: ["בְּסֵדֶר", "הַמְשֵׁךְ", "תּוֹדָה", "חֲזוֹר"],
+            prompt: tr("אוֹפְּס... אֵין קְטָעִים חֲדָשִׁים כָּרֶגַע"),
+            options: [tr("בְּסֵדֶר"), tr("הַמְשֵׁךְ"), tr("תּוֹדָה"), tr("חֲזוֹר")],
             correctIndex: 0
         )
     }
@@ -67,15 +67,21 @@ enum ReadingContent {
     /// 🎓 The passages a grade reads: its own window, else the NEAREST grade's.
     /// The old fallback was the whole pool, so a ז׳ child (no passage reaches
     /// past ו׳) could be handed a two-line א׳ story.
+    /// The passages written in one language (Hebrew = the original set).
+    static func passages(in language: AppLanguage) -> [ReadingPassage] {
+        language == .he ? passages : EnglishContent.passages
+    }
+
     static func universe(for grade: Int?) -> [ReadingPassage] {
-        guard let g = grade else { return passages }
-        let inWindow = passages.filter { $0.gradeWindow.contains(g) }
+        let pool = passages(in: LanguageStore.shared.current)
+        guard let g = grade else { return pool }
+        let inWindow = pool.filter { $0.gradeWindow.contains(g) }
         if !inWindow.isEmpty { return inWindow }
         let distance: (ReadingPassage) -> Int = { p in
             min(abs(p.gradeWindow.lowerBound - g), abs(p.gradeWindow.upperBound - g))
         }
-        guard let nearest = passages.map(distance).min() else { return passages }
-        return passages.filter { distance($0) == nearest }
+        guard let nearest = pool.map(distance).min() else { return pool }
+        return pool.filter { distance($0) == nearest }
     }
 
     /// Prefer the target tier, then drift easier before harder (same spirit as

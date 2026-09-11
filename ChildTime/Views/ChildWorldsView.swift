@@ -32,7 +32,7 @@ struct ChildWorldsView: View {
                     // Base worlds always; a pack world when the family HAS it (bought or
                     // Tofy+) and the founder switched it on — even if this child's switch is off.
                     ForEach(Worlds.all.filter { w in
-                        guard !w.isBonusWorld else { return false }
+                        guard !w.isBonusWorld, ContentAvailability.hasContent(w.topic) else { return false }
                         guard let pack = w.topic.pack else { return true }
                         return profile.map { PackAccess.has($0, pack) } == true
                             && PackStore.shared.visiblePacks.contains { $0.id == pack.id }

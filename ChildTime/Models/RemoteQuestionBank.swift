@@ -26,6 +26,8 @@ final class RemoteQuestionBank {
         let tier: String?
         let gradeLo: Int
         let gradeHi: Int
+        /// "en" for English items; nil = Hebrew (everything written before languages).
+        let lang: String?
 
         init?(_ d: [String: Any]) {
             guard let id = d["id"] as? String,
@@ -38,6 +40,7 @@ final class RemoteQuestionBank {
             self.id = id; self.prompt = prompt; self.correctAnswer = answer
             self.distractors = distractors; self.tier = d["tier"] as? String
             self.gradeLo = lo; self.gradeHi = hi
+            self.lang = d["lang"] as? String
         }
 
         private static func int(_ v: Any?) -> Int? {
@@ -82,9 +85,11 @@ final class RemoteQuestionBank {
 
     /// Approved cloud questions for a topic, ready to merge. Synchronous — reads
     /// the in-memory cache only, so it is safe on the question runner's hot path.
-    func questions(for topic: Topic) -> [BankQuestion] {
+    func questions(for topic: Topic, in language: AppLanguage = LanguageStore.shared.current) -> [BankQuestion] {
         lock.lock(); defer { lock.unlock() }
-        return (cache.items[topic.rawValue] ?? []).filter(\.isPlayable).map(\.bankQuestion)
+        return (cache.items[topic.rawValue] ?? [])
+            .filter { $0.isPlayable && ($0.lang ?? AppLanguage.he.rawValue) == language.rawValue }
+            .map(\.bankQuestion)
     }
 
     /// How many cloud items each topic holds — for diagnostics.

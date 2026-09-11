@@ -12,6 +12,8 @@ import Foundation
 enum BonusQuestionBank {
 
     static func pool(for topic: Topic) -> [BankQuestion] {
+        // Hebrew-only pool; other languages fall back to their bank's hard tier.
+        guard LanguageStore.shared.current == .he else { return [] }
         switch topic {
         case .math:      return []   // procedural — see QuestionGenerator.makeBonusMath
         case .reading:   return []   // falls back to a hard passage via generate(.reading)

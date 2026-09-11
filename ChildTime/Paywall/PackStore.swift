@@ -58,6 +58,11 @@ final class PackStore: ObservableObject {
 
     /// Packs the parent can see and buy right now, in catalog order.
     var visiblePacks: [QuestionPack] {
+        // 🌍 Only packs that have questions in the app's language.
+        livePacks.filter { ContentAvailability.hasContent($0.topic) }
+    }
+
+    private var livePacks: [QuestionPack] {
         #if DEBUG
         // DEMO_PACKS=tishrei,soccer — a screenshot run pins the shelf to exactly
         // these packs, so the family board isn't buried under the full catalog.

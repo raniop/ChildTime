@@ -1,11 +1,14 @@
 {
-  "generatedAt" : "2026-09-11T16:23:54Z",
+  "generatedAt" : "2026-09-11T16:45:59Z",
   "minGradePool" : 30,
   "target" : 200,
   "topics" : [
     {
       "computed" : true,
       "emoji" : "🧮",
+      "en" : {
+        "computed" : true
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -61,6 +64,47 @@
     },
     {
       "emoji" : "🇬🇧",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -121,6 +165,47 @@
     },
     {
       "emoji" : "✍️",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -181,6 +266,47 @@
     },
     {
       "emoji" : "🧩",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -241,6 +367,47 @@
     },
     {
       "emoji" : "🔬",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -301,6 +468,47 @@
     },
     {
       "emoji" : "🏛️",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -361,6 +569,47 @@
     },
     {
       "emoji" : "🌍",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -421,6 +670,47 @@
     },
     {
       "emoji" : "💰",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -481,6 +771,57 @@
     },
     {
       "emoji" : "📖",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "passages" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "passages" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "passages" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "passages" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "passages" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "passages" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "passages" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "passages" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "passages" : 0,
+            "tagged" : 0
+          }
+        ],
+        "passages" : 0,
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -546,6 +887,47 @@
     },
     {
       "emoji" : "⚽",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -606,6 +988,47 @@
     },
     {
       "emoji" : "🦖",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 14
+          },
+          {
+            "grade" : 1,
+            "tagged" : 27
+          },
+          {
+            "grade" : 2,
+            "tagged" : 50
+          },
+          {
+            "grade" : 3,
+            "tagged" : 45
+          },
+          {
+            "grade" : 4,
+            "tagged" : 46
+          },
+          {
+            "grade" : 5,
+            "tagged" : 17
+          },
+          {
+            "grade" : 6,
+            "tagged" : 13
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 74
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -666,6 +1089,47 @@
     },
     {
       "emoji" : "🚀",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 23
+          },
+          {
+            "grade" : 2,
+            "tagged" : 33
+          },
+          {
+            "grade" : 3,
+            "tagged" : 52
+          },
+          {
+            "grade" : 4,
+            "tagged" : 42
+          },
+          {
+            "grade" : 5,
+            "tagged" : 37
+          },
+          {
+            "grade" : 6,
+            "tagged" : 14
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -726,6 +1190,47 @@
     },
     {
       "emoji" : "🐾",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 32
+          },
+          {
+            "grade" : 1,
+            "tagged" : 56
+          },
+          {
+            "grade" : 2,
+            "tagged" : 51
+          },
+          {
+            "grade" : 3,
+            "tagged" : 42
+          },
+          {
+            "grade" : 4,
+            "tagged" : 21
+          },
+          {
+            "grade" : 5,
+            "tagged" : 10
+          },
+          {
+            "grade" : 6,
+            "tagged" : 1
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 76
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -786,6 +1291,47 @@
     },
     {
       "emoji" : "🌊",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 23
+          },
+          {
+            "grade" : 1,
+            "tagged" : 40
+          },
+          {
+            "grade" : 2,
+            "tagged" : 47
+          },
+          {
+            "grade" : 3,
+            "tagged" : 38
+          },
+          {
+            "grade" : 4,
+            "tagged" : 33
+          },
+          {
+            "grade" : 5,
+            "tagged" : 11
+          },
+          {
+            "grade" : 6,
+            "tagged" : 1
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 74
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -846,6 +1392,47 @@
     },
     {
       "emoji" : "🧠",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -906,6 +1493,47 @@
     },
     {
       "emoji" : "🍳",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 32
+          },
+          {
+            "grade" : 2,
+            "tagged" : 50
+          },
+          {
+            "grade" : 3,
+            "tagged" : 34
+          },
+          {
+            "grade" : 4,
+            "tagged" : 36
+          },
+          {
+            "grade" : 5,
+            "tagged" : 14
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 75
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -966,6 +1594,47 @@
     },
     {
       "emoji" : "🏛️",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -1026,6 +1695,47 @@
     },
     {
       "emoji" : "🎵",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 24
+          },
+          {
+            "grade" : 1,
+            "tagged" : 44
+          },
+          {
+            "grade" : 2,
+            "tagged" : 58
+          },
+          {
+            "grade" : 3,
+            "tagged" : 42
+          },
+          {
+            "grade" : 4,
+            "tagged" : 30
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 74
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -1086,6 +1796,47 @@
     },
     {
       "emoji" : "🧍",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 28
+          },
+          {
+            "grade" : 3,
+            "tagged" : 56
+          },
+          {
+            "grade" : 4,
+            "tagged" : 42
+          },
+          {
+            "grade" : 5,
+            "tagged" : 42
+          },
+          {
+            "grade" : 6,
+            "tagged" : 14
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -1146,6 +1897,47 @@
     },
     {
       "emoji" : "🚗",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 36
+          },
+          {
+            "grade" : 1,
+            "tagged" : 60
+          },
+          {
+            "grade" : 2,
+            "tagged" : 34
+          },
+          {
+            "grade" : 3,
+            "tagged" : 34
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -1206,6 +1998,47 @@
     },
     {
       "emoji" : "🌍",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 28
+          },
+          {
+            "grade" : 4,
+            "tagged" : 57
+          },
+          {
+            "grade" : 5,
+            "tagged" : 44
+          },
+          {
+            "grade" : 6,
+            "tagged" : 15
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 72
+      },
       "grades" : [
         {
           "grade" : 0,
@@ -1266,6 +2099,47 @@
     },
     {
       "emoji" : "🍎",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "grades" : [
         {
           "grade" : 0,

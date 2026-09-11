@@ -217,8 +217,15 @@ enum QuestionBanks {
     /// item that repeats a built-in one (same prompt and answer) is dropped —
     /// otherwise it would count twice and QuestionMemory would treat them as two.
     static func bank(for topic: Topic) -> [BankQuestion]? {
-        guard let builtIn = builtInBank(for: topic) else { return nil }
-        let cloud = RemoteQuestionBank.shared.questions(for: topic)
+        bank(for: topic, in: LanguageStore.shared.current)
+    }
+
+    /// 🌍 The bank in one language — Hebrew is the original catalog; any other
+    /// language gets only its own questions (see ContentAvailability).
+    static func bank(for topic: Topic, in language: AppLanguage) -> [BankQuestion]? {
+        guard let hebrewBuiltIn = builtInBank(for: topic) else { return nil }
+        let builtIn = language == .he ? hebrewBuiltIn : EnglishContent.bank(for: topic)
+        let cloud = RemoteQuestionBank.shared.questions(for: topic, in: language)
         guard !cloud.isEmpty else { return builtIn }
         var seen = Set(builtIn.map { "\($0.prompt)|\($0.correctAnswer)" })
         return builtIn + cloud.filter { seen.insert("\($0.prompt)|\($0.correctAnswer)").inserted }

@@ -3097,7 +3097,7 @@ const QB_TIERS = ["easy", "medium", "hard"];
 
 // The automated gate every item passes before it can reach a child. Returns the
 // reasons it fails, or [] when it is playable.
-function qbProblems(q) {
+function qbProblems(q, lang = "he") {
   const out = [];
   const t = (v) => String(v == null ? "" : v).trim();
   const prompt = t(q.prompt), answer = t(q.correctAnswer);
@@ -3113,7 +3113,10 @@ function qbProblems(q) {
   if (q.tier && !QB_TIERS.includes(q.tier)) out.push("רמה לא תקינה");
   // Hebrew content without a single niqqud mark is almost always an unreviewed
   // paste — the whole app is vocalised for young readers.
-  if (/[א-ת]/.test(prompt) && !/[ְ-ׇ]/.test(prompt)) out.push("שאלה בלי ניקוד");
+  if (lang === "en") {
+    // 🇺🇸 An English item must be English all the way through.
+    if (/[א-ת]/.test([prompt, answer, ...ds].join(" "))) out.push("עברית בשאלה באנגלית");
+  } else if (/[א-ת]/.test(prompt) && !/[ְ-ׇ]/.test(prompt)) out.push("שאלה בלי ניקוד");
   return out;
 }
 
@@ -3135,6 +3138,9 @@ exports.adminImportQuestions = onCall({ timeoutSeconds: 120, memory: "512MiB" },
   if (!incoming.length) throw new HttpsError("invalid-argument", "items");
   if (incoming.length > 2000) throw new HttpsError("invalid-argument", "max 2000 per import");
   const approve = request.data?.approve === true;
+  // 🌍 Items without `lang` are Hebrew (everything before languages); English
+  // items carry lang: "en" and only reach devices showing English.
+  const lang = request.data?.lang === "en" ? "en" : "he";
 
   const ref = db.collection("questionBanks").doc(topic);
   const result = await db.runTransaction(async (tx) => {
@@ -3145,7 +3151,7 @@ exports.adminImportQuestions = onCall({ timeoutSeconds: 120, memory: "512MiB" },
     const rejected = [], added = [];
     let dup = 0;
     for (const raw of incoming) {
-      const problems = qbProblems(raw);
+      const problems = qbProblems(raw, lang);
       if (problems.length) { rejected.push({ prompt: String(raw.prompt || "").slice(0, 80), problems }); continue; }
       const key = qbKey(raw);
       if (have.has(key)) { dup++; continue; }
@@ -3159,6 +3165,7 @@ exports.adminImportQuestions = onCall({ timeoutSeconds: 120, memory: "512MiB" },
         gradeLo: Number(raw.gradeLo), gradeHi: Number(raw.gradeHi),
         status: approve ? "approved" : "draft",
         createdAt: Date.now(), createdBy: email,
+        ...(lang === "en" ? { lang: "en" } : {}),
       });
     }
     const version = (cur.version || 0) + (added.length ? 1 : 0);
@@ -3166,7 +3173,7 @@ exports.adminImportQuestions = onCall({ timeoutSeconds: 120, memory: "512MiB" },
     return { added: added.length, duplicates: dup, rejected, version };
   });
   if (result.added) await qbBumpIndex(topic, result.version);
-  console.log("[adminImportQuestions]", email, topic, "+" + result.added, "dup", result.duplicates, "rejected", result.rejected.length);
+  console.log("[adminImportQuestions]", email, topic, lang, "+" + result.added, "dup", result.duplicates, "rejected", result.rejected.length);
   return result;
 });
 
@@ -3200,24 +3207,34 @@ exports.adminSetQuestionStatus = onCall({ timeoutSeconds: 60, memory: "256MiB" }
 exports.adminQuestionBankSummary = onCall({ timeoutSeconds: 60, memory: "512MiB" }, async (request) => {
   requireAdmin(request);
   const wantDrafts = String(request.data?.draftsFor || "");
+  const draftsLang = request.data?.lang === "en" ? "en" : "he";
   const snap = await db.collection("questionBanks").get();
   const topics = {};
   let drafts = [];
-  snap.forEach((d) => {
-    const items = d.data().items || [];
+  // Counts per language: the top level stays Hebrew (what the dashboard always
+  // showed); English sits under `en` with the same shape.
+  const countsFor = (items) => {
     const byGrade = {};
     for (let g = 0; g <= 8; g++) byGrade[g] = { approved: 0, draft: 0 };
     for (const i of items) {
       const st = i.status === "draft" ? "draft" : "approved";
       for (let g = Math.max(0, i.gradeLo); g <= Math.min(8, i.gradeHi); g++) byGrade[g][st]++;
     }
-    topics[d.id] = {
-      version: d.data().version || 0,
+    return {
       approved: items.filter((i) => i.status !== "draft").length,
       draft: items.filter((i) => i.status === "draft").length,
       byGrade,
     };
-    if (d.id === wantDrafts) drafts = items.filter((i) => i.status === "draft");
+  };
+  const langOf = (i) => (i.lang === "en" ? "en" : "he");
+  snap.forEach((d) => {
+    const items = d.data().items || [];
+    topics[d.id] = {
+      version: d.data().version || 0,
+      ...countsFor(items.filter((i) => langOf(i) === "he")),
+      en: countsFor(items.filter((i) => langOf(i) === "en")),
+    };
+    if (d.id === wantDrafts) drafts = items.filter((i) => i.status === "draft" && langOf(i) === draftsLang);
   });
   return { topics, drafts };
 });

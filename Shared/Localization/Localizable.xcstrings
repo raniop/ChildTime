@@ -2622,6 +2622,16 @@
         }
       }
     },
+    "אֵיפֹה %@?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where is %@?"
+          }
+        }
+      }
+    },
     "אֵלֶּה יִנָּעֲלוּ עַד שֶׁהַיֶּלֶד יַרְוִיחַ דַּקּוֹת מִשְׂחָק.": {
       "localizations": {
         "en": {
@@ -2937,7 +2947,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Astronauts, rockets, and Israel in space"
+            "value": "Astronauts, rockets, and NASA missions"
           }
         }
       }
@@ -3338,6 +3348,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "You get a star for every correct answer. Stars never go down — they're your score on the friends leaderboard!"
+          }
+        }
+      }
+    },
+    "אוֹפְּס... אֵין קְטָעִים חֲדָשִׁים כָּרֶגַע": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oops… no new passages right now"
           }
         }
       }
@@ -4602,6 +4622,16 @@
         }
       }
     },
+    "בָּנָנוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bananas"
+          }
+        }
+      }
+    },
     "בָּעֶרֶב": {
       "localizations": {
         "en": {
@@ -5322,6 +5352,16 @@
         }
       }
     },
+    "דְּבוֹרִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bees"
+          }
+        }
+      }
+    },
     "דְּגָלִים": {
       "localizations": {
         "en": {
@@ -5548,6 +5588,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "min"
+          }
+        }
+      }
+    },
+    "דָּגִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fish"
           }
         }
       }
@@ -6442,6 +6492,16 @@
         }
       }
     },
+    "הֶחָתוּל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the cat"
+          }
+        }
+      }
+    },
     "הֶקֵּף וְשֶׁטַח": {
       "localizations": {
         "en": {
@@ -6882,6 +6942,16 @@
         }
       }
     },
+    "הַחֲזִיר": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the pig"
+          }
+        }
+      }
+    },
     "הַחֵל עַל כָּל הַנּוֹשְׂאִים": {
       "localizations": {
         "en": {
@@ -6947,7 +7017,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your child explores the world's favorite game: teams and players from Israel and around the world, countries and tournaments, rules, history, and a little score math — and every correct answer earns play minutes, just like in every world."
+            "value": "Your child explores the world's favorite game: teams and players from the US and around the world, countries and tournaments, rules, history, and a little score math — and every correct answer earns play minutes, just like in every world."
           }
         }
       }
@@ -6988,6 +7058,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "The Moon, the Sun, day and night"
+          }
+        }
+      }
+    },
+    "הַיָּרוֹק": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "green"
           }
         }
       }
@@ -7052,12 +7132,52 @@
         }
       }
     },
+    "הַכֶּלֶב": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the dog"
+          }
+        }
+      }
+    },
+    "הַכָּחוֹל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "blue"
+          }
+        }
+      }
+    },
+    "הַכָּתוֹם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "orange"
+          }
+        }
+      }
+    },
     "הַכֹּל נָעוּל": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Everything is locked"
+          }
+        }
+      }
+    },
+    "הַכּוֹכָב": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the star"
           }
         }
       }
@@ -7072,6 +7192,16 @@
         }
       }
     },
+    "הַלֵּב": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the heart"
+          }
+        }
+      }
+    },
     "הַלֵּב, הָרֵאוֹת וְהַדָּם": {
       "localizations": {
         "en": {
@@ -7082,12 +7212,22 @@
         }
       }
     },
+    "הַמְּשׁוּלָּשׁ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the triangle"
+          }
+        }
+      }
+    },
     "הַמְצָאוֹת וּדְמֻיּוֹת מִיִּשְׂרָאֵל": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Inventions and famous people from Israel"
+            "value": "Inventions and famous Americans"
           }
         }
       }
@@ -7402,6 +7542,16 @@
         }
       }
     },
+    "הַנָּמֵר": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the tiger"
+          }
+        }
+      }
+    },
     "הַסְּמָלִים, הַמַּאֲכָלִים וְהַמִּנְהָגִים שֶׁל חַגֵּי תִּשְׁרֵי — בְּשָׁלוֹשׁ רָמוֹת שֶׁמִּתְאִימוֹת אֶת עַצְמָן לַיֶּלֶד, וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.": {
       "localizations": {
         "en": {
@@ -7418,6 +7568,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Next round starting… ⏳"
+          }
+        }
+      }
+    },
+    "הַסָּגוֹל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "purple"
           }
         }
       }
@@ -7462,12 +7622,62 @@
         }
       }
     },
+    "הַפִּיל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the elephant"
+          }
+        }
+      }
+    },
+    "הַפִּינְגְּוִין": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the penguin"
+          }
+        }
+      }
+    },
+    "הַפָּרָה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the cow"
+          }
+        }
+      }
+    },
+    "הַצְּפַרְדֵּעַ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the frog"
+          }
+        }
+      }
+    },
     "הַצְלָחָה": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "correct"
+          }
+        }
+      }
+    },
+    "הַצָּהוֹב": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "yellow"
           }
         }
       }
@@ -7552,6 +7762,16 @@
         }
       }
     },
+    "הַקּוֹף": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the monkey"
+          }
+        }
+      }
+    },
     "הַשְּׁאֵלָה הַבָּאָה תַּגִּיעַ 💫": {
       "localizations": {
         "en": {
@@ -7577,7 +7797,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Israel's neighbors"
+            "value": "America's neighbors"
           }
         }
       }
@@ -7658,6 +7878,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "The language changes right away across the whole app: text, layout, read-aloud, and questions."
+          }
+        }
+      }
+    },
+    "הַשּׁוּעָל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the fox"
           }
         }
       }
@@ -7792,6 +8022,36 @@
         }
       }
     },
+    "הָאַרְיֵה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the lion"
+          }
+        }
+      }
+    },
+    "הָאַרְנָב": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the rabbit"
+          }
+        }
+      }
+    },
+    "הָאָדוֹם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "red"
+          }
+        }
+      }
+    },
     "הָהַזְמָנָה מַמְתִּינָה לְאִשּׁוּר (Ask to Buy)": {
       "localizations": {
         "en": {
@@ -7832,6 +8092,16 @@
         }
       }
     },
+    "הָעִגּוּל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the circle"
+          }
+        }
+      }
+    },
     "הָעוֹלָם מְחַכֶּה בַּמָּסָךְ הָרָאשִׁי שֶׁל כָּל יֶלֶד, עִם סִימוּן \"חָדָשׁ\".": {
       "localizations": {
         "en": {
@@ -7868,6 +8138,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Consistency matters more than volume — even 10 minutes a day keeps it going."
+          }
+        }
+      }
+    },
+    "הָרִבּוּעַ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the square"
           }
         }
       }
@@ -9772,6 +10052,16 @@
         }
       }
     },
+    "חֲתוּלִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cats"
+          }
+        }
+      }
+    },
     "חִבּוּר וְחִסּוּר": {
       "localizations": {
         "en": {
@@ -10067,7 +10357,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Israel's animals and why we protect them"
+            "value": "North American animals and why we protect them"
           }
         }
       }
@@ -10757,7 +11047,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Take a short walk around your neighborhood or city — and talk about symbols, holidays, and places in Israel."
+            "value": "Take a short walk around your neighborhood or town — and talk about symbols, holidays, and places in America."
           }
         }
       }
@@ -11908,6 +12198,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Soccer"
+          }
+        }
+      }
+    },
+    "כַּמָּה %@?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How many %@?"
           }
         }
       }
@@ -14238,6 +14538,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bag packing"
+          }
+        }
+      }
+    },
+    "מְכוֹנִיּוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cars"
           }
         }
       }
@@ -17707,7 +18017,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Israel's cities, seas, and mountains"
+            "value": "US states, rivers, and mountains"
           }
         }
       }
@@ -18252,6 +18562,16 @@
         }
       }
     },
+    "עוּגִיּוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cookies"
+          }
+        }
+      }
+    },
     "עובד גם בלי אינטרנט": {
       "localizations": {
         "en": {
@@ -18327,7 +18647,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Help your child get to know players, teams, tournaments, and fun facts from the world of soccer, in Israel and around the globe."
+            "value": "Help your child get to know players, teams, tournaments, and fun facts from the world of soccer, in the US and around the globe."
           }
         }
       }
@@ -18388,6 +18708,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Order of operations"
+          }
+        }
+      }
+    },
+    "פְּרָחִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "flowers"
           }
         }
       }
@@ -18618,6 +18948,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Butterfly"
+          }
+        }
+      }
+    },
+    "פַּרְפָּרִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "butterflies"
           }
         }
       }
@@ -19417,7 +19757,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Teams and players from Israel and around the world"
+            "value": "Teams and players from the US and around the world"
           }
         }
       }
@@ -20597,7 +20937,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Age-appropriate questions — math, Hebrew, English, science, and more."
+            "value": "Age-appropriate questions — math, reading, English, science, and more."
           }
         }
       }

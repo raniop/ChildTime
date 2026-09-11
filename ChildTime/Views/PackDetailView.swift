@@ -197,7 +197,7 @@ struct PackDetailView: View {
                               selected: !choosingTofyPlus, gold: false) { Haptic.light(); withAnimation(.easeInOut(duration: 0.2)) { choosingTofyPlus = false } }
                     optionRow(title: tr("👑 טוֹפִי+ לְכָל הַמִּשְׁפָּחָה"),
                               price: tofyPlusPrice,
-                              line: tr("כָּל \(WorldPasses.all.count) הָעוֹלָמוֹת, מִשְׂחָקִים, זִירָה וּמַטְלוֹת · לְכָל הַיְלָדִים") + (subs.yearlyIntroEligible ? tr(" · 7 יָמִים חִנָּם") : ""),
+                              line: tr("כָּל \(WorldPasses.available.count) הָעוֹלָמוֹת, מִשְׂחָקִים, זִירָה וּמַטְלוֹת · לְכָל הַיְלָדִים") + (subs.yearlyIntroEligible ? tr(" · 7 יָמִים חִנָּם") : ""),
                               selected: choosingTofyPlus, gold: true) { Haptic.light(); withAnimation(.easeInOut(duration: 0.2)) { choosingTofyPlus = true } }
                 }
                 .foregroundStyle(GlassInk.primary)
@@ -433,14 +433,14 @@ struct PacksHomeSection: View {
                     .foregroundStyle(GlassInk.secondary)
                     .padding(.horizontal, 4)
                     .lineLimit(1).minimumScaleFactor(0.8)
-                let shown = worldsExpanded ? WorldPasses.all : Array(WorldPasses.all.prefix(3))
+                let shown = worldsExpanded ? WorldPasses.available : Array(WorldPasses.available.prefix(3))
                 ForEach(shown) { pass in
                     Button { Haptic.light(); onOpen(pass) } label: { card(pass) }
                         .buttonStyle(.plain)
                 }
-                if WorldPasses.all.count > 3 {
+                if WorldPasses.available.count > 3 {
                     Button { Haptic.light(); withAnimation(.easeInOut(duration: 0.25)) { worldsExpanded.toggle() } } label: {
-                        Text(worldsExpanded ? tr("פָּחוֹת ▴") : tr("+ עוֹד \(WorldPasses.all.count - 3) עוֹלָמוֹת ▾"))
+                        Text(worldsExpanded ? tr("פָּחוֹת ▴") : tr("+ עוֹד \(WorldPasses.available.count - 3) עוֹלָמוֹת ▾"))
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                             .frame(maxWidth: .infinity)

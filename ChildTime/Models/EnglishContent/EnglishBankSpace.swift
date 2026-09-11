@@ -1,0 +1,86 @@
+import Foundation
+
+/// 🚀 Space & astronomy — English (US). Adapted from QuestionBanksSpace (Hebrew).
+/// Timeless facts only (8 planets, Pluto is a dwarf planet, 1969 Moon landing);
+/// Israeli items (Ilan Ramon, Beresheet) replaced with US space history.
+extension EnglishContent {
+    static let space: [BankQuestion] = [
+        // ── The Sun, the Moon and Earth ──
+        BankQuestion(prompt: "☀️\nThe Sun is really a…", correctAnswer: "Star", distractors: ["Planet", "Moon", "Big cloud"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🌍\nWhat is the name of the planet we live on?", correctAnswer: "Earth", distractors: ["Mars", "Venus", "Jupiter"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🌞\nWhen can we see the Sun in the sky?", correctAnswer: "In the daytime", distractors: ["At night", "Only in winter", "Only on weekends"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🌅\nWhat does the Sun do in the morning?", correctAnswer: "It rises", distractors: ["It sets", "It disappears", "It falls asleep"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🌍\nWhat shape is Earth?", correctAnswer: "A ball", distractors: ["A cube", "A triangle", "A flat plate"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "📏\nWhich one is the biggest?", correctAnswer: "The Sun", distractors: ["Earth", "The Moon", "Mars"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🌕\nWhich one is closest to Earth?", correctAnswer: "The Moon", distractors: ["The Sun", "Mars", "Jupiter"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🌍\nHow many moons does Earth have?", correctAnswer: "1", distractors: ["0", "2", "3"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🌕\nWhat do we call the Moon when it looks perfectly round and bright?", correctAnswer: "Full moon", distractors: ["Half moon", "New moon", "Crescent moon"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🌙\nWhat do we call the Moon when we see only a thin, curved sliver of it?", correctAnswer: "Crescent moon", distractors: ["Full moon", "Half moon", "Shooting star"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🌍\nWhat does Earth travel around once every year?", correctAnswer: "The Sun", distractors: ["The Moon", "Mars", "Jupiter"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🌙\nWhat does the Moon travel around?", correctAnswer: "Earth", distractors: ["The Sun", "Mars", "Saturn"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🌞\nWhat is at the center of our solar system?", correctAnswer: "The Sun", distractors: ["Earth", "Jupiter", "The Moon"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "📅\nHow many days are in a regular year?", correctAnswer: "365", distractors: ["100", "300", "12"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "🕐\nHow long does it take Earth to spin all the way around one time?", correctAnswer: "About 24 hours", distractors: ["About 12 hours", "A week", "A year"], tier: .medium, grades: 2...4),
+        BankQuestion(prompt: "📅\nHow long does it take Earth to travel once around the Sun?", correctAnswer: "A year", distractors: ["A day", "A week", "A month"], tier: .medium, grades: 2...4),
+        BankQuestion(prompt: "🌙\nAbout how long does it take the Moon to travel around Earth?", correctAnswer: "About a month", distractors: ["About a day", "About a week", "About a year"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🌗\nWhy do we have day and night?", correctAnswer: "Because Earth spins", distractors: ["Because the Sun turns off at night", "Because the Moon hides the Sun", "Because clouds cover the Sun"], tier: .medium, grades: 2...4),
+        BankQuestion(prompt: "🌞\nThe Sun is a star. What is it mostly made of?", correctAnswer: "Hot, glowing gases", distractors: ["Rocks", "Water", "Ice"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🌕\nWhy does the Moon shine at night?", correctAnswer: "It reflects light from the Sun", distractors: ["It burns like the Sun", "It has lamps on it", "It is made of gold"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🌍\nWhy is Earth called \"the Blue Planet\"?", correctAnswer: "Most of it is covered by water", distractors: ["It is very cold", "It is made of blue rock", "It is painted blue"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🌑\nWhat do we call the Moon when we can hardly see it at all?", correctAnswer: "New moon", distractors: ["Full moon", "Half moon", "Blue moon"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🌸\nWhat causes the seasons — summer, fall, winter and spring?", correctAnswer: "Earth is tilted as it travels around the Sun", distractors: ["The Sun cools down in winter", "The Moon moves closer and farther", "Earth stops spinning"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "💡\nAbout how long does sunlight take to reach Earth?", correctAnswer: "About 8 minutes", distractors: ["One second", "About 8 hours", "About 8 days"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "🌗\nWhy does the Moon look a little different every night?", correctAnswer: "We see a different part of its sunlit side", distractors: ["It changes size", "Clouds cover part of it", "Earth's shadow covers part of it"], tier: .hard, grades: 4...6),
+
+        // ── The planets ──
+        BankQuestion(prompt: "🔢\nHow many planets travel around the Sun?", correctAnswer: "8", distractors: ["6", "9", "10"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🔴\nWhich planet is called \"the Red Planet\"?", correctAnswer: "Mars", distractors: ["Jupiter", "Venus", "Saturn"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🪐\nWhich planet has big, beautiful rings?", correctAnswer: "Saturn", distractors: ["Mars", "Earth", "Mercury"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🪐\nWhich planet is the biggest in our solar system?", correctAnswer: "Jupiter", distractors: ["Earth", "Mars", "Mercury"], tier: .medium, grades: 2...4),
+        BankQuestion(prompt: "🔥\nWhich planet is closest to the Sun?", correctAnswer: "Mercury", distractors: ["Venus", "Earth", "Mars"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🌍\nWhich planet is third from the Sun?", correctAnswer: "Earth", distractors: ["Venus", "Mars", "Jupiter"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🔴\nMoving away from the Sun, which planet comes right after Earth?", correctAnswer: "Mars", distractors: ["Venus", "Mercury", "Saturn"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🔵\nWhich planet is farthest from the Sun?", correctAnswer: "Neptune", distractors: ["Uranus", "Saturn", "Jupiter"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🔢\nOur solar system has 8 planets. 4 of them are rocky, and the rest are giant planets. How many giant planets are there?", correctAnswer: "4", distractors: ["2", "6", "8"], tier: .medium, grades: 2...4),
+        BankQuestion(prompt: "🔴\nWhy does Mars look red?", correctAnswer: "It is covered in rusty red dust", distractors: ["It is on fire", "It is very hot", "It has red flowers on it"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🌡️\nWhich planet has the hottest surface? (Hint: it is not the closest one to the Sun.)", correctAnswer: "Venus", distractors: ["Mercury", "Mars", "Jupiter"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "🪐\nWhich planet is between Saturn and Neptune?", correctAnswer: "Uranus", distractors: ["Jupiter", "Mars", "Venus"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "🪐\nPluto was once called the ninth planet. What is it called today?", correctAnswer: "A dwarf planet", distractors: ["A moon of Neptune", "A comet", "A star"], tier: .hard, grades: 4...6),
+
+        // ── Astronauts, rockets and satellites ──
+        BankQuestion(prompt: "🧑‍🚀\nWhat do we call a person who travels into space?", correctAnswer: "Astronaut", distractors: ["Pilot", "Diver", "Firefighter"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🚀\nWhat launches a spacecraft into space?", correctAnswer: "A rocket", distractors: ["An airplane", "A helicopter", "A hot-air balloon"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🍎\nWhat makes an apple fall down instead of floating up?", correctAnswer: "Gravity", distractors: ["The wind", "The Sun", "The rain"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "👩‍🚀\nWhat does an astronaut wear to go outside the spacecraft?", correctAnswer: "A spacesuit", distractors: ["A swimsuit", "A raincoat", "Pajamas"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🎈\nWhat happens to astronauts inside a spacecraft that circles Earth?", correctAnswer: "They float", distractors: ["They get smaller", "They sleep all the time", "They walk on their hands"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "👣\nWho was the first person to walk on the Moon?", correctAnswer: "Neil Armstrong", distractors: ["Sally Ride", "Yuri Gagarin", "Albert Einstein"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "👩‍🚀\nWho was the first American woman to fly into space?", correctAnswer: "Sally Ride", distractors: ["Amelia Earhart", "Neil Armstrong", "Yuri Gagarin"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "🛰️\nWhat do we call a machine that circles Earth in space and helps with maps and phones?", correctAnswer: "A satellite", distractors: ["An airplane", "A hot-air balloon", "A car"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "🔢\n3 astronauts flew to the Moon, and 2 of them went down to the surface. How many stayed in the spacecraft?", correctAnswer: "1", distractors: ["0", "2", "3"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🔢\nCountdown to launch: 10, 9, 8, 7… When counting down, which number comes right after 3?", correctAnswer: "2", distractors: ["4", "1", "0"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "👣\nIn what year did people first land on the Moon?", correctAnswer: "1969", distractors: ["1945", "1900", "2000"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🚀\nWhat was the name of the mission that took the first astronauts to land on the Moon?", correctAnswer: "Apollo 11", distractors: ["Sputnik 1", "Voyager 1", "Hubble"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🚀\nWho was the first person to fly into space, in 1961?", correctAnswer: "Yuri Gagarin", distractors: ["Neil Armstrong", "Sally Ride", "Galileo"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🇺🇸\nWhat is the name of the United States space agency?", correctAnswer: "NASA", distractors: ["FBI", "NFL", "NASCAR"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🌎\nIn 1962, John Glenn became the first American to do what?", correctAnswer: "Orbit Earth", distractors: ["Walk on the Moon", "Fly an airplane", "Land on Mars"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🧑‍🚀\nWhat is the name of the big space station that many countries built together, where astronauts live and work for months?", correctAnswer: "The International Space Station", distractors: ["The Hubble Space Telescope", "The Moon", "Mars"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🍎\nWhich scientist, the story goes, figured out gravity after seeing an apple fall?", correctAnswer: "Isaac Newton", distractors: ["Galileo", "Albert Einstein", "Thomas Edison"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🏋️\nGravity is weaker on the Moon. How would an astronaut feel jumping there?", correctAnswer: "Light, and able to jump high", distractors: ["Very heavy", "Exactly the same as at home", "Unable to move"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🚀\nWhy does a rocket need to be so strong and fast?", correctAnswer: "To overcome Earth's gravity", distractors: ["To make a loud noise", "To warm itself up", "To see far away"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🛰️\nWhat was the name of the first satellite ever launched into space, in 1957?", correctAnswer: "Sputnik", distractors: ["Apollo", "Hubble", "Voyager"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "🔢\nAstronauts on the space station see about 16 sunrises in one day. About how many do they see in 2 days?", correctAnswer: "32", distractors: ["16", "8", "24"], tier: .hard, grades: 4...6),
+
+        // ── Telescopes, stars and comets ──
+        BankQuestion(prompt: "🔭\nWhat tool do we use to look at faraway stars?", correctAnswer: "A telescope", distractors: ["A microscope", "A magnifying glass", "A thermometer"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "🌠\nWhat is a \"shooting star\" really?", correctAnswer: "A small space rock burning up in the air", distractors: ["A star falling to Earth", "A tiny moon", "An airplane at night"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "✨\nWhat do we call a group of stars that makes a picture in the sky, like a bear or a lion?", correctAnswer: "A constellation", distractors: ["A comet", "A satellite", "A cloud"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🧭\nWhich star helps people find north at night?", correctAnswer: "The North Star", distractors: ["The Sun", "Mars", "The Moon"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🌌\nWhat is a galaxy?", correctAnswer: "A huge group of stars", distractors: ["A big planet", "A kind of spaceship", "A moon of Jupiter"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "☄️\nWhat does a comet get when it comes near the Sun, that an asteroid does not?", correctAnswer: "A long glowing tail", distractors: ["Big rings", "Green oceans", "Hot lava"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "🪨\nWhere are most of the asteroids in our solar system?", correctAnswer: "Between Mars and Jupiter", distractors: ["Between the Sun and Mercury", "Next to the Moon", "Between Earth and Venus"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "🐻\nWhat is the famous group of 7 stars that looks like a big ladle or spoon?", correctAnswer: "The Big Dipper", distractors: ["Leo", "Scorpius", "Pisces"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "🌌\nWhat is the name of the galaxy our solar system is in?", correctAnswer: "The Milky Way", distractors: ["Andromeda", "The Big Dipper", "Orion"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "🔭\nWhich scientist used a telescope to discover the 4 big moons of Jupiter?", correctAnswer: "Galileo Galilei", distractors: ["Isaac Newton", "Albert Einstein", "Neil Armstrong"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "🔭\nWhich famous telescope was launched into orbit around Earth in 1990 to take pictures of space?", correctAnswer: "Hubble", distractors: ["Galileo", "Sputnik", "Apollo"], tier: .hard, grades: 4...6),
+    ]
+}

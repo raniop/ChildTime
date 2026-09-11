@@ -239,6 +239,9 @@ enum QuestionPacks {
 /// Tofy+ (Rani, 2026-09-06: "יש כאלה שירצו לשלם חד פעמי"). Same purchase
 /// machinery as packs; ownership carries an expiry (`Profile.packExpiry`).
 enum WorldPasses {
+    /// The passes a parent is offered — worlds with questions in the app's language.
+    static var available: [QuestionPack] { all.filter { ContentAvailability.hasContent($0.topic) } }
+
     static var all: [QuestionPack] { LocalizedCache.value("WorldPasses.all") { Worlds.all.filter { !$0.isBonusWorld && !$0.topic.isPack }.map { w in
         QuestionPack(
             id: w.topic.rawValue, topic: w.topic, name: w.name, emoji: w.emoji,
