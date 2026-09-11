@@ -636,6 +636,7 @@
 				he,
 				en,
 				Base,
+				"en-IL",
 			);
 			mainGroup = 4FD27B782FC70B4400909B38;
 			minimizedProjectReferenceProxies = 1;

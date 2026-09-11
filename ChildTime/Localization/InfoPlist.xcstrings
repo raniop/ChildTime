@@ -14,11 +14,17 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Tofy"
+          }
+        },
+        "en-IL" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "טופי"
           }
         }
       },
-      "comment" : "Home-screen name. English stays טופי until the US launch: Israelis with an English-language iPhone would otherwise see their icon renamed to Tofy after an update."
+      "comment" : "Home-screen name. English is Tofy; English with an Israeli region (en-IL — how most Israelis with an English iPhone are set up) keeps טופי, so existing families don't see their icon renamed."
     },
     "NSCameraUsageDescription" : {
       "extractionState" : "manual",

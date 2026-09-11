@@ -27,7 +27,7 @@ struct KidSnapshot: Codable {
 
     var accuracyToday: Int { answeredToday > 0 ? Int((Double(correctToday) / Double(answeredToday)) * 100) : 0 }
 
-    static let sample = KidSnapshot(name: "דָּן", stars: 4823, diamonds: 302, dayStreak: 5, answeredToday: 7, correctToday: 5, goalToday: 10, playMinutes: 42, choresAvailable: 3, money: 12)
+    static var sample: KidSnapshot { KidSnapshot(name: tr("דָּן"), stars: 4823, diamonds: 302, dayStreak: 5, answeredToday: 7, correctToday: 5, goalToday: 10, playMinutes: 42, choresAvailable: 3, money: 12) }
 
     static func load() -> KidSnapshot {
         guard let d = WidgetStore.defaults.data(forKey: WidgetStore.kidKey),
@@ -49,11 +49,11 @@ struct FamilyChildSnapshot: Codable, Identifiable {
     var money: Int? = nil
     var id: String { name }
 
-    static let sample: [FamilyChildSnapshot] = [
-        .init(name: "דָּן", stars: 4823, dayStreak: 5, answeredToday: 61, accuracy: 73, playedToday: true, playingNow: true, pendingChores: 1, money: 7),
-        .init(name: "שִׁפִי", stars: 1290, dayStreak: 3, answeredToday: 18, accuracy: 81, playedToday: true, pendingChores: 0, money: 12),
-        .init(name: "אוּרִי", stars: 940, dayStreak: 0, answeredToday: 0, accuracy: 0, playedToday: false),
-    ]
+    static var sample: [FamilyChildSnapshot] { [
+        .init(name: tr("דָּן"), stars: 4823, dayStreak: 5, answeredToday: 61, accuracy: 73, playedToday: true, playingNow: true, pendingChores: 1, money: 7),
+        .init(name: tr("שִׁפִי"), stars: 1290, dayStreak: 3, answeredToday: 18, accuracy: 81, playedToday: true, pendingChores: 0, money: 12),
+        .init(name: tr("אוּרִי"), stars: 940, dayStreak: 0, answeredToday: 0, accuracy: 0, playedToday: false),
+    ] }
 
     static func load() -> [FamilyChildSnapshot] {
         guard let d = WidgetStore.defaults.data(forKey: WidgetStore.familyKey),

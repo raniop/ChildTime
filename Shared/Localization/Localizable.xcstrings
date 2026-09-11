@@ -5602,6 +5602,16 @@
         }
       }
     },
+    "דָּן": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noah"
+          }
+        }
+      }
+    },
     "דָּן הַמֶּלֶךְ": {
       "localizations": {
         "en": {
@@ -21168,6 +21178,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Save"
+          }
+        }
+      }
+    },
+    "שִׁפִי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emma"
           }
         }
       }

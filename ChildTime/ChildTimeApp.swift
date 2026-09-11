@@ -123,7 +123,12 @@ struct ChildTimeApp: App {
         _cosmetics = StateObject(wrappedValue: CosmeticStore.shared)
         _characters = StateObject(wrappedValue: CharacterStore.shared)
 
-        if Self.demoScreen != nil { Self.seedDemo() }
+        if Self.demoScreen != nil {
+            // DEMO_RESET=1 — start from freshly seeded demo data, e.g. so an
+            // English audit run doesn't inherit names seeded by a Hebrew run.
+            if ProcessInfo.processInfo.environment["DEMO_RESET"] == "1" { Self.purgeDemoLeftoversIfNeeded() }
+            Self.seedDemo()
+        }
         // Live Activity "עצור ושמור": iOS may launch the app HEADLESS to run the
         // intent — the root view's .task never runs then. Register here so the
         // request is applied immediately (apps re-lock) instead of on next open.
