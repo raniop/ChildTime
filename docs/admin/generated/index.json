@@ -12,6 +12,15 @@
       "generatedAt": "2026-09-11T07:18:47.804Z"
     },
     {
+      "topic": "logic",
+      "count": 400,
+      "byGrade": {
+        "7": 200,
+        "8": 200
+      },
+      "generatedAt": "2026-09-11T07:27:27.178Z"
+    },
+    {
       "topic": "money",
       "count": 1600,
       "byGrade": {
