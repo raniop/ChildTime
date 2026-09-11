@@ -273,7 +273,7 @@ final class ProgressStore: ObservableObject {
         openingWatchdog = Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 20_000_000_000)
             guard let self, !Task.isCancelled, self.isOpeningWindow else { return }
-            self.endOpeningWindow(message: "רֶגַע, הָאִינְטֶרְנֶט קְצָת אִטִּי — נְנַסֶּה שׁוּב? 😊")
+            self.endOpeningWindow(message: tr("רֶגַע, הָאִינְטֶרְנֶט קְצָת אִטִּי — נְנַסֶּה שׁוּב? 😊"))
         }
     }
 

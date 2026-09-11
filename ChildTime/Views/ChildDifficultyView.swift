@@ -21,7 +21,7 @@ struct ChildDifficultyView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text("בִּחֲרוּ רָמַת קוֹשִׁי לְכָל נוֹשֵׂא עֲבוּר \(profile?.name ?? "הַיֶּלֶד"). הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד.")
+                    Text(tr("בִּחֲרוּ רָמַת קוֹשִׁי לְכָל נוֹשֵׂא עֲבוּר \(profile?.name ?? tr("הַיֶּלֶד")). הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד."))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -45,7 +45,7 @@ struct ChildDifficultyView: View {
                         }
                     }
                 } header: {
-                    Text("הַחֵל עַל כָּל הַנּוֹשְׂאִים")
+                    Text(tr("הַחֵל עַל כָּל הַנּוֹשְׂאִים"))
                 }
                 .glassRows()
 
@@ -56,7 +56,7 @@ struct ChildDifficultyView: View {
                                 Text(topic.emoji)
                                 Text(topic.displayName)
                             }
-                            Picker("רָמַת קוֹשִׁי", selection: binding(for: topic)) {
+                            Picker(tr("רָמַת קוֹשִׁי"), selection: binding(for: topic)) {
                                 ForEach(Difficulty.allCases) { d in
                                     Text(d.displayName).tag(d)
                                 }
@@ -66,16 +66,16 @@ struct ChildDifficultyView: View {
                         .padding(.vertical, 2)
                     }
                 } header: {
-                    Text("לְפִי נוֹשֵׂא")
+                    Text(tr("לְפִי נוֹשֵׂא"))
                 }
                 .glassRows()
             }
             .glassForm()
-            .navigationTitle("רָמַת קוֹשִׁי")
+            .navigationTitle(tr("רָמַת קוֹשִׁי"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("סִיּוּם") { dismiss() }
+                    Button(tr("סִיּוּם")) { dismiss() }
                 }
             }
         }

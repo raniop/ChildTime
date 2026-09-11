@@ -72,7 +72,7 @@ enum InsightNotificationScheduler {
                 idx += 1
 
                 let content = UNMutableNotificationContent()
-                content.title = "טופי — \(item.name)"
+                content.title = tr("טופי — \(item.name)")
                 content.body = item.text
                 content.sound = .default
                 // Strength insight → offer to raise the level right from the push.
@@ -107,7 +107,7 @@ enum InsightNotificationScheduler {
         snapshot s: ProgressSnapshot,
         enabledTopics: Set<Topic>
     ) -> [InsightItem] {
-        let name = profile.name.isEmpty ? "הילד" : profile.name
+        let name = profile.name.isEmpty ? tr("הילד") : profile.name
         // Hebrew is gendered — pick verb/adjective forms by THIS child's gender
         // (not the active profile's). Unknown → masculine.
         let isGirl = profile.gender == .girl
@@ -122,38 +122,38 @@ enum InsightNotificationScheduler {
         // Improvement / week-over-week.
         let delta = engine.weeklyAccuracyDelta
         if delta >= 8 {
-            out.append(InsightItem(name: name, text: "📈 \(name) \(g("השתפר","השתפרה")) ב-\(Int(delta))% השבוע — שווה לציין \(g("לו","לה")) כמה \(g("התקדם","התקדמה"))!"))
+            out.append(InsightItem(name: name, text: tr("📈 \(name) \(g(tr("השתפר"),tr("השתפרה"))) ב-\(Int(delta))% השבוע — שווה לציין \(g(tr("לו"),tr("לה"))) כמה \(g(tr("התקדם"),tr("התקדמה")))!")))
         }
 
         // Strength → actionable: offer to raise the level for this topic.
         if let strong = engine.strengths.first {
             out.append(InsightItem(
                 name: name,
-                text: "🌟 \(name) \(g("זוהר","זוהרת")) ב\(strong.displayName). רוצים שאתגר \(g("אותו","אותה")) בשאלות קצת יותר קשות?",
+                text: tr("🌟 \(name) \(g(tr("זוהר"),tr("זוהרת"))) ב\(strong.displayName). רוצים שאתגר \(g(tr("אותו"),tr("אותה"))) בשאלות קצת יותר קשות?"),
                 levelUpTopic: strong,
                 childID: profile.id))
         }
 
         // Interest / discovery.
         if let disc = engine.discovering.first {
-            out.append(InsightItem(name: name, text: "🔭 \(name) מגלה עניין ב\(disc.displayName). עודדו \(g("אותו","אותה")) לבחור עוד שאלות בנושא."))
+            out.append(InsightItem(name: name, text: tr("🔭 \(name) מגלה עניין ב\(disc.displayName). עודדו \(g(tr("אותו"),tr("אותה"))) לבחור עוד שאלות בנושא.")))
         } else if let fav = lp.favorites.first {
-            out.append(InsightItem(name: name, text: "💙 \(name) הכי \(g("אוהב","אוהבת")) \(fav.displayName). אפשר להתחיל מזה כדי לבנות ביטחון."))
+            out.append(InsightItem(name: name, text: tr("💙 \(name) הכי \(g(tr("אוהב"),tr("אוהבת"))) \(fav.displayName). אפשר להתחיל מזה כדי לבנות ביטחון.")))
         }
 
         // Challenge + concrete tip.
         if let weak = engine.challenges.first, let tip = coach.recommendedActions().first {
-            out.append(InsightItem(name: name, text: "💪 כדאי לחזק את \(name) ב\(weak.displayName). \(tip.text)"))
+            out.append(InsightItem(name: name, text: tr("💪 כדאי לחזק את \(name) ב\(weak.displayName). \(tip.text)")))
         }
 
         // Self-initiated learning.
         if engine.thisWeek.voluntaryLearningRate >= 0.4 {
-            out.append(InsightItem(name: name, text: "🙋 \(name) \(g("בחר","בחרה")) ללמוד \(g("מיוזמתו","מיוזמתה")) השבוע — סקרנות זה הדלק הכי טוב ללמידה!"))
+            out.append(InsightItem(name: name, text: tr("🙋 \(name) \(g(tr("בחר"),tr("בחרה"))) ללמוד \(g(tr("מיוזמתו"),tr("מיוזמתה"))) השבוע — סקרנות זה הדלק הכי טוב ללמידה!")))
         }
 
         // Fallback so there's always something kind to say.
         if out.isEmpty {
-            out.append(InsightItem(name: name, text: "🌱 \(name) \(g("ממשיך","ממשיכה")) לתרגל. 10 דקות משחק משותף היום יחזקו את ההרגל."))
+            out.append(InsightItem(name: name, text: tr("🌱 \(name) \(g(tr("ממשיך"),tr("ממשיכה"))) לתרגל. 10 דקות משחק משותף היום יחזקו את ההרגל.")))
         }
         return out
     }

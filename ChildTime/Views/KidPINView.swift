@@ -33,19 +33,19 @@ struct KidPINView: View {
     private var title: String {
         switch mode {
         case .verify(let t): return t
-        case .setNew: return firstEntry == nil ? "בַּחֲרוּ קוֹד סוֹדִי" : "עוֹד פַּעַם, לִבְדִיקָה"
+        case .setNew: return firstEntry == nil ? tr("בַּחֲרוּ קוֹד סוֹדִי") : tr("עוֹד פַּעַם, לִבְדִיקָה")
         }
     }
 
     private var subtitle: String {
         switch mode {
         case .verify:
-            return almost ? "כִּמְעַט! נַסּוּ שׁוּב 💪" : "הַזְמַן הַזֶּה שֶׁלְּךָ — רַק אַתָּה פּוֹתֵחַ אוֹתוֹ"
+            return almost ? tr("כִּמְעַט! נַסּוּ שׁוּב 💪") : tr("הַזְמַן הַזֶּה שֶׁלְּךָ — רַק אַתָּה פּוֹתֵחַ אוֹתוֹ")
         case .setNew:
-            if almost { return "הַקּוֹדִים לֹא הָיוּ אוֹתוֹ דָּבָר — בּוֹאוּ נְנַסֶּה שׁוּב 🙂" }
+            if almost { return tr("הַקּוֹדִים לֹא הָיוּ אוֹתוֹ דָּבָר — בּוֹאוּ נְנַסֶּה שׁוּב 🙂") }
             return firstEntry == nil
-                ? "4 סְפָרוֹת שֶׁרַק אַתָּה תֵּדַע — לֹא אַחִים וְלֹא חֲבֵרִים 😉"
-                : "מַקְלִידִים אֶת אוֹתוֹ קוֹד שׁוּב"
+                ? tr("4 סְפָרוֹת שֶׁרַק אַתָּה תֵּדַע — לֹא אַחִים וְלֹא חֲבֵרִים 😉")
+                : tr("מַקְלִידִים אֶת אוֹתוֹ קוֹד שׁוּב")
         }
     }
 
@@ -109,7 +109,7 @@ struct KidPINView: View {
                         Haptic.light()
                         onForgot()
                     } label: {
-                        Text("שָׁכַחְתִּי אֶת הַקּוֹד 🤔")
+                        Text(tr("שָׁכַחְתִּי אֶת הַקּוֹד 🤔"))
                             .font(.system(size: 14.5, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
                             .padding(.horizontal, 16).padding(.vertical, 9)
@@ -228,12 +228,12 @@ struct PlayPINForgotView: View {
                     .font(.system(size: 54))
                     .glow(AppColor.companionGlow, radius: 12)
 
-                Text("זֶה בְּסֵדֶר, קוֹרֶה לְכֻלָּם!")
+                Text(tr("זֶה בְּסֵדֶר, קוֹרֶה לְכֻלָּם!"))
                     .font(.system(size: 25, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
 
-                Text("שָׁלַחְנוּ עַכְשָׁיו הוֹדָעָה לְאַבָּא וּלְאִמָּא 💌\nהֵם רוֹאִים אֶת הַקּוֹד שֶׁלְּךָ בַּלּוּחַ שֶׁלָּהֶם,\nוְיוֹדְעִים אֵיךְ לַעֲזוֹר.")
+                Text(tr("שָׁלַחְנוּ עַכְשָׁיו הוֹדָעָה לְאַבָּא וּלְאִמָּא 💌\nהֵם רוֹאִים אֶת הַקּוֹד שֶׁלְּךָ בַּלּוּחַ שֶׁלָּהֶם,\nוְיוֹדְעִים אֵיךְ לַעֲזוֹר."))
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
@@ -245,7 +245,7 @@ struct PlayPINForgotView: View {
                         Haptic.light()
                         showParentGate = true
                     } label: {
-                        Label("אֲנִי הוֹרֶה · אִפּוּס עִם קוֹד הוֹרֶה", systemImage: "key.fill")
+                        Label(tr("אֲנִי הוֹרֶה · אִפּוּס עִם קוֹד הוֹרֶה"), systemImage: "key.fill")
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity).padding(.vertical, 15)
@@ -257,7 +257,7 @@ struct PlayPINForgotView: View {
                     Button {
                         Haptic.light(); onClose()
                     } label: {
-                        Text("סְגִירָה")
+                        Text(tr("סְגִירָה"))
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.8))
                             .padding(.top, 4)
@@ -277,8 +277,8 @@ struct PlayPINForgotView: View {
         // The parent-code gate; success clears the child's code immediately.
         .sheet(isPresented: $showParentGate) {
             ParentGateView(allowClose: true,
-                           gateTitle: "אִפּוּס קוֹד הֲגַנַּת הַזְּמַן",
-                           gateReason: "הַזִּינוּ קוֹד הוֹרֶה כְּדֵי לְאַפֵּס אֶת הַקּוֹד שֶׁל \(childName)",
+                           gateTitle: tr("אִפּוּס קוֹד הֲגַנַּת הַזְּמַן"),
+                           gateReason: tr("הַזִּינוּ קוֹד הוֹרֶה כְּדֵי לְאַפֵּס אֶת הַקּוֹד שֶׁל \(childName)"),
                            useFaceID: true,
                            respectSession: false,
                            // NEVER offer to CREATE a parent code here — a kid
@@ -291,7 +291,7 @@ struct PlayPINForgotView: View {
                 Color.clear
             }
             .environmentObject(settings)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
     }
 }
@@ -312,10 +312,10 @@ struct PlayPINManageView: View {
                 Text("🔒")
                     .font(.system(size: 54))
                     .glow(AppColor.starGold, radius: 12)
-                Text("הַזְּמַן שֶׁלְּךָ מוּגָן")
+                Text(tr("הַזְּמַן שֶׁלְּךָ מוּגָן"))
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("רַק מִי שֶׁיּוֹדֵעַ אֶת הַקּוֹד יָכוֹל לִפְתּוֹחַ אֶת דַּקּוֹת הַמִּשְׂחָק שֶׁלְּךָ.")
+                Text(tr("רַק מִי שֶׁיּוֹדֵעַ אֶת הַקּוֹד יָכוֹל לִפְתּוֹחַ אֶת דַּקּוֹת הַמִּשְׂחָק שֶׁלְּךָ."))
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
@@ -325,7 +325,7 @@ struct PlayPINManageView: View {
                     Button {
                         Haptic.light(); onChange()
                     } label: {
-                        Label("הַחְלָפַת הַקּוֹד", systemImage: "arrow.triangle.2.circlepath")
+                        Label(tr("הַחְלָפַת הַקּוֹד"), systemImage: "arrow.triangle.2.circlepath")
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity).padding(.vertical, 15)
@@ -337,7 +337,7 @@ struct PlayPINManageView: View {
                     Button {
                         Haptic.light(); onRemove()
                     } label: {
-                        Label("הֲסָרַת הַקּוֹד", systemImage: "lock.open")
+                        Label(tr("הֲסָרַת הַקּוֹד"), systemImage: "lock.open")
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity).padding(.vertical, 14)
@@ -348,7 +348,7 @@ struct PlayPINManageView: View {
                     Button {
                         Haptic.light(); onClose()
                     } label: {
-                        Text("סְגִירָה")
+                        Text(tr("סְגִירָה"))
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.8))
                             .padding(.top, 4)
@@ -363,6 +363,6 @@ struct PlayPINManageView: View {
 }
 
 #Preview {
-    KidPINView(profile: Profile(name: "דנה"), mode: .setNew, onSuccess: { _ in }, onCancel: {})
-        .environment(\.layoutDirection, .rightToLeft)
+    KidPINView(profile: Profile(name: tr("דנה")), mode: .setNew, onSuccess: { _ in }, onCancel: {})
+        .environment(\.layoutDirection, .app)
 }

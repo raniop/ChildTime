@@ -116,11 +116,11 @@ final class ChoreStore: ObservableObject {
                   lastApprovedAt: nil, photoData: nil, approvedTodayCount: 0, approvedTodayAt: nil,
                   archived: true)
         }
-        docs.append(Chore(id: "demo-approved_\(cid)", childID: cid, title: "לְהַשְׁקוֹת אֶת הָעֲצִיצִים",
+        docs.append(Chore(id: "demo-approved_\(cid)", childID: cid, title: tr("לְהַשְׁקוֹת אֶת הָעֲצִיצִים"),
                           emoji: "🪴", rewardMinutes: 10, rewardCoins: 0, isDaily: true, timesPerDay: 1,
                           createdAt: 1, markedDoneAt: nil, chosenReward: nil, lastApprovedAt: now,
                           photoData: nil, approvedTodayCount: 1, approvedTodayAt: now, archived: false))
-        docs.append(Chore(id: "demo-waiting_\(cid)", childID: cid, title: "לְטַאטֵא אֶת הַחֶדֶר",
+        docs.append(Chore(id: "demo-waiting_\(cid)", childID: cid, title: tr("לְטַאטֵא אֶת הַחֶדֶר"),
                           emoji: "🧹", rewardMinutes: 20, rewardCoins: 0, isDaily: true, timesPerDay: 1,
                           createdAt: 2, markedDoneAt: now, chosenReward: "minutes", lastApprovedAt: nil,
                           photoData: nil, approvedTodayCount: 0, approvedTodayAt: nil, archived: false))
@@ -199,29 +199,29 @@ final class ChoreStore: ObservableObject {
     /// money rewards were removed; it stays only for tuple/back-compat shape.
     /// The parent can retune the minutes or hide any chore (an override doc with
     /// the same deterministic id takes precedence).
-    static let catalog: [(key: String, emoji: String, title: String, minutes: Int, coins: Int, timesPerDay: Int)] = [
-        ("preset-bed",       "🛏", "לסדר את המיטה",            5,  2, 1),
-        ("preset-clothes",   "👕", "לשים בגדים בסל הכביסה",     5,  2, 2),
-        ("preset-plate",     "🍽", "לפנות את הצלחת מהשולחן",    5,  2, 3),
-        ("preset-shoes",     "👟", "לסדר את הנעליים בכניסה",    5,  2, 1),
-        ("preset-toys",      "🧸", "לאסוף את הצעצועים",        10,  5, 1),
-        ("preset-table",     "🍴", "לערוך את השולחן לארוחה",   10,  5, 3),
-        ("preset-bag",       "🎒", "להכין את התיק לבית הספר",  10,  5, 1),
-        ("preset-plants",    "🪴", "להשקות את העציצים",        10,  5, 1),
-        ("preset-pet",       "🐕", "להאכיל את חיית המחמד",     10,  5, 2),
-        ("preset-trash",     "🗑", "להוריד את הזבל",           10,  5, 1),
-        ("preset-desk",      "📚", "לסדר את שולחן הכתיבה",     15,  7, 1),
-        ("preset-sweep",     "🧹", "לטאטא את החדר",            20, 10, 1),
-        ("preset-laundry",   "🧺", "לעזור בקיפול כביסה",       20, 10, 1),
-        ("preset-groceries", "🛒", "לעזור בסידור הקניות",      20, 10, 1),
-        ("preset-cooking",   "🍳", "לעזור בהכנת ארוחה",        20, 10, 1),
-        ("preset-sibling",   "🎲", "לשחק עם אח או אחות",       10,  5, 2),
-        ("preset-outfit",    "👔", "לסדר תלבושת לבית הספר",     5,  2, 1),
-        ("preset-closet",    "🧥", "לסדר את הארון",            15,  7, 1),
-        ("preset-homework",  "📝", "להכין שיעורי בית",         30, 20, 1),
-        ("preset-reading",   "📖", "לקרוא ספר",                60, 50, 1),
-        ("preset-leaves",    "🍂", "לאסוף עלים מהגינה",        30, 20, 1),
-    ]
+    static var catalog: [(key: String, emoji: String, title: String, minutes: Int, coins: Int, timesPerDay: Int)] { LocalizedCache.value("ChoreStore.catalog") { [
+        ("preset-bed",       "🛏", tr("לסדר את המיטה"),            5,  2, 1),
+        ("preset-clothes",   "👕", tr("לשים בגדים בסל הכביסה"),     5,  2, 2),
+        ("preset-plate",     "🍽", tr("לפנות את הצלחת מהשולחן"),    5,  2, 3),
+        ("preset-shoes",     "👟", tr("לסדר את הנעליים בכניסה"),    5,  2, 1),
+        ("preset-toys",      "🧸", tr("לאסוף את הצעצועים"),        10,  5, 1),
+        ("preset-table",     "🍴", tr("לערוך את השולחן לארוחה"),   10,  5, 3),
+        ("preset-bag",       "🎒", tr("להכין את התיק לבית הספר"),  10,  5, 1),
+        ("preset-plants",    "🪴", tr("להשקות את העציצים"),        10,  5, 1),
+        ("preset-pet",       "🐕", tr("להאכיל את חיית המחמד"),     10,  5, 2),
+        ("preset-trash",     "🗑", tr("להוריד את הזבל"),           10,  5, 1),
+        ("preset-desk",      "📚", tr("לסדר את שולחן הכתיבה"),     15,  7, 1),
+        ("preset-sweep",     "🧹", tr("לטאטא את החדר"),            20, 10, 1),
+        ("preset-laundry",   "🧺", tr("לעזור בקיפול כביסה"),       20, 10, 1),
+        ("preset-groceries", "🛒", tr("לעזור בסידור הקניות"),      20, 10, 1),
+        ("preset-cooking",   "🍳", tr("לעזור בהכנת ארוחה"),        20, 10, 1),
+        ("preset-sibling",   "🎲", tr("לשחק עם אח או אחות"),       10,  5, 2),
+        ("preset-outfit",    "👔", tr("לסדר תלבושת לבית הספר"),     5,  2, 1),
+        ("preset-closet",    "🧥", tr("לסדר את הארון"),            15,  7, 1),
+        ("preset-homework",  "📝", tr("להכין שיעורי בית"),         30, 20, 1),
+        ("preset-reading",   "📖", tr("לקרוא ספר"),                60, 50, 1),
+        ("preset-leaves",    "🍂", tr("לאסוף עלים מהגינה"),        30, 20, 1),
+    ] } }
 
     /// The child's full list: the built-in catalog (overridden per-child by any
     /// doc with the matching deterministic id — retuned rewards, hidden, or

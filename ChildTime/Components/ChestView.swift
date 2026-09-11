@@ -491,7 +491,7 @@ struct ChestLidShape: Shape {
                 AppGradient.dreamy.ignoresSafeArea()
                 VStack(spacing: 40) {
                     ChestView(kind: .gold, stage: stage, size: 160)
-                    Button("פתח") {
+                    Button(tr("פתח")) {
                         stage = .opening
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { stage = .revealed }
                     }

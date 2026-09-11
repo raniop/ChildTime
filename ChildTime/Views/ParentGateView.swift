@@ -35,7 +35,7 @@ struct ParentGateView<Content: View>: View {
          allowSetup: Bool = true,
          onAuthorized: (() -> Void)? = nil,
          @ViewBuilder content: @escaping () -> Content = {
-             ParentSettingsView().environment(\.layoutDirection, .rightToLeft)
+             ParentSettingsView().environment(\.layoutDirection, .app)
          }) {
         self.allowClose = allowClose
         self.gateTitle = gateTitle
@@ -120,11 +120,11 @@ struct ParentGateView<Content: View>: View {
                 if loadingTimedOut {
                     // Rani: after a while this must SAY what is wrong, not spin.
                     Text("📡").font(.system(size: 44))
-                    Text("הַמַּכְשִׁיר לֹא הִצְלִיחַ לְהִתְחַבֵּר לַמִּשְׁפָּחָה")
+                    Text(tr("הַמַּכְשִׁיר לֹא הִצְלִיחַ לְהִתְחַבֵּר לַמִּשְׁפָּחָה"))
                         .font(.system(size: 19, weight: .heavy, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .multilineTextAlignment(.center)
-                    Text("בִּדְקוּ שֶׁיֵּשׁ אִינְטֶרְנֶט, וְשֶׁהַמַּכְשִׁיר עֲדַיִן מְקֻשָּׁר לַמִּשְׁפָּחָה בְּלוּחַ הַהוֹרִים.")
+                    Text(tr("בִּדְקוּ שֶׁיֵּשׁ אִינְטֶרְנֶט, וְשֶׁהַמַּכְשִׁיר עֲדַיִן מְקֻשָּׁר לַמִּשְׁפָּחָה בְּלוּחַ הַהוֹרִים."))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .multilineTextAlignment(.center)
@@ -134,7 +134,7 @@ struct ParentGateView<Content: View>: View {
                         household.refreshHouseholdNow()
                         armLoadingTimeout()
                     } label: {
-                        Text("נַסּוּ שׁוּב")
+                        Text(tr("נַסּוּ שׁוּב"))
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundStyle(Color(hex: "4B3FBF"))
                             .padding(.horizontal, 22).padding(.vertical, 10)
@@ -147,27 +147,27 @@ struct ParentGateView<Content: View>: View {
                     // have a way back to "who uses this device?" without the
                     // owner deleting and reinstalling the app.
                     Button { Haptic.light(); confirmDeviceReset = true } label: {
-                        Text("אַפְּסוּ אֶת הַמַּכְשִׁיר")
+                        Text(tr("אַפְּסוּ אֶת הַמַּכְשִׁיר"))
                             .font(.system(size: 13.5, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                             .underline()
                     }
                     .buttonStyle(.plain)
                     .padding(.top, 2)
-                    .alert("לְאַפֵּס אֶת הַמַּכְשִׁיר?", isPresented: $confirmDeviceReset) {
-                        Button("אַפְּסוּ", role: .destructive) {
+                    .alert(tr("לְאַפֵּס אֶת הַמַּכְשִׁיר?"), isPresented: $confirmDeviceReset) {
+                        Button(tr("אַפְּסוּ"), role: .destructive) {
                             HouseholdManager.shared.resetThisDevice()
                         }
-                        Button("בִּטּוּל", role: .cancel) {}
+                        Button(tr("בִּטּוּל"), role: .cancel) {}
                     } message: {
-                        Text("הַמַּכְשִׁיר יַחֲזֹר לְמָסָךְ הַפְּתִיחָה וְיִשְׁאַל שׁוּב מִי מִשְׁתַּמֵּשׁ בּוֹ. הַמִּשְׁפָּחָה וְהַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמָרוֹת.")
+                        Text(tr("הַמַּכְשִׁיר יַחֲזֹר לְמָסָךְ הַפְּתִיחָה וְיִשְׁאַל שׁוּב מִי מִשְׁתַּמֵּשׁ בּוֹ. הַמִּשְׁפָּחָה וְהַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמָרוֹת."))
                     }
                 } else {
                     ProgressView().scaleEffect(1.4).tint(.white)
-                    Text("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…")
+                    Text(tr("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…"))
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
-                    Text("רֶגַע אֶחָד…")
+                    Text(tr("רֶגַע אֶחָד…"))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                 }
@@ -219,11 +219,11 @@ struct ParentGateView<Content: View>: View {
                 Image(systemName: "lock.badge.clock")
                     .font(.system(size: 56))
                     .foregroundStyle(AppColor.starGold)
-                Text("קוֹד הַהוֹרֶה לֹא זָמִין כָּאן")
+                Text(tr("קוֹד הַהוֹרֶה לֹא זָמִין כָּאן"))
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
-                Text("קוֹד הַהוֹרֶה שֶׁל הַמִּשְׁפָּחָה עֲדַיִן לֹא הִגִּיעַ לַמַּכְשִׁיר הַזֶּה (בִּדְקוּ חִבּוּר לָאִינְטֶרְנֶט). אֶפְשָׁר תָּמִיד לְאַפֵּס מִלּוּחַ הַהוֹרִים בַּמַּכְשִׁיר שֶׁל אַבָּא אוֹ אִמָּא.")
+                Text(tr("קוֹד הַהוֹרֶה שֶׁל הַמִּשְׁפָּחָה עֲדַיִן לֹא הִגִּיעַ לַמַּכְשִׁיר הַזֶּה (בִּדְקוּ חִבּוּר לָאִינְטֶרְנֶט). אֶפְשָׁר תָּמִיד לְאַפֵּס מִלּוּחַ הַהוֹרִים בַּמַּכְשִׁיר שֶׁל אַבָּא אוֹ אִמָּא."))
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
@@ -232,7 +232,7 @@ struct ParentGateView<Content: View>: View {
                     Button {
                         dismiss()
                     } label: {
-                        Text("סְגִירָה")
+                        Text(tr("סְגִירָה"))
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 34).padding(.vertical, 13)
@@ -272,7 +272,7 @@ struct ParentGateView<Content: View>: View {
                             Haptic.light()
                             settings.deviceRole = .unset
                         } label: {
-                            Label("חֲזָרָה", systemImage: "chevron.backward")
+                            Label(tr("חֲזָרָה"), systemImage: "chevron.backward")
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 14).padding(.vertical, 8)
@@ -290,7 +290,7 @@ struct ParentGateView<Content: View>: View {
                         .foregroundStyle(.white)
                         .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
 
-                    Text(isSetupMode ? "בְּחֲרוּ קוֹד הוֹרֶה" : (gateTitle ?? "הַגְדָּרוֹת הוֹרֶה"))
+                    Text(isSetupMode ? tr("בְּחֲרוּ קוֹד הוֹרֶה") : (gateTitle ?? tr("הַגְדָּרוֹת הוֹרֶה")))
                         .font(.system(size: 30, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
 
@@ -317,7 +317,7 @@ struct ParentGateView<Content: View>: View {
                         Button {
                             Task { await tryBiometric() }
                         } label: {
-                            Label("פִּתְחוּ עִם Face ID", systemImage: "faceid")
+                            Label(tr("פִּתְחוּ עִם Face ID"), systemImage: "faceid")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 16)
@@ -438,17 +438,17 @@ struct ParentGateView<Content: View>: View {
     private var gateSubtitle: String {
         if isSetupMode {
             return setupFirst == nil
-                ? "בִּחֲרוּ קוֹד בֶּן 4 סְפָרוֹת לְהָגֵן עַל הַהַגְדָּרוֹת"
-                : "הַזִּינוּ שׁוּב אֶת הַקּוֹד לְאִשּׁוּר"
+                ? tr("בִּחֲרוּ קוֹד בֶּן 4 סְפָרוֹת לְהָגֵן עַל הַהַגְדָּרוֹת")
+                : tr("הַזִּינוּ שׁוּב אֶת הַקּוֹד לְאִשּׁוּר")
         }
         if let reason = gateReason { return reason }
         // A co-parent's FIRST entry on this device: the family code exists in
         // the cloud but was never typed here — and nobody told them a code
         // exists. Point them at the person who knows it (Rani).
         if !settings.hasSetParentPIN, household.householdPIN != nil {
-            return "זֶהוּ קוֹד הַהוֹרֶה הַמִּשְׁפַּחְתִּי · בַּקְּשׁוּ אוֹתוֹ מֵהַהוֹרֶה שֶׁהִזְמִין אֶתְכֶם"
+            return tr("זֶהוּ קוֹד הַהוֹרֶה הַמִּשְׁפַּחְתִּי · בַּקְּשׁוּ אוֹתוֹ מֵהַהוֹרֶה שֶׁהִזְמִין אֶתְכֶם")
         }
-        return "הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת"
+        return tr("הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת")
     }
 
     private func verify() {
@@ -468,7 +468,7 @@ struct ParentGateView<Content: View>: View {
                     Task { @MainActor in
                         if PINManager.shared.biometryAvailable {
                             let ok = await PINManager.shared.authenticateBiometric(
-                                reason: "הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID")
+                                reason: tr("הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID"))
                             if ok { settings.faceIDForParentGate = true }
                         }
                         grantAccess()
@@ -519,7 +519,7 @@ struct ParentGateView<Content: View>: View {
                 Haptic.success()
                 Task { @MainActor in
                     let ok = await PINManager.shared.authenticateBiometric(
-                        reason: "הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID")
+                        reason: tr("הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID"))
                     if ok { settings.faceIDForParentGate = true }
                     grantAccess()   // in either case — the code was right
                 }
@@ -540,5 +540,5 @@ struct ParentGateView<Content: View>: View {
     ParentGateView()
         .environmentObject(ParentSettings.shared)
         .environmentObject(ShieldManager.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

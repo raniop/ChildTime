@@ -71,10 +71,10 @@ final class ParentSettings: ObservableObject {
         }
         var displayName: String {
             switch self {
-            case .off:    return "כבוי"
-            case .once:   return "פעם ביום"
-            case .twice:  return "פעמיים ביום"
-            case .thrice: return "שלוש פעמים ביום"
+            case .off:    return tr("כבוי")
+            case .once:   return tr("פעם ביום")
+            case .twice:  return tr("פעמיים ביום")
+            case .thrice: return tr("שלוש פעמים ביום")
             }
         }
         /// Hours of day to fire at, for each frequency.
@@ -97,8 +97,8 @@ final class ParentSettings: ObservableObject {
         var id: String { rawValue }
         var displayName: String {
             switch self {
-            case .perAnswer: return "דקות לכל תשובה"
-            case .perBatch:  return "צבירת תשובות"
+            case .perAnswer: return tr("דקות לכל תשובה")
+            case .perBatch:  return tr("צבירת תשובות")
             }
         }
     }

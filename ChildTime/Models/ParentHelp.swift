@@ -61,7 +61,7 @@ struct HelpRequest: Identifiable {
               let a = data["optionA"] as? String, let b = data["optionB"] as? String else { return nil }
         self.id = id
         childID = data["childID"] as? String ?? ""
-        childName = data["childName"] as? String ?? "הילד"
+        childName = data["childName"] as? String ?? tr("הילד")
         parentUID = data["parentUID"] as? String ?? ""
         householdID = data["householdID"] as? String ?? ""
         topic = data["topic"] as? String ?? ""
@@ -287,7 +287,7 @@ final class ParentHelpManager: ObservableObject {
             "optionA": info["optionA"] as? String ?? "",
             "optionB": info["optionB"] as? String ?? "",
             "correctAnswer": info["correctAnswer"] as? String ?? "",
-            "childName": info["childName"] as? String ?? "הילד",
+            "childName": info["childName"] as? String ?? tr("הילד"),
             "topic": info["topic"] as? String ?? "",
             "gender": info["gender"] as? String ?? "",
             "createdAt": Date().timeIntervalSince1970,
@@ -297,8 +297,8 @@ final class ParentHelpManager: ObservableObject {
 
     /// A sample request for DEMO_SCREEN=parenthelp screenshots.
     static var demoRequest: HelpRequest {
-        HelpRequest(id: "demo", childID: "", childName: "נועה", parentUID: "demo", householdID: "",
-                    topic: Topic.math.rawValue, question: "כמה זה 7 + 8?",
+        HelpRequest(id: "demo", childID: "", childName: tr("נועה"), parentUID: "demo", householdID: "",
+                    topic: Topic.math.rawValue, question: tr("כמה זה 7 + 8?"),
                     optionA: "15", optionB: "13", correctAnswer: "15", gender: "girl")
     }
 }

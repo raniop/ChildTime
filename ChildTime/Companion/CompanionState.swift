@@ -45,7 +45,7 @@ final class CompanionController: ObservableObject {
     }
 
     func console(_ text: String? = nil) {
-        let line = text ?? "כִּמְעַט!"
+        let line = text ?? tr("כִּמְעַט!")
         state = .console
         bubbleText = line
         Haptic.soft()

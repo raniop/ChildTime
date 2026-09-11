@@ -96,14 +96,14 @@ struct ChoresKidView: View {
         .onAppear { choreStore.startIfNeeded() }
         // 📸 Optional proof photo — a picture beats a debate about whether the
         // room is really tidy (Rani).
-        .confirmationDialog("רוֹצִים לְצָרֵף תְּמוּנָה שֶׁל מַה שֶּׁעֲשִׂיתֶם? 📸", isPresented: $showPhotoOffer,
+        .confirmationDialog(tr("רוֹצִים לְצָרֵף תְּמוּנָה שֶׁל מַה שֶּׁעֲשִׂיתֶם? 📸"), isPresented: $showPhotoOffer,
                             titleVisibility: .visible) {
             if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                Button("📸 לְצַלֵּם עַכְשָׁו") { showCamera = true }
+                Button(tr("📸 לְצַלֵּם עַכְשָׁו")) { showCamera = true }
             }
-            Button("🖼 לִבְחֹר תְּמוּנָה") { libraryPickerPresented = true }
-            Button("לִשְׁלֹחַ בְּלִי תְּמוּנָה") { finishSend(photo: nil) }
-            Button("בִּטּוּל", role: .cancel) { pendingSend = nil }
+            Button(tr("🖼 לִבְחֹר תְּמוּנָה")) { libraryPickerPresented = true }
+            Button(tr("לִשְׁלֹחַ בְּלִי תְּמוּנָה")) { finishSend(photo: nil) }
+            Button(tr("בִּטּוּל"), role: .cancel) { pendingSend = nil }
         }
         .fullScreenCover(isPresented: $showCamera) {
             CameraPicker { image in
@@ -126,11 +126,11 @@ struct ChoresKidView: View {
         }
         // Gentle recovery — the send didn't reach the parent. No blame, no
         // "failed"; the chore is still there to tap again.
-        .alert("רֶגַע! ✨", isPresented: Binding(
+        .alert(tr("רֶגַע! ✨"), isPresented: Binding(
             get: { retryChoreID != nil }, set: { if !$0 { retryChoreID = nil } })) {
-            Button("אוֹקֵיי") { retryChoreID = nil }
+            Button(tr("אוֹקֵיי")) { retryChoreID = nil }
         } message: {
-            Text("לֹא הִסְפַּקְנוּ לִשְׁלֹחַ לְאַבָּא אוֹ אִמָּא. נַסּוּ שׁוּב עוֹד רֶגַע 🙂")
+            Text(tr("לֹא הִסְפַּקְנוּ לִשְׁלֹחַ לְאַבָּא אוֹ אִמָּא. נַסּוּ שׁוּב עוֹד רֶגַע 🙂"))
         }
     }
 
@@ -147,14 +147,14 @@ struct ChoresKidView: View {
                     .background(.white.opacity(0.22), in: Circle())
                     .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
             }
-            .accessibilityLabel("חזרה")
+            .accessibilityLabel(tr("חזרה"))
             Spacer()
             VStack(spacing: 2) {
-                Text("מַטְלוֹת הַבַּיִת 🧹")
+                Text(tr("מַטְלוֹת הַבַּיִת 🧹"))
                     .font(.system(size: 24, weight: .black, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
                     .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
-                Text("עוֹזְרִים בַּבַּיִת — וּבוֹחֲרִים פְּרָס!")
+                Text(tr("עוֹזְרִים בַּבַּיִת — וּבוֹחֲרִים פְּרָס!"))
                     .font(.system(size: 13.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
             }
@@ -174,10 +174,10 @@ struct ChoresKidView: View {
             HStack(spacing: AppSpacing.md) {
                 Text("🏆").font(.system(size: 30))
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(Gendered.g("סַךְ הַכֹּל הִרְוַחְתָּ מֵהַמַּטְלוֹת:", "סַךְ הַכֹּל הִרְוַחְתְּ מֵהַמַּטְלוֹת:"))
+                    Text(Gendered.g(tr("סַךְ הַכֹּל הִרְוַחְתָּ מֵהַמַּטְלוֹת:"), tr("סַךְ הַכֹּל הִרְוַחְתְּ מֵהַמַּטְלוֹת:")))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
-                    Text("🎮 \(totals.minutes) דַּקּוֹת מִשְׂחָק")
+                    Text(tr("🎮 \(totals.minutes) דַּקּוֹת מִשְׂחָק"))
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                 }
@@ -191,10 +191,10 @@ struct ChoresKidView: View {
     private var emptyState: some View {
         VStack(spacing: AppSpacing.md) {
             Text("🧹").font(.system(size: 56))
-            Text("עוֹד אֵין מַטְלוֹת")
+            Text(tr("עוֹד אֵין מַטְלוֹת"))
                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא לְהוֹסִיף מַטְלוֹת —\nוְתוּכְלוּ לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק אוֹ כֶּסֶף! 💪")
+            Text(tr("בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא לְהוֹסִיף מַטְלוֹת —\nוְתוּכְלוּ לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק אוֹ כֶּסֶף! 💪"))
                 .font(.system(size: 15, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
                 .multilineTextAlignment(.center)
@@ -226,7 +226,7 @@ struct ChoresKidView: View {
                 .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
             // Same-day repeat counter — reserved even when absent so every
             // card in a grid row keeps the same height.
-            Text(chore.timesPerDay > 1 ? "הַיּוֹם: \(chore.doneToday)/\(chore.timesPerDay) ✔️" : " ")
+            Text(chore.timesPerDay > 1 ? tr("הַיּוֹם: \(chore.doneToday)/\(chore.timesPerDay) ✔️") : " ")
                 .font(.system(size: 10.5, weight: .bold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
                 .lineLimit(1)
@@ -236,7 +236,7 @@ struct ChoresKidView: View {
                 Haptic.success()
                 tapDone(chore)
             } label: {
-                Text("עָשִׂיתִי! ✅")
+                Text(tr("עָשִׂיתִי! ✅"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color(hex: "4B3FBF"))
                     .lineLimit(1)
@@ -267,11 +267,11 @@ struct ChoresKidView: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(1).minimumScaleFactor(0.7)
             if sending.contains(chore.id) {
-                statusCapsule("שׁוֹלְחִים… 📨", background: .white.opacity(0.18))
+                statusCapsule(tr("שׁוֹלְחִים… 📨"), background: .white.opacity(0.18))
             } else if waiting {
-                statusCapsule("מְחַכִּים לְאִשּׁוּר 🕐", background: Color(hex: "FFD98A").opacity(0.35))
+                statusCapsule(tr("מְחַכִּים לְאִשּׁוּר 🕐"), background: Color(hex: "FFD98A").opacity(0.35))
             } else {
-                Text(Gendered.g("כָּל הַכָּבוֹד, אַלּוּף! 🎉", "כָּל הַכָּבוֹד, אַלּוּפָה! 🎉"))
+                Text(Gendered.g(tr("כָּל הַכָּבוֹד, אַלּוּף! 🎉"), tr("כָּל הַכָּבוֹד, אַלּוּפָה! 🎉")))
                     .font(.system(size: 11.5, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(1).minimumScaleFactor(0.6)
@@ -287,7 +287,7 @@ struct ChoresKidView: View {
     /// The "בוצעו היום 🎉" section under the to-do grid.
     private var doneSection: some View {
         VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            Text("בּוֹצְעוּ הַיּוֹם 🎉")
+            Text(tr("בּוֹצְעוּ הַיּוֹם 🎉"))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -302,7 +302,7 @@ struct ChoresKidView: View {
     private var allDoneBanner: some View {
         VStack(spacing: 8) {
             Text("🎉").font(.system(size: 46))
-            Text(Gendered.g("כָּל הַכָּבוֹד! סִיַּמְתָּ הַכֹּל לְהַיּוֹם", "כָּל הַכָּבוֹד! סִיַּמְתְּ הַכֹּל לְהַיּוֹם"))
+            Text(Gendered.g(tr("כָּל הַכָּבוֹד! סִיַּמְתָּ הַכֹּל לְהַיּוֹם"), tr("כָּל הַכָּבוֹד! סִיַּמְתְּ הַכֹּל לְהַיּוֹם")))
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
@@ -324,7 +324,7 @@ struct ChoresKidView: View {
     }
 
     private func rewardLine(_ c: Chore) -> String {
-        "🎮 \(max(c.rewardMinutes, 0)) דַּקּוֹת מִשְׂחָק"
+        tr("🎮 \(max(c.rewardMinutes, 0)) דַּקּוֹת מִשְׂחָק")
     }
 
     /// The kid tapped "עשיתי" — reward is always play-minutes; go to the photo

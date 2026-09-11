@@ -11,6 +11,16 @@ import StoreKit
 /// layer Firestore sync on top so the dashboard reflects state even when
 /// the kid is on a different device.
 struct ParentDashboardView: View {
+    /// Split out of `.alert(…)`: inline, the translated title made the modifier
+    /// chain too slow for the type checker.
+    private var resettingTitle: String { resettingProfile.map { tr("לאפס את ההתקדמות של \($0.name)?") } ?? "" }
+    private var pinResetTitle: String { pinResetProfile.map { tr("לאפס את קוד הגנת הזמן של \($0.name)?") } ?? "" }
+    private var deletingTitle: String { deletingProfile.map { tr("למחוק את \($0.name)?") } ?? "" }
+    private var revokeGiftTitle: String {
+        guard let p = revokeGiftProfile else { return "" }
+        return tr("לִנְעֹל וּלְאַפֵּס אֶת דַּקּוֹת הַמַּתָּנָה שֶׁל \(p.name)?")
+    }
+
     /// When true this is the device's HOME screen (parent device), not a sheet —
     /// so there's no "Done" button and we expose Settings via a gear instead.
     var isRoot: Bool = false
@@ -167,14 +177,15 @@ struct ParentDashboardView: View {
                             // card on smaller screens).
                             if isRoot {
                                 Button { showingFeedback = true } label: {
-                                    Label("פִידְבֵּק וְהַצָּעוֹת", systemImage: "text.bubble.fill")
+                                    Label(tr("פִידְבֵּק וְהַצָּעוֹת"), systemImage: "text.bubble.fill")
                                         .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                                         .foregroundStyle(.white.opacity(0.75))
                                         .padding(.vertical, 4)
                                 }
                                 .buttonStyle(.plain)
                                 .padding(.top, AppSpacing.sm)
-                                .accessibilityLabel("שליחת פידבק לצוות")
+                                .environment(\.layoutDirection, .leftToRight)
+                                .accessibilityLabel(tr("שליחת פידבק לצוות"))
 
                                 // Rani: the version, visible, and a tap away from
                                 // "what changed in it". The What's New sheet pops
@@ -185,17 +196,18 @@ struct ParentDashboardView: View {
                                 } label: {
                                     HStack(spacing: 6) {
                                         Image(systemName: "sparkles").font(.system(size: 11, weight: .bold))
-                                        Text("טוֹפִי · \(AppInfo.versionLine)")
+                                        Text(tr("טוֹפִי · \(AppInfo.versionLine)"))
                                             .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                                             .monospacedDigit()
-                                        Text("· מָה חָדָשׁ?").font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                                        Text(tr("· מָה חָדָשׁ?")).font(.system(size: 12.5, weight: .heavy, design: .rounded))
                                     }
                                     .foregroundStyle(.white.opacity(0.75))
                                     .padding(.vertical, 6)
+                                    .environment(\.layoutDirection, .leftToRight)
                                 }
                                 .buttonStyle(.plain)
                                 .disabled(WhatsNewContent.items(for: WhatsNewContent.currentVersion) == nil)
-                                .accessibilityLabel("גרסת האפליקציה — הצג מה חדש")
+                                .accessibilityLabel(tr("גרסת האפליקציה — הצג מה חדש"))
                             }
                         }
                         .padding(AppSpacing.lg)
@@ -228,7 +240,7 @@ struct ParentDashboardView: View {
                     // inner content while the ScrollView stayed RTL created a
                     // container/content mismatch that let the page drift sideways —
                     // matching the container fixes it so it scrolls vertically only.
-                    .environment(\.layoutDirection, .leftToRight)
+                    .environment(\.layoutDirection, .appMirrored)
                 }
                 // 📣 The in-app campaign pop-up — a sheet over the dimmed home.
                 if isRoot, let c = campaigns.popup { campaignPopupHost(c) }
@@ -241,7 +253,7 @@ struct ParentDashboardView: View {
             // Root: no bar at all — the greeting + ⚙️ are in the page (mockup), and
             // an empty bar only pushed the content down. Pushed pages turn it back on.
             .toolbar(isRoot ? .hidden : .visible, for: .navigationBar)
-            .navigationTitle("כָּל הַיְלָדִים")   // hidden here; it becomes the pushed page's back label
+            .navigationTitle(tr("כָּל הַיְלָדִים"))   // hidden here; it becomes the pushed page's back label
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     if isRoot {
@@ -250,7 +262,7 @@ struct ParentDashboardView: View {
                                 .foregroundStyle(.white)
                         }
                     } else {
-                        Button("סיום") { dismiss() }
+                        Button(tr("סיום")) { dismiss() }
                     }
                 }
             }
@@ -264,28 +276,28 @@ struct ParentDashboardView: View {
             // `confirmationDialog`) — the latter is a popover on iPad that, when
             // fired from a context menu, often has no anchor and never appears.
             .alert(
-                gridDeleteProfile.map { "למחוק את \($0.name)?" } ?? "",
+                gridDeleteProfile.map { tr("למחוק את \($0.name)?") } ?? "",
                 isPresented: Binding(get: { gridDeleteProfile != nil },
                                      set: { if !$0 { gridDeleteProfile = nil } }),
                 presenting: gridDeleteProfile
             ) { p in
-                Button("מחק ילד/ה", role: .destructive) {
+                Button(tr("מחק ילד/ה"), role: .destructive) {
                     profiles.remove(p)
                     gridDeleteProfile = nil
                 }
-                Button("בטל", role: .cancel) { gridDeleteProfile = nil }
+                Button(tr("בטל"), role: .cancel) { gridDeleteProfile = nil }
             } message: { _ in
-                Text("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק.")
+                Text(tr("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק."))
             }
             .sheet(isPresented: $showingSettings) {
                 ParentSettingsView()
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .sheet(isPresented: $showingReorder) {
                 ChildOrderView(profiles: rows.map(\.profile)) { ordered in
                     household.setChildOrder(ordered.map(\.id))
                 }
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
             }
             // Root-level alerts hosted on an invisible overlay — keeps the main
             // modifier chain small enough for the type-checker.
@@ -293,15 +305,15 @@ struct ParentDashboardView: View {
             .overlay(paywallHost)
             .sheet(isPresented: $showingKidMode) {
                 KidModeEntryView()
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .sheet(item: $kidModeChild) { p in
                 KidModeEntryView(preselected: p.id)
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .sheet(item: $friendsProfile) { p in
                 ChildFriendsView(childID: p.id.uuidString, childName: p.name)
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .sheet(isPresented: $showWhatsNew, onDismiss: { WhatsNewContent.markShown() }) {
                 WhatsNewView {
@@ -317,18 +329,18 @@ struct ParentDashboardView: View {
             }
             .sheet(item: $choresProfile) { p in
                 ChoresParentView(profile: p)
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .sheet(item: $difficultyProfile) { p in
                 ChildDifficultyView(profileID: p.id)
                     .environmentObject(profiles)
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .sheet(item: $screenTimeProfile) { p in
                 ChildScreenTimeView(profileID: p.id)
                     .environmentObject(profiles)
                     .environmentObject(settings)
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .sheet(item: $editProfile) { p in
                 ProfileEditorView(mode: .edit(p)) { updated in
@@ -339,16 +351,16 @@ struct ParentDashboardView: View {
                     navPath = []  // pop the (now-deleted) detail page
                 }
                 .environmentObject(profiles)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
             }
             .sheet(item: $worldsProfile) { p in
                 ChildWorldsView(profileID: p.id)
                     .environmentObject(profiles)
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .sheet(isPresented: $showingFeedback) {
                 ParentFeedbackView()
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .sheet(isPresented: $showingCreateChild, onDismiss: {
                 // Next step after creating: connect that child's device (skippable).
@@ -364,7 +376,7 @@ struct ParentDashboardView: View {
                     pendingQRChild = newProfile
                 } onDelete: { _ in }
                 .environmentObject(profiles)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
             }
             .sheet(item: $qrChild) { child in
                 childQRSheet(for: child)
@@ -453,10 +465,10 @@ struct ParentDashboardView: View {
         VStack(spacing: AppSpacing.lg) {
             Text("👨‍👩‍👧‍👦")
                 .font(.system(size: 64))
-            Text("בּוֹאוּ נְצַרֵף אֶת הַיְּלָדִים")
+            Text(tr("בּוֹאוּ נְצַרֵף אֶת הַיְּלָדִים"))
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("צְרוּ פְּרוֹפִיל לְכָל יֶלֶד/ה כָּאן. אַחַר כָּךְ כָּל יֶלֶד יְקַבֵּל קוֹד QR — סוֹרְקִים אוֹתוֹ בַּמַּכְשִׁיר שֶׁל הַיֶּלֶד, וְהוּא נִכְנָס יְשִׁירוֹת לְשַׂחֵק.")
+            Text(tr("צְרוּ פְּרוֹפִיל לְכָל יֶלֶד/ה כָּאן. אַחַר כָּךְ כָּל יֶלֶד יְקַבֵּל קוֹד QR — סוֹרְקִים אוֹתוֹ בַּמַּכְשִׁיר שֶׁל הַיֶּלֶד, וְהוּא נִכְנָס יְשִׁירוֹת לְשַׂחֵק."))
                 .font(.system(size: 16, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
@@ -511,15 +523,16 @@ struct ParentDashboardView: View {
             packToShow = pack
         } label: {
             HStack(spacing: 10) {
-                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold))
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text("\(child.name) \(child.gender == .girl ? "מְבַקֶּשֶׁת" : "מְבַקֵּשׁ") אֶת \(pack.name) \(pack.emoji)")
+                    Text(tr("\(child.name) \(child.gender == .girl ? tr("מְבַקֶּשֶׁת") : tr("מְבַקֵּשׁ")) אֶת \(pack.name) \(pack.emoji)"))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    Text("שְׁאֵלוֹן חָדָשׁ · תּוֹסֶפֶת · נִפְתָּח מִכָּאן, בַּטֶּלֶפוֹן שֶׁלָּכֶם")
+                    Text(tr("שְׁאֵלוֹן חָדָשׁ · תּוֹסֶפֶת · נִפְתָּח מִכָּאן, בַּטֶּלֶפוֹן שֶׁלָּכֶם"))
                         .font(.system(size: 12.5, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                 }
+                .multilineTextAlignment(.appMirroredText)
                 Text(pack.emoji).font(.system(size: 26))
             }
             .foregroundStyle(GlassInk.primary)
@@ -533,7 +546,7 @@ struct ParentDashboardView: View {
                     .foregroundStyle(GlassInk.secondary).padding(8)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("סגור את הבקשה")
+            .accessibilityLabel(tr("סגור את הבקשה"))
         }
     }
 
@@ -547,11 +560,11 @@ struct ParentDashboardView: View {
                 let c = snap.topicCorrect[raw] ?? 0
                 let acc = Int((Double(c) / Double(n) * 100).rounded())
                 let g = p.gender == .girl
-                return "בתקופת המתנה \(g ? "היא ענתה" : "הוא ענה") שם על \(n) שאלות ב־\(acc)%. ההתקדמות \(g ? "שלה" : "שלו") שמורה."
+                return tr("בתקופת המתנה \(g ? tr("היא ענתה") : tr("הוא ענה")) שם על \(n) שאלות ב־\(acc)%. ההתקדמות \(g ? tr("שלה") : tr("שלו")) שמורה.")
             }
-            return "עולם בודד ל־30 יום, או טופי+ לכל המשפחה — מכאן, בטלפון שלכם"
+            return tr("עולם בודד ל־30 יום, או טופי+ לכל המשפחה — מכאן, בטלפון שלכם")
         }
-        return "מנוי אחד לכל המשפחה — נפתח מכאן, בטלפון שלכם"
+        return tr("מנוי אחד לכל המשפחה — נפתח מכאן, בטלפון שלכם")
     }
 
     private func premiumRequestTitle(_ askers: [Profile]) -> String {
@@ -559,9 +572,9 @@ struct ParentDashboardView: View {
         if askers.count == 1, let p = askers.first,
            let raw = remote.premiumRequestTopics[p.id], let topic = Topic(rawValue: raw) {
             let ended = WorldPasses.pass(for: topic).map { p.passExpired($0) } ?? false
-            return "\(p.name) \(p.gender == .girl ? "רוצה" : "רוצה") \(ended ? "להמשיך" : "ללמוד") \(topic.displayName) \(topic.emoji)"
+            return tr("\(p.name) \(p.gender == .girl ? tr("רוצה") : tr("רוצה")) \(ended ? tr("להמשיך") : tr("ללמוד")) \(topic.displayName) \(topic.emoji)")
         }
-        return names.count == 1 ? "\(names[0]) רוצה טופי+ 👑" : "\(names.joined(separator: " ו")) רוצים טופי+ 👑"
+        return names.count == 1 ? tr("\(names[0]) רוצה טופי+ 👑") : tr("\(names.joined(separator: tr(" ו"))) רוצים טופי+ 👑")
     }
 
     /// 🧠 "נועה מבקשת עזרה בשאלה" — tap opens the answer sheet.
@@ -571,10 +584,10 @@ struct ParentDashboardView: View {
             parentHelp.promptedRequest = req
         } label: {
             HStack(spacing: 10) {
-                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold))
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(req.isGirl ? "\(req.childName) מבקשת עזרה בשאלה" : "\(req.childName) מבקש עזרה בשאלה")
+                    Text(req.isGirl ? tr("\(req.childName) מבקשת עזרה בשאלה") : tr("\(req.childName) מבקש עזרה בשאלה"))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                     Text(req.question)
                         .font(.system(size: 12.5, weight: .medium, design: .rounded))
@@ -608,7 +621,7 @@ struct ParentDashboardView: View {
             }
         } label: {
             HStack(spacing: 10) {
-                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold))
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(premiumRequestTitle(askers))
@@ -617,6 +630,7 @@ struct ParentDashboardView: View {
                         .font(.system(size: 12.5, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                 }
+                .multilineTextAlignment(.appMirroredText)
                 Text("👑").font(.system(size: 26))
             }
             .foregroundStyle(GlassInk.primary)
@@ -630,7 +644,7 @@ struct ParentDashboardView: View {
                     .foregroundStyle(GlassInk.secondary).padding(8)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("סגור את הבקשה")
+            .accessibilityLabel(tr("סגור את הבקשה"))
         }
     }
 
@@ -648,13 +662,13 @@ struct ParentDashboardView: View {
             // right) — so: chevron on the LEFT edge, text block right-aligned,
             // 🧹 on the RIGHT edge, like every other card here.
             HStack(spacing: 10) {
-                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold))
                     .opacity(urgent ? 1 : 0.6)
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(urgent
-                         ? (items.count == 1 ? "מטלה מחכה לאישור שלכם!" : "\(items.count) מטלות מחכות לאישור שלכם!")
-                         : "מטלות הבית")
+                         ? (items.count == 1 ? tr("מטלה מחכה לאישור שלכם!") : tr("\(items.count) מטלות מחכות לאישור שלכם!"))
+                         : tr("מטלות הבית"))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                     if urgent, let first = items.first,
                        let p = profiles.profiles.first(where: { $0.id.uuidString == first.childID }) {
@@ -662,7 +676,7 @@ struct ParentDashboardView: View {
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .opacity(0.85)
                     } else if !urgent {
-                        Text("אין בקשות ממתינות · ניהול מטלות ופרסים")
+                        Text(tr("אין בקשות ממתינות · ניהול מטלות ופרסים"))
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .opacity(0.8)
                     }
@@ -708,17 +722,20 @@ struct ParentDashboardView: View {
                 // CENTERED between the icons — the right-hugging text left a
                 // lopsided empty gap on the left (Rani, live E2E).
                 VStack(alignment: .center, spacing: 2) {
-                    Text("הַהַתְרָאוֹת כָּבוּיוֹת")
+                    Text(tr("הַהַתְרָאוֹת כָּבוּיוֹת"))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text("הַפְעִילוּ כְּדֵי לְקַבֵּל עֲדְכּוּנִים עַל הַיֶּלֶד")
+                    Text(tr("הַפְעִילוּ כְּדֵי לְקַבֵּל עֲדְכּוּנִים עַל הַיֶּלֶד"))
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
-                Image(systemName: "chevron.left").font(.caption.weight(.bold)).foregroundStyle(.white.opacity(0.8))
+                Image(systemName: AppSymbol.forwardChevron).font(.caption.weight(.bold)).foregroundStyle(.white.opacity(0.8))
             }
+            // Bell on the left, chevron on the right in every language (the
+            // mirrored container would flip it for English).
+            .environment(\.layoutDirection, .leftToRight)
             .padding(AppSpacing.md)
             // Glass with a warm whisper — a notice, not a red slab.
             .glassPane(radius: 18, tint: AppColor.flameOrange)
@@ -735,7 +752,7 @@ struct ParentDashboardView: View {
         } label: {
             HStack(spacing: 10) {
                 Image(systemName: "person.crop.circle.badge.plus")
-                Text("צְרוּ יֶלֶד/ה")
+                Text(tr("צְרוּ יֶלֶד/ה"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
@@ -762,7 +779,7 @@ struct ParentDashboardView: View {
                         .font(.system(size: 84))
                         .foregroundStyle(AppColor.successMint)
                         .glow(AppColor.successMint, radius: 16)
-                    Text("הַמַּכְשִׁיר שֶׁל \(child.name) חוּבַּר! 🎉")
+                    Text(tr("הַמַּכְשִׁיר שֶׁל \(child.name) חוּבַּר! 🎉"))
                         .font(.system(size: 24, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
@@ -771,7 +788,7 @@ struct ParentDashboardView: View {
                 .transition(.scale.combined(with: .opacity))
             } else {
                 VStack(spacing: AppSpacing.lg) {
-                    Text("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(child.name)")
+                    Text(tr("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(child.name)"))
                         .font(.system(size: 24, weight: .black, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
@@ -805,9 +822,9 @@ struct ParentDashboardView: View {
                     // Numbered steps — parents missed that Tofy must be
                     // DOWNLOADED on the kid's device first (Rani, live E2E).
                     VStack(alignment: .trailing, spacing: 5) {
-                        Text("1️⃣  הוֹרִידוּ אֶת טוֹפִי מֵה־App Store בַּמַּכְשִׁיר שֶׁל \(child.name) (אַיְפֵּד אוֹ אַיְפוֹן)")
-                        Text("2️⃣  פִּתְחוּ שָׁם אֶת טוֹפִי וּבַחֲרוּ \"הַמַּכְשִׁיר שֶׁל הַיֶּלֶד\"")
-                        Text("3️⃣  סִרְקוּ אֶת הַקּוֹד — וְ\(child.name) נִכְנָס יְשִׁירוֹת לְשַׂחֵק 🎉")
+                        Text(tr("1️⃣  הוֹרִידוּ אֶת טוֹפִי מֵה־App Store בַּמַּכְשִׁיר שֶׁל \(child.name) (אַיְפֵּד אוֹ אַיְפוֹן)"))
+                        Text(tr("2️⃣  פִּתְחוּ שָׁם אֶת טוֹפִי וּבַחֲרוּ \"הַמַּכְשִׁיר שֶׁל הַיֶּלֶד\""))
+                        Text(tr("3️⃣  סִרְקוּ אֶת הַקּוֹד — וְ\(child.name) נִכְנָס יְשִׁירוֹת לְשַׂחֵק 🎉"))
                     }
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
@@ -817,7 +834,7 @@ struct ParentDashboardView: View {
                     .glassInset(radius: 16)
 
                     ShareLink(item: URL(string: "https://tofyapp.com")!) {
-                        Label("שִׁלְחוּ אֶת טוֹפִי לַמַּכְשִׁיר שֶׁל \(child.name)", systemImage: "square.and.arrow.up")
+                        Label(tr("שִׁלְחוּ אֶת טוֹפִי לַמַּכְשִׁיר שֶׁל \(child.name)"), systemImage: "square.and.arrow.up")
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 16).padding(.vertical, 9)
@@ -825,13 +842,13 @@ struct ParentDashboardView: View {
                             .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }
 
-                    Button("סְגוֹר") { closeQRSheet() }
+                    Button(tr("סְגוֹר")) { closeQRSheet() }
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .padding(.horizontal, 28).padding(.vertical, 12)
                         .background(Capsule().fill(.white.opacity(0.92)))
 
-                    Text("אֶפְשָׁר לְדַלֵּג וּלְחַבֵּר אֶת הַמַּכְשִׁיר אַחַר כָּךְ — מֵהַמָּסָךְ הָרָאשִׁי.")
+                    Text(tr("אֶפְשָׁר לְדַלֵּג וּלְחַבֵּר אֶת הַמַּכְשִׁיר אַחַר כָּךְ — מֵהַמָּסָךְ הָרָאשִׁי."))
                         .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .multilineTextAlignment(.center)
@@ -886,31 +903,31 @@ struct ParentDashboardView: View {
                         Button {
                             profiles.setActive(profile)
                         } label: {
-                            Label("עבור לפרופיל זה", systemImage: "person.crop.circle.fill")
+                            Label(tr("עבור לפרופיל זה"), systemImage: "person.crop.circle.fill")
                         }
                     }
                     Menu {
-                        Button("חֲצִי שָׁעָה") { remoteOpen(profile, 30) }
-                        Button("שָׁעָה") { remoteOpen(profile, 60) }
-                        Button("שְׁעָתַיִם") { remoteOpen(profile, 120) }
-                        Button("4 שָׁעוֹת") { remoteOpen(profile, 240) }
+                        Button(tr("חֲצִי שָׁעָה")) { remoteOpen(profile, 30) }
+                        Button(tr("שָׁעָה")) { remoteOpen(profile, 60) }
+                        Button(tr("שְׁעָתַיִם")) { remoteOpen(profile, 120) }
+                        Button(tr("4 שָׁעוֹת")) { remoteOpen(profile, 240) }
                     } label: {
-                        Label("תֵּן דַּקּוֹת מַתָּנָה 💝", systemImage: "gift.fill")
+                        Label(tr("תֵּן דַּקּוֹת מַתָּנָה 💝"), systemImage: "gift.fill")
                     }
                     Button {
                         remoteLock(profile)
                     } label: {
-                        Label("נְעַל עַכְשָׁיו (מֵרָחוֹק)", systemImage: "lock.fill")
+                        Label(tr("נְעַל עַכְשָׁיו (מֵרָחוֹק)"), systemImage: "lock.fill")
                     }
                     Button(role: .destructive) {
                         revokeGiftProfile = profile
                     } label: {
-                        Label("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה", systemImage: "gift.circle")
+                        Label(tr("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה"), systemImage: "gift.circle")
                     }
                     Button {
                         allowAppRemoval(profile)
                     } label: {
-                        Label("אַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת (5 דַּק')", systemImage: "trash")
+                        Label(tr("אַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת (5 דַּק')"), systemImage: "trash")
                     }
                     // Repair for a device that keeps re-uploading wrong numbers:
                     // tell every device to drop its cached copy and take the cloud
@@ -921,37 +938,37 @@ struct ParentDashboardView: View {
                         Haptic.warning()
                         RemoteSyncManager.shared.purgeChildCaches(childID: profile.id)
                     } label: {
-                        Label("רַעֲנֵן נְתוּנִים בְּכָל הַמַּכְשִׁירִים", systemImage: "arrow.triangle.2.circlepath")
+                        Label(tr("רַעֲנֵן נְתוּנִים בְּכָל הַמַּכְשִׁירִים"), systemImage: "arrow.triangle.2.circlepath")
                     }
                     Button {
                         editProfile = profile
                     } label: {
-                        Label("ערוך פרופיל (שם, גיל)", systemImage: "pencil")
+                        Label(tr("ערוך פרופיל (שם, גיל)"), systemImage: "pencil")
                     }
                     Button {
                         choresProfile = profile
                     } label: {
-                        Label("מטלות הבית 🧹", systemImage: "checklist")
+                        Label(tr("מטלות הבית 🧹"), systemImage: "checklist")
                     }
                     Button {
                         difficultyProfile = profile
                     } label: {
-                        Label("רמת קושי", systemImage: "slider.horizontal.3")
+                        Label(tr("רמת קושי"), systemImage: "slider.horizontal.3")
                     }
                     Button {
                         screenTimeProfile = profile
                     } label: {
-                        Label("זמן מסך יומי", systemImage: "hourglass")
+                        Label(tr("זמן מסך יומי"), systemImage: "hourglass")
                     }
                     Button {
                         worldsProfile = profile
                     } label: {
-                        Label("עולמות פעילים", systemImage: "square.grid.2x2.fill")
+                        Label(tr("עולמות פעילים"), systemImage: "square.grid.2x2.fill")
                     }
                     Button {
                         friendsProfile = profile
                     } label: {
-                        Label("חברים", systemImage: "person.2.fill")
+                        Label(tr("חברים"), systemImage: "person.2.fill")
                     }
                     // Shown only when the child actually set a play-protection
                     // code — the escape hatch for a forgotten code.
@@ -959,18 +976,18 @@ struct ParentDashboardView: View {
                         Button {
                             pinResetProfile = profile
                         } label: {
-                            Label("אפס קוד הגנת זמן", systemImage: "lock.rotation")
+                            Label(tr("אפס קוד הגנת זמן"), systemImage: "lock.rotation")
                         }
                     }
                     Button(role: .destructive) {
                         resettingProfile = profile
                     } label: {
-                        Label("אפס התקדמות", systemImage: "arrow.counterclockwise")
+                        Label(tr("אפס התקדמות"), systemImage: "arrow.counterclockwise")
                     }
                     Button(role: .destructive) {
                         deletingProfile = profile
                     } label: {
-                        Label("מחק ילד/ה", systemImage: "trash")
+                        Label(tr("מחק ילד/ה"), systemImage: "trash")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -983,7 +1000,7 @@ struct ParentDashboardView: View {
                         if isChildPlayingNow(profile) {
                             HStack(spacing: 4) {
                                 Circle().fill(AppColor.successMint).frame(width: 7, height: 7)
-                                Text("בְּטוֹפִי עַכְשָׁיו")
+                                Text(tr("בְּטוֹפִי עַכְשָׁיו"))
                                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                             }
                             .foregroundStyle(.white)
@@ -994,7 +1011,7 @@ struct ParentDashboardView: View {
                         Text(profile.name)
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
                     }
-                    Text("\(profile.age.label) • \(profile.gender?.displayName ?? "לא צוין")")
+                    Text(tr("\(profile.age.label) • \(profile.gender?.displayName ?? tr("לא צוין"))"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     // 🎓 The grade drives ALL curriculum content — always visible
@@ -1007,14 +1024,14 @@ struct ParentDashboardView: View {
                                 Text(Profile.gradeDisplayName(profile.effectiveGrade))
                                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                                 if profile.gradeSetByChild {
-                                    Text("· נבחרה ע\"י הילד — בדקו")
+                                    Text(tr("· נבחרה ע\"י הילד — בדקו"))
                                         .font(.system(size: 10, weight: .bold, design: .rounded))
                                 }
                             } else {
-                                Text("כיתה לא הוגדרה — הגדירו")
+                                Text(tr("כיתה לא הוגדרה — הגדירו"))
                                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                             }
-                            Image(systemName: "chevron.left")
+                            Image(systemName: AppSymbol.forwardChevron)
                                 .font(.system(size: 8, weight: .bold))
                         }
                         .foregroundStyle(profile.grade == nil || profile.gradeSetByChild
@@ -1044,17 +1061,17 @@ struct ParentDashboardView: View {
             // PROGRESS. Each group has a tiny caption; every cell stays tappable
             // for its explanation.
             VStack(alignment: .leading, spacing: 10) {
-                statGroup("הַיּוֹם") {
+                statGroup(tr("הַיּוֹם")) {
                     statCell(emoji: "⏱",
                              value: cap.enabled ? "\(s.minutesEarnedToday)/\(cap.minutes)" : "\(s.minutesEarnedToday)",
-                             label: "זמן מסך היום")
-                    statCell(emoji: "❓", value: "\(s.answeredToday)", label: "שאלות היום")
-                    statCell(emoji: "🎯", value: s.answeredToday > 0 ? "\(Int(Double(s.correctToday) / Double(s.answeredToday) * 100))%" : "—", label: "הצלחה היום")
+                             label: tr("זמן מסך היום"))
+                    statCell(emoji: "❓", value: "\(s.answeredToday)", label: tr("שאלות היום"))
+                    statCell(emoji: "🎯", value: s.answeredToday > 0 ? "\(Int(Double(s.correctToday) / Double(s.answeredToday) * 100))%" : "—", label: tr("הצלחה היום"))
                 }
                 // The two pockets side by side, never blurred: what the child
                 // EARNED (or the live countdown of an open window) vs what the
                 // parent GAVE. Same split as the kid's own home screen.
-                statGroup("דַּקּוֹת מִשְׂחָק") {
+                statGroup(tr("דַּקּוֹת מִשְׂחָק")) {
                     // 🎮 = EARNED wallet only (or the live countdown of an open
                     // EARNED window). A GIFT window's countdown ticks under 💝 —
                     // each pocket shows its own open time, never the other's.
@@ -1063,16 +1080,16 @@ struct ParentDashboardView: View {
                     statCell(emoji: "🎮",
                              value: earnedLive ? formatTime(liveSecs) : (s.walletMinutesShown > 0 ? "\(s.walletMinutesShown)" : "—"),
                              label: earnedLive
-                                ? "זמן מסך פתוח"
-                                : (profile.gender == .girl ? "דק' שהרוויחה" : "דק' שהרוויח"))
+                                ? tr("זמן מסך פתוח")
+                                : (profile.gender == .girl ? tr("דק' שהרוויחה") : tr("דק' שהרוויח")))
                     statCell(emoji: "💝",
                              value: giftLive ? formatTime(liveSecs) : (giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—"),
-                             label: giftLive ? "זמן מתנה פתוח" : "דק' מתנה מכם")
+                             label: giftLive ? tr("זמן מתנה פתוח") : tr("דק' מתנה מכם"))
                 }
-                statGroup("הִתְקַדְּמוּת") {
-                    statCell(emoji: "🔥", value: "\(s.dayStreak)", label: "רצף ימים")
-                    statCell(emoji: "⭐", value: s.stars.currencyShort, label: "כוכבים (דירוג)")
-                    statCell(emoji: "💎", value: s.diamonds.currencyShort, label: "יהלומים (חנות)")
+                statGroup(tr("הִתְקַדְּמוּת")) {
+                    statCell(emoji: "🔥", value: "\(s.dayStreak)", label: tr("רצף ימים"))
+                    statCell(emoji: "⭐", value: s.stars.currencyShort, label: tr("כוכבים (דירוג)"))
+                    statCell(emoji: "💎", value: s.diamonds.currencyShort, label: tr("יהלומים (חנות)"))
                 }
             }
 
@@ -1086,9 +1103,9 @@ struct ParentDashboardView: View {
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(AppColor.starGold)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("קוד הגנת זמן המשחק")
+                        Text(tr("קוד הגנת זמן המשחק"))
                             .font(.system(size: 13.5, weight: .heavy, design: .rounded))
-                        Text("הילד מזין אותו כדי לפתוח את הדקות שצבר")
+                        Text(tr("הילד מזין אותו כדי לפתוח את הדקות שצבר"))
                             .font(.system(size: 11, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
@@ -1096,7 +1113,7 @@ struct ParentDashboardView: View {
                     Text(profile.playPIN ?? "")
                         .font(.system(size: 19, weight: .heavy, design: .monospaced))
                         .kerning(3)
-                    Button("אפס") {
+                    Button(tr("אפס")) {
                         pinResetProfile = profile
                     }
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
@@ -1127,11 +1144,11 @@ struct ParentDashboardView: View {
                     qrChild = profile
                 } label: {
                     HStack(spacing: 10) {
-                        Image(systemName: "chevron.left").font(.subheadline.weight(.bold))
+                        Image(systemName: AppSymbol.forwardChevron).font(.subheadline.weight(.bold))
                         Spacer()
                         Text((household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
-                             ? "חַבְּרוּ מַכְשִׁיר נוֹסָף לְ\(profile.name)"
-                             : "חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name)")
+                             ? tr("חַבְּרוּ מַכְשִׁיר נוֹסָף לְ\(profile.name)")
+                             : tr("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name)"))
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                         Image(systemName: "qrcode")
                             .font(.system(size: 20, weight: .bold))
@@ -1154,9 +1171,9 @@ struct ParentDashboardView: View {
                     .environmentObject(settings)
             } label: {
                 HStack(spacing: 8) {
-                    Image(systemName: "chevron.left").font(.caption)
+                    Image(systemName: AppSymbol.forwardChevron).font(.caption)
                     Spacer()
-                    Text("תובנות מלאות")
+                    Text(tr("תובנות מלאות"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                     Image(systemName: "chart.line.uptrend.xyaxis")
                 }
@@ -1179,11 +1196,11 @@ struct ParentDashboardView: View {
                     // gone missing. Spell out where new earnings go (tomorrow)
                     // and that the 💝 gift pocket stays open today.
                     Text(maxedOut
-                         ? "\(profile.gender == .girl ? "הגיעה" : "הגיע") לתקרה היומית (\(cap.minutes) דק') — מה \(profile.gender == .girl ? "שתרוויח" : "שירוויח") עכשיו נשמר למחר"
-                           + ((s.carryOverMinutes ?? 0) > 0 ? " · 🎁 כבר \(s.carryOverMinutes ?? 0)" : "")
-                           + (giftShownFor(profile, s) > 0 ? " · 💝 המתנה פתוחה גם היום" : "")
-                         : "נצבר היום: \(s.minutesEarnedToday) / \(cap.minutes) דק'"
-                           + ((s.carryOverMinutes ?? 0) > 0 ? "  ·  🎁 \(s.carryOverMinutes ?? 0) למחר" : ""))
+                         ? tr("\(profile.gender == .girl ? tr("הגיעה") : tr("הגיע")) לתקרה היומית (\(cap.minutes) דק') — מה \(profile.gender == .girl ? tr("שתרוויח") : tr("שירוויח")) עכשיו נשמר למחר")
+                           + ((s.carryOverMinutes ?? 0) > 0 ? tr(" · 🎁 כבר \(s.carryOverMinutes ?? 0)") : "")
+                           + (giftShownFor(profile, s) > 0 ? tr(" · 💝 המתנה פתוחה גם היום") : "")
+                         : tr("נצבר היום: \(s.minutesEarnedToday) / \(cap.minutes) דק'")
+                           + ((s.carryOverMinutes ?? 0) > 0 ? tr("  ·  🎁 \(s.carryOverMinutes ?? 0) למחר") : ""))
                         .font(.caption)
                         .foregroundStyle(maxedOut ? .primary : .secondary)
                     Spacer()
@@ -1196,7 +1213,7 @@ struct ParentDashboardView: View {
             HStack(spacing: 6) {
                 Image(systemName: "wallet.pass")
                     .foregroundStyle(.secondary)
-                Text("🎮 \(s.walletMinutesShown) דק' \(profile.gender == .girl ? "הרוויחה" : "הרוויח") מלמידה  ·  💝 \(giftShown) דק' מתנה מכם")
+                Text(tr("🎮 \(s.walletMinutesShown) דק' \(profile.gender == .girl ? tr("הרוויחה") : tr("הרוויח")) מלמידה  ·  💝 \(giftShown) דק' מתנה מכם"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -1207,7 +1224,7 @@ struct ParentDashboardView: View {
                 Button {
                     quickGift(profile: profile, minutes: 10)
                 } label: {
-                    Text("💝 +10 מתנה")
+                    Text(tr("💝 +10 מתנה"))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .padding(.horizontal, 10).padding(.vertical, 6)
                         .background(Capsule().fill(AppColor.successMint.opacity(0.25)))
@@ -1219,7 +1236,7 @@ struct ParentDashboardView: View {
                 Button {
                     quickAdjust(profile: profile, deltaMinutes: -5)
                 } label: {
-                    Text("−5 מהמורווח")
+                    Text(tr("−5 מהמורווח"))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .padding(.horizontal, 10).padding(.vertical, 6)
                         .background(Capsule().fill(Color.orange.opacity(0.25)))
@@ -1253,10 +1270,10 @@ struct ParentDashboardView: View {
         let pct = s.answeredToday > 0 ? Int((Double(s.correctToday) / Double(s.answeredToday) * 100).rounded()) : nil
         let hasDevice = childHasDevice(profile)
         let state: String = {
-            if playing { return "\(girl ? "מְשַׂחֶקֶת" : "מְשַׂחֵק") עַכְשָׁיו · נִשְׁאֲרוּ \(formatTime(liveSecs))" }
-            if isChildPlayingNow(profile) { return "בְּטוֹפִי עַכְשָׁיו · \(girl ? "לוֹמֶדֶת" : "לוֹמֵד")" }
-            if !hasDevice { return "עוֹד לֹא \(girl ? "הִתְחִילָה" : "הִתְחִיל")" }
-            return s.answeredToday > 0 ? "\(girl ? "לָמְדָה" : "לָמַד") הַיּוֹם" : "לֹא בְּטוֹפִי הַיּוֹם"
+            if playing { return tr("\(girl ? tr("מְשַׂחֶקֶת") : tr("מְשַׂחֵק")) עַכְשָׁיו · נִשְׁאֲרוּ \(formatTime(liveSecs))") }
+            if isChildPlayingNow(profile) { return tr("בְּטוֹפִי עַכְשָׁיו · \(girl ? tr("לוֹמֶדֶת") : tr("לוֹמֵד"))") }
+            if !hasDevice { return tr("עוֹד לֹא \(girl ? tr("הִתְחִילָה") : tr("הִתְחִיל"))") }
+            return s.answeredToday > 0 ? tr("\(girl ? tr("לָמְדָה") : tr("לָמַד")) הַיּוֹם") : tr("לֹא בְּטוֹפִי הַיּוֹם")
         }()
         return VStack(spacing: 12) {
             HStack(spacing: 12) {
@@ -1289,10 +1306,10 @@ struct ParentDashboardView: View {
                 HStack(spacing: 8) {
                     overviewStat(value: "\(s.minutesEarnedToday)",
                                  suffix: cap.enabled ? "/\(cap.minutes)" : nil,
-                                 label: "דַּקּוֹת הַיּוֹם",
+                                 label: tr("דַּקּוֹת הַיּוֹם"),
                                  progress: cap.enabled ? min(1, Double(s.minutesEarnedToday) / Double(max(cap.minutes, 1))) : nil)
-                    overviewStat(value: "\(s.answeredToday)", suffix: nil, label: "שְׁאֵלוֹת הַיּוֹם", progress: nil)
-                    overviewStat(value: "\(s.correctToday)", suffix: nil, label: "נְכוֹנוֹת", progress: nil)
+                    overviewStat(value: "\(s.answeredToday)", suffix: nil, label: tr("שְׁאֵלוֹת הַיּוֹם"), progress: nil)
+                    overviewStat(value: "\(s.correctToday)", suffix: nil, label: tr("נְכוֹנוֹת"), progress: nil)
                 }
                 .fixedSize(horizontal: false, vertical: true)   // all three tiles as tall as the one with the bar (Rani)
                 HStack(spacing: 8) {
@@ -1300,7 +1317,7 @@ struct ParentDashboardView: View {
                     // primary control. The ⚡ menu is overlaid by the grid into
                     // the reserved slot on its left (a Menu inside a link would
                     // swallow the tap).
-                    homePrimaryLabel("מֵידָע נוֹסָף ←")
+                    homePrimaryLabel(tr("מֵידָע נוֹסָף ←"))
                     Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
                 }
             } else {
@@ -1309,7 +1326,7 @@ struct ParentDashboardView: View {
                 // their page (Rani). That hid exactly the things a parent needs
                 // then: connect a device, or hand them the parent's own phone.
                 HStack(spacing: 6) {
-                    Text("\(Profile.gradeDisplayName(profile.effectiveGrade)) · אֵין עֲדַיִן מַכְשִׁיר מְחֻבָּר.")
+                    Text(tr("\(Profile.gradeDisplayName(profile.effectiveGrade)) · אֵין עֲדַיִן מַכְשִׁיר מְחֻבָּר."))
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .lineLimit(1).minimumScaleFactor(0.7)
@@ -1326,7 +1343,7 @@ struct ParentDashboardView: View {
         .padding(14)
         .foregroundStyle(GlassInk.primary)
         .glassPane(radius: AppRadius.large, strength: hasDevice ? 0.14 : 0.09)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     private static let actionsMenuWidth: CGFloat = 112
@@ -1364,7 +1381,7 @@ struct ParentDashboardView: View {
     /// the three things a parent does that aren't about one child's card.
     private var homeActionsRow: some View {
         HStack(spacing: 8) {
-            Button { Haptic.light(); showingCreateChild = true } label: { homeGhostLabel("＋ צְרוּ יֶלֶד/ה") }
+            Button { Haptic.light(); showingCreateChild = true } label: { homeGhostLabel(tr("＋ צְרוּ יֶלֶד/ה")) }
                 .buttonStyle(.plain)
             // "תנו לילד לשחק" moved into each child's ⚡ menu (Rani, 2026-09-07):
             // it opens Kid Mode for THAT child, no picker.
@@ -1375,10 +1392,10 @@ struct ParentDashboardView: View {
                     profiles.profiles.first(where: { $0.id.uuidString == first.childID })
                 } ?? rows.first?.profile
                 if let target { choresProfile = target }
-            } label: { homeGhostLabel("🧹 מַטְלוֹת") }
+            } label: { homeGhostLabel(tr("🧹 מַטְלוֹת")) }
                 .buttonStyle(.plain)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     /// 👑 Tofy+ lives on the home (Rani) — the one warm pane: the family offer
@@ -1406,28 +1423,28 @@ struct ParentDashboardView: View {
         return (world, n)
     }
     private func shortDate(_ d: Date) -> String {
-        let f = DateFormatter(); f.locale = Locale(identifier: "he_IL"); f.dateFormat = "d.M"; return f.string(from: d)
+        let f = DateFormatter(); f.locale = LanguageStore.shared.current.locale; f.dateFormat = "d.M"; return f.string(from: d)
     }
     private func weekdayName(_ d: Date) -> String {
         let cal = Calendar.current
-        if cal.isDateInToday(d) { return "הַיּוֹם" }
-        if cal.isDateInTomorrow(d) { return "מָחָר" }
-        let f = DateFormatter(); f.locale = Locale(identifier: "he_IL"); f.dateFormat = "EEEE"
-        return "בְּיוֹם " + f.string(from: d).replacingOccurrences(of: "יום ", with: "")
+        if cal.isDateInToday(d) { return tr("הַיּוֹם") }
+        if cal.isDateInTomorrow(d) { return tr("מָחָר") }
+        let f = DateFormatter(); f.locale = LanguageStore.shared.current.locale; f.dateFormat = "EEEE"
+        return tr("בְּיוֹם ") + f.string(from: d).replacingOccurrences(of: "יום ", with: "")
     }
 
     @ViewBuilder private func giftCards(_ gift: GiftState) -> some View {
         let names = rows.map(\.profile.name)
-        let who = names.count == 1 ? "לְ\(names[0])" : "לַיְלָדִים"
+        let who = names.count == 1 ? tr("לְ\(names[0])") : tr("לַיְלָדִים")
         let star = starRow
         if gift.daysLeft > 7 {
             // Days 1–7: the gift card in place of the Tofy+ card. No selling yet.
-            journeyCard(title: "🎁 טוֹפִי+ בְּמַתָּנָה · עוֹד \(gift.daysLeft) יָמִים",
-                        body: "כָּל הָעוֹלָמוֹת פְּתוּחִים \(who) עַד \(shortDate(gift.until)). בְּלִי כַּרְטִיס, לֹא מִתְחַדֵּשׁ. בֵּינְתַיִם תִּרְאוּ מָה \(names.count == 1 ? (girl(rows[0].profile) ? "הִיא אוֹהֶבֶת" : "הוּא אוֹהֵב") : "הֵם אוֹהֲבִים").",
+            journeyCard(title: tr("🎁 טוֹפִי+ בְּמַתָּנָה · עוֹד \(gift.daysLeft) יָמִים"),
+                        body: tr("כָּל הָעוֹלָמוֹת פְּתוּחִים \(who) עַד \(shortDate(gift.until)). בְּלִי כַּרְטִיס, לֹא מִתְחַדֵּשׁ. בֵּינְתַיִם תִּרְאוּ מָה \(names.count == 1 ? (girl(rows[0].profile) ? tr("הִיא אוֹהֶבֶת") : tr("הוּא אוֹהֵב")) : tr("הֵם אוֹהֲבִים"))."),
                         button: nil, gold: false)
             if let star, let fav = favoriteWorld(star.snapshot), fav.questions >= 20 {
-                journeyCard(title: "❤️ נִרְאֶה שֶׁ\(star.profile.name) \(girl(star.profile) ? "מָצְאָה" : "מָצָא") מַשֶּׁהוּ שֶׁ\(girl(star.profile) ? "הִיא אוֹהֶבֶת" : "הוּא אוֹהֵב")",
-                            body: "\(fav.world.emoji) \(fav.world.name) הוּא הַמָּקוֹם שֶׁ\(girl(star.profile) ? "הִיא חוֹזֶרֶת" : "הוּא חוֹזֵר") אֵלָיו הֲכִי הַרְבֵּה: \(fav.questions) שְׁאֵלוֹת.",
+                journeyCard(title: tr("❤️ נִרְאֶה שֶׁ\(star.profile.name) \(girl(star.profile) ? tr("מָצְאָה") : tr("מָצָא")) מַשֶּׁהוּ שֶׁ\(girl(star.profile) ? tr("הִיא אוֹהֶבֶת") : tr("הוּא אוֹהֵב"))"),
+                            body: tr("\(fav.world.emoji) \(fav.world.name) הוּא הַמָּקוֹם שֶׁ\(girl(star.profile) ? tr("הִיא חוֹזֶרֶת") : tr("הוּא חוֹזֵר")) אֵלָיו הֲכִי הַרְבֵּה: \(fav.questions) שְׁאֵלוֹת."),
                             button: nil, gold: false)
             }
         } else {
@@ -1437,20 +1454,20 @@ struct ParentDashboardView: View {
             let questions = s?.totalAnswered ?? 0
             let accuracy = (s?.totalAnswered ?? 0) > 0 ? Int((Double(s!.totalCorrect) / Double(s!.totalAnswered) * 100).rounded()) : 0
             VStack(alignment: .leading, spacing: 10) {
-                Text("🎁 הַמַּתָּנָה מִסְתַּיֶּמֶת \(weekdayName(gift.until))")
+                Text(tr("🎁 הַמַּתָּנָה מִסְתַּיֶּמֶת \(weekdayName(gift.until))"))
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                 HStack(spacing: 8) {
-                    journeyStat("\(worlds)", worlds == 1 ? "עוֹלָם" : "עוֹלָמוֹת")
-                    journeyStat("\(questions)", "שְׁאֵלוֹת")
-                    journeyStat("\(accuracy)%", "הַצְלָחָה")
+                    journeyStat("\(worlds)", worlds == 1 ? tr("עוֹלָם") : tr("עוֹלָמוֹת"))
+                    journeyStat("\(questions)", tr("שְׁאֵלוֹת"))
+                    journeyStat("\(accuracy)%", tr("הַצְלָחָה"))
                 }
                 if let star, let fav = favoriteWorld(star.snapshot) {
-                    Text("\(fav.world.emoji) הַתְּחוּם הָאָהוּב: \(fav.world.name) · \(fav.questions) שְׁאֵלוֹת")
+                    Text(tr("\(fav.world.emoji) הַתְּחוּם הָאָהוּב: \(fav.world.name) · \(fav.questions) שְׁאֵלוֹת"))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                 }
                 Button { Haptic.light(); paywallSource = "gift_card"; showingPaywall = true } label: {
-                    Text("הַשְׁאִירוּ \(who) אֶת כָּל הָעוֹלָמוֹת פְּתוּחִים")
+                    Text(tr("הַשְׁאִירוּ \(who) אֶת כָּל הָעוֹלָמוֹת פְּתוּחִים"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .frame(maxWidth: .infinity)
@@ -1468,7 +1485,7 @@ struct ParentDashboardView: View {
             .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .strokeBorder(Color(hex: "FFEBAA").opacity(0.7), lineWidth: 1))
             .shadow(color: .black.opacity(0.22), radius: 14, y: 8)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
     }
 
@@ -1478,9 +1495,9 @@ struct ParentDashboardView: View {
            let a = hh.activation, a.questions > 0, let star = starRow {
             let name = star.profile.name, g = girl(star.profile)
             let next: String = a.daysLeft > 0
-                ? "עוֹד \(a.daysLeft == 1 ? "יוֹם פָּעִיל אֶחָד" : "\(a.daysLeft) יָמִים פְּעִילִים") וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁"
-                : "עוֹד \(a.questionsLeft) שְׁאֵלוֹת וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁"
-            journeyCard(title: "🎉 \(name) כְּבָר \(g ? "עָנְתָה" : "עָנָה") עַל \(a.questions) שְׁאֵלוֹת",
+                ? tr("עוֹד \(a.daysLeft == 1 ? tr("יוֹם פָּעִיל אֶחָד") : tr("\(a.daysLeft) יָמִים פְּעִילִים")) וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁")
+                : tr("עוֹד \(a.questionsLeft) שְׁאֵלוֹת וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁")
+            journeyCard(title: tr("🎉 \(name) כְּבָר \(g ? tr("עָנְתָה") : tr("עָנָה")) עַל \(a.questions) שְׁאֵלוֹת"),
                         body: next, button: nil, gold: false)
         }
     }
@@ -1506,17 +1523,17 @@ struct ParentDashboardView: View {
         .multilineTextAlignment(.leading)
         .padding(14)
         .glassPane(radius: 22, tint: gold ? Color(hex: "FFD23F") : nil, shadow: false)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     @ViewBuilder private var tofyPlusCard: some View {
         if subs.isPremium {
             Button { Haptic.light(); showingManageSubscription = true } label: {
                 HStack {
-                    Text("👑 טוֹפִי+ פָּעִיל")
+                    Text(tr("👑 טוֹפִי+ פָּעִיל"))
                         .font(.system(size: 14.5, weight: .heavy, design: .rounded))
                     Spacer()
-                    Text("לְכָל הַמִּשְׁפָּחָה · נִהוּל")
+                    Text(tr("לְכָל הַמִּשְׁפָּחָה · נִהוּל"))
                         .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                 }
@@ -1526,18 +1543,18 @@ struct ParentDashboardView: View {
                 .glassPane(radius: 16, tint: Color(hex: "FFD23F"), shadow: false)
             }
             .buttonStyle(.plain)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
             .manageSubscriptionsSheet(isPresented: $showingManageSubscription)
         } else {
             VStack(alignment: .leading, spacing: 6) {
-                Text("👑 טוֹפִי+ לְכָל הַמִּשְׁפָּחָה")
+                Text(tr("👑 טוֹפִי+ לְכָל הַמִּשְׁפָּחָה"))
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
-                Text("כָּל הָעוֹלָמוֹת — כּוֹלֵל כָּל עוֹלָם חָדָשׁ שֶׁנּוֹסִיף — הַמִּשְׂחָקִים וְהַמַּטְלוֹת, לְכָל הַיְלָדִים, בְּכָל הַמַּכְשִׁירִים. קוֹנִים פַּעַם אַחַת, כָּאן.")
+                Text(tr("כָּל הָעוֹלָמוֹת — כּוֹלֵל כָּל עוֹלָם חָדָשׁ שֶׁנּוֹסִיף — הַמִּשְׂחָקִים וְהַמַּטְלוֹת, לְכָל הַיְלָדִים, בְּכָל הַמַּכְשִׁירִים. קוֹנִים פַּעַם אַחַת, כָּאן."))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 Button { Haptic.light(); showingPaywall = true } label: {
-                    Text(subs.yearlyIntroEligible ? "הַתְחִילוּ 7 יָמִים חִנָּם" : "לְכָל הַפְּרָטִים")
+                    Text(subs.yearlyIntroEligible ? tr("הַתְחִילוּ 7 יָמִים חִנָּם") : tr("לְכָל הַפְּרָטִים"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .frame(maxWidth: .infinity)
@@ -1556,7 +1573,7 @@ struct ParentDashboardView: View {
             .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .strokeBorder(Color(hex: "FFEBAA").opacity(0.7), lineWidth: 1))
             .shadow(color: .black.opacity(0.22), radius: 14, y: 8)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
     }
 
@@ -1574,7 +1591,7 @@ struct ParentDashboardView: View {
                     .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("הגדרות")
+            .accessibilityLabel(tr("הגדרות"))
             VStack(alignment: .trailing, spacing: 4) {
                 // The family's name IS the title (Rani); tap to name / rename.
                 Button {
@@ -1591,14 +1608,14 @@ struct ParentDashboardView: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .alert("שֵׁם הַמִּשְׁפָּחָה", isPresented: $showFamilyNameEditor) {
-                    TextField("מִשְׁפַּחַת גּוֹלָן", text: $familyNameDraft)
-                    Button("שִׁמְרוּ") { household.setFamilyName(familyNameDraft) }
-                    Button("לֹא עַכְשָׁו", role: .cancel) {
+                .alert(tr("שֵׁם הַמִּשְׁפָּחָה"), isPresented: $showFamilyNameEditor) {
+                    TextField(tr("מִשְׁפַּחַת גּוֹלָן"), text: $familyNameDraft)
+                    Button(tr("שִׁמְרוּ")) { household.setFamilyName(familyNameDraft) }
+                    Button(tr("לֹא עַכְשָׁו"), role: .cancel) {
                         UserDefaults.standard.set(true, forKey: "family.namePromptOff")
                     }
                 } message: {
-                    Text("מוֹפִיעַ כָּאן וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה.")
+                    Text(tr("מוֹפִיעַ כָּאן וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה."))
                 }
                 Text(homeSubtitle)
                     .font(.system(size: 13.5, weight: .medium, design: .rounded))
@@ -1628,13 +1645,13 @@ struct ParentDashboardView: View {
 
     /// "שבת · שלושה ילדים · יואב משחק עכשיו"
     private var homeSubtitle: String {
-        let f = DateFormatter(); f.locale = Locale(identifier: "he_IL"); f.dateFormat = "EEEE"
+        let f = DateFormatter(); f.locale = LanguageStore.shared.current.locale; f.dateFormat = "EEEE"
         let day = f.string(from: Date()).replacingOccurrences(of: "יום ", with: "")
         // With a family name in the title, the greeting moves down here; without
         // one, a nudge to name the family takes its place.
         let lead: String? = household.familyNameShown != nil
             ? greetingLine.replacingOccurrences(of: " 👋", with: "")
-            : "תְּנוּ שֵׁם לַמִּשְׁפָּחָה ✏️"
+            : tr("תְּנוּ שֵׁם לַמִּשְׁפָּחָה ✏️")
         return [lead, day, childrenCountLabel, familyMomentLine].compactMap { $0 }.joined(separator: " · ")
     }
 
@@ -1643,11 +1660,11 @@ struct ParentDashboardView: View {
         guard !ps.isEmpty else { return nil }
         let fem = ps.allSatisfy { $0.gender == .girl }
         switch ps.count {
-        case 1: return fem ? "יַלְדָּה אַחַת" : "יֶלֶד אֶחָד"
-        case 2: return fem ? "שְׁתֵּי יְלָדוֹת" : "שְׁנֵי יְלָדִים"
-        case 3: return fem ? "שָׁלוֹשׁ יְלָדוֹת" : "שְׁלוֹשָׁה יְלָדִים"
-        case 4: return fem ? "אַרְבַּע יְלָדוֹת" : "אַרְבָּעָה יְלָדִים"
-        default: return fem ? "\(ps.count) יְלָדוֹת" : "\(ps.count) יְלָדִים"
+        case 1: return fem ? tr("יַלְדָּה אַחַת") : tr("יֶלֶד אֶחָד")
+        case 2: return fem ? tr("שְׁתֵּי יְלָדוֹת") : tr("שְׁנֵי יְלָדִים")
+        case 3: return fem ? tr("שָׁלוֹשׁ יְלָדוֹת") : tr("שְׁלוֹשָׁה יְלָדִים")
+        case 4: return fem ? tr("אַרְבַּע יְלָדוֹת") : tr("אַרְבָּעָה יְלָדִים")
+        default: return fem ? tr("\(ps.count) יְלָדוֹת") : tr("\(ps.count) יְלָדִים")
         }
     }
 
@@ -1683,50 +1700,50 @@ struct ParentDashboardView: View {
             if !hasDevice {
                 Button {
                     Haptic.light(); qrCode = nil; qrChild = profile
-                } label: { Label("חַבְּרוּ מַכְשִׁיר לְ\(profile.name)", systemImage: "qrcode") }
+                } label: { Label(tr("חַבְּרוּ מַכְשִׁיר לְ\(profile.name)"), systemImage: "qrcode") }
                 Divider()
             }
             Button {
                 kidModeChild = profile
-            } label: { Label("תְּנוּ לְ\(profile.name) לְשַׂחֵק כָּאן 🧒", systemImage: "iphone.and.arrow.forward") }
+            } label: { Label(tr("תְּנוּ לְ\(profile.name) לְשַׂחֵק כָּאן 🧒"), systemImage: "iphone.and.arrow.forward") }
             if hasDevice {
             Divider()
             Menu {
-                Button("חֲצִי שָׁעָה") { remoteOpen(profile, 30) }
-                Button("שָׁעָה") { remoteOpen(profile, 60) }
-                Button("שְׁעָתַיִם") { remoteOpen(profile, 120) }
-                Button("4 שָׁעוֹת") { remoteOpen(profile, 240) }
+                Button(tr("חֲצִי שָׁעָה")) { remoteOpen(profile, 30) }
+                Button(tr("שָׁעָה")) { remoteOpen(profile, 60) }
+                Button(tr("שְׁעָתַיִם")) { remoteOpen(profile, 120) }
+                Button(tr("4 שָׁעוֹת")) { remoteOpen(profile, 240) }
             } label: {
-                Label("תֵּן דַּקּוֹת מַתָּנָה 💝", systemImage: "gift.fill")
+                Label(tr("תֵּן דַּקּוֹת מַתָּנָה 💝"), systemImage: "gift.fill")
             }
             Button {
                 remoteLock(profile)
             } label: {
-                Label("נְעַל עַכְשָׁיו (מֵרָחוֹק)", systemImage: "lock.fill")
+                Label(tr("נְעַל עַכְשָׁיו (מֵרָחוֹק)"), systemImage: "lock.fill")
             }
             Button(role: .destructive) {
                 revokeGiftProfile = profile
             } label: {
-                Label("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה", systemImage: "gift.circle")
+                Label(tr("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה"), systemImage: "gift.circle")
             }
             }   // remote controls need a device to reach
             Divider()
             Button {
                 navPath.append(profile.id)
-            } label: { Label("פתח כרטיס", systemImage: "rectangle.portrait.and.arrow.right") }
+            } label: { Label(tr("פתח כרטיס"), systemImage: "rectangle.portrait.and.arrow.right") }
             Button {
                 choresProfile = profile
-            } label: { Label("מַטְלוֹת הַבַּיִת 🧹", systemImage: "checklist") }
+            } label: { Label(tr("מַטְלוֹת הַבַּיִת 🧹"), systemImage: "checklist") }
             if rows.count >= 2 {
                 Button {
                     showingReorder = true
-                } label: { Label("סדר את הילדים", systemImage: "arrow.up.arrow.down") }
+                } label: { Label(tr("סדר את הילדים"), systemImage: "arrow.up.arrow.down") }
             }
             Button(role: .destructive) {
                 gridDeleteProfile = profile
-            } label: { Label("מחק ילד/ה", systemImage: "trash") }
+            } label: { Label(tr("מחק ילד/ה"), systemImage: "trash") }
         } label: {
-            homeGhostLabel("⚡ פְּעֻלּוֹת", width: Self.actionsMenuWidth)
+            homeGhostLabel(tr("⚡ פְּעֻלּוֹת"), width: Self.actionsMenuWidth)
         }
         .buttonStyle(.plain)
     }
@@ -1758,7 +1775,7 @@ struct ParentDashboardView: View {
     private var greetingLine: String {
         let first = (auth.displayName ?? "")
             .split(separator: " ").first.map(String.init) ?? ""
-        return first.isEmpty ? "שָׁלוֹם 👋" : "שָׁלוֹם \(first) 👋"
+        return first.isEmpty ? tr("שָׁלוֹם 👋") : tr("שָׁלוֹם \(first) 👋")
     }
 
     /// One short line from real family data — picked by priority so it's always
@@ -1772,31 +1789,31 @@ struct ParentDashboardView: View {
         //    named by its source: gift time (💝) is never dressed up as earned (🎮).
         if let (p, w) = theRows.lazy.compactMap({ r in liveWindow(r.profile).map { (r.profile, $0) } }).first {
             return w.isManual
-                ? "\(p.name) \(g(p, "פָּתַח", "פָּתְחָה")) דַּקּוֹת מַתָּנָה עַכְשָׁיו 💝"
-                : "\(p.name) \(g(p, "פָּתַח", "פָּתְחָה")) זְמַן מָסָךְ עַכְשָׁיו 🎮"
+                ? tr("\(p.name) \(g(p, tr("פָּתַח"), tr("פָּתְחָה"))) דַּקּוֹת מַתָּנָה עַכְשָׁיו 💝")
+                : tr("\(p.name) \(g(p, tr("פָּתַח"), tr("פָּתְחָה"))) זְמַן מָסָךְ עַכְשָׁיו 🎮")
         }
         // 1b. Someone is inside Tofy right now (learning).
         if let live = theRows.first(where: { isChildPlayingNow($0.profile) }) {
-            return "\(live.profile.name) בְּטוֹפִי עַכְשָׁיו — \(g(live.profile, "לוֹמֵד", "לוֹמֶדֶת")) 📚"
+            return tr("\(live.profile.name) בְּטוֹפִי עַכְשָׁיו — \(g(live.profile, tr("לוֹמֵד"), tr("לוֹמֶדֶת"))) 📚")
         }
         // 2. Best streak in the family (≥3 is worth celebrating).
         if let hot = theRows.max(by: { $0.snapshot.dayStreak < $1.snapshot.dayStreak }),
            hot.snapshot.dayStreak >= 3 {
-            return "\(hot.profile.name) בְּרֶצֶף שֶׁל \(hot.snapshot.dayStreak) יָמִים 🔥"
+            return tr("\(hot.profile.name) בְּרֶצֶף שֶׁל \(hot.snapshot.dayStreak) יָמִים 🔥")
         }
         // 3. Family activity today.
         let questions = theRows.reduce(0) { $0 + $1.snapshot.answeredToday }
         let idle = theRows.filter { $0.snapshot.answeredToday == 0 }
         if questions > 0, idle.count == 1, theRows.count > 1 {
             let kid = idle[0].profile
-            return "\(kid.name) עוֹד לֹא \(g(kid, "שִׂחֵק", "שִׂחֲקָה")) הַיּוֹם — אוּלַי לְעוֹדֵד? 💛"
+            return tr("\(kid.name) עוֹד לֹא \(g(kid, tr("שִׂחֵק"), tr("שִׂחֲקָה"))) הַיּוֹם — אוּלַי לְעוֹדֵד? 💛")
         }
         if questions > 0 {
-            return "הַמִּשְׁפָּחָה עָנְתָה עַל \(questions) שְׁאֵלוֹת הַיּוֹם 👏"
+            return tr("הַמִּשְׁפָּחָה עָנְתָה עַל \(questions) שְׁאֵלוֹת הַיּוֹם 👏")
         }
         // 4. Quiet day.
         let hour = Calendar.current.component(.hour, from: Date())
-        return hour < 12 ? "יוֹם חָדָשׁ, הַרְפַּתְקָאוֹת חֲדָשׁוֹת ✨" : "שֶׁקֶט הַיּוֹם — הַכֹּל בְּסֵדֶר 🌤️"
+        return hour < 12 ? tr("יוֹם חָדָשׁ, הַרְפַּתְקָאוֹת חֲדָשׁוֹת ✨") : tr("שֶׁקֶט הַיּוֹם — הַכֹּל בְּסֵדֶר 🌤️")
     }
 
     // MARK: - Live play window (what's happening RIGHT NOW)
@@ -1842,9 +1859,9 @@ struct ParentDashboardView: View {
         let girl = profile.gender == .girl
         let text: String = {
             // No countdown here — the 🎮/💝 stat below already ticks in green.
-            if let live { return live.isManual ? "💝 זְמַן מַתָּנָה פָּתוּחַ" : "🎮 זְמַן מָסָךְ פָּתוּחַ" }
-            if isChildPlayingNow(profile) { return "בְּטוֹפִי עַכְשָׁיו · \(girl ? "לוֹמֶדֶת" : "לוֹמֵד") 📚" }
-            return "לֹא בְּטוֹפִי כָּרֶגַע"
+            if let live { return live.isManual ? tr("💝 זְמַן מַתָּנָה פָּתוּחַ") : tr("🎮 זְמַן מָסָךְ פָּתוּחַ") }
+            if isChildPlayingNow(profile) { return tr("בְּטוֹפִי עַכְשָׁיו · \(girl ? tr("לוֹמֶדֶת") : tr("לוֹמֵד")) 📚") }
+            return tr("לֹא בְּטוֹפִי כָּרֶגַע")
         }()
         HStack(spacing: 6) {
             if live != nil { LivePulseDot() }
@@ -1873,8 +1890,8 @@ struct ParentDashboardView: View {
     @ViewBuilder
     private func liveWindowBanner(_ profile: Profile, compact: Bool) -> some View {
         if let live = liveWindow(profile) {
-            let deviceLabel = live.device.kind == "ipad" ? "בָּאַיְפֵּד" : (live.device.kind == "iphone" ? "בָּאַיְפוֹן" : "בַּמַּכְשִׁיר")
-            let source = live.isManual ? "זְמַן שֶׁנָּתַתֶּם" : (profile.gender == .girl ? "זְמַן שֶׁהִרְוִיחָה" : "זְמַן שֶׁהִרְוִיחַ")
+            let deviceLabel = live.device.kind == "ipad" ? tr("בָּאַיְפֵּד") : (live.device.kind == "iphone" ? tr("בָּאַיְפוֹן") : tr("בַּמַּכְשִׁיר"))
+            let source = live.isManual ? tr("זְמַן שֶׁנָּתַתֶּם") : (profile.gender == .girl ? tr("זְמַן שֶׁהִרְוִיחָה") : tr("זְמַן שֶׁהִרְוִיחַ"))
             // Authored RTL explicitly (the detail card is forced LTR): the pulse
             // dot leads on the RIGHT, Hebrew text is right-aligned, device icon
             // trails on the LEFT.
@@ -1882,17 +1899,17 @@ struct ParentDashboardView: View {
                 LivePulseDot()
                 if compact {
                     Text(live.isManual
-                         ? "💝 זְמַן מַתָּנָה פָּתוּחַ · \(formatTime(live.secondsLeft))"
-                         : "🎮 זְמַן מָסָךְ פָּתוּחַ · \(formatTime(live.secondsLeft))")
+                         ? tr("💝 זְמַן מַתָּנָה פָּתוּחַ · \(formatTime(live.secondsLeft))")
+                         : tr("🎮 זְמַן מָסָךְ פָּתוּחַ · \(formatTime(live.secondsLeft))"))
                         .font(.system(size: 11.5, weight: .heavy, design: .rounded))
                         .lineLimit(1).minimumScaleFactor(0.7)
                 } else {
                     VStack(alignment: .leading, spacing: 1) {
                         Text(live.isManual
-                             ? "\(profile.name) \(profile.gender == .girl ? "פָּתְחָה" : "פָּתַח") דַּקּוֹת מַתָּנָה \(deviceLabel) 💝"
-                             : "\(profile.name) \(profile.gender == .girl ? "פָּתְחָה" : "פָּתַח") זְמַן מָסָךְ \(deviceLabel) 🎮")
+                             ? tr("\(profile.name) \(profile.gender == .girl ? tr("פָּתְחָה") : tr("פָּתַח")) דַּקּוֹת מַתָּנָה \(deviceLabel) 💝")
+                             : tr("\(profile.name) \(profile.gender == .girl ? tr("פָּתְחָה") : tr("פָּתַח")) זְמַן מָסָךְ \(deviceLabel) 🎮"))
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
-                        Text("נִשְׁאֲרוּ \(formatTime(live.secondsLeft)) דַּקּוֹת · \(source)")
+                        Text(tr("נִשְׁאֲרוּ \(formatTime(live.secondsLeft)) דַּקּוֹת · \(source)"))
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .opacity(0.9)
                             .monospacedDigit()
@@ -1903,7 +1920,7 @@ struct ParentDashboardView: View {
                         .font(.system(size: 18, weight: .semibold))
                 }
             }
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
             .foregroundStyle(.white)
             .padding(.horizontal, compact ? 8 : 12)
             .padding(.vertical, compact ? 5 : 9)
@@ -1947,15 +1964,15 @@ struct ParentDashboardView: View {
 
     /// Bought here, behind the parent gate — Kids Category: commerce is always gated.
     private var gatedPaywall: some View {
-        ParentGateView(allowClose: true, gateTitle: "אֵזוֹר הוֹרִים",
-                       gateReason: "כְּדֵי לִפְתּוֹחַ אֶת הַמִּנּוּי לַמִּשְׁפָּחָה — הַזִּינוּ אֶת הַקּוֹד",
+        ParentGateView(allowClose: true, gateTitle: tr("אֵזוֹר הוֹרִים"),
+                       gateReason: tr("כְּדֵי לִפְתּוֹחַ אֶת הַמִּנּוּי לַמִּשְׁפָּחָה — הַזִּינוּ אֶת הַקּוֹד"),
                        useFaceID: true, respectSession: false) {
             PaywallView(source: paywallSource)
                 .environmentObject(subs)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
         }
         .environmentObject(settings)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     private var rootAlertsHost: some View {
@@ -1966,16 +1983,16 @@ struct ParentDashboardView: View {
         // "Lock + revoke gift" confirmation — a real consequence, so it asks.
         // Presented from either menu (root grid ⋯ / detail ⋯).
         .alert(
-            revokeGiftProfile.map { "לִנְעֹל וּלְאַפֵּס אֶת דַּקּוֹת הַמַּתָּנָה שֶׁל \($0.name)?" } ?? "",
+            revokeGiftProfile.map { tr("לִנְעֹל וּלְאַפֵּס אֶת דַּקּוֹת הַמַּתָּנָה שֶׁל \($0.name)?") } ?? "",
             isPresented: Binding(get: { revokeGiftProfile != nil && navPath.isEmpty },
                                  set: { if !$0 { revokeGiftProfile = nil } }),
             presenting: revokeGiftProfile
         ) { p in
-            Button("נְעַל וְאַפֵּס", role: .destructive) {
+            Button(tr("נְעַל וְאַפֵּס"), role: .destructive) {
                 lockAndRevokeGift(p)
                 revokeGiftProfile = nil
             }
-            Button("בַּטֵּל", role: .cancel) { revokeGiftProfile = nil }
+            Button(tr("בַּטֵּל"), role: .cancel) { revokeGiftProfile = nil }
         } message: { p in
             Text(revokeGiftMessage(p))
         }
@@ -1986,10 +2003,10 @@ struct ParentDashboardView: View {
         }
         // Remote open/lock confirmation on the ROOT — the grid-card ⋯ menu
         // fires these without opening the child's page.
-        .alert("שְׁלִיטָה מֵרָחוֹק", isPresented: Binding(
+        .alert(tr("שְׁלִיטָה מֵרָחוֹק"), isPresented: Binding(
             get: { remoteGrantMsg != nil && navPath.isEmpty },
             set: { if !$0 { remoteGrantMsg = nil } })) {
-            Button("הֵבַנְתִּי", role: .cancel) {}
+            Button(tr("הֵבַנְתִּי"), role: .cancel) {}
         } message: {
             Text(remoteGrantMsg ?? "")
         }
@@ -2003,19 +2020,19 @@ struct ParentDashboardView: View {
                                  set: { if !$0 { statExplain = nil } }),
             presenting: statExplain
         ) { _ in
-            Button("הבנתי", role: .cancel) { statExplain = nil }
+            Button(tr("הבנתי"), role: .cancel) { statExplain = nil }
         } message: { s in
             Text(s.text)
         }
         // A parent→child command (±דקות / איפוס) was permanently rejected — tell
         // the parent honestly instead of leaving an optimistic change that never
         // reached the child.
-        .alert("הפעולה לא נשלחה", isPresented: Binding(
+        .alert(tr("הפעולה לא נשלחה"), isPresented: Binding(
             get: { !remote.commandFailed.isEmpty },
             set: { if !$0 { remote.commandFailed.removeAll() } })) {
-            Button("הבנתי", role: .cancel) { remote.commandFailed.removeAll() }
+            Button(tr("הבנתי"), role: .cancel) { remote.commandFailed.removeAll() }
         } message: {
-            Text("לא הצלחנו לשלוח את העדכון למכשיר של הילד/ה. בדקו את החיבור לאינטרנט ונסו שוב.")
+            Text(tr("לא הצלחנו לשלוח את העדכון למכשיר של הילד/ה. בדקו את החיבור לאינטרנט ונסו שוב."))
         }
     }
 
@@ -2051,41 +2068,62 @@ struct ParentDashboardView: View {
                                 qrCode = nil
                                 qrChild = row.profile
                             } label: {
-                                homePrimaryLabel("+ חַבְּרוּ מַכְשִׁיר")
+                                homePrimaryLabel(tr("+ חַבְּרוּ מַכְשִׁיר"))
                             }
                             .buttonStyle(.borderless)
                             .padding(.horizontal, 14).padding(.bottom, 14)
                             .padding(.trailing, Self.actionsMenuWidth + 8)
-                            .environment(\.layoutDirection, .rightToLeft)
+                            .environment(\.layoutDirection, .app)
                         }
                     }
                     .contextMenu {
                         Button {
                             navPath.append(row.profile.id)
-                        } label: { Label("פתח כרטיס", systemImage: "rectangle.portrait.and.arrow.right") }
+                        } label: { Label(tr("פתח כרטיס"), systemImage: "rectangle.portrait.and.arrow.right") }
                         Button {
                             choresProfile = row.profile
-                        } label: { Label("מַטְלוֹת הַבַּיִת 🧹", systemImage: "checklist") }
+                        } label: { Label(tr("מַטְלוֹת הַבַּיִת 🧹"), systemImage: "checklist") }
                         if rows.count >= 2 {
                             Button {
                                 showingReorder = true
-                            } label: { Label("סדר את הילדים", systemImage: "arrow.up.arrow.down") }
+                            } label: { Label(tr("סדר את הילדים"), systemImage: "arrow.up.arrow.down") }
                         }
                         Button(role: .destructive) {
                             gridDeleteProfile = row.profile
-                        } label: { Label("מחק ילד/ה", systemImage: "trash") }
+                        } label: { Label(tr("מחק ילד/ה"), systemImage: "trash") }
                     }
                 }
             }
             // RTL so the cards fill right-to-left — with an odd count
             // the lone card sits on the RIGHT, not the left.
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
             .animation(.spring(response: 0.5, dampingFraction: 0.85),
                        value: rows.map(\.profile.id))
     }
+    /// Split out of `childDetailScreen`: with translated labels the whole page
+    /// became too slow for the type checker in one expression.
+    private func detailActionRow(_ profile: Profile) -> some View {
+        HStack(spacing: 8) {
+            Button { Haptic.light(); insightsProfile = profile } label: {
+                homeGhostLabel(tr("✨ תּוֹבָנוֹת מְלֵאוֹת"))
+            }.buttonStyle(.plain)
+            Button { Haptic.light(); withAnimation(.easeInOut(duration: 0.2)) { showLegacyChildCard.toggle() } } label: {
+                homeGhostLabel(showLegacyChildCard ? tr("⚙️ סְגֹר הַגְדָּרוֹת") : tr("⚙️ הַגְדָּרוֹת שֶׁל \(profile.name)"))
+            }.buttonStyle(.plain)
+        }
+        .environment(\.layoutDirection, .app)
+    }
+
     @ViewBuilder
     private func childDetailScreen(for id: UUID) -> some View {
         if let row = rows.first(where: { $0.profile.id == id }) {
+            detailDialogsB(detailDialogsA(childDetailPage(row)))
+        } else {
+            Color.clear.background(AppGradient.dreamy.ignoresSafeArea())
+        }
+    }
+
+    private func childDetailPage(_ row: (profile: Profile, snapshot: ProgressSnapshot)) -> some View {
             ScrollView {
                 VStack(spacing: 14) {
                     ChildReportView(
@@ -2103,15 +2141,7 @@ struct ParentDashboardView: View {
                     // Everything the old card offered (chores, worlds, difficulty,
                     // PIN, edit, delete…) is a tap away, folded under the report so
                     // the page itself is the approved design.
-                    HStack(spacing: 8) {
-                        Button { Haptic.light(); insightsProfile = row.profile } label: {
-                            homeGhostLabel("✨ תּוֹבָנוֹת מְלֵאוֹת")
-                        }.buttonStyle(.plain)
-                        Button { Haptic.light(); withAnimation(.easeInOut(duration: 0.2)) { showLegacyChildCard.toggle() } } label: {
-                            homeGhostLabel(showLegacyChildCard ? "⚙️ סְגֹר הַגְדָּרוֹת" : "⚙️ הַגְדָּרוֹת שֶׁל \(row.profile.name)")
-                        }.buttonStyle(.plain)
-                    }
-                    .environment(\.layoutDirection, .rightToLeft)
+                    detailActionRow(row.profile)
                     if showLegacyChildCard {
                         profileCard(profile: row.profile, snapshot: row.snapshot)
                     }
@@ -2124,118 +2154,126 @@ struct ParentDashboardView: View {
                 NavigationStack { ChildInsightsView(profile: p, snapshot: row.snapshot) }
             }
             .noHorizontalBounce()
-            .environment(\.layoutDirection, .leftToRight)
+            .environment(\.layoutDirection, .appMirrored)
             .background(GlassBackdrop())
             .navigationTitle("")
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
-            // These dialogs live on the DETAIL page (not the root) so they present
-            // IN-CONTEXT — at the root they only popped up after navigating back.
-            // Delete also pops the page back to the grid.
-            .alert(
-                resettingProfile.map { "לאפס את ההתקדמות של \($0.name)?" } ?? "",
-                isPresented: Binding(get: { resettingProfile != nil },
-                                     set: { if !$0 { resettingProfile = nil } }),
-                presenting: resettingProfile
-            ) { p in
-                Button("אפס דקות + ניקוד", role: .destructive) {
-                    resetProgress(for: p)
-                    resettingProfile = nil
-                }
-                Button("בטל", role: .cancel) { resettingProfile = nil }
-            } message: { _ in
-                Text("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן, ועונש טעויות. לא ימחק שמות, פרופילים או פריטי קוסמטיקה.")
+    }
+
+    // Split out of the page: with translated labels one modifier chain of seven
+    // dialogs was too slow for the type checker.
+    private func detailDialogsA<V: View>(_ page: V) -> some View {
+        page
+        // These dialogs live on the DETAIL page (not the root) so they present
+        // IN-CONTEXT — at the root they only popped up after navigating back.
+        // Delete also pops the page back to the grid.
+        .alert(
+            resettingTitle,
+            isPresented: Binding(get: { resettingProfile != nil },
+                                 set: { if !$0 { resettingProfile = nil } }),
+            presenting: resettingProfile
+        ) { p in
+            Button(tr("אפס דקות + ניקוד"), role: .destructive) {
+                resetProgress(for: p)
+                resettingProfile = nil
             }
-            // "What does this number mean?" — tapped stat cell explanation.
-            .alert(
-                statExplain.map { "\($0.emoji) \($0.label) — \($0.value)" } ?? "",
-                isPresented: Binding(get: { statExplain != nil && !navPath.isEmpty },
-                                     set: { if !$0 { statExplain = nil } }),
-                presenting: statExplain
-            ) { _ in
-                Button("הבנתי", role: .cancel) { statExplain = nil }
-            } message: { s in
-                Text(s.text)
-            }
-            .alert(
-                pinResetProfile.map { "לאפס את קוד הגנת הזמן של \($0.name)?" } ?? "",
-                isPresented: Binding(get: { pinResetProfile != nil },
-                                     set: { if !$0 { pinResetProfile = nil } }),
-                presenting: pinResetProfile
-            ) { p in
-                Button("אפס קוד", role: .destructive) {
-                    var updated = p
-                    // "" (not nil) — deliberate-clear sentinel; survives sync merges.
-                    updated.playPIN = ""
-                    profiles.update(updated)
-                    pinResetProfile = nil
-                }
-                Button("בטל", role: .cancel) { pinResetProfile = nil }
-            } message: { _ in
-                Text("הקוד שהילד הגדיר לפתיחת זמן משחק יימחק. הילד יוכל להגדיר קוד חדש מהמכשיר שלו. שימושי כשהקוד נשכח.")
-            }
-            .alert(
-                deletingProfile.map { "למחוק את \($0.name)?" } ?? "",
-                isPresented: Binding(get: { deletingProfile != nil },
-                                     set: { if !$0 { deletingProfile = nil } }),
-                presenting: deletingProfile
-            ) { p in
-                Button("מחק ילד/ה", role: .destructive) {
-                    profiles.remove(p)     // removes locally + from the cloud
-                    navPath.removeAll()    // pop back to the family grid
-                    deletingProfile = nil
-                }
-                Button("בטל", role: .cancel) { deletingProfile = nil }
-            } message: { _ in
-                Text("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק.")
-            }
-            // "Lock + revoke gift" confirmation on the DETAIL page (dialogs must sit
-            // on the visible page — on the root it only appeared after popping back).
-            .alert(
-                revokeGiftProfile.map { "לִנְעֹל וּלְאַפֵּס אֶת דַּקּוֹת הַמַּתָּנָה שֶׁל \($0.name)?" } ?? "",
-                isPresented: Binding(get: { revokeGiftProfile != nil && !navPath.isEmpty },
-                                     set: { if !$0 { revokeGiftProfile = nil } }),
-                presenting: revokeGiftProfile
-            ) { p in
-                Button("נְעַל וְאַפֵּס", role: .destructive) {
-                    lockAndRevokeGift(p)
-                    revokeGiftProfile = nil
-                }
-                Button("בַּטֵּל", role: .cancel) { revokeGiftProfile = nil }
-            } message: { p in
-                Text(revokeGiftMessage(p))
-            }
-            // Remote screen-time confirmation — also on the detail page so it shows
-            // immediately where the parent tapped, not only after popping back.
-            .alert("שְׁלִיטָה מֵרָחוֹק", isPresented: Binding(
-                get: { remoteGrantMsg != nil && !navPath.isEmpty },
-                set: { if !$0 { remoteGrantMsg = nil } })) {
-                Button("הֵבַנְתִּי", role: .cancel) {}
-            } message: {
-                Text(remoteGrantMsg ?? "")
-            }
-            // Remove-linked-device confirmation — on the detail page too, since the
-            // "remove device" button lives here; on the root it only popped up after
-            // navigating back.
-            .confirmationDialog(
-                deviceToRemove.map { "להסיר את \"\($0.name)\"?" } ?? "",
-                isPresented: Binding(
-                    get: { deviceToRemove != nil },
-                    set: { if !$0 { deviceToRemove = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("הסר מכשיר", role: .destructive) {
-                    if let d = deviceToRemove { household.removeChildDevice(id: d.id) }
-                    deviceToRemove = nil
-                }
-                Button("ביטול", role: .cancel) { deviceToRemove = nil }
-            } message: {
-                Text("המכשיר יתנתק אוטומטית מהילד ויחזור למצב התחלתי (כאילו הותקן מחדש). ההתקדמות בענן נשמרת — כדי לחבר אותו שוב (או לילד אחר), סרקו בו מחדש את ה-QR של הילד הנכון.")
-            }
-        } else {
-            Color.clear.background(AppGradient.dreamy.ignoresSafeArea())
+            Button(tr("בטל"), role: .cancel) { resettingProfile = nil }
+        } message: { _ in
+            Text(tr("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן, ועונש טעויות. לא ימחק שמות, פרופילים או פריטי קוסמטיקה."))
         }
+        // "What does this number mean?" — tapped stat cell explanation.
+        .alert(
+            statExplain.map { "\($0.emoji) \($0.label) — \($0.value)" } ?? "",
+            isPresented: Binding(get: { statExplain != nil && !navPath.isEmpty },
+                                 set: { if !$0 { statExplain = nil } }),
+            presenting: statExplain
+        ) { _ in
+            Button(tr("הבנתי"), role: .cancel) { statExplain = nil }
+        } message: { s in
+            Text(s.text)
+        }
+        .alert(
+            pinResetTitle,
+            isPresented: Binding(get: { pinResetProfile != nil },
+                                 set: { if !$0 { pinResetProfile = nil } }),
+            presenting: pinResetProfile
+        ) { p in
+            Button(tr("אפס קוד"), role: .destructive) {
+                var updated = p
+                // "" (not nil) — deliberate-clear sentinel; survives sync merges.
+                updated.playPIN = ""
+                profiles.update(updated)
+                pinResetProfile = nil
+            }
+            Button(tr("בטל"), role: .cancel) { pinResetProfile = nil }
+        } message: { _ in
+            Text(tr("הקוד שהילד הגדיר לפתיחת זמן משחק יימחק. הילד יוכל להגדיר קוד חדש מהמכשיר שלו. שימושי כשהקוד נשכח."))
+        }
+    }
+
+    private func detailDialogsB<V: View>(_ page: V) -> some View {
+        page
+        .alert(
+            deletingTitle,
+            isPresented: Binding(get: { deletingProfile != nil },
+                                 set: { if !$0 { deletingProfile = nil } }),
+            presenting: deletingProfile
+        ) { p in
+            Button(tr("מחק ילד/ה"), role: .destructive) {
+                profiles.remove(p)     // removes locally + from the cloud
+                navPath.removeAll()    // pop back to the family grid
+                deletingProfile = nil
+            }
+            Button(tr("בטל"), role: .cancel) { deletingProfile = nil }
+        } message: { _ in
+            Text(tr("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק."))
+        }
+        // "Lock + revoke gift" confirmation on the DETAIL page (dialogs must sit
+        // on the visible page — on the root it only appeared after popping back).
+        .alert(
+            revokeGiftTitle,
+            isPresented: Binding(get: { revokeGiftProfile != nil && !navPath.isEmpty },
+                                 set: { if !$0 { revokeGiftProfile = nil } }),
+            presenting: revokeGiftProfile
+        ) { p in
+            Button(tr("נְעַל וְאַפֵּס"), role: .destructive) {
+                lockAndRevokeGift(p)
+                revokeGiftProfile = nil
+            }
+            Button(tr("בַּטֵּל"), role: .cancel) { revokeGiftProfile = nil }
+        } message: { p in
+            Text(revokeGiftMessage(p))
+        }
+        // Remote screen-time confirmation — also on the detail page so it shows
+        // immediately where the parent tapped, not only after popping back.
+        .alert(tr("שְׁלִיטָה מֵרָחוֹק"), isPresented: Binding(
+            get: { remoteGrantMsg != nil && !navPath.isEmpty },
+            set: { if !$0 { remoteGrantMsg = nil } })) {
+            Button(tr("הֵבַנְתִּי"), role: .cancel) {}
+        } message: {
+            Text(remoteGrantMsg ?? "")
+        }
+        // Remove-linked-device confirmation — on the detail page too, since the
+        // "remove device" button lives here; on the root it only popped up after
+        // navigating back.
+        .confirmationDialog(
+            deviceToRemove.map { tr("להסיר את \"\($0.name)\"?") } ?? "",
+            isPresented: Binding(
+                get: { deviceToRemove != nil },
+                set: { if !$0 { deviceToRemove = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button(tr("הסר מכשיר"), role: .destructive) {
+                if let d = deviceToRemove { household.removeChildDevice(id: d.id) }
+                deviceToRemove = nil
+            }
+            Button(tr("ביטול"), role: .cancel) { deviceToRemove = nil }
+        } message: {
+            Text(tr("המכשיר יתנתק אוטומטית מהילד ויחזור למצב התחלתי (כאילו הותקן מחדש). ההתקדמות בענן נשמרת — כדי לחבר אותו שוב (או לילד אחר), סרקו בו מחדש את ה-QR של הילד הנכון."))
+        }
+
     }
 
     @ViewBuilder
@@ -2254,17 +2292,17 @@ struct ParentDashboardView: View {
             VStack(alignment: .trailing, spacing: 8) {
                 HStack(spacing: 6) {
                     Spacer()
-                    Text("פרופיל למידה")
+                    Text(tr("פרופיל למידה"))
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(.secondary)
                     Image(systemName: "brain.head.profile")
                         .font(.system(size: 13))
                         .foregroundStyle(AppColor.gemPurple)
                 }
-                if !strong.isEmpty   { topicLine(g("חזק ב","חזקה ב"), topics: strong, tint: AppColor.starGold) }
-                if !favorites.isEmpty { topicLine(g("אוהב","אוהבת"), topics: favorites, tint: AppColor.successMint) }
-                if !weak.isEmpty     { topicLine("כדאי לחזק", topics: weak, tint: AppColor.flameOrange) }
-                if !discovering.isEmpty { topicLine(g("מגלה","מגלה"), topics: discovering, tint: AppColor.gemPurple) }
+                if !strong.isEmpty   { topicLine(g(tr("חזק ב"),tr("חזקה ב")), topics: strong, tint: AppColor.starGold) }
+                if !favorites.isEmpty { topicLine(g(tr("אוהב"),tr("אוהבת")), topics: favorites, tint: AppColor.successMint) }
+                if !weak.isEmpty     { topicLine(tr("כדאי לחזק"), topics: weak, tint: AppColor.flameOrange) }
+                if !discovering.isEmpty { topicLine(g(tr("מגלה"),tr("מגלה")), topics: discovering, tint: AppColor.gemPurple) }
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(AppSpacing.sm)
@@ -2289,7 +2327,7 @@ struct ParentDashboardView: View {
             VStack(alignment: .trailing, spacing: 8) {
                 HStack(spacing: 6) {
                     Spacer()
-                    Text("רמת קושי חכמה")
+                    Text(tr("רמת קושי חכמה"))
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(.secondary)
                     Image(systemName: "dial.medium.fill")
@@ -2343,13 +2381,13 @@ struct ParentDashboardView: View {
         @ViewBuilder var chip: some View {
             switch self {
             case .raised:
-                Label("מאתגר יותר", systemImage: "arrow.up")
+                Label(tr("מאתגר יותר"), systemImage: "arrow.up")
                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                     .padding(.horizontal, 7).padding(.vertical, 3)
                     .background(Capsule().fill(AppColor.successMint.opacity(0.22)))
                     .foregroundStyle(AppColor.successMint)
             case .eased:
-                Label("בונה ביטחון", systemImage: "arrow.down")
+                Label(tr("בונה ביטחון"), systemImage: "arrow.down")
                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                     .padding(.horizontal, 7).padding(.vertical, 3)
                     .background(Capsule().fill(AppColor.starGold.opacity(0.22)))
@@ -2373,10 +2411,10 @@ struct ParentDashboardView: View {
             return adaptiveDirection(level: levels[t.rawValue] ?? base, base: base)
         }
         if let raised = topics.first(where: { dir($0) == .raised }) {
-            return "\(profile.name) \(g("מתקדם","מתקדמת")) יפה ב\(raised.displayName), אז המערכת התחילה להוסיף שאלות מעט מאתגרות יותר."
+            return tr("\(profile.name) \(g(tr("מתקדם"),tr("מתקדמת"))) יפה ב\(raised.displayName), אז המערכת התחילה להוסיף שאלות מעט מאתגרות יותר.")
         }
         if let eased = topics.first(where: { dir($0) == .eased }) {
-            return "ב\(eased.displayName) המערכת הורידה מעט את הקושי כדי לבנות ביטחון והצלחה."
+            return tr("ב\(eased.displayName) המערכת הורידה מעט את הקושי כדי לבנות ביטחון והצלחה.")
         }
         return nil
     }
@@ -2397,7 +2435,7 @@ struct ParentDashboardView: View {
             VStack(alignment: .trailing, spacing: 10) {
                 HStack(spacing: 6) {
                     Spacer()
-                    Text("המלצות להורה")
+                    Text(tr("המלצות להורה"))
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(.secondary)
                     Image(systemName: "lightbulb.fill")
@@ -2417,7 +2455,7 @@ struct ParentDashboardView: View {
                                 .background(Capsule().fill(AppColor.flameOrange.opacity(0.18)))
                                 .overlay(Capsule().stroke(AppColor.flameOrange.opacity(0.5), lineWidth: 1))
                         }
-                        Text("כדאי לחזק:")
+                        Text(tr("כדאי לחזק:"))
                             .font(.system(size: 12, weight: .heavy, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
@@ -2455,15 +2493,15 @@ struct ParentDashboardView: View {
         guard hasData else { return nil }
         let acc = engine.thisWeek.accuracy
         if acc >= 0.75 || engine.weeklyAccuracyDelta >= 8 {
-            return ("מתקדם יפה 🎉", AppColor.successMint)
+            return (tr("מתקדם יפה 🎉"), AppColor.successMint)
         }
         if engine.challenges.isEmpty, !engine.discovering.isEmpty {
-            return ("מגלה עניין חדש 🔭", AppColor.gemPurple)
+            return (tr("מגלה עניין חדש 🔭"), AppColor.gemPurple)
         }
         if !engine.challenges.isEmpty {
-            return ("צריך חיזוק 💪", AppColor.flameOrange)
+            return (tr("צריך חיזוק 💪"), AppColor.flameOrange)
         }
-        return ("מתקדם יפה 🎉", AppColor.successMint)
+        return (tr("מתקדם יפה 🎉"), AppColor.successMint)
     }
 
     private func topicLine(_ label: String, topics: [Topic], tint: Color) -> some View {
@@ -2490,7 +2528,7 @@ struct ParentDashboardView: View {
         VStack(alignment: .trailing, spacing: 8) {
             HStack(spacing: 6) {
                 Spacer()
-                Text(devices.isEmpty ? "אֵין מַכְשִׁירִים מְחוּבָּרִים" : "\(devices.count) מַכְשִׁירִים מְחוּבָּרִים")
+                Text(devices.isEmpty ? tr("אֵין מַכְשִׁירִים מְחוּבָּרִים") : tr("\(devices.count) מַכְשִׁירִים מְחוּבָּרִים"))
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(.secondary)
                 Image(systemName: "ipad.and.iphone")
@@ -2548,10 +2586,10 @@ struct ParentDashboardView: View {
 
     private func deviceSeenText(_ device: ChildDevice) -> String {
         let elapsed = Int(-device.lastSeenAt.timeIntervalSinceNow)
-        if elapsed < 90 { return "פָּעִיל עַכְשָׁיו 🟢" }
-        if elapsed < 3600 { return "נִרְאָה לִפְנֵי \(elapsed / 60) דַּקּוֹת" }
-        if elapsed < 86400 { return "נִרְאָה לִפְנֵי \(elapsed / 3600) שָׁעוֹת" }
-        return "נִרְאָה לִפְנֵי \(elapsed / 86400) יָמִים"
+        if elapsed < 90 { return tr("פָּעִיל עַכְשָׁיו 🟢") }
+        if elapsed < 3600 { return tr("נִרְאָה לִפְנֵי \(elapsed / 60) דַּקּוֹת") }
+        if elapsed < 86400 { return tr("נִרְאָה לִפְנֵי \(elapsed / 3600) שָׁעוֹת") }
+        return tr("נִרְאָה לִפְנֵי \(elapsed / 86400) יָמִים")
     }
 
     private func statCell(emoji: String, value: String, label: String) -> some View {
@@ -2611,34 +2649,34 @@ struct ParentDashboardView: View {
             // they share emojis with the per-child stats but sum the whole family.
             if isFamily {
             switch label {
-            case "דק' מסך היום":
-                return "סך כל דקות זמן המסך שכל הילדים הרוויחו היום ביחד (מכל המכשירים). מתאפס בחצות. לפירוט לכל ילד — פתחו את הכרטיס שלו."
-            case "שאלות היום":
-                return "כמה שאלות ענו כל הילדים ביחד היום — בכל העולמות, במשחקים ובהרפתקה החכמה. מספר טוב לתחושה כללית של \"היה יום למידה או לא\"."
-            case "ילדים פעילים":
-                return "כמה מהילדים כבר ענו לפחות על שאלה אחת היום, מתוך כלל הילדים במשפחה. 1/2 = ילד אחד מתוך שניים שיחק היום."
+            case tr("דק' מסך היום"):   // labels are shown translated, so match the translation
+                return tr("סך כל דקות זמן המסך שכל הילדים הרוויחו היום ביחד (מכל המכשירים). מתאפס בחצות. לפירוט לכל ילד — פתחו את הכרטיס שלו.")
+            case tr("שאלות היום"):   // labels are shown translated, so match the translation
+                return tr("כמה שאלות ענו כל הילדים ביחד היום — בכל העולמות, במשחקים ובהרפתקה החכמה. מספר טוב לתחושה כללית של \"היה יום למידה או לא\".")
+            case tr("ילדים פעילים"):   // labels are shown translated, so match the translation
+                return tr("כמה מהילדים כבר ענו לפחות על שאלה אחת היום, מתוך כלל הילדים במשפחה. 1/2 = ילד אחד מתוך שניים שיחק היום.")
             default: break
             }
             }
             switch emoji {
             case "⏱":
-                return "כמה דקות זמן מסך הילד/ה הרוויח/ה היום, מתוך התקרה היומית שקבעתם (המספר אחרי הקו). כל כמה תשובות נכונות מזכות בדקות מסך (היחס נקבע בהגדרות). כשהתקרה מתמלאת (למשל 240/240) — הילד/ה ממשיך/ה ללמוד, אבל דקות חדשות נשמרות למחר (🎁), ו-🎮 יציג \"—\" אם הארנק כבר נוצל. דקות מתנה 💝 אינן כפופות לתקרה."
+                return tr("כמה דקות זמן מסך הילד/ה הרוויח/ה היום, מתוך התקרה היומית שקבעתם (המספר אחרי הקו). כל כמה תשובות נכונות מזכות בדקות מסך (היחס נקבע בהגדרות). כשהתקרה מתמלאת (למשל 240/240) — הילד/ה ממשיך/ה ללמוד, אבל דקות חדשות נשמרות למחר (🎁), ו-🎮 יציג \"—\" אם הארנק כבר נוצל. דקות מתנה 💝 אינן כפופות לתקרה.")
             case "❓":
-                return "כמה שאלות הילד/ה ענה/תה היום — בכל העולמות, במשחקים ובהרפתקה החכמה. מתאפס בחצות."
+                return tr("כמה שאלות הילד/ה ענה/תה היום — בכל העולמות, במשחקים ובהרפתקה החכמה. מתאפס בחצות.")
             case "🎯":
-                return "אחוז התשובות הנכונות מתוך כל השאלות של היום. \"—\" = עוד לא ענה/תה היום. מתחת ל-50% לאורך זמן? כדאי להוריד רמת קושי מהתפריט ⋯."
+                return tr("אחוז התשובות הנכונות מתוך כל השאלות של היום. \"—\" = עוד לא ענה/תה היום. מתחת ל-50% לאורך זמן? כדאי להוריד רמת קושי מהתפריט ⋯.")
             case "🔥":
-                return "כמה ימים ברצף הילד/ה שיחק/ה בטופי (לפחות שאלה אחת ביום). יום שמדלגים עליו מאפס את הרצף — זה מה שמניע לחזור מחר."
+                return tr("כמה ימים ברצף הילד/ה שיחק/ה בטופי (לפחות שאלה אחת ביום). יום שמדלגים עליו מאפס את הרצף — זה מה שמניע לחזור מחר.")
             case "⭐":
-                return "כוכבים = הדירוג. הם רק עולים ולעולם לא נגמרים — הם מה שקובע את הרמה של הילד/ה ואת המקום בלוח החברים. אי אפשר לבזבז אותם."
+                return tr("כוכבים = הדירוג. הם רק עולים ולעולם לא נגמרים — הם מה שקובע את הרמה של הילד/ה ואת המקום בלוח החברים. אי אפשר לבזבז אותם.")
             case "💎":
-                return "יהלומים = הארנק של החנות. מרוויחים לאט יותר מכוכבים (בערך 1 לתשובה), ומוציאים אותם על דמויות ופריטים בחנות. יורדים כשקונים — זה תקין."
+                return tr("יהלומים = הארנק של החנות. מרוויחים לאט יותר מכוכבים (בערך 1 לתשובה), ומוציאים אותם על דמויות ופריטים בחנות. יורדים כשקונים — זה תקין.")
             case "🎮":
-                return "דקות משחק שהילד/ה הרוויח/ה מלמידה ועוד לא פתח/ה (הארנק המורווח). דקות שאתם נותנים (💝 מתנה) נשמרות בנפרד ולא נספרות כאן. כשיש חלון פתוח של זמן מורווח — רואים כאן ספירה לאחור (חלון של מתנה סופר תחת 💝). \"—\" = אין דקות ממתינות."
+                return tr("דקות משחק שהילד/ה הרוויח/ה מלמידה ועוד לא פתח/ה (הארנק המורווח). דקות שאתם נותנים (💝 מתנה) נשמרות בנפרד ולא נספרות כאן. כשיש חלון פתוח של זמן מורווח — רואים כאן ספירה לאחור (חלון של מתנה סופר תחת 💝). \"—\" = אין דקות ממתינות.")
             case "💝":
-                return "דקות שאתם נתתם במתנה ועוד לא נפתחו — נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, אותו מספר בכל מכשיר. הילד/ה פותח/ת אותן מתי שרוצה, וכשהמתנה פתוחה — הספירה לאחור מופיעה כאן (ולא ב-🎮). בכל נתינה אפשר לתת עד מה שנשאר עד חצות; מה שלא נוצל נשאר למחר."
+                return tr("דקות שאתם נתתם במתנה ועוד לא נפתחו — נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, אותו מספר בכל מכשיר. הילד/ה פותח/ת אותן מתי שרוצה, וכשהמתנה פתוחה — הספירה לאחור מופיעה כאן (ולא ב-🎮). בכל נתינה אפשר לתת עד מה שנשאר עד חצות; מה שלא נוצל נשאר למחר.")
             default:
-                return "נתון מסכם על הפעילות של הילד/ה בטופי."
+                return tr("נתון מסכם על הפעילות של הילד/ה בטופי.")
             }
         }
     }
@@ -2657,7 +2695,7 @@ struct ParentDashboardView: View {
         guard allowed > 0 else {
             // Only reachable in the last minute before midnight (capLeft == 0).
             Haptic.warning()
-            remoteGrantMsg = "עוֹד רֶגַע חֲצוֹת — אֵין מַה לָּתֵת לְהַיּוֹם. מִיָּד אַחֲרֵי חֲצוֹת אֶפְשָׁר לָתֵת שׁוּב."
+            remoteGrantMsg = tr("עוֹד רֶגַע חֲצוֹת — אֵין מַה לָּתֵת לְהַיּוֹם. מִיָּד אַחֲרֵי חֲצוֹת אֶפְשָׁר לָתֵת שׁוּב.")
             return
         }
         Haptic.success()
@@ -2667,7 +2705,7 @@ struct ParentDashboardView: View {
         // replaces the optimistic alert that claimed success before anything
         // actually happened.
         let note = allowed < minutes
-            ? "ביקשתם \(minutes) — זה המקסימום שנשאר להיום, עד חצות."
+            ? tr("ביקשתם \(minutes) — זה המקסימום שנשאר להיום, עד חצות.")
             : nil
         commandStatus = RemoteCommandStatusRequest(profile: profile,
                                                    kind: .gift(minutes: allowed, note: note))
@@ -2690,8 +2728,8 @@ struct ParentDashboardView: View {
         household.allowAppRemovalRemotely(toChildID: profile.id)
         let connected = (household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
         remoteGrantMsg = connected
-            ? "נִפְתָּח חַלּוֹן שֶׁל 5 דַּקּוֹת לִמְחִיקַת אַפְּלִיקַצְיוֹת בַּמַּכְשִׁיר שֶׁל \(profile.name) — מִיָּדִי כְּשֶׁטּוֹפִי פָּתוּחַ שָׁם. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד."
-            : "אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַחַלּוֹן יִפָּתַח בָּרֶגַע שֶׁהַמַּכְשִׁיר יִתְחַבֵּר."
+            ? tr("נִפְתָּח חַלּוֹן שֶׁל 5 דַּקּוֹת לִמְחִיקַת אַפְּלִיקַצְיוֹת בַּמַּכְשִׁיר שֶׁל \(profile.name) — מִיָּדִי כְּשֶׁטּוֹפִי פָּתוּחַ שָׁם. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד.")
+            : tr("אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַחַלּוֹן יִפָּתַח בָּרֶגַע שֶׁהַמַּכְשִׁיר יִתְחַבֵּר.")
     }
 
     private func remoteLock(_ profile: Profile) {
@@ -2707,8 +2745,8 @@ struct ParentDashboardView: View {
     /// minutes are the child's own — untouched (an open earned window is
     /// stopped-and-banked). Confirmed first — this one IS a consequence.
     private func revokeGiftMessage(_ p: Profile) -> String {
-        let earned = p.gender == .girl ? "הִיא הִרְוִיחָה" : "הוּא הִרְוִיחַ"
-        return "הַמַּכְשִׁיר יִנָּעֵל עַכְשָׁיו, וְכָל הַדַּקּוֹת שֶׁנְּתַתֶּם (💝 מַתָּנָה, ❄️ שְׁמוּרוֹת, וְחַלּוֹן פָּתוּחַ שֶׁל מַתָּנָה) יִמָּחֲקוּ. הַדַּקּוֹת שֶׁ\(earned) מִלְּמִידָה לֹא נִפְגָּעוֹת."
+        let earned = p.gender == .girl ? tr("הִיא הִרְוִיחָה") : tr("הוּא הִרְוִיחַ")
+        return tr("הַמַּכְשִׁיר יִנָּעֵל עַכְשָׁיו, וְכָל הַדַּקּוֹת שֶׁנְּתַתֶּם (💝 מַתָּנָה, ❄️ שְׁמוּרוֹת, וְחַלּוֹן פָּתוּחַ שֶׁל מַתָּנָה) יִמָּחֲקוּ. הַדַּקּוֹת שֶׁ\(earned) מִלְּמִידָה לֹא נִפְגָּעוֹת.")
     }
 
     private func lockAndRevokeGift(_ profile: Profile) {
@@ -2795,18 +2833,18 @@ struct ChildOrderView: View {
                     }
                     .onMove { from, to in working.move(fromOffsets: from, toOffset: to) }
                 } footer: {
-                    Text("גררו את הידיות כדי לקבוע את הסדר בלוח. הסדר נשמר לכל ההורים במשפחה.")
+                    Text(tr("גררו את הידיות כדי לקבוע את הסדר בלוח. הסדר נשמר לכל ההורים במשפחה."))
                 }
             }
             .environment(\.editMode, .constant(.active))
-            .navigationTitle("סדר הילדים")
+            .navigationTitle(tr("סדר הילדים"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("ביטול") { dismiss() }
+                    Button(tr("ביטול")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("שמור") {
+                    Button(tr("שמור")) {
                         Haptic.success()
                         onSave(working)
                         dismiss()
@@ -2841,5 +2879,5 @@ struct LivePulseDot: View {
         .environmentObject(ProfileStore.shared)
         .environmentObject(ParentSettings.shared)
         .environmentObject(AuthManager.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

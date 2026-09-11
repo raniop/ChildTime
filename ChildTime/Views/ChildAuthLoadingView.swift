@@ -21,10 +21,10 @@ struct ChildAuthLoadingView: View {
                     Image(systemName: "wifi.exclamationmark")
                         .font(.system(size: 56))
                         .foregroundStyle(.white)
-                    Text("לֹא הִצְלַחְנוּ לְהִתְחַבֵּר")
+                    Text(tr("לֹא הִצְלַחְנוּ לְהִתְחַבֵּר"))
                         .font(.system(size: 22, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text(auth.lastError ?? "בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב.")
+                    Text(auth.lastError ?? tr("בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב."))
                         .font(.system(size: 15, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
@@ -34,7 +34,7 @@ struct ChildAuthLoadingView: View {
                         Haptic.light()
                         retry()
                     } label: {
-                        Text("נַסּוּ שׁוּב")
+                        Text(tr("נַסּוּ שׁוּב"))
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 36).padding(.vertical, 14)
@@ -52,7 +52,7 @@ struct ChildAuthLoadingView: View {
                             Haptic.light()
                             settings.deviceRole = .unset   // back to the device-type picker
                         } label: {
-                            Text("הַחְלִיפוּ סוּג מַכְשִׁיר")
+                            Text(tr("הַחְלִיפוּ סוּג מַכְשִׁיר"))
                                 .font(.system(size: 15, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white.opacity(0.85))
                                 .padding(.horizontal, 20).padding(.vertical, 10)
@@ -63,7 +63,7 @@ struct ChildAuthLoadingView: View {
                     ProgressView()
                         .scaleEffect(1.4)
                         .tint(.white)
-                    Text("מִתְחַבְּרִים…")
+                    Text(tr("מִתְחַבְּרִים…"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                 }
@@ -81,7 +81,7 @@ struct ChildAuthLoadingView: View {
                             Haptic.light()
                             settings.deviceRole = .unset
                         } label: {
-                            Label("חֲזָרָה", systemImage: "chevron.backward")
+                            Label(tr("חֲזָרָה"), systemImage: "chevron.backward")
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 14).padding(.vertical, 8)

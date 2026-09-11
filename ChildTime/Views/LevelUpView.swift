@@ -32,7 +32,7 @@ struct LevelUpView: View {
 
                         if titleVisible {
                             VStack(spacing: AppSpacing.md) {
-                                Text("עָלִיתָ רָמָה!")
+                                Text(tr("עָלִיתָ רָמָה!"))
                                     .font(.system(size: titleFontSize, weight: .heavy, design: .rounded))
                                     .foregroundStyle(AppColor.starGold)
                                     .glow(AppColor.starGold, radius: 20)
@@ -40,12 +40,12 @@ struct LevelUpView: View {
                                     .minimumScaleFactor(0.6)
                                     .transition(.scale.combined(with: .opacity))
 
-                                Text("רָמָה \(newLevel)")
+                                Text(tr("רָמָה \(newLevel)"))
                                     .font(.system(size: levelFontSize, weight: .bold, design: .rounded))
                                     .foregroundStyle(.white)
                                     .transition(.scale.combined(with: .opacity))
 
-                                Text("+\(RewardEngine.levelUpDiamonds(newLevel)) 💎 בּוֹנוּס לַחֲנוּת!")
+                                Text(tr("+\(RewardEngine.levelUpDiamonds(newLevel)) 💎 בּוֹנוּס לַחֲנוּת!"))
                                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                                     .foregroundStyle(AppColor.starGold)
                                     .padding(.top, AppSpacing.sm)
@@ -63,7 +63,7 @@ struct LevelUpView: View {
                         }
 
                         Button { Haptic.light(); onContinue() } label: {
-                            Text("הַמְשֵׁךְ")
+                            Text(tr("הַמְשֵׁךְ"))
                                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
@@ -105,9 +105,9 @@ struct LevelUpView: View {
 
     private func perkForLevel(_ lvl: Int) -> String? {
         switch lvl {
-        case 5: return "🥉 מִסְגֶּרֶת בְּרוֹנְזָה לָאַוָּטָאר!"
-        case 10: return "🥈 מִסְגֶּרֶת כֶּסֶף לָאַוָּטָאר!"
-        case 20: return "🥇 מִסְגֶּרֶת זָהָב לָאַוָּטָאר!"
+        case 5: return tr("🥉 מִסְגֶּרֶת בְּרוֹנְזָה לָאַוָּטָאר!")
+        case 10: return tr("🥈 מִסְגֶּרֶת כֶּסֶף לָאַוָּטָאר!")
+        case 20: return tr("🥇 מִסְגֶּרֶת זָהָב לָאַוָּטָאר!")
         default: return nil
         }
     }
@@ -115,5 +115,5 @@ struct LevelUpView: View {
 
 #Preview {
     LevelUpView(newLevel: 5, onContinue: {})
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

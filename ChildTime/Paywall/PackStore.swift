@@ -179,7 +179,7 @@ final class PackStore: ObservableObject {
                 case .userCancelled:
                     return granted
                 case .pending:
-                    lastError = "הָהַזְמָנָה מַמְתִּינָה לְאִשּׁוּר (Ask to Buy)"
+                    lastError = tr("הָהַזְמָנָה מַמְתִּינָה לְאִשּׁוּר (Ask to Buy)")
                     return granted
                 @unknown default:
                     return granted

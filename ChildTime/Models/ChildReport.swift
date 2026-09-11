@@ -42,7 +42,7 @@ enum ReportPeriod: String, CaseIterable, Identifiable {
     case today, week, month
     var id: String { rawValue }
     var title: String {
-        switch self { case .today: return "הַיּוֹם"; case .week: return "הַשָּׁבוּעַ"; case .month: return "הַחֹדֶשׁ" }
+        switch self { case .today: return tr("הַיּוֹם"); case .week: return tr("הַשָּׁבוּעַ"); case .month: return tr("הַחֹדֶשׁ") }
     }
     /// Calendar days covered (today inclusive).
     var days: Int { switch self { case .today: return 1; case .week: return 7; case .month: return 30 } }
@@ -204,7 +204,7 @@ extension InsightsEngine {
             }
             // The topic as a whole only when there is nothing finer to say.
             if skills.isEmpty, t.accuracy >= 0.85 {
-                out.append((t.topic.displayName, "\(pct(t.accuracy)) · \(t.answered) שְׁאֵלוֹת", t.accuracy))
+                out.append((t.topic.displayName, tr("\(pct(t.accuracy)) · \(t.answered) שְׁאֵלוֹת"), t.accuracy))
             }
         }
         return out.sorted { $0.2 > $1.2 }.prefix(4).map { ($0.0, $0.1) }
@@ -217,10 +217,10 @@ extension InsightsEngine {
         for t in topicReports(period) where t.answered >= 6 {
             let skills = skillReports(t.topic, period)
             for s in skills.prefix(3) where s.answered >= 4 && s.accuracy < 0.7 {
-                out.append((s.name, "\(pct(s.accuracy)) בְּ\(t.topic.displayName)", s.accuracy))
+                out.append((s.name, tr("\(pct(s.accuracy)) בְּ\(t.topic.displayName)"), s.accuracy))
             }
             if skills.isEmpty, t.accuracy < 0.7 {
-                out.append((t.topic.displayName, "\(pct(t.accuracy)) · \(t.wrong) טְעֻיּוֹת", t.accuracy))
+                out.append((t.topic.displayName, tr("\(pct(t.accuracy)) · \(t.wrong) טְעֻיּוֹת"), t.accuracy))
             }
         }
         return out.sorted { $0.2 < $1.2 }.prefix(4).map { ($0.0, $0.1) }
@@ -239,6 +239,12 @@ extension InsightsEngine {
         var weekday: String {
             guard let d = LearningHistoryStore.date(fromKey: date) else { return "" }
             let i = Calendar.current.component(.weekday, from: d)   // 1 = Sunday
+            guard LanguageStore.shared.current == .he else {
+                // "א׳" also means "grade 1" in the catalog — weekdays come from the calendar instead.
+                var cal = Calendar(identifier: .gregorian)
+                cal.locale = LanguageStore.shared.current.locale
+                return cal.shortWeekdaySymbols[i - 1]
+            }
             return ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "שַׁבָּת"][i - 1]
         }
     }
@@ -272,52 +278,52 @@ extension InsightsEngine {
         if let best = topics.first, let worst = topics.last, best.topic != worst.topic,
            best.accuracy - worst.accuracy >= 0.30, worst.accuracy < 0.6 {
             let weakSkill = skillReports(worst.topic, period).first
-            let focus = weakSkill.map { " הַפַּעַר נִפְתָּח בְּעִקָּר בְּ\($0.name)." } ?? ""
+            let focus = weakSkill.map { tr(" הַפַּעַר נִפְתָּח בְּעִקָּר בְּ\($0.name).") } ?? ""
             return DailyInsight(
                 emoji: "💡",
-                title: "פַּעַר גָּדוֹל בֵּין נוֹשְׂאִים",
-                body: "\(name) \(g("עוֹנֶה", "עוֹנָה")) עַל \(worst.topic.displayName) בְּ-\(pct(worst.accuracy)) לְעֻמַּת \(pct(best.accuracy)) בְּ\(best.topic.displayName) — הַפַּעַר הַגָּדוֹל בְּיוֹתֵר בֵּין הַנּוֹשְׂאִים \(g("שֶׁלּוֹ", "שֶׁלָּהּ")).\(focus)",
-                recommendation: "10 דַּקּוֹת שֶׁל \(weakSkill?.name ?? worst.topic.displayName) בְּיַחַד, פַּעַם־פַּעֲמַיִם בַּשָּׁבוּעַ. \(g("הוּא", "הִיא")) כְּבָר \(g("חָזָק", "חֲזָקָה")) בְּ\(best.topic.displayName) — יֵשׁ עַל מָה לִבְנוֹת.")
+                title: tr("פַּעַר גָּדוֹל בֵּין נוֹשְׂאִים"),
+                body: tr("\(name) \(g(tr("עוֹנֶה"), tr("עוֹנָה"))) עַל \(worst.topic.displayName) בְּ-\(pct(worst.accuracy)) לְעֻמַּת \(pct(best.accuracy)) בְּ\(best.topic.displayName) — הַפַּעַר הַגָּדוֹל בְּיוֹתֵר בֵּין הַנּוֹשְׂאִים \(g(tr("שֶׁלּוֹ"), tr("שֶׁלָּהּ"))).\(focus)"),
+                recommendation: tr("10 דַּקּוֹת שֶׁל \(weakSkill?.name ?? worst.topic.displayName) בְּיַחַד, פַּעַם־פַּעֲמַיִם בַּשָּׁבוּעַ. \(g(tr("הוּא"), tr("הִיא"))) כְּבָר \(g(tr("חָזָק"), tr("חֲזָקָה"))) בְּ\(best.topic.displayName) — יֵשׁ עַל מָה לִבְנוֹת."))
         }
         // 2. A subject that jumped.
         if let up = deltas.first, up.deltaPoints >= 10 {
             return DailyInsight(
                 emoji: "🌟",
-                title: "\(up.topic.displayName) הוֹפֶכֶת לְחוֹזְקָה",
-                body: "\(name) \(g("הִשְׁתַּפֵּר", "הִשְׁתַּפְּרָה")) בְּ\(up.topic.displayName) בְּ-\(Int(up.deltaPoints.rounded())) נְקֻדּוֹת לְעֻמַּת הַתְּקוּפָה הַקּוֹדֶמֶת.",
-                recommendation: "שְׁוֶה לְצַיֵּן אֶת זֶה בְּקוֹל — יְלָדִים מַמְשִׁיכִים לְהִשְׁתַּפֵּר בְּמַה שֶׁמְּשַׁבְּחִים אוֹתָם עָלָיו.")
+                title: tr("\(up.topic.displayName) הוֹפֶכֶת לְחוֹזְקָה"),
+                body: tr("\(name) \(g(tr("הִשְׁתַּפֵּר"), tr("הִשְׁתַּפְּרָה"))) בְּ\(up.topic.displayName) בְּ-\(Int(up.deltaPoints.rounded())) נְקֻדּוֹת לְעֻמַּת הַתְּקוּפָה הַקּוֹדֶמֶת."),
+                recommendation: tr("שְׁוֶה לְצַיֵּן אֶת זֶה בְּקוֹל — יְלָדִים מַמְשִׁיכִים לְהִשְׁתַּפֵּר בְּמַה שֶׁמְּשַׁבְּחִים אוֹתָם עָלָיו."))
         }
         // 3. A subject that slipped.
         if let down = deltas.last, down.deltaPoints <= -8 {
             return DailyInsight(
                 emoji: "🔎",
-                title: "יְרִידָה קַלָּה בְּ\(down.topic.displayName)",
-                body: "הַדִּיּוּק שֶׁל \(name) בְּ\(down.topic.displayName) יָרַד בְּ-\(Int(abs(down.deltaPoints).rounded())) נְקֻדּוֹת לְעֻמַּת הַתְּקוּפָה הַקּוֹדֶמֶת. לִפְעָמִים זֶה פָּשׁוּט חֹמֶר חָדָשׁ שֶׁנִּכְנַס.",
-                recommendation: "\(g("שַׁאֲלוּ אוֹתוֹ", "שַׁאֲלוּ אוֹתָהּ")) מָה הָיָה קָשֶׁה הַשָּׁבוּעַ — לָרוֹב זוֹ שְׁאֵלָה אַחַת שֶׁפּוֹתַחַת הַכֹּל.")
+                title: tr("יְרִידָה קַלָּה בְּ\(down.topic.displayName)"),
+                body: tr("הַדִּיּוּק שֶׁל \(name) בְּ\(down.topic.displayName) יָרַד בְּ-\(Int(abs(down.deltaPoints).rounded())) נְקֻדּוֹת לְעֻמַּת הַתְּקוּפָה הַקּוֹדֶמֶת. לִפְעָמִים זֶה פָּשׁוּט חֹמֶר חָדָשׁ שֶׁנִּכְנַס."),
+                recommendation: tr("\(g(tr("שַׁאֲלוּ אוֹתוֹ"), tr("שַׁאֲלוּ אוֹתָהּ"))) מָה הָיָה קָשֶׁה הַשָּׁבוּעַ — לָרוֹב זוֹ שְׁאֵלָה אַחַת שֶׁפּוֹתַחַת הַכֹּל."))
         }
         // 4. A real streak.
         let s = summary(period)
         if s.activeDays >= 5 && period != .today {
             return DailyInsight(
                 emoji: "🔥",
-                title: "\(s.activeDays) יָמִים שֶׁל לְמִידָה",
-                body: "\(name) \(g("לָמַד", "לָמְדָה")) בְּ-\(s.activeDays) יָמִים \(period == .week ? "הַשָּׁבוּעַ" : "הַחֹדֶשׁ"), \(s.questions) שְׁאֵלוֹת בְּסַךְ הַכֹּל בְּ-\(pct(s.accuracy)) הַצְלָחָה.",
-                recommendation: "הָרְצִיפוּת שָׁוָה יוֹתֵר מֵהַכַּמּוּת — גַּם 10 דַּקּוֹת בְּיוֹם שׁוֹמְרוֹת עָלֶיהָ.")
+                title: tr("\(s.activeDays) יָמִים שֶׁל לְמִידָה"),
+                body: tr("\(name) \(g(tr("לָמַד"), tr("לָמְדָה"))) בְּ-\(s.activeDays) יָמִים \(period == .week ? tr("הַשָּׁבוּעַ") : tr("הַחֹדֶשׁ")), \(s.questions) שְׁאֵלוֹת בְּסַךְ הַכֹּל בְּ-\(pct(s.accuracy)) הַצְלָחָה."),
+                recommendation: tr("הָרְצִיפוּת שָׁוָה יוֹתֵר מֵהַכַּמּוּת — גַּם 10 דַּקּוֹת בְּיוֹם שׁוֹמְרוֹת עָלֶיהָ."))
         }
         // 5. Learning for its own sake.
         if s.voluntaryLearningRate >= 0.3, s.questions >= 20 {
             return DailyInsight(
                 emoji: "💛",
-                title: "\(g("לוֹמֵד", "לוֹמֶדֶת")) גַּם בְּלִי פְּרָס",
-                body: "\(Int((s.voluntaryLearningRate * 100).rounded()))% מֵהַתְּשׁוּבוֹת שֶׁל \(name) נִתְּנוּ אַחֲרֵי שֶׁהַדַּקּוֹת שֶׁל הַיּוֹם כְּבָר נִגְמְרוּ — כְּלוֹמַר סְתָם כִּי \(g("רָצָה", "רָצְתָה")).",
+                title: tr("\(g(tr("לוֹמֵד"), tr("לוֹמֶדֶת"))) גַּם בְּלִי פְּרָס"),
+                body: tr("\(Int((s.voluntaryLearningRate * 100).rounded()))% מֵהַתְּשׁוּבוֹת שֶׁל \(name) נִתְּנוּ אַחֲרֵי שֶׁהַדַּקּוֹת שֶׁל הַיּוֹם כְּבָר נִגְמְרוּ — כְּלוֹמַר סְתָם כִּי \(g(tr("רָצָה"), tr("רָצְתָה")))."),
                 recommendation: nil)
         }
         // 6. Plain summary when there is data but no story yet.
         guard s.questions > 0 else { return nil }
         return DailyInsight(
             emoji: "📚",
-            title: "\(s.questions) שְׁאֵלוֹת \(period.title.lowercased())",
-            body: "\(pct(s.accuracy)) הַצְלָחָה" + (s.minutesEarned > 0 ? " · \(s.minutesEarned) דַּקּוֹת שֶׁ\(g("הִרְוִיחַ", "הִרְוִיחָה"))" : ""),
+            title: tr("\(s.questions) שְׁאֵלוֹת \(period.title.lowercased())"),
+            body: tr("\(pct(s.accuracy)) הַצְלָחָה") + (s.minutesEarned > 0 ? tr(" · \(s.minutesEarned) דַּקּוֹת שֶׁ\(g(tr("הִרְוִיחַ"), tr("הִרְוִיחָה")))") : ""),
             recommendation: nil)
     }
 

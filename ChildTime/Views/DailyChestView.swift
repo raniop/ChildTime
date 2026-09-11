@@ -42,7 +42,7 @@ struct DailyChestView: View {
                     VStack(spacing: AppSpacing.lg) {
                         Spacer(minLength: AppSpacing.lg)
 
-                        Text("קוּפְסַת קֶסֶם יוֹמִית")
+                        Text(tr("קוּפְסַת קֶסֶם יוֹמִית"))
                             .font(.system(size: isCompact ? 34 : 48, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
@@ -73,7 +73,7 @@ struct DailyChestView: View {
 
                         if stage == .glowing {
                             VStack(spacing: AppSpacing.md) {
-                                Text(taps == 0 ? "לַחֲצוּ שׁוּב וָשׁוּב לִפְתִיחָה!" : "עוֹד \(tapsToOpen - taps)!")
+                                Text(taps == 0 ? tr("לַחֲצוּ שׁוּב וָשׁוּב לִפְתִיחָה!") : tr("עוֹד \(tapsToOpen - taps)!"))
                                     .font(AppFont.subtitle())
                                     .foregroundStyle(.white)
                                     .pulse()
@@ -84,15 +84,15 @@ struct DailyChestView: View {
                         if stage == .revealed {
                             VStack(spacing: AppSpacing.md) {
                                 if revealed >= 1 {
-                                    row(emoji: "⭐", text: "+\(reward.stars) כּוֹכָבִים")
+                                    row(emoji: "⭐", text: tr("+\(reward.stars) כּוֹכָבִים"))
                                         .transition(.scale.combined(with: .opacity))
                                 }
                                 if revealed >= 1 && reward.diamonds > 0 {
-                                    row(emoji: "💎", text: "+\(reward.diamonds) יַהֲלוֹמִים", glow: AppColor.gemPurple)
+                                    row(emoji: "💎", text: tr("+\(reward.diamonds) יַהֲלוֹמִים"), glow: AppColor.gemPurple)
                                         .transition(.scale.combined(with: .opacity))
                                 }
                                 if revealed >= 2 && reward.minutes > 0 {
-                                    row(emoji: "⏱", text: "+\(reward.minutes) דַּקּוֹת")
+                                    row(emoji: "⏱", text: tr("+\(reward.minutes) דַּקּוֹת"))
                                         .transition(.scale.combined(with: .opacity))
                                 }
                                 if revealed >= 2, let note = bankedNote {
@@ -131,7 +131,7 @@ struct DailyChestView: View {
 
                 if stage == .revealed {
                     Button { Haptic.light(); dismiss() } label: {
-                        Text("הַמְשֵׁךְ")
+                        Text(tr("הַמְשֵׁךְ"))
                             .font(.system(size: 22, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -182,13 +182,13 @@ struct DailyChestView: View {
                 reward = ChestReward(stars: reward.stars + 5, diamonds: reward.diamonds + 5,
                                      minutes: 0, cosmeticID: reward.cosmeticID)
             }
-            companion.cheer("חִכִּיתִי לְךָ!")
+            companion.cheer(tr("חִכִּיתִי לְךָ!"))
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 stage = .glowing
             }
         }
         // fullScreenCover content doesn't inherit the app root's RTL direction.
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     private func row(emoji: String, text: String, glow: Color = AppColor.starGold) -> some View {
@@ -240,10 +240,10 @@ struct DailyChestView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             stage = .revealed
             confettiTrigger += 1
-            companion.wow("טָא-דָה!")
+            companion.wow(tr("טָא-דָה!"))
             let grant = progress.applyChestReward(reward)
             if grant.bankedForTomorrow > 0 {
-                bankedNote = "הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"
+                bankedNote = tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))")
             }
             progress.openDailyChest()
             revealItems()
@@ -267,5 +267,5 @@ struct DailyChestView: View {
     DailyChestView()
         .environmentObject(ParentSettings.shared)
         .environmentObject(ProgressStore.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

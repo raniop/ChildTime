@@ -69,7 +69,7 @@ struct ProfilePickerView: View {
                 dismiss()
             }
             .environmentObject(profiles)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
         .sheet(item: $editingProfile) { p in
             ProfileEditorView(mode: .edit(p)) { updated in
@@ -80,7 +80,7 @@ struct ProfilePickerView: View {
                 editingProfile = nil
             }
             .environmentObject(profiles)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
     }
 
@@ -88,7 +88,7 @@ struct ProfilePickerView: View {
 
     private var hero: some View {
         VStack(spacing: 6) {
-            Text(profiles.isEmpty ? "בְּרוּכִים הַבָּאִים!" : "מִי מְשַׂחֵק?")
+            Text(profiles.isEmpty ? tr("בְּרוּכִים הַבָּאִים!") : tr("מִי מְשַׂחֵק?"))
                 .font(.system(size: isCompact ? 36 : 52, weight: .heavy, design: .rounded))
                 .foregroundStyle(
                     LinearGradient(
@@ -101,8 +101,8 @@ struct ProfilePickerView: View {
                 .opacity(headerAppear ? 1 : 0)
 
             Text(profiles.isEmpty
-                 ? "צְרוּ פְּרוֹפִיל רִאשׁוֹן כְּדֵי לְהַתְחִיל"
-                 : "בְּחַר אֶת הַפְּרוֹפִיל שֶׁלְּךָ")
+                 ? tr("צְרוּ פְּרוֹפִיל רִאשׁוֹן כְּדֵי לְהַתְחִיל")
+                 : tr("בְּחַר אֶת הַפְּרוֹפִיל שֶׁלְּךָ"))
                 .font(.system(size: isCompact ? 17 : 21, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
@@ -165,7 +165,7 @@ struct ProfilePickerView: View {
             }
             .frame(width: tileSize, height: tileSize)
 
-            Text("הוֹסָפָה")
+            Text(tr("הוֹסָפָה"))
                 .font(.system(size: isCompact ? 17 : 21, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
         }
@@ -287,5 +287,5 @@ struct ProfileAvatarView: View {
 #Preview {
     ProfilePickerView()
         .environmentObject(ProfileStore.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

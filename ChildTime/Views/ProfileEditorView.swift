@@ -90,7 +90,7 @@ struct ProfileEditorView: View {
                             Button(role: .destructive) {
                                 showDeleteConfirm = true
                             } label: {
-                                Label("מְחַק פְּרוֹפִיל", systemImage: "trash")
+                                Label(tr("מְחַק פְּרוֹפִיל"), systemImage: "trash")
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
@@ -99,21 +99,21 @@ struct ProfileEditorView: View {
                             }
                             .padding(.top, AppSpacing.md)
                             .confirmationDialog(
-                                "לִמְחוֹק אֶת הַפְּרוֹפִיל שֶׁל \(name)?",
+                                tr("לִמְחוֹק אֶת הַפְּרוֹפִיל שֶׁל \(name)?"),
                                 isPresented: $showDeleteConfirm,
                                 titleVisibility: .visible
                             ) {
-                                Button("מְחַק", role: .destructive) {
+                                Button(tr("מְחַק"), role: .destructive) {
                                     if case .edit(let p) = mode {
                                         onDelete?(p)
                                     }
                                     _ = id  // silence unused
                                 }
-                                Button("בַּטֵּל", role: .cancel) {}
+                                Button(tr("בַּטֵּל"), role: .cancel) {}
                             }
                         }
 
-                        Text("טופי · \(AppInfo.versionLine)")
+                        Text(tr("טופי · \(AppInfo.versionLine)"))
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.5))
                             .frame(maxWidth: .infinity)
@@ -126,14 +126,14 @@ struct ProfileEditorView: View {
                 }
             }
             .dismissKeyboardOnTap()
-            .navigationTitle(isEdit ? "עֲרוֹךְ פְּרוֹפִיל" : "פְּרוֹפִיל חָדָשׁ")
+            .navigationTitle(isEdit ? tr("עֲרוֹךְ פְּרוֹפִיל") : tr("פְּרוֹפִיל חָדָשׁ"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("בַּטֵּל") { dismiss() }
+                    Button(tr("בַּטֵּל")) { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("שְׁמוֹר") { save() }
+                    Button(tr("שְׁמוֹר")) { save() }
                         .disabled(!canSave)
                         .fontWeight(.bold)
                 }
@@ -168,10 +168,10 @@ struct ProfileEditorView: View {
 
     private var nameField: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("שֵׁם")
+            Text(tr("שֵׁם"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
-            RTLTextField(placeholder: "שֵׁם הַיֶּלֶד/ה", text: $name, textColor: .white)
+            RTLTextField(placeholder: tr("שֵׁם הַיֶּלֶד/ה"), text: $name, textColor: .white)
                 .frame(height: 28)
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.vertical, AppSpacing.sm)
@@ -181,7 +181,7 @@ struct ProfileEditorView: View {
 
     private var genderRow: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("יֶלֶד אוֹ יַלְדָּה?")
+            Text(tr("יֶלֶד אוֹ יַלְדָּה?"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             HStack(spacing: AppSpacing.md) {
@@ -220,7 +220,7 @@ struct ProfileEditorView: View {
 
     private var ageRow: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("בֶּן/בַּת כַּמָּה?")
+            Text(tr("בֶּן/בַּת כַּמָּה?"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 6) {
@@ -269,16 +269,16 @@ struct ProfileEditorView: View {
     /// September promotion). preK → gan types; otherwise כיתות א׳–ח׳.
     private var gradeRow: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(age == .preK ? "בְּאֵיזֶה גַּן?" : "בְּאֵיזוֹ כִּתָּה?")
+            Text(age == .preK ? tr("בְּאֵיזֶה גַּן?") : tr("בְּאֵיזוֹ כִּתָּה?"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             if age == .preK {
                 HStack(spacing: 6) {
-                    gradeOption(-1, label: "טְרוֹם־חוֹבָה", emoji: "🧸")
-                    gradeOption(0, label: "גַּן חוֹבָה", emoji: "🎒")
+                    gradeOption(-1, label: tr("טְרוֹם־חוֹבָה"), emoji: "🧸")
+                    gradeOption(0, label: tr("גַּן חוֹבָה"), emoji: "🎒")
                 }
             } else {
-                let letters = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"]
+                let letters = [tr("א׳"), tr("ב׳"), tr("ג׳"), tr("ד׳"), tr("ה׳"), tr("ו׳"), tr("ז׳"), tr("ח׳")]
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 6) {
                     ForEach(1...8, id: \.self) { g in
                         gradeOption(g, label: letters[g - 1], emoji: nil)
@@ -286,7 +286,7 @@ struct ProfileEditorView: View {
                 }
             }
             if grade == nil {
-                Text("חוֹבָה לִבְחֹר — כָּךְ טוֹפִי מַתְאִים אֶת הַשְּׁאֵלוֹת לַתָּכְנִית שֶׁל מִשְׂרַד הַחִנּוּךְ, וְכָל 1 בְּסֶפְּטֶמְבֶּר עוֹלִים כִּתָּה אוֹטוֹמָטִית 🎉")
+                Text(tr("חוֹבָה לִבְחֹר — כָּךְ טוֹפִי מַתְאִים אֶת הַשְּׁאֵלוֹת לַתָּכְנִית שֶׁל מִשְׂרַד הַחִנּוּךְ, וְכָל 1 בְּסֶפְּטֶמְבֶּר עוֹלִים כִּתָּה אוֹטוֹמָטִית 🎉"))
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
             }
@@ -320,7 +320,7 @@ struct ProfileEditorView: View {
 
     private var learningLevelRow: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("רָמַת לְמִידָה הַתְחָלָתִית")
+            Text(tr("רָמַת לְמִידָה הַתְחָלָתִית"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 6) {
@@ -351,7 +351,7 @@ struct ProfileEditorView: View {
 
     private var interestsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("תְּחוּמֵי עִנְיָן (לַפִּיד הֶחָכָם)")
+            Text(tr("תְּחוּמֵי עִנְיָן (לַפִּיד הֶחָכָם)"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
@@ -383,7 +383,7 @@ struct ProfileEditorView: View {
 
     private var avatarPresetGrid: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("🙂 בְּחַר פַּרְצוּף")
+            Text(tr("🙂 בְּחַר פַּרְצוּף"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
 
@@ -425,14 +425,14 @@ struct ProfileEditorView: View {
 
     private var photoControls: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("📷 אוֹ הַעֲלֵה תְּמוּנָה (אוֹפְּצִיוֹנָלִי)")
+            Text(tr("📷 אוֹ הַעֲלֵה תְּמוּנָה (אוֹפְּצִיוֹנָלִי)"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 10) {
                 Button {
                     showPicker = true
                 } label: {
-                    Label(photoData == nil ? "בְּחַר תְּמוּנָה" : "הַחְלֵף תְּמוּנָה",
+                    Label(photoData == nil ? tr("בְּחַר תְּמוּנָה") : tr("הַחְלֵף תְּמוּנָה"),
                           systemImage: "photo.on.rectangle.angled")
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white)
@@ -445,7 +445,7 @@ struct ProfileEditorView: View {
                     Button(role: .destructive) {
                         photoData = nil
                     } label: {
-                        Label("הָסֵר", systemImage: "trash")
+                        Label(tr("הָסֵר"), systemImage: "trash")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.8))
                             .padding(.horizontal, AppSpacing.md)

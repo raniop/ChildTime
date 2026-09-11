@@ -65,16 +65,16 @@ struct JuicyButton<Label: View>: View {
         AppGradient.dreamy.ignoresSafeArea()
         VStack(spacing: 16) {
             JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {} label: {
-                Label("יַאללָה!", systemImage: "play.fill")
+                Label(tr("יַאללָה!"), systemImage: "play.fill")
             }
             JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {} label: {
-                Text("בּוֹא נַתְחִיל")
+                Text(tr("בּוֹא נַתְחִיל"))
             }
             JuicyButton(gradient: AppGradient.castle, glowColor: AppColor.flameOrange) {} label: {
-                Label("פִּתְחוּ לִי 10 דַּקּוֹת", systemImage: "gamecontroller.fill")
+                Label(tr("פִּתְחוּ לִי 10 דַּקּוֹת"), systemImage: "gamecontroller.fill")
             }
         }
         .padding()
     }
-    .environment(\.layoutDirection, .rightToLeft)
+    .environment(\.layoutDirection, .app)
 }

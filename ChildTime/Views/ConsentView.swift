@@ -18,24 +18,24 @@ struct ConsentView: View {
                     Text("🔒").font(.system(size: 64))
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, AppSpacing.xl)
-                    Text("הפרטיות של הילד שלכם — קודם כול")
+                    Text(tr("הפרטיות של הילד שלכם — קודם כול"))
                         .font(.system(size: 26, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(alignment: .leading, spacing: 14) {
-                        principle("👨‍👩‍👧", "הפרדה מלאה בין משפחות", "הנתונים של כל משפחה מבודדים. אף משפחה אחרת לא יכולה לראות את הילד שלכם.")
-                        principle("📉", "איסוף נתונים מינימלי", "אנחנו אוספים רק את מה שדרוש כדי להציג התקדמות למידה — בלי פרסום מבוסס פרופיל ובלי מכירת נתונים.")
-                        principle("🔐", "מאובטח", "ההתקדמות מסונכרנת בצורה מאובטחת, והקוד ההורי נשמר מוצפן במכשיר.")
-                        principle("🗑️", "בשליטתכם", "אפשר לייצא את כל הנתונים או למחוק אותם לחלוטין בכל רגע, מתוך הגדרות ההורה.")
+                        principle("👨‍👩‍👧", tr("הפרדה מלאה בין משפחות"), tr("הנתונים של כל משפחה מבודדים. אף משפחה אחרת לא יכולה לראות את הילד שלכם."))
+                        principle("📉", tr("איסוף נתונים מינימלי"), tr("אנחנו אוספים רק את מה שדרוש כדי להציג התקדמות למידה — בלי פרסום מבוסס פרופיל ובלי מכירת נתונים."))
+                        principle("🔐", tr("מאובטח"), tr("ההתקדמות מסונכרנת בצורה מאובטחת, והקוד ההורי נשמר מוצפן במכשיר."))
+                        principle("🗑️", tr("בשליטתכם"), tr("אפשר לייצא את כל הנתונים או למחוק אותם לחלוטין בכל רגע, מתוך הגדרות ההורה."))
                     }
                     .padding(AppSpacing.md)
                     .frame(maxWidth: .infinity)
                     .background(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                         .fill(.white.opacity(0.12)))
 
-                    Link("קראו את מדיניות הפרטיות המלאה",
+                    Link(tr("קראו את מדיניות הפרטיות המלאה"),
                          destination: URL(string: "https://tofyapp.com/privacy")!)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
@@ -44,7 +44,7 @@ struct ConsentView: View {
                     Button {
                         accept()
                     } label: {
-                        Text("אני מסכים/ה ומאשר/ת כהורה")
+                        Text(tr("אני מסכים/ה ומאשר/ת כהורה"))
                             .font(.system(size: 19, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: 460)
@@ -72,7 +72,7 @@ struct ConsentView: View {
                         settings.pendingJoinFamily = false
                         settings.deviceRole = .unset
                     } label: {
-                        Label("חֲזָרָה", systemImage: "chevron.backward")
+                        Label(tr("חֲזָרָה"), systemImage: "chevron.backward")
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 14).padding(.vertical, 8)

@@ -30,12 +30,12 @@ struct WorldCard: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 0) {
                 HomeTileHeader(emoji: world.emoji,
-                               badge: badgeOverride ?? (subscriptionLocked ? "👑 טוֹפִי+" : nil))
+                               badge: badgeOverride ?? (subscriptionLocked ? tr("👑 טוֹפִי+") : nil))
                 HomeTileText(title: world.name,
-                             subtitle: world.isBonusWorld ? "כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת"
+                             subtitle: world.isBonusWorld ? tr("כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת")
                                 : (world.topic.pack?.tagline ?? world.topic.displayName))
                 Spacer(minLength: 6)
-                HomeTileFoot(label: footOverride ?? "חֶדֶר \(max(1, min(currentRoom + 1, world.rooms)))/\(world.rooms)",
+                HomeTileFoot(label: footOverride ?? tr("חֶדֶר \(max(1, min(currentRoom + 1, world.rooms)))/\(world.rooms)"),
                              frac: Double(currentRoom) / Double(max(1, world.rooms)))
             }
             .homeTileChrome(tint: world.glowColor, compact: isCompact)
@@ -163,5 +163,5 @@ extension View {
         }
         .padding()
     }
-    .environment(\.layoutDirection, .rightToLeft)
+    .environment(\.layoutDirection, .app)
 }

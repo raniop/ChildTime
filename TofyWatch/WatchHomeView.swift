@@ -24,11 +24,11 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
         // screen without a paired phone pushing real data.
         if ProcessInfo.processInfo.environment["WATCH_DEMO"] == "1" {
             children = [
-                .init(id: "1", name: "דָּנָה", emoji: "🦊", earnedToday: 35,
+                .init(id: "1", name: tr("דָּנָה"), emoji: "🦊", earnedToday: 35,
                       playingNow: true, pendingChores: 1, moneyBalance: 24),
-                .init(id: "2", name: "יוֹאָב", emoji: "🐨", earnedToday: 10,
+                .init(id: "2", name: tr("יוֹאָב"), emoji: "🐨", earnedToday: 10,
                       playingNow: false, pendingChores: 0, moneyBalance: 0),
-                .init(id: "3", name: "אוּרִי", emoji: "🐻", earnedToday: 0,
+                .init(id: "3", name: tr("אוּרִי"), emoji: "🐻", earnedToday: 0,
                       playingNow: false, pendingChores: 2, moneyBalance: 7),
             ]
             updatedAt = Date()
@@ -51,6 +51,9 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
     }
 
     private func apply(_ ctx: [String: Any]) {
+        if let code = ctx["language"] as? String, let lang = AppLanguage(rawValue: code) {
+            DispatchQueue.main.async { LanguageStore.shared.set(lang) }
+        }
         guard let rows = ctx["children"] as? [[String: Any]] else { return }
         let parsed = rows.map { r in
             WatchChildGlance(id: r["id"] as? String ?? UUID().uuidString,
@@ -77,6 +80,7 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
 /// child, each one big enough to read without looking twice.
 struct WatchHomeView: View {
     @StateObject private var model = WatchFamilyModel()
+    @ObservedObject private var language = LanguageStore.shared
 
     var body: some View {
         ZStack {
@@ -93,7 +97,8 @@ struct WatchHomeView: View {
                 .tabViewStyle(.verticalPage)
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, language.current.layoutDirection)
+        .id(language.current)
     }
 
     // MARK: - Family
@@ -104,7 +109,7 @@ struct WatchHomeView: View {
 
     private var familyPage: some View {
         VStack(spacing: 8) {
-            Text("🦁 טוֹפִי")
+            Text(tr("🦁 טוֹפִי"))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
 
@@ -115,14 +120,14 @@ struct WatchHomeView: View {
                 .lineLimit(2).minimumScaleFactor(0.8)
 
             HStack(spacing: 6) {
-                stat("\(minutesToday)", "דַּקּוֹת הַיּוֹם", tint: Tofy.mint)
+                stat("\(minutesToday)", tr("דַּקּוֹת הַיּוֹם"), tint: Tofy.mint)
                 if choresWaiting > 0 {
-                    stat("\(choresWaiting)", "מַטָּלוֹת", tint: Tofy.gold)
+                    stat("\(choresWaiting)", tr("מַטָּלוֹת"), tint: Tofy.gold)
                 }
             }
 
             if let t = model.updatedAt {
-                Text("עֻדְכַּן \(t.formatted(date: .omitted, time: .shortened))")
+                Text(tr("עֻדְכַּן \(t.formatted(date: .omitted, time: .shortened))"))
                     .font(.system(size: 10.5, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.55))
             }
@@ -133,13 +138,13 @@ struct WatchHomeView: View {
     private var headline: String {
         if let one = playing.first {
             return playing.count == 1
-                ? "\(one.name) מְשַׂחֵק עַכְשָׁו"
-                : "\(playing.count) יְלָדִים מְשַׂחֲקִים עַכְשָׁו"
+                ? tr("\(one.name) מְשַׂחֵק עַכְשָׁו")
+                : tr("\(playing.count) יְלָדִים מְשַׂחֲקִים עַכְשָׁו")
         }
         switch model.children.count {
-        case 1: return "יֶלֶד אֶחָד · אַף אֶחָד לֹא מְשַׂחֵק"
-        case 2: return "שְׁנֵי יְלָדִים · שֶׁקֶט עַכְשָׁו"
-        default: return "\(model.children.count) יְלָדִים · שֶׁקֶט עַכְשָׁו"
+        case 1: return tr("יֶלֶד אֶחָד · אַף אֶחָד לֹא מְשַׂחֵק")
+        case 2: return tr("שְׁנֵי יְלָדִים · שֶׁקֶט עַכְשָׁו")
+        default: return tr("\(model.children.count) יְלָדִים · שֶׁקֶט עַכְשָׁו")
         }
     }
 
@@ -174,18 +179,18 @@ struct WatchHomeView: View {
                     .lineLimit(1).minimumScaleFactor(0.7)
             }
 
-            Text(c.playingNow ? "מְשַׂחֵק עַכְשָׁו" : "לֹא מְשַׂחֵק כָּרֶגַע")
+            Text(c.playingNow ? tr("מְשַׂחֵק עַכְשָׁו") : tr("לֹא מְשַׂחֵק כָּרֶגַע"))
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(c.playingNow ? Tofy.mint : .white.opacity(0.65))
 
             VStack(spacing: 4) {
-                row("🎮", "\(c.earnedToday) דַּקּוֹת הַיּוֹם")
+                row("🎮", tr("\(c.earnedToday) דַּקּוֹת הַיּוֹם"))
                 if c.pendingChores > 0 {
-                    row("🧹", c.pendingChores == 1 ? "מַטָּלָה מְחַכָּה לְאִשּׁוּר"
-                                                   : "\(c.pendingChores) מַטָּלוֹת מְחַכּוֹת")
+                    row("🧹", c.pendingChores == 1 ? tr("מַטָּלָה מְחַכָּה לְאִשּׁוּר")
+                                                   : tr("\(c.pendingChores) מַטָּלוֹת מְחַכּוֹת"))
                 }
                 if c.moneyBalance > 0 {
-                    row("💰", "₪\(c.moneyBalance) בַּקֻּפָּה")
+                    row("💰", tr("\(Money.pocket(c.moneyBalance)) בַּקֻּפָּה"))
                 }
             }
             .padding(.vertical, 8).padding(.horizontal, 9)
@@ -211,10 +216,10 @@ struct WatchHomeView: View {
     private var emptyState: some View {
         VStack(spacing: 7) {
             Text("🦁").font(.system(size: 38))
-            Text("טוֹפִי")
+            Text(tr("טוֹפִי"))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("פִּתְחוּ אֶת טוֹפִי בָּאַיְפוֹן פַּעַם אַחַת — וְהַמִּשְׁפָּחָה תּוֹפִיעַ כָּאן")
+            Text(tr("פִּתְחוּ אֶת טוֹפִי בָּאַיְפוֹן פַּעַם אַחַת — וְהַמִּשְׁפָּחָה תּוֹפִיעַ כָּאן"))
                 .font(.system(size: 11.5, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
                 .multilineTextAlignment(.center)

@@ -87,5 +87,5 @@ struct StreakMeter: View {
             StreakMeter(streak: 18)
         }
     }
-    .environment(\.layoutDirection, .rightToLeft)
+    .environment(\.layoutDirection, .app)
 }

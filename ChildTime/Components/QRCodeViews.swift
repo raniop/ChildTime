@@ -64,11 +64,11 @@ struct QRScannerView: UIViewControllerRepresentable {
                 AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
                     DispatchQueue.main.async {
                         if granted { self?.setupSession() }
-                        else { self?.showMessage("אֵין הַרְשָׁאָה לְמַצְלֵמָה.\nהַקְלִידוּ אֶת הַקּוֹד בִּמְקוֹם זֹאת.") }
+                        else { self?.showMessage(tr("אֵין הַרְשָׁאָה לְמַצְלֵמָה.\nהַקְלִידוּ אֶת הַקּוֹד בִּמְקוֹם זֹאת.")) }
                     }
                 }
             default:
-                showMessage("אֵין הַרְשָׁאָה לְמַצְלֵמָה.\nהַקְלִידוּ אֶת הַקּוֹד בִּמְקוֹם זֹאת.")
+                showMessage(tr("אֵין הַרְשָׁאָה לְמַצְלֵמָה.\nהַקְלִידוּ אֶת הַקּוֹד בִּמְקוֹם זֹאת."))
             }
         }
 
@@ -77,7 +77,7 @@ struct QRScannerView: UIViewControllerRepresentable {
                   let input = try? AVCaptureDeviceInput(device: device),
                   session.canAddInput(input) else {
                 // No camera (e.g. the Simulator) — point to the code field.
-                showMessage("אֵין מַצְלֵמָה בַּמַּכְשִׁיר הַזֶּה.\nהַקְלִידוּ אֶת הַקּוֹד בִּמְקוֹם זֹאת.")
+                showMessage(tr("אֵין מַצְלֵמָה בַּמַּכְשִׁיר הַזֶּה.\nהַקְלִידוּ אֶת הַקּוֹד בִּמְקוֹם זֹאת."))
                 return
             }
             session.addInput(input)

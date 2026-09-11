@@ -28,7 +28,7 @@ struct CoachingEngine {
         let text: String
     }
 
-    private var name: String { childName.isEmpty ? "הילד" : childName }
+    private var name: String { childName.isEmpty ? tr("הילד") : childName }
 
     // MARK: - Narrative insights
 
@@ -39,41 +39,41 @@ struct CoachingEngine {
         let delta = insights.weeklyAccuracyDelta
         if delta <= -10 {
             out.append(.init(kind: .attention, emoji: "📉",
-                text: "השבוע נרשמה ירידה של \(Int(abs(delta)))% בביצועים הכלליים. שווה לתרגל יחד קצת."))
+                text: tr("השבוע נרשמה ירידה של \(Int(abs(delta)))% בביצועים הכלליים. שווה לתרגל יחד קצת.")))
         } else if delta >= 10 {
             out.append(.init(kind: .positive, emoji: "📈",
-                text: "\(name) \(g("שיפר","שיפרה")) את הביצועים ב-\(Int(delta))% השבוע. כל הכבוד!"))
+                text: tr("\(name) \(g(tr("שיפר"),tr("שיפרה"))) את הביצועים ב-\(Int(delta))% השבוע. כל הכבוד!")))
         }
 
         // Challenges (weak topics).
         if let weak = insights.challenges.first {
             out.append(.init(kind: .attention, emoji: "💪",
-                text: "נראה ש\(name) מתקשה ב\(weak.displayName). זה תחום מצוין להתמקד בו יחד."))
+                text: tr("נראה ש\(name) מתקשה ב\(weak.displayName). זה תחום מצוין להתמקד בו יחד.")))
         }
 
         // Strengths.
         if !insights.strengths.isEmpty {
             let list = insights.strengths.prefix(3).map { $0.displayName }.joined(separator: "، ")
             out.append(.init(kind: .positive, emoji: "🌟",
-                text: "\(name) \(g("מצטיין","מצטיינת")) ב\(list). תחומים שכיף לחגוג בהם."))
+                text: tr("\(name) \(g(tr("מצטיין"),tr("מצטיינת"))) ב\(list). תחומים שכיף לחגוג בהם.")))
         }
 
         // Discovery.
         if let disc = insights.discovering.first {
             out.append(.init(kind: .discovery, emoji: "🔭",
-                text: "\(name) מגלה עניין הולך וגובר ב\(disc.displayName)."))
+                text: tr("\(name) מגלה עניין הולך וגובר ב\(disc.displayName).")))
         }
 
         // Streak / consistency.
         let week = insights.thisWeek
         if week.activeDays >= 5 {
             out.append(.init(kind: .positive, emoji: "🔥",
-                text: "\(name) \(g("למד","למדה")) ב-\(week.activeDays) מתוך 7 הימים האחרונים — עקביות יפה!"))
+                text: tr("\(name) \(g(tr("למד"),tr("למדה"))) ב-\(week.activeDays) מתוך 7 הימים האחרונים — עקביות יפה!")))
         }
 
         if out.isEmpty {
             out.append(.init(kind: .neutral, emoji: "🌱",
-                text: "עוד אוספים נתונים על \(name). אחרי עוד כמה משחקים נוכל להציג תובנות אישיות."))
+                text: tr("עוד אוספים נתונים על \(name). אחרי עוד כמה משחקים נוכל להציג תובנות אישיות.")))
         }
         return out
     }
@@ -88,47 +88,47 @@ struct CoachingEngine {
         }
         if let disc = insights.discovering.first {
             out.append(.init(emoji: "💡",
-                text: "שאלו את \(name) מה \(g("הוא למד","היא למדה")) היום ב\(disc.displayName) — סקרנות מחזקת זיכרון."))
+                text: tr("שאלו את \(name) מה \(g(tr("הוא למד"),tr("היא למדה"))) היום ב\(disc.displayName) — סקרנות מחזקת זיכרון.")))
         }
         if insights.thisWeek.activeDays < 3 {
             out.append(.init(emoji: "💡",
-                text: "נסו לקבוע 10 דקות משחק קבועות ביום — עקביות חשובה יותר מכמות."))
+                text: tr("נסו לקבוע 10 דקות משחק קבועות ביום — עקביות חשובה יותר מכמות.")))
         }
         if out.count < 2, let strong = insights.strengths.first {
             out.append(.init(emoji: "💡",
-                text: "\(name) \(g("חזק","חזקה")) ב\(strong.displayName) — אתגרו \(g("אותו","אותה")) בשאלה קשה יותר ותראו את הביטחון."))
+                text: tr("\(name) \(g(tr("חזק"),tr("חזקה"))) ב\(strong.displayName) — אתגרו \(g(tr("אותו"),tr("אותה"))) בשאלה קשה יותר ותראו את הביטחון.")))
         }
         if out.isEmpty {
             out.append(.init(emoji: "💡",
-                text: "הקדישו 10 דקות למשחק משותף — זו דרך נהדרת לראות איך \(name) \(g("חושב","חושבת"))."))
+                text: tr("הקדישו 10 דקות למשחק משותף — זו דרך נהדרת לראות איך \(name) \(g(tr("חושב"),tr("חושבת"))).")))
         }
         return out
     }
 
     private func actionForWeakTopic(_ topic: Topic) -> String {
         switch topic {
-        case .math:      return "נסו לתרגל חיבור וחיסור קצר בזמן ארוחת הערב."
-        case .english:   return "הקדישו 10 דקות לקריאת מילים באנגלית יחד."
-        case .hebrew:    return "כתבו יחד כמה מילים והתרגלו איות נכון."
-        case .logic:     return "פתרו חידה או משחק חשיבה אחד ביחד היום."
-        case .science:   return "שאלו את \(name) שאלת \"למה\" על משהו בטבע."
-        case .history:   return "ספרו ל\(name) סיפור קצר על משהו שקרה פעם."
-        case .geography: return "הסתכלו יחד על מפה ובחרו מדינה ללמוד עליה."
-        case .money:     return "תנו ל\(name) לספור כסף קטן בחנות, או לדבר על חיסכון לצעצוע."
-        case .reading:   return "קראו יחד סיפור קצר ושאלו את \(name) מה קרה בו ולמה."
-        case .soccer:    return "צפו יחד במשחק ובקשו מ\(name) להסביר לכם חוק אחד שראיתם."
-        case .dinosaurs: return "בקרו במוזיאון טבע או צפו בסרטון על דינוזאורים, ותנו ל\(name) לספר לכם על אחד."
-        case .space:     return "צאו בערב להסתכל על הירח והכוכבים, ושאלו את \(name) מה זה כוכב לכת."
-        case .animals:   return "ביקור בגן חיות או בטבע — ותנו ל\(name) לזהות חיות ולספר מה הן אוכלות."
-        case .sea:       return "בחוף או באקווריום, בקשו מ\(name) להסביר איך דג נושם מתחת למים."
-        case .gifted:    return "שחקו יחד במשחקי חשיבה קצרים (סדרות, חידות) — 5 דקות ביום מספיקות."
-        case .food:      return "בשלו יחד מתכון פשוט ותנו ל\(name) למדוד ולהכפיל כמויות."
-        case .israel:    return "טיול קצר בשכונה או בעיר — ודברו על סמלים, חגים ומקומות בישראל."
-        case .tishrei:   return "הכינו יחד את שולחן החג ותנו ל\(name) להסביר מה מסמל כל מאכל."
-        case .music:     return "שימו שיר ובקשו מ\(name) לזהות כלי נגינה או למחוא כפיים בקצב."
-        case .body:      return "מדדו יחד דופק אחרי ריצה, ודברו על מה הלב עושה."
-        case .vehicles:  return "בנסיעה, ספרו יחד גלגלים וכלי רכב ושאלו את \(name) מי נוהג במה."
-        case .flags:     return "פתחו מפת עולם או גלובוס, ומצאו יחד מדינות ודגלים."
+        case .math:      return tr("נסו לתרגל חיבור וחיסור קצר בזמן ארוחת הערב.")
+        case .english:   return tr("הקדישו 10 דקות לקריאת מילים באנגלית יחד.")
+        case .hebrew:    return tr("כתבו יחד כמה מילים והתרגלו איות נכון.")
+        case .logic:     return tr("פתרו חידה או משחק חשיבה אחד ביחד היום.")
+        case .science:   return tr("שאלו את \(name) שאלת \"למה\" על משהו בטבע.")
+        case .history:   return tr("ספרו ל\(name) סיפור קצר על משהו שקרה פעם.")
+        case .geography: return tr("הסתכלו יחד על מפה ובחרו מדינה ללמוד עליה.")
+        case .money:     return tr("תנו ל\(name) לספור כסף קטן בחנות, או לדבר על חיסכון לצעצוע.")
+        case .reading:   return tr("קראו יחד סיפור קצר ושאלו את \(name) מה קרה בו ולמה.")
+        case .soccer:    return tr("צפו יחד במשחק ובקשו מ\(name) להסביר לכם חוק אחד שראיתם.")
+        case .dinosaurs: return tr("בקרו במוזיאון טבע או צפו בסרטון על דינוזאורים, ותנו ל\(name) לספר לכם על אחד.")
+        case .space:     return tr("צאו בערב להסתכל על הירח והכוכבים, ושאלו את \(name) מה זה כוכב לכת.")
+        case .animals:   return tr("ביקור בגן חיות או בטבע — ותנו ל\(name) לזהות חיות ולספר מה הן אוכלות.")
+        case .sea:       return tr("בחוף או באקווריום, בקשו מ\(name) להסביר איך דג נושם מתחת למים.")
+        case .gifted:    return tr("שחקו יחד במשחקי חשיבה קצרים (סדרות, חידות) — 5 דקות ביום מספיקות.")
+        case .food:      return tr("בשלו יחד מתכון פשוט ותנו ל\(name) למדוד ולהכפיל כמויות.")
+        case .israel:    return tr("טיול קצר בשכונה או בעיר — ודברו על סמלים, חגים ומקומות בישראל.")
+        case .tishrei:   return tr("הכינו יחד את שולחן החג ותנו ל\(name) להסביר מה מסמל כל מאכל.")
+        case .music:     return tr("שימו שיר ובקשו מ\(name) לזהות כלי נגינה או למחוא כפיים בקצב.")
+        case .body:      return tr("מדדו יחד דופק אחרי ריצה, ודברו על מה הלב עושה.")
+        case .vehicles:  return tr("בנסיעה, ספרו יחד גלגלים וכלי רכב ושאלו את \(name) מי נוהג במה.")
+        case .flags:     return tr("פתחו מפת עולם או גלובוס, ומצאו יחד מדינות ודגלים.")
         }
     }
 }

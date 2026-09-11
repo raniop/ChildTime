@@ -80,7 +80,7 @@ struct LoginGateView: View {
                                 .frame(width: 40, height: 40)
                                 .background(.white.opacity(0.16), in: Circle())
                         }
-                        .accessibilityLabel("חזרה")
+                        .accessibilityLabel(tr("חזרה"))
                         Spacer()
                     }
                     Spacer()
@@ -95,7 +95,7 @@ struct LoginGateView: View {
         .sheet(isPresented: $showEmailAuth) {
             EmailAuthView()
                 .environmentObject(auth)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
         }
     }
 
@@ -111,7 +111,7 @@ struct LoginGateView: View {
                 if bubbleVisible {
                     // Centered above the lion's head; centered tail points straight
                     // down at it — width-independent, so it always lines up.
-                    BubbleSpeech(text: "היי! אני טופי 💫")
+                    BubbleSpeech(text: tr("היי! אני טופי 💫"))
                         .offset(y: -10)
                         .transition(.scale.combined(with: .opacity))
                 }
@@ -120,7 +120,7 @@ struct LoginGateView: View {
 
             // Brand
             VStack(spacing: 0) {
-                Text("טופי")
+                Text(tr("טופי"))
                     .font(.system(size: titleSize, weight: .heavy, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
@@ -143,15 +143,15 @@ struct LoginGateView: View {
     // length, so the card reads as a tidy block instead of a ragged list.
     private var valueProps: some View {
         VStack(spacing: 10) {
-            Text("היכנסו כדי להתחיל")
+            Text(tr("היכנסו כדי להתחיל"))
                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.3), radius: 3)
 
             VStack(spacing: 9) {
-                bullet("📚", "לומדים ומרוויחים", "תשובה = דקות מסך")
-                bullet("👀", "רואים הכל", "התקדמות חיה, מכל מכשיר")
-                bullet("🔒", "פרטי לגמרי", "הנתונים נשארים אצלכם")
+                bullet("📚", tr("לומדים ומרוויחים"), tr("תשובה = דקות מסך"))
+                bullet("👀", tr("רואים הכל"), tr("התקדמות חיה, מכל מכשיר"))
+                bullet("🔒", tr("פרטי לגמרי"), tr("הנתונים נשארים אצלכם"))
             }
             .padding(AppSpacing.md)
             .frame(maxWidth: 360)   // match the sign-in buttons' width
@@ -188,10 +188,10 @@ struct LoginGateView: View {
 
     private var limitBannerView: some View {
         VStack(spacing: 6) {
-            Text("🎉 כָּל הַכָּבוֹד!")
+            Text(tr("🎉 כָּל הַכָּבוֹד!"))
                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("שִׂחַקְתָּ אֶת 30 הַשְּׁאֵלוֹת הַחִנָּם. הִירָשְׁמוּ כְּדֵי לְהַמְשִׁיךְ לְשַׂחֵק לְלֹא הַגְבָּלָה — וְלִשְׁמוֹר אֶת הַהִתְקַדְּמוּת.")
+            Text(tr("שִׂחַקְתָּ אֶת 30 הַשְּׁאֵלוֹת הַחִנָּם. הִירָשְׁמוּ כְּדֵי לְהַמְשִׁיךְ לְשַׂחֵק לְלֹא הַגְבָּלָה — וְלִשְׁמוֹר אֶת הַהִתְקַדְּמוּת."))
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
                 .multilineTextAlignment(.center)
@@ -237,7 +237,7 @@ struct LoginGateView: View {
                 auth.lastError = nil
                 showEmailAuth = true
             } label: {
-                Label("המשך עם אימייל", systemImage: "envelope.fill")
+                Label(tr("המשך עם אימייל"), systemImage: "envelope.fill")
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: 360)
@@ -271,7 +271,7 @@ struct LoginGateView: View {
         HStack(spacing: 10) {
             Image(systemName: "person.2.fill")
                 .foregroundStyle(AppColor.successMint)
-            Text("הִתְחַבְּרוּ עִם הַחֶשְׁבּוֹן שֶׁלָּכֶם — וּמִיָּד תַּזִּינוּ אֶת קוֹד הַמִּשְׁפָּחָה שֶׁקִּבַּלְתֶּם.")
+            Text(tr("הִתְחַבְּרוּ עִם הַחֶשְׁבּוֹן שֶׁלָּכֶם — וּמִיָּד תַּזִּינוּ אֶת קוֹד הַמִּשְׁפָּחָה שֶׁקִּבַּלְתֶּם."))
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
@@ -287,16 +287,16 @@ struct LoginGateView: View {
 
     private var footer: some View {
         VStack(spacing: 8) {
-            Text("בהתחברות אתם מסכימים לתנאי השימוש ולמדיניות הפרטיות")
+            Text(tr("בהתחברות אתם מסכימים לתנאי השימוש ולמדיניות הפרטיות"))
                 .font(.system(size: 11, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.65))
                 .multilineTextAlignment(.center)
 
             HStack(spacing: 14) {
-                Link("תנאי שימוש",
+                Link(tr("תנאי שימוש"),
                      destination: URL(string: "https://tofyapp.com/terms")!)
                 Text("•").foregroundStyle(.white.opacity(0.4))
-                Link("מדיניות פרטיות",
+                Link(tr("מדיניות פרטיות"),
                      destination: URL(string: "https://tofyapp.com/privacy")!)
             }
             .font(.system(size: 12, weight: .semibold, design: .rounded))
@@ -329,5 +329,5 @@ struct LoginGateView: View {
 #Preview {
     LoginGateView()
         .environmentObject(AuthManager.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

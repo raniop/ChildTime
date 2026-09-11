@@ -1,0 +1,92 @@
+{
+  "sourceLanguage" : "he",
+  "version" : "1.0",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "טופי"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "טופי"
+          }
+        }
+      },
+      "comment" : "Home-screen name. English stays טופי until the US launch: Israelis with an English-language iPhone would otherwise see their icon renamed to Tofy after an update."
+    },
+    "NSCameraUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סריקת קוד QR כדי לקשר בין מכשירים במשפחה."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan a QR code to link your family's devices."
+          }
+        }
+      }
+    },
+    "NSFaceIDUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פתיחת הגדרות ההורה באמצעות Face ID במקום הקלדת הקוד."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open parent settings with Face ID instead of typing the code."
+          }
+        }
+      }
+    },
+    "מצב ילד" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מצב ילד"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kid Mode"
+          }
+        }
+      }
+    },
+    "נעל את הטלפון לילד" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נעל את הטלפון לילד"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock the phone for your child"
+          }
+        }
+      }
+    }
+  }
+}

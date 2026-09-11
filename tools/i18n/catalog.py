@@ -12,7 +12,7 @@ guessing how an interpolation turns into a format key.
 import json, os, re, sys, glob
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-CATALOG = os.path.join(ROOT, "ChildTime", "Localization", "Localizable.xcstrings")
+CATALOG = os.path.join(ROOT, "Shared", "Localization", "Localizable.xcstrings")
 
 
 def load_catalog():
@@ -30,7 +30,7 @@ def save_catalog(cat):
 def extracted(derived, files=None):
     """{key: [source files]} from the app target's .stringsdata."""
     keys = {}
-    pattern = os.path.join(derived, "Build/Intermediates.noindex/ChildTime.build/*/ChildTime.build/Objects-normal/*/*.stringsdata")
+    pattern = os.path.join(derived, "Build/Intermediates.noindex/ChildTime.build/*/*.build/Objects-normal/*/*.stringsdata")
     wanted = {os.path.splitext(os.path.basename(f))[0] for f in files} if files else None
     for path in glob.glob(pattern):
         name = os.path.splitext(os.path.basename(path))[0]

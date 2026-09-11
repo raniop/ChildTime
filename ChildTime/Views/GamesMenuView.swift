@@ -32,30 +32,30 @@ struct GamesMenuView: View {
                         if !isPreReader {
                             gameCard(
                                 emoji: "⚡️",
-                                title: "מֵרוֹץ נָכוֹן/לֹא נָכוֹן",
-                                subtitle: "מַהֵר! נָכוֹן אוֹ לֹא? בּוֹנוּס עַל מְהִירוּת 🔥",
+                                title: tr("מֵרוֹץ נָכוֹן/לֹא נָכוֹן"),
+                                subtitle: tr("מַהֵר! נָכוֹן אוֹ לֹא? בּוֹנוּס עַל מְהִירוּת 🔥"),
                                 colors: [Color(hex: "EF476F"), Color(hex: "FF8A5B")]
                             ) { showingTrueFalse = true }
 
                             gameCard(
                                 emoji: "🎯",
-                                title: "חִידוֹן בָּזָק",
-                                subtitle: "אַרְבַּע תְּשׁוּבוֹת — בְּחַר אֶת הַנְּכוֹנָה מַהֵר!",
+                                title: tr("חִידוֹן בָּזָק"),
+                                subtitle: tr("אַרְבַּע תְּשׁוּבוֹת — בְּחַר אֶת הַנְּכוֹנָה מַהֵר!"),
                                 colors: [Color(hex: "118AB2"), Color(hex: "5B6CFF")]
                             ) { showingQuiz = true }
 
                             gameCard(
                                 emoji: "🧩",
-                                title: "הַתְאָמַת זוּגוֹת",
-                                subtitle: "הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וְזִכּוּ בְּפַרְסִים",
+                                title: tr("הַתְאָמַת זוּגוֹת"),
+                                subtitle: tr("הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וְזִכּוּ בְּפַרְסִים"),
                                 colors: [Color(hex: "06D6A0"), Color(hex: "118AB2")]
                             ) { showingMatch = true }
                         }
 
                         gameCard(
                             emoji: "🧠",
-                            title: "מִשְׂחַק הַזִּכָּרוֹן",
-                            subtitle: "מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה בְּאַנְגְּלִית",
+                            title: tr("מִשְׂחַק הַזִּכָּרוֹן"),
+                            subtitle: tr("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה בְּאַנְגְּלִית"),
                             colors: [Color(hex: "9B5DE5"), Color(hex: "EF476F")]
                         ) { showingMemory = true }
                     }
@@ -79,7 +79,7 @@ struct GamesMenuView: View {
             }
             .padding(20)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onAppear { withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) { appeared = true } }
         .fullScreenCover(isPresented: $showingTrueFalse) {
             TrueFalseRaceView { showingTrueFalse = false }
@@ -97,11 +97,11 @@ struct GamesMenuView: View {
 
     private var header: some View {
         VStack(spacing: 6) {
-            Text("מִשְׂחָקִים 🎮")
+            Text(tr("מִשְׂחָקִים 🎮"))
                 .font(.system(size: 36, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
-            Text("בְּחַר מִשְׂחָק וְקָדִימָה!")
+            Text(tr("בְּחַר מִשְׂחָק וְקָדִימָה!"))
                 .font(.system(size: 17, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
         }

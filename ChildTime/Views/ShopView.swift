@@ -43,15 +43,15 @@ struct ShopView: View {
             // that reasoning is exactly what got the app rejected. respectSession:
             // false so an earlier unlock this session can't open the store.
             ParentGateView(allowClose: true,
-                           gateTitle: "אֵזוֹר הוֹרִים",
-                           gateReason: "כְּדֵי לִקְנוֹת יַהֲלוֹמִים — בַּקְּשׁוּ מֵהוֹרֶה לְהַזִּין אֶת הַקּוֹד",
+                           gateTitle: tr("אֵזוֹר הוֹרִים"),
+                           gateReason: tr("כְּדֵי לִקְנוֹת יַהֲלוֹמִים — בַּקְּשׁוּ מֵהוֹרֶה לְהַזִּין אֶת הַקּוֹד"),
                            useFaceID: true,
                            respectSession: false) {
                 StarShopView()
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .environmentObject(ParentSettings.shared)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
         .sheet(isPresented: $showingProfileEditor) {
             if let active = profiles.active {
@@ -61,7 +61,7 @@ struct ShopView: View {
                     profiles.remove(profile)
                 }
                 .environmentObject(profiles)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
             }
         }
     }
@@ -72,7 +72,7 @@ struct ShopView: View {
 
     private var topBar: some View {
         ZStack {
-            Text("חֲנוּת הַדְּמוּיוֹת")
+            Text(tr("חֲנוּת הַדְּמוּיוֹת"))
                 .font(.system(size: isCompact ? 22 : 28, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
@@ -89,7 +89,7 @@ struct ShopView: View {
                         .background(.white.opacity(0.22), in: Circle())
                         .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                 }
-                .environment(\.layoutDirection, .leftToRight)
+                .environment(\.layoutDirection, .appMirrored)
 
                 Spacer()
 
@@ -134,14 +134,14 @@ struct ShopView: View {
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
 
-                pillButton(icon: "pencil", title: "עֲרוֹךְ פְּרוֹפִיל") {
+                pillButton(icon: "pencil", title: tr("עֲרוֹךְ פְּרוֹפִיל")) {
                     showingProfileEditor = true
                 }
                 .padding(.top, 4)
             }
             .padding(.top, AppSpacing.sm)
         } else {
-            Text("צוֹר פְּרוֹפִיל כְּדֵי לְהַתְחִיל")
+            Text(tr("צוֹר פְּרוֹפִיל כְּדֵי לְהַתְחִיל"))
                 .foregroundStyle(.white)
         }
     }
@@ -170,5 +170,5 @@ struct ShopView: View {
     ShopView()
         .environmentObject(ProfileStore.shared)
         .environmentObject(ProgressStore.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

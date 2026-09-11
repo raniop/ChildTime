@@ -75,7 +75,7 @@ struct TrueFalseRaceView: View {
             }
             .padding(20)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onAppear { if item == nil { loadNext() } }
         .onReceive(ticker) { t in
             guard phase == .playing else { return }
@@ -101,7 +101,7 @@ struct TrueFalseRaceView: View {
                         .modifier(Shake(animatableData: shake ? 1 : 0))
 
                     VStack(spacing: 4) {
-                        Text("הַתְּשׁוּבָה הִיא…")
+                        Text(tr("הַתְּשׁוּבָה הִיא…"))
                             .font(.system(size: 14, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.7))
                         Text(item.candidate)
@@ -119,8 +119,8 @@ struct TrueFalseRaceView: View {
             }
             Spacer()
             HStack(spacing: 14) {
-                verdictButton(text: "לֹא נָכוֹן", icon: "xmark", color: Color(hex: "EF476F"), said: false)
-                verdictButton(text: "נָכוֹן", icon: "checkmark", color: AppColor.successMint, said: true)
+                verdictButton(text: tr("לֹא נָכוֹן"), icon: "xmark", color: Color(hex: "EF476F"), said: false)
+                verdictButton(text: tr("נָכוֹן"), icon: "checkmark", color: AppColor.successMint, said: true)
             }
             .padding(.horizontal, 18).padding(.bottom, 28)
         }
@@ -134,7 +134,7 @@ struct TrueFalseRaceView: View {
                     .foregroundStyle(.white)
                 Spacer()
                 if combo >= 2 {
-                    Text("🔥 קוֹמְבּוֹ ×\(combo)")
+                    Text(tr("🔥 קוֹמְבּוֹ ×\(combo)"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 10).padding(.vertical, 4)
@@ -193,24 +193,24 @@ struct TrueFalseRaceView: View {
             CharacterView(character: Character3DCatalog.find("lion"))
                 .frame(width: 140, height: 140)
                 .float(amplitude: 10)
-            Text(correctCount >= total - 2 ? "וָואו, מְצֻיָּן! 🏆" : "כָּל הַכָּבוֹד! 🎉")
+            Text(correctCount >= total - 2 ? tr("וָואו, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"))
                 .font(.system(size: 32, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
-            Text("עָנִיתָ נָכוֹן עַל \(correctCount) מִתּוֹךְ \(total)")
+            Text(tr("עָנִיתָ נָכוֹן עַל \(correctCount) מִתּוֹךְ \(total)"))
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
 
             HStack(spacing: 14) {
                 rewardPill("⭐", correctCount, AppColor.starGold, step: 1)
                 rewardPill("💎", score, AppColor.gemPurple, step: 2)
-                rewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: " דק'")
+                rewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק'"))
             }
             .padding(.top, 4)
 
             VStack(spacing: 12) {
-                Button { restart() } label: { cta("עוֹד סִבּוּב 🔁", dark: true) }.buttonStyle(.juicy)
-                Button(action: onClose) { cta("סִיּוּם", dark: false) }.buttonStyle(.juicy)
+                Button { restart() } label: { cta(tr("עוֹד סִבּוּב 🔁"), dark: true) }.buttonStyle(.juicy)
+                Button(action: onClose) { cta(tr("סִיּוּם"), dark: false) }.buttonStyle(.juicy)
             }
             .padding(.horizontal, 40).padding(.top, 8)
         }

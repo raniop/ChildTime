@@ -81,7 +81,7 @@ struct ContentView: View {
         .overlay {
             let v = UserDefaults.standard.integer(forKey: "SchoolYearPreviewVariant")
             if v > 0 {
-                SchoolYearCelebrationView(gradeName: "כִּתָּה ב'", childName: "דן המלך",
+                SchoolYearCelebrationView(gradeName: tr("כִּתָּה ב'"), childName: tr("דן המלך"),
                                           gender: .boy, onDone: {})
             }
             if UserDefaults.standard.bool(forKey: "ParentGreetingPreview") {
@@ -242,7 +242,7 @@ struct ContentView: View {
             AppGradient.dreamy.ignoresSafeArea()
             VStack(spacing: AppSpacing.lg) {
                 ProgressView().scaleEffect(1.4).tint(.white)
-                Text("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…")
+                Text(tr("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
             }
@@ -257,9 +257,9 @@ private struct DelayedPartyPreview: View {
         ZStack {
             if show {
                 ParentSchoolYearPartyView(profiles: [
-                    Profile(name: "דן המלך", gender: .boy, grade: 2, gradeSchoolYear: Profile.schoolYear()),
-                    Profile(name: "נוני", gender: .girl, grade: 4, gradeSchoolYear: Profile.schoolYear()),
-                    Profile(name: "יהלי", gender: .girl, grade: 1, gradeSchoolYear: Profile.schoolYear()),
+                    Profile(name: tr("דן המלך"), gender: .boy, grade: 2, gradeSchoolYear: Profile.schoolYear()),
+                    Profile(name: tr("נוני"), gender: .girl, grade: 4, gradeSchoolYear: Profile.schoolYear()),
+                    Profile(name: tr("יהלי"), gender: .girl, grade: 1, gradeSchoolYear: Profile.schoolYear()),
                 ], onDone: {})
             }
         }

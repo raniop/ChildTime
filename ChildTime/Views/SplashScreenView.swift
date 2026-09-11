@@ -54,7 +54,7 @@ struct SplashScreenView: View {
                     // Same clean wordmark as the home header (unvocalized + the same
                     // gradient) so the two "טופי" match exactly — the niqqud version
                     // read as a different, thinner font.
-                    Text("טופי")
+                    Text(tr("טופי"))
                         .font(.system(size: 64, weight: .black, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .shadow(color: .black.opacity(0.2), radius: 10, y: 4)
@@ -62,7 +62,7 @@ struct SplashScreenView: View {
                         .opacity(showWordmark ? 1 : 0)
                         .offset(y: showWordmark ? 0 : 20)
 
-                    Text("לוֹמְדִים, מְשַׂחֲקִים, מַרְוִיחִים זְמַן מָסָךְ")
+                    Text(tr("לוֹמְדִים, מְשַׂחֲקִים, מַרְוִיחִים זְמַן מָסָךְ"))
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
@@ -109,5 +109,5 @@ struct SplashScreenView: View {
 
 #Preview {
     SplashScreenView(onFinish: {})
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

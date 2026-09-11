@@ -56,7 +56,7 @@ struct DailyGiftBeacon: View {
             .opacity(appeared ? 1 : 0)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text("מתנה יומית"))
+        .accessibilityLabel(Text(tr("מתנה יומית")))
         .onAppear {
             // Entrance: pop in with a spring after a beat so it reads as " taa-da!"
             withAnimation(.spring(response: 0.5, dampingFraction: 0.55).delay(0.6)) {
@@ -83,5 +83,5 @@ struct DailyGiftBeacon: View {
         AppGradient.dreamy.ignoresSafeArea()
         DailyGiftBeacon { }
     }
-    .environment(\.layoutDirection, .rightToLeft)
+    .environment(\.layoutDirection, .app)
 }

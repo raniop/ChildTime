@@ -63,11 +63,11 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// Kid-facing name for a grade value on our scale.
     static func gradeDisplayName(_ g: Int) -> String {
         switch g {
-        case ..<0: return "גַּן טְרוֹם־חוֹבָה"
-        case 0:    return "גַּן חוֹבָה"
+        case ..<0: return tr("גַּן טְרוֹם־חוֹבָה")
+        case 0:    return tr("גַּן חוֹבָה")
         default:
-            let letters = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳", "ט׳", "י׳", "יא׳", "יב׳"]
-            return "כִּתָּה \(letters[Swift.min(g, 12) - 1])"
+            let letters = [tr("א׳"), tr("ב׳"), tr("ג׳"), tr("ד׳"), tr("ה׳"), tr("ו׳"), tr("ז׳"), tr("ח׳"), tr("ט׳"), tr("י׳"), tr("יא׳"), tr("יב׳")]
+            return tr("כִּתָּה \(letters[Swift.min(g, 12) - 1])")
         }
     }
     /// Interest tags the parent picked at setup (see `InterestCatalog`). Seed
@@ -298,82 +298,82 @@ struct AvatarPreset: Identifiable, Hashable {
     let bottomColor: Color
     let label: String   // accessibility / picker label
 
-    static let all: [AvatarPreset] = [
+    static var all: [AvatarPreset] { LocalizedCache.value("Profile.all") { [
         // Boy-leaning
         AvatarPreset(id: "boy_red",
                      emoji: "👦",
                      topColor: Color(hex: "FF6B6B"),
                      bottomColor: Color(hex: "FFB84D"),
-                     label: "אָדוֹם-כָּתוֹם"),
+                     label: tr("אָדוֹם-כָּתוֹם")),
         AvatarPreset(id: "boy_blue",
                      emoji: "🧑",
                      topColor: Color(hex: "5B9BFF"),
                      bottomColor: Color(hex: "48BFE3"),
-                     label: "כָּחוֹל"),
+                     label: tr("כָּחוֹל")),
         AvatarPreset(id: "boy_green",
                      emoji: "👦",
                      topColor: Color(hex: "06D6A0"),
                      bottomColor: Color(hex: "118AB2"),
-                     label: "יָרוֹק-טוּרְקִיז"),
+                     label: tr("יָרוֹק-טוּרְקִיז")),
         // Girl-leaning
         AvatarPreset(id: "girl_pink",
                      emoji: "👧",
                      topColor: Color(hex: "F15BB5"),
                      bottomColor: Color(hex: "FF6B9D"),
-                     label: "וָרוֹד"),
+                     label: tr("וָרוֹד")),
         AvatarPreset(id: "girl_purple",
                      emoji: "👧",
                      topColor: Color(hex: "9B5DE5"),
                      bottomColor: Color(hex: "5E60CE"),
-                     label: "סָגוֹל"),
+                     label: tr("סָגוֹל")),
         AvatarPreset(id: "girl_yellow",
                      emoji: "🧒",
                      topColor: Color(hex: "FFD166"),
                      bottomColor: Color(hex: "FFB84D"),
-                     label: "צָהוֹב-זָהוֹב"),
+                     label: tr("צָהוֹב-זָהוֹב")),
         // More faces — diverse skin tones
         AvatarPreset(id: "boy_tan",
                      emoji: "👦🏽",
                      topColor: Color(hex: "FF9F45"),
                      bottomColor: Color(hex: "FF6B6B"),
-                     label: "פַּרְצוּף שָׁזוּף"),
+                     label: tr("פַּרְצוּף שָׁזוּף")),
         AvatarPreset(id: "girl_dark",
                      emoji: "👧🏿",
                      topColor: Color(hex: "C77DFF"),
                      bottomColor: Color(hex: "7C4DFF"),
-                     label: "פַּרְצוּף כֵּהֶה"),
+                     label: tr("פַּרְצוּף כֵּהֶה")),
         AvatarPreset(id: "kid_light",
                      emoji: "🧒🏻",
                      topColor: Color(hex: "48BFE3"),
                      bottomColor: Color(hex: "06D6A0"),
-                     label: "פַּרְצוּף בָּהִיר"),
+                     label: tr("פַּרְצוּף בָּהִיר")),
         // Neutral / fun
         AvatarPreset(id: "neutral_rainbow",
                      emoji: "🦄",
                      topColor: Color(hex: "9B5DE5"),
                      bottomColor: Color(hex: "06D6A0"),
-                     label: "קֶסֶם"),
+                     label: tr("קֶסֶם")),
         AvatarPreset(id: "neutral_robot",
                      emoji: "🤖",
                      topColor: Color(hex: "5E60CE"),
                      bottomColor: Color(hex: "48BFE3"),
-                     label: "רוֹבּוֹטִי"),
+                     label: tr("רוֹבּוֹטִי")),
         AvatarPreset(id: "fun_fox",
                      emoji: "🦊",
                      topColor: Color(hex: "FF8C42"),
                      bottomColor: Color(hex: "FF6B6B"),
-                     label: "שׁוּעָל"),
+                     label: tr("שׁוּעָל")),
         AvatarPreset(id: "fun_panda",
                      emoji: "🐼",
                      topColor: Color(hex: "5B9BFF"),
                      bottomColor: Color(hex: "9B5DE5"),
-                     label: "פַּנְדָּה"),
+                     label: tr("פַּנְדָּה")),
         AvatarPreset(id: "fun_dragon",
                      emoji: "🐲",
                      topColor: Color(hex: "06D6A0"),
                      bottomColor: Color(hex: "118AB2"),
-                     label: "דְּרָקוֹן"),
-    ]
+                     label: tr("דְּרָקוֹן")),
+    ] } }
 
     static func find(_ id: String) -> AvatarPreset {
         all.first { $0.id == id } ?? all[0]

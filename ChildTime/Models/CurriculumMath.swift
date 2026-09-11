@@ -141,7 +141,7 @@ enum CurriculumMath {
                 }
             }
         }
-        return mcq(prompt: "🍕 חִלַּקְנוּ פִּיצָה לְ־\(parts) חֲלָקִים שָׁוִים וְאָכַלְנוּ \(eaten). אֵיזֶה שֶׁבֶר אָכַלְנוּ?",
+        return mcq(prompt: tr("🍕 חִלַּקְנוּ פִּיצָה לְ־\(parts) חֲלָקִים שָׁוִים וְאָכַלְנוּ \(eaten). אֵיזֶה שֶׁבֶר אָכַלְנוּ?"),
                    answer: answer,
                    options: ([answer] + Array(distractors.shuffled().prefix(3))).shuffled())
     }
@@ -182,7 +182,7 @@ enum CurriculumMath {
         let sorted = dens.sorted()
         let (small, big) = (sorted[1], sorted[0])   // bigger denominator = smaller fraction
         let f1 = "1/\(small)", f2 = "1/\(big)"
-        return mcq(prompt: "מָה גָּדוֹל יוֹתֵר: \(f1) אוֹ \(f2)?",
+        return mcq(prompt: tr("מָה גָּדוֹל יוֹתֵר: \(f1) אוֹ \(f2)?"),
                    answer: f2, options: [f1, f2].shuffled())
     }
 
@@ -191,11 +191,11 @@ enum CurriculumMath {
         let q = Int.random(in: 3...9)
         let r = Int.random(in: 1..<b)
         let a = b * q + r
-        let answer = "\(q) וּשְׁאֵרִית \(r)"
+        let answer = tr("\(q) וּשְׁאֵרִית \(r)")
         let distractors = [
-            "\(q) וּשְׁאֵרִית \(r == 1 ? r + 1 : r - 1)",
-            "\(q + 1) וּשְׁאֵרִית \(r)",
-            "\(q) בְּדִיּוּק",
+            tr("\(q) וּשְׁאֵרִית \(r == 1 ? r + 1 : r - 1)"),
+            tr("\(q + 1) וּשְׁאֵרִית \(r)"),
+            tr("\(q) בְּדִיּוּק"),
         ]
         return mcq(prompt: "\(a) ÷ \(b) = ?", answer: answer,
                    options: ([answer] + distractors).shuffled())
@@ -204,11 +204,11 @@ enum CurriculumMath {
     private static func rectanglePerimeterArea() -> Question {
         let w = Int.random(in: 2...9), h = Int.random(in: 2...9)
         if Bool.random() {
-            return numericMCQ(prompt: "מַלְבֵּן בְּאֹרֶךְ \(w) ס\"מ וּבְרֹחַב \(h) ס\"מ — מָה הַהֶקֵּף שֶׁלּוֹ?",
-                              answer: 2 * (w + h), suffix: " ס\"מ")
+            return numericMCQ(prompt: tr("מַלְבֵּן בְּאֹרֶךְ \(w) ס\"מ וּבְרֹחַב \(h) ס\"מ — מָה הַהֶקֵּף שֶׁלּוֹ?"),
+                              answer: 2 * (w + h), suffix: tr(" ס\"מ"))
         }
-        return numericMCQ(prompt: "מַלְבֵּן בְּאֹרֶךְ \(w) ס\"מ וּבְרֹחַב \(h) ס\"מ — מָה הַשֶּׁטַח שֶׁלּוֹ?",
-                          answer: w * h, suffix: " סמ\"ר")
+        return numericMCQ(prompt: tr("מַלְבֵּן בְּאֹרֶךְ \(w) ס\"מ וּבְרֹחַב \(h) ס\"מ — מָה הַשֶּׁטַח שֶׁלּוֹ?"),
+                          answer: w * h, suffix: tr(" סמ\"ר"))
     }
 
     // MARK: - כיתה ה׳ — עשרוניים, שברים במכנים שונים, ממוצע, מבוא לאחוזים
@@ -242,7 +242,7 @@ enum CurriculumMath {
                                          ("1/5", "0.2"), ("1/10", "0.1"), ("2/5", "0.4")]
         let (frac, dec) = pairs.randomElement()!
         let distractors = pairs.map(\.1).filter { $0 != dec }.shuffled().prefix(3)
-        return mcq(prompt: "אֵיךְ כּוֹתְבִים אֶת \(frac) כְּמִסְפָּר עֶשְׂרוֹנִי?",
+        return mcq(prompt: tr("אֵיךְ כּוֹתְבִים אֶת \(frac) כְּמִסְפָּר עֶשְׂרוֹנִי?"),
                    answer: dec, options: ([dec] + distractors).shuffled())
     }
 
@@ -250,13 +250,13 @@ enum CurriculumMath {
         let m = Int.random(in: 3...12)
         let spread = Int.random(in: 1...4)
         let nums = [m - spread, m, m + spread].shuffled()
-        return numericMCQ(prompt: "מָה הַמְמֻצָּע שֶׁל \(nums[0]), \(nums[1]) וְ־\(nums[2])?", answer: m)
+        return numericMCQ(prompt: tr("מָה הַמְמֻצָּע שֶׁל \(nums[0]), \(nums[1]) וְ־\(nums[2])?"), answer: m)
     }
 
     private static func percentIntro() -> Question {
         let base = [40, 60, 80, 100, 200].randomElement()!
         let pct = [10, 25, 50].randomElement()!
-        return numericMCQ(prompt: "כַּמָּה הֵם \(pct)% מִ־\(base)?", answer: base * pct / 100)
+        return numericMCQ(prompt: tr("כַּמָּה הֵם \(pct)% מִ־\(base)?"), answer: base * pct / 100)
     }
 
     // MARK: - כיתה ו׳ — אחוזים, יחס, סדר פעולות, בעיות רב־שלביות
@@ -268,7 +268,7 @@ enum CurriculumMath {
             // (37.5 truncated), failing kids who computed correctly.
             let base = [60, 120, 150, 200, 300].randomElement()!
             let pct = [10, 20, 25, 30, 50, 75].filter { base * $0 % 100 == 0 }.randomElement()!
-            return numericMCQ(prompt: "כַּמָּה הֵם \(pct)% מִ־\(base)?", answer: base * pct / 100)
+            return numericMCQ(prompt: tr("כַּמָּה הֵם \(pct)% מִ־\(base)?"), answer: base * pct / 100)
         case 1:  return orderOfOperations(hard: d == .hard)
         case 2:  return ratio()
         default: return wordProblemTwoStep()
@@ -295,7 +295,7 @@ enum CurriculumMath {
         guard x != y, gcd(x, y) == 1 else { return ratio() }
         let answer = "\(x):\(y)"
         let distractors = ["\(y):\(x)", "\(x * unit):\(y)", "\(x + 1):\(y)"].filter { $0 != answer }
-        return mcq(prompt: "בַּכִּתָּה \(x * unit) בָּנִים וְ־\(y * unit) בָּנוֹת. מָה הַיַּחַס בֵּין בָּנִים לְבָנוֹת בְּצוּרָה מְצֻמְצֶמֶת?",
+        return mcq(prompt: tr("בַּכִּתָּה \(x * unit) בָּנִים וְ־\(y * unit) בָּנוֹת. מָה הַיַּחַס בֵּין בָּנִים לְבָנוֹת בְּצוּרָה מְצֻמְצֶמֶת?"),
                    answer: answer, options: ([answer] + distractors.prefix(3)).shuffled())
     }
 
@@ -340,7 +340,7 @@ enum CurriculumMath {
         let plus = Bool.random()
         let expr = plus ? "\(k)x + \(c)" : "\(k)x − \(c)"
         let answer = plus ? k * x + c : k * x - c
-        return signedMCQ(prompt: "\(ltr(expr))\nמָה עֵרֶךְ הַבִּטּוּי כְּשֶׁ־\(ltr("x = \(x)"))?", answer: answer,
+        return signedMCQ(prompt: tr("\(ltr(expr))\nמָה עֵרֶךְ הַבִּטּוּי כְּשֶׁ־\(ltr("x = \(x)"))?"), answer: answer,
                          plants: [plus ? k + x + c : k + x - c, plus ? k * 10 + x + c : k * 10 + x - c])
     }
 
@@ -351,7 +351,7 @@ enum CurriculumMath {
         let r = k * x + c
         let left = "\(coef(k))x"
         let eq = c >= 0 ? "\(left) + \(c) = \(signed(r))" : "\(left) − \(-c) = \(signed(r))"
-        return signedMCQ(prompt: "\(ltr(eq))\nמָה הָעֵרֶךְ שֶׁל x?", answer: x,
+        return signedMCQ(prompt: tr("\(ltr(eq))\nמָה הָעֵרֶךְ שֶׁל x?"), answer: x,
                          plants: [r - c == x ? r + c : r - c, r + c, k > 1 ? r / k : r])
     }
 
@@ -371,8 +371,8 @@ enum CurriculumMath {
         let pct = [10, 20, 25, 30, 40, 50].filter { base * $0 % 100 == 0 }.randomElement()!
         let change = base * pct / 100, up = Bool.random()
         let answer = up ? base + change : base - change
-        return signedMCQ(prompt: "🏷️ מְחִיר שֶׁל \(base) ₪ \(up ? "עָלָה" : "יָרַד") בְּ־\(pct)%. מָה הַמְּחִיר הֶחָדָשׁ?",
-                         answer: answer, suffix: " ₪", plants: [change, up ? base - change : base + change],
+        return signedMCQ(prompt: tr("🏷️ מְחִיר שֶׁל \(base) ₪ \(up ? tr("עָלָה") : tr("יָרַד")) בְּ־\(pct)%. מָה הַמְּחִיר הֶחָדָשׁ?"),
+                         answer: answer, prefix: Money.answerPrefix, suffix: Money.answerSuffix, plants: [change, up ? base - change : base + change],
                          allowNegative: false)
     }
 
@@ -382,11 +382,11 @@ enum CurriculumMath {
             let a = Int.random(in: 3...12) * 5, b = Int.random(in: 3...(30 - a / 5)) * 5
             let answer = 180 - a - b
             guard answer > 0 else { return angles() }
-            return signedMCQ(prompt: "📐 בִּמְשֻׁלָּשׁ יֵשׁ זָוִית שֶׁל \(a)° וְזָוִית שֶׁל \(b)°. מָה גֹּדֶל הַזָּוִית הַשְּׁלִישִׁית?",
+            return signedMCQ(prompt: tr("📐 בִּמְשֻׁלָּשׁ יֵשׁ זָוִית שֶׁל \(a)° וְזָוִית שֶׁל \(b)°. מָה גֹּדֶל הַזָּוִית הַשְּׁלִישִׁית?"),
                              answer: answer, suffix: "°", plants: [a + b, 360 - a - b, 90 - min(a, b) > 0 ? 90 - min(a, b) : a], allowNegative: false)
         }
         let a = Int.random(in: 4...32) * 5
-        return signedMCQ(prompt: "📐 שְׁתֵּי זָוִיּוֹת צְמוּדוֹת. אַחַת הִיא \(a)°. מָה גֹּדֶל הַשְּׁנִיָּה?",
+        return signedMCQ(prompt: tr("📐 שְׁתֵּי זָוִיּוֹת צְמוּדוֹת. אַחַת הִיא \(a)°. מָה גֹּדֶל הַשְּׁנִיָּה?"),
                          answer: 180 - a, suffix: "°", plants: [90 - a > 0 ? 90 - a : 360 - a, a], allowNegative: false)
     }
 
@@ -395,15 +395,15 @@ enum CurriculumMath {
         let unit = Int.random(in: 3...15), n = Int.random(in: 2...6)
         var m = Int.random(in: 3...12)
         if m == n { m += 1 }
-        return signedMCQ(prompt: "📒 \(n) מַחְבָּרוֹת עוֹלוֹת \(unit * n) ₪. כַּמָּה יַעֲלוּ \(m) מַחְבָּרוֹת?",
-                         answer: unit * m, suffix: " ₪", plants: [unit * n + (m - n), unit * n * m], allowNegative: false)
+        return signedMCQ(prompt: tr("📒 \(n) מַחְבָּרוֹת עוֹלוֹת \(unit * n) ₪. כַּמָּה יַעֲלוּ \(m) מַחְבָּרוֹת?"),
+                         answer: unit * m, prefix: Money.answerPrefix, suffix: Money.answerSuffix, plants: [unit * n + (m - n), unit * n * m], allowNegative: false)
     }
 
     private static func triangleArea() -> Question {
         let base = Int.random(in: 3...14), height = Int.random(in: 2...12)
         guard base * height % 2 == 0 else { return triangleArea() }
-        return signedMCQ(prompt: "🔺 מְשֻׁלָּשׁ שֶׁבָּסִיסוֹ \(base) ס\"מ וְהַגֹּבַהּ אֵלָיו \(height) ס\"מ. מָה הַשֶּׁטַח שֶׁלּוֹ?",
-                         answer: base * height / 2, suffix: " סמ\"ר", plants: [base * height, base + height], allowNegative: false)
+        return signedMCQ(prompt: tr("🔺 מְשֻׁלָּשׁ שֶׁבָּסִיסוֹ \(base) ס\"מ וְהַגֹּבַהּ אֵלָיו \(height) ס\"מ. מָה הַשֶּׁטַח שֶׁלּוֹ?"),
+                         answer: base * height / 2, suffix: tr(" סמ\"ר"), plants: [base * height, base + height], allowNegative: false)
     }
 
     // MARK: - כיתה ח׳ — משוואות, פיתגורס, שורשים, פונקציה קווית, נפח, הסתברות, מעגל
@@ -428,14 +428,14 @@ enum CurriculumMath {
             let a = Int.random(in: 2...6), b = Int.random(in: -6...9)
             let r = a * (x + b)
             let inner = b == 0 ? "x" : b > 0 ? "x + \(b)" : "x − \(-b)"
-            return signedMCQ(prompt: "\(ltr("\(a)(\(inner)) = \(signed(r))"))\nמָה הָעֵרֶךְ שֶׁל x?", answer: x,
+            return signedMCQ(prompt: tr("\(ltr("\(a)(\(inner)) = \(signed(r))"))\nמָה הָעֵרֶךְ שֶׁל x?"), answer: x,
                              // Plants: opening only the first term (ax + b = r), and dividing then adding.
                              plants: [(r - b) / a, r / a + b])
         }
         let a = Int.random(in: 3...9), c = Int.random(in: 1...(a - 1)), b = Int.random(in: -12...12)
         let e = (a - c) * x + b
         func side(_ k: Int, _ n: Int) -> String { n == 0 ? "\(coef(k))x" : n > 0 ? "\(coef(k))x + \(n)" : "\(coef(k))x − \(-n)" }
-        return signedMCQ(prompt: "\(ltr("\(side(a, b)) = \(side(c, e))"))\nמָה הָעֵרֶךְ שֶׁל x?", answer: x,
+        return signedMCQ(prompt: tr("\(ltr("\(side(a, b)) = \(side(c, e))"))\nמָה הָעֵרֶךְ שֶׁל x?"), answer: x,
                          // Plants: adding the x terms instead of subtracting, and a sign slip on the numbers.
                          plants: [(e - b) / (a + c), (e + b) / (a - c)])
     }
@@ -445,11 +445,11 @@ enum CurriculumMath {
         let triples = [(3, 4, 5), (6, 8, 10), (5, 12, 13), (8, 15, 17), (9, 12, 15), (7, 24, 25), (12, 16, 20), (9, 40, 41), (15, 20, 25)]
         let (a, b, c) = triples.randomElement()!
         if Bool.random() {
-            return signedMCQ(prompt: "📐 בִּמְשֻׁלָּשׁ יְשַׁר זָוִית אָרְכֵי הַנִּצָּבִים \(a) ס\"מ וְ־\(b) ס\"מ. מָה אֹרֶךְ הַיֶּתֶר?",
-                             answer: c, suffix: " ס\"מ", plants: [a + b, a * a + b * b], allowNegative: false)
+            return signedMCQ(prompt: tr("📐 בִּמְשֻׁלָּשׁ יְשַׁר זָוִית אָרְכֵי הַנִּצָּבִים \(a) ס\"מ וְ־\(b) ס\"מ. מָה אֹרֶךְ הַיֶּתֶר?"),
+                             answer: c, suffix: tr(" ס\"מ"), plants: [a + b, a * a + b * b], allowNegative: false)
         }
-        return signedMCQ(prompt: "📐 בִּמְשֻׁלָּשׁ יְשַׁר זָוִית הַיֶּתֶר \(c) ס\"מ וְאַחַד הַנִּצָּבִים \(a) ס\"מ. מָה אֹרֶךְ הַנִּצָּב הַשֵּׁנִי?",
-                         answer: b, suffix: " ס\"מ", plants: [c - a, c + a], allowNegative: false)
+        return signedMCQ(prompt: tr("📐 בִּמְשֻׁלָּשׁ יְשַׁר זָוִית הַיֶּתֶר \(c) ס\"מ וְאַחַד הַנִּצָּבִים \(a) ס\"מ. מָה אֹרֶךְ הַנִּצָּב הַשֵּׁנִי?"),
+                         answer: b, suffix: tr(" ס\"מ"), plants: [c - a, c + a], allowNegative: false)
     }
 
     private static func squareRoot() -> Question {
@@ -464,28 +464,28 @@ enum CurriculumMath {
         let rule = b == 0 ? "y = \(coef(m))x" : (b > 0 ? "y = \(coef(m))x + \(b)" : "y = \(coef(m))x − \(-b)")
         if Bool.random() {
             let x = Int.random(in: -4...6)
-            return signedMCQ(prompt: "📈 \(ltr(rule))\nמָה הָעֵרֶךְ שֶׁל y כְּשֶׁ־\(ltr("x = \(x)"))?", answer: m * x + b,
+            return signedMCQ(prompt: tr("📈 \(ltr(rule))\nמָה הָעֵרֶךְ שֶׁל y כְּשֶׁ־\(ltr("x = \(x)"))?"), answer: m * x + b,
                              plants: [m * x - b, m + x + b])
         }
-        return signedMCQ(prompt: "📈 \(ltr(rule))\nמָה הַשִּׁפּוּעַ שֶׁל הַיָּשָׁר?", answer: m,
+        return signedMCQ(prompt: tr("📈 \(ltr(rule))\nמָה הַשִּׁפּוּעַ שֶׁל הַיָּשָׁר?"), answer: m,
                          plants: [b == m ? -m : b, -m])
     }
 
     private static func boxVolume() -> Question {
         let l = Int.random(in: 2...12), w = Int.random(in: 2...9), h = Int.random(in: 2...8)
-        return signedMCQ(prompt: "📦 תֵּבָה בְּאֹרֶךְ \(l) ס\"מ, רֹחַב \(w) ס\"מ וְגֹבַהּ \(h) ס\"מ. מָה הַנֶּפַח שֶׁלָּהּ?",
-                         answer: l * w * h, suffix: " סמ\"ק", plants: [l + w + h, 2 * (l * w + l * h + w * h)], allowNegative: false)
+        return signedMCQ(prompt: tr("📦 תֵּבָה בְּאֹרֶךְ \(l) ס\"מ, רֹחַב \(w) ס\"מ וְגֹבַהּ \(h) ס\"מ. מָה הַנֶּפַח שֶׁלָּהּ?"),
+                         answer: l * w * h, suffix: tr(" סמ\"ק"), plants: [l + w + h, 2 * (l * w + l * h + w * h)], allowNegative: false)
     }
 
     /// aᵐ · aⁿ = a^? — plant: multiplying the exponents.
     private static func powerLaws() -> Question {
         let a = [2, 3, 5, 7, 10].randomElement()!, m = Int.random(in: 2...6), n = Int.random(in: 2...6)
         if Bool.random() {
-            return signedMCQ(prompt: "\(ltr("\(a)\(superscript(m)) · \(a)\(superscript(n)) = \(a)ⁿ"))\nמָה הָעֵרֶךְ שֶׁל n?",
+            return signedMCQ(prompt: tr("\(ltr("\(a)\(superscript(m)) · \(a)\(superscript(n)) = \(a)ⁿ"))\nמָה הָעֵרֶךְ שֶׁל n?"),
                              answer: m + n, plants: [m * n, abs(m - n)], allowNegative: false)
         }
         let big = m + n
-        return signedMCQ(prompt: "\(ltr("\(a)\(superscript(big)) : \(a)\(superscript(m)) = \(a)ⁿ"))\nמָה הָעֵרֶךְ שֶׁל n?",
+        return signedMCQ(prompt: tr("\(ltr("\(a)\(superscript(big)) : \(a)\(superscript(m)) = \(a)ⁿ"))\nמָה הָעֵרֶךְ שֶׁל n?"),
                          answer: n, plants: [big + m, max(1, big / m)], allowNegative: false)
     }
 
@@ -501,9 +501,9 @@ enum CurriculumMath {
             if options.count < 4, !options.contains(cand) { options.append(cand) }
         }
         guard options.count == 4 else { return probability() }
-        let r = red == 1 ? "כַּדּוּר אָדֹם אֶחָד" : "\(red) כַּדּוּרִים אֲדֻמִּים"
-        let b = blue == 1 ? "כַּדּוּר כָּחֹל אֶחָד" : "\(blue) כַּדּוּרִים כְּחֻלִּים"
-        return mcq(prompt: rtlLines("🎲 בְּשַׂקִּית \(r) וְ־\(b). שׁוֹלְפִים כַּדּוּר אֶחָד בְּלִי לְהִסְתַּכֵּל. מָה הַסִּכּוּי שֶׁהוּא אָדֹם?"),
+        let r = red == 1 ? tr("כַּדּוּר אָדֹם אֶחָד") : tr("\(red) כַּדּוּרִים אֲדֻמִּים")
+        let b = blue == 1 ? tr("כַּדּוּר כָּחֹל אֶחָד") : tr("\(blue) כַּדּוּרִים כְּחֻלִּים")
+        return mcq(prompt: rtlLines(tr("🎲 בְּשַׂקִּית \(r) וְ־\(b). שׁוֹלְפִים כַּדּוּר אֶחָד בְּלִי לְהִסְתַּכֵּל. מָה הַסִּכּוּי שֶׁהוּא אָדֹם?")),
                    answer: answer, options: options.shuffled())
     }
 
@@ -517,8 +517,8 @@ enum CurriculumMath {
         for cand in [askArea ? circumference : area, half, fmt(3.14 * Double(2 * r * 2 * r)), fmt(Double(2 * r) * 2)] {
             if options.count < 4, !options.contains(cand) { options.append(cand) }
         }
-        let unit = askArea ? " סמ\"ר" : " ס\"מ"
-        return mcq(prompt: rtlLines("⭕ מַעְגָּל שֶׁהָרַדְיוּס שֶׁלּוֹ \(r) ס\"מ. מָה \(askArea ? "הַשֶּׁטַח" : "הַהֶקֵּף") שֶׁלּוֹ? (\(ltr("π = 3.14")))"),
+        let unit = askArea ? tr(" סמ\"ר") : tr(" ס\"מ")
+        return mcq(prompt: rtlLines(tr("⭕ מַעְגָּל שֶׁהָרַדְיוּס שֶׁלּוֹ \(r) ס\"מ. מָה \(askArea ? tr("הַשֶּׁטַח") : tr("הַהֶקֵּף")) שֶׁלּוֹ? (\(ltr("π = 3.14")))")),
                    answer: answer + unit, options: options.map { $0 + unit }.shuffled())
     }
 
@@ -527,7 +527,7 @@ enum CurriculumMath {
     // Names are content, not translations: an American word problem gets American names.
     private static var kids: [String] {
         LanguageStore.shared.current == .he
-            ? ["דָּנָה", "יוֹסִי", "נֹעָה", "אִיתַי", "תָּמָר", "עוֹמֶר"]
+            ? [tr("דָּנָה"), tr("יוֹסִי"), tr("נֹעָה"), tr("אִיתַי"), tr("תָּמָר"), tr("עוֹמֶר")]
             : ["Emma", "Liam", "Olivia", "Noah", "Ava", "Mason"]
     }
     private static var things: [(String, String)] {
@@ -553,7 +553,7 @@ enum CurriculumMath {
         let name = kids.randomElement()!
         let (emoji, item) = things.randomElement()!
         let packs = Int.random(in: 2...maxFactor), per = Int.random(in: 2...maxFactor)
-        return numericMCQ(prompt: "\(emoji) לְ\(name) יֵשׁ \(packs) חֲבִילוֹת שֶׁל \(item), וּבְכָל חֲבִילָה \(per). כַּמָּה יֵשׁ בְּסַךְ הַכֹּל?",
+        return numericMCQ(prompt: tr("\(emoji) לְ\(name) יֵשׁ \(packs) חֲבִילוֹת שֶׁל \(item), וּבְכָל חֲבִילָה \(per). כַּמָּה יֵשׁ בְּסַךְ הַכֹּל?"),
                           answer: packs * per)
     }
 
@@ -562,7 +562,7 @@ enum CurriculumMath {
         let price = Int.random(in: 6...15)
         let count = Int.random(in: 2...4)
         let paid = ((price * count / 10) + 1) * 10 + [0, 10].randomElement()!
-        return numericMCQ(prompt: "💰 \(name) קָנָה/תָה \(count) מַחְבָּרוֹת בְּ־\(price) שְׁקָלִים כָּל אַחַת, וְשִׁלֵּם/ה בְּ־\(paid) שְׁקָלִים. כַּמָּה עֹדֶף מַגִּיעַ?",
+        return numericMCQ(prompt: tr("💰 \(name) קָנָה/תָה \(count) מַחְבָּרוֹת בְּ־\(price) שְׁקָלִים כָּל אַחַת, וְשִׁלֵּם/ה בְּ־\(paid) שְׁקָלִים. כַּמָּה עֹדֶף מַגִּיעַ?"),
                           answer: paid - price * count)
     }
 
@@ -625,7 +625,7 @@ enum CurriculumMath {
     /// the specific mistakes worth testing (sign slips, the wrong formula) —
     /// they go in first, then near misses. `numericMCQ` never offers a negative
     /// option, and with a negative answer it could loop forever.
-    private static func signedMCQ(prompt: String, answer: Int, suffix: String = "",
+    private static func signedMCQ(prompt: String, answer: Int, prefix: String = "", suffix: String = "",
                                   plants: [Int] = [], allowNegative: Bool = true) -> Question {
         var options: [Int] = [answer]
         func add(_ v: Int) { if options.count < 4, !options.contains(v), allowNegative || v >= 0 { options.append(v) } }
@@ -643,7 +643,7 @@ enum CurriculumMath {
         return Question(
             topic: .math,
             prompt: rtlLines(prompt),
-            options: shuffled.map { ltr(signed($0)) + suffix },
+            options: shuffled.map { ltr(prefix + signed($0)) + suffix },
             correctIndex: shuffled.firstIndex(of: answer) ?? 0
         )
     }

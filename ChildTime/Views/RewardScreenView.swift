@@ -52,7 +52,7 @@ struct RewardScreenView: View {
                                 heroTitle
                                 chestBlock
                                 if stage == .glowing {
-                                    Text(taps == 0 ? "לַחֲצוּ שׁוּב וָשׁוּב לִפְתִיחָה! ✨" : "עוֹד \(tapsToOpen - taps)!")
+                                    Text(taps == 0 ? tr("לַחֲצוּ שׁוּב וָשׁוּב לִפְתִיחָה! ✨") : tr("עוֹד \(tapsToOpen - taps)!"))
                                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                                         .foregroundStyle(.white)
                                         .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
@@ -141,7 +141,7 @@ struct RewardScreenView: View {
                 Text("🎉")
                     .font(.system(size: celebEmojiSize))
                     .shadow(color: AppColor.starGold.opacity(0.6), radius: 10)
-                Text("אֵיזֶה נִצָּחוֹן!")
+                Text(tr("אֵיזֶה נִצָּחוֹן!"))
                     .font(.system(size: isCompact ? 30 : 40, weight: .heavy, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
@@ -239,15 +239,15 @@ struct RewardScreenView: View {
             if revealedItems >= 1 {
                 // Full session total: ⭐ earned per-answer (already credited live)
                 // + the chest's flat bonus. Matches the home total's increase.
-                rewardPill(emoji: "⭐", value: progress.sessionStarsEarned + reward.stars, label: "כּוֹכָבִים", color: AppColor.starGold)
+                rewardPill(emoji: "⭐", value: progress.sessionStarsEarned + reward.stars, label: tr("כּוֹכָבִים"), color: AppColor.starGold)
             }
             if revealedItems >= 2 && (progress.sessionDiamondsEarned + reward.diamonds) > 0 {
                 // 💎 the spendable wallet earned this session — what buys characters.
-                rewardPill(emoji: "💎", value: progress.sessionDiamondsEarned + reward.diamonds, label: "יַהֲלוֹמִים", color: AppColor.gemPurple)
+                rewardPill(emoji: "💎", value: progress.sessionDiamondsEarned + reward.diamonds, label: tr("יַהֲלוֹמִים"), color: AppColor.gemPurple)
             }
             if revealedItems >= 3 && (progress.sessionMinutesEarned + reward.minutes) > 0 {
                 // Minutes won this round = what play granted + the chest's bonus.
-                rewardPill(emoji: "⏱", value: progress.sessionMinutesEarned + reward.minutes, label: "דַּקּוֹת מִשְׂחָק", color: AppColor.successMint)
+                rewardPill(emoji: "⏱", value: progress.sessionMinutesEarned + reward.minutes, label: tr("דַּקּוֹת מִשְׂחָק"), color: AppColor.successMint)
             }
             if revealedItems >= 3, let note = bankedNote {
                 Text(note)
@@ -306,7 +306,7 @@ struct RewardScreenView: View {
             Button {
                 proceedAfterReward()
             } label: {
-                Text("הַמְשֵׁךְ")
+                Text(tr("הַמְשֵׁךְ"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl)
@@ -329,7 +329,7 @@ struct RewardScreenView: View {
             minutesPerCorrect: settings.minutesPerCorrect
         )
         SoundPlayer.shared.play(.chestOpen)
-        companion.cheer("\(Gendered.g("שִׂחַקְתָּ", "שִׂחַקְתְּ")) מְצוּיָּן!")
+        companion.cheer(tr("\(Gendered.g(tr("שִׂחַקְתָּ"), tr("שִׂחַקְתְּ"))) מְצוּיָּן!"))
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             stage = .glowing
         }
@@ -342,7 +342,7 @@ struct RewardScreenView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             stage = .revealed
             confettiTrigger += 1
-            companion.wow("טָא-דָה!")
+            companion.wow(tr("טָא-דָה!"))
             revealItemsOneByOne()
             applyReward()
         }
@@ -368,7 +368,7 @@ struct RewardScreenView: View {
         // the won minutes weren't lost.
         let grant = progress.applyChestReward(reward)
         if grant.bankedForTomorrow > 0 {
-            bankedNote = "הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"
+            bankedNote = tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))")
         }
         progress.advanceRoom(in: world.id)
     }
@@ -410,5 +410,5 @@ extension ParentSettings {
     .environmentObject(ParentSettings.shared)
     .environmentObject(ProgressStore.shared)
     .environmentObject(ShieldManager.shared)
-    .environment(\.layoutDirection, .rightToLeft)
+    .environment(\.layoutDirection, .app)
 }

@@ -347,7 +347,7 @@ final class ProfileStore: ObservableObject {
 
         if hasLegacyData {
             let p = Profile(
-                name: s.childName.isEmpty ? "הילד שלי" : s.childName,
+                name: s.childName.isEmpty ? tr("הילד שלי") : s.childName,
                 gender: s.childGender,
                 age: s.childAge,
                 photoData: s.childPhotoData,

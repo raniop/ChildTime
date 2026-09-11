@@ -23,7 +23,7 @@ struct AddParentView: View {
             SparkleField(count: 16, size: 12)
 
             VStack(spacing: 0) {
-                LinkHeader(title: "הוֹסָפַת הוֹרֶה") { dismiss() }
+                LinkHeader(title: tr("הוֹסָפַת הוֹרֶה")) { dismiss() }
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
                         if justJoined { joinedBanner } else { content }
@@ -34,7 +34,7 @@ struct AddParentView: View {
                 }
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onAppear {
             baselineParents = household.linkedParentSummaries.count
             if code == nil { generate() }
@@ -47,10 +47,10 @@ struct AddParentView: View {
     @ViewBuilder private var content: some View {
         VStack(spacing: 8) {
             Text("👨‍👩‍👧‍👦").font(.system(size: 52))
-            Text("הוֹסִיפוּ הוֹרֶה לַמִּשְׁפָּחָה")
+            Text(tr("הוֹסִיפוּ הוֹרֶה לַמִּשְׁפָּחָה"))
                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("שְׁנֵיכֶם תִּרְאוּ אֶת אוֹתָם יְלָדִים וְאֶת אוֹתָהּ הַהִתְקַדְּמוּת.")
+            Text(tr("שְׁנֵיכֶם תִּרְאוּ אֶת אוֹתָם יְלָדִים וְאֶת אוֹתָהּ הַהִתְקַדְּמוּת."))
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
@@ -61,14 +61,14 @@ struct AddParentView: View {
         // one-tap "המשפחה מחכה לך" join. No QR, no prior knowledge (Rani).
         emailInviteCard
 
-        StepsCard(title: "אוֹ — בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה הַשֵּׁנִי:", steps: [
-            "הַתְקִינוּ אֶת אַפְּלִיקַצְיַת טוֹפִי",
-            "בְּמָסַךְ הַפְּתִיחָה הַקִּישׁוּ \u{201C}כְּבָר יֵשׁ לָכֶם מִשְׁפָּחָה? הִצְטָרְפוּ\u{201D}",
-            "הִתְחַבְּרוּ, וְסִרְקוּ אֶת הַקּוֹד שֶׁכָּאן (אוֹ הַקְלִידוּ אוֹתוֹ)",
+        StepsCard(title: tr("אוֹ — בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה הַשֵּׁנִי:"), steps: [
+            tr("הַתְקִינוּ אֶת אַפְּלִיקַצְיַת טוֹפִי"),
+            tr("בְּמָסַךְ הַפְּתִיחָה הַקִּישׁוּ \u{201C}כְּבָר יֵשׁ לָכֶם מִשְׁפָּחָה? הִצְטָרְפוּ\u{201D}"),
+            tr("הִתְחַבְּרוּ, וְסִרְקוּ אֶת הַקּוֹד שֶׁכָּאן (אוֹ הַקְלִידוּ אוֹתוֹ)"),
             // The joiner hits the parent-code gate right after — and nobody
             // told them a code exists. Say it here, to the person who KNOWS it
             // (verbally — a gate code doesn't belong in a WhatsApp message).
-            "בַּכְּנִיסָה יִתְבַּקֵּשׁ קוֹד הַהוֹרֶה — מִסְרוּ לוֹ אֶת הַקּוֹד שֶׁלָּכֶם בְּעַל־פֶּה 🔑",
+            tr("בַּכְּנִיסָה יִתְבַּקֵּשׁ קוֹד הַהוֹרֶה — מִסְרוּ לוֹ אֶת הַקּוֹד שֶׁלָּכֶם בְּעַל־פֶּה 🔑"),
         ])
 
         codeCard
@@ -84,8 +84,8 @@ struct AddParentView: View {
                     .font(.system(size: 32, weight: .heavy, design: .monospaced))
                     .kerning(6)
                     .foregroundStyle(.white)
-                ShareLink(item: "הִצְטָרְפוּ אֵלַי בְּטוֹפִי! קוֹד הַמִּשְׁפָּחָה: \(code)") {
-                    Label("שִׁתּוּף הַקּוֹד", systemImage: "square.and.arrow.up")
+                ShareLink(item: tr("הִצְטָרְפוּ אֵלַי בְּטוֹפִי! קוֹד הַמִּשְׁפָּחָה: \(code)")) {
+                    Label(tr("שִׁתּוּף הַקּוֹד"), systemImage: "square.and.arrow.up")
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 16).padding(.vertical, 9)
@@ -93,7 +93,7 @@ struct AddParentView: View {
                 }
                 HStack(spacing: 6) {
                     ProgressView().tint(.white).scaleEffect(0.8)
-                    Text("מַמְתִּין שֶׁהַהוֹרֶה יִצְטָרֵף…")
+                    Text(tr("מַמְתִּין שֶׁהַהוֹרֶה יִצְטָרֵף…"))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.7))
                 }
@@ -102,7 +102,7 @@ struct AddParentView: View {
                 ProgressView().tint(.white)
             } else if let error {
                 Text(error).font(.caption).foregroundStyle(.white.opacity(0.8))
-                Button("נַסּוּ שׁוּב") { generate() }.foregroundStyle(.white)
+                Button(tr("נַסּוּ שׁוּב")) { generate() }.foregroundStyle(.white)
             }
         }
         .frame(maxWidth: .infinity)
@@ -117,20 +117,20 @@ struct AddParentView: View {
 
     private var emailInviteCard: some View {
         VStack(spacing: AppSpacing.sm) {
-            Text("✉️ הַדֶּרֶךְ הַקַּלָּה: הַזְמִינוּ בְּאִימֵּיְל")
+            Text(tr("✉️ הַדֶּרֶךְ הַקַּלָּה: הַזְמִינוּ בְּאִימֵּיְל"))
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("הַהוֹרֶה הַשֵּׁנִי פָּשׁוּט יִתְחַבֵּר עִם הָאִימֵּיְל הַזֶּה — וְהַמִּשְׁפָּחָה תְּחַכֶּה לוֹ שָׁם, בְּלִי קוֹדִים.")
+            Text(tr("הַהוֹרֶה הַשֵּׁנִי פָּשׁוּט יִתְחַבֵּר עִם הָאִימֵּיְל הַזֶּה — וְהַמִּשְׁפָּחָה תְּחַכֶּה לוֹ שָׁם, בְּלִי קוֹדִים."))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
             if inviteSent {
-                Label("הַהַזְמָנָה נִשְׁמְרָה! אֶפְשָׁר לְהַזְמִין עוֹד אִימֵּיְל", systemImage: "checkmark.circle.fill")
+                Label(tr("הַהַזְמָנָה נִשְׁמְרָה! אֶפְשָׁר לְהַזְמִין עוֹד אִימֵּיְל"), systemImage: "checkmark.circle.fill")
                     .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.successMint)
             }
             HStack(spacing: 8) {
-                TextField("אִימֵּיְל שֶׁל הַהוֹרֶה הַשֵּׁנִי", text: $inviteEmail)
+                TextField(tr("אִימֵּיְל שֶׁל הַהוֹרֶה הַשֵּׁנִי"), text: $inviteEmail)
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
@@ -152,7 +152,7 @@ struct AddParentView: View {
                 } label: {
                     if inviting { ProgressView().tint(.white) }
                     else {
-                        Text("הַזְמִינוּ")
+                        Text(tr("הַזְמִינוּ"))
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                     }
@@ -171,15 +171,15 @@ struct AddParentView: View {
     private var joinedBanner: some View {
         VStack(spacing: AppSpacing.md) {
             Text("🎉").font(.system(size: 64))
-            Text("הוֹרֶה נוֹסָף לַמִּשְׁפָּחָה!")
+            Text(tr("הוֹרֶה נוֹסָף לַמִּשְׁפָּחָה!"))
                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("מֵעַכְשָׁיו שְׁנֵיכֶם רוֹאִים אֶת אוֹתָם הַיְּלָדִים.")
+            Text(tr("מֵעַכְשָׁיו שְׁנֵיכֶם רוֹאִים אֶת אוֹתָם הַיְּלָדִים."))
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
             Button { dismiss() } label: {
-                Text("סִיּוּם")
+                Text(tr("סִיּוּם"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(AppGradient.success, in: Capsule())
@@ -194,7 +194,7 @@ struct AddParentView: View {
             working = true; error = nil
             let c = await household.createInvite()
             code = c
-            if c == nil { error = household.lastError ?? "לֹא נִיתָּן לִיצוֹר קוֹד כָּעֵת" }
+            if c == nil { error = household.lastError ?? tr("לֹא נִיתָּן לִיצוֹר קוֹד כָּעֵת") }
             working = false
         }
     }
@@ -221,7 +221,7 @@ struct JoinFamilyFlowView: View {
             SparkleField(count: 16, size: 12)
 
             VStack(spacing: 0) {
-                LinkHeader(title: "הִצְטָרְפוּת לְמִשְׁפָּחָה", showClose: false) {}
+                LinkHeader(title: tr("הִצְטָרְפוּת לְמִשְׁפָּחָה"), showClose: false) {}
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
                         if joined { joinedBanner } else { content }
@@ -232,37 +232,37 @@ struct JoinFamilyFlowView: View {
                 }
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .sheet(isPresented: $showScanner) { scannerSheet }
     }
 
     @ViewBuilder private var content: some View {
         VStack(spacing: 8) {
             Text("🔗").font(.system(size: 52))
-            Text("הִצְטָרְפוּ לְמִשְׁפָּחָה קַיֶּמֶת")
+            Text(tr("הִצְטָרְפוּ לְמִשְׁפָּחָה קַיֶּמֶת"))
                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
         }
 
-        StepsCard(title: "בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה שֶׁכְּבָר רָשׁוּם:", steps: [
-            "פִּתְחוּ אֶת טוֹפִי → הַגְדָּרוֹת ⚙️",
-            "הַקִּישׁוּ \u{201C}הוֹסִיפוּ הוֹרֶה\u{201D}",
-            "יוֹפִיעַ קוֹד / QR — סִרְקוּ אוֹתוֹ כָּאן אוֹ הַקְלִידוּ:",
+        StepsCard(title: tr("בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה שֶׁכְּבָר רָשׁוּם:"), steps: [
+            tr("פִּתְחוּ אֶת טוֹפִי → הַגְדָּרוֹת ⚙️"),
+            tr("הַקִּישׁוּ \u{201C}הוֹסִיפוּ הוֹרֶה\u{201D}"),
+            tr("יוֹפִיעַ קוֹד / QR — סִרְקוּ אוֹתוֹ כָּאן אוֹ הַקְלִידוּ:"),
         ])
 
         // Scan + manual entry
         VStack(spacing: AppSpacing.md) {
             Button { showScanner = true } label: {
-                Label("סִרְקוּ קוֹד QR", systemImage: "qrcode.viewfinder")
+                Label(tr("סִרְקוּ קוֹד QR"), systemImage: "qrcode.viewfinder")
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(AppGradient.purpleDream, in: Capsule())
             }
 
-            Text("אוֹ הַקְלִידוּ אֶת הַקּוֹד").font(.system(size: 13, weight: .medium, design: .rounded))
+            Text(tr("אוֹ הַקְלִידוּ אֶת הַקּוֹד")).font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.7))
 
-            TextField("", text: $joinCode, prompt: Text("6 תָּוִים").foregroundColor(.white.opacity(0.5)))
+            TextField("", text: $joinCode, prompt: Text(tr("6 תָּוִים")).foregroundColor(.white.opacity(0.5)))
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
                 .multilineTextAlignment(.center)
@@ -276,7 +276,7 @@ struct JoinFamilyFlowView: View {
             Button { JoinCoordinator.shared.present(joinCode) } label: {
                 HStack(spacing: 8) {
                     if working { ProgressView().tint(.white) }
-                    Text("הִצְטָרְפוּ")
+                    Text(tr("הִצְטָרְפוּ"))
                 }
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
@@ -296,7 +296,7 @@ struct JoinFamilyFlowView: View {
         Button {
             settings.pendingJoinFamily = false   // fall through to their own dashboard
         } label: {
-            Text("אֵין לִי קוֹד — אֶצּוֹר מִשְׁפָּחָה מִשֶּׁלִּי")
+            Text(tr("אֵין לִי קוֹד — אֶצּוֹר מִשְׁפָּחָה מִשֶּׁלִּי"))
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85)).underline()
         }
@@ -306,14 +306,14 @@ struct JoinFamilyFlowView: View {
     private var joinedBanner: some View {
         VStack(spacing: AppSpacing.md) {
             Text("🎉").font(.system(size: 64))
-            Text("הִצְטָרַפְתֶּם לַמִּשְׁפָּחָה!")
+            Text(tr("הִצְטָרַפְתֶּם לַמִּשְׁפָּחָה!"))
                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("הַיְּלָדִים וְהַהִתְקַדְּמוּת יוֹפִיעוּ תּוֹךְ כַּמָּה שְׁנִיּוֹת.")
+            Text(tr("הַיְּלָדִים וְהַהִתְקַדְּמוּת יוֹפִיעוּ תּוֹךְ כַּמָּה שְׁנִיּוֹת."))
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8)).multilineTextAlignment(.center)
             Button { settings.pendingJoinFamily = false } label: {
-                Text("הַמְשִׁיכוּ")
+                Text(tr("הַמְשִׁיכוּ"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(AppGradient.success, in: Capsule())
@@ -327,8 +327,8 @@ struct JoinFamilyFlowView: View {
         NavigationStack {
             QRScannerView { scanned in showScanner = false; JoinCoordinator.shared.present(scanned) }
                 .ignoresSafeArea()
-                .navigationTitle("סְרִיקַת קוֹד").navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("בִּטּוּל") { showScanner = false } } }
+                .navigationTitle(tr("סְרִיקַת קוֹד")).navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(tr("בִּטּוּל")) { showScanner = false } } }
         }
     }
 
@@ -339,7 +339,7 @@ struct JoinFamilyFlowView: View {
             working = true; error = nil
             let ok = await household.redeemInvite(code: trimmed)
             if ok { Haptic.success(); withAnimation(.spring) { joined = true } }
-            else { error = household.lastError ?? "קוֹד לֹא תָּקִין"; Haptic.warning() }
+            else { error = household.lastError ?? tr("קוֹד לֹא תָּקִין"); Haptic.warning() }
             working = false
         }
     }
@@ -422,56 +422,56 @@ struct JoinConfirmView: View {
                 }
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     @ViewBuilder private var content: some View {
         if coord.resolving || working {
             ProgressView().tint(.white).scaleEffect(1.3)
-            Text(working ? "מְחַבְּרִים…" : "בּוֹדְקִים אֶת הַקּוֹד…")
+            Text(working ? tr("מְחַבְּרִים…") : tr("בּוֹדְקִים אֶת הַקּוֹד…"))
                 .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
         } else if joined {
-            panel(emoji: "🎉", title: "הִצְטָרַפְתֶּם לַמִּשְׁפָּחָה!",
-                  body: "הַיְּלָדִים וְהַהִתְקַדְּמוּת יוֹפִיעוּ תּוֹךְ כַּמָּה שְׁנִיּוֹת.") {
-                primaryButton("הַמְשִׁיכוּ") { settings.pendingJoinFamily = false; coord.dismiss() }
+            panel(emoji: "🎉", title: tr("הִצְטָרַפְתֶּם לַמִּשְׁפָּחָה!"),
+                  body: tr("הַיְּלָדִים וְהַהִתְקַדְּמוּת יוֹפִיעוּ תּוֹךְ כַּמָּה שְׁנִיּוֹת.")) {
+                primaryButton(tr("הַמְשִׁיכוּ")) { settings.pendingJoinFamily = false; coord.dismiss() }
             }
         } else if coord.invite == nil {
-            panel(emoji: "⚠️", title: "הַקּוֹד לֹא תָּקִין",
-                  body: "הַקּוֹד שֶׁסָּרַקְתֶּם לֹא נִמְצָא אוֹ פָּג תּוֹקֶף. בַּקְּשׁוּ קוֹד חָדָשׁ וְנַסּוּ שׁוּב.") {
-                secondaryButton("סְגִירָה") { coord.dismiss() }
+            panel(emoji: "⚠️", title: tr("הַקּוֹד לֹא תָּקִין"),
+                  body: tr("הַקּוֹד שֶׁסָּרַקְתֶּם לֹא נִמְצָא אוֹ פָּג תּוֹקֶף. בַּקְּשׁוּ קוֹד חָדָשׁ וְנַסּוּ שׁוּב.")) {
+                secondaryButton(tr("סְגִירָה")) { coord.dismiss() }
             }
         } else if let inv = coord.invite, inv.childID != nil {
             if isParentDevice {
                 // ⚠️ THE ACCIDENT: a parent device must NOT become a child.
-                panel(emoji: "🛑", title: "אִי אֶפְשָׁר לְהוֹסִיף הוֹרֶה כְּיֶלֶד",
-                      body: "לַמַּכְשִׁיר הַזֶּה כְּבָר יֵשׁ מִשְׁפָּחָה מִשֶּׁלְּךָ, וְהַקּוֹד שֶׁסָּרַקְתָּ הוּא קוֹד שֶׁל יֶלֶד.\n\nכְּדֵי לְהוֹסִיף הוֹרֶה נוֹסָף — בַּמַּכְשִׁיר שֶׁלּוֹ: הַגְדָּרוֹת ⚙️ ← \u{201C}הוֹסִיפוּ הוֹרֶה\u{201D}, וְסִרְקוּ אֶת הַקּוֹד שֶׁמּוֹפִיעַ.") {
-                    secondaryButton("הֵבַנְתִּי") { coord.dismiss() }
+                panel(emoji: "🛑", title: tr("אִי אֶפְשָׁר לְהוֹסִיף הוֹרֶה כְּיֶלֶד"),
+                      body: tr("לַמַּכְשִׁיר הַזֶּה כְּבָר יֵשׁ מִשְׁפָּחָה מִשֶּׁלְּךָ, וְהַקּוֹד שֶׁסָּרַקְתָּ הוּא קוֹד שֶׁל יֶלֶד.\n\nכְּדֵי לְהוֹסִיף הוֹרֶה נוֹסָף — בַּמַּכְשִׁיר שֶׁלּוֹ: הַגְדָּרוֹת ⚙️ ← \u{201C}הוֹסִיפוּ הוֹרֶה\u{201D}, וְסִרְקוּ אֶת הַקּוֹד שֶׁמּוֹפִיעַ.")) {
+                    secondaryButton(tr("הֵבַנְתִּי")) { coord.dismiss() }
                 }
             } else {
-                panel(emoji: "🎮", title: "לְחַבֵּר אֶת הַמַּכְשִׁיר הַזֶּה כְּמַכְשִׁיר שֶׁל יֶלֶד?",
-                      body: "הַמַּכְשִׁיר הַזֶּה יֵהָפֵךְ לְמַכְשִׁיר הַמִּשְׂחָק שֶׁל הַיֶּלֶד וְיִתְחַבֵּר לַמִּשְׁפָּחָה. אֶפְשָׁר תָּמִיד לְשַׁנּוֹת בַּהַגְדָּרוֹת.") {
-                    primaryButton("כֵּן, חַבְּרוּ") {
+                panel(emoji: "🎮", title: tr("לְחַבֵּר אֶת הַמַּכְשִׁיר הַזֶּה כְּמַכְשִׁיר שֶׁל יֶלֶד?"),
+                      body: tr("הַמַּכְשִׁיר הַזֶּה יֵהָפֵךְ לְמַכְשִׁיר הַמִּשְׂחָק שֶׁל הַיֶּלֶד וְיִתְחַבֵּר לַמִּשְׁפָּחָה. אֶפְשָׁר תָּמִיד לְשַׁנּוֹת בַּהַגְדָּרוֹת.")) {
+                    primaryButton(tr("כֵּן, חַבְּרוּ")) {
                         settings.deviceRole = .child
                         settings.pendingJoinPayload = coord.rawPayload
                         coord.dismiss()
                     }
-                    secondaryButton("בִּטּוּל") { coord.dismiss() }
+                    secondaryButton(tr("בִּטּוּל")) { coord.dismiss() }
                 }
             }
         } else if settings.deviceRole == .child {
             // ⚠️ THE MIRROR ACCIDENT: a CHILD device scanned a PARENT family code
             // (e.g. from the co-parent share). Joining as a parent would put the
             // child's anonymous uid on parentUIDs and stream strangers' kids.
-            panel(emoji: "🛑", title: "זֶה קוֹד שֶׁל הוֹרֶה",
-                  body: "הַמַּכְשִׁיר הַזֶּה הוּא מַכְשִׁיר שֶׁל יֶלֶד. כְּדֵי לְחַבֵּר אוֹתוֹ לַמִּשְׁפָּחָה — בַּקְּשׁוּ מֵהַהוֹרֶה קוֹד יֶלֶד מֵהַדַּשְׁבּוֹרְד.") {
-                secondaryButton("הֵבַנְתִּי") { coord.dismiss() }
+            panel(emoji: "🛑", title: tr("זֶה קוֹד שֶׁל הוֹרֶה"),
+                  body: tr("הַמַּכְשִׁיר הַזֶּה הוּא מַכְשִׁיר שֶׁל יֶלֶד. כְּדֵי לְחַבֵּר אוֹתוֹ לַמִּשְׁפָּחָה — בַּקְּשׁוּ מֵהַהוֹרֶה קוֹד יֶלֶד מֵהַדַּשְׁבּוֹרְד.")) {
+                secondaryButton(tr("הֵבַנְתִּי")) { coord.dismiss() }
             }
         } else {
             // CO-PARENT family code.
-            panel(emoji: "👨‍👩‍👧‍👦", title: "לְהִצְטָרֵף לַמִּשְׁפָּחָה כְּהוֹרֶה?",
-                  body: "תִּהְיוּ הוֹרֶה נוֹסָף בַּמִּשְׁפָּחָה וְתִרְאוּ אֶת אוֹתָם הַיְּלָדִים וְאֶת אוֹתָהּ הַהִתְקַדְּמוּת.") {
-                primaryButton("כֵּן, הִצְטָרְפוּ") { joinAsCoParent() }
-                secondaryButton("בִּטּוּל") { coord.dismiss() }
+            panel(emoji: "👨‍👩‍👧‍👦", title: tr("לְהִצְטָרֵף לַמִּשְׁפָּחָה כְּהוֹרֶה?"),
+                  body: tr("תִּהְיוּ הוֹרֶה נוֹסָף בַּמִּשְׁפָּחָה וְתִרְאוּ אֶת אוֹתָם הַיְּלָדִים וְאֶת אוֹתָהּ הַהִתְקַדְּמוּת.")) {
+                primaryButton(tr("כֵּן, הִצְטָרְפוּ")) { joinAsCoParent() }
+                secondaryButton(tr("בִּטּוּל")) { coord.dismiss() }
             }
         }
     }
@@ -482,7 +482,7 @@ struct JoinConfirmView: View {
             let ok = await household.redeemInvite(code: coord.code, bringLocalChildren: true)
             working = false
             if ok { Haptic.success(); withAnimation(.spring) { joined = true } }
-            else { note = household.lastError ?? "לֹא הִצְלַחְנוּ לְהִצְטָרֵף"; Haptic.warning() }
+            else { note = household.lastError ?? tr("לֹא הִצְלַחְנוּ לְהִצְטָרֵף"); Haptic.warning() }
         }
     }
 
@@ -536,7 +536,7 @@ private struct LinkHeader: View {
                             .font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
                             .frame(width: 36, height: 36).background(.white.opacity(0.18), in: Circle())
                     }
-                    .environment(\.layoutDirection, .leftToRight)
+                    .environment(\.layoutDirection, .appMirrored)
                 }
             }
         }

@@ -22,7 +22,7 @@ struct MinutesBadge: View {
                     .foregroundStyle(.white)
                     .numericTextTransition(Double(minutes))
                     .scaleEffect(bounce ? 1.15 : 1.0)
-                Text("דַּק׳")
+                Text(tr("דַּק׳"))
                     .font(.system(size: compact ? 14 : 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
             }
@@ -101,7 +101,7 @@ struct EarnedMinutesPopup: View {
                 .font(.system(size: 56, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.successMint)
                 .glow(AppColor.successMint, radius: 18)
-            Text("דַּקּוֹת")
+            Text(tr("דַּקּוֹת"))
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
             Text("🎮")
@@ -150,5 +150,5 @@ struct EarnedMinutesPopup: View {
             EarnedMinutesPopup(minutes: 6, visible: true)
         }
     }
-    .environment(\.layoutDirection, .rightToLeft)
+    .environment(\.layoutDirection, .app)
 }

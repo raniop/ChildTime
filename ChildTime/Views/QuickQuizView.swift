@@ -68,7 +68,7 @@ struct QuickQuizView: View {
             }
             .padding(20)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onAppear { if question == nil { loadNext() } }
         .onReceive(ticker) { t in
             guard phase == .playing else { return }
@@ -111,7 +111,7 @@ struct QuickQuizView: View {
                     .font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 Spacer()
                 if combo >= 2 {
-                    Text("🔥 קוֹמְבּוֹ ×\(combo)")
+                    Text(tr("🔥 קוֹמְבּוֹ ×\(combo)"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                         .padding(.horizontal, 10).padding(.vertical, 4)
                         .background(Capsule().fill(AppColor.flameOrange))
@@ -158,19 +158,19 @@ struct QuickQuizView: View {
         VStack(spacing: 18) {
             CharacterView(character: Character3DCatalog.find("lion"))
                 .frame(width: 140, height: 140).float(amplitude: 10)
-            Text(correctCount >= total - 2 ? "וָואו, מְצֻיָּן! 🏆" : "כָּל הַכָּבוֹד! 🎉")
+            Text(correctCount >= total - 2 ? tr("וָואו, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"))
                 .font(.system(size: 32, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).shadow(color: .black.opacity(0.25), radius: 6, y: 3)
-            Text("עָנִיתָ נָכוֹן עַל \(correctCount) מִתּוֹךְ \(total)")
+            Text(tr("עָנִיתָ נָכוֹן עַל \(correctCount) מִתּוֹךְ \(total)"))
                 .font(.system(size: 18, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.9))
             HStack(spacing: 14) {
                 pill("⭐", correctCount, AppColor.starGold, step: 1)
                 pill("💎", score, AppColor.gemPurple, step: 2)
-                pill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: " דק'")
+                pill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק'"))
             }
             VStack(spacing: 12) {
-                Button { restart() } label: { cta("עוֹד סִבּוּב 🔁", dark: true) }.buttonStyle(.juicy)
-                Button(action: onClose) { cta("סִיּוּם", dark: false) }.buttonStyle(.juicy)
+                Button { restart() } label: { cta(tr("עוֹד סִבּוּב 🔁"), dark: true) }.buttonStyle(.juicy)
+                Button(action: onClose) { cta(tr("סִיּוּם"), dark: false) }.buttonStyle(.juicy)
             }
             .padding(.horizontal, 40).padding(.top, 8)
         }

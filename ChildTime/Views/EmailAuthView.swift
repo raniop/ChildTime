@@ -24,20 +24,20 @@ struct EmailAuthView: View {
         NavigationStack {
             Form {
                 Section {
-                    Picker("מצב", selection: $mode) {
-                        Text("הרשמה").tag(Mode.signUp)
-                        Text("כניסה").tag(Mode.signIn)
+                    Picker(tr("מצב"), selection: $mode) {
+                        Text(tr("הרשמה")).tag(Mode.signUp)
+                        Text(tr("כניסה")).tag(Mode.signIn)
                     }
                     .pickerStyle(.segmented)
                 }
                 .glassRows()
 
-                Section("פרטי החשבון") {
+                Section(tr("פרטי החשבון")) {
                     if mode == .signUp {
-                        RTLTextField(placeholder: "שם ההורה", text: $name)
+                        RTLTextField(placeholder: tr("שם ההורה"), text: $name)
                             .frame(height: 24)
                     }
-                    TextField("אימייל", text: $email)
+                    TextField(tr("אימייל"), text: $email)
                         .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
@@ -47,11 +47,11 @@ struct EmailAuthView: View {
                     HStack {
                         Group {
                             if showPassword {
-                                TextField("סיסמה (לפחות 6 תווים)", text: $password)
+                                TextField(tr("סיסמה (לפחות 6 תווים)"), text: $password)
                                     .textInputAutocapitalization(.never)
                                     .autocorrectionDisabled()
                             } else {
-                                SecureField("סיסמה (לפחות 6 תווים)", text: $password)
+                                SecureField(tr("סיסמה (לפחות 6 תווים)"), text: $password)
                             }
                         }
                         .environment(\.layoutDirection, .leftToRight)
@@ -61,14 +61,14 @@ struct EmailAuthView: View {
                                 .foregroundStyle(.secondary)
                         }
                         .buttonStyle(.borderless)
-                        .accessibilityLabel(showPassword ? "הסתר סיסמה" : "הצג סיסמה")
+                        .accessibilityLabel(showPassword ? tr("הסתר סיסמה") : tr("הצג סיסמה"))
                     }
                 }
                 .glassRows()
 
                 if mode == .signIn {
                     Section {
-                        Button("שכחתי סיסמה") {
+                        Button(tr("שכחתי סיסמה")) {
                             Task { await auth.sendPasswordReset(to: email) }
                         }
                         .disabled(!email.contains("@"))
@@ -93,7 +93,7 @@ struct EmailAuthView: View {
                         HStack {
                             Spacer()
                             if working { ProgressView() }
-                            else { Text(mode == .signUp ? "צור חשבון" : "התחבר").fontWeight(.bold) }
+                            else { Text(mode == .signUp ? tr("צור חשבון") : tr("התחבר")).fontWeight(.bold) }
                             Spacer()
                         }
                     }
@@ -103,10 +103,10 @@ struct EmailAuthView: View {
             }
             .glassForm()
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("חשבון הורה")
+            .navigationTitle(tr("חשבון הורה"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { Button("בטל") { dismiss() } }
+                ToolbarItem(placement: .topBarLeading) { Button(tr("בטל")) { dismiss() } }
             }
             .onChangeCompat(of: auth.isSignedIn) { _, signedIn in
                 if signedIn { dismiss() }

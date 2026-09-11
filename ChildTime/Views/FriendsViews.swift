@@ -34,7 +34,7 @@ struct LeaderboardView: View {
                 }
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .task {
             await friends.startLive()   // real-time: new friends + live stars
             if let code = friends.pendingFriendCode {
@@ -44,25 +44,25 @@ struct LeaderboardView: View {
         }
         .onDisappear { friends.stopLive() }
         .sheet(isPresented: $showAdd) {
-            AddFriendView().environment(\.layoutDirection, .rightToLeft)
+            AddFriendView().environment(\.layoutDirection, .app)
         }
         .sheet(item: $selectedCard) { card in
-            FriendProfileView(card: card).environment(\.layoutDirection, .rightToLeft)
+            FriendProfileView(card: card).environment(\.layoutDirection, .app)
         }
         .sheet(isPresented: $showRequests) {
-            FriendRequestsView().environment(\.layoutDirection, .rightToLeft)
+            FriendRequestsView().environment(\.layoutDirection, .app)
         }
-        .confirmationDialog("לְהָסִיר חָבֵר?",
+        .confirmationDialog(tr("לְהָסִיר חָבֵר?"),
                             isPresented: Binding(get: { friendToRemove != nil },
                                                  set: { if !$0 { friendToRemove = nil } }),
                             titleVisibility: .visible,
                             presenting: friendToRemove) { f in
-            Button("הָסִירוּ אֶת \(f.name)", role: .destructive) {
+            Button(tr("הָסִירוּ אֶת \(f.name)"), role: .destructive) {
                 Task { await friends.removeFriend(f.id); friendToRemove = nil }
             }
-            Button("בִּטּוּל", role: .cancel) { friendToRemove = nil }
+            Button(tr("בִּטּוּל"), role: .cancel) { friendToRemove = nil }
         } message: { f in
-            Text("\(f.name) יֵצֵא מִלּוּחַ הַחֲבֵרִים שֶׁלְּךָ. תָּמִיד אֶפְשָׁר לְהוֹסִיף שׁוּב.")
+            Text(tr("\(f.name) יֵצֵא מִלּוּחַ הַחֲבֵרִים שֶׁלְּךָ. תָּמִיד אֶפְשָׁר לְהוֹסִיף שׁוּב."))
         }
     }
 
@@ -70,7 +70,7 @@ struct LeaderboardView: View {
     @ViewBuilder private func removeMenu(for card: FriendCard, isMe: Bool) -> some View {
         if !isMe {
             Button(role: .destructive) { friendToRemove = card } label: {
-                Label("הָסִירוּ חָבֵר", systemImage: "person.badge.minus")
+                Label(tr("הָסִירוּ חָבֵר"), systemImage: "person.badge.minus")
             }
         }
     }
@@ -96,8 +96,8 @@ struct LeaderboardView: View {
                 }
                 Button { showAdd = true } label: { headerCircle("person.badge.plus") }
             }
-            .environment(\.layoutDirection, .leftToRight)
-            Text("הַחֲבֵרִים")
+            .environment(\.layoutDirection, .appMirrored)
+            Text(tr("הַחֲבֵרִים"))
                 .font(.system(size: 26, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
@@ -121,15 +121,15 @@ struct LeaderboardView: View {
                         Text("🔔").font(.system(size: 24))
                         VStack(alignment: .leading, spacing: 1) {
                             // No verb — we don't know the HOST's gender.
-                            Text("הַזְמָנָה לְטוּרְנִיר מֵ\(invite.hostName)!")
+                            Text(tr("הַזְמָנָה לְטוּרְנִיר מֵ\(invite.hostName)!"))
                                 .font(.system(size: 14.5, weight: .heavy, design: .rounded))
                                 .lineLimit(1).minimumScaleFactor(0.8)
-                            Text("הַמִּשְׂחָק מַתְחִיל עַכְשָׁו — לַחֲצוּ לְהִצְטָרֵף")
+                            Text(tr("הַמִּשְׂחָק מַתְחִיל עַכְשָׁו — לַחֲצוּ לְהִצְטָרֵף"))
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                                 .foregroundStyle(GlassInk.secondary)
                         }
                         Spacer(minLength: 4)
-                        Text("הִצְטָרְפוּ")
+                        Text(tr("הִצְטָרְפוּ"))
                             .font(.system(size: 13, weight: .heavy, design: .rounded))
                             .foregroundStyle(Color(hex: "4B3FBF"))
                             .padding(.horizontal, 12).padding(.vertical, 8)
@@ -151,15 +151,15 @@ struct LeaderboardView: View {
                 HStack(spacing: 10) {
                     Text("🎮").font(.system(size: 26))
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("טוּרְנִיר חַי עִם חֲבֵרִים")
+                        Text(tr("טוּרְנִיר חַי עִם חֲבֵרִים"))
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
-                        Text("מַזְמִינִים, כֻּלָּם עוֹנִים בְּאוֹתוֹ זְמַן — מִי הֲכִי מָהִיר?")
+                        Text(tr("מַזְמִינִים, כֻּלָּם עוֹנִים בְּאוֹתוֹ זְמַן — מִי הֲכִי מָהִיר?"))
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                             .lineLimit(1).minimumScaleFactor(0.8)
                     }
                     Spacer(minLength: 4)
-                    Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                    Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold))
                 }
                 .foregroundStyle(GlassInk.primary)
                 .padding(12)
@@ -182,8 +182,8 @@ struct LeaderboardView: View {
     // Two tabs: my friends vs. everyone in the app.
     private var tabPicker: some View {
         HStack(spacing: 6) {
-            tabButton("הַחֲבֵרִים שֶׁלִּי", .friends)
-            tabButton("כָּל הַשַּׂחְקָנִים", .global)
+            tabButton(tr("הַחֲבֵרִים שֶׁלִּי"), .friends)
+            tabButton(tr("כָּל הַשַּׂחְקָנִים"), .global)
         }
         .padding(4)
         .glassInset(radius: 14)
@@ -249,13 +249,13 @@ struct LeaderboardView: View {
     @ViewBuilder private var myRankBanner: some View {
         if let rank = friends.myGlobalRank {
             VStack(spacing: 2) {
-                Text("הַמָּקוֹם שֶׁלְּךָ בְּכָל הָעוֹלָם")
+                Text(tr("הַמָּקוֹם שֶׁלְּךָ בְּכָל הָעוֹלָם"))
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                 Text("#\(rank.formatted())")
                     .font(.system(size: 34, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("כָּל כּוֹכָב מְקַדֵּם אוֹתְךָ לְמַעְלָה! ⭐")
+                Text(tr("כָּל כּוֹכָב מְקַדֵּם אוֹתְךָ לְמַעְלָה! ⭐"))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
             }
@@ -271,7 +271,7 @@ struct LeaderboardView: View {
         if let rank = friends.myGlobalRank, let meID,
            !friends.globalBoard.contains(where: { $0.id == meID }) {
             let me = FriendCard(id: meID,
-                                name: ProfileStore.shared.active?.name ?? "אֲנִי",
+                                name: ProfileStore.shared.active?.name ?? tr("אֲנִי"),
                                 character3DID: ProfileStore.shared.active?.character3DID,
                                 stars: ProgressStore.shared.stars,
                                 code: friends.myCode)
@@ -382,14 +382,14 @@ struct LeaderboardView: View {
         VStack(spacing: AppSpacing.md) {
             Spacer()
             Text("🏆").font(.system(size: 72))
-            Text("עוֹד אֵין חֲבֵרִים")
+            Text(tr("עוֹד אֵין חֲבֵרִים"))
                 .font(.system(size: 22, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-            Text("הוֹסִיפוּ אֶת הֶחָבֵר הָרִאשׁוֹן וְתִרְאוּ מִי אָסַף הֲכִי הַרְבֵּה כּוֹכָבִים!")
+            Text(tr("הוֹסִיפוּ אֶת הֶחָבֵר הָרִאשׁוֹן וְתִרְאוּ מִי אָסַף הֲכִי הַרְבֵּה כּוֹכָבִים!"))
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8)).multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.xl)
             Button { showAdd = true } label: {
-                Label("הוֹסִיפוּ חָבֵר", systemImage: "person.badge.plus")
+                Label(tr("הוֹסִיפוּ חָבֵר"), systemImage: "person.badge.plus")
                     .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(Color(hex: "4B3FBF"))
                     .padding(.horizontal, AppSpacing.xl).padding(.vertical, 14)
                     .background(Capsule().fill(.white.opacity(0.92)))
@@ -422,13 +422,13 @@ struct AddFriendView: View {
             SparkleField(count: 12, size: 11)
             VStack(spacing: 0) {
                 ZStack {
-                    Text("הוֹסָפַת חָבֵר").font(.system(size: 22, weight: .heavy, design: .rounded))
+                    Text(tr("הוֹסָפַת חָבֵר")).font(.system(size: 22, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                     HStack { Spacer()
                         Button { dismiss() } label: {
                             Image(systemName: "xmark").font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
                                 .frame(width: 36, height: 36).background(.white.opacity(0.18), in: Circle())
-                        }.environment(\.layoutDirection, .leftToRight)
+                        }.environment(\.layoutDirection, .appMirrored)
                     }
                 }
                 .padding(.horizontal, AppSpacing.lg).padding(.vertical, AppSpacing.md)
@@ -458,7 +458,7 @@ struct AddFriendView: View {
                     Text(f.name)
                         .font(.system(size: 24, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text("אַתֶּם חֲבֵרִים עַכְשָׁיו! 🤝")
+                    Text(tr("אַתֶּם חֲבֵרִים עַכְשָׁיו! 🤝"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(AppColor.starGold)
                 }
@@ -467,7 +467,7 @@ struct AddFriendView: View {
             FancyConfetti(trigger: confettiTrigger)
                 .allowsHitTesting(false)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         // Live so the inbound listener fires the instant someone scans MY code.
         .task { await friends.startLive() }
         .onAppear { knownFriendIDs = Set(friends.leaderboard.map(\.id)) }
@@ -480,7 +480,7 @@ struct AddFriendView: View {
                   newID != ProfileStore.shared.activeID?.uuidString,
                   let card = friends.leaderboard.first(where: { $0.id == newID }) else { return }
             added = true
-            message = "הִתְחַבַּרְתֶּם! 🎉"
+            message = tr("הִתְחַבַּרְתֶּם! 🎉")
             Haptic.success(); SoundPlayer.shared.play(.chestOpen)
             withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) { celebrate = card }
             confettiTrigger += 1
@@ -491,7 +491,7 @@ struct AddFriendView: View {
 
     private var myCard: some View {
         VStack(spacing: AppSpacing.md) {
-            Text("הַקּוֹד שֶׁלִּי").font(.system(size: 16, weight: .heavy, design: .rounded))
+            Text(tr("הַקּוֹד שֶׁלִּי")).font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
             if !friends.myCode.isEmpty {
                 QRCodeView(text: FriendLink.url(forCode: friends.myCode), size: 170)
@@ -505,7 +505,7 @@ struct AddFriendView: View {
             } else {
                 ProgressView().tint(.white)
             }
-            Text("חֲבֵרִים סוֹרְקִים אֶת הַקּוֹד אוֹ פּוֹתְחִים אֶת הַקִּישּׁוּר — וְאַתֶּם מְחוּבָּרִים!")
+            Text(tr("חֲבֵרִים סוֹרְקִים אֶת הַקּוֹד אוֹ פּוֹתְחִים אֶת הַקִּישּׁוּר — וְאַתֶּם מְחוּבָּרִים!"))
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.7)).multilineTextAlignment(.center)
         }
@@ -517,21 +517,21 @@ struct AddFriendView: View {
     private var addCard: some View {
         VStack(spacing: AppSpacing.md) {
             Button { showScanner = true } label: {
-                Label("סִרְקוּ חָבֵר", systemImage: "qrcode.viewfinder")
+                Label(tr("סִרְקוּ חָבֵר"), systemImage: "qrcode.viewfinder")
                     .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(AppGradient.purpleDream, in: Capsule())
             }
-            Text("אוֹ הַקְלִידוּ קוֹד שֶׁל חָבֵר").font(.system(size: 13, weight: .medium, design: .rounded))
+            Text(tr("אוֹ הַקְלִידוּ קוֹד שֶׁל חָבֵר")).font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.7))
-            TextField("", text: $typed, prompt: Text("קוֹד").foregroundColor(.white.opacity(0.5)))
+            TextField("", text: $typed, prompt: Text(tr("קוֹד")).foregroundColor(.white.opacity(0.5)))
                 .textInputAutocapitalization(.characters).autocorrectionDisabled()
                 .multilineTextAlignment(.center)
                 .font(.system(size: 24, weight: .heavy, design: .monospaced)).kerning(5).foregroundStyle(.white)
                 .padding(.vertical, 12).background(RoundedRectangle(cornerRadius: 14).fill(.white.opacity(0.12)))
                 .environment(\.layoutDirection, .leftToRight)
             Button { add(typed) } label: {
-                Text("הוֹסִיפוּ").font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Text(tr("הוֹסִיפוּ")).font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 14).background(AppGradient.gold, in: Capsule())
             }
             .disabled(typed.trimmingCharacters(in: .whitespaces).count < 4)
@@ -545,8 +545,8 @@ struct AddFriendView: View {
         NavigationStack {
             QRScannerView { scanned in showScanner = false; add(scanned) }
                 .ignoresSafeArea()
-                .navigationTitle("סְרִיקַת חָבֵר").navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("בִּטּוּל") { showScanner = false } } }
+                .navigationTitle(tr("סְרִיקַת חָבֵר")).navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(tr("בִּטּוּל")) { showScanner = false } } }
         }
     }
 
@@ -554,7 +554,7 @@ struct AddFriendView: View {
         Task {
             let ok = await friends.addFriend(code: raw)
             added = ok
-            message = ok ? "הִתְחַבַּרְתֶּם! 🎉" : (friends.lastError ?? "לֹא הִצְלַחְנוּ")
+            message = ok ? tr("הִתְחַבַּרְתֶּם! 🎉") : (friends.lastError ?? tr("לֹא הִצְלַחְנוּ"))
             if ok {
                 typed = ""; Haptic.success()
                 SoundPlayer.shared.play(.chestOpen)
@@ -589,7 +589,7 @@ struct ChildFriendsView: View {
                 if loading {
                     HStack { Spacer(); ProgressView(); Spacer() }
                 } else if friends.isEmpty {
-                    Text("עֲדַיִן אֵין חֲבֵרִים.").foregroundStyle(.secondary)
+                    Text(tr("עֲדַיִן אֵין חֲבֵרִים.")).foregroundStyle(.secondary)
                 } else {
                     ForEach(friends) { f in
                         HStack(spacing: 12) {
@@ -601,14 +601,14 @@ struct ChildFriendsView: View {
                                 .foregroundStyle(.secondary)
                         }
                         .swipeActions {
-                            Button("הָסֵר", role: .destructive) { remove(f) }
+                            Button(tr("הָסֵר"), role: .destructive) { remove(f) }
                         }
                     }
                 }
             }
-            .navigationTitle("הַחֲבֵרִים שֶׁל \(childName)")
+            .navigationTitle(tr("הַחֲבֵרִים שֶׁל \(childName)"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("סִיּוּם") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(tr("סִיּוּם")) { dismiss() } } }
         }
         .task { await reload() }
     }
@@ -668,11 +668,11 @@ struct FriendProfileView: View {
                             .frame(width: 140, height: 140)
                             .glow(AppColor.starGold, radius: 22)
 
-                        Text(card.name.isEmpty ? "שַׂחְקָן" : card.name)
+                        Text(card.name.isEmpty ? tr("שַׂחְקָן") : card.name)
                             .font(.system(size: 32, weight: .black, design: .rounded))
                             .foregroundStyle(.white)
 
-                        Label("\(card.stars) כּוֹכָבִים", systemImage: "star.fill")
+                        Label(tr("\(card.stars) כּוֹכָבִים"), systemImage: "star.fill")
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 18).padding(.vertical, 9)
@@ -686,7 +686,7 @@ struct FriendProfileView: View {
                 }
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         // A fixed height sized to the content (avatar + name + stars + button), so
         // the action button is fully visible without scrolling — `.medium` left it
         // clipped below the fold, especially on iPad's centered card sheet.
@@ -696,11 +696,11 @@ struct FriendProfileView: View {
 
     @ViewBuilder private var actionArea: some View {
         if isMe {
-            Label("זֶה אַתָּה 🙂", systemImage: "person.fill")
+            Label(tr("זֶה אַתָּה 🙂"), systemImage: "person.fill")
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
         } else if friends.isFriend(card.id) {
-            Label("חָבֵר שֶׁלְּךָ", systemImage: "checkmark.circle.fill")
+            Label(tr("חָבֵר שֶׁלְּךָ"), systemImage: "checkmark.circle.fill")
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.successMint)
         } else if let incoming {
@@ -708,13 +708,13 @@ struct FriendProfileView: View {
             Button {
                 Task { await friends.acceptRequest(incoming); Haptic.success(); dismiss() }
             } label: {
-                HStack(spacing: 8) { Image(systemName: "checkmark.circle.fill"); Text("אַשְּׁרוּ בַּקָּשַׁת חֲבֵרוּת") }
+                HStack(spacing: 8) { Image(systemName: "checkmark.circle.fill"); Text(tr("אַשְּׁרוּ בַּקָּשַׁת חֲבֵרוּת")) }
                     .font(.system(size: 18, weight: .black, design: .rounded)).foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(AppGradient.gold, in: Capsule())
             }
         } else if sent {
-            Label("בַּקָּשָׁה נִשְׁלְחָה ⏳", systemImage: "paperplane.fill")
+            Label(tr("בַּקָּשָׁה נִשְׁלְחָה ⏳"), systemImage: "paperplane.fill")
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .frame(maxWidth: .infinity).padding(.vertical, 14)
@@ -731,7 +731,7 @@ struct FriendProfileView: View {
                 HStack(spacing: 8) {
                     if sending { ProgressView().tint(.white) }
                     else { Image(systemName: "person.badge.plus") }
-                    Text("שִׁלְחוּ בַּקָּשַׁת חֲבֵרוּת")
+                    Text(tr("שִׁלְחוּ בַּקָּשַׁת חֲבֵרוּת"))
                 }
                 .font(.system(size: 18, weight: .black, design: .rounded)).foregroundStyle(.white)
                 .frame(maxWidth: .infinity).padding(.vertical, 14)
@@ -779,26 +779,26 @@ struct FriendRequestsView: View {
                     CharacterView(character: f.character)
                         .frame(width: 130, height: 130).shadow(color: .black.opacity(0.3), radius: 8, y: 4)
                     Text(f.name).font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                    Text("אַתֶּם חֲבֵרִים עַכְשָׁיו! 🤝")
+                    Text(tr("אַתֶּם חֲבֵרִים עַכְשָׁיו! 🤝"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(AppColor.starGold)
                 }
                 .transition(.scale.combined(with: .opacity))
             }
             FancyConfetti(trigger: confettiTrigger).allowsHitTesting(false)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .task { await friends.startLive() }
     }
 
     private var header: some View {
         ZStack {
-            Text("בַּקָּשׁוֹת חֲבֵרוּת").font(.system(size: 22, weight: .heavy, design: .rounded))
+            Text(tr("בַּקָּשׁוֹת חֲבֵרוּת")).font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
             HStack { Spacer()
                 Button { dismiss() } label: {
                     Image(systemName: "xmark").font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
                         .frame(width: 36, height: 36).background(.white.opacity(0.18), in: Circle())
-                }.environment(\.layoutDirection, .leftToRight)
+                }.environment(\.layoutDirection, .appMirrored)
             }
         }
         .padding(.horizontal, AppSpacing.lg).padding(.vertical, AppSpacing.md)
@@ -809,20 +809,20 @@ struct FriendRequestsView: View {
             CharacterView(character: req.character, portrait: true)
                 .frame(width: 54, height: 54)
             VStack(alignment: .leading, spacing: 2) {
-                Text(req.name.isEmpty ? "שַׂחְקָן" : req.name)
+                Text(req.name.isEmpty ? tr("שַׂחְקָן") : req.name)
                     .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 Text("\(req.stars) ⭐").font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white.opacity(0.75))
             }
             Spacer()
             Button { decline(req) } label: {
-                Text("לֹא עַכְשָׁיו").font(.system(size: 13, weight: .heavy, design: .rounded))
+                Text(tr("לֹא עַכְשָׁיו")).font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .padding(.horizontal, 12).padding(.vertical, 9)
                     .background(Capsule().fill(.white.opacity(0.12)))
             }
             Button { accept(req) } label: {
-                Label("אַשְּׁרוּ", systemImage: "checkmark")
+                Label(tr("אַשְּׁרוּ"), systemImage: "checkmark")
                     .font(.system(size: 14, weight: .black, design: .rounded)).foregroundStyle(.white)
                     .padding(.horizontal, 14).padding(.vertical, 9)
                     .background(AppGradient.gold, in: Capsule())
@@ -836,9 +836,9 @@ struct FriendRequestsView: View {
         VStack(spacing: AppSpacing.md) {
             Spacer()
             Text("📭").font(.system(size: 64))
-            Text("אֵין בַּקָּשׁוֹת חֲדָשׁוֹת")
+            Text(tr("אֵין בַּקָּשׁוֹת חֲדָשׁוֹת"))
                 .font(.system(size: 20, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-            Text("כְּשֶׁמִּישֶׁהוּ יְבַקֵּשׁ לִהְיוֹת חָבֵר שֶׁלְּךָ — זֶה יוֹפִיעַ כָּאן.")
+            Text(tr("כְּשֶׁמִּישֶׁהוּ יְבַקֵּשׁ לִהְיוֹת חָבֵר שֶׁלְּךָ — זֶה יוֹפִיעַ כָּאן."))
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8)).multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.xl)

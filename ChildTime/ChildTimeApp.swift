@@ -149,9 +149,9 @@ struct ChildTimeApp: App {
     private static func seedDemo() {
         if ProfileStore.shared.profiles.isEmpty {
             // Grades set, so the kid-facing grade picker never covers a demo screen.
-            let dana = Profile(name: "דָּנָה", gender: .girl, age: .grade1, grade: 3)
+            let dana = Profile(name: tr("דָּנָה"), gender: .girl, age: .grade1, grade: 3)
             ProfileStore.shared.add(dana)
-            let yoav = Profile(name: "יוֹאָב", gender: .boy, age: .grade1, grade: 1)
+            let yoav = Profile(name: tr("יוֹאָב"), gender: .boy, age: .grade1, grade: 1)
             ProfileStore.shared.add(yoav)
             ProfileStore.shared.setActive(dana)
             UserDefaults.standard.set([dana.id.uuidString, yoav.id.uuidString],
@@ -481,7 +481,7 @@ struct ChildTimeApp: App {
             .onAppear { HouseholdManager.shared.seedDemoJourney(activation: (days: 2, questions: 64)) }
         case "giftearly": ParentDashboardView(isRoot: true)    // gift, 11 days left
             .onAppear {
-                HouseholdManager.shared.seedDemoJourney(daysLeft: 11, familyName: "מִשְׁפַּחַת גּוֹלָן")
+                HouseholdManager.shared.seedDemoJourney(daysLeft: 11, familyName: tr("מִשְׁפַּחַת גּוֹלָן"))
                 // A family board worth showing: both kids with a device and a
                 // month of history, one of them mid-window.
                 for (i, p) in ProfileStore.shared.profiles.enumerated() {
@@ -502,12 +502,12 @@ struct ChildTimeApp: App {
         case "gradepicker":                                    // DEMO_SCREEN=gradepicker
             if let p = ProfileStore.shared.active { ChildGradePickerView(profile: p, onPicked: { _ in }) }
         case "kidpin":                                         // DEMO_SCREEN=kidpin
-            if let p = ProfileStore.shared.active { KidPINView(profile: p, mode: .verify(title: "הַדַּקּוֹת שֶׁלִּי 🔒"), onSuccess: { _ in }, onCancel: {}) }
+            if let p = ProfileStore.shared.active { KidPINView(profile: p, mode: .verify(title: tr("הַדַּקּוֹת שֶׁלִּי 🔒")), onSuccess: { _ in }, onCancel: {}) }
         case "parentassist":                                   // DEMO_SCREEN=parentassist — the kid asks a parent
             WorldMapView().sheet(isPresented: .constant(true)) {
-                ParentAssistView(question: Question(topic: .math, prompt: "כַּמָּה זֶה 7 + 8?", options: ["13", "15", "14", "16"], correctIndex: 1),
+                ParentAssistView(question: Question(topic: .math, prompt: tr("כַּמָּה זֶה 7 + 8?"), options: ["13", "15", "14", "16"], correctIndex: 1),
                                  topic: .math, onContinue: {})
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
         case "parenthelp":                                     // DEMO_SCREEN=parenthelp — the parent answers
             ParentDashboardView(isRoot: true).sheet(isPresented: .constant(true)) {

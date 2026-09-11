@@ -84,8 +84,8 @@ final class CosmeticStore: ObservableObject {
 
         var errorDescription: String? {
             switch self {
-            case .alreadyOwned:                  return "כבר יש לך את הפריט הזה"
-            case .notEnoughDiamonds(let short):  return "חסרים לך \(short) יהלומים"
+            case .alreadyOwned:                  return tr("כבר יש לך את הפריט הזה")
+            case .notEnoughDiamonds(let short):  return tr("חסרים לך \(short) יהלומים")
             }
         }
     }

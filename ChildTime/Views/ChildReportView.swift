@@ -51,7 +51,7 @@ struct ChildReportView: View {
             masteryCards
             devicesCard
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .task(id: profile.id) {
             // The parent's phone never recorded this child's play — pull the
             // history down so week/month and the trends are real, not empty.
@@ -84,7 +84,7 @@ struct ChildReportView: View {
                             Text("·")
                             LivePulseDot()
                             let kind = devices.first?.kind ?? ""
-                            Text("\(g("מְשַׂחֵק", "מְשַׂחֶקֶת")) עַכְשָׁיו" + (kind == "ipad" ? " בָּאַיְפֵּד" : kind == "iphone" ? " בָּאַיְפוֹן" : ""))
+                            Text(tr("\(g(tr("מְשַׂחֵק"), tr("מְשַׂחֶקֶת"))) עַכְשָׁיו") + (kind == "ipad" ? tr(" בָּאַיְפֵּד") : kind == "iphone" ? tr(" בָּאַיְפוֹן") : ""))
                         }
                     }
                     .font(.system(size: 13.5, weight: .semibold, design: .rounded))
@@ -96,10 +96,10 @@ struct ChildReportView: View {
             }
             // The four numbers that answer "is my kid using it and learning?"
             HStack(spacing: 0) {
-                snap("\(s.questions)", "שְׁאֵלוֹת")
-                snap(s.questions > 0 ? pct(s.accuracy) : "0%", "הַצְלָחָה")
-                snap(minutes, "דַּקּוֹת")
-                snap("\(snapshot.dayStreak)", "יְמֵי רֶצֶף")
+                snap("\(s.questions)", tr("שְׁאֵלוֹת"))
+                snap(s.questions > 0 ? pct(s.accuracy) : "0%", tr("הַצְלָחָה"))
+                snap(minutes, tr("דַּקּוֹת"))
+                snap("\(snapshot.dayStreak)", tr("יְמֵי רֶצֶף"))
             }
             .padding(.vertical, 10)
             .glassPane(radius: 16, shadow: false)
@@ -143,14 +143,14 @@ struct ChildReportView: View {
 
     private func insightCard(_ i: DailyInsight) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("💡 תּוֹבְנַת \(period == .today ? "הַיּוֹם" : period == .week ? "הַשָּׁבוּעַ" : "הַחֹדֶשׁ")")
+            Text(tr("💡 תּוֹבְנַת \(period == .today ? tr("הַיּוֹם") : period == .week ? tr("הַשָּׁבוּעַ") : tr("הַחֹדֶשׁ"))"))
                 .font(.system(size: 14.5, weight: .heavy, design: .rounded))
             Text(i.body)
                 .font(.system(size: 13.5, weight: .medium, design: .rounded))
                 .fixedSize(horizontal: false, vertical: true)
             if let rec = i.recommendation {
                 Divider().overlay(Color.white.opacity(0.35))
-                Text("מֻמְלָץ: \(rec)")
+                Text(tr("מֻמְלָץ: \(rec)"))
                     .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -171,9 +171,9 @@ struct ChildReportView: View {
 
     private var topicsCard: some View {
         let topics = engine.topicReports(period)
-        return card("בִּיצוּעִים לִימוּדִיִּים", detail: "לְפִי נוֹשֵׂא, \(period.title.lowercased())") {
+        return card(tr("בִּיצוּעִים לִימוּדִיִּים"), detail: tr("לְפִי נוֹשֵׂא, \(period.title.lowercased())")) {
             if topics.isEmpty {
-                empty("עוֹד לֹא נֶעֶנוּ שְׁאֵלוֹת \(period.title.lowercased()).")
+                empty(tr("עוֹד לֹא נֶעֶנוּ שְׁאֵלוֹת \(period.title.lowercased())."))
             } else {
                 // The weakest topic opens on its own (the mockup shows math's
                 // sub-skills right there); any row toggles on tap.
@@ -186,7 +186,7 @@ struct ChildReportView: View {
                         if open == t.topic {
                             let skills = engine.skillReports(t.topic, period)
                             if skills.isEmpty {
-                                Text("אֵין עֲדַיִן פֵּרוּט לְפִי מְיֻמָּנוּת בְּנוֹשֵׂא זֶה.")
+                                Text(tr("אֵין עֲדַיִן פֵּרוּט לְפִי מְיֻמָּנוּת בְּנוֹשֵׂא זֶה."))
                                     .font(.system(size: 12.5, weight: .medium, design: .rounded))
                                     .foregroundStyle(GlassInk.secondary)
                                     .padding(.vertical, 6)
@@ -225,7 +225,7 @@ struct ChildReportView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(t.topic.displayName)
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
-                    Text("\(t.answered) שְׁאֵלוֹת · \(t.correct) נְכוֹנוֹת" + (t.wrong > 0 ? " · \(t.wrong) טְעֻיּוֹת" : ""))
+                    Text(tr("\(t.answered) שְׁאֵלוֹת · \(t.correct) נְכוֹנוֹת") + (t.wrong > 0 ? tr(" · \(t.wrong) טְעֻיּוֹת") : ""))
                         .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary).monospacedDigit()
                 }
@@ -240,10 +240,10 @@ struct ChildReportView: View {
     private func verdictPill(_ t: TopicReport) -> some View {
         let (label, color): (String, Color) = {
             switch t.verdict {
-            case .strong: return (t.accuracy >= 0.95 ? "חָזָק מְאוֹד" : "חָזָק", verdictColor(.strong))
-            case .ok:     return ("בְּסֵדֶר", verdictColor(.ok))
-            case .weak:   return ("דּוֹרֵשׁ חִזּוּק", verdictColor(.weak))
-            case .tooFew: return ("עוֹד מְעַט", GlassInk.tertiary)
+            case .strong: return (t.accuracy >= 0.95 ? tr("חָזָק מְאוֹד") : tr("חָזָק"), verdictColor(.strong))
+            case .ok:     return (tr("בְּסֵדֶר"), verdictColor(.ok))
+            case .weak:   return (tr("דּוֹרֵשׁ חִזּוּק"), verdictColor(.weak))
+            case .tooFew: return (tr("עוֹד מְעַט"), GlassInk.tertiary)
             }
         }()
         return Text("\(pct(t.accuracy)) · \(label)")
@@ -270,20 +270,20 @@ struct ChildReportView: View {
         let deltas = engine.topicDeltas(period)
         let overall = engine.overallDelta(period)
         if period != .today, overall != nil || !deltas.isEmpty {
-            card("הַאִם \(profile.name) \(g("מִשְׁתַּפֵּר", "מִשְׁתַּפֶּרֶת"))?") {
+            card(tr("הַאִם \(profile.name) \(g(tr("מִשְׁתַּפֵּר"), tr("מִשְׁתַּפֶּרֶת")))?")) {
                 VStack(alignment: .leading, spacing: 8) {
                     if let o = overall {
                         let up = o >= 0
-                        Text("\(up ? "📈" : "📉") \(up ? g("הִשְׁתַּפֵּר", "הִשְׁתַּפְּרָה") : "יָרַד קְצָת") בְּ-\(Int(abs(o).rounded()))% \(period == .week ? "הַשָּׁבוּעַ" : "הַחֹדֶשׁ")")
+                        Text(tr("\(up ? "📈" : "📉") \(up ? g(tr("הִשְׁתַּפֵּר"), tr("הִשְׁתַּפְּרָה")) : tr("יָרַד קְצָת")) בְּ-\(Int(abs(o).rounded()))% \(period == .week ? tr("הַשָּׁבוּעַ") : tr("הַחֹדֶשׁ"))"))
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
                             .foregroundStyle(up ? GlassInk.good : GlassInk.weak)
                     }
                     HStack(spacing: 16) {
                         if let best = deltas.first, best.deltaPoints > 0 {
-                            trendChip("הַשִּׁפּוּר הַגָּדוֹל", best.topic.displayName, best.deltaPoints)
+                            trendChip(tr("הַשִּׁפּוּר הַגָּדוֹל"), best.topic.displayName, best.deltaPoints)
                         }
                         if let worst = deltas.last, worst.deltaPoints < 0 {
-                            trendChip("דּוֹרֵשׁ חִזּוּק", worst.topic.displayName, worst.deltaPoints)
+                            trendChip(tr("דּוֹרֵשׁ חִזּוּק"), worst.topic.displayName, worst.deltaPoints)
                         }
                     }
                 }
@@ -309,26 +309,26 @@ struct ChildReportView: View {
 
     private var learningTrendCard: some View {
         let points = engine.dayPoints(days: chartDays)
-        return card("מְגַמַּת לְמִידָה", detail: "\(chartDays) יָמִים אַחֲרוֹנִים") {
+        return card(tr("מְגַמַּת לְמִידָה"), detail: tr("\(chartDays) יָמִים אַחֲרוֹנִים")) {
             if points.allSatisfy({ $0.questions == 0 }) {
-                empty("אֵין עֲדַיִן פְּעִילוּת בַּתְּקוּפָה הַזּוֹ.")
+                empty(tr("אֵין עֲדַיִן פְּעִילוּת בַּתְּקוּפָה הַזּוֹ."))
             } else {
                 LearningTrendChart(points: points)
                     .frame(height: 130)
-                legend([("שְׁאֵלוֹת", Color.white.opacity(0.4)), ("אֲחוּז הַצְלָחָה", .white)])
+                legend([(tr("שְׁאֵלוֹת"), Color.white.opacity(0.4)), (tr("אֲחוּז הַצְלָחָה"), .white)])
             }
         }
     }
 
     private var screenTimeCard: some View {
         let points = engine.dayPoints(days: chartDays)
-        return card("זְמַן מָסָךְ", detail: "\(g("הִרְוִיחַ", "הִרְוִיחָה")) מוּל \(g("נִצֵּל", "נִצְּלָה"))") {
+        return card(tr("זְמַן מָסָךְ"), detail: tr("\(g(tr("הִרְוִיחַ"), tr("הִרְוִיחָה"))) מוּל \(g(tr("נִצֵּל"), tr("נִצְּלָה")))")) {
             if points.allSatisfy({ $0.earned == 0 && $0.used == 0 }) {
-                empty("עוֹד לֹא נִפְתַּח זְמַן מָסָךְ בַּתְּקוּפָה הַזּוֹ.")
+                empty(tr("עוֹד לֹא נִפְתַּח זְמַן מָסָךְ בַּתְּקוּפָה הַזּוֹ."))
             } else {
                 ScreenTimeChart(points: points)
                     .frame(height: 120)
-                legend([(g("הִרְוִיחַ", "הִרְוִיחָה"), Color.white.opacity(0.4)), (g("נִצֵּל", "נִצְּלָה"), Color(hex: "7CF3FF"))])
+                legend([(g(tr("הִרְוִיחַ"), tr("הִרְוִיחָה")), Color.white.opacity(0.4)), (g(tr("נִצֵּל"), tr("נִצְּלָה")), Color(hex: "7CF3FF"))])
             }
         }
     }
@@ -354,12 +354,12 @@ struct ChildReportView: View {
         let todo = engine.toPractice(period)
         if !done.isEmpty || !todo.isEmpty {
             HStack(alignment: .top, spacing: 10) {
-                card("✅ כְּבָר \(g("שׁוֹלֵט", "שׁוֹלֶטֶת"))") {
-                    if done.isEmpty { empty("עוֹד לֹא — בְּקָרוֹב 😊") }
+                card(tr("✅ כְּבָר \(g(tr("שׁוֹלֵט"), tr("שׁוֹלֶטֶת")))")) {
+                    if done.isEmpty { empty(tr("עוֹד לֹא — בְּקָרוֹב 😊")) }
                     else { list(done) }
                 }
-                card("🎯 כְּדַאי לְתַרְגֵּל") {
-                    if todo.isEmpty { empty("שׁוּם דָּבָר בּוֹלֵט 👏") }
+                card(tr("🎯 כְּדַאי לְתַרְגֵּל")) {
+                    if todo.isEmpty { empty(tr("שׁוּם דָּבָר בּוֹלֵט 👏")) }
                     else { list(todo) }
                 }
             }
@@ -384,14 +384,14 @@ struct ChildReportView: View {
     // MARK: - Devices
 
     private var devicesCard: some View {
-        card("הַמַּכְשִׁירִים שֶׁל \(profile.name)") {
+        card(tr("הַמַּכְשִׁירִים שֶׁל \(profile.name)")) {
             VStack(spacing: 0) {
                 ForEach(devices) { d in
                     HStack {
                         // "אייפד של נועה" — the kind + the child (iOS names every phone
                         // just "iPhone"); a custom device name rides along.
-                        Text("\(d.kind == "ipad" ? "📲" : "📱") \(d.kind == "ipad" ? "אַיְפֵּד" : "אַיְפוֹן") שֶׁל \(profile.name)"
-                             + (["אייפד", "אייפון", "iPhone", "iPad", ""].contains(d.name) ? "" : " · \(d.name)"))
+                        Text(tr("\(d.kind == "ipad" ? "📲" : "📱") \(d.kind == "ipad" ? tr("אַיְפֵּד") : tr("אַיְפוֹן")) שֶׁל \(profile.name)")
+                             + ([tr("אייפד"), tr("אייפון"), "iPhone", "iPad", ""].contains(d.name) ? "" : " · \(d.name)"))
                             .font(.system(size: 13.5, weight: .semibold, design: .rounded))
                         Spacer()
                         deviceStatus(d)
@@ -400,10 +400,10 @@ struct ChildReportView: View {
                     if d.id != devices.last?.id { Divider().overlay(Color.white.opacity(0.16)) }
                 }
                 if devices.isEmpty {
-                    empty("עוֹד לֹא חֻבַּר מַכְשִׁיר.")
+                    empty(tr("עוֹד לֹא חֻבַּר מַכְשִׁיר."))
                 }
                 Button(action: onAddDevice) {
-                    Label("חַבְּרוּ מַכְשִׁיר נוֹסָף", systemImage: "qrcode")
+                    Label(tr("חַבְּרוּ מַכְשִׁיר נוֹסָף"), systemImage: "qrcode")
                         .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .frame(maxWidth: .infinity)
@@ -423,11 +423,11 @@ struct ChildReportView: View {
         let recent = Date().timeIntervalSince(d.lastSeenAt) < 120
         return Group {
             if live && recent {
-                Text("● \(g("מְשַׂחֵק", "מְשַׂחֶקֶת")) עַכְשָׁיו").foregroundStyle(GlassInk.good)
+                Text(tr("● \(g(tr("מְשַׂחֵק"), tr("מְשַׂחֶקֶת"))) עַכְשָׁיו")).foregroundStyle(GlassInk.good)
             } else if recent {
-                Text("● מְחֻבָּר").foregroundStyle(GlassInk.good)
+                Text(tr("● מְחֻבָּר")).foregroundStyle(GlassInk.good)
             } else {
-                Text("נִרְאָה \(relative(d.lastSeenAt))").foregroundStyle(GlassInk.secondary)
+                Text(tr("נִרְאָה \(relative(d.lastSeenAt))")).foregroundStyle(GlassInk.secondary)
             }
         }
         .font(.system(size: 12, weight: .heavy, design: .rounded))
@@ -464,9 +464,9 @@ struct ChildReportView: View {
     private func mmss(_ s: Int) -> String { String(format: "%d:%02d", s / 60, s % 60) }
     private func relative(_ d: Date) -> String {
         let m = Int(Date().timeIntervalSince(d) / 60)
-        if m < 60 { return "לִפְנֵי \(max(1, m)) דַּק׳" }
-        if m < 60 * 24 { return "לִפְנֵי \(m / 60) שָׁע׳" }
-        return "לִפְנֵי \(m / (60 * 24)) יָמִים"
+        if m < 60 { return tr("לִפְנֵי \(max(1, m)) דַּק׳") }
+        if m < 60 * 24 { return tr("לִפְנֵי \(m / 60) שָׁע׳") }
+        return tr("לִפְנֵי \(m / (60 * 24)) יָמִים")
     }
 }
 
@@ -504,9 +504,9 @@ struct LearningTrendChart: View {
                         .foregroundStyle(GlassInk.secondary)
                         .position(x: axisW / 2, y: y)
                 }
-                Text("שְׁאֵלוֹת").font(.system(size: 8.5, weight: .semibold, design: .rounded))
+                Text(tr("שְׁאֵלוֹת")).font(.system(size: 8.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary).position(x: axisW / 2, y: topPad + plotH + labelH / 2)
-                Text("הַצְלָחָה").font(.system(size: 8.5, weight: .semibold, design: .rounded))
+                Text(tr("הַצְלָחָה")).font(.system(size: 8.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.primary).position(x: w - axisW / 2, y: topPad + plotH + labelH / 2)
                 // bars
                 ForEach(points.indices, id: \.self) { i in
@@ -548,7 +548,7 @@ struct LearningTrendChart: View {
                 }
             }
         }
-        .accessibilityLabel("שְׁאֵלוֹת וְאֲחוּז הַצְלָחָה לְכָל יוֹם")
+        .accessibilityLabel(tr("שְׁאֵלוֹת וְאֲחוּז הַצְלָחָה לְכָל יוֹם"))
     }
 }
 
@@ -580,7 +580,7 @@ struct ScreenTimeChart: View {
                         .foregroundStyle(GlassInk.primary)
                         .position(x: axisW / 2, y: y)
                 }
-                Text("דַּקּוֹת").font(.system(size: 8.5, weight: .semibold, design: .rounded))
+                Text(tr("דַּקּוֹת")).font(.system(size: 8.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary).position(x: axisW / 2, y: h - labelH / 2)
                 ForEach(points.indices, id: \.self) { i in
                     let p = points[i]
@@ -602,6 +602,6 @@ struct ScreenTimeChart: View {
                 }
             }
         }
-        .accessibilityLabel("דַּקּוֹת שֶׁהוּרְוְחוּ וְדַקּוֹת שֶׁנֻּצְּלוּ לְכָל יוֹם")
+        .accessibilityLabel(tr("דַּקּוֹת שֶׁהוּרְוְחוּ וְדַקּוֹת שֶׁנֻּצְּלוּ לְכָל יוֹם"))
     }
 }

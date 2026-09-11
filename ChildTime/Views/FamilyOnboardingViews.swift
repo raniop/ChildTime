@@ -20,7 +20,7 @@ struct FamilyChoiceView: View {
             SparkleField(count: 12, size: 11)
             if namingNewFamily { namingView } else { choiceView }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     // MARK: - 👪 Name the family (new families only)
@@ -29,11 +29,11 @@ struct FamilyChoiceView: View {
         VStack(spacing: AppSpacing.xl) {
             VStack(spacing: AppSpacing.sm) {
                 Text("👪").font(.system(size: 54))
-                Text("אֵיךְ נִקְרָא לַמִּשְׁפָּחָה?")
+                Text(tr("אֵיךְ נִקְרָא לַמִּשְׁפָּחָה?"))
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
-                Text("הַשֵּׁם מוֹפִיעַ בַּמָּסָךְ הָרָאשִׁי וּבַהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה.")
+                Text(tr("הַשֵּׁם מוֹפִיעַ בַּמָּסָךְ הָרָאשִׁי וּבַהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה."))
                     .font(.system(size: 14.5, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
@@ -41,7 +41,7 @@ struct FamilyChoiceView: View {
             }
 
             TextField("", text: $familyName,
-                      prompt: Text("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן").foregroundColor(.white.opacity(0.55)))
+                      prompt: Text(tr("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן")).foregroundColor(.white.opacity(0.55)))
                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
@@ -54,10 +54,10 @@ struct FamilyChoiceView: View {
                 JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
                     createFamily(named: familyName)
                 } label: {
-                    if creating { ProgressView().tint(.white) } else { Text("צְרוּ אֶת הַמִּשְׁפָּחָה") }
+                    if creating { ProgressView().tint(.white) } else { Text(tr("צְרוּ אֶת הַמִּשְׁפָּחָה")) }
                 }
                 .disabled(creating)
-                Button("אֶקְבַּע אֶת הַשֵּׁם אַחַר כָּךְ") { createFamily(named: "") }
+                Button(tr("אֶקְבַּע אֶת הַשֵּׁם אַחַר כָּךְ")) { createFamily(named: "") }
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.75))
                     .disabled(creating)
@@ -83,11 +83,11 @@ struct FamilyChoiceView: View {
         VStack(spacing: AppSpacing.xl) {
                 VStack(spacing: AppSpacing.sm) {
                     Text("👋").font(.system(size: 54))
-                    Text("עוֹד אֵין לַחֶשְׁבּוֹן הַזֶּה מִשְׁפָּחָה")
+                    Text(tr("עוֹד אֵין לַחֶשְׁבּוֹן הַזֶּה מִשְׁפָּחָה"))
                         .font(.system(size: 26, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
-                    Text("רַק שְׁאֵלָה אַחַת כְּדֵי שֶׁנֵּדַע לְאָן לְהַמְשִׁיךְ:")
+                    Text(tr("רַק שְׁאֵלָה אַחַת כְּדֵי שֶׁנֵּדַע לְאָן לְהַמְשִׁיךְ:"))
                         .font(.system(size: 15, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                 }
@@ -95,8 +95,8 @@ struct FamilyChoiceView: View {
                 VStack(spacing: AppSpacing.lg) {
                     choiceCard(
                         emoji: "🏠",
-                        title: "אֲנַחְנוּ חֲדָשִׁים בְּטוֹפִי",
-                        subtitle: "צְרוּ מִשְׁפָּחָה חֲדָשָׁה וְהַתְחִילוּ לְהַגְדִּיר",
+                        title: tr("אֲנַחְנוּ חֲדָשִׁים בְּטוֹפִי"),
+                        subtitle: tr("צְרוּ מִשְׁפָּחָה חֲדָשָׁה וְהַתְחִילוּ לְהַגְדִּיר"),
                         glow: AppColor.starGold,
                         busy: creating
                     ) {
@@ -107,8 +107,8 @@ struct FamilyChoiceView: View {
                     }
                     choiceCard(
                         emoji: "👨‍👩‍👧",
-                        title: "הַהוֹרֶה הַשֵּׁנִי כְּבָר הִגְדִּיר",
-                        subtitle: "הִצְטָרְפוּ לַמִּשְׁפָּחָה הַקַּיֶּמֶת — סוֹרְקִים קוֹד מֵהַמַּכְשִׁיר שֶׁלּוֹ",
+                        title: tr("הַהוֹרֶה הַשֵּׁנִי כְּבָר הִגְדִּיר"),
+                        subtitle: tr("הִצְטָרְפוּ לַמִּשְׁפָּחָה הַקַּיֶּמֶת — סוֹרְקִים קוֹד מֵהַמַּכְשִׁיר שֶׁלּוֹ"),
                         glow: AppColor.companionGlow,
                         busy: false
                     ) {
@@ -118,7 +118,7 @@ struct FamilyChoiceView: View {
                 }
                 .frame(maxWidth: 460)
 
-                Text("טִיפּ: הַהוֹרֶה שֶׁכְּבָר בִּפְנִים יָכוֹל לְהַזְמִין אֶתְכֶם בְּאִימֵּיְל — וְאָז הַמָּסָךְ הַזֶּה נֶעֱלָם לְגַמְרֵי 😊")
+                Text(tr("טִיפּ: הַהוֹרֶה שֶׁכְּבָר בִּפְנִים יָכוֹל לְהַזְמִין אֶתְכֶם בְּאִימֵּיְל — וְאָז הַמָּסָךְ הַזֶּה נֶעֱלָם לְגַמְרֵי 😊"))
                     .font(.system(size: 12.5, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
@@ -168,7 +168,7 @@ struct EmailInviteWelcomeView: View {
     private var familyName: String {
         let names = (household.pendingEmailInvite?.parentNames ?? [:]).values
             .filter { !$0.isEmpty }.sorted()
-        return names.first.map { "הַמִּשְׁפָּחָה שֶׁל \($0)" } ?? "הַמִּשְׁפָּחָה שֶׁלָּכֶם"
+        return names.first.map { tr("הַמִּשְׁפָּחָה שֶׁל \($0)") } ?? tr("הַמִּשְׁפָּחָה שֶׁלָּכֶם")
     }
 
     var body: some View {
@@ -177,11 +177,11 @@ struct EmailInviteWelcomeView: View {
             SparkleField(count: 12, size: 11)
             VStack(spacing: AppSpacing.xl) {
                 Text("🎉").font(.system(size: 64))
-                Text("\(familyName) מְחַכָּה לָכֶם!")
+                Text(tr("\(familyName) מְחַכָּה לָכֶם!"))
                     .font(.system(size: 27, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
-                Text("הֻזְמַנְתֶּם לְהִצְטָרֵף כְּהוֹרֶה — תִּרְאוּ אֶת הַיְלָדִים, הַהִתְקַדְּמוּת וְהַשְּׁלִיטָה, בְּדִיּוּק כְּמוֹ הַהוֹרֶה שֶׁהִזְמִין אֶתְכֶם.")
+                Text(tr("הֻזְמַנְתֶּם לְהִצְטָרֵף כְּהוֹרֶה — תִּרְאוּ אֶת הַיְלָדִים, הַהִתְקַדְּמוּת וְהַשְּׁלִיטָה, בְּדִיּוּק כְּמוֹ הַהוֹרֶה שֶׁהִזְמִין אֶתְכֶם."))
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.88))
                     .multilineTextAlignment(.center)
@@ -198,7 +198,7 @@ struct EmailInviteWelcomeView: View {
                 } label: {
                     HStack(spacing: 10) {
                         if joining { ProgressView().tint(.white) }
-                        Text("הִצְטָרְפוּ לַמִּשְׁפָּחָה")
+                        Text(tr("הִצְטָרְפוּ לַמִּשְׁפָּחָה"))
                             .font(.system(size: 20, weight: .heavy, design: .rounded))
                     }
                     .foregroundStyle(.white)
@@ -214,7 +214,7 @@ struct EmailInviteWelcomeView: View {
                     household.pendingEmailInvite = nil
                     household.needsFamilyChoice = true
                 } label: {
-                    Text("לֹא הַמִּשְׁפָּחָה שֶׁלִּי — הַתְחִילוּ מֵהַתְחָלָה")
+                    Text(tr("לֹא הַמִּשְׁפָּחָה שֶׁלִּי — הַתְחִילוּ מֵהַתְחָלָה"))
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.75))
                         .underline()
@@ -222,6 +222,6 @@ struct EmailInviteWelcomeView: View {
             }
             .padding(.horizontal, AppSpacing.lg)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 }

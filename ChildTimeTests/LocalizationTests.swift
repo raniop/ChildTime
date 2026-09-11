@@ -35,6 +35,16 @@ final class LocalizationTests: XCTestCase {
 
     func testMissingTranslationFallsBackToHebrew() {
         LanguageStore.shared.setForTesting(.en)
-        XCTAssertEqual(tr("מִשְׁפָּט שֶׁאֵין לוֹ תַּרְגּוּם"), "מִשְׁפָּט שֶׁאֵין לוֹ תַּרְגּוּם")
+        XCTAssertEqual(tr("מִשְׁפָּט שֶׁאֵין לוֹ תַּרְגּוּם"), "\u{2067}מִשְׁפָּט שֶׁאֵין לוֹ תַּרְגּוּם\u{2069}")
+    }
+
+    /// A Hebrew name inside a translated piece inside another translated string
+    /// (PackDetailView's "✓ Unlocked for דנה · 30 days left") — one flat
+    /// right-to-left isolate around the name, no nested Foundation isolates.
+    func testHebrewNameInNestedEnglishIsIsolatedOnce() {
+        LanguageStore.shared.setForTesting(.en)
+        let name = "דָּנָה כֹּהֵן"
+        let part = tr("\(name)\(tr(" · עוֹד \(30) יוֹם"))")
+        XCTAssertEqual(tr("✓ פָּתוּחַ לְ\(part)"), "✓ Unlocked for \u{2067}דָּנָה כֹּהֵן\u{2069} · 30 days left")
     }
 }

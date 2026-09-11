@@ -42,10 +42,10 @@ struct World: Identifiable, Hashable {
 
 enum Worlds {
     /// The hand-written base worlds (+ the arena).
-    static let base: [World] = [
+    static var base: [World] { LocalizedCache.value("World.base") { [
         World(
             id: "math_kingdom",
-            name: "מַמְלֶכֶת הַמָּתֵמָטִיקָה",
+            name: tr("מַמְלֶכֶת הַמָּתֵמָטִיקָה"),
             emoji: "🧮",
             topic: .math,
             starsToUnlock: 0,
@@ -55,7 +55,7 @@ enum Worlds {
         ),
         World(
             id: "english_land",
-            name: "אֶרֶץ אַנְגְּלִית",
+            name: tr("אֶרֶץ אַנְגְּלִית"),
             emoji: "🔤",
             topic: .english,
             starsToUnlock: 0,
@@ -65,7 +65,7 @@ enum Worlds {
         ),
         World(
             id: "hebrew_land",
-            name: "אֶרֶץ הָעִבְרִית",
+            name: tr("אֶרֶץ הָעִבְרִית"),
             emoji: "✍️",
             topic: .hebrew,
             starsToUnlock: 0,
@@ -75,7 +75,7 @@ enum Worlds {
         ),
         World(
             id: "logic_lab",
-            name: "חִידוֹת הַלּוֹגִיקָה",
+            name: tr("חִידוֹת הַלּוֹגִיקָה"),
             emoji: "🧩",
             topic: .logic,
             starsToUnlock: 0,
@@ -85,7 +85,7 @@ enum Worlds {
         ),
         World(
             id: "science_lab",
-            name: "מַעְבְּדַת הַמַּדָּעִים",
+            name: tr("מַעְבְּדַת הַמַּדָּעִים"),
             emoji: "🔬",
             topic: .science,
             starsToUnlock: 0,
@@ -95,7 +95,7 @@ enum Worlds {
         ),
         World(
             id: "history_museum",
-            name: "מוּזֵיאוֹן הַהִיסְטוֹרְיָה",
+            name: tr("מוּזֵיאוֹן הַהִיסְטוֹרְיָה"),
             emoji: "🏛️",
             topic: .history,
             starsToUnlock: 0,
@@ -105,7 +105,7 @@ enum Worlds {
         ),
         World(
             id: "geo_journey",
-            name: "מַסָּע סְבִיב הָעוֹלָם",
+            name: tr("מַסָּע סְבִיב הָעוֹלָם"),
             emoji: "🌍",
             topic: .geography,
             starsToUnlock: 0,
@@ -115,7 +115,7 @@ enum Worlds {
         ),
         World(
             id: "money_market",
-            name: "שׁוּק הַכֶּסֶף",
+            name: tr("שׁוּק הַכֶּסֶף"),
             emoji: "💰",
             topic: .money,
             starsToUnlock: 0,
@@ -125,7 +125,7 @@ enum Worlds {
         ),
         World(
             id: "story_forest",
-            name: "יַעַר הַסִּפּוּרִים",
+            name: tr("יַעַר הַסִּפּוּרִים"),
             emoji: "📖",
             topic: .reading,
             starsToUnlock: 0,
@@ -135,7 +135,7 @@ enum Worlds {
         ),
         World(
             id: "bonus_arena",
-            name: "זִירַת הָעֲנָקִים",
+            name: tr("זִירַת הָעֲנָקִים"),
             emoji: "💫",
             topic: .logic,   // nominal — the arena mixes ALL topics (isBonusWorld)
             starsToUnlock: 0,
@@ -144,20 +144,20 @@ enum Worlds {
             glowColor: AppColor.flameOrange,
             isBonusWorld: true
         )
-    ]
+    ] } }
 
     /// ⚽🦖🚀 One world per question pack — shown only to a child who can play
     /// it (PackAccess). Generated from the catalog so a new pack never needs a
     /// hand-written tile.
-    static let packWorlds: [World] = QuestionPacks.all.map { p in
+    static var packWorlds: [World] { LocalizedCache.value("World.packWorlds") { QuestionPacks.all.map { p in
         World(id: "\(p.id)_world", name: p.name, emoji: p.emoji, topic: p.topic,
               starsToUnlock: 0, rooms: 10, gradient: .soccerWorld, glowColor: p.heroColors.first ?? Color(hex: "2ECC71"))
-    }
+    } } }
     /// Base worlds + pack worlds (the arena stays last).
-    static let all: [World] = {
+    static var all: [World] { LocalizedCache.value("World.all") {
         let arena = base.filter { $0.isBonusWorld }
         return base.filter { !$0.isBonusWorld } + packWorlds + arena
-    }()
+    } }
 
     static func find(_ id: String) -> World? {
         all.first { $0.id == id }

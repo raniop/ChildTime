@@ -415,17 +415,17 @@ private struct OpenSmileShape: Shape {
                     Spacer()
                     HStack {
                         Button("idle")    { c.state = .idle; c.bubbleText = nil }
-                        Button("cheer")   { c.cheer("יֵשׁ!") }
-                        Button("hype")    { c.hype("🔥 אֵשׁ!") }
-                        Button("wow")     { c.wow("וָואוּ!") }
-                        Button("console") { c.console("כִּמְעַט!") }
+                        Button("cheer")   { c.cheer(tr("יֵשׁ!")) }
+                        Button("hype")    { c.hype(tr("🔥 אֵשׁ!")) }
+                        Button("wow")     { c.wow(tr("וָואוּ!")) }
+                        Button("console") { c.console(tr("כִּמְעַט!")) }
                     }
                     .buttonStyle(.bordered)
                     .padding()
                 }
                 .padding()
             }
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
     }
     return DemoWrapper()

@@ -41,9 +41,9 @@ enum GameEvent: Equatable {
     var bannerText: String {
         switch self {
         case .doubleDiamonds:
-            return "סוֹף שָׁבוּעַ שֶׁל יַהֲלוֹמִים כְּפוּלִים! 💎×2"
+            return tr("סוֹף שָׁבוּעַ שֶׁל יַהֲלוֹמִים כְּפוּלִים! 💎×2")
         case .featuredTopic(let t):
-            return "נוֹשֵׂא הַיּוֹם: \(t.displayName) — יַהֲלוֹמִים כְּפוּלִים! 💎×2"
+            return tr("נוֹשֵׂא הַיּוֹם: \(t.displayName) — יַהֲלוֹמִים כְּפוּלִים! 💎×2")
         }
     }
 }

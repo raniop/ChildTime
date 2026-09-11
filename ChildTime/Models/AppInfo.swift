@@ -22,5 +22,5 @@ enum AppInfo {
         Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
     }
     /// Hebrew one-liner, e.g. "גרסה 2026.9.1 (141)".
-    static var versionLine: String { "גרסה \(version) (\(build))" }
+    static var versionLine: String { tr("גרסה \(version) (\(build))") }
 }

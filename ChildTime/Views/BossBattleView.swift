@@ -56,7 +56,7 @@ struct BossBattleView: View {
             }
             .padding(20)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onAppear { if question == nil { newQuestion() } }
     }
 
@@ -73,7 +73,7 @@ struct BossBattleView: View {
                     .scaleEffect(bossHit ? 1.18 : 1)
                     .rotationEffect(.degrees(bossHit ? -8 : 0))
                     .shadow(color: world.glowColor.opacity(0.8), radius: 24)
-                Text("הַבּוֹס שֶׁל \(world.name)")
+                Text(tr("הַבּוֹס שֶׁל \(world.name)"))
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                 heartsRow(count: bossMaxHP, filled: bossHP, color: Color(hex: "EF476F"), symbol: "bolt.heart.fill")
@@ -116,7 +116,7 @@ struct BossBattleView: View {
 
             // Player hearts
             HStack(spacing: 8) {
-                Text("הַלְּבָבוֹת שֶׁלְּךָ:").font(.system(size: 14, weight: .semibold, design: .rounded))
+                Text(tr("הַלְּבָבוֹת שֶׁלְּךָ:")).font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                 heartsRow(count: startHearts, filled: hearts, color: Color(hex: "FF5E78"), symbol: "heart.fill")
             }
@@ -157,22 +157,22 @@ struct BossBattleView: View {
         VStack(spacing: 18) {
             CharacterView(character: Character3DCatalog.find("lion"))
                 .frame(width: 130, height: 130)
-            Text(win ? "נִצַּחְתָּ אֶת הַבּוֹס! 🏆" : "כִּמְעַט! בּוֹא נְנַסֶּה שׁוּב 💪")
+            Text(win ? tr("נִצַּחְתָּ אֶת הַבּוֹס! 🏆") : tr("כִּמְעַט! בּוֹא נְנַסֶּה שׁוּב 💪"))
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).multilineTextAlignment(.center)
             if win {
                 HStack(spacing: 14) {
                     bossRewardPill("⭐", 20, AppColor.starGold, step: 1)
                     bossRewardPill("💎", 30, AppColor.gemPurple, step: 2)
-                    bossRewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: " דק'")
+                    bossRewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק'"))
                 }
             }
             VStack(spacing: 12) {
                 if !win {
-                    Button { restart() } label: { ctaLabel("עוֹד נִסָּיוֹן 🔁", dark: true) }
+                    Button { restart() } label: { ctaLabel(tr("עוֹד נִסָּיוֹן 🔁"), dark: true) }
                         .buttonStyle(.juicy)
                 }
-                Button(action: onClose) { ctaLabel(win ? "יֵשׁ! 🎉" : "חֲזָרָה", dark: win) }
+                Button(action: onClose) { ctaLabel(win ? tr("יֵשׁ! 🎉") : tr("חֲזָרָה"), dark: win) }
                     .buttonStyle(.juicy)
             }
             .padding(.horizontal, 44).padding(.top, 6)

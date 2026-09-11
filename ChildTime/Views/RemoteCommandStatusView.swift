@@ -45,17 +45,17 @@ struct RemoteCommandStatusSheet: View {
 
     private var title: String {
         switch request.kind {
-        case .lock: return "🔒 נעילה מרחוק — \(profile.name)"
+        case .lock: return tr("🔒 נעילה מרחוק — \(profile.name)")
         case .gift(let minutes, _):
-            let label = minutes % 60 == 0 ? "\(minutes / 60) שעות" : "\(minutes) דקות"
-            return "💝 מתנה ל\(profile.name) — \(label)"
+            let label = minutes % 60 == 0 ? tr("\(minutes / 60) שעות") : tr("\(minutes) דקות")
+            return tr("💝 מתנה ל\(profile.name) — \(label)")
         }
     }
 
     private var closingHint: String {
         switch request.kind {
-        case .lock: return "אפשר לסגור — אם האישור יגיע אחר כך, תקבלו התראה ברגע שהמכשיר יינעל."
-        case .gift: return "אפשר לסגור — המתנה שמורה בענן, ו\(profile.gender == .girl ? "היא תפתח" : "הוא יפתח") אותה מכל מכשיר, מתי שירצו."
+        case .lock: return tr("אפשר לסגור — אם האישור יגיע אחר כך, תקבלו התראה ברגע שהמכשיר יינעל.")
+        case .gift: return tr("אפשר לסגור — המתנה שמורה בענן, ו\(profile.gender == .girl ? tr("היא תפתח") : tr("הוא יפתח")) אותה מכל מכשיר, מתי שירצו.")
         }
     }
 
@@ -80,8 +80,8 @@ struct RemoteCommandStatusSheet: View {
                     if let tracker {
                         if tracker.targetDeviceIDs.isEmpty {
                             statusRow(icon: "iphone.slash", tint: .orange,
-                                      title: "אין מכשיר מחובר ל\(profile.name)",
-                                      detail: "הנעילה תחול ברגע שמכשיר יתחבר לילד.")
+                                      title: tr("אין מכשיר מחובר ל\(profile.name)"),
+                                      detail: tr("הנעילה תחול ברגע שמכשיר יתחבר לילד."))
                         } else {
                             ForEach(tracker.targetDeviceIDs, id: \.self) { deviceID in
                                 deviceRow(deviceID: deviceID, tracker: tracker, devices: devices)
@@ -111,7 +111,7 @@ struct RemoteCommandStatusSheet: View {
             Button {
                 dismiss()
             } label: {
-                Text("הבנתי")
+                Text(tr("הבנתי"))
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
@@ -120,7 +120,7 @@ struct RemoteCommandStatusSheet: View {
             .padding(.bottom, 12)
         }
         .padding(.horizontal, 20)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .presentationDetents([.medium, .large])
     }
 
@@ -137,13 +137,13 @@ struct RemoteCommandStatusSheet: View {
 
         if reached {
             statusRow(icon: "checkmark.icloud.fill", tint: .green,
-                      title: "הפקודה נשלחה", detail: nil)
+                      title: tr("הפקודה נשלחה"), detail: nil)
         } else if elapsed < Self.cloudTimeout {
-            spinnerRow(title: "שולח…")
+            spinnerRow(title: tr("שולח…"))
         } else {
             statusRow(icon: "wifi.slash", tint: .orange,
-                      title: "אין חיבור אינטרנט במכשיר שלך",
-                      detail: "הפקודה שמורה ותישלח אוטומטית ברגע שיחזור החיבור — אין צורך ללחוץ שוב.")
+                      title: tr("אין חיבור אינטרנט במכשיר שלך"),
+                      detail: tr("הפקודה שמורה ותישלח אוטומטית ברגע שיחזור החיבור — אין צורך ללחוץ שוב."))
         }
     }
 
@@ -153,20 +153,20 @@ struct RemoteCommandStatusSheet: View {
                            tracker: HouseholdManager.RemoteCommandTracker,
                            devices: [ChildDevice]) -> some View {
         let row = devices.first { $0.id == deviceID }
-        let name = row?.name ?? "מכשיר"
+        let name = row?.name ?? tr("מכשיר")
         let acked = (row?.remoteLockAppliedAt ?? 0) >= tracker.stamp
         let elapsed = Date().timeIntervalSince(tracker.sentAt)
 
         if acked {
             statusRow(icon: "lock.fill", tint: .green,
-                      title: "\(name) — ננעל ✓",
-                      detail: "המכשיר אישר את הנעילה.")
+                      title: tr("\(name) — ננעל ✓"),
+                      detail: tr("המכשיר אישר את הנעילה."))
         } else if elapsed < Self.deviceTimeout {
-            spinnerRow(title: "\(name) — ממתין לאישור מהמכשיר…")
+            spinnerRow(title: tr("\(name) — ממתין לאישור מהמכשיר…"))
         } else {
             statusRow(icon: "moon.zzz.fill", tint: .orange,
-                      title: "\(name) — לא מחובר כרגע",
-                      detail: "נראה לאחרונה \(relativeLastSeen(row?.lastSeenAt)). הנעילה שמורה ותחול ברגע שיתחבר — ואז תקבלו התראה.")
+                      title: tr("\(name) — לא מחובר כרגע"),
+                      detail: tr("נראה לאחרונה \(relativeLastSeen(row?.lastSeenAt)). הנעילה שמורה ותחול ברגע שיתחבר — ואז תקבלו התראה."))
         }
     }
 
@@ -177,18 +177,18 @@ struct RemoteCommandStatusSheet: View {
 
         if revoke?.failed == true {
             statusRow(icon: "exclamationmark.triangle.fill", tint: .red,
-                      title: "המחיקה לא נשלחה",
-                      detail: "משהו חסם את השליחה. נסו שוב עוד רגע.")
+                      title: tr("המחיקה לא נשלחה"),
+                      detail: tr("משהו חסם את השליחה. נסו שוב עוד רגע."))
         } else if revoke?.applied == true {
             statusRow(icon: "gift.fill", tint: .green,
-                      title: "דקות המתנה נמחקו ✓",
-                      detail: "המכשיר של \(profile.name) אישר את המחיקה.")
+                      title: tr("דקות המתנה נמחקו ✓"),
+                      detail: tr("המכשיר של \(profile.name) אישר את המחיקה."))
         } else if elapsed < Self.deviceTimeout {
-            spinnerRow(title: "מוחק דקות מתנה — ממתין לאישור…")
+            spinnerRow(title: tr("מוחק דקות מתנה — ממתין לאישור…"))
         } else {
             statusRow(icon: "gift", tint: .orange,
-                      title: "מחיקת דקות המתנה ממתינה למכשיר",
-                      detail: "תתבצע ברגע שהמכשיר של \(profile.name) יתחבר.")
+                      title: tr("מחיקת דקות המתנה ממתינה למכשיר"),
+                      detail: tr("תתבצע ברגע שהמכשיר של \(profile.name) יתחבר."))
         }
     }
 
@@ -203,18 +203,18 @@ struct RemoteCommandStatusSheet: View {
             // Permanent rejection — the honest state that used to be mislabeled
             // as "saved offline, will auto-send".
             statusRow(icon: "exclamationmark.triangle.fill", tint: .red,
-                      title: "המתנה לא נשלחה",
-                      detail: "משהו חסם את השליחה. נסו שוב עוד רגע.")
+                      title: tr("המתנה לא נשלחה"),
+                      detail: tr("משהו חסם את השליחה. נסו שוב עוד רגע."))
         } else if giftSend?.reachedCloud == true {
             statusRow(icon: "checkmark.icloud.fill", tint: .green,
-                      title: "המתנה נשלחה ונשמרה",
-                      detail: "גם אם המכשיר כבוי עכשיו — המתנה מחכה בענן.")
+                      title: tr("המתנה נשלחה ונשמרה"),
+                      detail: tr("גם אם המכשיר כבוי עכשיו — המתנה מחכה בענן."))
         } else if elapsed < Self.cloudTimeout {
-            spinnerRow(title: "שולח מתנה…")
+            spinnerRow(title: tr("שולח מתנה…"))
         } else {
             statusRow(icon: "wifi.slash", tint: .orange,
-                      title: "אין חיבור אינטרנט במכשיר שלך",
-                      detail: "המתנה שמורה ותישלח אוטומטית ברגע שיחזור החיבור — אין צורך ללחוץ שוב.")
+                      title: tr("אין חיבור אינטרנט במכשיר שלך"),
+                      detail: tr("המתנה שמורה ותישלח אוטומטית ברגע שיחזור החיבור — אין צורך ללחוץ שוב."))
         }
     }
 
@@ -226,18 +226,18 @@ struct RemoteCommandStatusSheet: View {
 
         if giftSend?.applied == true {
             statusRow(icon: "gift.fill", tint: .green,
-                      title: "המתנה הגיעה למכשיר של \(profile.name) ✓",
-                      detail: "ה-💝 כבר מופיע אצל\(profile.gender == .girl ? "ה" : "ו").")
+                      title: tr("המתנה הגיעה למכשיר של \(profile.name) ✓"),
+                      detail: tr("ה-💝 כבר מופיע אצל\(profile.gender == .girl ? tr("ה") : tr("ו"))."))
         } else if devices.isEmpty {
             statusRow(icon: "iphone.slash", tint: .orange,
-                      title: "אין כרגע מכשיר מחובר ל\(profile.name)",
-                      detail: "המתנה תופיע ברגע שמכשיר יתחבר.")
+                      title: tr("אין כרגע מכשיר מחובר ל\(profile.name)"),
+                      detail: tr("המתנה תופיע ברגע שמכשיר יתחבר."))
         } else if elapsed < Self.deviceTimeout {
-            spinnerRow(title: "ממתין למכשיר של \(profile.name)…")
+            spinnerRow(title: tr("ממתין למכשיר של \(profile.name)…"))
         } else {
             statusRow(icon: "moon.zzz.fill", tint: .orange,
-                      title: "המכשיר של \(profile.name) לא מחובר כרגע",
-                      detail: "נראה לאחרונה \(relativeLastSeen(devices.first?.lastSeenAt)). המתנה תופיע ברגע שיתחבר — ואז תקבלו התראה.")
+                      title: tr("המכשיר של \(profile.name) לא מחובר כרגע"),
+                      detail: tr("נראה לאחרונה \(relativeLastSeen(devices.first?.lastSeenAt)). המתנה תופיע ברגע שיתחבר — ואז תקבלו התראה."))
         }
     }
 
@@ -270,9 +270,9 @@ struct RemoteCommandStatusSheet: View {
     }
 
     private func relativeLastSeen(_ date: Date?) -> String {
-        guard let date else { return "לא ידוע" }
+        guard let date else { return tr("לא ידוע") }
         let fmt = RelativeDateTimeFormatter()
-        fmt.locale = Locale(identifier: "he_IL")
+        fmt.locale = LanguageStore.shared.current.locale
         fmt.unitsStyle = .full
         return fmt.localizedString(for: date, relativeTo: Date())
     }

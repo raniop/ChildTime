@@ -57,13 +57,13 @@ struct ChildAvatarView: View {
                         Button(role: .destructive) {
                             settings.childPhotoData = nil
                         } label: {
-                            Label("הסר תמונה", systemImage: "trash")
+                            Label(tr("הסר תמונה"), systemImage: "trash")
                         }
                     }
                     Button {
                         isPickerVisible = true
                     } label: {
-                        Label("בחר תמונה חדשה", systemImage: "photo")
+                        Label(tr("בחר תמונה חדשה"), systemImage: "photo")
                     }
                 }
             } else {

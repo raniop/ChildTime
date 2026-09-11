@@ -108,11 +108,11 @@ struct LuckyWheelView: View {
     private var header: some View {
         // Centered title + one line, straight on the backdrop (Rani: no box).
         VStack(spacing: 4) {
-            Text("גַּלְגַּל מַזָּל!")
+            Text(tr("גַּלְגַּל מַזָּל!"))
                 .font(.system(size: isCompact ? 30 : 40, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
-            Text(winner == nil ? "הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨" : "אֵיזֶה כֵּיף! 🎉")
+            Text(winner == nil ? tr("הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨") : tr("אֵיזֶה כֵּיף! 🎉"))
                 .font(.system(size: 13.5, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
         }
@@ -199,7 +199,7 @@ struct LuckyWheelView: View {
         VStack(spacing: 10) {
             Text(prize.emoji)
                 .font(.system(size: 54))
-            Text(prize.isPenalty ? "מְשִׂימָה מִשְׁפַּחְתִּית 🤗" : "זָכִיתָ!")
+            Text(prize.isPenalty ? tr("מְשִׂימָה מִשְׁפַּחְתִּית 🤗") : tr("זָכִיתָ!"))
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(prize.isPenalty ? AppColor.companionGlow : AppColor.starGold)
             Text(prize.label)
@@ -222,9 +222,9 @@ struct LuckyWheelView: View {
 
     private var primaryButton: some View {
         let label: String = {
-            if winner != nil { return "אַחְלָה — סְגוֹר" }
-            if isSpinning   { return "מִסְתּוֹבֵב…" }
-            return "סוֹבֵב!"
+            if winner != nil { return tr("אַחְלָה — סְגוֹר") }
+            if isSpinning   { return tr("מִסְתּוֹבֵב…") }
+            return tr("סוֹבֵב!")
         }()
         return Button {
             if winner != nil { onClose() }
@@ -249,7 +249,7 @@ struct LuckyWheelView: View {
             Haptic.light()
             onClose()
         } label: {
-            Text(winner == nil ? "דַּלֵּג הַפַּעַם" : "סְגוֹר")
+            Text(winner == nil ? tr("דַּלֵּג הַפַּעַם") : tr("סְגוֹר"))
                 .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .padding(.horizontal, 16).padding(.vertical, 9)
@@ -373,7 +373,7 @@ private struct WheelShape: View {
             .shadow(color: .black.opacity(0.35), radius: 3, y: 1)
             // Upright, never rotated: a radially rotated Hebrew label turns into
             // mirror-writing on the far half of the wheel.
-            .environment(\.layoutDirection, .rightToLeft)   // the Hebrew label itself
+            .environment(\.layoutDirection, .app)   // the Hebrew label itself
             .rotationEffect(.degrees(-rotation))              // upright at rest AND while spinning
             .offset(
                 x: cos(midAngle.radians) * size * 0.33,
@@ -414,5 +414,5 @@ private struct Triangle: Shape {
     LuckyWheelView { }
         .environmentObject(ProgressStore.shared)
         .environmentObject(CosmeticStore.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

@@ -435,10 +435,10 @@ extension ProgressSnapshot {
         guard ans.reduce(0, +) >= 25 else { return nil }   // need enough signal
         // Bands: morning 6–11, noon 12–16, evening 17–21, night 22–05.
         let bands: [(name: String, hours: [Int])] = [
-            ("בַּבֹּקֶר", Array(6...11)),
-            ("אַחַר הַצָּהֳרַיִם", Array(12...16)),
-            ("בָּעֶרֶב", Array(17...21)),
-            ("בַּלַּיְלָה", [22, 23, 0, 1, 2, 3, 4, 5]),
+            (tr("בַּבֹּקֶר"), Array(6...11)),
+            (tr("אַחַר הַצָּהֳרַיִם"), Array(12...16)),
+            (tr("בָּעֶרֶב"), Array(17...21)),
+            (tr("בַּלַּיְלָה"), [22, 23, 0, 1, 2, 3, 4, 5]),
         ]
         var best: (name: String, acc: Double, vol: Int)? = nil
         for b in bands {
@@ -449,8 +449,8 @@ extension ProgressSnapshot {
             if best == nil || acc > best!.acc { best = (b.name, acc, vol) }
         }
         guard let best else { return nil }
-        return (title: "שְׁעוֹת הַשִּׂיא: \(best.name)",
-                detail: "\(best.name) הַהַצְלָחָה הֲכִי גְּבוֹהָה — \(Int((best.acc * 100).rounded()))%. כְּדַאי לְתַזְמֵן לְמִידָה לַשָּׁעוֹת הָאֵלֶּה.")
+        return (title: tr("שְׁעוֹת הַשִּׂיא: \(best.name)"),
+                detail: tr("\(best.name) הַהַצְלָחָה הֲכִי גְּבוֹהָה — \(Int((best.acc * 100).rounded()))%. כְּדַאי לְתַזְמֵן לְמִידָה לַשָּׁעוֹת הָאֵלֶּה."))
     }
 
     /// Equal ignoring version metadata (revision/lastModifiedAt/deviceID) and the

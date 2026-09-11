@@ -21,11 +21,11 @@ struct RolePickerView: View {
                     VStack(spacing: AppSpacing.sm) {
                         CompanionView(controller: companion, size: isCompact ? 124 : 150)
                             .scaleEffect(appeared ? 1 : 0.4)
-                        Text("מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר הַזֶּה?")
+                        Text(tr("מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר הַזֶּה?"))
                             .font(.system(size: isCompact ? 26 : 34, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
-                        Text("אֶפְשָׁר לְשַׁנּוֹת מְאוּחָר יוֹתֵר בְּהַגְדָּרוֹת.")
+                        Text(tr("אֶפְשָׁר לְשַׁנּוֹת מְאוּחָר יוֹתֵר בְּהַגְדָּרוֹת."))
                             .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.8))
                     }
@@ -34,18 +34,18 @@ struct RolePickerView: View {
                     VStack(spacing: AppSpacing.lg) {
                         roleCard(
                             emoji: "🧒",
-                            title: "הַמַּכְשִׁיר שֶׁל הַיֶּלֶד",
+                            title: tr("הַמַּכְשִׁיר שֶׁל הַיֶּלֶד"),
                             // First-install guidance (Rani): families who start
                             // on the KID's device hit a scan screen with no code
                             // to scan — say up front that the parent goes first.
-                            subtitle: "לְשַׂחֵק וְלִלְמוֹד · מַתְחִילִים קֹדֶם בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה",
+                            subtitle: tr("לְשַׂחֵק וְלִלְמוֹד · מַתְחִילִים קֹדֶם בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה"),
                             glow: AppColor.companionGlow
                         ) { choose(.child) }
 
                         roleCard(
                             emoji: "👨‍👩‍👧",
-                            title: "הַמַּכְשִׁיר שֶׁלִּי (הוֹרֶה)",
-                            subtitle: "מַעֲקָב, דּוּחוֹת וְנִיהוּל",
+                            title: tr("הַמַּכְשִׁיר שֶׁלִּי (הוֹרֶה)"),
+                            subtitle: tr("מַעֲקָב, דּוּחוֹת וְנִיהוּל"),
                             glow: AppColor.starGold
                         ) { choose(.parent) }
                     }
@@ -112,5 +112,5 @@ struct RolePickerView: View {
 #Preview {
     RolePickerView()
         .environmentObject(ParentSettings.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

@@ -210,5 +210,5 @@ struct OptionCard: View {
         }
         .padding()
     }
-    .environment(\.layoutDirection, .rightToLeft)
+    .environment(\.layoutDirection, .app)
 }

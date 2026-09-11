@@ -30,8 +30,8 @@ struct LiveGameView: View {
                 case .reveal:    revealView(g)
                 case .roundBreak: roundBreakView(g)
                 case .final:     finalView(g)
-                case .cancelled: endedView(title: "הַמִּשְׂחָק הִסְתַּיֵּם 🎈",
-                                           subtitle: "תָּמִיד אֶפְשָׁר לְהַתְחִיל מִשְׂחָק חָדָשׁ!")
+                case .cancelled: endedView(title: tr("הַמִּשְׂחָק הִסְתַּיֵּם 🎈"),
+                                           subtitle: tr("תָּמִיד אֶפְשָׁר לְהַתְחִיל מִשְׂחָק חָדָשׁ!"))
                 }
             } else {
                 ProgressView().tint(.white)
@@ -46,19 +46,19 @@ struct LiveGameView: View {
 
             FancyConfetti(trigger: confetti).allowsHitTesting(false)
         }
-        .environment(\.layoutDirection, .rightToLeft)
-        .confirmationDialog("לָצֵאת מֵהַמִּשְׂחָק?", isPresented: $showQuit, titleVisibility: .visible) {
-            Button(amHost ? "כֵּן, לְסַיֵּם לְכוּלָּם" : "כֵּן, לָצֵאת", role: .destructive) {
+        .environment(\.layoutDirection, .app)
+        .confirmationDialog(tr("לָצֵאת מֵהַמִּשְׂחָק?"), isPresented: $showQuit, titleVisibility: .visible) {
+            Button(amHost ? tr("כֵּן, לְסַיֵּם לְכוּלָּם") : tr("כֵּן, לָצֵאת"), role: .destructive) {
                 Task { await lg.leaveGame() }
             }
-            Button("נִשְׁאָרִים בַּמִּשְׂחָק", role: .cancel) {}
+            Button(tr("נִשְׁאָרִים בַּמִּשְׂחָק"), role: .cancel) {}
         } message: {
-            Text(amHost ? "אַתָּה הַמַּנְהִיג — הַמִּשְׂחָק יִסְתַּיֵּם לְכָל הַחֲבֵרִים."
-                        : "אֶפְשָׁר תָּמִיד לְהִצְטָרֵף לְמִשְׂחָק חָדָשׁ אַחַר כָּךְ.")
+            Text(amHost ? tr("אַתָּה הַמַּנְהִיג — הַמִּשְׂחָק יִסְתַּיֵּם לְכָל הַחֲבֵרִים.")
+                        : tr("אֶפְשָׁר תָּמִיד לְהִצְטָרֵף לְמִשְׂחָק חָדָשׁ אַחַר כָּךְ."))
         }
         .sheet(item: $peekPlayer) { p in
             PlayerPeekView(player: p)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
         }
         .onDisappear { Task { await lg.leaveGame() } }
     }
@@ -78,7 +78,7 @@ struct LiveGameView: View {
             }
             Spacer()
         }
-        .environment(\.layoutDirection, .leftToRight)
+        .environment(\.layoutDirection, .appMirrored)
         .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.md)
     }
 
@@ -91,7 +91,7 @@ struct LiveGameView: View {
             }
             Spacer()
         }
-        .environment(\.layoutDirection, .leftToRight)
+        .environment(\.layoutDirection, .appMirrored)
         .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.md)
     }
 
@@ -103,9 +103,9 @@ struct LiveGameView: View {
         return VStack(spacing: AppSpacing.lg) {
             closeButton
             Text("🎮").font(.system(size: 56))
-            Text(isHost ? "מִי מִצְטָרֵף?" : "\(g.hostName) פָּתַח/ה מִשְׂחָק!")
+            Text(isHost ? tr("מִי מִצְטָרֵף?") : tr("\(g.hostName) פָּתַח/ה מִשְׂחָק!"))
                 .font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-            Text("\(g.topicEmoji) \(g.topicName) · הַטּוֹב מִ-\(g.totalRounds) סִבּוּבִים")
+            Text(tr("\(g.topicEmoji) \(g.topicName) · הַטּוֹב מִ-\(g.totalRounds) סִבּוּבִים"))
                 .font(.system(size: 15, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
 
@@ -120,7 +120,7 @@ struct LiveGameView: View {
                 // Category (guideline 1.3) forbids without a parental gate. Friends
                 // are invited in-app from the list above (push invites).
                 Button { lg.startGame() } label: {
-                    Text(canStart ? "מַתְחִילִים! 🚀" : "מְחַכִּים לְעוֹד שַׂחְקָן אֶחָד לְפָחוֹת…")
+                    Text(canStart ? tr("מַתְחִילִים! 🚀") : tr("מְחַכִּים לְעוֹד שַׂחְקָן אֶחָד לְפָחוֹת…"))
                         .font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                         .frame(maxWidth: .infinity).padding(.vertical, 16)
                         .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
@@ -128,7 +128,7 @@ struct LiveGameView: View {
                 .disabled(!canStart).opacity(canStart ? 1 : 0.55)
                 .padding(.horizontal, AppSpacing.xl)
             } else {
-                Text("מְחַכִּים שֶׁ\(g.hostName) יַתְחִיל… ⏳")
+                Text(tr("מְחַכִּים שֶׁ\(g.hostName) יַתְחִיל… ⏳"))
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .padding(.bottom, AppSpacing.lg)
@@ -171,7 +171,7 @@ struct LiveGameView: View {
             // RTL: .leading is the RIGHT edge, so the title sits flush right above
             // the rows (instead of floating to the left under .trailing).
             VStack(alignment: .leading, spacing: 8) {
-                Text("הַחֲבֵרִים שֶׁלִּי")
+                Text(tr("הַחֲבֵרִים שֶׁלִּי"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -183,7 +183,7 @@ struct LiveGameView: View {
                                 Text(f.name).font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                                 Spacer()
                                 if joinedIDs.contains(f.id) {
-                                    Label("הִצְטָרֵף", systemImage: "checkmark.circle.fill")
+                                    Label(tr("הִצְטָרֵף"), systemImage: "checkmark.circle.fill")
                                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                                         .foregroundStyle(AppColor.successMint).labelStyle(.titleAndIcon)
                                 } else {
@@ -191,7 +191,7 @@ struct LiveGameView: View {
                                         Haptic.light(); nudged.insert(f.id)
                                         Task { await lg.invite(friendID: f.id) }
                                     } label: {
-                                        Label(nudged.contains(f.id) ? "נִשְׁלַח" : "הַזְמִינוּ",
+                                        Label(nudged.contains(f.id) ? tr("נִשְׁלַח") : tr("הַזְמִינוּ"),
                                               systemImage: nudged.contains(f.id) ? "paperplane.fill" : "bell.fill")
                                             .font(.system(size: 13, weight: .heavy, design: .rounded))
                                             .foregroundStyle(.white)
@@ -223,7 +223,7 @@ struct LiveGameView: View {
                 .glow(AppColor.starGold, radius: 20)
                 .id(countdownValue)
                 .transition(.scale.combined(with: .opacity))
-            Text("מִתְכּוֹנְנִים…").font(.system(size: 20, weight: .heavy, design: .rounded))
+            Text(tr("מִתְכּוֹנְנִים…")).font(.system(size: 20, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             Spacer()
         }
@@ -272,7 +272,7 @@ struct LiveGameView: View {
                 .padding(.horizontal, AppSpacing.lg)
 
             if lg.myChoiceIndex != nil {
-                Label("עָנִיתָ! מְחַכִּים לַשְּׁאָר…", systemImage: "checkmark.circle.fill")
+                Label(tr("עָנִיתָ! מְחַכִּים לַשְּׁאָר…"), systemImage: "checkmark.circle.fill")
                     .font(.system(size: 19, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
                     .padding(.top, AppSpacing.sm)
@@ -286,13 +286,13 @@ struct LiveGameView: View {
     /// Round + question position as bold gold pills.
     private func progressPills(_ g: LiveGame) -> some View {
         VStack(alignment: .trailing, spacing: 6) {
-            Text("סִבּוּב \(g.currentRound + 1)/\(g.totalRounds)")
+            Text(tr("סִבּוּב \(g.currentRound + 1)/\(g.totalRounds)"))
                 .font(.system(size: 17, weight: .black, design: .rounded))
                 .foregroundStyle(AppColor.starGold)
                 .padding(.horizontal, 14).padding(.vertical, 7)
                 .background(Capsule().fill(.white.opacity(0.14)))
                 .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
-            Text("שְׁאֵלָה \(g.questionInRound + 1)/\(g.roundQuestions)")
+            Text(tr("שְׁאֵלָה \(g.questionInRound + 1)/\(g.roundQuestions)"))
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
                 .padding(.horizontal, 14).padding(.vertical, 6)
@@ -333,7 +333,7 @@ struct LiveGameView: View {
                     Text("\(left.roundWins) — \(right.roundWins)")
                         .font(.system(size: 30, weight: .black, design: .rounded))
                         .foregroundStyle(.white).monospacedDigit()
-                    Text("🏆 סִבּוּבִים")
+                    Text(tr("🏆 סִבּוּבִים"))
                         .font(.system(size: 10, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white.opacity(0.7))
                 }
@@ -452,7 +452,7 @@ struct LiveGameView: View {
         let gotIt = mine != nil && mine == correct
         return VStack(spacing: AppSpacing.lg) {
             Spacer()
-            Text(gotIt ? "נֶהֱדָר! 🎉" : (mine == nil ? "הַשְּׁאֵלָה הַבָּאָה תַּגִּיעַ 💫" : "כִּמְעַט! 🌟"))
+            Text(gotIt ? tr("נֶהֱדָר! 🎉") : (mine == nil ? tr("הַשְּׁאֵלָה הַבָּאָה תַּגִּיעַ 💫") : tr("כִּמְעַט! 🌟")))
                 .font(.system(size: 34, weight: .black, design: .rounded))
                 .foregroundStyle(gotIt ? AppColor.successMint : .white)
 
@@ -465,7 +465,7 @@ struct LiveGameView: View {
                             .foregroundStyle(.white).lineLimit(2).minimumScaleFactor(0.6)
                         Spacer()
                         if isCorrect { Text("✓").font(.system(size: 26, weight: .black)).foregroundStyle(.white) }
-                        else if isMine { Text("בָּחַרְתָּ").font(.system(size: 14, weight: .bold)).foregroundStyle(.white.opacity(0.8)) }
+                        else if isMine { Text(tr("בָּחַרְתָּ")).font(.system(size: 14, weight: .bold)).foregroundStyle(.white.opacity(0.8)) }
                     }
                     .padding(.horizontal, 18).padding(.vertical, 16)
                     .background(RoundedRectangle(cornerRadius: AppRadius.large)
@@ -491,7 +491,7 @@ struct LiveGameView: View {
     /// Compact live standings shown between questions.
     private var scoreStrip: some View {
         VStack(spacing: 8) {
-            Text("הַנִּקּוּד").font(.system(size: 14, weight: .heavy, design: .rounded))
+            Text(tr("הַנִּקּוּד")).font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
             ForEach(Array(lg.players.prefix(6).enumerated()), id: \.element.id) { idx, p in
                 Button { Haptic.light(); peekPlayer = p } label: {
@@ -520,19 +520,19 @@ struct LiveGameView: View {
         return VStack(spacing: AppSpacing.lg) {
             Spacer()
             Text("🏁").font(.system(size: 56))
-            Text("סִיַּמְנוּ סִבּוּב \(g.currentRound + 1)!")
+            Text(tr("סִיַּמְנוּ סִבּוּב \(g.currentRound + 1)!"))
                 .font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
             if let winner {
-                Text("\(winner.name) לָקַח/ה אֶת הַסִּבּוּב! 🎉")
+                Text(tr("\(winner.name) לָקַח/ה אֶת הַסִּבּוּב! 🎉"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
             } else {
-                Text("תֵּיקוּ בַּסִּבּוּב! 🤝")
+                Text(tr("תֵּיקוּ בַּסִּבּוּב! 🤝"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white.opacity(0.9))
             }
             roundWinsTally
-            Text("הַסִּבּוּב הַבָּא מַתְחִיל… ⏳")
+            Text(tr("הַסִּבּוּב הַבָּא מַתְחִיל… ⏳"))
                 .font(.system(size: 15, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
             Spacer(); Spacer()
@@ -576,11 +576,11 @@ struct LiveGameView: View {
         return VStack(spacing: AppSpacing.lg) {
             closeButton
             Text(iWon ? "🏆" : "🎉").font(.system(size: 76))
-            Text(iWon ? "וָואו, נִצַּחְתָּ! 🤩" : "כָּל הַכָּבוֹד! 🎉")
+            Text(iWon ? tr("וָואו, נִצַּחְתָּ! 🤩") : tr("כָּל הַכָּבוֹד! 🎉"))
                 .font(.system(size: 32, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 .glow(AppColor.starGold, radius: 14)
                 .multilineTextAlignment(.center)
-            Text("הַפְּרָסִים שֶׁלְּךָ:")
+            Text(tr("הַפְּרָסִים שֶׁלְּךָ:"))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 16) {
@@ -601,7 +601,7 @@ struct LiveGameView: View {
                                 Spacer()
                                 VStack(alignment: .trailing, spacing: 1) {
                                     Text(String(repeating: "🏆", count: p.roundWins)).font(.system(size: 14))
-                                    Text("\(p.score) נְקוּדּוֹת").font(.system(size: 13, weight: .heavy, design: .rounded))
+                                    Text(tr("\(p.score) נְקוּדּוֹת")).font(.system(size: 13, weight: .heavy, design: .rounded))
                                         .foregroundStyle(AppColor.starGold)
                                 }
                             }
@@ -616,11 +616,11 @@ struct LiveGameView: View {
 
             VStack(spacing: 10) {
                 Button { Haptic.light(); Task { await lg.leaveGame(); lg.wantsNewGame = true } } label: {
-                    Text("שַׂחֵק שׁוּב 🔄").font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    Text(tr("שַׂחֵק שׁוּב 🔄")).font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                         .frame(maxWidth: .infinity).padding(.vertical, 15).background(Capsule().fill(.white.opacity(0.92))).foregroundStyle(Color(hex: "4B3FBF"))
                 }
                 Button { Task { await lg.leaveGame() } } label: {
-                    Text("סִיּוּם").font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.9))
+                    Text(tr("סִיּוּם")).font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.9))
                         .frame(maxWidth: .infinity).padding(.vertical, 13).background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
             }
@@ -660,7 +660,7 @@ struct LiveGameView: View {
                 .foregroundStyle(.white.opacity(0.8)).multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.xl)
             Button { Task { await lg.leaveGame() } } label: {
-                Text("סְגִירָה").font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Text(tr("סְגִירָה")).font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl).padding(.vertical, 14)
                     .background(Capsule().fill(.white.opacity(0.92))).foregroundStyle(Color(hex: "4B3FBF"))
             }
@@ -712,12 +712,12 @@ struct PlayerPeekView: View {
                     .frame(width: 140, height: 140)
                     .glow(AppColor.starGold, radius: 22)
 
-                Text(player.name.isEmpty ? "שַׂחְקָן" : player.name)
+                Text(player.name.isEmpty ? tr("שַׂחְקָן") : player.name)
                     .font(.system(size: 34, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
 
                 if let stars = card?.stars {
-                    Label("\(stars) כּוֹכָבִים", systemImage: "star.fill")
+                    Label(tr("\(stars) כּוֹכָבִים"), systemImage: "star.fill")
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 18).padding(.vertical, 9)
@@ -727,11 +727,11 @@ struct PlayerPeekView: View {
                 }
 
                 HStack(spacing: 14) {
-                    statTile("🏆", "\(player.roundWins)", "סִבּוּבִים")
-                    statTile("⚡️", "\(player.score)", "נְקוּדּוֹת")
+                    statTile("🏆", "\(player.roundWins)", tr("סִבּוּבִים"))
+                    statTile("⚡️", "\(player.score)", tr("נְקוּדּוֹת"))
                 }
                 .padding(.horizontal, AppSpacing.lg)
-                Text("בַּמִּשְׂחָק הַזֶּה")
+                Text(tr("בַּמִּשְׂחָק הַזֶּה"))
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
 
@@ -742,7 +742,7 @@ struct PlayerPeekView: View {
             }
             .frame(maxWidth: 460).frame(maxWidth: .infinity)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .presentationDetents([.medium, .large])
         .task {
             card = await friends.card(for: player.id)
@@ -762,11 +762,11 @@ struct PlayerPeekView: View {
 
     @ViewBuilder private var addFriendArea: some View {
         if isMe {
-            Label("זֶה אַתָּה 🙂", systemImage: "person.fill")
+            Label(tr("זֶה אַתָּה 🙂"), systemImage: "person.fill")
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
         } else if added || friends.isFriend(player.id) {
-            Label("חָבֵר שֶׁלְּךָ", systemImage: "checkmark.circle.fill")
+            Label(tr("חָבֵר שֶׁלְּךָ"), systemImage: "checkmark.circle.fill")
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.successMint)
         } else if let code = card?.code, !code.isEmpty {
@@ -781,7 +781,7 @@ struct PlayerPeekView: View {
                 HStack(spacing: 8) {
                     if adding { ProgressView().tint(.white) }
                     else { Image(systemName: "person.badge.plus") }
-                    Text("הוֹסִיפוּ לַחֲבֵרִים")
+                    Text(tr("הוֹסִיפוּ לַחֲבֵרִים"))
                 }
                 .font(.system(size: 18, weight: .black, design: .rounded)).foregroundStyle(.white)
                 .frame(maxWidth: .infinity).padding(.vertical, 14)
@@ -844,11 +844,14 @@ struct LiveGameSetupSheet: View {
             GlassBackdrop()
             SparkleField(count: 12, size: 11)
             VStack(spacing: AppSpacing.lg) {
-                Text("בְּמָה מְשַׂחֲקִים? 🎮")
+                Text(tr("בְּמָה מְשַׂחֲקִים? 🎮"))
                     .font(.system(size: 26, weight: .black, design: .rounded)).foregroundStyle(GlassInk.primary)
+                    .lineLimit(1).minimumScaleFactor(0.75)
                     .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
+                    // Clear of the close button in the corner — a longer translation ran under it.
+                    .padding(.horizontal, 60)
                     .padding(.top, AppSpacing.xxl)
-                Text("בַּחֲרוּ נוֹשֵׂא וְהַמִּשְׂחָק מַתְחִיל!")
+                Text(tr("בַּחֲרוּ נוֹשֵׂא וְהַמִּשְׂחָק מַתְחִיל!"))
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
 
@@ -874,12 +877,12 @@ struct LiveGameSetupSheet: View {
                 Color.black.opacity(0.4).ignoresSafeArea()
                 VStack(spacing: AppSpacing.md) {
                     Text("🚀").font(.system(size: 52))
-                    Text("מַכְינִים אֶת הַמִּשְׂחָק…")
+                    Text(tr("מַכְינִים אֶת הַמִּשְׂחָק…"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 }
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .overlay(alignment: .topLeading) {
             Button { lg.closeSetup() } label: {
                 Image(systemName: "xmark").font(.system(size: 15, weight: .bold)).foregroundStyle(.white)

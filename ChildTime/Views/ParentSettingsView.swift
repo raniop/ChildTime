@@ -47,11 +47,11 @@ struct ParentSettingsView: View {
                                     .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.22)))
                                     .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("שָׁפָה · Language").font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
+                                    Text(tr("שָׁפָה · Language")).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
                                     Text(LanguageStore.shared.current.nativeName).font(.system(size: 12.5, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
                                 }
                                 Spacer(minLength: 0)
-                                Image(systemName: "chevron.forward").font(.system(size: 14, weight: .bold)).foregroundStyle(GlassInk.tertiary)
+                                Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold)).foregroundStyle(GlassInk.tertiary)
                             }
                             .padding(14)
                             .frame(maxWidth: .infinity)
@@ -59,26 +59,26 @@ struct ParentSettingsView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    menuRow("👪", "הַמִּשְׁפָּחָה", familySummary) {
-                        subScreen("הַמִּשְׁפָּחָה") { familySection; syncSection }
+                    menuRow("👪", tr("הַמִּשְׁפָּחָה"), familySummary) {
+                        subScreen(tr("הַמִּשְׁפָּחָה")) { familySection; syncSection }
                     }
-                    menuRow("🎮", "זְמַן מָסָךְ וּפְרָסִים", rewardsSummary) {
-                        subScreen("זְמַן מָסָךְ וּפְרָסִים") { rewardSection; penaltySection; smartFeedSection }
+                    menuRow("🎮", tr("זְמַן מָסָךְ וּפְרָסִים"), rewardsSummary) {
+                        subScreen(tr("זְמַן מָסָךְ וּפְרָסִים")) { rewardSection; penaltySection; smartFeedSection }
                     }
-                    menuRow("🔔", "הַתְרָאוֹת", notificationsSummary) {
-                        subScreen("הַתְרָאוֹת") { notificationsSection; insightNotificationsSection }
+                    menuRow("🔔", tr("הַתְרָאוֹת"), notificationsSummary) {
+                        subScreen(tr("הַתְרָאוֹת")) { notificationsSection; insightNotificationsSection }
                     }
-                    menuRow("🔐", "קוֹד הוֹרֶה", pinSummary) {
-                        subScreen("קוֹד הוֹרֶה") { pinSection }
+                    menuRow("🔐", tr("קוֹד הוֹרֶה"), pinSummary) {
+                        subScreen(tr("קוֹד הוֹרֶה")) { pinSection }
                     }
-                    menuRow("📱", "אַפְּלִיקַצְיוֹת וּנְעִילָה", devicesSummary, soft: true) {
-                        subScreen("אַפְּלִיקַצְיוֹת וּנְעִילָה") {
+                    menuRow("📱", tr("אַפְּלִיקַצְיוֹת וּנְעִילָה"), devicesSummary, soft: true) {
+                        subScreen(tr("אַפְּלִיקַצְיוֹת וּנְעִילָה")) {
                             if settings.deviceRole != .parent || shields.isAuthorized { authorizationSection }
                             appsSection; soundsSection; deviceSection
                         }
                     }
-                    menuRow("ℹ️", "אוֹדוֹת וּפְרָטִיּוּת", "\(AppInfo.versionLine) · יִצּוּא, מְחִיקָה", soft: true) {
-                        subScreen("אוֹדוֹת וּפְרָטִיּוּת") { versionSection; privacySection }
+                    menuRow("ℹ️", tr("אוֹדוֹת וּפְרָטִיּוּת"), tr("\(AppInfo.versionLine) · יִצּוּא, מְחִיקָה"), soft: true) {
+                        subScreen(tr("אוֹדוֹת וּפְרָטִיּוּת")) { versionSection; privacySection }
                     }
                 }
                 .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.sm).padding(.bottom, AppSpacing.xxl)
@@ -86,11 +86,11 @@ struct ParentSettingsView: View {
             }
             .background(GlassBackdrop())
             .environment(\.colorScheme, .dark)
-            .navigationTitle("הַגְדָּרוֹת")
+            .navigationTitle(tr("הַגְדָּרוֹת"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("סיום") { dismiss() }
+                    Button(tr("סיום")) { dismiss() }
                 }
             }
             .tofyActivityPicker(title: PickerCopy.blocked.title, header: PickerCopy.blocked.header, footer: PickerCopy.blocked.footer, isPresented: $showAppPicker, selection: $pickerSelection)
@@ -113,11 +113,11 @@ struct ParentSettingsView: View {
             .sheet(isPresented: $showSignIn) {
                 SignInView()
                     .environmentObject(auth)
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .sheet(isPresented: $showFamilyLinking) {
                 AddParentView()
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
         }
     }
@@ -130,13 +130,13 @@ struct ParentSettingsView: View {
             HStack {
                 Text("👪")
                 TextField("", text: $familyNameDraft,
-                          prompt: Text("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן").foregroundColor(.white.opacity(0.6)))
+                          prompt: Text(tr("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן")).foregroundColor(.white.opacity(0.6)))
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .submitLabel(.done)
                     .onSubmit { household.setFamilyName(familyNameDraft) }
                 if familyNameDraft != (household.familyNameShown ?? "") {
-                    Button("שִׁמְרוּ") { household.setFamilyName(familyNameDraft) }
+                    Button(tr("שִׁמְרוּ")) { household.setFamilyName(familyNameDraft) }
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .padding(.horizontal, 12).padding(.vertical, 6)
@@ -145,9 +145,9 @@ struct ParentSettingsView: View {
                 }
             }
         } header: {
-            Text("שֵׁם הַמִּשְׁפָּחָה")
+            Text(tr("שֵׁם הַמִּשְׁפָּחָה"))
         } footer: {
-            Text("מוֹפִיעַ בְּמָסָךְ הַהוֹרִים וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה.")
+            Text(tr("מוֹפִיעַ בְּמָסָךְ הַהוֹרִים וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה."))
         }
         .glassRows()
     }
@@ -168,7 +168,7 @@ struct ParentSettingsView: View {
                         .lineLimit(2).minimumScaleFactor(0.8)
                 }
                 Spacer(minLength: 0)
-                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold)).foregroundStyle(GlassInk.tertiary)
+                Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold)).foregroundStyle(GlassInk.tertiary)
             }
             .padding(14)
             .frame(maxWidth: .infinity)
@@ -186,22 +186,22 @@ struct ParentSettingsView: View {
 
     private var familySummary: String {
         let parents = household.linkedParentSummaries.isEmpty
-            ? (auth.displayName ?? "הוֹרֶה") : household.linkedParentSummaries.joined(separator: ", ")
+            ? (auth.displayName ?? tr("הוֹרֶה")) : household.linkedParentSummaries.joined(separator: ", ")
         let kids = profiles.profiles.count
-        return "\(parents) · \(kids == 1 ? "יֶלֶד אֶחָד" : "\(kids) יְלָדִים")"
+        return tr("\(parents) · \(kids == 1 ? tr("יֶלֶד אֶחָד") : tr("\(kids) יְלָדִים"))")
     }
     private var rewardsSummary: String {
-        var t = "\(settings.batchAnswers) תְּשׁוּבוֹת = \(settings.batchMinutes) דַּקּוֹת"
-        if settings.dailyCapEnabled { t += " · מַקְסִימוּם \(settings.maxMinutesPerDay) דַּק׳ בְּיוֹם" }
+        var t = tr("\(settings.batchAnswers) תְּשׁוּבוֹת = \(settings.batchMinutes) דַּקּוֹת")
+        if settings.dailyCapEnabled { t += tr(" · מַקְסִימוּם \(settings.maxMinutesPerDay) דַּק׳ בְּיוֹם") }
         return t
     }
     private var notificationsSummary: String {
-        let push = PushManager.shared.authorized ? "פּוֹעֲלוֹת" : "כְּבוּיוֹת"
-        return "\(push) · תּוֹבָנוֹת \(freqShortLabel(settings.parentInsightFrequency)) בְּיוֹם"
+        let push = PushManager.shared.authorized ? tr("פּוֹעֲלוֹת") : tr("כְּבוּיוֹת")
+        return tr("\(push) · תּוֹבָנוֹת \(freqShortLabel(settings.parentInsightFrequency)) בְּיוֹם")
     }
-    private var pinSummary: String { settings.faceIDForParentGate ? "Face ID פָּעִיל · שִׁנּוּי קוֹד" : "קוֹד בִּלְבַד · שִׁנּוּי קוֹד" }
+    private var pinSummary: String { settings.faceIDForParentGate ? tr("Face ID פָּעִיל · שִׁנּוּי קוֹד") : tr("קוֹד בִּלְבַד · שִׁנּוּי קוֹד") }
     private var devicesSummary: String {
-        settings.deviceRole == .parent ? "מֻגְדָּר בַּמַּכְשִׁיר שֶׁל כָּל יֶלֶד" : "אֵילוּ אַפְּלִיקַצְיוֹת נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה"
+        settings.deviceRole == .parent ? tr("מֻגְדָּר בַּמַּכְשִׁיר שֶׁל כָּל יֶלֶד") : tr("אֵילוּ אַפְּלִיקַצְיוֹת נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה")
     }
 
     private var dashboardSection: some View {
@@ -214,14 +214,14 @@ struct ParentSettingsView: View {
                         .font(.title3)
                         .foregroundStyle(AppColor.successMint)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("מבט-על על המשפחה")
+                        Text(tr("מבט-על על המשפחה"))
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
-                        Text("\(profiles.profiles.count) פרופילים • זמן, ניקוד, ואיפוסים")
+                        Text(tr("\(profiles.profiles.count) פרופילים • זמן, ניקוד, ואיפוסים"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
-                    Image(systemName: "chevron.left")
+                    Image(systemName: AppSymbol.forwardChevron)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -237,7 +237,7 @@ struct ParentSettingsView: View {
                 HStack(spacing: 12) {
                     Text("👑").font(.system(size: 32))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("טופי+ פעיל")
+                        Text(tr("טופי+ פעיל"))
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(AppColor.starGold)
                         Text(premiumStatusSubtitle)
@@ -251,7 +251,7 @@ struct ParentSettingsView: View {
                         UIApplication.shared.open(url)
                     }
                 } label: {
-                    Label("נהל מנוי ב-Apple ID", systemImage: "gear")
+                    Label(tr("נהל מנוי ב-Apple ID"), systemImage: "gear")
                 }
             } else {
                 // Upsell card
@@ -261,15 +261,15 @@ struct ParentSettingsView: View {
                     HStack(spacing: 12) {
                         Text("👑").font(.system(size: 28))
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("שדרג ל-טופי+")
+                            Text(tr("שדרג ל-טופי+"))
                                 .font(.system(size: 17, weight: .heavy, design: .rounded))
-                            Text("כל הנושאים, כל העולמות, פרופילים לכל ילד")
+                            Text(tr("כל הנושאים, כל העולמות, פרופילים לכל ילד"))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .multilineTextAlignment(.leading)
                         }
                         Spacer()
-                        Image(systemName: "chevron.left")
+                        Image(systemName: AppSymbol.forwardChevron)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -278,15 +278,15 @@ struct ParentSettingsView: View {
                 Button {
                     Task { await subs.restorePurchases() }
                 } label: {
-                    Label("שחזר רכישה קיימת", systemImage: "arrow.clockwise")
+                    Label(tr("שחזר רכישה קיימת"), systemImage: "arrow.clockwise")
                         .font(.caption)
                 }
             }
         } header: {
-            Text("מנוי")
+            Text(tr("מנוי"))
         } footer: {
             if !subs.isPremium {
-                Text("ניסיון 7 ימים חינם במסלול השנתי. ניתן לבטל בכל עת בהגדרות Apple ID.")
+                Text(tr("ניסיון 7 ימים חינם במסלול השנתי. ניתן לבטל בכל עת בהגדרות Apple ID."))
                     .font(.caption2)
             } else {
                 EmptyView()
@@ -300,17 +300,17 @@ struct ParentSettingsView: View {
         case .active(let expires?, let willRenew):
             let df = DateFormatter()
             df.dateStyle = .medium
-            df.locale = Locale(identifier: "he_IL")
+            df.locale = LanguageStore.shared.current.locale
             return willRenew
-                ? "מתחדש ב-\(df.string(from: expires))"
-                : "פעיל עד \(df.string(from: expires))"
+                ? tr("מתחדש ב-\(df.string(from: expires))")
+                : tr("פעיל עד \(df.string(from: expires))")
         case .active(nil, _):
-            return "רכישה לכל החיים ✨"
+            return tr("רכישה לכל החיים ✨")
         case .inTrial(let expires):
             let df = DateFormatter()
             df.dateStyle = .medium
-            df.locale = Locale(identifier: "he_IL")
-            return "ניסיון חינם עד \(df.string(from: expires))"
+            df.locale = LanguageStore.shared.current.locale
+            return tr("ניסיון חינם עד \(df.string(from: expires))")
         default:
             return ""
         }
@@ -319,17 +319,17 @@ struct ParentSettingsView: View {
     private var authorizationSection: some View {
         Group {
         insightNotificationsSection
-        Section("הרשאות") {
+        Section(tr("הרשאות")) {
             HStack {
                 Image(systemName: shields.isAuthorized ? "checkmark.shield.fill" : "exclamationmark.shield.fill")
                     .foregroundStyle(shields.isAuthorized ? .green : .orange)
                 VStack(alignment: .leading) {
-                    Text(shields.isAuthorized ? "Family Controls מאושר" : "צריך אישור")
+                    Text(shields.isAuthorized ? tr("Family Controls מאושר") : tr("צריך אישור"))
                         .font(.headline)
                     if let err = shields.authorizationError {
                         Text(err).font(.caption).foregroundStyle(.red)
                     } else if !shields.isAuthorized {
-                        Text("בלי זה לא נוכל לחסום אפליקציות")
+                        Text(tr("בלי זה לא נוכל לחסום אפליקציות"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -349,7 +349,7 @@ struct ParentSettingsView: View {
                         if requestingShield {
                             ProgressView().tint(.white)
                         } else {
-                            Text(shields.authorizationError == nil ? "בקש" : "נסו שוב")
+                            Text(shields.authorizationError == nil ? tr("בקש") : tr("נסו שוב"))
                         }
                     }
                     .buttonStyle(.borderedProminent)
@@ -366,38 +366,38 @@ struct ParentSettingsView: View {
     /// design: greeting, child cards, version — nothing else).
     private var insightNotificationsSection: some View {
         Section {
-            Picker("תְּדִירוּת", selection: $settings.parentInsightFrequency) {
+            Picker(tr("תְּדִירוּת"), selection: $settings.parentInsightFrequency) {
                 ForEach(ParentSettings.InsightFrequency.allCases) { f in
                     Text(freqShortLabel(f)).tag(f)
                 }
             }
             .pickerStyle(.segmented)
         } header: {
-            Text("התראות תובנות להורה")
+            Text(tr("התראות תובנות להורה"))
         } footer: {
-            Text("עדכונים קצרים ואישיים על כל ילד — במה השתפר, איפה התקשה ומה לתרגל.")
+            Text(tr("עדכונים קצרים ואישיים על כל ילד — במה השתפר, איפה התקשה ומה לתרגל."))
         }
         .glassRows()
     }
 
     private func freqShortLabel(_ f: ParentSettings.InsightFrequency) -> String {
         switch f {
-        case .off:    return "כבוי"
-        case .once:   return "פעם"
-        case .twice:  return "פעמיים"
-        case .thrice: return "3 פעמים"
+        case .off:    return tr("כבוי")
+        case .once:   return tr("פעם")
+        case .twice:  return tr("פעמיים")
+        case .thrice: return tr("3 פעמים")
         }
     }
 
     private var syncSection: some View {
-        Section("סנכרון בין מכשירים") {
+        Section(tr("סנכרון בין מכשירים")) {
             if auth.isSignedIn {
                 HStack(spacing: 12) {
                     Image(systemName: "checkmark.icloud.fill")
                         .foregroundStyle(.green)
                         .font(.title3)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(auth.displayName ?? auth.email ?? "מחובר")
+                        Text(auth.displayName ?? auth.email ?? tr("מחובר"))
                             .font(.headline)
                         if let email = auth.email, email != auth.displayName {
                             Text(email)
@@ -405,7 +405,7 @@ struct ParentSettingsView: View {
                                 .foregroundStyle(.secondary)
                         }
                         if let p = auth.provider {
-                            Text(p == .apple ? "דרך Apple" : "דרך Google")
+                            Text(p == .apple ? tr("דרך Apple") : tr("דרך Google"))
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
@@ -420,7 +420,7 @@ struct ParentSettingsView: View {
                             .foregroundStyle(AppColor.gemPurple).font(.title3)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(name).font(.headline)
-                            Text("הוֹרֶה בַּמִּשְׁפָּחָה").font(.caption).foregroundStyle(.secondary)
+                            Text(tr("הוֹרֶה בַּמִּשְׁפָּחָה")).font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer()
                     }
@@ -428,31 +428,31 @@ struct ParentSettingsView: View {
                 Button {
                     showFamilyLinking = true
                 } label: {
-                    Label("הוֹסִיפוּ הוֹרֶה לַמִּשְׁפָּחָה", systemImage: "person.2.badge.plus.fill")
+                    Label(tr("הוֹסִיפוּ הוֹרֶה לַמִּשְׁפָּחָה"), systemImage: "person.2.badge.plus.fill")
                 }
                 Button(role: .destructive) {
                     showSignOutConfirm = true
                 } label: {
-                    Label("התנתק ומחק מהמכשיר", systemImage: "rectangle.portrait.and.arrow.right")
+                    Label(tr("התנתק ומחק מהמכשיר"), systemImage: "rectangle.portrait.and.arrow.right")
                 }
-                .alert("להתנתק ולמחוק הכול מהמכשיר?", isPresented: $showSignOutConfirm) {
-                    Button("התנתק ומחק", role: .destructive) {
+                .alert(tr("להתנתק ולמחוק הכול מהמכשיר?"), isPresented: $showSignOutConfirm) {
+                    Button(tr("התנתק ומחק"), role: .destructive) {
                         HouseholdManager.shared.resetThisDevice()
                         dismiss()
                     }
-                    Button("בטל", role: .cancel) {}
+                    Button(tr("בטל"), role: .cancel) {}
                 } message: {
-                    Text("המכשיר יחזור למצב התחלתי לגמרי — בלי חשבון, בלי קוד הורה, בלי נתונים מקומיים (כאילו הותקן מחדש). המשפחה וההתקדמות בענן נשמרות — התחברות מחדש תשחזר אותן.")
+                    Text(tr("המכשיר יחזור למצב התחלתי לגמרי — בלי חשבון, בלי קוד הורה, בלי נתונים מקומיים (כאילו הותקן מחדש). המשפחה וההתקדמות בענן נשמרות — התחברות מחדש תשחזר אותן."))
                 }
             } else {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("התחבר כדי שההתקדמות של הילד תישמר גם ב-iPad וגם ב-iPhone.")
+                    Text(tr("התחבר כדי שההתקדמות של הילד תישמר גם ב-iPad וגם ב-iPhone."))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     Button {
                         showSignIn = true
                     } label: {
-                        Label("התחבר עם Apple או Google", systemImage: "icloud.and.arrow.up")
+                        Label(tr("התחבר עם Apple או Google"), systemImage: "icloud.and.arrow.up")
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -472,19 +472,19 @@ struct ParentSettingsView: View {
     private var notificationsSection: some View {
         Section {
             if push.authorized {
-                Label("התראות פעילות", systemImage: "bell.badge.fill")
+                Label(tr("התראות פעילות"), systemImage: "bell.badge.fill")
                     .foregroundStyle(AppColor.successMint)
             } else {
                 Button {
                     Task { await push.requestAuthorization() }
                 } label: {
-                    Label("הפעל התראות חיות", systemImage: "bell.fill")
+                    Label(tr("הפעל התראות חיות"), systemImage: "bell.fill")
                 }
             }
             Button {
                 Task { testPushMessage = await push.sendTestPush() }
             } label: {
-                Label("שלח התראת בדיקה", systemImage: "paperplane.fill")
+                Label(tr("שלח התראת בדיקה"), systemImage: "paperplane.fill")
             }
             if let testPushMessage {
                 Text(testPushMessage)
@@ -492,9 +492,9 @@ struct ParentSettingsView: View {
                     .foregroundStyle(.secondary)
             }
         } header: {
-            Text("התראות להורה")
+            Text(tr("התראות להורה"))
         } footer: {
-            Text("קבלו עדכון כשהילד מתחיל ומסיים לשחק, פותח רצף, זוכה בגלגל מזל או מגלה תחום חדש — וגם דוח שבועי. ההתראות נשלחות בין המכשירים בבית. \"שלח התראת בדיקה\" שולח התראה אליכם עכשיו כדי לוודא שהכול עובד.")
+            Text(tr("קבלו עדכון כשהילד מתחיל ומסיים לשחק, פותח רצף, זוכה בגלגל מזל או מגלה תחום חדש — וגם דוח שבועי. ההתראות נשלחות בין המכשירים בבית. \"שלח התראת בדיקה\" שולח התראה אליכם עכשיו כדי לוודא שהכול עובד."))
         }
         .glassRows()
         .task { await push.refreshAuthorizationStatus() }
@@ -506,29 +506,29 @@ struct ParentSettingsView: View {
             HStack(spacing: 10) {
                 Image(systemName: "gamecontroller.fill")
                     .foregroundStyle(AppColor.successMint)
-                Text("כל \(settings.batchAnswers) תשובות נכונות = \(settings.batchMinutes) דקות משחק")
+                Text(tr("כל \(settings.batchAnswers) תשובות נכונות = \(settings.batchMinutes) דקות משחק"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                 Spacer()
             }
             Stepper(
-                "תשובות נכונות לתגמול: \(settings.batchAnswers)",
+                tr("תשובות נכונות לתגמול: \(settings.batchAnswers)"),
                 value: $settings.batchAnswers,
                 in: 1...30
             )
             Stepper(
-                "דקות משחק לתגמול: \(settings.batchMinutes)",
+                tr("דקות משחק לתגמול: \(settings.batchMinutes)"),
                 value: $settings.batchMinutes,
                 in: 1...30
             )
             Stepper(
-                "שאלות בכל סבב: \(settings.questionsPerSession)",
+                tr("שאלות בכל סבב: \(settings.questionsPerSession)"),
                 value: $settings.questionsPerSession,
                 in: 15...30
             )
         } header: {
-            Text("תגמול")
+            Text(tr("תגמול"))
         } footer: {
-            Text("הילד מרוויח \(settings.batchMinutes) דקות משחק על כל \(settings.batchAnswers) תשובות נכונות. אפשר לשנות את שני המספרים. ברירת המחדל: 10 תשובות = 4 דקות.")
+            Text(tr("הילד מרוויח \(settings.batchMinutes) דקות משחק על כל \(settings.batchAnswers) תשובות נכונות. אפשר לשנות את שני המספרים. ברירת המחדל: 10 תשובות = 4 דקות."))
         }
         .glassRows()
     }
@@ -536,15 +536,15 @@ struct ParentSettingsView: View {
     private var smartFeedSection: some View {
         Section {
             Stepper(
-                "גלגל מזל כל \(settings.questionsPerWheel) שאלות",
+                tr("גלגל מזל כל \(settings.questionsPerWheel) שאלות"),
                 value: $settings.questionsPerWheel,
                 in: 5...50,
                 step: 5
             )
         } header: {
-            Text("פיד למידה חכם")
+            Text(tr("פיד למידה חכם"))
         } footer: {
-            Text("ב\"טופי טיים\" המערכת בונה לכל ילד פיד אישי: 80% מהנושאים שהוא אוהב ו-20% תחומים חדשים לגילוי. הפיד משתפר אחרי כל שאלה. כל \(settings.questionsPerWheel) שאלות הילד מרוויח סיבוב חינם בגלגל המזל.")
+            Text(tr("ב\"טופי טיים\" המערכת בונה לכל ילד פיד אישי: 80% מהנושאים שהוא אוהב ו-20% תחומים חדשים לגילוי. הפיד משתפר אחרי כל שאלה. כל \(settings.questionsPerWheel) שאלות הילד מרוויח סיבוב חינם בגלגל המזל."))
         }
         .glassRows()
     }
@@ -553,24 +553,24 @@ struct ParentSettingsView: View {
     private var penaltySection: some View {
         let perMistake = progress.mistakePenaltyMinutes(minutesPerCorrect: settings.minutesPerCorrectAnswer)
         return Section {
-            Toggle("טעויות עולות זמן", isOn: $settings.penaltyEnabled)
+            Toggle(tr("טעויות עולות זמן"), isOn: $settings.penaltyEnabled)
         } header: {
-            Text("טעויות ולולאת תיקון")
+            Text(tr("טעויות ולולאת תיקון"))
         } footer: {
             Text(settings.penaltyEnabled
-                ? "כל טעות מורידה \(perMistake) דק' (חצי מתגמול תשובה נכונה) — אבל הילד יכול להחזיר את הזמן מיד: תשובה נכונה ונקייה בשאלה הבאה מחזירה את כל הזמן שירד. אף פעם לא מוצג לילד \"טעית\" או \"הפסדת\"."
-                : "כבוי. הילד לא יאבד זמן גם אם יטעה הרבה.")
+                ? tr("כל טעות מורידה \(perMistake) דק' (חצי מתגמול תשובה נכונה) — אבל הילד יכול להחזיר את הזמן מיד: תשובה נכונה ונקייה בשאלה הבאה מחזירה את כל הזמן שירד. אף פעם לא מוצג לילד \"טעית\" או \"הפסדת\".")
+                : tr("כבוי. הילד לא יאבד זמן גם אם יטעה הרבה."))
         }
         .glassRows()
     }
 
     private var soundsSection: some View {
         Section {
-            Toggle("צלילים פעילים", isOn: $settings.soundsEnabled)
+            Toggle(tr("צלילים פעילים"), isOn: $settings.soundsEnabled)
         } header: {
-            Text("צלילים")
+            Text(tr("צלילים"))
         } footer: {
-            Text("הצלילים באפליקציה רכים ומשמשים כפידבק על תשובות נכונות / שגויות. ניתן לכבות אותם לגמרי.")
+            Text(tr("הצלילים באפליקציה רכים ומשמשים כפידבק על תשובות נכונות / שגויות. ניתן לכבות אותם לגמרי."))
         }
         .glassRows()
     }
@@ -578,7 +578,7 @@ struct ParentSettingsView: View {
     private var appsSection: some View {
         Section {
             Toggle(isOn: $settings.blockAllExceptAllowed) {
-                Label("חסום הכל חוץ מהמותר", systemImage: "lock.shield.fill")
+                Label(tr("חסום הכל חוץ מהמותר"), systemImage: "lock.shield.fill")
             }
 
             if settings.blockAllExceptAllowed {
@@ -588,26 +588,26 @@ struct ParentSettingsView: View {
                 } label: {
                     HStack {
                         Image(systemName: "checkmark.shield.fill")
-                        Text("בחר אפליקציות מותרות")
+                        Text(tr("בחר אפליקציות מותרות"))
                         Spacer()
                         let count = allowedSelection.applicationTokens.count
                             + allowedSelection.categoryTokens.count
                         if count > 0 {
-                            Text("\(count) מותרות").foregroundStyle(.secondary)
+                            Text(tr("\(count) מותרות")).foregroundStyle(.secondary)
                         }
-                        Image(systemName: "chevron.left").foregroundStyle(.secondary)
+                        Image(systemName: AppSymbol.forwardChevron).foregroundStyle(.secondary)
                     }
                 }
                 if allowedSelection.applicationTokens.isEmpty
                     && allowedSelection.categoryTokens.isEmpty {
-                    Text("⚠️ חשוב: בחרו אילו אפליקציות יישארו פתוחות — והקפידו לכלול את ChildTime (וכן אפליקציות חיוניות כמו טלפון). עד שתבחרו — לא ייחסם כלום, כדי לא לנעול את המכשיר בטעות.")
+                    Text(tr("⚠️ חשוב: בחרו אילו אפליקציות יישארו פתוחות — והקפידו לכלול את ChildTime (וכן אפליקציות חיוניות כמו טלפון). עד שתבחרו — לא ייחסם כלום, כדי לא לנעול את המכשיר בטעות."))
                         .font(.caption)
                         .foregroundStyle(.orange)
                 } else {
                     Button(role: .destructive) {
                         allowedSelection = FamilyActivitySelection()
                     } label: {
-                        Label("נקה רשימת מותרות", systemImage: "trash")
+                        Label(tr("נקה רשימת מותרות"), systemImage: "trash")
                     }
                 }
             } else {
@@ -617,35 +617,35 @@ struct ParentSettingsView: View {
                 } label: {
                     HStack {
                         Image(systemName: "app.badge.fill")
-                        Text("בחר אפליקציות")
+                        Text(tr("בחר אפליקציות"))
                         Spacer()
                         let count = pickerSelection.applicationTokens.count
                             + pickerSelection.categoryTokens.count
                         if count > 0 {
-                            Text("\(count) נבחרו").foregroundStyle(.secondary)
+                            Text(tr("\(count) נבחרו")).foregroundStyle(.secondary)
                         }
-                        Image(systemName: "chevron.left").foregroundStyle(.secondary)
+                        Image(systemName: AppSymbol.forwardChevron).foregroundStyle(.secondary)
                     }
                 }
                 if pickerSelection.applicationTokens.isEmpty
                     && pickerSelection.categoryTokens.isEmpty {
-                    Text("עדיין לא בחרת אפליקציות לחסום. בלי בחירה - לא יקרה כלום כשהילד פותח את ה-iPad.")
+                    Text(tr("עדיין לא בחרת אפליקציות לחסום. בלי בחירה - לא יקרה כלום כשהילד פותח את ה-iPad."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else {
                     Button(role: .destructive) {
                         pickerSelection = FamilyActivitySelection()
                     } label: {
-                        Label("נקה בחירה", systemImage: "trash")
+                        Label(tr("נקה בחירה"), systemImage: "trash")
                     }
                 }
             }
         } header: {
-            Text("חסימת אפליקציות")
+            Text(tr("חסימת אפליקציות"))
         } footer: {
             Text(settings.blockAllExceptAllowed
-                 ? "כל האפליקציות ייחסמו עד שהילד מרוויח זמן — חוץ מהאפליקציות שתבחרו כ\"מותרות\". חובה לכלול את ChildTime ברשימה."
-                 : "רק האפליקציות שתבחרו ייחסמו. כל השאר נשארות פתוחות.")
+                 ? tr("כל האפליקציות ייחסמו עד שהילד מרוויח זמן — חוץ מהאפליקציות שתבחרו כ\"מותרות\". חובה לכלול את ChildTime ברשימה.")
+                 : tr("רק האפליקציות שתבחרו ייחסמו. כל השאר נשארות פתוחות."))
         }
         .glassRows()
     }
@@ -658,7 +658,7 @@ struct ParentSettingsView: View {
             Button {
                 showRolePickerConfirm = true
             } label: {
-                Label("הַחְלֵף תַּפְקִיד מַכְשִׁיר (חֲזָרָה לִבְחִירָה)", systemImage: "person.2.badge.gearshape")
+                Label(tr("הַחְלֵף תַּפְקִיד מַכְשִׁיר (חֲזָרָה לִבְחִירָה)"), systemImage: "person.2.badge.gearshape")
             }
             Button {
                 Haptic.medium()
@@ -667,22 +667,22 @@ struct ParentSettingsView: View {
                 // instantly re-block the deletion this button just allowed.
                 shields.cancelScheduledReshield()
                 shields.setAppRemovalLocked(false)
-                removalNote = "נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת. צְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד."
+                removalNote = tr("נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת. צְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד.")
             } label: {
-                Label("אַפְשְׁרוּ מְחִיקַת הָאַפְּלִיקַצְיָה (5 דַּקּוֹת)", systemImage: "trash")
+                Label(tr("אַפְשְׁרוּ מְחִיקַת הָאַפְּלִיקַצְיָה (5 דַּקּוֹת)"), systemImage: "trash")
             }
             if let removalNote {
                 Text(removalNote).font(.footnote).foregroundStyle(.secondary)
             }
         } header: {
-            Text("מַכְשִׁיר")
+            Text(tr("מַכְשִׁיר"))
         } footer: {
-            Text("\"הַחְלֵף תַּפְקִיד\" מַחֲזִיר אֶת הַמַּכְשִׁיר לְמָסַךְ \"מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר?\" — לְמָשָׁל לְהָפֹךְ מַכְשִׁיר הוֹרֶה בַּחֲזָרָה לְמַכְשִׁיר יֶלֶד. בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה; הַכַּפְתּוֹר פּוֹתֵחַ חַלּוֹן קָצָר לְהָסָרָה אֲמִתִּית.")
+            Text(tr("\"הַחְלֵף תַּפְקִיד\" מַחֲזִיר אֶת הַמַּכְשִׁיר לְמָסַךְ \"מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר?\" — לְמָשָׁל לְהָפֹךְ מַכְשִׁיר הוֹרֶה בַּחֲזָרָה לְמַכְשִׁיר יֶלֶד. בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה; הַכַּפְתּוֹר פּוֹתֵחַ חַלּוֹן קָצָר לְהָסָרָה אֲמִתִּית."))
         }
         .glassRows()
-        .confirmationDialog("לַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד?",
+        .confirmationDialog(tr("לַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד?"),
                             isPresented: $showRolePickerConfirm, titleVisibility: .visible) {
-            Button("חֲזֹר לִבְחִירָה") {
+            Button(tr("חֲזֹר לִבְחִירָה")) {
                 settings.sessionUnlocked = false   // re-lock the gate after a role switch
                 // Clear the child binding so re-picking "child" starts a FRESH scan
                 // instead of silently dropping back into the previously-bound kid.
@@ -697,9 +697,9 @@ struct ParentSettingsView: View {
                 settings.deviceRole = .unset
                 dismiss()
             }
-            Button("בִּטּוּל", role: .cancel) {}
+            Button(tr("בִּטּוּל"), role: .cancel) {}
         } message: {
-            Text("הַמַּכְשִׁיר יַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד. הַנְּתוּנִים בֶּעָנָן נִשְׁמָרִים — אֶפְשָׁר לִבְחֹר יֶלֶד וְלִסְרֹק שׁוּב, אוֹ לְהִשָּׁאֵר הוֹרֶה.")
+            Text(tr("הַמַּכְשִׁיר יַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד. הַנְּתוּנִים בֶּעָנָן נִשְׁמָרִים — אֶפְשָׁר לִבְחֹר יֶלֶד וְלִסְרֹק שׁוּב, אוֹ לְהִשָּׁאֵר הוֹרֶה."))
         }
         .glassRows()
     }
@@ -709,51 +709,51 @@ struct ParentSettingsView: View {
             Button {
                 exportURL = DataExporter.writeExportFile()
             } label: {
-                Label("ייצוא הנתונים שלי (JSON)", systemImage: "square.and.arrow.up")
+                Label(tr("ייצוא הנתונים שלי (JSON)"), systemImage: "square.and.arrow.up")
             }
             if let url = exportURL {
                 ShareLink(item: url) {
-                    Label("שתף את קובץ הייצוא", systemImage: "doc.badge.arrow.up")
+                    Label(tr("שתף את קובץ הייצוא"), systemImage: "doc.badge.arrow.up")
                         .font(.subheadline)
                 }
             }
             Button {
                 showResetDeviceConfirm = true
             } label: {
-                Label("אפס מכשיר זה", systemImage: "arrow.triangle.2.circlepath")
+                Label(tr("אפס מכשיר זה"), systemImage: "arrow.triangle.2.circlepath")
             }
             Button(role: .destructive) {
                 showDeleteAllConfirm = true
             } label: {
                 if deleting {
-                    HStack { ProgressView(); Text("מוחק…") }
+                    HStack { ProgressView(); Text(tr("מוחק…")) }
                 } else {
-                    Label("מחק את כל הנתונים שלי", systemImage: "trash.fill")
+                    Label(tr("מחק את כל הנתונים שלי"), systemImage: "trash.fill")
                 }
             }
             .disabled(deleting)
         } header: {
-            Text("פרטיות ונתונים")
+            Text(tr("פרטיות ונתונים"))
         } footer: {
-            Text("ייצוא מפיק קובץ JSON עם כל הפרופילים, ההתקדמות וההיסטוריה.\n\n‏\"אפס מכשיר זה\" מנקה את המכשיר לגמרי (מנותק, בלי קוד, בלי נתונים מקומיים) אבל משאיר את המשפחה בענן.\n\n‏\"מחק את כל הנתונים\" מוחק לצמיתות גם מהמכשיר וגם מהענן — לא ניתן לשחזר.")
+            Text(tr("ייצוא מפיק קובץ JSON עם כל הפרופילים, ההתקדמות וההיסטוריה.\n\n‏\"אפס מכשיר זה\" מנקה את המכשיר לגמרי (מנותק, בלי קוד, בלי נתונים מקומיים) אבל משאיר את המשפחה בענן.\n\n‏\"מחק את כל הנתונים\" מוחק לצמיתות גם מהמכשיר וגם מהענן — לא ניתן לשחזר."))
         }
         .glassRows()
-        .confirmationDialog("לאפס את המכשיר הזה?",
+        .confirmationDialog(tr("לאפס את המכשיר הזה?"),
                             isPresented: $showResetDeviceConfirm, titleVisibility: .visible) {
-            Button("אפס מכשיר", role: .destructive) {
+            Button(tr("אפס מכשיר"), role: .destructive) {
                 HouseholdManager.shared.resetThisDevice()
                 dismiss()
             }
-            Button("בטל", role: .cancel) {}
+            Button(tr("בטל"), role: .cancel) {}
         } message: {
-            Text("המכשיר יחזור למצב התחלתי: מנותק, בלי קוד הורה, בלי נתונים מקומיים. המשפחה וההתקדמות בענן יישמרו — אפשר להתחבר מחדש בכל עת.")
+            Text(tr("המכשיר יחזור למצב התחלתי: מנותק, בלי קוד הורה, בלי נתונים מקומיים. המשפחה וההתקדמות בענן יישמרו — אפשר להתחבר מחדש בכל עת."))
         }
-        .confirmationDialog("למחוק את כל הנתונים לצמיתות?",
+        .confirmationDialog(tr("למחוק את כל הנתונים לצמיתות?"),
                             isPresented: $showDeleteAllConfirm, titleVisibility: .visible) {
-            Button("מחק הכול", role: .destructive) { Task { await deleteEverything() } }
-            Button("בטל", role: .cancel) {}
+            Button(tr("מחק הכול"), role: .destructive) { Task { await deleteEverything() } }
+            Button(tr("בטל"), role: .cancel) {}
         } message: {
-            Text("פעולה זו תמחק את כל הילדים, ההתקדמות וההיסטוריה מהמכשיר ומהענן, ותנתק את החשבון. לא ניתן לבטל.")
+            Text(tr("פעולה זו תמחק את כל הילדים, ההתקדמות וההיסטוריה מהמכשיר ומהענן, ותנתק את החשבון. לא ניתן לבטל."))
         }
         .glassRows()
     }
@@ -783,17 +783,17 @@ struct ParentSettingsView: View {
             Button {
                 showChangePIN = true
             } label: {
-                Label("שנה קוד הורה", systemImage: "key.fill")
+                Label(tr("שנה קוד הורה"), systemImage: "key.fill")
             }
             if PINManager.shared.biometryAvailable {
                 Toggle(isOn: $settings.faceIDForParentGate) {
-                    Label("פתח עם Face ID / Touch ID", systemImage: "faceid")
+                    Label(tr("פתח עם Face ID / Touch ID"), systemImage: "faceid")
                 }
             }
         } header: {
-            Text("אבטחה")
+            Text(tr("אבטחה"))
         } footer: {
-            Text("הקוד נשמר מוצפן (hash) במכשיר ולא בטקסט גלוי.")
+            Text(tr("הקוד נשמר מוצפן (hash) במכשיר ולא בטקסט גלוי."))
         }
         .glassRows()
     }
@@ -807,13 +807,13 @@ struct ParentSettingsView: View {
                 Haptic.light()
                 showWhatsNew = true
             } label: {
-                Label("מָה חָדָשׁ בַּגִּרְסָה הַזּוֹ ✨", systemImage: "sparkles")
+                Label(tr("מָה חָדָשׁ בַּגִּרְסָה הַזּוֹ ✨"), systemImage: "sparkles")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
             }
             .disabled(WhatsNewContent.items(for: WhatsNewContent.currentVersion) == nil)
 
             VStack(spacing: 3) {
-                Text("טופי")
+                Text(tr("טופי"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.secondary)
                 Text(AppInfo.versionLine)
@@ -842,10 +842,10 @@ struct ChangePINView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("קוד חדש") {
-                    SecureField("4 ספרות", text: $newPIN)
+                Section(tr("קוד חדש")) {
+                    SecureField(tr("4 ספרות"), text: $newPIN)
                         .keyboardType(.numberPad)
-                    SecureField("אמת קוד", text: $confirmPIN)
+                    SecureField(tr("אמת קוד"), text: $confirmPIN)
                         .keyboardType(.numberPad)
                 }
                 .glassRows()
@@ -854,17 +854,17 @@ struct ChangePINView: View {
                     .glassRows()
                 }
                 Section {
-                    Button("שמור") { save() }
+                    Button(tr("שמור")) { save() }
                         .disabled(newPIN.count != 4 || confirmPIN.count != 4)
                 }
                 .glassRows()
             }
             .glassForm()
-            .navigationTitle("שינוי קוד הורה")
+            .navigationTitle(tr("שינוי קוד הורה"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("ביטול") { dismiss() }
+                    Button(tr("ביטול")) { dismiss() }
                 }
             }
         }
@@ -872,11 +872,11 @@ struct ChangePINView: View {
 
     private func save() {
         guard newPIN.count == 4, newPIN.allSatisfy(\.isNumber) else {
-            error = "הקוד חייב להיות בדיוק 4 ספרות"
+            error = tr("הקוד חייב להיות בדיוק 4 ספרות")
             return
         }
         guard newPIN == confirmPIN else {
-            error = "הקודים לא תואמים"
+            error = tr("הקודים לא תואמים")
             return
         }
         settings.pin = newPIN          // keep legacy mirror for migration safety
@@ -895,5 +895,5 @@ struct ChangePINView: View {
         .environmentObject(SubscriptionManager.shared)
         .environmentObject(ProgressStore.shared)
         .environmentObject(ProfileStore.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

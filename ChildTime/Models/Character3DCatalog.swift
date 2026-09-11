@@ -47,12 +47,12 @@ enum CharacterTier: Int, CaseIterable {
 
     var label: String {
         switch self {
-        case .free:      return "חִינָּם"
-        case .common:    return "רָגִיל"
-        case .rare:      return "נָדִיר"
-        case .epic:      return "מְיוּחָד"
-        case .legendary: return "אַגָּדִי"
-        case .mythic:    return "מִיתִי"
+        case .free:      return tr("חִינָּם")
+        case .common:    return tr("רָגִיל")
+        case .rare:      return tr("נָדִיר")
+        case .epic:      return tr("מְיוּחָד")
+        case .legendary: return tr("אַגָּדִי")
+        case .mythic:    return tr("מִיתִי")
         }
     }
 
@@ -81,69 +81,69 @@ enum CharacterTier: Int, CaseIterable {
 enum Character3DCatalog {
     /// Roster grows over time (downloaded from Mixamo via tools/mixamo_fetch.py).
     /// Order = display order in the picker.
-    static let all: [Character3D] = [
+    static var all: [Character3D] { LocalizedCache.value("Character3DCatalog.all") { [
         // 🆓 Free (owned from day one) — encourage-level help.
-        Character3D(id: "fox",      name: "שׁוּעָל",    priceStars: 0,    imageAsset: "fox"),
-        Character3D(id: "bunny",    name: "אַרְנָב",     priceStars: 0,    imageAsset: "bunny"),
-        Character3D(id: "penguin",  name: "פִּינְגְּוִין", priceStars: 0,    imageAsset: "penguin"),
-        Character3D(id: "bear",     name: "דּוֹב",       priceStars: 0,    imageAsset: "bear"),
+        Character3D(id: "fox",      name: tr("שׁוּעָל"),    priceStars: 0,    imageAsset: "fox"),
+        Character3D(id: "bunny",    name: tr("אַרְנָב"),     priceStars: 0,    imageAsset: "bunny"),
+        Character3D(id: "penguin",  name: tr("פִּינְגְּוִין"), priceStars: 0,    imageAsset: "penguin"),
+        Character3D(id: "bear",     name: tr("דּוֹב"),       priceStars: 0,    imageAsset: "bear"),
 
         // 🟢 Common (≤2400) — encourage-level help. (incl. alternate-art variants)
         // Prices are intentionally high — a character should be days/weeks of
         // learning, not an afternoon's worth of stars.
-        Character3D(id: "hamster",     name: "אוֹגֵר",     priceStars: 950,  imageAsset: "hamster"),
-        Character3D(id: "hamster_b",   name: "אוֹגֵר",     priceStars: 1050, imageAsset: "hamster_b"),
-        Character3D(id: "squirrel",    name: "סְנָאִי",     priceStars: 1050, imageAsset: "squirrel"),
-        Character3D(id: "squirrel_b",  name: "סְנָאִי",     priceStars: 1100, imageAsset: "squirrel_b"),
-        Character3D(id: "turtle",      name: "צָב",       priceStars: 1150, imageAsset: "turtle"),
-        Character3D(id: "hedgehog",    name: "קִיפּוֹד",    priceStars: 1200, imageAsset: "hedgehog"),
-        Character3D(id: "hedgehog_b",  name: "קִיפּוֹד",    priceStars: 1250, imageAsset: "hedgehog_b"),
-        Character3D(id: "fennec",      name: "פֶנֶק",      priceStars: 1300, imageAsset: "fennec"),
-        Character3D(id: "monkey",      name: "קוֹף",      priceStars: 1350, imageAsset: "monkey"),
-        Character3D(id: "gazelle",     name: "צְבִי",      priceStars: 1450, imageAsset: "gazelle"),
-        Character3D(id: "ibex",        name: "יָעֵל",      priceStars: 1550, imageAsset: "ibex"),
-        Character3D(id: "pig",         name: "חֲזַרְזִיר",   priceStars: 1600, imageAsset: "pig"),
-        Character3D(id: "pig_b",       name: "חֲזַרְזִיר",   priceStars: 1700, imageAsset: "pig_b"),
-        Character3D(id: "koala",       name: "קוֹאָלָה",   priceStars: 1800, imageAsset: "koala"),
-        Character3D(id: "koala_b",     name: "קוֹאָלָה",   priceStars: 1850, imageAsset: "koala_b"),
-        Character3D(id: "koala_c",     name: "קוֹאָלָה",   priceStars: 1950, imageAsset: "koala_c"),
-        Character3D(id: "otter",       name: "לוּטְרָה",    priceStars: 2000, imageAsset: "otter"),
-        Character3D(id: "fox_b",       name: "שׁוּעָל",    priceStars: 2100, imageAsset: "fox_b"),
-        Character3D(id: "crocodile_b", name: "תַּנִּין",    priceStars: 2250, imageAsset: "crocodile_b"),
-        Character3D(id: "mouse",       name: "עַכְבָּר",    priceStars: 1500, imageAsset: "mouse"),
-        Character3D(id: "chinchilla",  name: "צִ'ינְצִ'ילָה", priceStars: 1650, imageAsset: "chinchilla"),
-        Character3D(id: "koala_d",     name: "קוֹאָלָה",   priceStars: 1900, imageAsset: "koala_d"),
-        Character3D(id: "koala_e",     name: "קוֹאָלָה",   priceStars: 2300, imageAsset: "koala_e"),
+        Character3D(id: "hamster",     name: tr("אוֹגֵר"),     priceStars: 950,  imageAsset: "hamster"),
+        Character3D(id: "hamster_b",   name: tr("אוֹגֵר"),     priceStars: 1050, imageAsset: "hamster_b"),
+        Character3D(id: "squirrel",    name: tr("סְנָאִי"),     priceStars: 1050, imageAsset: "squirrel"),
+        Character3D(id: "squirrel_b",  name: tr("סְנָאִי"),     priceStars: 1100, imageAsset: "squirrel_b"),
+        Character3D(id: "turtle",      name: tr("צָב"),       priceStars: 1150, imageAsset: "turtle"),
+        Character3D(id: "hedgehog",    name: tr("קִיפּוֹד"),    priceStars: 1200, imageAsset: "hedgehog"),
+        Character3D(id: "hedgehog_b",  name: tr("קִיפּוֹד"),    priceStars: 1250, imageAsset: "hedgehog_b"),
+        Character3D(id: "fennec",      name: tr("פֶנֶק"),      priceStars: 1300, imageAsset: "fennec"),
+        Character3D(id: "monkey",      name: tr("קוֹף"),      priceStars: 1350, imageAsset: "monkey"),
+        Character3D(id: "gazelle",     name: tr("צְבִי"),      priceStars: 1450, imageAsset: "gazelle"),
+        Character3D(id: "ibex",        name: tr("יָעֵל"),      priceStars: 1550, imageAsset: "ibex"),
+        Character3D(id: "pig",         name: tr("חֲזַרְזִיר"),   priceStars: 1600, imageAsset: "pig"),
+        Character3D(id: "pig_b",       name: tr("חֲזַרְזִיר"),   priceStars: 1700, imageAsset: "pig_b"),
+        Character3D(id: "koala",       name: tr("קוֹאָלָה"),   priceStars: 1800, imageAsset: "koala"),
+        Character3D(id: "koala_b",     name: tr("קוֹאָלָה"),   priceStars: 1850, imageAsset: "koala_b"),
+        Character3D(id: "koala_c",     name: tr("קוֹאָלָה"),   priceStars: 1950, imageAsset: "koala_c"),
+        Character3D(id: "otter",       name: tr("לוּטְרָה"),    priceStars: 2000, imageAsset: "otter"),
+        Character3D(id: "fox_b",       name: tr("שׁוּעָל"),    priceStars: 2100, imageAsset: "fox_b"),
+        Character3D(id: "crocodile_b", name: tr("תַּנִּין"),    priceStars: 2250, imageAsset: "crocodile_b"),
+        Character3D(id: "mouse",       name: tr("עַכְבָּר"),    priceStars: 1500, imageAsset: "mouse"),
+        Character3D(id: "chinchilla",  name: tr("צִ'ינְצִ'ילָה"), priceStars: 1650, imageAsset: "chinchilla"),
+        Character3D(id: "koala_d",     name: tr("קוֹאָלָה"),   priceStars: 1900, imageAsset: "koala_d"),
+        Character3D(id: "koala_e",     name: tr("קוֹאָלָה"),   priceStars: 2300, imageAsset: "koala_e"),
 
         // 🔵 Rare (2401–5200) — hint-level help.
-        Character3D(id: "tiger",       name: "נָמֵר",      priceStars: 2900, imageAsset: "tiger"),
-        Character3D(id: "zebra",       name: "זֶבְּרָה",    priceStars: 3200, imageAsset: "zebra"),
-        Character3D(id: "zebra_b",     name: "זֶבְּרָה",    priceStars: 3450, imageAsset: "zebra_b"),
-        Character3D(id: "crocodile",   name: "תַּנִּין",    priceStars: 3750, imageAsset: "crocodile"),
-        Character3D(id: "elephant",    name: "פִּיל",      priceStars: 4200, imageAsset: "elephant"),
-        Character3D(id: "elephant_b",  name: "פִּיל",      priceStars: 4500, imageAsset: "elephant_b"),
-        Character3D(id: "elephant_c",  name: "פִּיל",      priceStars: 4800, imageAsset: "elephant_c"),
-        Character3D(id: "hedgehog_c",  name: "קִיפּוֹד",    priceStars: 2650, imageAsset: "hedgehog_c"),
-        Character3D(id: "lemur",       name: "לֶמוּר",     priceStars: 3100, imageAsset: "lemur"),
-        Character3D(id: "camel",       name: "גָּמָל",      priceStars: 3600, imageAsset: "camel"),
-        Character3D(id: "quokka",      name: "קְווֹקָה",   priceStars: 4300, imageAsset: "quokka"),
+        Character3D(id: "tiger",       name: tr("נָמֵר"),      priceStars: 2900, imageAsset: "tiger"),
+        Character3D(id: "zebra",       name: tr("זֶבְּרָה"),    priceStars: 3200, imageAsset: "zebra"),
+        Character3D(id: "zebra_b",     name: tr("זֶבְּרָה"),    priceStars: 3450, imageAsset: "zebra_b"),
+        Character3D(id: "crocodile",   name: tr("תַּנִּין"),    priceStars: 3750, imageAsset: "crocodile"),
+        Character3D(id: "elephant",    name: tr("פִּיל"),      priceStars: 4200, imageAsset: "elephant"),
+        Character3D(id: "elephant_b",  name: tr("פִּיל"),      priceStars: 4500, imageAsset: "elephant_b"),
+        Character3D(id: "elephant_c",  name: tr("פִּיל"),      priceStars: 4800, imageAsset: "elephant_c"),
+        Character3D(id: "hedgehog_c",  name: tr("קִיפּוֹד"),    priceStars: 2650, imageAsset: "hedgehog_c"),
+        Character3D(id: "lemur",       name: tr("לֶמוּר"),     priceStars: 3100, imageAsset: "lemur"),
+        Character3D(id: "camel",       name: tr("גָּמָל"),      priceStars: 3600, imageAsset: "camel"),
+        Character3D(id: "quokka",      name: tr("קְווֹקָה"),   priceStars: 4300, imageAsset: "quokka"),
 
         // 🟣 Epic (5201–8800) — hint-level help.
-        Character3D(id: "panda",       name: "פַּנְדָּה",    priceStars: 6000, imageAsset: "panda"),
-        Character3D(id: "panda_b",     name: "פַּנְדָּה",    priceStars: 6600, imageAsset: "panda_b"),
-        Character3D(id: "octopus",     name: "תַּמְנוּן",    priceStars: 7200, imageAsset: "octopus"),
-        Character3D(id: "lion",        name: "אַרְיֵה",    priceStars: 8000, imageAsset: "lion"),
-        Character3D(id: "octopus_b",   name: "תַּמְנוּן",    priceStars: 7400, imageAsset: "octopus_b"),
-        Character3D(id: "lion_b",      name: "אַרְיֵה",    priceStars: 8400, imageAsset: "lion_b"),
+        Character3D(id: "panda",       name: tr("פַּנְדָּה"),    priceStars: 6000, imageAsset: "panda"),
+        Character3D(id: "panda_b",     name: tr("פַּנְדָּה"),    priceStars: 6600, imageAsset: "panda_b"),
+        Character3D(id: "octopus",     name: tr("תַּמְנוּן"),    priceStars: 7200, imageAsset: "octopus"),
+        Character3D(id: "lion",        name: tr("אַרְיֵה"),    priceStars: 8000, imageAsset: "lion"),
+        Character3D(id: "octopus_b",   name: tr("תַּמְנוּן"),    priceStars: 7400, imageAsset: "octopus_b"),
+        Character3D(id: "lion_b",      name: tr("אַרְיֵה"),    priceStars: 8400, imageAsset: "lion_b"),
 
         // 👑 Legendary (8801–20000) — explain-level help.
-        Character3D(id: "dragon",      name: "דְּרָקוֹן",  priceStars: 12000, imageAsset: "dragon"),
-        Character3D(id: "redpanda",    name: "פַּנְדָּה אֲדוּמָּה", priceStars: 13000, imageAsset: "redpanda"),
-        Character3D(id: "unicorn",     name: "חַד-קֶרֶן", priceStars: 16000, imageAsset: "unicorn"),
+        Character3D(id: "dragon",      name: tr("דְּרָקוֹן"),  priceStars: 12000, imageAsset: "dragon"),
+        Character3D(id: "redpanda",    name: tr("פַּנְדָּה אֲדוּמָּה"), priceStars: 13000, imageAsset: "redpanda"),
+        Character3D(id: "unicorn",     name: tr("חַד-קֶרֶן"), priceStars: 16000, imageAsset: "unicorn"),
 
         // 🩷 Mythic (20001+) — explain-level help. (Premium tier; more coming.)
-        Character3D(id: "owl",         name: "יַנְשׁוּף",    priceStars: 22000, imageAsset: "owl"),
-    ]
+        Character3D(id: "owl",         name: tr("יַנְשׁוּף"),    priceStars: 22000, imageAsset: "owl"),
+    ] } }
 
     static let defaultID = "fox"
 

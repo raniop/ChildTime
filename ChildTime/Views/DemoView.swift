@@ -35,12 +35,12 @@ struct DemoView: View {
             FancyConfetti(trigger: confettiTrigger)
         }
         .rumble(trigger: rumbleTrigger)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     private var header: some View {
         VStack(spacing: AppSpacing.xs) {
-            Text("טופי")
+            Text(tr("טופי"))
                 .heroStyle()
                 .glow(AppColor.starGold, radius: 16)
             Text("Phase A — Foundation Demo")
@@ -50,7 +50,7 @@ struct DemoView: View {
 
     private var companionSection: some View {
         VStack(spacing: AppSpacing.lg) {
-            sectionTitle("טופי — Companion")
+            sectionTitle(tr("טופי — Companion"))
             ZStack(alignment: .top) {
                 CompanionView(controller: companion)
                 if let text = companion.bubbleText {
@@ -64,10 +64,10 @@ struct DemoView: View {
 
             HStack(spacing: AppSpacing.sm) {
                 miniBtn("idle")    { companion.state = .idle; companion.bubbleText = nil }
-                miniBtn("cheer")   { companion.cheer("יש!") }
-                miniBtn("hype")    { companion.hype("🔥 אש!") }
-                miniBtn("wow")     { companion.wow("וואו!") }
-                miniBtn("console") { companion.console("כמעט!") }
+                miniBtn("cheer")   { companion.cheer(tr("יש!")) }
+                miniBtn("hype")    { companion.hype(tr("🔥 אש!")) }
+                miniBtn("wow")     { companion.wow(tr("וואו!")) }
+                miniBtn("console") { companion.console(tr("כמעט!")) }
             }
         }
     }
@@ -76,20 +76,20 @@ struct DemoView: View {
         VStack(spacing: AppSpacing.lg) {
             sectionTitle("JuicyButtons")
             JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-                companion.cheer("יאללה!")
+                companion.cheer(tr("יאללה!"))
             } label: {
-                Label("יאללה!", systemImage: "play.fill")
+                Label(tr("יאללה!"), systemImage: "play.fill")
             }
             JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
-                companion.cheer("בוא נתחיל")
+                companion.cheer(tr("בוא נתחיל"))
             } label: {
-                Text("בוא נתחיל")
+                Text(tr("בוא נתחיל"))
             }
             JuicyButton(gradient: AppGradient.castle, glowColor: AppColor.flameOrange) {
                 burstTrigger += 1
-                companion.wow("פתחו לי דקות!")
+                companion.wow(tr("פתחו לי דקות!"))
             } label: {
-                Label("פתח 10 דקות", systemImage: "gamecontroller.fill")
+                Label(tr("פתח 10 דקות"), systemImage: "gamecontroller.fill")
             }
         }
     }
@@ -142,13 +142,13 @@ struct DemoView: View {
     private var textStylesSection: some View {
         VStack(alignment: .trailing, spacing: AppSpacing.md) {
             sectionTitle("Typography")
-            Text("Hero — טופי").font(AppFont.hero()).minimumScaleFactor(0.4)
-            Text("Title — ממלכת המספרים").font(AppFont.title())
+            Text(tr("Hero — טופי")).font(AppFont.hero()).minimumScaleFactor(0.4)
+            Text(tr("Title — ממלכת המספרים")).font(AppFont.title())
             Text("Question — 7 + 5 = ?").font(AppFont.question())
             Text("Option — 12").font(AppFont.option())
-            Text("Subtitle — משנה הוראות").font(AppFont.subtitle()).foregroundStyle(AppColor.textSecondary)
-            Text("Body — טקסט גוף רגיל").font(AppFont.body())
-            Text("Caption — מטא").font(AppFont.caption()).foregroundStyle(AppColor.textSecondary)
+            Text(tr("Subtitle — משנה הוראות")).font(AppFont.subtitle()).foregroundStyle(AppColor.textSecondary)
+            Text(tr("Body — טקסט גוף רגיל")).font(AppFont.body())
+            Text(tr("Caption — מטא")).font(AppFont.caption()).foregroundStyle(AppColor.textSecondary)
         }
         .foregroundStyle(AppColor.textPrimary)
         .frame(maxWidth: .infinity, alignment: .trailing)

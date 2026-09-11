@@ -41,16 +41,16 @@ struct CharacterCollectionView: View {
             titleVisibility: .visible,
             presenting: pendingPurchase
         ) { character in
-            Button("קְנֵה וְהַחֲלֵף") { buy(character) }
-            Button("בִּטּוּל", role: .cancel) {}
+            Button(tr("קְנֵה וְהַחֲלֵף")) { buy(character) }
+            Button(tr("בִּטּוּל"), role: .cancel) {}
         }
-        .alert("חֲסֵרִים יַהֲלוֹמִים 💎",
+        .alert(tr("חֲסֵרִים יַהֲלוֹמִים 💎"),
                isPresented: Binding(get: { shortBy != nil },
                                     set: { if !$0 { shortBy = nil } })) {
-            Button("קְנֵה יַהֲלוֹמִים") { showStarShop = true }
-            Button("הֲבַנְתִּי", role: .cancel) {}
+            Button(tr("קְנֵה יַהֲלוֹמִים")) { showStarShop = true }
+            Button(tr("הֲבַנְתִּי"), role: .cancel) {}
         } message: {
-            if let s = shortBy { Text("צָרִיךְ עוֹד \(s) יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמוֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.") }
+            if let s = shortBy { Text(tr("צָרִיךְ עוֹד \(s) יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמוֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.")) }
         }
     }
 

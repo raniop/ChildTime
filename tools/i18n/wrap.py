@@ -79,6 +79,11 @@ def process(path, apply):
     lines = text.split("\n")
     counts, flagged = {}, []
     in_block_comment = False
+    # A stored constant (static / file-scope `let`, or a `static var` with an
+    # initializer) is evaluated ONCE — a tr() inside it freezes the first
+    # language. Track multi-line initializers by bracket depth.
+    frozen_depth = 0
+    stored_start = re.compile(r"^(\s*(?:@\w+\s+)*(?:(?:private|fileprivate|public|internal)\s+)?static\s+(?:let|var)\s+\w+[^={]*=(?!=)|let\s+\w+[^={]*=(?!=))")
     for idx, line in enumerate(lines):
         s = line.strip()
         if s.startswith("/*"):
@@ -90,9 +95,17 @@ def process(path, apply):
         if s.startswith("//"):
             continue
         spans = [(a, b) for a, b in literals(line) if HEB.search(line[a : b + 1])]
+        starts_stored = bool(stored_start.match(line))
+        in_frozen = frozen_depth > 0 or starts_stored
+        if starts_stored or frozen_depth > 0:
+            code = re.sub(r'"(?:[^"\\]|\\.)*"', '""', line.split("//")[0])
+            frozen_depth += code.count("[") + code.count("(") - code.count("]") - code.count(")")
+            frozen_depth = max(frozen_depth, 0)
         new = line
         for a, b in reversed(spans):
             kind = classify(line, a, b)
+            if kind == "wrap" and in_frozen:
+                kind = "static"
             counts[kind] = counts.get(kind, 0) + 1
             if kind == "wrap":
                 new = new[:a] + "tr(" + new[a : b + 1] + ")" + new[b + 1 :]

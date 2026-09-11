@@ -93,7 +93,7 @@ struct OnboardingView: View {
                 // Companion hero with bubble
                 ZStack(alignment: .topLeading) {
                     if welcomeBubbleVisible {
-                        BubbleSpeech(text: "היי! אני טופי 💫")
+                        BubbleSpeech(text: tr("היי! אני טופי 💫"))
                             .offset(x: welcomeCompanionSize * 0.55, y: -30)
                             .transition(.scale.combined(with: .opacity))
                     }
@@ -105,7 +105,7 @@ struct OnboardingView: View {
 
                 // Animated title — "טופי" big & gradient.
                 VStack(spacing: 0) {
-                    Text("טופי")
+                    Text(tr("טופי"))
                         .font(.system(size: welcomeTitleSize, weight: .heavy, design: .rounded))
                         .foregroundStyle(GlassInk.primary).shadow(color: .black.opacity(0.2), radius: 8, y: 3)
                         .shadow(color: AppColor.starGold.opacity(0.7), radius: 18)
@@ -115,7 +115,7 @@ struct OnboardingView: View {
                 .rotationEffect(.degrees(welcomeTitleAppeared ? 0 : -8))
                 .opacity(welcomeTitleAppeared ? 1 : 0)
 
-                Text("שעת משחק\nשמתחילה בשאלה")
+                Text(tr("שעת משחק\nשמתחילה בשאלה"))
                     .font(.system(size: subtitleSize, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
@@ -126,13 +126,13 @@ struct OnboardingView: View {
                 Spacer()
 
                 JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
-                    welcomeCompanion.cheer("קָדִימָה!")
+                    welcomeCompanion.cheer(tr("קָדִימָה!"))
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                         step = .parentInfo
                     }
                 } label: {
                     HStack {
-                        Text("בוא נתחיל!")
+                        Text(tr("בוא נתחיל!"))
                         Image(systemName: "play.fill")
                     }
                     .font(.system(size: 30, weight: .heavy, design: .rounded))
@@ -182,12 +182,12 @@ struct OnboardingView: View {
 
             infoIcon(systemName: "person.2.fill")
 
-            Text("שלום, הורה 👋")
+            Text(tr("שלום, הורה 👋"))
                 .font(.system(size: 36, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
-            Text("לפני שניתן את האפליקציה לילד,\nצריך להגדיר כמה דברים:")
+            Text(tr("לפני שניתן את האפליקציה לילד,\nצריך להגדיר כמה דברים:"))
                 .font(.system(size: 18, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
@@ -198,22 +198,22 @@ struct OnboardingView: View {
                 setupRow(
                     icon: "📱",
                     tint: Color(hex: "5B9BFF"),
-                    title: "אפליקציות לחסום",
-                    subtitle: "YouTube, TikTok, משחקים…"
+                    title: tr("אפליקציות לחסום"),
+                    subtitle: tr("YouTube, TikTok, משחקים…")
                 )
                 rowDivider
                 setupRow(
                     icon: "⏱",
                     tint: AppColor.successMint,
-                    title: "דקות לכל תשובה נכונה",
-                    subtitle: "כמה זמן משחק הילד מרוויח"
+                    title: tr("דקות לכל תשובה נכונה"),
+                    subtitle: tr("כמה זמן משחק הילד מרוויח")
                 )
                 rowDivider
                 setupRow(
                     icon: "🔒",
                     tint: AppColor.gemPurple,
-                    title: "קוד הורה",
-                    subtitle: "4 ספרות שרק אתה תדע"
+                    title: tr("קוד הורה"),
+                    subtitle: tr("4 ספרות שרק אתה תדע")
                 )
             }
             .padding(.vertical, AppSpacing.sm)
@@ -230,11 +230,11 @@ struct OnboardingView: View {
             HStack(spacing: 10) {
                 Text("👪").font(.system(size: 22))
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text("איך קוראים למשפחה?")
+                    Text(tr("איך קוראים למשפחה?"))
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.8))
                     TextField("", text: $familyName,
-                              prompt: Text("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן").foregroundColor(.white.opacity(0.55)))
+                              prompt: Text(tr("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן")).foregroundColor(.white.opacity(0.55)))
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.trailing)
@@ -252,7 +252,7 @@ struct OnboardingView: View {
                 HouseholdManager.shared.setFamilyName(familyName)
                 step = .familyControls
             } label: {
-                Text("המשך")
+                Text(tr("המשך"))
             }
             .padding(.bottom, AppSpacing.xl)
         }
@@ -309,12 +309,12 @@ struct OnboardingView: View {
 
             infoIcon(systemName: "app.badge.fill")
 
-            Text("אילו אפליקציות לחסום?")
+            Text(tr("אילו אפליקציות לחסום?"))
                 .font(.system(size: 30, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
-            Text("בחר אילו אפליקציות יהיו נעולות עד שהילד יענה על שאלות\n(YouTube, TikTok, משחקים…)")
+            Text(tr("בחר אילו אפליקציות יהיו נעולות עד שהילד יענה על שאלות\n(YouTube, TikTok, משחקים…)"))
                 .font(.system(size: 17, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
@@ -324,19 +324,19 @@ struct OnboardingView: View {
             if !shields.isAuthorized {
                 statusPill(
                     icon: "exclamationmark.shield.fill",
-                    text: "צריך אישור Family Controls",
+                    text: tr("צריך אישור Family Controls"),
                     color: AppColor.almostWarm
                 )
             } else if !selectionHasItems {
                 statusPill(
                     icon: "info.circle.fill",
-                    text: "עדיין לא נבחרו אפליקציות",
+                    text: tr("עדיין לא נבחרו אפליקציות"),
                     color: AppColor.companionGlow
                 )
             } else {
                 statusPill(
                     icon: "checkmark.circle.fill",
-                    text: "\(selectionCount) אפליקציות נבחרו",
+                    text: tr("\(selectionCount) אפליקציות נבחרו"),
                     color: AppColor.successMint
                 )
             }
@@ -346,7 +346,7 @@ struct OnboardingView: View {
                 JuicyButton(gradient: AppGradient.castle, glowColor: AppColor.flameOrange) {
                     Task { await shields.requestAuthorizationIfNeeded() }
                 } label: {
-                    Label("אשר Family Controls", systemImage: "checkmark.shield.fill")
+                    Label(tr("אשר Family Controls"), systemImage: "checkmark.shield.fill")
                 }
 
                 if let err = shields.authorizationError {
@@ -355,7 +355,7 @@ struct OnboardingView: View {
                 Button {
                     openSettings()
                 } label: {
-                    Label("פתח Settings", systemImage: "arrow.up.right.square")
+                    Label(tr("פתח Settings"), systemImage: "arrow.up.right.square")
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                         .padding(.horizontal, AppSpacing.md)
@@ -367,7 +367,7 @@ struct OnboardingView: View {
                     showPicker = true
                 } label: {
                     Label(
-                        selectionHasItems ? "ערוך בחירה" : "בחר אפליקציות",
+                        selectionHasItems ? tr("ערוך בחירה") : tr("בחר אפליקציות"),
                         systemImage: "app.badge.fill"
                     )
                 }
@@ -378,7 +378,7 @@ struct OnboardingView: View {
             JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
                 step = .pinSetup
             } label: {
-                Text("המשך")
+                Text(tr("המשך"))
             }
             .padding(.bottom, AppSpacing.xl)
         }
@@ -389,7 +389,7 @@ struct OnboardingView: View {
     /// (which is the visual left side of the screen).
     private func backArrowButton(action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: "chevron.left")
+            Image(systemName: AppSymbol.forwardChevron)
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 44, height: 44)
@@ -397,7 +397,7 @@ struct OnboardingView: View {
                 .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
         }
         .buttonStyle(.juicy)
-        .environment(\.layoutDirection, .leftToRight)  // keep arrow pointing left regardless
+        .environment(\.layoutDirection, .appMirrored)  // keep arrow pointing left regardless
     }
 
     private var selectionCount: Int {
@@ -422,7 +422,7 @@ struct OnboardingView: View {
 
     private func errorBubble(message: String) -> some View {
         VStack(spacing: 6) {
-            Text("⚠️ שגיאה")
+            Text(tr("⚠️ שגיאה"))
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
             Text(message)
@@ -442,18 +442,18 @@ struct OnboardingView: View {
         VStack(spacing: AppSpacing.xl) {
             Spacer().frame(height: 60)
             infoIcon(systemName: "lock.fill")
-            Text("צור קוד הורה")
+            Text(tr("צור קוד הורה"))
                 .font(.system(size: 32, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("רק אתה תדע אותו — הילד לא יוכל לפתוח הגדרות בלעדיו")
+            Text(tr("רק אתה תדע אותו — הילד לא יוכל לפתוח הגדרות בלעדיו"))
                 .font(.system(size: 18, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.lg)
 
             VStack(spacing: AppSpacing.sm) {
-                pinField(text: $newPIN, placeholder: "קוד חדש (4 ספרות)")
-                pinField(text: $confirmPIN, placeholder: "אמת קוד")
+                pinField(text: $newPIN, placeholder: tr("קוד חדש (4 ספרות)"))
+                pinField(text: $confirmPIN, placeholder: tr("אמת קוד"))
             }
             .frame(maxWidth: 460)
             .padding(.horizontal, AppSpacing.lg)
@@ -481,7 +481,7 @@ struct OnboardingView: View {
             JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
                 savePIN()
             } label: {
-                Text("שמור")
+                Text(tr("שמור"))
             }
             .padding(.bottom, AppSpacing.xl)
         }
@@ -552,16 +552,16 @@ struct OnboardingView: View {
         let c = String(confirmPIN.filter(\.isNumber).prefix(4))
         guard n.count == 4 else {
             pinError = n.isEmpty
-                ? "הקלד קוד בן 4 ספרות"
-                : "חסרות ספרות — צריך בדיוק 4"
+                ? tr("הקלד קוד בן 4 ספרות")
+                : tr("חסרות ספרות — צריך בדיוק 4")
             return
         }
         guard c.count == 4 else {
-            pinError = "צריך להקליד גם בשורת האימות"
+            pinError = tr("צריך להקליד גם בשורת האימות")
             return
         }
         guard n == c else {
-            pinError = "שני הקודים לא תואמים"
+            pinError = tr("שני הקודים לא תואמים")
             return
         }
         pinError = nil
@@ -571,7 +571,7 @@ struct OnboardingView: View {
         Task { @MainActor in
             if PINManager.shared.biometryAvailable {
                 let ok = await PINManager.shared.authenticateBiometric(
-                    reason: "הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID")
+                    reason: tr("הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID"))
                 if ok { settings.faceIDForParentGate = true }
             }
             step = .hatching
@@ -596,5 +596,5 @@ struct OnboardingView: View {
         .environmentObject(ProgressStore.shared)
         .environmentObject(ShieldManager.shared)
         .environmentObject(AuthManager.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

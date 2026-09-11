@@ -43,15 +43,21 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
                 backgroundBlurStyle: .systemThinMaterialDark,
                 backgroundColor: Self.mint,
                 icon: icon,
+                // Whole sentences per gender and name, so a translation never
+                // has to glue a capitalised fragment after "Noa, ".
                 title: .init(text: {
-                    let have = s.girl ? "יֵשׁ לָךְ" : "יֵשׁ לְךָ"
-                    return name.isEmpty ? "\(have) \(mins) דַּקּוֹת" : "\(name), \(have) \(mins) דַּקּוֹת"
+                    switch (name.isEmpty, s.girl) {
+                    case (true, true):   return tr("יֵשׁ לָךְ \(mins) דַּקּוֹת")
+                    case (true, false):  return tr("יֵשׁ לְךָ \(mins) דַּקּוֹת")
+                    case (false, true):  return tr("\(name), יֵשׁ לָךְ \(mins) דַּקּוֹת")
+                    case (false, false): return tr("\(name), יֵשׁ לְךָ \(mins) דַּקּוֹת")
+                    }
                 }(),
                              color: .white),
-                subtitle: .init(text: s.girl ? "הִרְוַחְתְּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי"
-                                            : "הִרְוַחְתָּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי",
+                subtitle: .init(text: s.girl ? tr("הִרְוַחְתְּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי")
+                                            : tr("הִרְוַחְתָּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי"),
                                 color: UIColor.white.withAlphaComponent(0.85)),
-                primaryButtonLabel: .init(text: "בּוֹאוּ נִפְתַּח אוֹתָן", color: Self.mint),
+                primaryButtonLabel: .init(text: tr("בּוֹאוּ נִפְתַּח אוֹתָן"), color: Self.mint),
                 primaryButtonBackgroundColor: .white
             )
 
@@ -60,10 +66,11 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
                 backgroundBlurStyle: .systemThinMaterialDark,
                 backgroundColor: Self.night,
                 icon: icon,
-                title: .init(text: name.isEmpty ? "מַסְפִּיק לְהַיּוֹם" : "\(name), מַסְפִּיק לְהַיּוֹם", color: .white),
-                subtitle: .init(text: (s.girl ? "הִגַּעַתְּ" : "הִגַּעְתָּ") + " לְכָל הַדַּקּוֹת שֶׁל הַיּוֹם.\nנִתְרָאֶה מָחָר בַּבֹּקֶר",
+                title: .init(text: name.isEmpty ? tr("מַסְפִּיק לְהַיּוֹם") : tr("\(name), מַסְפִּיק לְהַיּוֹם"), color: .white),
+                subtitle: .init(text: s.girl ? tr("הִגַּעַתְּ לְכָל הַדַּקּוֹת שֶׁל הַיּוֹם.\nנִתְרָאֶה מָחָר בַּבֹּקֶר")
+                                             : tr("הִגַּעְתָּ לְכָל הַדַּקּוֹת שֶׁל הַיּוֹם.\nנִתְרָאֶה מָחָר בַּבֹּקֶר"),
                                 color: UIColor.white.withAlphaComponent(0.85)),
-                primaryButtonLabel: .init(text: "הֵבַנְתִּי", color: Self.night),
+                primaryButtonLabel: .init(text: tr("הֵבַנְתִּי"), color: Self.night),
                 primaryButtonBackgroundColor: .white
             )
 
@@ -71,16 +78,23 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             // The honest rule, and the only one Tofy actually has: a correct
             // answer banks minutes. There is no question quota to reach.
             let m = max(1, s.minutesPerCorrect)
-            let worth = m == 1 ? "דַּקָּה אַחַת" : "\(m) דַּקּוֹת"
-            let noMinutes = s.girl ? "עוֹד אֵין לָךְ דַּקּוֹת" : "עוֹד אֵין לְךָ דַּקּוֹת"
+            let worth = m == 1 ? tr("דַּקָּה אַחַת") : tr("\(m) דַּקּוֹת")
+            let noMinutes: String = {
+                switch (name.isEmpty, s.girl) {
+                case (true, true):   return tr("עוֹד אֵין לָךְ דַּקּוֹת")
+                case (true, false):  return tr("עוֹד אֵין לְךָ דַּקּוֹת")
+                case (false, true):  return tr("\(name), עוֹד אֵין לָךְ דַּקּוֹת")
+                case (false, false): return tr("\(name), עוֹד אֵין לְךָ דַּקּוֹת")
+                }
+            }()
             return ShieldConfiguration(
                 backgroundBlurStyle: .systemThinMaterialDark,
                 backgroundColor: Self.indigo,
                 icon: icon,
-                title: .init(text: name.isEmpty ? noMinutes : "\(name), \(noMinutes)", color: .white),
-                subtitle: .init(text: "כָּל תְּשׁוּבָה נְכוֹנָה בְּטוֹפִי = \(worth) מִשְׂחָק",
+                title: .init(text: noMinutes, color: .white),
+                subtitle: .init(text: tr("כָּל תְּשׁוּבָה נְכוֹנָה בְּטוֹפִי = \(worth) מִשְׂחָק"),
                                 color: UIColor.white.withAlphaComponent(0.85)),
-                primaryButtonLabel: .init(text: "בּוֹאוּ נַרְוִיחַ דַּקּוֹת", color: Self.indigo),
+                primaryButtonLabel: .init(text: tr("בּוֹאוּ נַרְוִיחַ דַּקּוֹת"), color: Self.indigo),
                 primaryButtonBackgroundColor: .white
             )
         }

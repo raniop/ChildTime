@@ -129,7 +129,7 @@ final class RemoteSyncManager: ObservableObject {
         } else if let cached = AuthManager.shared.userID, !cached.isEmpty {
             resolvedUID = cached
         } else {
-            lastError = "אין משתמש מחובר — סנכרון לא פעיל"
+            lastError = tr("אין משתמש מחובר — סנכרון לא פעיל")
             isActive = false
             SyncLog.error("start: NO signed-in user — sync inactive. If this is a child device, enable Anonymous Auth in the Firebase console.")
             return
@@ -150,7 +150,7 @@ final class RemoteSyncManager: ObservableObject {
         // mirrors what's on disk.
         uploadActiveProfileSoon()
         #else
-        lastError = "Firebase Firestore לא הותקן"
+        lastError = tr("Firebase Firestore לא הותקן")
         isActive = false
         #endif
     }

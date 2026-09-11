@@ -27,8 +27,8 @@ struct ScoreBadge: View {
 
     private var label: String {
         switch style {
-        case .lifetime: return "נִקּוּד"
-        case .session:  return "סִבּוּב"
+        case .lifetime: return tr("נִקּוּד")
+        case .session:  return tr("סִבּוּב")
         }
     }
 
@@ -66,5 +66,5 @@ struct ScoreBadge: View {
             ScoreBadge(value: 80, style: .session, compact: true)
         }
     }
-    .environment(\.layoutDirection, .rightToLeft)
+    .environment(\.layoutDirection, .app)
 }

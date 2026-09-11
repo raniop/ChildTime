@@ -86,7 +86,7 @@ final class StarPackStore: ObservableObject {
             case .userCancelled:
                 return false
             case .pending:
-                lastError = "ההזמנה ממתינה לאישור (Ask to Buy)"
+                lastError = tr("ההזמנה ממתינה לאישור (Ask to Buy)")
                 return false
             @unknown default:
                 return false

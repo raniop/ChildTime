@@ -31,7 +31,7 @@ struct ChildJoinView: View {
                             Haptic.light()
                             settings.deviceRole = .unset
                         } label: {
-                            Label("חֲזָרָה", systemImage: "chevron.backward")
+                            Label(tr("חֲזָרָה"), systemImage: "chevron.backward")
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 14).padding(.vertical, 8)
@@ -50,31 +50,31 @@ struct ChildJoinView: View {
                 VStack(spacing: AppSpacing.lg) {
                     CompanionView(controller: companion, size: 120)
                     if settings.justDisconnected {
-                        Text("הַמַּכְשִׁיר נוּתַּק")
+                        Text(tr("הַמַּכְשִׁיר נוּתַּק"))
                             .font(.system(size: 30, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
-                        Label("סִרְקוּ שׁוּב אֶת קוֹד הַהוֹרֶה כְּדֵי לְהַמְשִׁיךְ", systemImage: "qrcode.viewfinder")
+                        Label(tr("סִרְקוּ שׁוּב אֶת קוֹד הַהוֹרֶה כְּדֵי לְהַמְשִׁיךְ"), systemImage: "qrcode.viewfinder")
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 16).padding(.vertical, 10)
                             .background(AppColor.almostWarm.opacity(0.9), in: Capsule())
-                        Text("הַהִתְקַדְּמוּת שֶׁלְּךָ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד.")
+                        Text(tr("הַהִתְקַדְּמוּת שֶׁלְּךָ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד."))
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
                             .multilineTextAlignment(.center)
                     } else {
-                        Text("הֵיי! בּוֹאוּ נִתְחַבֵּר")
+                        Text(tr("הֵיי! בּוֹאוּ נִתְחַבֵּר"))
                             .font(.system(size: 30, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
-                        Text("בְּמַכְשִׁיר הַהוֹרֶה מוֹפִיעַ קוֹד QR לַיֶּלֶד.\nסִרְקוּ אוֹתוֹ כָּאן וְהַמַּכְשִׁיר יִתְחַבֵּר.")
+                        Text(tr("בְּמַכְשִׁיר הַהוֹרֶה מוֹפִיעַ קוֹד QR לַיֶּלֶד.\nסִרְקוּ אוֹתוֹ כָּאן וְהַמַּכְשִׁיר יִתְחַבֵּר."))
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.9))
                             .multilineTextAlignment(.center)
                     }
 
                     Button { showScanner = true } label: {
-                        Label("סִרְקוּ קוֹד QR", systemImage: "qrcode.viewfinder")
+                        Label(tr("סִרְקוּ קוֹד QR"), systemImage: "qrcode.viewfinder")
                             .font(.system(size: 20, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -85,7 +85,7 @@ struct ChildJoinView: View {
 
                     VStack(spacing: 8) {
                         TextField("", text: $code,
-                                  prompt: Text("אוֹ הַקְלִידוּ אֶת הַקּוֹד").foregroundColor(.white.opacity(0.75)))   // visible on glass
+                                  prompt: Text(tr("אוֹ הַקְלִידוּ אֶת הַקּוֹד")).foregroundColor(.white.opacity(0.75)))   // visible on glass
                             .textInputAutocapitalization(.characters)
                             .autocorrectionDisabled()
                             .font(.system(.title3, design: .monospaced))
@@ -94,7 +94,7 @@ struct ChildJoinView: View {
                             .padding(.vertical, 12)
                             .glassPane(radius: 14, shadow: false)
                         Button { JoinCoordinator.shared.present(code) } label: {
-                            Text("הִתְחַבְּרוּ")
+                            Text(tr("הִתְחַבְּרוּ"))
                                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
                         }
@@ -115,12 +115,12 @@ struct ChildJoinView: View {
                     // Steps flush to one edge, numbers in a column (Rani: "1 2 3
                     // צריכים להיות באותו קו") — on a glass inset.
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("עוֹד אֵין לָכֶם טוֹפִי אֵצֶל הַהוֹרֶה?")
+                        Text(tr("עוֹד אֵין לָכֶם טוֹפִי אֵצֶל הַהוֹרֶה?"))
                             .font(.system(size: 14.5, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
-                        ForEach(Array(["מוֹרִידִים אֶת טוֹפִי בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה",
-                                       "נִרְשָׁמִים וְיוֹצְרִים שָׁם אֶת הַיְלָדִים",
-                                       "חוֹזְרִים לְכָאן וְסוֹרְקִים אֶת הַקּוֹד"].enumerated()), id: \.offset) { i, step in
+                        ForEach(Array([tr("מוֹרִידִים אֶת טוֹפִי בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה"),
+                                       tr("נִרְשָׁמִים וְיוֹצְרִים שָׁם אֶת הַיְלָדִים"),
+                                       tr("חוֹזְרִים לְכָאן וְסוֹרְקִים אֶת הַקּוֹד")].enumerated()), id: \.offset) { i, step in
                             HStack(alignment: .top, spacing: 8) {
                                 Text("\(i + 1)")
                                     .font(.system(size: 12, weight: .black, design: .rounded))
@@ -147,7 +147,7 @@ struct ChildJoinView: View {
                     // impossible to uninstall. This lets a parent — with the code —
                     // open a 5-minute deletion window from the disconnected screen.
                     Button { showRemovalGate = true } label: {
-                        Label("אֲנִי הוֹרֶה · פְּתִיחַת מְחִיקַת הָאַפְּלִיקַצְיָה", systemImage: "trash")
+                        Label(tr("אֲנִי הוֹרֶה · פְּתִיחַת מְחִיקַת הָאַפְּלִיקַצְיָה"), systemImage: "trash")
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.75))
                             .padding(.horizontal, 14).padding(.vertical, 9)
@@ -171,24 +171,24 @@ struct ChildJoinView: View {
                     JoinCoordinator.shared.present(scanned)
                 }
                 .ignoresSafeArea()
-                .navigationTitle("סריקת קוד")
+                .navigationTitle(tr("סריקת קוד"))
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("ביטול") { showScanner = false } } }
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(tr("ביטול")) { showScanner = false } } }
             }
         }
         .sheet(isPresented: $showRemovalGate) {
             // respectSession:false → always re-authenticate; a child must never open
             // the deletion window off a stale unlock.
             ParentGateView(allowClose: true,
-                           gateTitle: "אֵזוֹר הוֹרִים",
-                           gateReason: "כְּדֵי לְאַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת — הַזִּינוּ קוֹד הוֹרֶה",
+                           gateTitle: tr("אֵזוֹר הוֹרִים"),
+                           gateReason: tr("כְּדֵי לְאַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת — הַזִּינוּ קוֹד הוֹרֶה"),
                            useFaceID: true,
                            respectSession: false) {
                 AppRemovalUnlockView { showRemovalGate = false }
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .environmentObject(settings)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
         .onAppear {
             // The confirmed child-join hands off here via pendingJoinPayload.
@@ -216,12 +216,12 @@ struct ChildJoinView: View {
         let codeChildID = parts.count > 1 ? UUID(uuidString: parts[1]) : nil
         Task {
             working = true
-            message = "מִתְחַבְּרִים…"
+            message = tr("מִתְחַבְּרִים…")
             // A child play-device only BINDS to one existing child — it must not
             // upload its local profiles as new kids (that spawned phantom children).
             let ok = await household.redeemInvite(code: codePart, bringLocalChildren: false)
             guard ok else {
-                message = household.lastError ?? "קוֹד לֹא תָּקִין"
+                message = household.lastError ?? tr("קוֹד לֹא תָּקִין")
                 working = false
                 return
             }
@@ -237,7 +237,7 @@ struct ChildJoinView: View {
                 }()
             guard let cid = resolved else {
                 // Joined, but a bare code can't disambiguate among several kids.
-                message = "כִּמְעַט! בְּמַכְשִׁיר הַהוֹרֶה לַחֲצוּ עַל הַיֶּלֶד הַסְּפֵּצִיפִי כְּדֵי לְקַבֵּל קוֹד אִישִׁי, אוֹ סִרְקוּ אֶת קוֹד הַ-QR שֶׁלּוֹ."
+                message = tr("כִּמְעַט! בְּמַכְשִׁיר הַהוֹרֶה לַחֲצוּ עַל הַיֶּלֶד הַסְּפֵּצִיפִי כְּדֵי לְקַבֵּל קוֹד אִישִׁי, אוֹ סִרְקוּ אֶת קוֹד הַ-QR שֶׁלּוֹ.")
                 working = false
                 return
             }
@@ -262,7 +262,7 @@ struct ChildJoinView: View {
             }
             RemoteSyncManager.shared.start()   // ensure live sync now follows this child
             AppAnalytics.deviceJoined(kind: DeviceIdentity.kind)
-            message = "הִתְחַבַּרְתֶּם! 🎉"
+            message = tr("הִתְחַבַּרְתֶּם! 🎉")
             working = false
         }
     }
@@ -281,17 +281,17 @@ private struct AppRemovalUnlockView: View {
             VStack(spacing: 20) {
                 Image(systemName: "trash.circle.fill")
                     .font(.system(size: 64)).foregroundStyle(AppColor.flameOrange)
-                Text("מְחִיקַת הָאַפְּלִיקַצְיָה")
+                Text(tr("מְחִיקַת הָאַפְּלִיקַצְיָה"))
                     .font(.system(size: 26, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 Text(opened
-                     ? "נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת.\nצְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד."
-                     : "בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה. פִּתְחוּ חַלּוֹן קָצָר כְּדֵי לְהָסִיר אֶת טוֹפִי מִמָּסַךְ הַבַּיִת.")
+                     ? tr("נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת.\nצְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד.")
+                     : tr("בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה. פִּתְחוּ חַלּוֹן קָצָר כְּדֵי לְהָסִיר אֶת טוֹפִי מִמָּסַךְ הַבַּיִת."))
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.9)).multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true).padding(.horizontal, 24)
                 if opened {
                     Button { onDone() } label: {
-                        Text("סְגִירָה").font(.system(size: 17, weight: .heavy, design: .rounded))
+                        Text(tr("סְגִירָה")).font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
                             .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }.buttonStyle(.juicy).padding(.horizontal, 40)
@@ -306,7 +306,7 @@ private struct AppRemovalUnlockView: View {
                         ShieldManager.shared.setAppRemovalLocked(false)
                         withAnimation { opened = true }
                     } label: {
-                        Label("אַפְשְׁרוּ מְחִיקָה לְ-5 דַּקּוֹת", systemImage: "trash")
+                        Label(tr("אַפְשְׁרוּ מְחִיקָה לְ-5 דַּקּוֹת"), systemImage: "trash")
                             .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                             .frame(maxWidth: .infinity).padding(.vertical, 15)
                             .background(AppColor.flameOrange.opacity(0.9), in: Capsule())
@@ -321,5 +321,5 @@ private struct AppRemovalUnlockView: View {
 #Preview {
     ChildJoinView()
         .environmentObject(ProfileStore.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

@@ -290,8 +290,8 @@ struct WorldMapView: View {
             subtitle: pack.tagline,
             gradient: pack.heroGradient,
             glowColor: Color(hex: "2ECC71"),
-            badge: "✨ חָדָשׁ בְּטוֹפִי",
-            foot: "בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא 💌"
+            badge: tr("✨ חָדָשׁ בְּטוֹפִי"),
+            foot: tr("בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא 💌")
         ) {
             Haptic.light()
             // One tap is enough: the sparkle has done its job (Rani).
@@ -404,13 +404,13 @@ struct WorldMapView: View {
                                 case .tofyTime:
                                     FeatureCard(
                                         emoji: "🎲",
-                                        title: "טוֹפִי טַיים",
-                                        subtitle: "שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ",
+                                        title: tr("טוֹפִי טַיים"),
+                                        subtitle: tr("שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ"),
                                         gradient: AppGradient.portal,
                                         glowColor: AppColor.companionGlow,
                                         // Free, always (Rani): the one thing on this screen that
                                         // is never behind Tofy+ says so, in mint.
-                                        badge: "✨ חינם",   // always — טופי טיים is free for everyone (Rani)
+                                        badge: tr("✨ חינם"),   // always — טופי טיים is free for everyone (Rani)
                                         badgeTint: Color(hex: "8CFFC4")
                                     ) {
                                         // No companion line here — we leave this screen
@@ -439,7 +439,7 @@ struct WorldMapView: View {
                                     // progress kept, and the foot says so — no failure language.
                                     let girl = profiles.active?.gender == .girl
                                     let continueFoot: String? = locked && room > 0
-                                        ? "חֶדֶר \(max(1, min(room + 1, world.rooms)))/\(world.rooms) · \(girl ? "רוֹצָה" : "רוֹצֶה") לְהַמְשִׁיךְ?" : nil
+                                        ? tr("חֶדֶר \(max(1, min(room + 1, world.rooms)))/\(world.rooms) · \(girl ? tr("רוֹצָה") : tr("רוֹצֶה")) לְהַמְשִׁיךְ?") : nil
                                     WorldCard(
                                         // Premium unlocks every world (that's what the
                                         // subscription buys). Stars are now a spendable
@@ -450,7 +450,7 @@ struct WorldMapView: View {
                                         currentRoom: room,
                                         starsHeld: progress.stars,
                                         subscriptionLocked: locked,
-                                        badgeOverride: packNew ? "✨ חָדָשׁ!" : (isGuest ? "🌟 אוֹרֵחַ הַשָּׁבוּעַ" : nil),
+                                        badgeOverride: packNew ? tr("✨ חָדָשׁ!") : (isGuest ? tr("🌟 אוֹרֵחַ הַשָּׁבוּעַ") : nil),
                                         footOverride: continueFoot,
                                         // Glows on its launch day only until the child taps it (Rani).
                                         pulse: neverOpened && (pack.map { p in profiles.activeID.map { PackKidState.isFirstDay(p.id, childID: $0) } ?? false } ?? false)
@@ -482,20 +482,20 @@ struct WorldMapView: View {
                             // is the dessert at the end.
                             FeatureCard(
                                 emoji: "🎮",
-                                title: "מִשְׂחָקִים",
+                                title: tr("מִשְׂחָקִים"),
                                 // Daily warm-up gate: games open after a few CORRECT
                                 // answers of real learning (Rani). Framed as a goal,
                                 // never a lock — no grey-out, no failure language.
                                 subtitle: gamesUnlockedToday
-                                    ? "מֵרוֹץ נָכוֹן/לֹא · הַתְאָמַת זוּגוֹת"
-                                    : "עוֹנִים \(gamesGateTarget) נְכוֹנוֹת — וְנִפְתָּח! 💪",
+                                    ? tr("מֵרוֹץ נָכוֹן/לֹא · הַתְאָמַת זוּגוֹת")
+                                    : tr("עוֹנִים \(gamesGateTarget) נְכוֹנוֹת — וְנִפְתָּח! 💪"),
                                 gradient: LinearGradient(colors: [Color(hex: "EF476F"), Color(hex: "9B5DE5")],
                                                          startPoint: .topLeading, endPoint: .bottomTrailing),
                                 glowColor: Color(hex: "EF476F"),
-                                badge: !subs.isPremium ? "👑 טוֹפִי+"
+                                badge: !subs.isPremium ? tr("👑 טוֹפִי+")
                                     : gamesUnlockedToday ? nil
                                     : "\(min(progress.correctToday, gamesGateTarget))/\(gamesGateTarget) ✅",
-                                foot: gamesUnlockedToday ? "🎮 פָּתוּחַ הַיּוֹם" : "חִמּוּם יוֹמִי",
+                                foot: gamesUnlockedToday ? tr("🎮 פָּתוּחַ הַיּוֹם") : tr("חִמּוּם יוֹמִי"),
                                 footFrac: gamesUnlockedToday ? nil
                                     : Double(min(progress.correctToday, gamesGateTarget)) / Double(max(1, gamesGateTarget))
                             ) {
@@ -504,7 +504,7 @@ struct WorldMapView: View {
                                     if gamesUnlockedToday {
                                         showingGames = true
                                     } else {
-                                        companion.cheer("עוֹד \(gamesGateRemaining) תְּשׁוּבוֹת נְכוֹנוֹת וְהַמִּשְׂחָקִים נִפְתָּחִים! 🎮")
+                                        companion.cheer(tr("עוֹד \(gamesGateRemaining) תְּשׁוּבוֹת נְכוֹנוֹת וְהַמִּשְׂחָקִים נִפְתָּחִים! 🎮"))
                                     }
                                 }
                             }
@@ -710,7 +710,7 @@ struct WorldMapView: View {
                     .glow(AppColor.successMint, radius: 12)
                     .padding(.top, 60)
                     .transition(.move(edge: .top).combined(with: .opacity))
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
         }
         .animation(.spring(response: 0.5, dampingFraction: 0.7), value: challengeCelebration)
@@ -723,18 +723,18 @@ struct WorldMapView: View {
             // walked straight back in off the session unlock).
             ParentGateView(respectSession: false) {
                 ChildDeviceControlsView()
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
         }
         .fullScreenCover(isPresented: $showingAppLockSetup) {
             ChildAppLockSetupView()
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
         }
         // The child's "protect my time" code — verify before spending minutes,
         // plus the set/change/remove flows.
         .fullScreenCover(item: $playPINSheet) { sheet in
             playPINCover(sheet)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
         }
         .fullScreenCover(isPresented: $showingShop) {
             ShopView()
@@ -785,8 +785,8 @@ struct WorldMapView: View {
         // respectSession:false so this gate itself always authenticates.
         .sheet(isPresented: $showKidExit) {
             ParentGateView(allowClose: true,
-                           gateTitle: "יְצִיאָה מִמַּצַּב יֶלֶד",
-                           gateReason: "אַמְּתוּ זֶהוּת כְּדֵי לָצֵאת מִמַּצַּב יֶלֶד",
+                           gateTitle: tr("יְצִיאָה מִמַּצַּב יֶלֶד"),
+                           gateReason: tr("אַמְּתוּ זֶהוּת כְּדֵי לָצֵאת מִמַּצַּב יֶלֶד"),
                            useFaceID: true,
                            respectSession: false,
                            onAuthorized: {
@@ -796,7 +796,7 @@ struct WorldMapView: View {
                 Color.clear
             }
             .environmentObject(settings)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
         // A friend started a game I'm invited to → pop a toast at the top (far more
         // visible than the small red dot). It auto-hides after a few seconds; the
@@ -824,7 +824,7 @@ struct WorldMapView: View {
             ChoresKidView { showingChores = false }
                 .environmentObject(profiles)
                 .environmentObject(progress)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
         }
         .fullScreenCover(isPresented: $showingWheel) {
             LuckyWheelView { showingWheel = false }
@@ -859,7 +859,7 @@ struct WorldMapView: View {
                     profiles.remove(profile)
                 }
                 .environmentObject(profiles)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
             }
         }
         .fullScreenCover(isPresented: $showEventSplash) {
@@ -871,14 +871,14 @@ struct WorldMapView: View {
                     emoji: event.emoji,
                     title: copy.title,
                     message: copy.message,
-                    ctaTitle: "יַאלְלָה, בּוֹאוּ נַאֲסֹף! 🚀",
+                    ctaTitle: tr("יַאלְלָה, בּוֹאוּ נַאֲסֹף! 🚀"),
                     onCTA: {
                         showEventSplash = false
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { showingSmartFeed = true }
                     },
                     onClose: { showEventSplash = false }
                 )
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
             } else {
                 Color.clear.onAppear { showEventSplash = false }
             }
@@ -923,9 +923,9 @@ struct WorldMapView: View {
         HStack(spacing: 12) {
             Text("🎮").font(.system(size: 30))
             VStack(alignment: .trailing, spacing: 2) {
-                Text("\(invite.hostName) מַזְמִין/ה אוֹתְךָ!")
+                Text(tr("\(invite.hostName) מַזְמִין/ה אוֹתְךָ!"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                Text("מִשְׂחָק חִידוֹן נֶגֶד חֲבֵרִים")
+                Text(tr("מִשְׂחָק חִידוֹן נֶגֶד חֲבֵרִים"))
                     .font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.85))
             }
             Spacer()
@@ -933,7 +933,7 @@ struct WorldMapView: View {
                 Haptic.medium()
                 Task { await liveGame.joinGame(invite.id) }
             } label: {
-                Text("הִצְטָרְפוּ")
+                Text(tr("הִצְטָרְפוּ"))
                     .font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(AppColor.textOnLight)
                     .padding(.horizontal, 18).padding(.vertical, 9)
                     .background(Capsule().fill(AppColor.starGold))
@@ -945,7 +945,7 @@ struct WorldMapView: View {
         .glow(AppColor.gemPurple, radius: 14)
         .shadow(color: .black.opacity(0.3), radius: 10, y: 5)
         .frame(maxWidth: 520)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .eraseToAnyView()
     }
 
@@ -958,7 +958,7 @@ struct WorldMapView: View {
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "lock.fill").font(.system(size: 14, weight: .bold))
-                Text("יְצִיאָה מִמַּצַּב יֶלֶד").font(.system(size: 15, weight: .heavy, design: .rounded))
+                Text(tr("יְצִיאָה מִמַּצַּב יֶלֶד")).font(.system(size: 15, weight: .heavy, design: .rounded))
             }
             .foregroundStyle(.white)
             .padding(.horizontal, 28).padding(.vertical, 12)
@@ -997,7 +997,7 @@ struct WorldMapView: View {
         }
         // RTL like the mockup (Rani): avatar + name on the RIGHT, the round
         // buttons on the left with ⚙️ the leftmost; אתגר יומי right, מטלות left.
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .padding(16)
         .glassPane(radius: 24)
         .padding(.top, AppSpacing.sm)
@@ -1009,7 +1009,7 @@ struct WorldMapView: View {
     private var brandRow: some View {
         HStack(alignment: .center, spacing: 10) {
             HStack(spacing: 8) {
-                Text(subs.isPremium ? "טופי +" : "טופי")
+                Text(subs.isPremium ? tr("טופי +") : tr("טופי"))
                     .font(.system(size: heroTitleSize, weight: .black, design: .rounded))
                     .foregroundStyle(LinearGradient(colors: [Color(hex: "FFF6C4"), Color(hex: "FFD23F"), Color(hex: "FFB347")],
                                                     startPoint: .top, endPoint: .bottom))
@@ -1040,7 +1040,7 @@ struct WorldMapView: View {
             Spacer(minLength: 6)
             navButtonsRow(size: isCompact ? 44 : 50)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .padding(.top, AppSpacing.sm)
         .padding(.bottom, 2)
         .eraseToAnyView()
@@ -1051,14 +1051,14 @@ struct WorldMapView: View {
     /// and ⏱ minutes earned.
     private var walletStats: some View {
         HStack(spacing: isCompact ? 12 : 18) {
-            walletStat("⭐ " + progress.stars.currencyShort, "כּוֹכָבִים") { infoStat = .stars }
-            walletStat("💎 " + progress.diamonds.currencyShort, "יַהֲלוֹמִים") { infoStat = .diamonds }
+            walletStat("⭐ " + progress.stars.currencyShort, tr("כּוֹכָבִים")) { infoStat = .stars }
+            walletStat("💎 " + progress.diamonds.currencyShort, tr("יַהֲלוֹמִים")) { infoStat = .diamonds }
             if !isCompact {
-                walletStat("💝 \(progress.parentGiftMinutes)", "דַּקּ׳ מַתָּנָה") { infoStat = .minutes }
-                walletStat("⏱ \(progress.pendingMinutes)", "דַּקּ׳ שֶׁהִרְוִיחַ") { infoStat = .minutes }
+                walletStat("💝 \(progress.parentGiftMinutes)", tr("דַּקּ׳ מַתָּנָה")) { infoStat = .minutes }
+                walletStat("⏱ \(progress.pendingMinutes)", tr("דַּקּ׳ שֶׁהִרְוִיחַ")) { infoStat = .minutes }
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .eraseToAnyView()
     }
 
@@ -1124,13 +1124,13 @@ struct WorldMapView: View {
         }
         let status = Group {
             if claimed {
-                Text("כָּל הַכָּבוֹד! נִפְגָּשִׁים מָחָר 🌙")
+                Text(tr("כָּל הַכָּבוֹד! נִפְגָּשִׁים מָחָר 🌙"))
                     .font(.system(size: 11.5, weight: .bold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.88)).lineLimit(1).minimumScaleFactor(0.6)
             } else if ready {
                 HStack(spacing: 4) {
                     Text("🎁").font(.system(size: 13)).scaleEffect(challengePulse ? 1.18 : 1)
-                    Text("פִּתְחוּ!").font(.system(size: 12, weight: .black, design: .rounded))
+                    Text(tr("פִּתְחוּ!")).font(.system(size: 12, weight: .black, design: .rounded))
                         .foregroundStyle(AppColor.textOnLight).lineLimit(1).fixedSize()
                 }
                 .padding(.horizontal, 10).padding(.vertical, 3)
@@ -1138,7 +1138,7 @@ struct WorldMapView: View {
                 .overlay(Capsule().stroke(.white.opacity(0.7), lineWidth: 1.2))
                 .glow(AppColor.starGold, radius: challengePulse ? 10 : 5)
             } else {
-                Text("\(done) מִתּוֹךְ \(target)")
+                Text(tr("\(done) מִתּוֹךְ \(target)"))
                     .font(.system(size: 11.5, weight: .bold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.88)).lineLimit(1).minimumScaleFactor(0.6)
             }
@@ -1147,10 +1147,10 @@ struct WorldMapView: View {
             Haptic.light()
             requirePremium { infoSheet = .dailyChallenge }
         } label: {
-            twinCard(ring: ring, title: "אֶתְגָּר יוֹמִי", status: status, frac: frac)
+            twinCard(ring: ring, title: tr("אֶתְגָּר יוֹמִי"), status: status, frac: frac)
         }
         .buttonStyle(.juicy)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onAppear {
             withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
                 challengePulse = true
@@ -1193,8 +1193,8 @@ struct WorldMapView: View {
         Haptic.success()
         SoundPlayer.shared.play(.streakUp)
         let total = grant.addedToday + grant.bankedForTomorrow
-        challengeCelebration = "🎉 כָּל הַכָּבוֹד! +\(15 + min(progress.dayStreak, 7) * 2) 💎" + (total > 0 ? " וְ-\(total) דַּקּוֹת" : "")
-        companion.hype("שָׁמַרְתָּ עַל הָרֶצֶף! 🔥")
+        challengeCelebration = tr("🎉 כָּל הַכָּבוֹד! +\(15 + min(progress.dayStreak, 7) * 2) 💎") + (total > 0 ? tr(" וְ-\(total) דַּקּוֹת") : "")
+        companion.hype(tr("שָׁמַרְתָּ עַל הָרֶצֶף! 🔥"))
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { challengeCelebration = nil }
     }
 
@@ -1215,12 +1215,12 @@ struct WorldMapView: View {
             let prize = 15 + min(progress.dayStreak, 7) * 2
             ChallengeInfoView(
                 emoji: "🔥",
-                title: "אֶתְגָּר יוֹמִי",
+                title: tr("אֶתְגָּר יוֹמִי"),
                 message: claimed
-                    ? "הִשְׁלַמְתָּ אֶת הָאֶתְגָּר הַיּוֹם — כָּל הַכָּבוֹד! 🎉\nאֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק וְלִצְבֹּר עוֹד."
-                    : "עֲנֵה נָכוֹן עַל \(target) שְׁאֵלוֹת הַיּוֹם וְזָכֵה בִּ-\(prize) 💎!\nכָּל יוֹם רָצוּף שֶׁמְּשַׂחֲקִים — הַפְּרָס גָּדֵל. 🔥",
+                    ? tr("הִשְׁלַמְתָּ אֶת הָאֶתְגָּר הַיּוֹם — כָּל הַכָּבוֹד! 🎉\nאֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק וְלִצְבֹּר עוֹד.")
+                    : tr("עֲנֵה נָכוֹן עַל \(target) שְׁאֵלוֹת הַיּוֹם וְזָכֵה בִּ-\(prize) 💎!\nכָּל יוֹם רָצוּף שֶׁמְּשַׂחֲקִים — הַפְּרָס גָּדֵל. 🔥"),
                 progressText: "\(done)/\(target)",
-                ctaTitle: ready ? "אַסְפוּ אֶת הַפְּרָס 🎁" : "קָדִימָה, נְעַנֶּה! 🚀",
+                ctaTitle: ready ? tr("אַסְפוּ אֶת הַפְּרָס 🎁") : tr("קָדִימָה, נְעַנֶּה! 🚀"),
                 onCTA: {
                     if ready { claimChallenge(); infoSheet = nil }
                     else { enterSmartFeedFromInfo() }
@@ -1235,11 +1235,11 @@ struct WorldMapView: View {
     private func eventCopy(_ event: GameEvent) -> (title: String, message: String) {
         switch event {
         case .doubleDiamonds:
-            return ("סוֹף שָׁבוּעַ כָּפוּל!",
-                    "כָּל הַיַּהֲלוֹמִים שֶׁתִּצְבְּרוּ הַיּוֹם — כְּפוּלִים! 💎×2\nזֶה הַזְּמַן הֲכִי טוֹב לֶאֱסֹף הַרְבֵּה.")
+            return (tr("סוֹף שָׁבוּעַ כָּפוּל!"),
+                    tr("כָּל הַיַּהֲלוֹמִים שֶׁתִּצְבְּרוּ הַיּוֹם — כְּפוּלִים! 💎×2\nזֶה הַזְּמַן הֲכִי טוֹב לֶאֱסֹף הַרְבֵּה."))
         case .featuredTopic(let t):
-            return ("נוֹשֵׂא הַיּוֹם: \(t.displayName)",
-                    "הַיּוֹם כָּל תְּשׁוּבָה נְכוֹנָה בְּ\(t.displayName) שָׁוָה יַהֲלוֹמִים כְּפוּלִים! 💎×2")
+            return (tr("נוֹשֵׂא הַיּוֹם: \(t.displayName)"),
+                    tr("הַיּוֹם כָּל תְּשׁוּבָה נְכוֹנָה בְּ\(t.displayName) שָׁוָה יַהֲלוֹמִים כְּפוּלִים! 💎×2"))
         }
     }
 
@@ -1251,7 +1251,7 @@ struct WorldMapView: View {
                 emoji: event.emoji,
                 title: copy.title,
                 message: copy.message,
-                ctaTitle: "קָדִימָה! 🚀",
+                ctaTitle: tr("קָדִימָה! 🚀"),
                 onCTA: { enterSmartFeedFromInfo() },
                 onClose: { infoSheet = nil }
             )
@@ -1287,7 +1287,7 @@ struct WorldMapView: View {
                 Button {
                     Haptic.light(); showingChildSettings = true
                 } label: {
-                    Text((profiles.active?.name ?? "טוֹפִי").split(separator: " ").first.map(String.init) ?? "טוֹפִי")
+                    Text((profiles.active?.name ?? tr("טוֹפִי")).split(separator: " ").first.map(String.init) ?? tr("טוֹפִי"))
                         .font(.system(size: isCompact ? 17 : 20, weight: .black, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .lineLimit(1).minimumScaleFactor(0.6)
@@ -1301,7 +1301,7 @@ struct WorldMapView: View {
                     // Mockup: the grade, then the day streak — the level lives in
                     // the sheet this line opens.
                     Text(Profile.gradeDisplayName(profiles.active?.effectiveGrade ?? 1)
-                         + (progress.dayStreak > 0 ? " · 🔥 \(progress.dayStreak) יָמִים" : ""))
+                         + (progress.dayStreak > 0 ? tr(" · 🔥 \(progress.dayStreak) יָמִים") : ""))
                         .font(.system(size: isCompact ? 12 : 13, weight: .bold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .lineLimit(1).minimumScaleFactor(0.7)
@@ -1309,7 +1309,7 @@ struct WorldMapView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
         .eraseToAnyView()
     }
@@ -1372,13 +1372,13 @@ struct WorldMapView: View {
         // The approved header: ⏱ minutes today · ✅ correct today · ⭐ level
         // (stars and diamonds moved up beside the name).
         return HStack(spacing: 0) {
-            statColumn(value: minutes, suffix: minutesMax, label: "⏱ דַּקּוֹת הַיּוֹם") { infoStat = .minutes }
+            statColumn(value: minutes, suffix: minutesMax, label: tr("⏱ דַּקּוֹת הַיּוֹם")) { infoStat = .minutes }
             statDivider
-            statColumn(value: "\(progress.correctToday)", label: "✅ נְכוֹנוֹת הַיּוֹם", action: nil)
+            statColumn(value: "\(progress.correctToday)", label: tr("✅ נְכוֹנוֹת הַיּוֹם"), action: nil)
             statDivider
-            statColumn(value: "\(progress.companionLevel)", label: "⭐ רָמָה") { showLevelInfo = true }
+            statColumn(value: "\(progress.companionLevel)", label: tr("⭐ רָמָה")) { showLevelInfo = true }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .padding(.vertical, 13)
         .padding(.horizontal, 4)
         .glassInset(radius: 18)
@@ -1386,7 +1386,7 @@ struct WorldMapView: View {
         // awkwardly over the header on iPhone).
         .sheet(item: $infoStat) { stat in
             statInfoCard(stat)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
                 .presentationDetents([.height(stat == .minutes ? 460 : 380)])
                 .presentationDragIndicator(.visible)
         }
@@ -1478,12 +1478,12 @@ struct WorldMapView: View {
             // Quick jump straight from the explanation: diamonds → shop,
             // stars → the friends leaderboard (דֵּירוּג).
             if stat == .diamonds {
-                infoCTA(title: "לַחֲנוּת", icon: "storefront.fill",
+                infoCTA(title: tr("לַחֲנוּת"), icon: "storefront.fill",
                         gradient: AnyShapeStyle(AppGradient.gold), glow: AppColor.starGold) {
                     showingShop = true
                 }
             } else if stat == .stars {
-                infoCTA(title: "לַדֵּרוּג", icon: "trophy.fill",
+                infoCTA(title: tr("לַדֵּרוּג"), icon: "trophy.fill",
                         gradient: AnyShapeStyle(LinearGradient(
                             colors: [Color(hex: "10B981"), Color(hex: "0E9E72")],
                             startPoint: .leading, endPoint: .trailing)),
@@ -1492,7 +1492,7 @@ struct WorldMapView: View {
                 }
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .padding(24)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
@@ -1532,57 +1532,57 @@ struct WorldMapView: View {
             var lines: [String] = []
             if progress.canRedeemNow {
                 // Enough to open now.
-                lines.append("אֶפְשָׁר לִפְתּוֹחַ עַכְשָׁיו \(progress.redeemableMinutesNow) דַּקּוֹת מִשְׂחָק! 🎮")
+                lines.append(tr("אֶפְשָׁר לִפְתּוֹחַ עַכְשָׁיו \(progress.redeemableMinutesNow) דַּקּוֹת מִשְׂחָק! 🎮"))
                 if progress.pendingMinutes > progress.redeemableMinutesNow {
-                    lines.append("בָּאַרְנָק יֵשׁ \(progress.pendingMinutes) — הַשְּׁאָר נִשְׁמָר לְיָמִים הַבָּאִים.")
+                    lines.append(tr("בָּאַרְנָק יֵשׁ \(progress.pendingMinutes) — הַשְּׁאָר נִשְׁמָר לְיָמִים הַבָּאִים."))
                 }
             } else if progress.dailyScreenTimeMaxedOut {
                 // Today's screen-time cap is used up — the wallet waits for tomorrow.
-                lines.append("הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לְמָחָר!")
+                lines.append(tr("הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לְמָחָר!"))
             } else if progress.pendingMinutes > 0 {
                 // Has some, but below the 15-min minimum we can open.
-                lines.append("יֵשׁ לְךָ \(progress.pendingMinutes) דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-\(progress.minimumUnlockMinutes) דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊")
+                lines.append(tr("יֵשׁ לְךָ \(progress.pendingMinutes) דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-\(progress.minimumUnlockMinutes) דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊"))
             } else if cap.enabled, progress.minutesEarnedToday >= cap.max {
                 // Earned the WHOLE day's allowance and spent it — a win, not a
                 // lack ("עדיין אין דקות" here read as failure and invited more
                 // answering "to earn", when today's earning is over). Point at
                 // what IS possible now: tomorrow's bank + the gift pocket.
-                lines.append("וָאוּ — נִצַּלְתָּ אֶת כָּל \(cap.max) הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆")
-                lines.append("כָּל מַה שֶּׁתַּרְוִיחַ עַכְשָׁיו נִשְׁמָר לְמָחָר.")
+                lines.append(tr("וָאוּ — נִצַּלְתָּ אֶת כָּל \(cap.max) הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆"))
+                lines.append(tr("כָּל מַה שֶּׁתַּרְוִיחַ עַכְשָׁיו נִשְׁמָר לְמָחָר."))
                 if progress.parentGiftMinutes > 0 {
-                    lines.append("וְיֵשׁ לְךָ \(progress.parentGiftMinutes) דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!")
+                    lines.append(tr("וְיֵשׁ לְךָ \(progress.parentGiftMinutes) דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!"))
                 }
             } else {
-                lines.append("עֲדַיִן אֵין דַּקּוֹת. עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק! 🎮")
+                lines.append(tr("עֲדַיִן אֵין דַּקּוֹת. עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק! 🎮"))
             }
             if cap.enabled {
-                lines.append("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת.")
+                lines.append(tr("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת."))
             }
             if progress.carryOverMinutes > 0 {
-                lines.append("🎁 \(progress.carryOverMinutes) דַּקּוֹת נִשְׁמְרוּ לְמָחָר.")
+                lines.append(tr("🎁 \(progress.carryOverMinutes) דַּקּוֹת נִשְׁמְרוּ לְמָחָר."))
             }
             return InfoContent(
                 emoji: "🎮",
-                title: "דַּקּוֹת מִשְׂחָק",
-                subtitle: "זְמַן הַמִּשְׂחָק שֶׁלְּךָ",
+                title: tr("דַּקּוֹת מִשְׂחָק"),
+                subtitle: tr("זְמַן הַמִּשְׂחָק שֶׁלְּךָ"),
                 body: lines.joined(separator: "\n"),
-                tip: "עוֹנִים נָכוֹן — מַרְוִיחִים עוֹד דַּקּוֹת!"
+                tip: tr("עוֹנִים נָכוֹן — מַרְוִיחִים עוֹד דַּקּוֹת!")
             )
         case .stars:
             return InfoContent(
                 emoji: "⭐",
-                title: "\(progress.stars.grouped) כּוֹכָבִים",
-                subtitle: "הַדֵּרוּג שֶׁלָּכֶם",
-                body: "אוֹסְפִים כּוֹכָב עַל כָּל תְּשׁוּבָה נְכוֹנָה. הַכּוֹכָבִים אַף פַּעַם לֹא יוֹרְדִים — הֵם הַנִּקּוּד שֶׁלָּכֶם בְּטַבְלַת הַחֲבֵרִים!",
-                tip: "כָּל מַה שֶּׁאַתֶּם לוֹמְדִים מְטַפֵּס בַּדֵּרוּג 🏆"
+                title: tr("\(progress.stars.grouped) כּוֹכָבִים"),
+                subtitle: tr("הַדֵּרוּג שֶׁלָּכֶם"),
+                body: tr("אוֹסְפִים כּוֹכָב עַל כָּל תְּשׁוּבָה נְכוֹנָה. הַכּוֹכָבִים אַף פַּעַם לֹא יוֹרְדִים — הֵם הַנִּקּוּד שֶׁלָּכֶם בְּטַבְלַת הַחֲבֵרִים!"),
+                tip: tr("כָּל מַה שֶּׁאַתֶּם לוֹמְדִים מְטַפֵּס בַּדֵּרוּג 🏆")
             )
         case .diamonds:
             return InfoContent(
                 emoji: "💎",
-                title: "\(progress.diamonds.grouped) יַהֲלוֹמִים",
-                subtitle: "הַאַרְנָק שֶׁלָּכֶם",
-                body: "מַרְוִיחִים יַהֲלוֹמִים עַל תְּשׁוּבוֹת נְכוֹנוֹת, מִמַּתָּנוֹת וּמִגַּלְגַּל הַמַּזָּל — וְקוֹנִים בָּהֶם בַּחֲנוּת.",
-                tip: "קְנִיָּה לֹא פּוֹגַעַת בַּדֵּרוּג שֶׁלָּכֶם 😊"
+                title: tr("\(progress.diamonds.grouped) יַהֲלוֹמִים"),
+                subtitle: tr("הַאַרְנָק שֶׁלָּכֶם"),
+                body: tr("מַרְוִיחִים יַהֲלוֹמִים עַל תְּשׁוּבוֹת נְכוֹנוֹת, מִמַּתָּנוֹת וּמִגַּלְגַּל הַמַּזָּל — וְקוֹנִים בָּהֶם בַּחֲנוּת."),
+                tip: tr("קְנִיָּה לֹא פּוֹגַעַת בַּדֵּרוּג שֶׁלָּכֶם 😊")
             )
         }
     }
@@ -1593,7 +1593,7 @@ struct WorldMapView: View {
         VStack(spacing: 4) {
             // The wordmark now heads the screen (brandRow); this line keeps its
             // place over the worlds — the one the mockup kept (Rani).
-            Text("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨")
+            Text(tr("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨"))
                 .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
                 .lineLimit(1).minimumScaleFactor(0.6)
@@ -1603,7 +1603,7 @@ struct WorldMapView: View {
         }
         .sheet(isPresented: $showLevelInfo) {
             levelInfoSheet
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
                 .presentationDetents([.medium])
         }
         .eraseToAnyView()
@@ -1615,10 +1615,10 @@ struct WorldMapView: View {
             SparkleField(count: 14, size: 12)
             VStack(spacing: AppSpacing.lg) {
                 Text("⭐").font(.system(size: 54))
-                Text("רָמַת טוֹפִי")
+                Text(tr("רָמַת טוֹפִי"))
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("כָּל תְּשׁוּבָה נְכוֹנָה נוֹתֶנֶת נְקוּדּוֹת. כְּשֶׁהַפַּס מִתְמַלֵּא עוֹלִים רָמָה — וּמְקַבְּלִים 💎 בּוֹנוּס לַחֲנוּת (10 עַל כָּל רָמָה). מֵרָמָה 5 הָאַוָּטָאר מְקַבֵּל מִסְגֶּרֶת בְּרוֹנְזָה, מֵ־10 כֶּסֶף, וּמֵ־20 זָהָב!")
+                Text(tr("כָּל תְּשׁוּבָה נְכוֹנָה נוֹתֶנֶת נְקוּדּוֹת. כְּשֶׁהַפַּס מִתְמַלֵּא עוֹלִים רָמָה — וּמְקַבְּלִים 💎 בּוֹנוּס לַחֲנוּת (10 עַל כָּל רָמָה). מֵרָמָה 5 הָאַוָּטָאר מְקַבֵּל מִסְגֶּרֶת בְּרוֹנְזָה, מֵ־10 כֶּסֶף, וּמֵ־20 זָהָב!"))
                     .font(.system(size: 17, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.92))
                     .multilineTextAlignment(.center)
@@ -1626,10 +1626,10 @@ struct WorldMapView: View {
                     .padding(.horizontal, AppSpacing.lg)
 
                 VStack(spacing: 6) {
-                    Text("רָמָה נוֹכְחִית: \(progress.companionLevel)")
+                    Text(tr("רָמָה נוֹכְחִית: \(progress.companionLevel)"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(AppColor.starGold)
-                    Text("עוֹד \(progress.questionsUntilNextLevel) תְּשׁוּבוֹת נְכוֹנוֹת לָרָמָה הַבָּאָה")
+                    Text(tr("עוֹד \(progress.questionsUntilNextLevel) תְּשׁוּבוֹת נְכוֹנוֹת לָרָמָה הַבָּאָה"))
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                 }
@@ -1639,7 +1639,7 @@ struct WorldMapView: View {
                 .padding(.horizontal, AppSpacing.lg)
 
                 Button { showLevelInfo = false } label: {
-                    Text("הֵבַנְתִּי!")
+                    Text(tr("הֵבַנְתִּי!"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -1681,7 +1681,7 @@ struct WorldMapView: View {
                     HStack(spacing: 10) {
                         if isOpening {
                             ProgressView().tint(.white).scaleEffect(0.9)
-                            Text("פּוֹתְחִים לְךָ… ✨")
+                            Text(tr("פּוֹתְחִים לְךָ… ✨"))
                                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                         } else {
                             Text("💝").font(.system(size: 22))
@@ -1707,7 +1707,7 @@ struct WorldMapView: View {
             // the TRANSFER: lock it THERE (stop-and-save, nothing lost), wait for
             // the honest confirmation, then the regular open buttons return here.
             if let other = peerWindow {
-                let where_ = other.kindLabel == "ipad" ? "בָּאַיְפֵּד" : (other.kindLabel == "iphone" ? "בָּאַיְפוֹן" : "בְּמַכְשִׁיר אַחֵר")
+                let where_ = other.kindLabel == "ipad" ? tr("בָּאַיְפֵּד") : (other.kindLabel == "iphone" ? tr("בָּאַיְפוֹן") : tr("בְּמַכְשִׁיר אַחֵר"))
                 VStack(spacing: 10) {
                     // Rani: the child must watch the OTHER device's time tick down
                     // here, live. Nothing extra is sent for this — the lease already
@@ -1718,10 +1718,10 @@ struct WorldMapView: View {
                     // transfer.
                     TimelineView(.periodic(from: .now, by: 1)) { _ in
                         let left = max(0, peerWindow?.secondsLeft ?? 0)
-                        bottomHint("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו \(where_) — נִשְׁאֲרוּ \(left / 60):\(String(format: "%02d", left % 60))")
+                        bottomHint(tr("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו \(where_) — נִשְׁאֲרוּ \(left / 60):\(String(format: "%02d", left % 60))"))
                     }
                     if transferRequestedAt != nil {
-                        bottomHint("🔒 נוֹעֲלִים \(where_)… רֶגַע אֶחָד ⏳")
+                        bottomHint(tr("🔒 נוֹעֲלִים \(where_)… רֶגַע אֶחָד ⏳"))
                     } else {
                         // NO "open anyway" escape hatch (Rani). An override that
                         // opens a window while another device may still hold one
@@ -1731,7 +1731,7 @@ struct WorldMapView: View {
                         // and the wake-up sweep), and a genuinely dead lease
                         // expires. So the honest answer here is "try again".
                         if transferTimedOut {
-                            bottomHint("לֹא הִצְלַחְנוּ לִנְעֹל \(where_) עַכְשָׁיו — אוּלַי הוּא כָּבוּי. אֶפְשָׁר לְנַסּוֹת שׁוּב 😊")
+                            bottomHint(tr("לֹא הִצְלַחְנוּ לִנְעֹל \(where_) עַכְשָׁיו — אוּלַי הוּא כָּבוּי. אֶפְשָׁר לְנַסּוֹת שׁוּב 😊"))
                         }
                         Button {
                             transferWindowHere(rowID: other.rowID, peerSecondsLeft: other.secondsLeft)
@@ -1739,12 +1739,12 @@ struct WorldMapView: View {
                             HStack(spacing: 10) {
                                 if isTransferring {
                                     ProgressView().tint(.white).scaleEffect(0.9)
-                                    Text("מַעֲבִירִים לְכָאן… ✨")
+                                    Text(tr("מַעֲבִירִים לְכָאן… ✨"))
                                         .font(.system(size: 19, weight: .heavy, design: .rounded))
                                 } else {
                                     Image(systemName: "lock.arrow.circlepath")
                                         .font(.system(size: 20, weight: .bold))
-                                    Text("נַעֲלוּ \(where_) וּפִתְחוּ כָּאן")
+                                    Text(tr("נַעֲלוּ \(where_) וּפִתְחוּ כָּאן"))
                                         .font(.system(size: 19, weight: .heavy, design: .rounded))
                                         .minimumScaleFactor(0.7).lineLimit(1)
                                 }
@@ -1769,12 +1769,12 @@ struct WorldMapView: View {
                         // this the button looked dead for 2–3 seconds (Rani).
                         if isOpening {
                             ProgressView().tint(.white).scaleEffect(0.9)
-                            Text("פּוֹתְחִים לְךָ… ✨")
+                            Text(tr("פּוֹתְחִים לְךָ… ✨"))
                                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                         } else {
                             Image(systemName: "gamecontroller.fill")
                                 .font(.system(size: 24))
-                            Text("פִּתְחוּ לִי \(progress.redeemableMinutesNow) דַּקּוֹת לְשַׂחֵק")
+                            Text(tr("פִּתְחוּ לִי \(progress.redeemableMinutesNow) דַּקּוֹת לְשַׂחֵק"))
                                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                                 .minimumScaleFactor(0.7).lineLimit(1)
                         }
@@ -1791,15 +1791,15 @@ struct WorldMapView: View {
             } else if progress.dailyScreenTimeMaxedOut {
                 // Wallet has minutes, but today's screen-time cap is used up — they
                 // wait for tomorrow. Say so clearly (don't tell them to earn more).
-                bottomHint("הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לְמָחָר")
+                bottomHint(tr("הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לְמָחָר"))
             } else if progress.redeemableMinutesNow > 0 {
                 // Has some minutes but below the 15-min minimum we can enforce.
                 // Tell the kid how many more to go instead of hiding the button.
-                bottomHint("עוֹד \(max(0, progress.minimumUnlockMinutes - progress.redeemableMinutesNow)) דַּקּוֹת וְאֶפְשָׁר לִפְתּוֹחַ זְמַן מִשְׂחָק 🎮")
+                bottomHint(tr("עוֹד \(max(0, progress.minimumUnlockMinutes - progress.redeemableMinutesNow)) דַּקּוֹת וְאֶפְשָׁר לִפְתּוֹחַ זְמַן מִשְׂחָק 🎮"))
             } else {
                 // Empty wallet (nothing earned / all opened). Nudge to earn instead
                 // of leaving the spot blank.
-                bottomHint("עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק 🎮")
+                bottomHint(tr("עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק 🎮"))
             }
 
             // "Protect my time" — the child's own code on the unlock buttons, so a
@@ -1814,7 +1814,7 @@ struct WorldMapView: View {
                 } label: {
                     // Rani (2026-09-07): "הגנו על הזמן שלכם בקוד" read like a parent
                     // setting; this is the child's own secret code for their minutes.
-                    Label(p.hasPlayPIN ? "הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד" : "קוֹד סוֹדִי לַדַּקּוֹת שֶׁלִּי",
+                    Label(p.hasPlayPIN ? tr("הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד") : tr("קוֹד סוֹדִי לַדַּקּוֹת שֶׁלִּי"),
                           systemImage: p.hasPlayPIN ? "lock.fill" : "lock.open")
                         .font(.system(size: 13.5, weight: .bold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
@@ -1870,9 +1870,9 @@ struct WorldMapView: View {
         // may not have synced yet — that's how 30 minutes became 60).
         if let other = HouseholdManager.shared.otherDeviceOpenWindow(forChildID: p.id) {
             let mins = max(1, (other.secondsLeft + 59) / 60)
-            let where_ = other.device.kind == "ipad" ? "בָּאַיְפֵּד" : (other.device.kind == "iphone" ? "בָּאַיְפוֹן" : "בְּמַכְשִׁיר אַחֵר")
+            let where_ = other.device.kind == "ipad" ? tr("בָּאַיְפֵּד") : (other.device.kind == "iphone" ? tr("בָּאַיְפוֹן") : tr("בְּמַכְשִׁיר אַחֵר"))
             Haptic.warning()
-            companion.console("הַזְּמַן שֶׁלְּךָ כְּבָר פָּתוּחַ \(where_) — עוֹד \(mins) דַּקּוֹת 🎮")
+            companion.console(tr("הַזְּמַן שֶׁלְּךָ כְּבָר פָּתוּחַ \(where_) — עוֹד \(mins) דַּקּוֹת 🎮"))
             return
         }
         guard p.hasPlayPIN else { action(); return }
@@ -1893,7 +1893,7 @@ struct WorldMapView: View {
         guard var p = profiles.active else { return }
         p.playPIN = pin
         profiles.update(p)
-        companion.cheer("הַזְּמַן שֶׁלְּךָ מוּגָן! 🔒")
+        companion.cheer(tr("הַזְּמַן שֶׁלְּךָ מוּגָן! 🔒"))
     }
 
     private func clearPlayPIN() {
@@ -1901,7 +1901,7 @@ struct WorldMapView: View {
         // "" (not nil) — the deliberate-clear sentinel that survives sync merges.
         p.playPIN = ""
         profiles.update(p)
-        companion.cheer("הַקּוֹד הוּסַר 🔓")
+        companion.cheer(tr("הַקּוֹד הוּסַר 🔓"))
     }
 
     /// The KidPIN full-screen flows, attached to the map's root in `body`.
@@ -1910,7 +1910,7 @@ struct WorldMapView: View {
         if let p = profiles.active {
             switch sheet {
             case .verifyUnlock:
-                KidPINView(profile: p, mode: .verify(title: "פּוֹתְחִים זְמַן מִשְׂחָק")) { _ in
+                KidPINView(profile: p, mode: .verify(title: tr("פּוֹתְחִים זְמַן מִשְׂחָק"))) { _ in
                     playPINSheet = nil
                     let action = pendingUnlockAction
                     pendingUnlockAction = nil
@@ -1935,12 +1935,12 @@ struct WorldMapView: View {
                     onClose: { playPINSheet = nil }
                 )
             case .verifyThenSet:
-                KidPINView(profile: p, mode: .verify(title: "קֹדֶם הַקּוֹד הַנּוֹכְחִי")) { _ in
+                KidPINView(profile: p, mode: .verify(title: tr("קֹדֶם הַקּוֹד הַנּוֹכְחִי"))) { _ in
                     playPINSheet = .setNew
                 } onCancel: { playPINSheet = nil }
                   onForgot: { playPINSheet = .forgot }
             case .verifyThenClear:
-                KidPINView(profile: p, mode: .verify(title: "קֹדֶם הַקּוֹד הַנּוֹכְחִי")) { _ in
+                KidPINView(profile: p, mode: .verify(title: tr("קֹדֶם הַקּוֹד הַנּוֹכְחִי"))) { _ in
                     clearPlayPIN()
                     playPINSheet = nil
                 } onCancel: { playPINSheet = nil }
@@ -1951,7 +1951,7 @@ struct WorldMapView: View {
                     // clear the kid's code on the spot.
                     clearPlayPIN()
                     playPINSheet = nil
-                    companion.cheer("הַקּוֹד אֻפַּס! אֶפְשָׁר לִבְחוֹר חָדָשׁ 🔓")
+                    companion.cheer(tr("הַקּוֹד אֻפַּס! אֶפְשָׁר לִבְחוֹר חָדָשׁ 🔓"))
                 } onClose: { playPINSheet = nil }
             }
         }
@@ -2026,7 +2026,7 @@ struct WorldMapView: View {
                                      leaseKind: kind.rawValue, extraSeconds: seconds % 60)
                 LiveEventReporter.report(.screenTimeMoved, extra: ["fromKind": transferFromKind])
                 Haptic.success()
-                companion.hype("נָעוּל שָׁם! ✅ אֶפְשָׁר לְשַׂחֵק כָּאן 🎉")
+                companion.hype(tr("נָעוּל שָׁם! ✅ אֶפְשָׁר לְשַׂחֵק כָּאן 🎉"))
             case .heldElsewhere:
                 transferTimedOut = true      // owner never answered → "try again"
                 Haptic.warning()
@@ -2078,7 +2078,7 @@ struct WorldMapView: View {
                 _ = ProgressStore.shared.mergeRemote(cloud)
             }
             Haptic.success()
-            companion.hype("נָעוּל שָׁם! ✅ הַדַּקּוֹת חָזְרוּ — אֶפְשָׁר לִפְתּוֹחַ כָּאן 🎉")
+            companion.hype(tr("נָעוּל שָׁם! ✅ הַדַּקּוֹת חָזְרוּ — אֶפְשָׁר לִפְתּוֹחַ כָּאן 🎉"))
         }
     }
 
@@ -2109,19 +2109,19 @@ struct WorldMapView: View {
                 .shadow(color: Color(hex: "48BFE3").opacity(0.55), radius: 9)
             Text("🧹").font(.system(size: 20))
         }
-        let status = Text(pending > 0 ? (pending == 1 ? "אַחַת מְחַכָּה" : "\(pending) מְחַכּוֹת")
-                          : doneToday > 0 ? "\(doneToday) הֻשְׁלְמוּ הַיּוֹם! 💪"
-                          : "עוֹזְרִים — וּבוֹחֲרִים פְּרָס!")
+        let status = Text(pending > 0 ? (pending == 1 ? tr("אַחַת מְחַכָּה") : tr("\(pending) מְחַכּוֹת"))
+                          : doneToday > 0 ? tr("\(doneToday) הֻשְׁלְמוּ הַיּוֹם! 💪")
+                          : tr("עוֹזְרִים — וּבוֹחֲרִים פְּרָס!"))
             .font(.system(size: 11.5, weight: .bold, design: .rounded))
             .foregroundStyle(.white.opacity(0.88)).lineLimit(1).minimumScaleFactor(0.6)
         return Button {
             Haptic.light()
             requirePremium { showingChores = true }
         } label: {
-            twinCard(ring: ring, title: "מַטְלוֹת הַבַּיִת", status: status, frac: frac)
+            twinCard(ring: ring, title: tr("מַטְלוֹת הַבַּיִת"), status: status, frac: frac)
         }
         .buttonStyle(.juicy)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
     /// `correctToday` resets at midnight, so the warm-up is a fresh daily goal.
     private var gamesUnlockedToday: Bool { gamesGateRemaining == 0 }
@@ -2133,18 +2133,18 @@ struct WorldMapView: View {
         if DayGate.usedToday(UserDefaults.standard.object(forKey: key) as? Date) { return }
         UserDefaults.standard.set(Date(), forKey: key)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            companion.hype(Gendered.g("פָּתַחְתָּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨",
-                                      "פָּתַחְתְּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨"))
+            companion.hype(Gendered.g(tr("פָּתַחְתָּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨"),
+                                      tr("פָּתַחְתְּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨")))
         }
     }
 
     private func greetIfNeeded() {
         if progress.dayStreak == 0 {
-            companion.cheer("הֵיי! יַאלְלָה לְהַרְפַּתְקָה 🌟")
+            companion.cheer(tr("הֵיי! יַאלְלָה לְהַרְפַּתְקָה 🌟"))
         } else if progress.dayStreak == 1 {
-            companion.cheer("בָּרוּךְ הַבָּא! 👋")
+            companion.cheer(tr("בָּרוּךְ הַבָּא! 👋"))
         } else {
-            companion.cheer("חָזַרְתָּ! \(progress.dayStreak) יָמִים בְּרֶצֶף 🔥")
+            companion.cheer(tr("חָזַרְתָּ! \(progress.dayStreak) יָמִים בְּרֶצֶף 🔥"))
         }
     }
 
@@ -2176,7 +2176,7 @@ struct WorldMapView: View {
         for world in Worlds.all where !progress.unlockedWorlds.contains(world.id) {
             if progress.canUnlock(world: world) {
                 progress.unlockWorld(world.id)
-                companion.wow("\(world.emoji) \(world.name) נִפְתַּח!")
+                companion.wow(tr("\(world.emoji) \(world.name) נִפְתַּח!"))
             }
         }
     }
@@ -2199,7 +2199,7 @@ struct WorldMapView: View {
             case .granted(let leaseID, let seconds, let wallet):
                 let mins = seconds / 60
                 guard mins > 0 else {
-                    progress.endOpeningWindow(message: "רֶגַע, לֹא הִצְלַחְנוּ לִפְתֹּחַ עַכְשָׁיו — נְנַסֶּה שׁוּב 😊")
+                    progress.endOpeningWindow(message: tr("רֶגַע, לֹא הִצְלַחְנוּ לִפְתֹּחַ עַכְשָׁיו — נְנַסֶּה שׁוּב 😊"))
                     return
                 }
                 if let wallet { progress.applyClaimedWallet(wallet) }
@@ -2212,10 +2212,10 @@ struct WorldMapView: View {
             case .heldElsewhere:
                 // The lease listener drives the "open on your iPad" card + transfer.
                 Haptic.warning()
-                progress.endOpeningWindow(message: "הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")
+                progress.endOpeningWindow(message: tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮"))
             case .insufficient:
                 Haptic.light()
-                progress.endOpeningWindow(message: "עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לְךָ! 💪")
+                progress.endOpeningWindow(message: tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לְךָ! 💪"))
             case .offline:
                 // Transactions don't queue offline. Fall back to the bounded local
                 // window so a kid with no network is never stranded.
@@ -2258,11 +2258,11 @@ struct WorldMapView: View {
         var parts: [String] = []
         if seconds > 0 {
             parts.append(seconds % 60 == 0
-                         ? "\(seconds / 60) דַּקּוֹת"
-                         : "\(seconds / 60):\(String(format: "%02d", seconds % 60)) דַּקּוֹת")
+                         ? tr("\(seconds / 60) דַּקּוֹת")
+                         : tr("\(seconds / 60):\(String(format: "%02d", seconds % 60)) דַּקּוֹת"))
         }
-        if frozen > 0 { parts.append("❄️ \(frozen) שְׁמוּרוֹת") }
-        return "מַתָּנָה מֵהַהוֹרִים · " + parts.joined(separator: " + ")
+        if frozen > 0 { parts.append(tr("❄️ \(frozen) שְׁמוּרוֹת")) }
+        return tr("מַתָּנָה מֵהַהוֹרִים · ") + parts.joined(separator: " + ")
     }
 
     /// 💝 Open ALL parent time as one fixed manual window: the gift pocket plus
@@ -2285,7 +2285,7 @@ struct WorldMapView: View {
             case .granted(let leaseID, let seconds, let wallet):
                 let mins = seconds / 60
                 guard mins > 0 else {
-                    progress.endOpeningWindow(message: "רֶגַע, לֹא הִצְלַחְנוּ לִפְתֹּחַ עַכְשָׁיו — נְנַסֶּה שׁוּב 😊")
+                    progress.endOpeningWindow(message: tr("רֶגַע, לֹא הִצְלַחְנוּ לִפְתֹּחַ עַכְשָׁיו — נְנַסֶּה שׁוּב 😊"))
                     return
                 }
                 if let wallet { progress.applyClaimedWallet(wallet) }
@@ -2296,10 +2296,10 @@ struct WorldMapView: View {
                 progress.endOpeningWindow()
             case .heldElsewhere:
                 Haptic.warning()
-                progress.endOpeningWindow(message: "הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")
+                progress.endOpeningWindow(message: tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮"))
             case .insufficient:
                 Haptic.light()
-                progress.endOpeningWindow(message: "רֶגַע, אֵין כָּרֶגַע דַּקּוֹת מַתָּנָה לִפְתֹּחַ 💝")
+                progress.endOpeningWindow(message: tr("רֶגַע, אֵין כָּרֶגַע דַּקּוֹת מַתָּנָה לִפְתֹּחַ 💝"))
             case .offline:
                 progress.endOpeningWindow()
                 legacyRedeemGift()
@@ -2349,7 +2349,7 @@ struct XPBarMini: View {
         .environmentObject(ProgressStore.shared)
         .environmentObject(ShieldManager.shared)
         .environmentObject(ProfileStore.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }
 
 /// Aligns the avatar, the name, and each header button CIRCLE on one line — the

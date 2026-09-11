@@ -120,12 +120,12 @@ final class FriendsManager: ObservableObject {
     func seedDemo() {
         let meID = ProfileStore.shared.activeID?.uuidString ?? "me"
         leaderboard = [
-            FriendCard(id: "f1", name: "יוֹאָב", character3DID: "lion",    stars: 1890, code: "AAA"),
-            FriendCard(id: "f2", name: "מָאיָה", character3DID: "panda",   stars: 1530, code: "BBB"),
-            FriendCard(id: meID, name: "דָּנָה", character3DID: "unicorn", stars: 1240, code: "ABC234"),
-            FriendCard(id: "f3", name: "אִיתַי", character3DID: "dragon",  stars: 980,  code: "CCC"),
-            FriendCard(id: "f4", name: "נוֹעָה",  character3DID: "fox",     stars: 640,  code: "DDD"),
-            FriendCard(id: "f5", name: "עוֹמֶר",  character3DID: "tiger",   stars: 410,  code: "EEE"),
+            FriendCard(id: "f1", name: tr("יוֹאָב"), character3DID: "lion",    stars: 1890, code: "AAA"),
+            FriendCard(id: "f2", name: tr("מָאיָה"), character3DID: "panda",   stars: 1530, code: "BBB"),
+            FriendCard(id: meID, name: tr("דָּנָה"), character3DID: "unicorn", stars: 1240, code: "ABC234"),
+            FriendCard(id: "f3", name: tr("אִיתַי"), character3DID: "dragon",  stars: 980,  code: "CCC"),
+            FriendCard(id: "f4", name: tr("נוֹעָה"),  character3DID: "fox",     stars: 640,  code: "DDD"),
+            FriendCard(id: "f5", name: tr("עוֹמֶר"),  character3DID: "tiger",   stars: 410,  code: "EEE"),
         ].sorted { $0.stars > $1.stars }
         myCode = "ABC234"
     }
@@ -176,15 +176,15 @@ final class FriendsManager: ObservableObject {
     @discardableResult
     func addFriend(code raw: String) async -> Bool {
         #if canImport(FirebaseFirestore)
-        guard let myID else { lastError = "אֵין פְּרוֹפִיל פָּעִיל"; return false }
+        guard let myID else { lastError = tr("אֵין פְּרוֹפִיל פָּעִיל"); return false }
         guard AuthManager.shared.isSignedIn else {
-            lastError = "צָרִיךְ לְהִתְחַבֵּר לְחֶשְׁבּוֹן כְּדֵי לְהוֹסִיף חֲבֵרִים"
+            lastError = tr("צָרִיךְ לְהִתְחַבֵּר לְחֶשְׁבּוֹן כְּדֵי לְהוֹסִיף חֲבֵרִים")
             return false
         }
         let code = FriendLink.code(from: raw).uppercased()
         log("addFriend raw=\(raw) → code=\(code), myCode=\(myCode), myID=\(myID)")
         guard !code.isEmpty, code != myCode else {
-            lastError = code == myCode ? "זֶה הַקּוֹד שֶׁלְּךָ 🙂" : "קוֹד לֹא תָּקִין"
+            lastError = code == myCode ? tr("זֶה הַקּוֹד שֶׁלְּךָ 🙂") : tr("קוֹד לֹא תָּקִין")
             log("rejected: \(lastError ?? "")")
             return false
         }
@@ -193,11 +193,11 @@ final class FriendsManager: ObservableObject {
                 .whereField("code", isEqualTo: code).limit(to: 1).getDocuments()
             log("query code=\(code) → \(snap.documents.count) result(s)")
             guard let doc = snap.documents.first, let card = Self.decode(doc.data()) else {
-                lastError = "לֹא מָצָאנוּ חָבֵר עִם הַקּוֹד הַזֶּה"
+                lastError = tr("לֹא מָצָאנוּ חָבֵר עִם הַקּוֹד הַזֶּה")
                 log("no card matches code=\(code)")
                 return false
             }
-            guard card.id != myID else { lastError = "זֶה אַתָּה 🙂"; return false }
+            guard card.id != myID else { lastError = tr("זֶה אַתָּה 🙂"); return false }
             log("found friend id=\(card.id) name=\(card.name); writing to my card…")
             // Add to MY card's friend list (+ un-hide if previously removed).
             // Include ownerUID so the write passes the owner gate even if this is
@@ -244,13 +244,13 @@ final class FriendsManager: ObservableObject {
     @discardableResult
     func sendRequest(to card: FriendCard) async -> Bool {
         #if canImport(FirebaseFirestore)
-        guard let myID else { lastError = "אֵין פְּרוֹפִיל פָּעִיל"; return false }
+        guard let myID else { lastError = tr("אֵין פְּרוֹפִיל פָּעִיל"); return false }
         guard AuthManager.shared.isSignedIn else {
-            lastError = "צָרִיךְ לְהִתְחַבֵּר לְחֶשְׁבּוֹן כְּדֵי לִשְׁלוֹחַ בַּקָּשָׁה"
+            lastError = tr("צָרִיךְ לְהִתְחַבֵּר לְחֶשְׁבּוֹן כְּדֵי לִשְׁלוֹחַ בַּקָּשָׁה")
             return false
         }
-        guard card.id != myID else { lastError = "זֶה אַתָּה 🙂"; return false }
-        guard !isFriend(card.id) else { lastError = "אַתֶּם כְּבָר חֲבֵרִים 🙂"; return false }
+        guard card.id != myID else { lastError = tr("זֶה אַתָּה 🙂"); return false }
+        guard !isFriend(card.id) else { lastError = tr("אַתֶּם כְּבָר חֲבֵרִים 🙂"); return false }
         let profile = ProfileStore.shared.active
         let req = FriendRequest(
             id: myID, fromID: myID,
@@ -261,7 +261,7 @@ final class FriendsManager: ObservableObject {
         )
         guard let data = try? JSONEncoder.firestore.encode(req),
               let dict = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
-            lastError = "לֹא הִצְלַחְנוּ"; return false
+            lastError = tr("לֹא הִצְלַחְנוּ"); return false
         }
         do {
             try await db.collection("friendCards").document(card.id)

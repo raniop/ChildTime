@@ -115,12 +115,12 @@ enum DeviceIdentity {
         let generic = ["iPhone", "iPad", "iPod touch"]
         if !raw.isEmpty, !generic.contains(raw) { return raw }
         switch kind {
-        case "ipad":   return "אייפד"
-        case "iphone": return "אייפון"
-        default:       return "מכשיר"
+        case "ipad":   return tr("אייפד")
+        case "iphone": return tr("אייפון")
+        default:       return tr("מכשיר")
         }
         #else
-        return "מכשיר"
+        return tr("מכשיר")
         #endif
     }
 

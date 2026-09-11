@@ -46,7 +46,7 @@ struct ChoresParentView: View {
             Form {
                 if profilesStore.profiles.count > 1 {
                     Section {
-                        Picker("ילד/ה", selection: $selectedID) {
+                        Picker(tr("ילד/ה"), selection: $selectedID) {
                             ForEach(profilesStore.profiles) { p in
                                 // 🕐 marks a kid with a chore waiting for approval.
                                 Text(choreStore.chores(forChild: p.id).contains(where: { $0.isPendingApproval })
@@ -60,7 +60,7 @@ struct ChoresParentView: View {
                 }
 
                 if !pending.isEmpty {
-                    Section(pending.count == 1 ? "מחכה לאישור שלכם 🕐" : "מחכות לאישור שלכם 🕐") {
+                    Section(pending.count == 1 ? tr("מחכה לאישור שלכם 🕐") : tr("מחכות לאישור שלכם 🕐")) {
                         ForEach(pending) { chore in pendingRow(chore) }
                     }
                     .glassRows()
@@ -68,7 +68,7 @@ struct ChoresParentView: View {
 
                 if choreStore.totals(forChild: profile.id).minutes > 0 {
                     Section {
-                        Text("סה\"כ הרוויח\(profile.gender == .girl ? "ה" : "") מהמטלות: 🎮 \(choreStore.totals(forChild: profile.id).minutes) דקות משחק")
+                        Text(tr("סה\"כ הרוויח\(profile.gender == .girl ? tr("ה") : "") מהמטלות: 🎮 \(choreStore.totals(forChild: profile.id).minutes) דקות משחק"))
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     .glassRows()
@@ -83,20 +83,20 @@ struct ChoresParentView: View {
                             }
                         }
                 } header: {
-                    Text("המטלות של \(profile.name)")
+                    Text(tr("המטלות של \(profile.name)"))
                 } footer: {
-                    Text("כל המטלות זמינות אוטומטית, ופרס דקות המשחק מוצע לפי גודל המטלה. לחיצה על מטלה — עריכת הפרס; החלקה — הסתרה.")
+                    Text(tr("כל המטלות זמינות אוטומטית, ופרס דקות המשחק מוצע לפי גודל המטלה. לחיצה על מטלה — עריכת הפרס; החלקה — הסתרה."))
                 }
                 .glassRows()
 
                 if !hidden.isEmpty {
-                    Section("מטלות שהוסתרו 🙈") {
+                    Section(tr("מטלות שהוסתרו 🙈")) {
                         ForEach(hidden) { chore in
                             HStack {
                                 Text("\(chore.emoji) \(chore.title)")
                                     .foregroundStyle(.secondary)
                                 Spacer()
-                                Button("החזירו") { choreStore.restoreChore(chore) }
+                                Button(tr("החזירו")) { choreStore.restoreChore(chore) }
                                     .buttonStyle(.borderless)
                             }
                         }
@@ -104,7 +104,7 @@ struct ChoresParentView: View {
                     .glassRows()
                 }
 
-                Section("מטלה חדשה ➕") {
+                Section(tr("מטלה חדשה ➕")) {
                     formFields
                 }
                 .glassRows()
@@ -122,24 +122,24 @@ struct ChoresParentView: View {
                         }
                     }
                     .glassForm()
-                    .navigationTitle("עריכת מטלה")
+                    .navigationTitle(tr("עריכת מטלה"))
                     .navigationBarTitleDisplayMode(.inline)
-                    .toolbar { ToolbarItem(placement: .cancellationAction) { Button("ביטול") { showEditor = false } } }
+                    .toolbar { ToolbarItem(placement: .cancellationAction) { Button(tr("ביטול")) { showEditor = false } } }
                 }
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
                 .presentationDetents([.medium, .large])
             }
-            .navigationTitle("מטלות הבית · \(profile.name)")
+            .navigationTitle(tr("מטלות הבית · \(profile.name)"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { Button("סגור") { dismiss() } }
+                ToolbarItem(placement: .topBarLeading) { Button(tr("סגור")) { dismiss() } }
             }
             .onAppear { choreStore.startIfNeeded() }
             .onChangeCompat(of: selectedID) { _, _ in clearForm() }
-            .alert("האישור לא נשלח", isPresented: $choreStore.lastActionFailed) {
-                Button("הבנתי", role: .cancel) { }
+            .alert(tr("האישור לא נשלח"), isPresented: $choreStore.lastActionFailed) {
+                Button(tr("הבנתי"), role: .cancel) { }
             } message: {
-                Text("לא הצלחנו לאשר את המטלה כרגע. בדקו את החיבור לאינטרנט ונסו שוב.")
+                Text(tr("לא הצלחנו לאשר את המטלה כרגע. בדקו את החיבור לאינטרנט ונסו שוב."))
             }
         }
     }
@@ -149,7 +149,7 @@ struct ChoresParentView: View {
     @ViewBuilder private var formFields: some View {
                     // A catalog chore keeps its name — only the rewards retune.
                     if editing == nil || !ChoreStore.isPreset(editing!) {
-                        RTLTextField(placeholder: "מה המטלה? (למשל: לשטוף את האוטו)", text: $formTitle)
+                        RTLTextField(placeholder: tr("מה המטלה? (למשל: לשטוף את האוטו)"), text: $formTitle)
                             .frame(height: 24)
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
@@ -167,13 +167,13 @@ struct ChoresParentView: View {
                             }
                         }
                     }
-                    Stepper("🎮 פרס דקות משחק: \(formMinutes)", value: $formMinutes, in: 5...120, step: 5)
-                    Stepper(formTimesPerDay == 1 ? "🔁 פעם אחת ביום" : "🔁 עד \(formTimesPerDay) פעמים ביום",
+                    Stepper(tr("🎮 פרס דקות משחק: \(formMinutes)"), value: $formMinutes, in: 5...120, step: 5)
+                    Stepper(formTimesPerDay == 1 ? tr("🔁 פעם אחת ביום") : tr("🔁 עד \(formTimesPerDay) פעמים ביום"),
                             value: $formTimesPerDay, in: 1...6)
                     Button {
                         saveForm()
                     } label: {
-                        HStack { Spacer(); Text(editing == nil ? "הוסיפו מטלה" : "שמרו שינויים").bold(); Spacer() }
+                        HStack { Spacer(); Text(editing == nil ? tr("הוסיפו מטלה") : tr("שמרו שינויים")).bold(); Spacer() }
                     }
                     .disabled((editing == nil && formTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                               || formMinutes == 0)
@@ -185,7 +185,7 @@ struct ChoresParentView: View {
             HStack {
                 Text("\(chore.emoji) \(chore.title)").bold()
                 Spacer()
-                Text("🎮 \(chore.rewardMinutes) דק׳ משחק")
+                Text(tr("🎮 \(chore.rewardMinutes) דק׳ משחק"))
                     .font(.caption).foregroundStyle(.secondary)
             }
             if let data = chore.photoData, let img = UIImage(data: data) {
@@ -204,7 +204,7 @@ struct ChoresParentView: View {
                 } label: {
                     HStack(spacing: 6) {
                         if approving { ProgressView().controlSize(.small).tint(.white) }
-                        Text(approving ? "מאשר…" : "בוצע — אשרו ✅").bold()
+                        Text(approving ? tr("מאשר…") : tr("בוצע — אשרו ✅")).bold()
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -215,7 +215,7 @@ struct ChoresParentView: View {
                     choreStore.returnChore(chore)
                     Haptic.light()
                 } label: {
-                    Text("עוד לא הושלמה")
+                    Text(tr("עוד לא הושלמה"))
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -235,10 +235,10 @@ struct ChoresParentView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(chore.title).foregroundStyle(.primary)
                     HStack(spacing: 6) {
-                        Text("🎮 \(chore.rewardMinutes) דק׳")
-                        if chore.timesPerDay > 1 { Text("🔁 עד \(chore.timesPerDay) ביום") }
+                        Text(tr("🎮 \(chore.rewardMinutes) דק׳"))
+                        if chore.timesPerDay > 1 { Text(tr("🔁 עד \(chore.timesPerDay) ביום")) }
                     if chore.isDaily && chore.doneToday > 0 {
-                        Text(chore.approvedToday ? "✅ הושלמה להיום" : "✅ \(chore.doneToday)/\(chore.timesPerDay) היום")
+                        Text(chore.approvedToday ? tr("✅ הושלמה להיום") : tr("✅ \(chore.doneToday)/\(chore.timesPerDay) היום"))
                     }
                     }
                     .font(.caption).foregroundStyle(.secondary)

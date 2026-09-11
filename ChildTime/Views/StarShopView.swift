@@ -30,7 +30,7 @@ struct StarShopView: View {
                                 packRow(product)
                             }
                         }
-                        Text("הָרְכִישָׁה דּוֹרֶשֶׁת אִישּׁוּר Apple ID (סִיסְמָה / Face ID). הַיַּהֲלוֹמִים מְשַׁמְּשִׁים לִקְנִיַּת דְּמוּיוֹת בְּתוֹךְ הָאַפְּלִיקַצְיָה בִּלְבַד.")
+                        Text(tr("הָרְכִישָׁה דּוֹרֶשֶׁת אִישּׁוּר Apple ID (סִיסְמָה / Face ID). הַיַּהֲלוֹמִים מְשַׁמְּשִׁים לִקְנִיַּת דְּמוּיוֹת בְּתוֹךְ הָאַפְּלִיקַצְיָה בִּלְבַד."))
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.6))
                             .multilineTextAlignment(.center)
@@ -46,7 +46,7 @@ struct StarShopView: View {
                 StarGrantCelebration(amount: amount) { celebrate = nil }
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onChangeCompat(of: store.lastGrantedDiamonds) { _, new in
             if let new { celebrate = new; store.lastGrantedDiamonds = nil; Haptic.success() }
         }
@@ -54,7 +54,7 @@ struct StarShopView: View {
 
     private var header: some View {
         ZStack {
-            Text("חֲנוּת יַהֲלוֹמִים")
+            Text(tr("חֲנוּת יַהֲלוֹמִים"))
                 .font(.system(size: 24, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
@@ -68,7 +68,7 @@ struct StarShopView: View {
                         .background(.white.opacity(0.22), in: Circle())
                         .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                 }
-                .environment(\.layoutDirection, .leftToRight)
+                .environment(\.layoutDirection, .appMirrored)
             }
         }
         .padding(.horizontal, AppSpacing.lg)
@@ -83,7 +83,7 @@ struct StarShopView: View {
                 .foregroundStyle(.white)
                 .lineLimit(1)
                 .numericTextTransition(Double(progress.diamonds))
-            Text("יַהֲלוֹמִים שֶׁלְּךָ")
+            Text(tr("יַהֲלוֹמִים שֶׁלְּךָ"))
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
         }
@@ -100,11 +100,11 @@ struct StarShopView: View {
                 Text("💎").font(.system(size: 30))
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(diamonds) יַהֲלוֹמִים")
+                Text(tr("\(diamonds) יַהֲלוֹמִים"))
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                 if best {
-                    Text("הֲכִי מִשְׁתַּלֵּם 🔥")
+                    Text(tr("הֲכִי מִשְׁתַּלֵּם 🔥"))
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundStyle(AppColor.starGold)
                 }
@@ -134,11 +134,11 @@ struct StarShopView: View {
                     Text("💎").font(.system(size: 30))
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(diamonds) יַהֲלוֹמִים")
+                    Text(tr("\(diamonds) יַהֲלוֹמִים"))
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                     if best {
-                        Text("הֲכִי מִשְׁתַּלֵּם 🔥")
+                        Text(tr("הֲכִי מִשְׁתַּלֵּם 🔥"))
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(AppColor.starGold)
                     }
@@ -165,7 +165,7 @@ struct StarShopView: View {
             // Genuinely still loading.
             VStack(spacing: AppSpacing.sm) {
                 ProgressView().tint(.white)
-                Text("טוֹעֵן חֲבִילוֹת…")
+                Text(tr("טוֹעֵן חֲבִילוֹת…"))
                     .font(.system(size: 15, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
             }
@@ -174,16 +174,16 @@ struct StarShopView: View {
             // Loaded but empty — products aren't configured / available yet.
             VStack(spacing: AppSpacing.md) {
                 Text("🛒").font(.system(size: 44))
-                Text("הַחֲבִילוֹת אֵינָן זְמִינוֹת כָּרֶגַע")
+                Text(tr("הַחֲבִילוֹת אֵינָן זְמִינוֹת כָּרֶגַע"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("נַסֵּה שׁוּב בְּעוֹד רֶגַע.")
+                Text(tr("נַסֵּה שׁוּב בְּעוֹד רֶגַע."))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
                 Button {
                     Task { await store.reload() }
                 } label: {
-                    Text("נַסֵּה שׁוּב")
+                    Text(tr("נַסֵּה שׁוּב"))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 22).padding(.vertical, 10)
@@ -215,7 +215,7 @@ private struct StarGrantCelebration: View {
                 Text("+\(amount)")
                     .font(.system(size: 44, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.gemPurple)
-                Text("יַהֲלוֹמִים נוֹסְפוּ!")
+                Text(tr("יַהֲלוֹמִים נוֹסְפוּ!"))
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
             }
@@ -226,6 +226,6 @@ private struct StarGrantCelebration: View {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) { shown = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { onDone() }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 }

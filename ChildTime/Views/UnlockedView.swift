@@ -35,7 +35,7 @@ struct UnlockedView: View {
                     .float()
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
 
-                Text(preparing ? "הַזְּמַן שֶׁלְּךָ בַּדֶּרֶךְ!" : "זְמַן מִשְׂחָק!")
+                Text(preparing ? tr("הַזְּמַן שֶׁלְּךָ בַּדֶּרֶךְ!") : tr("זְמַן מִשְׂחָק!"))
                     .font(.system(size: titleSize, weight: .black, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
                     .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
@@ -49,8 +49,8 @@ struct UnlockedView: View {
                     // cannot honour — the claim can take half a second or five.
                     VStack(spacing: AppSpacing.md) {
                         Text(progress.openingIsGift
-                             ? "מְשַׁחְרְרִים אֶת דַּקּוֹת הַמַּתָּנָה 💝"
-                             : "מְשַׁחְרְרִים אֶת הַדַּקּוֹת שֶׁ\(Gendered.g("הִרְוַחְתָּ", "הִרְוַחְתְּ")) ✨")
+                             ? tr("מְשַׁחְרְרִים אֶת דַּקּוֹת הַמַּתָּנָה 💝")
+                             : tr("מְשַׁחְרְרִים אֶת הַדַּקּוֹת שֶׁ\(Gendered.g(tr("הִרְוַחְתָּ"), tr("הִרְוַחְתְּ"))) ✨"))
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                             .multilineTextAlignment(.center)
@@ -71,7 +71,7 @@ struct UnlockedView: View {
                 } else {
                 // The countdown on one glass pane (the same glass as every screen).
                 VStack(spacing: AppSpacing.md) {
-                    Text(progress.unlockIsManual ? "מַתָּנָה מֵאַבָּא וְאִמָּא 💝 · נוֹתְרוּ" : "נוֹתְרוּ")
+                    Text(progress.unlockIsManual ? tr("מַתָּנָה מֵאַבָּא וְאִמָּא 💝 · נוֹתְרוּ") : tr("נוֹתְרוּ"))
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                     timerRow
@@ -81,7 +81,7 @@ struct UnlockedView: View {
                 .frame(maxWidth: 420)
                 .glassPane(radius: 28)
 
-                Text("עַכְשָׁיו אֶפְשָׁר לַעֲבוֹר לָאַפְּלִיקַצְיָה שֶׁ\(Gendered.g("אַתָּה רוֹצֶה", "אַתְּ רוֹצָה")) לְשַׂחֵק בָּהּ 🚀")
+                Text(tr("עַכְשָׁיו אֶפְשָׁר לַעֲבוֹר לָאַפְּלִיקַצְיָה שֶׁ\(Gendered.g(tr("אַתָּה רוֹצֶה"), tr("אַתְּ רוֹצָה"))) לְשַׂחֵק בָּהּ 🚀"))
                     .font(.system(size: 14.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .multilineTextAlignment(.center)
@@ -100,7 +100,7 @@ struct UnlockedView: View {
                 Button {
                     endEarly()
                 } label: {
-                    Text(progress.unlockIsManual ? "עֲצֹר וּשְׁמֹר אֶת הַזְּמַן 💝" : "סִיַּמְתִּי לְשַׂחֵק")
+                    Text(progress.unlockIsManual ? tr("עֲצֹר וּשְׁמֹר אֶת הַזְּמַן 💝") : tr("סִיַּמְתִּי לְשַׂחֵק"))
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, AppSpacing.xl)
@@ -138,7 +138,7 @@ struct UnlockedView: View {
             if !greeted, !preparing {
                 greeted = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    companion.cheer("\(Gendered.g("שִׂחַקְתָּ", "שִׂחַקְתְּ")) יָפֶה!")
+                    companion.cheer(tr("\(Gendered.g(tr("שִׂחַקְתָּ"), tr("שִׂחַקְתְּ"))) יָפֶה!"))
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     companion.state = .sleep
@@ -153,7 +153,7 @@ struct UnlockedView: View {
             startTimer()
             if !greeted {
                 greeted = true
-                companion.cheer("\(Gendered.g("שִׂחַקְתָּ", "שִׂחַקְתְּ")) יָפֶה!")
+                companion.cheer(tr("\(Gendered.g(tr("שִׂחַקְתָּ"), tr("שִׂחַקְתְּ"))) יָפֶה!"))
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { companion.state = .sleep }
             }
         }
@@ -197,12 +197,12 @@ struct UnlockedView: View {
         let s = secondsRemaining % 60
         return HStack(alignment: .top, spacing: isCompact ? 4 : 8) {
             if showHours {
-                timeColumn(h, "שָׁעוֹת")
+                timeColumn(h, tr("שָׁעוֹת"))
                 timerColon
             }
-            timeColumn(m, "דַּקּוֹת")
+            timeColumn(m, tr("דַּקּוֹת"))
             timerColon
-            timeColumn(s, "שְׁנִיּוֹת")
+            timeColumn(s, tr("שְׁנִיּוֹת"))
         }
         // A clock always reads hours→minutes→seconds left-to-right, even in the RTL
         // UI — otherwise the columns flip and seconds land on the left.
@@ -285,5 +285,5 @@ struct UnlockedView: View {
 #Preview {
     UnlockedView()
         .environmentObject(ProgressStore.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

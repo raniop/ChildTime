@@ -18,7 +18,7 @@ struct GoogleSignInBranded: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 logo
-                Text("התחבר עם Google")
+                Text(tr("התחבר עם Google"))
                     .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .foregroundStyle(textColor)
             }
@@ -139,5 +139,5 @@ enum GoogleBrand {
         .padding()
         .background(Color(white: 0.96))
     }
-    .environment(\.layoutDirection, .rightToLeft)
+    .environment(\.layoutDirection, .app)
 }

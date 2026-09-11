@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 /// 🌍 Parent settings → Language.
 ///
@@ -37,7 +38,15 @@ struct LanguagePickerView: View {
             Haptic.light()
             dismiss()
             // Let the sheet close before the tree rebuilds in the new direction.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { language.set(lang) }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                language.set(lang)
+                // Everything outside the app follows too: widgets, the shield screen, the watch.
+                WidgetCenter.shared.reloadAllTimelines()
+                ShieldBridge.refresh()
+                WatchBridge.shared.resendLastSnapshot()
+                // …and notifications sent from the server.
+                if let token = PushManager.shared.currentToken { PushManager.shared.uploadFCMToken(token) }
+            }
         } label: {
             HStack(spacing: 12) {
                 Text(lang == .he ? "🇮🇱" : "🇺🇸").font(.system(size: 26))

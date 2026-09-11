@@ -45,11 +45,11 @@ struct WelcomeIntroView: View {
             // Brand mascot — the lion (matches the app icon & launch logo).
             CharacterView(character: Character3DCatalog.find("lion"))
                 .frame(width: isCompact ? 104 : 148, height: isCompact ? 104 : 148)
-            Text("טופי")
+            Text(tr("טופי"))
                 .font(.system(size: isCompact ? 42 : 58, weight: .heavy, design: .rounded))
                 .foregroundStyle(GlassInk.primary).shadow(color: .black.opacity(0.2), radius: 8, y: 3)
                 .shadow(color: AppColor.starGold.opacity(0.5), radius: 12)
-            Text("לוֹמְדִים, מַרְוִיחִים זְמַן מָסָךְ —\nוְהַהוֹרִים תָּמִיד בַּתְּמוּנָה.")
+            Text(tr("לוֹמְדִים, מַרְוִיחִים זְמַן מָסָךְ —\nוְהַהוֹרִים תָּמִיד בַּתְּמוּנָה."))
                 .font(.system(size: isCompact ? 16 : 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.92))
                 .multilineTextAlignment(.center)
@@ -62,16 +62,16 @@ struct WelcomeIntroView: View {
     private var stepsCard: some View {
         VStack(spacing: 0) {
             step("🧠", AppColor.gemPurple,
-                 "הַיֶּלֶד לוֹמֵד וּמְשַׂחֵק",
-                 "שְׁאֵלוֹת מַתְאִימוֹת לְגִיל — חֶשְׁבּוֹן, עִבְרִית, אַנְגְּלִית, מַדָּע וְעוֹד.")
+                 tr("הַיֶּלֶד לוֹמֵד וּמְשַׂחֵק"),
+                 tr("שְׁאֵלוֹת מַתְאִימוֹת לְגִיל — חֶשְׁבּוֹן, עִבְרִית, אַנְגְּלִית, מַדָּע וְעוֹד."))
             divider
             step("🎮", AppColor.successMint,
-                 "כָּל 10 תְּשׁוּבוֹת = 4 דַּקּוֹת מָסָךְ",
-                 "מַרְוִיחַ זְמַן מָסָךְ אֲמִתִּי דֶּרֶךְ לְמִידָה.")
+                 tr("כָּל 10 תְּשׁוּבוֹת = 4 דַּקּוֹת מָסָךְ"),
+                 tr("מַרְוִיחַ זְמַן מָסָךְ אֲמִתִּי דֶּרֶךְ לְמִידָה."))
             divider
             step("📊", AppColor.starGold,
-                 "אַתֶּם עוֹקְבִים וּמְקַבְּלִים הַמְלָצוֹת",
-                 "דּוּחוֹת, חוֹזֶק וְחוּלְשָׁה, וְהַתְרָאוֹת — בְּמַכְשִׁיר נִפְרָד.")
+                 tr("אַתֶּם עוֹקְבִים וּמְקַבְּלִים הַמְלָצוֹת"),
+                 tr("דּוּחוֹת, חוֹזֶק וְחוּלְשָׁה, וְהַתְרָאוֹת — בְּמַכְשִׁיר נִפְרָד."))
         }
         .padding(AppSpacing.md)
         .glassPane(radius: AppRadius.large)
@@ -114,12 +114,12 @@ struct WelcomeIntroView: View {
             HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(AppColor.flameOrange)
-                Text("זְמַן הַמָּסָךְ מְנוּהָל בְּטוֹפִּי")
+                Text(tr("זְמַן הַמָּסָךְ מְנוּהָל בְּטוֹפִּי"))
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                 Spacer(minLength: 0)
             }
-            Text("אִם הִגְדַּרְתֶּם לַיֶּלֶד מַגְבָּלוֹת זְמַן מָסָךְ בְּ\"מִשְׁפָּחָה\" / Screen Time שֶׁל אַפְּל — כַּבּוּ אוֹתָן. מֵעַכְשָׁו טוֹפִּי מְנַהֵל אֶת זְמַן הַמָּסָךְ; שְׁתֵּי מַעֲרָכוֹת בְּמַקְבִּיל יִתְנַגְּשׁוּ.")
+            Text(tr("אִם הִגְדַּרְתֶּם לַיֶּלֶד מַגְבָּלוֹת זְמַן מָסָךְ בְּ\"מִשְׁפָּחָה\" / Screen Time שֶׁל אַפְּל — כַּבּוּ אוֹתָן. מֵעַכְשָׁו טוֹפִּי מְנַהֵל אֶת זְמַן הַמָּסָךְ; שְׁתֵּי מַעֲרָכוֹת בְּמַקְבִּיל יִתְנַגְּשׁוּ."))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
                 .multilineTextAlignment(.leading)
@@ -143,7 +143,7 @@ struct WelcomeIntroView: View {
             Haptic.medium()
             settings.hasSeenWelcome = true
         } label: {
-            Text("בּוֹאוּ נַתְחִיל 🚀")
+            Text(tr("בּוֹאוּ נַתְחִיל 🚀"))
                 .font(.system(size: 21, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
@@ -157,5 +157,5 @@ struct WelcomeIntroView: View {
 #Preview {
     WelcomeIntroView()
         .environmentObject(ParentSettings.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

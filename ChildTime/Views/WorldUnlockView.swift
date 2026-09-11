@@ -35,7 +35,7 @@ struct WorldUnlockView: View {
 
                         if stage >= 2 {
                             VStack(spacing: AppSpacing.md) {
-                                Text("עוֹלָם חָדָשׁ נִפְתַּח!")
+                                Text(tr("עוֹלָם חָדָשׁ נִפְתַּח!"))
                                     .font(.system(size: subtitleFontSize, weight: .bold, design: .rounded))
                                     .foregroundStyle(.white.opacity(0.85))
                                     .multilineTextAlignment(.center)
@@ -55,7 +55,7 @@ struct WorldUnlockView: View {
 
                         if stage >= 3 {
                             Button { Haptic.light(); onContinue() } label: {
-                                Text("בּוֹא נַחְקוֹר!")
+                                Text(tr("בּוֹא נַחְקוֹר!"))
                                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                                     .foregroundStyle(.white)
                                     .frame(maxWidth: .infinity)
@@ -98,5 +98,5 @@ struct WorldUnlockView: View {
 
 #Preview {
     WorldUnlockView(world: Worlds.all[1], onContinue: {})
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

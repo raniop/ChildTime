@@ -31,12 +31,12 @@ struct ChildAppLockSetupView: View {
                         .font(.system(size: 64))
                         .foregroundStyle(AppColor.starGold)
 
-                    Text("אֵילוּ אַפְּלִיקַצְיוֹת לִנְעוֹל?")
+                    Text(tr("אֵילוּ אַפְּלִיקַצְיוֹת לִנְעוֹל?"))
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
 
-                    Text("בַּחֲרוּ אֶת הָאַפְּלִיקַצְיוֹת שֶׁיִּהְיוּ נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה — עַד שֶׁהַיֶּלֶד מַרְוִיחַ זְמַן מָסָךְ בְּטוֹפִּי. אֶפְשָׁר לְשַׁנּוֹת בְּכָל עֵת בְּהַגְדָּרוֹת הוֹרֶה.")
+                    Text(tr("בַּחֲרוּ אֶת הָאַפְּלִיקַצְיוֹת שֶׁיִּהְיוּ נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה — עַד שֶׁהַיֶּלֶד מַרְוִיחַ זְמַן מָסָךְ בְּטוֹפִּי. אֶפְשָׁר לְשַׁנּוֹת בְּכָל עֵת בְּהַגְדָּרוֹת הוֹרֶה."))
                         .font(.system(size: 16, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
@@ -59,12 +59,12 @@ struct ChildAppLockSetupView: View {
                         HStack(spacing: 10) {
                             if requestingAuth {
                                 ProgressView().tint(Color(hex: "4B3FBF"))
-                                Text("מְבַקְּשִׁים אִשּׁוּר מֵ־iOS…")
+                                Text(tr("מְבַקְּשִׁים אִשּׁוּר מֵ־iOS…"))
                             } else {
                                 Image(systemName: selectedCount > 0 ? "checkmark.circle.fill" : "app.badge.fill")
                                 Text(selectedCount > 0
-                                     ? "\(selectedCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · הַקִּישׁוּ לַעֲרוֹךְ"
-                                     : "בַּחֲרוּ אַפְּלִיקַצְיוֹת")
+                                     ? tr("\(selectedCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · הַקִּישׁוּ לַעֲרוֹךְ")
+                                     : tr("בַּחֲרוּ אַפְּלִיקַצְיוֹת"))
                             }
                         }
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
@@ -79,7 +79,7 @@ struct ChildAppLockSetupView: View {
                     .disabled(requestingAuth)
 
                     if requestingAuth {
-                        Text("iOS מַצִּיג עַכְשָׁיו חַלּוֹן אִשּׁוּר לְ־Screen Time — זֶה יָכוֹל לָקַחַת כַּמָּה שְׁנִיּוֹת. אַשְּׁרוּ שָׁם, וְנַמְשִׁיךְ.")
+                        Text(tr("iOS מַצִּיג עַכְשָׁיו חַלּוֹן אִשּׁוּר לְ־Screen Time — זֶה יָכוֹל לָקַחַת כַּמָּה שְׁנִיּוֹת. אַשְּׁרוּ שָׁם, וְנַמְשִׁיךְ."))
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                             .multilineTextAlignment(.center)
@@ -100,7 +100,7 @@ struct ChildAppLockSetupView: View {
                             Haptic.success()
                             finish()
                         } label: {
-                            Label("בּוֹאוּ נַתְחִיל! 🚀", systemImage: "checkmark.circle.fill")
+                            Label(tr("בּוֹאוּ נַתְחִיל! 🚀"), systemImage: "checkmark.circle.fill")
                                 .font(.system(size: 21, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
@@ -114,7 +114,7 @@ struct ChildAppLockSetupView: View {
                             Haptic.medium()
                             finish()
                         } label: {
-                            Text("אֶבְחַר אַחַר כָּךְ")
+                            Text(tr("אֶבְחַר אַחַר כָּךְ"))
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white.opacity(0.85))
                                 .padding(.horizontal, 28).padding(.vertical, 12)

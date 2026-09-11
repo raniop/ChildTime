@@ -15,8 +15,10 @@ struct RTLTextField: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextField {
         let tf = UITextField()
         tf.delegate = context.coordinator
-        tf.textAlignment = .right
-        tf.semanticContentAttribute = .forceRightToLeft
+        // Right-to-left for Hebrew (as always); the app language's own direction otherwise.
+        let hebrew = LanguageStore.shared.current == .he
+        tf.textAlignment = hebrew ? .right : .left
+        tf.semanticContentAttribute = hebrew ? .forceRightToLeft : .forceLeftToRight
         tf.textColor = textColor
         tf.autocapitalizationType = .words
         tf.returnKeyType = .done

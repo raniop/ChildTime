@@ -42,7 +42,7 @@ struct KidModeEntryView: View {
                     .padding(AppSpacing.lg)
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .tofyActivityPicker(title: PickerCopy.kidMode.title, header: PickerCopy.kidMode.header, footer: PickerCopy.kidMode.footer, isPresented: $showPicker, selection: $selection)
         .onChangeCompat(of: selection) { _, new in
             kidMode.allowedData = SelectionStorage.encode(new)
@@ -51,16 +51,16 @@ struct KidModeEntryView: View {
             selection = kidMode.allowedSelection
             selectedChild = selectedChild ?? profiles.activeID ?? profiles.profiles.first?.id
         }
-        .alert("צָרִיךְ הַרְשָׁאַת Screen Time", isPresented: $authFailed) {
-            Button("הֲבַנְתִּי", role: .cancel) {}
+        .alert(tr("צָרִיךְ הַרְשָׁאַת Screen Time"), isPresented: $authFailed) {
+            Button(tr("הֲבַנְתִּי"), role: .cancel) {}
         } message: {
-            Text("כְּדֵי לִנְעוֹל אֶת הַטֶּלֶפוֹן בְּמַצַּב יֶלֶד צָרִיךְ לְאַשֵּׁר Screen Time בִּשְׁבִיל טוֹפִי.")
+            Text(tr("כְּדֵי לִנְעוֹל אֶת הַטֶּלֶפוֹן בְּמַצַּב יֶלֶד צָרִיךְ לְאַשֵּׁר Screen Time בִּשְׁבִיל טוֹפִי."))
         }
     }
 
     private var header: some View {
         ZStack {
-            Text("מַצַּב יֶלֶד")
+            Text(tr("מַצַּב יֶלֶד"))
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
@@ -73,7 +73,7 @@ struct KidModeEntryView: View {
                         .frame(width: 38, height: 38)
                         .background(.white.opacity(0.22), in: Circle()).overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                 }
-                .environment(\.layoutDirection, .leftToRight)
+                .environment(\.layoutDirection, .appMirrored)
             }
         }
         .padding(.horizontal, AppSpacing.lg)
@@ -82,7 +82,7 @@ struct KidModeEntryView: View {
 
     private var childPicker: some View {
         VStack(spacing: AppSpacing.sm) {
-            Text("מִי מְשַׂחֵק?")
+            Text(tr("מִי מְשַׂחֵק?"))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
             ScrollView(.horizontal, showsIndicators: false) {
@@ -116,16 +116,16 @@ struct KidModeEntryView: View {
                     .font(.system(size: 26))
                     .foregroundStyle(AppColor.successMint)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("אַפְּלִיקַצְיוֹת מוּתָּרוֹת")
+                    Text(tr("אַפְּלִיקַצְיוֹת מוּתָּרוֹת"))
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text(allowedCount == 0 ? "רַק טוֹפִי — הַקִּישׁוּ לִבְחוֹר עוֹד"
-                                           : "\(allowedCount) אַפְּלִיקַצְיוֹת + טוֹפִי")
+                    Text(allowedCount == 0 ? tr("רַק טוֹפִי — הַקִּישׁוּ לִבְחוֹר עוֹד")
+                                           : tr("\(allowedCount) אַפְּלִיקַצְיוֹת + טוֹפִי"))
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.75))
                 }
                 Spacer()
-                Image(systemName: "chevron.left").foregroundStyle(.white.opacity(0.6))
+                Image(systemName: AppSymbol.forwardChevron).foregroundStyle(.white.opacity(0.6))
             }
             .padding(AppSpacing.md)
             .glassPane(radius: AppRadius.large)
@@ -134,7 +134,7 @@ struct KidModeEntryView: View {
     }
 
     private var explainer: some View {
-        Text("כָּל שְׁאָר הָאַפְּלִיקַצְיוֹת בַּטֶּלֶפוֹן יִנָּעֲלוּ. הַיֶּלֶד יִלְמַד וִישַׂחֵק בְּטוֹפִי, וְיוּכַל לִפְתּוֹחַ אֶת הָאַפְּלִיקַצְיוֹת הַמּוּתָּרוֹת. לִיצִיאָה — קוֹד הוֹרֶה.")
+        Text(tr("כָּל שְׁאָר הָאַפְּלִיקַצְיוֹת בַּטֶּלֶפוֹן יִנָּעֲלוּ. הַיֶּלֶד יִלְמַד וִישַׂחֵק בְּטוֹפִי, וְיוּכַל לִפְתּוֹחַ אֶת הָאַפְּלִיקַצְיוֹת הַמּוּתָּרוֹת. לִיצִיאָה — קוֹד הוֹרֶה."))
             .font(.system(size: 13, weight: .medium, design: .rounded))
             .foregroundStyle(.white.opacity(0.65))
             .multilineTextAlignment(.center)
@@ -155,7 +155,7 @@ struct KidModeEntryView: View {
             HStack(spacing: 8) {
                 if requesting { ProgressView().tint(.white) }
                 Image(systemName: "lock.fill")
-                Text("הַתְחִילוּ מַצַּב יֶלֶד")
+                Text(tr("הַתְחִילוּ מַצַּב יֶלֶד"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
             }
             .foregroundStyle(.white)
@@ -179,15 +179,15 @@ struct KidModeExitView: View {
             SparkleField(count: 12, size: 11)
             VStack(spacing: AppSpacing.lg) {
                 Text("🔓").font(.system(size: 72))
-                Text("לָצֵאת מִמַּצַּב יֶלֶד?")
+                Text(tr("לָצֵאת מִמַּצַּב יֶלֶד?"))
                     .font(.system(size: 24, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("הַטֶּלֶפוֹן יַחֲזוֹר לְמַצָּב רָגִיל וְהַנְּעִילָה תּוּסַר.")
+                Text(tr("הַטֶּלֶפוֹן יַחֲזוֹר לְמַצָּב רָגִיל וְהַנְּעִילָה תּוּסַר."))
                     .font(.system(size: 15, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
                 Button { onExit() } label: {
-                    Text("כֵּן, צְאוּ")
+                    Text(tr("כֵּן, צְאוּ"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -200,6 +200,6 @@ struct KidModeExitView: View {
             .padding(AppSpacing.xl)
             .frame(maxWidth: 420)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 }

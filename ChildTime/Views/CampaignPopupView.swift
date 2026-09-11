@@ -18,11 +18,11 @@ struct CampaignPopupView: View {
     private var body_: String { isChild ? (campaign.childBody.isEmpty ? campaign.body : campaign.childBody) : campaign.body }
     private var pack: QuestionPack? { campaign.action.type == "pack" ? QuestionPacks.find(campaign.action.packID) : nil }
     private var cta: String {
-        if isChild { return pack != nil ? "בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא 💌" : "סַבָּבָּה! 👍" }
+        if isChild { return pack != nil ? tr("בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא 💌") : tr("סַבָּבָּה! 👍") }
         switch campaign.action.type {
-        case "pack":     return SubscriptionManager.shared.isPremium ? "מְעוּלֶה, כְּבָר פָּתוּחַ לַיְלָדִים 👍" : "שִׁלְחוּ לַיֶּלֶד שֶׁלִּי"
-        case "tofyPlus": return "לְכָל הַפְּרָטִים"
-        default:         return "הֵבַנְתִּי"
+        case "pack":     return SubscriptionManager.shared.isPremium ? tr("מְעוּלֶה, כְּבָר פָּתוּחַ לַיְלָדִים 👍") : tr("שִׁלְחוּ לַיֶּלֶד שֶׁלִּי")
+        case "tofyPlus": return tr("לְכָל הַפְּרָטִים")
+        default:         return tr("הֵבַנְתִּי")
         }
     }
 
@@ -54,9 +54,9 @@ struct CampaignPopupView: View {
                     .fixedSize(horizontal: false, vertical: true)
                 if let pack, !isChild {
                     HStack(spacing: 6) {
-                        chip("מֻמְלָץ \(pack.gradesLabel)")
-                        chip("\(pack.questionCount) שְׁאֵלוֹת")
-                        chip(SubscriptionManager.shared.isPremium ? "כָּלוּל בְּטוֹפִי+ ✓" : "כָּלוּל בְּטוֹפִי+ · אוֹ חַד־פַּעֲמִי")
+                        chip(tr("מֻמְלָץ \(pack.gradesLabel)"))
+                        chip(tr("\(pack.questionCount) שְׁאֵלוֹת"))
+                        chip(SubscriptionManager.shared.isPremium ? tr("כָּלוּל בְּטוֹפִי+ ✓") : tr("כָּלוּל בְּטוֹפִי+ · אוֹ חַד־פַּעֲמִי"))
                     }
                 }
                 Button { Haptic.light(); onAct() } label: {
@@ -70,7 +70,7 @@ struct CampaignPopupView: View {
                 .buttonStyle(.plain)
                 .padding(.top, 4)
                 Button { Haptic.light(); onLater() } label: {
-                    Text("אוּלַי אַחַר כָּךְ")
+                    Text(tr("אוּלַי אַחַר כָּךְ"))
                         .font(.system(size: 13.5, weight: .bold, design: .rounded))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
@@ -90,7 +90,7 @@ struct CampaignPopupView: View {
             .frame(maxWidth: 480)
             .offset(y: shown ? 0 : 500)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onAppear {
             withAnimation(.spring(response: 0.55, dampingFraction: 0.8)) { shown = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { bob = true }

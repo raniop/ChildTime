@@ -51,8 +51,8 @@ final class CharacterStore: ObservableObject {
 
         var errorDescription: String? {
             switch self {
-            case .alreadyOwned:                  return "הדמות כבר שלך"
-            case .notEnoughDiamonds(let short):  return "חסרים \(short) יהלומים"
+            case .alreadyOwned:                  return tr("הדמות כבר שלך")
+            case .notEnoughDiamonds(let short):  return tr("חסרים \(short) יהלומים")
             }
         }
     }

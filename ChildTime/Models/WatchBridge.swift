@@ -45,6 +45,15 @@ final class WatchBridge: NSObject, WCSessionDelegate {
                                     "pendingChores": $0.pendingChores,
                                     "moneyBalance": $0.moneyBalance] },
         ]
+        // 🌍 The watch can't read the phone's App Group — it follows the language
+        // the phone sends with every snapshot.
+        lastPayload?["language"] = LanguageStore.shared.current.rawValue
+        flush()
+    }
+
+    /// Re-send the last family snapshot (e.g. with a new language).
+    func resendLastSnapshot() {
+        lastPayload?["language"] = LanguageStore.shared.current.rawValue
         flush()
     }
 

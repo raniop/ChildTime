@@ -27,16 +27,19 @@ struct ChoreNotificationView: View {
     let bodyText: String
     let photoURL: URL?
 
+    // Hebrew keeps the exact look it shipped with; other languages read from the leading edge.
+    private var hebrew: Bool { LanguageStore.shared.current == .he }
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .trailing, spacing: 6) {
+            VStack(alignment: hebrew ? .trailing : .leading, spacing: 6) {
                 Text(title)
                     .font(.headline)
-                    .multilineTextAlignment(.trailing)
+                    .multilineTextAlignment(hebrew ? .trailing : .leading)
                 Text(bodyText)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.trailing)
+                    .multilineTextAlignment(hebrew ? .trailing : .leading)
                 if let photoURL {
                     AsyncImage(url: photoURL) { phase in
                         switch phase {
@@ -56,8 +59,8 @@ struct ChoreNotificationView: View {
                     }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            .frame(maxWidth: .infinity, alignment: hebrew ? .trailing : .leading)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 }

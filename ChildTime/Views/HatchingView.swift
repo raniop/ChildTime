@@ -56,7 +56,7 @@ struct HatchingView: View {
                     .frame(height: 320)
 
                 if bubbleVisible {
-                    BubbleSpeech(text: "הֵיי! חִכִּיתִי לְךָ... אֲנִי טוֹפִּי! 💫")
+                    BubbleSpeech(text: tr("הֵיי! חִכִּיתִי לְךָ... אֲנִי טוֹפִּי! 💫"))
                         .transition(.scale.combined(with: .opacity))
                 }
 
@@ -66,7 +66,7 @@ struct HatchingView: View {
                     JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {
                         onContinue()
                     } label: {
-                        Text("בּוֹאוּ נֵצֵא לְהַרְפַּתְקָה!")
+                        Text(tr("בּוֹאוּ נֵצֵא לְהַרְפַּתְקָה!"))
                             .font(.system(size: ctaSize, weight: .heavy, design: .rounded))
                     }
                     .padding(.horizontal, AppSpacing.xl)
@@ -78,7 +78,7 @@ struct HatchingView: View {
             if stage == 0 {
                 VStack {
                     Spacer()
-                    Text("לַחֲצוּ עַל הַבֵּיצָה")
+                    Text(tr("לַחֲצוּ עַל הַבֵּיצָה"))
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
@@ -344,5 +344,5 @@ struct CrackLine: Shape {
 
 #Preview {
     HatchingView(onContinue: {})
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

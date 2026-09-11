@@ -50,7 +50,7 @@ struct ChildDeviceControlsView: View {
                     allowDeleteCard
                     disconnectButton
 
-                    Text("שְׁאָר הַהַגְדָּרוֹת — פְּרָסִים, דּוּחוֹת, רָמַת קוֹשִׁי וְהַתְרָאוֹת — מְנוּהֲלוֹת בְּמַכְשִׁיר הַהוֹרֶה.")
+                    Text(tr("שְׁאָר הַהַגְדָּרוֹת — פְּרָסִים, דּוּחוֹת, רָמַת קוֹשִׁי וְהַתְרָאוֹת — מְנוּהֲלוֹת בְּמַכְשִׁיר הַהוֹרֶה."))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.75))
                         .multilineTextAlignment(.center)
@@ -60,7 +60,7 @@ struct ChildDeviceControlsView: View {
                         Haptic.light()
                         dismiss()
                     } label: {
-                        Text("סְגִירָה")
+                        Text(tr("סְגִירָה"))
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
                             .padding(.horizontal, 28).padding(.vertical, 12)
@@ -74,7 +74,7 @@ struct ChildDeviceControlsView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .tofyActivityPicker(title: PickerCopy.blocked.title, header: PickerCopy.blocked.header, footer: PickerCopy.blocked.footer, isPresented: $showAppPicker, selection: $selection)
         .onChangeCompat(of: selection) { _, new in
             settings.activitySelectionData = SelectionStorage.encode(new)
@@ -86,15 +86,15 @@ struct ChildDeviceControlsView: View {
             allowSelection = SelectionStorage.decode(settings.allowExceptionData)
             alwaysAllowSelection = SelectionStorage.decode(settings.alwaysAllowedAppsData)
         }
-        .confirmationDialog("לְנַתֵּק אֶת הַמַּכְשִׁיר?",
+        .confirmationDialog(tr("לְנַתֵּק אֶת הַמַּכְשִׁיר?"),
                             isPresented: $showDisconnect, titleVisibility: .visible) {
-            Button("נַתֵּק וְאַפֵּס", role: .destructive) {
+            Button(tr("נַתֵּק וְאַפֵּס"), role: .destructive) {
                 HouseholdManager.shared.resetAsRemovedDevice()
                 dismiss()
             }
-            Button("בִּטּוּל", role: .cancel) {}
+            Button(tr("בִּטּוּל"), role: .cancel) {}
         } message: {
-            Text("הַמַּכְשִׁיר יִתְנַתֵּק מֵהַיֶּלֶד וְיַחֲזוֹר לְמַצָּב הַתְחָלָתִי (כְּאִלּוּ הוּתְקַן מֵחָדָשׁ). הַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמֶרֶת — אֶפְשָׁר תָּמִיד לְחַבֵּר שׁוּב בִּסְרִיקַת הַקּוֹד.")
+            Text(tr("הַמַּכְשִׁיר יִתְנַתֵּק מֵהַיֶּלֶד וְיַחֲזוֹר לְמַצָּב הַתְחָלָתִי (כְּאִלּוּ הוּתְקַן מֵחָדָשׁ). הַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמֶרֶת — אֶפְשָׁר תָּמִיד לְחַבֵּר שׁוּב בִּסְרִיקַת הַקּוֹד."))
         }
     }
 
@@ -106,7 +106,7 @@ struct ChildDeviceControlsView: View {
                 .font(.system(size: 44, weight: .semibold))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
-            Text("בַּקָּרַת הַמַּכְשִׁיר")
+            Text(tr("בַּקָּרַת הַמַּכְשִׁיר"))
                 .font(.system(size: 28, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
@@ -124,7 +124,7 @@ struct ChildDeviceControlsView: View {
             kidMode.exit()
             dismiss()
         } label: {
-            Label("צֵא מִמַּצַּב יֶלֶד", systemImage: "figure.walk.departure")
+            Label(tr("צֵא מִמַּצַּב יֶלֶד"), systemImage: "figure.walk.departure")
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
@@ -165,15 +165,15 @@ struct ChildDeviceControlsView: View {
 
     @ViewBuilder private var statusBanner: some View {
         if isUnlocked {
-            banner(title: "פָּתוּחַ עַכְשָׁיו",
-                   detail: "נִשְׁאֲרוּ כְּ-\(max(1, progress.unlockSecondsRemaining / 60)) דַּקּוֹת",
+            banner(title: tr("פָּתוּחַ עַכְשָׁיו"),
+                   detail: tr("נִשְׁאֲרוּ כְּ-\(max(1, progress.unlockSecondsRemaining / 60)) דַּקּוֹת"),
                    open: true, lock: { Haptic.medium(); lockNow() })
         } else if settings.allowExceptionActive {
-            banner(title: "אַפְּלִיקַצְיָה מְסוּיֶּמֶת פְּתוּחָה",
-                   detail: "הַשְּׁאָר נְעוּלוֹת\(allowEndText)",
+            banner(title: tr("אַפְּלִיקַצְיָה מְסוּיֶּמֶת פְּתוּחָה"),
+                   detail: tr("הַשְּׁאָר נְעוּלוֹת\(allowEndText)"),
                    open: true, lock: { Haptic.medium(); cancelAllowException() })
         } else {
-            banner(title: "הַכֹּל נָעוּל", detail: "הַיֶּלֶד מַרְוִיחַ זְמַן כְּדֵי לִפְתּוֹחַ", open: false, lock: nil)
+            banner(title: tr("הַכֹּל נָעוּל"), detail: tr("הַיֶּלֶד מַרְוִיחַ זְמַן כְּדֵי לִפְתּוֹחַ"), open: false, lock: nil)
         }
     }
 
@@ -191,7 +191,7 @@ struct ChildDeviceControlsView: View {
             Spacer()
             if let lock {
                 Button { lock() } label: {
-                    Label("נְעוֹל", systemImage: "lock.fill")
+                    Label(tr("נְעוֹל"), systemImage: "lock.fill")
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 14).padding(.vertical, 8)
@@ -215,19 +215,19 @@ struct ChildDeviceControlsView: View {
         // left until midnight (no daily accumulator — see giftAllowance).
         let capLeft = ProgressStore.minutesUntilMidnight()
         return controlCard(tint: AppColor.starGold) {
-            sectionHead("תֵּן דַּקּוֹת מַתָּנָה 💝",
+            sectionHead(tr("תֵּן דַּקּוֹת מַתָּנָה 💝"),
                         capLeft > 0
-                            ? "נִכְנָס לַכִּיס 💝 שֶׁל הַיֶּלֶד — \(profileName) \(isGirl ? "פּוֹתַחַת" : "פּוֹתֵחַ") מָתַי שֶׁ\(isGirl ? "תִּרְצֶה" : "יִרְצֶה"), מִכָּל מַכְשִׁיר. אֶפְשָׁר לָתֵת עוֹד עַד \(capLeft) דַּקּוֹת הַיּוֹם (עַד חֲצוֹת)."
-                            : "עוֹד רֶגַע חֲצוֹת — מִיָּד אַחֲרֵי חֲצוֹת אֶפְשָׁר לָתֵת שׁוּב.",
+                            ? tr("נִכְנָס לַכִּיס 💝 שֶׁל הַיֶּלֶד — \(profileName) \(isGirl ? tr("פּוֹתַחַת") : tr("פּוֹתֵחַ")) מָתַי שֶׁ\(isGirl ? tr("תִּרְצֶה") : tr("יִרְצֶה")), מִכָּל מַכְשִׁיר. אֶפְשָׁר לָתֵת עוֹד עַד \(capLeft) דַּקּוֹת הַיּוֹם (עַד חֲצוֹת).")
+                            : tr("עוֹד רֶגַע חֲצוֹת — מִיָּד אַחֲרֵי חֲצוֹת אֶפְשָׁר לָתֵת שׁוּב."),
                         icon: "gift.fill", tint: AppColor.starGold)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                durationPill("חֲצִי שָׁעָה", minutes: 30, capLeft: capLeft)
-                durationPill("שָׁעָה", minutes: 60, capLeft: capLeft)
-                durationPill("שְׁעָתַיִם", minutes: 120, capLeft: capLeft)
-                durationPill("4 שָׁעוֹת", minutes: 240, capLeft: capLeft)
+                durationPill(tr("חֲצִי שָׁעָה"), minutes: 30, capLeft: capLeft)
+                durationPill(tr("שָׁעָה"), minutes: 60, capLeft: capLeft)
+                durationPill(tr("שְׁעָתַיִם"), minutes: 120, capLeft: capLeft)
+                durationPill(tr("4 שָׁעוֹת"), minutes: 240, capLeft: capLeft)
             }
             if progress.parentGiftMinutes > 0 {
-                Text("בַּכִּיס עַכְשָׁיו: 💝 \(progress.parentGiftMinutes) דַּקּוֹת")
+                Text(tr("בַּכִּיס עַכְשָׁיו: 💝 \(progress.parentGiftMinutes) דַּקּוֹת"))
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.textOnLight.opacity(0.8))
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -235,7 +235,7 @@ struct ChildDeviceControlsView: View {
         }
     }
 
-    private var profileName: String { profiles.active?.name ?? "הַיֶּלֶד" }
+    private var profileName: String { profiles.active?.name ?? tr("הַיֶּלֶד") }
     private var isGirl: Bool { profiles.active?.gender == .girl }
 
     private func durationPill(_ title: String, minutes: Int, capLeft: Int) -> some View {
@@ -260,8 +260,8 @@ struct ChildDeviceControlsView: View {
 
     private var perAppAllowCard: some View {
         controlCard(tint: AppColor.diamondBlue) {
-            sectionHead("פְּתִיחַת אַפְּלִיקַצְיָה מְסוּיֶּמֶת",
-                        "רַק אַפְּלִיקַצְיָה אַחַת אוֹ כַּמָּה (לְמָשָׁל יוּטְיוּבּ). הַשְּׁאָר נְעוּלוֹת.",
+            sectionHead(tr("פְּתִיחַת אַפְּלִיקַצְיָה מְסוּיֶּמֶת"),
+                        tr("רַק אַפְּלִיקַצְיָה אַחַת אוֹ כַּמָּה (לְמָשָׁל יוּטְיוּבּ). הַשְּׁאָר נְעוּלוֹת."),
                         icon: "app.badge.checkmark", tint: AppColor.diamondBlue)
 
             Button {
@@ -270,7 +270,7 @@ struct ChildDeviceControlsView: View {
                     if shields.isAuthorized { showAllowPicker = true }
                 }
             } label: {
-                Label(allowCount > 0 ? "\(allowCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · עֲרִיכָה" : "בְּחִירַת אַפְּלִיקַצְיוֹת",
+                Label(allowCount > 0 ? tr("\(allowCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · עֲרִיכָה") : tr("בְּחִירַת אַפְּלִיקַצְיוֹת"),
                       systemImage: "checkmark.circle.fill")
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
@@ -283,10 +283,10 @@ struct ChildDeviceControlsView: View {
 
             if allowCount > 0 {
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                    allowDurationPill("חֲצִי שָׁעָה", minutes: 30)
-                    allowDurationPill("שָׁעָה", minutes: 60)
-                    allowDurationPill("שְׁעָתַיִם", minutes: 120)
-                    allowDurationPill("עַד סוֹף הַיּוֹם", minutes: minutesUntilEndOfDay())
+                    allowDurationPill(tr("חֲצִי שָׁעָה"), minutes: 30)
+                    allowDurationPill(tr("שָׁעָה"), minutes: 60)
+                    allowDurationPill(tr("שְׁעָתַיִם"), minutes: 120)
+                    allowDurationPill(tr("עַד סוֹף הַיּוֹם"), minutes: minutesUntilEndOfDay())
                 }
             }
         }
@@ -312,17 +312,17 @@ struct ChildDeviceControlsView: View {
         guard let end = settings.allowExceptionEndsAt else { return "" }
         let f = DateFormatter()
         f.dateFormat = "HH:mm"
-        return " עַד \(f.string(from: end))"
+        return tr(" עַד \(f.string(from: end))")
     }
 
     // MARK: - App lock
 
     private var appLockCard: some View {
         controlCard(tint: AppColor.successMint) {
-            sectionHead("אֵילוּ אַפְּלִיקַצְיוֹת נְעוּלוֹת",
+            sectionHead(tr("אֵילוּ אַפְּלִיקַצְיוֹת נְעוּלוֹת"),
                         selectedCount > 0
-                            ? "\(selectedCount) אַפְּלִיקַצְיוֹת/קָטֵגוֹרְיוֹת נְעוּלוֹת עַד שֶׁמַּרְוִיחִים זְמַן."
-                            : "עֲדַיִן לֹא נִבְחֲרוּ אַפְּלִיקַצְיוֹת לִנְעִילָה.",
+                            ? tr("\(selectedCount) אַפְּלִיקַצְיוֹת/קָטֵגוֹרְיוֹת נְעוּלוֹת עַד שֶׁמַּרְוִיחִים זְמַן.")
+                            : tr("עֲדַיִן לֹא נִבְחֲרוּ אַפְּלִיקַצְיוֹת לִנְעִילָה."),
                         icon: "lock.app.dashed", tint: AppColor.successMint)
             Button {
                 Task {
@@ -330,7 +330,7 @@ struct ChildDeviceControlsView: View {
                     if shields.isAuthorized { showAppPicker = true }
                 }
             } label: {
-                Label(selectedCount > 0 ? "עֲרִיכַת הָרְשִׁימָה" : "בְּחִירַת אַפְּלִיקַצְיוֹת",
+                Label(selectedCount > 0 ? tr("עֲרִיכַת הָרְשִׁימָה") : tr("בְּחִירַת אַפְּלִיקַצְיוֹת"),
                       systemImage: "app.badge.fill")
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color(hex: "4B3FBF"))
@@ -350,8 +350,8 @@ struct ChildDeviceControlsView: View {
     /// fell under a locked category) without unlocking the entire category.
     private var alwaysAllowedCard: some View {
         controlCard(tint: AppColor.companionGlow) {
-            sectionHead("אַפְּלִיקַצְיוֹת שֶׁתָּמִיד מוּתָּרוֹת",
-                        "אַף פַּעַם לֹא נְעוּלוֹת — גַּם אִם הַקָּטֵגוֹרְיָה שֶׁלָּהֶן חֲסוּמָה. שִׁמּוּשִׁי כְּדֵי לְאַפְשֵׁר אַפְּלִיקַצְיָה חֲדָשָׁה לִצְמִיתוּת.",
+            sectionHead(tr("אַפְּלִיקַצְיוֹת שֶׁתָּמִיד מוּתָּרוֹת"),
+                        tr("אַף פַּעַם לֹא נְעוּלוֹת — גַּם אִם הַקָּטֵגוֹרְיָה שֶׁלָּהֶן חֲסוּמָה. שִׁמּוּשִׁי כְּדֵי לְאַפְשֵׁר אַפְּלִיקַצְיָה חֲדָשָׁה לִצְמִיתוּת."),
                         icon: "checkmark.shield.fill", tint: AppColor.companionGlow)
             Button {
                 Task {
@@ -359,7 +359,7 @@ struct ChildDeviceControlsView: View {
                     if shields.isAuthorized { showAlwaysAllowPicker = true }
                 }
             } label: {
-                Label(alwaysAllowCount > 0 ? "\(alwaysAllowCount) אַפְּלִיקַצְיוֹת מוּתָּרוֹת · עֲרִיכָה" : "בְּחִירַת אַפְּלִיקַצְיוֹת",
+                Label(alwaysAllowCount > 0 ? tr("\(alwaysAllowCount) אַפְּלִיקַצְיוֹת מוּתָּרוֹת · עֲרִיכָה") : tr("בְּחִירַת אַפְּלִיקַצְיוֹת"),
                       systemImage: "checkmark.shield.fill")
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
@@ -386,8 +386,8 @@ struct ChildDeviceControlsView: View {
     /// short window to legitimately uninstall Tofy. It auto-re-locks after 5 min.
     private var allowDeleteCard: some View {
         controlCard(tint: AppColor.flameOrange) {
-            sectionHead("מְחִיקַת הָאַפְּלִיקַצְיָה",
-                        "בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה. לִמְחִיקָה אֲמִתִּית — פִּתְחוּ חַלּוֹן קָצָר וְהָסִירוּ אֶת טוֹפִי מִמָּסַךְ הַבַּיִת.",
+            sectionHead(tr("מְחִיקַת הָאַפְּלִיקַצְיָה"),
+                        tr("בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה. לִמְחִיקָה אֲמִתִּית — פִּתְחוּ חַלּוֹן קָצָר וְהָסִירוּ אֶת טוֹפִי מִמָּסַךְ הַבַּיִת."),
                         icon: "trash", tint: AppColor.flameOrange)
             Button {
                 Haptic.medium()
@@ -396,9 +396,9 @@ struct ChildDeviceControlsView: View {
                 // instantly re-block the deletion this button just allowed.
                 shields.cancelScheduledReshield()
                 shields.setAppRemovalLocked(false)
-                removalNote = "נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת. צְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד."
+                removalNote = tr("נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת. צְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד.")
             } label: {
-                Label("אַפְשְׁרוּ מְחִיקָה לְ-5 דַּקּוֹת", systemImage: "trash")
+                Label(tr("אַפְשְׁרוּ מְחִיקָה לְ-5 דַּקּוֹת"), systemImage: "trash")
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 13)
@@ -420,7 +420,7 @@ struct ChildDeviceControlsView: View {
     /// (Parent-gated, like everything on this screen.) Cloud progress is kept.
     private var disconnectButton: some View {
         Button { Haptic.medium(); showDisconnect = true } label: {
-            Label("הִתְנַתְּקוּ מֵהַמִּשְׁפָּחָה", systemImage: "iphone.slash")
+            Label(tr("הִתְנַתְּקוּ מֵהַמִּשְׁפָּחָה"), systemImage: "iphone.slash")
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.flameOrange)
                 .frame(maxWidth: .infinity).padding(.vertical, 13)
@@ -481,5 +481,5 @@ struct ChildDeviceControlsView: View {
         .environmentObject(ParentSettings.shared)
         .environmentObject(ShieldManager.shared)
         .environmentObject(ProgressStore.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

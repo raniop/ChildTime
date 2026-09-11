@@ -15,7 +15,7 @@ struct XPBar: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
             HStack(spacing: 6) {
-                Text("רמה \(level)")
+                Text(tr("רמה \(level)"))
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
                 Image(systemName: "sparkles")
@@ -47,5 +47,5 @@ struct XPBar: View {
             XPBar(level: 5, xp: 150, xpForCurrentLevel: 100, xpForNextLevel: 200)
         }
     }
-    .environment(\.layoutDirection, .rightToLeft)
+    .environment(\.layoutDirection, .app)
 }

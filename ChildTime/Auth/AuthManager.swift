@@ -192,9 +192,9 @@ final class AuthManager: ObservableObject {
         } catch {
             let ns = error as NSError
             if ns.code == 17014 {   // AuthErrorCode.requiresRecentLogin
-                lastError = "כדי למחוק את החשבון לצמיתות יש להתחבר מחדש ואז לנסות שוב. שאר הנתונים כבר נמחקו."
+                lastError = tr("כדי למחוק את החשבון לצמיתות יש להתחבר מחדש ואז לנסות שוב. שאר הנתונים כבר נמחקו.")
             } else {
-                lastError = "מחיקת החשבון נכשלה: \(ns.localizedDescription)"
+                lastError = tr("מחיקת החשבון נכשלה: \(ns.localizedDescription)")
             }
             return false
         }
@@ -217,7 +217,7 @@ final class AuthManager: ObservableObject {
     func handleAppleCompletion(_ result: Result<ASAuthorization, Error>) {
         switch result {
         case .failure(let error):
-            lastError = "Apple Sign-In נכשל: \(error.localizedDescription)"
+            lastError = tr("Apple Sign-In נכשל: \(error.localizedDescription)")
         case .success(let authorization):
             Task { await self.processApple(authorization) }
         }
@@ -283,7 +283,7 @@ final class AuthManager: ObservableObject {
             lastError = mapAuthError(error)
         }
         #else
-        lastError = "Firebase Auth לא הותקן"
+        lastError = tr("Firebase Auth לא הותקן")
         #endif
     }
 
@@ -299,7 +299,7 @@ final class AuthManager: ObservableObject {
             lastError = mapAuthError(error)
         }
         #else
-        lastError = "Firebase Auth לא הותקן"
+        lastError = tr("Firebase Auth לא הותקן")
         #endif
     }
 
@@ -314,7 +314,7 @@ final class AuthManager: ObservableObject {
             try await Auth.auth().sendPasswordReset(withEmail: email)
             lastError = nil
             // The button used to "do nothing" visibly (Rani) — say what happened.
-            infoMessage = "שלחנו קישור לאיפוס הסיסמה אל \(email) — בדקו את המייל (גם בספאם)"
+            infoMessage = tr("שלחנו קישור לאיפוס הסיסמה אל \(email) — בדקו את המייל (גם בספאם)")
         } catch {
             lastError = mapAuthError(error)
         }
@@ -330,14 +330,14 @@ final class AuthManager: ObservableObject {
                            // here ("supplied auth credential is malformed").
              17009,        // wrong password (legacy)
              17011:        // user not found (legacy)
-            return "האימייל או הסיסמה לא נכונים — נסו שוב, או הקישו \"שכחתי סיסמה\""
-        case 17007: return "כבר קיים חשבון עם האימייל הזה — עברו ללשונית \"כניסה\""
-        case 17008: return "כתובת האימייל לא תקינה — בדקו אותה שוב"
-        case 17026: return "הסיסמה קצרה מדי — לפחות 6 תווים"
-        case 17010: return "יותר מדי ניסיונות — המתינו דקה ונסו שוב"
-        case 17020: return "אין חיבור לאינטרנט — בדקו את הרשת ונסו שוב"
-        case 17005: return "החשבון הזה הושבת — פנו אלינו לתמיכה"
-        default:    return "משהו השתבש בהתחברות — נסו שוב בעוד רגע"
+            return tr("האימייל או הסיסמה לא נכונים — נסו שוב, או הקישו \"שכחתי סיסמה\"")
+        case 17007: return tr("כבר קיים חשבון עם האימייל הזה — עברו ללשונית \"כניסה\"")
+        case 17008: return tr("כתובת האימייל לא תקינה — בדקו אותה שוב")
+        case 17026: return tr("הסיסמה קצרה מדי — לפחות 6 תווים")
+        case 17010: return tr("יותר מדי ניסיונות — המתינו דקה ונסו שוב")
+        case 17020: return tr("אין חיבור לאינטרנט — בדקו את הרשת ונסו שוב")
+        case 17005: return tr("החשבון הזה הושבת — פנו אלינו לתמיכה")
+        default:    return tr("משהו השתבש בהתחברות — נסו שוב בעוד רגע")
         }
     }
 
@@ -369,7 +369,7 @@ final class AuthManager: ObservableObject {
             lastError = "Google: \(error.localizedDescription)"
         }
         #else
-        lastError = "Google Sign-In SDK עוד לא הותקן"
+        lastError = tr("Google Sign-In SDK עוד לא הותקן")
         #endif
     }
 

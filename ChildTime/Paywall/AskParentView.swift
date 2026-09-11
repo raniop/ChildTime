@@ -46,15 +46,15 @@ struct AskParentView: View {
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
                 Text(world.map { w in
                         let ended = WorldPasses.pass(for: w.topic).map { child?.passExpired($0) ?? false } ?? false
-                        return ended ? "\(g("רוֹצֶה", "רוֹצָה")) לְהַמְשִׁיךְ לִלְמֹד \(w.topic.displayName)?" : "\(g("רוֹצֶה", "רוֹצָה")) לִלְמֹד \(w.topic.displayName)?"
-                     } ?? "טוֹפִי+")
+                        return ended ? tr("\(g(tr("רוֹצֶה"), tr("רוֹצָה"))) לְהַמְשִׁיךְ לִלְמֹד \(w.topic.displayName)?") : tr("\(g(tr("רוֹצֶה"), tr("רוֹצָה"))) לִלְמֹד \(w.topic.displayName)?")
+                     } ?? tr("טוֹפִי+"))
                     .font(.system(size: world == nil ? 34 : 27, weight: .black, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
                     .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(world.map { "\($0.name) וְכָל הָעוֹלָמוֹת נִפְתָּחִים עִם טוֹפִי+ לְכָל הַמִּשְׁפָּחָה — וְאַבָּא אוֹ אִמָּא פּוֹתְחִים אֶת זֶה מֵהַטֶּלֶפוֹן שֶׁלָּהֶם." }
-                     ?? "הַמִּשְׂחָקִים, הַזִּירָה, הַמַּטְלוֹת וְכָל הָעוֹלָמוֹת נִפְתָּחִים לְכָל הַמִּשְׁפָּחָה — וְאַבָּא אוֹ אִמָּא פּוֹתְחִים אֶת זֶה מֵהַטֶּלֶפוֹן שֶׁלָּהֶם.")
+                Text(world.map { tr("\($0.name) וְכָל הָעוֹלָמוֹת נִפְתָּחִים עִם טוֹפִי+ לְכָל הַמִּשְׁפָּחָה — וְאַבָּא אוֹ אִמָּא פּוֹתְחִים אֶת זֶה מֵהַטֶּלֶפוֹן שֶׁלָּהֶם.") }
+                     ?? tr("הַמִּשְׂחָקִים, הַזִּירָה, הַמַּטְלוֹת וְכָל הָעוֹלָמוֹת נִפְתָּחִים לְכָל הַמִּשְׁפָּחָה — וְאַבָּא אוֹ אִמָּא פּוֹתְחִים אֶת זֶה מֵהַטֶּלֶפוֹן שֶׁלָּהֶם."))
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
@@ -62,10 +62,10 @@ struct AskParentView: View {
                     .padding(.horizontal, 8)
 
                 VStack(alignment: .leading, spacing: 10) {
-                    perk("🎮", "מִשְׂחָקִים וְזִירַת הָעֲנָקִים")
-                    perk("🌍", "כָּל הָעוֹלָמוֹת — בְּלִי גְּבוּלוֹת")
-                    perk("🧹", "מַטְלוֹת הַבַּיִת עִם פְּרָסִים")
-                    perk("👨‍👩‍👧", "פַּעַם אַחַת — לְכָל הַמַּכְשִׁירִים בַּמִּשְׁפָּחָה")
+                    perk("🎮", tr("מִשְׂחָקִים וְזִירַת הָעֲנָקִים"))
+                    perk("🌍", tr("כָּל הָעוֹלָמוֹת — בְּלִי גְּבוּלוֹת"))
+                    perk("🧹", tr("מַטְלוֹת הַבַּיִת עִם פְּרָסִים"))
+                    perk("👨‍👩‍👧", tr("פַּעַם אַחַת — לְכָל הַמַּכְשִׁירִים בַּמִּשְׁפָּחָה"))
                 }
                 .padding(16)
                 .frame(maxWidth: .infinity)
@@ -82,7 +82,7 @@ struct AskParentView: View {
                 } label: {
                     HStack(spacing: 10) {
                         if sending { ProgressView().tint(AppColor.textOnLight) }
-                        Text(sent ? "נִשְׁלַח לְאַבָּא וּלְאִמָּא ✅" : "\(g("בַּקֵּשׁ", "בַּקְּשִׁי")) מֵאַבָּא אוֹ אִמָּא 💌")
+                        Text(sent ? tr("נִשְׁלַח לְאַבָּא וּלְאִמָּא ✅") : tr("\(g(tr("בַּקֵּשׁ"), tr("בַּקְּשִׁי"))) מֵאַבָּא אוֹ אִמָּא 💌"))
                             .font(.system(size: 19, weight: .heavy, design: .rounded))
                     }
                     .foregroundStyle(Color(hex: "4B3FBF"))
@@ -93,14 +93,14 @@ struct AskParentView: View {
                 }
                 .buttonStyle(.juicy)
                 .disabled(sent)
-                Text(sent ? "הֵם יְקַבְּלוּ הוֹדָעָה בַּטֶּלֶפוֹן 📱" : "הַבַּקָּשָׁה מַגִּיעָה יָשָׁר לַטֶּלֶפוֹן שֶׁל הַהוֹרֶה")
+                Text(sent ? tr("הֵם יְקַבְּלוּ הוֹדָעָה בַּטֶּלֶפוֹן 📱") : tr("הַבַּקָּשָׁה מַגִּיעָה יָשָׁר לַטֶּלֶפוֹן שֶׁל הַהוֹרֶה"))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
             }
             .padding(AppSpacing.lg)
             .frame(maxWidth: 520)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     private func perk(_ emoji: String, _ text: String) -> some View {

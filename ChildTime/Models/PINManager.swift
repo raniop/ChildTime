@@ -54,9 +54,9 @@ final class PINManager {
         return LAContext().canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
     }
 
-    func authenticateBiometric(reason: String = "פתיחת הגדרות הורה") async -> Bool {
+    func authenticateBiometric(reason: String = tr("פתיחת הגדרות הורה")) async -> Bool {
         let context = LAContext()
-        context.localizedFallbackTitle = "השתמש בקוד"
+        context.localizedFallbackTitle = tr("השתמש בקוד")
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
             return false

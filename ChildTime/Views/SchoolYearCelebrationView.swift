@@ -15,7 +15,7 @@ struct SchoolYearCelebrationView: View {
     @State private var stage = 0     // staged entrance: 0 → 3
 
     /// "עוֹלֶה" / "עוֹלָה" by the child's gender (the old slash-both was a bug).
-    private var risesVerb: String { gender == .girl ? "עוֹלָה" : "עוֹלֶה" }
+    private var risesVerb: String { gender == .girl ? tr("עוֹלָה") : tr("עוֹלֶה") }
 
     var body: some View {
         ZStack {
@@ -26,7 +26,7 @@ struct SchoolYearCelebrationView: View {
 
                 medal
 
-                Text("יוֹם רִאשׁוֹן לַלִּמּוּדִים!")
+                Text(tr("יוֹם רִאשׁוֹן לַלִּמּוּדִים!"))
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
@@ -36,7 +36,7 @@ struct SchoolYearCelebrationView: View {
 
                 (Text("\(childName) ")
                     .foregroundColor(Color(hex: "FFD23F"))
-                 + Text("\(risesVerb) לְ\(gradeName)!")
+                 + Text(tr("\(risesVerb) לְ\(gradeName)!"))
                     .foregroundColor(.white))
                     .font(.system(size: 34, weight: .black, design: .rounded))
                     .shadow(color: .black.opacity(0.35), radius: 5, y: 3)
@@ -45,7 +45,7 @@ struct SchoolYearCelebrationView: View {
                     .scaleEffect(stage >= 2 ? 1 : 0.4)
                     .opacity(stage >= 2 ? 1 : 0)
 
-                Text("שָׁנָה חֲדָשָׁה, הַרְפַּתְקָה חֲדָשָׁה — טוֹפִי כְּבָר הֵכִין\nשְׁאֵלוֹת חֲדָשׁוֹת בְּדִיּוּק \(gender == .girl ? "בִּשְׁבִילֵךְ" : "בִּשְׁבִילְךָ")! 🚀")
+                Text(tr("שָׁנָה חֲדָשָׁה, הַרְפַּתְקָה חֲדָשָׁה — טוֹפִי כְּבָר הֵכִין\nשְׁאֵלוֹת חֲדָשׁוֹת בְּדִיּוּק \(gender == .girl ? tr("בִּשְׁבִילֵךְ") : tr("בִּשְׁבִילְךָ"))! 🚀"))
                     .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.95))
                     .multilineTextAlignment(.center)
@@ -59,7 +59,7 @@ struct SchoolYearCelebrationView: View {
                     Haptic.success()
                     onDone()
                 } label: {
-                    Text("יַאלְלָה, מַתְחִילִים! 🚀")
+                    Text(tr("יַאלְלָה, מַתְחִילִים! 🚀"))
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(AppColor.textOnLight)
                         .frame(maxWidth: 420)
@@ -80,7 +80,7 @@ struct SchoolYearCelebrationView: View {
                 .allowsHitTesting(false)
                 .ignoresSafeArea()
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onAppear {
             appeared = true
             SoundPlayer.shared.play(.levelUp)
@@ -283,7 +283,7 @@ struct ParentSchoolYearPartyView: View {
                         .shadow(color: .black.opacity(0.25), radius: 14, y: 8)
                     VStack(spacing: 2) {
                         Text("🎒").font(.system(size: 44))
-                        Text("שָׁנָה חֲדָשָׁה!")
+                        Text(tr("שָׁנָה חֲדָשָׁה!"))
                             .font(.system(size: 20, weight: .black, design: .rounded))
                             .foregroundStyle(Color(hex: "6B3B00"))
                             .lineLimit(1).minimumScaleFactor(0.6)
@@ -295,7 +295,7 @@ struct ParentSchoolYearPartyView: View {
                 .scaleEffect(stage >= 1 ? 1 : 0.2)
                 .animation(.spring(response: 0.6, dampingFraction: 0.55), value: stage)
 
-                Text("שֶׁתִּהְיֶה שְׁנַת לִמּוּדִים נִפְלָאָה!")
+                Text(tr("שֶׁתִּהְיֶה שְׁנַת לִמּוּדִים נִפְלָאָה!"))
                     .font(.system(size: 27, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
@@ -310,7 +310,7 @@ struct ParentSchoolYearPartyView: View {
                         if p.grade != nil {
                             (Text("\(p.name) ")
                                 .foregroundColor(Color(hex: "FFD23F"))
-                             + Text("\(p.gender == .girl ? "עוֹלָה" : "עוֹלֶה") לְ\(Profile.gradeDisplayName(p.effectiveGrade))! ⭐️")
+                             + Text(tr("\(p.gender == .girl ? tr("עוֹלָה") : tr("עוֹלֶה")) לְ\(Profile.gradeDisplayName(p.effectiveGrade))! ⭐️"))
                                 .foregroundColor(.white))
                                 .font(.system(size: 23, weight: .black, design: .rounded))
                                 .shadow(color: .black.opacity(0.35), radius: 5, y: 3)
@@ -323,7 +323,7 @@ struct ParentSchoolYearPartyView: View {
                 .scaleEffect(stage >= 2 ? 1 : 0.4)
                 .opacity(stage >= 2 ? 1 : 0)
 
-                Text("שָׁנָה שֶׁל סַקְרָנוּת, בִּטָּחוֹן וְהָמוֹן רְגָעִים טוֹבִים —\nטוֹפִי כְּבָר מְחַכֶּה לָהֶם עִם שְׁאֵלוֹת חֲדָשׁוֹת 💛")
+                Text(tr("שָׁנָה שֶׁל סַקְרָנוּת, בִּטָּחוֹן וְהָמוֹן רְגָעִים טוֹבִים —\nטוֹפִי כְּבָר מְחַכֶּה לָהֶם עִם שְׁאֵלוֹת חֲדָשׁוֹת 💛"))
                     .font(.system(size: 16, weight: .bold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.95))
                     .multilineTextAlignment(.center)
@@ -337,7 +337,7 @@ struct ParentSchoolYearPartyView: View {
                     Haptic.success()
                     onDone()
                 } label: {
-                    Text("לְשָׁנָה מֻצְלַחַת! 💛")
+                    Text(tr("לְשָׁנָה מֻצְלַחַת! 💛"))
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(AppColor.textOnLight)
                         .frame(maxWidth: 420)
@@ -358,7 +358,7 @@ struct ParentSchoolYearPartyView: View {
                 .allowsHitTesting(false)
                 .ignoresSafeArea()
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onAppear {
             appeared = true
             SoundPlayer.shared.play(.levelUp)

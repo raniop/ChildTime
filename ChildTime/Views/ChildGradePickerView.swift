@@ -11,7 +11,7 @@ struct ChildGradePickerView: View {
 
     @State private var chosen: Int? = nil
     @State private var confetti = 0
-    private let letters = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"]
+    private let letters = [tr("א׳"), tr("ב׳"), tr("ג׳"), tr("ד׳"), tr("ה׳"), tr("ו׳"), tr("ז׳"), tr("ח׳")]
 
     var body: some View {
         ZStack {
@@ -25,16 +25,16 @@ struct ChildGradePickerView: View {
                     .font(.system(size: 84))
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
 
-                Text("הַיי \(profile.name)!")
+                Text(tr("הַיי \(profile.name)!"))
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
 
-                Text("בְּאֵיזוֹ כִּתָּה \(profile.gender == .girl ? "אַתְּ" : "אַתָּה")?")
+                Text(tr("בְּאֵיזוֹ כִּתָּה \(profile.gender == .girl ? tr("אַתְּ") : tr("אַתָּה"))?"))
                     .font(.system(size: 30, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
                     .glow(AppColor.starGold, radius: 10)
 
-                Text("כָּךְ טוֹפִי יַתְאִים אֶת הַשְּׁאֵלוֹת בְּדִיּוּק בִּשְׁבִילְךָ 🎯")
+                Text(tr("כָּךְ טוֹפִי יַתְאִים אֶת הַשְּׁאֵלוֹת בְּדִיּוּק בִּשְׁבִילְךָ 🎯"))
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
@@ -42,19 +42,19 @@ struct ChildGradePickerView: View {
 
                 VStack(spacing: 8) {
                     HStack(spacing: 8) {
-                        chip(-1, label: "גַּן טְרוֹם־חוֹבָה", emoji: "🧸")
-                        chip(0, label: "גַּן חוֹבָה", emoji: "🎒")
+                        chip(-1, label: tr("גַּן טְרוֹם־חוֹבָה"), emoji: "🧸")
+                        chip(0, label: tr("גַּן חוֹבָה"), emoji: "🎒")
                     }
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
                         ForEach(1...8, id: \.self) { g in
-                            chip(g, label: "כִּתָּה \(letters[g - 1])", emoji: nil)
+                            chip(g, label: tr("כִּתָּה \(letters[g - 1])"), emoji: nil)
                         }
                     }
                 }
                 .padding(.horizontal, AppSpacing.lg)
                 .frame(maxWidth: 560)
 
-                Text("לֹא בְּטוּחִים? אֶפְשָׁר לִשְׁאֹל אֶת אַבָּא אוֹ אִמָּא 😊")
+                Text(tr("לֹא בְּטוּחִים? אֶפְשָׁר לִשְׁאֹל אֶת אַבָּא אוֹ אִמָּא 😊"))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.75))
 
@@ -63,7 +63,7 @@ struct ChildGradePickerView: View {
 
             FancyConfetti(trigger: confetti)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     private func chip(_ g: Int, label: String, emoji: String?) -> some View {

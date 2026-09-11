@@ -16,7 +16,7 @@ struct ChildInsightsView: View {
         var id: String { rawValue }
         var label: String {
             switch self {
-            case .day: return "היום"; case .week: return "השבוע"; case .month: return "החודש"
+            case .day: return tr("היום"); case .week: return tr("השבוע"); case .month: return tr("החודש")
             }
         }
     }
@@ -61,7 +61,7 @@ struct ChildInsightsView: View {
             .frame(maxWidth: .infinity)
             // Sections are authored with `.trailing` == right, so render LTR;
             // Hebrew still flows RTL within each label.
-            .environment(\.layoutDirection, .leftToRight)
+            .environment(\.layoutDirection, .appMirrored)
         }
         .background(AppGradient.dreamy.ignoresSafeArea())
         .environment(\.colorScheme, .dark)
@@ -81,9 +81,9 @@ struct ChildInsightsView: View {
         HStack(spacing: 8) {
             snapChip(engine.learningTrend.label, color: engine.learningTrend.color)
             if let s = engine.avgResponseSeconds {
-                snapChip("⏳ \(s) שׁנִיּוֹת מֵעֲנֶה", color: .secondary)
+                snapChip(tr("⏳ \(s) שׁנִיּוֹת מֵעֲנֶה"), color: .secondary)
             }
-            snapChip("🔥 \(snapshot.dayStreak) יְמֵי רֶצֶף", color: AppColor.flameOrange)
+            snapChip(tr("🔥 \(snapshot.dayStreak) יְמֵי רֶצֶף"), color: AppColor.flameOrange)
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
     }
@@ -98,11 +98,11 @@ struct ChildInsightsView: View {
 
     @ViewBuilder private var interestsSection: some View {
         if !engine.gainedInterest.isEmpty || !engine.lostInterest.isEmpty {
-            card(title: "תְּחוּמֵי עִנְיָן") {
+            card(title: tr("תְּחוּמֵי עִנְיָן")) {
                 VStack(alignment: .trailing, spacing: 10) {
-                    topicRow("צוֹבֵר עִנְיָן", engine.gainedInterest, AppColor.gemPurple, empty: "")
+                    topicRow(tr("צוֹבֵר עִנְיָן"), engine.gainedInterest, AppColor.gemPurple, empty: "")
                     if !engine.lostInterest.isEmpty {
-                        topicRow("אִבֵּד עִנְיָן", engine.lostInterest, AppColor.flameOrange, empty: "")
+                        topicRow(tr("אִבֵּד עִנְיָן"), engine.lostInterest, AppColor.flameOrange, empty: "")
                     }
                 }
             }
@@ -111,7 +111,7 @@ struct ChildInsightsView: View {
 
     @ViewBuilder private var learningStyleSection: some View {
         if let style = engine.learningStyle {
-            card(title: "סִגְנוֹן לְמִידָה") {
+            card(title: tr("סִגְנוֹן לְמִידָה")) {
                 labeledRow(style)
             }
         }
@@ -119,7 +119,7 @@ struct ChildInsightsView: View {
 
     @ViewBuilder private var persistenceSection: some View {
         if let p = engine.persistence {
-            card(title: "הַתְמָדָה") {
+            card(title: tr("הַתְמָדָה")) {
                 labeledRow(p)
             }
         }
@@ -127,7 +127,7 @@ struct ChildInsightsView: View {
 
     @ViewBuilder private var focusSection: some View {
         if let f = snapshot.focusInsight {
-            card(title: "רִכּוּז וּשְׁעוֹת שִׂיא") {
+            card(title: tr("רִכּוּז וּשְׁעוֹת שִׂיא")) {
                 labeledRow(InsightsEngine.Labeled(emoji: "⏰", title: f.title, detail: f.detail))
             }
         }
@@ -147,7 +147,7 @@ struct ChildInsightsView: View {
     }
 
     private var periodPicker: some View {
-        Picker("תקופה", selection: $period) {
+        Picker(tr("תקופה"), selection: $period) {
             ForEach(Period.allCases) { Text($0.label).tag($0) }
         }
         .pickerStyle(.segmented)
@@ -157,16 +157,16 @@ struct ChildInsightsView: View {
     private var summaryGrid: some View {
         let cols = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
         return LazyVGrid(columns: cols, spacing: 10) {
-            metric("❓", "\(summary.questions)", "שאלות")
-            metric("✅", "\(summary.correct)", "נכונות")
-            metric("💡", "\(summary.wrong)", "טעויות")
-            metric("🎮", "\(summary.minutesEarned)", "דק' שנצברו")
-            metric("⏱️", "\(summary.minutesUsed)", "דק' שנוצלו")
-            metric("🔥", "\(summary.longestStreak)", "רצף הכי ארוך")
-            metric("📚", "\(summary.learningMinutes)", "דק' למידה")
-            metric("🎯", "\(Int(summary.accuracy * 100))%", "דיוק")
-            metric("📅", "\(summary.activeDays)", "ימי פעילות")
-            metric("🙋", "\(Int(summary.voluntaryLearningRate * 100))%", "למידה מרצון")
+            metric("❓", "\(summary.questions)", tr("שאלות"))
+            metric("✅", "\(summary.correct)", tr("נכונות"))
+            metric("💡", "\(summary.wrong)", tr("טעויות"))
+            metric("🎮", "\(summary.minutesEarned)", tr("דק' שנצברו"))
+            metric("⏱️", "\(summary.minutesUsed)", tr("דק' שנוצלו"))
+            metric("🔥", "\(summary.longestStreak)", tr("רצף הכי ארוך"))
+            metric("📚", "\(summary.learningMinutes)", tr("דק' למידה"))
+            metric("🎯", "\(Int(summary.accuracy * 100))%", tr("דיוק"))
+            metric("📅", "\(summary.activeDays)", tr("ימי פעילות"))
+            metric("🙋", "\(Int(summary.voluntaryLearningRate * 100))%", tr("למידה מרצון"))
         }
     }
 
@@ -190,9 +190,9 @@ struct ChildInsightsView: View {
         let mins = engine.minutesSeries(days: days)
         if acc.contains(where: { $0.accuracy > 0 }) || mins.contains(where: { $0.minutes > 0 }) {
             VStack(alignment: .trailing, spacing: 14) {
-                card(title: "מגמת דיוק") {
+                card(title: tr("מגמת דיוק")) {
                     Chart(acc, id: \.date) { p in
-                        LineMark(x: .value("יום", p.date), y: .value("דיוק", p.accuracy * 100))
+                        LineMark(x: .value(tr("יום"), p.date), y: .value(tr("דיוק"), p.accuracy * 100))
                             .foregroundStyle(AppColor.successMint)
                             .interpolationMethod(.catmullRom)
                     }
@@ -200,9 +200,9 @@ struct ChildInsightsView: View {
                     .chartXAxis(.hidden)
                     .frame(height: 130)
                 }
-                card(title: "דקות שנצברו") {
+                card(title: tr("דקות שנצברו")) {
                     Chart(mins, id: \.date) { p in
-                        BarMark(x: .value("יום", p.date), y: .value("דקות", p.minutes))
+                        BarMark(x: .value(tr("יום"), p.date), y: .value(tr("דקות"), p.minutes))
                             .foregroundStyle(AppColor.flameOrange)
                     }
                     .chartXAxis(.hidden)
@@ -213,11 +213,11 @@ struct ChildInsightsView: View {
     }
 
     private var confidenceSection: some View {
-        card(title: "ציון ביטחון לפי תחום") {
+        card(title: tr("ציון ביטחון לפי תחום")) {
             VStack(spacing: 10) {
                 let rows = engine.confidenceByTopic
                 if rows.isEmpty {
-                    Text("עוד אוספים נתונים…").font(.caption).foregroundStyle(.secondary)
+                    Text(tr("עוד אוספים נתונים…")).font(.caption).foregroundStyle(.secondary)
                 } else {
                     ForEach(rows, id: \.topic) { row in
                         HStack(spacing: 10) {
@@ -244,12 +244,12 @@ struct ChildInsightsView: View {
     }
 
     private var strengthsChallenges: some View {
-        card(title: "חוזקות ואתגרים") {
+        card(title: tr("חוזקות ואתגרים")) {
             VStack(alignment: .trailing, spacing: 10) {
-                topicRow("מצטיין ב", engine.strengths, AppColor.successMint, empty: "עוד נגלה")
-                topicRow("מתאמן על", engine.challenges, AppColor.flameOrange, empty: "אין כרגע")
+                topicRow(tr("מצטיין ב"), engine.strengths, AppColor.successMint, empty: tr("עוד נגלה"))
+                topicRow(tr("מתאמן על"), engine.challenges, AppColor.flameOrange, empty: tr("אין כרגע"))
                 if !engine.discovering.isEmpty {
-                    topicRow("מגלה", engine.discovering, AppColor.gemPurple, empty: "")
+                    topicRow(tr("מגלה"), engine.discovering, AppColor.gemPurple, empty: "")
                 }
             }
         }
@@ -275,7 +275,7 @@ struct ChildInsightsView: View {
     }
 
     private var coachingSection: some View {
-        card(title: "מה אומרים הנתונים") {
+        card(title: tr("מה אומרים הנתונים")) {
             VStack(alignment: .trailing, spacing: 10) {
                 ForEach(coach.insightCards()) { ins in
                     HStack(alignment: .top, spacing: 10) {
@@ -292,7 +292,7 @@ struct ChildInsightsView: View {
     }
 
     private var actionsSection: some View {
-        card(title: "המלצות להורה") {
+        card(title: tr("המלצות להורה")) {
             VStack(alignment: .trailing, spacing: 10) {
                 ForEach(coach.recommendedActions()) { act in
                     HStack(alignment: .top, spacing: 10) {

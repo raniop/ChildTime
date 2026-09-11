@@ -97,7 +97,7 @@ final class HouseholdManager: ObservableObject {
     func seedDemoLiveWindow(childID: UUID) {
         let now = Date()
         let dev = ChildDevice(id: "\(childID.uuidString)_demo", childID: childID.uuidString,
-                              householdID: "demo", deviceID: "demo", name: "אייפד", kind: "ipad",
+                              householdID: "demo", deviceID: "demo", name: tr("אייפד"), kind: "ipad",
                               systemVersion: "18", joinedAt: now, lastSeenAt: now, removed: nil,
                               remoteUnlockMinutes: nil, remoteUnlockAt: nil,
                               windowEndsAt: now.timeIntervalSince1970 + 23 * 60 + 40,
@@ -998,7 +998,7 @@ final class HouseholdManager: ObservableObject {
     var suggestedFamilyName: String? {
         let words = (displayName ?? "").split(separator: " ").map(String.init).filter { !$0.isEmpty }
         guard let last = words.last, words.count >= 2 else { return nil }
-        return "משפחת " + last
+        return tr("משפחת \(last)")
     }
 
     /// The parent names the family ("משפחת גולן"). Empty clears it.
@@ -1596,9 +1596,9 @@ final class HouseholdManager: ObservableObject {
         do {
             let doc = try await db.collection("invites").document(trimmed).getDocument()
             guard let data = doc.data(), let invite = Self.decodeInvite(id: trimmed, data) else {
-                lastError = "קוד לא נמצא"; return false
+                lastError = tr("קוד לא נמצא"); return false
             }
-            guard !invite.isExpired else { lastError = "הקוד פג תוקף"; return false }
+            guard !invite.isExpired else { lastError = tr("הקוד פג תוקף"); return false }
             // Surface the bound child (if this is a per-child code) so a typed code
             // binds the device to the right kid, not just a scanned QR.
             redeemedInviteChildID = invite.childID
@@ -1702,15 +1702,15 @@ final class HouseholdManager: ObservableObject {
     func requestChildLink(childEmail: String) async -> Bool {
         #if canImport(FirebaseFirestore)
         guard let hh = household, let uid else {
-            lastError = "צריך להיות מחובר עם חשבון כדי לצרף ילד/ה (בדקו את הסנכרון)."
+            lastError = tr("צריך להיות מחובר עם חשבון כדי לצרף ילד/ה (בדקו את הסנכרון).")
             return false
         }
         let target = childEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard target.contains("@"), target.count >= 5 else {
-            lastError = "אנא הזינו כתובת אימייל תקינה"; return false
+            lastError = tr("אנא הזינו כתובת אימייל תקינה"); return false
         }
-        guard target != email else { lastError = "זה האימייל שלך 🙂"; return false }
-        let name = parentAccount?.displayName ?? parentAccount?.email ?? email ?? "הוֹרֶה"
+        guard target != email else { lastError = tr("זה האימייל שלך 🙂"); return false }
+        let name = parentAccount?.displayName ?? parentAccount?.email ?? email ?? tr("הוֹרֶה")
         do {
             // Clean up any earlier requests from me to this email so "resend"
             // doesn't pile up duplicate rows — then create one fresh request.

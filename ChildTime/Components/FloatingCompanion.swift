@@ -224,12 +224,12 @@ private struct BubbleSizeKey: PreferenceKey {
         var body: some View {
             ZStack {
                 AppGradient.dreamy.ignoresSafeArea()
-                Text("גרור את טופי")
+                Text(tr("גרור את טופי"))
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                 FloatingCompanion(controller: c, size: 120)
             }
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
     }
     return DemoWrapper()

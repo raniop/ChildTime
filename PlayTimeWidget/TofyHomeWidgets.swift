@@ -13,7 +13,7 @@ private enum WidgetStore {
 }
 
 struct KidSnapshot: Codable {
-    var name = "טופי"
+    var name = tr("טופי")
     var stars = 0
     var diamonds = 0
     var dayStreak = 0
@@ -150,9 +150,9 @@ struct KidWidgetView: View {
         case .accessoryCircular: accessoryCircle
         case .accessoryRectangular: accessoryRect
         case .systemSmall:
-            small.environment(\.layoutDirection, .rightToLeft).tofyBackground()
+            small.environment(\.layoutDirection, .app).tofyBackground()
         default:
-            medium.environment(\.layoutDirection, .rightToLeft).tofyBackground()
+            medium.environment(\.layoutDirection, .app).tofyBackground()
         }
     }
 
@@ -176,17 +176,17 @@ struct KidWidgetView: View {
             Text(kid.name)
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .lineLimit(1)
-            Text("🎮 \(kid.playMinutes) דַּק׳ · 🔥 \(kid.dayStreak)")
+            Text(tr("🎮 \(kid.playMinutes) דַּק׳ · 🔥 \(kid.dayStreak)"))
                 .font(.system(size: 12, weight: .bold, design: .rounded))
                 .lineLimit(1).minimumScaleFactor(0.7)
             if let chores = kid.choresAvailable, chores > 0 {
-                Text("🧹 \(chores) מַטְלוֹת מְחַכּוֹת")
+                Text(tr("🧹 \(chores) מַטְלוֹת מְחַכּוֹת"))
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .lineLimit(1).minimumScaleFactor(0.7)
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .lockScreenBackground()
     }
 
@@ -203,17 +203,17 @@ struct KidWidgetView: View {
         VStack(spacing: 8) {
             header
             HStack(spacing: 9) {
-                rewardTile("⏱️", "\(kid.playMinutes)", "דַּקּוֹת לְשַׂחֵק", mint)
-                rewardTile("💎", kid.diamonds.formatted(), "יַהֲלוֹמִים", cyan)
-                rewardTile("⭐", kid.stars.formatted(), "כּוֹכָבִים", gold)
+                rewardTile("⏱️", "\(kid.playMinutes)", tr("דַּקּוֹת לְשַׂחֵק"), mint)
+                rewardTile("💎", kid.diamonds.formatted(), tr("יַהֲלוֹמִים"), cyan)
+                rewardTile("⭐", kid.stars.formatted(), tr("כּוֹכָבִים"), gold)
             }
             // 🧹/💰 — the chores world at a glance (only when there's something).
             HStack(spacing: 8) {
                 if let chores = kid.choresAvailable, chores > 0 {
-                    Pill(icon: "🧹", value: "\(chores) מַטְלוֹת")
+                    Pill(icon: "🧹", value: tr("\(chores) מַטְלוֹת"))
                 }
                 if let money = kid.money, money > 0 {
-                    Pill(icon: "💰", value: "₪\(money)")
+                    Pill(icon: "💰", value: Money.pocket(money))
                 }
                 Spacer(minLength: 0)
                 Pill(icon: "✅", value: "\(min(kid.correctToday, kid.goalToday))/\(kid.goalToday)")
@@ -237,7 +237,7 @@ struct KidWidgetView: View {
                 Text("\(kid.playMinutes)").font(.system(size: 36, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).minimumScaleFactor(0.5).lineLimit(1)
             }
-            Text("דַּקּוֹת לְשַׂחֵק").font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.75))
+            Text(tr("דַּקּוֹת לְשַׂחֵק")).font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.75))
             Spacer(minLength: 0)
             HStack(spacing: 12) {
                 Text("💎 \(kid.diamonds.formatted())")
@@ -269,8 +269,8 @@ struct TofyKidWidget: Widget {
         StaticConfiguration(kind: "TofyKidWidget", provider: KidProvider()) { entry in
             KidWidgetView(kid: entry.kid, avatar: entry.avatar)
         }
-        .configurationDisplayName("טופי שלי")
-        .description("דקות המשחק, היהלומים, הכוכבים והמטלות שלך.")
+        .configurationDisplayName(tr("טופי שלי"))
+        .description(tr("דקות המשחק, היהלומים, הכוכבים והמטלות שלך."))
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular, .accessoryRectangular])
     }
 }
@@ -291,14 +291,14 @@ struct KidHeroView: View {
             VStack(alignment: .leading, spacing: 9) {
                 Text(kid.name).font(.system(size: 19, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).lineLimit(1).minimumScaleFactor(0.7)
-                statRow("⏱️", "\(kid.playMinutes)", "דַּקּוֹת לְשַׂחֵק", mint)
-                statRow("💎", kid.diamonds.formatted(), "יַהֲלוֹמִים", cyan)
-                statRow("⭐", kid.stars.formatted(), "כּוֹכָבִים", gold)
+                statRow("⏱️", "\(kid.playMinutes)", tr("דַּקּוֹת לְשַׂחֵק"), mint)
+                statRow("💎", kid.diamonds.formatted(), tr("יַהֲלוֹמִים"), cyan)
+                statRow("⭐", kid.stars.formatted(), tr("כּוֹכָבִים"), gold)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(16)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .tofyBackground()
     }
 
@@ -332,8 +332,8 @@ struct TofyKidHeroWidget: Widget {
         StaticConfiguration(kind: "TofyKidHeroWidget", provider: KidProvider()) { entry in
             KidHeroView(kid: entry.kid, avatar: entry.avatar)
         }
-        .configurationDisplayName("טופי — הדמות שלי")
-        .description("הדמות שלך בגדול, עם דקות, יהלומים וכוכבים.")
+        .configurationDisplayName(tr("טופי — הדמות שלי"))
+        .description(tr("הדמות שלך בגדול, עם דקות, יהלומים וכוכבים."))
         .supportedFamilies([.systemMedium])
     }
 }
@@ -375,7 +375,7 @@ struct FamilyWidgetView: View {
                         }
                     }
                 }
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, .app)
                 .tofyBackground()
             }
         }
@@ -400,26 +400,26 @@ struct FamilyWidgetView: View {
         let playing = kids.filter { $0.playingNow ?? false }.map(\.name)
         let pending = kids.reduce(0) { $0 + ($1.pendingChores ?? 0) }
         return VStack(alignment: .trailing, spacing: 1) {
-            Text("טופי · המשפחה")
+            Text(tr("טופי · המשפחה"))
                 .font(.system(size: 13, weight: .heavy, design: .rounded))
                 .lineLimit(1)
-            Text(playing.isEmpty ? "אף אחד לא משחק כרגע"
-                                 : "🟢 \(playing.joined(separator: ", ")) עכשיו")
+            Text(playing.isEmpty ? tr("אף אחד לא משחק כרגע")
+                                 : tr("🟢 \(playing.joined(separator: ", ")) עכשיו"))
                 .font(.system(size: 12, weight: .bold, design: .rounded))
                 .lineLimit(1).minimumScaleFactor(0.7)
-            Text(pending > 0 ? "🧹 \(pending) מטלות מחכות לאישור" : "🧹 אין מטלות ממתינות")
+            Text(pending > 0 ? tr("🧹 \(pending) מטלות מחכות לאישור") : tr("🧹 אין מטלות ממתינות"))
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .lineLimit(1).minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .lockScreenBackground()
     }
 
     private var header: some View {
         HStack(spacing: 6) {
             Text("👨‍👩‍👧").font(.system(size: 15))
-            Text("המשפחה").font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+            Text(tr("המשפחה")).font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(.white)
             Spacer()
         }
     }
@@ -427,7 +427,7 @@ struct FamilyWidgetView: View {
     private var empty: some View {
         VStack(spacing: 6) {
             Text("👨‍👩‍👧").font(.system(size: 34))
-            Text("פתחו את טופי כדי לראות\nאת המשפחה כאן").font(.system(size: 12, weight: .semibold, design: .rounded)).multilineTextAlignment(.center).foregroundStyle(.white.opacity(0.9))
+            Text(tr("פתחו את טופי כדי לראות\nאת המשפחה כאן")).font(.system(size: 12, weight: .semibold, design: .rounded)).multilineTextAlignment(.center).foregroundStyle(.white.opacity(0.9))
         }.padding(14)
     }
 
@@ -438,12 +438,12 @@ struct FamilyWidgetView: View {
             header
             Spacer(minLength: 0)
             if let top {
-                Text("הכי בוער 🔥").font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
+                Text(tr("הכי בוער 🔥")).font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
                 Text(top.name).font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white).lineLimit(1)
-                Text("רצף \(top.dayStreak) ימים").font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.85))
+                Text(tr("רצף \(top.dayStreak) ימים")).font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.85))
             }
             Spacer(minLength: 0)
-            Text("\(playedCount) מתוך \(kids.count) שיחקו היום").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white)
+            Text(tr("\(playedCount) מתוך \(kids.count) שיחקו היום")).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white)
         }.padding(14)
     }
 
@@ -468,7 +468,7 @@ struct FamilyWidgetView: View {
                     }
                     Text("⭐\(kid.stars)").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.95))
                     Text("🔥\(kid.dayStreak)").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.95))
-                    Text("\(kid.answeredToday) ש'").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
+                    Text(tr("\(kid.answeredToday) ש'")).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
                 }
             }
             Spacer(minLength: 0)
@@ -480,9 +480,9 @@ struct FamilyWidgetView: View {
         return VStack(alignment: .leading, spacing: 9) {
             HStack(spacing: 6) {
                 Text("👨‍👩‍👧").font(.system(size: 18))
-                Text("מבט על המשפחה").font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Text(tr("מבט על המשפחה")).font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 Spacer()
-                Text("\(playedCount)/\(kids.count) שיחקו היום")
+                Text(tr("\(playedCount)/\(kids.count) שיחקו היום"))
                     .font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(.white)
                     .padding(.horizontal, 8).padding(.vertical, 4).background(.white.opacity(0.16), in: Capsule())
             }
@@ -500,9 +500,9 @@ struct FamilyWidgetView: View {
                             Text("🧹\(n)").font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(.white)
                         }
                         if let m = kid.money, m > 0 {
-                            Text("💰₪\(m)").font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(.white)
+                            Text("💰" + Money.pocket(m)).font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(.white)
                         }
-                        Text("\(kid.answeredToday) שאלות").font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
+                        Text(tr("\(kid.answeredToday) שאלות")).font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
                         GeometryReader { geo in
                             ZStack(alignment: .leading) {
                                 Capsule().fill(.white.opacity(0.18)).frame(height: 6)
@@ -528,8 +528,8 @@ struct TofyFamilyWidget: Widget {
         StaticConfiguration(kind: "TofyFamilyWidget", provider: FamilyProvider()) { entry in
             FamilyWidgetView(kids: entry.kids)
         }
-        .configurationDisplayName("מבט על המשפחה")
-        .description("מי משחק עכשיו, מטלות ממתינות, קופה — וכל הסטטים.")
+        .configurationDisplayName(tr("מבט על המשפחה"))
+        .description(tr("מי משחק עכשיו, מטלות ממתינות, קופה — וכל הסטטים."))
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryCircular, .accessoryRectangular])
     }
 }

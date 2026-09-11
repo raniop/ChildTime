@@ -42,7 +42,7 @@ enum WidgetBridge {
         let p = ProgressStore.shared
         let activeID = ProfileStore.shared.activeID
         let snap = KidSnapshot(
-            name: ProfileStore.shared.active?.name ?? "טופי",
+            name: ProfileStore.shared.active?.name ?? tr("טופי"),
             stars: p.stars,
             diamonds: p.diamonds,
             dayStreak: p.dayStreak,

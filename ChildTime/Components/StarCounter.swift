@@ -72,7 +72,7 @@ struct MinuteCounter: View {
         HStack(spacing: 6) {
             Image(systemName: "clock.fill")
                 .foregroundStyle(AppColor.successMint)
-            Text("\(minutes) דק׳")
+            Text(tr("\(minutes) דק׳"))
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .foregroundStyle(AppColor.textPrimary)
                 .numericTextTransition(Double(minutes))

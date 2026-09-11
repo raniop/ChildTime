@@ -86,27 +86,27 @@ struct PackRevealView: View {
                         .multilineTextAlignment(.center)
                         .scaleEffect(titleIn ? 1 : 0.3)
                         .opacity(titleIn ? 1 : 0)
-                    Text(isGift ? "אַבָּא וְאִמָּא שָׁלְחוּ לְךָ עוֹלָם חָדָשׁ! 🎉" : "עוֹלָם חָדָשׁ הִגִּיעַ לְטוֹפִי — וּפָתוּחַ בִּשְׁבִילְךָ! 👑")
+                    Text(isGift ? tr("אַבָּא וְאִמָּא שָׁלְחוּ לְךָ עוֹלָם חָדָשׁ! 🎉") : tr("עוֹלָם חָדָשׁ הִגִּיעַ לְטוֹפִי — וּפָתוּחַ בִּשְׁבִילְךָ! 👑"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white.opacity(0.92))
                         .multilineTextAlignment(.center)
                         .opacity(titleIn ? 1 : 0)
                         .offset(y: titleIn ? 0 : 16)
                     HStack(spacing: 8) {
-                        chip("🧠 \(pack.questionCount) שְׁאֵלוֹת", 1)
-                        chip("🏆 3 רָמוֹת", 2)
-                        chip("⏱ דַּקּוֹת מִשְׂחָק", 3)
+                        chip(tr("🧠 \(pack.questionCount) שְׁאֵלוֹת"), 1)
+                        chip(tr("🏆 3 רָמוֹת"), 2)
+                        chip(tr("⏱ דַּקּוֹת מִשְׂחָק"), 3)
                     }
                     .padding(.top, 4)
                 } else {
-                    Text(isGift ? "יֵשׁ לְךָ מַתָּנָה!" : "יֵשׁ לְךָ הַפְתָּעָה!")
+                    Text(isGift ? tr("יֵשׁ לְךָ מַתָּנָה!") : tr("יֵשׁ לְךָ הַפְתָּעָה!"))
                         .font(.system(size: 36, weight: .black, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
-                    Text(isGift ? "מֵאַבָּא וְאִמָּא 💝" : "עוֹלָם חָדָשׁ נִפְתַּח 🌍")
+                    Text(isGift ? tr("מֵאַבָּא וְאִמָּא 💝") : tr("עוֹלָם חָדָשׁ נִפְתַּח 🌍"))
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white.opacity(0.92))
-                    Text("👆 \(g("לְחַץ", "לַחֲצִי")) עַל הַמַּתָּנָה כְּדֵי לִפְתֹּחַ")
+                    Text(tr("👆 \(g(tr("לְחַץ"), tr("לַחֲצִי"))) עַל הַמַּתָּנָה כְּדֵי לִפְתֹּחַ"))
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .offset(y: hint ? -4 : 4)
@@ -120,7 +120,7 @@ struct PackRevealView: View {
                         SoundPlayer.shared.play(.portalAppear)
                         onStart()
                     } label: {
-                        Text("יַאלְלָה, \(g("בּוֹא", "בּוֹאִי")) נְשַׂחֵק! 🚀")
+                        Text(tr("יַאלְלָה, \(g(tr("בּוֹא"), tr("בּוֹאִי"))) נְשַׂחֵק! 🚀"))
                             .font(.system(size: 21, weight: .heavy, design: .rounded))
                             .foregroundStyle(Color(hex: "4B3FBF"))
                             .frame(maxWidth: .infinity)
@@ -133,7 +133,7 @@ struct PackRevealView: View {
                     .transition(.scale(scale: 0.6).combined(with: .opacity))
                 }
                 Button { Haptic.light(); onSkip() } label: {
-                    Text("אוּלַי אַחַר כָּךְ")
+                    Text(tr("אוּלַי אַחַר כָּךְ"))
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .padding(.vertical, 6)
@@ -143,7 +143,7 @@ struct PackRevealView: View {
             .padding(AppSpacing.lg)
             .frame(maxWidth: 520)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onAppear {
             SoundPlayer.shared.play(.portalAppear)
             withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { wobble = true }
@@ -225,12 +225,12 @@ struct PackAskParentView: View {
                 Spacer(minLength: 0)
                 Text(pack.emoji).font(.system(size: 72))
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
-                Text("\(g("רוֹצֶה", "רוֹצָה")) לִלְמֹד עַל \(pack.shortSubject)?")
+                Text(tr("\(g(tr("רוֹצֶה"), tr("רוֹצָה"))) לִלְמֹד עַל \(pack.shortSubject)?"))
                     .font(.system(size: 26, weight: .black, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("\(pack.tagline) — וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק ⏱")
+                Text(tr("\(pack.tagline) — וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק ⏱"))
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
@@ -258,7 +258,7 @@ struct PackAskParentView: View {
                 } label: {
                     HStack(spacing: 10) {
                         if sending { ProgressView().tint(AppColor.textOnLight) }
-                        Text(sent ? "נִשְׁלַח לְאַבָּא וּלְאִמָּא ✅" : "\(g("בַּקֵּשׁ", "בַּקְּשִׁי")) מֵאַבָּא אוֹ אִמָּא 💌")
+                        Text(sent ? tr("נִשְׁלַח לְאַבָּא וּלְאִמָּא ✅") : tr("\(g(tr("בַּקֵּשׁ"), tr("בַּקְּשִׁי"))) מֵאַבָּא אוֹ אִמָּא 💌"))
                             .font(.system(size: 19, weight: .heavy, design: .rounded))
                     }
                     .foregroundStyle(Color(hex: "4B3FBF"))
@@ -269,14 +269,14 @@ struct PackAskParentView: View {
                 }
                 .buttonStyle(.juicy)
                 .disabled(sent)
-                Text(sent ? "הֵם יְקַבְּלוּ הוֹדָעָה בַּטֶּלֶפוֹן 📱" : "הַבַּקָּשָׁה מַגִּיעָה יָשָׁר לַטֶּלֶפוֹן שֶׁל הַהוֹרֶה")
+                Text(sent ? tr("הֵם יְקַבְּלוּ הוֹדָעָה בַּטֶּלֶפוֹן 📱") : tr("הַבַּקָּשָׁה מַגִּיעָה יָשָׁר לַטֶּלֶפוֹן שֶׁל הַהוֹרֶה"))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
             }
             .padding(AppSpacing.lg)
             .frame(maxWidth: 520)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     /// Stamps `packRequestedAt` + `packRequestedID` on the child doc — the

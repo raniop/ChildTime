@@ -132,9 +132,9 @@ struct Campaign: Identifiable, Equatable {
 
     /// Demo / preview.
     init(sampleFor packID: String) {
-        id = "sample"; title = "חדש בטופי: עולם הכדורגל"; emoji = "⚽"; imageURL = ""
-        body = "עזרו לילד שלכם להכיר שחקנים, קבוצות, תחרויות ועובדות מעניינות מעולם הכדורגל בישראל ובעולם."
-        childTitle = "רוצה ללמוד על כדורגל?"; childBody = "שחקנים, קבוצות, תחרויות ועובדות מפתיעות — בקש מאבא או אמא"
+        id = "sample"; title = tr("חדש בטופי: עולם הכדורגל"); emoji = "⚽"; imageURL = ""
+        body = tr("עזרו לילד שלכם להכיר שחקנים, קבוצות, תחרויות ועובדות מעניינות מעולם הכדורגל בישראל ובעולם.")
+        childTitle = tr("רוצה ללמוד על כדורגל?"); childBody = tr("שחקנים, קבוצות, תחרויות ועובדות מפתיעות — בקש מאבא או אמא")
         action = Action(type: "pack", packID: packID)
         audience = Audience(roles: ["parents", "children"], gradeMin: 0, gradeMax: 8, premium: "any", topics: [], gradeScale: 8)
         sentAt = Date().timeIntervalSince1970 * 1000

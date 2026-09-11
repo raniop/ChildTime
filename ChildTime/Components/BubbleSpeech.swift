@@ -113,11 +113,11 @@ struct BubbleShape: Shape {
     ZStack {
         AppGradient.dreamy.ignoresSafeArea()
         VStack(spacing: 24) {
-            BubbleSpeech(text: "הֵיי! אֲנִי טוֹפִּי! בּוֹא נֵצֵא לְהַרְפַּתְקָה")
-            BubbleSpeech(text: "וָואוּ! 5 בָּרֶצֶף 🔥")
-            BubbleSpeech(text: "כִּמְעַט!")
+            BubbleSpeech(text: tr("הֵיי! אֲנִי טוֹפִּי! בּוֹא נֵצֵא לְהַרְפַּתְקָה"))
+            BubbleSpeech(text: tr("וָואוּ! 5 בָּרֶצֶף 🔥"))
+            BubbleSpeech(text: tr("כִּמְעַט!"))
         }
         .padding()
     }
-    .environment(\.layoutDirection, .rightToLeft)
+    .environment(\.layoutDirection, .app)
 }

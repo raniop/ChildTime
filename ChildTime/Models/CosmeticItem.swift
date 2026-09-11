@@ -16,14 +16,14 @@ enum CosmeticCategory: String, Codable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .hat:       return "כּוֹבָעִים"
-        case .glasses:   return "מִשְׁקָפַיִם"
-        case .shirt:     return "חוּלְצוֹת"
-        case .pants:     return "מִכְנָסַיִם"
-        case .shoes:     return "נַעֲלַיִם"
-        case .accessory: return "אַקְסֶסוֹרִיז"
-        case .backpack:  return "תִּיקִים"
-        case .vehicle:   return "גַּלְגַּלִּים"
+        case .hat:       return tr("כּוֹבָעִים")
+        case .glasses:   return tr("מִשְׁקָפַיִם")
+        case .shirt:     return tr("חוּלְצוֹת")
+        case .pants:     return tr("מִכְנָסַיִם")
+        case .shoes:     return tr("נַעֲלַיִם")
+        case .accessory: return tr("אַקְסֶסוֹרִיז")
+        case .backpack:  return tr("תִּיקִים")
+        case .vehicle:   return tr("גַּלְגַּלִּים")
         }
     }
 
@@ -77,10 +77,10 @@ enum CosmeticRarity: String, Codable, CaseIterable, Comparable {
 
     var label: String {
         switch self {
-        case .common:    return "רָגִיל"
-        case .rare:      return "נָדִיר"
-        case .epic:      return "אַגָּדִי"
-        case .legendary: return "נָדִיר בִּמְיוּחָד"
+        case .common:    return tr("רָגִיל")
+        case .rare:      return tr("נָדִיר")
+        case .epic:      return tr("אַגָּדִי")
+        case .legendary: return tr("נָדִיר בִּמְיוּחָד")
         }
     }
 

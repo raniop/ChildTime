@@ -58,17 +58,17 @@ struct MemoryMatchView: View {
             }
             .padding(20)
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .onAppear { if cards.isEmpty { deal() } }
     }
 
     private var board: some View {
         VStack(spacing: 16) {
             VStack(spacing: 4) {
-                Text("מִשְׂחַק הַזִּכָּרוֹן 🧠")
+                Text(tr("מִשְׂחַק הַזִּכָּרוֹן 🧠"))
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).shadow(color: .black.opacity(0.2), radius: 4, y: 2)
-                Text("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה הַתּוֹאֶמֶת בְּאַנְגְּלִית")
+                Text(tr("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה הַתּוֹאֶמֶת בְּאַנְגְּלִית"))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85)).multilineTextAlignment(.center)
             }
@@ -122,19 +122,19 @@ struct MemoryMatchView: View {
         VStack(spacing: 18) {
             CharacterView(character: Character3DCatalog.find("lion"))
                 .frame(width: 140, height: 140).float(amplitude: 10)
-            Text(mistakes <= 2 ? "זִכָּרוֹן מְצֻיָּן! 🌟" : "כָּל הַכָּבוֹד! 🎉")
+            Text(mistakes <= 2 ? tr("זִכָּרוֹן מְצֻיָּן! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"))
                 .font(.system(size: 32, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).shadow(color: .black.opacity(0.25), radius: 6, y: 3)
-            Text("מָצָאתָ אֶת כָּל הַזּוּגוֹת!")
+            Text(tr("מָצָאתָ אֶת כָּל הַזּוּגוֹת!"))
                 .font(.system(size: 17, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.9))
             HStack(spacing: 14) {
                 pill("⭐", pairCount, AppColor.starGold, step: 1)
                 pill("💎", max(8, 20 - mistakes * 2), AppColor.gemPurple, step: 2)
-                pill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: " דק'")
+                pill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק'"))
             }
             VStack(spacing: 12) {
-                Button { deal(); won = false } label: { cta("עוֹד לוּחַ 🔁", dark: true) }.buttonStyle(.juicy)
-                Button(action: onClose) { cta("סִיּוּם", dark: false) }.buttonStyle(.juicy)
+                Button { deal(); won = false } label: { cta(tr("עוֹד לוּחַ 🔁"), dark: true) }.buttonStyle(.juicy)
+                Button(action: onClose) { cta(tr("סִיּוּם"), dark: false) }.buttonStyle(.juicy)
             }
             .padding(.horizontal, 44).padding(.top, 6)
         }

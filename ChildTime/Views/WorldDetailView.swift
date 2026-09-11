@@ -75,7 +75,7 @@ struct WorldDetailView: View {
         // Presented as a fullScreenCover, which does NOT inherit the app root's
         // RTL layout direction — set it here so Hebrew rows (and the top bar)
         // align right, not left.
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
     }
 
     // MARK: - Top bar
@@ -161,7 +161,7 @@ struct WorldDetailView: View {
             HStack(spacing: 6) {
                 Image(systemName: "door.left.hand.open")
                     .font(.system(size: 13, weight: .semibold))
-                Text("חֶדֶר \(currentRoom + 1) מִתּוֹךְ \(world.rooms)")
+                Text(tr("חֶדֶר \(currentRoom + 1) מִתּוֹךְ \(world.rooms)"))
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
             }
             .foregroundStyle(.white.opacity(0.92))
@@ -176,11 +176,11 @@ struct WorldDetailView: View {
     private var missionCard: some View {
         VStack(spacing: AppSpacing.md) {
             if world.isBonusWorld {
-                rewardRow("💪", "רַק שְׁאֵלוֹת עֲנָק — קָשׁוֹת בִּמְיוּחָד, מִכָּל הַנּוֹשְׂאִים!")
-                rewardRow("🎮", "דַּקּוֹת כְּפוּלוֹת: כָּל \(max(1, settings.batchAnswers / 2)) נְכוֹנוֹת = \(settings.batchMinutes) דַּקּוֹת מִשְׂחָק")
+                rewardRow("💪", tr("רַק שְׁאֵלוֹת עֲנָק — קָשׁוֹת בִּמְיוּחָד, מִכָּל הַנּוֹשְׂאִים!"))
+                rewardRow("🎮", tr("דַּקּוֹת כְּפוּלוֹת: כָּל \(max(1, settings.batchAnswers / 2)) נְכוֹנוֹת = \(settings.batchMinutes) דַּקּוֹת מִשְׂחָק"))
             } else {
-                rewardRow("🎁", "\(settings.questionsPerSession) שְׁאֵלוֹת → קוּפְסַת הַפְתָּעָה")
-                rewardRow("🎮", "כָּל \(settings.batchAnswers) נְכוֹנוֹת = \(settings.batchMinutes) דַּקּוֹת מִשְׂחָק")
+                rewardRow("🎁", tr("\(settings.questionsPerSession) שְׁאֵלוֹת → קוּפְסַת הַפְתָּעָה"))
+                rewardRow("🎮", tr("כָּל \(settings.batchAnswers) נְכוֹנוֹת = \(settings.batchMinutes) דַּקּוֹת מִשְׂחָק"))
             }
         }
         .padding(AppSpacing.lg)
@@ -214,7 +214,7 @@ struct WorldDetailView: View {
                 startSession = true
             }
         } label: {
-            Text("קָדִימָה! 🚀")
+            Text(tr("קָדִימָה! 🚀"))
                 .font(.system(size: ctaSize, weight: .heavy, design: .rounded))
         }
     }
@@ -227,7 +227,7 @@ struct WorldDetailView: View {
             Haptic.light()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { showBoss = true }
         } label: {
-            Text("קְרַב בּוֹס 👹")
+            Text(tr("קְרַב בּוֹס 👹"))
                 .font(.system(size: ctaSize, weight: .heavy, design: .rounded))
         }
     }
@@ -253,5 +253,5 @@ struct WorldDetailView: View {
         .environmentObject(ParentSettings.shared)
         .environmentObject(ProgressStore.shared)
         .environmentObject(ProfileStore.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

@@ -75,21 +75,21 @@ final class PushManager: NSObject, ObservableObject {
     @discardableResult
     func sendTestPush() async -> String {
         await requestAuthorization()
-        guard authorized else { return "צריך לאשר התראות קודם" }
+        guard authorized else { return tr("צריך לאשר התראות קודם") }
         UIApplication.shared.registerForRemoteNotifications()
         #if canImport(FirebaseFirestore)
-        guard let uid = AuthManager.shared.userID else { return "אין משתמש מחובר" }
+        guard let uid = AuthManager.shared.userID else { return tr("אין משתמש מחובר") }
         do {
             try await Firestore.firestore().collection("pushTests").addDocument(data: [
                 "uid": uid,
                 "createdAt": Date().timeIntervalSince1970
             ])
-            return "נשלחה בקשת בדיקה — ההתראה אמורה להגיע תוך כמה שניות"
+            return tr("נשלחה בקשת בדיקה — ההתראה אמורה להגיע תוך כמה שניות")
         } catch {
-            return "שגיאה: \(error.localizedDescription)"
+            return tr("שגיאה: \(error.localizedDescription)")
         }
         #else
-        return "Firestore לא זמין"
+        return tr("Firestore לא זמין")
         #endif
     }
 
@@ -122,7 +122,11 @@ final class PushManager: NSObject, ObservableObject {
         let mine  = isChild ? "childFcmTokens" : "fcmTokens"
         let other = isChild ? "fcmTokens" : "childFcmTokens"
         let ref = Firestore.firestore().collection("parents").document(uid)
-        ref.setData([mine: FieldValue.arrayUnion([token])], merge: true)
+        // 🌍 Which language THIS device shows, so server pushes can be written in
+        // it (a map per token: one parent account may run Hebrew and English devices).
+        let language = LanguageStore.shared.current.rawValue
+        // `language` = the account's most recent choice, for email.
+        ref.setData([mine: FieldValue.arrayUnion([token]), "tokenLanguages": [token: language], "language": language], merge: true)
         ref.updateData([other: FieldValue.arrayRemove([token])])   // move if role changed
         // ALSO stamp the token on this device's own childDevices row, so Cloud
         // Functions can target THIS child's device(s) precisely (the account-level
@@ -133,7 +137,7 @@ final class PushManager: NSObject, ObservableObject {
             // ownerUID: additive metadata tying this row to the device's auth
             // account (see ChildDevice.ownerUID) — refreshed on every launch.
             Firestore.firestore().collection("childDevices").document(docID)
-                .setData(["fcmToken": token, "ownerUID": uid], merge: true)
+                .setData(["fcmToken": token, "ownerUID": uid, "language": language], merge: true)
         }
         #endif
     }
@@ -168,11 +172,11 @@ extension PushManager {
     func configureCategories() {
         let yes = UNNotificationAction(
             identifier: Action.levelUpYes,
-            title: "👑 כן, העלו רמה",
+            title: tr("👑 כן, העלו רמה"),
             options: [])
         let no = UNNotificationAction(
             identifier: Action.levelUpNo,
-            title: "לא, להשאיר",
+            title: tr("לא, להשאיר"),
             options: [])
         let cat = UNNotificationCategory(
             identifier: Category.insightLevelUp,
@@ -184,8 +188,8 @@ extension PushManager {
         // (collapsed banner); HelpContentExtension replaces them with the real
         // option texts when the notification is expanded. Actions are NOT
         // `.foreground` — the tap is handled in the background, no app launch.
-        let optA = UNNotificationAction(identifier: Action.helpOptionA, title: "אפשרות א׳", options: [])
-        let optB = UNNotificationAction(identifier: Action.helpOptionB, title: "אפשרות ב׳", options: [])
+        let optA = UNNotificationAction(identifier: Action.helpOptionA, title: tr("אפשרות א׳"), options: [])
+        let optB = UNNotificationAction(identifier: Action.helpOptionB, title: tr("אפשרות ב׳"), options: [])
         let helpCat = UNNotificationCategory(
             identifier: Category.parentHelp,
             actions: [optA, optB],
@@ -198,7 +202,7 @@ extension PushManager {
         // opening the app.
         let choreApprove = UNNotificationAction(
             identifier: Action.choreApprove,
-            title: "✅ בוצע — אשרו",
+            title: tr("✅ בוצע — אשרו"),
             options: [.authenticationRequired])
         let choreCat = UNNotificationCategory(
             identifier: Category.choreApproval,
@@ -241,10 +245,10 @@ extension PushManager {
         guard await ParentHelpManager.shared.answer(requestID: requestID, kept: kept, removed: removed) else { return }
 
         // Quietly confirm to the parent.
-        let childName = (userInfo["childName"] as? String) ?? "הילד"
+        let childName = (userInfo["childName"] as? String) ?? tr("הילד")
         let content = UNMutableNotificationContent()
-        content.title = "✅ הָעֶזְרָה נִשְׁלְחָה"
-        content.body = "עָזַרְתָּ לְ\(childName) — נִשְׁאֲרָה הָאֶפְשָׁרוּת \(kept)."
+        content.title = tr("✅ הָעֶזְרָה נִשְׁלְחָה")
+        content.body = tr("עָזַרְתָּ לְ\(childName) — נִשְׁאֲרָה הָאֶפְשָׁרוּת \(kept).")
         try? await UNUserNotificationCenter.current().add(
             UNNotificationRequest(identifier: "help.confirm.\(requestID)", content: content, trigger: nil))
     }
@@ -271,14 +275,14 @@ extension PushManager {
             ProfileStore.shared.update(profile)
         }
 
-        let name = (userInfo["childName"] as? String) ?? "הילד"
+        let name = (userInfo["childName"] as? String) ?? tr("הילד")
         let content = UNMutableNotificationContent()
         if changed {
-            content.title = "👑 עָלִינוּ רָמָה!"
-            content.body = "מֵעַכְשָׁיו \(name) יְקַבֵּל שְׁאֵלוֹת בְּרָמָה \(next.displayName) יוֹתֵר בְּ\(topic.displayName). תָּמִיד אֶפְשָׁר לְשַׁנּוֹת בַּהַגְדָּרוֹת."
+            content.title = tr("👑 עָלִינוּ רָמָה!")
+            content.body = tr("מֵעַכְשָׁיו \(name) יְקַבֵּל שְׁאֵלוֹת בְּרָמָה \(next.displayName) יוֹתֵר בְּ\(topic.displayName). תָּמִיד אֶפְשָׁר לְשַׁנּוֹת בַּהַגְדָּרוֹת.")
         } else {
-            content.title = "כְּבָר בָּרָמָה הַגְּבוֹהָה 💪"
-            content.body = "\(name) כְּבָר מְקַבֵּל אֶת הַשְּׁאֵלוֹת הֲכִי מְאַתְגְּרוֹת בְּ\(topic.displayName)."
+            content.title = tr("כְּבָר בָּרָמָה הַגְּבוֹהָה 💪")
+            content.body = tr("\(name) כְּבָר מְקַבֵּל אֶת הַשְּׁאֵלוֹת הֲכִי מְאַתְגְּרוֹת בְּ\(topic.displayName).")
         }
         content.sound = .default
         let req = UNNotificationRequest(

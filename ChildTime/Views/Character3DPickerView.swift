@@ -27,26 +27,26 @@ struct Character3DPickerView: View {
                 }
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
         .sheet(isPresented: $showStarShop) {
             // Kids Category (guideline 1.3): real-money packs MUST sit behind a
             // parental gate — Apple ID / Face ID payment auth is NOT a substitute.
             ParentGateView(allowClose: true,
-                           gateTitle: "אֵזוֹר הוֹרִים",
-                           gateReason: "כְּדֵי לִקְנוֹת יַהֲלוֹמִים — בַּקְּשׁוּ מֵהוֹרֶה לְהַזִּין אֶת הַקּוֹד",
+                           gateTitle: tr("אֵזוֹר הוֹרִים"),
+                           gateReason: tr("כְּדֵי לִקְנוֹת יַהֲלוֹמִים — בַּקְּשׁוּ מֵהוֹרֶה לְהַזִּין אֶת הַקּוֹד"),
                            useFaceID: true,
                            respectSession: false) {
                 StarShopView()
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, .app)
             }
             .environmentObject(ParentSettings.shared)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, .app)
         }
     }
 
     private var header: some View {
         ZStack {
-            Text("בְּחַר דְּמוּת")
+            Text(tr("בְּחַר דְּמוּת"))
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
@@ -61,7 +61,7 @@ struct Character3DPickerView: View {
                         .background(.white.opacity(0.18), in: Circle())
                 }
             }
-            .environment(\.layoutDirection, .leftToRight)
+            .environment(\.layoutDirection, .appMirrored)
         }
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, AppSpacing.md)

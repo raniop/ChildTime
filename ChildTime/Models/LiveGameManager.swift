@@ -167,7 +167,7 @@ final class LiveGameManager: ObservableObject {
 
     /// DEMO only (DEMO_SCREEN=gameinvite): seed a sample invite to preview the
     /// home-screen invite banner. Never used in production.
-    func seedDemoInvite() { invites = [LiveGameInvite(id: "demo", hostName: "דָּן הַמֶּלֶךְ")] }
+    func seedDemoInvite() { invites = [LiveGameInvite(id: "demo", hostName: tr("דָּן הַמֶּלֶךְ"))] }
 
     /// Open the topic-pick screen (home screen presents the flow).
     func openSetup() { lastError = nil; isSettingUp = true }
@@ -182,7 +182,7 @@ final class LiveGameManager: ObservableObject {
     func createGame(topic: Topic, difficulty: Difficulty) async -> String? {
         #if canImport(FirebaseFirestore)
         guard let myID, AuthManager.shared.isSignedIn, let uid = AuthManager.shared.userID else {
-            lastError = "צָרִיךְ לְהִתְחַבֵּר כְּדֵי לְשַׂחֵק עִם חֲבֵרִים"; return nil
+            lastError = tr("צָרִיךְ לְהִתְחַבֵּר כְּדֵי לְשַׂחֵק עִם חֲבֵרִים"); return nil
         }
         let profile = ProfileStore.shared.active
 
@@ -204,7 +204,7 @@ final class LiveGameManager: ObservableObject {
             if let spoken = q.spoken { qd["spoken"] = spoken }
             wireQuestions.append(qd)
         }
-        guard !wireQuestions.isEmpty else { lastError = "לֹא הִצְלַחְנוּ לְהָכִין שְׁאֵלוֹת"; return nil }
+        guard !wireQuestions.isEmpty else { lastError = tr("לֹא הִצְלַחְנוּ לְהָכִין שְׁאֵלוֹת"); return nil }
 
         // Load my friend list so the lobby can show who to invite. We do NOT
         // auto-invite everyone on create anymore — the host picks who to invite
@@ -253,13 +253,13 @@ final class LiveGameManager: ObservableObject {
     /// Join a game I was invited to (from a deep link / push / in-app banner).
     func joinGame(_ gameID: String) async {
         #if canImport(FirebaseFirestore)
-        guard AuthManager.shared.isSignedIn else { lastError = "צָרִיךְ לְהִתְחַבֵּר"; return }
+        guard AuthManager.shared.isSignedIn else { lastError = tr("צָרִיךְ לְהִתְחַבֵּר"); return }
         // Only join while the lobby is still open — no jumping into a game already
         // in progress or finished (the round timing wouldn't be fair).
         guard let snap = try? await db.collection("liveGames").document(gameID).getDocument(),
               let state = snap.data()?["state"] as? String,
               state == LiveGameState.lobby.rawValue || state == LiveGameState.countdown.rawValue else {
-            lastError = "הַמִּשְׂחָק כְּבָר הִתְחִיל אוֹ הִסְתַּיֵּם"
+            lastError = tr("הַמִּשְׂחָק כְּבָר הִתְחִיל אוֹ הִסְתַּיֵּם")
             return
         }
         isHost = false
@@ -584,7 +584,7 @@ final class LiveGameManager: ObservableObject {
                               let host = d["hostID"] as? String, host != myID else { return nil }
                         // Skip stale lobbies a host opened but never started.
                         if let created = (d["createdAt"] as? Timestamp)?.dateValue(), created < cutoff { return nil }
-                        return LiveGameInvite(id: doc.documentID, hostName: d["hostName"] as? String ?? "חָבֵר")
+                        return LiveGameInvite(id: doc.documentID, hostName: d["hostName"] as? String ?? tr("חָבֵר"))
                     }
                 }
             }

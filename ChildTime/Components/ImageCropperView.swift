@@ -29,7 +29,7 @@ struct ImageCropperView: View {
             SparkleField(count: 16, size: 12)
 
             VStack(spacing: AppSpacing.lg) {
-                Text("הַתְאִימוּ אֶת הַתְּמוּנָה")
+                Text(tr("הַתְאִימוּ אֶת הַתְּמוּנָה"))
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
 
@@ -56,7 +56,7 @@ struct ImageCropperView: View {
                         )
                     )
 
-                Text("צַבְטוּ לְהַגְדָּלָה · גַּרְרוּ לְמִקּוּם")
+                Text(tr("צַבְטוּ לְהַגְדָּלָה · גַּרְרוּ לְמִקּוּם"))
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.8))
 
@@ -65,7 +65,7 @@ struct ImageCropperView: View {
                         Haptic.light()
                         onCancel()
                     } label: {
-                        Text("בַּטֵּל")
+                        Text(tr("בַּטֵּל"))
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -76,7 +76,7 @@ struct ImageCropperView: View {
                         Haptic.success()
                         onDone(render())
                     } label: {
-                        Text("שְׁמוֹר")
+                        Text(tr("שְׁמוֹר"))
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)

@@ -29,11 +29,11 @@ struct ParentFeedbackView: View {
                     form
                 }
             }
-            .navigationTitle("פִידְבֶּק")
+            .navigationTitle(tr("פִידְבֶּק"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("סְגוֹר") { dismiss() }
+                    Button(tr("סְגוֹר")) { dismiss() }
                 }
             }
         }
@@ -42,18 +42,18 @@ struct ParentFeedbackView: View {
     private var form: some View {
         Form {
             Section {
-                Text("נִשְׂמַח לִשְׁמוֹעַ מָה דַּעְתְּכֶם — מָה לְשַׁפֵּר, מָה חָסֵר, אוֹ כָּל רַעְיוֹן שֶׁיֵּשׁ לָכֶם. כָּל מִלָּה עוֹזֶרֶת לָנוּ לְשַׁפֵּר אֶת ChildTime לַיְּלָדִים.")
+                Text(tr("נִשְׂמַח לִשְׁמוֹעַ מָה דַּעְתְּכֶם — מָה לְשַׁפֵּר, מָה חָסֵר, אוֹ כָּל רַעְיוֹן שֶׁיֵּשׁ לָכֶם. כָּל מִלָּה עוֹזֶרֶת לָנוּ לְשַׁפֵּר אֶת ChildTime לַיְּלָדִים."))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
             .glassRows()
-            Section("הַהוֹדָעָה שֶׁלָּכֶם") {
+            Section(tr("הַהוֹדָעָה שֶׁלָּכֶם")) {
                 TextEditor(text: $text)
                     .frame(minHeight: 140)
                     .focused($focused)
                     .overlay(alignment: .topLeading) {
                         if text.isEmpty {
-                            Text("כִּתְבוּ כָּאן…")
+                            Text(tr("כִּתְבוּ כָּאן…"))
                                 .foregroundStyle(.secondary)
                                 .padding(.top, 8)
                                 .padding(.leading, 5)
@@ -69,7 +69,7 @@ struct ParentFeedbackView: View {
                     HStack {
                         Spacer()
                         if sending { ProgressView() }
-                        else { Label("שְׁלַח לָנוּ", systemImage: "paperplane.fill") }
+                        else { Label(tr("שְׁלַח לָנוּ"), systemImage: "paperplane.fill") }
                         Spacer()
                     }
                 }
@@ -86,15 +86,15 @@ struct ParentFeedbackView: View {
             Spacer()
             Text("🙏")
                 .font(.system(size: 60))
-            Text("תּוֹדָה רַבָּה!")
+            Text(tr("תּוֹדָה רַבָּה!"))
                 .font(.title2.weight(.bold))
-            Text("קִבַּלְנוּ אֶת הַפִידְבֶּק שֶׁלָּכֶם — זֶה מְאוֹד עוֹזֵר לָנוּ.")
+            Text(tr("קִבַּלְנוּ אֶת הַפִידְבֶּק שֶׁלָּכֶם — זֶה מְאוֹד עוֹזֵר לָנוּ."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Spacer()
-            Button("סְגוֹר") { dismiss() }
+            Button(tr("סְגוֹר")) { dismiss() }
                 .buttonStyle(.borderedProminent)
                 .padding(.bottom, 24)
         }

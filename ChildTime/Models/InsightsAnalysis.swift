@@ -23,7 +23,7 @@ extension InsightsEngine {
     }
 
     enum Trend { case up, flat, down
-        var label: String { self == .up ? "⬆ מִשְׁתַּפֵּר" : self == .down ? "⬇ יְרִידָה קַלָּה" : "➡ יַצִּיב" }
+        var label: String { self == .up ? tr("⬆ מִשְׁתַּפֵּר") : self == .down ? tr("⬇ יְרִידָה קַלָּה") : tr("➡ יַצִּיב") }
         var color: Color { self == .up ? AppColor.successMint : self == .down ? AppColor.flameOrange : .secondary }
     }
     var learningTrend: Trend {
@@ -48,24 +48,24 @@ extension InsightsEngine {
         let accurate = profile.overallAccuracy >= 0.8
 
         if fast && accurate {
-            return Labeled(emoji: "⚡️", title: "לוֹמֵד דֶּרֶךְ דְּפוּסִים",
-                           detail: "קוֹלֵט מָהֵר וּמְזַהֶה דְּפוּסִים — עוֹנֶה נָכוֹן וּבִמְהִירוּת.")
+            return Labeled(emoji: "⚡️", title: tr("לוֹמֵד דֶּרֶךְ דְּפוּסִים"),
+                           detail: tr("קוֹלֵט מָהֵר וּמְזַהֶה דְּפוּסִים — עוֹנֶה נָכוֹן וּבִמְהִירוּת."))
         }
         if !strong.isDisjoint(with: logicLike) && strong.isDisjoint(with: memoryLike) {
-            return Labeled(emoji: "🧠", title: "לוֹמֵד דֶּרֶךְ הִיגָּיוֹן",
-                           detail: "מְצֻיָּן בִּמְשִׂימוֹת חֲשִׁיבָה וּפִתְרוֹן בְּעָיוֹת.")
+            return Labeled(emoji: "🧠", title: tr("לוֹמֵד דֶּרֶךְ הִיגָּיוֹן"),
+                           detail: tr("מְצֻיָּן בִּמְשִׂימוֹת חֲשִׁיבָה וּפִתְרוֹן בְּעָיוֹת."))
         }
         if !strong.isDisjoint(with: memoryLike) && strong.isDisjoint(with: logicLike) {
-            return Labeled(emoji: "📚", title: "לוֹמֵד דֶּרֶךְ זִכָּרוֹן",
-                           detail: "חָזָק בִּשְׁמִירַת מֵידָע — אוֹצַר מִלִּים, עֻבְדּוֹת וּמְקוֹמוֹת.")
+            return Labeled(emoji: "📚", title: tr("לוֹמֵד דֶּרֶךְ זִכָּרוֹן"),
+                           detail: tr("חָזָק בִּשְׁמִירַת מֵידָע — אוֹצַר מִלִּים, עֻבְדּוֹת וּמְקוֹמוֹת."))
         }
         let abandons = Topic.allCases.reduce(0) { $0 + profile.abandonCount(for: $1) }
         if abandons >= 4 {
-            return Labeled(emoji: "🔬", title: "לוֹמֵד דֶּרֶךְ נִסּוּי וְטָעִיָּה",
-                           detail: "מְנַסֶּה, טוֹעֶה וּמְתַקֵּן — כְּדַאי לְעוֹדֵד לְהַמְשִׁיךְ גַּם כְּשֶׁקָּשֶׁה.")
+            return Labeled(emoji: "🔬", title: tr("לוֹמֵד דֶּרֶךְ נִסּוּי וְטָעִיָּה"),
+                           detail: tr("מְנַסֶּה, טוֹעֶה וּמְתַקֵּן — כְּדַאי לְעוֹדֵד לְהַמְשִׁיךְ גַּם כְּשֶׁקָּשֶׁה."))
         }
-        return Labeled(emoji: "🌱", title: "סִגְנוֹן מְעֹרָב",
-                       detail: "לוֹמֵד מִכַּמָּה כִּוּוּנִים — נַמְשִׁיךְ לְלַמֵּד אֵיךְ הוּא לוֹמֵד הֲכִי טוֹב.")
+        return Labeled(emoji: "🌱", title: tr("סִגְנוֹן מְעֹרָב"),
+                       detail: tr("לוֹמֵד מִכַּמָּה כִּוּוּנִים — נַמְשִׁיךְ לְלַמֵּד אֵיךְ הוּא לוֹמֵד הֲכִי טוֹב."))
     }
 
     // MARK: - Persistence
@@ -78,16 +78,16 @@ extension InsightsEngine {
         let abandons = Topic.allCases.reduce(0) { $0 + profile.abandonCount(for: $1) }
         let rate = Double(abandons) / Double(exposureTotal + abandons)
         if rate < 0.06 {
-            return Labeled(emoji: "💪", title: "הַתְמָדָה גְּבוֹהָה",
-                           detail: "מַמְשִׁיךְ לַעֲנוֹת גַּם אַחֲרֵי טָעֻיּוֹת וְכִמְעַט לֹא נוֹטֵשׁ.")
+            return Labeled(emoji: "💪", title: tr("הַתְמָדָה גְּבוֹהָה"),
+                           detail: tr("מַמְשִׁיךְ לַעֲנוֹת גַּם אַחֲרֵי טָעֻיּוֹת וְכִמְעַט לֹא נוֹטֵשׁ."))
         }
         if rate < 0.18 {
-            return Labeled(emoji: "🙂", title: "הַתְמָדָה טוֹבָה",
-                           detail: "בְּדֶרֶךְ כְּלָל מַתְמִיד; לִפְעָמִים מְדַלֵּג עַל שְׁאֵלָה קָשָׁה.")
+            return Labeled(emoji: "🙂", title: tr("הַתְמָדָה טוֹבָה"),
+                           detail: tr("בְּדֶרֶךְ כְּלָל מַתְמִיד; לִפְעָמִים מְדַלֵּג עַל שְׁאֵלָה קָשָׁה."))
         }
-        let bail = profile.abandoned.first.map { " (בְּעִקָּר \($0.displayName))" } ?? ""
-        return Labeled(emoji: "🤝", title: "נוֹטֶה לְוַתֵּר עַל קָשֶׁה",
-                       detail: "מְדַלֵּג עַל שְׁאֵלוֹת קָשׁוֹת\(bail) — שָׁוֶה לְעוֹדֵד וּלְהָקֵל אֶת הָרָמָה.")
+        let bail = profile.abandoned.first.map { tr(" (בְּעִקָּר \($0.displayName))") } ?? ""
+        return Labeled(emoji: "🤝", title: tr("נוֹטֶה לְוַתֵּר עַל קָשֶׁה"),
+                       detail: tr("מְדַלֵּג עַל שְׁאֵלוֹת קָשׁוֹת\(bail) — שָׁוֶה לְעוֹדֵד וּלְהָקֵל אֶת הָרָמָה."))
     }
 
     // MARK: - Interests

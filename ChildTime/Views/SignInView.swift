@@ -19,10 +19,10 @@ struct SignInView: View {
                         .padding(AppSpacing.md)
                         .background(.tint.opacity(0.15), in: Circle())
 
-                    Text("סנכרון בין מכשירים")
+                    Text(tr("סנכרון בין מכשירים"))
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
 
-                    Text("התחבר כדי שהילד יראה את אותה התקדמות גם ב-iPad וגם ב-iPhone.")
+                    Text(tr("התחבר כדי שהילד יראה את אותה התקדמות גם ב-iPad וגם ב-iPhone."))
                         .font(.system(size: 17, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -60,7 +60,7 @@ struct SignInView: View {
 
                     Spacer()
 
-                    Text("הסנכרון אופציונלי. אפשר להמשיך לעבוד מקומית בלי להתחבר.")
+                    Text(tr("הסנכרון אופציונלי. אפשר להמשיך לעבוד מקומית בלי להתחבר."))
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -69,11 +69,11 @@ struct SignInView: View {
                 }
                 .padding(AppSpacing.lg)
             }
-            .navigationTitle("חיבור חשבון")
+            .navigationTitle(tr("חיבור חשבון"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("סגור") { dismiss() }
+                    Button(tr("סגור")) { dismiss() }
                 }
             }
             .onChangeCompat(of: auth.isSignedIn) { _, signed in
@@ -86,5 +86,5 @@ struct SignInView: View {
 #Preview {
     SignInView()
         .environmentObject(AuthManager.shared)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .app)
 }

@@ -23,10 +23,10 @@ enum RewardEngine {
     static func comboLabel(streak: Int) -> String? {
         switch streak {
         case ..<3:    return nil
-        case 3..<5:   return "קוֹמְבּוֹ ×2 🔥"
-        case 5..<10:  return "קוֹמְבּוֹ ×3 🔥🔥"
-        case 10..<15: return "קוֹמְבּוֹ ×4 ⚡"
-        default:      return "עַל הָאֵשׁ! ×5 👑"
+        case 3..<5:   return tr("קוֹמְבּוֹ ×2 🔥")
+        case 5..<10:  return tr("קוֹמְבּוֹ ×3 🔥🔥")
+        case 10..<15: return tr("קוֹמְבּוֹ ×4 ⚡")
+        default:      return tr("עַל הָאֵשׁ! ×5 👑")
         }
     }
 
@@ -165,10 +165,10 @@ enum ChestKind: String, Codable {
 
     var label: String {
         switch self {
-        case .wood: return "קוּפְסַת עֵץ"
-        case .gold: return "קוּפְסַת זָהָב"
-        case .magic: return "קוּפְסַת קֶסֶם"
-        case .legendary: return "קוּפְסַת אַגָּדָה"
+        case .wood: return tr("קוּפְסַת עֵץ")
+        case .gold: return tr("קוּפְסַת זָהָב")
+        case .magic: return tr("קוּפְסַת קֶסֶם")
+        case .legendary: return tr("קוּפְסַת אַגָּדָה")
         }
     }
 }

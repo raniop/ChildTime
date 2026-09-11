@@ -85,13 +85,13 @@ final class SpeechReader {
         // 1) Math symbols → words. The generator uses the dedicated −/×/÷ glyphs
         //    (never a plain hyphen), so this never touches ordinary text.
         var math = raw
-        math = math.replacingOccurrences(of: "= ?", with: " \(tr("כַּמָּה זֶה")) ")
-        math = math.replacingOccurrences(of: "=?", with: " \(tr("כַּמָּה זֶה")) ")
-        math = math.replacingOccurrences(of: "+", with: " \(tr("וְעוֹד")) ")
-        math = math.replacingOccurrences(of: "\u{2212}", with: " \(tr("פָּחוֹת")) ")   // − minus sign
-        math = math.replacingOccurrences(of: "\u{00D7}", with: " \(tr("כָּפוּל")) ")   // × times
-        math = math.replacingOccurrences(of: "\u{00F7}", with: " \(tr("חֶלְקֵי")) ")   // ÷ divide
-        math = math.replacingOccurrences(of: "=", with: " \(tr("שָׁוֶה")) ")           // any other =
+        math = math.replacingOccurrences(of: "= ?", with: tr(" \(tr("כַּמָּה זֶה")) "))
+        math = math.replacingOccurrences(of: "=?", with: tr(" \(tr("כַּמָּה זֶה")) "))
+        math = math.replacingOccurrences(of: "+", with: tr(" \(tr("וְעוֹד")) "))
+        math = math.replacingOccurrences(of: "\u{2212}", with: tr(" \(tr("פָּחוֹת")) "))   // − minus sign
+        math = math.replacingOccurrences(of: "\u{00D7}", with: tr(" \(tr("כָּפוּל")) "))   // × times
+        math = math.replacingOccurrences(of: "\u{00F7}", with: tr(" \(tr("חֶלְקֵי")) "))   // ÷ divide
+        math = math.replacingOccurrences(of: "=", with: tr(" \(tr("שָׁוֶה")) "))           // any other =
 
         let noEmoji = String(String.UnicodeScalarView(math.unicodeScalars.filter { s in
             switch s.value {

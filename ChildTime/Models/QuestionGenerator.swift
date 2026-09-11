@@ -232,8 +232,8 @@ struct QuestionGenerator {
         guard let item = QuestionMemory.shared.pickFresh(bank, for: topic, target: difficulty) else {
             return Question(
                 topic: topic,
-                prompt: "אוֹפְּס... אֵין שְׁאֵלוֹת לַנּוֹשֵׂא הַזֶּה עֲדַיִן",
-                options: ["בְּסֵדֶר", "הַמְשֵׁךְ", "תּוֹדָה", "חֲזוֹר"],
+                prompt: tr("אוֹפְּס... אֵין שְׁאֵלוֹת לַנּוֹשֵׂא הַזֶּה עֲדַיִן"),
+                options: [tr("בְּסֵדֶר"), tr("הַמְשֵׁךְ"), tr("תּוֹדָה"), tr("חֲזוֹר")],
                 correctIndex: 0
             )
         }

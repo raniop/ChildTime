@@ -21,10 +21,10 @@ struct PlayTimeWidgetLiveActivity: Widget {
                         Text(over ? "🔒" : "🎮").font(.system(size: 26))
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(over ? "הַזְּמַן נִגְמַר" : "זְמַן מִשְׂחָק")
+                        Text(over ? tr("הַזְּמַן נִגְמַר") : tr("זְמַן מִשְׂחָק"))
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
-                        Text(over ? "פִּתְחוּ אֶת טוֹפִי לְהַרְוִיחַ עוֹד" : "נִשְׁאָר לְשַׂחֵק")
+                        Text(over ? tr("פִּתְחוּ אֶת טוֹפִי לְהַרְוִיחַ עוֹד") : tr("נִשְׁאָר לְשַׂחֵק"))
                             .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.7))
                     }
@@ -41,20 +41,20 @@ struct PlayTimeWidgetLiveActivity: Widget {
             let over = context.isStale || context.state.endsAt <= Date()
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Label("זמן משחק", systemImage: "gamecontroller.fill")
+                    Label(tr("זמן משחק"), systemImage: "gamecontroller.fill")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.yellow)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     if over {
-                        Text("נִגְמַר").font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.yellow)
+                        Text(tr("נִגְמַר")).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.yellow)
                     } else {
                         countdown(to: context.state.endsAt, size: 20).frame(minWidth: 72)
                     }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(spacing: 8) {
-                        Text(over ? "הַזְּמַן נִגְמַר 🔒" : "נִשְׁאָר זְמַן לְשַׂחֵק 🎮")
+                        Text(over ? tr("הַזְּמַן נִגְמַר 🔒") : tr("נִשְׁאָר זְמַן לְשַׂחֵק 🎮"))
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
                         if !over { stopButton() }
@@ -78,7 +78,7 @@ struct PlayTimeWidgetLiveActivity: Widget {
     private func stopButton() -> some View {
         if #available(iOS 17.0, *) {
             Button(intent: StopAndSavePlayIntent()) {
-                Label("עֲצֹר וּשְׁמֹר", systemImage: "pause.fill")
+                Label(tr("עֲצֹר וּשְׁמֹר"), systemImage: "pause.fill")
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)

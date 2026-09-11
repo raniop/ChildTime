@@ -15,8 +15,8 @@ awk '/^enum WorldSuitability/{f=1} f{print} f&&/^}/{exit}' $M/ConversionConfig.s
 
 xcrun swiftc -Onone -parse-as-library -o $TMP/coverage \
   $M/QuestionBanks*.swift $M/QuestionDifficultyTags*.swift $M/ReadingContent.swift \
-  $M/Topic.swift $M/Question.swift $M/RemoteQuestionBank.swift $M/AppStorage.swift \
-  $ROOT/ChildTime/Localization/AppLanguage.swift \
+  $M/Topic.swift $M/Question.swift $M/RemoteQuestionBank.swift $ROOT/Shared/AppGroup.swift \
+  $ROOT/Shared/Localization/AppLanguage.swift \
   $ROOT/ChildTime/DesignSystem/Colors.swift \
   $TMP/QuestionPack.swift $TMP/WorldSuitability.swift \
   $ROOT/tools/coverage/export.swift

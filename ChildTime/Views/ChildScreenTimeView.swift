@@ -27,18 +27,18 @@ struct ChildScreenTimeView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text("בִּחֲרוּ כַּמָּה דַּקּוֹת מָסָךְ בְּיוֹם עֲבוּר \(profile?.name ?? "הַיֶּלֶד"). הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד.")
+                    Text(tr("בִּחֲרוּ כַּמָּה דַּקּוֹת מָסָךְ בְּיוֹם עֲבוּר \(profile?.name ?? tr("הַיֶּלֶד")). הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד."))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
                 .glassRows()
 
                 Section {
-                    Toggle("הַגְבָּלַת זְמַן יוֹמִית", isOn: $limited)
+                    Toggle(tr("הַגְבָּלַת זְמַן יוֹמִית"), isOn: $limited)
 
                     if limited {
                         HStack {
-                            Text("דַּקּוֹת בְּיוֹם")
+                            Text(tr("דַּקּוֹת בְּיוֹם"))
                             Spacer()
                             TextField("60", value: $minutes, format: .number)
                                 .keyboardType(.numberPad)
@@ -60,29 +60,29 @@ struct ChildScreenTimeView: View {
                             .foregroundStyle(.secondary)
                     } else {
                         HStack {
-                            Text("לְלֹא הַגְבָּלָה")
+                            Text(tr("לְלֹא הַגְבָּלָה"))
                             Spacer()
                             Text("♾️")
                         }
                         .foregroundStyle(.secondary)
                     }
                 } header: {
-                    Text("מַקְסִימוּם זְמַן מָסָךְ יוֹמִי")
+                    Text(tr("מַקְסִימוּם זְמַן מָסָךְ יוֹמִי"))
                 } footer: {
-                    Text("הַיֶּלֶד מַרְוִיחַ עַד הַתִּקְרָה הַזּוֹ בִּלְמִידָה. בּוֹנוּסִים מֵהַגַּלְגַּל/קוּפְסָה נִשְׁמָרִים לְמָחָר כְּשֶׁמַּגִּיעִים לַתִּקְרָה.")
+                    Text(tr("הַיֶּלֶד מַרְוִיחַ עַד הַתִּקְרָה הַזּוֹ בִּלְמִידָה. בּוֹנוּסִים מֵהַגַּלְגַּל/קוּפְסָה נִשְׁמָרִים לְמָחָר כְּשֶׁמַּגִּיעִים לַתִּקְרָה."))
                 }
                 .glassRows()
             }
             .glassForm()
-            .navigationTitle("זְמַן מָסָךְ יוֹמִי")
+            .navigationTitle(tr("זְמַן מָסָךְ יוֹמִי"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("סִיּוּם") { save(); dismiss() }
+                    Button(tr("סִיּוּם")) { save(); dismiss() }
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("סִיּוּם") { minutesFocused = false }
+                    Button(tr("סִיּוּם")) { minutesFocused = false }
                 }
             }
         }
@@ -96,10 +96,10 @@ struct ChildScreenTimeView: View {
     private var readout: String {
         let m = clamped(minutes)
         let h = m / 60, r = m % 60
-        let hWord = h == 1 ? "שָׁעָה" : "\(h) שָׁעוֹת"
-        if h == 0 { return "\(r) דַּקּוֹת בְּיוֹם" }
-        if r == 0 { return "\(hWord) בְּיוֹם" }
-        return "\(hWord) וְ-\(r) דַּקּוֹת בְּיוֹם"
+        let hWord = h == 1 ? tr("שָׁעָה") : tr("\(h) שָׁעוֹת")
+        if h == 0 { return tr("\(r) דַּקּוֹת בְּיוֹם") }
+        if r == 0 { return tr("\(hWord) בְּיוֹם") }
+        return tr("\(hWord) וְ-\(r) דַּקּוֹת בְּיוֹם")
     }
 
     private func clamped(_ v: Int) -> Int { min(Self.maxMinutes, max(Self.minMinutes, v)) }
