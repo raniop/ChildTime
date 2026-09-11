@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#3C3D84">
+<title>טופי — הצהרת נגישות</title>
+<meta name="description" content="הצהרת הנגישות של אתר טופי: התקן שאליו האתר מכוון (ת״י 5568 ברמה AA), מה נעשה באתר, מגבלות ידועות ודרכי פנייה לרכז הנגישות.">
+<link rel="canonical" href="https://tofyapp.com/accessibility.html">
+<link rel="alternate" hreflang="he" href="https://tofyapp.com/accessibility.html">
+<link rel="alternate" hreflang="en" href="https://tofyapp.com/en/accessibility.html">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
+<link rel="stylesheet" href="glass.css?v=4">
+<script src="site.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">דילוג לתוכן הראשי</a>
+<div class="backdrop"></div>
+
+<header class="site-head"><div class="wrap">
+  <a class="brand" href="/"><img src="lion.png" alt=""><span>טופי</span><span class="visually-hidden"> — דף הבית</span></a>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="תפריט" aria-expanded="false" aria-controls="nav">☰</button>
+  <nav class="site-nav" id="nav" aria-label="ניווט ראשי">
+    <a href="/">דף הבית</a>
+    <a href="privacy.html">פרטיות</a>
+    <a href="terms.html">תנאים</a>
+    <a href="support.html">תמיכה</a>
+  </nav>
+  <nav class="lang-switch" aria-label="Language / שפה">
+    <a href="accessibility.html" lang="he" hreflang="he" dir="rtl" aria-current="true"><span class="flag" aria-hidden="true">🇮🇱</span>עברית</a>
+    <a href="en/accessibility.html" lang="en" hreflang="en" dir="ltr"><span class="flag" aria-hidden="true">🇺🇸</span>English</a>
+  </nav>
+</div></header>
+
+<main class="wrap" id="main" tabindex="-1" style="padding-top:34px;padding-bottom:20px">
+  <div class="doc pane">
+    <h1>הצהרת נגישות</h1>
+    <p class="stamp">עודכן: 12 בספטמבר 2026 · אתר טופי (Tofy) · <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
+
+    <p>אנחנו רואים בנגישות האתר חלק מהמוצר עצמו, ולא תוספת לו. טופי היא אפליקציה לילדים ולהורים, ואנחנו רוצים שכל הורה יוכל לקרוא על האפליקציה, להבין מה היא עושה וליצור איתנו קשר — בלי תלות במוגבלות, בטכנולוגיה מסייעת שהוא משתמש בה או בדרך שבה הוא מפעיל את המחשב.</p>
+
+    <h2>לאיזה תקן האתר מכוון</h2>
+    <p>אתר זה נבנה כך שיעמוד בדרישות <b>תקן ישראלי ת״י 5568, ״קווים מנחים לנגישות תכנים באינטרנט״, ברמת התאמה AA</b>, המבוסס על הנחיות <span lang="en">WCAG 2.0</span> של ארגון <span lang="en">W3C</span> ברמה AA. בנוסף יישמנו דרישות מתוך <span lang="en">WCAG 2.1</span> ברמה AA, שהיא הנוהג המקובל היום גם בארצות הברית — בין היתר בכל הנוגע להצגת תוכן במסכים צרים, לניגודיות של רכיבים גרפיים ולהתאמת מרווחי טקסט.</p>
+    <p>ההצהרה ניתנת ברוח <span lang="he">תקנות שוויון זכויות לאנשים עם מוגבלות (התאמות נגישות לשירות), התשע״ג–2013</span>, מכוח חוק שוויון זכויות לאנשים עם מוגבלות, התשנ״ח–1998.</p>
+
+    <h2>מה נעשה באתר</h2>
+    <ul>
+      <li><b>ניווט מלא במקלדת.</b> אפשר להגיע לכל קישור, כפתור ושדה בעזרת מקש <span lang="en">Tab</span> בלבד, ולכל רכיב יש סימון מיקוד ברור ובולט.</li>
+      <li><b>קישור ״דילוג לתוכן הראשי״</b> בתחילת כל עמוד, כדי לדלג על התפריט.</li>
+      <li><b>מבנה סמנטי.</b> כותרות בסדר היררכי תקין, אזורי ניווט מסומנים (<span lang="en">landmarks</span>), ושמות מפורשים לתפריטים.</li>
+      <li><b>ניגודיות צבעים.</b> צבעי הרקע והטקסט של האתר תוכננו מחדש כך שהטקסט הרגיל עומד ביחס ניגודיות של 4.5:1 לפחות מול הרקע המדורג, בכל מקום שבו הוא מופיע.</li>
+      <li><b>טפסים.</b> לשדות בטופס ההרשמה לעדכוני ההשקה יש תוויות גלויות, והודעות שגיאה מוצגות בטקסט — לצד סימן אזהרה ולא בצבע בלבד — ומוקראות על ידי קוראי מסך.</li>
+      <li><b>הפחתת תנועה.</b> אם הגדרתם במערכת ההפעלה בקשה להפחתת אנימציות, האתר מכבד אותה: הניצוצות והתנועות נעצרות. בנוסף יש בדף הבית כפתור לעצירת התנועה והסרטון באופן ידני.</li>
+      <li><b>תמונות.</b> לכל תמונה שנושאת מידע יש טקסט חלופי; אמוג׳י ואיורים שנועדו לקישוט בלבד מוסתרים מקוראי מסך כדי לא להעמיס רעש על ההקראה.</li>
+      <li><b>תוכן גם בלי <span lang="en">JavaScript</span>.</b> תוכן העמודים מוצג במלואו גם אם קוד התסריט אינו פועל או נחסם.</li>
+      <li><b>עברית מימין לשמאל</b> בכל העמודים, וסימון שפה על קטעים באנגלית כדי שקוראי מסך יהגו אותם נכון.</li>
+    </ul>
+
+    <h2>מגבלות ידועות</h2>
+    <p>אנחנו מעדיפים לומר את זה בגלוי. נכון למועד עדכון ההצהרה, אלה הדברים שטרם נפתרו:</p>
+    <ul>
+      <li><b>צילומי המסך של האפליקציה הם תמונות.</b> לכל צילום יש תיאור קצר, אבל הטקסט שבתוך הצילום עצמו אינו זמין כטקסט שניתן לסמן או להגדיל.</li>
+      <li><b>סרטון ההדגמה בדף הבית</b> הוא ללא פס קול, ולכן אין לו כתוביות. יש לו תיאור טקסטואלי וכפתור עצירה, אך אין לו תיאור קולי (<span lang="en">audio description</span>) של כל מה שקורה בו.</li>
+      <li><b>עמודים של צד שלישי</b> — למשל עמוד האפליקציה בחנות <span lang="en">App Store</span> של <span lang="en">Apple</span>, שאליו מוביל כפתור ההורדה — אינם בשליטתנו, ונגישותם באחריות מפעיליהם.</li>
+      <li><b>גופנים חיצוניים.</b> האתר טוען את הגופן העברי משירות <span lang="en">Google Fonts</span>. אם השירות חסום או אינו זמין, הטקסט מוצג בגופן ברירת המחדל של המכשיר — הקריאוּת נשמרת, אך המראה משתנה.</li>
+      <li><b>בדיקות.</b> ביצענו בדיקה ידנית של ניווט במקלדת, מבנה הכותרות, הניגודיות והתנהגות העמודים ללא תסריטים. טרם נערכה בדיקה מקיפה מול כלל קוראי המסך הנפוצים ובשיתוף משתמשים עם מוגבלות, וזו משימה שנמשיך בה.</li>
+      <li><b>עמודים חדשים.</b> מדי פעם נוספים לאתר עמודים ורכיבים חדשים. ייתכן שעמוד חדש יעלה לפני שהושלמה בדיקת הנגישות שלו — אם נתקלתם בכזה, נשמח לשמוע.</li>
+    </ul>
+    <p>הצהרה זו מתייחסת לאתר <span lang="en">tofyapp.com</span> בלבד. נגישות אפליקציית טופי עצמה אינה חלק מהצהרה זו.</p>
+
+    <h2>באתר הזה אין ״תוסף נגישות״</h2>
+    <p>לא התקנו באתר סרגל נגישות או תוסף חיצוני, ולא בכוונתנו להתקין. תוספים כאלה אינם הופכים אתר לנגיש: הם מצטרפים מעל קוד שאינו תקין במקום לתקן אותו, לעיתים מפריעים דווקא לטכנולוגיה המסייעת שכבר מותקנת אצל המשתמש ומוגדרת לטעמו, ומחייבים טעינת קוד של צד שלישי לכל מי שנכנס לאתר. במקום זאת תיקנו את הנגישות בקוד האתר עצמו — שם היא באמת נמדדת.</p>
+
+    <h2>פנייה בנושא נגישות</h2>
+    <p>אם נתקלתם בבעיית נגישות באתר, או שיש רכיב שאינכם מצליחים להפעיל — ספרו לנו. כתבו מה ניסיתם לעשות, באיזה עמוד, ובאיזה דפדפן או טכנולוגיה מסייעת. נטפל בפנייה ונחזור אליכם.</p>
+    <div class="contact-card inset">
+      <p><b>רכז הנגישות:</b> רני אופיר (<span lang="en">Rani Ophir</span>)</p>
+      <p><b>כתובת:</b> חיים בר לב 17, רמת גן</p>
+      <p><b>טלפון:</b> <a href="tel:+972524444244" dir="ltr">052-444-4244</a></p>
+      <p><b>דוא״ל:</b> <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
+    </div>
+
+    <h2>עוד מידע</h2>
+    <p><a href="privacy.html">מדיניות פרטיות</a> · <a href="terms.html">תנאי שימוש</a> · <a href="age-suitability.html">התאמה לגיל</a> · <a href="support.html">תמיכה</a></p>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap">
+  <div>טופי (Tofy) · אפליקציית למידה וזמן מסך לילדים</div>
+  <nav class="links" aria-label="קישורים בתחתית העמוד">
+    <a href="/">דף הבית</a>
+    <a href="privacy.html">מדיניות פרטיות</a>
+    <a href="terms.html">תנאי שימוש</a>
+    <a href="age-suitability.html">התאמה לגיל</a>
+    <a href="accessibility.html">הצהרת נגישות</a>
+    <a href="support.html">תמיכה</a>
+    <a href="mailto:ranioph@gmail.com">צרו קשר</a>
+  </nav>
+  <div class="copyright">© 2026 Tofy · tofyapp.com</div>
+</div></footer>
+</body>
+</html>

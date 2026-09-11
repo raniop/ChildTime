@@ -4,9 +4,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#5E60CE">
+<meta name="theme-color" content="#3C3D84">
 <title>Tofy — Terms of Use</title>
-<meta name="description" content="Tofy's Terms of Use (EULA), including the Tofy+ subscription terms.">
+<meta name="description" content="Tofy's Terms of Use for families in the United States: parents' role, the Tofy+ subscription and in-app purchases, friends and leaderboards, and your rights.">
 <link rel="canonical" href="https://tofyapp.com/en/terms.html">
 <link rel="alternate" hreflang="en" href="https://tofyapp.com/en/terms.html">
 <link rel="alternate" hreflang="he" href="https://tofyapp.com/terms.html">
@@ -15,108 +15,268 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
-<link rel="stylesheet" href="../glass.css?v=3">
+<link rel="stylesheet" href="../glass.css?v=4">
+<style>
+  .doc h3{font-size:17px;font-weight:800;margin:18px 0 6px;color:#fff}
+  .doc .updated{display:inline-block;font-weight:800;color:#fff;background:rgba(255,210,63,.2);
+    border:1px solid rgba(255,210,63,.5);border-radius:999px;padding:5px 14px;margin:4px 0 10px;font-size:15px}
+  .doc .summary{padding:18px 22px;margin:8px 0 22px}
+  .doc .summary ul{margin-bottom:0}
+  .doc .notice{padding:16px 20px;margin:10px 0 16px;border-color:rgba(255,210,63,.55)}
+  .doc .notice p:last-child,.doc .notice ul:last-child{margin-bottom:0}
+  .doc .toc{columns:2;column-gap:28px}
+  @media(max-width:620px){.doc .toc{columns:1}}
+</style>
+<script src="../site.js" defer></script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 <div class="backdrop"></div>
 
 <header class="site-head"><div class="wrap">
-  <a class="brand" href="./"><img src="../lion.png" alt=""><span>Tofy</span></a>
-  <nav class="site-nav">
+  <a class="brand" href="./"><img src="../lion.png" alt=""><span>Tofy</span><span class="visually-hidden"> — home</span></a>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">☰</button>
+  <nav class="site-nav" id="nav" aria-label="Main">
     <a href="./">Home</a>
     <a href="privacy.html">Privacy</a>
     <a href="terms.html">Terms</a>
     <a href="support.html">Support</a>
-    <a href="../terms.html" lang="he" hreflang="he">עברית</a>
+  </nav>
+  <nav class="lang-switch" aria-label="Language / שפה">
+    <a href="../terms.html" lang="he" hreflang="he" dir="rtl"><span class="flag" aria-hidden="true">🇮🇱</span>עברית</a>
+    <a href="terms.html" lang="en" hreflang="en" dir="ltr" aria-current="true"><span class="flag" aria-hidden="true">🇺🇸</span>English</a>
   </nav>
 </div></header>
 
-<main class="wrap" style="padding-top:34px;padding-bottom:20px">
+<main id="main" tabindex="-1" class="wrap" style="padding-top:34px;padding-bottom:20px">
   <div class="doc pane">
-    <h1>Terms of Use (EULA) — Tofy</h1>
-    <p class="stamp">Last updated: <time datetime="2026-09-11">September 11, 2026</time> · Developer: Rani Ophir · Contact: <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
+    <h1>Terms of Use — Tofy</h1>
+    <p class="updated">Last updated: <time datetime="2026-09-12">September 12, 2026</time></p>
+    <p class="stamp">Operator: Rani Ophir · Haim Bar-Lev St 17, Ramat Gan, Israel · <a href="tel:+972524444244">+972-52-444-4244</a> · <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
 
-    <p>This End User License Agreement (the "Agreement") is between you (the "User") and Rani Ophir (the "Developer"), the owner of the Tofy app. By using the app, you agree to these terms. If you don't agree, don't use the app.</p>
+    <p>Welcome to Tofy. Tofy is a learning app for families: children answer questions to earn screen time, and parents decide how it all works. These Terms of Use (the "Terms") are a legal agreement between you and Rani Ophir, the individual developer who makes and runs Tofy ("Tofy," "we," "us"). They cover the Tofy app for iPhone and iPad, its Apple Watch app and widgets, and our website, tofyapp.com (together, the "Service").</p>
+    <p>Please read these Terms before you set up Tofy for your family. By creating a family account, setting up a child profile, making a purchase, or otherwise using the Service, you agree to these Terms. If you don't agree, please don't use Tofy.</p>
 
-    <h2>1. Acknowledgement</h2>
-    <p>This Agreement is between you and the Developer only, and not with Apple. The Developer, not Apple, is solely responsible for the app and its content. This Agreement does not grant rights that go beyond the App Store Usage Rules.</p>
+    <div class="summary inset">
+      <p style="margin-bottom:8px"><b>The short version</b></p>
+      <ul>
+        <li>Tofy is set up and managed by a parent or legal guardian who is at least 18. Children use Tofy through a child profile, with that parent's permission and supervision.</li>
+        <li>Tofy+ is a subscription that <b>renews automatically</b> until you cancel it. Apple bills it, and you cancel it in your Apple ID settings at least 24 hours before the renewal date.</li>
+        <li>All purchases happen behind a parental gate, and Apple handles payments and refunds.</li>
+        <li>No ads, no third-party analytics, and we never sell your family's information. See our <a href="privacy.html">Privacy Policy</a>.</li>
+        <li>Nothing in these Terms takes away the consumer protection rights you have under the laws of the state where you live.</li>
+      </ul>
+    </div>
 
-    <h2>2. Scope of license</h2>
-    <p>The Developer grants you a personal, limited, non-exclusive, non-transferable license to install and use the app on Apple-branded products that you own or control, subject to the App Store Usage Rules. You may not copy, distribute, reverse engineer, or create derivative works from the app, except to the extent the law allows.</p>
-
-    <h2>3. Parents and children</h2>
-    <p>Tofy is a family app for children, used under a parent's guidance. The family account must be set up and managed by a parent or legal guardian who is an adult. By setting up Tofy for a child, you confirm that you are that child's parent or legal guardian, or have their permission, and you agree to these terms on the child's behalf.</p>
-    <p>You are responsible for supervising your child's use of the app and of their device. Tofy's app blocking relies on Apple's Screen Time features, which Tofy doesn't control; it may not block every app or work in every situation, and it isn't a substitute for a parent's supervision. Keep your parent code private — anyone who knows it can change your family's settings.</p>
-
-    <h2>4. Acceptable use</h2>
-    <p>You agree not to, and not to let anyone else:</p>
-    <ul>
-      <li>try to access another family's information, or interfere with the app's security, parental gate, or Screen Time controls;</li>
-      <li>enter anyone's personal information other than your own family's, or use a child's name or nickname field to share contact details;</li>
-      <li>use scripts, bots, or other automated means with the app, including to manipulate leaderboards or live quizzes;</li>
-      <li>use the app in a way that is unlawful, harmful, or harassing to others; or</li>
-      <li>resell, rent, or commercially exploit the app or its content.</li>
-    </ul>
-    <p>We may suspend or limit access for anyone who violates these terms. You can stop using the app and delete your family's data at any time from Parent settings.</p>
-
-    <h2>5. Educational content</h2>
-    <p>We work hard to make Tofy's questions accurate and age-appropriate, but content may occasionally contain mistakes. You can report a question from inside the app, and we'll review it. Tofy supports learning; it doesn't replace school or professional educational advice.</p>
-
-    <h2>6. Maintenance and support</h2>
-    <p>The Developer is solely responsible for providing maintenance and support for the app. Apple has no obligation whatsoever to furnish any maintenance or support services with respect to the app. For support: <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a>.</p>
-
-    <h2>7. Warranty</h2>
-    <p>The Developer is solely responsible for any product warranties, to the extent not effectively disclaimed. If the app fails to conform to any applicable warranty, you may notify Apple, and Apple will refund the purchase price of the app (if any). To the maximum extent permitted by law, Apple has no other warranty obligation whatsoever with respect to the app.</p>
-
-    <h2>8. Product claims</h2>
-    <p>The Developer, not Apple, is responsible for addressing any claims by you or a third party relating to the app or your possession and use of it, including: (a) product liability claims; (b) any claim that the app fails to conform to any applicable legal or regulatory requirement; and (c) claims arising under consumer protection or similar legislation.</p>
-
-    <h2>9. Intellectual property</h2>
-    <p>All rights in the app, its content, its design, the "Tofy" character, and its trademarks belong to the Developer. In the event of any third-party claim that the app or your possession and use of it infringes that third party's intellectual property rights, the Developer, not Apple, is solely responsible for the investigation, defense, settlement, and discharge of that claim.</p>
-
-    <h2>10. Legal compliance</h2>
-    <p>You represent and warrant that (a) you are not located in a country that is subject to a U.S. Government embargo, or that has been designated by the U.S. Government as a "terrorist supporting" country; and (b) you are not listed on any U.S. Government list of prohibited or restricted parties.</p>
-
-    <h2>11. Tofy+ subscription and purchases</h2>
-    <ul>
-      <li><b>Tofy+</b> is an auto-renewable family subscription, offered monthly or yearly. The price and billing period are shown in the app, in your local currency, before you buy.</li>
-      <li>Payment is charged to your Apple ID account when you confirm the purchase.</li>
-      <li>The subscription renews automatically at the same price unless it is canceled at least 24 hours before the end of the current period. Your account is charged for renewal within the 24 hours before the current period ends.</li>
-      <li>You can manage or cancel your subscription at any time in your Apple ID account settings (on iPhone: Settings → your name → Subscriptions). Cancellation takes effect at the end of the current paid period.</li>
-      <li>If a free trial is offered, it becomes a paid subscription at the end of the trial unless canceled at least 24 hours before the trial ends. Any unused portion of a free trial is forfeited when you purchase a subscription.</li>
-      <li>Refunds are handled by Apple under Apple's policies.</li>
-      <li>In addition to the subscription, the app offers one-time purchases of individual content worlds, which do not renew.</li>
-      <li>Any gift period we grant at our discretion is free, does not renew, and involves no charge when it ends.</li>
-      <li>All purchases are made in a parent-protected area, on a parent's device only. A child's device never shows prices or offers purchases.</li>
+    <h2>Contents</h2>
+    <ul class="toc">
+      <li><a href="#about">1. About these Terms</a></li>
+      <li><a href="#eligibility">2. Who can use Tofy</a></li>
+      <li><a href="#parents">3. Parents' role and consent</a></li>
+      <li><a href="#license">4. Your license to use Tofy</a></li>
+      <li><a href="#purchases">5. Tofy+ and purchases</a></li>
+      <li><a href="#friends">6. Friends, leaderboards, and live quizzes</a></li>
+      <li><a href="#content">7. Chores, photos, and feedback</a></li>
+      <li><a href="#rules">8. Acceptable use</a></li>
+      <li><a href="#learning">9. Learning content and screen time</a></li>
+      <li><a href="#ip">10. Intellectual property</a></li>
+      <li><a href="#privacy">11. Privacy</a></li>
+      <li><a href="#apple">12. Apple App Store terms</a></li>
+      <li><a href="#changes-service">13. Changes to the Service</a></li>
+      <li><a href="#termination">14. Suspension and termination</a></li>
+      <li><a href="#disclaimers">15. Disclaimers</a></li>
+      <li><a href="#liability">16. Limitation of liability</a></li>
+      <li><a href="#indemnity">17. Indemnity</a></li>
+      <li><a href="#disputes">18. Governing law and disputes</a></li>
+      <li><a href="#changes-terms">19. Changes to these Terms</a></li>
+      <li><a href="#general">20. General terms</a></li>
+      <li><a href="#contact">21. Contact us</a></li>
     </ul>
 
-    <h2>12. Third-party terms</h2>
-    <p>You must comply with applicable third-party terms of agreement when using the app (for example, your wireless data service agreement).</p>
+    <h2 id="about">1. About these Terms</h2>
+    <p>These Terms, together with our <a href="privacy.html">Privacy Policy</a>, make up the whole agreement between you and Tofy about the Service. Section 12 explains how these Terms relate to Apple's App Store. When we say "you," we mean the adult who agrees to these Terms, and, where it fits, the children in your family who use Tofy with your permission.</p>
+    <p>These English Terms are written for families in the United States. Families in Israel are covered by our <a href="../terms.html" lang="he" hreflang="he">Hebrew Terms of Use</a>.</p>
 
-    <h2>13. Third-party beneficiary</h2>
-    <p>Apple and Apple's subsidiaries are third-party beneficiaries of this Agreement, and upon your acceptance of its terms, Apple will have the right (and will be deemed to have accepted the right) to enforce this Agreement against you as a third-party beneficiary.</p>
+    <h2 id="eligibility">2. Who can use Tofy</h2>
+    <ul>
+      <li><b>Adults set up the account.</b> Only a parent or legal guardian who is at least 18 years old (or the age of majority where they live, if higher) may create a family account, invite a co-parent, create child profiles, or make purchases.</li>
+      <li><b>Children use child profiles.</b> Children don't create their own accounts. A child may use Tofy only through a child profile set up by their parent, and only with that parent's permission and supervision.</li>
+      <li><b>Accurate information.</b> Please give accurate information when you set up your family, such as your child's grade, so Tofy can offer the right questions.</li>
+      <li><b>Guest parents.</b> You can start Tofy as a guest without giving us an email address. These Terms apply to guest families in the same way. If a guest family's device is lost or the app is deleted, we may not be able to recover that family's data.</li>
+      <li><b>Where you live.</b> You may use Tofy only where doing so is legal, and only if you meet the requirements in Section 12 (Legal compliance).</li>
+    </ul>
 
-    <h2>14. Privacy</h2>
-    <p>Your use of the app is also subject to our <a href="privacy.html">Privacy Policy</a>, which explains how we handle parents' and children's information.</p>
+    <h2 id="parents">3. Parents' role and consent</h2>
+    <p>Tofy is built so that parents are in charge. By setting up Tofy for a child, you confirm that you are that child's parent or legal guardian, and you agree to these Terms on your own behalf and on behalf of that child. You also confirm that you have read our <a href="privacy.html">Privacy Policy</a> and consent, as a parent, to Tofy handling your child's information as it describes.</p>
+    <p>As the parent, you are responsible for:</p>
+    <ul>
+      <li>supervising your child's use of Tofy and of the device Tofy runs on;</li>
+      <li>explaining the rules in these Terms to your child in a way they can understand;</li>
+      <li>choosing your family's settings, such as which apps are blocked, how many minutes each correct answer earns, and which chores and rewards are offered;</li>
+      <li>keeping your parent code and your device secure. Anyone who knows your parent code can change your family's settings, so please don't share it with your children;</li>
+      <li>the activity of any co-parent you invite. A co-parent can see and change your family's information in the same way you can; and</li>
+      <li>purchases made on your device or with your Apple ID, including any made by someone you let use them.</li>
+    </ul>
 
-    <h2>15. Disclaimer, limitation of liability, and governing law</h2>
-    <p>The app is provided "AS IS." To the maximum extent permitted by law, the Developer is not liable for indirect or consequential damages. This Agreement is governed by the laws of the State of Israel. We'll update these terms when needed, and the current version will always be posted on this page.</p>
+    <h2 id="license">4. Your license to use Tofy</h2>
+    <p>While you follow these Terms, we give you a personal, limited, non-exclusive, non-transferable, revocable license to download and use Tofy on Apple devices that you own or control, as allowed by Apple's App Store Usage Rules, for your family's own non-commercial use. This license lets the children in your family use Tofy through their child profiles.</p>
+    <p>Tofy is licensed to you, not sold. We and our licensors keep all rights not expressly given to you. Unless the law lets you do so despite this limit, you may not copy, modify, translate, rent, lend, sell, or redistribute the app or its content, create derivative works from it, or reverse engineer, decompile, or try to extract its source code.</p>
 
-    <h2>16. Developer information and contact</h2>
-    <p>Rani Ophir · Email for questions, complaints, and claims: <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
+    <h2 id="purchases">5. Tofy+ and purchases</h2>
+    <p>Some parts of Tofy are free. Others require the Tofy+ subscription or a one-time purchase. Purchases are only offered in the parent area of a parent's device, behind a parental gate. A child's device never shows prices or lets a child buy anything. A child can only ask a parent for something.</p>
+
+    <h3>5.1 Apple handles payment</h3>
+    <p>All purchases are made through Apple's In-App Purchase system and charged to the payment method on the Apple ID used to buy them. Apple's Media Services Terms and Conditions also apply to your purchases. We never see or store your card details. Current prices, in your local currency, are shown in the App Store and on the purchase screen in the app before you confirm. Prices may include or exclude taxes depending on where you live.</p>
+
+    <h3>5.2 Tofy+ is an automatically renewing subscription</h3>
+    <div class="notice inset">
+      <p><b>AUTOMATIC RENEWAL TERMS.</b> <b>Tofy+ is a family subscription that renews automatically, monthly or yearly depending on the plan you choose, until you cancel it.</b> When you confirm the purchase, the price of the first period is charged to your Apple ID. <b>Each renewal is charged to your Apple ID within 24 hours before the current period ends, at the price shown for your plan, unless you turn off auto-renewal at least 24 hours before the end of the current period.</b></p>
+      <p><b>HOW TO CANCEL.</b> On your iPhone or iPad, open <b>Settings → [your name] → Subscriptions → Tofy+ → Cancel Subscription</b>. You can also cancel from the App Store app or on a Mac, as Apple describes at <a href="https://support.apple.com/118428" rel="noopener">support.apple.com/118428</a>. <b>Deleting the Tofy app does not cancel your subscription.</b></p>
+      <p><b>FREE TRIALS.</b> If a plan is offered with a free trial, the length of the trial and the price that follows are shown before you start it. <b>When the trial ends, it automatically becomes a paid subscription and your Apple ID is charged, unless you cancel at least 24 hours before the trial ends.</b></p>
+    </div>
+    <ul>
+      <li><b>What happens when you cancel.</b> Cancellation stops future renewals. You keep Tofy+ until the end of the period you've already paid for, and then it ends without further charges. If you cancel during a free trial, you won't be charged when the trial ends.</li>
+      <li><b>One trial per family.</b> Free trials are for new subscribers. Apple decides eligibility based on your Apple ID's purchase history. If you buy a subscription during a free trial, any unused part of the trial ends.</li>
+      <li><b>Gift periods.</b> We may give a family free Tofy+ for a limited time, for example after signing up. A gift period doesn't require a payment method, doesn't renew, and ends on its own with no charge.</li>
+      <li><b>Price changes.</b> If the price of your plan goes up, Apple will notify you before the change and, where Apple's rules or the law require it, ask for your consent. If you don't agree, you can cancel before the new price applies.</li>
+      <li><b>Family devices.</b> One Tofy+ subscription covers the family account it was bought for, including all child profiles and connected devices in that family.</li>
+    </ul>
+
+    <h3>5.3 One-time purchases</h3>
+    <ul>
+      <li><b>World passes</b> unlock one learning world for one child for 30 days. A world pass doesn't renew, and ends on its own after 30 days.</li>
+      <li><b>Question packs</b> are add-on worlds bought for one child, on top of Tofy+. Unless the purchase screen says otherwise, a pack stays available to that child for as long as Tofy offers the pack. A pack for an additional child in the same family may be offered at a lower price.</li>
+      <li><b>Diamond packs</b> add diamonds 💎 to a child's in-app wallet. Diamonds can be spent in the Tofy shop, for example on characters or, with a parent's approval, to trade play-minutes with a sibling.</li>
+      <li><b>Virtual items have no cash value.</b> Diamonds, stars ⭐, earned minutes, characters, and other in-app items are part of a license to use Tofy. They aren't money or property, can't be exchanged for cash or real-world goods, can't be transferred outside your family, and aren't refundable except as described in Section 5.4 or where the law requires.</li>
+      <li><b>Chore rewards.</b> The chores feature can keep a record of money a parent has promised for chores. It is only a tracker: no money moves in Tofy, and any payment is between you and your child.</li>
+    </ul>
+
+    <h3>5.4 Refunds</h3>
+    <p>Because Apple processes every payment, refunds are handled by Apple under its policies. We can't issue refunds ourselves. You can request a refund from Apple at <a href="https://reportaproblem.apple.com" rel="noopener">reportaproblem.apple.com</a>. If something you bought doesn't work, please also email us, and we'll try to fix it. Nothing in these Terms limits any right to a refund you have under the law.</p>
+
+    <h2 id="friends">6. Friends, leaderboards, and live quizzes</h2>
+    <p>Tofy lets children compare progress with friends and play live quizzes. We designed these features to share as little as possible:</p>
+    <ul>
+      <li>Other players can see only a child's <b>first name or nickname, chosen character, and star count</b>. In a live quiz, players also see each other's score for that game. Photos, contact details, and grades are never shown.</li>
+      <li>Children can't send messages, chat, or post text or photos to other users.</li>
+      <li>Friends are added with a friend code, QR code, or link. A child's card may also appear on the "All players" leaderboard, where other Tofy users can see it.</li>
+      <li>Parents can see all of a child's friends and remove any of them from the parent dashboard. Deleting a child's profile removes that child's card.</li>
+      <li>Please choose a child nickname that doesn't include a last name, contact details, or anything inappropriate. We may change or hide a name or card that breaks these Terms.</li>
+    </ul>
+
+    <h2 id="content">7. Chores, photos, and feedback</h2>
+    <p><b>Your content.</b> Some features let your family add content to Tofy, such as a profile photo, a photo attached to a finished chore, chore names, or a report about a question ("User Content"). You keep ownership of your User Content. You give us a limited, non-exclusive, royalty-free license to store, copy, process, and display it <b>only as needed to run Tofy for your family</b>, for example to show a chore photo to the parents in your family. This license ends when the content is deleted, except for copies kept for a short time in backups, as our <a href="privacy.html">Privacy Policy</a> explains. Chore photos are visible only to the parents in your family, and are deleted automatically when a parent approves or archives the chore, and after 7 days at most.</p>
+    <p>You're responsible for the User Content your family adds. Please don't add content that you don't have the right to share, that shows people outside your family without their permission, or that is inappropriate for children.</p>
+    <p><b>Feedback.</b> If you send us ideas, suggestions, or question reports, we may use them to improve Tofy without owing you anything. We won't publicly identify you or your child when we do.</p>
+
+    <h2 id="rules">8. Acceptable use</h2>
+    <p>You agree not to, and not to help or allow anyone else to:</p>
+    <ul>
+      <li>use Tofy in a way that breaks the law or harms, harasses, or bullies anyone;</li>
+      <li>try to access another family's information, another person's account, or parts of the Service you aren't allowed to use;</li>
+      <li>get around or interfere with Tofy's parental gate, Screen Time controls, security features, or purchase system;</li>
+      <li>cheat, or use bots, scripts, or other automated tools, for example to earn minutes, stars, or diamonds, or to change leaderboard or live quiz results;</li>
+      <li>use a child's name or nickname to share contact details or offensive content;</li>
+      <li>add personal information about people outside your family;</li>
+      <li>upload viruses or anything designed to disrupt or damage the Service;</li>
+      <li>copy, scrape, or collect Tofy's questions or other content; or</li>
+      <li>use Tofy for any commercial purpose, such as reselling access, without our written permission.</li>
+    </ul>
+
+    <h2 id="learning">9. Learning content and screen time</h2>
+    <ul>
+      <li><b>Learning support, not a replacement for school.</b> Tofy's questions are written to match children's school grades and are reviewed for accuracy, but a question may sometimes contain a mistake. You can report any question from inside the app, and we'll review it. Tofy supports your child's learning. It doesn't replace school, teachers, or professional advice about your child's education, development, health, or wellbeing. Grade levels, reports, and recommendations are general guidance, not an assessment.</li>
+      <li><b>Screen time depends on Apple.</b> Tofy's app blocking works through Apple's Screen Time and Family Controls features, which we don't control. Blocking may not cover every app or website, and may stop working if device settings, Apple's software, or permissions change, or if a device is offline or restarted. Earned time and schedules may not always be exact. Tofy is a helpful tool, but it doesn't replace a parent's supervision.</li>
+      <li><b>Healthy use.</b> You decide how much screen time is right for your child. Please encourage regular breaks.</li>
+    </ul>
+
+    <h2 id="ip">10. Intellectual property</h2>
+    <p>Tofy and everything in it, including its questions, passages, illustrations, characters, sounds, software, design, and the Tofy name and logo, belong to us or our licensors and are protected by copyright, trademark, and other laws. Except for the license in Section 4, these Terms don't give you any rights to them.</p>
+    <p>If you believe something in Tofy infringes your copyright or other rights, please email us at <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a>. Include a description of the work, where it appears in Tofy, your contact details, and a statement that you believe in good faith that the use isn't authorized. We'll review every notice and remove material where appropriate.</p>
+
+    <h2 id="privacy">11. Privacy</h2>
+    <p>Protecting children's information is central to Tofy. Our <a href="privacy.html">Privacy Policy</a> explains what we collect, how we use it, and how parents can review, export, and delete their family's information. It includes our children's privacy (COPPA) notice.</p>
+
+    <h2 id="apple">12. Apple App Store terms</h2>
+    <p>You download Tofy from Apple's App Store. The following terms apply to your use of the app. If they conflict with anything else in these Terms, they control.</p>
+    <ul>
+      <li><b>Acknowledgement.</b> These Terms are between you and Tofy only, not with Apple Inc. ("Apple"). We, not Apple, are solely responsible for the app and its content. Your use of the app must also follow the App Store Usage Rules in Apple's Media Services Terms and Conditions. If these Terms give you more rights than the Usage Rules allow, the Usage Rules control.</li>
+      <li><b>Scope of license.</b> The license in Section 4 is limited to using the app on Apple-branded products that you own or control, as permitted by the Usage Rules. The app may also be accessed by other accounts linked to the purchaser through Family Sharing or volume purchasing where Apple allows it.</li>
+      <li><b>Maintenance and support.</b> We alone are responsible for providing maintenance and support for the app, as described in these Terms or as required by law. Apple has no obligation to provide any maintenance or support for the app.</li>
+      <li><b>Warranty.</b> We alone are responsible for any product warranties, whether express or implied by law, to the extent not effectively disclaimed. If the app fails to conform to any applicable warranty, you may notify Apple, and Apple will refund the purchase price of the app to you, if any. To the maximum extent permitted by law, Apple has no other warranty obligation with respect to the app. Any other claims, losses, liabilities, damages, costs, or expenses caused by a failure to conform to a warranty are our responsibility, to the extent these Terms don't disclaim them.</li>
+      <li><b>Product claims.</b> We, not Apple, are responsible for addressing any claims by you or a third party relating to the app or your possession and use of it, including: (a) product liability claims; (b) any claim that the app fails to conform to any applicable legal or regulatory requirement; and (c) claims under consumer protection, privacy, or similar laws.</li>
+      <li><b>Intellectual property claims.</b> If a third party claims that the app, or your possession and use of it, infringes that third party's intellectual property rights, we, not Apple, are solely responsible for the investigation, defense, settlement, and discharge of that claim.</li>
+      <li><b>Legal compliance.</b> You represent and warrant that (a) you are not located in a country that is subject to a U.S. Government embargo or that has been designated by the U.S. Government as a "terrorist supporting" country; and (b) you are not listed on any U.S. Government list of prohibited or restricted parties.</li>
+      <li><b>Developer contact.</b> Questions, complaints, or claims about the app should be sent to us using the contact details in Section 21.</li>
+      <li><b>Third-party terms.</b> When using the app, you must comply with any third-party agreements that apply, such as your wireless data service agreement.</li>
+      <li><b>Third-party beneficiary.</b> Apple and Apple's subsidiaries are third-party beneficiaries of these Terms. Once you accept these Terms, Apple will have the right (and will be deemed to have accepted the right) to enforce them against you as a third-party beneficiary.</li>
+    </ul>
+
+    <h2 id="changes-service">13. Changes to the Service</h2>
+    <p>We're always working on Tofy, so features, questions, worlds, and question packs may be added, changed, or removed over time. Some features need an internet connection or a recent version of iOS. We'll try to give reasonable notice before removing a paid feature that you're actively using. If we stop offering Tofy+ or content you paid for before the end of the period you paid for, we'll work with you, and with Apple where needed, toward a fair solution, as the law requires.</p>
+
+    <h2 id="termination">14. Suspension and termination</h2>
+    <ul>
+      <li><b>You can stop at any time.</b> You can stop using Tofy at any time. You can delete a child's profile, or all of your family's data, from Parent settings → Privacy &amp; data. <b>Deleting your data or the app does not cancel a Tofy+ subscription.</b> Cancel it in your Apple ID settings as described in Section 5.2.</li>
+      <li><b>What we may do.</b> We may suspend or end access to the Service, or to a feature such as friends or leaderboards, for a family that seriously or repeatedly breaks these Terms, puts children or other users at risk, or where the law requires it. Where it's reasonable and lawful, we'll tell you why and give you a chance to fix the problem first.</li>
+      <li><b>After termination.</b> When access ends, your license ends too, and we'll handle your family's information as described in our <a href="privacy.html">Privacy Policy</a>. Sections 5.3 (virtual items), 7, 10, and 15 through 20 continue to apply after these Terms end.</li>
+    </ul>
+
+    <h2 id="disclaimers">15. Disclaimers</h2>
+    <p>We work hard to make Tofy reliable, safe, and accurate. But to the extent permitted by law, <b>the Service is provided "as is" and "as available," and we make no warranties beyond those stated in these Terms</b>. That includes implied warranties of merchantability, fitness for a particular purpose, and non-infringement. We don't promise that Tofy will always be available, uninterrupted, or error-free, that every question will be correct, that app blocking will work in every case, or that using Tofy will lead to any particular learning result.</p>
+    <p>Some states don't allow the exclusion of implied warranties, so some of these exclusions may not apply to you. This section doesn't affect any warranty or right that can't be excluded under the law that applies to you.</p>
+
+    <h2 id="liability">16. Limitation of liability</h2>
+    <p>To the extent permitted by law:</p>
+    <ul>
+      <li>we won't be liable for any indirect, incidental, special, consequential, or punitive damages, or for lost profits or lost data, arising out of or relating to these Terms or the Service; and</li>
+      <li>our total liability for all claims arising out of or relating to these Terms or the Service is limited to the greater of (a) the amount you paid for Tofy purchases in the 12 months before the event giving rise to the claim, or (b) US $100.</li>
+    </ul>
+    <p><b>Nothing in these Terms limits or excludes liability that can't be limited or excluded under applicable law</b>, including liability for death or personal injury caused by our negligence, for fraud, or for gross negligence or willful misconduct. Some states don't allow these kinds of limitations, so some of them may not apply to you.</p>
+
+    <h2 id="indemnity">17. Indemnity</h2>
+    <p>To the extent permitted by law, you agree to compensate us for reasonable losses, costs, and legal fees resulting from a third-party claim caused by your intentional misuse of the Service or your serious breach of these Terms. This doesn't apply to the extent the claim was caused by our own fault. If a claim comes up, we'll tell you promptly and let you take part in how it's handled.</p>
+
+    <h2 id="disputes">18. Governing law and disputes</h2>
+    <p><b>Talk to us first.</b> Most problems can be solved quickly. Before starting a formal claim, please email <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a> with your name, a description of the problem, and what you'd like us to do. We'll try in good faith to resolve it with you within 30 days. This step doesn't stop you from contacting Apple about a purchase, or from filing a complaint with a consumer protection agency at any time.</p>
+    <p><b>Governing law.</b> Tofy is run by an individual developer in Israel. These Terms are governed by the laws of the State of Israel, without regard to its conflict-of-law rules. The United Nations Convention on Contracts for the International Sale of Goods doesn't apply.</p>
+    <p><b>Courts.</b> Any dispute arising out of or relating to these Terms or the Service that we can't resolve informally may be brought before the competent courts of Tel Aviv-Yafo, Israel.</p>
+    <div class="notice inset">
+      <p><b>Your consumer rights are protected.</b> If you use Tofy as a consumer, <b>nothing in this section takes away the protection of the mandatory consumer protection laws of the state or country where you live</b>. The choice of Israeli law doesn't deprive you of those protections. You may also bring a claim in the courts where you live, including small claims court, where those laws allow it. These Terms don't require arbitration and don't include a class action waiver.</p>
+    </div>
+    <p><b>California residents.</b> Under California Civil Code § 1789.3, California users are entitled to the following consumer rights notice: the Complaint Assistance Unit of the Division of Consumer Services of the California Department of Consumer Affairs may be contacted in writing at 1625 North Market Blvd., Suite N 112, Sacramento, CA 95834, or by telephone at (916) 445-1254 or (800) 952-5210.</p>
+
+    <h2 id="changes-terms">19. Changes to these Terms</h2>
+    <p>We may update these Terms as Tofy changes or as the law requires. When we do, we'll post the new version on this page and change the "Last updated" date. <b>If a change is material, we'll notify parents in the app or by email at least 30 days before it takes effect.</b> Changes that are required by law, or that only fix typos or add new features, may take effect sooner. Changes don't apply to disputes that arose before the change took effect.</p>
+    <p>If you don't agree with an update, you can stop using Tofy and cancel any subscription before the update takes effect. If you keep using Tofy after the effective date, you accept the updated Terms. We won't change the price or renewal terms of an existing subscription through an update to these Terms. Those changes go through Apple, as described in Section 5.2.</p>
+
+    <h2 id="general">20. General terms</h2>
+    <ul>
+      <li><b>Severability.</b> If a court finds part of these Terms unenforceable, that part will be enforced to the maximum extent allowed, and the rest of the Terms stay in effect.</li>
+      <li><b>No waiver.</b> If we don't enforce a provision right away, that doesn't mean we give up the right to enforce it later.</li>
+      <li><b>Transfer.</b> You may not transfer your rights under these Terms. We may transfer these Terms to a person or company that takes over running Tofy, as long as your rights under these Terms aren't reduced. We'll notify you if that happens.</li>
+      <li><b>Events outside our control.</b> We aren't responsible for delays or failures caused by events beyond our reasonable control, such as outages at Apple or our hosting providers, natural disasters, or war.</li>
+      <li><b>Electronic notices.</b> You agree that we may send notices about these Terms and the Service electronically, in the app or by email, and that these notices meet any legal requirement for written notice.</li>
+      <li><b>Headings.</b> Headings and the "short version" summary are there to make these Terms easier to read. They don't limit the full text.</li>
+    </ul>
+
+    <h2 id="contact">21. Contact us</h2>
+    <p>For questions, support, complaints, or legal notices about Tofy, contact the operator:</p>
+    <p>Rani Ophir<br>Haim Bar-Lev St 17, Ramat Gan, Israel<br>Phone: <a href="tel:+972524444244">+972-52-444-4244</a><br>Email: <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
   </div>
 </main>
 
 <footer class="site-foot"><div class="wrap">
   <div>Tofy · a learning and screen-time app for kids</div>
-  <div class="links">
+  <nav class="links" aria-label="Footer links">
     <a href="./">Home</a>
     <a href="privacy.html">Privacy Policy</a>
     <a href="terms.html">Terms of Use</a>
+    <a href="accessibility.html">Accessibility</a>
     <a href="support.html">Support</a>
     <a href="mailto:ranioph@gmail.com">Contact us</a>
-  </div>
-  <div style="opacity:.75">© 2026 Tofy · tofyapp.com</div>
+  </nav>
+  <div class="copyright">© 2026 Tofy · tofyapp.com</div>
 </div></footer>
 </body>
 </html>

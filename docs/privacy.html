@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#5E60CE">
+<meta name="theme-color" content="#3C3D84">
 <title>טופי — מדיניות פרטיות</title>
 <meta name="description" content="מדיניות הפרטיות של טופי: אילו נתונים נאספים, למה, ואיך הם נשמרים. בלי פרסומות, בלי מעקב ובלי אנליטיקה של צד שלישי.">
 <link rel="canonical" href="https://tofyapp.com/privacy.html">
@@ -14,23 +14,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
-<link rel="stylesheet" href="glass.css?v=3">
+<link rel="stylesheet" href="glass.css?v=4">
+<script src="site.js" defer></script>
 </head>
 <body>
+<a class="skip-link" href="#main">דילוג לתוכן הראשי</a>
 <div class="backdrop"></div>
 
 <header class="site-head"><div class="wrap">
-  <a class="brand" href="/"><img src="lion.png" alt=""><span>טופי</span></a>
-  <nav class="site-nav">
+  <a class="brand" href="/"><img src="lion.png" alt=""><span>טופי</span><span class="visually-hidden"> — דף הבית</span></a>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="תפריט" aria-expanded="false" aria-controls="nav">☰</button>
+  <nav class="site-nav" id="nav" aria-label="ניווט ראשי">
     <a href="/">דף הבית</a>
     <a href="privacy.html">פרטיות</a>
     <a href="terms.html">תנאים</a>
     <a href="support.html">תמיכה</a>
-    <a href="en/privacy.html" lang="en" hreflang="en">English</a>
+  </nav>
+  <nav class="lang-switch" aria-label="Language / שפה">
+    <a href="privacy.html" lang="he" hreflang="he" dir="rtl" aria-current="true"><span class="flag" aria-hidden="true">🇮🇱</span>עברית</a>
+    <a href="en/privacy.html" lang="en" hreflang="en" dir="ltr"><span class="flag" aria-hidden="true">🇺🇸</span>English</a>
   </nav>
 </div></header>
 
-<main class="wrap" style="padding-top:34px;padding-bottom:20px">
+<main id="main" tabindex="-1" class="wrap" style="padding-top:34px;padding-bottom:20px">
   <div class="doc pane">
     <h1>מדיניות פרטיות — טופי (Tofy)</h1>
   <p class="stamp">עודכן לאחרונה: 12 בספטמבר 2026 · בעל האפליקציה: Rani Ophir · חיים בר לב 17, רמת גן · <a href="tel:+972524444244">052-444-4244</a> · <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
@@ -78,6 +84,10 @@
   <h2>ילדים</h2>
   <p>האפליקציה מיועדת לשימוש משפחתי בהנחיית הורה. יצירת הפרופילים, ההסכמה וההגדרות נעשות ע"י ההורה.</p>
 
+  <h2>האתר שלנו</h2>
+  <p>באתר tofyapp.com אין פרסומות ואין עוגיות של אנליטיקה או פרסום. הדפים טוענים גופנים מ‑Google Fonts, ולכן כתובת ה‑IP שלכם מגיעה לשירות הזה כדי שהגופן יישלח אליכם.</p>
+  <p>בחירת השפה שלכם — הדגלים 🇮🇱 / 🇺🇸 בראש העמוד — נשמרת בדפדפן עצמו (אחסון מקומי), כדי שהאתר ייפתח בשפה שבחרתם גם בפעם הבאה. כל עוד לא בחרתם, מבקר שהדפדפן שלו אינו בעברית ושעון המכשיר שלו אינו ישראלי מועבר אוטומטית לעמודים באנגלית. ההעדפה נשארת בדפדפן ואינה נשלחת אלינו.</p>
+
   <h2>שינויים ויצירת קשר</h2>
   <p>נעדכן מדיניות זו בעת הצורך. לשאלות: <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a>.</p>
 
@@ -93,15 +103,16 @@
 
 <footer class="site-foot"><div class="wrap">
   <div>טופי (Tofy) · אפליקציית למידה וזמן מסך לילדים</div>
-  <div class="links">
+  <nav class="links" aria-label="קישורים בתחתית העמוד">
     <a href="/">דף הבית</a>
     <a href="privacy.html">מדיניות פרטיות</a>
     <a href="terms.html">תנאי שימוש</a>
     <a href="age-suitability.html">התאמה לגיל</a>
+    <a href="accessibility.html">הצהרת נגישות</a>
     <a href="support.html">תמיכה</a>
     <a href="mailto:ranioph@gmail.com">צרו קשר</a>
-  </div>
-  <div style="opacity:.75">© 2026 Tofy · tofyapp.com</div>
+  </nav>
+  <div class="copyright">© 2026 Tofy · tofyapp.com</div>
 </div></footer>
 </body>
 </html>

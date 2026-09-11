@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#3C3D84">
+<title>Tofy — Accessibility statement</title>
+<meta name="description" content="Tofy's accessibility statement: the standard the site aims to meet (IS 5568 / WCAG 2.0 AA and WCAG 2.1 AA), what we did, known limitations, and how to reach our accessibility coordinator.">
+<link rel="canonical" href="https://tofyapp.com/en/accessibility.html">
+<link rel="alternate" hreflang="en" href="https://tofyapp.com/en/accessibility.html">
+<link rel="alternate" hreflang="he" href="https://tofyapp.com/accessibility.html">
+<link rel="icon" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
+<link rel="stylesheet" href="../glass.css?v=4">
+<script src="../site.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="backdrop"></div>
+
+<header class="site-head"><div class="wrap">
+  <a class="brand" href="./"><img src="../lion.png" alt=""><span>Tofy</span><span class="visually-hidden"> — home</span></a>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">☰</button>
+  <nav class="site-nav" id="nav" aria-label="Main">
+    <a href="./">Home</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="support.html">Support</a>
+  </nav>
+  <nav class="lang-switch" aria-label="Language / שפה">
+    <a href="../accessibility.html" lang="he" hreflang="he" dir="rtl"><span class="flag" aria-hidden="true">🇮🇱</span>עברית</a>
+    <a href="accessibility.html" lang="en" hreflang="en" dir="ltr" aria-current="true"><span class="flag" aria-hidden="true">🇺🇸</span>English</a>
+  </nav>
+</div></header>
+
+<main class="wrap" id="main" tabindex="-1" style="padding-top:34px;padding-bottom:20px">
+  <div class="doc pane">
+    <h1>Accessibility statement</h1>
+    <p class="stamp">Last updated: <time datetime="2026-09-12">September 12, 2026</time> · tofyapp.com · <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
+
+    <p>We treat accessibility as part of the product rather than an add-on. Tofy is an app for children and their parents, and we want every parent to be able to read about it, understand what it does, and get in touch with us — whatever their disability, whatever assistive technology they use, and however they drive their computer.</p>
+
+    <h2>The standard we aim for</h2>
+    <p>This site is built to meet <b>Israeli Standard IS 5568, "Web content accessibility guidelines", at conformance level AA</b>, which is based on the W3C's <span lang="en">WCAG 2.0</span> guidelines at level AA. We have also applied level AA requirements from <span lang="en">WCAG 2.1</span> — today's common practice in the United States — including those covering narrow screens (reflow), the contrast of graphical elements, and text spacing.</p>
+    <p>This statement is published in the spirit of Israel's Equal Rights for Persons with Disabilities (Accessibility Adjustments to Service) Regulations, 5773–2013, under the Equal Rights for Persons with Disabilities Law, 5758–1998.</p>
+
+    <h2>What we did</h2>
+    <ul>
+      <li><b>Full keyboard navigation.</b> Every link, button and field can be reached with the <span lang="en">Tab</span> key alone, and each one shows a clear, high-contrast focus indicator.</li>
+      <li><b>A "skip to main content" link</b> at the start of every page, so the menu can be skipped.</li>
+      <li><b>Semantic structure.</b> Headings run in a correct hierarchical order, navigation regions are marked as landmarks, and every menu has an explicit accessible name.</li>
+      <li><b>Colour contrast.</b> The site's background and text colours were reworked so that normal text meets a contrast ratio of at least 4.5:1 against the gradient background everywhere it appears.</li>
+      <li><b>Forms.</b> The launch-updates sign-up form has visible labels, and validation errors appear as text — with a warning icon rather than colour alone — and are announced to screen readers.</li>
+      <li><b>Reduced motion.</b> If your system asks for reduced motion, the site honours it and the sparkles and animations stop. The home page also has a button to stop the motion and the video by hand.</li>
+      <li><b>Images.</b> Every meaningful image has alternative text; emoji and illustrations that are purely decorative are hidden from screen readers so they don't clutter the reading.</li>
+      <li><b>Content without <span lang="en">JavaScript</span>.</b> Page content is shown in full even when scripts are blocked or fail to run.</li>
+      <li><b>Language marking</b> on passages written in the other language, so screen readers pronounce them correctly.</li>
+    </ul>
+
+    <h2>Known limitations</h2>
+    <p>We would rather say this plainly. As of the date of this statement, these are the things we have not solved:</p>
+    <ul>
+      <li><b>App screenshots are images.</b> Each one has a short description, but the text inside the screenshot itself is not available as selectable, resizable text. The screenshots also show the Hebrew edition of the app.</li>
+      <li><b>The demo video on the home page</b> has no soundtrack, so it has no captions. It has a text description and a pause button, but no audio description of everything happening on screen.</li>
+      <li><b>Third-party pages</b> — such as the app's page on Apple's <span lang="en">App Store</span>, where the download button leads — are outside our control, and their accessibility is their operators' responsibility.</li>
+      <li><b>External fonts.</b> The site loads its font from <span lang="en">Google Fonts</span>. If that service is blocked or unavailable, text falls back to the device's default font: readability is preserved, but the appearance changes.</li>
+      <li><b>Testing.</b> We manually checked keyboard navigation, heading structure, contrast, and behaviour with scripts disabled. We have not yet completed comprehensive testing across all common screen readers or with users with disabilities, and that work continues.</li>
+      <li><b>New pages.</b> Pages and components are added from time to time, and one may go live before its accessibility review is finished. If you find one, please tell us.</li>
+    </ul>
+    <p>This statement covers the tofyapp.com website only. The accessibility of the Tofy app itself is not part of this statement.</p>
+
+    <h2>This site has no accessibility overlay</h2>
+    <p>We have not installed an accessibility toolbar, widget or overlay, and we do not intend to. Such tools do not make a site accessible: they sit on top of markup that is wrong instead of fixing it, they sometimes interfere with the assistive technology a visitor has already installed and tuned to their own preferences, and they force third-party code onto everyone who opens the site. We fixed the accessibility in the site's own code instead — which is where it is actually measured.</p>
+
+    <h2>Contacting us about accessibility</h2>
+    <p>If you run into an accessibility problem on this site, or there is something you cannot operate, please tell us. Let us know what you were trying to do, on which page, and which browser or assistive technology you were using. We will look into it and get back to you.</p>
+    <div class="contact-card inset">
+      <p><b>Accessibility coordinator:</b> Rani Ophir</p>
+      <p><b>Address:</b> Haim Bar-Lev St 17, Ramat Gan, Israel</p>
+      <p><b>Phone:</b> <a href="tel:+972524444244" dir="ltr">+972-52-444-4244</a></p>
+      <p><b>Email:</b> <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
+    </div>
+
+    <h2>More information</h2>
+    <p><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Use</a> · <a href="support.html">Support</a></p>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap">
+  <div>Tofy · a learning and screen-time app for kids</div>
+  <nav class="links" aria-label="Footer">
+    <a href="./">Home</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms of Use</a>
+    <a href="accessibility.html">Accessibility</a>
+    <a href="support.html">Support</a>
+    <a href="mailto:ranioph@gmail.com">Contact us</a>
+  </nav>
+  <div class="copyright">© 2026 Tofy · tofyapp.com</div>
+</div></footer>
+</body>
+</html>

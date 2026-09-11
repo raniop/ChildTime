@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#5E60CE">
+<meta name="theme-color" content="#3C3D84">
 <title>טופי — תנאי שימוש</title>
 <meta name="description" content="תנאי השימוש (EULA) של אפליקציית טופי, כולל תנאי המנוי טופי+.">
 <link rel="canonical" href="https://tofyapp.com/terms.html">
@@ -14,69 +14,75 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
-<link rel="stylesheet" href="glass.css?v=3">
+<link rel="stylesheet" href="glass.css?v=4">
+<script src="site.js" defer></script>
 </head>
 <body>
+<a class="skip-link" href="#main">דילוג לתוכן הראשי</a>
 <div class="backdrop"></div>
 
 <header class="site-head"><div class="wrap">
-  <a class="brand" href="/"><img src="lion.png" alt=""><span>טופי</span></a>
-  <nav class="site-nav">
+  <a class="brand" href="/"><img src="lion.png" alt=""><span>טופי</span><span class="visually-hidden"> — דף הבית</span></a>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="תפריט" aria-expanded="false" aria-controls="nav">☰</button>
+  <nav class="site-nav" id="nav" aria-label="ניווט ראשי">
     <a href="/">דף הבית</a>
     <a href="privacy.html">פרטיות</a>
     <a href="terms.html">תנאים</a>
     <a href="support.html">תמיכה</a>
-    <a href="en/terms.html" lang="en" hreflang="en">English</a>
+  </nav>
+  <nav class="lang-switch" aria-label="Language / שפה">
+    <a href="terms.html" lang="he" hreflang="he" dir="rtl" aria-current="true"><span class="flag" aria-hidden="true">🇮🇱</span>עברית</a>
+    <a href="en/terms.html" lang="en" hreflang="en" dir="ltr"><span class="flag" aria-hidden="true">🇺🇸</span>English</a>
   </nav>
 </div></header>
 
-<main class="wrap" style="padding-top:34px;padding-bottom:20px">
+<main class="wrap" id="main" tabindex="-1" style="padding-top:34px;padding-bottom:20px">
   <div class="doc pane">
-    <h1>תנאי שימוש (EULA) — טופי (Tofy)</h1>
+    <h1>תנאי שימוש (<span lang="en">EULA</span>) — טופי (<span lang="en">Tofy</span>)</h1>
   <p class="stamp">עודכן לאחרונה: 8 בספטמבר 2026 · בעל האפליקציה: Rani Ophir · יצירת קשר: <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
 
   <p>הסכם רישיון למשתמש קצה זה ("ההסכם") נכרת בינך ("המשתמש") לבין Rani Ophir ("היזם"), בעל האפליקציה טופי (Tofy). השימוש באפליקציה מהווה הסכמה לתנאים אלה. אם אינך מסכים — אל תשתמש באפליקציה.</p>
 
-  <h2>1. הכרה (Acknowledgement)</h2>
-  <p>הסכם זה נכרת בינך לבין היזם בלבד, ולא עם Apple. היזם — ולא Apple — אחראי באופן בלעדי לאפליקציה ולתוכן שבה. ההסכם אינו מקנה זכויות החורגות מ"כללי השימוש" (Usage Rules) שב-App Store של Apple.</p>
+  <h2>1. הכרה (<span lang="en">Acknowledgement</span>)</h2>
+  <p>הסכם זה נכרת בינך לבין היזם בלבד, ולא עם Apple. היזם — ולא Apple — אחראי באופן בלעדי לאפליקציה ולתוכן שבה. ההסכם אינו מקנה זכויות החורגות מ"כללי השימוש" (<span lang="en">Usage Rules</span>) שב-App Store של Apple.</p>
 
-  <h2>2. היקף הרישיון (Scope of License)</h2>
+  <h2>2. היקף הרישיון (<span lang="en">Scope of License</span>)</h2>
   <p>היזם מעניק לך רישיון אישי, מוגבל, לא בלעדי ולא ניתן להעברה, להתקין ולהשתמש באפליקציה על מכשירי Apple שבבעלותך או בשליטתך, בכפוף לכללי השימוש של App Store. אסור להעתיק, להפיץ, להנדס לאחור, או ליצור יצירות נגזרות מהאפליקציה אלא במידה שהחוק מתיר.</p>
 
-  <h2>3. תחזוקה ותמיכה (Maintenance and Support)</h2>
+  <h2>3. תחזוקה ותמיכה (<span lang="en">Maintenance and Support</span>)</h2>
   <p>היזם אחראי באופן בלעדי למתן שירותי תחזוקה ותמיכה לאפליקציה. ל-Apple אין כל חובה לספק שירותי תחזוקה או תמיכה ביחס לאפליקציה. לתמיכה: <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a>.</p>
 
-  <h2>4. אחריות (Warranty)</h2>
+  <h2>4. אחריות (<span lang="en">Warranty</span>)</h2>
   <p>היזם אחראי באופן בלעדי לכל אחריות ביחס לאפליקציה, במידה שאינה נשללת כדין. אם האפליקציה אינה תואמת לאחריות החלה, באפשרותך להודיע על כך ל-Apple, ו-Apple תשיב לך את מחיר הרכישה של האפליקציה (אם שולם). במידה המרבית המותרת בחוק, ל-Apple לא תהיה כל חובת אחריות אחרת ביחס לאפליקציה.</p>
 
-  <h2>5. תביעות מוצר (Product Claims)</h2>
+  <h2>5. תביעות מוצר (<span lang="en">Product Claims</span>)</h2>
   <p>היזם — ולא Apple — אחראי לטיפול בכל תביעה שלך או של צד שלישי ביחס לאפליקציה או להחזקתה ולשימוש בה, לרבות: (א) תביעות אחריות מוצר; (ב) טענה כי האפליקציה אינה עומדת בדרישת חוק או רגולציה; ו-(ג) תביעות מכוח חוקי הגנת הצרכן או חקיקה דומה.</p>
 
-  <h2>6. קניין רוחני (Intellectual Property)</h2>
+  <h2>6. קניין רוחני (<span lang="en">Intellectual Property</span>)</h2>
   <p>כל הזכויות באפליקציה, בתוכן, בעיצוב, בדמות "טופי" ובסימני המסחר הן של היזם. בכל מקרה של טענה מצד שלישי כי האפליקציה או השימוש בה מפרים זכויות קניין רוחני, היזם — ולא Apple — יהיה אחראי לחקירה, הגנה, פשרה וסילוק של תביעה כאמור.</p>
 
-  <h2>7. עמידה בחוק (Legal Compliance)</h2>
+  <h2>7. עמידה בחוק (<span lang="en">Legal Compliance</span>)</h2>
   <p>בהצהרתך אתה מאשר כי: (א) אינך נמצא במדינה הכפופה לאמברגו של ממשלת ארה"ב או שהוגדרה כמדינה "תומכת טרור"; וכן (ב) אינך מופיע ברשימה כלשהי של גורמים אסורים או מוגבלים מטעם ממשלת ארה"ב.</p>
 
   <h2>8. מנוי טופי+ (חיוב מתחדש)</h2>
   <p>האפליקציה מציעה מנוי בחידוש אוטומטי "טופי+": חודשי ב-₪24.90 לחודש, או שנתי ב-₪199 לשנה. התשלום נגבה מחשבון ה-Apple ID בעת אישור הרכישה. המנוי מתחדש אוטומטית באותו מחיר אלא אם בוטל לפחות 24 שעות לפני תום התקופה. ניתן לנהל ולבטל את המנוי בכל עת דרך הגדרות חשבון ה-Apple ID. בנוסף למנוי, האפליקציה מציעה רכישות חד-פעמיות של עולמות תוכן בודדים, שאינן מתחדשות. תקופת מתנה שאנו פותחים לפי שיקול דעתנו ניתנת ללא תשלום, אינה מתחדשת ואינה כרוכה בחיוב כלשהו בסיומה. כל הרכישות נעשות בסביבה מוגנת-הורה, במכשיר של ההורה בלבד.</p>
 
-  <h2>9. תנאי צד שלישי (Third Party Terms)</h2>
+  <h2>9. תנאי צד שלישי (<span lang="en">Third Party Terms</span>)</h2>
   <p>עליך לעמוד בתנאי השימוש של צדדים שלישיים החלים בעת השימוש באפליקציה (למשל תנאי ספק התקשורת שלך).</p>
 
-  <h2>10. צד שלישי נהנה (Third Party Beneficiary)</h2>
+  <h2>10. צד שלישי נהנה (<span lang="en">Third Party Beneficiary</span>)</h2>
   <p>Apple וחברות הבת שלה הן צד שלישי נהנה מהסכם זה, ועם קבלתך את תנאי ההסכם תהיה ל-Apple הזכות (וייראה כי קיבלה את הזכות) לאכוף הסכם זה כלפיך כצד שלישי נהנה.</p>
 
   <h2>11. פרטיות</h2>
-  <p>השימוש באפליקציה כפוף גם ל<a href="https://tofyapp.com/privacy">מדיניות הפרטיות</a> שלנו.</p>
+  <p>השימוש באפליקציה כפוף גם ל<a href="privacy.html">מדיניות הפרטיות</a> שלנו.</p>
 
   <h2>12. הגבלת אחריות ודין חל</h2>
-  <p>האפליקציה מסופקת "כפי שהיא" (AS IS). במידה המרבית המותרת בחוק, היזם לא יישא באחריות לנזקים עקיפים או תוצאתיים. על הסכם זה יחולו דיני מדינת ישראל. נעדכן תנאים אלה בעת הצורך, והגרסה העדכנית תפורסם בעמוד זה.</p>
+  <p>האפליקציה מסופקת "כפי שהיא" (<span lang="en">AS IS</span>). במידה המרבית המותרת בחוק, היזם לא יישא באחריות לנזקים עקיפים או תוצאתיים. על הסכם זה יחולו דיני מדינת ישראל. נעדכן תנאים אלה בעת הצורך, והגרסה העדכנית תפורסם בעמוד זה.</p>
 
   <h2>13. פרטי היזם ויצירת קשר</h2>
-  <p>Rani Ophir · אימייל לתלונות ותביעות: <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
+  <p>Rani Ophir · חיים בר לב 17, רמת גן · טלפון: <a href="tel:+972524444244" dir="ltr">052-444-4244</a> · אימייל לתלונות ותביעות: <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
 
-  <div class="en">
+  <div class="en" lang="en" dir="ltr">
     <h2>Terms of Use / EULA — Tofy (ChildTime)</h2>
     <p class="stamp">Last updated: September 8, 2026 · Owner: Rani Ophir · Contact: <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
     <p>This End User License Agreement ("Agreement") is between you (the "User") and Rani Ophir (the "Developer"), owner of the Tofy app. By using the app you agree to these terms.</p>
@@ -90,24 +96,25 @@
     <p><b>8. Subscription (Tofy+).</b> Auto-renewable subscription: ₪24.90/month or ₪199/year. Payment is charged to your Apple ID at confirmation of purchase and renews automatically unless canceled at least 24 hours before the period ends. Manage or cancel anytime in Apple ID settings. The app also offers non-renewing one-time purchases of individual content worlds. Any gift period we grant at our discretion is free, does not renew and charges nothing when it ends. All purchases are made behind a parental gate, on a parent device only.</p>
     <p><b>9. Third Party Terms.</b> You must comply with applicable third-party terms of agreement when using the app.</p>
     <p><b>10. Third Party Beneficiary.</b> Apple and its subsidiaries are third-party beneficiaries of this Agreement and, upon your acceptance, will have the right to enforce it against you.</p>
-    <p><b>11. Privacy.</b> Use of the app is also subject to our <a href="https://tofyapp.com/privacy">Privacy Policy</a>.</p>
-    <p><b>12. Disclaimer & Governing Law.</b> The app is provided "AS IS". To the maximum extent permitted by law, the Developer is not liable for indirect or consequential damages. This Agreement is governed by the laws of the State of Israel.</p>
-    <p><b>13. Contact.</b> Rani Ophir · Claims and complaints: ranioph@gmail.com</p>
+    <p><b>11. Privacy.</b> Use of the app is also subject to our <a href="en/privacy.html">Privacy Policy</a>.</p>
+    <p><b>12. Disclaimer &amp; Governing Law.</b> The app is provided "AS IS". To the maximum extent permitted by law, the Developer is not liable for indirect or consequential damages. This Agreement is governed by the laws of the State of Israel.</p>
+    <p><b>13. Contact.</b> Rani Ophir · Haim Bar-Lev St 17, Ramat Gan, Israel · Phone: <a href="tel:+972524444244" dir="ltr">+972-52-444-4244</a> · Claims and complaints: <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
   </div>
   </div>
 </main>
 
 <footer class="site-foot"><div class="wrap">
   <div>טופי (Tofy) · אפליקציית למידה וזמן מסך לילדים</div>
-  <div class="links">
+  <nav class="links" aria-label="קישורים בתחתית העמוד">
     <a href="/">דף הבית</a>
     <a href="privacy.html">מדיניות פרטיות</a>
     <a href="terms.html">תנאי שימוש</a>
     <a href="age-suitability.html">התאמה לגיל</a>
+    <a href="accessibility.html">הצהרת נגישות</a>
     <a href="support.html">תמיכה</a>
     <a href="mailto:ranioph@gmail.com">צרו קשר</a>
-  </div>
-  <div style="opacity:.75">© 2026 Tofy · tofyapp.com</div>
+  </nav>
+  <div class="copyright">© 2026 Tofy · tofyapp.com</div>
 </div></footer>
 </body>
 </html>

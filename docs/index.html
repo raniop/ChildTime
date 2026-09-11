@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#5E60CE">
+<meta name="theme-color" content="#3C3D84">
 <title>טופי — זמן מסך שמרוויחים בלמידה</title>
 <meta name="description" content="טופי הופך זמן מסך לפרס שמרוויחים. הילד עונה על שאלות לפי תוכנית הלימודים — מתמטיקה, עברית, אנגלית, מדעים ועוד — ומקבל דקות משחק אמיתיות באפליקציות שאתם בוחרים. בלי פרסומות ובלי מעקב.">
 <link rel="canonical" href="https://tofyapp.com/">
@@ -29,7 +29,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
-<link rel="stylesheet" href="glass.css?v=3">
+<link rel="stylesheet" href="glass.css?v=4">
+<!-- Marks the page as scripted BEFORE paint, so .reveal only ever hides
+     content while JavaScript is actually running to bring it back. -->
+<script>document.documentElement.className += " js";</script>
+<script src="site.js" defer></script>
 <style>
   /* ---------- hero ---------- */
   .hero{padding:60px 0 30px}
@@ -38,12 +42,13 @@
     background:linear-gradient(180deg,#fff,#FFE9A8);-webkit-background-clip:text;background-clip:text;color:transparent}
   .hero .sub{font-size:clamp(17px,2.1vw,21px);color:var(--muted);margin:18px 0 8px;max-width:520px;font-weight:500}
   .hero .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
-  .pills{display:flex;flex-wrap:wrap;gap:9px;margin-top:26px}
-  .pills span{font-size:14px;font-weight:700;padding:8px 15px;border-radius:999px;
-    background:rgba(255,255,255,.12);border:1px solid var(--edge);color:var(--muted)}
+  .pills{display:flex;flex-wrap:wrap;gap:9px;margin-top:26px;list-style:none}
+  .pills li{font-size:14px;font-weight:700;padding:8px 15px;border-radius:999px;
+    background:var(--pane-pill);border:1px solid var(--edge);color:var(--muted)}
   /* The kid's phone leads, the parent's sits behind it. Both are capped in
      pixels so a mid-sized window never turns the hero into two giant phones. */
   .stage{position:relative;width:100%;max-width:520px}
+  .motion-wrap{display:flex;justify-content:center;margin-top:18px}
   .stage img,.stage video{border-radius:30px;border:1px solid rgba(255,255,255,.2);
     box-shadow:0 30px 70px rgba(18,9,58,.45);display:block;max-width:100%;height:auto}
   .stage .front{position:relative;z-index:2;width:min(66%,300px);margin-inline-start:auto;
@@ -87,7 +92,7 @@
   .rail .shot{padding:0;border:0;background:none;display:block;cursor:zoom-in;border-radius:26px;
     transition:transform .18s ease}
   .rail .shot:hover{transform:translateY(-4px)}
-  .rail .shot::after{content:"⤢";position:absolute;inset-block-start:10px;inset-inline-start:10px;
+  .rail .shot::after{content:"⤢";content:"⤢" / "";position:absolute;inset-block-start:10px;inset-inline-start:10px;
     width:30px;height:30px;display:grid;place-items:center;border-radius:50%;font-size:14px;font-weight:800;
     background:rgba(20,12,60,.55);border:1px solid rgba(255,255,255,.34);color:#fff;
     opacity:0;transition:opacity .18s ease;pointer-events:none}
@@ -119,10 +124,10 @@
   }
 
   /* ---------- worlds ---------- */
-  .worlds{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:900px;margin:0 auto}
+  .worlds{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:900px;margin:0 auto;list-style:none}
   .world{font-size:15.5px;font-weight:700;padding:11px 18px;border-radius:999px;
-    background:rgba(255,255,255,.12);border:1px solid var(--edge)}
-  .world.free{background:rgba(140,255,196,.18);border-color:rgba(140,255,196,.5)}
+    background:var(--pane-pill);border:1px solid var(--edge)}
+  .world.free{background:rgba(140,255,196,.10);border-color:rgba(140,255,196,.55)}
   .worlds-note{text-align:center;color:var(--faint);font-size:15px;margin-top:22px}
 
   /* ---------- feature cards ---------- */
@@ -138,7 +143,7 @@
   .band{padding:48px 30px;text-align:center}
   .band .list{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:26px}
   .band .list li{list-style:none;font-weight:700;font-size:15.5px;padding:11px 18px;border-radius:14px;
-    background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.2)}
+    background:var(--pane-pill);border:1px solid var(--edge)}
 
   /* ---------- pricing ---------- */
   .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
@@ -152,7 +157,7 @@
   .plan .note{color:var(--faint);font-size:14.5px;margin-bottom:16px}
   .plan ul{list-style:none;margin:0 0 20px;display:flex;flex-direction:column;gap:9px}
   .plan li{color:var(--muted);font-size:15.5px;display:flex;gap:8px}
-  .plan li::before{content:"✓";color:var(--mint);font-weight:900;flex:0 0 auto}
+  .plan li::before{content:"✓";content:"✓" / "";color:var(--mint);font-weight:900;flex:0 0 auto}
   .plan .foot{margin-top:auto;color:var(--faint);font-size:14px}
   @media(max-width:900px){.plans{grid-template-columns:1fr}}
 
@@ -161,18 +166,23 @@
   .faq details{padding:18px 22px;margin-bottom:12px}
   .faq summary{font-weight:800;font-size:17.5px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:14px}
   .faq summary::-webkit-details-marker{display:none}
-  .faq summary::after{content:"+";font-size:24px;color:var(--gold);line-height:1}
-  .faq details[open] summary::after{content:"−"}
+  .faq summary::after{content:"+";content:"+" / "";font-size:24px;color:var(--gold);line-height:1}
+  .faq details[open] summary::after{content:"−";content:"−" / ""}
   .faq details p{margin-top:12px;color:var(--muted);font-size:16px}
 
   /* ---------- waitlist ---------- */
   .ef{display:flex;flex-direction:column;gap:12px;max-width:420px;margin:26px auto 0}
   .ef input,.ef select{width:100%;font-family:inherit;font-size:16px;font-weight:600;color:#fff;
-    background:rgba(255,255,255,.12);border:1px solid var(--edge);border-radius:14px;padding:14px 16px;outline:none;
+    background:rgba(27,15,74,.30);border:1px solid var(--edge);border-radius:14px;padding:14px 16px;outline:none;
     transition:border-color .2s, background .2s}
-  .ef input::placeholder{color:rgba(255,255,255,.6)}
-  .ef input:focus,.ef select:focus{border-color:var(--gold);background:rgba(255,255,255,.18)}
-  .ef select{appearance:none}
+  .ef input::placeholder{color:rgba(255,255,255,.78)}
+  .ef input:focus,.ef select:focus{border-color:var(--gold);background:rgba(27,15,74,.42)}
+  /* appearance:none removes the native arrow, so draw one back — otherwise
+     nothing says "this opens a list". It sits on the inline-end (left in RTL). */
+  .ef select{appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:left 16px center;background-size:12px 8px;
+    padding-inline-end:40px}
   .ef option{color:#1b1340}
   .ef-ok{font-weight:800;font-size:19px;color:var(--mint);margin-top:22px}
   .ef-note{font-size:13.5px;color:var(--faint);margin-top:14px}
@@ -184,23 +194,28 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">דילוג לתוכן הראשי</a>
 <div class="backdrop"></div>
-<div class="sparks" id="sparks"></div>
+<div class="sparks" id="sparks" aria-hidden="true"></div>
 
 <header class="site-head"><div class="wrap">
-  <a class="brand" href="/"><img src="lion.png" alt=""><span>טופי</span></a>
-  <button class="menu-btn" id="menuBtn" aria-label="תפריט" aria-expanded="false">☰</button>
-  <nav class="site-nav" id="nav">
+  <a class="brand" href="/"><img src="lion.png" alt=""><span>טופי</span><span class="visually-hidden"> — דף הבית</span></a>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="תפריט" aria-expanded="false" aria-controls="nav">☰</button>
+  <nav class="site-nav" id="nav" aria-label="ניווט ראשי">
     <a href="#how">איך זה עובד</a>
     <a href="#screens">הצצה לאפליקציה</a>
     <a href="#worlds">העולמות</a>
     <a href="#parents">להורים</a>
     <a href="#price">מחירים</a>
-    <a href="en/" lang="en" hreflang="en">English</a>
     <a class="btn" href="#early">עדכנו אותי בהשקה</a>
+  </nav>
+  <nav class="lang-switch" aria-label="Language / שפה">
+    <a href="/" lang="he" hreflang="he" dir="rtl" aria-current="true"><span class="flag" aria-hidden="true">🇮🇱</span>עברית</a>
+    <a href="en/" lang="en" hreflang="en" dir="ltr"><span class="flag" aria-hidden="true">🇺🇸</span>English</a>
   </nav>
 </div></header>
 
+<main id="main" tabindex="-1">
 <!-- ===================== HERO ===================== -->
 <section class="hero"><div class="wrap">
   <div>
@@ -213,20 +228,31 @@
       </a>
       <a class="btn ghost" href="#how">איך זה עובד ↓</a>
     </div>
-    <div class="pills">
-      <span>👧 לגילאי 4–12</span>
-      <span>🚫 בלי פרסומות</span>
-      <span>🔒 בלי מעקב</span>
-      <span>🇮🇱 עברית מלאה</span>
-    </div>
+    <ul class="pills">
+      <li><span aria-hidden="true">👧</span> לגילאי 4–12</li>
+      <li><span aria-hidden="true">🚫</span> בלי פרסומות</li>
+      <li><span aria-hidden="true">🔒</span> בלי מעקב</li>
+      <li><span aria-hidden="true">🇮🇱</span> עברית מלאה</li>
+    </ul>
   </div>
   <div class="stage">
     <!-- The hero plays the app itself: a silent, looping capture of a real
-         session. The poster is the first frame, so the layout never jumps. -->
+         session. The poster is the first frame, so the layout never jumps.
+         The loop never ends on its own, so WCAG 2.2.2 says it owes the reader
+         a way to stop it — that is the button below, which also freezes the
+         sparkles and the floating phones. -->
     <video class="front" src="video/hero-loop.mp4" poster="video/hero-poster.jpg"
-           width="820" height="1781" autoplay muted loop playsinline preload="metadata"
+           width="820" height="1781" autoplay muted loop playsinline preload="metadata" data-motion
            aria-label="הצצה לאפליקציה: הילד עונה על שאלה, צובר דקות ופותח זמן משחק"></video>
     <img class="back" src="shots/giftearly.jpg" alt="לוח המשפחה אצל ההורה" width="820" height="1781" loading="lazy">
+    <div class="motion-wrap">
+      <button class="motion-btn" type="button" data-motion-toggle aria-pressed="false"
+              data-label-pause="עצירת התנועה בעמוד" data-label-play="הפעלת התנועה בעמוד"
+              aria-label="עצירת התנועה בעמוד">
+        <span class="motion-icon" aria-hidden="true">⏸</span>
+        <span class="motion-text">עצירת התנועה בעמוד</span>
+      </button>
+    </div>
   </div>
 </div></section>
 
@@ -236,13 +262,13 @@
   <h2 class="title reveal">איך זה עובד</h2>
   <p class="lead reveal">במקום לריב על המסך — הופכים אותו לעסקה הוגנת שכולם מרוויחים ממנה.</p>
   <div class="steps">
-    <div class="step pane reveal"><div class="n">1</div><div class="ico">🧠</div>
+    <div class="step pane reveal"><div class="n">1</div><div class="ico" aria-hidden="true">🧠</div>
       <h3>הילד לומד ומשחק</h3>
       <p>שאלות לפי הכיתה בחשבון, עברית, אנגלית, מדעים ועוד — בתוך הרפתקה צבעונית עם דמות, כוכבים ויהלומים.</p></div>
-    <div class="step pane reveal"><div class="n">2</div><div class="ico">🎮</div>
+    <div class="step pane reveal"><div class="n">2</div><div class="ico" aria-hidden="true">🎮</div>
       <h3>מרוויח דקות משחק</h3>
       <p>כל תשובה נכונה שווה שניות משחק, והן מצטברות לדקות. כשיש מספיק דקות, האפליקציות שחסמתם נפתחות באמת.</p></div>
-    <div class="step pane reveal"><div class="n">3</div><div class="ico">📊</div>
+    <div class="step pane reveal"><div class="n">3</div><div class="ico" aria-hidden="true">📊</div>
       <h3>אתם רואים ושולטים</h3>
       <p>מה נלמד היום, במה הילד חזק ובמה הוא צריך עזרה, כמה זמן מותר ואילו עולמות פתוחים — הכול מאחורי קוד הורה.</p></div>
   </div>
@@ -255,28 +281,28 @@
   <p class="lead reveal">לטופי שני צדדים: מה שהילד רואה ומשחק בו, ומה שאתם רואים ושולטים בו — ממכשיר נפרד.</p>
 
   <div class="side reveal">
-    <h3>🧒 צד הילד</h3>
+    <h3><span aria-hidden="true">🧒</span> צד הילד</h3>
     <p class="side-sub">הרפתקה צבעונית: עונים על שאלות, אוספים כוכבים ויהלומים, מסדרים את החדר בבית — ומרוויחים דקות משחק אמיתיות.</p>
     <div class="rail">
-      <figure><button class="shot" type="button"><img src="shots/kidhome.jpg" alt="מסך הבית של הילד" loading="lazy"></button><figcaption>🏠 בוחרים עולם</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="shots/question.jpg" alt="מסך שאלה" loading="lazy"></button><figcaption>🧠 שאלה לפי הכיתה</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="shots/choreskid.jpg" alt="מטלות הבית" loading="lazy"></button><figcaption>🧹 מטלות הבית</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="shots/wheel.jpg" alt="גלגל המזל" loading="lazy"></button><figcaption>🎡 גלגל המזל</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="shots/shop.jpg" alt="חנות הדמויות" loading="lazy"></button><figcaption>💎 חנות הדמויות</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="shots/leaderboard.jpg" alt="חברים ולוח מובילים" loading="lazy"></button><figcaption>🏆 חברים וחידון חי</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/kidhome.jpg" alt="מסך הבית של הילד" loading="lazy"></button><figcaption><span aria-hidden="true">🏠</span> בוחרים עולם</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/question.jpg" alt="מסך שאלה" loading="lazy"></button><figcaption><span aria-hidden="true">🧠</span> שאלה לפי הכיתה</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/choreskid.jpg" alt="מטלות הבית" loading="lazy"></button><figcaption><span aria-hidden="true">🧹</span> מטלות הבית</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/wheel.jpg" alt="גלגל המזל" loading="lazy"></button><figcaption><span aria-hidden="true">🎡</span> גלגל המזל</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/shop.jpg" alt="חנות הדמויות" loading="lazy"></button><figcaption><span aria-hidden="true">💎</span> חנות הדמויות</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/leaderboard.jpg" alt="חברים ולוח מובילים" loading="lazy"></button><figcaption><span aria-hidden="true">🏆</span> חברים וחידון חי</figcaption></figure>
     </div>
   </div>
 
   <div class="side reveal">
-    <h3>👨‍👩‍👧 צד ההורה</h3>
+    <h3><span aria-hidden="true">👨‍👩‍👧</span> צד ההורה</h3>
     <p class="side-sub">נכנסים ורואים את כל הילדים במסך אחד: מי משחק עכשיו, כמה נשאר לו והאם הוא התקדם היום. ומשם, נעול בקוד — כמה זמן מותר, אילו אפליקציות נחסמות, אילו עולמות פתוחים לכל ילד ואישור מטלות בלחיצה.</p>
     <div class="rail">
-      <figure><button class="shot" type="button"><img src="shots/giftearly.jpg" alt="לוח המשפחה — כל הילדים במסך אחד" loading="lazy"></button><figcaption>👨‍👩‍👧 לוח המשפחה</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="shots/devicecontrols.jpg" alt="בקרת המכשיר" loading="lazy"></button><figcaption>🔒 בקרת המכשיר</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="shots/childscreentime.jpg" alt="הגבלת זמן מסך יומית" loading="lazy"></button><figcaption>⏱ תקרה יומית</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="shots/childworlds.jpg" alt="עולמות פעילים לכל ילד" loading="lazy"></button><figcaption>🌍 עולם לכל ילד</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="shots/choresparent.jpg" alt="אישור מטלות" loading="lazy"></button><figcaption>✅ אישור מטלות</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="shots/childdifficulty.jpg" alt="רמת קושי לכל נושא" loading="lazy"></button><figcaption>🎯 רמה לכל נושא</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/giftearly.jpg" alt="לוח המשפחה — כל הילדים במסך אחד" loading="lazy"></button><figcaption><span aria-hidden="true">👨‍👩‍👧</span> לוח המשפחה</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/devicecontrols.jpg" alt="בקרת המכשיר" loading="lazy"></button><figcaption><span aria-hidden="true">🔒</span> בקרת המכשיר</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/childscreentime.jpg" alt="הגבלת זמן מסך יומית" loading="lazy"></button><figcaption><span aria-hidden="true">⏱</span> תקרה יומית</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/childworlds.jpg" alt="עולמות פעילים לכל ילד" loading="lazy"></button><figcaption><span aria-hidden="true">🌍</span> עולם לכל ילד</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/choresparent.jpg" alt="אישור מטלות" loading="lazy"></button><figcaption><span aria-hidden="true">✅</span> אישור מטלות</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/childdifficulty.jpg" alt="רמת קושי לכל נושא" loading="lazy"></button><figcaption><span aria-hidden="true">🎯</span> רמה לכל נושא</figcaption></figure>
     </div>
   </div>
 </div></section>
@@ -286,31 +312,31 @@
   <div class="eyebrow reveal">תוכן</div>
   <h2 class="title reveal">עולם לכל ילד</h2>
   <p class="lead reveal">כל עולם הוא נושא שלם, עם שאלות מתויגות לפי כיתה. אתם מחליטים אילו עולמות פתוחים לכל ילד בנפרד.</p>
-  <div class="worlds reveal">
-    <span class="world free">✨ טופי טיים · חינם תמיד</span>
-    <span class="world">🧮 מתמטיקה</span>
-    <span class="world">✍️ עברית</span>
-    <span class="world">🇬🇧 אנגלית</span>
-    <span class="world">📖 הבנת הנקרא</span>
-    <span class="world">🧩 לוגיקה</span>
-    <span class="world">🔬 מדעים</span>
-    <span class="world">🏛️ היסטוריה</span>
-    <span class="world">🌍 גיאוגרפיה</span>
-    <span class="world">💰 חינוך פיננסי</span>
-    <span class="world">⚽ כדורגל</span>
-    <span class="world">🦖 דינוזאורים</span>
-    <span class="world">🚀 חלל וכוכבים</span>
-    <span class="world">🐾 עולם החיות</span>
-    <span class="world">🌊 מעמקי הים</span>
-    <span class="world">🧠 הכנה למחוננים</span>
-    <span class="world">🍳 מטבח ומדע של אוכל</span>
-    <span class="world">🏛️ ישראל שלי</span>
-    <span class="world">🎵 מוזיקה</span>
-    <span class="world">🧍 גוף האדם</span>
-    <span class="world">🚗 כלי רכב ותחבורה</span>
-    <span class="world">🌍 דגלים ומדינות</span>
-    <span class="world">🍎 חגי תשרי</span>
-  </div>
+  <ul class="worlds reveal">
+    <li class="world free"><span aria-hidden="true">✨</span> טופי טיים · חינם תמיד</li>
+    <li class="world"><span aria-hidden="true">🧮</span> מתמטיקה</li>
+    <li class="world"><span aria-hidden="true">✍️</span> עברית</li>
+    <li class="world"><span aria-hidden="true">🇬🇧</span> אנגלית</li>
+    <li class="world"><span aria-hidden="true">📖</span> הבנת הנקרא</li>
+    <li class="world"><span aria-hidden="true">🧩</span> לוגיקה</li>
+    <li class="world"><span aria-hidden="true">🔬</span> מדעים</li>
+    <li class="world"><span aria-hidden="true">🏛️</span> היסטוריה</li>
+    <li class="world"><span aria-hidden="true">🌍</span> גיאוגרפיה</li>
+    <li class="world"><span aria-hidden="true">💰</span> חינוך פיננסי</li>
+    <li class="world"><span aria-hidden="true">⚽</span> כדורגל</li>
+    <li class="world"><span aria-hidden="true">🦖</span> דינוזאורים</li>
+    <li class="world"><span aria-hidden="true">🚀</span> חלל וכוכבים</li>
+    <li class="world"><span aria-hidden="true">🐾</span> עולם החיות</li>
+    <li class="world"><span aria-hidden="true">🌊</span> מעמקי הים</li>
+    <li class="world"><span aria-hidden="true">🧠</span> הכנה למחוננים</li>
+    <li class="world"><span aria-hidden="true">🍳</span> מטבח ומדע של אוכל</li>
+    <li class="world"><span aria-hidden="true">🏛️</span> ישראל שלי</li>
+    <li class="world"><span aria-hidden="true">🎵</span> מוזיקה</li>
+    <li class="world"><span aria-hidden="true">🧍</span> גוף האדם</li>
+    <li class="world"><span aria-hidden="true">🚗</span> כלי רכב ותחבורה</li>
+    <li class="world"><span aria-hidden="true">🌍</span> דגלים ומדינות</li>
+    <li class="world"><span aria-hidden="true">🍎</span> חגי תשרי</li>
+  </ul>
   <p class="worlds-note reveal">ואנחנו מוסיפים עולמות עונתיים סביב חגים ואירועים — כמו חגי תשרי 🍎</p>
 </div></section>
 
@@ -320,17 +346,17 @@
   <h2 class="title reveal">מתאימה את עצמה לילד</h2>
   <p class="lead reveal">לא עוד אפליקציית חידונים. טופי יודע באיזו כיתה הילד נמצא, במה הוא חזק, ומתי כדאי לעלות רמה.</p>
   <div class="cards">
-    <div class="card pane reveal"><div class="ico">🎒</div><h3>לפי תוכנית הלימודים</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🎒</div><h3>לפי תוכנית הלימודים</h3>
       <p>כל שאלה מתויגת לכיתה שלה, מגן טרום־חובה ועד כיתה ו׳. בספטמבר הילד עולה כיתה — והשאלות עולות איתו.</p></div>
-    <div class="card pane reveal"><div class="ico">📈</div><h3>רמה שמתכווננת לבד</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">📈</div><h3>רמה שמתכווננת לבד</h3>
       <p>הרמה נקבעת לכל נושא בנפרד לפי ההצלחות בפועל, סביב הרמה שאתם קבעתם. קל מדי? עולה. קשה מדי? יורדת.</p></div>
-    <div class="card pane reveal"><div class="ico">🔊</div><h3>גם למי שעוד לא קורא</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🔊</div><h3>גם למי שעוד לא קורא</h3>
       <p>הקראה קולית של השאלה והתשובות, והתשובות גם ממוספרות — כדי שגם ילדי גן יוכלו לשחק לבד.</p></div>
-    <div class="card pane reveal"><div class="ico">💛</div><h3>טעות היא לא כישלון</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">💛</div><h3>טעות היא לא כישלון</h3>
       <p>תשובה שגויה מקבלת רמז והסבר — אף פעם לא שפה של כישלון. אפשר גם לבקש עזרה מאבא או אמא — והם עונים מהטלפון.</p></div>
-    <div class="card pane reveal"><div class="ico">🧹</div><h3>גם מטלות הבית</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🧹</div><h3>גם מטלות הבית</h3>
       <p>סידור החדר או פינוי השולחן שווים דקות משחק. הילד מסמן שביצע, ואתם מאשרים — לפעמים גם עם צילום.</p></div>
-    <div class="card pane reveal"><div class="ico">🏆</div><h3>חברים וחידון חי</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🏆</div><h3>חברים וחידון חי</h3>
       <p>ילדים שחיברתם בקוד יכולים להתחרות בלוח מובילים ובחידון חי בזמן אמת. בלי צ׳אט, בלי הודעות, בלי זרים.</p></div>
   </div>
 </div></section>
@@ -342,14 +368,14 @@
     <h2 class="title">בנוי גם בשבילכם</h2>
     <p class="lead" style="margin-bottom:0">האפליקציות נחסמות דרך Screen Time של אפל ונפתחות רק כשהילד הרוויח. אתם קובעים תקרה יומית, פותחים זמן ידנית מכל מקום, ומקבלים התראה כשהילד התחיל, סיים או ביקש עזרה.</p>
     <ul class="list">
-      <li>⏱ תקרה יומית לכל ילד</li>
-      <li>🎁 פתיחת זמן מרחוק</li>
-      <li>🎯 רמת קושי לכל נושא</li>
-      <li>🌍 בחירת עולמות לכל ילד</li>
-      <li>🔔 התראות חכמות</li>
-      <li>👨‍👩‍👧 כמה הורים, כמה ילדים</li>
-      <li>⌚️ גם על ה־Apple Watch</li>
-      <li>🔐 הכול מאחורי קוד הורה</li>
+      <li><span aria-hidden="true">⏱</span> תקרה יומית לכל ילד</li>
+      <li><span aria-hidden="true">🎁</span> פתיחת זמן מרחוק</li>
+      <li><span aria-hidden="true">🎯</span> רמת קושי לכל נושא</li>
+      <li><span aria-hidden="true">🌍</span> בחירת עולמות לכל ילד</li>
+      <li><span aria-hidden="true">🔔</span> התראות חכמות</li>
+      <li><span aria-hidden="true">👨‍👩‍👧</span> כמה הורים, כמה ילדים</li>
+      <li><span aria-hidden="true">⌚️</span> גם על ה־<span lang="en">Apple Watch</span></li>
+      <li><span aria-hidden="true">🔐</span> הכול מאחורי קוד הורה</li>
     </ul>
   </div>
 </div></section>
@@ -360,11 +386,11 @@
   <h2 class="title reveal">מה שאין בטופי חשוב לא פחות</h2>
   <p class="lead reveal">טופי נמצא בקטגוריית הילדים של ה־App Store, ונבנה לפי הכללים שלה מהיום הראשון.</p>
   <div class="cards">
-    <div class="card pane reveal"><div class="ico">🚫</div><h3>בלי פרסומות</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🚫</div><h3>בלי פרסומות</h3>
       <p>אין באנרים, אין סרטוני פרסומת, ואין קישורים שמוציאים את הילד מהאפליקציה.</p></div>
-    <div class="card pane reveal"><div class="ico">🕵️</div><h3>בלי מעקב</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🕵️</div><h3>בלי מעקב</h3>
       <p>אין כלי אנליטיקה של צד שלישי, אין מזהה פרסומי ואין מעקב חוצה־אפליקציות. הנתונים משמשים רק להפעלת האפליקציה.</p></div>
-    <div class="card pane reveal"><div class="ico">💳</div><h3>בלי קניות אצל הילד</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">💳</div><h3>בלי קניות אצל הילד</h3>
       <p>במכשיר של הילד לא מוצגים מחירים ואי אפשר לקנות. כל תשלום נעשה אצלכם, מאחורי קוד הורה.</p></div>
   </div>
 </div></section>
@@ -440,24 +466,36 @@
   <div class="band pane reveal">
     <div class="eyebrow">בקרוב</div>
     <h2 class="title">רוצים לדעת מתי טופי עולה לאוויר?</h2>
-    <p class="lead" style="margin-bottom:0">השאירו אימייל ונעדכן אתכם ביום ההשקה. הודעה אחת, בלי ספאם. 🦁</p>
-    <form class="ef" id="earlyForm" onsubmit="return joinWaitlist(event)">
-      <input id="ef-name" type="text" placeholder="השם שלכם" autocomplete="name">
-      <input id="ef-email" type="email" placeholder="אימייל" required autocomplete="email">
-      <select id="ef-age" aria-label="גיל הילד">
-        <option value="">גיל הילד (לא חובה)</option>
-        <option>4–5</option><option>6–7</option><option>8–9</option><option>10+</option>
-      </select>
-      <button type="submit" class="btn" id="ef-btn">עדכנו אותי 🎉</button>
+    <p class="lead" style="margin-bottom:0">השאירו אימייל ונעדכן אתכם ביום ההשקה. הודעה אחת, בלי ספאם. <span aria-hidden="true">🦁</span></p>
+    <form class="ef" id="earlyForm" novalidate>
+      <div class="field">
+        <label for="ef-name">השם שלכם <span class="opt">(לא חובה)</span></label>
+        <input id="ef-name" type="text" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="ef-email">אימייל</label>
+        <input id="ef-email" type="email" required autocomplete="email"
+               placeholder="name@example.com" aria-describedby="ef-email-error">
+        <p class="ef-error" id="ef-email-error"></p>
+      </div>
+      <div class="field">
+        <label for="ef-age">גיל הילד <span class="opt">(לא חובה)</span></label>
+        <select id="ef-age">
+          <option value="">בחרו גיל</option>
+          <option>4–5</option><option>6–7</option><option>8–9</option><option>10+</option>
+        </select>
+      </div>
+      <button type="submit" class="btn" id="ef-btn">עדכנו אותי <span aria-hidden="true">🎉</span></button>
     </form>
-    <div class="ef-ok" id="ef-ok" style="display:none">יש! רשמנו אתכם 🎉 נעדכן ברגע שטופי עולה לאוויר.</div>
-    <div class="ef-note">האימייל משמש להודעת ההשקה בלבד.</div>
+    <p class="ef-ok" id="ef-ok" tabindex="-1" hidden>יש! רשמנו אתכם <span aria-hidden="true">🎉</span> נעדכן ברגע שטופי עולה לאוויר.</p>
+    <p class="ef-status visually-hidden" id="ef-status" role="status" aria-live="polite"></p>
+    <div class="ef-note">האימייל משמש להודעת ההשקה בלבד. <a href="privacy.html">מדיניות הפרטיות</a></div>
   </div>
 </div></section>
 
 <!-- ===================== FINAL ===================== -->
 <section id="download"><div class="wrap final reveal">
-  <img src="lion.png" alt="טופי" width="96" height="96">
+  <img src="lion.png" alt="" width="96" height="96">
   <h2>במקום לריב על המסך —<br>הילדים מרוויחים אותו</h2>
   <p>אתם קובעים את הכללים, וטופי דואג שהם יקרו.</p>
   <a class="appstore" href="#early" style="margin:0 auto" data-store>
@@ -466,16 +504,19 @@
   </a>
 </div></section>
 
+</main>
+
 <footer class="site-foot"><div class="wrap">
   <div>טופי (Tofy) · אפליקציית למידה וזמן מסך לילדים</div>
-  <div class="links">
+  <nav class="links" aria-label="קישורים בתחתית העמוד">
     <a href="privacy.html">מדיניות פרטיות</a>
     <a href="terms.html">תנאי שימוש</a>
     <a href="age-suitability.html">התאמה לגיל</a>
+    <a href="accessibility.html">הצהרת נגישות</a>
     <a href="support.html">תמיכה</a>
     <a href="mailto:ranioph@gmail.com">צרו קשר</a>
-  </div>
-  <div style="opacity:.75">© 2026 Tofy · tofyapp.com</div>
+  </nav>
+  <div class="copyright">© 2026 Tofy · tofyapp.com</div>
 </div></footer>
 
 <div class="lb" id="lightbox" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="צילום מסך מוגדל">
@@ -514,19 +555,8 @@
     }
   })();
 
-  /* mobile menu */
-  var btn = document.getElementById("menuBtn"), nav = document.getElementById("nav");
-  btn.addEventListener("click", function(){
-    var open = nav.classList.toggle("open");
-    btn.setAttribute("aria-expanded", open ? "true" : "false");
-  });
-  nav.addEventListener("click", function(e){ if (e.target.tagName === "A") nav.classList.remove("open"); });
-
-  /* scroll reveal */
-  var io = new IntersectionObserver(function(es){
-    es.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-  }, { threshold: .12 });
-  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+  /* The mobile menu, the scroll reveal and the stop-the-motion button live in
+     site.js now, so every page on the site behaves the same way. */
 
   /* 🔍 Lightbox: any screenshot opens large, with ← → and Esc. */
   (function(){
@@ -546,7 +576,9 @@
       var thumb = shots[index].querySelector("img");
       img.src = thumb.src;
       img.alt = thumb.alt;
-      cap.textContent = shots[index].parentNode.querySelector("figcaption").textContent;
+      /* innerHTML, not textContent: the caption's emoji sit in aria-hidden
+         spans, and they should stay hidden inside the dialog too. */
+      cap.innerHTML = shots[index].parentNode.querySelector("figcaption").innerHTML;
       count.textContent = (index + 1) + " / " + shots.length;
     }
     function open(i, from){
@@ -563,6 +595,7 @@
     }
 
     shots.forEach(function(btn, i){
+      btn.setAttribute("aria-haspopup", "dialog");
       btn.addEventListener("click", function(){ open(i, btn); });
     });
     closeBtn.addEventListener("click", close);
@@ -571,6 +604,15 @@
     lb.addEventListener("click", function(e){ if (e.target === lb) close(); });
     document.addEventListener("keydown", function(e){
       if (lb.hidden) return;
+      /* aria-modal only tells assistive tech the rest is inert — Tab still
+         has to be kept inside the dialog by hand. */
+      if (e.key === "Tab") {
+        var ring = [closeBtn, prevBtn, nextBtn];
+        var at = ring.indexOf(document.activeElement);
+        e.preventDefault();
+        ring[(at + (e.shiftKey ? ring.length - 1 : 1) + ring.length) % ring.length].focus();
+        return;
+      }
       if (e.key === "Escape") close();
       // The rail reads right-to-left, so → walks back and ← walks forward.
       else if (e.key === "ArrowRight") show(index - 1);
@@ -587,38 +629,76 @@
     }, {passive:true});
   })();
 
-  /* Waitlist → Firestore `waitlist` (REST, no SDK). Falls back to a pre-filled
-     email so a lead is never lost if the write is blocked. */
-  async function joinWaitlist(e){
-    e.preventDefault();
-    var email = document.getElementById("ef-email").value.trim();
-    var name  = document.getElementById("ef-name").value.trim();
-    var age   = document.getElementById("ef-age").value;
-    if (!email) return false;
-    var btn = document.getElementById("ef-btn"); btn.disabled = true; btn.textContent = "שולח…";
-    var PROJECT = "childtime-86e98";
-    var KEY = "AIzaSyB2sLDqhZsZ0gTFD2qUs9upO3JljuwV1Tw"; // public Firebase web key (secured by rules)
-    var url = "https://firestore.googleapis.com/v1/projects/" + PROJECT + "/databases/(default)/documents/waitlist?key=" + KEY;
-    var body = { fields: {
-      email:     { stringValue: email },
-      name:      { stringValue: name || "" },
-      childAge:  { stringValue: age || "" },
-      source:    { stringValue: "web" },
-      createdAt: { timestampValue: new Date().toISOString() }
-    }};
-    try {
-      var r = await fetch(url, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
-      if (!r.ok) throw new Error("status " + r.status);
-      document.getElementById("earlyForm").style.display = "none";
-      document.getElementById("ef-ok").style.display = "block";
-    } catch (err) {
-      var subj = encodeURIComponent("טופי - עדכנו אותי בהשקה");
-      var bdy  = encodeURIComponent("שם: " + name + "\nאימייל: " + email + "\nגיל הילד: " + age);
-      window.location.href = "mailto:ranioph@gmail.com?subject=" + subj + "&body=" + bdy;
-      btn.disabled = false; btn.textContent = "עדכנו אותי 🎉";
+  /* Waitlist → Firestore `waitlist` (REST, no SDK). Validation is ours rather
+     than the browser's, so a mistake is announced as real text in a live
+     region instead of a native bubble that screen readers may not read.
+     Falls back to a pre-filled email so a lead is never lost. */
+  (function(){
+    var form = document.getElementById("earlyForm");
+    if (!form) return;
+    var emailEl  = document.getElementById("ef-email"),
+        nameEl   = document.getElementById("ef-name"),
+        ageEl    = document.getElementById("ef-age"),
+        errEl    = document.getElementById("ef-email-error"),
+        okEl     = document.getElementById("ef-ok"),
+        statusEl = document.getElementById("ef-status"),
+        btn      = document.getElementById("ef-btn");
+
+    function setError(msg){
+      errEl.textContent = msg ? "⚠ " + msg : "";
+      emailEl.setAttribute("aria-invalid", msg ? "true" : "false");
+      if (msg) statusEl.textContent = msg;
     }
-    return false;
-  }
+
+    form.addEventListener("submit", async function(e){
+      e.preventDefault();
+      var email = emailEl.value.trim(),
+          name  = nameEl.value.trim(),
+          age   = ageEl.value;
+
+      if (!email) {
+        setError("כדי שנוכל לעדכן אתכם, כתבו כתובת אימייל.");
+        emailEl.focus();
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setError("נראה שחסר משהו בכתובת האימייל — בדקו אותה ונסו שוב.");
+        emailEl.focus();
+        return;
+      }
+      setError("");
+
+      btn.disabled = true;
+      btn.textContent = "שולח…";
+      statusEl.textContent = "שולחים את הפרטים…";
+
+      var PROJECT = "childtime-86e98";
+      var KEY = "AIzaSyB2sLDqhZsZ0gTFD2qUs9upO3JljuwV1Tw"; // public Firebase web key (secured by rules)
+      var url = "https://firestore.googleapis.com/v1/projects/" + PROJECT + "/databases/(default)/documents/waitlist?key=" + KEY;
+      var body = { fields: {
+        email:     { stringValue: email },
+        name:      { stringValue: name || "" },
+        childAge:  { stringValue: age || "" },
+        source:    { stringValue: "web" },
+        createdAt: { timestampValue: new Date().toISOString() }
+      }};
+      try {
+        var r = await fetch(url, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+        if (!r.ok) throw new Error("status " + r.status);
+        form.hidden = true;
+        okEl.hidden = false;
+        statusEl.textContent = "יש! רשמנו אתכם. נעדכן ברגע שטופי עולה לאוויר.";
+        okEl.focus();            /* the submit button just disappeared */
+      } catch (err) {
+        statusEl.textContent = "לא הצלחנו לשלוח — פותחים לכם הודעת אימייל מוכנה.";
+        var subj = encodeURIComponent("טופי - עדכנו אותי בהשקה");
+        var bdy  = encodeURIComponent("שם: " + name + "\nאימייל: " + email + "\nגיל הילד: " + age);
+        window.location.href = "mailto:ranioph@gmail.com?subject=" + subj + "&body=" + bdy;
+        btn.disabled = false;
+        btn.textContent = "עדכנו אותי 🎉";
+      }
+    });
+  })();
 </script>
 </body>
 </html>

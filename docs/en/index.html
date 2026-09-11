@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#5E60CE">
+<meta name="theme-color" content="#3C3D84">
 <title>Tofy — Screen time kids earn by learning</title>
 <meta name="description" content="Tofy turns screen time into something kids earn. Your child answers grade-level questions — math, reading, science, and more — and earns real play minutes in the apps you choose. No ads, no tracking.">
 <link rel="canonical" href="https://tofyapp.com/en/">
@@ -30,7 +30,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
-<link rel="stylesheet" href="../glass.css?v=3">
+<link rel="stylesheet" href="../glass.css?v=4">
+<!-- Marks the page as scripted BEFORE paint, so .reveal only ever hides
+     content while JavaScript is actually running to bring it back. -->
+<script>document.documentElement.className += " js";</script>
+<script src="../site.js" defer></script>
 <style>
   /* ---------- hero ---------- */
   .hero{padding:60px 0 30px}
@@ -39,12 +43,13 @@
     background:linear-gradient(180deg,#fff,#FFE9A8);-webkit-background-clip:text;background-clip:text;color:transparent}
   .hero .sub{font-size:clamp(17px,2.1vw,21px);color:var(--muted);margin:18px 0 8px;max-width:520px;font-weight:500}
   .hero .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
-  .pills{display:flex;flex-wrap:wrap;gap:9px;margin-top:26px}
-  .pills span{font-size:14px;font-weight:700;padding:8px 15px;border-radius:999px;
-    background:rgba(255,255,255,.12);border:1px solid var(--edge);color:var(--muted)}
+  .pills{display:flex;flex-wrap:wrap;gap:9px;margin-top:26px;list-style:none}
+  .pills li{font-size:14px;font-weight:700;padding:8px 15px;border-radius:999px;
+    background:var(--pane-pill);border:1px solid var(--edge);color:var(--muted)}
   /* The kid's phone leads, the parent's sits behind it. Both are capped in
      pixels so a mid-sized window never turns the hero into two giant phones. */
   .stage{position:relative;width:100%;max-width:520px}
+  .motion-wrap{display:flex;justify-content:center;margin-top:18px}
   .stage img,.stage video{border-radius:30px;border:1px solid rgba(255,255,255,.2);
     box-shadow:0 30px 70px rgba(18,9,58,.45);display:block;max-width:100%;height:auto}
   .stage .front{position:relative;z-index:2;width:min(66%,300px);margin-inline-start:auto;
@@ -89,7 +94,7 @@
   .rail .shot{padding:0;border:0;background:none;display:block;cursor:zoom-in;border-radius:26px;
     transition:transform .18s ease}
   .rail .shot:hover{transform:translateY(-4px)}
-  .rail .shot::after{content:"⤢";position:absolute;inset-block-start:10px;inset-inline-start:10px;
+  .rail .shot::after{content:"⤢";content:"⤢" / "";position:absolute;inset-block-start:10px;inset-inline-start:10px;
     width:30px;height:30px;display:grid;place-items:center;border-radius:50%;font-size:14px;font-weight:800;
     background:rgba(20,12,60,.55);border:1px solid rgba(255,255,255,.34);color:#fff;
     opacity:0;transition:opacity .18s ease;pointer-events:none}
@@ -121,10 +126,10 @@
   }
 
   /* ---------- worlds ---------- */
-  .worlds{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:900px;margin:0 auto}
+  .worlds{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:900px;margin:0 auto;list-style:none}
   .world{font-size:15.5px;font-weight:700;padding:11px 18px;border-radius:999px;
-    background:rgba(255,255,255,.12);border:1px solid var(--edge)}
-  .world.free{background:rgba(140,255,196,.18);border-color:rgba(140,255,196,.5)}
+    background:var(--pane-pill);border:1px solid var(--edge)}
+  .world.free{background:rgba(140,255,196,.10);border-color:rgba(140,255,196,.55)}
   .worlds-note{text-align:center;color:var(--faint);font-size:15px;margin-top:22px}
 
   /* ---------- feature cards ---------- */
@@ -140,7 +145,7 @@
   .band{padding:48px 30px;text-align:center}
   .band .list{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:26px}
   .band .list li{list-style:none;font-weight:700;font-size:15.5px;padding:11px 18px;border-radius:14px;
-    background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.2)}
+    background:var(--pane-pill);border:1px solid var(--edge)}
 
   /* ---------- pricing ---------- */
   .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
@@ -154,7 +159,7 @@
   .plan .note{color:var(--faint);font-size:14.5px;margin-bottom:16px}
   .plan ul{list-style:none;margin:0 0 20px;display:flex;flex-direction:column;gap:9px}
   .plan li{color:var(--muted);font-size:15.5px;display:flex;gap:8px}
-  .plan li::before{content:"✓";color:var(--mint);font-weight:900;flex:0 0 auto}
+  .plan li::before{content:"✓";content:"✓" / "";color:var(--mint);font-weight:900;flex:0 0 auto}
   .plan .foot{margin-top:auto;color:var(--faint);font-size:14px}
   @media(max-width:900px){.plans{grid-template-columns:1fr}}
 
@@ -163,18 +168,23 @@
   .faq details{padding:18px 22px;margin-bottom:12px}
   .faq summary{font-weight:800;font-size:17.5px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:14px}
   .faq summary::-webkit-details-marker{display:none}
-  .faq summary::after{content:"+";font-size:24px;color:var(--gold);line-height:1}
-  .faq details[open] summary::after{content:"−"}
+  .faq summary::after{content:"+";content:"+" / "";font-size:24px;color:var(--gold);line-height:1}
+  .faq details[open] summary::after{content:"−";content:"−" / ""}
   .faq details p{margin-top:12px;color:var(--muted);font-size:16px}
 
   /* ---------- waitlist ---------- */
   .ef{display:flex;flex-direction:column;gap:12px;max-width:420px;margin:26px auto 0}
   .ef input,.ef select{width:100%;font-family:inherit;font-size:16px;font-weight:600;color:#fff;
-    background:rgba(255,255,255,.12);border:1px solid var(--edge);border-radius:14px;padding:14px 16px;outline:none;
+    background:rgba(27,15,74,.30);border:1px solid var(--edge);border-radius:14px;padding:14px 16px;outline:none;
     transition:border-color .2s, background .2s}
-  .ef input::placeholder{color:rgba(255,255,255,.6)}
-  .ef input:focus,.ef select:focus{border-color:var(--gold);background:rgba(255,255,255,.18)}
-  .ef select{appearance:none}
+  .ef input::placeholder{color:rgba(255,255,255,.78)}
+  .ef input:focus,.ef select:focus{border-color:var(--gold);background:rgba(27,15,74,.42)}
+  /* appearance:none removes the native arrow, so draw one back — otherwise
+     nothing says "this opens a list". */
+  .ef select{appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 16px center;background-size:12px 8px;
+    padding-inline-end:40px}
   .ef option{color:#1b1340}
   .ef-ok{font-weight:800;font-size:19px;color:var(--mint);margin-top:22px}
   .ef-note{font-size:13.5px;color:var(--faint);margin-top:14px}
@@ -187,23 +197,28 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 <div class="backdrop"></div>
-<div class="sparks" id="sparks"></div>
+<div class="sparks" id="sparks" aria-hidden="true"></div>
 
 <header class="site-head"><div class="wrap">
-  <a class="brand" href="./"><img src="../lion.png" alt=""><span>Tofy</span></a>
-  <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">☰</button>
-  <nav class="site-nav" id="nav">
+  <a class="brand" href="./"><img src="../lion.png" alt=""><span>Tofy</span><span class="visually-hidden"> — home</span></a>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">☰</button>
+  <nav class="site-nav" id="nav" aria-label="Main">
     <a href="#how">How it works</a>
     <a href="#screens">Sneak peek</a>
     <a href="#worlds">Worlds</a>
     <a href="#parents">For parents</a>
     <a href="#price">Pricing</a>
-    <a href="../" lang="he" hreflang="he">עברית</a>
     <a class="btn" href="#early">Notify me at launch</a>
+  </nav>
+  <nav class="lang-switch" aria-label="Language / שפה">
+    <a href="../" lang="he" hreflang="he" dir="rtl"><span class="flag" aria-hidden="true">🇮🇱</span>עברית</a>
+    <a href="./" lang="en" hreflang="en" dir="ltr" aria-current="true"><span class="flag" aria-hidden="true">🇺🇸</span>English</a>
   </nav>
 </div></header>
 
+<main id="main" tabindex="-1">
 <!-- ===================== HERO ===================== -->
 <section class="hero"><div class="wrap">
   <div>
@@ -216,20 +231,31 @@
       </a>
       <a class="btn ghost" href="#how">How it works ↓</a>
     </div>
-    <div class="pills">
-      <span>🎒 Grades K–8</span>
-      <span>🚫 No ads</span>
-      <span>🔒 No tracking</span>
-      <span>🇺🇸 Fully in English</span>
-    </div>
+    <ul class="pills">
+      <li><span aria-hidden="true">🎒</span> Grades K–8</li>
+      <li><span aria-hidden="true">🚫</span> No ads</li>
+      <li><span aria-hidden="true">🔒</span> No tracking</li>
+      <li><span aria-hidden="true">🇺🇸</span> Fully in English</li>
+    </ul>
   </div>
   <div class="stage">
     <!-- The hero plays the app itself: a silent, looping capture of a real
-         session. The poster is the first frame, so the layout never jumps. -->
-    <video class="front" src="../video/hero-loop.mp4" poster="../video/hero-poster.jpg"
-           width="820" height="1781" autoplay muted loop playsinline preload="metadata"
+         session. The poster is the first frame, so the layout never jumps.
+         The loop never ends on its own, so WCAG 2.2.2 says it owes the reader
+         a way to stop it — that is the button below, which also freezes the
+         sparkles and the floating phones. -->
+    <video class="front" src="../video/en/hero-loop.mp4" poster="../video/en/hero-poster.jpg"
+           width="820" height="1781" autoplay muted loop playsinline preload="metadata" data-motion
            aria-label="A look inside the app: a child answers a question, collects minutes, and unlocks play time"></video>
-    <img class="back" src="../shots/giftearly.jpg" alt="The family board on a parent's phone" width="820" height="1781" loading="lazy">
+    <img class="back" src="../shots/en/giftearly.jpg" alt="The family board on a parent's phone" width="820" height="1781" loading="lazy">
+    <div class="motion-wrap">
+      <button class="motion-btn" type="button" data-motion-toggle aria-pressed="false"
+              data-label-pause="Pause the motion on this page" data-label-play="Start the motion on this page"
+              aria-label="Pause the motion on this page">
+        <span class="motion-icon" aria-hidden="true">⏸</span>
+        <span class="motion-text">Pause the motion on this page</span>
+      </button>
+    </div>
   </div>
 </div></section>
 
@@ -239,13 +265,13 @@
   <h2 class="title reveal">How it works</h2>
   <p class="lead reveal">Instead of fighting over screens, turn them into a fair deal where everyone wins.</p>
   <div class="steps">
-    <div class="step pane reveal"><div class="n">1</div><div class="ico">🧠</div>
+    <div class="step pane reveal"><div class="n">1</div><div class="ico" aria-hidden="true">🧠</div>
       <h3>Your child learns and plays</h3>
       <p>Grade-level questions in math, reading, science, and more — inside a colorful adventure with a character, stars, and diamonds.</p></div>
-    <div class="step pane reveal"><div class="n">2</div><div class="ico">🎮</div>
+    <div class="step pane reveal"><div class="n">2</div><div class="ico" aria-hidden="true">🎮</div>
       <h3>Earns play minutes</h3>
       <p>Every correct answer is worth seconds of play time, and they add up to minutes. Once there are enough, the apps you blocked really open.</p></div>
-    <div class="step pane reveal"><div class="n">3</div><div class="ico">📊</div>
+    <div class="step pane reveal"><div class="n">3</div><div class="ico" aria-hidden="true">📊</div>
       <h3>You see it all and stay in control</h3>
       <p>What they learned today, where they shine and where they need help, how much time is allowed, and which worlds are open — all behind a parent code.</p></div>
   </div>
@@ -259,28 +285,28 @@
   <p class="shots-note reveal">Screenshots are from the Hebrew edition of the app.</p>
 
   <div class="side reveal">
-    <h3>🧒 Your child's side</h3>
+    <h3><span aria-hidden="true">🧒</span> Your child's side</h3>
     <p class="side-sub">A colorful adventure: answer questions, collect stars and diamonds, help out around the house — and earn real play minutes.</p>
     <div class="rail">
-      <figure><button class="shot" type="button"><img src="../shots/kidhome.jpg" alt="Your child's home screen" loading="lazy"></button><figcaption>🏠 Pick a world</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="../shots/question.jpg" alt="A question screen" loading="lazy"></button><figcaption>🧠 A grade-level question</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="../shots/choreskid.jpg" alt="House chores" loading="lazy"></button><figcaption>🧹 House chores</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="../shots/wheel.jpg" alt="The prize wheel" loading="lazy"></button><figcaption>🎡 Prize wheel</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="../shots/shop.jpg" alt="The character shop" loading="lazy"></button><figcaption>💎 Character shop</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="../shots/leaderboard.jpg" alt="Friends and leaderboard" loading="lazy"></button><figcaption>🏆 Friends and live quiz</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/kidhome.jpg" alt="Your child's home screen" loading="lazy"></button><figcaption><span aria-hidden="true">🏠</span> Pick a world</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/question.jpg" alt="A question screen" loading="lazy"></button><figcaption><span aria-hidden="true">🧠</span> A grade-level question</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/choreskid.jpg" alt="House chores" loading="lazy"></button><figcaption><span aria-hidden="true">🧹</span> House chores</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/wheel.jpg" alt="The prize wheel" loading="lazy"></button><figcaption><span aria-hidden="true">🎡</span> Prize wheel</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/shop.jpg" alt="The character shop" loading="lazy"></button><figcaption><span aria-hidden="true">💎</span> Character shop</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/leaderboard.jpg" alt="Friends and leaderboard" loading="lazy"></button><figcaption><span aria-hidden="true">🏆</span> Friends and live quiz</figcaption></figure>
     </div>
   </div>
 
   <div class="side reveal">
-    <h3>👨‍👩‍👧 Your side</h3>
+    <h3><span aria-hidden="true">👨‍👩‍👧</span> Your side</h3>
     <p class="side-sub">Open the app and see all your kids on one screen: who's playing right now, how much time they have left, and whether they made progress today. From there, locked with a code — how much time is allowed, which apps are blocked, which worlds are open for each child, and one-tap chore approvals.</p>
     <div class="rail">
-      <figure><button class="shot" type="button"><img src="../shots/giftearly.jpg" alt="The family board — all your kids on one screen" loading="lazy"></button><figcaption>👨‍👩‍👧 Family board</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="../shots/devicecontrols.jpg" alt="Device controls" loading="lazy"></button><figcaption>🔒 Device controls</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="../shots/childscreentime.jpg" alt="Daily screen time limit" loading="lazy"></button><figcaption>⏱ Daily limit</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="../shots/childworlds.jpg" alt="Active worlds for each child" loading="lazy"></button><figcaption>🌍 Worlds for each child</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="../shots/choresparent.jpg" alt="Chore approvals" loading="lazy"></button><figcaption>✅ Chore approvals</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="../shots/childdifficulty.jpg" alt="Difficulty level for each topic" loading="lazy"></button><figcaption>🎯 Level for each topic</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/giftearly.jpg" alt="The family board — all your kids on one screen" loading="lazy"></button><figcaption><span aria-hidden="true">👨‍👩‍👧</span> Family board</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/devicecontrols.jpg" alt="Device controls" loading="lazy"></button><figcaption><span aria-hidden="true">🔒</span> Device controls</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/childscreentime.jpg" alt="Daily screen time limit" loading="lazy"></button><figcaption><span aria-hidden="true">⏱</span> Daily limit</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/childworlds.jpg" alt="Active worlds for each child" loading="lazy"></button><figcaption><span aria-hidden="true">🌍</span> Worlds for each child</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/choresparent.jpg" alt="Chore approvals" loading="lazy"></button><figcaption><span aria-hidden="true">✅</span> Chore approvals</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/childdifficulty.jpg" alt="Difficulty level for each topic" loading="lazy"></button><figcaption><span aria-hidden="true">🎯</span> Level for each topic</figcaption></figure>
     </div>
   </div>
 </div></section>
@@ -290,28 +316,28 @@
   <div class="eyebrow reveal">CONTENT</div>
   <h2 class="title reveal">A world for every child</h2>
   <p class="lead reveal">Each world is a whole subject, with questions tagged by grade. You decide which worlds are open for each child.</p>
-  <div class="worlds reveal">
-    <span class="world free">✨ Tofy Time · always free</span>
-    <span class="world">🧮 Math</span>
-    <span class="world">📖 Reading</span>
-    <span class="world">✍️ English</span>
-    <span class="world">🧩 Logic</span>
-    <span class="world">🔬 Science</span>
-    <span class="world">🏛️ History</span>
-    <span class="world">🌍 Geography</span>
-    <span class="world">💰 Money Skills</span>
-    <span class="world">⚽ Soccer</span>
-    <span class="world">🦖 Dinosaurs</span>
-    <span class="world">🚀 Space and Stars</span>
-    <span class="world">🐾 Animal World</span>
-    <span class="world">🌊 Deep Sea</span>
-    <span class="world">🧠 Gifted Prep</span>
-    <span class="world">🍳 Kitchen and Food Science</span>
-    <span class="world">🎵 Music</span>
-    <span class="world">🧍 The Human Body</span>
-    <span class="world">🚗 Vehicles and Transportation</span>
-    <span class="world">🚩 Flags and Countries</span>
-  </div>
+  <ul class="worlds reveal">
+    <li class="world free"><span aria-hidden="true">✨</span> Tofy Time · always free</li>
+    <li class="world"><span aria-hidden="true">🧮</span> Math</li>
+    <li class="world"><span aria-hidden="true">📖</span> Reading</li>
+    <li class="world"><span aria-hidden="true">✍️</span> English</li>
+    <li class="world"><span aria-hidden="true">🧩</span> Logic</li>
+    <li class="world"><span aria-hidden="true">🔬</span> Science</li>
+    <li class="world"><span aria-hidden="true">🏛️</span> History</li>
+    <li class="world"><span aria-hidden="true">🌍</span> Geography</li>
+    <li class="world"><span aria-hidden="true">💰</span> Money Skills</li>
+    <li class="world"><span aria-hidden="true">⚽</span> Soccer</li>
+    <li class="world"><span aria-hidden="true">🦖</span> Dinosaurs</li>
+    <li class="world"><span aria-hidden="true">🚀</span> Space and Stars</li>
+    <li class="world"><span aria-hidden="true">🐾</span> Animal World</li>
+    <li class="world"><span aria-hidden="true">🌊</span> Deep Sea</li>
+    <li class="world"><span aria-hidden="true">🧠</span> Gifted Prep</li>
+    <li class="world"><span aria-hidden="true">🍳</span> Kitchen and Food Science</li>
+    <li class="world"><span aria-hidden="true">🎵</span> Music</li>
+    <li class="world"><span aria-hidden="true">🧍</span> The Human Body</li>
+    <li class="world"><span aria-hidden="true">🚗</span> Vehicles and Transportation</li>
+    <li class="world"><span aria-hidden="true">🚩</span> Flags and Countries</li>
+  </ul>
   <p class="worlds-note reveal">And we keep adding seasonal worlds around holidays and special events.</p>
 </div></section>
 
@@ -321,17 +347,17 @@
   <h2 class="title reveal">It adapts to your child</h2>
   <p class="lead reveal">Not just another quiz app. Tofy knows what grade your child is in, what they're good at, and when it's time to level up.</p>
   <div class="cards">
-    <div class="card pane reveal"><div class="ico">🎒</div><h3>Grade by grade</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🎒</div><h3>Grade by grade</h3>
       <p>Every question is tagged to its grade, from kindergarten through 8th grade. Each September your child moves up a grade — and the questions move up with them.</p></div>
-    <div class="card pane reveal"><div class="ico">📈</div><h3>A level that adjusts itself</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">📈</div><h3>A level that adjusts itself</h3>
       <p>The level is set separately for each topic, based on real results and centered on the level you chose. Too easy? It goes up. Too hard? It comes down.</p></div>
-    <div class="card pane reveal"><div class="ico">🔊</div><h3>Even for kids who can't read yet</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🔊</div><h3>Even for kids who can't read yet</h3>
       <p>Questions and answers are read aloud, and the answers are numbered — so even the youngest kids can play on their own.</p></div>
-    <div class="card pane reveal"><div class="ico">💛</div><h3>A mistake isn't a failure</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">💛</div><h3>A mistake isn't a failure</h3>
       <p>A wrong answer gets a hint and an explanation — never language about failing. Kids can also ask Mom or Dad for help, and you answer right from your phone.</p></div>
-    <div class="card pane reveal"><div class="ico">🧹</div><h3>House chores, too</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🧹</div><h3>House chores, too</h3>
       <p>Tidying their room or clearing the table can be worth play minutes. Your child marks a chore as done, and you approve it — sometimes with a photo.</p></div>
-    <div class="card pane reveal"><div class="ico">🏆</div><h3>Friends and a live quiz</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🏆</div><h3>Friends and a live quiz</h3>
       <p>Kids who connect with a friend code can compete on a leaderboard and in a real-time live quiz. No chat and no messages — and you can see and remove any friend.</p></div>
   </div>
 </div></section>
@@ -343,14 +369,14 @@
     <h2 class="title">Built for you, too</h2>
     <p class="lead" style="margin-bottom:0">Apps are blocked through Apple's Screen Time and open only once your child has earned the time. You set a daily limit, unlock time manually from anywhere, and get a notification when your child starts, finishes, or asks for help.</p>
     <ul class="list">
-      <li>⏱ A daily limit for each child</li>
-      <li>🎁 Unlock time remotely</li>
-      <li>🎯 Difficulty for each topic</li>
-      <li>🌍 Choose worlds for each child</li>
-      <li>🔔 Smart notifications</li>
-      <li>👨‍👩‍👧 Multiple parents, multiple kids</li>
-      <li>⌚️ On Apple Watch, too</li>
-      <li>🔐 Everything behind a parent code</li>
+      <li><span aria-hidden="true">⏱</span> A daily limit for each child</li>
+      <li><span aria-hidden="true">🎁</span> Unlock time remotely</li>
+      <li><span aria-hidden="true">🎯</span> Difficulty for each topic</li>
+      <li><span aria-hidden="true">🌍</span> Choose worlds for each child</li>
+      <li><span aria-hidden="true">🔔</span> Smart notifications</li>
+      <li><span aria-hidden="true">👨‍👩‍👧</span> Multiple parents, multiple kids</li>
+      <li><span aria-hidden="true">⌚️</span> On Apple Watch, too</li>
+      <li><span aria-hidden="true">🔐</span> Everything behind a parent code</li>
     </ul>
   </div>
 </div></section>
@@ -361,11 +387,11 @@
   <h2 class="title reveal">What Tofy doesn't have matters just as much</h2>
   <p class="lead reveal">Tofy is in the Kids category of the App Store and was built to its rules from day one.</p>
   <div class="cards">
-    <div class="card pane reveal"><div class="ico">🚫</div><h3>No ads</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🚫</div><h3>No ads</h3>
       <p>No banners, no video ads, and no links that take your child out of the app.</p></div>
-    <div class="card pane reveal"><div class="ico">🕵️</div><h3>No tracking</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🕵️</div><h3>No tracking</h3>
       <p>No third-party analytics, no advertising identifier, and no cross-app tracking. Data is used only to run the app.</p></div>
-    <div class="card pane reveal"><div class="ico">💳</div><h3>No shopping for kids</h3>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">💳</div><h3>No shopping for kids</h3>
       <p>Your child's device never shows prices and can't make purchases. Every payment happens on your device, behind a parent code.</p></div>
   </div>
 </div></section>
@@ -441,24 +467,36 @@
   <div class="band pane reveal">
     <div class="eyebrow">COMING SOON</div>
     <h2 class="title">Want to know when Tofy launches?</h2>
-    <p class="lead" style="margin-bottom:0">Leave your email and we'll let you know on launch day. One email, no spam. 🦁</p>
-    <form class="ef" id="earlyForm" onsubmit="return joinWaitlist(event)">
-      <input id="ef-name" type="text" placeholder="Your name" autocomplete="name">
-      <input id="ef-email" type="email" placeholder="Email" required autocomplete="email">
-      <select id="ef-age" aria-label="Your child's age">
-        <option value="">Your child's age (optional)</option>
-        <option>4–5</option><option>6–7</option><option>8–9</option><option>10+</option>
-      </select>
-      <button type="submit" class="btn" id="ef-btn">Notify me 🎉</button>
+    <p class="lead" style="margin-bottom:0">Leave your email and we'll let you know on launch day. One email, no spam. <span aria-hidden="true">🦁</span></p>
+    <form class="ef" id="earlyForm" novalidate>
+      <div class="field">
+        <label for="ef-name">Your name <span class="opt">(optional)</span></label>
+        <input id="ef-name" type="text" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="ef-email">Email</label>
+        <input id="ef-email" type="email" required autocomplete="email"
+               placeholder="name@example.com" aria-describedby="ef-email-error">
+        <p class="ef-error" id="ef-email-error"></p>
+      </div>
+      <div class="field">
+        <label for="ef-age">Your child's age <span class="opt">(optional)</span></label>
+        <select id="ef-age">
+          <option value="">Choose an age</option>
+          <option>4–5</option><option>6–7</option><option>8–9</option><option>10+</option>
+        </select>
+      </div>
+      <button type="submit" class="btn" id="ef-btn">Notify me <span aria-hidden="true">🎉</span></button>
     </form>
-    <div class="ef-ok" id="ef-ok" style="display:none">You're on the list! 🎉 We'll let you know the moment Tofy launches.</div>
+    <p class="ef-ok" id="ef-ok" tabindex="-1" hidden>You're on the list! <span aria-hidden="true">🎉</span> We'll let you know the moment Tofy launches.</p>
+    <p class="ef-status visually-hidden" id="ef-status" role="status" aria-live="polite"></p>
     <div class="ef-note">For parents. We use your email only to tell you about the launch. <a href="privacy.html">Privacy Policy</a></div>
   </div>
 </div></section>
 
 <!-- ===================== FINAL ===================== -->
 <section id="download"><div class="wrap final reveal">
-  <img src="../lion.png" alt="Tofy" width="96" height="96">
+  <img src="../lion.png" alt="" width="96" height="96">
   <h2>Instead of fighting over screens —<br>kids earn them</h2>
   <p>You set the rules, and Tofy makes sure they happen.</p>
   <a class="appstore" href="#early" style="margin:0 auto" data-store>
@@ -467,15 +505,18 @@
   </a>
 </div></section>
 
+</main>
+
 <footer class="site-foot"><div class="wrap">
   <div>Tofy · a learning and screen-time app for kids</div>
-  <div class="links">
+  <nav class="links" aria-label="Footer">
     <a href="privacy.html">Privacy Policy</a>
     <a href="terms.html">Terms of Use</a>
+    <a href="accessibility.html">Accessibility</a>
     <a href="support.html">Support</a>
     <a href="mailto:ranioph@gmail.com">Contact us</a>
-  </div>
-  <div style="opacity:.75">© 2026 Tofy · tofyapp.com</div>
+  </nav>
+  <div class="copyright">© 2026 Tofy · tofyapp.com</div>
 </div></footer>
 
 <div class="lb" id="lightbox" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="Enlarged screenshot">
@@ -515,19 +556,8 @@
     }
   })();
 
-  /* mobile menu */
-  var btn = document.getElementById("menuBtn"), nav = document.getElementById("nav");
-  btn.addEventListener("click", function(){
-    var open = nav.classList.toggle("open");
-    btn.setAttribute("aria-expanded", open ? "true" : "false");
-  });
-  nav.addEventListener("click", function(e){ if (e.target.tagName === "A") nav.classList.remove("open"); });
-
-  /* scroll reveal */
-  var io = new IntersectionObserver(function(es){
-    es.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-  }, { threshold: .12 });
-  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+  /* The mobile menu, the scroll reveal and the stop-the-motion button live in
+     site.js now, so every page on the site behaves the same way. */
 
   /* Lightbox: any screenshot opens large, with ← → and Esc. */
   (function(){
@@ -547,7 +577,9 @@
       var thumb = shots[index].querySelector("img");
       img.src = thumb.src;
       img.alt = thumb.alt;
-      cap.textContent = shots[index].parentNode.querySelector("figcaption").textContent;
+      /* innerHTML, not textContent: the caption's emoji sit in aria-hidden
+         spans, and they should stay hidden inside the dialog too. */
+      cap.innerHTML = shots[index].parentNode.querySelector("figcaption").innerHTML;
       count.textContent = (index + 1) + " / " + shots.length;
     }
     function open(i, from){
@@ -564,6 +596,7 @@
     }
 
     shots.forEach(function(btn, i){
+      btn.setAttribute("aria-haspopup", "dialog");
       btn.addEventListener("click", function(){ open(i, btn); });
     });
     closeBtn.addEventListener("click", close);
@@ -572,6 +605,15 @@
     lb.addEventListener("click", function(e){ if (e.target === lb) close(); });
     document.addEventListener("keydown", function(e){
       if (lb.hidden) return;
+      /* aria-modal only tells assistive tech the rest is inert — Tab still
+         has to be kept inside the dialog by hand. */
+      if (e.key === "Tab") {
+        var ring = [closeBtn, prevBtn, nextBtn];
+        var at = ring.indexOf(document.activeElement);
+        e.preventDefault();
+        ring[(at + (e.shiftKey ? ring.length - 1 : 1) + ring.length) % ring.length].focus();
+        return;
+      }
       if (e.key === "Escape") close();
       // The rail reads left-to-right, so → walks forward and ← walks back.
       else if (e.key === "ArrowRight") show(index + 1);
@@ -591,37 +633,73 @@
   /* Waitlist → Firestore `waitlist` (REST, no SDK), same collection as the
      Hebrew page. `language: "en"` makes the welcome email go out in English.
      Falls back to a pre-filled email so a lead is never lost. */
-  async function joinWaitlist(e){
-    e.preventDefault();
-    var email = document.getElementById("ef-email").value.trim();
-    var name  = document.getElementById("ef-name").value.trim();
-    var age   = document.getElementById("ef-age").value;
-    if (!email) return false;
-    var btn = document.getElementById("ef-btn"); btn.disabled = true; btn.textContent = "Sending…";
-    var PROJECT = "childtime-86e98";
-    var KEY = "AIzaSyB2sLDqhZsZ0gTFD2qUs9upO3JljuwV1Tw"; // public Firebase web key (secured by rules)
-    var url = "https://firestore.googleapis.com/v1/projects/" + PROJECT + "/databases/(default)/documents/waitlist?key=" + KEY;
-    var body = { fields: {
-      email:     { stringValue: email },
-      name:      { stringValue: name || "" },
-      childAge:  { stringValue: age || "" },
-      source:    { stringValue: "web-en" },
-      language:  { stringValue: "en" },
-      createdAt: { timestampValue: new Date().toISOString() }
-    }};
-    try {
-      var r = await fetch(url, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
-      if (!r.ok) throw new Error("status " + r.status);
-      document.getElementById("earlyForm").style.display = "none";
-      document.getElementById("ef-ok").style.display = "block";
-    } catch (err) {
-      var subj = encodeURIComponent("Tofy - notify me at launch");
-      var bdy  = encodeURIComponent("Name: " + name + "\nEmail: " + email + "\nChild's age: " + age);
-      window.location.href = "mailto:ranioph@gmail.com?subject=" + subj + "&body=" + bdy;
-      btn.disabled = false; btn.textContent = "Notify me 🎉";
+  (function(){
+    var form = document.getElementById("earlyForm");
+    if (!form) return;
+    var emailEl  = document.getElementById("ef-email"),
+        nameEl   = document.getElementById("ef-name"),
+        ageEl    = document.getElementById("ef-age"),
+        errEl    = document.getElementById("ef-email-error"),
+        okEl     = document.getElementById("ef-ok"),
+        statusEl = document.getElementById("ef-status"),
+        btn      = document.getElementById("ef-btn");
+
+    function setError(msg){
+      errEl.textContent = msg ? "⚠ " + msg : "";
+      emailEl.setAttribute("aria-invalid", msg ? "true" : "false");
+      if (msg) statusEl.textContent = msg;
     }
-    return false;
-  }
+
+    form.addEventListener("submit", async function(e){
+      e.preventDefault();
+      var email = emailEl.value.trim(),
+          name  = nameEl.value.trim(),
+          age   = ageEl.value;
+
+      if (!email) {
+        setError("Please enter your email address so we can let you know.");
+        emailEl.focus();
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setError("That email address doesn't look right — please check it and try again.");
+        emailEl.focus();
+        return;
+      }
+      setError("");
+
+      btn.disabled = true;
+      btn.textContent = "Sending…";
+      statusEl.textContent = "Sending your details…";
+
+      var PROJECT = "childtime-86e98";
+      var KEY = "AIzaSyB2sLDqhZsZ0gTFD2qUs9upO3JljuwV1Tw"; // public Firebase web key (secured by rules)
+      var url = "https://firestore.googleapis.com/v1/projects/" + PROJECT + "/databases/(default)/documents/waitlist?key=" + KEY;
+      var body = { fields: {
+        email:     { stringValue: email },
+        name:      { stringValue: name || "" },
+        childAge:  { stringValue: age || "" },
+        source:    { stringValue: "web-en" },
+        language:  { stringValue: "en" },
+        createdAt: { timestampValue: new Date().toISOString() }
+      }};
+      try {
+        var r = await fetch(url, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+        if (!r.ok) throw new Error("status " + r.status);
+        form.hidden = true;
+        okEl.hidden = false;
+        statusEl.textContent = "You're on the list. We'll let you know the moment Tofy launches.";
+        okEl.focus();            /* the submit button just disappeared */
+      } catch (err) {
+        statusEl.textContent = "We couldn't send that — opening a pre-filled email for you.";
+        var subj = encodeURIComponent("Tofy - notify me at launch");
+        var bdy  = encodeURIComponent("Name: " + name + "\nEmail: " + email + "\nChild's age: " + age);
+        window.location.href = "mailto:ranioph@gmail.com?subject=" + subj + "&body=" + bdy;
+        btn.disabled = false;
+        btn.textContent = "Notify me 🎉";
+      }
+    });
+  })();
 </script>
 </body>
 </html>

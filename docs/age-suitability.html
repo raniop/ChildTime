@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#5E60CE">
+<meta name="theme-color" content="#3C3D84">
 <title>טופי — התאמה לגיל</title>
 <meta name="description" content="למי טופי מיועד, איך התוכן מותאם לכיתה, ומה אין באפליקציה: בלי צ׳אט, בלי פרסומות ובלי רכישות אצל הילד.">
 <link rel="canonical" href="https://tofyapp.com/age-suitability.html">
@@ -12,26 +12,32 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
-<link rel="stylesheet" href="glass.css?v=3">
+<link rel="stylesheet" href="glass.css?v=4">
+<script src="site.js" defer></script>
 </head>
 <body>
+<a class="skip-link" href="#main">דילוג לתוכן הראשי</a>
 <div class="backdrop"></div>
 
 <header class="site-head"><div class="wrap">
-  <a class="brand" href="/"><img src="lion.png" alt=""><span>טופי</span></a>
-  <nav class="site-nav">
+  <a class="brand" href="/"><img src="lion.png" alt=""><span>טופי</span><span class="visually-hidden"> — דף הבית</span></a>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="תפריט" aria-expanded="false" aria-controls="nav">☰</button>
+  <nav class="site-nav" id="nav" aria-label="ניווט ראשי">
     <a href="/">דף הבית</a>
     <a href="privacy.html">פרטיות</a>
     <a href="terms.html">תנאים</a>
     <a href="support.html">תמיכה</a>
-    <a href="en/" lang="en" hreflang="en">English</a>
+  </nav>
+  <nav class="lang-switch" aria-label="Language / שפה">
+    <a href="age-suitability.html" lang="he" hreflang="he" dir="rtl" aria-current="true"><span class="flag" aria-hidden="true">🇮🇱</span>עברית</a>
+    <a href="en/" lang="en" hreflang="en" dir="ltr"><span class="flag" aria-hidden="true">🇺🇸</span>English</a>
   </nav>
 </div></header>
 
-<main class="wrap" style="padding-top:34px;padding-bottom:20px">
+<main class="wrap" id="main" tabindex="-1" style="padding-top:34px;padding-bottom:20px">
   <div class="doc pane">
     <h1>התאמה לגיל</h1>
-<p class="stamp">עודכן: 6 בספטמבר 2026 · מפעיל: Rani Ophir · <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
+<p class="stamp">עודכן: 6 בספטמבר 2026 · מפעיל: Rani Ophir · חיים בר לב 17, רמת גן · <a href="tel:+972524444244" dir="ltr">052-444-4244</a> · <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
 
 <h2>למי האפליקציה מיועדת</h2>
 <p>טופי היא אפליקציית למידה לילדים מגן טרום־חובה ועד כיתה ו׳ (גילאי 4–12), בשימוש בהשגחת הורה. הילד עונה על שאלות לימודיות (מתמטיקה, עברית, אנגלית, מדעים, היסטוריה, גיאוגרפיה, הבנת הנקרא ועוד) ומרוויח דקות משחק באפליקציות שההורה בחר. קבוצת הגיל שנבחרה בחנות, 6–8, היא מרכז טווח הגילאים.</p>
@@ -56,30 +62,31 @@
 
 <h2>בקרת הורים</h2>
 <p>ההורה מגדיר אילו אפליקציות נעולות עד שהילד מרוויח זמן, כמה דקות מותרות ביום, אילו נושאים פתוחים ובאיזו רמה, ורואה דוח התקדמות. כל הגדרה מוגנת בקוד הורה.</p>
-<p class="stamp">מדיניות פרטיות: <a href="privacy.html">tofyapp.com/privacy</a> · תמיכה: <a href="support.html">tofyapp.com/support</a></p>
+<p class="stamp">מדיניות פרטיות: <a href="privacy.html">tofyapp.com/privacy</a> · תמיכה: <a href="support.html">tofyapp.com/support</a> · <a href="accessibility.html">הצהרת נגישות</a></p>
 
-<div class="en">
-<h1>Age Suitability</h1>
+<div class="en" lang="en" dir="ltr">
+<h2>Age Suitability</h2>
 <p><b>Who Tofy is for.</b> Tofy is a learning app for children from pre-kindergarten to 6th grade (ages 4–12), used under a parent's guidance. The child answers curriculum questions (math, Hebrew, English, science, history, geography, reading comprehension and more) and earns play minutes in the apps the parent chose. The Kids age band chosen on the App Store, 6–8, is the middle of that range.</p>
 <p><b>How content fits the age.</b> Every question is tagged to the Israeli Ministry of Education curriculum (pre-K–6) and served only to the matching grade; three difficulty levels adapt to the child; pre-readers get read-aloud questions and numbered answers; a wrong answer gets a hint and the answer, never failure language.</p>
 <p><b>What the app does not have.</b> No social media, no chat, no messaging, no user-generated content shown to others. "Friends" are children linked by a parent-shared code; only a first name, a cartoon avatar and a score are shown, and a parent can see and remove any friend. No ads, no tracking, no third-party analytics. No purchase on a child's device: every payment (family subscription or a single world) happens on the parent's device behind the parent code; a child can only tap "ask a parent". No external links or open web browsing. An optional chore photo is visible only to the family's parents and is deleted after approval.</p>
 <p><b>Parental controls.</b> Parents choose which apps stay locked until minutes are earned, the daily cap, which topics are open and at what level, and see a progress report. Every setting sits behind the parent code.</p>
-<p class="stamp">Privacy policy: <a href="privacy.html">tofyapp.com/privacy</a> · Support: <a href="support.html">tofyapp.com/support</a></p>
+<p class="stamp">Privacy policy: <a href="en/privacy.html">tofyapp.com/en/privacy</a> · Support: <a href="en/support.html">tofyapp.com/en/support</a> · <a href="en/accessibility.html">Accessibility statement</a></p>
 </div>
   </div>
 </main>
 
 <footer class="site-foot"><div class="wrap">
   <div>טופי (Tofy) · אפליקציית למידה וזמן מסך לילדים</div>
-  <div class="links">
+  <nav class="links" aria-label="קישורים בתחתית העמוד">
     <a href="/">דף הבית</a>
     <a href="privacy.html">מדיניות פרטיות</a>
     <a href="terms.html">תנאי שימוש</a>
     <a href="age-suitability.html">התאמה לגיל</a>
+    <a href="accessibility.html">הצהרת נגישות</a>
     <a href="support.html">תמיכה</a>
     <a href="mailto:ranioph@gmail.com">צרו קשר</a>
-  </div>
-  <div style="opacity:.75">© 2026 Tofy · tofyapp.com</div>
+  </nav>
+  <div class="copyright">© 2026 Tofy · tofyapp.com</div>
 </div></footer>
 </body>
 </html>
