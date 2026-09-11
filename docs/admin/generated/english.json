@@ -4798,5 +4798,4805 @@
       "X",
       "T"
     ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ English.⁩",
+    "correctAnswer": "spoke",
+    "distractors": [
+      "speaked",
+      "speaks",
+      "speaking"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ a horse every day.⁩",
+    "correctAnswer": "rides",
+    "distractors": [
+      "ride",
+      "riding",
+      "to ride"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ a picture.⁩",
+    "correctAnswer": "drew",
+    "distractors": [
+      "drawed",
+      "draws",
+      "drawing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦make⁩?",
+    "correctAnswer": "made",
+    "distractors": [
+      "maked",
+      "makes",
+      "making"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ a kite.⁩",
+    "correctAnswer": "flew",
+    "distractors": [
+      "flyed",
+      "flies",
+      "flying"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ our friends.⁩",
+    "correctAnswer": "met",
+    "distractors": [
+      "meeted",
+      "meets",
+      "meeting"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦go⁩?",
+    "correctAnswer": "went",
+    "distractors": [
+      "goed",
+      "goes",
+      "gone"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦fly⁩?",
+    "correctAnswer": "flew",
+    "distractors": [
+      "flyed",
+      "flies",
+      "flown"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents ___ a horse every day.⁩",
+    "correctAnswer": "ride",
+    "distractors": [
+      "rides",
+      "riding",
+      "to ride"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ a glass.⁩",
+    "correctAnswer": "broke",
+    "distractors": [
+      "breaked",
+      "breaks",
+      "breaking"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ breakfast every day.⁩",
+    "correctAnswer": "eat",
+    "distractors": [
+      "eats",
+      "eating",
+      "to eat"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ a horse every day.⁩",
+    "correctAnswer": "ride",
+    "distractors": [
+      "rides",
+      "riding",
+      "to ride"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ a letter.⁩",
+    "correctAnswer": "wrote",
+    "distractors": [
+      "writed",
+      "writes",
+      "writing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friend ___ a picture.⁩",
+    "correctAnswer": "drew",
+    "distractors": [
+      "drawed",
+      "draws",
+      "drawing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Dan is ___ than his little brother. (tall)⁩",
+    "correctAnswer": "taller",
+    "distractors": [
+      "more tall",
+      "tallest",
+      "tall"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦tooth⁩?",
+    "correctAnswer": "teeth",
+    "distractors": [
+      "tooths",
+      "teeths",
+      "tooth"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday she ___ the key.⁩",
+    "correctAnswer": "lost",
+    "distractors": [
+      "losed",
+      "loses",
+      "losing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Winter is ___ than spring. (cold)⁩",
+    "correctAnswer": "colder",
+    "distractors": [
+      "more cold",
+      "coldest",
+      "cold"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The boy ___ math every day.⁩",
+    "correctAnswer": "studies",
+    "distractors": [
+      "study",
+      "studying",
+      "to study"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦dry⁩?",
+    "correctAnswer": "wet",
+    "distractors": [
+      "big",
+      "hot",
+      "always"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The boy ___ a picture every day.⁩",
+    "correctAnswer": "draws",
+    "distractors": [
+      "draw",
+      "drawing",
+      "to draw"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦lose⁩?",
+    "correctAnswer": "win",
+    "distractors": [
+      "wet",
+      "up",
+      "weak"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ the sea.⁩",
+    "correctAnswer": "saw",
+    "distractors": [
+      "seed",
+      "sees",
+      "seeing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦speak⁩?",
+    "correctAnswer": "spoke",
+    "distractors": [
+      "speaked",
+      "speaks",
+      "spoken"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦person⁩?",
+    "correctAnswer": "people",
+    "distractors": [
+      "persones",
+      "peoples",
+      "person"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦see⁩?",
+    "correctAnswer": "saw",
+    "distractors": [
+      "seed",
+      "sees",
+      "seen"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦draw⁩?",
+    "correctAnswer": "drew",
+    "distractors": [
+      "drawed",
+      "draws",
+      "drawn"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦buy⁩?",
+    "correctAnswer": "sell",
+    "distractors": [
+      "end",
+      "short",
+      "loud"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦break⁩?",
+    "correctAnswer": "broke",
+    "distractors": [
+      "breaked",
+      "breaks",
+      "broken"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I ___ in the park every day.⁩",
+    "correctAnswer": "run",
+    "distractors": [
+      "runs",
+      "running",
+      "to run"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My grandfather is ___ than my father. (old)⁩",
+    "correctAnswer": "older",
+    "distractors": [
+      "more old",
+      "oldest",
+      "old"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦light⁩?",
+    "correctAnswer": "heavy",
+    "distractors": [
+      "slow",
+      "cry",
+      "big"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦This book is ___ than the movie. (interesting)⁩",
+    "correctAnswer": "more interesting",
+    "distractors": [
+      "interestinger",
+      "most interesting",
+      "interesting"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦life⁩?",
+    "correctAnswer": "lives",
+    "distractors": [
+      "lifes",
+      "lifs",
+      "life"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦baby⁩?",
+    "correctAnswer": "babies",
+    "distractors": [
+      "babys",
+      "babyes",
+      "baby"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦write⁩?",
+    "correctAnswer": "wrote",
+    "distractors": [
+      "writed",
+      "writes",
+      "written"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦give⁩?",
+    "correctAnswer": "take",
+    "distractors": [
+      "outside",
+      "difficult",
+      "slow"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦potato⁩?",
+    "correctAnswer": "potatoes",
+    "distractors": [
+      "potatos",
+      "potatoies",
+      "potato"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦You ___ English every day.⁩",
+    "correctAnswer": "speak",
+    "distractors": [
+      "speaks",
+      "speaking",
+      "to speak"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦take⁩?",
+    "correctAnswer": "took",
+    "distractors": [
+      "taked",
+      "takes",
+      "taken"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Noa is ___ today than yesterday. (happy)⁩",
+    "correctAnswer": "happier",
+    "distractors": [
+      "happyer",
+      "happiest",
+      "happy"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦swim⁩?",
+    "correctAnswer": "swam",
+    "distractors": [
+      "swimmed",
+      "swims",
+      "swum"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Our teacher ___ the homework every day.⁩",
+    "correctAnswer": "does",
+    "distractors": [
+      "do",
+      "doing",
+      "to do"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦forget⁩?",
+    "correctAnswer": "remember",
+    "distractors": [
+      "loud",
+      "end",
+      "expensive"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦long⁩?",
+    "correctAnswer": "short",
+    "distractors": [
+      "cry",
+      "cheap",
+      "dry"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother ___ bread every day.⁩",
+    "correctAnswer": "buys",
+    "distractors": [
+      "buy",
+      "buying",
+      "to buy"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦cold⁩?",
+    "correctAnswer": "hot",
+    "distractors": [
+      "win",
+      "never",
+      "lose"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ our friends every day.⁩",
+    "correctAnswer": "meet",
+    "distractors": [
+      "meets",
+      "meeting",
+      "to meet"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ in the pool every day.⁩",
+    "correctAnswer": "swim",
+    "distractors": [
+      "swims",
+      "swimming",
+      "to swim"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦woman⁩?",
+    "correctAnswer": "women",
+    "distractors": [
+      "womans",
+      "womens",
+      "woman"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦This joke is ___ than the first one. (funny)⁩",
+    "correctAnswer": "funnier",
+    "distractors": [
+      "funnyer",
+      "funniest",
+      "funny"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦lose⁩?",
+    "correctAnswer": "lost",
+    "distractors": [
+      "losed",
+      "loses",
+      "losing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦weak⁩?",
+    "correctAnswer": "strong",
+    "distractors": [
+      "small",
+      "young",
+      "forget"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My sister is ___ than me. (young)⁩",
+    "correctAnswer": "younger",
+    "distractors": [
+      "more young",
+      "youngest",
+      "young"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ a car.⁩",
+    "correctAnswer": "drove",
+    "distractors": [
+      "drived",
+      "drives",
+      "driving"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦old⁩?",
+    "correctAnswer": "young",
+    "distractors": [
+      "fast",
+      "poor",
+      "laugh"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦A plane ticket is ___ than a bus ticket. (expensive)⁩",
+    "correctAnswer": "more expensive",
+    "distractors": [
+      "expensiver",
+      "most expensive",
+      "expensive"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦give⁩?",
+    "correctAnswer": "gave",
+    "distractors": [
+      "gived",
+      "gives",
+      "given"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday she ___ a present.⁩",
+    "correctAnswer": "gave",
+    "distractors": [
+      "gived",
+      "gives",
+      "giving"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦This test is ___ than the last one. (easy)⁩",
+    "correctAnswer": "easier",
+    "distractors": [
+      "easyer",
+      "easiest",
+      "easy"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦city⁩?",
+    "correctAnswer": "cities",
+    "distractors": [
+      "citys",
+      "cityes",
+      "city"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦box⁩?",
+    "correctAnswer": "boxes",
+    "distractors": [
+      "boxs",
+      "boxies",
+      "box"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦catch⁩?",
+    "correctAnswer": "caught",
+    "distractors": [
+      "catched",
+      "catches",
+      "catching"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Summer is ___ than winter in Israel. (hot)⁩",
+    "correctAnswer": "hotter",
+    "distractors": [
+      "hoter",
+      "hottest",
+      "hot"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦big⁩?",
+    "correctAnswer": "small",
+    "distractors": [
+      "cry",
+      "last",
+      "loud"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦never⁩?",
+    "correctAnswer": "always",
+    "distractors": [
+      "laugh",
+      "hot",
+      "dry"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦sing⁩?",
+    "correctAnswer": "sang",
+    "distractors": [
+      "singed",
+      "sings",
+      "sung"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ orange juice every day.⁩",
+    "correctAnswer": "drinks",
+    "distractors": [
+      "drink",
+      "drinking",
+      "to drink"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦You ___ breakfast every day.⁩",
+    "correctAnswer": "eat",
+    "distractors": [
+      "eats",
+      "eating",
+      "to eat"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦win⁩?",
+    "correctAnswer": "lose",
+    "distractors": [
+      "loud",
+      "arrive",
+      "fast"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦down⁩?",
+    "correctAnswer": "up",
+    "distractors": [
+      "light",
+      "always",
+      "cry"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦drink⁩?",
+    "correctAnswer": "drank",
+    "distractors": [
+      "drinked",
+      "drinks",
+      "drunk"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦sleep⁩?",
+    "correctAnswer": "slept",
+    "distractors": [
+      "sleeped",
+      "sleeps",
+      "sleeping"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦watch⁩?",
+    "correctAnswer": "watches",
+    "distractors": [
+      "watchs",
+      "watchies",
+      "watch"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday she ___ a coin.⁩",
+    "correctAnswer": "found",
+    "distractors": [
+      "finded",
+      "finds",
+      "finding"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ the ball.⁩",
+    "correctAnswer": "caught",
+    "distractors": [
+      "catched",
+      "catches",
+      "catching"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friend ___ in the park.⁩",
+    "correctAnswer": "ran",
+    "distractors": [
+      "runned",
+      "runs",
+      "running"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday she ___ the class.⁩",
+    "correctAnswer": "taught",
+    "distractors": [
+      "teached",
+      "teaches",
+      "teaching"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦foot⁩?",
+    "correctAnswer": "feet",
+    "distractors": [
+      "foots",
+      "feets",
+      "foot"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She ___ the class every day.⁩",
+    "correctAnswer": "teaches",
+    "distractors": [
+      "teach",
+      "teaching",
+      "to teach"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother ___ English every day.⁩",
+    "correctAnswer": "speaks",
+    "distractors": [
+      "speak",
+      "speaking",
+      "to speak"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦ride⁩?",
+    "correctAnswer": "rode",
+    "distractors": [
+      "rided",
+      "rides",
+      "ridden"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦always⁩?",
+    "correctAnswer": "never",
+    "distractors": [
+      "poor",
+      "end",
+      "arrive"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦short⁩?",
+    "correctAnswer": "long",
+    "distractors": [
+      "fast",
+      "early",
+      "weak"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦early⁩?",
+    "correctAnswer": "late",
+    "distractors": [
+      "big",
+      "sad",
+      "difficult"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦wolf⁩?",
+    "correctAnswer": "wolves",
+    "distractors": [
+      "wolfs",
+      "wolfes",
+      "wolf"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦leaf⁩?",
+    "correctAnswer": "leaves",
+    "distractors": [
+      "leafs",
+      "leafes",
+      "leaf"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦teach⁩?",
+    "correctAnswer": "taught",
+    "distractors": [
+      "teached",
+      "teaches",
+      "teaching"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦This pencil is ___ than that one. (thin)⁩",
+    "correctAnswer": "thinner",
+    "distractors": [
+      "thiner",
+      "thinnest",
+      "thin"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦meet⁩?",
+    "correctAnswer": "met",
+    "distractors": [
+      "meeted",
+      "meets",
+      "meeting"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦bus⁩?",
+    "correctAnswer": "buses",
+    "distractors": [
+      "buss",
+      "busies",
+      "bus"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦wear⁩?",
+    "correctAnswer": "wore",
+    "distractors": [
+      "weared",
+      "wears",
+      "worn"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ a hat every day.⁩",
+    "correctAnswer": "wears",
+    "distractors": [
+      "wear",
+      "wearing",
+      "to wear"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦wet⁩?",
+    "correctAnswer": "dry",
+    "distractors": [
+      "short",
+      "dirty",
+      "light"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦first⁩?",
+    "correctAnswer": "last",
+    "distractors": [
+      "rich",
+      "strong",
+      "remember"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My new phone is ___ than my old one. (good)⁩",
+    "correctAnswer": "better",
+    "distractors": [
+      "gooder",
+      "best",
+      "good"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ the key.⁩",
+    "correctAnswer": "lost",
+    "distractors": [
+      "losed",
+      "loses",
+      "losing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦A shark is ___ than a fish. (dangerous)⁩",
+    "correctAnswer": "more dangerous",
+    "distractors": [
+      "dangerouser",
+      "most dangerous",
+      "dangerous"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ a car every day.⁩",
+    "correctAnswer": "drive",
+    "distractors": [
+      "drives",
+      "driving",
+      "to drive"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother ___ orange juice every day.⁩",
+    "correctAnswer": "drinks",
+    "distractors": [
+      "drink",
+      "drinking",
+      "to drink"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦full⁩?",
+    "correctAnswer": "empty",
+    "distractors": [
+      "leave",
+      "open",
+      "buy"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦laugh⁩?",
+    "correctAnswer": "cry",
+    "distractors": [
+      "full",
+      "cheap",
+      "up"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦A car is ___ than a bike. (fast)⁩",
+    "correctAnswer": "faster",
+    "distractors": [
+      "more fast",
+      "fastest",
+      "fast"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦A bag of books is ___ than a bag of feathers. (heavy)⁩",
+    "correctAnswer": "heavier",
+    "distractors": [
+      "heavyer",
+      "heaviest",
+      "heavy"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ to school.⁩",
+    "correctAnswer": "went",
+    "distractors": [
+      "goed",
+      "goes",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦man⁩?",
+    "correctAnswer": "men",
+    "distractors": [
+      "mans",
+      "mens",
+      "man"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ in the park.⁩",
+    "correctAnswer": "ran",
+    "distractors": [
+      "runned",
+      "runs",
+      "running"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦goose⁩?",
+    "correctAnswer": "geese",
+    "distractors": [
+      "gooses",
+      "geeses",
+      "goose"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother ___ in the park every day.⁩",
+    "correctAnswer": "runs",
+    "distractors": [
+      "run",
+      "running",
+      "to run"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The children ___ a book every day.⁩",
+    "correctAnswer": "read",
+    "distractors": [
+      "reads",
+      "reading",
+      "to read"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ the homework.⁩",
+    "correctAnswer": "forgot",
+    "distractors": [
+      "forgetted",
+      "forgets",
+      "forgetting"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ a movie every day.⁩",
+    "correctAnswer": "watch",
+    "distractors": [
+      "watches",
+      "watching",
+      "to watch"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The weather today is ___ than yesterday. (bad)⁩",
+    "correctAnswer": "worse",
+    "distractors": [
+      "badder",
+      "worst",
+      "bad"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friend ___ a cake.⁩",
+    "correctAnswer": "made",
+    "distractors": [
+      "maked",
+      "makes",
+      "making"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦arrive⁩?",
+    "correctAnswer": "leave",
+    "distractors": [
+      "weak",
+      "never",
+      "happy"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦expensive⁩?",
+    "correctAnswer": "cheap",
+    "distractors": [
+      "full",
+      "big",
+      "young"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday she ___ a ball.⁩",
+    "correctAnswer": "brought",
+    "distractors": [
+      "bringed",
+      "brings",
+      "bringing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents ___ a book every day.⁩",
+    "correctAnswer": "read",
+    "distractors": [
+      "reads",
+      "reading",
+      "to read"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦This flower is ___ than that one. (beautiful)⁩",
+    "correctAnswer": "more beautiful",
+    "distractors": [
+      "beautifuller",
+      "most beautiful",
+      "beautiful"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦inside⁩?",
+    "correctAnswer": "outside",
+    "distractors": [
+      "cheap",
+      "down",
+      "early"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦closed⁩?",
+    "correctAnswer": "open",
+    "distractors": [
+      "up",
+      "cheap",
+      "inside"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friend ___ the class.⁩",
+    "correctAnswer": "taught",
+    "distractors": [
+      "teached",
+      "teaches",
+      "teaching"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦small⁩?",
+    "correctAnswer": "big",
+    "distractors": [
+      "hot",
+      "young",
+      "old"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother ___ a car every day.⁩",
+    "correctAnswer": "drives",
+    "distractors": [
+      "drive",
+      "driving",
+      "to drive"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦push⁩?",
+    "correctAnswer": "pull",
+    "distractors": [
+      "expensive",
+      "cold",
+      "dirty"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The boy ___ a book every day.⁩",
+    "correctAnswer": "reads",
+    "distractors": [
+      "read",
+      "reading",
+      "to read"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ the bus.⁩",
+    "correctAnswer": "took",
+    "distractors": [
+      "taked",
+      "takes",
+      "taking"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ English.⁩",
+    "correctAnswer": "spoke",
+    "distractors": [
+      "speaked",
+      "speaks",
+      "speaking"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She ___ the homework every day.⁩",
+    "correctAnswer": "does",
+    "distractors": [
+      "do",
+      "doing",
+      "to do"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦sheep⁩?",
+    "correctAnswer": "sheep",
+    "distractors": [
+      "sheeps",
+      "sheepes",
+      "sheepen"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I ___ football every day.⁩",
+    "correctAnswer": "play",
+    "distractors": [
+      "plays",
+      "playing",
+      "to play"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ to school every day.⁩",
+    "correctAnswer": "go",
+    "distractors": [
+      "goes",
+      "going",
+      "to go"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday she ___ the bus.⁩",
+    "correctAnswer": "took",
+    "distractors": [
+      "taked",
+      "takes",
+      "taking"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ a cake every day.⁩",
+    "correctAnswer": "make",
+    "distractors": [
+      "makes",
+      "making",
+      "to make"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦dish⁩?",
+    "correctAnswer": "dishes",
+    "distractors": [
+      "dishs",
+      "dishies",
+      "dish"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦cry⁩?",
+    "correctAnswer": "laugh",
+    "distractors": [
+      "loud",
+      "dark",
+      "pull"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦drive⁩?",
+    "correctAnswer": "drove",
+    "distractors": [
+      "drived",
+      "drives",
+      "driven"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦run⁩?",
+    "correctAnswer": "ran",
+    "distractors": [
+      "runned",
+      "runs",
+      "run"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ a message every day.⁩",
+    "correctAnswer": "send",
+    "distractors": [
+      "sends",
+      "sending",
+      "to send"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦take⁩?",
+    "correctAnswer": "give",
+    "distractors": [
+      "cheap",
+      "slow",
+      "big"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ a coin.⁩",
+    "correctAnswer": "found",
+    "distractors": [
+      "finded",
+      "finds",
+      "finding"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦happy⁩?",
+    "correctAnswer": "sad",
+    "distractors": [
+      "weak",
+      "arrive",
+      "closed"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦buy⁩?",
+    "correctAnswer": "bought",
+    "distractors": [
+      "buyed",
+      "buys",
+      "buying"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦rich⁩?",
+    "correctAnswer": "poor",
+    "distractors": [
+      "outside",
+      "long",
+      "dry"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦last⁩?",
+    "correctAnswer": "first",
+    "distractors": [
+      "young",
+      "light",
+      "push"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother ___ the bus every day.⁩",
+    "correctAnswer": "takes",
+    "distractors": [
+      "take",
+      "taking",
+      "to take"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The children ___ a hat every day.⁩",
+    "correctAnswer": "wear",
+    "distractors": [
+      "wears",
+      "wearing",
+      "to wear"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ breakfast.⁩",
+    "correctAnswer": "ate",
+    "distractors": [
+      "eated",
+      "eats",
+      "eating"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Dana ___ breakfast every day.⁩",
+    "correctAnswer": "eats",
+    "distractors": [
+      "eat",
+      "eating",
+      "to eat"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents ___ a hat every day.⁩",
+    "correctAnswer": "wear",
+    "distractors": [
+      "wears",
+      "wearing",
+      "to wear"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦sad⁩?",
+    "correctAnswer": "happy",
+    "distractors": [
+      "dirty",
+      "closed",
+      "up"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ the game.⁩",
+    "correctAnswer": "won",
+    "distractors": [
+      "winned",
+      "wins",
+      "winning"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦difficult⁩?",
+    "correctAnswer": "easy",
+    "distractors": [
+      "outside",
+      "slow",
+      "wet"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ a ball.⁩",
+    "correctAnswer": "brought",
+    "distractors": [
+      "bringed",
+      "brings",
+      "bringing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ our friends every day.⁩",
+    "correctAnswer": "meets",
+    "distractors": [
+      "meet",
+      "meeting",
+      "to meet"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The children ___ English every day.⁩",
+    "correctAnswer": "speak",
+    "distractors": [
+      "speaks",
+      "speaking",
+      "to speak"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦eat⁩?",
+    "correctAnswer": "ate",
+    "distractors": [
+      "eated",
+      "eats",
+      "eaten"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦mouse⁩?",
+    "correctAnswer": "mice",
+    "distractors": [
+      "mouses",
+      "mices",
+      "mouse"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦cheap⁩?",
+    "correctAnswer": "expensive",
+    "distractors": [
+      "difficult",
+      "laugh",
+      "old"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I ___ the class every day.⁩",
+    "correctAnswer": "teach",
+    "distractors": [
+      "teaches",
+      "teaching",
+      "to teach"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦slow⁩?",
+    "correctAnswer": "fast",
+    "distractors": [
+      "old",
+      "short",
+      "push"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Dana ___ a letter every day.⁩",
+    "correctAnswer": "writes",
+    "distractors": [
+      "write",
+      "writing",
+      "to write"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ in the park every day.⁩",
+    "correctAnswer": "runs",
+    "distractors": [
+      "run",
+      "running",
+      "to run"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friend ___ a coin.⁩",
+    "correctAnswer": "found",
+    "distractors": [
+      "finded",
+      "finds",
+      "finding"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦strong⁩?",
+    "correctAnswer": "weak",
+    "distractors": [
+      "closed",
+      "take",
+      "quiet"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦A lion is ___ than a cat. (strong)⁩",
+    "correctAnswer": "stronger",
+    "distractors": [
+      "more strong",
+      "strongest",
+      "strong"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦An elephant is ___ than a dog. (big)⁩",
+    "correctAnswer": "bigger",
+    "distractors": [
+      "biger",
+      "biggest",
+      "big"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ the ball.⁩",
+    "correctAnswer": "caught",
+    "distractors": [
+      "catched",
+      "catches",
+      "catching"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦leave⁩?",
+    "correctAnswer": "arrive",
+    "distractors": [
+      "cold",
+      "outside",
+      "laugh"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother ___ breakfast every day.⁩",
+    "correctAnswer": "eats",
+    "distractors": [
+      "eat",
+      "eating",
+      "to eat"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friend ___ to school.⁩",
+    "correctAnswer": "went",
+    "distractors": [
+      "goed",
+      "goes",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ breakfast.⁩",
+    "correctAnswer": "ate",
+    "distractors": [
+      "eated",
+      "eats",
+      "eating"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦send⁩?",
+    "correctAnswer": "sent",
+    "distractors": [
+      "sended",
+      "sends",
+      "sending"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The boy ___ a letter every day.⁩",
+    "correctAnswer": "writes",
+    "distractors": [
+      "write",
+      "writing",
+      "to write"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הָרַבִּים שֶׁל ⁦child⁩?",
+    "correctAnswer": "children",
+    "distractors": [
+      "childs",
+      "childrens",
+      "child"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ at a friend's house.⁩",
+    "correctAnswer": "slept",
+    "distractors": [
+      "sleeped",
+      "sleeps",
+      "sleeping"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ to school.⁩",
+    "correctAnswer": "went",
+    "distractors": [
+      "goed",
+      "goes",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The children ___ in the pool every day.⁩",
+    "correctAnswer": "swim",
+    "distractors": [
+      "swims",
+      "swimming",
+      "to swim"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ a coin.⁩",
+    "correctAnswer": "found",
+    "distractors": [
+      "finded",
+      "finds",
+      "finding"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The children ___ a movie every day.⁩",
+    "correctAnswer": "watch",
+    "distractors": [
+      "watches",
+      "watching",
+      "to watch"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friend ___ a song.⁩",
+    "correctAnswer": "sang",
+    "distractors": [
+      "singed",
+      "sings",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦young⁩?",
+    "correctAnswer": "old",
+    "distractors": [
+      "rich",
+      "happy",
+      "down"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Chess is ___ than checkers. (difficult)⁩",
+    "correctAnswer": "more difficult",
+    "distractors": [
+      "difficulter",
+      "most difficult",
+      "difficult"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "מָה הַהֶפֶךְ שֶׁל ⁦pull⁩?",
+    "correctAnswer": "push",
+    "distractors": [
+      "begin",
+      "lose",
+      "cheap"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friend ___ a glass.⁩",
+    "correctAnswer": "broke",
+    "distractors": [
+      "breaked",
+      "breaks",
+      "breaking"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ a letter.⁩",
+    "correctAnswer": "wrote",
+    "distractors": [
+      "writed",
+      "writes",
+      "writing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Our teacher ___ a movie every day.⁩",
+    "correctAnswer": "watches",
+    "distractors": [
+      "watch",
+      "watching",
+      "to watch"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ a cake.⁩",
+    "correctAnswer": "made",
+    "distractors": [
+      "maked",
+      "makes",
+      "making"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ a hat every day.⁩",
+    "correctAnswer": "wear",
+    "distractors": [
+      "wears",
+      "wearing",
+      "to wear"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ bread every day.⁩",
+    "correctAnswer": "buy",
+    "distractors": [
+      "buys",
+      "buying",
+      "to buy"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Dana ___ the dishes every day.⁩",
+    "correctAnswer": "washes",
+    "distractors": [
+      "wash",
+      "washing",
+      "to wash"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ orange juice.⁩",
+    "correctAnswer": "drank",
+    "distractors": [
+      "drinked",
+      "drinks",
+      "drinking"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Our teacher ___ math every day.⁩",
+    "correctAnswer": "studies",
+    "distractors": [
+      "study",
+      "studying",
+      "to study"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother ___ a horse every day.⁩",
+    "correctAnswer": "rides",
+    "distractors": [
+      "ride",
+      "riding",
+      "to ride"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ in the pool.⁩",
+    "correctAnswer": "swam",
+    "distractors": [
+      "swimmed",
+      "swims",
+      "swimming"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ a kite every day.⁩",
+    "correctAnswer": "fly",
+    "distractors": [
+      "flies",
+      "flying",
+      "to fly"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "מָה צוּרַת הֶעָבָר שֶׁל הַפֹּעַל ⁦bring⁩?",
+    "correctAnswer": "brought",
+    "distractors": [
+      "bringed",
+      "brings",
+      "bringing"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ the bus.⁩",
+    "correctAnswer": "took",
+    "distractors": [
+      "taked",
+      "takes",
+      "taking"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Our teacher ___ a horse every day.⁩",
+    "correctAnswer": "rides",
+    "distractors": [
+      "ride",
+      "riding",
+      "to ride"
+    ]
+  },
+  {
+    "gradeLo": 7,
+    "gradeHi": 7,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ orange juice.⁩",
+    "correctAnswer": "drank",
+    "distractors": [
+      "drinked",
+      "drinks",
+      "drinking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents ___ English when the phone rang.⁩",
+    "correctAnswer": "were speaking",
+    "distractors": [
+      "was speaking",
+      "are speaking",
+      "speaking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friends ___ at home.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ many brothers do you have? – Two.⁩",
+    "correctAnswer": "How",
+    "distractors": [
+      "When",
+      "Why",
+      "Whose"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦This is the ___ book on the shelf. (thin)⁩",
+    "correctAnswer": "thinnest",
+    "distractors": [
+      "thinest",
+      "thinner",
+      "thin"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦It often rains ___ winter.⁩",
+    "correctAnswer": "in",
+    "distractors": [
+      "on",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I drink coffee ___ the morning.⁩",
+    "correctAnswer": "in",
+    "distractors": [
+      "on",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday she ___ in Jerusalem.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "is",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦This is the ___ building in the city. (old)⁩",
+    "correctAnswer": "oldest",
+    "distractors": [
+      "most old",
+      "older",
+      "old"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I ___ lunch when the phone rang.⁩",
+    "correctAnswer": "was having",
+    "distractors": [
+      "were having",
+      "am having",
+      "having"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Dana has already ___ the bus.⁩",
+    "correctAnswer": "taken",
+    "distractors": [
+      "took",
+      "take",
+      "taking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ at a friend's house when the phone rang.⁩",
+    "correctAnswer": "was sleeping",
+    "distractors": [
+      "were sleeping",
+      "is sleeping",
+      "sleeping"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The fireworks start ___ midnight.⁩",
+    "correctAnswer": "at",
+    "distractors": [
+      "in",
+      "on",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦It is the ___ road in the area. (dangerous)⁩",
+    "correctAnswer": "most dangerous",
+    "distractors": [
+      "dangerousest",
+      "more dangerous",
+      "dangerous"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ do you go to bed? – At ten o'clock.⁩",
+    "correctAnswer": "When",
+    "distractors": [
+      "How",
+      "Who",
+      "Why"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If Dan is hungry, he ___ a pizza.⁩",
+    "correctAnswer": "will order",
+    "distractors": [
+      "would order",
+      "ordered",
+      "ordering"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My birthday is ___ July.⁩",
+    "correctAnswer": "in",
+    "distractors": [
+      "on",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If it snows, they ___ a snowman.⁩",
+    "correctAnswer": "will build",
+    "distractors": [
+      "would build",
+      "built",
+      "building"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If it is sunny, they ___ to the beach.⁩",
+    "correctAnswer": "will go",
+    "distractors": [
+      "would go",
+      "went",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He is the ___ boy in the class. (tall)⁩",
+    "correctAnswer": "tallest",
+    "distractors": [
+      "most tall",
+      "taller",
+      "tall"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦It is the ___ beach in the country. (beautiful)⁩",
+    "correctAnswer": "most beautiful",
+    "distractors": [
+      "beautifullest",
+      "more beautiful",
+      "beautiful"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If it snows, we ___ a snowman.⁩",
+    "correctAnswer": "will build",
+    "distractors": [
+      "would build",
+      "built",
+      "building"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The Olympics were ___ 2024.⁩",
+    "correctAnswer": "in",
+    "distractors": [
+      "on",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents have already ___ the homework.⁩",
+    "correctAnswer": "forgotten",
+    "distractors": [
+      "forgot",
+      "forget",
+      "forgetting"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He has already ___ a letter.⁩",
+    "correctAnswer": "written",
+    "distractors": [
+      "wrote",
+      "write",
+      "writing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Our teacher has already ___ a hat.⁩",
+    "correctAnswer": "worn",
+    "distractors": [
+      "wore",
+      "wear",
+      "wearing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ a song when the phone rang.⁩",
+    "correctAnswer": "were singing",
+    "distractors": [
+      "was singing",
+      "are singing",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ very tired.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "am",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If it rains, I ___ at home.⁩",
+    "correctAnswer": "will stay",
+    "distractors": [
+      "would stay",
+      "stayed",
+      "staying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If Dan is late, he ___ a taxi.⁩",
+    "correctAnswer": "will take",
+    "distractors": [
+      "would take",
+      "took",
+      "taking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We have already ___ the sea.⁩",
+    "correctAnswer": "seen",
+    "distractors": [
+      "saw",
+      "see",
+      "seeing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ at the beach.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The shop closes ___ 9 o'clock.⁩",
+    "correctAnswer": "at",
+    "distractors": [
+      "in",
+      "on",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ English when the phone rang.⁩",
+    "correctAnswer": "were speaking",
+    "distractors": [
+      "was speaking",
+      "are speaking",
+      "speaking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Our teacher has already ___ a present.⁩",
+    "correctAnswer": "given",
+    "distractors": [
+      "gave",
+      "give",
+      "giving"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ phone is ringing? – It's mine.⁩",
+    "correctAnswer": "Whose",
+    "distractors": [
+      "Why",
+      "When",
+      "What"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They visit us ___ Friday evening.⁩",
+    "correctAnswer": "on",
+    "distractors": [
+      "in",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If the bus is late, we ___ a taxi.⁩",
+    "correctAnswer": "will take",
+    "distractors": [
+      "would take",
+      "took",
+      "taking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Owls hunt ___ night.⁩",
+    "correctAnswer": "at",
+    "distractors": [
+      "in",
+      "on",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ is your birthday? – In May.⁩",
+    "correctAnswer": "When",
+    "distractors": [
+      "Why",
+      "How",
+      "Whose"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother has already ___ in the pool.⁩",
+    "correctAnswer": "swum",
+    "distractors": [
+      "swam",
+      "swim",
+      "swimming"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He has already ___ the sea.⁩",
+    "correctAnswer": "seen",
+    "distractors": [
+      "saw",
+      "see",
+      "seeing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I do my homework ___ the afternoon.⁩",
+    "correctAnswer": "in",
+    "distractors": [
+      "on",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ in Jerusalem.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ at home.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦This is the ___ question on the test. (easy)⁩",
+    "correctAnswer": "easiest",
+    "distractors": [
+      "more easy",
+      "easier",
+      "easy"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She ___ a cake when the phone rang.⁩",
+    "correctAnswer": "was making",
+    "distractors": [
+      "were making",
+      "is making",
+      "making"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Tom is the ___ child in the family. (young)⁩",
+    "correctAnswer": "youngest",
+    "distractors": [
+      "most young",
+      "younger",
+      "young"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ a horse when the phone rang.⁩",
+    "correctAnswer": "were riding",
+    "distractors": [
+      "was riding",
+      "are riding",
+      "riding"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If it rains, they ___ at home.⁩",
+    "correctAnswer": "will stay",
+    "distractors": [
+      "would stay",
+      "stayed",
+      "staying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ lunch when the phone rang.⁩",
+    "correctAnswer": "were having",
+    "distractors": [
+      "was having",
+      "are having",
+      "having"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She has already ___ breakfast.⁩",
+    "correctAnswer": "eaten",
+    "distractors": [
+      "ate",
+      "eat",
+      "eating"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I ___ math when the phone rang.⁩",
+    "correctAnswer": "was studying",
+    "distractors": [
+      "were studying",
+      "am studying",
+      "studying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The children have already ___ a hat.⁩",
+    "correctAnswer": "worn",
+    "distractors": [
+      "wore",
+      "wear",
+      "wearing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ a car when the phone rang.⁩",
+    "correctAnswer": "was driving",
+    "distractors": [
+      "were driving",
+      "is driving",
+      "driving"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ orange juice when the phone rang.⁩",
+    "correctAnswer": "were drinking",
+    "distractors": [
+      "was drinking",
+      "are drinking",
+      "drinking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦That was the ___ movie I have ever seen. (bad)⁩",
+    "correctAnswer": "worst",
+    "distractors": [
+      "baddest",
+      "worse",
+      "bad"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ a letter when the phone rang.⁩",
+    "correctAnswer": "were writing",
+    "distractors": [
+      "was writing",
+      "are writing",
+      "writing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ very tired.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents ___ a message when the phone rang.⁩",
+    "correctAnswer": "were sending",
+    "distractors": [
+      "was sending",
+      "are sending",
+      "sending"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The movie starts ___ 7 o'clock.⁩",
+    "correctAnswer": "at",
+    "distractors": [
+      "in",
+      "on",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ at home.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friends ___ at the beach.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my dog ___ at the beach.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "is",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The cheetah is the ___ animal on land. (fast)⁩",
+    "correctAnswer": "fastest",
+    "distractors": [
+      "most fast",
+      "faster",
+      "fast"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ in Jerusalem.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Our teacher has already ___ a letter.⁩",
+    "correctAnswer": "written",
+    "distractors": [
+      "wrote",
+      "write",
+      "writing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ to school when the phone rang.⁩",
+    "correctAnswer": "were going",
+    "distractors": [
+      "was going",
+      "are going",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ time does the movie start? – At eight.⁩",
+    "correctAnswer": "What",
+    "distractors": [
+      "Whose",
+      "When",
+      "How"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ are you crying? – Because I'm sad.⁩",
+    "correctAnswer": "Why",
+    "distractors": [
+      "Where",
+      "What",
+      "Whose"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He tells the ___ jokes. (funny)⁩",
+    "correctAnswer": "funniest",
+    "distractors": [
+      "more funny",
+      "funnier",
+      "funny"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday she ___ at home.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "is",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We eat lunch ___ noon.⁩",
+    "correctAnswer": "at",
+    "distractors": [
+      "in",
+      "on",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We had a party ___ my birthday.⁩",
+    "correctAnswer": "on",
+    "distractors": [
+      "in",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents ___ the homework when the phone rang.⁩",
+    "correctAnswer": "were doing",
+    "distractors": [
+      "was doing",
+      "are doing",
+      "doing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ did you go last summer? – To Eilat.⁩",
+    "correctAnswer": "Where",
+    "distractors": [
+      "When",
+      "What",
+      "Who"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ do you live? – In Haifa.⁩",
+    "correctAnswer": "Where",
+    "distractors": [
+      "Who",
+      "When",
+      "What"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I was born ___ 2012.⁩",
+    "correctAnswer": "in",
+    "distractors": [
+      "on",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother has already ___ a letter.⁩",
+    "correctAnswer": "written",
+    "distractors": [
+      "wrote",
+      "write",
+      "writing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The school trip is ___ the first of May.⁩",
+    "correctAnswer": "on",
+    "distractors": [
+      "in",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He has already ___ a present.⁩",
+    "correctAnswer": "given",
+    "distractors": [
+      "gave",
+      "give",
+      "giving"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my dog ___ in Jerusalem.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "is",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She ___ the dishes when the phone rang.⁩",
+    "correctAnswer": "was washing",
+    "distractors": [
+      "were washing",
+      "is washing",
+      "washing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She is the ___ player on the team. (good)⁩",
+    "correctAnswer": "best",
+    "distractors": [
+      "goodest",
+      "better",
+      "good"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We go to the beach ___ Saturdays.⁩",
+    "correctAnswer": "on",
+    "distractors": [
+      "in",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦August is the ___ month of the year. (hot)⁩",
+    "correctAnswer": "hottest",
+    "distractors": [
+      "hotest",
+      "hotter",
+      "hot"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Our teacher has already ___ a picture.⁩",
+    "correctAnswer": "drawn",
+    "distractors": [
+      "drew",
+      "draw",
+      "drawing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ are you late? – Because I missed the bus.⁩",
+    "correctAnswer": "Why",
+    "distractors": [
+      "What",
+      "Whose",
+      "How"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents ___ breakfast when the phone rang.⁩",
+    "correctAnswer": "were eating",
+    "distractors": [
+      "was eating",
+      "are eating",
+      "eating"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦This is the ___ car in the shop. (expensive)⁩",
+    "correctAnswer": "most expensive",
+    "distractors": [
+      "expensivest",
+      "more expensive",
+      "expensive"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents ___ in the park when the phone rang.⁩",
+    "correctAnswer": "were running",
+    "distractors": [
+      "was running",
+      "are running",
+      "running"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If it is sunny, we ___ to the beach.⁩",
+    "correctAnswer": "will go",
+    "distractors": [
+      "would go",
+      "went",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If it is sunny, I ___ to the beach.⁩",
+    "correctAnswer": "will go",
+    "distractors": [
+      "would go",
+      "went",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ is your English teacher? – Mrs. Levi.⁩",
+    "correctAnswer": "Who",
+    "distractors": [
+      "Where",
+      "Whose",
+      "When"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦It is very hot here ___ the summer.⁩",
+    "correctAnswer": "in",
+    "distractors": [
+      "on",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I ___ a picture when the phone rang.⁩",
+    "correctAnswer": "was drawing",
+    "distractors": [
+      "were drawing",
+      "am drawing",
+      "drawing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He has already ___ a horse.⁩",
+    "correctAnswer": "ridden",
+    "distractors": [
+      "rode",
+      "ride",
+      "riding"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦This is the ___ box of all. (heavy)⁩",
+    "correctAnswer": "heaviest",
+    "distractors": [
+      "more heavy",
+      "heavier",
+      "heavy"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ a message when the phone rang.⁩",
+    "correctAnswer": "was sending",
+    "distractors": [
+      "were sending",
+      "is sending",
+      "sending"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother has already ___ English.⁩",
+    "correctAnswer": "spoken",
+    "distractors": [
+      "spoke",
+      "speak",
+      "speaking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ a horse when the phone rang.⁩",
+    "correctAnswer": "was riding",
+    "distractors": [
+      "were riding",
+      "is riding",
+      "riding"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She ___ a horse when the phone rang.⁩",
+    "correctAnswer": "was riding",
+    "distractors": [
+      "were riding",
+      "is riding",
+      "riding"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If Dan is tired, he ___ to sleep early.⁩",
+    "correctAnswer": "will go",
+    "distractors": [
+      "would go",
+      "went",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother has already ___ the homework.⁩",
+    "correctAnswer": "forgotten",
+    "distractors": [
+      "forgot",
+      "forget",
+      "forgetting"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents ___ the class when the phone rang.⁩",
+    "correctAnswer": "were teaching",
+    "distractors": [
+      "was teaching",
+      "are teaching",
+      "teaching"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She ___ a letter when the phone rang.⁩",
+    "correctAnswer": "was writing",
+    "distractors": [
+      "were writing",
+      "is writing",
+      "writing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my dog ___ very tired.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "is",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The boy has already ___ a horse.⁩",
+    "correctAnswer": "ridden",
+    "distractors": [
+      "rode",
+      "ride",
+      "riding"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ bag is this? – It's Dana's.⁩",
+    "correctAnswer": "Whose",
+    "distractors": [
+      "How",
+      "Who",
+      "When"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ a picture when the phone rang.⁩",
+    "correctAnswer": "were drawing",
+    "distractors": [
+      "was drawing",
+      "are drawing",
+      "drawing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She ___ bread when the phone rang.⁩",
+    "correctAnswer": "was buying",
+    "distractors": [
+      "were buying",
+      "is buying",
+      "buying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We have already ___ breakfast.⁩",
+    "correctAnswer": "eaten",
+    "distractors": [
+      "ate",
+      "eat",
+      "eating"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She ___ in the park when the phone rang.⁩",
+    "correctAnswer": "was running",
+    "distractors": [
+      "were running",
+      "is running",
+      "running"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He has already ___ the homework.⁩",
+    "correctAnswer": "done",
+    "distractors": [
+      "did",
+      "do",
+      "doing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They have already ___ a kite.⁩",
+    "correctAnswer": "flown",
+    "distractors": [
+      "flew",
+      "fly",
+      "flying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ bread when the phone rang.⁩",
+    "correctAnswer": "were buying",
+    "distractors": [
+      "was buying",
+      "are buying",
+      "buying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friends ___ in Jerusalem.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦It was the ___ day of my life. (happy)⁩",
+    "correctAnswer": "happiest",
+    "distractors": [
+      "happyest",
+      "happier",
+      "happy"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friends ___ at the concert.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my dog ___ at the concert.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "is",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They have already ___ the homework.⁩",
+    "correctAnswer": "forgotten",
+    "distractors": [
+      "forgot",
+      "forget",
+      "forgetting"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ did you call? – My grandmother.⁩",
+    "correctAnswer": "Who",
+    "distractors": [
+      "What",
+      "Why",
+      "How"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I ___ a horse when the phone rang.⁩",
+    "correctAnswer": "was riding",
+    "distractors": [
+      "were riding",
+      "am riding",
+      "riding"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If it snows, I ___ a snowman.⁩",
+    "correctAnswer": "will build",
+    "distractors": [
+      "would build",
+      "built",
+      "building"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They have already ___ a song.⁩",
+    "correctAnswer": "sung",
+    "distractors": [
+      "sang",
+      "sing",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday she ___ at the beach.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "is",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The children have already ___ the bus.⁩",
+    "correctAnswer": "taken",
+    "distractors": [
+      "took",
+      "take",
+      "taking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ is your favorite food? – Pizza.⁩",
+    "correctAnswer": "What",
+    "distractors": [
+      "Where",
+      "When",
+      "Who"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She has already ___ a picture.⁩",
+    "correctAnswer": "drawn",
+    "distractors": [
+      "drew",
+      "draw",
+      "drawing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ a song when the phone rang.⁩",
+    "correctAnswer": "was singing",
+    "distractors": [
+      "were singing",
+      "is singing",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We have already ___ a song.⁩",
+    "correctAnswer": "sung",
+    "distractors": [
+      "sang",
+      "sing",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ bread when the phone rang.⁩",
+    "correctAnswer": "was buying",
+    "distractors": [
+      "were buying",
+      "is buying",
+      "buying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ at the beach.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "am",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We have already ___ a glass.⁩",
+    "correctAnswer": "broken",
+    "distractors": [
+      "broke",
+      "break",
+      "breaking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I ___ a song when the phone rang.⁩",
+    "correctAnswer": "was singing",
+    "distractors": [
+      "were singing",
+      "am singing",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The children have already ___ a horse.⁩",
+    "correctAnswer": "ridden",
+    "distractors": [
+      "rode",
+      "ride",
+      "riding"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ at the concert.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Dana has already ___ the homework.⁩",
+    "correctAnswer": "done",
+    "distractors": [
+      "did",
+      "do",
+      "doing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ a car when the phone rang.⁩",
+    "correctAnswer": "were driving",
+    "distractors": [
+      "was driving",
+      "are driving",
+      "driving"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The boy has already ___ to school.⁩",
+    "correctAnswer": "gone",
+    "distractors": [
+      "went",
+      "go",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Our teacher has already ___ the homework.⁩",
+    "correctAnswer": "forgotten",
+    "distractors": [
+      "forgot",
+      "forget",
+      "forgetting"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He has already ___ a song.⁩",
+    "correctAnswer": "sung",
+    "distractors": [
+      "sang",
+      "sing",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ old are you? – I'm thirteen.⁩",
+    "correctAnswer": "How",
+    "distractors": [
+      "Why",
+      "When",
+      "What"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ to school when the phone rang.⁩",
+    "correctAnswer": "were going",
+    "distractors": [
+      "was going",
+      "are going",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ at a friend's house when the phone rang.⁩",
+    "correctAnswer": "were sleeping",
+    "distractors": [
+      "was sleeping",
+      "are sleeping",
+      "sleeping"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ math when the phone rang.⁩",
+    "correctAnswer": "were studying",
+    "distractors": [
+      "was studying",
+      "are studying",
+      "studying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He has already ___ a glass.⁩",
+    "correctAnswer": "broken",
+    "distractors": [
+      "broke",
+      "break",
+      "breaking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents have already ___ the homework.⁩",
+    "correctAnswer": "done",
+    "distractors": [
+      "did",
+      "do",
+      "doing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Dana has already ___ English.⁩",
+    "correctAnswer": "spoken",
+    "distractors": [
+      "spoke",
+      "speak",
+      "speaking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They have already ___ a hat.⁩",
+    "correctAnswer": "worn",
+    "distractors": [
+      "wore",
+      "wear",
+      "wearing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ to school when the phone rang.⁩",
+    "correctAnswer": "was going",
+    "distractors": [
+      "were going",
+      "is going",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ at the concert.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "am",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He is the ___ man in the gym. (strong)⁩",
+    "correctAnswer": "strongest",
+    "distractors": [
+      "most strong",
+      "stronger",
+      "strong"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦I ___ football when the phone rang.⁩",
+    "correctAnswer": "was playing",
+    "distractors": [
+      "were playing",
+      "am playing",
+      "playing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents have already ___ orange juice.⁩",
+    "correctAnswer": "drunk",
+    "distractors": [
+      "drank",
+      "drink",
+      "drinking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The boy has already ___ a song.⁩",
+    "correctAnswer": "sung",
+    "distractors": [
+      "sang",
+      "sing",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The boy has already ___ the homework.⁩",
+    "correctAnswer": "forgotten",
+    "distractors": [
+      "forgot",
+      "forget",
+      "forgetting"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She has already ___ a glass.⁩",
+    "correctAnswer": "broken",
+    "distractors": [
+      "broke",
+      "break",
+      "breaking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He has already ___ a kite.⁩",
+    "correctAnswer": "flown",
+    "distractors": [
+      "flew",
+      "fly",
+      "flying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The children have already ___ a picture.⁩",
+    "correctAnswer": "drawn",
+    "distractors": [
+      "drew",
+      "draw",
+      "drawing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ lunch when the phone rang.⁩",
+    "correctAnswer": "were having",
+    "distractors": [
+      "was having",
+      "are having",
+      "having"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ in Jerusalem.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "am",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦January is the ___ month here. (cold)⁩",
+    "correctAnswer": "coldest",
+    "distractors": [
+      "most cold",
+      "colder",
+      "cold"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ a horse when the phone rang.⁩",
+    "correctAnswer": "were riding",
+    "distractors": [
+      "was riding",
+      "are riding",
+      "riding"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If the bus is late, I ___ a taxi.⁩",
+    "correctAnswer": "will take",
+    "distractors": [
+      "would take",
+      "took",
+      "taking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦This is the ___ puzzle in the book. (difficult)⁩",
+    "correctAnswer": "most difficult",
+    "distractors": [
+      "difficultest",
+      "more difficult",
+      "difficult"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday they ___ at the concert.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The boy has already ___ a picture.⁩",
+    "correctAnswer": "drawn",
+    "distractors": [
+      "drew",
+      "draw",
+      "drawing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She has already ___ a kite.⁩",
+    "correctAnswer": "flown",
+    "distractors": [
+      "flew",
+      "fly",
+      "flying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We ___ a book when the phone rang.⁩",
+    "correctAnswer": "were reading",
+    "distractors": [
+      "was reading",
+      "are reading",
+      "reading"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦We have a test ___ Monday.⁩",
+    "correctAnswer": "on",
+    "distractors": [
+      "in",
+      "at",
+      "to"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother has already ___ a present.⁩",
+    "correctAnswer": "given",
+    "distractors": [
+      "gave",
+      "give",
+      "giving"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He has already ___ the homework.⁩",
+    "correctAnswer": "forgotten",
+    "distractors": [
+      "forgot",
+      "forget",
+      "forgetting"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My brother has already ___ breakfast.⁩",
+    "correctAnswer": "eaten",
+    "distractors": [
+      "ate",
+      "eat",
+      "eating"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She ___ to school when the phone rang.⁩",
+    "correctAnswer": "was going",
+    "distractors": [
+      "were going",
+      "is going",
+      "going"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "אֵיזוֹ מִלַּת שְׁאֵלָה חֲסֵרָה?\n⁦___ much is this shirt? – 50 shekels.⁩",
+    "correctAnswer": "How",
+    "distractors": [
+      "Who",
+      "When",
+      "Whose"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They have already ___ orange juice.⁩",
+    "correctAnswer": "drunk",
+    "distractors": [
+      "drank",
+      "drink",
+      "drinking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ very tired.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She ___ in the pool when the phone rang.⁩",
+    "correctAnswer": "was swimming",
+    "distractors": [
+      "were swimming",
+      "is swimming",
+      "swimming"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday we ___ at the beach.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The boy has already ___ in the pool.⁩",
+    "correctAnswer": "swum",
+    "distractors": [
+      "swam",
+      "swim",
+      "swimming"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Our teacher has already ___ a song.⁩",
+    "correctAnswer": "sung",
+    "distractors": [
+      "sang",
+      "sing",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday my friends ___ very tired.⁩",
+    "correctAnswer": "were",
+    "distractors": [
+      "was",
+      "are",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ a song when the phone rang.⁩",
+    "correctAnswer": "were singing",
+    "distractors": [
+      "was singing",
+      "are singing",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents ___ bread when the phone rang.⁩",
+    "correctAnswer": "were buying",
+    "distractors": [
+      "was buying",
+      "are buying",
+      "buying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He has already ___ English.⁩",
+    "correctAnswer": "spoken",
+    "distractors": [
+      "spoke",
+      "speak",
+      "speaking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The children have already ___ a present.⁩",
+    "correctAnswer": "given",
+    "distractors": [
+      "gave",
+      "give",
+      "giving"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦History is the ___ lesson this week. (interesting)⁩",
+    "correctAnswer": "most interesting",
+    "distractors": [
+      "interestingest",
+      "more interesting",
+      "interesting"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "easy",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Yesterday I ___ at home.⁩",
+    "correctAnswer": "was",
+    "distractors": [
+      "were",
+      "am",
+      "be"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents have already ___ a glass.⁩",
+    "correctAnswer": "broken",
+    "distractors": [
+      "broke",
+      "break",
+      "breaking"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She ___ a song when the phone rang.⁩",
+    "correctAnswer": "was singing",
+    "distractors": [
+      "were singing",
+      "is singing",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦He ___ football when the phone rang.⁩",
+    "correctAnswer": "was playing",
+    "distractors": [
+      "were playing",
+      "is playing",
+      "playing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents have already ___ a song.⁩",
+    "correctAnswer": "sung",
+    "distractors": [
+      "sang",
+      "sing",
+      "singing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ a movie when the phone rang.⁩",
+    "correctAnswer": "were watching",
+    "distractors": [
+      "was watching",
+      "are watching",
+      "watching"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She has already ___ a present.⁩",
+    "correctAnswer": "given",
+    "distractors": [
+      "gave",
+      "give",
+      "giving"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦If it rains, we ___ at home.⁩",
+    "correctAnswer": "will stay",
+    "distractors": [
+      "would stay",
+      "stayed",
+      "staying"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦She has already ___ in the pool.⁩",
+    "correctAnswer": "swum",
+    "distractors": [
+      "swam",
+      "swim",
+      "swimming"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "medium",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦The blue whale is the ___ animal in the sea. (big)⁩",
+    "correctAnswer": "biggest",
+    "distractors": [
+      "bigest",
+      "bigger",
+      "big"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦My parents ___ a letter when the phone rang.⁩",
+    "correctAnswer": "were writing",
+    "distractors": [
+      "was writing",
+      "are writing",
+      "writing"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦They ___ at a friend's house when the phone rang.⁩",
+    "correctAnswer": "were sleeping",
+    "distractors": [
+      "was sleeping",
+      "are sleeping",
+      "sleeping"
+    ]
+  },
+  {
+    "gradeLo": 8,
+    "gradeHi": 8,
+    "tier": "hard",
+    "prompt": "הַשְׁלִימוּ אֶת הַמִּשְׁפָּט:\n⁦Our teacher has already ___ a glass.⁩",
+    "correctAnswer": "broken",
+    "distractors": [
+      "broke",
+      "break",
+      "breaking"
+    ]
   }
 ]
