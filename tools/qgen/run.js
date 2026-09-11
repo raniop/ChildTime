@@ -5,8 +5,18 @@ const fs = require("fs"), path = require("path");
 const { collect } = require("./core");
 const TARGET = Number(process.env.PER_GRADE || 200);
 const outDir = path.join(__dirname, "..", "..", "docs", "admin", "generated"); fs.mkdirSync(outDir, { recursive: true });
+const { qbProblems, rng } = require("./core");
 for (const name of process.argv.slice(2)) {
   const gen = require(`./${name}`);
+  // A module with a fixed item list (e.g. soccer-english: every word once) writes
+  // <name>.json; its world comes from `topic`, so the admin imports it there.
+  if (gen.items) {
+    const list = gen.items(rng(97 + name.length)), bad = list.filter((q) => qbProblems(q).length);
+    const seen = new Set(), unique = list.filter((q) => !bad.includes(q) && !seen.has(q.prompt + "|" + q.correctAnswer) && seen.add(q.prompt + "|" + q.correctAnswer));
+    fs.writeFileSync(path.join(outDir, `${name}.json`), JSON.stringify(unique, null, 2));
+    console.log(`\n${name} → ${gen.topic}: ${unique.length} items${bad.length ? ` (${bad.length} failed the gate)` : ""}`);
+    continue;
+  }
   const all = []; const report = [];
   for (let grade = 1; grade <= 8; grade++) {
     if (!gen.byGrade[grade]) continue;   // a generator may cover only some grades
@@ -22,6 +32,10 @@ for (const name of process.argv.slice(2)) {
 const batches = fs.readdirSync(outDir).filter((f) => f.endsWith(".json") && f !== "index.json").map((f) => {
   const items = JSON.parse(fs.readFileSync(path.join(outDir, f), "utf8"));
   const byGrade = items.reduce((m, i) => (m[i.gradeLo] = (m[i.gradeLo] || 0) + 1, m), {});
-  return { topic: f.replace(/\.json$/, ""), count: items.length, byGrade, generatedAt: fs.statSync(path.join(outDir, f)).mtime.toISOString() };
+  const file = f;
+  // "soccer-english.json" belongs to the soccer world.
+  const topic = f.replace(/\.json$/, "").split("-")[0];
+  const label = f.includes("-") ? f.replace(/\.json$/, "").split("-").slice(1).join(" ") : "";
+  return { topic, file, label, count: items.length, byGrade, generatedAt: fs.statSync(path.join(outDir, f)).mtime.toISOString() };
 });
 fs.writeFileSync(path.join(outDir, "index.json"), JSON.stringify({ batches }, null, 2));

@@ -482,12 +482,12 @@ async function loadBatches() {
   const GN = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"];
   $("genBatches").innerHTML = (idx.batches || []).map((b) => { const t = T[b.topic] || {}; const inCloud = ((summary.topics || {})[b.topic] || {}); const have = (inCloud.approved || 0) + (inCloud.draft || 0);
     return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)">
-      <div><b>${t.emoji || ""} ${esc(t.label || b.topic)}</b> · ${fmt(b.count)} שאלות<div class="stamp">${Object.entries(b.byGrade || {}).map(([g, n]) => `${GN[g] || g} ${n}`).join(" · ")}${have ? ` · בענן כבר ${fmt(have)}` : ""}</div></div>
-      <button class="btn" data-batch="${esc(b.topic)}">ייבוא כטיוטות</button></div>`; }).join("") || '<div class="empty">אין שאלות מוכנות.</div>';
+      <div><b>${t.emoji || ""} ${esc(t.label || b.topic)}</b>${b.label === "english" ? " · 🇬🇧 אַנְגְּלִית בְּתוֹךְ הָעוֹלָם" : ""} · ${fmt(b.count)} שאלות<div class="stamp">${Object.entries(b.byGrade || {}).map(([g, n]) => `${GN[g] || g} ${n}`).join(" · ")}${have ? ` · בענן כבר ${fmt(have)}` : ""}</div></div>
+      <button class="btn" data-batch="${esc(b.topic)}" data-file="${esc(b.file || b.topic + ".json")}">ייבוא כטיוטות</button></div>`; }).join("") || '<div class="empty">אין שאלות מוכנות.</div>';
   document.querySelectorAll("[data-batch]").forEach((btn) => btn.onclick = async () => {
     const topic = btn.dataset.batch; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
     try {
-      const items = await (await fetch(`generated/${topic}.json?v=` + Date.now())).json();
+      const items = await (await fetch(`generated/${btn.dataset.file}?v=` + Date.now())).json();
       const r = await call("adminImportQuestions", { topic, items, approve: false });
       toast(`✅ נוספו ${r.added} טיוטות${r.duplicates ? ` · ${r.duplicates} כבר היו` : ""}${(r.rejected || []).length ? ` · ${r.rejected.length} נדחו` : ""}`);
       COV = null; IMP_TOPIC = topic; DRAFT_GRADE = null; importQuestions();

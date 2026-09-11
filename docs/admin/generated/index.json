@@ -2,6 +2,8 @@
   "batches": [
     {
       "topic": "english",
+      "file": "english.json",
+      "label": "",
       "count": 800,
       "byGrade": {
         "1": 200,
@@ -13,6 +15,8 @@
     },
     {
       "topic": "geography",
+      "file": "geography.json",
+      "label": "",
       "count": 386,
       "byGrade": {
         "7": 197,
@@ -22,6 +26,8 @@
     },
     {
       "topic": "history",
+      "file": "history.json",
+      "label": "",
       "count": 393,
       "byGrade": {
         "7": 199,
@@ -31,6 +37,8 @@
     },
     {
       "topic": "logic",
+      "file": "logic.json",
+      "label": "",
       "count": 400,
       "byGrade": {
         "7": 200,
@@ -40,6 +48,8 @@
     },
     {
       "topic": "money",
+      "file": "money.json",
+      "label": "",
       "count": 1600,
       "byGrade": {
         "1": 200,
@@ -55,6 +65,8 @@
     },
     {
       "topic": "science",
+      "file": "science.json",
+      "label": "",
       "count": 393,
       "byGrade": {
         "7": 194,
@@ -64,6 +76,20 @@
     },
     {
       "topic": "soccer",
+      "file": "soccer-english.json",
+      "label": "english",
+      "count": 95,
+      "byGrade": {
+        "2": 30,
+        "5": 42,
+        "7": 23
+      },
+      "generatedAt": "2026-09-11T09:33:25.967Z"
+    },
+    {
+      "topic": "soccer",
+      "file": "soccer.json",
+      "label": "",
       "count": 1600,
       "byGrade": {
         "1": 200,

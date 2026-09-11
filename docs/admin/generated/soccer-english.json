@@ -1,0 +1,1142 @@
+[
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦ball⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "כַּדּוּר",
+    "distractors": [
+      "נִצָּחוֹן",
+      "כַּרְטִיס צָהֹב",
+      "כַּרְטִיס אָדֹם"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״כַּדּוּר״ בְּאַנְגְּלִית?",
+    "correctAnswer": "ball",
+    "distractors": [
+      "net",
+      "win",
+      "whistle"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦team⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "קְבוּצָה",
+    "distractors": [
+      "כַּרְטִיס צָהֹב",
+      "נִצָּחוֹן",
+      "שׁוֹעֵר"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״קְבוּצָה״ בְּאַנְגְּלִית?",
+    "correctAnswer": "team",
+    "distractors": [
+      "win",
+      "net",
+      "fans"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦player⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "שַׂחְקָן",
+    "distractors": [
+      "כַּרְטִיס אָדֹם",
+      "שַׁעַר",
+      "כַּדּוּר"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״שַׂחְקָן״ בְּאַנְגְּלִית?",
+    "correctAnswer": "player",
+    "distractors": [
+      "whistle",
+      "net",
+      "win"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦goal⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "שַׁעַר",
+    "distractors": [
+      "קְבוּצָה",
+      "כַּרְטִיס אָדֹם",
+      "שׁוֹפֵט"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״שַׁעַר״ בְּאַנְגְּלִית?",
+    "correctAnswer": "goal",
+    "distractors": [
+      "goalkeeper",
+      "net",
+      "referee"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦goalkeeper⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "שׁוֹעֵר",
+    "distractors": [
+      "כַּדּוּר",
+      "שׁוֹפֵט",
+      "רֶשֶׁת"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״שׁוֹעֵר״ בְּאַנְגְּלִית?",
+    "correctAnswer": "goalkeeper",
+    "distractors": [
+      "team",
+      "win",
+      "referee"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦referee⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "שׁוֹפֵט",
+    "distractors": [
+      "כַּדּוּר",
+      "רֶשֶׁת",
+      "מַשְׁרוֹקִית"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״שׁוֹפֵט״ בְּאַנְגְּלִית?",
+    "correctAnswer": "referee",
+    "distractors": [
+      "red card",
+      "fans",
+      "coach"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦coach⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "מְאַמֵּן",
+    "distractors": [
+      "כַּרְטִיס אָדֹם",
+      "שׁוֹפֵט",
+      "שַׂחְקָן"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״מְאַמֵּן״ בְּאַנְגְּלִית?",
+    "correctAnswer": "coach",
+    "distractors": [
+      "yellow card",
+      "field",
+      "net"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦fans⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "אוֹהֲדִים",
+    "distractors": [
+      "מִגְרָשׁ",
+      "כַּדּוּר",
+      "קְבוּצָה"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״אוֹהֲדִים״ בְּאַנְגְּלִית?",
+    "correctAnswer": "fans",
+    "distractors": [
+      "team",
+      "net",
+      "stadium"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦stadium⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "אִצְטַדְיוֹן",
+    "distractors": [
+      "נִצָּחוֹן",
+      "כַּרְטִיס צָהֹב",
+      "מְאַמֵּן"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״אִצְטַדְיוֹן״ בְּאַנְגְּלִית?",
+    "correctAnswer": "stadium",
+    "distractors": [
+      "team",
+      "goalkeeper",
+      "win"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦win⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "נִצָּחוֹן",
+    "distractors": [
+      "כַּרְטִיס צָהֹב",
+      "שׁוֹפֵט",
+      "רֶשֶׁת"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״נִצָּחוֹן״ בְּאַנְגְּלִית?",
+    "correctAnswer": "win",
+    "distractors": [
+      "goal",
+      "ball",
+      "stadium"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦whistle⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "מַשְׁרוֹקִית",
+    "distractors": [
+      "מְאַמֵּן",
+      "מִגְרָשׁ",
+      "כַּרְטִיס אָדֹם"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״מַשְׁרוֹקִית״ בְּאַנְגְּלִית?",
+    "correctAnswer": "whistle",
+    "distractors": [
+      "stadium",
+      "referee",
+      "yellow card"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦yellow card⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "כַּרְטִיס צָהֹב",
+    "distractors": [
+      "אוֹהֲדִים",
+      "שׁוֹפֵט",
+      "קְבוּצָה"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״כַּרְטִיס צָהֹב״ בְּאַנְגְּלִית?",
+    "correctAnswer": "yellow card",
+    "distractors": [
+      "player",
+      "team",
+      "goalkeeper"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦red card⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "כַּרְטִיס אָדֹם",
+    "distractors": [
+      "שַׂחְקָן",
+      "מְאַמֵּן",
+      "אִצְטַדְיוֹן"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״כַּרְטִיס אָדֹם״ בְּאַנְגְּלִית?",
+    "correctAnswer": "red card",
+    "distractors": [
+      "yellow card",
+      "stadium",
+      "referee"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦field⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "מִגְרָשׁ",
+    "distractors": [
+      "רֶשֶׁת",
+      "שׁוֹפֵט",
+      "שַׂחְקָן"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״מִגְרָשׁ״ בְּאַנְגְּלִית?",
+    "correctAnswer": "field",
+    "distractors": [
+      "goal",
+      "net",
+      "stadium"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦net⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "רֶשֶׁת",
+    "distractors": [
+      "כַּרְטִיס צָהֹב",
+      "שׁוֹעֵר",
+      "אִצְטַדְיוֹן"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״רֶשֶׁת״ בְּאַנְגְּלִית?",
+    "correctAnswer": "net",
+    "distractors": [
+      "referee",
+      "team",
+      "field"
+    ],
+    "tier": "easy",
+    "gradeLo": 2,
+    "gradeHi": 4
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦penalty⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "פֶּנְדֵּל",
+    "distractors": [
+      "חָלוּץ",
+      "בְּעִיטַת קֶרֶן",
+      "שַׂחְקָן מַחְלִיף"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״פֶּנְדֵּל״ בְּאַנְגְּלִית?",
+    "correctAnswer": "penalty",
+    "distractors": [
+      "captain",
+      "trophy",
+      "foul"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦corner kick⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "בְּעִיטַת קֶרֶן",
+    "distractors": [
+      "קַשָּׁר",
+      "פֶּנְדֵּל",
+      "סַפְסָל"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״בְּעִיטַת קֶרֶן״ בְּאַנְגְּלִית?",
+    "correctAnswer": "corner kick",
+    "distractors": [
+      "header",
+      "substitute",
+      "striker"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦free kick⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "בְּעִיטָה חָפְשִׁית",
+    "distractors": [
+      "אַלּוּף",
+      "גָּבִיעַ",
+      "מַחֲצִית"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״בְּעִיטָה חָפְשִׁית״ בְּאַנְגְּלִית?",
+    "correctAnswer": "free kick",
+    "distractors": [
+      "striker",
+      "champion",
+      "draw"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦offside⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "נִבְדָּל",
+    "distractors": [
+      "קַשָּׁר",
+      "לִיגָה",
+      "הַצָּלָה"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״נִבְדָּל״ בְּאַנְגְּלִית?",
+    "correctAnswer": "offside",
+    "distractors": [
+      "defender",
+      "champion",
+      "winger"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦defender⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "מָגֵן",
+    "distractors": [
+      "קַפְּטֶן",
+      "סַפְסָל",
+      "אַלּוּף"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״מָגֵן״ בְּאַנְגְּלִית?",
+    "correctAnswer": "defender",
+    "distractors": [
+      "extra time",
+      "champion",
+      "draw"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦striker⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "חָלוּץ",
+    "distractors": [
+      "שַׂחְקָן מַחְלִיף",
+      "נְגִיחָה",
+      "מַחֲצִית"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״חָלוּץ״ בְּאַנְגְּלִית?",
+    "correctAnswer": "striker",
+    "distractors": [
+      "captain",
+      "draw",
+      "extra time"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦midfielder⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "קַשָּׁר",
+    "distractors": [
+      "תֵּיקוֹ",
+      "בְּעִיטַת קֶרֶן",
+      "כַּנָּף"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״קַשָּׁר״ בְּאַנְגְּלִית?",
+    "correctAnswer": "midfielder",
+    "distractors": [
+      "striker",
+      "foul",
+      "draw"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦winger⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "כַּנָּף",
+    "distractors": [
+      "קַשָּׁר",
+      "בְּעִיטָה חָפְשִׁית",
+      "סַפְסָל"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״כַּנָּף״ בְּאַנְגְּלִית?",
+    "correctAnswer": "winger",
+    "distractors": [
+      "foul",
+      "midfielder",
+      "striker"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦substitute⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "שַׂחְקָן מַחְלִיף",
+    "distractors": [
+      "בְּעִיטַת קֶרֶן",
+      "מְסִירָה",
+      "קַשָּׁר"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״שַׂחְקָן מַחְלִיף״ בְּאַנְגְּלִית?",
+    "correctAnswer": "substitute",
+    "distractors": [
+      "trophy",
+      "save",
+      "header"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦captain⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "קַפְּטֶן",
+    "distractors": [
+      "אַלּוּף",
+      "קַשָּׁר",
+      "בְּעִיטָה חָפְשִׁית"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״קַפְּטֶן״ בְּאַנְגְּלִית?",
+    "correctAnswer": "captain",
+    "distractors": [
+      "striker",
+      "penalty",
+      "winger"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦header⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "נְגִיחָה",
+    "distractors": [
+      "חָלוּץ",
+      "פֶּנְדֵּל",
+      "לִיגָה"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״נְגִיחָה״ בְּאַנְגְּלִית?",
+    "correctAnswer": "header",
+    "distractors": [
+      "half-time",
+      "defender",
+      "winger"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦pass⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "מְסִירָה",
+    "distractors": [
+      "סַפְסָל",
+      "כַּנָּף",
+      "שַׂחְקָן מַחְלִיף"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״מְסִירָה״ בְּאַנְגְּלִית?",
+    "correctAnswer": "pass",
+    "distractors": [
+      "champion",
+      "half-time",
+      "save"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦foul⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "עֲבֵרָה",
+    "distractors": [
+      "כַּנָּף",
+      "פֶּנְדֵּל",
+      "קַפְּטֶן"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״עֲבֵרָה״ בְּאַנְגְּלִית?",
+    "correctAnswer": "foul",
+    "distractors": [
+      "header",
+      "free kick",
+      "bench"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦half-time⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "מַחֲצִית",
+    "distractors": [
+      "גָּבִיעַ",
+      "לִיגָה",
+      "מְסִירָה"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״מַחֲצִית״ בְּאַנְגְּלִית?",
+    "correctAnswer": "half-time",
+    "distractors": [
+      "striker",
+      "winger",
+      "draw"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦extra time⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "הַאֲרָכָה",
+    "distractors": [
+      "קַשָּׁר",
+      "פֶּנְדֵּל",
+      "נִבְדָּל"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״הַאֲרָכָה״ בְּאַנְגְּלִית?",
+    "correctAnswer": "extra time",
+    "distractors": [
+      "substitute",
+      "champion",
+      "offside"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦draw⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "תֵּיקוֹ",
+    "distractors": [
+      "מָגֵן",
+      "שַׂחְקָן מַחְלִיף",
+      "כַּנָּף"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״תֵּיקוֹ״ בְּאַנְגְּלִית?",
+    "correctAnswer": "draw",
+    "distractors": [
+      "free kick",
+      "half-time",
+      "trophy"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦trophy⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "גָּבִיעַ",
+    "distractors": [
+      "מַחֲצִית",
+      "מְסִירָה",
+      "תֵּיקוֹ"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״גָּבִיעַ״ בְּאַנְגְּלִית?",
+    "correctAnswer": "trophy",
+    "distractors": [
+      "draw",
+      "defender",
+      "league"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦league⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "לִיגָה",
+    "distractors": [
+      "בְּעִיטַת קֶרֶן",
+      "קַשָּׁר",
+      "מָגֵן"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״לִיגָה״ בְּאַנְגְּלִית?",
+    "correctAnswer": "league",
+    "distractors": [
+      "pass",
+      "defender",
+      "corner kick"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦bench⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "סַפְסָל",
+    "distractors": [
+      "אַלּוּף",
+      "מָגֵן",
+      "נְגִיחָה"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״סַפְסָל״ בְּאַנְגְּלִית?",
+    "correctAnswer": "bench",
+    "distractors": [
+      "champion",
+      "draw",
+      "striker"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦save⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "הַצָּלָה",
+    "distractors": [
+      "מַחֲצִית",
+      "נְגִיחָה",
+      "סַפְסָל"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״הַצָּלָה״ בְּאַנְגְּלִית?",
+    "correctAnswer": "save",
+    "distractors": [
+      "substitute",
+      "midfielder",
+      "defender"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nמָה פֵּרוּשׁ ⁦champion⁩ בְּעוֹלַם הַכַּדּוּרֶגֶל?",
+    "correctAnswer": "אַלּוּף",
+    "distractors": [
+      "פֶּנְדֵּל",
+      "עֲבֵרָה",
+      "מָגֵן"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיךְ אוֹמְרִים ״אַלּוּף״ בְּאַנְגְּלִית?",
+    "correctAnswer": "champion",
+    "distractors": [
+      "midfielder",
+      "defender",
+      "bench"
+    ],
+    "tier": "medium",
+    "gradeLo": 5,
+    "gradeHi": 6
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦the player who guards the goal⁩",
+    "correctAnswer": "goalkeeper",
+    "distractors": [
+      "champion",
+      "fans",
+      "red card"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦the person who controls the game and blows the whistle⁩",
+    "correctAnswer": "referee",
+    "distractors": [
+      "substitute",
+      "trophy",
+      "yellow card"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦a player who comes on to replace another player⁩",
+    "correctAnswer": "substitute",
+    "distractors": [
+      "referee",
+      "yellow card",
+      "striker"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦a card that sends a player off the field⁩",
+    "correctAnswer": "red card",
+    "distractors": [
+      "stadium",
+      "extra time",
+      "fans"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦a warning card shown to a player⁩",
+    "correctAnswer": "yellow card",
+    "distractors": [
+      "red card",
+      "foul",
+      "league"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦a game that ends with the same score for both teams⁩",
+    "correctAnswer": "draw",
+    "distractors": [
+      "goalkeeper",
+      "substitute",
+      "striker"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦extra minutes played when a knockout game is tied⁩",
+    "correctAnswer": "extra time",
+    "distractors": [
+      "header",
+      "striker",
+      "save"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦hitting the ball with your head⁩",
+    "correctAnswer": "header",
+    "distractors": [
+      "bench",
+      "draw",
+      "yellow card"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦a kick taken from the corner of the field⁩",
+    "correctAnswer": "corner kick",
+    "distractors": [
+      "league",
+      "extra time",
+      "captain"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦the person who trains the team⁩",
+    "correctAnswer": "coach",
+    "distractors": [
+      "champion",
+      "half-time",
+      "trophy"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦the leader of the team on the field⁩",
+    "correctAnswer": "captain",
+    "distractors": [
+      "striker",
+      "yellow card",
+      "goalkeeper"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦the break between the two halves of the game⁩",
+    "correctAnswer": "half-time",
+    "distractors": [
+      "coach",
+      "fans",
+      "stadium"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦breaking a rule, like pushing or tripping a player⁩",
+    "correctAnswer": "foul",
+    "distractors": [
+      "champion",
+      "defender",
+      "league"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦a kick at the goal from the penalty spot⁩",
+    "correctAnswer": "penalty",
+    "distractors": [
+      "extra time",
+      "striker",
+      "corner kick"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦a group of teams that play each other during the season⁩",
+    "correctAnswer": "league",
+    "distractors": [
+      "goalkeeper",
+      "coach",
+      "fans"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦the people who support a team⁩",
+    "correctAnswer": "fans",
+    "distractors": [
+      "trophy",
+      "save",
+      "coach"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦a player whose main job is to score goals⁩",
+    "correctAnswer": "striker",
+    "distractors": [
+      "defender",
+      "stadium",
+      "bench"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦a player whose main job is to stop the other team from scoring⁩",
+    "correctAnswer": "defender",
+    "distractors": [
+      "draw",
+      "bench",
+      "header"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦the long seat where the substitutes wait⁩",
+    "correctAnswer": "bench",
+    "distractors": [
+      "save",
+      "captain",
+      "goalkeeper"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦a prize given to the winning team⁩",
+    "correctAnswer": "trophy",
+    "distractors": [
+      "substitute",
+      "foul",
+      "referee"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦when the goalkeeper stops a shot⁩",
+    "correctAnswer": "save",
+    "distractors": [
+      "yellow card",
+      "referee",
+      "draw"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦a big place for games, with thousands of seats for fans⁩",
+    "correctAnswer": "stadium",
+    "distractors": [
+      "striker",
+      "draw",
+      "penalty"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  },
+  {
+    "prompt": "⚽🇬🇧\nאֵיזוֹ מִלָּה מַתְאִימָה לַהַגְדָּרָה?\n⁦the team that wins the league or the cup⁩",
+    "correctAnswer": "champion",
+    "distractors": [
+      "stadium",
+      "league",
+      "yellow card"
+    ],
+    "tier": "hard",
+    "gradeLo": 7,
+    "gradeHi": 8
+  }
+]
