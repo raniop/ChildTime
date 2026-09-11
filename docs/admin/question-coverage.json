@@ -1,5 +1,5 @@
 {
-  "generatedAt" : "2026-09-11T16:45:59Z",
+  "generatedAt" : "2026-09-11T17:35:11Z",
   "minGradePool" : 30,
   "target" : 200,
   "topics" : [
@@ -68,42 +68,42 @@
         "grades" : [
           {
             "grade" : 0,
-            "tagged" : 0
+            "tagged" : 37
           },
           {
             "grade" : 1,
-            "tagged" : 0
+            "tagged" : 72
           },
           {
             "grade" : 2,
-            "tagged" : 0
+            "tagged" : 72
           },
           {
             "grade" : 3,
-            "tagged" : 0
+            "tagged" : 77
           },
           {
             "grade" : 4,
-            "tagged" : 0
+            "tagged" : 75
           },
           {
             "grade" : 5,
-            "tagged" : 0
+            "tagged" : 76
           },
           {
             "grade" : 6,
-            "tagged" : 0
+            "tagged" : 74
           },
           {
             "grade" : 7,
-            "tagged" : 0
+            "tagged" : 71
           },
           {
             "grade" : 8,
-            "tagged" : 0
+            "tagged" : 74
           }
         ],
-        "total" : 0
+        "total" : 335
       },
       "grades" : [
         {
@@ -270,31 +270,31 @@
         "grades" : [
           {
             "grade" : 0,
-            "tagged" : 0
+            "tagged" : 108
           },
           {
             "grade" : 1,
-            "tagged" : 0
+            "tagged" : 137
           },
           {
             "grade" : 2,
-            "tagged" : 0
+            "tagged" : 198
           },
           {
             "grade" : 3,
-            "tagged" : 0
+            "tagged" : 110
           },
           {
             "grade" : 4,
-            "tagged" : 0
+            "tagged" : 117
           },
           {
             "grade" : 5,
-            "tagged" : 0
+            "tagged" : 55
           },
           {
             "grade" : 6,
-            "tagged" : 0
+            "tagged" : 47
           },
           {
             "grade" : 7,
@@ -305,7 +305,7 @@
             "tagged" : 0
           }
         ],
-        "total" : 0
+        "total" : 254
       },
       "grades" : [
         {
@@ -371,42 +371,42 @@
         "grades" : [
           {
             "grade" : 0,
-            "tagged" : 0
+            "tagged" : 87
           },
           {
             "grade" : 1,
-            "tagged" : 0
+            "tagged" : 99
           },
           {
             "grade" : 2,
-            "tagged" : 0
+            "tagged" : 172
           },
           {
             "grade" : 3,
-            "tagged" : 0
+            "tagged" : 123
           },
           {
             "grade" : 4,
-            "tagged" : 0
+            "tagged" : 171
           },
           {
             "grade" : 5,
-            "tagged" : 0
+            "tagged" : 109
           },
           {
             "grade" : 6,
-            "tagged" : 0
+            "tagged" : 94
           },
           {
             "grade" : 7,
-            "tagged" : 0
+            "tagged" : 39
           },
           {
             "grade" : 8,
-            "tagged" : 0
+            "tagged" : 22
           }
         ],
-        "total" : 0
+        "total" : 314
       },
       "grades" : [
         {
@@ -472,42 +472,42 @@
         "grades" : [
           {
             "grade" : 0,
-            "tagged" : 0
+            "tagged" : 27
           },
           {
             "grade" : 1,
-            "tagged" : 0
+            "tagged" : 56
           },
           {
             "grade" : 2,
-            "tagged" : 0
+            "tagged" : 78
           },
           {
             "grade" : 3,
-            "tagged" : 0
+            "tagged" : 92
           },
           {
             "grade" : 4,
-            "tagged" : 0
+            "tagged" : 103
           },
           {
             "grade" : 5,
-            "tagged" : 0
+            "tagged" : 126
           },
           {
             "grade" : 6,
-            "tagged" : 0
+            "tagged" : 116
           },
           {
             "grade" : 7,
-            "tagged" : 0
+            "tagged" : 124
           },
           {
             "grade" : 8,
-            "tagged" : 0
+            "tagged" : 92
           }
         ],
-        "total" : 0
+        "total" : 321
       },
       "grades" : [
         {
@@ -573,42 +573,42 @@
         "grades" : [
           {
             "grade" : 0,
-            "tagged" : 0
+            "tagged" : 31
           },
           {
             "grade" : 1,
-            "tagged" : 0
+            "tagged" : 55
           },
           {
             "grade" : 2,
-            "tagged" : 0
+            "tagged" : 78
           },
           {
             "grade" : 3,
-            "tagged" : 0
+            "tagged" : 125
           },
           {
             "grade" : 4,
-            "tagged" : 0
+            "tagged" : 178
           },
           {
             "grade" : 5,
-            "tagged" : 0
+            "tagged" : 232
           },
           {
             "grade" : 6,
-            "tagged" : 0
+            "tagged" : 219
           },
           {
             "grade" : 7,
-            "tagged" : 0
+            "tagged" : 156
           },
           {
             "grade" : 8,
-            "tagged" : 0
+            "tagged" : 81
           }
         ],
-        "total" : 0
+        "total" : 381
       },
       "grades" : [
         {
@@ -674,42 +674,42 @@
         "grades" : [
           {
             "grade" : 0,
-            "tagged" : 0
+            "tagged" : 29
           },
           {
             "grade" : 1,
-            "tagged" : 0
+            "tagged" : 68
           },
           {
             "grade" : 2,
-            "tagged" : 0
+            "tagged" : 101
           },
           {
             "grade" : 3,
-            "tagged" : 0
+            "tagged" : 99
           },
           {
             "grade" : 4,
-            "tagged" : 0
+            "tagged" : 71
           },
           {
             "grade" : 5,
-            "tagged" : 0
+            "tagged" : 59
           },
           {
             "grade" : 6,
-            "tagged" : 0
+            "tagged" : 59
           },
           {
             "grade" : 7,
-            "tagged" : 0
+            "tagged" : 56
           },
           {
             "grade" : 8,
-            "tagged" : 0
+            "tagged" : 41
           }
         ],
-        "total" : 0
+        "total" : 241
       },
       "grades" : [
         {
@@ -775,52 +775,52 @@
         "grades" : [
           {
             "grade" : 0,
-            "passages" : 0,
-            "tagged" : 0
+            "passages" : 7,
+            "tagged" : 24
           },
           {
             "grade" : 1,
-            "passages" : 0,
-            "tagged" : 0
+            "passages" : 10,
+            "tagged" : 38
           },
           {
             "grade" : 2,
-            "passages" : 0,
-            "tagged" : 0
+            "passages" : 9,
+            "tagged" : 35
           },
           {
             "grade" : 3,
-            "passages" : 0,
-            "tagged" : 0
+            "passages" : 9,
+            "tagged" : 35
           },
           {
             "grade" : 4,
-            "passages" : 0,
-            "tagged" : 0
+            "passages" : 9,
+            "tagged" : 36
           },
           {
             "grade" : 5,
-            "passages" : 0,
-            "tagged" : 0
+            "passages" : 10,
+            "tagged" : 40
           },
           {
             "grade" : 6,
-            "passages" : 0,
-            "tagged" : 0
+            "passages" : 8,
+            "tagged" : 32
           },
           {
             "grade" : 7,
-            "passages" : 0,
-            "tagged" : 0
+            "passages" : 9,
+            "tagged" : 36
           },
           {
             "grade" : 8,
-            "passages" : 0,
-            "tagged" : 0
+            "passages" : 9,
+            "tagged" : 36
           }
         ],
-        "passages" : 0,
-        "total" : 0
+        "passages" : 56,
+        "total" : 218
       },
       "grades" : [
         {
@@ -895,27 +895,27 @@
           },
           {
             "grade" : 1,
-            "tagged" : 0
+            "tagged" : 30
           },
           {
             "grade" : 2,
-            "tagged" : 0
+            "tagged" : 62
           },
           {
             "grade" : 3,
-            "tagged" : 0
+            "tagged" : 68
           },
           {
             "grade" : 4,
-            "tagged" : 0
+            "tagged" : 74
           },
           {
             "grade" : 5,
-            "tagged" : 0
+            "tagged" : 64
           },
           {
             "grade" : 6,
-            "tagged" : 0
+            "tagged" : 55
           },
           {
             "grade" : 7,
@@ -926,7 +926,7 @@
             "tagged" : 0
           }
         ],
-        "total" : 0
+        "total" : 119
       },
       "grades" : [
         {
@@ -1404,19 +1404,19 @@
           },
           {
             "grade" : 2,
-            "tagged" : 0
+            "tagged" : 25
           },
           {
             "grade" : 3,
-            "tagged" : 0
+            "tagged" : 53
           },
           {
             "grade" : 4,
-            "tagged" : 0
+            "tagged" : 45
           },
           {
             "grade" : 5,
-            "tagged" : 0
+            "tagged" : 17
           },
           {
             "grade" : 6,
@@ -1431,7 +1431,7 @@
             "tagged" : 0
           }
         ],
-        "total" : 0
+        "total" : 70
       },
       "grades" : [
         {
