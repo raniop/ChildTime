@@ -112,7 +112,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260912010202";
+const PAGE_STAMP = "20260912010343";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -519,18 +519,17 @@ async function importQuestions() {
   const opts = (topics.length ? topics : [{ topic: "soccer", label: "כדורגל", emoji: "⚽" }])
     .map((t) => `<option value="${t.topic}" ${t.topic === IMP_TOPIC ? "selected" : ""}>${t.emoji || ""} ${esc(t.label)}</option>`).join("");
   $("main").innerHTML = `<div class="top"><h3>ייבוא ואישור שאלות</h3><div class="filters"><span class="chip" data-ct="reports">דיווחים</span><span class="chip" data-ct="coverage">כיסוי לפי כיתה</span><span class="chip on" data-ct="import">ייבוא ואישור</span></div>${langChips(false)}</div>
-    <div class="card" style="margin-bottom:14px"><h4>📦 שאלות מוכנות מהמחולל</h4><div id="genBatches"><span class="spin"></span></div>
-      <div class="stamp" style="margin-top:6px">שאלות שנוצרו בקוד (התשובה מחושבת, לא נכתבה ביד). נכנסות כטיוטות — עוברים עליהן כיתה־כיתה ומאשרים. לחיצה חוזרת לא יוצרת כפילויות.</div></div>
+    <div class="card" style="margin-bottom:14px"><h4>📚 השאלות המוכנות ${QLANG === "en" ? "🇺🇸 באנגלית" : "🇮🇱 בעברית"}</h4><div id="genBatches"><span class="spin"></span></div></div>
     <div class="grid2">
-      <div class="card"><h4>ייבוא ידני (הדבקה)</h4>
+      <div class="card"><details><summary style="cursor:pointer;font-weight:800">ייבוא ידני (הדבקת JSON)</summary>
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><label>עולם</label><select id="impTopic">${opts}</select></div>
         <textarea id="impJson" dir="ltr" style="width:100%;min-height:220px;font:12px ui-monospace,monospace" placeholder='${QLANG === "en" ? `[{"prompt":"⚽\\nHow many players...","correctAnswer":"11","distractors":["9","10","12"],"tier":"easy","gradeLo":1,"gradeHi":3}]` : `[{"prompt":"⚽\\nכַּמָּה...","correctAnswer":"11","distractors":["9","10","12"],"tier":"easy","gradeLo":1,"gradeHi":3}]`}'></textarea>
         <label style="display:flex;gap:6px;align-items:center;margin:8px 0"><input type="checkbox" id="impApprove"> לאשר מיד (בלי לעבור על טיוטות)</label>
         <button class="btn" id="impGo">בדיקה וייבוא</button>
         <div id="impResult" style="margin-top:10px"></div>
         <div class="stamp" style="margin-top:8px">כל שאלה עוברת בדיקה אוטומטית: 3 מסיחים שונים, התשובה לא בין המסיחים, טווח כיתות 0–8, וניקוד בעברית. כפילויות מדולגות.</div>
-      </div>
-      <div class="card"><h4>טיוטות שממתינות לאישור</h4><div id="drafts"><span class="spin"></span></div></div>
+      </details></div>
+      <div class="card"><h4>ממתינות לאישור (לפי עולם)</h4><div id="drafts"><span class="spin"></span></div></div>
     </div>`;
   wireContentTabs(); wireLangChips(importQuestions);
   $("impTopic").onchange = () => { IMP_TOPIC = $("impTopic").value; DRAFT_GRADE = null; loadDrafts(); };
@@ -565,25 +564,39 @@ async function loadBatches() {
     return { approved: m.approved + (v.approved || 0), draft: m.draft + (v.draft || 0) };
   }, { approved: 0, draft: 0 });
   const he = cloudTotals("he"), en = cloudTotals("en");
-  const state = `<div id="bulkState" style="background:var(--soft);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:13px;line-height:1.7">
-      <b>בענן עכשיו:</b> 🇮🇱 ${fmt(he.approved)} מאושרות${he.draft ? ` · ${fmt(he.draft)} טיוטות` : ""}
-      · 🇺🇸 ${fmt(en.approved)} מאושרות${en.draft ? ` · ${fmt(en.draft)} טיוטות` : ""}
-      ${(QLANG === "en" ? en : he).approved === 0 ? `<br><span class="stamp">בשפה שנבחרה (${QLANG === "en" ? "🇺🇸 English" : "🇮🇱 עברית"}) עוד אין שאלות בענן — התחילו ב־📦 ייבוא הכל.</span>` : ""}
-      <div id="bulkResult" class="stamp" style="margin-top:6px"></div></div>`;
-  const bulk = batches.length ? state + `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 0 10px">
-      <button class="btn" id="impAll">📦 ייבוא הכל · ${batches.length} אצוות · ${fmt(batches.reduce((n, b) => n + (b.count || 0), 0))} שאלות</button>
-      <button class="btn" id="apprAll">✅ אישור כל הטיוטות</button>
-      <span class="stamp" id="bulkMsg"></span></div>` : state;
-  $("genBatches").innerHTML = bulk + batches.map((b) => { const t = T[b.topic] || {}; const all = ((summary.topics || {})[b.topic] || {}); const inCloud = QLANG === "en" ? (all.en || {}) : all; const have = (inCloud.approved || 0) + (inCloud.draft || 0);
+  const mine = QLANG === "en" ? en : he;
+  const ready = batches.reduce((n, b) => n + (b.count || 0), 0);
+  const flag = QLANG === "en" ? "🇺🇸 English" : "🇮🇱 עברית";
+  const state = `<div id="bulkState" style="background:var(--soft);border-radius:14px;padding:14px;margin-bottom:12px;line-height:1.8">
+      <div style="font-size:15px"><b>אצל הילדים עכשיו (${flag}):</b> ${fmt(mine.approved)} שאלות${mine.draft ? ` · <b style="color:#F5C049">${fmt(mine.draft)} מחכות לאישור שלך</b>` : ""}</div>
+      <div class="stamp">בשפה השנייה: ${QLANG === "en" ? `🇮🇱 ${fmt(he.approved)}` : `🇺🇸 ${fmt(en.approved)}`} שאלות · מוכנות כאן לפרסום: ${fmt(ready)} שאלות ב־${batches.length} קבצים</div>
+      <div id="bulkResult" style="margin-top:8px;font-size:13px"></div>
+      <div id="bulkMsg" class="stamp" style="margin-top:4px"></div></div>`;
+  const bulk = batches.length ? state + `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+      <button class="btn" id="pubAll" style="font-size:16px;padding:14px 22px">🚀 פרסמו הכל לילדים · ${fmt(ready)} שאלות ${flag}</button>
+      <span class="stamp">מייבא את כל הקבצים ומאשר אותם. אפשר גם בשלבים:</span>
+      <button class="btn" id="impAll">📦 ייבוא בלבד</button>
+      <button class="btn" id="apprAll">✅ אישור מה שממתין</button></div>` : state;
+  const rows = batches.map((b) => { const t = T[b.topic] || {}; const all = ((summary.topics || {})[b.topic] || {}); const inCloud = QLANG === "en" ? (all.en || {}) : all; const have = (inCloud.approved || 0) + (inCloud.draft || 0);
     return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)">
       <div><b>${t.emoji || ""} ${esc(t.label || b.topic)}</b>${b.label === "english" ? " · 🇬🇧 אַנְגְּלִית בְּתוֹךְ הָעוֹלָם" : ""} · ${fmt(b.count)} שאלות<div class="stamp">${Object.entries(b.byGrade || {}).map(([g, n]) => `${GN[g] || g} ${n}`).join(" · ")}${have ? ` · בענן כבר ${fmt(have)}` : ""}</div></div>
-      <button class="btn" data-batch="${esc(b.topic)}" data-file="${esc(b.file || b.topic + ".json")}" data-lang="${esc(b.lang || "he")}">ייבוא כטיוטות</button></div>`; }).join("") || '<div class="empty">אין שאלות מוכנות.</div>';
+      <button class="btn" data-batch="${esc(b.topic)}" data-file="${esc(b.file || b.topic + ".json")}" data-lang="${esc(b.lang || "he")}">ייבוא הקובץ הזה</button></div>`; }).join("");
+  $("genBatches").innerHTML = bulk + (rows
+    ? `<details><summary style="cursor:pointer;font-weight:700;padding:6px 0">פירוט לפי קובץ (${batches.length})</summary>${rows}</details>`
+    : '<div class="empty">אין קבצים מוכנים בשפה הזאת.</div>');
+  // 🚀 The whole job in one click: import every file, approved, then sweep up anything
+  // that was imported earlier and left waiting.
+  if ($("pubAll")) $("pubAll").onclick = async () => {
+    if (!confirm(`לפרסם ${fmt(ready)} שאלות ${flag} לילדים?`)) return;
+    if ($("impApprove")) $("impApprove").checked = true;
+    await runImport(true);
+    await runApprove(true);
+  };
   // 📦 Everything in one click: import each batch in turn, then (optionally) approve.
-  if ($("impAll")) $("impAll").onclick = async () => {
-    const go = $("impAll"), msg = $("bulkMsg");
-    const approve = $("impApprove") && $("impApprove").checked;
-    if (!confirm(`לייבא ${batches.length} אצוות (${fmt(batches.reduce((n, b) => n + (b.count || 0), 0))} שאלות)${approve ? " ולאשר אותן מיד" : " כטיוטות"}?`)) return;
-    go.disabled = true; if ($("apprAll")) $("apprAll").disabled = true;
+  async function runImport(approve, silent) {
+    const msg = $("bulkMsg");
+    if (!silent && !confirm(`לייבא ${fmt(ready)} שאלות מ־${batches.length} קבצים${approve ? " ולאשר אותן מיד" : " (בלי לאשר)"}?`)) return;
+    ["pubAll", "impAll", "apprAll"].forEach((id) => { if ($(id)) $(id).disabled = true; });
     let added = 0, dup = 0, rejected = 0, failed = 0;
     for (let i = 0; i < batches.length; i++) {
       const b = batches[i];
@@ -595,17 +608,18 @@ async function loadBatches() {
       } catch (e) { failed++; console.error("import failed", b.file, e); }
     }
     msg.textContent = "";
-    const line = `📦 ייבוא (${QLANG === "en" ? "🇺🇸 English" : "🇮🇱 עברית"}): נוספו ${fmt(added)}${dup ? ` · ${fmt(dup)} כבר היו` : ""}${rejected ? ` · ${rejected} נדחו` : ""}${failed ? ` · ${failed} אצוות נכשלו` : ""}${approve ? " · אושרו מיד" : " · ממתינות לאישור"}`;
+    const line = `📦 ייבוא (${flag}): נוספו ${fmt(added)}${dup ? ` · ${fmt(dup)} כבר היו` : ""}${rejected ? ` · ${rejected} נדחו` : ""}${failed ? ` · ${failed} אצוות נכשלו` : ""}${approve ? " · אושרו מיד" : " · ממתינות לאישור"}`;
     sessionStorage.setItem("admin.bulkResult", line);
+    if ($("bulkResult")) $("bulkResult").textContent = line;
     toast(line);
-    COV = null; importQuestions();
-  };
-  // ✅ Approve every draft in this language, world by world.
-  if ($("apprAll")) $("apprAll").onclick = async () => {
-    const go = $("apprAll"), msg = $("bulkMsg");
+  }
+  if ($("impAll")) $("impAll").onclick = () => runImport($("impApprove") && $("impApprove").checked).then(() => { COV = null; importQuestions(); });
+  // ✅ Approve everything still waiting in this language, world by world.
+  async function runApprove(silent) {
+    const msg = $("bulkMsg");
     const topics = [...new Set(batches.map((b) => b.topic))].concat(((COV && COV.topics) || []).map((t) => t.topic)).filter((t, i, a) => a.indexOf(t) === i);
-    if (!confirm("לאשר את כל הטיוטות בשפה הזאת? אחרי האישור השאלות מגיעות לילדים.")) return;
-    go.disabled = true; if ($("impAll")) $("impAll").disabled = true;
+    if (!silent && !confirm("לאשר את כל מה שממתין בשפה הזאת? אחרי האישור השאלות מגיעות לילדים.")) return;
+    ["pubAll", "impAll", "apprAll"].forEach((id) => { if ($(id)) $(id).disabled = true; });
     let approved = 0, failed = 0;
     for (let i = 0; i < topics.length; i++) {
       const topic = topics[i];
@@ -619,11 +633,13 @@ async function loadBatches() {
       } catch (e) { failed++; console.error("approve failed", topic, e); }
     }
     msg.textContent = "";
-    const line = `✅ אישור (${QLANG === "en" ? "🇺🇸 English" : "🇮🇱 עברית"}): אושרו ${fmt(approved)} שאלות${failed ? ` · ${failed} עולמות נכשלו` : ""}${approved === 0 ? " — לא נמצאו טיוטות. אם עוד לא ייבאתם, התחילו ב־📦 ייבוא הכל." : ""}`;
-    sessionStorage.setItem("admin.bulkResult", line);
+    const line = `✅ אישור (${flag}): אושרו ${fmt(approved)} שאלות${failed ? ` · ${failed} עולמות נכשלו` : ""}${approved === 0 ? " — לא היה מה לאשר." : ""}`;
+    sessionStorage.setItem("admin.bulkResult", (sessionStorage.getItem("admin.bulkResult") || "").split(" | ")[0] + " | " + line);
+    if ($("bulkResult")) $("bulkResult").textContent = sessionStorage.getItem("admin.bulkResult");
     toast(line);
     COV = null; importQuestions();
-  };
+  }
+  if ($("apprAll")) $("apprAll").onclick = () => runApprove();
   const last = sessionStorage.getItem("admin.bulkResult");
   if (last && $("bulkResult")) $("bulkResult").textContent = last;
   document.querySelectorAll("[data-batch]").forEach((btn) => btn.onclick = async () => {
