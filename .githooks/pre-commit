@@ -11,4 +11,10 @@ if git diff --cached --name-only | grep -qE '^ChildTime/(Models/(QuestionBanks|Q
     echo "⚠️  coverage export failed — run tools/coverage/export.sh to see why" >&2
   fi
 fi
+# 🔄 Stamp the admin page so open dashboards notice a newer version and reload.
+if git diff --cached --name-only | grep -q '^docs/admin/app.html$'; then
+  STAMP=$(date +%Y%m%d%H%M%S)
+  sed -i '' "s/const PAGE_STAMP = \"[^\"]*\"/const PAGE_STAMP = \"$STAMP\"/" "$ROOT/docs/admin/app.html"
+  git add "$ROOT/docs/admin/app.html"
+fi
 exit 0

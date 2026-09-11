@@ -107,6 +107,23 @@
 </div>
 
 <script type="module">
+// 🔄 The site lets a browser keep this page for 10 minutes, so right after an
+// update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
+// rewritten on every commit that touches this file (.githooks/pre-commit); if
+// the server holds a newer stamp, reload once from a fresh URL.
+const PAGE_STAMP = "20260911131011";
+async function reloadIfStale() {
+  try {
+    const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
+    const m = fresh.match(/const PAGE_STAMP = "20260911131011"]+)"/);
+    if (m && m[1] !== PAGE_STAMP && sessionStorage.getItem("admin.reloadedFor") !== m[1]) {
+      sessionStorage.setItem("admin.reloadedFor", m[1]);
+      location.replace(location.pathname + "?r=" + m[1] + location.hash);
+    }
+  } catch (e) { /* offline or blocked storage — keep the page as it is */ }
+}
+reloadIfStale();
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reloadIfStale(); });
 const CONFIG = { firebase: { apiKey: "AIzaSyCjZFUZFXwsbNrDA8Icw_ZZ-bPGARCLMLI", authDomain: "childtime-86e98.firebaseapp.com", projectId: "childtime-86e98" }, adminEmails: ["ranioph@gmail.com", "amitgolans@gmail.com"] };
 const PACKS = { soccer:{name:"עולם הכדורגל",emoji:"⚽",q:82}, dinosaurs:{name:"דינוזאורים",emoji:"🦖",q:70}, space:{name:"חלל וכוכבים",emoji:"🚀",q:70}, animals:{name:"עולם החיות",emoji:"🐾",q:70}, sea:{name:"מעמקי הים",emoji:"🌊",q:70}, gifted:{name:"הכנה למחוננים",emoji:"🧠",q:70}, food:{name:"מטבח ומדע של אוכל",emoji:"🍳",q:70}, israel:{name:"ישראל שלי",emoji:"🏛️",q:70}, music:{name:"מוזיקה",emoji:"🎵",q:70}, body:{name:"גוף האדם",emoji:"🧍",q:70}, vehicles:{name:"כלי רכב ותחבורה",emoji:"🚗",q:70}, flags:{name:"דגלים ומדינות",emoji:"🌍",q:70}, tishrei:{name:"חגי תשרי",emoji:"🍎",q:71} };
 const PACK_PRICE = 14.9;
