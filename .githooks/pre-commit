@@ -1,0 +1,14 @@
+#!/bin/zsh
+# 📊 Keep the dashboard's question coverage in step with the banks.
+# When a commit touches a question bank, re-export the coverage file and add it
+# to the same commit. A failed export warns but never blocks the commit.
+ROOT=$(git rev-parse --show-toplevel)
+if git diff --cached --name-only | grep -qE '^ChildTime/(Models/(QuestionBanks|QuestionDifficultyTags|ReadingContent|Topic|QuestionPack)|DesignSystem/Colors)'; then
+  if "$ROOT/tools/coverage/export.sh" >/dev/null 2>&1; then
+    git add "$ROOT/docs/admin/question-coverage.json"
+    echo "📊 question-coverage.json refreshed"
+  else
+    echo "⚠️  coverage export failed — run tools/coverage/export.sh to see why" >&2
+  fi
+fi
+exit 0

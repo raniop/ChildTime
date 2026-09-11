@@ -47,7 +47,7 @@ const key = (q) => `${String(q.prompt).trim()}|${String(q.correctAnswer).trim()}
 
 (async () => {
   for (const topic of topics) {
-    const incoming = JSON.parse(fs.readFileSync(path.join(__dirname, "out", `${topic}.json`), "utf8"));
+    const incoming = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "docs", "admin", "generated", `${topic}.json`), "utf8"));
     const { status, body: doc } = await api(`${BASE}/questionBanks/${topic}`);
     const cur = status === 404 ? { version: 0, items: [] } : dec({ mapValue: { fields: doc.fields || {} } });
     const items = Array.isArray(cur.items) ? cur.items : [];
