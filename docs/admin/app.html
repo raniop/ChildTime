@@ -112,7 +112,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260912003541";
+const PAGE_STAMP = "20260912005214";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -559,10 +559,56 @@ async function loadBatches() {
   // English batches import with lang:"en" — the server learned languages in the
   // 2026-09-12 deploy. (A lock that waited for `en` counts stayed shut on a cloud
   // bank with no worlds yet, since an empty summary looks the same either way.)
-  $("genBatches").innerHTML = batches.map((b) => { const t = T[b.topic] || {}; const all = ((summary.topics || {})[b.topic] || {}); const inCloud = QLANG === "en" ? (all.en || {}) : all; const have = (inCloud.approved || 0) + (inCloud.draft || 0);
+  const bulk = batches.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 0 10px">
+      <button class="btn" id="impAll">📦 ייבוא הכל · ${batches.length} אצוות · ${fmt(batches.reduce((n, b) => n + (b.count || 0), 0))} שאלות</button>
+      <button class="btn" id="apprAll">✅ אישור כל הטיוטות</button>
+      <span class="stamp" id="bulkMsg"></span></div>` : "";
+  $("genBatches").innerHTML = bulk + batches.map((b) => { const t = T[b.topic] || {}; const all = ((summary.topics || {})[b.topic] || {}); const inCloud = QLANG === "en" ? (all.en || {}) : all; const have = (inCloud.approved || 0) + (inCloud.draft || 0);
     return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)">
       <div><b>${t.emoji || ""} ${esc(t.label || b.topic)}</b>${b.label === "english" ? " · 🇬🇧 אַנְגְּלִית בְּתוֹךְ הָעוֹלָם" : ""} · ${fmt(b.count)} שאלות<div class="stamp">${Object.entries(b.byGrade || {}).map(([g, n]) => `${GN[g] || g} ${n}`).join(" · ")}${have ? ` · בענן כבר ${fmt(have)}` : ""}</div></div>
       <button class="btn" data-batch="${esc(b.topic)}" data-file="${esc(b.file || b.topic + ".json")}" data-lang="${esc(b.lang || "he")}">ייבוא כטיוטות</button></div>`; }).join("") || '<div class="empty">אין שאלות מוכנות.</div>';
+  // 📦 Everything in one click: import each batch in turn, then (optionally) approve.
+  if ($("impAll")) $("impAll").onclick = async () => {
+    const go = $("impAll"), msg = $("bulkMsg");
+    const approve = $("impApprove") && $("impApprove").checked;
+    if (!confirm(`לייבא ${batches.length} אצוות (${fmt(batches.reduce((n, b) => n + (b.count || 0), 0))} שאלות)${approve ? " ולאשר אותן מיד" : " כטיוטות"}?`)) return;
+    go.disabled = true; if ($("apprAll")) $("apprAll").disabled = true;
+    let added = 0, dup = 0, rejected = 0, failed = 0;
+    for (let i = 0; i < batches.length; i++) {
+      const b = batches[i];
+      msg.textContent = `מייבא ${i + 1}/${batches.length} · ${b.topic}…`;
+      try {
+        const items = await (await fetch(`generated/${b.file}?v=` + Date.now())).json();
+        const r = await call("adminImportQuestions", { topic: b.topic, items, approve, lang: b.lang || "he" });
+        added += r.added || 0; dup += r.duplicates || 0; rejected += (r.rejected || []).length;
+      } catch (e) { failed++; console.error("import failed", b.file, e); }
+    }
+    msg.textContent = "";
+    toast(`✅ נוספו ${fmt(added)}${dup ? ` · ${fmt(dup)} כבר היו` : ""}${rejected ? ` · ${rejected} נדחו` : ""}${failed ? ` · ${failed} אצוות נכשלו` : ""}`);
+    COV = null; importQuestions();
+  };
+  // ✅ Approve every draft in this language, world by world.
+  if ($("apprAll")) $("apprAll").onclick = async () => {
+    const go = $("apprAll"), msg = $("bulkMsg");
+    const topics = [...new Set(batches.map((b) => b.topic))].concat(((COV && COV.topics) || []).map((t) => t.topic)).filter((t, i, a) => a.indexOf(t) === i);
+    if (!confirm("לאשר את כל הטיוטות בשפה הזאת? אחרי האישור השאלות מגיעות לילדים.")) return;
+    go.disabled = true; if ($("impAll")) $("impAll").disabled = true;
+    let approved = 0, failed = 0;
+    for (let i = 0; i < topics.length; i++) {
+      const topic = topics[i];
+      msg.textContent = `מאשר ${i + 1}/${topics.length} · ${topic}…`;
+      try {
+        const r = await call("adminQuestionBankSummary", { draftsFor: topic, lang: QLANG });
+        const ids = (r.drafts || []).map((q) => q.id);
+        if (!ids.length) continue;
+        await call("adminSetQuestionStatus", { topic, ids, status: "approved" });
+        approved += ids.length;
+      } catch (e) { failed++; console.error("approve failed", topic, e); }
+    }
+    msg.textContent = "";
+    toast(`✅ אושרו ${fmt(approved)} שאלות${failed ? ` · ${failed} עולמות נכשלו` : ""}`);
+    COV = null; importQuestions();
+  };
   document.querySelectorAll("[data-batch]").forEach((btn) => btn.onclick = async () => {
     const topic = btn.dataset.batch; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
     try {
