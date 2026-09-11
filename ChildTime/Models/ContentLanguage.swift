@@ -45,6 +45,7 @@ enum EnglishContent {
         .flags: flags, .food: food, .music: music,
         .animals: animals, .sea: sea, .dinosaurs: dinosaurs,
         .gifted: gifted, .soccer: soccer, .logic: logic,
+        .science: science, .english: english,
     ]
 
     static var passages: [ReadingPassage] { readingPassages }
