@@ -1,0 +1,7 @@
+[
+  {"prompt": "🦀\nHow does a crab usually walk?", "correctAnswer": "Sideways", "distractors": ["Only backward", "On two legs", "It can't walk"], "tier": "easy", "gradeLo": 1, "gradeHi": 1},
+  {"prompt": "🌊\nWhat does ocean water taste like?", "correctAnswer": "Salty", "distractors": ["Sweet", "Like apple juice", "Like milk"], "tier": "easy", "gradeLo": 1, "gradeHi": 1},
+  {"prompt": "🐢\nWhere do sea turtles lay their eggs?", "correctAnswer": "In the sand on a beach", "distractors": ["On floating ice", "In nests high in trees", "Inside coral"], "tier": "medium", "gradeLo": 1, "gradeHi": 1},
+  {"prompt": "🌊\nWhich of these animals lives in the ocean?", "correctAnswer": "Seal", "distractors": ["Camel", "Squirrel", "Owl"], "tier": "easy", "gradeLo": 1, "gradeHi": 1},
+  {"prompt": "🏖️\nWhat do we call the edge of the land where it meets the ocean?", "correctAnswer": "The shore", "distractors": ["The desert", "The forest", "The mountain top"], "tier": "easy", "gradeLo": 1, "gradeHi": 1}
+]
