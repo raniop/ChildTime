@@ -25,6 +25,21 @@ struct FriendCard: Codable, Identifiable, Equatable {
 }
 
 extension FriendCard {
+    /// 🔒 The name other players see: the first word only. Cards are readable by
+    /// every signed-in player (the global board), and parents sometimes type a
+    /// child's full name — a surname never leaves the family.
+    static func publicName(_ name: String) -> String {
+        name.split(whereSeparator: \.isWhitespace).first.map(String.init) ?? ""
+    }
+    /// For cards written before the rule (they may still hold a full name).
+    var displayName: String { Self.publicName(name) }
+}
+
+extension FriendRequest {
+    var displayName: String { FriendCard.publicName(name) }
+}
+
+extension FriendCard {
     enum CodingKeys: String, CodingKey {
         case id, name, character3DID, stars, code, ownerUID, friendIDs, hiddenIDs, updatedAt, demo, language
     }
@@ -256,7 +271,7 @@ final class FriendsManager: ObservableObject {
         let profile = ProfileStore.shared.active
         let req = FriendRequest(
             id: myID, fromID: myID,
-            name: profile?.name ?? "",
+            name: FriendCard.publicName(profile?.name ?? ""),
             character3DID: profile?.character3DID,
             stars: ProgressStore.shared.stars,
             requesterUID: AuthManager.shared.userID ?? ""
@@ -483,7 +498,7 @@ final class FriendsManager: ObservableObject {
         let profile = ProfileStore.shared.active
         let card = FriendCard(
             id: id,
-            name: profile?.name ?? "",
+            name: FriendCard.publicName(profile?.name ?? ""),
             character3DID: profile?.character3DID,
             stars: ProgressStore.shared.stars,
             code: myCode,

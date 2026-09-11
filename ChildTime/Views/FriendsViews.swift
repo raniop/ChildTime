@@ -57,12 +57,12 @@ struct LeaderboardView: View {
                                                  set: { if !$0 { friendToRemove = nil } }),
                             titleVisibility: .visible,
                             presenting: friendToRemove) { f in
-            Button(tr("הָסִירוּ אֶת \(f.name)"), role: .destructive) {
+            Button(tr("הָסִירוּ אֶת \(f.displayName)"), role: .destructive) {
                 Task { await friends.removeFriend(f.id); friendToRemove = nil }
             }
             Button(tr("בִּטּוּל"), role: .cancel) { friendToRemove = nil }
         } message: { f in
-            Text(tr("\(f.name) יֵצֵא מִלּוּחַ הַחֲבֵרִים שֶׁלְּךָ. תָּמִיד אֶפְשָׁר לְהוֹסִיף שׁוּב."))
+            Text(tr("\(f.displayName) יֵצֵא מִלּוּחַ הַחֲבֵרִים שֶׁלְּךָ. תָּמִיד אֶפְשָׁר לְהוֹסִיף שׁוּב."))
         }
     }
 
@@ -311,7 +311,7 @@ struct LeaderboardView: View {
                 .frame(width: size, height: size)
                 .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
                 .glow(isMe ? AppColor.starGold : .clear, radius: isMe ? 14 : 0)
-            Text(card.name).font(.system(size: 14, weight: .heavy, design: .rounded))
+            Text(card.displayName).font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).lineLimit(1)
             starsPill(card.stars)
             // Glass steps — gold glows through the winner's, softer for 2 and 3.
@@ -350,7 +350,7 @@ struct LeaderboardView: View {
                 .foregroundStyle(.white.opacity(0.7)).frame(width: 28)
             CharacterView(character: card.character, portrait: true)
                 .frame(width: 46, height: 46)
-            Text(card.name).font(.system(size: 16, weight: .heavy, design: .rounded))
+            Text(card.displayName).font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
             Spacer()
             starsPill(card.stars)
@@ -455,7 +455,7 @@ struct AddFriendView: View {
                     CharacterView(character: f.character)
                         .frame(width: 130, height: 130)
                         .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
-                    Text(f.name)
+                    Text(f.displayName)
                         .font(.system(size: 24, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                     Text(tr("אַתֶּם חֲבֵרִים עַכְשָׁיו! 🤝"))
@@ -595,7 +595,7 @@ struct ChildFriendsView: View {
                         HStack(spacing: 12) {
                             CharacterView(character: f.character, portrait: true)
                                 .frame(width: 40, height: 40).clipShape(Circle())
-                            Text(f.name).font(.system(size: 16, weight: .semibold, design: .rounded))
+                            Text(f.displayName).font(.system(size: 16, weight: .semibold, design: .rounded))
                             Spacer()
                             Text("\(f.stars) ⭐").font(.system(size: 14, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.secondary)
@@ -668,7 +668,7 @@ struct FriendProfileView: View {
                             .frame(width: 140, height: 140)
                             .glow(AppColor.starGold, radius: 22)
 
-                        Text(card.name.isEmpty ? tr("שַׂחְקָן") : card.name)
+                        Text(card.displayName.isEmpty ? tr("שַׂחְקָן") : card.displayName)
                             .font(.system(size: 32, weight: .black, design: .rounded))
                             .foregroundStyle(.white)
 
@@ -778,7 +778,7 @@ struct FriendRequestsView: View {
                     Text("🎉").font(.system(size: 56))
                     CharacterView(character: f.character)
                         .frame(width: 130, height: 130).shadow(color: .black.opacity(0.3), radius: 8, y: 4)
-                    Text(f.name).font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    Text(f.displayName).font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                     Text(tr("אַתֶּם חֲבֵרִים עַכְשָׁיו! 🤝"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(AppColor.starGold)
                 }
@@ -809,7 +809,7 @@ struct FriendRequestsView: View {
             CharacterView(character: req.character, portrait: true)
                 .frame(width: 54, height: 54)
             VStack(alignment: .leading, spacing: 2) {
-                Text(req.name.isEmpty ? tr("שַׂחְקָן") : req.name)
+                Text(req.displayName.isEmpty ? tr("שַׂחְקָן") : req.displayName)
                     .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 Text("\(req.stars) ⭐").font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white.opacity(0.75))
@@ -850,7 +850,7 @@ struct FriendRequestsView: View {
         Task {
             await friends.acceptRequest(req)
             Haptic.success(); SoundPlayer.shared.play(.chestOpen)
-            let card = FriendCard(id: req.fromID, name: req.name,
+            let card = FriendCard(id: req.fromID, name: req.displayName,
                                   character3DID: req.character3DID, stars: req.stars, code: "")
             withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) { celebrate = card }
             confettiTrigger += 1
