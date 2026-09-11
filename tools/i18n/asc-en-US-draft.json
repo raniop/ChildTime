@@ -1,0 +1,42 @@
+{
+  "_note": "English (U.S.) App Store Connect localizations still missing (app info, Tofy+ group + monthly/yearly, 3 diamond packs). Tried 2026-09-11: Apple returned 409 (locked while version 170 is in review). Rerun `node tools/asc-en-localizations.js` once review ends.",
+  "appInfo": {
+    "locale": "en-US",
+    "name": "Tofy: Learn & Earn Screen Time",
+    "subtitle": "Kids answer, then they play"
+  },
+  "subscriptionGroup": {
+    "referenceName": "tofi_premium",
+    "locale": "en-US",
+    "name": "Tofy+"
+  },
+  "subscriptions": {
+    "com.rani.ChildTime.premium.monthly": {
+      "locale": "en-US",
+      "name": "Tofy+ Monthly",
+      "description": "All worlds for every kid in the family"
+    },
+    "com.rani.ChildTime.premium.yearly": {
+      "locale": "en-US",
+      "name": "Tofy+ Yearly",
+      "description": "All worlds for every kid, billed once a year"
+    }
+  },
+  "inAppPurchases": {
+    "com.rani.ChildTime.stars.small": {
+      "locale": "en-US",
+      "name": "60 Diamonds",
+      "description": "Diamonds for new characters in the shop"
+    },
+    "com.rani.ChildTime.stars.medium": {
+      "locale": "en-US",
+      "name": "200 Diamonds",
+      "description": "Diamonds for new characters in the shop"
+    },
+    "com.rani.ChildTime.stars.large": {
+      "locale": "en-US",
+      "name": "500 Diamonds",
+      "description": "Diamonds for new characters in the shop"
+    }
+  }
+}
