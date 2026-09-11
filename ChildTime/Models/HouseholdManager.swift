@@ -1903,6 +1903,30 @@ final class HouseholdManager: ObservableObject {
     /// lapses. A co-parent's phone must never clear premium it did not grant.
     private static let selfPublishedKey = "premium.publishedBySelfUntil"
 
+    /// 🍎 The family, as Apple's `appAccountToken`. Attached to every purchase so
+    /// App Store Server Notifications (renewals, cancellations, refunds) can be
+    /// matched to this household on the server without the app being opened.
+    var appAccountToken: UUID? { household.flatMap { UUID(uuidString: $0.id) } }
+
+    /// Purchases made before `appAccountToken` existed carry no family, so tell
+    /// the server which subscription is ours. Once per original transaction.
+    func publishAppStoreSubscription(originalID: UInt64) {
+        #if canImport(FirebaseFirestore)
+        guard !Self.skipsCloudSync, let hh = household?.id, AuthManager.shared.isRealAccount else { return }
+        let id = String(originalID)
+        let key = "appStore.publishedOriginalIDs.\(hh)"
+        var sent = Set(UserDefaults.standard.stringArray(forKey: key) ?? [])
+        guard !sent.contains(id) else { return }
+        let ref = db.collection("households").document(hh)
+        Task {
+            if await confirmedMerge(ref, ["appStoreOriginalTxIDs": FieldValue.arrayUnion([id])]) == .ok {
+                sent.insert(id)
+                UserDefaults.standard.set(Array(sent), forKey: key)
+            }
+        }
+        #endif
+    }
+
     /// The subscription behind our own `publishPremium` is gone. Clear the
     /// family's premium so the children's devices lock again.
     ///

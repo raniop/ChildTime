@@ -116,7 +116,11 @@ final class SubscriptionManager: ObservableObject {
         defer { isPurchasing = false }
 
         do {
-            let result = try await product.purchase()
+            // Tag the purchase with the family so Apple's server notifications
+            // (renew, cancel, refund) reach the right household.
+            var options: Set<Product.PurchaseOption> = []
+            if let token = HouseholdManager.shared.appAccountToken { options.insert(.appAccountToken(token)) }
+            let result = try await product.purchase(options: options)
             switch result {
             case .success(let verification):
                 let transaction = try Self.verify(verification)
@@ -180,6 +184,7 @@ final class SubscriptionManager: ObservableObject {
 
             // Auto-renewable subscription
             if let expirationDate = transaction.expirationDate {
+                HouseholdManager.shared.publishAppStoreSubscription(originalID: transaction.originalID)
                 let willRenew = transaction.revocationDate == nil
                 if expirationDate > Date() {
                     if transaction.offerType == .introductory {
@@ -258,6 +263,7 @@ final class SubscriptionManager: ObservableObject {
         if transaction.productType == .nonConsumable {
             candidate = .active(expires: nil, willRenew: false)
         } else if let expires = transaction.expirationDate, expires > Date() {
+            HouseholdManager.shared.publishAppStoreSubscription(originalID: transaction.originalID)
             candidate = transaction.offerType == .introductory
                 ? .inTrial(expires: expires)
                 : .active(expires: expires, willRenew: transaction.revocationDate == nil)

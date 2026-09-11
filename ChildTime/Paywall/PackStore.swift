@@ -168,6 +168,7 @@ final class PackStore: ObservableObject {
             do {
                 var options: Set<Product.PurchaseOption> = []
                 if line.quantity > 1 { options.insert(.quantity(line.quantity)) }
+                if let token = HouseholdManager.shared.appAccountToken { options.insert(.appAccountToken(token)) }
                 let result = try await line.product.purchase(options: options)
                 switch result {
                 case .success(let verification):

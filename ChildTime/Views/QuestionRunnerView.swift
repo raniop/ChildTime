@@ -96,7 +96,6 @@ struct QuestionRunnerView: View {
     @State private var reportedWheel = false
     @State private var reportedDiscovery: Set<Topic> = []
     @State private var showParentAssist = false
-    @State private var assistOfferedThisQuestion = false
     @ObservedObject private var parentHelp = ParentHelpManager.shared
     /// True once a parent's help removed an option on this question (for "success
     /// after help" analytics).
@@ -607,9 +606,9 @@ struct QuestionRunnerView: View {
             // Hint shows whenever it's payable; wand only after 2 wrong picks.
             // Fixed height so the layout never jumps when these appear/disappear
             // (e.g. the hint hides the moment the answer is locked in).
-            // RTL row: hint in the middle, 🔊 + 🚩 together on the right; the
+            // RTL row: hint in the middle, 🚩 🔊 🙋 together on the right; the
             // left end stays empty for the buddy.
-            HStack(spacing: AppSpacing.md) {
+            HStack(spacing: AppSpacing.sm) {
                 cardIconButton(system: "flag", fg: .white.opacity(0.7), bg: .white.opacity(0.14)) {
                     showReportConfirm = true
                 }
@@ -619,6 +618,9 @@ struct QuestionRunnerView: View {
                     // utterance, so the two don't cut each other off.
                     let spokenPrompt = (q.passage.map { $0 + ". " } ?? "") + q.readAloudText
                     SpeechReader.shared.readQuestion(prompt: spokenPrompt, options: q.options)
+                }
+                if !isPreReader {
+                    askParentButton(for: q)
                 }
                 Spacer(minLength: 0)
                 if !showFeedback {
@@ -635,6 +637,43 @@ struct QuestionRunnerView: View {
             .frame(height: 56)
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: consecutiveWrong)
         }
+    }
+
+    /// 🙋 Ask a parent — available on every question, not only after mistakes
+    /// (Rani: once a wrong answer started moving on, a child had no way left to
+    /// ask). Pulses after two misses in a row; one request per question and a
+    /// two-minute gap between requests, so a parent's phone isn't flooded.
+    @ViewBuilder
+    private func askParentButton(for q: Question) -> some View {
+        let waiting = parentHelp.hasActiveRequest && parentHelp.activeQuestion == q.prompt
+        let stuck = consecutiveWrong >= 2 && !receivedHelpThisQuestion && !waiting && !showFeedback
+        cardIconButton(system: waiting ? "hourglass" : "hand.raised.fill",
+                       fg: .white,
+                       bg: waiting ? AppColor.starGold.opacity(0.55) : .white.opacity(stuck ? 0.34 : 0.22),
+                       glow: stuck ? AppColor.starGold : .clear) {
+            let girl = profiles.active?.gender == .girl
+            if waiting {
+                companion.console("💌 הַבַּקָּשָׁה בַּדֶּרֶךְ — אֶפְשָׁר לְהַמְשִׁיךְ לַחְשֹׁב בֵּינְתַיִם")
+                return
+            }
+            guard !showFeedback else { return }
+            // One request per question — backing out of the sheet doesn't count.
+            if receivedHelpThisQuestion {
+                companion.console("כְּבָר קִבַּלְנוּ עֶזְרָה בַּשְּׁאֵלָה הַזֹּאת 💛")
+                return
+            }
+            let childID = profiles.activeID?.uuidString ?? ""
+            if parentHelp.cooldownRemaining(childID: childID) > 0 {
+                companion.console(girl ? "⏳ עוֹד רֶגַע תּוּכְלִי לְבַקֵּשׁ שׁוּב — נַסִּי לְבַד בֵּינְתַיִם"
+                                        : "⏳ עוֹד רֶגַע תּוּכַל לְבַקֵּשׁ שׁוּב — נַסֵּה לְבַד בֵּינְתַיִם")
+                return
+            }
+            Haptic.light()
+            showParentAssist = true
+        }
+        .scaleEffect(stuck ? 1.08 : 1)
+        .animation(stuck ? .easeInOut(duration: 0.7).repeatForever(autoreverses: true) : .default, value: stuck)
+        .accessibilityLabel("בַּקָּשַׁת עֶזְרָה מֵהוֹרֶה")
     }
 
     // Cost of one hint, in pending-minutes (the kid's banked play time).
@@ -665,7 +704,7 @@ struct QuestionRunnerView: View {
         Button {
             useHint(q: q)
         } label: {
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 Text("💡")
                 Text("רֶמֶז")
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
@@ -674,7 +713,10 @@ struct QuestionRunnerView: View {
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.75))
             }
-            .padding(.horizontal, AppSpacing.lg)
+            // Never truncate to "💡 …": the row also holds 🚩 🔊 🙋 and the buddy.
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
+            .padding(.horizontal, AppSpacing.md)
             .padding(.vertical, AppSpacing.sm)
             .background(Capsule().fill(.white.opacity(0.14)))
             .overlay(Capsule().strokeBorder(AppColor.starGold.opacity(enabled ? 0.7 : 0.3), lineWidth: 1))
@@ -920,7 +962,6 @@ struct QuestionRunnerView: View {
         showFeedback = false
         hadMistakeThisQuestion = false
         usedHintThisQuestion = false
-        assistOfferedThisQuestion = false
         receivedHelpThisQuestion = false
         // A request still open for the previous question is closed so the
         // parent's banner doesn't offer help on a question that's gone.
@@ -1371,11 +1412,9 @@ struct QuestionRunnerView: View {
         Haptic.warning()
         consecutiveWrong += 1
         hadMistakeThisQuestion = true
-        // Stuck? Gently offer to bring a parent in (once per question).
-        if consecutiveWrong == 2, !assistOfferedThisQuestion {
-            assistOfferedThisQuestion = true
-            showParentAssist = true
-        }
+        // No automatic help sheet any more: a wrong answer moves on after a
+        // second, so a sheet opened here landed on the NEXT question. The 🙋
+        // button pulses instead (see `askParentButton`).
         let lostSeconds = progress.recordWrong(
             topic: q.topic,
             minutesPerCorrect: settings.minutesPerCorrectAnswer,

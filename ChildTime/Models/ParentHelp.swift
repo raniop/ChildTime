@@ -116,6 +116,16 @@ final class ParentHelpManager: ObservableObject {
     private var activeRequestID: String?
     var hasActiveRequest: Bool { activeRequestID != nil }
 
+    /// A help request pushes a parent's phone, so a child can't send them back
+    /// to back: one per question (the runner) and this gap between any two.
+    static let cooldown: TimeInterval = 120
+    private func lastRequestKey(_ childID: String) -> String { "parentHelp.lastRequestAt.\(childID)" }
+    /// Seconds until this child may ask again (0 = now).
+    func cooldownRemaining(childID: String) -> TimeInterval {
+        let last = UserDefaults.standard.double(forKey: lastRequestKey(childID))
+        return max(0, last + Self.cooldown - Date().timeIntervalSince1970)
+    }
+
     /// Create a help request targeting one parent. Returns the request id (nil if
     /// Firestore isn't available). `distractor` is the wrong option the parent
     /// sees alongside the correct answer.
@@ -139,6 +149,7 @@ final class ParentHelpManager: ObservableObject {
         let ref = db.collection("helpRequests").document()
         req.id = ref.documentID
         ref.setData(req.firestoreData)
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: lastRequestKey(childID))
         activeRequestID = ref.documentID
         activeQuestion = question
         lastReply = nil
@@ -191,6 +202,7 @@ final class ParentHelpManager: ObservableObject {
             .setData(["status": "expired", "expiredAt": Date().timeIntervalSince1970], merge: true)
         #endif
         stopListening()
+        activeRequestID = nil
         activeQuestion = nil
     }
 

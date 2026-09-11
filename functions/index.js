@@ -828,6 +828,18 @@ exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{cho
 exports.onHelpRequest = onDocumentCreated("helpRequests/{id}", async (event) => {
   const data = event.data && event.data.data();
   if (!data || !data.parentUID) return;
+  // The app allows one request per question and two minutes between them; this
+  // is the backstop for an old build or a tampered device: at most 8 help pushes
+  // per child per hour.
+  const hour = new Date().toISOString().slice(0, 13);
+  const counter = db.collection("pushDedup").doc(`help_${String(data.childID || data.fromUID || "x")}_${hour}`);
+  const allowed = await db.runTransaction(async (t) => {
+    const n = Number(((await t.get(counter)).data() || {}).count || 0);
+    if (n >= 8) return false;
+    t.set(counter, { count: n + 1, at: Date.now() }, { merge: true });
+    return true;
+  });
+  if (!allowed) { console.warn("[onHelpRequest] hourly cap reached for", data.childID); return; }
 
   // "all" = the child had no named parent to pick → every parent device in the
   // household (minus the asking device itself).

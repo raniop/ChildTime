@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Shown mid-session when a child is clearly stuck (2 wrong picks). The child
+/// Opened from the 🙋 button on the question card. The child
 /// picks a parent → that parent gets a push with the question and the two
 /// options (and the same request shows as a banner in the parent app); one tap
 /// removes a wrong option from the child's screen. Warm, no-pressure, never
@@ -51,10 +51,10 @@ struct ParentAssistView: View {
                     } else if household.linkedParents.isEmpty {
                         // No named parent on file — every parent device in the family
                         // gets the same interactive request.
-                        assistButton("👨‍👩‍👧 בַּקֵּשׁ עֶזְרָה מֵאַבָּא אוֹ אִמָּא") { askParent(uid: "all") }
+                        assistButton(isGirl ? "👨‍👩‍👧 בַּקְּשִׁי עֶזְרָה מֵאַבָּא אוֹ אִמָּא" : "👨‍👩‍👧 בַּקֵּשׁ עֶזְרָה מֵאַבָּא אוֹ אִמָּא") { askParent(uid: "all") }
                     } else {
                         ForEach(household.linkedParents, id: \.uid) { parent in
-                            assistButton("👋 בַּקֵּשׁ עֶזְרָה מ\(parent.name)") { askParent(uid: parent.uid) }
+                            assistButton((isGirl ? "👋 בַּקְּשִׁי עֶזְרָה מ" : "👋 בַּקֵּשׁ עֶזְרָה מ") + parent.name) { askParent(uid: parent.uid) }
                         }
                     }
                 }
