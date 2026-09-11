@@ -44,7 +44,8 @@ enum EnglishContent {
         .space: space, .body: body, .vehicles: vehicles,
         .flags: flags, .food: food, .music: music,
         .animals: animals, .sea: sea, .dinosaurs: dinosaurs,
+        .gifted: gifted, .soccer: soccer, .logic: logic,
     ]
 
-    static let passages: [ReadingPassage] = []
+    static var passages: [ReadingPassage] { readingPassages }
 }
