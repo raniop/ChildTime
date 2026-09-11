@@ -2,7 +2,7 @@
 // percentages. Teams are colours, not clubs — timeless, and a plural subject
 // keeps every verb in one agreement ("הַכְּחֻלִּים הִבְקִיעוּ").
 "use strict";
-const { int, pick, numericDistractors, pctDistractors, prefixed, and } = require("./core");
+const { int, pick, numericDistractors, pctDistractors, prefixed, and, ltr, signed, frac } = require("./core");
 
 const TEAMS = ["הַכְּחֻלִּים", "הָאֲדֻמִּים", "הַצְּהֻבִּים", "הַיְּרֻקִּים", "הַלְּבָנִים", "הַשְּׁחֹרִים"];
 const two = (r) => { const a = pick(r, TEAMS); let b = pick(r, TEAMS); while (b === a) b = pick(r, TEAMS); return [a, b]; };
@@ -90,6 +90,63 @@ const byGrade = {
         return { prompt: `🏆\nלַמּוֹבִילָה יֵשׁ ${lead} נְקֻדּוֹת ${and(prefixed("לְ", A))} יֵשׁ ${cur}. כַּמָּה נִצְחוֹנוֹת לְפָחוֹת (3 נְקֻדּוֹת כָּל אֶחָד) הֵם צְרִיכִים כְּדֵי לַעֲקֹף אוֹתָהּ?`, correctAnswer: String(need), distractors: d(r, need, { min: 1 }), tier: "hard" }; }
       default: { const base = int(r, 2, 40) * 1000, pct = pick(r, [10, 20, 25, 50]); const next = base * (100 + pct) / 100;
         return { prompt: `📈\nבַּמִּשְׂחָק הַקּוֹדֵם הָיוּ ${base} אוֹהֲדִים, וְהַפַּעַם הַמִּסְפָּר עָלָה בְּ־${pct}%. כַּמָּה אוֹהֲדִים הָיוּ הַפַּעַם?`, correctAnswer: String(next), distractors: d(r, next, { step: Math.max(100, base * 0.05) }), tier: "hard" }; }
+    }
+  },
+  // ——— ז׳: הֶפְרֵשׁ שְׁלִילִי, מְמֻצָּעִים, טַבְלַת נְקֻדּוֹת, אֲחוּזֵי תְּפוּסָה ———
+  7(r) {
+    const [A, B] = two(r);
+    // A signed answer and its three sign-slip neighbours, all isolated.
+    const signedSet = (ans, extra) => { const out = []; for (const v of [-ans, ...extra, ans + 1, ans - 1, ans + 2]) { const sv = signed(v); if (v !== ans && !out.includes(sv) && out.length < 3) out.push(sv); } return out; };
+    switch (int(r, 0, 5)) {
+      case 0: { const scored = int(r, 20, 45), conceded = scored + int(r, 1, 15);
+        return { prompt: `📊\n${A} הִבְקִיעוּ הָעוֹנָה ${scored} שְׁעָרִים וְסָפְגוּ ${conceded}. מָה הֶפְרֵשׁ הַשְּׁעָרִים שֶׁלָּהֶם?`,
+          correctAnswer: signed(scored - conceded), distractors: signedSet(scored - conceded, [scored + conceded]), tier: "medium" }; }
+      case 1: { const games = pick(r, [4, 6, 8, 10]), half = int(r, 1, 7), total = games * half / 2;
+        if (!Number.isInteger(total) || half % 2 === 0) return null;
+        const avg = (half / 2).toFixed(1);
+        return { prompt: `⚽\n${A} הִבְקִיעוּ ${total} שְׁעָרִים בְּ־${games} מִשְׂחָקִים. מָה מְמֻצַּע הַשְּׁעָרִים לְמִשְׂחָק?`,
+          correctAnswer: avg, distractors: [String(Math.floor(half / 2)), String(Math.ceil(half / 2)), (half / 2 + 0.5).toFixed(1), String(games * 2)].filter((x, i, a) => x !== avg && a.indexOf(x) === i).slice(0, 3), tier: "medium" }; }
+      case 2: { const w = int(r, 5, 20), dr = int(r, 1, 10), l = int(r, 1, 10), pts = 3 * w + dr;
+        return { prompt: `🏆\n${A}: ${w} נִצְחוֹנוֹת, ${dr} תֵּיקוֹ וְ־${l} הֶפְסֵדִים. נִצָּחוֹן = 3 נְקֻדּוֹת, תֵּיקוֹ = נְקֻדָּה אַחַת. כַּמָּה נְקֻדּוֹת יֵשׁ לָהֶם?`,
+          correctAnswer: String(pts), distractors: d(r, pts, { min: 1, mistakes: [w + dr + l, 3 * w, 3 * w + dr - l] }), tier: "medium" }; }
+      case 3: { const pts = int(r, 30, 70), w = int(r, 5, Math.floor(pts / 3)), dr = pts - 3 * w;
+        if (dr < 0 || dr > 15) return null;
+        return { prompt: `🏆\n${prefixed("לְ", A)} יֵשׁ ${pts} נְקֻדּוֹת וְ־${w} נִצְחוֹנוֹת. בְּכַמָּה מִשְׂחָקִים הֵם סִיְּמוּ בְּתֵיקוֹ? (נִצָּחוֹן = 3 נְקֻדּוֹת, תֵּיקוֹ = נְקֻדָּה אַחַת)`,
+          correctAnswer: String(dr), distractors: d(r, dr, { min: 0, mistakes: [pts - w, Math.round(pts / 3)] }), tier: "hard" }; }
+      case 4: { const cap = pick(r, [8000, 12000, 20000, 30000, 40000]), pct = pick(r, [40, 55, 60, 75, 80, 85, 90]), fans = cap * pct / 100;
+        return { prompt: `🏟️\nבָּאִצְטַדְיוֹן יֵשׁ ${cap.toLocaleString("en-US")} מְקוֹמוֹת, וְהִגִּיעוּ ${fans.toLocaleString("en-US")} אוֹהֲדִים. אֵיזֶה אָחוּז מֵהַמְּקוֹמוֹת מָלֵא?`,
+          correctAnswer: `${pct}%`, distractors: pctDistractors(r, pct, 5), tier: "medium" }; }
+      default: { const minutes = int(r, 3, 9) * 90, goals = minutes / 90 * pick(r, [1, 2, 3]) / pick(r, [1, 2]);
+        if (!Number.isInteger(goals) || goals < 2) return null;
+        const per = minutes / goals;
+        if (!Number.isInteger(per)) return null;
+        return { prompt: `⏱️\nחָלוּץ שִׂחֵק ${minutes} דַּקּוֹת וְהִבְקִיעַ ${goals} שְׁעָרִים. כָּל כַּמָּה דַּקּוֹת, בִּמְמֻצָּע, הוּא הִבְקִיעַ?`,
+          correctAnswer: String(per), distractors: d(r, per, { min: 1, step: 5, mistakes: [goals * 90 / minutes === Math.round(goals * 90 / minutes) ? goals * 90 / minutes : per + 10, minutes - goals] }), tier: "hard" }; }
+    }
+  },
+  // ——— ח׳: הִסְתַּבְּרוּת, מְהִירוּת, שֶׁטַח מִגְרָשׁ, מִשְׁוָאָה, מְמֻצָּע נִדְרָשׁ ———
+  8(r) {
+    const [A] = two(r);
+    switch (int(r, 0, 4)) {
+      case 0: { const shots = pick(r, [8, 10, 12, 15, 16, 20, 24, 25, 30]), made = int(r, 1, shots - 1);
+        const ans = frac(made, shots), opts = [frac(shots - made, shots), frac(made, shots - made), frac(made + 1, shots + 1), frac(1, shots), frac(made, shots + made)];
+        const distractors = [...new Set(opts)].filter((x) => x !== ans).slice(0, 3);
+        return { prompt: `🥅\nשׁוֹעֵר עָצַר ${made} מִתּוֹךְ ${shots} פֶּנְדֶּלִים. לְפִי זֶה, מָה הַסִּכּוּי שֶׁהוּא יַעֲצֹר אֶת הַפֶּנְדֵּל הַבָּא?`,
+          correctAnswer: ans, distractors, tier: "hard" }; }
+      case 1: { const km = int(r, 3, 12) * 3, speed = km / 1.5;
+        return { prompt: `🏃\nשַׂחְקָן רָץ ${km} קִילוֹמֶטְרִים בְּמִשְׂחָק שֶׁל 90 דַּקּוֹת. מָה הַמְּהִירוּת הַמְּמֻצַּעַת שֶׁלּוֹ בְּקָמָ"שׁ?`,
+          correctAnswer: String(speed), distractors: d(r, speed, { min: 1, mistakes: [km / 90 === Math.round(km / 90) ? km / 90 : speed + 3, km, Math.round(km * 90 / 60 / 1)] }), tier: "hard" }; }
+      case 2: { const len = int(r, 100, 110), wid = int(r, 64, 75), area = len * wid;
+        return { prompt: `📐\nמִגְרָשׁ כַּדּוּרֶגֶל בְּאֹרֶךְ ${len} מֶטֶר וּבְרֹחַב ${wid} מֶטֶר. מָה הַשֶּׁטַח שֶׁלּוֹ בְּמֶטְרִים רְבוּעִים?`,
+          correctAnswer: area.toLocaleString("en-US"), distractors: [2 * (len + wid), area + len, area - wid, len * (wid + 1)].map((x) => x.toLocaleString("en-US")).filter((x, i, a) => x !== area.toLocaleString("en-US") && a.indexOf(x) === i).slice(0, 3), tier: "hard" }; }
+      case 3: { const fixed = int(r, 2, 20) * 1000, price = pick(r, [40, 50, 60, 80, 100]), tickets = int(r, 5, 40) * 100, revenue = fixed + price * tickets;
+        return { prompt: `🎟️\nהַכְנָסַת הַמִּשְׂחָק הָיְתָה ${revenue.toLocaleString("en-US")} ₪: ${fixed.toLocaleString("en-US")} ₪ מִפִּרְסוֹמוֹת, וְהַשְּׁאָר מִכַּרְטִיסִים שֶׁל ${price} ₪ כָּל אֶחָד. כַּמָּה כַּרְטִיסִים נִמְכְּרוּ?`,
+          correctAnswer: tickets.toLocaleString("en-US"), distractors: [Math.round(revenue / price), tickets + 100, tickets - 100, Math.round(fixed / price)].filter((x) => x > 0).map((x) => x.toLocaleString("en-US")).filter((x, i, a) => x !== tickets.toLocaleString("en-US") && a.indexOf(x) === i).slice(0, 3), tier: "hard" }; }
+      default: { const n = int(r, 3, 7), target = int(r, 2, 4), sofar = n * target - int(r, 1, 4);
+        const need = (n + 1) * target - sofar;
+        if (need < 1 || need > 10) return null;
+        return { prompt: `⚽\n${A} הִבְקִיעוּ ${sofar} שְׁעָרִים בְּ־${n} מִשְׂחָקִים. כַּמָּה שְׁעָרִים הֵם צְרִיכִים בַּמִּשְׂחָק הַבָּא כְּדֵי שֶׁהַמְּמֻצָּע יִהְיֶה ${target} שְׁעָרִים לְמִשְׂחָק?`,
+          correctAnswer: String(need), distractors: d(r, need, { min: 0, mistakes: [target, n * target - sofar] }), tier: "hard" }; }
     }
   },
 };

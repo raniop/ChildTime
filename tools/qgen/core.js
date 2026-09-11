@@ -118,4 +118,12 @@ function pctDistractors(r, pct, step = 5) {
   return out.map((v) => `${v}%`);
 }
 
-module.exports = { qbProblems, rng, int, pick, numericDistractors, pctDistractors, prefixed, and, KIDS, g, collect };
+// Math inside a Hebrew question: keep it left-to-right and in one piece (a
+// wrap split "x = 0" across lines; "−5" can render as "5−" without the isolate).
+const ltr = (x) => `\u2066${String(x).replace(/ /g, "\u00A0")}\u2069`;
+// A signed number as a child reads it: real minus sign, isolated.
+const signed = (n) => ltr(n < 0 ? `−${-n}` : `${n}`);
+const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
+const frac = (n, d) => { const k = gcd(n, d); return ltr(`${n / k}/${d / k}`); };
+
+module.exports = { qbProblems, rng, int, pick, numericDistractors, pctDistractors, prefixed, and, KIDS, g, collect, ltr, signed, gcd, frac };

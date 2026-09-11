@@ -2,7 +2,7 @@
 // curriculum the money world sits on: א׳ within 20, ב׳ within 100, ג׳ times
 // tables, ד׳ division, ה׳ simple percent and agorot, ו׳ percent / ratio.
 "use strict";
-const { int, pick, numericDistractors, prefixed, and, KIDS, g } = require("./core");
+const { int, pick, numericDistractors, prefixed, and, KIDS, g, ltr, gcd } = require("./core");
 
 // Items carry their grammatical gender so "עוֹלֶה/עוֹלָה" always agrees.
 // Items carry their gender (so "עוֹלֶה/עוֹלָה" agrees) and a believable price
@@ -114,6 +114,87 @@ const byGrade = {
         // "א׳" and a child learns the letter instead of the maths.
         const cheapIsA = r() < 0.5, A = cheapIsA ? cheap : dear, B = cheapIsA ? dear : cheap;
         return { prompt: `🛒\nחֲבִילָה א׳: ${A.n} מַחְבָּרוֹת בְּ־${A.p} ₪. חֲבִילָה ב׳: ${B.n} מַחְבָּרוֹת בְּ־${B.p} ₪. אֵיזוֹ זוֹלָה יוֹתֵר לְמַחְבֶּרֶת?`, correctAnswer: cheapIsA ? "חֲבִילָה א׳" : "חֲבִילָה ב׳", distractors: [cheapIsA ? "חֲבִילָה ב׳" : "חֲבִילָה א׳", "שְׁתֵּיהֶן אוֹתוֹ מְחִיר", "אִי אֶפְשָׁר לָדַעַת"], tier: "hard" }; }
+    }
+  },
+  // ——— ז׳: חינוך פיננסי — הנחות כפולות, רִבִּית פְּשׁוּטָה, אָחוּז שִׁנּוּי, שַׁעַר חֲלִיפִין, תַּקְצִיב ———
+  7(r) {
+    const k = pick(r, KIDS);
+    switch (int(r, 0, 5)) {
+      case 0: { // two discounts one after the other are NOT their sum
+        const price = int(r, 5, 40) * 20, p1 = pick(r, [10, 20, 25, 50]), p2 = pick(r, [10, 20]);
+        const final = price * (100 - p1) / 100 * (100 - p2) / 100;
+        if (!Number.isInteger(final) || !Number.isInteger(price * (100 - p1 - p2) / 100)) return null;
+        return { prompt: `🏷️\nמְעִיל עוֹלֶה ${price} ₪. קִבַּלְנוּ הֲנָחָה שֶׁל ${p1}%, וְאַחֲרֶיהָ עוֹד ${p2}% הֲנָחָה עַל הַמְּחִיר הַחָדָשׁ. כַּמָּה מְשַׁלְּמִים?`,
+          correctAnswer: sh(final), distractors: dist(r, final, { step: Math.max(1, Math.round(price * 0.02)), mistakes: [price * (100 - p1 - p2) / 100, price * (p1 + p2) / 100] }), tier: "hard" }; }
+      case 1: { // simple interest
+        const dep = int(r, 1, 20) * 500, rate = pick(r, [2, 3, 4, 5, 10]), years = int(r, 2, 5);
+        const interest = dep * rate * years / 100;
+        if (!Number.isInteger(interest)) return null;
+        return { prompt: `🏦\n${k.n} ${g(k, "הִפְקִיד", "הִפְקִידָה")} ${dep} ₪ בְּחִסָּכוֹן עִם רִבִּית פְּשׁוּטָה שֶׁל ${rate}% בְּשָׁנָה. כַּמָּה כֶּסֶף יִהְיֶה בַּחִסָּכוֹן אַחֲרֵי ${years} שָׁנִים?`,
+          correctAnswer: sh(dep + interest), distractors: dist(r, dep + interest, { step: Math.max(5, dep * rate / 100), mistakes: [interest, dep + dep * rate / 100] }), tier: "hard" }; }
+      case 2: { // percent change between two prices
+        const before = int(r, 2, 30) * 20, pct = pick(r, [5, 10, 15, 20, 25, 40, 50]), up = r() < 0.5;
+        const after = before * (100 + (up ? pct : -pct)) / 100;
+        if (!Number.isInteger(after)) return null;
+        return { prompt: `📊\nמְחִיר הַכַּרְטִיס ${up ? "עָלָה" : "יָרַד"} מִ־${before} ₪ לְ־${after} ₪. בְּכַמָּה אֲחוּזִים ${up ? "הוּא עָלָה" : "הוּא יָרַד"}?`,
+          correctAnswer: `${pct}%`, distractors: [`${Math.abs(after - before)}%`, `${Math.round(Math.abs(after - before) * 100 / after)}%`, `${pct + 5}%`, `${pct * 2}%`, `${Math.max(1, pct - 5)}%`].filter((x, i, a) => x !== `${pct}%` && a.indexOf(x) === i && parseInt(x, 10) <= 100).slice(0, 3), tier: "hard" }; }
+      case 3: { // exchange rate (a stated, made-up rate — never "today's")
+        const rate = pick(r, [3, 3.5, 4]), dollars = int(r, 2, 40) * 2, shekels = dollars * rate;
+        if (!Number.isInteger(shekels)) return null;
+        return { prompt: `💱\nנַנִּיחַ שֶׁדּוֹלָר אֶחָד שָׁוֶה ${rate} ₪. ${k.n} ${g(k, "רוֹצֶה", "רוֹצָה")} לִקְנוֹת מִשְׂחָק שֶׁעוֹלֶה ${dollars} דּוֹלָר. כַּמָּה זֶה בִּשְׁקָלִים?`,
+          correctAnswer: sh(shekels), distractors: dist(r, shekels, { step: rate * 2, mistakes: [Math.round(dollars / rate), dollars + rate] }), tier: "medium" }; }
+      case 4: { // budget: a fraction of the allowance
+        const allowance = pick(r, [120, 150, 180, 200, 240, 300]), [num, den] = pick(r, [[1, 3], [1, 4], [2, 5], [3, 4], [1, 5], [3, 5]]);
+        const spent = allowance * num / den;
+        if (!Number.isInteger(spent)) return null;
+        return { prompt: `🗓️\n${k.n} ${g(k, "מְקַבֵּל", "מְקַבֶּלֶת")} ${allowance} ₪ דְּמֵי כִּיס בְּחֹדֶשׁ וּ${g(k, "מוֹצִיא", "מוֹצִיאָה")} ${ltr(`${num}/${den}`)} מֵהֶם עַל אֹכֶל. כַּמָּה נִשְׁאָר ${g(k, "לוֹ", "לָהּ")}?`,
+          correctAnswer: sh(allowance - spent), distractors: dist(r, allowance - spent, { step: Math.max(5, allowance / 20), mistakes: [spent, allowance - num * den] }), tier: "medium" }; }
+      default: { // unit price comparison, with the answer as a price
+        const n1 = pick(r, [4, 6, 8]), n2 = pick(r, [10, 12, 15]), u1 = int(r, 3, 9), u2 = u1 - int(r, 1, 2);
+        if (u2 < 1) return null;
+        return { prompt: `🥤\nחֲבִילָה שֶׁל ${n1} בַּקְבּוּקִים עוֹלָה ${n1 * u1} ₪, וַחֲבִילָה שֶׁל ${n2} בַּקְבּוּקִים עוֹלָה ${n2 * u2} ₪. כַּמָּה חוֹסְכִים עַל כָּל בַּקְבּוּק כְּשֶׁקּוֹנִים אֶת הַחֲבִילָה הַגְּדוֹלָה?`,
+          correctAnswer: sh(u1 - u2), distractors: dist(r, u1 - u2, { min: 1, mistakes: [n2 * u2 - n1 * u1, u1, n2 - n1] }), tier: "hard" }; }
+    }
+  },
+  // ——— ח׳: רִבִּית דְּרִבִּית, אָחוּז הָפוּךְ, הַשְׁוָאַת תָּכְנִיּוֹת, מְמֻצָּע חָסֵר, חֲלֻקָּה בְּיַחַס ———
+  8(r) {
+    const k = pick(r, KIDS);
+    switch (int(r, 0, 5)) {
+      case 0: { // compound interest over two years
+        const dep = int(r, 1, 30) * 100, rate = pick(r, [10, 20]);
+        const final = dep * (100 + rate) * (100 + rate) / 10000;
+        if (!Number.isInteger(final)) return null;
+        return { prompt: `🏦\n${dep} ₪ בְּחִסָּכוֹן עִם רִבִּית דְּרִבִּית שֶׁל ${rate}% בְּשָׁנָה. כַּמָּה יִהְיֶה בַּחִסָּכוֹן אַחֲרֵי שְׁנָתַיִם?`,
+          correctAnswer: sh(final), distractors: dist(r, final, { step: Math.max(2, dep * 0.02), mistakes: [dep * (100 + 2 * rate) / 100, dep * (100 + rate) / 100] }), tier: "hard" }; }
+      case 1: { // reverse percent: the price after the discount → the original
+        const orig = int(r, 3, 30) * 20, pct = pick(r, [10, 20, 25, 50]), after = orig * (100 - pct) / 100;
+        if (!Number.isInteger(after) || !Number.isInteger(after * (100 + pct) / 100)) return null;
+        return { prompt: `🔎\nאַחֲרֵי הֲנָחָה שֶׁל ${pct}% ${k.n} ${g(k, "שִׁלֵּם", "שִׁלְּמָה")} ${after} ₪ עַל אוֹזְנִיּוֹת. מֶה הָיָה הַמְּחִיר לִפְנֵי הַהֲנָחָה?`,
+          correctAnswer: sh(orig), distractors: dist(r, orig, { step: Math.max(2, orig * 0.05), mistakes: [after * (100 + pct) / 100, after + pct] }), tier: "hard" }; }
+      case 2: { // two phone plans: when do they cost the same?
+        const perA = int(r, 1, 4), perB = perA + int(r, 1, 4), fixedB = int(r, 1, 4) * 5, x = int(r, 3, 20);
+        const fixedA = fixedB + (perB - perA) * x;
+        if (fixedA > 150) return null;
+        return { prompt: `📱\nתָּכְנִית א׳: ${fixedA} ₪ בְּחֹדֶשׁ וְעוֹד ${perA} ₪ לְכָל גִּיגָה.\nתָּכְנִית ב׳: ${fixedB} ₪ בְּחֹדֶשׁ וְעוֹד ${perB} ₪ לְכָל גִּיגָה.\nבְּכַמָּה גִּיגָה הֵן עוֹלוֹת אוֹתוֹ דָּבָר?`,
+          correctAnswer: String(x), distractors: dist(r, x, { fmt: String, min: 1, mistakes: [Math.round(fixedA / perB), Math.round((fixedA + fixedB) / (perA + perB))] }), tier: "hard" }; }
+      case 3: { // the missing month for a target average
+        const target = int(r, 4, 20) * 10, known = [0, 0, 0].map(() => target + int(r, -4, 4) * 5);
+        const need = 4 * target - known.reduce((a, b) => a + b, 0);
+        if (need <= 0) return null;
+        return { prompt: `📒\nבִּשְׁלֹשָׁה חֳדָשִׁים ${k.n} ${g(k, "חָסַךְ", "חָסְכָה")} ${known[0]}, ${known[1]} וְ־${known[2]} ₪. כַּמָּה ${g(k, "צָרִיךְ", "צְרִיכָה")} לַחְסֹךְ בַּחֹדֶשׁ הָרְבִיעִי כְּדֵי שֶׁהַמְּמֻצָּע יִהְיֶה ${target} ₪?`,
+          correctAnswer: sh(need), distractors: dist(r, need, { step: 5, mistakes: [target, 3 * target - known.reduce((a, b) => a + b, 0) + target * 0] }), tier: "hard" }; }
+      case 4: { // sharing in a three-way ratio
+        const a = int(r, 1, 4), b = int(r, 1, 4), c = int(r, 1, 5), unit = int(r, 5, 30);
+        if ((a === b && b === c) || gcd(gcd(a, b), c) > 1) return null;   // a reduced ratio, like a textbook
+        const total = (a + b + c) * unit;
+        return { prompt: `⚖️\nשְׁלֹשָׁה אַחִים חוֹלְקִים ${total} ₪ בְּיַחַס ${ltr(`${a} : ${b} : ${c}`)}. כַּמָּה מְקַבֵּל הָאָח שֶׁחֶלְקוֹ ${c}?`,
+          correctAnswer: sh(c * unit), distractors: dist(r, c * unit, { step: unit, mistakes: [Math.round(total / 3), total / c === Math.round(total / c) ? total / c : c * unit + unit] }), tier: "hard" }; }
+      default: { // salary after tax, then a percent of what is left
+        const salary = int(r, 4, 20) * 500, tax = pick(r, [10, 20]), save = pick(r, [10, 20, 25]);
+        const net = salary * (100 - tax) / 100, saved = net * save / 100;
+        if (!Number.isInteger(saved)) return null;
+        return { prompt: `💼\nמַשְׂכֹּרֶת שֶׁל ${salary} ₪. ${tax}% הוֹלְכִים לְמַס, וּמִמָּה שֶׁנִּשְׁאַר חוֹסְכִים ${save}%. כַּמָּה חוֹסְכִים?`,
+          correctAnswer: sh(saved), distractors: dist(r, saved, { step: Math.max(5, saved * 0.1), mistakes: [salary * save / 100, salary * (save - tax) / 100] }), tier: "hard" }; }
     }
   },
 };
