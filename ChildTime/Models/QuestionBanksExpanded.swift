@@ -12,7 +12,7 @@ enum QuestionBanksExpanded {
         // Animals (more)
         BankQuestion(prompt: "🦓\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "zebra", distractors: ["horse", "cow", "donkey"], grades: 3...4),
         BankQuestion(prompt: "🦒\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "giraffe", distractors: ["elephant", "horse", "camel"], grades: 3...4),
-        BankQuestion(prompt: "🐒\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "monkey", distractors: ["bear", "ape", "lion"], grades: 3...4),
+        BankQuestion(prompt: "🐒\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "monkey", distractors: ["bear", "tiger", "lion"], grades: 3...4),
         BankQuestion(prompt: "🐻\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "bear", distractors: ["wolf", "fox", "dog"], grades: 3...4),
         BankQuestion(prompt: "🐺\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "wolf", distractors: ["dog", "fox", "bear"], grades: 3...4),
         BankQuestion(prompt: "🐰\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "rabbit", distractors: ["mouse", "hamster", "fox"], grades: 3...4),
@@ -25,7 +25,7 @@ enum QuestionBanksExpanded {
         BankQuestion(prompt: "🦄\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "unicorn", distractors: ["horse", "dragon", "pony"], grades: 3...4),
         BankQuestion(prompt: "🐬\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "dolphin", distractors: ["whale", "fish", "shark"], grades: 3...4),
         BankQuestion(prompt: "🦈\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "shark", distractors: ["whale", "fish", "dolphin"], grades: 3...4),
-        BankQuestion(prompt: "🐢\nאֵיךְ אוֹמְרִים 'אִיטִּי' בְּאַנְגְּלִית?", correctAnswer: "slow", distractors: ["fast", "small", "old"], grades: 3...4),
+        BankQuestion(prompt: "🐢\nאֵיךְ אוֹמְרִים 'אִטִּי' בְּאַנְגְּלִית?", correctAnswer: "slow", distractors: ["fast", "small", "old"], grades: 3...4),
 
         // Colors
         BankQuestion(prompt: "🔴\nמַה הַצֶּבַע בְּאַנְגְּלִית?", correctAnswer: "red", distractors: ["blue", "yellow", "pink"], grades: 3...4),
@@ -33,7 +33,7 @@ enum QuestionBanksExpanded {
         BankQuestion(prompt: "🟢\nמַה הַצֶּבַע בְּאַנְגְּלִית?", correctAnswer: "green", distractors: ["yellow", "blue", "brown"], grades: 3...4),
         BankQuestion(prompt: "🟡\nמַה הַצֶּבַע בְּאַנְגְּלִית?", correctAnswer: "yellow", distractors: ["orange", "gold", "white"], grades: 3...4),
         BankQuestion(prompt: "🟠\nמַה הַצֶּבַע בְּאַנְגְּלִית?", correctAnswer: "orange", distractors: ["yellow", "red", "brown"], grades: 3...4),
-        BankQuestion(prompt: "🟣\nמַה הַצֶּבַע בְּאַנְגְּלִית?", correctAnswer: "purple", distractors: ["pink", "blue", "violet"], grades: 3...4),
+        BankQuestion(prompt: "🟣\nמַה הַצֶּבַע בְּאַנְגְּלִית?", correctAnswer: "purple", distractors: ["pink", "blue", "green"], grades: 3...4),
         BankQuestion(prompt: "⚫\nמַה הַצֶּבַע בְּאַנְגְּלִית?", correctAnswer: "black", distractors: ["gray", "brown", "dark"], grades: 3...4),
         BankQuestion(prompt: "⚪\nמַה הַצֶּבַע בְּאַנְגְּלִית?", correctAnswer: "white", distractors: ["gray", "silver", "light"], grades: 3...4),
 
@@ -41,7 +41,7 @@ enum QuestionBanksExpanded {
         BankQuestion(prompt: "1\nאֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?", correctAnswer: "one", distractors: ["two", "three", "four"], grades: 3...4),
         BankQuestion(prompt: "2\nאֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?", correctAnswer: "two", distractors: ["three", "one", "five"], grades: 3...4),
         BankQuestion(prompt: "3\nאֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?", correctAnswer: "three", distractors: ["thirteen", "two", "four"], grades: 3...4),
-        BankQuestion(prompt: "4\nאֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?", correctAnswer: "four", distractors: ["five", "fourteen", "fourty"], grades: 3...4),
+        BankQuestion(prompt: "4\nאֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?", correctAnswer: "four", distractors: ["five", "fourteen", "forty"], grades: 3...4),
         BankQuestion(prompt: "5\nאֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?", correctAnswer: "five", distractors: ["four", "fifteen", "six"], grades: 3...4),
         BankQuestion(prompt: "10\nאֵיךְ אוֹמְרִים אֶת הַמִּסְפָּר בְּאַנְגְּלִית?", correctAnswer: "ten", distractors: ["twenty", "tin", "eleven"], grades: 3...4),
 
@@ -63,7 +63,7 @@ enum QuestionBanksExpanded {
         BankQuestion(prompt: "לְשַׂחֵק בְּאַנְגְּלִית?", correctAnswer: "play", distractors: ["work", "study", "sleep"], grades: 3...5),
         BankQuestion(prompt: "לִרְאוֹת בְּאַנְגְּלִית?", correctAnswer: "see", distractors: ["hear", "look", "watch"], grades: 3...5),
         BankQuestion(prompt: "לִשְׁמוֹעַ בְּאַנְגְּלִית?", correctAnswer: "hear", distractors: ["see", "say", "listen"], grades: 3...5),
-        BankQuestion(prompt: "לְדַבֵּר בְּאַנְגְּלִית?", correctAnswer: "speak", distractors: ["talk", "tell", "say"], grades: 3...5),
+        BankQuestion(prompt: "לְדַבֵּר בְּאַנְגְּלִית?", correctAnswer: "speak", distractors: ["write", "tell", "say"], grades: 3...5),
 
         // Days & time
         BankQuestion(prompt: "יוֹם רִאשׁוֹן בְּאַנְגְּלִית?", correctAnswer: "Sunday", distractors: ["Monday", "Saturday", "Friday"], grades: 3...5),
@@ -72,7 +72,7 @@ enum QuestionBanksExpanded {
         BankQuestion(prompt: "יוֹם רְבִיעִי בְּאַנְגְּלִית?", correctAnswer: "Wednesday", distractors: ["Tuesday", "Thursday", "Sunday"], grades: 3...5),
         BankQuestion(prompt: "יוֹם חֲמִישִׁי בְּאַנְגְּלִית?", correctAnswer: "Thursday", distractors: ["Friday", "Wednesday", "Sunday"], grades: 3...5),
         BankQuestion(prompt: "יוֹם שִׁשִּׁי בְּאַנְגְּלִית?", correctAnswer: "Friday", distractors: ["Saturday", "Thursday", "Sunday"], grades: 3...5),
-        BankQuestion(prompt: "שַׁבָּת בְּאַנְגְּלִית?", correctAnswer: "Saturday", distractors: ["Sunday", "Friday", "Sabbath"], grades: 3...5),
+        BankQuestion(prompt: "שַׁבָּת בְּאַנְגְּלִית?", correctAnswer: "Saturday", distractors: ["Sunday", "Friday", "Monday"], grades: 3...5),
 
         // Weather & nature
         BankQuestion(prompt: "🌧\nגֶּשֶׁם בְּאַנְגְּלִית?", correctAnswer: "rain", distractors: ["snow", "wind", "cloud"], grades: 3...5),
@@ -86,7 +86,7 @@ enum QuestionBanksExpanded {
         BankQuestion(prompt: "אַף בְּאַנְגְּלִית?", correctAnswer: "nose", distractors: ["mouth", "ear", "eye"], grades: 3...4),
         BankQuestion(prompt: "פֶּה בְּאַנְגְּלִית?", correctAnswer: "mouth", distractors: ["nose", "lip", "tongue"], grades: 3...4),
         BankQuestion(prompt: "אוֹזֶן בְּאַנְגְּלִית?", correctAnswer: "ear", distractors: ["eye", "nose", "head"], grades: 3...4),
-        BankQuestion(prompt: "רֶגֶל בְּאַנְגְּלִית?", correctAnswer: "leg", distractors: ["hand", "foot", "knee"], grades: 3...4),
+        BankQuestion(prompt: "רֶגֶל בְּאַנְגְּלִית?", correctAnswer: "leg", distractors: ["hand", "arm", "knee"], grades: 3...4),
         BankQuestion(prompt: "כַּף יָד בְּאַנְגְּלִית?", correctAnswer: "hand", distractors: ["foot", "arm", "finger"], grades: 3...4),
 
         // Food
@@ -118,7 +118,7 @@ enum QuestionBanksExpanded {
         BankQuestion(prompt: "What does 'happy' mean?", correctAnswer: "שָׂמֵחַ", distractors: ["עָצוּב", "כּוֹעֵס", "עָיֵף"], grades: 3...5),
         BankQuestion(prompt: "What does 'big' mean?", correctAnswer: "גָּדוֹל", distractors: ["קָטָן", "אָרוֹךְ", "רָחָב"], grades: 3...5),
         BankQuestion(prompt: "What does 'small' mean?", correctAnswer: "קָטָן", distractors: ["גָּדוֹל", "צַר", "קָצָר"], grades: 3...5),
-        BankQuestion(prompt: "What does 'fast' mean?", correctAnswer: "מָהִיר", distractors: ["אִיטִּי", "חָזָק", "אָרוֹךְ"], grades: 3...5),
+        BankQuestion(prompt: "What does 'fast' mean?", correctAnswer: "מָהִיר", distractors: ["אִטִּי", "חָזָק", "אָרוֹךְ"], grades: 3...5),
         BankQuestion(prompt: "What does 'cold' mean?", correctAnswer: "קַר", distractors: ["חַם", "עָרֵב", "סַגְרִיר"], grades: 3...5),
         BankQuestion(prompt: "What does 'hot' mean?", correctAnswer: "חַם", distractors: ["קַר", "נָעִים", "סוֹעֵר"], grades: 3...5),
     ]
@@ -182,7 +182,7 @@ enum QuestionBanksExpanded {
         // Mirror/reverse
         BankQuestion(prompt: "מַה הַהֵפֶךְ שֶׁל 'גָּדוֹל'?", correctAnswer: "קָטָן", distractors: ["אָרוֹךְ", "רָחָב", "גָּבוֹהַּ"], grades: 0...2),
         BankQuestion(prompt: "מַה הַהֵפֶךְ שֶׁל 'חַם'?", correctAnswer: "קַר", distractors: ["טָעִים", "מָתוֹק", "יָבֵשׁ"], grades: 0...2),
-        BankQuestion(prompt: "מַה הַהֵפֶךְ שֶׁל 'מָהִיר'?", correctAnswer: "אִיטִּי", distractors: ["חָזָק", "אָרוֹךְ", "כָּבֵד"], grades: 0...2),
+        BankQuestion(prompt: "מַה הַהֵפֶךְ שֶׁל 'מָהִיר'?", correctAnswer: "אִטִּי", distractors: ["חָזָק", "אָרוֹךְ", "כָּבֵד"], grades: 0...2),
         BankQuestion(prompt: "מַה הַהֵפֶךְ שֶׁל 'יוֹם'?", correctAnswer: "לַיְלָה", distractors: ["בּוֹקֶר", "עֶרֶב", "צָהֳרַיִם"], grades: 0...2),
         BankQuestion(prompt: "מַה הַהֵפֶךְ שֶׁל 'שָׂמֵחַ'?", correctAnswer: "עָצוּב", distractors: ["מַצְחִיק", "רָגוּעַ", "מְבוּלְבָּל"], grades: 0...2),
         BankQuestion(prompt: "מַה הַהֵפֶךְ שֶׁל 'יָמִין'?", correctAnswer: "שְׂמֹאל", distractors: ["מֵעַל", "מִתַּחַת", "מִלְּפָנִים"], grades: 0...2),
