@@ -108,15 +108,22 @@ enum DeviceIdentity {
     }
 
     /// A human label. iOS returns a generic name without a special entitlement,
-    /// so fall back to a Hebrew device-type label that's still clear to parents.
+    /// so fall back to the device type.
+    ///
+    /// The product names stay in Latin on purpose. This string is written by the
+    /// CHILD's device and later read by the parent's — and by the server that
+    /// composes the push — so a translated label would arrive frozen in whatever
+    /// language the child's phone happened to be in ("אייפון" inside an English
+    /// notification, which is what Rani saw). "iPhone" and "iPad" are product
+    /// names Apple itself leaves untranslated in Hebrew and Russian too.
     static var friendlyName: String {
         #if canImport(UIKit)
         let raw = UIDevice.current.name
         let generic = ["iPhone", "iPad", "iPod touch"]
         if !raw.isEmpty, !generic.contains(raw) { return raw }
         switch kind {
-        case "ipad":   return tr("אייפד")
-        case "iphone": return tr("אייפון")
+        case "ipad":   return "iPad"
+        case "iphone": return "iPhone"
         default:       return tr("מכשיר")
         }
         #else

@@ -97,7 +97,7 @@ final class HouseholdManager: ObservableObject {
     func seedDemoLiveWindow(childID: UUID) {
         let now = Date()
         let dev = ChildDevice(id: "\(childID.uuidString)_demo", childID: childID.uuidString,
-                              householdID: "demo", deviceID: "demo", name: tr("אייפד"), kind: "ipad",
+                              householdID: "demo", deviceID: "demo", name: "iPad", kind: "ipad",
                               systemVersion: "18", joinedAt: now, lastSeenAt: now, removed: nil,
                               remoteUnlockMinutes: nil, remoteUnlockAt: nil,
                               windowEndsAt: now.timeIntervalSince1970 + 23 * 60 + 40,
