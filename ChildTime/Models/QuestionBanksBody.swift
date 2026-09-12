@@ -74,7 +74,7 @@ enum QuestionBanksBody {
 
         // ── קָשֶׁה ──
         BankQuestion(prompt: "👂\nאֵיפֹה נִמְצֵאת הָעֶצֶם הַקְּטַנָּה בְּיוֹתֵר בַּגּוּף?", correctAnswer: "בָּאֹזֶן", distractors: ["בָּאֶצְבַּע", "בָּאַף", "בַּבֶּרֶךְ"], tier: .hard, grades: 4...6),
-        BankQuestion(prompt: "🦴\nמָה מְיֻצָּר בְּתוֹךְ מַח הָעֶצֶם?", correctAnswer: "תָּאֵי דָּם", distractors: ["שִׁנַּיִם", "שֵׂעָר", "צִפָּרְנַיִם"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "🦴\nמָה מְיֻצָּר בְּתוֹךְ מֹחַ הָעֶצֶם?", correctAnswer: "תָּאֵי דָּם", distractors: ["שִׁנַּיִם", "שֵׂעָר", "צִפָּרְנַיִם"], tier: .hard, grades: 4...6),
         BankQuestion(prompt: "🫀\nכַּמָּה חֲלָלִים (חֲדָרִים וַעֲלִיּוֹת) יֵשׁ בַּלֵּב?", correctAnswer: "4", distractors: ["1", "2", "6"], tier: .hard, grades: 4...6),
         BankQuestion(prompt: "🩸\nאֵיךְ קוֹרְאִים לִכְלֵי הַדָּם שֶׁמּוֹלִיכִים דָּם מֵהַלֵּב אֶל הַגּוּף?", correctAnswer: "עוֹרְקִים", distractors: ["וְרִידִים", "עֲצַבִּים", "גִּידִים"], tier: .hard, grades: 4...6),
         BankQuestion(prompt: "🩸\nמָה תַּפְקִידָם שֶׁל תָּאֵי הַדָּם הָאֲדֻמִּים?", correctAnswer: "לָשֵׂאת חַמְצָן", distractors: ["לְעַכֵּל אֹכֶל", "לִבְנוֹת עֲצָמוֹת", "לְיַצֵּר שֵׂעָר"], tier: .hard, grades: 4...6),

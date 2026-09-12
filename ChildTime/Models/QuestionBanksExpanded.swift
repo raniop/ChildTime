@@ -139,11 +139,11 @@ enum QuestionBanksExpanded {
         BankQuestion(prompt: "🔴🔵🔴🔵🔴?", correctAnswer: "🔵", distractors: ["🔴", "🟢", "🟡"], grades: 0...2),
 
         // Odd one out
-        BankQuestion(prompt: "מִי לֹא שַׁיָּךְ?", correctAnswer: "כַּדּוּרְסַל", distractors: ["תַּפּוּחַ", "בָּנָנָה", "אַגָּס"], grades: 0...2),
-        BankQuestion(prompt: "מִי לֹא שַׁיָּךְ?", correctAnswer: "שׁוּלְחָן", distractors: ["כֶּלֶב", "חָתוּל", "אַרְיֵה"], grades: 0...2),
-        BankQuestion(prompt: "מִי לֹא שַׁיָּךְ?", correctAnswer: "אוֹפַנַּיִם", distractors: ["מְכוֹנִית", "אוֹטוֹבּוּס", "מָטוֹס"], grades: 0...2),
-        BankQuestion(prompt: "מִי לֹא שַׁיָּךְ?", correctAnswer: "אַרְיֵה", distractors: ["דָּג", "כָּרִישׁ", "דּוֹלְפִין"], grades: 0...2),
-        BankQuestion(prompt: "מִי לֹא שַׁיָּךְ?", correctAnswer: "אָדוֹם", distractors: ["שָׁלוֹשׁ", "חָמֵשׁ", "שֶׁבַע"], grades: 0...2),
+        BankQuestion(prompt: "מָה לֹא שַׁיָּךְ?", correctAnswer: "כַּדּוּרְסַל", distractors: ["תַּפּוּחַ", "בָּנָנָה", "אַגָּס"], grades: 0...2),
+        BankQuestion(prompt: "מָה לֹא שַׁיָּךְ?", correctAnswer: "שׁוּלְחָן", distractors: ["כֶּלֶב", "חָתוּל", "אַרְיֵה"], grades: 0...2),
+        BankQuestion(prompt: "מָה לֹא שַׁיָּךְ?", correctAnswer: "אוֹפַנַּיִם", distractors: ["מְכוֹנִית", "אוֹטוֹבּוּס", "מָטוֹס"], grades: 0...2),
+        BankQuestion(prompt: "מָה לֹא שַׁיָּךְ?", correctAnswer: "אַרְיֵה", distractors: ["דָּג", "כָּרִישׁ", "דּוֹלְפִין"], grades: 0...2),
+        BankQuestion(prompt: "מָה לֹא שַׁיָּךְ?", correctAnswer: "אָדוֹם", distractors: ["שָׁלוֹשׁ", "חָמֵשׁ", "שֶׁבַע"], grades: 0...2),
 
         // Comparisons
         BankQuestion(prompt: "מַה גָּדוֹל יוֹתֵר?", correctAnswer: "פִּיל", distractors: ["עַכְבָּר", "נְמָלָה", "פַּרְפַּר"], grades: 0...2),
@@ -319,17 +319,17 @@ enum QuestionBanksExpanded {
         BankQuestion(prompt: "🇰🇷\nמַה בִּירַת קוֹרֵאָה הַדְּרוֹמִית?", correctAnswer: "סֵאוּל", distractors: ["בּוּסָאן", "אִינְצֶ'ון", "פְּיוֹנְגְיָאנְג"], grades: 4...6),
 
         // Israel
-        BankQuestion(prompt: "🇮🇱\nמַה הַיָּם הַמָּלוּחַ בְּיוֹתֵר בְּיִשְׂרָאֵל?", correctAnswer: "יָם הַמֶּלַח", distractors: ["הַכִּנֶּרֶת", "הַיָּם הַתִּיכוֹן", "יָם סוּף"], grades: 2...4),
-        BankQuestion(prompt: "🇮🇱\nמַה אֲגַם הַמַּיִם הַמְּתוּקִים הַגָּדוֹל בְּיִשְׂרָאֵל?", correctAnswer: "הַכִּנֶּרֶת", distractors: ["יָם הַמֶּלַח", "אֲגַם מוֹנְפוֹרְט", "יָם סוּף"], grades: 2...4),
+        BankQuestion(prompt: "🇮🇱\nמַה הַיָּם הַמָּלוּחַ בְּיוֹתֵר בְּיִשְׂרָאֵל?", correctAnswer: "יַם הַמֶּלַח", distractors: ["הַכִּנֶּרֶת", "הַיָּם הַתִּיכוֹן", "יַם סוּף"], grades: 2...4),
+        BankQuestion(prompt: "🇮🇱\nמַה אֲגַם הַמַּיִם הַמְּתוּקִים הַגָּדוֹל בְּיִשְׂרָאֵל?", correctAnswer: "הַכִּנֶּרֶת", distractors: ["יַם הַמֶּלַח", "אֲגַם מוֹנְפוֹרְט", "יַם סוּף"], grades: 2...4),
         BankQuestion(prompt: "🇮🇱\nמַה הָהָר הַגָּבוֹהַּ בְּיִשְׂרָאֵל?", correctAnswer: "הַחֶרְמוֹן", distractors: ["מֵירוֹן", "תָּבוֹר", "כַּרְמֶל"], grades: 2...4),
         BankQuestion(prompt: "🇮🇱\nמַה הַנָּהָר הָאָרוֹךְ בְּיִשְׂרָאֵל?", correctAnswer: "הַיַּרְדֵּן", distractors: ["הַיַּרְקוֹן", "הַקִּישׁוֹן", "הָאָלֶכְּסַנְדֶּר"], grades: 2...4),
-        BankQuestion(prompt: "🇮🇱\nאֵיזוֹ עִיר נִמְצֵאת קָרוֹב לְיָם הַמֶּלַח?", correctAnswer: "עֲרָד", distractors: ["נָצְרַת", "צְפַת", "אֵילַת"], grades: 2...4),
+        BankQuestion(prompt: "🇮🇱\nאֵיזוֹ עִיר נִמְצֵאת קָרוֹב לְיַם הַמֶּלַח?", correctAnswer: "עֲרָד", distractors: ["נָצְרַת", "צְפַת", "אֵילַת"], grades: 2...4),
         BankQuestion(prompt: "🇮🇱\nאֵיזוֹ עִיר הִיא הַדְּרוֹמִית בְּיוֹתֵר בְּיִשְׂרָאֵל?", correctAnswer: "אֵילַת", distractors: ["בְּאֵר שֶׁבַע", "עֲרָד", "דִּימוֹנָה"], grades: 2...4),
         BankQuestion(prompt: "🇮🇱\nאֵיזוֹ עִיר הִיא הַצְּפוֹנִית בְּיוֹתֵר?", correctAnswer: "מְטוּלָּה", distractors: ["קִרְיַת שְׁמוֹנָה", "צְפַת", "טְבֶרְיָה"], grades: 2...4),
         BankQuestion(prompt: "🇮🇱\nאֵיזוֹ עִיר הִיא בִּירַת יִשְׂרָאֵל?", correctAnswer: "יְרוּשָׁלַיִם", distractors: ["תֵּל אָבִיב", "חֵיפָה", "בְּאֵר שֶׁבַע"], grades: 2...4),
         BankQuestion(prompt: "🇮🇱\nכַּמָּה מְחוֹזוֹת יֵשׁ בְּיִשְׂרָאֵל?", correctAnswer: "6", distractors: ["4", "5", "8"], grades: 2...4),
-        BankQuestion(prompt: "🇮🇱\nאֵיזֶה יָם נִמְצָא בְּמַעֲרַב יִשְׂרָאֵל?", correctAnswer: "הַיָּם הַתִּיכוֹן", distractors: ["יָם סוּף", "יָם הַמֶּלַח", "הָאוֹקְיָנוֹס"], grades: 2...4),
-        BankQuestion(prompt: "🇮🇱\nאֵיזֶה יָם נִמְצָא בִּדְרוֹם יִשְׂרָאֵל?", correctAnswer: "יָם סוּף", distractors: ["הַיָּם הַתִּיכוֹן", "יָם הַמֶּלַח", "הַיָּם הַשָּׁחוֹר"], grades: 2...4),
+        BankQuestion(prompt: "🇮🇱\nאֵיזֶה יָם נִמְצָא בְּמַעֲרַב יִשְׂרָאֵל?", correctAnswer: "הַיָּם הַתִּיכוֹן", distractors: ["יַם סוּף", "יַם הַמֶּלַח", "הָאוֹקְיָנוֹס"], grades: 2...4),
+        BankQuestion(prompt: "🇮🇱\nאֵיזֶה יָם נִמְצָא בִּדְרוֹם יִשְׂרָאֵל?", correctAnswer: "יַם סוּף", distractors: ["הַיָּם הַתִּיכוֹן", "יַם הַמֶּלַח", "הַיָּם הַשָּׁחוֹר"], grades: 2...4),
         BankQuestion(prompt: "🇮🇱\nאֵיזוֹ מְדִינָה גּוֹבֶלֶת עִם יִשְׂרָאֵל מִצָּפוֹן?", correctAnswer: "לְבָנוֹן", distractors: ["מִצְרַיִם", "סוּרְיָה", "יַרְדֵּן"], grades: 2...4),
         BankQuestion(prompt: "🇮🇱\nאֵיזוֹ מְדִינָה גּוֹבֶלֶת עִם יִשְׂרָאֵל מִמִּזְרָח?", correctAnswer: "יַרְדֵּן", distractors: ["לְבָנוֹן", "מִצְרַיִם", "סוּרְיָה"], grades: 2...4),
         BankQuestion(prompt: "🇮🇱\nאֵיזוֹ מְדִינָה גּוֹבֶלֶת עִם יִשְׂרָאֵל מִדָּרוֹם?", correctAnswer: "מִצְרַיִם", distractors: ["סוּדָאן", "סוּרְיָה", "סְעוּדְיָה"], grades: 2...4),

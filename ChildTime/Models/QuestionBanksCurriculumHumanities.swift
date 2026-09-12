@@ -22,12 +22,12 @@ enum CurriculumHumanitiesBank {
         // כיתה ד׳ — גיאוגרפיה של ישראל
         BankQuestion(prompt: "🏜️\nאֵיךְ נִקְרָא הַמִּדְבָּר הַגָּדוֹל בִּדְרוֹם יִשְׂרָאֵל?", correctAnswer: "הַנֶּגֶב", distractors: ["הַגָּלִיל", "הַשָּׁרוֹן", "הַשְּׁפֵלָה"], tier: .medium, grades: 4...4),
         BankQuestion(prompt: "⛰️\nאֵיךְ נִקְרָא הָאֵזוֹר הֶהָרָרִי בִּצְפוֹן יִשְׂרָאֵל?", correctAnswer: "הַגָּלִיל", distractors: ["הַנֶּגֶב", "הָעֲרָבָה", "הַשְּׁפֵלָה"], tier: .medium, grades: 4...4),
-        BankQuestion(prompt: "🧂\nמָהוּ הַמָּקוֹם הַנָּמוּךְ בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "יָם הַמֶּלַח", distractors: ["הַכִּנֶּרֶת", "הַיָּם הַתִּיכוֹן", "יָם סוּף"], tier: .medium, grades: 4...4),
-        BankQuestion(prompt: "🚰\nאֵיךְ נִקְרָא אֲגַם הַמַּיִם הַמְּתוּקִים הַגָּדוֹל בְּיִשְׂרָאֵל?", correctAnswer: "הַכִּנֶּרֶת", distractors: ["יָם הַמֶּלַח", "יָם סוּף", "הַיָּם הַתִּיכוֹן"], tier: .medium, grades: 4...4),
-        BankQuestion(prompt: "🏞️\nאֵיזֶה נָהָר זוֹרֵם מֵהַכִּנֶּרֶת אֶל יָם הַמֶּלַח?", correctAnswer: "נְהַר הַיַּרְדֵּן", distractors: ["הַנִּילוּס", "נַחַל הַיַּרְקוֹן", "נַחַל אֲלֶכְּסַנְדֶּר"], tier: .medium, grades: 4...4),
+        BankQuestion(prompt: "🧂\nמָהוּ הַמָּקוֹם הַנָּמוּךְ בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "יַם הַמֶּלַח", distractors: ["הַכִּנֶּרֶת", "הַיָּם הַתִּיכוֹן", "יַם סוּף"], tier: .medium, grades: 4...4),
+        BankQuestion(prompt: "🚰\nאֵיךְ נִקְרָא אֲגַם הַמַּיִם הַמְּתוּקִים הַגָּדוֹל בְּיִשְׂרָאֵל?", correctAnswer: "הַכִּנֶּרֶת", distractors: ["יַם הַמֶּלַח", "יַם סוּף", "הַיָּם הַתִּיכוֹן"], tier: .medium, grades: 4...4),
+        BankQuestion(prompt: "🏞️\nאֵיזֶה נָהָר זוֹרֵם מֵהַכִּנֶּרֶת אֶל יַם הַמֶּלַח?", correctAnswer: "נְהַר הַיַּרְדֵּן", distractors: ["הַנִּילוּס", "נַחַל הַיַּרְקוֹן", "נַחַל אֲלֶכְּסַנְדֶּר"], tier: .medium, grades: 4...4),
         BankQuestion(prompt: "⚓\nבְּאֵיזוֹ עִיר נִמְצָאִים נָמָל גָּדוֹל וְהַר הַכַּרְמֶל?", correctAnswer: "חֵיפָה", distractors: ["אֵילַת", "תֵּל אָבִיב", "אַשְׁדּוֹד"], tier: .medium, grades: 4...4),
-        BankQuestion(prompt: "🌊\nאֵיזֶה יָם נִמְצָא מִמַּעֲרָב לְיִשְׂרָאֵל?", correctAnswer: "הַיָּם הַתִּיכוֹן", distractors: ["יָם סוּף", "יָם הַמֶּלַח", "הַכִּנֶּרֶת"], tier: .medium, grades: 4...4),
-        BankQuestion(prompt: "🐠\nעַל חוֹף אֵיזֶה יָם יוֹשֶׁבֶת הָעִיר אֵילַת?", correctAnswer: "יָם סוּף", distractors: ["הַיָּם הַתִּיכוֹן", "יָם הַמֶּלַח", "הַכִּנֶּרֶת"], tier: .medium, grades: 4...4),
+        BankQuestion(prompt: "🌊\nאֵיזֶה יָם נִמְצָא מִמַּעֲרָב לְיִשְׂרָאֵל?", correctAnswer: "הַיָּם הַתִּיכוֹן", distractors: ["יַם סוּף", "יַם הַמֶּלַח", "הַכִּנֶּרֶת"], tier: .medium, grades: 4...4),
+        BankQuestion(prompt: "🐠\nעַל חוֹף אֵיזֶה יָם יוֹשֶׁבֶת הָעִיר אֵילַת?", correctAnswer: "יַם סוּף", distractors: ["הַיָּם הַתִּיכוֹן", "יַם הַמֶּלַח", "הַכִּנֶּרֶת"], tier: .medium, grades: 4...4),
         BankQuestion(prompt: "🐪\nאֵיזוֹ עִיר מְכוּנָּה בִּירַת הַנֶּגֶב?", correctAnswer: "בְּאֵר שֶׁבַע", distractors: ["דִּימוֹנָה", "עֲרָד", "אֵילַת"], tier: .medium, grades: 4...4),
         BankQuestion(prompt: "🌡️\nאֵיזֶה אַקְלִים שׂוֹרֵר בַּנֶּגֶב?", correctAnswer: "מִדְבָּרִי — חַם וְיָבֵשׁ", distractors: ["גָּשׁוּם וְקַר", "מוּשְׁלָג כָּל הַשָּׁנָה", "טְרוֹפִּי וְלַח"], tier: .medium, grades: 4...4),
 
@@ -48,7 +48,7 @@ enum CurriculumHumanitiesBank {
         BankQuestion(prompt: "🌏\nמָהִי הַיַּבֶּשֶׁת הַגְּדוֹלָה בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "אַסְיָה", distractors: ["אַפְרִיקָה", "אֵירוֹפָּה", "אָמֵרִיקָה הַצְּפוֹנִית"], tier: .hard, grades: 6...6),
         BankQuestion(prompt: "🗼\nמָה עִיר הַבִּירָה שֶׁל צָרְפַת?", correctAnswer: "פָּרִיז", distractors: ["לוֹנְדוֹן", "רוֹמָא", "מַדְרִיד"], tier: .hard, grades: 6...6),
         BankQuestion(prompt: "🇺🇸\nמָה עִיר הַבִּירָה שֶׁל אַרְצוֹת הַבְּרִית?", correctAnswer: "וָשִׁינְגְטוֹן", distractors: ["נְיוּ יוֹרְק", "לוֹס אַנְגֶ׳לֶס", "שִׁיקָגוֹ"], tier: .hard, grades: 6...6),
-        BankQuestion(prompt: "🏞️\nאֵיזֶה נָהָר נֶחְשָׁב לָאָרוֹךְ בָּעוֹלָם?", correctAnswer: "הַנִּילוּס", distractors: ["הָאָמָזוֹנָס", "הַיַּרְדֵּן", "הַדָּנוּבָּה"], tier: .hard, grades: 6...6),
+        BankQuestion(prompt: "🏞️\nאֵיזֶה נָהָר נֶחְשָׁב לָאָרֹךְ בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "הַנִּילוּס", distractors: ["הָאָמָזוֹנָס", "הַיַּרְדֵּן", "הַדָּנוּבָּה"], tier: .hard, grades: 6...6),
         BankQuestion(prompt: "🏔️\nמָהוּ הָהָר הַגָּבוֹהַּ בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "אֶוֶרֶסְט", distractors: ["הַחֶרְמוֹן", "קִילִימַנְגָ׳רוֹ", "מוֹן בְּלָאן"], tier: .hard, grades: 6...6),
         BankQuestion(prompt: "🏜️\nמָהוּ הַמִּדְבָּר הַחַם הַגָּדוֹל בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "סַהֲרָה", distractors: ["הַנֶּגֶב", "גּוֹבִּי", "אֲטָקָמָה"], tier: .hard, grades: 6...6),
         BankQuestion(prompt: "🧱\nבְּאֵיזוֹ מְדִינָה נִמְצֵאת הַחוֹמָה הַגְּדוֹלָה?", correctAnswer: "סִין", distractors: ["יַפָּן", "הוֹדּוּ", "מִצְרַיִם"], tier: .hard, grades: 6...6),
@@ -62,7 +62,7 @@ enum CurriculumHumanitiesBank {
 
         // כיתות ב׳-ד׳ — מורשת וחגים
         BankQuestion(prompt: "🫓\nמָה מְצַיְּנִים בְּחַג הַפֶּסַח?", correctAnswer: "אֶת יְצִיאַת מִצְרַיִם", distractors: ["אֶת מַתַּן תּוֹרָה", "אֶת נֵס פַּךְ הַשֶּׁמֶן", "אֶת הֲקָמַת הַמְּדִינָה"], tier: .easy, grades: 2...4),
-        BankQuestion(prompt: "🕎\nמָה מְצַיְּנִים בְּחַג הַחֲנוּכָּה?", correctAnswer: "אֶת נֵס פַּךְ הַשֶּׁמֶן וְנִצְחוֹן הַמַּכַּבִּים", distractors: ["אֶת יְצִיאַת מִצְרַיִם", "אֶת מַתַּן תּוֹרָה", "אֶת הֲקָמַת הַמְּדִינָה"], tier: .easy, grades: 2...4),
+        BankQuestion(prompt: "🕎\nמָה מְצַיְּנִים בְּחַג הַחֲנוּכָּה?", correctAnswer: "אֶת נֵס פַּךְ הַשֶּׁמֶן וְנִצָּחוֹן הַמַּכַּבִּים", distractors: ["אֶת יְצִיאַת מִצְרַיִם", "אֶת מַתַּן תּוֹרָה", "אֶת הֲקָמַת הַמְּדִינָה"], tier: .easy, grades: 2...4),
         BankQuestion(prompt: "🎭\nמָה מְצַיְּנִים בְּחַג פּוּרִים?", correctAnswer: "אֶת הַצָּלַת הַיְּהוּדִים בִּימֵי אֶסְתֵּר וּמָרְדְּכַי", distractors: ["אֶת יְצִיאַת מִצְרַיִם", "אֶת נֵס פַּךְ הַשֶּׁמֶן", "אֶת שְׁתִילַת הָעֵצִים"], tier: .easy, grades: 2...4),
         BankQuestion(prompt: "📜\nמָה מְצַיְּנִים בְּחַג הַשָּׁבוּעוֹת?", correctAnswer: "אֶת מַתַּן תּוֹרָה", distractors: ["אֶת יְצִיאַת מִצְרַיִם", "אֶת חֲנוּכַּת הַמִּקְדָּשׁ", "אֶת הַצָּלַת הַיְּהוּדִים"], tier: .medium, grades: 2...4),
         BankQuestion(prompt: "🎉\nמָה חוֹגְגִים בְּיוֹם הָעַצְמָאוּת?", correctAnswer: "אֶת הֲקָמַת מְדִינַת יִשְׂרָאֵל", distractors: ["אֶת מַתַּן תּוֹרָה", "אֶת יְצִיאַת מִצְרַיִם", "אֶת רֹאשׁ הַשָּׁנָה"], tier: .easy, grades: 2...4),
@@ -84,7 +84,7 @@ enum CurriculumHumanitiesBank {
         BankQuestion(prompt: "🏞️\nלְיַד אֵיזֶה נָהָר גָּדוֹל צָמְחָה מִצְרַיִם הָעַתִּיקָה?", correctAnswer: "הַנִּילוּס", distractors: ["הַיַּרְדֵּן", "הַפְּרָת", "הָאָמָזוֹנָס"], tier: .medium, grades: 5...5),
         BankQuestion(prompt: "🦉\nאֵיזוֹ עִיר יְוָנִית עַתִּיקָה נוֹדְעָה בְּחָכְמָתָהּ וּבַפִילוֹסוֹפִים שֶׁלָּהּ?", correctAnswer: "אַתּוּנָה", distractors: ["סְפָּרְטָה", "רוֹמָא", "אֲלֶכְּסַנְדְּרִיָּה"], tier: .medium, grades: 5...5),
         BankQuestion(prompt: "👑\nאֵיךְ כִּינּוּ אֶת מַלְכֵי מִצְרַיִם הָעַתִּיקָה?", correctAnswer: "פַּרְעֹה", distractors: ["קֵיסָר", "סוּלְטָן", "צָאר"], tier: .medium, grades: 5...5),
-        BankQuestion(prompt: "🏰\nאֵיזֶה מִבְצָר עַתִּיק נִמְצָא עַל הַר לְיַד יָם הַמֶּלַח?", correctAnswer: "מְצָדָה", distractors: ["מִגְדַּל דָּוִד", "עַכּוֹ", "מִבְצַר נִמְרוֹד"], tier: .medium, grades: 5...5),
+        BankQuestion(prompt: "🏰\nאֵיזֶה מִבְצָר עַתִּיק נִמְצָא עַל הַר לְיַד יַם הַמֶּלַח?", correctAnswer: "מְצָדָה", distractors: ["מִגְדַּל דָּוִד", "עַכּוֹ", "מִבְצַר נִמְרוֹד"], tier: .medium, grades: 5...5),
 
         // כיתה ו׳ — תולדות עם ישראל והציונות
         BankQuestion(prompt: "📜\nאֵיזוֹ מְדִינָה פִּרְסְמָה אֶת הַצְהָרַת בַּלְפוּר בִּשְׁנַת 1917?", correctAnswer: "בְּרִיטַנְיָה", distractors: ["צָרְפַת", "אַרְצוֹת הַבְּרִית", "טוּרְקִיָּה"], tier: .hard, grades: 6...6),

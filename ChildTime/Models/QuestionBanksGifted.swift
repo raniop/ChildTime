@@ -36,8 +36,8 @@ enum QuestionBanksGifted {
         // ── קַל · בְּעָיוֹת מִלּוּלִיּוֹת וּסְפִירָה ──
         BankQuestion(prompt: "🍎\nלְנֹעַם יֵשׁ 3 תַּפּוּחִים. הוּא נָתַן 1 לְחָבֵר וְקִבֵּל 2 מֵאִמָּא. כַּמָּה תַּפּוּחִים יֵשׁ לוֹ עַכְשָׁו?", correctAnswer: "4", distractors: ["3", "5", "6"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🚌\nבָּאוֹטוֹבּוּס הָיוּ 5 יְלָדִים. בַּתַּחֲנָה עָלוּ 3 וְיָרְדוּ 2. כַּמָּה יְלָדִים יֵשׁ עַכְשָׁו בָּאוֹטוֹבּוּס?", correctAnswer: "6", distractors: ["4", "5", "10"], tier: .easy, grades: 2...3),
-        BankQuestion(prompt: "🍬\nלְדָנָה יֵשׁ 6 סֻכָּרִיּוֹת, וּלְיוֹסִי יֵשׁ 2 יוֹתֵר מִמֶּנָּה. כַּמָּה סֻכָּרִיּוֹת יֵשׁ לְיוֹסִי?", correctAnswer: "8", distractors: ["4", "6", "12"], tier: .easy, grades: 2...3),
-        BankQuestion(prompt: "🕐\nהַשָּׁעָה עַכְשָׁו 3. מָה תִּהְיֶה הַשָּׁעָה בְּעוֹד 2 שָׁעוֹת?", correctAnswer: "5", distractors: ["1", "4", "6"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "🍬\nלְדָנָה יֵשׁ 6 סֻכָּרִיּוֹת, וּלְיוֹסִי יֵשׁ בְּ־2 יוֹתֵר מִמֶּנָּה. כַּמָּה סֻכָּרִיּוֹת יֵשׁ לְיוֹסִי?", correctAnswer: "8", distractors: ["4", "6", "12"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "🕐\nהַשָּׁעָה עַכְשָׁו 3. מָה תִּהְיֶה הַשָּׁעָה בְּעוֹד שְׁעָתַיִם?", correctAnswer: "5", distractors: ["1", "4", "6"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🐔\nכַּמָּה רַגְלַיִם יֵשׁ לְ־3 תַּרְנְגוֹלוֹת בְּיַחַד?", correctAnswer: "6", distractors: ["3", "9", "12"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🐶\nכַּמָּה רַגְלַיִם יֵשׁ לְ־2 כְּלָבִים וְתַרְנְגֹלֶת אַחַת בְּיַחַד?", correctAnswer: "10", distractors: ["6", "8", "12"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🪑\nבַּכִּתָּה 4 שֻׁלְחָנוֹת, וּלְיַד כָּל שֻׁלְחָן 2 כִּסְאוֹת. כַּמָּה כִּסְאוֹת יֵשׁ בַּכִּתָּה?", correctAnswer: "8", distractors: ["4", "6", "10"], tier: .easy, grades: 2...3),
@@ -80,7 +80,7 @@ enum QuestionBanksGifted {
         // ── בֵּינוֹנִי · בְּעָיוֹת מִלּוּלִיּוֹת וּסְפִירָה ──
         BankQuestion(prompt: "🏫\nבַּכִּתָּה 12 בָּנִים וְ־14 בָּנוֹת. 6 יְלָדִים הָלְכוּ לַסִּפְרִיָּה. כַּמָּה יְלָדִים נִשְׁאֲרוּ בַּכִּתָּה?", correctAnswer: "20", distractors: ["18", "22", "26"], tier: .medium, grades: 3...4),
         BankQuestion(prompt: "💰\nלְרוֹן יֵשׁ 20 שְׁקָלִים. הוּא קָנָה 2 מְחָקִים, כָּל מַחַק בְּ־3 שְׁקָלִים. כַּמָּה שְׁקָלִים נִשְׁאֲרוּ לוֹ?", correctAnswer: "14", distractors: ["12", "16", "17"], tier: .medium, grades: 3...4),
-        BankQuestion(prompt: "🎂\nדָּנָה בַּת 8, וְאָחִיהָ גָּדוֹל מִמֶּנָּה בְּ־3 שָׁנִים. כַּמָּה שָׁנִים הֵם בְּיַחַד?", correctAnswer: "19", distractors: ["11", "16", "21"], tier: .medium, grades: 3...4),
+        BankQuestion(prompt: "🎂\nדָּנָה בַּת 8, וְאָחִיהָ גָּדוֹל מִמֶּנָּה בְּ־3 שָׁנִים. מַה סְכוּם הַגִּילִים שֶׁלָּהֶם?", correctAnswer: "19", distractors: ["11", "16", "21"], tier: .medium, grades: 3...4),
         BankQuestion(prompt: "🚗\nבַּחֲנָיָה 3 מְכוֹנִיּוֹת וְ־4 אוֹפַנַּיִם. כַּמָּה גַּלְגַּלִּים יֵשׁ בְּסַךְ הַכֹּל?", correctAnswer: "20", distractors: ["14", "16", "24"], tier: .medium, grades: 3...4),
         BankQuestion(prompt: "🔢\nכַּמָּה מִסְפָּרִים מִ־1 עַד 20 (כּוֹלֵל 20) מִתְחַלְּקִים בְּ־5 בְּלִי שְׁאֵרִית?", correctAnswer: "4", distractors: ["2", "3", "5"], tier: .medium, grades: 3...4),
 

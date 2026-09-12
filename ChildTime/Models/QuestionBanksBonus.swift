@@ -99,7 +99,7 @@ enum BonusQuestionBank {
         BankQuestion(prompt: "מִי הִמְצִיא אֶת הַנּוּרָה הַחַשְׁמַלִּית?", correctAnswer: "תּוֹמָס אֶדִיסוֹן", distractors: ["אַלְבֶּרְט אַיְנְשְׁטַיְן", "אִיסָק נְיוּטוֹן", "לֵאוֹנַרְדּוֹ דָּה וִינְצִ'י"], tier: .hard, grades: 5...6),
         BankQuestion(prompt: "אֵיזוֹ עִיר עַתִּיקָה נִקְבְּרָה תַּחַת הִתְפָּרְצוּת הַר גַּעַשׁ?", correctAnswer: "פּוֹמְפֵּיִי", distractors: ["אַתּוּנָה", "רוֹמָא", "יְרוּשָׁלַיִם"], tier: .hard, grades: 5...6),
         BankQuestion(prompt: "מִי צִיֵּר אֶת הַמּוֹנָה לִיזָה?", correctAnswer: "לֵאוֹנַרְדּוֹ דָּה וִינְצִ'י", distractors: ["פִּיקָאסוֹ", "וָן גּוֹךְ", "מִיכֶלְאַנְגֶ'לוֹ"], tier: .hard, grades: 4...6),
-        BankQuestion(prompt: "עַל מָה מְסַפֵּר חַג הַחֲנֻכָּה?", correctAnswer: "נִצְחוֹן הַמַּכַּבִּים וְנֵס פַּךְ הַשֶּׁמֶן", distractors: ["יְצִיאַת מִצְרַיִם", "הַצָּלַת הַיְּהוּדִים בְּפָרַס", "קַבָּלַת הַתּוֹרָה"], tier: .hard, grades: 1...3),
+        BankQuestion(prompt: "עַל מָה מְסַפֵּר חַג הַחֲנֻכָּה?", correctAnswer: "נִצָּחוֹן הַמַּכַּבִּים וְנֵס פַּךְ הַשֶּׁמֶן", distractors: ["יְצִיאַת מִצְרַיִם", "הַצָּלַת הַיְּהוּדִים בְּפָרַס", "קַבָּלַת הַתּוֹרָה"], tier: .hard, grades: 1...3),
         BankQuestion(prompt: "מִי הָיְתָה רֹאשׁ הַמֶּמְשָׁלָה הָאִשָּׁה הָרִאשׁוֹנָה שֶׁל יִשְׂרָאֵל?", correctAnswer: "גּוֹלְדָּה מֵאִיר", distractors: ["צִפִּי לִבְנִי", "שׁוּלַמִּית אַלּוֹנִי", "מִרְיָם הַנְּבִיאָה"], tier: .hard, grades: 4...6),
     ]
 
@@ -110,7 +110,7 @@ enum BonusQuestionBank {
         BankQuestion(prompt: "מָה הַנָּהָר הָאָרֹךְ בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "הַנִּילוּס", distractors: ["הָאָמָזוֹנָס", "הַיַּרְדֵּן", "הַמִּיסִיסִיפִּי"], tier: .hard, grades: 5...6),
         BankQuestion(prompt: "בְּאֵיזוֹ יַבֶּשֶׁת נִמְצֵאת מִצְרַיִם?", correctAnswer: "אַפְרִיקָה", distractors: ["אַסְיָה", "אֵירוֹפָּה", "אָמֵרִיקָה"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "מָה הַהַר הַגָּבוֹהַּ בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "אֶוֶרֶסְט", distractors: ["הַחֶרְמוֹן", "קִילִימַנְגָ'רוֹ", "מוֹן בְּלָאן"], tier: .hard, grades: 3...5),
-        BankQuestion(prompt: "אֵיזֶה יָם הוּא הַמָּקוֹם הַנָּמוּךְ בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "יָם הַמֶּלַח", distractors: ["הַיָּם הַתִּיכוֹן", "יָם סוּף", "הַכִּנֶּרֶת"], tier: .hard, grades: 2...4),
+        BankQuestion(prompt: "אֵיזֶה יָם הוּא הַמָּקוֹם הַנָּמוּךְ בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "יַם הַמֶּלַח", distractors: ["הַיָּם הַתִּיכוֹן", "יַם סוּף", "הַכִּנֶּרֶת"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "מָה עִיר הַבִּירָה שֶׁל אוֹסְטְרַלְיָה?", correctAnswer: "קַנְבֶּרָה", distractors: ["סִידְנִי", "מֶלְבּוּרְן", "פֶּרְת'"], tier: .hard, grades: 5...6),
         BankQuestion(prompt: "כַּמָּה יַבָּשׁוֹת יֵשׁ בָּעוֹלָם?", correctAnswer: "7", distractors: ["5", "6", "8"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "מָה הָאוֹקְיָנוֹס הַגָּדוֹל בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "הַשָּׁקֵט", distractors: ["הָאַטְלַנְטִי", "הַהֹדִּי", "הַצְּפוֹנִי"], tier: .hard, grades: 4...6),

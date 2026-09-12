@@ -7,7 +7,7 @@ import Foundation
 enum QuestionBanksSpace {
     static let space: [BankQuestion] = [
         // ── הַשֶּׁמֶשׁ, הַיָּרֵחַ וְכַדּוּר הָאָרֶץ ──
-        BankQuestion(prompt: "☀️\nהַשֶּׁמֶשׁ הִיא בֶּעֶצֶם…", correctAnswer: "כּוֹכָב", distractors: ["כּוֹכַב לֶכֶת", "יָרֵחַ", "עָנָן גָּדוֹל"], tier: .easy, grades: 1...3),
+        BankQuestion(prompt: "☀️\nהַשֶּׁמֶשׁ הִיא בְּעֶצֶם…", correctAnswer: "כּוֹכָב", distractors: ["כּוֹכַב לֶכֶת", "יָרֵחַ", "עָנָן גָּדוֹל"], tier: .easy, grades: 1...3),
         BankQuestion(prompt: "🌍\nאֵיךְ קוֹרְאִים לְכוֹכַב הַלֶּכֶת שֶׁאֲנַחְנוּ חַיִּים עָלָיו?", correctAnswer: "כַּדּוּר הָאָרֶץ", distractors: ["מַאְדִּים", "הַיָּרֵחַ", "צֶדֶק"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "🌞\nמָתַי רוֹאִים אֶת הַשֶּׁמֶשׁ בַּשָּׁמַיִם?", correctAnswer: "בַּיּוֹם", distractors: ["בַּלַּיְלָה", "רַק בַּחֹרֶף", "רַק בְּשַׁבָּת"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "🌅\nמָה עוֹשָׂה הַשֶּׁמֶשׁ בַּבֹּקֶר?", correctAnswer: "זוֹרַחַת", distractors: ["שׁוֹקַעַת", "נֶעֱלֶמֶת", "נִרְדֶּמֶת"], tier: .easy, grades: 1...2),

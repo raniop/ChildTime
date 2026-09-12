@@ -13,7 +13,7 @@ enum QuestionBanksSea {
         BankQuestion(prompt: "🐙\nאֵיךְ קוֹרְאִים לַחַיָּה הָרַכָּה עִם 8 זְרוֹעוֹת?", correctAnswer: "תַּמְנוּן", distractors: ["כָּרִישׁ", "צָב", "סַרְטָן"], tier: .easy, grades: 0...1),
         BankQuestion(prompt: "🐙\nכַּמָּה לְבָבוֹת יֵשׁ לְתַמְנוּן?", correctAnswer: "3", distractors: ["1", "2", "5"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "🐢\nמַה יֵשׁ לְצַב הַיָּם עַל הַגַּב?", correctAnswer: "שִׁרְיוֹן", distractors: ["כְּנָפַיִם", "פַּרְוָה", "קַרְנַיִם"], tier: .easy, grades: 0...2),
-        BankQuestion(prompt: "🐢\nאֵיפֹה צַבַּת הַיָּם מַטִּילָה אֶת הַבֵּיצִים שֶׁלָּהּ?", correctAnswer: "בַּחוֹל עַל הַחוֹף", distractors: ["בְּעֹמֶק הַיָּם", "עַל עֵץ", "בַּשֶּׁלֶג"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🐢\nאֵיפֹה צַב הַיָּם מַטִּיל אֶת הַבֵּיצִים שֶׁלּוֹ?", correctAnswer: "בַּחוֹל עַל הַחוֹף", distractors: ["בְּעֹמֶק הַיָּם", "עַל עֵץ", "בַּשֶּׁלֶג"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "🐋\nמִי הַחַיָּה הַגְּדוֹלָה בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "הַלִּוְיָתָן הַכָּחֹל", distractors: ["הַפִּיל", "הַכָּרִישׁ", "הַגִּ'ירָפָה"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "🐬\nמַה עוֹשֶׂה הַדּוֹלְפִין כְּשֶׁהוּא עוֹלֶה אֶל פְּנֵי הַמַּיִם?", correctAnswer: "נוֹשֵׁם אֲוִיר", distractors: ["יָשֵׁן", "אוֹכֵל חוֹל", "מִתְיַבֵּשׁ"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "🐟\nבְּעֶזְרַת מָה הַדָּג נוֹשֵׁם מִתַּחַת לַמַּיִם?", correctAnswer: "זִימִים", distractors: ["רֵאוֹת", "אַף", "פֶּה"], tier: .easy, grades: 1...2),
