@@ -34,7 +34,7 @@ extension EnglishContent {
         BankQuestion(prompt: "🧼\nWhat is a good thing to do before you eat?", correctAnswer: "Wash your hands", distractors: ["Run a race", "Take a nap", "Sing a song"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "☀️\nWhat do we put on our skin to protect it from the sun?", correctAnswer: "Sunscreen", distractors: ["Water", "Olive oil", "Glue"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🛌\nWhat does your body do at night to rest and recharge?", correctAnswer: "Sleep", distractors: ["Run", "Eat", "Jump"], tier: .easy, grades: 2...3),
-        BankQuestion(prompt: "💧\nWhat is the best drink to have a lot of to keep your body healthy?", correctAnswer: "Water", distractors: ["Soda", "Syrup", "Coffee"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "💧\nWhich drink is best for keeping your body healthy?", correctAnswer: "Water", distractors: ["Soda", "Syrup", "Coffee"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🏃\nWhat helps your muscles get strong?", correctAnswer: "Exercise", distractors: ["Candy", "Watching TV", "Video games"], tier: .easy, grades: 2...3),
 
         // ── Medium · bones and teeth ──
@@ -57,7 +57,7 @@ extension EnglishContent {
         BankQuestion(prompt: "🫁\nHow many lungs does a person have?", correctAnswer: "2", distractors: ["1", "3", "4"], tier: .medium, grades: 3...5),
         BankQuestion(prompt: "🫁\nWhich gas do we breathe in from the air because our body needs it?", correctAnswer: "Oxygen", distractors: ["Carbon dioxide", "Helium", "Hydrogen"], tier: .medium, grades: 3...5),
         BankQuestion(prompt: "🌬️\nWhich gas does the body add to the air we breathe out?", correctAnswer: "Carbon dioxide", distractors: ["Oxygen", "Helium", "Hydrogen"], tier: .medium, grades: 3...5),
-        BankQuestion(prompt: "🌡️\nAbout what is a healthy person's normal body temperature?", correctAnswer: "About 98.6°F", distractors: ["About 50°F", "About 70°F", "About 150°F"], tier: .medium, grades: 3...5),
+        BankQuestion(prompt: "🌡️\nWhat is a healthy person's normal body temperature?", correctAnswer: "About 98.6°F", distractors: ["About 50°F", "About 70°F", "About 150°F"], tier: .medium, grades: 3...5),
 
         // ── Medium · brain, senses and digestion ──
         BankQuestion(prompt: "🧠\nWhat does the brain use to send messages to the whole body?", correctAnswer: "Nerves", distractors: ["Muscles", "Hair", "Bones"], tier: .medium, grades: 3...5),

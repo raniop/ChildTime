@@ -345,7 +345,7 @@ extension EnglishContent {
                 BankQuestion(prompt: "How do scientists divide the ocean into zones?", correctAnswer: "By how much sunlight reaches them", distractors: ["By how salty the water is", "By which animals live there", "By how far they are from land"], tier: .easy, grades: 5...5),
                 BankQuestion(prompt: "Why can plants grow in the sunlight zone but not in the twilight zone?", correctAnswer: "Too little light reaches the twilight zone", distractors: ["The twilight zone is too salty", "Animals eat all the plants there", "The twilight zone is too warm"], tier: .medium, grades: 5...5),
                 BankQuestion(prompt: "What does \"bioluminescence\" mean?", correctAnswer: "Light that living things make", distractors: ["A kind of deep-sea plant", "The pressure of deep water", "The cold at the ocean floor"], tier: .medium, grades: 5...5),
-                BankQuestion(prompt: "Which detail shows that the midnight zone is a hard place to live?", correctAnswer: "It is dark, cold, and high pressure", distractors: ["Most ocean animals live there", "Plants and algae grow there", "It reaches down about 650 feet"], tier: .hard, grades: 5...5),
+                BankQuestion(prompt: "Which detail shows that the midnight zone is a hard place to live?", correctAnswer: "It is dark and cold, with enormous pressure", distractors: ["Most ocean animals live there", "Plants and algae grow there", "It reaches down about 650 feet"], tier: .hard, grades: 5...5),
             ]),
 
         ReadingPassage(
@@ -354,7 +354,7 @@ extension EnglishContent {
             questions: [
                 BankQuestion(prompt: "Why did President Jefferson send the Corps of Discovery?", correctAnswer: "To explore the land and seek a route west", distractors: ["To buy the land from France", "To start a new town in the West", "To search for gold in the mountains"], tier: .medium, grades: 5...6),
                 BankQuestion(prompt: "How did the explorers travel at the start of the trip?", correctAnswer: "Up the Missouri River in boats", distractors: ["Across the plains on horses", "By train from St. Louis", "Along the coast on a ship"], tier: .easy, grades: 5...6),
-                BankQuestion(prompt: "According to the passage, how did Sacagawea help the group?", correctAnswer: "She interpreted and showed they were peaceful", distractors: ["She drew the maps of every river", "She built the boats for the journey", "She found them an all-water route"], tier: .medium, grades: 5...6),
+                BankQuestion(prompt: "According to the passage, how did Sacagawea help the group?", correctAnswer: "She was an interpreter, and she showed others that the group came in peace", distractors: ["She drew the maps of every river", "She built the boats for the journey", "She found them an all-water route"], tier: .medium, grades: 5...6),
                 BankQuestion(prompt: "What was one result of the Lewis and Clark expedition?", correctAnswer: "Their maps changed how Americans saw the West", distractors: ["They found an all-water route to the ocean", "They bought the Louisiana land from France", "They built a settlement on the Pacific coast"], tier: .hard, grades: 5...6),
             ]),
 
@@ -499,7 +499,7 @@ extension EnglishContent {
                 BankQuestion(prompt: "What is the writer's central claim about Linden Heights?", correctAnswer: "The town should approve the skate park", distractors: ["Skateboarding should be banned downtown", "The town needs more baseball fields", "Teens should skate only in parking lots"], tier: .easy, grades: 7...8),
                 BankQuestion(prompt: "According to the writer, where do skaters practice right now?", correctAnswer: "Parking lots, stair rails, and sidewalks", distractors: ["Baseball fields and tennis courts", "The public pool deck and park paths", "School gyms and playgrounds"], tier: .medium, grades: 7...8),
                 BankQuestion(prompt: "About how much has the business group offered to pay for the skate park?", correctAnswer: "About $83,000", distractors: ["About $250,000", "About $125,000", "About $25,000"], tier: .hard, grades: 7...8),
-                BankQuestion(prompt: "How does the writer address the concern about noise and litter?", correctAnswer: "By pointing to the plan's cans, hours, and wall", distractors: ["By saying the neighbors should move away", "By arguing that noise is not a real problem", "By suggesting a different location instead"], tier: .hard, grades: 7...8),
+                BankQuestion(prompt: "How does the writer address the concern about noise and litter?", correctAnswer: "By pointing to the plan's trash cans, posted hours, and sound wall", distractors: ["By saying the neighbors should move away", "By arguing that noise is not a real problem", "By suggesting a different location instead"], tier: .hard, grades: 7...8),
             ]),
 
         ReadingPassage(

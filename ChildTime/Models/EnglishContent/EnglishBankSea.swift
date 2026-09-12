@@ -20,7 +20,7 @@ extension EnglishContent {
         BankQuestion(prompt: "🐠\nWhat helps a fish swim?", correctAnswer: "Fins", distractors: ["Legs", "Wings", "Hands"], tier: .easy, grades: 0...1),
         BankQuestion(prompt: "🐟\nWhat covers the body of most fish?", correctAnswer: "Scales", distractors: ["Fur", "Feathers", "Hair"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "🐟\nWhere do fish live?", correctAnswer: "In the water", distractors: ["In the air", "In trees", "In the desert"], tier: .easy, grades: 0...1),
-        BankQuestion(prompt: "🦈\nWhat does a shark have lots and lots of, that keep getting replaced?", correctAnswer: "Teeth", distractors: ["Eyes", "Ears", "Legs"], tier: .easy, grades: 0...2),
+        BankQuestion(prompt: "🦈\nA shark keeps growing new ones of these all its life. What are they?", correctAnswer: "Teeth", distractors: ["Eyes", "Ears", "Legs"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "🪼\nWhich soft, see-through sea animal has long, dangly tentacles?", correctAnswer: "Jellyfish", distractors: ["Turtle", "Dolphin", "Crab"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "🦀\nWhich animal walks sideways on the beach and has claws?", correctAnswer: "Crab", distractors: ["Fish", "Jellyfish", "Turtle"], tier: .easy, grades: 0...2),
         BankQuestion(prompt: "⭐\nWhich sea animal is shaped like a star and often has 5 arms?", correctAnswer: "Starfish", distractors: ["Seahorse", "Swordfish", "Jellyfish"], tier: .easy, grades: 0...2),
