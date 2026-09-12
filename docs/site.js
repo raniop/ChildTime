@@ -26,6 +26,23 @@
     try { return window.localStorage.getItem(key); } catch (e) { return null; }
   }
 
+  /* The language menu is a <details>, so it opens with no JS at all and the
+     keyboard gets it for free. All JS adds is what a menu is expected to do:
+     close when you click away, and close on Escape. */
+  var langBox = document.querySelector("details.lang-switch");
+  if (langBox) {
+    document.addEventListener("click", function (e) {
+      if (langBox.open && !langBox.contains(e.target)) langBox.open = false;
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && langBox.open) {
+        langBox.open = false;
+        var summary = langBox.querySelector("summary");
+        if (summary) summary.focus();
+      }
+    });
+  }
+
   /* The flags are the manual choice: remember it before the browser leaves. */
   var flags = document.querySelectorAll(".lang-switch a[hreflang]");
   for (var f = 0; f < flags.length; f++) {

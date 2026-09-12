@@ -28,7 +28,7 @@ struct LanguagePickerView: View {
         }
         .background(GlassBackdrop())
         .environment(\.colorScheme, .dark)
-        .navigationTitle("שָׁפָה · Language")
+        .navigationTitle(tr("שָׁפָה · Language"))
         .navigationBarTitleDisplayMode(.inline)
     }
 

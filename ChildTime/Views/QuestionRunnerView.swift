@@ -688,7 +688,12 @@ struct QuestionRunnerView: View {
     }
 
     // Cost of one hint, in pending-minutes (the kid's banked play time).
-    private let hintCostMinutes = 2
+    //
+    // It was 2. A correct answer is worth ~24 seconds, so a hint cost five of
+    // them — for removing ONE wrong option out of four (a guess goes from 25%
+    // to 33%). Rani: "רמז מוריד 2 דק זה הרבה מידי". One minute is still more
+    // than a question is worth, which is the point: a hint should cost, not hurt.
+    private let hintCostMinutes = 1
 
     /// The equipped character is the "smart helper". Higher tiers help more:
     /// rare/epic add a topic nudge, legendary/mythic add a method explanation
@@ -697,8 +702,12 @@ struct QuestionRunnerView: View {
         (profiles.active?.character ?? Character3DCatalog.find(nil)).helpLevel
     }
 
-    /// A hint costs 2 minutes; legendary/mythic helpers discount it to 1 (never free).
-    private var hintCost: Int { helperLevel == .explain ? 1 : hintCostMinutes }
+    /// A hint costs a minute. A legendary/mythic helper gives it away — at the
+    /// old price its discount was a minute, and now that the base IS a minute
+    /// the only discount left is free. That character costs real money, and the
+    /// free hint is now the visible half of its perk; the method explanation it
+    /// also brings is the other half.
+    private var hintCost: Int { helperLevel == .explain ? 0 : hintCostMinutes }
 
     private func canUseHint(_ q: Question) -> Bool {
         guard !showFeedback else { return false }

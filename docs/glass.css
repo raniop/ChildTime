@@ -173,19 +173,37 @@ img{max-width:100%;height:auto;display:block}
    link to the same page in the other language. The language NAME is always
    shown next to the flag — flag emoji fall back to two letters ("IL", "US")
    on Windows, so the name is what actually carries the meaning. */
-.lang-switch{display:flex;align-items:center;gap:2px;flex:0 0 auto;
-  padding:3px;border-radius:999px;
+.lang-switch{position:relative;flex:0 0 auto}
+/* The button itself: one small pill showing the language you are in. Three
+   languages side by side ate the header, so the other two live in a menu. */
+.lang-switch>summary{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  list-style:none;cursor:pointer;user-select:none;
+  font-weight:800;font-size:13.5px;line-height:1;color:#fff;
+  padding:9px 12px;min-height:34px;border-radius:999px;
   background:rgba(12,6,40,.34);border:1px solid var(--edge);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.lang-switch a{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
-  font-weight:800;font-size:13.5px;line-height:1;color:var(--muted);
-  padding:8px 13px;min-height:32px;border-radius:999px;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:background .16s ease}
+.lang-switch>summary::-webkit-details-marker{display:none}
+.lang-switch>summary::marker{content:""}
+.lang-switch>summary:hover{background:rgba(255,255,255,.16)}
+.lang-switch>summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.lang-switch .chev{width:11px;height:11px;opacity:.75;transition:transform .18s ease}
+.lang-switch[open] .chev{transform:rotate(180deg)}
+/* The menu. Anchored to the button's edge on both sides, so it never hangs off
+   the screen in either direction. */
+.lang-switch .lang-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;z-index:60;
+  min-width:172px;display:flex;flex-direction:column;gap:2px;padding:6px;
+  border-radius:16px;background:rgba(30,18,86,.97);border:1px solid var(--edge);
+  box-shadow:0 18px 44px rgba(6,2,28,.5);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.lang-switch .lang-menu a{display:flex;align-items:center;gap:9px;white-space:nowrap;
+  font-weight:800;font-size:14px;line-height:1;color:var(--muted);
+  padding:10px 12px;border-radius:11px;
   transition:background .16s ease,color .16s ease}
-.lang-switch a:hover{color:#fff;background:rgba(255,255,255,.14)}
-.lang-switch a[aria-current="true"]{
-  background:linear-gradient(180deg,#fff,#EDEAFF);color:var(--ink);
-  box-shadow:0 4px 12px rgba(10,5,40,.3)}
-.lang-switch .flag{font-size:15px;line-height:1}
+.lang-switch .lang-menu a:hover{color:#fff;background:rgba(255,255,255,.14)}
+.lang-switch .lang-menu a[aria-current="true"]{color:var(--ink);
+  background:linear-gradient(180deg,#fff,#EDEAFF)}
+.lang-switch .flag{font-size:16px;line-height:1}
 
 @media(max-width:860px){
   .menu-btn{display:block}
@@ -201,11 +219,11 @@ img{max-width:100%;height:auto;display:block}
   .wrap{padding:0 16px}
   .brand{font-size:21px;gap:8px}
   .brand img{height:30px}
-  .lang-switch a{font-size:12.5px;padding:7px 10px;gap:5px}
+  .lang-switch>summary{font-size:12.5px;padding:8px 10px;gap:5px}
 }
 @media(max-width:374px){
-  /* Last resort on very narrow phones: the names stay, the flags go. */
-  .lang-switch .flag{display:none}
+  /* Last resort on very narrow phones: the button keeps the flag, drops the name. */
+  .lang-switch>summary .cur{display:none}
 }
 
 /* ---------- sections ------------------------------------------------------- */
@@ -279,7 +297,8 @@ h2.title{text-align:center;font-size:clamp(28px,4.6vw,44px);font-weight:900;marg
   .brand span,.mini h1,.hero h1{
     background:none;-webkit-background-clip:border-box;background-clip:border-box;
     color:CanvasText;forced-color-adjust:none}
-  .lang-switch a[aria-current="true"]{border:2px solid CanvasText}
+  .lang-switch .lang-menu a[aria-current="true"]{border:2px solid CanvasText}
+  .lang-switch>summary{border:2px solid CanvasText}
   .skip-link{border:2px solid CanvasText}
 }
 
