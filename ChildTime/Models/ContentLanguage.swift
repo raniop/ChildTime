@@ -22,6 +22,11 @@ enum ContentAvailability {
         guard language != .he else { return true }
         switch topic {
         case .math:    return true
+        // 🇺🇸 The Hebrew world teaches Hebrew spelling to children who already
+        // speak it. An American family has no use for it (Rani: "לא צריך להציג
+        // להם שם עולם עברית"), so it stays hidden in English even if questions
+        // ever land in its bank.
+        case .hebrew:  return false
         case .reading: return !ReadingContent.passages(in: language).isEmpty
         default:       return (QuestionBanks.bank(for: topic, in: language)?.count ?? 0) >= minimumBank
         }
