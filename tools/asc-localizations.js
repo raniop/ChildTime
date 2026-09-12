@@ -1,6 +1,8 @@
-// Adds the missing en-US App Store Connect localizations from tools/i18n/asc-en-US-draft.json
-// (approved by Rani: "תעשה הכל"). Apple refuses these while a version is in review
-// (409 UNMODIFIABLE) — rerun after review: node tools/asc-en-localizations.js
+// Adds the App Store Connect localizations for one locale, from
+// tools/i18n/asc-<locale>-draft.json. Apple refuses these while a version is in
+// review (409 UNMODIFIABLE) — rerun after review:
+//   node tools/asc-localizations.js en-US
+//   node tools/asc-localizations.js ru
 // Idempotent: skips any locale that already exists.
 const fs = require("fs"), path = require("path"), os = require("os");
 const ROOT = "/Users/raniophir/ChildTime";
@@ -14,32 +16,36 @@ async function api(method, url, body) {
   if (!res.ok) throw new Error(`${method} ${url} → ${res.status}: ${JSON.stringify((j && j.errors) || j).slice(0, 400)}`); return j;
 }
 async function all(url) { let out = [], next = url; while (next) { const j = await api("GET", next); out = out.concat(j.data || []); next = j.links && j.links.next; } return out; }
-const draft = JSON.parse(fs.readFileSync(path.join(ROOT, "tools/i18n/asc-en-US-draft.json"), "utf8"));
+const LOCALE = process.argv[2] || "en-US";
+const draftPath = path.join(ROOT, `tools/i18n/asc-${LOCALE}-draft.json`);
+if (!fs.existsSync(draftPath)) { console.error(`no draft for ${LOCALE} at ${draftPath}`); process.exit(1); }
+const draft = JSON.parse(fs.readFileSync(draftPath, "utf8"));
+console.log(`locale: ${LOCALE}`);
 async function step(label, fn) { try { console.log("✅", label, await fn()); } catch (e) { console.log("❌", label, e.message); } }
 (async () => {
   const app = (await api("GET", `/v1/apps?filter[bundleId]=${BUNDLE}`)).data[0];
   for (const info of await all(`/v1/apps/${app.id}/appInfos`)) {
     await step(`appInfo ${info.attributes.appStoreState || info.attributes.state}`, async () => {
       const locs = await all(`/v1/appInfos/${info.id}/appInfoLocalizations`);
-      if (locs.find((l) => l.attributes.locale === "en-US")) return "exists";
+      if (locs.find((l) => l.attributes.locale === LOCALE)) return "exists";
       const a = draft.appInfo;
-      await api("POST", "/v1/appInfoLocalizations", { data: { type: "appInfoLocalizations", attributes: { locale: "en-US", name: a.name, subtitle: a.subtitle }, relationships: { appInfo: { data: { type: "appInfos", id: info.id } } } } });
+      await api("POST", "/v1/appInfoLocalizations", { data: { type: "appInfoLocalizations", attributes: { locale: LOCALE, name: a.name, subtitle: a.subtitle }, relationships: { appInfo: { data: { type: "appInfos", id: info.id } } } } });
       return "added";
     });
   }
   for (const g of await all(`/v1/apps/${app.id}/subscriptionGroups`)) {
     await step(`subscription group ${g.attributes.referenceName}`, async () => {
       const locs = await all(`/v1/subscriptionGroups/${g.id}/subscriptionGroupLocalizations`);
-      if (locs.find((l) => l.attributes.locale === "en-US")) return "exists";
-      await api("POST", "/v1/subscriptionGroupLocalizations", { data: { type: "subscriptionGroupLocalizations", attributes: { locale: "en-US", name: draft.subscriptionGroup.name }, relationships: { subscriptionGroup: { data: { type: "subscriptionGroups", id: g.id } } } } });
+      if (locs.find((l) => l.attributes.locale === LOCALE)) return "exists";
+      await api("POST", "/v1/subscriptionGroupLocalizations", { data: { type: "subscriptionGroupLocalizations", attributes: { locale: LOCALE, name: draft.subscriptionGroup.name }, relationships: { subscriptionGroup: { data: { type: "subscriptionGroups", id: g.id } } } } });
       return "added";
     });
     for (const s of await all(`/v1/subscriptionGroups/${g.id}/subscriptions`)) {
       const want = draft.subscriptions[s.attributes.productId]; if (!want) continue;
       await step(`subscription ${s.attributes.productId}`, async () => {
         const locs = await all(`/v1/subscriptions/${s.id}/subscriptionLocalizations`);
-        if (locs.find((l) => l.attributes.locale === "en-US")) return "exists";
-        await api("POST", "/v1/subscriptionLocalizations", { data: { type: "subscriptionLocalizations", attributes: { locale: "en-US", name: want.name, description: want.description }, relationships: { subscription: { data: { type: "subscriptions", id: s.id } } } } });
+        if (locs.find((l) => l.attributes.locale === LOCALE)) return "exists";
+        await api("POST", "/v1/subscriptionLocalizations", { data: { type: "subscriptionLocalizations", attributes: { locale: LOCALE, name: want.name, description: want.description }, relationships: { subscription: { data: { type: "subscriptions", id: s.id } } } } });
         return "added";
       });
     }
@@ -48,8 +54,8 @@ async function step(label, fn) { try { console.log("✅", label, await fn()); } 
     const want = draft.inAppPurchases[x.attributes.productId]; if (!want) continue;
     await step(`iap ${x.attributes.productId}`, async () => {
       const locs = await all(`/v2/inAppPurchases/${x.id}/inAppPurchaseLocalizations`);
-      if (locs.find((l) => l.attributes.locale === "en-US")) return "exists";
-      await api("POST", "/v1/inAppPurchaseLocalizations", { data: { type: "inAppPurchaseLocalizations", attributes: { locale: "en-US", name: want.name, description: want.description }, relationships: { inAppPurchaseV2: { data: { type: "inAppPurchases", id: x.id } } } } });
+      if (locs.find((l) => l.attributes.locale === LOCALE)) return "exists";
+      await api("POST", "/v1/inAppPurchaseLocalizations", { data: { type: "inAppPurchaseLocalizations", attributes: { locale: LOCALE, name: want.name, description: want.description }, relationships: { inAppPurchaseV2: { data: { type: "inAppPurchases", id: x.id } } } } });
       return "added";
     });
   }

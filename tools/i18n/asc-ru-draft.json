@@ -1,0 +1,42 @@
+{
+ "_note": "Russian App Store Connect localizations (app info, Tofy+ group + monthly/yearly, 3 diamond packs). Apple returns 409 while a version is in review — run `node tools/asc-localizations.js ru` once review ends. Character limits: name ≤30, subtitle ≤30, IAP name ≤30, IAP description ≤45.",
+ "appInfo": {
+  "locale": "ru",
+  "name": "Tofy: учись и играй",
+  "subtitle": "Ответил — заработал время"
+ },
+ "subscriptionGroup": {
+  "referenceName": "tofi_premium",
+  "locale": "ru",
+  "name": "Tofy+"
+ },
+ "subscriptions": {
+  "com.rani.ChildTime.premium.monthly": {
+   "locale": "ru",
+   "name": "Tofy+ на месяц",
+   "description": "Все миры для каждого ребёнка в семье"
+  },
+  "com.rani.ChildTime.premium.yearly": {
+   "locale": "ru",
+   "name": "Tofy+ на год",
+   "description": "Все миры для всех детей, оплата раз в год"
+  }
+ },
+ "inAppPurchases": {
+  "com.rani.ChildTime.stars.small": {
+   "locale": "ru",
+   "name": "60 алмазов",
+   "description": "Алмазы на новых героев в магазине"
+  },
+  "com.rani.ChildTime.stars.medium": {
+   "locale": "ru",
+   "name": "200 алмазов",
+   "description": "Алмазы на новых героев в магазине"
+  },
+  "com.rani.ChildTime.stars.large": {
+   "locale": "ru",
+   "name": "500 алмазов",
+   "description": "Алмазы на новых героев в магазине"
+  }
+ }
+}

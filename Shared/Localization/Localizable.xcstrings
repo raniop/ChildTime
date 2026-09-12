@@ -11086,7 +11086,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Минуты сегодня"
+            "value": "Минут сегодня"
           }
         }
       }
@@ -20427,6 +20427,22 @@
         }
       }
     },
+    "טופי מדבר גם רוסית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy speaks Russian too"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy говорит и по-русски"
+          }
+        }
+      }
+    },
     "טופי שלי": {
       "localizations": {
         "en": {
@@ -23623,6 +23639,22 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "כל האפליקציה, וגם השאלות עצמן — כמעט 3,000 שאלות שנכתבו מחדש ברוסית, כולל עולם ישראל וחגי תשרי. בהגדרות ההורים, במסך \"שפה\", בוחרים עברית, אנגלית או רוסית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The whole app, and the questions themselves — nearly 3,000 questions rewritten in Russian, including the Israel world and the Tishrei holidays. Parent Settings → Language picks Hebrew, English or Russian."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё приложение и сами вопросы — почти 3 000 вопросов, заново написанных по-русски, включая мир «Израиль» и праздники тишрея. В родительских настройках, в разделе «Язык», можно выбрать иврит, английский или русский."
           }
         }
       }
@@ -29704,7 +29736,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Правильные"
+            "value": "Правильных"
           }
         }
       }
@@ -30826,7 +30858,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Правильные"
+            "value": "Правильных"
           }
         }
       }

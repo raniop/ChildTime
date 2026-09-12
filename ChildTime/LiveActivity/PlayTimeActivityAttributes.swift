@@ -27,6 +27,12 @@ public let tofyAppGroupID = "group.com.childtime.shared"
 
 @available(iOS 17.0, *)
 struct StopAndSavePlayIntent: LiveActivityIntent {
+    // The Lock Screen button. AppIntents extracts these at BUILD time, so they
+    // have to stay literals — `tr()` here fails the metadata export outright.
+    // The literal is the catalog key, so the system still translates it, but it
+    // follows the DEVICE language rather than the language picked inside Tofy.
+    // A family whose iPhone is Russian sees Russian; one running a Russian Tofy
+    // on a Hebrew iPhone sees Hebrew here alone.
     static var title: LocalizedStringResource = "עֲצֹר וּשְׁמֹר זְמַן"
     static var description = IntentDescription("עוֹצֵר אֶת זְמַן הַמִּשְׂחָק וְשׁוֹמֵר אֶת מַה שֶּׁנִּשְׁאַר")
 
