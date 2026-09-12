@@ -178,6 +178,17 @@
       "lang": "en"
     },
     {
+      "topic": "body",
+      "file": "en/body-w2-g1.json",
+      "label": "w2 g1",
+      "count": 60,
+      "byGrade": {
+        "1": 60
+      },
+      "generatedAt": "2026-09-12T06:14:09.329Z",
+      "lang": "en"
+    },
+    {
       "topic": "dinosaurs",
       "file": "en/dinosaurs-w1-part1.json",
       "label": "w1 part1",
@@ -248,6 +259,17 @@
       "lang": "en"
     },
     {
+      "topic": "flags",
+      "file": "en/flags-w2-early.json",
+      "label": "w2 early",
+      "count": 70,
+      "byGrade": {
+        "1": 70
+      },
+      "generatedAt": "2026-09-12T06:14:47.018Z",
+      "lang": "en"
+    },
+    {
       "topic": "food",
       "file": "en/food-w1-part1.json",
       "label": "w1 part1",
@@ -309,6 +331,28 @@
         "8": 37
       },
       "generatedAt": "2026-09-11T21:00:32.942Z",
+      "lang": "en"
+    },
+    {
+      "topic": "gifted",
+      "file": "en/gifted-w2-g1.json",
+      "label": "w2 g1",
+      "count": 60,
+      "byGrade": {
+        "1": 60
+      },
+      "generatedAt": "2026-09-12T06:15:14.013Z",
+      "lang": "en"
+    },
+    {
+      "topic": "history",
+      "file": "en/history-w2-g1.json",
+      "label": "w2 g1",
+      "count": 20,
+      "byGrade": {
+        "1": 20
+      },
+      "generatedAt": "2026-09-12T06:15:46.073Z",
       "lang": "en"
     },
     {
@@ -489,6 +533,17 @@
         "8": 20
       },
       "generatedAt": "2026-09-11T21:07:06.901Z",
+      "lang": "en"
+    },
+    {
+      "topic": "soccer",
+      "file": "en/soccer-w2-g1.json",
+      "label": "w2 g1",
+      "count": 40,
+      "byGrade": {
+        "1": 40
+      },
+      "generatedAt": "2026-09-12T06:16:12.925Z",
       "lang": "en"
     },
     {
