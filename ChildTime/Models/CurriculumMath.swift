@@ -525,10 +525,14 @@ enum CurriculumMath {
     // MARK: - בעיות מילוליות (תבניות עם שמות מתחלפים)
 
     // Names are content, not translations: an American word problem gets American names.
-    private static var kids: [String] {
+    // Each name carries the gender its verbs have to agree with — a learning app
+    // cannot ship "יוֹסִי קָנָה/תָה" (Rani), so every sentence below exists twice.
+    private static var kids: [(name: String, girl: Bool)] {
         LanguageStore.shared.current == .he
-            ? [tr("דָּנָה"), tr("יוֹסִי"), tr("נֹעָה"), tr("אִיתַי"), tr("תָּמָר"), tr("עוֹמֶר")]
-            : ["Emma", "Liam", "Olivia", "Noah", "Ava", "Mason"]
+            ? [(tr("דָּנָה"), true), (tr("יוֹסִי"), false), (tr("נֹעָה"), true),
+               (tr("אִיתַי"), false), (tr("תָּמָר"), true), (tr("עוֹמֶר"), false)]
+            : [("Emma", true), ("Liam", false), ("Olivia", true),
+               ("Noah", false), ("Ava", true), ("Mason", false)]
     }
     private static var things: [(String, String)] {
         [("🎈", tr("בַּלּוֹנִים")), ("📚", tr("סְפָרִים")), ("🍎", tr("תַּפּוּחִים")),
@@ -536,21 +540,25 @@ enum CurriculumMath {
     }
 
     private static func wordProblemAddSub(max: Int) -> Question {
-        let name = kids.randomElement()!
+        let kid = kids.randomElement()!, name = kid.name
         let (emoji, item) = things.randomElement()!
         let a = Int.random(in: 3...max)
         if Bool.random() {
             let b = Int.random(in: 2...max)
-            return numericMCQ(prompt: tr("\(emoji) לְ\(name) יֵשׁ \(a) \(item). \(name) קִבֵּל/ה עוֹד \(b). כַּמָּה יֵשׁ עַכְשָׁיו?"),
+            return numericMCQ(prompt: kid.girl
+                ? tr("\(emoji) לְ\(name) יֵשׁ \(a) \(item). \(name) קִבְּלָה עוֹד \(b). כַּמָּה יֵשׁ עַכְשָׁיו?")
+                : tr("\(emoji) לְ\(name) יֵשׁ \(a) \(item). \(name) קִבֵּל עוֹד \(b). כַּמָּה יֵשׁ עַכְשָׁיו?"),
                               answer: a + b)
         }
         let b = Int.random(in: 1..<a)
-        return numericMCQ(prompt: tr("\(emoji) לְ\(name) הָיוּ \(a) \(item), וְ\(name) נָתַן/ה \(b) לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?"),
+        return numericMCQ(prompt: kid.girl
+            ? tr("\(emoji) לְ\(name) הָיוּ \(a) \(item), וְ\(name) נָתְנָה \(b) לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?")
+            : tr("\(emoji) לְ\(name) הָיוּ \(a) \(item), וְ\(name) נָתַן \(b) לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?"),
                           answer: a - b)
     }
 
     private static func wordProblemMultiply(maxFactor: Int) -> Question {
-        let name = kids.randomElement()!
+        let name = kids.randomElement()!.name
         let (emoji, item) = things.randomElement()!
         let packs = Int.random(in: 2...maxFactor), per = Int.random(in: 2...maxFactor)
         return numericMCQ(prompt: tr("\(emoji) לְ\(name) יֵשׁ \(packs) חֲבִילוֹת שֶׁל \(item), וּבְכָל חֲבִילָה \(per). כַּמָּה יֵשׁ בְּסַךְ הַכֹּל?"),
@@ -558,11 +566,13 @@ enum CurriculumMath {
     }
 
     private static func wordProblemTwoStep() -> Question {
-        let name = kids.randomElement()!
+        let kid = kids.randomElement()!, name = kid.name
         let price = Int.random(in: 6...15)
         let count = Int.random(in: 2...4)
         let paid = ((price * count / 10) + 1) * 10 + [0, 10].randomElement()!
-        return numericMCQ(prompt: tr("💰 \(name) קָנָה/תָה \(count) מַחְבָּרוֹת בְּ־\(price) שְׁקָלִים כָּל אַחַת, וְשִׁלֵּם/ה בְּ־\(paid) שְׁקָלִים. כַּמָּה עֹדֶף מַגִּיעַ?"),
+        return numericMCQ(prompt: kid.girl
+            ? tr("💰 \(name) קָנְתָה \(count) מַחְבָּרוֹת בְּ־\(price) שְׁקָלִים כָּל אַחַת, וְשִׁלְּמָה בְּ־\(paid) שְׁקָלִים. כַּמָּה עֹדֶף מַגִּיעַ?")
+            : tr("💰 \(name) קָנָה \(count) מַחְבָּרוֹת בְּ־\(price) שְׁקָלִים כָּל אַחַת, וְשִׁלֵּם בְּ־\(paid) שְׁקָלִים. כַּמָּה עֹדֶף מַגִּיעַ?"),
                           answer: paid - price * count)
     }
 

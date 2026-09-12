@@ -923,7 +923,7 @@ struct WorldMapView: View {
         HStack(spacing: 12) {
             Text("🎮").font(.system(size: 30))
             VStack(alignment: .trailing, spacing: 2) {
-                Text(tr("\(invite.hostName) מַזְמִין/ה אוֹתְךָ!"))
+                Text(tr("הַזְמָנָה מִ\(invite.hostName)!"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 Text(tr("מִשְׂחָק חִידוֹן נֶגֶד חֲבֵרִים"))
                     .font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.85))

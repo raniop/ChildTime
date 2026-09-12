@@ -811,7 +811,7 @@
         }
       }
     },
-    "%@ לְ%@ הָיוּ %lld %@, וְ%@ נָתַן/ה %lld לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?": {
+    "%@ לְ%@ הָיוּ %lld %@, וְ%@ נָתְנָה %lld לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -821,7 +821,27 @@
         }
       }
     },
-    "%@ לְ%@ יֵשׁ %lld %@. %@ קִבֵּל/ה עוֹד %lld. כַּמָּה יֵשׁ עַכְשָׁיו?": {
+    "%@ לְ%@ הָיוּ %lld %@, וְ%@ נָתַן %lld לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ had %lld %@, and %@ gave %lld to a friend. How many are left?"
+          }
+        }
+      }
+    },
+    "%@ לְ%@ יֵשׁ %lld %@. %@ קִבְּלָה עוֹד %lld. כַּמָּה יֵשׁ עַכְשָׁיו?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ has %lld %@. %@ got %lld more. How many now?"
+          }
+        }
+      }
+    },
+    "%@ לְ%@ יֵשׁ %lld %@. %@ קִבֵּל עוֹד %lld. כַּמָּה יֵשׁ עַכְשָׁיו?": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -891,16 +911,6 @@
         }
       }
     },
-    "%@ לָקַח/ה אֶת הַסִּבּוּב! 🎉": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ won the round! 🎉"
-          }
-        }
-      }
-    },
     "%@ לתקרה היומית (%lld דק׳) — מה %@ עכשיו נשמר למחר": {
       "localizations": {
         "en": {
@@ -947,16 +957,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ Mom or Dad 💌"
-          }
-        }
-      }
-    },
-    "%@ מַזְמִין/ה אוֹתְךָ!": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ is inviting you!"
           }
         }
       }
@@ -1057,16 +1057,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ hasn't %@ today — maybe cheer them on? 💛"
-          }
-        }
-      }
-    },
-    "%@ פָּתַח/ה מִשְׂחָק!": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ started a game!"
           }
         }
       }
@@ -6821,6 +6811,16 @@
         }
       }
     },
+    "הַזְמָנָה מִ%@!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is inviting you!"
+          }
+        }
+      }
+    },
     "הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת": {
       "localizations": {
         "en": {
@@ -7567,6 +7567,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Next round starting… ⏳"
+          }
+        }
+      }
+    },
+    "הַסִּבּוּב שַׁיָּךְ לְ%@! 🎉": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ won the round! 🎉"
           }
         }
       }
@@ -15027,6 +15037,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quiz game against friends"
+          }
+        }
+      }
+    },
+    "מִשְׂחָק חָדָשׁ שֶׁל %@!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ started a game!"
           }
         }
       }
@@ -23371,7 +23391,17 @@
         }
       }
     },
-    "💰 %@ קָנָה/תָה %lld מַחְבָּרוֹת בְּ־%lld שְׁקָלִים כָּל אַחַת, וְשִׁלֵּם/ה בְּ־%lld שְׁקָלִים. כַּמָּה עֹדֶף מַגִּיעַ?": {
+    "💰 %@ קָנְתָה %lld מַחְבָּרוֹת בְּ־%lld שְׁקָלִים כָּל אַחַת, וְשִׁלְּמָה בְּ־%lld שְׁקָלִים. כַּמָּה עֹדֶף מַגִּיעַ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💰 %@ bought %lld notebooks for %lld dollars each and paid with %lld dollars. How much change should they get?"
+          }
+        }
+      }
+    },
+    "💰 %@ קָנָה %lld מַחְבָּרוֹת בְּ־%lld שְׁקָלִים כָּל אַחַת, וְשִׁלֵּם בְּ־%lld שְׁקָלִים. כַּמָּה עֹדֶף מַגִּיעַ?": {
       "localizations": {
         "en": {
           "stringUnit": {

@@ -103,7 +103,7 @@ struct LiveGameView: View {
         return VStack(spacing: AppSpacing.lg) {
             closeButton
             Text("🎮").font(.system(size: 56))
-            Text(isHost ? tr("מִי מִצְטָרֵף?") : tr("\(g.hostName) פָּתַח/ה מִשְׂחָק!"))
+            Text(isHost ? tr("מִי מִצְטָרֵף?") : tr("מִשְׂחָק חָדָשׁ שֶׁל \(g.hostName)!"))
                 .font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
             Text(tr("\(g.topicEmoji) \(g.topicName) · הַטּוֹב מִ-\(g.totalRounds) סִבּוּבִים"))
                 .font(.system(size: 15, weight: .semibold, design: .rounded))
@@ -523,7 +523,7 @@ struct LiveGameView: View {
             Text(tr("סִיַּמְנוּ סִבּוּב \(g.currentRound + 1)!"))
                 .font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
             if let winner {
-                Text(tr("\(winner.name) לָקַח/ה אֶת הַסִּבּוּב! 🎉"))
+                Text(tr("הַסִּבּוּב שַׁיָּךְ לְ\(winner.name)! 🎉"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
             } else {
