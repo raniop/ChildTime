@@ -186,7 +186,7 @@ function liveMessage(event, lang) {
   const g = (male, female) => (f ? female : male);   // pick by gender
   const dev = deviceLabel(event);                    // " · אייפד" / " · אייפון" / ""
   switch (event.type) {
-    case "sessionStart": return { title: g("התחיל לשחק 📱", "התחילה לשחק 📱"), body: `${name} ${g("התחיל", "התחילה")} עכשיו לשחק ${g("ולומד", "ולומדת")}${dev}.` };
+    case "sessionStart": return { title: g("התחיל לשחק 📱", "התחילה לשחק 📱"), body: `${name} ${g("התחיל", "התחילה")} עכשיו לשחק וללמוד${dev}.` };
     case "sessionEnd": {
       const q = Number(event.questions) || 0;
       const acc = Number(event.accuracy) || 0;
@@ -596,7 +596,7 @@ function packRequestMessage(after, lang) {
 const PACK_META = {
   soccer: { name: "עולם הכדורגל", emoji: "⚽", subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות",
     nameEn: "Soccer World", subjectEn: "soccer", taglineEn: "Players, teams, tournaments, and surprising facts" },
-  dinosaurs: { name: "דינוזאורים", emoji: "🦖", subject: "דינוזאורים", tagline: "מינים, גדל, מה אכלו, ואיך מגלים מאבנים",
+  dinosaurs: { name: "דינוזאורים", emoji: "🦖", subject: "דינוזאורים", tagline: "מינים, גודל, מה אכלו, ואיך מגלים מאובנים",
     nameEn: "Dinosaurs", subjectEn: "dinosaurs", taglineEn: "Species, size, what they ate, and how fossils are found" },
   space: { name: "חלל וכוכבים", emoji: "🚀", subject: "חלל", tagline: "כוכבי לכת, ירח, אסטרונאוטים ושמש",
     nameEn: "Space and Stars", subjectEn: "space", taglineEn: "Planets, the Moon, astronauts, and the Sun" },
@@ -604,11 +604,11 @@ const PACK_META = {
     nameEn: "Animal World", subjectEn: "animals", taglineEn: "Continents, endangered animals, and record-breakers" },
   sea: { name: "מעמקי הים", emoji: "🌊", subject: "הים", tagline: "כרישים, לויתנים, שוניות, ומי חי איפה",
     nameEn: "Deep Sea", subjectEn: "the ocean", taglineEn: "Sharks, whales, reefs, and who lives where" },
-  gifted: { name: "הכנה למחוננים", emoji: "🧠", subject: "חשיבה", tagline: "חשיבה, סדרות, הקשים ותפיסה מרחבית",
+  gifted: { name: "הכנה למחוננים", emoji: "🧠", subject: "חשיבה", tagline: "חשיבה, סדרות, היקשים ותפיסה מרחבית",
     nameEn: "Gifted Prep", subjectEn: "thinking skills", taglineEn: "Thinking, sequences, inference, and spatial reasoning" },
-  food: { name: "מטבח ומדע של אכל", emoji: "🍳", subject: "אכל", tagline: "מאין מגיע אכל, מדידות ומתכונים בחשבון",
+  food: { name: "מטבח ומדע של אוכל", emoji: "🍳", subject: "אוכל", tagline: "מאין מגיע אוכל, מדידות ומתכונים בחשבון",
     nameEn: "Kitchen and Food Science", subjectEn: "food", taglineEn: "Where food comes from, measuring, and recipe math" },
-  israel: { name: "ישראל שלי", emoji: "🏛️", subject: "ישראל", tagline: "ערים, סמלים, חגים, דמיות וטבע",
+  israel: { name: "ישראל שלי", emoji: "🏛️", subject: "ישראל", tagline: "ערים, סמלים, חגים, דמויות וטבע",
     nameEn: "My Israel", subjectEn: "Israel", taglineEn: "Cities, symbols, holidays, famous people, and nature" },
   tishrei: { name: "חגי תשרי", emoji: "🍎", subject: "חגי תשרי", tagline: "ראש השנה, יום כיפור, סוכות ושמחת תורה",
     nameEn: "Fall Holidays", subjectEn: "the fall holidays", taglineEn: "Rosh Hashanah, Yom Kippur, Sukkot, and Simchat Torah" },
@@ -1175,7 +1175,7 @@ function childLinkMessage(kind, after, lang) {
   }
   return kind === "request"
     ? { title: "בקשת צירוף למשפחה 👨‍👩‍👧",
-        body: `${after.fromParentName || "הורה"} מבקש/ת לצרף אותך למשפחה. פתחו את טופי כדי לאשר.` }
+        body: `${after.fromParentName || "הורה"} מבקש/ת לצרף אותך למשפחה. פתח/י את טופי כדי לאשר.` }
     : { title: "הצירוף אושר! ✅",
         body: "הילד/ה אישר/ה את הבקשה ומופיע/ה עכשיו במשפחה שלך." };
 }
@@ -1344,7 +1344,7 @@ exports.onQuestionReport = onDocumentCreated(
       `סיבה: ${r.reason || "(לא צוינה)"}`,
       ``,
       `— ילד: ${r.childName || "-"}`,
-      `— דווח ע"י: ${reporter}`,
+      `— דווח ע״י: ${reporter}`,
       `— uid: ${r.reportedBy || "anonymous"}`,
       `— מתי: ${when}`,
     ];
@@ -3114,7 +3114,7 @@ function qbProblems(q, lang = "he") {
   if (!prompt) out.push("אין שאלה");
   if (prompt.length > 260) out.push("שאלה ארוכה מדי");
   if (!answer) out.push("אין תשובה נכונה");
-  if (ds.length < 3) out.push("פחות מ-3 מסיחים");
+  if (ds.length < 3) out.push("פחות מ־3 מסיחים");
   if (ds.includes(answer)) out.push("התשובה הנכונה מופיעה גם כמסיח");
   if (new Set(ds).size !== ds.length) out.push("מסיחים כפולים");
   const lo = Number(q.gradeLo), hi = Number(q.gradeHi);

@@ -147,7 +147,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260912103326";
+const PAGE_STAMP = "20260912171836";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -178,7 +178,7 @@ const ago = (n) => n <= 0 ? "היום" : n === 1 ? "לפני יום" : n === 2 ?
 const daysLeft = (n) => n === 1 ? "עוד יום" : n === 2 ? "עוד יומיים" : `עוד ${n} ימים`;
 const shortMail = (e) => e ? e.replace(/@.*/, "@…") : "";
 const famName = (f) => f.familyName || f.label || f.name || ((f.children || []).map((k) => k.name).filter(Boolean).length ? "המשפחה של " + (f.children || []).map((k) => k.name).filter(Boolean).slice(0, 4).join(", ") : ((f.parents || []).map((p) => p.email).find(Boolean) ? "משפחת " + (f.parents || []).map((p) => p.email).find(Boolean).split("@")[0] : "משפחה ללא שם"));
-const gradeName = (g) => g == null ? "—" : g < 0 ? "טרום־חובה" : (["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳", "ט׳", "י׳", "יא׳", "יב׳"][Math.min(g, 12)] ?? g);
+const gradeName = (g) => g == null ? "—" : g < 0 ? "טרום־חובה" : (["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳", "ט׳", "י׳", "י״א", "י״ב"][Math.min(g, 12)] ?? g);
 const pct = (n) => `<span class="pct ${n >= 80 ? "hi" : n < 50 ? "lo" : ""}">${n}%</span>`;
 const toast = (t) => { const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); };
 
@@ -742,7 +742,7 @@ async function loadBatches() {
   const runLine = !lr ? "עוד לא רץ." :
     `רץ לאחרונה ${when(lr.at)} · ${lr.files || 0} קבצים · נוספו ${fmt(lr.added || 0)} (🇮🇱 ${fmt((lr.byLang || {}).he || 0)} · 🇺🇸 ${fmt((lr.byLang || {}).en || 0)})` +
     `${lr.approved ? ` · אושרו ${fmt(lr.approved)}` : ""}${lr.duplicates ? ` · ${fmt(lr.duplicates)} כבר היו` : ""}` +
-    `${lr.rejected ? ` · ${fmt(lr.rejected)} נדחו בבדיקה` : ""}${(lr.failed || []).length ? ` · ⚠️ ${lr.failed.length} כשלונות` : ""}`;
+    `${lr.rejected ? ` · ${fmt(lr.rejected)} נדחו בבדיקה` : ""}${(lr.failed || []).length ? ` · ⚠️ ${lr.failed.length} כישלונות` : ""}`;
   const autoCard = `<div class="card" style="margin-bottom:14px">
     <h4>🤖 פרסום אוטומטי</h4>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0">
@@ -806,7 +806,7 @@ async function loadBatches() {
         } catch (e) { failed++; console.error("approve failed", topics[i], e); }
       }
       msg.textContent = "";
-      const line = `${L.flag} נוספו ${fmt(added)} שאלות${dup ? ` · ${fmt(dup)} כבר היו` : ""}${approved ? ` · אושרו ${fmt(approved)}` : ""}${rejected ? ` · ${rejected} נדחו` : ""}${failed ? ` · ${failed} כשלונות` : ""}`;
+      const line = `${L.flag} נוספו ${fmt(added)} שאלות${dup ? ` · ${fmt(dup)} כבר היו` : ""}${approved ? ` · אושרו ${fmt(approved)}` : ""}${rejected ? ` · ${rejected} נדחו` : ""}${failed ? ` · ${failed} כישלונות` : ""}`;
       sessionStorage.setItem("admin.bulk." + L.id, line);
       if (res) res.textContent = line;
       toast(line);
