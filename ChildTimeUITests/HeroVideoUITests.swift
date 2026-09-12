@@ -108,9 +108,46 @@ final class HeroVideoUITests: XCTestCase {
         // 2) Back to the home screen, then open the play time the parents gifted.
         tapFirst(in: app, ["xmark", "✕", "X"], fallback: CGVector(dx: 0.08, dy: 0.07))
         wait(2.5)
-        tapFirst(in: app, ["Gift from your parents", "מַתָּנָה מֵהַהוֹרִים", "מתנה מההורים"],
-                 fallback: CGVector(dx: 0.5, dy: 0.78))
-        wait(8.0)                                   // "your time is on its way" → the running clock
+        tapFirst(in: app, ["💝", "Gift from your parents", "מתנה מההורים"],
+                 fallback: CGVector(dx: 0.5, dy: 0.80))
+        wait(3.0)                                   // the gift lands in the bank…
+        // …and the minutes still have to be opened: the banner is replaced by
+        // "Unlock N minutes to play", and THAT is what starts the clock.
+        tapFirst(in: app, ["Unlock", "פתחו לי", "לשחק"], fallback: CGVector(dx: 0.5, dy: 0.87))
+        wait(9.0)                                   // "your time is on its way" → the running clock
+    }
+
+    // MARK: 3) everything else worth showing
+
+    /// The rest of the app in one pass — the lucky wheel (spun), the daily chest
+    /// (opened), the character shop, the friends leaderboard, a level-up and the
+    /// chores board. Each is its own launch, so one recording carries every beat
+    /// the hero loop might want.
+    @MainActor
+    func testShowcaseForHeroLoop() throws {
+        let beats: [(screen: String, taps: Int, at: CGVector, settle: TimeInterval)] = [
+            ("wheel",       1, CGVector(dx: 0.50, dy: 0.44), 7.5),   // the wheel itself spins on a tap
+            ("dailychest",  6, CGVector(dx: 0.50, dy: 0.45), 6.0),   // "tap again and again to open"
+            ("starshop",    0, .zero, 4.5),
+            ("shop",        0, .zero, 5.0),
+            ("leaderboard", 0, .zero, 5.0),
+            ("levelup",     0, .zero, 4.0),
+            ("choreskid",   0, .zero, 5.0),
+        ]
+        for beat in beats {
+            let app = XCUIApplication()
+            app.launchEnvironment["DEMO_SCREEN"] = beat.screen
+            app.launchEnvironment["DEMO_LANG"] = lang
+            app.launch()
+            wait(3.0)                                   // the screen settles before anything is touched
+            for _ in 0..<beat.taps {
+                app.coordinate(withNormalizedOffset: beat.at).tap()
+                wait(0.35)
+            }
+            wait(beat.settle)
+            app.terminate()
+            wait(0.6)
+        }
     }
 
     // MARK: helpers
@@ -118,7 +155,11 @@ final class HeroVideoUITests: XCTestCase {
     @MainActor private func tapFirst(in app: XCUIApplication, _ labels: [String], fallback: CGVector) {
         for label in labels {
             let match = app.descendants(matching: .any)
-                .matching(NSPredicate(format: "label CONTAINS[c] %@ OR identifier CONTAINS[c] %@", label, label))
+                // [cd] — diacritic-insensitive: the app's Hebrew is vocalised
+                // ("מַתָּנָה מֵהַהוֹרִים"), and matching that by hand-typed niqqud is a
+                // coin flip. Without it the gift banner was never found and the
+                // fallback tap opened whatever tile sat under those coordinates.
+                .matching(NSPredicate(format: "label CONTAINS[cd] %@ OR identifier CONTAINS[cd] %@", label, label))
                 .allElementsBoundByIndex.first(where: { $0.isHittable })
             if let match { match.tap(); return }
         }
