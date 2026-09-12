@@ -282,3 +282,15 @@ h2.title{text-align:center;font-size:clamp(28px,4.6vw,44px);font-weight:900;marg
   .lang-switch a[aria-current="true"]{border:2px solid CanvasText}
   .skip-link{border:2px solid CanvasText}
 }
+
+
+/* 🇷🇺 Russian pages: Heebo has no Cyrillic, so body text would silently fall
+   back to a system face and the page would read in two typefaces. Rubik — the
+   display face everywhere else on the site — does have Cyrillic. */
+html[lang="ru"] body,
+html[lang="ru"] button,
+html[lang="ru"] input,
+html[lang="ru"] textarea,
+html[lang="ru"] select{
+  font-family:"Rubik","Heebo",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+}

@@ -27,21 +27,7 @@ enum QuestionBanks {
         BankQuestion(prompt: "🐈\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "cat", distractors: ["dog", "fish", "bird"], grades: 3...4),
         BankQuestion(prompt: "🐕\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "dog", distractors: ["cat", "horse", "cow"], grades: 3...4),
         BankQuestion(prompt: "🌞\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "sun", distractors: ["moon", "star", "sky"], grades: 3...4),
-        BankQuestion(prompt: "🍎\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "apple", distractors: ["banana", "orange", "pear"], grades: 3...4),
-        BankQuestion(prompt: "🏠\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "house", distractors: ["car", "tree", "school"], grades: 3...5),
         BankQuestion(prompt: "📚\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "book", distractors: ["pen", "table", "chair"], grades: 3...5),
-        BankQuestion(prompt: "🚗\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "car", distractors: ["bus", "bike", "boat"], grades: 3...5),
-        BankQuestion(prompt: "🌳\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "tree", distractors: ["flower", "grass", "leaf"], grades: 3...4),
-        BankQuestion(prompt: "💧\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "water", distractors: ["fire", "ice", "milk"], grades: 3...4),
-        BankQuestion(prompt: "⭐\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "star", distractors: ["sun", "moon", "cloud"], grades: 3...4),
-        BankQuestion(prompt: "🌙\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "moon", distractors: ["star", "sun", "night"], grades: 3...4),
-        BankQuestion(prompt: "🥛\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "milk", distractors: ["water", "juice", "tea"], grades: 3...5),
-        BankQuestion(prompt: "🍞\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "bread", distractors: ["cake", "rice", "egg"], grades: 3...5),
-        BankQuestion(prompt: "🐟\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "fish", distractors: ["cat", "dog", "bird"], grades: 3...4),
-        BankQuestion(prompt: "🐦\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "bird", distractors: ["fish", "frog", "duck"], grades: 3...4),
-        BankQuestion(prompt: "🌸\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "flower", distractors: ["tree", "leaf", "grass"], grades: 3...4),
-        BankQuestion(prompt: "🐘\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "elephant", distractors: ["lion", "bear", "tiger"], grades: 3...4),
-        BankQuestion(prompt: "🦁\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "lion", distractors: ["tiger", "bear", "elephant"], grades: 3...4),
         BankQuestion(prompt: "🚲\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "bike", distractors: ["car", "bus", "train"], grades: 3...5),
         BankQuestion(prompt: "🎂\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "cake", distractors: ["bread", "milk", "fruit"], grades: 3...5),
         BankQuestion(prompt: "✋\nאֵיךְ אוֹמְרִים 'יָד' בְּאַנְגְּלִית?", correctAnswer: "hand", distractors: ["foot", "head", "eye"], grades: 3...5),
@@ -130,7 +116,6 @@ enum QuestionBanks {
 
     static let geography: [BankQuestion] = [
         BankQuestion(prompt: "🇮🇱\nמָה בִּירַת יִשְׂרָאֵל?", correctAnswer: "יְרוּשָׁלַיִם", distractors: ["תֵּל אָבִיב", "חֵיפָה", "בְּאֵר שֶׁבַע"], grades: 2...4),
-        BankQuestion(prompt: "🌊\nאֵיזֶה יָם נִמְצָא מִמַּעֲרָב לְיִשְׂרָאֵל?", correctAnswer: "הַיָּם הַתִּיכוֹן", distractors: ["יַם סוּף", "יַם הַמֶּלַח", "הָאוֹקְיָינוֹס"], grades: 2...4),
         BankQuestion(prompt: "🏞️\nמָה הַיָּם הַמָּלוּחַ בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "יַם הַמֶּלַח", distractors: ["הַיָּם הַתִּיכוֹן", "יַם סוּף", "הַיָּם הַשָּׁחוֹר"], grades: 2...4),
         BankQuestion(prompt: "🌎\nבְּאֵיזוֹ יַבֶּשֶׁת נִמְצֵאת יִשְׂרָאֵל?", correctAnswer: "אַסְיָה", distractors: ["אַפְרִיקָה", "אֵירוֹפָּה", "אָמֵרִיקָה"], grades: 4...6),
         BankQuestion(prompt: "🗽\nמָה בִּירַת אַרְהַ\"ב?", correctAnswer: "וָשִׁינְגְּטוֹן", distractors: ["נְיוּ יוֹרְק", "לוֹס אַנְגֶּ'לֶס", "שִׁיקָגוֹ"], grades: 4...6),
@@ -141,7 +126,6 @@ enum QuestionBanks {
         BankQuestion(prompt: "🏔️\nמָה הָהָר הַגָּבוֹהַּ בָּעוֹלָם?", correctAnswer: "אֶוֶרֶסְט", distractors: ["חֶרְמוֹן", "קִילִימַנְגֶּ'רוֹ", "אַלְפִּים"], grades: 4...6),
         BankQuestion(prompt: "🌊\nמָה הַיָּם הַגָּדוֹל בְּיוֹתֵר?", correctAnswer: "הָאוֹקְיָינוֹס הַשָּׁקֵט", distractors: ["הַיָּם הַתִּיכוֹן", "הָאַטְלַנְטִי", "הַהוֹדִי"], grades: 4...6),
         BankQuestion(prompt: "🏞️\nמָה הַנָּהָר הָאָרוֹךְ בְּיוֹתֵר בָּעוֹלָם?", correctAnswer: "הַנִּילוּס", distractors: ["הַיַּרְדֵּן", "הָאָמָזוֹנָס", "הַמִּיסִיסִיפִּי"], grades: 4...6),
-        BankQuestion(prompt: "🌍\nכַּמָּה יַבָּשׁוֹת יֵשׁ בָּעוֹלָם?", correctAnswer: "7", distractors: ["5", "6", "8"], grades: 4...6),
         BankQuestion(prompt: "🐘\nאֵיפֹה חַיִּים פִּילִים?", correctAnswer: "בְּאַפְרִיקָה וּבְהוֹדּוּ", distractors: ["בְּיִשְׂרָאֵל", "בְּאוֹסְטְרַלְיָה", "בְּאַנְטַרְקְטִיקָה"], grades: 2...4),
         BankQuestion(prompt: "🇮🇹\nמָה בִּירַת אִיטַלְיָה?", correctAnswer: "רוֹמָא", distractors: ["מִילָאנוֹ", "פִירֶנְצֶה", "וֶנֵצְיָה"], grades: 4...6),
         BankQuestion(prompt: "🇪🇸\nמָה בִּירַת סְפָרַד?", correctAnswer: "מַדְרִיד", distractors: ["בַּרְצֵלוֹנָה", "סֵבִילְיָה", "וָלֶנְסְיָה"], grades: 4...6),
@@ -155,8 +139,6 @@ enum QuestionBanks {
     /// single-letter mistakes kids commonly make (כ/ח, ת/ט, ק/כ, ס/שׂ, א/ע/ה).
     static let hebrew: [BankQuestion] = [
         // הפכים
-        BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'גָּדוֹל'?",  correctAnswer: "קָטָן",   distractors: ["גָּבוֹהַּ", "כָּבֵד", "רָחָב"], grades: 1...3),
-        BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'חַם'?",     correctAnswer: "קַר",    distractors: ["שֶׁמֶשׁ", "אֵשׁ", "קַיִץ"], grades: 1...3),
         BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'יוֹם'?",    correctAnswer: "לַיְלָה",  distractors: ["בּוֹקֶר", "אוֹר", "שֶׁמֶשׁ"], grades: 1...3),
         BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'שָׂמֵחַ'?",  correctAnswer: "עָצוּב",  distractors: ["צוֹחֵק", "טוֹב", "יָפֶה"], grades: 1...3),
         BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'פָּתוּחַ'?", correctAnswer: "סָגוּר",  distractors: ["גָּדוֹל", "רֵיק", "נָקִי"], grades: 1...3),

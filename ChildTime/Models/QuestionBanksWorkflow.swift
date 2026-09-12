@@ -6,18 +6,10 @@ import Foundation
 enum QuestionBanksWorkflow {
     static let english: [BankQuestion] = [
         BankQuestion(prompt: "🐮\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "cow", distractors: ["goat", "sheep", "pig"], grades: 3...4),
-        BankQuestion(prompt: "🐷\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "pig", distractors: ["cow", "dog", "sheep"], grades: 3...4),
-        BankQuestion(prompt: "🐴\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "horse", distractors: ["donkey", "cow", "goat"], grades: 3...4),
-        BankQuestion(prompt: "🐑\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "sheep", distractors: ["goat", "cow", "pig"], grades: 3...4),
-        BankQuestion(prompt: "🐔\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "chicken", distractors: ["duck", "bird", "cow"], grades: 3...4),
-        BankQuestion(prompt: "🦆\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "duck", distractors: ["chicken", "bird", "fish"], grades: 3...4),
-        BankQuestion(prompt: "🍌\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "banana", distractors: ["apple", "lemon", "orange"], grades: 3...5),
-        BankQuestion(prompt: "🥚\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "egg", distractors: ["milk", "bread", "cheese"], grades: 3...5),
         BankQuestion(prompt: "🍪\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "cookie", distractors: ["cake", "candy", "bread"], grades: 3...5),
         BankQuestion(prompt: "🍦\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "ice cream", distractors: ["cake", "candy", "milk"], grades: 3...5),
         BankQuestion(prompt: "🟤\nמַה הַצֶּבַע בְּאַנְגְּלִית?", correctAnswer: "brown", distractors: ["black", "gray", "orange"], grades: 3...4),
         BankQuestion(prompt: "🩷\nמַה הַצֶּבַע בְּאַנְגְּלִית?", correctAnswer: "pink", distractors: ["red", "purple", "orange"], grades: 3...4),
-        BankQuestion(prompt: "🦶\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "foot", distractors: ["leg", "hand", "arm"], grades: 3...5),
         BankQuestion(prompt: "💪\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "arm", distractors: ["leg", "hand", "foot"], grades: 3...5),
         BankQuestion(prompt: "🦷\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "tooth", distractors: ["nose", "mouth", "ear"], grades: 3...5),
         BankQuestion(prompt: "👶\nאֵיךְ אוֹמְרִים 'תִּינוֹק' בְּאַנְגְּלִית?", correctAnswer: "baby", distractors: ["boy", "girl", "man"], grades: 3...5),

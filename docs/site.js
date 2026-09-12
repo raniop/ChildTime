@@ -30,50 +30,67 @@
   var flags = document.querySelectorAll(".lang-switch a[hreflang]");
   for (var f = 0; f < flags.length; f++) {
     flags[f].addEventListener("click", function () {
-      store(LANG_KEY, this.getAttribute("hreflang") === "en" ? "en" : "he");
+      store(LANG_KEY, this.getAttribute("hreflang"));
     });
   }
 
-  /* Every Hebrew page that has an English twin, and where it lives. */
-  var EN_TWIN = {
-    "/": "/en/",
-    "/index.html": "/en/",
-    "/privacy.html": "/en/privacy.html",
-    "/terms.html": "/en/terms.html",
-    "/support.html": "/en/support.html",
-    "/accessibility.html": "/en/accessibility.html"
+  /* Every Hebrew page that has a twin, and where each one lives. Hebrew is the
+     original, so the map is keyed on its paths; the English and Russian pages
+     are never redirected away from. */
+  var TWINS = {
+    "/":                   { en: "/en/",                   ru: "/ru/" },
+    "/index.html":         { en: "/en/",                   ru: "/ru/" },
+    "/privacy.html":       { en: "/en/privacy.html",       ru: "/ru/privacy.html" },
+    "/terms.html":         { en: "/en/terms.html",         ru: "/ru/terms.html" },
+    "/support.html":       { en: "/en/support.html",       ru: "/ru/support.html" },
+    "/accessibility.html": { en: "/en/accessibility.html", ru: "/ru/accessibility.html" }
   };
 
-  function wantsHebrew() {
+  /* What the browser itself asks for. Hebrew wins on an Israeli clock even when
+     the language list says otherwise — a Hebrew speaker with an English phone
+     is far more common here than the reverse. */
+  function browserLanguage() {
     var langs = navigator.languages || [navigator.language || ""];
     for (var i = 0; i < langs.length; i++) {
-      if (/^he|^iw/i.test(langs[i] || "")) return true;
+      var tag = langs[i] || "";
+      if (/^he|^iw/i.test(tag)) return "he";
+      if (/^ru/i.test(tag)) return "ru";
+      if (/^en/i.test(tag)) return "en";
     }
+    return "";
+  }
+  function israeliClock() {
     try {
       var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-      if (tz === "Asia/Jerusalem" || tz === "Asia/Tel_Aviv") return true;
-    } catch (e) {}
-    return false;
+      return tz === "Asia/Jerusalem" || tz === "Asia/Tel_Aviv";
+    } catch (e) { return false; }
   }
 
   (function routeLanguage() {
     var path = location.pathname.replace(/\/{2,}/g, "/");
-    var twin = EN_TWIN[path];
-    if (!twin) return;                                   // already English, or a page with no twin
-    if (/[?&]lang=he\b/.test(location.search)) {          // an explicit "stay in Hebrew" link
-      store(LANG_KEY, "he");
+    var twins = TWINS[path];
+    if (!twins) return;                                   // already translated, or no twin
+    var pinned = /[?&]lang=(he|en|ru)\b/.exec(location.search);
+    if (pinned) {                                         // an explicit link wins and is remembered
+      store(LANG_KEY, pinned[1]);
+      if (pinned[1] === "he") return;
+      location.replace(twins[pinned[1]] + location.search + location.hash);
       return;
     }
     var choice = stored(LANG_KEY);
     if (choice === "he") return;                          // they chose Hebrew — never move them
-    if (choice !== "en") {                                // no choice yet: guess, and only once
-      if (wantsHebrew()) return;
+    if (choice !== "en" && choice !== "ru") {             // no choice yet: guess, and only once
       /* Search engines and link previews should index the Hebrew page they
-         asked for; hreflang tells them where the English one is. */
+         asked for; hreflang tells them where the others are. */
       if (/bot|crawl|spider|slurp|facebookexternalhit|embedly|preview|lighthouse/i
             .test(navigator.userAgent || "")) return;
+      var guess = browserLanguage();
+      if (guess === "he" || guess === "") return;
+      if (guess === "en" && israeliClock()) return;       // Hebrew family, English phone
+      choice = guess;                                     // "en" or "ru"
     }
-    location.replace(twin + location.search + location.hash);
+    if (!twins[choice]) return;
+    location.replace(twins[choice] + location.search + location.hash);
   })();
   var reduced = window.matchMedia
     ? window.matchMedia("(prefers-reduced-motion: reduce)")
