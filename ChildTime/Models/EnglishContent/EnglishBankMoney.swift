@@ -97,7 +97,7 @@ extension EnglishContent {
         BankQuestion(prompt: "🧹\nHow can a kid earn a little money at home?", correctAnswer: "Doing extra chores", distractors: ["Hiding the remote", "Skipping homework", "Staying up late"], tier: .easy, grades: 1...3),
         BankQuestion(prompt: "🫙\nMany kids use three money jars: Save, Spend and…", correctAnswer: "Share", distractors: ["Lose", "Hide", "Waste"], tier: .easy, grades: 1...3),
         // ── Grades 2–4 · Adding, change and word problems ──
-        BankQuestion(prompt: "🍬\nA candy costs 5¢. You have 8¢. How much is left after you buy it?", correctAnswer: "3¢", distractors: ["2¢", "4¢", "13¢"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "🍬\nA piece of candy costs 5¢. You have 8¢. How much is left after you buy it?", correctAnswer: "3¢", distractors: ["2¢", "4¢", "13¢"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "🐷\nYou put 2 dimes in your piggy bank each day for 3 days. How much did you save?", correctAnswer: "60¢", distractors: ["20¢", "23¢", "50¢"], tier: .medium, grades: 2...3),
         BankQuestion(prompt: "🎈\nA balloon costs 10¢. How much do 3 balloons cost?", correctAnswer: "30¢", distractors: ["13¢", "20¢", "40¢"], tier: .medium, grades: 2...3),
         BankQuestion(prompt: "🧃\nJuice costs 45¢. You pay with 2 quarters. How much change do you get?", correctAnswer: "5¢", distractors: ["10¢", "15¢", "25¢"], tier: .medium, grades: 2...3),
