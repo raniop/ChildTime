@@ -168,3 +168,59 @@ final class HeroVideoUITests: XCTestCase {
 
     private func wait(_ seconds: TimeInterval) { Thread.sleep(forTimeInterval: seconds) }
 }
+
+// MARK: - regression: answering must move on to a DIFFERENT question
+//
+// A wrong answer used to be able to come back as the very next question (the
+// re-ask queue popped the item that had just been pushed), so from the child's
+// side a wrong answer looked like it did nothing. This drives nine real answers
+// and fails if any question is shown twice in a row.
+extension HeroVideoUITests {
+    @MainActor
+    func testWrongAnswerAdvances() throws {
+        let app = XCUIApplication()
+        app.launchEnvironment["DEMO_SCREEN"] = "mathgrade"
+        app.launchEnvironment["DEMO_WORLD"] = "math"
+        app.launchEnvironment["DEMO_GRADE"] = "3"
+        app.launchEnvironment["DEMO_LANG"] = "he"
+        app.launch()
+        Thread.sleep(forTimeInterval: 4.0)
+
+        let screen = app.windows.element(boundBy: 0).frame
+        func promptNow() -> String {
+            app.staticTexts.allElementsBoundByIndex
+                .filter { $0.frame.midY > screen.height * 0.24 && $0.frame.midY < screen.height * 0.45 }
+                .map(\.label)
+                .filter { !$0.contains("·") && !$0.contains("בַּחֲרוּ") && $0.count > 4 }
+                .max(by: { $0.count < $1.count }) ?? ""
+        }
+
+        var seen: [String] = []
+        var repeats: [String] = []
+        for round in 0..<9 {
+            var prompt = ""
+            for _ in 0..<20 { prompt = promptNow(); if !prompt.isEmpty { break }; Thread.sleep(forTimeInterval: 0.5) }
+            guard !prompt.isEmpty else { print("ROUND \(round): לא נמצאה שאלה"); break }
+            // 💫 a bonus question is MEANT to stay put on a wrong answer.
+            let bonus = app.staticTexts.allElementsBoundByIndex.contains { $0.label.contains("💫") }
+            if prompt == seen.last, !bonus { repeats.append("\(round): \(prompt)") }
+            seen.append(prompt)
+
+            // ONLY the four answer tiles: their label starts with the value
+            // ("44, 1") and they carry no identifier. Anything else in that band
+            // is a tool button — the 🚩 flag one really does file a report and
+            // email the team, so the filter here is a safety rule, not a detail.
+            let options = app.buttons.allElementsBoundByIndex
+                .filter { $0.isHittable && $0.identifier.isEmpty
+                          && $0.frame.midY > screen.height * 0.45 && $0.frame.midY < screen.height * 0.80
+                          && ($0.label.first?.isNumber ?? false) }
+            guard let pick = options.first else { print("ROUND \(round): אין אפשרויות"); break }
+            pick.tap()
+            Thread.sleep(forTimeInterval: 2.8)
+        }
+        print("PROMPTS SEEN: \(seen)")
+        print("REPEATS: \(repeats)")
+        XCTAssertTrue(repeats.isEmpty, "אותה שאלה הוצגה שוב מיד אחרי תשובה: \(repeats)")
+        XCTAssertGreaterThanOrEqual(seen.count, 7, "לא נאספו מספיק שאלות")
+    }
+}

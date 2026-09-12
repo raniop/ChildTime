@@ -13181,16 +13181,6 @@
         }
       }
     },
-    "לְטַאטֵא אֶת הַחֶדֶר": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sweep the room"
-          }
-        }
-      }
-    },
     "לְיֶלֶד אֶחָד · %@": {
       "localizations": {
         "en": {
@@ -13287,6 +13277,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Disconnect this device?"
+          }
+        }
+      }
+    },
+    "לְסַדֵּר אֶת הַחֶדֶר": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidy the room"
           }
         }
       }
@@ -14121,16 +14121,6 @@
         }
       }
     },
-    "לטאטא את החדר": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sweep the room"
-          }
-        }
-      }
-    },
     "לכל ילד כרטיס פשוט: דקות היום מתוך המקסימום, שאלות, נכונות ואחוז הצלחה. לחיצה פותחת דוח מלא — במה הילד חזק, מה כדאי לתרגל, האם הוא משתפר, ותובנה יומית עם המלצה. בלי כוכבים ויהלומים — אלה של הילדים": {
       "localizations": {
         "en": {
@@ -14207,6 +14197,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tidy up the closet"
+          }
+        }
+      }
+    },
+    "לסדר את החדר": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidy the room"
           }
         }
       }

@@ -120,7 +120,7 @@ final class ChoreStore: ObservableObject {
                           emoji: "🪴", rewardMinutes: 10, rewardCoins: 0, isDaily: true, timesPerDay: 1,
                           createdAt: 1, markedDoneAt: nil, chosenReward: nil, lastApprovedAt: now,
                           photoData: nil, approvedTodayCount: 1, approvedTodayAt: now, archived: false))
-        docs.append(Chore(id: "demo-waiting_\(cid)", childID: cid, title: tr("לְטַאטֵא אֶת הַחֶדֶר"),
+        docs.append(Chore(id: "demo-waiting_\(cid)", childID: cid, title: tr("לְסַדֵּר אֶת הַחֶדֶר"),
                           emoji: "🧹", rewardMinutes: 20, rewardCoins: 0, isDaily: true, timesPerDay: 1,
                           createdAt: 2, markedDoneAt: now, chosenReward: "minutes", lastApprovedAt: nil,
                           photoData: nil, approvedTodayCount: 0, approvedTodayAt: nil, archived: false))
@@ -211,7 +211,7 @@ final class ChoreStore: ObservableObject {
         ("preset-pet",       "🐕", tr("להאכיל את חיית המחמד"),     10,  5, 2),
         ("preset-trash",     "🗑", tr("להוריד את הזבל"),           10,  5, 1),
         ("preset-desk",      "📚", tr("לסדר את שולחן הכתיבה"),     15,  7, 1),
-        ("preset-sweep",     "🧹", tr("לטאטא את החדר"),            20, 10, 1),
+        ("preset-sweep",     "🧹", tr("לסדר את החדר"),            20, 10, 1),
         ("preset-laundry",   "🧺", tr("לעזור בקיפול כביסה"),       20, 10, 1),
         ("preset-groceries", "🛒", tr("לעזור בסידור הקניות"),      20, 10, 1),
         ("preset-cooking",   "🍳", tr("לעזור בהכנת ארוחה"),        20, 10, 1),

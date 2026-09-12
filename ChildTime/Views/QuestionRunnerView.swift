@@ -77,7 +77,14 @@ struct QuestionRunnerView: View {
     @State private var topicHistory: [Topic] = []
     /// Questions the child got wrong this session — re-asked later (the only
     /// allowed repeat). Deduped by prompt.
-    @State private var reAskQueue: [Question] = []
+    ///
+    /// `readyAt` is the earliest question index an item may come back at. Without
+    /// it the question the child had just missed could be popped as the very next
+    /// one: the screen swapped a question for the same question, and from the
+    /// child's side a wrong answer simply didn't move on (Rani).
+    @State private var reAskQueue: [(question: Question, readyAt: Int)] = []
+    /// How many questions must pass before a missed one may return.
+    private let reAskSpacing = 3
     /// 📖 Remaining questions of the current reading passage — served
     /// back-to-back so the child reads once and answers everything about it.
     @State private var readingQueue: [Question] = []
@@ -973,8 +980,9 @@ struct QuestionRunnerView: View {
 
         // Re-ask a previously-wrong question every few questions (spaced out) —
         // the only repeat we allow.
-        if !isSuper, !bonus, questionIndex > 0, questionIndex % 3 == 0, !reAskQueue.isEmpty {
-            let requeued = reAskQueue.removeFirst()
+        if !isSuper, !bonus, questionIndex > 0, questionIndex % 3 == 0,
+           let slot = reAskQueue.firstIndex(where: { $0.readyAt <= questionIndex && $0.question.id != current?.id }) {
+            let requeued = reAskQueue.remove(at: slot).question
             currentTopic = requeued.topic
             current = requeued
             questionShownAt = Date()
@@ -1168,8 +1176,8 @@ struct QuestionRunnerView: View {
             handleCorrect(q: q)
             // If the child stumbled on this one, queue it to re-ask later — the
             // only question that's allowed to repeat in a session.
-            if hadMistakeThisQuestion, !reAskQueue.contains(where: { $0.prompt == q.prompt }) {
-                reAskQueue.append(q)
+            if hadMistakeThisQuestion, !reAskQueue.contains(where: { $0.question.prompt == q.prompt }) {
+                reAskQueue.append((q, questionIndex + reAskSpacing))
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 questionIndex += 1
@@ -1193,8 +1201,8 @@ struct QuestionRunnerView: View {
             // Do NOT reveal the correct answer.
             feedbackForIndex[idx] = .wrong
             handleWrong(q: q)
-            if !reAskQueue.contains(where: { $0.prompt == q.prompt }) {
-                reAskQueue.append(q)
+            if !reAskQueue.contains(where: { $0.question.prompt == q.prompt }) {
+                reAskQueue.append((q, questionIndex + reAskSpacing))
             }
             companion.cheer(tr("נַחְזֹר לָזוֹ עוֹד מְעַט 💪"))
             showFeedback = true   // lock the grid during the short transition
