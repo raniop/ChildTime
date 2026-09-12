@@ -32,7 +32,7 @@ enum CurriculumEnglishScienceBank {
         BankQuestion(prompt: "אֵיךְ אוֹמְרִים גֶּשֶׁם בְּאַנְגְּלִית?", correctAnswer: "rain", distractors: ["snow", "wind", "cloud"], tier: .medium, grades: 4...4),
         BankQuestion(prompt: "אֵיךְ אוֹמְרִים שֶׁלֶג בְּאַנְגְּלִית?", correctAnswer: "snow", distractors: ["rain", "wind", "storm"], tier: .medium, grades: 4...4),
         BankQuestion(prompt: "אֵיךְ אוֹמְרִים אַף בְּאַנְגְּלִית?", correctAnswer: "nose", distractors: ["mouth", "hand", "eye"], tier: .medium, grades: 4...4),
-        BankQuestion(prompt: "אֵיךְ אוֹמְרִים יָד בְּאַנְגְּלִית?", correctAnswer: "hand", distractors: ["foot", "head", "arm"], tier: .medium, grades: 4...4),
+        BankQuestion(prompt: "אֵיךְ אוֹמְרִים יָד בְּאַנְגְּלִית?", correctAnswer: "hand", distractors: ["foot", "head", "leg"], tier: .medium, grades: 4...4),
         BankQuestion(prompt: "✏️\nאֵיךְ אוֹמְרִים אֶת זֶה בְּאַנְגְּלִית?", correctAnswer: "pencil", distractors: ["pen", "paper", "eraser"], tier: .medium, grades: 4...4),
 
         // כיתה ה׳ — הֲבָנַת מִשְׁפָּטִים, מִלּוֹת שְׁאֵלָה, הֲפָכִים, כִּנּוּיֵי גּוּף
@@ -70,7 +70,7 @@ enum CurriculumEnglishScienceBank {
 
         // כיתות א׳-ב׳ — חוּשִׁים, בַּעֲלֵי חַיִּים, צְמָחִים, עוֹנוֹת, יוֹם וְלַיְלָה
         BankQuestion(prompt: "בְּאֵיזֶה אֵבֶר בַּגּוּף אֲנַחְנוּ רוֹאִים?", correctAnswer: "עֵינַיִם", distractors: ["אָזְנַיִם", "אַף", "יָדַיִם"], tier: .easy, grades: 1...2),
-        BankQuestion(prompt: "בְּאֵיזֶה חוּשׁ מִשְׁתַּמְּשִׁים בָּאָזְנַיִם?", correctAnswer: "שְׁמִיעָה", distractors: ["רְאִיָּה", "טַעַם", "רֵיחַ"], tier: .easy, grades: 1...2),
+        BankQuestion(prompt: "אֵיזֶה חוּשׁ יֵשׁ לָנוּ בָּאָזְנַיִם?", correctAnswer: "שְׁמִיעָה", distractors: ["רְאִיָּה", "טַעַם", "רֵיחַ"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "מָה צָרִיךְ צֶמַח כְּדֵי לִגְדֹּל?", correctAnswer: "מַיִם, אוֹר וַאֲוִיר", distractors: ["רַק חֹשֶׁךְ", "רַק חוֹל", "סֻכָּר וּמֶלַח"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "אֵיךְ קוֹרְאִים לַגּוּר שֶׁל הַכֶּלֶב?", correctAnswer: "כְּלַבְלַב", distractors: ["חֲתַלְתּוּל", "אֶפְרוֹחַ", "עֵגֶל"], tier: .easy, grades: 1...2),
         BankQuestion(prompt: "אֵיךְ קוֹרְאִים לַגּוּר שֶׁל הַתַּרְנְגֹלֶת?", correctAnswer: "אֶפְרוֹחַ", distractors: ["עֵגֶל", "גְּדִי", "כְּלַבְלַב"], tier: .easy, grades: 1...2),
@@ -107,7 +107,7 @@ enum CurriculumEnglishScienceBank {
         BankQuestion(prompt: "אֵיזֶה גַּז אֲנַחְנוּ פּוֹלְטִים כְּשֶׁאֲנַחְנוּ נוֹשְׁפִים?", correctAnswer: "פַּחְמָן דּוּ־חַמְצָנִי", distractors: ["חַמְצָן", "מֵימָן", "הֶלְיוּם"], tier: .hard, grades: 5...5),
         BankQuestion(prompt: "מָה הַתַּפְקִיד שֶׁל הַדָּם בַּגּוּף?", correctAnswer: "לְהוֹבִיל חַמְצָן וּמָזוֹן לְכָל הַגּוּף", distractors: ["לְעַכֵּל אֶת הָאֹכֶל", "לִיצֹר אוֹר", "לְנַקּוֹת אֶת הָאֲוִיר"], tier: .hard, grades: 5...5),
         BankQuestion(prompt: "מַהִי מַעֲרֶכֶת אֶקוֹלוֹגִית?", correctAnswer: "בַּעֲלֵי חַיִּים וּצְמָחִים הַחַיִּים יַחַד בִּסְבִיבָתָם", distractors: ["קְבוּצַת אֲבָנִים בַּמִּדְבָּר", "מְכוֹנָה שֶׁמְּיַצֶּרֶת חַשְׁמַל", "סוּג שֶׁל מֶזֶג אֲוִיר"], tier: .hard, grades: 5...5),
-        BankQuestion(prompt: "לְמָה מְשַׁמֶּשֶׁת אֶנֶרְגְּיַת הָרוּחַ בְּטוּרְבִּינוֹת?", correctAnswer: "לְהַפָּקַת חַשְׁמַל", distractors: ["לְחִמּוּם הַשֶּׁמֶשׁ", "לִיצִירַת גֶּשֶׁם", "לְהַקְפָּאַת מַיִם"], tier: .hard, grades: 5...5),
+        BankQuestion(prompt: "לְמָה מְשַׁמֶּשֶׁת אֶנֶרְגְּיַת הָרוּחַ בְּטוּרְבִּינוֹת?", correctAnswer: "לַהֲפָקַת חַשְׁמַל", distractors: ["לְחִמּוּם הַשֶּׁמֶשׁ", "לִיצִירַת גֶּשֶׁם", "לְהַקְפָּאַת מַיִם"], tier: .hard, grades: 5...5),
         BankQuestion(prompt: "מַדּוּעַ הַיָּרֵחַ מֵאִיר בַּלַּיְלָה?", correctAnswer: "הוּא מַחֲזִיר אֶת אוֹר הַשֶּׁמֶשׁ", distractors: ["הוּא בּוֹעֵר כְּמוֹ הַשֶּׁמֶשׁ", "הוּא מְיַצֵּר אוֹר מִשֶּׁלּוֹ", "הַכּוֹכָבִים מְאִירִים אוֹתוֹ"], tier: .hard, grades: 5...5),
 
         // כיתה ו׳ — פוֹטוֹסִינְתֶזָה, מְכוֹנוֹת פְּשׁוּטוֹת, אוֹר וְקוֹל, אֵיכוּת הַסְּבִיבָה, מִיקְרוֹאוֹרְגָנִיזְמִים

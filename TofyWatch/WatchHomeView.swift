@@ -139,12 +139,12 @@ struct WatchHomeView: View {
         if let one = playing.first {
             return playing.count == 1
                 ? tr("\(one.name) מְשַׂחֵק עַכְשָׁו")
-                : tr("\(playing.count) יְלָדִים מְשַׂחֲקִים עַכְשָׁו")
+                : tr("\(playing.count) יְלָדִים מְשַׂחֲקִים עַכְשָׁיו")
         }
         switch model.children.count {
         case 1: return tr("יֶלֶד אֶחָד · אַף אֶחָד לֹא מְשַׂחֵק")
         case 2: return tr("שְׁנֵי יְלָדִים · שֶׁקֶט עַכְשָׁו")
-        default: return tr("\(model.children.count) יְלָדִים · שֶׁקֶט עַכְשָׁו")
+        default: return tr("\(model.children.count) יְלָדִים · שֶׁקֶט עַכְשָׁיו")
         }
     }
 

@@ -40,7 +40,7 @@ enum BonusQuestionBank {
         BankQuestion(prompt: "\"I am thirsty\" — מָה זֶה אוֹמֵר?", correctAnswer: "אֲנִי צָמֵא", distractors: ["אֲנִי רָעֵב", "אֲנִי עָיֵף", "אֲנִי שָׂמֵחַ"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "\"See you tomorrow\" — מָה זֶה אוֹמֵר?", correctAnswer: "נִתְרָאֶה מָחָר", distractors: ["לְהִתְרָאוֹת אֶתְמוֹל", "בּוֹקֶר טוֹב", "אֲנִי רוֹאֶה אוֹתְךָ עַכְשָׁיו"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "אֵיזוֹ מִלָּה הִיא חַיָּה?", correctAnswer: "squirrel", distractors: ["mountain", "kitchen", "winter"], tier: .hard, grades: 4...6),
-        BankQuestion(prompt: "אֵיךְ אוֹמְרִים \"סְפָרִיָּה\" בְּאַנְגְּלִית?", correctAnswer: "library", distractors: ["laboratory", "bakery", "pharmacy"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "אֵיךְ אוֹמְרִים \"סִפְרִיָּה\" בְּאַנְגְּלִית?", correctAnswer: "library", distractors: ["laboratory", "bakery", "pharmacy"], tier: .hard, grades: 4...6),
     ]
 
     // MARK: - עברית
@@ -52,7 +52,7 @@ enum BonusQuestionBank {
         BankQuestion(prompt: "אֵיזוֹ מִלָּה קְרוֹבָה בְּמַשְׁמָעוּת לְ\"שָׂמֵחַ\"?", correctAnswer: "עַלִּיז", distractors: ["עָיֵף", "רָגוּעַ", "מֻפְתָּע"], tier: .hard, grades: 2...3),
         BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "מִצְטַעֵר", distractors: ["מִסְטַעֵר", "מִצְתַּעֵר", "מִזְטַעֵר"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "הִתְרַגַּשְׁתִּי", distractors: ["הִתְרַגַּשְׁתִי", "הִתְרַגָּשְׁתִּי", "הִתְרַקַּשְׁתִּי"], tier: .hard, grades: 4...6),
-        BankQuestion(prompt: "מִי אָמַר? \"הַצִּפּוֹר שָׁרָה שִׁיר יָפֶה\" — מָה הַנּוֹשֵׂא בַּמִּשְׁפָּט?", correctAnswer: "הַצִּפּוֹר", distractors: ["שָׁרָה", "שִׁיר", "יָפֶה"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "\"הַצִּפּוֹר שָׁרָה שִׁיר יָפֶה\" — מָה הַנּוֹשֵׂא בַּמִּשְׁפָּט?", correctAnswer: "הַצִּפּוֹר", distractors: ["שָׁרָה", "שִׁיר", "יָפֶה"], tier: .hard, grades: 4...6),
         BankQuestion(prompt: "מָה פֵּרוּשׁ הַבִּטּוּי \"שָׁבַר אֶת הַקֶּרַח\"?", correctAnswer: "גָּרַם לָאֲוִירָה לִהְיוֹת נְעִימָה", distractors: ["שָׁבַר מַשֶּׁהוּ קַר", "הֵכִין גְּלִידָה", "יָצָא הַחוּצָה בַּחֹרֶף"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "מָה פֵּרוּשׁ הַבִּטּוּי \"לָשִׂים לֵב\"?", correctAnswer: "לְהִתְרַכֵּז וּלְהַבְחִין", distractors: ["לְצַיֵּר לֵב", "לֶאֱהֹב מִישֶׁהוּ", "לָשִׂים יָד עַל הַחָזֶה"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "אֵיזוֹ מִלָּה הִיא פֹּעַל?", correctAnswer: "רָקַד", distractors: ["שֻׁלְחָן", "יָפֶה", "מְאוֹד"], tier: .hard, grades: 3...5),
@@ -67,10 +67,10 @@ enum BonusQuestionBank {
         BankQuestion(prompt: "לְדָנָה יֵשׁ פִּי 2 גּוּלוֹת מִלְּיוֹסִי. לְיוֹסִי יֵשׁ 6. כַּמָּה יֵשׁ לִשְׁנֵיהֶם בְּיַחַד?", correctAnswer: "18", distractors: ["12", "24", "16"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "אִם כָּל הַדְּרָקוֹנִים יוֹדְעִים לָעוּף, וְרוֹנִי הוּא דְּרָקוֹן — מָה נָכוֹן בֶּטַח?", correctAnswer: "רוֹנִי יוֹדֵעַ לָעוּף", distractors: ["רוֹנִי יָרֹק", "כָּל מִי שֶׁעָף הוּא דְּרָקוֹן", "רוֹנִי לֹא עָף"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "בְּכַד יֵשׁ 3 גַּרְבַּיִם אֲדֻמִּים וְ־3 כְּחֻלִּים. כַּמָּה צָרִיךְ לְהוֹצִיא בְּלִי לְהִסְתַּכֵּל כְּדֵי שֶׁבֶּטַח יִהְיֶה זוּג בְּאוֹתוֹ צֶבַע?", correctAnswer: "3", distractors: ["2", "4", "6"], tier: .hard, grades: 4...6),
-        BankQuestion(prompt: "שָׁעוֹן מַרְאֶה 3:00. מָה תַּרְאֶה הַשָּׁעָה בְּעוֹד 50 דַּקּוֹת?", correctAnswer: "3:50", distractors: ["4:00", "3:40", "4:10"], tier: .hard, grades: 2...4),
+        BankQuestion(prompt: "שָׁעוֹן מַרְאֶה 3:00. מָה תִּהְיֶה הַשָּׁעָה בְּעוֹד 50 דַּקּוֹת?", correctAnswer: "3:50", distractors: ["4:00", "3:40", "4:10"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "אֲנִי מִסְפָּר. אִם תַּכְפִּילוּ אוֹתִי בְּ־3 וְתוֹסִיפוּ 1 תְּקַבְּלוּ 22. מִי אֲנִי?", correctAnswer: "7", distractors: ["6", "8", "9"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "מָה לֹא שַׁיָּךְ לַקְּבוּצָה: מְשֻׁלָּשׁ, רִבּוּעַ, עִגּוּל, מַלְבֵּן?", correctAnswer: "עִגּוּל", distractors: ["מְשֻׁלָּשׁ", "רִבּוּעַ", "מַלְבֵּן"], tier: .hard, grades: 1...3),
-        BankQuestion(prompt: "הַאִם אַבָּא שֶׁל דָּנָה צָעִיר מִסַּבָּא שֶׁל דָּנָה מִצַּד אַבָּא?", correctAnswer: "לֹא — סַבָּא הוּא אַבָּא שֶׁל אַבָּא", distractors: ["כֵּן, תָּמִיד", "הֵם בְּאוֹתוֹ גִּיל", "אִי אֶפְשָׁר לָדַעַת בִּכְלָל"], tier: .hard, grades: 1...3),
+        BankQuestion(prompt: "הַאִם אַבָּא שֶׁל דָּנָה צָעִיר מִסַּבָּא שֶׁל דָּנָה מִצַּד אַבָּא?", correctAnswer: "כֵּן — סַבָּא הוּא אַבָּא שֶׁל אַבָּא, וְלָכֵן מְבֻגָּר יוֹתֵר", distractors: ["לֹא, אַף פַּעַם", "הֵם בְּאוֹתוֹ גִּיל", "אִי אֶפְשָׁר לָדַעַת בִּכְלָל"], tier: .hard, grades: 1...3),
     ]
 
     // MARK: - מדע
@@ -100,7 +100,7 @@ enum BonusQuestionBank {
         BankQuestion(prompt: "אֵיזוֹ עִיר עַתִּיקָה נִקְבְּרָה תַּחַת הִתְפָּרְצוּת הַר גַּעַשׁ?", correctAnswer: "פּוֹמְפֵּיִי", distractors: ["אַתּוּנָה", "רוֹמָא", "יְרוּשָׁלַיִם"], tier: .hard, grades: 5...6),
         BankQuestion(prompt: "מִי צִיֵּר אֶת הַמּוֹנָה לִיזָה?", correctAnswer: "לֵאוֹנַרְדּוֹ דָּה וִינְצִ'י", distractors: ["פִּיקָאסוֹ", "וָן גּוֹךְ", "מִיכֶלְאַנְגֶ'לוֹ"], tier: .hard, grades: 4...6),
         BankQuestion(prompt: "עַל מָה מְסַפֵּר חַג הַחֲנֻכָּה?", correctAnswer: "נִצָּחוֹן הַמַּכַּבִּים וְנֵס פַּךְ הַשֶּׁמֶן", distractors: ["יְצִיאַת מִצְרַיִם", "הַצָּלַת הַיְּהוּדִים בְּפָרַס", "קַבָּלַת הַתּוֹרָה"], tier: .hard, grades: 1...3),
-        BankQuestion(prompt: "מִי הָיְתָה רֹאשׁ הַמֶּמְשָׁלָה הָאִשָּׁה הָרִאשׁוֹנָה שֶׁל יִשְׂרָאֵל?", correctAnswer: "גּוֹלְדָּה מֵאִיר", distractors: ["צִפִּי לִבְנִי", "שׁוּלַמִּית אַלּוֹנִי", "מִרְיָם הַנְּבִיאָה"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "מִי הָיְתָה הָאִשָּׁה הָרִאשׁוֹנָה שֶׁכִּהֲנָה כְּרֹאשׁ מֶמְשֶׁלֶת יִשְׂרָאֵל?", correctAnswer: "גּוֹלְדָּה מֵאִיר", distractors: ["צִפִּי לִבְנִי", "שׁוּלַמִּית אַלּוֹנִי", "מִרְיָם הַנְּבִיאָה"], tier: .hard, grades: 4...6),
     ]
 
     // MARK: - גיאוגרפיה

@@ -274,7 +274,7 @@ enum QuestionBanksWorkflow3 {
         BankQuestion(prompt: "אֵיךְ אוֹמְרִים הַרְבֵּה \"אֵם\"?", correctAnswer: "אִמָּהוֹת", distractors: ["אִמּוֹת", "אִמִּים", "אֵמוֹת"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "אֵיךְ אוֹמְרִים הַרְבֵּה \"אָב\"?", correctAnswer: "אָבוֹת", distractors: ["אָבִים", "אַבָּאִים", "אֲבָאוֹת"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "אֵיךְ אוֹמְרִים הַרְבֵּה \"קִיר\"?", correctAnswer: "קִירוֹת", distractors: ["קִירִים", "קִירָה", "קִירוֹן"], tier: .hard, grades: 3...5),
-        BankQuestion(prompt: "אֵיךְ אוֹמְרִים הַרְבֵּה \"לַיְלָה\"?", correctAnswer: "לֵילוֹת", distractors: ["לַיְלָאוֹת", "לֵילִים", "לַיְלָאוֹת"], tier: .hard, grades: 3...5),
+        BankQuestion(prompt: "אֵיךְ אוֹמְרִים הַרְבֵּה \"לַיְלָה\"?", correctAnswer: "לֵילוֹת", distractors: ["לַיְלָאוֹת", "לֵילִים", "לַיְלוֹת"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "אֵיךְ אוֹמְרִים הַרְבֵּה \"כּוֹס\"?", correctAnswer: "כּוֹסוֹת", distractors: ["כּוֹסִים", "כּוֹסָה", "כּוֹסַיִם"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "אֵיזוֹ מִלָּה שַׁיֶּכֶת לַקְּבוּצָה: נְחֹשֶׁת, בַּרְזֶל, זָהָב?", correctAnswer: "כֶּסֶף", distractors: ["עֵץ", "אֶבֶן", "זְכוּכִית"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "מָה לֹא שַׁיָּךְ: נְחֹשֶׁת, בַּרְזֶל, עֵץ?", correctAnswer: "עֵץ", distractors: ["נְחֹשֶׁת", "בַּרְזֶל", "זָהָב"], tier: .hard, grades: 3...5),
