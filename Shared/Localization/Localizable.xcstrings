@@ -700,7 +700,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ · лучший из %#@count@"
+            "value": "%1$@ %2$@ · лучший из %#@count@"
           },
           "substitutions": {
             "count": {
@@ -830,7 +830,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ в %@ на %#@count@ по сравнению с предыдущим периодом."
+            "value": "%1$@ %2$@ в %3$@ на %#@count@ по сравнению с предыдущим периодом."
           },
           "substitutions": {
             "count": {
@@ -880,7 +880,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ в течение %#@count@ %@ — всего %lld вопр., %@ правильных."
+            "value": "%1$@ %2$@ в течение %#@count@ %4$@ — всего %5$lld вопр., %6$@ правильных."
           },
           "substitutions": {
             "count": {
@@ -978,7 +978,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ — это место, куда %@ чаще всего: %#@count@."
+            "value": "%1$@ %2$@ — это место, куда %3$@ чаще всего: %#@count@."
           },
           "substitutions": {
             "count": {
@@ -1204,7 +1204,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · %#@count@"
+            "value": "%1$@ · %#@count@"
           },
           "substitutions": {
             "count": {
@@ -1414,7 +1414,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ — серия из %#@count@ 🔥"
+            "value": "%1$@ — серия из %#@count@ 🔥"
           },
           "substitutions": {
             "count": {
@@ -1576,7 +1576,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ и %#@count@ в день"
+            "value": "%1$@ и %#@count@ в день"
           },
           "substitutions": {
             "count": {
@@ -1802,7 +1802,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ У %@ есть %#@count@ %@, и в каждой упаковке %lld. Сколько всего?"
+            "value": "%1$@ У %2$@ есть %#@count@ %4$@, и в каждой упаковке %5$lld. Сколько всего?"
           },
           "substitutions": {
             "count": {
@@ -2300,7 +2300,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, у тебя %#@count@"
+            "value": "%1$@, у тебя %#@count@"
           },
           "substitutions": {
             "count": {
@@ -2350,7 +2350,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, у тебя %#@count@"
+            "value": "%1$@, у тебя %#@count@"
           },
           "substitutions": {
             "count": {
@@ -3952,7 +3952,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld вопр. · %#@count@"
+            "value": "%1$lld вопр. · %#@count@"
           },
           "substitutions": {
             "count": {
@@ -4202,7 +4202,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@count@ = %lld мин."
+            "value": "%#@count@ = %2$lld мин."
           },
           "substitutions": {
             "count": {
@@ -4284,7 +4284,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld/%#@count@"
+            "value": "%1$lld/%#@count@"
           },
           "substitutions": {
             "count": {
@@ -4590,7 +4590,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "+%#@count@ сейчас · ещё %lld сохранено на завтра 🎁"
+            "value": "+%#@count@ сейчас · ещё %2$lld сохранено на завтра 🎁"
           },
           "substitutions": {
             "count": {
@@ -9178,7 +9178,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "В классе %#@count@, а девочек — %lld. Каково отношение мальчиков к девочкам в сокращённом виде?"
+            "value": "В классе %#@count@, а девочек — %2$lld. Каково отношение мальчиков к девочкам в сокращённом виде?"
           },
           "substitutions": {
             "count": {
@@ -11118,7 +11118,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Двойные минуты: %#@count@ = %lld мин. игры"
+            "value": "Двойные минуты: %#@count@ = %2$lld мин. игры"
           },
           "substitutions": {
             "count": {
@@ -11992,7 +11992,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ты достиг дневного максимума! %#@count@ на завтра 🎁 (%lld/%lld)"
+            "value": "Ты достиг дневного максимума! %#@count@ на завтра 🎁 (%2$lld/%3$lld)"
           },
           "substitutions": {
             "count": {
@@ -12154,7 +12154,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "По теме %@ она ответила на %#@count@, точность %lld%%."
+            "value": "По теме %1$@ она ответила на %#@count@, точность %3$lld%%."
           },
           "substitutions": {
             "count": {
@@ -13036,7 +13036,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Точность %@ по теме %@ упала на %#@count@ по сравнению с прошлым периодом. Иногда это просто новый материал."
+            "value": "Точность %1$@ по теме %2$@ упала на %#@count@ по сравнению с прошлым периодом. Иногда это просто новый материал."
           },
           "substitutions": {
             "count": {
@@ -13358,7 +13358,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Твоё время уже открыто %@ — ещё %#@count@ 🎮"
+            "value": "Твоё время уже открыто %1$@ — ещё %#@count@ 🎮"
           },
           "substitutions": {
             "count": {
@@ -13944,7 +13944,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сегодня ты заработал %lld из %#@count@."
+            "value": "Сегодня ты заработал %1$lld из %#@count@."
           },
           "substitutions": {
             "count": {
@@ -16266,7 +16266,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "По %@ он ответил на %#@count@, %lld%% верных."
+            "value": "По %1$@ он ответил на %#@count@, %3$lld%% верных."
           },
           "substitutions": {
             "count": {
@@ -16588,7 +16588,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ребёнок получает %lld мин. игры за %#@count@. Оба числа можно изменить. По умолчанию: 10 ответов = 4 минуты."
+            "value": "Ребёнок получает %1$lld мин. игры за %#@count@. Оба числа можно изменить. По умолчанию: 10 ответов = 4 минуты."
           },
           "substitutions": {
             "count": {
@@ -20782,7 +20782,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "У тебя %#@count@. Игровое время открывается с %lld мин. — ответь ещё на несколько вопросов! 😊"
+            "value": "У тебя %#@count@. Игровое время открывается с %2$lld мин. — ответь ещё на несколько вопросов! 😊"
           },
           "substitutions": {
             "count": {
@@ -22672,7 +22672,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@count@ = %lld мин. игры"
+            "value": "%#@count@ = %2$lld мин. игры"
           },
           "substitutions": {
             "count": {
@@ -23074,7 +23074,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Входит в Tofy+ · %@ %@ · %#@count@"
+            "value": "Входит в Tofy+ · %1$@ %2$@ · %#@count@"
           },
           "substitutions": {
             "count": {
@@ -23620,7 +23620,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@count@ = %lld мин. игры"
+            "value": "%#@count@ = %2$lld мин. игры"
           },
           "substitutions": {
             "count": {
@@ -24126,7 +24126,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Для %#@count@ · %@"
+            "value": "Для %#@count@ · %2$@"
           },
           "substitutions": {
             "count": {
@@ -29912,7 +29912,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Попадёт в 💝 кармашек ребёнка — %@ %@ когда %@, с любого устройства. Сегодня можно дать ещё до %#@count@ (до полуночи)."
+            "value": "Попадёт в 💝 кармашек ребёнка — %1$@ %2$@ когда %3$@, с любого устройства. Сегодня можно дать ещё до %#@count@ (до полуночи)."
           },
           "substitutions": {
             "count": {
@@ -31698,7 +31698,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Всего заработано%@ на делах: 🎮 %#@count@"
+            "value": "Всего заработано%1$@ на делах: 🎮 %#@count@"
           },
           "substitutions": {
             "count": {
@@ -31940,7 +31940,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ответь правильно на %#@count@ сегодня и получи %lld 💎!\nКаждый день подряд, когда играешь, приз растёт. 🔥"
+            "value": "Ответь правильно на %#@count@ сегодня и получи %2$lld 💎!\nКаждый день подряд, когда играешь, приз растёт. 🔥"
           },
           "substitutions": {
             "count": {
@@ -33854,7 +33854,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Откройте %@ для %#@count@"
+            "value": "Откройте %1$@ для %#@count@"
           },
           "substitutions": {
             "count": {
@@ -40848,7 +40848,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "🍕 Мы разрезали пиццу на %#@count@ и съели %lld. Какую дробь мы съели?"
+            "value": "🍕 Мы разрезали пиццу на %#@count@ и съели %2$lld. Какую дробь мы съели?"
           },
           "substitutions": {
             "count": {
@@ -40994,7 +40994,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "🎉 %@ уже %@ на %#@count@"
+            "value": "🎉 %1$@ уже %2$@ на %#@count@"
           },
           "substitutions": {
             "count": {
@@ -41044,7 +41044,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "🎉 %@ уже ответила на %#@count@ с Tofy+"
+            "value": "🎉 %1$@ уже ответила на %#@count@ с Tofy+"
           },
           "substitutions": {
             "count": {
@@ -41094,7 +41094,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "🎉 %@ уже ответил на %#@count@ с Tofy+"
+            "value": "🎉 %1$@ уже ответил на %#@count@ с Tofy+"
           },
           "substitutions": {
             "count": {
@@ -42008,7 +42008,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "💰 %@ купила %#@count@ по %lld ₪ каждая и заплатила %lld ₪. Сколько сдачи она получит?"
+            "value": "💰 %1$@ купила %#@count@ по %3$lld ₪ каждая и заплатила %4$lld ₪. Сколько сдачи она получит?"
           },
           "substitutions": {
             "count": {
@@ -42058,7 +42058,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "💰 %@ купил %#@count@ по %lld ₪ каждая и заплатил %lld ₪. Сколько сдачи он получит?"
+            "value": "💰 %1$@ купил %#@count@ по %3$lld ₪ каждая и заплатил %4$lld ₪. Сколько сдачи он получит?"
           },
           "substitutions": {
             "count": {
@@ -42244,7 +42244,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "📒 %#@count@ %lld ₪. Какова цена %lld шт.?"
+            "value": "📒 %#@count@ %2$lld ₪. Какова цена %3$lld шт.?"
           },
           "substitutions": {
             "count": {
