@@ -26,7 +26,9 @@ enum ContentAvailability {
         // speak it. An American family has no use for it (Rani: "לא צריך להציג
         // להם שם עולם עברית"), so it stays hidden in English even if questions
         // ever land in its bank.
-        case .hebrew:  return false
+        // 🇷🇺 …but a Russian-speaking child in Israel goes to an Israeli school
+        // and learns exactly this. The world stays, and stays in Hebrew.
+        case .hebrew:  return language == .ru
         case .reading: return !ReadingContent.passages(in: language).isEmpty
         default:       return (QuestionBanks.bank(for: topic, in: language)?.count ?? 0) >= minimumBank
         }

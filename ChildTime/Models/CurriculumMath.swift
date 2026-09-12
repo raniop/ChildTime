@@ -528,11 +528,16 @@ enum CurriculumMath {
     // Each name carries the gender its verbs have to agree with — a learning app
     // cannot ship "יוֹסִי קָנָה/תָה" (Rani), so every sentence below exists twice.
     private static var kids: [(name: String, girl: Bool)] {
-        LanguageStore.shared.current == .he
-            ? [(tr("דָּנָה"), true), (tr("יוֹסִי"), false), (tr("נֹעָה"), true),
-               (tr("אִיתַי"), false), (tr("תָּמָר"), true), (tr("עוֹמֶר"), false)]
-            : [("Emma", true), ("Liam", false), ("Olivia", true),
-               ("Noah", false), ("Ava", true), ("Mason", false)]
+        switch LanguageStore.shared.current {
+        case .he: return [(tr("דָּנָה"), true), (tr("יוֹסִי"), false), (tr("נֹעָה"), true),
+                          (tr("אִיתַי"), false), (tr("תָּמָר"), true), (tr("עוֹמֶר"), false)]
+        // Russian past-tense verbs agree with gender the same way Hebrew's do
+        // ("купил" / "купила"), so each name here carries its gender too.
+        case .ru: return [("Даша", true), ("Миша", false), ("Аня", true),
+                          ("Лёва", false), ("Соня", true), ("Марк", false)]
+        case .en: return [("Emma", true), ("Liam", false), ("Olivia", true),
+                          ("Noah", false), ("Ava", true), ("Mason", false)]
+        }
     }
     private static var things: [(String, String)] {
         [("🎈", tr("בַּלּוֹנִים")), ("📚", tr("סְפָרִים")), ("🍎", tr("תַּפּוּחִים")),

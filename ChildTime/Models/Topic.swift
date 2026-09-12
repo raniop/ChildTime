@@ -68,7 +68,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
     var emoji: String {
         switch self {
         case .math:      return "🧮"
-        case .english:   return LanguageStore.shared.current == .he ? "🇬🇧" : "📝"   // a US child's own language class, not a foreign one
+        case .english:   return LanguageStore.shared.current == .en ? "📝" : "🇬🇧"   // a US child's own language class, not a foreign one
         case .hebrew:    return "✍️"
         case .logic:     return "🧩"
         case .science:   return "🔬"

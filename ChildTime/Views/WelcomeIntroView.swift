@@ -119,7 +119,7 @@ struct WelcomeIntroView: View {
                     .foregroundStyle(.white)
                 Spacer(minLength: 0)
             }
-            Text(tr("אִם הִגְדַּרְתֶּם לַיֶּלֶד מַגְבָּלוֹת זְמַן מָסָךְ בְּ\"מִשְׁפָּחָה\" / Screen Time שֶׁל אַפְּל — כַּבּוּ אוֹתָן. מֵעַכְשָׁיו טוֹפִּי מְנַהֵל אֶת זְמַן הַמָּסָךְ; שְׁתֵּי מַעֲרָכוֹת בְּמַקְבִּיל יִתְנַגְּשׁוּ."))
+            Text(tr("אִם הִגְדַּרְתֶּם לַיֶּלֶד מַגְבָּלוֹת זְמַן מָסָךְ בְּ\"מִשְׁפָּחָה\" / Screen Time שֶׁל אַפְּל — כַּבּוּ אוֹתָן. מֵעַכְשָׁיו טוֹפִי מְנַהֵל אֶת זְמַן הַמָּסָךְ; שְׁתֵּי מַעֲרָכוֹת בְּמַקְבִּיל יִתְנַגְּשׁוּ."))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
                 .multilineTextAlignment(.leading)

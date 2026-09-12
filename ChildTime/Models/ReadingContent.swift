@@ -69,7 +69,11 @@ enum ReadingContent {
     /// past ו׳) could be handed a two-line א׳ story.
     /// The passages written in one language (Hebrew = the original set).
     static func passages(in language: AppLanguage) -> [ReadingPassage] {
-        language == .he ? passages : EnglishContent.passages
+        switch language {
+        case .he: return passages
+        case .en: return EnglishContent.passages
+        case .ru: return RussianContent.passages
+        }
     }
 
     static func universe(for grade: Int?) -> [ReadingPassage] {

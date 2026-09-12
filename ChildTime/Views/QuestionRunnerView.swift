@@ -725,8 +725,11 @@ struct QuestionRunnerView: View {
                     .foregroundStyle(.white.opacity(0.75))
             }
             // Never truncate to "💡 …": the row also holds 🚩 🔊 🙋 and the buddy.
+            // It may SHRINK though — a fixed size let a longer label (Russian
+            // "Подсказка (2 мин.)") run straight under the buddy instead of
+            // giving the row a chance to fit it.
             .lineLimit(1)
-            .fixedSize(horizontal: true, vertical: false)
+            .minimumScaleFactor(0.7)
             .padding(.horizontal, AppSpacing.md)
             .padding(.vertical, AppSpacing.sm)
             .background(Capsule().fill(.white.opacity(0.14)))

@@ -10,6 +10,7 @@ import Combine
 enum AppLanguage: String, CaseIterable, Codable, Identifiable {
     case he
     case en
+    case ru
 
     var id: String { rawValue }
 
@@ -19,28 +20,44 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
         switch self {
         case .he: return "עברית"
         case .en: return "English"
+        case .ru: return "Русский"
         }
     }
 
     /// The region whose content, currency and school grades come with it.
+    ///
+    /// 🇷🇺 Russian is Israel's second home language, not a second country: these
+    /// are families here, with Israeli school grades and shekels. The interface
+    /// is Russian; the country around it is the same one Hebrew has.
     var regionCode: String {
         switch self {
         case .he: return "IL"
         case .en: return "US"
+        case .ru: return "IL"
         }
     }
+
+    /// Israeli money, Israeli grades, Israeli facts — everything but the words.
+    var isIsraeli: Bool { regionCode == "IL" }
 
     var locale: Locale { Locale(identifier: "\(rawValue)_\(regionCode)") }
 
     var layoutDirection: LayoutDirection {
         switch self {
         case .he: return .rightToLeft
-        case .en: return .leftToRight
+        case .en, .ru: return .leftToRight
         }
     }
 
-    /// BCP-47 code for AVSpeechSynthesisVoice.
-    var speechCode: String { "\(rawValue)-\(regionCode)" }
+    /// BCP-47 code for AVSpeechSynthesisVoice. Not `locale` — a Russian voice is
+    /// ru-RU wherever the family lives; there is no ru-IL voice to ask for.
+    var speechCode: String {
+        switch self {
+        case .he: return "he-IL"
+        case .en: return "en-US"
+        case .ru: return "ru-RU"
+        }
+    }
 }
 
 /// The language the app is showing right now, and the switch that changes it.
@@ -84,6 +101,9 @@ final class LanguageStore: ObservableObject {
         guard let first = preferred.first else { return .he }
         let locale = Locale(identifier: first)
         let region = locale.region?.identifier ?? Locale.current.region?.identifier
+        // A Russian-speaking phone opens in Russian wherever it is — unlike
+        // English, which in Israel means a Hebrew family with an English phone.
+        if locale.language.languageCode?.identifier == "ru" { return .ru }
         return locale.language.languageCode?.identifier == "en" && region != "IL" ? .en : .he
     }
 
@@ -155,12 +175,13 @@ func tr(_ key: String.LocalizationValue) -> String {
 enum Money {
     /// "₪5" / "$5" — the chore pocket balance.
     static func pocket(_ amount: Int) -> String {
-        guard LanguageStore.shared.current != .he else { return "₪\(amount)" }
+        guard !LanguageStore.shared.current.isIsraeli else { return "₪\(amount)" }
         return (Locale.current.currencySymbol ?? "$") + "\(amount)"
     }
-    /// Math answers: Hebrew appends " ₪" after the number, English puts "$" before it.
-    static var answerPrefix: String { LanguageStore.shared.current == .he ? "" : "$" }
-    static var answerSuffix: String { LanguageStore.shared.current == .he ? " ₪" : "" }
+    /// Math answers: an Israeli language appends " ₪" after the number, English
+    /// puts "$" before it.
+    static var answerPrefix: String { LanguageStore.shared.current.isIsraeli ? "" : "$" }
+    static var answerSuffix: String { LanguageStore.shared.current.isIsraeli ? " ₪" : "" }
 }
 
 /// A value built from translated strings, rebuilt once per language.

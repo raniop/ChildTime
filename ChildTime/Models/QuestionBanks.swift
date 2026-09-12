@@ -224,7 +224,15 @@ enum QuestionBanks {
     /// language gets only its own questions (see ContentAvailability).
     static func bank(for topic: Topic, in language: AppLanguage) -> [BankQuestion]? {
         guard let hebrewBuiltIn = builtInBank(for: topic) else { return nil }
-        let builtIn = language == .he ? hebrewBuiltIn : EnglishContent.bank(for: topic)
+        // 🇮🇱 The Hebrew world is Hebrew in every language that shows it — it
+        // teaches Hebrew itself, so there is nothing to translate.
+        let builtIn: [BankQuestion]
+        switch language {
+        case .he:                      builtIn = hebrewBuiltIn
+        case .ru where topic == .hebrew: builtIn = hebrewBuiltIn
+        case .ru:                      builtIn = RussianContent.bank(for: topic)
+        case .en:                      builtIn = EnglishContent.bank(for: topic)
+        }
         let cloud = RemoteQuestionBank.shared.questions(for: topic, in: language)
         guard !cloud.isEmpty else { return builtIn }
         var seen = Set(builtIn.map { "\($0.prompt)|\($0.correctAnswer)" })

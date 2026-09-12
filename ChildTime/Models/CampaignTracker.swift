@@ -115,15 +115,23 @@ struct Campaign: Identifiable, Equatable {
         self.id = id
         // 🌍 Campaigns are written in Hebrew; English copy sits in the same doc
         // as titleEn/bodyEn/… A campaign without it is never shown in English.
-        let suffix = LanguageStore.shared.current == .he ? "" : "En"
-        func copy(_ key: String) -> String { data[key + suffix] as? String ?? "" }
+        // Hebrew is the original; every other language has its own suffixed
+        // fields (titleEn / titleRu / …) and falls back to English, then Hebrew,
+        // rather than showing a blank card.
+        let language = LanguageStore.shared.current
+        func copy(_ key: String) -> String {
+            guard language != .he else { return data[key] as? String ?? "" }
+            let mine = language.rawValue.capitalized          // "En" / "Ru"
+            if let v = data[key + mine] as? String, !v.isEmpty { return v }
+            return data[key + "En"] as? String ?? ""          // English before nothing
+        }
         title = copy("title")
         body = copy("body")
         emoji = data["emoji"] as? String ?? ""
         imageURL = data["imageURL"] as? String ?? ""
         childTitle = copy("childTitle")
         childBody = copy("childBody")
-        if !suffix.isEmpty {
+        if language != .he {
             // Same rules as the server's sendCampaignTo: English needs a body when
             // the Hebrew has one, and a kids-only campaign may carry only child copy.
             if !(data["body"] as? String ?? "").isEmpty, body.isEmpty { return nil }

@@ -635,6 +635,7 @@
 			knownRegions = (
 				he,
 				en,
+				ru,
 				Base,
 				"en-IL",
 			);
