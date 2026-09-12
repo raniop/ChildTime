@@ -193,7 +193,7 @@ struct TrueFalseRaceView: View {
             CharacterView(character: Character3DCatalog.find("lion"))
                 .frame(width: 140, height: 140)
                 .float(amplitude: 10)
-            Text(correctCount >= total - 2 ? tr("וָואו, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"))
+            Text(correctCount >= total - 2 ? tr("וָואוּ, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"))
                 .font(.system(size: 32, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
@@ -204,7 +204,7 @@ struct TrueFalseRaceView: View {
             HStack(spacing: 14) {
                 rewardPill("⭐", correctCount, AppColor.starGold, step: 1)
                 rewardPill("💎", score, AppColor.gemPurple, step: 2)
-                rewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק'"))
+                rewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק׳"))
             }
             .padding(.top, 4)
 

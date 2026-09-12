@@ -40,7 +40,7 @@ struct KidPINView: View {
     private var subtitle: String {
         switch mode {
         case .verify:
-            return almost ? tr("כִּמְעַט! נַסּוּ שׁוּב 💪") : tr("הַזְמַן הַזֶּה שֶׁלְּךָ — רַק אַתָּה פּוֹתֵחַ אוֹתוֹ")
+            return almost ? tr("כִּמְעַט! נַסּוּ שׁוּב 💪") : tr("הַזְּמַן הַזֶּה שֶׁלְּךָ — רַק אַתָּה פּוֹתֵחַ אוֹתוֹ")
         case .setNew:
             if almost { return tr("הַקּוֹדִים לֹא הָיוּ אוֹתוֹ דָּבָר — בּוֹאוּ נְנַסֶּה שׁוּב 🙂") }
             return firstEntry == nil

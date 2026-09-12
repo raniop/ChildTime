@@ -22,7 +22,7 @@ enum ChildAge: Int, Codable, CaseIterable, Identifiable {
         case .preK:   return tr("גַּן וּטְרוֹם")
         case .grade1: return tr("כִּתּוֹת א-ב")
         case .grade3: return tr("כִּתּוֹת ג-ד")
-        case .older:  return tr("כִּתָּה ה וּמַעְלָה")
+        case .older:  return tr("כִּתָּה ה׳ וּמַעְלָה")
         }
     }
 

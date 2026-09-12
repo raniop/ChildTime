@@ -158,7 +158,7 @@ struct QuickQuizView: View {
         VStack(spacing: 18) {
             CharacterView(character: Character3DCatalog.find("lion"))
                 .frame(width: 140, height: 140).float(amplitude: 10)
-            Text(correctCount >= total - 2 ? tr("וָואו, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"))
+            Text(correctCount >= total - 2 ? tr("וָואוּ, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"))
                 .font(.system(size: 32, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).shadow(color: .black.opacity(0.25), radius: 6, y: 3)
             Text(tr("עָנִיתָ נָכוֹן עַל \(correctCount) מִתּוֹךְ \(total)"))
@@ -166,7 +166,7 @@ struct QuickQuizView: View {
             HStack(spacing: 14) {
                 pill("⭐", correctCount, AppColor.starGold, step: 1)
                 pill("💎", score, AppColor.gemPurple, step: 2)
-                pill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק'"))
+                pill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק׳"))
             }
             VStack(spacing: 12) {
                 Button { restart() } label: { cta(tr("עוֹד סִבּוּב 🔁"), dark: true) }.buttonStyle(.juicy)

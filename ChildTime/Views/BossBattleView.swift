@@ -164,7 +164,7 @@ struct BossBattleView: View {
                 HStack(spacing: 14) {
                     bossRewardPill("⭐", 20, AppColor.starGold, step: 1)
                     bossRewardPill("💎", 30, AppColor.gemPurple, step: 2)
-                    bossRewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק'"))
+                    bossRewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק׳"))
                 }
             }
             VStack(spacing: 12) {

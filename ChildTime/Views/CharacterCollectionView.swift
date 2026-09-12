@@ -48,7 +48,7 @@ struct CharacterCollectionView: View {
                isPresented: Binding(get: { shortBy != nil },
                                     set: { if !$0 { shortBy = nil } })) {
             Button(tr("קְנֵה יַהֲלוֹמִים")) { showStarShop = true }
-            Button(tr("הֲבַנְתִּי"), role: .cancel) {}
+            Button(tr("הֵבַנְתִּי"), role: .cancel) {}
         } message: {
             if let s = shortBy { Text(tr("צָרִיךְ עוֹד \(s) יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמוֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.")) }
         }

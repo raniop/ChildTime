@@ -147,7 +147,7 @@ struct ParentSettingsView: View {
         } header: {
             Text(tr("שֵׁם הַמִּשְׁפָּחָה"))
         } footer: {
-            Text(tr("מוֹפִיעַ בְּמָסָךְ הַהוֹרִים וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה."))
+            Text(tr("מוֹפִיעַ בְּמָסַךְ הַהוֹרִים וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה."))
         }
         .glassRows()
     }
@@ -216,7 +216,7 @@ struct ParentSettingsView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(tr("מבט-על על המשפחה"))
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
-                        Text(tr("\(profiles.profiles.count) פרופילים • זמן, ניקוד, ואיפוסים"))
+                        Text(tr("\(profiles.profiles.count) פרופילים • זמן, ניקוד ואיפוסים"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -261,7 +261,7 @@ struct ParentSettingsView: View {
                     HStack(spacing: 12) {
                         Text("👑").font(.system(size: 28))
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(tr("שדרג ל-טופי+"))
+                            Text(tr("שדרג לטופי+"))
                                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                             Text(tr("כל הנושאים, כל העולמות, פרופילים לכל ילד"))
                                 .font(.caption)
@@ -558,7 +558,7 @@ struct ParentSettingsView: View {
             Text(tr("טעויות ולולאת תיקון"))
         } footer: {
             Text(settings.penaltyEnabled
-                ? tr("כל טעות מורידה \(perMistake) דק' (חצי מתגמול תשובה נכונה) — אבל הילד יכול להחזיר את הזמן מיד: תשובה נכונה ונקייה בשאלה הבאה מחזירה את כל הזמן שירד. אף פעם לא מוצג לילד \"טעית\" או \"הפסדת\".")
+                ? tr("כל טעות מורידה \(perMistake) דק׳ (חצי מתגמול תשובה נכונה) — אבל הילד יכול להחזיר את הזמן מיד: תשובה נכונה ונקייה בשאלה הבאה מחזירה את כל הזמן שירד. אף פעם לא מוצג לילד \"טעית\" או \"הפסדת\".")
                 : tr("כבוי. הילד לא יאבד זמן גם אם יטעה הרבה."))
         }
         .glassRows()
@@ -600,7 +600,7 @@ struct ParentSettingsView: View {
                 }
                 if allowedSelection.applicationTokens.isEmpty
                     && allowedSelection.categoryTokens.isEmpty {
-                    Text(tr("⚠️ חשוב: בחרו אילו אפליקציות יישארו פתוחות — והקפידו לכלול את ChildTime (וכן אפליקציות חיוניות כמו טלפון). עד שתבחרו — לא ייחסם כלום, כדי לא לנעול את המכשיר בטעות."))
+                    Text(tr("⚠️ חשוב: בחרו אילו אפליקציות יישארו פתוחות — והקפידו לכלול את טופי (וכן אפליקציות חיוניות כמו טלפון). עד שתבחרו — לא ייחסם כלום, כדי לא לנעול את המכשיר בטעות."))
                         .font(.caption)
                         .foregroundStyle(.orange)
                 } else {
@@ -644,7 +644,7 @@ struct ParentSettingsView: View {
             Text(tr("חסימת אפליקציות"))
         } footer: {
             Text(settings.blockAllExceptAllowed
-                 ? tr("כל האפליקציות ייחסמו עד שהילד מרוויח זמן — חוץ מהאפליקציות שתבחרו כ\"מותרות\". חובה לכלול את ChildTime ברשימה.")
+                 ? tr("כל האפליקציות ייחסמו עד שהילד מרוויח זמן — חוץ מהאפליקציות שתבחרו כ\"מותרות\". חובה לכלול את טופי ברשימה.")
                  : tr("רק האפליקציות שתבחרו ייחסמו. כל השאר נשארות פתוחות."))
         }
         .glassRows()

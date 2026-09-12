@@ -871,7 +871,7 @@ struct WorldMapView: View {
                     emoji: event.emoji,
                     title: copy.title,
                     message: copy.message,
-                    ctaTitle: tr("יַאלְלָה, בּוֹאוּ נַאֲסֹף! 🚀"),
+                    ctaTitle: tr("יַאלְלָה, בּוֹאוּ נֶאֱסֹף! 🚀"),
                     onCTA: {
                         showEventSplash = false
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { showingSmartFeed = true }
@@ -1004,12 +1004,12 @@ struct WorldMapView: View {
         .eraseToAnyView()
     }
 
-    /// The gold wordmark ("טופי", or "טופי +" for a Tofy+ family) with the
+    /// The gold wordmark ("טופי", or "טופי+" for a Tofy+ family) with the
     /// lion beside it, and the three round glass buttons on the other side.
     private var brandRow: some View {
         HStack(alignment: .center, spacing: 10) {
             HStack(spacing: 8) {
-                Text(subs.isPremium ? tr("טופי +") : tr("טופי"))
+                Text(subs.isPremium ? tr("טופי+") : tr("טופי"))
                     .font(.system(size: heroTitleSize, weight: .black, design: .rounded))
                     .foregroundStyle(LinearGradient(colors: [Color(hex: "FFF6C4"), Color(hex: "FFD23F"), Color(hex: "FFB347")],
                                                     startPoint: .top, endPoint: .bottom))
@@ -1220,7 +1220,7 @@ struct WorldMapView: View {
                     ? tr("הִשְׁלַמְתָּ אֶת הָאֶתְגָּר הַיּוֹם — כָּל הַכָּבוֹד! 🎉\nאֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק וְלִצְבֹּר עוֹד.")
                     : tr("עֲנֵה נָכוֹן עַל \(target) שְׁאֵלוֹת הַיּוֹם וְזָכֵה בִּ-\(prize) 💎!\nכָּל יוֹם רָצוּף שֶׁמְּשַׂחֲקִים — הַפְּרָס גָּדֵל. 🔥"),
                 progressText: "\(done)/\(target)",
-                ctaTitle: ready ? tr("אַסְפוּ אֶת הַפְּרָס 🎁") : tr("קָדִימָה, נְעַנֶּה! 🚀"),
+                ctaTitle: ready ? tr("אִסְפוּ אֶת הַפְּרָס 🎁") : tr("קָדִימָה, נְעַנֶּה! 🚀"),
                 onCTA: {
                     if ready { claimChallenge(); infoSheet = nil }
                     else { enterSmartFeedFromInfo() }
@@ -1547,7 +1547,7 @@ struct WorldMapView: View {
                 // lack ("עדיין אין דקות" here read as failure and invited more
                 // answering "to earn", when today's earning is over). Point at
                 // what IS possible now: tomorrow's bank + the gift pocket.
-                lines.append(tr("וָאוּ — נִצַּלְתָּ אֶת כָּל \(cap.max) הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆"))
+                lines.append(tr("וָואוּ — נִצַּלְתָּ אֶת כָּל \(cap.max) הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆"))
                 lines.append(tr("כָּל מַה שֶּׁתַּרְוִיחַ עַכְשָׁיו נִשְׁמָר לְמָחָר."))
                 if progress.parentGiftMinutes > 0 {
                     lines.append(tr("וְיֵשׁ לְךָ \(progress.parentGiftMinutes) דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!"))
@@ -1580,7 +1580,7 @@ struct WorldMapView: View {
             return InfoContent(
                 emoji: "💎",
                 title: tr("\(progress.diamonds.grouped) יַהֲלוֹמִים"),
-                subtitle: tr("הַאַרְנָק שֶׁלָּכֶם"),
+                subtitle: tr("הָאַרְנָק שֶׁלָּכֶם"),
                 body: tr("מַרְוִיחִים יַהֲלוֹמִים עַל תְּשׁוּבוֹת נְכוֹנוֹת, מִמַּתָּנוֹת וּמִגַּלְגַּל הַמַּזָּל — וְקוֹנִים בָּהֶם בַּחֲנוּת."),
                 tip: tr("קְנִיָּה לֹא פּוֹגַעַת בַּדֵּרוּג שֶׁלָּכֶם 😊")
             )

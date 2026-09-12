@@ -81,7 +81,7 @@ struct ChildInsightsView: View {
         HStack(spacing: 8) {
             snapChip(engine.learningTrend.label, color: engine.learningTrend.color)
             if let s = engine.avgResponseSeconds {
-                snapChip(tr("⏳ \(s) שׁנִיּוֹת מֵעֲנֶה"), color: .secondary)
+                snapChip(tr("⏳ \(s) שְׁנִיּוֹת מַעֲנֶה"), color: .secondary)
             }
             snapChip(tr("🔥 \(snapshot.dayStreak) יְמֵי רֶצֶף"), color: AppColor.flameOrange)
         }
@@ -160,10 +160,10 @@ struct ChildInsightsView: View {
             metric("❓", "\(summary.questions)", tr("שאלות"))
             metric("✅", "\(summary.correct)", tr("נכונות"))
             metric("💡", "\(summary.wrong)", tr("טעויות"))
-            metric("🎮", "\(summary.minutesEarned)", tr("דק' שנצברו"))
-            metric("⏱️", "\(summary.minutesUsed)", tr("דק' שנוצלו"))
+            metric("🎮", "\(summary.minutesEarned)", tr("דק׳ שנצברו"))
+            metric("⏱️", "\(summary.minutesUsed)", tr("דק׳ שנוצלו"))
             metric("🔥", "\(summary.longestStreak)", tr("רצף הכי ארוך"))
-            metric("📚", "\(summary.learningMinutes)", tr("דק' למידה"))
+            metric("📚", "\(summary.learningMinutes)", tr("דק׳ למידה"))
             metric("🎯", "\(Int(summary.accuracy * 100))%", tr("דיוק"))
             metric("📅", "\(summary.activeDays)", tr("ימי פעילות"))
             metric("🙋", "\(Int(summary.voluntaryLearningRate * 100))%", tr("למידה מרצון"))

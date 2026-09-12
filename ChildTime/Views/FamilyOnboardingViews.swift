@@ -118,7 +118,7 @@ struct FamilyChoiceView: View {
                 }
                 .frame(maxWidth: 460)
 
-                Text(tr("טִיפּ: הַהוֹרֶה שֶׁכְּבָר בִּפְנִים יָכוֹל לְהַזְמִין אֶתְכֶם בְּאִימֵּיְל — וְאָז הַמָּסָךְ הַזֶּה נֶעֱלָם לְגַמְרֵי 😊"))
+                Text(tr("טִיפּ: הַהוֹרֶה שֶׁכְּבָר בִּפְנִים יָכוֹל לְהַזְמִין אֶתְכֶם בְּאִימֵיל — וְאָז הַמָּסָךְ הַזֶּה נֶעֱלָם לְגַמְרֵי 😊"))
                     .font(.system(size: 12.5, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
                     .multilineTextAlignment(.center)

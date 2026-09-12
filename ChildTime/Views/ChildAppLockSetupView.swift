@@ -31,12 +31,12 @@ struct ChildAppLockSetupView: View {
                         .font(.system(size: 64))
                         .foregroundStyle(AppColor.starGold)
 
-                    Text(tr("אֵילוּ אַפְּלִיקַצְיוֹת לִנְעוֹל?"))
+                    Text(tr("אֵילוּ אַפְּלִיקַצְיוֹת לִנְעַל?"))
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
 
-                    Text(tr("בַּחֲרוּ אֶת הָאַפְּלִיקַצְיוֹת שֶׁיִּהְיוּ נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה — עַד שֶׁהַיֶּלֶד מַרְוִיחַ זְמַן מָסָךְ בְּטוֹפִּי. אֶפְשָׁר לְשַׁנּוֹת בְּכָל עֵת בְּהַגְדָּרוֹת הוֹרֶה."))
+                    Text(tr("בַּחֲרוּ אֶת הָאַפְּלִיקַצְיוֹת שֶׁיִּהְיוּ נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה — עַד שֶׁהַיֶּלֶד מַרְוִיחַ זְמַן מָסָךְ בְּטוֹפִי. אֶפְשָׁר לְשַׁנּוֹת בְּכָל עֵת בְּהַגְדָּרוֹת הוֹרֶה."))
                         .font(.system(size: 16, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)

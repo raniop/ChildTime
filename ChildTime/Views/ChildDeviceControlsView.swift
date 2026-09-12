@@ -191,7 +191,7 @@ struct ChildDeviceControlsView: View {
             Spacer()
             if let lock {
                 Button { lock() } label: {
-                    Label(tr("נְעוֹל"), systemImage: "lock.fill")
+                    Label(tr("נְעַל"), systemImage: "lock.fill")
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 14).padding(.vertical, 8)

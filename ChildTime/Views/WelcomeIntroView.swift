@@ -114,12 +114,12 @@ struct WelcomeIntroView: View {
             HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(AppColor.flameOrange)
-                Text(tr("זְמַן הַמָּסָךְ מְנוּהָל בְּטוֹפִּי"))
+                Text(tr("זְמַן הַמָּסָךְ מְנוּהָל בְּטוֹפִי"))
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                 Spacer(minLength: 0)
             }
-            Text(tr("אִם הִגְדַּרְתֶּם לַיֶּלֶד מַגְבָּלוֹת זְמַן מָסָךְ בְּ\"מִשְׁפָּחָה\" / Screen Time שֶׁל אַפְּל — כַּבּוּ אוֹתָן. מֵעַכְשָׁו טוֹפִּי מְנַהֵל אֶת זְמַן הַמָּסָךְ; שְׁתֵּי מַעֲרָכוֹת בְּמַקְבִּיל יִתְנַגְּשׁוּ."))
+            Text(tr("אִם הִגְדַּרְתֶּם לַיֶּלֶד מַגְבָּלוֹת זְמַן מָסָךְ בְּ\"מִשְׁפָּחָה\" / Screen Time שֶׁל אַפְּל — כַּבּוּ אוֹתָן. מֵעַכְשָׁיו טוֹפִּי מְנַהֵל אֶת זְמַן הַמָּסָךְ; שְׁתֵּי מַעֲרָכוֹת בְּמַקְבִּיל יִתְנַגְּשׁוּ."))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
                 .multilineTextAlignment(.leading)

@@ -56,7 +56,7 @@ struct HatchingView: View {
                     .frame(height: 320)
 
                 if bubbleVisible {
-                    BubbleSpeech(text: tr("הֵיי! חִכִּיתִי לְךָ... אֲנִי טוֹפִּי! 💫"))
+                    BubbleSpeech(text: tr("הֵיי! חִכִּיתִי לְךָ... אֲנִי טוֹפִי! 💫"))
                         .transition(.scale.combined(with: .opacity))
                 }
 

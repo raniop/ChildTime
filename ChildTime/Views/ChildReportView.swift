@@ -173,7 +173,7 @@ struct ChildReportView: View {
         let topics = engine.topicReports(period)
         return card(tr("בִּיצוּעִים לִימוּדִיִּים"), detail: tr("לְפִי נוֹשֵׂא, \(period.title.lowercased())")) {
             if topics.isEmpty {
-                empty(tr("עוֹד לֹא נֶעֶנוּ שְׁאֵלוֹת \(period.title.lowercased())."))
+                empty(tr("עוֹד לֹא נַעֲנוּ שְׁאֵלוֹת \(period.title.lowercased())."))
             } else {
                 // The weakest topic opens on its own (the mockup shows math's
                 // sub-skills right there); any row toggles on tap.
@@ -548,7 +548,7 @@ struct LearningTrendChart: View {
                 }
             }
         }
-        .accessibilityLabel(tr("שְׁאֵלוֹת וְאֲחוּז הַצְלָחָה לְכָל יוֹם"))
+        .accessibilityLabel(tr("שְׁאֵלוֹת וַאֲחוּז הַצְלָחָה לְכָל יוֹם"))
     }
 }
 

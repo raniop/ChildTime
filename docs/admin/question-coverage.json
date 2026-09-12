@@ -1,5 +1,5 @@
 {
-  "generatedAt" : "2026-09-11T17:35:11Z",
+  "generatedAt" : "2026-09-12T14:26:53Z",
   "minGradePool" : 30,
   "target" : 200,
   "topics" : [
@@ -758,7 +758,7 @@
           "tagged" : 0
         }
       ],
-      "label" : "חִנּוּךְ פִינַנְסִי",
+      "label" : "חִנּוּךְ פִּינַנְסִי",
       "minGrade" : 2,
       "pack" : false,
       "tiers" : {
@@ -780,47 +780,47 @@
           },
           {
             "grade" : 1,
-            "passages" : 10,
-            "tagged" : 38
+            "passages" : 18,
+            "tagged" : 70
           },
           {
             "grade" : 2,
-            "passages" : 9,
-            "tagged" : 35
+            "passages" : 18,
+            "tagged" : 71
           },
           {
             "grade" : 3,
-            "passages" : 9,
-            "tagged" : 35
+            "passages" : 17,
+            "tagged" : 67
           },
           {
             "grade" : 4,
-            "passages" : 9,
-            "tagged" : 36
+            "passages" : 17,
+            "tagged" : 68
           },
           {
             "grade" : 5,
-            "passages" : 10,
-            "tagged" : 40
+            "passages" : 18,
+            "tagged" : 72
           },
           {
             "grade" : 6,
-            "passages" : 8,
-            "tagged" : 32
+            "passages" : 16,
+            "tagged" : 64
           },
           {
             "grade" : 7,
-            "passages" : 9,
-            "tagged" : 36
+            "passages" : 18,
+            "tagged" : 72
           },
           {
             "grade" : 8,
-            "passages" : 9,
-            "tagged" : 36
+            "passages" : 17,
+            "tagged" : 68
           }
         ],
-        "passages" : 56,
-        "total" : 218
+        "passages" : 113,
+        "total" : 446
       },
       "grades" : [
         {

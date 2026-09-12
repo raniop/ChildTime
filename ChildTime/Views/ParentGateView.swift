@@ -160,7 +160,7 @@ struct ParentGateView<Content: View>: View {
                         }
                         Button(tr("בִּטּוּל"), role: .cancel) {}
                     } message: {
-                        Text(tr("הַמַּכְשִׁיר יַחֲזֹר לְמָסָךְ הַפְּתִיחָה וְיִשְׁאַל שׁוּב מִי מִשְׁתַּמֵּשׁ בּוֹ. הַמִּשְׁפָּחָה וְהַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמָרוֹת."))
+                        Text(tr("הַמַּכְשִׁיר יַחֲזֹר לְמָסַךְ הַפְּתִיחָה וְיִשְׁאַל שׁוּב מִי מִשְׁתַּמֵּשׁ בּוֹ. הַמִּשְׁפָּחָה וְהַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמָרוֹת."))
                     }
                 } else {
                     ProgressView().scaleEffect(1.4).tint(.white)
@@ -290,7 +290,7 @@ struct ParentGateView<Content: View>: View {
                         .foregroundStyle(.white)
                         .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
 
-                    Text(isSetupMode ? tr("בְּחֲרוּ קוֹד הוֹרֶה") : (gateTitle ?? tr("הַגְדָּרוֹת הוֹרֶה")))
+                    Text(isSetupMode ? tr("בַּחֲרוּ קוֹד הוֹרֶה") : (gateTitle ?? tr("הַגְדָּרוֹת הוֹרֶה")))
                         .font(.system(size: 30, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
 

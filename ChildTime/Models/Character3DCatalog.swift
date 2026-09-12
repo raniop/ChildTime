@@ -47,7 +47,7 @@ enum CharacterTier: Int, CaseIterable {
 
     var label: String {
         switch self {
-        case .free:      return tr("חִינָּם")
+        case .free:      return tr("חִנָּם")
         case .common:    return tr("רָגִיל")
         case .rare:      return tr("נָדִיר")
         case .epic:      return tr("מְיוּחָד")

@@ -52,9 +52,9 @@ struct KidModeEntryView: View {
             selectedChild = selectedChild ?? profiles.activeID ?? profiles.profiles.first?.id
         }
         .alert(tr("צָרִיךְ הַרְשָׁאַת Screen Time"), isPresented: $authFailed) {
-            Button(tr("הֲבַנְתִּי"), role: .cancel) {}
+            Button(tr("הֵבַנְתִּי"), role: .cancel) {}
         } message: {
-            Text(tr("כְּדֵי לִנְעוֹל אֶת הַטֶּלֶפוֹן בְּמַצַּב יֶלֶד צָרִיךְ לְאַשֵּׁר Screen Time בִּשְׁבִיל טוֹפִי."))
+            Text(tr("כְּדֵי לִנְעַל אֶת הַטֶּלֶפוֹן בְּמַצַּב יֶלֶד צָרִיךְ לְאַשֵּׁר Screen Time בִּשְׁבִיל טוֹפִי."))
         }
     }
 

@@ -50,7 +50,7 @@ struct UnlockedView: View {
                     VStack(spacing: AppSpacing.md) {
                         Text(progress.openingIsGift
                              ? tr("מְשַׁחְרְרִים אֶת דַּקּוֹת הַמַּתָּנָה 💝")
-                             : tr("מְשַׁחְרְרִים אֶת הַדַּקּוֹת שֶׁ\(Gendered.g(tr("הִרְוַחְתָּ"), tr("הִרְוַחְתְּ"))) ✨"))
+                             : tr("מְשַׁחְרְרִים אֶת הַדַּקּוֹת שֶׁ\(Gendered.g(tr("הִרְוַחְתָּ"), tr("הִרְוַחַתְּ"))) ✨"))
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                             .multilineTextAlignment(.center)

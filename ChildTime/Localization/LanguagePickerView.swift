@@ -17,7 +17,7 @@ struct LanguagePickerView: View {
                 ForEach(language.available) { lang in
                     row(lang)
                 }
-                Text(tr("הַשָּׂפָה מִשְׁתַּנָּה מִיָּד בְּכָל הָאַפְּלִיקַצְיָה: טְקְסְטִים, כִּוּוּן, הַקְרָאָה וּשְׁאֵלוֹת."))
+                Text(tr("הַשָּׂפָה מִשְׁתַּנָּה מִיָּד בְּכָל הָאַפְּלִיקַצְיָה: טֶקְסְטִים, כִּוּוּן, הַקְרָאָה וּשְׁאֵלוֹת."))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .multilineTextAlignment(.center)

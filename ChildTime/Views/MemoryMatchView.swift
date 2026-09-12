@@ -130,7 +130,7 @@ struct MemoryMatchView: View {
             HStack(spacing: 14) {
                 pill("⭐", pairCount, AppColor.starGold, step: 1)
                 pill("💎", max(8, 20 - mistakes * 2), AppColor.gemPurple, step: 2)
-                pill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק'"))
+                pill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק׳"))
             }
             VStack(spacing: 12) {
                 Button { deal(); won = false } label: { cta(tr("עוֹד לוּחַ 🔁"), dark: true) }.buttonStyle(.juicy)

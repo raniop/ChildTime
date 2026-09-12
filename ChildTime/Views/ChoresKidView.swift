@@ -174,7 +174,7 @@ struct ChoresKidView: View {
             HStack(spacing: AppSpacing.md) {
                 Text("🏆").font(.system(size: 30))
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(Gendered.g(tr("סַךְ הַכֹּל הִרְוַחְתָּ מֵהַמַּטְלוֹת:"), tr("סַךְ הַכֹּל הִרְוַחְתְּ מֵהַמַּטְלוֹת:")))
+                    Text(Gendered.g(tr("סַךְ הַכֹּל הִרְוַחְתָּ מֵהַמַּטְלוֹת:"), tr("סַךְ הַכֹּל הִרְוַחַתְּ מֵהַמַּטְלוֹת:")))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
                     Text(tr("🎮 \(totals.minutes) דַּקּוֹת מִשְׂחָק"))

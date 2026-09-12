@@ -191,7 +191,7 @@ struct LoginGateView: View {
             Text(tr("🎉 כָּל הַכָּבוֹד!"))
                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text(tr("שִׂחַקְתָּ אֶת 30 הַשְּׁאֵלוֹת הַחִנָּם. הִירָשְׁמוּ כְּדֵי לְהַמְשִׁיךְ לְשַׂחֵק לְלֹא הַגְבָּלָה — וְלִשְׁמוֹר אֶת הַהִתְקַדְּמוּת."))
+            Text(tr("שִׂחַקְתָּ אֶת 30 הַשְּׁאֵלוֹת הַחִנָּם. הֵירָשְׁמוּ כְּדֵי לְהַמְשִׁיךְ לְשַׂחֵק לְלֹא הַגְבָּלָה — וְלִשְׁמוֹר אֶת הַהִתְקַדְּמוּת."))
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
                 .multilineTextAlignment(.center)

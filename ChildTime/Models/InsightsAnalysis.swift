@@ -61,11 +61,11 @@ extension InsightsEngine {
         }
         let abandons = Topic.allCases.reduce(0) { $0 + profile.abandonCount(for: $1) }
         if abandons >= 4 {
-            return Labeled(emoji: "🔬", title: tr("לוֹמֵד דֶּרֶךְ נִסּוּי וְטָעִיָּה"),
+            return Labeled(emoji: "🔬", title: tr("לוֹמֵד דֶּרֶךְ נִסּוּי וּטְעִיָּה"),
                            detail: tr("מְנַסֶּה, טוֹעֶה וּמְתַקֵּן — כְּדַאי לְעוֹדֵד לְהַמְשִׁיךְ גַּם כְּשֶׁקָּשֶׁה."))
         }
         return Labeled(emoji: "🌱", title: tr("סִגְנוֹן מְעֹרָב"),
-                       detail: tr("לוֹמֵד מִכַּמָּה כִּוּוּנִים — נַמְשִׁיךְ לְלַמֵּד אֵיךְ הוּא לוֹמֵד הֲכִי טוֹב."))
+                       detail: tr("לוֹמֵד מִכַּמָּה כִּוּוּנִים — נַמְשִׁיךְ לִלְמֹד אֵיךְ הוּא לוֹמֵד הֲכִי טוֹב."))
     }
 
     // MARK: - Persistence
@@ -87,7 +87,7 @@ extension InsightsEngine {
         }
         let bail = profile.abandoned.first.map { tr(" (בְּעִקָּר \($0.displayName))") } ?? ""
         return Labeled(emoji: "🤝", title: tr("נוֹטֶה לְוַתֵּר עַל קָשֶׁה"),
-                       detail: tr("מְדַלֵּג עַל שְׁאֵלוֹת קָשׁוֹת\(bail) — שָׁוֶה לְעוֹדֵד וּלְהָקֵל אֶת הָרָמָה."))
+                       detail: tr("מְדַלֵּג עַל שְׁאֵלוֹת קָשׁוֹת\(bail) — שָׁוֶה לְעוֹדֵד וּלְהוֹרִיד אֶת הָרָמָה."))
     }
 
     // MARK: - Interests

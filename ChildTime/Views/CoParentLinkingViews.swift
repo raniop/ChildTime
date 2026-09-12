@@ -50,7 +50,7 @@ struct AddParentView: View {
             Text(tr("הוֹסִיפוּ הוֹרֶה לַמִּשְׁפָּחָה"))
                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text(tr("שְׁנֵיכֶם תִּרְאוּ אֶת אוֹתָם יְלָדִים וְאֶת אוֹתָהּ הַהִתְקַדְּמוּת."))
+            Text(tr("שְׁנֵיכֶם תִּרְאוּ אֶת אוֹתָם הַיְּלָדִים וְאֶת אוֹתָהּ הַהִתְקַדְּמוּת."))
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
@@ -117,20 +117,20 @@ struct AddParentView: View {
 
     private var emailInviteCard: some View {
         VStack(spacing: AppSpacing.sm) {
-            Text(tr("✉️ הַדֶּרֶךְ הַקַּלָּה: הַזְמִינוּ בְּאִימֵּיְל"))
+            Text(tr("✉️ הַדֶּרֶךְ הַקַּלָּה: הַזְמִינוּ בְּאִימֵיל"))
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text(tr("הַהוֹרֶה הַשֵּׁנִי פָּשׁוּט יִתְחַבֵּר עִם הָאִימֵּיְל הַזֶּה — וְהַמִּשְׁפָּחָה תְּחַכֶּה לוֹ שָׁם, בְּלִי קוֹדִים."))
+            Text(tr("הַהוֹרֶה הַשֵּׁנִי פָּשׁוּט יִתְחַבֵּר עִם הָאִימֵיל הַזֶּה — וְהַמִּשְׁפָּחָה תְּחַכֶּה לוֹ שָׁם, בְּלִי קוֹדִים."))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
             if inviteSent {
-                Label(tr("הַהַזְמָנָה נִשְׁמְרָה! אֶפְשָׁר לְהַזְמִין עוֹד אִימֵּיְל"), systemImage: "checkmark.circle.fill")
+                Label(tr("הַהַזְמָנָה נִשְׁמְרָה! אֶפְשָׁר לְהַזְמִין עוֹד אִימֵיל"), systemImage: "checkmark.circle.fill")
                     .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.successMint)
             }
             HStack(spacing: 8) {
-                TextField(tr("אִימֵּיְל שֶׁל הַהוֹרֶה הַשֵּׁנִי"), text: $inviteEmail)
+                TextField(tr("אִימֵיל שֶׁל הַהוֹרֶה הַשֵּׁנִי"), text: $inviteEmail)
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()

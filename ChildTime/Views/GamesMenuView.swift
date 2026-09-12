@@ -47,7 +47,7 @@ struct GamesMenuView: View {
                             gameCard(
                                 emoji: "🧩",
                                 title: tr("הַתְאָמַת זוּגוֹת"),
-                                subtitle: tr("הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וְזִכּוּ בְּפַרְסִים"),
+                                subtitle: tr("הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וּזְכוּ בִּפְרָסִים"),
                                 colors: [Color(hex: "06D6A0"), Color(hex: "118AB2")]
                             ) { showingMatch = true }
                         }

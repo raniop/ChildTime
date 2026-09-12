@@ -45,7 +45,7 @@ struct ChildDifficultyView: View {
                         }
                     }
                 } header: {
-                    Text(tr("הַחֵל עַל כָּל הַנּוֹשְׂאִים"))
+                    Text(tr("הָחֵל עַל כָּל הַנּוֹשְׂאִים"))
                 }
                 .glassRows()
 

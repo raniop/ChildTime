@@ -816,7 +816,7 @@ struct FriendRequestsView: View {
             }
             Spacer()
             Button { decline(req) } label: {
-                Text(tr("לֹא עַכְשָׁיו")).font(.system(size: 13, weight: .heavy, design: .rounded))
+                Text(tr("לֹא עַכְשָׁו")).font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .padding(.horizontal, 12).padding(.vertical, 9)
                     .background(Capsule().fill(.white.opacity(0.12)))

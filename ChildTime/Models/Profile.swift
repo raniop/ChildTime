@@ -332,7 +332,7 @@ struct AvatarPreset: Identifiable, Hashable {
                      emoji: "🧒",
                      topColor: Color(hex: "FFD166"),
                      bottomColor: Color(hex: "FFB84D"),
-                     label: tr("צָהוֹב-זָהוֹב")),
+                     label: tr("צָהוֹב-זָהוּב")),
         // More faces — diverse skin tones
         AvatarPreset(id: "boy_tan",
                      emoji: "👦🏽",

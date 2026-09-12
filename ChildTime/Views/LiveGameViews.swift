@@ -877,7 +877,7 @@ struct LiveGameSetupSheet: View {
                 Color.black.opacity(0.4).ignoresSafeArea()
                 VStack(spacing: AppSpacing.md) {
                     Text("🚀").font(.system(size: 52))
-                    Text(tr("מַכְינִים אֶת הַמִּשְׂחָק…"))
+                    Text(tr("מְכִינִים אֶת הַמִּשְׂחָק…"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 }
             }

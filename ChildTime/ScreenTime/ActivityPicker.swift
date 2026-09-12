@@ -33,15 +33,15 @@ extension View {
 enum PickerCopy {
     /// The apps that stay locked until the child earns minutes.
     static var blocked: (title: String, header: String, footer: String) { (
-        title: tr("אֵילוּ אַפְלִיקַצְיוֹת לִנְעֹל"),
+        title: tr("אֵילוּ אַפְּלִיקַצְיוֹת לִנְעֹל"),
         header: tr("אֵלֶּה יִנָּעֲלוּ עַד שֶׁהַיֶּלֶד יַרְוִיחַ דַּקּוֹת מִשְׂחָק."),
-        footer: tr("אֶפְשָׁר לִבְחֹר קָטֵגוֹרְיָה שְׁלֵמָה (מִשְׂחָקִים, רְשָׁתוֹת חֶבְרָתִיּוֹת) אוֹ אַפְלִיקַצְיוֹת מְסֻיָּמוֹת. תָּמִיד אֶפְשָׁר לְשַׁנּוֹת.")
+        footer: tr("אֶפְשָׁר לִבְחֹר קָטֵגוֹרְיָה שְׁלֵמָה (מִשְׂחָקִים, רְשָׁתוֹת חֶבְרָתִיּוֹת) אוֹ אַפְּלִיקַצְיוֹת מְסֻיָּמוֹת. תָּמִיד אֶפְשָׁר לְשַׁנּוֹת.")
     ) }
     /// Apps that are never locked, whatever else is blocked.
     static var alwaysAllowed: (title: String, header: String, footer: String) { (
         title: tr("מָה תָּמִיד פָּתוּחַ"),
         header: tr("אֵלֶּה לֹא יִנָּעֲלוּ אַף פַּעַם — גַּם אִם הַקָּטֵגוֹרְיָה שֶׁלָּהֶם חֲסוּמָה."),
-        footer: tr("מַתְאִים לִשְׁעוֹן מְעוֹרֵר, מַצְלֵמָה, טֶלֶפוֹן אוֹ אַפְלִיקַצְיָה לִמּוּדִית שֶׁתָּמִיד מֻתֶּרֶת.")
+        footer: tr("מַתְאִים לִשְׁעוֹן מְעוֹרֵר, מַצְלֵמָה, טֶלֶפוֹן אוֹ אַפְּלִיקַצְיָה לִמּוּדִית שֶׁתָּמִיד מֻתֶּרֶת.")
     ) }
     /// A one-off window for specific apps.
     static var temporaryAllow: (title: String, header: String, footer: String) { (

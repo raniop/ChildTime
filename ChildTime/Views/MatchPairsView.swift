@@ -138,7 +138,7 @@ struct MatchPairsView: View {
             HStack(spacing: 14) {
                 rewardPill("⭐", pairCount, AppColor.starGold, step: 1)
                 rewardPill("💎", max(8, 20 - mistakes * 2), AppColor.gemPurple, step: 2)
-                rewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק'"))
+                rewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק׳"))
             }
             VStack(spacing: 12) {
                 Button { deal(); won = false } label: { cta(tr("עוֹד לוּחַ 🔁"), dark: true) }.buttonStyle(.juicy)

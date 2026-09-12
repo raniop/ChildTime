@@ -713,7 +713,7 @@ struct QuestionRunnerView: View {
                 Text(tr("רֶמֶז"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text(hintCost == 0 ? tr("(חִינָּם)") : tr("(\(hintCost) דַּק')"))
+                Text(hintCost == 0 ? tr("(חִנָּם)") : tr("(\(hintCost) דַּק')"))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.75))
             }
@@ -1323,7 +1323,7 @@ struct QuestionRunnerView: View {
         // that play continues for fun/learning without more minutes.
         if earnsTime, !cappedBefore, progress.atDailyCap, !capMessageShown {
             capMessageShown = true
-            companion.wow(Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת"), tr("הִגַּעְתְּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת")))
+            companion.wow(Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת"), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת")))
             confettiTrigger += 1
             return
         }
@@ -1334,7 +1334,7 @@ struct QuestionRunnerView: View {
                 companion.wow(tr("אַלּוּפִים! 💫 הַדַּקּוֹת נִשְׁמְרוּ לְמָחָר 🏦"))
                 confettiTrigger += 1
             } else {
-                companion.cheer([tr("יָפֶה! לוֹמְדִים בִּשְׁבִיל הַכֵּיף 🌟"), tr("כֹּל הַכָּבוֹד! עוֹד נְקוּדּוֹת וְכוֹכָבִים"), Gendered.g(tr("אַלּוּף! מַמְשִׁיכִים לְהִתְקַדֵּם"), tr("אַלּוּפָה! מַמְשִׁיכִים לְהִתְקַדֵּם"))].randomElement()!)
+                companion.cheer([tr("יָפֶה! לוֹמְדִים בִּשְׁבִיל הַכֵּיף 🌟"), tr("כָּל הַכָּבוֹד! עוֹד נְקוּדּוֹת וְכוֹכָבִים"), Gendered.g(tr("אַלּוּף! מַמְשִׁיכִים לְהִתְקַדֵּם"), tr("אַלּוּפָה! מַמְשִׁיכִים לְהִתְקַדֵּם"))].randomElement()!)
             }
             return
         }

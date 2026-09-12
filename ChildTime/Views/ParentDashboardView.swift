@@ -177,7 +177,7 @@ struct ParentDashboardView: View {
                             // card on smaller screens).
                             if isRoot {
                                 Button { showingFeedback = true } label: {
-                                    Label(tr("פִידְבֵּק וְהַצָּעוֹת"), systemImage: "text.bubble.fill")
+                                    Label(tr("פִידְבֶּק וְהַצָּעוֹת"), systemImage: "text.bubble.fill")
                                         .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                                         .foregroundStyle(.white.opacity(0.75))
                                         .padding(.vertical, 4)
@@ -465,7 +465,7 @@ struct ParentDashboardView: View {
         VStack(spacing: AppSpacing.lg) {
             Text("👨‍👩‍👧‍👦")
                 .font(.system(size: 64))
-            Text(tr("בּוֹאוּ נְצַרֵף אֶת הַיְּלָדִים"))
+            Text(tr("בּוֹאוּ נְצָרֵף אֶת הַיְּלָדִים"))
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
             Text(tr("צְרוּ פְּרוֹפִיל לְכָל יֶלֶד/ה כָּאן. אַחַר כָּךְ כָּל יֶלֶד יְקַבֵּל קוֹד QR — סוֹרְקִים אוֹתוֹ בַּמַּכְשִׁיר שֶׁל הַיֶּלֶד, וְהוּא נִכְנָס יְשִׁירוֹת לְשַׂחֵק."))
@@ -725,7 +725,7 @@ struct ParentDashboardView: View {
                     Text(tr("הַהַתְרָאוֹת כָּבוּיוֹת"))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text(tr("הַפְעִילוּ כְּדֵי לְקַבֵּל עֲדְכּוּנִים עַל הַיֶּלֶד"))
+                    Text(tr("הַפְעִילוּ כְּדֵי לְקַבֵּל עִדְכּוּנִים עַל הַיֶּלֶד"))
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
@@ -1081,10 +1081,10 @@ struct ParentDashboardView: View {
                              value: earnedLive ? formatTime(liveSecs) : (s.walletMinutesShown > 0 ? "\(s.walletMinutesShown)" : "—"),
                              label: earnedLive
                                 ? tr("זמן מסך פתוח")
-                                : (profile.gender == .girl ? tr("דק' שהרוויחה") : tr("דק' שהרוויח")))
+                                : (profile.gender == .girl ? tr("דק׳ שהרוויחה") : tr("דק׳ שהרוויח")))
                     statCell(emoji: "💝",
                              value: giftLive ? formatTime(liveSecs) : (giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—"),
-                             label: giftLive ? tr("זמן מתנה פתוח") : tr("דק' מתנה מכם"))
+                             label: giftLive ? tr("זמן מתנה פתוח") : tr("דק׳ מתנה מכם"))
                 }
                 statGroup(tr("הִתְקַדְּמוּת")) {
                     statCell(emoji: "🔥", value: "\(s.dayStreak)", label: tr("רצף ימים"))
@@ -1196,10 +1196,10 @@ struct ParentDashboardView: View {
                     // gone missing. Spell out where new earnings go (tomorrow)
                     // and that the 💝 gift pocket stays open today.
                     Text(maxedOut
-                         ? tr("\(profile.gender == .girl ? tr("הגיעה") : tr("הגיע")) לתקרה היומית (\(cap.minutes) דק') — מה \(profile.gender == .girl ? tr("שתרוויח") : tr("שירוויח")) עכשיו נשמר למחר")
+                         ? tr("\(profile.gender == .girl ? tr("הגיעה") : tr("הגיע")) לתקרה היומית (\(cap.minutes) דק׳) — מה \(profile.gender == .girl ? tr("שתרוויח") : tr("שירוויח")) עכשיו נשמר למחר")
                            + ((s.carryOverMinutes ?? 0) > 0 ? tr(" · 🎁 כבר \(s.carryOverMinutes ?? 0)") : "")
                            + (giftShownFor(profile, s) > 0 ? tr(" · 💝 המתנה פתוחה גם היום") : "")
-                         : tr("נצבר היום: \(s.minutesEarnedToday) / \(cap.minutes) דק'")
+                         : tr("נצבר היום: \(s.minutesEarnedToday) / \(cap.minutes) דק׳")
                            + ((s.carryOverMinutes ?? 0) > 0 ? tr("  ·  🎁 \(s.carryOverMinutes ?? 0) למחר") : ""))
                         .font(.caption)
                         .foregroundStyle(maxedOut ? .primary : .secondary)
@@ -1213,7 +1213,7 @@ struct ParentDashboardView: View {
             HStack(spacing: 6) {
                 Image(systemName: "wallet.pass")
                     .foregroundStyle(.secondary)
-                Text(tr("🎮 \(s.walletMinutesShown) דק' \(profile.gender == .girl ? tr("הרוויחה") : tr("הרוויח")) מלמידה  ·  💝 \(giftShown) דק' מתנה מכם"))
+                Text(tr("🎮 \(s.walletMinutesShown) דק׳ \(profile.gender == .girl ? tr("הרוויחה") : tr("הרוויח")) מלמידה  ·  💝 \(giftShown) דק׳ מתנה מכם"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -2180,7 +2180,7 @@ struct ParentDashboardView: View {
             }
             Button(tr("בטל"), role: .cancel) { resettingProfile = nil }
         } message: { _ in
-            Text(tr("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן, ועונש טעויות. לא ימחק שמות, פרופילים או פריטי קוסמטיקה."))
+            Text(tr("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן ועונש טעויות. לא יימחקו שמות, פרופילים או פריטי קוסמטיקה."))
         }
         // "What does this number mean?" — tapped stat cell explanation.
         .alert(
@@ -2649,7 +2649,7 @@ struct ParentDashboardView: View {
             // they share emojis with the per-child stats but sum the whole family.
             if isFamily {
             switch label {
-            case tr("דק' מסך היום"):   // labels are shown translated, so match the translation
+            case tr("דק׳ מסך היום"):   // labels are shown translated, so match the translation
                 return tr("סך כל דקות זמן המסך שכל הילדים הרוויחו היום ביחד (מכל המכשירים). מתאפס בחצות. לפירוט לכל ילד — פתחו את הכרטיס שלו.")
             case tr("שאלות היום"):   // labels are shown translated, so match the translation
                 return tr("כמה שאלות ענו כל הילדים ביחד היום — בכל העולמות, במשחקים ובהרפתקה החכמה. מספר טוב לתחושה כללית של \"היה יום למידה או לא\".")

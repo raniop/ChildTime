@@ -13,7 +13,7 @@ enum SkillCatalog {
         "mul":          tr("כֶּפֶל"),
         "div":          tr("חִלּוּק"),
         "mixedOps":     tr("פְּעֻלּוֹת מְשֻׁלָּבוֹת"),
-        "wordProblem":  tr("בְּעָיוֹת מִלּוּלִיוֹת"),
+        "wordProblem":  tr("בְּעָיוֹת מִלּוּלִיּוֹת"),
         "fractions":    tr("שְׁבָרִים פְּשׁוּטִים"),
         "divRemainder": tr("חִלּוּק עִם שְׁאֵרִית"),
         "geometry":     tr("הֶקֵּף וְשֶׁטַח"),
@@ -291,7 +291,7 @@ extension InsightsEngine {
                 emoji: "🌟",
                 title: tr("\(up.topic.displayName) הוֹפֶכֶת לְחוֹזְקָה"),
                 body: tr("\(name) \(g(tr("הִשְׁתַּפֵּר"), tr("הִשְׁתַּפְּרָה"))) בְּ\(up.topic.displayName) בְּ-\(Int(up.deltaPoints.rounded())) נְקֻדּוֹת לְעֻמַּת הַתְּקוּפָה הַקּוֹדֶמֶת."),
-                recommendation: tr("שְׁוֶה לְצַיֵּן אֶת זֶה בְּקוֹל — יְלָדִים מַמְשִׁיכִים לְהִשְׁתַּפֵּר בְּמַה שֶׁמְּשַׁבְּחִים אוֹתָם עָלָיו."))
+                recommendation: tr("שָׁוֶה לְצַיֵּן אֶת זֶה בְּקוֹל — יְלָדִים מַמְשִׁיכִים לְהִשְׁתַּפֵּר בְּמַה שֶׁמְּשַׁבְּחִים אוֹתָם עָלָיו."))
         }
         // 3. A subject that slipped.
         if let down = deltas.last, down.deltaPoints <= -8 {

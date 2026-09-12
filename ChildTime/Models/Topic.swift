@@ -47,7 +47,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         case .science:   return tr("מַדָּעִים")
         case .history:   return tr("הִיסְטוֹרְיָה")
         case .geography: return tr("גֵּאוֹגְרַפְיָה")
-        case .money:     return tr("חִנּוּךְ פִינַנְסִי")
+        case .money:     return tr("חִנּוּךְ פִּינַנְסִי")
         case .reading:   return tr("הֲבָנַת הַנִּקְרָא")
         case .soccer:    return tr("עוֹלַם הַכַּדּוּרֶגֶל")
         case .dinosaurs: return tr("דִּינוֹזָאוּרִים")

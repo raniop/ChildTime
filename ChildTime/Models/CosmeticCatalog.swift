@@ -20,7 +20,7 @@ enum CosmeticCatalog {
         CosmeticItem(id: "hat_santa",     category: .hat, name: tr("כּוֹבַע חוֹרֶף"),    emoji: "🎄", rarity: .common,    price: 36),
 
         // MARK: - Glasses (6)
-        CosmeticItem(id: "glasses_round", category: .glasses, name: tr("מִשְׁקָפַיִים עֲגוּלִים"),   emoji: "🤓", rarity: .common,    price: 36),
+        CosmeticItem(id: "glasses_round", category: .glasses, name: tr("מִשְׁקָפַיִם עֲגוּלִים"),   emoji: "🤓", rarity: .common,    price: 36),
         CosmeticItem(id: "glasses_shade", category: .glasses, name: tr("מִשְׁקְפֵי שֶׁמֶשׁ"),       emoji: "😎", rarity: .rare,      price: 66),
         CosmeticItem(id: "glasses_3d",    category: .glasses, name: tr("מִשְׁקְפֵי 3D"),        emoji: "🥽", rarity: .epic,      price: 150),
         CosmeticItem(id: "glasses_vr",    category: .glasses, name: tr("מִשְׁקְפֵי VR"),        emoji: "🕶",  rarity: .epic,      price: 210),
@@ -39,7 +39,7 @@ enum CosmeticCatalog {
 
         // MARK: - Pants (5)
         CosmeticItem(id: "pants_jeans",      category: .pants, name: tr("גִּ'ינְס"),         emoji: "👖", rarity: .common, price: 30),
-        CosmeticItem(id: "pants_shorts",     category: .pants, name: tr("מִכְנָסַיִים קְצָרִים"), emoji: "🩳", rarity: .common, price: 24),
+        CosmeticItem(id: "pants_shorts",     category: .pants, name: tr("מִכְנָסַיִם קְצָרִים"), emoji: "🩳", rarity: .common, price: 24),
         CosmeticItem(id: "pants_skirt",      category: .pants, name: tr("חֲצָאִית"),         emoji: "👗", rarity: .rare,   price: 75),
         CosmeticItem(id: "pants_sweats",     category: .pants, name: tr("מִכְנְסֵי טְרֶנִינְג"),  emoji: "🩲", rarity: .common, price: 27),
         CosmeticItem(id: "pants_overalls",   category: .pants, name: tr("אוֹבֵרוֹל"),        emoji: "👨‍🌾", rarity: .epic,  price: 165),

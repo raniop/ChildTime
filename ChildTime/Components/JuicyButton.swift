@@ -65,7 +65,7 @@ struct JuicyButton<Label: View>: View {
         AppGradient.dreamy.ignoresSafeArea()
         VStack(spacing: 16) {
             JuicyButton(gradient: AppGradient.gold, glowColor: AppColor.starGold) {} label: {
-                Label(tr("יַאללָה!"), systemImage: "play.fill")
+                Label(tr("יַאלְלָה!"), systemImage: "play.fill")
             }
             JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {} label: {
                 Text(tr("בּוֹא נַתְחִיל"))

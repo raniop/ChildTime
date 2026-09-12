@@ -151,7 +151,7 @@
         }
       }
     },
-    " דק'": {
+    " דק׳": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -901,7 +901,7 @@
         }
       }
     },
-    "%@ לתקרה היומית (%lld דק') — מה %@ עכשיו נשמר למחר": {
+    "%@ לתקרה היומית (%lld דק׳) — מה %@ עכשיו נשמר למחר": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -1561,7 +1561,7 @@
         }
       }
     },
-    "%lld פרופילים • זמן, ניקוד, ואיפוסים": {
+    "%lld פרופילים • זמן, ניקוד ואיפוסים": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -2351,7 +2351,7 @@
         }
       }
     },
-    "אִימֵּיְל שֶׁל הַהוֹרֶה הַשֵּׁנִי": {
+    "אִימֵיל שֶׁל הַהוֹרֶה הַשֵּׁנִי": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -2377,6 +2377,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "If you've set screen time limits for your child in Apple's Family Sharing / Screen Time — turn them off. From now on, Tofy manages screen time; two systems running side by side will conflict."
+          }
+        }
+      }
+    },
+    "אִסְפוּ אֶת הַפְּרָס 🎁": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claim your prize 🎁"
           }
         }
       }
@@ -2481,6 +2491,16 @@
         }
       }
     },
+    "אֵילוּ אַפְּלִיקַצְיוֹת לִנְעֹל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Which apps to lock"
+          }
+        }
+      }
+    },
     "אֵילוּ אַפְּלִיקַצְיוֹת לִנְעוֹל?": {
       "localizations": {
         "en": {
@@ -2507,16 +2527,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Which apps are locked on this device"
-          }
-        }
-      }
-    },
-    "אֵילוּ אַפְלִיקַצְיוֹת לִנְעֹל": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Which apps to lock"
           }
         }
       }
@@ -2681,7 +2691,7 @@
         }
       }
     },
-    "אֶפְשָׁר לִבְחֹר קָטֵגוֹרְיָה שְׁלֵמָה (מִשְׂחָקִים, רְשָׁתוֹת חֶבְרָתִיּוֹת) אוֹ אַפְלִיקַצְיוֹת מְסֻיָּמוֹת. תָּמִיד אֶפְשָׁר לְשַׁנּוֹת.": {
+    "אֶפְשָׁר לִבְחֹר קָטֵגוֹרְיָה שְׁלֵמָה (מִשְׂחָקִים, רְשָׁתוֹת חֶבְרָתִיּוֹת) אוֹ אַפְּלִיקַצְיוֹת מְסֻיָּמוֹת. תָּמִיד אֶפְשָׁר לְשַׁנּוֹת.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -2947,16 +2957,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Astronauts, rockets, and NASA missions"
-          }
-        }
-      }
-    },
-    "אַסְפוּ אֶת הַפְּרָס 🎁": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claim your prize 🎁"
           }
         }
       }
@@ -3951,16 +3951,6 @@
         }
       }
     },
-    "בְּחֲרוּ קוֹד הוֹרֶה": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose a parent code"
-          }
-        }
-      }
-    },
     "בְּחִירַת אַפְּלִיקַצְיוֹת": {
       "localizations": {
         "en": {
@@ -4121,22 +4111,22 @@
         }
       }
     },
+    "בְּעָיוֹת מִלּוּלִיּוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Word problems"
+          }
+        }
+      }
+    },
     "בְּעָיוֹת מִלּוּלִיּוֹת בִּשְׁנֵי שְׁלַבִּים": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Two-step word problems"
-          }
-        }
-      }
-    },
-    "בְּעָיוֹת מִלּוּלִיוֹת": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Word problems"
           }
         }
       }
@@ -4311,7 +4301,7 @@
         }
       }
     },
-    "בַּחֲרוּ אֶת הָאַפְּלִיקַצְיוֹת שֶׁיִּהְיוּ נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה — עַד שֶׁהַיֶּלֶד מַרְוִיחַ זְמַן מָסָךְ בְּטוֹפִּי. אֶפְשָׁר לְשַׁנּוֹת בְּכָל עֵת בְּהַגְדָּרוֹת הוֹרֶה.": {
+    "בַּחֲרוּ אֶת הָאַפְּלִיקַצְיוֹת שֶׁיִּהְיוּ נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה — עַד שֶׁהַיֶּלֶד מַרְוִיחַ זְמַן מָסָךְ בְּטוֹפִי. אֶפְשָׁר לְשַׁנּוֹת בְּכָל עֵת בְּהַגְדָּרוֹת הוֹרֶה.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -4357,6 +4347,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pick a topic and the game begins!"
+          }
+        }
+      }
+    },
+    "בַּחֲרוּ קוֹד הוֹרֶה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a parent code"
           }
         }
       }
@@ -4731,7 +4731,7 @@
         }
       }
     },
-    "בּוֹאוּ נְצַרֵף אֶת הַיְּלָדִים": {
+    "בּוֹאוּ נְצָרֵף אֶת הַיְּלָדִים": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -5711,76 +5711,6 @@
         }
       }
     },
-    "דק' למידה": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Learning min"
-          }
-        }
-      }
-    },
-    "דק' מסך היום": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Screen min today"
-          }
-        }
-      }
-    },
-    "דק' מתנה מכם": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gift min from you"
-          }
-        }
-      }
-    },
-    "דק' שהרוויח": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Min earned"
-          }
-        }
-      }
-    },
-    "דק' שהרוויחה": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Min earned"
-          }
-        }
-      }
-    },
-    "דק' שנוצלו": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Min used"
-          }
-        }
-      }
-    },
-    "דק' שנצברו": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Min earned"
-          }
-        }
-      }
-    },
     "דקות": {
       "localizations": {
         "en": {
@@ -5871,6 +5801,76 @@
         }
       }
     },
+    "דק׳ למידה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learning min"
+          }
+        }
+      }
+    },
+    "דק׳ מסך היום": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screen min today"
+          }
+        }
+      }
+    },
+    "דק׳ מתנה מכם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gift min from you"
+          }
+        }
+      }
+    },
+    "דק׳ שהרוויח": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Min earned"
+          }
+        }
+      }
+    },
+    "דק׳ שהרוויחה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Min earned"
+          }
+        }
+      }
+    },
+    "דק׳ שנוצלו": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Min used"
+          }
+        }
+      }
+    },
+    "דק׳ שנצברו": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Min earned"
+          }
+        }
+      }
+    },
     "דרך Apple": {
       "localizations": {
         "en": {
@@ -5921,16 +5921,6 @@
         }
       }
     },
-    "הֲבַנְתִּי": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Got it"
-          }
-        }
-      }
-    },
     "הֲבָנַת הַנִּקְרָא": {
       "localizations": {
         "en": {
@@ -5967,16 +5957,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Remove code"
-          }
-        }
-      }
-    },
-    "הִגַּעְתְּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You reached today's max! 🎉 You can keep learning — just without extra minutes"
           }
         }
       }
@@ -6047,6 +6027,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "You've used all of today's minutes.\nSee you tomorrow morning"
+          }
+        }
+      }
+    },
+    "הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You reached today's max! 🎉 You can keep learning — just without extra minutes"
           }
         }
       }
@@ -6221,26 +6211,6 @@
         }
       }
     },
-    "הִרְוַחְתְּ": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "you earned"
-          }
-        }
-      }
-    },
-    "הִרְוַחְתְּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You earned them — they're waiting in Tofy"
-          }
-        }
-      }
-    },
     "הִרְוַחְתָּ": {
       "localizations": {
         "en": {
@@ -6252,6 +6222,26 @@
       }
     },
     "הִרְוַחְתָּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You earned them — they're waiting in Tofy"
+          }
+        }
+      }
+    },
+    "הִרְוַחַתְּ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "you earned"
+          }
+        }
+      }
+    },
+    "הִרְוַחַתְּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6401,7 +6391,7 @@
         }
       }
     },
-    "הֵיי! אֲנִי טוֹפִּי! בּוֹא נֵצֵא לְהַרְפַּתְקָה": {
+    "הֵיי! אֲנִי טוֹפִי! בּוֹא נֵצֵא לְהַרְפַּתְקָה": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6421,7 +6411,7 @@
         }
       }
     },
-    "הֵיי! חִכִּיתִי לְךָ... אֲנִי טוֹפִּי! 💫": {
+    "הֵיי! חִכִּיתִי לְךָ... אֲנִי טוֹפִי! 💫": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6537,16 +6527,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Is %@ %@?"
-          }
-        }
-      }
-    },
-    "הַאַרְנָק שֶׁלָּכֶם": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your wallet"
           }
         }
       }
@@ -6671,6 +6651,16 @@
         }
       }
     },
+    "הַהַזְמָנָה מַמְתִּינָה לְאִשּׁוּר (Ask to Buy)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order waiting for approval (Ask to Buy)"
+          }
+        }
+      }
+    },
     "הַהַזְמָנָה נִשְׁלְחָה לְאִשּׁוּר. הִיא תִּכָּנֵס לְתֹקֶף בָּרֶגַע שֶׁתְּאֻשַּׁר.": {
       "localizations": {
         "en": {
@@ -6681,7 +6671,7 @@
         }
       }
     },
-    "הַהַזְמָנָה נִשְׁמְרָה! אֶפְשָׁר לְהַזְמִין עוֹד אִימֵּיְל": {
+    "הַהַזְמָנָה נִשְׁמְרָה! אֶפְשָׁר לְהַזְמִין עוֹד אִימֵיל": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6721,12 +6711,22 @@
         }
       }
     },
-    "הַהוֹרֶה הַשֵּׁנִי פָּשׁוּט יִתְחַבֵּר עִם הָאִימֵּיְל הַזֶּה — וְהַמִּשְׁפָּחָה תְּחַכֶּה לוֹ שָׁם, בְּלִי קוֹדִים.": {
+    "הַהוֹרֶה הַשֵּׁנִי פָּשׁוּט יִתְחַבֵּר עִם הָאִימֵיל הַזֶּה — וְהַמִּשְׁפָּחָה תְּחַכֶּה לוֹ שָׁם, בְּלִי קוֹדִים.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The other parent just signs in with this email — the family will be waiting for them there, no codes needed."
+          }
+        }
+      }
+    },
+    "הַזְּמַן הַזֶּה שֶׁלְּךָ — רַק אַתָּה פּוֹתֵחַ אוֹתוֹ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This time is yours — only you can unlock it"
           }
         }
       }
@@ -6807,16 +6807,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Invite"
-          }
-        }
-      }
-    },
-    "הַזְמַן הַזֶּה שֶׁלְּךָ — רַק אַתָּה פּוֹתֵחַ אוֹתוֹ": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This time is yours — only you can unlock it"
           }
         }
       }
@@ -6961,16 +6951,6 @@
         }
       }
     },
-    "הַחֵל עַל כָּל הַנּוֹשְׂאִים": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apply to all topics"
-          }
-        }
-      }
-    },
     "הַחֹדֶשׁ": {
       "localizations": {
         "en": {
@@ -7021,7 +7001,7 @@
         }
       }
     },
-    "הַיֶּלֶד מַכִּיר אֶת הַמִּשְׂחָק הַכִּי אָהוּב בָּעוֹלָם: קְבוּצוֹת וְשַׂחְקָנִים מִיִּשְׂרָאֵל וּמֵהָעוֹלָם, מְדִינוֹת וְתַחֲרֻיּוֹת, חֻקִּים, הִיסְטוֹרְיָה וְקְצָת חֶשְׁבּוֹן שֶׁל תּוֹצָאוֹת — וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.": {
+    "הַיֶּלֶד מַכִּיר אֶת הַמִּשְׂחָק הַכִּי אָהוּב בָּעוֹלָם: קְבוּצוֹת וְשַׂחְקָנִים מִיִּשְׂרָאֵל וּמֵהָעוֹלָם, מְדִינוֹת וְתַחֲרֻיּוֹת, חֻקִּים, הִיסְטוֹרְיָה וּקְצָת חֶשְׁבּוֹן שֶׁל תּוֹצָאוֹת — וְעַל כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחִים דַּקּוֹת מִשְׂחָק, בְּדִיּוּק כְּמוֹ בְּכָל עוֹלָם.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -7411,7 +7391,7 @@
         }
       }
     },
-    "הַמַּכְשִׁיר יַחֲזֹר לְמָסָךְ הַפְּתִיחָה וְיִשְׁאַל שׁוּב מִי מִשְׁתַּמֵּשׁ בּוֹ. הַמִּשְׁפָּחָה וְהַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמָרוֹת.": {
+    "הַמַּכְשִׁיר יַחֲזֹר לְמָסַךְ הַפְּתִיחָה וְיִשְׁאַל שׁוּב מִי מִשְׁתַּמֵּשׁ בּוֹ. הַמִּשְׁפָּחָה וְהַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמָרוֹת.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -7621,7 +7601,7 @@
         }
       }
     },
-    "הַפְעִילוּ כְּדֵי לְקַבֵּל עֲדְכּוּנִים עַל הַיֶּלֶד": {
+    "הַפְעִילוּ כְּדֵי לְקַבֵּל עִדְכּוּנִים עַל הַיֶּלֶד": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -7891,7 +7871,7 @@
         }
       }
     },
-    "הַשָּׂפָה מִשְׁתַּנָּה מִיָּד בְּכָל הָאַפְּלִיקַצְיָה: טְקְסְטִים, כִּוּוּן, הַקְרָאָה וּשְׁאֵלוֹת.": {
+    "הַשָּׂפָה מִשְׁתַּנָּה מִיָּד בְּכָל הָאַפְּלִיקַצְיָה: טֶקְסְטִים, כִּוּוּן, הַקְרָאָה וּשְׁאֵלוֹת.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -7951,7 +7931,7 @@
         }
       }
     },
-    "הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וְזִכּוּ בְּפַרְסִים": {
+    "הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וּזְכוּ בִּפְרָסִים": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -8061,6 +8041,16 @@
         }
       }
     },
+    "הָאַרְנָק שֶׁלָּכֶם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your wallet"
+          }
+        }
+      }
+    },
     "הָאָדוֹם": {
       "localizations": {
         "en": {
@@ -8071,12 +8061,12 @@
         }
       }
     },
-    "הָהַזְמָנָה מַמְתִּינָה לְאִשּׁוּר (Ask to Buy)": {
+    "הָחֵל עַל כָּל הַנּוֹשְׂאִים": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Order waiting for approval (Ask to Buy)"
+            "value": "Apply to all topics"
           }
         }
       }
@@ -9461,32 +9451,22 @@
         }
       }
     },
-    "וָאוּ — נִצַּלְתָּ אֶת כָּל %lld הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wow — you used all %lld of today's minutes! 🏆"
-          }
-        }
-      }
-    },
-    "וָואו, מְצֻיָּן! 🏆": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wow, excellent! 🏆"
-          }
-        }
-      }
-    },
     "וָואו, נִצַּחְתָּ! 🤩": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Wow, you won! 🤩"
+          }
+        }
+      }
+    },
+    "וָואוּ — נִצַּלְתָּ אֶת כָּל %lld הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wow — you used all %lld of today's minutes! 🏆"
           }
         }
       }
@@ -9507,6 +9487,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wow! 5 in a row 🔥"
+          }
+        }
+      }
+    },
+    "וָואוּ, מְצֻיָּן! 🏆": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wow, excellent! 🏆"
           }
         }
       }
@@ -9551,7 +9541,7 @@
         }
       }
     },
-    "זְמַן הַמָּסָךְ מְנוּהָל בְּטוֹפִּי": {
+    "זְמַן הַמָּסָךְ מְנוּהָל בְּטוֹפִי": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -10151,16 +10141,6 @@
         }
       }
     },
-    "חִינָּם": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Free"
-          }
-        }
-      }
-    },
     "חִכִּיתִי לְךָ!": {
       "localizations": {
         "en": {
@@ -10201,7 +10181,17 @@
         }
       }
     },
-    "חִנּוּךְ פִינַנְסִי": {
+    "חִנָּם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free"
+          }
+        }
+      }
+    },
+    "חִנּוּךְ פִּינַנְסִי": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -10801,7 +10791,7 @@
         }
       }
     },
-    "טִיפּ: הַהוֹרֶה שֶׁכְּבָר בִּפְנִים יָכוֹל לְהַזְמִין אֶתְכֶם בְּאִימֵּיְל — וְאָז הַמָּסָךְ הַזֶּה נֶעֱלָם לְגַמְרֵי 😊": {
+    "טִיפּ: הַהוֹרֶה שֶׁכְּבָר בִּפְנִים יָכוֹל לְהַזְמִין אֶתְכֶם בְּאִימֵיל — וְאָז הַמָּסָךְ הַזֶּה נֶעֱלָם לְגַמְרֵי 😊": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -10957,16 +10947,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tofy"
-          }
-        }
-      }
-    },
-    "טופי +": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tofy+"
           }
         }
       }
@@ -11271,6 +11251,16 @@
         }
       }
     },
+    "יַאלְלָה!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let's go!"
+          }
+        }
+      }
+    },
     "יַאלְלָה, %@ נְשַׂחֵק! 🚀": {
       "localizations": {
         "en": {
@@ -11281,7 +11271,7 @@
         }
       }
     },
-    "יַאלְלָה, בּוֹאוּ נַאֲסֹף! 🚀": {
+    "יַאלְלָה, בּוֹאוּ נֶאֱסֹף! 🚀": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -11297,16 +11287,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Let's get started! 🚀"
-          }
-        }
-      }
-    },
-    "יַאללָה!": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let's go!"
           }
         }
       }
@@ -11901,7 +11881,7 @@
         }
       }
     },
-    "כְּרִישִׁים, לִוְיְתָנִים, שׁוּנִיּוֹת, וּמִי חַי אֵיפֹה": {
+    "כְּרִישִׁים, לִוְיְתָנִים, שׁוּנִיּוֹת וּמִי חַי אֵיפֹה": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -12021,7 +12001,7 @@
         }
       }
     },
-    "כִּתָּה ה וּמַעְלָה": {
+    "כִּתָּה ה׳ וּמַעְלָה": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -12351,6 +12331,16 @@
         }
       }
     },
+    "כָּל הַכָּבוֹד! עוֹד נְקוּדּוֹת וְכוֹכָבִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Great job! More points and stars"
+          }
+        }
+      }
+    },
     "כָּל הַכָּבוֹד! 🎉": {
       "localizations": {
         "en": {
@@ -12577,16 +12567,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "orange"
-          }
-        }
-      }
-    },
-    "כֹּל הַכָּבוֹד! עוֹד נְקוּדּוֹת וְכוֹכָבִים": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Great job! More points and stars"
           }
         }
       }
@@ -12841,7 +12821,7 @@
         }
       }
     },
-    "כל האפליקציות ייחסמו עד שהילד מרוויח זמן — חוץ מהאפליקציות שתבחרו כ\"מותרות\". חובה לכלול את ChildTime ברשימה.": {
+    "כל האפליקציות ייחסמו עד שהילד מרוויח זמן — חוץ מהאפליקציות שתבחרו כ\"מותרות\". חובה לכלול את טופי ברשימה.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -12901,7 +12881,7 @@
         }
       }
     },
-    "כל טעות מורידה %lld דק' (חצי מתגמול תשובה נכונה) — אבל הילד יכול להחזיר את הזמן מיד: תשובה נכונה ונקייה בשאלה הבאה מחזירה את כל הזמן שירד. אף פעם לא מוצג לילד \"טעית\" או \"הפסדת\".": {
+    "כל טעות מורידה %lld דק׳ (חצי מתגמול תשובה נכונה) — אבל הילד יכול להחזיר את הזמן מיד: תשובה נכונה ונקייה בשאלה הבאה מחזירה את כל הזמן שירד. אף פעם לא מוצג לילד \"טעית\" או \"הפסדת\".": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -13771,16 +13751,6 @@
         }
       }
     },
-    "לֹא עַכְשָׁיו": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not now"
-          }
-        }
-      }
-    },
     "לא הצלחנו לאשר את המטלה כרגע. בדקו את החיבור לאינטרנט ונסו שוב.": {
       "localizations": {
         "en": {
@@ -14081,7 +14051,7 @@
         }
       }
     },
-    "לוֹמֵד דֶּרֶךְ נִסּוּי וְטָעִיָּה": {
+    "לוֹמֵד דֶּרֶךְ נִסּוּי וּטְעִיָּה": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -14091,7 +14061,7 @@
         }
       }
     },
-    "לוֹמֵד מִכַּמָּה כִּוּוּנִים — נַמְשִׁיךְ לְלַמֵּד אֵיךְ הוּא לוֹמֵד הֲכִי טוֹב.": {
+    "לוֹמֵד מִכַּמָּה כִּוּוּנִים — נַמְשִׁיךְ לִלְמֹד אֵיךְ הוּא לוֹמֵד הֲכִי טוֹב.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -14451,7 +14421,7 @@
         }
       }
     },
-    "מְדַלֵּג עַל שְׁאֵלוֹת קָשׁוֹת%@ — שָׁוֶה לְעוֹדֵד וּלְהָקֵל אֶת הָרָמָה.": {
+    "מְדַלֵּג עַל שְׁאֵלוֹת קָשׁוֹת%@ — שָׁוֶה לְעוֹדֵד וּלְהוֹרִיד אֶת הָרָמָה.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -14537,6 +14507,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Special"
+          }
+        }
+      }
+    },
+    "מְכִינִים אֶת הַמִּשְׂחָק…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Setting up the game…"
           }
         }
       }
@@ -14821,22 +14801,22 @@
         }
       }
     },
-    "מִכְנָסַיִים קְצָרִים": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shorts"
-          }
-        }
-      }
-    },
     "מִכְנָסַיִם": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Pants"
+          }
+        }
+      }
+    },
+    "מִכְנָסַיִם קְצָרִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shorts"
           }
         }
       }
@@ -14981,22 +14961,22 @@
         }
       }
     },
-    "מִשְׁקָפַיִים עֲגוּלִים": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Round glasses"
-          }
-        }
-      }
-    },
     "מִשְׁקָפַיִם": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Glasses"
+          }
+        }
+      }
+    },
+    "מִשְׁקָפַיִם עֲגוּלִים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Round glasses"
           }
         }
       }
@@ -15371,16 +15351,6 @@
         }
       }
     },
-    "מַכְינִים אֶת הַמִּשְׂחָק…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Setting up the game…"
-          }
-        }
-      }
-    },
     "מַכְשִׁיר": {
       "localizations": {
         "en": {
@@ -15581,7 +15551,7 @@
         }
       }
     },
-    "מַתְאִים לִשְׁעוֹן מְעוֹרֵר, מַצְלֵמָה, טֶלֶפוֹן אוֹ אַפְלִיקַצְיָה לִמּוּדִית שֶׁתָּמִיד מֻתֶּרֶת.": {
+    "מַתְאִים לִשְׁעוֹן מְעוֹרֵר, מַצְלֵמָה, טֶלֶפוֹן אוֹ אַפְּלִיקַצְיָה לִמּוּדִית שֶׁתָּמִיד מֻתֶּרֶת.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -15971,7 +15941,7 @@
         }
       }
     },
-    "מוֹפִיעַ בְּמָסָךְ הַהוֹרִים וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה.": {
+    "מוֹפִיעַ בְּמָסַךְ הַהוֹרִים וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -16541,6 +16511,16 @@
         }
       }
     },
+    "נְעַל": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock"
+          }
+        }
+      }
+    },
     "נְעַל וְאַפֵּס": {
       "localizations": {
         "en": {
@@ -16567,16 +16547,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lock now (remotely)"
-          }
-        }
-      }
-    },
-    "נְעוֹל": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lock"
           }
         }
       }
@@ -16821,7 +16791,7 @@
         }
       }
     },
-    "נִשְׂמַח לִשְׁמוֹעַ מָה דַּעְתְּכֶם — מָה לְשַׁפֵּר, מָה חָסֵר, אוֹ כָּל רַעְיוֹן שֶׁיֵּשׁ לָכֶם. כָּל מִלָּה עוֹזֶרֶת לָנוּ לְשַׁפֵּר אֶת ChildTime לַיְּלָדִים.": {
+    "נִשְׂמַח לִשְׁמוֹעַ מָה דַּעְתְּכֶם — מָה לְשַׁפֵּר, מָה חָסֵר, אוֹ כָּל רַעְיוֹן שֶׁיֵּשׁ לָכֶם. כָּל מִלָּה עוֹזֶרֶת לָנוּ לְשַׁפֵּר אֶת טוֹפִי לַיְּלָדִים.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -17191,7 +17161,7 @@
         }
       }
     },
-    "נצבר היום: %lld / %lld דק'": {
+    "נצבר היום: %lld / %lld דק׳": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -18271,7 +18241,7 @@
         }
       }
     },
-    "עוֹד לֹא נֶעֶנוּ שְׁאֵלוֹת %@.": {
+    "עוֹד לֹא נַעֲנוּ שְׁאֵלוֹת %@.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -18881,22 +18851,22 @@
         }
       }
     },
-    "פִידְבֵּק וְהַצָּעוֹת": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feedback & ideas"
-          }
-        }
-      }
-    },
     "פִידְבֶּק": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Feedback"
+          }
+        }
+      }
+    },
+    "פִידְבֶּק וְהַצָּעוֹת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feedback & ideas"
           }
         }
       }
@@ -19181,7 +19151,7 @@
         }
       }
     },
-    "פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן, ועונש טעויות. לא ימחק שמות, פרופילים או פריטי קוסמטיקה.": {
+    "פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן ועונש טעויות. לא יימחקו שמות, פרופילים או פריטי קוסמטיקה.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -19521,7 +19491,7 @@
         }
       }
     },
-    "צָהוֹב-זָהוֹב": {
+    "צָהוֹב-זָהוּב": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -20921,7 +20891,7 @@
         }
       }
     },
-    "שְׁאֵלוֹת וְאֲחוּז הַצְלָחָה לְכָל יוֹם": {
+    "שְׁאֵלוֹת וַאֲחוּז הַצְלָחָה לְכָל יוֹם": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -20977,16 +20947,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fractions"
-          }
-        }
-      }
-    },
-    "שְׁוֶה לְצַיֵּן אֶת זֶה בְּקוֹל — יְלָדִים מַמְשִׁיכִים לְהִשְׁתַּפֵּר בְּמַה שֶׁמְּשַׁבְּחִים אוֹתָם עָלָיו.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Worth saying out loud — kids keep improving at what they're praised for."
           }
         }
       }
@@ -21091,7 +21051,7 @@
         }
       }
     },
-    "שְׁנֵיכֶם תִּרְאוּ אֶת אוֹתָם יְלָדִים וְאֶת אוֹתָהּ הַהִתְקַדְּמוּת.": {
+    "שְׁנֵיכֶם תִּרְאוּ אֶת אוֹתָם הַיְּלָדִים וְאֶת אוֹתָהּ הַהִתְקַדְּמוּת.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -21261,7 +21221,7 @@
         }
       }
     },
-    "שִׂחַקְתָּ אֶת 30 הַשְּׁאֵלוֹת הַחִנָּם. הִירָשְׁמוּ כְּדֵי לְהַמְשִׁיךְ לְשַׂחֵק לְלֹא הַגְבָּלָה — וְלִשְׁמוֹר אֶת הַהִתְקַדְּמוּת.": {
+    "שִׂחַקְתָּ אֶת 30 הַשְּׁאֵלוֹת הַחִנָּם. הֵירָשְׁמוּ כְּדֵי לְהַמְשִׁיךְ לְשַׂחֵק לְלֹא הַגְבָּלָה — וְלִשְׁמוֹר אֶת הַהִתְקַדְּמוּת.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -21427,6 +21387,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "equals"
+          }
+        }
+      }
+    },
+    "שָׁוֶה לְצַיֵּן אֶת זֶה בְּקוֹל — יְלָדִים מַמְשִׁיכִים לְהִשְׁתַּפֵּר בְּמַה שֶׁמְּשַׁבְּחִים אוֹתָם עָלָיו.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Worth saying out loud — kids keep improving at what they're praised for."
           }
         }
       }
@@ -21741,7 +21711,7 @@
         }
       }
     },
-    "שדרג ל-טופי+": {
+    "שדרג לטופי+": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -22461,7 +22431,7 @@
         }
       }
     },
-    "⏳ %lld שׁנִיּוֹת מֵעֲנֶה": {
+    "⏳ %lld שְׁנִיּוֹת מַעֲנֶה": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -22531,7 +22501,7 @@
         }
       }
     },
-    "⚠️ חשוב: בחרו אילו אפליקציות יישארו פתוחות — והקפידו לכלול את ChildTime (וכן אפליקציות חיוניות כמו טלפון). עד שתבחרו — לא ייחסם כלום, כדי לא לנעול את המכשיר בטעות.": {
+    "⚠️ חשוב: בחרו אילו אפליקציות יישארו פתוחות — והקפידו לכלול את טופי (וכן אפליקציות חיוניות כמו טלפון). עד שתבחרו — לא ייחסם כלום, כדי לא לנעול את המכשיר בטעות.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -22631,7 +22601,7 @@
         }
       }
     },
-    "✉️ הַדֶּרֶךְ הַקַּלָּה: הַזְמִינוּ בְּאִימֵּיְל": {
+    "✉️ הַדֶּרֶךְ הַקַּלָּה: הַזְמִינוּ בְּאִימֵיל": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -23021,22 +22991,22 @@
         }
       }
     },
-    "🎮 %lld דק' %@ מלמידה  ·  💝 %lld דק' מתנה מכם": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "🎮 %lld min %@ from learning  ·  💝 %lld gift min from you"
-          }
-        }
-      }
-    },
     "🎮 %lld דק׳": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "🎮 %lld min"
+          }
+        }
+      }
+    },
+    "🎮 %lld דק׳ %@ מלמידה  ·  💝 %lld דק׳ מתנה מכם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🎮 %lld min %@ from learning  ·  💝 %lld gift min from you"
           }
         }
       }
