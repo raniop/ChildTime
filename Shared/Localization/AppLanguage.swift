@@ -205,6 +205,25 @@ enum LocalizedCache {
 }
 
 enum Localization {
+    /// A word placed after a prefix vocalised with shva — לְ, בְּ, כְּ — drops the
+    /// dagesh lene of an initial בג״ד כפ״ת letter: "מִזְמוֹר לְדָוִד", never לְדָּוִד.
+    /// Without this the app wrote "לְדָּנָה" and "לְכִּתָּה א׳" wherever it glued a
+    /// prefix onto a vocalised name. Anything that is not Hebrew comes back as is.
+    static func afterShvaPrefix(_ word: String) -> String {
+        var scalars = Array(word.unicodeScalars)
+        guard let first = scalars.first, "בגדכפת".unicodeScalars.contains(first) else { return word }
+        // The dagesh is not necessarily the next scalar: canonical order sorts the
+        // marks by combining class, so "תָּמָר" is ת + qamats (U+05B8) + dagesh
+        // (U+05BC). Walk the whole run of marks on this letter and drop the dagesh.
+        var i = 1
+        while i < scalars.count, (0x0591...0x05C7).contains(scalars[i].value) {
+            if scalars[i].value == 0x05BC { scalars.remove(at: i); break }
+            i += 1
+        }
+        var out = String.UnicodeScalarView(); out.append(contentsOf: scalars)
+        return String(out)
+    }
+
     /// Drop U+2068 (first-strong isolate) and the U+2069 that closes it, leaving
     /// the app's own left-to-right isolates (U+2066 … U+2069, used for math) intact.
     static func removingInsertedIsolates(_ s: String) -> String {

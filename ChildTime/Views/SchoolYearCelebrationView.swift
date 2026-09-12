@@ -36,7 +36,7 @@ struct SchoolYearCelebrationView: View {
 
                 (Text("\(childName) ")
                     .foregroundColor(Color(hex: "FFD23F"))
-                 + Text(tr("\(risesVerb) לְ\(gradeName)!"))
+                 + Text(tr("\(risesVerb) לְ\(Localization.afterShvaPrefix(gradeName))!"))
                     .foregroundColor(.white))
                     .font(.system(size: 34, weight: .black, design: .rounded))
                     .shadow(color: .black.opacity(0.35), radius: 5, y: 3)
@@ -310,7 +310,7 @@ struct ParentSchoolYearPartyView: View {
                         if p.grade != nil {
                             (Text("\(p.name) ")
                                 .foregroundColor(Color(hex: "FFD23F"))
-                             + Text(tr("\(p.gender == .girl ? tr("עוֹלָה") : tr("עוֹלֶה")) לְ\(Profile.gradeDisplayName(p.effectiveGrade))! ⭐️"))
+                             + Text(tr("\(p.gender == .girl ? tr("עוֹלָה") : tr("עוֹלֶה")) לְ\(Localization.afterShvaPrefix(Profile.gradeDisplayName(p.effectiveGrade)))! ⭐️"))
                                 .foregroundColor(.white))
                                 .font(.system(size: 23, weight: .black, design: .rounded))
                                 .shadow(color: .black.opacity(0.35), radius: 5, y: 3)

@@ -543,8 +543,13 @@ enum CurriculumMath {
 
     private static var kids: [Kid] {
         switch LanguageStore.shared.current {
-        case .he: return [Kid(tr("דָּנָה"), girl: true), Kid(tr("יוֹסִי"), girl: false), Kid(tr("נֹעָה"), girl: true),
-                          Kid(tr("אִיתַי"), girl: false), Kid(tr("תָּמָר"), girl: true), Kid(tr("עוֹמֶר"), girl: false)]
+        // Hebrew declines too, quietly: after the לְ of "לְדָנָה" a בג״ד כפ״ת letter
+        // drops its dagesh, so the plain name cannot be glued on as it stands.
+        // Each name's gender is spelled out, never inferred: "יוֹסִי קָנְתָה" is
+        // exactly the bug this table exists to prevent.
+        case .he: return [("דָּנָה", true), ("יוֹסִי", false), ("נֹעָה", true),
+                          ("אִיתַי", false), ("תָּמָר", true), ("עוֹמֶר", false)]
+            .map { Kid(tr($0.0), of: Localization.afterShvaPrefix(tr($0.0)), girl: $0.1) }
         case .ru: return [Kid("Даша", of: "Даши", girl: true), Kid("Миша", of: "Миши", girl: false),
                           Kid("Аня", of: "Ани", girl: true),   Kid("Лёва", of: "Лёвы", girl: false),
                           Kid("Соня", of: "Сони", girl: true), Kid("Марк", of: "Марка", girl: false)]

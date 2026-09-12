@@ -182,17 +182,30 @@ extension HeroVideoUITests {
         app.launchEnvironment["DEMO_SCREEN"] = "mathgrade"
         app.launchEnvironment["DEMO_WORLD"] = "math"
         app.launchEnvironment["DEMO_GRADE"] = "3"
-        app.launchEnvironment["DEMO_LANG"] = "he"
+        app.launchEnvironment["DEMO_LANG"] = lang
         app.launch()
         Thread.sleep(forTimeInterval: 4.0)
 
         let screen = app.windows.element(boundBy: 0).frame
+
+        /// Every element is re-queried one at a time. Reading a whole
+        /// `allElementsBoundByIndex` array mid-animation throws "no matches found
+        /// for element at index N" — the question swap is exactly such a moment.
+        func labels(_ query: XCUIElementQuery, in band: ClosedRange<CGFloat>) -> [(String, CGFloat)] {
+            var out: [(String, CGFloat)] = []
+            for i in 0..<query.count {
+                let e = query.element(boundBy: i)
+                guard e.exists else { continue }
+                let y = e.frame.midY
+                guard band.contains(y / screen.height) else { continue }
+                if !e.label.isEmpty { out.append((e.label, y)) }
+            }
+            return out
+        }
+        // Every prompt carries the "?" of "3 × 8 + 13 = ?" or of a word problem.
         func promptNow() -> String {
-            app.staticTexts.allElementsBoundByIndex
-                .filter { $0.frame.midY > screen.height * 0.24 && $0.frame.midY < screen.height * 0.45 }
-                .map(\.label)
-                .filter { !$0.contains("·") && !$0.contains("בַּחֲרוּ") && $0.count > 4 }
-                .max(by: { $0.count < $1.count }) ?? ""
+            labels(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "?")), in: 0.20...0.48)
+                .map(\.0).max(by: { $0.count < $1.count }) ?? ""
         }
 
         var seen: [String] = []
@@ -202,7 +215,7 @@ extension HeroVideoUITests {
             for _ in 0..<20 { prompt = promptNow(); if !prompt.isEmpty { break }; Thread.sleep(forTimeInterval: 0.5) }
             guard !prompt.isEmpty else { print("ROUND \(round): לא נמצאה שאלה"); break }
             // 💫 a bonus question is MEANT to stay put on a wrong answer.
-            let bonus = app.staticTexts.allElementsBoundByIndex.contains { $0.label.contains("💫") }
+            let bonus = !labels(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "💫")), in: 0...1).isEmpty
             if prompt == seen.last, !bonus { repeats.append("\(round): \(prompt)") }
             seen.append(prompt)
 
@@ -210,12 +223,16 @@ extension HeroVideoUITests {
             // ("44, 1") and they carry no identifier. Anything else in that band
             // is a tool button — the 🚩 flag one really does file a report and
             // email the team, so the filter here is a safety rule, not a detail.
-            let options = app.buttons.allElementsBoundByIndex
-                .filter { $0.isHittable && $0.identifier.isEmpty
-                          && $0.frame.midY > screen.height * 0.45 && $0.frame.midY < screen.height * 0.80
-                          && ($0.label.first?.isNumber ?? false) }
-            guard let pick = options.first else { print("ROUND \(round): אין אפשרויות"); break }
-            pick.tap()
+            var picked = false
+            let buttons = app.buttons
+            for i in 0..<buttons.count {
+                let b = buttons.element(boundBy: i)
+                guard b.exists, b.identifier.isEmpty, b.isHittable else { continue }
+                let y = b.frame.midY / screen.height
+                guard y > 0.45, y < 0.80, b.label.first?.isNumber == true else { continue }
+                b.tap(); picked = true; break
+            }
+            guard picked else { print("ROUND \(round): אין אפשרויות"); break }
             Thread.sleep(forTimeInterval: 2.8)
         }
         print("PROMPTS SEEN: \(seen)")
