@@ -216,6 +216,16 @@ final class ProfileStore: ObservableObject {
                 } else {
                     merged.character3DID = remote.character3DID ?? working[idx].character3DID
                 }
+                // 🌍 Language: the same fresher-stamp rule as the character —
+                // a parent's stale roster upload must not undo a switch made on
+                // the device a moment ago. Last press wins.
+                let localLangStamp = working[idx].languageUpdatedAt ?? .distantPast
+                let remoteLangStamp = remote.languageUpdatedAt ?? .distantPast
+                if localLangStamp > remoteLangStamp {
+                    merged.language = working[idx].language
+                    merged.languageUpdatedAt = working[idx].languageUpdatedAt
+                    localCharacterWinners.append(merged)     // heal the stale cloud doc
+                }
                 // Play-protection code: a MISSING remote field (pre-field doc /
                 // stale writer) must not wipe a code the child just set locally —
                 // but an EMPTY string is a deliberate clear (parent reset), and
@@ -242,6 +252,23 @@ final class ProfileStore: ObservableObject {
         for winner in localCharacterWinners {
             HouseholdManager.shared.upsertChild(winner)
         }
+        applyRemoteLanguageIfBound()
+    }
+
+    /// 🌍 A child's device follows the language on its OWN record. Only the bound
+    /// child device acts: a parent's phone showing five children must not flip to
+    /// whatever the last one of them is set to.
+    private func applyRemoteLanguageIfBound() {
+        let settings = ParentSettings.shared
+        guard settings.deviceRole == .child,
+              let boundID = settings.joinedChildID,
+              let mine = profiles.first(where: { $0.id.uuidString == boundID }),
+              let raw = mine.language,
+              let wanted = AppLanguage(rawValue: raw),
+              wanted != LanguageStore.shared.current else { return }
+        LanguageStore.shared.set(wanted)
+        // Everything outside the app follows too — the same list the in-app picker runs.
+        LanguageStore.reloadEverythingOutsideTheApp()
     }
 
     /// Remove local profiles the cloud household no longer contains — ghosts

@@ -3,7 +3,7 @@ import WidgetKit
 
 /// 🌍 Parent settings → Language.
 ///
-/// Each language is listed in its own name ("עברית", "English"), so the list is
+/// Each language is listed in its own name ("עברית", "English", "Русский"), so the list is
 /// readable whatever the app is showing now. Choosing one switches the whole app
 /// at once — text, direction, voice — without a restart: the root view is keyed
 /// on the language and rebuilds.
@@ -40,17 +40,15 @@ struct LanguagePickerView: View {
             // Let the sheet close before the tree rebuilds in the new direction.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 language.set(lang)
-                // Everything outside the app follows too: widgets, the shield screen, the watch.
-                WidgetCenter.shared.reloadAllTimelines()
-                ShieldBridge.refresh()
-                WatchBridge.shared.resendLastSnapshot()
-                // …and notifications: their buttons, and what the server sends.
-                PushManager.shared.configureCategories()
-                if let token = PushManager.shared.currentToken { PushManager.shared.uploadFCMToken(token) }
+                // On a child's device the choice belongs to that child's record,
+                // so the parent's dashboard shows it and a later parent change
+                // can be compared against it. Last press wins.
+                LanguageStore.stampActiveChild(lang)
+                LanguageStore.reloadEverythingOutsideTheApp()
             }
         } label: {
             HStack(spacing: 12) {
-                Text(lang == .he ? "🇮🇱" : "🇺🇸").font(.system(size: 26))
+                Text(lang.flag).font(.system(size: 26))
                 Text(lang.nativeName)
                     .font(.system(size: 19, weight: .heavy, design: .rounded))
                     .foregroundStyle(GlassInk.primary)

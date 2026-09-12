@@ -85,6 +85,16 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// their device and synced via `ChildRecord`. nil → inherit the device's
     /// global setting; 0 → unlimited (no cap). Per-child so siblings can differ.
     var dailyCapMinutes: Int?
+    /// 🌍 The app language on THIS child's device — `AppLanguage.rawValue`.
+    /// nil → whatever that device already shows (the old behaviour).
+    ///
+    /// A parent sets it from their own phone; the child's device applies it on
+    /// the next sync. Whoever pressed last wins, which is what `languageUpdatedAt`
+    /// is for: the change made on the device stamps itself too, so a parent's
+    /// stale roster upload can never undo a choice made a moment ago on the
+    /// child's phone (the same rule `characterUpdatedAt` already gives the 3D pick).
+    var language: String?
+    var languageUpdatedAt: Date?
     /// Topics (worlds) the parent allows THIS child to learn. Drives BOTH the
     /// world cards on the home screen AND the Smart Feed's topic universe — so a
     /// parent who turns off English hides that world and stops English questions.
@@ -133,6 +143,8 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         learningLevel: LearningLevel = .developing,
         difficultyByTopic: [String: String] = [:],
         dailyCapMinutes: Int? = nil,
+        language: String? = nil,
+        languageUpdatedAt: Date? = nil,
         enabledTopics: Set<Topic> = Set(Topic.core),
         topicsVersion: Int = 2,
         playPIN: String? = nil,
@@ -152,6 +164,8 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.learningLevel = learningLevel
         self.difficultyByTopic = difficultyByTopic
         self.dailyCapMinutes = dailyCapMinutes
+        self.language = language
+        self.languageUpdatedAt = languageUpdatedAt
         self.enabledTopics = enabledTopics
         self.topicsVersion = topicsVersion
         self.playPIN = playPIN
@@ -181,6 +195,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         case id, name, gender, age, photoData, avatarPresetID, character3DID, characterUpdatedAt, createdAt
         case grade, gradeSchoolYear, gradeSetByChild, interests, learningLevel, difficultyByTopic, dailyCapMinutes, enabledTopics
         case topicsVersion
+        case language, languageUpdatedAt
         case playPIN
         case ownedPacks, packExpiry, disabledPacks
     }
@@ -203,6 +218,8 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.learningLevel = try c.decodeIfPresent(LearningLevel.self, forKey: .learningLevel) ?? .developing
         self.difficultyByTopic = try c.decodeIfPresent([String: String].self, forKey: .difficultyByTopic) ?? [:]
         self.dailyCapMinutes = try c.decodeIfPresent(Int.self, forKey: .dailyCapMinutes)
+        self.language = try c.decodeIfPresent(String.self, forKey: .language)
+        self.languageUpdatedAt = try? c.decodeIfPresent(Date.self, forKey: .languageUpdatedAt)
         // Older profiles (pre per-child topics) decode to "everything enabled".
         // LENIENT on the values: an unknown topic rawValue (data written by a
         // NEWER build that added a topic) silently drops instead of failing the

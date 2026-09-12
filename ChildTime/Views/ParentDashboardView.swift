@@ -78,6 +78,7 @@ struct ParentDashboardView: View {
     @State private var remoteGrantMsg: String?
     /// Live remote-lock status sheet — real send/ack progress, not a static alert.
     @State private var commandStatus: RemoteCommandStatusRequest?
+    @State private var languageProfile: Profile?
     @State private var worldsProfile: Profile?
     @State private var showingFeedback = false
     @State private var qrChild: Profile? = nil
@@ -352,6 +353,11 @@ struct ParentDashboardView: View {
                 }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .app)
+            }
+            .sheet(item: $languageProfile) { p in
+                ChildLanguageView(profileID: p.id)
+                    .environmentObject(profiles)
+                    .environment(\.layoutDirection, .app)
             }
             .sheet(item: $worldsProfile) { p in
                 ChildWorldsView(profileID: p.id)
@@ -964,6 +970,11 @@ struct ParentDashboardView: View {
                         worldsProfile = profile
                     } label: {
                         Label(tr("עולמות פעילים"), systemImage: "square.grid.2x2.fill")
+                    }
+                    Button {
+                        languageProfile = profile
+                    } label: {
+                        Label(tr("שפה במכשיר של הילד"), systemImage: "globe")
                     }
                     Button {
                         friendsProfile = profile

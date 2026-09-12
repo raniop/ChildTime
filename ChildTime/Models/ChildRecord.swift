@@ -124,6 +124,11 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// Per-child daily screen-time cap in minutes (parent-set, authoritative on
     /// the parent's device). nil → inherit the device global; 0 → unlimited.
     var dailyCapMinutes: Int?
+    /// 🌍 The app language on this child's device (`AppLanguage.rawValue`), set
+    /// either by the parent from the dashboard or on the device itself.
+    /// `languageUpdatedAt` decides between them: last press wins.
+    var language: String?
+    var languageUpdatedAt: Date?
     /// Topics (worlds) the parent enabled for this child (topic.rawValues).
     /// nil → all topics enabled (also the backward-compatible default).
     var enabledTopics: [String]?
@@ -162,6 +167,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.photoData = Self.compressForSync(profile.photoData)
         self.difficultyByTopic = profile.difficultyByTopic.isEmpty ? nil : profile.difficultyByTopic
         self.dailyCapMinutes = profile.dailyCapMinutes
+        self.language = profile.language
+        self.languageUpdatedAt = profile.languageUpdatedAt
         // Store only when the parent narrowed it (all-enabled stays nil → smaller doc).
         // Only base topics are stored (packs are gated by `packs`, not here).
         let base = profile.enabledTopics.filter { !$0.isPack }
@@ -200,6 +207,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             learningLevel: LearningLevel(rawValue: learningLevel) ?? .developing,
             difficultyByTopic: difficultyByTopic ?? [:],
             dailyCapMinutes: dailyCapMinutes,
+            language: language,
+            languageUpdatedAt: languageUpdatedAt,
             enabledTopics: topics,
             topicsVersion: 2,
             playPIN: playPIN,

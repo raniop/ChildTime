@@ -24,6 +24,15 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
         }
     }
 
+    /// The flag shown beside the name in a picker.
+    var flag: String {
+        switch self {
+        case .he: return "🇮🇱"
+        case .en: return "🇺🇸"
+        case .ru: return "🇷🇺"
+        }
+    }
+
     /// The region whose content, currency and school grades come with it.
     ///
     /// 🇷🇺 Russian is Israel's second home language, not a second country: these
