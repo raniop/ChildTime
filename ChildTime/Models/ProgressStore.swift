@@ -1341,6 +1341,29 @@ final class ProgressStore: ObservableObject {
         return Int((before - cycleSeconds).rounded())
     }
 
+    /// 💡 What one hint costs — the same as a mistake: half a step off the cycle
+    /// progress, never a minute the child already banked.
+    ///
+    /// It used to cost 2 banked minutes. A right answer is worth one step (24
+    /// seconds by default), so a hint cost five of them for removing ONE wrong
+    /// option out of four (Rani: "רמז לדעתי צריך להיות 12 שניות כמו טעות").
+    /// Charging it in the same currency as a mistake also means it follows the
+    /// parent's own settings instead of a number written here.
+    var hintCostSeconds: Int {
+        guard ParentSettings.shared.penaltyEnabled else { return 0 }
+        return Int((Double(bonusTargetSeconds) / Double(cycleQuestionsTotal) / 2).rounded())
+    }
+
+    /// Take the hint's cost. Returns the seconds actually removed (0 when the
+    /// parent turned penalties off, or when the cycle is already at zero).
+    @discardableResult
+    func chargeHint() -> Int {
+        guard ParentSettings.shared.penaltyEnabled else { return 0 }
+        let before = cycleSeconds
+        cycleSeconds = max(0, cycleSeconds - Double(hintCostSeconds))
+        return Int((before - cycleSeconds).rounded())
+    }
+
     private func updateTopicStat(topic: Topic, correct: Bool) {
         let key = topic.rawValue
         let answered = (topicAnswered[key] ?? 0) + 1

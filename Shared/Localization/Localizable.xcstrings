@@ -4395,6 +4395,22 @@
         }
       }
     },
+    "(%lld שְׁנִיּוֹת)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(%lld sec)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(%lld сек)"
+          }
+        }
+      }
+    },
     "(חִינָּם)": {
       "localizations": {
         "en": {

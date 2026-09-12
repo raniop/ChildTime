@@ -687,31 +687,21 @@ struct QuestionRunnerView: View {
         .accessibilityLabel(tr("בַּקָּשַׁת עֶזְרָה מֵהוֹרֶה"))
     }
 
-    // Cost of one hint, in pending-minutes (the kid's banked play time).
-    //
-    // It was 2. A correct answer is worth ~24 seconds, so a hint cost five of
-    // them — for removing ONE wrong option out of four (a guess goes from 25%
-    // to 33%). Rani: "רמז מוריד 2 דק זה הרבה מידי". One minute is still more
-    // than a question is worth, which is the point: a hint should cost, not hurt.
-    private let hintCostMinutes = 1
-
     /// The equipped character is the "smart helper". Higher tiers help more:
     /// rare/epic add a topic nudge, legendary/mythic add a method explanation
-    /// AND a cheaper hint. This is the payoff for a pricier character.
+    /// AND a free hint. This is the payoff for a pricier character.
     private var helperLevel: Character3D.HelpLevel {
         (profiles.active?.character ?? Character3DCatalog.find(nil)).helpLevel
     }
 
-    /// A hint costs a minute. A legendary/mythic helper gives it away — at the
-    /// old price its discount was a minute, and now that the base IS a minute
-    /// the only discount left is free. That character costs real money, and the
-    /// free hint is now the visible half of its perk; the method explanation it
-    /// also brings is the other half.
-    private var hintCost: Int { helperLevel == .explain ? 0 : hintCostMinutes }
+    /// A hint costs exactly what a mistake costs: half a step off the cycle
+    /// progress — 12 seconds with the default settings — and never a minute the
+    /// child already banked. It used to take 2 banked minutes, which is five
+    /// right answers for removing ONE wrong option out of four.
+    private var hintCost: Int { helperLevel == .explain ? 0 : progress.hintCostSeconds }
 
     private func canUseHint(_ q: Question) -> Bool {
         guard !showFeedback else { return false }
-        guard progress.pendingMinutes >= hintCost else { return false }
         // Need at least one wrong option still un-eliminated.
         return q.options.indices.contains(where: { idx in
             idx != q.correctIndex && (feedbackForIndex[idx] ?? .normal) == .normal
@@ -733,7 +723,7 @@ struct QuestionRunnerView: View {
              + Text(tr("רֶמֶז"))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundColor(.white)
-             + Text("  " + (hintCost == 0 ? tr("(חִנָּם)") : tr("(\(hintCost) דַּק')")))
+             + Text("  " + (hintCost == 0 ? tr("(חִנָּם)") : tr("(\(hintCost) שְׁנִיּוֹת)")))
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundColor(.white.opacity(0.75)))
             .lineLimit(1)
@@ -1231,7 +1221,9 @@ struct QuestionRunnerView: View {
         guard q.id == current?.id else { return }   // stale view — see pickOption
         guard canUseHint(q) else { return }
         // Spend the minutes (0 for a free legendary/mythic helper → always true).
-        guard progress.spendPendingMinutes(hintCost) else { return }
+        // The cost comes off the cycle progress, exactly like a mistake — so a
+        // hint can never leave a child with fewer minutes than they had.
+        progress.chargeHint()
         usedHintThisQuestion = true   // adaptive engine: a hinted win counts as "shaky"
 
         // Pick a random wrong option that hasn't been eliminated yet.
