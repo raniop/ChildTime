@@ -700,7 +700,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ · лучший из %lld раундов"
+            "value": "%@ %@ · лучший из %#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 3,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg раунда"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg раундов"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg раундов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg раунда"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -796,7 +830,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ в %@ на %lld пунктов по сравнению с предыдущим периодом."
+            "value": "%@ %@ в %@ на %#@count@ по сравнению с предыдущим периодом."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 4,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пункт"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пункта"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пунктов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пункта"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -812,7 +880,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ в течение %lld дней %@ — всего %lld вопросов, %@ правильных."
+            "value": "%@ %@ в течение %#@count@ %@ — всего %lld вопр., %@ правильных."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 3,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg дня"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg дней"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg дней"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg дня"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -876,7 +978,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ — это место, куда %@ чаще всего: %lld вопросов."
+            "value": "%@ %@ — это место, куда %@ чаще всего: %#@count@."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 4,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопрос"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопросов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1068,7 +1204,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · %lld ошибок"
+            "value": "%@ · %#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ошибка"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ошибки"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ошибок"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ошибки"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1244,7 +1414,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ — серия из %lld дней 🔥"
+            "value": "%@ — серия из %#@count@ 🔥"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg дня"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg дней"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg дней"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg дня"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1372,7 +1576,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ и %lld минут в день"
+            "value": "%@ и %#@count@ в день"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минута"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минут"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1564,7 +1802,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ У %@ есть %lld упаковок %@, и в каждой упаковке %lld. Сколько всего?"
+            "value": "%@ У %@ есть %#@count@ %@, и в каждой упаковке %lld. Сколько всего?"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 3,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg упаковка"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg упаковки"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg упаковок"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg упаковки"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2028,7 +2300,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, у тебя %lld минут"
+            "value": "%@, у тебя %#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минута"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минут"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2044,7 +2350,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, у тебя %lld минут"
+            "value": "%@, у тебя %#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минута"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минут"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -3612,7 +3952,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld вопр. · %lld правильных"
+            "value": "%lld вопр. · %#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg правильный"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg правильных"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg правильных"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg правильных"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -3828,7 +4202,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld ответов = %lld минут"
+            "value": "%#@count@ = %lld мин."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ответ"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ответа"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ответов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ответа"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -3876,7 +4284,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld/%lld пар"
+            "value": "%lld/%#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пара"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пары"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пар"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пары"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -4132,7 +4574,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "+%lld минут сейчас · ещё %lld сохранено на завтра 🎁"
+            "value": "+%#@count@ сейчас · ещё %lld сохранено на завтра 🎁"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минута"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минут"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -7780,7 +8256,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "В «Tofy Time» система строит каждому ребёнку личную ленту: 80%% тем, которые он любит, и 20%% новых областей для открытий. Лента улучшается после каждого вопроса. За каждые %lld вопросов ребёнок получает бесплатное вращение колеса удачи."
+            "value": "В «Tofy Time» система строит каждому ребёнку личную ленту: 80%% тем, которые он любит, и 20%% новых областей для открытий. Лента улучшается после каждого вопроса. За %#@count@ ребёнок получает бесплатное вращение колеса удачи."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждый %arg вопрос"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждые %arg вопроса"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждые %arg вопросов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждые %arg вопроса"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -8652,7 +9162,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "В классе %lld мальчиков и %lld девочек. Каково отношение мальчиков к девочкам в сокращённом виде?"
+            "value": "В классе %#@count@, а девочек — %lld. Каково отношение мальчиков к девочкам в сокращённом виде?"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg мальчик"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg мальчика"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg мальчиков"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg мальчика"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -9740,7 +10284,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "За время подарка %1$@ там на %2$lld вопросов с точностью %3$lld%%. %4$@ прогресс сохранён."
+            "value": "За время подарка %1$@ там на %#@count@ с точностью %3$lld%%. %4$@ прогресс сохранён."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопрос"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопросов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -10524,7 +11102,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Двойные минуты: каждые %lld правильных = %lld игровых минут"
+            "value": "Двойные минуты: %#@count@ = %lld мин. игры"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждый %arg правильный"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждые %arg правильных"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждые %arg правильных"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждые %arg правильных"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -11364,7 +11976,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ты достиг дневного максимума! %lld минут сохранены на завтра 🎁 (%lld/%lld)"
+            "value": "Ты достиг дневного максимума! %#@count@ на завтра 🎁 (%lld/%lld)"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минута сохранена"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты сохранены"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минут сохранены"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты сохранено"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -11492,7 +12138,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "По теме %@ она ответила на %lld вопросов, точность %lld%%."
+            "value": "По теме %@ она ответила на %#@count@, точность %lld%%."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопрос"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопросов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -12340,7 +13020,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Точность %@ по теме %@ упала на %lld пунктов по сравнению с прошлым периодом. Иногда это просто новый материал."
+            "value": "Точность %@ по теме %@ упала на %#@count@ по сравнению с прошлым периодом. Иногда это просто новый материал."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 3,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пункт"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пункта"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пунктов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg пункта"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -12628,7 +13342,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Твоё время уже открыто %@ — ещё %lld минут 🎮"
+            "value": "Твоё время уже открыто %@ — ещё %#@count@ 🎮"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минута"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минут"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -13180,7 +13928,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сегодня ты заработал %lld из %lld минут."
+            "value": "Сегодня ты заработал %lld из %#@count@."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минут"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минут"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -15468,7 +16250,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "По %@ он ответил на %lld вопросов, %lld%% верных."
+            "value": "По %@ он ответил на %#@count@, %lld%% верных."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопрос"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопросов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -15756,7 +16572,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ребёнок получает %lld минут игры за каждые %lld правильных ответов. Оба числа можно изменить. По умолчанию: 10 ответов = 4 минуты."
+            "value": "Ребёнок получает %lld мин. игры за %#@count@. Оба числа можно изменить. По умолчанию: 10 ответов = 4 минуты."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждый %arg правильный ответ"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждые %arg правильных ответа"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждые %arg правильных ответов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "каждые %arg правильных ответа"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -19900,7 +20750,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "У тебя %lld минут. Игровое время открывается с %lld минут — ответь ещё на несколько вопросов! 😊"
+            "value": "У тебя %#@count@. Игровое время открывается с %lld мин. — ответь ещё на несколько вопросов! 😊"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минута"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минут"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -21756,7 +22640,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Каждые %lld правильных = %lld минут игры"
+            "value": "%#@count@ = %lld мин. игры"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "Каждый %arg правильный"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "Каждые %arg правильных"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "Каждые %arg правильных"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "Каждые %arg правильных"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -22124,7 +23042,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Входит в Tofy+ · %@ %@ · %lld вопросов"
+            "value": "Входит в Tofy+ · %@ %@ · %#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 3,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопрос"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопросов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -22636,7 +23588,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Каждые %lld правильных ответов = %lld минут игры"
+            "value": "%#@count@ = %lld мин. игры"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "Каждый %arg правильный ответ"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "Каждые %arg правильных ответа"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "Каждые %arg правильных ответов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "Каждые %arg правильных ответа"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -23092,7 +24078,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Для %lld детей · %@"
+            "value": "Для %#@count@ · %@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ребёнка"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg детей"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg детей"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ребёнка"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -28844,7 +29864,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Попадёт в 💝 кармашек ребёнка — %@ %@ когда %@, с любого устройства. Сегодня можно дать ещё до %lld минут (до полуночи)."
+            "value": "Попадёт в 💝 кармашек ребёнка — %@ %@ когда %@, с любого устройства. Сегодня можно дать ещё до %#@count@ (до полуночи)."
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 4,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минут"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минут"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg минуты"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -30596,7 +31650,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Всего заработано%@ на делах: 🎮 %lld игровых минут"
+            "value": "Всего заработано%@ на делах: 🎮 %#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg игровая минута"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg игровые минуты"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg игровых минут"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg игровой минуты"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -30804,7 +31892,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ответь правильно на %lld вопросов сегодня и получи %lld 💎!\nКаждый день подряд, когда играешь, приз растёт. 🔥"
+            "value": "Ответь правильно на %#@count@ сегодня и получи %lld 💎!\nКаждый день подряд, когда играешь, приз растёт. 🔥"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопрос"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопросов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -32684,7 +33806,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Откройте %@ для %lld детей"
+            "value": "Откройте %@ для %#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ребёнка"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg детей"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg детей"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg ребёнка"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -39644,7 +40800,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "🍕 Мы разрезали пиццу на %lld равных кусков и съели %lld. Какую дробь мы съели?"
+            "value": "🍕 Мы разрезали пиццу на %#@count@ и съели %lld. Какую дробь мы съели?"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg равный кусок"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg равных куска"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg равных кусков"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg равного куска"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -39756,7 +40946,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "🎉 %@ уже %@ на %lld вопросов"
+            "value": "🎉 %@ уже %@ на %#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 3,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопрос"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопросов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -39772,7 +40996,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "🎉 %@ уже ответила на %lld вопросов с Tofy+"
+            "value": "🎉 %@ уже ответила на %#@count@ с Tofy+"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопрос"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопросов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -39788,7 +41046,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "🎉 %@ уже ответил на %lld вопросов с Tofy+"
+            "value": "🎉 %@ уже ответил на %#@count@ с Tofy+"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопрос"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопросов"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg вопроса"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -40668,7 +41960,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "💰 %@ купила %lld тетрадей по %lld ₪ каждая и заплатила %lld ₪. Сколько сдачи она получит?"
+            "value": "💰 %@ купила %#@count@ по %lld ₪ каждая и заплатила %lld ₪. Сколько сдачи она получит?"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетрадь"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетради"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетрадей"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетради"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -40684,7 +42010,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "💰 %@ купил %lld тетрадей по %lld ₪ каждая и заплатил %lld ₪. Сколько сдачи он получит?"
+            "value": "💰 %@ купил %#@count@ по %lld ₪ каждая и заплатил %lld ₪. Сколько сдачи он получит?"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетрадь"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетради"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетрадей"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетради"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -40836,7 +42196,41 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "📒 %lld тетрадей стоят %lld ₪. Сколько будут стоить %lld тетрадей?"
+            "value": "📒 %#@count@ %lld ₪. Какова цена %lld шт.?"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетрадь стоит"
+                    }
+                  },
+                  "few": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетради стоят"
+                    }
+                  },
+                  "many": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетрадей стоят"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg тетради стоят"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

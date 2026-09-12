@@ -715,21 +715,20 @@ struct QuestionRunnerView: View {
         Button {
             useHint(q: q)
         } label: {
-            HStack(spacing: 6) {
-                Text("💡")
-                Text(tr("רֶמֶז"))
-                    .font(.system(size: 17, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                Text(hintCost == 0 ? tr("(חִנָּם)") : tr("(\(hintCost) דַּק')"))
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.75))
-            }
-            // Never truncate to "💡 …": the row also holds 🚩 🔊 🙋 and the buddy.
-            // It may SHRINK though — a fixed size let a longer label (Russian
-            // "Подсказка (2 мин.)") run straight under the buddy instead of
-            // giving the row a chance to fit it.
+            // ONE Text, not an HStack of three: the row also holds 🚩 🔊 🙋 and the
+            // buddy, so a longer label (Russian "Подсказка (2 мин.)") has to shrink
+            // to fit. Three separate Texts let SwiftUI squeeze one of them until it
+            // truncated to "Под…" while the others stayed full size; concatenated,
+            // minimumScaleFactor scales the whole label evenly instead.
+            (Text("💡 ")
+             + Text(tr("רֶמֶז"))
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundColor(.white)
+             + Text("  " + (hintCost == 0 ? tr("(חִנָּם)") : tr("(\(hintCost) דַּק')")))
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundColor(.white.opacity(0.75)))
             .lineLimit(1)
-            .minimumScaleFactor(0.7)
+            .minimumScaleFactor(0.6)
             .padding(.horizontal, AppSpacing.md)
             .padding(.vertical, AppSpacing.sm)
             .background(Capsule().fill(.white.opacity(0.14)))

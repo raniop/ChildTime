@@ -201,7 +201,7 @@ enum QuestionBanksWorkflow2 {
         BankQuestion(prompt: "🕯️\nכַּמָּה נֵרוֹת מַדְלִיקִים בַּלַּיְלָה הָאַחֲרוֹן שֶׁל חֲנוּכָּה?", correctAnswer: "שְׁמוֹנָה", distractors: ["אֶחָד", "שְׁנַיִם", "אַרְבָּעָה"], grades: 2...4),
         BankQuestion(prompt: "📜\nאֵיזוֹ מְגִלָּה קוֹרְאִים בְּחַג פּוּרִים?", correctAnswer: "מְגִלַּת אֶסְתֵּר", distractors: ["מְגִלַּת רוּת", "הַהַגָּדָה", "הַתּוֹרָה"], grades: 2...4),
         BankQuestion(prompt: "🍞\nאֵיזֶה אוֹכֶל אֲנַחְנוּ לֹא אוֹכְלִים בְּחַג הַפֶּסַח?", correctAnswer: "לֶחֶם", distractors: ["מַצָּה", "תַּפּוּחַ", "אֱגוֹזִים"], grades: 2...4),
-        BankQuestion(prompt: "🌳\nאֵיזֶה חַג נִקְרָא 'יוֹם הוּלֶּדֶת לָאִילָנוֹת'?", correctAnswer: "ט״וּ בִּשְׁבָט", distractors: ["פּוּרִים", "שָׁבוּעוֹת", "סוּכּוֹת"], grades: 2...4),
+        BankQuestion(prompt: "🌳\nאֵיזֶה חַג נִקְרָא 'יוֹם הוּלֶּדֶת לָאִילָנוֹת'?", correctAnswer: "ט״ו בִּשְׁבָט", distractors: ["פּוּרִים", "שָׁבוּעוֹת", "סוּכּוֹת"], grades: 2...4),
         BankQuestion(prompt: "🎭\nמָה נָהוּג לִלְבּוֹשׁ בְּחַג פּוּרִים?", correctAnswer: "תַּחְפּוֹשֶׂת", distractors: ["מְעִיל גֶּשֶׁם", "בֶּגֶד יָם", "פִּיגָ'מָה"], grades: 2...4),
         BankQuestion(prompt: "🐸\nאֵיזוֹ חַיָּה הָיְתָה אַחַת מֵעֶשֶׂר הַמַּכּוֹת בְּמִצְרַיִם?", correctAnswer: "צְפַרְדֵּעַ", distractors: ["פִּיל", "דּוּבִּי", "ג'ִירָפָה"], grades: 2...4),
         BankQuestion(prompt: "👑\nמִי הָיָה הַמֶּלֶךְ הֶחָכָם שֶׁבָּנָה אֶת בֵּית הַמִּקְדָּשׁ?", correctAnswer: "שְׁלֹמֹה", distractors: ["שָׁאוּל", "יוֹסֵף", "אַהֲרֹן"], grades: 2...4),

@@ -25,11 +25,11 @@ enum QuestionBanksIsrael {
         BankQuestion(prompt: "🎭\nבְּאֵיזֶה חַג מִתְחַפְּשִׂים?", correctAnswer: "פּוּרִים", distractors: ["חֲנֻכָּה", "שָׁבוּעוֹת", "פֶּסַח"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🍪\nאֵיזוֹ עוּגִיָּה מְשֻׁלֶּשֶׁת אוֹכְלִים בְּפוּרִים?", correctAnswer: "אָזְנֵי הָמָן", distractors: ["סֻפְגָּנִיּוֹת", "לְבִיבוֹת", "מַצּוֹת"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🫓\nבְּאֵיזֶה חַג אוֹכְלִים מַצּוֹת בִּמְקוֹם לֶחֶם?", correctAnswer: "פֶּסַח", distractors: ["סֻכּוֹת", "חֲנֻכָּה", "פּוּרִים"], tier: .easy, grades: 2...3),
-        BankQuestion(prompt: "🍎\nבְּאֵיזֶה חַג טוֹבְלִים תַּפּוּחַ בִּדְבַשׁ?", correctAnswer: "רֹאשׁ הַשָּׁנָה", distractors: ["פּוּרִים", "פֶּסַח", "ט״וּ בִּשְׁבָט"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "🍎\nבְּאֵיזֶה חַג טוֹבְלִים תַּפּוּחַ בִּדְבַשׁ?", correctAnswer: "רֹאשׁ הַשָּׁנָה", distractors: ["פּוּרִים", "פֶּסַח", "ט״ו בִּשְׁבָט"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🛖\nבְּאֵיזֶה חַג בּוֹנִים סֻכָּה וְיוֹשְׁבִים בָּהּ?", correctAnswer: "סֻכּוֹת", distractors: ["פֶּסַח", "חֲנֻכָּה", "שָׁבוּעוֹת"], tier: .easy, grades: 2...3),
-        BankQuestion(prompt: "🌳\nבְּאֵיזֶה חַג נוֹטְעִים עֵצִים?", correctAnswer: "ט״וּ בִּשְׁבָט", distractors: ["פּוּרִים", "סֻכּוֹת", "חֲנֻכָּה"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "🌳\nבְּאֵיזֶה חַג נוֹטְעִים עֵצִים?", correctAnswer: "ט״ו בִּשְׁבָט", distractors: ["פּוּרִים", "סֻכּוֹת", "חֲנֻכָּה"], tier: .easy, grades: 2...3),
         BankQuestion(prompt: "🎆\nמָה נָהוּג לַעֲשׂוֹת בְּיוֹם הָעַצְמָאוּת?", correctAnswer: "עוֹשִׂים מַנְגָּל וְרוֹאִים זִקּוּקִים", distractors: ["בּוֹנִים סֻכָּה", "מִתְחַפְּשִׂים", "אוֹכְלִים מַצּוֹת"], tier: .easy, grades: 2...3),
-        BankQuestion(prompt: "🎂\nאֵיזֶה חַג הוּא \"יוֹם הַהֻלֶּדֶת\" שֶׁל מְדִינַת יִשְׂרָאֵל?", correctAnswer: "יוֹם הָעַצְמָאוּת", distractors: ["רֹאשׁ הַשָּׁנָה", "פּוּרִים", "ט״וּ בִּשְׁבָט"], tier: .easy, grades: 2...3),
+        BankQuestion(prompt: "🎂\nאֵיזֶה חַג הוּא \"יוֹם הַהֻלֶּדֶת\" שֶׁל מְדִינַת יִשְׂרָאֵל?", correctAnswer: "יוֹם הָעַצְמָאוּת", distractors: ["רֹאשׁ הַשָּׁנָה", "פּוּרִים", "ט״ו בִּשְׁבָט"], tier: .easy, grades: 2...3),
 
         // ── קַל · יַמִּים, הָרִים וְעָרִים ──
         BankQuestion(prompt: "🌊\nאֵיזֶה יָם נִמְצָא לְיַד תֵּל אָבִיב וְחֵיפָה?", correctAnswer: "הַיָּם הַתִּיכוֹן", distractors: ["יַם הַמֶּלַח", "יַם סוּף", "הַכִּנֶּרֶת"], tier: .easy, grades: 2...3),

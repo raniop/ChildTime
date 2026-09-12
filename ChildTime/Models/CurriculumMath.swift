@@ -527,46 +527,100 @@ enum CurriculumMath {
     // Names are content, not translations: an American word problem gets American names.
     // Each name carries the gender its verbs have to agree with — a learning app
     // cannot ship "יוֹסִי קָנָה/תָה" (Rani), so every sentence below exists twice.
-    private static var kids: [(name: String, girl: Bool)] {
-        switch LanguageStore.shared.current {
-        case .he: return [(tr("דָּנָה"), true), (tr("יוֹסִי"), false), (tr("נֹעָה"), true),
-                          (tr("אִיתַי"), false), (tr("תָּמָר"), true), (tr("עוֹמֶר"), false)]
-        // Russian past-tense verbs agree with gender the same way Hebrew's do
-        // ("купил" / "купила"), so each name here carries its gender too.
-        case .ru: return [("Даша", true), ("Миша", false), ("Аня", true),
-                          ("Лёва", false), ("Соня", true), ("Марк", false)]
-        case .en: return [("Emma", true), ("Liam", false), ("Olivia", true),
-                          ("Noah", false), ("Ava", true), ("Mason", false)]
+    /// A child in a word problem.
+    ///
+    /// `girl` picks the verb form — Hebrew and Russian both inflect the past
+    /// tense for gender ("קָנְתָה"/"קָנָה", "купила"/"купил"). `of` is the form
+    /// the name takes after "У …": Russian declines names, so "У Миша" is wrong
+    /// and "У Миши" is right. Hebrew and English never change the name, so there
+    /// `of` is simply the name again.
+    private struct Kid {
+        let name: String, of: String, girl: Bool
+        init(_ name: String, of: String? = nil, girl: Bool) {
+            self.name = name; self.of = of ?? name; self.girl = girl
         }
     }
-    private static var things: [(String, String)] {
-        [("🎈", tr("בַּלּוֹנִים")), ("📚", tr("סְפָרִים")), ("🍎", tr("תַּפּוּחִים")),
-         ("⚽", tr("כַּדּוּרִים")), ("🖍️", tr("צְבָעִים")), ("🐚", tr("צְדָפִים"))]
+
+    private static var kids: [Kid] {
+        switch LanguageStore.shared.current {
+        case .he: return [Kid(tr("דָּנָה"), girl: true), Kid(tr("יוֹסִי"), girl: false), Kid(tr("נֹעָה"), girl: true),
+                          Kid(tr("אִיתַי"), girl: false), Kid(tr("תָּמָר"), girl: true), Kid(tr("עוֹמֶר"), girl: false)]
+        case .ru: return [Kid("Даша", of: "Даши", girl: true), Kid("Миша", of: "Миши", girl: false),
+                          Kid("Аня", of: "Ани", girl: true),   Kid("Лёва", of: "Лёвы", girl: false),
+                          Kid("Соня", of: "Сони", girl: true), Kid("Марк", of: "Марка", girl: false)]
+        case .en: return [Kid("Emma", girl: true), Kid("Liam", girl: false), Kid("Olivia", girl: true),
+                          Kid("Noah", girl: false), Kid("Ava", girl: true), Kid("Mason", girl: false)]
+        }
+    }
+    /// A countable object in a word problem.
+    ///
+    /// Hebrew and English need one plural form next to any number. Russian needs
+    /// three, because the number decides the case: 1 шарик · 2 шарика · 5 шариков.
+    /// That cannot come from the catalog — one Hebrew key has one translation —
+    /// so the Russian forms live here, beside the numbers that choose them.
+    private struct Countable {
+        let emoji: String
+        let one: String, few: String, many: String
+
+        init(_ emoji: String, _ one: String, _ few: String, _ many: String) {
+            self.emoji = emoji; self.one = one; self.few = few; self.many = many
+        }
+        init(_ emoji: String, plural: String) {
+            self.init(emoji, plural, plural, plural)
+        }
+
+        /// The form that stands next to `n`.
+        func counted(_ n: Int) -> String {
+            let hundreds = n % 100, units = n % 10
+            if hundreds >= 11 && hundreds <= 14 { return many }   // 11–14 break the pattern
+            switch units {
+            case 1:    return one
+            case 2...4: return few
+            default:   return many
+            }
+        }
+        /// After another counted noun ("5 упаковок шариков") the form is fixed.
+        var afterCount: String { many }
+    }
+
+    private static var things: [Countable] {
+        guard LanguageStore.shared.current == .ru else {
+            return [Countable("🎈", plural: tr("בַּלּוֹנִים")), Countable("📚", plural: tr("סְפָרִים")),
+                    Countable("🍎", plural: tr("תַּפּוּחִים")), Countable("⚽", plural: tr("כַּדּוּרִים")),
+                    Countable("🖍️", plural: tr("צְבָעִים")), Countable("🐚", plural: tr("צְדָפִים"))]
+        }
+        return [Countable("🎈", "шарик", "шарика", "шариков"),
+                Countable("📚", "книга", "книги", "книг"),
+                Countable("🍎", "яблоко", "яблока", "яблок"),
+                Countable("⚽", "мяч", "мяча", "мячей"),
+                Countable("🖍️", "карандаш", "карандаша", "карандашей"),
+                Countable("🐚", "ракушка", "ракушки", "ракушек")]
     }
 
     private static func wordProblemAddSub(max: Int) -> Question {
-        let kid = kids.randomElement()!, name = kid.name
-        let (emoji, item) = things.randomElement()!
+        let kid = kids.randomElement()!, name = kid.name, owner = kid.of
+        let thing = things.randomElement()!, emoji = thing.emoji
         let a = Int.random(in: 3...max)
+        let item = thing.counted(a)
         if Bool.random() {
             let b = Int.random(in: 2...max)
             return numericMCQ(prompt: kid.girl
-                ? tr("\(emoji) לְ\(name) יֵשׁ \(a) \(item). \(name) קִבְּלָה עוֹד \(b). כַּמָּה יֵשׁ עַכְשָׁיו?")
-                : tr("\(emoji) לְ\(name) יֵשׁ \(a) \(item). \(name) קִבֵּל עוֹד \(b). כַּמָּה יֵשׁ עַכְשָׁיו?"),
+                ? tr("\(emoji) לְ\(owner) יֵשׁ \(a) \(item). \(name) קִבְּלָה עוֹד \(b). כַּמָּה יֵשׁ עַכְשָׁיו?")
+                : tr("\(emoji) לְ\(owner) יֵשׁ \(a) \(item). \(name) קִבֵּל עוֹד \(b). כַּמָּה יֵשׁ עַכְשָׁיו?"),
                               answer: a + b)
         }
         let b = Int.random(in: 1..<a)
         return numericMCQ(prompt: kid.girl
-            ? tr("\(emoji) לְ\(name) הָיוּ \(a) \(item), וְ\(name) נָתְנָה \(b) לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?")
-            : tr("\(emoji) לְ\(name) הָיוּ \(a) \(item), וְ\(name) נָתַן \(b) לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?"),
+            ? tr("\(emoji) לְ\(owner) הָיוּ \(a) \(item), וְ\(name) נָתְנָה \(b) לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?")
+            : tr("\(emoji) לְ\(owner) הָיוּ \(a) \(item), וְ\(name) נָתַן \(b) לְחָבֵר. כַּמָּה נִשְׁאֲרוּ?"),
                           answer: a - b)
     }
 
     private static func wordProblemMultiply(maxFactor: Int) -> Question {
-        let name = kids.randomElement()!.name
-        let (emoji, item) = things.randomElement()!
+        let owner = kids.randomElement()!.of
+        let thing = things.randomElement()!, emoji = thing.emoji, item = thing.afterCount
         let packs = Int.random(in: 2...maxFactor), per = Int.random(in: 2...maxFactor)
-        return numericMCQ(prompt: tr("\(emoji) לְ\(name) יֵשׁ \(packs) חֲבִילוֹת שֶׁל \(item), וּבְכָל חֲבִילָה \(per). כַּמָּה יֵשׁ בְּסַךְ הַכֹּל?"),
+        return numericMCQ(prompt: tr("\(emoji) לְ\(owner) יֵשׁ \(packs) חֲבִילוֹת שֶׁל \(item), וּבְכָל חֲבִילָה \(per). כַּמָּה יֵשׁ בְּסַךְ הַכֹּל?"),
                           answer: packs * per)
     }
 
