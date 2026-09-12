@@ -61,15 +61,25 @@ final class LanguageLeakUITests: XCTestCase {
             app.launch()
             Thread.sleep(forTimeInterval: 3.5)
 
+            // A screen that never came up, or an app that died mid-sweep, is
+            // reported — not silently counted as clean. (Reading elements from a
+            // dead app throws "Lost connection to the application" and took the
+            // whole sweep down with it before this check existed.)
+            guard app.state == .runningForeground else {
+                print("SKIP \(lang) \(screen): the app was not in the foreground")
+                app.terminate(); Thread.sleep(forTimeInterval: 0.5); continue
+            }
             for label in visibleText(app) where label.rangeOfCharacter(from: hebrew) != nil {
                 if Self.allowed.contains(where: { label.contains($0) }) { continue }
-                leaks.append("\(screen): \(label.replacingOccurrences(of: "\n", with: " ⏎ "))")
+                let line = "\(screen): \(label.replacingOccurrences(of: "\n", with: " ⏎ "))"
+                leaks.append(line)
+                print("LEAK \(lang) \(line)")      // as they are found, not only at the end
             }
+            print("SWEPT \(lang) \(screen)")
             app.terminate()
             Thread.sleep(forTimeInterval: 0.3)
         }
         print("LEAKS[\(lang)] \(leaks.count)")
-        for l in leaks { print("LEAK \(l)") }
         XCTAssertTrue(leaks.isEmpty, "עברית דלפה ל-\(lang): \(leaks.prefix(10).joined(separator: " | "))")
     }
 
