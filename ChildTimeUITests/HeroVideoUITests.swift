@@ -17,8 +17,9 @@
 //    xcodebuild test -scheme ChildTime -destination 'platform=iOS Simulator,id=<id>' \
 //      -only-testing:ChildTimeUITests/HeroVideoUITests
 //    kill -INT %1
-//  HERO_LANG picks the language (defaults to Hebrew — the simulator's region is
-//  American, so a fresh install would otherwise open in English).
+//  The language is the `lang` default below, NOT the HERO_LANG env var: xcodebuild
+//  does not pass the shell's environment to the test runner, so the variable
+//  silently does nothing. Edit the default, rebuild for testing, record.
 //
 import XCTest
 
@@ -108,12 +109,12 @@ final class HeroVideoUITests: XCTestCase {
         // 2) Back to the home screen, then open the play time the parents gifted.
         tapFirst(in: app, ["xmark", "✕", "X"], fallback: CGVector(dx: 0.08, dy: 0.07))
         wait(2.5)
-        tapFirst(in: app, ["💝", "Gift from your parents", "מתנה מההורים"],
+        tapFirst(in: app, ["💝", "Gift from your parents", "מתנה מההורים", "Подарок от родителей"],
                  fallback: CGVector(dx: 0.5, dy: 0.80))
         wait(3.0)                                   // the gift lands in the bank…
         // …and the minutes still have to be opened: the banner is replaced by
         // "Unlock N minutes to play", and THAT is what starts the clock.
-        tapFirst(in: app, ["Unlock", "פתחו לי", "לשחק"], fallback: CGVector(dx: 0.5, dy: 0.87))
+        tapFirst(in: app, ["Unlock", "פתחו לי", "לשחק", "Открыть", "Открой"], fallback: CGVector(dx: 0.5, dy: 0.87))
         wait(9.0)                                   // "your time is on its way" → the running clock
     }
 
