@@ -107,9 +107,9 @@ struct CoachingEngine {
 
     private func actionForWeakTopic(_ topic: Topic) -> String {
         switch topic {
-        case .math:      return tr("נסו לתרגל חיבור וחיסור קצר בזמן ארוחת הערב.")
+        case .math:      return tr("נסו תרגול קצר של חיבור וחיסור בזמן ארוחת הערב.")
         case .english:   return tr("הקדישו 10 דקות לקריאת מילים באנגלית יחד.")
-        case .hebrew:    return tr("כתבו יחד כמה מילים והתרגלו איות נכון.")
+        case .hebrew:    return tr("כתבו יחד כמה מילים ותרגלו איות נכון.")
         case .logic:     return tr("פתרו חידה או משחק חשיבה אחד ביחד היום.")
         case .science:   return tr("שאלו את \(name) שאלת \"למה\" על משהו בטבע.")
         case .history:   return tr("ספרו ל\(name) סיפור קצר על משהו שקרה פעם.")
@@ -119,11 +119,11 @@ struct CoachingEngine {
         case .soccer:    return tr("צפו יחד במשחק ובקשו מ\(name) להסביר לכם חוק אחד שראיתם.")
         case .dinosaurs: return tr("בקרו במוזיאון טבע או צפו בסרטון על דינוזאורים, ותנו ל\(name) לספר לכם על אחד.")
         case .space:     return tr("צאו בערב להסתכל על הירח והכוכבים, ושאלו את \(name) מה זה כוכב לכת.")
-        case .animals:   return tr("ביקור בגן חיות או בטבע — ותנו ל\(name) לזהות חיות ולספר מה הן אוכלות.")
+        case .animals:   return tr("בקרו בגן חיות או צאו לטבע, ותנו ל\(name) לזהות חיות ולספר מה הן אוכלות.")
         case .sea:       return tr("בחוף או באקווריום, בקשו מ\(name) להסביר איך דג נושם מתחת למים.")
         case .gifted:    return tr("שחקו יחד במשחקי חשיבה קצרים (סדרות, חידות) — 5 דקות ביום מספיקות.")
         case .food:      return tr("בשלו יחד מתכון פשוט ותנו ל\(name) למדוד ולהכפיל כמויות.")
-        case .israel:    return tr("טיול קצר בשכונה או בעיר — ודברו על סמלים, חגים ומקומות בישראל.")
+        case .israel:    return tr("צאו לטיול קצר בשכונה או בעיר, ודברו על סמלים, חגים ומקומות בישראל.")
         case .tishrei:   return tr("הכינו יחד את שולחן החג ותנו ל\(name) להסביר מה מסמל כל מאכל.")
         case .music:     return tr("שימו שיר ובקשו מ\(name) לזהות כלי נגינה או למחוא כפיים בקצב.")
         case .body:      return tr("מדדו יחד דופק אחרי ריצה, ודברו על מה הלב עושה.")

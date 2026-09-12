@@ -1,6 +1,5 @@
 {
   "sourceLanguage": "he",
-  "version": "1.0",
   "strings": {
     "\n%@ · %lld שְׁאֵלוֹת · %lld%%": {
       "localizations": {
@@ -4962,16 +4961,6 @@
         }
       }
     },
-    "ביקור בגן חיות או בטבע — ותנו ל%@ לזהות חיות ולספר מה הן אוכלות.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Visit a zoo or go out in nature — and let %@ spot animals and tell you what they eat."
-          }
-        }
-      }
-    },
     "ביקשתם %lld — זה המקסימום שנשאר להיום, עד חצות.": {
       "localizations": {
         "en": {
@@ -5008,6 +4997,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "On a drive, count wheels and vehicles together and ask %@ who drives what."
+          }
+        }
+      }
+    },
+    "בקרו בגן חיות או צאו לטבע, ותנו ל%@ לזהות חיות ולספר מה הן אוכלות.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visit a zoo or go out in nature — and let %@ spot animals and tell you what they eat."
           }
         }
       }
@@ -11062,16 +11061,6 @@
         }
       }
     },
-    "טיול קצר בשכונה או בעיר — ודברו על סמלים, חגים ומקומות בישראל.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Take a short walk around your neighborhood or town — and talk about symbols, holidays, and places in America."
-          }
-        }
-      }
-    },
     "טעויות": {
       "localizations": {
         "en": {
@@ -13082,7 +13071,7 @@
         }
       }
     },
-    "כתבו יחד כמה מילים והתרגלו איות נכון.": {
+    "כתבו יחד כמה מילים ותרגלו איות נכון.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -17172,22 +17161,22 @@
         }
       }
     },
-    "נסו לתרגל חיבור וחיסור קצר בזמן ארוחת הערב.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Try some quick addition and subtraction practice at dinner."
-          }
-        }
-      }
-    },
     "נסו שוב": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Try again"
+          }
+        }
+      }
+    },
+    "נסו תרגול קצר של חיבור וחיסור בזמן ארוחת הערב.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try some quick addition and subtraction practice at dinner."
           }
         }
       }
@@ -19608,6 +19597,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Go out one evening to look at the moon and stars, and ask %@ what a planet is."
+          }
+        }
+      }
+    },
+    "צאו לטיול קצר בשכונה או בעיר, ודברו על סמלים, חגים ומקומות בישראל.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take a short walk around your neighborhood or town — and talk about symbols, holidays, and places in America."
           }
         }
       }
@@ -23792,5 +23791,6 @@
         }
       }
     }
-  }
+  },
+  "version": "1.0"
 }
