@@ -65,6 +65,30 @@
   .btn{display:inline-block;border-radius:10px;padding:8px 14px;font:800 13px Rubik,sans-serif;background:var(--indigo);color:#fff;border:0;cursor:pointer;font-family:Rubik,sans-serif;text-decoration:none} .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)} .btn.danger{background:rgba(255,107,157,.2);color:#a1244e} .btn:disabled{opacity:.5}
   .sw{display:inline-block;width:38px;height:22px;border-radius:99px;background:var(--line);position:relative;vertical-align:middle;cursor:pointer} .sw::after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s} .sw.on{background:var(--good)} .sw.on::after{inset-inline-start:18px}
   .money{color:var(--good);font-weight:800} .pct.hi{color:var(--good);font-weight:800} .pct.lo{color:var(--warn);font-weight:800}
+  /* 👪 One family = one calm row: who they are, how they're doing, and a single
+     ⋯ that holds every action. The old card repeated eight buttons per family. */
+  .famrow{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;
+    margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:3px 12px;align-items:start}
+  .famrow:hover{border-color:var(--indigo)}
+  .famrow .title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:800 15px Rubik,sans-serif}
+  .famrow .sub{grid-column:1;color:var(--muted);font-size:12px}
+  .famrow .rowside{grid-row:1/3;grid-column:2;display:flex;align-items:center;gap:8px}
+  .famrow .when{font:700 12px Rubik,sans-serif;color:var(--muted);white-space:nowrap}
+  .famrow .when.live{color:var(--good)} .famrow .when.cold{color:var(--bad)}
+  .famrow .kids{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .famrow .kids span{background:var(--soft);border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-size:12px;white-space:nowrap}
+  .famrow .kids span.quiet{color:var(--muted)}
+  .dots{width:32px;height:32px;border-radius:10px;border:1px solid var(--line);background:var(--soft);
+    font:700 16px/1 Rubik,sans-serif;cursor:pointer;color:var(--ink)}
+  .dots:hover{background:var(--indigo);color:#fff;border-color:transparent}
+  .rowmenu{position:absolute;z-index:50;inset-inline-end:12px;top:46px;min-width:196px;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 44px rgba(20,10,60,.22);padding:6px;display:none}
+  .rowmenu.open{display:block}
+  .rowmenu button,.rowmenu a{display:block;width:100%;text-align:start;background:none;border:0;padding:9px 12px;
+    border-radius:10px;font:700 13px Rubik,sans-serif;color:var(--ink);cursor:pointer;text-decoration:none}
+  .rowmenu button:hover,.rowmenu a:hover{background:var(--soft)}
+  .rowmenu .sep{height:1px;background:var(--line);margin:6px 4px}
+  .rowmenu button.danger{color:var(--bad)} .rowmenu button.danger:hover{background:rgba(214,69,91,.12)}
   .fam{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
   .fam .h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap} .fam b{font:800 14px Rubik,sans-serif} .fam .m{font-size:12px;color:var(--muted)}
   .fam .kids{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px} .fam .kids span{background:var(--soft);border:1px solid var(--line);border-radius:99px;padding:3px 9px;font-size:12px}
@@ -112,7 +136,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260912014509";
+const PAGE_STAMP = "20260912101554";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -236,6 +260,10 @@ async function families() {
   // under its own chip, where it can be un-marked.
   const inFilter = (f) => famFilter === "demo" ? !!f.isDemo
     : !f.isDemo && (famFilter === "all" || (f.j.state || "free_new") === famFilter);
+  // What each filter chip is worth, so the numbers are visible before clicking.
+  const countFor = (k) => k === "demo" ? fams.filter((f) => f.isDemo).length
+    : k === "all" ? fams.filter((f) => !f.isDemo).length
+    : fams.filter((f) => !f.isDemo && (f.j.state || "free_new") === k).length;
   const byActive = (a, b) => (b.j.lastActive || "").localeCompare(a.j.lastActive || "");
   // On "הכל" the demo families are not hidden — they sit in their own section
   // at the bottom, so they never mix into the real list but are one scroll away.
@@ -250,7 +278,7 @@ async function families() {
     return (main || (tail ? "" : '<div class="empty">אין משפחות בסינון הזה.</div>')) + tail;
   };
   $("main").innerHTML = `
-    <div class="top"><h3>משפחות · ${fmt(fams.filter((f) => !f.isDemo).length)}${fams.some((f) => f.isDemo) ? ` <span class="m" style="font-weight:400">· ${fmt(fams.filter((f) => f.isDemo).length)} דמו</span>` : ""}</h3><div class="filters">${FILTERS.map(([k, l]) => `<span class="chip ${famFilter === k ? "on" : ""}" data-f="${k}">${l}</span>`).join("")}<span class="chip search">🔎 <input id="famSearch" placeholder="חיפוש" value="${esc(famQuery)}"></span></div></div>
+    <div class="top"><h3>משפחות · ${fmt(fams.filter((f) => !f.isDemo).length)}${fams.some((f) => f.isDemo) ? ` <span class="m" style="font-weight:400">· ${fmt(fams.filter((f) => f.isDemo).length)} דמו</span>` : ""}</h3><div class="filters">${FILTERS.map(([k, l]) => `<span class="chip ${famFilter === k ? "on" : ""}" data-f="${k}">${l} <b>${fmt(countFor(k))}</b></span>`).join("")}<span class="chip search">🔎 <input id="famSearch" placeholder="חיפוש" value="${esc(famQuery)}"></span></div></div>
     <div id="famList">${listHTML()}</div>`;
   document.querySelectorAll("[data-f]").forEach((c) => c.onclick = () => { famFilter = c.dataset.f; families(); });
   const inp = $("famSearch"); inp.oninput = () => { famQuery = inp.value; redrawList(); };
@@ -269,26 +297,78 @@ function patchFam(hh, fn) {
   if (f) fn(f, (J && J.households && J.households[hh]) || null);
   redrawList();
 }
+/// How long since anyone in the family opened Tofy — the one thing worth seeing
+/// without clicking into the family.
+function famWhen(f) {
+  const days = (f.children || []).map((k) => ((J && J.children && J.children[k.fullId || k.id]) || {}))
+    .map((c) => c.lastActive).filter(Boolean).sort().pop();
+  if (!days) return { cls: "cold", text: "עוד לא שיחקו" };
+  const d = Math.round((Date.now() - new Date(days + "T12:00:00").getTime()) / 86400000);
+  if (d <= 0) return { cls: "live", text: "פעילה היום" };
+  if (d === 1) return { cls: "", text: "אתמול" };
+  if (d < 30) return { cls: "", text: `לפני ${d} ימים` };
+  return { cls: "cold", text: `לפני ${Math.round(d / 30)} חודשים` };
+}
+
 function famCard(f) {
   const j = f.j || {}, state = j.state || "free_new";
-  let chip = "", extra = "";
-  if (state === "plus") { chip = `<span class="chip gold" style="padding:2px 8px;font-size:11px">👑 טופי+ ${j.plan === "yearly" ? "שנתי" : "חודשי"}</span>`; extra = `<span class="state">מתחדש ${dateShort(j.premiumUntil)}</span>`; }
-  else if (state === "gift") chip = `<span class="chip mint" style="padding:2px 8px;font-size:11px">🎁 במתנה · ${daysLeft(j.daysLeft)}</span>`;
-  else if (state === "gift_expiring") chip = `<span class="chip pink" style="padding:2px 8px;font-size:11px">מתנה מסתיימת ${days(j.daysLeft)}</span>`;
+  let chip = "";
+  if (state === "plus") chip = `<span class="chip gold" style="padding:2px 9px;font-size:11px">👑 טופי+ ${j.plan === "yearly" ? "שנתי" : "חודשי"} · מתחדש ${dateShort(j.premiumUntil)}</span>`;
+  else if (state === "gift") chip = `<span class="chip mint" style="padding:2px 9px;font-size:11px">🎁 במתנה · ${daysLeft(j.daysLeft)}</span>`;
+  else if (state === "gift_expiring") chip = `<span class="chip pink" style="padding:2px 9px;font-size:11px">מתנה מסתיימת ${days(j.daysLeft)}</span>`;
   else { const [l] = STATE[state] || STATE.free_new; chip = `<span class="state">${l}</span>`; }
+  const labelChip = f.label ? `<span class="state">🏷 ${esc(f.label)}</span>` : "";
+  const demoChip = f.isDemo ? '<span class="state">🧪 דמו</span>' : "";
+
   const parents = (f.parents || []).filter((p) => !p.anonymous || p.isGuestParent);
-  const kids = (f.children || []).map((k) => { const c = (J && J.children && J.children[k.fullId || k.id]) || {}; const t = c.today || {}; const girl = (k.gender || c.gender) === "girl";
-    const act = t.questions ? `היום ${t.questions} שאלות · ${pct(Math.round(100 * (t.correct || 0) / t.questions))}` : c.lastActive ? c.lastActive.slice(5).replace("-", ".") : (girl ? "עוד לא שיחקה" : "עוד לא שיחק");
-    return `<span>🧒 ${esc(k.name)}${k.grade != null ? " · " + gradeName(k.grade) : ""} · ${act}${c.favorite ? ` · ${girl ? "אוהבת" : "אוהב"}: ${esc(c.favorite.label.split(" ")[0])}` : ""}</span>`; }).join("");
-  const devs = (f.children || []).flatMap((k) => (k.deviceRows || []).map((d) => `<span>📱 ${esc(k.name)} · ${d.kind === "ipad" ? "אייפד" : d.kind === "iphone" ? "אייפון" : esc(d.name || "מכשיר")}${d.lastSeenAt ? " · " + (Date.now() / 1000 - d.lastSeenAt < 86400 ? "פעיל" : "לפני " + Math.round((Date.now() / 1000 - d.lastSeenAt) / 86400) + " ימים") : ""}${d.appVersion ? " · " + esc(String(d.appVersion).replace(/^.*\((\d+)\)$/, "$1")) : ""}</span>`)).join("");
   const joined = Math.min(...(f.children || []).map((k) => k.createdAt || Infinity).concat([Infinity]));
-  const meta = [parents.map((p) => p.email || p.name || "אורח").slice(0, 3).join(" · "), parents.length ? `${parents.length === 1 ? "הורה אחד" : parents.length + " הורים"}` : "", isFinite(joined) ? "הצטרפו " + dateShort(joined) : "", j.purchaseSource ? "מקור המנוי: " + (SOURCE[j.purchaseSource] || j.purchaseSource) : ""].filter(Boolean).join(" · ");
-  const demoChip = f.isDemo ? '<span class="chip" style="padding:2px 8px;font-size:11px">🧪 דמו</span>' : "";
-  return `<div class="fam" data-hh="${esc(f.hh)}"><div class="h"><div><b>👪 ${esc(famName(f))}</b> ${chip} ${demoChip} ${extra}</div><div class="m">${esc(meta)}</div></div>
-    <div class="kids">${kids}${devs}</div>
-    <div class="acts"><a class="btn ghost" href="families.html">פרטי הילדים</a><button class="btn ghost" data-gift="${esc(f.hh)}">🎁 הארך מתנה</button><button class="btn ghost" data-endgift="${esc(f.hh)}">⏹ סיים מתנה</button><button class="btn ghost" data-world="${esc(f.hh)}">🌍 פתח עולם</button><a class="btn ghost" href="notifications.html">📣 שלח הודעה</a><button class="btn ghost" data-label="${esc(f.hh)}" data-cur="${esc(f.label || "")}">🏷 תווית</button><button class="btn ghost" data-demo="${esc(f.hh)}" data-on="${f.isDemo ? "1" : ""}">${f.isDemo ? "↩︎ בטל דמו" : "🧪 סמן כדמו"}</button><button class="btn danger" data-del="${esc(f.hh)}" data-name="${esc(famName(f))}">🗑 מחק</button></div></div>`;
+  const meta = [parents.length ? (parents.length === 1 ? "הורה אחד" : parents.length + " הורים") : "אורח",
+    parents.map((p) => p.email || p.name).filter(Boolean).slice(0, 2).join(" · "),
+    isFinite(joined) ? "הצטרפו " + dateShort(joined) : "",
+    j.purchaseSource ? "מקור: " + (SOURCE[j.purchaseSource] || j.purchaseSource) : ""].filter(Boolean).join(" · ");
+
+  // Children: name, grade and what they did today — the device list collapses
+  // into one pill, because eight device rows told nobody anything.
+  const kids = (f.children || []).map((k) => {
+    const c = (J && J.children && J.children[k.fullId || k.id]) || {}, t = c.today || {};
+    const girl = (k.gender || c.gender) === "girl";
+    const act = t.questions ? `${t.questions} שאלות היום · ${pct(Math.round(100 * (t.correct || 0) / t.questions))}`
+      : c.lastActive ? c.lastActive.slice(5).replace("-", ".") : (girl ? "עוד לא שיחקה" : "עוד לא שיחק");
+    const quiet = !t.questions;
+    return `<span class="${quiet ? "quiet" : ""}">🧒 ${esc(k.name)}${k.grade != null ? " · " + gradeName(k.grade) : ""} · ${act}</span>`;
+  }).join("");
+  const devs = (f.children || []).flatMap((k) => (k.deviceRows || []).map((d) => `${k.name} · ${d.kind === "ipad" ? "אייפד" : d.kind === "iphone" ? "אייפון" : (d.name || "מכשיר")}${d.appVersion ? " · גרסה " + String(d.appVersion).replace(/^.*\((\d+)\)$/, "$1") : ""}`));
+  const devPill = devs.length ? `<span class="quiet" title="${esc(devs.join("\n"))}">📱 ${devs.length === 1 ? "מכשיר אחד" : fmt(devs.length) + " מכשירים"}</span>` : "";
+
+  const w = famWhen(f);
+  return `<div class="fam famrow" data-hh="${esc(f.hh)}">
+    <div class="title">👪 ${esc(famName(f))} ${chip} ${labelChip} ${demoChip}</div>
+    <div class="sub">${esc(meta)}</div>
+    <div class="rowside"><span class="when ${w.cls}">${w.text}</span><button class="dots" type="button" data-menu aria-label="פעולות">⋯</button></div>
+    <div class="kids">${kids}${devPill}</div>
+    <div class="rowmenu">
+      <button data-gift="${esc(f.hh)}">🎁 הארך מתנה</button>
+      <button data-endgift="${esc(f.hh)}">⏹ סיים מתנה</button>
+      <button data-world="${esc(f.hh)}">🌍 פתח עולם</button>
+      <a href="notifications.html">📣 שלח הודעה</a>
+      <a href="families.html">🧒 פרטי הילדים</a>
+      <button data-label="${esc(f.hh)}" data-cur="${esc(f.label || "")}">🏷 תווית</button>
+      <div class="sep"></div>
+      <button data-demo="${esc(f.hh)}" data-on="${f.isDemo ? "1" : ""}">${f.isDemo ? "↩︎ בטל דמו" : "🧪 סמן כדמו"}</button>
+      <button class="danger" data-del="${esc(f.hh)}" data-name="${esc(famName(f))}">🗑 מחיקת המשפחה</button>
+    </div></div>`;
 }
-function wireFam() {
+document.addEventListener("click", () => document.querySelectorAll(".rowmenu.open").forEach((m) => m.classList.remove("open")));
+function wireFam() { /* closeFamMenus wired above */
+  // One menu open at a time; a click anywhere else closes it.
+  document.querySelectorAll("[data-menu]").forEach((b) => b.onclick = (e) => {
+    e.stopPropagation();
+    const menu = b.closest(".famrow").querySelector(".rowmenu"), open = menu.classList.contains("open");
+    document.querySelectorAll(".rowmenu.open").forEach((m) => m.classList.remove("open"));
+    if (!open) menu.classList.add("open");
+  });
+  document.querySelectorAll(".rowmenu").forEach((m) => m.onclick = (e) => { if (e.target.closest("button,a")) m.classList.remove("open"); });
+
   document.querySelectorAll("[data-gift]").forEach((b) => b.onclick = async () => { const n = Number(prompt("כמה ימי טופי+ במתנה? (מוסיף על מה שיש)", "14")); if (!n) return; try { const r = await call("adminGiftHousehold", { householdID: b.dataset.gift, days: n }); toast("המתנה נפתחה ל־" + n + " ימים"); patchFam(b.dataset.gift, (f, j) => { f.premiumUntil = r.premiumUntil || f.premiumUntil; if (j) { j.state = "gift"; j.premiumUntil = r.premiumUntil || j.premiumUntil; j.daysLeft = Math.max(0, Math.round(((r.premiumUntil || 0) - Date.now() / 1000) / 86400)); } }); } catch (e) { toast("נכשל: " + e.message); } });
   document.querySelectorAll("[data-endgift]").forEach((b) => b.onclick = async () => { if (!confirm("לסיים עכשיו את המתנה של המשפחה הזאת? טופי+ ייסגר להם מיד.")) return; try { await call("adminEndGift", { householdID: b.dataset.endgift }); toast("המתנה הסתיימה"); patchFam(b.dataset.endgift, (f, j) => { f.premiumUntil = null; if (j) { j.state = "returned"; j.premiumUntil = null; j.daysLeft = 0; } }); } catch (e) { toast("נכשל: " + e.message); } });
   document.querySelectorAll("[data-demo]").forEach((b) => b.onclick = async () => { const on = !b.dataset.on; try { await call("adminSetDemoFlag", { householdID: b.dataset.demo, demo: on }); toast(on ? "סומנה כדמו" : "כבר לא דמו"); patchFam(b.dataset.demo, (f) => { f.isDemo = on; }); } catch (e) { toast("נכשל: " + e.message); } });
