@@ -10,9 +10,8 @@
 //  built at runtime, text from the server, values cached from an earlier run —
 //  and fails on any Hebrew letter it finds.
 //
-//  Run one language at a time:
-//    LEAK_LANG=en xcodebuild test -only-testing:ChildTimeUITests/LanguageLeakUITests
-//    LEAK_LANG=ru …
+//  One test per language — a plain env var never reaches the test runner, and a
+//  sweep that silently ran the wrong language is worse than no sweep at all.
 //
 import XCTest
 
@@ -20,7 +19,7 @@ final class LanguageLeakUITests: XCTestCase {
 
     override func setUpWithError() throws { continueAfterFailure = true }
 
-    private var lang: String { ProcessInfo.processInfo.environment["LEAK_LANG"] ?? "en" }
+
 
     /// Every screen `ChildTimeApp.demoScreen` can open.
     private static let screens = [
@@ -45,8 +44,11 @@ final class LanguageLeakUITests: XCTestCase {
 
     private let hebrew = CharacterSet(charactersIn: Unicode.Scalar(0x0590)!...Unicode.Scalar(0x05FF)!)
 
+    @MainActor func testNoHebrewLeaksIntoEnglish() throws { try sweep("en") }
+    @MainActor func testNoHebrewLeaksIntoRussian() throws { try sweep("ru") }
+
     @MainActor
-    func testNoHebrewLeaksIntoThisLanguage() throws {
+    private func sweep(_ lang: String) throws {
         var leaks: [String] = []
         for screen in Self.screens {
             let app = XCUIApplication()

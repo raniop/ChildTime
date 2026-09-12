@@ -282,7 +282,16 @@ enum Localization {
             out += "\u{2067}" + ns.substring(with: m.range) + "\u{2069}"
             last = m.range.location + m.range.length
         }
-        return out + ns.substring(from: last)
+        out += ns.substring(from: last)
+        // …and the whole sentence is declared left-to-right.
+        //
+        // Isolating the Hebrew run is not enough on its own. Unicode resolves a
+        // number next to right-to-left text AS right-to-left, so in
+        // "Gift for ⁧דן המלך⁩ — 32 minutes" the dash and the 32 could join the
+        // name's side and come out as "Gift for 32 — דן המלך minutes" — which is
+        // exactly what a parent saw. Wrapping the line in an LTR isolate settles
+        // the direction for every neutral and every digit inside it.
+        return "\u{2066}" + out + "\u{2069}"
     }
 
     private static var cache: [AppLanguage: Bundle] = [:]

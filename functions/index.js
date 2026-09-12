@@ -46,6 +46,8 @@ function rtlBody(lines) {
 // lang "en" → left-to-right layout and the English brand line.
 function brandEmail({ title, intro, bullets = [], ctaText, ctaHref, signoff, footer, lang }) {
   const en = lang === "en";
+  const ru = lang === "ru";
+  const ltr = en || ru;              // English and Russian read left-to-right
   const li = bullets.map((b) => `
               <tr>
                 <td style="padding:0 0 12px 0;">
@@ -61,7 +63,7 @@ function brandEmail({ title, intro, bullets = [], ctaText, ctaHref, signoff, foo
               </tr>`).join("");
 
   return `<!DOCTYPE html>
-${en ? `<html dir="ltr" lang="en">` : `<html dir="rtl" lang="he">`}<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+${ltr ? `<html dir="ltr" lang="${ru ? "ru" : "en"}">` : `<html dir="rtl" lang="he">`}<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#EFECFA;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(intro).slice(0, 90)}</div>
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#EFECFA;padding:24px 12px;">
@@ -71,16 +73,16 @@ ${en ? `<html dir="ltr" lang="en">` : `<html dir="rtl" lang="he">`}<head><meta c
         <!-- header -->
         <tr>
           <td bgcolor="#5E60CE" background="https://tofyapp.com/email-header.png" style="background-color:#5E60CE;background-image:linear-gradient(135deg,#7A5CFF 0%,#5E60CE 55%,#3E8BF0 100%);padding:30px 24px;text-align:center;">
-            <img src="https://tofyapp.com/apple-touch-icon.png" width="84" height="84" alt="${en ? "Tofy" : "טופי"}"
+            <img src="https://tofyapp.com/apple-touch-icon.png" width="84" height="84" alt="${ltr ? "Tofy" : "טופי"}"
                  style="display:block;margin:0 auto 12px auto;border-radius:22px;border:0;">
-            <div style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:bold;color:#FFD23F;letter-spacing:.5px;">${en ? "Tofy" : "טופי"}</div>
-            <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#EFEBFF;padding-top:4px;">${en ? "Screen time earned by learning" : "זמן מסך שמרוויחים בלמידה"}</div>
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:bold;color:#FFD23F;letter-spacing:.5px;">${ltr ? "Tofy" : "טופי"}</div>
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#EFEBFF;padding-top:4px;">${ru ? "Экранное время, заработанное учёбой" : (en ? "Screen time earned by learning" : "זמן מסך שמרוויחים בלמידה")}</div>
           </td>
         </tr>
 
         <!-- body -->
         <tr>
-          <td style="padding:30px 26px 8px 26px;" ${en ? `dir="ltr" align="left"` : `dir="rtl" align="right"`}>
+          <td style="padding:30px 26px 8px 26px;" ${ltr ? `dir="ltr" align="left"` : `dir="rtl" align="right"`}>
             <h1 style="margin:0 0 12px 0;font-family:Arial,Helvetica,sans-serif;font-size:23px;line-height:1.35;color:#1B1340;">${escapeHtml(title)}</h1>
             <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.75;color:#463E70;">${escapeHtml(intro)}</p>
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${li}</table>
@@ -96,7 +98,7 @@ ${en ? `<html dir="ltr" lang="en">` : `<html dir="rtl" lang="he">`}<head><meta c
 
         <!-- signoff -->
         <tr>
-          <td style="padding:0 26px 28px 26px;" ${en ? `dir="ltr" align="left"` : `dir="rtl" align="right"`}>
+          <td style="padding:0 26px 28px 26px;" ${ltr ? `dir="ltr" align="left"` : `dir="rtl" align="right"`}>
             <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;color:#463E70;">${escapeHtml(signoff).replace(/\n/g, "<br>")}</p>
           </td>
         </tr>
@@ -116,17 +118,22 @@ ${en ? `<html dir="ltr" lang="en">` : `<html dir="rtl" lang="he">`}<head><meta c
 
 // ---- 🌍 Device language ----------------------------------------------------
 // Each device records the language it shows: parents/{uid}.tokenLanguages maps
-// FCM token → "he" | "en" (one account can run Hebrew AND English devices), and
-// childDevices/{id}.language sits next to that row's fcmToken. Missing = Hebrew
-// (every install from before the language picker).
+// FCM token → "he" | "en" | "ru" (one account can run devices in different
+// languages), and childDevices/{id}.language sits next to that row's fcmToken.
+// Missing = Hebrew (every install from before the language picker).
 //
 // The token helpers below learn each token's language while they read those
 // docs anyway; the send helpers then split the tokens by language and build the
 // text once per language. Entries are only ever written from an explicit value
 // on a doc, so a warm instance reusing the map stays correct.
-const LANGS = ["he", "en"];
+const LANGS = ["he", "en", "ru"];
 const TOKEN_LANG = new Map();
-const normLang = (v) => (String(v || "").toLowerCase().startsWith("en") ? "en" : "he");
+const normLang = (v) => {
+  const s = String(v || "").toLowerCase();
+  if (s.startsWith("en")) return "en";
+  if (s.startsWith("ru")) return "ru";
+  return "he";                       // the default every pre-picker install has
+};
 function learnTokenLang(token, lang) {
   if (token && typeof lang === "string" && lang) TOKEN_LANG.set(token, normLang(lang));
 }
@@ -169,6 +176,16 @@ function deviceLabel(event) {
   return "";
 }
 
+// Russian: the same suffix. Device kinds keep their Latin product names.
+function deviceLabelRu(event) {
+  const nm = (event.deviceName || "").trim();
+  const generic = ["מכשיר", "Device", "Устройство", "iPhone", "iPad", "iPod touch"];
+  if (nm && !generic.includes(nm)) return ` · ${nm}`;
+  if (event.deviceKind === "ipad") return " · iPad";
+  if (event.deviceKind === "iphone") return " · iPhone";
+  return "";
+}
+
 // English: the same suffix, with English device-kind labels.
 function deviceLabelEn(event) {
   const nm = (event.deviceName || "").trim();
@@ -181,6 +198,7 @@ function deviceLabelEn(event) {
 
 function liveMessage(event, lang) {
   if (lang === "en") return liveMessageEn(event);
+  if (lang === "ru") return liveMessageRu(event);
   const f = event.gender === "girl";                 // feminine forms?
   const name = event.childName || (f ? "הילדה" : "הילד");
   const g = (male, female) => (f ? female : male);   // pick by gender
@@ -273,6 +291,52 @@ function liveMessageEn(event) {
     case "assistRequest": return { title: "Help request 💌", body: `${name} asked for your help with a question${dev}.` };
     case "parentGateOpened": return { title: "🔐 Parent settings opened", body: `Someone opened parent settings on ${whose} device${dev}.` };
     case "playPINForgot": return { title: "🔒 Play time lock code forgotten", body: `${name} forgot the play time lock code${dev}. The code is on ${whose} card in the parent dashboard — you can reset it there, or right on your child's device with the parent code.` };
+    default: return null;
+  }
+}
+
+// Parent-facing Russian for the same events (formal «вы»). Gender comes from the
+// event, as in Hebrew; returns null for exactly the types the Hebrew skips.
+function liveMessageRu(event) {
+  const f = event.gender === "girl";
+  const name = event.childName || (f ? "Ваша дочь" : "Ваш ребёнок");
+  const g = (male, female) => (f ? female : male);
+  const dev = deviceLabelRu(event);
+  switch (event.type) {
+    case "sessionStart": return { title: g("Начал играть 📱", "Начала играть 📱"), body: `${name} ${g("начал", "начала")} играть и учиться${dev}.` };
+    case "sessionEnd": {
+      const q = Number(event.questions) || 0;
+      const acc = Number(event.accuracy) || 0;
+      const mins = Number(event.minutes) || 0;
+      const stars = Number(event.stars) || 0;
+      const parts = [];
+      if (q > 0) parts.push(`${q} вопр.`);
+      if (q > 0) parts.push(`${acc}% верно`);
+      if (mins > 0) parts.push(`${mins} мин. заработано`);
+      if (stars > 0) parts.push(`${stars} ⭐`);
+      const summary = parts.length ? parts.join(" · ") : g("закончил занятие", "закончила занятие");
+      return { title: g("Закончил играть ✅", "Закончила играть ✅"), body: `${name}${dev}: ${summary}` };
+    }
+    case "screenTimeStart": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` (${mins} мин.)` : "";
+      return { title: g("Открыл игровое время 🎮", "Открыла игровое время 🎮"), body: `${name} ${g("открыл", "открыла")} игровое время${tail}${dev}.` };
+    }
+    case "screenTimeEnd": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` · осталось мин.: ${mins}` : "";
+      return { title: g("Закончил игровое время ⏹️", "Закончила игровое время ⏹️"), body: `${name} ${g("закончил", "закончила")} игровое время${dev}${tail}.` };
+    }
+    case "screenTimeMoved": {
+      const kindLabel = (k) => (k === "ipad" ? "iPad" : (k === "iphone" ? "iPhone" : "другое устройство"));
+      const from = kindLabel(event.fromKind);
+      const to = kindLabel(event.deviceKind);
+      return { title: g("Перенёс игровое время 🔄", "Перенесла игровое время 🔄"),
+               body: `${name} ${g("перенёс", "перенесла")} игровое время: ${from} → ${to}. Устройство ${from} заблокировано 🔒` };
+    }
+    case "assistRequest": return { title: "Просьба о помощи 💌", body: `${name} ${g("попросил", "попросила")} вашей помощи с вопросом${dev}.` };
+    case "parentGateOpened": return { title: "🔐 Открыты родительские настройки", body: `Кто-то открыл родительские настройки на устройстве ребёнка (${name})${dev}.` };
+    case "playPINForgot": return { title: "🔒 Код защиты игрового времени забыт", body: `${name} ${g("забыл", "забыла")} код защиты игрового времени${dev}. Код есть в карточке ребёнка (${name}) в родительской панели — там же его можно сбросить, или прямо на устройстве ребёнка с родительским кодом.` };
     default: return null;
   }
 }
@@ -387,6 +451,10 @@ function dupChildMessage(name, lang) {
     return { title: "⚠️ A duplicate child may have been created",
              body: `A new child named "${name}" was just created, but your family already has a child with this name. If you didn't create it on purpose, don't delete anything — contact support.` };
   }
+  if (lang === "ru") {
+    return { title: "⚠️ Возможно, создан дубликат профиля",
+             body: `Только что создан новый профиль ребёнка с именем «${name}», хотя в вашей семье уже есть ребёнок с таким именем. Если вы сделали это не намеренно — ничего не удаляйте, напишите в поддержку.` };
+  }
   return {
     title: "⚠️ יתכן שנוצר ילד כפול",
     body: `נוצר עכשיו ילד חדש בשם "${name}" למרות שכבר קיים ילד בשם הזה במשפחה. אם לא יצרתם אותו בכוונה — אל תמחקו כלום, פנו לתמיכה.`,
@@ -396,6 +464,10 @@ function suspiciousStateMessage(stars, lang) {
   if (lang === "en") {
     return { title: "⚠️ Unusual progress data",
              body: `A new profile with ${stars} stars was detected — it may be a copy of an existing child. Don't delete anything; contact support.` };
+  }
+  if (lang === "ru") {
+    return { title: "⚠️ Подозрительные данные прогресса",
+             body: `Обнаружен новый профиль, звёзд в нём: ${stars} — возможно, это копия существующего ребёнка. Ничего не удаляйте, напишите в поддержку.` };
   }
   return {
     title: "⚠️ נתוני התקדמות חשודים",
@@ -530,6 +602,8 @@ exports.onPremiumRequest = onDocumentWritten("children/{childID}", async (event)
 // The base worlds, as parents read them in a push.
 const TOPIC_EN = { math: "Math 🧮", english: "English 🇬🇧", hebrew: "Hebrew ✍️", logic: "Logic 🧩", science: "Science 🔬",
                    history: "History 🏛️", geography: "Geography 🌍", money: "Money Skills 💰", reading: "Reading 📖" };
+const TOPIC_RU = { math: "Математика 🧮", english: "Английский 🇬🇧", hebrew: "Иврит ✍️", logic: "Логика 🧩", science: "Наука 🔬",
+                   history: "История 🏛️", geography: "География 🌍", money: "Финансовая грамотность 💰", reading: "Понимание текста 📖" };
 
 function premiumRequestMessage(after, lang) {
   if (lang === "en") {
@@ -540,6 +614,15 @@ function premiumRequestMessage(after, lang) {
           body: `${name} tapped this world in Tofy. It opens with Tofy+ — one subscription for the whole family, from your phone.` }
       : { title: `👑 ${name} wants Tofy+`,
           body: `${name} asked to unlock the games and worlds. The subscription covers the whole family — unlock it once from your phone.` };
+  }
+  if (lang === "ru") {
+    const name = after.name || "Ваш ребёнок";
+    const topic = TOPIC_RU[after.premiumRequestedTopic || ""];
+    return topic
+      ? { title: `${name} хочет открыть мир: ${topic}`,
+          body: `${name} просит открыть этот мир в Tofy. Он открывается с Tofy+ — одна подписка на всю семью, прямо с вашего телефона.` }
+      : { title: `👑 ${name} просит Tofy+`,
+          body: `${name} просит открыть игры и миры. Подписка — на всю семью, открывается один раз с вашего телефона.` };
   }
   const name = after.name || "הילד";
   const girl = after.gender === "girl";
@@ -584,6 +667,15 @@ function packRequestMessage(after, lang) {
       : { title: `✨ ${name} is asking for a new quiz`,
           body: `${name} wants a new quiz. It's a one-time add-on — unlock it from your phone.` };
   }
+  if (lang === "ru") {
+    const name = after.name || "Ваш ребёнок";
+    const p = PACK_META[packID];
+    return p
+      ? { title: `${p.emoji} ${name} просит набор «${p.nameRu}»`,
+          body: `${name} хочет узнать больше про это: ${p.subjectRu}. Это разовое дополнение — откройте его со своего телефона.` }
+      : { title: `✨ ${name} просит новый набор вопросов`,
+          body: `${name} хочет новый набор вопросов. Это разовое дополнение — откройте его со своего телефона.` };
+  }
   const name = after.name || "הילד";
   const girl = after.gender === "girl";
   const packName = PACK_NAMES[packID] || "שאלון חדש";
@@ -593,33 +685,47 @@ function packRequestMessage(after, lang) {
 // Pack copy for pushes — keep in sync with QuestionPacks (iOS) and PACKS in
 // docs/admin/notifications.html. English names/taglines match the app's English
 // catalog; subjectEn completes "Want to learn about …?" (lowercase, mid-sentence).
+// The *Ru fields are the same copy for Russian-speaking families in Israel.
 const PACK_META = {
   soccer: { name: "עולם הכדורגל", emoji: "⚽", subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות",
-    nameEn: "Soccer World", subjectEn: "soccer", taglineEn: "Players, teams, tournaments, and surprising facts" },
+    nameEn: "Soccer World", subjectEn: "soccer", taglineEn: "Players, teams, tournaments, and surprising facts",
+    nameRu: "Мир футбола", subjectRu: "футбол", taglineRu: "Игроки, команды, турниры и неожиданные факты" },
   dinosaurs: { name: "דינוזאורים", emoji: "🦖", subject: "דינוזאורים", tagline: "מינים, גודל, מה אכלו, ואיך מגלים מאובנים",
-    nameEn: "Dinosaurs", subjectEn: "dinosaurs", taglineEn: "Species, size, what they ate, and how fossils are found" },
+    nameEn: "Dinosaurs", subjectEn: "dinosaurs", taglineEn: "Species, size, what they ate, and how fossils are found",
+    nameRu: "Динозавры", subjectRu: "динозавры", taglineRu: "Виды, размеры, чем питались и как находят окаменелости" },
   space: { name: "חלל וכוכבים", emoji: "🚀", subject: "חלל", tagline: "כוכבי לכת, ירח, אסטרונאוטים ושמש",
-    nameEn: "Space and Stars", subjectEn: "space", taglineEn: "Planets, the Moon, astronauts, and the Sun" },
+    nameEn: "Space and Stars", subjectEn: "space", taglineEn: "Planets, the Moon, astronauts, and the Sun",
+    nameRu: "Космос и звёзды", subjectRu: "космос", taglineRu: "Планеты, Луна, космонавты и Солнце" },
   animals: { name: "עולם החיות", emoji: "🐾", subject: "חיות", tagline: "יבשות, חיות בסכנה ושיאים",
-    nameEn: "Animal World", subjectEn: "animals", taglineEn: "Continents, endangered animals, and record-breakers" },
+    nameEn: "Animal World", subjectEn: "animals", taglineEn: "Continents, endangered animals, and record-breakers",
+    nameRu: "Мир животных", subjectRu: "животные", taglineRu: "Континенты, животные под угрозой и рекордсмены" },
   sea: { name: "מעמקי הים", emoji: "🌊", subject: "הים", tagline: "כרישים, לויתנים, שוניות, ומי חי איפה",
-    nameEn: "Deep Sea", subjectEn: "the ocean", taglineEn: "Sharks, whales, reefs, and who lives where" },
+    nameEn: "Deep Sea", subjectEn: "the ocean", taglineEn: "Sharks, whales, reefs, and who lives where",
+    nameRu: "Морские глубины", subjectRu: "море", taglineRu: "Акулы, киты, рифы и кто где живёт" },
   gifted: { name: "הכנה למחוננים", emoji: "🧠", subject: "חשיבה", tagline: "חשיבה, סדרות, היקשים ותפיסה מרחבית",
-    nameEn: "Gifted Prep", subjectEn: "thinking skills", taglineEn: "Thinking, sequences, inference, and spatial reasoning" },
+    nameEn: "Gifted Prep", subjectEn: "thinking skills", taglineEn: "Thinking, sequences, inference, and spatial reasoning",
+    nameRu: "Подготовка для одарённых", subjectRu: "мышление", taglineRu: "Мышление, последовательности, выводы и пространственное восприятие" },
   food: { name: "מטבח ומדע של אוכל", emoji: "🍳", subject: "אוכל", tagline: "מאין מגיע אוכל, מדידות ומתכונים בחשבון",
-    nameEn: "Kitchen and Food Science", subjectEn: "food", taglineEn: "Where food comes from, measuring, and recipe math" },
+    nameEn: "Kitchen and Food Science", subjectEn: "food", taglineEn: "Where food comes from, measuring, and recipe math",
+    nameRu: "Кухня и наука о еде", subjectRu: "еда", taglineRu: "Откуда берётся еда, измерения и математика в рецептах" },
   israel: { name: "ישראל שלי", emoji: "🏛️", subject: "ישראל", tagline: "ערים, סמלים, חגים, דמויות וטבע",
-    nameEn: "My Israel", subjectEn: "Israel", taglineEn: "Cities, symbols, holidays, famous people, and nature" },
+    nameEn: "My Israel", subjectEn: "Israel", taglineEn: "Cities, symbols, holidays, famous people, and nature",
+    nameRu: "Мой Израиль", subjectRu: "Израиль", taglineRu: "Города, символы, праздники, известные люди и природа" },
   tishrei: { name: "חגי תשרי", emoji: "🍎", subject: "חגי תשרי", tagline: "ראש השנה, יום כיפור, סוכות ושמחת תורה",
-    nameEn: "Fall Holidays", subjectEn: "the fall holidays", taglineEn: "Rosh Hashanah, Yom Kippur, Sukkot, and Simchat Torah" },
+    nameEn: "Fall Holidays", subjectEn: "the fall holidays", taglineEn: "Rosh Hashanah, Yom Kippur, Sukkot, and Simchat Torah",
+    nameRu: "Осенние праздники", subjectRu: "осенние праздники", taglineRu: "Рош ха-Шана, Йом Кипур, Суккот и Симхат Тора" },
   music: { name: "מוזיקה", emoji: "🎵", subject: "מוזיקה", tagline: "כלי נגינה, קצב, מלחינים ושירי ילדים",
-    nameEn: "Music", subjectEn: "music", taglineEn: "Instruments, rhythm, composers, and children's songs" },
+    nameEn: "Music", subjectEn: "music", taglineEn: "Instruments, rhythm, composers, and children's songs",
+    nameRu: "Музыка", subjectRu: "музыка", taglineRu: "Инструменты, ритм, композиторы и детские песни" },
   body: { name: "גוף האדם", emoji: "🧍", subject: "גוף האדם", tagline: "עצמות, לב, נשימה ובריאות",
-    nameEn: "The Human Body", subjectEn: "the human body", taglineEn: "Bones, heart, breathing, and health" },
+    nameEn: "The Human Body", subjectEn: "the human body", taglineEn: "Bones, heart, breathing, and health",
+    nameRu: "Тело человека", subjectRu: "тело человека", taglineRu: "Кости, сердце, дыхание и здоровье" },
   vehicles: { name: "כלי רכב ותחבורה", emoji: "🚗", subject: "כלי רכב", tagline: "מכוניות, רכבות, מטוסים, ואיך זה עובד",
-    nameEn: "Vehicles and Transportation", subjectEn: "vehicles", taglineEn: "Cars, trains, planes, and how they work" },
+    nameEn: "Vehicles and Transportation", subjectEn: "vehicles", taglineEn: "Cars, trains, planes, and how they work",
+    nameRu: "Транспорт", subjectRu: "транспорт", taglineRu: "Машины, поезда, самолёты и как это работает" },
   flags: { name: "דגלים ומדינות", emoji: "🌍", subject: "דגלים ומדינות", tagline: "דגלים, בירות ויבשות",
-    nameEn: "Flags and Countries", subjectEn: "flags and countries", taglineEn: "Flags, capitals, and continents" },
+    nameEn: "Flags and Countries", subjectEn: "flags and countries", taglineEn: "Flags, capitals, and continents",
+    nameRu: "Флаги и страны", subjectRu: "флаги и страны", taglineRu: "Флаги, столицы и континенты" },
 };
 const PACK_NAMES = Object.fromEntries(Object.entries(PACK_META).map(([k, v]) => [k, v.name]));
 const PACK_EMOJI = Object.fromEntries(Object.entries(PACK_META).map(([k, v]) => [k, v.emoji]));
@@ -629,7 +735,7 @@ const taglineMidEn = (t) => (/^(Rosh|Israel|The Moon)\b/.test(t) ? t : t.charAt(
 
 // The agreed launch message (Rani, 2026-09-06): the moment a pack is switched
 // on, every family's parents get this — "we found a new world", never "buy".
-// The *En fields are what English-language devices get (see campaignPayload).
+// The *En / *Ru fields are what English- and Russian-language devices get (see campaignPayload).
 function launchCampaignFor(packID) {
   const p = PACK_META[packID]; if (!p) return null;
   return {
@@ -639,6 +745,9 @@ function launchCampaignFor(packID) {
     titleEn: `New world in Tofy: ${p.nameEn}`,
     bodyEn: `We found a new world for your kids: ${taglineMidEn(p.taglineEn)}. Every correct answer earns play minutes. It's already open for Tofy+ subscribers; otherwise, send it to your child from your phone.`,
     childTitleEn: `Want to learn about ${p.subjectEn}?`, childBodyEn: `${p.taglineEn} — ask Mom or Dad`,
+    titleRu: `Новый мир в Tofy: ${p.nameRu}`,
+    bodyRu: `Мы нашли новый мир для детей: ${p.taglineRu}. За каждый верный ответ начисляются игровые минуты. Подписчикам Tofy+ он уже открыт; иначе отправьте его ребёнку со своего телефона.`,
+    childTitleRu: `Хочешь узнать про это: ${p.subjectRu}?`, childBodyRu: `${p.taglineRu} — попроси маму или папу`,
     audience: { roles: ["parents"], gradeMin: 0, gradeMax: 8, gradeScale: 8, premium: "any", topics: [], excludeOwners: true },
     action: { type: "pack", packID }, showPopup: true,
   };
@@ -713,6 +822,7 @@ async function tokensForChildOwnDevices(childID, householdID) {
 // Kid-facing: the gentle "screen time closed" alert on a remote lock.
 function lockPushAlert(lang) {
   if (lang === "en") return { title: "Tofy 💙", body: "Screen time is over for now. You can earn more minutes in Tofy! 🌟" };
+  if (lang === "ru") return { title: "Tofy 💙", body: "Экранное время пока закончилось. Ты можешь заработать ещё минуты в Tofy! 🌟" };
   return { title: "טופי 💙", body: "זמן המסך נסגר עכשיו. אפשר להרוויח עוד דקות בטופי! 🌟" };
 }
 
@@ -778,6 +888,12 @@ function ackMessage(kind, found, deviceName, lang) {
     if (kind === "revoke") return { title: "💝 Gift minutes removed", body: `${whose} device just confirmed the gift minutes were removed.` };
     if (kind === "gift") return { title: "💝 The gift arrived", body: `${whose} device connected and received the gift minutes.` };
     return { title: "✅ Device locked", body: `${whose} device${deviceName ? ` (${deviceName})` : ""} connected and is now locked.` };
+  }
+  if (lang === "ru") {
+    const whose = found ? `ребёнка ${found}` : "вашего ребёнка";
+    if (kind === "revoke") return { title: "💝 Подаренные минуты удалены", body: `Устройство ${whose} подтвердило удаление подаренных минут.` };
+    if (kind === "gift") return { title: "💝 Подарок доставлен", body: `Устройство ${whose} вышло на связь и получило подаренные минуты.` };
+    return { title: "✅ Устройство заблокировано", body: `Устройство ${whose}${deviceName ? ` (${deviceName})` : ""} вышло на связь и теперь заблокировано.` };
   }
   const name = found || "הילד/ה";
   if (kind === "revoke") return { title: "💝 דקות המתנה נמחקו", body: `המכשיר של ${name} אישר עכשיו את מחיקת דקות המתנה.` };
@@ -891,6 +1007,12 @@ function liveGameInviteMessage(kind, rawHostName, lang) {
       ? { title: "🎮 You're wanted in a game!", body: `${hostName} is inviting you to join right now — who's the fastest?` }
       : { title: "🎮 Game invite!", body: `${hostName} invited you to a quiz game against friends — who's the fastest?` };
   }
+  if (lang === "ru") {
+    const hostName = rawHostName || "Друг";
+    return kind === "nudge"
+      ? { title: "🎮 Тебя зовут в игру!", body: `${hostName} приглашает тебя присоединиться прямо сейчас — кто быстрее?` }
+      : { title: "🎮 Приглашение в игру!", body: `${hostName} приглашает тебя в викторину с друзьями — кто быстрее?` };
+  }
   const hostName = rawHostName || "חבר";
   return kind === "nudge"
     ? { title: "🎮 קוראים לך למשחק!", body: `${hostName} מזמין/ה אותך להצטרף עכשיו — מי הכי מהיר?` }
@@ -970,6 +1092,15 @@ function timeTransferMessage(kind, after, lang) {
       : `${after.fromName} wants to give ${plural(after.minutes, "minute", "minutes")} to ${after.toName} — needs your approval`;
     return { title: "⏳ Time transfer needs approval", body };
   }
+  if (lang === "ru") {
+    if (kind === "seller") {
+      return { title: "🛒 Просьба купить время", body: `${after.toName} хочет купить у тебя минут: ${after.minutes} за ${after.diamondPrice} 💎` };
+    }
+    const body = (after.diamondPrice > 0)
+      ? `Покупает ${after.toName}, продаёт ${after.fromName} — минут: ${after.minutes}. Нужно ваше подтверждение`
+      : `Дарит ${after.fromName}, получает ${after.toName} — минут: ${after.minutes}. Нужно ваше подтверждение`;
+    return { title: "⏳ Перевод времени ждёт подтверждения", body };
+  }
   if (kind === "seller") {
     return { title: "🛒 בקשה לקניית זמן", body: `${after.toName} רוצה לקנות ממך ${after.minutes} דקות תמורת ${after.diamondPrice} 💎` };
   }
@@ -1042,7 +1173,7 @@ exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{cho
   }
 });
 
-const choreLabelFor = (after, lang) => `${after.emoji || "🧹"} ${after.title || (lang === "en" ? "Chore" : "מטלה")}`;
+const choreLabelFor = (after, lang) => `${after.emoji || "🧹"} ${after.title || (lang === "en" ? "Chore" : (lang === "ru" ? "Дело" : "מטלה"))}`;
 
 // Parents: a kid marked a chore done. `kid` = the child doc, or null.
 function choreMarkedMessage(after, kid, lang) {
@@ -1052,6 +1183,12 @@ function choreMarkedMessage(after, kid, lang) {
       ? `💰 $${after.rewardCoins || 0}` : `🎮 ${after.rewardMinutes || 0} min`;
     return { title: `🧹 ${(kid && kid.name) || "Your child"} finished a chore!`,
              body: `${choreLabel} — waiting for your approval (${reward})` };
+  }
+  if (lang === "ru") {
+    const reward = after.chosenReward === "coins"
+      ? `💰 ${after.rewardCoins || 0} ₪` : `🎮 ${after.rewardMinutes || 0} мин.`;
+    return { title: `🧹 ${(kid && kid.name) || "Ваш ребёнок"} — дело выполнено!`,
+             body: `${choreLabel} — ждёт вашего подтверждения (${reward})` };
   }
   let name = "הילד/ה"; let doneVerb = "סיים/ה";
   if (kid) {
@@ -1073,6 +1210,12 @@ function choreApprovedMessage(before, after, lang) {
       ? `💰 $${after.rewardCoins || 0} added to your pocket money!`
       : `🎮 ${plural(after.rewardMinutes || 0, "play minute", "play minutes")} added!`;
     return { title: "🎉 Chore approved!", body: `${choreLabel} — ${reward}` };
+  }
+  if (lang === "ru") {
+    const reward = coins
+      ? `💰 ${after.rewardCoins || 0} ₪ уже в твоей копилке!`
+      : `🎮 игровых минут добавлено: ${after.rewardMinutes || 0}!`;
+    return { title: "🎉 Дело принято!", body: `${choreLabel} — ${reward}` };
   }
   const reward = coins
     ? `💰 ₪${after.rewardCoins || 0} נכנסו לקופה!`
@@ -1104,7 +1247,7 @@ exports.onHelpRequest = onDocumentCreated("helpRequests/{id}", async (event) => 
   if (!tokens.length) return;
 
   await sendEachLocalized(tokens, (lang) => {
-    const childName = data.childName || (lang === "en" ? "Your child" : "הילד");
+    const childName = data.childName || (lang === "en" ? "Your child" : (lang === "ru" ? "Ваш ребёнок" : "הילד"));
     return {
       notification: helpRequestNotification(data, childName, lang),
       data: {
@@ -1136,6 +1279,10 @@ function helpRequestNotification(data, childName, lang) {
   if (lang === "en") {
     const body = `${String(data.question || "")}\nA: ${String(data.optionA || "")} · B: ${String(data.optionB || "")}`;
     return { title: `🧠 ${childName} asked for help with a question`, body };
+  }
+  if (lang === "ru") {
+    const body = `${String(data.question || "")}\nА: ${String(data.optionA || "")} · Б: ${String(data.optionB || "")}`;
+    return { title: `🧠 ${childName} просит помочь с вопросом`, body };
   }
   const f = data.gender === "girl";
   const body = `${String(data.question || "")}\nא׳: ${String(data.optionA || "")} · ב׳: ${String(data.optionB || "")}`;
@@ -1172,6 +1319,13 @@ function childLinkMessage(kind, after, lang) {
           body: `${after.fromParentName || "A parent"} wants to add you to their family. Open Tofy to approve.` }
       : { title: "Request approved! ✅",
           body: "Your child approved the request and now appears in your family." };
+  }
+  if (lang === "ru") {
+    return kind === "request"
+      ? { title: "Запрос на присоединение к семье 👨‍👩‍👧",
+          body: `${after.fromParentName || "Родитель"} хочет добавить вас в свою семью. Откройте Tofy, чтобы подтвердить.` }
+      : { title: "Запрос подтверждён! ✅",
+          body: "Ваш ребёнок подтвердил запрос и теперь есть в вашей семье." };
   }
   return kind === "request"
     ? { title: "בקשת צירוף למשפחה 👨‍👩‍👧",
@@ -1221,6 +1375,10 @@ function weeklyReportMessage({ name: rawName, questions, minutesEarned, longestS
     return { title: `📊 Weekly report — ${rawName || "your child"}`,
              body: `${plural(questions, "question", "questions")} · ${minutesEarned} min earned · best streak ${longestStreak} · ${plural(activeDays, "active day", "active days")}` };
   }
+  if (lang === "ru") {
+    return { title: `📊 Отчёт за неделю — ${rawName || "ваш ребёнок"}`,
+             body: `вопросов: ${questions} · заработано мин.: ${minutesEarned} · лучшая серия: ${longestStreak} · активных дней: ${activeDays}` };
+  }
   const name = rawName || "הילד";
   return { title: `📊 דוח שבועי — ${name}`,
            body: `${questions} שאלות · ${minutesEarned} דק' שנצברו · רצף ${longestStreak} · ${activeDays} ימי פעילות` };
@@ -1243,7 +1401,9 @@ exports.sendTestPush = onDocumentCreated("pushTests/{id}", async (event) => {
     const res = await sendEachLocalized(tokens, (lang) => ({
       notification: lang === "en"
         ? { title: "Tofy — notification test ✅", body: "Great! Notifications are working." }
-        : { title: "טופי — בדיקת התראות ✅", body: "מעולה! ההתראות עובדות." },
+        : lang === "ru"
+          ? { title: "Tofy — проверка уведомлений ✅", body: "Отлично! Уведомления работают." }
+          : { title: "טופי — בדיקת התראות ✅", body: "מעולה! ההתראות עובדות." },
       apns: { payload: { aps: { sound: "default" } } },
     }));
     console.log(`[testPush] sent: success=${res.successCount} failure=${res.failureCount}`);
@@ -1477,6 +1637,29 @@ function waitlistWelcomeEmail(w, lang) {
       ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`),
       "", "tofyapp.com", "", signoff].join("\n");
     return { fromName: "Tofy", subject: "Welcome to Tofy! 🦁 Your spot is saved", text, html };
+  }
+  if (lang === "ru") {
+    const first = String(w.name || "").trim().split(/\s+/)[0];
+    const title = first ? `${first}, место за вами 🎉` : "Место за вами 🎉";
+    const intro = "Спасибо, что записались в Tofy! Мы напишем вам в тот день, когда приложение выйдет — одно письмо, без спама. А пока — вот что вас ждёт.";
+    const bullets = [
+      { emoji: "🧠", title: "Ребёнок учится и играет", text: "Вопросы по школьной программе: математика, иврит, английский, наука и другое — внутри яркого приключения." },
+      { emoji: "🎮", title: "Зарабатывает игровые минуты", text: "Каждый верный ответ стоит секунд игрового времени. Приложения, которые вы закрыли, откроются только тогда, когда ребёнок заработает время." },
+      { emoji: "💝", title: "Две недели Tofy+ в подарок", text: "Когда ребёнок по-настоящему начнёт учиться, мы откроем все миры на две недели. Без банковской карты." },
+    ];
+    const signoff = "До скорой встречи,\nКоманда Tofy 🦁";
+    const html = brandEmail({
+      title, intro, bullets,
+      ctaText: "Сайт Tofy",
+      ctaHref: "https://tofyapp.com",
+      signoff,
+      footer: "Вы получили это письмо, потому что подписались на новости о запуске на tofyapp.com.",
+      lang: "ru",
+    });
+    const text = [title, "", intro, "",
+      ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`),
+      "", "tofyapp.com", "", signoff].join("\n");
+    return { fromName: "Tofy", subject: "Добро пожаловать в Tofy! 🦁 Место за вами", text, html };
   }
   const first = String(w.name || "").trim().split(/\s+/)[0];
   const title = first ? `היי ${first}, שמרנו לכם מקום 🎉` : "שמרנו לכם מקום 🎉";
@@ -2325,13 +2508,27 @@ async function resolveAudience(audience) {
 
 // A campaign's copy for one audience and language. Hebrew is the authored copy;
 // English uses the optional *En fields and returns null when they are missing —
-// an English device is never sent Hebrew. Kids fall back to the parent copy, as
-// in Hebrew. A campaign with a Hebrew body needs an English body too.
+// an English device is never sent Hebrew. Russian prefers the *Ru fields and
+// falls back to the English ones (the same order the app reads them in), and is
+// likewise never sent Hebrew. Kids fall back to the parent copy, as in Hebrew.
+// A campaign with a Hebrew body needs an English body too.
 function campaignCopy(c, forChild, lang) {
   if (lang === "en") {
     const t = (v) => String(v || "").trim();
     const title = forChild ? (t(c.childTitleEn) || t(c.titleEn)) : t(c.titleEn);
     const body = forChild ? (t(c.childBodyEn) || t(c.bodyEn)) : t(c.bodyEn);
+    const heBody = forChild ? (c.childBody || c.body) : c.body;
+    if (!title || (!body && heBody)) return null;
+    return { title, body };
+  }
+  if (lang === "ru") {
+    const t = (v) => String(v || "").trim();
+    const title = forChild
+      ? (t(c.childTitleRu) || t(c.titleRu) || t(c.childTitleEn) || t(c.titleEn))
+      : (t(c.titleRu) || t(c.titleEn));
+    const body = forChild
+      ? (t(c.childBodyRu) || t(c.bodyRu) || t(c.childBodyEn) || t(c.bodyEn))
+      : (t(c.bodyRu) || t(c.bodyEn));
     const heBody = forChild ? (c.childBody || c.body) : c.body;
     if (!title || (!body && heBody)) return null;
     return { title, body };
@@ -2351,7 +2548,8 @@ function campaignPayload(c, forChild, lang) {
 }
 
 // Per device language: Hebrew devices get the authored copy; English devices get
-// the English copy, or are skipped (counted in `skipped`) when there is none.
+// the English copy and Russian devices the Russian one (falling back to English),
+// or are skipped (counted in `skipped`) when there is none.
 async function sendCampaignTo(tokens, c, forChild) {
   let sent = 0, failed = 0, skipped = 0;
   const results = [];   // { token, ok, error }
@@ -2427,6 +2625,12 @@ function worldPassMessage(rawName, packID, at, lang, tz = DEFAULT_TZ) {
     const day = new Date(Number(at) * 1000).toLocaleDateString("en-US", { weekday: "long", timeZone: tz });
     return { title: `${whose} ${TOPIC_EN[packID]} pass ends on ${day}`,
              body: "The 30 days are almost up. You can add another 30 days, or get Tofy+ for the whole family — from your phone. Progress is saved." };
+  }
+  if (lang === "ru") {
+    const whose = rawName ? `у ребёнка ${rawName}` : "у вашего ребёнка";
+    const day = new Date(Number(at) * 1000).toLocaleDateString("ru-RU", { weekday: "long", timeZone: tz });
+    return { title: `${TOPIC_RU[packID]} ${whose} — доступ заканчивается: ${day}`,
+             body: "30 дней почти закончились. Можно открыть ещё 30 дней или Tofy+ на всю семью — с вашего телефона. Прогресс сохраняется." };
   }
   const name = rawName || "הילד";
   const day = new Date(Number(at) * 1000).toLocaleDateString("he-IL", { weekday: "long", timeZone: tz });
@@ -3419,6 +3623,14 @@ const CONVERSION_COPY_EN = {
   // No favourite world yet — the sentence about it would read "their favorite world: played on 0 days".
   copyTwoDaysNoFavorite: "⏰ 2 days left of Tofy+ for {שם} · Keep every world open with Tofy+.",
 };
+// The same, for Russian devices. {variables} are identical, and each keeps the
+// "prefix · body" shape so the prefix is stripped the same way.
+const CONVERSION_COPY_RU = {
+  copyActivation: "🎁 Tofy+ в подарок — {שם} · Отвечено вопросов: {שאלות} — поэтому все миры открыты. Дней: {ימים}. Карта не нужна, подписка не продлевается. Заканчивается {תאריך}.",
+  copyTwoDays: "⏰ Осталось 2 дня Tofy+ — {שם} · {עולם אהוב}: дней с занятиями за последний месяц: {חזרות}. Оставьте все миры открытыми с Tofy+.",
+  // No favourite world yet — the sentence about it would read "любимый мир: дней 0".
+  copyTwoDaysNoFavorite: "⏰ Осталось 2 дня Tofy+ — {שם} · Оставьте все миры открытыми с Tofy+.",
+};
 const TOPIC_LABEL_EN = { math: "🧮 Math", english: "🇬🇧 English", hebrew: "✍️ Hebrew", logic: "🧩 Logic", science: "🔬 Science", history: "🏛️ History",
   geography: "🌍 Geography", money: "💰 Money Skills", reading: "📖 Reading", soccer: "⚽ Soccer", dinosaurs: "🦖 Dinosaurs", space: "🚀 Space", animals: "🐾 Animals",
   sea: "🌊 Ocean", gifted: "🧠 Gifted Prep", food: "🍳 Food", israel: "🏛️ My Israel", music: "🎵 Music", body: "🧍 Human Body", vehicles: "🚗 Vehicles", flags: "🌍 Flags", tishrei: "🍎 Fall Holidays" };
@@ -3427,6 +3639,13 @@ const favLabelEn = (fav) => TOPIC_LABEL_EN[fav.topic] || capFirst(String(fav.top
 const favNameEn = (fav) => (TOPIC_LABEL_EN[fav.topic] ? TOPIC_LABEL_EN[fav.topic].replace(/^\S+\s/, "") : favLabelEn(fav));
 const enDate = (s, tz = DEFAULT_TZ) => new Date(s * 1000).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: tz });
 const enWeekday = (s, tz = DEFAULT_TZ) => new Date(s * 1000).toLocaleDateString("en-US", { weekday: "long", timeZone: tz });
+const TOPIC_LABEL_RU = { math: "🧮 Математика", english: "🇬🇧 Английский", hebrew: "✍️ Иврит", logic: "🧩 Логика", science: "🔬 Наука", history: "🏛️ История",
+  geography: "🌍 География", money: "💰 Финансовая грамотность", reading: "📖 Понимание текста", soccer: "⚽ Футбол", dinosaurs: "🦖 Динозавры", space: "🚀 Космос", animals: "🐾 Животные",
+  sea: "🌊 Море", gifted: "🧠 Подготовка для одарённых", food: "🍳 Еда", israel: "🏛️ Мой Израиль", music: "🎵 Музыка", body: "🧍 Тело человека", vehicles: "🚗 Транспорт", flags: "🌍 Флаги", tishrei: "🍎 Осенние праздники" };
+const favLabelRu = (fav) => TOPIC_LABEL_RU[fav.topic] || capFirst(String(fav.topic || "")) || "Любимый мир";
+const favNameRu = (fav) => (TOPIC_LABEL_RU[fav.topic] ? TOPIC_LABEL_RU[fav.topic].replace(/^\S+\s/, "") : favLabelRu(fav));
+const ruDate = (s, tz = DEFAULT_TZ) => new Date(s * 1000).toLocaleDateString("ru-RU", { month: "long", day: "numeric", timeZone: tz });
+const ruWeekday = (s, tz = DEFAULT_TZ) => new Date(s * 1000).toLocaleDateString("ru-RU", { weekday: "long", timeZone: tz });
 
 // ctx = { star, kids, totalQ, fav, cfg } for one household (see runConversionEngine).
 function conversionVars(ctx, lang) {
@@ -3434,6 +3653,10 @@ function conversionVars(ctx, lang) {
   if (lang === "en") {
     const name = star && star.name ? star.name : "your child";
     return { "שם": name, "שאלות": totalQ, "ימים": cfg.giftDays, "עולם אהוב": fav ? favLabelEn(fav) : "their favorite world", "חזרות": fav ? fav.days : 0, "מחיר חודשי בשנתי": "" };
+  }
+  if (lang === "ru") {
+    const name = star && star.name ? star.name : "ваш ребёнок";
+    return { "שם": name, "שאלות": totalQ, "ימים": cfg.giftDays, "עולם אהוב": fav ? favLabelRu(fav) : "любимый мир", "חזרות": fav ? fav.days : 0, "מחיר חודשי בשנתי": "16.60 ₪" };
   }
   const name = star ? star.name : "הילד";
   return { "שם": name, "שאלות": totalQ, "ימים": cfg.giftDays, "עולם אהוב": fav ? fav.label : "העולם האהוב", "חזרות": fav ? fav.days : 0, "מחיר חודשי בשנתי": "₪16.60" };
@@ -3445,6 +3668,10 @@ function giftStartMessage(ctx, until, lang) {
   if (lang === "en") {
     return { title: `🎁 We opened Tofy+ for ${vars["שם"]} as a gift`,
              body: capFirst(fill(CONVERSION_COPY_EN.copyActivation, { ...vars, "תאריך": enDate(until, ctx.tz) }).replace(/^🎁[^·]*·\s*/, "")) };
+  }
+  if (lang === "ru") {
+    return { title: `🎁 Tofy+ в подарок — ${vars["שם"]}`,
+             body: capFirst(fill(CONVERSION_COPY_RU.copyActivation, { ...vars, "תאריך": ruDate(until, ctx.tz) }).replace(/^🎁[^·]*·\s*/, "")) };
   }
   const name = vars["שם"];
   return { title: `🎁 פתחנו ל${name} את טופי+ במתנה`, body: fill(ctx.cfg.copyActivation, { ...vars, "תאריך": ilDate(until, ctx.tz) }).replace(/^🎁[^·]*·\s*/, "") };
@@ -3472,6 +3699,24 @@ function giftDayMessage(ctx, day, daysLeft, premiumUntil, lang) {
     }
     return { title: `${capFirst(name)} discovered ${worldsToday ? plural(worldsToday, "world", "worlds") : "a few worlds"} 🌎`,
              body: `${plural(totalQ, "question", "questions")} in the last month${favLabel ? " · Favorite: " + favLabel : ""}. The gift ends on ${enWeekday(premiumUntil, ctx.tz)}. Keep every world open.` };
+  }
+  if (lang === "ru") {
+    const name = vars["שם"];
+    const favLabel = fav ? favLabelRu(fav) : null;
+    if (daysLeft <= 1) {
+      const keep = fav ? `${favNameRu(fav)} и другие миры` : "все миры";
+      return { title: `Подарок Tofy+ заканчивается сегодня — ${name}`, body: `${capFirst(name)} и дальше будет учиться и зарабатывать игровое время бесплатно, как обычно. Чтобы доступ сохранился (${keep}), продолжите с Tofy+.` };
+    }
+    if (daysLeft <= 2) {
+      const tpl = fav ? CONVERSION_COPY_RU.copyTwoDays : CONVERSION_COPY_RU.copyTwoDaysNoFavorite;
+      return { title: `⏰ Осталось 2 дня Tofy+ — ${name}`, body: capFirst(fill(tpl, vars).replace(/^⏰[^·]*·\s*/, "")) };
+    }
+    if (day <= 9) {
+      return fav ? { title: `❤️ ${capFirst(name)} — кажется, любимый мир найден`,
+                     body: `${favLabel} — это место, куда ${name} возвращается в Tofy чаще всего: дней: ${fav.days}, вопросов: ${fav.questions}.` } : null;
+    }
+    return { title: `${capFirst(name)} — новых миров: ${worldsToday || "несколько"} 🌎`,
+             body: `Вопросов за последний месяц: ${totalQ}${favLabel ? " · Любимый: " + favLabel : ""}. Подарок заканчивается: ${ruWeekday(premiumUntil, ctx.tz)}. Оставьте все миры открытыми.` };
   }
   const name = vars["שם"]; const girl = star && star.gender === "girl";
   let msg = null;
@@ -4037,6 +4282,10 @@ function retentionNoticeMessage(lang) {
     return { title: "⏳ Your family's Tofy data will be deleted in 30 days",
              body: "No one in your family has used Tofy for more than 18 months. To protect your children's privacy, their profiles and progress will be deleted in 30 days. To keep them, just open Tofy on any of your devices." };
   }
+  if (lang === "ru") {
+    return { title: "⏳ Данные вашей семьи в Tofy будут удалены через 30 дней",
+             body: "Больше полутора лет никто в вашей семье не пользовался Tofy. Чтобы защитить приватность детей, их профили и прогресс будут удалены через 30 дней. Хотите их сохранить? Просто откройте Tofy на любом из своих устройств." };
+  }
   return { title: "⏳ נתוני המשפחה בטופי יימחקו בעוד 30 יום",
            body: "כבר שנה וחצי שאף אחד במשפחה לא השתמש בטופי. כדי לשמור על פרטיות הילדים — הפרופילים וההתקדמות יימחקו בעוד 30 יום. רוצים להשאיר אותם? פשוט פתחו את טופי באחד המכשירים." };
 }
@@ -4056,6 +4305,21 @@ function retentionNoticeEmail(lang) {
       footer: "You're getting this email because your parent account is connected to a family in Tofy.", lang: "en" });
     const text = [title, "", intro, "", ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`), "", "tofyapp.com", "", signoff].join("\n");
     return { fromName: "Tofy", subject: "Your family's Tofy data will be deleted in 30 days", text, html };
+  }
+  if (lang === "ru") {
+    const title = "Данные вашей семьи в Tofy будут удалены через 30 дней";
+    const intro = "Больше полутора лет никто в вашей семье не пользовался Tofy. Чтобы защитить приватность детей, мы не храним информацию о семьях, которые перестали пользоваться приложением.";
+    const bullets = [
+      { emoji: "🗓️", title: "Что будет удалено", text: "Профили ваших детей, их прогресс и история занятий, домашние дела семьи и записи о подключённых устройствах — через 30 дней." },
+      { emoji: "📱", title: "Хотите сохранить?", text: "Просто откройте Tofy на любом устройстве вашей семьи в ближайшие 30 дней, и всё останется точно так же." },
+      { emoji: "✉️", title: "Есть вопросы?", text: "Напишите нам на ranioph@gmail.com — мы поможем." },
+    ];
+    const signoff = "Команда Tofy 🦁";
+    const html = brandEmail({ title, intro, bullets, ctaText: "Наша политика конфиденциальности",
+      ctaHref: "https://tofyapp.com/ru/privacy.html", signoff,
+      footer: "Вы получили это письмо, потому что ваш родительский аккаунт связан с семьёй в Tofy.", lang: "ru" });
+    const text = [title, "", intro, "", ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`), "", "tofyapp.com", "", signoff].join("\n");
+    return { fromName: "Tofy", subject: "Данные вашей семьи в Tofy будут удалены через 30 дней", text, html };
   }
   const title = "נתוני המשפחה בטופי יימחקו בעוד 30 יום";
   const intro = "כבר שנה וחצי שאף אחד במשפחה לא השתמש בטופי. כדי לשמור על פרטיות הילדים, אנחנו לא שומרים מידע על משפחות שהפסיקו להשתמש באפליקציה.";
