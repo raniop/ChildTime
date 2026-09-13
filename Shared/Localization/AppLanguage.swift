@@ -51,6 +51,11 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
 
     var locale: Locale { Locale(identifier: "\(rawValue)_\(regionCode)") }
 
+    /// Right-to-left script. Not "is Hebrew" — the app had those two ideas
+    /// glued together in a dozen places, which works only until a second
+    /// right-to-left language exists.
+    var isRightToLeft: Bool { layoutDirection == .rightToLeft }
+
     var layoutDirection: LayoutDirection {
         switch self {
         case .he: return .rightToLeft
@@ -137,21 +142,21 @@ extension LayoutDirection {
     /// For the few rows that were pinned left-to-right inside a Hebrew screen
     /// (a close button on the far left): the mirror of `.app`, so English puts
     /// it on the far right the way a left-to-right app expects.
-    static var appMirrored: LayoutDirection { LanguageStore.shared.current == .he ? .leftToRight : .rightToLeft }
+    static var appMirrored: LayoutDirection { LanguageStore.shared.current.isRightToLeft ? .leftToRight : .rightToLeft }
 }
 
 extension TextAlignment {
     /// Card text inside a mirrored container (see `LayoutDirection.appMirrored`):
     /// Hebrew keeps SwiftUI's default, other languages align to the same edge as
     /// the card's `.trailing` stack so wrapped lines don't zig-zag.
-    static var appMirroredText: TextAlignment { LanguageStore.shared.current == .he ? .leading : .trailing }
+    static var appMirroredText: TextAlignment { LanguageStore.shared.current.isRightToLeft ? .leading : .trailing }
 }
 
 /// Symbols that point "onward" in a row. Hebrew always used `chevron.left` —
 /// even inside rows pinned left-to-right, where `chevron.forward` would flip —
 /// so it's chosen by language, not by the surrounding layout direction.
 enum AppSymbol {
-    static var forwardChevron: String { LanguageStore.shared.current == .he ? "chevron.left" : "chevron.right" }
+    static var forwardChevron: String { LanguageStore.shared.current.isRightToLeft ? "chevron.left" : "chevron.right" }
 }
 
 /// Look up a user-facing string in the current app language.
@@ -169,7 +174,7 @@ func tr(_ key: String.LocalizationValue) -> String {
     // isolates (U+2068 … U+2069). They help an English sentence hold a Hebrew
     // name, but in Hebrew they would make "the same" string differ byte-for-byte
     // from what the app always produced — read-aloud scripts, keys, comparisons.
-    guard language != .he else { return Localization.removingInsertedIsolates(text) }
+    guard !language.isRightToLeft else { return Localization.removingInsertedIsolates(text) }
     // A child's Hebrew name inside an English sentence: Foundation nests its
     // isolates when a translated piece is interpolated into another, and text
     // rendering mis-orders those ("Unlocked for · 30דנה days left"). Flatten
@@ -214,6 +219,16 @@ enum LocalizedCache {
 }
 
 enum Localization {
+    /// Hebrew, Arabic, and their presentation forms — every block whose text
+    /// runs right to left and therefore reorders the neutrals around it.
+    static func isRightToLeftScalar(_ u: Unicode.Scalar) -> Bool {
+        switch u.value {
+        case 0x0590...0x05FF, 0x0600...0x06FF, 0x0750...0x077F,
+             0x08A0...0x08FF, 0xFB1D...0xFDFF, 0xFE70...0xFEFF: return true
+        default: return false
+        }
+    }
+
     /// A word placed after a prefix vocalised with shva — לְ, בְּ, כְּ — drops the
     /// dagesh lene of an initial בג״ד כפ״ת letter: "מִזְמוֹר לְדָוִד", never לְדָּוִד.
     /// Without this the app wrote "לְדָּנָה" and "לְכִּתָּה א׳" wherever it glued a
@@ -255,12 +270,12 @@ enum Localization {
     }
 
     private static let rightToLeftRun = try! NSRegularExpression(
-        pattern: "[\\u0590-\\u05FF\\uFB1D-\\uFB4F]+(?:[ \\-'\"׳״־]+[\\u0590-\\u05FF\\uFB1D-\\uFB4F]+)*")
+        pattern: "[\\u0590-\\u05FF\\u0600-\\u06FF\\u0750-\\u077F\\u08A0-\\u08FF\\uFB1D-\\uFDFF\\uFE70-\\uFEFF]+(?:[ \\-'\"׳״־]+[\\u0590-\\u05FF\\u0600-\\u06FF\\u0750-\\u077F\\u08A0-\\u08FF\\uFB1D-\\uFDFF\\uFE70-\\uFEFF]+)*")
 
     /// Wrap every run of Hebrew letters (a name, "דנה כהן") in U+2067 … U+2069 so
     /// it reads right-to-left as one unit inside left-to-right text.
     static func isolatingRightToLeftRuns(_ text: String) -> String {
-        guard text.unicodeScalars.contains(where: { (0x0590...0x05FF).contains($0.value) || (0xFB1D...0xFB4F).contains($0.value) }) else { return text }
+        guard text.unicodeScalars.contains(where: isRightToLeftScalar) else { return text }
         // A piece that already went through here carries its own U+2067 marks —
         // drop them (with their closers) so the whole sentence is wrapped once.
         var flat = String.UnicodeScalarView()

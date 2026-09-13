@@ -679,7 +679,7 @@ enum CurriculumMath {
     /// Hebrew line out left-to-right, words in reverse. The math itself stays
     /// left-to-right inside its `ltr` isolate.
     private static func rtlLines(_ s: String) -> String {
-        guard LanguageStore.shared.current == .he else { return s }   // only right-to-left languages need it
+        guard LanguageStore.shared.current.isRightToLeft else { return s }   // only right-to-left languages need it
         return s.split(separator: "\n", omittingEmptySubsequences: false).map { "\u{200F}" + $0 }.joined(separator: "\n")
     }
 

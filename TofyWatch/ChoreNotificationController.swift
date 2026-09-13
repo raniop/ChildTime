@@ -28,7 +28,7 @@ struct ChoreNotificationView: View {
     let photoURL: URL?
 
     // Hebrew keeps the exact look it shipped with; other languages read from the leading edge.
-    private var hebrew: Bool { LanguageStore.shared.current == .he }
+    private var hebrew: Bool { LanguageStore.shared.current.isRightToLeft }
 
     var body: some View {
         ScrollView {

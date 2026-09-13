@@ -16,7 +16,7 @@ struct RTLTextField: UIViewRepresentable {
         let tf = UITextField()
         tf.delegate = context.coordinator
         // Right-to-left for Hebrew (as always); the app language's own direction otherwise.
-        let hebrew = LanguageStore.shared.current == .he
+        let hebrew = LanguageStore.shared.current.isRightToLeft
         tf.textAlignment = hebrew ? .right : .left
         tf.semanticContentAttribute = hebrew ? .forceRightToLeft : .forceLeftToRight
         tf.textColor = textColor
