@@ -254,6 +254,19 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.disabledPacks = Set((try? c.decodeIfPresent([String].self, forKey: .disabledPacks)) ?? nil ?? [])
     }
 
+    /// The worlds a demo run is pinned to, or nil in the real app. Read ONCE:
+    /// `allows` runs for every topic inside a SwiftUI body, and reading
+    /// `ProcessInfo.environment` there rebuilt the whole environment dictionary
+    /// on each call — enough to block the main thread for seconds.
+    private static let demoTopics: Set<Topic>? = {
+        let env = ProcessInfo.processInfo.environment
+        guard env["DEMO_SCREEN"] != nil, let only = env["DEMO_TOPICS"], !only.isEmpty else { return nil }
+        let topics = Set(only.split(separator: ",").compactMap {
+            Topic(rawValue: $0.trimmingCharacters(in: .whitespaces))
+        })
+        return topics.isEmpty ? nil : topics
+    }()
+
     /// Whether this child may play the topic: a base topic the parent hasn't
     /// turned off, or a paid pack the parent bought for this child.
     func allows(_ topic: Topic) -> Bool {
@@ -263,11 +276,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         // home grid and the smart feed to exactly these worlds. The Arabic take
         // otherwise kept drawing ✍️ עברית, which is correct in the app (those
         // children learn Hebrew at school) and wrong in an Arabic promo.
-        if let only = ProcessInfo.processInfo.environment["DEMO_TOPICS"],
-           !only.isEmpty, ProcessInfo.processInfo.environment["DEMO_SCREEN"] != nil {
-            guard only.split(separator: ",").contains(where: { $0.trimmingCharacters(in: .whitespaces) == topic.rawValue })
-            else { return false }
-        }
+        if let pinned = Self.demoTopics, !pinned.contains(topic) { return false }
         // A pack world is playable when the family has it — bought for this
         // child, OR included in Tofy+ (every pack is; Rani) — and the founder
         // has switched the pack on. `ownedPacks` alone hid every unbought pack

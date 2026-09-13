@@ -32,10 +32,11 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
         case .he: return "🇮🇱"
         case .en: return "🇺🇸"
         case .ru: return "🇷🇺"
-        // Deliberately not a flag. Every flag that could stand for Arabic here
-        // is a statement about somebody — and the families this is for are
-        // Israeli. The letter says "Arabic" and nothing else.
-        case .ar: return "ع"
+        // 🇦🇪 for Arabic, the way language pickers everywhere mark it (Rani).
+        // There is no flag of "the Arabic language", so the convention settles
+        // on a Gulf state — and of the options that is the one that says the
+        // least about the families this is for, who are Israeli.
+        case .ar: return "🇦🇪"
         }
     }
 
