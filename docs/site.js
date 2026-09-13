@@ -55,12 +55,12 @@
      original, so the map is keyed on its paths; the English and Russian pages
      are never redirected away from. */
   var TWINS = {
-    "/":                   { en: "/en/",                   ru: "/ru/" },
-    "/index.html":         { en: "/en/",                   ru: "/ru/" },
-    "/privacy.html":       { en: "/en/privacy.html",       ru: "/ru/privacy.html" },
-    "/terms.html":         { en: "/en/terms.html",         ru: "/ru/terms.html" },
-    "/support.html":       { en: "/en/support.html",       ru: "/ru/support.html" },
-    "/accessibility.html": { en: "/en/accessibility.html", ru: "/ru/accessibility.html" }
+    "/":                   { en: "/en/",                   ru: "/ru/",                   ar: "/ar/" },
+    "/index.html":         { en: "/en/",                   ru: "/ru/",                   ar: "/ar/" },
+    "/privacy.html":       { en: "/en/privacy.html",       ru: "/ru/privacy.html",       ar: "/ar/privacy.html" },
+    "/terms.html":         { en: "/en/terms.html",         ru: "/ru/terms.html",         ar: "/ar/terms.html" },
+    "/support.html":       { en: "/en/support.html",       ru: "/ru/support.html",       ar: "/ar/support.html" },
+    "/accessibility.html": { en: "/en/accessibility.html", ru: "/ru/accessibility.html", ar: "/ar/accessibility.html" }
   };
 
   /* What the browser itself asks for. Hebrew wins on an Israeli clock even when
@@ -72,6 +72,7 @@
       var tag = langs[i] || "";
       if (/^he|^iw/i.test(tag)) return "he";
       if (/^ru/i.test(tag)) return "ru";
+      if (/^ar/i.test(tag)) return "ar";
       if (/^en/i.test(tag)) return "en";
     }
     return "";
@@ -87,7 +88,7 @@
     var path = location.pathname.replace(/\/{2,}/g, "/");
     var twins = TWINS[path];
     if (!twins) return;                                   // already translated, or no twin
-    var pinned = /[?&]lang=(he|en|ru)\b/.exec(location.search);
+    var pinned = /[?&]lang=(he|en|ru|ar)\b/.exec(location.search);
     if (pinned) {                                         // an explicit link wins and is remembered
       store(LANG_KEY, pinned[1]);
       if (pinned[1] === "he") return;
@@ -96,7 +97,7 @@
     }
     var choice = stored(LANG_KEY);
     if (choice === "he") return;                          // they chose Hebrew — never move them
-    if (choice !== "en" && choice !== "ru") {             // no choice yet: guess, and only once
+    if (choice !== "en" && choice !== "ru" && choice !== "ar") {             // no choice yet: guess, and only once
       /* Search engines and link previews should index the Hebrew page they
          asked for; hreflang tells them where the others are. */
       if (/bot|crawl|spider|slurp|facebookexternalhit|embedly|preview|lighthouse/i
@@ -104,7 +105,7 @@
       var guess = browserLanguage();
       if (guess === "he" || guess === "") return;
       if (guess === "en" && israeliClock()) return;       // Hebrew family, English phone
-      choice = guess;                                     // "en" or "ru"
+      choice = guess;                                     // "en", "ru" or "ar"
     }
     if (!twins[choice]) return;
     location.replace(twins[choice] + location.search + location.hash);

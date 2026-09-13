@@ -46,6 +46,7 @@ final class LanguageLeakUITests: XCTestCase {
 
     @MainActor func testNoHebrewLeaksIntoEnglish() throws { try sweep("en") }
     @MainActor func testNoHebrewLeaksIntoRussian() throws { try sweep("ru") }
+    @MainActor func testNoHebrewLeaksIntoArabic() throws { try sweep("ar") }
 
     @MainActor
     private func sweep(_ lang: String) throws {

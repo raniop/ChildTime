@@ -1,0 +1,42 @@
+{
+ "_note": "Arabic App Store Connect localizations (app info, Tofy+ group + monthly/yearly, 3 diamond packs). Apple returns 409 while a version is in review — run `node tools/asc-localizations.js ar` once review ends. Character limits: name ≤30, subtitle ≤30, IAP name ≤30, IAP description ≤45.",
+ "appInfo": {
+  "locale": "ar",
+  "name": "Tofy: تعلّم واربح وقت لعب",
+  "subtitle": "يجيب على الأسئلة، فيربح وقتًا"
+ },
+ "subscriptionGroup": {
+  "referenceName": "tofi_premium",
+  "locale": "ar",
+  "name": "Tofy+"
+ },
+ "subscriptions": {
+  "com.rani.ChildTime.premium.monthly": {
+   "locale": "ar",
+   "name": "Tofy+ شهريًا",
+   "description": "كلّ العوالم لكلّ أطفال العائلة"
+  },
+  "com.rani.ChildTime.premium.yearly": {
+   "locale": "ar",
+   "name": "Tofy+ سنويًا",
+   "description": "كلّ العوالم لكلّ الأطفال، بدفعة سنويّة"
+  }
+ },
+ "inAppPurchases": {
+  "com.rani.ChildTime.stars.small": {
+   "locale": "ar",
+   "name": "٦٠ ألماسة",
+   "description": "ألماس لشخصيّات جديدة في المتجر"
+  },
+  "com.rani.ChildTime.stars.medium": {
+   "locale": "ar",
+   "name": "٢٠٠ ألماسة",
+   "description": "ألماس لشخصيّات جديدة في المتجر"
+  },
+  "com.rani.ChildTime.stars.large": {
+   "locale": "ar",
+   "name": "٥٠٠ ألماسة",
+   "description": "ألماس لشخصيّات جديدة في المتجر"
+  }
+ }
+}

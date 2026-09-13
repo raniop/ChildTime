@@ -313,3 +313,15 @@ html[lang="ru"] textarea,
 html[lang="ru"] select{
   font-family:"Rubik","Heebo",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
 }
+
+/* 🇸🇦 Arabic pages: neither Heebo nor Rubik carries an Arabic glyph, so the page
+   would be set in whatever fallback the device happens to have. Cairo does, and
+   its Latin matches — so a line that mixes "Tofy" with Arabic stays one face. */
+html[lang="ar"] body,
+html[lang="ar"] button,
+html[lang="ar"] input,
+html[lang="ar"] textarea,
+html[lang="ar"] select{
+  font-family:"Cairo","Heebo",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+}
+
