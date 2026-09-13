@@ -8,10 +8,12 @@ import Combine
 /// direction, the read-aloud voice and the region whose curriculum, currency
 /// and grade names come with it.
 enum AppLanguage: String, CaseIterable, Codable, Identifiable {
+    // Order matters: `allCases` is what every picker shows, and the two
+    // languages of Israel come first (Rani).
     case he
+    case ar
     case en
     case ru
-    case ar
 
     var id: String { rawValue }
 
