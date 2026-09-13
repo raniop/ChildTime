@@ -19,8 +19,12 @@ enum ContentAvailability {
     static let minimumBank = 20
 
     static func hasContent(_ topic: Topic, in language: AppLanguage = LanguageStore.shared.current) -> Bool {
-        guard language != .he else { return true }
         switch topic {
+        // 🎊 الأعياد exists only in Arabic — it is that audience's own holidays,
+        // not a translation of anything. Hidden everywhere else, including in
+        // Hebrew, which otherwise short-circuits to "yes" above.
+        case .holidays: return language == .ar
+        case _ where language == .he: return true      // Hebrew is the complete catalog
         case .math:    return true
         // 🇺🇸 The Hebrew world teaches Hebrew spelling to children who already
         // speak it. An American family has no use for it (Rani: "לא צריך להציג
@@ -28,7 +32,7 @@ enum ContentAvailability {
         // ever land in its bank.
         // 🇷🇺 …but a Russian-speaking child in Israel goes to an Israeli school
         // and learns exactly this. The world stays, and stays in Hebrew.
-        case .hebrew:  return language == .ru
+        case .hebrew:  return language == .ru || language == .ar
         case .reading: return !ReadingContent.passages(in: language).isEmpty
         default:       return (QuestionBanks.bank(for: topic, in: language)?.count ?? 0) >= minimumBank
         }

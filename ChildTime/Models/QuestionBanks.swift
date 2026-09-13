@@ -213,6 +213,8 @@ enum QuestionBanks {
         case .he:                      builtIn = hebrewBuiltIn
         case .ru where topic == .hebrew: builtIn = hebrewBuiltIn
         case .ru:                      builtIn = RussianContent.bank(for: topic)
+        case .ar where topic == .hebrew: builtIn = hebrewBuiltIn
+        case .ar:                      builtIn = ArabicContent.bank(for: topic)
         case .en:                      builtIn = EnglishContent.bank(for: topic)
         }
         let cloud = RemoteQuestionBank.shared.questions(for: topic, in: language)
@@ -240,6 +242,8 @@ enum QuestionBanks {
         case .food: return QuestionBanksFood.food
         case .israel: return QuestionBanksIsrael.israel
         case .tishrei: return QuestionBanksTishrei.tishrei
+        // 🎊 الأعياد ships only in Arabic — there is no Hebrew built-in bank for it.
+        case .holidays: return []
         case .music: return QuestionBanksMusic.music
         case .body: return QuestionBanksBody.body
         case .vehicles: return QuestionBanksVehicles.vehicles

@@ -11,6 +11,7 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
     case he
     case en
     case ru
+    case ar
 
     var id: String { rawValue }
 
@@ -21,6 +22,7 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
         case .he: return "עברית"
         case .en: return "English"
         case .ru: return "Русский"
+        case .ar: return "العربية"
         }
     }
 
@@ -30,6 +32,10 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
         case .he: return "🇮🇱"
         case .en: return "🇺🇸"
         case .ru: return "🇷🇺"
+        // Deliberately not a flag. Every flag that could stand for Arabic here
+        // is a statement about somebody — and the families this is for are
+        // Israeli. The letter says "Arabic" and nothing else.
+        case .ar: return "ع"
         }
     }
 
@@ -43,6 +49,7 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
         case .he: return "IL"
         case .en: return "US"
         case .ru: return "IL"
+        case .ar: return "IL"
         }
     }
 
@@ -58,7 +65,7 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
 
     var layoutDirection: LayoutDirection {
         switch self {
-        case .he: return .rightToLeft
+        case .he, .ar: return .rightToLeft
         case .en, .ru: return .leftToRight
         }
     }
@@ -70,6 +77,7 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
         case .he: return "he-IL"
         case .en: return "en-US"
         case .ru: return "ru-RU"
+        case .ar: return "ar-SA"      // the Arabic voice iOS actually ships
         }
     }
 }
@@ -118,6 +126,7 @@ final class LanguageStore: ObservableObject {
         // A Russian-speaking phone opens in Russian wherever it is — unlike
         // English, which in Israel means a Hebrew family with an English phone.
         if locale.language.languageCode?.identifier == "ru" { return .ru }
+        if locale.language.languageCode?.identifier == "ar" { return .ar }
         return locale.language.languageCode?.identifier == "en" && region != "IL" ? .en : .he
     }
 

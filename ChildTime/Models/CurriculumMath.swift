@@ -553,6 +553,11 @@ enum CurriculumMath {
         case .ru: return [Kid("Даша", of: "Даши", girl: true), Kid("Миша", of: "Миши", girl: false),
                           Kid("Аня", of: "Ани", girl: true),   Kid("Лёва", of: "Лёвы", girl: false),
                           Kid("Соня", of: "Сони", girl: true), Kid("Марк", of: "Марка", girl: false)]
+        // Arabic past-tense verbs agree with gender too (اشترى / اشترت), so each
+        // name carries its own. Common names among Arabic-speaking families in
+        // Israel, Muslim and Christian both.
+        case .ar: return [Kid("ليان", girl: true), Kid("آدم", girl: false), Kid("سارة", girl: true),
+                          Kid("كرم", girl: false), Kid("مريم", girl: true), Kid("جاد", girl: false)]
         case .en: return [Kid("Emma", girl: true), Kid("Liam", girl: false), Kid("Olivia", girl: true),
                           Kid("Noah", girl: false), Kid("Ava", girl: true), Kid("Mason", girl: false)]
         }
@@ -589,6 +594,13 @@ enum CurriculumMath {
     }
 
     private static var things: [Countable] {
+        // Arabic counts in six forms; the app only ever shows 2–20 here, where
+        // the broken plural is right — so one form covers every number it draws.
+        if LanguageStore.shared.current == .ar {
+            return [Countable("🎈", plural: "بالونات"), Countable("📚", plural: "كتب"),
+                    Countable("🍎", plural: "تفّاحات"), Countable("⚽", plural: "كرات"),
+                    Countable("🖍️", plural: "أقلام تلوين"), Countable("🐚", plural: "أصداف")]
+        }
         guard LanguageStore.shared.current == .ru else {
             return [Countable("🎈", plural: tr("בַּלּוֹנִים")), Countable("📚", plural: tr("סְפָרִים")),
                     Countable("🍎", plural: tr("תַּפּוּחִים")), Countable("⚽", plural: tr("כַּדּוּרִים")),

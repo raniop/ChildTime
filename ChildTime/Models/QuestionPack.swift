@@ -273,7 +273,7 @@ enum WorldPasses {
         case .geography: return tr("מְדִינוֹת, יַבָּשׁוֹת, יַמִּים וּדְגָלִים")
         case .money:     return tr("כֶּסֶף, חִסָּכוֹן וּבְחִירוֹת חֲכָמוֹת")
         case .reading:   return tr("קְטָעִים קְצָרִים וּשְׁאֵלוֹת עֲלֵיהֶם")
-        case .soccer, .dinosaurs, .space, .animals, .sea, .gifted, .food, .israel, .music, .body, .vehicles, .flags, .tishrei: return ""
+        case .soccer, .dinosaurs, .space, .animals, .sea, .gifted, .food, .israel, .music, .body, .vehicles, .flags, .tishrei, .holidays: return ""
         }
     }
     private static func description(_ t: Topic) -> String {

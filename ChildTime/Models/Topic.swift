@@ -10,6 +10,11 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
     case geography  // גיאוגרפיה
     case money      // כסף וחיים — חינוך פיננסי בסיסי
     case reading    // הבנת הנקרא — קטע קריאה + שאלות עליו
+    // 🎊 الأعياد — the holidays an Arabic-speaking family in Israel actually
+    // keeps: Ramadan and the two Eids, Christmas and Easter. Core, not a paid
+    // pack: it ships free with the language, because a family should meet its
+    // own holidays on the first screen and not behind a price tag.
+    case holidays
     // ── Paid question packs (add-ons on top of Tofy+; see QuestionPack) ──
     case soccer     // ⚽ עולם הכדורגל
     case dinosaurs
@@ -62,6 +67,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         case .vehicles: return tr("כְּלֵי רֶכֶב וְתַחְבּוּרָה")
         case .flags: return tr("דְּגָלִים וּמְדִינוֹת")
         case .tishrei: return tr("חַגֵּי תִּשְׁרֵי")
+        case .holidays: return tr("הַחַגִּים")
         }
     }
 
@@ -89,6 +95,7 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         case .vehicles: return "🚗"
         case .flags: return "🌍"
         case .tishrei: return "🍎"
+        case .holidays: return "🎊"
         }
     }
 }

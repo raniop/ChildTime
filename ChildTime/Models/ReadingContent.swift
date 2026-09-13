@@ -73,6 +73,7 @@ enum ReadingContent {
         case .he: return passages
         case .en: return EnglishContent.passages
         case .ru: return RussianContent.passages
+        case .ar: return ArabicContent.passages
         }
     }
 
