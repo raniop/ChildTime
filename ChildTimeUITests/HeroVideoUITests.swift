@@ -17,11 +17,12 @@
 //    xcodebuild test -scheme ChildTime -destination 'platform=iOS Simulator,id=<id>' \
 //      -only-testing:ChildTimeUITests/HeroVideoUITests
 //    kill -INT %1
-//  The language comes from HERO_LANG, but the shell's own environment never
-//  reaches the test runner — xcodebuild forwards only settings prefixed
-//  TEST_RUNNER_, so pass it as:
-//      xcodebuild test-without-building … TEST_RUNNER_HERO_LANG=ar
-//  (`HERO_LANG=ar xcodebuild …` silently does nothing and records Hebrew.)
+//  The language is the `lang` default below. Neither `HERO_LANG=ar xcodebuild …`
+//  nor `xcodebuild … TEST_RUNNER_HERO_LANG=ar` reaches the runner — the shell's
+//  environment is not forwarded, and `test-without-building` applies no build
+//  settings at all, so the TEST_RUNNER_ prefix has nothing to act on either.
+//  Both fail silently and record Hebrew. Edit the default, rebuild for testing,
+//  record, and put it back to "he".
 //
 import XCTest
 
@@ -112,6 +113,11 @@ final class HeroVideoUITests: XCTestCase {
         app.launchEnvironment["DEMO_SCREEN"] = "kidflow"
         app.launchEnvironment["DEMO_LANG"] = lang
         if let demoTopics { app.launchEnvironment["DEMO_TOPICS"] = demoTopics }
+        // 💝 Seed the gift pocket explicitly. It used to be whatever the last run
+        // left behind: one take opened on a 10-minute gift, the next had none,
+        // the tap fell through to the coordinate under it and the recording ended
+        // on the Tofy+ paywall instead of the running clock.
+        app.launchEnvironment["DEMO_GIFT_MINUTES"] = "10"
         app.launch()
         wait(3.0)                                   // the home screen settles
 
