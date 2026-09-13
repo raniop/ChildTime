@@ -47,6 +47,7 @@ function rtlBody(lines) {
 function brandEmail({ title, intro, bullets = [], ctaText, ctaHref, signoff, footer, lang }) {
   const en = lang === "en";
   const ru = lang === "ru";
+  const ar = lang === "ar";          // Arabic reads right-to-left, like Hebrew
   const ltr = en || ru;              // English and Russian read left-to-right
   const li = bullets.map((b) => `
               <tr>
@@ -63,7 +64,7 @@ function brandEmail({ title, intro, bullets = [], ctaText, ctaHref, signoff, foo
               </tr>`).join("");
 
   return `<!DOCTYPE html>
-${ltr ? `<html dir="ltr" lang="${ru ? "ru" : "en"}">` : `<html dir="rtl" lang="he">`}<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+${ltr ? `<html dir="ltr" lang="${ru ? "ru" : "en"}">` : (ar ? `<html dir="rtl" lang="ar">` : `<html dir="rtl" lang="he">`)}<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#EFECFA;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(intro).slice(0, 90)}</div>
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#EFECFA;padding:24px 12px;">
@@ -73,10 +74,10 @@ ${ltr ? `<html dir="ltr" lang="${ru ? "ru" : "en"}">` : `<html dir="rtl" lang="h
         <!-- header -->
         <tr>
           <td bgcolor="#5E60CE" background="https://tofyapp.com/email-header.png" style="background-color:#5E60CE;background-image:linear-gradient(135deg,#7A5CFF 0%,#5E60CE 55%,#3E8BF0 100%);padding:30px 24px;text-align:center;">
-            <img src="https://tofyapp.com/apple-touch-icon.png" width="84" height="84" alt="${ltr ? "Tofy" : "טופי"}"
+            <img src="https://tofyapp.com/apple-touch-icon.png" width="84" height="84" alt="${ltr || ar ? "Tofy" : "טופי"}"
                  style="display:block;margin:0 auto 12px auto;border-radius:22px;border:0;">
-            <div style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:bold;color:#FFD23F;letter-spacing:.5px;">${ltr ? "Tofy" : "טופי"}</div>
-            <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#EFEBFF;padding-top:4px;">${ru ? "Экранное время, заработанное учёбой" : (en ? "Screen time earned by learning" : "זמן מסך שמרוויחים בלמידה")}</div>
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:bold;color:#FFD23F;letter-spacing:.5px;">${ltr || ar ? "Tofy" : "טופי"}</div>
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#EFEBFF;padding-top:4px;">${ru ? "Экранное время, заработанное учёбой" : (en ? "Screen time earned by learning" : (ar ? "وقت شاشة يُكتسب بالتعلّم" : "זמן מסך שמרוויחים בלמידה"))}</div>
           </td>
         </tr>
 
@@ -118,7 +119,7 @@ ${ltr ? `<html dir="ltr" lang="${ru ? "ru" : "en"}">` : `<html dir="rtl" lang="h
 
 // ---- 🌍 Device language ----------------------------------------------------
 // Each device records the language it shows: parents/{uid}.tokenLanguages maps
-// FCM token → "he" | "en" | "ru" (one account can run devices in different
+// FCM token → "he" | "en" | "ru" | "ar" (one account can run devices in different
 // languages), and childDevices/{id}.language sits next to that row's fcmToken.
 // Missing = Hebrew (every install from before the language picker).
 //
@@ -126,12 +127,13 @@ ${ltr ? `<html dir="ltr" lang="${ru ? "ru" : "en"}">` : `<html dir="rtl" lang="h
 // docs anyway; the send helpers then split the tokens by language and build the
 // text once per language. Entries are only ever written from an explicit value
 // on a doc, so a warm instance reusing the map stays correct.
-const LANGS = ["he", "en", "ru"];
+const LANGS = ["he", "en", "ru", "ar"];
 const TOKEN_LANG = new Map();
 const normLang = (v) => {
   const s = String(v || "").toLowerCase();
   if (s.startsWith("en")) return "en";
   if (s.startsWith("ru")) return "ru";
+  if (s.startsWith("ar")) return "ar";
   return "he";                       // the default every pre-picker install has
 };
 function learnTokenLang(token, lang) {
@@ -186,6 +188,16 @@ function deviceLabelRu(event) {
   return "";
 }
 
+// Arabic: the same suffix. Device kinds keep their Latin product names.
+function deviceLabelAr(event) {
+  const nm = (event.deviceName || "").trim();
+  const generic = ["מכשיר", "Device", "Устройство", "جهاز", "iPhone", "iPad", "iPod touch"];
+  if (nm && !generic.includes(nm)) return ` · ${nm}`;
+  if (event.deviceKind === "ipad") return " · iPad";
+  if (event.deviceKind === "iphone") return " · iPhone";
+  return "";
+}
+
 // English: the same suffix, with English device-kind labels.
 function deviceLabelEn(event) {
   const nm = (event.deviceName || "").trim();
@@ -199,6 +211,7 @@ function deviceLabelEn(event) {
 function liveMessage(event, lang) {
   if (lang === "en") return liveMessageEn(event);
   if (lang === "ru") return liveMessageRu(event);
+  if (lang === "ar") return liveMessageAr(event);
   const f = event.gender === "girl";                 // feminine forms?
   const name = event.childName || (f ? "הילדה" : "הילד");
   const g = (male, female) => (f ? female : male);   // pick by gender
@@ -341,6 +354,53 @@ function liveMessageRu(event) {
   }
 }
 
+// Parent-facing Modern Standard Arabic for the same events, for Arabic-speaking
+// families in Israel. Gender comes from the event, as in Hebrew; returns null
+// for exactly the types the Hebrew skips.
+function liveMessageAr(event) {
+  const f = event.gender === "girl";
+  const name = event.childName || (f ? "ابنتكم" : "ابنكم");
+  const g = (male, female) => (f ? female : male);
+  const dev = deviceLabelAr(event);
+  switch (event.type) {
+    case "sessionStart": return { title: g("بدأ اللعب 📱", "بدأت اللعب 📱"), body: `${name} ${g("بدأ", "بدأت")} اللعب والتعلّم الآن${dev}.` };
+    case "sessionEnd": {
+      const q = Number(event.questions) || 0;
+      const acc = Number(event.accuracy) || 0;
+      const mins = Number(event.minutes) || 0;
+      const stars = Number(event.stars) || 0;
+      const parts = [];
+      if (q > 0) parts.push(`عدد الأسئلة: ${q}`);
+      if (q > 0) parts.push(`${acc}% إجابات صحيحة`);
+      if (mins > 0) parts.push(`الدقائق المكتسبة: ${mins}`);
+      if (stars > 0) parts.push(`${stars} ⭐`);
+      const summary = parts.length ? parts.join(" · ") : g("أنهى رحلة التعلّم", "أنهت رحلة التعلّم");
+      return { title: g("أنهى اللعب ✅", "أنهت اللعب ✅"), body: `${name}${dev}: ${summary}` };
+    }
+    case "screenTimeStart": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` (عدد الدقائق: ${mins})` : "";
+      return { title: g("فتح وقت الشاشة 🎮", "فتحت وقت الشاشة 🎮"), body: `${name} ${g("فتح", "فتحت")} وقت اللعب${tail}${dev}.` };
+    }
+    case "screenTimeEnd": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` · الدقائق المتبقية: ${mins}` : "";
+      return { title: g("أنهى وقت الشاشة ⏹️", "أنهت وقت الشاشة ⏹️"), body: `${name} ${g("أنهى", "أنهت")} وقت اللعب${dev}${tail}.` };
+    }
+    case "screenTimeMoved": {
+      const kindLabel = (k) => (k === "ipad" ? "iPad" : (k === "iphone" ? "iPhone" : "جهاز آخر"));
+      const from = kindLabel(event.fromKind);
+      const to = kindLabel(event.deviceKind);
+      return { title: g("نقل وقت اللعب 🔄", "نقلت وقت اللعب 🔄"),
+               body: `${name} ${g("نقل", "نقلت")} وقت اللعب من ${from} إلى ${to}. الجهاز ${from} مقفل الآن 🔒` };
+    }
+    case "assistRequest": return { title: "طلب مساعدة 💌", body: `${name} ${g("طلب", "طلبت")} مساعدتكم في سؤال${dev}.` };
+    case "parentGateOpened": return { title: "🔐 فُتحت إعدادات الوالدين", body: `فتح أحدهم إعدادات الوالدين على جهاز الطفل (${name})${dev}.` };
+    case "playPINForgot": return { title: "🔒 نُسي رمز حماية وقت اللعب", body: `${name} ${g("نسي", "نسيت")} رمز حماية وقت اللعب${dev}. الرمز موجود في بطاقة الطفل (${name}) في لوحة الوالدين — ويمكن إعادة ضبطه هناك، أو مباشرة على جهاز الطفل باستخدام رمز الوالدين.` };
+    default: return null;
+  }
+}
+
 async function tokensForUID(uid) {
   const p = await db.collection("parents").doc(uid).get();
   if (p.exists) learnParentLangs(p.data());
@@ -455,6 +515,10 @@ function dupChildMessage(name, lang) {
     return { title: "⚠️ Возможно, создан дубликат профиля",
              body: `Только что создан новый профиль ребёнка с именем «${name}», хотя в вашей семье уже есть ребёнок с таким именем. Если вы сделали это не намеренно — ничего не удаляйте, напишите в поддержку.` };
   }
+  if (lang === "ar") {
+    return { title: "⚠️ ربما أُنشئ ملف طفل مكرّر",
+             body: `أُنشئ الآن ملف طفل جديد باسم «${name}»، مع أنّ عائلتكم تضمّ طفلاً بهذا الاسم. إذا لم يكن ذلك مقصوداً — لا تحذفوا أي شيء، وتواصلوا مع الدعم.` };
+  }
   return {
     title: "⚠️ יתכן שנוצר ילד כפול",
     body: `נוצר עכשיו ילד חדש בשם "${name}" למרות שכבר קיים ילד בשם הזה במשפחה. אם לא יצרתם אותו בכוונה — אל תמחקו כלום, פנו לתמיכה.`,
@@ -468,6 +532,10 @@ function suspiciousStateMessage(stars, lang) {
   if (lang === "ru") {
     return { title: "⚠️ Подозрительные данные прогресса",
              body: `Обнаружен новый профиль, звёзд в нём: ${stars} — возможно, это копия существующего ребёнка. Ничего не удаляйте, напишите в поддержку.` };
+  }
+  if (lang === "ar") {
+    return { title: "⚠️ بيانات تقدّم مشبوهة",
+             body: `رُصد ملف جديد، عدد النجوم فيه: ${stars} — قد يكون نسخة من طفل موجود. لا تحذفوا أي شيء، وتواصلوا مع الدعم.` };
   }
   return {
     title: "⚠️ נתוני התקדמות חשודים",
@@ -604,6 +672,8 @@ const TOPIC_EN = { math: "Math 🧮", english: "English 🇬🇧", hebrew: "Hebr
                    history: "History 🏛️", geography: "Geography 🌍", money: "Money Skills 💰", reading: "Reading 📖" };
 const TOPIC_RU = { math: "Математика 🧮", english: "Английский 🇬🇧", hebrew: "Иврит ✍️", logic: "Логика 🧩", science: "Наука 🔬",
                    history: "История 🏛️", geography: "География 🌍", money: "Финансовая грамотность 💰", reading: "Понимание текста 📖" };
+const TOPIC_AR = { math: "الرياضيات 🧮", english: "الإنجليزية 🇬🇧", hebrew: "العبرية ✍️", logic: "المنطق 🧩", science: "العلوم 🔬",
+                   history: "التاريخ 🏛️", geography: "الجغرافيا 🌍", money: "الثقافة المالية 💰", reading: "فهم المقروء 📖" };
 
 function premiumRequestMessage(after, lang) {
   if (lang === "en") {
@@ -623,6 +693,15 @@ function premiumRequestMessage(after, lang) {
           body: `${name} просит открыть этот мир в Tofy. Он открывается с Tofy+ — одна подписка на всю семью, прямо с вашего телефона.` }
       : { title: `👑 ${name} просит Tofy+`,
           body: `${name} просит открыть игры и миры. Подписка — на всю семью, открывается один раз с вашего телефона.` };
+  }
+  if (lang === "ar") {
+    const name = after.name || "طفلكم";
+    const topic = TOPIC_AR[after.premiumRequestedTopic || ""];
+    return topic
+      ? { title: `${name} يريد أن يتعلّم ${topic}`,
+          body: `${name} ضغط على هذا العالم في Tofy. ويُفتح مع Tofy+ — اشتراك واحد لكل العائلة، من هاتفكم.` }
+      : { title: `👑 ${name} يطلب Tofy+`,
+          body: `${name} يطلب فتح الألعاب والعوالم. الاشتراك يشمل العائلة كلها — يُفتح مرة واحدة من هاتفكم.` };
   }
   const name = after.name || "הילד";
   const girl = after.gender === "girl";
@@ -676,6 +755,15 @@ function packRequestMessage(after, lang) {
       : { title: `✨ ${name} просит новый набор вопросов`,
           body: `${name} хочет новый набор вопросов. Это разовое дополнение — откройте его со своего телефона.` };
   }
+  if (lang === "ar") {
+    const name = after.name || "طفلكم";
+    const p = PACK_META[packID];
+    return p
+      ? { title: `${p.emoji} ${name} يطلب مجموعة «${p.nameAr}»`,
+          body: `${name} يريد أن يعرف المزيد عن هذا: ${p.subjectAr}. وهي إضافة لمرة واحدة — افتحوها من هاتفكم.` }
+      : { title: `✨ ${name} يطلب مجموعة أسئلة جديدة`,
+          body: `${name} يريد مجموعة أسئلة جديدة. وهي إضافة لمرة واحدة — افتحوها من هاتفكم.` };
+  }
   const name = after.name || "הילד";
   const girl = after.gender === "girl";
   const packName = PACK_NAMES[packID] || "שאלון חדש";
@@ -685,47 +773,61 @@ function packRequestMessage(after, lang) {
 // Pack copy for pushes — keep in sync with QuestionPacks (iOS) and PACKS in
 // docs/admin/notifications.html. English names/taglines match the app's English
 // catalog; subjectEn completes "Want to learn about …?" (lowercase, mid-sentence).
-// The *Ru fields are the same copy for Russian-speaking families in Israel.
+// The *Ru and *Ar fields are the same copy for Russian- and Arabic-speaking
+// families in Israel.
 const PACK_META = {
   soccer: { name: "עולם הכדורגל", emoji: "⚽", subject: "כדורגל", tagline: "שחקנים, קבוצות, תחרויות ועובדות מפתיעות",
     nameEn: "Soccer World", subjectEn: "soccer", taglineEn: "Players, teams, tournaments, and surprising facts",
-    nameRu: "Мир футбола", subjectRu: "футбол", taglineRu: "Игроки, команды, турниры и неожиданные факты" },
+    nameRu: "Мир футбола", subjectRu: "футбол", taglineRu: "Игроки, команды, турниры и неожиданные факты",
+    nameAr: "عالم كرة القدم", subjectAr: "كرة القدم", taglineAr: "لاعبون وفرق وبطولات وحقائق مفاجئة" },
   dinosaurs: { name: "דינוזאורים", emoji: "🦖", subject: "דינוזאורים", tagline: "מינים, גודל, מה אכלו, ואיך מגלים מאובנים",
     nameEn: "Dinosaurs", subjectEn: "dinosaurs", taglineEn: "Species, size, what they ate, and how fossils are found",
-    nameRu: "Динозавры", subjectRu: "динозавры", taglineRu: "Виды, размеры, чем питались и как находят окаменелости" },
+    nameRu: "Динозавры", subjectRu: "динозавры", taglineRu: "Виды, размеры, чем питались и как находят окаменелости",
+    nameAr: "الديناصورات", subjectAr: "الديناصورات", taglineAr: "الأنواع والأحجام وما كانت تأكله وكيف تُكتشف الأحافير" },
   space: { name: "חלל וכוכבים", emoji: "🚀", subject: "חלל", tagline: "כוכבי לכת, ירח, אסטרונאוטים ושמש",
     nameEn: "Space and Stars", subjectEn: "space", taglineEn: "Planets, the Moon, astronauts, and the Sun",
-    nameRu: "Космос и звёзды", subjectRu: "космос", taglineRu: "Планеты, Луна, космонавты и Солнце" },
+    nameRu: "Космос и звёзды", subjectRu: "космос", taglineRu: "Планеты, Луна, космонавты и Солнце",
+    nameAr: "الفضاء والنجوم", subjectAr: "الفضاء", taglineAr: "الكواكب والقمر ورُوّاد الفضاء والشمس" },
   animals: { name: "עולם החיות", emoji: "🐾", subject: "חיות", tagline: "יבשות, חיות בסכנה ושיאים",
     nameEn: "Animal World", subjectEn: "animals", taglineEn: "Continents, endangered animals, and record-breakers",
-    nameRu: "Мир животных", subjectRu: "животные", taglineRu: "Континенты, животные под угрозой и рекордсмены" },
+    nameRu: "Мир животных", subjectRu: "животные", taglineRu: "Континенты, животные под угрозой и рекордсмены",
+    nameAr: "عالم الحيوان", subjectAr: "الحيوانات", taglineAr: "القارات والحيوانات المهدّدة بالانقراض وأصحاب الأرقام القياسية" },
   sea: { name: "מעמקי הים", emoji: "🌊", subject: "הים", tagline: "כרישים, לויתנים, שוניות, ומי חי איפה",
     nameEn: "Deep Sea", subjectEn: "the ocean", taglineEn: "Sharks, whales, reefs, and who lives where",
-    nameRu: "Морские глубины", subjectRu: "море", taglineRu: "Акулы, киты, рифы и кто где живёт" },
+    nameRu: "Морские глубины", subjectRu: "море", taglineRu: "Акулы, киты, рифы и кто где живёт",
+    nameAr: "أعماق البحار", subjectAr: "البحر", taglineAr: "أسماك القرش والحيتان والشِّعاب ومن يعيش أين" },
   gifted: { name: "הכנה למחוננים", emoji: "🧠", subject: "חשיבה", tagline: "חשיבה, סדרות, היקשים ותפיסה מרחבית",
     nameEn: "Gifted Prep", subjectEn: "thinking skills", taglineEn: "Thinking, sequences, inference, and spatial reasoning",
-    nameRu: "Подготовка для одарённых", subjectRu: "мышление", taglineRu: "Мышление, последовательности, выводы и пространственное восприятие" },
+    nameRu: "Подготовка для одарённых", subjectRu: "мышление", taglineRu: "Мышление, последовательности, выводы и пространственное восприятие",
+    nameAr: "التحضير للموهوبين", subjectAr: "التفكير", taglineAr: "التفكير والمتتاليات والاستنتاج والإدراك المكاني" },
   food: { name: "מטבח ומדע של אוכל", emoji: "🍳", subject: "אוכל", tagline: "מאין מגיע אוכל, מדידות ומתכונים בחשבון",
     nameEn: "Kitchen and Food Science", subjectEn: "food", taglineEn: "Where food comes from, measuring, and recipe math",
-    nameRu: "Кухня и наука о еде", subjectRu: "еда", taglineRu: "Откуда берётся еда, измерения и математика в рецептах" },
+    nameRu: "Кухня и наука о еде", subjectRu: "еда", taglineRu: "Откуда берётся еда, измерения и математика в рецептах",
+    nameAr: "المطبخ وعلم الغذاء", subjectAr: "الطعام", taglineAr: "من أين يأتي الطعام والقياسات والحساب في الوصفات" },
   israel: { name: "ישראל שלי", emoji: "🏛️", subject: "ישראל", tagline: "ערים, סמלים, חגים, דמויות וטבע",
     nameEn: "My Israel", subjectEn: "Israel", taglineEn: "Cities, symbols, holidays, famous people, and nature",
-    nameRu: "Мой Израиль", subjectRu: "Израиль", taglineRu: "Города, символы, праздники, известные люди и природа" },
+    nameRu: "Мой Израиль", subjectRu: "Израиль", taglineRu: "Города, символы, праздники, известные люди и природа",
+    nameAr: "إسرائيل بلدي", subjectAr: "إسرائيل", taglineAr: "المدن والرموز والأعياد والشخصيات والطبيعة" },
   tishrei: { name: "חגי תשרי", emoji: "🍎", subject: "חגי תשרי", tagline: "ראש השנה, יום כיפור, סוכות ושמחת תורה",
     nameEn: "Fall Holidays", subjectEn: "the fall holidays", taglineEn: "Rosh Hashanah, Yom Kippur, Sukkot, and Simchat Torah",
-    nameRu: "Осенние праздники", subjectRu: "осенние праздники", taglineRu: "Рош ха-Шана, Йом Кипур, Суккот и Симхат Тора" },
+    nameRu: "Осенние праздники", subjectRu: "осенние праздники", taglineRu: "Рош ха-Шана, Йом Кипур, Суккот и Симхат Тора",
+    nameAr: "أعياد الخريف", subjectAr: "أعياد الخريف", taglineAr: "رأس السنة العبرية ويوم الغفران وعيد المظال وسمحات توراة" },
   music: { name: "מוזיקה", emoji: "🎵", subject: "מוזיקה", tagline: "כלי נגינה, קצב, מלחינים ושירי ילדים",
     nameEn: "Music", subjectEn: "music", taglineEn: "Instruments, rhythm, composers, and children's songs",
-    nameRu: "Музыка", subjectRu: "музыка", taglineRu: "Инструменты, ритм, композиторы и детские песни" },
+    nameRu: "Музыка", subjectRu: "музыка", taglineRu: "Инструменты, ритм, композиторы и детские песни",
+    nameAr: "الموسيقى", subjectAr: "الموسيقى", taglineAr: "الآلات والإيقاع والملحّنون وأغاني الأطفال" },
   body: { name: "גוף האדם", emoji: "🧍", subject: "גוף האדם", tagline: "עצמות, לב, נשימה ובריאות",
     nameEn: "The Human Body", subjectEn: "the human body", taglineEn: "Bones, heart, breathing, and health",
-    nameRu: "Тело человека", subjectRu: "тело человека", taglineRu: "Кости, сердце, дыхание и здоровье" },
+    nameRu: "Тело человека", subjectRu: "тело человека", taglineRu: "Кости, сердце, дыхание и здоровье",
+    nameAr: "جسم الإنسان", subjectAr: "جسم الإنسان", taglineAr: "العظام والقلب والتنفّس والصحة" },
   vehicles: { name: "כלי רכב ותחבורה", emoji: "🚗", subject: "כלי רכב", tagline: "מכוניות, רכבות, מטוסים, ואיך זה עובד",
     nameEn: "Vehicles and Transportation", subjectEn: "vehicles", taglineEn: "Cars, trains, planes, and how they work",
-    nameRu: "Транспорт", subjectRu: "транспорт", taglineRu: "Машины, поезда, самолёты и как это работает" },
+    nameRu: "Транспорт", subjectRu: "транспорт", taglineRu: "Машины, поезда, самолёты и как это работает",
+    nameAr: "المركبات والمواصلات", subjectAr: "المركبات", taglineAr: "السيارات والقطارات والطائرات وكيف تعمل" },
   flags: { name: "דגלים ומדינות", emoji: "🌍", subject: "דגלים ומדינות", tagline: "דגלים, בירות ויבשות",
     nameEn: "Flags and Countries", subjectEn: "flags and countries", taglineEn: "Flags, capitals, and continents",
-    nameRu: "Флаги и страны", subjectRu: "флаги и страны", taglineRu: "Флаги, столицы и континенты" },
+    nameRu: "Флаги и страны", subjectRu: "флаги и страны", taglineRu: "Флаги, столицы и континенты",
+    nameAr: "الأعلام والدول", subjectAr: "الأعلام والدول", taglineAr: "الأعلام والعواصم والقارات" },
 };
 const PACK_NAMES = Object.fromEntries(Object.entries(PACK_META).map(([k, v]) => [k, v.name]));
 const PACK_EMOJI = Object.fromEntries(Object.entries(PACK_META).map(([k, v]) => [k, v.emoji]));
@@ -735,7 +837,7 @@ const taglineMidEn = (t) => (/^(Rosh|Israel|The Moon)\b/.test(t) ? t : t.charAt(
 
 // The agreed launch message (Rani, 2026-09-06): the moment a pack is switched
 // on, every family's parents get this — "we found a new world", never "buy".
-// The *En / *Ru fields are what English- and Russian-language devices get (see campaignPayload).
+// The *En / *Ru / *Ar fields are what English-, Russian- and Arabic-language devices get (see campaignPayload).
 function launchCampaignFor(packID) {
   const p = PACK_META[packID]; if (!p) return null;
   return {
@@ -748,6 +850,9 @@ function launchCampaignFor(packID) {
     titleRu: `Новый мир в Tofy: ${p.nameRu}`,
     bodyRu: `Мы нашли новый мир для детей: ${p.taglineRu}. За каждый верный ответ начисляются игровые минуты. Подписчикам Tofy+ он уже открыт; иначе отправьте его ребёнку со своего телефона.`,
     childTitleRu: `Хочешь узнать про это: ${p.subjectRu}?`, childBodyRu: `${p.taglineRu} — попроси маму или папу`,
+    titleAr: `عالم جديد في Tofy: ${p.nameAr}`,
+    bodyAr: `اكتشفنا عالماً جديداً للأطفال: ${p.taglineAr}. ومع كل إجابة صحيحة تُكتسب دقائق لعب. وهو مفتوح أصلاً لمشتركي Tofy+؛ وإلا فأرسلوه إلى طفلكم من هاتفكم.`,
+    childTitleAr: `هل تريد أن تتعرّف على هذا: ${p.subjectAr}؟`, childBodyAr: `${p.taglineAr} — اطلب من أمك أو أبيك`,
     audience: { roles: ["parents"], gradeMin: 0, gradeMax: 8, gradeScale: 8, premium: "any", topics: [], excludeOwners: true },
     action: { type: "pack", packID }, showPopup: true,
   };

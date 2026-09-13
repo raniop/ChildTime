@@ -56,7 +56,15 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
     /// Israeli money, Israeli grades, Israeli facts — everything but the words.
     var isIsraeli: Bool { regionCode == "IL" }
 
-    var locale: Locale { Locale(identifier: "\(rawValue)_\(regionCode)") }
+    var locale: Locale {
+        // Arabic in Israel counts in Western digits — 1, 2, 3 — the way the
+        // schools here teach and the street writes. The default ar locale would
+        // format numbers as ١، ٢، ٣ and, worse, only SOME of them: a number
+        // interpolated through a Text came out Arabic-Indic while one built as
+        // a plain String stayed Western, so one screen showed both.
+        guard self != .ar else { return Locale(identifier: "ar_IL@numbers=latn") }
+        return Locale(identifier: "\(rawValue)_\(regionCode)")
+    }
 
     /// Right-to-left script. Not "is Hebrew" — the app had those two ideas
     /// glued together in a dozen places, which works only until a second

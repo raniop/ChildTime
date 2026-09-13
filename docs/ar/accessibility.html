@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#3C3D84">
+<title>Tofy — بيان إمكانية الوصول</title>
+<meta name="description" content="بيان إمكانية الوصول لموقع Tofy: المعيار الذي يلتزم به الموقع (المعيار الإسرائيلي IS 5568 / WCAG 2.0 AA وWCAG 2.1 AA)، وما نُفِّذ في الموقع، والقيود المعروفة، وكيفية التوجّه إلى منسّق إمكانية الوصول.">
+<link rel="canonical" href="https://tofyapp.com/ar/accessibility.html">
+<link rel="alternate" hreflang="he" href="https://tofyapp.com/accessibility.html">
+<link rel="alternate" hreflang="en" href="https://tofyapp.com/en/accessibility.html">
+<link rel="alternate" hreflang="ru" href="https://tofyapp.com/ru/accessibility.html">
+<link rel="alternate" hreflang="ar" href="https://tofyapp.com/ar/accessibility.html">
+<link rel="icon" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../glass.css?v=4">
+<script src="../site.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">تخطّي إلى المحتوى الرئيسي</a>
+<div class="backdrop"></div>
+
+<header class="site-head"><div class="wrap">
+  <a class="brand" href="./"><img src="../lion.png" alt=""><span>Tofy</span><span class="visually-hidden"> — الصفحة الرئيسية</span></a>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="القائمة" aria-expanded="false" aria-controls="nav">☰</button>
+  <nav class="site-nav" id="nav" aria-label="التنقّل الرئيسي">
+    <a href="./">الصفحة الرئيسية</a>
+    <a href="privacy.html">الخصوصية</a>
+    <a href="terms.html">الشروط</a>
+    <a href="support.html">الدعم</a>
+  </nav>
+  <details class="lang-switch" aria-label="Language / שפה">
+    <summary><span class="flag" aria-hidden="true">ع</span><span class="cur">العربية</span><svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.5L6 8.5L10 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+    <div class="lang-menu" role="menu">
+      <a href="../accessibility.html" lang="he" hreflang="he" dir="rtl" role="menuitem"><span class="flag" aria-hidden="true">🇮🇱</span>עברית</a>
+      <a href="../en/accessibility.html" lang="en" hreflang="en" dir="ltr" role="menuitem"><span class="flag" aria-hidden="true">🇺🇸</span>English</a>
+      <a href="../ru/accessibility.html" lang="ru" hreflang="ru" dir="ltr" role="menuitem"><span class="flag" aria-hidden="true">🇷🇺</span>Русский</a>
+      <a href="accessibility.html" lang="ar" hreflang="ar" dir="rtl" aria-current="true" role="menuitem"><span class="flag" aria-hidden="true">ع</span>العربية</a>
+    </div>
+  </details>
+</div></header>
+
+<main class="wrap" id="main" tabindex="-1" style="padding-top:34px;padding-bottom:20px">
+  <div class="doc pane">
+    <h1>بيان إمكانية الوصول</h1>
+    <p class="stamp">آخر تحديث: <time datetime="2026-09-12">12 سبتمبر 2026</time> · موقع Tofy · <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
+
+    <p>نحن نرى في إمكانية الوصول إلى الموقع جزءًا من المنتج نفسه، لا إضافةً إليه. Tofy تطبيق للأطفال والأهل، ونريد أن يتمكّن كلّ والد ووالدة من القراءة عن التطبيق وفهم ما يفعله والتواصل معنا — بصرف النظر عن الإعاقة، وعن التقنية المساعِدة التي يستخدمها، وعن الطريقة التي يشغّل بها الحاسوب.</p>
+
+    <h2>إلى أيّ معيار يلتزم الموقع</h2>
+    <p>بُني هذا الموقع ليستوفي متطلّبات <b>المعيار الإسرائيلي <span lang="en">IS 5568</span>، «خطوط إرشادية لإتاحة المحتوى على الإنترنت»، بمستوى مطابقة AA</b>، وهو معيار مبنيّ على إرشادات <span lang="en">WCAG 2.0</span> الصادرة عن منظّمة <span lang="en">W3C</span> بالمستوى AA. وإضافةً إلى ذلك طبّقنا متطلّبات من <span lang="en">WCAG 2.1</span> بالمستوى AA، وهي الممارسة المتّبعة اليوم في الولايات المتّحدة أيضًا — ومنها ما يتعلّق بعرض المحتوى على الشاشات الضيّقة، وبتباين العناصر الرسومية، وبمواءمة تباعُد النصّ.</p>
+    <p>يُنشَر هذا البيان بروح أنظمة مساواة حقوق الأشخاص ذوي الإعاقة (تعديلات إتاحة الخدمة)، 5773–2013، الصادرة بموجب قانون مساواة حقوق الأشخاص ذوي الإعاقة، 5758–1998.</p>
+
+    <h2>ما الذي نُفِّذ في الموقع</h2>
+    <ul>
+      <li><b>تنقّل كامل بلوحة المفاتيح.</b> يمكن الوصول إلى كلّ رابط وزرّ وحقل بمفتاح <span lang="en">Tab</span> وحده، ولكلّ عنصر علامة تركيز واضحة وبارزة.</li>
+      <li><b>رابط «تخطّي إلى المحتوى الرئيسي»</b> في مستهلّ كلّ صفحة، لتخطّي القائمة.</li>
+      <li><b>بنية دلالية.</b> العناوين مرتّبة ترتيبًا هرميًّا سليمًا، ومناطق التنقّل معلَّمة كمَعالِم (<span lang="en">landmarks</span>)، ولكلّ قائمة اسم صريح.</li>
+      <li><b>تباين الألوان.</b> أُعيد تصميم ألوان الخلفية والنصّ في الموقع بحيث يستوفي النصّ العادي نسبة تباين لا تقلّ عن 4.5:1 أمام الخلفية المتدرّجة، في كلّ موضع يظهر فيه.</li>
+      <li><b>النماذج.</b> لحقول نموذج التسجيل لتحديثات الإطلاق تسميات مرئية، ورسائل الخطأ تُعرَض نصًّا — إلى جانب علامة تحذير لا باللون وحده — وتقرأها قارئات الشاشة.</li>
+      <li><b>تقليل الحركة.</b> إذا طلبتم في نظام التشغيل تقليل الرسوم المتحرّكة، فالموقع يحترم ذلك: تتوقّف الومضات والحركات. كما يوجد في الصفحة الرئيسية زرّ لإيقاف الحركة والفيديو يدويًا.</li>
+      <li><b>الصور.</b> لكلّ صورة تحمل معلومة نصٌّ بديل؛ أمّا الإيموجي والرسوم المخصّصة للزينة فقط فمخفيّة عن قارئات الشاشة كي لا تُثقل القراءة بالضجيج.</li>
+      <li><b>المحتوى من دون <span lang="en">JavaScript</span> أيضًا.</b> يُعرَض محتوى الصفحات كاملًا حتى لو لم تعمل الشيفرة البرمجية أو جرى حجبها.</li>
+      <li><b>العربية من اليمين إلى اليسار</b> في كلّ الصفحات، مع تعليم اللغة على المقاطع المكتوبة بلغة أخرى كي تنطقها قارئات الشاشة نطقًا صحيحًا.</li>
+    </ul>
+
+    <h2>قيود معروفة</h2>
+    <p>نُفضّل أن نقول ذلك صراحةً. حتى تاريخ تحديث هذا البيان، هذه هي الأمور التي لم تُحلّ بعد:</p>
+    <ul>
+      <li><b>لقطات شاشة التطبيق هي صور.</b> لكلّ لقطة وصف قصير، لكنّ النصّ الموجود داخل اللقطة نفسها غير متاح كنصّ يمكن تحديده أو تكبيره. كما أنّ اللقطات تُظهر نسخة التطبيق بالعبرية.</li>
+      <li><b>فيديو العرض في الصفحة الرئيسية</b> من دون مسار صوتي، ولذلك لا توجد له ترجمة مكتوبة. له وصف نصّي وزرّ إيقاف، لكن ليس له وصف صوتي (<span lang="en">audio description</span>) لكلّ ما يجري فيه.</li>
+      <li><b>صفحات الأطراف الثالثة</b> — مثل صفحة التطبيق في متجر <span lang="en">App Store</span> التابع لشركة <span lang="en">Apple</span>، التي يقود إليها زرّ التنزيل — ليست تحت سيطرتنا، وإتاحتها على مسؤولية مشغّليها.</li>
+      <li><b>الخطوط.</b> الخطّ العربي يأتي من خادمنا نحن لا من خدمة خارجية، فيُحمَّل النصّ أيضًا حين تكون الخدمات الخارجية محجوبة.</li>
+      <li><b>الفحوص.</b> أجرينا فحصًا يدويًا للتنقّل بلوحة المفاتيح، ولبنية العناوين، وللتباين، ولسلوك الصفحات من دون شيفرة برمجية. أمّا الفحص الشامل مع جميع قارئات الشاشة الشائعة وبمشاركة مستخدمين ذوي إعاقة فلم يُجرَ بعد، وهي مهمّة نواصل العمل عليها.</li>
+      <li><b>صفحات جديدة.</b> تُضاف إلى الموقع بين الحين والآخر صفحات وعناصر جديدة. وقد تُنشَر صفحة جديدة قبل استكمال فحص إتاحتها — فإن صادفتم واحدة كهذه، يسعدنا أن نسمع منكم.</li>
+    </ul>
+    <p>يتعلّق هذا البيان بموقع <span lang="en">tofyapp.com</span> وحده. أمّا إتاحة تطبيق Tofy نفسه فليست جزءًا من هذا البيان.</p>
+
+    <h2>لا يوجد في هذا الموقع «إضافة إمكانية وصول»</h2>
+    <p>لم نركّب في الموقع شريط إتاحة أو إضافة خارجية، ولا ننوي أن نفعل. فمثل هذه الإضافات لا تجعل الموقع متاحًا: هي تُركَّب فوق شيفرة غير سليمة بدل إصلاحها، وتعرقل أحيانًا التقنية المساعِدة نفسها المثبّتة أصلًا لدى الزائر والمضبوطة على ذوقه، وتُلزم كلّ من يدخل الموقع بتحميل شيفرة طرف ثالث. وبدلًا من ذلك أصلحنا الإتاحة في شيفرة الموقع نفسها — حيث تُقاس فعلًا.</p>
+
+    <h2>التوجّه في شؤون إمكانية الوصول</h2>
+    <p>إن صادفتم في الموقع مشكلة في إمكانية الوصول، أو كان هناك عنصر لا تنجحون في تشغيله — أخبرونا. اكتبوا ما الذي حاولتم فعله، وفي أيّ صفحة، وبأيّ متصفّح أو تقنية مساعِدة. سنعالج التوجّه ونعود إليكم.</p>
+    <div class="contact-card inset">
+      <p><b>منسّق إمكانية الوصول:</b> راني أوفير (<span lang="en">Rani Ophir</span>)</p>
+      <p><b>العنوان:</b> شارع حاييم بار ليف 17، رمات غان</p>
+      <p><b>الهاتف:</b> <a href="tel:+972524444244" dir="ltr">052-444-4244</a></p>
+      <p><b>البريد الإلكتروني:</b> <a href="mailto:ranioph@gmail.com">ranioph@gmail.com</a></p>
+    </div>
+
+    <h2>مزيد من المعلومات</h2>
+    <p><a href="privacy.html">سياسة الخصوصية</a> · <a href="terms.html">شروط الاستخدام</a> · <a href="support.html">الدعم</a></p>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap">
+  <div>Tofy · تطبيق تعلُّم ووقت شاشة للأطفال</div>
+  <nav class="links" aria-label="روابط أسفل الصفحة">
+    <a href="./">الصفحة الرئيسية</a>
+    <a href="privacy.html">سياسة الخصوصية</a>
+    <a href="terms.html">شروط الاستخدام</a>
+    <a href="accessibility.html">إمكانية الوصول</a>
+    <a href="support.html">الدعم</a>
+    <a href="mailto:ranioph@gmail.com">تواصلوا معنا</a>
+  </nav>
+  <div class="copyright">© 2026 Tofy · tofyapp.com</div>
+</div></footer>
+</body>
+</html>
