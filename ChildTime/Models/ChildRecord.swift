@@ -192,6 +192,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         if (topicsVersion ?? 1) < 2, ChildAge(rawValue: age) ?? .grade1 != .preK {
             topics.insert(.reading)
         }
+        // …and the same for 🎊 الأعياد, added at version 3. See Profile.topicsVersion.
+        if (topicsVersion ?? 1) < 3 { topics.insert(.holidays) }
         var p = Profile(
             id: uuid,
             name: name,
@@ -210,7 +212,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
             language: language,
             languageUpdatedAt: languageUpdatedAt,
             enabledTopics: topics,
-            topicsVersion: 2,
+            topicsVersion: 3,
             playPIN: playPIN,
             ownedPacks: Set(packs ?? [])
         )

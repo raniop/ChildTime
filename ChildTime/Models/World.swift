@@ -133,6 +133,18 @@ enum Worlds {
             gradient: .readingWorld,
             glowColor: Color(hex: "AB47BC")
         ),
+        // 🎊 الأعياد — shown only where it exists (ContentAvailability gates it to
+        // Arabic). Core, not a pack: it ships free with the language.
+        World(
+            id: "holidays",
+            name: tr("הַחַגִּים"),
+            emoji: "🎊",
+            topic: .holidays,
+            starsToUnlock: 0,
+            rooms: 10,
+            gradient: .readingWorld,
+            glowColor: Color(hex: "FFB300")
+        ),
         World(
             id: "bonus_arena",
             name: tr("זִירַת הָעֲנָקִים"),

@@ -100,11 +100,14 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// parent who turns off English hides that world and stops English questions.
     /// Synced via `ChildRecord`. Default: every topic enabled (opt-out per child).
     var enabledTopics: Set<Topic>
-    /// Version stamp for `enabledTopics`. Data written before הבנת הנקרא shipped
-    /// (version 1 / missing) can't tell "parent disabled reading" from "reading
-    /// didn't exist yet" — so v1 data gets the new topic enabled once on decode,
-    /// and every write from this build stamps 2, preserving the parent's choice.
-    var topicsVersion: Int = 2
+    /// Version stamp for `enabledTopics`. A stored set can't tell "the parent
+    /// turned this world off" from "this world didn't exist when the set was
+    /// written" — so each time a CORE topic is added, the version goes up and
+    /// older data gets the new topic enabled once on decode.
+    ///   v1 → v2: הבנת הנקרא
+    ///   v2 → v3: 🎊 الأعياد (Arabic only — but the set is language-independent,
+    ///            so every profile gets it and ContentAvailability does the rest)
+    var topicsVersion: Int = 3
     /// The child's OWN 4-digit "protect my time" code. When set, redeeming/
     /// resuming play minutes on the child's device asks for this code — so a
     /// sibling/friend holding the device can't burn the minutes the child
@@ -146,7 +149,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         language: String? = nil,
         languageUpdatedAt: Date? = nil,
         enabledTopics: Set<Topic> = Set(Topic.core),
-        topicsVersion: Int = 2,
+        topicsVersion: Int = 3,
         playPIN: String? = nil,
         ownedPacks: Set<String> = []
     ) {
@@ -237,8 +240,14 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.topicsVersion = (try? c.decodeIfPresent(Int.self, forKey: .topicsVersion)) ?? nil ?? 1
         if topicsVersion < 2 {
             if age != .preK { enabledTopics.insert(.reading) }
-            topicsVersion = 2
         }
+        // v2 data predates 🎊 الأعياد. Without this an Arabic-speaking family
+        // that already had profiles would never see the world at all — their
+        // stored set simply has no such topic in it.
+        if topicsVersion < 3 {
+            enabledTopics.insert(.holidays)
+        }
+        topicsVersion = 3
         self.playPIN = try c.decodeIfPresent(String.self, forKey: .playPIN)
         self.ownedPacks = Set((try? c.decodeIfPresent([String].self, forKey: .ownedPacks)) ?? nil ?? [])
         self.packExpiry = (try? c.decodeIfPresent([String: Double].self, forKey: .packExpiry)) ?? nil ?? [:]
