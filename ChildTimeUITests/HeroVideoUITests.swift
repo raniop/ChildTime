@@ -27,7 +27,7 @@ final class HeroVideoUITests: XCTestCase {
 
     override func setUpWithError() throws { continueAfterFailure = true }
 
-    private var lang: String { ProcessInfo.processInfo.environment["HERO_LANG"] ?? "he" }
+    private var lang: String { ProcessInfo.processInfo.environment["HERO_LANG"] ?? "ar" }
     private var hebrew: Bool { lang == "he" }
 
     // MARK: 1) answering correctly
@@ -109,12 +109,12 @@ final class HeroVideoUITests: XCTestCase {
         // 2) Back to the home screen, then open the play time the parents gifted.
         tapFirst(in: app, ["xmark", "✕", "X"], fallback: CGVector(dx: 0.08, dy: 0.07))
         wait(2.5)
-        tapFirst(in: app, ["💝", "Gift from your parents", "מתנה מההורים", "Подарок от родителей"],
+        tapFirst(in: app, ["💝", "Gift from your parents", "מתנה מההורים", "Подарок от родителей", "هديّة من الوالدين", "هدية"],
                  fallback: CGVector(dx: 0.5, dy: 0.80))
         wait(3.0)                                   // the gift lands in the bank…
         // …and the minutes still have to be opened: the banner is replaced by
         // "Unlock N minutes to play", and THAT is what starts the clock.
-        tapFirst(in: app, ["Unlock", "פתחו לי", "לשחק", "Открыть", "Открой"], fallback: CGVector(dx: 0.5, dy: 0.87))
+        tapFirst(in: app, ["Unlock", "פתחו לי", "לשחק", "Открыть", "Открой", "افتحوا", "افتح"], fallback: CGVector(dx: 0.5, dy: 0.87))
         wait(9.0)                                   // "your time is on its way" → the running clock
     }
 

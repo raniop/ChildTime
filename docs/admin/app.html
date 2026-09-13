@@ -147,7 +147,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260912171836";
+const PAGE_STAMP = "20260913204351";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -551,7 +551,17 @@ function trackTopBar() {
 // import works on one language at a time. English (US) items only reach devices
 // showing English.
 let QLANG = "both";
-const langChips = (withBoth) => `<div class="filters" style="margin-top:6px">${withBoth ? `<span class="chip ${QLANG === "both" ? "on" : ""}" data-qlang="both">🇮🇱 + 🇺🇸 שתי השפות</span>` : ""}<span class="chip ${QLANG === "he" ? "on" : ""}" data-qlang="he">🇮🇱 עברית</span><span class="chip ${QLANG === "en" ? "on" : ""}" data-qlang="en">🇺🇸 English</span></div>`;
+// 🌍 The four catalogs the app ships. Hebrew is the original and the fallback
+// for any item written before languages existed.
+const QLANGS = [
+  { id: "he", flag: "🇮🇱", name: "עברית" },
+  { id: "en", flag: "🇺🇸", name: "English" },
+  { id: "ru", flag: "🇷🇺", name: "Русский" },
+  { id: "ar", flag: "ع", name: "العربية" },
+];
+const QFLAG = Object.fromEntries(QLANGS.map((L) => [L.id, L.flag]));
+const QNAME = Object.fromEntries(QLANGS.map((L) => [L.id, L.name]));
+const langChips = (withBoth) => `<div class="filters" style="margin-top:6px">${withBoth ? `<span class="chip ${QLANG === "both" ? "on" : ""}" data-qlang="both">🌍 כל השפות</span>` : ""}${QLANGS.map((L) => `<span class="chip ${QLANG === L.id ? "on" : ""}" data-qlang="${L.id}">${L.flag} ${L.name}</span>`).join("")}</div>`;
 function wireLangChips(redraw) { document.querySelectorAll("[data-qlang]").forEach((c) => c.onclick = () => { if (QLANG === c.dataset.qlang) return; QLANG = c.dataset.qlang; DRAFT_GRADE = null; redraw(); }); }
 async function coverage() {
   $("main").innerHTML = `<div class="top"><h3>כיסוי שאלות לפי כיתה</h3><div class="filters"><span class="chip" data-ct="reports">דיווחים</span><span class="chip on" data-ct="coverage">כיסוי לפי כיתה</span><span class="chip" data-ct="import">ייבוא ואישור</span></div>${langChips(true)}</div><div id="covBox"><span class="spin"></span></div>`;
@@ -563,19 +573,27 @@ async function coverage() {
     call("adminQuestionBankSummary").catch(() => ({})),
     PACKSTATE ? Promise.resolve(PACKSTATE) : call("adminListPacks").then((r) => (PACKSTATE = r)).catch(() => ({})),
   ]);
-  const LANGS = QLANG === "both" ? ["he", "en"] : [QLANG];
-  const FLAG = { he: "🇮🇱", en: "🇺🇸" };
-  // Per-language views: the coverage file keeps English under `en`, and so does the cloud summary.
-  const cloudOf = (t, L) => { const v = (cloudR.topics || {})[t.topic] || {}; return (L === "en" ? v.en : v) || {}; };
-  const gradesOf = (t, L) => (L === "en" ? (t.en || {}).grades : t.grades) || [];
+  const LANGS = QLANG === "both" ? QLANGS.map((L) => L.id) : [QLANG];
+  const FLAG = QFLAG;
+  // Per-language views: the coverage file and the cloud summary both keep Hebrew
+  // at the top level and every other catalog under its own code.
+  const sub = (o, L) => (L === "he" ? o : (o || {})[L]) || {};
+  const cloudOf = (t, L) => sub((cloudR.topics || {})[t.topic] || {}, L);
+  const gradesOf = (t, L) => sub(t, L).grades || [];
   const builtAt = (t, g, L) => (gradesOf(t, L).find((x) => x.grade === g) || {}).tagged || 0;
   const cloudAt = (t, g, L) => ((cloudOf(t, L).byGrade || {})[g] || {}).approved || 0;
   const count = (t, g, L) => builtAt(t, g, L) + cloudAt(t, g, L);
-  const totalOf = (t, L) => ((L === "en" ? (t.en || {}).total : t.total) || 0) + (cloudOf(t, L).approved || 0);
-  const passagesOf = (t, L) => (L === "en" ? (t.en || {}).passages : t.passages) || 0;
-  // A world exists in English only with ≥ 20 questions (ContentAvailability.minimumBank);
-  // Hebrew is the original catalog and has every world.
-  const existsIn = (t, L) => L === "he" || t.computed || (t.topic === "reading" ? passagesOf(t, L) > 0 : totalOf(t, L) >= 20);
+  const totalOf = (t, L) => (sub(t, L).total || 0) + (cloudOf(t, L).approved || 0);
+  const passagesOf = (t, L) => sub(t, L).passages || 0;
+  // Mirrors ContentAvailability.hasContent: a world shows in another language
+  // only with ≥ 20 questions (minimumBank). Two worlds are decided by hand —
+  // 🇮🇱 עברית is taught from the Hebrew bank wherever the child reads another
+  // language, and 🎊 الأعياد exists only in Arabic.
+  const existsIn = (t, L) => {
+    if (t.topic === "holidays") return L === "ar";   // born in Arabic, nowhere else yet
+    if (L === "he" || t.computed) return true;       // Hebrew is the complete catalog
+    return t.topic === "reading" ? passagesOf(t, L) > 0 : totalOf(t, L) >= 20;
+  };
   // What exists but isn't counted yet: batches not imported, drafts not approved.
   let batches = []; try { batches = (await (await fetch("generated/index.json?v=" + Date.now())).json()).batches || []; } catch (e) { batches = []; }
   const topicsAll = (COV.topics || []).slice();
@@ -634,13 +652,13 @@ async function coverage() {
     const red = open.reduce((n, t) => n + redIn(t, L), 0);
     const w = waitingIn(L), d = draftsIn(L);
     return `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;padding:8px 12px;border-radius:12px;background:var(--soft);margin-bottom:8px;font-size:13px">
-      <b style="font-size:15px">${FLAG[L]} ${L === "he" ? "עברית" : "English"}</b>
+      <b style="font-size:15px">${FLAG[L]} ${QNAME[L]}</b>
       <span><b>${fmt(q)}</b> שאלות</span><span><b>${worlds.length}</b>/${open.length} עולמות פתוחים</span>
       ${red ? `<span style="color:#D6455B"><b>${red}</b> משבצות שיחזרו על עצמן</span>` : `<span style="color:#17A67B">אין משבצות שיחזרו על עצמן</span>`}
       ${w ? `<span>📦 <b>${fmt(w)}</b> מוכנות לייבוא</span>` : ""}${d ? `<span>⏳ <b>${fmt(d)}</b> טיוטות — <a href="#" data-ct="import">לאישור</a></span>` : ""}</div>`;
   }).join("");
   $("covBox").innerHTML = `
-    <div class="card">${summary}<div class="stamp" style="margin:6px 0 10px;line-height:1.7">המספר = שאלות שמתאימות לכיתה (מובנות באפליקציה + מאושרות בענן). יעד: <b>${TARGET}</b> לכל כיתה בכל שפה.${both ? " בכל משבצת: 🇮🇱 עברית למעלה, 🇺🇸 אנגלית למטה." : ""}<br>
+    <div class="card">${summary}<div class="stamp" style="margin:6px 0 10px;line-height:1.7">המספר = שאלות שמתאימות לכיתה (מובנות באפליקציה + מאושרות בענן). יעד: <b>${TARGET}</b> לכל כיתה בכל שפה.${both ? ` בכל משבצת, מלמעלה למטה: ${LANGS.map((L) => FLAG[L]).join(" ")}.` : ""}<br>
       <span class="cv inl" style="background:#D6455B;color:#fff">0</span> אין ·
       <span class="cv inl" style="background:#E8845E;color:#fff">&lt;${MIN}</span> יחזרו על עצמן ·
       <span class="cv inl" style="background:#F5C049;color:#3A1B08">&lt;${TARGET}</span> מתחת ליעד ·
@@ -705,7 +723,7 @@ async function loadBatches() {
 
   // Both languages on one screen: no toggle to understand, and each side shows
   // whether there is anything left to do (Rani: "אחרי שלחצתי… זה הרי בוצע כבר").
-  const LANGS = [{ id: "he", flag: "🇮🇱", name: "עברית" }, { id: "en", flag: "🇺🇸", name: "English" }];
+  const LANGS = QLANGS;
   const cloudOf = (t, L) => { const v = (summary.topics || {})[t] || {}; return (L === "en" ? v.en : v) || {}; };
   const totals = (L) => Object.keys(summary.topics || {}).reduce((m, t) => {
     const v = cloudOf(t, L); return { approved: m.approved + (v.approved || 0), draft: m.draft + (v.draft || 0) };

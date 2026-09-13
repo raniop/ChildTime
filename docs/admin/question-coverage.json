@@ -1,9 +1,12 @@
 {
-  "generatedAt" : "2026-09-12T16:43:25Z",
+  "generatedAt" : "2026-09-13T17:41:05Z",
   "minGradePool" : 30,
   "target" : 200,
   "topics" : [
     {
+      "ar" : {
+        "computed" : true
+      },
       "computed" : true,
       "emoji" : "🧮",
       "en" : {
@@ -59,10 +62,54 @@
       "label" : "מָתֵמָטִיקָה",
       "minGrade" : 0,
       "pack" : false,
+      "ru" : {
+        "computed" : true
+      },
       "topic" : "math",
       "total" : 0
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 270
+          },
+          {
+            "grade" : 4,
+            "tagged" : 317
+          },
+          {
+            "grade" : 5,
+            "tagged" : 196
+          },
+          {
+            "grade" : 6,
+            "tagged" : 65
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 358
+      },
       "emoji" : "🇬🇧",
       "en" : {
         "grades" : [
@@ -123,23 +170,23 @@
         },
         {
           "grade" : 3,
-          "pool" : 287,
-          "tagged" : 287
+          "pool" : 230,
+          "tagged" : 230
         },
         {
           "grade" : 4,
-          "pool" : 333,
-          "tagged" : 333
+          "pool" : 275,
+          "tagged" : 275
         },
         {
           "grade" : 5,
-          "pool" : 204,
-          "tagged" : 204
+          "pool" : 182,
+          "tagged" : 182
         },
         {
           "grade" : 6,
-          "pool" : 66,
-          "tagged" : 66
+          "pool" : 65,
+          "tagged" : 65
         },
         {
           "grade" : 7,
@@ -155,15 +202,97 @@
       "label" : "אַנְגְּלִית",
       "minGrade" : 0,
       "pack" : false,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 270
+          },
+          {
+            "grade" : 4,
+            "tagged" : 321
+          },
+          {
+            "grade" : 5,
+            "tagged" : 203
+          },
+          {
+            "grade" : 6,
+            "tagged" : 69
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 362
+      },
       "tiers" : {
-        "easy" : 125,
-        "hard" : 90,
-        "medium" : 162
+        "easy" : 103,
+        "hard" : 84,
+        "medium" : 132
       },
       "topic" : "english",
-      "total" : 377
+      "total" : 319
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 59
+          },
+          {
+            "grade" : 1,
+            "tagged" : 117
+          },
+          {
+            "grade" : 2,
+            "tagged" : 237
+          },
+          {
+            "grade" : 3,
+            "tagged" : 220
+          },
+          {
+            "grade" : 4,
+            "tagged" : 170
+          },
+          {
+            "grade" : 5,
+            "tagged" : 99
+          },
+          {
+            "grade" : 6,
+            "tagged" : 29
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 319
+      },
       "emoji" : "✍️",
       "en" : {
         "grades" : [
@@ -214,18 +343,18 @@
         },
         {
           "grade" : 1,
-          "pool" : 119,
-          "tagged" : 119
+          "pool" : 117,
+          "tagged" : 117
         },
         {
           "grade" : 2,
-          "pool" : 239,
-          "tagged" : 239
+          "pool" : 237,
+          "tagged" : 237
         },
         {
           "grade" : 3,
-          "pool" : 222,
-          "tagged" : 222
+          "pool" : 220,
+          "tagged" : 220
         },
         {
           "grade" : 4,
@@ -256,15 +385,97 @@
       "label" : "עִבְרִית",
       "minGrade" : 0,
       "pack" : false,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 59
+          },
+          {
+            "grade" : 1,
+            "tagged" : 117
+          },
+          {
+            "grade" : 2,
+            "tagged" : 237
+          },
+          {
+            "grade" : 3,
+            "tagged" : 220
+          },
+          {
+            "grade" : 4,
+            "tagged" : 170
+          },
+          {
+            "grade" : 5,
+            "tagged" : 99
+          },
+          {
+            "grade" : 6,
+            "tagged" : 29
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 319
+      },
       "tiers" : {
-        "easy" : 115,
+        "easy" : 113,
         "hard" : 72,
         "medium" : 134
       },
       "topic" : "hebrew",
-      "total" : 321
+      "total" : 319
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 106
+          },
+          {
+            "grade" : 1,
+            "tagged" : 135
+          },
+          {
+            "grade" : 2,
+            "tagged" : 200
+          },
+          {
+            "grade" : 3,
+            "tagged" : 116
+          },
+          {
+            "grade" : 4,
+            "tagged" : 126
+          },
+          {
+            "grade" : 5,
+            "tagged" : 61
+          },
+          {
+            "grade" : 6,
+            "tagged" : 50
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 261
+      },
       "emoji" : "🧩",
       "en" : {
         "grades" : [
@@ -310,33 +521,33 @@
       "grades" : [
         {
           "grade" : 0,
+          "pool" : 105,
+          "tagged" : 105
+        },
+        {
+          "grade" : 1,
+          "pool" : 133,
+          "tagged" : 133
+        },
+        {
+          "grade" : 2,
+          "pool" : 192,
+          "tagged" : 192
+        },
+        {
+          "grade" : 3,
           "pool" : 107,
           "tagged" : 107
         },
         {
-          "grade" : 1,
-          "pool" : 135,
-          "tagged" : 135
-        },
-        {
-          "grade" : 2,
-          "pool" : 197,
-          "tagged" : 197
-        },
-        {
-          "grade" : 3,
-          "pool" : 111,
-          "tagged" : 111
-        },
-        {
           "grade" : 4,
-          "pool" : 119,
-          "tagged" : 119
+          "pool" : 115,
+          "tagged" : 115
         },
         {
           "grade" : 5,
-          "pool" : 57,
-          "tagged" : 57
+          "pool" : 56,
+          "tagged" : 56
         },
         {
           "grade" : 6,
@@ -357,15 +568,97 @@
       "label" : "לוֹגִיקָה",
       "minGrade" : 0,
       "pack" : false,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 106
+          },
+          {
+            "grade" : 1,
+            "tagged" : 135
+          },
+          {
+            "grade" : 2,
+            "tagged" : 200
+          },
+          {
+            "grade" : 3,
+            "tagged" : 117
+          },
+          {
+            "grade" : 4,
+            "tagged" : 127
+          },
+          {
+            "grade" : 5,
+            "tagged" : 62
+          },
+          {
+            "grade" : 6,
+            "tagged" : 50
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 262
+      },
       "tiers" : {
-        "easy" : 89,
-        "hard" : 67,
-        "medium" : 98
+        "easy" : 88,
+        "hard" : 66,
+        "medium" : 94
       },
       "topic" : "logic",
-      "total" : 254
+      "total" : 248
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 107
+          },
+          {
+            "grade" : 1,
+            "tagged" : 119
+          },
+          {
+            "grade" : 2,
+            "tagged" : 205
+          },
+          {
+            "grade" : 3,
+            "tagged" : 112
+          },
+          {
+            "grade" : 4,
+            "tagged" : 167
+          },
+          {
+            "grade" : 5,
+            "tagged" : 81
+          },
+          {
+            "grade" : 6,
+            "tagged" : 67
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 310
+      },
       "emoji" : "🔬",
       "en" : {
         "grades" : [
@@ -411,33 +704,33 @@
       "grades" : [
         {
           "grade" : 0,
-          "pool" : 110,
-          "tagged" : 110
+          "pool" : 108,
+          "tagged" : 108
         },
         {
           "grade" : 1,
-          "pool" : 122,
-          "tagged" : 122
+          "pool" : 120,
+          "tagged" : 120
         },
         {
           "grade" : 2,
-          "pool" : 206,
-          "tagged" : 206
+          "pool" : 204,
+          "tagged" : 204
         },
         {
           "grade" : 3,
-          "pool" : 106,
-          "tagged" : 106
+          "pool" : 105,
+          "tagged" : 105
         },
         {
           "grade" : 4,
-          "pool" : 159,
-          "tagged" : 159
+          "pool" : 158,
+          "tagged" : 158
         },
         {
           "grade" : 5,
-          "pool" : 75,
-          "tagged" : 75
+          "pool" : 74,
+          "tagged" : 74
         },
         {
           "grade" : 6,
@@ -458,15 +751,97 @@
       "label" : "מַדָּעִים",
       "minGrade" : 0,
       "pack" : false,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 108
+          },
+          {
+            "grade" : 1,
+            "tagged" : 120
+          },
+          {
+            "grade" : 2,
+            "tagged" : 208
+          },
+          {
+            "grade" : 3,
+            "tagged" : 113
+          },
+          {
+            "grade" : 4,
+            "tagged" : 167
+          },
+          {
+            "grade" : 5,
+            "tagged" : 79
+          },
+          {
+            "grade" : 6,
+            "tagged" : 66
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 311
+      },
       "tiers" : {
-        "easy" : 98,
+        "easy" : 97,
         "hard" : 98,
-        "medium" : 109
+        "medium" : 107
       },
       "topic" : "science",
-      "total" : 305
+      "total" : 302
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 3
+          },
+          {
+            "grade" : 1,
+            "tagged" : 24
+          },
+          {
+            "grade" : 2,
+            "tagged" : 141
+          },
+          {
+            "grade" : 3,
+            "tagged" : 189
+          },
+          {
+            "grade" : 4,
+            "tagged" : 200
+          },
+          {
+            "grade" : 5,
+            "tagged" : 126
+          },
+          {
+            "grade" : 6,
+            "tagged" : 84
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 277
+      },
       "emoji" : "🏛️",
       "en" : {
         "grades" : [
@@ -559,6 +934,47 @@
       "label" : "הִיסְטוֹרְיָה",
       "minGrade" : 2,
       "pack" : false,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 3
+          },
+          {
+            "grade" : 1,
+            "tagged" : 24
+          },
+          {
+            "grade" : 2,
+            "tagged" : 141
+          },
+          {
+            "grade" : 3,
+            "tagged" : 189
+          },
+          {
+            "grade" : 4,
+            "tagged" : 199
+          },
+          {
+            "grade" : 5,
+            "tagged" : 125
+          },
+          {
+            "grade" : 6,
+            "tagged" : 83
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 276
+      },
       "tiers" : {
         "easy" : 68,
         "hard" : 92,
@@ -568,6 +984,47 @@
       "total" : 267
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 4
+          },
+          {
+            "grade" : 1,
+            "tagged" : 4
+          },
+          {
+            "grade" : 2,
+            "tagged" : 100
+          },
+          {
+            "grade" : 3,
+            "tagged" : 124
+          },
+          {
+            "grade" : 4,
+            "tagged" : 299
+          },
+          {
+            "grade" : 5,
+            "tagged" : 215
+          },
+          {
+            "grade" : 6,
+            "tagged" : 188
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 334
+      },
       "emoji" : "🌍",
       "en" : {
         "grades" : [
@@ -623,28 +1080,28 @@
         },
         {
           "grade" : 2,
-          "pool" : 99,
-          "tagged" : 99
+          "pool" : 98,
+          "tagged" : 98
         },
         {
           "grade" : 3,
-          "pool" : 120,
-          "tagged" : 120
+          "pool" : 119,
+          "tagged" : 119
         },
         {
           "grade" : 4,
-          "pool" : 293,
-          "tagged" : 293
+          "pool" : 291,
+          "tagged" : 291
         },
         {
           "grade" : 5,
-          "pool" : 208,
-          "tagged" : 208
+          "pool" : 207,
+          "tagged" : 207
         },
         {
           "grade" : 6,
-          "pool" : 183,
-          "tagged" : 183
+          "pool" : 182,
+          "tagged" : 182
         },
         {
           "grade" : 7,
@@ -660,15 +1117,97 @@
       "label" : "גֵּאוֹגְרַפְיָה",
       "minGrade" : 1,
       "pack" : false,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 4
+          },
+          {
+            "grade" : 1,
+            "tagged" : 4
+          },
+          {
+            "grade" : 2,
+            "tagged" : 99
+          },
+          {
+            "grade" : 3,
+            "tagged" : 123
+          },
+          {
+            "grade" : 4,
+            "tagged" : 294
+          },
+          {
+            "grade" : 5,
+            "tagged" : 211
+          },
+          {
+            "grade" : 6,
+            "tagged" : 183
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 328
+      },
       "tiers" : {
         "easy" : 70,
-        "hard" : 135,
-        "medium" : 122
+        "hard" : 134,
+        "medium" : 121
       },
       "topic" : "geography",
-      "total" : 327
+      "total" : 325
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 1
+          },
+          {
+            "grade" : 1,
+            "tagged" : 43
+          },
+          {
+            "grade" : 2,
+            "tagged" : 124
+          },
+          {
+            "grade" : 3,
+            "tagged" : 205
+          },
+          {
+            "grade" : 4,
+            "tagged" : 171
+          },
+          {
+            "grade" : 5,
+            "tagged" : 86
+          },
+          {
+            "grade" : 6,
+            "tagged" : 25
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 246
+      },
       "emoji" : "💰",
       "en" : {
         "grades" : [
@@ -761,6 +1300,47 @@
       "label" : "חִנּוּךְ פִּינַנְסִי",
       "minGrade" : 2,
       "pack" : false,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 1
+          },
+          {
+            "grade" : 1,
+            "tagged" : 43
+          },
+          {
+            "grade" : 2,
+            "tagged" : 124
+          },
+          {
+            "grade" : 3,
+            "tagged" : 205
+          },
+          {
+            "grade" : 4,
+            "tagged" : 171
+          },
+          {
+            "grade" : 5,
+            "tagged" : 86
+          },
+          {
+            "grade" : 6,
+            "tagged" : 25
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 246
+      },
       "tiers" : {
         "easy" : 67,
         "hard" : 68,
@@ -770,6 +1350,57 @@
       "total" : 236
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "passages" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "passages" : 15,
+            "tagged" : 33
+          },
+          {
+            "grade" : 2,
+            "passages" : 25,
+            "tagged" : 63
+          },
+          {
+            "grade" : 3,
+            "passages" : 17,
+            "tagged" : 51
+          },
+          {
+            "grade" : 4,
+            "passages" : 22,
+            "tagged" : 66
+          },
+          {
+            "grade" : 5,
+            "passages" : 16,
+            "tagged" : 48
+          },
+          {
+            "grade" : 6,
+            "passages" : 16,
+            "tagged" : 48
+          },
+          {
+            "grade" : 7,
+            "passages" : 12,
+            "tagged" : 48
+          },
+          {
+            "grade" : 8,
+            "passages" : 12,
+            "tagged" : 48
+          }
+        ],
+        "passages" : 75,
+        "total" : 237
+      },
       "emoji" : "📖",
       "en" : {
         "grades" : [
@@ -882,10 +1513,283 @@
       "minGrade" : 1,
       "pack" : false,
       "passages" : 75,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "passages" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "passages" : 15,
+            "tagged" : 33
+          },
+          {
+            "grade" : 2,
+            "passages" : 25,
+            "tagged" : 63
+          },
+          {
+            "grade" : 3,
+            "passages" : 17,
+            "tagged" : 51
+          },
+          {
+            "grade" : 4,
+            "passages" : 22,
+            "tagged" : 66
+          },
+          {
+            "grade" : 5,
+            "passages" : 16,
+            "tagged" : 48
+          },
+          {
+            "grade" : 6,
+            "passages" : 16,
+            "tagged" : 48
+          },
+          {
+            "grade" : 7,
+            "passages" : 12,
+            "tagged" : 48
+          },
+          {
+            "grade" : 8,
+            "passages" : 12,
+            "tagged" : 48
+          }
+        ],
+        "passages" : 75,
+        "total" : 237
+      },
       "topic" : "reading",
       "total" : 237
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 16
+          },
+          {
+            "grade" : 2,
+            "tagged" : 31
+          },
+          {
+            "grade" : 3,
+            "tagged" : 42
+          },
+          {
+            "grade" : 4,
+            "tagged" : 37
+          },
+          {
+            "grade" : 5,
+            "tagged" : 43
+          },
+          {
+            "grade" : 6,
+            "tagged" : 24
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 72
+      },
+      "emoji" : "🎊",
+      "en" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
+      "grades" : [
+        {
+          "grade" : 0,
+          "pool" : 0,
+          "tagged" : 0
+        },
+        {
+          "grade" : 1,
+          "pool" : 0,
+          "tagged" : 0
+        },
+        {
+          "grade" : 2,
+          "pool" : 0,
+          "tagged" : 0
+        },
+        {
+          "grade" : 3,
+          "pool" : 0,
+          "tagged" : 0
+        },
+        {
+          "grade" : 4,
+          "pool" : 0,
+          "tagged" : 0
+        },
+        {
+          "grade" : 5,
+          "pool" : 0,
+          "tagged" : 0
+        },
+        {
+          "grade" : 6,
+          "pool" : 0,
+          "tagged" : 0
+        },
+        {
+          "grade" : 7,
+          "pool" : 0,
+          "tagged" : 0
+        },
+        {
+          "grade" : 8,
+          "pool" : 0,
+          "tagged" : 0
+        }
+      ],
+      "label" : "הַחַגִּים",
+      "minGrade" : 0,
+      "pack" : false,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
+      "tiers" : {
+
+      },
+      "topic" : "holidays",
+      "total" : 0
+    },
+    {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 29
+          },
+          {
+            "grade" : 2,
+            "tagged" : 60
+          },
+          {
+            "grade" : 3,
+            "tagged" : 67
+          },
+          {
+            "grade" : 4,
+            "tagged" : 70
+          },
+          {
+            "grade" : 5,
+            "tagged" : 58
+          },
+          {
+            "grade" : 6,
+            "tagged" : 49
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 111
+      },
       "emoji" : "⚽",
       "en" : {
         "grades" : [
@@ -978,6 +1882,47 @@
       "label" : "עוֹלַם הַכַּדּוּרֶגֶל",
       "minGrade" : 2,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 30
+          },
+          {
+            "grade" : 2,
+            "tagged" : 61
+          },
+          {
+            "grade" : 3,
+            "tagged" : 67
+          },
+          {
+            "grade" : 4,
+            "tagged" : 70
+          },
+          {
+            "grade" : 5,
+            "tagged" : 58
+          },
+          {
+            "grade" : 6,
+            "tagged" : 49
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 112
+      },
       "tiers" : {
         "easy" : 61,
         "hard" : 21,
@@ -987,6 +1932,47 @@
       "total" : 112
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 14
+          },
+          {
+            "grade" : 1,
+            "tagged" : 28
+          },
+          {
+            "grade" : 2,
+            "tagged" : 49
+          },
+          {
+            "grade" : 3,
+            "tagged" : 43
+          },
+          {
+            "grade" : 4,
+            "tagged" : 41
+          },
+          {
+            "grade" : 5,
+            "tagged" : 14
+          },
+          {
+            "grade" : 6,
+            "tagged" : 11
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "emoji" : "🦖",
       "en" : {
         "grades" : [
@@ -1079,6 +2065,47 @@
       "label" : "דִּינוֹזָאוּרִים",
       "minGrade" : 0,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 14
+          },
+          {
+            "grade" : 1,
+            "tagged" : 28
+          },
+          {
+            "grade" : 2,
+            "tagged" : 49
+          },
+          {
+            "grade" : 3,
+            "tagged" : 43
+          },
+          {
+            "grade" : 4,
+            "tagged" : 41
+          },
+          {
+            "grade" : 5,
+            "tagged" : 14
+          },
+          {
+            "grade" : 6,
+            "tagged" : 11
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "tiers" : {
         "easy" : 28,
         "hard" : 14,
@@ -1088,6 +2115,47 @@
       "total" : 70
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 23
+          },
+          {
+            "grade" : 2,
+            "tagged" : 33
+          },
+          {
+            "grade" : 3,
+            "tagged" : 52
+          },
+          {
+            "grade" : 4,
+            "tagged" : 42
+          },
+          {
+            "grade" : 5,
+            "tagged" : 37
+          },
+          {
+            "grade" : 6,
+            "tagged" : 14
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "emoji" : "🚀",
       "en" : {
         "grades" : [
@@ -1180,6 +2248,47 @@
       "label" : "חָלָל וְכוֹכָבִים",
       "minGrade" : 1,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 23
+          },
+          {
+            "grade" : 2,
+            "tagged" : 33
+          },
+          {
+            "grade" : 3,
+            "tagged" : 52
+          },
+          {
+            "grade" : 4,
+            "tagged" : 42
+          },
+          {
+            "grade" : 5,
+            "tagged" : 37
+          },
+          {
+            "grade" : 6,
+            "tagged" : 14
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "tiers" : {
         "easy" : 28,
         "hard" : 14,
@@ -1189,6 +2298,47 @@
       "total" : 70
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 30
+          },
+          {
+            "grade" : 1,
+            "tagged" : 53
+          },
+          {
+            "grade" : 2,
+            "tagged" : 46
+          },
+          {
+            "grade" : 3,
+            "tagged" : 38
+          },
+          {
+            "grade" : 4,
+            "tagged" : 17
+          },
+          {
+            "grade" : 5,
+            "tagged" : 9
+          },
+          {
+            "grade" : 6,
+            "tagged" : 1
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "emoji" : "🐾",
       "en" : {
         "grades" : [
@@ -1281,6 +2431,47 @@
       "label" : "עוֹלַם הַחַיּוֹת",
       "minGrade" : 0,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 30
+          },
+          {
+            "grade" : 1,
+            "tagged" : 53
+          },
+          {
+            "grade" : 2,
+            "tagged" : 46
+          },
+          {
+            "grade" : 3,
+            "tagged" : 38
+          },
+          {
+            "grade" : 4,
+            "tagged" : 17
+          },
+          {
+            "grade" : 5,
+            "tagged" : 9
+          },
+          {
+            "grade" : 6,
+            "tagged" : 1
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "tiers" : {
         "easy" : 32,
         "hard" : 10,
@@ -1290,6 +2481,47 @@
       "total" : 70
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 22
+          },
+          {
+            "grade" : 1,
+            "tagged" : 40
+          },
+          {
+            "grade" : 2,
+            "tagged" : 43
+          },
+          {
+            "grade" : 3,
+            "tagged" : 34
+          },
+          {
+            "grade" : 4,
+            "tagged" : 30
+          },
+          {
+            "grade" : 5,
+            "tagged" : 10
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "emoji" : "🌊",
       "en" : {
         "grades" : [
@@ -1382,6 +2614,47 @@
       "label" : "מַעֲמַקֵּי הַיָּם",
       "minGrade" : 0,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 22
+          },
+          {
+            "grade" : 1,
+            "tagged" : 40
+          },
+          {
+            "grade" : 2,
+            "tagged" : 43
+          },
+          {
+            "grade" : 3,
+            "tagged" : 34
+          },
+          {
+            "grade" : 4,
+            "tagged" : 30
+          },
+          {
+            "grade" : 5,
+            "tagged" : 10
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "tiers" : {
         "easy" : 32,
         "hard" : 10,
@@ -1391,6 +2664,47 @@
       "total" : 70
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 25
+          },
+          {
+            "grade" : 3,
+            "tagged" : 53
+          },
+          {
+            "grade" : 4,
+            "tagged" : 45
+          },
+          {
+            "grade" : 5,
+            "tagged" : 17
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "emoji" : "🧠",
       "en" : {
         "grades" : [
@@ -1483,6 +2797,47 @@
       "label" : "הֲכָנָה לִמְחוֹנָנִים",
       "minGrade" : 2,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 25
+          },
+          {
+            "grade" : 3,
+            "tagged" : 53
+          },
+          {
+            "grade" : 4,
+            "tagged" : 45
+          },
+          {
+            "grade" : 5,
+            "tagged" : 17
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "tiers" : {
         "easy" : 25,
         "hard" : 17,
@@ -1492,6 +2847,47 @@
       "total" : 70
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 28
+          },
+          {
+            "grade" : 2,
+            "tagged" : 44
+          },
+          {
+            "grade" : 3,
+            "tagged" : 33
+          },
+          {
+            "grade" : 4,
+            "tagged" : 36
+          },
+          {
+            "grade" : 5,
+            "tagged" : 14
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "emoji" : "🍳",
       "en" : {
         "grades" : [
@@ -1584,6 +2980,47 @@
       "label" : "מִטְבָּח וּמַדָּע שֶׁל אֹכֶל",
       "minGrade" : 1,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 28
+          },
+          {
+            "grade" : 2,
+            "tagged" : 44
+          },
+          {
+            "grade" : 3,
+            "tagged" : 33
+          },
+          {
+            "grade" : 4,
+            "tagged" : 36
+          },
+          {
+            "grade" : 5,
+            "tagged" : 14
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "tiers" : {
         "easy" : 28,
         "hard" : 14,
@@ -1593,6 +3030,47 @@
       "total" : 70
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 28
+          },
+          {
+            "grade" : 3,
+            "tagged" : 56
+          },
+          {
+            "grade" : 4,
+            "tagged" : 42
+          },
+          {
+            "grade" : 5,
+            "tagged" : 41
+          },
+          {
+            "grade" : 6,
+            "tagged" : 14
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "emoji" : "🏛️",
       "en" : {
         "grades" : [
@@ -1685,6 +3163,47 @@
       "label" : "יִשְׂרָאֵל שֶׁלִּי",
       "minGrade" : 2,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 28
+          },
+          {
+            "grade" : 3,
+            "tagged" : 56
+          },
+          {
+            "grade" : 4,
+            "tagged" : 42
+          },
+          {
+            "grade" : 5,
+            "tagged" : 41
+          },
+          {
+            "grade" : 6,
+            "tagged" : 14
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "tiers" : {
         "easy" : 28,
         "hard" : 14,
@@ -1694,6 +3213,47 @@
       "total" : 70
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 25
+          },
+          {
+            "grade" : 1,
+            "tagged" : 45
+          },
+          {
+            "grade" : 2,
+            "tagged" : 57
+          },
+          {
+            "grade" : 3,
+            "tagged" : 38
+          },
+          {
+            "grade" : 4,
+            "tagged" : 25
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "emoji" : "🎵",
       "en" : {
         "grades" : [
@@ -1786,6 +3346,47 @@
       "label" : "מוּזִיקָה",
       "minGrade" : 0,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 25
+          },
+          {
+            "grade" : 1,
+            "tagged" : 45
+          },
+          {
+            "grade" : 2,
+            "tagged" : 57
+          },
+          {
+            "grade" : 3,
+            "tagged" : 38
+          },
+          {
+            "grade" : 4,
+            "tagged" : 25
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "tiers" : {
         "easy" : 32,
         "hard" : 10,
@@ -1795,6 +3396,47 @@
       "total" : 70
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 28
+          },
+          {
+            "grade" : 3,
+            "tagged" : 56
+          },
+          {
+            "grade" : 4,
+            "tagged" : 42
+          },
+          {
+            "grade" : 5,
+            "tagged" : 42
+          },
+          {
+            "grade" : 6,
+            "tagged" : 14
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "emoji" : "🧍",
       "en" : {
         "grades" : [
@@ -1887,6 +3529,47 @@
       "label" : "גּוּף הָאָדָם",
       "minGrade" : 2,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 28
+          },
+          {
+            "grade" : 3,
+            "tagged" : 56
+          },
+          {
+            "grade" : 4,
+            "tagged" : 42
+          },
+          {
+            "grade" : 5,
+            "tagged" : 42
+          },
+          {
+            "grade" : 6,
+            "tagged" : 14
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "tiers" : {
         "easy" : 28,
         "hard" : 14,
@@ -1896,6 +3579,47 @@
       "total" : 70
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 35
+          },
+          {
+            "grade" : 1,
+            "tagged" : 60
+          },
+          {
+            "grade" : 2,
+            "tagged" : 35
+          },
+          {
+            "grade" : 3,
+            "tagged" : 35
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "emoji" : "🚗",
       "en" : {
         "grades" : [
@@ -1988,6 +3712,47 @@
       "label" : "כְּלֵי רֶכֶב וְתַחְבּוּרָה",
       "minGrade" : 0,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 35
+          },
+          {
+            "grade" : 1,
+            "tagged" : 60
+          },
+          {
+            "grade" : 2,
+            "tagged" : 35
+          },
+          {
+            "grade" : 3,
+            "tagged" : 35
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "tiers" : {
         "easy" : 35,
         "hard" : 10,
@@ -1997,6 +3762,47 @@
       "total" : 70
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 28
+          },
+          {
+            "grade" : 4,
+            "tagged" : 56
+          },
+          {
+            "grade" : 5,
+            "tagged" : 42
+          },
+          {
+            "grade" : 6,
+            "tagged" : 14
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "emoji" : "🌍",
       "en" : {
         "grades" : [
@@ -2089,6 +3895,47 @@
       "label" : "דְּגָלִים וּמְדִינוֹת",
       "minGrade" : 3,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 28
+          },
+          {
+            "grade" : 4,
+            "tagged" : 56
+          },
+          {
+            "grade" : 5,
+            "tagged" : 42
+          },
+          {
+            "grade" : 6,
+            "tagged" : 14
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 70
+      },
       "tiers" : {
         "easy" : 28,
         "hard" : 14,
@@ -2098,6 +3945,47 @@
       "total" : 70
     },
     {
+      "ar" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 0
+          },
+          {
+            "grade" : 1,
+            "tagged" : 0
+          },
+          {
+            "grade" : 2,
+            "tagged" : 0
+          },
+          {
+            "grade" : 3,
+            "tagged" : 0
+          },
+          {
+            "grade" : 4,
+            "tagged" : 0
+          },
+          {
+            "grade" : 5,
+            "tagged" : 0
+          },
+          {
+            "grade" : 6,
+            "tagged" : 0
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 0
+      },
       "emoji" : "🍎",
       "en" : {
         "grades" : [
@@ -2190,6 +4078,47 @@
       "label" : "חַגֵּי תִּשְׁרֵי",
       "minGrade" : 0,
       "pack" : true,
+      "ru" : {
+        "grades" : [
+          {
+            "grade" : 0,
+            "tagged" : 17
+          },
+          {
+            "grade" : 1,
+            "tagged" : 30
+          },
+          {
+            "grade" : 2,
+            "tagged" : 33
+          },
+          {
+            "grade" : 3,
+            "tagged" : 41
+          },
+          {
+            "grade" : 4,
+            "tagged" : 41
+          },
+          {
+            "grade" : 5,
+            "tagged" : 31
+          },
+          {
+            "grade" : 6,
+            "tagged" : 14
+          },
+          {
+            "grade" : 7,
+            "tagged" : 0
+          },
+          {
+            "grade" : 8,
+            "tagged" : 0
+          }
+        ],
+        "total" : 72
+      },
       "tiers" : {
         "easy" : 28,
         "hard" : 15,

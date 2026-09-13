@@ -3,6 +3,9 @@
 // review (409 UNMODIFIABLE) — rerun after review:
 //   node tools/asc-localizations.js en-US
 //   node tools/asc-localizations.js ru
+//   node tools/asc-localizations.js ar-SA
+// The locale is Apple's code, not ours: Arabic is "ar-SA" on App Store Connect
+// even though the app itself calls it "ar".
 // Idempotent: skips any locale that already exists.
 const fs = require("fs"), path = require("path"), os = require("os");
 const ROOT = "/Users/raniophir/ChildTime";

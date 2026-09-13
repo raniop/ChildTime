@@ -3531,14 +3531,26 @@ function qbProblems(q, lang = "he") {
   if (q.tier && !QB_TIERS.includes(q.tier)) out.push("רמה לא תקינה");
   // Hebrew content without a single niqqud mark is almost always an unreviewed
   // paste — the whole app is vocalised for young readers.
-  if (lang === "en") {
-    // 🇺🇸 An English item must be English all the way through.
-    if (/[א-ת]/.test([prompt, answer, ...ds].join(" "))) out.push("עברית בשאלה באנגלית");
+  if (lang !== "he") {
+    // 🌍 An item in another language must be in that language all the way
+    // through — a Hebrew word left inside is exactly the leak we sweep for.
+    const all = [prompt, answer, ...ds].join(" ");
+    const NAME = { en: "אנגלית", ru: "רוסית", ar: "ערבית" }[lang];
+    if (/[א-ת]/.test(all)) out.push(`עברית בשאלה ב${NAME}`);
+    // …and it must actually use its own script, so a Russian batch cannot be
+    // quietly filled with English.
+    if (lang === "ru" && !/[\u0400-\u04FF]/.test(all)) out.push("שאלה ברוסית בלי אותיות קיריליות");
+    if (lang === "ar" && !/[\u0600-\u06FF]/.test(all)) out.push("שאלה בערבית בלי אותיות ערביות");
   } else if (/[א-ת]/.test(prompt) && !/[ְ-ׇ]/.test(prompt)) out.push("שאלה בלי ניקוד");
   return out;
 }
 
 function qbKey(q) { return `${String(q.prompt).trim()}|${String(q.correctAnswer).trim()}`; }
+
+// 🌍 Which catalog an item belongs to. Items written before languages carry no
+// `lang` at all, and those are Hebrew — that default must never change.
+const QB_LANGS = ["he", "en", "ru", "ar"];
+function qbLang(v) { const s = String(v || "he"); return QB_LANGS.includes(s) ? s : "he"; }
 
 async function qbBumpIndex(topic, version) {
   await db.collection("questionBankIndex").doc("current")
@@ -3556,9 +3568,9 @@ exports.adminImportQuestions = onCall({ timeoutSeconds: 120, memory: "512MiB" },
   if (!incoming.length) throw new HttpsError("invalid-argument", "items");
   if (incoming.length > 2000) throw new HttpsError("invalid-argument", "max 2000 per import");
   const approve = request.data?.approve === true;
-  // 🌍 Items without `lang` are Hebrew (everything before languages); English
-  // items carry lang: "en" and only reach devices showing English.
-  const lang = request.data?.lang === "en" ? "en" : "he";
+  // 🌍 Items without `lang` are Hebrew (everything before languages); every
+  // other catalog carries its own code and only reaches devices showing it.
+  const lang = qbLang(request.data?.lang);
 
   const result = await qbImportInto(topic, incoming, { approve, lang, by: email });
   console.log("[adminImportQuestions]", email, topic, lang, "+" + result.added, "dup", result.duplicates, "rejected", result.rejected.length);
@@ -3592,7 +3604,7 @@ async function qbImportInto(topic, incoming, { approve = false, lang = "he", by 
         gradeLo: Number(raw.gradeLo), gradeHi: Number(raw.gradeHi),
         status: approve ? "approved" : "draft",
         createdAt: Date.now(), createdBy: by,
-        ...(lang === "en" ? { lang: "en" } : {}),
+        ...(lang === "he" ? {} : { lang }),
       });
     }
     const version = (cur.version || 0) + (added.length ? 1 : 0);
@@ -3613,7 +3625,7 @@ async function qbApproveDrafts(topic, lang, by) {
     const items = Array.isArray(cur.items) ? cur.items : [];
     let count = 0;
     const next = items.map((i) => {
-      const l = i.lang === "en" ? "en" : "he";
+      const l = qbLang(i.lang);
       if (i.status !== "draft" || l !== lang) return i;
       count++;
       return { ...i, status: "approved", approvedAt: Date.now(), approvedBy: by };
@@ -3657,12 +3669,12 @@ exports.adminSetQuestionStatus = onCall({ timeoutSeconds: 60, memory: "256MiB" }
 exports.adminQuestionBankSummary = onCall({ timeoutSeconds: 60, memory: "512MiB" }, async (request) => {
   requireAdmin(request);
   const wantDrafts = String(request.data?.draftsFor || "");
-  const draftsLang = request.data?.lang === "en" ? "en" : "he";
+  const draftsLang = qbLang(request.data?.lang);
   const snap = await db.collection("questionBanks").get();
   const topics = {};
   let drafts = [];
   // Counts per language: the top level stays Hebrew (what the dashboard always
-  // showed); English sits under `en` with the same shape.
+  // showed); every other catalog sits under its own code with the same shape.
   const countsFor = (items) => {
     const byGrade = {};
     for (let g = 0; g <= 8; g++) byGrade[g] = { approved: 0, draft: 0 };
@@ -3676,13 +3688,14 @@ exports.adminQuestionBankSummary = onCall({ timeoutSeconds: 60, memory: "512MiB"
       byGrade,
     };
   };
-  const langOf = (i) => (i.lang === "en" ? "en" : "he");
+  const langOf = (i) => qbLang(i.lang);
   snap.forEach((d) => {
     const items = d.data().items || [];
     topics[d.id] = {
       version: d.data().version || 0,
       ...countsFor(items.filter((i) => langOf(i) === "he")),
-      en: countsFor(items.filter((i) => langOf(i) === "en")),
+      ...Object.fromEntries(QB_LANGS.filter((L) => L !== "he")
+        .map((L) => [L, countsFor(items.filter((i) => langOf(i) === L))])),
     };
     if (d.id === wantDrafts) drafts = items.filter((i) => i.status === "draft" && langOf(i) === draftsLang);
   });
@@ -3715,7 +3728,7 @@ async function runAutoPublish({ force = false, by = "schedule" } = {}) {
   const cfg = await qbAutoConfig();
   if (!cfg.autoPublish && !force) return { skipped: "disabled" };
   const run = { at: Date.now(), by, files: 0, added: 0, duplicates: 0, rejected: 0, approved: 0,
-    byLang: { he: 0, en: 0 }, failed: [], samples: [] };
+    byLang: Object.fromEntries(QB_LANGS.map((L) => [L, 0])), failed: [], samples: [] };
   let batches = [];
   try {
     const idx = await qbJSON("index.json");
@@ -3726,7 +3739,7 @@ async function runAutoPublish({ force = false, by = "schedule" } = {}) {
   for (const b of batches) {
     const topic = String(b.topic || "");
     if (!QB_TOPICS.includes(topic)) { run.failed.push(`${b.file}: unknown world "${topic}"`); continue; }
-    const lang = b.lang === "en" ? "en" : "he";
+    const lang = qbLang(b.lang);
     try {
       const items = await qbJSON(b.file || `${topic}.json`);
       const r = await qbImportInto(topic, Array.isArray(items) ? items : [items], { approve: true, lang, by: `auto:${by}` });
@@ -3741,14 +3754,14 @@ async function runAutoPublish({ force = false, by = "schedule" } = {}) {
   }
   // Drafts from an earlier manual import are part of "everything is published".
   for (const topic of QB_TOPICS) {
-    for (const lang of ["he", "en"]) {
+    for (const lang of QB_LANGS) {
       try { run.approved += await qbApproveDrafts(topic, lang, `auto:${by}`); }
       catch (e) { run.failed.push(`approve ${topic}/${lang}: ${e.message}`); }
     }
   }
   await db.collection("config").doc("questions").set({ lastRun: run }, { merge: true });
   console.log("[autoPublish]", by, `files ${run.files}/${batches.length}`, "+" + run.added,
-    `(he ${run.byLang.he} · en ${run.byLang.en})`, "dup", run.duplicates, "rejected", run.rejected,
+    `(${QB_LANGS.map((L) => `${L} ${run.byLang[L]}`).join(" · ")})`, "dup", run.duplicates, "rejected", run.rejected,
     "approved", run.approved, run.failed.length ? `FAILED ${run.failed.length}: ${run.failed[0]}` : "");
   return run;
 }
