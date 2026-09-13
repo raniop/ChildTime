@@ -29981,6 +29981,28 @@
         }
       }
     },
+    "טופי מדבר גם ערבית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy speaks Arabic too"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy говорит и по-арабски"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy يتكلّم العربية أيضًا"
+          }
+        }
+      }
+    },
     "טופי מדבר גם רוסית": {
       "localizations": {
         "en": {
@@ -34429,6 +34451,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "كل %lld إجابات صحيحة = %lld دقائق لعب"
+          }
+        }
+      }
+    },
+    "כל האפליקציה והשאלות — כמעט 3,000 שאלות בערבית, ועולם חדש של الأعياد: רמדאן, שני העידים, חג המולד והפסחא. בהגדרות ההורים, במסך \"שפה\", בוחרים עברית, ערבית, רוסית או אנגלית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The whole app and its questions — nearly 3,000 questions in Arabic, and a new الأعياد world: Ramadan, both Eids, Christmas and Easter. Parent Settings → Language picks Hebrew, Arabic, Russian or English."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё приложение и вопросы — почти 3 000 вопросов на арабском и новый мир الأعياد: Рамадан, оба Ид, Рождество и Пасха. В родительских настройках, в разделе «Язык», можно выбрать иврит, арабский, русский или английский."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التطبيق كلّه وأسئلته — نحو 3000 سؤال بالعربية، وعالم جديد هو الأعياد: رمضان والعيدان وعيد الميلاد وعيد الفصح. في إعدادات الوالدين، في شاشة «اللغة»، تختارون العبرية أو العربية أو الروسية أو الإنجليزية."
           }
         }
       }
