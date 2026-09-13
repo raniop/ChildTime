@@ -1,6 +1,6 @@
 import Foundation
 
-/// 🇵🇸🇮🇱 Arabic content that ships in the app.
+/// 🌍 Arabic content that ships in the app.
 ///
 /// For **Arabic-speaking families in Israel**: shekels, Israeli school grades,
 /// the curriculum their children actually learn. Like the Russian catalog and

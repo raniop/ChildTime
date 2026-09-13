@@ -17,9 +17,11 @@
 //    xcodebuild test -scheme ChildTime -destination 'platform=iOS Simulator,id=<id>' \
 //      -only-testing:ChildTimeUITests/HeroVideoUITests
 //    kill -INT %1
-//  The language is the `lang` default below, NOT the HERO_LANG env var: xcodebuild
-//  does not pass the shell's environment to the test runner, so the variable
-//  silently does nothing. Edit the default, rebuild for testing, record.
+//  The language comes from HERO_LANG, but the shell's own environment never
+//  reaches the test runner — xcodebuild forwards only settings prefixed
+//  TEST_RUNNER_, so pass it as:
+//      xcodebuild test-without-building … TEST_RUNNER_HERO_LANG=ar
+//  (`HERO_LANG=ar xcodebuild …` silently does nothing and records Hebrew.)
 //
 import XCTest
 
@@ -27,8 +29,21 @@ final class HeroVideoUITests: XCTestCase {
 
     override func setUpWithError() throws { continueAfterFailure = true }
 
-    private var lang: String { ProcessInfo.processInfo.environment["HERO_LANG"] ?? "ar" }
+    private var lang: String { ProcessInfo.processInfo.environment["HERO_LANG"] ?? "he" }
     private var hebrew: Bool { lang == "he" }
+
+    /// Which worlds the smart feed may draw from while recording. ✍️ עברית is
+    /// served in Hebrew to Russian and Arabic speakers on purpose — those
+    /// children learn Hebrew at school — but a Hebrew question in the middle of
+    /// an Arabic promo makes the app look like it was never translated. Arabic
+    /// leads with 🎊 الأعياد, the world that ships with the language.
+    private var demoTopics: String? {
+        switch lang {
+        case "ar": return "holidays,science,geography,math,logic,english"
+        case "ru": return "science,geography,math,logic,english,reading"
+        default:   return nil
+        }
+    }
 
     // MARK: 1) answering correctly
 
@@ -96,6 +111,7 @@ final class HeroVideoUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchEnvironment["DEMO_SCREEN"] = "kidflow"
         app.launchEnvironment["DEMO_LANG"] = lang
+        if let demoTopics { app.launchEnvironment["DEMO_TOPICS"] = demoTopics }
         app.launch()
         wait(3.0)                                   // the home screen settles
 

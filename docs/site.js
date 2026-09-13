@@ -52,8 +52,8 @@
   }
 
   /* Every Hebrew page that has a twin, and where each one lives. Hebrew is the
-     original, so the map is keyed on its paths; the English and Russian pages
-     are never redirected away from. */
+     original, so the map is keyed on its paths; the English, Russian and Arabic
+     pages are never redirected away from. */
   var TWINS = {
     "/":                   { en: "/en/",                   ru: "/ru/",                   ar: "/ar/" },
     "/index.html":         { en: "/en/",                   ru: "/ru/",                   ar: "/ar/" },

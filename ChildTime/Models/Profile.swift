@@ -259,6 +259,15 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     func allows(_ topic: Topic) -> Bool {
         // 🌍 A world with no questions in the app's language isn't offered at all.
         guard ContentAvailability.hasContent(topic) else { return false }
+        // DEMO_TOPICS=holidays,science — a screenshot or hero-video run pins the
+        // home grid and the smart feed to exactly these worlds. The Arabic take
+        // otherwise kept drawing ✍️ עברית, which is correct in the app (those
+        // children learn Hebrew at school) and wrong in an Arabic promo.
+        if let only = ProcessInfo.processInfo.environment["DEMO_TOPICS"],
+           !only.isEmpty, ProcessInfo.processInfo.environment["DEMO_SCREEN"] != nil {
+            guard only.split(separator: ",").contains(where: { $0.trimmingCharacters(in: .whitespaces) == topic.rawValue })
+            else { return false }
+        }
         // A pack world is playable when the family has it — bought for this
         // child, OR included in Tofy+ (every pack is; Rani) — and the founder
         // has switched the pack on. `ownedPacks` alone hid every unbought pack
