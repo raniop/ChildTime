@@ -207,7 +207,7 @@ struct ParentDashboardView: View {
                                     .environment(\.layoutDirection, .leftToRight)
                                 }
                                 .buttonStyle(.plain)
-                                .disabled(WhatsNewContent.items(for: WhatsNewContent.currentVersion) == nil)
+                                .disabled(WhatsNewContent.releases.isEmpty)
                                 .accessibilityLabel(tr("גרסת האפליקציה — הצג מה חדש"))
                             }
                         }

@@ -807,10 +807,10 @@ struct ParentSettingsView: View {
                 Haptic.light()
                 showWhatsNew = true
             } label: {
-                Label(tr("מָה חָדָשׁ בַּגִּרְסָה הַזּוֹ ✨"), systemImage: "sparkles")
+                Label(tr("מָה חָדָשׁ בְּטוֹפִי ✨"), systemImage: "sparkles")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
             }
-            .disabled(WhatsNewContent.items(for: WhatsNewContent.currentVersion) == nil)
+            .disabled(WhatsNewContent.releases.isEmpty)
 
             VStack(spacing: 3) {
                 Text(tr("טופי"))
@@ -826,7 +826,8 @@ struct ParentSettingsView: View {
         }
         .glassRows()
         .sheet(isPresented: $showWhatsNew) {
-            WhatsNewView(onDone: { showWhatsNew = false })
+            // Every update, newest first — not just the one this build carried.
+            WhatsNewHistoryView(onDone: { showWhatsNew = false })
         }
         .glassRows()
     }

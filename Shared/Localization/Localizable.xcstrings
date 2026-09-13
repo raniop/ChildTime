@@ -1075,6 +1075,50 @@
         }
       }
     },
+    "\"לטאטא את החדר\" נקרא עכשיו \"לסדר את החדר\"": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"Sweep the room\" is now \"Tidy the room\""
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Подмести комнату» теперь «Убрать комнату»"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«كنس الغرفة» صارت «ترتيب الغرفة»"
+          }
+        }
+      }
+    },
+    "\"מה חדש\" מראה רק מה שחדש": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"What's new\" shows only what's new"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Что нового» показывает только новое"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«ما الجديد» يعرض الجديد فقط"
+          }
+        }
+      }
+    },
     "\"מספר 1. קטן. מספר 2. …\" — עם הפסקה בין המספר לתשובה, כדי שילד שעוד לא קורא יבחר בקלות. ואם התקנתם את קול \"כרמית משופרת\" בהגדרות הנגישות, טופי משתמש בו": {
       "localizations": {
         "en": {
@@ -6863,6 +6907,100 @@
         }
       }
     },
+    "%lld שינויים": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld change"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld changes"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld изменение"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld изменения"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld изменений"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld изменения"
+                }
+              }
+            }
+          }
+        },
+        "ar": {
+          "variations": {
+            "plural": {
+              "zero": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "لا تغييرات"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "تغيير واحد"
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "تغييران"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld تغييرات"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld تغييرًا"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld تغيير"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld שעות": {
       "localizations": {
         "en": {
@@ -8751,6 +8889,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "6 أحرف"
+          }
+        }
+      }
+    },
+    "71 שאלות כפולות ירדו מהמאגר העברי, כדי שילד לא יקבל פעמיים את אותה שאלה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "71 duplicate questions were removed from the Hebrew bank, so a child never gets the same question twice"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Из ивритского банка убрали 71 повторяющийся вопрос, чтобы ребёнок не получал один и тот же вопрос дважды"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أُزيل 71 سؤالًا مكرّرًا من بنك الأسئلة العبري، كي لا يصل الطفل السؤال نفسه مرّتين"
+          }
+        }
+      }
+    },
+    "72 שאלות על רמדאן, עיד אל־פיטר, עיד אל־אדחא, חג המולד והפסחא — העולם היה קיים אבל לא היה אפשר להגיע אליו. עכשיו הוא במסך הבית של כל ילד שהאפליקציה שלו בערבית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "72 questions about Ramadan, Eid al-Fitr, Eid al-Adha, Christmas and Easter. The world existed but there was no way to reach it — now it's on the home screen of every child whose app is in Arabic"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "72 вопроса о Рамадане, Ид аль-Фитр, Ид аль-Адха, Рождестве и Пасхе. Мир существовал, но попасть в него было нельзя — теперь он на главном экране каждого ребёнка, у которого приложение на арабском"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "٧٢ سؤالًا عن رمضان وعيد الفطر وعيد الأضحى وعيد الميلاد وعيد الفصح. كان العالم موجودًا لكن لا يمكن الوصول إليه — والآن هو في الشاشة الرئيسية لكلّ طفل تطبيقه بالعربية"
           }
         }
       }
@@ -15229,6 +15411,28 @@
         }
       }
     },
+    "בורר השפה — עם דגל לכל שפה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The language picker — a flag for every language"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбор языка — флаг у каждого языка"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختيار اللغة — علَم لكلّ لغة"
+          }
+        }
+      }
+    },
     "בחוף או באקווריום, בקשו מ%@ להסביר איך דג נושם מתחת למים.": {
       "localizations": {
         "en": {
@@ -15505,6 +15709,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "בכרטיס של כל ילד במסך ההורים אפשר לבחור באיזו שפה האפליקציה תופיע אצלו — והמכשיר שלו מתחלף מיד, בלי לגעת בו": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On each child's card in the parent screen you can choose which language the app appears in for them — and their device switches right away, without touching it"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На карточке каждого ребёнка в родительском экране можно выбрать, на каком языке у него будет приложение, — и его устройство переключится сразу, без вашего вмешательства"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "في بطاقة كلّ طفل في شاشة الوالدين يمكنكم اختيار اللغة التي يظهر بها التطبيق عنده — وجهازه يتبدّل فورًا، دون أن تلمسوه"
           }
         }
       }
@@ -23629,6 +23855,28 @@
         }
       }
     },
+    "הגרסה הראשונה של טופי": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy's first release"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Первая версия Tofy"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الإصدار الأول من Tofy"
+          }
+        }
+      }
+    },
     "הדמות כבר שלך": {
       "localizations": {
         "en": {
@@ -23757,6 +24005,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "تقدّم كل طفل يبقى خاصًا به"
+          }
+        }
+      }
+    },
+    "ההתראות מגיעות בשפה של המכשיר": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications arrive in the device's language"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уведомления приходят на языке устройства"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الإشعارات تصل بلغة الجهاز"
           }
         }
       }
@@ -25123,6 +25393,100 @@
           "stringUnit": {
             "state": "translated",
             "value": "ستظهر الهدية فور اتصال أحد الأجهزة."
+          }
+        }
+      }
+    },
+    "הנה מה שהוספנו ב־%lld העדכונים האחרונים": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Here's what we added in the last update"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Here's what we added in the last %lld updates"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вот что мы добавили в последнем обновлении"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вот что мы добавили в последних %lld обновлениях"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вот что мы добавили в последних %lld обновлениях"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вот что мы добавили в последних %lld обновлениях"
+                }
+              }
+            }
+          }
+        },
+        "ar": {
+          "variations": {
+            "plural": {
+              "zero": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "لم نضف شيئًا بعد"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "هذا ما أضفناه في التحديث الأخير"
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "هذا ما أضفناه في آخر تحديثَين"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "هذا ما أضفناه في آخر %lld تحديثات"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "هذا ما أضفناه في آخر %lld تحديثًا"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "هذا ما أضفناه في آخر %lld تحديث"
+                }
+              }
+            }
           }
         }
       }
@@ -30245,6 +30609,28 @@
         }
       }
     },
+    "טעות תמיד מעבירה לשאלה הבאה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A mistake always moves on to the next question"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ошибка всегда переводит к следующему вопросу"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الخطأ ينقل دائمًا إلى السؤال التالي"
+          }
+        }
+      }
+    },
     "ט׳": {
       "localizations": {
         "en": {
@@ -31627,6 +32013,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "التصدير يُنتج ملفّ JSON يضمّ كل الملفّات الشخصيّة والتقدّم والسجلّ.\n\n‏\"إعادة ضبط هذا الجهاز\" تمسح الجهاز تمامًا (غير متّصل، بلا رمز، بلا بيانات محليّة) لكنّها تُبقي عائلتكم في السحابة.\n\n‏\"حذف كل البيانات\" يحذف نهائيًّا من الجهاز ومن السحابة معًا — ولا يمكن استرجاعه."
+          }
+        }
+      }
+    },
+    "ילד שהאפליקציה שלו ברוסית מקבל את ההתראות ברוסית, וההורה בעברית — באותה משפחה, על אותו אירוע": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A child whose app is in Russian gets Russian notifications, and the parent gets Hebrew — same family, same event"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ребёнок, у которого приложение на русском, получает уведомления на русском, а родитель — на иврите. Одна семья, одно событие"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الطفل الذي تطبيقه بالروسية يتلقّى الإشعارات بالروسية، والوالد بالعبرية — في العائلة نفسها وعن الحدث نفسه"
           }
         }
       }
@@ -34605,6 +35013,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "كل المواضيع، وكل العوالم، وملف شخصي لكل طفل"
+          }
+        }
+      }
+    },
+    "כל העדכונים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All updates"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все обновления"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كلّ التحديثات"
+          }
+        }
+      }
+    },
+    "כל העדכונים הקודמים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All earlier updates"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все прошлые обновления"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كلّ التحديثات السابقة"
+          }
+        }
+      }
+    },
+    "כל העדכונים, אחד אחד": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every update, one by one"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все обновления, одно за другим"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كلّ التحديثات، واحدًا واحدًا"
           }
         }
       }
@@ -37671,6 +38145,28 @@
         }
       }
     },
+    "לחיצה על עדכון מראה מה השתנה בו": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap an update to see what changed in it"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите на обновление, чтобы увидеть, что в нём изменилось"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اضغطوا على تحديث لتروا ما تغيّر فيه"
+          }
+        }
+      }
+    },
     "לכל ילד כרטיס פשוט: דקות היום מתוך המקסימום, שאלות, נכונות ואחוז הצלחה. לחיצה פותחת דוח מלא — במה הילד חזק, מה כדאי לתרגל, האם הוא משתפר, ותובנה יומית עם המלצה. בלי כוכבים ויהלומים — אלה של הילדים": {
       "localizations": {
         "en": {
@@ -38023,6 +38519,28 @@
         }
       }
     },
+    "לערבית יש עכשיו דגל כמו לשאר השפות, והסדר הוא עברית, ערבית, אנגלית ורוסית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arabic now has a flag like every other language, and the order is Hebrew, Arabic, English, Russian"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У арабского теперь есть флаг, как и у остальных языков, а порядок такой: иврит, арабский, английский, русский"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "صار للعربية علَم مثل باقي اللغات، والترتيب هو: العبرية، العربية، الإنجليزية، الروسية"
+          }
+        }
+      }
+    },
     "לערוך את השולחן לארוחה": {
       "localizations": {
         "en": {
@@ -38085,6 +38603,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "قبل أن نعطي التطبيق للطفل،\nعلينا ضبط بعض الأمور:"
+          }
+        }
+      }
+    },
+    "לפעמים אחרי טעות חזרה בדיוק אותה שאלה, וזה נראה לילד כאילו כלום לא קרה. עכשיו השאלה תחזור מאוחר יותר — לא מיד": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sometimes the very same question came back after a mistake, and to a child it looked like nothing happened. Now the question returns later — not right away"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Иногда после ошибки возвращался тот же самый вопрос, и ребёнку казалось, что ничего не произошло. Теперь вопрос вернётся позже — не сразу"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أحيانًا كان السؤال نفسه يعود مباشرة بعد الخطأ، فيبدو للطفل كأنّ شيئًا لم يحدث. الآن يعود السؤال لاحقًا — لا فورًا"
           }
         }
       }
@@ -41141,6 +41681,28 @@
         }
       }
     },
+    "מָה חָדָשׁ בְּטוֹפִי ✨": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's new in Tofy ✨"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Что нового в Tofy ✨"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ما الجديد في Tofy ✨"
+          }
+        }
+      }
+    },
     "מָה חָדָשׁ בַּגִּרְסָה הַזּוֹ ✨": {
       "localizations": {
         "en": {
@@ -41735,6 +42297,28 @@
         }
       }
     },
+    "מה היה בעדכון הזה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What changed in this update"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Что изменилось в этом обновлении"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ما الذي تغيّر في هذا التحديث"
+          }
+        }
+      }
+    },
     "מה המטלה? (למשל: לשטוף את האוטו)": {
       "localizations": {
         "en": {
@@ -42175,6 +42759,28 @@
         }
       }
     },
+    "מטלה שילד באמת מכיר בשם הזה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A chore a child actually knows by that name"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дело, которое ребёнок действительно знает под этим названием"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مهمّة يعرفها الطفل فعلًا بهذا الاسم"
+          }
+        }
+      }
+    },
     "מטלות הבית": {
       "localizations": {
         "en": {
@@ -42523,6 +43129,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "شاشة والدين جديدة — بنظرة من ثوانٍ"
+          }
+        }
+      }
+    },
+    "מסך חדש עם כל העדכונים של טופי, מהחדש לישן. לחיצה על עדכון מראה בדיוק מה השתנה בו. גם בהגדרות ההורים": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A new screen with every Tofy update, newest first. Tap one to see exactly what changed in it. It's in Parent Settings too"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новый экран со всеми обновлениями Tofy, от новых к старым. Нажмите на любое — и увидите, что именно в нём изменилось. Он есть и в настройках родителей"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شاشة جديدة فيها كلّ تحديثات Tofy، من الأحدث إلى الأقدم. اضغطوا على أيّ تحديث لتروا بالضبط ما تغيّر فيه. وهي موجودة أيضًا في إعدادات الوالدين"
           }
         }
       }
@@ -45743,6 +46371,28 @@
         }
       }
     },
+    "סגירה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрыть"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إغلاق"
+          }
+        }
+      }
+    },
     "סדר את הילדים": {
       "localizations": {
         "en": {
@@ -48575,6 +49225,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "عالم واحد لمدة 30 يومًا، أو Tofy+ لكل العائلة — من هنا، من هاتفكم"
+          }
+        }
+      }
+    },
+    "עולם الأعياد נפתח": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The الأعياد world is open"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мир الأعياد открыт"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عالم الأعياد صار متاحًا"
+          }
+        }
+      }
+    },
+    "עולם الأعياد, ודגל לערבית": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The الأعياد world, and a flag for Arabic"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мир الأعياد и флаг для арабского"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عالم الأعياد، وعلَم للعربية"
           }
         }
       }
@@ -52307,6 +53001,28 @@
         }
       }
     },
+    "קובעים לילד שפה מהטלפון שלכם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set your child's language from your phone"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите язык ребёнка со своего телефона"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختاروا لغة طفلكم من هاتفكم"
+          }
+        }
+      }
+    },
     "קוד הגנת זמן המשחק": {
       "localizations": {
         "en": {
@@ -52413,6 +53129,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "لم يُعثر على الرمز"
+          }
+        }
+      }
+    },
+    "קודם המסך הזה הראה את כל מה שנוסף אי פעם, בכל פעם מחדש. עכשיו הוא מראה רק את מה שהגיע מאז העדכון האחרון שראיתם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This screen used to list everything ever added, every single time. Now it shows only what arrived since the last update you saw"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раньше этот экран каждый раз показывал всё, что когда-либо добавлялось. Теперь — только то, что появилось после последнего обновления, которое вы видели"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كانت هذه الشاشة تعرض كلّ ما أُضيف منذ البداية، في كلّ مرّة. الآن تعرض فقط ما وصل بعد آخر تحديث رأيتموه"
+          }
+        }
+      }
+    },
+    "קודם רמז לקח שתי דקות שלמות מזמן המשחק, וזה היה הרבה מדי — עכשיו הוא עולה בדיוק כמו טעות": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A hint used to take two whole minutes of play time, which was far too much — now it costs exactly what a mistake costs"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раньше подсказка забирала целых две минуты игрового времени — это было слишком много. Теперь она стоит ровно столько же, сколько ошибка"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كان التلميح يأخذ دقيقتين كاملتين من وقت اللعب، وهذا كثير جدًّا — والآن يكلّف تمامًا مثل الخطأ"
           }
         }
       }
@@ -53751,6 +54511,50 @@
         }
       }
     },
+    "רמז עולה 12 שניות": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A hint costs 12 seconds"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подсказка стоит 12 секунд"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التلميح يكلّف 12 ثانية"
+          }
+        }
+      }
+    },
+    "רמז עולה פחות": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A hint costs less"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подсказка стоит дешевле"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التلميح صار أرخص"
+          }
+        }
+      }
+    },
     "רמת קושי": {
       "localizations": {
         "en": {
@@ -53961,6 +54765,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "ستُحجب فقط التطبيقات التي تختارونها. وكلّ الباقي يبقى مفتوحًا."
+          }
+        }
+      }
+    },
+    "רק מה שבאמת חדש בשבילכם": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only what's actually new to you"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Только то, что действительно ново для вас"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فقط ما هو جديد بالنسبة لكم فعلًا"
           }
         }
       }
@@ -56191,6 +57017,28 @@
         }
       }
     },
+    "שאלות שחזרו על עצמן — נוקו": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeated questions — cleaned up"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторяющиеся вопросы — убраны"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أسئلة كانت تتكرّر — تمّ تنظيفها"
+          }
+        }
+      }
+    },
     "שגיאה: %@": {
       "localizations": {
         "en": {
@@ -56363,6 +57211,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "شغّلوا أغنية واطلبوا من %@ التعرّف على الآلات الموسيقية أو التصفيق مع الإيقاع."
+          }
+        }
+      }
+    },
+    "שינוי אחד": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 change"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 изменение"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تغيير واحد"
           }
         }
       }
@@ -56847,6 +57717,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "وقت لعب\nيبدأ بسؤال"
+          }
+        }
+      }
+    },
+    "שפה לילד, מרחוק": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A language for your child, from afar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Язык для ребёнка — на расстоянии"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لغة لطفلكم، عن بُعد"
           }
         }
       }
@@ -57639,6 +58531,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "إجابة = دقائق شاشة"
+          }
+        }
+      }
+    },
+    "תשובה שגויה מעבירה הלאה": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A wrong answer moves you on"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неверный ответ ведёт дальше"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الإجابة الخاطئة تنقل للسؤال التالي"
           }
         }
       }
