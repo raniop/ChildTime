@@ -22,7 +22,27 @@ enum ArabicContent {
     }
 
     /// Filled topic by topic as each set is written and verified.
-    static let banks: [Topic: [BankQuestion]] = [:]
+    static let banks: [Topic: [BankQuestion]] = [
+        .animals: animals,
+        .body: body,
+        .dinosaurs: dinosaurs,
+        .english: english,
+        .flags: flags,
+        .food: food,
+        .geography: geography,
+        .gifted: gifted,
+        .history: history,
+        .holidays: holidays,
+        .israel: israel,
+        .logic: logic,
+        .money: money,
+        .music: music,
+        .science: science,
+        .sea: sea,
+        .soccer: soccer,
+        .space: space,
+        .vehicles: vehicles,
+    ]
 
-    static var passages: [ReadingPassage] { [] }
+    static var passages: [ReadingPassage] { readingPassages }
 }

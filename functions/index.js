@@ -392,7 +392,7 @@ function liveMessageAr(event) {
       const from = kindLabel(event.fromKind);
       const to = kindLabel(event.deviceKind);
       return { title: g("نقل وقت اللعب 🔄", "نقلت وقت اللعب 🔄"),
-               body: `${name} ${g("نقل", "نقلت")} وقت اللعب من ${from} إلى ${to}. الجهاز ${from} مقفل الآن 🔒` };
+               body: `${name} ${g("نقل", "نقلت")} وقت اللعب من ${from} إلى ${to}. وقد قُفل ${from} الآن 🔒` };
     }
     case "assistRequest": return { title: "طلب مساعدة 💌", body: `${name} ${g("طلب", "طلبت")} مساعدتكم في سؤال${dev}.` };
     case "parentGateOpened": return { title: "🔐 فُتحت إعدادات الوالدين", body: `فتح أحدهم إعدادات الوالدين على جهاز الطفل (${name})${dev}.` };
@@ -1320,7 +1320,7 @@ function choreMarkedMessage(after, kid, lang) {
   if (lang === "ar") {
     const reward = after.chosenReward === "coins"
       ? `💰 ${after.rewardCoins || 0} ₪` : `🎮 عدد الدقائق: ${after.rewardMinutes || 0}`;
-    return { title: `🧹 ${(kid && kid.name) || "طفلكم"} — أنجز مهمة!`,
+    return { title: `🧹 ${(kid && kid.name) || "طفلكم"} — أُنجزت مهمة!`,
              body: `${choreLabel} — بانتظار موافقتكم (${reward})` };
   }
   let name = "הילד/ה"; let doneVerb = "סיים/ה";
@@ -2615,9 +2615,16 @@ function cleanCampaign(input) {
   return {
     title: s(d.title, 80), body: s(d.body, 240), emoji: s(d.emoji, 8), imageURL: s(d.imageURL, 400),
     childTitle: s(d.childTitle, 80), childBody: s(d.childBody, 240),
-    // Optional English copy. Without it, English-language devices get nothing.
+    // Optional copy per language. A device in a language with no copy here falls
+    // back to English, and never to Hebrew — see campaignCopy. Russian and
+    // Arabic were missing from this whitelist, so an admin-written campaign
+    // could not reach those devices in their own language at all.
     titleEn: s(d.titleEn, 80), bodyEn: s(d.bodyEn, 240),
     childTitleEn: s(d.childTitleEn, 80), childBodyEn: s(d.childBodyEn, 240),
+    titleRu: s(d.titleRu, 80), bodyRu: s(d.bodyRu, 240),
+    childTitleRu: s(d.childTitleRu, 80), childBodyRu: s(d.childBodyRu, 240),
+    titleAr: s(d.titleAr, 80), bodyAr: s(d.bodyAr, 240),
+    childTitleAr: s(d.childTitleAr, 80), childBodyAr: s(d.childBodyAr, 240),
     audience: { roles: roles.length ? roles : ["parents"], gradeMin, gradeMax, gradeScale: TOP_GRADE, premium, topics,
                 excludeOwners: aud.excludeOwners !== false },
     action: { type: actionType, packID },
@@ -3945,7 +3952,7 @@ function giftDayMessage(ctx, day, daysLeft, premiumUntil, lang) {
     const favLabel = fav ? favLabelAr(fav) : null;
     if (daysLeft <= 1) {
       const keep = fav ? `${favNameAr(fav)} وبقية العوالم` : "كل العوالم";
-      return { title: `هدية Tofy+ تنتهي اليوم — ${name}`, body: `${capFirst(name)} سيواصل التعلّم وربح وقت اللعب مجاناً كالعادة. وللإبقاء على ما يلي مفتوحاً (${keep})، تابعوا مع Tofy+.` };
+      return { title: `هدية Tofy+ تنتهي اليوم — ${name}`, body: `${capFirst(name)} سيواصل التعلّم وربح وقت اللعب مجاناً كالعادة. وللإبقاء على ${keep} مفتوحة، تابعوا مع Tofy+.` };
     }
     if (daysLeft <= 2) {
       const tpl = fav ? CONVERSION_COPY_AR.copyTwoDays : CONVERSION_COPY_AR.copyTwoDaysNoFavorite;
@@ -4575,7 +4582,7 @@ function retentionNoticeEmail(lang) {
     ];
     const signoff = "فريق Tofy 🦁";
     const html = brandEmail({ title, intro, bullets, ctaText: "سياسة الخصوصية لدينا",
-      ctaHref: "https://tofyapp.com/en/privacy.html", signoff,
+      ctaHref: "https://tofyapp.com/ar/privacy.html", signoff,
       footer: "وصلتكم هذه الرسالة لأنّ حساب الوالد/ة الخاص بكم مرتبط بعائلة في Tofy.", lang: "ar" });
     const text = [title, "", intro, "", ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`), "", "tofyapp.com", "", signoff].join("\n");
     return { fromName: "Tofy", subject: "ستُحذف بيانات عائلتكم في Tofy بعد 30 يوماً", text, html };
