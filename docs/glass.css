@@ -196,7 +196,13 @@ img{max-width:100%;height:auto;display:block}
   border-radius:16px;background:rgba(30,18,86,.97);border:1px solid var(--edge);
   box-shadow:0 18px 44px rgba(6,2,28,.5);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+/* One side for the whole menu: the PAGE decides where the flag and the name sit,
+   not each language's own direction. On a Hebrew or Arabic page every row reads
+   from the right; on a Russian or English page, from the left. Without this each
+   row followed its own dir and the menu came out ragged (Rani). `direction` is
+   set explicitly so it wins over any dir="" left on the link itself. */
 .lang-switch .lang-menu a{display:flex;align-items:center;gap:9px;white-space:nowrap;
+  direction:inherit;
   font-weight:800;font-size:14px;line-height:1;color:var(--muted);
   padding:10px 12px;border-radius:11px;
   transition:background .16s ease,color .16s ease}
