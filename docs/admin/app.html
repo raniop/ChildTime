@@ -147,7 +147,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260914001953";
+const PAGE_STAMP = "20260914075131";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -555,9 +555,9 @@ let QLANG = "both";
 // for any item written before languages existed.
 const QLANGS = [
   { id: "he", flag: "🇮🇱", name: "עברית" },
-  { id: "ar", flag: "🇦🇪", name: "العربية" },
   { id: "en", flag: "🇺🇸", name: "English" },
   { id: "ru", flag: "🇷🇺", name: "Русский" },
+  { id: "ar", flag: "🇦🇪", name: "العربية" },
 ];
 const QFLAG = Object.fromEntries(QLANGS.map((L) => [L.id, L.flag]));
 const QNAME = Object.fromEntries(QLANGS.map((L) => [L.id, L.name]));

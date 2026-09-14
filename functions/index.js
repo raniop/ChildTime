@@ -127,7 +127,7 @@ ${ltr ? `<html dir="ltr" lang="${ru ? "ru" : "en"}">` : (ar ? `<html dir="rtl" l
 // docs anyway; the send helpers then split the tokens by language and build the
 // text once per language. Entries are only ever written from an explicit value
 // on a doc, so a warm instance reusing the map stays correct.
-const LANGS = ["he", "ar", "en", "ru"];
+const LANGS = ["he", "en", "ru", "ar"];
 const TOKEN_LANG = new Map();
 const normLang = (v) => {
   const s = String(v || "").toLowerCase();
@@ -3549,7 +3549,7 @@ function qbKey(q) { return `${String(q.prompt).trim()}|${String(q.correctAnswer)
 
 // 🌍 Which catalog an item belongs to. Items written before languages carry no
 // `lang` at all, and those are Hebrew — that default must never change.
-const QB_LANGS = ["he", "ar", "en", "ru"];
+const QB_LANGS = ["he", "en", "ru", "ar"];
 function qbLang(v) { const s = String(v || "he"); return QB_LANGS.includes(s) ? s : "he"; }
 
 async function qbBumpIndex(topic, version) {

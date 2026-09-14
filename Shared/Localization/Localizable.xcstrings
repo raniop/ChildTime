@@ -38519,24 +38519,24 @@
         }
       }
     },
-    "לערבית יש עכשיו דגל כמו לשאר השפות, והסדר הוא עברית, ערבית, אנגלית ורוסית": {
+    "לערבית יש עכשיו דגל בבורר השפה, כמו לכל שאר השפות": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Arabic now has a flag like every other language, and the order is Hebrew, Arabic, English, Russian"
+            "value": "Arabic now has a flag in the language picker, like every other language"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "У арабского теперь есть флаг, как и у остальных языков, а порядок такой: иврит, арабский, английский, русский"
+            "value": "У арабского теперь есть флаг в выборе языка, как и у всех остальных"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "صار للعربية علَم مثل باقي اللغات، والترتيب هو: العبرية، العربية، الإنجليزية، الروسية"
+            "value": "صار للعربية علَم في اختيار اللغة، مثل باقي اللغات"
           }
         }
       }
