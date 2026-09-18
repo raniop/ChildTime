@@ -80,6 +80,12 @@ struct WorldMapView: View {
     @State private var showLevelInfo = false
 
     private var isCompact: Bool { hsc == .compact }
+    /// 📐 A short screen (the foldable held open, an iPhone SE): the bottom
+    /// panel tightens and the grid/companion clear its MEASURED height instead
+    /// of the tuned constants below, which assume a tall iPhone.
+    @ObservedObject private var display = DisplayGeometry.shared
+    @State private var bottomPanelHeight: CGFloat = 0
+    private var isShort: Bool { display.isShort }
     private var companionSize: CGFloat { isCompact ? 90 : 120 }
     // Glass look: a modest brand line heading the grid, not a poster.
     private var heroTitleSize: CGFloat { isCompact ? 34 : 40 }
@@ -523,7 +529,9 @@ struct WorldMapView: View {
                     // margin — 360 left a huge dead gap after the last row
                     // (Rani, on-device). The companion floats and never needs
                     // scroll room of its own.
-                    .padding(.bottom, isCompact ? 220 : 190)
+                    .padding(.bottom, isShort && bottomPanelHeight > 0
+                             ? bottomPanelHeight + 8
+                             : (isCompact ? 220 : 190))
                 }
             }
 
@@ -533,15 +541,19 @@ struct WorldMapView: View {
                 Spacer()
                 bottomCTAs
                     .padding(.horizontal, AppSpacing.lg)
-                    .padding(.top, 48)
-                    .padding(.bottom, AppSpacing.md)
+                    .padding(.top, isShort ? 26 : 48)
+                    .padding(.bottom, isShort ? AppSpacing.sm : AppSpacing.md)
                     .background(
                         LinearGradient(stops: [.init(color: .clear, location: 0),
                                                .init(color: Color(hex: "2A1E5C").opacity(0.72), location: 0.35),
                                                .init(color: Color(hex: "2A1E5C").opacity(0.9), location: 1)],
                                        startPoint: .top, endPoint: .bottom)
-                            .ignoresSafeArea(edges: .bottom)
+                            // The sides too: on the foldable the system's vertical
+                            // bar takes a safe-area inset on one side, and a scrim
+                            // stopping there left a hard seam against the gradient.
+                            .ignoresSafeArea(edges: [.bottom, .horizontal])
                     )
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bottomPanelHeight = $0 }
             }
 
 
@@ -561,7 +573,7 @@ struct WorldMapView: View {
                 // Keep the buddy (and the gift above its head) BELOW the taller
                 // header card so it never parks on top of the stats.
                 topInset: isCompact ? 300 : 230,
-                bottomInset: isCompact ? 220 : 200,
+                bottomInset: isShort && bottomPanelHeight > 0 ? bottomPanelHeight : (isCompact ? 220 : 200),
                 horizontalInset: AppSpacing.lg
             )
         }
@@ -1684,22 +1696,22 @@ struct WorldMapView: View {
                             Text(tr("פּוֹתְחִים לְךָ… ✨"))
                                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                         } else {
-                            Text("💝").font(.system(size: 22))
+                            Text("💝").font(.system(size: isShort ? 19 : 22))
                             Text(giftButtonTitle)
-                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                .font(.system(size: isShort ? 18 : 20, weight: .heavy, design: .rounded))
                                 .minimumScaleFactor(0.7).lineLimit(1)
                         }
                     }
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl)
-                    .padding(.vertical, 16)
+                    .padding(.vertical, isShort ? 11 : 16)
                     .frame(maxWidth: .infinity)
                     .ctaGlass(Color(hex: "FF5FA8"), Color(hex: "FFA53A"), colour: 0.82)
                 }
                 .buttonStyle(.juicy)
                 .disabled(isOpening)
                 .frame(maxWidth: 480)
-                .padding(.bottom, 6)
+                .padding(.bottom, isShort ? 0 : 6)
             }
 
             // Another device of THIS child has the window open — say so instead of
@@ -1773,15 +1785,15 @@ struct WorldMapView: View {
                                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                         } else {
                             Image(systemName: "gamecontroller.fill")
-                                .font(.system(size: 24))
+                                .font(.system(size: isShort ? 21 : 24))
                             Text(tr("פִּתְחוּ לִי \(progress.redeemableMinutesNow) דַּקּוֹת לְשַׂחֵק"))
-                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                .font(.system(size: isShort ? 18 : 20, weight: .heavy, design: .rounded))
                                 .minimumScaleFactor(0.7).lineLimit(1)
                         }
                     }
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl)
-                    .padding(.vertical, 16)
+                    .padding(.vertical, isShort ? 11 : 16)
                     .frame(maxWidth: .infinity)
                     .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
                 }
@@ -1816,14 +1828,14 @@ struct WorldMapView: View {
                     // setting; this is the child's own secret code for their minutes.
                     Label(p.hasPlayPIN ? tr("הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד") : tr("קוֹד סוֹדִי לַדַּקּוֹת שֶׁלִּי"),
                           systemImage: p.hasPlayPIN ? "lock.fill" : "lock.open")
-                        .font(.system(size: 13.5, weight: .bold, design: .rounded))
+                        .font(.system(size: isShort ? 12.5 : 13.5, weight: .bold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
-                        .padding(.horizontal, 14).padding(.vertical, 8)
+                        .padding(.horizontal, 14).padding(.vertical, isShort ? 5 : 8)
                         .background(Capsule().fill(.white.opacity(0.16)))
                         .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .padding(.top, 2)
+                .padding(.top, isShort ? 0 : 2)
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)
@@ -1833,10 +1845,10 @@ struct WorldMapView: View {
     /// grant — so the area is never silently blank.
     private func bottomHint(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 14, weight: .heavy, design: .rounded))
+            .font(.system(size: isShort ? 13 : 14, weight: .heavy, design: .rounded))
             .foregroundStyle(GlassInk.primary)
             .multilineTextAlignment(.center)
-            .padding(.horizontal, AppSpacing.lg).padding(.vertical, 12)
+            .padding(.horizontal, AppSpacing.lg).padding(.vertical, isShort ? 8 : 12)
             .frame(maxWidth: .infinity)
             // Floats over the scrolling grid, so it needs a darker body than a
             // pane on the bare gradient — otherwise tile titles read through it.

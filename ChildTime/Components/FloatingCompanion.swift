@@ -234,3 +234,61 @@ private struct BubbleSizeKey: PreferenceKey {
     }
     return DemoWrapper()
 }
+
+/// 📐 The buddy as PART of the layout instead of floating over it — for a short
+/// screen (the foldable held open, an iPhone SE). A floating buddy needs free
+/// screen under the content, and on a short screen there is none: the answers
+/// run to the bottom and it ended up standing on answer 4. Here it sits in the
+/// slot the question screen's tool row always kept for it and scrolls with the
+/// row. Its speech is `InlineBuddyBubble`, laid over the whole row.
+struct InlineBuddy: View {
+    @ObservedObject var controller: CompanionController
+    var profile: Profile?
+    var width: CGFloat = 44
+
+    @State private var bob = false
+
+    var body: some View {
+        avatar
+            .frame(width: width, height: width * 1.3)
+            .offset(y: bob ? -2 : 2)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) { bob = true }
+            }
+            .accessibilityHidden(true)
+    }
+
+    @ViewBuilder private var avatar: some View {
+        if let profile,
+           let img = profile.character.uiImage
+            ?? CharacterSnapshot.image(modelName: profile.character.scn, pixelSize: width * 2) {
+            Image(uiImage: img).resizable().scaledToFit()
+        } else {
+            CompanionView(controller: controller, size: width, useLion: false)
+        }
+    }
+}
+
+/// What the inline buddy says. Put it over the WHOLE row the buddy ends —
+/// `.overlay(alignment: .trailing) { InlineBuddyBubble(…) }` — so it is offered
+/// the row's width (over just the 44pt avatar it was squeezed to one letter a
+/// line), starts beside the buddy and opens toward the middle of the screen in
+/// either direction. It never takes a tap from what it passes over.
+struct InlineBuddyBubble: View {
+    @ObservedObject var controller: CompanionController
+    /// The buddy's width plus the row's own trailing padding.
+    var clearance: CGFloat
+
+    var body: some View {
+        ZStack {
+            if let text = controller.bubbleText {
+                BubbleSpeech(text: text, showTail: false)
+                    .frame(maxWidth: 250)
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .padding(.trailing, clearance)
+        .allowsHitTesting(false)
+        .animation(.spring(response: 0.5, dampingFraction: 0.7), value: controller.bubbleText)
+    }
+}

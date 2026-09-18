@@ -38,6 +38,12 @@ struct QuestionRunnerView: View {
     }
     private var topicEmojiSize: CGFloat { isCompact ? 30 : 36 }
     private var companionSize: CGFloat { isCompact ? 78 : 90 }
+    /// 📐 A short screen (the foldable held open, an iPhone SE): the card and
+    /// the answer tiles tighten, a question that still doesn't fit scrolls, and
+    /// the buddy moves INTO the tool row (InlineBuddy) — floating over the
+    /// screen it stood on answer 4, because a short screen has no free strip
+    /// under the answers for it.
+    @ObservedObject private var display = DisplayGeometry.shared
     private var portalEmojiSize: CGFloat { isCompact ? 130 : 180 }
     private var portalTitleSize: CGFloat { isCompact ? 36 : 56 }
 
@@ -119,6 +125,27 @@ struct QuestionRunnerView: View {
         }
     }
 
+    /// Mockup order, top-down: chips · timer · question card · answers · hint —
+    /// no centring gap between the timer and the card.
+    @ViewBuilder
+    private func questionColumn(_ q: Question) -> some View {
+        VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
+            Spacer().frame(height: 6)
+            // .id(q.id): each question gets a FRESH subtree, so a new
+            // prompt can never render above the previous question's
+            // option cards (the reused position-keyed views used to
+            // linger mid-transition — and a tap on a stale card was
+            // judged against the NEW question. Reported on-device in
+            // the bonus arena; must never happen).
+            questionHeader(q)
+                .id("question-\(q.id)")
+            Spacer().frame(height: 10)
+            answersBlock(q)
+                .id("answers-\(q.id)")
+            Spacer(minLength: display.isShort ? AppSpacing.sm : AppSpacing.xxl)   // breathing room above the companion
+        }
+    }
+
     /// The world used to theme the current question (background, orbs, glow).
     /// Fixed for a world session; follows the question's topic in the feed.
     private var themeWorld: World {
@@ -132,24 +159,22 @@ struct QuestionRunnerView: View {
         ZStack {
             background
 
-            VStack(spacing: AppSpacing.md) {
+            VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
                 topBar
                 if let q = current {
-                    // Mockup order, top-down: chips · timer · question card ·
-                    // answers · hint — no centring gap between the timer and the card.
-                    Spacer().frame(height: 6)
-                    // .id(q.id): each question gets a FRESH subtree, so a new
-                    // prompt can never render above the previous question's
-                    // option cards (the reused position-keyed views used to
-                    // linger mid-transition — and a tap on a stale card was
-                    // judged against the NEW question. Reported on-device in
-                    // the bonus arena; must never happen).
-                    questionHeader(q)
-                        .id("question-\(q.id)")
-                    Spacer().frame(height: 10)
-                    answersBlock(q)
-                        .id("answers-\(q.id)")
-                    Spacer(minLength: AppSpacing.xxl)   // breathing room above the companion
+                    if display.isShort {
+                        // 📐 A short screen: laid out plainly when it fits; when
+                        // it doesn't (a reading passage with long answers — in
+                        // English they run to four lines), it scrolls instead
+                        // of overflowing under the buddy and off the screen.
+                        ViewThatFits(in: .vertical) {
+                            questionColumn(q)
+                            ScrollView { questionColumn(q) }
+                                .scrollIndicators(.hidden)
+                        }
+                    } else {
+                        questionColumn(q)
+                    }
                 } else {
                     Spacer()
                 }
@@ -165,6 +190,7 @@ struct QuestionRunnerView: View {
             // The buddy wanders and can be dragged, exactly like on the home
             // (Rani, 2026-09-07) — kept to the strip under the answers so it never
             // parks on a choice or on the 🔊 button.
+            if !display.isShort {
             GeometryReader { geo in
                 FloatingCompanion(
                     controller: companion,
@@ -176,6 +202,7 @@ struct QuestionRunnerView: View {
                 )
             }
             .allowsHitTesting(true)
+            }
 
             // Effects overlays
             StarBurst(color: AppColor.starGold, trigger: burstTrigger)
@@ -526,7 +553,10 @@ struct QuestionRunnerView: View {
                 }
                 // A floor as well as a ceiling: the big question text used to squeeze
                 // the card down to two lines, and a ז׳–ח׳ passage was read through a slot.
-                .frame(minHeight: isCompact ? 150 : 200, maxHeight: isCompact ? 210 : 280)
+                // A short screen caps it lower — the passage scrolls inside its
+                // own box, and the answers + buddy need the room below.
+                .frame(minHeight: isCompact ? (display.isShort ? 112 : 150) : 200,
+                       maxHeight: isCompact ? (display.isShort ? 150 : 210) : 280)
                 .layoutPriority(1)
                 .glassInset(radius: 16)
                 .environment(\.layoutDirection, .app)   // the passage reads in the language's direction
@@ -548,7 +578,7 @@ struct QuestionRunnerView: View {
 
             Text(q.prompt)
                 // Under a passage the text is the star — the question steps down a size.
-                .font(.system(size: min(questionFontSize(for: q.prompt), q.passage != nil ? (isCompact ? 22 : 28) : (isCompact ? 30 : 38)), weight: .heavy, design: .rounded))
+                .font(.system(size: min(questionFontSize(for: q.prompt), q.passage != nil ? (isCompact ? 22 : 28) : (isCompact ? (display.isShort ? 25 : 30) : 38)) * (display.isShort ? 0.86 : 1), weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.4)
@@ -591,7 +621,7 @@ struct QuestionRunnerView: View {
     /// The answers grid + the hint / magic-wand row (the lower block).
     @ViewBuilder
     private func answersBlock(_ q: Question) -> some View {
-        VStack(spacing: AppSpacing.md) {
+        VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
             optionsGrid(for: q)
 
             // Mockup `.streak`: "🔥 3 ברצף · עוד 2 ובונוס!" in gold under the answers.
@@ -603,7 +633,9 @@ struct QuestionRunnerView: View {
                     .contentTransition(.numericText())
             }
             // Mockup `.hint`: what a right answer is worth, as a glass line.
-            if earnsTime {
+            // Not on a short screen: the timer bar at the top already shows the
+            // seconds, and this line pushed a three-line question off the screen.
+            if earnsTime && !display.isShort {
                 Text(tr("💡 כָּל תְּשׁוּבָה נְכוֹנָה = \(progress.secondsPerCorrect) שְׁנִיּוֹת שֶׁל מִשְׂחָק"))
                     .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
@@ -641,11 +673,21 @@ struct QuestionRunnerView: View {
                     magicWandButton
                 }
                 Spacer(minLength: 0)
-                Color.clear.frame(width: companionSize * 0.7, height: 1)   // room for the buddy
+                if display.isShort {
+                    // 📐 A short screen: the buddy lives IN this slot.
+                    InlineBuddy(controller: companion, profile: profiles.active, width: 44)
+                } else {
+                    Color.clear.frame(width: companionSize * 0.7, height: 1)   // room for the buddy
+                }
             }
             .padding(.horizontal, AppSpacing.md)
             .frame(maxWidth: .infinity)
             .frame(height: 56)
+            .overlay(alignment: .trailing) {
+                if display.isShort {
+                    InlineBuddyBubble(controller: companion, clearance: AppSpacing.md + 44 + 6)
+                }
+            }
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: consecutiveWrong)
         }
     }

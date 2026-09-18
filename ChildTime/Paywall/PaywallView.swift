@@ -25,6 +25,12 @@ struct PaywallView: View {
     @State private var successConfetti = 0
 
     private var isCompact: Bool { hsc == .compact }
+    /// 📐 On a short screen (the foldable held open, an iPhone SE) the offer no
+    /// longer fits in one screen, and the purchase button was the part cut off.
+    /// There the button — WITH the billing line under it, which Apple requires
+    /// next to the purchase action (3.1.2) — is pinned to the bottom and the
+    /// rest scrolls above it.
+    @ObservedObject private var display = DisplayGeometry.shared
 
     var body: some View {
         // Family subscription: bought ONCE on a parent's phone, unlocking every
@@ -52,7 +58,7 @@ struct PaywallView: View {
                     if let pitch { personalCard(pitch) }
                     benefitsCard
                     planPicker
-                    primaryCTA
+                    if !display.isShort { primaryCTA }
                     if let pitch { freeForeverLine(pitch) }
                     footerLinks
                 }
@@ -61,6 +67,22 @@ struct PaywallView: View {
                 .padding(.bottom, isCompact ? AppSpacing.md : AppSpacing.xxxl)
                 .frame(maxWidth: 720)
                 .frame(maxWidth: .infinity)
+            }
+            .safeAreaInset(edge: .bottom) {
+                if display.isShort {
+                    primaryCTA
+                        .padding(.horizontal, AppSpacing.lg)
+                        .padding(.top, 18)
+                        .padding(.bottom, 4)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            LinearGradient(stops: [.init(color: .clear, location: 0),
+                                                   .init(color: Color(hex: "2A1E5C").opacity(0.7), location: 0.3),
+                                                   .init(color: Color(hex: "2A1E5C").opacity(0.88), location: 1)],
+                                           startPoint: .top, endPoint: .bottom)
+                                .ignoresSafeArea(edges: [.bottom, .horizontal])
+                        )
+                }
             }
             // On a phone the ✕ floats over the top-left corner instead of taking
             // a row of its own — that row pushed the whole offer down a screen.
@@ -219,7 +241,7 @@ struct PaywallView: View {
 
     private var hero: some View {
         VStack(spacing: isCompact ? 2 : AppSpacing.sm) {
-            CompanionView(controller: companion, size: isCompact ? 76 : 140)
+            CompanionView(controller: companion, size: isCompact ? (display.isShort ? 58 : 76) : 140)
                 .padding(.top, isCompact ? 0 : 24)
                 .padding(.bottom, isCompact ? -14 : 0)
 
@@ -267,10 +289,15 @@ struct PaywallView: View {
                     .font(.system(size: isCompact ? 15 : 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(1).minimumScaleFactor(0.8)
-                Text(subtitle)
-                    .font(.system(size: isCompact ? 11.5 : 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.75))
-                    .lineLimit(1).minimumScaleFactor(0.75)
+                // A short screen keeps the titles only — they stand on their
+                // own, and the room goes to showing BOTH plans above the pinned
+                // purchase button instead of hiding the preselected yearly one.
+                if !display.isShort {
+                    Text(subtitle)
+                        .font(.system(size: isCompact ? 11.5 : 13, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.75))
+                        .lineLimit(1).minimumScaleFactor(0.75)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: "checkmark")

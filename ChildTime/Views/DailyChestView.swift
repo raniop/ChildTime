@@ -17,7 +17,11 @@ struct DailyChestView: View {
     @State private var bankedNote: String? = nil
 
     private var isCompact: Bool { hsc == .compact }
-    private var chestSize: CGFloat { isCompact ? 120 : 150 }
+    /// 📐 A short screen (the foldable held open, an iPhone SE): a smaller chest
+    /// and title, and room kept at the bottom for the companion — otherwise its
+    /// bubble sat right on top of "לחצו שוב ושוב לפתיחה".
+    @ObservedObject private var display = DisplayGeometry.shared
+    private var chestSize: CGFloat { isCompact ? (display.isShort ? 92 : 120) : 150 }
     private var companionSize: CGFloat { isCompact ? 70 : 90 }
 
     /// The child's OWN chosen character (falls back to the default if none).
@@ -43,7 +47,7 @@ struct DailyChestView: View {
                         Spacer(minLength: AppSpacing.lg)
 
                         Text(tr("קוּפְסַת קֶסֶם יוֹמִית"))
-                            .font(.system(size: isCompact ? 34 : 48, weight: .heavy, design: .rounded))
+                            .font(.system(size: isCompact ? (display.isShort ? 28 : 34) : 48, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
@@ -115,6 +119,8 @@ struct DailyChestView: View {
                             .id("rewardsBottom")
                     }
                     .frame(maxWidth: .infinity)
+                    // Clear the companion (+ its bubble) standing at the bottom.
+                    .padding(.bottom, display.isShort ? companionSize * 1.3 + 44 : 0)
                     // Fill the viewport so the chest sits VERTICALLY CENTERED when
                     // there's room, and only scrolls when it genuinely overflows.
                     .frame(minHeight: geo.size.height)

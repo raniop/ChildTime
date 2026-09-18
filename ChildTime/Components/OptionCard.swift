@@ -17,7 +17,9 @@ struct OptionCard: View {
 
     @Environment(\.horizontalSizeClass) private var hsc
     private var isCompact: Bool { hsc == .compact }
-    private var minHeight: CGFloat { isCompact ? 80 : 110 }
+    /// 📐 A little shorter on a short screen, so four answers + the buddy fit.
+    @ObservedObject private var display = DisplayGeometry.shared
+    private var minHeight: CGFloat { isCompact ? (display.isShort ? 68 : 80) : 110 }
     /// Big by default; shrinks for a long answer / long word so it never breaks
     /// mid-word across lines.
     private var fontSize: CGFloat {

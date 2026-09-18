@@ -188,6 +188,10 @@ struct ChildTimeApp: App {
                 // screen + splash) so the first SwiftUI frame is the same blue
                 // backdrop — never a flat purple or white flash.
                 AppGradient.dreamy.ignoresSafeArea()
+                // 📐 Reads the screen's real geometry — safe area, and on the
+                // foldable the hinge, the vertical bar and the fold — for
+                // every screen through DisplayGeometry.shared.
+                DisplayProbe().ignoresSafeArea().allowsHitTesting(false)
                 Group { if let demo = Self.demoScreen { demoRoot(demo) } else { ContentView() } }
                     .id(language.current)
 
@@ -199,6 +203,10 @@ struct ChildTimeApp: App {
                         .zIndex(10)
                 }
             }
+                // 📐 The safe size SwiftUI really lays out in — short screens adapt.
+                .onGeometryChange(for: DisplayGeometry.Layout.self) { proxy in
+                    DisplayGeometry.Layout(size: proxy.size, insets: proxy.safeAreaInsets)
+                } action: { DisplayGeometry.shared.updateLayout($0) }
                 .environment(\.layoutDirection, language.current.layoutDirection)
                 // Hebrew keeps the device locale exactly as before; other languages bring their own.
                 .environment(\.locale, language.current == .he ? .current : language.current.locale)
