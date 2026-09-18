@@ -85,8 +85,12 @@ struct WorldMapView: View {
     /// of the tuned constants below, which assume a tall iPhone.
     @ObservedObject private var display = DisplayGeometry.shared
     @State private var bottomPanelHeight: CGFloat = 0
+    /// Where the header pane really ends. The buddy's zone starts under it on a
+    /// short screen — the open foldable (867×635) parked it on the daily
+    /// challenge, because the tuned 230/300 assume a taller screen.
+    @State private var headerBottom: CGFloat = 0
     private var isShort: Bool { display.isShort }
-    private var companionSize: CGFloat { isCompact ? 90 : 120 }
+    private var companionSize: CGFloat { isCompact ? 90 : (isShort ? 96 : 120) }
     // Glass look: a modest brand line heading the grid, not a poster.
     private var heroTitleSize: CGFloat { isCompact ? 34 : 40 }
 
@@ -390,6 +394,7 @@ struct WorldMapView: View {
                         .frame(maxWidth: worldGridMaxWidth)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.horizontal, homeHPad)
+                        .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("home")).maxY } action: { headerBottom = $0 }
                     // (The limited-time event banner is now a transient TOAST —
                     // see eventToastOverlay — instead of a permanent row here
                     // that ate a full line of the map all day.)
@@ -572,11 +577,15 @@ struct WorldMapView: View {
                 size: companionSize,
                 // Keep the buddy (and the gift above its head) BELOW the taller
                 // header card so it never parks on top of the stats.
-                topInset: isCompact ? 300 : 230,
+                topInset: isShort && headerBottom > 0
+                    ? max(headerBottom + companionSize * 0.35, 120)   // + the gift riding on its head
+                    : (isCompact ? 300 : 230),
                 bottomInset: isShort && bottomPanelHeight > 0 ? bottomPanelHeight : (isCompact ? 220 : 200),
                 horizontalInset: AppSpacing.lg
             )
         }
+        // 📐 The header and the floating buddy measure in the same space.
+        .coordinateSpace(name: "home")
         // Returning from the smart adventure with the warm-up freshly completed →
         // celebrate the games opening (the map's onAppear doesn't re-fire under
         // a dismissed fullScreenCover, so listen to the cover's flag directly).

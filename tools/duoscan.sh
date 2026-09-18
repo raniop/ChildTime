@@ -5,6 +5,9 @@
 #   tools/duoscan.sh <device-udid> <out-dir> [lang]            # all screens
 #   SCREENS="kidhome paywall" tools/duoscan.sh <udid> <out>    # just these
 #   swift tools/grid.swift sheet.png 7 300 <out>/*.png         # read them as a grid
+#   SIM_DISPLAY=<uuid> tools/duoscan.sh …                       # a foldable's INNER screen
+#     (the Duo has two: `xcrun simctl io <udid> enumerate` lists them — the outer
+#      466×678pt one is the default; the inner 951×669pt one needs its UUID)
 #
 # The app must already be installed. What the screen measured is printed by the
 # app itself (DisplayGeometry, DEBUG) — see tools/measure in the commit notes:
@@ -24,5 +27,5 @@ for s in $SCREENS; do
       SIMCTL_CHILD_DEMO_WORLD=math SIMCTL_CHILD_DEMO_GRADE=3 \
     xcrun simctl launch "$DEV" com.rani.ChildTime >/dev/null
   sleep 6
-  xcrun simctl io "$DEV" screenshot "$OUT/$s.png" >/dev/null 2>&1 && echo "✔ $s" || echo "✗ $s"
+  xcrun simctl io "$DEV" screenshot ${SIM_DISPLAY:+--display=$SIM_DISPLAY} "$OUT/$s.png" >/dev/null 2>&1 && echo "✔ $s" || echo "✗ $s"
 done

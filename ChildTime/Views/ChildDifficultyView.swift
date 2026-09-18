@@ -70,6 +70,7 @@ struct ChildDifficultyView: View {
                 }
                 .glassRows()
             }
+            .readableOnWideShort()
             .glassForm()
             .navigationTitle(tr("רָמַת קוֹשִׁי"))
             .navigationBarTitleDisplayMode(.inline)

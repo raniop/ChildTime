@@ -54,8 +54,34 @@ final class DisplayGeometry: ObservableObject {
     /// A short screen — tighten vertical spacing, keep the primary action visible.
     var isShort: Bool { safeSize.height > 0 && safeSize.height < Self.shortHeight }
 
+    /// Wide AND short — the foldable held open (867×635): a landscape canvas
+    /// that a phone's single column wastes. Screens there go side by side and
+    /// cap their rows at a readable width. No iPad qualifies (the shortest,
+    /// an iPad mini in landscape, keeps ~724pt), and no iPhone is this wide.
+    var isWideShort: Bool { isShort && safeSize.width >= Self.wideWidth }
+
+    /// A comfortable reading width for rows and single-column content on a
+    /// wide screen — label and control within one glance.
+    static let readableWidth: CGFloat = 600
+
     /// Is there a fold the layout must not put anything across?
     var hasFold: Bool { !divisions.isEmpty }
+
+    // MARK: 🎯 Centering on the PHYSICAL screen
+
+    /// How much of the vertical bar's inset to mirror on the opposite side, by
+    /// screen. The bar sits on one side only, so content centered in the safe
+    /// area sits off the middle of the glass (Rani: "כל מסך אצלנו נראה כאילו
+    /// הוא לא ממורכז").
+    ///   • Wide (the open foldable, 867pt): the full mirror — dead centre, and
+    ///     84pt off a screen that wide costs nothing.
+    ///   • Narrow (its outer screen, 382pt): none. Rani compared none / half /
+    ///     full on screenshots and kept the width: "אי אפשר להקטין במצב סגור".
+    static let balanceWide: CGFloat = 1.0
+    static let balanceNarrow: CGFloat = 0
+    /// Above this safe width a screen counts as wide.
+    static let wideWidth: CGFloat = 600
+
 
     /// The size and safe area SwiftUI actually lays the root out in. Taken from
     /// the root's GeometryProxy — the UIView below did NOT reliably receive the
@@ -111,6 +137,9 @@ struct DisplayProbe: UIViewRepresentable {
 final class DisplayProbeView: UIView {
     private var hinge: DisplayGeometry.Hinge = .none
     private var angle: Double?
+    /// While a one-sided bar is showing: re-checks the presented screens, which
+    /// live outside this view's hierarchy and would otherwise never be told.
+    private var balanceTimer: Timer?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -120,8 +149,46 @@ final class DisplayProbeView: UIView {
     }
     required init?(coder: NSCoder) { fatalError() }
 
-    override func layoutSubviews() { super.layoutSubviews(); refresh() }
-    override func didMoveToWindow() { super.didMoveToWindow(); refresh() }
+    override func layoutSubviews() { super.layoutSubviews(); refresh(); balance() }
+    override func didMoveToWindow() { super.didMoveToWindow(); refresh(); balance() }
+
+    // MARK: 🎯 Centered on the glass
+
+    /// The foldable's vertical bar is on ONE side, so content centered in the
+    /// safe area sits off the middle of the screen (Rani: "כל מסך אצלנו נראה
+    /// כאילו הוא לא ממורכז"). The same inset is mirrored on the other side as
+    /// `additionalSafeAreaInsets` on every view controller in the window — the
+    /// root and each sheet/cover above it (86 presentations; a SwiftUI modifier
+    /// at the root reaches none of them). Content moves in, backdrops that
+    /// ignore the safe area still run edge to edge.
+    ///
+    /// Measured from the WINDOW's insets (physical left/right, never including
+    /// what is added here — so it can't feed back on itself). Nothing happens on
+    /// any device without a one-sided bar.
+    private func balance() {
+        guard let window else { return }
+        let l = window.safeAreaInsets.left, r = window.safeAreaInsets.right
+        let gap = abs(l - r)
+        var add = UIEdgeInsets.zero
+        if gap >= 40 {
+            let safeWidth = window.bounds.width - l - r
+            let factor = safeWidth >= DisplayGeometry.wideWidth ? DisplayGeometry.balanceWide : DisplayGeometry.balanceNarrow
+            let amount = (gap * factor).rounded()
+            if l > r { add.right = amount } else { add.left = amount }
+        }
+        var vc = window.rootViewController
+        while let c = vc {
+            if c.additionalSafeAreaInsets != add { c.additionalSafeAreaInsets = add }
+            vc = c.presentedViewController
+        }
+        if add == .zero {
+            balanceTimer?.invalidate(); balanceTimer = nil
+        } else if balanceTimer == nil {
+            balanceTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
+                MainActor.assumeIsolated { self?.balance() }
+            }
+        }
+    }
 
     private func installFoldableObservers() {
         #if canImport(UIKit, _version: 9127.0.85)
@@ -174,4 +241,28 @@ final class DisplayProbeView: UIView {
                                           divisions: divisions, occlusions: occlusions)
         }
     }
+}
+
+/// 📐 Rows at a readable width on a wide, short screen (the open foldable).
+/// A Form there ran its rows 780pt across — the label on one side and its
+/// switch on the other, too far apart to read as one line. `contentMargins`
+/// narrows the rows INSIDE the scroll view, so the backdrop behind still runs
+/// edge to edge. Nothing changes anywhere else.
+struct ReadableWidthOnWideShort: ViewModifier {
+    @ObservedObject private var display = DisplayGeometry.shared
+
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, *), display.isWideShort {
+            content.contentMargins(.horizontal,
+                                   max(16, (display.safeSize.width - DisplayGeometry.readableWidth) / 2),
+                                   for: .scrollContent)
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    /// See `ReadableWidthOnWideShort`.
+    func readableOnWideShort() -> some View { modifier(ReadableWidthOnWideShort()) }
 }

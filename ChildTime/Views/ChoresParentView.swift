@@ -109,6 +109,7 @@ struct ChoresParentView: View {
                 }
                 .glassRows()
             }
+            .readableOnWideShort()
             .glassForm()
             .sheet(isPresented: $showEditor, onDismiss: { clearForm() }) {
                 NavigationStack {
@@ -121,6 +122,7 @@ struct ChoresParentView: View {
                             .glassRows()
                         }
                     }
+                    .readableOnWideShort()
                     .glassForm()
                     .navigationTitle(tr("עריכת מטלה"))
                     .navigationBarTitleDisplayMode(.inline)

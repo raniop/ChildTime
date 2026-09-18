@@ -11,6 +11,8 @@ import StoreKit
 /// layer Firestore sync on top so the dashboard reflects state even when
 /// the kid is on a different device.
 struct ParentDashboardView: View {
+    /// 📐 Wide & short (the open foldable) lays the children out two across.
+    @ObservedObject private var display = DisplayGeometry.shared
     /// Split out of `.alert(…)`: inline, the translated title made the modifier
     /// chain too slow for the type checker.
     private var resettingTitle: String { resettingProfile.map { tr("לאפס את ההתקדמות של \($0.name)?") } ?? "" }
@@ -2051,7 +2053,11 @@ struct ParentDashboardView: View {
     /// full inline expression).
     private var childrenGrid: some View {
             LazyVGrid(
-                columns: [GridItem(.flexible(), spacing: 12)],
+                // 📐 Two across on the open foldable (wide, 635pt tall): one
+                // column fit about two children on the screen and left the
+                // width empty. Everywhere else, one — as before.
+                columns: Array(repeating: GridItem(.flexible(), spacing: 12),
+                               count: display.isWideShort && rows.count > 1 ? 2 : 1),
                 spacing: 12
             ) {
                 ForEach(rows, id: \.profile.id) { row in

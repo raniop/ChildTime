@@ -179,6 +179,7 @@ struct ParentSettingsView: View {
 
     private func subScreen<C: View>(_ title: String, @ViewBuilder _ content: () -> C) -> some View {
         Form { content() }
+            .readableOnWideShort()
             .glassForm()
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
@@ -860,6 +861,7 @@ struct ChangePINView: View {
                 }
                 .glassRows()
             }
+            .readableOnWideShort()
             .glassForm()
             .navigationTitle(tr("שינוי קוד הורה"))
             .navigationBarTitleDisplayMode(.inline)

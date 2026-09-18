@@ -25,6 +25,9 @@ struct PaywallView: View {
     @State private var successConfetti = 0
 
     private var isCompact: Bool { hsc == .compact }
+    /// Phone sizing — on a phone, and on the open foldable, which is wide but
+    /// only 635pt tall: the iPad's 140pt lion and 60pt title don't fit there.
+    private var compactLook: Bool { isCompact || display.isWideShort }
     /// 📐 On a short screen (the foldable held open, an iPhone SE) the offer no
     /// longer fits in one screen, and the purchase button was the part cut off.
     /// There the button — WITH the billing line under it, which Apple requires
@@ -51,9 +54,12 @@ struct PaywallView: View {
             StarBurst(count: 14, color: AppColor.starGold, trigger: burst)
             FancyConfetti(trigger: successConfetti)
 
+            if display.isWideShort {
+                wideBody
+            } else {
             ScrollView {
-                VStack(spacing: isCompact ? AppSpacing.sm : AppSpacing.lg) {
-                    if !isCompact { closeRow }
+                VStack(spacing: compactLook ? AppSpacing.sm : AppSpacing.lg) {
+                    if !compactLook { closeRow }
                     hero
                     if let pitch { personalCard(pitch) }
                     benefitsCard
@@ -63,13 +69,13 @@ struct PaywallView: View {
                     footerLinks
                 }
                 .padding(.horizontal, AppSpacing.lg)
-                .padding(.top, isCompact ? 6 : 0)
-                .padding(.bottom, isCompact ? AppSpacing.md : AppSpacing.xxxl)
+                .padding(.top, compactLook ? 6 : 0)
+                .padding(.bottom, compactLook ? AppSpacing.md : AppSpacing.xxxl)
                 .frame(maxWidth: 720)
                 .frame(maxWidth: .infinity)
             }
             .safeAreaInset(edge: .bottom) {
-                if display.isShort {
+                if display.isShort && !display.isWideShort {
                     primaryCTA
                         .padding(.horizontal, AppSpacing.lg)
                         .padding(.top, 18)
@@ -84,9 +90,10 @@ struct PaywallView: View {
                         )
                 }
             }
+            }
             // On a phone the ✕ floats over the top-left corner instead of taking
             // a row of its own — that row pushed the whole offer down a screen.
-            if isCompact {
+            if compactLook {
                 VStack {
                     HStack {
                         Button { dismiss() } label: {
@@ -127,6 +134,35 @@ struct PaywallView: View {
             // The moment we detect a successful purchase, celebrate + dismiss.
             if case .active = newState { celebrateAndDismiss() }
             if case .inTrial = newState { celebrateAndDismiss() }
+        }
+    }
+
+    /// 📐 The open foldable (wide, 635pt tall): the offer side by side instead
+    /// of one column the plans fell off the bottom of. The reason to buy on one
+    /// side — who it's for and what's in it; the decision on the other — the
+    /// child's own numbers, both plans, the button with its billing line.
+    private var wideBody: some View {
+        ScrollView {
+            HStack(alignment: .top, spacing: AppSpacing.xl) {
+                VStack(spacing: AppSpacing.sm) {
+                    hero
+                    benefitsCard
+                }
+                .frame(maxWidth: .infinity)
+                VStack(spacing: AppSpacing.md) {
+                    if let pitch { personalCard(pitch) }
+                    planPicker
+                    primaryCTA
+                    if let pitch { freeForeverLine(pitch) }
+                    footerLinks
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.top, AppSpacing.sm)
+            .padding(.bottom, AppSpacing.md)
+            .frame(maxWidth: 900)
+            .frame(maxWidth: .infinity)
         }
     }
 
@@ -240,20 +276,20 @@ struct PaywallView: View {
     }
 
     private var hero: some View {
-        VStack(spacing: isCompact ? 2 : AppSpacing.sm) {
-            CompanionView(controller: companion, size: isCompact ? (display.isShort ? 58 : 76) : 140)
-                .padding(.top, isCompact ? 0 : 24)
-                .padding(.bottom, isCompact ? -14 : 0)
+        VStack(spacing: compactLook ? 2 : AppSpacing.sm) {
+            CompanionView(controller: companion, size: compactLook ? (display.isShort ? 58 : 76) : 140)
+                .padding(.top, compactLook ? 0 : 24)
+                .padding(.bottom, compactLook ? -14 : 0)
 
             Text(tr("טופי+"))
-                .font(.system(size: isCompact ? 34 : 60, weight: .black, design: .rounded))
+                .font(.system(size: compactLook ? 34 : 60, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.2), radius: 8, y: 3)
                 .scaleEffect(headerAppeared ? 1 : 0.5)
                 .opacity(headerAppeared ? 1 : 0)
 
             Text(tr("חוויה מלאה — לכל הילדים בבית"))
-                .font(.system(size: isCompact ? 14.5 : 20, weight: .semibold, design: .rounded))
+                .font(.system(size: compactLook ? 14.5 : 20, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
                 .multilineTextAlignment(.center)
                 .opacity(headerAppeared ? 1 : 0)
@@ -262,7 +298,7 @@ struct PaywallView: View {
     }
 
     private var benefitsCard: some View {
-        VStack(spacing: isCompact ? 7 : 14) {
+        VStack(spacing: compactLook ? 7 : 14) {
             benefitRow("🧠", tr("כל הנושאים"), tr("מתמטיקה, עברית, אנגלית, מדעים ועוד"))
             divider
             benefitRow("🌍", tr("כל העולמות"), tr("כולל כל עולם חדש שנוסיף"))
@@ -275,38 +311,38 @@ struct PaywallView: View {
             divider
             benefitRow("☁️", tr("סנכרון בין מכשירים"), tr("iPad + iPhone, אותה התקדמות"))
         }
-        .padding(.vertical, isCompact ? AppSpacing.sm : AppSpacing.md)
-        .padding(.horizontal, isCompact ? AppSpacing.sm : AppSpacing.md)
+        .padding(.vertical, compactLook ? AppSpacing.sm : AppSpacing.md)
+        .padding(.horizontal, compactLook ? AppSpacing.sm : AppSpacing.md)
         .glassPane(radius: 22)
     }
 
     private func benefitRow(_ emoji: String, _ title: String, _ subtitle: String) -> some View {
-        HStack(spacing: isCompact ? 10 : AppSpacing.md) {
-            Text(emoji).font(.system(size: isCompact ? 20 : 26))
-                .frame(width: isCompact ? 28 : 36)
+        HStack(spacing: compactLook ? 10 : AppSpacing.md) {
+            Text(emoji).font(.system(size: compactLook ? 20 : 26))
+                .frame(width: compactLook ? 28 : 36)
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
-                    .font(.system(size: isCompact ? 15 : 17, weight: .heavy, design: .rounded))
+                    .font(.system(size: compactLook ? 15 : 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(1).minimumScaleFactor(0.8)
                 // A short screen keeps the titles only — they stand on their
                 // own, and the room goes to showing BOTH plans above the pinned
                 // purchase button instead of hiding the preselected yearly one.
-                if !display.isShort {
+                if !display.isShort || display.isWideShort {
                     Text(subtitle)
-                        .font(.system(size: isCompact ? 11.5 : 13, weight: .medium, design: .rounded))
+                        .font(.system(size: compactLook ? 11.5 : 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.75))
                         .lineLimit(1).minimumScaleFactor(0.75)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: "checkmark")
-                .font(.system(size: isCompact ? 11 : 14, weight: .bold))
+                .font(.system(size: compactLook ? 11 : 14, weight: .bold))
                 .foregroundStyle(AppColor.successMint)
-                .padding(isCompact ? 4 : 6)
+                .padding(compactLook ? 4 : 6)
                 .background(AppColor.successMint.opacity(0.20), in: Circle())
         }
-        .padding(.horizontal, isCompact ? 2 : AppSpacing.sm)
+        .padding(.horizontal, compactLook ? 2 : AppSpacing.sm)
     }
 
     private var divider: some View {
