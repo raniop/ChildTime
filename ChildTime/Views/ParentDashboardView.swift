@@ -43,6 +43,13 @@ struct ParentDashboardView: View {
     /// Confirm 'lock + revoke all parent-given minutes' (a deliberate act).
     @State private var revokeGiftProfile: Profile? = nil
     @State private var navPath: [UUID] = []   // pushed child-detail pages (pop on delete)
+    /// 🎚 The foldable held OPEN: which child the second half of the screen shows.
+    /// Closed, the same choice lives in `navPath` — `syncSplit` hands it across
+    /// so folding and unfolding never loses the parent's place.
+    @State private var selectedChild: UUID? = nil
+    /// Did the parent actually pick that child, or did the split just have to
+    /// show someone? Only a real choice is pushed when the device folds back.
+    @State private var chosenExplicitly = false
     @State private var gridDeleteProfile: Profile? = nil   // long-press delete from the grid
     @State private var showLegacyChildCard = false
     @State private var showFamilyNameEditor = false
@@ -128,7 +135,149 @@ struct ParentDashboardView: View {
         }
     }
 
+    // MARK: - 🎚 iPhone Duo: the rail, and the half the fold reveals
+
+    /// The parent's home owns the bar strip (see `SideRailContainer`). Only at
+    /// the root — a pushed page has its own back button up there.
+    private var useRail: Bool { isRoot && display.hasBarStrip && (splitOpen || navPath.isEmpty) }
+
+    /// Held open: the home column keeps its width and the revealed half shows
+    /// one child. Nothing moves between the two states — the screen just grows.
+    private var splitOpen: Bool { isRoot && display.hasBarStrip && display.isWideShort }
+
+    /// The home column keeps a phone's width, so folding back changes nothing
+    /// about it. Measured on the Duo: its outer screen's safe width is 382pt.
+    /// Clamped, so a future foldable with other proportions still splits sanely.
+    private var homeColumnWidth: CGFloat {
+        min(382, max(300, display.safeSize.width * 0.55))
+    }
+
     var body: some View {
+        Group {
+            if splitOpen {
+                // Laid out PHYSICALLY: the home column belongs beside the rail,
+                // on the bar's own side of the glass, in Hebrew as in English.
+                // Both widths are handed out from the measured container — a
+                // `.frame(maxWidth: .infinity)` pane claimed the whole proposal
+                // and then the column was added on top, stretching the root to
+                // 1165pt on a 951pt screen (and pushing the rail off the glass).
+                GeometryReader { geo in
+                    let home = min(homeColumnWidth, geo.size.width * 0.6)
+                    HStack(spacing: 0) {
+                        if display.barOnLeft {
+                            homePane(width: home)
+                            revealedPane(width: geo.size.width - home)
+                        } else {
+                            revealedPane(width: geo.size.width - home)
+                            homePane(width: home)
+                        }
+                    }
+                }
+                .environment(\.layoutDirection, .leftToRight)
+            } else {
+                dashboardStack
+            }
+        }
+        .overlay { parentRail }
+        .onAppear { syncSplit(open: splitOpen) }
+        // Watch the split itself, not the width: the strip and the width are
+        // published separately, and the first frame has neither.
+        .onChangeCompat(of: splitOpen) { _, open in syncSplit(open: open) }
+        // The children arrive from the cloud after the first layout — the open
+        // half must not sit empty waiting for a tap that already happened.
+        .onChangeCompat(of: rows.map(\.profile.id)) { _, ids in
+            guard splitOpen else { return }
+            if selectedChild == nil || !ids.contains(where: { $0 == selectedChild }) {
+                selectedChild = ids.first
+                chosenExplicitly = false
+            }
+        }
+    }
+
+    private func homePane(width: CGFloat) -> some View {
+        dashboardStack
+            .frame(width: width)
+            .environment(\.layoutDirection, .app)
+    }
+
+    /// What the fold reveals: the selected child's page, exactly the page a tap
+    /// opens when the device is closed — same view, same actions, no second
+    /// design to keep in step.
+    private func revealedPane(width: CGFloat) -> some View {
+        Group {
+            if let id = selectedChild ?? rows.first?.profile.id {
+                childDetailScreen(for: id)
+            } else {
+                Color.clear.background(GlassBackdrop().ignoresSafeArea())
+            }
+        }
+        .frame(width: max(0, width))
+        .frame(maxHeight: .infinity)
+        .environment(\.layoutDirection, .app)
+    }
+
+    @ViewBuilder private var parentRail: some View {
+        if useRail {
+            SideRailContainer {
+                SideRailButton(systemImage: "gearshape.fill", label: tr("הגדרות")) { showingSettings = true }
+                SideRailButton(systemImage: "person.badge.plus", label: tr("＋ צְרוּ יֶלֶד/ה")) { showingCreateChild = true }
+                SideRailButton(emoji: "🧹", label: tr("🧹 מַטְלוֹת")) { openChores() }
+                if !rows.isEmpty {
+                    SideRailDivider()
+                    ScrollView {
+                        VStack(spacing: 8) {
+                            ForEach(rows, id: \.profile.id) { row in
+                                SideRailAvatar(profile: row.profile,
+                                               isSelected: splitOpen && selectedChild == row.profile.id,
+                                               isPlaying: (liveWindow(row.profile)?.secondsLeft ?? 0) > 0) {
+                                    selectChild(row.profile.id)
+                                }
+                            }
+                        }
+                    }
+                    .scrollIndicators(.hidden)
+                }
+            }
+        }
+    }
+
+    /// One tap on a child, wherever it came from (a card or the rail): open, it
+    /// fills the revealed half; closed, it pushes the page as it always has.
+    private func selectChild(_ id: UUID) {
+        chosenExplicitly = true
+        if splitOpen {
+            selectedChild = id
+        } else if navPath.last != id {
+            navPath.append(id)
+        }
+    }
+
+    /// The device folded or unfolded — carry the parent's place across.
+    private func syncSplit(open: Bool) {
+        if open {
+            if let id = navPath.last { selectedChild = id; chosenExplicitly = true; navPath = [] }
+            if selectedChild == nil || !rows.contains(where: { $0.profile.id == selectedChild }) {
+                selectedChild = rows.first?.profile.id
+                chosenExplicitly = false
+            }
+        } else {
+            // Push only a child the parent actually chose — never the one the
+            // open layout had to put somewhere.
+            if chosenExplicitly, let id = selectedChild, navPath.isEmpty { navPath.append(id) }
+            selectedChild = nil
+        }
+    }
+
+    /// The chores sheet, opened from the rail as well as the actions row.
+    private func openChores() {
+        let items = choreStore.pendingApproval
+        let target = items.first.flatMap { first in
+            profiles.profiles.first(where: { $0.id.uuidString == first.childID })
+        } ?? rows.first?.profile
+        if let target { choresProfile = target }
+    }
+
+    private var dashboardStack: some View {
         NavigationStack(path: $navPath) {
             ZStack {
                 // A real, branded control center — vibrant, not a grey list.
@@ -145,7 +294,8 @@ struct ParentDashboardView: View {
                                 // No family totals, no big buttons — banners only
                                 // when something actually needs the parent.
                                 homeHeader
-                                homeActionsRow
+                                // ⚙️ / ＋ / 🧹 moved into the rail on the Duo.
+                                if !useRail { homeActionsRow }
                                 // 🧠 A child is stuck on a question RIGHT NOW — above
                                 // everything else; it is live and it is short.
                                 ForEach(parentHelp.pendingForParent) { req in helpRequestBanner(req) }
@@ -228,6 +378,9 @@ struct ParentDashboardView: View {
                     // container flip left a hair of horizontal slack that became
                     // a draggable sideways drift; `.basedOnSize` disables the
                     // horizontal axis entirely when the content already fits.
+                    // 📐 Duo: use the whole width beside the rail, not the
+                    // navigation controller's mirrored half.
+                    .fillBesideBar()
                     .noHorizontalBounce()
                     .refreshable {
                         // Pull-to-refresh: actually re-fetch every child's cloud
@@ -1594,17 +1747,19 @@ struct ParentDashboardView: View {
     private var homeHeader: some View {
         HStack(alignment: .top, spacing: 12) {
             // ⚙️ on the far left (the container is LTR), a glass circle like the
-            // kid's nav buttons.
-            Button { Haptic.light(); showingSettings = true } label: {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 40, height: 40)
-                    .background(Circle().fill(Color.white.opacity(0.22)))
-                    .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+            // kid's nav buttons. On the Duo it lives in the rail instead.
+            if !useRail {
+                Button { Haptic.light(); showingSettings = true } label: {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 40, height: 40)
+                        .background(Circle().fill(Color.white.opacity(0.22)))
+                        .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(tr("הגדרות"))
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(tr("הגדרות"))
             VStack(alignment: .trailing, spacing: 4) {
                 // The family's name IS the title (Rani); tap to name / rename.
                 Button {
@@ -2051,20 +2206,42 @@ struct ParentDashboardView: View {
 
     /// The children grid (pulled out of `body` — the type-checker choked on the
     /// full inline expression).
+    /// The card as a tap target: a push when the device is closed, a selection
+    /// when it is open — the same card either way.
+    @ViewBuilder private func childCardTap(_ row: (profile: Profile, snapshot: ProgressSnapshot)) -> some View {
+        Group {
+            if splitOpen {
+                Button { selectChild(row.profile.id) } label: {
+                    childCard(profile: row.profile, snapshot: row.snapshot)
+                }
+                .buttonStyle(.plain)
+                .overlay {
+                    if selectedChild == row.profile.id {
+                        RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                            .strokeBorder(.white.opacity(0.8), lineWidth: 2)
+                            .allowsHitTesting(false)
+                    }
+                }
+            } else {
+                NavigationLink(value: row.profile.id) {
+                    childCard(profile: row.profile, snapshot: row.snapshot)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
     private var childrenGrid: some View {
             LazyVGrid(
-                // 📐 Two across on the open foldable (wide, 635pt tall): one
-                // column fit about two children on the screen and left the
-                // width empty. Everywhere else, one — as before.
+                // 📐 Two across on a wide, short screen that has no rail beside
+                // it. On the Duo the home keeps a phone's width and the second
+                // half of the screen holds the child's page, so one column.
                 columns: Array(repeating: GridItem(.flexible(), spacing: 12),
-                               count: display.isWideShort && rows.count > 1 ? 2 : 1),
+                               count: display.isWideShort && !useRail && rows.count > 1 ? 2 : 1),
                 spacing: 12
             ) {
                 ForEach(rows, id: \.profile.id) { row in
-                    NavigationLink(value: row.profile.id) {
-                        childCard(profile: row.profile, snapshot: row.snapshot)
-                    }
-                    .buttonStyle(.plain)
+                    childCardTap(row)
                     // ⋯ quick actions right on the card — the two
                     // remote controls (open / lock now) without
                     // opening the child's page. Overlaid on the link

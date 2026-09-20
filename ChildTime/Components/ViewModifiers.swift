@@ -156,9 +156,8 @@ extension View {
 extension View {
     /// iOS 17+ `containerRelativeFrame(.horizontal)`; no-op on iOS 16 (the
     /// surrounding `.frame(maxWidth:)` still constrains width there).
-    @ViewBuilder func containerWidthLock() -> some View {
-        if #available(iOS 17.0, *) { self.containerRelativeFrame(.horizontal) } else { self }
-    }
+    /// See `ContainerWidthLock` for why the foldable takes a different path.
+    func containerWidthLock() -> some View { modifier(ContainerWidthLock()) }
     /// iOS 16.4+ `scrollBounceBehavior(.basedOnSize, axes: .horizontal)`; no-op below.
     @ViewBuilder func noHorizontalBounce() -> some View {
         if #available(iOS 16.4, *) { self.scrollBounceBehavior(.basedOnSize, axes: .horizontal) } else { self }
@@ -189,5 +188,32 @@ private struct LegacyOnChange<V: Equatable>: ViewModifier {
                 action(previous ?? newValue, newValue)
                 previous = newValue
             }
+    }
+}
+
+
+/// 📐 Lock a scroll view's content to the container's width — without paying
+/// the safe area twice.
+///
+/// `containerRelativeFrame(.horizontal)` measures the container MINUS its safe
+/// area. Inside a scroll view that is already inside that safe area, the inset
+/// is subtracted a SECOND time. On every iPhone the horizontal insets are 0 and
+/// nobody ever saw it; on the foldable the vertical bar's 84pt came off twice,
+/// so the page sat flush against the bar with 84pt of dead glass on the far
+/// side (Rani: "חבל על המקום בצד שמאל").
+///
+/// The lock exists only to stop a vertical scroll view drifting sideways, which
+/// filling the width does just as well — so that is what a one-sided bar gets.
+struct ContainerWidthLock: ViewModifier {
+    @ObservedObject private var display = DisplayGeometry.shared
+
+    func body(content: Content) -> some View {
+        if display.hasBarStrip {
+            content.frame(maxWidth: .infinity)
+        } else if #available(iOS 17.0, *) {
+            content.containerRelativeFrame(.horizontal)
+        } else {
+            content
+        }
     }
 }

@@ -41,10 +41,24 @@ final class DisplayGeometry: ObservableObject {
     /// Radians. System policy decides how often it updates — prefer `hinge`.
     @Published private(set) var hingeAngle: Double?
     @Published private(set) var verticalBarEdge: BarEdge = .none
+    /// UIKit's own horizontal size class — what decides whether SwiftUI's
+    /// NavigationSplitView shows two columns or collapses to one.
+    @Published private(set) var sizeClass: String = "-"
     /// Where content has to split in two (the fold), in full-screen coordinates.
     @Published private(set) var divisions: [CGRect] = []
-    /// What the system covers (the camera), in full-screen coordinates.
+    /// What the system covers (the camera, and the vertical bar's own items),
+    /// in full-screen coordinates.
     @Published private(set) var occlusions: [CGRect] = []
+    /// The whole glass, before ANY safe area — window bounds. The safe size
+    /// above is what SwiftUI lays out in; this is what the rail is placed on.
+    @Published private(set) var screenSize: CGSize = .zero
+    /// The inset the SYSTEM took for the vertical bar, read from the WINDOW —
+    /// a navigation controller mirrors it onto the far side as well, and that
+    /// mirror must not be mistaken for a second bar.
+    @Published private(set) var barInset: CGFloat = 0
+    /// Which PHYSICAL side that bar is on. `verticalBarEdge` reports `.trailing`
+    /// even in Hebrew, so it cannot answer this — the window's insets can.
+    @Published private(set) var barOnLeft: Bool = false
 
     /// Below this usable height a phone layout stops fitting: the Duo held
     /// open (≈658pt) and the iPhone SE (647pt) are under it, a 13 mini (728)
@@ -67,21 +81,34 @@ final class DisplayGeometry: ObservableObject {
     /// Is there a fold the layout must not put anything across?
     var hasFold: Bool { !divisions.isEmpty }
 
-    // MARK: 🎯 Centering on the PHYSICAL screen
+    // MARK: 🎚 The vertical bar's strip — ours below what the system reserved
 
-    /// How much of the vertical bar's inset to mirror on the opposite side, by
-    /// screen. The bar sits on one side only, so content centered in the safe
-    /// area sits off the middle of the glass (Rani: "כל מסך אצלנו נראה כאילו
-    /// הוא לא ממורכז").
-    ///   • Wide (the open foldable, 867pt): the full mirror — dead centre, and
-    ///     84pt off a screen that wide costs nothing.
-    ///   • Narrow (its outer screen, 382pt): none. Rani compared none / half /
-    ///     full on screenshots and kept the width: "אי אפשר להקטין במצב סגור".
-    static let balanceWide: CGFloat = 1.0
-    static let balanceNarrow: CGFloat = 0
+    /// The foldable moved the status bar to a strip down one side. Only the
+    /// TOP of that strip belongs to the system, and it says exactly how much:
+    /// a `.occlusion` region over the strip, 170pt closed and 120pt open.
+    /// Measured on both Duos: a tap above that line is swallowed, a tap below
+    /// it reaches our views — so the rest of the strip is ours to use.
+    var hasBarStrip: Bool { barInset >= 40 && screenSize.width > 0 }
+
+    /// The strip in full-screen coordinates (empty when there is no bar).
+    var barStrip: CGRect {
+        guard hasBarStrip else { return .zero }
+        return CGRect(x: barOnLeft ? 0 : screenSize.width - barInset, y: 0,
+                      width: barInset, height: screenSize.height)
+    }
+
+    /// How far down the strip the system's own items reach. Anything we draw
+    /// starts below this — above it the touch never arrives.
+    var barStripTop: CGFloat {
+        let strip = barStrip
+        guard !strip.isEmpty else { return 0 }
+        return occlusions.filter { $0.intersects(strip) }.map(\.maxY).max() ?? 0
+    }
+
+    // MARK: 🎯 Centering on the PHYSICAL screen — the system's job, not ours
+
     /// Above this safe width a screen counts as wide.
     static let wideWidth: CGFloat = 600
-
 
     /// The size and safe area SwiftUI actually lays the root out in. Taken from
     /// the root's GeometryProxy — the UIView below did NOT reliably receive the
@@ -98,7 +125,10 @@ final class DisplayGeometry: ObservableObject {
     }
 
     fileprivate func update(hinge: Hinge? = nil, angle: Double?? = nil, bar: BarEdge? = nil,
-                            divisions: [CGRect]? = nil, occlusions: [CGRect]? = nil) {
+                            sizeClass: String? = nil,
+                            divisions: [CGRect]? = nil, occlusions: [CGRect]? = nil,
+                            screenSize: CGSize? = nil, barInset: CGFloat? = nil,
+                            barOnLeft: Bool? = nil) {
         var changed = false
         func set<T: Equatable>(_ kp: ReferenceWritableKeyPath<DisplayGeometry, T>, _ v: T?) {
             guard let v, self[keyPath: kp] != v else { return }
@@ -107,8 +137,12 @@ final class DisplayGeometry: ObservableObject {
         set(\.hinge, hinge)
         if let angle { set(\.hingeAngle, angle) }
         set(\.verticalBarEdge, bar)
+        set(\.sizeClass, sizeClass)
         set(\.divisions, divisions)
         set(\.occlusions, occlusions)
+        set(\.screenSize, screenSize)
+        set(\.barInset, barInset)
+        set(\.barOnLeft, barOnLeft)
         #if DEBUG
         if changed { print(debugLine) }
         #endif
@@ -119,8 +153,9 @@ final class DisplayGeometry: ObservableObject {
         func r(_ c: CGRect) -> String { "(\(Int(c.minX)),\(Int(c.minY)) \(Int(c.width))×\(Int(c.height)))" }
         return "📐 DISPLAY safe=\(Int(safeSize.width))×\(Int(safeSize.height)) "
             + "insets=t\(Int(safeInsets.top)) l\(Int(safeInsets.leading)) b\(Int(safeInsets.bottom)) t\(Int(safeInsets.trailing)) "
-            + "short=\(isShort) bar=\(verticalBarEdge.rawValue) hinge=\(hinge.rawValue) "
+            + "short=\(isShort) wideShort=\(isWideShort) hsc=\(sizeClass) bar=\(verticalBarEdge.rawValue) hinge=\(hinge.rawValue) "
             + "angle=\(hingeAngle.map { String(format: "%.2f", $0) } ?? "-") "
+            + "screen=\(Int(screenSize.width))×\(Int(screenSize.height)) strip=\(Int(barInset))@\(barOnLeft ? "L" : "R")+\(Int(barStripTop)) "
             + "divisions=\(divisions.map(r)) occlusions=\(occlusions.map(r))"
     }
 }
@@ -137,9 +172,6 @@ struct DisplayProbe: UIViewRepresentable {
 final class DisplayProbeView: UIView {
     private var hinge: DisplayGeometry.Hinge = .none
     private var angle: Double?
-    /// While a one-sided bar is showing: re-checks the presented screens, which
-    /// live outside this view's hierarchy and would otherwise never be told.
-    private var balanceTimer: Timer?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -149,46 +181,8 @@ final class DisplayProbeView: UIView {
     }
     required init?(coder: NSCoder) { fatalError() }
 
-    override func layoutSubviews() { super.layoutSubviews(); refresh(); balance() }
-    override func didMoveToWindow() { super.didMoveToWindow(); refresh(); balance() }
-
-    // MARK: 🎯 Centered on the glass
-
-    /// The foldable's vertical bar is on ONE side, so content centered in the
-    /// safe area sits off the middle of the screen (Rani: "כל מסך אצלנו נראה
-    /// כאילו הוא לא ממורכז"). The same inset is mirrored on the other side as
-    /// `additionalSafeAreaInsets` on every view controller in the window — the
-    /// root and each sheet/cover above it (86 presentations; a SwiftUI modifier
-    /// at the root reaches none of them). Content moves in, backdrops that
-    /// ignore the safe area still run edge to edge.
-    ///
-    /// Measured from the WINDOW's insets (physical left/right, never including
-    /// what is added here — so it can't feed back on itself). Nothing happens on
-    /// any device without a one-sided bar.
-    private func balance() {
-        guard let window else { return }
-        let l = window.safeAreaInsets.left, r = window.safeAreaInsets.right
-        let gap = abs(l - r)
-        var add = UIEdgeInsets.zero
-        if gap >= 40 {
-            let safeWidth = window.bounds.width - l - r
-            let factor = safeWidth >= DisplayGeometry.wideWidth ? DisplayGeometry.balanceWide : DisplayGeometry.balanceNarrow
-            let amount = (gap * factor).rounded()
-            if l > r { add.right = amount } else { add.left = amount }
-        }
-        var vc = window.rootViewController
-        while let c = vc {
-            if c.additionalSafeAreaInsets != add { c.additionalSafeAreaInsets = add }
-            vc = c.presentedViewController
-        }
-        if add == .zero {
-            balanceTimer?.invalidate(); balanceTimer = nil
-        } else if balanceTimer == nil {
-            balanceTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
-                MainActor.assumeIsolated { self?.balance() }
-            }
-        }
-    }
+    override func layoutSubviews() { super.layoutSubviews(); refresh() }
+    override func didMoveToWindow() { super.didMoveToWindow(); refresh() }
 
     private func installFoldableObservers() {
         #if canImport(UIKit, _version: 9127.0.85)
@@ -231,14 +225,33 @@ final class DisplayProbeView: UIView {
             case .trailing: bar = .trailing
             default:        bar = .none
             }
-            divisions = reservedRegions(kind: .division).filter(\.isActive).map(\.frame)
-            occlusions = reservedRegions(kind: .occlusion).filter(\.isActive).map(\.frame)
+            // In the WINDOW's coordinates, not this view's: a screen that lays
+            // itself out wider than the glass would otherwise shift every rect
+            // and the strip would stop matching (measured: a 1165pt-wide root
+            // reported the bar's occlusion at x=974 on a 951pt screen).
+            divisions = reservedRegions(kind: .division).filter(\.isActive)
+                .map { convert($0.frame, to: nil) }
+            occlusions = reservedRegions(kind: .occlusion).filter(\.isActive)
+                .map { convert($0.frame, to: nil) }
         }
         #endif
+        let sc: String
+        switch traitCollection.horizontalSizeClass {
+        case .compact: sc = "compact"
+        case .regular: sc = "regular"
+        default:       sc = "-"
+        }
+        // The WINDOW's insets: a UINavigationController mirrors the bar's inset
+        // onto the far side to keep its content optically centred, and reading
+        // that back would say "a bar on both sides".
+        let screen = window?.bounds.size ?? .zero
+        let wl = window?.safeAreaInsets.left ?? 0, wr = window?.safeAreaInsets.right ?? 0
+        let inset = max(wl, wr), onLeft = wl > wr
         let (h, a) = (hinge, angle)
         Task { @MainActor in
-            DisplayGeometry.shared.update(hinge: h, angle: .some(a), bar: bar,
-                                          divisions: divisions, occlusions: occlusions)
+            DisplayGeometry.shared.update(hinge: h, angle: .some(a), bar: bar, sizeClass: sc,
+                                          divisions: divisions, occlusions: occlusions,
+                                          screenSize: screen, barInset: inset, barOnLeft: onLeft)
         }
     }
 }
