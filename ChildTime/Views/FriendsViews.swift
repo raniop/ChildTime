@@ -6,6 +6,7 @@ import SwiftUI
 /// each showing the friend's character, name, and star count. The child is
 /// highlighted. "Add friend" opens the QR / link / code flow.
 struct LeaderboardView: View {
+    @ObservedObject private var railHost = DisplayGeometry.shared
     @ObservedObject private var friends = FriendsManager.shared
     @ObservedObject private var liveGame = LiveGameManager.shared
     @Environment(\.dismiss) private var dismiss
@@ -35,6 +36,20 @@ struct LeaderboardView: View {
             }
         }
         .environment(\.layoutDirection, .app)
+        .sideRail {
+            SideRailButton(systemImage: "xmark", label: tr("סְגֹר")) { dismiss() }
+            SideRailDivider()
+            SideRailButton(systemImage: "tray.fill",
+                           label: friends.incomingRequests.isEmpty
+                               ? tr("בַּקָּשׁוֹת חֲבֵרוּת")
+                               : tr("בַּקָּשׁוֹת חֲבֵרוּת (\(friends.incomingRequests.count))")) {
+                showRequests = true
+            }
+            if !friends.incomingRequests.isEmpty {
+                SideRailLabel(text: "\(friends.incomingRequests.count)")
+            }
+            SideRailButton(systemImage: "person.badge.plus", label: tr("הוֹסָפַת חָבֵר")) { showAdd = true }
+        }
         .task {
             await friends.startLive()   // real-time: new friends + live stars
             if let code = friends.pendingFriendCode {
@@ -77,26 +92,29 @@ struct LeaderboardView: View {
 
     private var header: some View {
         VStack(spacing: 10) {
-            HStack(spacing: 8) {
-                Button { dismiss() } label: { headerCircle("xmark") }
-                Spacer()
-                Button { showRequests = true } label: {
-                    ZStack(alignment: .topTrailing) {
-                        headerCircle("tray.fill")
-                        if !friends.incomingRequests.isEmpty {
-                            Text("\(friends.incomingRequests.count)")
-                                .font(.system(size: 11, weight: .black, design: .rounded))
-                                .foregroundStyle(.white)
-                                .frame(minWidth: 18, minHeight: 18)
-                                .background(Circle().fill(AppColor.almostWarm))
-                                .overlay(Circle().stroke(.white, lineWidth: 1.5))
-                                .offset(x: 4, y: -4)
+            // 🎚 All three are chrome — on a foldable they live in the rail.
+            if !railHost.hasBarStrip {
+                HStack(spacing: 8) {
+                    Button { dismiss() } label: { headerCircle("xmark") }
+                    Spacer()
+                    Button { showRequests = true } label: {
+                        ZStack(alignment: .topTrailing) {
+                            headerCircle("tray.fill")
+                            if !friends.incomingRequests.isEmpty {
+                                Text("\(friends.incomingRequests.count)")
+                                    .font(.system(size: 11, weight: .black, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .frame(minWidth: 18, minHeight: 18)
+                                    .background(Circle().fill(AppColor.almostWarm))
+                                    .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                                    .offset(x: 4, y: -4)
+                            }
                         }
                     }
+                    Button { showAdd = true } label: { headerCircle("person.badge.plus") }
                 }
-                Button { showAdd = true } label: { headerCircle("person.badge.plus") }
+                .environment(\.layoutDirection, .appMirrored)
             }
-            .environment(\.layoutDirection, .appMirrored)
             Text(tr("הַחֲבֵרִים"))
                 .font(.system(size: 26, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)

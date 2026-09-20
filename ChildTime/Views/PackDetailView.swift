@@ -5,6 +5,7 @@ import StoreKit
 /// whom, and the one button that buys it (behind the parent gate) and sends it
 /// to the chosen children. Approved mockup: notifications-and-packs.html.
 struct PackDetailView: View {
+    @ObservedObject private var railHost = DisplayGeometry.shared
     let pack: QuestionPack
     var preselected: UUID? = nil
     var onClose: () -> Void
@@ -47,6 +48,7 @@ struct PackDetailView: View {
                 .padding(.bottom, 32)
             }
         }
+        .railDismiss(tr("סְגֹר")) { Haptic.light(); onClose() }
         .environment(\.layoutDirection, .app)
         .foregroundStyle(GlassInk.primary)
         .onAppear {
@@ -80,13 +82,16 @@ struct PackDetailView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Button { Haptic.light(); onClose() } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 15, weight: .bold))
-                        .frame(width: 36, height: 36)
-                        .background(Circle().fill(.white.opacity(0.18)))
+                // 🎚 The way out lives in the rail on a foldable.
+                if !railHost.hasBarStrip {
+                    Button { Haptic.light(); onClose() } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 15, weight: .bold))
+                            .frame(width: 36, height: 36)
+                            .background(Circle().fill(.white.opacity(0.18)))
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
                 Spacer()
                 Text(pack.isPass ? tr("עוֹלָם בְּסִיסִי · כָּלוּל בְּטוֹפִי+") : tr("כָּלוּל בְּטוֹפִי+ · אוֹ רְכִישָׁה חַד־פַּעֲמִית"))
                     .font(.system(size: 11.5, weight: .bold, design: .rounded))
