@@ -170,6 +170,10 @@ struct DisplayProbe: UIViewRepresentable {
 }
 
 final class DisplayProbeView: UIView {
+    /// What a screen gets above its content when the status bar is not there to
+    /// provide it. A hair under the 20pt a classic status bar took.
+    static let minimumTopMargin: CGFloat = 16
+
     private var hinge: DisplayGeometry.Hinge = .none
     private var angle: Double?
     /// Keeps the un-mirroring true for screens that appear later — a pushed
@@ -221,8 +225,18 @@ final class DisplayProbeView: UIView {
             let far = barOnLeft ? insets.right - add.right : insets.left - add.left
             let want = active ? -max(0, far) : 0
             let current = barOnLeft ? add.right : add.left
-            guard abs(current - want) > 0.5 else { return }
+
+            // ⬆️ With the status bar moved to the side, the TOP safe area is 0
+            // and every screen in the app sat flush against the glass (Rani:
+            // "הוא קרוב מדי למעלה, זה לא נראה טוב"). Give the top back the
+            // margin a status bar used to provide — measured the same way, so
+            // a screen that already has a top inset is left alone.
+            let systemTop = insets.top - add.top
+            let wantTop = active ? max(0, Self.minimumTopMargin - systemTop) : 0
+
+            guard abs(current - want) > 0.5 || abs(add.top - wantTop) > 0.5 else { return }
             if barOnLeft { add.right = want } else { add.left = want }
+            add.top = wantTop
             vc.additionalSafeAreaInsets = add
             touched = true
         }

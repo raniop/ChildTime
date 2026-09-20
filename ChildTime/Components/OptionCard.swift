@@ -62,7 +62,11 @@ struct OptionCard: View {
                     .lineLimit(2)
                     .minimumScaleFactor(0.45)          // shrink, don't break, long words
                     .strikethrough(feedback == .eliminated, color: .white.opacity(0.8))
-                    .frame(maxWidth: .infinity, minHeight: minHeight)
+                    // `maxHeight: .infinity` so the card GROWS when its row is
+                    // given room, instead of staying at `minHeight` and leaving
+                    // the extra space as a gap around itself (the foldable's
+                    // question screen, where the tool row moved to the rail).
+                    .frame(maxWidth: .infinity, minHeight: minHeight, maxHeight: .infinity)
                     // Keep the words clear of the corner badge — a long answer used
                     // to run under the number (Rani).
                     .padding(.horizontal, 14)

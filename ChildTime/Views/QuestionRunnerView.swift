@@ -142,7 +142,12 @@ struct QuestionRunnerView: View {
             Spacer().frame(height: 10)
             answersBlock(q)
                 .id("answers-\(q.id)")
-            Spacer(minLength: display.isShort ? AppSpacing.sm : AppSpacing.xxl)   // breathing room above the companion
+                .frame(maxHeight: display.hasBarStrip && q.passage == nil ? .infinity : nil)
+            // Room above the floating companion — none is needed where the
+            // buddy lives in the rail and the answers already fill the screen.
+            if !(display.hasBarStrip && q.passage == nil) {
+                Spacer(minLength: display.isShort ? AppSpacing.sm : AppSpacing.xxl)
+            }
         }
     }
 
@@ -202,6 +207,16 @@ struct QuestionRunnerView: View {
                 )
             }
             .allowsHitTesting(true)
+            }
+
+            // 💬 What the rail's buddy says — pinned low, clear of the answers.
+            if display.hasBarStrip {
+                VStack {
+                    Spacer()
+                    InlineBuddyBubble(controller: companion, clearance: 0)
+                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.bottom, AppSpacing.sm)
+                }
             }
 
             // Effects overlays
@@ -265,6 +280,39 @@ struct QuestionRunnerView: View {
         } message: {
             Text(tr("נָסִיר אֶת הַשְּׁאֵלָה הַזּוֹ וְלֹא נַצִּיג אוֹתָהּ שׁוּב, וְנִשְׁלַח עָלֶיהָ דִּוּוּחַ כְּדֵי שֶׁנְּשַׁפֵּר."))
         }
+        // 🎚 The foldable's bar strip is this screen's tool row: ✕, then the
+        // four controls that sat under the answers, then טופי himself. The row
+        // they came from is gone, so the answers get its 56pt — and the buddy
+        // stops standing on answer 4.
+        .sideRail {
+            SideRailButton(systemImage: "xmark", label: tr("סְגֹר")) { dismiss() }
+            SideRailDivider()
+            SideRailButton(systemImage: "flag", label: tr("דִּוּוּחַ עַל הַשְּׁאֵלָה")) { showReportConfirm = true }
+            SideRailButton(systemImage: "speaker.wave.2.fill", label: tr("הַקְרָאָה")) {
+                guard let q = current else { return }
+                let spokenPrompt = (q.passage.map { $0 + ". " } ?? "") + q.readAloudText
+                SpeechReader.shared.readQuestion(prompt: spokenPrompt, options: q.options)
+            }
+            if let q = current {
+                if !isPreReader {
+                    SideRailButton(systemImage: parentHelp.hasActiveRequest && parentHelp.activeQuestion == q.prompt
+                                   ? "hourglass" : "hand.raised.fill",
+                                   label: tr("בַּקָּשַׁת עֶזְרָה מֵהוֹרֶה")) {
+                        guard !showFeedback, !receivedHelpThisQuestion else { return }
+                        Haptic.light()
+                        showParentAssist = true
+                    }
+                }
+                if !showFeedback {
+                    SideRailButton(emoji: "💡", label: tr("רֶמֶז")) { useHint(q: q) }
+                        .opacity(canUseHint(q) ? 1 : 0.45)
+                        .disabled(!canUseHint(q))
+                    SideRailLabel(text: hintCost == 0 ? tr("(חִנָּם)") : tr("(\(hintCost) שְׁנִיּוֹת)"))
+                }
+            }
+            SideRailDivider()
+            InlineBuddy(controller: companion, profile: profiles.active, width: 50)
+        }
         .onAppear { startSession() }
         // NOTE: the "child finished playing" report is NOT sent here — leaving an
         // adventure isn't leaving the app (they often start another). It's sent
@@ -324,10 +372,15 @@ struct QuestionRunnerView: View {
         let done = min(questionIndex + 1, total)
         return VStack(spacing: 8) {
             HStack(spacing: 8) {
-                Button { dismiss() } label: {
-                    quizChip { Image(systemName: "xmark").font(.system(size: 13, weight: .heavy)) }
+                // ✕ heads the rail on the foldable — see `.sideRail` on the body.
+                if !display.hasBarStrip {
+                    Button { dismiss() } label: {
+                        quizChip { Image(systemName: "xmark").font(.system(size: 13, weight: .heavy)) }
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
+                // With ✕ gone the three chips are the whole row, so they sit in
+                // the middle of it rather than pushed to one end (Rani).
                 Spacer(minLength: 0)
                 quizChip {
                     Text("💎 \(progress.diamonds.currencyShort)")
@@ -342,6 +395,7 @@ struct QuestionRunnerView: View {
                 quizChip {
                     Text(tr("\(current?.topic.emoji ?? themeWorld.emoji) שְׁאֵלָה \(done)/\(total)"))
                 }
+                if display.hasBarStrip { Spacer(minLength: 0) }
             }
             .font(.system(size: 12.5, weight: .heavy, design: .rounded))
             .foregroundStyle(.white)
@@ -622,7 +676,12 @@ struct QuestionRunnerView: View {
     @ViewBuilder
     private func answersBlock(_ q: Question) -> some View {
         VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-            optionsGrid(for: q)
+            // A passage question still scrolls, so it keeps the content-sized grid.
+            if display.hasBarStrip, q.passage == nil {
+                fillingOptions(for: q)
+            } else {
+                optionsGrid(for: q)
+            }
 
             // Mockup `.streak`: "🔥 3 ברצף · עוד 2 ובונוס!" in gold under the answers.
             if progress.currentStreak >= 2 {
@@ -646,49 +705,54 @@ struct QuestionRunnerView: View {
                     .padding(.horizontal, AppSpacing.md)
             }
 
-            // Hint shows whenever it's payable; wand only after 2 wrong picks.
-            // Fixed height so the layout never jumps when these appear/disappear
-            // (e.g. the hint hides the moment the answer is locked in).
-            // RTL row: hint in the middle, 🚩 🔊 🙋 together on the right; the
-            // left end stays empty for the buddy.
-            HStack(spacing: AppSpacing.sm) {
-                cardIconButton(system: "flag", fg: .white.opacity(0.7), bg: .white.opacity(0.14)) {
-                    showReportConfirm = true
+            // 🎚 On the foldable every one of these lives in the rail, and this
+            // 56pt row disappears — real height back to the answers on a 644pt
+            // screen, and the buddy stops standing on answer 4.
+            if !display.hasBarStrip {
+                // Hint shows whenever it's payable; wand only after 2 wrong picks.
+                // Fixed height so the layout never jumps when these appear/disappear
+                // (e.g. the hint hides the moment the answer is locked in).
+                // RTL row: hint in the middle, 🚩 🔊 🙋 together on the right; the
+                // left end stays empty for the buddy.
+                HStack(spacing: AppSpacing.sm) {
+                    cardIconButton(system: "flag", fg: .white.opacity(0.7), bg: .white.opacity(0.14)) {
+                        showReportConfirm = true
+                    }
+                    cardIconButton(system: "speaker.wave.2.fill", fg: .white, bg: .white.opacity(0.22)) {
+                        Haptic.light()
+                        // For a passage question, read the passage first — one
+                        // utterance, so the two don't cut each other off.
+                        let spokenPrompt = (q.passage.map { $0 + ". " } ?? "") + q.readAloudText
+                        SpeechReader.shared.readQuestion(prompt: spokenPrompt, options: q.options)
+                    }
+                    if !isPreReader {
+                        askParentButton(for: q)
+                    }
+                    Spacer(minLength: 0)
+                    if !showFeedback {
+                        hintButton(for: q)
+                    }
+                    if consecutiveWrong >= 2 && !showFeedback {
+                        magicWandButton
+                    }
+                    Spacer(minLength: 0)
+                    if display.isShort {
+                        // 📐 A short screen: the buddy lives IN this slot.
+                        InlineBuddy(controller: companion, profile: profiles.active, width: 44)
+                    } else {
+                        Color.clear.frame(width: companionSize * 0.7, height: 1)   // room for the buddy
+                    }
                 }
-                cardIconButton(system: "speaker.wave.2.fill", fg: .white, bg: .white.opacity(0.22)) {
-                    Haptic.light()
-                    // For a passage question, read the passage first — one
-                    // utterance, so the two don't cut each other off.
-                    let spokenPrompt = (q.passage.map { $0 + ". " } ?? "") + q.readAloudText
-                    SpeechReader.shared.readQuestion(prompt: spokenPrompt, options: q.options)
+                .padding(.horizontal, AppSpacing.md)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .overlay(alignment: .trailing) {
+                    if display.isShort {
+                        InlineBuddyBubble(controller: companion, clearance: AppSpacing.md + 44 + 6)
+                    }
                 }
-                if !isPreReader {
-                    askParentButton(for: q)
-                }
-                Spacer(minLength: 0)
-                if !showFeedback {
-                    hintButton(for: q)
-                }
-                if consecutiveWrong >= 2 && !showFeedback {
-                    magicWandButton
-                }
-                Spacer(minLength: 0)
-                if display.isShort {
-                    // 📐 A short screen: the buddy lives IN this slot.
-                    InlineBuddy(controller: companion, profile: profiles.active, width: 44)
-                } else {
-                    Color.clear.frame(width: companionSize * 0.7, height: 1)   // room for the buddy
-                }
+                .animation(.spring(response: 0.4, dampingFraction: 0.7), value: consecutiveWrong)
             }
-            .padding(.horizontal, AppSpacing.md)
-            .frame(maxWidth: .infinity)
-            .frame(height: 56)
-            .overlay(alignment: .trailing) {
-                if display.isShort {
-                    InlineBuddyBubble(controller: companion, clearance: AppSpacing.md + 44 + 6)
-                }
-            }
-            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: consecutiveWrong)
         }
     }
 
@@ -778,6 +842,39 @@ struct QuestionRunnerView: View {
         }
         .buttonStyle(.juicy)
         .disabled(!enabled)
+    }
+
+    /// 📐 The four answers, filling the height the tool row used to take.
+    ///
+    /// `LazyVGrid` sizes its rows to their content, so with the row gone the
+    /// answers bunched at the top of the screen and left a dead band under them
+    /// (Rani: "זה לא נראה טוב התשובות"). Two explicit rows of two share the
+    /// space instead, and every card is the same size — which is also how a
+    /// quiz answer should read: four equal choices, not four different ones.
+    private func fillingOptions(for q: Question) -> some View {
+        let opts = Array(q.options.enumerated())
+        let rows = stride(from: 0, to: opts.count, by: 2).map { Array(opts[$0..<min($0 + 2, opts.count)]) }
+        return VStack(spacing: AppSpacing.md) {
+            ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                HStack(spacing: AppSpacing.md) {
+                    ForEach(row, id: \.offset) { idx, opt in
+                        OptionCard(
+                            text: opt,
+                            feedback: feedbackForIndex[idx] ?? .normal,
+                            index: idx
+                        ) {
+                            pickOption(idx, q: q)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
+                .frame(maxHeight: .infinity)
+            }
+        }
+        .frame(maxHeight: .infinity)
+        .padding(.horizontal, AppSpacing.md)
+        // Answers always number right-to-left — 1 top-right, 2 top-left, 3, 4.
+        .environment(\.layoutDirection, .app)
     }
 
     private func optionsGrid(for q: Question) -> some View {
