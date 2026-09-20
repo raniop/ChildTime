@@ -564,7 +564,11 @@ struct WorldMapView: View {
 
             // Companion wanders the screen and is also draggable.
             // On iPhone we keep the wander zone tighter so it doesn't park
-            // on top of world cards in the middle of the grid.
+            // on top of world cards in the middle of the grid. On the foldable
+            // there is no free screen to wander in at all — it stood on
+            // "עולם הכדורגל" and cut its name — so the buddy moves into the
+            // rail (see `.sideRail`) and only its speech comes out.
+            if !display.hasBarStrip {
             FloatingCompanion(
                 controller: companion,
                 profile: profiles.active,
@@ -583,20 +587,42 @@ struct WorldMapView: View {
                 bottomInset: isShort && bottomPanelHeight > 0 ? bottomPanelHeight : (isCompact ? 220 : 200),
                 horizontalInset: AppSpacing.lg
             )
+            }
+        }
+        // 💬 What the rail's buddy says — over the bottom scrim, where it can
+        // cover nothing that matters, instead of over a world card.
+        .overlay(alignment: .bottom) {
+            if display.hasBarStrip {
+                InlineBuddyBubble(controller: companion, clearance: 0)
+                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.bottom, max(bottomPanelHeight, 80) + 10)
+            }
         }
         // 📐 The header and the floating buddy measure in the same space.
         .coordinateSpace(name: "home")
         // 🎚 The kid's own rail in the foldable's bar strip: the three round
-        // buttons that used to head the screen, and the wallet under them.
+        // buttons that used to head the screen. ⭐ and 💎 stay on the screen
+        // itself, beside the child's name (Rani) — they are part of the card,
+        // not chrome.
         .sideRail {
             SideRailButton(emoji: "🛍️", label: tr("חֲנוּת")) { showingShop = true }
             SideRailButton(emoji: "🏆", label: tr("חֲבֵרִים")) { showingLeaderboard = true }
             SideRailButton(emoji: "⚙️", label: tr("הגדרות")) { showingParentGate = true }
             SideRailDivider()
-            SideRailCounter(emoji: "⭐", value: progress.stars.currencyShort,
-                            label: tr("כּוֹכָבִים")) { infoStat = .stars }
-            SideRailCounter(emoji: "💎", value: progress.diamonds.currencyShort,
-                            label: tr("יַהֲלוֹמִים")) { infoStat = .diamonds }
+            // 🎁 The daily chest rides beside the buddy, exactly as it rides on
+            // its head everywhere else.
+            if progress.dailyChestAvailable {
+                SideRailButton(emoji: "🎁", label: tr("מַתָּנָה")) { showDailyChest = true }
+            }
+            Button {
+                Haptic.light()
+                showingShop = true
+            } label: {
+                InlineBuddy(controller: companion, profile: profiles.active, width: 50)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(tr("טופי"))
         }
         // Returning from the smart adventure with the warm-up freshly completed →
         // celebrate the games opening (the map's onAppear doesn't re-fire under
@@ -1019,9 +1045,7 @@ struct WorldMapView: View {
             HStack(alignment: .center, spacing: 10) {
                 identityBlock(avatar: avatarSize)
                 Spacer(minLength: 6)
-                // ⭐ / 💎 move into the rail on the foldable — always on screen,
-                // and the header wins back a whole line on a short screen.
-                if !display.hasBarStrip { walletStats }
+                walletStats
             }
             statsPanel
             HStack(spacing: 10) {
