@@ -151,43 +151,62 @@ struct SideRailDivider: View {
     }
 }
 
-
-/// 📐 Take the width back from the bar's mirror.
-///
-/// On the foldable a `UINavigationController` insets its content by the bar's
-/// width on BOTH sides, so the page stays optically centred between the bar and
-/// the far edge. With our own rail living in the bar's strip that mirror is just
-/// 84pt of dead glass (Rani: "חבל על המקום בצד שמאל" — measured: the parent's
-/// home ran 266pt wide inside a 382pt safe area). A screen with no navigation
-/// controller never had the mirror and is untouched.
-///
-/// This reclaims the horizontal safe area and hands back only the side the bar
-/// is really on. The layout is done physically, so it is the same page in
-/// Hebrew and in English; the content keeps whatever direction it came with.
-struct FillBesideBar: ViewModifier {
-    @ObservedObject private var display = DisplayGeometry.shared
-    @Environment(\.layoutDirection) private var direction
-
-    func body(content: Content) -> some View {
-        if display.hasBarStrip {
-            HStack(spacing: 0) {
-                if display.barOnLeft { gap }
-                content
-                    .frame(maxWidth: .infinity)
-                    .environment(\.layoutDirection, direction)
-                if !display.barOnLeft { gap }
-            }
-            .environment(\.layoutDirection, .leftToRight)
-            .ignoresSafeArea(.container, edges: .horizontal)
-        } else {
-            content
-        }
+extension View {
+    /// 🎚 Put this screen's own controls in the foldable's bar strip.
+    ///
+    /// One line per screen, and the rail is drawn where the system's own items
+    /// are not (`DisplayGeometry.barStripTop`). On every other device it is not
+    /// drawn at all, so a screen can declare a rail unconditionally.
+    ///
+    /// It is an overlay rather than something the app root renders, because a
+    /// sheet and a full-screen cover live in their own hosting controllers — a
+    /// preference from inside one never reaches the root, and those are exactly
+    /// the screens that were losing the strip.
+    func sideRail<Rail: View>(@ViewBuilder _ rail: @escaping () -> Rail) -> some View {
+        overlay { SideRailContainer(content: rail) }
     }
-
-    private var gap: some View { Color.clear.frame(width: display.barInset) }
 }
 
-extension View {
-    /// See `FillBesideBar`.
-    func fillBesideBar() -> some View { modifier(FillBesideBar()) }
+/// A label under a rail control, for the few that need naming.
+struct SideRailLabel: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .font(.system(size: 9.5, weight: .bold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.8))
+            .lineLimit(1).minimumScaleFactor(0.7)
+            .frame(maxWidth: 54)
+            .padding(.top, -5)
+    }
+}
+
+/// A counter in the rail — ⭐ stars, 💎 diamonds. Tappable when it leads
+/// somewhere, and always at least a 44pt target.
+struct SideRailCounter: View {
+    let emoji: String
+    let value: String
+    var label: String = ""
+    var action: (() -> Void)? = nil
+
+    var body: some View {
+        Button {
+            guard let action else { return }
+            Haptic.light()
+            action()
+        } label: {
+            VStack(spacing: 0) {
+                Text(emoji).font(.system(size: 17))
+                Text(value)
+                    .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .monospacedDigit()
+                    .lineLimit(1).minimumScaleFactor(0.6)
+            }
+            .frame(width: 52, height: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(action == nil)
+        .accessibilityLabel(label.isEmpty ? value : "\(label) \(value)")
+    }
 }

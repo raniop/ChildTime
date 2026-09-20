@@ -172,6 +172,10 @@ struct DisplayProbe: UIViewRepresentable {
 final class DisplayProbeView: UIView {
     private var hinge: DisplayGeometry.Hinge = .none
     private var angle: Double?
+    /// Keeps the un-mirroring true for screens that appear later — a pushed
+    /// page, a sheet, a full-screen cover — which are not in this view's
+    /// hierarchy and would otherwise never be visited.
+    private var sweepTimer: Timer?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -181,8 +185,66 @@ final class DisplayProbeView: UIView {
     }
     required init?(coder: NSCoder) { fatalError() }
 
-    override func layoutSubviews() { super.layoutSubviews(); refresh() }
-    override func didMoveToWindow() { super.didMoveToWindow(); refresh() }
+    override func layoutSubviews() { super.layoutSubviews(); refresh(); unmirrorVerticalBar() }
+    override func didMoveToWindow() { super.didMoveToWindow(); refresh(); unmirrorVerticalBar() }
+
+    // MARK: 📐 Give the page back the width the bar's mirror took
+
+    /// On the foldable a `UINavigationController` adds the vertical bar's inset
+    /// to BOTH sides of its content, so the page stays optically centred between
+    /// the bar and the far edge. Every pushed page, sheet and cover in the app
+    /// inherits that — the parent's home ran 266pt wide inside a 382pt safe area,
+    /// with 84pt of dead glass opposite the bar (Rani: "זה ממש ניצול על הפנים
+    /// של המסך"). With the app's own rail living in the bar's strip there is
+    /// nothing to centre against, so the mirror is cancelled.
+    ///
+    /// Done once here for the whole window rather than screen by screen: the
+    /// mirror is added by UIKit, so it is removed in UIKit. Each controller is
+    /// measured, never assumed — `additionalSafeAreaInsets` is set to exactly
+    /// minus what the system put on the far side, so a screen that never had a
+    /// mirror is left alone and the correction cannot compound.
+    private func unmirrorVerticalBar() {
+        guard let window else { return }
+        let l = window.safeAreaInsets.left, r = window.safeAreaInsets.right
+        let bar = max(l, r)
+        let active = bar >= 40 && abs(l - r) >= 40
+        let barOnLeft = l > r
+
+        var touched = false
+        forEachViewController(from: window.rootViewController) { vc in
+            guard vc.isViewLoaded else { return }
+            var add = vc.additionalSafeAreaInsets
+            // What the SYSTEM gives on the side the bar is not on — our own
+            // correction is subtracted back out so this reads the same value
+            // on every pass instead of chasing itself.
+            let insets = vc.view.safeAreaInsets
+            let far = barOnLeft ? insets.right - add.right : insets.left - add.left
+            let want = active ? -max(0, far) : 0
+            let current = barOnLeft ? add.right : add.left
+            guard abs(current - want) > 0.5 else { return }
+            if barOnLeft { add.right = want } else { add.left = want }
+            vc.additionalSafeAreaInsets = add
+            touched = true
+        }
+        if touched { window.layoutIfNeeded() }
+
+        if active, sweepTimer == nil {
+            sweepTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
+                MainActor.assumeIsolated { self?.unmirrorVerticalBar() }
+            }
+        } else if !active {
+            sweepTimer?.invalidate(); sweepTimer = nil
+        }
+    }
+
+    /// Every view controller currently in the window: the root, its children,
+    /// and whatever each of them has presented.
+    private func forEachViewController(from root: UIViewController?, _ body: (UIViewController) -> Void) {
+        guard let root else { return }
+        body(root)
+        for child in root.children { forEachViewController(from: child, body) }
+        forEachViewController(from: root.presentedViewController, body)
+    }
 
     private func installFoldableObservers() {
         #if canImport(UIKit, _version: 9127.0.85)

@@ -378,9 +378,6 @@ struct ParentDashboardView: View {
                     // container flip left a hair of horizontal slack that became
                     // a draggable sideways drift; `.basedOnSize` disables the
                     // horizontal axis entirely when the content already fits.
-                    // 📐 Duo: use the whole width beside the rail, not the
-                    // navigation controller's mirrored half.
-                    .fillBesideBar()
                     .noHorizontalBounce()
                     .refreshable {
                         // Pull-to-refresh: actually re-fetch every child's cloud

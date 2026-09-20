@@ -586,6 +586,18 @@ struct WorldMapView: View {
         }
         // 📐 The header and the floating buddy measure in the same space.
         .coordinateSpace(name: "home")
+        // 🎚 The kid's own rail in the foldable's bar strip: the three round
+        // buttons that used to head the screen, and the wallet under them.
+        .sideRail {
+            SideRailButton(emoji: "🛍️", label: tr("חֲנוּת")) { showingShop = true }
+            SideRailButton(emoji: "🏆", label: tr("חֲבֵרִים")) { showingLeaderboard = true }
+            SideRailButton(emoji: "⚙️", label: tr("הגדרות")) { showingParentGate = true }
+            SideRailDivider()
+            SideRailCounter(emoji: "⭐", value: progress.stars.currencyShort,
+                            label: tr("כּוֹכָבִים")) { infoStat = .stars }
+            SideRailCounter(emoji: "💎", value: progress.diamonds.currencyShort,
+                            label: tr("יַהֲלוֹמִים")) { infoStat = .diamonds }
+        }
         // Returning from the smart adventure with the warm-up freshly completed →
         // celebrate the games opening (the map's onAppear doesn't re-fire under
         // a dismissed fullScreenCover, so listen to the cover's flag directly).
@@ -1007,7 +1019,9 @@ struct WorldMapView: View {
             HStack(alignment: .center, spacing: 10) {
                 identityBlock(avatar: avatarSize)
                 Spacer(minLength: 6)
-                walletStats
+                // ⭐ / 💎 move into the rail on the foldable — always on screen,
+                // and the header wins back a whole line on a short screen.
+                if !display.hasBarStrip { walletStats }
             }
             statsPanel
             HStack(spacing: 10) {
@@ -1059,7 +1073,9 @@ struct WorldMapView: View {
                 }
             }
             Spacer(minLength: 6)
-            navButtonsRow(size: isCompact ? 44 : 50)
+            // 🎚 On the foldable these three live in the bar's strip instead —
+            // see `.sideRail` on the body.
+            if !display.hasBarStrip { navButtonsRow(size: isCompact ? 44 : 50) }
         }
         .environment(\.layoutDirection, .app)
         .padding(.top, AppSpacing.sm)
