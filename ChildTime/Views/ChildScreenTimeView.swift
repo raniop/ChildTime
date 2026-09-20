@@ -74,7 +74,6 @@ struct ChildScreenTimeView: View {
                 }
                 .glassRows()
             }
-            .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { save(); dismiss() }
             .readableOnWideShort()
             .glassForm()
             .navigationTitle(tr("זְמַן מָסָךְ יוֹמִי"))
@@ -92,6 +91,10 @@ struct ChildScreenTimeView: View {
                 }
             }
         }
+        // 🎚 Outside the NavigationStack and outside the readable-width cap —
+        // otherwise the rail is drawn at the edge of the 600pt column instead
+        // of the edge of the glass.
+        .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { save(); dismiss() }
         .onAppear { loadIfNeeded() }
         // Persist when the sheet closes (covers both typed and stepped values)
         // — keeps Firestore writes to one per edit session, not one per keystroke.

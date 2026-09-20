@@ -341,10 +341,15 @@ struct ReadableWidthOnWideShort: ViewModifier {
     @ObservedObject private var display = DisplayGeometry.shared
 
     func body(content: Content) -> some View {
-        if #available(iOS 17.0, *), display.isWideShort {
-            content.contentMargins(.horizontal,
-                                   max(16, (display.safeSize.width - DisplayGeometry.readableWidth) / 2),
-                                   for: .scrollContent)
+        if display.isWideShort, display.safeSize.width > DisplayGeometry.readableWidth {
+            // A capped, centred frame — NOT `contentMargins(for: .scrollContent)`,
+            // which measured on the open Duo as doing nothing to a Form: the rows
+            // still ran the full 867pt with the label at one edge and its control
+            // at the other. This is also what iOS itself does with a Form on a
+            // wide screen: one readable column in the middle.
+            content
+                .frame(maxWidth: DisplayGeometry.readableWidth)
+                .frame(maxWidth: .infinity)
         } else {
             content
         }

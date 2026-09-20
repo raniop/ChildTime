@@ -61,7 +61,6 @@ struct ChildLanguageView: View {
                 }
                 .glassRows()
             }
-            .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
             .readableOnWideShort()
             .glassForm()
             .navigationTitle(tr("שָׂפָה"))
@@ -75,6 +74,10 @@ struct ChildLanguageView: View {
                 }
             }
         }
+        // 🎚 Outside the NavigationStack and outside the readable-width
+        // cap — otherwise the rail is drawn at the edge of the 600pt
+        // column instead of the edge of the glass.
+        .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
     }
 
     private func pick(_ lang: AppLanguage) {

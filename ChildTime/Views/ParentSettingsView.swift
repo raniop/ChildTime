@@ -2,6 +2,7 @@ import SwiftUI
 import FamilyControls
 
 struct ParentSettingsView: View {
+    @ObservedObject private var railHost = DisplayGeometry.shared
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var shields: ShieldManager
     @EnvironmentObject var auth: AuthManager
@@ -89,8 +90,11 @@ struct ParentSettingsView: View {
             .navigationTitle(tr("הַגְדָּרוֹת"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(tr("סיום")) { dismiss() }
+                // 🎚 The one way out lives in the rail on a foldable.
+                if !railHost.hasBarStrip {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(tr("סיום")) { dismiss() }
+                    }
                 }
             }
             .tofyActivityPicker(title: PickerCopy.blocked.title, header: PickerCopy.blocked.header, footer: PickerCopy.blocked.footer, isPresented: $showAppPicker, selection: $pickerSelection)
@@ -120,6 +124,9 @@ struct ParentSettingsView: View {
                     .environment(\.layoutDirection, .app)
             }
         }
+        // 🎚 Outside the NavigationStack, so the rail is drawn at the edge
+        // of the glass and not at the edge of the content.
+        .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
     }
 
     /// "משפחת גולן" — one name for the whole household (Rani: the dashboard

@@ -71,7 +71,6 @@ struct ChildDifficultyView: View {
                 }
                 .glassRows()
             }
-            .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
             .readableOnWideShort()
             .glassForm()
             .navigationTitle(tr("רָמַת קוֹשִׁי"))
@@ -85,6 +84,10 @@ struct ChildDifficultyView: View {
                 }
             }
         }
+        // 🎚 Outside the NavigationStack and outside the readable-width
+        // cap — otherwise the rail is drawn at the edge of the 600pt
+        // column instead of the edge of the glass.
+        .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
     }
 
     // MARK: - Editing
