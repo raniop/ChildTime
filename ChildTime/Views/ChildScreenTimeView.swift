@@ -5,6 +5,7 @@ import SwiftUI
 /// `ChildRecord` — so the parent controls it from THEIR device, per child.
 /// The parent types the exact minutes (no preset buttons); 0 = unlimited.
 struct ChildScreenTimeView: View {
+    @ObservedObject private var railHost = DisplayGeometry.shared
     @EnvironmentObject private var profiles: ProfileStore
     @EnvironmentObject private var settings: ParentSettings
     @Environment(\.dismiss) private var dismiss
@@ -73,13 +74,17 @@ struct ChildScreenTimeView: View {
                 }
                 .glassRows()
             }
+            .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { save(); dismiss() }
             .readableOnWideShort()
             .glassForm()
             .navigationTitle(tr("זְמַן מָסָךְ יוֹמִי"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(tr("סִיּוּם")) { save(); dismiss() }
+                // 🎚 The one way out lives in the rail on a foldable.
+                if !railHost.hasBarStrip {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(tr("סִיּוּם")) { save(); dismiss() }
+                    }
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()

@@ -16,6 +16,14 @@ import SwiftUI
 /// The payoff is continuity: the rail sits at a PHYSICAL edge, so unfolding the
 /// device does not move it. The column beside it does not move either — the
 /// screen only grows a second half. Fold back and that half closes again.
+///
+/// Why not Apple's own path: iOS 27.1 can host toolbar items in the vertical
+/// bar — `UIBarButtonItem.AxisBehavior.verticalPreferred`, `ToolbarItem` /
+/// `.axisBehavior(.verticalPreferred)` in SwiftUI. Tried and measured on the
+/// Duo: it moves nothing here, because the header is explicit that an item
+/// prefers a vertical placement "when both horizontal and vertical bars are
+/// present" — the system hosts a vertical BAR for a tab bar or toolbar, and
+/// this app has neither. Worth re-testing if a tab bar is ever added.
 struct SideRailContainer<Content: View>: View {
     @ObservedObject private var display = DisplayGeometry.shared
 
@@ -208,5 +216,20 @@ struct SideRailCounter: View {
         .buttonStyle(.plain)
         .disabled(action == nil)
         .accessibilityLabel(label.isEmpty ? value : "\(label) \(value)")
+    }
+}
+
+extension View {
+    /// 🎚 A screen whose only chrome is a way out puts that way out in the rail.
+    ///
+    /// Sheets and covers — settings, chores, a child's worlds, the paywall —
+    /// carry one button and a title. On the foldable the title bar is squeezed
+    /// against the top of the glass while the bar's whole strip sits empty, so
+    /// the button moves into the strip and the screen keeps its full height.
+    /// Hide the toolbar item behind `DisplayGeometry.shared.hasBarStrip` so the
+    /// same screen is untouched on every other device.
+    func railDismiss(_ label: String, systemImage: String = "xmark",
+                     action: @escaping () -> Void) -> some View {
+        sideRail { SideRailButton(systemImage: systemImage, label: label, action: action) }
     }
 }

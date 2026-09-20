@@ -6,6 +6,7 @@ import SwiftUI
 /// still nudges the chosen level up/down a little based on the child's accuracy
 /// (DDA) — this sets the *base* level.
 struct ChildDifficultyView: View {
+    @ObservedObject private var railHost = DisplayGeometry.shared
     @EnvironmentObject private var profiles: ProfileStore
     @Environment(\.dismiss) private var dismiss
 
@@ -70,13 +71,17 @@ struct ChildDifficultyView: View {
                 }
                 .glassRows()
             }
+            .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
             .readableOnWideShort()
             .glassForm()
             .navigationTitle(tr("רָמַת קוֹשִׁי"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(tr("סִיּוּם")) { dismiss() }
+                // 🎚 The one way out lives in the rail on a foldable.
+                if !railHost.hasBarStrip {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(tr("סִיּוּם")) { dismiss() }
+                    }
                 }
             }
         }

@@ -6,6 +6,7 @@ import SwiftUI
 /// the Smart Feed from serving that topic — so a parent who doesn't want English
 /// just switches it off. At least one world must stay open.
 struct ChildWorldsView: View {
+    @ObservedObject private var railHost = DisplayGeometry.shared
     @EnvironmentObject private var profiles: ProfileStore
     @Environment(\.dismiss) private var dismiss
 
@@ -56,13 +57,17 @@ struct ChildWorldsView: View {
                 }
                 .glassRows()
             }
+            .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
             .readableOnWideShort()
             .glassForm()
             .navigationTitle(tr("עוֹלָמוֹת פְּעִילִים"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(tr("סִיּוּם")) { dismiss() }
+                // 🎚 The one way out lives in the rail on a foldable.
+                if !railHost.hasBarStrip {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(tr("סִיּוּם")) { dismiss() }
+                    }
                 }
             }
         }

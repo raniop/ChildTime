@@ -11,6 +11,7 @@ import SwiftUI
 /// writes the same field back, stamped. Whoever pressed last wins — see
 /// `Profile.languageUpdatedAt` and `ProfileStore.mergeRemoteChildren`.
 struct ChildLanguageView: View {
+    @ObservedObject private var railHost = DisplayGeometry.shared
     @EnvironmentObject private var profiles: ProfileStore
     @Environment(\.dismiss) private var dismiss
 
@@ -60,13 +61,17 @@ struct ChildLanguageView: View {
                 }
                 .glassRows()
             }
+            .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
             .readableOnWideShort()
             .glassForm()
             .navigationTitle(tr("שָׂפָה"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(tr("סִיּוּם")) { dismiss() }
+                // 🎚 The one way out lives in the rail on a foldable.
+                if !railHost.hasBarStrip {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(tr("סִיּוּם")) { dismiss() }
+                    }
                 }
             }
         }
