@@ -593,9 +593,12 @@ struct WorldMapView: View {
         // cover nothing that matters, instead of over a world card.
         .overlay(alignment: .bottom) {
             if display.hasBarStrip {
+                // Beside the buddy, which lives at the BOTTOM of the rail — so
+                // the bubble opens over the bottom scrim, not over a world card
+                // (it was landing a whole panel-height too high).
                 InlineBuddyBubble(controller: companion, clearance: 0)
                     .padding(.horizontal, AppSpacing.lg)
-                    .padding(.bottom, max(bottomPanelHeight, 80) + 10)
+                    .padding(.bottom, 8)
             }
         }
         // 📐 The header and the floating buddy measure in the same space.

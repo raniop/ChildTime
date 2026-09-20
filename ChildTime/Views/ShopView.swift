@@ -4,6 +4,7 @@ import SwiftUI
 /// with earned stars (or buy more stars with real money, parent-gated), and
 /// equip them. The hero shows the currently-equipped character big.
 struct ShopView: View {
+    @ObservedObject private var railHost = DisplayGeometry.shared
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var progress: ProgressStore
     @Environment(\.dismiss) private var dismiss
@@ -37,6 +38,8 @@ struct ShopView: View {
                 }
             }
         }
+        // 🎚 The kid closes this screen from the rail on a foldable.
+        .railDismiss(tr("סְגֹר")) { dismiss() }
         .sheet(isPresented: $showStarShop) {
             // Kids Category (guideline 1.3): real-money packs MUST sit behind a
             // parental gate. Apple ID / Face ID payment auth is NOT a substitute —
@@ -79,17 +82,20 @@ struct ShopView: View {
                 .frame(maxWidth: .infinity)
 
             HStack {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 40, height: 40)
-                        .background(.white.opacity(0.22), in: Circle())
-                        .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+                // 🎚 The way out lives in the rail on a foldable.
+                if !railHost.hasBarStrip {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 40, height: 40)
+                            .background(.white.opacity(0.22), in: Circle())
+                            .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+                    }
+                    .environment(\.layoutDirection, .appMirrored)
                 }
-                .environment(\.layoutDirection, .appMirrored)
 
                 Spacer()
 

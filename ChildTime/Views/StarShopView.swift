@@ -4,6 +4,7 @@ import StoreKit
 /// Buy 💎 diamond packs with real money. ALWAYS presented inside `ParentGateView`,
 /// so a child can't purchase without a parent entering the PIN / Face ID.
 struct StarShopView: View {
+    @ObservedObject private var railHost = DisplayGeometry.shared
     @ObservedObject private var store = StarPackStore.shared
     @ObservedObject private var progress = ProgressStore.shared
     @Environment(\.dismiss) private var dismiss
@@ -46,6 +47,8 @@ struct StarShopView: View {
                 StarGrantCelebration(amount: amount) { celebrate = nil }
             }
         }
+        // 🎚 The kid closes this screen from the rail on a foldable.
+        .railDismiss(tr("סְגֹר")) { dismiss() }
         .environment(\.layoutDirection, .app)
         .onChangeCompat(of: store.lastGrantedDiamonds) { _, new in
             if let new { celebrate = new; store.lastGrantedDiamonds = nil; Haptic.success() }
@@ -60,15 +63,18 @@ struct StarShopView: View {
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
             HStack {
                 Spacer()
-                Button { dismiss() } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 40, height: 40)
-                        .background(.white.opacity(0.22), in: Circle())
-                        .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+                // 🎚 The way out lives in the rail on a foldable.
+                if !railHost.hasBarStrip {
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 40, height: 40)
+                            .background(.white.opacity(0.22), in: Circle())
+                            .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+                    }
+                    .environment(\.layoutDirection, .appMirrored)
                 }
-                .environment(\.layoutDirection, .appMirrored)
             }
         }
         .padding(.horizontal, AppSpacing.lg)
