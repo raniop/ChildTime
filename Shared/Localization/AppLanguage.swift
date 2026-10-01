@@ -295,19 +295,7 @@ enum Localization {
     /// it reads right-to-left as one unit inside left-to-right text.
     static func isolatingRightToLeftRuns(_ text: String) -> String {
         guard text.unicodeScalars.contains(where: isRightToLeftScalar) else { return text }
-        // A piece that already went through here carries its own U+2067 marks —
-        // drop them (with their closers) so the whole sentence is wrapped once.
-        var flat = String.UnicodeScalarView()
-        var openers: [UInt32] = []
-        for u in text.unicodeScalars {
-            switch u.value {
-            case 0x2066, 0x2068: openers.append(u.value); flat.append(u)
-            case 0x2067: openers.append(u.value)
-            case 0x2069: if openers.popLast() != 0x2067 { flat.append(u) }
-            default: flat.append(u)
-            }
-        }
-        let s = String(flat)
+        let s = flattenedForReisolation(text)
         let ns = s as NSString
         var out = ""
         var last = 0
@@ -325,7 +313,71 @@ enum Localization {
         // name's side and come out as "Gift for 32 — דן המלך minutes" — which is
         // exactly what a parent saw. Wrapping the line in an LTR isolate settles
         // the direction for every neutral and every digit inside it.
+        //
+        // Only when there is something left-to-right to settle, though. An
+        // untranslated string falls back to Hebrew, and forcing THAT line
+        // left-to-right throws its own punctuation to the wrong end — the line is
+        // right-to-left and should stay that way.
+        guard s.unicodeScalars.contains(where: isLeftToRightLetter) else { return out }
         return "\u{2066}" + out + "\u{2069}"
+    }
+
+    /// A letter that makes a sentence read left-to-right — Latin, Cyrillic, Greek,
+    /// CJK. Digits and punctuation are deliberately NOT here: they are neutral,
+    /// they take the direction of whatever surrounds them, and a line that holds
+    /// only Hebrew and digits is a Hebrew line.
+    private static func isLeftToRightLetter(_ u: Unicode.Scalar) -> Bool {
+        guard !isRightToLeftScalar(u) else { return false }
+        switch u.properties.generalCategory {
+        case .uppercaseLetter, .lowercaseLetter, .titlecaseLetter, .modifierLetter, .otherLetter:
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// Strip the marks a previous pass through `isolatingRightToLeftRuns` left
+    /// behind, so a sentence is wrapped exactly once however deeply its pieces
+    /// were nested.
+    ///
+    /// Two different things arrive here as U+2066 and they must not be treated
+    /// alike. A piece that already went through that function carries the
+    /// whole-sentence left-to-right wrapper it adds at the end, and keeping those
+    /// nests a wrapper inside a wrapper — "⁦✓ Unlocked for ⁦⁧דָּנָה כֹּהֵן⁩ · 30 days
+    /// left⁩⁩", which is what `testHebrewNameInNestedEnglishIsIsolatedOnce` caught.
+    /// But the app's own math isolates ("⁦3 + 4⁩") are U+2066 too and MUST survive.
+    ///
+    /// What tells them apart is what they hold: the sentence wrapper is only ever
+    /// added around right-to-left text (the guard above returns early otherwise),
+    /// and a math isolate never contains any. So an LTR isolate holding Hebrew is
+    /// ours to remove, and one holding only digits is the app's to keep.
+    private static func flattenedForReisolation(_ text: String) -> String {
+        let scalars = Array(text.unicodeScalars)
+        var drop = Set<Int>()
+        var open: [(at: Int, value: UInt32, holdsRTL: Bool)] = []
+        for (i, u) in scalars.enumerated() {
+            switch u.value {
+            case 0x2066, 0x2067, 0x2068:
+                open.append((i, u.value, false))
+            case 0x2069:
+                guard let opener = open.popLast() else { break }
+                // Every right-to-left isolate is re-applied below, so drop it and
+                // its closer. A left-to-right one goes only if it is a leftover
+                // sentence wrapper — which is to say, only if it holds Hebrew.
+                if opener.value == 0x2067 || (opener.value == 0x2066 && opener.holdsRTL) {
+                    drop.insert(opener.at)
+                    drop.insert(i)
+                }
+            default:
+                if isRightToLeftScalar(u) {
+                    for k in open.indices { open[k].holdsRTL = true }
+                }
+            }
+        }
+        guard !drop.isEmpty else { return text }
+        var out = String.UnicodeScalarView()
+        for (i, u) in scalars.enumerated() where !drop.contains(i) { out.append(u) }
+        return String(out)
     }
 
     private static var cache: [AppLanguage: Bundle] = [:]

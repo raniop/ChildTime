@@ -78,6 +78,46 @@ struct QuestionRunnerView: View {
     @State private var secondsFlashPositive = true
     @State private var secondsFlashID = 0
 
+    /// 📐 Where the answers actually END, and how tall the screen actually is —
+    /// both in `runnerSpace`. Measured, because every guess we made here was
+    /// wrong on some device.
+    @State private var answersBottom: CGFloat = 0
+    /// 📖 How tall the reading passage actually is, so its card can hug it.
+    @State private var passageHeight: CGFloat = 0
+    @State private var runnerHeight: CGFloat = 0
+    private static let runnerSpace = "runner"
+
+    /// Do the answers TAKE the leftover height, or hug their own text?
+    ///
+    /// They take it wherever there is leftover height to take: the foldable, whose
+    /// rail gave back a 56pt tool row, and any regular-width screen — an iPad has
+    /// room to spare and hugging there leaves a third of the glass empty. A compact
+    /// phone has no slack, so nothing changes for it.
+    ///
+    /// Both the block's height and WHICH grid draws it must follow this one answer:
+    /// an expanded block drawn with the content-sized `LazyVGrid` just moves the
+    /// empty space into the middle of the screen instead of the bottom.
+    private func answersFill(_ q: Question) -> Bool {
+        (display.hasBarStrip && q.passage == nil) || !isCompact
+    }
+
+    /// Is there a real strip under the answers for the floating buddy to stand in?
+    ///
+    /// This used to be `!display.isShort`, and a short screen is simply not the
+    /// only screen that runs out of room: an iPad holding a reading passage fills
+    /// to the bottom too, and the buddy parked squarely on answer 4 there (Rani
+    /// photographed it on Yoav's iPad). Now the strip is measured, and the buddy
+    /// moves into the tool row wherever it isn't there — the same move a short
+    /// screen already made, for the same reason.
+    ///
+    /// On the foldable it never floats at all: the rail holds טופי already, and
+    /// two of him on one screen is worse than either place.
+    private var buddyHasFreeStrip: Bool {
+        guard !display.hasBarStrip else { return false }
+        guard runnerHeight > 0, answersBottom > 0 else { return !display.isShort }
+        return runnerHeight - answersBottom >= companionSize + 24
+    }
+
     // Smart Feed / learning state
     @State private var currentTopic: Topic = .math
     @State private var topicHistory: [Topic] = []
@@ -142,11 +182,23 @@ struct QuestionRunnerView: View {
             Spacer().frame(height: 10)
             answersBlock(q)
                 .id("answers-\(q.id)")
-                .frame(maxHeight: display.hasBarStrip && q.passage == nil ? .infinity : nil)
+                // The answers take whatever the card gave back. Hugging the passage
+                // freed ~140pt on an iPad and it all pooled at the bottom as one
+                // empty third — the same wasted glass Rani objected to, moved down
+                // the screen rather than removed. A compact screen is untouched:
+                // there is no slack there to take.
+                .frame(maxHeight: answersFill(q) ? .infinity : nil)
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.frame(in: .named(Self.runnerSpace)).maxY
+                } action: { answersBottom = $0 }
             // Room above the floating companion — none is needed where the
             // buddy lives in the rail and the answers already fill the screen.
             if !(display.hasBarStrip && q.passage == nil) {
-                Spacer(minLength: display.isShort ? AppSpacing.sm : AppSpacing.xxl)
+                // …and this reserves exactly the strip the floating buddy stands in.
+                // Without it the filling answers would push him into the tool row on
+                // the very device with the most room for him.
+                Spacer(minLength: display.isShort ? AppSpacing.sm
+                                  : (isCompact ? AppSpacing.xxl : companionSize + 24))
             }
         }
     }
@@ -167,18 +219,18 @@ struct QuestionRunnerView: View {
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
                 topBar
                 if let q = current {
-                    if display.isShort {
-                        // 📐 A short screen: laid out plainly when it fits; when
-                        // it doesn't (a reading passage with long answers — in
-                        // English they run to four lines), it scrolls instead
-                        // of overflowing under the buddy and off the screen.
-                        ViewThatFits(in: .vertical) {
-                            questionColumn(q)
-                            ScrollView { questionColumn(q) }
-                                .scrollIndicators(.hidden)
-                        }
-                    } else {
+                    // 📐 Laid out plainly when it fits; when it doesn't (a reading
+                    // passage with long answers — in English they run to four lines),
+                    // it scrolls instead of overflowing off the screen.
+                    //
+                    // This was gated on `display.isShort`, which left a tall screen
+                    // with no protection at all: on Yoav's iPad the passage pushed the
+                    // whole tool row under the bottom of the glass and "רמז" was cut
+                    // in half at the edge. A screen that fits is unaffected either way.
+                    ViewThatFits(in: .vertical) {
                         questionColumn(q)
+                        ScrollView { questionColumn(q) }
+                            .scrollIndicators(.hidden)
                     }
                 } else {
                     Spacer()
@@ -194,19 +246,22 @@ struct QuestionRunnerView: View {
 
             // The buddy wanders and can be dragged, exactly like on the home
             // (Rani, 2026-09-07) — kept to the strip under the answers so it never
-            // parks on a choice or on the 🔊 button.
-            if !display.isShort {
-            GeometryReader { geo in
-                FloatingCompanion(
-                    controller: companion,
-                    profile: profiles.active,
-                    size: companionSize,
-                    topInset: max(120, geo.size.height - companionSize - 150),
-                    bottomInset: 28,
-                    horizontalInset: AppSpacing.md
-                )
-            }
-            .allowsHitTesting(true)
+            // parks on a choice or on the 🔊 button. `topInset` is now where the
+            // answers REALLY end rather than a fixed 150pt from the bottom, which
+            // was only ever right on the screens it was guessed on.
+            if buddyHasFreeStrip {
+                GeometryReader { geo in
+                    FloatingCompanion(
+                        controller: companion,
+                        profile: profiles.active,
+                        size: companionSize,
+                        topInset: min(max(120, answersBottom + 8),
+                                      max(120, geo.size.height - companionSize - 28)),
+                        bottomInset: 28,
+                        horizontalInset: AppSpacing.md
+                    )
+                }
+                .allowsHitTesting(true)
             }
 
             // 💬 What the rail's buddy says — pinned low, clear of the answers.
@@ -256,6 +311,8 @@ struct QuestionRunnerView: View {
                 portalIntro
             }
         }
+        .coordinateSpace(name: Self.runnerSpace)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { runnerHeight = $0 }
         .rumble(trigger: rumbleTrigger)
         .sheet(isPresented: $showParentAssist) {
             if let q = current {
@@ -556,6 +613,18 @@ struct QuestionRunnerView: View {
 
     // MARK: - Question content
 
+    /// 📖 The passage itself — one definition, used both as the content-sized
+    /// candidate and as the scrolling one, so they can never drift apart.
+    private func passageText(_ passage: String) -> some View {
+        Text(passage)
+            .font(.system(size: isCompact ? 17 : 21, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white)
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(AppSpacing.md)
+    }
+
     /// Topic indicator + the prompt card (the upper block).
     @ViewBuilder
     private func questionHeader(_ q: Question) -> some View {
@@ -596,21 +665,27 @@ struct QuestionRunnerView: View {
             // Scrolls inside its own frame so a long passage can never squeeze
             // the answers off-screen.
             if let passage = q.passage {
+                // A ceiling, and NO floor. The floor was protecting against the
+                // opposite problem — the big question text squeezing a ז׳–ח׳ passage
+                // down to a slot — but it fired unconditionally, so on an iPad, where
+                // the passage wraps wide into two lines, it held 200pt open under four
+                // words. Rani photographed the dead glass on Yoav's iPad.
+                //
+                // Fit the text when it fits; scroll inside the ceiling when it doesn't.
+                // That is what the floor was actually for, without the empty rectangle.
+                // Measured, not proposed: `.frame(maxHeight:)` in SwiftUI is EXPANSIVE —
+                // it takes everything offered up to the bound — so bounding the card
+                // that way just rebuilt the same empty rectangle one ceiling lower.
+                // An exact height, read from the text itself, is the only thing that
+                // hugs short content and still caps a long passage.
+                let ceiling: CGFloat = isCompact ? (display.isShort ? 150 : 210) : 280
                 ScrollView {
-                    Text(passage)
-                        .font(.system(size: isCompact ? 17 : 21, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(AppSpacing.md)
+                    passageText(passage)
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                            passageHeight = $0
+                        }
                 }
-                // A floor as well as a ceiling: the big question text used to squeeze
-                // the card down to two lines, and a ז׳–ח׳ passage was read through a slot.
-                // A short screen caps it lower — the passage scrolls inside its
-                // own box, and the answers + buddy need the room below.
-                .frame(minHeight: isCompact ? (display.isShort ? 112 : 150) : 200,
-                       maxHeight: isCompact ? (display.isShort ? 150 : 210) : 280)
+                .frame(height: min(passageHeight > 0 ? passageHeight : ceiling, ceiling))
                 .layoutPriority(1)
                 .glassInset(radius: 16)
                 .environment(\.layoutDirection, .app)   // the passage reads in the language's direction
@@ -676,8 +751,7 @@ struct QuestionRunnerView: View {
     @ViewBuilder
     private func answersBlock(_ q: Question) -> some View {
         VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-            // A passage question still scrolls, so it keeps the content-sized grid.
-            if display.hasBarStrip, q.passage == nil {
+            if answersFill(q) {
                 fillingOptions(for: q)
             } else {
                 optionsGrid(for: q)
@@ -736,8 +810,9 @@ struct QuestionRunnerView: View {
                         magicWandButton
                     }
                     Spacer(minLength: 0)
-                    if display.isShort {
-                        // 📐 A short screen: the buddy lives IN this slot.
+                    if !buddyHasFreeStrip {
+                        // 📐 Nowhere under the answers to stand: the buddy lives IN
+                        // this slot instead. A short screen was never the only case.
                         InlineBuddy(controller: companion, profile: profiles.active, width: 44)
                     } else {
                         Color.clear.frame(width: companionSize * 0.7, height: 1)   // room for the buddy
@@ -747,7 +822,7 @@ struct QuestionRunnerView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .overlay(alignment: .trailing) {
-                    if display.isShort {
+                    if !buddyHasFreeStrip {
                         InlineBuddyBubble(controller: companion, clearance: AppSpacing.md + 44 + 6)
                     }
                 }

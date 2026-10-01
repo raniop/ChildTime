@@ -8,9 +8,13 @@ final class ContentLanguageTests: XCTestCase {
 
     func testHebrewKeepsEveryWorld() {
         LanguageStore.shared.setForTesting(.he)
-        for topic in Topic.allCases {
+        // 🎊 .holidays is the Arabic audience's own holidays, not a translation of
+        // anything, and is hidden everywhere else INCLUDING Hebrew by design.
+        for topic in Topic.allCases where topic != .holidays {
             XCTAssertTrue(ContentAvailability.hasContent(topic), "\(topic) must stay available in Hebrew")
         }
+        XCTAssertFalse(ContentAvailability.hasContent(.holidays), "holidays is Arabic-only")
+        XCTAssertTrue(ContentAvailability.hasContent(.holidays, in: .ar))
         XCTAssertEqual(QuestionBanks.bank(for: .animals)?.count, QuestionBanks.builtInBank(for: .animals).map { $0.count + RemoteQuestionBank.shared.questions(for: .animals, in: .he).count })
     }
 
