@@ -256,6 +256,14 @@ function liveMessage(event, lang) {
     // Deliberately does NOT include the code itself — lock-screen previews are
     // often visible to the very kid (or sibling) the code guards against. The
     // parent sees the code inside the gated dashboard.
+    // 💝 The child tried twice and the gift would not open. Says explicitly that
+    // nothing was lost: the minutes stay in the child's pocket, and the fix is one
+    // tap on the parent's side. We never revoke a gift to resolve a disagreement.
+    case "giftOpenFailed": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` (${mins} דק')` : "";
+      return { title: "💝 המתנה לא נפתחה", body: `${name} ${g("ניסה", "ניסתה")} פעמיים לפתוח את דקות המתנה${tail} וזה לא נפתח${dev}. הדקות לא אבדו — אפשר לשלוח אותן שוב מהכרטיס של ${name} בלוח ההורים.` };
+    }
     case "playPINForgot": return { title: "🔒 קוד הגנת הזמן נשכח", body: `${name} ${g("שכח", "שכחה")} את קוד הגנת זמן המשחק${dev}. הקוד מופיע בכרטיס של ${name} בלוח ההורים — ואפשר גם לאפס שם, או ישירות במכשיר של הילד עם קוד ההורה.` };
     // Intentionally NO push for milestone / streak / wheelWin / discovery —
     // those flooded the parent. Only start/finish, screen-time open/close, and
@@ -303,6 +311,11 @@ function liveMessageEn(event) {
     }
     case "assistRequest": return { title: "Help request 💌", body: `${name} asked for your help with a question${dev}.` };
     case "parentGateOpened": return { title: "🔐 Parent settings opened", body: `Someone opened parent settings on ${whose} device${dev}.` };
+    case "giftOpenFailed": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` (${mins} min)` : "";
+      return { title: "💝 The gift wouldn't open", body: `${name} tried twice to open the gift minutes${tail} and nothing opened${dev}. The minutes are still there — you can send them again from ${whose} card in the parent dashboard.` };
+    }
     case "playPINForgot": return { title: "🔒 Play time lock code forgotten", body: `${name} forgot the play time lock code${dev}. The code is on ${whose} card in the parent dashboard — you can reset it there, or right on your child's device with the parent code.` };
     default: return null;
   }
@@ -349,6 +362,11 @@ function liveMessageRu(event) {
     }
     case "assistRequest": return { title: "Просьба о помощи 💌", body: `${name} ${g("попросил", "попросила")} вашей помощи с вопросом${dev}.` };
     case "parentGateOpened": return { title: "🔐 Открыты родительские настройки", body: `Кто-то открыл родительские настройки на устройстве ребёнка (${name})${dev}.` };
+    case "giftOpenFailed": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` (${mins} мин)` : "";
+      return { title: "💝 Подарок не открылся", body: `${name} дважды ${g("пытался", "пыталась")} открыть подаренные минуты${tail}, но ничего не открылось${dev}. Минуты не пропали — их можно отправить снова в карточке ребёнка (${name}) в родительской панели.` };
+    }
     case "playPINForgot": return { title: "🔒 Код защиты игрового времени забыт", body: `${name} ${g("забыл", "забыла")} код защиты игрового времени${dev}. Код есть в карточке ребёнка (${name}) в родительской панели — там же его можно сбросить, или прямо на устройстве ребёнка с родительским кодом.` };
     default: return null;
   }
@@ -396,6 +414,11 @@ function liveMessageAr(event) {
     }
     case "assistRequest": return { title: "طلب مساعدة 💌", body: `${name} ${g("طلب", "طلبت")} مساعدتكم في سؤال${dev}.` };
     case "parentGateOpened": return { title: "🔐 فُتحت إعدادات الوالدين", body: `فتح أحدهم إعدادات الوالدين على جهاز الطفل (${name})${dev}.` };
+    case "giftOpenFailed": {
+      const mins = Number(event.minutes) || 0;
+      const tail = mins > 0 ? ` (${mins} د)` : "";
+      return { title: "💝 لم تُفتح الهدية", body: `${name} ${g("حاول", "حاولت")} مرتين فتح دقائق الهدية${tail} ولم تُفتح${dev}. الدقائق لم تُفقد — يمكن إرسالها مرة أخرى من بطاقة ${name} في لوحة الوالدين.` };
+    }
     case "playPINForgot": return { title: "🔒 نُسي رمز حماية وقت اللعب", body: `${name} ${g("نسي", "نسيت")} رمز حماية وقت اللعب${dev}. الرمز موجود في بطاقة الطفل (${name}) في لوحة الوالدين — ويمكن إعادة ضبطه هناك، أو مباشرة على جهاز الطفل باستخدام رمز الوالدين.` };
     default: return null;
   }

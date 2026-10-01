@@ -53501,6 +53501,72 @@
         }
       }
     },
+    "רֶגַע, אֲנִי בּוֹדֵק אֶת הַדַּקּוֹת שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One moment, I'm checking your minutes — shall we try again? 😊"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Секундочку, я проверяю твои минуты — попробуем ещё раз? 😊"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لحظة، أتحقّق من دقائقك — نحاول مرّة أخرى؟ 😊"
+          }
+        }
+      }
+    },
+    "רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One moment, I'm checking your gift — shall we try again? 😊"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Секундочку, я проверяю твой подарок — попробуем ещё раз? 😊"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لحظة، أتحقّق من هديّتك — نحاول مرّة أخرى؟ 😊"
+          }
+        }
+      }
+    },
+    "רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — סִפַּרְתִּי לַהוֹרִים שֶׁלְּךָ וְהֵם יַעַזְרוּ 😊": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One moment, I'm checking your gift — I've told your parents and they'll help 😊"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Секундочку, я проверяю твой подарок — я сказал твоим родителям, они помогут 😊"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لحظة، أتحقّق من هديّتك — أخبرت والديك وسيساعدانك 😊"
+          }
+        }
+      }
+    },
     "רֶגַע, אֵין כָּרֶגַע דַּקּוֹת מַתָּנָה לִפְתֹּחַ 💝": {
       "localizations": {
         "en": {

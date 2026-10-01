@@ -898,4 +898,68 @@ struct WalletCounterTests {
         #expect(ProgressSnapshot.ratchetMerged(local: blank, remote: written).giftSecondsAvailable == 600)
         #expect(ProgressSnapshot.ratchetMerged(local: written, remote: blank).giftSecondsAvailable == 600)
     }
+
+    // ── 💝 THE 60-MINUTE GIFT THAT OPENED NOTHING ────────────────────────────
+    // A real report from a real child: her card showed "מתנה מההורים · 60 דקות",
+    // she tapped it, the screen said "הזמן שלך בדרך" — and then she was back on
+    // the map with nothing but "חזרת! 4 ימים ברצף". The counters held the full
+    // 3600 seconds the whole time; the mirror the open consulted held 0.
+
+    @Test("a snapshot with no counters cannot zero a gift this device really holds")
+    func legacySnapshotCannotEraseTheGiftMirror() {
+        let p = fresh()
+        p.creditGift(seconds: 60 * 60)
+        #expect(p.parentGiftMinutes == 60)
+
+        // Exactly what a device on an older build publishes: no counters at all,
+        // and its own stale idea of the pocket. This used to be adopted verbatim.
+        var legacy = ProgressSnapshot()
+        legacy.parentGiftMinutes = 0
+        legacy.revision = p.revision + 1
+        p.apply(legacy)
+
+        #expect(p.giftSecondsAvailable == 60 * 60)   // the truth never moved…
+        #expect(p.parentGiftMinutes == 60)           // …and the mirror now follows it
+    }
+
+    @Test("the open consults the counters, so a stale mirror cannot swallow a gift")
+    func openReadsTheCountersNotTheMirror() {
+        let p = fresh()
+        p.creditGift(seconds: 60 * 60)
+        var legacy = ProgressSnapshot()
+        legacy.parentGiftMinutes = 0
+        legacy.revision = p.revision + 1
+        p.apply(legacy)
+
+        // The card reads `openableSeconds(gift:)`; the open must agree with it.
+        #expect(p.openableSeconds(gift: true) == 60 * 60)
+        #expect(p.consumeParentGiftForUnlock() == 60)
+        #expect(p.giftSecondsAvailable == 0)         // and it was actually spent
+    }
+
+    @Test("a sub-minute gift the button displays is openable, not stranded")
+    func subMinuteGiftIsHonoured() {
+        let p = fresh()
+        p.creditGift(seconds: 40)                    // button shows "0:40 דקות"
+        #expect(p.consumeParentGiftForUnlock() == 1) // so it must open something
+        #expect(p.giftSecondsAvailable == 0)         // debited to the second
+    }
+
+    @Test("a genuinely empty pocket still opens nothing")
+    func emptyPocketOpensNothing() {
+        let p = fresh()
+        #expect(p.consumeParentGiftForUnlock() == 0)
+    }
+
+    @Test("a pre-counters snapshot is still believed when nobody holds counters")
+    func legacySnapshotIsBelievedOnABlankDevice() {
+        let p = fresh()                              // resetWallets: all counters 0
+        var legacy = ProgressSnapshot()
+        legacy.parentGiftMinutes = 25
+        legacy.pendingMinutes = 10
+        legacy.revision = p.revision + 1
+        p.apply(legacy)
+        #expect(p.parentGiftMinutes == 25)
+        #expect(p.pendingMinutes == 10)
+    }
 }

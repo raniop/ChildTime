@@ -2297,7 +2297,13 @@ struct WorldMapView: View {
         // Cap a single unlock to today's remaining screen-time allowance; the
         // accumulated wallet beyond the daily cap stays for future days.
         let minutes = progress.consumeMinutesForUnlock()
-        guard minutes > 0 else { return }
+        // Same rule as the gift: never return to the map in silence. The button is
+        // only on screen when the wallet says there is time, so reaching this line
+        // means our own numbers disagreed — which is ours to say out loud, kindly.
+        guard minutes > 0 else {
+            progress.endOpeningWindow(message: tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַדַּקּוֹת שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊"))
+            return
+        }
         shields.unlock(minutes: minutes)
         progress.startUnlock(minutes: minutes)
         LearningHistoryStore.shared.recordMinutesUsed(minutes)
@@ -2348,22 +2354,23 @@ struct WorldMapView: View {
             switch outcome {
             case .granted(let leaseID, let seconds, let wallet):
                 let mins = seconds / 60
-                guard mins > 0 else {
-                    progress.endOpeningWindow(message: tr("רֶגַע, לֹא הִצְלַחְנוּ לִפְתֹּחַ עַכְשָׁיו — נְנַסֶּה שׁוּב 😊"))
-                    return
-                }
+                guard mins > 0 else { giftOpenFailed("grantTooSmall"); return }
                 if let wallet { progress.applyClaimedWallet(wallet) }
                 shields.unlock(minutes: max(1, (seconds + 59) / 60))
                 progress.startUnlock(minutes: mins, manual: true, leaseID: leaseID, leaseKind: "gift",
                                      extraSeconds: seconds % 60)
                 LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins, "gift": true])
+                progress.giftOpenFailureStreak = 0
                 progress.endOpeningWindow()
             case .heldElsewhere:
                 Haptic.warning()
                 progress.endOpeningWindow(message: tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮"))
             case .insufficient:
+                // The button only exists when OUR pocket says there is time, so the
+                // cloud saying otherwise is two ledgers disagreeing — not an empty
+                // pocket. Never phrase it to the child as "you have nothing".
                 Haptic.light()
-                progress.endOpeningWindow(message: tr("רֶגַע, אֵין כָּרֶגַע דַּקּוֹת מַתָּנָה לִפְתֹּחַ 💝"))
+                giftOpenFailed("cloudInsufficient")
             case .offline:
                 progress.endOpeningWindow()
                 legacyRedeemGift()
@@ -2377,13 +2384,42 @@ struct WorldMapView: View {
         // Frozen seconds resume as their own manual window; fold the gift on top.
         let frozenMinutes = progress.hasPausedManualTime ? progress.resumeManualUnlock() : 0
         let total = gift + frozenMinutes
-        guard total > 0 else { return }
+        // THE SILENT RETURN THAT STARTED ALL THIS. A child tapped a 60-minute gift,
+        // this guard fired, and she was put back on the map without a word — the
+        // home screen's own "חזרת! 4 ימים ברצף" was the only thing she heard.
+        guard total > 0 else { giftOpenFailed("walletDisagreement"); return }
         if gift > 0 {
             if frozenMinutes > 0 { progress.extendUnlock(minutes: gift) }
             else { progress.startUnlock(minutes: gift, manual: true, leaseKind: "gift") }
         }
         shields.unlock(minutes: total)
+        progress.giftOpenFailureStreak = 0
         LiveEventReporter.report(.screenTimeStart, extra: ["minutes": total, "gift": true])
+    }
+
+    /// 💝 A gift open that did not happen.
+    ///
+    /// Two rules here, both deliberate. The child ALWAYS hears something — a silent
+    /// return to the map is the defect this exists to delete. And nothing is ever
+    /// taken away: the pocket stays exactly as it was, because a disagreement
+    /// between two of our OWN ledgers must never cost a child minutes a parent
+    /// really gave them. (The tempting opposite — wipe the gift after two failures
+    /// and make the parent re-send it — destroys real time to paper over a bug of
+    /// ours, and in this very case the counters were the side that was right.)
+    ///
+    /// The parent is told on the SECOND failure in a row. Once is a blip: a slow
+    /// network, a window still open on the iPad. Twice means the child is tapping
+    /// something that will not open, and only a parent can move it.
+    private func giftOpenFailed(_ reason: String) {
+        progress.giftOpenFailureStreak += 1
+        let tellingParent = progress.giftOpenFailureStreak >= 2
+        progress.endOpeningWindow(message: tellingParent
+            ? tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — סִפַּרְתִּי לַהוֹרִים שֶׁלְּךָ וְהֵם יַעַזְרוּ 😊")
+            : tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊"))
+        guard tellingParent else { return }
+        LiveEventReporter.report(.giftOpenFailed,
+                                 extra: ["minutes": giftOpenableSeconds / 60, "reason": reason])
+        progress.giftOpenFailureStreak = 0   // told once; start counting afresh
     }
 
 }

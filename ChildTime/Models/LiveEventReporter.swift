@@ -25,6 +25,7 @@ enum LiveEventReporter {
         case screenTimeMoved    // child moved the open play window to another device
         case parentGateOpened   // someone entered the parent code/Face ID on a CHILD device
         case playPINForgot      // child tapped "I forgot my play-protection code"
+        case giftOpenFailed     // child tried twice to open a parent gift and it would not open
     }
 
     static func report(_ type: EventType, value: String? = nil, topic: Topic? = nil,

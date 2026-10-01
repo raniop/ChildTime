@@ -125,6 +125,30 @@ final class ProgressStore: ObservableObject {
         giftSecondsIn = max(0, giftMinutes) * 60
     }
 
+    /// 💝 THE MIRRORS ARE DERIVED, NEVER ADOPTED — the one rule behind the gift
+    /// that showed 60 minutes on the card and opened nothing at all.
+    ///
+    /// `apply(_:)` merges both counters with `max`, so this device can legitimately
+    /// hold more than the arriving snapshot claims. And the snapshot's own minute
+    /// fields are a last-write-wins mirror that any device on an older build can
+    /// publish stale — a build with no counters at all publishes `parentGiftMinutes: 0`
+    /// beside a pocket this device knows holds 3600 seconds. Taking that field at
+    /// face value is what left the card reading the counters and the open reading
+    /// the mirror, and the previous guard here missed exactly that case: it only
+    /// recomputed when the SNAPSHOT carried counters, never when only WE did.
+    ///
+    /// Each wallet decides for itself, and the legacy field is read for one case
+    /// only: a snapshot written before the counters existed, arriving at a device
+    /// that has none either. Anything else comes from what we actually hold.
+    private func deriveWalletMirrors(from s: ProgressSnapshot) {
+        let earnedKnown = s.earnedSecondsIn != nil || s.earnedSecondsOut != nil
+                          || earnedSecondsIn > 0 || earnedSecondsOut > 0
+        let giftKnown   = s.giftSecondsIn != nil || s.giftSecondsOut != nil
+                          || giftSecondsIn > 0 || giftSecondsOut > 0
+        pendingMinutes    = earnedKnown ? earnedSecondsAvailable / 60 : s.pendingMinutes
+        parentGiftMinutes = giftKnown   ? giftSecondsAvailable / 60   : (s.parentGiftMinutes ?? 0)
+    }
+
     func recomputeWallets() {
         guard !isRecomputingWallets else { return }
         isRecomputingWallets = true
@@ -262,6 +286,16 @@ final class ProgressStore: ObservableObject {
     @Published var openWindowMessage: String?
 
     private var openingWatchdog: Task<Void, Never>?
+
+    /// Gift opens in a row that could not happen for a reason the child is unable
+    /// to resolve alone. The parent is told on the SECOND — once is a blip (a
+    /// slow network, a window still open on the iPad), twice means the child is
+    /// tapping a gift that will not open and nobody but a parent can fix it.
+    ///
+    /// Deliberately NOT persisted and deliberately NOT a reason to take anything
+    /// away: the counters are the truth, and a bookkeeping disagreement must never
+    /// cost a child minutes a parent really gave them.
+    var giftOpenFailureStreak = 0
 
     func beginOpeningWindow(gift: Bool) {
         openWindowMessage = nil
@@ -1573,10 +1607,14 @@ final class ProgressStore: ObservableObject {
     /// what's already been unlocked today). Wallet beyond the daily cap stays put
     /// for future days. When the cap is disabled, the whole wallet is available.
     var redeemableMinutesNow: Int {
+        // From the COUNTERS, not `pendingMinutes`: this value both labels the button
+        // and decides the debit, so it must come from the one ledger that is the
+        // truth. The mirror is for display on older builds and the parent's tiles.
+        let wallet = earnedSecondsAvailable / 60
         let cap = dailyCap
-        guard cap.enabled else { return pendingMinutes }
+        guard cap.enabled else { return wallet }
         let roomToday = max(0, cap.max - minutesUnlockedTodayResolved)
-        return min(pendingMinutes, roomToday)
+        return min(wallet, roomToday)
     }
 
     /// `minutesUnlockedToday`, but treated as 0 if the stored counter is from a
@@ -1815,10 +1853,19 @@ final class ProgressStore: ObservableObject {
     /// Returns the minutes opened (0 = nothing to open).
     @discardableResult
     func consumeParentGiftForUnlock() -> Int {
-        let amount = parentGiftMinutes
-        guard amount > 0 else { return 0 }
-        debitGift(seconds: giftSecondsAvailable)
-        return amount
+        // The COUNTERS decide, never `parentGiftMinutes`. That field is a display
+        // mirror, and `apply(_:)` used to adopt it straight from a snapshot whose
+        // own copy was behind — so the card read the counters and showed a real
+        // 60-minute gift while this line read the mirror, found 0, and opened
+        // nothing at all. The child was returned to the map in silence.
+        //
+        // `max(1, ...)` honours a sub-minute pocket instead of stranding it: the
+        // button shows "0:40 דקות", so 40 seconds must open something. We debit
+        // every second we were holding, so nothing is handed out twice.
+        let seconds = giftSecondsAvailable
+        guard seconds > 0 else { return 0 }
+        debitGift(seconds: seconds)
+        return max(1, seconds / 60)
     }
 
     /// `extraSeconds` overrides the device-local carry: with the lease on, the
@@ -2256,14 +2303,9 @@ final class ProgressStore: ObservableObject {
             revision = s.revision
             noteAdoptedGeneration(s.revision)
             lastModifiedAt = s.lastModifiedAt
-            // LAST word: the balance comes from the counters, never from the
-            // snapshot's legacy minute fields. Those are a mirror written by
-            // whoever last won a last-write-wins field, so a device whose counters
-            // are behind can publish a balance that contradicts them — which is
-            // how a 30-minute gift landed in the counters and still showed 0.
-            if s.earnedSecondsIn != nil || s.giftSecondsIn != nil { recomputeWallets() }
+            // LAST word on both wallets, and the only place either mirror is set.
+            deriveWalletMirrors(from: s)
         }
-        pendingMinutes      = s.pendingMinutes
         totalCorrect        = s.totalCorrect
         totalAnswered       = s.totalAnswered
         earnedSecondsIn  = max(earnedSecondsIn,  s.earnedSecondsIn  ?? 0)
@@ -2312,7 +2354,6 @@ final class ProgressStore: ObservableObject {
         topicAdaptiveLevel  = s.topicAdaptiveLevel ?? [:]
         wheelProgressCount  = s.wheelProgressCount
         recoveryPot         = s.recoveryPot
-        parentGiftMinutes   = s.parentGiftMinutes ?? 0
         giftGivenToday      = s.giftGivenToday ?? 0
         giftGivenDate       = s.giftGivenDate
         // Replace (not union) — apply() also runs on profile switch, so merging
