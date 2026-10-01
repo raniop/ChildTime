@@ -12561,6 +12561,28 @@
         }
       }
     },
+    "אם פתיחה לא מצליחה פעמיים ברצף, הילד שומע משפט רגוע במקום שתיקה, ואתם מקבלים התראה. הדקות לא נמחקות אף פעם — הן נשארות בכיס שלו": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If an opening fails twice in a row, your child hears a calm line instead of silence, and you get a notification. The minutes are never taken away — they stay in their pocket."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Если открыть не удаётся дважды подряд, ребёнок слышит спокойную фразу вместо тишины, а вы получаете уведомление. Минуты никогда не списываются — они остаются у него."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إذا فشل الفتح مرّتين متتاليتين، يسمع طفلكم جملة هادئة بدل الصمت، ويصلكم إشعار. الدقائق لا تُحذف أبدًا — تبقى في جيبه."
+          }
+        }
+      }
+    },
     "אמת קוד": {
       "localizations": {
         "en": {
@@ -15297,6 +15319,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "أُنجزت اليوم 🎉"
+          }
+        }
+      }
+    },
+    "באייפד, כרטיס הקטע נשאר ענק גם כשהקטע היה קצר, טופי עמד על תשובה 4 וכפתור הרמז נחתך בקצה המסך. עכשיו הכרטיס בגודל הקטע, התשובות ממלאות את השטח, והכל נשאר בתוך המסך": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On iPad the passage card stayed huge even when the passage was short, Tofy stood on answer 4, and the hint button was cut off at the edge. Now the card is the size of the passage, the answers fill the space, and everything stays on screen."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На iPad карточка с текстом оставалась огромной даже для короткого отрывка, Тофи стоял на ответе 4, а кнопка подсказки обрезалась у края. Теперь карточка по размеру текста, ответы заполняют экран, и всё помещается."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "على الآيباد كانت بطاقة النص تبقى ضخمة حتى عندما يكون النص قصيرًا، وكان توفي يقف فوق الإجابة 4، وزر التلميح يُقتطع عند الحافة. الآن البطاقة بحجم النص، والإجابات تملأ المساحة، وكل شيء يبقى داخل الشاشة."
           }
         }
       }
@@ -23767,6 +23811,28 @@
         }
       }
     },
+    "הבנת הנקרא באייפד": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading comprehension on iPad"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Понимание прочитанного на iPad"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فهم المقروء على الآيباد"
+          }
+        }
+      }
+    },
     "הבנתי": {
       "localizations": {
         "en": {
@@ -25349,6 +25415,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "أُرسلت الهدية وحُفظت"
+          }
+        }
+      }
+    },
+    "המתנה שלכם נפתחת תמיד": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your gift always opens"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш подарок теперь всегда открывается"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هديتكم تُفتح دائمًا"
           }
         }
       }
@@ -26949,6 +27037,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "وردي"
+          }
+        }
+      }
+    },
+    "ואם בכל זאת משהו נתקע — תדעו": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "And if something does get stuck — you'll know"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "А если что-то всё же застрянет — вы узнаете"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وإذا تعثّر شيء رغم ذلك — ستعرفون"
           }
         }
       }
@@ -32035,6 +32145,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "الطفل الذي تطبيقه بالروسية يتلقّى الإشعارات بالروسية، والوالد بالعبرية — في العائلة نفسها وعن الحدث نفسه"
+          }
+        }
+      }
+    },
+    "ילד שראה \"מתנה מההורים · 60 דקות\" ולחץ, יכול היה לחזור למסך הבית בלי שנפתח לו כלום ובלי מילה. הדקות תמיד היו שם — רק הכפתור והפתיחה ספרו אותן משני מקומות שונים. עכשיו הם סופרים מאותו מקום": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A child who saw \"A gift from your parents · 60 minutes\" and tapped it could land back on the home screen with nothing opened and nothing said. The minutes were always there — the button and the opening were simply counting them from two different places. Now they count from one."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ребёнок, который видел «Подарок от родителей · 60 минут» и нажимал на него, мог вернуться на главный экран без игры и без единого слова. Минуты всегда были на месте — просто кнопка и открытие считали их из разных мест. Теперь из одного."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الطفل الذي رأى \"هدية من الوالدين · 60 دقيقة\" وضغط عليها كان قد يعود إلى الشاشة الرئيسية دون أن يُفتح شيء ودون كلمة. الدقائق كانت موجودة دائمًا — الزر وعملية الفتح كانا يحسبانها من مكانين مختلفين. الآن من مكان واحد."
           }
         }
       }
@@ -43547,6 +43679,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "هديّة يوميّة"
+          }
+        }
+      }
+    },
+    "מתנה שנתתם — נפתחת": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A gift you sent — opens"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подарок, который вы отправили, открывается"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الهدية التي أرسلتموها — تُفتح"
           }
         }
       }
