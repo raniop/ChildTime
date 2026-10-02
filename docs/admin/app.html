@@ -148,7 +148,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261002224123";
+const PAGE_STAMP = "20261002231220";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -528,8 +528,12 @@ function funnel() {
     <div class="top"><h3>משפך ההמרה</h3><div class="filters"><span class="chip dim">7 ימים</span><span class="chip on">30 ימים</span><span class="chip dim">90 ימים</span><span class="chip dim">שנה</span><span class="chip dim">גיל: הכל ▾</span><span class="chip dim">ילדים במשפחה: הכל ▾</span><span class="chip dim">ניסוי: בסיס ▾</span></div></div>
     <div class="kpis">${kpi(o.activatedToPaid30 + "%", "משפחות מופעלות → משלמות תוך 30 יום")}${kpi(valuedPct + "%", "ילדים שחוו ערך של טופי+ (2+ מפגשים, 20+ שאלות בעולמות)")}${kpi(renewPct + "%", "חידוש ראשון")}</div>
     <div class="card"><h4>המשפך</h4><div class="funnel">
-      ${funnelRow("התקנות (App Store)", "—", 0)}${funnelRow("הורה נרשם", f.registered, f.registered)}${funnelRow("ילד נוצר ושיחק", f.childPlayed, f.registered, f.registered)}${funnelRow(`הפעלה (${cfg.activationDays || 3} ימים + ${cfg.activationQuestions || 40})`, f.activated, f.registered, f.childPlayed)}${funnelRow("מתנה התחילה", f.gift, f.registered, f.activated)}${funnelRow("חוו ערך של טופי+", f.valued, f.registered, f.gift || f.activated)}${funnelRow("הורה ראה פייוול אישי", f.paywall, f.registered, f.valued)}${funnelRow("התחיל רכישה", f.purchaseStarted, f.registered, f.paywall)}${funnelRow("רכש", f.purchased, f.registered, f.purchaseStarted || f.activated)}${funnelRow("חידש", f.renewed, f.registered, f.purchased)}
-    </div><div class="stamp" style="margin-top:6px">התקנות יגיעו מ־App Store Connect. שלבי הפייוול והרכישה מתמלאים עם הגרסה הבאה של האפליקציה.</div></div>
+      ${typeof f.installs === "number"
+        ? funnelRow("התקנות (App Store)", f.installs, Math.max(f.installs, f.registered)) + funnelRow("הורה נרשם", f.registered, Math.max(f.installs, f.registered), f.installs || undefined)
+        : funnelRow("התקנות (App Store)", "—", 0) + funnelRow("הורה נרשם", f.registered, f.registered)}${funnelRow("ילד נוצר ושיחק", f.childPlayed, f.registered, f.registered)}${funnelRow(`הפעלה (${cfg.activationDays || 3} ימים + ${cfg.activationQuestions || 40})`, f.activated, f.registered, f.childPlayed)}${funnelRow("מתנה התחילה", f.gift, f.registered, f.activated)}${funnelRow("חוו ערך של טופי+", f.valued, f.registered, f.gift || f.activated)}${funnelRow("הורה ראה פייוול אישי", f.paywall, f.registered, f.valued)}${funnelRow("התחיל רכישה", f.purchaseStarted, f.registered, f.paywall)}${funnelRow("רכש", f.purchased, f.registered, f.purchaseStarted || f.activated)}${funnelRow("חידש", f.renewed, f.registered, f.purchased)}
+    </div><div class="stamp" style="margin-top:6px">${typeof f.installs === "number"
+        ? `התקנות: הורדות ראשונות מ־App Store Connect, מאז ההשקה · אפל מעדכנת באיחור של יום-יומיים${f.installsUpdatedAt ? " · נמשך " + when(f.installsUpdatedAt) : ""}`
+        : "התקנות: הבקשה לדוחות של אפל נשלחה ב־2.10 — המספר יופיע כשאפל תתחיל לשלוח אותם (בדרך כלל אחרי יום-יומיים)."}</div></div>
     <div class="grid2">
       <div class="card"><h4>מאיפה הגיעה הרכישה</h4><div class="src">${sources()}</div><h4 style="margin-top:14px">אחרי שהמתנה נגמרה בלי רכישה</h4><div class="empty">יתמלא עם המשפחות הראשונות שיסיימו מתנה.</div></div>
       <div class="card"><h4>פוש → רכישה</h4><div class="tblwrap" id="pushTbl"><span class="spin"></span></div><h4 style="margin-top:14px">משפך בקשות הילד</h4><div class="stamp">${childReqLine()}</div></div>

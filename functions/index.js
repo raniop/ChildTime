@@ -3414,6 +3414,11 @@ async function computeJourney() {
   // households → journey state
   const households = {};
   const funnel = { registered: 0, childPlayed: 0, activated: 0, gift: 0, valued: 0, paywall: 0, purchaseStarted: 0, purchased: 0, renewed: 0 };
+  // 📲 First-time App Store downloads since launch (syncAppStoreInstalls). null =
+  // Apple has not delivered a report yet — the dashboard keeps showing "—" then.
+  const installsDoc = await db.collection("adminStats").doc("appStoreInstalls").get().catch(() => null);
+  funnel.installs = installsDoc && installsDoc.exists ? (installsDoc.data().total ?? null) : null;
+  funnel.installsUpdatedAt = installsDoc && installsDoc.exists ? (installsDoc.data().updatedAt || null) : null;
   // The child-request funnel: counters the devices bump on households/{id}.funnel.
   const childRequests = { lockedSeen: 0, lockedTapped: 0, asked: 0, parentOpened: 0, paywall: 0, purchaseStarted: 0, purchased: 0 };
   const states = { free_new: 0, free_activated: 0, gift: 0, gift_expiring: 0, plus: 0, returned: 0, inactive: 0 };
@@ -5037,3 +5042,98 @@ async function deleteHouseholdForRetention(hhID, hhDoc, email) {
   return { ok: true, retention: true, childrenDeleted: kids.size, devicesDeleted: devices,
     invitesDeleted: invites.size, recordsDeleted: records, parentsDeleted, parentsUnlinked };
 }
+
+// ---- 📲 App Store installs → the founders' funnel -------------------------------
+// The app only learns about a family when they OPEN it and sign up, so "how many
+// downloaded Tofy" was a "—" at the top of the funnel (Rani: "איך הוא אמור לדעת
+// התקנות מהאפל סטור?"). Apple has the number in App Store Connect Analytics; an
+// ONGOING report request for the app was created 2026-10-02 (id below). Once a
+// day this pulls the "App Downloads" daily reports and stores first-time
+// downloads per day in adminStats/appStoreInstalls; computeJourney reads it.
+// Apple delivers each day 1–2 days late, and may withhold very small counts.
+const ASC_KEY_P8 = defineSecret("ASC_KEY_P8");
+const ASC_KEY_ID = "2N6QHTA4QJ";
+const ASC_ISSUER = "69a6de6e-f3cf-47e3-e053-5b8c7c11a4d1";
+const ASC_ANALYTICS_REQUEST = "85931bca-0cb3-4d9e-ba47-790e87e21e3c";
+
+function ascToken() {
+  const crypto = require("crypto");
+  const b = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+  const now = Math.floor(Date.now() / 1000);
+  const head = b({ alg: "ES256", kid: ASC_KEY_ID, typ: "JWT" });
+  const body = b({ iss: ASC_ISSUER, iat: now, exp: now + 1100, aud: "appstoreconnect-v1" });
+  const sig = crypto.sign("sha256", Buffer.from(head + "." + body),
+    { key: ASC_KEY_P8.value(), dsaEncoding: "ieee-p1363" }).toString("base64url");
+  return head + "." + body + "." + sig;
+}
+
+async function ascGet(path) {
+  const r = await fetch(path.startsWith("http") ? path : "https://api.appstoreconnect.apple.com" + path,
+    { headers: { Authorization: "Bearer " + ascToken() } });
+  if (!r.ok) throw new Error(`ASC ${r.status} ${path.slice(0, 80)}`);
+  return r.json();
+}
+
+// Every page of a list endpoint.
+async function ascAll(path) {
+  const out = [];
+  let next = path;
+  while (next) {
+    const j = await ascGet(next);
+    out.push(...(j.data || []));
+    next = j.links && j.links.next;
+  }
+  return out;
+}
+
+async function syncAppStoreInstalls() {
+  const zlib = require("zlib");
+  const reports = await ascAll(`/v1/analyticsReportRequests/${ASC_ANALYTICS_REQUEST}/reports?filter[category]=COMMERCE`);
+  const report = reports.find((r) => /app downloads/i.test(r.attributes.name) && /standard/i.test(r.attributes.name))
+    || reports.find((r) => /app downloads/i.test(r.attributes.name));
+  if (!report) return { ok: false, why: "no App Downloads report yet (Apple needs 1–2 days after the request)", reports: reports.map((r) => r.attributes.name) };
+
+  const ref = db.collection("adminStats").doc("appStoreInstalls");
+  const prev = (await ref.get()).data() || {};
+  const days = { ...(prev.days || {}) };
+  const seen = new Set(prev.instances || []);
+  const instances = await ascAll(`/v1/analyticsReports/${report.id}/instances?filter[granularity]=DAILY`);
+  let read = 0;
+  for (const inst of instances) {
+    if (seen.has(inst.id)) continue;
+    const segs = await ascAll(`/v1/analyticsReportInstances/${inst.id}/segments`);
+    for (const seg of segs) {
+      const raw = Buffer.from(await (await fetch(seg.attributes.url)).arrayBuffer());
+      let text;
+      try { text = zlib.gunzipSync(raw).toString("utf8"); } catch (e) { text = raw.toString("utf8"); }
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      const head = (lines.shift() || "").split("\t");
+      const iDate = head.indexOf("Date"), iType = head.indexOf("Download Type"), iCount = head.indexOf("Counts");
+      if (iDate < 0 || iCount < 0) continue;
+      for (const l of lines) {
+        const c = l.split("\t");
+        const day = c[iDate];
+        const n = Number(c[iCount]) || 0;
+        const type = iType >= 0 ? c[iType] : "First-time download";
+        const d = days[day] || (days[day] = { firstTime: 0, redownload: 0 });
+        if (/first/i.test(type)) d.firstTime += n;
+        else if (/redownload|restore/i.test(type)) d.redownload += n;
+      }
+    }
+    seen.add(inst.id);
+    read++;
+  }
+  const total = Object.values(days).reduce((s, d) => s + (d.firstTime || 0), 0);
+  await ref.set({ days, instances: [...seen], total, report: report.attributes.name, updatedAt: Date.now() });
+  return { ok: true, report: report.attributes.name, newInstances: read, total };
+}
+
+exports.syncAppStoreInstalls = onSchedule(
+  { schedule: "0 7 * * *", timeZone: "Asia/Jerusalem", secrets: [ASC_KEY_P8], timeoutSeconds: 300, memory: "512MiB" },
+  async () => { console.log("[installs]", JSON.stringify(await syncAppStoreInstalls())); });
+
+// "Sync now" from the dashboard (and for checking the first delivery).
+exports.adminSyncInstalls = onCall({ secrets: [ASC_KEY_P8], timeoutSeconds: 300, memory: "512MiB" }, async (request) => {
+  requireAdmin(request);
+  return await syncAppStoreInstalls();
+});
