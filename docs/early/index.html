@@ -1,108 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#5E60CE">
-<title>טופי — עדכנו אותי בהשקה</title>
-<meta name="description" content="טופי הופך זמן מסך לפרס שמרוויחים בלמידה. השאירו אימייל ונעדכן אתכם ביום ההשקה.">
-<meta property="og:title" content="טופי — זמן מסך שמרוויחים בלמידה">
-<meta property="og:description" content="השאירו אימייל ונעדכן אתכם ביום ההשקה.">
-<meta property="og:image" content="https://tofyapp.com/og-image.jpg?v=6">
-<meta property="og:url" content="https://tofyapp.com/early/">
-<link rel="canonical" href="https://tofyapp.com/early/">
-<link rel="icon" href="../favicon.png">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
-<link rel="stylesheet" href="../fonts/fonts.css">
-<link rel="stylesheet" href="../glass.css?v=3">
-<style>
-  .ef{display:flex;flex-direction:column;gap:12px;max-width:400px;margin:24px auto 0}
-  .ef input,.ef select{width:100%;font-family:inherit;font-size:16px;font-weight:600;color:#fff;
-    background:rgba(255,255,255,.12);border:1px solid var(--edge);border-radius:14px;padding:14px 16px;outline:none}
-  .ef input::placeholder{color:rgba(255,255,255,.6)}
-  .ef input:focus,.ef select:focus{border-color:var(--gold);background:rgba(255,255,255,.18)}
-  .ef select{appearance:none}
-  .ef option{color:#1b1340}
-  .ef-ok{font-weight:800;font-size:19px;color:var(--mint);margin-top:22px}
-  .ef-note{font-size:13.5px;color:var(--faint);margin-top:14px}
-  .bullets{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:22px}
-  .bullets span{font-size:14px;font-weight:700;padding:8px 15px;border-radius:999px;
-    background:rgba(255,255,255,.12);border:1px solid var(--edge);color:var(--muted)}
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- This was the pre-launch "עדכנו אותי בהשקה" page. Tofy is in the App Store
+     now (2 Oct 2026), so any old link or QR that points here lands on the main
+     page, which has the download button. -->
+<title>טופי</title>
+<link rel="canonical" href="https://tofyapp.com/">
+<meta http-equiv="refresh" content="0; url=/">
+<script>location.replace("/" + location.search);</script>
 </head>
-<body>
-<div class="backdrop"></div>
-<div class="sparks" id="sparks"></div>
-
-<main class="mini">
-  <div class="card pane" style="max-width:520px">
-    <img class="lion" src="../lion.png" alt="טופי">
-    <div class="eyebrow" style="margin-top:10px">בקרוב</div>
-    <h1>זמן מסך שמרוויחים בלמידה</h1>
-    <p>הילד עונה על שאלות לפי תוכנית הלימודים — ומקבל דקות משחק אמיתיות באפליקציות שאתם בוחרים. השאירו אימייל ונעדכן אתכם ביום ההשקה.</p>
-    <form class="ef" id="earlyForm" onsubmit="return joinWaitlist(event)">
-      <input id="ef-name" type="text" placeholder="השם שלכם" autocomplete="name">
-      <input id="ef-email" type="email" placeholder="אימייל" required autocomplete="email">
-      <select id="ef-age" aria-label="גיל הילד">
-        <option value="">גיל הילד (לא חובה)</option>
-        <option>4–5</option><option>6–7</option><option>8–9</option><option>10+</option>
-      </select>
-      <button type="submit" class="btn" id="ef-btn">עדכנו אותי 🎉</button>
-    </form>
-    <div class="ef-ok" id="ef-ok" style="display:none">יש! רשמנו אתכם 🎉 נעדכן ברגע שטופי עולה לאוויר.</div>
-    <div class="ef-note">הודעה אחת ביום ההשקה, בלי ספאם.</div>
-    <div class="bullets">
-      <span>👧 לגילאי 4–12</span><span>🚫 בלי פרסומות</span><span>🔒 בלי מעקב</span>
-    </div>
-    <p style="margin-top:24px"><a href="/" style="color:var(--gold);font-weight:700">← לאתר של טופי</a></p>
-  </div>
-</main>
-
-<script>
-  (function(){
-    var c = document.getElementById("sparks");
-    for (var i = 0; i < 40; i++) {
-      var s = document.createElement("div");
-      s.className = "spark"; s.textContent = "✦";
-      s.style.left = (Math.random()*100) + "%";
-      s.style.top = (Math.random()*100) + "%";
-      s.style.fontSize = (6 + Math.random()*14) + "px";
-      s.style.color = Math.random() < .5 ? "#FFD23F" : "#fff";
-      s.style.animationDelay = (Math.random()*3.4) + "s";
-      c.appendChild(s);
-    }
-  })();
-
-  async function joinWaitlist(e){
-    e.preventDefault();
-    var email = document.getElementById("ef-email").value.trim();
-    var name  = document.getElementById("ef-name").value.trim();
-    var age   = document.getElementById("ef-age").value;
-    if (!email) return false;
-    var btn = document.getElementById("ef-btn"); btn.disabled = true; btn.textContent = "שולח…";
-    var PROJECT = "childtime-86e98";
-    var KEY = "AIzaSyB2sLDqhZsZ0gTFD2qUs9upO3JljuwV1Tw"; // public Firebase web key (secured by rules)
-    var url = "https://firestore.googleapis.com/v1/projects/" + PROJECT + "/databases/(default)/documents/waitlist?key=" + KEY;
-    var body = { fields: {
-      email:     { stringValue: email },
-      name:      { stringValue: name || "" },
-      childAge:  { stringValue: age || "" },
-      source:    { stringValue: "web-early" },
-      createdAt: { timestampValue: new Date().toISOString() }
-    }};
-    try {
-      var r = await fetch(url, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
-      if (!r.ok) throw new Error("status " + r.status);
-      document.getElementById("earlyForm").style.display = "none";
-      document.getElementById("ef-ok").style.display = "block";
-    } catch (err) {
-      var subj = encodeURIComponent("טופי - עדכנו אותי בהשקה");
-      var bdy  = encodeURIComponent("שם: " + name + "\nאימייל: " + email + "\nגיל הילד: " + age);
-      window.location.href = "mailto:ranioph@gmail.com?subject=" + subj + "&body=" + bdy;
-      btn.disabled = false; btn.textContent = "עדכנו אותי 🎉";
-    }
-    return false;
-  }
-</script>
+<body style="font-family:system-ui,sans-serif;text-align:center;padding:40px">
+  <a href="/">טופי כבר ב־App Store — להורדה</a>
 </body>
 </html>
