@@ -991,7 +991,9 @@ struct ParentDashboardView: View {
                     .frame(maxWidth: .infinity)
                     .glassInset(radius: 16)
 
-                    ShareLink(item: URL(string: "https://tofyapp.com")!) {
+                    // 🎉 Live on the App Store 2026-10-02 — this pointed at the
+                    // marketing site while the listing was still in review.
+                    ShareLink(item: URL(string: "https://apps.apple.com/app/id6773805449")!) {
                         Label(tr("שִׁלְחוּ אֶת טוֹפִי לַמַּכְשִׁיר שֶׁל \(child.name)"), systemImage: "square.and.arrow.up")
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
