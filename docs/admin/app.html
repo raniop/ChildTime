@@ -147,7 +147,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261002140741";
+const PAGE_STAMP = "20261002154700";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -430,13 +430,31 @@ function famTable(rows) {
     : '<th class="plain"></th>').join("");
   return `<div class="tblwrap"><table class="ftable"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
-function wireFam() { /* closeFamMenus wired above */
-  // One menu open at a time; a click anywhere else closes it.
+// One ⋯ menu open at a time; a click anywhere else, a scroll or Esc closes it.
+// (Wired once — wireFam runs on every redraw.)
+const closeFamMenus = () => document.querySelectorAll(".rowmenu.open").forEach((m) => m.classList.remove("open"));
+document.addEventListener("click", (e) => { if (!e.target.closest(".rowmenu,[data-menu]")) closeFamMenus(); });
+window.addEventListener("scroll", closeFamMenus, { passive: true, capture: true });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeFamMenus(); });
+
+function wireFam() {
   document.querySelectorAll("[data-menu]").forEach((b) => b.onclick = (e) => {
     e.stopPropagation();
-    const menu = b.closest(".famrow").querySelector(".rowmenu"), open = menu.classList.contains("open");
-    document.querySelectorAll(".rowmenu.open").forEach((m) => m.classList.remove("open"));
-    if (!open) menu.classList.add("open");
+    // The row is .frow — this looked for ".famrow" (renamed in the table
+    // redesign), got null, threw, and the ⋯ silently did nothing (Rani).
+    const menu = b.closest(".menucell").querySelector(".rowmenu"), open = menu.classList.contains("open");
+    closeFamMenus();
+    if (open) return;
+    // The table scrolls sideways (.tblwrap overflow), which clips anything
+    // absolutely positioned inside it — the bottom rows' menus were cut off.
+    // So the menu floats in the viewport under the button, and opens upward
+    // when there is no room below.
+    menu.classList.add("open");
+    const r = b.getBoundingClientRect(), h = menu.offsetHeight, w = menu.offsetWidth;
+    menu.style.position = "fixed";
+    menu.style.insetInlineEnd = "auto";
+    menu.style.top = (r.bottom + 6 + h > innerHeight ? Math.max(8, r.top - 6 - h) : r.bottom + 6) + "px";
+    menu.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + "px";
   });
   document.querySelectorAll(".rowmenu").forEach((m) => m.onclick = (e) => { if (e.target.closest("button,a")) m.classList.remove("open"); });
   // A header cell sorts by its column; clicking the same one again flips it.
