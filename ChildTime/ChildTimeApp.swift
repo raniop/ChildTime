@@ -504,6 +504,9 @@ struct ChildTimeApp: App {
         case "opening":  UnlockedView().onAppear { ProgressStore.shared.beginOpeningWindow(gift: false) }           // DEMO_SCREEN=opening — the "we're opening it" state
         case "openinggift": UnlockedView().onAppear { ProgressStore.shared.beginOpeningWindow(gift: true) }         // DEMO_SCREEN=openinggift
         case "whatsnew": WhatsNewView(onDone: {})   // DEMO_SCREEN=whatsnew — the release-notes sheet
+        // Debug-only: UpdateDemoHost and setForTesting live behind #if DEBUG, so
+        // these three cases broke the Release (archive) build of 181.
+        #if DEBUG
         case "updateparent":                        // DEMO_SCREEN=updateparent — "a newer Tofy" for the parent
             UpdateDemoHost(detent: .fraction(0.76)) { UpdateAvailableSheet(onUpdate: {}, onLater: {}) }
                 .onAppear { AppUpdateConfig.shared.setForTesting(
@@ -517,6 +520,7 @@ struct ChildTimeApp: App {
         case "updateforced":                        // DEMO_SCREEN=updateforced — below minBuild, blocking
             ForcedUpdateView()
                 .onAppear { AppUpdateConfig.shared.setForTesting(latest: 9999, min: 9999) }
+        #endif
         case "parenthome": ParentDashboardView(isRoot: true)   // DEMO_SCREEN=parenthome — the redesigned overview
             .onAppear {
                 if let id = ProfileStore.shared.activeID {
