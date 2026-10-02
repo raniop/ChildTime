@@ -51,7 +51,7 @@ struct ChildAppLockSetupView: View {
                         Haptic.light()
                         requestingAuth = true
                         Task {
-                            await shields.requestAuthorizationIfNeeded()
+                            await shields.requestAuthorizationIfNeeded(userInitiated: true)
                             requestingAuth = false
                             if shields.isAuthorized { showAppPicker = true }
                         }

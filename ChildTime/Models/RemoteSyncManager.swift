@@ -108,7 +108,8 @@ final class RemoteSyncManager: ObservableObject {
     private var db: Firestore { Firestore.firestore() }
     private var listeners: [String: ListenerRegistration] = [:]   // keyed by profileID
     private var childDocListeners: [String: ListenerRegistration] = [:]
-    private var windowListeners: [String: ListenerRegistration] = [:]   // child doc (for minute grants)
+    private var windowListeners: [String: ListenerRegistration] = [:]
+    private var profilesSink: AnyCancellable?   // child doc (for minute grants)
     #endif
 
     private init() {}
@@ -819,10 +820,47 @@ final class RemoteSyncManager: ObservableObject {
     private func subscribeToAllProfiles(uid: String) {
         // React when the local roster of children changes (e.g. a co-parent's
         // child arrives via the household listener) by re-subscribing.
-        ProfileStore.shared.$profiles
+        profilesSink = ProfileStore.shared.$profiles
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.refreshProfileSubscriptions() }
-            .store(in: &cancellables)
+        refreshProfileSubscriptions()
+    }
+
+    /// 💝 Why a gift sent to a just-joined child never arrived (Rani, 2026-10-02).
+    ///
+    /// On a child device the profile lands locally a moment BEFORE this device's
+    /// uid is written into the household, so the first listeners were refused
+    /// (permission-denied). Firestore ends a refused listener for good, the error
+    /// was ignored (`doc, _ in`), and the dead registration still sat in its slot
+    /// — `if listeners[id] != nil { continue }` — so nothing ever re-subscribed
+    /// until the app was relaunched. Proven on the simulator: the same gift sat
+    /// 60s unapplied in the joining session and landed in <1s after a relaunch.
+    /// Now a refused listener frees its slot and retries with a short backoff.
+    private var listenerRetries: [String: Int] = [:]
+
+    private func dropListeners(_ id: String) {
+        listeners[id]?.remove(); listeners.removeValue(forKey: id)
+        windowListeners[id]?.remove(); windowListeners.removeValue(forKey: id)
+        childDocListeners[id]?.remove(); childDocListeners.removeValue(forKey: id)
+    }
+
+    nonisolated private func listenerFailed(_ id: String, _ err: Error) {
+        Task { @MainActor in
+            TofyLink("listener for child \(id.prefix(8)) failed: \(err.localizedDescription) — retrying")
+            self.dropListeners(id)
+            let n = (self.listenerRetries[id] ?? 0) + 1
+            self.listenerRetries[id] = n
+            guard n <= 8 else { return }   // ~2 minutes of tries; the next launch/foreground starts over
+            try? await Task.sleep(nanoseconds: UInt64(min(30, 2 * n)) * 1_000_000_000)
+            self.refreshProfileSubscriptions()
+        }
+    }
+
+    /// Re-attach every listener now — after a child device JOINS, its earlier
+    /// (refused) listeners must not be trusted.
+    func resubscribeAll() {
+        for id in Array(Set(listeners.keys).union(childDocListeners.keys).union(windowListeners.keys)) { dropListeners(id) }
+        listenerRetries.removeAll()
         refreshProfileSubscriptions()
     }
 
@@ -853,8 +891,9 @@ final class RemoteSyncManager: ObservableObject {
             if windowListeners[id] == nil {
                 windowListeners[id] = db.collection("children").document(id)
                     .collection("state").document("window")
-                    .addSnapshotListener { [weak self] snap, _ in
+                    .addSnapshotListener { [weak self] snap, err in
                         guard let self, let pid = UUID(uuidString: id) else { return }
+                        if let err { self.listenerFailed(id, err); return }
                         let lease = PlayWindowLease.from(snap?.data() ?? [:])
                         Task { @MainActor in
                             if lease.isHeld, !lease.isExpired() { self.openWindows[pid] = lease }
@@ -865,7 +904,8 @@ final class RemoteSyncManager: ObservableObject {
             if listeners[id] != nil { continue }
             let listener = db.collection("children").document(id)
                 .collection("state").document("current")
-                .addSnapshotListener { [weak self] doc, _ in
+                .addSnapshotListener { [weak self] doc, err in
+                    if let err { self?.listenerFailed(id, err); return }
                     guard let self, let doc, let raw = doc.data() else { return }
                     guard let snap = Self.decode(raw) else { return }
                     self.handleRemoteSnapshot(snap, profileID: profile.id)
@@ -876,8 +916,10 @@ final class RemoteSyncManager: ObservableObject {
             // surface it for the parent's display, and — on THIS child's own play
             // device — consume it additively.
             childDocListeners[id] = db.collection("children").document(id)
-                .addSnapshotListener { [weak self] doc, _ in
+                .addSnapshotListener { [weak self] doc, err in
                     guard let self else { return }
+                    if let err { self.listenerFailed(id, err); return }
+                    self.listenerRetries[id] = 0
                     let adj = (doc?.data()?["pendingMinuteAdjustment"] as? Int) ?? 0
                     let gift = (doc?.data()?["pendingGiftAdjustment"] as? Int) ?? 0
                     let revokeAck = doc?.data()?["revokeGiftAppliedAt"] as? Double

@@ -45,17 +45,19 @@ final class ShieldManager: ObservableObject {
     /// Has an automatic (not user-initiated) request already been shown and not
     /// approved? Apple's sheet re-presents on every call, so the launch-time
     /// request put a full-screen system dialog in front of the child on EVERY
-    /// single open once it had been declined once. Ask automatically at most
-    /// twice; after that only an explicit tap ("בקש" / "נסו שוב") asks again.
+    /// single open once it had been declined once. Ask automatically ONCE; after
+    /// that only an explicit tap ("בקש" / "נסו שוב" / "בחרו אפליקציות") asks again.
     private static let autoAsksKey = "shield.autoAuthAsks"
-    private static let autoAskLimit = 2
+    private static let autoAskLimit = 1
     var automaticRequestExhausted: Bool {
         UserDefaults.standard.integer(forKey: Self.autoAsksKey) >= Self.autoAskLimit
     }
 
-    /// `userInitiated` — the parent tapped a button asking for it. Those always
-    /// ask; the launch-time call is throttled by `automaticRequestExhausted`.
-    func requestAuthorizationIfNeeded(userInitiated: Bool = true) async {
+    /// `userInitiated` — a person tapped a button asking for it: those always ask.
+    /// Everything else (launch, onAppear, a remote command) is throttled by
+    /// `automaticRequestExhausted`. The default is the SAFE one: a new caller that
+    /// forgets the argument cannot put Apple's sheet in front of a child again.
+    func requestAuthorizationIfNeeded(userInitiated: Bool = false) async {
         refreshStatus()
         print("[ShieldManager] Status before request: \(authStatusText)")
         guard authCenter.authorizationStatus != .approved else {

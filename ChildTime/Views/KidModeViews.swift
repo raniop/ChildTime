@@ -145,7 +145,7 @@ struct KidModeEntryView: View {
             guard let child = selectedChild else { return }
             requesting = true
             Task {
-                await shields.requestAuthorizationIfNeeded()
+                await shields.requestAuthorizationIfNeeded(userInitiated: true)
                 guard shields.isAuthorized else { requesting = false; authFailed = true; return }
                 await kidMode.enter(childID: child)
                 requesting = false

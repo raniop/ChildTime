@@ -674,7 +674,12 @@ struct WorldMapView: View {
             // Event splash: announce today's event ONCE a day as a full pop-up
             // (like the lucky wheel) — it used to be a permanent row eating map
             // space. Never on top of the grade picker / school-year party.
-            if GameEvent.current() != nil, !showChildGradePicker, !showSchoolYearParty {
+            // Not for a child who has barely played: a brand-new child's first
+            // screen was "סוף שבוע כפול! היהלומים כפולים" — before the map, with
+            // zero diamonds and no idea what one is. Same threshold the campaign
+            // pop-ups use (CampaignTracker.childPopupMinAnswers).
+            if GameEvent.current() != nil, !showChildGradePicker, !showSchoolYearParty,
+               progress.totalAnswered >= CampaignTracker.childPopupMinAnswers {
                 let day = Calendar.current.component(.year, from: Date()) * 1000
                     + (Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0)
                 let key = "eventSplash.lastShownDay"

@@ -99,7 +99,7 @@ struct ChildReportView: View {
                 snap("\(s.questions)", tr("שְׁאֵלוֹת"))
                 snap(s.questions > 0 ? pct(s.accuracy) : "0%", tr("הַצְלָחָה"))
                 snap(minutes, tr("הֻרְווּ"))   // minutes EARNED, not the wallet — see the dashboard note
-                snap("\(snapshot.dayStreak)", tr("יְמֵי רֶצֶף"))
+                snap("\(snapshot.dayStreak)", snapshot.dayStreak == 1 ? tr("יוֹם רֶצֶף") : tr("יְמֵי רֶצֶף"))   // "1 ימי רצף" read wrong
             }
             .padding(.vertical, 10)
             .glassPane(radius: 16, shadow: false)
@@ -225,7 +225,9 @@ struct ChildReportView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(t.topic.displayName)
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
-                    Text(tr("\(t.answered) שְׁאֵלוֹת · \(t.correct) נְכוֹנוֹת") + (t.wrong > 0 ? tr(" · \(t.wrong) טְעֻיּוֹת") : ""))
+                    // One count per string, so each takes its own singular ("שאלה אחת · נכונה
+                    // אחת" — the two-count string read "1 שאלות · 1 נכונות").
+                    Text(tr("\(t.answered) שְׁאֵלוֹת") + " · " + tr("\(t.correct) נְכוֹנוֹת") + (t.wrong > 0 ? tr(" · \(t.wrong) טְעֻיּוֹת") : ""))
                         .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary).monospacedDigit()
                 }
@@ -396,7 +398,20 @@ struct ChildReportView: View {
                         Spacer()
                         deviceStatus(d)
                     }
-                    .padding(.vertical, 8)
+                    .padding(.top, 8)
+                    .padding(.bottom, d.shieldAuthorized == false ? 2 : 8)
+                    // This is the device list a parent actually opens — the
+                    // dashboard row that first got the warning is not shown on
+                    // this path, so the green "● מחובר" was all they saw.
+                    if d.shieldAuthorized == false, d.role != "parent" {
+                        Label(tr("אֵין הַרְשָׁאַת ״זְמַן מָסָךְ״ בַּמַּכְשִׁיר הַזֶּה — נְעִילַת אַפְּלִיקַצְיוֹת לֹא תַּעֲבוֹד בּוֹ. פִּתְחוּ בּוֹ אֶת טוֹפִי ← ⚙️ ← בַּקָּשׁ הַרְשָׁאָה."),
+                              systemImage: "exclamationmark.shield.fill")
+                            .font(.system(size: 11.5, weight: .semibold, design: .rounded))
+                            .foregroundStyle(AppColor.flameOrange)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.bottom, 8)
+                    }
                     if d.id != devices.last?.id { Divider().overlay(Color.white.opacity(0.16)) }
                 }
                 if devices.isEmpty {

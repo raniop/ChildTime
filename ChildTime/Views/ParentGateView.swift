@@ -62,6 +62,8 @@ struct ParentGateView<Content: View>: View {
     @State private var setupFirst: String? = nil   // first entry while confirming
     /// The code they just picked is one a child guesses in three tries.
     @State private var weakCodeChosen = false
+    /// The confirm step did not match — said out loud instead of a silent reset.
+    @State private var setupMismatch = false
 
     // First-time setup only when NEITHER this device NOR the family has a code.
     // If the family already set one (e.g. on the parent's phone), this device
@@ -320,6 +322,19 @@ struct ParentGateView<Content: View>: View {
                     .offset(x: shake ? -10 : 0)
                     .animation(shake ? .default.repeatCount(3, autoreverses: true).speed(6) : .default, value: shake)
 
+                    // The weak-code warning offers "לחזור ולבחור אחר" — this is that.
+                    if isSetupMode, setupFirst != nil {
+                        Button {
+                            Haptic.light()
+                            entered = ""; setupFirst = nil; weakCodeChosen = false; setupMismatch = false
+                        } label: {
+                            Label(tr("בְּחִירַת קוֹד אַחֵר"), systemImage: "arrow.uturn.backward")
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.9))
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     if canUseFaceID {
                         Button {
                             Task { await tryBiometric() }
@@ -447,7 +462,11 @@ struct ParentGateView<Content: View>: View {
 
     private var gateSubtitle: String {
         if isSetupMode {
-            if setupFirst == nil { return tr("בַּחֲרוּ קוֹד בֶּן 4 סְפָרוֹת כְּדֵי לְהָגֵן עַל הַהַגְדָּרוֹת") }
+            if setupFirst == nil {
+                return setupMismatch
+                    ? tr("הַקּוֹדִים לֹא תָּאֲמוּ — בַּחֲרוּ קוֹד שׁוּב")
+                    : tr("בַּחֲרוּ קוֹד בֶּן 4 סְפָרוֹת כְּדֵי לְהָגֵן עַל הַהַגְדָּרוֹת")
+            }
             if weakCodeChosen { return tr("⚠️ קוֹד קַל לְנִחוּשׁ — הַיֶּלֶד רוֹאֶה אֶתְכֶם מַקְלִידִים אוֹתוֹ. אֶפְשָׁר לְאַשֵּׁר בְּכָל זֹאת, אוֹ לַחֲזוֹר וְלִבְחֹר אַחֵר.") }
             return tr("הַזִּינוּ שׁוּב אֶת הַקּוֹד לְאִשּׁוּר")
         }
@@ -456,6 +475,11 @@ struct ParentGateView<Content: View>: View {
         // the cloud but was never typed here — and nobody told them a code
         // exists. Point them at the person who knows it (Rani).
         if !settings.hasSetParentPIN, household.householdPIN != nil {
+            // The parent who CREATED the family lands here too after reinstalling
+            // Tofy — and was told to ask "the parent who invited you", i.e. himself.
+            if let hh = household.household, hh.createdBy == AuthManager.shared.userID {
+                return tr("הַזִּינוּ אֶת קוֹד הַהוֹרֶה שֶׁבְּחַרְתֶּם לַמִּשְׁפָּחָה")
+            }
             return tr("זֶהוּ קוֹד הַהוֹרֶה הַמִּשְׁפַּחְתִּי · בַּקְּשׁוּ אוֹתוֹ מֵהַהוֹרֶה שֶׁהִזְמִין אֶתְכֶם")
         }
         return tr("הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת")
@@ -498,6 +522,7 @@ struct ParentGateView<Content: View>: View {
                     shake = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                         shake = false; entered = ""; setupFirst = nil; weakCodeChosen = false
+                        setupMismatch = true
                     }
                 }
             } else {
@@ -505,6 +530,7 @@ struct ParentGateView<Content: View>: View {
                 // This code guards purchases and the screen-time controls, and the
                 // child watches it being typed. 1234 went through without a word.
                 weakCodeChosen = Self.isWeakPIN(entered)
+                setupMismatch = false
                 setupFirst = entered
                 entered = ""
             }

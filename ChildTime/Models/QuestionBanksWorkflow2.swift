@@ -82,7 +82,7 @@ enum QuestionBanksWorkflow2 {
         BankQuestion(prompt: "אֵיךְ אוֹמְרִים 'קָטָן' כְּשֶׁמְּדַבְּרִים עַל חֲתוּלָה?", correctAnswer: "קְטַנָּה", distractors: ["קָטָן", "קְטַנִּים", "קְטַנּוֹת"], grades: 2...4),
         BankQuestion(prompt: "אֵיךְ אוֹמְרִים 'הַתִּיק שֶׁל בֵּית הַסֵּפֶר' בְּמִלָּה אַחַת?", correctAnswer: "יַלְקוּט", distractors: ["מִזְוָדָה", "אַרְנָק", "קוּפְסָה"], grades: 2...4),
         BankQuestion(prompt: "אֵיךְ קוֹרְאִים לַבֶּגֶד שֶׁל הַיָּד בַּחוֹרֶף?", correctAnswer: "כְּפָפָה", distractors: ["גֶּרֶב", "כּוֹבַע", "צָעִיף"], grades: 2...4),
-        BankQuestion(prompt: "אֵיךְ אוֹמְרִים 'הַזָּנָב שֶׁל הַכֶּלֶב' בִּסְמִיכוּת?", correctAnswer: "זְנַב הַכֶּלֶב", distractors: ["זָנָב הַכֶּלֶב", "הַזָּנָב כֶּלֶב", "כֶּלֶב הַזָּנָב"], grades: 2...4),
+        BankQuestion(prompt: "אֵיךְ אוֹמְרִים 'הַזָּנָב שֶׁל הַכֶּלֶב' בִּסְמִיכוּת?", correctAnswer: "זְנַב הַכֶּלֶב", distractors: ["הַזְּנַב הַכֶּלֶב", "הַזָּנָב כֶּלֶב", "כֶּלֶב הַזָּנָב"], grades: 2...4),
         BankQuestion(prompt: "אֵיזוֹ מִילָּה מִתְחָרֶזֶת עִם 'כַּדּוּר'?", correctAnswer: "צִפּוֹר", distractors: ["סֵפֶר", "כִּסֵּא", "תַּפּוּחַ"], grades: 0...2),
         BankQuestion(prompt: "אֵיזוֹ מִילָּה מִתְחָרֶזֶת עִם 'דָּג'?", correctAnswer: "חָג", distractors: ["יָם", "אֲגַם", "סִירָה"], grades: 0...2),
         BankQuestion(prompt: "אֵיזוֹ מִילָּה מִתְחָרֶזֶת עִם 'פִּיל'?", correctAnswer: "גִּיל", distractors: ["דּוֹב", "זְאֵב", "אַרְיֵה"], grades: 0...2),

@@ -350,7 +350,7 @@ struct ParentSettingsView: View {
                     Button {
                         Task {
                             requestingShield = true
-                            await shields.requestAuthorizationIfNeeded()
+                            await shields.requestAuthorizationIfNeeded(userInitiated: true)
                             requestingShield = false
                         }
                     } label: {

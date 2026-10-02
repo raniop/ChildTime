@@ -47,11 +47,11 @@ enum BonusQuestionBank {
 
     static let hebrew: [BankQuestion] = [
         BankQuestion(prompt: "מָה צוּרַת הָרַבִּים שֶׁל \"אֲרִי\"?", correctAnswer: "אֲרָיוֹת", distractors: ["אֲרִיִּים", "אוֹרִים", "אֲרָיִים"], tier: .hard, grades: 1...3),
-        BankQuestion(prompt: "מָה צוּרַת הָרַבִּים שֶׁל \"חַלּוֹן\"?", correctAnswer: "חַלּוֹנוֹת", distractors: ["חַלּוֹנִים", "חֲלוֹנוֹת", "חַלּוֹנֵי"], tier: .hard, grades: 1...2),
+        BankQuestion(prompt: "מָה צוּרַת הָרַבִּים שֶׁל \"חַלּוֹן\"?", correctAnswer: "חַלּוֹנוֹת", distractors: ["חַלּוֹנִים", "חַלּוֹנָה", "חַלּוֹנֵי"], tier: .hard, grades: 1...2),
         BankQuestion(prompt: "מָה הַהֵפֶךְ שֶׁל \"נָדִיב\"?", correctAnswer: "קַמְצָן", distractors: ["עָשִׁיר", "חָזָק", "עָצוּב"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "אֵיזוֹ מִלָּה קְרוֹבָה בְּמַשְׁמָעוּת לְ\"שָׂמֵחַ\"?", correctAnswer: "עַלִּיז", distractors: ["עָיֵף", "רָגוּעַ", "מֻפְתָּע"], tier: .hard, grades: 2...3),
         BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "מִצְטַעֵר", distractors: ["מִסְטַעֵר", "מִצְתַּעֵר", "מִזְטַעֵר"], tier: .hard, grades: 2...4),
-        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "הִתְרַגַּשְׁתִּי", distractors: ["הִתְרַגַּשְׁתִי", "הִתְרַגָּשְׁתִּי", "הִתְרַקַּשְׁתִּי"], tier: .hard, grades: 4...6),
+        BankQuestion(prompt: "אֵיךְ כּוֹתְבִים נָכוֹן?", correctAnswer: "הִתְרַגַּשְׁתִּי", distractors: ["הִטְרַגַּשְׁתִּי", "הִתְרַגַּשְׁטִי", "הִתְרַקַּשְׁתִּי"], tier: .hard, grades: 4...6),
         BankQuestion(prompt: "\"הַצִּפּוֹר שָׁרָה שִׁיר יָפֶה\" — מָה הַנּוֹשֵׂא בַּמִּשְׁפָּט?", correctAnswer: "הַצִּפּוֹר", distractors: ["שָׁרָה", "שִׁיר", "יָפֶה"], tier: .hard, grades: 4...6),
         BankQuestion(prompt: "מָה פֵּרוּשׁ הַבִּטּוּי \"שָׁבַר אֶת הַקֶּרַח\"?", correctAnswer: "גָּרַם לָאֲוִירָה לִהְיוֹת נְעִימָה", distractors: ["שָׁבַר מַשֶּׁהוּ קַר", "הֵכִין גְּלִידָה", "יָצָא הַחוּצָה בַּחֹרֶף"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "מָה פֵּרוּשׁ הַבִּטּוּי \"לָשִׂים לֵב\"?", correctAnswer: "לְהִתְרַכֵּז וּלְהַבְחִין", distractors: ["לְצַיֵּר לֵב", "לֶאֱהֹב מִישֶׁהוּ", "לָשִׂים יָד עַל הַחָזֶה"], tier: .hard, grades: 2...4),

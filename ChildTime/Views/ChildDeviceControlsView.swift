@@ -220,7 +220,9 @@ struct ChildDeviceControlsView: View {
                             ? tr("נִכְנָס לַכִּיס 💝 שֶׁל הַיֶּלֶד — \(profileName) \(isGirl ? tr("פּוֹתַחַת") : tr("פּוֹתֵחַ")) מָתַי שֶׁ\(isGirl ? tr("תִּרְצֶה") : tr("יִרְצֶה")), מִכָּל מַכְשִׁיר. אֶפְשָׁר לָתֵת עוֹד עַד \(capLeft) דַּקּוֹת הַיּוֹם (עַד חֲצוֹת).")
                             : tr("עוֹד רֶגַע חֲצוֹת — מִיָּד אַחֲרֵי חֲצוֹת אֶפְשָׁר לָתֵת שׁוּב."),
                         icon: "gift.fill", tint: AppColor.starGold)
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+            // Same five as the parent's own menu — "רבע שעה" was missing here.
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
+                durationPill(tr("רֶבַע שָׁעָה"), minutes: 15, capLeft: capLeft)
                 durationPill(tr("חֲצִי שָׁעָה"), minutes: 30, capLeft: capLeft)
                 durationPill(tr("שָׁעָה"), minutes: 60, capLeft: capLeft)
                 durationPill(tr("שְׁעָתַיִם"), minutes: 120, capLeft: capLeft)
@@ -266,7 +268,7 @@ struct ChildDeviceControlsView: View {
 
             Button {
                 Task {
-                    await shields.requestAuthorizationIfNeeded()
+                    await shields.requestAuthorizationIfNeeded(userInitiated: true)
                     if shields.isAuthorized { showAllowPicker = true }
                 }
             } label: {
@@ -326,7 +328,7 @@ struct ChildDeviceControlsView: View {
                         icon: "lock.app.dashed", tint: AppColor.successMint)
             Button {
                 Task {
-                    await shields.requestAuthorizationIfNeeded()
+                    await shields.requestAuthorizationIfNeeded(userInitiated: true)
                     if shields.isAuthorized { showAppPicker = true }
                 }
             } label: {
@@ -355,7 +357,7 @@ struct ChildDeviceControlsView: View {
                         icon: "checkmark.shield.fill", tint: AppColor.companionGlow)
             Button {
                 Task {
-                    await shields.requestAuthorizationIfNeeded()
+                    await shields.requestAuthorizationIfNeeded(userInitiated: true)
                     if shields.isAuthorized { showAlwaysAllowPicker = true }
                 }
             } label: {
@@ -452,7 +454,7 @@ struct ChildDeviceControlsView: View {
 
     private func startAllow(minutes: Int) {
         Task {
-            await shields.requestAuthorizationIfNeeded()
+            await shields.requestAuthorizationIfNeeded(userInitiated: true)
             let blocked = SelectionStorage.decode(settings.activitySelectionData)
             settings.allowExceptionData = SelectionStorage.encode(allowSelection)
             settings.allowExceptionEndsAt = Date().addingTimeInterval(TimeInterval(minutes * 60))

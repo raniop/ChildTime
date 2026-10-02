@@ -26,7 +26,7 @@ enum CurriculumHebrewBank {
         BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'חַם'?", correctAnswer: "קַר", distractors: ["חָזָק", "רָטֹב", "יָבֵשׁ"], tier: .easy, grades: 2...2),
         BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'לַיְלָה'?", correctAnswer: "יוֹם", distractors: ["עֶרֶב", "צָהֳרַיִם", "שָׁעָה"], tier: .easy, grades: 2...2),
         BankQuestion(prompt: "מָה צוּרַת הָרַבִּים שֶׁל 'יֶלֶד'?", correctAnswer: "יְלָדִים", distractors: ["יַלְדָּה", "יְלָדוֹת", "יַלְדוּת"], tier: .easy, grades: 2...2),
-        BankQuestion(prompt: "מָה צוּרַת הָרַבִּים שֶׁל 'סֵפֶר'?", correctAnswer: "סְפָרִים", distractors: ["סֵפֶרִים", "סְפָרוֹת", "סִפְרִיּוֹת"], tier: .easy, grades: 2...2),
+        BankQuestion(prompt: "מָה צוּרַת הָרַבִּים שֶׁל 'סֵפֶר'?", correctAnswer: "סְפָרִים", distractors: ["סְפָרָה", "סְפָרוֹת", "סִפְרִיּוֹת"], tier: .easy, grades: 2...2),
         BankQuestion(prompt: "מָה צוּרַת הָרַבִּים שֶׁל 'חַלּוֹן'?", correctAnswer: "חַלּוֹנוֹת", distractors: ["חַלּוֹנִים", "חַלּוֹנָה", "חַלּוֹנֵי"], tier: .easy, grades: 2...2),
 
         // ——— כיתה ג׳: זמני הפועל, זכר/נקבה, משפחות מילים ———

@@ -101,6 +101,15 @@ struct FloatingCompanion: View {
                 }
             }
             .onDisappear { cancelWandering() }
+            // The band it may wander in is MEASURED after it appears (on the quiz
+            // screen: where the answers end). The first wander target was picked
+            // from the unmeasured band (topInset 120), so the buddy walked onto the
+            // answers and stayed there — nothing moved it back once the real band
+            // arrived. When the band moves, a buddy now outside it walks back in.
+            .onChangeCompat(of: topInset) { _, newTop in
+                guard !isDragging, position != .zero, position.y - size * 0.65 < newTop else { return }
+                position = randomTarget(in: geo.size)
+            }
 
             // Layer 2 (middle): the daily gift 🎁 — IN FRONT of the avatar,
             // floating above its head and following it. Its own button opens
@@ -124,13 +133,18 @@ struct FloatingCompanion: View {
                     : anchor.x
                 BubbleSpeech(text: bubble, showTail: false)
                     .fixedSize()
+                    // A new line REPLACES the old one. Without its own identity the
+                    // text change rode the 4-second walk animation below, so two
+                    // lines cross-faded on top of each other and neither could be
+                    // read (seen after a wrong answer, 2026-10-02).
+                    .id(bubble)
                     .background(GeometryReader { g in
                         Color.clear.preference(key: BubbleSizeKey.self, value: g.size)
                     })
                     .onPreferenceChange(BubbleSizeKey.self) { bubbleSize = $0 }
                     .position(x: clampedX, y: anchor.y - size * 0.9)
                     .animation(isDragging ? nil : .easeInOut(duration: 4), value: position)
-                    .transition(.scale.combined(with: .opacity))
+                    .transition(.asymmetric(insertion: .scale.combined(with: .opacity), removal: .identity))
                     .allowsHitTesting(false)
             }
             }
@@ -180,7 +194,7 @@ struct FloatingCompanion: View {
         let r = size * 0.5
         let minX = horizontalInset + r
         let maxX = max(minX, container.width - horizontalInset - r)
-        let minY = topInset + r
+        let minY = topInset + size * 0.65   // the avatar is size×1.3 tall, centred
         let maxY = max(minY, container.height - bottomInset - r)
         let midX = (minX + maxX) / 2
         func y(_ t: CGFloat) -> CGFloat { minY + (maxY - minY) * t }

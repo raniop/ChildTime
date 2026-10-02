@@ -145,10 +145,10 @@ enum QuestionBanks {
         BankQuestion(prompt: "מָה הַהֵפֶךְ מִ'מָּלֵא'?",   correctAnswer: "רֵיק",   distractors: ["כָּבֵד", "גָּדוֹל", "חָדָשׁ"], grades: 1...3),
 
         // רבים
-        BankQuestion(prompt: "מָה הָרַבִּים שֶׁל 'יֶלֶד'?",   correctAnswer: "יְלָדִים",  distractors: ["יְלָדוֹת", "יַלְדָּה", "יֶלֶדִים"], grades: 2...4),
-        BankQuestion(prompt: "מָה הָרַבִּים שֶׁל 'סֵפֶר'?",   correctAnswer: "סְפָרִים",  distractors: ["סְפָרוֹת", "סֵפֶרִים", "סְפָרַיִם"], grades: 2...4),
+        BankQuestion(prompt: "מָה הָרַבִּים שֶׁל 'יֶלֶד'?",   correctAnswer: "יְלָדִים",  distractors: ["יְלָדוֹת", "יַלְדָּה", "יַלְדוּת"], grades: 2...4),
+        BankQuestion(prompt: "מָה הָרַבִּים שֶׁל 'סֵפֶר'?",   correctAnswer: "סְפָרִים",  distractors: ["סְפָרוֹת", "סִפְרִיּוֹת", "סְפָרָה"], grades: 2...4),
         BankQuestion(prompt: "מָה הָרַבִּים שֶׁל 'בַּיִת'?",   correctAnswer: "בָּתִּים",  distractors: ["בַּיִתִים", "בֵּיתוֹת", "בַּיּוֹת"], grades: 2...4),
-        BankQuestion(prompt: "מָה הָרַבִּים שֶׁל 'תַּפּוּחַ'?", correctAnswer: "תַּפּוּחִים", distractors: ["תַּפּוּחוֹת", "תַּפּוּחֵי", "תַּפּוּחַיִם"], grades: 2...4),
+        BankQuestion(prompt: "מָה הָרַבִּים שֶׁל 'תַּפּוּחַ'?", correctAnswer: "תַּפּוּחִים", distractors: ["תַּפּוּחוֹת", "תַּפּוּחֵי", "תַּפּוּחָה"], grades: 2...4),
 
         // קטגוריות
         BankQuestion(prompt: "אֵיזוֹ מִלָּה הִיא שֵׁם שֶׁל בַּעַל חַיִּים?", correctAnswer: "פִּיל",     distractors: ["כִּסֵּא", "דֶּלֶת", "עִפָּרוֹן"], grades: 0...2),

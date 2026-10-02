@@ -196,9 +196,21 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": " · %lld mistakes"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " · %lld mistake"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " · %lld mistakes"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -226,6 +238,24 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": " · %lld ошибки"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " · טָעוּת אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " · %lld טְעֻיּוֹת"
                 }
               }
             }
@@ -1134,6 +1164,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "«Tofy Time» всегда открыта и даёт вопросы только из активных тем. Хотя бы один мир должен оставаться открытым."
+          }
+        }
+      }
+    },
+    "\"יום אחד\" במקום \"1 ימים\", קוד הורה שנפתח נקי אחרי יציאה מהאפליקציה, אזהרה כשאין במכשיר הילד הרשאת \"זמן מסך\", ו\"רבע שעה\" במתנות": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«يوم واحد» بدل «1 أيام»، ورمز أهل يُفتح فارغًا بعد الخروج من التطبيق، وتنبيه عندما لا يملك جهاز الطفل إذن «مدة استخدام الجهاز»، و«ربع ساعة» في الهدايا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"1 day\" instead of \"1 days\", a parent code that opens clean after leaving the app, a warning when a child's device has no Screen Time permission, and \"15 minutes\" in gifts"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«1 день» вместо «1 дней», родительский код, который открывается чистым после выхода из приложения, предупреждение, когда на устройстве ребёнка нет разрешения «Экранное время», и «15 минут» в подарках"
           }
         }
       }
@@ -6650,6 +6703,47 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld из %lld играли сегодня"
+          }
+        }
+      }
+    },
+    "%lld נְכוֹנוֹת": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld صحيحة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld correct"
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "נְכוֹנָה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld נְכוֹנוֹת"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld верно"
           }
         }
       }
@@ -14361,6 +14455,29 @@
         }
       }
     },
+    "בְּחִירַת קוֹד אַחֵר": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختيار رمز آخر"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a different code"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать другой код"
+          }
+        }
+      }
+    },
     "בְּחַר אֶת הַפְּרוֹפִיל שֶׁלְּךָ": {
       "localizations": {
         "ar": {
@@ -16504,6 +16621,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "На iPad карточка с текстом оставалась огромной даже для короткого отрывка, Тофи стоял на ответе 4, а кнопка подсказки обрезалась у края. Теперь карточка по размеру текста, ответы заполняют экран, и всё помещается."
+          }
+        }
+      }
+    },
+    "באייפון בעברית אי אפשר היה להקליד את קוד החיבור, כי עלתה רק מקלדת עברית. עכשיו עולה מקלדת לטינית — לחיבור ילד, להורה שני ולהוספת חבר": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "على آيفون باللغة العبرية لم يكن ممكنًا كتابة رمز الانضمام — كانت تظهر لوحة عبرية فقط. الآن تظهر لوحة لاتينية — لربط طفل، ولوليّ أمر ثانٍ، ولإضافة صديق"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On an iPhone set to Hebrew the join code couldn't be typed — only a Hebrew keyboard came up. Now a Latin keyboard appears — for joining a child, a second parent, and adding a friend"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На iPhone на иврите код подключения нельзя было ввести — появлялась только ивритская клавиатура. Теперь появляется латинская — для подключения ребёнка, второго родителя и добавления друга"
           }
         }
       }
@@ -21723,6 +21863,29 @@
         }
       }
     },
+    "הַזִּינוּ אֶת קוֹד הַהוֹרֶה שֶׁבְּחַרְתֶּם לַמִּשְׁפָּחָה": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أدخلوا رمز الأهل الذي اخترتموه للعائلة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the parent code you chose for your family"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введите родительский код, который вы выбрали для семьи"
+          }
+        }
+      }
+    },
     "הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת": {
       "localizations": {
         "ar": {
@@ -24106,6 +24269,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Коды не совпали — попробуем ещё раз 🙂"
+          }
+        }
+      }
+    },
+    "הַקּוֹדִים לֹא תָּאֲמוּ — בַּחֲרוּ קוֹד שׁוּב": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الرمزان غير متطابقين — اختاروا رمزًا من جديد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The codes didn't match — choose a code again"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Коды не совпали — выберите код снова"
           }
         }
       }
@@ -27971,6 +28157,29 @@
         }
       }
     },
+    "התקנה חדשה נפתחת בשפה של המכשיר — עברית, English, Русский או العربية — ואפשר להחליף כבר במסך הראשון": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التثبيت الجديد يُفتح بلغة الجهاز — العبرية أو الإنجليزية أو الروسية أو العربية — ويمكن التبديل من الشاشة الأولى"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A new install opens in your device's language — Hebrew, English, Russian or Arabic — and you can switch right on the first screen"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новая установка открывается на языке устройства — иврит, английский, русский или арабский — и сменить его можно прямо на первом экране"
+          }
+        }
+      }
+    },
     "התראות להורה": {
       "localizations": {
         "ar": {
@@ -28448,6 +28657,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вау!"
+          }
+        }
+      }
+    },
+    "ועוד המון תיקונים קטנים": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "والكثير من الإصلاحات الصغيرة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "And lots of small fixes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "И множество мелких исправлений"
           }
         }
       }
@@ -31877,6 +32109,29 @@
         }
       }
     },
+    "טופי מדבר בשפה של האייפון": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy يتحدث بلغة آيفونك"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy speaks your iPhone's language"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy говорит на языке вашего iPhone"
+          }
+        }
+      }
+    },
     "טופי מדבר גם ערבית": {
       "localizations": {
         "ar": {
@@ -33456,6 +33711,29 @@
         }
       }
     },
+    "יוֹם רֶצֶף": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يوم متتالٍ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "day streak"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "день подряд"
+          }
+        }
+      }
+    },
     "יוֹסִי": {
       "localizations": {
         "ar": {
@@ -33629,6 +33907,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ребёнок, у которого приложение на русском, получает уведомления на русском, а родитель — на иврите. Одна семья, одно событие"
+          }
+        }
+      }
+    },
+    "ילד שמצליח מקבל שאלות קשות מכיתה אחת מעליו, במקום לחזור לשאלות של גן. ותשובות שנראו אותו דבר בלי ניקוד הוחלפו": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الطفل المتفوّق يحصل على أسئلة أصعب من الصف الأعلى بدل العودة إلى أسئلة الروضة. واستُبدلت الإجابات التي بدت متطابقة بلا تشكيل"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A child who's doing well gets harder questions from one grade up instead of sliding back to kindergarten ones. And answers that looked identical without vowel marks were replaced"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ребёнок, который справляется, получает более сложные вопросы на класс выше, а не возвращается к детсадовским. А варианты ответа, выглядевшие одинаково без огласовок, заменены"
           }
         }
       }
@@ -44681,6 +44982,29 @@
         }
       }
     },
+    "מכשיר של ילד שרק הצטרף למשפחה לא קיבל מתנת דקות עד שסגרו ופתחו את טופי. עכשיו המתנה מגיעה תוך שנייה, גם בדקות הראשונות": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جهاز الطفل الذي انضمّ للتوّ إلى العائلة لم يكن يستلم دقائق الهدية حتى يُغلَق Tofy ويُفتح من جديد. الآن تصل الهدية خلال ثانية، حتى في الدقائق الأولى"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A child's device that had just joined the family didn't receive gifted minutes until Tofy was closed and reopened. Now the gift arrives within a second, even in the first minutes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Устройство ребёнка, только что присоединившееся к семье, не получало подаренные минуты, пока Tofy не закрывали и не открывали снова. Теперь подарок приходит за секунду — даже в первые минуты"
+          }
+        }
+      }
+    },
     "מכשיר תקוע כבר לא תקוע": {
       "localizations": {
         "ar": {
@@ -45250,6 +45574,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ежедневный подарок"
+          }
+        }
+      }
+    },
+    "מתנה ראשונה מגיעה מיד": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الهدية الأولى تصل فورًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your first gift arrives right away"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Первый подарок приходит сразу"
+          }
+        }
+      }
+    },
+    "מתנה ראשונה מגיעה מיד, ושאלות שמתאימות לילד": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الهدية الأولى تصل فورًا، وأسئلة تناسب طفلك"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your first gift arrives right away, and questions that fit your child"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Первый подарок приходит сразу — и вопросы по уровню ребёнка"
           }
         }
       }
@@ -55223,6 +55593,29 @@
         }
       }
     },
+    "קוד החיבור מוקלד בכל מקלדת": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رمز الانضمام يُكتب بأي لوحة مفاتيح"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The join code types on any keyboard"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Код подключения вводится с любой клавиатуры"
+          }
+        }
+      }
+    },
     "קוד חדש": {
       "localizations": {
         "ar": {
@@ -59346,6 +59739,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Повторяющиеся вопросы — убраны"
+          }
+        }
+      }
+    },
+    "שאלות שמתאימות לילד": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أسئلة تناسب طفلك"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questions that fit your child"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вопросы по уровню ребёнка"
           }
         }
       }

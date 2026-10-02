@@ -344,7 +344,7 @@ struct OnboardingView: View {
             // Primary action — either approve, or pick apps
             if !shields.isAuthorized {
                 JuicyButton(gradient: AppGradient.castle, glowColor: AppColor.flameOrange) {
-                    Task { await shields.requestAuthorizationIfNeeded() }
+                    Task { await shields.requestAuthorizationIfNeeded(userInitiated: true) }
                 } label: {
                     Label(tr("אשר Family Controls"), systemImage: "checkmark.shield.fill")
                 }

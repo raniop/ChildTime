@@ -200,3 +200,28 @@ final class StretchTierTests: XCTestCase {
         }
     }
 }
+
+/// "אֵיךְ אוֹמְרִים הַרְבֵּה דֶּלֶת?" offered "דְּלָתוֹת" (right) and "דֶּלֶתוֹת" (wrong) —
+/// a plural question that turned into a niqqud quiz (2026-10-02). In a PLURAL
+/// question no wrong option may spell the right answer with the same letters.
+/// Grammar questions are left alone on purpose: in סמיכות, בניינים and gender
+/// (בֵּית / בַּיִת, פֻּעַל / פִּעֵל, לָךְ / לְךָ) the niqqud IS the lesson.
+final class LookAlikeOptionTests: XCTestCase {
+    private func letters(_ s: String) -> String {
+        String(String.UnicodeScalarView(s.unicodeScalars.filter { !(0x0591...0x05C7).contains($0.value) }))
+    }
+
+    func testPluralQuestionsHaveNoLookAlikeOptions() {
+        LanguageStore.shared.setForTesting(.he)
+        var bad: [String] = []
+        let items = (QuestionBanks.builtInBank(for: .hebrew) ?? []) + BonusQuestionBank.pool(for: .hebrew)   // the code, not the device's cloud cache
+        for q in items {
+            let p = letters(q.prompt)
+            guard p.contains("הרבה") || p.contains("הרבים") || p.contains("צורת הרבים") else { continue }
+            for d in q.distractors where letters(d) == letters(q.correctAnswer) {
+                bad.append("\(p.prefix(40)): \(q.correctAnswer) ≈ \(d)")
+            }
+        }
+        XCTAssertTrue(bad.isEmpty, "look-alike plural options:\n" + bad.joined(separator: "\n"))
+    }
+}
