@@ -1645,46 +1645,94 @@ exports.onParentFeedback = onDocumentCreated(
   }
 );
 
-// ---- 🎉 New family → push to the founders ----------------------------------
+// ---- 🎉 New family → push + email to the founders --------------------------
 // Every household created (a parent finished "צרו את המשפחה") pings Rani and
-// Amit on their own phones — the Tofy app they already have installed as
-// parents, via the FCM tokens on parents/{uid}. Demo/test families are skipped
-// with the same rule the dashboard uses, so a QA run does not wake anyone.
-exports.onHouseholdCreated = onDocumentCreated("households/{hid}", async (event) => {
-  const hh = (event.data && event.data.data()) || {};
-  const hid = event.params.hid;
-  const parentsByUID = {};
-  await Promise.all((hh.parentUIDs || []).map(async (u) => {
-    const p = await db.collection("parents").doc(u).get().catch(() => null);
-    if (p && p.exists) parentsByUID[u] = p.data();
-  }));
-  if (isDemoHousehold(hh, parentsByUID, [])) {
-    console.log("[newFamily] demo household — no push:", hid);
-    return;
-  }
-  const who = Object.values(parentsByUID).map((p) => p.name || p.email).filter(Boolean)[0] || "";
-  const name = hh.familyName || hh.familyLabel || "";
-  const body = [name, who].filter(Boolean).join(" · ") || "משפחה חדשה נרשמה עכשיו";
+// Amit: a push on their own phones (the Tofy app they have installed as
+// parents, via parents/{uid}.fcmTokens) and an email. Demo/test families are
+// skipped with the same rule the dashboard uses, so a QA run wakes nobody.
+//
+// The household doc is created FIRST and named a moment later (the name is a
+// separate write from the app), so the first version of this read an unnamed
+// doc and the push said only "joni.avni@gmail.com". It now waits briefly and
+// reads the household again, so the name is there when it exists.
+const NEW_FAMILY_SETTLE_MS = 12000;
+exports.onHouseholdCreated = onDocumentCreated(
+  { document: "households/{hid}", secrets: [GMAIL_USER, GMAIL_PASS], timeoutSeconds: 60 },
+  async (event) => {
+    const hid = event.params.hid;
+    await new Promise((r) => setTimeout(r, NEW_FAMILY_SETTLE_MS));
+    const fresh = await db.collection("households").doc(hid).get().catch(() => null);
+    const hh = (fresh && fresh.exists ? fresh.data() : (event.data && event.data.data())) || {};
+    const parentsByUID = {};
+    await Promise.all((hh.parentUIDs || []).map(async (u) => {
+      const p = await db.collection("parents").doc(u).get().catch(() => null);
+      if (p && p.exists) parentsByUID[u] = p.data();
+    }));
+    if (isDemoHousehold(hh, parentsByUID, [])) {
+      console.log("[newFamily] demo household — no notice:", hid);
+      return;
+    }
+    const parents = Object.values(parentsByUID);
+    const parentName = parents.map((p) => p.name || p.displayName).filter(Boolean)[0] || "";
+    const email = parents.map((p) => p.email).filter(Boolean)[0] || "";
+    const familyName = hh.familyName || hh.familyLabel || "";
+    // Name first; the email only when there is nothing better to call them.
+    const title = familyName ? `🎉 ${familyName} הצטרפה לטופי` : "🎉 משפחה חדשה בטופי";
+    const body = [parentName, familyName ? "" : email].filter(Boolean).join(" · ") || "משפחה חדשה נרשמה עכשיו";
 
-  const tokens = [];
-  for (const email of ADMIN_EMAILS) {
+    // 1) Push to the founders' phones.
+    const tokens = [];
+    for (const adminEmail of ADMIN_EMAILS) {
+      try {
+        const u = await admin.auth().getUserByEmail(adminEmail);
+        tokens.push(...(await tokensForUID(u.uid)));
+      } catch (e) {
+        console.warn("[newFamily] no admin account for", adminEmail, e && e.code);
+      }
+    }
+    const uniq = [...new Set(tokens)];
+    if (uniq.length) {
+      const res = await admin.messaging().sendEachForMulticast({
+        tokens: uniq,
+        notification: { title, body },
+        data: { kind: "adminNewFamily", householdID: hid },
+        apns: { payload: { aps: { sound: "default" } } },
+      });
+      console.log("[newFamily]", hid, "push", res.successCount, "/", uniq.length);
+    } else {
+      console.warn("[newFamily] no founder tokens for", hid);
+    }
+
+    // 2) Email — a record that stays, unlike a push that gets swiped away.
+    const user = GMAIL_USER.value();
+    const pass = GMAIL_PASS.value();
+    if (!user || !pass) { console.warn("[newFamily] GMAIL secrets missing — no email"); return; }
+    const when = new Date().toLocaleString("he-IL", { timeZone: "Asia/Jerusalem" });
+    const lines = [
+      `משפחה חדשה נרשמה לטופי 🎉`,
+      ``,
+      `— משפחה: ${familyName || "(עוד בלי שם)"}`,
+      `— הורה: ${parentName || "-"}`,
+      `— מייל: ${email || "-"}`,
+      `— שפה: ${hh.language || hh.locale || "-"}`,
+      `— מתי: ${when}`,
+      ``,
+      `בפאנל: https://tofyapp.com/admin/`,
+    ];
     try {
-      const u = await admin.auth().getUserByEmail(email);
-      tokens.push(...(await tokensForUID(u.uid)));
+      await nodemailer.createTransport({ service: "gmail", auth: { user, pass } }).sendMail({
+        from: `Tofy <${user}>`,
+        to: ADMIN_EMAILS,
+        subject: familyName ? `🎉 ${familyName} הצטרפה לטופי` : "🎉 משפחה חדשה נרשמה לטופי",
+        text: lines.join("\n"),
+        html: rtlBody(lines),
+      });
+      console.log("[newFamily] emailed", ADMIN_EMAILS.join(", "));
     } catch (e) {
-      console.warn("[newFamily] no admin account for", email, e && e.code);
+      console.error("[newFamily] email failed:", e && e.message);
     }
   }
-  const uniq = [...new Set(tokens)];
-  if (!uniq.length) { console.warn("[newFamily] no founder tokens — nothing sent for", hid); return; }
-  const res = await admin.messaging().sendEachForMulticast({
-    tokens: uniq,
-    notification: { title: "🎉 משפחה חדשה בטופי", body },
-    data: { kind: "adminNewFamily", householdID: hid },
-    apns: { payload: { aps: { sound: "default" } } },
-  });
-  console.log("[newFamily]", hid, "sent", res.successCount, "/", uniq.length);
-});
+);
 
 // ---- Bad-question report → email ------------------------------------------
 // When a parent flags a question (the 🚩 in the game, written to
@@ -2337,6 +2385,9 @@ exports.adminFamiliesOverview = onCall(
         parentDevices: parentDevs,
         id: h.id.slice(0, 8),
         fullId: h.id,     // needed by the admin actions (admin-only page)
+        // When the household itself was created — the only age signal for a
+        // family that never added a child (Rani: "משפחת Apple" sat on top).
+        createdAt: h.createTime ? h.createTime.toMillis() / 1000 : null,
         familyLabel: d.familyLabel || null,   // admin-set display label
         familyName: d.familyName || null,   // the parent-set name (Settings → שם המשפחה)
         premiumUntil: d.premiumUntil || null,   // Tofy+ for the whole family (epoch seconds)

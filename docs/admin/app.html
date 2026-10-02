@@ -147,7 +147,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261002132011";
+const PAGE_STAMP = "20261002140741";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -268,13 +268,25 @@ async function families() {
   const fams = (FAM.families || []).map((f) => ({ ...f, hh: f.fullId || f.householdID || f.id, j: (J && J.households && J.households[f.fullId || f.householdID || f.id]) || {} }));
   const q = famQuery.trim();
   const hay = (f) => [f.familyName, f.label, f.name, ...(f.parents || []).map((p) => (p.email || "") + " " + (p.name || "")), ...(f.children || []).map((k) => k.name)].join(" ");
-  // 🧪 A family marked as demo never pollutes the real lists — it shows only
+  // "לא פעילה" by the journey state, OR registered over a week ago and never
+  // played at all — those sat on top as "חינם · לפני הפעלה" (Adam, Apple) while
+  // a family that joined an hour ago belongs on top. No age known → inactive.
+  const QUIET_AFTER_DAYS = 7;
+  const isInactive = (f) => {
+    if ((f.j.state || "free_new") === "inactive") return true;
+    if (famWhen(f).days !== 99999) return false;            // they have played
+    const born = f.createdAt || famStats(f).joined || 0;     // seconds
+    if (!born) return true;
+    return (Date.now() / 1000 - born) / 86400 > QUIET_AFTER_DAYS;
+  };  // 🧪 A family marked as demo never pollutes the real lists — it shows only
   // under its own chip, where it can be un-marked.
   const inFilter = (f) => famFilter === "demo" ? !!f.isDemo
+    : famFilter === "inactive" ? !f.isDemo && isInactive(f)
     : !f.isDemo && (famFilter === "all" || (f.j.state || "free_new") === famFilter);
   // What each filter chip is worth, so the numbers are visible before clicking.
   const countFor = (k) => k === "demo" ? fams.filter((f) => f.isDemo).length
     : k === "all" ? fams.filter((f) => !f.isDemo).length
+    : k === "inactive" ? fams.filter((f) => !f.isDemo && isInactive(f)).length
     : fams.filter((f) => !f.isDemo && (f.j.state || "free_new") === k).length;
   // Sorting: the column the founder picked, newest activity first by default.
   const STATE_ORDER = { plus: 0, gift_expiring: 1, gift: 2, returned: 3, free_new: 4, inactive: 5 };
@@ -299,7 +311,7 @@ async function families() {
   // On "הכל" the list is three sections: active families on top, the families
   // that went quiet in their own section under them (Rani: they buried the
   // ones worth looking at), and the demo families last.
-  const isInactive = (f) => (f.j.state || "free_new") === "inactive";
+
   const listHTML = () => {
     const qq = famQuery.trim();
     const ok = (f) => !qq || hay(f).includes(qq);
