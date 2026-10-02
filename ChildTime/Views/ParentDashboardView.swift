@@ -37,6 +37,8 @@ struct ParentDashboardView: View {
     @Environment(\.openURL) private var openURL
 
     @State private var resettingProfile: Profile? = nil
+    /// 🔄 "there is a newer Tofy" — the ONLY screen allowed to open the App Store.
+    @State private var showUpdateSheet = false
     @State private var deletingProfile: Profile? = nil
     /// Confirm clearing a child's "protect my time" code (when the kid forgot it).
     @State private var pinResetProfile: Profile? = nil
@@ -467,6 +469,28 @@ struct ParentDashboardView: View {
             .sheet(item: $friendsProfile) { p in
                 ChildFriendsView(childID: p.id.uuidString, childName: p.name)
                     .environment(\.layoutDirection, .app)
+            }
+            // 🔄 A newer build exists. Shown to the PARENT, with what changed, and
+            // the one button in the app that may leave for the App Store.
+            .sheet(isPresented: $showUpdateSheet) {
+                UpdateAvailableSheet(onUpdate: {
+                    showUpdateSheet = false
+                    UIApplication.shared.open(AppUpdateConfig.storeURL)
+                }, onLater: {
+                    AppUpdateConfig.shared.dismissCurrent()   // quiet until the NEXT build
+                    showUpdateSheet = false
+                })
+                // Sized to the offer, not to the screen: `.large` left a third of
+                // the sheet empty under three short lines. It can still be dragged
+                // up when a release has a long list.
+                .presentationDetents([.fraction(0.76), .large])
+            }
+            .onAppear {
+                // Never stack it on "what's new" — that one is about the build they
+                // already have, and two sheets on launch is one too many.
+                if case .recommended = AppUpdateConfig.shared.state, !showWhatsNew {
+                    showUpdateSheet = true
+                }
             }
             .sheet(isPresented: $showWhatsNew, onDismiss: { WhatsNewContent.markShown() }) {
                 WhatsNewView {

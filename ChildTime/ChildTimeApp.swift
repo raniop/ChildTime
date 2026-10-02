@@ -181,6 +181,8 @@ struct ChildTimeApp: App {
         d.removeObject(forKey: demoSeededIDsKey)
     }
 
+    @ObservedObject private var updateConfig = AppUpdateConfig.shared
+
     var body: some Scene {
         WindowGroup {
             ZStack {
@@ -194,6 +196,13 @@ struct ChildTimeApp: App {
                 DisplayProbe().ignoresSafeArea().allowsHitTesting(false)
                 Group { if let demo = Self.demoScreen { demoRoot(demo) } else { ContentView() } }
                     .id(language.current)
+                // 🔄 Below `minBuild` this copy can no longer be trusted against
+                // the server, so it covers everything — no tab, no sheet, no deep
+                // link gets behind it. Only reachable when the admin raises
+                // `minBuild`, which stays 0 until a server change forces it.
+                    .overlay {
+                        if case .required = updateConfig.state { ForcedUpdateView() }
+                    }
 
                 // Animated welcome splash on top of the first frame, then it
                 // fades away to reveal the app.
@@ -246,6 +255,7 @@ struct ChildTimeApp: App {
                         progress.applyDailyRolloverIfNeeded()   // release minutes banked for "tomorrow"
                     }
                     ConversionConfig.shared.start()   // what a free child sees (admin knobs)
+                    AppUpdateConfig.shared.start()    // "there is a newer Tofy" (admin knobs)
                     enforceShieldStateIfNeeded()
                 }
                 .onChangeCompat(of: scenePhase) { _, phase in
@@ -482,6 +492,19 @@ struct ChildTimeApp: App {
         case "opening":  UnlockedView().onAppear { ProgressStore.shared.beginOpeningWindow(gift: false) }           // DEMO_SCREEN=opening — the "we're opening it" state
         case "openinggift": UnlockedView().onAppear { ProgressStore.shared.beginOpeningWindow(gift: true) }         // DEMO_SCREEN=openinggift
         case "whatsnew": WhatsNewView(onDone: {})   // DEMO_SCREEN=whatsnew — the release-notes sheet
+        case "updateparent":                        // DEMO_SCREEN=updateparent — "a newer Tofy" for the parent
+            UpdateDemoHost(detent: .fraction(0.76)) { UpdateAvailableSheet(onUpdate: {}, onLater: {}) }
+                .onAppear { AppUpdateConfig.shared.setForTesting(
+                    latest: 9999, version: "2026.10.2",
+                    notes: ["💝 המתנה שלכם נפתחת תמיד — גם כשהמכשיר השני עוד לא יודע",
+                            "⏱ עצירה מוקדמת מחזירה את הדקות גם למכסה היומית",
+                            "📖 הבנת הנקרא באייפד — הכרטיס בגודל הקטע והתשובות ממלאות"]) }
+        case "updatekid":                           // DEMO_SCREEN=updatekid — the child's notice (no way out of the app)
+            UpdateDemoHost(detent: .medium) { UpdateKidNotice(onOK: {}) }
+                .onAppear { AppUpdateConfig.shared.setForTesting(latest: 9999) }
+        case "updateforced":                        // DEMO_SCREEN=updateforced — below minBuild, blocking
+            ForcedUpdateView()
+                .onAppear { AppUpdateConfig.shared.setForTesting(latest: 9999, min: 9999) }
         case "parenthome": ParentDashboardView(isRoot: true)   // DEMO_SCREEN=parenthome — the redesigned overview
             .onAppear {
                 if let id = ProfileStore.shared.activeID {

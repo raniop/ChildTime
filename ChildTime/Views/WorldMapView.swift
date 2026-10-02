@@ -14,6 +14,8 @@ struct WorldMapView: View {
     @ObservedObject private var liveGame = LiveGameManager.shared
     @ObservedObject private var kidMode = KidModeManager.shared
     @State private var inviteBannerVisible = false
+    /// 🔄 "there is a newer Tofy" — once per launch, and never over another sheet.
+    @State private var showUpdateNotice = false
     @State private var showKidExit = false
     @StateObject private var companion = CompanionController()
     @State private var selectedWorld: World?
@@ -756,6 +758,17 @@ struct WorldMapView: View {
                     campaignTracker.popupTapped(c)   // → the ask-a-parent page via consumeCampaignLanding
                 }, onLater: { campaignTracker.popup = nil })
             }
+        }
+        // 🔄 A newer Tofy exists. The child is TOLD, and pointed at a grown-up —
+        // never at the App Store, which they could not finish and must not reach.
+        .sheet(isPresented: $showUpdateNotice) {
+            UpdateKidNotice { showUpdateNotice = false }
+                .presentationDetents([.medium])
+        }
+        .onAppear {
+            // One sheet at a time: a campaign pop-up outranks this.
+            if case .recommended = AppUpdateConfig.shared.state,
+               campaignTracker.popup == nil { showUpdateNotice = true }
         }
         .onChangeCompat(of: CampaignTracker.shared.pendingPackID) { _, _ in consumeCampaignLanding() }
         .onChangeCompat(of: profiles.active?.ownedPacks.count ?? 0) { _, _ in maybeRevealPack() }
