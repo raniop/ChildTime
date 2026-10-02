@@ -33,17 +33,18 @@ final class LocalizationTests: XCTestCase {
         XCTAssertEqual(tr("תַּרְגִּיל \(math)"), "תַּרְגִּיל \u{2066}3 + 4\u{2069}", "the app's own math isolates stay")
     }
 
-    /// A brand-new install follows the iPhone; an Israeli English iPhone and every
-    /// install from before languages stay Hebrew.
+    /// A brand-new install follows the iPhone's language — English included, in
+    /// Israel too (Rani, 2026-10-02). Every install from before languages stays Hebrew.
     func testFirstLaunchLanguage() {
         let fresh = UserDefaults(suiteName: "test.firstLaunch.\(UUID().uuidString)")!
         XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["en-US"], defaults: fresh), .en)
         XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["en-GB"], defaults: fresh), .en)
-        XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["en-IL", "he-IL"], defaults: fresh), .he)
+        XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["en-IL", "he-IL"], defaults: fresh), .en, "an English iPhone opens English, in Israel too")
         XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["he-IL"], defaults: fresh), .he)
-        // A Russian-speaking phone opens in Russian wherever it is — including in
-        // Israel, where the family's child still goes to an Israeli school. That is
-        // the opposite of the English rule one line above, and deliberately so.
+        XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["he"], defaults: fresh), .he)
+        // A language Tofy does not speak: Israel → Hebrew, elsewhere → English.
+        XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["fr-IL"], defaults: fresh), .he)
+        XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["fr-FR"], defaults: fresh), .en)
         XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["ru-IL"], defaults: fresh), .ru)
         XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["ru-RU"], defaults: fresh), .ru)
         XCTAssertEqual(LanguageStore.firstLaunchLanguage(preferred: ["ar-SA"], defaults: fresh), .ar)

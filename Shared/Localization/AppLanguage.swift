@@ -125,19 +125,27 @@ final class LanguageStore: ObservableObject {
 
     /// No saved choice yet. Every install from before languages is Hebrew — it
     /// already finished onboarding or picked a device role — and stays Hebrew.
-    /// A brand-new install follows the iPhone: English outside Israel starts in
-    /// English (an American family never lands on a Hebrew app); an English
-    /// iPhone set to Israel (en-IL) and everything else start in Hebrew.
+    ///
+    /// A brand-new install follows the iPhone's LANGUAGE (Rani, 2026-10-02: "הדיפולט
+    /// שנפתח יהיה לפי השפה באייפון"). An English iPhone opens Tofy in English — in
+    /// Israel too; it used to open in Hebrew there (en-IL), on the guess that an
+    /// Israeli with an English phone wants Hebrew. The guess goes to the welcome
+    /// screen's language button instead: one tap, before anything else.
+    /// A language Tofy does not speak falls back by REGION: Israel → Hebrew,
+    /// anywhere else → English.
     static func firstLaunchLanguage(preferred: [String] = Locale.preferredLanguages, defaults: UserDefaults = AppGroup.defaults) -> AppLanguage {
         if defaults.object(forKey: "onboardingCompleted") != nil || defaults.object(forKey: "deviceRole") != nil { return .he }
         guard let first = preferred.first else { return .he }
         let locale = Locale(identifier: first)
-        let region = locale.region?.identifier ?? Locale.current.region?.identifier
-        // A Russian-speaking phone opens in Russian wherever it is — unlike
-        // English, which in Israel means a Hebrew family with an English phone.
-        if locale.language.languageCode?.identifier == "ru" { return .ru }
-        if locale.language.languageCode?.identifier == "ar" { return .ar }
-        return locale.language.languageCode?.identifier == "en" && region != "IL" ? .en : .he
+        switch locale.language.languageCode?.identifier {
+        case "he", "iw": return .he
+        case "en":       return .en
+        case "ru":       return .ru
+        case "ar":       return .ar
+        default:
+            let region = locale.region?.identifier ?? Locale.current.region?.identifier
+            return region == "IL" ? .he : .en
+        }
     }
 
     func set(_ language: AppLanguage) {
