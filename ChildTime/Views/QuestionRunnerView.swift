@@ -1137,12 +1137,14 @@ struct QuestionRunnerView: View {
         // earn mode, and the pool is text-based → not for pre-readers.
         let bonusQ = bonusCooldownOK && purpose.grantsScreenTime && !isPreReader
             && !progress.atDailyCap   // never promise minutes the cap won't allow today
+            && !progress.bonusQuestionServedToday   // a jackpot: once a day, not every other session
             && EventEngine.shouldFireBonusQuestion(questionIndex: questionIndex, totalQuestions: totalQuestions)
         let mystery = bonusCooldownOK && !bonusQ && EventEngine.shouldFireMysteryPortal(questionIndex: questionIndex, totalQuestions: totalQuestions)
         let superQ = bonusCooldownOK && !bonusQ && !mystery && EventEngine.shouldFireSuperQuestion(questionIndex: questionIndex, totalQuestions: totalQuestions)
         if bonusQ || mystery || superQ { lastBonusIndex = questionIndex }
 
         if bonusQ {
+            progress.markBonusQuestionServed()
             isInPortal = false
             showBonusIntro = true
             SoundPlayer.shared.play(.portalAppear)

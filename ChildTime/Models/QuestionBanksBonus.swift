@@ -67,10 +67,14 @@ enum BonusQuestionBank {
         BankQuestion(prompt: "לְדָנָה יֵשׁ פִּי 2 גּוּלוֹת מִלְּיוֹסִי. לְיוֹסִי יֵשׁ 6. כַּמָּה יֵשׁ לִשְׁנֵיהֶם בְּיַחַד?", correctAnswer: "18", distractors: ["12", "24", "16"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "אִם כָּל הַדְּרָקוֹנִים יוֹדְעִים לָעוּף, וְרוֹנִי הוּא דְּרָקוֹן — מָה נָכוֹן בֶּטַח?", correctAnswer: "רוֹנִי יוֹדֵעַ לָעוּף", distractors: ["רוֹנִי יָרֹק", "כָּל מִי שֶׁעָף הוּא דְּרָקוֹן", "רוֹנִי לֹא עָף"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "בְּכַד יֵשׁ 3 גַּרְבַּיִם אֲדֻמִּים וְ־3 כְּחֻלִּים. כַּמָּה צָרִיךְ לְהוֹצִיא בְּלִי לְהִסְתַּכֵּל כְּדֵי שֶׁבֶּטַח יִהְיֶה זוּג בְּאוֹתוֹ צֶבַע?", correctAnswer: "3", distractors: ["2", "4", "6"], tier: .hard, grades: 4...6),
-        BankQuestion(prompt: "שָׁעוֹן מַרְאֶה 3:00. מָה תִּהְיֶה הַשָּׁעָה בְּעוֹד 50 דַּקּוֹת?", correctAnswer: "3:50", distractors: ["4:00", "3:40", "4:10"], tier: .hard, grades: 2...4),
+        // 2026-10-02: was "3:00 + 50 דקות" — no hour crossing, so not a bonus.
+        BankQuestion(prompt: "שָׁעוֹן מַרְאֶה 2:40. מָה תִּהְיֶה הַשָּׁעָה בְּעוֹד 35 דַּקּוֹת?", correctAnswer: "3:15", distractors: ["2:75", "3:05", "3:25"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "אֲנִי מִסְפָּר. אִם תַּכְפִּילוּ אוֹתִי בְּ־3 וְתוֹסִיפוּ 1 תְּקַבְּלוּ 22. מִי אֲנִי?", correctAnswer: "7", distractors: ["6", "8", "9"], tier: .hard, grades: 3...5),
-        BankQuestion(prompt: "מָה לֹא שַׁיָּךְ לַקְּבוּצָה: מְשֻׁלָּשׁ, רִבּוּעַ, עִגּוּל, מַלְבֵּן?", correctAnswer: "עִגּוּל", distractors: ["מְשֻׁלָּשׁ", "רִבּוּעַ", "מַלְבֵּן"], tier: .hard, grades: 1...3),
-        BankQuestion(prompt: "הַאִם אַבָּא שֶׁל דָּנָה צָעִיר מִסַּבָּא שֶׁל דָּנָה מִצַּד אַבָּא?", correctAnswer: "כֵּן — סַבָּא הוּא אַבָּא שֶׁל אַבָּא, וְלָכֵן מְבֻגָּר יוֹתֵר", distractors: ["לֹא, אַף פַּעַם", "הֵם בְּאוֹתוֹ גִּיל", "אִי אֶפְשָׁר לָדַעַת בִּכְלָל"], tier: .hard, grades: 1...3),
+        // 2026-10-02: was "מה לא שייך: משולש, ריבוע, עיגול, מלבן" — a regular easy item.
+        BankQuestion(prompt: "יֵשׁ לִי 3 חֻלְצוֹת וּשְׁנֵי זוּגוֹת מִכְנָסַיִם. כַּמָּה תִּלְבּוֹשׁוֹת שׁוֹנוֹת (חֻלְצָה + מִכְנָסַיִם) אֶפְשָׁר לְהַרְכִּיב?", correctAnswer: "6", distractors: ["5", "3", "9"], tier: .hard, grades: 2...4),
+        // 2026-10-02: the old item's right answer was the only one with an
+        // explanation attached ("כן — סבא הוא…"), so it answered itself.
+        BankQuestion(prompt: "בַּתּוֹר עוֹמְדִים 5 יְלָדִים. נוֹעָה שְׁנִיָּה מֵהַהַתְחָלָה. מָה הַמָּקוֹם שֶׁלָּהּ מֵהַסּוֹף?", correctAnswer: "רְבִיעִי", distractors: ["שֵׁנִי", "שְׁלִישִׁי", "חֲמִישִׁי"], tier: .hard, grades: 1...3),
     ]
 
     // MARK: - מדע
@@ -79,7 +83,9 @@ enum BonusQuestionBank {
         BankQuestion(prompt: "בְּאֵיזוֹ טֶמְפֶּרָטוּרָה הַמַּיִם רוֹתְחִים?", correctAnswer: "100 מַעֲלוֹת", distractors: ["50 מַעֲלוֹת", "80 מַעֲלוֹת", "200 מַעֲלוֹת"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "אֵיזֶה כּוֹכַב לֶכֶת הוּא הַגָּדוֹל בְּיוֹתֵר בְּמַעֲרֶכֶת הַשֶּׁמֶשׁ?", correctAnswer: "צֶדֶק", distractors: ["מַאְדִּים", "שַׁבְּתַאי", "נֹגַהּ"], tier: .hard, grades: 3...5),
         BankQuestion(prompt: "מָה עוֹשֶׂה הַלֵּב בַּגּוּף?", correctAnswer: "מַזְרִים דָּם לְכָל הַגּוּף", distractors: ["מְעַכֵּל אֹכֶל", "שׁוֹלֵחַ מַחְשָׁבוֹת", "מְנַקֶּה אֶת הָאֲוִיר"], tier: .hard, grades: 2...4),
-        BankQuestion(prompt: "אֵיךְ צְמָחִים מְיַצְּרִים אֹכֶל לְעַצְמָם?", correctAnswer: "פוֹטוֹסִינְתֶזָה — מֵאוֹר הַשֶּׁמֶשׁ", distractors: ["שׁוֹאֲבִים אֹכֶל מֵחֲרָקִים", "אוֹכְלִים אֲדָמָה", "קוֹנִים בַּחֲנוּת"], tier: .hard, grades: 4...6),
+        // 2026-10-02: the old answer carried its own explanation and the others
+        // were jokes ("קונים בחנות") — a giveaway worth 7 minutes.
+        BankQuestion(prompt: "אֵיךְ נִקְרָא הַתַּהֲלִיךְ שֶׁבּוֹ צְמָחִים מְיַצְּרִים אֹכֶל מֵאוֹר הַשֶּׁמֶשׁ?", correctAnswer: "פוֹטוֹסִינְתֶזָה", distractors: ["הַאֲבָקָה", "הִתְאַדּוּת", "נְבִיטָה"], tier: .hard, grades: 4...6),
         BankQuestion(prompt: "כַּמָּה עֲצָמוֹת יֵשׁ בְּעֶרֶךְ בְּגוּף הָאָדָם הַבּוֹגֵר?", correctAnswer: "206", distractors: ["100", "500", "50"], tier: .hard, grades: 4...6),
         BankQuestion(prompt: "מָה מוֹשֵׁךְ אוֹתָנוּ לְמַטָּה אֶל כַּדּוּר הָאָרֶץ?", correctAnswer: "כּוֹחַ הַכְּבִידָה", distractors: ["הָרוּחַ", "הַחַשְׁמַל", "הַמַּגְנֵט שֶׁבַּשָּׁמַיִם"], tier: .hard, grades: 2...4),
         BankQuestion(prompt: "אֵיזֶה גַּז אֲנַחְנוּ נוֹשְׁמִים כְּדֵי לִחְיוֹת?", correctAnswer: "חַמְצָן", distractors: ["פַּחְמָן דּוּ־חַמְצָנִי", "מֵימָן", "הֶלְיוּם"], tier: .hard, grades: 3...5),

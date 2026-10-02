@@ -1118,6 +1118,24 @@ final class ProgressStore: ObservableObject {
             ?? (s.dailyCapEnabled, s.maxMinutesPerDay)
     }
 
+    // MARK: - 💫 Bonus question: once a day
+
+    /// The 7-minute "שאלת ענק" was meant to be the rarest event in the game, but
+    /// at 6% a question from Q3 on it showed up in ~43% of 15-question sessions —
+    /// and paid what 17.5 regular right answers pay. Rani saw Dan get it out of
+    /// nowhere. One per child per day keeps it a jackpot.
+    private var bonusQuestionDayKey: String {
+        "bonusQ.servedDay." + (ProfileStore.shared.activeID?.uuidString ?? "none")
+    }
+    var bonusQuestionServedToday: Bool {
+        DayGate.usedToday(UserDefaults.standard.object(forKey: bonusQuestionDayKey) as? Date)
+    }
+    /// Marked when the question is SHOWN, not when it is answered — a wrong
+    /// answer still used up today's chance.
+    func markBonusQuestionServed() {
+        UserDefaults.standard.set(Date(), forKey: bonusQuestionDayKey)
+    }
+
     /// True iff the kid has already hit today's earning ceiling.
     var atDailyCap: Bool {
         guard dailyCap.enabled else { return false }

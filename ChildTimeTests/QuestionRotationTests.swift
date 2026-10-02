@@ -146,3 +146,57 @@ extension QuestionRotationTests {
         print("📊 coverage written to \(out)")
     }
 }
+
+/// Rani, 2026-10-02, watching Dan (כיתה ב׳) play logic: "נראה לי היו שאלות קלות
+/// מידי". ב׳ logic was 87 easy / 83 medium / 22 hard, so a child doing well ran
+/// through the hard ones and walked DOWN hard → medium → easy to "מה בא אחרי 5?".
+final class StretchTierTests: XCTestCase {
+
+    override func setUp() {
+        super.setUp()
+        QuestionMemory.shared.clear()
+        LanguageStore.shared.setForTesting(.he)
+    }
+
+    /// Asking for HARD at a grade with no hard items borrows hard ones from the
+    /// grade above instead of handing out nothing hard at all.
+    func testHardLogicAtGradeTwoBorrowsFromGradeThree() {
+        let own = QuestionGenerator.effectivePool(topic: .logic, grade: 2)
+        let stretch = QuestionGenerator.stretchItems(topic: .logic, difficulty: .hard, grade: 2, pool: own)
+        XCTAssertFalse(stretch.isEmpty, "no hard logic for a strong 2nd grader to move up to")
+        XCTAssertTrue(stretch.allSatisfy { $0.difficulty == .hard && $0.grades.contains(3) })
+        // …and the picker, asked for hard, now actually serves hard.
+        QuestionMemory.shared.beginSession()
+        for _ in 0..<8 {
+            let q = QuestionMemory.shared.pickFresh(own + stretch, for: .logic, target: .hard)
+            XCTAssertEqual(q?.difficulty, .hard, "asked for hard, got \(String(describing: q?.difficulty))")
+        }
+    }
+
+    /// Easy questions never pull a stretch — the stretch is for children doing well.
+    func testEasyNeverStretches() {
+        let own = QuestionGenerator.effectivePool(topic: .logic, grade: 2)
+        XCTAssertTrue(QuestionGenerator.stretchItems(topic: .logic, difficulty: .easy, grade: 2, pool: own).isEmpty)
+    }
+
+    /// The גן-level counting items no longer reach a 2nd grader.
+    func testPreschoolCountingIsNotServedToGradeTwo() {
+        let pool = QuestionGenerator.effectivePool(topic: .logic, grade: 2)
+        let prompts = pool.map { $0.prompt }
+        XCTAssertFalse(prompts.contains("מָה בָּא אַחֲרֵי הַמִּסְפָּר 5?"))
+        XCTAssertFalse(prompts.contains("מָה הַמִּסְפָּר הַבָּא? 1, 2, 3, ?"))
+        // …but a 1st grader still has them.
+        let first = QuestionGenerator.effectivePool(topic: .logic, grade: 1).map { $0.prompt }
+        XCTAssertTrue(first.contains("מָה בָּא אַחֲרֵי הַמִּסְפָּר 5?"))
+    }
+
+    /// No bonus (7-minute) question may carry its own explanation in the answer.
+    func testNoBonusAnswerGivesItselfAway() {
+        for topic: Topic in [.english, .hebrew, .logic, .science, .history, .geography, .money] {
+            for item in BonusQuestionBank.pool(for: topic) {
+                XCTAssertFalse(item.correctAnswer.contains("—"),
+                               "\(topic.rawValue): bonus answer explains itself — \(item.correctAnswer)")
+            }
+        }
+    }
+}

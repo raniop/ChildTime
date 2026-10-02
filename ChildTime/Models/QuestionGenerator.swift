@@ -213,6 +213,35 @@ struct QuestionGenerator {
         return gradePool(bank, grade: grade, distance: d)
     }
 
+    /// Below this many items at the asked-for tier, a grade is "thin" there.
+    static let stretchMinimum = 12
+
+    /// 🎓 A child doing WELL must stay challenged.
+    ///
+    /// When the adaptive engine asks for `.hard` (or `.medium`) and the child's
+    /// own grade window is thin at that tier, `pickFresh` used to walk DOWN —
+    /// hard → medium → easy. Logic at כיתה ב׳ had 22 hard items against 87 easy
+    /// ones (many of them גן-level), so once the hard ones were in the recency
+    /// window, the better a 2nd grader played the more "מה בא אחרי 5?" he got
+    /// (Rani, watching Dan, 2026-10-02). Now the same tier is borrowed from ONE
+    /// grade up first, so the walk-down only happens when even that runs out.
+    static func stretchItems(topic: Topic, difficulty: Difficulty, grade: Int,
+                             pool: [BankQuestion]) -> [BankQuestion] {
+        guard difficulty != .easy else { return [] }
+        // "Thin" is relative: ב׳ logic has 22 hard items — but against 144 easier
+        // ones, so they sit in the recency window after a few sessions and the
+        // walk-down starts anyway. Stretch while the tier is under a quarter.
+        let have = pool.filter { $0.difficulty == difficulty }.count
+        guard have < max(stretchMinimum, pool.count / 4) else { return [] }
+        // Prompt AND answer: many items share a prompt ("מִי לֹא שַׁיָּךְ לַקְּבוּצָה?").
+        let key: (BankQuestion) -> String = { $0.prompt + "\u{1F}" + $0.correctAnswer }
+        let present = Set(pool.map(key))
+        return (QuestionBanks.bank(for: topic) ?? []).filter {
+            $0.difficulty == difficulty && $0.grades.contains(grade + 1)
+                && !present.contains(key($0))
+        }
+    }
+
     private static func makeFromBank(topic: Topic, difficulty: Difficulty, grade: Int? = nil) -> Question {
         var bank = QuestionBanks.bank(for: topic) ?? []
         if let g = grade {
@@ -228,6 +257,7 @@ struct QuestionGenerator {
                 return min(abs(r.lowerBound - g), abs(r.upperBound - g))
             }
             bank = gradePool(bank, grade: g, distance: windowDistance)
+            bank += stretchItems(topic: topic, difficulty: difficulty, grade: g, pool: bank)
         }
         guard let item = QuestionMemory.shared.pickFresh(bank, for: topic, target: difficulty) else {
             return Question(

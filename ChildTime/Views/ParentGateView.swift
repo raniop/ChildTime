@@ -107,6 +107,11 @@ struct ParentGateView<Content: View>: View {
             // device keeps its session so the parent isn't re-prompted constantly.
             if phase == .background, settings.deviceRole == .child {
                 authorized = false
+                // …and forget the code that opened it. The keypad kept those four
+                // digits, so on return the dots were already full and it refused
+                // any new digit (`entered.count < 4`) until ⌫ was tapped four
+                // times — Rani hit exactly that on a child device.
+                entered = ""; setupFirst = nil; weakCodeChosen = false
             }
         }
     }
@@ -376,6 +381,9 @@ struct ParentGateView<Content: View>: View {
             settings.sessionUnlocked = true
         }
         authorized = true
+        // Never leave the code sitting in the keypad behind the opened content —
+        // the next time this gate shows, it must start empty.
+        entered = ""
         onAuthorized?()
     }
 
