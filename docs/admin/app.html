@@ -147,7 +147,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20260914075131";
+const PAGE_STAMP = "20261002132011";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -296,18 +296,25 @@ async function families() {
   };
   // On "הכל" the demo families are not hidden — they sit in their own section
   // at the bottom, so they never mix into the real list but are one scroll away.
+  // On "הכל" the list is three sections: active families on top, the families
+  // that went quiet in their own section under them (Rani: they buried the
+  // ones worth looking at), and the demo families last.
+  const isInactive = (f) => (f.j.state || "free_new") === "inactive";
   const listHTML = () => {
     const qq = famQuery.trim();
     const ok = (f) => !qq || hay(f).includes(qq);
-    const main = fams.filter(inFilter).filter(ok).sort(bySort).map(famCard).join("");
-    const demo = famFilter === "all" ? fams.filter((f) => f.isDemo).filter(ok).sort(bySort) : [];
-    const tail = demo.length
-      ? `<div class="top" style="margin-top:22px"><h3>🧪 משפחות דמו · ${fmt(demo.length)}</h3></div>` + famTable(demo.map(famCard).join(""))
+    const all = famFilter === "all";
+    const main = fams.filter(inFilter).filter((f) => !all || !isInactive(f)).filter(ok).sort(bySort).map(famCard).join("");
+    const quiet = all ? fams.filter((f) => !f.isDemo && isInactive(f)).filter(ok).sort(bySort) : [];
+    const demo = all ? fams.filter((f) => f.isDemo).filter(ok).sort(bySort) : [];
+    const section = (title, list) => list.length
+      ? `<div class="top" style="margin-top:22px"><h3>${title} · ${fmt(list.length)}</h3></div>` + famTable(list.map(famCard).join(""))
       : "";
+    const tail = section("😴 משפחות לא פעילות", quiet) + section("🧪 משפחות דמו", demo);
     return (main ? famTable(main) : (tail ? "" : '<div class="empty">אין משפחות בסינון הזה.</div>')) + tail;
   };
   $("main").innerHTML = `
-    <div class="top"><h3>משפחות · ${fmt(fams.filter((f) => !f.isDemo).length)}${fams.some((f) => f.isDemo) ? ` <span class="m" style="font-weight:400">· ${fmt(fams.filter((f) => f.isDemo).length)} דמו</span>` : ""}</h3><div class="filters">${FILTERS.map(([k, l]) => `<span class="chip ${famFilter === k ? "on" : ""}" data-f="${k}">${l} <b>${fmt(countFor(k))}</b></span>`).join("")}<span class="chip search">🔎 <input id="famSearch" placeholder="חיפוש" value="${esc(famQuery)}"></span></div></div>
+    <div class="top"><h3>${famFilter === "all" ? "משפחות פעילות" : "משפחות"} · ${fmt(fams.filter((f) => !f.isDemo && (famFilter !== "all" || !isInactive(f))).length)}${famFilter === "all" && fams.some((f) => !f.isDemo && isInactive(f)) ? ` <span class="m" style="font-weight:400">· ${fmt(fams.filter((f) => !f.isDemo && isInactive(f)).length)} לא פעילות</span>` : ""}${fams.some((f) => f.isDemo) ? ` <span class="m" style="font-weight:400">· ${fmt(fams.filter((f) => f.isDemo).length)} דמו</span>` : ""}</h3><div class="filters">${FILTERS.map(([k, l]) => `<span class="chip ${famFilter === k ? "on" : ""}" data-f="${k}">${l} <b>${fmt(countFor(k))}</b></span>`).join("")}<span class="chip search">🔎 <input id="famSearch" placeholder="חיפוש" value="${esc(famQuery)}"></span></div></div>
     <div id="famList">${listHTML()}</div>`;
   document.querySelectorAll("[data-f]").forEach((c) => c.onclick = () => { famFilter = c.dataset.f; families(); });
   const inp = $("famSearch"); inp.oninput = () => { famQuery = inp.value; redrawList(); };
