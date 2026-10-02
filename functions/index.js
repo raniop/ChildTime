@@ -1800,6 +1800,7 @@ exports.onMailJob = onDocumentCreated(
       seen.add(email);
       if (founders.has(email)) { skipped.push(email + " (founder)"); continue; }
       if (w.launchEmailSentAt) { skipped.push(email + " (already sent)"); continue; }
+      if (w.source === "beta") { skipped.push(email + " (beta, signed up after launch)"); continue; }
       const name = overrides[email] !== undefined ? overrides[email] : firstName(w.name);
       try {
         await sendOne(email, name);
@@ -1898,11 +1899,12 @@ exports.onWaitlistSignup = onDocumentCreated(
       when = d.toLocaleString("he-IL", { timeZone: "Asia/Jerusalem" });
     } catch (e) { /* leave blank */ }
     const lines = [
-      `נרשם חדש לרשימת ההמתנה של טופי! 🦁🎉`,
+      (w.source === "beta" ? `נרשם חדש לבטא של טופי! 🧪🎉` : `נרשם חדש לרשימת ההמתנה של טופי! 🦁🎉`),
       ``,
       `אימייל: ${w.email || "-"}`,
       `שם: ${w.name || "-"}`,
       `גיל הילד: ${w.childAge || "-"}`,
+      `מכשיר: ${w.device || "-"}`,
       `מקור: ${w.source || "web"}`,
       `מתי: ${when}`,
     ];
@@ -1923,7 +1925,7 @@ exports.onWaitlistSignup = onDocumentCreated(
       await transporter.sendMail({
         from: `טופי <${user}>`,
         to: FEEDBACK_TO,
-        subject: "🦁 נרשם חדש לרשימת ההמתנה — טופי",
+        subject: w.source === "beta" ? "🧪 נרשם חדש לבטא — טופי" : "🦁 נרשם חדש לרשימת ההמתנה — טופי",
         text: lines.join("\n"),
         html: rtlBody(lines),
       });
@@ -1966,7 +1968,7 @@ function waitlistWelcomeEmail(w, lang) {
   if (lang === "en") {
     const first = String(w.name || "").trim().split(/\s+/)[0];
     const title = first ? `Hi ${first}, your spot is saved 🎉` : "Your spot is saved 🎉";
-    const intro = "Thanks for signing up for Tofy! We'll let you know the day the app launches — one email, no spam. In the meantime, here's what's waiting for you.";
+    const intro = (w.source === "beta" ? "Thanks for joining the Tofy beta! Tofy is already in the App Store — download it on your phone, add your kids, and tell us what you think: just reply to this email." : "Thanks for signing up for Tofy! Tofy is already in the App Store — here's what's waiting for you.");
     const bullets = [
       { emoji: "🧠", title: "Your child learns and plays", text: "Grade-level questions in math, reading, science, and more — inside a colorful adventure." },
       { emoji: "🎮", title: "Earns play minutes", text: "Every correct answer is worth seconds of play time. The apps you blocked open only once your child has earned the time." },
@@ -1975,10 +1977,10 @@ function waitlistWelcomeEmail(w, lang) {
     const signoff = "See you soon,\nThe Tofy team 🦁";
     const html = brandEmail({
       title, intro, bullets,
-      ctaText: "Visit Tofy",
-      ctaHref: "https://tofyapp.com",
+      ctaText: "Download Tofy",
+      ctaHref: "https://apps.apple.com/app/id6773805449",
       signoff,
-      footer: "You're getting this email because you signed up for launch updates at tofyapp.com.",
+      footer: "You're getting this email because you signed up at tofyapp.com.",
       lang: "en",
     });
     const text = [title, "", intro, "",
@@ -1989,7 +1991,7 @@ function waitlistWelcomeEmail(w, lang) {
   if (lang === "ru") {
     const first = String(w.name || "").trim().split(/\s+/)[0];
     const title = first ? `${first}, место за вами 🎉` : "Место за вами 🎉";
-    const intro = "Спасибо, что записались в Tofy! Мы напишем вам в тот день, когда приложение выйдет — одно письмо, без спама. А пока — вот что вас ждёт.";
+    const intro = (w.source === "beta" ? "Спасибо, что присоединились к бета-версии Tofy! Tofy уже в App Store — скачайте его на свой телефон, добавьте детей и расскажите нам, что думаете: просто ответьте на это письмо." : "Спасибо, что записались в Tofy! Tofy уже в App Store — вот что вас ждёт.");
     const bullets = [
       { emoji: "🧠", title: "Ребёнок учится и играет", text: "Вопросы по школьной программе: математика, иврит, английский, наука и другое — внутри яркого приключения." },
       { emoji: "🎮", title: "Зарабатывает игровые минуты", text: "Каждый верный ответ стоит секунд игрового времени. Приложения, которые вы закрыли, откроются только тогда, когда ребёнок заработает время." },
@@ -1998,10 +2000,10 @@ function waitlistWelcomeEmail(w, lang) {
     const signoff = "До скорой встречи,\nКоманда Tofy 🦁";
     const html = brandEmail({
       title, intro, bullets,
-      ctaText: "Сайт Tofy",
-      ctaHref: "https://tofyapp.com",
+      ctaText: "Скачать Tofy",
+      ctaHref: "https://apps.apple.com/app/id6773805449",
       signoff,
-      footer: "Вы получили это письмо, потому что подписались на новости о запуске на tofyapp.com.",
+      footer: "Вы получили это письмо, потому что записались на tofyapp.com.",
       lang: "ru",
     });
     const text = [title, "", intro, "",
@@ -2012,7 +2014,7 @@ function waitlistWelcomeEmail(w, lang) {
   if (lang === "ar") {
     const first = String(w.name || "").trim().split(/\s+/)[0];
     const title = first ? `أهلاً ${first}، حجزنا لكم مكاناً 🎉` : "حجزنا لكم مكاناً 🎉";
-    const intro = "شكراً لتسجيلكم في Tofy! سنخبركم في اليوم الذي يُطلَق فيه التطبيق — رسالة واحدة، بلا إزعاج. وفي هذه الأثناء، إليكم ما ينتظركم.";
+    const intro = (w.source === "beta" ? "شكراً لانضمامكم إلى النسخة التجريبية من Tofy! التطبيق متوفر الآن في App Store — حمّلوه على هاتفكم، أضيفوا أطفالكم، وأخبرونا برأيكم: فقط ردّوا على هذه الرسالة." : "شكراً لتسجيلكم في Tofy! التطبيق متوفر الآن في App Store — إليكم ما ينتظركم.");
     const bullets = [
       { emoji: "🧠", title: "طفلكم يتعلّم ويلعب", text: "أسئلة وفق المنهاج الدراسي: الرياضيات والعربية والعبرية والإنجليزية والعلوم وغيرها — داخل مغامرة ملوّنة." },
       { emoji: "🎮", title: "ويربح دقائق لعب", text: "كل إجابة صحيحة تساوي ثوانيَ من وقت اللعب. والتطبيقات التي أغلقتموها لا تُفتح إلا بعد أن يربح طفلكم الوقت." },
@@ -2021,10 +2023,10 @@ function waitlistWelcomeEmail(w, lang) {
     const signoff = "إلى اللقاء قريباً،\nفريق Tofy 🦁";
     const html = brandEmail({
       title, intro, bullets,
-      ctaText: "موقع Tofy",
-      ctaHref: "https://tofyapp.com",
+      ctaText: "حمّلوا Tofy",
+      ctaHref: "https://apps.apple.com/app/id6773805449",
       signoff,
-      footer: "وصلتكم هذه الرسالة لأنكم سجّلتم لتلقّي أخبار الإطلاق على tofyapp.com.",
+      footer: "وصلتكم هذه الرسالة لأنكم سجّلتم على tofyapp.com.",
       lang: "ar",
     });
     const text = [title, "", intro, "",
@@ -2034,7 +2036,7 @@ function waitlistWelcomeEmail(w, lang) {
   }
   const first = String(w.name || "").trim().split(/\s+/)[0];
   const title = first ? `היי ${first}, שמרנו לכם מקום 🎉` : "שמרנו לכם מקום 🎉";
-  const intro = "תודה שנרשמתם לטופי! נעדכן אתכם ביום שהאפליקציה עולה לאוויר — הודעה אחת, בלי ספאם. בינתיים, הנה מה שמחכה לכם.";
+  const intro = (w.source === "beta" ? "תודה שהצטרפתם לבטא של טופי! טופי כבר זמין ב־App Store — מורידים לטלפון שלכם, יוצרים פרופיל לכל ילד, ואז מורידים גם למכשיר של הילד וסורקים את הקוד. ונשמח לשמוע מה אתם חושבים — פשוט עונים למייל הזה." : "תודה שנרשמתם לטופי! טופי כבר זמין ב־App Store — הנה מה שמחכה לכם.");
   const bullets = [
     { emoji: "🧠", title: "הילד לומד ומשחק", text: "שאלות לפי הכיתה בחשבון, עברית, אנגלית, מדעים ועוד — בתוך הרפתקה צבעונית." },
     { emoji: "🎮", title: "מרוויח דקות משחק", text: "כל תשובה נכונה שווה שניות משחק. האפליקציות שחסמתם נפתחות רק כשהוא הרוויח." },
@@ -2043,15 +2045,15 @@ function waitlistWelcomeEmail(w, lang) {
   const signoff = "נתראה בקרוב,\nצוות טופי 🦁";
   const html = brandEmail({
     title, intro, bullets,
-    ctaText: "לאתר של טופי",
-    ctaHref: "https://tofyapp.com",
+    ctaText: "הורידו את טופי",
+    ctaHref: "https://apps.apple.com/app/id6773805449",
     signoff,
-    footer: "קיבלתם את המייל הזה כי נרשמתם לעדכון ההשקה ב־tofyapp.com.",
+    footer: "קיבלתם את המייל הזה כי נרשמתם ב־tofyapp.com.",
   });
   const text = [title, "", intro, "",
     ...bullets.map((b) => `${b.emoji} ${b.title} — ${b.text}`),
     "", "tofyapp.com", "", signoff].join("\n");
-  return { fromName: "טופי", subject: "ברוכים הבאים לטופי! 🦁 שמרנו לכם מקום", text, html };
+  return { fromName: "טופי", subject: w.source === "beta" ? "ברוכים הבאים לבטא של טופי! 🦁" : "ברוכים הבאים לטופי! 🦁", text, html };
 }
 
 // ---- 3) Founder analytics aggregator ---------------------------------------

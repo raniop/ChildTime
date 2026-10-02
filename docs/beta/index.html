@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#5E60CE">
+<title>טופי — בטא להורים</title>
+<meta name="description" content="הילדים מרוויחים זמן מסך בלמידה. הצטרפו לבטא של טופי — נסו עם הילדים וספרו לנו מה אתם חושבים.">
+<meta property="og:title" content="טופי — הצטרפו לבטא 🦁">
+<meta property="og:description" content="הילדים עונים על שאלות, צוברים דקות — ורק אז מקבלים זמן מסך. נסו עם הילדים וספרו לנו מה דעתכם.">
+<meta property="og:image" content="https://tofyapp.com/og-image.jpg?v=6">
+<meta property="og:url" content="https://tofyapp.com/beta/">
+<link rel="canonical" href="https://tofyapp.com/beta/">
+<link rel="icon" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../glass.css?v=5">
+<style>
+  .ef{display:flex;flex-direction:column;gap:12px;max-width:400px;margin:24px auto 0;text-align:start}
+  .ef label{font-size:13.5px;font-weight:700;color:var(--muted);margin-bottom:-6px}
+  .ef input,.ef select{width:100%;font-family:inherit;font-size:16px;font-weight:600;color:#fff;
+    background:rgba(255,255,255,.12);border:1px solid var(--edge);border-radius:14px;padding:14px 16px;outline:none}
+  .ef input::placeholder{color:rgba(255,255,255,.6)}
+  .ef input:focus,.ef select:focus{border-color:var(--gold);background:rgba(255,255,255,.18)}
+  .ef select{appearance:none}
+  .ef option{color:#1b1340}
+  .ef .btn{margin-top:6px}
+  .ef-err{color:#FFD0D6;font-weight:700;font-size:14px;min-height:1em}
+  .ef-note{font-size:13.5px;color:var(--faint);margin-top:14px}
+  .steps{list-style:none;padding:0;margin:22px auto 0;max-width:400px;text-align:start;display:flex;flex-direction:column;gap:12px}
+  .steps li{display:flex;gap:12px;align-items:flex-start;font-size:15.5px;line-height:1.55;color:var(--muted)}
+  .steps b{color:#fff}
+  .steps .n{flex:0 0 28px;height:28px;border-radius:50%;background:var(--gold);color:#2B1C04;
+    font-weight:800;display:grid;place-items:center;font-size:14px}
+  .done{display:none}
+  .done h2{font-size:26px;margin:6px 0 4px}
+  .done .ctas{display:flex;flex-direction:column;gap:12px;max-width:400px;margin:22px auto 0}
+  .wa{background:#25D366!important;color:#06311A!important;border:0}
+  .bullets{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:22px}
+  .bullets span{font-size:14px;font-weight:700;padding:8px 15px;border-radius:999px;
+    background:rgba(255,255,255,.12);border:1px solid var(--edge);color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="backdrop"></div>
+<div class="sparks" id="sparks"></div>
+
+<main class="mini">
+  <div class="card pane" style="max-width:520px">
+    <img class="lion" src="../lion.png" alt="טופי">
+
+    <!-- ===== before signing up ===== -->
+    <div id="signup">
+      <div class="eyebrow" style="margin-top:10px">בטא להורים 🧪</div>
+      <h1>זמן מסך שמרוויחים בלמידה</h1>
+      <p>במקום לקבל עוד זמן מסך, הילדים <b>מרוויחים</b> אותו: עונים על שאלות טריוויה ולמידה לפי הכיתה שלהם, צוברים דקות — ורק אז האפליקציות שלהם נפתחות. 🧠📱</p>
+      <p>אם כבר מסך, אז לפחות שילמדו משהו בדרך 😊</p>
+
+      <form class="ef" id="betaForm" novalidate>
+        <label for="bf-name">השם שלכם</label>
+        <input id="bf-name" type="text" placeholder="לדוגמה: מיכל" autocomplete="name">
+        <label for="bf-email">אימייל</label>
+        <input id="bf-email" type="email" placeholder="name@example.com" required autocomplete="email" inputmode="email" dir="ltr">
+        <label for="bf-age">גיל הילדים</label>
+        <select id="bf-age">
+          <option value="">בחרו (לא חובה)</option>
+          <option>4–5</option><option>6–7</option><option>8–9</option><option>10–12</option><option>כמה גילאים</option>
+        </select>
+        <label for="bf-dev">על מה הילדים משחקים?</label>
+        <select id="bf-dev">
+          <option value="">בחרו (לא חובה)</option>
+          <option>iPhone</option><option>iPad</option><option>גם וגם</option>
+        </select>
+        <div class="ef-err" id="bf-err" role="alert"></div>
+        <button type="submit" class="btn" id="bf-btn">אני בפנים — צרפו אותי לבטא 🎉</button>
+      </form>
+      <div class="ef-note">האימייל משמש רק לבטא של טופי. <a href="../privacy.html" style="color:var(--gold)">מדיניות הפרטיות</a></div>
+      <div class="bullets">
+        <span>🎓 לפי תוכנית הלימודים</span><span>🚫 בלי פרסומות</span><span>🔒 בלי מעקב</span>
+      </div>
+    </div>
+
+    <!-- ===== after signing up ===== -->
+    <div id="done" class="done" tabindex="-1">
+      <div class="eyebrow" style="margin-top:10px">ברוכים הבאים לבטא 🎉</div>
+      <h2>יש! רשמנו אתכם</h2>
+      <p>עכשיו רק מתחילים — זה לוקח כמה דקות:</p>
+      <ol class="steps">
+        <li><span class="n">1</span><span>מורידים את טופי <b>לטלפון שלכם</b> ונרשמים כהורה.</span></li>
+        <li><span class="n">2</span><span>יוצרים פרופיל לכל ילד — שם וכיתה.</span></li>
+        <li><span class="n">3</span><span>מורידים את טופי <b>גם למכשיר של הילד</b>, וסורקים את הקוד שמופיע אצלכם.</span></li>
+      </ol>
+      <div class="ctas">
+        <a class="appstore" href="https://apps.apple.com/app/id6773805449">
+          <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.1 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+          <span class="tx"><small>הורידו ב־</small><b>App&nbsp;Store</b></span>
+        </a>
+        <a class="btn wa" id="waBtn" href="#" style="display:none">💬 הצטרפו לקבוצת ה־WhatsApp של הבטא</a>
+      </div>
+      <p class="ef-note">שאלות, פידבק ורעיונות — נשמח לשמוע הכול 🙏</p>
+    </div>
+
+    <p style="margin-top:24px"><a href="/" style="color:var(--gold);font-weight:700">← לאתר של טופי</a></p>
+  </div>
+</main>
+
+<script>
+  /* The beta parents' WhatsApp group invite link (chat.whatsapp.com/…).
+     Empty → the button stays hidden. */
+  var WA_GROUP = "";
+
+  (function(){
+    var c = document.getElementById("sparks");
+    for (var i = 0; i < 40; i++) {
+      var s = document.createElement("div");
+      s.className = "spark"; s.textContent = "✦";
+      s.style.left = (Math.random()*100) + "%";
+      s.style.top = (Math.random()*100) + "%";
+      s.style.fontSize = (6 + Math.random()*14) + "px";
+      s.style.color = Math.random() < .5 ? "#FFD23F" : "#fff";
+      s.style.animationDelay = (Math.random()*3.4) + "s";
+      c.appendChild(s);
+    }
+    if (WA_GROUP) { var w = document.getElementById("waBtn"); w.href = WA_GROUP; w.style.display = ""; }
+  })();
+
+  function showDone(){
+    document.getElementById("signup").style.display = "none";
+    var d = document.getElementById("done"); d.style.display = "block"; d.focus();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* Same `waitlist` collection as the main site (rules: create-only, ≤6 fields),
+     tagged source:"beta" so the founders' email and the panel can tell them apart. */
+  document.getElementById("betaForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+    var email = document.getElementById("bf-email").value.trim();
+    var name  = document.getElementById("bf-name").value.trim();
+    var age   = document.getElementById("bf-age").value;
+    var dev   = document.getElementById("bf-dev").value;
+    var err   = document.getElementById("bf-err");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "בדקו את כתובת האימייל 🙂"; document.getElementById("bf-email").focus(); return; }
+    err.textContent = "";
+    var btn = document.getElementById("bf-btn"); btn.disabled = true; btn.textContent = "שולח…";
+    var url = "https://firestore.googleapis.com/v1/projects/childtime-86e98/databases/(default)/documents/waitlist?key=AIzaSyB2sLDqhZsZ0gTFD2qUs9upO3JljuwV1Tw";
+    var body = { fields: {
+      email:     { stringValue: email },
+      name:      { stringValue: name },
+      childAge:  { stringValue: age },
+      device:    { stringValue: dev },
+      source:    { stringValue: "beta" },
+      createdAt: { timestampValue: new Date().toISOString() }
+    }};
+    try {
+      var r = await fetch(url, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+      if (!r.ok) throw new Error("status " + r.status);
+      showDone();
+    } catch (ex) {
+      var subj = encodeURIComponent("טופי - הצטרפות לבטא");
+      var bdy  = encodeURIComponent("שם: " + name + "\nאימייל: " + email + "\nגיל הילדים: " + age + "\nמכשיר: " + dev);
+      window.location.href = "mailto:ranioph@gmail.com?subject=" + subj + "&body=" + bdy;
+      btn.disabled = false; btn.textContent = "אני בפנים — צרפו אותי לבטא 🎉";
+    }
+  });
+</script>
+</body>
+</html>
