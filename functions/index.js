@@ -1645,6 +1645,47 @@ exports.onParentFeedback = onDocumentCreated(
   }
 );
 
+// ---- 🎉 New family → push to the founders ----------------------------------
+// Every household created (a parent finished "צרו את המשפחה") pings Rani and
+// Amit on their own phones — the Tofy app they already have installed as
+// parents, via the FCM tokens on parents/{uid}. Demo/test families are skipped
+// with the same rule the dashboard uses, so a QA run does not wake anyone.
+exports.onHouseholdCreated = onDocumentCreated("households/{hid}", async (event) => {
+  const hh = (event.data && event.data.data()) || {};
+  const hid = event.params.hid;
+  const parentsByUID = {};
+  await Promise.all((hh.parentUIDs || []).map(async (u) => {
+    const p = await db.collection("parents").doc(u).get().catch(() => null);
+    if (p && p.exists) parentsByUID[u] = p.data();
+  }));
+  if (isDemoHousehold(hh, parentsByUID, [])) {
+    console.log("[newFamily] demo household — no push:", hid);
+    return;
+  }
+  const who = Object.values(parentsByUID).map((p) => p.name || p.email).filter(Boolean)[0] || "";
+  const name = hh.familyName || hh.familyLabel || "";
+  const body = [name, who].filter(Boolean).join(" · ") || "משפחה חדשה נרשמה עכשיו";
+
+  const tokens = [];
+  for (const email of ADMIN_EMAILS) {
+    try {
+      const u = await admin.auth().getUserByEmail(email);
+      tokens.push(...(await tokensForUID(u.uid)));
+    } catch (e) {
+      console.warn("[newFamily] no admin account for", email, e && e.code);
+    }
+  }
+  const uniq = [...new Set(tokens)];
+  if (!uniq.length) { console.warn("[newFamily] no founder tokens — nothing sent for", hid); return; }
+  const res = await admin.messaging().sendEachForMulticast({
+    tokens: uniq,
+    notification: { title: "🎉 משפחה חדשה בטופי", body },
+    data: { kind: "adminNewFamily", householdID: hid },
+    apns: { payload: { aps: { sound: "default" } } },
+  });
+  console.log("[newFamily]", hid, "sent", res.successCount, "/", uniq.length);
+});
+
 // ---- Bad-question report → email ------------------------------------------
 // When a parent flags a question (the 🚩 in the game, written to
 // `questionReports/{id}`), email it to the team so we can fix/remove it.

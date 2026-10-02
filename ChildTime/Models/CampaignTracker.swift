@@ -23,8 +23,15 @@ final class CampaignTracker: ObservableObject {
     private(set) var popupChecked = false
 
     /// Once per launch: find the newest unseen campaign for this device.
+    /// A brand-new child has never seen the map, has no diamonds and does not yet
+    /// know what one is — and the very first thing the app put in front of them
+    /// was a promotion about doubling them. Hold every pop-up back until the
+    /// child has actually played a little.
+    static let childPopupMinAnswers = 10
+
     func checkPopup(role: String, profiles: [Profile], premium: Bool) {
         guard !popupChecked else { return }
+        if role == "child", ProgressStore.shared.totalAnswered < Self.childPopupMinAnswers { return }
         popupChecked = true
         Task { @MainActor in
             if let c = await fetchPopup(role: role, profiles: profiles, premium: premium) {

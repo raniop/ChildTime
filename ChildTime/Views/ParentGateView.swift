@@ -60,6 +60,8 @@ struct ParentGateView<Content: View>: View {
     /// First-time setup: the parent never picked a code on this device, so we
     /// let them CREATE one (enter → confirm) instead of guessing the default.
     @State private var setupFirst: String? = nil   // first entry while confirming
+    /// The code they just picked is one a child guesses in three tries.
+    @State private var weakCodeChosen = false
 
     // First-time setup only when NEITHER this device NOR the family has a code.
     // If the family already set one (e.g. on the parent's phone), this device
@@ -437,9 +439,9 @@ struct ParentGateView<Content: View>: View {
 
     private var gateSubtitle: String {
         if isSetupMode {
-            return setupFirst == nil
-                ? tr("בִּחֲרוּ קוֹד בֶּן 4 סְפָרוֹת לְהָגֵן עַל הַהַגְדָּרוֹת")
-                : tr("הַזִּינוּ שׁוּב אֶת הַקּוֹד לְאִשּׁוּר")
+            if setupFirst == nil { return tr("בַּחֲרוּ קוֹד בֶּן 4 סְפָרוֹת כְּדֵי לְהָגֵן עַל הַהַגְדָּרוֹת") }
+            if weakCodeChosen { return tr("⚠️ קוֹד קַל לְנִחוּשׁ — הַיֶּלֶד רוֹאֶה אֶתְכֶם מַקְלִידִים אוֹתוֹ. אֶפְשָׁר לְאַשֵּׁר בְּכָל זֹאת, אוֹ לַחֲזוֹר וְלִבְחֹר אַחֵר.") }
+            return tr("הַזִּינוּ שׁוּב אֶת הַקּוֹד לְאִשּׁוּר")
         }
         if let reason = gateReason { return reason }
         // A co-parent's FIRST entry on this device: the family code exists in
@@ -449,6 +451,17 @@ struct ParentGateView<Content: View>: View {
             return tr("זֶהוּ קוֹד הַהוֹרֶה הַמִּשְׁפַּחְתִּי · בַּקְּשׁוּ אוֹתוֹ מֵהַהוֹרֶה שֶׁהִזְמִין אֶתְכֶם")
         }
         return tr("הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת")
+    }
+
+    /// 1234 / 0000 / 1111 / 4321 and friends: a run or a single repeated digit.
+    static func isWeakPIN(_ pin: String) -> Bool {
+        let digits = pin.compactMap { $0.wholeNumberValue }
+        guard digits.count == 4 else { return false }
+        if Set(digits).count == 1 { return true }                       // 0000
+        let steps = zip(digits, digits.dropFirst()).map { $1 - $0 }
+        if steps.allSatisfy({ $0 == 1 }) || steps.allSatisfy({ $0 == -1 }) { return true }   // 1234 / 4321
+        if digits[0] == digits[2] && digits[1] == digits[3] { return true }                  // 1212
+        return false
     }
 
     private func verify() {
@@ -476,11 +489,14 @@ struct ParentGateView<Content: View>: View {
                 } else {
                     shake = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                        shake = false; entered = ""; setupFirst = nil
+                        shake = false; entered = ""; setupFirst = nil; weakCodeChosen = false
                     }
                 }
             } else {
                 // First entry → ask to confirm.
+                // This code guards purchases and the screen-time controls, and the
+                // child watches it being typed. 1234 went through without a word.
+                weakCodeChosen = Self.isWeakPIN(entered)
                 setupFirst = entered
                 entered = ""
             }

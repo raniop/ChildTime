@@ -70,6 +70,14 @@ struct ChildDevice: Codable, Identifiable, Equatable {
     /// to live device rows, so dead device ACCOUNTS can be told apart from live
     /// ones. Optional — older rows/builds simply don't have it.
     var ownerUID: String?
+    /// Does THIS device actually hold the Screen Time (Family Controls) grant?
+    ///
+    /// Without it nothing can be shielded — the whole promise of the app is off
+    /// on this phone — and until now the only place that was visible was the
+    /// device's own parent area. A parent looking at the dashboard saw a healthy
+    /// green "מחובר" row and had no way to know that locking does nothing here.
+    /// Optional: older rows simply don't have it, and nil means "not reported".
+    var shieldAuthorized: Bool?
 
     var sfSymbol: String {
         switch kind {

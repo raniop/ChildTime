@@ -297,7 +297,12 @@ struct ProfileEditorView: View {
         let selected = grade == g
         return Button {
             Haptic.light()
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { grade = g }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                grade = g
+                // The grade is what the content actually follows, so it pulls the
+                // age bracket with it instead of letting the two contradict.
+                age = ChildAge.forGrade(g)
+            }
         } label: {
             VStack(spacing: 3) {
                 if let emoji { Text(emoji).font(.system(size: 22)) }
@@ -351,7 +356,7 @@ struct ProfileEditorView: View {
 
     private var interestsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(tr("תְּחוּמֵי עִנְיָן (לַפִּיד הֶחָכָם)"))
+            Text(tr("תְּחוּמֵי עִנְיָן — מֵהֶם נִבְנוֹת הַשְּׁאֵלוֹת הַמֻּתְאָמוֹת"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {

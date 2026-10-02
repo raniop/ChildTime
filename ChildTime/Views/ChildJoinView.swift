@@ -88,6 +88,11 @@ struct ChildJoinView: View {
                                   prompt: Text(tr("אוֹ הַקְלִידוּ אֶת הַקּוֹד")).foregroundColor(.white.opacity(0.75)))   // visible on glass
                             .textInputAutocapitalization(.characters)
                             .autocorrectionDisabled()
+                            // The code is Latin letters + digits. Without this, a phone
+                            // set to Hebrew (or Russian/Arabic) raises ITS keyboard — and a
+                            // clean Hebrew iPhone ships with Hebrew + Emoji only, so there is
+                            // nothing to switch to and the code simply cannot be typed.
+                            .keyboardType(.asciiCapable)
                             .font(.system(.title3, design: .monospaced))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
@@ -147,7 +152,7 @@ struct ChildJoinView: View {
                     // impossible to uninstall. This lets a parent — with the code —
                     // open a 5-minute deletion window from the disconnected screen.
                     Button { showRemovalGate = true } label: {
-                        Label(tr("אֲנִי הוֹרֶה · פְּתִיחַת מְחִיקַת הָאַפְּלִיקַצְיָה"), systemImage: "trash")
+                        Label(tr("אֲנִי הוֹרֶה · לְאַפְשֵׁר מְחִיקַת הָאַפְּלִיקַצְיָה"), systemImage: "trash")
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.75))
                             .padding(.horizontal, 14).padding(.vertical, 9)

@@ -1465,11 +1465,15 @@ final class ProgressStore: ObservableObject {
     /// one short sitting, so the streak feels achievable every day.
     static let dailyChallengeTarget = 10
 
-    /// Questions answered today toward the goal, capped at the target.
-    var dailyChallengeProgress: Int { min(answeredToday, Self.dailyChallengeTarget) }
+    /// CORRECT answers today toward the goal, capped at the target.
+    ///
+    /// It counted every answer, right or wrong — while the card's own copy says
+    /// "ענה נכון על 10 שאלות היום". Ten random taps collected the diamonds, and
+    /// the promise on screen was not the promise in the code.
+    var dailyChallengeProgress: Int { min(correctToday, Self.dailyChallengeTarget) }
 
     /// The goal was reached today (regardless of whether the reward was claimed).
-    var dailyChallengeGoalMet: Bool { answeredToday >= Self.dailyChallengeTarget }
+    var dailyChallengeGoalMet: Bool { correctToday >= Self.dailyChallengeTarget }
 
     /// Today's reward was already collected.
     var dailyChallengeClaimed: Bool {

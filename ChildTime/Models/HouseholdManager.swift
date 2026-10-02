@@ -674,6 +674,11 @@ final class HouseholdManager: ObservableObject {
         // Stamp this device's auth uid so admin tooling can tell which of the
         // household's anonymous accounts still owns a LIVE device.
         device.ownerUID = uid
+        // Report whether Screen Time is actually granted here. A device that
+        // never got the grant cannot shield anything, and the parent had no way
+        // to see that from their own phone — the row looked perfectly healthy.
+        ShieldManager.shared.refreshStatus()
+        device.shieldAuthorized = ShieldManager.shared.isAuthorized
         do {
             // Don't clobber the original joinedAt on relaunch.
             let existing = try? await db.collection("childDevices").document(docID).getDocument()

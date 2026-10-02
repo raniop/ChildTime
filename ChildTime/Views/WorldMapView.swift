@@ -1902,6 +1902,22 @@ struct WorldMapView: View {
                 .buttonStyle(.plain)
                 .padding(.top, isShort ? 0 : 2)
             }
+
+            // 🛡 Screen Time was never granted on this device, so nothing here can
+            // actually be locked when the time runs out. The child is not asked to
+            // fix it — they're told to fetch a grown-up, which is the only thing
+            // they can do (the grant needs an adult's Apple ID either way).
+            if settings.deviceRole == .child, !shields.isAuthorized {
+                Label(tr("בִּקְשׁוּ מֵאַבָּא אוֹ מֵאִמָּא לְסַיֵּם אֶת הַהַגְדָּרָה שֶׁל טוֹפִי"),
+                      systemImage: "exclamationmark.shield.fill")
+                    .font(.system(size: isShort ? 12 : 13, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color(hex: "2B1C04"))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 14).padding(.vertical, isShort ? 5 : 8)
+                    .background(Capsule().fill(AppColor.starGold.opacity(0.92)))
+                    .padding(.top, isShort ? 2 : 4)
+                    .accessibilityAddTraits(.isStaticText)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .center)
     }

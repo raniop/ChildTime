@@ -243,7 +243,10 @@ struct ChildTimeApp: App {
                     // anything). Prompt ONLY on an actual child device; parent
                     // flows that need it (Kid Mode, quick-open) ask themselves.
                     if settings.deviceRole == .child {
-                        await shields.requestAuthorizationIfNeeded()
+                        // Not user-initiated: throttled, so a declined grant does
+                        // not put Apple's system sheet in front of the child on
+                        // every single launch forever.
+                        await shields.requestAuthorizationIfNeeded(userInitiated: false)
                     } else {
                         shields.refreshStatus()
                     }
@@ -277,6 +280,15 @@ struct ChildTimeApp: App {
                         // Ask Apple again on every return: a subscription that
                         // lapsed while the app was closed must stop unlocking.
                         Task { await SubscriptionManager.shared.refreshSubscriptionStatus() }
+                        // 💝 Catch up on anything the parent sent while this device
+                        // was away — or while it was open but its child-doc listener
+                        // had not been attached yet (a device that JOINS the family
+                        // mid-session subscribes only once the profile lands here).
+                        // The apply helpers are read+zero transactions, so running
+                        // this beside the live listener can only ever apply once.
+                        if settings.deviceRole == .child, let cid = profiles.activeID {
+                            Task { await RemoteSyncManager.shared.consumePendingCommandsNow(for: cid) }
+                        }
                     }
                     // Child LEFT the app → send the single "finished playing" report
                     // now (covers all adventures this sitting). Self-guards: no-op if

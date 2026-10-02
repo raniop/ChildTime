@@ -8,6 +8,20 @@ enum ChildAge: Int, Codable, CaseIterable, Identifiable {
 
     var id: Int { rawValue }
 
+    /// The bracket a school grade belongs to (0 = גן).
+    ///
+    /// The two pickers describe the same child and could silently disagree —
+    /// picking כיתה ב׳ left the bracket on "6-7" or even "10+" with nothing
+    /// said. The grade is the one the content engines follow, so it wins.
+    static func forGrade(_ grade: Int) -> ChildAge {
+        switch grade {
+        case ..<1:  return .preK
+        case 1...2: return .grade1
+        case 3...4: return .grade3
+        default:    return .older
+        }
+    }
+
     var label: String {
         switch self {
         case .preK:   return "4-5"

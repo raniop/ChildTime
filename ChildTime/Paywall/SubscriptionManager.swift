@@ -333,9 +333,23 @@ extension Product {
         }
     }
 
-    /// e.g. "חיסכון 30%" — only meaningful for the yearly plan.
+    /// e.g. "חסוך 33%" — only meaningful for the yearly plan, and computed from
+    /// the two live prices rather than written down.
+    ///
+    /// It used to be the constant "חסוך 30%". That is a price claim standing next
+    /// to a price: in the Israeli store the real saving is 33%, and in the US
+    /// store ($5.99 / $39.99) it is 44% — so the badge was simply wrong there,
+    /// and it would have gone on being wrong after any price change.
+    @MainActor
     var savingsBadge: String? {
         guard id == SubscriptionManager.yearlyID else { return nil }
-        return tr("חסוך 30%")
+        guard let monthly = SubscriptionManager.shared.products
+            .first(where: { $0.id == SubscriptionManager.monthlyID }) else { return nil }
+        let twelveMonths = (monthly.price as NSDecimalNumber).doubleValue * 12
+        let yearly = (price as NSDecimalNumber).doubleValue
+        guard twelveMonths > 0, yearly < twelveMonths else { return nil }
+        let percent = Int(((twelveMonths - yearly) / twelveMonths * 100).rounded())
+        guard percent >= 5 else { return nil }   // not worth a badge
+        return tr("חסוך \(percent)%")
     }
 }

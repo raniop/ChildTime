@@ -650,9 +650,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": " · 🔥 %lld days"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " · 🔥 %lld day"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " · 🔥 %lld days"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " · 🔥 יוֹם אֶחָד"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " · 🔥 %lld יָמִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -886,9 +916,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": " and %lld minutes"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " and %lld minute"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " and %lld minutes"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " וְדַקָּה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " וְ-%lld דַּקּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -4199,9 +4259,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld minutes"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld minute"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld minutes"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "דַּקָּה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld דַּקּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -4281,9 +4371,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld minutes a day"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld minute a day"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld minutes a day"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "דַּקָּה אַחַת בְּיוֹם"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld דַּקּוֹת בְּיוֹם"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -4363,9 +4483,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld min today"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld min today"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld min today"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "דַּקָּה אַחַת הַיּוֹם"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld דַּקּוֹת הַיּוֹם"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -4713,9 +4863,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld kids"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kid"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kids"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יֶלֶד אֶחָד"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld יְלָדִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -4796,9 +4976,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld kids · all quiet"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kid · all quiet"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kids · all quiet"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יֶלֶד אֶחָד · שֶׁקֶט עַכְשָׁו"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld יְלָדִים · שֶׁקֶט עַכְשָׁו"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -4833,7 +5043,28 @@
         }
       }
     },
-    "%lld יְלָדִים · שֶׁקֶט עַכְשָׁיו": {},
+    "%lld יְלָדִים · שֶׁקֶט עַכְשָׁיו": {
+      "localizations": {
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יֶלֶד אֶחָד · שֶׁקֶט עַכְשָׁיו"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld יְלָדִים · שֶׁקֶט עַכְשָׁיו"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld יְלָדִים מְשַׂחֲקִים עַכְשָׁו": {
       "extractionState": "stale",
       "localizations": {
@@ -4880,9 +5111,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld kids playing now"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kid playing now"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kids playing now"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יֶלֶד אֶחָד מְשַׂחֵק עַכְשָׁו"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld יְלָדִים מְשַׂחֲקִים עַכְשָׁו"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -4917,7 +5178,28 @@
         }
       }
     },
-    "%lld יְלָדִים מְשַׂחֲקִים עַכְשָׁיו": {},
+    "%lld יְלָדִים מְשַׂחֲקִים עַכְשָׁיו": {
+      "localizations": {
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יֶלֶד אֶחָד מְשַׂחֵק עַכְשָׁיו"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld יְלָדִים מְשַׂחֲקִים עַכְשָׁיו"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld יְלָדוֹת": {
       "localizations": {
         "ar": {
@@ -5045,9 +5327,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld diamonds"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld diamond"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld diamonds"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יַהֲלוֹם אֶחָד"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld יַהֲלוֹמִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -5127,9 +5439,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last %lld days"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Last %lld day"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Last %lld days"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "הַיּוֹם הָאַחֲרוֹן"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld יָמִים אַחֲרוֹנִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -5209,9 +5551,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld active days"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld active day"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld active days"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יוֹם פָּעִיל אֶחָד"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld יָמִים פְּעִילִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -5291,9 +5663,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld days of learning"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld day of learning"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld days of learning"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יוֹם אֶחָד שֶׁל לְמִידָה"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld יָמִים שֶׁל לְמִידָה"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -5619,9 +6021,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld stars"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld star"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld stars"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "כּוֹכָב אֶחָד"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld כּוֹכָבִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -5805,9 +6237,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld chores"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld chore"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld chores"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "מַטָּלָה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld מַטְלוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -6565,9 +7027,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld questions"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld question"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld questions"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "שְׁאֵלָה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld שְׁאֵלוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -6725,9 +7217,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld questions · 3 levels"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld question · 3 levels"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld questions · 3 levels"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "שְׁאֵלָה אַחַת · 3 רָמוֹת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld שְׁאֵלוֹת · 3 רָמוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -6807,9 +7329,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld questions → surprise box"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld question → surprise box"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld questions → surprise box"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "שְׁאֵלָה אַחַת → קוּפְסַת הַפְתָּעָה"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld שְׁאֵלוֹת → קוּפְסַת הַפְתָּעָה"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -6889,9 +7441,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld hours"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld hour"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld hours"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "שָׁעָה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld שָׁעוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -7534,9 +8116,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "(%lld sec)"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "(%lld sec)"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "(%lld sec)"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "(שְׁנִיָּה אַחַת)"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "(%lld שְׁנִיּוֹת)"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -7659,9 +8271,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+ %lld more worlds ▾"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+ %lld more world ▾"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+ %lld more worlds ▾"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+ עוֹד עוֹלָם אֶחָד ▾"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+ עוֹד %lld עוֹלָמוֹת ▾"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -7742,9 +8384,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+%lld minutes"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld minute"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld minutes"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+דַּקָּה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld דַּקּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -7824,9 +8496,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+%lld minutes added to play time"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld minute added to play time"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld minutes added to play time"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+דַּקָּה אַחַת נוֹסְפָה לִזְמַן הַמִּשְׂחָק"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld דַּקּוֹת נוֹסְפוּ לִזְמַן הַמִּשְׂחָק"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -7962,9 +8664,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+%lld diamonds"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld diamond"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld diamonds"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+יַהֲלוֹם אֶחָד"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld יַהֲלוֹמִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -8044,9 +8776,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+%lld diamonds added! 💎"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld diamond added! 💎"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld diamonds added! 💎"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+יַהֲלוֹם אֶחָד נוֹסַף! 💎"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld יַהֲלוֹמִים נוֹסְפוּ! 💎"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -8126,9 +8888,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+%lld stars"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld star"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld stars"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+כּוֹכָב אֶחָד"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld כּוֹכָבִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -8208,9 +9000,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+%lld stars added!"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld star added!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld stars added!"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+כּוֹכָב אֶחָד נוֹסַף!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld כּוֹכָבִים נוֹסְפוּ!"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -8290,9 +9112,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+%lld seconds"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld second"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld seconds"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+שְׁנִיָּה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld שְׁנִיּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -9597,6 +10449,29 @@
         }
       }
     },
+    "אֲנִי הוֹרֶה · לְאַפְשֵׁר מְחִיקַת הָאַפְּלִיקַצְיָה": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أنا ولي الأمر · السماح بحذف التطبيق"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I'm a parent · allow deleting the app"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Я родитель · разрешить удаление приложения"
+          }
+        }
+      }
+    },
     "אֲנִי הוֹרֶה · פְּתִיחַת מְחִיקַת הָאַפְּלִיקַצְיָה": {
       "localizations": {
         "ar": {
@@ -10193,6 +11068,29 @@
         }
       }
     },
+    "אֵין הַרְשָׁאַת ״זְמַן מָסָךְ״ בַּמַּכְשִׁיר הַזֶּה — נְעִילַת אַפְּלִיקַצְיוֹת לֹא תַּעֲבוֹד בּוֹ. פִּתְחוּ בּוֹ אֶת טוֹפִי ← ⚙️ ← בַּקָּשׁ הַרְשָׁאָה.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا يوجد إذن «وقت الشاشة» على هذا الجهاز — لن يعمل قفل التطبيقات فيه. افتحوا توفي عليه ← ⚙️ ← اطلبوا الإذن."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Screen Time permission on this device — app locking will not work there. Open Tofy on it → ⚙️ → Request permission."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На этом устройстве нет разрешения «Экранное время» — блокировка приложений там не работает. Откройте на нём Tofy → ⚙️ → Запросить разрешение."
+          }
+        }
+      }
+    },
     "אֵין הַרְשָׁאָה לְמַצְלֵמָה.\nהַקְלִידוּ אֶת הַקּוֹד בִּמְקוֹם זֹאת.": {
       "localizations": {
         "ar": {
@@ -10612,9 +11510,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You can unlock %lld play minutes now! 🎮"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You can unlock %lld play minute now! 🎮"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You can unlock %lld play minutes now! 🎮"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "אֶפְשָׁר לִפְתּוֹחַ עַכְשָׁיו דַּקָּה אַחַת שֶׁל מִשְׂחָק! 🎮"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "אֶפְשָׁר לִפְתּוֹחַ עַכְשָׁיו %lld דַּקּוֹת מִשְׂחָק! 🎮"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -14072,6 +15000,29 @@
         }
       }
     },
+    "בִּקְשׁוּ מֵאַבָּא אוֹ מֵאִמָּא לְסַיֵּם אֶת הַהַגְדָּרָה שֶׁל טוֹפִי": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اطلب من أبيك أو أمك إكمال إعداد توفي"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask a grown-up to finish setting Tofy up"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Попроси маму или папу завершить настройку Tofy"
+          }
+        }
+      }
+    },
     "בִּשְׁבִילְךָ": {
       "localizations": {
         "ar": {
@@ -14292,6 +15243,29 @@
         }
       }
     },
+    "בַּחֲרוּ קוֹד בֶּן 4 סְפָרוֹת כְּדֵי לְהָגֵן עַל הַהַגְדָּרוֹת": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختاروا رمزًا من 4 أرقام لحماية الإعدادات"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a 4-digit code to protect the settings"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите 4-значный код для защиты настроек"
+          }
+        }
+      }
+    },
     "בַּחֲרוּ קוֹד הוֹרֶה": {
       "localizations": {
         "ar": {
@@ -14447,9 +15421,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In the pocket now: 💝 %lld minutes"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "In the pocket now: 💝 %lld minute"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "In the pocket now: 💝 %lld minutes"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "בַּכִּיס עַכְשָׁיו: 💝 דַּקָּה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "בַּכִּיס עַכְשָׁיו: 💝 %lld דַּקּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -18433,9 +19437,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You've reached today's max screen time 🌙 — %lld minutes saved for tomorrow"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You've reached today's max screen time 🌙 — %lld minute saved for tomorrow"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You've reached today's max screen time 🌙 — %lld minutes saved for tomorrow"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — דַּקָּה אַחַת שְׁמוּרָה לְמָחָר"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — %lld דַּקּוֹת שְׁמוּרוֹת לְמָחָר"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -18515,9 +19549,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You've reached today's max screen time 🌙 — %lld minutes saved for tomorrow!"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You've reached today's max screen time 🌙 — %lld minute saved for tomorrow!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You've reached today's max screen time 🌙 — %lld minutes saved for tomorrow!"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — דַּקָּה אַחַת שְׁמוּרָה לְמָחָר!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — %lld דַּקּוֹת שְׁמוּרוֹת לְמָחָר!"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -21788,9 +22852,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The family answered %lld questions today 👏"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The family answered %lld question today 👏"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The family answered %lld questions today 👏"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "הַמִּשְׁפָּחָה עָנְתָה עַל שְׁאֵלָה אַחַת הַיּוֹם 👏"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "הַמִּשְׁפָּחָה עָנְתָה עַל %lld שְׁאֵלוֹת הַיּוֹם 👏"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -22332,9 +23426,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The gift ends in %lld days"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The gift ends in %lld day"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The gift ends in %lld days"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "הַמַּתָּנָה מִסְתַּיֶּמֶת מָחָר"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד %lld יָמִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -23885,6 +25009,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вас пригласили присоединиться как родителя — вы увидите детей, их прогресс и управление, точно как родитель, который вас пригласил."
+          }
+        }
+      }
+    },
+    "הֻרְווּ": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رُبح"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Earned"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заработано"
+          }
+        }
+      }
+    },
+    "הֻרְווּ הַיּוֹם": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رُبح اليوم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Earned today"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заработано сегодня"
           }
         }
       }
@@ -26956,9 +28126,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "And you have %lld gift minutes 💝 you can unlock right now too!"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "And you have %lld gift minute 💝 you can unlock right now too!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "And you have %lld gift minutes 💝 you can unlock right now too!"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "וְיֵשׁ לְךָ דַּקָּה אַחַת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "וְיֵשׁ לְךָ %lld דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -29301,9 +30501,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You're back! %lld days in a row 🔥"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You're back! %lld day in a row 🔥"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You're back! %lld days in a row 🔥"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "חָזַרְתָּ! יוֹם אֶחָד בְּרֶצֶף 🔥"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "חָזַרְתָּ! %lld יָמִים בְּרֶצֶף 🔥"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -29906,6 +31136,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Одно окно игры — сразу на всех устройствах"
+          }
+        }
+      }
+    },
+    "חסוך %lld%%": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وفّر %lld%%"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save %lld%%"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Экономия %lld%%"
           }
         }
       }
@@ -31109,9 +32362,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You have %lld minutes"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You have %lld minute"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You have %lld minutes"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יֵשׁ לְךָ דַּקָּה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יֵשׁ לְךָ %lld דַּקּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -31291,9 +32574,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You have %lld minutes"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You have %lld minute"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You have %lld minutes"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יֵשׁ לָךְ דַּקָּה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "יֵשׁ לָךְ %lld דַּקּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -36033,9 +37346,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "For %lld kids · one time"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "For %lld kid · one time"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "For %lld kids · one time"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "לְיֶלֶד אֶחָד · פַּעַם אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "לְ־%lld יְלָדִים · פַּעַם אַחַת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -36791,9 +38134,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld days ago"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld day ago"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld days ago"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "אֶתְמוֹל"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "לִפְנֵי %lld יָמִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -39260,6 +40633,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Удаление приложения"
+          }
+        }
+      }
+    },
+    "מְחִיקַת יֶלֶד/ה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حذف طفل/ة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete child"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить ребёнка"
           }
         }
       }
@@ -43022,28 +44417,6 @@
         }
       }
     },
-    "מחק ילד/ה": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "حذف طفل/ة"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete child"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Удалить ребёнка"
-          }
-        }
-      }
-    },
     "מטלה חדשה ➕": {
       "localizations": {
         "ar": {
@@ -44466,9 +45839,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seen %lld min ago"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Seen %lld min ago"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Seen %lld min ago"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "נִרְאָה לִפְנֵי דַּקָּה"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "נִרְאָה לִפְנֵי %lld דַּקּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -44548,9 +45951,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seen %lld days ago"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Seen %lld day ago"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Seen %lld days ago"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "נִרְאָה אֶתְמוֹל"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "נִרְאָה לִפְנֵי %lld יָמִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -44630,9 +46063,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seen %lld hours ago"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Seen %lld hour ago"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Seen %lld hours ago"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "נִרְאָה לִפְנֵי שָׁעָה"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "נִרְאָה לִפְנֵי %lld שָׁעוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -44756,9 +46219,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "About %lld minutes left"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "About %lld minute left"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "About %lld minutes left"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "נִשְׁאֲרָה בְּעֵרֶךְ דַּקָּה"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "נִשְׁאֲרוּ כְּ-%lld דַּקּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -45185,6 +46678,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Заблокируй %@ и открой здесь"
+          }
+        }
+      }
+    },
+    "נַקּוּ אֶת הַשֵּׁם": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "امسح الاسم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear the name"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистить имя"
           }
         }
       }
@@ -47234,9 +48750,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Amazing! 💫 +%lld minutes!"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Amazing! 💫 +%lld minute!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Amazing! 💫 +%lld minutes!"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "עֲנָקִים! 💫 +דַּקָּה אַחַת!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "עֲנָקִים! 💫 +%lld דַּקּוֹת!"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -47531,6 +49077,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Иврит"
+          }
+        }
+      }
+    },
+    "עִבְרוּ לַפְּרוֹפִיל הַזֶּה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "انتقل إلى هذا الملف الشخصي"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch to this profile"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перейти в этот профиль"
           }
         }
       }
@@ -47909,28 +49477,6 @@
         }
       }
     },
-    "עבור לפרופיל זה": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "انتقل إلى هذا الملف الشخصي"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Switch to this profile"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Перейти в этот профиль"
-          }
-        }
-      }
-    },
     "עדיין לא בחרת אפליקציות לחסום. בלי בחירה - לא יקרה כלום כשהילד פותח את ה-iPad.": {
       "localizations": {
         "ar": {
@@ -48064,9 +49610,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld more minutes and you can unlock play time 🎮"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld more minute and you can unlock play time 🎮"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld more minutes and you can unlock play time 🎮"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "עוֹד דַּקָּה אַחַת וְאֶפְשָׁר לִפְתּוֹחַ זְמַן מִשְׂחָק 🎮"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "עוֹד %lld דַּקּוֹת וְאֶפְשָׁר לִפְתּוֹחַ זְמַן מִשְׂחָק 🎮"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -48228,9 +49804,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld questions to go until your Tofy+ gift unlocks 🎁"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld question to go until your Tofy+ gift unlocks 🎁"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld questions to go until your Tofy+ gift unlocks 🎁"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "עוֹד שְׁאֵלָה אַחַת וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "עוֹד %lld שְׁאֵלוֹת וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -48310,9 +49916,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld more correct answers and the games open! 🎮"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld more correct answer and the games open! 🎮"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld more correct answers and the games open! 🎮"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "עוֹד תְּשׁוּבָה נְכוֹנָה אַחַת וְהַמִּשְׂחָקִים נִפְתָּחִים! 🎮"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "עוֹד %lld תְּשׁוּבוֹת נְכוֹנוֹת וְהַמִּשְׂחָקִים נִפְתָּחִים! 🎮"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -48392,9 +50028,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld more correct answers to the next level"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld more correct answer to the next level"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld more correct answers to the next level"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "עוֹד תְּשׁוּבָה נְכוֹנָה אַחַת לָרָמָה הַבָּאָה"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "עוֹד %lld תְּשׁוּבוֹת נְכוֹנוֹת לָרָמָה הַבָּאָה"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -50205,6 +51871,28 @@
         }
       }
     },
+    "פִּתְחוּ כַּרְטִיס": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "افتح البطاقة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open card"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть карточку"
+          }
+        }
+      }
+    },
     "פִּתְחוּ לִי %lld דַּקּוֹת לְשַׂחֵק": {
       "localizations": {
         "ar": {
@@ -50250,9 +51938,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unlock %lld minutes to play"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Unlock %lld minute to play"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Unlock %lld minutes to play"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "פִּתְחוּ לִי דַּקָּה אַחַת לְשַׂחֵק"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "פִּתְחוּ לִי %lld דַּקּוֹת לְשַׂחֵק"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -51345,28 +53063,6 @@
         }
       }
     },
-    "פתח כרטיס": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "افتح البطاقة"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open card"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Открыть карточку"
-          }
-        }
-      }
-    },
     "פתח עם Face ID / Touch ID": {
       "localizations": {
         "ar": {
@@ -51940,9 +53636,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You need %lld more diamonds. Keep learning to earn them — or a parent can buy some."
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You need %lld more diamond. Keep learning to earn it — or a parent can buy some."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You need %lld more diamonds. Keep learning to earn them — or a parent can buy some."
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "צָרִיךְ עוֹד יַהֲלוֹם אֶחָד. תַּמְשִׁיךְ לִלְמוֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "צָרִיךְ עוֹד %lld יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמוֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת."
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -52704,9 +54430,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Variety magic! 🌈 +%lld bonus minutes!"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Variety magic! 🌈 +%lld bonus minute!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Variety magic! 🌈 +%lld bonus minutes!"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "קֶסֶם הַגִּוּוּן! 🌈 +דַּקָּה אַחַת בּוֹנוּס!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "קֶסֶם הַגִּוּוּן! 🌈 +%lld דַּקּוֹת בּוֹנוּס!"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -53798,9 +55554,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Buy and send to %lld kids"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Buy and send to %lld kid"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Buy and send to %lld kids"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "רִכְשׁוּ וְשִׁלְחוּ לְיֶלֶד אֶחָד"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "רִכְשׁוּ וְשִׁלְחוּ לְ־%lld יְלָדִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -53853,6 +55639,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Концентрация и часы пика"
+          }
+        }
+      }
+    },
+    "רֶבַע שָׁעָה": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ربع ساعة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 minutes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 минут"
           }
         }
       }
@@ -55413,9 +57222,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giant question! 💫 Worth %lld minutes"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Giant question! 💫 Worth %lld minute"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Giant question! 💫 Worth %lld minutes"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "שְׁאֵלַת עֲנָק! 💫 שָׁוָה דַּקָּה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "שְׁאֵלַת עֲנָק! 💫 שָׁוָה %lld דַּקּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -58326,6 +60165,29 @@
         }
       }
     },
+    "תְּחוּמֵי עִנְיָן — מֵהֶם נִבְנוֹת הַשְּׁאֵלוֹת הַמֻּתְאָמוֹת": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الاهتمامات — تُبنى منها الأسئلة المخصّصة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interests — the tailored questions are built from these"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Интересы — из них строятся персональные вопросы"
+          }
+        }
+      }
+    },
     "תְּנוּ לְ%@ לְשַׂחֵק כָּאן 🧒": {
       "localizations": {
         "ar": {
@@ -59205,9 +61067,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "−%lld seconds · almost!"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "−%lld second · almost!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "−%lld seconds · almost!"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "−שְׁנִיָּה אַחַת · כִּמְעַט!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "−%lld שְׁנִיּוֹת · כִּמְעַט!"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -59354,9 +61246,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⏳ %lld sec to answer"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "⏳ %lld sec to answer"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "⏳ %lld sec to answer"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "⏳ שְׁנִיָּה אַחַת מַעֲנֶה"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "⏳ %lld שְׁנִיּוֹת מַעֲנֶה"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -59542,6 +61464,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "⚠️ Важно: выберите, какие приложения останутся открытыми, — и обязательно включите Tofy (а также нужные приложения вроде телефона). Пока вы не выбрали, не блокируется ничего, чтобы устройство не оказалось заперто по ошибке."
+          }
+        }
+      }
+    },
+    "⚠️ קוֹד קַל לְנִחוּשׁ — הַיֶּלֶד רוֹאֶה אֶתְכֶם מַקְלִידִים אוֹתוֹ. אֶפְשָׁר לְאַשֵּׁר בְּכָל זֹאת, אוֹ לַחֲזוֹר וְלִבְחֹר אַחֵר.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠️ رمز سهل التخمين — وطفلك يراكم تكتبونه. يمكنكم التأكيد على أي حال، أو العودة واختيار رمز آخر."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠️ That code is easy to guess — and your child watches you type it. You can confirm anyway, or go back and pick another."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠️ Такой код легко угадать — ребёнок видит, как вы его вводите. Можно подтвердить всё равно или вернуться и выбрать другой."
           }
         }
       }
@@ -60532,9 +62477,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "🎁 %lld minutes saved for tomorrow."
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎁 %lld minute saved for tomorrow."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎁 %lld minutes saved for tomorrow."
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎁 דַּקָּה אַחַת נִשְׁמְרָה לְמָחָר."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎁 %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר."
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -60636,9 +62611,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "🎁 Tofy+ gift · %lld days left"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎁 Tofy+ gift · %lld day left"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎁 Tofy+ gift · %lld days left"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎁 טוֹפִי+ בְּמַתָּנָה · עוֹד יוֹם אֶחָד"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎁 טוֹפִי+ בְּמַתָּנָה · עוֹד %lld יָמִים"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -60996,9 +63001,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "🎮 %lld play minutes"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎮 %lld play minute"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎮 %lld play minutes"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎮 דַּקַּת מִשְׂחָק אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎮 %lld דַּקּוֹת מִשְׂחָק"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -61286,9 +63321,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "🎮 +%lld minutes"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎮 +%lld minute"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎮 +%lld minutes"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎮 +דַּקָּה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🎮 +%lld דַּקּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -62089,9 +64154,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "💡 Every right answer = %lld seconds of play"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "💡 Every right answer = %lld second of play"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "💡 Every right answer = %lld seconds of play"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "💡 כָּל תְּשׁוּבָה נְכוֹנָה = שְׁנִיָּה אַחַת שֶׁל מִשְׂחָק"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "💡 כָּל תְּשׁוּבָה נְכוֹנָה = %lld שְׁנִיּוֹת שֶׁל מִשְׂחָק"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -62238,9 +64333,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "💫 Giant question! +%lld minutes"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "💫 Giant question! +%lld minute"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "💫 Giant question! +%lld minutes"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "💫 שְׁאֵלַת עֲנָק! +דַּקָּה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "💫 שְׁאֵלַת עֲנָק! +%lld דַּקּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -63170,9 +65295,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "🔥 %lld-day streak"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🔥 %lld-day streak"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🔥 %lld-day streak"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🔥 יוֹם אֶחָד בְּרֶצֶף"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🔥 %lld יְמֵי רֶצֶף"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -63632,9 +65787,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "🧠 %lld questions"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🧠 %lld question"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🧠 %lld questions"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🧠 שְׁאֵלָה אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🧠 %lld שְׁאֵלוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {
@@ -63715,9 +65900,39 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "🧹 %lld chores waiting"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🧹 %lld chore waiting"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🧹 %lld chores waiting"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🧹 מַטָּלָה אַחַת מְחַכָּה"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "🧹 %lld מַטְלוֹת מְחַכּוֹת"
+                }
+              }
+            }
           }
         },
         "ru": {

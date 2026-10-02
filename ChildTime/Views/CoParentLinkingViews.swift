@@ -265,6 +265,7 @@ struct JoinFamilyFlowView: View {
             TextField("", text: $joinCode, prompt: Text(tr("6 תָּוִים")).foregroundColor(.white.opacity(0.5)))
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
+                .keyboardType(.asciiCapable)   // Latin code on a Hebrew-only keyboard (see ChildJoinView)
                 .multilineTextAlignment(.center)
                 .font(.system(size: 26, weight: .heavy, design: .monospaced))
                 .kerning(6)

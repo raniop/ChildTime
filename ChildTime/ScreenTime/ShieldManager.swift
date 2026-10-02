@@ -42,12 +42,31 @@ final class ShieldManager: ObservableObject {
         authStatusText = text
     }
 
-    func requestAuthorizationIfNeeded() async {
+    /// Has an automatic (not user-initiated) request already been shown and not
+    /// approved? Apple's sheet re-presents on every call, so the launch-time
+    /// request put a full-screen system dialog in front of the child on EVERY
+    /// single open once it had been declined once. Ask automatically at most
+    /// twice; after that only an explicit tap ("בקש" / "נסו שוב") asks again.
+    private static let autoAsksKey = "shield.autoAuthAsks"
+    private static let autoAskLimit = 2
+    var automaticRequestExhausted: Bool {
+        UserDefaults.standard.integer(forKey: Self.autoAsksKey) >= Self.autoAskLimit
+    }
+
+    /// `userInitiated` — the parent tapped a button asking for it. Those always
+    /// ask; the launch-time call is throttled by `automaticRequestExhausted`.
+    func requestAuthorizationIfNeeded(userInitiated: Bool = true) async {
         refreshStatus()
         print("[ShieldManager] Status before request: \(authStatusText)")
         guard authCenter.authorizationStatus != .approved else {
             isAuthorized = true
+            UserDefaults.standard.set(0, forKey: Self.autoAsksKey)   // granted — forget the throttle
             return
+        }
+        if !userInitiated {
+            guard !automaticRequestExhausted else { return }
+            UserDefaults.standard.set(UserDefaults.standard.integer(forKey: Self.autoAsksKey) + 1,
+                                      forKey: Self.autoAsksKey)
         }
         do {
             try await authCenter.requestAuthorization(for: .individual)
@@ -58,6 +77,12 @@ final class ShieldManager: ObservableObject {
             refreshStatus()
             let nsErr = error as NSError
             authorizationError = Self.friendlyAuthError(nsErr)
+            // A child device that cannot shield is not a working child device.
+            // Publish the failure so the kid's home can say "a grown-up needs to
+            // finish this" and the parent's dashboard can show it from afar.
+            if let cid = ProfileStore.shared.activeID, ParentSettings.shared.deviceRole == .child {
+                Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
+            }
             print("[ShieldManager] Auth FAILED: \(nsErr.domain) #\(nsErr.code): \(error.localizedDescription)")
         }
     }

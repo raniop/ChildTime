@@ -35,11 +35,16 @@ struct ConsentView: View {
                     .background(RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                         .fill(.white.opacity(0.12)))
 
-                    Link(tr("קראו את מדיניות הפרטיות המלאה"),
-                         destination: URL(string: "https://tofyapp.com/privacy")!)
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.9))
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    // It was styled as plain white body text — on a Kids Category
+                    // app this is the one link that has to read as a link.
+                    Link(destination: URL(string: "https://tofyapp.com/privacy")!) {
+                        Label(tr("קראו את מדיניות הפרטיות המלאה"), systemImage: "arrow.up.right.square")
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppColor.starGold)
+                            .underline()
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 6)   // a real tap target, not a text line
 
                     Button {
                         accept()

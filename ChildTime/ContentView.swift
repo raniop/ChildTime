@@ -200,6 +200,10 @@ struct ContentView: View {
         }
         .onAppear {
             if profiles.activeID != cid { profiles.setActiveID(cid) }
+            // A device that JOINED a moment ago subscribes to its child doc only
+            // once the profile lands locally, so a gift sent in that window used
+            // to sit until the next launch. Read it once, here.
+            Task { await RemoteSyncManager.shared.consumePendingCommandsNow(for: cid) }
             if let p = profiles.active {
                 AppAnalytics.describeAudience(
                     role: "child",

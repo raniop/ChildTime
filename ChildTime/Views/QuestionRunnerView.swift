@@ -979,16 +979,20 @@ struct QuestionRunnerView: View {
                 regenerateQuestion()
             }
         } label: {
-            HStack {
-                Text("🪄")
-                Text(tr("הַחְלֵף שְׁאֵלָה"))
-            }
-            .font(.system(size: 18, weight: .semibold, design: .rounded))
-            .foregroundStyle(.white)
-            .padding(.horizontal, AppSpacing.lg)
-            .padding(.vertical, AppSpacing.sm)
-            .background(Capsule().fill(.white.opacity(0.14)))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
+            // ONE Text, scaled as a whole — the same rule the hint pill already
+            // follows. This button only appears after two wrong answers in a row,
+            // and it joins a row that already holds 🚩 🔊 🙋, the hint and the
+            // buddy: on a 402pt iPhone the two pills squeezed each other until
+            // the wand read "הַ" and the hint read "רְמָ…".
+            (Text("🪄 ") + Text(tr("הַחְלֵף שְׁאֵלָה")))
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.vertical, AppSpacing.sm)
+                .background(Capsule().fill(.white.opacity(0.14)))
+                .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
         }
         .buttonStyle(.juicy)
         .transition(.scale.combined(with: .opacity))

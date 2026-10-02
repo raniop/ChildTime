@@ -544,6 +544,7 @@ struct AddFriendView: View {
                 .foregroundStyle(.white.opacity(0.7))
             TextField("", text: $typed, prompt: Text(tr("קוֹד")).foregroundColor(.white.opacity(0.5)))
                 .textInputAutocapitalization(.characters).autocorrectionDisabled()
+                .keyboardType(.asciiCapable)   // Latin code on a Hebrew-only keyboard (see ChildJoinView)
                 .multilineTextAlignment(.center)
                 .font(.system(size: 24, weight: .heavy, design: .monospaced)).kerning(5).foregroundStyle(.white)
                 .padding(.vertical, 12).background(RoundedRectangle(cornerRadius: 14).fill(.white.opacity(0.12)))

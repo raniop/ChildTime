@@ -436,7 +436,7 @@ struct ParentDashboardView: View {
                                      set: { if !$0 { gridDeleteProfile = nil } }),
                 presenting: gridDeleteProfile
             ) { p in
-                Button(tr("מחק ילד/ה"), role: .destructive) {
+                Button(tr("מְחִיקַת יֶלֶד/ה"), role: .destructive) {
                     profiles.remove(p)
                     gridDeleteProfile = nil
                 }
@@ -1087,10 +1087,14 @@ struct ParentDashboardView: View {
                         Button {
                             profiles.setActive(profile)
                         } label: {
-                            Label(tr("עבור לפרופיל זה"), systemImage: "person.crop.circle.fill")
+                            Label(tr("עִבְרוּ לַפְּרוֹפִיל הַזֶּה"), systemImage: "person.crop.circle.fill")
                         }
                     }
                     Menu {
+                        // 15 minutes was missing entirely: the smallest gift a
+                        // parent could give was half an hour, so "עוד רבע שעה ודי"
+                        // had no button.
+                        Button(tr("רֶבַע שָׁעָה")) { remoteOpen(profile, 15) }
                         Button(tr("חֲצִי שָׁעָה")) { remoteOpen(profile, 30) }
                         Button(tr("שָׁעָה")) { remoteOpen(profile, 60) }
                         Button(tr("שְׁעָתַיִם")) { remoteOpen(profile, 120) }
@@ -1176,7 +1180,7 @@ struct ParentDashboardView: View {
                     Button(role: .destructive) {
                         deletingProfile = profile
                     } label: {
-                        Label(tr("מחק ילד/ה"), systemImage: "trash")
+                        Label(tr("מְחִיקַת יֶלֶד/ה"), systemImage: "trash")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -1493,9 +1497,13 @@ struct ParentDashboardView: View {
             }
             if hasDevice {
                 HStack(spacing: 8) {
+                    // "דקות היום" meant two different numbers on the two screens —
+                    // here minutes EARNED by learning today, on the kid's own home
+                    // the wallet. A parent watching a 30-minute gift window run saw
+                    // "0 דקות היום" and reasonably thought something was broken.
                     overviewStat(value: "\(s.minutesEarnedToday)",
                                  suffix: cap.enabled ? "/\(cap.minutes)" : nil,
-                                 label: tr("דַּקּוֹת הַיּוֹם"),
+                                 label: tr("הֻרְווּ הַיּוֹם"),
                                  progress: cap.enabled ? min(1, Double(s.minutesEarnedToday) / Double(max(cap.minutes, 1))) : nil)
                     overviewStat(value: "\(s.answeredToday)", suffix: nil, label: tr("שְׁאֵלוֹת הַיּוֹם"), progress: nil)
                     overviewStat(value: "\(s.correctToday)", suffix: nil, label: tr("נְכוֹנוֹת"), progress: nil)
@@ -1900,6 +1908,7 @@ struct ParentDashboardView: View {
             if hasDevice {
             Divider()
             Menu {
+                Button(tr("רֶבַע שָׁעָה")) { remoteOpen(profile, 15) }
                 Button(tr("חֲצִי שָׁעָה")) { remoteOpen(profile, 30) }
                 Button(tr("שָׁעָה")) { remoteOpen(profile, 60) }
                 Button(tr("שְׁעָתַיִם")) { remoteOpen(profile, 120) }
@@ -1921,7 +1930,7 @@ struct ParentDashboardView: View {
             Divider()
             Button {
                 navPath.append(profile.id)
-            } label: { Label(tr("פתח כרטיס"), systemImage: "rectangle.portrait.and.arrow.right") }
+            } label: { Label(tr("פִּתְחוּ כַּרְטִיס"), systemImage: "rectangle.portrait.and.arrow.right") }
             Button {
                 choresProfile = profile
             } label: { Label(tr("מַטְלוֹת הַבַּיִת 🧹"), systemImage: "checklist") }
@@ -1932,7 +1941,7 @@ struct ParentDashboardView: View {
             }
             Button(role: .destructive) {
                 gridDeleteProfile = profile
-            } label: { Label(tr("מחק ילד/ה"), systemImage: "trash") }
+            } label: { Label(tr("מְחִיקַת יֶלֶד/ה"), systemImage: "trash") }
         } label: {
             homeGhostLabel(tr("⚡ פְּעֻלּוֹת"), width: Self.actionsMenuWidth)
         }
@@ -2296,7 +2305,7 @@ struct ParentDashboardView: View {
                     .contextMenu {
                         Button {
                             navPath.append(row.profile.id)
-                        } label: { Label(tr("פתח כרטיס"), systemImage: "rectangle.portrait.and.arrow.right") }
+                        } label: { Label(tr("פִּתְחוּ כַּרְטִיס"), systemImage: "rectangle.portrait.and.arrow.right") }
                         Button {
                             choresProfile = row.profile
                         } label: { Label(tr("מַטְלוֹת הַבַּיִת 🧹"), systemImage: "checklist") }
@@ -2307,7 +2316,7 @@ struct ParentDashboardView: View {
                         }
                         Button(role: .destructive) {
                             gridDeleteProfile = row.profile
-                        } label: { Label(tr("מחק ילד/ה"), systemImage: "trash") }
+                        } label: { Label(tr("מְחִיקַת יֶלֶד/ה"), systemImage: "trash") }
                     }
                 }
             }
@@ -2437,7 +2446,7 @@ struct ParentDashboardView: View {
                                  set: { if !$0 { deletingProfile = nil } }),
             presenting: deletingProfile
         ) { p in
-            Button(tr("מחק ילד/ה"), role: .destructive) {
+            Button(tr("מְחִיקַת יֶלֶד/ה"), role: .destructive) {
                 profiles.remove(p)     // removes locally + from the cloud
                 navPath.removeAll()    // pop back to the family grid
                 deletingProfile = nil
@@ -2776,6 +2785,24 @@ struct ParentDashboardView: View {
                         .font(.system(size: 18))
                         .foregroundStyle(AppColor.gemPurple)
                         .frame(width: 26)
+                }
+                // Screen Time was never granted on that device — so nothing there
+                // can actually be locked. A healthy-looking green row used to be
+                // the only thing the parent saw.
+                if device.shieldAuthorized == false, device.role != "parent" {
+                    HStack(alignment: .top, spacing: 6) {
+                        Spacer(minLength: 0)
+                        Text(tr("אֵין הַרְשָׁאַת ״זְמַן מָסָךְ״ בַּמַּכְשִׁיר הַזֶּה — נְעִילַת אַפְּלִיקַצְיוֹת לֹא תַּעֲבוֹד בּוֹ. פִּתְחוּ בּוֹ אֶת טוֹפִי ← ⚙️ ← בַּקָּשׁ הַרְשָׁאָה."))
+                            .font(.system(size: 11, weight: .semibold, design: .rounded))
+                            .foregroundStyle(AppColor.flameOrange)
+                            .multilineTextAlignment(.trailing)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Image(systemName: "exclamationmark.shield.fill")
+                            .font(.system(size: 13))
+                            .foregroundStyle(AppColor.flameOrange)
+                            .frame(width: 26)
+                    }
+                    .padding(.top, 4)
                 }
             }
         }

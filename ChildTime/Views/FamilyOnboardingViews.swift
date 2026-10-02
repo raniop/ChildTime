@@ -40,15 +40,35 @@ struct FamilyChoiceView: View {
                     .padding(.horizontal, AppSpacing.lg)
             }
 
-            TextField("", text: $familyName,
-                      prompt: Text(tr("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן")).foregroundColor(.white.opacity(0.55)))
-                .font(.system(size: 20, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .submitLabel(.done)
-                .padding(.horizontal, 16).padding(.vertical, 14)
-                .glassPane(radius: AppRadius.large)
-                .frame(maxWidth: 460)
+            // The field arrives PRE-FILLED with a guess from the parent's own
+            // name, so it holds a value, not a placeholder. Tapping in the middle
+            // of it spliced what you typed into the guess ("משפחת QA-TESTגולן"),
+            // and a centred field gives iOS nowhere to put a clear button — so
+            // here is an explicit one.
+            HStack(spacing: 8) {
+                if !familyName.isEmpty {
+                    Button {
+                        Haptic.light()
+                        familyName = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(.white.opacity(0.6))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(tr("נַקּוּ אֶת הַשֵּׁם"))
+                }
+                TextField("", text: $familyName,
+                          prompt: Text(tr("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן")).foregroundColor(.white.opacity(0.55)))
+                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .submitLabel(.done)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(.horizontal, 16).padding(.vertical, 14)
+            .glassPane(radius: AppRadius.large)
+            .frame(maxWidth: 460)
 
             VStack(spacing: AppSpacing.sm) {
                 JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {

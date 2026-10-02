@@ -98,7 +98,7 @@ struct ChildReportView: View {
             HStack(spacing: 0) {
                 snap("\(s.questions)", tr("שְׁאֵלוֹת"))
                 snap(s.questions > 0 ? pct(s.accuracy) : "0%", tr("הַצְלָחָה"))
-                snap(minutes, tr("דַּקּוֹת"))
+                snap(minutes, tr("הֻרְווּ"))   // minutes EARNED, not the wallet — see the dashboard note
                 snap("\(snapshot.dayStreak)", tr("יְמֵי רֶצֶף"))
             }
             .padding(.vertical, 10)
