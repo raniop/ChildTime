@@ -1632,7 +1632,7 @@ exports.onParentFeedback = onDocumentCreated(
         auth: { user, pass },
       });
       await transporter.sendMail({
-        from: `ChildTime <${user}>`,
+        from: `טופי <${user}>`,
         to: FEEDBACK_TO,
         subject: "📩 פידבק חדש מהורה — ChildTime",
         text: lines.join("\n"),
@@ -1721,7 +1721,7 @@ exports.onHouseholdCreated = onDocumentCreated(
     ];
     try {
       await nodemailer.createTransport({ service: "gmail", auth: { user, pass } }).sendMail({
-        from: `Tofy <${user}>`,
+        from: `טופי <${user}>`,
         to: ADMIN_EMAILS,
         subject: familyName ? `🎉 ${familyName} הצטרפה לטופי` : "🎉 משפחה חדשה נרשמה לטופי",
         text: lines.join("\n"),
@@ -1765,7 +1765,7 @@ exports.onMailJob = onDocumentCreated(
     const firstName = (full) => String(full || "").trim().split(/\s+/)[0] || "";
     const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
     const sendOne = (to, name) => transporter.sendMail({
-      from: `רני ועמית · טופי <${user}>`,
+      from: `טופי <${user}>`,
       to,
       replyTo: ADMIN_EMAILS,          // "פשוט עונים למייל הזה" reaches both founders
       subject: WAITLIST_LAUNCH_SUBJECT,
@@ -1871,7 +1871,7 @@ exports.onQuestionReport = onDocumentCreated(
         auth: { user, pass },
       });
       await transporter.sendMail({
-        from: `ChildTime <${user}>`,
+        from: `טופי <${user}>`,
         to: FEEDBACK_TO,
         subject: "🚩 דיווח על שאלה לא טובה — ChildTime",
         text: lines.join("\n"),
