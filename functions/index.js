@@ -1734,6 +1734,86 @@ exports.onHouseholdCreated = onDocumentCreated(
   }
 );
 
+// ---- ✉️ Founder mail jobs (admin SDK only — clients cannot write mailJobs) ----
+// kind "waitlistLaunch": the "טופי כבר ב־App Store" email to the waitlist.
+//   { testTo, testName }            → ONE email to testTo, nothing else.
+//   { send: true, confirm: "SEND-WAITLIST-LAUNCH", nameOverrides? }
+//                                   → every waitlist address, once each
+//                                     (launchEmailSentAt marks who got it),
+//                                     the founders themselves skipped.
+// The lion travels INSIDE the email as an inline (cid) attachment: Outlook and
+// Gmail often block remote images until the reader allows them, and an empty
+// hero is the first thing a waitlist parent would see. (Rani: "לוודא שהאריה שלנו
+// נשלח גם".) The job doc gets the outcome written back to it.
+const fs = require("fs");
+const path = require("path");
+const WAITLIST_LAUNCH_SUBJECT = "טופי כבר ב־App Store 🎉 — ואתם בין הראשונים";
+exports.onMailJob = onDocumentCreated(
+  { document: "mailJobs/{id}", secrets: [GMAIL_USER, GMAIL_PASS], timeoutSeconds: 300 },
+  async (event) => {
+    const job = (event.data && event.data.data()) || {};
+    const ref = event.data.ref;
+    if (job.kind !== "waitlistLaunch") { await ref.update({ status: "ignored: unknown kind" }); return; }
+    const user = GMAIL_USER.value(), pass = GMAIL_PASS.value();
+    if (!user || !pass) { await ref.update({ status: "error: GMAIL secrets missing" }); return; }
+
+    const template = fs.readFileSync(path.join(__dirname, "emails", "waitlist-launch.html"), "utf8");
+    const lion = fs.readFileSync(path.join(__dirname, "emails", "lion.png"));
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    // "היי מורן 👋" — first name only; no name → just "היי 👋".
+    const render = (name) => template.replace("היי {{NAME}} 👋", name ? `היי ${esc(name)} 👋` : "היי 👋");
+    const firstName = (full) => String(full || "").trim().split(/\s+/)[0] || "";
+    const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
+    const sendOne = (to, name) => transporter.sendMail({
+      from: `רני ועמית · טופי <${user}>`,
+      to,
+      replyTo: ADMIN_EMAILS,          // "פשוט עונים למייל הזה" reaches both founders
+      subject: WAITLIST_LAUNCH_SUBJECT,
+      html: render(name),
+      text: `${name ? "היי " + name : "היי"},\n\nטופי זמין להורדה ב־App Store: https://apps.apple.com/app/id6773805449\n\nנשמח לשמוע מכם — פשוט עונים למייל הזה.\n\nרני ועמית, טופי`,
+      attachments: [{ filename: "tofy-lion.png", content: lion, cid: "tofy-lion", contentDisposition: "inline" }],
+    });
+
+    if (job.testTo) {
+      try {
+        await sendOne(job.testTo, job.testName || "");
+        await ref.update({ status: "test sent", sentAt: Date.now() / 1000 });
+      } catch (e) {
+        await ref.update({ status: "error: " + (e && e.message) });
+      }
+      return;
+    }
+
+    if (job.send !== true || job.confirm !== "SEND-WAITLIST-LAUNCH") {
+      await ref.update({ status: "refused: real send needs send:true + confirm" });
+      return;
+    }
+    const founders = new Set(ADMIN_EMAILS.map((e) => e.toLowerCase()));
+    const overrides = job.nameOverrides || {};
+    const snap = await db.collection("waitlist").get();
+    const sent = [], skipped = [], errors = [];
+    const seen = new Set();
+    for (const doc of snap.docs) {
+      const w = doc.data();
+      const email = String(w.email || "").trim().toLowerCase();
+      if (!email || seen.has(email)) { skipped.push(email || doc.id + " (no email)"); continue; }
+      seen.add(email);
+      if (founders.has(email)) { skipped.push(email + " (founder)"); continue; }
+      if (w.launchEmailSentAt) { skipped.push(email + " (already sent)"); continue; }
+      const name = overrides[email] !== undefined ? overrides[email] : firstName(w.name);
+      try {
+        await sendOne(email, name);
+        await doc.ref.update({ launchEmailSentAt: Date.now() / 1000 });
+        sent.push(email);
+      } catch (e) {
+        errors.push(email + ": " + (e && e.message));
+      }
+    }
+    await ref.update({ status: "done", sent, skipped, errors, finishedAt: Date.now() / 1000 });
+    console.log("[mailJob waitlistLaunch] sent", sent.length, "skipped", skipped.length, "errors", errors.length);
+  }
+);
+
 // ---- Bad-question report → email ------------------------------------------
 // When a parent flags a question (the 🚩 in the game, written to
 // `questionReports/{id}`), email it to the team so we can fix/remove it.
