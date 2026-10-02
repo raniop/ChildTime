@@ -148,7 +148,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261002172624";
+const PAGE_STAMP = "20261002224123";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -195,6 +195,11 @@ $("loginBtn").onclick = async () => { $("gateMsg").className = "msg"; $("gateMsg
 $("logoutBtn").onclick = () => auth.signOut(authI);
 
 let J = null, FAM = null, PACKSTATE = null;
+// When J / FAM were last fetched. Both were loaded once and then read from
+// memory forever, so moving between tabs showed the numbers from when the page
+// opened until a full reload (Rani). Now a tab older than STALE_MS refetches.
+let J_AT = 0, FAM_AT = 0;
+const STALE_MS = 30000;
 auth.onAuthStateChanged(authI, async (user) => {
   if (!user) { $("gate").hidden = false; $("app").hidden = true; return; }
   const email = (user.email || "").toLowerCase();
@@ -205,7 +210,7 @@ auth.onAuthStateChanged(authI, async (user) => {
 $("refreshBtn").onclick = async () => { $("stamp").innerHTML = '<span class="spin"></span>'; await loadJourney(true); route(); toast("עודכן"); };
 const ov = () => Object.assign({ activeFamilies30: 0, childrenToday: 0, questionsToday: 0, accuracyToday: 0, minutesToday: 0, mrr: 0, premiumFamilies: 0, yearlyShare: 0, activatedToPaid30: 0, openReports: 0, openFeedback: 0, packsOn: 0, packsReady: Object.keys(PACKS).length, activeSeries: [], worldsToday: [] }, (J && J.overview) || {});
 async function loadJourney(recompute) {
-  try { J = await call("adminJourney", { recompute }); } catch (e) { J = null; toast("טעינה נכשלה: " + (e.message || e)); }
+  try { J = await call("adminJourney", { recompute }); J_AT = Date.now(); } catch (e) { J = null; toast("טעינה נכשלה: " + (e.message || e)); }
   if (J) { const o = ov(); $("stamp").textContent = "עודכן " + when(J.computedAt);
     $("navFamilies").textContent = fmt(o.activeFamilies30) + " פעילות";
     $("navWorlds").textContent = `${o.packsOn} דלוקים · ${o.packsReady} מוכנים`;
@@ -224,7 +229,33 @@ function route() {
   let p = (location.hash || "#dashboard").slice(1); if (!PAGES[p]) p = "dashboard";
   document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", a.dataset.p === p));
   PAGES[p]();
+  refreshIfStale(p);
 }
+// Show what we have at once, then — if it is older than STALE_MS — fetch fresh
+// data in the background and redraw the SAME tab (unless the user moved on).
+let refreshing = false;
+async function refreshIfStale(p) {
+  const now = Date.now();
+  const famStale = FAM && now - FAM_AT > STALE_MS, jStale = J && now - J_AT > STALE_MS;
+  if (refreshing || (!famStale && !jStale)) return;
+  refreshing = true;
+  try {
+    await Promise.all([
+      jStale ? loadJourney(false) : null,
+      famStale ? call("adminFamiliesOverview").then((r) => { FAM = r; FAM_AT = Date.now(); }).catch(() => {}) : null,
+    ]);
+  } finally { refreshing = false; }
+  const cur = (location.hash || "#dashboard").slice(1);
+  if ((PAGES[cur] ? cur : "dashboard") !== p) return;
+  // Keep the reader where they were — a redraw must not jump the page to the top.
+  const y = window.scrollY;
+  await PAGES[p]();
+  window.scrollTo(0, y);
+}
+// Coming back to the browser tab after a while counts as a visit too.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && J) refreshIfStale((location.hash || "#dashboard").slice(1) || "dashboard");
+});
 const kpi = (v, l, delta, cls) => `<div class="kpi"><b>${v}</b><span>${l}</span> ${delta ? `<i class="${cls || ""}">${delta}</i>` : ""}</div>`;
 const funnelRow = (label, n, base, prev) => `<div class="f"><span>${label}</span><div class="barw"><div class="bar" style="width:${typeof n === "number" && base ? Math.max(1, Math.round(100 * n / base)) : 0}%"></div></div><span class="n">${fmt(n)}</span><span class="p">${typeof n === "number" && prev ? Math.round(100 * n / prev) + "%" : ""}</span></div>`;
 
@@ -256,7 +287,7 @@ async function dashboard() {
       <div class="card"><h4>קורה עכשיו</h4><div class="feed" id="feed"><span class="spin"></span></div></div>
     </div>`;
   $("recompute").onclick = async () => { $("recompute").innerHTML = '<span class="spin"></span>'; await loadJourney(true); dashboard(); };
-  try { const [a] = await Promise.all([call("adminActivity"), FAM ? Promise.resolve() : call("adminFamiliesOverview").then((r) => { FAM = r; }).catch(() => {})]);
+  try { const [a] = await Promise.all([call("adminActivity"), FAM ? Promise.resolve() : call("adminFamiliesOverview").then((r) => { FAM = r; FAM_AT = Date.now(); }).catch(() => {})]);
     const famById = Object.fromEntries((FAM?.families || []).map((f) => [f.fullId || f.householdID || f.id, f]));
     const label = (i) => { let t = i.text; const f = i.ref?.householdID && famById[i.ref.householdID]; if (f) t = t.replace(/משפחה [0-9A-F]{4}/, famName(f)); const k = i.ref?.childID && (f?.children || []).find((c) => (c.fullId || c.id) === i.ref.childID); return (k && !t.includes(k.name) ? esc(k.name) + " · " : "") + esc(t) + (f ? ` <a href="#families" style="font-size:11px">פתח משפחה</a>` : ""); };
     $("feed").innerHTML = a.items.length ? a.items.map((i) => `<div class="i"><span>${when(i.at)}</span><div>${label(i)}</div></div>`).join("") : '<div class="empty">שקט כרגע.</div>'; } catch (e) { $("feed").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; }
@@ -267,7 +298,7 @@ let famFilter = "all", famQuery = "";
 let famSort = { key: "active", dir: -1 };   // quiet families first is the default question
 const FILTERS = [["all", "הכל"], ["gift", "במתנה"], ["gift_expiring", "מסתיימת"], ["plus", "טופי+"], ["returned", "חזרו לחינם"], ["inactive", "לא פעילות"], ["demo", "🧪 דמו"]];
 async function families() {
-  if (!FAM) { $("main").innerHTML = '<div class="empty"><span class="spin"></span> טוען משפחות…</div>'; try { FAM = await call("adminFamiliesOverview"); } catch (e) { return $("main").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; } }
+  if (!FAM) { $("main").innerHTML = '<div class="empty"><span class="spin"></span> טוען משפחות…</div>'; try { FAM = await call("adminFamiliesOverview"); FAM_AT = Date.now(); } catch (e) { return $("main").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; } }
   const fams = (FAM.families || []).map((f) => ({ ...f, hh: f.fullId || f.householdID || f.id, j: (J && J.households && J.households[f.fullId || f.householdID || f.id]) || {} }));
   const q = famQuery.trim();
   const hay = (f) => [f.familyName, f.label, f.name, ...(f.parents || []).map((p) => (p.email || "") + " " + (p.name || "")), ...(f.children || []).map((k) => k.name)].join(" ");
