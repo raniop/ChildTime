@@ -32,7 +32,7 @@
   .steps b{color:#fff}
   .steps .n{flex:0 0 28px;height:28px;border-radius:50%;background:var(--gold);color:#2B1C04;
     font-weight:800;display:grid;place-items:center;font-size:14px}
-  .done{display:none}
+  .done{display:none} .done:focus{outline:none}
   .done h2{font-size:26px;margin:6px 0 4px}
   .done .ctas{display:flex;flex-direction:column;gap:12px;max-width:400px;margin:22px auto 0}
   .wa{background:#25D366!important;color:#06311A!important;border:0}
@@ -72,7 +72,7 @@
           <option>iPhone</option><option>iPad</option><option>גם וגם</option>
         </select>
         <div class="ef-err" id="bf-err" role="alert"></div>
-        <button type="submit" class="btn" id="bf-btn">אני בפנים — צרפו אותי לבטא 🎉</button>
+        <button type="submit" class="btn" id="bf-btn">הצטרפו לבטא 🎉</button>
       </form>
       <div class="ef-note">האימייל משמש רק לבטא של טופי. <a href="../privacy.html" style="color:var(--gold)">מדיניות הפרטיות</a></div>
       <div class="bullets">
@@ -159,7 +159,7 @@
       var subj = encodeURIComponent("טופי - הצטרפות לבטא");
       var bdy  = encodeURIComponent("שם: " + name + "\nאימייל: " + email + "\nגיל הילדים: " + age + "\nמכשיר: " + dev);
       window.location.href = "mailto:ranioph@gmail.com?subject=" + subj + "&body=" + bdy;
-      btn.disabled = false; btn.textContent = "אני בפנים — צרפו אותי לבטא 🎉";
+      btn.disabled = false; btn.textContent = "הצטרפו לבטא 🎉";
     }
   });
 </script>
