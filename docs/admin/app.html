@@ -133,6 +133,7 @@
       <a href="#campaigns" data-p="campaigns">📣 הודעות ועדכונים</a>
       <a href="#worlds" data-p="worlds">🌍 עולמות<small id="navWorlds"></small></a>
       <a href="#content" data-p="content">🧠 תוכן ושאלות<small id="navContent"></small></a>
+      <a href="#beta" data-p="beta">🧪 בטא</a>
       <a href="#support" data-p="support">💬 תמיכה<small id="navSupport"></small></a>
       <a href="#financials" data-p="financials">💰 כספים<small id="navFin"></small></a>
       <a href="#settings" data-p="settings">⚙️ הגדרות וניסויים</a>
@@ -147,7 +148,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261002154700";
+const PAGE_STAMP = "20261002172624";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -216,7 +217,9 @@ window.addEventListener("hashchange", route);
 // 📱 Phone: everything lives behind the ☰; a tap on a page closes it.
 $("menuBtn").onclick = () => document.querySelector(".side").classList.toggle("open");
 document.querySelectorAll("#nav a").forEach((a) => a.addEventListener("click", () => document.querySelector(".side").classList.remove("open")));
-const PAGES = { dashboard, families, funnel, campaigns, worlds, content, support, settings, financials };
+// 🧪 The beta sign-ups: the same view as תמיכה → בטא והמתנה, one click away.
+function beta() { supTab = "waitlist"; wlFilter = "beta"; return support(); }
+const PAGES = { dashboard, families, funnel, campaigns, worlds, content, support, settings, financials, beta };
 function route() {
   let p = (location.hash || "#dashboard").slice(1); if (!PAGES[p]) p = "dashboard";
   document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", a.dataset.p === p));
@@ -928,9 +931,9 @@ async function content() {
 // ---------------- 7 · support ----------------
 let supTab = "open";
 async function support() {
-  $("main").innerHTML = `<div class="top"><h3 id="supH">תמיכה</h3><div class="filters" id="supFilters"><span class="chip ${supTab === "open" ? "on" : ""}" data-s="open">פתוחות</span><span class="chip ${supTab === "done" ? "on" : ""}" data-s="done">נענו</span><span class="chip ${supTab === "feedback" ? "on" : ""}" data-s="feedback">פידבק</span><span class="chip ${supTab === "waitlist" ? "on" : ""}" data-s="waitlist" id="wl">רשימת המתנה</span></div></div><div class="card"><div class="tblwrap" id="supTbl"><span class="spin"></span></div></div>`;
-  try { const r = await call("adminListSupport"); $("wl").textContent = "רשימת המתנה (" + r.waitlist + ")"; const openN = r.items.filter((i) => i.status === "open").length;
-    if (supTab === "waitlist") { $("supH").textContent = "רשימת המתנה · " + r.waitlist; $("navSupport").textContent = openN ? openN + " פתוחות" : ""; waitlist(); document.querySelectorAll("#supFilters [data-s]").forEach((c) => c.onclick = () => { supTab = c.dataset.s; support(); }); return; } $("supH").textContent = openN ? `תמיכה · ${openN} פתוחות` : "תמיכה"; $("navSupport").textContent = openN ? openN + " פתוחות" : "";
+  $("main").innerHTML = `<div class="top"><h3 id="supH">תמיכה</h3><div class="filters" id="supFilters"><span class="chip ${supTab === "open" ? "on" : ""}" data-s="open">פתוחות</span><span class="chip ${supTab === "done" ? "on" : ""}" data-s="done">נענו</span><span class="chip ${supTab === "feedback" ? "on" : ""}" data-s="feedback">פידבק</span><span class="chip ${supTab === "waitlist" ? "on" : ""}" data-s="waitlist" id="wl">🧪 בטא והמתנה</span></div></div><div class="card"><div class="tblwrap" id="supTbl"><span class="spin"></span></div></div>`;
+  try { const r = await call("adminListSupport"); $("wl").textContent = "🧪 בטא והמתנה (" + r.waitlist + ")"; const openN = r.items.filter((i) => i.status === "open").length;
+    if (supTab === "waitlist") { $("supH").textContent = "בטא ורשימת המתנה · " + r.waitlist; $("navSupport").textContent = openN ? openN + " פתוחות" : ""; waitlist(); document.querySelectorAll("#supFilters [data-s]").forEach((c) => c.onclick = () => { supTab = c.dataset.s; support(); }); return; } $("supH").textContent = openN ? `תמיכה · ${openN} פתוחות` : "תמיכה"; $("navSupport").textContent = openN ? openN + " פתוחות" : "";
     const famOf = (i) => (FAM && (FAM.families || []).find((f) => (f.fullId || f.householdID || f.id) === i.householdID)) || null;
     const rows = r.items.filter((i) => supTab === "open" ? i.status === "open" : supTab === "done" ? i.status !== "open" : i.kind === "feedback");
     $("supTbl").innerHTML = rows.length ? `<table><tr><th>מתי</th><th>משפחה</th><th>סוג</th><th>תוכן</th><th>מכשיר · גרסה</th><th></th></tr>${rows.map((i) => { const f = famOf(i); const mail = f && (f.parents || []).map((p) => p.email).find(Boolean);
@@ -943,20 +946,33 @@ async function support() {
 
 // everyone who left an email on tofyapp.com — newest first, with one click to
 // copy every address for the launch mail.
+// 🧪 Beta sign-ups (tofyapp.com/beta) and the old launch waitlist live in the
+// same collection; the chips split them, and copy/CSV follow the chip — so
+// "email just the beta parents" is one click.
+let wlFilter = "beta";
+const WL_SOURCE = (s) => s === "beta" ? "🧪 בטא" : s.startsWith("web") ? "🌐 אתר" : (s || "—");
 async function waitlist() {
   try {
     const r = await call("adminListWaitlist");
-    const rows = r.items || [];
-    if (!rows.length) { $("supTbl").innerHTML = '<div class="empty">עוד אף אחד לא נרשם.</div>'; return; }
+    const all = r.items || [];
+    const isBeta = (i) => i.source === "beta";
+    const counts = { beta: all.filter(isBeta).length, site: all.filter((i) => !isBeta(i)).length, all: all.length };
+    if (wlFilter === "beta" && !counts.beta) wlFilter = "all";
+    const rows = all.filter((i) => wlFilter === "all" || (wlFilter === "beta" ? isBeta(i) : !isBeta(i)));
+    const chip = (k, l) => `<span class="chip ${wlFilter === k ? "on" : ""}" data-wlf="${k}">${l} <b>${fmt(counts[k])}</b></span>`;
     const mails = rows.map((i) => i.email).filter(Boolean);
-    $("supTbl").innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    $("supTbl").innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        ${chip("beta", "🧪 בטא")}${chip("site", "🌐 רשימת ההמתנה מהאתר")}${chip("all", "הכל")}
+        <span style="flex:1"></span>
         <button class="btn ghost" id="wlCopy">העתקת ${mails.length} האימיילים</button>
-        <a class="btn ghost" id="wlCsv" download="tofy-waitlist.csv">הורדת CSV</a>
-      </div>
-      <table><tr><th>מתי</th><th>אימייל</th><th>שם</th><th>גיל הילד</th><th>מאיפה</th><th></th></tr>${rows.map((i) =>
-        `<tr><td>${when(i.at)}</td><td><a href="mailto:${esc(i.email)}">${esc(i.email)}</a></td><td>${esc(i.name || "—")}</td><td>${esc(i.childAge || "—")}</td><td>${esc(i.source || "—")}</td><td style="white-space:nowrap"><button class="btn ghost" data-wldel="${esc(i.id)}" data-wlmail="${esc(i.email)}">מחקו</button></td></tr>`).join("")}</table>`;
+        <a class="btn ghost" id="wlCsv" download="tofy-${wlFilter}.csv">הורדת CSV</a>
+      </div>` + (rows.length ? `
+      <table><tr><th>מתי</th><th>אימייל</th><th>שם</th><th>גיל הילדים</th><th>מכשיר</th><th>מאיפה</th><th></th></tr>${rows.map((i) =>
+        `<tr><td>${when(i.at)}</td><td><a href="mailto:${esc(i.email)}">${esc(i.email)}</a></td><td>${esc(i.name || "—")}</td><td>${esc(i.childAge || "—")}</td><td>${esc(i.device || "—")}</td><td>${WL_SOURCE(i.source)}${i.launchEmailed ? ' <span class="m" title="קיבלו את מייל ההשקה">✉️</span>' : ""}</td><td style="white-space:nowrap"><button class="btn ghost" data-wldel="${esc(i.id)}" data-wlmail="${esc(i.email)}">מחקו</button></td></tr>`).join("")}</table>`
+      : '<div class="empty">עוד אף אחד לא נרשם כאן.</div>');
+    document.querySelectorAll("[data-wlf]").forEach((c) => c.onclick = () => { wlFilter = c.dataset.wlf; waitlist(); });
     document.querySelectorAll("[data-wldel]").forEach((b) => b.onclick = async () => {
-      if (!confirm(`למחוק את ${b.dataset.wlmail} מרשימת ההמתנה?`)) return;
+      if (!confirm(`למחוק את ${b.dataset.wlmail} מהרשימה?`)) return;
       b.disabled = true; b.textContent = "מוחק…";
       try { await call("adminDeleteWaitlistEntry", { id: b.dataset.wldel }); waitlist(); }
       catch (e) { b.disabled = false; b.textContent = "מחקו"; alert(e.message); }
@@ -965,8 +981,8 @@ async function waitlist() {
       try { await navigator.clipboard.writeText(mails.join(", ")); $("wlCopy").textContent = "הועתק ✓"; }
       catch (e) { $("wlCopy").textContent = "ההעתקה נחסמה"; }
     };
-    const csv = "email,name,childAge,source,date\n" + rows.map((i) =>
-      [i.email, i.name, i.childAge, i.source, i.at ? new Date(i.at).toISOString() : ""]
+    const csv = "email,name,childAge,device,source,date\n" + rows.map((i) =>
+      [i.email, i.name, i.childAge, i.device, i.source, i.at ? new Date(i.at).toISOString() : ""]
         .map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(",")).join("\n");
     $("wlCsv").href = "data:text/csv;charset=utf-8," + encodeURIComponent("\ufeff" + csv);
   } catch (e) { $("supTbl").textContent = e.message; }

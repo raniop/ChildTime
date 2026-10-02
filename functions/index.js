@@ -3620,7 +3620,9 @@ exports.adminListWaitlist = onCall({ timeoutSeconds: 60, memory: "256MiB" }, asy
       email: String(x.email || ""),
       name: String(x.name || ""),
       childAge: String(x.childAge || ""),
+      device: String(x.device || ""),
       source: String(x.source || ""),
+      launchEmailed: !!x.launchEmailSentAt,
       at: at(x.createdAt),
     };
   }).sort((a, b) => b.at - a.at);
