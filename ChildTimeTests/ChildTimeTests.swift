@@ -890,6 +890,81 @@ struct WalletCounterTests {
         #expect(m.earnedSecondsOut == 250)
     }
 
+    // ── ⏱ THE DAILY ALLOWANCE THAT DOES NOT COME BACK ───────────────────────
+    // Yoav: a 90-minute daily cap, 22 minutes actually played, and the app telling
+    // him he has hit today's maximum while 79 minutes sit unusable in his wallet.
+    // `minutesUnlockedToday` must be able to go DOWN — stopping early returns the
+    // unused minutes to the wallet AND to today's allowance (ProgressStore:2180
+    // says so in as many words). The question these ask is whether the sync lets it.
+
+    @Test("stopping early returns the minutes to today's allowance, and sync keeps them")
+    func refundedMinutesStayRefunded() {
+        let today = Date()
+        var opened = ProgressSnapshot()          // what the cloud saw when he opened 90
+        opened.dailyEarnedDate = today
+        opened.minutesUnlockedToday = 90
+        opened.revision = 5
+
+        var afterStop = ProgressSnapshot()       // the device after he stopped at 22
+        afterStop.dailyEarnedDate = today
+        afterStop.minutesUnlockedToday = 90      // he did open 90 — that never un-happens
+        afterStop.returnedTodayMinutes = 68      // …and handed 68 straight back
+        afterStop.revision = 6                   // newer: the refund happened after
+
+        let merged = ProgressSnapshot.ratchetMerged(local: afterStop, remote: opened)
+        #expect(merged.netUnlockedToday == 22,
+                "the 68 unused minutes must not keep counting against today's cap")
+    }
+
+    @Test("two devices opening time today still cannot buy two daily caps")
+    func twoDevicesShareOneDailyCap() {
+        let today = Date()
+        var iPad = ProgressSnapshot()
+        iPad.dailyEarnedDate = today; iPad.minutesUnlockedToday = 30; iPad.revision = 4
+        var iPhone = ProgressSnapshot()
+        iPhone.dailyEarnedDate = today; iPhone.minutesUnlockedToday = 50; iPhone.revision = 5
+
+        let merged = ProgressSnapshot.ratchetMerged(local: iPhone, remote: iPad)
+        #expect(merged.netUnlockedToday >= 50,
+                "what both devices opened today still has to count")
+    }
+
+    @Test("a refund on one device is not undone by the other device's older copy")
+    func refundSurvivesAStaleSibling() {
+        let today = Date()
+        var stale = ProgressSnapshot()           // the iPad never saw the stop
+        stale.dailyEarnedDate = today
+        stale.minutesUnlockedToday = 60
+        stale.revision = 9
+        var fresh = ProgressSnapshot()           // the iPhone stopped and returned 45
+        fresh.dailyEarnedDate = today
+        fresh.minutesUnlockedToday = 60
+        fresh.returnedTodayMinutes = 45
+        fresh.revision = 10
+
+        #expect(ProgressSnapshot.ratchetMerged(local: fresh, remote: stale).netUnlockedToday == 15)
+        #expect(ProgressSnapshot.ratchetMerged(local: stale, remote: fresh).netUnlockedToday == 15,
+                "and it must hold whichever side is merging")
+    }
+
+    @Test("a new day wipes both counters together, refund included")
+    func newDayClearsTheRefundToo() {
+        let cal = Calendar.current
+        var yesterday = ProgressSnapshot()
+        yesterday.dailyEarnedDate = cal.date(byAdding: .day, value: -1, to: Date())
+        yesterday.minutesUnlockedToday = 90
+        yesterday.returnedTodayMinutes = 68
+        yesterday.revision = 3
+        var today = ProgressSnapshot()
+        today.dailyEarnedDate = Date()
+        today.minutesUnlockedToday = 0
+        today.revision = 4
+
+        let merged = ProgressSnapshot.ratchetMerged(local: today, remote: yesterday)
+        #expect(merged.netUnlockedToday == 0)
+        #expect(merged.returnedTodayMinutes == 0, "yesterday's refund must not leak into today")
+    }
+
     @Test("a counter a build has never written cannot erase one that has")
     func nilNeverErases() {
         var written = ProgressSnapshot()

@@ -36,7 +36,14 @@ struct ProgressSnapshot: Codable, Equatable {
     /// 60 on the iPad, then 60 more on the iPhone) and reset it on any reinstall.
     /// Now synced and merged as a max within the same `dailyEarnedDate` day.
     var minutesUnlockedToday: Int = 0
+    /// Minutes handed back to today's allowance by stopping early. Climbs only,
+    /// exactly like the field above, so `max` is safe on both and a refund is no
+    /// longer erased by the next sync. See ProgressStore.returnedTodayMinutes.
+    var returnedTodayMinutes: Int = 0
     var dailyEarnedDate: Date? = nil
+
+    /// What today's cap has actually been charged: opened minus handed back.
+    var netUnlockedToday: Int { max(0, minutesUnlockedToday - returnedTodayMinutes) }
     /// Questions answered / correct TODAY — synced so the parent's dashboard
     /// shows today's activity even though the full learning history is local.
     var answeredToday: Int = 0
@@ -201,6 +208,7 @@ extension ProgressSnapshot {
         case currentStreak, dayStreak, lastSessionDate, lastDailyChestDate, lastDailyChallengeDate
         case unlockedWorlds, worldProgress, topicAccuracy, topicAnswered, topicCorrect
         case batchCounter, wrongStreak, totalScore, minutesEarnedToday, minutesUnlockedToday, dailyEarnedDate
+        case returnedTodayMinutes
         case answeredToday, correctToday, carryOverMinutes, bestStreak, cycleSeconds
         case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
         case hourlyAnswered, hourlyCorrect
@@ -245,6 +253,7 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .totalScore)) ?? nil { totalScore = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .minutesEarnedToday)) ?? nil { minutesEarnedToday = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .minutesUnlockedToday)) ?? nil { minutesUnlockedToday = v }
+        if let v = (try? c.decodeIfPresent(Int.self, forKey: .returnedTodayMinutes)) ?? nil { returnedTodayMinutes = v }
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .dailyEarnedDate)) ?? nil { dailyEarnedDate = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .answeredToday)) ?? nil { answeredToday = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .correctToday)) ?? nil { correctToday = v }
@@ -377,6 +386,11 @@ extension ProgressSnapshot {
             // MAX, never the winner's value: the daily cap must count what BOTH
             // devices already opened today, or two devices are worth two caps.
             m.minutesUnlockedToday = max(local.minutesUnlockedToday, remote.minutesUnlockedToday)
+            // Max on this one too — and THAT is what makes the refund survive. A
+            // device that handed minutes back raises `returned`; the cloud's
+            // untouched copy is lower, so the max keeps the refund instead of the
+            // old code's max on a counter that had to come DOWN.
+            m.returnedTodayMinutes = max(local.returnedTodayMinutes, remote.returnedTodayMinutes)
             // Today's question counters are same-day counters exactly like
             // `minutesEarnedToday`, and they were the ONLY per-day fields left to
             // LWW. The cloud's generation runs one ahead of the child's after
@@ -390,12 +404,14 @@ extension ProgressSnapshot {
             m.dailyEarnedDate = remoteDay
             m.minutesEarnedToday = remote.minutesEarnedToday
             m.minutesUnlockedToday = remote.minutesUnlockedToday
+            m.returnedTodayMinutes = remote.returnedTodayMinutes
             m.answeredToday = remote.answeredToday
             m.correctToday  = remote.correctToday
         } else {
             m.dailyEarnedDate = localDay
             m.minutesEarnedToday = local.minutesEarnedToday
             m.minutesUnlockedToday = local.minutesUnlockedToday
+            m.returnedTodayMinutes = local.returnedTodayMinutes
             m.answeredToday = local.answeredToday
             m.correctToday  = local.correctToday
         }

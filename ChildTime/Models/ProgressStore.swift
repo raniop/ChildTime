@@ -48,6 +48,7 @@ final class ProgressStore: ObservableObject {
         static let totalScore = "totalScore"
         static let minutesEarnedToday = "minutesEarnedToday"
         static let minutesUnlockedToday = "minutesUnlockedToday"
+        static let returnedTodayMinutes = "returnedTodayMinutes"
         static let dailyEarnedDate = "dailyEarnedDate"
         static let carryOverMinutes = "carryOverMinutes"
         static let resetEpoch = "resetEpoch"
@@ -478,6 +479,25 @@ final class ProgressStore: ObservableObject {
     /// resets on the same daily boundary as `minutesEarnedToday`. Caps a single
     /// redemption so an accumulated wallet can't be cashed in past the daily
     /// screen-time allowance — the overflow waits in `pendingMinutes` for later.
+    /// ⏱ Minutes handed BACK to today's allowance — a child who opened 90 and
+    /// stopped at 22 gets the other 68 back, in the wallet AND in the cap.
+    ///
+    /// Why a second counter instead of just lowering `minutesUnlockedToday`:
+    /// that field is merged with `max` across devices on purpose, so two devices
+    /// opening time today cannot buy two daily caps (ProgressSnapshot's merge
+    /// says so). `max` can only ever RAISE, so every refund was erased by the
+    /// next sync — the cloud still held the opened total, and the upload itself
+    /// goes through the same merge, so the lowered value could never get there.
+    /// Yoav lost 68 of his 90 minutes that way and was told he had hit his daily
+    /// maximum while 79 unusable minutes sat in his wallet.
+    ///
+    /// Both counters only climb, so `max` stays correct on each, two devices
+    /// still share one cap, and the refund survives. Same shape as the wallet's
+    /// own `…SecondsIn` / `…SecondsOut` pair — see [[cross-device-progress-sync]].
+    @Published private(set) var returnedTodayMinutes: Int {
+        didSet { defaults.set(returnedTodayMinutes, forKey: Key.returnedTodayMinutes) }
+    }
+
     @Published private(set) var minutesUnlockedToday: Int {
         didSet { defaults.set(minutesUnlockedToday, forKey: Key.minutesUnlockedToday) }
     }
@@ -659,6 +679,7 @@ final class ProgressStore: ObservableObject {
         self.totalScore = d.integer(forKey: Key.totalScore)
         self.minutesEarnedToday = d.integer(forKey: Key.minutesEarnedToday)
         self.minutesUnlockedToday = d.integer(forKey: Key.minutesUnlockedToday)
+        self.returnedTodayMinutes = d.integer(forKey: Key.returnedTodayMinutes)
         self.carryOverMinutes = d.integer(forKey: Key.carryOverMinutes)
         self.answeredToday = d.integer(forKey: Key.answeredToday)
         self.correctToday = d.integer(forKey: Key.correctToday)
@@ -1142,6 +1163,7 @@ final class ProgressStore: ObservableObject {
         // Reset the daily counters together.
         minutesEarnedToday = 0
         minutesUnlockedToday = 0
+        returnedTodayMinutes = 0
         answeredToday = 0
         correctToday = 0
         dailyEarnedDate = today
@@ -1623,7 +1645,9 @@ final class ProgressStore: ObservableObject {
     /// the real reset still happens in `minutesEarnedTodayRespectingDate()`.
     private var minutesUnlockedTodayResolved: Int {
         guard DayGate.usedToday(dailyEarnedDate) else { return 0 }
-        return minutesUnlockedToday
+        // Opened minus handed back: the minutes a child returned by stopping early
+        // are not spent, so they must not keep counting against today's cap.
+        return max(0, minutesUnlockedToday - returnedTodayMinutes)
     }
 
     /// Smallest grant the kid may open — ALWAYS 15 min, in every blocking mode.
@@ -2050,7 +2074,7 @@ final class ProgressStore: ObservableObject {
             creditGift(seconds: r.minutesIn * 60)
         } else {
             creditEarned(seconds: r.minutesIn * 60)
-            minutesUnlockedToday = max(0, minutesUnlockedToday - r.minutesIn)
+            returnedTodayMinutes += r.minutesIn
         }
     }
 
@@ -2178,7 +2202,7 @@ final class ProgressStore: ObservableObject {
             creditEarned(seconds: remainingMinutes * 60)
             // These minutes were returned unused — they don't count against today's
             // unlocked allowance, so the kid can re-open them later today.
-            minutesUnlockedToday = max(0, minutesUnlockedToday - remainingMinutes)
+            returnedTodayMinutes += remainingMinutes
         }
         unlockEndsAt = nil
         PlayTimeLiveActivity.end()
@@ -2257,6 +2281,7 @@ final class ProgressStore: ObservableObject {
         s.varietyBonusDate    = defaults.object(forKey: varietyBonusDateKey) as? Date
         s.minutesEarnedToday  = minutesEarnedToday
         s.minutesUnlockedToday = minutesUnlockedToday
+        s.returnedTodayMinutes = returnedTodayMinutes
         s.dailyEarnedDate     = dailyEarnedDate
         s.answeredToday       = answeredToday
         s.correctToday        = correctToday
@@ -2342,6 +2367,7 @@ final class ProgressStore: ObservableObject {
         }
         minutesEarnedToday  = s.minutesEarnedToday
         minutesUnlockedToday = s.minutesUnlockedToday
+        returnedTodayMinutes = s.returnedTodayMinutes
         dailyEarnedDate     = s.dailyEarnedDate
         answeredToday       = s.answeredToday
         correctToday        = s.correctToday

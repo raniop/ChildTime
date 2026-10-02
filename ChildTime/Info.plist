@@ -4,18 +4,6 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<!-- The App Store's "Languages" list is read from the BINARY, and with this
-	     key absent Apple infers it from whatever .lproj folders it finds — which
-	     on the 1.0 listing came out as English alone, with no "+3 More", for an
-	     app that is Hebrew first. Declared explicitly, Hebrew leads and all four
-	     are listed. Any new language must be added here as well. -->
-	<key>CFBundleLocalizations</key>
-	<array>
-		<string>he</string>
-		<string>en</string>
-		<string>ru</string>
-		<string>ar</string>
-	</array>
 	<key>CFBundleDisplayName</key>
 	<string>טופי</string>
 	<key>CFBundleExecutable</key>
@@ -24,6 +12,13 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>he</string>
+		<string>en</string>
+		<string>ru</string>
+		<string>ar</string>
+	</array>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
