@@ -148,7 +148,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261003104307";
+const PAGE_STAMP = "20261003111243";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -257,6 +257,14 @@ async function refreshIfStale(p) {
   await PAGES[p]();
   window.scrollTo(0, y);
 }
+// Live: every minute while the page is visible, fetch fresh data and redraw —
+// but never under the founder's hands (an open ⋯ menu, typing in a field).
+setInterval(() => {
+  if (document.visibilityState !== "visible" || !J) return;
+  if (document.querySelector(".rowmenu.open")) return;
+  const a = document.activeElement; if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return;
+  refreshIfStale((location.hash || "#dashboard").slice(1) || "dashboard");
+}, 60000);
 // Coming back to the browser tab after a while counts as a visit too.
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && J) refreshIfStale((location.hash || "#dashboard").slice(1) || "dashboard");
@@ -313,7 +321,9 @@ async function families() {
   const QUIET_AFTER_DAYS = 7;
   const isInactive = (f) => {
     if ((f.j.state || "free_new") === "inactive") return true;
-    if (famWhen(f).days !== 99999) return false;            // they have played
+    const w = famWhen(f).days;
+    // Played, but not for more than a week → inactive until they play again (Rani).
+    if (w !== 99999) return w > QUIET_AFTER_DAYS;
     const born = f.createdAt || famStats(f).joined || 0;     // seconds
     if (!born) return true;
     return (Date.now() / 1000 - born) / 86400 > QUIET_AFTER_DAYS;
@@ -382,7 +392,10 @@ let redrawList = () => {};
 function patchFam(hh, fn) {
   const f = (FAM && FAM.families || []).find((x) => (x.fullId || x.householdID || x.id) === hh);
   if (f) fn(f, (J && J.households && J.households[hh]) || null);
-  redrawList();
+  // families() works on COPIES of these rows, so a plain redraw kept showing the
+  // old values — "סמן כדמו" didn't move the family until a reload (Rani). Rebuild.
+  const y = window.scrollY;
+  if ((location.hash || "").slice(1) === "families") { families(); window.scrollTo(0, y); } else redrawList();
 }
 /// How long since anyone in the family opened Tofy — the column the table sorts
 /// by, so "who went quiet" is one click away.
