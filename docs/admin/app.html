@@ -148,7 +148,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261002231220";
+const PAGE_STAMP = "20261003104307";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -200,12 +200,15 @@ let J = null, FAM = null, PACKSTATE = null;
 // opened until a full reload (Rani). Now a tab older than STALE_MS refetches.
 let J_AT = 0, FAM_AT = 0;
 const STALE_MS = 30000;
+const JOURNEY_MAX_AGE_MS = 10 * 60 * 1000;
 auth.onAuthStateChanged(authI, async (user) => {
   if (!user) { $("gate").hidden = false; $("app").hidden = true; return; }
   const email = (user.email || "").toLowerCase();
   if (!CONFIG.adminEmails.map((e) => e.toLowerCase()).includes(email)) { $("gateMsg").className = "msg err"; $("gateMsg").textContent = "החשבון " + email + " אינו מורשה."; await auth.signOut(authI); return; }
   $("gate").hidden = true; $("app").hidden = false; $("whoName").textContent = user.email;
   await loadJourney(false); route();
+  // Opened on an hour-old snapshot → recompute now in the background.
+  if (J && Date.now() - Number(J.computedAt || 0) > JOURNEY_MAX_AGE_MS) { J_AT = 0; refreshIfStale((location.hash || "#dashboard").slice(1) || "dashboard"); }
 });
 $("refreshBtn").onclick = async () => { $("stamp").innerHTML = '<span class="spin"></span>'; await loadJourney(true); route(); toast("עודכן"); };
 const ov = () => Object.assign({ activeFamilies30: 0, childrenToday: 0, questionsToday: 0, accuracyToday: 0, minutesToday: 0, mrr: 0, premiumFamilies: 0, yearlyShare: 0, activatedToPaid30: 0, openReports: 0, openFeedback: 0, packsOn: 0, packsReady: Object.keys(PACKS).length, activeSeries: [], worldsToday: [] }, (J && J.overview) || {});
@@ -241,7 +244,9 @@ async function refreshIfStale(p) {
   refreshing = true;
   try {
     await Promise.all([
-      jStale ? loadJourney(false) : null,
+      // The journey is precomputed hourly; anything older than 10 minutes is
+      // recomputed on the spot, so a child playing right now shows up (Rani).
+      jStale ? loadJourney(Date.now() - Number(J.computedAt || 0) > JOURNEY_MAX_AGE_MS) : null,
       famStale ? call("adminFamiliesOverview").then((r) => { FAM = r; FAM_AT = Date.now(); }).catch(() => {}) : null,
     ]);
   } finally { refreshing = false; }

@@ -1367,6 +1367,22 @@ final class ProgressStore: ObservableObject {
         return max(1, Int((Double(minutesPerCorrect) / 2.0).rounded()))
     }
 
+    /// 🐉 A boss-battle answer COUNTS as a question — answered/correct totals,
+    /// today's count and the hourly stat — but pays nothing per answer: the boss
+    /// pays its own prize on a win. Before this, boss answers were invisible to
+    /// the parent's reports, the admin panel and the gift activation count
+    /// (Rani saw Noa playing with "0 questions today", 2026-10-03).
+    func recordBossAnswer(correct: Bool) {
+        totalAnswered += 1
+        _ = minutesEarnedTodayRespectingDate()   // roll over the day if needed
+        answeredToday += 1
+        if correct {
+            totalCorrect += 1
+            correctToday += 1
+        }
+        recordHourly(correct: correct)
+    }
+
     /// Records a wrong pick. Deducts half the per-correct reward and parks it in
     /// the recovery pot — a clean correct answer on the next question wins it
     /// back (Risk & Recovery loop). Returns the minutes deducted this tick.

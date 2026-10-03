@@ -1549,7 +1549,7 @@ struct ParentDashboardView: View {
                     // "0 דקות היום" and reasonably thought something was broken.
                     overviewStat(value: "\(s.minutesEarnedToday)",
                                  suffix: cap.enabled ? "/\(cap.minutes)" : nil,
-                                 label: tr("הֻרְווּ הַיּוֹם"),
+                                 label: tr("דַּקּוֹת הַיּוֹם"),
                                  progress: cap.enabled ? min(1, Double(s.minutesEarnedToday) / Double(max(cap.minutes, 1))) : nil)
                     overviewStat(value: "\(s.answeredToday)", suffix: nil, label: tr("שְׁאֵלוֹת הַיּוֹם"), progress: nil)
                     overviewStat(value: "\(s.correctToday)", suffix: nil, label: tr("נְכוֹנוֹת"), progress: nil)

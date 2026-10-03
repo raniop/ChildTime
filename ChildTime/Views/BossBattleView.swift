@@ -28,6 +28,7 @@ struct BossBattleView: View {
     @State private var confetti = 0
     @State private var earnedMinutes = 0
     @State private var revealStep = 0
+    @State private var shownAt = Date()
 
     var body: some View {
         ZStack {
@@ -236,6 +237,7 @@ struct BossBattleView: View {
         }
         picked = nil
         locked = false
+        shownAt = Date()
     }
 
     private func pick(_ idx: Int) {
@@ -243,6 +245,15 @@ struct BossBattleView: View {
         locked = true
         picked = idx
         let correct = idx == q.correctIndex
+        // Every boss answer is a real question: it counts in the parent's
+        // reports, today's total and the admin panel — without paying minutes
+        // per answer (the win pays the boss prize).
+        progress.recordBossAnswer(correct: correct)
+        LearningHistoryStore.shared.recordAnswer(
+            topic: q.topic, correct: correct,
+            responseMs: Date().timeIntervalSince(shownAt) * 1000,
+            earnedMinutes: 0, streak: progress.currentStreak
+        )
         if correct {
             SoundPlayer.shared.play(.correctBig)
             Haptic.success()
