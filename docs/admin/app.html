@@ -148,7 +148,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261003111243";
+const PAGE_STAMP = "20261003113608";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -200,7 +200,7 @@ let J = null, FAM = null, PACKSTATE = null;
 // opened until a full reload (Rani). Now a tab older than STALE_MS refetches.
 let J_AT = 0, FAM_AT = 0;
 const STALE_MS = 30000;
-const JOURNEY_MAX_AGE_MS = 10 * 60 * 1000;
+const JOURNEY_MAX_AGE_MS = 60 * 1000;   // the founder expects "every minute" (Rani)
 auth.onAuthStateChanged(authI, async (user) => {
   if (!user) { $("gate").hidden = false; $("app").hidden = true; return; }
   const email = (user.email || "").toLowerCase();
@@ -244,7 +244,7 @@ async function refreshIfStale(p) {
   refreshing = true;
   try {
     await Promise.all([
-      // The journey is precomputed hourly; anything older than 10 minutes is
+      // The journey is precomputed hourly; anything older than a minute is
       // recomputed on the spot, so a child playing right now shows up (Rani).
       jStale ? loadJourney(Date.now() - Number(J.computedAt || 0) > JOURNEY_MAX_AGE_MS) : null,
       famStale ? call("adminFamiliesOverview").then((r) => { FAM = r; FAM_AT = Date.now(); }).catch(() => {}) : null,
