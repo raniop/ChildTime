@@ -6,11 +6,14 @@ import SwiftUI
 /// the world it came from: country ↔ capital (🌍), word ↔ English (🇬🇧),
 /// exercise ↔ result (🧮), or short question ↔ answer from the world's bank.
 ///
-/// Pays ⭐/💎 only — never screen-time minutes.
+/// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser each pair
+/// matched first time earns screen time like a regular answer.
 struct PairsGameView: View {
     var topic: Topic? = nil
     /// ⚡ Launched by the runner's surprise round: no intro, one board, ×2.
     var surprise: Bool = false
+    /// From a world's chooser: each pair matched first time earns like a question.
+    var earn: MiniGameEarnSession? = nil
     var onClose: () -> Void
 
     @ObservedObject private var profiles = ProfileStore.shared
@@ -48,7 +51,7 @@ struct PairsGameView: View {
             MiniGameBackdrop()
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-                MiniGameTopBar(onClose: onClose) {
+                MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
                     MiniGameChipLabel(text: "🔗 \(matched.count)/\(Self.pairCount)", surprise: surprise)
                 }
                 if !started {
@@ -92,9 +95,45 @@ struct PairsGameView: View {
 
     // MARK: - Board
 
+    /// An iPad: the title card and the board sit together in the middle of the
+    /// glass, tiles a size up — top-aligned they left the bottom half empty
+    /// (Rani). Whatever doesn't fit (an iPad in landscape) scrolls instead.
+    @ViewBuilder
     private var board: some View {
-        VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-            // The runner's question card, as the board's title.
+        if roomy {
+            ViewThatFits(in: .vertical) {
+                VStack(spacing: AppSpacing.md) {
+                    Spacer(minLength: 0)
+                    boardTitle
+                    columns
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: 760)
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.bottom, AppSpacing.sm)
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: AppSpacing.md) {
+                        boardTitle
+                        columns
+                    }
+                }
+                .frame(maxWidth: 760)
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.bottom, AppSpacing.sm)
+            }
+        } else {
+            VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
+                boardTitle
+                ScrollView(showsIndicators: false) { columns }
+            }
+            .frame(maxWidth: 680)
+            .padding(.horizontal, AppSpacing.md)
+            .padding(.bottom, AppSpacing.sm)
+        }
+    }
+
+    /// The runner's question card, as the board's title.
+    private var boardTitle: some View {
             VStack(spacing: 8) {
                 Text(tr("חַבְּרוּ אֶת הַזּוּגוֹת 🔗"))
                     .font(.system(size: isCompact ? 26 : 32, weight: .heavy, design: .rounded))
@@ -117,20 +156,19 @@ struct PairsGameView: View {
             .padding(.horizontal, 14).padding(.vertical, 12)
             .glassPane(radius: 22)
             .padding(.horizontal, AppSpacing.sm)
+    }
 
-            ScrollView(showsIndicators: false) {
-                HStack(alignment: .top, spacing: AppSpacing.md) {
-                    column(lefts, side: .left)
-                    column(rights, side: .right)
-                }
-                .padding(.horizontal, AppSpacing.sm)
-                .padding(.vertical, 6)
-                .environment(\.layoutDirection, .app)
-            }
+    /// A regular-width screen with height to spare.
+    private var roomy: Bool { !isCompact && !display.isShort }
+
+    private var columns: some View {
+        HStack(alignment: .top, spacing: AppSpacing.md) {
+            column(lefts, side: .left)
+            column(rights, side: .right)
         }
-        .frame(maxWidth: 680)
-        .padding(.horizontal, AppSpacing.md)
-        .padding(.bottom, AppSpacing.sm)
+        .padding(.horizontal, AppSpacing.sm)
+        .padding(.vertical, 6)
+        .environment(\.layoutDirection, .app)
     }
 
     private func column(_ cards: [Card], side: Side) -> some View {
@@ -141,12 +179,13 @@ struct PairsGameView: View {
                 let isWrong = (side == .left ? wrongLeft : wrongRight) == card.pair
                 let state: MiniGameTileState = isMatched ? .correct : (isWrong ? .wrong : (isPicked ? .picked : .normal))
                 Button { tap(card, side: side) } label: {
-                    Text(card.text)
+                    Text(MiniGameText.show(card.text))
                         .font(.system(size: fontSize(card.text, side: side), weight: .bold, design: .rounded))
                         .multilineTextAlignment(.center)
                         .lineLimit(4).minimumScaleFactor(0.55)
                         .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity, minHeight: display.isShort ? 56 : (isCompact ? 68 : 86))
+                        .frame(maxWidth: .infinity, minHeight: display.isShort ? 56 : (isCompact ? 68 : 104))
+                        .mathLTR(MiniGameText.isMath(card.text))
                         .padding(.horizontal, 10).padding(.vertical, 8)
                         .miniGameTile(state, tint: OptionCard.tints[(i + (side == .left ? 0 : 2)) % OptionCard.tints.count],
                                       radius: 20)
@@ -163,7 +202,7 @@ struct PairsGameView: View {
 
     private func fontSize(_ text: String, side: Side) -> CGFloat {
         let longest = text.split(whereSeparator: { $0 == " " || $0 == "\n" }).map(\.count).max() ?? text.count
-        let base: CGFloat = isCompact ? 20 : 26
+        let base: CGFloat = isCompact ? 20 : 28
         if longest >= 11 || text.count > 30 { return base - 4 }
         return base
     }
@@ -172,7 +211,9 @@ struct PairsGameView: View {
 
     private func deal() {
         let picked = MatchPairsSource.pick(for: topic, grade: grade)
-        let built = picked.pairs(count: Self.pairCount, grade: grade, profile: profiles.active)
+        // Math follows the child's adaptive level in math.
+        let g = picked == .math ? MiniGameLevel.grade(for: .math) : grade
+        let built = picked.pairs(count: Self.pairCount, grade: g, profile: profiles.active)
         source = built.source
         let pairs = built.pairs
         lefts = pairs.enumerated().map { Card(pair: $0.offset, text: $0.element.left) }.shuffled()
@@ -196,11 +237,12 @@ struct PairsGameView: View {
         if l == r {
             // One answer per pair in the parent's reports: right the first time,
             // or a miss if it took more than one try. No minutes.
-            let firstTry = !missed.contains(l)
-            ProgressStore.shared.recordGameAnswer(correct: firstTry)
-            LearningHistoryStore.shared.recordAnswer(topic: source.topic, correct: firstTry,
-                                                     responseMs: Date().timeIntervalSince(boardShownAt) * 1000 / Double(Self.pairCount),
-                                                     earnedMinutes: 0, streak: 0)
+            // A pair that took a miss was already recorded as one (below).
+            if !missed.contains(l) {
+                MiniGameLedger.record(correct: true, topic: source.topic,
+                                      responseMs: Date().timeIntervalSince(boardShownAt) * 1000 / Double(Self.pairCount),
+                                      earn: earn, surprise: surprise)
+            }
             SoundPlayer.shared.play(.correctSmall)
             Haptic.success()
             burst += 1
@@ -208,7 +250,9 @@ struct PairsGameView: View {
             pickedLeft = nil; pickedRight = nil
             if matched.count == lefts.count { finish() }
         } else {
-            missed.insert(l)
+            if missed.insert(l).inserted {
+                MiniGameLedger.record(correct: false, topic: source.topic, earn: earn, surprise: surprise)
+            }
             SoundPlayer.shared.play(.wrongSoft)
             Haptic.light()
             wrongLeft = l; wrongRight = r

@@ -7,11 +7,17 @@ import Combine
 /// ones; a wrong one only wobbles (no text, no penalty beyond the streak), and
 /// a balloon that floats away just floats away. 30 seconds.
 ///
-/// Pays ⭐/💎 only — never screen-time minutes.
+/// A world without a category of its own plays it as questions: the prompt
+/// is one of the world's questions and the balloons carry its answers — pop
+/// the right one and the next question comes.
+///
+/// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser every
+/// right pop earns screen time like a regular answer.
 struct BalloonPopView: View {
     var topic: Topic? = nil
     /// ⚡ Launched by the runner's surprise round: no intro, one round, ×2.
     var surprise: Bool = false
+    var earn: MiniGameEarnSession? = nil
     var onClose: () -> Void
 
     @ObservedObject private var profiles = ProfileStore.shared
@@ -24,6 +30,8 @@ struct BalloonPopView: View {
         /// Horizontal lane, 0…1 of the field's width.
         let lane: CGFloat
         let spawnedAt: Date
+        /// Question mode: which question this balloon answers.
+        var round: Int = 0
         /// Seconds to cross the field — varied, so the sky never moves in step.
         let duration: Double
         let color: Color
@@ -54,6 +62,16 @@ struct BalloonPopView: View {
     @State private var burst = 0
     @State private var confetti = 0
     @State private var grant: MiniGameReward.Grant?
+    /// Question mode — the world's questions, the one on screen, and whether
+    /// it already took a miss (one answer per question in the reports).
+    @State private var questions: [GameItem] = []
+    @State private var qIndex = 0
+    @State private var qMissed = false
+    @State private var qQueue: [String] = []
+    @State private var sinceCorrect = 0
+    @State private var qShownAt = Date()
+    private var questionMode: Bool { !questions.isEmpty }
+    private var currentQuestion: GameItem? { questionMode ? questions[qIndex % questions.count] : nil }
 
     private let ticker = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
 
@@ -69,7 +87,7 @@ struct BalloonPopView: View {
             MiniGameBackdrop()
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-                MiniGameTopBar(onClose: onClose) {
+                MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
                     MiniGameChipLabel(text: "🎈 \(popped)", surprise: surprise)
                 }
                 switch phase {
@@ -118,13 +136,29 @@ struct BalloonPopView: View {
         VStack(spacing: AppSpacing.sm) {
             // The prompt, in the runner's question card.
             VStack(spacing: 10) {
-                Text(set?.prompt ?? "")
-                    .font(.system(size: isCompact ? 22 : 28, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                    .minimumScaleFactor(0.6)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity)
+                if let q = currentQuestion {
+                    Text(tr("פּוֹצְצוּ אֶת הַתְּשׁוּבָה הַנְּכוֹנָה!"))
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                    Text(MiniGameText.show(q.prompt))
+                        .font(.system(size: isCompact ? 22 : 28, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.6)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity)
+                        .mathLTR(MiniGameText.isMath(q.prompt))
+                        .id(qIndex)
+                        .transition(.scale(scale: 0.9).combined(with: .opacity))
+                } else {
+                    Text(set?.prompt ?? "")
+                        .font(.system(size: isCompact ? 22 : 28, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.6)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity)
+                }
                 timerBar
             }
             .padding(.horizontal, 14).padding(.vertical, 12)
@@ -146,7 +180,7 @@ struct BalloonPopView: View {
             }
             .clipped()
         }
-        .frame(maxWidth: 700)
+        .frame(maxWidth: isCompact ? 700 : 900)
     }
 
     private var timerBar: some View {
@@ -213,8 +247,16 @@ struct BalloonPopView: View {
     // MARK: - Logic
 
     private func start() {
+        // A world with a category of its own pops that; any other world pops
+        // the answers to its own questions.
+        if let topic, !BalloonSets.hasCategory(topic, grade: grade) {
+            questions = GameContent.items(topic: topic, grade: grade, maxPrompt: 70, maxAnswer: 16)
+        } else {
+            questions = []
+        }
+        qIndex = 0; qMissed = false; qQueue = []; sinceCorrect = 0; qShownAt = Date()
         let s = BalloonSets.make(for: topic, grade: grade)
-        set = s
+        set = questionMode ? BalloonSet(prompt: "", topic: topic ?? s.topic, targets: [], others: []) : s
         targetQueue = []; otherQueue = []
         balloons = []
         popped = 0; misses = 0; streak = 0; bestStreak = 0; grant = nil
@@ -223,6 +265,18 @@ struct BalloonPopView: View {
     }
 
     private func nextItem() -> BalloonItem? {
+        if let q = currentQuestion {
+            // Its answers in turn — the right one never more than 3 balloons apart.
+            if sinceCorrect >= 2 {
+                sinceCorrect = 0
+                return BalloonItem(emoji: "", label: q.answer, correct: true)
+            }
+            if qQueue.isEmpty { qQueue = q.shuffledOptions }
+            let label = qQueue.removeLast()
+            let right = label == q.answer
+            sinceCorrect = right ? 0 : sinceCorrect + 1
+            return BalloonItem(emoji: "", label: label, correct: right)
+        }
         guard let s = set else { return nil }
         let wantTarget = Double.random(in: 0...1) < 0.55
         if wantTarget {
@@ -251,7 +305,7 @@ struct BalloonPopView: View {
             if abs(lane - lastLane) < 0.25 { lane = lane > 0.5 ? lane - 0.35 : lane + 0.35 }
             lastLane = lane
             let slow = grade <= 1 ? 1.25 : 1.0
-            balloons.append(Balloon(item: item, lane: lane, spawnedAt: t,
+            balloons.append(Balloon(item: item, lane: lane, spawnedAt: t, round: qIndex,
                                     duration: Double.random(in: 4.6...7.0) * slow,
                                     color: Self.palette.randomElement()!,
                                     swayPhase: Double.random(in: 0...(2 * .pi))))
@@ -263,6 +317,7 @@ struct BalloonPopView: View {
         guard phase == .playing, let i = balloons.firstIndex(where: { $0.id == id }),
               balloons[i].poppedAt == nil, balloons[i].wobbledAt == nil, let s = set else { return }
         let b = balloons[i]
+        if questionMode, b.round != qIndex { return }   // an earlier question's balloon
         if b.item.correct {
             balloons[i].poppedAt = Date()
             popped += 1
@@ -279,10 +334,30 @@ struct BalloonPopView: View {
             SoundPlayer.shared.play(.wrongSoft)
             Haptic.light()
         }
-        // Every tap is an answer in the parent's reports (no minutes).
-        ProgressStore.shared.recordGameAnswer(correct: b.item.correct)
-        LearningHistoryStore.shared.recordAnswer(topic: s.topic, correct: b.item.correct, responseMs: 0,
-                                                 earnedMinutes: 0, streak: streak)
+        if let q = currentQuestion {
+            // One answer per question: a miss once, or right first time.
+            if !b.item.correct {
+                if !qMissed {
+                    qMissed = true
+                    MiniGameLedger.record(correct: false, topic: q.topic, earn: earn, surprise: surprise)
+                }
+                return
+            }
+            if !qMissed {
+                MiniGameLedger.record(correct: true, topic: q.topic,
+                                      responseMs: Date().timeIntervalSince(qShownAt) * 1000,
+                                      streak: streak, earn: earn, surprise: surprise)
+            }
+            // The next question: this one's other balloons drift off.
+            let old = qIndex
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { qIndex += 1 }
+            qMissed = false; qQueue = []; sinceCorrect = 0; qShownAt = Date()
+            balloons.removeAll { $0.round == old && $0.poppedAt == nil }
+            nextSpawnAt = Date().addingTimeInterval(0.3)
+            return
+        }
+        // Every tap is an answer in the parent's reports.
+        MiniGameLedger.record(correct: b.item.correct, topic: s.topic, streak: streak, earn: earn, surprise: surprise)
     }
 
     private func finish() {
@@ -323,14 +398,15 @@ private struct BalloonShape: View {
                     if !item.emoji.isEmpty {
                         Text(item.emoji).font(.system(size: body.width * 0.3))
                     }
-                    Text(item.label)
-                        .font(.system(size: item.emoji.isEmpty ? body.width * 0.26 : body.width * 0.15,
+                    Text(MiniGameText.show(item.label))
+                        .font(.system(size: item.emoji.isEmpty ? body.width * (item.label.count > 6 ? 0.2 : 0.26) : body.width * 0.15,
                                       weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
                         .lineLimit(2).minimumScaleFactor(0.45)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 8)
+                        .mathLTR(MiniGameText.isMath(item.label))
                 }
             }
             .frame(width: body.width, height: body.height)

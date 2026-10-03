@@ -12,8 +12,9 @@ import SwiftUI
 //                         themed words hidden in the "תַּפְזֹרֶת".
 //   ⚡ SurpriseRound    — which game, on which theme, the runner launches.
 //
-// Nothing here grants screen-time minutes: the parent's daily cap has to keep
-// meaning what it says, so every extra here pays ⭐ and 💎 only.
+// A ⚡ surprise round pays ⭐ and 💎 only. A game opened from a world's chooser
+// earns minutes through the runner's own path (MiniGameEarnSession), so the
+// parent's rates and daily cap keep meaning what they say.
 
 // MARK: - 🧮 Computed math facts
 
@@ -82,7 +83,7 @@ enum MathFacts {
     }
 
     /// "−4" with a real minus sign.
-    static func show(_ n: Int) -> String { n < 0 ? "−\(abs(n))" : "\(n)" }
+    nonisolated static func show(_ n: Int) -> String { n < 0 ? "−\(abs(n))" : "\(n)" }
 }
 
 /// A bank question that works as one short card on its own: no passage, no
@@ -273,21 +274,12 @@ enum MatchPairsSource: Equatable {
         }
     }
 
-    /// Short prompt ↔ answer pairs from the world's own bank (🦖 🚀 🔬 …).
+    /// Short prompt ↔ answer pairs from the world's own bank (🦖 🚀 🔬 …) —
+    /// only questions that stand without their options, five different answers.
     static func bankPairs(topic: Topic, count: Int, grade: Int, profile: Profile?) -> [MatchPair] {
-        var out: [MatchPair] = []
-        var seenLeft = Set<String>(), seenRight = Set<String>()
-        let base = profile?.difficulty(for: topic) ?? .easy
-        var tries = 0
-        while out.count < count && tries < 60 {
-            tries += 1
-            let q = QuestionGenerator.generate(topic: topic, difficulty: base, grade: grade)
-            guard ShortQuestions.isShortAndSelfContained(q, maxPrompt: 60, maxAnswer: 24),
-                  !seenLeft.contains(q.prompt), !seenRight.contains(q.correctAnswer) else { continue }
-            seenLeft.insert(q.prompt); seenRight.insert(q.correctAnswer)
-            out.append(MatchPair(left: q.prompt, right: q.correctAnswer))
-        }
-        return out
+        let items = GameContent.distinctAnswers(
+            GameContent.items(topic: topic, grade: grade, maxPrompt: 60, maxAnswer: 24, standalone: true))
+        return items.prefix(count).map { MatchPair(left: $0.prompt, right: $0.answer) }
     }
 }
 
@@ -353,6 +345,16 @@ struct BalloonSet {
 enum BalloonSets {
     /// The set for a world (or a surprise round's theme). Every interest world
     /// has its own; the rest get numbers sized to the child's grade.
+    /// Does this world have balloons of its own? (Any other world pops the
+    /// answers to its own questions.)
+    static func hasCategory(_ topic: Topic, grade: Int) -> Bool {
+        switch topic {
+        case .sea, .animals, .space, .dinosaurs, .soccer, .english, .science, .math: return true
+        case .flags, .geography: return grade >= 2
+        default: return false
+        }
+    }
+
     static func make(for topic: Topic?, grade: Int) -> BalloonSet {
         switch topic {
         case .sea?, .animals?:      return seaAnimals()
@@ -548,10 +550,25 @@ struct SpellWord: Hashable {
 
 enum SpellScript {
     case hebrew, english
-    /// Hebrew fills its slots right-to-left, English left-to-right — whatever
-    /// the app's own language is.
-    var direction: LayoutDirection { self == .hebrew ? .rightToLeft : .leftToRight }
+    /// A world's own answers in the child's language (🇷🇺 / 🇸🇦 banks).
+    case cyrillic, arabic
+    /// Hebrew and Arabic fill their slots right-to-left, English and Russian
+    /// left-to-right — whatever the app's own language is.
+    var direction: LayoutDirection { self == .hebrew || self == .arabic ? .rightToLeft : .leftToRight }
     var topic: Topic { self == .hebrew ? .hebrew : .english }
+    /// Latin and Cyrillic are shown in capitals.
+    var uppercased: Bool { self == .english || self == .cyrillic }
+    /// The letters an extra tile / the word search's filler come from.
+    var alphabet: [Character] {
+        switch self {
+        case .english:  return Array("ABCDEFGHIKLMNOPRSTUWY")
+        case .hebrew:   return Array("אבגדהוזחטיכלמנסעפצקרשת")
+        case .cyrillic: return Array("АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЫЭЮЯ")
+        case .arabic:   return Array("ابتثجحخدذرزسشصضطظعغفقكلمنهوي")
+        }
+    }
+    /// A word as its tiles show it.
+    func display(_ word: String) -> String { uppercased ? word.uppercased() : word }
 }
 
 /// Short concrete nouns with an unambiguous picture — the picture is the only
@@ -578,6 +595,15 @@ enum WordSets {
     /// An English or Hebrew speaker always (their own letters); a Russian or
     /// Arabic speaker from ג׳, when English starts at school — never a script
     /// the child hasn't met yet.
+    /// A world with its own picture list (the rest spell their own answers).
+    static func hasThemedList(_ topic: Topic?, grade: Int) -> Bool {
+        switch topic {
+        case .english?, .hebrew?: return true
+        case .soccer?, .sea?, .space?, .animals?, .dinosaurs?, .flags?: return spellingAvailable(grade: grade)
+        default: return false
+        }
+    }
+
     static func spellingAvailable(grade: Int) -> Bool {
         switch LanguageStore.shared.current {
         case .en, .he: return true
@@ -594,6 +620,9 @@ enum WordSets {
         switch script {
         case .english: return english(topic, grade: grade)
         case .hebrew:  return hebrew(topic)
+        // Picture lists exist in English and Hebrew only; the other scripts
+        // spell a world's own answers (GameContent.words).
+        case .cyrillic, .arabic: return english(topic, grade: grade)
         }
     }
 
@@ -663,17 +692,26 @@ enum WordSearch {
     /// filled with random letters. English is shown in capitals; Hebrew
     /// without niqqud, final letters as written.
     static func make(topic: Topic?, script: SpellScript, grade: Int, size: Int) -> WordSearchBoard {
-        var directions = [(0, 1), (1, 0)]
-        if grade >= 4 { directions.append((1, 1)) }
         let themed = WordSets.list(for: topic, script: script, grade: grade).shuffled()
         let general = WordSets.list(for: nil, script: script, grade: grade).shuffled()
         let candidates = (themed + general).filter { (2...size).contains($0.word.count) }
+        return place(candidates, script: script, grade: grade, size: size)
+    }
 
+    /// 🧺 The world's own short answers (capitals, animals, planets…) hidden in
+    /// the grid — for a world without a themed picture list.
+    static func make(words: [SpellWord], script: SpellScript, grade: Int, size: Int) -> WordSearchBoard {
+        place(words.filter { (2...size).contains($0.word.count) }.shuffled(), script: script, grade: grade, size: size)
+    }
+
+    private static func place(_ candidates: [SpellWord], script: SpellScript, grade: Int, size: Int) -> WordSearchBoard {
+        var directions = [(0, 1), (1, 0)]
+        if grade >= 4 { directions.append((1, 1)) }
         var grid = Array(repeating: Array(repeating: Character(" "), count: size), count: size)
         var placed: [HiddenWord] = []
         var used = Set<String>()
         for cand in candidates where placed.count < wordCount {
-            let word = script == .english ? cand.word.uppercased() : cand.word
+            let word = script.display(cand.word)
             guard used.insert(word).inserted else { continue }
             let letters = Array(word)
             var done = false
@@ -693,7 +731,7 @@ enum WordSearch {
                 done = true
             }
         }
-        let alphabet = Array(script == .english ? "ABCDEFGHIJKLMNOPRSTUWY" : "אבגדהוזחטיכלמנסעפצקרשת")
+        let alphabet = script == .english ? Array("ABCDEFGHIJKLMNOPRSTUWY") : script.alphabet
         for r in 0..<size {
             for c in 0..<size where grid[r][c] == " " {
                 grid[r][c] = alphabet.randomElement()!
@@ -892,18 +930,16 @@ enum LightningStatements {
                 .filter { $0 != .math && $0 != .reading && ContentAvailability.hasContent($0) }
         }
         guard !pool.isEmpty else { return nil }
-        for _ in 0..<30 {
+        // The same short items the chooser counted when it offered the game.
+        for _ in 0..<4 {
             guard let t = pool.randomElement() else { return nil }
-            let base = profile?.difficulty(for: t) ?? .easy
-            let q = QuestionGenerator.generate(topic: t, difficulty: base, grade: grade)
-            guard ShortQuestions.isShortAndSelfContained(q, maxPrompt: 70, maxAnswer: 28),
-                  !seen.contains(q.prompt) else { continue }
+            let items = GameContent.items(topic: t, grade: grade, maxPrompt: 70, maxAnswer: 28)
+            guard let q = items.first(where: { !seen.contains($0.prompt) }) else { continue }
             seen.insert(q.prompt)
-            let wrongs = q.options.filter { $0 != q.correctAnswer }
-            if Bool.random() || wrongs.isEmpty {
-                return LightningStatement(prompt: q.prompt, claim: q.correctAnswer, isTrue: true, topic: t)
+            if Bool.random() || q.distractors.isEmpty {
+                return LightningStatement(prompt: q.prompt, claim: q.answer, isTrue: true, topic: t)
             }
-            return LightningStatement(prompt: q.prompt, claim: wrongs.randomElement()!, isTrue: false, topic: t)
+            return LightningStatement(prompt: q.prompt, claim: q.distractors.randomElement()!, isTrue: false, topic: t)
         }
         return nil
     }
@@ -919,8 +955,9 @@ struct SurprisePlan: Identifiable {
 }
 
 /// ⚡ "סִבּוּב הַפְתָּעָה" — after every 12–15 regular questions (twice a
-/// session at most) the runner stops for one quick arcade game out of the six
-/// — 🔗 🎈 🧩 🧱 🔤 ⚡ — themed on ⚽ 🌍 🚀 🐾 🦖 🌊, paying ⭐ and 💎 twice over
+/// session at most) the runner stops for one quick arcade game — 🔗 🎈 🧩 🧱 🔤
+/// ⚡ 🧺 🧠, and 🔢 🔐 ⚖️ / 🛒 where numbers / money are on the menu — themed
+/// on ⚽ 🌍 🚀 🐾 🦖 🌊, paying ⭐ and 💎 twice over
 /// and never a minute.
 enum SurpriseRound {
     static let maxPerSession = 2
@@ -1011,6 +1048,17 @@ enum SurpriseRound {
         if (topic == .flags && grade >= 2) || short.count >= 12 { out.append(.pairs) }
         if short.count >= 12 { out.append(.lightning) }
         if context == nil || context == .math { out.append(.crush) }
+        // 🧺 every theme world has baskets of its own; 🧠 patterns are drawn in
+        // the theme's own pictures.
+        if SortSets.make(topic: topic, grade: grade) != nil { out.append(.sort) }
+        out.append(.pattern)
+        // 🔢 🔐 ⚖️ — numbers and logic: only where those are already on the menu.
+        if context == nil || [.math, .logic, .gifted].contains(context!) {
+            out += [.game2048, .balance]
+            if short.count >= 6 || context == .math { out.append(.vault) }
+        }
+        // 🛒 the shop belongs to the money world.
+        if context == .money { out.append(.grocery) }
         // In the English / Hebrew world, the spelling games come first.
         if context == .english || context == .hebrew {
             let spelling = out.filter { $0 == .word || $0 == .wordSearch }

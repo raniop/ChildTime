@@ -5,11 +5,16 @@ import SwiftUI
 /// fills right-to-left, English left-to-right); a wrong letter just bounces
 /// back. A finished word pops in mint and the next one comes. 5 words.
 ///
-/// Pays ⭐/💎 only — never screen-time minutes.
+/// A world without a picture list spells its own one-word answers, with the
+/// question as the clue (capitals, planets, animals — in the child's script).
+///
+/// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser every word
+/// built without a bounce earns screen time like a regular answer.
 struct BuildWordView: View {
     var topic: Topic? = nil
     /// ⚡ Launched by the runner's surprise round: no intro, one round, ×2.
     var surprise: Bool = false
+    var earn: MiniGameEarnSession? = nil
     var onClose: () -> Void
 
     @ObservedObject private var profiles = ProfileStore.shared
@@ -36,18 +41,21 @@ struct BuildWordView: View {
     @State private var confetti = 0
     @State private var shownAt = Date()
     @State private var grant: MiniGameReward.Grant?
+    /// The clue is the world's question, not a picture.
+    @State private var textClues = false
+    @State private var wordTopic: Topic = .english
 
     private var isCompact: Bool { hsc == .compact }
     private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
     private var current: SpellWord? { index < words.count ? words[index] : nil }
-    private var letters: [Character] { current.map { Array(script == .english ? $0.word.uppercased() : $0.word) } ?? [] }
+    private var letters: [Character] { current.map { Array(script.display($0.word)) } ?? [] }
 
     var body: some View {
         ZStack {
             MiniGameBackdrop()
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-                MiniGameTopBar(onClose: onClose) {
+                MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
                     MiniGameChipLabel(text: "🧩 \(min(index + 1, max(1, words.count)))/\(max(1, words.count))", surprise: surprise)
                 }
                 if !started {
@@ -87,10 +95,21 @@ struct BuildWordView: View {
                 Text(tr("בְּנוּ אֶת הַמִּלָּה"))
                     .font(.system(size: 12.5, weight: .heavy, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
-                Text(current?.emoji ?? "")
-                    .font(.system(size: display.isShort ? 72 : (isCompact ? 96 : 130)))
-                    .scaleEffect(pop ? 1.15 : 1)
-                    .shadow(color: .black.opacity(0.2), radius: 8, y: 5)
+                if textClues {
+                    Text(current?.emoji ?? "")
+                        .font(.system(size: isCompact ? 22 : 30, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.6)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .scaleEffect(pop ? 1.06 : 1)
+                        .padding(.vertical, 6)
+                } else {
+                    Text(current?.emoji ?? "")
+                        .font(.system(size: display.isShort ? 72 : (isCompact ? 96 : 130)))
+                        .scaleEffect(pop ? 1.15 : 1)
+                        .shadow(color: .black.opacity(0.2), radius: 8, y: 5)
+                }
                 slots
             }
             .frame(maxWidth: .infinity)
@@ -101,7 +120,7 @@ struct BuildWordView: View {
             tileGrid
             Spacer(minLength: 0)
         }
-        .frame(maxWidth: 600)
+        .frame(maxWidth: isCompact ? 600 : 720)
         .padding(.horizontal, AppSpacing.md)
         .padding(.bottom, AppSpacing.md)
         .id(index)
@@ -110,7 +129,7 @@ struct BuildWordView: View {
 
     private var slotSize: CGSize {
         let n = max(1, letters.count)
-        let w: CGFloat = isCompact ? min(52, 300 / CGFloat(n)) : 64
+        let w: CGFloat = isCompact ? min(52, 300 / CGFloat(n)) : min(76, 560 / CGFloat(n))
         return CGSize(width: w, height: w * 1.18)
     }
 
@@ -158,8 +177,20 @@ struct BuildWordView: View {
     // MARK: - Logic
 
     private func begin() {
-        script = WordSets.script(for: topic, grade: grade)
-        words = WordSets.words(for: topic, script: script, grade: grade)
+        // The world's own one-word answers where it has no picture list.
+        if let topic, !WordSets.hasThemedList(topic, grade: grade),
+           case let bank = GameContent.words(topic: topic, grade: grade), bank.count >= WordSets.wordCount,
+           let first = bank.first {
+            script = first.script
+            words = bank.prefix(WordSets.wordCount).map { SpellWord(emoji: $0.clue, word: $0.word) }
+            textClues = true
+            wordTopic = topic
+        } else {
+            script = WordSets.script(for: topic, grade: grade)
+            words = WordSets.words(for: topic, script: script, grade: grade)
+            textClues = false
+            wordTopic = script.topic
+        }
         index = 0; cleanWords = 0; grant = nil
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { started = true; done = false }
         loadWord()
@@ -170,8 +201,7 @@ struct BuildWordView: View {
         var pool = letters
         // From ג׳ one extra letter keeps it from being pure ordering.
         if grade >= 3 {
-            let extra = Array(script == .english ? "ABCDEFGHIKLMNOPRSTUWY" : "אבגדהוזחטיכלמנסעפצקרשת")
-            if let x = extra.filter({ !pool.contains($0) }).randomElement() { pool.append(x) }
+            if let x = script.alphabet.filter({ !pool.contains($0) }).randomElement() { pool.append(x) }
         }
         tiles = pool.shuffled().enumerated().map { Tile(id: $0.offset, letter: $0.element) }
         shownAt = Date()
@@ -204,11 +234,10 @@ struct BuildWordView: View {
         let clean = mistakesThisWord == 0
         if clean { cleanWords += 1 }
         // One answer per word in the parent's reports — right the first time,
-        // or a miss if a letter bounced. No minutes.
-        ProgressStore.shared.recordGameAnswer(correct: clean)
-        LearningHistoryStore.shared.recordAnswer(topic: script.topic, correct: clean,
-                                                 responseMs: Date().timeIntervalSince(shownAt) * 1000,
-                                                 earnedMinutes: 0, streak: 0)
+        // or a miss if a letter bounced.
+        MiniGameLedger.record(correct: clean, topic: wordTopic,
+                              responseMs: Date().timeIntervalSince(shownAt) * 1000,
+                              earn: earn, surprise: surprise)
         withAnimation(.spring(response: 0.3, dampingFraction: 0.55)) { wordDone = true; pop = true }
         burst += 1
         SoundPlayer.shared.play(.correctBig)
@@ -234,7 +263,7 @@ struct BuildWordView: View {
         SoundPlayer.shared.play(.chestOpen)
         Haptic.success()
         confetti += 1
-        AppAnalytics.log("build_word_done", ["script": script == .hebrew ? "he" : "en", "clean": "\(cleanWords)",
+        AppAnalytics.log("build_word_done", ["script": "\(script)", "clean": "\(cleanWords)",
                                              "surprise": surprise ? "1" : "0"])
     }
 }

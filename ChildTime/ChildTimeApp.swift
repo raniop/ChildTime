@@ -363,6 +363,10 @@ struct ChildTimeApp: App {
         // wordsearch | lightninggame [DEMO_WORLD=english] [DEMO_GRADE=3] [DEMO_SURPRISE=1]
         case "pairsgame", "balloongame", "wordgame", "crushgame", "wordsearch", "lightninggame":
             MiniGameDemoHost(screen: name)
+        // …and the second six — DEMO_SCREEN=sortgame | patterngame | game2048 | vaultgame |
+        // grocerygame | balancegame [DEMO_WORLD=…] [DEMO_GRADE=…] [DEMO_EARN=1 → earns like the chooser]
+        case "sortgame", "patterngame", "game2048", "vaultgame", "grocerygame", "balancegame":
+            MiniGameDemoHost(screen: name)
         case "surpriseround":                               // DEMO_SCREEN=surpriseround [DEMO_WORLD=soccer] [DEMO_GAME=balloon] — ⚡ the interstitial → the game
             MiniGameDemoHost(screen: name)
         case "wheel":    LuckyWheelView(onClose: {})

@@ -14,6 +14,12 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
     case crush       // 🧱 מְפַצְּחִים
     case wordSearch  // 🔤 תַּפְזֹרֶת
     case lightning   // ⚡ נָכוֹן אוֹ לֹא נָכוֹן?
+    case sort        // 🧺 מִיּוּן לַסַּלִּים
+    case pattern     // 🧠 הַתַּבְנִית
+    case game2048    // 🔢 2048 שֶׁל טוֹפִּי
+    case vault       // 🔐 הַכַּסֶּפֶת
+    case grocery     // 🛒 הַמַּכֹּלֶת
+    case balance     // ⚖️ מֹאזְנַיִם
 
     var id: String { rawValue }
 
@@ -25,6 +31,12 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .crush:      return "🧱"
         case .wordSearch: return "🔤"
         case .lightning:  return "⚡"
+        case .sort:       return "🧺"
+        case .pattern:    return "🧠"
+        case .game2048:   return "🔢"
+        case .vault:      return "🔐"
+        case .grocery:    return "🛒"
+        case .balance:    return "⚖️"
         }
     }
 
@@ -36,15 +48,23 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .crush:      return tr("מְפַצְּחִים")
         case .wordSearch: return tr("תַּפְזֹרֶת")
         case .lightning:  return tr("נָכוֹן אוֹ לֹא נָכוֹן?")
+        case .sort:       return tr("מִיּוּן לַסַּלִּים")
+        case .pattern:    return tr("הַתַּבְנִית")
+        case .game2048:   return tr("2048 שֶׁל טוֹפִּי")
+        case .vault:      return tr("הַכַּסֶּפֶת")
+        case .grocery:    return tr("הַמַּכֹּלֶת")
+        case .balance:    return tr("מֹאזְנַיִם")
         }
     }
 
     /// Seconds on the clock for the timed games (a surprise round is shorter).
     func seconds(surprise: Bool) -> Int {
         switch self {
-        case .balloon: return 30
+        case .balloon:  return 30
         case .crush, .lightning: return surprise ? 45 : 60
-        default:       return 0
+        case .sort:     return surprise ? 30 : 40
+        case .game2048: return surprise ? 90 : 150
+        default:        return 0
         }
     }
 
@@ -56,6 +76,13 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .crush:      return tr("\(seconds(surprise: surprise)) שְׁנִיּוֹת — בַּחֲרוּ קֻבִּיּוֹת שֶׁמַּגִּיעוֹת בְּדִיּוּק לַיַּעַד!")
         case .wordSearch: return tr("5 מִלִּים מִסְתַּתְּרוֹת — גִּרְרוּ אֶצְבַּע עַל כָּל מִלָּה")
         case .lightning:  return tr("\(seconds(surprise: surprise)) שְׁנִיּוֹת — כַּמָּה שֶׁיּוֹתֵר תְּשׁוּבוֹת נְכוֹנוֹת!")
+        case .sort:       return tr("\(seconds(surprise: surprise)) שְׁנִיּוֹת — גִּרְרוּ כָּל פְּרִיט לַסַּל הַמַּתְאִים")
+        case .pattern:    return tr("6 סְדָרוֹת — מָה מַשְׁלִים אֶת הַתַּבְנִית?")
+        case .game2048:   return tr("חַבְּרוּ אֲרִיחִים זֵהִים — וְכָל 5 מַהֲלָכִים שְׁאֵלַת בּוֹנוּס")
+        case .vault:      return tr("פַּצְּחוּ אֶת הַקּוֹד הַסּוֹדִי — 6 נִסְיוֹנוֹת, וּמַפְתְּחוֹת שֶׁפּוֹתְחִים סְפָרוֹת")
+        case .grocery:    return surprise ? tr("2 קְנִיּוֹת — קוֹנִים לְפִי הָרְשִׁימָה וּמְחַשְּׁבִים עֹדֶף")
+                                          : tr("3 קְנִיּוֹת — קוֹנִים לְפִי הָרְשִׁימָה וּמְחַשְּׁבִים עֹדֶף")
+        case .balance:    return tr("5 מֹאזְנַיִם — מָה מֵבִיא אוֹתָם לְאִזּוּן?")
         }
     }
 
@@ -68,23 +95,30 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .crush:      return tr("מְפַצְּחִים")
         case .wordSearch: return tr("תַּפְזֹרֶת")
         case .lightning:  return tr("נָכוֹן אוֹ לֹא")
+        case .sort:       return tr("מִיּוּן לַסַּלִּים")
+        case .pattern:    return tr("הַתַּבְנִית")
+        case .game2048:   return tr("2048 שֶׁל טוֹפִּי")
+        case .vault:      return tr("הַכַּסֶּפֶת")
+        case .grocery:    return tr("הַמַּכֹּלֶת")
+        case .balance:    return tr("מֹאזְנַיִם")
         }
     }
 
-    /// The games a world screen offers. 🔗 🎈 ⚡ everywhere; 🧩 🔤 where there
-    /// is a spelling to build (the English and Hebrew worlds, and the interest
-    /// worlds' themed words); 🧱 in the math world.
-    static func forWorld(_ topic: Topic?, grade: Int) -> [MiniGameKind] {
-        let spelling = WordSets.spellingAvailable(grade: grade)
-        switch topic {
-        case .english?, .hebrew?:
-            return [.word, .wordSearch, .pairs, .balloon, .lightning]
-        case .math?:
-            return [.crush, .pairs, .balloon, .lightning]
-        case .soccer?, .flags?, .space?, .animals?, .dinosaurs?, .sea?:
-            return [.balloon, .pairs, .lightning] + (spelling ? [.wordSearch, .word] : [])
-        default:
-            return [.pairs, .balloon, .lightning]
+    /// One line under the game's card in the world's chooser.
+    var blurb: String {
+        switch self {
+        case .pairs:      return tr("מְחַבְּרִים כָּל שְׁאֵלָה לַתְּשׁוּבָה שֶׁלָּהּ")
+        case .balloon:    return tr("מְפוֹצְצִים רַק אֶת הַנְּכוֹנִים")
+        case .word:       return tr("בּוֹנִים מִלָּה אוֹת אַחַר אוֹת")
+        case .crush:      return tr("קֻבִּיּוֹת שֶׁמַּגִּיעוֹת בְּדִיּוּק לַיַּעַד")
+        case .wordSearch: return tr("מוֹצְאִים מִלִּים מִסְתַּתְּרוֹת")
+        case .lightning:  return tr("נָכוֹן אוֹ לֹא — מַהֵר!")
+        case .sort:       return tr("כָּל פְּרִיט לַסַּל הַמַּתְאִים")
+        case .pattern:    return tr("מָה מַמְשִׁיךְ אֶת הַסִּדְרָה?")
+        case .game2048:   return tr("מְחַבְּרִים אֲרִיחִים עַד 2048")
+        case .vault:      return tr("מְפַצְּחִים קוֹד סוֹדִי")
+        case .grocery:    return tr("קוֹנִים, מְחַשְּׁבִים וּמְקַבְּלִים עֹדֶף")
+        case .balance:    return tr("מְאַזְּנִים אֶת שְׁתֵּי הַכַּפּוֹת")
         }
     }
 
@@ -96,21 +130,76 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
 
 /// The game screen itself, for a cover. `surprise` = launched by the runner's
 /// ⚡ surprise round: no intro (the interstitial was it), one round, ×2 ⭐/💎.
+/// `earn` = launched from a world's chooser: every right answer earns screen
+/// time exactly like a regular question (see MiniGameEarnSession).
 struct MiniGameScreen: View {
     let kind: MiniGameKind
     var topic: Topic?
     var surprise: Bool = false
+    var earn: MiniGameEarnSession? = nil
     var onClose: () -> Void
 
     var body: some View {
-        switch kind {
-        case .pairs:      PairsGameView(topic: topic, surprise: surprise, onClose: onClose)
-        case .balloon:    BalloonPopView(topic: topic, surprise: surprise, onClose: onClose)
-        case .word:       BuildWordView(topic: topic, surprise: surprise, onClose: onClose)
-        case .crush:      NumberCrushView(topic: topic, surprise: surprise, onClose: onClose)
-        case .wordSearch: WordSearchView(topic: topic, surprise: surprise, onClose: onClose)
-        case .lightning:  LightningTrueFalseView(topic: topic, surprise: surprise, onClose: onClose)
+        Group {
+            switch kind {
+            case .pairs:      PairsGameView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .balloon:    BalloonPopView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .word:       BuildWordView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .crush:      NumberCrushView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .wordSearch: WordSearchView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .lightning:  LightningTrueFalseView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .sort:       SortBasketsView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .pattern:    PatternGameView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .game2048:   Game2048View(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .vault:      VaultGameView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .grocery:    GroceryGameView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .balance:    BalanceGameView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            }
         }
+        .overlay {
+            if let earn, !surprise { MiniGameEarnOverlay(earn: earn) }
+        }
+    }
+}
+
+// MARK: - Left-to-right math
+
+/// Math and numbers read left-to-right in every language. "90 ÷ 10" laid out
+/// in a Hebrew line came out as "10 ÷ 90" on an iPad (Rani) — a wrong sum on
+/// screen. Two locks, because one wasn't enough there: a left-to-right mark on
+/// each side of the run (so even text with no letters at all resolves LTR),
+/// and `.mathLTR()` on the Text itself.
+enum MiniGameText {
+    static func ltr(_ s: String) -> String {
+        "\u{200E}" + s.replacingOccurrences(of: " ", with: "\u{00A0}") + "\u{200E}"
+    }
+
+    /// No letters at all, and some digits → a number, an expression, a sequence.
+    static func isMath(_ s: String) -> Bool {
+        let scalars = s.unicodeScalars
+        return !scalars.contains { CharacterSet.letters.contains($0) }
+            && scalars.contains { CharacterSet.decimalDigits.contains($0) }
+    }
+
+    /// `ltr` for math, the text untouched otherwise.
+    static func show(_ s: String) -> String { isMath(s) ? ltr(s) : s }
+}
+
+private struct MathLTR: ViewModifier {
+    let on: Bool
+    @Environment(\.layoutDirection) private var current
+    func body(content: Content) -> some View {
+        content.environment(\.layoutDirection, on ? .leftToRight : current)
+    }
+}
+
+extension View {
+    /// Lay this text out left-to-right when it is math (see `MiniGameText`).
+    func mathLTR(_ on: Bool = true) -> some View { modifier(MathLTR(on: on)) }
+
+    /// A scroll view that opens at its bottom (iOS 17+; earlier: the top).
+    @ViewBuilder func scrollAnchorBottom() -> some View {
+        if #available(iOS 17.0, *) { defaultScrollAnchor(.bottom) } else { self }
     }
 }
 
@@ -141,10 +230,21 @@ struct MiniGameChip<Content: View>: View {
 /// The runner's top row: ✕ · 💎 · ⭐ · the game's own chip.
 struct MiniGameTopBar<Trailing: View>: View {
     var onClose: () -> Void
+    /// From a world's chooser: the runner's earned-time bar under the chips.
+    var earn: MiniGameEarnSession? = nil
     @ViewBuilder var gameChip: () -> Trailing
     @ObservedObject private var progress = ProgressStore.shared
 
     var body: some View {
+        VStack(spacing: 8) {
+            chips
+            if earn != nil { MiniGameEarnBar() }
+        }
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.top, AppSpacing.sm)
+    }
+
+    private var chips: some View {
         HStack(spacing: 8) {
             Button(action: onClose) {
                 MiniGameChip { Image(systemName: "xmark").font(.system(size: 13, weight: .heavy)) }
@@ -167,8 +267,6 @@ struct MiniGameTopBar<Trailing: View>: View {
         .font(.system(size: 12.5, weight: .heavy, design: .rounded))
         .foregroundStyle(.white)
         .monospacedDigit()
-        .padding(.horizontal, AppSpacing.md)
-        .padding(.top, AppSpacing.sm)
     }
 }
 
@@ -302,28 +400,31 @@ struct MiniGameGlassButton: View {
 struct MiniGameIntroCard: View {
     let kind: MiniGameKind
     var onStart: () -> Void
+    @Environment(\.horizontalSizeClass) private var hsc
+    /// An iPad gets the card a size up — at 440pt it sat small in a sea of glass.
+    private var big: Bool { hsc == .regular }
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: big ? 18 : 14) {
             Text(kind.emoji)
-                .font(.system(size: 84))
+                .font(.system(size: big ? 120 : 84))
                 .float(amplitude: 6)
                 .glow(AppColor.starGold, radius: 14)
             Text(kind.title)
-                .font(.system(size: 30, weight: .heavy, design: .rounded))
+                .font(.system(size: big ? 40 : 30, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.7)
             Text(kind.subtitle(surprise: false))
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(.system(size: big ? 22 : 17, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             MiniGameGoldButton(title: tr("יַאלְלָה! 🚀"), action: onStart)
                 .padding(.top, 6)
         }
-        .padding(24)
-        .frame(maxWidth: 440)
+        .padding(big ? 36 : 24)
+        .frame(maxWidth: big ? 580 : 440)
         .glassPane(radius: 28)
         .padding(.horizontal, AppSpacing.lg)
     }
@@ -362,20 +463,22 @@ struct MiniGameEndCard: View {
     var onDone: () -> Void
 
     @ObservedObject private var profiles = ProfileStore.shared
+    @Environment(\.horizontalSizeClass) private var hsc
     @State private var reveal = 0
+    private var big: Bool { hsc == .regular }
 
     var body: some View {
         VStack(spacing: 14) {
             CharacterView(character: profiles.active?.character ?? Character3DCatalog.find(nil))
-                .frame(width: 120, height: 120)
+                .frame(width: big ? 160 : 120, height: big ? 160 : 120)
                 .float(amplitude: 8)
             Text(title)
-                .font(.system(size: 30, weight: .heavy, design: .rounded))
+                .font(.system(size: big ? 40 : 30, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.7)
             Text(detail)
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(.system(size: big ? 21 : 17, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -407,8 +510,8 @@ struct MiniGameEndCard: View {
             }
             .padding(.top, 6)
         }
-        .padding(24)
-        .frame(maxWidth: 440)
+        .padding(big ? 36 : 24)
+        .frame(maxWidth: big ? 580 : 440)
         .glassPane(radius: 28)
         .padding(.horizontal, AppSpacing.lg)
         .onAppear {
@@ -595,9 +698,18 @@ struct MiniGameDemoHost: View {
         case "crushgame":     return .crush
         case "wordsearch":    return .wordSearch
         case "lightninggame": return .lightning
+        case "sortgame":      return .sort
+        case "patterngame":   return .pattern
+        case "game2048":      return .game2048
+        case "vaultgame":     return .vault
+        case "grocerygame":   return .grocery
+        case "balancegame":   return .balance
         default:              return nil
         }
     }
+
+    /// DEMO_EARN=1 plays it as if opened from a world's chooser (earns minutes).
+    @State private var earn: MiniGameEarnSession?
 
     var body: some View {
         Group {
@@ -605,7 +717,14 @@ struct MiniGameDemoHost: View {
                 SurpriseRoundFlow(plan: SurprisePlan(topic: topic ?? .soccer,
                                                      game: env["DEMO_GAME"].flatMap(MiniGameKind.init(rawValue:)) ?? .balloon)) {}
             } else if let kind = Self.kind(for: screen) {
-                MiniGameScreen(kind: kind, topic: topic, surprise: env["DEMO_SURPRISE"] == "1") {}
+                MiniGameScreen(kind: kind, topic: GameContent.sourceTopic(topic) ?? topic,
+                               surprise: env["DEMO_SURPRISE"] == "1", earn: earn) {}
+            }
+        }
+        .task {
+            if env["DEMO_EARN"] == "1", earn == nil {
+                let world = Worlds.all.first { $0.topic == (topic ?? .math) } ?? Worlds.all[0]
+                earn = MiniGameEarnSession(world: world)
             }
         }
         .onAppear {

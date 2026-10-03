@@ -8,11 +8,13 @@ import Combine
 /// of the selection with a small shake. The board always holds at least one
 /// way to the target. 60 seconds (45 in a surprise round).
 ///
-/// Pays ⭐/💎 only — never screen-time minutes.
+/// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser every hit
+/// earns screen time like a regular answer (paced — see MiniGameEarnSession).
 struct NumberCrushView: View {
     var topic: Topic? = nil
     /// ⚡ Launched by the runner's surprise round: no intro, one round, ×2.
     var surprise: Bool = false
+    var earn: MiniGameEarnSession? = nil
     var onClose: () -> Void
 
     @ObservedObject private var profiles = ProfileStore.shared
@@ -50,7 +52,13 @@ struct NumberCrushView: View {
     private let ticker = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
 
     private var isCompact: Bool { hsc == .compact }
-    private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
+    /// The child's level in math (adaptive), not just the class.
+    private var grade: Int { MiniGameLevel.grade(for: .math) }
+    /// Hits count in the world they're played in when it is a numbers world.
+    private var recordTopic: Topic {
+        if let topic, [.math, .money, .logic, .gifted].contains(topic) { return topic }
+        return .math
+    }
     private var roundSeconds: TimeInterval { TimeInterval(MiniGameKind.crush.seconds(surprise: surprise)) }
     private var remaining: TimeInterval { max(0, roundSeconds - now.timeIntervalSince(startedAt)) }
     /// 4×3 on a phone (and the foldable), 5×4 on an iPad.
@@ -62,7 +70,7 @@ struct NumberCrushView: View {
             MiniGameBackdrop()
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-                MiniGameTopBar(onClose: onClose) {
+                MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
                     MiniGameChipLabel(text: "🧱 \(hits)", surprise: surprise)
                 }
                 switch phase {
@@ -133,11 +141,11 @@ struct NumberCrushView: View {
                         }
                     }
                 }
-                Text(selectionLine)
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                Text(pickedValues.isEmpty ? selectionLine : MiniGameText.ltr(selectionLine))
+                    .font(.system(size: isCompact ? 17 : 21, weight: .bold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .lineLimit(1).minimumScaleFactor(0.6)
-                    .environment(\.layoutDirection, .leftToRight)
+                    .mathLTR(!pickedValues.isEmpty)
                 MiniGameTimerBar(remaining: remaining, total: roundSeconds)
             }
             .frame(maxWidth: .infinity)
@@ -149,7 +157,7 @@ struct NumberCrushView: View {
             grid
             Spacer(minLength: 0)
         }
-        .frame(maxWidth: 620)
+        .frame(maxWidth: isCompact ? 620 : 760)
         .padding(.horizontal, AppSpacing.md)
         .padding(.bottom, AppSpacing.md)
     }
@@ -193,7 +201,7 @@ struct NumberCrushView: View {
             .frame(width: boardW, height: boardH)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxHeight: isCompact ? 330 : 520)
+        .frame(maxHeight: isCompact ? 330 : 640)
         .environment(\.layoutDirection, .leftToRight)
     }
 
@@ -201,7 +209,7 @@ struct NumberCrushView: View {
         let isPicked = picked.contains(b.id)
         let isBursting = bursting.contains(b.id)
         return Button { tap(b) } label: {
-            Text(rules.display(b.value))
+            Text(MiniGameText.ltr(rules.display(b.value)))
                 .font(.system(size: side * (rules.mode == .decimal ? 0.32 : 0.42), weight: .black, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
@@ -268,11 +276,10 @@ struct NumberCrushView: View {
         SoundPlayer.shared.play(hits % 5 == 0 ? .streakUp : .correctBig)
         Haptic.success()
         withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { targetPop = true }
-        // One answer per hit in the parent's reports (no minutes).
-        ProgressStore.shared.recordGameAnswer(correct: true)
-        LearningHistoryStore.shared.recordAnswer(topic: .math, correct: true,
-                                                 responseMs: Date().timeIntervalSince(pickStartedAt) * 1000,
-                                                 earnedMinutes: 0, streak: hits)
+        // One answer per hit in the parent's reports.
+        MiniGameLedger.record(correct: true, topic: recordTopic,
+                              responseMs: Date().timeIntervalSince(pickStartedAt) * 1000,
+                              streak: hits, earn: earn, surprise: surprise)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
             guard phase == .playing else { return }
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { targetPop = false }

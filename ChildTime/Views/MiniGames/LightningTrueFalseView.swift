@@ -8,11 +8,13 @@ import Combine
 /// along. Math is computed; everything else is a short bank question with its
 /// real answer or one of its distractors.
 ///
-/// Pays ⭐/💎 only — never screen-time minutes.
+/// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser every card
+/// is an answer that earns (or gently costs) like a regular question.
 struct LightningTrueFalseView: View {
     var topic: Topic? = nil
     /// ⚡ Launched by the runner's surprise round: no intro, one round, ×2.
     var surprise: Bool = false
+    var earn: MiniGameEarnSession? = nil
     var onClose: () -> Void
 
     @ObservedObject private var profiles = ProfileStore.shared
@@ -41,7 +43,8 @@ struct LightningTrueFalseView: View {
     private let ticker = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
 
     private var isCompact: Bool { hsc == .compact }
-    private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
+    /// Math cards follow the child's adaptive level in math.
+    private var grade: Int { topic == .math ? MiniGameLevel.grade(for: .math) : max(1, profiles.active?.effectiveGrade ?? 2) }
     private var roundSeconds: TimeInterval { TimeInterval(MiniGameKind.lightning.seconds(surprise: surprise)) }
     private var remaining: TimeInterval { max(0, roundSeconds - now.timeIntervalSince(startedAt)) }
 
@@ -50,7 +53,7 @@ struct LightningTrueFalseView: View {
             MiniGameBackdrop()
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-                MiniGameTopBar(onClose: onClose) {
+                MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
                     MiniGameChipLabel(text: "✓ \(correct)", surprise: surprise)
                 }
                 switch phase {
@@ -121,7 +124,7 @@ struct LightningTrueFalseView: View {
             }
             .environment(\.layoutDirection, .app)
         }
-        .frame(maxWidth: 640)
+        .frame(maxWidth: isCompact ? 640 : 780)
         .padding(.horizontal, AppSpacing.md)
         .padding(.bottom, AppSpacing.md)
     }
@@ -133,18 +136,20 @@ struct LightningTrueFalseView: View {
                 .font(.system(size: 13, weight: .heavy, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
             if let p = statement?.prompt {
-                Text(p)
+                Text(MiniGameText.show(p))
                     .font(.system(size: isCompact ? 20 : 26, weight: .bold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.92))
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.6)
                     .fixedSize(horizontal: false, vertical: true)
+                    .mathLTR(MiniGameText.isMath(p))
             }
-            Text(statement?.claim ?? "")
+            Text(MiniGameText.show(statement?.claim ?? ""))
                 .font(.system(size: claimSize, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .lineLimit(3).minimumScaleFactor(0.5)
+                .mathLTR(MiniGameText.isMath(statement?.claim ?? ""))
                 .padding(.horizontal, 14).padding(.vertical, 8)
                 .frame(maxWidth: .infinity)
                 .miniGameTile(claimState, tint: AppColor.starGold, radius: 20)
@@ -230,11 +235,10 @@ struct LightningTrueFalseView: View {
             Haptic.light()
             withAnimation(.linear(duration: 0.35)) { shake += 1 }
         }
-        // Every card is an answer in the parent's reports (no minutes).
-        ProgressStore.shared.recordGameAnswer(correct: right)
-        LearningHistoryStore.shared.recordAnswer(topic: s.topic, correct: right,
-                                                 responseMs: Date().timeIntervalSince(shownAt) * 1000,
-                                                 earnedMinutes: 0, streak: streak)
+        // Every card is an answer in the parent's reports.
+        MiniGameLedger.record(correct: right, topic: s.topic,
+                              responseMs: Date().timeIntervalSince(shownAt) * 1000,
+                              streak: streak, earn: earn, surprise: surprise)
         DispatchQueue.main.asyncAfter(deadline: .now() + (right ? 0.5 : 1.0)) {
             guard phase == .playing else { return }
             nextStatement()

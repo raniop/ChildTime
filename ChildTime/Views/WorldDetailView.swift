@@ -229,8 +229,8 @@ struct WorldDetailView: View {
     /// content (⭐ and 💎 only, never minutes). The mission card's glass, with
     /// one tile per game.
     private var miniGameButtons: some View {
-        let games = MiniGameKind.forWorld(world.isBonusWorld ? nil : world.topic,
-                                          grade: profiles.active?.effectiveGrade ?? 1)
+        let games = WorldGameFit.games(for: world, grade: profiles.active?.effectiveGrade ?? 1)
+
         let cols = [GridItem(.adaptive(minimum: isCompact ? 92 : 120), spacing: AppSpacing.sm)]
         return VStack(spacing: AppSpacing.md) {
             Text(tr("🎮 מִשְׂחָקִים"))

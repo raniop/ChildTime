@@ -8,11 +8,15 @@ import Combine
 /// in capitals. After 30 seconds without a find, the first letter of a hidden
 /// word glows for a moment.
 ///
-/// Pays ⭐/💎 only — never screen-time minutes.
+/// A world without a themed picture list hides its own one-word answers.
+///
+/// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser every word
+/// found earns screen time like a regular answer.
 struct WordSearchView: View {
     var topic: Topic? = nil
     /// ⚡ Launched by the runner's surprise round: no intro, one board, ×2.
     var surprise: Bool = false
+    var earn: MiniGameEarnSession? = nil
     var onClose: () -> Void
 
     @ObservedObject private var profiles = ProfileStore.shared
@@ -37,6 +41,7 @@ struct WordSearchView: View {
     @State private var burst = 0
     @State private var confetti = 0
     @State private var grant: MiniGameReward.Grant?
+    @State private var wordTopic: Topic = .english
 
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -50,7 +55,7 @@ struct WordSearchView: View {
             MiniGameBackdrop()
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-                MiniGameTopBar(onClose: onClose) {
+                MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
                     MiniGameChipLabel(text: "🔤 \(found.count)/\(max(1, words.count))", surprise: surprise)
                 }
                 if !started {
@@ -85,6 +90,8 @@ struct WordSearchView: View {
 
     private var playing: some View {
         VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
+            // An iPad: the board sits in the middle of the glass, not at the top.
+            if !isCompact && !display.isShort { Spacer(minLength: 0) }
             Text(tr("גִּרְרוּ אֶצְבַּע עַל כָּל מִלָּה שֶׁמְּצָאתֶם"))
                 .font(.system(size: isCompact ? 15 : 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
@@ -100,7 +107,7 @@ struct WordSearchView: View {
             wordList
             Spacer(minLength: 0)
         }
-        .frame(maxWidth: 620)
+        .frame(maxWidth: isCompact ? 620 : 700)
         .padding(.horizontal, AppSpacing.md)
         .padding(.bottom, AppSpacing.sm)
     }
@@ -134,7 +141,7 @@ struct WordSearchView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .aspectRatio(1, contentMode: .fit)
-        .frame(maxWidth: isCompact ? 380 : 540)
+        .frame(maxWidth: isCompact ? 380 : 600)
         .environment(\.layoutDirection, .leftToRight)
     }
 
@@ -175,7 +182,7 @@ struct WordSearchView: View {
             ForEach(Array(words.enumerated()), id: \.element.id) { i, w in
                 let isFound = found.contains(w.word)
                 HStack(spacing: 6) {
-                    Text(w.emoji).font(.system(size: 18))
+                    if w.emoji.count <= 2 { Text(w.emoji).font(.system(size: 18)) }
                     Text(w.word)
                         .font(.system(size: isCompact ? 16 : 19, weight: .heavy, design: .rounded))
                         .strikethrough(isFound, color: .white.opacity(0.8))
@@ -200,13 +207,13 @@ struct WordSearchView: View {
 
     /// Logical column 0 is where a line STARTS: the right edge for Hebrew.
     private func visualColumn(_ c: Int, n: Int) -> Int {
-        board?.script == .hebrew ? n - 1 - c : c
+        board?.script.direction == .rightToLeft ? n - 1 - c : c
     }
 
     private func cellAt(_ p: CGPoint, cell: CGFloat, n: Int) -> GridCell? {
         let vc = Int(p.x / cell), r = Int(p.y / cell)
         guard (0..<n).contains(vc), (0..<n).contains(r) else { return nil }
-        return GridCell(r: r, c: board?.script == .hebrew ? n - 1 - vc : vc)
+        return GridCell(r: r, c: board?.script.direction == .rightToLeft ? n - 1 - vc : vc)
     }
 
     private func dragChanged(_ v: DragGesture.Value, cell: CGFloat, n: Int) {
@@ -254,8 +261,18 @@ struct WordSearchView: View {
     // MARK: - Logic
 
     private func deal() {
-        let script = WordSets.script(for: topic, grade: grade)
-        board = WordSearch.make(topic: topic, script: script, grade: grade, size: gridSize)
+        if let topic, !WordSets.hasThemedList(topic, grade: grade),
+           case let bank = GameContent.words(topic: topic, grade: grade, maxLetters: gridSize),
+           bank.count >= WordSearch.wordCount, let first = bank.first {
+            // The world's own answers — no pictures, the words are the list.
+            board = WordSearch.make(words: bank.map { SpellWord(emoji: "", word: $0.word) },
+                                    script: first.script, grade: grade, size: gridSize)
+            wordTopic = topic
+        } else {
+            let script = WordSets.script(for: topic, grade: grade)
+            board = WordSearch.make(topic: topic, script: script, grade: grade, size: gridSize)
+            wordTopic = script.topic
+        }
         found = []; dragStart = nil; dragCells = []; hintCell = nil; grant = nil
         lastFindAt = Date(); shownAt = Date()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { started = true; done = false }
@@ -282,11 +299,10 @@ struct WordSearchView: View {
         burst += 1
         SoundPlayer.shared.play(.correctBig)
         Haptic.success()
-        // One answer per found word in the parent's reports (no minutes).
-        ProgressStore.shared.recordGameAnswer(correct: true)
-        LearningHistoryStore.shared.recordAnswer(topic: board?.script.topic ?? .english, correct: true,
-                                                 responseMs: Date().timeIntervalSince(shownAt) * 1000 / Double(max(1, words.count)),
-                                                 earnedMinutes: 0, streak: found.count)
+        // One answer per found word in the parent's reports.
+        MiniGameLedger.record(correct: true, topic: wordTopic,
+                              responseMs: Date().timeIntervalSince(shownAt) * 1000 / Double(max(1, words.count)),
+                              streak: found.count, earn: earn, surprise: surprise)
         if found.count == words.count { finish() }
     }
 
@@ -318,7 +334,7 @@ struct WordSearchView: View {
             Haptic.success()
             confetti += 1
         }
-        AppAnalytics.log("word_search_done", ["script": board?.script == .hebrew ? "he" : "en",
+        AppAnalytics.log("word_search_done", ["script": board.map { "\($0.script)" } ?? "",
                                               "surprise": surprise ? "1" : "0"])
     }
 }
