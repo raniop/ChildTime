@@ -43,7 +43,9 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
-        Release(build: 182, version: "2026.10.2", headline: tr("אייפד של הילד, כרטיס ילד מסודר, וקרב בוס שנספר"), items: [
+        Release(build: 183, version: "2026.10.2", headline: tr("צ'אט עם צוות טופי, אייפד של הילד וכרטיס ילד מסודר"), items: [
+            Item(emoji: "💬", title: tr("צ'אט עם צוות טופי"),
+                 line: tr("שאלה? משהו לא ברור? הכפתור העגול 💬 במסך הבית פותח שיחה איתנו, ואנחנו עונים ישר לטלפון שלכם")),
             Item(emoji: "📱", title: tr("האייפד הוא של הילד"),
                  line: tr("הגדרתם בטעות את האייפד של הילד כמכשיר הורה? בהגדרות יש עכשיו \"להפוך את האייפד הזה למכשיר של ילד\" — בלחיצה אחת, בלי למחוק כלום. והתקנה חדשה באייפד ממליצה מראש על מכשיר ילד")),
             Item(emoji: "🧹", title: tr("כרטיס ילד מסודר"),

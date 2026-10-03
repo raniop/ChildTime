@@ -54840,6 +54840,50 @@
         }
       }
     },
+    "צ'אט עם צוות טופי": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دردشة مع فريق Tofy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat with the Tofy team"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чат с командой Tofy"
+          }
+        }
+      }
+    },
+    "צ'אט עם צוות טופי, אייפד של הילד וכרטיס ילד מסודר": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دردشة مع فريق Tofy، آيباد الطفل، وصفحة طفل مرتّبة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat with the Tofy team, the kid's iPad, and a tidier child page"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чат с командой Tofy, iPad ребёнка и аккуратная карточка ребёнка"
+          }
+        }
+      }
+    },
     "צְבִי": {
       "localizations": {
         "ar": {
@@ -61130,6 +61174,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Денежный рынок"
+          }
+        }
+      }
+    },
+    "שאלה? משהו לא ברור? הכפתור העגול 💬 במסך הבית פותח שיחה איתנו, ואנחנו עונים ישר לטלפון שלכם": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سؤال؟ شيء غير واضح؟ الزر الدائري 💬 في الشاشة الرئيسية يفتح محادثة معنا، ونردّ مباشرة على هاتفكم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A question? Something unclear? The round 💬 button on the home screen opens a chat with us, and we reply straight to your phone"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вопрос? Что-то непонятно? Круглая кнопка 💬 на главном экране открывает чат с нами, и мы отвечаем прямо на ваш телефон"
           }
         }
       }
