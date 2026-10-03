@@ -13587,6 +13587,28 @@
         }
       }
     },
+    "אחר": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أخرى"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Другое"
+          }
+        }
+      }
+    },
     "אחרי אישור התשלום ב-App Store המנוי נפתח באותו רגע. קודם קרה שהתשלום עבר והאפליקציה עדיין הציגה את מסך הרכישה": {
       "localizations": {
         "ar": {
@@ -13605,6 +13627,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "После подтверждения оплаты в App Store подписка открывается сразу. Раньше бывало, что оплата проходила, а приложение всё ещё показывало экран покупки"
+          }
+        }
+      }
+    },
+    "אחר…": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أخرى…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Другое…"
           }
         }
       }
@@ -17340,6 +17384,28 @@
         }
       }
     },
+    "בין 15 ל-480 דקות": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بين 15 و480 دقيقة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Between 15 and 480 minutes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "От 15 до 480 минут"
+          }
+        }
+      }
+    },
     "ביקשתם %lld — זה המקסימום שנשאר להיום, עד חצות.": {
       "localizations": {
         "ar": {
@@ -19280,6 +19346,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Минуты"
+          }
+        }
+      }
+    },
+    "דקות ביום": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دقيقة يوميًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "minutes a day"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "минут в день"
           }
         }
       }
@@ -38245,6 +38333,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Каждый правильный ответ даёт время игры"
+          }
+        }
+      }
+    },
+    "כמה דקות ביום?": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كم دقيقة في اليوم؟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How many minutes a day?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сколько минут в день?"
           }
         }
       }

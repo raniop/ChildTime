@@ -26,6 +26,13 @@ enum DailyCapChoice {
         }
     }
 
+    /// A parent-typed amount ("אחר"): 15 minutes to 8 hours, in 5-minute steps.
+    static let customRange = 15...480
+    static func clampCustom(_ m: Int) -> Int {
+        min(customRange.upperBound, max(customRange.lowerBound, (m / 5) * 5))
+    }
+    static func isPreset(_ m: Int) -> Bool { options.contains(m) }
+
     /// What the child is held to right now, as one of the stored values
     /// (0 = no limit) — the per-child value, else the device-global fallback.
     static func current(for profile: Profile, settings: ParentSettings) -> Int {
@@ -56,8 +63,79 @@ struct DailyCapStepView: View {
     var onContinue: () -> Void
 
     @ObservedObject private var display = DisplayGeometry.shared
+    /// "אחר" — the parent sets their own amount (Rani: presets alone aren't enough).
+    @State private var customOn = false
 
     private var isGirl: Bool { profile.gender == .girl }
+
+    private var customPill: some View {
+        let selected = customOn
+        return Button {
+            Haptic.light()
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                customOn = true
+                if minutes <= 0 || DailyCapChoice.isPreset(minutes) { minutes = 45 }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Text("✏️").font(.system(size: 16))
+                Text(selected ? DailyCapChoice.label(minutes) : tr("אחר"))
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                if selected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 14, weight: .black))
+                        .foregroundStyle(AppColor.successMint)
+                }
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
+            .overlay(
+                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
+                    .stroke(selected ? AppColor.successMint : .white.opacity(0.2), lineWidth: selected ? 2.5 : 1)
+            )
+        }
+        .buttonStyle(.juicy)
+    }
+
+    private var customStepper: some View {
+        HStack(spacing: 14) {
+            stepButton("minus") { minutes = DailyCapChoice.clampCustom(minutes - 5) }
+            VStack(spacing: 2) {
+                Text("\(minutes)")
+                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.white)
+                    .contentTransition(.numericText())
+                Text(tr("דקות ביום"))
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.75))
+            }
+            .frame(minWidth: 110)
+            stepButton("plus") { minutes = DailyCapChoice.clampCustom(minutes + 5) }
+        }
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity)
+        .glassInset(radius: 16)
+        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+    }
+
+    private func stepButton(_ icon: String, _ action: @escaping () -> Void) -> some View {
+        Button {
+            Haptic.light()
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) { action() }
+        } label: {
+            Image(systemName: icon)
+                .font(.system(size: 20, weight: .black))
+                .foregroundStyle(.white)
+                .frame(width: 52, height: 52)
+                .background(Circle().fill(.white.opacity(0.18)))
+                .overlay(Circle().strokeBorder(.white.opacity(0.35), lineWidth: 1))
+        }
+        .buttonStyle(.juicy)
+    }
 
     var body: some View {
         ScrollView {
@@ -82,7 +160,11 @@ struct DailyCapStepView: View {
                         pill(m)
                     }
                 }
-                pill(0)
+                HStack(spacing: 10) {
+                    customPill
+                    pill(0)
+                }
+                if customOn { customStepper }
 
                 tipBox
 
@@ -108,10 +190,10 @@ struct DailyCapStepView: View {
     }
 
     private func pill(_ m: Int) -> some View {
-        let selected = minutes == m
+        let selected = minutes == m && !customOn
         return Button {
             Haptic.light()
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { minutes = m }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { minutes = m; customOn = false }
         } label: {
             HStack(spacing: 6) {
                 if m == 0 { Text("♾️").font(.system(size: 17)) }
@@ -188,6 +270,9 @@ struct DailyCapSetupCard: View {
 
     /// Only the rows the parent touched; the rest show their current value.
     @State private var drafts: [UUID: Int] = [:]
+    /// "אחר…" in a row's menu: the child being edited + the typed minutes.
+    @State private var customFor: Profile?
+    @State private var customText = ""
 
     private func value(for p: Profile) -> Int {
         drafts[p.id] ?? DailyCapChoice.current(for: p, settings: settings)
@@ -224,6 +309,20 @@ struct DailyCapSetupCard: View {
         .padding(AppSpacing.md)
         .glassPane(radius: 20, tint: AppColor.starGold)
         .environment(\.layoutDirection, .app)
+        .alert(tr("כמה דקות ביום?"), isPresented: Binding(get: { customFor != nil },
+                                                          set: { if !$0 { customFor = nil } })) {
+            TextField(tr("דקות"), text: $customText)
+                .keyboardType(.numberPad)
+            Button(tr("ביטול"), role: .cancel) { customFor = nil }
+            Button(tr("שמירה")) {
+                if let p = customFor, let m = Int(customText.filter(\.isNumber)), m > 0 {
+                    drafts[p.id] = DailyCapChoice.clampCustom(m)
+                }
+                customFor = nil
+            }
+        } message: {
+            Text(tr("בין 15 ל-480 דקות"))
+        }
     }
 
     private func row(_ p: Profile) -> some View {
@@ -260,6 +359,11 @@ struct DailyCapSetupCard: View {
                         }
                     }
                 }
+                Divider()
+                Button {
+                    customText = current > 0 ? "\(current)" : ""
+                    customFor = p
+                } label: { Label(tr("אחר…"), systemImage: "pencil") }
             } label: {
                 HStack(spacing: 5) {
                     Text(DailyCapChoice.label(current))
