@@ -31,6 +31,9 @@ struct ProfileEditorView: View {
     @State private var showPicker = false
     @State private var pendingCrop: PendingCrop? = nil
     @State private var showDeleteConfirm = false
+    /// ⏱ The create flow's last step (parent only): the daily screen-time ceiling.
+    @State private var showCapStep = false
+    @State private var capMinutes: Int = DailyCapChoice.defaultMinutes
 
     private var isEdit: Bool {
         if case .edit = mode { return true }
@@ -55,12 +58,34 @@ struct ProfileEditorView: View {
         ParentSettings.shared.deviceRole == .parent && !KidModeManager.shared.active
     }
 
+    /// A NEW child created by the parent gets one more step — the daily
+    /// screen-time ceiling. Editing an existing child (or a child device
+    /// creating its own profile) never shows it.
+    private var hasCapStep: Bool { !isEdit && canEditLearning }
+
+    /// The child being created, as the step shows them (avatar + name).
+    private var draftProfile: Profile {
+        Profile(
+            id: existingID ?? UUID(),
+            name: name.trimmingCharacters(in: .whitespaces),
+            gender: gender,
+            age: age,
+            photoData: photoData,
+            avatarPresetID: avatarPresetID,
+            character3DID: character3DID
+        )
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
                 GlassBackdrop()
                 SparkleField(count: 12, size: 11)
 
+                if showCapStep {
+                    DailyCapStepView(profile: draftProfile, minutes: $capMinutes) { save() }
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                } else {
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
                         livePreview
@@ -124,18 +149,37 @@ struct ProfileEditorView: View {
                     .frame(maxWidth: 540)
                     .frame(maxWidth: .infinity)
                 }
+                .transition(.move(edge: .leading).combined(with: .opacity))
+                }
             }
             .dismissKeyboardOnTap()
             .navigationTitle(isEdit ? tr("עֲרוֹךְ פְּרוֹפִיל") : tr("פְּרוֹפִיל חָדָשׁ"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(tr("בַּטֵּל")) { dismiss() }
+                    if showCapStep {
+                        Button(tr("חזרה")) {
+                            withAnimation(.easeInOut(duration: 0.25)) { showCapStep = false }
+                        }
+                    } else {
+                        Button(tr("בַּטֵּל")) { dismiss() }
+                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(tr("שְׁמוֹר")) { save() }
+                    // On the ⏱ step the gold "המשך" in the page is the way on.
+                    if !showCapStep {
+                        Button(hasCapStep ? tr("המשך") : tr("שְׁמוֹר")) {
+                            if hasCapStep {
+                                guard canSave else { return }
+                                Haptic.light()
+                                withAnimation(.easeInOut(duration: 0.25)) { showCapStep = true }
+                            } else {
+                                save()
+                            }
+                        }
                         .disabled(!canSave)
                         .fontWeight(.bold)
+                    }
                 }
             }
             .onAppear { hydrateFromMode() }
@@ -520,6 +564,13 @@ struct ProfileEditorView: View {
             // A parent-side save is a confirmation — clears the "child picked
             // this" flag the dashboard warns about. (Fresh Profile defaults it
             // to false, so nothing to do — noted for clarity.)
+        } else if hasCapStep {
+            // ⏱ The ceiling picked on the last step — the same per-child field
+            // ChildScreenTimeView edits (0 = no limit). It rides the new child's
+            // first upload (ProfileStore.add → upsertChild) to their device.
+            p.dailyCapMinutes = capMinutes
+            // This family has met the question — the home's one-time card is moot.
+            ParentSettings.shared.dailyCapCardDone = true
         }
         Haptic.success()
         SoundPlayer.shared.play(.companionCheer)

@@ -315,6 +315,12 @@ struct ParentDashboardView: View {
                                 }
                                 if !push.authorized { notificationsBanner }
                                 if !choreStore.pendingApproval.isEmpty { choresApprovalBanner }
+                                // ⏱ Once: the daily screen-time ceiling, per child —
+                                // right above the children it is about.
+                                if showsDailyCapCard {
+                                    DailyCapSetupCard(children: rows.map(\.profile))
+                                        .transition(.opacity.combined(with: .scale(scale: 0.97)))
+                                }
                             }
                             childrenGrid
 
@@ -790,6 +796,20 @@ struct ParentDashboardView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(tr("סגור את הבקשה"))
         }
+    }
+
+
+    /// ⏱ The one-time "how much screen time a day?" card: a parent's own device
+    /// (never a child device or Kid Mode), children to set, not saved before,
+    /// and at least one child still without a ceiling of their own — a family
+    /// that set every child (the create step, the screen-time editor, or a
+    /// co-parent's phone) has nothing left to ask. Demo runs only on its own
+    /// DEMO_SCREEN, so every other screenshot stays as it was.
+    private var showsDailyCapCard: Bool {
+        guard isRoot, !settings.dailyCapCardDone, !profiles.profiles.isEmpty else { return false }
+        if AppInfo.isDemoRun { return ChildTimeApp.demoScreen == "dailycapcard" }
+        guard settings.deviceRole == .parent, !KidModeManager.shared.active else { return false }
+        return profiles.profiles.contains { $0.dailyCapMinutes == nil }
     }
 
     private var choresApprovalBanner: some View {

@@ -39,6 +39,7 @@ final class ParentSettings: ObservableObject {
         static let deviceRole = "deviceRole"
         static let hasSeenWelcome = "hasSeenWelcome"
         static let hasPromptedChildAppLock = "hasPromptedChildAppLock"
+        static let dailyCapCardDone = "dailyCapCardDone"
         static let pendingJoinFamily = "pendingJoinFamily"
         static let pendingJoinPayload = "pendingJoinPayload"
         static let joinedChildID = "joinedChildID"
@@ -291,6 +292,12 @@ final class ParentSettings: ObservableObject {
     @Published var hasPromptedChildAppLock: Bool {
         didSet { defaults.set(hasPromptedChildAppLock, forKey: Key.hasPromptedChildAppLock) }
     }
+    /// ⏱ The parent home's one-time "how much screen time a day?" card was
+    /// saved — or this family set the ceiling while creating a child (the
+    /// create flow's last step), so it never needs the card.
+    @Published var dailyCapCardDone: Bool {
+        didSet { defaults.set(dailyCapCardDone, forKey: Key.dailyCapCardDone) }
+    }
     /// On a CHILD device, the specific child this device joined as (set when a QR
     /// is scanned). A child device is bound to ONE child — it must scan to join,
     /// even if the account already has children, so it never auto-drops into a
@@ -408,6 +415,7 @@ final class ParentSettings: ObservableObject {
         self.deviceRole = DeviceRole(rawValue: d.string(forKey: Key.deviceRole) ?? "") ?? .unset
         self.hasSeenWelcome = d.bool(forKey: Key.hasSeenWelcome)
         self.hasPromptedChildAppLock = d.bool(forKey: Key.hasPromptedChildAppLock)
+        self.dailyCapCardDone = d.bool(forKey: Key.dailyCapCardDone)
         self.pendingJoinFamily = d.bool(forKey: Key.pendingJoinFamily)
         self.pendingJoinPayload = d.string(forKey: Key.pendingJoinPayload)
         self.joinedChildID = d.string(forKey: Key.joinedChildID)
