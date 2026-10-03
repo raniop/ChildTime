@@ -16,12 +16,13 @@ struct ChildReportView: View {
     let liveIsGift: Bool
     let devices: [ChildDevice]
 
+    /// The page's live banner + quick actions (gift / lock / chores), owned by
+    /// the dashboard — it holds the remote commands, sheets and alerts. Shown
+    /// right under the name, above the numbers.
+    var topActions: AnyView? = nil
     // Parent actions, owned by the dashboard (it holds the sheets and alerts).
-    let onGift: (Int) -> Void
-    let onLock: () -> Void
-    let onLockAndRevoke: () -> Void
     let onAddDevice: () -> Void
-    let onFullInsights: () -> Void
+    let onRemoveDevice: (ChildDevice) -> Void
 
     @EnvironmentObject private var settings: ParentSettings
     @ObservedObject private var historyStore = LearningHistoryStore.shared
@@ -43,8 +44,10 @@ struct ChildReportView: View {
     var body: some View {
         VStack(spacing: 14) {
             header
-            if let insight = engine.dailyInsight(name: profile.name, isGirl: isGirl, period: period) {
-                insightCard(insight)
+            let insight = engine.dailyInsight(name: profile.name, isGirl: isGirl, period: period)
+            let tip = parentTip
+            if insight != nil || tip != nil {
+                insightCard(insight, tip: tip)
             }
             topicsCard
             improvementCard
@@ -105,6 +108,7 @@ struct ChildReportView: View {
                 Spacer()
                 if isRefreshing { ProgressView().tint(.white) }
             }
+            if let topActions { topActions }
             // The four numbers that answer "is my kid using it and learning?"
             HStack(spacing: 0) {
                 snap("\(s.questions)", tr("שְׁאֵלוֹת"))
@@ -152,17 +156,35 @@ struct ChildReportView: View {
 
     // MARK: - Insight
 
-    private func insightCard(_ i: DailyInsight) -> some View {
+    /// The coaching engine's top concrete tip for the parent — what the old
+    /// child card showed as a separate "המלצות להורה" box, now the insight
+    /// card's second line. Period-independent, so it rides along every tab.
+    private var parentTip: CoachingEngine.RecommendedAction? {
+        guard snapshot.totalAnswered >= 4 else { return nil }
+        let lp = LearningProfile(snapshot: snapshot, enabledTopics: profile.playableTopics, age: profile.age)
+        return CoachingEngine(childName: profile.name, insights: engine, profile: lp, isGirl: isGirl)
+            .recommendedActions().first
+    }
+
+    private func insightCard(_ i: DailyInsight?, tip: CoachingEngine.RecommendedAction?) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(tr("💡 תּוֹבְנַת \(period == .today ? tr("הַיּוֹם") : period == .week ? tr("הַשָּׁבוּעַ") : tr("הַחֹדֶשׁ"))"))
                 .font(.system(size: 14.5, weight: .heavy, design: .rounded))
-            Text(i.body)
-                .font(.system(size: 13.5, weight: .medium, design: .rounded))
-                .fixedSize(horizontal: false, vertical: true)
-            if let rec = i.recommendation {
-                Divider().overlay(Color.white.opacity(0.35))
-                Text(tr("מֻמְלָץ: \(rec)"))
-                    .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+            if let i {
+                Text(i.body)
+                    .font(.system(size: 13.5, weight: .medium, design: .rounded))
+                    .fixedSize(horizontal: false, vertical: true)
+                if let rec = i.recommendation {
+                    Divider().overlay(Color.white.opacity(0.35))
+                    Text(tr("מֻמְלָץ: \(rec)"))
+                        .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            if let tip, tip.text != i?.recommendation {
+                if i != nil, i?.recommendation == nil { Divider().overlay(Color.white.opacity(0.35)) }
+                Text("\(tip.emoji) \(tip.text)")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -192,6 +214,7 @@ struct ChildReportView: View {
                     ?? topics.first(where: { $0.verdict == .weak })
                 let open = expandedTopic ?? (autoCollapsed ? nil : weakest?.topic)
                 VStack(spacing: 0) {
+                    learningProfileLines
                     ForEach(topics) { t in
                         topicRow(t, open: open == t.topic)
                         if open == t.topic {
@@ -234,8 +257,13 @@ struct ChildReportView: View {
             HStack(spacing: 10) {
                 Text(t.topic.emoji).font(.system(size: 22)).frame(width: 34)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(t.topic.displayName)
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                    HStack(spacing: 6) {
+                        Text(t.topic.displayName)
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .lineLimit(1).minimumScaleFactor(0.8)
+                            .layoutPriority(1)
+                        difficultyTag(t.topic)
+                    }
                     // One count per string, so each takes its own singular ("שאלה אחת · נכונה
                     // אחת" — the two-count string read "1 שאלות · 1 נכונות").
                     Text(tr("\(t.answered) שְׁאֵלוֹת") + " · " + tr("\(t.correct) נְכוֹנוֹת") + (t.wrong > 0 ? tr(" · \(t.wrong) טְעֻיּוֹת") : ""))
@@ -248,6 +276,62 @@ struct ChildReportView: View {
             .foregroundStyle(GlassInk.primary)
         }
         .buttonStyle(.plain)
+    }
+
+    /// "חֲזָקָה בְּ… / אוֹהֶבֶת…" — what the Smart Feed has learned about this
+    /// child (the old card's "פרופיל למידה"), above the topic rows.
+    @ViewBuilder private var learningProfileLines: some View {
+        let lp = LearningProfile(snapshot: snapshot, enabledTopics: profile.playableTopics, age: profile.age)
+        let strong = Array(lp.strong.prefix(3))
+        let favorites = Array(lp.favorites.prefix(3))
+        if snapshot.totalAnswered >= 4, !strong.isEmpty || !favorites.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                if !strong.isEmpty { chipLine("💪 " + g(tr("חָזָק בְּ"), tr("חֲזָקָה בְּ")), strong) }
+                if !favorites.isEmpty { chipLine("❤️ " + g(tr("אוֹהֵב"), tr("אוֹהֶבֶת")), favorites) }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.bottom, 10)
+            Divider().overlay(Color.white.opacity(0.16)).padding(.bottom, 8)
+        }
+    }
+
+    /// A label and as many topic chips as fit on one line.
+    private func chipLine(_ label: String, _ topics: [Topic]) -> some View {
+        ViewThatFits(in: .horizontal) {
+            ForEach((1...max(topics.count, 1)).reversed(), id: \.self) { n in
+                HStack(spacing: 6) {
+                    Text(label)
+                        .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .fixedSize()
+                    ForEach(topics.prefix(n)) { t in
+                        Text("\(t.emoji) \(t.displayName)")
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .fixedSize()
+                            .padding(.horizontal, 8).padding(.vertical, 3)
+                            .background(Color.white.opacity(0.14), in: Capsule())
+                            .overlay(Capsule().strokeBorder(Color.white.opacity(0.24), lineWidth: 1))
+                    }
+                    Spacer(minLength: 0)
+                }
+            }
+        }
+    }
+
+    /// The level the adaptive engine serves in this topic now ("קַל"), plus
+    /// "↓ בּוֹנֶה בִּטָּחוֹן" / "↑ מְאַתְגֵּר יוֹתֵר" when it moved away from the
+    /// parent's base (the old card's "רמת קושי חכמה", per row).
+    @ViewBuilder private func difficultyTag(_ topic: Topic) -> some View {
+        if AdaptiveTopicLevel.hasSignal(snapshot) {
+            let st = AdaptiveTopicLevel.state(for: topic, profile: profile, snapshot: snapshot)
+            let hint: String? = st.direction.map { $0 == .eased ? "↓ " + tr("בּוֹנֶה בִּטָּחוֹן") : "↑ " + tr("מְאַתְגֵּר יוֹתֵר") }
+            Text(st.served.displayName + (hint.map { " · " + $0 } ?? ""))
+                .font(.system(size: 10.5, weight: .heavy, design: .rounded))
+                .foregroundStyle(st.direction == .eased ? GlassInk.warn : st.direction == .raised ? GlassInk.good : GlassInk.secondary)
+                .lineLimit(1).minimumScaleFactor(0.7)
+                .padding(.horizontal, 7).padding(.vertical, 2)
+                .background(Color.white.opacity(0.10), in: Capsule())
+        }
     }
 
     private func verdictPill(_ t: TopicReport) -> some View {
@@ -401,6 +485,20 @@ struct ChildReportView: View {
             VStack(spacing: 0) {
                 ForEach(devices) { d in
                     HStack {
+                        // Remove (e.g. linked to the wrong child) — the dashboard
+                        // confirms before anything happens.
+                        Menu {
+                            Button(role: .destructive) { onRemoveDevice(d) } label: {
+                                Label(tr("הסר מכשיר"), systemImage: "minus.circle")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(GlassInk.secondary)
+                                .frame(width: 28, height: 28)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
                         // "אייפד של נועה" — the kind + the child (iOS names every phone
                         // just "iPhone"); a custom device name rides along.
                         Text(tr("\(d.kind == "ipad" ? "📲" : "📱") \(d.kind == "ipad" ? tr("אַיְפֵּד") : tr("אַיְפוֹן")) שֶׁל \(profile.name)")
@@ -429,7 +527,7 @@ struct ChildReportView: View {
                     empty(tr("עוֹד לֹא חֻבַּר מַכְשִׁיר."))
                 }
                 Button(action: onAddDevice) {
-                    Label(tr("חַבְּרוּ מַכְשִׁיר נוֹסָף"), systemImage: "qrcode")
+                    Label(devices.isEmpty ? tr("+ חַבְּרוּ מַכְשִׁיר") : tr("+ חִבּוּר מַכְשִׁיר נוֹסָף"), systemImage: "qrcode")
                         .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .frame(maxWidth: .infinity)
