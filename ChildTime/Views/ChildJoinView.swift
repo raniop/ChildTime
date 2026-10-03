@@ -262,7 +262,7 @@ struct ChildJoinView: View {
             // device just converted into a child one) can beat the household's
             // sign-in by a runloop tick — wait briefly for the uid instead of
             // failing the redeem on "no session".
-            for _ in 0..<60 where !household.hasSession {
+            for _ in 0..<100 where !household.hasSession {
                 try? await Task.sleep(nanoseconds: 100_000_000)
             }
             // A child play-device only BINDS to one existing child — it must not

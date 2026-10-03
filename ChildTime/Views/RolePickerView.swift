@@ -129,6 +129,12 @@ struct RolePickerView: View {
             }
             .padding(AppSpacing.xl)
             .frame(maxWidth: 440)
+            // Solid backing: the plain glass let the role cards behind read
+            // straight through the title (seen live on the iPad).
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
+                    .fill(Color(hex: "4A3AB0").opacity(0.97))
+            )
             .glassPane(radius: AppRadius.large, strength: 0.2)
             .padding(.horizontal, AppSpacing.lg)
             .transition(.scale(scale: 0.92).combined(with: .opacity))

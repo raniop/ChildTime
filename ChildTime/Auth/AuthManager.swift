@@ -65,6 +65,15 @@ final class AuthManager: ObservableObject {
     /// So: no local marker + a live session means the app was reinstalled. Drop
     /// the session and let the device be set up from scratch, which is what
     /// deleting an app is universally understood to mean.
+    /// This install is being set up on purpose (a parent device converting
+    /// itself into a child one) — not a reinstall. Without this, the first
+    /// child launch found no marker beside a live anonymous session and pulled
+    /// the freshly joined iPad straight back out of the family (seen live,
+    /// 2026-10-03).
+    func markInstallSetUp() {
+        UserDefaults.standard.set(true, forKey: Self.installMarkKey)
+    }
+
     func dropSessionIfReinstalled() async {
         #if canImport(FirebaseAuth)
         let d = UserDefaults.standard

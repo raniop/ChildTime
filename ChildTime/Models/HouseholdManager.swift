@@ -4,6 +4,9 @@ import Combine
 #if canImport(FirebaseFirestore)
 import FirebaseFirestore
 #endif
+#if canImport(FirebaseAuth)
+import FirebaseAuth
+#endif
 
 /// Diagnostic logging for the child ↔ household ↔ device binding flow. Prints via
 /// NSLog so it shows in Xcode's console AND Console.app (filter: "TofyLink").
@@ -220,6 +223,7 @@ final class HouseholdManager: ObservableObject {
     private func bootstrap(uid: String, email: String?, displayName: String?) async {
         do {
             try await ensureParentDoc(uid: uid, email: email, displayName: displayName)
+            parentDocReadyUID = uid
             // NOBODY gets a silently-created household anymore (Rani):
             //  • found an existing membership → load it (veterans feel nothing).
             //  • real account + a pending EMAIL INVITE → "המשפחה מחכה לך" screen.
@@ -1586,7 +1590,25 @@ final class HouseholdManager: ObservableObject {
     /// Whether this manager has an auth uid yet. `AuthManager` publishes
     /// `isSignedIn` one runloop tick BEFORE it calls `start(uid:)`, so a join that
     /// fires the instant the child screen appears must wait for this.
-    var hasSession: Bool { uid != nil }
+    /// The uid must also be the one Firebase Auth is signed in with NOW: after a
+    /// parent device converts into a child one, `signOut()` stops the manager but
+    /// leaves the parent's uid here until the anonymous child session starts — a
+    /// redeem sent in that gap carries the wrong identity and is refused
+    /// ("Missing or insufficient permissions"), seen live on the iPad, 2026-10-03.
+    var hasSession: Bool {
+        guard let uid, parentDocReadyUID == uid else { return false }
+        #if canImport(FirebaseAuth)
+        return Auth.auth().currentUser?.uid == uid
+        #else
+        return true
+        #endif
+    }
+    /// The uid whose `parents/{uid}` doc bootstrap has confirmed. redeemInvite
+    /// updates that doc, and the rules refuse an update to a doc that doesn't
+    /// exist yet — so a join fired the moment a fresh anonymous session appears
+    /// half-succeeded (added to the household, then "Missing or insufficient
+    /// permissions"). Seen live converting an iPad, 2026-10-03.
+    private var parentDocReadyUID: String?
 
     /// Drop THIS install's parent footprint while the parent account is still
     /// signed in (afterwards there is no permission to): its `parent_<install>`
@@ -1647,6 +1669,7 @@ final class HouseholdManager: ObservableObject {
         UserDefaults.standard.removeObject(forKey: "device.deliberateReset")
         s.deviceRole = .child
         s.pendingJoinPayload = payload
+        AuthManager.shared.markInstallSetUp()   // a conversion, not a reinstall
         AuthManager.shared.signOut()         // local session only — the family stays in the cloud
         return true
     }
@@ -1685,6 +1708,10 @@ final class HouseholdManager: ObservableObject {
         #if canImport(FirebaseFirestore)
         guard let uid else { return false }
         let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        var step = "read invite"
+        #if canImport(FirebaseAuth)
+        TofyLink("redeemInvite: uid=\(uid.prefix(8)) auth=\(Auth.auth().currentUser?.uid.prefix(8) ?? "nil") anon=\(Auth.auth().currentUser?.isAnonymous ?? false)")
+        #endif
         do {
             let doc = try await db.collection("invites").document(trimmed).getDocument()
             guard let data = doc.data(), let invite = Self.decodeInvite(id: trimmed, data) else {
@@ -1695,9 +1722,12 @@ final class HouseholdManager: ObservableObject {
             // binds the device to the right kid, not just a scanned QR.
             redeemedInviteChildID = invite.childID
             // Add me to the household + mark invite redeemed.
+            step = "household parentUIDs"
             try await db.collection("households").document(invite.householdID)
                 .updateData(["parentUIDs": FieldValue.arrayUnion([uid])])
+            step = "parent householdIDs"
             try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([invite.householdID])])
+            step = "invite redeemedBy"
             try await db.collection("invites").document(trimmed).updateData(["redeemedBy": uid])
 
             // Bring MY children into the joined household, so whoever scans the
@@ -1737,14 +1767,30 @@ final class HouseholdManager: ObservableObject {
 
             // Adopt the joined household as my canonical one + switch listeners.
             UserDefaults.standard.set(invite.householdID, forKey: preferredHouseholdKey)
-            let hhDoc = try await db.collection("households").document(invite.householdID).getDocument()
-            if let hhData = hhDoc.data(), let hh = Self.decodeHousehold(id: invite.householdID, hhData) {
-                self.household = hh
-                listenToHousehold(hh.id)
-                listenToChildren(in: hh.id); listenToChildDevices(in: hh.id)
+            // The membership writes above already succeeded — the join is done.
+            // Re-reading the household right after a fresh anonymous session
+            // (an iPad just converted from a parent device) was refused for a
+            // moment ("Missing or insufficient permissions") although the very
+            // same read passed a second later, so retry briefly, and never turn
+            // a completed join into a failure over it (bootstrap loads it too).
+            step = "read household"
+            for attempt in 1...4 {
+                do {
+                    let hhDoc = try await db.collection("households").document(invite.householdID).getDocument()
+                    if let hhData = hhDoc.data(), let hh = Self.decodeHousehold(id: invite.householdID, hhData) {
+                        self.household = hh
+                        listenToHousehold(hh.id)
+                        listenToChildren(in: hh.id); listenToChildDevices(in: hh.id)
+                    }
+                    break
+                } catch {
+                    TofyLink("redeemInvite: household read attempt \(attempt) failed: \(error.localizedDescription)")
+                    try? await Task.sleep(nanoseconds: 700_000_000)
+                }
             }
             return true
         } catch {
+            TofyLink("redeemInvite FAILED at \(step): \(error.localizedDescription)")
             lastError = error.localizedDescription
             return false
         }

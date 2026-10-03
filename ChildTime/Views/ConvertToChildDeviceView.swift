@@ -32,8 +32,16 @@ struct ConvertToChildDeviceView: View {
     /// Another device that can still manage the family once this one is a
     /// child's. This install's own row is `parent_<installID>`.
     private var hasOtherParentDevice: Bool {
+        // Only a parent device that is really someone else's counts: seen in the
+        // last 30 days, and not an older row of THIS same iPad (a reinstall gets a
+        // new install ID, and its old parent row stays behind — seen live, 2026-10-03,
+        // where a stale row hid this warning on a family with no other parent device).
         let mine = "parent_\(DeviceIdentity.installID)"
-        return household.parentDevices.contains { $0.id != mine }
+        let recent = Date().addingTimeInterval(-30 * 86_400)
+        return household.parentDevices.contains {
+            $0.id != mine && $0.lastSeenAt > recent
+                && !($0.kind == DeviceIdentity.kind && $0.name == DeviceIdentity.friendlyName)
+        }
     }
 
     private var selectedChild: Profile? {
