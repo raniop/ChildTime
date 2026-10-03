@@ -11537,6 +11537,28 @@
         }
       }
     },
+    "אֵין עֲדַיִן שִׂיחוֹת": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا توجد محادثات بعد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No chats yet"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока нет чатов"
+          }
+        }
+      }
+    },
     "אֵין פְּרוֹפִיל פָּעִיל": {
       "localizations": {
         "ar": {
@@ -21873,6 +21895,28 @@
         }
       }
     },
+    "הַהוֹדָעָה לֹא נִשְׁלְחָה — נַסּוּ שׁוּב": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم تُرسَل الرسالة — حاولوا مجددًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The message wasn't sent — please try again"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сообщение не отправлено — попробуйте ещё раз"
+          }
+        }
+      }
+    },
     "הַהוֹדָעָה שֶׁלָּכֶם": {
       "localizations": {
         "ar": {
@@ -24979,6 +25023,28 @@
         }
       }
     },
+    "הַתְּשׁוּבָה לֹא נִשְׁלְחָה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم يُرسَل الرد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The reply wasn't sent"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответ не отправлен"
+          }
+        }
+      }
+    },
     "הַתְּשׁוּבָה מִתְחַבֵּאת בַּקֶּטַע — חַפֵּשׂ בּוֹ אֶת הַמִּלִּים מֵהַשְּׁאֵלָה.": {
       "localizations": {
         "ar": {
@@ -25613,6 +25679,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "квадрат"
+          }
+        }
+      }
+    },
+    "הָשֵׁב": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ردّ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответить"
           }
         }
       }
@@ -35387,6 +35475,28 @@
         }
       }
     },
+    "כִּתְבוּ הוֹדָעָה…": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اكتبوا رسالة…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a message…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Напишите сообщение…"
+          }
+        }
+      }
+    },
     "כִּתְבוּ כָּאן…": {
       "localizations": {
         "ar": {
@@ -36401,6 +36511,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Всё остальное останется закрытым. Когда время выйдет, приложения закроются сами."
+          }
+        }
+      }
+    },
+    "כָּל הַשִּׂיחוֹת": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كل المحادثات"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All chats"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все чаты"
           }
         }
       }
@@ -42889,6 +43021,28 @@
         }
       }
     },
+    "מִשְׁפָּחָה לְלֹא שֵׁם": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عائلة بلا اسم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unnamed family"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Семья без названия"
+          }
+        }
+      }
+    },
     "מִשְׁקְפֵי 3D": {
       "localizations": {
         "ar": {
@@ -47839,6 +47993,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вернёмся к ней чуть позже 💪"
+          }
+        }
+      }
+    },
+    "נַחֲזֹר אֲלֵיכֶם בְּהֶקְדֵּם": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سنعود إليكم قريبًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll get back to you soon"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мы скоро вам ответим"
           }
         }
       }
@@ -53252,6 +53428,28 @@
         }
       }
     },
+    "פִּתְחוּ אֶת הַשִּׂיחָה בָּאַפְּלִיקַצְיָה וְנַסּוּ שׁוּב.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "افتحوا المحادثة في التطبيق وحاولوا مجددًا."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the chat in the app and try again."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Откройте чат в приложении и попробуйте снова."
+          }
+        }
+      }
+    },
     "פִּתְחוּ אֶת טוֹפִי בָּאַיְפוֹן פַּעַם אַחַת — וְהַמִּשְׁפָּחָה תּוֹפִיעַ כָּאן": {
       "localizations": {
         "ar": {
@@ -54858,6 +55056,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Выйти из детского режима"
+          }
+        }
+      }
+    },
+    "צֶוֶת טוֹפִּי": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فريق Tofy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy team"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Команда Tofy"
           }
         }
       }
@@ -59221,6 +59441,28 @@
         }
       }
     },
+    "שְׁלַח": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إرسال"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправить"
+          }
+        }
+      }
+    },
     "שְׁלַח לָנוּ": {
       "localizations": {
         "ar": {
@@ -59897,6 +60139,28 @@
         }
       }
     },
+    "שִׂיחָה עִם צֶוֶת טוֹפִּי": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "محادثة مع فريق Tofy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat with the Tofy team"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чат с командой Tofy"
+          }
+        }
+      }
+    },
     "שֵׁם": {
       "localizations": {
         "ar": {
@@ -60423,6 +60687,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Привет 👋"
+          }
+        }
+      }
+    },
+    "שָׁלוֹם! כָּאן צֶוֶת טוֹפִּי 👋 אֵיךְ אֶפְשָׁר לַעֲזֹר?": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مرحبًا! معكم فريق Tofy 👋 كيف يمكننا المساعدة؟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hi! This is the Tofy team 👋 How can we help?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здравствуйте! Это команда Tofy 👋 Чем можем помочь?"
           }
         }
       }
@@ -63377,6 +63663,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "✅ Выполнено — подтвердите"
+          }
+        }
+      }
+    },
+    "✅ הַתְּשׁוּבָה נִשְׁלְחָה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✅ أُرسل الرد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✅ Reply sent"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✅ Ответ отправлен"
           }
         }
       }

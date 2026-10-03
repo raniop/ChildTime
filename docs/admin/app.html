@@ -148,7 +148,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261003113608";
+const PAGE_STAMP = "20261003164552";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -984,7 +984,8 @@ async function content() {
 // ---------------- 7 · support ----------------
 let supTab = "open";
 async function support() {
-  $("main").innerHTML = `<div class="top"><h3 id="supH">תמיכה</h3><div class="filters" id="supFilters"><span class="chip ${supTab === "open" ? "on" : ""}" data-s="open">פתוחות</span><span class="chip ${supTab === "done" ? "on" : ""}" data-s="done">נענו</span><span class="chip ${supTab === "feedback" ? "on" : ""}" data-s="feedback">פידבק</span><span class="chip ${supTab === "waitlist" ? "on" : ""}" data-s="waitlist" id="wl">🧪 בטא והמתנה</span></div></div><div class="card"><div class="tblwrap" id="supTbl"><span class="spin"></span></div></div>`;
+  $("main").innerHTML = `<div class="top"><h3 id="supH">תמיכה</h3><div class="filters" id="supFilters"><span class="chip ${supTab === "chat" ? "on" : ""}" data-s="chat" id="chatChip">💬 צ׳אט</span><span class="chip ${supTab === "open" ? "on" : ""}" data-s="open">פתוחות</span><span class="chip ${supTab === "done" ? "on" : ""}" data-s="done">נענו</span><span class="chip ${supTab === "feedback" ? "on" : ""}" data-s="feedback">פידבק</span><span class="chip ${supTab === "waitlist" ? "on" : ""}" data-s="waitlist" id="wl">🧪 בטא והמתנה</span></div></div><div class="card"><div class="tblwrap" id="supTbl"><span class="spin"></span></div></div>`;
+  if (supTab === "chat") { document.querySelectorAll("#supFilters [data-s]").forEach((c) => c.onclick = () => { supTab = c.dataset.s; support(); }); return supportChat(); }
   try { const r = await call("adminListSupport"); $("wl").textContent = "🧪 בטא והמתנה (" + r.waitlist + ")"; const openN = r.items.filter((i) => i.status === "open").length;
     if (supTab === "waitlist") { $("supH").textContent = "בטא ורשימת המתנה · " + r.waitlist; $("navSupport").textContent = openN ? openN + " פתוחות" : ""; waitlist(); document.querySelectorAll("#supFilters [data-s]").forEach((c) => c.onclick = () => { supTab = c.dataset.s; support(); }); return; } $("supH").textContent = openN ? `תמיכה · ${openN} פתוחות` : "תמיכה"; $("navSupport").textContent = openN ? openN + " פתוחות" : "";
     const famOf = (i) => (FAM && (FAM.families || []).find((f) => (f.fullId || f.householdID || f.id) === i.householdID)) || null;
@@ -995,6 +996,34 @@ async function support() {
     document.querySelectorAll("[data-fam]").forEach((a) => a.onclick = () => { famFilter = "all"; famQuery = ""; });
     document.querySelectorAll("#supFilters [data-s]").forEach((c) => c.onclick = () => { supTab = c.dataset.s; support(); });
   } catch (e) { $("supTbl").textContent = e.message; }
+}
+
+// 💬 The in-app support chat: every family's thread, newest first. Replies go
+// through the `supportReply` callable — the parent gets a push from
+// "צוות טופי" (never a team member's name).
+let chatOpen = null;
+async function supportChat() {
+  $("supTbl").innerHTML = '<span class="spin"></span>';
+  let chats = [];
+  try { chats = (await call("adminSupportChats")).chats || []; } catch (e) { $("supTbl").textContent = e.message; return; }
+  const waiting = chats.filter((c) => c.needsReply).length;
+  $("chatChip").textContent = waiting ? `💬 צ׳אט (${waiting})` : "💬 צ׳אט";
+  $("supH").textContent = waiting ? `תמיכה · ${waiting} מחכות לתשובה` : "תמיכה";
+  if (!chats.length) { $("supTbl").innerHTML = '<div class="empty">אין עדיין שיחות.</div>'; return; }
+  const list = chats.map((c) => `<div class="q" data-chat="${esc(c.householdID)}" style="cursor:pointer;${chatOpen === c.householdID ? "background:rgba(255,255,255,.12);border-radius:10px;" : ""}">${c.needsReply ? '<span class="chip pink" style="padding:1px 7px;font-size:10px">מחכה</span> ' : ""}<b>${esc(c.familyName || "משפחה ללא שם")}</b>${c.kidsSummary ? " · " + esc(c.kidsSummary) : ""}<div class="m">${c.lastFrom === "team" ? "↩︎ " : ""}${esc(c.lastText).slice(0, 140)} · ${when(c.lastAt)}</div></div>`).join("");
+  $("supTbl").innerHTML = `<div style="display:grid;grid-template-columns:minmax(220px,1fr) 2fr;gap:12px"><div>${list}</div><div id="chatThread">${chatOpen ? '<span class="spin"></span>' : '<div class="empty">בחרו שיחה.</div>'}</div></div>`;
+  document.querySelectorAll("[data-chat]").forEach((el) => el.onclick = () => { chatOpen = el.dataset.chat; supportChat(); });
+  if (chatOpen) chatThread(chatOpen, chats.find((c) => c.householdID === chatOpen));
+}
+async function chatThread(hid, c) {
+  let msgs = [];
+  try { msgs = (await call("adminSupportThread", { householdID: hid })).messages || []; } catch (e) { $("chatThread").textContent = e.message; return; }
+  const bubble = (m) => { const team = m.from === "team"; return `<div style="display:flex;justify-content:${team ? "flex-start" : "flex-end"};margin:6px 0"><div style="max-width:80%;padding:8px 12px;border-radius:14px;white-space:pre-wrap;${team ? "background:rgba(255,255,255,.92);color:#2B2D42" : "background:linear-gradient(135deg,#FFD23F,#FFB84D);color:#3A2600"}"><div style="font-size:11px;opacity:.7">${esc(team ? (m.senderName || "צוות טופי") : (m.senderName || (c && c.parentName) || "הורה"))} · ${when(m.at)}</div>${esc(m.text)}</div></div>`; };
+  $("chatThread").innerHTML = `<div class="card"><b>${esc((c && c.familyName) || "משפחה")}</b>${c && c.kidsSummary ? ` · <span class="m">${esc(c.kidsSummary)}</span>` : ""}<div id="chatMsgs" style="max-height:52vh;overflow:auto;margin-top:8px">${msgs.map(bubble).join("") || '<div class="empty">אין הודעות.</div>'}</div>
+    <textarea id="chatReply" maxlength="2000" placeholder="תשובה מצוות טופי…"></textarea><div style="margin-top:6px"><button class="btn" id="chatSend">שלח</button></div></div>`;
+  const box = $("chatMsgs"); box.scrollTop = box.scrollHeight;
+  $("chatSend").onclick = async () => { const text = $("chatReply").value.trim(); if (!text) return; $("chatSend").disabled = true;
+    try { await call("supportReply", { householdID: hid, text }); toast("נשלח"); supportChat(); } catch (e) { toast("נכשל: " + e.message); $("chatSend").disabled = false; } };
 }
 
 // everyone who left an email on tofyapp.com — newest first, with one click to

@@ -335,6 +335,47 @@ service cloud.firestore {
       allow delete: if householdHasMe(resource.data.householdID);
     }
 
+    // 💬 Support chat — parents ↔ צוות טופי (Rani + Amit), in the app.
+    // The chat doc's summary (lastText/lastAt/lastFrom/needsReply/familyName…)
+    // is written ONLY by the onSupportMessage Cloud Function (admin SDK). A
+    // parent may read their own family's chat, clear their unread counter, and
+    // add messages AS A PARENT; the team (listed founder accounts) reads every
+    // chat and adds messages AS THE TEAM. Child devices are household members
+    // (anonymous uids in parentUIDs) — they may read, but never write; the app
+    // also never shows them the chat.
+    function supportTeam() {
+      return signedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() in ['ranioph@gmail.com', 'amitgolans@gmail.com']
+        && (request.auth.token.email_verified == true
+            || request.auth.token.firebase.sign_in_provider in ['google.com', 'apple.com']);
+    }
+    function supportMessageOK(from) {
+      return request.resource.data.keys().hasOnly(['text', 'from', 'senderUID', 'senderName', 'at'])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 2000
+        && request.resource.data.from == from
+        && request.resource.data.senderUID == request.auth.uid
+        && (!('senderName' in request.resource.data)
+            || (request.resource.data.senderName is string && request.resource.data.senderName.size() <= 80))
+        && request.resource.data.at == request.time;
+    }
+    match /supportChats/{hid} {
+      allow read: if supportTeam() || householdHasMe(hid);
+      allow update: if householdHasMe(hid)
+                    && request.auth.token.firebase.sign_in_provider != 'anonymous'
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['parentUnread', 'parentReadAt']);
+
+      match /messages/{mid} {
+        allow read: if supportTeam() || householdHasMe(hid);
+        allow create: if (householdHasMe(hid)
+                          && request.auth.token.firebase.sign_in_provider != 'anonymous'
+                          && supportMessageOK('parent'))
+                      || (supportTeam() && supportMessageOK('team'));
+      }
+    }
+
     // Early-access signups from the marketing site (tofyapp.com). Anyone may
     // CREATE one (no account needed), with light validation to curb junk; the
     // collection is never readable from a client — view leads in the console.

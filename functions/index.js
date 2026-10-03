@@ -5137,3 +5137,193 @@ exports.adminSyncInstalls = onCall({ secrets: [ASC_KEY_P8], timeoutSeconds: 300,
   requireAdmin(request);
   return await syncAppStoreInstalls();
 });
+
+// ============================================================================
+// 💬 Support chat — parents ↔ צוות טופי, inside the app (no links out: Kids
+// Category 1.3). One chat per household:
+//   supportChats/{householdID}              — summary, maintained HERE only
+//   supportChats/{householdID}/messages/{id} — { text, from, senderUID, senderName, at }
+// A parent message pushes the team (Rani + Amit, the same ADMIN_EMAILS →
+// parents/{uid}.fcmTokens path the new-family push uses) with an inline
+// "הָשֵׁב" text field (category SUPPORT_CHAT); the reply comes back through
+// `supportReply`. A team message pushes the family's parent devices. Parents
+// never see a team member's name — not in the app and not in a push.
+// ============================================================================
+const SUPPORT_TEXT_MAX = 2000;
+const SUPPORT_GRADES_HE = ["גן", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳", "ט׳", "י׳", "י״א", "י״ב"];
+const supportGradeHe = (g) => (g == null || g === "" ? "" : (Number(g) < 0 ? "טרום־חובה" : (Number(g) === 0 ? "גן" : `כיתה ${SUPPORT_GRADES_HE[Math.min(Number(g), 12)] || g}`)));
+
+// The team, by the signed-in account: a listed email that Firebase verified,
+// or one that came from Google / Apple (they vouch for the address).
+function supportTeamEmail(request) {
+  const t = (request.auth && request.auth.token) || {};
+  const email = String(t.email || "").toLowerCase();
+  const provider = (t.firebase && t.firebase.sign_in_provider) || "";
+  const trusted = t.email_verified === true || provider === "google.com" || provider === "apple.com";
+  if (!email || !trusted || !ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(email)) {
+    throw new HttpsError("permission-denied", "Not a Tofy team account.");
+  }
+  return email;
+}
+
+// Who is writing in, for the team's eyes only: the family's name and its kids.
+async function supportFamilyInfo(hid) {
+  const hhSnap = await db.collection("households").doc(hid).get().catch(() => null);
+  const hh = (hhSnap && hhSnap.exists && hhSnap.data()) || {};
+  const kidsSnap = await db.collection("children").where("householdID", "==", hid).get().catch(() => ({ docs: [] }));
+  const byID = {};
+  for (const d of kidsSnap.docs || []) { const k = d.data() || {}; if (!k.deletedAt) byID[d.id] = k; }
+  const order = (hh.childOrder || hh.childIDs || []).filter((id) => byID[id]);
+  const ids = [...order, ...Object.keys(byID).filter((id) => !order.includes(id))];
+  const kids = ids.map((id) => byID[id]).filter((k) => k && k.name);
+  const familyName = hh.familyName || hh.familyLabel ||
+    (kids.length ? `המשפחה של ${kids.map((k) => k.name).slice(0, 3).join(", ")}` : "משפחה ללא שם");
+  const first = kids[0];
+  const firstGrade = first ? supportGradeHe(first.grade) : "";
+  return {
+    familyName,
+    firstKid: first ? (firstGrade ? `${first.name}, ${firstGrade}` : first.name) : "",
+    kidsSummary: kids.map((k) => { const g = supportGradeHe(k.grade); return g ? `${k.name} (${g.replace("כיתה ", "")})` : k.name; }).join(", "),
+  };
+}
+
+// Rani's and Amit's phones (their own parent accounts in the app).
+async function supportTeamTokens() {
+  const tokens = [];
+  for (const adminEmail of ADMIN_EMAILS) {
+    try {
+      const u = await admin.auth().getUserByEmail(adminEmail);
+      tokens.push(...(await tokensForUID(u.uid)));
+    } catch (e) {
+      console.warn("[support] no team account for", adminEmail, e && e.code);
+    }
+  }
+  return [...new Set(tokens)];
+}
+
+// Parent push when the team answered. Never names who answered.
+function supportReplyMessage(text, lang) {
+  const body = String(text || "").slice(0, 900);
+  if (lang === "en") return { title: "The Tofy team replied 💬", body };
+  if (lang === "ru") return { title: "Команда Tofy ответила вам 💬", body };
+  if (lang === "ar") return { title: "ردّ عليكم فريق Tofy 💬", body };
+  return { title: "צוות טופי ענו לכם 💬", body };
+}
+
+exports.onSupportMessage = onDocumentCreated(
+  { document: "supportChats/{hid}/messages/{mid}", timeoutSeconds: 60 },
+  async (event) => {
+    const hid = event.params.hid;
+    const msg = (event.data && event.data.data()) || {};
+    const text = String(msg.text || "").trim().slice(0, SUPPORT_TEXT_MAX);
+    if (!text) return;
+    const chatRef = db.collection("supportChats").doc(hid);
+    const FV = admin.firestore.FieldValue;
+    const lastAt = msg.at || FV.serverTimestamp();
+
+    if (msg.from === "parent") {
+      const info = await supportFamilyInfo(hid);
+      await chatRef.set({
+        householdID: hid,
+        familyName: info.familyName,
+        kidsSummary: info.kidsSummary,
+        parentName: String(msg.senderName || "").slice(0, 80),
+        lastText: text.slice(0, 300),
+        lastAt,
+        lastFrom: "parent",
+        needsReply: true,
+        parentUnread: 0,                  // they are looking at the chat right now
+      }, { merge: true });
+
+      const tokens = await supportTeamTokens();
+      if (!tokens.length) { console.warn("[support] no team tokens for", hid); return; }
+      const title = `💬 ${info.familyName}${info.firstKid ? ` · ${info.firstKid}` : ""}`;
+      const res = await admin.messaging().sendEachForMulticast({
+        tokens,
+        notification: { title, body: text.slice(0, 900) },
+        data: { type: "support-chat", audience: "team", householdID: hid },
+        apns: { payload: { aps: { "sound": "default", "category": "SUPPORT_CHAT", "thread-id": `support-${hid}` } } },
+      });
+      console.log("[support] parent message", hid, "→ team push", res.successCount, "/", tokens.length);
+      return;
+    }
+
+    if (msg.from === "team") {
+      await chatRef.set({
+        householdID: hid,
+        lastText: text.slice(0, 300),
+        lastAt,
+        lastFrom: "team",
+        lastTeamName: String(msg.senderName || "").slice(0, 40),   // team inbox only
+        needsReply: false,
+        parentUnread: FV.increment(1),
+      }, { merge: true });
+
+      // The family's parent devices — minus the replying team member's own
+      // phones (Rani answering in his own family must not ping himself).
+      let tokens = await tokensForHousehold(hid);
+      if (msg.senderUID) {
+        const mine = new Set(await tokensForUID(String(msg.senderUID)));
+        tokens = tokens.filter((t) => !mine.has(t));
+      }
+      if (!tokens.length) { console.log("[support] team reply", hid, "— no parent tokens"); return; }
+      const out = await sendEachLocalized(tokens, (lang) => ({
+        notification: supportReplyMessage(text, lang),
+        data: { type: "support-chat", audience: "parent", householdID: hid },
+        apns: { payload: { aps: { "sound": "default", "thread-id": "support" } } },
+      }));
+      console.log("[support] team reply", hid, "→ parent push", out.successCount, "/", tokens.length);
+    }
+  }
+);
+
+// The team answers — from the notification's inline reply (the app may be
+// woken in the background just for this, so one HTTPS call is sturdier than a
+// queued Firestore write) and from the admin panel. The message lands in the
+// thread; `onSupportMessage` then updates the summary and pushes the parent.
+exports.supportReply = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  supportTeamEmail(request);
+  const hid = String((request.data && request.data.householdID) || "");
+  const text = String((request.data && request.data.text) || "").trim();
+  if (!hid || hid.includes("/")) throw new HttpsError("invalid-argument", "householdID required.");
+  if (!text || text.length > SUPPORT_TEXT_MAX) throw new HttpsError("invalid-argument", "text must be 1–2000 characters.");
+  if (!(await db.collection("households").doc(hid).get()).exists) throw new HttpsError("not-found", "Household not found.");
+  const t = request.auth.token || {};
+  const given = String((request.data && request.data.senderName) || "").trim();
+  const fromToken = String(t.name || "").trim().split(/\s+/)[0] || "";
+  const senderName = (given || fromToken || "צוות טופי").slice(0, 40);
+  const ref = await db.collection("supportChats").doc(hid).collection("messages").add({
+    text,
+    from: "team",
+    senderUID: request.auth.uid,
+    senderName,
+    at: admin.firestore.FieldValue.serverTimestamp(),
+  });
+  return { ok: true, id: ref.id };
+});
+
+// Admin panel (tofyapp.com/admin → תמיכה → צ׳אט): the chat list and one thread.
+const supportTs = (v) => (v && typeof v.toMillis === "function" ? v.toMillis() : (Number(v) || 0));
+exports.adminSupportChats = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  supportTeamEmail(request);
+  const snap = await db.collection("supportChats").orderBy("lastAt", "desc").limit(200).get();
+  return {
+    chats: snap.docs.map((d) => {
+      const c = d.data() || {};
+      return { householdID: d.id, familyName: c.familyName || "", kidsSummary: c.kidsSummary || "", parentName: c.parentName || "",
+        lastText: c.lastText || "", lastFrom: c.lastFrom || "", lastAt: supportTs(c.lastAt), needsReply: c.needsReply === true };
+    }),
+  };
+});
+exports.adminSupportThread = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  supportTeamEmail(request);
+  const hid = String((request.data && request.data.householdID) || "");
+  if (!hid || hid.includes("/")) throw new HttpsError("invalid-argument", "householdID required.");
+  const snap = await db.collection("supportChats").doc(hid).collection("messages").orderBy("at", "asc").limit(500).get();
+  return {
+    messages: snap.docs.map((d) => {
+      const m = d.data() || {};
+      return { id: d.id, text: m.text || "", from: m.from || "", senderName: m.senderName || "", at: supportTs(m.at) };
+    }),
+  };
+});

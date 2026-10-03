@@ -79,6 +79,8 @@ struct ParentDashboardView: View {
     /// Live remote-lock status sheet — real send/ack progress, not a static alert.
     @State private var commandStatus: RemoteCommandStatusRequest?
     @State private var showingFeedback = false
+    /// 💬 Live support chat (the old feedback form's successor).
+    @ObservedObject private var support = SupportChatStore.shared
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
     /// 📱 "This iPad is the child's" — opened from the QR sheet on a parent iPad.
@@ -320,7 +322,9 @@ struct ParentDashboardView: View {
                             // (replaces the floating bubble that overlapped a child
                             // card on smaller screens).
                             if isRoot {
-                                Button { showingFeedback = true } label: {
+                                // Now opens the live chat (Rani); the old email
+                                // form (ParentFeedbackView) stays in the code.
+                                Button { openSupportChat() } label: {
                                     Label(tr("פִידְבֶּק וְהַצָּעוֹת"), systemImage: "text.bubble.fill")
                                         .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                                         .foregroundStyle(.white.opacity(0.75))
@@ -355,6 +359,8 @@ struct ParentDashboardView: View {
                             }
                         }
                         .padding(AppSpacing.lg)
+                        // Room to scroll the last card out from under the 💬 button.
+                        .padding(.bottom, showsSupport ? 64 : 0)
                         .frame(maxWidth: 720)
                         // Pin the content to EXACTLY the scroll container's width.
                         // A vertical ScrollView can only drift sideways if its
@@ -386,6 +392,8 @@ struct ParentDashboardView: View {
                     // matching the container fixes it so it scrolls vertically only.
                     .environment(\.layoutDirection, .appMirrored)
                 }
+                // 💬 Chat with צוות טופי (+ the team's inbox on Rani's / Amit's phones).
+                if showsSupport { supportCorner }
                 // 📣 The in-app campaign pop-up — a sheet over the dimmed home.
                 if isRoot, let c = campaigns.popup { campaignPopupHost(c) }
             }
@@ -447,6 +455,7 @@ struct ParentDashboardView: View {
             // modifier chain small enough for the type-checker.
             .overlay(rootAlertsHost)
             .overlay(paywallHost)
+            .overlay(supportSheetHost)
             .sheet(isPresented: $showingKidMode) {
                 KidModeEntryView()
                     .environment(\.layoutDirection, .app)
@@ -1767,6 +1776,45 @@ struct ParentDashboardView: View {
     /// 👑 Family subscription host — its own zero-size view so the paywall cover
     /// and the premium watcher never land on `body` or `rootAlertsHost`, both of
     /// which already sit at the type-checker's limit.
+    // MARK: - 💬 Support chat
+
+    /// Parents only — a real (non-anonymous) account on a parent device. Never
+    /// on a child's device or inside Kid Mode (a sheet over this screen).
+    private var showsSupport: Bool {
+        isRoot && auth.isRealAccount && settings.deviceRole != .child && !HouseholdManager.skipsCloudSync
+    }
+
+    private func openSupportChat() {
+        guard let hid = household.household?.id else { return }
+        support.route = .parent(householdID: hid)
+    }
+
+    private var supportCorner: some View {
+        SupportFloatingButtons(
+            showsInbox: SupportTeam.isCurrentUser,
+            onChat: { openSupportChat() },
+            onInbox: { support.route = .inbox }
+        )
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.bottom, AppSpacing.md)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+        .environment(\.layoutDirection, .app)
+        .task(id: household.household?.id) {
+            support.startParent(householdID: household.household?.id)
+            support.startTeamIfNeeded()
+        }
+    }
+
+    /// Hosts the chat sheet off the main modifier chain (type-checker budget).
+    private var supportSheetHost: some View {
+        Color.clear
+            .frame(width: 0, height: 0)
+            .allowsHitTesting(false)
+            .sheet(item: $support.route) { route in
+                SupportChatRouteView(route: route)
+            }
+    }
+
     private var paywallHost: some View {
         Color.clear
             .frame(width: 0, height: 0)

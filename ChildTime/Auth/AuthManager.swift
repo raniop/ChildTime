@@ -166,6 +166,7 @@ final class AuthManager: ObservableObject {
         // Stop remote sync first so we don't fire writes during teardown.
         RemoteSyncManager.shared.stop()
         HouseholdManager.shared.stop()
+        SupportChatStore.shared.stop()   // 💬 the next account sees only its own chat
         #if canImport(FirebaseAuth)
         try? Auth.auth().signOut()
         #endif

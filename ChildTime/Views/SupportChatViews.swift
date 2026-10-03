@@ -1,0 +1,498 @@
+import SwiftUI
+import Combine
+
+#if canImport(FirebaseFirestore)
+import FirebaseFirestore
+#endif
+
+// MARK: - Floating buttons (parent dashboard)
+
+/// 💬 The round chat button in the corner of the parent home — and, for the
+/// team's own accounts only, the green inbox button above it.
+struct SupportFloatingButtons: View {
+    @ObservedObject private var store = SupportChatStore.shared
+    let showsInbox: Bool
+    let onChat: () -> Void
+    let onInbox: () -> Void
+
+    var body: some View {
+        VStack(spacing: 12) {
+            if showsInbox {
+                Button {
+                    Haptic.light()
+                    onInbox()
+                } label: {
+                    Image(systemName: "tray.full.fill")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 50, height: 50)
+                        .background(AppGradient.success, in: Circle())
+                        .overlay(Circle().strokeBorder(.white.opacity(0.45), lineWidth: 1))
+                        .shadow(color: .black.opacity(0.28), radius: 10, y: 5)
+                        .overlay(alignment: .topTrailing) { badge(store.teamAwaitingReply) }
+                }
+                .buttonStyle(.juicy)
+                .accessibilityLabel(tr("כָּל הַשִּׂיחוֹת"))
+            }
+            Button {
+                Haptic.light()
+                onChat()
+            } label: {
+                Text("💬")
+                    .font(.system(size: 26))
+                    .frame(width: 58, height: 58)
+                    .background(AppGradient.gold, in: Circle())
+                    .overlay(Circle().strokeBorder(.white.opacity(0.6), lineWidth: 1.5))
+                    .shadow(color: .black.opacity(0.3), radius: 12, y: 6)
+                    .overlay(alignment: .topTrailing) { badge(store.parentUnread) }
+            }
+            .buttonStyle(.juicy)
+            .accessibilityLabel(tr("שִׂיחָה עִם צֶוֶת טוֹפִּי"))
+        }
+    }
+
+    @ViewBuilder private func badge(_ n: Int) -> some View {
+        if n > 0 {
+            Text(n > 99 ? "99+" : "\(n)")
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(.white)
+                .padding(.horizontal, 6)
+                .frame(minWidth: 22, minHeight: 22)
+                .background(Capsule().fill(Color(hex: "FF3B4E")))
+                .overlay(Capsule().strokeBorder(.white, lineWidth: 1.5))
+                .offset(x: 6, y: -6)
+                .accessibilityHidden(true)
+        }
+    }
+}
+
+// MARK: - Presenting a route
+
+/// The sheet content for a `SupportChatRoute`.
+struct SupportChatRouteView: View {
+    let route: SupportChatRoute
+
+    var body: some View {
+        Group {
+            switch route {
+            case .parent(let hid):
+                NavigationStack { SupportChatView(householdID: hid, mode: .parent, showsClose: true) }
+            case .inbox:
+                SupportInboxView()
+            case .teamThread(let hid):
+                NavigationStack {
+                    SupportChatView(householdID: hid, mode: .team, showsClose: true)
+                }
+            }
+        }
+        .environment(\.layoutDirection, .app)
+    }
+}
+
+// MARK: - The thread
+
+/// Live messages of one family's thread.
+@MainActor
+final class SupportThreadModel: ObservableObject {
+    @Published private(set) var messages: [SupportMessage] = []
+    @Published private(set) var loaded = false
+    #if canImport(FirebaseFirestore)
+    private var listener: ListenerRegistration?
+    #endif
+
+    func start(householdID: String) {
+        #if canImport(FirebaseFirestore)
+        guard listener == nil, !HouseholdManager.skipsCloudSync else { loaded = true; return }
+        // Unordered on the server, sorted here: our own message carries only an
+        // ESTIMATED server time until the write lands, and must still sit last.
+        listener = SupportChatStore.shared.messagesQuery(householdID: householdID)
+            .addSnapshotListener(includeMetadataChanges: true) { [weak self] snap, error in
+                if let error { print("[Support] thread listen failed: \(error.localizedDescription)") }
+                let list = (snap?.documents ?? []).compactMap { SupportMessage($0) }
+                    .sorted { ($0.at ?? .distantFuture) < ($1.at ?? .distantFuture) }
+                Task { @MainActor in
+                    self?.messages = list
+                    self?.loaded = true
+                }
+            }
+        #else
+        loaded = true
+        #endif
+    }
+
+    func stop() {
+        #if canImport(FirebaseFirestore)
+        listener?.remove(); listener = nil
+        #endif
+    }
+}
+
+/// One chat screen — the parent's with the team, or the team inside a family's
+/// thread. "Mine" sits on the trailing side in gold; the other side on the
+/// leading side in light bubbles with a small name line. On the PARENT side the
+/// name line is always "צֶוֶת טוֹפִּי" — never who on the team wrote.
+struct SupportChatView: View {
+    enum Mode { case parent, team }
+
+    let householdID: String
+    let mode: Mode
+    var showsClose: Bool = false
+
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var model = SupportThreadModel()
+    @ObservedObject private var store = SupportChatStore.shared
+    @State private var draft = ""
+    @State private var sending = false
+    @State private var failed = false
+    @FocusState private var focused: Bool
+
+    private var summary: SupportChatSummary? { store.teamChats.first { $0.id == householdID } }
+
+    private var title: String {
+        switch mode {
+        case .parent: return tr("צֶוֶת טוֹפִּי")
+        case .team:
+            let name = summary?.familyName ?? ""
+            return name.isEmpty ? tr("מִשְׁפָּחָה לְלֹא שֵׁם") : name
+        }
+    }
+    private var subtitle: String {
+        switch mode {
+        case .parent: return tr("נַחֲזֹר אֲלֵיכֶם בְּהֶקְדֵּם")
+        case .team: return summary?.kidsSummary ?? ""
+        }
+    }
+
+    private var canSend: Bool {
+        !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !sending
+    }
+
+    var body: some View {
+        ZStack {
+            GlassBackdrop()
+            VStack(spacing: 0) {
+                messageList
+                inputBar
+            }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .principal) { header }
+            if showsClose {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(tr("סְגוֹר")) { dismiss() }
+                        .foregroundStyle(.white)
+                }
+            }
+        }
+        .onAppear {
+            model.start(householdID: householdID)
+            store.visibleHouseholdID = householdID
+            if mode == .parent { store.markParentRead(householdID: householdID) }
+            clearDeliveredPushes()
+        }
+        .onDisappear {
+            model.stop()
+            if store.visibleHouseholdID == householdID { store.visibleHouseholdID = nil }
+        }
+    }
+
+    /// The chat is open — its banners in Notification Center have done their job.
+    private func clearDeliveredPushes() {
+        let hid = householdID
+        let center = UNUserNotificationCenter.current()
+        center.getDeliveredNotifications { list in
+            let ids = list.filter {
+                let info = $0.request.content.userInfo
+                return info["type"] as? String == "support-chat" && info["householdID"] as? String == hid
+            }.map(\.request.identifier)
+            if !ids.isEmpty { center.removeDeliveredNotifications(withIdentifiers: ids) }
+        }
+    }
+
+    private var header: some View {
+        VStack(spacing: 1) {
+            Text(title)
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+            if !subtitle.isEmpty {
+                Text(subtitle)
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    private var messageList: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 10) {
+                    if mode == .parent {
+                        // Rendered here, never stored — every chat opens with it.
+                        bubble(text: tr("שָׁלוֹם! כָּאן צֶוֶת טוֹפִּי 👋 אֵיךְ אֶפְשָׁר לַעֲזֹר?"),
+                               mine: false, name: tr("צֶוֶת טוֹפִּי"), at: nil, pending: false)
+                    }
+                    ForEach(model.messages) { m in
+                        let mine = (mode == .parent) == (m.from == .parent)
+                        bubble(text: m.text, mine: mine, name: mine ? nil : nameLine(for: m),
+                               at: m.at, pending: m.pending)
+                            .id(m.id)
+                    }
+                    Color.clear.frame(height: 1).id("bottom")
+                }
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.top, AppSpacing.md)
+                .padding(.bottom, AppSpacing.sm)
+                .frame(maxWidth: 720)
+                .frame(maxWidth: .infinity)
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .onAppear { scrollToBottom(proxy, animated: false) }
+            .onChangeCompat(of: model.messages.count) { _, _ in scrollToBottom(proxy, animated: true) }
+            .onChangeCompat(of: focused) { _, isOn in
+                if isOn { DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { scrollToBottom(proxy, animated: true) } }
+            }
+        }
+    }
+
+    private func scrollToBottom(_ proxy: ScrollViewProxy, animated: Bool) {
+        DispatchQueue.main.async {
+            if animated { withAnimation(.easeOut(duration: 0.25)) { proxy.scrollTo("bottom", anchor: .bottom) } }
+            else { proxy.scrollTo("bottom", anchor: .bottom) }
+        }
+    }
+
+    /// The small line above an incoming bubble.
+    private func nameLine(for m: SupportMessage) -> String {
+        switch mode {
+        case .parent:
+            return tr("צֶוֶת טוֹפִּי")       // never the team member's own name
+        case .team:
+            if m.from == .team { return m.senderName.isEmpty ? tr("צֶוֶת טוֹפִּי") : m.senderName }
+            if !m.senderName.isEmpty { return m.senderName }
+            if let p = summary?.parentName, !p.isEmpty { return p }
+            return tr("הוֹרֶה")
+        }
+    }
+
+    @ViewBuilder
+    private func bubble(text: String, mine: Bool, name: String?, at: Date?, pending: Bool) -> some View {
+        HStack(alignment: .bottom, spacing: 0) {
+            if mine { Spacer(minLength: 48) }
+            VStack(alignment: mine ? .trailing : .leading, spacing: 3) {
+                if let name {
+                    Text(name)
+                        .font(.system(size: 11.5, weight: .bold, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .padding(.horizontal, 6)
+                }
+                Text(text)
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundStyle(mine ? Color(hex: "3A2600") : AppColor.textOnLight)
+                    .multilineTextAlignment(.leading)
+                    .textSelection(.enabled)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .fill(mine ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.93)))
+                    )
+                    .shadow(color: .black.opacity(0.14), radius: 5, y: 2)
+                if let at {
+                    HStack(spacing: 4) {
+                        if pending { Image(systemName: "clock").font(.system(size: 9, weight: .bold)) }
+                        Text(Self.timeLabel(at))
+                    }
+                    .font(.system(size: 10.5, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.tertiary)
+                    .padding(.horizontal, 6)
+                }
+            }
+            if !mine { Spacer(minLength: 48) }
+        }
+    }
+
+    private static func timeLabel(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = LanguageStore.shared.current.locale
+        if Calendar.current.isDateInToday(date) {
+            f.dateStyle = .none
+        } else {
+            f.dateStyle = .short
+        }
+        f.timeStyle = .short
+        return f.string(from: date)
+    }
+
+    private var inputBar: some View {
+        VStack(spacing: 6) {
+            if failed {
+                Text(tr("הַהוֹדָעָה לֹא נִשְׁלְחָה — נַסּוּ שׁוּב"))
+                    .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.warn)
+            }
+            HStack(alignment: .bottom, spacing: 10) {
+                TextField(tr("כִּתְבוּ הוֹדָעָה…"), text: $draft, axis: .vertical)
+                    .lineLimit(1...5)
+                    .focused($focused)
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white)
+                    .tint(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 11)
+                    .glassPane(radius: 22, strength: 0.18, shadow: false)
+                    .onChangeCompat(of: draft) { _, v in
+                        if v.count > SupportChatStore.textLimit { draft = String(v.prefix(SupportChatStore.textLimit)) }
+                        if failed { failed = false }
+                    }
+                Button(action: send) {
+                    Group {
+                        if sending { ProgressView().tint(Color(hex: "3A2600")) }
+                        else {
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 18, weight: .heavy))
+                                .foregroundStyle(Color(hex: "3A2600"))
+                        }
+                    }
+                    .frame(width: 44, height: 44)
+                    .background(AppGradient.gold, in: Circle())
+                    .overlay(Circle().strokeBorder(.white.opacity(0.6), lineWidth: 1))
+                    .opacity(canSend || sending ? 1 : 0.5)
+                }
+                .buttonStyle(.juicy)
+                .disabled(!canSend)
+                .accessibilityLabel(tr("שְׁלַח"))
+            }
+        }
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.top, AppSpacing.sm)
+        .padding(.bottom, AppSpacing.sm)
+        .frame(maxWidth: 720)
+        .frame(maxWidth: .infinity)
+    }
+
+    private func send() {
+        let text = draft
+        guard canSend else { return }
+        sending = true
+        failed = false
+        draft = ""
+        Haptic.light()
+        Task {
+            let ok = await store.send(text, householdID: householdID, asTeam: mode == .team)
+            sending = false
+            if !ok {
+                // Nothing is lost: the text goes back into the field.
+                failed = true
+                if draft.isEmpty { draft = text }
+            }
+        }
+    }
+}
+
+// MARK: - The team's inbox
+
+/// "כָּל הַשִּׂיחוֹת" — every family that wrote in, newest first. A dot marks
+/// the chats whose last word is the parent's (waiting for us).
+struct SupportInboxView: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var store = SupportChatStore.shared
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                GlassBackdrop()
+                if store.teamChats.isEmpty {
+                    VStack(spacing: AppSpacing.md) {
+                        Text("📭").font(.system(size: 54))
+                        Text(tr("אֵין עֲדַיִן שִׂיחוֹת"))
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                    }
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 10) {
+                            ForEach(store.teamChats) { chat in
+                                NavigationLink {
+                                    SupportChatView(householdID: chat.id, mode: .team)
+                                } label: {
+                                    row(chat)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(AppSpacing.lg)
+                        .frame(maxWidth: 720)
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            }
+            .navigationTitle(tr("כָּל הַשִּׂיחוֹת"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(tr("סְגוֹר")) { dismiss() }
+                        .foregroundStyle(.white)
+                }
+            }
+        }
+        .tint(.white)
+        .onAppear { store.startTeamIfNeeded() }
+    }
+
+    private func row(_ chat: SupportChatSummary) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Circle()
+                .fill(chat.needsReply ? Color(hex: "FF3B4E") : .clear)
+                .frame(width: 10, height: 10)
+                .padding(.top, 6)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(chat.familyName.isEmpty ? tr("מִשְׁפָּחָה לְלֹא שֵׁם") : chat.familyName)
+                        .font(.system(size: 16, weight: chat.needsReply ? .heavy : .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                    Spacer(minLength: 8)
+                    if let at = chat.lastAt {
+                        Text(Self.relative(at))
+                            .font(.system(size: 11.5, weight: .semibold, design: .rounded))
+                            .foregroundStyle(GlassInk.tertiary)
+                    }
+                }
+                if !chat.kidsSummary.isEmpty {
+                    Text(chat.kidsSummary)
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .lineLimit(1)
+                }
+                Text((chat.lastFrom == "team" ? "↩︎ " : "") + chat.lastText)
+                    .font(.system(size: 13.5, weight: .medium, design: .rounded))
+                    .foregroundStyle(chat.needsReply ? GlassInk.primary : GlassInk.secondary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Image(systemName: AppSymbol.forwardChevron)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(GlassInk.tertiary)
+                .padding(.top, 4)
+        }
+        .padding(14)
+        .glassPane(radius: 18)
+        .contentShape(Rectangle())
+    }
+
+    private static func relative(_ date: Date) -> String {
+        let f = RelativeDateTimeFormatter()
+        f.locale = LanguageStore.shared.current.locale
+        f.unitsStyle = .short
+        return f.localizedString(for: date, relativeTo: Date())
+    }
+}

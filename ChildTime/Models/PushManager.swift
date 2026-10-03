@@ -156,6 +156,9 @@ extension PushManager {
         /// 🧹 A kid finished a chore — one-tap approve straight from the
         /// notification, no app launch.
         static let choreApproval = "CHORE_APPROVAL"
+        /// 💬 A parent wrote to the support chat — the team (Rani/Amit) can
+        /// answer straight from the notification's text field.
+        static let supportChat = "SUPPORT_CHAT"
     }
     enum Action {
         static let levelUpYes = "LEVELUP_YES"
@@ -165,6 +168,8 @@ extension PushManager {
         static let helpOptionB = "HELP_OPT_B"
         /// The parent approved the chore from the notification button.
         static let choreApprove = "CHORE_APPROVE"
+        /// The team typed a reply into a support-chat notification.
+        static let supportReply = "SUPPORT_REPLY"
     }
 
     /// Register interactive notification categories so the strength-insight push
@@ -210,7 +215,22 @@ extension PushManager {
             intentIdentifiers: [],
             options: [])
 
-        UNUserNotificationCenter.current().setNotificationCategories([cat, helpCat, choreCat])
+        // 💬 Support chat (team devices only receive it): an inline text reply.
+        // `.authenticationRequired` — a reply goes out in the team's name, so
+        // never from a locked phone in someone else's hand.
+        let supportReply = UNTextInputNotificationAction(
+            identifier: Action.supportReply,
+            title: tr("הָשֵׁב"),
+            options: [.authenticationRequired],
+            textInputButtonTitle: tr("שְׁלַח"),
+            textInputPlaceholder: tr("כִּתְבוּ הוֹדָעָה…"))
+        let supportCat = UNNotificationCategory(
+            identifier: Category.supportChat,
+            actions: [supportReply],
+            intentIdentifiers: [],
+            options: [])
+
+        UNUserNotificationCenter.current().setNotificationCategories([cat, helpCat, choreCat, supportCat])
     }
 
     /// 🧹 Approve a chore straight from the notification button. MUST be awaited
@@ -222,6 +242,14 @@ extension PushManager {
               let hh = userInfo["householdID"] as? String,
               let choreID = userInfo["choreID"] as? String else { return }
         await ChoreStore.shared.approveFromPush(householdID: hh, choreID: choreID)
+    }
+
+    /// 💬 The team answered a parent from the notification's text field. MUST be
+    /// awaited from `didReceive` — the app may be awake only for this.
+    func handleSupportReply(_ actionID: String, typed: String?, userInfo: [AnyHashable: Any]) async {
+        guard actionID == Action.supportReply, let typed,
+              let hid = userInfo["householdID"] as? String else { return }
+        _ = await SupportChatStore.shared.replyFromNotification(householdID: hid, text: typed)
     }
 
     /// Apply the parent's tapped answer: the option they kept stays on the child's
@@ -305,7 +333,16 @@ extension PushManager: UNUserNotificationCenterDelegate {
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter,
                                             willPresent notification: UNNotification,
                                             withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        DispatchQueue.main.async { completionHandler([.banner, .sound]) }
+        let info = notification.request.content.userInfo
+        let supportHH = info["type"] as? String == "support-chat" ? info["householdID"] as? String : nil
+        DispatchQueue.main.async {
+            // 💬 The chat it is about is already on screen — the bubble is the news.
+            if let supportHH, MainActor.assumeIsolated({ SupportChatStore.shared.visibleHouseholdID == supportHH }) {
+                completionHandler([])
+                return
+            }
+            completionHandler([.banner, .sound])
+        }
     }
 
     // Handle a tapped notification / action button (e.g. "כן, העלו רמה").
@@ -314,6 +351,7 @@ extension PushManager: UNUserNotificationCenterDelegate {
                                             withCompletionHandler completionHandler: @escaping () -> Void) {
         let actionID = response.actionIdentifier
         let info = response.notification.request.content.userInfo
+        let typed = (response as? UNTextInputNotificationResponse)?.userText
         Task { @MainActor in
             PushManager.shared.handleLevelUpDecision(actionID, userInfo: info)
             // A tapped live-game invite → remember the game id; the home screen
@@ -340,6 +378,12 @@ extension PushManager: UNUserNotificationCenterDelegate {
             // child's listener never sees the parent's answer.
             await PushManager.shared.handleParentHelpDecision(actionID, userInfo: info)
             await PushManager.shared.handleChoreApproval(actionID, userInfo: info)
+            // 💬 Support chat: a tap opens the thread; a typed reply is sent.
+            if info["type"] as? String == "support-chat",
+               actionID == UNNotificationDefaultActionIdentifier {
+                SupportChatStore.shared.open(fromPush: info)
+            }
+            await PushManager.shared.handleSupportReply(actionID, typed: typed, userInfo: info)
             completionHandler()   // on main — UIKit's post-tap snapshot work requires it
         }
     }
