@@ -137,19 +137,29 @@ struct LeaderboardView: View {
                 } label: {
                     HStack(spacing: 10) {
                         Text("🔔").font(.system(size: 24))
+                        // Russian/Arabic run long ("Приглашение на турнир от …"):
+                        // both lines may wrap to two rather than be cut, and
+                        // the text gets the room before the button (QA round 3).
                         VStack(alignment: .leading, spacing: 1) {
                             // No verb — we don't know the HOST's gender.
                             Text(tr("הַזְמָנָה לְטוּרְנִיר מֵ\(invite.hostName)!"))
                                 .font(.system(size: 14.5, weight: .heavy, design: .rounded))
-                                .lineLimit(1).minimumScaleFactor(0.8)
+                                .lineLimit(2).minimumScaleFactor(0.85)
+                                .fixedSize(horizontal: false, vertical: true)
                             Text(tr("הַמִּשְׂחָק מַתְחִיל עַכְשָׁו — לַחֲצוּ לְהִצְטָרֵף"))
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                                 .foregroundStyle(GlassInk.secondary)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
-                        Spacer(minLength: 4)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .layoutPriority(1)
                         Text(tr("הִצְטָרְפוּ"))
                             .font(.system(size: 13, weight: .heavy, design: .rounded))
                             .foregroundStyle(Color(hex: "4B3FBF"))
+                            .lineLimit(1)
+                            .fixedSize()
                             .padding(.horizontal, 12).padding(.vertical, 8)
                             .background(Capsule().fill(.white.opacity(0.92)))
                     }
@@ -171,12 +181,18 @@ struct LeaderboardView: View {
                     VStack(alignment: .leading, spacing: 1) {
                         Text(tr("טוּרְנִיר חַי עִם חֲבֵרִים"))
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .lineLimit(2).minimumScaleFactor(0.85)
+                            .fixedSize(horizontal: false, vertical: true)
+                        // Two lines rather than "…" in Russian/Arabic (QA round 3).
                         Text(tr("מַזְמִינִים, כֻּלָּם עוֹנִים בְּאוֹתוֹ זְמַן — מִי הֲכִי מָהִיר?"))
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
-                            .lineLimit(1).minimumScaleFactor(0.8)
+                            .lineLimit(2).minimumScaleFactor(0.9)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    Spacer(minLength: 4)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .layoutPriority(1)
                     Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold))
                 }
                 .foregroundStyle(GlassInk.primary)

@@ -87,12 +87,41 @@ struct WorldMapView: View {
     /// of the tuned constants below, which assume a tall iPhone.
     @ObservedObject private var display = DisplayGeometry.shared
     @State private var bottomPanelHeight: CGFloat = 0
-    /// Where the header pane really ends. The buddy's zone starts under it on a
-    /// short screen — the open foldable (867×635) parked it on the daily
-    /// challenge, because the tuned 230/300 assume a taller screen.
-    @State private var headerBottom: CGFloat = 0
+    /// The bottom panel's width — decides whether the docked buddy fits beside
+    /// the CTA pill (iPad) or the pill must leave it a gutter (iPhone).
+    @State private var bottomPanelWidth: CGFloat = 0
     private var isShort: Bool { display.isShort }
     private var companionSize: CGFloat { isCompact ? 90 : (isShort ? 96 : 120) }
+
+    // MARK: 🦊 The buddy's corner on the home
+    //
+    // The home buddy no longer wanders: anywhere in the old wander band was on
+    // top of the world grid (QA round 3 — it cut "עולם הכדורגל" on iPhone and sat
+    // on the bottom row on iPad). It rests in the bottom-trailing corner of the
+    // CTA panel instead, where only the scrim is underneath.
+
+    /// Gap between the screen edge and the docked buddy.
+    private var buddyDockEdge: CGFloat { isCompact ? AppSpacing.xs : AppSpacing.lg }
+    /// Its feet sit on the panel's own bottom padding.
+    private var buddyDockFeet: CGFloat { isShort ? AppSpacing.sm : AppSpacing.md }
+    /// What the CTA pill leaves free on its trailing side for the buddy. The
+    /// pill is at most 480pt and centred, so on an iPad the corner is free
+    /// anyway; on an iPhone the pill steps aside by the buddy's width.
+    private var buddyDockGutter: CGFloat {
+        guard !display.hasBarStrip, bottomPanelWidth > 0 else { return 0 }
+        let clearance = buddyDockEdge + companionSize + AppSpacing.xs
+        let pillEdge = max(AppSpacing.lg, (bottomPanelWidth - 480) / 2)
+        return pillEdge >= clearance ? 0 : clearance - AppSpacing.lg
+    }
+    /// The panel's content is at least as tall as the buddy (and the gift on
+    /// its head), so the scrim covers all of it and the grid never shows under
+    /// it. `topPad` is the panel's own top padding — the fade — which already
+    /// counts toward the height.
+    private func buddyDockMinHeight(topPad: CGFloat) -> CGFloat {
+        guard !display.hasBarStrip else { return 0 }
+        let gift = progress.dailyChestAvailable ? companionSize * 0.32 : 0
+        return max(0, companionSize * 1.3 + gift + 10 - topPad)
+    }
     // Glass look: a modest brand line heading the grid, not a poster.
     private var heroTitleSize: CGFloat { isCompact ? 34 : 40 }
 
@@ -396,7 +425,6 @@ struct WorldMapView: View {
                         .frame(maxWidth: worldGridMaxWidth)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.horizontal, homeHPad)
-                        .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("home")).maxY } action: { headerBottom = $0 }
                     // (The limited-time event banner is now a transient TOAST —
                     // see eventToastOverlay — instead of a permanent row here
                     // that ate a full line of the map all day.)
@@ -534,11 +562,12 @@ struct WorldMapView: View {
                     // Bottom inset just tall enough for the floating CTA panel
                     // (two pills + the protect-code line ≈ 180pt) with a small
                     // margin — 360 left a huge dead gap after the last row
-                    // (Rani, on-device). The companion floats and never needs
-                    // scroll room of its own.
+                    // (Rani, on-device). The companion sits inside the panel
+                    // and never needs scroll room of its own — but the panel is
+                    // now at least buddy-tall, so never clear less than it.
                     .padding(.bottom, isShort && bottomPanelHeight > 0
                              ? bottomPanelHeight + 8
-                             : (isCompact ? 220 : 190))
+                             : max(isCompact ? 220 : 190, bottomPanelHeight + 8))
                 }
             }
 
@@ -547,6 +576,10 @@ struct WorldMapView: View {
             VStack {
                 Spacer()
                 bottomCTAs
+                    // 🦊 Room for the docked buddy: as tall as it, and (iPhone)
+                    // stepped aside from its corner.
+                    .frame(minHeight: buddyDockMinHeight(topPad: isShort ? 26 : 48), alignment: .bottom)
+                    .padding(.trailing, buddyDockGutter)
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.top, isShort ? 26 : 48)
                     .padding(.bottom, isShort ? AppSpacing.sm : AppSpacing.md)
@@ -560,16 +593,19 @@ struct WorldMapView: View {
                             // stopping there left a hard seam against the gradient.
                             .ignoresSafeArea(edges: [.bottom, .horizontal])
                     )
-                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bottomPanelHeight = $0 }
+                    .onGeometryChange(for: CGSize.self) { $0.size } action: {
+                        bottomPanelHeight = $0.height
+                        bottomPanelWidth = $0.width
+                    }
             }
 
 
-            // Companion wanders the screen and is also draggable.
-            // On iPhone we keep the wander zone tighter so it doesn't park
-            // on top of world cards in the middle of the grid. On the foldable
-            // there is no free screen to wander in at all — it stood on
-            // "עולם הכדורגל" and cut its name — so the buddy moves into the
-            // rail (see `.sideRail`) and only its speech comes out.
+            // Companion rests in the bottom-trailing corner of the CTA panel
+            // (see "The buddy's corner" above) and can be dragged — it walks
+            // back a few seconds later. It no longer wanders: every spot it
+            // could wander to was over the world grid. On the foldable the
+            // buddy moves into the rail (see `.sideRail`) and only its speech
+            // comes out.
             if !display.hasBarStrip {
             FloatingCompanion(
                 controller: companion,
@@ -581,13 +617,8 @@ struct WorldMapView: View {
                 showGift: progress.dailyChestAvailable,
                 onGiftTap: { showDailyChest = true },
                 size: companionSize,
-                // Keep the buddy (and the gift above its head) BELOW the taller
-                // header card so it never parks on top of the stats.
-                topInset: isShort && headerBottom > 0
-                    ? max(headerBottom + companionSize * 0.35, 120)   // + the gift riding on its head
-                    : (isCompact ? 300 : 230),
-                bottomInset: isShort && bottomPanelHeight > 0 ? bottomPanelHeight : (isCompact ? 220 : 200),
-                horizontalInset: AppSpacing.lg
+                horizontalInset: buddyDockEdge,
+                dockBottomInset: buddyDockFeet
             )
             }
         }
@@ -603,8 +634,6 @@ struct WorldMapView: View {
                     .padding(.bottom, 8)
             }
         }
-        // 📐 The header and the floating buddy measure in the same space.
-        .coordinateSpace(name: "home")
         // 🎚 The kid's own rail in the foldable's bar strip: the three round
         // buttons that used to head the screen. ⭐ and 💎 stay on the screen
         // itself, beside the child's name (Rani) — they are part of the card,

@@ -104,11 +104,34 @@ struct ChildScreenTimeView: View {
 
     private var readout: String {
         let m = clamped(minutes)
+        let language = LanguageStore.shared.current
+        // 🇦🇪 Arabic: the hours word from the catalog read "2 ساعتان" (the dual
+        // already says "two"), and a line opening with a digit could come out
+        // with its numbers in the wrong order (QA round 3). The system's own
+        // formatter writes it the Arabic way — "ساعتان و30 دقيقة", Western
+        // digits from the app's locale — and the whole line is one explicit
+        // right-to-left unit (RLM + RLI … PDI), whatever direction the text
+        // view itself starts in. Hebrew is untouched; English/Russian keep the
+        // catalog's "and"/"и".
+        if language.isRightToLeft, language != .he, let span = Self.durationText(minutes: m, locale: language.locale) {
+            return "\u{200F}\u{2067}" + tr("\(span) בְּיוֹם") + "\u{2069}"
+        }
         let h = m / 60, r = m % 60
         let hWord = h == 1 ? tr("שָׁעָה") : tr("\(h) שָׁעוֹת")
         if h == 0 { return tr("\(r) דַּקּוֹת בְּיוֹם") }
         if r == 0 { return tr("\(hWord) בְּיוֹם") }
         return tr("\(hWord) וְ-\(r) דַּקּוֹת בְּיוֹם")
+    }
+
+    /// "ساعة و30 دقيقة" — hours + minutes spelled out by the system in `locale`.
+    private static func durationText(minutes: Int, locale: Locale) -> String? {
+        let f = DateComponentsFormatter()
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = locale
+        f.calendar = calendar
+        f.unitsStyle = .full
+        f.allowedUnits = [.hour, .minute]
+        return f.string(from: TimeInterval(minutes * 60))
     }
 
     private func clamped(_ v: Int) -> Int { min(Self.maxMinutes, max(Self.minMinutes, v)) }

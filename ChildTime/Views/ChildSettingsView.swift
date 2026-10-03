@@ -142,13 +142,26 @@ struct ChildSettingsView: View {
     }
 
     private func learningSection(_ p: Profile) -> some View {
-        Section {
-            row("🎚️", tr("רָמַת קֹשִׁי")) { difficulty = p }
-            row("🌐", tr("עוֹלָמוֹת פְּעִילִים")) { worlds = p }
+        let listed = ChildWorldsView.listedWorlds(for: p)
+        let open = listed.filter { p.allows($0.topic) }.count
+        return Section {
+            row("🎚️", tr("רָמַת קֹשִׁי"), value: difficultySummary(p)) { difficulty = p }
+            row("🌐", tr("עוֹלָמוֹת פְּעִילִים"),
+                value: listed.isEmpty ? nil : tr("\(open) מִתּוֹךְ \(listed.count)")) { worlds = p }
         } header: {
             Text(tr("לְמִידָה"))
         }
         .glassRows()
+    }
+
+    /// The base level the parent set — one name when every open topic shares
+    /// it, "לפי נושא" when they differ. (The engine still adapts on top; the
+    /// section below shows where it moved.)
+    private func difficultySummary(_ p: Profile) -> String {
+        let topics = p.playableTopics.isEmpty ? Set(Topic.allCases) : p.playableTopics
+        let levels = Set(topics.map { p.difficulty(for: $0) })
+        if levels.count == 1, let only = levels.first { return only.displayName }
+        return tr("לְפִי נוֹשֵׂא")
     }
 
     /// "רמת קושי חכמה" — the adaptive engine's current level per practiced
@@ -195,8 +208,10 @@ struct ChildSettingsView: View {
     }
 
     private func screenTimeSection(_ p: Profile) -> some View {
-        Section {
-            row("⏳", tr("זְמַן מָסָךְ יוֹמִי")) { screenTime = p }
+        let cap = p.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
+        return Section {
+            row("⏳", tr("זְמַן מָסָךְ יוֹמִי"),
+                value: cap.enabled ? tr("\(cap.minutes) דַּקּוֹת") : tr("לְלֹא הַגְבָּלָה")) { screenTime = p }
             // The child's play-protection code — full parental transparency: the
             // parent SEES the code (to remind a forgetful kid) and can reset it.
             // Always shown (Rani looked for it and couldn't find it): before the

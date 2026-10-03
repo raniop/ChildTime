@@ -32,12 +32,7 @@ struct ChildWorldsView: View {
                     // topics are enabled here, so it has no row of its own.
                     // Base worlds always; a pack world when the family HAS it (bought or
                     // Tofy+) and the founder switched it on — even if this child's switch is off.
-                    ForEach(Worlds.all.filter { w in
-                        guard !w.isBonusWorld, ContentAvailability.hasContent(w.topic) else { return false }
-                        guard let pack = w.topic.pack else { return true }
-                        return profile.map { PackAccess.has($0, pack) } == true
-                            && PackStore.shared.visiblePacks.contains { $0.id == pack.id }
-                    }) { world in
+                    ForEach(Self.listedWorlds(for: profile)) { world in
                         Toggle(isOn: binding(for: world)) {
                             HStack(spacing: 10) {
                                 Text(world.emoji).font(.title3)
@@ -74,6 +69,17 @@ struct ChildWorldsView: View {
         // cap — otherwise the rail is drawn at the edge of the 600pt
         // column instead of the edge of the glass.
         .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
+    }
+
+    /// The worlds this editor lists — also counted on the child's settings
+    /// page ("5 מִתּוֹךְ 7").
+    static func listedWorlds(for profile: Profile?) -> [World] {
+        Worlds.all.filter { w in
+            guard !w.isBonusWorld, ContentAvailability.hasContent(w.topic) else { return false }
+            guard let pack = w.topic.pack else { return true }
+            return profile.map { PackAccess.has($0, pack) } == true
+                && PackStore.shared.visiblePacks.contains { $0.id == pack.id }
+        }
     }
 
     private func binding(for world: World) -> Binding<Bool> {
