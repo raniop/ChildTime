@@ -130,6 +130,10 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// renewal extends the SAME entry. Merges keep the later date. Absent for
     /// a permanent pack.
     var packExpiry: [String: Double] = [:]
+    /// 📝 The parent's "רק שאלות רגילות" switch: tapping a world goes straight
+    /// into regular questions — no game chooser (⚡ surprise rounds still come).
+    /// Set from the parent's dashboard, synced via `ChildRecord`. Default off.
+    var onlyRegularQuestions: Bool = false
 
     init(
         id: UUID = UUID(),
@@ -201,6 +205,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         case language, languageUpdatedAt
         case playPIN
         case ownedPacks, packExpiry, disabledPacks
+        case onlyRegularQuestions
     }
 
     init(from decoder: Decoder) throws {
@@ -252,6 +257,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.ownedPacks = Set((try? c.decodeIfPresent([String].self, forKey: .ownedPacks)) ?? nil ?? [])
         self.packExpiry = (try? c.decodeIfPresent([String: Double].self, forKey: .packExpiry)) ?? nil ?? [:]
         self.disabledPacks = Set((try? c.decodeIfPresent([String].self, forKey: .disabledPacks)) ?? nil ?? [])
+        self.onlyRegularQuestions = (try? c.decodeIfPresent(Bool.self, forKey: .onlyRegularQuestions)) ?? nil ?? false
     }
 
     /// The worlds a demo run is pinned to, or nil in the real app. Read ONCE:

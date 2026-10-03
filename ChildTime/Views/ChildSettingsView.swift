@@ -148,10 +148,39 @@ struct ChildSettingsView: View {
             row("🎚️", tr("רָמַת קֹשִׁי"), value: difficultySummary(p)) { difficulty = p }
             row("🌐", tr("עוֹלָמוֹת פְּעִילִים"),
                 value: listed.isEmpty ? nil : tr("\(open) מִתּוֹךְ \(listed.count)")) { worlds = p }
+            onlyQuestionsToggle(p)
         } header: {
             Text(tr("לְמִידָה"))
         }
         .glassRows()
+    }
+
+    /// 📝 "רק שאלות רגילות" — a world opens straight into regular questions,
+    /// without the game chooser. Synced to the child's device via ChildRecord.
+    private func onlyQuestionsToggle(_ p: Profile) -> some View {
+        Toggle(isOn: Binding(
+            get: { profiles.profiles.first { $0.id == p.id }?.onlyRegularQuestions ?? false },
+            set: { on in
+                guard var fresh = profiles.profiles.first(where: { $0.id == p.id }),
+                      fresh.onlyRegularQuestions != on else { return }
+                Haptic.light()
+                fresh.onlyRegularQuestions = on
+                profiles.update(fresh)
+            })) {
+            HStack(spacing: 12) {
+                Text("📝").font(.system(size: 20)).frame(width: 28)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tr("רק שאלות רגילות"))
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(GlassInk.primary)
+                    Text(tr("בלי מסך המשחקים: בחירת עולם מובילה ישר לשאלות"))
+                        .font(.system(size: 12.5, weight: .medium, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .tint(AppColor.successMint)
     }
 
     /// The base level the parent set — one name when every open topic shares

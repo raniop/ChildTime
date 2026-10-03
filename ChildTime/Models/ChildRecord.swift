@@ -148,6 +148,10 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     var packExpiry: [String: Double]?
     /// Packs the parent switched off for this child. nil = none.
     var disabledPacks: [String]?
+    /// 📝 "רק שאלות רגילות" (see `Profile.onlyRegularQuestions`). Always
+    /// written — true or false — so turning it OFF reaches a merge write too
+    /// (a nil would leave the old `true` in the cloud). nil = an older doc.
+    var onlyRegularQuestions: Bool?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -180,6 +184,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.packs = profile.ownedPacks.isEmpty ? nil : profile.ownedPacks.sorted()
         self.packExpiry = profile.packExpiry.isEmpty ? nil : profile.packExpiry
         self.disabledPacks = profile.disabledPacks.isEmpty ? nil : profile.disabledPacks.sorted()
+        self.onlyRegularQuestions = profile.onlyRegularQuestions
     }
 
     /// Rehydrate a local `Profile`. The photo now syncs (compressed), so a custom
@@ -219,6 +224,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         p.packExpiry = packExpiry ?? [:]
         p.disabledPacks = Set(disabledPacks ?? [])
         p.gradeSetByChild = gradeSetByChild ?? false
+        p.onlyRegularQuestions = onlyRegularQuestions ?? false
         p.characterUpdatedAt = characterUpdatedAt
         return p
     }
