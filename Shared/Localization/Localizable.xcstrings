@@ -37579,24 +37579,24 @@
         }
       }
     },
-    "כבר ביצירת ילד בוחרים כמה זמן מסך הוא יכול להרוויח ביום — חצי שעה, שעה, שעתיים או בלי הגבלה. ואפשר לשנות בכל רגע בהגדרות של הילד": {
+    "כבר ביצירת ילד בוחרים כמה זמן מסך הוא יכול להרוויח ביום — חצי שעה, שעה, שעתיים, בלי הגבלה, או כל מספר דקות שתרצו. ואפשר לשנות בכל רגע בהגדרות של הילד": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "عند إنشاء الطفل تختارون كم وقت شاشة يمكنه أن يربح يوميًا — نصف ساعة أو ساعة أو ساعتين أو بلا حدود. ويمكن التغيير في أي وقت من إعدادات الطفل"
+            "value": "عند إنشاء الطفل تختارون كم وقت شاشة يمكنه أن يربح يوميًا — نصف ساعة أو ساعة أو ساعتين أو بلا حدود أو أي عدد دقائق تريدونه. ويمكن التغيير في أي وقت من إعدادات الطفل"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Right when you create a child, choose how much screen time they can earn per day — half an hour, an hour, two hours or no limit. You can change it anytime in the child's settings"
+            "value": "Right when you create a child, choose how much screen time they can earn per day — half an hour, an hour, two hours, no limit, or any number of minutes you like. You can change it anytime in the child's settings"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Уже при создании ребёнка выбираете, сколько экранного времени он может заработать за день — полчаса, час, два часа или без ограничений. Изменить можно в любой момент в настройках ребёнка"
+            "value": "Уже при создании ребёнка выбираете, сколько экранного времени он может заработать за день — полчаса, час, два часа, без ограничений или любое число минут. Изменить можно в любой момент в настройках ребёнка"
           }
         }
       }
