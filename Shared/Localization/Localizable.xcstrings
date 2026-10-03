@@ -1102,6 +1102,28 @@
       }
     },
     " — %@": {},
+    "\"דקות היום\" במקום מילה לא ברורה, קוד הגנת זמן המשחק תמיד גלוי לכם בהגדרות הילד, שדה הקוד בערבית קריא, ומסך פתיחה בשפה של האייפון": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«دقائق اليوم» بدل كلمة غير واضحة، ورمز حماية وقت اللعب ظاهر دائمًا في إعدادات الطفل، وحقل رمز مقروء بالعربية، وشاشة بدء بلغة الآيفون"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"Minutes today\" instead of an unclear word, the play-time code always visible in the kid's settings, a readable code field in Arabic, and a launch screen in your iPhone's language"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Минут сегодня» вместо непонятного слова, код защиты игрового времени всегда виден в настройках ребёнка, читаемое поле кода на арабском и экран запуска на языке iPhone"
+          }
+        }
+      }
+    },
     "\"הַחְלֵף תַּפְקִיד\" מַחֲזִיר אֶת הַמַּכְשִׁיר לְמָסַךְ \"מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר?\" — לְמָשָׁל לְהָפֹךְ מַכְשִׁיר הוֹרֶה בַּחֲזָרָה לְמַכְשִׁיר יֶלֶד. בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה; הַכַּפְתּוֹר פּוֹתֵחַ חַלּוֹן קָצָר לְהָסָרָה אֲמִתִּית.": {
       "localizations": {
         "ar": {
@@ -13607,6 +13629,28 @@
         }
       }
     },
+    "אייפד של הילד, כרטיס ילד מסודר, וקרב בוס שנספר": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "آيباد الطفل، صفحة طفل مرتّبة، ومعركة الزعيم تُحتسب"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The kid's iPad, a tidier child page, and boss battles that count"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad ребёнка, аккуратная карточка ребёнка и бой с боссом, который считается"
+          }
+        }
+      }
+    },
     "אייפון": {
       "localizations": {
         "ar": {
@@ -25619,6 +25663,28 @@
         }
       }
     },
+    "האייפד הוא של הילד": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الآيباد للطفل"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The iPad belongs to the kid"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad — для ребёнка"
+          }
+        }
+      }
+    },
     "האייפד לא ייפתח עד שהאייפון באמת ננעל — ורק אז הדקות שנשארו עוברות אליו. בלי כפילויות ובלי דקות שנעלמות": {
       "localizations": {
         "ar": {
@@ -25769,6 +25835,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Настройки"
+          }
+        }
+      }
+    },
+    "הגדרתם בטעות את האייפד של הילד כמכשיר הורה? בהגדרות יש עכשיו \"להפוך את האייפד הזה למכשיר של ילד\" — בלחיצה אחת, בלי למחוק כלום. והתקנה חדשה באייפד ממליצה מראש על מכשיר ילד": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هل أعددتم آيباد الطفل كجهاز والد بالخطأ؟ في الإعدادات الآن «تحويل هذا الآيباد إلى جهاز طفل» — بلمسة واحدة ومن دون حذف أي شيء. والتثبيت الجديد على الآيباد يوصي بجهاز الطفل مسبقًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set up your kid's iPad as a parent device by mistake? Settings now has \"Make this iPad a child's device\" — one tap, nothing deleted. And a fresh install on an iPad recommends a child's device up front"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Случайно настроили iPad ребёнка как устройство родителя? В настройках появилось «Сделать этот iPad устройством ребёнка» — одним нажатием, ничего не удаляется. А новая установка на iPad сразу советует устройство ребёнка"
           }
         }
       }
@@ -29054,6 +29142,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "И множество мелких исправлений"
+          }
+        }
+      }
+    },
+    "ועוד תיקונים": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وإصلاحات أخرى"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "And more fixes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "И другие исправления"
           }
         }
       }
@@ -37941,6 +38051,28 @@
         }
       }
     },
+    "כרטיס ילד מסודר": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "صفحة طفل مرتّبة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A tidier child page"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Аккуратная карточка ребёнка"
+          }
+        }
+      }
+    },
     "כשהילד פותח דקות באייפון, האייפד מראה שהחלון פתוח שם ומציע להעביר אותו לכאן. אותן דקות לא נפתחות פעמיים, והמגבלה היומית נספרת פעם אחת לכל הילד": {
       "localizations": {
         "ar": {
@@ -46411,6 +46543,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Подарок, который вы отправили, открывается"
+          }
+        }
+      }
+    },
+    "מתנה, נעילה ומטלות בלחיצה אחת למעלה, הדוח מתחת, כל המכשירים במקום אחד, וכל ההגדרות של הילד ברשימה אחת — במקום כפתור שפתח עוד כרטיס ותפריט ארוך": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الهدية والقفل والمهام بلمسة واحدة في الأعلى، والتقرير تحتها، وكل الأجهزة في مكان واحد، وكل إعدادات الطفل في قائمة واحدة — بدلًا من زر يفتح بطاقة أخرى وقائمة طويلة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gift, lock and chores one tap away at the top, the report below, all devices in one place, and all of the kid's settings in one list — instead of a button that opened another card and a long menu"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подарок, блокировка и дела — в одно нажатие сверху, отчёт ниже, все устройства в одном месте и все настройки ребёнка одним списком — вместо кнопки, открывавшей ещё одну карточку, и длинного меню"
           }
         }
       }
@@ -56759,6 +56913,28 @@
         }
       }
     },
+    "קרב בוס נספר": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "معركة الزعيم تُحتسب"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boss battles count"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Бой с боссом засчитывается"
+          }
+        }
+      }
+    },
     "רְבִיעִית": {
       "localizations": {
         "ar": {
@@ -62425,6 +62601,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Неверный ответ ведёт дальше"
+          }
+        }
+      }
+    },
+    "תשובות בקרב בוס לא הופיעו בדוחות שלכם. עכשיו כל תשובה בקרב נספרת — בשאלות היום, בהצלחה ובהתקדמות": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم تكن إجابات معركة الزعيم تظهر في تقاريركم. الآن تُحتسب كل إجابة في المعركة — في أسئلة اليوم ونسبة النجاح والتقدّم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answers in a boss battle didn't show up in your reports. Now every answer in a battle counts — in today's questions, success rate and progress"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответы в бою с боссом не попадали в ваши отчёты. Теперь каждый ответ в бою засчитывается — в вопросах за день, успешности и прогрессе"
           }
         }
       }
