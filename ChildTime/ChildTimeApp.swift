@@ -380,6 +380,18 @@ struct ChildTimeApp: App {
         case "createchild":                             // DEMO_SCREEN=createchild — as the PARENT sees it
             ProfileEditorView(mode: .create) { _ in } onDelete: { _ in }
                 .onAppear { ParentSettings.shared.deviceRole = .parent }   // demo: age / grade rows are parent-only
+        case "dailycapstep":                            // DEMO_SCREEN=dailycapstep — create child: ⏱ the last step
+            DailyCapStepDemo(profile: ProfileStore.shared.active
+                             ?? Profile(name: tr("דָּנָה"), gender: .girl, age: .grade1, grade: 3))
+                .onAppear { ParentSettings.shared.deviceRole = .parent }
+        case "dailycapcard":                            // DEMO_SCREEN=dailycapcard — parent home: ⏱ the one-time card
+            ParentDashboardView(isRoot: true)
+                .onAppear {
+                    ParentSettings.shared.dailyCapCardDone = false
+                    for var p in ProfileStore.shared.profiles where p.dailyCapMinutes != nil {
+                        p.dailyCapMinutes = nil; ProfileStore.shared.update(p)
+                    }
+                }
         case "kidmode": KidModeEntryView()              // DEMO_SCREEN=kidmode
         case "packdetail":                              // DEMO_SCREEN=packdetail — ⚽ pack page (parent)
             PackDetailView(pack: QuestionPacks.all[0], onClose: {})

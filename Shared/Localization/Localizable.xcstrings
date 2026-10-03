@@ -25966,6 +25966,28 @@
         }
       }
     },
+    "הגדירו לכל ילד כמה זמן הוא יכול להרוויח ביום": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حدّدوا لكل طفل كم من الوقت يمكنه أن يكسب في اليوم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set how much time each child can earn a day"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задайте для каждого ребёнка, сколько времени он может заработать за день"
+          }
+        }
+      }
+    },
     "הגדרות": {
       "localizations": {
         "ar": {
@@ -34919,6 +34941,28 @@
         }
       }
     },
+    "יצירת ילד · שלב אחרון": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إنشاء طفل · الخطوة الأخيرة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New child · Last step"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новый ребёнок · последний шаг"
+          }
+        }
+      }
+    },
     "יש!": {
       "localizations": {
         "ar": {
@@ -38205,6 +38249,50 @@
         }
       }
     },
+    "כמה זמן מסך ביום %@ יכול להרוויח?": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كم من وقت الشاشة يمكن أن يكسب %@ في اليوم؟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How much screen time a day can %@ earn?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сколько экранного времени в день может заработать %@?"
+          }
+        }
+      }
+    },
+    "כמה זמן מסך ביום %@ יכולה להרוויח?": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كم من وقت الشاشة يمكن أن تكسب %@ في اليوم؟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How much screen time a day can %@ earn?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сколько экранного времени в день может заработать %@?"
+          }
+        }
+      }
+    },
     "כמה זמן משחק הילד מרוויח": {
       "localizations": {
         "ar": {
@@ -41265,6 +41353,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "У каждого ребёнка простая карточка: минуты за сегодня из максимума, вопросы, правильные ответы и процент успеха. Нажатие открывает полный отчёт — в чём ребёнок силён, что стоит потренировать, улучшается ли он, и ежедневная подсказка с рекомендацией. Без звёзд и алмазов — они у детей"
+          }
+        }
+      }
+    },
+    "ללא הגבלה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بلا حدّ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No limit"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без ограничения"
           }
         }
       }
@@ -62423,6 +62533,28 @@
         }
       }
     },
+    "שמירה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حفظ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранить"
+          }
+        }
+      }
+    },
     "שמרו שינויים": {
       "localizations": {
         "ar": {
@@ -62511,6 +62643,50 @@
         }
       }
     },
+    "שעה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ساعة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 hour"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 час"
+          }
+        }
+      }
+    },
+    "שעה וחצי": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ساعة ونصف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1½ hours"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1,5 часа"
+          }
+        }
+      }
+    },
     "שעת משחק\nשמתחילה בשאלה": {
       "localizations": {
         "ar": {
@@ -62529,6 +62705,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Игровое время,\nкоторое начинается с вопроса"
+          }
+        }
+      }
+    },
+    "שעתיים": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ساعتان"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 hours"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 часа"
           }
         }
       }
@@ -63745,6 +63943,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "⏱ Заработано сегодня"
+          }
+        }
+      }
+    },
+    "⏱ כמה זמן מסך ביום?": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏱ كم من وقت الشاشة في اليوم؟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏱ How much screen time a day?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏱ Сколько экранного времени в день?"
           }
         }
       }
@@ -66686,6 +66906,50 @@
     },
     "💡": {},
     "💡 ": {},
+    "💡 %@ מרוויח זמן רק על תשובות נכונות. זו התקרה היומית, ואפשר לשנות בכל רגע בהגדרות של %@.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💡 %@ يكسب الوقت فقط على الإجابات الصحيحة. هذا هو الحدّ اليومي، ويمكن تغييره في أي وقت من إعدادات %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💡 %@ earns time only for correct answers. This is the daily limit, and you can change it anytime in %@'s settings."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💡 %@ получает время только за правильные ответы. Это дневной лимит — его можно изменить в любой момент: Настройки → %@."
+          }
+        }
+      }
+    },
+    "💡 %@ מרוויחה זמן רק על תשובות נכונות. זו התקרה היומית, ואפשר לשנות בכל רגע בהגדרות של %@.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💡 %@ تكسب الوقت فقط على الإجابات الصحيحة. هذا هو الحدّ اليومي، ويمكن تغييره في أي وقت من إعدادات %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💡 %@ earns time only for correct answers. This is the daily limit, and you can change it anytime in %@'s settings."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💡 %@ получает время только за правильные ответы. Это дневной лимит — его можно изменить в любой момент: Настройки → %@."
+          }
+        }
+      }
+    },
     "💡 כִּמְעַט! תְּשׁוּבָה נְכוֹנָה תַּחֲזִיר אֶת הַזְּמַן": {
       "localizations": {
         "ar": {

@@ -25,7 +25,8 @@ final class LanguageLeakUITests: XCTestCase {
     private static let screens = [
         "applock", "askparent", "askworld", "campaignpopup", "campaignpopupkid",
         "childdifficulty", "childjoin", "childscreentime", "childworlds", "choreskid",
-        "choresparent", "createchild", "dailychest", "dashboard", "devicecontrols",
+        "choresparent", "createchild", "dailycapcard", "dailycapstep", "dailychest",
+        "dashboard", "devicecontrols",
         "familychoice", "gate", "giftearly", "giftended", "giftlate", "gradepicker",
         "kidflow", "kidhome", "kidmode", "kidpass", "kidpin", "leaderboard", "levelup",
         "mathgrade", "onboarding", "opening", "openinggift", "packask", "packdetail",
