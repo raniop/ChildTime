@@ -19,6 +19,14 @@ struct FloatingCompanion: View {
     var topInset: CGFloat = 80
     var bottomInset: CGFloat = 220
     var horizontalInset: CGFloat = 20
+    /// 🏠 The kid HOME sets this: there the buddy does NOT wander. Every spot in
+    /// the wander band was over the world grid — it stood on "עולם הכדורגל" and
+    /// cut its name on iPhone, and on the bottom row of cards on iPad (QA round
+    /// 3). Instead it rests in the bottom-TRAILING corner, its feet this far
+    /// above the bottom edge, beside the bottom CTA panel (which leaves it a
+    /// gutter). It can still be dragged; a few seconds after it is let go it
+    /// walks back to its corner. nil (the question runner) = wander as before.
+    var dockBottomInset: CGFloat? = nil
 
     @Environment(\.layoutDirection) private var layoutDirection
 
@@ -31,7 +39,9 @@ struct FloatingCompanion: View {
 
     var body: some View {
         GeometryReader { geo in
-            let anchor = position == .zero ? defaultPosition(in: geo.size) : position
+            // Docked, `.zero` means "in its corner" — worked out live from the
+            // current size, so a rotation or a taller CTA panel moves it along.
+            let anchor = position == .zero ? restingPosition(in: geo.size) : position
             ZStack {
             // Layer 1 (back): the draggable avatar.
             ZStack {
@@ -96,6 +106,8 @@ struct FloatingCompanion: View {
             .onAppear {
                 if !hasAppeared {
                     hasAppeared = true
+                    // Docked: stay at `.zero` — the live corner — and don't wander.
+                    guard dockBottomInset == nil else { return }
                     position = defaultPosition(in: geo.size)
                     scheduleWander(in: geo.size)
                 }
@@ -107,7 +119,7 @@ struct FloatingCompanion: View {
             // answers and stayed there — nothing moved it back once the real band
             // arrived. When the band moves, a buddy now outside it walks back in.
             .onChangeCompat(of: topInset) { _, newTop in
-                guard !isDragging, position != .zero, position.y - size * 0.65 < newTop else { return }
+                guard dockBottomInset == nil, !isDragging, position != .zero, position.y - size * 0.65 < newTop else { return }
                 position = randomTarget(in: geo.size)
             }
 
@@ -158,16 +170,18 @@ struct FloatingCompanion: View {
     private func scheduleWander(in size: CGSize) {
         cancelWandering()
         wanderTask = Task {
+            let docked = dockBottomInset != nil
             while !Task.isCancelled {
-                // Wait between 6 and 12 seconds, then pick a new spot.
-                let wait = Double.random(in: 6...12)
+                // Wait between 6 and 12 seconds, then pick a new spot. Docked
+                // (after a drag): a short pause, then back to the corner — once.
+                let wait = docked ? 4 : Double.random(in: 6...12)
                 try? await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000))
                 if Task.isCancelled { break }
                 await MainActor.run {
                     guard !isDragging else { return }
-                    let target = randomTarget(in: size)
-                    position = target
+                    position = docked ? .zero : randomTarget(in: size)
                 }
+                if docked { break }
             }
         }
     }
@@ -178,6 +192,18 @@ struct FloatingCompanion: View {
     }
 
     // MARK: - Positioning
+
+    /// Where the buddy stands when nobody moved it: the dock on the home, the
+    /// bottom-trailing start spot everywhere else.
+    private func restingPosition(in container: CGSize) -> CGPoint {
+        guard let feet = dockBottomInset else { return defaultPosition(in: container) }
+        // Bottom-TRAILING, the same side `defaultPosition` always used (x is
+        // measured from the leading edge, so this is the left in Hebrew/Arabic
+        // and the right in English/Russian). Feet `feet` above the bottom.
+        let x = container.width - horizontalInset - size * 0.5
+        let y = container.height - feet - size * 0.65   // the avatar is size×1.3 tall, centred
+        return clamp(CGPoint(x: x, y: y), in: container)
+    }
 
     private func defaultPosition(in container: CGSize) -> CGPoint {
         // Start in the bottom-trailing area, but inside safe zone.

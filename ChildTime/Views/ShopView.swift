@@ -12,6 +12,10 @@ struct ShopView: View {
 
     @State private var showingProfileEditor = false
     @State private var showStarShop = false
+    /// The wider of the two top-bar sides (✕ / 💎 balance). The centred title
+    /// keeps clear of BOTH by this much, so it stays centred and never runs
+    /// into the balance ("Магазин персонажей" did, on an iPhone — QA round 3).
+    @State private var topBarSide: CGFloat = 44
 
     private var isCompact: Bool { hsc == .compact }
     private var avatarSize: CGFloat { isCompact ? 140 : 180 }
@@ -78,7 +82,10 @@ struct ShopView: View {
             Text(tr("חֲנוּת הַדְּמוּיוֹת"))
                 .font(.system(size: isCompact ? 22 : 28, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
+                .padding(.horizontal, topBarSide + AppSpacing.sm)
                 .frame(maxWidth: .infinity)
 
             HStack {
@@ -119,6 +126,8 @@ struct ShopView: View {
                     .padding(.vertical, 8)
                     .background(Capsule().fill(.white.opacity(0.14)))
                     .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
+                    .fixedSize()
+                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { topBarSide = max(40, $0) }
                 }
                 .buttonStyle(.plain)
             }
