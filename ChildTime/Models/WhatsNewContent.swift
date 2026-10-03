@@ -43,7 +43,9 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
-        Release(build: 183, version: "2026.10.2", headline: tr("צ'אט עם צוות טופי, אייפד של הילד וכרטיס ילד מסודר"), items: [
+        Release(build: 184, version: "2026.10.2", headline: tr("צ'אט עם צוות טופי, אייפד של הילד וכרטיס ילד מסודר"), items: [
+            Item(emoji: "⏱", title: tr("אתם קובעים כמה זמן מסך ביום"),
+                 line: tr("כבר ביצירת ילד בוחרים כמה זמן מסך הוא יכול להרוויח ביום — חצי שעה, שעה, שעתיים או בלי הגבלה. ואפשר לשנות בכל רגע בהגדרות של הילד")),
             Item(emoji: "💬", title: tr("צ'אט עם צוות טופי"),
                  line: tr("שאלה? משהו לא ברור? הכפתור העגול 💬 במסך הבית פותח שיחה איתנו, ואנחנו עונים ישר לטלפון שלכם")),
             Item(emoji: "📱", title: tr("האייפד הוא של הילד"),

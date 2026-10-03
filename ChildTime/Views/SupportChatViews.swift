@@ -228,10 +228,13 @@ struct SupportChatView: View {
         }
     }
 
+    @State private var contentHeight: CGFloat = 0
+    @State private var viewportHeight: CGFloat = 0
+
     private var messageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 10) {
+                VStack(spacing: 10) {
                     if mode == .parent {
                         // Rendered here, never stored — every chat opens with it.
                         bubble(text: tr("שלום! כאן צוות טופי 👋 איך אפשר לעזור?"),
@@ -250,7 +253,9 @@ struct SupportChatView: View {
                 .padding(.bottom, AppSpacing.sm)
                 .frame(maxWidth: 720)
                 .frame(maxWidth: .infinity)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
             }
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewportHeight = $0 }
             .scrollDismissesKeyboard(.interactively)
             .onAppear { scrollToBottom(proxy, animated: false) }
             .onChangeCompat(of: model.messages.count) { _, _ in scrollToBottom(proxy, animated: true) }
@@ -262,6 +267,10 @@ struct SupportChatView: View {
 
     private func scrollToBottom(_ proxy: ScrollViewProxy, animated: Bool) {
         DispatchQueue.main.async {
+            // A short chat that fits on screen must stay pinned to the TOP —
+            // scrolling a not-yet-laid-out list "to the bottom" pushed the first
+            // bubbles down and left an empty band above them (Rani, 2026-10-03).
+            guard contentHeight > viewportHeight + 1 else { return }
             if animated { withAnimation(.easeOut(duration: 0.25)) { proxy.scrollTo("bottom", anchor: .bottom) } }
             else { proxy.scrollTo("bottom", anchor: .bottom) }
         }
