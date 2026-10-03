@@ -78,7 +78,7 @@ struct BalanceGameView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if surprise && phase == .intro { start() } }
+        .onAppear { if (surprise || earn != nil) && phase == .intro { start() } }
     }
 
     // MARK: - Playing
@@ -167,12 +167,12 @@ struct BalanceGameView: View {
         GeometryReader { geo in
             let w = geo.size.width, h = geo.size.height
             let pivot = CGPoint(x: w / 2, y: h * 0.22)
-            let arm = min(w * 0.36, 300)
+            let arm = min(w * 0.29, 300)
             let a = tilt * .pi / 180
             let leftEnd = CGPoint(x: pivot.x - arm * cos(a), y: pivot.y - arm * sin(a))
             let rightEnd = CGPoint(x: pivot.x + arm * cos(a), y: pivot.y + arm * sin(a))
             let string = h * 0.26
-            let panW = min(w * 0.4, 260)
+            let panW = min(w * 0.38, 260)
             ZStack {
                 // Stand.
                 Path { p in

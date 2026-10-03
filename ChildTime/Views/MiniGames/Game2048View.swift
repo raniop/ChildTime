@@ -101,7 +101,7 @@ struct Game2048View: View {
         .environment(\.layoutDirection, .app)
         .onAppear {
             best = UserDefaults.standard.integer(forKey: Board2048.bestKey())
-            if surprise && phase == .intro { start() }
+            if (surprise || earn != nil) && phase == .intro { start() }
         }
         .onReceive(ticker) { t in
             guard phase == .playing else { return }

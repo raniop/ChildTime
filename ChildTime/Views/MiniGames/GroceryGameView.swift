@@ -96,7 +96,7 @@ struct GroceryGameView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if surprise && phase == .intro { start() } }
+        .onAppear { if (surprise || earn != nil) && phase == .intro { start() } }
     }
 
     // MARK: - Names

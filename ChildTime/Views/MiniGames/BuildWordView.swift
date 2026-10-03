@@ -82,7 +82,7 @@ struct BuildWordView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if surprise && !started { begin() } }
+        .onAppear { if (surprise || earn != nil) && !started { begin() } }
     }
 
     // MARK: - Board

@@ -93,7 +93,7 @@ struct VaultGameView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if surprise && phase == .intro { start() } }
+        .onAppear { if (surprise || earn != nil) && phase == .intro { start() } }
     }
 
     private var codeText: String { MiniGameText.ltr(code.map(String.init).joined()) }

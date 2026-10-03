@@ -98,7 +98,7 @@ struct NumberCrushView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if surprise && phase == .intro { start() } }
+        .onAppear { if (surprise || earn != nil) && phase == .intro { start() } }
         .onReceive(ticker) { t in
             guard phase == .playing else { return }
             now = t

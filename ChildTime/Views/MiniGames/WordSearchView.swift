@@ -82,7 +82,7 @@ struct WordSearchView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if surprise && !started { deal() } }
+        .onAppear { if (surprise || earn != nil) && !started { deal() } }
         .onReceive(ticker) { t in hintTick(t) }
     }
 
