@@ -11,6 +11,9 @@ struct MiniGamePreview: View {
     private static let blue = Color(hex: "48BFE3"), purple = Color(hex: "9B5DE5"), pink = Color(hex: "FF6B9D"),
                         orange = Color(hex: "FFB84D"), mint = Color(hex: "06D6A0")
     private var wordy: Bool { topic == .english || topic == .hebrew || topic == .reading }
+    /// Word games show the letters the child actually plays with: Hebrew in
+    /// every world but English for a Hebrew-speaking child.
+    private var hebrewLetters: Bool { topic == .hebrew || (topic != .english && LanguageStore.shared.current == .he) }
 
     var body: some View {
         GeometryReader { geo in
@@ -105,18 +108,18 @@ struct MiniGamePreview: View {
     }
 
     private func word(_ s: CGFloat) -> some View {
-        let letters = topic == .hebrew || topic == .reading ? ["ב", "י", "ת"] : ["C", "A", "T"]
+        let letters = hebrewLetters ? ["ב", "י", "ת"] : ["C", "A", "T"]
         let w = s * 0.13
         return VStack(spacing: s * 0.04) {
-            Text(topic == .hebrew || topic == .reading ? "🏠" : "🐱").font(.system(size: s * 0.16))
+            Text(hebrewLetters ? "🏠" : "🐱").font(.system(size: s * 0.16))
             HStack(spacing: s * 0.02) {
                 tile(letters[0], .white.opacity(0.2), .normal, w: w, h: w * 1.15, font: w * 0.55)
                 tile(letters[1], .white.opacity(0.2), .normal, w: w, h: w * 1.15, font: w * 0.55)
                 tile("", .white.opacity(0.2), .picked, w: w, h: w * 1.15, font: w * 0.55)
             }
-            .environment(\.layoutDirection, topic == .hebrew || topic == .reading ? .rightToLeft : .leftToRight)
+            .environment(\.layoutDirection, hebrewLetters ? .rightToLeft : .leftToRight)
             HStack(spacing: s * 0.025) {
-                ForEach(Array((topic == .hebrew || topic == .reading ? ["ת", "ש", "מ"] : ["T", "O", "S"]).enumerated()), id: \.offset) { i, l in
+                ForEach(Array((hebrewLetters ? ["ת", "ש", "מ"] : ["T", "O", "S"]).enumerated()), id: \.offset) { i, l in
                     tile(l, OptionCard.tints[i], w: w * 0.9, h: w * 0.9, font: w * 0.5)
                 }
             }
@@ -144,7 +147,7 @@ struct MiniGamePreview: View {
     }
 
     private func wordSearch(_ s: CGFloat) -> some View {
-        let grid = topic == .hebrew || topic == .reading
+        let grid = hebrewLetters
             ? [["כ", "ל", "ב", "ש"], ["ע", "ץ", "ר", "מ"], ["ס", "פ", "ר", "ד"], ["ג", "ת", "י", "נ"]]
             : [["D", "O", "G", "K"], ["S", "U", "N", "A"], ["P", "C", "A", "T"], ["E", "R", "B", "L"]]
         let hit: Set<Int> = [0, 1, 2]
