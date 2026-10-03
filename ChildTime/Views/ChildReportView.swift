@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 /// The parent's report on ONE child: is my kid using it, actually learning,
 /// strong where / struggling where, and what can I do. Rani: a parent should
@@ -28,6 +29,7 @@ struct ChildReportView: View {
     @State private var expandedTopic: Topic? = nil
     @State private var autoCollapsed = false
     @State private var isRefreshing = false
+    @Environment(\.requestReview) private var requestReview
 
     private var engine: InsightsEngine {
         InsightsEngine(history: historyStore.history(for: profile.id),
@@ -58,6 +60,15 @@ struct ChildReportView: View {
             isRefreshing = true
             await historyStore.fetchRemoteHistory(for: profile.id)
             isRefreshing = false
+            // A report full of real learning is the moment to ask the parent
+            // for a rating (parent device only — this view is parent-side).
+            if ReviewPrompter.shouldAsk(history: historyStore.history(for: profile.id),
+                                        totalAnswered: snapshot.totalAnswered) {
+                try? await Task.sleep(nanoseconds: 2_500_000_000)
+                guard !Task.isCancelled else { return }
+                ReviewPrompter.markAsked()
+                requestReview()
+            }
         }
     }
 
