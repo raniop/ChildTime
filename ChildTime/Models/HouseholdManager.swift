@@ -629,6 +629,9 @@ final class HouseholdManager: ObservableObject {
         #if canImport(FirebaseFirestore)
         guard !Self.skipsCloudSync, let hh = household, uid != nil else { return }
         guard ParentSettings.shared.deviceRole != .child else { return }
+        // Mid-conversion to a child device: the 15s heartbeat must not re-create
+        // the row `retireThisParentDevice` just deleted.
+        guard !retiringParentDevice else { return }
         let now = Date()
         let device = ChildDevice(
             id: "parent_\(DeviceIdentity.installID)", childID: "",
@@ -1575,6 +1578,77 @@ final class HouseholdManager: ObservableObject {
         // mid-teardown could have written it back. Clear it once more now that
         // sync is stopped.
         DataExporter.wipeLocalData()
+    }
+
+    /// True while `convertThisParentDeviceToChild` runs — see registerParentDevice.
+    private var retiringParentDevice = false
+
+    /// Whether this manager has an auth uid yet. `AuthManager` publishes
+    /// `isSignedIn` one runloop tick BEFORE it calls `start(uid:)`, so a join that
+    /// fires the instant the child screen appears must wait for this.
+    var hasSession: Bool { uid != nil }
+
+    /// Drop THIS install's parent footprint while the parent account is still
+    /// signed in (afterwards there is no permission to): its `parent_<install>`
+    /// device row, so the family's device list doesn't keep a stale parent iPad,
+    /// and its push token in the account's `fcmTokens`, so the kid's device stops
+    /// receiving the parent's family notifications. Never touches household data.
+    func retireThisParentDevice() async {
+        #if canImport(FirebaseFirestore)
+        guard !Self.skipsCloudSync, let uid else { return }
+        do {
+            try await db.collection("childDevices")
+                .document("parent_\(DeviceIdentity.installID)").delete()
+        } catch { TofyLink("retireThisParentDevice: row delete failed: \(error.localizedDescription)") }
+        if let token = PushManager.shared.currentToken {
+            do {
+                try await parentRef(uid).updateData([
+                    "fcmTokens": FieldValue.arrayRemove([token]),
+                    FieldPath(["tokenLanguages", token]): FieldValue.delete(),
+                ])
+            } catch { TofyLink("retireThisParentDevice: token removal failed: \(error.localizedDescription)") }
+        }
+        #endif
+    }
+
+    /// 📱 "להפוך את האייפד הזה למכשיר של ילד" — fixes a family whose shared iPad
+    /// became a PARENT device. Does exactly what scanning the dashboard's child QR
+    /// on a fresh device does, without needing a second device to show the QR:
+    ///  1. while still the parent: mint the SAME per-child payload the dashboard's
+    ///     "connect a device" QR shows (`makeChildJoinCode`) and retire this
+    ///     install's parent row + push token;
+    ///  2. locally: re-lock the parent gate, clear the child binding + active
+    ///     profile (as "חזור לבחירה" does), become a CHILD device, hand the payload
+    ///     to ChildJoinView via `pendingJoinPayload`, and sign the parent account
+    ///     out of THIS device only (`AuthManager.signOut` — the cloud family, its
+    ///     children and the parent's membership all stay).
+    /// ChildJoinView then signs in anonymously and redeems the payload like any scan.
+    /// Returns false (and changes nothing locally) if the payload couldn't be made.
+    func convertThisParentDeviceToChild(childID: UUID) async -> Bool {
+        let s = ParentSettings.shared
+        guard s.deviceRole == .parent, household != nil, !KidModeManager.shared.active else { return false }
+        retiringParentDevice = true
+        defer { retiringParentDevice = false }
+        guard let payload = await makeChildJoinCode(for: childID.uuidString) else {
+            TofyLink("convertToChild: could not create a join payload — nothing changed")
+            return false
+        }
+        await retireThisParentDevice()
+        TofyLink("convertToChild: parent device \(DeviceIdentity.installID.prefix(8)) → child \(childID.uuidString.prefix(8))")
+        s.sessionUnlocked = false            // re-lock the parent gate
+        s.joinedChildID = nil
+        s.justDisconnected = false
+        s.pendingJoinFamily = false
+        // The active profile is the evidence healLostChildRoleIfNeeded restores a
+        // child role from — clear it as the role reset does; the join sets the
+        // chosen child active again.
+        ProfileStore.shared.signOutCurrentProfile()
+        // A chosen role ends any "deliberate reset" — same as RolePickerView.choose.
+        UserDefaults.standard.removeObject(forKey: "device.deliberateReset")
+        s.deviceRole = .child
+        s.pendingJoinPayload = payload
+        AuthManager.shared.signOut()         // local session only — the family stays in the cloud
+        return true
     }
 
     func stopWatchingInviteRedemption() {

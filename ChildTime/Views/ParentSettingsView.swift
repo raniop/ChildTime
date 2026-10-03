@@ -63,6 +63,15 @@ struct ParentSettingsView: View {
                     menuRow("👪", tr("הַמִּשְׁפָּחָה"), familySummary) {
                         subScreen(tr("הַמִּשְׁפָּחָה")) { familySection; syncSection }
                     }
+                    // 📱 A parent iPad is usually the KID's iPad that got set up
+                    // first — offer the one-tap fix (the dashboard behind this
+                    // sheet is already behind the root parent gate).
+                    if showConvertToChild {
+                        menuRow("🧒", tr("לַהֲפֹךְ אֶת הָאַיְפֵּד הַזֶּה לְמַכְשִׁיר שֶׁל יֶלֶד"),
+                                tr("מֻמְלָץ אִם הַיֶּלֶד מְשַׂחֵק בָּאַיְפֵּד הַזֶּה")) {
+                            ConvertToChildDeviceView { dismiss() }
+                        }
+                    }
                     menuRow("🎮", tr("זְמַן מָסָךְ וּפְרָסִים"), rewardsSummary) {
                         subScreen(tr("זְמַן מָסָךְ וּפְרָסִים")) { rewardSection; penaltySection; smartFeedSection }
                     }
@@ -190,6 +199,15 @@ struct ParentSettingsView: View {
             .glassForm()
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// Only on an iPad (the device, not the size class) that is a parent device
+    /// with a family loaded — and not while it is in Kid Mode.
+    private var showConvertToChild: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+            && settings.deviceRole == .parent
+            && household.household != nil
+            && !KidModeManager.shared.active
     }
 
     private var familySummary: String {

@@ -147,6 +147,8 @@ struct ChildJoinView: View {
                     .glassInset(radius: 16)
                     .padding(.top, 6)
 
+                    getTofyOnIPhoneCard
+
                     // Escape hatch: a child device blocks app deletion, so a device
                     // stranded HERE (can't reach the in-app parent controls) would be
                     // impossible to uninstall. This lets a parent — with the code —
@@ -211,6 +213,40 @@ struct ChildJoinView: View {
         }
     }
 
+    /// 📱 A family that started on the iPad needs Tofy on the parent's iPhone
+    /// first. The App Store link is drawn as a QR, rendered LOCALLY and not
+    /// tappable — the iPhone's camera opens it there. A link or share button here
+    /// would be a leave-app path on a child screen (Kids Category, 1.3).
+    private var getTofyOnIPhoneCard: some View {
+        let qr = QRCodeView(text: Self.appStoreURL, size: 84)
+            .accessibilityLabel(tr("קוֹד QR לְהוֹרָדַת טוֹפִי"))
+        let caption = Text(tr("סִרְקוּ עִם הַמַּצְלֵמָה שֶׁל הָאַיְפוֹן כְּדֵי לְהוֹרִיד אֶת טוֹפִי, צְרוּ מִשְׁפָּחָה וְחִזְרוּ לְכָאן"))
+            .font(.system(size: 13, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.9))
+            .fixedSize(horizontal: false, vertical: true)
+        return VStack(alignment: .leading, spacing: 8) {
+            Text(tr("עוֹד אֵין לָכֶם טוֹפִי בָּאַיְפוֹן?"))
+                .font(.system(size: 14.5, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            // Side by side when it fits; stacked on the narrowest iPhones.
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .center, spacing: 12) {
+                    qr
+                    caption.frame(minWidth: 150, idealWidth: 160, maxWidth: .infinity, alignment: .leading)
+                }
+                VStack(alignment: .leading, spacing: 8) {
+                    qr
+                    caption
+                }
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .glassInset(radius: 16)
+    }
+
+    static let appStoreURL = "https://apps.apple.com/app/id6773805449"
+
     /// Payload is "CODE|childID". Redeem the code (join the family), then land on
     /// that specific child.
     private func join(_ raw: String) {
@@ -222,11 +258,22 @@ struct ChildJoinView: View {
         Task {
             working = true
             message = tr("מִתְחַבְּרִים…")
+            // A payload handed over the instant this screen appears (a parent
+            // device just converted into a child one) can beat the household's
+            // sign-in by a runloop tick — wait briefly for the uid instead of
+            // failing the redeem on "no session".
+            for _ in 0..<60 where !household.hasSession {
+                try? await Task.sleep(nanoseconds: 100_000_000)
+            }
             // A child play-device only BINDS to one existing child — it must not
             // upload its local profiles as new kids (that spawned phantom children).
             let ok = await household.redeemInvite(code: codePart, bringLocalChildren: false)
             guard ok else {
                 message = household.lastError ?? tr("קוֹד לֹא תָּקִין")
+                // Keep the code in the field so "הִתְחַבְּרוּ" retries it — a
+                // handed-over payload has no QR to scan again. (The invite doc
+                // carries the childID, so the bare code binds the same child.)
+                if code.isEmpty { code = codePart }
                 working = false
                 return
             }

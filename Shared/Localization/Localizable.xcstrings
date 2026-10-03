@@ -11273,6 +11273,28 @@
         }
       }
     },
+    "אֵין לַמִּשְׁפָּחָה מַכְשִׁיר הוֹרֶה נוֹסָף. קֹדֶם הַתְקִינוּ טוֹפִי בָּאַיְפוֹן וְהִתְחַבְּרוּ עִם אוֹתוֹ חֶשְׁבּוֹן, אַחֶרֶת לֹא תּוּכְלוּ לְנַהֵל.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا يوجد للعائلة جهاز والد آخر. ثبّتوا Tofy أولًا على الـ iPhone وسجّلوا الدخول بالحساب نفسه، وإلا فلن تتمكنوا من الإدارة."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your family has no other parent device. First install Tofy on your iPhone and sign in with the same account — otherwise you won't be able to manage the family."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У семьи нет другого устройства родителя. Сначала установите Tofy на iPhone и войдите с тем же аккаунтом, иначе вы не сможете управлять семьёй."
+          }
+        }
+      }
+    },
     "אֵין מַכְשִׁירִים מְחוּבָּרִים": {
       "localizations": {
         "ar": {
@@ -11755,6 +11777,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Страна иврита"
+          }
+        }
+      }
+    },
+    "אֶת הַמִּשְׁפָּחָה מְנַהֲלִים בְּדֶרֶךְ כְּלָל מֵהָאַיְפוֹן שֶׁלָּכֶם": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عادةً تُدار العائلة من الـ iPhone الخاص بكم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The family is usually managed from your iPhone"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Семьёй обычно управляют с вашего iPhone"
           }
         }
       }
@@ -20684,6 +20728,28 @@
         }
       }
     },
+    "הֵבַנְתִּי — לְהַמְשִׁיךְ בְּכָל זֹאת": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فهمت — المتابعة على أي حال"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Got it — continue anyway"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Понятно — всё равно продолжить"
+          }
+        }
+      }
+    },
     "הֵבַנְתִּי!": {
       "localizations": {
         "ar": {
@@ -24865,6 +24931,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "Уведомления"
+          }
+        }
+      }
+    },
+    "הָאַיְפֵּד הַזֶּה שֶׁל %@? לַהֲפֹךְ אוֹתוֹ לַמַּכְשִׁיר שֶׁלָּהּ": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هل هذا الـ iPad لـ %@؟ حوّلوه إلى جهازها"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Is this iPad %@'s? Make it her device"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это iPad %@? Сделать его устройством ребёнка"
+          }
+        }
+      }
+    },
+    "הָאַיְפֵּד הַזֶּה שֶׁל %@? לַהֲפֹךְ אוֹתוֹ לַמַּכְשִׁיר שֶׁלּוֹ": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هل هذا الـ iPad لـ %@؟ حوّلوه إلى جهازه"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Is this iPad %@'s? Make it his device"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это iPad %@? Сделать его устройством ребёнка"
+          }
+        }
+      }
+    },
+    "הָאַיְפֵּד יִתְנַתֵּק מֵחֶשְׁבּוֹן הַהוֹרֶה וְיִתְחַבֵּר כְּמַכְשִׁיר הַמִּשְׂחָק שֶׁל הַיֶּלֶד שֶׁתִּבְחֲרוּ. הַמִּשְׁפָּחָה, הַיְּלָדִים וְהַהִתְקַדְּמוּת נִשְׁמָרִים בֶּעָנָן.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سيُسجَّل خروج الـ iPad من حساب الوالد ويتصل كجهاز اللعب للطفل الذي تختارونه. العائلة والأطفال وتقدّمهم محفوظة في السحابة."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The iPad will sign out of the parent account and connect as the play device of the child you choose. The family, the children and their progress stay saved in the cloud."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad выйдет из аккаунта родителя и подключится как игровое устройство выбранного ребёнка. Семья, дети и их прогресс сохраняются в облаке."
           }
         }
       }
@@ -29054,6 +29186,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "Это твой код 🙂"
+          }
+        }
+      }
+    },
+    "זֶה הָאַיְפֵּד שֶׁל הַיֶּלֶד": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هذا iPad الطفل"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It's my child's iPad"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это iPad ребёнка"
+          }
+        }
+      }
+    },
+    "זֶה הָאַיְפֵּד שֶׁלִּי, לְהַמְשִׁיךְ כְּהוֹרֶה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هذا الـ iPad لي، المتابعة كوالد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It's my iPad — continue as a parent"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это мой iPad, продолжить как родитель"
           }
         }
       }
@@ -38672,6 +38848,50 @@
         }
       }
     },
+    "לַהֲפֹךְ אֶת הָאַיְפֵּד הַזֶּה לְמַכְשִׁיר שֶׁל יֶלֶד": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحويل هذا الـ iPad إلى جهاز طفل"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn this iPad into a child's device"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сделать этот iPad устройством ребёнка"
+          }
+        }
+      }
+    },
+    "לַהֲפֹךְ לְמַכְשִׁיר שֶׁל %@": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحويله إلى جهاز %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Make it %@'s device"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сделать устройством %@"
+          }
+        }
+      }
+    },
     "לַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד?": {
       "localizations": {
         "ar": {
@@ -39174,6 +39394,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сейчас не удалось завершить покупку. Попробуйте ещё раз через минуту — деньги не списаны."
+          }
+        }
+      }
+    },
+    "לֹא הִצְלַחְנוּ לְהָכִין אֶת הַחִבּוּר. בִּדְקוּ אֶת הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم نتمكن من تجهيز الاتصال. تحقّقوا من الإنترنت وحاولوا مرة أخرى."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We couldn't prepare the connection. Check your internet and try again."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось подготовить подключение. Проверьте интернет и попробуйте снова."
           }
         }
       }
@@ -41620,6 +41862,28 @@
         }
       }
     },
+    "מִי מִשְׁתַּמֵּשׁ בָּאַיְפֵּד הַזֶּה?": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "من يستخدم هذا الـ iPad؟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Who uses this iPad?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кто пользуется этим iPad?"
+          }
+        }
+      }
+    },
     "מִי נוֹהֵג, מַטִּיס וּמְנַוֵּט": {
       "localizations": {
         "ar": {
@@ -43066,6 +43330,28 @@
         }
       }
     },
+    "מַכְשִׁיר שֶׁל יֶלֶד": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جهاز طفل"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Child's device"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Устройство ребёнка"
+          }
+        }
+      }
+    },
     "מַלְבֵּן בְּאֹרֶךְ %lld ס\"מ וּבְרֹחַב %lld ס\"מ — מָה הַהֶקֵּף שֶׁלּוֹ?": {
       "localizations": {
         "ar": {
@@ -44032,6 +44318,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "Рекомендуем %@"
+          }
+        }
+      }
+    },
+    "מֻמְלָץ אִם הַיֶּלֶד מְשַׂחֵק בָּאַיְפֵּד הַזֶּה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "موصى به إذا كان الطفل يلعب على هذا الـ iPad"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recommended if your child plays on this iPad"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рекомендуем, если ребёнок играет на этом iPad"
+          }
+        }
+      }
+    },
+    "מֻמְלָץ לְאַיְפֵּד": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "موصى به للـ iPad"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recommended for iPad"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рекомендуем для iPad"
           }
         }
       }
@@ -48368,6 +48698,50 @@
         }
       }
     },
+    "סִרְקוּ עִם הַמַּצְלֵמָה שֶׁל הָאַיְפוֹן כְּדֵי לְהוֹרִיד אֶת טוֹפִי": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "امسحوا بكاميرا الـ iPhone لتنزيل Tofy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan with your iPhone's camera to download Tofy"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отсканируйте камерой iPhone, чтобы скачать Tofy"
+          }
+        }
+      }
+    },
+    "סִרְקוּ עִם הַמַּצְלֵמָה שֶׁל הָאַיְפוֹן כְּדֵי לְהוֹרִיד אֶת טוֹפִי, צְרוּ מִשְׁפָּחָה וְחִזְרוּ לְכָאן": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "امسحوا بكاميرا الـ iPhone لتنزيل Tofy، أنشئوا عائلة وعودوا إلى هنا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan with your iPhone's camera to download Tofy, create a family and come back here"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отсканируйте камерой iPhone, чтобы скачать Tofy, создайте семью и вернитесь сюда"
+          }
+        }
+      }
+    },
     "סִרְקוּ קוֹד QR": {
       "localizations": {
         "ar": {
@@ -50569,6 +50943,28 @@
         }
       }
     },
+    "עוֹד אֵין יְלָדִים בַּמִּשְׁפָּחָה. הוֹסִיפוּ יֶלֶד קֹדֶם, וְאָז חִזְרוּ לְכָאן.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا يوجد أطفال في العائلة بعد. أضيفوا طفلًا أولًا، ثم عودوا إلى هنا."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are no children in the family yet. Add a child first, then come back here."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В семье ещё нет детей. Сначала добавьте ребёнка, а потом вернитесь сюда."
+          }
+        }
+      }
+    },
     "עוֹד אֵין לְךָ דַּקּוֹת": {
       "localizations": {
         "ar": {
@@ -50653,6 +51049,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "У родителя ещё нет Tofy?"
+          }
+        }
+      }
+    },
+    "עוֹד אֵין לָכֶם טוֹפִי בָּאַיְפוֹן?": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ليس لديكم Tofy على الـ iPhone بعد؟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don't have Tofy on your iPhone yet?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На iPhone ещё нет Tofy?"
           }
         }
       }
@@ -55131,6 +55549,28 @@
         }
       }
     },
+    "קוֹד QR לְהוֹרָדַת טוֹפִי": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رمز QR لتنزيل Tofy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QR code to download Tofy"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QR-код для загрузки Tofy"
+          }
+        }
+      }
+    },
     "קוֹד בִּלְבַד · שִׁנּוּי קוֹד": {
       "localizations": {
         "ar": {
@@ -56214,6 +56654,28 @@
         }
       }
     },
+    "רֶגַע, הָאַיְפֵּד הַזֶּה שֶׁל מִי?": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لحظة، لمن هذا الـ iPad؟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wait — whose iPad is this?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Минутку, чей это iPad?"
+          }
+        }
+      }
+    },
     "רֶגַע, לֹא הִצְלַחְנוּ לִפְתֹּחַ עַכְשָׁיו — נְנַסֶּה שׁוּב 😊": {
       "localizations": {
         "ar": {
@@ -56852,6 +57314,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Рош ха-Шана, Йом Кипур, Суккот и Симхат Тора"
+          }
+        }
+      }
+    },
+    "רֹב הַמִּשְׁפָּחוֹת מְנַהֲלוֹת אֶת טוֹפִי מֵהָאַיְפוֹן שֶׁל הַהוֹרֶה, וּמְחַבְּרוֹת אֶת הָאַיְפֵּד כְּמַכְשִׁיר שֶׁל הַיֶּלֶד.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "معظم العائلات تدير Tofy من iPhone الوالد، وتربط الـ iPad كجهاز الطفل."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most families manage Tofy from the parent's iPhone and connect the iPad as the child's device."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Большинство семей управляют Tofy с iPhone родителя, а iPad подключают как устройство ребёнка."
           }
         }
       }
@@ -58706,6 +59190,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Фамилия"
+          }
+        }
+      }
+    },
+    "שֶׁל מִי הָאַיְפֵּד?": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لمن هذا الـ iPad؟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whose iPad is it?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чей это iPad?"
           }
         }
       }

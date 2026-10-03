@@ -94,6 +94,8 @@ struct ParentDashboardView: View {
     @State private var showingFeedback = false
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
+    /// 📱 "This iPad is the child's" — opened from the QR sheet on a parent iPad.
+    @State private var convertChild: Profile? = nil
     /// After creating a child we offer to connect their device right away.
     @State private var pendingQRChild: Profile? = nil
     /// Flips to true when the child device redeems the code — shows success then
@@ -1026,6 +1028,27 @@ struct ParentDashboardView: View {
                             .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }
 
+                    // 📱 On a parent iPad the "child's device" is very often THIS
+                    // iPad (the parent set it up first). Offer the one-tap fix.
+                    if qrSheetOffersConvert {
+                        Button {
+                            Haptic.light()
+                            convertChild = child
+                        } label: {
+                            Label(child.gender == .girl
+                                  ? tr("הָאַיְפֵּד הַזֶּה שֶׁל \(child.name)? לַהֲפֹךְ אוֹתוֹ לַמַּכְשִׁיר שֶׁלָּהּ")
+                                  : tr("הָאַיְפֵּד הַזֶּה שֶׁל \(child.name)? לַהֲפֹךְ אוֹתוֹ לַמַּכְשִׁיר שֶׁלּוֹ"),
+                                  systemImage: "ipad")
+                                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 16).padding(.vertical, 9)
+                                .background(Capsule().fill(.white.opacity(0.14)))
+                                .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        }
+                        .buttonStyle(.juicy)
+                    }
+
                     Button(tr("סְגוֹר")) { closeQRSheet() }
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
@@ -1041,6 +1064,22 @@ struct ParentDashboardView: View {
                 .frame(maxWidth: 460)
             }
         }
+        .sheet(item: $convertChild) { kid in
+            NavigationStack {
+                ConvertToChildDeviceView(preselectedChildID: kid.id) {
+                    convertChild = nil
+                    closeQRSheet()
+                }
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(tr("סְגוֹר")) { convertChild = nil }
+                    }
+                }
+            }
+            .environmentObject(profiles)
+            .environment(\.colorScheme, .dark)
+            .environment(\.layoutDirection, .app)
+        }
         .task(id: child.id) {
             childDeviceLinked = false
             qrCode = await HouseholdManager.shared.makeChildJoinCode(for: child.id.uuidString)
@@ -1055,6 +1094,13 @@ struct ParentDashboardView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { closeQRSheet() }
         }
         .onDisappear { HouseholdManager.shared.stopWatchingInviteRedemption() }
+    }
+
+    /// The device (not the size class) is an iPad acting as a parent device.
+    private var qrSheetOffersConvert: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+            && settings.deviceRole == .parent
+            && !KidModeManager.shared.active
     }
 
     private func closeQRSheet() {

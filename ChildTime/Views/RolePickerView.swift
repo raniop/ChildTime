@@ -8,8 +8,15 @@ struct RolePickerView: View {
     @Environment(\.horizontalSizeClass) private var hsc
     @StateObject private var companion = CompanionController()
     @State private var appeared = false
+    /// iPad only: "רגע, האייפד הזה של מי?" before it becomes a parent device.
+    @State private var confirmParentOnPad = false
 
     private var isCompact: Bool { hsc == .compact }
+    /// 📱 The DEVICE, not the size class — an iPad in Split View is still the
+    /// family iPad. In production 3 of 16 families made the shared iPad their
+    /// ONLY parent device (the parent installs there first and picks "parent"),
+    /// while the kid is the one actually using it. Steer iPads to "child".
+    private let isPad = UIDevice.current.userInterfaceIdiom == .pad
 
     var body: some View {
         ZStack {
@@ -21,13 +28,15 @@ struct RolePickerView: View {
                     VStack(spacing: AppSpacing.sm) {
                         CompanionView(controller: companion, size: isCompact ? 124 : 150)
                             .scaleEffect(appeared ? 1 : 0.4)
-                        Text(tr("מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר הַזֶּה?"))
+                        Text(isPad ? tr("מִי מִשְׁתַּמֵּשׁ בָּאַיְפֵּד הַזֶּה?") : tr("מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר הַזֶּה?"))
                             .font(.system(size: isCompact ? 26 : 34, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
-                        Text(tr("אֶפְשָׁר לְשַׁנּוֹת מְאוּחָר יוֹתֵר בְּהַגְדָּרוֹת."))
+                        Text(isPad ? tr("אֶת הַמִּשְׁפָּחָה מְנַהֲלִים בְּדֶרֶךְ כְּלָל מֵהָאַיְפוֹן שֶׁלָּכֶם")
+                                   : tr("אֶפְשָׁר לְשַׁנּוֹת מְאוּחָר יוֹתֵר בְּהַגְדָּרוֹת."))
                             .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.8))
+                            .multilineTextAlignment(.center)
                     }
                     .padding(.top, AppSpacing.lg)
 
@@ -39,7 +48,8 @@ struct RolePickerView: View {
                             // on the KID's device hit a scan screen with no code
                             // to scan — say up front that the parent goes first.
                             subtitle: tr("לְשַׂחֵק וְלִלְמוֹד · מַתְחִילִים קֹדֶם בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה"),
-                            glow: AppColor.companionGlow
+                            glow: AppColor.companionGlow,
+                            badge: isPad ? tr("מֻמְלָץ לְאַיְפֵּד") : nil
                         ) { choose(.child) }
 
                         roleCard(
@@ -47,7 +57,14 @@ struct RolePickerView: View {
                             title: tr("הַמַּכְשִׁיר שֶׁלִּי (הוֹרֶה)"),
                             subtitle: tr("מַעֲקָב, דּוּחוֹת וְנִיהוּל"),
                             glow: AppColor.starGold
-                        ) { choose(.parent) }
+                        ) {
+                            if isPad {
+                                Haptic.light()
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { confirmParentOnPad = true }
+                            } else {
+                                choose(.parent)
+                            }
+                        }
                     }
                     .frame(maxWidth: 460)
                 }
@@ -56,14 +73,75 @@ struct RolePickerView: View {
                 .frame(maxWidth: .infinity)
             }
         }
+        .overlay {
+            if confirmParentOnPad { padParentConfirm }
+        }
         .opacity(appeared ? 1 : 0)
         .onAppear {
             withAnimation(.easeOut(duration: 0.4)) { appeared = true }
         }
     }
 
+    /// Glass confirmation shown on an iPad before it becomes a PARENT device.
+    /// The kid's choice is the primary (gold) button; "it's mine" stays possible.
+    private var padParentConfirm: some View {
+        ZStack {
+            Color.black.opacity(0.45)
+                .ignoresSafeArea()
+                .onTapGesture { dismissPadConfirm() }
+            VStack(spacing: AppSpacing.md) {
+                Text("🤔").font(.system(size: 54))
+                Text(tr("רֶגַע, הָאַיְפֵּד הַזֶּה שֶׁל מִי?"))
+                    .font(.system(size: 24, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                Text(tr("רֹב הַמִּשְׁפָּחוֹת מְנַהֲלוֹת אֶת טוֹפִי מֵהָאַיְפוֹן שֶׁל הַהוֹרֶה, וּמְחַבְּרוֹת אֶת הָאַיְפֵּד כְּמַכְשִׁיר שֶׁל הַיֶּלֶד."))
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.88))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button {
+                    confirmParentOnPad = false
+                    choose(.child)
+                } label: {
+                    Text(tr("זֶה הָאַיְפֵּד שֶׁל הַיֶּלֶד"))
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .glassFill(AppGradient.gold, radius: 16)
+                }
+                .buttonStyle(.juicy)
+                .padding(.top, 4)
+                Button {
+                    confirmParentOnPad = false
+                    choose(.parent)
+                } label: {
+                    Text(tr("זֶה הָאַיְפֵּד שֶׁלִּי, לְהַמְשִׁיךְ כְּהוֹרֶה"))
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(Capsule().fill(.white.opacity(0.14)))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                }
+                .buttonStyle(.juicy)
+            }
+            .padding(AppSpacing.xl)
+            .frame(maxWidth: 440)
+            .glassPane(radius: AppRadius.large, strength: 0.2)
+            .padding(.horizontal, AppSpacing.lg)
+            .transition(.scale(scale: 0.92).combined(with: .opacity))
+        }
+    }
+
+    private func dismissPadConfirm() {
+        withAnimation(.easeOut(duration: 0.2)) { confirmParentOnPad = false }
+    }
+
     private func roleCard(emoji: String, title: String, subtitle: String,
-                          glow: Color, action: @escaping () -> Void) -> some View {
+                          glow: Color, badge: String? = nil,
+                          action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: AppSpacing.md) {
                 Text(emoji)
@@ -77,6 +155,13 @@ struct RolePickerView: View {
                     )
                     .overlay(Circle().stroke(.white.opacity(0.35), lineWidth: 1))
                 VStack(alignment: .leading, spacing: 4) {
+                    if let badge {
+                        Text(badge)
+                            .font(.system(size: 12, weight: .heavy, design: .rounded))
+                            .foregroundStyle(Color(hex: "2B1C04"))
+                            .padding(.horizontal, 10).padding(.vertical, 3)
+                            .background(Capsule().fill(AppGradient.gold))
+                    }
                     Text(title)
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
