@@ -220,10 +220,10 @@ extension PushManager {
         // never from a locked phone in someone else's hand.
         let supportReply = UNTextInputNotificationAction(
             identifier: Action.supportReply,
-            title: tr("הָשֵׁב"),
+            title: tr("השב"),
             options: [.authenticationRequired],
-            textInputButtonTitle: tr("שְׁלַח"),
-            textInputPlaceholder: tr("כִּתְבוּ הוֹדָעָה…"))
+            textInputButtonTitle: tr("שלח"),
+            textInputPlaceholder: tr("כתבו הודעה…"))
         let supportCat = UNNotificationCategory(
             identifier: Category.supportChat,
             actions: [supportReply],

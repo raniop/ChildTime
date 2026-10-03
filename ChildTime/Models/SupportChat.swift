@@ -270,8 +270,8 @@ final class SupportChatStore: ObservableObject {
         defer { if taskID != .invalid { app.endBackgroundTask(taskID); taskID = .invalid } }
         let ok = await callSupportReply(householdID: householdID, text: text)
         let content = UNMutableNotificationContent()
-        content.title = ok ? tr("✅ הַתְּשׁוּבָה נִשְׁלְחָה") : tr("הַתְּשׁוּבָה לֹא נִשְׁלְחָה")
-        content.body = ok ? text : tr("פִּתְחוּ אֶת הַשִּׂיחָה בָּאַפְּלִיקַצְיָה וְנַסּוּ שׁוּב.")
+        content.title = ok ? tr("✅ התשובה נשלחה") : tr("התשובה לא נשלחה")
+        content.body = ok ? text : tr("פתחו את השיחה באפליקציה ונסו שוב.")
         try? await UNUserNotificationCenter.current().add(
             UNNotificationRequest(identifier: "support.sent.\(householdID)", content: content, trigger: nil))
         return ok

@@ -25,6 +25,7 @@
       }
     },
     "  ·  🎁 %lld למחר": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "variations": {
@@ -213,6 +214,24 @@
             }
           }
         },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " · טָעוּת אַחַת"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": " · %lld טְעֻיּוֹת"
+                }
+              }
+            }
+          }
+        },
         "ru": {
           "variations": {
             "plural": {
@@ -238,24 +257,6 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": " · %lld ошибки"
-                }
-              }
-            }
-          }
-        },
-        "he": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": " · טָעוּת אַחַת"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": " · %lld טְעֻיּוֹת"
                 }
               }
             }
@@ -532,6 +533,7 @@
       }
     },
     " · 🎁 כבר %lld": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "variations": {
@@ -614,6 +616,7 @@
       }
     },
     " · 💝 המתנה פתוחה גם היום": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -2980,6 +2983,7 @@
       }
     },
     "%@ לתקרה היומית (%lld דק׳) — מה %@ עכשיו נשמר למחר": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -3001,6 +3005,7 @@
         }
       }
     },
+    "%@ מְחַכָּה לָכֶם בְּ-App Store": {},
     "%@ מְחַכָּה לָכֶם!": {
       "localizations": {
         "ar": {
@@ -3579,16 +3584,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ — заблокировано ✓"
-          }
-        }
-      }
-    },
-    "%@ • %@": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ • %2$@"
           }
         }
       }
@@ -6550,6 +6545,7 @@
       }
     },
     "%lld מַכְשִׁירִים מְחוּבָּרִים": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "variations": {
@@ -7321,6 +7317,7 @@
       }
     },
     "%lld שְׁאֵלוֹת · %lld נְכוֹנוֹת": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -10174,8 +10171,8 @@
         }
       }
     },
+    "99+": {},
     ":": {},
-    ":%@": {},
     "?": {},
     "Apple Sign-In נכשל: %@": {
       "localizations": {
@@ -10404,6 +10401,7 @@
         }
       }
     },
+    "Language · שפה": {},
     "OK": {},
     "Option — 12": {},
     "Phase A — Foundation Demo": {},
@@ -10699,6 +10697,7 @@
       }
     },
     "אֲנִי הוֹרֶה · פְּתִיחַת מְחִיקַת הָאַפְּלִיקַצְיָה": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -11450,6 +11449,7 @@
       }
     },
     "אֵין מַכְשִׁירִים מְחוּבָּרִים": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -12133,6 +12133,7 @@
         }
       }
     },
+    "אַחַר כָּךְ": {},
     "אַחַת מְחַכָּה": {
       "localizations": {
         "ar": {
@@ -12618,6 +12619,7 @@
       }
     },
     "אַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת (5 דַּק')": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -13652,6 +13654,7 @@
       }
     },
     "אייפד של הילד, כרטיס ילד מסודר, וקרב בוס שנספר": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -13955,6 +13958,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Нет вошедшего пользователя — синхронизация выключена"
+          }
+        }
+      }
+    },
+    "אין עדיין שיחות": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا توجد محادثات بعد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No chats yet"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока нет чатов"
           }
         }
       }
@@ -14268,6 +14294,7 @@
       }
     },
     "אפס התקדמות": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -14356,6 +14383,7 @@
       }
     },
     "אפס קוד הגנת זמן": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -14853,6 +14881,7 @@
       }
     },
     "בְּטוֹפִי עַכְשָׁיו": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -15250,6 +15279,7 @@
       }
     },
     "בִּחֲרוּ קוֹד בֶּן 4 סְפָרוֹת לְהָגֵן עַל הַהַגְדָּרוֹת": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -15426,6 +15456,7 @@
         }
       }
     },
+    "בִּקְשׁוּ מֵאַבָּא אוֹ מֵאִמָּא לְעַדְכֵּן,\nוְיִהְיוּ דְּבָרִים חֲדָשִׁים לְשַׂחֵק בָּהֶם 💛": {},
     "בִּשְׁבִילְךָ": {
       "localizations": {
         "ar": {
@@ -17023,6 +17054,7 @@
       }
     },
     "בונה ביטחון": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -19511,6 +19543,7 @@
       }
     },
     "דק׳ מתנה מכם": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -19533,6 +19566,7 @@
       }
     },
     "דק׳ שהרוויח": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -19555,6 +19589,7 @@
       }
     },
     "דק׳ שהרוויחה": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -19841,6 +19876,7 @@
       }
     },
     "הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — %lld דַּקּוֹת שְׁמוּרוֹת לְמָחָר": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "variations": {
@@ -19953,6 +19989,7 @@
       }
     },
     "הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — %lld דַּקּוֹת שְׁמוּרוֹת לְמָחָר!": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "variations": {
@@ -20971,6 +21008,7 @@
       }
     },
     "הִתְקַדְּמוּת": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -21619,6 +21657,7 @@
         }
       }
     },
+    "הַגִּרְסָה שֶׁמֻּתְקֶנֶת כָּאן כְּבָר לֹא מְדַבֶּרֶת עִם הַשֵּׁרֵת שֶׁל טוֹפִי. הָעִדְכּוּן לוֹקֵחַ רֶגַע — וְכָל הַזְּמַן, הַכּוֹכָבִים וְהַיַּהֲלוֹמִים נִשְׁמָרִים בַּמָּקוֹם.": {},
     "הַדִּיּוּק שֶׁל %@ בְּ%@ יָרַד בְּ-%lld נְקֻדּוֹת לְעֻמַּת הַתְּקוּפָה הַקּוֹדֶמֶת. לִפְעָמִים זֶה פָּשׁוּט חֹמֶר חָדָשׁ שֶׁנִּכְנַס.": {
       "localizations": {
         "ar": {
@@ -25972,6 +26011,7 @@
       }
     },
     "הגיע": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -25994,6 +26034,7 @@
       }
     },
     "הגיעה": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -26077,6 +26118,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Твой персонаж крупным планом, с минутами, алмазами и звёздами."
+          }
+        }
+      }
+    },
+    "ההודעה לא נשלחה — נסו שוב": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم تُرسَل الرسالة — حاولوا مجددًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The message wasn't sent — please try again"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сообщение не отправлено — попробуйте ещё раз"
           }
         }
       }
@@ -26687,6 +26751,29 @@
         }
       }
     },
+    "הורה": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "والد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parent"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Родитель"
+          }
+        }
+      }
+    },
     "הזזת השעון במכשיר לא מוסיפה דקות, לא פותחת מחדש פרסים יומיים ולא משאירה אפליקציות פתוחות": {
       "localizations": {
         "ar": {
@@ -26952,6 +27039,7 @@
       }
     },
     "הילד מזין אותו כדי לפתוח את הדקות שצבר": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -28070,6 +28158,7 @@
       }
     },
     "הצלחה היום": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -28290,6 +28379,7 @@
       }
     },
     "הרוויח": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -28312,6 +28402,7 @@
       }
     },
     "הרוויחה": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -28373,6 +28464,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Регистрация"
+          }
+        }
+      }
+    },
+    "השב": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ردّ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответить"
           }
         }
       }
@@ -28814,6 +28928,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Уведомления с выводами для родителя"
+          }
+        }
+      }
+    },
+    "התשובה לא נשלחה": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم يُرسَل الرد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The reply wasn't sent"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответ не отправлен"
           }
         }
       }
@@ -29895,6 +30032,7 @@
       }
     },
     "זמן מסך היום": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -29917,6 +30055,7 @@
       }
     },
     "זמן מסך יומי": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -29939,6 +30078,7 @@
       }
     },
     "זמן מסך פתוח": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -29983,6 +30123,7 @@
       }
     },
     "זמן מתנה פתוח": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -31062,6 +31203,7 @@
       }
     },
     "חַבְּרוּ מַכְשִׁיר נוֹסָף": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -31084,6 +31226,7 @@
       }
     },
     "חַבְּרוּ מַכְשִׁיר נוֹסָף לְ%@": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -31658,6 +31801,7 @@
       }
     },
     "חברים": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -31944,6 +32088,7 @@
       }
     },
     "חזק ב": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -31988,6 +32133,7 @@
       }
     },
     "חזקה ב": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -32099,6 +32245,7 @@
       }
     },
     "חסוך 30%": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -33275,6 +33422,8 @@
         }
       }
     },
+    "יֵשׁ גִּרְסָה חֲדָשָׁה שֶׁל טוֹפִי": {},
+    "יֵשׁ טוֹפִי חָדָשׁ! ✨": {},
     "יֵשׁ לְךָ %lld דַּקּוֹת": {
       "localizations": {
         "ar": {
@@ -34261,6 +34410,7 @@
       }
     },
     "יהלומים (חנות)": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -34639,6 +34789,12 @@
     },
     "ילד שפתח 90 דקות, שיחק 22 ועצר — קיבל את 68 הדקות בחזרה לארנק, אבל הן המשיכו להיספר נגד המכסה היומית שלו. הוא ראה \"הגעת למקסימום\" עם דקות שהוא לא יכול לגעת בהן. עכשיו הן חוזרות לשניהם, וגם אם המכשיר השני עוד לא יודע שהוא עצר": {
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الطفل الذي فتح 90 دقيقة ولعب 22 ثم توقّف كان يستعيد الـ68 الباقية إلى محفظته — لكنها كانت تبقى محسوبة ضمن حصّته اليومية. فيرى \"وصلت إلى الحد الأقصى\" بجانب دقائق لا يستطيع لمسها. الآن تعود الدقائق إلى الاثنين معًا، حتى لو لم يعرف الجهاز الآخر بعد أنه توقّف."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -34649,12 +34805,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ребёнок, который открыл 90 минут, поиграл 22 и остановился, получал оставшиеся 68 обратно в кошелёк — но они продолжали считаться против дневного лимита. Он видел «ты достиг максимума» рядом с минутами, которых не мог коснуться. Теперь минуты возвращаются и туда, и туда, даже если второе устройство ещё не знает об остановке."
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الطفل الذي فتح 90 دقيقة ولعب 22 ثم توقّف كان يستعيد الـ68 الباقية إلى محفظته — لكنها كانت تبقى محسوبة ضمن حصّته اليومية. فيرى \"وصلت إلى الحد الأقصى\" بجانب دقائق لا يستطيع لمسها. الآن تعود الدقائق إلى الاثنين معًا، حتى لو لم يعرف الجهاز الآخر بعد أنه توقّف."
           }
         }
       }
@@ -37320,6 +37470,7 @@
       }
     },
     "כדאי לחזק": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -37342,6 +37493,7 @@
       }
     },
     "כדאי לחזק:": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -37386,6 +37538,7 @@
       }
     },
     "כוכבים (דירוג)": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -37789,6 +37942,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Все миры"
+          }
+        }
+      }
+    },
+    "כל השיחות": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كل المحادثات"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All chats"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все чаты"
           }
         }
       }
@@ -38245,6 +38421,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Когда ребёнок открывает минуты на iPhone, iPad показывает, что окно открыто там, и предлагает перенести его сюда. Одни и те же минуты не открываются дважды, а дневной лимит считается один раз на ребёнка"
+          }
+        }
+      }
+    },
+    "כתבו הודעה…": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اكتبوا رسالة…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a message…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Напишите сообщение…"
           }
         }
       }
@@ -40344,6 +40543,7 @@
       }
     },
     "לא צוין": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -45157,6 +45357,16 @@
         }
       }
     },
+    "מֻתְקָן אֶצְלְכֶם: %@ (%@)": {
+      "localizations": {
+        "he": {
+          "stringUnit": {
+            "state": "new",
+            "value": "מֻתְקָן אֶצְלְכֶם: %1$@ (%2$@)"
+          }
+        }
+      }
+    },
     "מאובטח": {
       "localizations": {
         "ar": {
@@ -45202,6 +45412,7 @@
       }
     },
     "מאתגר יותר": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -45290,6 +45501,7 @@
       }
     },
     "מגלה עניין חדש 🔭": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -45906,6 +46118,7 @@
       }
     },
     "מטלות הבית 🧹": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -46522,6 +46735,29 @@
         }
       }
     },
+    "משפחה ללא שם": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عائلة بلا اسم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unnamed family"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Семья без названия"
+          }
+        }
+      }
+    },
     "משפחת ": {
       "extractionState": "stale",
       "localizations": {
@@ -46768,6 +47004,7 @@
       }
     },
     "מתקדם יפה 🎉": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -47308,6 +47545,7 @@
       }
     },
     "נִרְאָה לִפְנֵי %lld דַּקּוֹת": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "variations": {
@@ -47420,6 +47658,7 @@
       }
     },
     "נִרְאָה לִפְנֵי %lld יָמִים": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "variations": {
@@ -47532,6 +47771,7 @@
       }
     },
     "נִרְאָה לִפְנֵי %lld שָׁעוֹת": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "variations": {
@@ -48614,6 +48854,29 @@
         }
       }
     },
+    "נחזור אליכם בהקדם": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سنعود إليكم قريبًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll get back to you soon"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мы скоро вам ответим"
+          }
+        }
+      }
+    },
     "ניסיון 7 ימים חינם במסלול השנתי. ניתן לבטל בכל עת בהגדרות Apple ID.": {
       "localizations": {
         "ar": {
@@ -48769,6 +49032,7 @@
       }
     },
     "נצבר היום: %lld / %lld דק׳": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -50661,6 +50925,7 @@
       }
     },
     "עִבְרוּ לַפְּרוֹפִיל הַזֶּה": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -50726,6 +50991,7 @@
         }
       }
     },
+    "עַדְכְּנוּ עַכְשָׁיו": {},
     "עַכְבָּר": {
       "localizations": {
         "ar": {
@@ -52917,6 +53183,7 @@
       }
     },
     "עולמות פעילים": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -52984,6 +53251,12 @@
     },
     "עצירה מוקדמת כבר לא עולה לילד ביום": {
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التوقّف المبكر لم يعد يكلّف طفلكم يومه"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -52995,17 +53268,17 @@
             "state": "translated",
             "value": "Ранняя остановка больше не стоит ребёнку целого дня"
           }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "التوقّف المبكر لم يعد يكلّف طفلكم يومه"
-          }
         }
       }
     },
     "עצרתם מוקדם? הדקות חוזרות גם למכסה": {
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "توقّفتم مبكرًا؟ الدقائق تعود إلى الحصّة أيضًا"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -53016,12 +53289,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Остановились раньше? Минуты возвращаются и в лимит"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "توقّفتم مبكرًا؟ الدقائق تعود إلى الحصّة أيضًا"
           }
         }
       }
@@ -53049,6 +53316,7 @@
       }
     },
     "ערוך פרופיל (שם, גיל)": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -54026,6 +54294,7 @@
       }
     },
     "פָּעִיל עַכְשָׁיו 🟢": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -54554,6 +54823,7 @@
       }
     },
     "פרופיל למידה": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -54726,6 +54996,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открыть с Face ID / Touch ID"
+          }
+        }
+      }
+    },
+    "פתחו את השיחה באפליקציה ונסו שוב.": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "افتحوا المحادثة في التطبيق وحاولوا مجددًا."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the chat in the app and try again."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Откройте чат в приложении и попробуйте снова."
           }
         }
       }
@@ -55302,6 +55595,7 @@
         }
       }
     },
+    "צָרִיךְ לְעַדְכֵּן כְּדֵי לְהַמְשִׁיךְ": {},
     "צָרִיךְ עוֹד %lld יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמוֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.": {
       "localizations": {
         "ar": {
@@ -55546,6 +55840,29 @@
         }
       }
     },
+    "צוות טופי": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فريق Tofy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tofy team"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Команда Tofy"
+          }
+        }
+      }
+    },
     "צור חשבון": {
       "localizations": {
         "ar": {
@@ -55723,6 +56040,7 @@
       }
     },
     "צריך חיזוק 💪": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -56935,6 +57253,7 @@
       }
     },
     "קוד הגנת זמן המשחק": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -57710,6 +58029,7 @@
       }
     },
     "רַעֲנֵן נְתוּנִים בְּכָל הַמַּכְשִׁירִים": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -58720,6 +59040,7 @@
       }
     },
     "רמת קושי": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -58868,6 +59189,7 @@
       }
     },
     "רצף ימים": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -61613,6 +61935,29 @@
         }
       }
     },
+    "שיחה עם צוות טופי": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "محادثة مع فريق Tofy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat with the Tofy team"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чат с командой Tofy"
+          }
+        }
+      }
+    },
     "שימו שיר ובקשו מ%@ לזהות כלי נגינה או למחוא כפיים בקצב.": {
       "localizations": {
         "ar": {
@@ -61746,6 +62091,7 @@
       }
     },
     "שירוויח": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -61833,6 +62179,29 @@
         }
       }
     },
+    "שלום! כאן צוות טופי 👋 איך אפשר לעזור?": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مرحبًا! معكم فريق Tofy 👋 كيف يمكننا المساعدة؟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hi! This is the Tofy team 👋 How can we help?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здравствуйте! Это команда Tofy 👋 Чем можем помочь?"
+          }
+        }
+      }
+    },
     "שלום, הורה 👋": {
       "localizations": {
         "ar": {
@@ -61873,6 +62242,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Три раза в день"
+          }
+        }
+      }
+    },
+    "שלח": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إرسال"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправить"
           }
         }
       }
@@ -62141,7 +62533,6 @@
         }
       }
     },
-    "שפה במכשיר של הילד": {},
     "שפה לילד, מרחוק": {
       "localizations": {
         "ar": {
@@ -62187,6 +62578,7 @@
       }
     },
     "שתרוויח": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -62253,6 +62645,7 @@
       }
     },
     "תְּחוּמֵי עִנְיָן (לַפִּיד הֶחָכָם)": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -62848,6 +63241,7 @@
       }
     },
     "תובנות מלאות": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -63266,6 +63660,7 @@
       }
     },
     "−5 מהמורווח": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -63288,6 +63683,7 @@
       }
     },
     "⏱ דַּקּוֹת הַיּוֹם": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -63578,6 +63974,7 @@
       }
     },
     "⚙️ סְגֹר הַגְדָּרוֹת": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -63599,6 +63996,7 @@
         }
       }
     },
+    "⚠️": {},
     "⚠️ חשוב: בחרו אילו אפליקציות יישארו פתוחות — והקפידו לכלול את טופי (וכן אפליקציות חיוניות כמו טלפון). עד שתבחרו — לא ייחסם כלום, כדי לא לנעול את המכשיר בטעות.": {
       "localizations": {
         "ar": {
@@ -63795,6 +64193,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "✅ Выполнено на сегодня"
+          }
+        }
+      }
+    },
+    "✅ התשובה נשלחה": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✅ أُرسل الرد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✅ Reply sent"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✅ Ответ отправлен"
           }
         }
       }
@@ -64133,6 +64554,7 @@
       }
     },
     "✨ תּוֹבָנוֹת מְלֵאוֹת": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -65348,6 +65770,7 @@
       }
     },
     "🎮 %lld דק׳ %@ מלמידה  ·  💝 %lld דק׳ מתנה מכם": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -66173,6 +66596,7 @@
     },
     "💝": {},
     "💝 +10 מתנה": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -66575,6 +66999,7 @@
         }
       }
     },
+    "💬": {},
     "💰 %@ קָנְתָה %lld מַחְבָּרוֹת בְּ־%lld שְׁקָלִים כָּל אַחַת, וְשִׁלְּמָה בְּ־%lld שְׁקָלִים. כַּמָּה עֹדֶף מַגִּיעַ?": {
       "localizations": {
         "ar": {
@@ -66982,6 +67407,7 @@
       }
     },
     "📭": {},
+    "📱 → 🧒": {},
     "📷 אוֹ הַעֲלֵה תְּמוּנָה (אוֹפְּצִיוֹנָלִי)": {
       "localizations": {
         "ar": {
@@ -67212,6 +67638,7 @@
         }
       }
     },
+    "🔐": {},
     "🔒": {},
     "🔒 נוֹעֲלִים %@… רֶגַע אֶחָד ⏳": {
       "localizations": {
@@ -68269,7 +68696,7 @@
       }
     },
     "🧹%lld": {},
-    "🪄": {}
+    "🪄 ": {}
   },
   "version": "1.0"
 }

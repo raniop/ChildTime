@@ -32,7 +32,7 @@ struct SupportFloatingButtons: View {
                         .overlay(alignment: .topTrailing) { badge(store.teamAwaitingReply) }
                 }
                 .buttonStyle(.juicy)
-                .accessibilityLabel(tr("כָּל הַשִּׂיחוֹת"))
+                .accessibilityLabel(tr("כל השיחות"))
             }
             Button {
                 Haptic.light()
@@ -47,7 +47,7 @@ struct SupportFloatingButtons: View {
                     .overlay(alignment: .topTrailing) { badge(store.parentUnread) }
             }
             .buttonStyle(.juicy)
-            .accessibilityLabel(tr("שִׂיחָה עִם צֶוֶת טוֹפִּי"))
+            .accessibilityLabel(tr("שיחה עם צוות טופי"))
         }
     }
 
@@ -151,15 +151,15 @@ struct SupportChatView: View {
 
     private var title: String {
         switch mode {
-        case .parent: return tr("צֶוֶת טוֹפִּי")
+        case .parent: return tr("צוות טופי")
         case .team:
             let name = summary?.familyName ?? ""
-            return name.isEmpty ? tr("מִשְׁפָּחָה לְלֹא שֵׁם") : name
+            return name.isEmpty ? tr("משפחה ללא שם") : name
         }
     }
     private var subtitle: String {
         switch mode {
-        case .parent: return tr("נַחֲזֹר אֲלֵיכֶם בְּהֶקְדֵּם")
+        case .parent: return tr("נחזור אליכם בהקדם")
         case .team: return summary?.kidsSummary ?? ""
         }
     }
@@ -183,7 +183,7 @@ struct SupportChatView: View {
             ToolbarItem(placement: .principal) { header }
             if showsClose {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(tr("סְגוֹר")) { dismiss() }
+                    Button(tr("סגירה")) { dismiss() }
                         .foregroundStyle(.white)
                 }
             }
@@ -234,8 +234,8 @@ struct SupportChatView: View {
                 LazyVStack(spacing: 10) {
                     if mode == .parent {
                         // Rendered here, never stored — every chat opens with it.
-                        bubble(text: tr("שָׁלוֹם! כָּאן צֶוֶת טוֹפִּי 👋 אֵיךְ אֶפְשָׁר לַעֲזֹר?"),
-                               mine: false, name: tr("צֶוֶת טוֹפִּי"), at: nil, pending: false)
+                        bubble(text: tr("שלום! כאן צוות טופי 👋 איך אפשר לעזור?"),
+                               mine: false, name: tr("צוות טופי"), at: nil, pending: false)
                     }
                     ForEach(model.messages) { m in
                         let mine = (mode == .parent) == (m.from == .parent)
@@ -271,12 +271,12 @@ struct SupportChatView: View {
     private func nameLine(for m: SupportMessage) -> String {
         switch mode {
         case .parent:
-            return tr("צֶוֶת טוֹפִּי")       // never the team member's own name
+            return tr("צוות טופי")       // never the team member's own name
         case .team:
-            if m.from == .team { return m.senderName.isEmpty ? tr("צֶוֶת טוֹפִּי") : m.senderName }
+            if m.from == .team { return m.senderName.isEmpty ? tr("צוות טופי") : m.senderName }
             if !m.senderName.isEmpty { return m.senderName }
             if let p = summary?.parentName, !p.isEmpty { return p }
-            return tr("הוֹרֶה")
+            return tr("הורה")
         }
     }
 
@@ -332,12 +332,12 @@ struct SupportChatView: View {
     private var inputBar: some View {
         VStack(spacing: 6) {
             if failed {
-                Text(tr("הַהוֹדָעָה לֹא נִשְׁלְחָה — נַסּוּ שׁוּב"))
+                Text(tr("ההודעה לא נשלחה — נסו שוב"))
                     .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.warn)
             }
             HStack(alignment: .bottom, spacing: 10) {
-                TextField(tr("כִּתְבוּ הוֹדָעָה…"), text: $draft, axis: .vertical)
+                TextField(tr("כתבו הודעה…"), text: $draft, axis: .vertical)
                     .lineLimit(1...5)
                     .focused($focused)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -366,7 +366,7 @@ struct SupportChatView: View {
                 }
                 .buttonStyle(.juicy)
                 .disabled(!canSend)
-                .accessibilityLabel(tr("שְׁלַח"))
+                .accessibilityLabel(tr("שלח"))
             }
         }
         .padding(.horizontal, AppSpacing.md)
@@ -410,7 +410,7 @@ struct SupportInboxView: View {
                 if store.teamChats.isEmpty {
                     VStack(spacing: AppSpacing.md) {
                         Text("📭").font(.system(size: 54))
-                        Text(tr("אֵין עֲדַיִן שִׂיחוֹת"))
+                        Text(tr("אין עדיין שיחות"))
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                     }
@@ -432,13 +432,13 @@ struct SupportInboxView: View {
                     }
                 }
             }
-            .navigationTitle(tr("כָּל הַשִּׂיחוֹת"))
+            .navigationTitle(tr("כל השיחות"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(tr("סְגוֹר")) { dismiss() }
+                    Button(tr("סגירה")) { dismiss() }
                         .foregroundStyle(.white)
                 }
             }
@@ -455,7 +455,7 @@ struct SupportInboxView: View {
                 .padding(.top, 6)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(chat.familyName.isEmpty ? tr("מִשְׁפָּחָה לְלֹא שֵׁם") : chat.familyName)
+                    Text(chat.familyName.isEmpty ? tr("משפחה ללא שם") : chat.familyName)
                         .font(.system(size: 16, weight: chat.needsReply ? .heavy : .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .lineLimit(1)
