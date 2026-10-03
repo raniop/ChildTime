@@ -367,6 +367,11 @@ struct ChildTimeApp: App {
         // grocerygame | balancegame [DEMO_WORLD=…] [DEMO_GRADE=…] [DEMO_EARN=1 → earns like the chooser]
         case "sortgame", "patterngame", "game2048", "vaultgame", "grocerygame", "balancegame":
             MiniGameDemoHost(screen: name)
+        // 🎮 A world's "how do you want to play?" — DEMO_SCREEN=gamechooser (math) |
+        // gamechooser_english [DEMO_WORLD=space] [DEMO_GRADE=3]
+        case "gamechooser", "gamechooser_english":
+            WorldGameChooserDemo(topic: name == "gamechooser_english" ? .english
+                                 : (ProcessInfo.processInfo.environment["DEMO_WORLD"].flatMap(Topic.init(rawValue:)) ?? .math))
         case "surpriseround":                               // DEMO_SCREEN=surpriseround [DEMO_WORLD=soccer] [DEMO_GAME=balloon] — ⚡ the interstitial → the game
             MiniGameDemoHost(screen: name)
         case "wheel":    LuckyWheelView(onClose: {})

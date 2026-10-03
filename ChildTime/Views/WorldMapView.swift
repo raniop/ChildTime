@@ -731,8 +731,12 @@ struct WorldMapView: View {
             lastSeenStars = new
             checkWorldUnlocks()
         }
+        // A world opens to "how do you want to play?" (Rani, 2026-10-03) — or
+        // straight into its questions when the parent switched games off for
+        // this child, or when there is nothing else to choose. The tile above
+        // already did the pack / ask-a-parent gating before setting this.
         .fullScreenCover(item: $selectedWorld) { world in
-            WorldDetailView(world: world)
+            WorldEntryView(world: world)
         }
         .fullScreenCover(item: $packReveal) { pack in
             PackRevealView(pack: pack, isGift: profiles.active.map { PackAccess.isGift($0, pack) } ?? true, onStart: {
