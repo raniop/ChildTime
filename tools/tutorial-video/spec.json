@@ -1,0 +1,314 @@
+{
+ "out": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/video_only.mp4",
+ "fps": 30,
+ "clips": [
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s01_welcome.mov",
+   "kind": "phone",
+   "from": 0.4,
+   "dur": 6.7
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s02_rolepicker.mov",
+   "kind": "phone",
+   "from": 0.5,
+   "dur": 6.7
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s03a_family.mov",
+   "kind": "phone",
+   "from": 0.5,
+   "dur": 2.0
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s03b_gate.mov",
+   "kind": "phone",
+   "from": 0.3,
+   "dur": 2.4
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s03c_create.mov",
+   "kind": "phone",
+   "from": 14.6,
+   "dur": 3.0
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s04_parenthome.mov",
+   "kind": "phone",
+   "from": 0.5,
+   "dur": 9.066666666666666
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s05_childjoin.mov",
+   "kind": "ipad",
+   "from": 0.5,
+   "dur": 8.733333333333333
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s06_applock.mov",
+   "kind": "ipad",
+   "from": 0.5,
+   "dur": 6.933333333333334
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s07b_kidhome_phone.mov",
+   "kind": "phone",
+   "from": 1.0,
+   "dur": 7.833333333333333
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s08_question.mov",
+   "kind": "ipad",
+   "from": 17.4,
+   "dur": 4.866666666666666
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s08_question.mov",
+   "kind": "ipad",
+   "from": 3.7,
+   "dur": 5.233333333333333
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s09a_wheel.mov",
+   "kind": "ipad",
+   "from": 25.9,
+   "dur": 5.1
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s09b_chest.mov",
+   "kind": "ipad",
+   "from": 2.8,
+   "dur": 3.5
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s07_kidhome.mov",
+   "kind": "ipad",
+   "from": 0.5,
+   "dur": 2.8
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s10_opening.mov",
+   "kind": "ipad",
+   "from": 0.5,
+   "dur": 4.7
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s11_child.mov",
+   "kind": "phone",
+   "from": 2.0,
+   "dur": 8.2
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s11_child.mov",
+   "kind": "phone",
+   "from": 12.6,
+   "dur": 4.0
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s11_child.mov",
+   "kind": "phone",
+   "from": 20.6,
+   "dur": 4.166666666666667
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s13a_choreskid.mov",
+   "kind": "ipad",
+   "from": 0.5,
+   "dur": 3.0
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s13b_choresparent.mov",
+   "kind": "phone",
+   "from": 0.5,
+   "dur": 4.233333333333333
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s11_child.mov",
+   "kind": "phone",
+   "from": 70.0,
+   "dur": 9.233333333333333
+  },
+  {
+   "file": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/rec/s01_welcome.mov",
+   "kind": "phone",
+   "from": 3.0,
+   "dur": 5.466666666666667
+  },
+  {
+   "kind": "card",
+   "image": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/endcard.png",
+   "dur": 3.5
+  }
+ ],
+ "subs": [
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub01.png",
+   "from": 0.75,
+   "to": 5.847,
+   "fin": true,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub02.png",
+   "from": 7.45,
+   "to": 12.562,
+   "fin": true,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub03.png",
+   "from": 14.15,
+   "to": 16.841,
+   "fin": true,
+   "fout": false
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub04.png",
+   "from": 16.841,
+   "to": 19.948,
+   "fin": false,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub05.png",
+   "from": 21.55,
+   "to": 24.336,
+   "fin": true,
+   "fout": false
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub06.png",
+   "from": 24.336,
+   "to": 29.016,
+   "fin": false,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub07.png",
+   "from": 30.617,
+   "to": 34.929,
+   "fin": true,
+   "fout": false
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub08.png",
+   "from": 34.929,
+   "to": 37.734,
+   "fin": false,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub09.png",
+   "from": 39.35,
+   "to": 41.533,
+   "fin": true,
+   "fout": false
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub10.png",
+   "from": 41.533,
+   "to": 44.668,
+   "fin": false,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub11.png",
+   "from": 46.283,
+   "to": 52.526,
+   "fin": true,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub12.png",
+   "from": 54.117,
+   "to": 57.38,
+   "fin": true,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub13.png",
+   "from": 58.983,
+   "to": 62.419,
+   "fin": true,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub14.png",
+   "from": 64.217,
+   "to": 68.69,
+   "fin": true,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub15.png",
+   "from": 72.817,
+   "to": 76.485,
+   "fin": true,
+   "fout": false
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub16.png",
+   "from": 76.485,
+   "to": 78.728,
+   "fin": false,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub17.png",
+   "from": 80.317,
+   "to": 84.149,
+   "fin": true,
+   "fout": false
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub18.png",
+   "from": 84.149,
+   "to": 86.93,
+   "fin": false,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub19.png",
+   "from": 88.517,
+   "to": 91.866,
+   "fin": true,
+   "fout": false
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub20.png",
+   "from": 91.866,
+   "to": 94.679,
+   "fin": false,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub21.png",
+   "from": 96.683,
+   "to": 102.317,
+   "fin": true,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub22.png",
+   "from": 103.917,
+   "to": 108.184,
+   "fin": true,
+   "fout": false
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub23.png",
+   "from": 108.184,
+   "to": 111.557,
+   "fin": false,
+   "fout": true
+  },
+  {
+   "png": "/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/tutorial/subs/sub24.png",
+   "from": 113.15,
+   "to": 117.62,
+   "fin": true,
+   "fout": true
+  }
+ ],
+ "xfade": 0.3
+}
