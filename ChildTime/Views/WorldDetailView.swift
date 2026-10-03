@@ -10,6 +10,8 @@ struct WorldDetailView: View {
 
     @State private var startSession = false
     @State private var showBoss = false
+    /// 🎮 A mini-game opened from this world.
+    @State private var miniGame: MiniGameKind?
     @State private var heroAppeared = false
 
     /// The boss waits in the final room — a finale challenge once the kid has
@@ -42,6 +44,7 @@ struct WorldDetailView: View {
                         heroBlock
                         missionCard
                         startButton
+                        if MiniGameKind.availableForActiveChild { miniGameButtons }
                         if bossUnlocked { bossButton }
                     }
                     .frame(maxWidth: 480)
@@ -71,6 +74,9 @@ struct WorldDetailView: View {
         }
         .fullScreenCover(isPresented: $showBoss) {
             BossBattleView(world: world) { showBoss = false }
+        }
+        .fullScreenCover(item: $miniGame) { kind in
+            MiniGameScreen(kind: kind, topic: world.isBonusWorld ? nil : world.topic) { miniGame = nil }
         }
         // Presented as a fullScreenCover, which does NOT inherit the app root's
         // RTL layout direction — set it here so Hebrew rows (and the top bar)
@@ -217,6 +223,53 @@ struct WorldDetailView: View {
             Text(tr("קָדִימָה! 🚀"))
                 .font(.system(size: ctaSize, weight: .heavy, design: .rounded))
         }
+    }
+
+    /// 🎮 The mini-games that fit this world — a different way to play its
+    /// content (⭐ and 💎 only, never minutes). The mission card's glass, with
+    /// one tile per game.
+    private var miniGameButtons: some View {
+        let games = MiniGameKind.forWorld(world.isBonusWorld ? nil : world.topic,
+                                          grade: profiles.active?.effectiveGrade ?? 1)
+        let cols = [GridItem(.adaptive(minimum: isCompact ? 92 : 120), spacing: AppSpacing.sm)]
+        return VStack(spacing: AppSpacing.md) {
+            Text(tr("🎮 מִשְׂחָקִים"))
+                .font(.system(size: isCompact ? 20 : 24, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            LazyVGrid(columns: cols, spacing: AppSpacing.sm) {
+                ForEach(Array(games.enumerated()), id: \.element) { i, kind in
+                    miniGameButton(kind, tint: OptionCard.tints[i % OptionCard.tints.count])
+                }
+            }
+        }
+        .padding(AppSpacing.lg)
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial.opacity(0.75), in: RoundedRectangle(cornerRadius: AppRadius.large))
+        .overlay(RoundedRectangle(cornerRadius: AppRadius.large).stroke(.white.opacity(0.25), lineWidth: 1.5))
+        .shadow(color: .black.opacity(0.15), radius: 10, y: 6)
+    }
+
+    /// One game: its emoji big, its short name under it, on an answer-tile pane.
+    private func miniGameButton(_ kind: MiniGameKind, tint: Color) -> some View {
+        Button {
+            Haptic.light()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { miniGame = kind }
+        } label: {
+            VStack(spacing: 4) {
+                Text(kind.emoji)
+                    .font(.system(size: isCompact ? 30 : 38))
+                Text(kind.shortName)
+                    .font(.system(size: isCompact ? 14 : 17, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(2).minimumScaleFactor(0.7)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity, minHeight: isCompact ? 84 : 104)
+            .padding(.horizontal, 6)
+            .miniGameTile(.normal, tint: tint, radius: 18)
+        }
+        .buttonStyle(.juicy)
+        .accessibilityLabel(kind.title)
     }
 
     /// Finale challenge — appears in the world's last room.

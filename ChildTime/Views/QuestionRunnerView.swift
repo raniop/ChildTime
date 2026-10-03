@@ -155,6 +155,11 @@ struct QuestionRunnerView: View {
     @State private var receivedHelpThisQuestion = false
     @State private var showReportConfirm = false
     @State private var capMessageShown = false
+    /// ⚡ The surprise round: the plan on screen (presents the cover), how many
+    /// ran this session, and the question index the next one is due at.
+    @State private var surprisePlan: SurprisePlan?
+    @State private var surprisesThisSession = 0
+    @State private var nextSurpriseAt = SurpriseRound.nextGap()
 
     /// Earn mode: the parent's session length, hard-capped at 30 ("no matter
     /// what"). Free mode: effectively unlimited — the child ends it with סיום.
@@ -380,6 +385,11 @@ struct QuestionRunnerView: View {
             if settings.deviceRole == .child, let cid = profiles.activeID {
                 Task { await HouseholdManager.shared.registerDevice(forChildID: cid) }
             }
+        }
+        // ⚡ סִבּוּב הַפְתָּעָה — the interstitial and its game; afterwards the
+        // session simply carries on with the next question.
+        .fullScreenCover(item: $surprisePlan, onDismiss: { nextQuestion() }) { plan in
+            SurpriseRoundFlow(plan: plan) { surprisePlan = nil }
         }
         .fullScreenCover(isPresented: $goToReward) {
             RewardScreenView(
@@ -1110,6 +1120,8 @@ struct QuestionRunnerView: View {
         consecutiveWrong = 0
         topicHistory = []
         reAskQueue = []
+        surprisesThisSession = 0
+        nextSurpriseAt = SurpriseRound.nextGap()
         QuestionMemory.shared.beginSession()   // no repeats within this session
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             companion.cheer(mode.isFeed ? tr("טוֹפִי טַיים — קָדִימָה! 🧠") : tr("מוּכָן? קָדִימָה!"))
@@ -1124,6 +1136,19 @@ struct QuestionRunnerView: View {
                 goToReward = true
             }
             return
+        }
+
+        // ⚡ A surprise round is due — show it; the next question follows when
+        // it's over (the cover's onDismiss calls back in here).
+        if surpriseRoundDue {
+            nextSurpriseAt = questionIndex + SurpriseRound.nextGap()
+            if let plan = SurpriseRound.plan(grade: profiles.active?.effectiveGrade ?? 1,
+                                             profile: profiles.active, context: mode.fixedTopic) {
+                surprisesThisSession += 1
+                SpeechReader.shared.stop()
+                surprisePlan = plan
+                return
+            }
         }
 
         // Decide special events. A cooldown keeps at least 3 normal questions
@@ -1294,6 +1319,18 @@ struct QuestionRunnerView: View {
         questionShownAt = Date()
         // Read the instruction aloud automatically for early readers.
         if preReader { SpeechReader.shared.speak(q.readAloudText) }
+    }
+
+    /// ⚡ After 12–15 questions (twice a session at most) — never in the bonus
+    /// arena, never for a pre-reader, never in the middle of a reading passage
+    /// or right after a 💫 bonus question. (The boss battle is its own screen.)
+    private var surpriseRoundDue: Bool {
+        questionIndex >= nextSurpriseAt
+            && surprisesThisSession < SurpriseRound.maxPerSession
+            && !isBonusArena && !isPreReader
+            && readingQueue.isEmpty && current?.passage == nil
+            && !isBonusQuestion
+            && MiniGameKind.availableForActiveChild
     }
 
     /// The active child is in the pre-reader (גן) picture mode — driven by the

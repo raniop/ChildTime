@@ -359,6 +359,12 @@ struct ChildTimeApp: App {
                         ProfileStore.shared.update(p)
                     }
                 }
+        // 🎮 The mini-games — DEMO_SCREEN=pairsgame | balloongame | wordgame | crushgame |
+        // wordsearch | lightninggame [DEMO_WORLD=english] [DEMO_GRADE=3] [DEMO_SURPRISE=1]
+        case "pairsgame", "balloongame", "wordgame", "crushgame", "wordsearch", "lightninggame":
+            MiniGameDemoHost(screen: name)
+        case "surpriseround":                               // DEMO_SCREEN=surpriseround [DEMO_WORLD=soccer] [DEMO_GAME=balloon] — ⚡ the interstitial → the game
+            MiniGameDemoHost(screen: name)
         case "wheel":    LuckyWheelView(onClose: {})
         case "dashboard": ParentDashboardView(isRoot: true)
             .onAppear {

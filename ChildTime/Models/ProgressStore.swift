@@ -1383,6 +1383,14 @@ final class ProgressStore: ObservableObject {
         recordHourly(correct: correct)
     }
 
+    /// 🎮 A mini-game answer (⚡ נָכוֹן אוֹ לֹא, 🔗 זוּגוֹת) counts exactly like a
+    /// boss answer: it shows up in the parent's reports and today's total, and
+    /// pays nothing per answer — the game pays its own ⭐/💎 at the end, and
+    /// never minutes.
+    func recordGameAnswer(correct: Bool) {
+        recordBossAnswer(correct: correct)
+    }
+
     /// Records a wrong pick. Deducts half the per-correct reward and parks it in
     /// the recovery pot — a clean correct answer on the next question wins it
     /// back (Risk & Recovery loop). Returns the minutes deducted this tick.

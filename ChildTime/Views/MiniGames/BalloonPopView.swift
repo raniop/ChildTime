@@ -1,0 +1,364 @@
+import SwiftUI
+import Combine
+
+/// 🎈 "פּוֹצְצוּ אֶת הַבַּלּוֹנִים" — a category prompt ("פּוֹצְצוּ אֶת כָּל הַחַיּוֹת
+/// שֶׁחַיּוֹת בַּיָּם!") and colourful balloons floating up from the bottom at
+/// different speeds, each carrying a word, a number or a picture. Pop the right
+/// ones; a wrong one only wobbles (no text, no penalty beyond the streak), and
+/// a balloon that floats away just floats away. 30 seconds.
+///
+/// Pays ⭐/💎 only — never screen-time minutes.
+struct BalloonPopView: View {
+    var topic: Topic? = nil
+    /// ⚡ Launched by the runner's surprise round: no intro, one round, ×2.
+    var surprise: Bool = false
+    var onClose: () -> Void
+
+    @ObservedObject private var profiles = ProfileStore.shared
+    @ObservedObject private var display = DisplayGeometry.shared
+    @Environment(\.horizontalSizeClass) private var hsc
+
+    private struct Balloon: Identifiable {
+        let id = UUID()
+        let item: BalloonItem
+        /// Horizontal lane, 0…1 of the field's width.
+        let lane: CGFloat
+        let spawnedAt: Date
+        /// Seconds to cross the field — varied, so the sky never moves in step.
+        let duration: Double
+        let color: Color
+        let swayPhase: Double
+        var poppedAt: Date?
+        var wobbledAt: Date?
+    }
+
+    private enum Phase { case intro, playing, done }
+
+    /// The balloon palette (the app's own accents).
+    private static let palette: [Color] = [Color(hex: "FF6B9D"), Color(hex: "06D6A0"), Color(hex: "FFB84D"),
+                                           Color(hex: "48BFE3"), Color(hex: "9B5DE5")]
+
+    @State private var phase: Phase = .intro
+    @State private var set: BalloonSet?
+    @State private var balloons: [Balloon] = []
+    @State private var startedAt = Date()
+    @State private var now = Date()
+    @State private var nextSpawnAt = Date()
+    @State private var targetQueue: [BalloonItem] = []
+    @State private var otherQueue: [BalloonItem] = []
+    @State private var lastLane: CGFloat = 0.5
+    @State private var popped = 0
+    @State private var misses = 0
+    @State private var streak = 0
+    @State private var bestStreak = 0
+    @State private var burst = 0
+    @State private var confetti = 0
+    @State private var grant: MiniGameReward.Grant?
+
+    private let ticker = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
+
+    private var isCompact: Bool { hsc == .compact }
+    private var roundSeconds: TimeInterval { TimeInterval(MiniGameKind.balloon.seconds(surprise: surprise)) }
+    private var remaining: TimeInterval { max(0, roundSeconds - now.timeIntervalSince(startedAt)) }
+    private var timeFrac: Double { remaining / roundSeconds }
+    private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
+    private var balloonSize: CGSize { isCompact ? CGSize(width: 96, height: 114) : CGSize(width: 124, height: 146) }
+
+    var body: some View {
+        ZStack {
+            MiniGameBackdrop()
+
+            VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
+                MiniGameTopBar(onClose: onClose) {
+                    MiniGameChipLabel(text: "🎈 \(popped)", surprise: surprise)
+                }
+                switch phase {
+                case .intro:
+                    Spacer()
+                    MiniGameIntroCard(kind: .balloon) { start() }
+                    Spacer()
+                case .playing:
+                    playing
+                case .done:
+                    Spacer()
+                    MiniGameEndCard(
+                        title: popped >= 12 ? tr("וָואוּ, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"),
+                        detail: summaryLine,
+                        grant: grant,
+                        surprise: surprise,
+                        againLabel: tr("עוֹד סִבּוּב 🔁"),
+                        onAgain: { start() },
+                        onDone: onClose)
+                    Spacer()
+                }
+            }
+
+            StarBurst(color: AppColor.starGold, trigger: burst)
+            FancyConfetti(trigger: confetti)
+        }
+        .environment(\.layoutDirection, .app)
+        .onAppear { if surprise && phase == .intro { start() } }
+        .onReceive(ticker) { t in tick(t) }
+    }
+
+    private var summaryLine: String {
+        let first: String
+        switch popped {
+        case 0:  first = surprise ? tr("נְנַסֶּה שׁוּב בַּסִּבּוּב הַבָּא 💪") : tr("אֶפְשָׁר לְנַסּוֹת עוֹד סִבּוּב 💪")
+        case 1:  first = tr("בַּלּוֹן נָכוֹן אֶחָד")
+        default: first = tr("\(popped) בַּלּוֹנִים נְכוֹנִים")
+        }
+        guard bestStreak >= 2 else { return first }
+        return first + "\n" + tr("הָרֶצֶף הֲכִי אָרֹךְ: \(bestStreak) 🔥")
+    }
+
+    // MARK: - Playing
+
+    private var playing: some View {
+        VStack(spacing: AppSpacing.sm) {
+            // The prompt, in the runner's question card.
+            VStack(spacing: 10) {
+                Text(set?.prompt ?? "")
+                    .font(.system(size: isCompact ? 22 : 28, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.6)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+                timerBar
+            }
+            .padding(.horizontal, 14).padding(.vertical, 12)
+            .glassPane(radius: 22)
+            .padding(.horizontal, AppSpacing.md)
+
+            Text(streak >= 2 ? tr("🔥 \(streak) בְּרֶצֶף") : " ")
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(AppColor.starGold)
+                .contentTransition(.numericText())
+
+            GeometryReader { geo in
+                ZStack {
+                    ForEach(balloons) { b in
+                        balloonView(b, in: geo.size)
+                    }
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
+            }
+            .clipped()
+        }
+        .frame(maxWidth: 700)
+    }
+
+    private var timerBar: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "timer").font(.system(size: 14, weight: .bold)).foregroundStyle(.white.opacity(0.9))
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.white.opacity(0.18))
+                    Capsule()
+                        .fill(LinearGradient(colors: [Color(hex: "FFD23F"), Color(hex: "FF9F1C")],
+                                             startPoint: .leading, endPoint: .trailing))
+                        .frame(width: max(6, geo.size.width * timeFrac))
+                        .animation(.linear(duration: 0.1), value: timeFrac)
+                }
+            }
+            .frame(height: 8)
+            Text("\(Int(remaining.rounded(.up)))″")
+                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .monospacedDigit()
+                .frame(minWidth: 30)
+        }
+    }
+
+    @ViewBuilder
+    private func balloonView(_ b: Balloon, in field: CGSize) -> some View {
+        let size = balloonSize
+        let age = now.timeIntervalSince(b.spawnedAt)
+        let progress = age / b.duration
+        let y = field.height + size.height / 2 - CGFloat(progress) * (field.height + size.height * 1.4)
+        let sway = CGFloat(sin(age * 1.6 + b.swayPhase)) * 10
+        let usable = max(1, field.width - size.width)
+        let x = size.width / 2 + b.lane * usable + sway
+        let wobble: Double = {
+            guard let w = b.wobbledAt else { return 0 }
+            let dt = now.timeIntervalSince(w)
+            guard dt < 0.6 else { return 0 }
+            return sin(dt * 28) * 14 * (1 - dt / 0.6)
+        }()
+        let popT = b.poppedAt.map { now.timeIntervalSince($0) } ?? -1
+
+        Group {
+            if popT >= 0 {
+                // Popped: a mint ring and a sparkle, gone in a moment.
+                ZStack {
+                    Circle()
+                        .strokeBorder(Color(hex: "8CFFC4"), lineWidth: 4)
+                        .frame(width: size.width * (0.6 + popT * 2), height: size.width * (0.6 + popT * 2))
+                    Text("✨").font(.system(size: 34))
+                }
+                .glow(AppColor.successMint, radius: 10)
+                .opacity(max(0, 1 - popT / 0.35))
+            } else {
+                BalloonShape(item: b.item, color: b.color, size: size, tried: b.wobbledAt != nil)
+                    .rotationEffect(.degrees(wobble), anchor: .bottom)
+                    .contentShape(Ellipse())
+                    .onTapGesture { tap(b.id) }
+            }
+        }
+        .position(x: x, y: y)
+        .allowsHitTesting(popT < 0)
+    }
+
+    // MARK: - Logic
+
+    private func start() {
+        let s = BalloonSets.make(for: topic, grade: grade)
+        set = s
+        targetQueue = []; otherQueue = []
+        balloons = []
+        popped = 0; misses = 0; streak = 0; bestStreak = 0; grant = nil
+        startedAt = Date(); now = Date(); nextSpawnAt = Date()
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .playing }
+    }
+
+    private func nextItem() -> BalloonItem? {
+        guard let s = set else { return nil }
+        let wantTarget = Double.random(in: 0...1) < 0.55
+        if wantTarget {
+            if targetQueue.isEmpty { targetQueue = s.targets.shuffled() }
+            return targetQueue.popLast()
+        }
+        if otherQueue.isEmpty { otherQueue = s.others.shuffled() }
+        return otherQueue.popLast()
+    }
+
+    private func tick(_ t: Date) {
+        guard phase == .playing else { return }
+        now = t
+        // Tidy up: balloons that floated away, pops that finished.
+        balloons.removeAll { b in
+            if let p = b.poppedAt { return t.timeIntervalSince(p) > 0.4 }
+            return t.timeIntervalSince(b.spawnedAt) > b.duration
+        }
+        if remaining <= 0 {
+            finish()
+            return
+        }
+        if t >= nextSpawnAt, balloons.count < 9, let item = nextItem() {
+            // A lane away from the last one, so two balloons never stack.
+            var lane = CGFloat.random(in: 0...1)
+            if abs(lane - lastLane) < 0.25 { lane = lane > 0.5 ? lane - 0.35 : lane + 0.35 }
+            lastLane = lane
+            let slow = grade <= 1 ? 1.25 : 1.0
+            balloons.append(Balloon(item: item, lane: lane, spawnedAt: t,
+                                    duration: Double.random(in: 4.6...7.0) * slow,
+                                    color: Self.palette.randomElement()!,
+                                    swayPhase: Double.random(in: 0...(2 * .pi))))
+            nextSpawnAt = t.addingTimeInterval(Double.random(in: 0.55...0.95) * slow)
+        }
+    }
+
+    private func tap(_ id: UUID) {
+        guard phase == .playing, let i = balloons.firstIndex(where: { $0.id == id }),
+              balloons[i].poppedAt == nil, balloons[i].wobbledAt == nil, let s = set else { return }
+        let b = balloons[i]
+        if b.item.correct {
+            balloons[i].poppedAt = Date()
+            popped += 1
+            streak += 1
+            bestStreak = max(bestStreak, streak)
+            burst += 1
+            SoundPlayer.shared.play(streak % 5 == 0 ? .streakUp : .correctSmall)
+            Haptic.success()
+        } else {
+            // A gentle wobble — the balloon stays and floats on; no word about it.
+            balloons[i].wobbledAt = Date()
+            misses += 1
+            streak = 0
+            SoundPlayer.shared.play(.wrongSoft)
+            Haptic.light()
+        }
+        // Every tap is an answer in the parent's reports (no minutes).
+        ProgressStore.shared.recordGameAnswer(correct: b.item.correct)
+        LearningHistoryStore.shared.recordAnswer(topic: s.topic, correct: b.item.correct, responseMs: 0,
+                                                 earnedMinutes: 0, streak: streak)
+    }
+
+    private func finish() {
+        guard phase == .playing else { return }
+        balloons = []
+        grant = MiniGameReward.grant(game: "balloon", correct: popped, starsPer: 1, diamondsPer: 1,
+                                     cap: surprise ? 12 : 15, surprise: surprise)
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { phase = .done }
+        SoundPlayer.shared.play(.chestOpen)
+        Haptic.success()
+        if popped > 0 { confetti += 1 }
+        AppAnalytics.log("balloon_pop_done", ["topic": set?.topic.rawValue ?? "", "popped": "\(popped)",
+                                              "surprise": surprise ? "1" : "0"])
+    }
+}
+
+/// One balloon: a glossy oval in its colour, a knot and a string, the word /
+/// number / picture riding on it.
+private struct BalloonShape: View {
+    let item: BalloonItem
+    let color: Color
+    let size: CGSize
+    let tried: Bool
+
+    var body: some View {
+        let body = CGSize(width: size.width, height: size.height * 0.82)
+        VStack(spacing: 0) {
+            ZStack {
+                Ellipse()
+                    .fill(RadialGradient(colors: [color.opacity(0.95), color.opacity(0.78)],
+                                         center: UnitPoint(x: 0.35, y: 0.3), startRadius: 2, endRadius: body.width))
+                Ellipse()
+                    .fill(.white.opacity(0.35))
+                    .frame(width: body.width * 0.22, height: body.height * 0.16)
+                    .offset(x: -body.width * 0.2, y: -body.height * 0.26)
+                Ellipse().strokeBorder(.white.opacity(0.45), lineWidth: 1.2)
+                VStack(spacing: 1) {
+                    if !item.emoji.isEmpty {
+                        Text(item.emoji).font(.system(size: body.width * 0.3))
+                    }
+                    Text(item.label)
+                        .font(.system(size: item.emoji.isEmpty ? body.width * 0.26 : body.width * 0.15,
+                                      weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
+                        .lineLimit(2).minimumScaleFactor(0.45)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 8)
+                }
+            }
+            .frame(width: body.width, height: body.height)
+            .opacity(tried ? 0.75 : 1)
+            // Knot + string.
+            Triangle()
+                .fill(color.opacity(0.9))
+                .frame(width: 10, height: 7)
+            Rectangle()
+                .fill(.white.opacity(0.55))
+                .frame(width: 1.2, height: size.height * 0.18 - 7)
+        }
+        .frame(width: size.width, height: size.height)
+        .shadow(color: .black.opacity(0.18), radius: 6, y: 4)
+    }
+}
+
+private struct Triangle: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        p.closeSubpath()
+        return p
+    }
+}
+
+#Preview {
+    BalloonPopView(topic: .sea, onClose: {})
+}
