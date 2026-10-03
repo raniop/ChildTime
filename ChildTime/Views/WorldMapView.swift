@@ -1454,7 +1454,7 @@ struct WorldMapView: View {
         // The approved header: ⏱ minutes today · ✅ correct today · ⭐ level
         // (stars and diamonds moved up beside the name).
         return HStack(spacing: 0) {
-            statColumn(value: minutes, suffix: minutesMax, label: tr("⏱ דַּקּוֹת הַיּוֹם")) { infoStat = .minutes }
+            statColumn(value: minutes, suffix: minutesMax, label: tr("⏱ הִרְוַחְתָּ הַיּוֹם")) { infoStat = .minutes }
             statDivider
             statColumn(value: "\(progress.correctToday)", label: tr("✅ נְכוֹנוֹת הַיּוֹם"), action: nil)
             statDivider
@@ -1620,7 +1620,10 @@ struct WorldMapView: View {
                 }
             } else if progress.dailyScreenTimeMaxedOut {
                 // Today's screen-time cap is used up — the wallet waits for tomorrow.
-                lines.append(tr("הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לְמָחָר!"))
+                // The cap that's full is PLAYED time, so say that number — "הרווחת
+                // היום 49 מתוך 90" under "הגעת למקסימום" read as a contradiction
+                // (Yoav, 2026-10-03).
+                lines.append(tr("הִגַּעְתָּ לַמַּקְסִימוּם 🌙 — שִׂחַקְתָּ הַיּוֹם \(progress.minutesPlayedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת. \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לְךָ לְמָחָר!"))
             } else if progress.pendingMinutes > 0 {
                 // Has some, but below the 15-min minimum we can open.
                 lines.append(tr("יֵשׁ לְךָ \(progress.pendingMinutes) דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-\(progress.minimumUnlockMinutes) דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊"))
@@ -1637,7 +1640,7 @@ struct WorldMapView: View {
             } else {
                 lines.append(tr("עֲדַיִן אֵין דַּקּוֹת. עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק! 🎮"))
             }
-            if cap.enabled {
+            if cap.enabled, !progress.dailyScreenTimeMaxedOut {
                 lines.append(tr("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת."))
             }
             if progress.carryOverMinutes > 0 {
@@ -1873,7 +1876,7 @@ struct WorldMapView: View {
             } else if progress.dailyScreenTimeMaxedOut {
                 // Wallet has minutes, but today's screen-time cap is used up — they
                 // wait for tomorrow. Say so clearly (don't tell them to earn more).
-                bottomHint(tr("הִגַּעְתָּ לְמַקְסִימוּם זְמַן הַמָּסָךְ הַיּוֹמִי 🌙 — \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לְמָחָר"))
+                bottomHint(tr("שִׂחַקְתָּ הַיּוֹם \(progress.minutesPlayedToday) מִתּוֹךְ \(progress.dailyCap.max) דַּקּוֹת 🌙 — \(progress.pendingMinutes) שְׁמוּרוֹת לְמָחָר"))
             } else if progress.redeemableMinutesNow > 0 {
                 // Has some minutes but below the 15-min minimum we can enforce.
                 // Tell the kid how many more to go instead of hiding the button.

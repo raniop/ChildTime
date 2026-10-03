@@ -1701,6 +1701,10 @@ final class ProgressStore: ObservableObject {
     /// today's screen-time cap is already used up (the rest waits for tomorrow) —
     /// distinct from simply not having earned enough yet. Drives an accurate
     /// "you hit today's limit" message instead of "answer more questions".
+    /// Screen time actually opened today (minus what was handed back) — what the
+    /// kid has PLAYED against today's cap, for "שיחקת היום X מתוך Y".
+    var minutesPlayedToday: Int { minutesUnlockedTodayResolved }
+
     var dailyScreenTimeMaxedOut: Bool {
         dailyCap.enabled && !canRedeemNow && pendingMinutes > redeemableMinutesNow
     }

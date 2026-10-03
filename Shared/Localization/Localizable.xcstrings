@@ -20142,6 +20142,28 @@
         }
       }
     },
+    "הִגַּעְתָּ לַמַּקְסִימוּם 🌙 — שִׂחַקְתָּ הַיּוֹם %lld מִתּוֹךְ %lld דַּקּוֹת. %lld דַּקּוֹת שְׁמוּרוֹת לְךָ לְמָחָר!": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وصلتَ إلى الحدّ الأقصى 🌙 — لعبتَ اليوم %lld من %lld دقيقة. %lld دقيقة محفوظة لك للغد!"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You've reached today's max 🌙 — you played %lld of %lld minutes today. %lld minutes are saved for you for tomorrow!"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ты достиг максимума 🌙 — сегодня ты играл %lld из %lld минут. %lld минут сохранены для тебя на завтра!"
+          }
+        }
+      }
+    },
     "הִגַּעַתְּ לְכָל הַדַּקּוֹת שֶׁל הַיּוֹם.\nנִתְרָאֶה מָחָר בַּבֹּקֶר": {
       "localizations": {
         "ar": {
@@ -59771,6 +59793,28 @@
         }
       }
     },
+    "שִׂחַקְתָּ הַיּוֹם %lld מִתּוֹךְ %lld דַּקּוֹת 🌙 — %lld שְׁמוּרוֹת לְמָחָר": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لعبتَ اليوم %lld من %lld دقيقة 🌙 — %lld محفوظة للغد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You played %lld of %lld minutes today 🌙 — %lld saved for tomorrow"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сегодня ты играл %lld из %lld минут 🌙 — %lld сохранено на завтра"
+          }
+        }
+      }
+    },
     "שִׂיא חָדָשׁ! 🏆 %lld בָּרֶצֶף!": {
       "localizations": {
         "ar": {
@@ -62931,6 +62975,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "⏱ Игровые минуты"
+          }
+        }
+      }
+    },
+    "⏱ הִרְוַחְתָּ הַיּוֹם": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏱ ربحتَ اليوم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏱ Earned today"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏱ Заработано сегодня"
           }
         }
       }
