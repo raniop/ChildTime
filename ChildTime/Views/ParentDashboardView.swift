@@ -15,9 +15,6 @@ struct ParentDashboardView: View {
     @ObservedObject private var display = DisplayGeometry.shared
     /// Split out of `.alert(…)`: inline, the translated title made the modifier
     /// chain too slow for the type checker.
-    private var resettingTitle: String { resettingProfile.map { tr("לאפס את ההתקדמות של \($0.name)?") } ?? "" }
-    private var pinResetTitle: String { pinResetProfile.map { tr("לאפס את קוד הגנת הזמן של \($0.name)?") } ?? "" }
-    private var deletingTitle: String { deletingProfile.map { tr("למחוק את \($0.name)?") } ?? "" }
     private var revokeGiftTitle: String {
         guard let p = revokeGiftProfile else { return "" }
         return tr("לִנְעֹל וּלְאַפֵּס אֶת דַּקּוֹת הַמַּתָּנָה שֶׁל \(p.name)?")
@@ -36,12 +33,8 @@ struct ParentDashboardView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
-    @State private var resettingProfile: Profile? = nil
     /// 🔄 "there is a newer Tofy" — the ONLY screen allowed to open the App Store.
     @State private var showUpdateSheet = false
-    @State private var deletingProfile: Profile? = nil
-    /// Confirm clearing a child's "protect my time" code (when the kid forgot it).
-    @State private var pinResetProfile: Profile? = nil
     /// Confirm 'lock + revoke all parent-given minutes' (a deliberate act).
     @State private var revokeGiftProfile: Profile? = nil
     @State private var navPath: [UUID] = []   // pushed child-detail pages (pop on delete)
@@ -53,7 +46,8 @@ struct ParentDashboardView: View {
     /// show someone? Only a real choice is pushed when the device folds back.
     @State private var chosenExplicitly = false
     @State private var gridDeleteProfile: Profile? = nil   // long-press delete from the grid
-    @State private var showLegacyChildCard = false
+    /// ⚙️ The child's settings list (page 2), opened from the bottom of their page.
+    @State private var settingsChild: Profile? = nil
     @State private var showFamilyNameEditor = false
     @State private var familyNameDraft = ""
     @State private var showingReorder = false               // manual child order sheet
@@ -65,8 +59,6 @@ struct ParentDashboardView: View {
     @State private var showingKidMode = false
     /// Kid Mode straight for one child (from the card's ⚡ menu).
     @State private var kidModeChild: Profile? = nil
-    @State private var friendsProfile: Profile?
-    @State private var difficultyProfile: Profile?
     @State private var choresProfile: Profile?    // 🧹 chores sheet
     @State private var showSchoolYearParty = false
     @State private var showWhatsNew = false
@@ -82,15 +74,10 @@ struct ParentDashboardView: View {
     @ObservedObject private var campaigns = CampaignTracker.shared
     @ObservedObject private var subs = SubscriptionManager.shared
     @ObservedObject private var parentHelp = ParentHelpManager.shared
-    @State private var insightsProfile: Profile? = nil
     @StateObject private var choreStore = ChoreStore.shared
-    @State private var screenTimeProfile: Profile?
-    @State private var editProfile: Profile?
     @State private var remoteGrantMsg: String?
     /// Live remote-lock status sheet — real send/ack progress, not a static alert.
     @State private var commandStatus: RemoteCommandStatusRequest?
-    @State private var languageProfile: Profile?
-    @State private var worldsProfile: Profile?
     @State private var showingFeedback = false
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
@@ -468,10 +455,6 @@ struct ParentDashboardView: View {
                 KidModeEntryView(preselected: p.id)
                     .environment(\.layoutDirection, .app)
             }
-            .sheet(item: $friendsProfile) { p in
-                ChildFriendsView(childID: p.id.uuidString, childName: p.name)
-                    .environment(\.layoutDirection, .app)
-            }
             // 🔄 A newer build exists. Shown to the PARENT, with what changed, and
             // the one button in the app that may leave for the App Store.
             .sheet(isPresented: $showUpdateSheet) {
@@ -508,38 +491,6 @@ struct ParentDashboardView: View {
             }
             .sheet(item: $choresProfile) { p in
                 ChoresParentView(profile: p)
-                    .environment(\.layoutDirection, .app)
-            }
-            .sheet(item: $difficultyProfile) { p in
-                ChildDifficultyView(profileID: p.id)
-                    .environmentObject(profiles)
-                    .environment(\.layoutDirection, .app)
-            }
-            .sheet(item: $screenTimeProfile) { p in
-                ChildScreenTimeView(profileID: p.id)
-                    .environmentObject(profiles)
-                    .environmentObject(settings)
-                    .environment(\.layoutDirection, .app)
-            }
-            .sheet(item: $editProfile) { p in
-                ProfileEditorView(mode: .edit(p)) { updated in
-                    profiles.update(updated)
-                } onDelete: { profile in
-                    editProfile = nil          // close the editor sheet
-                    profiles.remove(profile)
-                    navPath = []  // pop the (now-deleted) detail page
-                }
-                .environmentObject(profiles)
-                .environment(\.layoutDirection, .app)
-            }
-            .sheet(item: $languageProfile) { p in
-                ChildLanguageView(profileID: p.id)
-                    .environmentObject(profiles)
-                    .environment(\.layoutDirection, .app)
-            }
-            .sheet(item: $worldsProfile) { p in
-                ChildWorldsView(profileID: p.id)
-                    .environmentObject(profiles)
                     .environment(\.layoutDirection, .app)
             }
             .sheet(isPresented: $showingFeedback) {
@@ -1108,391 +1059,6 @@ struct ParentDashboardView: View {
         qrChild = nil
         qrCode = nil
         childDeviceLinked = false
-    }
-
-    /// Quick family-wide summary for today — minutes earned, questions answered,
-    /// and how many kids were active. Only meaningful when kids are linked.
-    @ViewBuilder
-    private func profileCard(profile: Profile, snapshot s: ProgressSnapshot) -> some View {
-        let isActive = profile.id == profiles.activeID
-        let live = liveWindow(profile)
-        let liveSecs = live?.secondsLeft ?? 0
-        // A GIFT window's countdown belongs to 💝, not 🎮 — otherwise a kid
-        // playing pure gift time looks like he's burning minutes he earned.
-        let liveIsGift = live?.isManual ?? false
-        let lp = LearningProfile(snapshot: s, enabledTopics: profile.playableTopics, age: profile.age)
-        let engine = InsightsEngine(history: LearningHistoryStore.shared.history(for: profile.id), profile: lp)
-        let status = overallStatus(engine: engine, lp: lp, hasData: s.totalAnswered >= 4)
-        // This child's effective daily screen-time cap (per-child override, else global).
-        let cap = profile.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
-
-        return VStack(spacing: 14) {
-            HStack(spacing: 12) {
-                Menu {
-                    if !isActive {
-                        Button {
-                            profiles.setActive(profile)
-                        } label: {
-                            Label(tr("עִבְרוּ לַפְּרוֹפִיל הַזֶּה"), systemImage: "person.crop.circle.fill")
-                        }
-                    }
-                    Menu {
-                        // 15 minutes was missing entirely: the smallest gift a
-                        // parent could give was half an hour, so "עוד רבע שעה ודי"
-                        // had no button.
-                        Button(tr("רֶבַע שָׁעָה")) { remoteOpen(profile, 15) }
-                        Button(tr("חֲצִי שָׁעָה")) { remoteOpen(profile, 30) }
-                        Button(tr("שָׁעָה")) { remoteOpen(profile, 60) }
-                        Button(tr("שְׁעָתַיִם")) { remoteOpen(profile, 120) }
-                        Button(tr("4 שָׁעוֹת")) { remoteOpen(profile, 240) }
-                    } label: {
-                        Label(tr("תֵּן דַּקּוֹת מַתָּנָה 💝"), systemImage: "gift.fill")
-                    }
-                    Button {
-                        remoteLock(profile)
-                    } label: {
-                        Label(tr("נְעַל עַכְשָׁיו (מֵרָחוֹק)"), systemImage: "lock.fill")
-                    }
-                    Button(role: .destructive) {
-                        revokeGiftProfile = profile
-                    } label: {
-                        Label(tr("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה"), systemImage: "gift.circle")
-                    }
-                    Button {
-                        allowAppRemoval(profile)
-                    } label: {
-                        Label(tr("אַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת (5 דַּק')"), systemImage: "trash")
-                    }
-                    // Repair for a device that keeps re-uploading wrong numbers:
-                    // tell every device to drop its cached copy and take the cloud
-                    // as-is. Before this the only fix was deleting and reinstalling
-                    // the app — which a parent cannot diagnose, and which our own
-                    // app-removal lock can block outright.
-                    Button {
-                        Haptic.warning()
-                        RemoteSyncManager.shared.purgeChildCaches(childID: profile.id)
-                    } label: {
-                        Label(tr("רַעֲנֵן נְתוּנִים בְּכָל הַמַּכְשִׁירִים"), systemImage: "arrow.triangle.2.circlepath")
-                    }
-                    Button {
-                        editProfile = profile
-                    } label: {
-                        Label(tr("ערוך פרופיל (שם, גיל)"), systemImage: "pencil")
-                    }
-                    Button {
-                        choresProfile = profile
-                    } label: {
-                        Label(tr("מטלות הבית 🧹"), systemImage: "checklist")
-                    }
-                    Button {
-                        difficultyProfile = profile
-                    } label: {
-                        Label(tr("רמת קושי"), systemImage: "slider.horizontal.3")
-                    }
-                    Button {
-                        screenTimeProfile = profile
-                    } label: {
-                        Label(tr("זמן מסך יומי"), systemImage: "hourglass")
-                    }
-                    Button {
-                        worldsProfile = profile
-                    } label: {
-                        Label(tr("עולמות פעילים"), systemImage: "square.grid.2x2.fill")
-                    }
-                    Button {
-                        languageProfile = profile
-                    } label: {
-                        Label(tr("שפה במכשיר של הילד"), systemImage: "globe")
-                    }
-                    Button {
-                        friendsProfile = profile
-                    } label: {
-                        Label(tr("חברים"), systemImage: "person.2.fill")
-                    }
-                    // Shown only when the child actually set a play-protection
-                    // code — the escape hatch for a forgotten code.
-                    if profile.hasPlayPIN {
-                        Button {
-                            pinResetProfile = profile
-                        } label: {
-                            Label(tr("אפס קוד הגנת זמן"), systemImage: "lock.rotation")
-                        }
-                    }
-                    Button(role: .destructive) {
-                        resettingProfile = profile
-                    } label: {
-                        Label(tr("אפס התקדמות"), systemImage: "arrow.counterclockwise")
-                    }
-                    Button(role: .destructive) {
-                        deletingProfile = profile
-                    } label: {
-                        Label(tr("מְחִיקַת יֶלֶד/ה"), systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                        .font(.system(size: 22))
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    HStack(spacing: 6) {
-                        if isChildPlayingNow(profile) {
-                            HStack(spacing: 4) {
-                                Circle().fill(AppColor.successMint).frame(width: 7, height: 7)
-                                Text(tr("בְּטוֹפִי עַכְשָׁיו"))
-                                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                            }
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 3)
-                            .background(Capsule().fill(AppColor.successMint.opacity(0.9)))
-                        }
-                        Text(profile.name)
-                            .font(.system(size: 18, weight: .heavy, design: .rounded))
-                    }
-                    Text(tr("\(profile.age.label) • \(profile.gender?.displayName ?? tr("לא צוין"))"))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    // 🎓 The grade drives ALL curriculum content — always visible
-                    // here so the parent knows it's right, tappable to change.
-                    // Flagged when the CHILD picked it (the kid-side picker).
-                    Button { editProfile = profile } label: {
-                        HStack(spacing: 4) {
-                            Text("🎓").font(.system(size: 10))
-                            if profile.grade != nil {
-                                Text(Profile.gradeDisplayName(profile.effectiveGrade))
-                                    .font(.system(size: 11, weight: .heavy, design: .rounded))
-                                if profile.gradeSetByChild {
-                                    Text(tr("· נבחרה ע\"י הילד — בדקו"))
-                                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                                }
-                            } else {
-                                Text(tr("כיתה לא הוגדרה — הגדירו"))
-                                    .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            }
-                            Image(systemName: AppSymbol.forwardChevron)
-                                .font(.system(size: 8, weight: .bold))
-                        }
-                        .foregroundStyle(profile.grade == nil || profile.gradeSetByChild
-                                         ? AppColor.flameOrange : Color.secondary)
-                        .padding(.horizontal, 8).padding(.vertical, 3)
-                        .background(Capsule().fill(
-                            (profile.grade == nil || profile.gradeSetByChild
-                             ? AppColor.flameOrange : Color.secondary).opacity(0.12)))
-                    }
-                    .buttonStyle(.plain)
-                    if let status {
-                        Text(status.text)
-                            .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(Capsule().fill(status.color))
-                    }
-                }
-                ProfileAvatarView(profile: profile, size: 54)
-            }
-
-            // LIVE: an open play window right now — green, ticking, with the device.
-            liveWindowBanner(profile, compact: false)
-
-            // Stats, grouped so the card reads top-down: TODAY → PLAY MINUTES →
-            // PROGRESS. Each group has a tiny caption; every cell stays tappable
-            // for its explanation.
-            VStack(alignment: .leading, spacing: 10) {
-                statGroup(tr("הַיּוֹם")) {
-                    statCell(emoji: "⏱",
-                             value: cap.enabled ? "\(s.minutesEarnedToday)/\(cap.minutes)" : "\(s.minutesEarnedToday)",
-                             label: tr("זמן מסך היום"))
-                    statCell(emoji: "❓", value: "\(s.answeredToday)", label: tr("שאלות היום"))
-                    statCell(emoji: "🎯", value: s.answeredToday > 0 ? "\(Int(Double(s.correctToday) / Double(s.answeredToday) * 100))%" : "—", label: tr("הצלחה היום"))
-                }
-                // The two pockets side by side, never blurred: what the child
-                // EARNED (or the live countdown of an open window) vs what the
-                // parent GAVE. Same split as the kid's own home screen.
-                statGroup(tr("דַּקּוֹת מִשְׂחָק")) {
-                    // 🎮 = EARNED wallet only (or the live countdown of an open
-                    // EARNED window). A GIFT window's countdown ticks under 💝 —
-                    // each pocket shows its own open time, never the other's.
-                    let earnedLive = liveSecs > 0 && !liveIsGift
-                    let giftLive = liveSecs > 0 && liveIsGift
-                    statCell(emoji: "🎮",
-                             value: earnedLive ? formatTime(liveSecs) : (s.walletMinutesShown > 0 ? "\(s.walletMinutesShown)" : "—"),
-                             label: earnedLive
-                                ? tr("זמן מסך פתוח")
-                                : (profile.gender == .girl ? tr("דק׳ שהרוויחה") : tr("דק׳ שהרוויח")))
-                    statCell(emoji: "💝",
-                             value: giftLive ? formatTime(liveSecs) : (giftShownFor(profile, s) > 0 ? "\(giftShownFor(profile, s))" : "—"),
-                             label: giftLive ? tr("זמן מתנה פתוח") : tr("דק׳ מתנה מכם"))
-                }
-                statGroup(tr("הִתְקַדְּמוּת")) {
-                    statCell(emoji: "🔥", value: "\(s.dayStreak)", label: tr("רצף ימים"))
-                    statCell(emoji: "⭐", value: s.stars.currencyShort, label: tr("כוכבים (דירוג)"))
-                    statCell(emoji: "💎", value: s.diamonds.currencyShort, label: tr("יהלומים (חנות)"))
-                }
-            }
-
-            // (Friends are managed from the "⋯" menu — "חברים".)
-
-            // The child's play-protection code — full parental transparency: the
-            // parent SEES the code (to remind a forgetful kid) and can reset it.
-            if profile.hasPlayPIN {
-                HStack(spacing: 10) {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(AppColor.starGold)
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(tr("קוד הגנת זמן המשחק"))
-                            .font(.system(size: 13.5, weight: .heavy, design: .rounded))
-                        Text(tr("הילד מזין אותו כדי לפתוח את הדקות שצבר"))
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Text(profile.playPIN ?? "")
-                        .font(.system(size: 19, weight: .heavy, design: .monospaced))
-                        .kerning(3)
-                    Button(tr("אפס")) {
-                        pinResetProfile = profile
-                    }
-                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .buttonStyle(.bordered)
-                    .tint(.orange)
-                }
-                .padding(12)
-                .background(RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                    .fill(AppColor.starGold.opacity(0.1)))
-                .overlay(RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                    .stroke(AppColor.starGold.opacity(0.35), lineWidth: 1))
-            }
-
-            // Learning profile — what the Smart Feed has learned about this kid.
-            learningProfileCard(for: profile, snapshot: s)
-
-            // Smart difficulty — current per-topic level + where it adapted.
-            adaptiveDifficultyCard(for: profile, snapshot: s)
-
-            // Actionable coaching — where to reinforce + concrete tips.
-            coachingCard(for: profile, snapshot: s)
-
-            // Set up this child's own device (QR / code) — primary action.
-            if isRoot {
-                Button {
-                    Haptic.light()
-                    qrCode = nil
-                    qrChild = profile
-                } label: {
-                    HStack(spacing: 10) {
-                        Image(systemName: AppSymbol.forwardChevron).font(.subheadline.weight(.bold))
-                        Spacer()
-                        Text((household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
-                             ? tr("חַבְּרוּ מַכְשִׁיר נוֹסָף לְ\(profile.name)")
-                             : tr("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל \(profile.name)"))
-                            .font(.system(size: 16, weight: .heavy, design: .rounded))
-                        Image(systemName: "qrcode")
-                            .font(.system(size: 20, weight: .bold))
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.vertical, 14).padding(.horizontal, 16)
-                    .frame(maxWidth: .infinity)
-                    .background(AppGradient.purpleDream, in: RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous))
-                    .glow(AppColor.gemPurple, radius: 10)
-                }
-                .buttonStyle(.juicy)
-            }
-
-            // Connected devices for this child.
-            connectedDevicesView(for: profile)
-
-            // Full analytics deep-dive (daily/weekly/monthly + coaching).
-            NavigationLink {
-                ChildInsightsView(profile: profile, snapshot: s)
-                    .environmentObject(settings)
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: AppSymbol.forwardChevron).font(.caption)
-                    Spacer()
-                    Text(tr("תובנות מלאות"))
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                    Image(systemName: "chart.line.uptrend.xyaxis")
-                }
-                .foregroundStyle(AppColor.gemPurple)
-                .padding(.vertical, 10).padding(.horizontal, 12)
-                .background(RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                    .fill(AppColor.gemPurple.opacity(0.12)))
-            }
-            .buttonStyle(.plain)
-
-            // Daily cap line (if enabled) — earned-out-of-max + any minutes banked
-            // for tomorrow (bonus overflow once the daily cap was full).
-            if cap.enabled {
-                let maxedOut = s.minutesEarnedToday >= cap.minutes
-                HStack(spacing: 6) {
-                    Image(systemName: maxedOut ? "flag.checkered" : "timer")
-                        .foregroundStyle(maxedOut ? AppColor.flameOrange : .secondary)
-                    // When the day's allowance is fully earned, SAY so — a
-                    // parent seeing 🎮 "—" next to 240/240 read it as minutes
-                    // gone missing. Spell out where new earnings go (tomorrow)
-                    // and that the 💝 gift pocket stays open today.
-                    Text(maxedOut
-                         ? tr("\(profile.gender == .girl ? tr("הגיעה") : tr("הגיע")) לתקרה היומית (\(cap.minutes) דק׳) — מה \(profile.gender == .girl ? tr("שתרוויח") : tr("שירוויח")) עכשיו נשמר למחר")
-                           + ((s.carryOverMinutes ?? 0) > 0 ? tr(" · 🎁 כבר \(s.carryOverMinutes ?? 0)") : "")
-                           + (giftShownFor(profile, s) > 0 ? tr(" · 💝 המתנה פתוחה גם היום") : "")
-                         : tr("נצבר היום: \(s.minutesEarnedToday) / \(cap.minutes) דק׳")
-                           + ((s.carryOverMinutes ?? 0) > 0 ? tr("  ·  🎁 \(s.carryOverMinutes ?? 0) למחר") : ""))
-                        .font(.caption)
-                        .foregroundStyle(maxedOut ? .primary : .secondary)
-                    Spacer()
-                }
-            }
-
-            // Two clearly-separated pockets: what the child EARNED vs what the
-            // parent GAVE. Give → gift pocket (💝). Take back → earned wallet.
-            let giftShown = giftShownFor(profile, s)
-            HStack(spacing: 6) {
-                Image(systemName: "wallet.pass")
-                    .foregroundStyle(.secondary)
-                Text(tr("🎮 \(s.walletMinutesShown) דק׳ \(profile.gender == .girl ? tr("הרוויחה") : tr("הרוויח")) מלמידה  ·  💝 \(giftShown) דק׳ מתנה מכם"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Spacer()
-            }
-
-            // Quick actions
-            HStack(spacing: 10) {
-                Button {
-                    quickGift(profile: profile, minutes: 10)
-                } label: {
-                    Text(tr("💝 +10 מתנה"))
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .padding(.horizontal, 10).padding(.vertical, 6)
-                        .background(Capsule().fill(AppColor.successMint.opacity(0.25)))
-                        .overlay(Capsule().stroke(AppColor.successMint, lineWidth: 1))
-                        .foregroundStyle(.primary)
-                }
-                .buttonStyle(.borderless)
-
-                Button {
-                    quickAdjust(profile: profile, deltaMinutes: -5)
-                } label: {
-                    Text(tr("−5 מהמורווח"))
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .padding(.horizontal, 10).padding(.vertical, 6)
-                        .background(Capsule().fill(Color.orange.opacity(0.25)))
-                        .overlay(Capsule().stroke(Color.orange, lineWidth: 1))
-                        .foregroundStyle(.primary)
-                }
-                .buttonStyle(.borderless)
-
-                Spacer()
-            }
-        }
-        .padding(AppSpacing.md)
-        .legacyGlassCard(radius: AppRadius.large)
-        .overlay(
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .stroke(isActive ? AppColor.successMint.opacity(0.6) : .clear, lineWidth: 2)
-        )
     }
 
     // MARK: - Child collection tile + per-child detail page
@@ -2134,7 +1700,7 @@ struct ParentDashboardView: View {
     /// Green, pulsing "playing NOW" strip: live countdown + the device it's on.
     /// Shown on the grid card (compact) and the detail card (full sentence).
     @ViewBuilder
-    private func liveWindowBanner(_ profile: Profile, compact: Bool) -> some View {
+    private func liveWindowBanner(_ profile: Profile, compact: Bool, onLock: (() -> Void)? = nil) -> some View {
         if let live = liveWindow(profile) {
             let deviceLabel = live.device.kind == "ipad" ? tr("בָּאַיְפֵּד") : (live.device.kind == "iphone" ? tr("בָּאַיְפוֹן") : tr("בַּמַּכְשִׁיר"))
             let source = live.isManual ? tr("זְמַן שֶׁנָּתַתֶּם") : (profile.gender == .girl ? tr("זְמַן שֶׁהִרְוִיחָה") : tr("זְמַן שֶׁהִרְוִיחַ"))
@@ -2162,8 +1728,22 @@ struct ParentDashboardView: View {
                     }
                     .multilineTextAlignment(.leading)
                     Spacer(minLength: 0)
-                    Image(systemName: live.device.sfSymbol)
-                        .font(.system(size: 18, weight: .semibold))
+                    if let onLock {
+                        Button {
+                            Haptic.light()
+                            onLock()
+                        } label: {
+                            Label(tr("נְעִילָה"), systemImage: "lock.fill")
+                                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                                .foregroundStyle(Color(hex: "15803D"))
+                                .padding(.horizontal, 12).padding(.vertical, 7)
+                                .background(Capsule().fill(.white.opacity(0.95)))
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        Image(systemName: live.device.sfSymbol)
+                            .font(.system(size: 18, weight: .semibold))
+                    }
                 }
             }
             .environment(\.layoutDirection, .app)
@@ -2372,17 +1952,92 @@ struct ParentDashboardView: View {
             .animation(.spring(response: 0.5, dampingFraction: 0.85),
                        value: rows.map(\.profile.id))
     }
-    /// Split out of `childDetailScreen`: with translated labels the whole page
-    /// became too slow for the type checker in one expression.
-    private func detailActionRow(_ profile: Profile) -> some View {
-        HStack(spacing: 8) {
-            Button { Haptic.light(); insightsProfile = profile } label: {
-                homeGhostLabel(tr("✨ תּוֹבָנוֹת מְלֵאוֹת"))
-            }.buttonStyle(.plain)
-            Button { Haptic.light(); withAnimation(.easeInOut(duration: 0.2)) { showLegacyChildCard.toggle() } } label: {
-                homeGhostLabel(showLegacyChildCard ? tr("⚙️ סְגֹר הַגְדָּרוֹת") : tr("⚙️ הַגְדָּרוֹת שֶׁל \(profile.name)"))
-            }.buttonStyle(.plain)
+    /// Live banner + the three quick actions, right under the child's name
+    /// (Rani's approved mockup). Split out of the page: with translated labels
+    /// one expression was too slow for the type checker.
+    private func detailTopActions(_ profile: Profile) -> some View {
+        VStack(spacing: 10) {
+            // LIVE: an open play window right now — with the lock one tap away.
+            liveWindowBanner(profile, compact: false) { remoteLock(profile) }
+            HStack(spacing: 8) {
+                Menu {
+                    // 15 minutes: "עוד רבע שעה ודי" needs its own button.
+                    Button(tr("רֶבַע שָׁעָה")) { remoteOpen(profile, 15) }
+                    Button(tr("חֲצִי שָׁעָה")) { remoteOpen(profile, 30) }
+                    Button(tr("שָׁעָה")) { remoteOpen(profile, 60) }
+                    Button(tr("שְׁעָתַיִם")) { remoteOpen(profile, 120) }
+                    Button(tr("4 שָׁעוֹת")) { remoteOpen(profile, 240) }
+                } label: {
+                    quickActionLabel("💝", tr("מַתְּנַת דַּקּוֹת"))
+                }
+                .buttonStyle(.plain)
+                Menu {
+                    Button {
+                        remoteLock(profile)
+                    } label: {
+                        Label(tr("נְעַל עַכְשָׁיו"), systemImage: "lock.fill")
+                    }
+                    Button(role: .destructive) {
+                        revokeGiftProfile = profile
+                    } label: {
+                        Label(tr("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה"), systemImage: "gift.circle")
+                    }
+                } label: {
+                    quickActionLabel("🔒", tr("נְעִילָה"))
+                }
+                .buttonStyle(.plain)
+                Button {
+                    Haptic.light()
+                    choresProfile = profile
+                } label: {
+                    quickActionLabel("🧹", tr("מַטָּלוֹת"))
+                }
+                .buttonStyle(.juicy)
+            }
+            .fixedSize(horizontal: false, vertical: true)   // three tiles, one height
         }
+        .environment(\.layoutDirection, .app)
+    }
+
+    /// One of the three equal quick-action tiles: emoji over a short label.
+    private func quickActionLabel(_ emoji: String, _ title: String) -> some View {
+        VStack(spacing: 4) {
+            Text(emoji).font(.system(size: 20))
+            Text(title)
+                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                .lineLimit(1).minimumScaleFactor(0.7)
+        }
+        .foregroundStyle(GlassInk.primary)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.vertical, 10).padding(.horizontal, 6)
+        .background(Color.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
+        .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    /// "⚙️ הגדרות של X ›" — the one door to everything that is SET about the
+    /// child (page 2). It used to unfold the whole legacy card under the report.
+    private func detailSettingsRow(_ profile: Profile) -> some View {
+        Button {
+            Haptic.light()
+            settingsChild = profile
+        } label: {
+            HStack(spacing: 10) {
+                Text(tr("⚙️ הַגְדָּרוֹת שֶׁל \(profile.name)"))
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .lineLimit(1).minimumScaleFactor(0.8)
+                Spacer(minLength: 0)
+                Image(systemName: AppSymbol.forwardChevron)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(GlassInk.tertiary)
+            }
+            .foregroundStyle(GlassInk.primary)
+            .padding(.horizontal, 14).padding(.vertical, 14)
+            .frame(maxWidth: .infinity)
+            .glassPane(radius: 22)
+            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        }
+        .buttonStyle(.plain)
         .environment(\.layoutDirection, .app)
     }
 
@@ -2404,26 +2059,30 @@ struct ParentDashboardView: View {
                         liveSecondsLeft: liveWindow(row.profile)?.secondsLeft ?? 0,
                         liveIsGift: liveWindow(row.profile)?.isManual ?? false,
                         devices: household.devicesByChild[row.profile.id.uuidString] ?? [],
-                        onGift: { remoteOpen(row.profile, $0) },
-                        onLock: { remoteLock(row.profile) },
-                        onLockAndRevoke: { revokeGiftProfile = row.profile },
+                        topActions: AnyView(detailTopActions(row.profile)),
                         onAddDevice: { qrCode = nil; qrChild = row.profile },
-                        onFullInsights: { insightsProfile = row.profile }
+                        onRemoveDevice: { deviceToRemove = $0 }
                     )
-                    // Everything the old card offered (chores, worlds, difficulty,
-                    // PIN, edit, delete…) is a tap away, folded under the report so
-                    // the page itself is the approved design.
-                    detailActionRow(row.profile)
-                    if showLegacyChildCard {
-                        profileCard(profile: row.profile, snapshot: row.snapshot)
-                    }
+                    // Everything that is SET rather than read (name, grade,
+                    // difficulty, worlds, cap, PIN, friends, reset, delete…)
+                    // lives one tap away on the child's settings list.
+                    detailSettingsRow(row.profile)
                 }
                 .padding(AppSpacing.lg)
                 .frame(maxWidth: 720)
                 .containerWidthLock()
             }
-            .sheet(item: $insightsProfile) { p in
-                NavigationStack { ChildInsightsView(profile: p, snapshot: row.snapshot) }
+            .sheet(item: $settingsChild) { p in
+                ChildSettingsView(profileID: p.id,
+                                  snapshot: rows.first(where: { $0.profile.id == p.id })?.snapshot ?? row.snapshot,
+                                  onResetProgress: { resetProgress(for: $0) },
+                                  onDelete: { removed in
+                                      settingsChild = nil
+                                      profiles.remove(removed)   // removes locally + from the cloud
+                                      navPath.removeAll()        // pop back to the family grid
+                                  })
+                    .environmentObject(profiles)
+                    .environmentObject(settings)
             }
             .noHorizontalBounce()
             .environment(\.layoutDirection, .appMirrored)
@@ -2439,21 +2098,8 @@ struct ParentDashboardView: View {
         page
         // These dialogs live on the DETAIL page (not the root) so they present
         // IN-CONTEXT — at the root they only popped up after navigating back.
-        // Delete also pops the page back to the grid.
-        .alert(
-            resettingTitle,
-            isPresented: Binding(get: { resettingProfile != nil },
-                                 set: { if !$0 { resettingProfile = nil } }),
-            presenting: resettingProfile
-        ) { p in
-            Button(tr("אפס דקות + ניקוד"), role: .destructive) {
-                resetProgress(for: p)
-                resettingProfile = nil
-            }
-            Button(tr("בטל"), role: .cancel) { resettingProfile = nil }
-        } message: { _ in
-            Text(tr("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן ועונש טעויות. לא יימחקו שמות, פרופילים או פריטי קוסמטיקה."))
-        }
+        // (Reset / PIN / delete confirmations moved to ChildSettingsView with
+        // their rows — a sheet, which these could not show over.)
         // "What does this number mean?" — tapped stat cell explanation.
         .alert(
             statExplain.map { "\($0.emoji) \($0.label) — \($0.value)" } ?? "",
@@ -2465,42 +2111,10 @@ struct ParentDashboardView: View {
         } message: { s in
             Text(s.text)
         }
-        .alert(
-            pinResetTitle,
-            isPresented: Binding(get: { pinResetProfile != nil },
-                                 set: { if !$0 { pinResetProfile = nil } }),
-            presenting: pinResetProfile
-        ) { p in
-            Button(tr("אפס קוד"), role: .destructive) {
-                var updated = p
-                // "" (not nil) — deliberate-clear sentinel; survives sync merges.
-                updated.playPIN = ""
-                profiles.update(updated)
-                pinResetProfile = nil
-            }
-            Button(tr("בטל"), role: .cancel) { pinResetProfile = nil }
-        } message: { _ in
-            Text(tr("הקוד שהילד הגדיר לפתיחת זמן משחק יימחק. הילד יוכל להגדיר קוד חדש מהמכשיר שלו. שימושי כשהקוד נשכח."))
-        }
     }
 
     private func detailDialogsB<V: View>(_ page: V) -> some View {
         page
-        .alert(
-            deletingTitle,
-            isPresented: Binding(get: { deletingProfile != nil },
-                                 set: { if !$0 { deletingProfile = nil } }),
-            presenting: deletingProfile
-        ) { p in
-            Button(tr("מְחִיקַת יֶלֶד/ה"), role: .destructive) {
-                profiles.remove(p)     // removes locally + from the cloud
-                navPath.removeAll()    // pop back to the family grid
-                deletingProfile = nil
-            }
-            Button(tr("בטל"), role: .cancel) { deletingProfile = nil }
-        } message: { _ in
-            Text(tr("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק."))
-        }
         // "Lock + revoke gift" confirmation on the DETAIL page (dialogs must sit
         // on the visible page — on the root it only appeared after popping back).
         .alert(
@@ -2548,315 +2162,6 @@ struct ParentDashboardView: View {
 
     }
 
-    @ViewBuilder
-    private func learningProfileCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
-        let lp = LearningProfile(snapshot: s, enabledTopics: profile.playableTopics, age: profile.age)
-        let favorites = Array(lp.favorites.prefix(3))
-        let strong = Array(lp.strong.prefix(3))
-        let weak = Array(lp.weak.prefix(3))
-        let discovering = Array(lp.discovering.prefix(3))
-
-        // Hebrew labels inflect by gender — pick by this child's gender.
-        let g: (String, String) -> String = { profile.gender == .girl ? $1 : $0 }
-
-        // Only show once the kid has actually played enough to have signals.
-        if s.totalAnswered >= 4 {
-            VStack(alignment: .trailing, spacing: 8) {
-                HStack(spacing: 6) {
-                    Spacer()
-                    Text(tr("פרופיל למידה"))
-                        .font(.system(size: 13, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.secondary)
-                    Image(systemName: "brain.head.profile")
-                        .font(.system(size: 13))
-                        .foregroundStyle(AppColor.gemPurple)
-                }
-                if !strong.isEmpty   { topicLine(g(tr("חזק ב"),tr("חזקה ב")), topics: strong, tint: AppColor.starGold) }
-                if !favorites.isEmpty { topicLine(g(tr("אוהב"),tr("אוהבת")), topics: favorites, tint: AppColor.successMint) }
-                if !weak.isEmpty     { topicLine(tr("כדאי לחזק"), topics: weak, tint: AppColor.flameOrange) }
-                if !discovering.isEmpty { topicLine(g(tr("מגלה"),tr("מגלה")), topics: discovering, tint: AppColor.gemPurple) }
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-            .padding(AppSpacing.sm)
-            .glassInset(radius: AppRadius.medium)
-        }
-    }
-
-    /// "רמת קושי חכמה" — the adaptive engine's current per-topic level and where
-    /// it has nudged the difficulty up (mastering) or eased it (building
-    /// confidence). Framed positively, per the app's tone.
-    @ViewBuilder
-    private func adaptiveDifficultyCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
-        let levels = s.topicAdaptiveLevel ?? [:]
-        // Topics the child has actually practiced, most-practiced first.
-        let topics = profile.playableTopics
-            .filter { (s.topicAnswered[$0.rawValue] ?? 0) >= 1 }
-            .sorted { (s.topicAnswered[$0.rawValue] ?? 0) > (s.topicAnswered[$1.rawValue] ?? 0) }
-            .prefix(6)
-        let g: (String, String) -> String = { profile.gender == .girl ? $1 : $0 }
-
-        if s.totalAnswered >= 4, !topics.isEmpty {
-            VStack(alignment: .trailing, spacing: 8) {
-                HStack(spacing: 6) {
-                    Spacer()
-                    Text(tr("רמת קושי חכמה"))
-                        .font(.system(size: 13, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.secondary)
-                    Image(systemName: "dial.medium.fill")
-                        .font(.system(size: 13))
-                        .foregroundStyle(AppColor.gemPurple)
-                }
-
-                ForEach(Array(topics)) { topic in
-                    let base = profile.difficulty(for: topic)
-                    let level = levels[topic.rawValue] ?? AdaptiveDifficultyEngine.level(for: base)
-                    let served = AdaptiveDifficultyEngine.difficulty(forLevel: level)
-                    let baseLevel = AdaptiveDifficultyEngine.level(for: base)
-                    let dir = adaptiveDirection(level: level, base: baseLevel)
-                    HStack(spacing: 8) {
-                        Spacer()
-                        if let dir { dir.chip }
-                        Text(served.displayName)
-                            .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            .padding(.horizontal, 8).padding(.vertical, 3)
-                            .background(Capsule().fill(AppColor.gemPurple.opacity(0.15)))
-                            .overlay(Capsule().stroke(AppColor.gemPurple.opacity(0.4), lineWidth: 1))
-                        Text("\(topic.emoji) \(topic.displayName)")
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.primary)
-                    }
-                }
-
-                if let sentence = adaptiveSentence(for: Array(topics), levels: levels,
-                                                   profile: profile, g: g) {
-                    Text(sentence)
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.trailing)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-            .padding(AppSpacing.sm)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                    .fill(AppColor.gemPurple.opacity(0.06))
-                    .overlay(RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                        .stroke(AppColor.gemPurple.opacity(0.2), lineWidth: 1))
-            )
-        }
-    }
-
-    private enum AdaptiveDir {
-        case raised, eased
-        @ViewBuilder var chip: some View {
-            switch self {
-            case .raised:
-                Label(tr("מאתגר יותר"), systemImage: "arrow.up")
-                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                    .padding(.horizontal, 7).padding(.vertical, 3)
-                    .background(Capsule().fill(AppColor.successMint.opacity(0.22)))
-                    .foregroundStyle(AppColor.successMint)
-            case .eased:
-                Label(tr("בונה ביטחון"), systemImage: "arrow.down")
-                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                    .padding(.horizontal, 7).padding(.vertical, 3)
-                    .background(Capsule().fill(AppColor.starGold.opacity(0.22)))
-                    .foregroundStyle(Color(hex: "B8860B"))
-            }
-        }
-    }
-
-    private func adaptiveDirection(level: Double, base: Double) -> AdaptiveDir? {
-        if level > base + 0.35 { return .raised }
-        if level < base - 0.35 { return .eased }
-        return nil
-    }
-
-    /// One warm, plain-language sentence about the most notable adaptation —
-    /// a topic where the system raised the challenge, else one it eased.
-    private func adaptiveSentence(for topics: [Topic], levels: [String: Double],
-                                  profile: Profile, g: (String, String) -> String) -> String? {
-        func dir(_ t: Topic) -> AdaptiveDir? {
-            let base = AdaptiveDifficultyEngine.level(for: profile.difficulty(for: t))
-            return adaptiveDirection(level: levels[t.rawValue] ?? base, base: base)
-        }
-        if let raised = topics.first(where: { dir($0) == .raised }) {
-            return tr("\(profile.name) \(g(tr("מתקדם"),tr("מתקדמת"))) יפה ב\(raised.displayName), אז המערכת התחילה להוסיף שאלות מעט מאתגרות יותר.")
-        }
-        if let eased = topics.first(where: { dir($0) == .eased }) {
-            return tr("ב\(eased.displayName) המערכת הורידה מעט את הקושי כדי לבנות ביטחון והצלחה.")
-        }
-        return nil
-    }
-
-    /// "המלצות להורה" — surfaces where the child needs reinforcement (the
-    /// topics they get wrong most) plus the CoachingEngine's concrete, low-effort
-    /// tips. Only appears once the kid has played enough to have signal.
-    @ViewBuilder
-    private func coachingCard(for profile: Profile, snapshot s: ProgressSnapshot) -> some View {
-        let lp = LearningProfile(snapshot: s, enabledTopics: profile.playableTopics, age: profile.age)
-        let history = LearningHistoryStore.shared.history(for: profile.id)
-        let engine = InsightsEngine(history: history, profile: lp)
-        let coach = CoachingEngine(childName: profile.name, insights: engine, profile: lp, isGirl: profile.gender == .girl)
-        let actions = Array(coach.recommendedActions().prefix(3))
-        let weak = Array(lp.weak.prefix(2))
-
-        if s.totalAnswered >= 4 {
-            VStack(alignment: .trailing, spacing: 10) {
-                HStack(spacing: 6) {
-                    Spacer()
-                    Text(tr("המלצות להורה"))
-                        .font(.system(size: 13, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.secondary)
-                    Image(systemName: "lightbulb.fill")
-                        .font(.system(size: 13))
-                        .foregroundStyle(AppColor.starGold)
-                }
-
-                // Where the child struggles most — what to reinforce.
-                if !weak.isEmpty {
-                    HStack(spacing: 6) {
-                        Spacer()
-                        ForEach(weak) { t in
-                            Text("\(t.emoji) \(t.displayName)")
-                                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(Capsule().fill(AppColor.flameOrange.opacity(0.18)))
-                                .overlay(Capsule().stroke(AppColor.flameOrange.opacity(0.5), lineWidth: 1))
-                        }
-                        Text(tr("כדאי לחזק:"))
-                            .font(.system(size: 12, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                // Concrete tips.
-                ForEach(actions) { act in
-                    HStack(alignment: .top, spacing: 8) {
-                        Text(act.emoji).font(.system(size: 14))
-                        Text(act.text)
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundStyle(.primary)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .multilineTextAlignment(.trailing)
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-            .padding(AppSpacing.sm)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                    .fill(AppColor.starGold.opacity(0.08))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
-                            .stroke(AppColor.starGold.opacity(0.25), lineWidth: 1)
-                    )
-            )
-        }
-    }
-
-    /// Overall one-glance status for the child: progressing / needs reinforcement
-    /// / discovering. Returns nil until there's enough data.
-    private func overallStatus(engine: InsightsEngine, lp: LearningProfile, hasData: Bool) -> (text: String, color: Color)? {
-        guard hasData else { return nil }
-        let acc = engine.thisWeek.accuracy
-        if acc >= 0.75 || engine.weeklyAccuracyDelta >= 8 {
-            return (tr("מתקדם יפה 🎉"), AppColor.successMint)
-        }
-        if engine.challenges.isEmpty, !engine.discovering.isEmpty {
-            return (tr("מגלה עניין חדש 🔭"), AppColor.gemPurple)
-        }
-        if !engine.challenges.isEmpty {
-            return (tr("צריך חיזוק 💪"), AppColor.flameOrange)
-        }
-        return (tr("מתקדם יפה 🎉"), AppColor.successMint)
-    }
-
-    private func topicLine(_ label: String, topics: [Topic], tint: Color) -> some View {
-        HStack(spacing: 6) {
-            Spacer()
-            ForEach(topics) { t in
-                Text("\(t.emoji) \(t.displayName)")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Capsule().fill(tint.opacity(0.18)))
-                    .overlay(Capsule().stroke(tint.opacity(0.5), lineWidth: 1))
-            }
-            Text(":\(label)")
-                .font(.system(size: 12, weight: .heavy, design: .rounded))
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    /// Which devices this child plays on, with how long ago each was active.
-    @ViewBuilder
-    private func connectedDevicesView(for profile: Profile) -> some View {
-        let devices = household.devicesByChild[profile.id.uuidString] ?? []
-        VStack(alignment: .trailing, spacing: 8) {
-            HStack(spacing: 6) {
-                Spacer()
-                Text(devices.isEmpty ? tr("אֵין מַכְשִׁירִים מְחוּבָּרִים") : tr("\(devices.count) מַכְשִׁירִים מְחוּבָּרִים"))
-                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.secondary)
-                Image(systemName: "ipad.and.iphone")
-                    .font(.system(size: 13))
-                    .foregroundStyle(AppColor.gemPurple)
-            }
-            ForEach(devices) { device in
-                HStack(spacing: 10) {
-                    Button {
-                        Haptic.light()
-                        deviceToRemove = device
-                    } label: {
-                        Image(systemName: "minus.circle.fill")
-                            .font(.system(size: 18))
-                            .foregroundStyle(.red.opacity(0.8))
-                    }
-                    .buttonStyle(.plain)
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 1) {
-                        Text(device.name)
-                            .font(.system(size: 13, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.primary)
-                        Text(deviceSeenText(device))
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundStyle(.secondary)
-                    }
-                    Image(systemName: device.sfSymbol)
-                        .font(.system(size: 18))
-                        .foregroundStyle(AppColor.gemPurple)
-                        .frame(width: 26)
-                }
-                // Screen Time was never granted on that device — so nothing there
-                // can actually be locked. A healthy-looking green row used to be
-                // the only thing the parent saw.
-                if device.shieldAuthorized == false, device.role != "parent" {
-                    HStack(alignment: .top, spacing: 6) {
-                        Spacer(minLength: 0)
-                        Text(tr("אֵין הַרְשָׁאַת ״זְמַן מָסָךְ״ בַּמַּכְשִׁיר הַזֶּה — נְעִילַת אַפְּלִיקַצְיוֹת לֹא תַּעֲבוֹד בּוֹ. פִּתְחוּ בּוֹ אֶת טוֹפִי ← ⚙️ ← בַּקָּשׁ הַרְשָׁאָה."))
-                            .font(.system(size: 11, weight: .semibold, design: .rounded))
-                            .foregroundStyle(AppColor.flameOrange)
-                            .multilineTextAlignment(.trailing)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Image(systemName: "exclamationmark.shield.fill")
-                            .font(.system(size: 13))
-                            .foregroundStyle(AppColor.flameOrange)
-                            .frame(width: 26)
-                    }
-                    .padding(.top, 4)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .trailing)
-        .padding(AppSpacing.sm)
-        .glassInset(radius: AppRadius.medium)
-    }
-
     /// True when any of the child's devices sent a heartbeat in the last ~75s
     /// (the play screen refreshes every 30s) — i.e. the child is playing now.
     private func isChildPlayingNow(_ profile: Profile) -> Bool {
@@ -2872,57 +2177,6 @@ struct ParentDashboardView: View {
         _ = refreshTrigger
         let devices = household.devicesByChild[profile.id.uuidString] ?? []
         return devices.map(\.lastSeenAt).max() ?? .distantPast
-    }
-
-    private func deviceSeenText(_ device: ChildDevice) -> String {
-        let elapsed = Int(-device.lastSeenAt.timeIntervalSinceNow)
-        if elapsed < 90 { return tr("פָּעִיל עַכְשָׁיו 🟢") }
-        if elapsed < 3600 { return tr("נִרְאָה לִפְנֵי \(elapsed / 60) דַּקּוֹת") }
-        if elapsed < 86400 { return tr("נִרְאָה לִפְנֵי \(elapsed / 3600) שָׁעוֹת") }
-        return tr("נִרְאָה לִפְנֵי \(elapsed / 86400) יָמִים")
-    }
-
-    private func statCell(emoji: String, value: String, label: String) -> some View {
-        // Tappable: every number on the child card explains itself (a parent
-        // shouldn't have to guess what "דק' זמינות" or ⭐ vs 💎 mean).
-        Button {
-            Haptic.light()
-            statExplain = StatExplain(emoji: emoji, label: label, value: value)
-        } label: {
-            VStack(spacing: 2) {
-                Text(emoji).font(.system(size: 18))
-                Text(value)
-                    .font(.system(size: 17, weight: .heavy, design: .rounded))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-                Text(label)
-                    .font(.system(size: 10, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .glassInset(radius: AppRadius.medium)
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(.primary)
-    }
-
-    /// A captioned row of stat cells — the caption sits on the RIGHT (Hebrew)
-    /// above the row, so the three groups on the card read as sections.
-    private func statGroup<Content: View>(_ title: String, @ViewBuilder _ content: () -> Content) -> some View {
-        VStack(alignment: .trailing, spacing: 6) {
-            Text(title)
-                .font(.system(size: 11.5, weight: .heavy, design: .rounded))
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .padding(.trailing, 4)
-            HStack(spacing: 8) { content() }
-        }
-        .padding(8)
-        .background(
-            RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
-                .fill(Color.primary.opacity(0.04))
-        )
     }
 
     /// Which stat the parent tapped for an explanation.
@@ -3011,17 +2265,6 @@ struct ParentDashboardView: View {
         return (min(wanting, capLeft), capLeft)
     }
 
-    /// Open a 5-minute app-deletion window on the child's device from afar —
-    /// deletion is normally hard-blocked there (Screen Time denyAppRemoval).
-    private func allowAppRemoval(_ profile: Profile) {
-        Haptic.medium()
-        household.allowAppRemovalRemotely(toChildID: profile.id)
-        let connected = (household.devicesByChild[profile.id.uuidString]?.isEmpty == false)
-        remoteGrantMsg = connected
-            ? tr("נִפְתָּח חַלּוֹן שֶׁל 5 דַּקּוֹת לִמְחִיקַת אַפְּלִיקַצְיוֹת בַּמַּכְשִׁיר שֶׁל \(profile.name) — מִיָּדִי כְּשֶׁטּוֹפִי פָּתוּחַ שָׁם. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד.")
-            : tr("אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(profile.name) — הַחַלּוֹן יִפָּתַח בָּרֶגַע שֶׁהַמַּכְשִׁיר יִתְחַבֵּר.")
-    }
-
     private func remoteLock(_ profile: Profile) {
         Haptic.warning()
         household.lockRemoteScreenTime(toChildID: profile.id)
@@ -3057,36 +2300,6 @@ struct ParentDashboardView: View {
         // no-op: it uploads only the ACTIVE profile and ratchet-merges — it can
         // never lower cloud values, so the reset "did nothing".)
         remote.resetChildProgress(childID: profile.id)
-        refreshTrigger &+= 1
-    }
-
-    /// Quick +/- minute adjustment. Only works on the active profile (the
-    /// one with state in memory). For non-active profiles we'd need to
-    /// edit the snapshot directly — kept out of v1 to avoid stale-data
-    /// races; the parent can switch to that profile first.
-    /// 💝 Gift pocket as the parent should see it: the synced value plus any
-    /// gift still in flight to the child's device (so a "+10" shows at once).
-    private func giftShownFor(_ profile: Profile, _ s: ProgressSnapshot) -> Int {
-        // 💝 = the SYNCED gift pocket + any "+N" still in flight. Frozen leftover
-        // now lives INSIDE the synced pocket (pauseManualUnlock), so device-row
-        // frozenSeconds is NOT added — a stale row from a device that hasn't
-        // updated/come online would otherwise double-count or haunt the tile
-        // (Dan: 29 real + a phantom 121 from an old-build phone).
-        max(0, s.giftMinutesShown + remote.pendingGifts[profile.id, default: 0])
-    }
-
-    /// 💝 Give minutes — into the child's separate GIFT pocket (never the earned
-    /// wallet). Cloud delta-command; the child's device applies it.
-    private func quickGift(profile: Profile, minutes: Int) {
-        remoteOpen(profile, minutes)   // one path, one cap, one message
-    }
-
-    private func quickAdjust(profile: Profile, deltaMinutes: Int) {
-        Haptic.light()
-        // Edit the child's CLOUD snapshot directly (revision-bumping transaction)
-        // so it reaches the child's device regardless of which profile is active
-        // on this parent device.
-        remote.adjustChildMinutes(childID: profile.id, deltaMinutes: deltaMinutes)
         refreshTrigger &+= 1
     }
 

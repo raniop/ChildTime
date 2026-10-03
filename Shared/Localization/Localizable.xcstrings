@@ -3067,6 +3067,50 @@
         }
       }
     },
+    "%@ מַזִּין אוֹתוֹ כְּדֵי לִפְתֹּחַ אֶת הַדַּקּוֹת שֶׁצָּבַר": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يُدخله %@ ليفتح الدقائق التي جمعها"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ enters it to unlock the minutes he earned"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ вводит его, чтобы открыть накопленные минуты"
+          }
+        }
+      }
+    },
+    "%@ מַזִּינָה אוֹתוֹ כְּדֵי לִפְתֹּחַ אֶת הַדַּקּוֹת שֶׁצָּבְרָה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تُدخله %@ لتفتح الدقائق التي جمعتها"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ enters it to unlock the minutes she earned"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ вводит его, чтобы открыть накопленные минуты"
+          }
+        }
+      }
+    },
     "%@ מָה הָיָה קָשֶׁה הַשָּׁבוּעַ — לָרוֹב זוֹ שְׁאֵלָה אַחַת שֶׁפּוֹתַחַת הַכֹּל.": {
       "localizations": {
         "ar": {
@@ -8298,6 +8342,28 @@
         }
       }
     },
+    "+ חִבּוּר מַכְשִׁיר נוֹסָף": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+ ربط جهاز آخر"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+ Connect another device"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+ Подключить ещё устройство"
+          }
+        }
+      }
+    },
     "+ חַבְּרוּ מַכְשִׁיר": {
       "localizations": {
         "ar": {
@@ -10809,6 +10875,28 @@
         }
       }
     },
+    "אִפּוּס הִתְקַדְּמוּת": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إعادة تعيين التقدّم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset progress"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить прогресс"
+          }
+        }
+      }
+    },
     "אִפּוּס קוֹד הֲגַנַּת הַזְּמַן": {
       "localizations": {
         "ar": {
@@ -13075,6 +13163,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "О приложении и приватность"
+          }
+        }
+      }
+    },
+    "אוֹהֵב": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يحبّ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loves"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Любит"
+          }
+        }
+      }
+    },
+    "אוֹהֶבֶת": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحبّ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loves"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Любит"
           }
         }
       }
@@ -16621,6 +16753,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Выбираем мир и отправляемся в приключение ✨"
+          }
+        }
+      }
+    },
+    "בּוֹנֶה בִּטָּחוֹן": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يبني الثقة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Building confidence"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Укрепляет уверенность"
           }
         }
       }
@@ -21311,6 +21465,28 @@
         }
       }
     },
+    "הַגְדָּרוֹת שֶׁל %@": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إعدادات %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@'s settings"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки: %@"
+          }
+        }
+      }
+    },
     "הַדִּיּוּק שֶׁל %@ בְּ%@ יָרַד בְּ-%lld נְקֻדּוֹת לְעֻמַּת הַתְּקוּפָה הַקּוֹדֶמֶת. לִפְעָמִים זֶה פָּשׁוּט חֹמֶר חָדָשׁ שֶׁנִּכְנַס.": {
       "localizations": {
         "ar": {
@@ -22432,6 +22608,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ребёнок зарабатывает учёбой до этого потолка. Бонусы с колеса и коробки сохраняются на завтра, когда потолок достигнут."
+          }
+        }
+      }
+    },
+    "הַיַּלְדָּה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "طفلتك"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "your child"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ребёнок"
           }
         }
       }
@@ -29586,7 +29784,28 @@
         }
       }
     },
-    "חֲבֵרִים": {},
+    "חֲבֵרִים": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أصدقاء"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Friends"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Друзья"
+          }
+        }
+      }
+    },
     "חֲבֵרִים סוֹרְקִים אֶת הַקּוֹד אוֹ פּוֹתְחִים אֶת הַקִּישּׁוּר — וְאַתֶּם מְחוּבָּרִים!": {
       "localizations": {
         "ar": {
@@ -29649,6 +29868,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "сильная"
+          }
+        }
+      }
+    },
+    "חֲזָקָה בְּ": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قويّة في"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strong in"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сильна в"
           }
         }
       }
@@ -30994,6 +31235,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "сильный"
+          }
+        }
+      }
+    },
+    "חָזָק בְּ": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قويّ في"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strong in"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Силён в"
           }
         }
       }
@@ -37890,6 +38153,28 @@
         }
       }
     },
+    "לְאַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת (5 דַּק')": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "السماح بحذف التطبيقات (5 دقائق)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow app deletion (5 min)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить удаление приложений (5 мин)"
+          }
+        }
+      }
+    },
     "לְאַפֵּס אֶת הַמַּכְשִׁיר?": {
       "localizations": {
         "ar": {
@@ -38216,6 +38501,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Для кого?"
+          }
+        }
+      }
+    },
+    "לְמִידָה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التعلّم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learning"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обучение"
           }
         }
       }
@@ -40960,6 +41267,28 @@
         }
       }
     },
+    "מְאַתְגֵּר יוֹתֵר": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أكثر تحدّيًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More challenging"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сложнее"
+          }
+        }
+      }
+    },
     "מְאֻבָּנִים וְאֵיךְ מוֹצְאִים אוֹתָם": {
       "localizations": {
         "ar": {
@@ -41154,6 +41483,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "Пропускает трудные вопросы%@ — стоит подбодрить и снизить уровень."
+          }
+        }
+      }
+    },
+    "מְחִיקַת הַיֶּלֶד": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حذف الطفل"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete child"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить ребёнка"
+          }
+        }
+      }
+    },
+    "מְחִיקַת הַיַּלְדָּה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حذف الطفلة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete child"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить ребёнка"
           }
         }
       }
@@ -43770,6 +44143,28 @@
         }
       }
     },
+    "מַתְּנַת דַּקּוֹת": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إهداء دقائق"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gift minutes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подарить минуты"
+          }
+        }
+      }
+    },
     "מַתְאִים לִשְׁעוֹן מְעוֹרֵר, מַצְלֵמָה, טֶלֶפוֹן אוֹ אַפְּלִיקַצְיָה לִמּוּדִית שֶׁתָּמִיד מֻתֶּרֶת.": {
       "localizations": {
         "ar": {
@@ -46086,6 +46481,28 @@
         }
       }
     },
+    "נְעִילָה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قفل"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Блокировка"
+          }
+        }
+      }
+    },
     "נְעַל": {
       "localizations": {
         "ar": {
@@ -46148,6 +46565,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Заблокировать и обнулить подарочные минуты"
+          }
+        }
+      }
+    },
+    "נְעַל עַכְשָׁיו": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أقفل الآن"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock now"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заблокировать сейчас"
           }
         }
       }
@@ -55593,6 +56032,28 @@
         }
       }
     },
+    "קוֹד הַגָּנַת זְמַן הַמִּשְׂחָק": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رمز حماية وقت اللعب"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play time lock code"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Код защиты игрового времени"
+          }
+        }
+      }
+    },
     "קוֹד הַהוֹרֶה לֹא זָמִין כָּאן": {
       "localizations": {
         "ar": {
@@ -56764,6 +57225,28 @@
         }
       }
     },
+    "רַעֲנוּן נְתוּנִים בְּכָל הַמַּכְשִׁירִים": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحديث البيانات في كلّ الأجهزة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh data on all devices"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновить данные на всех устройствах"
+          }
+        }
+      }
+    },
     "רַק אַפְּלִיקַצְיָה אַחַת אוֹ כַּמָּה (לְמָשָׁל יוּטְיוּבּ). הַשְּׁאָר נְעוּלוֹת.": {
       "localizations": {
         "ar": {
@@ -56980,6 +57463,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Начальный уровень обучения"
+          }
+        }
+      }
+    },
+    "רָמַת קֹשִׁי": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مستوى الصعوبة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Difficulty level"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уровень сложности"
           }
         }
       }
@@ -59194,6 +59699,28 @@
         }
       }
     },
+    "שֵׁם, גִּיל וְכִתָּה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الاسم والعمر والصف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name, age and grade"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Имя, возраст и класс"
+          }
+        }
+      }
+    },
     "שֶׁל מִי הָאַיְפֵּד?": {
       "localizations": {
         "ar": {
@@ -59859,6 +60386,50 @@
     },
     "שָׂפַת הָאַפְּלִיקַצְיָה אֵצֶל הַיֶּלֶד": {},
     "שָׂפָה": {},
+    "שָׂפָה בַּמַּכְשִׁיר שֶׁלָּהּ": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اللغة على جهازها"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language on her device"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Язык на её устройстве"
+          }
+        }
+      }
+    },
+    "שָׂפָה בַּמַּכְשִׁיר שֶׁלּוֹ": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اللغة على جهازه"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language on his device"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Язык на его устройстве"
+          }
+        }
+      }
+    },
     "שׁוֹלְחִים… 📨": {
       "localizations": {
         "ar": {
