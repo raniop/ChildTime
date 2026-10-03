@@ -546,7 +546,8 @@ struct AddFriendView: View {
                 .textInputAutocapitalization(.characters).autocorrectionDisabled()
                 .keyboardType(.asciiCapable)   // Latin code on a Hebrew-only keyboard (see ChildJoinView)
                 .multilineTextAlignment(.center)
-                .font(.system(size: 24, weight: .heavy, design: .monospaced)).kerning(5).foregroundStyle(.white)
+                .font(.system(size: 24, weight: .heavy, design: typed.isEmpty ? .rounded : .monospaced))
+                .kerning(typed.isEmpty ? 0 : 5).foregroundStyle(.white)
                 .padding(.vertical, 12).background(RoundedRectangle(cornerRadius: 14).fill(.white.opacity(0.12)))
                 .environment(\.layoutDirection, .leftToRight)
             Button { add(typed) } label: {

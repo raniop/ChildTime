@@ -267,8 +267,10 @@ struct JoinFamilyFlowView: View {
                 .autocorrectionDisabled()
                 .keyboardType(.asciiCapable)   // Latin code on a Hebrew-only keyboard (see ChildJoinView)
                 .multilineTextAlignment(.center)
-                .font(.system(size: 26, weight: .heavy, design: .monospaced))
-                .kerning(6)
+                // Spaced monospace only for the code itself — the Arabic placeholder
+                // broke into isolated letters under it.
+                .font(.system(size: 26, weight: .heavy, design: joinCode.isEmpty ? .rounded : .monospaced))
+                .kerning(joinCode.isEmpty ? 0 : 6)
                 .foregroundStyle(.white)
                 .padding(.vertical, 12)
                 .background(RoundedRectangle(cornerRadius: 14).fill(.white.opacity(0.12)))

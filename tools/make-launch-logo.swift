@@ -1,7 +1,7 @@
 import AppKit
 // LaunchScreen logo: the lion above a white "טופי" wordmark (SF Rounded, black
 // weight) on a transparent canvas — the glass language, no gold gradient.
-// usage: swift tools/make-launch-logo.swift <lion.png> <out@3x.png>
+// usage: swift tools/make-launch-logo.swift <lion.png> <out@3x.png> [wordmark, default "טופי"]
 let a = CommandLine.arguments
 let lion = NSImage(contentsOfFile: a[1])!
 let W: CGFloat = 450, H: CGFloat = 798   // 150×266 pt @3x
@@ -23,7 +23,7 @@ let rounded = NSFont(descriptor: desc, size: 132) ?? font
 let para = NSMutableParagraphStyle(); para.alignment = .center
 let tShadow = NSShadow(); tShadow.shadowColor = NSColor.black.withAlphaComponent(0.25); tShadow.shadowBlurRadius = 14; tShadow.shadowOffset = NSSize(width: 0, height: -6)
 let attrs: [NSAttributedString.Key: Any] = [.font: rounded, .foregroundColor: NSColor.white, .paragraphStyle: para, .shadow: tShadow]
-let str = NSAttributedString(string: "טופי", attributes: attrs)
+let str = NSAttributedString(string: a.count > 3 ? a[3] : "טופי", attributes: attrs)
 let size = str.size()
 str.draw(in: NSRect(x: 0, y: 40, width: W, height: size.height + 20))
 img.unlockFocus()

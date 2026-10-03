@@ -199,8 +199,24 @@ struct ChildSettingsView: View {
             row("⏳", tr("זְמַן מָסָךְ יוֹמִי")) { screenTime = p }
             // The child's play-protection code — full parental transparency: the
             // parent SEES the code (to remind a forgetful kid) and can reset it.
-            // Only when the child actually set one.
-            if p.hasPlayPIN {
+            // Always shown (Rani looked for it and couldn't find it): before the
+            // child picks one it says so instead of hiding the row.
+            if !p.hasPlayPIN {
+                HStack(spacing: 12) {
+                    Text("🔐").font(.system(size: 20)).frame(width: 28)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(tr("קוֹד הַגָּנַת זְמַן הַמִּשְׂחָק"))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundStyle(GlassInk.primary)
+                        Text(p.gender == .girl
+                             ? tr("\(p.name) עוֹד לֹא בָּחֲרָה קוֹד")
+                             : tr("\(p.name) עוֹד לֹא בָּחַר קוֹד"))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundStyle(GlassInk.secondary)
+                    }
+                    Spacer(minLength: 4)
+                }
+            } else {
                 HStack(spacing: 12) {
                     Text("🔐").font(.system(size: 20)).frame(width: 28)
                     VStack(alignment: .leading, spacing: 2) {

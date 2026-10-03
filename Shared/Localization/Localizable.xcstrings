@@ -3331,6 +3331,50 @@
         }
       }
     },
+    "%@ עוֹד לֹא בָּחֲרָה קוֹד": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم تختر %@ رمزًا بعد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hasn't chosen a code yet"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ещё не выбрала код"
+          }
+        }
+      }
+    },
+    "%@ עוֹד לֹא בָּחַר קוֹד": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم يختر %@ رمزًا بعد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hasn't chosen a code yet"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ещё не выбрал код"
+          }
+        }
+      }
+    },
     "%@ רוצה טופי+ 👑": {
       "localizations": {
         "ar": {

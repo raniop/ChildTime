@@ -93,7 +93,9 @@ struct ChildJoinView: View {
                             // clean Hebrew iPhone ships with Hebrew + Emoji only, so there is
                             // nothing to switch to and the code simply cannot be typed.
                             .keyboardType(.asciiCapable)
-                            .font(.system(.title3, design: .monospaced))
+                            // Monospaced only for the CODE: the Arabic placeholder in a
+                            // monospaced face fell apart into isolated letters (2026-10-03).
+                            .font(.system(.title3, design: code.isEmpty ? .rounded : .monospaced))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
                             .padding(.vertical, 12)
