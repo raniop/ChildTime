@@ -273,23 +273,43 @@ enum PreReaderGames {
 
     // MARK: - 🧱 Collecting
 
-    /// 🧱 "מְפַצְּחִים" with no numerals at all: the target is a row of apples,
-    /// every block carries one, two or three apples, and the child taps blocks
-    /// that together make exactly the row. Counting, which is what גן maths is.
+    /// 🧱 "מְפַצְּחִים" turned into pure counting for גן — and only counting.
+    ///
+    /// Rani, twice, on the version where the child combined cards to reach a
+    /// target: "זה לא מובן." He was right, and the reason is not presentation:
+    /// adding 3 + 1 to make four is a FIRST-GRADE skill. A five-year-old
+    /// counts to five; they do not compose two groups. So the גן round is a
+    /// single choice — "tap the card that has exactly four flowers" — and the
+    /// combining board stays exactly as it is from א׳ upward.
     struct Collect {
-        /// The object every block and the target are drawn from.
+        /// The object the basket and every card are drawn from.
         let emoji: String
-        let rules: CrushRules
+        /// How many the basket wants — and exactly one card carries.
+        let target: Int
+        /// The counts on the six cards, target included, already shuffled.
+        let cards: [Int]
         let cue: PreReaderCue
     }
 
+    /// Counts a גן child can take in at a glance.
+    static let countingCards = 6
+    private static let countRange = 1...5
+
     static func collecting() -> Collect {
         let item = countables.randomElement()!
-        let target = Int.random(in: 4...6)
-        return Collect(emoji: item.emoji,
-                       rules: CrushRules(mode: .sum, target: target, values: [1, 2, 3]),
+        let target = Int.random(in: countRange)
+        // Five more cards, every one of them a DIFFERENT count from the target,
+        // so there is never a second right answer. Each of the four remaining
+        // counts appears once before any repeats — three cards of five flowers
+        // on one board made it look like the game had only two answers.
+        let others = countRange.filter { $0 != target }.shuffled()
+        var cards = [target] + others
+        while cards.count < countingCards {
+            cards.append(others.randomElement() ?? 1)
+        }
+        return Collect(emoji: item.emoji, target: target, cards: cards.shuffled(),
                        cue: PreReaderCue(icons: Array(repeating: item.emoji, count: target),
-                                         spoken: tr("אָסְפוּ בְּדִיּוּק \(countPhrase(target, item.plural))!")))
+                                         spoken: tr("בַּחֲרוּ אֶת הַכַּרְטִיס שֶׁיֵּשׁ בּוֹ בְּדִיּוּק \(countPhrase(target, item.plural))!")))
     }
 
     // MARK: - 🧰 Shared chrome copy (spoken only)

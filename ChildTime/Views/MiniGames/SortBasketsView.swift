@@ -105,8 +105,12 @@ struct SortBasketsView: View {
                 case .done:
                     Spacer()
                     if preReader {
-                        PreReaderEndCard(tally: "🧺", tallyCount: placedCount, grant: grant, surprise: surprise,
-                                         onAgain: { start() }, onDone: onClose)
+                        PreReaderEndCard(
+                            title: cleanCount == total ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),
+                            detail: summaryLine,
+                            tally: "🧺", tallyCount: placedCount, grant: grant, surprise: surprise,
+                            againLabel: tr("עוֹד סִבּוּב 🔁"),
+                            onAgain: { start() }, onDone: onClose)
                     } else {
                         MiniGameEndCard(
                             title: cleanCount == total ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),

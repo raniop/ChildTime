@@ -18209,6 +18209,28 @@
         }
       }
     },
+    "בַּחֲרוּ אֶת הַכַּרְטִיס שֶׁיֵּשׁ בּוֹ בְּדִיּוּק %@!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اِضْغَطُوا البِطاقَةَ التي عَلَيْها بِالضَّبْط: %@!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the card that has exactly: %@!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите карточку, на которой ровно: %@!"
+          }
+        }
+      }
+    },
     "בַּחֲרוּ אֶת הָאַפְּלִיקַצְיוֹת שֶׁיִּהְיוּ נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה — עַד שֶׁהַיֶּלֶד מַרְוִיחַ זְמַן מָסָךְ בְּטוֹפִי. אֶפְשָׁר לְשַׁנּוֹת בְּכָל עֵת בְּהַגְדָּרוֹת הוֹרֶה." : {
       "localizations" : {
         "ar" : {
@@ -18359,6 +18381,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выберите блоки, сумма которых равна цели"
+          }
+        }
+      }
+    },
+    "בַּחֲרוּ קֻבִּיּוֹת, עַד שֶׁיִּהְיוּ בַּסַּל בְּדִיּוּק %@!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اِضْغَطُوا المُكَعَّبات حتى تَحْتَوِيَ السَّلَّة بِالضَّبْط على: %@!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap blocks until the basket holds exactly: %@!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажимайте кубики, пока в корзине не будет ровно: %@!"
           }
         }
       }
@@ -51760,6 +51804,50 @@
         }
       }
     },
+    "מִלֵּאתֶם אֶת הַסַּל %lld פְּעָמִים!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مَلَأْتُمُ السَّلَّةَ %lld مَرّات!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You filled the basket %lld times!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы наполнили корзину %lld раз!"
+          }
+        }
+      }
+    },
+    "מִלֵּאתֶם אֶת הַסַּל פַּעַם אַחַת!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مَلَأْتُمُ السَّلَّةَ مَرَّةً واحِدَة!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You filled the basket once!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы наполнили корзину один раз!"
+          }
+        }
+      }
+    },
     "מִנּוּי לַטֶּלֶפוֹן" : {
       "localizations" : {
         "ar" : {
@@ -54791,6 +54879,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "нашёл"
+          }
+        }
+      }
+    },
+    "מָצָאתֶם אֶת הַכַּרְטִיס הַנָּכוֹן %lld פְּעָמִים!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وَجَدْتُمُ البِطاقَةَ الصَّحِيحَةَ %lld مَرّات!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You found the right card %lld times!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы нашли нужную карточку %lld раз!"
+          }
+        }
+      }
+    },
+    "מָצָאתֶם אֶת הַכַּרְטִיס הַנָּכוֹן פַּעַם אַחַת!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وَجَدْتُمُ البِطاقَةَ الصَّحِيحَةَ مَرَّةً واحِدَة!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You found the right card once!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы нашли нужную карточку один раз!"
           }
         }
       }

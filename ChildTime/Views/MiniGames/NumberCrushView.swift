@@ -8,11 +8,15 @@ import Combine
 /// of the selection with a small shake. The board always holds at least one
 /// way to the target. 60 seconds (45 in a surprise round).
 ///
-/// 👶 גן plays it as COUNTING, with no numeral anywhere: the target is a row
-/// of apples, every block carries one, two or three apples, and the child taps
-/// blocks that together make exactly that row. Six big blocks, no clock, and
-/// "אָסְפוּ בְּדִיּוּק חֲמִשָּׁה תַּפּוּחִים" read aloud instead of printed — the round
-/// ends after five collections. See `PreReaderGames`.
+/// 👶 גן plays a different game on the same screen: pure COUNTING, with no
+/// numeral and no addition. A basket at the top wants four flowers; six cards
+/// hold one to five each; the child taps the one that has exactly four and its
+/// flowers fly into the basket. Five baskets filled and the round is over.
+///
+/// It got there the hard way. The first גן version asked the child to COMBINE
+/// cards until they added up to the basket, and Rani said "זה לא מובן" twice —
+/// because composing 3 + 1 is a first-grade skill, not a גן one. A five-year-old
+/// counts to five. The combining board is untouched from א׳ upward.
 ///
 /// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser every hit
 /// earns screen time like a regular answer (paced — see MiniGameEarnSession).
@@ -54,8 +58,17 @@ struct NumberCrushView: View {
     @State private var burst = 0
     @State private var confetti = 0
     @State private var grant: MiniGameReward.Grant?
-    /// 👶 גן: the object every block is drawn from, and the spoken rule.
+    /// 👶 גן: the basket, its six cards and the spoken rule.
     @State private var collect: PreReaderGames.Collect?
+    /// The card the child got right — it turns mint and swells for a moment
+    /// before the next goal comes.
+    @State private var preSolved: Int?
+    /// The card that was just tapped and isn't the one — it wobbles and stays.
+    @State private var preWrong: Int?
+    /// Already counted a miss this basket (one answer per basket in reports).
+    @State private var preMissed = false
+    /// Between baskets: taps do nothing while the flowers settle.
+    @State private var preSettling = false
     /// 👶 Dealt before the intro card, so the card shows the row to collect;
     /// ▶️ then consumes it.
     @State private var preDealt = false
@@ -76,10 +89,10 @@ struct NumberCrushView: View {
     }
     private var roundSeconds: TimeInterval { TimeInterval(MiniGameKind.crush.seconds(surprise: surprise)) }
     private var remaining: TimeInterval { max(0, roundSeconds - now.timeIntervalSince(startedAt)) }
-    /// 4×3 on a phone (and the foldable), 5×4 on an iPad.
-    /// 👶 גן: 3×2 — six blocks, each one big enough for a small finger.
-    private var colCount: Int { preReader ? 3 : (isCompact || display.isShort ? 4 : 5) }
-    private var rowCount: Int { preReader ? 2 : (isCompact || display.isShort ? 3 : 4) }
+    /// 4×3 on a phone (and the foldable), 5×4 on an iPad. (גן doesn't use
+    /// this board at all — see `preReaderCards`.)
+    private var colCount: Int { isCompact || display.isShort ? 4 : 5 }
+    private var rowCount: Int { isCompact || display.isShort ? 3 : 4 }
 
     var body: some View {
         ZStack {
@@ -88,7 +101,8 @@ struct NumberCrushView: View {
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
                 MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
                     MiniGameChipLabel(text: preReader
-                                      ? "🧱 " + PreReaderChrome.dots(done: hits, total: PreReaderGames.countingHits)
+                                      ? (collect?.emoji ?? "🧱") + " "
+                                        + PreReaderChrome.dots(done: hits, total: PreReaderGames.countingHits)
                                       : "🧱 \(hits)",
                                       surprise: surprise)
                 }
@@ -107,8 +121,13 @@ struct NumberCrushView: View {
                 case .done:
                     Spacer()
                     if preReader {
-                        PreReaderEndCard(tally: collect?.emoji ?? "🧱", tallyCount: hits, grant: grant,
-                                         surprise: surprise, onAgain: { start() }, onDone: onClose)
+                        PreReaderEndCard(
+                            title: hits >= PreReaderGames.countingHits ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),
+                            detail: preReaderSummary,
+                            tally: collect?.emoji ?? "🧱", tallyCount: hits, grant: grant,
+                            surprise: surprise,
+                            againLabel: tr("עוֹד סִבּוּב 🔁"),
+                            onAgain: { start() }, onDone: onClose)
                     } else {
                         MiniGameEndCard(
                             title: hits >= 10 ? tr("וָואוּ, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"),
@@ -154,31 +173,224 @@ struct NumberCrushView: View {
         }
     }
 
+    /// 👶 What a גן round produced, in words: cards matched, not targets hit.
+    private var preReaderSummary: String {
+        switch hits {
+        case 0:  return tr("אֶפְשָׁר לְנַסּוֹת עוֹד סִבּוּב 💪")
+        case 1:  return tr("מָצָאתֶם אֶת הַכַּרְטִיס הַנָּכוֹן פַּעַם אַחַת!")
+        default: return tr("מָצָאתֶם אֶת הַכַּרְטִיס הַנָּכוֹן \(hits) פְּעָמִים!")
+        }
+    }
+
     // MARK: - Playing
 
     private var pickedValues: [Int] {
         picked.compactMap { id in columns.joined().first { $0.id == id }?.value }
     }
 
+    @ViewBuilder
     private var playing: some View {
-        VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-            // 👶 גן: the row to collect and the 🔊 — no "יַעַד", no numeral.
-            if preReader, let collect {
-                VStack(spacing: 10) {
-                    PreReaderCueCard(cue: collect.cue, compact: isCompact)
-                    // What is in the basket so far, as that many objects.
-                    let gathered = pickedValues.reduce(0, +)
-                    HStack(spacing: 2) {
-                        ForEach(Array(0..<max(1, gathered)), id: \.self) { _ in
-                            Text(gathered == 0 ? "⬜️" : collect.emoji)
-                                .font(.system(size: isCompact ? 28 : 36))
+        if preReader, let collect {
+            // 👶 גן plays a different layout entirely: goal, arrow, tray, board,
+            // with no gap between them. See `preReaderBoard`.
+            preReaderBoard(collect)
+        } else {
+            readerBoard
+        }
+    }
+
+    /// 👶 The גן screen: one basket that wants N, six cards that hold one to
+    /// five each, and exactly one of them right. Tap it and its objects fill
+    /// the basket. No adding up, no running total, nothing to keep in mind.
+    ///
+    /// The basket and the cards are one act, so they sit together with no gap:
+    /// goal, the sentence, the arrow, then the cards straight underneath.
+    private func preReaderBoard(_ collect: PreReaderGames.Collect) -> some View {
+        VStack(spacing: display.isShort ? AppSpacing.xs : AppSpacing.sm) {
+            preReaderGoal(collect)
+            preReaderCards(collect)
+        }
+        .frame(maxWidth: isCompact ? 620 : 700)
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.bottom, AppSpacing.sm)
+    }
+
+    /// What to look for, drawn as the THING ITSELF: three flowers in a gold
+    /// frame, the same picture and the same size they have on the cards below.
+    ///
+    /// It took three tries to get here. A 🎯 beside the row read as a fourth
+    /// item; a 🧺 at the end of it did the same ("הסל מבלבל!"); and dashed
+    /// placeholder circles are an abstraction a five-year-old has to decode
+    /// before the game even starts. Showing the real objects makes the round
+    /// pure matching — "find the card that looks like this" — which needs no
+    /// reading, no counting-out-loud and no explaining. Nothing else goes in
+    /// the frame, because anything else in it gets counted too.
+    private func preReaderGoal(_ collect: PreReaderGames.Collect) -> some View {
+        VStack(spacing: display.isShort ? 6 : 10) {
+            HStack(spacing: isCompact ? 3 : 6) {
+                ForEach(Array(0..<max(1, collect.target)), id: \.self) { _ in
+                    Text(collect.emoji).font(.system(size: goalGlyph(collect.target)))
+                }
+            }
+            .lineLimit(1).minimumScaleFactor(0.5)
+            .padding(.horizontal, isCompact ? 16 : 22)
+            .padding(.vertical, display.isShort ? 7 : 10)
+            .background(RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(AppColor.starGold.opacity(0.20)))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(AppColor.starGold.opacity(0.9), lineWidth: 2.5))
+            .glow(AppColor.starGold, radius: 10)
+            .scaleEffect(targetPop ? 1.08 : 1)
+            .animation(.spring(response: 0.3, dampingFraction: 0.55), value: targetPop)
+
+            // The rule in words, for whoever is reading, and out loud on tap.
+            // No arrow under it any more: the goal is concrete and the cards
+            // start a few points below it, so it was pointing at the obvious.
+            HStack(spacing: 9) {
+                PreReaderSpeakButton(spoken: collect.cue.spoken, side: display.isShort ? 38 : (isCompact ? 44 : 54))
+                Text(collect.cue.spoken)
+                    .font(.system(size: display.isShort ? 12.5 : (isCompact ? 14 : 17),
+                                  weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2).minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 12).padding(.vertical, display.isShort ? 8 : 11)
+        .glassPane(radius: 22)
+    }
+
+    /// Five objects in the frame still have to fit a phone's width beside the
+    /// gold border, so the more there are the smaller each one is — but never
+    /// smaller than they are on a card, or the match stops being obvious.
+    private func goalGlyph(_ count: Int) -> CGFloat {
+        let base: CGFloat = display.isShort ? 38 : (isCompact ? 58 : 72)
+        switch count {
+        case ...2: return base
+        case 3:    return base * 0.92
+        case 4:    return base * 0.84
+        default:   return base * 0.76
+        }
+    }
+
+    /// Six cards, each holding one to five objects. One tap, one answer.
+    ///
+    /// Upright they go 2 across and 3 down: the leftover height was dead space
+    /// either way, and spent on the cards it makes every one of them half as
+    /// wide again — which is what a five-year-old's finger wants. On its side
+    /// the height is what runs out, so they go 3 across and 2 down instead;
+    /// kept at 2 × 3 there, six cards shrank to a narrow column in the middle.
+    private var preReaderCardColumns: Int { display.isShort ? 3 : 2 }
+
+    private func preReaderCards(_ collect: PreReaderGames.Collect) -> some View {
+        GeometryReader { geo in
+            let cols = preReaderCardColumns
+            let rows = Int(ceil(Double(PreReaderGames.countingCards) / Double(cols)))
+            let gap: CGFloat = isCompact ? 10 : 14
+            let w = (geo.size.width - gap * CGFloat(cols - 1)) / CGFloat(cols)
+            let h = (geo.size.height - gap * CGFloat(rows - 1)) / CGFloat(rows)
+            let side = max(60, min(w, h))
+            VStack(spacing: gap) {
+                ForEach(0..<rows, id: \.self) { row in
+                    HStack(spacing: gap) {
+                        ForEach(0..<cols, id: \.self) { col in
+                            let i = row * cols + col
+                            if i < collect.cards.count {
+                                preReaderCard(collect, index: i, side: side)
+                            }
                         }
                     }
-                    .frame(height: isCompact ? 36 : 46)
-                    .opacity(gathered == 0 ? 0.3 : 1)
-                    .modifier(MiniGameShake(animatableData: shake))
                 }
-            } else {
+            }
+            .frame(width: side * CGFloat(cols) + gap * CGFloat(cols - 1),
+                   height: side * CGFloat(rows) + gap * CGFloat(rows - 1))
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        }
+        .environment(\.layoutDirection, .leftToRight)
+    }
+
+    private func preReaderCard(_ collect: PreReaderGames.Collect, index: Int, side: CGFloat) -> some View {
+        let count = collect.cards[index]
+        let right = preSolved == index
+        let wrong = preWrong == index
+        return Button { preReaderTap(collect, index: index) } label: {
+            Text(String(repeating: collect.emoji, count: max(1, count)))
+                .font(.system(size: side * cardGlyphScale(count)))
+                .lineLimit(2).minimumScaleFactor(0.4)
+                .multilineTextAlignment(.center)
+                .frame(width: side, height: side)
+                .miniGameTile(right ? .correct : (wrong ? .wrong : .normal),
+                              tint: Self.palette[index % Self.palette.count], radius: side * 0.22)
+                .scaleEffect(right ? 1.08 : 1)
+                .modifier(MiniGameShake(animatableData: wrong ? shake : 0))
+                .animation(.spring(response: 0.28, dampingFraction: 0.6), value: right)
+        }
+        .buttonStyle(.juicy)
+        .disabled(preSettling)
+    }
+
+    /// One object fills the card; five of them wrap into two rows.
+    private func cardGlyphScale(_ count: Int) -> CGFloat {
+        switch count {
+        case ...1: return 0.52
+        case 2:    return 0.36
+        case 3:    return 0.28
+        case 4:    return 0.26
+        default:   return 0.24
+        }
+    }
+
+    /// A tap on one card. Right → its objects fill the basket and the next one
+    /// comes. Not right → that card wobbles and stays; the child tries again.
+    /// Nothing is ever lost and nothing is ever called a mistake.
+    private func preReaderTap(_ collect: PreReaderGames.Collect, index: Int) {
+        guard phase == .playing, !preSettling else { return }
+        if collect.cards[index] == collect.target {
+            preSettling = true
+            preWrong = nil
+            hits += 1
+            burst += 1
+            SoundPlayer.shared.play(hits % 5 == 0 ? .streakUp : .correctBig)
+            Haptic.success()
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+                preSolved = index
+                targetPop = true
+            }
+            MiniGameLedger.record(correct: true, topic: recordTopic,
+                                  responseMs: Date().timeIntervalSince(pickStartedAt) * 1000,
+                                  streak: hits, earn: earn, surprise: surprise)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) {
+                guard phase == .playing else { return }
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { targetPop = false }
+                if hits >= PreReaderGames.countingHits {
+                    finish()
+                } else {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { dealPreReader() }
+                    preDealt = false
+                    preSettling = false
+                }
+            }
+        } else {
+            if !preMissed {
+                preMissed = true
+                MiniGameLedger.record(correct: false, topic: recordTopic, earn: earn, surprise: surprise)
+            }
+            SoundPlayer.shared.play(.wrongSoft)
+            Haptic.light()
+            SpeechReader.shared.speak(PreReaderGames.almost)
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { preWrong = index }
+            withAnimation(.linear(duration: 0.35)) { shake += 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.easeOut(duration: 0.2)) { if preWrong == index { preWrong = nil } }
+            }
+        }
+    }
+
+    private var readerBoard: some View {
+        VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
             // The target, in the runner's question card.
             VStack(spacing: 10) {
                 HStack(spacing: 10) {
@@ -209,7 +421,6 @@ struct NumberCrushView: View {
             .padding(.horizontal, 14).padding(.vertical, 12)
             .glassPane(radius: 22)
             .modifier(MiniGameShake(animatableData: shake))
-            }
 
             Spacer(minLength: 0)
             grid
@@ -267,15 +478,11 @@ struct NumberCrushView: View {
         let isPicked = picked.contains(b.id)
         let isBursting = bursting.contains(b.id)
         return Button { tap(b) } label: {
-            Text(preReader ? String(repeating: collect?.emoji ?? "🍎", count: max(1, b.value))
-                           : MiniGameText.ltr(rules.display(b.value)))
-                .font(.system(size: preReader ? side * (b.value >= 3 ? 0.26 : (b.value == 2 ? 0.34 : 0.46))
-                                              : side * (rules.mode == .decimal ? 0.32 : 0.42),
-                              weight: .black, design: .rounded))
+            Text(MiniGameText.ltr(rules.display(b.value)))
+                .font(.system(size: side * (rules.mode == .decimal ? 0.32 : 0.42), weight: .black, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
-                .lineLimit(1).minimumScaleFactor(0.4)
-                .padding(.horizontal, preReader ? side * 0.06 : 0)
+                .lineLimit(1).minimumScaleFactor(0.5)
                 .frame(width: side, height: side)
                 .miniGameTile(isBursting ? .correct : (isPicked ? .picked : .normal), tint: b.color, radius: side * 0.24)
                 .background(
@@ -293,12 +500,19 @@ struct NumberCrushView: View {
 
     private func start() {
         if preReader {
+            // 👶 גן never builds the combining board — its round is six cards
+            // and one tap. See `preReaderBoard`.
             if !preDealt { dealPreReader() }
             preDealt = false
-        } else {
-            collect = nil
-            rules = CrushBoards.rules(grade: grade, topic: topic)
+            columns = []
+            picked = []; bursting = []; hits = 0; grant = nil
+            preSettling = false
+            startedAt = Date(); now = Date(); pickStartedAt = Date()
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .playing }
+            return
         }
+        collect = nil
+        rules = CrushBoards.rules(grade: grade, topic: topic)
         var cols: [[Block]] = (0..<colCount).map { _ in (0..<rowCount).map { _ in newBlock() } }
         cols = ensureSolvable(cols, fresh: Set(cols.joined().map(\.id)))
         columns = cols
@@ -307,12 +521,14 @@ struct NumberCrushView: View {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .playing }
     }
 
-    /// 👶 One גן round: the object, the row to collect, and the rule that
-    /// every block carries one, two or three of them.
+    /// 👶 One גן basket: the object, how many it wants, the six cards and the
+    /// rule — spoken when the cue card appears, and printed beside the 🔊.
     private func dealPreReader() {
-        let round = PreReaderGames.collecting()
-        collect = round
-        rules = round.rules
+        collect = PreReaderGames.collecting()
+        preSolved = nil
+        preWrong = nil
+        preMissed = false
+        pickStartedAt = Date()
         preDealt = true
     }
 
@@ -360,12 +576,6 @@ struct NumberCrushView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
             guard phase == .playing else { return }
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { targetPop = false }
-            // 👶 גן: five collections and the round is done — no clock at all.
-            if preReader, hits >= PreReaderGames.countingHits {
-                picked = []; bursting = []
-                finish()
-                return
-            }
             // Remove the burst blocks — the rest fall — and drop new ones in on top.
             var cols = columns.map { $0.filter { !ids.contains($0.id) } }
             var fresh = Set<UUID>()

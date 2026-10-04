@@ -134,25 +134,29 @@ struct MiniGamePreview: View {
         }
     }
 
-    /// 🧱 A row of apples to collect, and blocks carrying one, two or three.
+    /// 🧱 The goal in its gold frame, and the cards to match it against —
+    /// the גן round is "find the card that looks like this", so the miniature
+    /// shows exactly that.
     private func preCount(_ s: CGFloat) -> some View {
-        let side = s * 0.16
-        let blocks = ["🍎", "🍎🍎", "🍎🍎🍎"]
-        let colors: [Color] = [Self.pink, Self.mint, Self.orange]
-        return VStack(spacing: s * 0.05) {
+        let cards: [Int] = [1, 3, 2]
+        let side = s * 0.2
+        return VStack(spacing: s * 0.055) {
             HStack(spacing: 1) {
-                ForEach(0..<4, id: \.self) { _ in Text("🍎").font(.system(size: s * 0.085)) }
+                ForEach(0..<3, id: \.self) { _ in Text("🍎").font(.system(size: s * 0.09)) }
             }
+            .padding(.horizontal, s * 0.035).padding(.vertical, s * 0.02)
+            .background(RoundedRectangle(cornerRadius: s * 0.045, style: .continuous)
+                .fill(AppColor.starGold.opacity(0.22)))
+            .overlay(RoundedRectangle(cornerRadius: s * 0.045, style: .continuous)
+                .strokeBorder(AppColor.starGold.opacity(0.9), lineWidth: 1.5))
             HStack(spacing: s * 0.03) {
-                ForEach(blocks.indices, id: \.self) { i in
-                    Text(blocks[i])
-                        .font(.system(size: side * (0.5 - CGFloat(i) * 0.11)))
+                ForEach(cards.indices, id: \.self) { i in
+                    Text(String(repeating: "🍎", count: cards[i]))
+                        .font(.system(size: side * (cards[i] >= 3 ? 0.3 : (cards[i] == 2 ? 0.38 : 0.5))))
                         .lineLimit(1).minimumScaleFactor(0.4)
                         .frame(width: side, height: side)
-                        .background(RoundedRectangle(cornerRadius: side * 0.22, style: .continuous)
-                            .fill(colors[i].opacity(0.85)))
-                        .overlay(RoundedRectangle(cornerRadius: side * 0.22, style: .continuous)
-                            .strokeBorder(i == 0 ? AppColor.starGold : .white.opacity(0.45), lineWidth: i == 0 ? 2.5 : 1))
+                        .miniGameTile(cards[i] == 3 ? .correct : .normal,
+                                      tint: OptionCard.tints[i % OptionCard.tints.count], radius: side * 0.24)
                 }
             }
         }
