@@ -125,6 +125,14 @@ final class SupportThreadModel: ObservableObject {
         #endif
     }
 
+    /// 🖼 Fill the thread from a fixed local list, for a miniature on a story
+    /// card. No listener is opened, so nothing is fetched and nothing is read.
+    func seedPreview(_ list: [SupportMessage]) {
+        guard messages.isEmpty else { return }
+        messages = list
+        loaded = true
+    }
+
     func stop() {
         #if canImport(FirebaseFirestore)
         listener?.remove(); listener = nil
@@ -144,6 +152,7 @@ struct SupportChatView: View {
     var showsClose: Bool = false
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.isInertPreview) private var inertPreview
     @StateObject private var model = SupportThreadModel()
     @ObservedObject private var store = SupportChatStore.shared
     @State private var draft = ""
@@ -166,6 +175,23 @@ struct SupportChatView: View {
         case .parent: return tr("נחזור אליכם בהקדם")
         case .team: return summary?.kidsSummary ?? ""
         }
+    }
+
+    /// 🖼 The exchange a story card shows. Fixed, so the card reads the same
+    /// way every time, and local, so nothing is fetched to draw it.
+    static var previewThread: [SupportMessage] {
+        let now = Date()
+        // ⚠️ No greeting here: `messageList` renders "שלום! כאן צוות טופי" on
+        // every parent chat without storing it, so seeding one too showed it
+        // twice on the card.
+        return [
+            SupportMessage(id: "p2", text: tr("איך מחברים את האייפד לילדה שלי?"),
+                           from: .parent, senderUID: "", senderName: "",
+                           at: now.addingTimeInterval(-420)),
+            SupportMessage(id: "p3", text: tr("בהגדרות של האייפד בוחרים \"זה המכשיר של הילד\" ומזינים את קוד המשפחה 🙂"),
+                           from: .team, senderUID: "", senderName: tr("צוות טופי"),
+                           at: now.addingTimeInterval(-360)),
+        ]
     }
 
     private var canSend: Bool {
@@ -193,12 +219,18 @@ struct SupportChatView: View {
             }
         }
         .onAppear {
+            // 🖼 A miniature of this screen on a story card must not open a
+            // listener, must not mark the thread read and must not clear the
+            // parent's notifications — it shows a fixed exchange and nothing
+            // else happens.
+            guard !inertPreview else { model.seedPreview(Self.previewThread); return }
             model.start(householdID: householdID)
             store.visibleHouseholdID = householdID
             if mode == .parent { store.markParentRead(householdID: householdID) }
             clearDeliveredPushes()
         }
         .onDisappear {
+            guard !inertPreview else { return }
             model.stop()
             if store.visibleHouseholdID == householdID { store.visibleHouseholdID = nil }
         }

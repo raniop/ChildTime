@@ -18,6 +18,7 @@ import Combine
 struct WorldGameChooserView: View {
     let world: World
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.isInertPreview) private var inertPreview
     @Environment(\.horizontalSizeClass) private var hsc
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var progress: ProgressStore
@@ -95,7 +96,8 @@ struct WorldGameChooserView: View {
             games = WorldGameFit.games(for: world, grade: profiles.active?.effectiveGrade ?? 1)
             lastPick = UserDefaults.standard.string(forKey: lastKey)
             // 👶 A גן child can't read "אֵיךְ בָּא לְךָ לְשַׂחֵק?", so they hear it.
-            if preReader {
+            // 🖼 …but a miniature of this screen on a story card says nothing.
+            if preReader, !inertPreview {
                 SpeechReader.shared.speak(Gendered.g(tr("אֵיךְ בָּא לְךָ לְשַׂחֵק?"), tr("אֵיךְ בָּא לָךְ לְשַׂחֵק?")))
             }
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) { appeared = true }
