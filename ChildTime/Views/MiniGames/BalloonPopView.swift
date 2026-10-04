@@ -129,8 +129,12 @@ struct BalloonPopView: View {
                 case .done:
                     Spacer()
                     if preReader {
-                        PreReaderEndCard(tally: "🎈", tallyCount: popped, grant: grant, surprise: surprise,
-                                         onAgain: { start() }, onDone: onClose)
+                        PreReaderEndCard(
+                            title: popped >= 6 ? tr("וָואוּ, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"),
+                            detail: summaryLine,
+                            tally: "🎈", tallyCount: popped, grant: grant, surprise: surprise,
+                            againLabel: tr("עוֹד סִבּוּב 🔁"),
+                            onAgain: { start() }, onDone: onClose)
                     } else {
                         MiniGameEndCard(
                             title: popped >= 12 ? tr("וָואוּ, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"),

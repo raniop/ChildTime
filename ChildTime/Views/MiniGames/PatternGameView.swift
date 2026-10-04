@@ -78,8 +78,12 @@ struct PatternGameView: View {
                 case .done:
                     Spacer()
                     if preReader {
-                        PreReaderEndCard(tally: "🧠", tallyCount: clean, grant: grant, surprise: surprise,
-                                         onAgain: { start() }, onDone: onClose)
+                        PreReaderEndCard(
+                            title: clean == count ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),
+                            detail: tr("פִּצַּחְתֶּם \(count) תַּבְנִיּוֹת!"),
+                            tally: "🧠", tallyCount: clean, grant: grant, surprise: surprise,
+                            againLabel: tr("עוֹד סִבּוּב 🔁"),
+                            onAgain: { start() }, onDone: onClose)
                     } else {
                         MiniGameEndCard(
                             title: clean == count ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),

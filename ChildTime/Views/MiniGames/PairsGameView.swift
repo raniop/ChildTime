@@ -84,8 +84,12 @@ struct PairsGameView: View {
                 } else if done {
                     Spacer()
                     if preReader {
-                        PreReaderEndCard(tally: "🔗", tallyCount: matched.count, grant: grant, surprise: surprise,
-                                         onAgain: { deal() }, onDone: onClose)
+                        PreReaderEndCard(
+                            title: missed.isEmpty ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),
+                            detail: tr("כָּל הַזּוּגוֹת מְחֻבָּרִים!"),
+                            tally: "🔗", tallyCount: matched.count, grant: grant, surprise: surprise,
+                            againLabel: tr("עוֹד לוּחַ 🔁"),
+                            onAgain: { deal() }, onDone: onClose)
                     } else {
                         MiniGameEndCard(
                             title: missed.isEmpty ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),
