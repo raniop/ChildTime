@@ -249,7 +249,8 @@ struct WhatsNewStoryView: View {
     /// A phone-framed screen brings its own border and shadow.
     private func framesItself(_ art: StoryArt) -> Bool {
         switch art {
-        case .game, .preReaderGame: return true
+        case .game, .preReaderGame, .chooser, .chat: return true
+        case .chips: return ProfileStore.shared.active != nil
         default: return false
         }
     }
@@ -583,6 +584,8 @@ struct WhatsNewStoryView: View {
             let n = CGFloat(Swift.max(list.count, 1))
             let tallestRow: CGFloat = isCompact ? 58 : 112
             return Swift.min(height, n * tallestRow + (n - 1) * gap)
+        case .chat where framesItself(art), .chooser, .chips where framesItself(art):
+            return share(isCompact ? 0.52 : 0.58, min: 180, max: 900)
         case .chat(let lines):
             // Bubbles, like rows, look stranded in a pane built for a poster.
             let n = CGFloat(Swift.max(lines.count, 1))
@@ -749,44 +752,25 @@ private struct Box: View {
     /// 🕹 The chooser, as the child meets it: "שאלות" on one side, a real game
     /// board on the other, with the game outlined the way the screen outlines
     /// a pick. Two real choices, not an icon of a choice.
-    /// The game side shows the REAL board; the questions side shows the mark a
-    /// question wears. The game's own name carries niqqud (it is the child's),
-    /// so on a parent's screen the two cards are named for what they are.
+    /// 🕹 The chooser, as the child really meets it — the real
+    /// `WorldGameChooserView` on a fixed world, inert, inside the phone.
+    ///
+    /// It needs the three stores it normally gets from the app, so they are
+    /// handed to it explicitly: a story can be presented from a cover whose
+    /// environment is not the one the screen was written for.
     private func chooserArt(_ kind: MiniGameKind, topic: Topic) -> some View {
-        let gap = Swift.max(10, box.width * 0.035)
-        // Clamped: a `GeometryReader` can propose a zero size on its first
-        // pass, and `(0 - gap) / 2` is a NEGATIVE frame width.
-        let cardW = Swift.max(60, (box.width - gap) / 2)
-        let cardH = Swift.max(80, box.height * 0.92)
-        let label = Swift.min(Swift.max(box.height * 0.085, 13), 22)
-        let radius = Swift.max(14, box.height * 0.06)
-        return LazyVGrid(columns: Array(repeating: GridItem(.fixed(cardW), spacing: gap), count: 2),
-                         spacing: gap) {
-            chooserCard(tr("שאלות"), w: cardW, h: cardH, label: label, radius: radius, picked: false) {
-                Text("❓").font(.system(size: cardH * 0.3))
-                    .shadow(color: .black.opacity(0.28), radius: 10, y: 6)
-            }
-            chooserCard(tr("משחק"), w: cardW, h: cardH, label: label, radius: radius, picked: true) {
-                MiniGamePreview(kind: kind, topic: topic)
-                    .frame(width: cardW * 0.8, height: cardW * 0.8 / 1.6)
-            }
+        PhoneFrame(box: box) {
+            WorldGameChooserView(world: Self.chooserWorld)
+                .environmentObject(ParentSettings.shared)
+                .environmentObject(ProgressStore.shared)
+                .environmentObject(ProfileStore.shared)
         }
     }
 
-    private func chooserCard<Content: View>(_ name: String, w: CGFloat, h: CGFloat,
-                                            label: CGFloat, radius: CGFloat, picked: Bool,
-                                            @ViewBuilder content: () -> Content) -> some View {
-        VStack(spacing: h * 0.08) {
-            content()
-            Text(name)
-                .font(.system(size: label, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .lineLimit(1).minimumScaleFactor(0.6)
-        }
-        .frame(width: w, height: h)
-        .glassInset(radius: radius)
-        .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous)
-            .strokeBorder(picked ? AppColor.starGold : .clear, lineWidth: 2.5))
+    /// One world, always the same one, so the card does not change shape
+    /// between showings. Maths is the world every child has unlocked.
+    private static var chooserWorld: World {
+        Worlds.all.first { $0.id == "math_kingdom" } ?? Worlds.all[0]
     }
 
     /// 🔐 The vault's point in one picture: the code with one digit known, and
@@ -825,8 +809,24 @@ private struct Box: View {
         }
     }
 
-    /// The daily-cap picker as it really looks: choices, one of them taken.
+    /// ⏱ The real daily-cap picker, with an option taken. It wants a child
+    /// and a binding; the binding is constant, so nothing it does can change
+    /// a cap. Falls back to the drawn chips when there is no child yet.
+    @ViewBuilder
     private func chipsArt(_ list: [String], selected: Int) -> some View {
+        if let profile = ProfileStore.shared.active {
+            PhoneFrame(box: box) {
+                DailyCapStepView(profile: profile,
+                                 minutes: .constant(DailyCapChoice.defaultMinutes),
+                                 onContinue: {})
+            }
+        } else {
+            drawnChips(list, selected: selected)
+        }
+    }
+
+    /// The chips as a drawing — kept for a device with no child on it yet.
+    private func drawnChips(_ list: [String], selected: Int) -> some View {
         let font = Swift.min(Swift.max(box.height * 0.085, 13), 22)
         let gap = font * 0.5
         return LazyVGrid(columns: [GridItem(.adaptive(minimum: font * 5.2, maximum: font * 9), spacing: gap)],
@@ -851,39 +851,16 @@ private struct Box: View {
         .padding(.horizontal, gap)
     }
 
-    /// 💬 The support chat, as the conversation the 💬 button opens.
+    /// 💬 The real chat screen with a fixed three-message exchange. In a
+    /// preview it opens no listener, marks nothing read and clears no pushes
+    /// (`SupportChatView` checks `isInertPreview` before any of that), so the
+    /// card costs one local array and no network at all.
     private func chatArt(_ lines: [StoryChatLine]) -> some View {
-        let font = Swift.min(Swift.max(box.height * 0.082, 13), 22)
-        return VStack(alignment: .leading, spacing: font * 0.9) {
-            ForEach(lines) { line in
-                HStack(spacing: 0) {
-                    if line.mine { Spacer(minLength: font * 2) }
-                    VStack(alignment: line.mine ? .trailing : .leading, spacing: font * 0.25) {
-                        if !line.mine {
-                            Text(tr("צוות טופי"))
-                                .font(.system(size: font * 0.72, weight: .heavy, design: .rounded))
-                                .foregroundStyle(AppColor.starGold)
-                        }
-                        Text(line.text)
-                            .font(.system(size: font, weight: .semibold, design: .rounded))
-                            .foregroundStyle(line.mine ? AppColor.textOnLight : .white)
-                            .multilineTextAlignment(line.mine ? .trailing : .leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.horizontal, font * 0.8)
-                            .padding(.vertical, font * 0.6)
-                            .background {
-                                if line.mine {
-                                    RoundedRectangle(cornerRadius: font, style: .continuous).fill(AppGradient.gold)
-                                } else {
-                                    RoundedRectangle(cornerRadius: font, style: .continuous).fill(.white.opacity(0.2))
-                                }
-                            }
-                    }
-                    if !line.mine { Spacer(minLength: font * 2) }
-                }
+        PhoneFrame(box: box) {
+            NavigationStack {
+                SupportChatView(householdID: "whatsnew.preview", mode: .parent)
             }
         }
-        .padding(.horizontal, font * 0.6)
     }
 
     /// Every game at once — what the parent actually got, in one look.

@@ -23,18 +23,15 @@ import SwiftUI
 ///    every frame and blurs for the whole animation. A static downscale is the
 ///    opposite case: it is how every device mockup is drawn, and it is what
 ///    "just smaller" means.
-struct MiniGameScreenPreview: View {
-    let kind: MiniGameKind
-    var topic: Topic? = nil
-    /// 👶 Force the גן form. Defaults to whoever is using the app.
-    var preReader: Bool = PreReaderGames.activeChildIsPreReader
+struct PhoneFrame<Content: View>: View {
     /// The space the framed phone has to fit inside.
     let box: CGSize
+    @ViewBuilder var content: () -> Content
 
     /// A phone's points — an iPhone 16/15/14's 393 × 852. Fixed on purpose:
     /// the miniature should look the same on every device, and it is a picture
     /// OF a phone, not a reflection of the one in your hand.
-    static let reference = CGSize(width: 393, height: 852)
+    static var reference: CGSize { CGSize(width: 393, height: 852) }
 
     private var fit: CGFloat {
         guard box.width > 0, box.height > 0 else { return 0.2 }
@@ -43,7 +40,7 @@ struct MiniGameScreenPreview: View {
 
     var body: some View {
         let radius: CGFloat = 46
-        screen
+        content()
             .frame(width: Self.reference.width, height: Self.reference.height)
             .environment(\.isInertPreview, true)
             .environment(\.horizontalSizeClass, .compact)
@@ -56,6 +53,21 @@ struct MiniGameScreenPreview: View {
             .scaleEffect(fit)                      // static — never animated
             .frame(width: Self.reference.width * fit, height: Self.reference.height * fit)
             .shadow(color: .black.opacity(0.38), radius: 22 * fit + 6, y: 10 * fit + 3)
+    }
+}
+
+/// One of the twelve games, as the child really sees it.
+struct MiniGameScreenPreview: View {
+    let kind: MiniGameKind
+    var topic: Topic? = nil
+    /// 👶 Force the גן form. Defaults to whoever is using the app.
+    var preReader: Bool = PreReaderGames.activeChildIsPreReader
+    let box: CGSize
+
+    static var reference: CGSize { PhoneFrame<EmptyView>.reference }
+
+    var body: some View {
+        PhoneFrame(box: box) { screen }
     }
 
     /// The real view, by kind. Every one of them takes the same four things,

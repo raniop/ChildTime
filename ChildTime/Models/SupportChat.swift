@@ -62,6 +62,19 @@ struct SupportMessage: Identifiable, Equatable {
         pending = doc.metadata.hasPendingWrites
     }
     #endif
+
+    /// 🖼 Built in code rather than read from a document — the fixed exchange a
+    /// What's-New story card shows, which is drawn without fetching anything.
+    init(id: String, text: String, from: Sender, senderUID: String = "",
+         senderName: String = "", at: Date?, pending: Bool = false) {
+        self.id = id
+        self.text = text
+        self.from = from
+        self.senderUID = senderUID
+        self.senderName = senderName
+        self.at = at
+        self.pending = pending
+    }
 }
 
 struct SupportChatSummary: Identifiable, Equatable {

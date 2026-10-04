@@ -169,6 +169,7 @@ struct BalloonPopView: View {
         .onAppear {
             if preReader, !preDealt { dealPreReader() }
             if (surprise || earn != nil || inertPreview) && phase == .intro { start() }
+            if inertPreview { fillSkyForPreview() }
         }
         .onReceive(ticker) { t in if !inertPreview { tick(t) } }
     }
@@ -421,6 +422,35 @@ struct BalloonPopView: View {
                                     color: Self.palette.randomElement()!,
                                     swayPhase: Double.random(in: 0...(2 * .pi))))
             nextSpawnAt = t.addingTimeInterval(Double.random(in: 0.55...0.95) * slow)
+        }
+    }
+
+    /// 🖼 A sky with balloons already in it, for a miniature on a story card.
+    ///
+    /// The balloons rise on the clock, and a miniature has no clock — so at
+    /// t=0 the card showed a single balloon sitting on the floor, which is not
+    /// what this game looks like. These are dealt ALREADY AGED: each one is
+    /// given a birth time a few seconds in the past, so the same position
+    /// maths that the real game uses places them up the field. Nothing ticks,
+    /// nothing moves, nothing is scored — the sky is simply drawn mid-round.
+    ///
+    /// Lanes, ages and colours are fixed rather than random: this one board is
+    /// a picture, and a picture should not reshuffle itself.
+    private func fillSkyForPreview() {
+        guard phase == .playing, balloons.isEmpty else { return }
+        let t = Date()
+        now = t
+        let lanes: [CGFloat] = [0.14, 0.45, 0.76, 0.28, 0.62]
+        let ages: [Double]   = [3.6, 2.3, 1.2, 4.4, 0.7]
+        let spans: [Double]  = [6.2, 5.6, 6.8, 6.0, 5.9]
+        let slow: Double = preReader ? 1.9 : 1.0
+        for i in 0..<(preReader ? 4 : 5) {
+            guard let item = nextItem() else { break }
+            balloons.append(Balloon(item: item, lane: lanes[i],
+                                    spawnedAt: t.addingTimeInterval(-ages[i] * slow),
+                                    round: qIndex, duration: spans[i] * slow,
+                                    color: Self.palette[i % Self.palette.count],
+                                    swayPhase: Double(i) * 1.1))
         }
     }
 

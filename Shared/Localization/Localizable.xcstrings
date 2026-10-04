@@ -20621,6 +20621,28 @@
         }
       }
     },
+    "בהגדרות של האייפד בוחרים \"זה המכשיר של הילד\" ומזינים את קוד המשפחה 🙂" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في إعدادات الـ iPad اختاروا «هذا جهاز الطفل» وأدخلوا رمز العائلة 🙂"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the iPad’s settings choose \"this is the child’s device\" and enter your family code 🙂"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В настройках iPad выберите «это устройство ребёнка» и введите код семьи 🙂"
+          }
+        }
+      }
+    },
     "בהתחברות אתם מסכימים לתנאי השימוש ולמדיניות הפרטיות" : {
       "localizations" : {
         "ar" : {
