@@ -38,7 +38,7 @@ struct VaultGameView: View {
 
     /// What the screen is saying under the door. Never a failure — always the
     /// next thing to do.
-    private enum Hint: Equatable { case idle, needClue, broke(Int), consistent, already, retry }
+    private enum Hint: Equatable { case idle, broke(Int), consistent, already, retry }
 
     @State private var phase: Phase = .intro
     @State private var round = VaultGen.Round(code: [], clues: [], needed: 0)
@@ -66,6 +66,10 @@ struct VaultGameView: View {
     private var total: Int { round.clues.count }
     /// Clues the child never had to open — the "we worked it out early" bonus.
     private var spare: Int { max(0, total - revealed) }
+    /// 🚪 Before the first clue there is no board at all — just the loop and
+    /// the opening question. An idle board of locked rows is what Rani could
+    /// not read: "זה לא מובן מה אמורים לעשות? איפה השאלה?".
+    private var opening: Bool { revealed == 0 && !cracked }
     /// A numbers world asks the lock's own dial exercises as well as its bank.
     private var mathWorld: Bool { topic == nil || [.math, .money, .logic, .gifted].contains(topic!) }
     private var recordTopic: Topic { topic ?? .logic }
@@ -137,25 +141,43 @@ struct VaultGameView: View {
 
     // MARK: - Playing
 
+    @ViewBuilder
     private var playing: some View {
+        if opening { openingState } else { board }
+    }
+
+    /// 🚪 The first frame of a round: the loop in one line and the question
+    /// itself, nothing else. The board only exists once there is a clue to
+    /// put on it. (The button is the way back if the child dismisses the
+    /// card — normally they never see it, because `start` asks at once.)
+    private var openingState: some View {
+        VStack(spacing: 18) {
+            // The banner stays at the top so the question card — which the
+            // ZStack centres — never lands on top of it.
+            loopBanner
+            if question == nil {
+                Text(MiniGameKind.vault.emoji)
+                    .font(.system(size: isCompact ? 76 : 110))
+                    .float(amplitude: 6)
+                    .glow(AppColor.starGold, radius: 14)
+                    .padding(.top, 20)
+                MiniGameGoldButton(title: tr("🔑 לַשְּׁאֵלָה הָרִאשׁוֹנָה")) { ask() }
+                    .frame(maxWidth: isCompact ? 320 : 420)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: isCompact ? 560 : 720, maxHeight: .infinity, alignment: .top)
+        .padding(.horizontal, AppSpacing.lg)
+    }
+
+    private var board: some View {
         let slot: CGFloat = isCompact ? (digits >= 4 ? 48 : 56) : 68
         return VStack(spacing: display.isShort ? 7 : 10) {
+            loopBanner
             door(slot: slot)
             hintLine
             clueBoard
-            if revealed < total && !cracked {
-                Button { ask() } label: {
-                    Text(tr("🔑 שְׁאֵלָה — פּוֹתְחִים רֶמֶז (\(total - revealed))"))
-                        .font(.system(size: isCompact ? 16 : 19, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .lineLimit(1).minimumScaleFactor(0.7)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, isCompact ? 10 : 13)
-                        .glassFill(AppGradient.gold, radius: 20)
-                }
-                .buttonStyle(.juicy)
-                .frame(maxWidth: isCompact ? 320 : 420)
-            } else if offerReveal {
+            if offerReveal {
                 MiniGameGlassButton(title: tr("✨ לִפְתֹּחַ אֶת הַכַּסֶּפֶת יַחַד")) { giveTheCode() }
                     .frame(maxWidth: isCompact ? 320 : 420)
             }
@@ -171,16 +193,35 @@ struct VaultGameView: View {
         .padding(.bottom, AppSpacing.sm)
     }
 
-    /// The vault door: the slots the child types into, and the codes already
-    /// tried, so nobody repeats one by accident.
+    /// 🧭 The whole game in one line, above everything — three steps with
+    /// arrows beat a sentence, and a child who has never seen the vault knows
+    /// what the screen is for before reading anything else.
+    private var loopBanner: some View {
+        Text(tr("🔑 עוֹנִים עַל שְׁאֵלָה ← 💡 נִפְתָּח רֶמֶז ← 🔓 פּוֹתְחִים אֶת הַכַּסֶּפֶת"))
+            .font(.system(size: isCompact ? 14 : 18, weight: .heavy, design: .rounded))
+            .foregroundStyle(.white)
+            .multilineTextAlignment(.center)
+            .lineLimit(2).minimumScaleFactor(0.7)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 12).padding(.vertical, isCompact ? 7 : 10)
+            .glassPane(radius: 18, shadow: false)
+    }
+
+    /// The vault door: a captioned row of "?" slots, so it reads as the field
+    /// the child types the code into and not as decoration, plus the codes
+    /// already tried so nobody repeats one by accident.
     private func door(slot: CGFloat) -> some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 7) {
+            Text(cracked ? tr("הַכַּסֶּפֶת נִפְתְּחָה! 🔓") : tr("🔐 הַקּוֹד הַסּוֹדִי — הַקִּישׁוּ אוֹתוֹ כָּאן"))
+                .font(.system(size: isCompact ? 12.5 : 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(cracked ? AppColor.successMint : AppColor.starGold)
+                .lineLimit(1).minimumScaleFactor(0.65)
             HStack(spacing: 9) {
                 ForEach(0..<max(digits, 1), id: \.self) { i in
                     let d = cracked ? round.code[i] : (input.indices.contains(i) ? input[i] : nil)
-                    Text(d.map(String.init) ?? "•")
-                        .font(.system(size: slot * (d == nil ? 0.4 : 0.52), weight: .black, design: .rounded))
-                        .foregroundStyle(cracked ? AppColor.starGold : (d == nil ? .white.opacity(0.35) : .white))
+                    Text(d.map(String.init) ?? "?")
+                        .font(.system(size: slot * (d == nil ? 0.46 : 0.52), weight: .black, design: .rounded))
+                        .foregroundStyle(cracked ? AppColor.starGold : (d == nil ? .white.opacity(0.45) : .white))
                         .frame(width: slot, height: slot * 1.1)
                         .miniGameTile(cracked ? .correct : (i == firstEmpty ? .picked : .normal),
                                       tint: AppColor.starGold, radius: 16)
@@ -190,7 +231,7 @@ struct VaultGameView: View {
             .modifier(MiniGameShake(animatableData: shake))
             if !attempts.isEmpty { triedStrip }
         }
-        .padding(12)
+        .padding(.horizontal, 12).padding(.vertical, 10)
         .frame(maxWidth: .infinity)
         .glassPane(radius: 22)
     }
@@ -228,15 +269,10 @@ struct VaultGameView: View {
     private var hintText: String {
         switch hint {
         case .idle:
-            if revealed == 0 {
-                return tr("כָּל תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת רֶמֶז — וְהָרְמָזִים מְגַלִּים אֶת הַקּוֹד")
-            }
             if revealed < total {
                 return tr("יוֹדְעִים אֶת הַקּוֹד? הַקִּישׁוּ אוֹתוֹ! וְאִם לֹא — פִּתְחוּ עוֹד רֶמֶז")
             }
             return tr("כָּל הָרְמָזִים כָּאן — וְיֵשׁ רַק קוֹד אֶחָד שֶׁמַּתְאִים לְכֻלָּם! 🧠")
-        case .needClue:
-            return tr("🔑 פִּתְחוּ רֶמֶז רִאשׁוֹן — וְהַקּוֹד יַתְחִיל לְהִתְגַּלּוֹת")
         case .broke:
             return tr("💡 כִּמְעַט! הַקּוֹד הַזֶּה לֹא מַסְכִּים עִם הָרֶמֶז הַמְּסֻמָּן")
         case .consistent:
@@ -249,9 +285,13 @@ struct VaultGameView: View {
     }
 
     /// The clue list — the heart of the screen. The lock's own rule sits on
-    /// top, then every clue the child has earned, then the ones still shut.
+    /// top, then every clue that is open (the round GIVES the first one or
+    /// two, so row ① always holds a real sentence), then the key button right
+    /// where the next clue will appear, then the clues still shut — numbered,
+    /// so they read as rewards waiting rather than as rows that failed to load.
     private var clueBoard: some View {
-        ScrollViewReader { proxy in
+        let askRow = revealed < total && !cracked
+        return ScrollViewReader { proxy in
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 5) {
                     row(badge: "🔐", text: tr("בַּקּוֹד \(digits) סְפָרוֹת שׁוֹנוֹת, מִ־1 עַד 9"),
@@ -260,6 +300,8 @@ struct VaultGameView: View {
                         if i < revealed {
                             row(badge: "\(i + 1)", text: clue.text, tone: flagged == i ? .flagged : .open)
                                 .id(i)
+                        } else if i == revealed && askRow {
+                            nextClueButton
                         } else {
                             lockedRow(i)
                         }
@@ -271,14 +313,36 @@ struct VaultGameView: View {
             // Tall enough for the rows it holds and no taller, so the panel
             // visibly GROWS as clues open instead of starting as a sea of
             // glass (an open clue is a taller row than a locked one).
-            .frame(maxHeight: CGFloat(revealed + 1) * (isCompact ? 46 : 54)
-                            + CGFloat(total - revealed) * (isCompact ? 30 : 34) + 24)
+            .frame(maxHeight: CGFloat(revealed + 1 + (askRow ? 1 : 0)) * (isCompact ? 46 : 54)
+                            + CGFloat(total - revealed - (askRow ? 1 : 0)) * (isCompact ? 32 : 36) + 24)
             .glassPane(radius: 20)
             .onChangeCompat(of: revealed) { _, v in
                 guard v > 0 else { return }
                 withAnimation(.easeOut(duration: 0.3)) { proxy.scrollTo(v - 1, anchor: .bottom) }
             }
         }
+    }
+
+    /// 🔑 The one thing to press — and it sits exactly where the clue it buys
+    /// will appear, so "press this" and "that row opens" are the same place.
+    private var nextClueButton: some View {
+        Button { ask() } label: {
+            HStack(spacing: 8) {
+                Text("🔑")
+                    .font(.system(size: 13))
+                    .frame(width: 22, height: 22)
+                    .background(Circle().fill(.white.opacity(0.28)))
+                Text(tr("עֲנוּ עַל שְׁאֵלָה וְיִפָּתַח רֶמֶז \(revealed + 1)"))
+                    .font(.system(size: isCompact ? 14 : 16.5, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 9).padding(.vertical, isCompact ? 8 : 11)
+            .frame(maxWidth: .infinity)
+            .glassFill(AppGradient.gold, radius: 13)
+        }
+        .buttonStyle(.juicy)
     }
 
     private enum Tone { case rule, open, flagged }
@@ -306,21 +370,22 @@ struct VaultGameView: View {
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
+    /// A clue still shut. It carries its NUMBER, so the row reads as "רֶמֶז 3,
+    /// waiting for you" and not as a line that failed to load.
     private func lockedRow(_ i: Int) -> some View {
         HStack(spacing: 8) {
             Text("🔒")
                 .font(.system(size: 12))
-                .frame(width: 22, height: 20)
-            Text(i == revealed ? tr("הָרֶמֶז הַבָּא — עֲנוּ עַל שְׁאֵלָה וְהוּא יִפָּתַח") : "• • • • •")
-                .font(.system(size: isCompact ? 12.5 : 14.5, weight: .semibold, design: .rounded))
+                .frame(width: 22, height: 22)
+                .background(Circle().fill(.white.opacity(0.08)))
+            Text(tr("רֶמֶז \(i + 1)"))
+                .font(.system(size: isCompact ? 13 : 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(GlassInk.tertiary)
                 .lineLimit(1).minimumScaleFactor(0.8)
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 9).padding(.vertical, 4)
-        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.04)))
-        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous)
-            .strokeBorder(i == revealed ? AppColor.starGold.opacity(0.55) : .clear, lineWidth: 1))
+        .padding(.horizontal, 9).padding(.vertical, 5)
+        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.05)))
     }
 
     // MARK: - Logic
@@ -339,6 +404,11 @@ struct VaultGameView: View {
         grant = nil
         startedAt = Date()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .playing }
+        // 🚪 The round OPENS with a question. The child answers, clue ① flips
+        // open, and only then does the board appear — already holding a real
+        // sentence, with the loop lived through once. A board of locked rows
+        // and no question was the thing Rani could not read.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { ask() }
     }
 
     private func press(_ k: String) {
@@ -370,10 +440,7 @@ struct VaultGameView: View {
         }
         attempts.append(guess)
         // The one piece of feedback a miss gives: WHICH clue it disagrees with.
-        if revealed == 0 {
-            hint = .needClue
-            flagged = nil
-        } else if let i = (0..<revealed).first(where: { !round.clues[$0].holds(guess) }) {
+        if let i = (0..<revealed).first(where: { !round.clues[$0].holds(guess) }) {
             hint = .broke(i)
             flagged = i
         } else {
@@ -416,8 +483,11 @@ struct VaultGameView: View {
                               earn: earn, surprise: surprise)
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { question = nil }
         guard right else {
-            // Nothing is lost — the clue stays shut and a new question is a tap away.
+            // Nothing is lost — the clue stays shut and a new question is a tap
+            // away. Before the first clue there is no board to go back to, so
+            // the next question comes by itself rather than leaving a bare screen.
             hint = .retry
+            if opening { DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { ask() } }
             return
         }
         flagged = nil

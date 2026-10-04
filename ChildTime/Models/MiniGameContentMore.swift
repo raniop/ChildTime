@@ -988,6 +988,10 @@ enum VaultGen {
 
     /// Deal a vault. `clues` is overridden for a ⚡ surprise round (a short
     /// 3-digit deduction). The result is proven unique before it ships.
+    ///
+    /// No clue is handed over for free: the round OPENS with a question (see
+    /// `VaultGameView.start`), so the child earns clue ① before the board is
+    /// ever drawn — Rani looked at an idle board and asked "איפה השאלה?".
     static func round(grade: Int, digits n: Int? = nil, clues total: Int? = nil) -> Round {
         let band = MiniGameBand.of(grade)
         let count = n ?? digits(grade: grade)
