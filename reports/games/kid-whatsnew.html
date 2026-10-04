@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>מה חדש לילדים</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@500;700;900&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Heebo, system-ui, sans-serif;
+    background: #15123a;
+    padding: 56px 40px 40px;
+  }
+  h1 { color: #fff; font-size: 30px; font-weight: 900; text-align: center; margin-bottom: 6px; }
+  .sub { color: #b9b2e8; font-size: 16px; text-align: center; margin-bottom: 40px; }
+  .row { display: flex; gap: 34px; justify-content: center; align-items: flex-start; }
+  .col { width: 352px; }
+  .caption { color: #cfc8ff; font-size: 15px; font-weight: 700; text-align: center; margin-top: 14px; }
+  .caption b { color: #FFD23F; }
+
+  /* ---- phone ---- */
+  .phone {
+    width: 352px; height: 740px; border-radius: 46px; padding: 12px;
+    background: #000; box-shadow: 0 24px 60px rgba(0,0,0,.55);
+    position: relative; overflow: hidden;
+  }
+  .screen {
+    width: 100%; height: 100%; border-radius: 36px; overflow: hidden; position: relative;
+    background:
+      radial-gradient(130% 80% at 78% 6%, #FF7AD9 0%, rgba(255,122,217,0) 48%),
+      radial-gradient(120% 70% at 10% 96%, #35E7E0 0%, rgba(53,231,224,0) 52%),
+      linear-gradient(170deg, #7B5BFF 0%, #6A5BFF 42%, #3E8BFF 100%);
+    display: flex; flex-direction: column;
+  }
+  .notch {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    width: 112px; height: 30px; border-radius: 16px; background: #000; z-index: 6;
+  }
+  .star { position: absolute; color: #FFE28A; font-size: 12px; opacity: .85; }
+
+  /* ---- dim + sheet ---- */
+  .dim { position: absolute; inset: 0; background: rgba(12,8,45,.42); }
+  .sheet {
+    position: absolute; left: 16px; right: 16px; top: 76px; bottom: 26px;
+    border-radius: 30px; padding: 18px 16px 18px;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.3);
+    backdrop-filter: blur(22px);
+    box-shadow: 0 20px 48px rgba(0,0,0,.34);
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .close {
+    position: absolute; top: 14px; left: 14px; width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4);
+    color: #fff; font-size: 17px; font-weight: 700; display: grid; place-items: center;
+  }
+  .kicker { color: #FFD23F; font-size: 14px; font-weight: 900; margin-bottom: 2px; }
+  .title { color: #fff; font-size: 25px; font-weight: 900; line-height: 1.22; text-align: center; }
+  .lead { color: rgba(255,255,255,.92); font-size: 15px; font-weight: 700; text-align: center; margin-top: 6px; }
+
+  /* ---- preview tile (the game's own miniature) ---- */
+  .preview {
+    width: 100%; height: 232px; margin: 16px 0 12px; border-radius: 24px;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.26);
+    display: grid; place-items: center; position: relative; overflow: hidden;
+  }
+  .glowdot { position: absolute; width: 190px; height: 190px; border-radius: 50%; filter: blur(26px); opacity: .5; }
+
+  .slots { display: flex; gap: 10px; }
+  .slot {
+    width: 54px; height: 62px; border-radius: 15px; display: grid; place-items: center;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.34);
+    color: #fff; font-size: 26px; font-weight: 900;
+  }
+  
+  .slot.on { background: linear-gradient(160deg, #FFE08A, #FFB03A); color: #4B3FBF; border-color: #fff; }
+  .clues { margin-top: 14px; width: 86%; display: flex; flex-direction: column; gap: 6px; }
+  .clue {
+    border-radius: 12px; padding: 7px 10px; font-size: 13px; font-weight: 700;
+    background: rgba(255,255,255,.17); border: 1px solid rgba(255,255,255,.26); color: #fff;
+  }
+  .clue.locked { color: rgba(255,255,255,.6); }
+
+  .cart { display: grid; grid-template-columns: repeat(3, 72px); gap: 10px; }
+  .item {
+    height: 76px; border-radius: 16px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
+    color: #fff; font-size: 12px; font-weight: 800;
+  }
+  .item span.big { font-size: 25px; }
+
+  .balloons { display: flex; gap: 14px; align-items: flex-end; }
+  .balloon {
+    width: 62px; height: 72px; border-radius: 50% 50% 46% 46%;
+    display: grid; place-items: center; font-size: 25px; color: #fff; font-weight: 900;
+    box-shadow: inset 0 -8px 16px rgba(0,0,0,.14);
+  }
+
+  /* ---- dots + button ---- */
+  .dots { display: flex; gap: 7px; margin: 6px 0 12px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); }
+  .dot.on { background: #FFD23F; width: 22px; border-radius: 5px; }
+  .cta {
+    width: 100%; height: 58px; border-radius: 20px; display: grid; place-items: center;
+    background: linear-gradient(160deg, #FFE08A 0%, #FFB03A 100%);
+    color: #4B3FBF; font-size: 20px; font-weight: 900;
+    box-shadow: 0 10px 22px rgba(255,170,40,.36);
+  }
+  .skip { color: rgba(255,255,255,.78); font-size: 14px; font-weight: 700; margin-top: 10px; }
+  .speak {
+    position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4);
+    display: grid; place-items: center; font-size: 17px;
+  }
+  .fox { font-size: 92px; line-height: 1; }
+  .reward {
+    display: flex; gap: 10px; margin: 14px 0 6px;
+  }
+  .chip {
+    padding: 9px 16px; border-radius: 999px; font-size: 19px; font-weight: 900; color: #fff;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.38);
+  }
+</style>
+</head>
+<body>
+  <h1>🎁 "מָה חָדָשׁ" — הַמָּסָךְ שֶׁל הַיְּלָדִים</h1>
+  <p class="sub">נפתח לבד בכניסה הראשונה אחרי עדכון · קלף אחד לכל דבר חדש · בלי הסברים — רק האיור והכפתור</p>
+
+  <div class="row">
+
+    <!-- 1 -->
+    <div class="col">
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <span class="star" style="top:120px;right:36px">✦</span>
+        <span class="star" style="top:300px;left:30px">✦</span>
+        <div class="dim"></div>
+        <div class="sheet">
+          <div class="close">✕</div>
+          <div class="speak">🔊</div>
+          <div class="kicker">⚡ חָדָשׁ בְּטוֹפִי</div>
+          <div class="title">הַכַּסֶּפֶת 🔐</div>
+          <div class="lead">כָּל תְּשׁוּבָה פּוֹתַחַת רֶמֶז</div>
+          <div class="preview">
+            <div class="glowdot" style="background:#FFD23F; top:-30px; right:-20px"></div>
+            <div>
+              <div class="slots">
+                <div class="slot on">?</div><div class="slot">?</div><div class="slot">?</div>
+              </div>
+              <div class="clues">
+                <div class="clue">① הַסִּפְרָה הַשְּׁנִיָּה הִיא 5</div>
+                <div class="clue locked">🔒 רֶמֶז 2</div>
+                <div class="clue locked">🔒 רֶמֶז 3</div>
+              </div>
+            </div>
+          </div>
+          <div class="dots"><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="cta">נַסּוּ עַכְשָׁיו! 🚀</div>
+          <div class="skip">הַבָּא ←</div>
+        </div>
+      </div></div>
+      <p class="caption">קלף 1 · <b>נכנס ישר למשחק</b> בלחיצה אחת</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="col">
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <span class="star" style="top:200px;left:44px">✦</span>
+        <div class="dim"></div>
+        <div class="sheet">
+          <div class="close">✕</div>
+          <div class="speak">🔊</div>
+          <div class="kicker">⚡ חָדָשׁ בְּטוֹפִי</div>
+          <div class="title">הַמַּכֹּלֶת 🛒</div>
+          <div class="lead">קוֹנִים, מְחַשְּׁבִים וּמְקַבְּלִים עֹדֶף</div>
+          <div class="preview">
+            <div class="glowdot" style="background:#35E7E0; bottom:-40px; left:-20px"></div>
+            <div class="cart">
+              <div class="item"><span class="big">🍎</span>8 ₪</div>
+              <div class="item"><span class="big">🥛</span>14 ₪</div>
+              <div class="item"><span class="big">🍫</span>12 ₪</div>
+              <div class="item"><span class="big">🥕</span>6 ₪</div>
+              <div class="item"><span class="big">🍞</span>9 ₪</div>
+              <div class="item"><span class="big">🧺</span>50 ₪</div>
+            </div>
+          </div>
+          <div class="dots"><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="cta">נַסּוּ עַכְשָׁיו! 🚀</div>
+          <div class="skip">הַבָּא ←</div>
+        </div>
+      </div></div>
+      <p class="caption">קלף 2 · האיור הוא <b>המשחק עצמו</b>, לא תמונה</p>
+    </div>
+
+    <!-- 3 -->
+    <div class="col">
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <span class="star" style="top:150px;right:50px">✦</span>
+        <span class="star" style="bottom:160px;left:40px">✦</span>
+        <div class="dim"></div>
+        <div class="sheet">
+          <div class="close">✕</div>
+          <div class="speak">🔊</div>
+          <div class="kicker">🎉 זֶה הַכֹּל!</div>
+          <div class="title">יֵשׁ 12 מִשְׂחָקִים<br>חֲדָשִׁים בְּטוֹפִי</div>
+          <div class="preview" style="height:252px">
+            <div class="glowdot" style="background:#FF7AD9; top:10px; right:-30px"></div>
+            <div style="text-align:center">
+              <div class="fox">🦊</div>
+              <div class="reward">
+                <div class="chip">💎 +15</div>
+                <div class="chip">⭐ +10</div>
+              </div>
+            </div>
+          </div>
+          <div class="lead">מַתָּנָה קְטַנָּה — כִּי בָּאתֶם לִרְאוֹת 💛</div>
+          <div class="dots" style="margin-top:10px"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot on"></span></div>
+          <div class="cta">יַאלְלָה, לְשַׂחֵק! 🎮</div>
+        </div>
+      </div></div>
+      <p class="caption">קלף אחרון · <b>מתנה</b> על זה שפתחו</p>
+    </div>
+
+  </div>
+</body>
+</html>
