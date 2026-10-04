@@ -34,6 +34,9 @@ struct SupportFloatingButtons: View {
                 .buttonStyle(.juicy)
                 .accessibilityLabel(tr("כל השיחות"))
             }
+            // On the team's own phones the 💬 button is pointless — it would
+            // open a chat with ourselves. One button there: the inbox.
+            if !showsInbox {
             Button {
                 Haptic.light()
                 onChat()
@@ -48,6 +51,7 @@ struct SupportFloatingButtons: View {
             }
             .buttonStyle(.juicy)
             .accessibilityLabel(tr("שיחה עם צוות טופי"))
+            }
         }
     }
 

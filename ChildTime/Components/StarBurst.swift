@@ -27,7 +27,9 @@ private struct StarParticle: View {
     let particleIndex: Int
 
     @State private var t: CGFloat = 0
-    @State private var opacity: Double = 1
+    /// Starts invisible — at rest every particle sits stacked at the centre, so
+    /// opacity 1 parked a gold star in the middle of any screen hosting a burst.
+    @State private var opacity: Double = 0
 
     var body: some View {
         Image(systemName: "star.fill")
