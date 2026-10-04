@@ -21,6 +21,9 @@ struct PatternGameView: View {
     @ObservedObject private var profiles = ProfileStore.shared
     @ObservedObject private var display = DisplayGeometry.shared
     @Environment(\.horizontalSizeClass) private var hsc
+    /// 🖼 A miniature on a What's-New story card: show the real screen,
+    /// but do not play it — no round is scored and no clock runs.
+    @Environment(\.isInertPreview) private var inertPreview
 
     private enum Phase { case intro, playing, done }
 
@@ -44,7 +47,13 @@ struct PatternGameView: View {
     }
     /// 👶 A pre-reader (גן): pictures only, bigger cells, four rows a round.
     /// One definition for all five games — see `PreReaderGames`.
+    /// 🖼 A story card showing the גן form to a PARENT has no גן child
+    /// active, so it says which form it wants. Everywhere else this is nil
+    /// and the answer is simply "is the child using the app a pre-reader".
+    var forcePreReader: Bool? = nil
+
     private var preReader: Bool {
+        if let forcePreReader { return forcePreReader }
         _ = profiles.active      // redraw when the active child changes
         return PreReaderGames.activeChildIsPreReader
     }
@@ -106,7 +115,7 @@ struct PatternGameView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if (surprise || earn != nil) && phase == .intro { start() } }
+        .onAppear { if (surprise || earn != nil || inertPreview) && phase == .intro { start() } }
     }
 
     // MARK: - Playing

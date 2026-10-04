@@ -21,6 +21,9 @@ struct GroceryGameView: View {
     @ObservedObject private var profiles = ProfileStore.shared
     @ObservedObject private var display = DisplayGeometry.shared
     @Environment(\.horizontalSizeClass) private var hsc
+    /// 🖼 A miniature on a What's-New story card: show the real screen,
+    /// but do not play it — no round is scored and no clock runs.
+    @Environment(\.isInertPreview) private var inertPreview
 
     private enum Phase { case intro, shopping, total, change, done }
     private enum ListMode { case pictures, english, hebrew }
@@ -99,7 +102,7 @@ struct GroceryGameView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if (surprise || earn != nil) && phase == .intro { start() } }
+        .onAppear { if (surprise || earn != nil || inertPreview) && phase == .intro { start() } }
     }
 
     // MARK: - Names

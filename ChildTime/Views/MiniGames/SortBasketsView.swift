@@ -25,6 +25,9 @@ struct SortBasketsView: View {
     @ObservedObject private var profiles = ProfileStore.shared
     @ObservedObject private var display = DisplayGeometry.shared
     @Environment(\.horizontalSizeClass) private var hsc
+    /// 🖼 A miniature on a What's-New story card: show the real screen,
+    /// but do not play it — no round is scored and no clock runs.
+    @Environment(\.isInertPreview) private var inertPreview
 
     private enum Phase { case intro, playing, done }
     private struct FramesKey: PreferenceKey {
@@ -73,7 +76,13 @@ struct SortBasketsView: View {
     private var total: Int { roundTotal }
     /// 👶 A pre-reader (גן): pictures only, and no clock to lose to.
     /// One definition for all five games — see `PreReaderGames`.
+    /// 🖼 A story card showing the גן form to a PARENT has no גן child
+    /// active, so it says which form it wants. Everywhere else this is nil
+    /// and the answer is simply "is the child using the app a pre-reader".
+    var forcePreReader: Bool? = nil
+
     private var preReader: Bool {
+        if let forcePreReader { return forcePreReader }
         _ = profiles.active      // redraw when the active child changes
         return PreReaderGames.activeChildIsPreReader
     }
@@ -135,9 +144,10 @@ struct SortBasketsView: View {
         .environment(\.layoutDirection, .app)
         .onAppear {
             if preReader, !preDealt { dealPreReader() }
-            if (surprise || earn != nil) && phase == .intro { start() }
+            if (surprise || earn != nil || inertPreview) && phase == .intro { start() }
         }
         .onReceive(ticker) { t in
+            guard !inertPreview else { return }
             // 👶 גן has no clock: the round ends when the last basket is filled.
             guard phase == .playing, !preReader else { return }
             now = t
