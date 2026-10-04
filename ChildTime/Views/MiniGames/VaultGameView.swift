@@ -103,6 +103,9 @@ struct VaultGameView: View {
                     Spacer()
                 }
             }
+            // Pin to the top: the VStack hugs its content, and on a tall screen a
+            // centred stack dragged the ✕ and the chips into the middle.
+            .frame(maxHeight: .infinity, alignment: .top)
 
             if let item = question, phase == .playing {
                 // Tapping outside closes it — the ✕ sits behind this layer, and a
