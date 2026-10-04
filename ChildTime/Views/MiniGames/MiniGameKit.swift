@@ -439,8 +439,17 @@ struct PreReaderSpeakButton: View {
     }
 }
 
-/// The card at the top of a גן round: the rule as pictures (big), the rule in
-/// words under them (smaller, for whoever is reading), and the 🔊 that says it.
+/// The card at the top of a גן round — and the order on it is the point.
+///
+/// Rani, looking at it on an iPad: "השאלה צריכה להיות ממורכזת, זה נראה מוזר
+/// שהיא בצד לא? … למה התשובות כאלה גדולות? נראה לי יותר הגיוני שהשאלה תהיה
+/// בגדול יותר וגם הכיתוב." He was describing a hierarchy standing on its
+/// head: the question was the smallest thing on screen and pinned to one
+/// edge, while the answers filled the rest of it.
+///
+/// So, top to bottom and all centred: **the question in words** (the biggest
+/// text on the screen) with the 🔊 beside it, then **the rule as pictures**
+/// under it. The answers below are sized to a hand, not to the screen.
 struct PreReaderCueCard: View {
     let cue: PreReaderCue
     var compact: Bool = true
@@ -450,35 +459,35 @@ struct PreReaderCueCard: View {
     private var short: Bool { display.isShort }
 
     var body: some View {
-        HStack(spacing: compact ? 12 : 18) {
-            PreReaderSpeakButton(spoken: cue.spoken, side: short ? 44 : (compact ? 54 : 68))
-            VStack(spacing: short ? 2 : 5) {
-                if !cue.icons.isEmpty {
-                    // The pictures are the rule, and they stay the biggest
-                    // thing here: a quantity is that many objects, a colour is
-                    // its swatch, a thing is its picture.
-                    HStack(spacing: compact ? 2 : 5) {
-                        ForEach(Array(cue.icons.prefix(6).enumerated()), id: \.offset) { _, icon in
-                            Text(icon)
-                                .font(.system(size: iconSize))
-                                .minimumScaleFactor(0.5)
-                        }
-                    }
-                    .lineLimit(1)
-                    .glow(AppColor.starGold, radius: 8)
-                }
-                // …and the same rule in words, for a parent playing along.
+        VStack(spacing: short ? 6 : (compact ? 9 : 13)) {
+            // 1️⃣ The question, centred and the largest text on the screen,
+            //    with the 🔊 beside it rather than stranded at the far edge.
+            HStack(spacing: compact ? 9 : 13) {
                 Text(cue.spoken)
-                    .font(.system(size: short ? 12.5 : (compact ? 14 : 17), weight: .semibold, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary)
+                    .font(.system(size: short ? 16 : (compact ? 19 : 26), weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .lineLimit(3).minimumScaleFactor(0.7)
                     .fixedSize(horizontal: false, vertical: true)
+                PreReaderSpeakButton(spoken: cue.spoken, side: short ? 40 : (compact ? 46 : 58))
             }
             .frame(maxWidth: .infinity)
+
+            // 2️⃣ …and the same rule as pictures under it.
+            if !cue.icons.isEmpty {
+                HStack(spacing: compact ? 3 : 6) {
+                    ForEach(Array(cue.icons.prefix(6).enumerated()), id: \.offset) { _, icon in
+                        Text(icon)
+                            .font(.system(size: iconSize))
+                            .minimumScaleFactor(0.5)
+                    }
+                }
+                .lineLimit(1)
+                .glow(AppColor.starGold, radius: 8)
+            }
         }
         .padding(.horizontal, compact ? 14 : 20)
-        .padding(.vertical, short ? 7 : (compact ? 10 : 14))
+        .padding(.vertical, short ? 8 : (compact ? 12 : 16))
         .frame(maxWidth: .infinity)
         .glassPane(radius: 24)
         .onAppear { SpeechReader.shared.speak(cue.spoken) }
@@ -486,14 +495,14 @@ struct PreReaderCueCard: View {
     }
 
     /// Six apples in a row still have to fit a phone, so the more there are
-    /// the smaller each one gets.
+    /// the smaller each one gets — but they are the goal, so they stay big.
     private var iconSize: CGFloat {
-        let base: CGFloat = short ? 34 : (compact ? 46 : 60)
+        let base: CGFloat = short ? 36 : (compact ? 50 : 76)
         switch cue.icons.count {
         case 1:    return base
-        case 2, 3: return base * 0.82
-        case 4:    return base * 0.68
-        default:   return base * 0.56
+        case 2, 3: return base * 0.86
+        case 4:    return base * 0.74
+        default:   return base * 0.62
         }
     }
 }
@@ -1031,8 +1040,14 @@ struct MiniGameDemoHost: View {
     /// so setting it there handed the screenshot a board at the old grade.
     init(screen: String) {
         self.screen = screen
+        // 📅 Re-stamp the school year EVERY time, not only when the grade
+        // changes: a profile a previous run left at DEMO_GRADE=0 keeps that 0
+        // but carries last year's `gradeSchoolYear`, and September's auto
+        // advance then makes `effectiveGrade` 1 — so a גן screenshot run on a
+        // device that has been used before quietly rendered the reader form.
         if let g = ProcessInfo.processInfo.environment["DEMO_GRADE"].flatMap(Int.init),
-           var p = ProfileStore.shared.active, p.grade != g {
+           var p = ProfileStore.shared.active,
+           p.grade != g || p.gradeSchoolYear != Profile.schoolYear() {
             p.grade = g
             p.gradeSchoolYear = Profile.schoolYear()
             ProfileStore.shared.update(p)

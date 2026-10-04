@@ -202,9 +202,17 @@ enum GameContent {
 
 /// The adaptive engine's view, for a game: the level the child is really
 /// playing at in a topic, around the parent's base.
+///
+/// ⚠️ This is a **content level**, not the child's band, and it never goes
+/// below 1 — the generators it feeds (`CrushBoards.rules`, the ladders, the
+/// balance) are all written from א׳ upward and index from 1. A גן child
+/// therefore reads 1 here, which is correct for picking content and WRONG for
+/// deciding which form of a game to draw. For that one question there is a
+/// single answer in the app: `PreReaderGames.activeChildIsPreReader`.
 enum MiniGameLevel {
     /// The child's grade, one step up or down when the adaptive level has
-    /// clearly moved away from the parent's base for this topic.
+    /// clearly moved away from the parent's base for this topic. Never below 1
+    /// — see the note on the enum.
     static func grade(for topic: Topic?) -> Int {
         let base = max(1, ProfileStore.shared.active?.effectiveGrade ?? 2)
         guard let topic, let p = ProfileStore.shared.active else { return base }

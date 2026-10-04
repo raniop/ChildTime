@@ -52,7 +52,13 @@ enum PreReaderGames {
     /// Is this child a pre-reader? (גן and below — `effectiveGrade <= 0`.)
     static func isPreReader(_ grade: Int) -> Bool { MiniGameBand.of(grade) == .preReader }
 
-    /// The active child, as every game screen asks it.
+    /// 👶 **The** question every גן game asks, and the only place it is
+    /// answered: is the child in front of us a pre-reader?
+    ///
+    /// All five screens read this one property rather than each deriving it,
+    /// so a גן round can never half-appear — and in particular nothing asks
+    /// `MiniGameLevel.grade(for:)`, which floors at 1 and would answer "א׳"
+    /// for a child who cannot read a word.
     static var activeChildIsPreReader: Bool {
         isPreReader(ProfileStore.shared.active?.effectiveGrade ?? 1)
     }
@@ -127,7 +133,13 @@ enum PreReaderGames {
     }
 
     /// "שְׁלוֹשָׁה תַּפּוּחִים" — a quantity as words, for the ear only.
-    static func countPhrase(_ n: Int, _ plural: String) -> String { countWord(n) + " " + plural }
+    /// ⚠️ Two and up only. Hebrew counts ONE the other way round — the noun
+    /// comes first and in the singular, "פַּרְפָּר אֶחָד" — so every caller
+    /// keeps its quantities at two or more rather than letting this produce
+    /// "אֶחָד פַּרְפָּרִים".
+    static func countPhrase(_ n: Int, _ plural: String) -> String {
+        countWord(max(2, n)) + " " + plural
+    }
 
     // MARK: - 🎈 Balloons
 
@@ -293,11 +305,18 @@ enum PreReaderGames {
 
     /// Counts a גן child can take in at a glance.
     static let countingCards = 6
+    /// What a card may hold.
     private static let countRange = 1...5
+    /// What the goal may ask for. It starts at TWO, and not because one is too
+    /// easy: Hebrew counts one the other way round — "פַּרְפָּר אֶחָד", noun
+    /// first — so `countPhrase` would have produced "אֶחָד פַּרְפָּרִים". Two to
+    /// five is the range worth counting anyway, and a card holding one is
+    /// still a fine distractor, because a card carries no words at all.
+    private static let targetRange = 2...5
 
     static func collecting() -> Collect {
         let item = countables.randomElement()!
-        let target = Int.random(in: countRange)
+        let target = Int.random(in: targetRange)
         // Five more cards, every one of them a DIFFERENT count from the target,
         // so there is never a second right answer. Each of the four remaining
         // counts appears once before any repeats — three cards of five flowers

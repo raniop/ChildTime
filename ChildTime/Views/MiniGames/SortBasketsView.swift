@@ -72,7 +72,11 @@ struct SortBasketsView: View {
     private var current: SortItem? { queue.first }
     private var total: Int { roundTotal }
     /// 👶 A pre-reader (גן): pictures only, and no clock to lose to.
-    private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
+    /// One definition for all five games — see `PreReaderGames`.
+    private var preReader: Bool {
+        _ = profiles.active      // redraw when the active child changes
+        return PreReaderGames.activeChildIsPreReader
+    }
     private var placedCount: Int { sorted.values.map(\.count).reduce(0, +) }
     /// Baskets in reading order — the first on the right in Hebrew / Arabic.
     private var basketOrder: [Int] {
@@ -213,7 +217,7 @@ struct SortBasketsView: View {
             }
             .padding(.bottom, AppSpacing.sm)
         }
-        .frame(maxWidth: isCompact ? 640 : 820)
+        .frame(maxWidth: preReader ? (isCompact ? 560 : 620) : (isCompact ? 640 : 820))
         .padding(.horizontal, AppSpacing.md)
         .padding(.bottom, AppSpacing.md)
         .coordinateSpace(name: Self.space)
