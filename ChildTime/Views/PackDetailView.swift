@@ -99,13 +99,7 @@ struct PackDetailView: View {
                     .padding(.horizontal, 10).padding(.vertical, 5)
                     .background(Capsule().fill(.white.opacity(0.12)))
             }
-            Text(pack.emoji)
-                .font(.system(size: 64))
-                .frame(maxWidth: .infinity)
-                .frame(height: 120)
-                .background(RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(pack.heroGradient.opacity(0.45)))
-                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            PackHeroArt(emoji: pack.emoji, colors: pack.heroColors)
             Text(pack.name)
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
             Text(pack.tagline)
@@ -484,10 +478,8 @@ struct PacksHomeSection: View {
     private func card(_ pack: QuestionPack) -> some View {
         let owners = profiles.profiles.filter { PackAccess.has($0, pack) }
         return HStack(spacing: 12) {
-            Text(pack.emoji)
-                .font(.system(size: 30))
-                .frame(width: 56, height: 56)
-                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(pack.heroGradient.opacity(0.45)))
+            PackHeroArt(emoji: pack.emoji, colors: pack.heroColors, size: 30, height: 56)
+                .frame(width: 56)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(pack.name).font(.system(size: 15, weight: .heavy, design: .rounded))

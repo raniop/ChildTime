@@ -31,13 +31,9 @@ struct CampaignPopupView: View {
             Color(hex: "14122A").opacity(shown ? 0.45 : 0).ignoresSafeArea()
                 .onTapGesture { onLater() }
             VStack(spacing: 10) {
-                Text(campaign.emoji.isEmpty ? (pack?.emoji ?? "🦁") : campaign.emoji)
-                    .font(.system(size: 60))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 116)
-                    .background(RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill((pack?.heroGradient ?? LinearGradient(colors: [Color(hex: "8CFFC4"), Color(hex: "7CF3FF")], startPoint: .topLeading, endPoint: .bottomTrailing)).opacity(0.45)))
-                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                PackHeroArt(emoji: campaign.emoji.isEmpty ? (pack?.emoji ?? "🦁") : campaign.emoji,
+                            colors: pack?.heroColors ?? [Color(hex: "8CFFC4"), Color(hex: "7CF3FF")],
+                            size: 60, height: 116)
                     .offset(y: bob ? -3 : 3)
                     // Scoped to the hero — a global repeatForever transaction
                     // leaked into the sheet's entrance and left the button
