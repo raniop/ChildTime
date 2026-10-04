@@ -1,17 +1,29 @@
 import SwiftUI
 
-/// 🔐 "הַכַּסֶּפֶת" — a secret code of distinct digits (3 up to ג׳, 4 from ד׳)
-/// and six tries. 🎚️ The key cards are what scales: 2 for א׳–ב׳, 3 for ג׳–ה׳,
-/// 2 for ו׳ and a single one for ז׳–ח׳, whose key questions are roots, signed
-/// products and squares. A ח׳ child deduces three of the four digits. Each try lights its digits: green = right digit, right
-/// place; orange = in the code, another place; plain = not in the code (a
-/// small legend says so). A key card opens one digit for a right answer — in
-/// the math worlds a clue to work out ("הַסְּפָרָה הָרִאשׁוֹנָה = 3 × 2"), in any
-/// other world one of its own questions. Cracked → coins burst; six tries
-/// gone → the code is shown, gently, and another vault is one tap away.
+/// 🔐 "הַכַּסֶּפֶת" — a secret code of distinct digits 1–9 (3 up to ג׳, 4 from ד׳)
+/// that the child **works out**, never guesses (Rani, 2026-10-04, after playing
+/// the old Mastermind version: "הכספת זה לא טוב, המשחק הזה הוא סתם ניחושים!
+/// תעשה את הכספת שיהיה שכל פתרון מקרב אותך לקוד").
 ///
-/// The key questions and the crack are the answers: from a world's chooser
-/// they earn screen time like regular answers; a ⚡ surprise round pays ⭐/💎.
+/// So solving IS the lock-pick. The loop is: a question appears → the child
+/// answers it → **one more clue about the code opens, and stays on screen** in
+/// a growing list. The clue set is proven in `VaultGen.round` to leave exactly
+/// one possible code, so the vault can always be opened by reasoning alone —
+/// and at least one clue is slack, so a child who gets there early opens it
+/// with questions to spare and earns more ⭐/💎 for it.
+///
+/// 🎚️ What scales is the KIND of clue: א׳–ב׳ reads the digits off the clues
+/// ("הַסִּפְרָה הָרִאשׁוֹנָה הִיא 3"), ג׳–ד׳ compares and counts, ה׳–ו׳ gets
+/// arithmetic relations between positions, ז׳–ח׳ gets fewer and tighter ones
+/// (sums, differences, multiples, how many digits are prime). See `VaultClue`.
+///
+/// A wrong attempt is never the engine and never a failure: the screen simply
+/// points at the one revealed clue the attempt disagrees with ("💡 כִּמְעַט!"),
+/// which is itself a deduction lesson. There are no colour marks and no limit
+/// on attempts.
+///
+/// The questions and the crack are the answers: from a world's chooser they
+/// earn screen time like regular answers; a ⚡ surprise round pays ⭐/💎.
 struct VaultGameView: View {
     var topic: Topic? = nil
     var surprise: Bool = false
@@ -23,18 +35,24 @@ struct VaultGameView: View {
     @Environment(\.horizontalSizeClass) private var hsc
 
     private enum Phase { case intro, playing, done }
-    private struct Try: Identifiable { let id = UUID(); let digits: [Int]; let marks: [VaultMark] }
+
+    /// What the screen is saying under the door. Never a failure — always the
+    /// next thing to do.
+    private enum Hint: Equatable { case idle, needClue, broke(Int), consistent, already, retry }
 
     @State private var phase: Phase = .intro
-    @State private var code: [Int] = []
-    @State private var revealed: Set<Int> = []
+    @State private var round = VaultGen.Round(code: [], clues: [], needed: 0)
+    /// How many clues are open. The list is shuffled, so these are the first
+    /// `revealed` entries of `round.clues`.
+    @State private var revealed = 0
     @State private var input: [Int?] = []
-    @State private var tries: [Try] = []
-    @State private var key: GameItem?
-    @State private var keyFor: Int?
-    @State private var keysUsed = 0
+    @State private var attempts: [[Int]] = []
+    @State private var question: GameItem?
+    @State private var hint: Hint = .idle
+    /// The clue an attempt just disagreed with — pulsed warm for a moment.
+    @State private var flagged: Int?
     @State private var seen: Set<String> = []
-    @State private var keyShownAt = Date()
+    @State private var askedAt = Date()
     @State private var cracked = false
     @State private var shake: CGFloat = 0
     @State private var coins = 0
@@ -44,14 +62,18 @@ struct VaultGameView: View {
 
     private var isCompact: Bool { hsc == .compact }
     private var grade: Int { MiniGameLevel.grade(for: mathWorld ? .math : topic) }
-    private var digits: Int { code.count }
-    /// A numbers world: its keys are clues to work out. Any other world: its questions.
+    private var digits: Int { round.code.count }
+    private var total: Int { round.clues.count }
+    /// Clues the child never had to open — the "we worked it out early" bonus.
+    private var spare: Int { max(0, total - revealed) }
+    /// A numbers world asks the lock's own dial exercises as well as its bank.
     private var mathWorld: Bool { topic == nil || [.math, .money, .logic, .gifted].contains(topic!) }
-    /// 🎚️ Fewer keys as the child grows — by ז׳–ח׳ one key card, and the rest
-    /// of the code has to be deduced (VaultGen.maxKeys).
-    private var maxKeys: Int { min(max(1, digits - 1), VaultGen.maxKeys(grade: grade)) }
     private var recordTopic: Topic { topic ?? .logic }
     private var full: Bool { !input.isEmpty && input.allSatisfy { $0 != nil } }
+    private var firstEmpty: Int? { input.firstIndex { $0 == nil } }
+    /// Every clue is open and a couple of attempts have gone by — the gentle
+    /// way out, so nobody is ever stuck in front of a closed vault.
+    private var offerReveal: Bool { !cracked && revealed >= total && attempts.count >= 2 }
 
     var body: some View {
         ZStack {
@@ -59,7 +81,7 @@ struct VaultGameView: View {
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
                 MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
-                    MiniGameChipLabel(text: "🔐 \(min(tries.count + 1, VaultGen.maxTries))/\(VaultGen.maxTries)", surprise: surprise)
+                    MiniGameChipLabel(text: total > 0 ? "🔑 \(revealed)/\(total)" : "🔐", surprise: surprise)
                 }
                 switch phase {
                 case .intro:
@@ -71,10 +93,8 @@ struct VaultGameView: View {
                 case .done:
                     Spacer()
                     MiniGameEndCard(
-                        title: cracked ? tr("פִּצַּחְתֶּם אֶת הַכַּסֶּפֶת! 🔓") : tr("כִּמְעַט! 💪"),
-                        detail: cracked
-                            ? (tries.count == 1 ? tr("בְּנִסָּיוֹן אֶחָד!") : tr("בְּ־\(tries.count) נִסְיוֹנוֹת"))
-                            : tr("הַקּוֹד הָיָה \(codeText) — נְנַסֶּה שׁוּב?"),
+                        title: cracked ? tr("פִּצַּחְתֶּם אֶת הַכַּסֶּפֶת! 🔓") : tr("עֲבוֹדָה יָפָה! 💪"),
+                        detail: endDetail,
                         grant: grant,
                         surprise: surprise,
                         againLabel: tr("עוֹד כַּסֶּפֶת 🔁"),
@@ -84,14 +104,14 @@ struct VaultGameView: View {
                 }
             }
 
-            if let item = key, phase == .playing {
+            if let item = question, phase == .playing {
                 // Tapping outside closes it — the ✕ sits behind this layer, and a
-                // child who can't answer must still be able to leave. The key is
-                // already spent, so putting it away costs the same as a miss.
+                // child who can't answer must still be able to leave. Nothing is
+                // spent by putting a question away; the clue stays locked.
                 Color.black.opacity(0.35).ignoresSafeArea().transition(.opacity)
-                    .onTapGesture { withAnimation(.easeOut(duration: 0.2)) { key = nil; keyFor = nil } }
-                MiniGameQuestionCard(item: item, header: tr("🔑 תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת סִפְרָה!")) { right in
-                    answerKey(item, right: right)
+                    .onTapGesture { withAnimation(.easeOut(duration: 0.2)) { question = nil } }
+                MiniGameQuestionCard(item: item, header: tr("🔑 תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת רֶמֶז!")) { right in
+                    answered(item, right: right)
                 }
                 .padding(.horizontal, AppSpacing.lg)
                 .transition(.scale(scale: 0.85).combined(with: .opacity))
@@ -104,146 +124,230 @@ struct VaultGameView: View {
         .onAppear { if (surprise || earn != nil) && phase == .intro { start() } }
     }
 
-    private var codeText: String { MiniGameText.ltr(code.map(String.init).joined()) }
+    private var codeText: String { MiniGameText.ltr(round.code.map(String.init).joined()) }
+
+    private var endDetail: String {
+        guard cracked else { return tr("הַקּוֹד הָיָה \(codeText) — נְנַסֶּה שׁוּב?") }
+        guard spare > 0 else { return tr("פְּתַרְתֶּם אֶת כָּל הָרְמָזִים וּפִצַּחְתֶּם אֶת הַקּוֹד!") }
+        return tr("פִּצַּחְתֶּם אֶת הַקּוֹד וְעוֹד נִשְׁאֲרוּ רְמָזִים סְגוּרִים — הַסָּקָה מְשֻׁבַּחַת! 🧠")
+    }
 
     // MARK: - Playing
 
     private var playing: some View {
-        let slot: CGFloat = isCompact ? (digits >= 4 ? 52 : 58) : 74
-        return VStack(spacing: display.isShort ? 8 : 12) {
-            if !isCompact && !display.isShort { Spacer(minLength: 0) }
-            // The vault door: the code, closed digits as 🔒, opened ones gold.
-            VStack(spacing: 10) {
-                HStack(spacing: 10) {
-                    ForEach(0..<digits, id: \.self) { i in
-                        let open = revealed.contains(i) || cracked
-                        Text(open ? "\(code[i])" : "🔒")
-                            .font(.system(size: slot * (open ? 0.5 : 0.36), weight: .black, design: .rounded))
-                            .foregroundStyle(open ? AppColor.starGold : .white)
-                            .frame(width: slot, height: slot * 1.1)
-                            .miniGameTile(open ? .picked : .normal, tint: AppColor.starGold, radius: 16)
-                            .scaleEffect(open ? 1.04 : 1)
-                            .animation(.spring(response: 0.35, dampingFraction: 0.5), value: open)
-                    }
+        let slot: CGFloat = isCompact ? (digits >= 4 ? 48 : 56) : 68
+        return VStack(spacing: display.isShort ? 7 : 10) {
+            door(slot: slot)
+            hintLine
+            clueBoard
+            if revealed < total && !cracked {
+                Button { ask() } label: {
+                    Text(tr("🔑 שְׁאֵלָה — פּוֹתְחִים רֶמֶז (\(total - revealed))"))
+                        .font(.system(size: isCompact ? 16 : 19, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, isCompact ? 10 : 13)
+                        .glassFill(AppGradient.gold, radius: 20)
                 }
-                .environment(\.layoutDirection, .leftToRight)
-                if keysUsed < maxKeys && !cracked {
-                    Button { askKey() } label: {
-                        Text(tr("🔑 מַפְתֵּחַ — פּוֹתְחִים סִפְרָה (\(maxKeys - keysUsed))"))
-                            .font(.system(size: isCompact ? 15 : 18, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 16).padding(.vertical, 9)
-                            .glassFill(AppGradient.gold, radius: 18)
-                    }
-                    .buttonStyle(.juicy)
-                }
+                .buttonStyle(.juicy)
+                .frame(maxWidth: isCompact ? 320 : 420)
+            } else if offerReveal {
+                MiniGameGlassButton(title: tr("✨ לִפְתֹּחַ אֶת הַכַּסֶּפֶת יַחַד")) { giveTheCode() }
+                    .frame(maxWidth: isCompact ? 320 : 420)
             }
-            .padding(14)
-            .frame(maxWidth: .infinity)
-            .glassPane(radius: 24)
-
-            Text(tr("נַחֲשׁוּ אֶת הַקּוֹד! אַחֲרֵי כָּל נִסָּיוֹן הַצְּבָעִים מְגַלִּים כַּמָּה הִתְקָרַבְתֶּם"))
-                .font(.system(size: isCompact ? 13 : 15, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-
-            legend
-
-            // The tries so far, newest at the bottom, then the one being typed.
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 6) {
-                    ForEach(tries) { t in tryRow(t.digits.map { Optional($0) }, marks: t.marks, slot: slot * 0.72) }
-                    tryRow(input, marks: nil, slot: slot * 0.72)
-                        .modifier(MiniGameShake(animatableData: shake))
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .frame(height: min(CGFloat(tries.count + 1) * (slot * 0.72 + 6), isCompact ? 200 : 260))
-            .scrollAnchorBottom()
-
-            MiniGameNumberPad(keyHeight: display.isShort ? 40 : (isCompact ? 46 : 60)) { k in press(k) }
+            MiniGameNumberPad(keyHeight: display.isShort ? 38 : (isCompact ? 44 : 58)) { press($0) }
                 .frame(maxWidth: isCompact ? 320 : 420)
             MiniGameGoldButton(title: tr("פְּתִיחָה 🔓")) { submit() }
                 .frame(maxWidth: isCompact ? 320 : 420)
-                .opacity(full ? 1 : 0.5)
-                .disabled(!full)
-            if !isCompact && !display.isShort { Spacer(minLength: 0) }
+                .opacity(full && !cracked ? 1 : 0.5)
+                .disabled(!full || cracked)
         }
         .frame(maxWidth: isCompact ? 600 : 760)
         .padding(.horizontal, AppSpacing.md)
         .padding(.bottom, AppSpacing.sm)
     }
 
-    private var legend: some View {
-        HStack(spacing: 12) {
-            legendItem(AppColor.successMint, tr("בַּמָּקוֹם הַנָּכוֹן"))
-            legendItem(AppColor.almostWarm, tr("בַּקּוֹד, בְּמָקוֹם אַחֵר"))
-            legendItem(.white.opacity(0.25), tr("לֹא בַּקּוֹד"))
+    /// The vault door: the slots the child types into, and the codes already
+    /// tried, so nobody repeats one by accident.
+    private func door(slot: CGFloat) -> some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 9) {
+                ForEach(0..<max(digits, 1), id: \.self) { i in
+                    let d = cracked ? round.code[i] : (input.indices.contains(i) ? input[i] : nil)
+                    Text(d.map(String.init) ?? "•")
+                        .font(.system(size: slot * (d == nil ? 0.4 : 0.52), weight: .black, design: .rounded))
+                        .foregroundStyle(cracked ? AppColor.starGold : (d == nil ? .white.opacity(0.35) : .white))
+                        .frame(width: slot, height: slot * 1.1)
+                        .miniGameTile(cracked ? .correct : (i == firstEmpty ? .picked : .normal),
+                                      tint: AppColor.starGold, radius: 16)
+                }
+            }
+            .environment(\.layoutDirection, .leftToRight)
+            .modifier(MiniGameShake(animatableData: shake))
+            if !attempts.isEmpty { triedStrip }
         }
-        .font(.system(size: isCompact ? 11.5 : 14, weight: .semibold, design: .rounded))
-        .foregroundStyle(GlassInk.secondary)
-        .lineLimit(1).minimumScaleFactor(0.7)
+        .padding(12)
+        .frame(maxWidth: .infinity)
+        .glassPane(radius: 22)
     }
 
-    private func legendItem(_ c: Color, _ s: String) -> some View {
-        HStack(spacing: 4) {
-            Circle().fill(c).frame(width: 10, height: 10)
-            Text(s)
-        }
-    }
-
-    private func tryRow(_ ds: [Int?], marks: [VaultMark]?, slot: CGFloat) -> some View {
-        HStack(spacing: 8) {
-            ForEach(Array(ds.enumerated()), id: \.offset) { i, d in
-                let mark = marks?[i]
-                let fill: Color = {
-                    switch mark {
-                    case .exact?:   return AppColor.successMint.opacity(0.75)
-                    case .present?: return AppColor.almostWarm.opacity(0.8)
-                    case .absent?:  return .white.opacity(0.08)
-                    case nil:       return .white.opacity(0.14)
+    private var triedStrip: some View {
+        HStack(spacing: 6) {
+            Text(tr("נִסִּינוּ:"))
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(GlassInk.tertiary)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 5) {
+                    ForEach(Array(attempts.enumerated()), id: \.offset) { _, a in
+                        Text(a.map(String.init).joined())
+                            .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.45))
+                            .padding(.horizontal, 7).padding(.vertical, 2)
+                            .background(Capsule().fill(.white.opacity(0.08)))
                     }
-                }()
-                Text(d.map(String.init) ?? "")
-                    .font(.system(size: slot * 0.5, weight: .black, design: .rounded))
-                    .foregroundStyle(.white.opacity(mark == .absent ? 0.6 : 1))
-                    .frame(width: slot, height: slot)
-                    .background(RoundedRectangle(cornerRadius: slot * 0.24, style: .continuous).fill(fill))
-                    .overlay(RoundedRectangle(cornerRadius: slot * 0.24, style: .continuous)
-                        .strokeBorder(marks == nil && i == firstEmpty ? AppColor.starGold : .white.opacity(0.25),
-                                      lineWidth: marks == nil && i == firstEmpty ? 2 : 1))
+                }
+                .environment(\.layoutDirection, .leftToRight)
             }
         }
-        .environment(\.layoutDirection, .leftToRight)
+        .frame(height: 22)
     }
 
-    private var firstEmpty: Int? { input.firstIndex { $0 == nil } }
+    private var hintLine: some View {
+        Text(hintText)
+            .font(.system(size: isCompact ? 13 : 15, weight: .heavy, design: .rounded))
+            .foregroundStyle(hint == .idle ? GlassInk.secondary : .white)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .animation(.easeOut(duration: 0.2), value: hintText)
+    }
+
+    private var hintText: String {
+        switch hint {
+        case .idle:
+            if revealed == 0 {
+                return tr("כָּל תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת רֶמֶז — וְהָרְמָזִים מְגַלִּים אֶת הַקּוֹד")
+            }
+            if revealed < total {
+                return tr("יוֹדְעִים אֶת הַקּוֹד? הַקִּישׁוּ אוֹתוֹ! וְאִם לֹא — פִּתְחוּ עוֹד רֶמֶז")
+            }
+            return tr("כָּל הָרְמָזִים כָּאן — וְיֵשׁ רַק קוֹד אֶחָד שֶׁמַּתְאִים לְכֻלָּם! 🧠")
+        case .needClue:
+            return tr("🔑 פִּתְחוּ רֶמֶז רִאשׁוֹן — וְהַקּוֹד יַתְחִיל לְהִתְגַּלּוֹת")
+        case .broke:
+            return tr("💡 כִּמְעַט! הַקּוֹד הַזֶּה לֹא מַסְכִּים עִם הָרֶמֶז הַמְּסֻמָּן")
+        case .consistent:
+            return tr("✨ מַתְאִים לְכָל הָרְמָזִים שֶׁכָּאן — אֲבָל צָרִיךְ עוֹד רֶמֶז")
+        case .already:
+            return tr("אֶת הַקּוֹד הַזֶּה כְּבָר נִסִּינוּ — בּוֹאוּ נְנַסֶּה אַחֵר")
+        case .retry:
+            return tr("💡 כִּמְעַט! אֶפְשָׁר לְבַקֵּשׁ שְׁאֵלָה חֲדָשָׁה")
+        }
+    }
+
+    /// The clue list — the heart of the screen. The lock's own rule sits on
+    /// top, then every clue the child has earned, then the ones still shut.
+    private var clueBoard: some View {
+        ScrollViewReader { proxy in
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 5) {
+                    row(badge: "🔐", text: tr("בַּקּוֹד \(digits) סְפָרוֹת שׁוֹנוֹת, מִ־1 עַד 9"),
+                        tone: .rule)
+                    ForEach(Array(round.clues.enumerated()), id: \.element.id) { i, clue in
+                        if i < revealed {
+                            row(badge: "\(i + 1)", text: clue.text, tone: flagged == i ? .flagged : .open)
+                                .id(i)
+                        } else {
+                            lockedRow(i)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(10)
+            }
+            // Tall enough for the rows it holds and no taller, so the panel
+            // visibly GROWS as clues open instead of starting as a sea of
+            // glass (an open clue is a taller row than a locked one).
+            .frame(maxHeight: CGFloat(revealed + 1) * (isCompact ? 46 : 54)
+                            + CGFloat(total - revealed) * (isCompact ? 30 : 34) + 24)
+            .glassPane(radius: 20)
+            .onChangeCompat(of: revealed) { _, v in
+                guard v > 0 else { return }
+                withAnimation(.easeOut(duration: 0.3)) { proxy.scrollTo(v - 1, anchor: .bottom) }
+            }
+        }
+    }
+
+    private enum Tone { case rule, open, flagged }
+
+    private func row(badge: String, text: String, tone: Tone) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(badge)
+                .font(.system(size: 12.5, weight: .black, design: .rounded))
+                .foregroundStyle(tone == .rule ? GlassInk.secondary : .white)
+                .frame(width: 22, height: 22)
+                .background(Circle().fill(tone == .flagged ? AppColor.almostWarm.opacity(0.9)
+                                                           : .white.opacity(tone == .rule ? 0.10 : 0.20)))
+            Text(text)
+                .font(.system(size: isCompact ? 14 : 16.5, weight: tone == .rule ? .semibold : .heavy, design: .rounded))
+                .foregroundStyle(tone == .rule ? GlassInk.secondary : .white)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 9).padding(.vertical, 6)
+        .background(RoundedRectangle(cornerRadius: 13, style: .continuous)
+            .fill(.white.opacity(tone == .rule ? 0.05 : 0.12)))
+        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous)
+            .strokeBorder(tone == .flagged ? AppColor.almostWarm : .clear, lineWidth: 2))
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+    }
+
+    private func lockedRow(_ i: Int) -> some View {
+        HStack(spacing: 8) {
+            Text("🔒")
+                .font(.system(size: 12))
+                .frame(width: 22, height: 20)
+            Text(i == revealed ? tr("הָרֶמֶז הַבָּא — עֲנוּ עַל שְׁאֵלָה וְהוּא יִפָּתַח") : "• • • • •")
+                .font(.system(size: isCompact ? 12.5 : 14.5, weight: .semibold, design: .rounded))
+                .foregroundStyle(GlassInk.tertiary)
+                .lineLimit(1).minimumScaleFactor(0.8)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 9).padding(.vertical, 4)
+        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.04)))
+        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous)
+            .strokeBorder(i == revealed ? AppColor.starGold.opacity(0.55) : .clear, lineWidth: 1))
+    }
 
     // MARK: - Logic
 
     private func start() {
-        code = VaultGen.code(grade: grade)
-        revealed = []; tries = []; keysUsed = 0; cracked = false; key = nil; keyFor = nil; grant = nil
-        input = Array(repeating: nil, count: code.count)
+        // ⚡ A surprise round is a short deduction: three digits, four clues.
+        round = VaultGen.round(grade: grade, digits: surprise ? 3 : nil, clues: surprise ? 4 : nil)
+        revealed = 0
+        input = Array(repeating: nil, count: round.code.count)
+        attempts = []
+        question = nil
+        hint = .idle
+        flagged = nil
+        seen = []
+        cracked = false
+        grant = nil
         startedAt = Date()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .playing }
     }
 
-    /// Opened digits sit in the typed row already.
-    private func refill() {
-        for i in revealed where input.indices.contains(i) { input[i] = code[i] }
-    }
-
     private func press(_ k: String) {
-        guard phase == .playing, key == nil, !cracked else { return }
+        guard phase == .playing, question == nil, !cracked else { return }
         if k == "⌫" {
-            if let i = input.indices.last(where: { input[$0] != nil && !revealed.contains($0) }) { input[i] = nil }
+            if let i = input.indices.last(where: { input[$0] != nil }) { input[i] = nil }
             return
         }
         guard k != ".", let d = Int(k), let slot = firstEmpty else { return }
-        // Every digit in the code is different — the same one twice can't fit.
-        if input.contains(d) {
+        // The lock's own two rules, shown at the top of the clue list: every
+        // digit is different, and 0 is not one of them.
+        guard d != 0, !input.contains(d) else {
             withAnimation(.linear(duration: 0.3)) { shake += 1 }
             Haptic.light()
             return
@@ -254,68 +358,95 @@ struct VaultGameView: View {
     private func submit() {
         guard full, phase == .playing, !cracked else { return }
         let guess = input.compactMap { $0 }
-        let marks = VaultGen.feedback(guess: guess, code: code)
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) { tries.append(Try(digits: guess, marks: marks)) }
-        if guess == code {
-            cracked = true
-            coins += 1
-            SoundPlayer.shared.play(.levelUp)
-            Haptic.success()
-            MiniGameLedger.record(correct: true, topic: recordTopic, responseMs: Date().timeIntervalSince(startedAt) * 1000,
-                                  earn: earn, surprise: surprise)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { finish() }
+        if guess == round.code { crack(); return }
+        if attempts.contains(guess) {
+            hint = .already
+            withAnimation(.linear(duration: 0.3)) { shake += 1 }
+            Haptic.light()
             return
         }
-        SoundPlayer.shared.play(marks.contains(.exact) ? .correctSmall : .uiTap)
+        attempts.append(guess)
+        // The one piece of feedback a miss gives: WHICH clue it disagrees with.
+        if revealed == 0 {
+            hint = .needClue
+            flagged = nil
+        } else if let i = (0..<revealed).first(where: { !round.clues[$0].holds(guess) }) {
+            hint = .broke(i)
+            flagged = i
+        } else {
+            hint = .consistent
+            flagged = nil
+        }
+        SoundPlayer.shared.play(.uiTap)
         Haptic.light()
-        input = Array(repeating: nil, count: code.count)
-        refill()
-        if tries.count >= VaultGen.maxTries {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { finish() }
-        }
+        withAnimation(.linear(duration: 0.3)) { shake += 1 }
+        input = Array(repeating: nil, count: round.code.count)
     }
 
-    private func askKey() {
-        guard keysUsed < maxKeys, key == nil else { return }
-        let closed = (0..<digits).filter { !revealed.contains($0) }
-        guard let pos = closed.randomElement() else { return }
-        keyFor = pos
+    private func crack() {
+        cracked = true
+        coins += 1
+        SoundPlayer.shared.play(.levelUp)
+        Haptic.success()
+        MiniGameLedger.record(correct: true, topic: recordTopic,
+                              responseMs: Date().timeIntervalSince(startedAt) * 1000,
+                              earn: earn, surprise: surprise)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { finish() }
+    }
+
+    private func ask() {
+        guard revealed < total, question == nil, !cracked else { return }
         let item: GameItem
-        if mathWorld {
-            item = VaultGen.clue(code: code, position: pos, grade: grade)
+        if mathWorld && Bool.random() {
+            item = VaultGen.dialQuestion(grade: grade)
         } else {
-            item = GameContent.card(topic: topic, grade: max(1, profiles.active?.effectiveGrade ?? 2), avoiding: &seen)
+            item = GameContent.card(topic: topic, grade: max(1, profiles.active?.effectiveGrade ?? 2),
+                                    avoiding: &seen)
         }
-        keysUsed += 1
-        keyShownAt = Date()
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) { key = item }
+        askedAt = Date()
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) { question = item }
     }
 
-    private func answerKey(_ item: GameItem, right: Bool) {
-        MiniGameLedger.record(correct: right, topic: mathWorld ? (topic ?? .math) : item.topic,
-                              responseMs: Date().timeIntervalSince(keyShownAt) * 1000, earn: earn, surprise: surprise)
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { key = nil }
-        if right, let pos = keyFor {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.5)) { _ = revealed.insert(pos) }
-            refill()
-            coins += 1
-        } else {
-            // No digit this time — the key comes back (it wasn't used up).
-            keysUsed = max(0, keysUsed - 1)
+    private func answered(_ item: GameItem, right: Bool) {
+        MiniGameLedger.record(correct: right, topic: item.topic,
+                              responseMs: Date().timeIntervalSince(askedAt) * 1000,
+                              earn: earn, surprise: surprise)
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { question = nil }
+        guard right else {
+            // Nothing is lost — the clue stays shut and a new question is a tap away.
+            hint = .retry
+            return
         }
-        keyFor = nil
+        flagged = nil
+        hint = .idle
+        coins += 1
+        SoundPlayer.shared.play(.chestOpen)
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) { revealed += 1 }
+    }
+
+    /// The gentle way out once every clue is open: the code is shown and the
+    /// round ends on the clues the child did earn. Never framed as losing.
+    private func giveTheCode() {
+        guard !cracked, phase == .playing else { return }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { input = round.code.map { Optional($0) } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { finish() }
     }
 
     private func finish() {
         guard phase == .playing else { return }
-        let left = cracked ? VaultGen.maxTries - tries.count + 1 : 0
-        grant = MiniGameReward.grant(game: "vault", correct: cracked ? 2 + left : revealed.count, starsPer: 2, diamondsPer: 1,
-                                     cap: 8, surprise: surprise)
+        // 🧠 Opening it with clues to spare is the big win: every clue the
+        // child DIDN'T need is worth double one they did.
+        let score = cracked ? 3 + 2 * spare + revealed : revealed
+        grant = MiniGameReward.grant(game: "vault", correct: score, starsPer: 2, diamondsPer: 1,
+                                     cap: 10, surprise: surprise)
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { phase = .done }
         SoundPlayer.shared.play(.chestOpen)
         Haptic.success()
         if cracked { confetti += 1 }
-        AppAnalytics.log("vault_done", ["cracked": cracked ? "1" : "0", "tries": "\(tries.count)", "keys": "\(keysUsed)",
+        AppAnalytics.log("vault_done", ["cracked": cracked ? "1" : "0",
+                                        "clues": "\(revealed)/\(total)",
+                                        "needed": "\(round.needed)",
+                                        "tries": "\(attempts.count)",
                                         "surprise": surprise ? "1" : "0"])
     }
 }

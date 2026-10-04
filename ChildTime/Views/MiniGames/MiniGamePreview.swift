@@ -238,25 +238,35 @@ struct MiniGamePreview: View {
         .glassInset(radius: 10)
     }
 
+    /// 🔐 The door being typed into, above the clue list that opens it.
     private func vault(_ s: CGFloat) -> some View {
         let side = s * 0.13
-        let row: [(String, Color)] = [("6", AppColor.successMint), ("2", AppColor.almostWarm), ("9", .white.opacity(0.12))]
         return VStack(spacing: s * 0.04) {
             HStack(spacing: s * 0.025) {
-                tile("6", AppColor.starGold, .picked, w: side, h: side * 1.1, font: side * 0.5)
-                tile("🔒", .white.opacity(0.2), w: side, h: side * 1.1, font: side * 0.36)
-                tile("🔒", .white.opacity(0.2), w: side, h: side * 1.1, font: side * 0.36)
+                tile("7", AppColor.starGold, .picked, w: side, h: side * 1.1, font: side * 0.5)
+                tile("•", .white.opacity(0.18), w: side, h: side * 1.1, font: side * 0.42)
+                tile("•", .white.opacity(0.18), w: side, h: side * 1.1, font: side * 0.42)
             }
-            HStack(spacing: s * 0.025) {
-                ForEach(row.indices, id: \.self) { i in
-                    Text(row[i].0)
-                        .font(.system(size: side * 0.42, weight: .black, design: .rounded))
-                        .foregroundStyle(.white)
-                        .frame(width: side * 0.85, height: side * 0.85)
-                        .background(RoundedRectangle(cornerRadius: side * 0.2).fill(row[i].1))
-                }
+            VStack(spacing: s * 0.022) {
+                clueBar(s, open: true, fill: 0.46)
+                clueBar(s, open: true, fill: 0.34)
+                clueBar(s, open: false, fill: 0.26)
             }
         }
+    }
+
+    private func clueBar(_ s: CGFloat, open: Bool, fill: CGFloat) -> some View {
+        HStack(spacing: s * 0.025) {
+            Text(open ? "🔑" : "🔒").font(.system(size: s * 0.05))
+            Capsule().fill(.white.opacity(open ? 0.5 : 0.16))
+                .frame(width: s * fill, height: s * 0.032)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, s * 0.03)
+        .padding(.vertical, s * 0.016)
+        .frame(width: s * 0.72, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: s * 0.032, style: .continuous)
+            .fill(.white.opacity(open ? 0.12 : 0.05)))
     }
 
     private func grocery(_ s: CGFloat) -> some View {
