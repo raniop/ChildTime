@@ -1529,16 +1529,17 @@ struct ParentDashboardView: View {
         return Date().timeIntervalSince1970 - last > 7 * 86_400
     }
 
-    /// "שבת · שלושה ילדים · יואב משחק עכשיו"
+    /// "שלום רני · שלושה ילדים · יואב משחק עכשיו"
+    ///
+    /// The weekday used to sit in here and was dropped (Rani): a parent knows
+    /// what day it is, and bare "ראשון" read like a label on the children.
     private var homeSubtitle: String {
-        let f = DateFormatter(); f.locale = LanguageStore.shared.current.locale; f.dateFormat = "EEEE"
-        let day = f.string(from: Date()).replacingOccurrences(of: "יום ", with: "")
         // With a family name in the title, the greeting moves down here; without
         // one, a nudge to name the family takes its place.
         let lead: String? = household.familyNameShown != nil
             ? greetingLine.replacingOccurrences(of: " 👋", with: "")
             : tr("תְּנוּ שֵׁם לַמִּשְׁפָּחָה ✏️")
-        return [lead, day, childrenCountLabel, familyMomentLine].compactMap { $0 }.joined(separator: " · ")
+        return [lead, childrenCountLabel, familyMomentLine].compactMap { $0 }.joined(separator: " · ")
     }
 
     private var childrenCountLabel: String? {
