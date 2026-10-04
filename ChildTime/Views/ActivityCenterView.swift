@@ -204,23 +204,26 @@ struct ActivityBellButton: View {
             Haptic.light()
             action()
         } label: {
-            ZStack(alignment: .topTrailing) {
-                Image(systemName: "bell.fill")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: style == .circle ? 40 : 28,
-                           height: style == .circle ? 40 : 28)
-                    .background {
-                        if style == .circle {
-                            Circle().fill(Color.white.opacity(0.22))
-                                .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
-                        }
+            // The circle is EXACTLY the ⚙️'s 40×40 and nothing may displace it —
+            // the badge used to be laid out beside it with compensating padding,
+            // which pushed the bell a few points down and out of line with the
+            // gear (Rani). It is an overlay now, so it floats over the corner
+            // and the circle keeps the same size and baseline as the gear's.
+            Image(systemName: "bell.fill")
+                .font(.system(size: 17, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: style == .circle ? 40 : 28,
+                       height: style == .circle ? 40 : 28)
+                .background {
+                    if style == .circle {
+                        Circle().fill(Color.white.opacity(0.22))
+                            .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                     }
-                if unread > 0 { badge }
-            }
-            // The badge pokes out of the circle; keep it hittable.
-            .padding(.top, 3).padding(.trailing, 3)
-            .padding(.bottom, -3).padding(.leading, -3)
+                }
+                .overlay(alignment: .topTrailing) {
+                    if unread > 0 { badge.offset(x: 5, y: -5) }
+                }
+                .contentShape(Circle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(unread > 0 ? tr("עדכונים — \(unread) חדשים") : tr("עדכונים"))
