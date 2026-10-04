@@ -55931,6 +55931,28 @@
         }
       }
     },
+    "מֵידָע ←" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "معلومات ←"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details →"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Детали →"
+          }
+        }
+      }
+    },
     "מֵעַכְשָׁיו %@ יְקַבֵּל שְׁאֵלוֹת בְּרָמָה %@ יוֹתֵר בְּ%@. תָּמִיד אֶפְשָׁר לְשַׁנּוֹת בַּהַגְדָּרוֹת." : {
       "localizations" : {
         "ar" : {
@@ -80987,6 +81009,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Разрешите %@ играть здесь 🧒"
+          }
+        }
+      }
+    },
+    "תְּנוּ לוֹ לְשַׂחֵק כָּאן 🧒" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دعوه يلعب هنا 🧒"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let them play here 🧒"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дать поиграть здесь 🧒"
           }
         }
       }

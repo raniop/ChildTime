@@ -1151,14 +1151,16 @@ struct ParentDashboardView: View {
                     // primary control. The ⚡ menu is overlaid by the grid into
                     // the reserved slot on its left (a Menu inside a link would
                     // swallow the tap).
+                    // 🧒 Handing the phone over is the thing parents could not
+                    // find, so it is the WIDE control now and says what it does
+                    // in a full sentence. "מידע נוסף" takes the narrow slot —
+                    // the whole card is already a link to that page.
                     homePrimaryLabel(tr("מֵידָע נוֹסָף ←"))
-                    // 🧒 Straight into Kid Mode for THIS child — no picker. Both
-                    // this and the ⚡ menu are overlaid by the grid into the slots
-                    // reserved here (a Button inside a NavigationLink would
-                    // swallow the tap).
-                    Color.clear.frame(width: Self.playButtonWidth, height: 1)
                     Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
                 }
+                // 🧒 Its own full-width row, in a whole sentence: this is the
+                // thing parents wrote in about and it earns the space (Rani).
+                Color.clear.frame(maxWidth: .infinity).frame(height: Self.playRowHeight)
             } else {
                 // No device yet. This card used to end here — one dead line — so
                 // a child without a device had NO actions menu and no way into
@@ -1175,9 +1177,9 @@ struct ParentDashboardView: View {
                 // connect a device) plus the slot the ⚡ menu is overlaid into.
                 HStack(spacing: 8) {
                     Color.clear.frame(maxWidth: .infinity).frame(height: 38)
-                    Color.clear.frame(width: Self.playButtonWidth, height: 1)
                     Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
                 }
+                Color.clear.frame(maxWidth: .infinity).frame(height: Self.playRowHeight)
             }
         }
         .padding(14)
@@ -1187,7 +1189,8 @@ struct ParentDashboardView: View {
     }
 
     private static let actionsMenuWidth: CGFloat = 112
-    private static let playButtonWidth: CGFloat = 112
+    /// The full-width row the "let them play here" button sits in.
+    private static let playRowHeight: CGFloat = 44
 
     private func childHasDevice(_ profile: Profile) -> Bool {
         !(household.devicesByChild[profile.id.uuidString] ?? []).isEmpty
@@ -1822,7 +1825,9 @@ struct ParentDashboardView: View {
                     // (a Menu inside the NavigationLink would swallow the tap).
                     // The grid is RTL, so `.bottomTrailing` is the bottom-LEFT.
                     .overlay(alignment: .bottomTrailing) {
-                        gridCardMenu(row.profile).padding(14)
+                        gridCardMenu(row.profile)
+                            .padding(14)
+                            .padding(.bottom, Self.playRowHeight + 8)
                     }
                     // 🧒 One tap hands THIS device to THIS child. Parents wrote in
                     // that they could not find Kid Mode at all when it lived only
@@ -1836,11 +1841,10 @@ struct ParentDashboardView: View {
                                 Haptic.light()
                                 kidModeStart = row.profile
                             } label: {
-                                homeGhostLabel(tr("🧒 מצב ילד"), width: Self.playButtonWidth)
+                                homePrimaryLabel(tr("תְּנוּ לוֹ לְשַׂחֵק כָּאן 🧒"))
                             }
                             .buttonStyle(.plain)
                             .padding(14)
-                            .padding(.trailing, Self.actionsMenuWidth + 8)
                             .environment(\.layoutDirection, .app)
                         }
                     }
@@ -1855,7 +1859,8 @@ struct ParentDashboardView: View {
                                 homePrimaryLabel(tr("+ חַבְּרוּ מַכְשִׁיר"))
                             }
                             .buttonStyle(.borderless)
-                            .padding(.horizontal, 14).padding(.bottom, 14)
+                            .padding(.horizontal, 14)
+                            .padding(.bottom, 14 + Self.playRowHeight + 8)
                             .padding(.trailing, Self.actionsMenuWidth + 8)
                             .environment(\.layoutDirection, .app)
                         }
