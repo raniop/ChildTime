@@ -84,7 +84,9 @@ enum WhatsNewStories {
             items.append(StoryItem(
                 id: "187.game.\(kind.rawValue)",
                 art: .game(kind, topic: previewTopic(kind)),
-                title: kind.title,
+                // 🎈 The emoji is a small MARK beside the name now — the board
+                // itself is the picture (Rani, build 188).
+                title: "\(kind.emoji) \(kind.shortName)",
                 line: kind.blurb,
                 audience: .child,
                 seconds: 4.2))
