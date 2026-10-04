@@ -3,7 +3,7 @@
 set -e
 LANG_CODE="$1"; OUT="$2"
 D=427C2D37-8D77-48AD-957F-3C69EDD4D1C3
-APP=/private/tmp/claude-501/-Users-raniophir-ChildTime/1dc2083a-3de8-4dc0-b3fd-aa18f2342293/scratchpad/dd/Build/Products/Debug-iphonesimulator/ChildTime.app
+APP=${TOFY_APP:-/private/tmp/claude-501/dd-main/Build/Products/Debug-iphonesimulator/ChildTime.app}
 HERE="$(cd "$(dirname "$0")" && pwd)"
 TMP=$(mktemp -d)
 mkdir -p "$OUT"
@@ -53,6 +53,10 @@ shoot() {  # shoot <file> <DEMO_SCREEN> [extra env assignments…]
 }
 
 shoot kidhome         kidhome
+# 🎮 The chooser and two of the twelve games — the website's games section.
+shoot gamechooser     gamechooser    SIMCTL_CHILD_DEMO_WORLD=math SIMCTL_CHILD_DEMO_GRADE=3
+shoot gamevault       vaultgame      SIMCTL_CHILD_DEMO_WORLD=math SIMCTL_CHILD_DEMO_GRADE=4 SIMCTL_CHILD_DEMO_SURPRISE=1
+shoot gamegrocery     grocerygame    SIMCTL_CHILD_DEMO_WORLD=math SIMCTL_CHILD_DEMO_GRADE=5 SIMCTL_CHILD_DEMO_SURPRISE=1
 shoot question        mathgrade      SIMCTL_CHILD_DEMO_WORLD=math SIMCTL_CHILD_DEMO_GRADE=3
 shoot choreskid       choreskid
 shoot wheel           wheel

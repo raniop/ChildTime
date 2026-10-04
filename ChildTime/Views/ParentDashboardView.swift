@@ -1185,6 +1185,11 @@ struct ParentDashboardView: View {
                     // the reserved slot on its left (a Menu inside a link would
                     // swallow the tap).
                     homePrimaryLabel(tr("מֵידָע נוֹסָף ←"))
+                    // 🧒 Straight into Kid Mode for THIS child — no picker. Both
+                    // this and the ⚡ menu are overlaid by the grid into the slots
+                    // reserved here (a Button inside a NavigationLink would
+                    // swallow the tap).
+                    Color.clear.frame(width: Self.playButtonWidth, height: 1)
                     Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
                 }
             } else {
@@ -1214,6 +1219,7 @@ struct ParentDashboardView: View {
     }
 
     private static let actionsMenuWidth: CGFloat = 112
+    private static let playButtonWidth: CGFloat = 112
 
     private func childHasDevice(_ profile: Profile) -> Bool {
         !(household.devicesByChild[profile.id.uuidString] ?? []).isEmpty
@@ -1264,7 +1270,7 @@ struct ParentDashboardView: View {
             // 📱 Parents wrote in that they could not find how to hand their own
             // phone to the child. It had been moved into each child's ⚡ menu,
             // where nobody looked; this row is where they go looking.
-            Button { Haptic.light(); showingKidMode = true } label: { homeGhostLabel(tr("📱 מצב ילד")) }
+            Button { Haptic.light(); showingKidMode = true } label: { homeGhostLabel(tr("🧒 תנו לילד/ה לשחק")) }
                 .buttonStyle(.plain)
         }
         .environment(\.layoutDirection, .app)
@@ -2013,6 +2019,23 @@ struct ParentDashboardView: View {
                     // The grid is RTL, so `.bottomTrailing` is the bottom-LEFT.
                     .overlay(alignment: .bottomTrailing) {
                         gridCardMenu(row.profile).padding(14)
+                    }
+                    // 🧒 One tap hands THIS device to THIS child. Parents wrote in
+                    // that they could not find Kid Mode at all when it lived only
+                    // inside the ⚡ menu.
+                    .overlay(alignment: .bottomTrailing) {
+                        if isRoot, childHasDevice(row.profile) {
+                            Button {
+                                Haptic.light()
+                                kidModeChild = row.profile
+                            } label: {
+                                homeGhostLabel(tr("🧒 לְשַׂחֵק כָּאן"), width: Self.playButtonWidth)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(14)
+                            .padding(.trailing, Self.actionsMenuWidth + 8)
+                            .environment(\.layoutDirection, .app)
+                        }
                     }
                     // 📱 No device yet → "+ חברו מכשיר" closes the card's one line.
                     .overlay(alignment: .bottomLeading) {
