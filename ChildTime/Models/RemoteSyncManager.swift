@@ -257,8 +257,15 @@ final class RemoteSyncManager: ObservableObject {
         // the child device applies it and `pendingMinuteAdjustment` returns to 0).
         pendingAdjustments[childID, default: 0] += deltaMinutes
         let fields: [String: Any] = ["pendingMinuteAdjustment": FieldValue.increment(Int64(deltaMinutes))]
+        // 🔔 The parent's activity centre: what you handed out, and whether it left.
+        let feedID = ActivityLog.record(deltaMinutes >= 0 ? .minutesGranted : .minutesRevoked,
+                                        childID: childID.uuidString,
+                                        childName: ProfileStore.shared.profiles.first { $0.id == childID }?.name,
+                                        number: abs(deltaMinutes), status: .sending)
         Task { @MainActor in
             let outcome = await self.sendChildCommandConfirmed(childID, fields)
+            ActivityLog.update(id: feedID,
+                               status: (outcome == .denied || outcome == .error) ? .failed : .reachedCloud)
             guard self.isActive else { return }   // manager torn down mid-flight — don't touch published state
             // Permanent rejection → roll back the optimistic bump and tell the
             // parent, instead of leaving a +N that will never reach the child.
@@ -296,8 +303,16 @@ final class RemoteSyncManager: ObservableObject {
         var fields: [String: Any] = ["pendingGiftAdjustment": FieldValue.increment(Int64(minutes)),
                                      "giftSentAt": stamp]
         if let uid = AuthManager.shared.userID { fields["giftCommandBy"] = uid }
+        // 🔔 One feed row for the gift, keyed on the same stamp the ack echoes
+        // back, so "המכשיר אישר" can land on it later.
+        ActivityLog.record(.giftSent, childID: childID.uuidString,
+                           childName: ProfileStore.shared.profiles.first { $0.id == childID }?.name,
+                           number: abs(minutes), status: .sending,
+                           id: Self.giftActivityID(childID: childID, stamp: stamp))
         Task { @MainActor in
             let outcome = await self.sendChildCommandConfirmed(childID, fields)
+            ActivityLog.update(id: Self.giftActivityID(childID: childID, stamp: stamp),
+                               status: (outcome == .denied || outcome == .error) ? .failed : .reachedCloud)
             guard self.isActive else { return }   // manager torn down mid-flight — don't touch published state
             switch outcome {
             case .ok:
@@ -481,6 +496,12 @@ final class RemoteSyncManager: ObservableObject {
         var applied: Bool { (appliedAt ?? 0) >= stamp }
     }
     @Published var giftRevokeTracker: [UUID: GiftRevokeTracker] = [:]
+
+    /// 🔔 Stable id of the feed row for one 💝 gift, so its delivery status can
+    /// be promoted when the child's device echoes the stamp back.
+    static func giftActivityID(childID: UUID, stamp: Double) -> String {
+        "gift.\(childID.uuidString).\(Int(stamp))"
+    }
 
     func revokeChildGift(childID: UUID) {
         #if canImport(FirebaseFirestore)
@@ -953,6 +974,8 @@ final class RemoteSyncManager: ObservableObject {
                            giftAck >= t.stamp, t.appliedAt != giftAck {
                             t.appliedAt = giftAck
                             self.giftSendTracker[profile.id] = t
+                            ActivityLog.update(id: Self.giftActivityID(childID: profile.id, stamp: t.stamp),
+                                               status: .deviceConfirmed)   // 🔔 the feed row too
                         }
                     }
                     // Consume the grant on whatever device is currently BEING this

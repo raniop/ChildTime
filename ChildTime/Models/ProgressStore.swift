@@ -336,7 +336,17 @@ final class ProgressStore: ObservableObject {
         didSet { defaults.set(Array(ownedCharacterIDs), forKey: Key.ownedCharacters) }
     }
     @Published private(set) var xp: Int {
-        didSet { defaults.set(xp, forKey: Key.xp) }
+        didSet {
+            defaults.set(xp, forKey: Key.xp)
+            // 👑 Crossing a level is news for the parent's activity centre. No
+            // push (see LiveEventReporter.EventType.levelUp) — just a row.
+            // Adopting a snapshot (profile switch / remote update) is not a
+            // level-up, however far the number jumps.
+            guard !isApplyingSnapshot else { return }
+            let was = RewardEngine.level(forXP: oldValue)
+            let now = RewardEngine.level(forXP: xp)
+            if now > was { Task { @MainActor in LiveEventReporter.report(.levelUp, value: "\(now)") } }
+        }
     }
     @Published private(set) var currentStreak: Int {
         didSet { defaults.set(currentStreak, forKey: Key.currentStreak) }
@@ -1016,6 +1026,9 @@ final class ProgressStore: ObservableObject {
             if currentStreak >= 3 && !recordCelebratedThisRun {
                 recordCelebratedThisRun = true
                 newStreakRecord = true
+                // 🏆 …and one row in the parent's activity centre (no push).
+                let best = currentStreak
+                Task { @MainActor in LiveEventReporter.report(.personalBest, value: "\(best)") }
             }
         }
         sessionStarsEarned += earned
@@ -1546,7 +1559,12 @@ final class ProgressStore: ObservableObject {
     func unlockWorld(_ id: String) {
         let isNew = !unlockedWorlds.contains(id)
         unlockedWorlds.insert(id)
-        if isNew { AppAnalytics.worldUnlocked(id) }
+        if isNew {
+            AppAnalytics.worldUnlocked(id)
+            // 🗺 …and one row in the parent's activity centre (no push).
+            let name = Worlds.all.first { $0.id == id }?.name ?? id
+            Task { @MainActor in LiveEventReporter.report(.worldUnlocked, value: name) }
+        }
     }
 
     func canUnlock(world: World) -> Bool {

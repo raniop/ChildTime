@@ -26,6 +26,13 @@ enum LiveEventReporter {
         case parentGateOpened   // someone entered the parent code/Face ID on a CHILD device
         case playPINForgot      // child tapped "I forgot my play-protection code"
         case giftOpenFailed     // child tried twice to open a parent gift and it would not open
+        // 🔔 Milestones. Deliberately PUSH-FREE (`liveMessage` returns nil for
+        // them, as it always has for milestone/streak/wheelWin/discovery): they
+        // would flood the parent as notifications. They are recorded so the
+        // parent's activity centre can show them, which is where they belong.
+        case levelUp            // the companion crossed into a new level
+        case worldUnlocked      // a new world opened
+        case personalBest       // beat their own best streak
     }
 
     static func report(_ type: EventType, value: String? = nil, topic: Topic? = nil,

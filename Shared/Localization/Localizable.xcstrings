@@ -16183,6 +16183,50 @@
         }
       }
     },
+    "אין עדכונים חדשים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد تحديثات جديدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No new updates"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новых обновлений нет"
+          }
+        }
+      }
+    },
+    "אין פעילות מהמכשיר כבר %lld ימים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا نشاط من هذا الجهاز منذ %lld أيام"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No activity from this device for %lld days"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "С этого устройства нет активности уже %lld дн."
+          }
+        }
+      }
+    },
     "איסוף נתונים מינימלי" : {
       "localizations" : {
         "ar" : {
@@ -16223,6 +16267,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Где ребёнок силён, а где нужна помощь"
+          }
+        }
+      }
+    },
+    "אישרתם מטלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وافقتم على مهمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You approved a chore"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы подтвердили дело"
           }
         }
       }
@@ -16819,6 +16885,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вы решаете, сколько экранного времени в день"
+          }
+        }
+      }
+    },
+    "אתמול" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أمس"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yesterday"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вчера"
           }
         }
       }
@@ -21232,6 +21320,116 @@
         }
       }
     },
+    "בקשה לאיפוס קוד ההגנה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طلب إعادة تعيين رمز حماية وقت اللعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A request to reset the play-protection code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрос на сброс кода защиты игрового времени"
+          }
+        }
+      }
+    },
+    "בקשה להעברת דקות בין האחים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طلب نقل دقائق بين الأشقاء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A request to move minutes between siblings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрос на передачу минут между детьми"
+          }
+        }
+      }
+    },
+    "בקשה לחבילת שאלות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طلب حزمة أسئلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A question-pack request"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрос на набор вопросов"
+          }
+        }
+      }
+    },
+    "בקשה לטופי+" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طلب Tofy+"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Tofy+ request"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрос на Tofy+"
+          }
+        }
+      }
+    },
+    "בקשת עזרה בשאלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طلب مساعدة في سؤال"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A request for help with a question"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Просьба помочь с вопросом"
+          }
+        }
+      }
+    },
     "בשלו יחד מתכון פשוט ותנו ל%@ למדוד ולהכפיל כמויות." : {
       "localizations" : {
         "ar" : {
@@ -22162,6 +22360,50 @@
         }
       }
     },
+    "גילוי עניין ב%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اهتمام جديد بـ%@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taking an interest in %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Появился интерес к теме «%@»"
+          }
+        }
+      }
+    },
+    "גילוי עניין בנושא חדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اهتمام بموضوع جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taking an interest in a new subject"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Появился интерес к новой теме"
+          }
+        }
+      }
+    },
     "גלגל מזל כל %lld שאלות" : {
       "localizations" : {
         "ar" : {
@@ -22395,6 +22637,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Версия %@ (%@)"
+          }
+        }
+      }
+    },
+    "גרסה חדשה של טופי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إصدار جديد من Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new version of Tofy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая версия Tofy"
           }
         }
       }
@@ -31947,6 +32211,28 @@
         }
       }
     },
+    "הדוח השבועי מוכן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التقرير الأسبوعي جاهز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The weekly report is ready"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Недельный отчёт готов"
+          }
+        }
+      }
+    },
     "הדמות כבר שלך" : {
       "localizations" : {
         "ar" : {
@@ -32009,6 +32295,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сообщение не отправлено — попробуйте ещё раз"
+          }
+        }
+      }
+    },
+    "ההזמנה למשפחה מומשה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تم استخدام دعوة العائلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The family invitation was used"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приглашение в семью использовано"
           }
         }
       }
@@ -32707,6 +33015,28 @@
         }
       }
     },
+    "הודעה מטופי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رسالة من Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A message from Tofy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сообщение от Tofy"
+          }
+        }
+      }
+    },
     "הוסיפו מטלה" : {
       "localizations" : {
         "ar" : {
@@ -32725,6 +33055,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добавить задание"
+          }
+        }
+      }
+    },
+    "הוספתם %lld דקות משחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أضفتم %lld دقيقة لعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You added %lld play minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы добавили %lld мин. игры"
+          }
+        }
+      }
+    },
+    "הורדתם %lld דקות משחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خصمتم %lld دقيقة لعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You took away %lld play minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы убрали %lld мин. игры"
           }
         }
       }
@@ -33182,6 +33556,28 @@
         }
       }
     },
+    "הישג חדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إنجاز جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new achievement"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новое достижение"
+          }
+        }
+      }
+    },
     "הכי בוער 🔥" : {
       "localizations" : {
         "ar" : {
@@ -33266,6 +33662,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Кнопка 💬 на главном экране открывает переписку с нами, а ответ приходит на ваш телефон"
+          }
+        }
+      }
+    },
+    "המגבלה היומית נגמרה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انتهى الحد اليومي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The daily limit ran out"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дневной лимит исчерпан"
           }
         }
       }
@@ -33618,6 +34036,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подарок дошёл до устройства %@ ✓"
+          }
+        }
+      }
+    },
+    "המתנה לא נפתחה במכשיר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تُفتح الهدية على الجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The gift did not open on the device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подарок не открылся на устройстве"
           }
         }
       }
@@ -34863,6 +35303,28 @@
         }
       }
     },
+    "התחלת משחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بدء اللعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Started playing"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Игра началась"
+          }
+        }
+      }
+    },
     "התנתק ומחק" : {
       "localizations" : {
         "ar" : {
@@ -35058,6 +35520,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Уведомления с выводами для родителя"
+          }
+        }
+      }
+    },
+    "התראת מערכת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تنبيه من النظام"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A system alert"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Системное уведомление"
           }
         }
       }
@@ -36398,6 +36882,94 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "сияет"
+          }
+        }
+      }
+    },
+    "זכייה בגלגל המזל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فوز في عجلة الحظ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Won on the lucky wheel"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выигрыш в колесе фортуны"
+          }
+        }
+      }
+    },
+    "זמן המשחק נגמר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انتهى وقت اللعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play time ended"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Игровое время закончилось"
+          }
+        }
+      }
+    },
+    "זמן המשחק נפתח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بدأ وقت اللعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play time opened"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Игровое время открылось"
+          }
+        }
+      }
+    },
+    "זמן המשחק עבר למכשיר אחר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انتقل وقت اللعب إلى جهاز آخر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play time moved to another device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Игровое время перешло на другое устройство"
           }
         }
       }
@@ -46004,6 +46576,28 @@
         }
       }
     },
+    "כאן יופיע כל מה שקורה אצל הילדים: כל התראה ששלחנו לכם, סבב שהסתיים ודקות שהורווחו, מטלה שמחכה לאישור שלכם, דקות מתנה ונעילה מרחוק, הישגים כמו רצף ועליית רמה, מכשיר שהצטרף למשפחה, ותשובה מצוות טופי." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سيظهر هنا كل ما يحدث مع أطفالكم: كل إشعار أرسلناه لكم، جولة انتهت والدقائق التي رُبحت فيها، مهمة تنتظر موافقتكم، دقائق هدية وقفل عن بُعد، إنجازات مثل سلسلة إجابات وارتفاع مستوى، جهاز انضم إلى العائلة، وردّ من فريق Tofy."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything happening with your children will show up here: every notification we sent you, a round that ended and the minutes it earned, a chore waiting for your approval, gift minutes and a remote lock, milestones like a streak or a level up, a device that joined the family, and a reply from the Tofy team."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Здесь появится всё, что происходит у детей: каждое отправленное вам уведомление, завершённый раунд и заработанные минуты, дело, которое ждёт вашего подтверждения, подаренные минуты и блокировка на расстоянии, достижения — серия верных ответов и новый уровень, присоединившееся устройство и ответ команды Tofy."
+          }
+        }
+      }
+    },
     "כבוי" : {
       "localizations" : {
         "ar" : {
@@ -47065,6 +47659,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сколько будет 7 + 8?"
+          }
+        }
+      }
+    },
+    "כמה זה 7 × 8?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كم يساوي 7 × 8؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What is 7 × 8?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сколько будет 7 × 8?"
           }
         }
       }
@@ -49775,6 +50391,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Неизвестно"
+          }
+        }
+      }
+    },
+    "לא נשלח — אפשר לנסות שוב" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُرسل — يمكنكم المحاولة مرة أخرى"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not sent — you can try again"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не отправлено — можно попробовать снова"
           }
         }
       }
@@ -56787,6 +57425,28 @@
         }
       }
     },
+    "מוצגים כאן העדכונים מהשבועיים האחרונים. הם נשארים בתוך המשפחה שלכם בלבד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذه تحديثات الأسبوعين الأخيرين. تبقى داخل عائلتكم وحدها."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These are the updates from the past two weeks. They stay inside your family and nowhere else."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Здесь обновления за последние две недели. Они остаются только внутри вашей семьи."
+          }
+        }
+      }
+    },
     "מותאם לגיל" : {
       "localizations" : {
         "ar" : {
@@ -56981,6 +57641,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новое дело ➕"
+          }
+        }
+      }
+    },
+    "מטלה מחכה לאישור שלכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهمة تنتظر موافقتكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A chore is waiting for your approval"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дело ждёт вашего подтверждения"
           }
         }
       }
@@ -57272,6 +57954,28 @@
         }
       }
     },
+    "מכשיר חדש הצטרף למשפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انضم جهاز جديد إلى العائلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new device joined the family"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "К семье присоединилось новое устройство"
+          }
+        }
+      }
+    },
     "מכשיר שאיבד את הקשר למשפחה מציע לאפס את עצמו ולחזור למסך הפתיחה, בלי למחוק ולהתקין מחדש" : {
       "localizations" : {
         "ar" : {
@@ -57467,6 +58171,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Одна подписка на всю семью — открывается отсюда, с вашего телефона"
+          }
+        }
+      }
+    },
+    "מנוי לעולם עומד להסתיים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اشتراك عالم على وشك الانتهاء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A world pass is about to end"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подписка на мир скоро закончится"
           }
         }
       }
@@ -60778,6 +61504,28 @@
         }
       }
     },
+    "נעלתם את המכשיר מרחוק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قفلتم الجهاز عن بُعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You locked the device remotely"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы заблокировали устройство дистанционно"
+          }
+        }
+      }
+    },
     "נצבר היום: %lld / %lld דק׳" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -62222,6 +62970,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "конфета"
+          }
+        }
+      }
+    },
+    "סבב הסתיים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انتهت جولة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A round ended"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Раунд завершён"
           }
         }
       }
@@ -63928,6 +64698,72 @@
         }
       }
     },
+    "עדכון בחיבור המשפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تغيير في ربط العائلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A change in the family link"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменение в связях семьи"
+          }
+        }
+      }
+    },
+    "עדכון חדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحديث جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new update"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новое обновление"
+          }
+        }
+      }
+    },
+    "עדכונים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التحديثات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updates"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обновления"
+          }
+        }
+      }
+    },
     "עדכונים קצרים ואישיים על כל ילד — במה השתפר, איפה התקשה ומה לתרגל." : {
       "localizations" : {
         "ar" : {
@@ -63946,6 +64782,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Короткие личные обновления о каждом ребёнке — в чём он продвинулся, где было трудно и что стоит потренировать."
+          }
+        }
+      }
+    },
+    "עדכונים — %lld חדשים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التحديثات — %lld جديدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updates — %lld new"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обновления — %lld новых"
           }
         }
       }
@@ -65678,6 +66536,28 @@
         }
       }
     },
+    "עוד %lld דקות משחק נצברו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رُبحت %lld دقيقة لعب إضافية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld more play minutes earned"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заработано ещё %lld мин. игры"
+          }
+        }
+      }
+    },
     "עוד אוספים נתונים על %@. אחרי עוד כמה משחקים נוכל להציג תובנות אישיות." : {
       "localizations" : {
         "ar" : {
@@ -65784,6 +66664,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отдельный мир на 30 дней или Tofy+ для всей семьи — отсюда, с вашего телефона"
+          }
+        }
+      }
+    },
+    "עולם חדש נפתח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انفتح عالم جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new world opened"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открылся новый мир"
+          }
+        }
+      }
+    },
+    "עולם חדש נפתח: %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انفتح عالم جديد: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new world opened: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открылся новый мир: %@"
           }
         }
       }
@@ -65895,6 +66819,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новый стеклянный дизайн — во всём приложении"
+          }
+        }
+      }
+    },
+    "עלייה לרמה %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوصول إلى المستوى %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reached level %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переход на уровень %lld"
+          }
+        }
+      }
+    },
+    "עליית רמה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ارتفاع مستوى"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A level up"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый уровень"
           }
         }
       }
@@ -68855,6 +69823,28 @@
         }
       }
     },
+    "פתחתם את המכשיר מרחוק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فتحتم الجهاز عن بُعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You opened the device remotely"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы открыли устройство дистанционно"
+          }
+        }
+      }
+    },
     "פתיחת הגדרות הורה" : {
       "localizations" : {
         "ar" : {
@@ -69759,6 +70749,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Команда Tofy"
+          }
+        }
+      }
+    },
+    "צוות טופי ענה לכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فريق Tofy ردّ عليكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Tofy team replied to you"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Команда Tofy вам ответила"
           }
         }
       }
@@ -71678,6 +72690,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Код защиты игрового времени"
+          }
+        }
+      }
+    },
+    "קוד ההורים הוזן במכשיר של הילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُدخل رمز الوالدين على جهاز الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The parent code was entered on the child's device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Родительский код введён на устройстве ребёнка"
           }
         }
       }
@@ -73856,6 +74890,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Серия дней"
+          }
+        }
+      }
+    },
+    "רצף של %lld תשובות נכונות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سلسلة من %lld إجابات صحيحة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A streak of %lld correct answers"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Серия из %lld верных ответов"
           }
         }
       }
@@ -77339,6 +78395,50 @@
         }
       }
     },
+    "שיא אישי חדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رقم شخصي قياسي جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new personal best"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый личный рекорд"
+          }
+        }
+      }
+    },
+    "שיא אישי חדש: רצף של %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رقم شخصي قياسي جديد: سلسلة من %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new personal best: a streak of %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый личный рекорд: серия из %lld"
+          }
+        }
+      }
+    },
     "שיחה עם צוות טופי" : {
       "localizations" : {
         "ar" : {
@@ -77714,6 +78814,28 @@
         }
       }
     },
+    "שלחתם %lld דקות מתנה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أرسلتم %lld دقيقة هدية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You sent %lld gift minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы отправили %lld мин. в подарок"
+          }
+        }
+      }
+    },
     "שליחת פידבק לצוות" : {
       "localizations" : {
         "ar" : {
@@ -77820,6 +78942,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сохранить"
+          }
+        }
+      }
+    },
+    "שמחים לעזור — שלחנו לכם הסבר במסך הצ'אט." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يسعدنا أن نساعد — أرسلنا لكم شرحاً في المحادثة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Happy to help — we sent you an explanation in the chat."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рады помочь — мы отправили вам объяснение в чате."
           }
         }
       }
@@ -79147,6 +80291,28 @@
         }
       }
     },
+    "תובנה על הילדים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ملاحظة عن أطفالكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An insight about your children"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Наблюдение о детях"
+          }
+        }
+      }
+    },
     "תובנות מלאות" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -79975,6 +81141,28 @@
         }
       }
     },
+    "☁️ הגיע לענן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "☁️ وصل إلى السحابة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "☁️ Reached the cloud"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "☁️ Дошло до облака"
+          }
+        }
+      }
+    },
     "♾️" : {
 
     },
@@ -80269,6 +81457,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "✅ Выполнено на сегодня"
+          }
+        }
+      }
+    },
+    "✅ המכשיר אישר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ أكّد الجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ The device confirmed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ Устройство подтвердило"
           }
         }
       }
@@ -85316,6 +86526,28 @@
         }
       }
     },
+    "🧹 לסדר את החדר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧹 ترتيب الغرفة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧹 Tidy the room"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧹 Убрать комнату"
+          }
+        }
+      }
+    },
     "🧹 מַטְלוֹת" : {
       "localizations" : {
         "ar" : {
@@ -85365,6 +86597,28 @@
     },
     "🪄 " : {
 
+    },
+    "🪴 להשקות את העציצים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🪴 سقي النباتات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🪴 Water the plants"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🪴 Полить растения"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

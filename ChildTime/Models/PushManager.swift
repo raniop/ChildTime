@@ -143,6 +143,46 @@ final class PushManager: NSObject, ObservableObject {
     }
 }
 
+// MARK: - 🔔 The parent's activity log
+
+extension PushManager {
+    /// Everything still sitting in Notification Center, swept into the parent's
+    /// activity log. This is what makes a push survive being swiped away: it was
+    /// delivered while Tofy was closed, nobody tapped it, and the next time the
+    /// parent home appears it is recorded anyway.
+    ///
+    /// Keyed by each notification's own identifier, so sweeping twice is free.
+    /// Nothing leaves the device.
+    func sweepDeliveredNotifications() async {
+        let arrived: [(type: String?, id: String, body: String, at: Date)] =
+            await withCheckedContinuation { cont in
+                UNUserNotificationCenter.current().getDeliveredNotifications { list in
+                    cont.resume(returning: list.map { n in
+                        let info = n.request.content.userInfo
+                        return (type: (info["type"] as? String) ?? (info["kind"] as? String),
+                                id: n.request.identifier,
+                                body: n.request.content.body,
+                                at: n.date)
+                    })
+                }
+            }
+        for n in arrived {
+            ActivityLog.recordNotification(type: n.type, identifier: n.id, body: n.body, at: n.at)
+        }
+    }
+
+    /// One notification, the moment it shows up or is tapped.
+    nonisolated fileprivate func logArrival(_ request: UNNotificationRequest) {
+        let info = request.content.userInfo
+        let type = (info["type"] as? String) ?? (info["kind"] as? String)
+        let id = request.identifier
+        let body = request.content.body
+        Task { @MainActor in
+            ActivityLog.recordNotification(type: type, identifier: id, body: body, at: Date())
+        }
+    }
+}
+
 // MARK: - Interactive notification actions
 
 extension PushManager {
@@ -334,6 +374,7 @@ extension PushManager: UNUserNotificationCenterDelegate {
                                             willPresent notification: UNNotification,
                                             withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let info = notification.request.content.userInfo
+        logArrival(notification.request)   // 🔔 keep it in the activity centre
         let supportHH = info["type"] as? String == "support-chat" ? info["householdID"] as? String : nil
         DispatchQueue.main.async {
             // 💬 The chat it is about is already on screen — the bubble is the news.
@@ -352,6 +393,7 @@ extension PushManager: UNUserNotificationCenterDelegate {
         let actionID = response.actionIdentifier
         let info = response.notification.request.content.userInfo
         let typed = (response as? UNTextInputNotificationResponse)?.userText
+        logArrival(response.notification.request)   // 🔔 a tapped push is news too
         Task { @MainActor in
             PushManager.shared.handleLevelUpDecision(actionID, userInfo: info)
             // A tapped live-game invite → remember the game id; the home screen
