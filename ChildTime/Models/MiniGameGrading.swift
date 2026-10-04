@@ -135,7 +135,10 @@ enum MiniGameGradeFit {
             // 🔢 Doubling to 2048 and planning a board: from ג׳.
             return band >= .middle
         case .vault:
-            // 🔐 Deduction from exact/present/absent marks: from ב׳.
+            // 🔐 Earning clues and reasoning a code out of them: from ב׳. In
+            // א׳–ב׳ a clue names a digit outright ("הַסִּפְרָה הָרִאשׁוֹנָה הִיא 3"),
+            // so the work is holding three facts at once; א׳ is still a year
+            // too early for that.
             return grade >= 2
         case .pattern:
             // 🧠 In the number worlds the sequences climb to cubes and

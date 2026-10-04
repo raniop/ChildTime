@@ -2262,6 +2262,28 @@
         }
       }
     },
+    "%@ אִי־זוּגִית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ فردي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is odd"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — нечётная"
+          }
+        }
+      }
+    },
     "%@ בְּ%@" : {
       "localizations" : {
         "ar" : {
@@ -2406,6 +2428,72 @@
         }
       }
     },
+    "%@ גְּדוֹלָה מִ־%lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ أكبر من %2$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ is greater than %2$lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ больше %2$lld"
+          }
+        }
+      }
+    },
+    "%@ גְּדוֹלָה מֵ%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ أكبر من %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ is greater than %2$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ больше, чем %2$@"
+          }
+        }
+      }
+    },
+    "%@ גְּדוֹלָה פִּי %lld מֵ%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ يساوي %2$lld أضعاف %3$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ is %2$lld times %3$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ в %2$lld раза больше, чем %3$@"
+          }
+        }
+      }
+    },
     "%@ גַּם בְּלִי פְּרָס" : {
       "localizations" : {
         "ar" : {
@@ -2424,6 +2512,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ и без награды"
+          }
+        }
+      }
+    },
+    "%@ הִיא %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ هو %2$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ is %2$lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ — %2$lld"
           }
         }
       }
@@ -2538,6 +2648,28 @@
         }
       }
     },
+    "%@ וְ%@ מִתְחַבְּרוֹת לְ־%lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ و%2$@ مجموعهما %3$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ and %2$@ add up to %3$lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ и %2$@ в сумме дают %3$lld"
+          }
+        }
+      }
+    },
     "%@ וְ-%lld דַּקּוֹת בְּיוֹם" : {
       "localizations" : {
         "ar" : {
@@ -2612,6 +2744,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ и все миры открываются с Tofy+ для всей семьи — а папа или мама открывают это со своего телефона."
+          }
+        }
+      }
+    },
+    "%@ זוּגִית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ زوجي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is even"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — чётная"
           }
         }
       }
@@ -3094,6 +3248,28 @@
         }
       }
     },
+    "%@ מִתְחַלֶּקֶת בְּ־%lld בְּלִי שְׁאֵרִית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ يقبل القسمة على %2$lld بدون باقٍ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ divides by %2$lld with no remainder"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ делится на %2$lld без остатка"
+          }
+        }
+      }
+    },
     "%@ מֵאַבָּא אוֹ אִמָּא 💌" : {
       "localizations" : {
         "ar" : {
@@ -3420,6 +3596,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ ещё не выбрал код"
+          }
+        }
+      }
+    },
+    "%@ קְטַנָּה מִ־%lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ أصغر من %2$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ is less than %2$lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ меньше %2$lld"
           }
         }
       }
@@ -13032,6 +13230,28 @@
         }
       }
     },
+    "אֶת הַקּוֹד הַזֶּה כְּבָר נִסִּינוּ — בּוֹאוּ נְנַסֶּה אַחֵר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جرّبنا هذا الرمز من قبل — لنجرّب غيره"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We already tried this code — let's try another"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот код мы уже пробовали — попробуем другой"
+          }
+        }
+      }
+    },
     "אֶתְגָּר יוֹמִי" : {
       "localizations" : {
         "ar" : {
@@ -13691,6 +13911,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "нос"
+          }
+        }
+      }
+    },
+    "אַף סִפְרָה בַּקּוֹד אֵינָהּ רִאשׁוֹנִית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد رقم أولي في الرمز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No digit in the code is a prime number"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ни одна цифра кода не является простым числом"
           }
         }
       }
@@ -18974,6 +19216,116 @@
     },
     "בַּקָּשׁוֹת חֲבֵרוּת (%lld)" : {
 
+    },
+    "בַּקּוֹד %lld סְפָרוֹת שׁוֹנוֹת, מִ־1 עַד 9" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرمز مكوّن من %lld أرقام مختلفة، من 1 إلى 9"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The code has %lld different digits, from 1 to 9"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В коде %lld разных цифры, от 1 до 9"
+          }
+        }
+      }
+    },
+    "בַּקּוֹד יֵשׁ בְּדִיּוּק %lld סְפָרוֹת זוּגִיּוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الرمز %lld أرقام زوجية بالضبط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The code has exactly %lld even digits"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В коде ровно %lld чётных цифры"
+          }
+        }
+      }
+    },
+    "בַּקּוֹד יֵשׁ בְּדִיּוּק %lld סְפָרוֹת רִאשׁוֹנִיּוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الرمز %lld أرقام أولية بالضبط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The code has exactly %lld prime digits"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В коде ровно %lld простых цифры"
+          }
+        }
+      }
+    },
+    "בַּקּוֹד יֵשׁ סִפְרָה זוּגִית אַחַת בִּלְבַד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الرمز رقم زوجي واحد فقط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The code has exactly one even digit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В коде ровно одна чётная цифра"
+          }
+        }
+      }
+    },
+    "בַּקּוֹד יֵשׁ סִפְרָה רִאשׁוֹנִית אַחַת בִּלְבַד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الرمز رقم أولي واحد فقط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The code has exactly one prime digit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В коде ровно одна простая цифра"
+          }
+        }
+      }
     },
     "בַּקּוֹד, בְּמָקוֹם אַחֵר" : {
       "localizations" : {
@@ -25682,6 +26034,28 @@
         }
       }
     },
+    "הַהֶפְרֵשׁ בֵּין %@ וּבֵין %@ הוּא %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الفرق بين %1$@ و%2$@ هو %3$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The difference between %1$@ and %2$@ is %3$lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разница между %1$@ и %2$@ равна %3$lld"
+          }
+        }
+      }
+    },
     "הַהֶקֵּף" : {
       "localizations" : {
         "ar" : {
@@ -28610,6 +28984,138 @@
         }
       }
     },
+    "הַסִּפְרָה %lld לֹא מוֹפִיעָה בַּקּוֹד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرقم %lld غير موجود في الرمز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The digit %lld does not appear in the code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цифры %lld в коде нет"
+          }
+        }
+      }
+    },
+    "הַסִּפְרָה %lld מוֹפִיעָה בַּקּוֹד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرقم %lld موجود في الرمز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The digit %lld appears in the code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цифра %lld есть в коде"
+          }
+        }
+      }
+    },
+    "הַסִּפְרָה הַשְּׁלִישִׁית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرقم الثالث"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The third digit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Третья цифра"
+          }
+        }
+      }
+    },
+    "הַסִּפְרָה הַשְּׁנִיָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرقم الثاني"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The second digit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вторая цифра"
+          }
+        }
+      }
+    },
+    "הַסִּפְרָה הָרְבִיעִית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرقم الرابع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The fourth digit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Четвёртая цифра"
+          }
+        }
+      }
+    },
+    "הַסִּפְרָה הָרִאשׁוֹנָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرقم الأول"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The first digit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Первая цифра"
+          }
+        }
+      }
+    },
     "הַסָּגוֹל" : {
       "localizations" : {
         "ar" : {
@@ -29292,6 +29798,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Соседи Израиля"
+          }
+        }
+      }
+    },
+    "הַשְּׁלִישִׁית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الثالث"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "the third"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "третья"
+          }
+        }
+      }
+    },
+    "הַשְּׁנִיָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الثاني"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "the second"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "вторая"
           }
         }
       }
@@ -30334,6 +30884,28 @@
         }
       }
     },
+    "הָרְבִיעִית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرابع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "the fourth"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "четвёртая"
+          }
+        }
+      }
+    },
     "הָרְכִישָׁה דּוֹרֶשֶׁת אִישּׁוּר Apple ID (סִיסְמָה / Face ID). הַיַּהֲלוֹמִים מְשַׁמְּשִׁים לִקְנִיַּת דְּמוּיוֹת בְּתוֹךְ הָאַפְּלִיקַצְיָה בִּלְבַד." : {
       "localizations" : {
         "ar" : {
@@ -30400,6 +30972,28 @@
         }
       }
     },
+    "הָרִאשׁוֹנָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأول"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "the first"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "первая"
+          }
+        }
+      }
+    },
     "הָרִבּוּעַ" : {
       "localizations" : {
         "ar" : {
@@ -30418,6 +31012,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "квадрат"
+          }
+        }
+      }
+    },
+    "הָרֶמֶז הַבָּא — עֲנוּ עַל שְׁאֵלָה וְהוּא יִפָּתַח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التلميح التالي — أجب عن سؤال وسيُفتح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next clue — answer a question and it opens"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Следующая подсказка — ответьте на вопрос, и она откроется"
           }
         }
       }
@@ -40589,6 +41205,28 @@
         }
       }
     },
+    "יוֹדְעִים אֶת הַקּוֹד? הַקִּישׁוּ אוֹתוֹ! וְאִם לֹא — פִּתְחוּ עוֹד רֶמֶז" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعرف الرمز؟ اكتبه! وإن لم تعرف — افتح تلميحًا آخر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Know the code? Type it in! If not — open another clue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Знаете код? Введите его! Если нет — откройте ещё подсказку"
+          }
+        }
+      }
+    },
     "יוֹם חָדָשׁ, הַרְפַּתְקָאוֹת חֲדָשׁוֹת ✨" : {
       "localizations" : {
         "ar" : {
@@ -43439,6 +44077,28 @@
         }
       }
     },
+    "כָּל הַסְּפָרוֹת בַּקּוֹד אִי־זוּגִיּוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل أرقام الرمز فردية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every digit in the code is odd"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все цифры кода нечётные"
+          }
+        }
+      }
+    },
     "כָּל הַשְּׁאָר נִשְׁאָר נָעוּל. בְּתֹם הַזְּמַן הֵן נִנְעָלוֹת בַּחֲזָרָה לְבַד." : {
       "localizations" : {
         "ar" : {
@@ -43568,6 +44228,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Все миры — включая каждый новый мир, который мы добавим, — игры и задания, для всех ваших детей, на всех устройствах. Покупка один раз, здесь."
+          }
+        }
+      }
+    },
+    "כָּל הָרְמָזִים כָּאן — וְיֵשׁ רַק קוֹד אֶחָד שֶׁמַּתְאִים לְכֻלָּם! 🧠" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل التلميحات هنا — ولا يوافقها إلا رمز واحد! 🧠"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every clue is here — and only one code fits them all! 🧠"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все подсказки открыты — и подходит только один код! 🧠"
           }
         }
       }
@@ -43810,6 +44492,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Каждый правильный ответ даёт очки. Когда полоса заполняется, ты переходишь на новый уровень — и получаешь бонусные 💎 для магазина (10 за каждый уровень). С 5-го уровня у аватара бронзовая рамка, с 10-го — серебряная, а с 20-го — золотая!"
+          }
+        }
+      }
+    },
+    "כָּל תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת רֶמֶז — וְהָרְמָזִים מְגַלִּים אֶת הַקּוֹד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل إجابة صحيحة تفتح تلميحًا — والتلميحات تكشف الرمز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every right answer opens a clue — and the clues reveal the code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый верный ответ открывает подсказку — а подсказки раскрывают код"
+          }
+        }
+      }
+    },
+    "כָּל תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת רֶמֶז — וְהָרְמָזִים מְגַלִּים אֶת הַקּוֹד הַסּוֹדִי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل إجابة صحيحة تفتح تلميحًا — والتلميحات تكشف الرمز السري"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every right answer opens a clue — and the clues reveal the secret code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый верный ответ открывает подсказку — а подсказки раскрывают секретный код"
           }
         }
       }
@@ -56695,6 +57421,28 @@
         }
       }
     },
+    "נִסִּינוּ:" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جرّبنا:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tried:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пробовали:"
+          }
+        }
+      }
+    },
     "נִסּוּי" : {
       "localizations" : {
         "ar" : {
@@ -58888,7 +59636,26 @@
       }
     },
     "סְגֹר" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إغلاق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закрыть"
+          }
+        }
+      }
     },
     "סְגוֹר" : {
       "localizations" : {
@@ -58952,6 +59719,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "стегозавр"
+          }
+        }
+      }
+    },
+    "סְכוּם כָּל הַסְּפָרוֹת בַּקּוֹד הוּא %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مجموع كل أرقام الرمز هو %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All the digits in the code add up to %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сумма всех цифр кода — %lld"
           }
         }
       }
@@ -60477,6 +61266,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сканировать код"
+          }
+        }
+      }
+    },
+    "עֲבוֹדָה יָפָה! 💪" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عمل رائع! 💪"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nice work! 💪"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отличная работа! 💪"
           }
         }
       }
@@ -64115,6 +64926,28 @@
         }
       }
     },
+    "פְּתַרְתֶּם אֶת כָּל הָרְמָזִים וּפִצַּחְתֶּם אֶת הַקּוֹד!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حللت كل التلميحات وفككت الرمز!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You solved every clue and cracked the code!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы решили все подсказки и взломали код!"
+          }
+        }
+      }
+    },
     "פִּטְרִיָּה" : {
       "localizations" : {
         "ar" : {
@@ -64369,6 +65202,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сейф открыт! 🔓"
+          }
+        }
+      }
+    },
+    "פִּצַּחְתֶּם אֶת הַקּוֹד וְעוֹד נִשְׁאֲרוּ רְמָזִים סְגוּרִים — הַסָּקָה מְשֻׁבַּחַת! 🧠" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فككت الرمز وبقيت تلميحات مغلقة — استنتاج رائع! 🧠"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You cracked the code with clues still locked — brilliant reasoning! 🧠"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код взломан, а подсказки ещё остались закрытыми — блестящая логика! 🧠"
           }
         }
       }
@@ -69702,6 +70557,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подсказки и чтение вслух для тех, кто ещё не читает"
+          }
+        }
+      }
+    },
+    "רְמָזִים שֶׁמְּגַלִּים קוֹד סוֹדִי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تلميحات تكشف رمزًا سريًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clues that reveal a secret code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подсказки, раскрывающие секретный код"
           }
         }
       }
@@ -78088,6 +78965,50 @@
         }
       }
     },
+    "✨ לִפְתֹּחַ אֶת הַכַּסֶּפֶת יַחַד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✨ لنفتح الخزنة معًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✨ Open the vault together"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✨ Откроем сейф вместе"
+          }
+        }
+      }
+    },
+    "✨ מַתְאִים לְכָל הָרְמָזִים שֶׁכָּאן — אֲבָל צָרִיךְ עוֹד רֶמֶז" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✨ يوافق كل التلميحات هنا — لكن نحتاج تلميحًا آخر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✨ It fits every clue here — but one more clue is needed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✨ Подходит ко всем подсказкам — но нужна ещё одна"
+          }
+        }
+      }
+    },
     "✨ מֻתְאָם לְךָ" : {
       "localizations" : {
         "ar" : {
@@ -80503,6 +81424,50 @@
         }
       }
     },
+    "💡 כִּמְעַט! אֶפְשָׁר לְבַקֵּשׁ שְׁאֵלָה חֲדָשָׁה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 اقتربت! يمكنك طلب سؤال جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 So close! You can ask for a new question"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 Почти! Можно попросить новый вопрос"
+          }
+        }
+      }
+    },
+    "💡 כִּמְעַט! הַקּוֹד הַזֶּה לֹא מַסְכִּים עִם הָרֶמֶז הַמְּסֻמָּן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 اقتربت! هذا الرمز لا يتوافق مع التلميح المعلَّم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 So close! This code disagrees with the marked clue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 Почти! Этот код не согласуется с отмеченной подсказкой"
+          }
+        }
+      }
+    },
     "💡 כִּמְעַט! תְּשׁוּבָה נְכוֹנָה תַּחֲזִיר אֶת הַזְּמַן" : {
       "localizations" : {
         "ar" : {
@@ -81542,6 +82507,50 @@
         }
       }
     },
+    "🔑 פִּתְחוּ רֶמֶז רִאשׁוֹן — וְהַקּוֹד יַתְחִיל לְהִתְגַּלּוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 افتح التلميح الأول — وسيبدأ الرمز بالظهور"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 Open the first clue — and the code starts to show"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 Откройте первую подсказку — и код начнёт проявляться"
+          }
+        }
+      }
+    },
+    "🔑 שְׁאֵלָה — פּוֹתְחִים רֶמֶז (%lld)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 سؤال — يفتح تلميحًا (%lld)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 Question — opens a clue (%lld)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 Вопрос — открыть подсказку (%lld)"
+          }
+        }
+      }
+    },
     "🔑 תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת סִפְרָה!" : {
       "localizations" : {
         "ar" : {
@@ -81560,6 +82569,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🔑 Верный ответ открывает цифру!"
+          }
+        }
+      }
+    },
+    "🔑 תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת רֶמֶז!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 الإجابة الصحيحة تفتح تلميحًا!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 A right answer opens a clue!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 Верный ответ открывает подсказку!"
           }
         }
       }

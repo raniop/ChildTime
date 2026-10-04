@@ -79,7 +79,7 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .sort:       return tr("\(seconds(surprise: surprise)) שְׁנִיּוֹת — גִּרְרוּ כָּל פְּרִיט לַסַּל הַמַּתְאִים")
         case .pattern:    return tr("6 סְדָרוֹת — מָה מַשְׁלִים אֶת הַתַּבְנִית?")
         case .game2048:   return tr("חַבְּרוּ אֲרִיחִים זֵהִים — וְכָל כַּמָּה מַהֲלָכִים מַגִּיעָה שְׁאֵלַת בּוֹנוּס")
-        case .vault:      return tr("פַּצְּחוּ אֶת הַקּוֹד הַסּוֹדִי — 6 נִסְיוֹנוֹת, וּמַפְתְּחוֹת שֶׁפּוֹתְחִים סְפָרוֹת")
+        case .vault:      return tr("כָּל תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת רֶמֶז — וְהָרְמָזִים מְגַלִּים אֶת הַקּוֹד הַסּוֹדִי")
         case .grocery:    return surprise ? tr("2 קְנִיּוֹת — קוֹנִים לְפִי הָרְשִׁימָה וּמְחַשְּׁבִים עֹדֶף")
                                           : tr("3 קְנִיּוֹת — קוֹנִים לְפִי הָרְשִׁימָה וּמְחַשְּׁבִים עֹדֶף")
         case .balance:    return tr("5 מֹאזְנַיִם — מָה מֵבִיא אוֹתָם לְאִזּוּן?")
@@ -116,7 +116,7 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .sort:       return tr("כָּל פְּרִיט לַסַּל הַמַּתְאִים")
         case .pattern:    return tr("מָה מַמְשִׁיךְ אֶת הַסִּדְרָה?")
         case .game2048:   return tr("מְחַבְּרִים אֲרִיחִים עַד 2048")
-        case .vault:      return tr("מְפַצְּחִים קוֹד סוֹדִי")
+        case .vault:      return tr("רְמָזִים שֶׁמְּגַלִּים קוֹד סוֹדִי")
         case .grocery:    return tr("קוֹנִים, מְחַשְּׁבִים וּמְקַבְּלִים עֹדֶף")
         case .balance:    return tr("מְאַזְּנִים אֶת שְׁתֵּי הַכַּפּוֹת")
         }

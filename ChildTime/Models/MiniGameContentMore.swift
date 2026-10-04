@@ -785,48 +785,418 @@ enum Board2048 {
 
 // MARK: - 🔐 The vault
 
-enum VaultMark { case exact, present, absent }
+/// 🔐 One hard fact about the vault's code — "הַסִּפְרָה הַשְּׁנִיָּה גְּדוֹלָה מִ־5",
+/// "הָרִאשׁוֹנָה וְהַשְּׁלִישִׁית מִתְחַבְּרוֹת לְ־11".
+///
+/// A clue is never written by hand: the code is dealt first, every clue is
+/// generated *against* it, and `holds` is what makes the round provable —
+/// `VaultGen` brute forces all 504 / 3,024 possible codes and only ships a
+/// clue set that leaves exactly one standing. So the child can always reach
+/// the code by reasoning alone, and never has to guess.
+struct VaultClue: Identifiable, Hashable {
+    enum Kind: Hashable {
+        /// "הַסִּפְרָה הָרִאשׁוֹנָה הִיא 3" — א׳–ב׳ (and ג׳–ד׳, sparingly).
+        case digitIs(pos: Int, digit: Int)
+        case inCode(digit: Int)
+        case notInCode(digit: Int)
+        case greater(pos: Int, bound: Int)
+        case less(pos: Int, bound: Int)
+        case parity(pos: Int, even: Bool)
+        case divisible(pos: Int, by: Int)
+        case pairSum(a: Int, b: Int, total: Int)
+        case pairDiff(a: Int, b: Int, diff: Int)
+        /// `b` is `factor` times `a` — "הַשְּׁנִיָּה גְּדוֹלָה פִּי 2 מֵהָרִאשׁוֹנָה".
+        case pairTimes(a: Int, b: Int, factor: Int)
+        case bigger(a: Int, b: Int)
+        case totalSum(Int)
+        case evenCount(Int)
+        case primeCount(Int)
+    }
+
+    let kind: Kind
+    var id: Kind { kind }
+
+    /// Is this clue true of `c`? The whole game rests on this one function:
+    /// the generator uses it to prove the round has a single answer, and the
+    /// screen uses it to tell a child which clue their attempt broke.
+    func holds(_ c: [Int]) -> Bool {
+        func has(_ i: Int) -> Bool { c.indices.contains(i) }
+        switch kind {
+        case .digitIs(let p, let d):          return has(p) && c[p] == d
+        case .inCode(let d):                  return c.contains(d)
+        case .notInCode(let d):               return !c.contains(d)
+        case .greater(let p, let b):          return has(p) && c[p] > b
+        case .less(let p, let b):             return has(p) && c[p] < b
+        case .parity(let p, let even):        return has(p) && (c[p] % 2 == 0) == even
+        case .divisible(let p, let k):        return has(p) && k != 0 && c[p] % k == 0
+        case .pairSum(let a, let b, let t):   return has(a) && has(b) && c[a] + c[b] == t
+        case .pairDiff(let a, let b, let d):  return has(a) && has(b) && abs(c[a] - c[b]) == d
+        case .pairTimes(let a, let b, let k): return has(a) && has(b) && c[b] == c[a] * k
+        case .bigger(let a, let b):           return has(a) && has(b) && c[a] > c[b]
+        case .totalSum(let t):                return c.reduce(0, +) == t
+        case .evenCount(let n):               return c.filter { $0 % 2 == 0 }.count == n
+        case .primeCount(let n):              return c.filter { VaultGen.primeDigits.contains($0) }.count == n
+        }
+    }
+
+    /// 🗣️ The sentence the child reads. Built from whole translatable
+    /// templates — the position names are the only thing interpolated — so no
+    /// language has to glue Hebrew fragments together.
+    var text: String {
+        switch kind {
+        case .digitIs(let p, let d):
+            return tr("\(VaultGen.positionName(p)) הִיא \(d)")
+        case .inCode(let d):
+            return tr("הַסִּפְרָה \(d) מוֹפִיעָה בַּקּוֹד")
+        case .notInCode(let d):
+            return tr("הַסִּפְרָה \(d) לֹא מוֹפִיעָה בַּקּוֹד")
+        case .greater(let p, let b):
+            return tr("\(VaultGen.positionName(p)) גְּדוֹלָה מִ־\(b)")
+        case .less(let p, let b):
+            return tr("\(VaultGen.positionName(p)) קְטַנָּה מִ־\(b)")
+        case .parity(let p, let even):
+            return even ? tr("\(VaultGen.positionName(p)) זוּגִית") : tr("\(VaultGen.positionName(p)) אִי־זוּגִית")
+        case .divisible(let p, let k):
+            return tr("\(VaultGen.positionName(p)) מִתְחַלֶּקֶת בְּ־\(k) בְּלִי שְׁאֵרִית")
+        case .pairSum(let a, let b, let t):
+            return tr("\(VaultGen.shortName(a)) וְ\(VaultGen.shortName(b)) מִתְחַבְּרוֹת לְ־\(t)")
+        case .pairDiff(let a, let b, let d):
+            return tr("הַהֶפְרֵשׁ בֵּין \(VaultGen.shortName(a)) וּבֵין \(VaultGen.shortName(b)) הוּא \(d)")
+        case .pairTimes(let a, let b, let k):
+            return tr("\(VaultGen.shortName(b)) גְּדוֹלָה פִּי \(k) מֵ\(VaultGen.shortName(a))")
+        case .bigger(let a, let b):
+            return tr("\(VaultGen.shortName(a)) גְּדוֹלָה מֵ\(VaultGen.shortName(b))")
+        case .totalSum(let t):
+            return tr("סְכוּם כָּל הַסְּפָרוֹת בַּקּוֹד הוּא \(t)")
+        case .evenCount(let n):
+            switch n {
+            case 0:  return tr("כָּל הַסְּפָרוֹת בַּקּוֹד אִי־זוּגִיּוֹת")
+            case 1:  return tr("בַּקּוֹד יֵשׁ סִפְרָה זוּגִית אַחַת בִּלְבַד")
+            default: return tr("בַּקּוֹד יֵשׁ בְּדִיּוּק \(n) סְפָרוֹת זוּגִיּוֹת")
+            }
+        case .primeCount(let n):
+            switch n {
+            case 0:  return tr("אַף סִפְרָה בַּקּוֹד אֵינָהּ רִאשׁוֹנִית")
+            case 1:  return tr("בַּקּוֹד יֵשׁ סִפְרָה רִאשׁוֹנִית אַחַת בִּלְבַד")
+            default: return tr("בַּקּוֹד יֵשׁ בְּדִיּוּק \(n) סְפָרוֹת רִאשׁוֹנִיּוֹת")
+            }
+        }
+    }
+
+}
+
+extension VaultClue.Kind {
+    /// The kind of thinking the clue asks for. The generator uses it to keep a
+    /// round from being five sentences of the same shape — left to pure
+    /// "which clue cuts the most codes" greed, every ד׳ round came out as
+    /// three sums in a row.
+    var family: String {
+        switch self {
+        case .digitIs:    return "digitIs"
+        case .inCode:     return "inCode"
+        case .notInCode:  return "notInCode"
+        case .greater:    return "greater"
+        case .less:       return "less"
+        case .parity:     return "parity"
+        case .divisible:  return "divisible"
+        case .pairSum:    return "pairSum"
+        case .pairDiff:   return "pairDiff"
+        case .pairTimes:  return "pairTimes"
+        case .bigger:     return "bigger"
+        case .totalSum:   return "totalSum"
+        case .evenCount:  return "evenCount"
+        case .primeCount: return "primeCount"
+        }
+    }
+}
 
 enum VaultGen {
-    static let maxTries = 6
+    static let primeDigits: Set<Int> = [2, 3, 5, 7]
 
+    /// 🎚️ 3 digits up to ג׳, 4 from ד׳ — what the keypad promises the child.
     static func digits(grade: Int) -> Int { grade >= 4 ? 4 : 3 }
 
-    /// 🗝️ How many of the code's digits a key card may open. A ב׳ child gets
-    /// most of the code handed over and only has to place it; by ז׳–ח׳ one key
-    /// is all there is and the other three digits have to be deduced from the
-    /// green / orange marks. (The code itself stays four slots of distinct
-    /// digits at every grade — the keypad's own rule depends on that.)
-    static func maxKeys(grade: Int) -> Int {
-        switch MiniGameBand.of(grade) {
-        case .preReader, .lower: return 2
-        case .middle:            return 3
-        case .upper:             return grade >= 6 ? 2 : 3
-        case .top:               return 1
-        }
-    }
-
-    /// Distinct digits; never a leading 0 (a "code" that starts with 0 reads oddly).
-    static func code(grade: Int) -> [Int] {
-        var pool = Array(0...9).shuffled()
-        if pool.first == 0 { pool.swapAt(0, 1) }
-        return Array(pool.prefix(digits(grade: grade)))
-    }
-
-    static func feedback(guess: [Int], code: [Int]) -> [VaultMark] {
-        guess.enumerated().map { i, d in
-            if code.indices.contains(i), code[i] == d { return .exact }
-            return code.contains(d) ? .present : .absent
-        }
-    }
-
+    /// Sentence-initial: "הַסִּפְרָה הָרִאשׁוֹנָה …".
     static func positionName(_ i: Int) -> String {
         switch i {
-        case 0:  return tr("הַסְּפָרָה הָרִאשׁוֹנָה")
-        case 1:  return tr("הַסְּפָרָה הַשְּׁנִיָּה")
-        case 2:  return tr("הַסְּפָרָה הַשְּׁלִישִׁית")
-        default: return tr("הַסְּפָרָה הָרְבִיעִית")
+        case 0:  return tr("הַסִּפְרָה הָרִאשׁוֹנָה")
+        case 1:  return tr("הַסִּפְרָה הַשְּׁנִיָּה")
+        case 2:  return tr("הַסִּפְרָה הַשְּׁלִישִׁית")
+        default: return tr("הַסִּפְרָה הָרְבִיעִית")
         }
+    }
+
+    /// Inside a sentence, where "הַסִּפְרָה" would repeat: "הָרִאשׁוֹנָה וְהַשְּׁנִיָּה …".
+    static func shortName(_ i: Int) -> String {
+        switch i {
+        case 0:  return tr("הָרִאשׁוֹנָה")
+        case 1:  return tr("הַשְּׁנִיָּה")
+        case 2:  return tr("הַשְּׁלִישִׁית")
+        default: return tr("הָרְבִיעִית")
+        }
+    }
+
+    // MARK: A round
+
+    /// A dealt vault: the code, and a clue list that **provably** pins it down.
+    struct Round {
+        let code: [Int]
+        /// Shuffled: the child never knows which clue is the spare one.
+        let clues: [VaultClue]
+        /// How many of them are strictly needed — the rest is slack, and
+        /// opening the vault with slack left over is the big win.
+        let needed: Int
+        var spare: Int { max(0, clues.count - needed) }
+    }
+
+    /// Every possible code: `n` different digits **1–9**. Zero stays out — the
+    /// lock's own rule (shown to the child), and it keeps "זוּגִית" away from
+    /// the one digit whose parity a ג׳ child would argue about.
+    static func allCodes(_ n: Int) -> [[Int]] {
+        var out: [[Int]] = []
+        var current: [Int] = []
+        func walk() {
+            guard current.count < n else { out.append(current); return }
+            for d in 1...9 where !current.contains(d) {
+                current.append(d)
+                walk()
+                current.removeLast()
+            }
+        }
+        walk()
+        return out
+    }
+
+    /// 🎚️ How many direct "הַסִּפְרָה הָרִאשׁוֹנָה הִיא 3" reveals a band may use.
+    /// א׳–ב׳ reads the code off the clues; ג׳–ד׳ gets all but two digits that
+    /// way and works the rest out; from ה׳ nothing is handed over.
+    static func reveals(band: MiniGameBand, digits n: Int) -> Int {
+        switch band {
+        case .preReader, .lower: return n
+        case .middle:            return max(1, n - 2)
+        case .upper, .top:       return 0
+        }
+    }
+
+    /// 🎚️ How many clues go on the board — and so the most questions the child
+    /// can ever be asked in a round. ז׳–ח׳ gets fewer, each one worth more.
+    /// At least one of them is always slack (see `Round.spare`).
+    static func clueCount(band: MiniGameBand, digits n: Int) -> Int {
+        if n == 3 { return band >= .upper ? 4 : 5 }
+        return band >= .upper ? 5 : 6
+    }
+
+    /// Deal a vault. `clues` is overridden for a ⚡ surprise round (a short
+    /// 3-digit deduction). The result is proven unique before it ships.
+    static func round(grade: Int, digits n: Int? = nil, clues total: Int? = nil) -> Round {
+        let band = MiniGameBand.of(grade)
+        let count = n ?? digits(grade: grade)
+        let universe = allCodes(count)
+        let board = total ?? clueCount(band: band, digits: count)
+        for attempt in 0..<90 {
+            let code = Array((1...9).shuffled().prefix(count))
+            let pool = poolKinds(code: code, band: band, digits: count, generous: attempt >= 55).shuffled()
+            guard let picked = minimalSet(code: code, universe: universe, pool: pool,
+                                          limit: board - 1) else { continue }
+            // Two clues is a lucky deal, not a round — ask for another code.
+            guard picked.core.count >= 3 || attempt >= 80 else { continue }
+            let kinds = picked.core + sparesFrom(picked.rest, core: picked.core, universe: universe,
+                                                 want: max(1, board - picked.core.count))
+            let round = Round(code: code, clues: kinds.map(VaultClue.init(kind:)).shuffled(),
+                              needed: picked.core.count)
+            // The one invariant: a round that does not pin the code down, or
+            // whose clues are not all true of it, must never reach a child.
+            guard verify(round) else {
+                assertionFailure("🔐 a vault round that is not uniquely solvable must never ship")
+                continue
+            }
+            return round
+        }
+        // The floor that can never fail: every digit spelled out.
+        let code = Array((1...9).shuffled().prefix(count))
+        let clues = (0..<count).map { VaultClue(kind: .digitIs(pos: $0, digit: code[$0])) }
+        return Round(code: code, clues: clues.shuffled(), needed: count)
+    }
+
+    /// Exactly one code satisfies the whole list, and every clue is true of
+    /// the code the round was built around. Both the `assert` above and the
+    /// throwaway harness go through here.
+    static func verify(_ round: Round) -> Bool {
+        guard round.clues.allSatisfy({ $0.holds(round.code) }) else { return false }
+        return allCodes(round.code.count).filter { c in round.clues.allSatisfy { $0.holds(c) } }.count == 1
+    }
+
+    // MARK: The generator
+
+    /// Greedy: take a clue that rules out (close to) the most codes, until one
+    /// is left — preferring a kind of clue the round has not used yet, so the
+    /// child reads five different kinds of fact and not five sums. Then drop
+    /// every clue the others already imply, so the set is irredundant: each
+    /// clue really is a step.
+    private static func minimalSet(code: [Int], universe: [[Int]], pool: [VaultClue.Kind],
+                                   limit: Int) -> (core: [VaultClue.Kind], rest: [VaultClue.Kind])? {
+        var survivors = universe
+        var rest = pool
+        var core: [VaultClue.Kind] = []
+        var used = Set<String>()
+        while survivors.count > 1 && core.count < limit {
+            var scored: [(index: Int, left: Int)] = []
+            for (i, kind) in rest.enumerated() {
+                let clue = VaultClue(kind: kind)
+                var n = 0
+                for c in survivors where clue.holds(c) { n += 1 }
+                if n < survivors.count { scored.append((i, n)) }
+            }
+            guard let best = scored.map(\.left).min() else { return nil }
+            // Everything within 40% of the best cut counts as "good enough" —
+            // among those, a clue of a kind not used yet wins.
+            let slack = max(best, Int((Double(best) * 1.4).rounded()))
+            let close = scored.filter { $0.left <= slack }
+            let fresh = close.filter { !used.contains(rest[$0.index].family) }
+            guard let choice = (fresh.isEmpty ? close : fresh).randomElement() else { return nil }
+            let kind = rest.remove(at: choice.index)
+            used.insert(kind.family)
+            core.append(kind)
+            let clue = VaultClue(kind: kind)
+            survivors = survivors.filter { clue.holds($0) }
+        }
+        guard survivors.count == 1 else { return nil }
+        var i = 0
+        while i < core.count {
+            var test = core
+            test.remove(at: i)
+            if solutions(universe, test) == 1 { core = test } else { i += 1 }
+        }
+        return (core, rest)
+    }
+
+    private static func solutions(_ universe: [[Int]], _ kinds: [VaultClue.Kind]) -> Int {
+        let clues = kinds.map(VaultClue.init(kind:))
+        var n = 0
+        for c in universe where clues.allSatisfy({ $0.holds(c) }) { n += 1 }
+        return n
+    }
+
+    /// The spare clues. A spare has to add something: one that a single clue
+    /// in the core already implies ("הָרִאשׁוֹנָה הִיא 3" → "3 מוֹפִיעָה בַּקּוֹד")
+    /// would read like the game is repeating itself.
+    private static func sparesFrom(_ rest: [VaultClue.Kind], core: [VaultClue.Kind],
+                                   universe: [[Int]], want: Int) -> [VaultClue.Kind] {
+        guard want > 0 else { return [] }
+        func satisfying(_ kind: VaultClue.Kind) -> Set<Int> {
+            let clue = VaultClue(kind: kind)
+            var out = Set<Int>()
+            for (i, c) in universe.enumerated() where clue.holds(c) { out.insert(i) }
+            return out
+        }
+        let coreSets = core.map(satisfying)
+        let coreFamilies = Set(core.map(\.family))
+        var out: [VaultClue.Kind] = []
+        var outSets: [Set<Int>] = []
+        var looked = 0
+        // A kind the round has not used yet first — a spare should read like
+        // one more angle on the code, not a second helping of the same clue.
+        let order = rest.shuffled().sorted { a, b in
+            !coreFamilies.contains(a.family) && coreFamilies.contains(b.family)
+        }
+        for kind in order {
+            guard out.count < want, looked < 80 else { break }
+            looked += 1
+            let set = satisfying(kind)
+            guard !coreSets.contains(where: { $0.isSubset(of: set) }) else { continue }
+            guard !outSets.contains(where: { $0.isSubset(of: set) || set.isSubset(of: $0) }) else { continue }
+            out.append(kind)
+            outSets.append(set)
+        }
+        return out
+    }
+
+    /// 🎚️ The clue kinds a band is allowed to speak in — every one of them
+    /// true of `code`. `generous` widens the comparison bounds on a late
+    /// attempt, so a stubborn code still finds a provable set.
+    private static func poolKinds(code: [Int], band: MiniGameBand, digits n: Int,
+                                  generous: Bool) -> [VaultClue.Kind] {
+        var out: [VaultClue.Kind] = []
+        let positions = Array(0..<n)
+        let missing = (1...9).filter { !code.contains($0) }
+
+        for p in positions.shuffled().prefix(reveals(band: band, digits: n)) {
+            out.append(.digitIs(pos: p, digit: code[p]))
+        }
+        if band <= .middle || generous {
+            for d in code.shuffled().prefix(2) { out.append(.inCode(digit: d)) }
+            for d in missing.shuffled().prefix(3) { out.append(.notInCode(digit: d)) }
+        }
+        if band >= .middle {
+            for p in positions {
+                let d = code[p]
+                // ז׳–ח׳ only hears a comparison that is worth something: a
+                // bound right next to the digit, not "קְטַנָּה מִ־9".
+                let lowFloor = band >= .top ? max(1, d - 2) : 1
+                let highCeil = band >= .top ? min(9, d + 2) : 9
+                if d > lowFloor {
+                    for b in (lowFloor..<d).shuffled().prefix(generous ? 8 : 2) {
+                        out.append(.greater(pos: p, bound: b))
+                    }
+                }
+                if d < highCeil {
+                    for b in ((d + 1)...highCeil).shuffled().prefix(generous ? 8 : 2) {
+                        out.append(.less(pos: p, bound: b))
+                    }
+                }
+                out.append(.parity(pos: p, even: d % 2 == 0))
+            }
+            // ג׳–ד׳ sees at most two sums: the band's own work is comparing and
+            // counting, and three sums in a row solve the code on their own.
+            let pairs = positions.flatMap { a in positions.filter { $0 > a }.map { (a, $0) } }
+            let sumPairs = band == .middle ? Array(pairs.shuffled().prefix(2)) : pairs
+            for (a, b) in sumPairs { out.append(.pairSum(a: a, b: b, total: code[a] + code[b])) }
+            for a in positions {
+                for b in positions where b > a {
+                    guard band >= .upper else { continue }
+                    out.append(.pairDiff(a: a, b: b, diff: abs(code[a] - code[b])))
+                    out.append(code[a] > code[b] ? .bigger(a: a, b: b) : .bigger(a: b, b: a))
+                    if code[b] % code[a] == 0, code[b] / code[a] >= 2 {
+                        out.append(.pairTimes(a: a, b: b, factor: code[b] / code[a]))
+                    }
+                    if code[a] % code[b] == 0, code[a] / code[b] >= 2 {
+                        out.append(.pairTimes(a: b, b: a, factor: code[a] / code[b]))
+                    }
+                }
+            }
+        }
+        if band >= .upper {
+            for p in positions {
+                for k in [3, 4] where code[p] % k == 0 && code[p] != k {
+                    out.append(.divisible(pos: p, by: k))
+                }
+            }
+            out.append(.totalSum(code.reduce(0, +)))
+            out.append(.evenCount(code.filter { $0 % 2 == 0 }.count))
+        }
+        if band >= .top {
+            out.append(.primeCount(code.filter { primeDigits.contains($0) }.count))
+        }
+        return out
+    }
+
+    // MARK: The questions on the way
+
+    /// 🔑 A lock-dial exercise whose answer is a single digit — sized to the
+    /// grade (ו׳ brackets and percents, ז׳ roots and negatives, ח׳ a root
+    /// inside a division). Used in the number worlds; any other world asks
+    /// its own questions through `GameContent.card`.
+    static func dialQuestion(grade: Int) -> GameItem {
+        let d = Int.random(in: 1...9)
+        var options: Set<Int> = [d]
+        for x in [d + 1, d - 1, d + 2, d - 2, d + 3].shuffled() where options.count < 4 && (0...9).contains(x) {
+            options.insert(x)
+        }
+        while options.count < 4 { options.insert(Int.random(in: 0...9)) }
+        return GameItem(prompt: MiniGameText.ltr(expression(for: d, grade: grade) + " = ?"),
+                        answer: "\(d)",
+                        distractors: options.subtracting([d]).map { "\($0)" },
+                        topic: .math)
     }
 
     /// An exercise whose answer is the digit `d` — sized to the grade.
@@ -875,16 +1245,6 @@ enum VaultGen {
                 return "\(a)² − \(a * a - d)"
             }
         }
-    }
-
-    /// The math key card: "הַסְּפָרָה הָרִאשׁוֹנָה = 3 × 2" and four digits.
-    static func clue(code: [Int], position i: Int, grade: Int) -> GameItem {
-        let d = code[i]
-        var opts: Set<Int> = [d]
-        for x in [d + 1, d - 1, d + 2, d - 2, d + 3].shuffled() where opts.count < 4 && (0...9).contains(x) { opts.insert(x) }
-        while opts.count < 4 { opts.insert(Int.random(in: 0...9)) }
-        return GameItem(prompt: positionName(i) + " = " + MiniGameText.ltr(expression(for: d, grade: grade)),
-                        answer: "\(d)", distractors: opts.subtracting([d]).map { "\($0)" }, topic: .math)
     }
 }
 
