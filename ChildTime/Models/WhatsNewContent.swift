@@ -23,6 +23,18 @@ enum WhatsNewContent {
         let emoji: String
         let title: String
         let line: String
+        /// A stable name for a note that something else also shows — the
+        /// "מה חדש" STORY (`WhatsNewStories`) reads its parent-facing lines
+        /// from here by key, so a sentence a parent can read in two places is
+        /// written in exactly one.
+        var key: String? = nil
+
+        init(emoji: String, title: String, line: String, key: String? = nil) {
+            self.emoji = emoji
+            self.title = title
+            self.line = line
+            self.key = key
+        }
     }
 
     /// One upload's worth of notes. `build` is what `shouldShow` compares, and
@@ -45,15 +57,23 @@ enum WhatsNewContent {
 
         Release(build: 186, version: "2026.10.3", headline: tr("12 משחקים חדשים — הילד בוחר איך לשחק"), items: [
             Item(emoji: "🎮", title: tr("בוחרים עולם, ואז בוחרים משחק"),
-                 line: tr("אחרי בחירת עולם נפתח מסך \"איך בא לך לשחק?\" — שאלות רגילות או אחד המשחקים, ובלחיצה אחת נכנסים ישר לשחק")),
+                 line: tr("אחרי בחירת עולם נפתח מסך \"איך בא לך לשחק?\" — שאלות רגילות או אחד המשחקים, ובלחיצה אחת נכנסים ישר לשחק"),
+                 key: "chooser"),
             Item(emoji: "🕹", title: tr("12 משחקים, לפי מה שיש בעולם"),
-                 line: tr("מצאו את הזוגות, פיצוץ בלונים, בנו את המילה, מפצחים, תפזורת, נכון או לא נכון, מיון לסלים, התבנית, 2048 של טופי, הכספת, המכולת ומאזניים. בכל עולם מופיעים רק המשחקים שמתאימים לתוכן שלו")),
+                 line: tr("מצאו את הזוגות, פיצוץ בלונים, בנו את המילה, מפצחים, תפזורת, נכון או לא נכון, מיון לסלים, התבנית, 2048 של טופי, הכספת, המכולת ומאזניים. בכל עולם מופיעים רק המשחקים שמתאימים לתוכן שלו"),
+                 key: "games12"),
+            Item(emoji: "🎓", title: tr("כל משחק לפי הכיתה של הילד"),
+                 line: tr("בעברית הרמה עולה חזק עם הגיל. באנגלית, שהיא שפה שנייה, היא נשארת נגישה"),
+                 key: "gradefit"),
             Item(emoji: "⏱", title: tr("גם במשחקים מרוויחים דקות"),
-                 line: tr("כל תשובה נכונה במשחק מרוויחה זמן מסך בדיוק כמו שאלה רגילה")),
+                 line: tr("כל תשובה נכונה במשחק מרוויחה זמן מסך בדיוק כמו שאלה רגילה"),
+                 key: "minutes"),
             Item(emoji: "⚡", title: tr("סיבוב הפתעה באמצע השאלות"),
-                 line: tr("כל כמה שאלות קופצת הפתעה — משחק קצר עם כוכבים ויהלומים כפולים")),
+                 line: tr("כל כמה שאלות קופצת הפתעה — משחק קצר עם כוכבים ויהלומים כפולים"),
+                 key: "surprise"),
             Item(emoji: "📝", title: tr("להורים: רק שאלות רגילות"),
-                 line: tr("בעמוד הילד יש מתג חדש שמכבה את המשחקים, והילד נכנס ישר לשאלות")),
+                 line: tr("בעמוד הילד יש מתג חדש שמכבה את המשחקים, והילד נכנס ישר לשאלות"),
+                 key: "onlyQuestions"),
         ]),
 
         Release(build: 185, version: "2026.10.2", headline: tr("צ'אט עם צוות טופי, אייפד של הילד וכרטיס ילד מסודר"), items: [
@@ -208,14 +228,32 @@ enum WhatsNewContent {
     /// The stored value has been three different things over time (a build
     /// number, a version string, a "version (build)" pair), so every shape is
     /// read here rather than migrated — the number in it is what matters.
-    private static var seenBuild: Int? {
-        guard let raw = UserDefaults.standard.string(forKey: seenKey) else { return nil }
-        // "2026.9.1 (174)" → 174 · "174" → 174 · "2026.9.1" → the release it names
+    private static var seenBuild: Int? { build(inToken: UserDefaults.standard.string(forKey: seenKey)) }
+
+    /// The build inside a stored token, in every shape the app has ever
+    /// written: "2026.9.1 (174)" → 174 · "174" → 174 · "2026.9.1" → the
+    /// release it names. `nil` in, `nil` out — "this reader has no record".
+    /// Shared with the "מה חדש" STORY, which keeps a token of its own per child.
+    static func build(inToken raw: String?) -> Int? {
+        guard let raw else { return nil }
         if let open = raw.lastIndex(of: "("), let close = raw.lastIndex(of: ")"), open < close {
             return Int(raw[raw.index(after: open)..<close])
         }
         if let n = Int(raw) { return n }
         return releases.first(where: { $0.version == raw })?.build
+    }
+
+    /// One note by its stable `key` — the single source for a line that the
+    /// release notes AND the story both show (see `WhatsNewStories`).
+    static func item(_ key: String) -> Item? {
+        releases.lazy.flatMap(\.items).first { $0.key == key }
+    }
+
+    /// Builds that landed after `seen` and no later than this one. The story
+    /// keeps its own seen-token per child and asks this.
+    static func unseenBuilds(seen: Int?) -> [Int] {
+        guard let seen else { return [] }
+        return releases.filter { $0.build > seen && $0.build <= currentBuild }.map(\.build)
     }
 
     /// What to write once the sheet has been shown.

@@ -10306,6 +10306,28 @@
         }
       }
     },
+    "12 משחקים חדשים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 لعبة جديدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 new games"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 новых игр"
+          }
+        }
+      }
+    },
     "12 משחקים חדשים — הילד בוחר איך לשחק" : {
       "localizations" : {
         "ar" : {
@@ -10881,6 +10903,28 @@
     "60" : {
 
     },
+    "60 דקות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "60 دقيقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "60 minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "60 минут"
+          }
+        }
+      }
+    },
     "71 שאלות כפולות ירדו מהמאגר העברי, כדי שילד לא יקבל פעמיים את אותה שאלה" : {
       "localizations" : {
         "ar" : {
@@ -11320,7 +11364,7 @@
     "·" : {
 
     },
-    "· מָה חָדָשׁ?" : {
+    "· מה חדש?" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -16559,6 +16603,28 @@
         }
       }
     },
+    "אפשר לראות את זה שוב בכל רגע: הגדרות ← מה חדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكنكم مشاهدة هذا مجددًا في أي وقت: الإعدادات ← ما الجديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can watch this again any time: Settings → What's new"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это можно посмотреть снова в любой момент: Настройки → Что нового"
+          }
+        }
+      }
+    },
     "אפשרות א׳" : {
       "localizations" : {
         "ar" : {
@@ -19982,6 +20048,28 @@
         }
       }
     },
+    "בּוֹאוּ נְשַׂחֵק! 🚀" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هيّا نلعب! 🚀"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let's play! 🚀"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Давайте играть! 🚀"
+          }
+        }
+      }
+    },
     "בּוֹאוּ נִפְתַּח אוֹתָן" : {
       "localizations" : {
         "ar" : {
@@ -20132,6 +20220,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выбираем мир и отправляемся в приключение ✨"
+          }
+        }
+      }
+    },
+    "בּוֹחֲרִים עוֹלָם, וְאָז בּוֹחֲרִים: שְׁאֵלוֹת רְגִילוֹת אוֹ מִשְׂחָק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختاروا عالمًا، ثم اختاروا: أسئلة عادية أو لعبة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a world, then pick how: regular questions or a game"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбираем мир, а потом выбираем: обычные вопросы или игру"
           }
         }
       }
@@ -20858,6 +20968,28 @@
         }
       }
     },
+    "בעברית הרמה עולה חזק עם הגיל. באנגלית, שהיא שפה שנייה, היא נשארת נגישה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في اللغة الأم يرتفع المستوى بقوة مع العمر. وفي الإنجليزية، وهي لغة ثانية، يبقى في المتناول"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the mother tongue the level climbs steeply with age. In English, a second language, it stays within reach"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В родном языке уровень заметно растёт с возрастом. В английском — втором языке — он остаётся посильным"
+          }
+        }
+      }
+    },
     "בעמוד הילד יש מתג חדש שמכבה את המשחקים, והילד נכנס ישר לשאלות" : {
       "localizations" : {
         "ar" : {
@@ -20964,6 +21096,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Приготовьте вместе простое блюдо и дайте %@ отмерять и удваивать количества."
+          }
+        }
+      }
+    },
+    "בשליטה שלכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحت سيطرتكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In your hands"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Под вашим контролем"
           }
         }
       }
@@ -21586,6 +21740,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сёрфборд"
+          }
+        }
+      }
+    },
+    "גַּם בַּמִּשְׂחָקִים מַרְוִיחִים דַּקּוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الألعاب أيضًا تربحون دقائق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Games earn minutes too"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В играх тоже зарабатывают минуты"
           }
         }
       }
@@ -23265,6 +23441,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Точность"
+          }
+        }
+      }
+    },
+    "דלג" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تخطٍّ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропустить"
           }
         }
       }
@@ -26726,6 +26924,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Проведите в любую сторону 👆"
+          }
+        }
+      }
+    },
+    "הַחְלִיקוּ לַבָּא" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسحبوا للتالي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe for the next one"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проведите для следующего"
           }
         }
       }
@@ -32641,6 +32861,28 @@
         }
       }
     },
+    "הילד בוחר איך לענות: שאלות רגילות או משחק — והתוכן נשאר אותו תוכן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يختار الطفل كيف يجيب: أسئلة عادية أو لعبة — والمحتوى يبقى نفسه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your child chooses how to answer — regular questions or a game — and the content stays exactly the same"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ребёнок выбирает, как отвечать: обычные вопросы или игра — а содержание остаётся тем же"
+          }
+        }
+      }
+    },
     "הילד מזין אותו כדי לפתוח את הדקות שצבר" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -34600,6 +34842,28 @@
         }
       }
     },
+    "וְהִנֵּה מַתָּנָה קְטַנָּה בִּשְׁבִילְכֶם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وهذه هديّة صغيرة لكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "And here's a little gift for you"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "А вот и маленький подарок для вас"
+          }
+        }
+      }
+    },
     "וְיֵשׁ לְךָ %lld דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!" : {
       "localizations" : {
         "ar" : {
@@ -35720,6 +35984,28 @@
         }
       }
     },
+    "זה הכל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا كل شيء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That's everything"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это всё"
+          }
+        }
+      }
+    },
     "זוּגִי" : {
       "localizations" : {
         "ar" : {
@@ -35830,6 +36116,28 @@
         }
       }
     },
+    "זמן מסך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت الشاشة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экранное время"
+          }
+        }
+      }
+    },
     "זמן מסך היום" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -35872,6 +36180,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ежедневное экранное время"
+          }
+        }
+      }
+    },
+    "זמן מסך ליום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت الشاشة في اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily screen time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экранное время в день"
           }
         }
       }
@@ -39200,28 +39530,6 @@
         }
       }
     },
-    "טוֹפִי · %@" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tofy · %@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tofy · %@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tofy · %@"
-          }
-        }
-      }
-    },
     "טוֹפִי טַיים" : {
       "localizations" : {
         "ar" : {
@@ -40540,6 +40848,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Поехали, собираем! 🚀"
+          }
+        }
+      }
+    },
+    "יַאלְלָה, מַמְשִׁיכִים! 🚀" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يلّا، نواصل! 🚀"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let's go! 🚀"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поехали! 🚀"
           }
         }
       }
@@ -44320,6 +44650,28 @@
         }
       }
     },
+    "כָּל כַּמָּה שְׁאֵלוֹת קוֹפֵץ מִשְׂחָק קָצָר — עִם כּוֹכָבִים וְיַהֲלוֹמִים כְּפוּלִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل بضعة أسئلة تقفز لعبة قصيرة — مع نجوم وألماسات مضاعفة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every few questions a short game pops up — with double stars and diamonds"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждые несколько вопросов выскакивает короткая игра — со звёздами и алмазами вдвойне"
+          }
+        }
+      }
+    },
     "כָּל כּוֹכָב מְקַדֵּם אוֹתְךָ לְמַעְלָה! ⭐" : {
       "localizations" : {
         "ar" : {
@@ -44536,6 +44888,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Каждый правильный ответ в Tofy = %@ игры"
+          }
+        }
+      }
+    },
+    "כָּל תְּשׁוּבָה נְכוֹנָה מוֹסִיפָה זְמַן מִשְׂחָק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل إجابة صحيحة تضيف وقت لعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every correct answer adds play time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый правильный ответ добавляет время игры"
           }
         }
       }
@@ -45523,6 +45897,94 @@
         }
       }
     },
+    "כיתה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الصف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grade"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Класс"
+          }
+        }
+      }
+    },
+    "כיתה ג׳ · עברית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الصف الثالث · اللغة الأم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grade 3 · mother tongue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3-й класс · родной язык"
+          }
+        }
+      }
+    },
+    "כיתה ו׳ · אנגלית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الصف السادس · الإنجليزية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grade 6 · English"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6-й класс · английский"
+          }
+        }
+      }
+    },
+    "כיתה ו׳ · עברית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الصف السادس · اللغة الأم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grade 6 · mother tongue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6-й класс · родной язык"
+          }
+        }
+      }
+    },
     "כיתה לא הוגדרה — הגדירו" : {
       "localizations" : {
         "ar" : {
@@ -45799,6 +46261,28 @@
         }
       }
     },
+    "כל העדכונים של טופי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كلّ تحديثات Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Tofy updates"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все обновления Tofy"
+          }
+        }
+      }
+    },
     "כל העדכונים, אחד אחד" : {
       "localizations" : {
         "ar" : {
@@ -46009,6 +46493,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Каждый экран получил прозрачный стеклянный дизайн на фоне бренда: домашний экран ребёнка, вопросы, колесо удачи, магазин, задания, рейтинг и турнир — а также экран родителя, отчёт по каждому ребёнку, настройки и экран покупки. Кнопки и карточки стали одинаковыми, читаемее и спокойнее"
+          }
+        }
+      }
+    },
+    "כל משחק לפי הכיתה של הילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل لعبة حسب صف الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every game at your child's grade"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждая игра — по классу ребёнка"
           }
         }
       }
@@ -46361,6 +46867,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вход"
+          }
+        }
+      }
+    },
+    "כניסה לטופי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدخول إلى Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go into Tofy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Войти в Tofy"
           }
         }
       }
@@ -54508,28 +55036,6 @@
         }
       }
     },
-    "מָה חָדָשׁ בְּטוֹפִי ✨" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ما الجديد في Tofy ✨"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What's new in Tofy ✨"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Что нового в Tofy ✨"
-          }
-        }
-      }
-    },
     "מָה חָדָשׁ בַּגִּרְסָה הַזּוֹ ✨" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -55489,6 +55995,50 @@
         }
       }
     },
+    "מה חדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما الجديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's new"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что нового"
+          }
+        }
+      }
+    },
+    "מה חדש בטופי ✨" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما الجديد في Tofy ✨"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's new in Tofy ✨"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что нового в Tofy ✨"
+          }
+        }
+      }
+    },
     "מה חדש בטופי?" : {
       "localizations" : {
         "ar" : {
@@ -55749,6 +56299,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удаляем…"
+          }
+        }
+      }
+    },
+    "מותאם לגיל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مُلائم للعمر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matched to age"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "По возрасту"
           }
         }
       }
@@ -56124,6 +56696,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "сам"
+          }
+        }
+      }
+    },
+    "מיקרופון · גלגיליות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ميكروفون · زلاجات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "microphone · rollerblades"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "микрофон · ролики"
+          }
+        }
+      }
+    },
+    "מכונית · אונייה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سيارة · سفينة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "car · ship"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "машина · корабль"
           }
         }
       }
@@ -56764,6 +57380,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Продлевается %@"
+          }
+        }
+      }
+    },
+    "מתחלף לבד · אפשר להחליק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ينتقل وحده · يمكن السحب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Advances on its own · you can swipe"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Меняется само · можно листать"
           }
         }
       }
@@ -59745,6 +60383,28 @@
         }
       }
     },
+    "נתראה בפנים 👋" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نراكم في الداخل 👋"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See you inside 👋"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увидимся внутри 👋"
+          }
+        }
+      }
+    },
     "סְגִירָה" : {
       "localizations" : {
         "ar" : {
@@ -60203,6 +60863,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Раунд %lld/%lld"
+          }
+        }
+      }
+    },
+    "סִבּוּב הַפְתָּעָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جولة مفاجأة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A surprise round"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Раунд-сюрприз"
           }
         }
       }
@@ -61244,6 +61926,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сюрприз-раунд посреди вопросов"
+          }
+        }
+      }
+    },
+    "סיבוב הפתעה ⚡" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جولة مفاجأة ⚡"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A surprise round ⚡"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Раунд-сюрприз ⚡"
           }
         }
       }
@@ -75606,6 +76310,28 @@
         }
       }
     },
+    "שאלה רגילה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سؤال عادي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A regular question"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обычный вопрос"
+          }
+        }
+      }
+    },
     "שאלה? משהו לא ברור? הכפתור העגול 💬 במסך הבית פותח שיחה איתנו, ואנחנו עונים ישר לטלפון שלכם" : {
       "localizations" : {
         "ar" : {
@@ -77982,6 +78708,28 @@
         }
       }
     },
+    "תשובה נכונה במשחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إجابة صحيحة في لعبة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A correct answer in a game"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Правильный ответ в игре"
+          }
+        }
+      }
+    },
     "תשובה שגויה מעבירה הלאה" : {
       "localizations" : {
         "ar" : {
@@ -78297,6 +79045,28 @@
         }
       }
     },
+    "⏱ אותו זמן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏱ الوقت نفسه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏱ The same time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏱ То же время"
+          }
+        }
+      }
+    },
     "⏱ דַּקּוֹת הַיּוֹם" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -78360,6 +79130,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "⏱ Заработано сегодня"
+          }
+        }
+      }
+    },
+    "⏱ זמן מסך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏱ وقت الشاشة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏱ Screen time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏱ Экранное время"
           }
         }
       }
@@ -78703,6 +79495,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "⚠️ Ошибка"
+          }
+        }
+      }
+    },
+    "⚡ חָדָשׁ בְּטוֹפִי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚡ جديد في Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚡ New in Tofy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚡ Новое в Tofy"
           }
         }
       }
@@ -79565,6 +80379,28 @@
     },
     "⭐️" : {
 
+    },
+    "⭐💎 כפולים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⭐💎 مضاعفة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⭐💎 doubled"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⭐💎 вдвое"
+          }
+        }
+      }
     },
     "⭕ מַעְגָּל שֶׁהָרַדְיוּס שֶׁלּוֹ %lld ס\"מ. מָה %@ שֶׁלּוֹ? (%@)" : {
       "localizations" : {
