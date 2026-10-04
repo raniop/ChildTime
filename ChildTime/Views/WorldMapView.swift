@@ -152,9 +152,14 @@ struct WorldMapView: View {
         let allowed = profiles.active?.playableTopics ?? Set(Topic.core)
         let grade = profiles.active?.effectiveGrade ?? 1
         let offered = Set(packOffers.map(\.id))
+        // Once, not once per world: `visiblePacks` asks whether every pack has
+        // questions in this language, and that answer is only cheap because
+        // ContentCache keeps it. Asking it inside the filter is still twenty
+        // rebuilds of the same set for nothing.
+        let visible = Set(packStore.visiblePacks.map(\.id))
         let candidates = Worlds.all.filter { w in
             guard !w.isBonusWorld, !isOwned(w), WorldSuitability.suits(w.topic, grade: grade) else { return false }
-            if let pack = w.topic.pack { return !offered.contains(pack.id) && packStore.visiblePacks.contains { $0.id == pack.id } }
+            if let pack = w.topic.pack { return !offered.contains(pack.id) && visible.contains(pack.id) }
             return allowed.contains(w.topic)
         }
         tier.owned = Worlds.all.filter { !$0.isBonusWorld && isOwned($0) }
@@ -413,6 +418,11 @@ struct WorldMapView: View {
                         // padding — the gap above טופי should match the gap
                         // between the subtitle and the cards below.
                         heroTitle
+                        // 🌟 The guest worlds, worked out ONCE for the whole grid.
+                        // Each tile used to ask `freeTier` for itself, and every
+                        // one of those rebuilt the free tier from the full world
+                        // list — the same answer, ten times over, every render.
+                        let guestIDs = subs.isPremium ? Set<String>() : freeTier.guestIDs
                         LazyVGrid(
                             columns: worldGridColumns,
                             spacing: AppSpacing.md
@@ -450,7 +460,7 @@ struct WorldMapView: View {
                                     let packNew = pack.map { p in profiles.activeID.map { isNewForChild(p, childID: $0) } ?? false } ?? false
                                     let neverOpened = pack.map { p in profiles.activeID.map { !PackKidState.isOpened(p.id, childID: $0) } ?? false } ?? false
                                     // 🌟 A free "guest" world (founder's knob) plays like Tofy+.
-                                    let isGuest = !subs.isPremium && pack == nil && freeTier.guestIDs.contains(world.id)
+                                    let isGuest = !subs.isPremium && pack == nil && guestIDs.contains(world.id)
                                     let locked = !subs.isPremium && pack == nil && !isGuest
                                     let room = progress.progress(in: world.id)
                                     // A locked world the child ALREADY played (their gift ended):

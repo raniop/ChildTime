@@ -204,7 +204,16 @@ enum QuestionBanks {
 
     /// 🌍 The bank in one language — Hebrew is the original catalog; any other
     /// language gets only its own questions (see ContentAvailability).
+    ///
+    /// 🧊 Assembled once per (topic, language) and kept: `builtInBank` below
+    /// CONCATENATES six static arrays into a new one on every call, and the
+    /// cloud merge validates every item it holds. Views ask for this inside
+    /// their bodies, so doing it again per call is what froze the kid's home.
     static func bank(for topic: Topic, in language: AppLanguage) -> [BankQuestion]? {
+        ContentCache.bank("\(topic.rawValue)|\(language.rawValue)") { assemble(topic, in: language) }
+    }
+
+    private static func assemble(_ topic: Topic, in language: AppLanguage) -> [BankQuestion]? {
         guard let hebrewBuiltIn = builtInBank(for: topic) else { return nil }
         // 🇮🇱 The Hebrew world is Hebrew in every language that shows it — it
         // teaches Hebrew itself, so there is nothing to translate.

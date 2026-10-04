@@ -1,5 +1,50 @@
 import Foundation
 
+/// 🧊 What a topic's content IS, in one language — worked out once.
+///
+/// Assembling a bank is not cheap: the built-in files are concatenated into a
+/// fresh array, the cloud items are validated one by one and de-duplicated
+/// against it. That is fine once; it is not fine inside a view's body, which is
+/// where `ContentAvailability.hasContent` is asked from (the kid's home calls it
+/// for every pack, for every tile, on every render).
+///
+/// Keyed by "topic|language", so switching language is simply a different key —
+/// nothing to invalidate. The one thing that DOES change under us is the cloud
+/// bank, and `RemoteQuestionBank` clears this after a sync that brought
+/// something new, so new questions still reach a child without a relaunch.
+///
+/// `build` deliberately runs OUTSIDE the lock: assembling a bank asks for
+/// availability and vice versa, and a lock held across that would deadlock.
+/// The cost of two threads racing to build the same key is one wasted build.
+enum ContentCache {
+    private static let lock = NSLock()
+    private static var banks: [String: [BankQuestion]?] = [:]
+    private static var availability: [String: Bool] = [:]
+
+    static func bank(_ key: String, _ build: () -> [BankQuestion]?) -> [BankQuestion]? {
+        lock.lock()
+        if let hit = banks[key] { lock.unlock(); return hit }
+        lock.unlock()
+        let value = build()
+        lock.lock(); banks[key] = value; lock.unlock()
+        return value
+    }
+
+    static func available(_ key: String, _ build: () -> Bool) -> Bool {
+        lock.lock()
+        if let hit = availability[key] { lock.unlock(); return hit }
+        lock.unlock()
+        let value = build()
+        lock.lock(); availability[key] = value; lock.unlock()
+        return value
+    }
+
+    /// New cloud questions landed — forget everything and work it out again.
+    static func invalidate() {
+        lock.lock(); banks.removeAll(); availability.removeAll(); lock.unlock()
+    }
+}
+
 /// 🌍 Questions follow the app language.
 ///
 /// A translated screen is not enough (Rani: "לא סתם תרגום") — a child who picks
@@ -18,7 +63,22 @@ enum ContentAvailability {
     /// hidden until its content arrives.
     static let minimumBank = 20
 
+    /// 🧊 Answered once per (topic, language), then remembered.
+    ///
+    /// Hebrew short-circuits to `true` on line one; every OTHER language has to
+    /// ASSEMBLE the topic's whole bank to count it. The kid's home asks this for
+    /// every pack, inside a filter, inside the grid's `ForEach` — so one render
+    /// rebuilt hundreds of banks (built-ins concatenated, cloud items merged and
+    /// validated one by one). In Hebrew that cost nothing and the home drew
+    /// instantly; in English/Russian/Arabic it was seconds of main-thread work
+    /// before the FIRST frame, and on a device with a full cloud bank the child
+    /// just sat in front of a black screen. Measured on an iPhone 18 Pro,
+    /// 2026-10-04: Hebrew drew in ~2s, English never drew at all.
     static func hasContent(_ topic: Topic, in language: AppLanguage = LanguageStore.shared.current) -> Bool {
+        ContentCache.available("\(topic.rawValue)|\(language.rawValue)") { resolve(topic, in: language) }
+    }
+
+    private static func resolve(_ topic: Topic, in language: AppLanguage) -> Bool {
         switch topic {
         // 🎊 الأعياد exists only in Arabic — it is that audience's own holidays,
         // not a translation of anything. Hidden everywhere else, including in

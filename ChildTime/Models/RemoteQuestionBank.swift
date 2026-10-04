@@ -142,7 +142,10 @@ final class RemoteQuestionBank {
             lock.unlock()
             changed = true
         }
-        if changed { saveToDisk() }
+        // 🧊 Assembled banks and per-language availability are remembered (see
+        // ContentCache); new cloud questions have to reach the child without a
+        // relaunch, so forget them the moment a topic actually moved.
+        if changed { ContentCache.invalidate(); saveToDisk() }
     }
     #endif
 
