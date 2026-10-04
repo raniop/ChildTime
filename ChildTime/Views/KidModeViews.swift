@@ -40,6 +40,11 @@ struct KidModeEntryView: View {
                 }
                 startButton
                     .padding(AppSpacing.lg)
+                    // 📐 The button sits outside the scroll view, so without
+                    // this it ran the full 1376pt of an iPad while the card
+                    // column above it stayed 480pt wide.
+                    .frame(maxWidth: 480 + AppSpacing.lg * 2)
+                    .frame(maxWidth: .infinity)
             }
         }
         .environment(\.layoutDirection, .app)
