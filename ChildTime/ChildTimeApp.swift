@@ -221,7 +221,12 @@ struct ChildTimeApp: App {
                     // 🔄 DEMO_ORIENT=landscape — a screenshot run can check the
                     // iPad on its side. The simulator here is headless, so the
                     // app has to turn itself; never reached in production.
-                    .onAppear { Self.applyDemoOrientation() }
+                    .onAppear {
+                        Self.applyDemoOrientation()
+                        // 🔊 Resolve the speech voice off the main thread now,
+                        // so the first read-aloud never blocks a layout pass.
+                        SpeechReader.warmUp()
+                    }
                 // 🔄 Below `minBuild` this copy can no longer be trusted against
                 // the server, so it covers everything — no tab, no sheet, no deep
                 // link gets behind it. Only reachable when the admin raises
