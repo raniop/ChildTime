@@ -1,5 +1,7 @@
 import Foundation
 import Combine
+import FamilyControls
+import ManagedSettings
 
 final class ParentSettings: ObservableObject {
     static let shared = ParentSettings()
@@ -122,17 +124,25 @@ final class ParentSettings: ObservableObject {
     @Published var activitySelectionData: Data? {
         didSet { defaults.set(activitySelectionData, forKey: Key.activitySelection) }
     }
-    /// When true, the child device's LOCKED baseline blocks every app except the
-    /// `allowedAppsData` allowlist (the inverse of the block-list model), so the
-    /// device is protected by default. SAFETY: this only actually takes effect
-    /// when the allowlist is non-empty — otherwise we'd shield ChildTime itself
-    /// (whose token we can't add programmatically) and brick the device, so we
-    /// fall back to the block-list model. The allowlist MUST include ChildTime.
-    @Published var blockAllExceptAllowed: Bool {
-        didSet { defaults.set(blockAllExceptAllowed, forKey: Key.blockAllExceptAllowed) }
+    /// 🔒 "לנעול גם אפליקציות חדשות" — the allow-list model. When on, the locked
+    /// baseline shields EVERY app on the device, including one installed after
+    /// the policy was written, except `allowedAppsData` + `alwaysAllowedAppsData`
+    /// + any open per-app allowance. This is the behaviour Tofy promises: a child
+    /// who downloads a new app must not walk straight out of the lock.
+    ///
+    /// SAFETY: it can only take effect once the parent has picked at least one
+    /// app that stays open. Apple's `.all(except:)` shields Tofy itself too, and
+    /// an app cannot mint its own `ApplicationToken` — only the parent can, in
+    /// Apple's picker — so with an empty list we would lock the child out of the
+    /// one app that earns their minutes. Until then we fall back to the classic
+    /// (leaky) block-list. See `ShieldPolicy.swift` for the whole story.
+    /// Stored under the historical key so an installed build's value carries over.
+    @Published var lockNewApps: Bool {
+        didSet { defaults.set(lockNewApps, forKey: Key.blockAllExceptAllowed) }
     }
-    /// Apps that stay OPEN while the device is locked (block-all mode). Picked by
-    /// the parent; must include ChildTime so the child can always earn time.
+    /// Apps that stay OPEN while the device is locked. Picked by the parent; must
+    /// include Tofy itself so the child can always earn time, plus the essentials
+    /// (phone, messages, camera, clock).
     @Published var allowedAppsData: Data? {
         didSet { defaults.set(allowedAppsData, forKey: Key.allowedAppsData) }
     }
@@ -145,12 +155,18 @@ final class ParentSettings: ObservableObject {
     @Published var alwaysAllowedAppsData: Data? {
         didSet { defaults.set(alwaysAllowedAppsData, forKey: Key.alwaysAllowedAppsData) }
     }
-    /// Block-all is only SAFE to enforce once the parent has chosen a non-empty
-    /// allowlist (otherwise ChildTime itself would be shielded). This is the
-    /// single source of truth both the app and the monitor extension use.
-    var blockAllActive: Bool {
-        blockAllExceptAllowed && !SelectionStorage.isEmpty(allowedAppsData)
+    /// Apps the parent chose to keep open on a locked device.
+    var openByDesignApps: Set<ApplicationToken> {
+        SelectionStorage.decode(allowedAppsData).applicationTokens
     }
+    /// True when the allow-list model is actually in force, i.e. a newly
+    /// installed app IS shielded. Note it needs APPS, not categories: a category
+    /// token is not something `.all(except:)` accepts, so an allow-list holding
+    /// only "Education" would still shield Tofy.
+    var newAppLockArmed: Bool { lockNewApps && !openByDesignApps.isEmpty }
+    /// The parent wants new apps locked but hasn't named what stays open, so the
+    /// device is still on the leaky block-list. The one thing to nag about.
+    var allowListNeedsSetup: Bool { lockNewApps && openByDesignApps.isEmpty }
     /// A temporary per-app allowance: which apps are open right now even though
     /// they're in the blocked list, and until when. Lets a parent open just one
     /// app (e.g. YouTube) for a while while the rest stay locked.
@@ -340,9 +356,10 @@ final class ParentSettings: ObservableObject {
 
 
         self.activitySelectionData = d.data(forKey: Key.activitySelection)
-        // Default ON so the device is protected by default — but it only blocks
-        // all once the parent picks an allowlist (see the property's note).
-        self.blockAllExceptAllowed = (d.object(forKey: Key.blockAllExceptAllowed) as? Bool) ?? true
+        // Default ON so a new app is locked by default — but it only takes
+        // effect once the parent has picked what stays open (see the note on
+        // the property: with an empty list we would shield Tofy itself).
+        self.lockNewApps = (d.object(forKey: Key.blockAllExceptAllowed) as? Bool) ?? true
         self.allowedAppsData = d.data(forKey: Key.allowedAppsData)
         self.alwaysAllowedAppsData = d.data(forKey: Key.alwaysAllowedAppsData)
         self.allowExceptionData = d.data(forKey: Key.allowExceptionData)

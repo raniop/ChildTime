@@ -12,8 +12,7 @@ private let monitorLog = Logger(subsystem: "com.rani.ChildTime", category: "Scre
 
 class DeviceActivityMonitorExtension: DeviceActivityMonitor {
 
-    private let store = ManagedSettingsStore(named: .init("childtime.shield"))
-    private let appGroupID = "group.com.childtime.shared"
+    private let appGroupID = TofyShield.appGroupID
     private static let unlockName = DeviceActivityName("childtime.unlock")
 
     override func intervalDidEnd(for activity: DeviceActivityName) {
@@ -42,89 +41,21 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         super.intervalWillEndWarning(for: activity)
     }
 
+    /// Re-apply the locked baseline.
+    ///
+    /// This used to be a hand-written copy of the app's logic and it drifted
+    /// from it: the block-list branch here shielded only the parent's enumerated
+    /// apps and categories, so an app the child installed after setup was never
+    /// covered. It now asks the SAME brain the app asks (`ShieldPolicy.swift`),
+    /// which means a background re-lock writes byte-for-byte the policy the app
+    /// would have written — including `.all(except:)` once the allow-list is
+    /// armed, so a newly installed app is shielded even though this process has
+    /// no network and no idea the app exists.
+    ///
+    /// `TofyShield.relock` also owns `denyAppRemoval`, honoring the parent's
+    /// short "you may delete Tofy" window.
     private func reapplyShield() {
-        let defaults = UserDefaults(suiteName: appGroupID) ?? .standard
-        let decoder = JSONDecoder()
-
-        // Keep app DELETION blocked on every background re-lock — deleting
-        // ChildTime would wipe the shield and unlock every app.
-        // EXCEPTION: honor a parent's short "allow deletion" window (opened in
-        // the app to legitimately uninstall Tofy). Without this check, any
-        // background re-lock landing inside the window silently re-blocked the
-        // deletion the parent just enabled (Yoav's iPad).
-        let removalWindow = defaults.object(forKey: "appRemovalUnlockedUntil") as? Date
-        if let removalWindow, removalWindow > Date() {
-            monitorLog.notice("ext: parent delete-window active → NOT re-locking app removal")
-            store.application.denyAppRemoval = nil
-        } else {
-            store.application.denyAppRemoval = true
-        }
-
-        // 👶 Kid Mode (parent phone): the baseline is lock-all-EXCEPT the
-        // kid-mode allow-list. Must be checked BEFORE the normal block modes,
-        // or a background window-end would fall through to the (empty) parent
-        // block-list and leave the whole phone open for the kid.
-        let kidModeActive = (defaults.object(forKey: "kidModeActive") as? Bool) ?? false
-        if kidModeActive,
-           let kmData = defaults.data(forKey: "kidModeAllowedData"),
-           let kmAllowed = try? decoder.decode(FamilyActivitySelection.self, from: kmData) {
-            store.shield.applications = nil
-            store.shield.applicationCategories = .all(except: kmAllowed.applicationTokens)
-            store.shield.webDomains = nil
-            store.shield.webDomainCategories = .all(except: kmAllowed.webDomainTokens)
-            store.application.denyAppRemoval = true
-            monitorLog.notice("ext: re-applied KID-MODE lock-all-except")
-            return
-        }
-
-        // Block-all-except-allowlist mode — only when an allowlist actually exists
-        // (otherwise we'd shield ChildTime itself and brick the device). Mirrors
-        // ParentSettings.blockAllActive + ShieldManager.applyLockAllExcept.
-        let blockAll = (defaults.object(forKey: "blockAllExceptAllowed") as? Bool) ?? true
-        if blockAll,
-           let allowedData = defaults.data(forKey: "allowedAppsData"),
-           let allowed = try? decoder.decode(FamilyActivitySelection.self, from: allowedData),
-           !(allowed.applicationTokens.isEmpty && allowed.categoryTokens.isEmpty && allowed.webDomainTokens.isEmpty) {
-            store.shield.applications = nil
-            store.shield.applicationCategories = .all(except: allowed.applicationTokens)
-            store.shield.webDomains = nil
-            store.shield.webDomainCategories = .all(except: allowed.webDomainTokens)
-            monitorLog.notice("ext: re-applied block-all shield")
-            return
-        }
-
-        guard let data = defaults.data(forKey: "activitySelection"),
-              let selection = try? decoder.decode(FamilyActivitySelection.self, from: data) else {
-            monitorLog.error("ext: no activitySelection to re-apply — shield NOT restored")
-            return
-        }
-
-        // Honor an ACTIVE temporary parent exception (a per-app allowance that
-        // hasn't expired) — mirrors ShieldManager.applyShield(from:allowing:).
-        // Without this, a background re-lock would block the exception app too.
-        var allowedApps: Set<ApplicationToken> = []
-        if let endsAt = defaults.object(forKey: "allowExceptionEndsAt") as? Date, endsAt > Date(),
-           let exData = defaults.data(forKey: "allowExceptionData"),
-           let exSel = try? decoder.decode(FamilyActivitySelection.self, from: exData) {
-            allowedApps = exSel.applicationTokens
-            monitorLog.notice("ext: honoring active parent exception (\(allowedApps.count, privacy: .public) apps)")
-        }
-
-        // Permanent "always allowed" whitelist — never re-shielded, even under a
-        // blocked category. Mirrors ShieldManager.applyShield(from:allowing:).
-        if let alwaysData = defaults.data(forKey: "alwaysAllowedAppsData"),
-           let alwaysSel = try? decoder.decode(FamilyActivitySelection.self, from: alwaysData) {
-            allowedApps.formUnion(alwaysSel.applicationTokens)
-        }
-
-        let blockedApps = selection.applicationTokens.subtracting(allowedApps)
-        store.shield.applications = blockedApps.isEmpty ? nil : blockedApps
-        store.shield.applicationCategories = selection.categoryTokens.isEmpty
-            ? .none
-            : .specific(selection.categoryTokens, except: allowedApps)
-        store.shield.webDomains = selection.webDomainTokens.isEmpty ? nil : selection.webDomainTokens
-        store.shield.webDomainCategories = .none
-        monitorLog.notice("ext: re-applied block-list shield (\(blockedApps.count, privacy: .public) apps blocked)")
+        TofyShield.relock(reason: "monitor-ext", log: monitorLog)
     }
 
     private func clearUnlockEnd() {

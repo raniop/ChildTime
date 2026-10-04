@@ -49,11 +49,13 @@ enum PickerCopy {
         header: tr("בַּחֲרוּ אֶת הָאַפְלִיקַצְיוֹת שֶׁיִּפָּתְחוּ עַכְשָׁו, וְאַחַר כָּךְ אֶת מֶשֶׁךְ הַזְּמַן."),
         footer: tr("כָּל הַשְּׁאָר נִשְׁאָר נָעוּל. בְּתֹם הַזְּמַן הֵן נִנְעָלוֹת בַּחֲזָרָה לְבַד.")
     ) }
-    /// The "block everything except these" model on a child's device.
+    /// The allow-list: everything is locked except these — including an app the
+    /// child installs tomorrow. Tofy itself MUST be in here (we cannot add it
+    /// programmatically), or the child can never earn a minute again.
     static var allowList: (title: String, header: String, footer: String) { (
         title: tr("מָה נִשְׁאָר פָּתוּחַ"),
-        header: tr("בַּמַּצָּב הַזֶּה הַכֹּל נָעוּל חוּץ מִמָּה שֶׁתִּבְחֲרוּ כָּאן."),
-        footer: tr("כְּדַאי לִכְלֹל טֶלֶפוֹן, הוֹדָעוֹת וּמַצְלֵמָה — וְאֶת טוֹפִי עַצְמָהּ.")
+        header: tr("כָּל הַשְּׁאָר נָעוּל עַד שֶׁמַּרְוִיחִים זְמַן — גַּם אַפְּלִיקַצְיָה שֶׁתֻּתְקַן מָחָר."),
+        footer: tr("חָשׁוּב לְסַמֵּן אֶת טוֹפִי עַצְמָהּ, אַחֶרֶת הַיֶּלֶד לֹא יוּכַל לְהַרְוִיחַ זְמַן. כְּדַאי גַּם טֶלֶפוֹן, הוֹדָעוֹת, מַצְלֵמָה וְשָׁעוֹן.")
     ) }
     /// Kid Mode on a parent's own phone — an allow-list, the inverse.
     static var kidMode: (title: String, header: String, footer: String) { (

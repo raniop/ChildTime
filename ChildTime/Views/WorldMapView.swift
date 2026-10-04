@@ -2298,11 +2298,19 @@ struct WorldMapView: View {
         }
     }
 
-    /// One-time, after a child device joins: offer to pick which apps to lock.
-    /// Shielding is device-local, so this has to happen here on the child device.
+    /// One-time, after a child device joins: ask the parent (who is standing
+    /// right there) what stays open. Shielding is device-local, so this has to
+    /// happen here on the child device.
+    ///
+    /// NOTE deliberately NOT re-shown to existing installs: this screen opens
+    /// Apple's picker without the parent code in front of it, and a child who
+    /// found it could add apps to the allow-list. Families who already finished
+    /// setup are nudged from the PARENT's device instead (the device row in the
+    /// child's report), and the picker itself lives behind the gear + code.
     private func maybePromptAppLockSetup() {
         guard settings.deviceRole == .child,
               !settings.hasPromptedChildAppLock,
+              settings.openByDesignApps.isEmpty,
               SelectionStorage.isEmpty(settings.activitySelectionData),
               !showingWheel, !showingSmartFeed
         else { return }

@@ -450,6 +450,9 @@ struct ChildTimeApp: App {
         case "childjoin": ChildJoinView()               // DEMO_SCREEN=childjoin
         case "familychoice": FamilyChoiceView()         // DEMO_SCREEN=familychoice
         case "applock": ChildAppLockSetupView()         // DEMO_SCREEN=applock
+        case "devicecontrols":                          // DEMO_SCREEN=devicecontrols — the child device's parent screen
+            ChildDeviceControlsView()
+                .onAppear { ParentSettings.shared.deviceRole = .child }
         case "createchild":                             // DEMO_SCREEN=createchild — as the PARENT sees it
             ProfileEditorView(mode: .create) { _ in } onDelete: { _ in }
                 .onAppear { ParentSettings.shared.deviceRole = .parent }   // demo: age / grade rows are parent-only
@@ -702,7 +705,7 @@ struct ChildTimeApp: App {
         // and no block-all allowlist) → make sure nothing is left shielded,
         // including a stale Kid Mode web/app lock.
         let hasBlockList = !SelectionStorage.isEmpty(settings.activitySelectionData)
-        guard hasBlockList || settings.blockAllActive else {
+        guard hasBlockList || settings.newAppLockArmed else {
             shields.clearShield()
             return
         }

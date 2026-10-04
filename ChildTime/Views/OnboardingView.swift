@@ -67,7 +67,7 @@ struct OnboardingView: View {
         .tofyActivityPicker(title: PickerCopy.blocked.title, header: PickerCopy.blocked.header, footer: PickerCopy.blocked.footer, isPresented: $showPicker, selection: $selection)
         .onChangeCompat(of: selection) { _, new in
             settings.activitySelectionData = SelectionStorage.encode(new)
-            shields.applyShield(from: new)
+            shields.applyDefaultLock()
         }
         .onAppear {
             selection = SelectionStorage.decode(settings.activitySelectionData)
