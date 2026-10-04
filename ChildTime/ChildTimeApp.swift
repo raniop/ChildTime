@@ -14,6 +14,18 @@ import GoogleSignIn
 /// account. SwiftUI apps need this adaptor because remote-notification
 /// callbacks are only delivered to a UIApplicationDelegate.
 final class AppDelegate: NSObject, UIApplicationDelegate {
+    /// 🔄 A DEMO_SCREEN run with DEMO_ORIENT=landscape turns the app on its
+    /// side, so iPad layouts can be checked in landscape on a headless
+    /// simulator that has no window to rotate. Production is never restricted:
+    /// without both env vars this returns .all, exactly as before.
+    func application(_ application: UIApplication,
+                     supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        let env = ProcessInfo.processInfo.environment
+        guard env["DEMO_SCREEN"] != nil,
+              env["DEMO_ORIENT"]?.lowercased().hasPrefix("land") == true else { return .all }
+        return .landscape
+    }
+
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         // Firebase's recommended spot — runs at the UIKit entry point, before
@@ -147,6 +159,16 @@ struct ChildTimeApp: App {
     /// Activated only via the DEMO_SCREEN launch env var; never in production.
     static var demoScreen: String? { ProcessInfo.processInfo.environment["DEMO_SCREEN"] }
 
+    /// Turns a DEMO_SCREEN run to landscape when asked, so iPad layouts can be
+    /// checked on their side without a Simulator window to rotate.
+    static func applyDemoOrientation() {
+        guard demoScreen != nil,
+              let want = ProcessInfo.processInfo.environment["DEMO_ORIENT"]?.lowercased(),
+              want.hasPrefix("land"),
+              let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
+        scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight))
+    }
+
     /// Profiles seeded by a DEMO_SCREEN run — recorded so the next NORMAL
     /// launch on this install wipes them before any sync starts.
     private static let demoSeededIDsKey = "demo.seededProfileIDs"
@@ -196,6 +218,10 @@ struct ChildTimeApp: App {
                 DisplayProbe().ignoresSafeArea().allowsHitTesting(false)
                 Group { if let demo = Self.demoScreen { demoRoot(demo) } else { ContentView() } }
                     .id(language.current)
+                    // 🔄 DEMO_ORIENT=landscape — a screenshot run can check the
+                    // iPad on its side. The simulator here is headless, so the
+                    // app has to turn itself; never reached in production.
+                    .onAppear { Self.applyDemoOrientation() }
                 // 🔄 Below `minBuild` this copy can no longer be trusted against
                 // the server, so it covers everything — no tab, no sheet, no deep
                 // link gets behind it. Only reachable when the admin raises
