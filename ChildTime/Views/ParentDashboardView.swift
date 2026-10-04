@@ -30,6 +30,9 @@ struct ParentDashboardView: View {
     @StateObject private var remote = RemoteSyncManager.shared
     @ObservedObject private var push = PushManager.shared
     @ObservedObject private var household = HouseholdManager.shared
+    /// 🔔 The bell beside the ⚙️ — everything that happened lately, and its
+    /// unread badge. Started from a `.task` AFTER the first frame.
+    @ObservedObject private var activity = ActivityFeedStore.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
@@ -55,6 +58,7 @@ struct ParentDashboardView: View {
     @State private var refreshTrigger = 0
     @State private var lastRefreshed = Date()
     @State private var showingSettings = false
+    @State private var showingActivity = false      // 🔔 the activity centre
     @State private var showingCreateChild = false
     @State private var showingKidMode = false
     /// Kid Mode straight for one child (from the card's ⚡ menu).
@@ -221,6 +225,8 @@ struct ParentDashboardView: View {
         if useRail {
             SideRailContainer {
                 SideRailButton(systemImage: "gearshape.fill", label: tr("הגדרות")) { showingSettings = true }
+                SideRailButton(systemImage: activity.unread > 0 ? "bell.badge.fill" : "bell.fill",
+                               label: tr("עדכונים")) { showingActivity = true }
                 SideRailButton(systemImage: "person.badge.plus", label: tr("＋ צְרוּ יֶלֶד/ה")) { showingCreateChild = true }
                 SideRailButton(emoji: "🧹", label: tr("🧹 מַטְלוֹת")) { openChores() }
                 if !rows.isEmpty {
@@ -276,6 +282,28 @@ struct ParentDashboardView: View {
             profiles.profiles.first(where: { $0.id.uuidString == first.childID })
         } ?? rows.first?.profile
         if let target { choresProfile = target }
+    }
+
+    /// 🔔 A tapped feed row. The sheet has already dismissed itself; give UIKit
+    /// a beat before presenting the next one, or the second sheet is swallowed.
+    private func openActivity(_ route: ActivityRoute, _ who: Profile?) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            switch route {
+            case .chores:
+                if let who { choresProfile = who } else { openChores() }
+            case .support:
+                openSupportChat()
+            case .whatsNew:
+                if WhatsNewStories.parentItems.isEmpty {
+                    showWhatsNew = true
+                } else {
+                    whatsNewStory = WhatsNewStories.parentItems
+                    showWhatsNewStory = true
+                }
+            case .child:
+                if let who { selectChild(who.id) }
+            }
+        }
     }
 
     private var dashboardStack: some View {
@@ -461,6 +489,11 @@ struct ParentDashboardView: View {
                 ParentSettingsView()
                     .environment(\.layoutDirection, .app)
             }
+            // 🔔 The activity centre. The sheet closes itself first and hands the
+            // destination back here, so a tapped row lands on the real screen.
+            .sheet(isPresented: $showingActivity) {
+                ActivityCenterView { route, who in openActivity(route, who) }
+            }
             .sheet(isPresented: $showingReorder) {
                 ChildOrderView(profiles: rows.map(\.profile)) { ordered in
                     household.setChildOrder(ordered.map(\.id))
@@ -617,6 +650,16 @@ struct ParentDashboardView: View {
                     Task { await PushManager.shared.requestAuthorization() }
                 }
                 rescheduleInsights()
+            }
+            // 🔔 The feed, started only once the home screen is up: `start()`
+            // attaches ONE household-scoped listener (60 docs) and derives the
+            // rest from state already in memory. `Task.yield()` first so not a
+            // line of it runs before the first frame.
+            .task(id: isRoot) {
+                guard isRoot else { return }
+                await Task.yield()
+                ActivityFeedStore.shared.start()
+                await PushManager.shared.sweepDeliveredNotifications()
             }
             // One stable ticker (a .task, not body-recreated Timer publishers):
             // 5s → live 'minutes remaining' countdown; every 20s → re-attach any
@@ -1477,6 +1520,7 @@ struct ParentDashboardView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(tr("הגדרות"))
+                ActivityBellButton(unread: activity.unread) { showingActivity = true }
             }
             VStack(alignment: .trailing, spacing: 4) {
                 // The family's name IS the title (Rani); tap to name / rename.

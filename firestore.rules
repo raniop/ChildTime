@@ -85,6 +85,16 @@ service cloud.firestore {
         );
       }
 
+      // 🔔 The parent's activity centre. One tiny structural row per push the
+      // backend sent this family (plus the quiet kid events that deliberately
+      // never push). Readable by the family's own members ONLY, and written
+      // exclusively by the Cloud Functions (the admin SDK bypasses these rules)
+      // — a device can never forge a family's history.
+      match /activity/{actID} {
+        allow read:  if householdHasMe(hid);
+        allow write: if false;
+      }
+
       // 🧹 Lifetime chore-earnings ledger per child (minutesTotal/coinsTotal/
       // coinsPaid). Read by any member; WRITTEN only by a real parent account
       // (the approve/settle transaction) — a child device can't inflate coins.

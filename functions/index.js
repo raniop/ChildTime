@@ -473,8 +473,76 @@ async function tokensForEmail(email) {
   return [...new Set(tokens)];
 }
 
+// ---- 🔔 The parent's activity centre --------------------------------------
+//
+// Every push we send to a PARENT is ALSO recorded as one tiny document in
+// `households/{hid}/activity`, so the app's bell can still show it after the
+// banner was swiped away — or when it was never seen at all (delivered while
+// Tofy was force-quit, or sent to the parent's other device).
+//
+// The record is STRUCTURAL — `kind` plus a child, a short value and a number —
+// and never the sentence we pushed. The device renders the line in whatever
+// language that parent reads Tofy in, which also keeps each document to a
+// handful of bytes. It is first-party family data: it lives inside the family's
+// own household and only its parents can read it (firestore.rules).
+//
+// Quiet events count too: sendLiveEvent records level-ups, streaks and personal
+// bests that deliberately send NO push (as notifications they flooded the
+// parent) — the feed is exactly where those belong.
+//
+// 🗑 Every row carries `expireAt`, so a Firestore TTL policy on
+// `households/*/activity` field `expireAt` retires them; the app reads only the
+// newest rows regardless.
+const ACTIVITY_KEEP_DAYS = 21;
+const recordedPushes = new WeakSet();
+
+const activityNum = (raw) => {
+  if (raw === undefined || raw === null || String(raw).trim() === "") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+};
+
+async function recordParentActivity(data, atSeconds) {
+  if (!data || typeof data !== "object") return;
+  if (!data.householdID) return;                  // no family to file it under
+  // Only a push aimed at this family's PARENTS belongs in their feed — never a
+  // kid-facing one, and never one aimed at the Tofy team.
+  if (data.audience && data.audience !== "parent") return;
+  const kind = String(data.act || data.type || data.kind || "").trim();
+  if (!kind) return;
+  const at = activityNum(atSeconds) || Date.now() / 1000;
+  const childID = data.childID ? String(data.childID) : null;
+  // Deterministic id: every language group of ONE send collapses into one row,
+  // and the same happening recorded twice in the same second stays one row.
+  const safe = (x) => String(x).replace(/[^A-Za-z0-9_-]/g, "");
+  const docID = safe(kind) + "_" + (childID ? safe(childID) : "hh") + "_" + Math.floor(at);
+  try {
+    await db.collection("households").doc(String(data.householdID))
+      .collection("activity").doc(docID).set({
+        at,
+        kind,
+        childID,
+        childName: data.childName ? String(data.childName) : null,
+        value: data.value ? String(data.value) : null,
+        num: activityNum(data.num),
+        expireAt: new Date((at + ACTIVITY_KEEP_DAYS * 86400) * 1000),
+      }, { merge: true });
+  } catch (e) {
+    // The push itself matters more than its record — never fail a send over this.
+    console.warn("activity record failed", e && e.message);
+  }
+}
+
+// Record `data` at most once, however many language groups it is sent to.
+async function recordPushOnce(data) {
+  if (!data || typeof data !== "object" || recordedPushes.has(data)) return;
+  recordedPushes.add(data);
+  await recordParentActivity(data);
+}
+
 async function send(tokens, notification, data) {
   if (!tokens.length) return;
+  await recordPushOnce(data);        // 🔔 the parent's activity centre
   await admin.messaging().sendEachForMulticast({
     tokens,
     notification,
@@ -498,9 +566,13 @@ async function sendLocalized(tokens, build, data) {
 // with every response paired to its token, so per-token handling keeps working.
 async function sendEachLocalized(tokens, payloadFor) {
   const out = { successCount: 0, failureCount: 0, skipped: 0, results: [] };
+  // One timestamp for the whole send, so per-language payloads (which may be
+  // freshly-built objects) all record into the SAME activity row.
+  const actAt = Date.now() / 1000;
   for (const [lang, group] of langGroups(tokens)) {
     const payload = payloadFor(lang);
     if (!payload) { out.skipped += group.length; continue; }
+    await recordParentActivity(payload.data, actAt);   // 🔔 the parent's activity centre
     const res = await admin.messaging().sendEachForMulticast({ tokens: group, ...payload });
     out.successCount += res.successCount;
     out.failureCount += res.failureCount;
@@ -522,10 +594,25 @@ exports.sendLiveEvent = onDocumentCreated("children/{childID}/events/{eventID}",
   // Notify every parent device in the household EXCEPT the one that's playing.
   // Exclude by FCM token (not uid) so the parent's other device still gets the
   // push even when both devices share one account.
+  // 🔔 The parent's activity centre gets EVERY kid event, including the ones we
+  // deliberately never push (milestone / streak / wheelWin / discovery /
+  // levelUp / worldUnlocked / personalBest flooded the parent as notifications).
+  // Recorded with the event's own timestamp, and marked so the push below does
+  // not file a second row for the same happening.
+  const num = (data.minutes !== undefined && data.minutes !== null) ? data.minutes : data.value;
+  const pushData = { childID: event.params.childID, type: data.type, householdID: String(householdID || "") };
+  await recordParentActivity({
+    ...pushData,
+    childName: data.childName,
+    value: data.topic || data.value,
+    num,
+  }, Number(data.createdAt) || Date.now() / 1000);
+  recordedPushes.add(pushData);
+
   let tokens = await tokensForHousehold(householdID, null);
   if (data.originToken) tokens = tokens.filter((t) => t !== data.originToken);
   if (!liveMessage(data, "he")) return;
-  await sendLocalized(tokens, (lang) => liveMessage(data, lang), { childID: event.params.childID, type: data.type });
+  await sendLocalized(tokens, (lang) => liveMessage(data, lang), pushData);
 });
 
 // ⚠️ Duplicate-child / suspicious-state alerts (parents).
@@ -586,7 +673,7 @@ exports.detectDuplicateChild = onDocumentCreated("children/{childID}", async (ev
     "hh=", data.householdID);
   const tokens = await tokensForHousehold(data.householdID, null);
   await sendLocalized(tokens, (lang) => dupChildMessage(data.name, lang),
-    { type: "dupAlert", childID: event.params.childID });
+    { type: "dupAlert", childID: event.params.childID, householdID: String(data.householdID || "") });
 });
 
 // A freshly-created state doc with MANY stars but a LOW revision is the exact
@@ -621,7 +708,7 @@ exports.detectSuspiciousState = onDocumentCreated("children/{childID}/state/{sta
   if (!hh) return;
   const tokens = await tokensForHousehold(hh, null);
   await sendLocalized(tokens, (lang) => suspiciousStateMessage(stars, lang),
-    { type: "dupAlert", childID: event.params.childID });
+    { type: "dupAlert", childID: event.params.childID, householdID: String(hh || "") });
 });
 
 // ---- 1a) Tombstone enforcement — deleted children can't come back -----------
@@ -687,7 +774,7 @@ exports.onPremiumRequest = onDocumentWritten("children/{childID}", async (event)
   const tokens = await tokensForHousehold(hhID);
   if (!tokens.length) return;
   await sendLocalized(tokens, (lang) => premiumRequestMessage(after, lang),
-    { type: "premium-request", childID: event.params.childID });
+    { type: "premium-request", childID: event.params.childID, householdID: String(hhID || "") });
 });
 
 // The base worlds, as parents read them in a push.
@@ -755,7 +842,7 @@ exports.onPackRequest = onDocumentWritten("children/{childID}", async (event) =>
   if (!tokens.length) return;
   const packID = after.packRequestedID || "";
   await sendLocalized(tokens, (lang) => packRequestMessage(after, lang),
-    { type: "pack-request", childID: event.params.childID, packID });
+    { type: "pack-request", childID: event.params.childID, packID, householdID: String(hhID || ""), value: String(packID || "") });
 });
 
 function packRequestMessage(after, lang) {
@@ -1293,6 +1380,11 @@ exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{cho
       type: "choreApproval",
       householdID: String(hhID),
       choreID: String(event.params.choreID),
+      // 🔔 For the parent's activity centre: whose chore, which one, what it pays.
+      childID: String(after.childID || ""),
+      childName: String((kid && kid.name) || ""),
+      value: `${after.emoji || "🧹"} ${after.title || ""}`.trim(),
+      num: String(after.rewardMinutes || 0),
     };
     if (after.photoData) {
       const token = require("crypto").randomBytes(16).toString("hex");
@@ -1538,7 +1630,7 @@ exports.weeklyReport = onSchedule({ schedule: "every monday 18:00", timeZone: "A
     const tokens = await tokensForHousehold(householdID, null);
     const week7 = { name: childDoc.data().name, questions, minutesEarned, longestStreak, activeDays };
     await sendLocalized(tokens, (lang) => weeklyReportMessage(week7, lang),
-      { childID, kind: "weeklyReport" });
+      { childID, kind: "weeklyReport", householdID: String(householdID || "") });
   }
 });
 
@@ -3003,7 +3095,7 @@ exports.worldPassReminders = onSchedule(
         const hhDoc = d.householdID ? await db.collection("households").doc(d.householdID).get() : null;
         const tz = tzOf(hhDoc && hhDoc.exists ? hhDoc.data() : null);
         await sendLocalized(tokens, (lang) => worldPassMessage(d.name, packID, at, lang, tz),
-          { type: "pass-ending", childID: k.id, packID });
+          { type: "pass-ending", childID: k.id, packID, householdID: String(d.householdID || ""), value: String(packID || "") });
         sent += 1;
       }
     }

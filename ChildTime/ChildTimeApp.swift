@@ -192,6 +192,11 @@ struct ChildTimeApp: App {
     /// A previous DEMO run left fake profiles + progress in local storage; a
     /// normal launch would otherwise sync them into a REAL production family
     /// (the leaked "דנה/יואב" household). Runs before any cloud sync starts.
+    /// The seeded demo family, in the shape the activity feed wants.
+    private static func demoChildren() -> [(id: UUID, name: String)] {
+        ProfileStore.shared.profiles.map { (id: $0.id, name: $0.name) }
+    }
+
     private static func purgeDemoLeftoversIfNeeded() {
         let d = UserDefaults.standard
         guard let raw = d.stringArray(forKey: demoSeededIDsKey), !raw.isEmpty else { return }
@@ -417,6 +422,26 @@ struct ChildTimeApp: App {
             }
         case "starshop": StarShopView()   // DEMO_SCREEN=starshop (+ STARSHOP_DEMO=1 for sample packs)
         case "shop": ShopView()   // DEMO_SCREEN=shop — the kid's character shop
+        // 🔔 The parent's activity centre — DEMO_SCREEN=notifications [DEMO_LANG=en|ru|ar]
+        // (`notificationsempty` = the empty state, `notificationsbell` = the home
+        // with the badge on the bell). Seeded in memory: nothing is written to the
+        // real log and no listener is attached.
+        // Seeded during body evaluation, not in `onAppear`: the feed has to be
+        // full BEFORE the screen appears, or it marks an empty feed as read.
+        case "notifications":
+            let _ = ActivityFeedStore.shared.seedDemo(children: Self.demoChildren())
+            ActivityCenterView()
+        case "notificationsempty":
+            let _ = ActivityFeedStore.shared.seedDemoEmpty()
+            ActivityCenterView()
+        case "notificationsbell":
+            let _ = ActivityFeedStore.shared.seedDemo(children: Self.demoChildren())
+            ParentDashboardView(isRoot: true)
+                .onAppear {
+                    if let p = ProfileStore.shared.profiles.first {
+                        HouseholdManager.shared.seedDemoLiveWindow(childID: p.id)
+                    }
+                }
         case "parentsettings": ParentSettingsView()   // DEMO_SCREEN=parentsettings
         case "splash": SplashScreenView { }             // DEMO_SCREEN=splash
         case "welcome": WelcomeIntroView()              // DEMO_SCREEN=welcome

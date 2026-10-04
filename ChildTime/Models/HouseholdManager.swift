@@ -619,6 +619,7 @@ final class HouseholdManager: ObservableObject {
                     grouped[key]?.sort { $0.lastSeenAt > $1.lastSeenAt }
                 }
                 self.devicesByChild = grouped
+                self.syncCommandAcksToFeed()   // 🔔 "המכשיר אישר" in the feed
             }
     }
 
@@ -1217,8 +1218,25 @@ final class HouseholdManager: ObservableObject {
             commandTracker[cid] = RemoteCommandTracker(kind: kind, stamp: stamp,
                                                        targetDeviceIDs: targets,
                                                        sentAt: Date(), reachedCloud: false)
+            // 🔔 The parent's activity centre keeps a record of the command and
+            // of how far it got — the tracker above lives only in memory, so
+            // without this the feed could not say "נעלתם, והמכשיר אישר".
+            if let feedKind = Self.feedKind(for: kind) {
+                ActivityLog.record(feedKind, childID: cid,
+                                   childName: ProfileStore.shared.profiles.first { $0.id.uuidString == cid }?.name,
+                                   number: fields["remoteUnlockMinutes"] as? Int,
+                                   status: .sending,
+                                   id: Self.commandActivityID(kind: kind, childID: cid, stamp: stamp))
+            }
         }
-        guard !targets.isEmpty else { return }
+        guard !targets.isEmpty else {
+            // Nowhere to send it: an honest failure in the feed, not a silent "sent".
+            await MainActor.run {
+                ActivityLog.update(id: Self.commandActivityID(kind: kind, childID: cid, stamp: stamp),
+                                   status: .failed)
+            }
+            return
+        }
         // setData(merge:) not updateData: a row deleted-and-recreated mid-flight
         // must still receive the command rather than throw NOT_FOUND. The awaits
         // resolve on BACKEND commit — that's what makes `reachedCloud` honest.
@@ -1230,10 +1248,41 @@ final class HouseholdManager: ObservableObject {
             } catch { /* offline: stays queued locally; reachedCloud stays false */ }
         }
         if committedAny {
-            await MainActor.run { commandTracker[cid]?.reachedCloud = true }
+            await MainActor.run {
+                commandTracker[cid]?.reachedCloud = true
+                ActivityLog.update(id: Self.commandActivityID(kind: kind, childID: cid, stamp: stamp),
+                                   status: .reachedCloud)
+            }
         }
     }
     #endif
+
+    /// 🔔 Which feed row a remote command becomes. `appRemoval` is a maintenance
+    /// window, not news about the child — it gets no row.
+    static func feedKind(for kind: RemoteCommandTracker.Kind) -> ActivityKind? {
+        switch kind {
+        case .lock:       return .remoteLock
+        case .unlock:     return .remoteUnlock
+        case .appRemoval: return nil
+        }
+    }
+
+    /// Stable across the command's whole life, so the ack can find its row.
+    static func commandActivityID(kind: RemoteCommandTracker.Kind, childID: String, stamp: Double) -> String {
+        "cmd.\(kind).\(childID).\(Int(stamp))"
+    }
+
+    /// 🔔 A device acked a command we recorded → promote its feed row to
+    /// "המכשיר אישר". Called from the childDevices listener, where the acks land.
+    private func syncCommandAcksToFeed() {
+        for (cid, cmd) in commandTracker {
+            guard Self.feedKind(for: cmd.kind) != nil else { continue }
+            guard let counts = appliedCount(childID: cid), counts.total > 0,
+                  counts.applied >= counts.total else { continue }
+            ActivityLog.update(id: Self.commandActivityID(kind: cmd.kind, childID: cid, stamp: cmd.stamp),
+                               status: .deviceConfirmed)
+        }
+    }
 
     /// Parent action: RE-LOCK the child's device now, from afar. Writes a
     /// `remoteLockAt` stamp onto the child's device rows; the device applies it
