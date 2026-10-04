@@ -81030,29 +81030,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Разрешите %@ играть здесь 🧒"
-          }
-        }
-      }
-    },
-    "תְּנוּ לוֹ לְשַׂחֵק כָּאן 🧒" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "دعوه يلعب هنا 🧒"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Let them play here 🧒"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дать поиграть здесь 🧒"
+            "value" : "Дать %@ поиграть здесь 🧒"
           }
         }
       }

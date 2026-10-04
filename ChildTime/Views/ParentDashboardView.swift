@@ -1160,7 +1160,7 @@ struct ParentDashboardView: View {
                 }
                 // 🧒 Its own full-width row, in a whole sentence: this is the
                 // thing parents wrote in about and it earns the space (Rani).
-                Color.clear.frame(maxWidth: .infinity).frame(height: Self.playRowHeight)
+                Color.clear.frame(maxWidth: .infinity).frame(height: Self.homeControlHeight)
             } else {
                 // No device yet. This card used to end here — one dead line — so
                 // a child without a device had NO actions menu and no way into
@@ -1179,7 +1179,7 @@ struct ParentDashboardView: View {
                     Color.clear.frame(maxWidth: .infinity).frame(height: 38)
                     Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
                 }
-                Color.clear.frame(maxWidth: .infinity).frame(height: Self.playRowHeight)
+                Color.clear.frame(maxWidth: .infinity).frame(height: Self.homeControlHeight)
             }
         }
         .padding(14)
@@ -1189,8 +1189,7 @@ struct ParentDashboardView: View {
     }
 
     private static let actionsMenuWidth: CGFloat = 112
-    /// The full-width row the "let them play here" button sits in.
-    private static let playRowHeight: CGFloat = 44
+
 
     private func childHasDevice(_ profile: Profile) -> Bool {
         !(household.devicesByChild[profile.id.uuidString] ?? []).isEmpty
@@ -1203,11 +1202,15 @@ struct ParentDashboardView: View {
             .foregroundStyle(Color(hex: "4B3FBF"))
             .lineLimit(1).minimumScaleFactor(0.8)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
+            .frame(height: Self.homeControlHeight)
             .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
     }
 
     /// `.btn.ghost` from the mockup: stronger glass, white ink.
+    /// Every control in a child card's action rows is this tall, so "מידע נוסף"
+    /// and "פעולות" can never end up different heights (Rani).
+    static let homeControlHeight: CGFloat = 42
+
     private func homeGhostLabel(_ text: String, width: CGFloat? = nil) -> some View {
         Text(text)
             .font(.system(size: 13.5, weight: .heavy, design: .rounded))
@@ -1215,7 +1218,7 @@ struct ParentDashboardView: View {
             .lineLimit(1).minimumScaleFactor(0.65)
             .frame(width: width)
             .frame(maxWidth: width == nil ? .infinity : nil)
-            .padding(.vertical, 10)
+            .frame(height: Self.homeControlHeight)
             .padding(.horizontal, width == nil ? 8 : 0)
             .background(Color.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
@@ -1827,7 +1830,7 @@ struct ParentDashboardView: View {
                     .overlay(alignment: .bottomTrailing) {
                         gridCardMenu(row.profile)
                             .padding(14)
-                            .padding(.bottom, Self.playRowHeight + 8)
+                            .padding(.bottom, Self.homeControlHeight + 8)
                     }
                     // 🧒 One tap hands THIS device to THIS child. Parents wrote in
                     // that they could not find Kid Mode at all when it lived only
@@ -1841,7 +1844,7 @@ struct ParentDashboardView: View {
                                 Haptic.light()
                                 kidModeStart = row.profile
                             } label: {
-                                homePrimaryLabel(tr("תְּנוּ לוֹ לְשַׂחֵק כָּאן 🧒"))
+                                homePrimaryLabel(tr("תְּנוּ לְ\(row.profile.name) לְשַׂחֵק כָּאן 🧒"))
                             }
                             .buttonStyle(.plain)
                             .padding(14)
@@ -1860,7 +1863,7 @@ struct ParentDashboardView: View {
                             }
                             .buttonStyle(.borderless)
                             .padding(.horizontal, 14)
-                            .padding(.bottom, 14 + Self.playRowHeight + 8)
+                            .padding(.bottom, 14 + Self.homeControlHeight + 8)
                             .padding(.trailing, Self.actionsMenuWidth + 8)
                             .environment(\.layoutDirection, .app)
                         }
