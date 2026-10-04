@@ -52,7 +52,7 @@ struct ChildWorldsView: View {
                 }
                 .glassRows()
             }
-            .readableOnWideShort()
+            .readableColumn()
             .glassForm()
             .navigationTitle(tr("עוֹלָמוֹת פְּעִילִים"))
             .navigationBarTitleDisplayMode(.inline)

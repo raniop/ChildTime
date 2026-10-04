@@ -46,6 +46,11 @@ struct PackDetailView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
                 .padding(.bottom, 32)
+                // 📐 On an iPad in landscape this page ran its paragraphs 1376pt
+                // across and left the bottom half of the glass empty. One card
+                // column, centred — the same shape the page has on a phone.
+                .frame(maxWidth: 680)
+                .frame(maxWidth: .infinity)
             }
         }
         .railDismiss(tr("סְגֹר")) { Haptic.light(); onClose() }

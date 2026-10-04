@@ -77,7 +77,7 @@ struct ParentFeedbackView: View {
             }
             .glassRows()
         }
-        .readableOnWideShort()
+        .readableColumn()
             .glassForm()
         .onAppear { focused = true }
     }

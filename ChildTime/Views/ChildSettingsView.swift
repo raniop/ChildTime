@@ -116,7 +116,7 @@ struct ChildSettingsView: View {
             .glassRows()
             advancedSection(p)
         }
-        .readableOnWideShort()
+        .readableColumn()
         .glassForm()
     }
 

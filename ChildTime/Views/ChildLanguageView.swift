@@ -61,7 +61,7 @@ struct ChildLanguageView: View {
                 }
                 .glassRows()
             }
-            .readableOnWideShort()
+            .readableColumn()
             .glassForm()
             .navigationTitle(tr("שָׂפָה"))
             .navigationBarTitleDisplayMode(.inline)
