@@ -55,6 +55,18 @@ struct Game2048View: View {
     }
     private var maxTile: Int { tiles.map(\.value).max() ?? 2 }
     private var grade: Int { MiniGameLevel.grade(for: topic ?? .math) }
+    /// 🎚️ The learning in 2048 is the bonus question, so that is what scales:
+    /// ג׳–ד׳ every 5 moves, ה׳–ו׳ every 4, ז׳–ח׳ every 3.
+    private var movesPerBonus: Int {
+        switch MiniGameBand.of(grade) {
+        case .upper: return 4
+        case .top:   return 3
+        default:     return Self.movesPerBonus
+        }
+    }
+    /// And the reward for a right answer: half the biggest tile for a ג׳ child,
+    /// a quarter of it by ז׳ — the board stays a puzzle, not a gift.
+    private var bonusTileDivisor: Int { MiniGameBand.of(grade) >= .top ? 4 : 2 }
 
     var body: some View {
         ZStack {
@@ -276,7 +288,7 @@ struct Game2048View: View {
             }
             spawn()
             moves += 1
-            if moves % Self.movesPerBonus == 0 {
+            if moves % movesPerBonus == 0 {
                 askBonus()
             } else if !Board2048.canMove(tiles) {
                 noMoves = true
@@ -301,7 +313,7 @@ struct Game2048View: View {
         if right {
             bonusRight += 1
             // A bonus tile: half the biggest on the board (4 at least).
-            let v = max(4, maxTile / 2)
+            let v = max(4, maxTile / bonusTileDivisor)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 if spawn(value: v) {
                     burst += 1

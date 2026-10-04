@@ -251,7 +251,7 @@ struct BalanceGameView: View {
     private func load() {
         if !numbersWorld, !bank.isEmpty {
             let item = bank[index % bank.count]
-            puzzle = BalanceGen.compare(item) ?? BalanceGen.make(grade: grade, topic: .math)
+            puzzle = BalanceGen.compare(item, grade: grade) ?? BalanceGen.make(grade: grade, topic: .math)
         } else {
             puzzle = BalanceGen.make(grade: grade, topic: topic ?? .math)
         }

@@ -60,7 +60,7 @@ enum MathFacts {
                 let a = Int.random(in: 3...12), b = Int.random(in: 3...12)
                 return Fact(expression: "\(a * b) ÷ \(a)", answer: b)
             }
-        case 5, 6:
+        case 5:
             switch Int.random(in: 0...2) {
             case 0:
                 let a = Int.random(in: 6...12), b = Int.random(in: 6...12)
@@ -72,13 +72,52 @@ enum MathFacts {
                 let a = Int.random(in: 6...12), b = Int.random(in: 6...12)
                 return Fact(expression: "\(a * b) ÷ \(a)", answer: b)
             }
-        default:   // ז׳–ח׳
-            if Bool.random() {
-                let a = -Int.random(in: 2...12), b = Int.random(in: 2...15)
-                return Fact(expression: "(−\(abs(a))) + \(b)", answer: a + b)
+        case 6:
+            // ו׳: order of operations with brackets, three-digit × one-digit,
+            // long division — the ה׳ facts are a warm-up by now.
+            switch Int.random(in: 0...3) {
+            case 0:
+                let a = Int.random(in: 2...9), b = Int.random(in: 2...9), c = Int.random(in: 2...12)
+                return Fact(expression: "(\(a) + \(b)) × \(c)", answer: (a + b) * c)
+            case 1:
+                let a = Int.random(in: 11...40), b = Int.random(in: 3...9)
+                return Fact(expression: "\(a) × \(b)", answer: a * b)
+            case 2:
+                let b = Int.random(in: 3...9), q = Int.random(in: 11...40)
+                return Fact(expression: "\(b * q) ÷ \(b)", answer: q)
+            default:
+                let a = Int.random(in: 2...9), b = Int.random(in: 2...9), c = Int.random(in: 2...9)
+                return Fact(expression: "\(a) × \(b) − \(c)", answer: a * b - c)
             }
-            let a = Int.random(in: 2...12)
-            return Fact(expression: "\(a)²", answer: a * a)
+        case 7:
+            // ז׳: signed numbers and powers.
+            switch Int.random(in: 0...2) {
+            case 0:
+                let a = Int.random(in: 2...12), b = Int.random(in: 2...15)
+                return Fact(expression: "(−\(a)) + \(b)", answer: b - a)
+            case 1:
+                let a = Int.random(in: 2...12), b = Int.random(in: 2...12)
+                return Fact(expression: "(−\(a)) × \(b)", answer: -a * b)
+            default:
+                let a = Int.random(in: 2...15)
+                return Fact(expression: "\(a)²", answer: a * a)
+            }
+        default:   // ח׳
+            // ח׳: roots, cubes, a product of two negatives, powers of two.
+            switch Int.random(in: 0...3) {
+            case 0:
+                let a = Int.random(in: 4...20)
+                return Fact(expression: "√\(a * a)", answer: a)
+            case 1:
+                let a = Int.random(in: 2...8)
+                return Fact(expression: "\(a)³", answer: a * a * a)
+            case 2:
+                let a = Int.random(in: 2...12), b = Int.random(in: 2...12)
+                return Fact(expression: "(−\(a)) × (−\(b))", answer: a * b)
+            default:
+                let a = Int.random(in: 2...9), b = Int.random(in: 2...6)
+                return Fact(expression: "\(a)² − \(b)²", answer: a * a - b * b)
+            }
         }
     }
 
@@ -242,6 +281,25 @@ enum MatchPairsSource: Equatable {
         Word(emoji: "💧", label: tr("מַיִם"), english: "water"),
     ] }
 
+    /// ז׳–ח׳: words a seventh grader meets in the textbook, not words that
+    /// are hard to spell. The English ladder rises by vocabulary only.
+    private static var laterWords: [Word] { [
+        Word(emoji: "🌦️", label: tr("מַזָּג אֲוִיר"), english: "weather"),
+        Word(emoji: "📚", label: tr("סִפְרִיָּה"), english: "library"),
+        Word(emoji: "🍳", label: tr("אֲרוּחַת בֹּקֶר"), english: "breakfast"),
+        Word(emoji: "🌍", label: tr("עוֹלָם"), english: "world"),
+        Word(emoji: "🚑", label: tr("אַמְבּוּלַנְס"), english: "ambulance"),
+        Word(emoji: "🏥", label: tr("בֵּית חוֹלִים"), english: "hospital"),
+        Word(emoji: "🧪", label: tr("נִסּוּי"), english: "experiment"),
+        Word(emoji: "🗺️", label: tr("מַסָּע"), english: "journey"),
+        Word(emoji: "🌉", label: tr("גֶּשֶׁר"), english: "bridge"),
+        Word(emoji: "🏖️", label: tr("חוֹף"), english: "beach"),
+        Word(emoji: "🎒", label: tr("שִׁעוּרֵי בַּיִת"), english: "homework"),
+        Word(emoji: "🌡️", label: tr("טֶמְפֶּרָטוּרָה"), english: "temperature"),
+        Word(emoji: "🦷", label: tr("רוֹפֵא שִׁנַּיִם"), english: "dentist"),
+        Word(emoji: "🎟️", label: tr("כַּרְטִיס"), english: "ticket"),
+    ] }
+
     private static var advancedWords: [Word] { [
         Word(emoji: "🏫", label: tr("בֵּית סֵפֶר"), english: "school"),
         Word(emoji: "🤝", label: tr("חָבֵר"), english: "friend"),
@@ -266,7 +324,15 @@ enum MatchPairsSource: Equatable {
     /// side is the picture alone — an American child matching "dog" to "dog"
     /// would be no game at all.
     static func englishPairs(count: Int, grade: Int) -> [MatchPair] {
-        let list = grade <= 3 ? basicWords : (Array(basicWords.shuffled().prefix(2)) + advancedWords)
+        let list: [Word]
+        switch MiniGameBand.of(grade) {
+        case .preReader, .lower, .middle:
+            list = basicWords
+        case .upper:
+            list = Array(basicWords.shuffled().prefix(2)) + advancedWords
+        case .top:
+            list = Array(advancedWords.shuffled().prefix(3)) + laterWords
+        }
         let pictureOnly = LanguageStore.shared.current == .en
         return list.shuffled().prefix(count).map { w in
             MatchPair(left: pictureOnly ? w.emoji : "\(w.emoji) \(w.label)",
@@ -355,25 +421,56 @@ enum BalloonSets {
         }
     }
 
+    /// Every set has two rungs: the picture-level sort for א׳–ד׳, and a real
+    /// classification from ה׳ — sea MAMMALS instead of "lives in the sea", gas
+    /// giants instead of "is a planet", carnivores instead of "is a dinosaur",
+    /// English VERBS instead of English animals. Same game, grown-up rule.
     static func make(for topic: Topic?, grade: Int) -> BalloonSet {
+        let hard = MiniGameBand.of(grade) >= .upper
         switch topic {
-        case .sea?, .animals?:      return seaAnimals()
-        case .flags?, .geography?:  return grade >= 2 ? capitals() : numbers(grade: grade)
-        case .space?:               return planets()
-        case .dinosaurs?:           return dinosaurs()
-        case .soccer?:              return soccer()
-        case .english?:             return englishAnimals()
-        case .science?:             return Bool.random() ? planets() : seaAnimals()
+        case .sea?, .animals?:      return seaAnimals(hard: hard)
+        case .flags?, .geography?:  return grade >= 2 ? capitals(grade: grade) : numbers(grade: grade)
+        case .space?:               return planets(hard: hard)
+        case .dinosaurs?:           return dinosaurs(hard: hard)
+        case .soccer?:              return soccer(hard: hard)
+        case .english?:             return englishWords(hard: hard)
+        case .science?:             return Bool.random() ? planets(hard: hard) : seaAnimals(hard: hard)
         case .math?:                return numbers(grade: grade)
         default:
-            var all: [() -> BalloonSet] = [{ numbers(grade: grade) }, { seaAnimals() }, { planets() }]
-            if grade >= 2 { all.append { capitals() } }
+            var all: [() -> BalloonSet] = [{ numbers(grade: grade) }, { seaAnimals(hard: hard) }, { planets(hard: hard) }]
+            if grade >= 2 { all.append { capitals(grade: grade) } }
             return all.randomElement()!()
         }
     }
 
-    static func seaAnimals() -> BalloonSet {
+    /// ה׳+: which of the sea's animals are MAMMALS — a dolphin and a whale
+    /// against a shark, an octopus and a turtle. The easy board's rule
+    /// ("lives in the sea") a ו׳ child solves without reading.
+    static func seaMammals() -> BalloonSet {
         BalloonSet(
+            prompt: tr("פּוֹצְצוּ אֶת כָּל הַיּוֹנְקִים שֶׁחַיִּים בַּיָּם!"),
+            topic: .sea,
+            targets: [
+                BalloonItem(emoji: "🐬", label: tr("דּוֹלְפִין"), correct: true),
+                BalloonItem(emoji: "🐳", label: tr("לִוְיָתָן"), correct: true),
+                BalloonItem(emoji: "🦭", label: tr("כֶּלֶב יָם"), correct: true),
+                BalloonItem(emoji: "🐋", label: tr("אוֹרְקָה"), correct: true),
+            ],
+            others: [
+                BalloonItem(emoji: "🦈", label: tr("כָּרִישׁ"), correct: false),
+                BalloonItem(emoji: "🐙", label: tr("תְּמָנוּן"), correct: false),
+                BalloonItem(emoji: "🪼", label: tr("מֵדוּזָה"), correct: false),
+                BalloonItem(emoji: "🦀", label: tr("סַרְטָן"), correct: false),
+                BalloonItem(emoji: "🐠", label: tr("דָּג"), correct: false),
+                BalloonItem(emoji: "🐢", label: tr("צָב יָם"), correct: false),
+                BalloonItem(emoji: "🦑", label: tr("דְּיוֹנוּן"), correct: false),
+                BalloonItem(emoji: "⭐", label: tr("כּוֹכַב יָם"), correct: false),
+            ])
+    }
+
+    static func seaAnimals(hard: Bool = false) -> BalloonSet {
+        if hard { return seaMammals() }
+        return BalloonSet(
             prompt: tr("פּוֹצְצוּ אֶת כָּל הַחַיּוֹת שֶׁחַיּוֹת בַּיָּם!"),
             topic: .sea,
             targets: [
@@ -398,15 +495,27 @@ enum BalloonSets {
             ])
     }
 
-    /// Even (or odd, or multiples of n) — sized to what the grade knows.
+    /// Even / odd / multiples of n / squares / primes — the rule and the range
+    /// both climb. Even-or-odd stops being offered from ה׳: a ו׳ child reads
+    /// it off the last digit without thinking.
     static func numbers(grade: Int) -> BalloonSet {
         let g = max(1, grade)
-        let top = g <= 1 ? 20 : (g == 2 ? 100 : 200)
-        enum Rule { case even, odd, multiple(Int) }
-        var rules: [Rule] = [.even, .odd]
-        if g >= 3 { rules += [.multiple([3, 4, 5].randomElement()!)] }
-        if g >= 5 { rules += [.multiple([6, 7, 9].randomElement()!)] }
-        let rule = rules.randomElement()!
+        let band = MiniGameBand.of(g)
+        let top: Int
+        switch band {
+        case .preReader, .lower: top = g <= 1 ? 20 : 100
+        case .middle:            top = 200
+        case .upper:             top = 500
+        case .top:               top = 1000
+        }
+        enum Rule { case even, odd, multiple(Int), square, prime }
+        var rules: [Rule] = []
+        if band <= .middle { rules += [.even, .odd] }
+        if g >= 3 { rules.append(.multiple([3, 4, 5].randomElement()!)) }
+        if g >= 5 { rules += [.multiple([6, 7, 9].randomElement()!), .square] }
+        if g >= 6 { rules.append(.multiple([11, 12, 15].randomElement()!)) }
+        if g >= 7 { rules.append(.prime) }
+        let rule = rules.randomElement() ?? .even
         let prompt: String
         let isTarget: (Int) -> Bool
         switch rule {
@@ -419,18 +528,44 @@ enum BalloonSets {
         case .multiple(let n):
             prompt = tr("פּוֹצְצוּ אֶת כָּל הַמִּסְפָּרִים שֶׁמִּתְחַלְּקִים בְּ־\(n)!")
             isTarget = { $0 % n == 0 }
+        case .square:
+            prompt = tr("פּוֹצְצוּ אֶת כָּל הַמִּסְפָּרִים הָרִבּוּעִיִּים!")
+            let squares = Set((1...40).map { $0 * $0 })
+            isTarget = { squares.contains($0) }
+        case .prime:
+            prompt = tr("פּוֹצְצוּ אֶת כָּל הַמִּסְפָּרִים הָרִאשׁוֹנִיִּים!")
+            isTarget = { n in
+                guard n > 1 else { return false }
+                if n < 4 { return true }
+                if n % 2 == 0 { return false }
+                var d = 3
+                while d * d <= n {
+                    if n % d == 0 { return false }
+                    d += 2
+                }
+                return true
+            }
         }
         let pool = Array(1...top).shuffled()
+        // A sparse rule (squares, primes) needs its targets found across the
+        // WHOLE range, not in the first slice of a shuffle.
         let targets = pool.filter(isTarget).prefix(14).map { BalloonItem(emoji: "", label: "\($0)", correct: true) }
-        let others = pool.filter { !isTarget($0) }.prefix(14).map { BalloonItem(emoji: "", label: "\($0)", correct: false) }
+        // Near misses: a square's neighbours, a prime's odd neighbours.
+        let misses = pool.filter { !isTarget($0) && (isTarget($0 - 1) || isTarget($0 + 1)) }.prefix(7)
+        let rest = pool.filter { !isTarget($0) && !misses.contains($0) }.prefix(14 - misses.count)
+        let others = (Array(misses) + Array(rest)).map { BalloonItem(emoji: "", label: "\($0)", correct: false) }
         return BalloonSet(prompt: prompt, topic: .math, targets: Array(targets), others: Array(others))
     }
 
     /// Capitals against big cities that are NOT capitals — each with its flag,
     /// so 🇪🇸 מַדְרִיד and 🇪🇸 בַּרְצֶלוֹנָה make the child think.
-    static func capitals() -> BalloonSet {
-        let caps = MatchPairsSource.capitalList.filter(\.easy)
-            .map { BalloonItem(emoji: $0.flag, label: $0.city, correct: true) }
+    static func capitals(grade: Int) -> BalloonSet {
+        // ה׳+: Ottawa, Canberra and Ankara join the board — the easy half
+        // alone (Paris, Rome, London) is a ג׳ round.
+        let list = MiniGameBand.of(grade) >= .upper
+            ? MatchPairsSource.capitalList
+            : MatchPairsSource.capitalList.filter(\.easy)
+        let caps = list.map { BalloonItem(emoji: $0.flag, label: $0.city, correct: true) }
         return BalloonSet(
             prompt: tr("פּוֹצְצוּ אֶת כָּל עָרֵי הַבִּירָה!"),
             topic: .geography,
@@ -448,8 +583,32 @@ enum BalloonSets {
             ])
     }
 
-    static func planets() -> BalloonSet {
+    /// ה׳+: the gas giants against the rocky planets — the easy board only
+    /// asks "is it a planet at all".
+    static func gasGiants() -> BalloonSet {
         BalloonSet(
+            prompt: tr("פּוֹצְצוּ אֶת כָּל כּוֹכְבֵי הַלֶּכֶת הַגָּזִיִּים!"),
+            topic: .space,
+            targets: [
+                BalloonItem(emoji: "🟠", label: tr("צֶדֶק"), correct: true),
+                BalloonItem(emoji: "🪐", label: tr("שַׁבְּתַאי"), correct: true),
+                BalloonItem(emoji: "🟢", label: tr("אוּרָנוּס"), correct: true),
+                BalloonItem(emoji: "🔵", label: tr("נֶפְּטוּן"), correct: true),
+            ],
+            others: [
+                BalloonItem(emoji: "🟤", label: tr("כּוֹכָב חַמָּה"), correct: false),
+                BalloonItem(emoji: "🟡", label: tr("נֹגַהּ"), correct: false),
+                BalloonItem(emoji: "🌍", label: tr("כַּדּוּר הָאָרֶץ"), correct: false),
+                BalloonItem(emoji: "🔴", label: tr("מַאְדִּים"), correct: false),
+                BalloonItem(emoji: "🌙", label: tr("הַיָּרֵחַ"), correct: false),
+                BalloonItem(emoji: "☄️", label: tr("שָׁבִיט"), correct: false),
+                BalloonItem(emoji: "🪨", label: tr("אַסְטֶרוֹאִיד"), correct: false),
+            ])
+    }
+
+    static func planets(hard: Bool = false) -> BalloonSet {
+        if hard { return gasGiants() }
+        return BalloonSet(
             prompt: tr("פּוֹצְצוּ אֶת כָּל כּוֹכְבֵי הַלֶּכֶת!"),
             topic: .space,
             targets: [
@@ -476,8 +635,31 @@ enum BalloonSets {
     /// Real dinosaurs against animals kids often mistake for them (a mammoth, a
     /// crocodile). Flying and swimming reptiles are left out on purpose — they
     /// weren't dinosaurs, and a balloon is no place for that fine print.
-    static func dinosaurs() -> BalloonSet {
+    /// ה׳+: which of them ATE MEAT. "Is it a dinosaur" is a ב׳ question.
+    static func dinosaurCarnivores() -> BalloonSet {
         BalloonSet(
+            prompt: tr("פּוֹצְצוּ אֶת כָּל הַדִּינוֹזָאוּרִים שֶׁאָכְלוּ בָּשָׂר!"),
+            topic: .dinosaurs,
+            targets: [
+                BalloonItem(emoji: "🦖", label: tr("טִירָנוֹזָאוּרוּס"), correct: true),
+                BalloonItem(emoji: "🦖", label: tr("וֶלוֹצִירַפְּטוֹר"), correct: true),
+                BalloonItem(emoji: "🦖", label: tr("סְפִּינוֹזָאוּרוּס"), correct: true),
+                BalloonItem(emoji: "🦖", label: tr("אַלוֹזָאוּרוּס"), correct: true),
+                BalloonItem(emoji: "🦖", label: tr("דִּילוֹפוֹזָאוּרוּס"), correct: true),
+            ],
+            others: [
+                BalloonItem(emoji: "🦴", label: tr("טְרִיצֶרָטוֹפְּס"), correct: false),
+                BalloonItem(emoji: "🦴", label: tr("סְטֶגוֹזָאוּרוּס"), correct: false),
+                BalloonItem(emoji: "🦕", label: tr("בְּרָכִיוֹזָאוּרוּס"), correct: false),
+                BalloonItem(emoji: "🦕", label: tr("דִּיפְּלוֹדוֹקוּס"), correct: false),
+                BalloonItem(emoji: "🦴", label: tr("אַנְקִילוֹזָאוּרוּס"), correct: false),
+                BalloonItem(emoji: "🦕", label: tr("פָּרָזָאוּרוֹלוֹפוּס"), correct: false),
+            ])
+    }
+
+    static func dinosaurs(hard: Bool = false) -> BalloonSet {
+        if hard { return dinosaurCarnivores() }
+        return BalloonSet(
             prompt: tr("פּוֹצְצוּ אֶת כָּל הַדִּינוֹזָאוּרִים!"),
             topic: .dinosaurs,
             targets: [
@@ -502,8 +684,30 @@ enum BalloonSets {
 
     /// Soccer things against other sports. (Club rosters change every
     /// transfer window — a balloon must still be true next year.)
-    static func soccer() -> BalloonSet {
+    /// ה׳+: the defensive roles against the attacking ones — real football
+    /// knowledge, instead of "is a ball part of football".
+    static func soccerRoles() -> BalloonSet {
         BalloonSet(
+            prompt: tr("פּוֹצְצוּ אֶת כָּל תַּפְקִידֵי הַהֲגָנָה!"),
+            topic: .soccer,
+            targets: [
+                BalloonItem(emoji: "🧤", label: tr("שׁוֹעֵר"), correct: true),
+                BalloonItem(emoji: "🛡️", label: tr("בַּלָּם"), correct: true),
+                BalloonItem(emoji: "🛡️", label: tr("מֵגֵן"), correct: true),
+            ],
+            others: [
+                BalloonItem(emoji: "🎯", label: tr("חָלוּץ"), correct: false),
+                BalloonItem(emoji: "🎯", label: tr("כַּנְפָן"), correct: false),
+                BalloonItem(emoji: "🔄", label: tr("קַשָּׁר"), correct: false),
+                BalloonItem(emoji: "🧑‍🏫", label: tr("מְאַמֵּן"), correct: false),
+                BalloonItem(emoji: "🧑‍⚖️", label: tr("שׁוֹפֵט"), correct: false),
+                BalloonItem(emoji: "📣", label: tr("אוֹהֵד"), correct: false),
+            ])
+    }
+
+    static func soccer(hard: Bool = false) -> BalloonSet {
+        if hard { return soccerRoles() }
+        return BalloonSet(
             prompt: tr("פּוֹצְצוּ אֶת כָּל מַה שֶּׁשַּׁיָּךְ לְכַדּוּרֶגֶל!"),
             topic: .soccer,
             targets: [
@@ -527,10 +731,22 @@ enum BalloonSets {
             ])
     }
 
-    /// English animal words against other English words — no pictures: the
-    /// child has to read the word.
-    static func englishAnimals() -> BalloonSet {
-        BalloonSet(
+    /// English words against other English words — no pictures: the child has
+    /// to read the word. ג׳–ד׳ sort animals from everything else; ה׳ and up
+    /// sort VERBS from nouns, which is what the English lesson is about by
+    /// then. The words themselves stay everyday words — English is a second
+    /// language here and its ladder is meant to stay gentle.
+    static func englishWords(hard: Bool = false) -> BalloonSet {
+        if hard {
+            return BalloonSet(
+                prompt: tr("פּוֹצְצוּ אֶת כָּל הַפְּעָלִים בְּאַנְגְּלִית!"),
+                topic: .english,
+                targets: ["run", "eat", "jump", "write", "sing", "read", "swim", "drink", "sleep", "think"]
+                    .map { BalloonItem(emoji: "", label: $0, correct: true) },
+                others: ["table", "water", "school", "friend", "window", "garden", "bread", "river", "chair", "flower"]
+                    .map { BalloonItem(emoji: "", label: $0, correct: false) })
+        }
+        return BalloonSet(
             prompt: tr("פּוֹצְצוּ אֶת כָּל הַחַיּוֹת בְּאַנְגְּלִית!"),
             topic: .english,
             targets: ["dog", "cat", "horse", "lion", "fish", "bird", "cow", "monkey", "duck"]
@@ -611,53 +827,54 @@ enum WordSets {
         }
     }
 
-    static func words(for topic: Topic?, script: SpellScript, grade: Int) -> [SpellWord] {
-        Array(list(for: topic, script: script, grade: grade).shuffled().prefix(wordCount))
+    /// 🧩 The five words one spelling board shows. `maxLetters` is what a row
+    /// of slots can hold before the tiles shrink out of reach.
+    static func words(for topic: Topic?, script: SpellScript, grade: Int, maxLetters: Int = 8) -> [SpellWord] {
+        Array(list(for: topic, script: script, grade: grade, maxLetters: maxLetters).prefix(wordCount))
     }
 
-    /// The whole themed list (the word search picks what fits its grid).
-    static func list(for topic: Topic?, script: SpellScript, grade: Int) -> [SpellWord] {
+    /// The child's own rung of the ladder, already shuffled (the word search
+    /// takes whatever fits its grid).
+    ///
+    /// 🇮🇱 Hebrew climbs steeply — it is the mother tongue, and by ה׳ a board of
+    /// כלב / בית / ספר is an insult. 🇺🇸 English climbs gently — it starts in ג׳
+    /// as a foreign language and the ו׳ level is already right.
+    static func list(for topic: Topic?, script: SpellScript, grade: Int, maxLetters: Int = 8) -> [SpellWord] {
         switch script {
-        case .english: return english(topic, grade: grade)
-        case .hebrew:  return hebrew(topic)
+        case .hebrew:
+            return HebrewLadder.words(topic: topic, grade: grade, maxLetters: maxLetters, minimum: wordCount)
         // Picture lists exist in English and Hebrew only; the other scripts
         // spell a world's own answers (GameContent.words).
-        case .cyrillic, .arabic: return english(topic, grade: grade)
+        case .english, .cyrillic, .arabic:
+            return english(topic, grade: grade, maxLetters: maxLetters)
         }
     }
 
-    private static func english(_ topic: Topic?, grade: Int) -> [SpellWord] {
+    /// 🇺🇸 A themed world keeps its own short picture words; everything else
+    /// comes off English's two gentle rungs (see `EnglishLadder`).
+    private static func english(_ topic: Topic?, grade: Int, maxLetters: Int) -> [SpellWord] {
         func w(_ e: String, _ s: String) -> SpellWord { SpellWord(emoji: e, word: s) }
+        let themed: [SpellWord]
         switch topic {
-        case .soccer?:    return [w("⚽", "ball"), w("🥅", "goal"), w("👟", "shoe"), w("🚩", "flag"), w("🏆", "cup"), w("🧤", "glove")]
-        case .sea?:       return [w("🐟", "fish"), w("🦀", "crab"), w("🦈", "shark"), w("🐳", "whale"), w("🐚", "shell"), w("🐙", "octopus")]
-        case .space?:     return [w("☀️", "sun"), w("🌙", "moon"), w("⭐", "star"), w("🚀", "rocket"), w("🪐", "planet"), w("👽", "alien")]
-        case .animals?:   return [w("🐶", "dog"), w("🐱", "cat"), w("🐄", "cow"), w("🦁", "lion"), w("🐴", "horse"), w("🦆", "duck"), w("🐸", "frog")]
-        case .dinosaurs?: return [w("🦴", "bone"), w("🥚", "egg"), w("🦷", "tooth"), w("🍃", "leaf"), w("🪨", "rock"), w("🌋", "volcano")]
-        case .flags?:     return [w("🚩", "flag"), w("🗺️", "map"), w("🏙️", "city"), w("🚢", "ship"), w("✈️", "plane"), w("🏝️", "island")]
-        default:
-            if grade <= 3 {
-                return [w("🐱", "cat"), w("🐶", "dog"), w("☀️", "sun"), w("🎩", "hat"), w("🛏️", "bed"), w("🚌", "bus"),
-                        w("🥚", "egg"), w("🦊", "fox"), w("📦", "box"), w("🐟", "fish"), w("⭐", "star"), w("🌳", "tree")]
-            }
-            return [w("🍎", "apple"), w("🏠", "house"), w("🪑", "chair"), w("🚆", "train"), w("💧", "water"), w("🍞", "bread"),
-                    w("🕐", "clock"), w("🐍", "snake"), w("🐯", "tiger"), w("🍕", "pizza"), w("🌸", "flower"), w("🦓", "zebra")]
+        case .soccer?:    themed = [w("⚽", "ball"), w("🥅", "goal"), w("👟", "shoe"), w("🚩", "flag"), w("🏆", "cup"), w("🧤", "glove")]
+        case .sea?:       themed = [w("🐟", "fish"), w("🦀", "crab"), w("🦈", "shark"), w("🐳", "whale"), w("🐚", "shell"), w("🐙", "octopus")]
+        case .space?:     themed = [w("☀️", "sun"), w("🌙", "moon"), w("⭐", "star"), w("🚀", "rocket"), w("🪐", "planet"), w("👽", "alien")]
+        case .animals?:   themed = [w("🐶", "dog"), w("🐱", "cat"), w("🐄", "cow"), w("🦁", "lion"), w("🐴", "horse"), w("🦆", "duck"), w("🐸", "frog")]
+        case .dinosaurs?: themed = [w("🦴", "bone"), w("🥚", "egg"), w("🦷", "tooth"), w("🍃", "leaf"), w("🪨", "rock"), w("🌋", "volcano")]
+        case .flags?:     themed = [w("🚩", "flag"), w("🗺️", "map"), w("🏙️", "city"), w("🚢", "ship"), w("✈️", "plane"), w("🏝️", "island")]
+        default:          themed = []
         }
-    }
-
-    private static func hebrew(_ topic: Topic?) -> [SpellWord] {
-        func w(_ e: String, _ s: String) -> SpellWord { SpellWord(emoji: e, word: s) }
-        switch topic {
-        case .soccer?:    return [w("⚽", "כדור"), w("🥅", "שער"), w("👟", "נעל"), w("🚩", "דגל"), w("🏆", "גביע")]
-        case .sea?:       return [w("🐟", "דג"), w("🌊", "ים"), w("🦀", "סרטן"), w("🦈", "כריש"), w("🐚", "צדף"), w("🐙", "תמנון")]
-        case .space?:     return [w("☀️", "שמש"), w("🌙", "ירח"), w("⭐", "כוכב"), w("🚀", "חללית"), w("👽", "חייזר")]
-        case .animals?:   return [w("🐶", "כלב"), w("🐱", "חתול"), w("🐴", "סוס"), w("🐘", "פיל"), w("🦁", "אריה"), w("🐒", "קוף"), w("🐄", "פרה")]
-        case .dinosaurs?: return [w("🦴", "עצם"), w("🥚", "ביצה"), w("🦷", "שן"), w("🍃", "עלה"), w("🪨", "סלע"), w("🦖", "דינוזאור")]
-        case .flags?:     return [w("🚩", "דגל"), w("🗺️", "מפה"), w("🏙️", "עיר"), w("🚢", "אונייה"), w("✈️", "מטוס"), w("🏝️", "אי")]
-        default:
-            return [w("🐶", "כלב"), w("🐱", "חתול"), w("🏠", "בית"), w("📖", "ספר"), w("🌳", "עץ"), w("☀️", "שמש"),
-                    w("🌸", "פרח"), w("🍎", "תפוח"), w("⚽", "כדור"), w("💧", "מים"), w("🍞", "לחם"), w("🥛", "חלב")]
+        // 🇬🇧 An American child's English is a mother tongue and gets the full
+        // ladder; an Israeli child's English is a second language and gets the
+        // gentle one.
+        let ladder = EnglishLadder.words(grade: grade, maxLetters: maxLetters, minimum: wordCount,
+                                         motherTongue: SpellScript.english.isMotherTongue)
+        guard !themed.isEmpty else { return ladder }
+        var out = themed.filter { $0.word.count <= maxLetters }.shuffled()
+        if out.count < wordCount {
+            out += ladder.filter { l in !out.contains(where: { $0.word == l.word }) }
         }
+        return out
     }
 }
 
@@ -683,19 +900,29 @@ struct WordSearchBoard {
     let letters: [[Character]]
     let words: [HiddenWord]
     let script: SpellScript
+    /// Words may run diagonally — the finger has to snap the same way the
+    /// board was built, so the rule travels WITH the board.
+    let diagonals: Bool
+    /// Words may run back-to-front (ה׳ and up, mother tongue only).
+    let backwards: Bool
 }
 
 enum WordSearch {
     static let wordCount = 5
 
-    /// 5 themed words hidden across, down (and diagonally from ד׳), the rest
-    /// filled with random letters. English is shown in capitals; Hebrew
-    /// without niqqud, final letters as written.
+    /// 5 themed words hidden in the grid, the rest filled with random letters.
+    /// How large the grid is, whether words run diagonally and whether they
+    /// run backwards all come from `WordSearchShape` — and all three climb
+    /// much faster in the child's own language than in a foreign one.
+    /// English is shown in capitals; Hebrew without niqqud, final letters as
+    /// written.
     static func make(topic: Topic?, script: SpellScript, grade: Int, size: Int) -> WordSearchBoard {
-        let themed = WordSets.list(for: topic, script: script, grade: grade).shuffled()
-        let general = WordSets.list(for: nil, script: script, grade: grade).shuffled()
-        let candidates = (themed + general).filter { (2...size).contains($0.word.count) }
-        return place(candidates, script: script, grade: grade, size: size)
+        let themed = WordSets.list(for: topic, script: script, grade: grade, maxLetters: size)
+        let general = WordSets.list(for: nil, script: script, grade: grade, maxLetters: size)
+        var candidates = themed
+        candidates += general.filter { g in !candidates.contains(where: { $0.word == g.word }) }
+        return place(candidates.filter { (2...size).contains($0.word.count) },
+                     script: script, grade: grade, size: size)
     }
 
     /// 🧺 The world's own short answers (capitals, animals, planets…) hidden in
@@ -705,22 +932,32 @@ enum WordSearch {
     }
 
     private static func place(_ candidates: [SpellWord], script: SpellScript, grade: Int, size: Int) -> WordSearchBoard {
-        var directions = [(0, 1), (1, 0)]
-        if grade >= 4 { directions.append((1, 1)) }
+        let diagonals = WordSearchShape.diagonals(grade: grade, script: script)
+        let backwards = WordSearchShape.backwards(grade: grade, script: script)
+        var directions: [(Int, Int)] = [(0, 1), (1, 0)]
+        if diagonals { directions.append((1, 1)) }
+        if backwards {
+            directions += [(0, -1), (-1, 0)]
+            if diagonals { directions += [(1, -1), (-1, 1)] }
+        }
         var grid = Array(repeating: Array(repeating: Character(" "), count: size), count: size)
         var placed: [HiddenWord] = []
         var used = Set<String>()
-        for cand in candidates where placed.count < wordCount {
+        // The longest words first: they need the emptiest grid.
+        for cand in candidates.sorted(by: { $0.word.count > $1.word.count }) where placed.count < wordCount {
             let word = script.display(cand.word)
             guard used.insert(word).inserted else { continue }
             let letters = Array(word)
+            let span = letters.count - 1
             var done = false
-            for _ in 0..<120 where !done {
+            for _ in 0..<200 where !done {
                 let (dr, dc) = directions.randomElement()!
-                let maxR = size - 1 - dr * (letters.count - 1)
-                let maxC = size - 1 - dc * (letters.count - 1)
-                guard maxR >= 0, maxC >= 0 else { continue }
-                let r0 = Int.random(in: 0...maxR), c0 = Int.random(in: 0...maxC)
+                // The first cell has to leave room for the whole word — in
+                // front of it, or behind it when the word runs backwards.
+                let rLo = dr < 0 ? span : 0, rHi = dr > 0 ? size - 1 - span : size - 1
+                let cLo = dc < 0 ? span : 0, cHi = dc > 0 ? size - 1 - span : size - 1
+                guard rLo <= rHi, cLo <= cHi else { continue }
+                let r0 = Int.random(in: rLo...rHi), c0 = Int.random(in: cLo...cHi)
                 let cells = letters.indices.map { GridCell(r: r0 + dr * $0, c: c0 + dc * $0) }
                 let fits = zip(cells, letters).allSatisfy { cell, ch in
                     grid[cell.r][cell.c] == " " || grid[cell.r][cell.c] == ch
@@ -737,7 +974,8 @@ enum WordSearch {
                 grid[r][c] = alphabet.randomElement()!
             }
         }
-        return WordSearchBoard(size: size, letters: grid, words: placed, script: script)
+        return WordSearchBoard(size: size, letters: grid, words: placed.shuffled(),
+                               script: script, diagonals: diagonals, backwards: backwards)
     }
 }
 
@@ -755,7 +993,7 @@ struct CrushRules {
 
     func display(_ v: Int) -> String {
         switch mode {
-        case .sum, .product: return "\(v)"
+        case .sum, .product: return MathFacts.show(v)
         case .fraction:
             switch v {
             case 2: return "⅙"
@@ -783,19 +1021,31 @@ struct CrushRules {
         mode == .product ? picked.reduce(1, *) : picked.reduce(0, +)
     }
 
-    /// Still on the way to the target?
+    /// Still on the way to the target? A signed round (ז׳–ח׳) can overshoot
+    /// and come back, so there the running total is never "too far".
     func canStillReach(_ picked: [Int]) -> Bool {
         let t = total(picked)
-        if mode == .product { return t <= target && target % t == 0 }
+        if mode == .product { return t != 0 && abs(t) <= abs(target) && target % t == 0 }
+        // A signed board can overshoot and come back, so "too far" is not a
+        // number here — but the selection still lets go after three blocks,
+        // because every solvable combination on the board is two or three.
+        if signed { return picked.count <= 3 }
         return t <= target
     }
 
+    /// Are there negative blocks on this board?
+    var signed: Bool { values.contains { $0 < 0 } }
+
     func hits(_ picked: [Int]) -> Bool { picked.count >= 2 && total(picked) == target }
 
-    /// "3 + 4 = 7" / "3 × 4 = 12" — what the child has picked so far.
+    /// "3 + 4 = 7" / "3 × 4 = 12" / "8 + (−5) = 3" — what the child has
+    /// picked so far.
     func expression(_ picked: [Int]) -> String {
         let op = mode == .product ? " × " : " + "
-        return picked.map(display).joined(separator: op)
+        return picked.map { v -> String in
+            let shown = display(v)
+            return v < 0 && picked.count > 1 ? "(\(shown))" : shown
+        }.joined(separator: op)
     }
 
     var symbol: String { mode == .product ? "×" : "+" }
@@ -814,36 +1064,84 @@ struct CrushRules {
 }
 
 enum CrushBoards {
-    /// Ranges by grade: א׳ sums to 10, ב׳ sums to 10–20, ג׳–ד׳ sums to 20–50 or
-    /// products (more often in the math world), ה׳+ fractions and decimals to 1.
+    /// One rung per grade, following CurriculumMath:
+    ///   א׳  sums to 10          ב׳  sums to 10–20
+    ///   ג׳  sums to 20–30 and the small times table
+    ///   ד׳  sums to 40–60 and products to 72
+    ///   ה׳  fractions and decimals to 1, or round sums to 100
+    ///   ו׳  products to 144 and sums of multiples of 25 to 200
+    ///   ז׳  signed blocks summing to a signed target
+    ///   ח׳  signed products, and sums to 1000 in hundreds and halves
     static func rules(grade: Int, topic: Topic?) -> CrushRules {
+        let productChance = topic == .math ? 0.5 : 0.3
         switch max(1, grade) {
         case 1:
             return CrushRules(mode: .sum, target: 10, values: Array(1...9))
         case 2:
             let t = [10, 12, 15, 20].randomElement()!
             return CrushRules(mode: .sum, target: t, values: Array(1...(t - 1)).filter { $0 <= 15 })
-        case 3, 4:
-            let productChance = topic == .math ? 0.5 : 0.3
+        case 3:
             if Double.random(in: 0...1) < productChance {
-                let t = [12, 18, 20, 24, 30, 36, 40].randomElement()!
+                let t = [12, 18, 20, 24, 30].randomElement()!
+                return CrushRules(mode: .product, target: t,
+                                  values: [2, 3, 4, 5, 6, 9, 10].filter { t % $0 == 0 && $0 < t })
+            }
+            let t = [20, 25, 30].randomElement()!
+            return CrushRules(mode: .sum, target: t, values: Array(2...min(15, t - 2)))
+        case 4:
+            if Double.random(in: 0...1) < productChance {
+                let t = [36, 40, 48, 54, 60, 72].randomElement()!
                 return CrushRules(mode: .product, target: t,
                                   values: [2, 3, 4, 5, 6, 8, 9, 10, 12].filter { t % $0 == 0 && $0 < t })
             }
-            let t = [20, 30, 40, 50].randomElement()!
-            return CrushRules(mode: .sum, target: t, values: Array(2...min(25, t - 2)))
-        case 5, 6:
-            if Bool.random() {
-                return CrushRules(mode: .fraction, target: 12, values: [2, 3, 4, 6, 8, 9, 10])
-            }
-            return CrushRules(mode: .decimal, target: 10, values: Array(1...9))
-        default:
+            let t = [40, 50, 60].randomElement()!
+            return CrushRules(mode: .sum, target: t, values: Array(3...min(29, t - 3)))
+        case 5:
             switch Int.random(in: 0...2) {
             case 0:  return CrushRules(mode: .fraction, target: 12, values: [2, 3, 4, 6, 8, 9, 10])
             case 1:  return CrushRules(mode: .decimal, target: 10, values: Array(1...9))
+            default: return CrushRules(mode: .sum, target: 100,
+                                       values: stride(from: 5, through: 95, by: 5).map { $0 })
+            }
+        case 6:
+            switch Int.random(in: 0...2) {
+            case 0:
+                let t = [84, 96, 108, 120, 144].randomElement()!
+                return CrushRules(mode: .product, target: t,
+                                  values: [2, 3, 4, 6, 7, 8, 9, 12].filter { t % $0 == 0 && $0 < t })
+            case 1:  return CrushRules(mode: .fraction, target: 12, values: [2, 3, 4, 6, 8, 9, 10])
             default:
-                let t = 100
-                return CrushRules(mode: .sum, target: t, values: stride(from: 5, through: 95, by: 5).map { $0 })
+                let t = [150, 175, 200].randomElement()!
+                return CrushRules(mode: .sum, target: t,
+                                  values: stride(from: 25, through: 125, by: 25).map { $0 }
+                                        + stride(from: 10, through: 50, by: 10).map { $0 })
+            }
+        case 7:
+            // ז׳: negative blocks on the board, and a target that can be below
+            // zero — reaching it means adding a loss, not only a gain.
+            switch Int.random(in: 0...1) {
+            case 0:
+                let t = [-10, -6, -4, 4, 6, 10].randomElement()!
+                return CrushRules(mode: .sum, target: t,
+                                  values: Array(-12...(-1)) + Array(1...12))
+            default:
+                let t = [60, 72, 84, 90, 96].randomElement()!
+                return CrushRules(mode: .product, target: t,
+                                  values: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12].filter { t % $0 == 0 && $0 < t })
+            }
+        default:   // ח׳
+            switch Int.random(in: 0...2) {
+            case 0:
+                let t = [-24, -18, 18, 24, 36].randomElement()!
+                return CrushRules(mode: .sum, target: t,
+                                  values: Array(-20...(-2)) + Array(2...20))
+            case 1:
+                let t = [120, 144, 168, 180, 240].randomElement()!
+                return CrushRules(mode: .product, target: t,
+                                  values: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15].filter { t % $0 == 0 && $0 < t })
+            default:
+                return CrushRules(mode: .sum, target: 1000,
+                                  values: stride(from: 50, through: 500, by: 50).map { $0 })
             }
         }
     }
@@ -853,7 +1151,7 @@ enum CrushBoards {
     /// look. Mixing in a few non-divisors makes it a puzzle.
     static func randomValue(_ rules: CrushRules) -> Int {
         if rules.mode == .product, Int.random(in: 0...3) == 0 {
-            return [7, 11, 14, 15, 16].filter { rules.target % $0 != 0 }.randomElement() ?? rules.values.randomElement()!
+            return [7, 11, 14, 15, 16, 17].filter { rules.target % $0 != 0 }.randomElement() ?? rules.values.randomElement()!
         }
         return rules.values.randomElement()!
     }
@@ -911,9 +1209,9 @@ enum LightningStatements {
         let isTrue = Bool.random()
         var shown = fact.answer
         if !isTrue {
-            var offsets = [-2, -1, 1, 2]
-            if abs(fact.answer) >= 20 { offsets += [-10, 10] }
+            var offsets = MiniGameDistractors.numericOffsets(answer: fact.answer, grade: grade)
             if grade < 7 { offsets = offsets.filter { fact.answer + $0 >= 0 } }
+            offsets = offsets.filter { $0 != 0 }
             shown = fact.answer + (offsets.randomElement() ?? 1)
         }
         return LightningStatement(prompt: nil,
@@ -939,7 +1237,10 @@ enum LightningStatements {
             if Bool.random() || q.distractors.isEmpty {
                 return LightningStatement(prompt: q.prompt, claim: q.answer, isTrue: true, topic: t)
             }
-            return LightningStatement(prompt: q.prompt, claim: q.distractors.randomElement()!, isTrue: false, topic: t)
+            // ה׳+ gets the near miss, not the throwaway.
+            let wrong = MiniGameDistractors.pick(answer: q.answer, from: q.distractors, grade: grade)
+                ?? q.distractors[0]
+            return LightningStatement(prompt: q.prompt, claim: wrong, isTrue: false, topic: t)
         }
         return nil
     }
@@ -1063,6 +1364,15 @@ enum SurpriseRound {
         if context == .english || context == .hebrew {
             let spelling = out.filter { $0 == .word || $0 == .wordSearch }
             if !spelling.isEmpty { out += spelling }
+        }
+        // 🎚️ And nothing that is a freebie at this grade (see MiniGameGradeFit)
+        // — a surprise round the child wins without thinking is a worse
+        // interruption than no surprise round.
+        let script = WordSets.script(for: topic, grade: grade)
+        out = out.filter {
+            MiniGameGradeFit.offered($0, grade: grade,
+                                     script: ($0 == .word || $0 == .wordSearch) ? script : nil,
+                                     topic: context ?? topic)
         }
         return out
     }

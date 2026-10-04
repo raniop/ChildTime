@@ -236,7 +236,11 @@ enum WorldGameFit {
     static func games(topic: Topic?, grade: Int) -> [MiniGameKind] {
         guard MiniGameKind.availableForActiveChild else { return [] }
         // 💫 The arena mixes every topic: the three games that mix too.
-        guard let topic else { return [.lightning, .pairs, .balloon] }
+        guard let topic else {
+            return [.lightning, .pairs, .balloon].filter {
+                MiniGameGradeFit.offered($0, grade: grade, topic: nil)
+            }
+        }
         let probe = Probe(topic: topic, grade: grade)
         return order(for: topic).filter { probe.fits($0) }
     }
@@ -278,7 +282,25 @@ enum WorldGameFit {
             return distinct ? GameContent.distinctAnswers(items).count : items.count
         }
 
+        /// The alphabet a spelling game would use for this world — the grade
+        /// table needs it, because a mother-tongue board and a foreign-language
+        /// board are not the same game.
+        var spellScript: SpellScript {
+            let world = source ?? topic
+            // A world with a picture list spells in the app's own script; one
+            // without spells its OWN answers, whatever alphabet those are in.
+            if let source, source != .math, !WordSets.hasThemedList(world, grade: grade),
+               let first = GameContent.words(topic: source, grade: grade).first {
+                return first.script
+            }
+            return WordSets.script(for: world, grade: grade)
+        }
+
         func fits(_ kind: MiniGameKind) -> Bool {
+            // 🎚️ First: is this game worth this child's time at this grade?
+            guard MiniGameGradeFit.offered(kind, grade: grade,
+                                           script: (kind == .word || kind == .wordSearch) ? spellScript : nil,
+                                           topic: source ?? topic) else { return false }
             switch kind {
             case .lightning:
                 return topic == .math || count(maxPrompt: 70, maxAnswer: 28, standalone: false) >= 12

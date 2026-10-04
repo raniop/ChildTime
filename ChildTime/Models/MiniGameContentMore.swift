@@ -50,15 +50,15 @@ enum SortSets {
         case .english:             return english(grade: g)
         case .hebrew:              return hebrew(grade: g)
         case .sea, .animals:       return animals(grade: g, topic: topic)
-        case .space:               return planets()
-        case .dinosaurs:           return dinosaurs()
-        case .soccer:              return soccer()
+        case .space:               return planets(grade: g)
+        case .dinosaurs:           return dinosaurs(grade: g)
+        case .soccer:              return soccer(grade: g)
         case .flags, .geography:   return places(grade: g, topic: topic)
         case .science:             return science(grade: g)
-        case .body:                return body()
+        case .body:                return body(grade: g)
         case .vehicles:            return vehicles(grade: g)
         case .music:               return music(grade: g)
-        case .food:                return food()
+        case .food:                return food(grade: g)
         case .money:               return money(grade: g)
         default:                   return nil
         }
@@ -89,7 +89,8 @@ enum SortSets {
         guard items.count >= 6 else { return nil }
         let cards = items.prefix(roundItems).map { q -> SortItem in
             let right = Bool.random() || q.distractors.isEmpty
-            return SortItem(emoji: "", label: q.prompt, detail: right ? q.answer : q.distractors.randomElement()!,
+            let wrong = MiniGameDistractors.pick(answer: q.answer, from: q.distractors, grade: grade)
+            return SortItem(emoji: "", label: q.prompt, detail: right ? q.answer : (wrong ?? q.answer),
                             basket: right ? 0 : 1)
         }
         return SortSet(baskets: [SortBasket(emoji: "✓", label: tr("נָכוֹן")), SortBasket(emoji: "✗", label: tr("לֹא נָכוֹן"))],
@@ -151,13 +152,34 @@ enum SortSets {
             let many = ["יְלָדִים", "פְּרָחִים", "כּוֹבָעִים", "יְלָדוֹת", "תַּפּוּחִים", "גַּנִּים", "צִפֳּרִים", "מַחְבָּרוֹת", "חֲבֵרִים", "עֲנָנִים"]
             return SortSet(baskets: [SortBasket(emoji: "☝️", label: tr("יָחִיד")), SortBasket(emoji: "🙌", label: tr("רַבִּים"))],
                            items: one.map { w($0, 0) } + many.map { w($0, 1) }, topic: .hebrew)
-        default:
+        case 4:
             let past = ["הָלַךְ", "אָכַל", "כָּתַב", "שִׂחֵק", "שָׁתָה", "צִיֵּר", "קָפַץ", "לָמַד"]
             let present = ["הוֹלֵךְ", "אוֹכֵל", "כּוֹתֵב", "מְשַׂחֵק", "שׁוֹתֶה", "מְצַיֵּר", "קוֹפֵץ", "לוֹמֵד"]
             let future = ["יֵלֵךְ", "יֹאכַל", "יִכְתֹּב", "יְשַׂחֵק", "יִשְׁתֶּה", "יְצַיֵּר", "יִקְפֹּץ", "יִלְמַד"]
             return SortSet(baskets: [SortBasket(emoji: "⏪", label: tr("עָבָר")), SortBasket(emoji: "⏺️", label: tr("הוֹוֶה")),
                                      SortBasket(emoji: "⏩", label: tr("עָתִיד"))],
                            items: past.map { w($0, 0) } + present.map { w($0, 1) } + future.map { w($0, 2) }, topic: .hebrew)
+        case 5, 6:
+            // ה׳–ו׳: the בִּנְיָן a verb is built in. Past / present / future is
+            // a ד׳ board — a native speaker hears the tense without thinking.
+            let paal = ["הָלַךְ", "כָּתַב", "שָׁמַר", "סָגַר", "לָמַד", "בָּנָה", "קָרָא"]
+            let piel = ["דִּבֵּר", "סִפֵּר", "שִׂחֵק", "לִמֵּד", "צִיֵּר", "בִּקֵּר", "שִׁלֵּם"]
+            let hifil = ["הִדְלִיק", "הִסְבִּיר", "הִכְנִיס", "הִרְגִּישׁ", "הִתְחִיל", "הִזְמִין", "הִשְׁאִיר"]
+            return SortSet(baskets: [SortBasket(emoji: "1️⃣", label: tr("בִּנְיַן פָּעַל")),
+                                     SortBasket(emoji: "2️⃣", label: tr("בִּנְיַן פִּעֵל")),
+                                     SortBasket(emoji: "3️⃣", label: tr("בִּנְיַן הִפְעִיל"))],
+                           items: paal.map { w($0, 0) } + piel.map { w($0, 1) } + hifil.map { w($0, 2) }, topic: .hebrew)
+        default:
+            // ז׳–ח׳: שֵׁם פְּעֻלָּה against an adjective against a verb — the
+            // part-of-speech question that still catches a teenager out.
+            let action = ["הֲלִיכָה", "כְּתִיבָה", "שְׁתִיקָה", "חֲשִׁיבָה", "קְרִיאָה", "יְצִירָה", "הַסְבָּרָה"]
+            let adjective = ["מָהִיר", "שָׁקֵט", "עָצוּם", "רָגוּעַ", "נָעִים", "חָרוּץ", "עָמוּק"]
+            let verb = ["הָלַךְ", "כָּתַב", "שָׁתַק", "חָשַׁב", "קָרָא", "יָצַר", "הִסְבִּיר"]
+            return SortSet(baskets: [SortBasket(emoji: "🏃", label: tr("שֵׁם פְּעֻלָּה")),
+                                     SortBasket(emoji: "🎨", label: tr("שֵׁם תֹּאַר")),
+                                     SortBasket(emoji: "⚡", label: tr("פֹּעַל"))],
+                           items: action.map { w($0, 0) } + adjective.map { w($0, 1) } + verb.map { w($0, 2) },
+                           topic: .hebrew)
         }
     }
 
@@ -188,15 +210,39 @@ enum SortSets {
             topic: topic)
     }
 
-    private static func planets() -> SortSet {
+    private static func planets(grade: Int) -> SortSet {
+        // ה׳+: gas giant or rocky planet. "Planet or not a planet" is a ב׳
+        // question — a ו׳ child answers it from the picture.
+        if MiniGameBand.of(grade) >= .upper {
+            return SortSet(
+                baskets: [SortBasket(emoji: "💨", label: tr("כּוֹכַב לֶכֶת גַּזִּי")),
+                          SortBasket(emoji: "🪨", label: tr("כּוֹכַב לֶכֶת סַלְעִי"))],
+                items: [
+                    i("🟠", tr("צֶדֶק"), 0), i("🪐", tr("שַׁבְּתַאי"), 0),
+                    i("🟢", tr("אוּרָנוּס"), 0), i("🔵", tr("נֶפְּטוּן"), 0),
+                    i("🟤", tr("כּוֹכָב חַמָּה"), 1), i("🟡", tr("נֹגַהּ"), 1),
+                    i("🌍", tr("כַּדּוּר הָאָרֶץ"), 1), i("🔴", tr("מַאְדִּים"), 1),
+                ],
+                topic: .space)
+        }
         let b = BalloonSets.planets()
         return SortSet(baskets: [SortBasket(emoji: "🪐", label: tr("כּוֹכַב לֶכֶת")), SortBasket(emoji: "✨", label: tr("לֹא כּוֹכַב לֶכֶת"))],
                        items: b.targets.map { i($0.emoji, $0.label, 0) } + b.others.map { i($0.emoji, $0.label, 1) },
                        topic: .space)
     }
 
-    private static func dinosaurs() -> SortSet {
-        SortSet(
+    private static func dinosaurs(grade: Int) -> SortSet {
+        // א׳–ג׳ meet the dinosaurs first (a crocodile and a mammoth are not
+        // dinosaurs); ד׳+ sort them by what they ate.
+        if MiniGameBand.of(grade) <= .lower || grade == 3 {
+            let b = BalloonSets.dinosaurs()
+            return SortSet(
+                baskets: [SortBasket(emoji: "🦕", label: tr("דִּינוֹזָאוּר")),
+                          SortBasket(emoji: "🚫", label: tr("לֹא דִּינוֹזָאוּר"))],
+                items: b.targets.map { i($0.emoji, $0.label, 0) } + b.others.map { i($0.emoji, $0.label, 1) },
+                topic: .dinosaurs)
+        }
+        return SortSet(
             baskets: [SortBasket(emoji: "🌿", label: tr("אוֹכֵל צְמָחִים")), SortBasket(emoji: "🍖", label: tr("אוֹכֵל בָּשָׂר"))],
             items: [
                 i("🦴", tr("טְרִיצֶרָטוֹפְּס"), 0), i("🦴", tr("סְטֶגוֹזָאוּרוּס"), 0), i("🦕", tr("בְּרָכִיוֹזָאוּרוּס"), 0),
@@ -207,7 +253,20 @@ enum SortSets {
             topic: .dinosaurs)
     }
 
-    private static func soccer() -> SortSet {
+    private static func soccer(grade: Int) -> SortSet {
+        // ה׳+: the roles on the pitch, defence against attack. Telling a ball
+        // from a tennis racket is not a ו׳ round.
+        if MiniGameBand.of(grade) >= .upper {
+            return SortSet(
+                baskets: [SortBasket(emoji: "🛡️", label: tr("הֲגָנָה")), SortBasket(emoji: "🎯", label: tr("הַתְקָפָה"))],
+                items: [
+                    i("🧤", tr("שׁוֹעֵר"), 0), i("🛡️", tr("בַּלָּם"), 0), i("🛡️", tr("מֵגֵן"), 0),
+                    i("🔙", tr("קַשָּׁר הֲגַנָּתִי"), 0),
+                    i("🎯", tr("חָלוּץ"), 1), i("🎯", tr("כַּנְפָן"), 1),
+                    i("🔜", tr("קַשָּׁר הַתְקָפִי"), 1), i("🥇", tr("חָלוּץ מְרֻכָּז"), 1),
+                ],
+                topic: .soccer)
+        }
         let b = BalloonSets.soccer()
         return SortSet(baskets: [SortBasket(emoji: "⚽", label: tr("כַּדּוּרֶגֶל")), SortBasket(emoji: "🏅", label: tr("עֲנַף סְפּוֹרְט אַחֵר"))],
                        items: b.targets.map { i($0.emoji, $0.label, 0) } + b.others.map { i($0.emoji, $0.label, 1) },
@@ -240,6 +299,23 @@ enum SortSets {
     }
 
     private static func science(grade: Int) -> SortSet {
+        // ז׳–ח׳: element, compound or mixture. Solid / liquid / gas is a ד׳
+        // board and a ח׳ child sorts it without looking.
+        if MiniGameBand.of(grade) >= .top {
+            return SortSet(
+                baskets: [SortBasket(emoji: "⚛️", label: tr("יְסוֹד")),
+                          SortBasket(emoji: "🧪", label: tr("תַּרְכֹּבֶת")),
+                          SortBasket(emoji: "🥣", label: tr("תַּעֲרֹבֶת"))],
+                items: [
+                    i("🪙", tr("זָהָב"), 0), i("🫁", tr("חַמְצָן"), 0), i("🧲", tr("בַּרְזֶל"), 0),
+                    i("🟠", tr("נְחֹשֶׁת"), 0), i("🎈", tr("הֶלְיוּם"), 0),
+                    i("💧", tr("מַיִם"), 1), i("🧂", tr("מֶלַח בִּשּׁוּל"), 1), i("🍬", tr("סֻכָּר"), 1),
+                    i("💨", tr("פַּחְמָן דּוּ־חַמְצָנִי"), 1),
+                    i("🌬️", tr("אֲוִיר"), 2), i("🌊", tr("מֵי יָם"), 2), i("🥛", tr("חָלָב"), 2),
+                    i("🔩", tr("פְּלָדָה"), 2),
+                ],
+                topic: .science)
+        }
         if grade >= 4 {
             return SortSet(
                 baskets: [SortBasket(emoji: "🧊", label: tr("מוּצָק")), SortBasket(emoji: "💧", label: tr("נוֹזֵל")),
@@ -262,8 +338,25 @@ enum SortSets {
             topic: .science)
     }
 
-    private static func body() -> SortSet {
-        SortSet(
+    private static func body(grade: Int) -> SortSet {
+        // ד׳+: which SYSTEM each organ belongs to. "Inside or outside the
+        // body" is something a גן child already knows.
+        if MiniGameBand.of(grade) >= .middle && grade >= 4 {
+            return SortSet(
+                baskets: [SortBasket(emoji: "🫁", label: tr("מַעֲרֶכֶת הַנְּשִׁימָה")),
+                          SortBasket(emoji: "🫀", label: tr("מַעֲרֶכֶת הַדָּם")),
+                          SortBasket(emoji: "🍽️", label: tr("מַעֲרֶכֶת הָעִכּוּל"))],
+                items: [
+                    i("🫁", tr("רֵאוֹת"), 0), i("🌬️", tr("קְנֵה נְשִׁימָה"), 0), i("🍃", tr("סִמְפּוֹנוֹת"), 0),
+                    i("👃", tr("אַף"), 0),
+                    i("🫀", tr("לֵב"), 1), i("🩸", tr("עוֹרְקִים"), 1), i("💉", tr("וְרִידִים"), 1),
+                    i("🫘", tr("טְחוֹל"), 1),
+                    i("🍽️", tr("קֵבָה"), 2), i("🌀", tr("מַעַיִם"), 2), i("🟤", tr("כָּבֵד"), 2),
+                    i("👄", tr("פֶּה"), 2),
+                ],
+                topic: .body)
+        }
+        return SortSet(
             baskets: [SortBasket(emoji: "🫀", label: tr("בְּתוֹךְ הַגּוּף")), SortBasket(emoji: "✋", label: tr("מִבַּחוּץ"))],
             items: [
                 i("🫀", tr("לֵב"), 0), i("🫁", tr("רֵאוֹת"), 0), i("🧠", tr("מֹחַ"), 0), i("🍽️", tr("קֵבָה"), 0),
@@ -295,6 +388,18 @@ enum SortSets {
         let drums = [i("🥁", tr("תֻּפִּים"), 1), i("🪘", tr("דַּרְבּוּקָה"), 1), i("🔔", tr("מְצִלְתַּיִם"), 1),
                      i("🎶", tr("קְסִילוֹפוֹן"), 1), i("", tr("מָרָקָס"), 1)]
         let wind = [i("🎺", tr("חֲצוֹצְרָה"), 2), i("🎷", tr("סַקְסוֹפוֹן"), 2), i("", tr("חָלִיל"), 2), i("🎵", tr("קְלַרְנִית"), 2)]
+        // ו׳+: inside the wind family — woodwind against brass.
+        if grade >= 6 {
+            return SortSet(
+                baskets: [SortBasket(emoji: "🪵", label: tr("נְשִׁיפָה מֵעֵץ")),
+                          SortBasket(emoji: "🎺", label: tr("נְשִׁיפָה מִמַּתֶּכֶת"))],
+                items: [
+                    i("", tr("חָלִיל"), 0), i("🎵", tr("קְלַרְנִית"), 0), i("🪈", tr("אַבּוּב"), 0), i("🎼", tr("בַּסּוּן"), 0),
+                    i("🎺", tr("חֲצוֹצְרָה"), 1), i("📢", tr("טְרוֹמְבּוֹן"), 1), i("🎶", tr("טוּבָּה"), 1),
+                    i("🔊", tr("קֶרֶן יַעַר"), 1),
+                ],
+                topic: .music)
+        }
         var baskets = [SortBasket(emoji: "🎻", label: tr("כְּלֵי מֵיתָרִים")), SortBasket(emoji: "🥁", label: tr("כְּלֵי הַקָּשָׁה"))]
         var items = strings + drums
         if grade >= 3 {
@@ -304,19 +409,39 @@ enum SortSets {
         return SortSet(baskets: baskets, items: items, topic: .music)
     }
 
-    private static func food() -> SortSet {
-        SortSet(
-            baskets: [SortBasket(emoji: "🍎", label: tr("פְּרִי")), SortBasket(emoji: "🥕", label: tr("יָרָק"))],
-            items: [
-                i("🍎", tr("תַּפּוּחַ"), 0), i("🍌", tr("בָּנָנָה"), 0), i("🍇", tr("עֲנָבִים"), 0), i("🍓", tr("תּוּת"), 0),
-                i("🍊", tr("תַּפּוּז"), 0), i("🍉", tr("אֲבַטִּיחַ"), 0), i("🍍", tr("אֲנָנָס"), 0), i("🍒", tr("דֻּבְדְּבָנִים"), 0),
-                i("🥕", tr("גֶּזֶר"), 1), i("🥦", tr("בְּרוֹקוֹלִי"), 1), i("🥬", tr("חַסָּה"), 1), i("🥔", tr("תַּפּוּחַ אֲדָמָה"), 1),
-                i("🧅", tr("בָּצָל"), 1), i("🧄", tr("שׁוּם"), 1),
-            ],
-            topic: .food)
+    private static func food(grade: Int) -> SortSet {
+        let fruit = [i("🍎", tr("תַּפּוּחַ"), 0), i("🍌", tr("בָּנָנָה"), 0), i("🍇", tr("עֲנָבִים"), 0), i("🍓", tr("תּוּת"), 0),
+                     i("🍊", tr("תַּפּוּז"), 0), i("🍉", tr("אֲבַטִּיחַ"), 0), i("🍍", tr("אֲנָנָס"), 0), i("🍒", tr("דֻּבְדְּבָנִים"), 0)]
+        let veg = [i("🥕", tr("גֶּזֶר"), 1), i("🥦", tr("בְּרוֹקוֹלִי"), 1), i("🥬", tr("חַסָּה"), 1), i("🥔", tr("תַּפּוּחַ אֲדָמָה"), 1),
+                   i("🧅", tr("בָּצָל"), 1), i("🧄", tr("שׁוּם"), 1)]
+        var baskets = [SortBasket(emoji: "🍎", label: tr("פְּרִי")), SortBasket(emoji: "🥕", label: tr("יָרָק"))]
+        var items = fruit + veg
+        // ד׳+: a third basket — legumes. Fruit-or-vegetable alone is a גן sort.
+        if grade >= 4 {
+            baskets.append(SortBasket(emoji: "🫘", label: tr("קִטְנִיּוֹת")))
+            items += [i("🫘", tr("עֲדָשִׁים"), 2), i("🫛", tr("אֲפוּנָה"), 2), i("🫘", tr("שְׁעוּעִית"), 2),
+                      i("🫘", tr("גַּרְגְּרֵי חֻמּוּס"), 2), i("🫛", tr("פּוֹל"), 2)]
+        }
+        return SortSet(baskets: baskets, items: items, topic: .food)
     }
 
     private static func money(grade: Int) -> SortSet {
+        // ו׳+: a fixed cost against a variable one — the question a household
+        // budget actually asks. Income-or-expense is a ד׳ board.
+        if grade >= 6 {
+            return SortSet(
+                baskets: [SortBasket(emoji: "📅", label: tr("הוֹצָאָה קְבוּעָה")),
+                          SortBasket(emoji: "🎲", label: tr("הוֹצָאָה מִשְׁתַּנָּה"))],
+                items: [
+                    i("🏠", tr("שְׂכַר דִּירָה"), 0), i("💡", tr("חֶשְׁבּוֹן חַשְׁמַל"), 0),
+                    i("📱", tr("מִנּוּי לַטֶּלֶפוֹן"), 0), i("🏫", tr("שְׂכַר לִמּוּד"), 0),
+                    i("🚌", tr("כַּרְטִיסִיָּה חֹדְשִׁית"), 0),
+                    i("🛒", tr("קְנִיּוֹת בַּסּוּפֶּר"), 1), i("🎬", tr("כַּרְטִיס לַקּוֹלְנוֹעַ"), 1),
+                    i("🍦", tr("גְּלִידָה"), 1), i("🎁", tr("מַתָּנָה לְחָבֵר"), 1),
+                    i("🩹", tr("תִּקּוּן פַּנְצֶ'ר"), 1),
+                ],
+                topic: .money)
+        }
         if grade >= 4 {
             return SortSet(
                 baskets: [SortBasket(emoji: "💰", label: tr("הַכְנָסָה")), SortBasket(emoji: "💸", label: tr("הוֹצָאָה"))],
@@ -416,37 +541,83 @@ enum PatternGen {
                 seq = [v]
                 for i in 0..<5 { v += i % 2 == 0 ? x : y; seq.append(v) }
             }
-        case 4, 5, 6:
-            switch Int.random(in: 0...3) {
+        case 4:
+            switch Int.random(in: 0...2) {
             case 0:
                 let m = [2, 3].randomElement()!, a = Int.random(in: 1...4)
                 seq = (0..<5).map { a * Int(pow(Double(m), Double($0))) }
             case 1:
                 let s = Int.random(in: 1...4)
                 seq = (s..<(s + 5)).map { $0 * $0 }
-            case 2:
+            default:
+                let k = Int.random(in: 6...15), a = Int.random(in: 20...120)
+                seq = (0..<6).map { a - $0 * k }
+            }
+        case 5:
+            switch Int.random(in: 0...2) {
+            case 0:
                 var a = Int.random(in: 1...3), b = Int.random(in: 2...5)
                 seq = [a, b]
                 for _ in 0..<4 { let c = a + b; seq.append(c); a = b; b = c }
+            case 1:
+                // Two steps that alternate: +7, ×2, +7, ×2 …
+                let k = Int.random(in: 3...9), a = Int.random(in: 1...6)
+                var v = a
+                seq = [v]
+                for n in 0..<5 { v = n % 2 == 0 ? v + k : v * 2; seq.append(v) }
             default:
-                let k = Int.random(in: 6...25), a = Int.random(in: 20...150)
+                let k = Int.random(in: 11...25), a = Int.random(in: 60...250)
                 seq = (0..<6).map { a - $0 * k }
             }
-        default:
-            switch Int.random(in: 0...3) {
+        case 6:
+            switch Int.random(in: 0...2) {
             case 0:
-                let s = Int.random(in: 1...3)
-                seq = (s..<(s + 5)).map { $0 * $0 * $0 }
+                // The gaps themselves grow: +2, +4, +6, +8 …
+                let k = Int.random(in: 2...4), a = Int.random(in: 1...9)
+                var v = a
+                seq = [v]
+                for n in 1...5 { v += k * n; seq.append(v) }
             case 1:
+                let s = Int.random(in: 4...9)
+                seq = (s..<(s + 5)).map { $0 * $0 }
+            default:
+                let m = [2, 3, 5].randomElement()!, a = Int.random(in: 2...6)
+                seq = (0..<5).map { a * Int(pow(Double(m), Double($0))) }
+            }
+        case 7:
+            switch Int.random(in: 0...2) {
+            case 0:
                 let a = Int.random(in: 1...3)
                 seq = (0..<6).map { a * Int(pow(-2.0, Double($0))) }
-            case 2:
+            case 1:
                 var a = Int.random(in: 2...5), b = Int.random(in: 3...7)
                 seq = [a, b]
                 for _ in 0..<4 { let c = a + b; seq.append(c); a = b; b = c }
             default:
                 let k = Int.random(in: 4...9), a = Int.random(in: 5...20)
                 seq = (0..<6).map { a - $0 * k }   // into the negatives
+            }
+        default:   // ח׳
+            switch Int.random(in: 0...3) {
+            case 0:
+                let s = Int.random(in: 1...4)
+                seq = (s..<(s + 5)).map { $0 * $0 * $0 }
+            case 1:
+                // n² + n: the gaps are the even numbers, one layer deeper.
+                let s = Int.random(in: 1...5)
+                seq = (s..<(s + 6)).map { $0 * $0 + $0 }
+            case 2:
+                // A signed geometric run — the sign flips every step.
+                let a = Int.random(in: 1...4), m = [-3, 3, -2].randomElement()!
+                var v = a
+                seq = [v]
+                for _ in 0..<5 { v *= m; seq.append(v) }
+            default:
+                // Each term is the one before it doubled, minus a constant.
+                let k = Int.random(in: 1...5), a = Int.random(in: 2...6)
+                var v = a
+                seq = [v]
+                for _ in 0..<5 { v = v * 2 - k; seq.append(v) }
             }
         }
         // The hole: the end, or (from ג׳) somewhere in the middle.
@@ -462,13 +633,18 @@ enum PatternGen {
     }
 
     private static func letters(_ abc: [String], grade g: Int, dir: LayoutDirection, topic: Topic) -> PatternRound {
-        let step = g <= 2 ? 1 : (g <= 4 ? 2 : 3)
+        let step = g <= 2 ? 1 : (g <= 4 ? 2 : [3, 4].randomElement()!)
         let length = 5
         let maxStart = abc.count - 1 - step * (length - 1)
-        let start = Int.random(in: 0...max(0, maxStart))
-        let seq = (0..<length).map { abc[start + $0 * step] }
+        // ה׳+: the run can go the other way through the alphabet.
+        let backwards = g >= 5 && Bool.random()
+        let start = backwards
+            ? abc.count - 1 - Int.random(in: 0...max(0, maxStart))
+            : Int.random(in: 0...max(0, maxStart))
+        let dirStep = backwards ? -step : step
+        let seq = (0..<length).map { abc[start + $0 * dirStep] }
         let hole = g >= 3 && Bool.random() ? Int.random(in: 1..<(length - 1)) : length - 1
-        let answerIndex = start + hole * step
+        let answerIndex = start + hole * dirStep
         var opts: Set<String> = [abc[answerIndex]]
         for d in [1, -1, step + 1, -(step + 1), 2, -2].shuffled() where opts.count < 4 {
             let j = answerIndex + d
@@ -481,7 +657,12 @@ enum PatternGen {
 
     private static func picture(_ set: [String], grade g: Int, topic: Topic) -> PatternRound {
         let shapes = Array(set.shuffled().prefix(3))
-        let units: [[Int]] = g <= 1 ? [[0, 1], [0, 0, 1]] : [[0, 1], [0, 0, 1], [0, 1, 2], [0, 1, 1], [0, 1, 2, 1]]
+        let units: [[Int]]
+        switch MiniGameBand.of(g) {
+        case .preReader, .lower: units = [[0, 1], [0, 0, 1]]
+        case .middle:            units = [[0, 1], [0, 0, 1], [0, 1, 2], [0, 1, 1], [0, 1, 2, 1]]
+        default:                 units = [[0, 1, 2], [0, 1, 1, 2], [0, 1, 2, 1], [0, 1, 2, 2, 1], [0, 0, 1, 2, 1]]
+        }
         let unit = units.randomElement()!
         let length = min(8, max(6, unit.count * 2 + 1))
         let seq = (0..<length).map { shapes[unit[$0 % unit.count]] }
@@ -599,6 +780,20 @@ enum VaultGen {
 
     static func digits(grade: Int) -> Int { grade >= 4 ? 4 : 3 }
 
+    /// 🗝️ How many of the code's digits a key card may open. A ב׳ child gets
+    /// most of the code handed over and only has to place it; by ז׳–ח׳ one key
+    /// is all there is and the other three digits have to be deduced from the
+    /// green / orange marks. (The code itself stays four slots of distinct
+    /// digits at every grade — the keypad's own rule depends on that.)
+    static func maxKeys(grade: Int) -> Int {
+        switch MiniGameBand.of(grade) {
+        case .preReader, .lower: return 2
+        case .middle:            return 3
+        case .upper:             return grade >= 6 ? 2 : 3
+        case .top:               return 1
+        }
+    }
+
     /// Distinct digits; never a leading 0 (a "code" that starts with 0 reads oddly).
     static func code(grade: Int) -> [Int] {
         var pool = Array(0...9).shuffled()
@@ -635,15 +830,38 @@ enum VaultGen {
             let factors = (2...9).filter { d % $0 == 0 && d / $0 >= 1 && $0 < d }
             if let f = factors.randomElement() { return "\(f) × \(d / f)" }
             let b = Int.random(in: 2...9); return "\(d + b) − \(b)"
-        case 4...6:
+        case 4, 5:
             let k = Int.random(in: 2...9)
             if d > 0, Bool.random() { return "\(d * k) ÷ \(k)" }
             let a = Int.random(in: 2...5), c = a * Int.random(in: 2...5)
             return "\(c) ÷ \(a) + \(d - c / a)".replacingOccurrences(of: "+ -", with: "− ")
-        default:
+        case 6:
+            // ו׳: brackets, percentages and a two-step quotient.
+            switch Int.random(in: 0...2) {
+            case 0:
+                let a = Int.random(in: 2...6), b = Int.random(in: 1...6)
+                return "(\(a) + \(b)) × \(d) ÷ \(a + b)"
+            case 1:
+                return "\(d * 25) ÷ 25"
+            default:
+                let k = Int.random(in: 3...9)
+                return "\(d * k + k) ÷ \(k) − 1"
+            }
+        case 7:
             if d >= 2, Bool.random() { return "√\(d * d)" }
             let a = Int.random(in: 2...9)
             return "(−\(a)) + \(d + a)"
+        default:   // ח׳
+            switch Int.random(in: 0...2) {
+            case 0 where d >= 2:
+                return "√\(d * d * 4) ÷ 2"
+            case 1:
+                let a = Int.random(in: 2...9), b = Int.random(in: 2...9)
+                return "(−\(a)) × (−\(b)) − \(a * b - d)"
+            default:
+                let a = Int.random(in: 2...6)
+                return "\(a)² − \(a * a - d)"
+            }
         }
     }
 
@@ -735,30 +953,57 @@ enum GroceryGen {
         return whole * 100 + fracCents
     }
 
+    /// One trip, sized to the grade:
+    ///   א׳  2 items, whole shekels to 5        ב׳  3 items to 12
+    ///   ג׳  3 items to 25                      ד׳  3 items with agorot
+    ///   ה׳  4 items, one on sale               ו׳  4 items, any agorot, one sale
+    ///   ז׳–ח׳ 4 items, TWO sales, percentages that are not round halves
+    /// The shelf stays six items wide at every grade, so the screen does not
+    /// have to grow — the arithmetic does.
     static func trip(grade g: Int) -> GroceryTrip {
         let all = products().shuffled()
-        let listCount = g <= 1 ? 2 : 3
+        let band = MiniGameBand.of(g)
+        let listCount = g <= 1 ? 2 : (band >= .upper ? 4 : 3)
         let decimals = g >= 4
         func price() -> Int {
             switch g {
             case ...1: return Int.random(in: 1...5) * 100
             case 2:    return Int.random(in: 2...12) * 100
             case 3:    return Int.random(in: 3...25) * 100
-            default:   return Int.random(in: 4...30) * 100 + (Bool.random() ? 50 : 0)
+            case 4, 5: return Int.random(in: 4...30) * 100 + (Bool.random() ? 50 : 0)
+            default:   return Int.random(in: 4...40) * 100 + [0, 20, 30, 50, 70, 90].randomElement()!
             }
         }
         var list = all.prefix(listCount).map { GroceryShelfItem(product: $0, price: price()) }
-        // ה׳+: one item is on sale — the till price is the child's to work out.
-        if g >= 5, let idx = list.indices.randomElement() {
-            let (base, off): (Int, Int) = [(Int.random(in: 1...4) * 1000, [10, 20].randomElement()!),
-                                           ([8, 12, 16, 20].randomElement()! * 100, 25),
-                                           (Int.random(in: 2...15) * 200, 50)].randomElement()!
+        // ה׳+: an item is on sale — the till price is the child's to work out.
+        func markDown(_ idx: Int, tough: Bool) {
+            let (base, off): (Int, Int) = tough
+                ? [(Int.random(in: 1...4) * 1000, [15, 35].randomElement()!),
+                   (Int.random(in: 2...8) * 500, 30),
+                   (Int.random(in: 2...6) * 1000, 45)].randomElement()!
+                : [(Int.random(in: 1...4) * 1000, [10, 20].randomElement()!),
+                   ([8, 12, 16, 20].randomElement()! * 100, 25),
+                   (Int.random(in: 2...15) * 200, 50)].randomElement()!
             list[idx] = GroceryShelfItem(product: list[idx].product, price: base, discount: off)
         }
-        let extras = all.dropFirst(listCount).prefix(g <= 1 ? 2 : 3).map { GroceryShelfItem(product: $0, price: price()) }
+        if band >= .upper {
+            let order = list.indices.shuffled()
+            if let first = order.first { markDown(first, tough: band >= .top) }
+            // ז׳–ח׳: a second sale, so the two have to be worked out separately.
+            if band >= .top, order.count > 1 { markDown(order[1], tough: true) }
+        }
+        let extras = all.dropFirst(listCount).prefix(max(2, 6 - listCount))
+            .map { GroceryShelfItem(product: $0, price: price()) }
         let total = list.map(\.finalPrice).reduce(0, +)
         // A budget the list fits in, with change to work out — never exact.
-        let steps = g <= 1 ? [1000, 2000] : (g == 2 ? [2000, 3000, 5000] : (g == 3 ? [5000, 10000] : [5000, 10000, 20000]))
+        let steps: [Int]
+        switch g {
+        case ...1: steps = [1000, 2000]
+        case 2:    steps = [2000, 3000, 5000]
+        case 3:    steps = [5000, 10000]
+        case 4, 5: steps = [5000, 10000, 20000]
+        default:   steps = [10000, 15000, 20000, 25000, 30000]
+        }
         let budget = steps.first { $0 > total } ?? (total / 1000 + 1) * 1000
         return GroceryTrip(budget: budget, list: Array(list), shelf: (list + extras).shuffled(), decimals: decimals)
     }
@@ -839,7 +1084,14 @@ enum BalanceGen {
             let k = Int.random(in: 2...6)
             return puzzle("? × \(a)", "\(a * x * k) ÷ \(k)", x: x) { v in (v * Double(a), Double(a * x)) }
         case 5, 6:
-            switch Int.random(in: 0...2) {
+            switch Int.random(in: 0...(g >= 6 ? 3 : 2)) {
+            case 3:
+                // ו׳: the unknown is divided, and both pans carry work.
+                let a = [2, 3, 4, 5, 6].randomElement()!, x = a * Int.random(in: 2...9)
+                let b = Int.random(in: 2...9), c = Int.random(in: 2...9)
+                return puzzle("? ÷ \(a) + \(b)", "\(b + x / a + c) − \(c)", x: x, pad: true) { v in
+                    (v / Double(a) + Double(b), Double(b + x / a))
+                }
             case 0:
                 let a = Int.random(in: 2...6), b = Int.random(in: 1...9), x = Int.random(in: 2...9)
                 return puzzle("\(a) × ? + \(b)", "\(a * x + b)", x: x, pad: g >= 6) { v in (Double(a) * v + Double(b), Double(a * x + b)) }
@@ -869,8 +1121,8 @@ enum BalanceGen {
                                      weigh: { v in swap ? (total, a + v) : (a + v, total) },
                                      value: { Double($0) }, topic: topic)
             }
-        default:
-            // ז׳–ח׳: equations in x, signed numbers.
+        case 7:
+            // ז׳: a one- or two-step equation in x, and signed totals.
             let q = tr("מָה הוּא x?")
             switch Int.random(in: 0...2) {
             case 0:
@@ -886,15 +1138,50 @@ enum BalanceGen {
                 let b = Int.random(in: 3...12), total = Int.random(in: -8...2), x = total - b
                 return puzzle("x + \(b)", MathFacts.show(total), x: x, question: q, negative: true) { v in (v + Double(b), Double(total)) }
             }
+        default:
+            // ח׳: brackets, x on both sides, and a square.
+            let q = tr("מָה הוּא x?")
+            switch Int.random(in: 0...2) {
+            case 0:
+                // a(x + b) = c
+                let a = Int.random(in: 2...6), b = Int.random(in: 1...9), x = Int.random(in: 1...9)
+                return puzzle("\(a)(x + \(b))", "\(a * (x + b))", x: x, question: q, pad: true) { v in
+                    (Double(a) * (v + Double(b)), Double(a * (x + b)))
+                }
+            case 1:
+                // a·x + b = c·x + d, with x on both sides and a negative d.
+                let a = Int.random(in: 3...7), c = Int.random(in: 1..<a)
+                let x = Int.random(in: 2...9), b = Int.random(in: -9...(-1))
+                let d = (a - c) * x + b
+                let left = "\(a)x \(b < 0 ? "− \(-b)" : "+ \(b)")"
+                let right = "\(c)x \(d < 0 ? "− \(-d)" : "+ \(d)")"
+                return puzzle(left, right, x: x, question: q, negative: true, pad: true) { v in
+                    (Double(a) * v + Double(b), Double(c) * v + Double(d))
+                }
+            default:
+                // x² = c
+                let x = Int.random(in: 2...12)
+                return puzzle("x²", "\(x * x)", x: x, question: q, pad: true) { v in (v * v, Double(x * x)) }
+            }
         }
     }
 
     /// A world question with a number for an answer: the beam says whether a
     /// guess is too light or too heavy.
-    static func compare(_ item: GameItem) -> BalancePuzzle? {
+    static func compare(_ item: GameItem, grade: Int = 1) -> BalancePuzzle? {
         guard let x = GameContent.number(item.answer) else { return nil }
+        // ה׳+: keep only the options closest to the answer, so the beam has to
+        // be read rather than guessed from "obviously far too heavy".
+        var options = item.shuffledOptions
+        if MiniGameBand.of(grade) >= .upper, options.count > 3 {
+            options = ([item.answer] + item.distractors.sorted { a, b in
+                let na = GameContent.number(a).map { abs($0 - x) } ?? Int.max
+                let nb = GameContent.number(b).map { abs($0 - x) } ?? Int.max
+                return na < nb
+            }.prefix(2)).shuffled()
+        }
         return BalancePuzzle(left: "?", right: "🎁", question: item.prompt, answer: item.answer,
-                             options: item.shuffledOptions,
+                             options: options,
                              weigh: { v in (v, Double(x)) }, value: intValue, topic: item.topic)
     }
 }

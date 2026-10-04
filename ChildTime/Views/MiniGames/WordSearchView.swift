@@ -1,12 +1,18 @@
 import SwiftUI
 import Combine
 
-/// 🔤 "תַּפְזֹרֶת" — a letter grid (6×6 on a phone, 8×8 on an iPad) with five
-/// themed words hidden across and down (and diagonally from ד׳). Drag a finger
-/// along a word: a found word stays highlighted and is ticked off in the list
-/// underneath. Hebrew reads right-to-left without niqqud; English left-to-right
-/// in capitals. After 30 seconds without a find, the first letter of a hidden
-/// word glows for a moment.
+/// 🔤 "תַּפְזֹרֶת" — a letter grid with five themed words hidden in it. Drag a
+/// finger along a word: a found word stays highlighted and is ticked off in the
+/// list underneath. Hebrew reads right-to-left without niqqud; English
+/// left-to-right in capitals. After 30 seconds without a find, the first letter
+/// of a hidden word glows for a moment.
+///
+/// 🎚️ The grid, the diagonals and the backwards words all come from the child's
+/// grade AND from which language the board is in (`WordSearchShape`): the
+/// mother-tongue board climbs 6×6 → 9×9 with diagonals from ג׳ and backwards
+/// words from ה׳, while a foreign-language board stays 6×6 → 7×7 and never runs
+/// a word back-to-front. Rani, 2026-10-04: "תפזורת באנגלית זה בסדר גם לכיתה ו,
+/// אבל בעברית זה קל מידי."
 ///
 /// A world without a themed picture list hides its own one-word answers.
 ///
@@ -47,7 +53,19 @@ struct WordSearchView: View {
 
     private var isCompact: Bool { hsc == .compact }
     private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
-    private var gridSize: Int { isCompact || display.isShort ? 6 : 8 }
+    /// A regular-width screen with the height to show a big grid.
+    private var roomy: Bool { !isCompact && !display.isShort }
+    /// The script the next board will be in — the grid's size depends on it.
+    private var plannedScript: SpellScript {
+        if let topic, !WordSets.hasThemedList(topic, grade: grade),
+           let first = GameContent.words(topic: topic, grade: grade, maxLetters: 8).first {
+            return first.script
+        }
+        return WordSets.script(for: topic, grade: grade)
+    }
+    private func gridSize(_ script: SpellScript) -> Int {
+        WordSearchShape.size(grade: grade, script: script, roomy: roomy)
+    }
     private var words: [HiddenWord] { board?.words ?? [] }
 
     var body: some View {
@@ -116,7 +134,7 @@ struct WordSearchView: View {
     /// Hebrew: the drag's coordinates then map to cells one way only.
     private var letterGrid: some View {
         GeometryReader { geo in
-            let n = board?.size ?? gridSize
+            let n = board?.size ?? gridSize(plannedScript)
             let side = min(geo.size.width, geo.size.height)
             let cell = side / CGFloat(n)
             ZStack(alignment: .topLeading) {
@@ -141,7 +159,7 @@ struct WordSearchView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .aspectRatio(1, contentMode: .fit)
-        .frame(maxWidth: isCompact ? 380 : 600)
+        .frame(maxWidth: isCompact ? 400 : 620)
         .environment(\.layoutDirection, .leftToRight)
     }
 
@@ -241,7 +259,7 @@ struct WordSearchView: View {
         let adr = abs(dr), adc = abs(dc)
         var stepR = 0, stepC = 0, len = 0
         if adr == 0 && adc == 0 { return [s] }
-        let diagonalOK = grade >= 4
+        let diagonalOK = board?.diagonals ?? false
         if diagonalOK && adr > 0 && adc > 0 && Double(min(adr, adc)) >= Double(max(adr, adc)) * 0.5 {
             stepR = dr.signum(); stepC = dc.signum(); len = max(adr, adc)
         } else if adc >= adr {
@@ -262,15 +280,17 @@ struct WordSearchView: View {
 
     private func deal() {
         if let topic, !WordSets.hasThemedList(topic, grade: grade),
-           case let bank = GameContent.words(topic: topic, grade: grade, maxLetters: gridSize),
+           case let probeSize = gridSize(plannedScript),
+           case let bank = GameContent.words(topic: topic, grade: grade, maxLetters: probeSize),
            bank.count >= WordSearch.wordCount, let first = bank.first {
             // The world's own answers — no pictures, the words are the list.
             board = WordSearch.make(words: bank.map { SpellWord(emoji: "", word: $0.word) },
-                                    script: first.script, grade: grade, size: gridSize)
+                                    script: first.script, grade: grade,
+                                    size: gridSize(first.script))
             wordTopic = topic
         } else {
             let script = WordSets.script(for: topic, grade: grade)
-            board = WordSearch.make(topic: topic, script: script, grade: grade, size: gridSize)
+            board = WordSearch.make(topic: topic, script: script, grade: grade, size: gridSize(script))
             wordTopic = script.topic
         }
         found = []; dragStart = nil; dragCells = []; hintCell = nil; grant = nil

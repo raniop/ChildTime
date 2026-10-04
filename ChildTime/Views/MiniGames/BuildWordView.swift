@@ -8,6 +8,13 @@ import SwiftUI
 /// A world without a picture list spells its own one-word answers, with the
 /// question as the clue (capitals, planets, animals — in the child's script).
 ///
+/// 🎚️ The words come off the child's own rung of the ladder (`HebrewLadder` /
+/// `EnglishLadder`): א׳–ב׳ כלב and בית, ה׳–ו׳ לווייתן and מיקרופון, ז׳–ח׳
+/// מיקרוסקופ and תיאטרון. English is a second language and keeps a gentle
+/// two-rung ladder. The number of spare letters on the board grows too — one
+/// from ג׳, two from ה׳, three from ז׳ — so a long word is not solved by
+/// elimination alone.
+///
 /// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser every word
 /// built without a bounce earns screen time like a regular answer.
 struct BuildWordView: View {
@@ -47,6 +54,18 @@ struct BuildWordView: View {
 
     private var isCompact: Bool { hsc == .compact }
     private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
+    /// How long a word a row of slots can still show legibly. A phone holds 8;
+    /// an iPad has room for the ז׳–ח׳ nine-letter words.
+    private var maxLetters: Int { isCompact ? 8 : 10 }
+    /// Spare letters mixed into the tiles — more of them as the child grows.
+    private var spareTiles: Int {
+        switch MiniGameBand.of(grade) {
+        case .preReader, .lower: return 0
+        case .middle:            return 1
+        case .upper:             return 2
+        case .top:               return 3
+        }
+    }
     private var current: SpellWord? { index < words.count ? words[index] : nil }
     private var letters: [Character] { current.map { Array(script.display($0.word)) } ?? [] }
 
@@ -129,7 +148,7 @@ struct BuildWordView: View {
 
     private var slotSize: CGSize {
         let n = max(1, letters.count)
-        let w: CGFloat = isCompact ? min(52, 300 / CGFloat(n)) : min(76, 560 / CGFloat(n))
+        let w: CGFloat = isCompact ? min(52, 330 / CGFloat(n)) : min(76, 620 / CGFloat(n))
         return CGSize(width: w, height: w * 1.18)
     }
 
@@ -187,7 +206,7 @@ struct BuildWordView: View {
             wordTopic = topic
         } else {
             script = WordSets.script(for: topic, grade: grade)
-            words = WordSets.words(for: topic, script: script, grade: grade)
+            words = WordSets.words(for: topic, script: script, grade: grade, maxLetters: maxLetters)
             textClues = false
             wordTopic = script.topic
         }
@@ -199,9 +218,14 @@ struct BuildWordView: View {
     private func loadWord() {
         filled = []; usedTiles = []; mistakesThisWord = 0; wordDone = false; wrongTile = nil
         var pool = letters
-        // From ג׳ one extra letter keeps it from being pure ordering.
-        if grade >= 3 {
-            if let x = script.alphabet.filter({ !pool.contains($0) }).randomElement() { pool.append(x) }
+        // From ג׳ spare letters keep it from being pure ordering — and by ז׳
+        // three of them mean the child has to know the spelling, not guess it.
+        if spareTiles > 0 {
+            var spares = script.alphabet.filter { !pool.contains($0) }.shuffled()
+            for _ in 0..<spareTiles {
+                guard let x = spares.popLast() else { break }
+                pool.append(x)
+            }
         }
         tiles = pool.shuffled().enumerated().map { Tile(id: $0.offset, letter: $0.element) }
         shownAt = Date()

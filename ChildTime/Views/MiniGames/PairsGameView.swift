@@ -20,7 +20,8 @@ struct PairsGameView: View {
     @ObservedObject private var display = DisplayGeometry.shared
     @Environment(\.horizontalSizeClass) private var hsc
 
-    static let pairCount = 5
+    /// The most pairs a board ever shows (two columns of six).
+    static let pairCount = 6
 
     private struct Card: Identifiable { let pair: Int; let text: String; var id: Int { pair } }
     private enum Side { case left, right }
@@ -45,6 +46,11 @@ struct PairsGameView: View {
 
     private var isCompact: Bool { hsc == .compact }
     private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
+    /// 🎚️ Five pairs up to ד׳, six from ה׳ — a sixth row needs the height,
+    /// so a short screen keeps five whatever the grade.
+    private var pairCount: Int {
+        MiniGameBand.of(grade) >= .upper && !display.isShort ? Self.pairCount : 5
+    }
 
     var body: some View {
         ZStack {
@@ -52,7 +58,7 @@ struct PairsGameView: View {
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
                 MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
-                    MiniGameChipLabel(text: "🔗 \(matched.count)/\(Self.pairCount)", surprise: surprise)
+                    MiniGameChipLabel(text: "🔗 \(matched.count)/\(pairCount)", surprise: surprise)
                 }
                 if !started {
                     Spacer()
@@ -144,7 +150,7 @@ struct PairsGameView: View {
                     .foregroundStyle(GlassInk.secondary)
                     .multilineTextAlignment(.center)
                 HStack(spacing: 6) {
-                    ForEach(0..<Self.pairCount, id: \.self) { i in
+                    ForEach(0..<pairCount, id: \.self) { i in
                         Circle()
                             .fill(i < matched.count ? AppColor.successMint : Color.white.opacity(0.25))
                             .frame(width: 9, height: 9)
@@ -213,7 +219,7 @@ struct PairsGameView: View {
         let picked = MatchPairsSource.pick(for: topic, grade: grade)
         // Math follows the child's adaptive level in math.
         let g = picked == .math ? MiniGameLevel.grade(for: .math) : grade
-        let built = picked.pairs(count: Self.pairCount, grade: g, profile: profiles.active)
+        let built = picked.pairs(count: pairCount, grade: g, profile: profiles.active)
         source = built.source
         let pairs = built.pairs
         lefts = pairs.enumerated().map { Card(pair: $0.offset, text: $0.element.left) }.shuffled()
@@ -240,7 +246,7 @@ struct PairsGameView: View {
             // A pair that took a miss was already recorded as one (below).
             if !missed.contains(l) {
                 MiniGameLedger.record(correct: true, topic: source.topic,
-                                      responseMs: Date().timeIntervalSince(boardShownAt) * 1000 / Double(Self.pairCount),
+                                      responseMs: Date().timeIntervalSince(boardShownAt) * 1000 / Double(pairCount),
                                       earn: earn, surprise: surprise)
             }
             SoundPlayer.shared.play(.correctSmall)
@@ -268,7 +274,7 @@ struct PairsGameView: View {
 
     private func finish() {
         grant = MiniGameReward.grant(game: "pairs", correct: matched.count, starsPer: 2, diamondsPer: 2,
-                                     cap: Self.pairCount, surprise: surprise)
+                                     cap: pairCount, surprise: surprise)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { done = true }
             SoundPlayer.shared.play(.chestOpen)
