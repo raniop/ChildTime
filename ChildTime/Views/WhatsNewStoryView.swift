@@ -28,10 +28,23 @@ struct WhatsNewStoryView: View {
     let onFinish: () -> Void
     /// Screenshot runs only: open on a particular story instead of the first.
     var startAt: Int = 0
+    /// Screenshot runs only: keep the clock RUNNING instead of holding the
+    /// story still, so the segment bar can be driven and checked by hand.
+    var liveInDemo: Bool = false
 
     @Environment(\.horizontalSizeClass) private var hsc
     @Environment(\.layoutDirection) private var direction
-    @ObservedObject private var display = DisplayGeometry.shared
+
+    /// 🧊 The glass this story has, MEASURED here.
+    ///
+    /// This used to be `@ObservedObject DisplayGeometry.shared`, and that is
+    /// what froze the screen black on one card: the probe republishes whenever
+    /// the root's safe-area insets change, those insets flip by a single point
+    /// between passes (`t67 b33` ⇄ `t68 b34`), and every publish re-evaluated
+    /// this body, which re-laid out, which published again — an endless loop
+    /// with nothing ever drawn. A story only needs its own size, so it takes
+    /// its own size and observes nothing.
+    @State private var canvas: CGSize = .zero
 
     @State private var index = 0
     /// How much of the CURRENT segment is filled, 0…1 — animated linearly for
@@ -42,16 +55,32 @@ struct WhatsNewStoryView: View {
     /// text for the whole animation, and this screen is mostly text.
     @State private var risen = false
     @State private var finished = false
+    /// How far a dismiss drag has pulled the card down, in points.
+    @State private var dragY: CGFloat = 0
 
     private var isCompact: Bool { hsc == .compact }
-    private var short: Bool { display.isShort }
+    /// A short screen — the open foldable, an SE — read off our own canvas.
+    private var short: Bool { canvas.height > 0 && canvas.height < DisplayGeometry.shortHeight }
     private var isKid: Bool { audience == .child }
 
     /// The story on screen. `items` can never be empty here (the callers check),
     /// but a defensive placeholder beats a crash on an index.
     private var item: StoryItem? { items.indices.contains(index) ? items[index] : items.first }
 
+    /// The AVAILABLE space is measured by an outer reader whose child is pinned
+    /// to that very size. Measuring from inside the stack instead would read
+    /// back the CONTENT's height — which these sizes then change — and that
+    /// feedback is what hung one card on a black screen for good.
     var body: some View {
+        GeometryReader { geo in
+            story
+                .frame(width: geo.size.width, height: geo.size.height)
+                .onAppear { if canvas != geo.size { canvas = geo.size } }
+                .onChangeCompat(of: geo.size) { _, new in if canvas != new { canvas = new } }
+        }
+    }
+
+    private var story: some View {
         ZStack {
             GlassBackdrop()
             // Few and small: a sparkle landing on a word reads as a typo, and
@@ -91,6 +120,11 @@ struct WhatsNewStoryView: View {
             .frame(maxWidth: columnWidth)
             .frame(maxWidth: .infinity)
         }
+        // 👇 Swipe-down-to-dismiss: the whole card rides the finger and takes a
+        // sheet's corner radius on the way, so letting go feels like letting go
+        // of a story rather than like a button.
+        .clipShape(RoundedRectangle(cornerRadius: dragY > 0 ? 34 : 0, style: .continuous))
+        .offset(y: dragY)
         .environment(\.layoutDirection, .app)
         .onAppear {
             if startAt > 0, items.indices.contains(startAt) { index = startAt } else { begin() }
@@ -172,6 +206,18 @@ struct WhatsNewStoryView: View {
     // MARK: - Chrome
 
     /// The thin segments children know: one per story, filling in real time.
+    ///
+    /// 🐛 Rani, tapping through by hand: "יש באג למעלה עם החיווי הצהוב שזז" —
+    /// on the LAST card the bar showed segment 1 grey, 2 gold, 3 half-filled
+    /// and the rest gold. The cause: ONE animated `fill` drives every segment's
+    /// width, so a segment the tap skipped past kept the interrupted `.linear`
+    /// animation and crawled toward its new target for the rest of that
+    /// animation's duration — leaving the bar mid-fill in several places at once.
+    ///
+    /// So the bar is now a pure function of `(index, fill)`, and only the
+    /// CURRENT segment is allowed to animate at all. The ones behind it snap to
+    /// full, the ones ahead snap to empty, and `begin()` resets `fill` inside a
+    /// transaction with animations off so nothing can be left in flight.
     private var segments: some View {
         HStack(spacing: 4) {
             ForEach(items.indices, id: \.self) { i in
@@ -180,6 +226,9 @@ struct WhatsNewStoryView: View {
                         Capsule().fill(.white.opacity(0.3))
                         Capsule().fill(AppColor.starGold)
                             .frame(width: g.size.width * segmentFill(i))
+                            // Everything that is not the running segment is a
+                            // hard state: full or empty, never a tween.
+                            .transaction { t in if i != index { t.animation = nil } }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -189,8 +238,20 @@ struct WhatsNewStoryView: View {
         .frame(height: 4)
     }
 
+    /// Read it as state, not as a timeline: before = done, current = running,
+    /// after = not started.
     private func segmentFill(_ i: Int) -> CGFloat {
-        i < index ? 1 : (i == index ? fill : 0)
+        if i < index { return 1 }
+        if i == index { return fill }
+        return 0
+    }
+
+    /// Change state with every animation switched off — used for the reset and
+    /// for every manual move, so a tap can never leave a tween behind.
+    private func snap(_ change: () -> Void) {
+        var t = Transaction()
+        t.disablesAnimations = true
+        withTransaction(t, change)
     }
 
     @ViewBuilder
@@ -285,41 +346,89 @@ struct WhatsNewStoryView: View {
 
     // MARK: - Moving between stories
 
-    /// Leading third → back, the rest → on. In Hebrew the leading edge is the
-    /// right one, so "back" is where the story came from — the same way round
-    /// as every story a child has already used.
+    /// Instagram's two zones, full height: the leading third goes back, the
+    /// whole rest goes on. Rani: "תן לי אפשרות לעשות טאפ בצדדים שמעביר לכל צד
+    /// כמו באינסטגרם". The side is taken from the layout direction, so "back"
+    /// is the RIGHT in Hebrew and Arabic and the left in English and Russian —
+    /// always the side the story came from.
+    ///
+    /// This layer sits under the chrome in the ZStack, so 🔊, ✕ / "דלג" and the
+    /// last card's button keep their own taps.
     private var tapZones: some View {
         GeometryReader { g in
             HStack(spacing: 0) {
-                Color.clear.contentShape(Rectangle())
-                    .frame(width: g.size.width * 0.3)
+                Color.clear
+                    .frame(width: g.size.width * 0.32, height: g.size.height)
+                    .contentShape(Rectangle())
                     .onTapGesture { back() }
-                Color.clear.contentShape(Rectangle())
-                    .frame(maxWidth: .infinity)
+                Color.clear
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
                     .onTapGesture { advance() }
             }
+            .frame(width: g.size.width, height: g.size.height)
         }
         .ignoresSafeArea()
     }
 
+    /// One gesture for both axes, so they cannot fight each other.
+    ///
+    /// Sideways moves between stories. **Downwards dismisses**, the way every
+    /// story app does it (Rani: "וסלייד למטה שמעיף"): the card follows the
+    /// finger, and past the threshold it closes to the home screen — exactly
+    /// what ✕ / "דלג" do. Short of the threshold it springs back and the story
+    /// starts its clock again.
+    ///
+    /// No `scaleEffect` while dragging: this screen is mostly text, and a
+    /// scaled text layer is a blurred text layer for the whole drag. The card
+    /// takes a corner radius and lifts instead.
     private var swipe: some Gesture {
-        DragGesture(minimumDistance: 28)
+        DragGesture(minimumDistance: 14)
+            .onChanged { value in
+                guard !finished else { return }
+                let dy = value.translation.height
+                guard dy > 0, dy > abs(value.translation.width) else { return }
+                if dragY == 0 { ticker?.cancel() }   // nothing advances under the finger
+                dragY = dy
+            }
             .onEnded { value in
-                guard abs(value.translation.width) > abs(value.translation.height) else { return }
-                let towardsStart = value.translation.width > 0
+                guard !finished else { return }
+                let dy = value.translation.height
+                let dx = value.translation.width
+
+                // A drag that was going down — finish the dismiss or spring back.
+                if dragY > 0 || (dy > 0 && dy > abs(dx)) {
+                    let projected = dy + value.predictedEndTranslation.height * 0.25
+                    if dy > Self.dismissDistance || projected > Self.dismissDistance * 2 {
+                        Haptic.light()
+                        finish()
+                    } else {
+                        withAnimation(.spring(response: 0.34, dampingFraction: 0.86)) { dragY = 0 }
+                        begin()   // the story it interrupted starts over
+                    }
+                    return
+                }
+
+                guard abs(dx) > abs(dy) else { return }
+                let towardsStart = dx > 0
                 let forward = direction == .rightToLeft ? towardsStart : !towardsStart
                 forward ? advance() : back()
             }
     }
 
+    /// How far down a drag has to go to let go of the story.
+    private static let dismissDistance: CGFloat = 130
+
     private func begin() {
         ticker?.cancel()
-        fill = 0
-        risen = false
+        // Snap the reset: assigned under a running `.linear`, `fill = 0` would
+        // RETARGET that animation instead of ending it, and the segment we just
+        // left would keep crawling.
+        snap { fill = 0; risen = false }
         withAnimation(.easeOut(duration: 0.38)) { risen = true }
         // 📸 A screenshot run holds the story still — the segment is drawn
         // part-filled so the bar still reads as "mid-story".
-        guard !AppInfo.isDemoRun else { risen = true; fill = 0.45; return }
+        guard !AppInfo.isDemoRun || liveInDemo else { snap { risen = true; fill = 0.45 }; return }
         let seconds = item?.seconds ?? 5
         withAnimation(.linear(duration: seconds)) { fill = 1 }
         speakIfPreReader()
@@ -342,7 +451,7 @@ struct WhatsNewStoryView: View {
         guard !finished else { return }
         Haptic.light()
         if index + 1 < items.count {
-            index += 1
+            snap { index += 1 }
         } else {
             finish()
         }
@@ -351,7 +460,7 @@ struct WhatsNewStoryView: View {
     private func back() {
         guard !finished, index > 0 else { return }
         Haptic.light()
-        index -= 1
+        snap { index -= 1 }
     }
 
     /// One way out, used by the last story, by ✕ and by "דלג" alike — and only
@@ -373,8 +482,8 @@ struct WhatsNewStoryView: View {
     // on a short foldable, a tall phone and a 13" iPad alike. A fixed column
     // with fixed type made the iPad a phone layout floating in the middle.
 
-    private var safeH: CGFloat { display.safeSize.height }
-    private var safeW: CGFloat { display.safeSize.width }
+    private var safeH: CGFloat { canvas.height }
+    private var safeW: CGFloat { canvas.width }
 
     /// Height-driven value, clamped. Falls back to `lo` before the first
     /// measurement lands.
@@ -404,11 +513,19 @@ struct WhatsNewStoryView: View {
     /// them instead, and a row stays the size of a row.
     private func parentStageHeight(_ art: StoryArt) -> CGFloat {
         let height = share(isCompact ? 0.40 : 0.48, min: 150, max: 780)
-        guard case .rows(let list) = art else { return height }
-        let n = CGFloat(Swift.max(list.count, 1))
-        let tallestRow: CGFloat = isCompact ? 58 : 112
         let gap = Swift.max(8, height * 0.045)
-        return Swift.min(height, n * tallestRow + (n - 1) * gap)
+        switch art {
+        case .rows(let list):
+            let n = CGFloat(Swift.max(list.count, 1))
+            let tallestRow: CGFloat = isCompact ? 58 : 112
+            return Swift.min(height, n * tallestRow + (n - 1) * gap)
+        case .chat(let lines):
+            // Bubbles, like rows, look stranded in a pane built for a poster.
+            let n = CGFloat(Swift.max(lines.count, 1))
+            return Swift.min(height, n * (isCompact ? 104 : 140) + gap)
+        default:
+            return height
+        }
     }
 
     private func type(_ fraction: CGFloat, min lo: CGFloat, max hi: CGFloat) -> CGFloat {
@@ -474,6 +591,16 @@ private struct Box: View {
             characterHero(who)
         case .game(let kind, let topic):
             gameArt(kind, topic: topic)
+        case .preReaderGame(let kind, let topic):
+            gameArt(kind, topic: topic, preReader: true)
+        case .chooser(let kind, let topic):
+            chooserArt(kind, topic: topic)
+        case .vault(let code, let clues):
+            vaultArt(code: code, clues: clues)
+        case .chips(let list, let selected):
+            chipsArt(list, selected: selected)
+        case .chat(let lines):
+            chatArt(lines)
         case .tiles(let list):
             tiles(list)
         case .rows(let rows):
@@ -520,12 +647,10 @@ private struct Box: View {
     /// The frame HUGS the board: `MiniGamePreview` draws at `min(w, h × 1.6)`,
     /// so a box in that exact ratio is filled edge to edge instead of being a
     /// large pane of padding around a small board.
-    private func gameArt(_ kind: MiniGameKind, topic: Topic) -> some View {
+    private func gameArt(_ kind: MiniGameKind, topic: Topic, preReader: Bool? = nil) -> some View {
         let gap = box.height * 0.04
         let emojiBand = box.height * 0.32
         let boardH = box.height - emojiBand - gap
-        let pad = Swift.max(8, box.height * 0.035)
-        let boardW = Swift.min(box.width, (boardH - pad * 2) * 1.6 + pad * 2)
         return VStack(spacing: gap) {
             ZStack {
                 glow(AppColor.starGold, size: emojiBand * 1.5)
@@ -535,11 +660,168 @@ private struct Box: View {
             }
             .frame(height: emojiBand)
 
-            MiniGamePreview(kind: kind, topic: topic)
-                .frame(width: boardW - pad * 2, height: boardH - pad * 2)
-                .padding(pad)
-                .glassInset(radius: Swift.max(14, box.height * 0.055))
+            board(kind, topic: topic, preReader: preReader, height: boardH)
         }
+    }
+
+    /// The real board in a frame that HUGS it: `MiniGamePreview` draws at
+    /// `min(w, h × 1.6)`, so a box in that ratio is filled edge to edge
+    /// instead of being a big pane of padding around a small board.
+    private func board(_ kind: MiniGameKind, topic: Topic,
+                       preReader: Bool?, height: CGFloat, maxWidth: CGFloat? = nil) -> some View {
+        let pad = Swift.max(8, box.height * 0.035)
+        let limit = maxWidth ?? box.width
+        let w = Swift.min(limit, (height - pad * 2) * 1.6 + pad * 2)
+        return Group {
+            if let preReader {
+                MiniGamePreview(kind: kind, topic: topic, preReader: preReader)
+            } else {
+                MiniGamePreview(kind: kind, topic: topic)
+            }
+        }
+        .frame(width: w - pad * 2, height: height - pad * 2)
+        .padding(pad)
+        .glassInset(radius: Swift.max(14, box.height * 0.055))
+    }
+
+    /// 🕹 The chooser, as the child meets it: "שאלות" on one side, a real game
+    /// board on the other, with the game outlined the way the screen outlines
+    /// a pick. Two real choices, not an icon of a choice.
+    /// The game side shows the REAL board; the questions side shows the mark a
+    /// question wears. The game's own name carries niqqud (it is the child's),
+    /// so on a parent's screen the two cards are named for what they are.
+    private func chooserArt(_ kind: MiniGameKind, topic: Topic) -> some View {
+        let gap = Swift.max(10, box.width * 0.035)
+        // Clamped: a `GeometryReader` can propose a zero size on its first
+        // pass, and `(0 - gap) / 2` is a NEGATIVE frame width.
+        let cardW = Swift.max(60, (box.width - gap) / 2)
+        let cardH = Swift.max(80, box.height * 0.92)
+        let label = Swift.min(Swift.max(box.height * 0.085, 13), 22)
+        let radius = Swift.max(14, box.height * 0.06)
+        return LazyVGrid(columns: Array(repeating: GridItem(.fixed(cardW), spacing: gap), count: 2),
+                         spacing: gap) {
+            chooserCard(tr("שאלות"), w: cardW, h: cardH, label: label, radius: radius, picked: false) {
+                Text("❓").font(.system(size: cardH * 0.3))
+                    .shadow(color: .black.opacity(0.28), radius: 10, y: 6)
+            }
+            chooserCard(tr("משחק"), w: cardW, h: cardH, label: label, radius: radius, picked: true) {
+                MiniGamePreview(kind: kind, topic: topic)
+                    .frame(width: cardW * 0.8, height: cardW * 0.8 / 1.6)
+            }
+        }
+    }
+
+    private func chooserCard<Content: View>(_ name: String, w: CGFloat, h: CGFloat,
+                                            label: CGFloat, radius: CGFloat, picked: Bool,
+                                            @ViewBuilder content: () -> Content) -> some View {
+        VStack(spacing: h * 0.08) {
+            content()
+            Text(name)
+                .font(.system(size: label, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1).minimumScaleFactor(0.6)
+        }
+        .frame(width: w, height: h)
+        .glassInset(radius: radius)
+        .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous)
+            .strokeBorder(picked ? AppColor.starGold : .clear, lineWidth: 2.5))
+    }
+
+    /// 🔐 The vault's point in one picture: the code with one digit known, and
+    /// the clues that are open so far.
+    private func vaultArt(code: [String], clues: [String]) -> some View {
+        let slot = Swift.min(box.height * 0.22, box.width * 0.17)
+        let font = Swift.min(Swift.max(box.height * 0.07, 13), 22)
+        return VStack(spacing: box.height * 0.07) {
+            // The code reads left to right, like every number in the app.
+            HStack(spacing: slot * 0.26) {
+                ForEach(Array(code.enumerated()), id: \.offset) { _, digit in
+                    Text(digit)
+                        .font(.system(size: slot * 0.5, weight: .black, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(digit == "?" ? .white.opacity(0.45) : AppColor.starGold)
+                        .frame(width: slot, height: slot)
+                        .background(RoundedRectangle(cornerRadius: slot * 0.26, style: .continuous)
+                            .fill(.white.opacity(0.18)))
+                        .overlay(RoundedRectangle(cornerRadius: slot * 0.26, style: .continuous)
+                            .strokeBorder(.white.opacity(0.38), lineWidth: 1.5))
+                }
+            }
+            .environment(\.layoutDirection, .leftToRight)
+
+            VStack(alignment: .leading, spacing: font * 0.45) {
+                ForEach(Array(clues.enumerated()), id: \.offset) { _, clue in
+                    HStack(spacing: font * 0.45) {
+                        Text("💡").font(.system(size: font))
+                        Text(clue)
+                            .font(.system(size: font, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.95))
+                            .lineLimit(1).minimumScaleFactor(0.6)
+                    }
+                }
+            }
+        }
+    }
+
+    /// The daily-cap picker as it really looks: choices, one of them taken.
+    private func chipsArt(_ list: [String], selected: Int) -> some View {
+        let font = Swift.min(Swift.max(box.height * 0.085, 13), 22)
+        let gap = font * 0.5
+        return LazyVGrid(columns: [GridItem(.adaptive(minimum: font * 5.2, maximum: font * 9), spacing: gap)],
+                         spacing: gap) {
+            ForEach(Array(list.enumerated()), id: \.offset) { i, name in
+                Text(name)
+                    .font(.system(size: font, weight: .heavy, design: .rounded))
+                    .foregroundStyle(i == selected ? AppColor.textOnLight : .white)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, font * 0.52)
+                    .background {
+                        if i == selected {
+                            Capsule().fill(AppGradient.gold)
+                        } else {
+                            Capsule().fill(.white.opacity(0.18))
+                                .overlay(Capsule().strokeBorder(.white.opacity(0.34), lineWidth: 1))
+                        }
+                    }
+            }
+        }
+        .padding(.horizontal, gap)
+    }
+
+    /// 💬 The support chat, as the conversation the 💬 button opens.
+    private func chatArt(_ lines: [StoryChatLine]) -> some View {
+        let font = Swift.min(Swift.max(box.height * 0.082, 13), 22)
+        return VStack(alignment: .leading, spacing: font * 0.9) {
+            ForEach(lines) { line in
+                HStack(spacing: 0) {
+                    if line.mine { Spacer(minLength: font * 2) }
+                    VStack(alignment: line.mine ? .trailing : .leading, spacing: font * 0.25) {
+                        if !line.mine {
+                            Text(tr("צוות טופי"))
+                                .font(.system(size: font * 0.72, weight: .heavy, design: .rounded))
+                                .foregroundStyle(AppColor.starGold)
+                        }
+                        Text(line.text)
+                            .font(.system(size: font, weight: .semibold, design: .rounded))
+                            .foregroundStyle(line.mine ? AppColor.textOnLight : .white)
+                            .multilineTextAlignment(line.mine ? .trailing : .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.horizontal, font * 0.8)
+                            .padding(.vertical, font * 0.6)
+                            .background {
+                                if line.mine {
+                                    RoundedRectangle(cornerRadius: font, style: .continuous).fill(AppGradient.gold)
+                                } else {
+                                    RoundedRectangle(cornerRadius: font, style: .continuous).fill(.white.opacity(0.2))
+                                }
+                            }
+                    }
+                    if !line.mine { Spacer(minLength: font * 2) }
+                }
+            }
+        }
+        .padding(.horizontal, font * 0.6)
     }
 
     /// Every game at once — what the parent actually got, in one look.
@@ -575,7 +857,7 @@ private struct Box: View {
         return VStack(spacing: gap) {
             ForEach(list) { row in
                 HStack(spacing: font * 0.65) {
-                    if row.kind == .bullet {
+                    if case .bullet = row.kind {
                         Text("●").font(.system(size: font * 0.9)).foregroundStyle(GlassInk.good)
                     }
                     Text(row.label)
@@ -586,6 +868,16 @@ private struct Box: View {
                     switch row.kind {
                     case .switchOn:
                         fakeSwitch(font * 2.1)
+                    case .action(let title):
+                        // The real button, drawn — this is where a parent will
+                        // look for it, so it has to look like what they'll see.
+                        Text(title)
+                            .font(.system(size: font * 0.92, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppColor.textOnLight)
+                            .lineLimit(1).minimumScaleFactor(0.6)
+                            .padding(.horizontal, font * 0.8)
+                            .padding(.vertical, font * 0.38)
+                            .background(Capsule().fill(AppGradient.gold))
                     case .bullet:
                         Text(row.value)
                             .font(.system(size: font, weight: .heavy, design: .rounded))
@@ -685,12 +977,18 @@ struct WhatsNewStoryDemo: View {
     private var startAt: Int {
         Int(ProcessInfo.processInfo.environment["DEMO_STORY"] ?? "") ?? 0
     }
+    /// `DEMO_LIVE=1` — run the clock, so taps and the segment bar can be
+    /// exercised for real instead of frozen for a screenshot.
+    private var live: Bool {
+        ProcessInfo.processInfo.environment["DEMO_LIVE"] == "1"
+    }
 
     var body: some View {
         WhatsNewStoryView(audience: audience,
                           items: WhatsNewStories.current(for: audience),
                           onFinish: {},
-                          startAt: startAt)
+                          startAt: startAt,
+                          liveInDemo: live)
             .onAppear {
                 guard let grade = Int(ProcessInfo.processInfo.environment["DEMO_GRADE"] ?? ""),
                       var p = ProfileStore.shared.active else { return }

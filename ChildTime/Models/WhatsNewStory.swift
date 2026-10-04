@@ -35,22 +35,22 @@ enum WhatsNewStories {
     /// "בָּא לָךְ", so a brother and a sister on one iPad must not share a cache
     /// entry the way two screens in one language can.
     static var byBuild: [Int: [StoryItem]] {
-        LocalizedCache.value("whatsNewStories.byBuild." + (Gendered.isGirl ? "f" : "m")) { [187: build186] }
+        LocalizedCache.value("whatsNewStories.byBuild." + (Gendered.isGirl ? "f" : "m")) { [187: build187] }
     }
 
-    /// 🎮 Build 186 — the twelve mini-games, the chooser in front of them, the
+    /// 🎮 Build 187 — the twelve mini-games, the chooser in front of them, the
     /// grade-matched content behind them, and the parent's "רק שאלות רגילות".
     ///
     /// Everything a parent reads here comes from `WhatsNewContent`'s note for
     /// the same build (`note(_:)`), and everything a child reads comes from the
     /// game's own `MiniGameKind` — so there is exactly one place to fix a line.
-    private static var build186: [StoryItem] {
+    private static var build187: [StoryItem] {
         var items: [StoryItem] = []
 
         // ── 1 · The chooser ────────────────────────────────────────────────
         // 👧 The child meets the screen they will actually see first.
         items.append(StoryItem(
-            id: "186.chooser.kid",
+            id: "187.chooser.kid",
             art: .emoji("🎮"),
             title: Gendered.g(tr("אֵיךְ בָּא לְךָ לְשַׂחֵק?"), tr("אֵיךְ בָּא לָךְ לְשַׂחֵק?")),
             line: tr("בּוֹחֲרִים עוֹלָם, וְאָז בּוֹחֲרִים: שְׁאֵלוֹת רְגִילוֹת אוֹ מִשְׂחָק"),
@@ -58,7 +58,7 @@ enum WhatsNewStories {
 
         // 👨‍👩‍👧 …and the parent meets all twelve at once, with what it means.
         items.append(StoryItem(
-            id: "186.games.parent",
+            id: "187.games.parent",
             art: .tiles(MiniGameKind.allCases.map(\.emoji)),
             kicker: tr("מה חדש"),
             title: tr("12 משחקים חדשים"),
@@ -66,13 +66,23 @@ enum WhatsNewStories {
             audience: .parent,
             seconds: 6.5))
 
+        // …and the chooser itself, drawn as the screen the child will meet:
+        // "שאלות" on one side, a real game board on the other.
+        items.append(StoryItem(
+            id: "187.chooser.parent",
+            art: .chooser(game: .pairs, topic: .math),
+            kicker: tr("מסך חדש"),
+            title: tr("איך בא לך לשחק?"),
+            line: tr("בלחיצה אחת נכנסים ישר לשחק — או ישר לשאלות"),
+            audience: .parent))
+
         // ── 2 · One story per game ────────────────────────────────────────
         // Rani: all twelve, never a summary. Title, line and art are the
         // game's own, so a thirteenth game is a new `MiniGameKind` and
         // nothing here.
         for kind in MiniGameKind.allCases {
             items.append(StoryItem(
-                id: "186.game.\(kind.rawValue)",
+                id: "187.game.\(kind.rawValue)",
                 art: .game(kind, topic: previewTopic(kind)),
                 title: kind.title,
                 line: kind.blurb,
@@ -82,7 +92,7 @@ enum WhatsNewStories {
 
         // ── 3 · Grade-matched content (parent: a real example) ────────────
         items.append(StoryItem(
-            id: "186.gradefit.parent",
+            id: "187.gradefit.parent",
             art: .rows([
                 StoryRow(label: tr("כיתה ג׳ · עברית"), value: tr("מכונית · אונייה")),
                 StoryRow(label: tr("כיתה ו׳ · עברית"), value: tr("מיקרופון · גלגיליות")),
@@ -94,16 +104,42 @@ enum WhatsNewStories {
             audience: .parent,
             seconds: 7))
 
+        // 👶 …and the other end of that ladder: what גן actually gets. The
+        // board here is the real text-free one, so a parent can see that
+        // "a game for a five-year-old" is pictures, not small print.
+        items.append(StoryItem(
+            id: "187.prereader.parent",
+            art: .preReaderGame(.balloon, topic: .math),
+            kicker: tr("גן"),
+            title: tr("חמישה משחקים בלי מילים"),
+            line: tr("בגן המשחקים הם תמונות, צבעים וכמויות — וההוראה נאמרת בקול, לא נכתבת"),
+            audience: .parent,
+            seconds: 6.5))
+
+        // 🔐 One game shown as what it really asks for: deduction.
+        items.append(StoryItem(
+            id: "187.vault.parent",
+            art: .vault(code: ["3", "?", "?"], clues: [
+                tr("הספרה הראשונה היא 3"),
+                tr("הספרה השנייה גדולה מ־5"),
+                tr("הספרה השלישית זוגית"),
+            ]),
+            kicker: tr("חשיבה"),
+            title: tr("הכספת — משחק של הסקה"),
+            line: tr("כל תשובה נכונה פותחת רמז, והרמזים ביחד מגלים את הקוד"),
+            audience: .parent,
+            seconds: 7))
+
         // ── 4 · Minutes are earned in a game too ─────────────────────────
         items.append(StoryItem(
-            id: "186.minutes.kid",
+            id: "187.minutes.kid",
             art: .emoji("⏱"),
             title: tr("גַּם בַּמִּשְׂחָקִים מַרְוִיחִים דַּקּוֹת"),
             line: tr("כָּל תְּשׁוּבָה נְכוֹנָה מוֹסִיפָה זְמַן מִשְׂחָק"),
             audience: .child))
 
         items.append(StoryItem(
-            id: "186.minutes.parent",
+            id: "187.minutes.parent",
             art: .rows([
                 StoryRow(label: tr("שאלה רגילה"), value: tr("⏱ זמן מסך")),
                 StoryRow(label: tr("תשובה נכונה במשחק"), value: tr("⏱ אותו זמן")),
@@ -117,7 +153,7 @@ enum WhatsNewStories {
 
         // ── 5 · The surprise round (child only — it is a surprise) ───────
         items.append(StoryItem(
-            id: "186.surprise.kid",
+            id: "187.surprise.kid",
             art: .emoji("⚡"),
             title: tr("סִבּוּב הַפְתָּעָה"),
             line: tr("כָּל כַּמָּה שְׁאֵלוֹת קוֹפֵץ מִשְׂחָק קָצָר — עִם כּוֹכָבִים וְיַהֲלוֹמִים כְּפוּלִים"),
@@ -125,7 +161,7 @@ enum WhatsNewStories {
 
         // ── 6 · "רק שאלות רגילות" — where it actually lives ──────────────
         items.append(StoryItem(
-            id: "186.onlyQuestions.parent",
+            id: "187.onlyQuestions.parent",
             art: .rows([
                 StoryRow(label: tr("רק שאלות רגילות"), value: "", kind: .switchOn),
                 StoryRow(label: tr("זמן מסך ליום"), value: tr("60 דקות")),
@@ -137,13 +173,66 @@ enum WhatsNewStories {
             audience: .parent,
             seconds: 7))
 
-        // ── 7 · The closing story ────────────────────────────────────────
+        // ── 7 · The rest of the parent's own screens ────────────────────
+        // ⏱ The daily ceiling, drawn as the picker it really is — including
+        // the "אחר" that takes any number of minutes.
+        items.append(StoryItem(
+            id: "187.dailyCap.parent",
+            art: .chips(DailyCapChoice.options.map(DailyCapChoice.label) + [tr("אחר")],
+                        selected: DailyCapChoice.options.firstIndex(of: DailyCapChoice.defaultMinutes) ?? 1),
+            kicker: tr("זמן מסך ליום"),
+            title: tr("אתם קובעים כמה"),
+            line: tr("חצי שעה, שעה, שעתיים, בלי הגבלה — או כל מספר דקות שתקלידו"),
+            audience: .parent,
+            seconds: 6.5))
+
+        // 🧒 Kid Mode. Parents were writing in that they could not find it, so
+        // the card shows the row the button really sits on.
+        items.append(StoryItem(
+            id: "187.kidMode.parent",
+            art: .rows([
+                StoryRow(label: tr("כרטיס הילד"), kind: .action(tr("🧒 תנו לשחק כאן"))),
+                StoryRow(label: tr("יציאה ממצב ילד"), value: tr("מוגן בקוד הורים")),
+            ]),
+            kicker: tr("הטלפון שלכם"),
+            title: tr("תנו לילד לשחק כאן"),
+            line: tr("מוסרים לילד את הטלפון שלכם לכמה דקות — והיציאה חזרה מוגנת בקוד"),
+            audience: .parent,
+            seconds: 6.5))
+
+        // 📱 The iPad that was set up as a parent device by mistake.
+        items.append(StoryItem(
+            id: "187.ipadChild.parent",
+            art: .rows([
+                StoryRow(label: "iPhone", value: tr("מכשיר הורה")),
+                StoryRow(label: "iPad", kind: .action(tr("להפוך למכשיר של ילד"))),
+            ]),
+            kicker: tr("מכשירים"),
+            title: tr("האייפד הוא של הילד"),
+            line: tr("אייפד שהוגדר בטעות כמכשיר הורה הופך למכשיר של ילד בלחיצה אחת, בלי למחוק כלום"),
+            audience: .parent,
+            seconds: 6.5))
+
+        // 💬 And the way to reach us, as the conversation it opens.
+        items.append(StoryItem(
+            id: "187.chat.parent",
+            art: .chat([
+                StoryChatLine(text: tr("שלום! כאן צוות טופי 👋 איך אפשר לעזור?"), mine: false),
+                StoryChatLine(text: tr("איך מחברים את האייפד לילדה שלי?"), mine: true),
+            ]),
+            kicker: tr("אנחנו כאן"),
+            title: tr("צ'אט עם צוות טופי"),
+            line: tr("הכפתור 💬 במסך הבית פותח שיחה איתנו — והתשובה מגיעה לטלפון שלכם"),
+            audience: .parent,
+            seconds: 6.5))
+
+        // ── 8 · The closing story ────────────────────────────────────────
         // 🦊 The child's own buddy hands them a small ⭐/💎 for having watched,
         // and then it closes itself to the map. The only button in the whole
         // story sits here (Rani: "צריך כפתור למטה במסך האחרון") — it does
         // exactly what the ending does anyway, so nothing waits on it.
         items.append(StoryItem(
-            id: "186.closing.kid",
+            id: "187.closing.kid",
             art: .gift(.childsBuddy, stars: Self.watchStars, diamonds: Self.watchDiamonds),
             title: tr("בּוֹאוּ נְשַׂחֵק! 🚀"),
             line: tr("וְהִנֵּה מַתָּנָה קְטַנָּה בִּשְׁבִילְכֶם"),
@@ -152,7 +241,7 @@ enum WhatsNewStories {
 
         // 🦁 Tofy's own lion for the parent: where to find this again, and in.
         items.append(StoryItem(
-            id: "186.closing.parent",
+            id: "187.closing.parent",
             art: .character(.lion),
             kicker: tr("זה הכל"),
             title: tr("נתראה בפנים 👋"),
@@ -324,7 +413,18 @@ struct StoryRow: Identifiable {
         case bullet
         /// A real-looking switch, turned on — "here is where it lives".
         case switchOn
+        /// The gold button that really sits on that row, drawn not live —
+        /// "תנו לשחק כאן", "להפוך למכשיר של ילד".
+        case action(String)
     }
+}
+
+/// One line in the support-chat preview.
+struct StoryChatLine: Identifiable {
+    let id = UUID()
+    let text: String
+    /// True for the parent's own message (trailing, gold); false for צוות טופי.
+    let mine: Bool
 }
 
 /// Which of Tofy's own characters a story shows. Rani, on seeing the system
@@ -350,17 +450,30 @@ enum StoryArt {
     /// 🎮 A real mini-game: its own emoji huge, and under it the real board,
     /// drawn by `MiniGamePreview` (including the גן form for a pre-reader).
     case game(MiniGameKind, topic: Topic)
+    /// 👶 The same, forced to the pre-reader board — so a PARENT can see the
+    /// text-free גן form their five-year-old actually gets.
+    case preReaderGame(MiniGameKind, topic: Topic)
+    /// 🕹 The chooser screen in miniature: "שאלות" beside a real game board,
+    /// which is the choice the child is handed after picking a world.
+    case chooser(game: MiniGameKind, topic: Topic)
     /// Every emoji at once, as a grid — "all twelve", for the parent.
     case tiles([String])
     /// Example rows — a real example instead of an explanation.
     case rows([StoryRow])
+    /// 🔐 The vault: the code slots with one digit known, and the clues open
+    /// so far. The point of the game in one picture.
+    case vault(code: [String], clues: [String])
+    /// A row of choices with one picked — the daily screen-time picker.
+    case chips([String], selected: Int)
+    /// 💬 A real-looking exchange with צוות טופי.
+    case chat([StoryChatLine])
     /// ⭐/💎 the child just earned, under their own buddy.
     case gift(StoryCharacter, stars: Int, diamonds: Int)
 }
 
 /// One screen of the story.
 struct StoryItem: Identifiable {
-    /// Stable, build-prefixed (`"186.game.vault"`) — so a story can be named
+    /// Stable, build-prefixed (`"187.game.vault"`) — so a story can be named
     /// in a bug report and found.
     let id: String
     let art: StoryArt
