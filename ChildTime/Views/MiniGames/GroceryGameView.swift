@@ -109,94 +109,155 @@ struct GroceryGameView: View {
         }
     }
 
+    /// The sticker price on the shelf — struck through when the item is on sale.
     private func price(_ item: GroceryShelfItem) -> String { MiniGameText.ltr(GroceryGen.money(item.price)) }
+    /// What the till actually charges. The receipt has to show THIS: a bill that
+    /// prints the pre-sale price and then asks for the post-sale total is a
+    /// wrong sum on screen (Rani: "the answer was 62.50 and it wrote 60").
+    private func tillPrice(_ item: GroceryShelfItem) -> String { MiniGameText.ltr(GroceryGen.money(item.finalPrice)) }
 
     // MARK: - Shopping
 
+    /// A canvas wider than it is tall — an iPad in landscape, a phone turned on
+    /// its side, the foldable held open. One tall column there stacks into the
+    /// top third and leaves a void under it (Rani, iPad Pro 13" landscape), so
+    /// the board goes side by side and the whole thing centres.
+    private var isWideCanvas: Bool {
+        let s = display.safeSize
+        return s.width > 0 && s.width >= s.height * 1.2
+    }
+
+    /// The shelf always holds six, so the grid gets a column count that divides
+    /// six evenly — 3 × 2, never the broken-looking 4 + 2 an iPad used to show.
+    private var shelfColumns: Int { 3 }
+
     private var shopping: some View {
         VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-            // The list and the budget, in the runner's question card.
-            VStack(spacing: 10) {
-                HStack {
-                    Text(tr("רְשִׁימַת קְנִיּוֹת"))
-                        .font(.system(size: isCompact ? 18 : 22, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                    Spacer(minLength: 8)
-                    MiniGameChip {
-                        Text("💰 " + MiniGameText.ltr(GroceryGen.money(trip?.budget ?? 0)))
-                            .font(.system(size: isCompact ? 16 : 19, weight: .heavy, design: .rounded))
-                            .foregroundStyle(AppColor.starGold)
+            Spacer(minLength: 0)
+            if isWideCanvas {
+                HStack(alignment: .top, spacing: AppSpacing.md) {
+                    VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
+                        listPane
+                        shelfGrid
                     }
-                }
-                FlowChips(items: trip?.list ?? []) { item in
-                    let inCart = cart.contains { $0.id == item.id }
-                    HStack(spacing: 6) {
-                        Image(systemName: inCart ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(inCart ? AppColor.successMint : .white.opacity(0.7))
-                        Text(listName(item.product))
-                            .font(.system(size: isCompact ? 17 : 21, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .environment(\.layoutDirection, mode == .english ? .leftToRight : .app)
+                    // No Spacer in here: a greedy column would eat the height the
+                    // two outer Spacers need to centre the whole board.
+                    VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
+                        cartStrip
+                        shoppingNote
+                        checkoutButton
                     }
-                    .padding(.horizontal, 12).padding(.vertical, 7)
-                    .background(Capsule().fill(inCart ? AppColor.successMint.opacity(0.25) : .white.opacity(0.12)))
-                    .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                    .frame(maxWidth: 300)
                 }
-            }
-            .padding(14)
-            .glassPane(radius: 22)
-
-            // The shelf.
-            let cols = Array(repeating: GridItem(.flexible(), spacing: 10), count: isCompact ? 3 : 4)
-            LazyVGrid(columns: cols, spacing: 10) {
-                ForEach(Array((trip?.shelf ?? []).enumerated()), id: \.element.id) { i, item in
-                    shelfItem(item, tint: OptionCard.tints[i % OptionCard.tints.count])
-                }
-            }
-
-            // The cart.
-            HStack(spacing: 8) {
-                Text("🛒").font(.system(size: 26))
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        ForEach(cart) { item in
-                            Button { remove(item) } label: {
-                                Text(item.product.emoji)
-                                    .font(.system(size: 24))
-                                    .padding(6)
-                                    .background(Circle().fill(.white.opacity(0.16)))
-                            }
-                            .buttonStyle(.juicy)
-                            .transition(.scale.combined(with: .opacity))
-                        }
-                    }
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 12).padding(.vertical, 8)
-            .frame(minHeight: 54)
-            .glassInset(radius: 18)
-
-            if let note {
-                Text(note)
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundStyle(AppColor.almostWarm)
-                    .multilineTextAlignment(.center)
-                    .transition(.opacity)
-            } else if overBudget {
-                Text(tr("אוֹפְּס, חָרַגְנוּ מֵהַתַּקְצִיב — מוֹצִיאִים מַשֶּׁהוּ מֵהָעֲגָלָה 🛒"))
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundStyle(AppColor.almostWarm)
-                    .multilineTextAlignment(.center)
+            } else {
+                listPane
+                shelfGrid
+                cartStrip
+                shoppingNote
+                checkoutButton
             }
             Spacer(minLength: 0)
-            MiniGameGoldButton(title: tr("לַקֻּפָּה 🧾")) { checkout() }
-                .opacity(listDone && !overBudget ? 1 : 0.5)
-                .disabled(!listDone || overBudget)
         }
-        .frame(maxWidth: isCompact ? 600 : 760)
+        .frame(maxWidth: isCompact ? 600 : (isWideCanvas ? 1100 : 760))
         .padding(.horizontal, AppSpacing.md)
         .padding(.bottom, AppSpacing.md)
+    }
+
+    // The list and the budget, in the runner's question card.
+    private var listPane: some View {
+        VStack(spacing: 10) {
+            HStack {
+                Text(tr("רְשִׁימַת קְנִיּוֹת"))
+                    .font(.system(size: isCompact ? 18 : 22, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Spacer(minLength: 8)
+                MiniGameChip {
+                    Text("💰 " + MiniGameText.ltr(GroceryGen.money(trip?.budget ?? 0)))
+                        .font(.system(size: isCompact ? 16 : 19, weight: .heavy, design: .rounded))
+                        .foregroundStyle(AppColor.starGold)
+                }
+            }
+            // A chooser or a ⚡ round skips the intro card, so the rule of the
+            // game has to be on the board itself (the vault's lesson).
+            Text(mode == .pictures
+                 ? tr("אוֹסְפִים מֵהַמַּדָּף אֶת כָּל מָה שֶׁבָּרְשִׁימָה וְהוֹלְכִים לַקֻּפָּה")
+                 : tr("קוֹרְאִים כָּל מִלָּה, מוֹצְאִים אוֹתָהּ עַל הַמַּדָּף — וְאָז לַקֻּפָּה"))
+                .font(.system(size: isCompact ? 13 : 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            FlowChips(items: trip?.list ?? []) { item in
+                let inCart = cart.contains { $0.id == item.id }
+                HStack(spacing: 6) {
+                    Image(systemName: inCart ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(inCart ? AppColor.successMint : .white.opacity(0.7))
+                    Text(listName(item.product))
+                        .font(.system(size: isCompact ? 17 : 21, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .environment(\.layoutDirection, mode == .english ? .leftToRight : .app)
+                }
+                .padding(.horizontal, 12).padding(.vertical, 7)
+                .background(Capsule().fill(inCart ? AppColor.successMint.opacity(0.25) : .white.opacity(0.12)))
+                .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            }
+        }
+        .padding(14)
+        .glassPane(radius: 22)
+    }
+
+    private var shelfGrid: some View {
+        let cols = Array(repeating: GridItem(.flexible(), spacing: 10), count: shelfColumns)
+        return LazyVGrid(columns: cols, spacing: 10) {
+            ForEach(Array((trip?.shelf ?? []).enumerated()), id: \.element.id) { i, item in
+                shelfItem(item, tint: OptionCard.tints[i % OptionCard.tints.count])
+            }
+        }
+    }
+
+    // The cart.
+    private var cartStrip: some View {
+        HStack(spacing: 8) {
+            Text("🛒").font(.system(size: 26))
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(cart) { item in
+                        Button { remove(item) } label: {
+                            Text(item.product.emoji)
+                                .font(.system(size: 24))
+                                .padding(6)
+                                .background(Circle().fill(.white.opacity(0.16)))
+                        }
+                        .buttonStyle(.juicy)
+                        .transition(.scale.combined(with: .opacity))
+                    }
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 8)
+        .frame(minHeight: 54)
+        .glassInset(radius: 18)
+    }
+
+    @ViewBuilder private var shoppingNote: some View {
+        if let note {
+            Text(note)
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(AppColor.almostWarm)
+                .multilineTextAlignment(.center)
+                .transition(.opacity)
+        } else if overBudget {
+            Text(tr("אוֹפְּס, חָרַגְנוּ מֵהַתַּקְצִיב — מוֹצִיאִים מַשֶּׁהוּ מֵהָעֲגָלָה 🛒"))
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(AppColor.almostWarm)
+                .multilineTextAlignment(.center)
+        }
+    }
+
+    private var checkoutButton: some View {
+        MiniGameGoldButton(title: tr("לַקֻּפָּה 🧾")) { checkout() }
+            .opacity(listDone && !overBudget ? 1 : 0.5)
+            .disabled(!listDone || overBudget)
     }
 
     private func shelfItem(_ item: GroceryShelfItem, tint: Color) -> some View {
@@ -235,48 +296,108 @@ struct GroceryGameView: View {
 
     // MARK: - Till
 
-    private var till: some View {
-        let isTotal = phase == .total
-        let budgetText = MiniGameText.ltr(GroceryGen.money(trip?.budget ?? 0))
-        return VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-            VStack(spacing: 10) {
-                Text(isTotal ? tr("כַּמָּה עוֹלֶה הַכֹּל?")
-                             : tr("כַּמָּה עֹדֶף נְקַבֵּל מִ־\(budgetText)?"))
-                    .font(.system(size: isCompact ? 22 : 28, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                // The receipt.
-                VStack(spacing: 4) {
-                    ForEach(cart) { item in
-                        HStack {
-                            Text(item.product.emoji + " " + GroceryGen.localName(item.product))
-                            Spacer()
-                            if item.discount > 0 {
-                                Text(tr("\(item.discount)% הֲנָחָה"))
-                                    .foregroundStyle(AppColor.starGold)
-                                    .font(.system(size: 12.5, weight: .heavy, design: .rounded))
-                            }
-                            Text(price(item)).monospacedDigit().mathLTR()
-                        }
+    /// The bill. Every line says what that item costs at this till — a sale
+    /// line shows the sticker price struck through, the discount, and the price
+    /// that goes into the sum, in gold.
+    private var receipt: some View {
+        VStack(spacing: 4) {
+            ForEach(cart) { item in
+                HStack(spacing: 6) {
+                    Text(item.product.emoji + " " + GroceryGen.localName(item.product))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    Spacer(minLength: 4)
+                    if item.discount > 0 {
+                        Text(tr("\(item.discount)% הֲנָחָה"))
+                            .foregroundStyle(AppColor.starGold)
+                            .font(.system(size: isCompact ? 11.5 : 13.5, weight: .heavy, design: .rounded))
+                            .lineLimit(1)
+                        Text(price(item))
+                            .monospacedDigit()
+                            .foregroundStyle(.white.opacity(0.55))
+                            .strikethrough(true, color: .white.opacity(0.55))
+                            .mathLTR()
                     }
-                    if !isTotal {
-                        Divider().overlay(.white.opacity(0.3))
-                        HStack {
-                            Text(tr("סַךְ הַכֹּל"))
-                            Spacer()
-                            Text(MiniGameText.ltr(GroceryGen.money(cartTotal))).monospacedDigit().mathLTR()
-                        }
-                        .foregroundStyle(AppColor.starGold)
-                    }
+                    Text(tillPrice(item))
+                        .monospacedDigit()
+                        .foregroundStyle(item.discount > 0 ? AppColor.starGold : .white)
+                        .mathLTR()
                 }
-                .font(.system(size: isCompact ? 15 : 18, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .padding(12)
-                .glassInset(radius: 14)
             }
-            .padding(14)
-            .glassPane(radius: 22)
+        }
+        .font(.system(size: isCompact ? 15 : 18, weight: .bold, design: .rounded))
+        .foregroundStyle(.white)
+        .padding(12)
+        .glassInset(radius: 14)
+    }
 
+    /// What the change question is actually about: the bill, and the note handed
+    /// over the counter.
+    private var paid: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                Text(tr("🧾 הַקְּנִיּוֹת עָלוּ"))
+                Spacer(minLength: 4)
+                Text(MiniGameText.ltr(GroceryGen.money(cartTotal))).monospacedDigit().mathLTR()
+            }
+            HStack(spacing: 6) {
+                Text(tr("💰 נָתַנּוּ לַקֻּפָּה"))
+                Spacer(minLength: 4)
+                Text(MiniGameText.ltr(GroceryGen.money(trip?.budget ?? 0))).monospacedDigit().mathLTR()
+            }
+            .foregroundStyle(AppColor.starGold)
+        }
+        .font(.system(size: isCompact ? 16 : 19, weight: .heavy, design: .rounded))
+        .foregroundStyle(.white)
+        .lineLimit(1).minimumScaleFactor(0.7)
+        .padding(12)
+        .glassInset(radius: 14)
+    }
+
+    private var till: some View {
+        VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
+            Spacer(minLength: 0)
+            if isWideCanvas {
+                HStack(alignment: .top, spacing: AppSpacing.md) {
+                    tillQuestion.frame(maxWidth: .infinity)
+                    tillAnswer.frame(maxWidth: isCompact ? 340 : 440)
+                }
+            } else {
+                tillQuestion
+                tillAnswer
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: isCompact ? 600 : (isWideCanvas ? 1100 : 760))
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.bottom, AppSpacing.md)
+    }
+
+    private var tillQuestion: some View {
+        let isTotal = phase == .total
+        return VStack(spacing: display.isShort ? 6 : 10) {
+            // Two questions at the till, and the child is told which one this
+            // is — the change used to arrive with no warning (Rani).
+            Text(tr("שְׁאֵלָה \(isTotal ? 1 : 2) מִתּוֹךְ 2"))
+                .font(.system(size: isCompact ? 13 : 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(AppColor.starGold)
+            Text(isTotal ? tr("כַּמָּה עוֹלֶה הַכֹּל?") : tr("כַּמָּה עֹדֶף נְקַבֵּל?"))
+                .font(.system(size: isCompact ? 22 : 28, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+            Text(isTotal ? tr("מְחַבְּרִים אֶת כָּל הַמְּחִירִים שֶׁבַּקַּבָּלָה")
+                         : tr("הָעֹדֶף הוּא מַה שֶׁנָּתַנּוּ פָּחוֹת מַה שֶׁהַקְּנִיּוֹת עָלוּ"))
+                .font(.system(size: isCompact ? 13 : 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            if isTotal { receipt } else { paid }
+        }
+        .padding(14)
+        .glassPane(radius: 22)
+    }
+
+    private var tillAnswer: some View {
+        VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
             MiniGameAnswerWell(text: typed, state: wellState, suffix: Money.answerSuffix, prefix: Money.answerPrefix,
                                height: isCompact ? 60 : 76)
                 .modifier(MiniGameShake(animatableData: shake))
@@ -284,9 +405,9 @@ struct GroceryGameView: View {
                 Text(note)
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.almostWarm)
+                    .multilineTextAlignment(.center)
                     .transition(.opacity)
             }
-            Spacer(minLength: 0)
             MiniGameNumberPad(decimal: trip?.decimals ?? false, keyHeight: display.isShort ? 40 : (isCompact ? 48 : 62)) { k in press(k) }
                 .frame(maxWidth: isCompact ? 340 : 440)
             MiniGameGoldButton(title: tr("בְּדִיקָה ✓")) { check() }
@@ -294,9 +415,6 @@ struct GroceryGameView: View {
                 .opacity(typed.isEmpty ? 0.5 : 1)
                 .disabled(typed.isEmpty || wellState == .correct)
         }
-        .frame(maxWidth: isCompact ? 600 : 760)
-        .padding(.horizontal, AppSpacing.md)
-        .padding(.bottom, AppSpacing.md)
     }
 
     // MARK: - Logic
@@ -308,7 +426,7 @@ struct GroceryGameView: View {
     }
 
     private func newTrip() {
-        trip = GroceryGen.trip(grade: grade)
+        trip = GroceryGen.trip(grade: grade, reading: mode != .pictures)
         cart = []; readingMissed = false; typed = ""; tries = 0; wellState = .normal; note = nil
         shownAt = Date()
     }
@@ -386,7 +504,10 @@ struct GroceryGameView: View {
             SoundPlayer.shared.play(.wrongSoft)
             Haptic.light()
             withAnimation(.linear(duration: 0.35)) { shake += 1 }
-            withAnimation { wellState = .wrong; note = tr("כִּמְעַט! נְנַסֶּה שׁוּב 💪") }
+            // The well is emptied for the second go: the child retypes instead of
+            // editing, and a second tap on ✓ can no longer re-submit the same
+            // amount and burn the last try before they have touched the pad.
+            withAnimation { typed = ""; wellState = .wrong; note = tr("כִּמְעַט! נְנַסֶּה שׁוּב 💪") }
         } else {
             // The second miss: the right amount appears, and the trip goes on.
             answered += 1

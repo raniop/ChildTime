@@ -1369,10 +1369,14 @@ enum SurpriseRound {
         // — a surprise round the child wins without thinking is a worse
         // interruption than no surprise round.
         let script = WordSets.script(for: topic, grade: grade)
-        out = out.filter {
-            MiniGameGradeFit.offered($0, grade: grade,
-                                     script: ($0 == .word || $0 == .wordSearch) ? script : nil,
-                                     topic: context ?? topic)
+        out = out.filter { kind in
+            // 🛒 The grocery reads a word list in the language worlds too.
+            let board: SpellScript? = switch kind {
+            case .word, .wordSearch: script
+            case .grocery:           topic == .english ? .english : (topic == .hebrew ? .hebrew : nil)
+            default:                 nil
+            }
+            return MiniGameGradeFit.offered(kind, grade: grade, script: board, topic: context ?? topic)
         }
         return out
     }

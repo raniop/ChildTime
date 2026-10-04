@@ -289,7 +289,7 @@ struct MiniGameNumberPad: View {
                 HStack(spacing: 8) {
                     ForEach(row, id: \.self) { key in
                         if key.isEmpty {
-                            Color.clear.frame(maxWidth: .infinity, minHeight: keyHeight)
+                            Color.clear.frame(maxWidth: .infinity).frame(height: keyHeight)
                         } else {
                             Button {
                                 Haptic.light()
@@ -303,7 +303,8 @@ struct MiniGameNumberPad: View {
                                     }
                                 }
                                 .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity, minHeight: keyHeight)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: keyHeight)
                                 .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.14)))
                                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.28), lineWidth: 1))
                             }
