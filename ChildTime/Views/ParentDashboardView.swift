@@ -62,6 +62,11 @@ struct ParentDashboardView: View {
     @State private var choresProfile: Profile?    // 🧹 chores sheet
     @State private var showSchoolYearParty = false
     @State private var showWhatsNew = false
+    /// 📖 The "מה חדש" STORY that opens by itself after an update. Captured
+    /// when it is decided to show, because showing it also MARKS the build as
+    /// seen — reading the list again afterwards would come back empty.
+    @State private var whatsNewStory: [StoryItem] = []
+    @State private var showWhatsNewStory = false
     @State private var showingPaywall = false
     /// Apple's own "manage subscription" sheet — where an existing subscriber
     /// belongs, instead of being shown the purchase page again.
@@ -350,10 +355,12 @@ struct ParentDashboardView: View {
                                 } label: {
                                     HStack(spacing: 6) {
                                         Image(systemName: "sparkles").font(.system(size: 11, weight: .bold))
-                                        Text(tr("טוֹפִי · \(AppInfo.versionLine)"))
+                                        // Parent-facing: no niqqud (the child's
+                                        // side is the only side that gets it).
+                                        Text(tr("טופי · \(AppInfo.versionLine)"))
                                             .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                                             .monospacedDigit()
-                                        Text(tr("· מָה חָדָשׁ?")).font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                                        Text(tr("· מה חדש?")).font(.system(size: 12.5, weight: .heavy, design: .rounded))
                                     }
                                     .foregroundStyle(.white.opacity(0.75))
                                     .padding(.vertical, 6)
@@ -488,7 +495,7 @@ struct ParentDashboardView: View {
             .onAppear {
                 // Never stack it on "what's new" — that one is about the build they
                 // already have, and two sheets on launch is one too many.
-                if case .recommended = AppUpdateConfig.shared.state, !showWhatsNew {
+                if case .recommended = AppUpdateConfig.shared.state, !showWhatsNew, !showWhatsNewStory {
                     showUpdateSheet = true
                 }
             }
@@ -496,6 +503,15 @@ struct ParentDashboardView: View {
                 WhatsNewView {
                     WhatsNewContent.markShown()
                     showWhatsNew = false
+                }
+            }
+            // 📖 …and the story version, which is what opens BY ITSELF on the
+            // first launch after an update. No button leaves it: the last story
+            // ends, the cover closes, and the parent is on the home screen.
+            .fullScreenCover(isPresented: $showWhatsNewStory) {
+                WhatsNewStoryView(audience: .parent, items: whatsNewStory) {
+                    WhatsNewStories.markParentShown()
+                    showWhatsNewStory = false
                 }
             }
             .fullScreenCover(isPresented: $showSchoolYearParty) {
@@ -550,8 +566,18 @@ struct ParentDashboardView: View {
                     // greeted again on the next launch.
                     SchoolYearCelebration.markParentGreeted()
                     showSchoolYearParty = true
+                } else if isRoot, WhatsNewStories.parentShouldShow {
+                    // 📖 Once per app UPDATE, and with no action from the parent:
+                    // the story of what changed, in parent language. Marked on
+                    // SHOW (like the September party) — an exit that skipped the
+                    // dismiss closure used to leave it unmarked and it opened
+                    // again on the next launch.
+                    whatsNewStory = WhatsNewStories.parentItems
+                    WhatsNewStories.markParentShown()
+                    showWhatsNewStory = true
                 } else if isRoot, WhatsNewContent.shouldShow {
-                    // ✨ Once per app UPDATE: what's new, in parent language.
+                    // A build with notes but no story of its own still gets the
+                    // old sheet, so nothing a parent should read can go missing.
                     showWhatsNew = true
                 } else if isRoot, !rows.isEmpty, household.household != nil,
                           household.familyNameShown == nil, shouldAskFamilyName {

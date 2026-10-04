@@ -564,6 +564,10 @@ struct ChildTimeApp: App {
         case "opening":  UnlockedView().onAppear { ProgressStore.shared.beginOpeningWindow(gift: false) }           // DEMO_SCREEN=opening — the "we're opening it" state
         case "openinggift": UnlockedView().onAppear { ProgressStore.shared.beginOpeningWindow(gift: true) }         // DEMO_SCREEN=openinggift
         case "whatsnew": WhatsNewView(onDone: {})   // DEMO_SCREEN=whatsnew — the release-notes sheet
+        // 📖 The "מה חדש" STORY, both sides — DEMO_SCREEN=kidstory | parentstory
+        // [DEMO_LANG=en] [DEMO_GRADE=0 → the גן boards + spoken] [DEMO_STORY=3 → start on story 3]
+        case "kidstory", "parentstory":
+            WhatsNewStoryDemo(audience: name == "kidstory" ? .child : .parent)
         // Debug-only: UpdateDemoHost and setForTesting live behind #if DEBUG, so
         // these three cases broke the Release (archive) build of 181.
         #if DEBUG

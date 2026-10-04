@@ -18,6 +18,8 @@ struct ParentSettingsView: View {
     @State private var allowedSelection = FamilyActivitySelection()
     @State private var showChangePIN = false
     @State private var showWhatsNew = false
+    /// 📖 The story version — what the closing card points back to.
+    @State private var showWhatsNewStory = false
     @State private var showSignIn = false
     @State private var showPaywall = false
     @State private var showDashboard = false
@@ -826,14 +828,26 @@ struct ParentSettingsView: View {
 
     private var versionSection: some View {
         Section {
-            // Rani: "מה חדש" pops once per version and is gone. A parent who
-            // dismissed it while busy had no way back to it — so it lives here,
-            // next to the version it describes, and can be re-opened any time.
+            // 📖 Rani: the story pops once per update and is gone, and its own
+            // closing card promises "הגדרות ← מה חדש" — so this is that place,
+            // and it plays the same story again, from the top.
+            // (Parent-facing copy carries no niqqud.)
+            Button {
+                Haptic.light()
+                showWhatsNewStory = true
+            } label: {
+                Label(tr("מה חדש בטופי ✨"), systemImage: "sparkles")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+            }
+            .disabled(WhatsNewStories.current(for: .parent).isEmpty)
+
+            // …and every update ever, newest first, for a parent who wants the
+            // detail rather than the story.
             Button {
                 Haptic.light()
                 showWhatsNew = true
             } label: {
-                Label(tr("מָה חָדָשׁ בְּטוֹפִי ✨"), systemImage: "sparkles")
+                Label(tr("כל העדכונים של טופי"), systemImage: "clock.arrow.circlepath")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
             }
             .disabled(WhatsNewContent.releases.isEmpty)
@@ -854,6 +868,11 @@ struct ParentSettingsView: View {
         .sheet(isPresented: $showWhatsNew) {
             // Every update, newest first — not just the one this build carried.
             WhatsNewHistoryView(onDone: { showWhatsNew = false })
+        }
+        .fullScreenCover(isPresented: $showWhatsNewStory) {
+            WhatsNewStoryView(audience: .parent, items: WhatsNewStories.current(for: .parent)) {
+                showWhatsNewStory = false
+            }
         }
         .glassRows()
     }

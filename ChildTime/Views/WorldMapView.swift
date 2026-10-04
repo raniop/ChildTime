@@ -38,6 +38,11 @@ struct WorldMapView: View {
     @State private var showSchoolYearParty = false
     /// 🎓 Kid-facing grade picker, when the profile has no grade yet.
     @State private var showChildGradePicker = false
+    /// 📖 The "מה חדש" STORY, once per update per child. Rani: it has to open
+    /// by itself — "מבלי שהוא צריך לעשות פעולה" — so there is nothing to tap.
+    @State private var showWhatsNewStory = false
+    /// Captured before the build is marked seen; reading it afterwards is empty.
+    @State private var whatsNewStory: [StoryItem] = []
     /// Limited-time event SPLASH (💎×2 etc.) — a full pop-up like the lucky
     /// wheel, once a day; the kid closes it or jumps straight in.
     @State private var showEventSplash = false
@@ -661,6 +666,14 @@ struct WorldMapView: View {
             else if let p = profiles.active, SchoolYearCelebration.shouldCelebrate(p), !AppInfo.isDemoRun {
                 showSchoolYearParty = true
             }
+            // 📖 First time in Tofy after an update: the story of everything
+            // new, opening by itself. Marked on SHOW, so leaving the app in the
+            // middle cannot make it greet the child again tomorrow.
+            else if let p = profiles.active, !AppInfo.isDemoRun, WhatsNewStories.kidShouldShow(for: p) {
+                whatsNewStory = WhatsNewStories.kidItems(for: p)
+                WhatsNewStories.markKidShown(for: p)
+                showWhatsNewStory = !whatsNewStory.isEmpty
+            }
             // Keep my friends-board score live during play (even with the board
             // closed), so friends always see my current stars.
             FriendsManager.shared.beginScoreSync()
@@ -977,6 +990,17 @@ struct WorldMapView: View {
                     profiles.update(updated)
                     showChildGradePicker = false
                 }
+            }
+        }
+        // 📖 "מה חדש" as a story. It closes itself to this screen when the last
+        // one ends, and ✕ does exactly the same thing — never a button that
+        // moves the child somewhere else (Rani).
+        .fullScreenCover(isPresented: $showWhatsNewStory) {
+            WhatsNewStoryView(audience: .child, items: whatsNewStory) {
+                // ⭐/💎 for having watched — the chips the last story shows.
+                progress.addStars(WhatsNewStories.watchStars)
+                progress.addDiamonds(WhatsNewStories.watchDiamonds)
+                showWhatsNewStory = false
             }
         }
         .fullScreenCover(isPresented: $showSchoolYearParty) {
