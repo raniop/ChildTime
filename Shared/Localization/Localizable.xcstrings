@@ -15786,6 +15786,28 @@
         }
       }
     },
+    "אייפד שהוגדר בטעות כמכשיר הורה הופך למכשיר של ילד בלחיצה אחת, בלי למחוק כלום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جهاز iPad أُعدّ بالخطأ كجهاز والدين يتحوّل إلى جهاز طفل بضغطة واحدة، دون حذف أي شيء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An iPad set up as a parent device by mistake becomes a child's device in one tap, with nothing erased"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPad, по ошибке настроенный как родительское устройство, становится детским в одно нажатие — ничего не удаляя"
+          }
+        }
+      }
+    },
     "אייפד של הילד, כרטיס ילד מסודר, וקרב בוס שנספר" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -15827,6 +15849,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iPhone"
+          }
+        }
+      }
+    },
+    "איך בא לך לשחק?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كيف تحبّ أن تلعب؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How do you want to play?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как хочешь играть?"
+          }
+        }
+      }
+    },
+    "איך מחברים את האייפד לילדה שלי?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كيف أربط الـ iPad بابنتي؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How do I connect the iPad to my daughter?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как подключить iPad к моей дочери?"
           }
         }
       }
@@ -16271,6 +16337,28 @@
         }
       }
     },
+    "אנחנו כאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نحن هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We're here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мы на связи"
+          }
+        }
+      }
+    },
     "אני מסכים/ה ומאשר/ת כהורה" : {
       "localizations" : {
         "ar" : {
@@ -16687,6 +16775,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подтвердить Family Controls"
+          }
+        }
+      }
+    },
+    "אתם קובעים כמה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أنتم تقرّرون كم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You decide how much"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы решаете сколько"
           }
         }
       }
@@ -20401,6 +20511,28 @@
         }
       }
     },
+    "בגן המשחקים הם תמונות, צבעים וכמויות — וההוראה נאמרת בקול, לא נכתבת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الروضة الألعاب صور وألوان وكمّيات — والتعليمات تُقال بصوت، لا تُكتب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In kindergarten the games are pictures, colours and quantities — and the rule is spoken aloud, not written"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В детском саду игры — это картинки, цвета и количества, а правило проговаривается вслух, а не пишется"
+          }
+        }
+      }
+    },
     "בהתחברות אתם מסכימים לתנאי השימוש ולמדיניות הפרטיות" : {
       "localizations" : {
         "ar" : {
@@ -20876,6 +21008,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "На карточке каждого ребёнка в родительском экране можно выбрать, на каком языке у него будет приложение, — и его устройство переключится сразу, без вашего вмешательства"
+          }
+        }
+      }
+    },
+    "בלחיצה אחת נכנסים ישר לשחק — או ישר לשאלות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ضغطة واحدة تدخل مباشرة إلى اللعبة — أو مباشرة إلى الأسئلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One tap goes straight into a game — or straight into the questions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одно нажатие — сразу в игру или сразу к вопросам"
           }
         }
       }
@@ -32707,6 +32861,28 @@
         }
       }
     },
+    "הטלפון שלכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هاتفكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваш телефон"
+          }
+        }
+      }
+    },
     "היא למדה" : {
       "localizations" : {
         "ar" : {
@@ -33046,6 +33222,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Накройте вместе праздничный стол и дайте %@ объяснить, что символизирует каждое блюдо."
+          }
+        }
+      }
+    },
+    "הכספת — משחק של הסקה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخزنة — لعبة استنتاج"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Vault — a game of deduction"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейф — игра на логику"
+          }
+        }
+      }
+    },
+    "הכפתור 💬 במסך הבית פותח שיחה איתנו — והתשובה מגיעה לטלפון שלכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "زرّ 💬 في الشاشة الرئيسية يفتح محادثة معنا — والردّ يصل إلى هاتفكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The 💬 button on the home screen opens a conversation with us — and the reply lands on your phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопка 💬 на главном экране открывает переписку с нами, а ответ приходит на ваш телефон"
           }
         }
       }
@@ -33734,6 +33954,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Синхронизация необязательна. Можно продолжать работать локально, не входя в аккаунт."
+          }
+        }
+      }
+    },
+    "הספרה הראשונה היא 3" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرقم الأول هو 3"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The first digit is 3"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Первая цифра — 3"
+          }
+        }
+      }
+    },
+    "הספרה השלישית זוגית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرقم الثالث زوجي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The third digit is even"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Третья цифра чётная"
+          }
+        }
+      }
+    },
+    "הספרה השנייה גדולה מ־5" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرقم الثاني أكبر من 5"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The second digit is greater than 5"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вторая цифра больше 5"
           }
         }
       }
@@ -38858,6 +39144,28 @@
         }
       }
     },
+    "חמישה משחקים בלי מילים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خمس ألعاب بلا كلمات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Five games with no words"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пять игр без слов"
+          }
+        }
+      }
+    },
     "חסוך %lld%%" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -39134,6 +39442,28 @@
         }
       }
     },
+    "חצי שעה, שעה, שעתיים, בלי הגבלה — או כל מספר דקות שתקלידו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نصف ساعة، ساعة، ساعتان، بلا حدّ — أو أي عدد دقائق تكتبونه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Half an hour, an hour, two hours, no limit — or any number of minutes you type"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Полчаса, час, два часа, без ограничения — или любое число минут, которое вы введёте"
+          }
+        }
+      }
+    },
     "חשבון הורה" : {
       "localizations" : {
         "ar" : {
@@ -39152,6 +39482,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Родительский аккаунт"
+          }
+        }
+      }
+    },
+    "חשיבה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تفكير"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thinking"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мышление"
           }
         }
       }
@@ -42062,6 +42414,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Дни активности"
+          }
+        }
+      }
+    },
+    "יציאה ממצב ילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخروج من وضع الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leaving kid mode"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выход из детского режима"
           }
         }
       }
@@ -46607,6 +46981,28 @@
         }
       }
     },
+    "כל תשובה נכונה פותחת רמז, והרמזים ביחד מגלים את הקוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل إجابة صحيحة تفتح تلميحًا، والتلميحات معًا تكشف الرمز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every correct answer opens a clue, and the clues together give away the code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый правильный ответ открывает подсказку, а подсказки вместе раскрывают код"
+          }
+        }
+      }
+    },
     "כמה דקות ביום?" : {
       "localizations" : {
         "ar" : {
@@ -46911,6 +47307,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Кнопка «Я сделал!» в цвете ребёнка, корона и поздравление «Чемпион!», а также отдельная категория «Сделано сегодня». Награда — всегда минуты игры"
+          }
+        }
+      }
+    },
+    "כרטיס הילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بطاقة الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The child's card"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карточка ребёнка"
           }
         }
       }
@@ -49732,6 +50150,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить «%@»?"
+          }
+        }
+      }
+    },
+    "להפוך למכשיר של ילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحويله إلى جهاز طفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make it a child's device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сделать устройством ребёнка"
           }
         }
       }
@@ -56259,6 +56699,28 @@
         }
       }
     },
+    "מוגן בקוד הורים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "محميّ برمز الوالدين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behind the parent code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Защищено родительским кодом"
+          }
+        }
+      }
+    },
     "מוחק דקות מתנה — ממתין לאישור…" : {
       "localizations" : {
         "ar" : {
@@ -56299,6 +56761,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удаляем…"
+          }
+        }
+      }
+    },
+    "מוסרים לילד את הטלפון שלכם לכמה דקות — והיציאה חזרה מוגנת בקוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعطون طفلكم هاتفكم لبضع دقائق — والخروج محميّ برمزكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hand your child your own phone for a few minutes — and the way back out is behind your code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Даёте ребёнку свой телефон на несколько минут — а выход обратно защищён кодом"
           }
         }
       }
@@ -56766,6 +57250,28 @@
         }
       }
     },
+    "מכשיר הורה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جهاز الوالدين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parent device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройство родителя"
+          }
+        }
+      }
+    },
     "מכשיר שאיבד את הקשר למשפחה מציע לאפס את עצמו ולחזור למסך הפתיחה, בלי למחוק ולהתקין מחדש" : {
       "localizations" : {
         "ar" : {
@@ -56829,6 +57335,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Зависшее устройство больше не зависает"
+          }
+        }
+      }
+    },
+    "מכשירים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأجهزة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devices"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройства"
           }
         }
       }
@@ -56961,6 +57489,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новый родительский экран — всё за пару секунд"
+          }
+        }
+      }
+    },
+    "מסך חדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شاشة جديدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new screen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый экран"
           }
         }
       }
@@ -57225,6 +57775,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Что-то помешало отправке. Попробуйте ещё раз через минуту."
+          }
+        }
+      }
+    },
+    "משחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لعبة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A game"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Игра"
           }
         }
       }
@@ -78660,6 +79232,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Пусть %@ посчитает мелочь в магазине, или поговорите о том, как копить на игрушку."
+          }
+        }
+      }
+    },
+    "תנו לילד לשחק כאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دعوا طفلكم يلعب هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let your child play right here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дайте ребёнку поиграть прямо здесь"
           }
         }
       }
