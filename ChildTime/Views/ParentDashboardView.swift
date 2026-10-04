@@ -1276,7 +1276,7 @@ struct ParentDashboardView: View {
             // 📱 Parents wrote in that they could not find how to hand their own
             // phone to the child. It had been moved into each child's ⚡ menu,
             // where nobody looked; this row is where they go looking.
-            Button { Haptic.light(); showingKidMode = true } label: { homeGhostLabel(tr("🧒 תנו לשחק")).frame(maxWidth: .infinity) }
+            Button { Haptic.light(); showingKidMode = true } label: { homeGhostLabel(tr("🧒 מצב ילד")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
         }
         .environment(\.layoutDirection, .app)
@@ -2035,7 +2035,7 @@ struct ParentDashboardView: View {
                                 Haptic.light()
                                 kidModeStart = row.profile
                             } label: {
-                                homeGhostLabel(tr("🧒 לְשַׂחֵק כָּאן"), width: Self.playButtonWidth)
+                                homeGhostLabel(tr("🧒 מצב ילד"), width: Self.playButtonWidth)
                             }
                             .buttonStyle(.plain)
                             .padding(14)

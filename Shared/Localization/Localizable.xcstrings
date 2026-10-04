@@ -84960,46 +84960,24 @@
         }
       }
     },
-    "🧒 לְשַׂחֵק כָּאן" : {
+    "🧒 מצב ילד" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "🧒 اللعب هنا"
+            "value" : "🧒 وضع الطفل"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "🧒 Play here"
+            "value" : "🧒 Kid mode"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "🧒 Играть здесь"
-          }
-        }
-      }
-    },
-    "🧒 תנו לשחק" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🧒 دعوه يلعب"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🧒 Let them play"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🧒 Дать поиграть"
+            "value" : "🧒 Детский режим"
           }
         }
       }
