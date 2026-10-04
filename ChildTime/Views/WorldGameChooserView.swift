@@ -200,8 +200,8 @@ struct WorldGameChooserView: View {
             .strokeBorder(last ? AppColor.starGold : .clear, lineWidth: 2.5)
             .overlay(alignment: .topLeading) {
                 if last {
-                    Text(tr("אַחֲרוֹן"))
-                        .font(.system(size: 11.5, weight: .heavy, design: .rounded))
+                    Text(Gendered.g(tr("שִׂחַקְתָּ לָאַחֲרוֹנָה"), tr("שִׂחַקְתְּ לָאַחֲרוֹנָה")))
+                        .font(.system(size: 10.5, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .padding(.horizontal, 9).padding(.vertical, 4)
                         .background(Capsule().fill(AppColor.starGold))

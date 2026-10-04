@@ -10070,6 +10070,50 @@
         }
       }
     },
+    "12 משחקים חדשים — הילד בוחר איך לשחק": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 لعبة جديدة — طفلك يختار كيف يلعب"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 new games — your child picks how to play"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 новых игр — ребёнок выбирает, как играть"
+          }
+        }
+      }
+    },
+    "12 משחקים, לפי מה שיש בעולם": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 لعبة، مناسبة لكل عالم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 games, matched to each world"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 игр, подобранных под каждый мир"
+          }
+        }
+      }
+    },
     "15 כּוֹכָבִים": {
       "localizations": {
         "ar": {
@@ -13001,28 +13045,6 @@
         }
       }
     },
-    "אַחֲרוֹן": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الأخيرة"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last played"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Последняя"
-          }
-        }
-      }
-    },
     "אַחַר הַצָּהֳרַיִם": {
       "localizations": {
         "ar": {
@@ -15067,6 +15089,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "После подтверждения оплаты в App Store подписка открывается сразу. Раньше бывало, что оплата проходила, а приложение всё ещё показывало экран покупки"
+          }
+        }
+      }
+    },
+    "אחרי בחירת עולם נפתח מסך \"איך בא לך לשחק?\" — שאלות רגילות או אחד המשחקים, ובלחיצה אחת נכנסים ישר לשחק": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بعد اختيار العالم تُفتح شاشة \"كيف تحب أن تلعب؟\" — أسئلة عادية أو إحدى الألعاب، وبضغطة واحدة تبدأ."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choosing a world now opens \"How do you want to play?\" — regular questions or one of the games, and a single tap starts it."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "После выбора мира открывается экран «Как хочешь играть?» — обычные вопросы или одна из игр, и одно нажатие начинает её."
           }
         }
       }
@@ -19417,6 +19461,28 @@
         }
       }
     },
+    "בוחרים עולם, ואז בוחרים משחק": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختاروا عالمًا، ثم اختاروا لعبة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick a world, then pick a game"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбираем мир, затем игру"
+          }
+        }
+      }
+    },
     "בונה ביטחון": {
       "extractionState": "stale",
       "localizations": {
@@ -19892,6 +19958,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "В поездке посчитайте вместе колёса и машины и спросите %@, кто чем управляет."
+          }
+        }
+      }
+    },
+    "בעמוד הילד יש מתג חדש שמכבה את המשחקים, והילד נכנס ישר לשאלות": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مفتاح جديد في صفحة الطفل يوقف الألعاب، فينتقل طفلك مباشرة إلى الأسئلة."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A new switch on the child's page turns the games off, so your child goes straight to the questions."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новый переключатель на странице ребёнка отключает игры, и ребёнок сразу переходит к вопросам."
           }
         }
       }
@@ -20926,6 +21014,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Даже если устройство ребёнка выключено или зависло, «Заблокировать сейчас (удалённо)» завершает игровое время — и ребёнок может сразу начать на другом устройстве"
+          }
+        }
+      }
+    },
+    "גם במשחקים מרוויחים דקות": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الألعاب تكسب دقائق أيضًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Games earn minutes too"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В играх тоже зарабатывают минуты"
           }
         }
       }
@@ -43321,6 +43431,28 @@
         }
       }
     },
+    "כל כמה שאלות קופצת הפתעה — משחק קצר עם כוכבים ויהלומים כפולים": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بين الحين والآخر تظهر مفاجأة — لعبة قصيرة بنجوم وألماس مضاعفة."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every so often a surprise pops up — a short game with double stars and diamonds."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Время от времени появляется сюрприз — короткая игра с удвоенными звёздами и алмазами."
+          }
+        }
+      }
+    },
     "כל מה שכלול, שני המסלולים והכפתור — בלי גלילה. ומנוי פעיל פותח את מסך ניהול המנוי של Apple": {
       "localizations": {
         "ar": {
@@ -43405,6 +43537,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Каждый вопрос в приложении привязан к учебной программе — каждый ребёнок получает именно свой уровень"
+          }
+        }
+      }
+    },
+    "כל תשובה נכונה במשחק מרוויחה זמן מסך בדיוק כמו שאלה רגילה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كل إجابة صحيحة في اللعبة تكسب وقت شاشة تمامًا كالسؤال العادي."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every correct answer in a game earns screen time exactly like a regular question."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Каждый правильный ответ в игре приносит экранное время так же, как обычный вопрос."
           }
         }
       }
@@ -46381,6 +46535,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вынести мусор"
+          }
+        }
+      }
+    },
+    "להורים: רק שאלות רגילות": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "للآباء: أسئلة عادية فقط"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For parents: regular questions only"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для родителей: только обычные вопросы"
           }
         }
       }
@@ -53325,6 +53501,28 @@
         }
       }
     },
+    "מצאו את הזוגות, פיצוץ בלונים, בנו את המילה, מפצחים, תפזורת, נכון או לא נכון, מיון לסלים, התבנית, 2048 של טופי, הכספת, המכולת ומאזניים. בכל עולם מופיעים רק המשחקים שמתאימים לתוכן שלו": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جدوا الأزواج، فرقعة البالونات، ابنوا الكلمة، المُحطِّمون، البحث عن الكلمات، صح أم خطأ، الفرز في السلال، النمط، 2048 من توفي، الخزنة، البقالة والميزان. يعرض كل عالم الألعاب المناسبة لمحتواه فقط."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find the Pairs, Balloon Pop, Build the Word, Crushers, Word Search, True or False, Sort into Baskets, The Pattern, Tofy 2048, The Vault, The Grocery and Balance Scales. Each world shows only the games that fit its content."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Найди пары», «Лопни шарики», «Собери слово», «Крушители», «Поиск слов», «Верно или нет», «Разложи по корзинам», «Закономерность», «2048 от Tofy», «Сейф», «Магазин» и «Весы». В каждом мире показываются только подходящие игры."
+          }
+        }
+      }
+    },
     "מצב": {
       "localizations": {
         "ar": {
@@ -57826,6 +58024,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "лошадь"
+          }
+        }
+      }
+    },
+    "סיבוב הפתעה באמצע השאלות": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جولة مفاجئة في منتصف الأسئلة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A surprise round mid-session"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сюрприз-раунд посреди вопросов"
           }
         }
       }
@@ -69735,6 +69955,28 @@
         }
       }
     },
+    "שִׂחַקְתְּ לָאַחֲרוֹנָה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لعبتها مؤخرًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last played"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Играли недавно"
+          }
+        }
+      }
+    },
     "שִׂחַקְתָּ": {
       "localizations": {
         "ar": {
@@ -69797,6 +70039,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сегодня ты играл %lld из %lld минут 🌙 — %lld сохранено на завтра"
+          }
+        }
+      }
+    },
+    "שִׂחַקְתָּ לָאַחֲרוֹנָה": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لعبتها مؤخرًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last played"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Играли недавно"
           }
         }
       }
