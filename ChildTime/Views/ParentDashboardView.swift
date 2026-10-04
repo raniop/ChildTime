@@ -1298,7 +1298,11 @@ struct ParentDashboardView: View {
                 Text(homeSubtitle)
                     .font(.system(size: 13.5, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
-                    .lineLimit(1).minimumScaleFactor(0.7)
+                    // It used to be one line with an ellipsis, so the end — the
+                    // part that says what is happening right now — was the half
+                    // that got cut (Rani). Two lines, and it wraps.
+                    .lineLimit(2).minimumScaleFactor(0.8)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
             .multilineTextAlignment(.trailing)
