@@ -453,6 +453,7 @@ struct PreReaderSpeakButton: View {
 struct PreReaderCueCard: View {
     let cue: PreReaderCue
     var compact: Bool = true
+    @Environment(\.isInertPreview) private var inertPreview
     /// 🔄 A short, wide screen (an iPhone on its side) — one rung down, so the
     /// card never eats the board below it.
     @ObservedObject private var display = DisplayGeometry.shared
@@ -490,8 +491,10 @@ struct PreReaderCueCard: View {
         .padding(.vertical, short ? 8 : (compact ? 12 : 16))
         .frame(maxWidth: .infinity)
         .glassPane(radius: 24)
-        .onAppear { SpeechReader.shared.speak(cue.spoken) }
-        .onChange(of: cue.spoken) { _ in SpeechReader.shared.speak(cue.spoken) }
+        // 🖼 A miniature on a story card is a picture of this screen, not this
+        // screen: it says nothing out loud.
+        .onAppear { if !inertPreview { SpeechReader.shared.speak(cue.spoken) } }
+        .onChange(of: cue.spoken) { _ in if !inertPreview { SpeechReader.shared.speak(cue.spoken) } }
     }
 
     /// Six apples in a row still have to fit a phone, so the more there are
@@ -513,6 +516,7 @@ struct PreReaderIntroCard: View {
     let kind: MiniGameKind
     let cue: PreReaderCue
     var onStart: () -> Void
+    @Environment(\.isInertPreview) private var inertPreview
     @Environment(\.horizontalSizeClass) private var hsc
     @ObservedObject private var display = DisplayGeometry.shared
     private var big: Bool { hsc == .regular }
@@ -555,7 +559,7 @@ struct PreReaderIntroCard: View {
         .glassPane(radius: 28)
         .padding(.horizontal, AppSpacing.lg)
         .onAppear {
-            SpeechReader.shared.speak(PreReaderGames.startCue + " " + cue.spoken)
+            if !inertPreview { SpeechReader.shared.speak(PreReaderGames.startCue + " " + cue.spoken) }
         }
     }
 }

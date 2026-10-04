@@ -211,11 +211,15 @@ struct WhatsNewStoryView: View {
 
             // The stage runs from under the lead to just above the footer, as
             // the mockup draws it — it is what grows on a tall screen.
+            //
+            // 📱 …except a card that IS a phone. That art already carries a
+            // device frame of its own, and a glass pane around a phone is two
+            // frames arguing, with a band of empty glass between them.
             StoryArtView(art: item.art, isCompact: isCompact, short: short)
                 .frame(maxWidth: .infinity)
                 .frame(height: parentStageHeight(item.art))
-                .padding(.vertical, short ? 10 : 16)
-                .glassPane(radius: 24)
+                .padding(.vertical, framesItself(item.art) ? 0 : (short ? 10 : 16))
+                .glassPaneUnless(framesItself(item.art), radius: 24)
                 .padding(.top, short ? 8 : 14)
         }
         .padding(.horizontal, 20)
@@ -223,6 +227,14 @@ struct WhatsNewStoryView: View {
         .padding(.bottom, short ? 8 : 16)
         .offset(y: risen ? 0 : 16)
         .opacity(risen ? 1 : 0)
+    }
+
+    /// A phone-framed screen brings its own border and shadow.
+    private func framesItself(_ art: StoryArt) -> Bool {
+        switch art {
+        case .game, .preReaderGame: return true
+        default: return false
+        }
     }
 
     // MARK: - Chrome
@@ -532,20 +544,12 @@ struct WhatsNewStoryView: View {
         return Swift.min(safeW * 0.92, 900)
     }
 
-    /// 👧 Art first and big — on a large screen it takes more than half.
+    /// 👧 Art first and big. 📱 A game card is now a whole PHONE, so it takes
+    /// every point it can get — the frame is tall and narrow, and the slack
+    /// left over goes beside it, not above it.
     private var kidArtHeight: CGFloat {
-        let height = share(isCompact ? 0.48 : 0.58, min: 170, max: 860)
-        if case .game = item?.art { return boardStage(within: height) }
-        return height
-    }
-
-    /// 🎮 A game card is its BOARD, so the stage is the size the board will
-    /// actually draw at: `MiniGamePreview` keeps a 1.6 aspect and never grows
-    /// past the card's width, so a stage taller than that is just empty glass
-    /// above and below the only thing worth looking at.
-    private func boardStage(within height: CGFloat) -> CGFloat {
-        let stageW = Swift.max(columnWidth - 40, 160)      // the pane's own width
-        return Swift.min(height, stageW / 1.45)
+        if case .game = item?.art { return share(isCompact ? 0.62 : 0.66, min: 200, max: 980) }
+        return share(isCompact ? 0.48 : 0.58, min: 170, max: 860)
     }
 
     /// 👨‍👩‍👧 The stage's height, inside the glass pane's own padding.
@@ -567,7 +571,8 @@ struct WhatsNewStoryView: View {
             let n = CGFloat(Swift.max(lines.count, 1))
             return Swift.min(height, n * (isCompact ? 104 : 140) + gap)
         case .game, .preReaderGame:
-            return boardStage(within: height)
+            // A phone wants height, and the parent's cards have text above it.
+            return share(isCompact ? 0.52 : 0.58, min: 180, max: 900)
         default:
             return height
         }
@@ -685,27 +690,20 @@ private struct Box: View {
         .frame(width: box.width, height: box.height)
     }
 
-    /// 🎮 The MINIATURE IS THE CARD.
+    /// 📱 THE REAL SCREEN, JUST SMALLER.
     ///
-    /// Rani, on build 188: "הסטוריז עם המשחקים החדשים אני ציפיתי לראות באמת
-    /// תמונה מוקטנת של כל משחק עם הסבר קטן למעלה וזה לא מה שהיה". It used to
-    /// be the other way up — a decorative emoji the height of a fist, with the
-    /// real board shrunk underneath it. The emoji is the one thing on the card
-    /// that carries no information, so it is gone from here and rides beside
-    /// the TITLE instead, and the board gets the whole stage.
-    ///
-    /// 🪟 And no glass behind it. `MiniGamePreview` draws every board from
-    /// `min(width, height × 1.6)` and centres it, but the boards are not all
-    /// one shape — the word search is a square grid, the pairs board is wide —
-    /// so a single pane left a large empty box of glass around half of them,
-    /// which is worse than no box at all. The board brings its own tiles and
-    /// colours; on a story it needs no frame.
+    /// Rani, after build 188: "אני רוצה שהסטוריז התצוגה של מסך חדש תהיה
+    /// אמיתית מתוך האפליקציה פשוט מוקטנת קצת" — with a picture of the whole
+    /// grocery screen inside a phone. So the card no longer draws a stylised
+    /// board at all: `MiniGameScreenPreview` builds the game's REAL view at a
+    /// phone's size, inert, and scales it into the stage inside a device
+    /// frame. The title and its one line stay above it.
     private func gameArt(_ kind: MiniGameKind, topic: Topic, preReader: Bool? = nil) -> some View {
         Group {
             if let preReader {
-                MiniGamePreview(kind: kind, topic: topic, preReader: preReader)
+                MiniGameScreenPreview(kind: kind, topic: topic, preReader: preReader, box: box)
             } else {
-                MiniGamePreview(kind: kind, topic: topic)
+                MiniGameScreenPreview(kind: kind, topic: topic, box: box)
             }
         }
         .frame(width: box.width, height: box.height)

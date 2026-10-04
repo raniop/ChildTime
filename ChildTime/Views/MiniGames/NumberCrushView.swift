@@ -30,6 +30,9 @@ struct NumberCrushView: View {
     @ObservedObject private var profiles = ProfileStore.shared
     @ObservedObject private var display = DisplayGeometry.shared
     @Environment(\.horizontalSizeClass) private var hsc
+    /// 🖼 A miniature on a What's-New story card: show the real screen,
+    /// but do not play it — no round is scored and no clock runs.
+    @Environment(\.isInertPreview) private var inertPreview
 
     private struct Block: Identifiable, Equatable {
         let id = UUID()
@@ -80,7 +83,13 @@ struct NumberCrushView: View {
     private var grade: Int { MiniGameLevel.grade(for: .math) }
     /// 👶 A pre-reader (גן): objects instead of numerals, and no clock.
     /// One definition for all five games — see `PreReaderGames`.
+    /// 🖼 A story card showing the גן form to a PARENT has no גן child
+    /// active, so it says which form it wants. Everywhere else this is nil
+    /// and the answer is simply "is the child using the app a pre-reader".
+    var forcePreReader: Bool? = nil
+
     private var preReader: Bool {
+        if let forcePreReader { return forcePreReader }
         _ = profiles.active      // redraw when the active child changes
         return PreReaderGames.activeChildIsPreReader
     }
@@ -152,9 +161,10 @@ struct NumberCrushView: View {
         .environment(\.layoutDirection, .app)
         .onAppear {
             if preReader, !preDealt { dealPreReader() }
-            if (surprise || earn != nil) && phase == .intro { start() }
+            if (surprise || earn != nil || inertPreview) && phase == .intro { start() }
         }
         .onReceive(ticker) { t in
+            guard !inertPreview else { return }
             guard phase == .playing else { return }
             now = t
             // 👶 גן has no clock on screen: the round ends after five

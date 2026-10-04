@@ -28,6 +28,9 @@ struct WordSearchView: View {
     @ObservedObject private var profiles = ProfileStore.shared
     @ObservedObject private var display = DisplayGeometry.shared
     @Environment(\.horizontalSizeClass) private var hsc
+    /// 🖼 A miniature on a What's-New story card: show the real screen,
+    /// but do not play it — no round is scored and no clock runs.
+    @Environment(\.isInertPreview) private var inertPreview
 
     /// Colours a found word is painted in, one per word.
     private static let palette: [Color] = [Color(hex: "06D6A0"), Color(hex: "48BFE3"), Color(hex: "FF6B9D"),
@@ -102,8 +105,8 @@ struct WordSearchView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if (surprise || earn != nil) && !started { deal() } }
-        .onReceive(ticker) { t in hintTick(t) }
+        .onAppear { if (surprise || earn != nil || inertPreview) && !started { deal() } }
+        .onReceive(ticker) { t in if !inertPreview { hintTick(t) } }
     }
 
     // MARK: - Board
