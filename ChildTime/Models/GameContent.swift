@@ -304,8 +304,14 @@ enum WorldGameFit {
 
         func fits(_ kind: MiniGameKind) -> Bool {
             // 🎚️ First: is this game worth this child's time at this grade?
-            guard MiniGameGradeFit.offered(kind, grade: grade,
-                                           script: (kind == .word || kind == .wordSearch) ? spellScript : nil,
+            // 🛒 The grocery's shopping list is words only in a reading world,
+            // so there too the grade table needs the board's alphabet.
+            let script: SpellScript? = switch kind {
+            case .word, .wordSearch: spellScript
+            case .grocery:           topic == .english ? .english : (topic == .hebrew ? .hebrew : nil)
+            default:                 nil
+            }
+            guard MiniGameGradeFit.offered(kind, grade: grade, script: script,
                                            topic: source ?? topic) else { return false }
             switch kind {
             case .lightning:

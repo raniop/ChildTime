@@ -14928,6 +14928,28 @@
         }
       }
     },
+    "אוֹסְפִים מֵהַמַּדָּף אֶת כָּל מָה שֶׁבָּרְשִׁימָה וְהוֹלְכִים לַקֻּפָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نأخذ من الرف كل ما في القائمة ثم نتوجه إلى الصندوق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take everything on the list off the shelf, then head to the till"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Берём с полки всё из списка и идём на кассу"
+          }
+        }
+      }
+    },
     "אוֹסָקָה" : {
       "localizations" : {
         "ar" : {
@@ -20778,6 +20800,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "гитара"
+          }
+        }
+      }
+    },
+    "גִּרְרוּ אֶצְבַּע עַל כָּל מִלָּה שֶׁמְּצָאתֶם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسحبوا الإصبع على كل كلمة تجدونها"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag your finger across every word you find"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проведите пальцем по каждому найденному слову"
           }
         }
       }
@@ -30220,6 +30264,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "дерево"
+          }
+        }
+      }
+    },
+    "הָעֹדֶף הוּא מַה שֶׁנָּתַנּוּ פָּחוֹת מַה שֶׁהַקְּנִיּוֹת עָלוּ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الباقي هو ما دفعناه ناقص ثمن المشتريات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The change is what we handed over minus what the shopping cost"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сдача — это то, что мы дали, минус стоимость покупок"
           }
         }
       }
@@ -42685,6 +42751,28 @@
         }
       }
     },
+    "כַּמָּה עֹדֶף נְקַבֵּל?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كم سنستلم من الباقي؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How much change do we get?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сколько сдачи мы получим?"
+          }
+        }
+      }
+    },
     "כַּמָּה עוֹלֶה הַכֹּל?" : {
       "localizations" : {
         "ar" : {
@@ -49710,6 +49798,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Соединяй плитки до 2048"
+          }
+        }
+      }
+    },
+    "מְחַבְּרִים אֶת כָּל הַמְּחִירִים שֶׁבַּקַּבָּלָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نجمع كل الأسعار في الفاتورة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add up every price on the receipt"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Складываем все цены в чеке"
           }
         }
       }
@@ -69088,6 +69198,28 @@
         }
       }
     },
+    "קוֹרְאִים כָּל מִלָּה, מוֹצְאִים אוֹתָהּ עַל הַמַּדָּף — וְאָז לַקֻּפָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نقرأ كل كلمة، نجدها على الرف — ثم إلى الصندوق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Read each word, find it on the shelf — then off to the till"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Читаем каждое слово, находим его на полке — и на кассу"
+          }
+        }
+      }
+    },
     "קוֹרְקִינֶט" : {
       "localizations" : {
         "ar" : {
@@ -71705,6 +71837,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "שְׁאֵלָה %lld מִתּוֹךְ 2" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سؤال %lld من 2"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Question %lld of 2"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопрос %lld из 2"
           }
         }
       }
@@ -80782,6 +80936,28 @@
     "💰 20 ₪" : {
 
     },
+    "💰 נָתַנּוּ לַקֻּפָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💰 دفعنا في الصندوق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💰 We handed over"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💰 Мы дали на кассе"
+          }
+        }
+      }
+    },
     "💰%lld" : {
 
     },
@@ -82483,6 +82659,28 @@
     },
     "🧹%lld" : {
 
+    },
+    "🧾 הַקְּנִיּוֹת עָלוּ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧾 ثمن المشتريات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧾 The shopping cost"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧾 Покупки стоили"
+          }
+        }
+      }
     },
     "🪄 " : {
 

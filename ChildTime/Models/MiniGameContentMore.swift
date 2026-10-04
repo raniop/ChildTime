@@ -895,6 +895,11 @@ struct GroceryProduct: Hashable {
     /// The Hebrew name — read as-is in the Hebrew world.
     let hebrew: String
     let english: String
+    /// The first band whose reader can be handed this word. In the English /
+    /// Hebrew worlds the list is words only, so "watermelon" is not an א׳ word
+    /// however familiar the fruit is. Ignored in the picture worlds, where the
+    /// shelf writes the name under every emoji anyway.
+    var reads: MiniGameBand = .preReader
 }
 
 struct GroceryShelfItem: Identifiable, Hashable {
@@ -916,12 +921,26 @@ struct GroceryTrip {
 
 enum GroceryGen {
     static func products() -> [GroceryProduct] {
-        func p(_ e: String, _ h: String, _ en: String) -> GroceryProduct { GroceryProduct(emoji: e, hebrew: h, english: en) }
-        return [p("🥛", "חָלָב", "milk"), p("🍞", "לֶחֶם", "bread"), p("🍎", "תַּפּוּחַ", "apple"), p("🍌", "בָּנָנָה", "banana"),
-                p("🧀", "גְּבִינָה", "cheese"), p("🥚", "בֵּיצִים", "eggs"), p("🍫", "שׁוֹקוֹלָד", "chocolate"),
-                p("🍪", "עוּגִיּוֹת", "cookies"), p("🧃", "מִיץ", "juice"), p("🥒", "מְלָפְפוֹן", "cucumber"),
-                p("🍅", "עַגְבָנִיָּה", "tomato"), p("🍉", "אֲבַטִּיחַ", "watermelon"), p("🍦", "גְּלִידָה", "ice cream"),
-                p("🍝", "פַּסְטָה", "pasta"), p("🍚", "אֹרֶז", "rice"), p("🥕", "גֶּזֶר", "carrot")]
+        func p(_ e: String, _ h: String, _ en: String, _ b: MiniGameBand = .preReader) -> GroceryProduct {
+            GroceryProduct(emoji: e, hebrew: h, english: en, reads: b)
+        }
+        return [p("🥛", "חָלָב", "milk"), p("🍞", "לֶחֶם", "bread"), p("🍎", "תַּפּוּחַ", "apple"),
+                p("🧀", "גְּבִינָה", "cheese"), p("🥚", "בֵּיצִים", "eggs"), p("🧃", "מִיץ", "juice"),
+                p("🍚", "אֹרֶז", "rice"), p("🥕", "גֶּזֶר", "carrot"),
+                p("🍌", "בָּנָנָה", "banana", .middle), p("🍪", "עוּגִיּוֹת", "cookies", .middle),
+                p("🍅", "עַגְבָנִיָּה", "tomato", .middle), p("🍝", "פַּסְטָה", "pasta", .middle),
+                p("🍫", "שׁוֹקוֹלָד", "chocolate", .upper), p("🥒", "מְלָפְפוֹן", "cucumber", .upper),
+                p("🍉", "אֲבַטִּיחַ", "watermelon", .upper), p("🍦", "גְּלִידָה", "ice cream", .upper)]
+    }
+
+    /// The pool a trip may draw from. In the reading worlds a word the child
+    /// cannot read yet is not a shopping list, it is a wall — so the pool
+    /// opens up band by band, and always stays wide enough for a full shelf.
+    static func products(reading: Bool, grade: Int) -> [GroceryProduct] {
+        guard reading else { return products() }
+        let band = MiniGameBand.of(grade)
+        let fit = products().filter { $0.reads <= band }
+        return fit.count >= 6 ? fit : products()
     }
 
     /// The name on the shelf / list in the child's own language.
@@ -972,8 +991,8 @@ enum GroceryGen {
     ///   ז׳–ח׳ 4 items, TWO sales, percentages that are not round halves
     /// The shelf stays six items wide at every grade, so the screen does not
     /// have to grow — the arithmetic does.
-    static func trip(grade g: Int) -> GroceryTrip {
-        let all = products().shuffled()
+    static func trip(grade g: Int, reading: Bool = false) -> GroceryTrip {
+        let all = products(reading: reading, grade: g).shuffled()
         let band = MiniGameBand.of(g)
         let listCount = g <= 1 ? 2 : (band >= .upper ? 4 : 3)
         let decimals = g >= 4

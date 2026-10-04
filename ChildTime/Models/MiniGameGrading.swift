@@ -143,7 +143,13 @@ enum MiniGameGradeFit {
             // work to ה׳, a freebie after it.
             if topic == .english || topic == .hebrew { return grade <= 5 }
             return true
-        case .pairs, .balloon, .crush, .lightning, .sort, .grocery, .balance:
+        case .grocery:
+            // 🛒 The money is sized to every grade. In a reading world the
+            // shopping list is words only and the shelf shows nothing but
+            // emoji, so in a second language it waits for ג׳ like 🧩 and 🔤.
+            guard let script, script.isSecondLanguage else { return true }
+            return grade >= 3
+        case .pairs, .balloon, .crush, .lightning, .sort, .balance:
             return true
         }
     }
