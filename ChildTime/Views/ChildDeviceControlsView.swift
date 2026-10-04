@@ -20,13 +20,14 @@ struct ChildDeviceControlsView: View {
     @State private var showAppPicker = false
     @State private var removalNote: String?
     @State private var showDisconnect = false
-    @State private var selection = FamilyActivitySelection()
+    @State private var selection = SelectionStorage.empty()
     @State private var showAllowPicker = false
-    @State private var allowSelection = FamilyActivitySelection()
+    @State private var allowSelection = SelectionStorage.empty()
     @State private var showAlwaysAllowPicker = false
-    @State private var alwaysAllowSelection = FamilyActivitySelection()
+    @State private var alwaysAllowSelection = SelectionStorage.empty()
     @State private var showOpenPicker = false
-    @State private var openSelection = FamilyActivitySelection()
+    @State private var openSelection = SelectionStorage.empty()
+    @State private var diagnostic: String?
 
     private var selectedCount: Int {
         selection.applicationTokens.count + selection.categoryTokens.count
@@ -37,6 +38,11 @@ struct ChildDeviceControlsView: View {
     /// (see `ShieldPolicy.swift`).
     private var openCount: Int { openSelection.applicationTokens.count }
     private var newAppsLocked: Bool { settings.lockNewApps && openCount > 0 }
+    /// Apps the block-list names individually. A list of CATEGORIES with zero
+    /// apps cannot reach Safari, Photos or Messages — see SelectionStorage.
+    private var blockedAppCount: Int { selection.applicationTokens.count }
+    private var blockedCategoryCount: Int { selection.categoryTokens.count }
+    private var blockListIsCategoryOnly: Bool { blockedAppCount == 0 && blockedCategoryCount > 0 }
     private var alwaysAllowCount: Int { alwaysAllowSelection.applicationTokens.count }
     private var isUnlocked: Bool { progress.isUnlocked }
 
@@ -55,6 +61,7 @@ struct ChildDeviceControlsView: View {
                     newAppLockCard
                     appLockCard
                     alwaysAllowedCard
+                    lockDiagnosticsCard
                     allowDeleteCard
                     disconnectButton
 
@@ -466,6 +473,90 @@ struct ChildDeviceControlsView: View {
             // (unless the child is mid-unlock, where everything is already open).
             if !isUnlocked { shields.applyDefaultLock() }
         }
+    }
+
+    // MARK: - 🩺 What is really locked right now
+
+    /// The screen that turns "I pressed it and nothing happened" into facts.
+    ///
+    /// Everything above describes what the parent CHOSE. This says what iOS was
+    /// actually told, which is a different thing in three ways that have all
+    /// bitten us: Screen Time may never have been granted (every write is then
+    /// silently ignored), the picker may have handed back categories and zero
+    /// app tokens (so Apple's own apps are untouched), and the allow-list may be
+    /// empty (so new apps are not covered).
+    private var lockDiagnosticsCard: some View {
+        controlCard(tint: AppColor.companionGlow) {
+            sectionHead(tr("מה נעול בפועל"),
+                        tr("זה מה ש-iOS קיבל מאיתנו ברגע זה — לא מה שסומן במסכים למעלה."),
+                        icon: "stethoscope", tint: AppColor.companionGlow)
+
+            diagnosticRow(tr("הרשאת זמן מסך"),
+                          shields.isAuthorized ? tr("יש") : tr("אין — שום נעילה לא תעבוד"),
+                          ok: shields.isAuthorized)
+            diagnosticRow(tr("נעולות ברשימה"),
+                          tr("\(blockedAppCount) אפליקציות · \(blockedCategoryCount) קטגוריות"),
+                          ok: blockedAppCount > 0 || newAppsLocked)
+            diagnosticRow(tr("נשארות פתוחות"), tr("\(openCount) אפליקציות"), ok: openCount > 0)
+            diagnosticRow(tr("תמיד מותרות"), tr("\(alwaysAllowCount) אפליקציות"), ok: true)
+            diagnosticRow(tr("אפליקציה חדשה"),
+                          newAppsLocked ? tr("נעולה") : tr("נשארת פתוחה"),
+                          ok: newAppsLocked)
+
+            if blockListIsCategoryOnly && !newAppsLocked {
+                Text(tr("בחרתם קטגוריות בלבד, בלי אף אפליקציה. נעילה לפי קטגוריה לא מגיעה לאפליקציות של אפל — ספארי, תמונות, הודעות, מצלמה — ולכן נראה שכלום לא השתנה. פתחו שוב את הרשימה וסמנו אפליקציות, או עדיף: בחרו מה נשאר פתוח."))
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(AppColor.starGold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Button {
+                Haptic.light()
+                diagnostic = shields.applyAndReport()
+            } label: {
+                Label(tr("החילו עכשיו ובדקו"), systemImage: "arrow.clockwise")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).padding(.vertical, 11)
+                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.14)))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            }
+            .buttonStyle(.juicy)
+
+            if let diagnostic {
+                // The same line the device writes to Console.app. Tappable to
+                // copy, so it can be pasted into a message to us.
+                Text(diagnostic)
+                    .font(.system(size: 10, weight: .regular, design: .monospaced))
+                    .foregroundStyle(.white.opacity(0.75))
+                    .environment(\.layoutDirection, .leftToRight)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onTapGesture {
+                        UIPasteboard.general.string = diagnostic
+                        Haptic.success()
+                    }
+            }
+        }
+    }
+
+    private func diagnosticRow(_ title: String, _ value: String, ok: Bool) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: ok ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(ok ? AppColor.successMint : AppColor.flameOrange)
+            Text(title)
+                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            Spacer()
+            Text(value)
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.8))
+                .multilineTextAlignment(.trailing)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Allow deleting the app (parent only, temporary window)

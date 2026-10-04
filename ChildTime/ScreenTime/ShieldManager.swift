@@ -180,6 +180,14 @@ final class ShieldManager: ObservableObject {
     ///                                   later, except what stays open
     ///  - otherwise                   -> the classic enumerated block-list
     func applyDefaultLock() {
+        // Without the Screen Time grant iOS silently ignores every write to
+        // ManagedSettingsStore: the parent edits a list, nothing happens, and
+        // no error surfaces anywhere. Say it out loud instead.
+        refreshStatus()
+        guard isAuthorized else {
+            screenTimeLog.error("shield NOT applied — Screen Time is \(self.authStatusText, privacy: .public); iOS ignores every ManagedSettings write")
+            return
+        }
         TofyShield.relock(reason: "app", log: screenTimeLog)
     }
 
@@ -187,6 +195,22 @@ final class ShieldManager: ObservableObject {
     /// can be checked against in Console.app, and what the tests assert.
     var lastAppliedPlanSummary: String {
         TofyShield.defaults.string(forKey: TofyShield.Key.lastPlan) ?? "none"
+    }
+
+    /// 🩺 Everything about the live lock on ONE line, including whether iOS ever
+    /// granted Screen Time. Printed on every apply and shown on the diagnostics
+    /// card, so a real-device report is facts instead of impressions.
+    var liveReport: String {
+        refreshStatus()
+        return "auth=\(authStatusText) " + TofyShield.liveReport()
+    }
+
+    /// Re-apply and log loudly. Used by the diagnostics card's "apply now".
+    func applyAndReport() -> String {
+        applyDefaultLock()
+        let report = liveReport
+        screenTimeLog.notice("shield DIAGNOSTIC \(report, privacy: .public)")
+        return report
     }
 
     // MARK: - Unlock for a duration

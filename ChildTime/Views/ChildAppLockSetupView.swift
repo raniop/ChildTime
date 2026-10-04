@@ -19,7 +19,7 @@ struct ChildAppLockSetupView: View {
 
     @State private var showAppPicker = false
     @State private var requestingAuth = false
-    @State private var openSelection = FamilyActivitySelection()
+    @State private var openSelection = SelectionStorage.empty()
     @StateObject private var companion = CompanionController()
 
     /// Apps named as "stays open". Only apps arm the lock, not categories.

@@ -21,7 +21,7 @@ struct KidModeEntryView: View {
         _selectedChild = State(initialValue: preselected)
         self.autoStart = autoStart && preselected != nil
     }
-    @State private var selection = FamilyActivitySelection()
+    @State private var selection = SelectionStorage.empty()
     @State private var requesting = false
     @State private var authFailed = false
 
