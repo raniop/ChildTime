@@ -27594,6 +27594,28 @@
         }
       }
     },
+    "הַכַּסֶּפֶת נִפְתְּחָה! 🔓" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخزنة مفتوحة! 🔓"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The vault is open! 🔓"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейф открыт! 🔓"
+          }
+        }
+      }
+    },
     "הַכָּחוֹל" : {
       "localizations" : {
         "ar" : {
@@ -31056,28 +31078,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "квадрат"
-          }
-        }
-      }
-    },
-    "הָרֶמֶז הַבָּא — עֲנוּ עַל שְׁאֵלָה וְהוּא יִפָּתַח" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "التلميح التالي — أجب عن سؤال وسيُفتح"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next clue — answer a question and it opens"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Следующая подсказка — ответьте на вопрос, и она откроется"
           }
         }
       }
@@ -44536,28 +44536,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Каждый правильный ответ даёт очки. Когда полоса заполняется, ты переходишь на новый уровень — и получаешь бонусные 💎 для магазина (10 за каждый уровень). С 5-го уровня у аватара бронзовая рамка, с 10-го — серебряная, а с 20-го — золотая!"
-          }
-        }
-      }
-    },
-    "כָּל תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת רֶמֶז — וְהָרְמָזִים מְגַלִּים אֶת הַקּוֹד" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "كل إجابة صحيحة تفتح تلميحًا — والتلميحات تكشف الرمز"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Every right answer opens a clue — and the clues reveal the code"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Каждый верный ответ открывает подсказку — а подсказки раскрывают код"
           }
         }
       }
@@ -61768,6 +61746,28 @@
         }
       }
     },
+    "עֲנוּ עַל שְׁאֵלָה וְיִפָּתַח רֶמֶז %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أجب عن سؤال ليُفتح التلميح %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Answer a question to open clue %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ответьте на вопрос — откроется подсказка %lld"
+          }
+        }
+      }
+    },
     "עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק 🎮" : {
       "localizations" : {
         "ar" : {
@@ -71199,6 +71199,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подсказка"
+          }
+        }
+      }
+    },
+    "רֶמֶז %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التلميح %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clue %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подсказка %lld"
           }
         }
       }
@@ -82617,6 +82639,50 @@
     "🔐" : {
 
     },
+    "🔐 הַקּוֹד הַסּוֹדִי — הַקִּישׁוּ אוֹתוֹ כָּאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔐 الرمز السري — اكتبه هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔐 The secret code — type it here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔐 Секретный код — введите его здесь"
+          }
+        }
+      }
+    },
+    "🔑 לַשְּׁאֵלָה הָרִאשׁוֹנָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 إلى السؤال الأول"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 To the first question"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 К первому вопросу"
+          }
+        }
+      }
+    },
     "🔑 מַפְתֵּחַ — פּוֹתְחִים סִפְרָה (%lld)" : {
       "localizations" : {
         "ar" : {
@@ -82639,46 +82705,24 @@
         }
       }
     },
-    "🔑 פִּתְחוּ רֶמֶז רִאשׁוֹן — וְהַקּוֹד יַתְחִיל לְהִתְגַּלּוֹת" : {
+    "🔑 עוֹנִים עַל שְׁאֵלָה ← 💡 נִפְתָּח רֶמֶז ← 🔓 פּוֹתְחִים אֶת הַכַּסֶּפֶת" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "🔑 افتح التلميح الأول — وسيبدأ الرمز بالظهور"
+            "value" : "🔑 تجيب عن سؤال ← 💡 يُفتح تلميح ← 🔓 تفتح الخزنة"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "🔑 Open the first clue — and the code starts to show"
+            "value" : "🔑 Answer a question → 💡 a clue opens → 🔓 you crack the vault"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "🔑 Откройте первую подсказку — и код начнёт проявляться"
-          }
-        }
-      }
-    },
-    "🔑 שְׁאֵלָה — פּוֹתְחִים רֶמֶז (%lld)" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🔑 سؤال — يفتح تلميحًا (%lld)"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🔑 Question — opens a clue (%lld)"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🔑 Вопрос — открыть подсказку (%lld)"
+            "value" : "🔑 Отвечаете на вопрос → 💡 открывается подсказка → 🔓 вы вскрываете сейф"
           }
         }
       }
