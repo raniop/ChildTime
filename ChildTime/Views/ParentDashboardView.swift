@@ -1180,11 +1180,14 @@ struct ParentDashboardView: View {
                 }
                 .fixedSize(horizontal: false, vertical: true)   // all three tiles as tall as the one with the bar (Rani)
                 HStack(spacing: 8) {
-                    // The whole card is a NavigationLink; this echoes it as the
-                    // primary control. The ⚡ menu is overlaid by the grid into
-                    // the reserved slot on its left (a Menu inside a link would
-                    // swallow the tap).
-                    homePrimaryLabel(tr("מֵידָע נוֹסָף ←"))
+                    // 🧒 The one thing parents wrote in about: they could not find
+                    // how to hand their own phone to the child. It used to live
+                    // inside the ⚡ menu, where nobody looked. Now it is the card's
+                    // primary control, and the card's own tap still opens the page.
+                    // The real button is overlaid by the grid into this slot (a
+                    // Button inside a NavigationLink would swallow the tap), as is
+                    // the ⚡ menu into the one on its left.
+                    homePrimaryLabel(tr("🧒 תנו לשחק כאן"))
                     Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
                 }
             } else {
@@ -2008,6 +2011,23 @@ struct ParentDashboardView: View {
                     // The grid is RTL, so `.bottomTrailing` is the bottom-LEFT.
                     .overlay(alignment: .bottomTrailing) {
                         gridCardMenu(row.profile).padding(14)
+                    }
+                    // 🧒 "תנו לשחק כאן" — the real button over the label the card
+                    // draws, so a parent can hand this device to the child in one
+                    // tap instead of hunting through the ⚡ menu.
+                    .overlay(alignment: .bottomLeading) {
+                        if isRoot, childHasDevice(row.profile) {
+                            Button {
+                                Haptic.light()
+                                kidModeChild = row.profile
+                            } label: {
+                                homePrimaryLabel(tr("🧒 תנו לשחק כאן"))
+                            }
+                            .buttonStyle(.borderless)
+                            .padding(.horizontal, 14).padding(.bottom, 14)
+                            .padding(.trailing, Self.actionsMenuWidth + 8)
+                            .environment(\.layoutDirection, .app)
+                        }
                     }
                     // 📱 No device yet → "+ חברו מכשיר" closes the card's one line.
                     .overlay(alignment: .bottomLeading) {

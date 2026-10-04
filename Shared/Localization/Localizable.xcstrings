@@ -84366,6 +84366,28 @@
         }
       }
     },
+    "🧒 תנו לשחק כאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧒 دعوه يلعب هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧒 Let them play here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧒 Дать поиграть здесь"
+          }
+        }
+      }
+    },
     "🧠" : {
 
     },
