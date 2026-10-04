@@ -122,12 +122,18 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         }
     }
 
-    /// Text games — a pre-reader (גן) never gets one. Which of the twelve a
-    /// reader does get, grade by grade, is `MiniGameGradeFit` — the single
-    /// table behind the chooser, the surprise round and reports/games/grade-fit.md.
+    /// Which of the twelve this child gets, grade by grade, is
+    /// `MiniGameGradeFit` — the single table behind the chooser, the surprise
+    /// round and reports/games/grade-fit.md. 👶 גן now has a roster of its own
+    /// there (five games in a text-free, spoken form), so every child has
+    /// games; this stays only as the "is there anything at all" question.
     static var availableForActiveChild: Bool {
-        MiniGameBand.of(ProfileStore.shared.active?.effectiveGrade ?? 1) > .preReader
+        !MiniGameGradeFit.roster(grade: ProfileStore.shared.active?.effectiveGrade ?? 1).isEmpty
     }
+
+    /// 👶 Does this game have a גן form — no words, a spoken instruction and
+    /// its content from `PreReaderGames`?
+    var hasPreReaderForm: Bool { MiniGameGradeFit.preReaderRoster.contains(self) }
 }
 
 /// The game screen itself, for a cover. `surprise` = launched by the runner's
@@ -395,6 +401,221 @@ struct MiniGameGlassButton: View {
     }
 }
 
+// MARK: - 👶 גן chrome: no words anywhere
+
+/// The 🔊 a גן round always carries: the instruction cannot be printed, so it
+/// is read aloud on entry — and a pre-reader can't re-read a reminder, so the
+/// child must be able to hear it again on demand. Big on purpose.
+struct PreReaderSpeakButton: View {
+    let spoken: String
+    var side: CGFloat = 52
+
+    var body: some View {
+        Button {
+            Haptic.light()
+            SpeechReader.shared.speak(spoken)
+        } label: {
+            Text("🔊")
+                .font(.system(size: side * 0.52))
+                .frame(width: side, height: side)
+                .background(Circle().fill(.white.opacity(0.16)))
+                .overlay(Circle().strokeBorder(.white.opacity(0.40), lineWidth: 1.5))
+        }
+        .buttonStyle(.juicy)
+        .accessibilityLabel(tr("הַקְשִׁיבוּ שׁוּב"))
+    }
+}
+
+/// The gold card at the top of a גן round: the rule as pictures, and the 🔊
+/// that says it again. Not one readable character — a quantity is that many
+/// objects, a colour is its swatch, a thing is its picture.
+struct PreReaderCueCard: View {
+    let cue: PreReaderCue
+    var compact: Bool = true
+    /// 🔄 A short, wide screen (an iPhone on its side) — one rung down, so the
+    /// card never eats the board below it.
+    @ObservedObject private var display = DisplayGeometry.shared
+    private var short: Bool { display.isShort }
+
+    var body: some View {
+        HStack(spacing: compact ? 12 : 18) {
+            PreReaderSpeakButton(spoken: cue.spoken, side: short ? 44 : (compact ? 54 : 68))
+            if !cue.icons.isEmpty {
+                // Up to six objects in a row; a count never becomes a numeral.
+                HStack(spacing: compact ? 2 : 5) {
+                    ForEach(Array(cue.icons.prefix(6).enumerated()), id: \.offset) { _, icon in
+                        Text(icon)
+                            .font(.system(size: iconSize))
+                            .minimumScaleFactor(0.5)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .glow(AppColor.starGold, radius: 8)
+            } else {
+                Spacer(minLength: 0)
+            }
+        }
+        .padding(.horizontal, compact ? 14 : 20)
+        .padding(.vertical, short ? 7 : (compact ? 10 : 14))
+        .frame(maxWidth: .infinity)
+        .glassPane(radius: 24)
+        .onAppear { SpeechReader.shared.speak(cue.spoken) }
+        .onChange(of: cue.spoken) { _ in SpeechReader.shared.speak(cue.spoken) }
+    }
+
+    /// Six apples in a row still have to fit a phone, so the more there are
+    /// the smaller each one gets.
+    private var iconSize: CGFloat {
+        let base: CGFloat = short ? 34 : (compact ? 46 : 60)
+        switch cue.icons.count {
+        case 1:    return base
+        case 2, 3: return base * 0.82
+        case 4:    return base * 0.68
+        default:   return base * 0.56
+        }
+    }
+}
+
+/// 👶 The intro a גן round opens with: the game's own emoji, the rule's
+/// pictures, the 🔊 and a ▶️ to begin. No title, no subtitle, no rules line.
+struct PreReaderIntroCard: View {
+    let kind: MiniGameKind
+    let cue: PreReaderCue
+    var onStart: () -> Void
+    @Environment(\.horizontalSizeClass) private var hsc
+    @ObservedObject private var display = DisplayGeometry.shared
+    private var big: Bool { hsc == .regular }
+    /// 🔄 On its side there is no room for a 96pt emoji above everything else.
+    private var short: Bool { display.isShort }
+
+    var body: some View {
+        VStack(spacing: short ? 12 : (big ? 22 : 18)) {
+            Text(kind.emoji)
+                .font(.system(size: short ? 62 : (big ? 130 : 96)))
+                .float(amplitude: 6)
+                .glow(AppColor.starGold, radius: 14)
+            if !cue.icons.isEmpty {
+                HStack(spacing: 4) {
+                    ForEach(Array(cue.icons.prefix(6).enumerated()), id: \.offset) { _, icon in
+                        Text(icon)
+                            .font(.system(size: short ? 32 : (big ? 56 : 42)))
+                            .minimumScaleFactor(0.5)
+                    }
+                }
+                .lineLimit(1)
+                .glow(AppColor.starGold, radius: 8)
+            }
+            PreReaderSpeakButton(spoken: cue.spoken, side: short ? 50 : (big ? 76 : 64))
+            MiniGameGoldButton(title: "▶️", action: onStart)
+                .padding(.top, 2)
+        }
+        .padding(short ? 18 : (big ? 36 : 26))
+        .frame(maxWidth: big ? 520 : 400)
+        .glassPane(radius: 28)
+        .padding(.horizontal, AppSpacing.lg)
+        .onAppear {
+            SpeechReader.shared.speak(PreReaderGames.startCue + " " + cue.spoken)
+        }
+    }
+}
+
+/// 👶 The end of a גן round: the child's own buddy, what they did drawn as
+/// that many pictures, the ⭐/💎 chips, and two picture buttons — 🔁 again,
+/// ✅ done. The praise is spoken, never printed. Never a failure, and never
+/// even a word about a miss.
+struct PreReaderEndCard: View {
+    /// What the round produced, as a picture repeated that many times
+    /// (capped — ten balloons in a row is a wall, not a reward).
+    let tally: String
+    let tallyCount: Int
+    let grant: MiniGameReward.Grant?
+    var surprise: Bool = false
+    var onAgain: () -> Void = {}
+    var onDone: () -> Void
+
+    @ObservedObject private var profiles = ProfileStore.shared
+    @Environment(\.horizontalSizeClass) private var hsc
+    @ObservedObject private var display = DisplayGeometry.shared
+    @State private var reveal = 0
+    private var big: Bool { hsc == .regular }
+    /// 🔄 Short and wide: the buddy and the tally come down a rung so the two
+    /// buttons at the bottom stay on screen.
+    private var short: Bool { display.isShort }
+
+    var body: some View {
+        VStack(spacing: short ? 9 : 14) {
+            CharacterView(character: profiles.active?.character ?? Character3DCatalog.find(nil))
+                .frame(width: short ? 82 : (big ? 160 : 120), height: short ? 82 : (big ? 160 : 120))
+                .float(amplitude: 8)
+            if tallyCount > 0 {
+                HStack(spacing: 2) {
+                    ForEach(0..<min(tallyCount, 8), id: \.self) { _ in
+                        Text(tally).font(.system(size: short ? 22 : (big ? 36 : 28)))
+                    }
+                    if tallyCount > 8 {
+                        Text("✨").font(.system(size: short ? 22 : (big ? 36 : 28)))
+                    }
+                }
+                .lineLimit(1).minimumScaleFactor(0.6)
+                .glow(AppColor.starGold, radius: 10)
+            }
+            if let grant {
+                HStack(spacing: 12) {
+                    MiniGameRewardChip(emoji: "⭐", value: grant.stars, color: AppColor.starGold, shown: reveal >= 1)
+                    if grant.diamonds > 0 {
+                        MiniGameRewardChip(emoji: "💎", value: grant.diamonds, color: AppColor.diamondBlue, shown: reveal >= 2)
+                    }
+                }
+                .padding(.top, 2)
+            }
+            PreReaderSpeakButton(spoken: PreReaderGames.wellDone, side: short ? 46 : (big ? 66 : 56))
+            VStack(spacing: short ? 7 : 10) {
+                if surprise {
+                    MiniGameGoldButton(title: "▶️", action: onDone)
+                } else {
+                    MiniGameGoldButton(title: "🔁", action: onAgain)
+                    MiniGameGlassButton(title: "✅", action: onDone)
+                }
+            }
+            .padding(.top, 4)
+        }
+        .padding(short ? 16 : (big ? 36 : 24))
+        .frame(maxWidth: big ? 520 : 400)
+        .glassPane(radius: 28)
+        .padding(.horizontal, AppSpacing.lg)
+        .onAppear {
+            SpeechReader.shared.speak(PreReaderGames.wellDone)
+            for s in 1...2 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25 * Double(s)) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.55)) { reveal = s }
+                    SoundPlayer.shared.play(.correctSmall)
+                }
+            }
+        }
+    }
+}
+
+/// 👶 A count with no numeral, for a גן round's top-bar chip: a filled dot
+/// per item done, a hollow one per item left.
+enum PreReaderChrome {
+    static func dots(done: Int, total: Int) -> String {
+        let shown = min(total, 8)
+        let filled = min(done, shown)
+        return String(repeating: "●", count: filled) + String(repeating: "○", count: shown - filled)
+            + (total > shown ? "…" : "")
+    }
+
+    /// An open-ended round (🎈): a dot per success, and a ✨ past the eighth.
+    static func dots(done: Int) -> String {
+        done > 8 ? String(repeating: "●", count: 8) + "✨" : String(repeating: "●", count: done)
+    }
+
+    /// 🔥 as a streak, with no number on it.
+    static func streak(_ n: Int) -> String {
+        n >= 2 ? String(repeating: "🔥", count: min(n, 5)) : " "
+    }
+}
+
 // MARK: - Intro / end cards
 
 /// The intro card a game opens with from a world screen — the rules in one
@@ -556,6 +777,8 @@ struct SurpriseRoundIntro: View {
     @State private var appeared = false
     @State private var confetti = 0
     private var isCompact: Bool { hsc == .compact }
+    /// 👶 A pre-reader (גן) can't read the game's name or its rules line.
+    private var preReader: Bool { PreReaderGames.activeChildIsPreReader }
 
     var body: some View {
         ZStack {
@@ -574,37 +797,45 @@ struct SurpriseRoundIntro: View {
                     .scaleEffect(appeared ? 1 : 0.5)
                     .rotationEffect(.degrees(appeared ? 0 : -20))
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
-                Text(SurpriseRound.themeName(plan.topic))
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary)
-                Text(plan.game.emoji + " " + plan.game.title)
-                    .font(.system(size: isCompact ? 28 : 36, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                    .minimumScaleFactor(0.6)
-                Text(plan.game.subtitle(surprise: true))
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
+                if preReader {
+                    Text(plan.game.emoji)
+                        .font(.system(size: isCompact ? 72 : 90))
+                        .float(amplitude: 5)
+                        .glow(AppColor.starGold, radius: 12)
+                } else {
+                    Text(SurpriseRound.themeName(plan.topic))
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                    Text(plan.game.emoji + " " + plan.game.title)
+                        .font(.system(size: isCompact ? 28 : 36, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.6)
+                    Text(plan.game.subtitle(surprise: true))
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 MiniGameChip {
                     Text("×2 ⭐ 💎")
                         .font(.system(size: 18, weight: .black, design: .rounded))
                         .foregroundStyle(AppColor.starGold)
                 }
                 .glow(AppColor.starGold, radius: 8)
-                MiniGameGoldButton(title: tr("יַאלְלָה! 🚀"), action: onStart)
+                MiniGameGoldButton(title: preReader ? "▶️" : tr("יַאלְלָה! 🚀"), action: onStart)
                     .padding(.top, 4)
                 Button {
                     Haptic.light()
                     onSkip()
                 } label: {
-                    Text(tr("דִּלּוּג"))
+                    Text(preReader ? "✖️" : tr("דִּלּוּג"))
                         .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .padding(.horizontal, 20).padding(.vertical, 6)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(tr("דִּלּוּג"))
             }
             .padding(24)
             .frame(maxWidth: 440)
@@ -619,6 +850,8 @@ struct SurpriseRoundIntro: View {
         .onAppear {
             withAnimation(.spring(response: 0.55, dampingFraction: 0.65)) { appeared = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { confetti += 1 }
+            // 👶 The one screen a pre-reader cannot read is announced out loud.
+            if preReader { SpeechReader.shared.speak(PreReaderGames.startCue) }
         }
     }
 }
@@ -686,6 +919,11 @@ struct MiniGameTimerBar: View {
 /// DEMO_SCREEN host for the mini-games (screenshots / review). DEMO_WORLD
 /// themes the game, DEMO_GRADE sets the active child's grade, DEMO_SURPRISE=1
 /// plays it as a surprise round; "surpriseround" shows the interstitial first.
+///
+/// 👶 DEMO_GRADE=0 is גן, so the five pre-reader games deal their text-free
+/// boards: DEMO_SCREEN=balloongame DEMO_GRADE=0, and the same for sortgame,
+/// pairsgame, patterngame and crushgame — plus DEMO_SCREEN=gamechooser
+/// DEMO_GRADE=0 for the chooser they appear in.
 struct MiniGameDemoHost: View {
     let screen: String
 

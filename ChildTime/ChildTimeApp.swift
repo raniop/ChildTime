@@ -387,6 +387,8 @@ struct ChildTimeApp: App {
                 }
         // 🎮 The mini-games — DEMO_SCREEN=pairsgame | balloongame | wordgame | crushgame |
         // wordsearch | lightninggame [DEMO_WORLD=english] [DEMO_GRADE=3] [DEMO_SURPRISE=1]
+        // 👶 DEMO_GRADE=0 is גן: pairsgame / balloongame / crushgame / sortgame /
+        // patterngame (and gamechooser) then draw their text-free pre-reader form.
         case "pairsgame", "balloongame", "wordgame", "crushgame", "wordsearch", "lightninggame":
             MiniGameDemoHost(screen: name)
         // …and the second six — DEMO_SCREEN=sortgame | patterngame | game2048 | vaultgame |

@@ -3,10 +3,17 @@ import SwiftUI
 /// A still miniature of each game's own screen, drawn with the same glass
 /// tiles and colours, for its card in a world's chooser — the child sees what
 /// the game looks like before choosing it.
+///
+/// 👶 For a גן child the miniature has to be text-free too, or the one place
+/// that promises "no words" would be the place that breaks it: the five
+/// pre-reader games draw pictures, colours and shapes here instead of words
+/// and numerals (see `PreReaderGames`).
 struct MiniGamePreview: View {
     let kind: MiniGameKind
     /// The world's topic, so the miniature shows the world's kind of content.
     var topic: Topic?
+    /// 👶 Draw the pre-reader's board. Defaults to the active child.
+    var preReader: Bool = PreReaderGames.activeChildIsPreReader
 
     private static let blue = Color(hex: "48BFE3"), purple = Color(hex: "9B5DE5"), pink = Color(hex: "FF6B9D"),
                         orange = Color(hex: "FFB84D"), mint = Color(hex: "06D6A0")
@@ -28,6 +35,133 @@ struct MiniGamePreview: View {
 
     @ViewBuilder
     private func content(_ s: CGFloat) -> some View {
+        if preReader, kind.hasPreReaderForm {
+            preReaderContent(s)
+        } else {
+            readerContent(s)
+        }
+    }
+
+    // MARK: - 👶 The five גן boards, with nothing to read
+
+    @ViewBuilder
+    private func preReaderContent(_ s: CGFloat) -> some View {
+        switch kind {
+        case .pairs:   prePairs(s)
+        case .balloon: preBalloons(s)
+        case .sort:    preSort(s)
+        case .pattern: prePattern(s)
+        case .crush:   preCount(s)
+        default:       readerContent(s)
+        }
+    }
+
+    /// 🔗 Four picture pairs — 🦴 with 🐶, 🥚 with 🐣.
+    private func prePairs(_ s: CGFloat) -> some View {
+        let w = s * 0.32, h = s * 0.17, f = s * 0.11
+        return HStack(spacing: s * 0.06) {
+            VStack(spacing: s * 0.035) {
+                tile("🦴", OptionCard.tints[0], .correct, w: w, h: h, font: f)
+                tile("🥚", OptionCard.tints[1], .picked, w: w, h: h, font: f)
+                tile("☂️", OptionCard.tints[2], w: w, h: h, font: f)
+            }
+            VStack(spacing: s * 0.035) {
+                tile("🐣", OptionCard.tints[2], w: w, h: h, font: f)
+                tile("🐶", OptionCard.tints[3], .correct, w: w, h: h, font: f)
+                tile("🌧️", OptionCard.tints[0], w: w, h: h, font: f)
+            }
+        }
+    }
+
+    /// 🎈 One picture, one colour and a quantity — the three גן rules at once.
+    private func preBalloons(_ s: CGFloat) -> some View {
+        let items: [(String, Color, CGFloat, CGFloat)] = [("🐶", Self.pink, -0.27, 0.05), ("", Self.blue, 0, -0.08),
+                                                          ("🍎🍎", Self.orange, 0.27, 0.07)]
+        return ZStack {
+            ForEach(items.indices, id: \.self) { i in
+                let it = items[i]
+                VStack(spacing: 0) {
+                    Text(it.0)
+                        .font(.system(size: it.0.count > 1 ? s * 0.08 : s * 0.13))
+                        .lineLimit(1).minimumScaleFactor(0.4)
+                        .frame(width: s * 0.22, height: s * 0.26)
+                        .background(Ellipse().fill(RadialGradient(colors: [it.1.opacity(0.95), it.1.opacity(0.75)],
+                                                                  center: UnitPoint(x: 0.35, y: 0.3),
+                                                                  startRadius: 1, endRadius: s * 0.22)))
+                        .overlay(Ellipse().strokeBorder(.white.opacity(0.45), lineWidth: 1))
+                    Rectangle().fill(.white.opacity(0.55)).frame(width: 1, height: s * 0.07)
+                }
+                .offset(x: s * it.2, y: s * it.3)
+            }
+        }
+    }
+
+    /// 🧺 Two baskets wearing pictures, and a picture to drop in.
+    private func preSort(_ s: CGFloat) -> some View {
+        let baskets = ["🌊", "🌳"]
+        return VStack(spacing: s * 0.05) {
+            tile("🐬", AppColor.starGold, .picked, w: s * 0.26, h: s * 0.17, font: s * 0.1)
+            HStack(spacing: s * 0.06) {
+                ForEach(baskets.indices, id: \.self) { i in
+                    Text(baskets[i])
+                        .font(.system(size: s * 0.1))
+                        .frame(width: s * 0.3, height: s * 0.21)
+                        .miniGameTile(.normal, tint: i == 0 ? Self.blue : Self.mint, radius: 12)
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .strokeBorder(.white.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                            .padding(3))
+                }
+            }
+        }
+    }
+
+    /// 🧠 🔴 🔵 🔴 🔵 ❓ and three pictures to choose from.
+    private func prePattern(_ s: CGFloat) -> some View {
+        let seq = ["🔴", "🔵", "🔴", "🔵", "?"]
+        let opts = ["🟡", "🔴", "🟢"]
+        let w = s * 0.145
+        return VStack(spacing: s * 0.05) {
+            HStack(spacing: s * 0.02) {
+                ForEach(seq.indices, id: \.self) { i in
+                    tile(seq[i], .white.opacity(0.2), seq[i] == "?" ? .picked : .normal, w: w, h: w, font: w * 0.55)
+                }
+            }
+            HStack(spacing: s * 0.035) {
+                ForEach(opts.indices, id: \.self) { i in
+                    tile(opts[i], OptionCard.tints[i], i == 1 ? .correct : .normal, w: w * 1.2, h: w, font: w * 0.5)
+                }
+            }
+        }
+    }
+
+    /// 🧱 A row of apples to collect, and blocks carrying one, two or three.
+    private func preCount(_ s: CGFloat) -> some View {
+        let side = s * 0.16
+        let blocks = ["🍎", "🍎🍎", "🍎🍎🍎"]
+        let colors: [Color] = [Self.pink, Self.mint, Self.orange]
+        return VStack(spacing: s * 0.05) {
+            HStack(spacing: 1) {
+                ForEach(0..<4, id: \.self) { _ in Text("🍎").font(.system(size: s * 0.085)) }
+            }
+            HStack(spacing: s * 0.03) {
+                ForEach(blocks.indices, id: \.self) { i in
+                    Text(blocks[i])
+                        .font(.system(size: side * (0.5 - CGFloat(i) * 0.11)))
+                        .lineLimit(1).minimumScaleFactor(0.4)
+                        .frame(width: side, height: side)
+                        .background(RoundedRectangle(cornerRadius: side * 0.22, style: .continuous)
+                            .fill(colors[i].opacity(0.85)))
+                        .overlay(RoundedRectangle(cornerRadius: side * 0.22, style: .continuous)
+                            .strokeBorder(i == 0 ? AppColor.starGold : .white.opacity(0.45), lineWidth: i == 0 ? 2.5 : 1))
+                }
+            }
+        }
+    }
+
+    // MARK: - The twelve as a reader sees them
+
+    @ViewBuilder
+    private func readerContent(_ s: CGFloat) -> some View {
         switch kind {
         case .pairs:      pairs(s)
         case .balloon:    balloons(s)

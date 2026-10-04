@@ -6,6 +6,10 @@ import SwiftUI
 /// youngest and the logic worlds. A right answer drops into the "?" in mint; a
 /// miss glows soft warm and the child tries again. Six per round.
 ///
+/// 👶 גן plays it with no words and no numbers: 🔴 🔵 🔴 🔵 🔴 ❓ — two
+/// pictures, five cells, three big choices, four sequences, and "מָה מַמְשִׁיךְ
+/// אֶת הַסִּדְרָה?" read aloud rather than printed. See `PreReaderGames`.
+///
 /// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser every
 /// pattern solved first time earns screen time like a regular answer.
 struct PatternGameView: View {
@@ -34,8 +38,14 @@ struct PatternGameView: View {
     @State private var grant: MiniGameReward.Grant?
 
     private var isCompact: Bool { hsc == .compact }
-    private var count: Int { surprise ? 5 : PatternGen.roundCount }
+    private var count: Int {
+        if preReader { return PreReaderGames.patternCount }
+        return surprise ? 5 : PatternGen.roundCount
+    }
+    /// 👶 A pre-reader (גן): pictures only, bigger cells, four rows a round.
+    private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
     private var grade: Int {
+        if preReader { return 0 }
         switch topic {
         case .english?, .hebrew?: return max(1, profiles.active?.effectiveGrade ?? 2)
         default: return MiniGameLevel.grade(for: topic ?? .math)
@@ -49,25 +59,37 @@ struct PatternGameView: View {
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
                 MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
-                    MiniGameChipLabel(text: "🧠 \(min(index + 1, count))/\(count)", surprise: surprise)
+                    MiniGameChipLabel(text: preReader
+                                      ? "🧠 " + PreReaderChrome.dots(done: index, total: count)
+                                      : "🧠 \(min(index + 1, count))/\(count)",
+                                      surprise: surprise)
                 }
                 switch phase {
                 case .intro:
                     Spacer()
-                    MiniGameIntroCard(kind: .pattern) { start() }
+                    if preReader {
+                        PreReaderIntroCard(kind: .pattern, cue: PreReaderGames.patternCue) { start() }
+                    } else {
+                        MiniGameIntroCard(kind: .pattern) { start() }
+                    }
                     Spacer()
                 case .playing:
                     playing
                 case .done:
                     Spacer()
-                    MiniGameEndCard(
-                        title: clean == count ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),
-                        detail: tr("פִּצַּחְתֶּם \(count) תַּבְנִיּוֹת!"),
-                        grant: grant,
-                        surprise: surprise,
-                        againLabel: tr("עוֹד סִבּוּב 🔁"),
-                        onAgain: { start() },
-                        onDone: onClose)
+                    if preReader {
+                        PreReaderEndCard(tally: "🧠", tallyCount: clean, grant: grant, surprise: surprise,
+                                         onAgain: { start() }, onDone: onClose)
+                    } else {
+                        MiniGameEndCard(
+                            title: clean == count ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),
+                            detail: tr("פִּצַּחְתֶּם \(count) תַּבְנִיּוֹת!"),
+                            grant: grant,
+                            surprise: surprise,
+                            againLabel: tr("עוֹד סִבּוּב 🔁"),
+                            onAgain: { start() },
+                            onDone: onClose)
+                    }
                     Spacer()
                 }
             }
@@ -85,10 +107,15 @@ struct PatternGameView: View {
         VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.lg) {
             Spacer(minLength: 0)
             VStack(spacing: 14) {
-                Text(tr("מָה מַשְׁלִים אֶת הַתַּבְנִית?"))
-                    .font(.system(size: isCompact ? 20 : 26, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
+                if preReader {
+                    // 👶 The row itself is the question; the 🔊 says it in words.
+                    PreReaderCueCard(cue: PreReaderGames.patternCue, compact: isCompact)
+                } else {
+                    Text(tr("מָה מַשְׁלִים אֶת הַתַּבְנִית?"))
+                        .font(.system(size: isCompact ? 20 : 26, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                }
                 sequenceRow
             }
             .padding(.horizontal, 12).padding(.vertical, 18)
@@ -110,7 +137,10 @@ struct PatternGameView: View {
         let cells = round?.cells ?? []
         return GeometryReader { geo in
             let gap: CGFloat = isCompact ? 6 : 10
-            let side = min(isCompact ? 70 : 104, (geo.size.width - gap * CGFloat(max(0, cells.count - 1))) / CGFloat(max(1, cells.count)))
+            let maxSide: CGFloat = preReader
+                ? (display.isShort ? 62 : (isCompact ? 86 : 120))
+                : (isCompact ? 70 : 104)
+            let side = min(maxSide, (geo.size.width - gap * CGFloat(max(0, cells.count - 1))) / CGFloat(max(1, cells.count)))
             HStack(spacing: gap) {
                 ForEach(Array(cells.enumerated()), id: \.offset) { _, cell in
                     let hole = cell == "?"
@@ -135,23 +165,33 @@ struct PatternGameView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(height: isCompact ? 74 : 108)
+        .frame(height: preReader
+               ? (display.isShort ? 66 : (isCompact ? 90 : 124))
+               : (isCompact ? 74 : 108))
         // Numbers and pictures read left-to-right; Hebrew letters from the right.
         .environment(\.layoutDirection, round?.direction ?? .leftToRight)
     }
 
     private var answers: some View {
         let opts = round?.options ?? []
-        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: isCompact ? 2 : 4), spacing: 12) {
+        // 👶 גן: three choices in one row, each a big picture.
+        let cols = preReader ? min(3, max(1, opts.count)) : (isCompact ? 2 : 4)
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: cols), spacing: 12) {
             ForEach(Array(opts.enumerated()), id: \.element) { i, opt in
                 let state: MiniGameTileState = opt == picked && solved ? .correct : (wrongPicks.contains(opt) ? .wrong : .normal)
                 Button { pick(opt) } label: {
                     Text(opt)
-                        .font(.system(size: isCompact ? 32 : 42, weight: .black, design: .rounded))
+                        .font(.system(size: preReader
+                                      ? (display.isShort ? 34 : (isCompact ? 46 : 58))
+                                      : (isCompact ? 32 : 42),
+                                      weight: .black, design: .rounded))
                         .foregroundStyle(.white)
                         .monospacedDigit()
                         .lineLimit(1).minimumScaleFactor(0.5)
-                        .frame(maxWidth: .infinity, minHeight: isCompact ? 76 : 110)
+                        .frame(maxWidth: .infinity,
+                               minHeight: preReader
+                               ? (display.isShort ? 70 : (isCompact ? 100 : 130))
+                               : (isCompact ? 76 : 110))
                         .miniGameTile(state, tint: OptionCard.tints[i % OptionCard.tints.count], radius: 22)
                         .mathLTR(round?.direction == .leftToRight)
                         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: state)
@@ -206,6 +246,7 @@ struct PatternGameView: View {
             }
             SoundPlayer.shared.play(.wrongSoft)
             Haptic.light()
+            if preReader { SpeechReader.shared.speak(PreReaderGames.almost) }
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { _ = wrongPicks.insert(opt) }
             withAnimation(.linear(duration: 0.35)) { shake += 1 }
         }
@@ -214,7 +255,7 @@ struct PatternGameView: View {
     private func finish() {
         guard phase == .playing else { return }
         grant = MiniGameReward.grant(game: "pattern", correct: clean, starsPer: 2, diamondsPer: 1,
-                                     cap: PatternGen.roundCount, surprise: surprise)
+                                     cap: count, surprise: surprise)
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { phase = .done }
         SoundPlayer.shared.play(.chestOpen)
         Haptic.success()

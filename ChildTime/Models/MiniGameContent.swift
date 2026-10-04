@@ -397,6 +397,9 @@ struct BalloonItem: Hashable {
     let emoji: String
     let label: String
     let correct: Bool
+    /// 👶 A גן colour round: the balloon's own fill IS the answer, so the
+    /// item carries it instead of taking a random one from the palette.
+    var colorHex: String? = nil
 }
 
 /// One balloon round: "פּוֹצְצוּ אֶת כָּל הַחַיּוֹת שֶׁחַיּוֹת בַּיָּם!" and the
@@ -1338,6 +1341,9 @@ enum SurpriseRound {
     /// enough SHORT question/answer pairs (or capitals for 🌍); 🧱 only where
     /// numbers are already on the menu — the math world and the mixed feed.
     static func games(for topic: Topic, grade: Int, context: Topic? = nil) -> [MiniGameKind] {
+        // 👶 גן: the five text-free games, whatever the theme — their content
+        // is `PreReaderGames`, not the theme's bank (see MiniGameGradeFit).
+        guard !PreReaderGames.isPreReader(grade) else { return MiniGameGradeFit.preReaderRoster }
         var out: [MiniGameKind] = [.balloon]
         if WordSets.spellingAvailable(grade: grade) { out += [.word, .wordSearch] }
         let short = nearGrade(topic: topic, grade: grade).filter { q in

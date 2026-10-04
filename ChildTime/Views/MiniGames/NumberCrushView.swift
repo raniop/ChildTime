@@ -8,6 +8,12 @@ import Combine
 /// of the selection with a small shake. The board always holds at least one
 /// way to the target. 60 seconds (45 in a surprise round).
 ///
+/// 👶 גן plays it as COUNTING, with no numeral anywhere: the target is a row
+/// of apples, every block carries one, two or three apples, and the child taps
+/// blocks that together make exactly that row. Six big blocks, no clock, and
+/// "אָסְפוּ בְּדִיּוּק חֲמִשָּׁה תַּפּוּחִים" read aloud instead of printed — the round
+/// ends after five collections. See `PreReaderGames`.
+///
 /// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser every hit
 /// earns screen time like a regular answer (paced — see MiniGameEarnSession).
 struct NumberCrushView: View {
@@ -48,22 +54,32 @@ struct NumberCrushView: View {
     @State private var burst = 0
     @State private var confetti = 0
     @State private var grant: MiniGameReward.Grant?
+    /// 👶 גן: the object every block is drawn from, and the spoken rule.
+    @State private var collect: PreReaderGames.Collect?
+    /// 👶 Dealt before the intro card, so the card shows the row to collect;
+    /// ▶️ then consumes it.
+    @State private var preDealt = false
 
     private let ticker = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
 
     private var isCompact: Bool { hsc == .compact }
     /// The child's level in math (adaptive), not just the class.
     private var grade: Int { MiniGameLevel.grade(for: .math) }
+    /// 👶 A pre-reader (גן): objects instead of numerals, and no clock.
+    private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
     /// Hits count in the world they're played in when it is a numbers world.
     private var recordTopic: Topic {
+        // 👶 A גן round is counting, whatever world it was opened from.
+        if PreReaderGames.activeChildIsPreReader { return .math }
         if let topic, [.math, .money, .logic, .gifted].contains(topic) { return topic }
         return .math
     }
     private var roundSeconds: TimeInterval { TimeInterval(MiniGameKind.crush.seconds(surprise: surprise)) }
     private var remaining: TimeInterval { max(0, roundSeconds - now.timeIntervalSince(startedAt)) }
     /// 4×3 on a phone (and the foldable), 5×4 on an iPad.
-    private var colCount: Int { isCompact || display.isShort ? 4 : 5 }
-    private var rowCount: Int { isCompact || display.isShort ? 3 : 4 }
+    /// 👶 גן: 3×2 — six blocks, each one big enough for a small finger.
+    private var colCount: Int { preReader ? 3 : (isCompact || display.isShort ? 4 : 5) }
+    private var rowCount: Int { preReader ? 2 : (isCompact || display.isShort ? 3 : 4) }
 
     var body: some View {
         ZStack {
@@ -71,25 +87,38 @@ struct NumberCrushView: View {
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
                 MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
-                    MiniGameChipLabel(text: "🧱 \(hits)", surprise: surprise)
+                    MiniGameChipLabel(text: preReader
+                                      ? "🧱 " + PreReaderChrome.dots(done: hits, total: PreReaderGames.countingHits)
+                                      : "🧱 \(hits)",
+                                      surprise: surprise)
                 }
                 switch phase {
                 case .intro:
                     Spacer()
-                    MiniGameIntroCard(kind: .crush) { start() }
+                    if preReader {
+                        PreReaderIntroCard(kind: .crush,
+                                           cue: collect?.cue ?? PreReaderCue(spoken: PreReaderGames.startCue)) { start() }
+                    } else {
+                        MiniGameIntroCard(kind: .crush) { start() }
+                    }
                     Spacer()
                 case .playing:
                     playing
                 case .done:
                     Spacer()
-                    MiniGameEndCard(
-                        title: hits >= 10 ? tr("וָואוּ, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"),
-                        detail: summaryLine,
-                        grant: grant,
-                        surprise: surprise,
-                        againLabel: tr("עוֹד סִבּוּב 🔁"),
-                        onAgain: { start() },
-                        onDone: onClose)
+                    if preReader {
+                        PreReaderEndCard(tally: collect?.emoji ?? "🧱", tallyCount: hits, grant: grant,
+                                         surprise: surprise, onAgain: { start() }, onDone: onClose)
+                    } else {
+                        MiniGameEndCard(
+                            title: hits >= 10 ? tr("וָואוּ, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"),
+                            detail: summaryLine,
+                            grant: grant,
+                            surprise: surprise,
+                            againLabel: tr("עוֹד סִבּוּב 🔁"),
+                            onAgain: { start() },
+                            onDone: onClose)
+                    }
                     Spacer()
                 }
             }
@@ -98,11 +127,22 @@ struct NumberCrushView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if (surprise || earn != nil) && phase == .intro { start() } }
+        .onAppear {
+            if preReader, !preDealt { dealPreReader() }
+            if (surprise || earn != nil) && phase == .intro { start() }
+        }
         .onReceive(ticker) { t in
             guard phase == .playing else { return }
             now = t
-            if remaining <= 0 { finish() }
+            // 👶 גן has no clock on screen: the round ends after five
+            // collections. The long backstop only keeps a child who never
+            // finds a pair from being left on the board forever — and it ends
+            // the same celebrating way, with whatever they did collect.
+            if preReader {
+                if t.timeIntervalSince(startedAt) > 180 { finish() }
+            } else if remaining <= 0 {
+                finish()
+            }
         }
     }
 
@@ -122,6 +162,23 @@ struct NumberCrushView: View {
 
     private var playing: some View {
         VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
+            // 👶 גן: the row to collect and the 🔊 — no "יַעַד", no numeral.
+            if preReader, let collect {
+                VStack(spacing: 10) {
+                    PreReaderCueCard(cue: collect.cue, compact: isCompact)
+                    // What is in the basket so far, as that many objects.
+                    let gathered = pickedValues.reduce(0, +)
+                    HStack(spacing: 2) {
+                        ForEach(Array(0..<max(1, gathered)), id: \.self) { _ in
+                            Text(gathered == 0 ? "⬜️" : collect.emoji)
+                                .font(.system(size: isCompact ? 28 : 36))
+                        }
+                    }
+                    .frame(height: isCompact ? 36 : 46)
+                    .opacity(gathered == 0 ? 0.3 : 1)
+                    .modifier(MiniGameShake(animatableData: shake))
+                }
+            } else {
             // The target, in the runner's question card.
             VStack(spacing: 10) {
                 HStack(spacing: 10) {
@@ -152,6 +209,7 @@ struct NumberCrushView: View {
             .padding(.horizontal, 14).padding(.vertical, 12)
             .glassPane(radius: 22)
             .modifier(MiniGameShake(animatableData: shake))
+            }
 
             Spacer(minLength: 0)
             grid
@@ -209,11 +267,15 @@ struct NumberCrushView: View {
         let isPicked = picked.contains(b.id)
         let isBursting = bursting.contains(b.id)
         return Button { tap(b) } label: {
-            Text(MiniGameText.ltr(rules.display(b.value)))
-                .font(.system(size: side * (rules.mode == .decimal ? 0.32 : 0.42), weight: .black, design: .rounded))
+            Text(preReader ? String(repeating: collect?.emoji ?? "🍎", count: max(1, b.value))
+                           : MiniGameText.ltr(rules.display(b.value)))
+                .font(.system(size: preReader ? side * (b.value >= 3 ? 0.26 : (b.value == 2 ? 0.34 : 0.46))
+                                              : side * (rules.mode == .decimal ? 0.32 : 0.42),
+                              weight: .black, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
-                .lineLimit(1).minimumScaleFactor(0.5)
+                .lineLimit(1).minimumScaleFactor(0.4)
+                .padding(.horizontal, preReader ? side * 0.06 : 0)
                 .frame(width: side, height: side)
                 .miniGameTile(isBursting ? .correct : (isPicked ? .picked : .normal), tint: b.color, radius: side * 0.24)
                 .background(
@@ -230,13 +292,28 @@ struct NumberCrushView: View {
     // MARK: - Logic
 
     private func start() {
-        rules = CrushBoards.rules(grade: grade, topic: topic)
+        if preReader {
+            if !preDealt { dealPreReader() }
+            preDealt = false
+        } else {
+            collect = nil
+            rules = CrushBoards.rules(grade: grade, topic: topic)
+        }
         var cols: [[Block]] = (0..<colCount).map { _ in (0..<rowCount).map { _ in newBlock() } }
         cols = ensureSolvable(cols, fresh: Set(cols.joined().map(\.id)))
         columns = cols
         picked = []; bursting = []; hits = 0; grant = nil
         startedAt = Date(); now = Date(); pickStartedAt = Date()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .playing }
+    }
+
+    /// 👶 One גן round: the object, the row to collect, and the rule that
+    /// every block carries one, two or three of them.
+    private func dealPreReader() {
+        let round = PreReaderGames.collecting()
+        collect = round
+        rules = round.rules
+        preDealt = true
     }
 
     private func newBlock(_ value: Int? = nil) -> Block {
@@ -283,6 +360,12 @@ struct NumberCrushView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
             guard phase == .playing else { return }
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { targetPop = false }
+            // 👶 גן: five collections and the round is done — no clock at all.
+            if preReader, hits >= PreReaderGames.countingHits {
+                picked = []; bursting = []
+                finish()
+                return
+            }
             // Remove the burst blocks — the rest fall — and drop new ones in on top.
             var cols = columns.map { $0.filter { !ids.contains($0.id) } }
             var fresh = Set<UUID>()
@@ -346,7 +429,8 @@ struct NumberCrushView: View {
         guard phase == .playing else { return }
         picked = []
         grant = MiniGameReward.grant(game: "crush", correct: hits, starsPer: 2, diamondsPer: 1,
-                                     cap: surprise ? 8 : 10, surprise: surprise)
+                                     cap: preReader ? PreReaderGames.countingHits : (surprise ? 8 : 10),
+                                     surprise: surprise)
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { phase = .done }
         SoundPlayer.shared.play(.chestOpen)
         Haptic.success()

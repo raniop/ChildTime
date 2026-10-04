@@ -86,14 +86,35 @@ extension SpellScript {
 /// is beyond the child; above the ceiling the board is a gift, not a game.
 enum MiniGameGradeFit {
 
+    /// 👶 The גן roster: the five games whose mechanic survives with NO text
+    /// at all — pop, sort, match, continue, collect. In this band they are
+    /// dealt from `PreReaderGames` instead of the question banks: pictures,
+    /// colours, shapes and quantities only, the instruction spoken rather
+    /// than printed, bigger targets, fewer items and no clock.
+    ///
+    /// The other seven stay shut for גן, and not for want of effort: 🧩 and 🔤
+    /// ARE reading, ⚡ is a written statement, 🔢 and 🔐 are numerals and
+    /// deduction, 🛒 is prices in ₪ and ⚖️ is an equation. A picture-only
+    /// version of any of them would be a different game wearing its name.
+    static let preReaderRoster: [MiniGameKind] = [.balloon, .sort, .pairs, .pattern, .crush]
+
+    /// Every game offered at this grade, best fit first (the chooser's order
+    /// for a reader comes from `WorldGameFit.order`; גן has one fixed roster
+    /// because its content doesn't come from the world's bank).
+    static func roster(grade: Int) -> [MiniGameKind] {
+        guard MiniGameBand.of(grade) == .preReader else {
+            return MiniGameKind.allCases.filter { offered($0, grade: grade) }
+        }
+        return preReaderRoster
+    }
+
     /// Is this game worth putting in front of this child at all?
     /// `script` is the board's alphabet where a game has one (🧩 🔤).
     static func offered(_ kind: MiniGameKind, grade: Int, script: SpellScript? = nil,
                         topic: Topic? = nil) -> Bool {
         let band = MiniGameBand.of(grade)
-        // 👶 גן is a pre-reader: every one of the twelve shows words, numbers or
-        // labels. The runner's picture questions are that child's game.
-        guard band > .preReader else { return false }
+        // 👶 גן: only the five that can be played without reading a word.
+        guard band > .preReader else { return preReaderRoster.contains(kind) }
         switch kind {
         case .word:
             // 🧩 Letter-by-letter spelling. In the mother tongue it stays real
@@ -127,9 +148,9 @@ enum MiniGameGradeFit {
         }
     }
 
-    /// Every grade this game is offered in (1…8) — the fit report's row.
+    /// Every grade this game is offered in (0 = גן … 8) — the fit report's row.
     static func grades(_ kind: MiniGameKind, script: SpellScript? = nil, topic: Topic? = nil) -> [Int] {
-        (1...8).filter { offered(kind, grade: $0, script: script, topic: topic) }
+        (0...8).filter { offered(kind, grade: $0, script: script, topic: topic) }
     }
 }
 

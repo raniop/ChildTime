@@ -6,6 +6,11 @@ import SwiftUI
 /// the world it came from: country ↔ capital (🌍), word ↔ English (🇬🇧),
 /// exercise ↔ result (🧮), or short question ↔ answer from the world's bank.
 ///
+/// 👶 גן plays it with no words at all: four PICTURE pairs a five-year-old can
+/// reason about — 🦴 and 🐶, 🥚 and 🐣, ☂️ and 🌧️ — on tiles a size up, with
+/// "חַבְּרוּ כָּל תְּמוּנָה לַתְּמוּנָה שֶׁהוֹלֶכֶת אִתָּהּ" read aloud instead of printed.
+/// See `PreReaderGames`.
+///
 /// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser each pair
 /// matched first time earns screen time like a regular answer.
 struct PairsGameView: View {
@@ -43,13 +48,18 @@ struct PairsGameView: View {
     @State private var burst = 0
     @State private var confetti = 0
     @State private var boardShownAt = Date()
+    /// 👶 גן: the spoken rule (nil for a reader).
+    @State private var cue: PreReaderCue?
 
     private var isCompact: Bool { hsc == .compact }
     private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
+    /// 👶 A pre-reader (גן): pictures only, four pairs, bigger tiles.
+    private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
     /// 🎚️ Five pairs up to ד׳, six from ה׳ — a sixth row needs the height,
-    /// so a short screen keeps five whatever the grade.
+    /// so a short screen keeps five whatever the grade. 👶 גן: four.
     private var pairCount: Int {
-        MiniGameBand.of(grade) >= .upper && !display.isShort ? Self.pairCount : 5
+        if preReader { return PreReaderGames.pairCount }
+        return MiniGameBand.of(grade) >= .upper && !display.isShort ? Self.pairCount : 5
     }
 
     var body: some View {
@@ -58,22 +68,34 @@ struct PairsGameView: View {
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
                 MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
-                    MiniGameChipLabel(text: "🔗 \(matched.count)/\(pairCount)", surprise: surprise)
+                    MiniGameChipLabel(text: preReader
+                                      ? "🔗 " + PreReaderChrome.dots(done: matched.count, total: pairCount)
+                                      : "🔗 \(matched.count)/\(pairCount)",
+                                      surprise: surprise)
                 }
                 if !started {
                     Spacer()
-                    MiniGameIntroCard(kind: .pairs) { deal() }
+                    if preReader {
+                        PreReaderIntroCard(kind: .pairs, cue: cue ?? PreReaderCue(spoken: PreReaderGames.startCue)) { deal() }
+                    } else {
+                        MiniGameIntroCard(kind: .pairs) { deal() }
+                    }
                     Spacer()
                 } else if done {
                     Spacer()
-                    MiniGameEndCard(
-                        title: missed.isEmpty ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),
-                        detail: tr("כָּל הַזּוּגוֹת מְחֻבָּרִים!"),
-                        grant: grant,
-                        surprise: surprise,
-                        againLabel: tr("עוֹד לוּחַ 🔁"),
-                        onAgain: { deal() },
-                        onDone: onClose)
+                    if preReader {
+                        PreReaderEndCard(tally: "🔗", tallyCount: matched.count, grant: grant, surprise: surprise,
+                                         onAgain: { deal() }, onDone: onClose)
+                    } else {
+                        MiniGameEndCard(
+                            title: missed.isEmpty ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),
+                            detail: tr("כָּל הַזּוּגוֹת מְחֻבָּרִים!"),
+                            grant: grant,
+                            surprise: surprise,
+                            againLabel: tr("עוֹד לוּחַ 🔁"),
+                            onAgain: { deal() },
+                            onDone: onClose)
+                    }
                     Spacer()
                 } else {
                     board
@@ -139,7 +161,15 @@ struct PairsGameView: View {
     }
 
     /// The runner's question card, as the board's title.
+    @ViewBuilder
     private var boardTitle: some View {
+        if preReader, let cue {
+            VStack(spacing: 10) {
+                PreReaderCueCard(cue: cue, compact: isCompact)
+                pips
+            }
+            .padding(.horizontal, AppSpacing.sm)
+        } else {
             VStack(spacing: 8) {
                 Text(tr("חַבְּרוּ אֶת הַזּוּגוֹת 🔗"))
                     .font(.system(size: isCompact ? 26 : 32, weight: .heavy, design: .rounded))
@@ -149,19 +179,25 @@ struct PairsGameView: View {
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .multilineTextAlignment(.center)
-                HStack(spacing: 6) {
-                    ForEach(0..<pairCount, id: \.self) { i in
-                        Circle()
-                            .fill(i < matched.count ? AppColor.successMint : Color.white.opacity(0.25))
-                            .frame(width: 9, height: 9)
-                    }
-                }
-                .animation(.spring(response: 0.35, dampingFraction: 0.7), value: matched.count)
+                pips
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 14).padding(.vertical, 12)
             .glassPane(radius: 22)
             .padding(.horizontal, AppSpacing.sm)
+        }
+    }
+
+    /// One mint dot per pair matched — a count with no numeral on it.
+    private var pips: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<pairCount, id: \.self) { i in
+                Circle()
+                    .fill(i < matched.count ? AppColor.successMint : Color.white.opacity(0.25))
+                    .frame(width: preReader ? 13 : 9, height: preReader ? 13 : 9)
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.7), value: matched.count)
     }
 
     /// A regular-width screen with height to spare.
@@ -190,7 +226,9 @@ struct PairsGameView: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(4).minimumScaleFactor(0.55)
                         .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity, minHeight: display.isShort ? 56 : (isCompact ? 68 : 104))
+                        .frame(maxWidth: .infinity,
+                               minHeight: preReader ? (display.isShort ? 80 : (isCompact ? 96 : 130))
+                                                    : (display.isShort ? 56 : (isCompact ? 68 : 104)))
                         .mathLTR(MiniGameText.isMath(card.text))
                         .padding(.horizontal, 10).padding(.vertical, 8)
                         .miniGameTile(state, tint: OptionCard.tints[(i + (side == .left ? 0 : 2)) % OptionCard.tints.count],
@@ -207,6 +245,8 @@ struct PairsGameView: View {
     }
 
     private func fontSize(_ text: String, side: Side) -> CGFloat {
+        // 👶 A גן tile carries one picture and nothing else — so it fills it.
+        if preReader { return display.isShort ? 40 : (isCompact ? 52 : 68) }
         let longest = text.split(whereSeparator: { $0 == " " || $0 == "\n" }).map(\.count).max() ?? text.count
         let base: CGFloat = isCompact ? 20 : 28
         if longest >= 11 || text.count > 30 { return base - 4 }
@@ -216,6 +256,19 @@ struct PairsGameView: View {
     // MARK: - Logic
 
     private func deal() {
+        if preReader {
+            let round = PreReaderGames.pairs(count: pairCount)
+            cue = round.cue
+            source = .bank(.logic)
+            lefts = round.pairs.enumerated().map { Card(pair: $0.offset, text: $0.element.left) }.shuffled()
+            rights = round.pairs.enumerated().map { Card(pair: $0.offset, text: $0.element.right) }.shuffled()
+            matched = []; missed = []; pickedLeft = nil; pickedRight = nil
+            wrongLeft = nil; wrongRight = nil; grant = nil
+            boardShownAt = Date()
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { started = true; done = false }
+            return
+        }
+        cue = nil
         let picked = MatchPairsSource.pick(for: topic, grade: grade)
         // Math follows the child's adaptive level in math.
         let g = picked == .math ? MiniGameLevel.grade(for: .math) : grade
@@ -261,6 +314,7 @@ struct PairsGameView: View {
             }
             SoundPlayer.shared.play(.wrongSoft)
             Haptic.light()
+            if preReader { SpeechReader.shared.speak(PreReaderGames.almost) }
             wrongLeft = l; wrongRight = r
             withAnimation(.linear(duration: 0.35)) { shake += 1 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
