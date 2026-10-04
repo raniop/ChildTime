@@ -11,8 +11,16 @@ struct KidModeEntryView: View {
 
     @State private var selectedChild: UUID?
     @State private var showPicker = false
-    /// Opened from a child's ⚡ menu → that child is already chosen (Rani).
-    init(preselected: UUID? = nil) { _selectedChild = State(initialValue: preselected) }
+    /// 🧒 Opened from a child's card → that child is chosen AND Kid Mode starts
+    /// on its own. A parent who pressed "לשחק כאן" on Dan's card has already
+    /// said which child and what they want; a picker in between is a dead step
+    /// (Rani: "לשחק כאן לא מכניס ישר למצב ילד").
+    private let autoStart: Bool
+    @State private var didAutoStart = false
+    init(preselected: UUID? = nil, autoStart: Bool = false) {
+        _selectedChild = State(initialValue: preselected)
+        self.autoStart = autoStart && preselected != nil
+    }
     @State private var selection = FamilyActivitySelection()
     @State private var requesting = false
     @State private var authFailed = false
@@ -55,6 +63,7 @@ struct KidModeEntryView: View {
         .onAppear {
             selection = kidMode.allowedSelection
             selectedChild = selectedChild ?? profiles.activeID ?? profiles.profiles.first?.id
+            if autoStart, !didAutoStart { didAutoStart = true; start() }
         }
         .alert(tr("צָרִיךְ הַרְשָׁאַת Screen Time"), isPresented: $authFailed) {
             Button(tr("הֵבַנְתִּי"), role: .cancel) {}
@@ -145,18 +154,22 @@ struct KidModeEntryView: View {
             .multilineTextAlignment(.center)
     }
 
+    /// Ask for the lock, then hand the device over. Shared by the button and by
+    /// the card's "לשחק כאן", which skips straight to it.
+    private func start() {
+        guard let child = selectedChild, !requesting else { return }
+        requesting = true
+        Task {
+            await shields.requestAuthorizationIfNeeded(userInitiated: true)
+            guard shields.isAuthorized else { requesting = false; authFailed = true; return }
+            await kidMode.enter(childID: child)
+            requesting = false
+            dismiss()
+        }
+    }
+
     private var startButton: some View {
-        Button {
-            guard let child = selectedChild else { return }
-            requesting = true
-            Task {
-                await shields.requestAuthorizationIfNeeded(userInitiated: true)
-                guard shields.isAuthorized else { requesting = false; authFailed = true; return }
-                await kidMode.enter(childID: child)
-                requesting = false
-                dismiss()
-            }
-        } label: {
+        Button { start() } label: {
             HStack(spacing: 8) {
                 if requesting { ProgressView().tint(.white) }
                 Image(systemName: "lock.fill")

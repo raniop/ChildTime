@@ -84982,24 +84982,24 @@
         }
       }
     },
-    "🧒 תנו לילד/ה לשחק" : {
+    "🧒 תנו לשחק" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "🧒 دعوا الطفل يلعب"
+            "value" : "🧒 دعوه يلعب"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "🧒 Let your child play"
+            "value" : "🧒 Let them play"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "🧒 Дать ребёнку поиграть"
+            "value" : "🧒 Дать поиграть"
           }
         }
       }

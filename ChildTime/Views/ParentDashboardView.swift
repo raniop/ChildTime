@@ -59,6 +59,9 @@ struct ParentDashboardView: View {
     @State private var showingKidMode = false
     /// Kid Mode straight for one child (from the card's ⚡ menu).
     @State private var kidModeChild: Profile? = nil
+    /// 🧒 "לשחק כאן" on a child's card — Kid Mode starts for that child with no
+    /// picker and no second button in between.
+    @State private var kidModeStart: Profile? = nil
     @State private var choresProfile: Profile?    // 🧹 chores sheet
     @State private var showSchoolYearParty = false
     @State private var showWhatsNew = false
@@ -472,6 +475,9 @@ struct ParentDashboardView: View {
             .sheet(isPresented: $showingKidMode) {
                 KidModeEntryView()
                     .environment(\.layoutDirection, .app)
+            }
+            .sheet(item: $kidModeStart) { p in
+                KidModeEntryView(preselected: p.id, autoStart: true)
             }
             .sheet(item: $kidModeChild) { p in
                 KidModeEntryView(preselected: p.id)
@@ -1254,7 +1260,7 @@ struct ParentDashboardView: View {
     /// the three things a parent does that aren't about one child's card.
     private var homeActionsRow: some View {
         HStack(spacing: 8) {
-            Button { Haptic.light(); showingCreateChild = true } label: { homeGhostLabel(tr("＋ צְרוּ יֶלֶד/ה")) }
+            Button { Haptic.light(); showingCreateChild = true } label: { homeGhostLabel(tr("＋ צְרוּ יֶלֶד/ה")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
             // "תנו לילד לשחק" moved into each child's ⚡ menu (Rani, 2026-09-07):
             // it opens Kid Mode for THAT child, no picker.
@@ -1265,12 +1271,12 @@ struct ParentDashboardView: View {
                     profiles.profiles.first(where: { $0.id.uuidString == first.childID })
                 } ?? rows.first?.profile
                 if let target { choresProfile = target }
-            } label: { homeGhostLabel(tr("🧹 מַטְלוֹת")) }
+            } label: { homeGhostLabel(tr("🧹 מַטְלוֹת")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
             // 📱 Parents wrote in that they could not find how to hand their own
             // phone to the child. It had been moved into each child's ⚡ menu,
             // where nobody looked; this row is where they go looking.
-            Button { Haptic.light(); showingKidMode = true } label: { homeGhostLabel(tr("🧒 תנו לילד/ה לשחק")) }
+            Button { Haptic.light(); showingKidMode = true } label: { homeGhostLabel(tr("🧒 תנו לשחק")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
         }
         .environment(\.layoutDirection, .app)
@@ -2027,7 +2033,7 @@ struct ParentDashboardView: View {
                         if isRoot, childHasDevice(row.profile) {
                             Button {
                                 Haptic.light()
-                                kidModeChild = row.profile
+                                kidModeStart = row.profile
                             } label: {
                                 homeGhostLabel(tr("🧒 לְשַׂחֵק כָּאן"), width: Self.playButtonWidth)
                             }
