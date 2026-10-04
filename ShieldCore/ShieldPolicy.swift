@@ -67,6 +67,16 @@ struct ShieldPlan<App: Hashable, Cat: Hashable, Web: Hashable>: Equatable {
     /// True when a newly installed app is covered without anyone picking it.
     var coversUnknownApps: Bool { lockEverything }
 
+    /// ⚠️ The shield names CATEGORIES but not a single app. A category policy
+    /// only reaches apps iOS files under an App Store category, so Apple's own
+    /// built-ins — Safari, Photos, Messages, Camera, App Store, Settings — are
+    /// never covered. The device looks locked and the child walks out through
+    /// Safari. This is what a selection made with `includeEntireCategory: false`
+    /// produces when a parent ticks a whole category.
+    var categoryOnlyAndWeak: Bool {
+        !lockEverything && shieldedApps.isEmpty && !shieldedCategories.isEmpty
+    }
+
     /// One line for `os_log` / the app-group breadcrumb, so a real-device run
     /// can be checked in Console.app and a test can assert what was written.
     var summary: String {
@@ -74,7 +84,8 @@ struct ShieldPlan<App: Hashable, Cat: Hashable, Web: Hashable>: Equatable {
         return "kind=\(kind.rawValue) coversNewApps=\(coversUnknownApps) "
             + "apps=\(shieldedApps.count) categories=\(cats) "
             + "web=\(shieldedWebDomains.count) exemptApps=\(exemptApps.count) "
-            + "exemptWeb=\(exemptWebDomains.count)"
+            + "exemptWeb=\(exemptWebDomains.count) "
+            + "CATEGORY_ONLY_WEAK=\(categoryOnlyAndWeak)"
     }
 }
 
@@ -206,6 +217,30 @@ enum TofyShield {
             ?? FamilyActivitySelection()
     }
 
+    /// Diagnostics: what is in force right now, in words a person can read out
+    /// over the phone. `includeEntireCategory` matters because a selection made
+    /// with it OFF hands back category tokens and no application tokens, and a
+    /// category-only shield cannot reach Apple's own apps.
+    static func liveReport(_ defaults: UserDefaults = TofyShield.defaults) -> String {
+        let i = inputs(from: defaults)
+        let plan = i.plan()
+        let blocked = selection(defaults, Key.blocked)
+        return [
+            "kind=\(plan.kind.rawValue)",
+            "coversNewApps=\(plan.coversUnknownApps)",
+            "blockedApps=\(blocked.applicationTokens.count)",
+            "blockedCategories=\(blocked.categoryTokens.count)",
+            "entireCategory=\(blocked.includeEntireCategory)",
+            "staysOpen=\(i.openByDesignApps.count)",
+            "alwaysAllowed=\(i.alwaysAllowedApps.count)",
+            "temporary=\(i.temporaryAllowedApps.count)",
+            "shieldedApps=\(plan.shieldedApps.count)",
+            "exemptApps=\(plan.exemptApps.count)",
+            "lastWrite=\(defaults.string(forKey: Key.lastPlan) ?? "never")",
+            "lastReason=\(defaults.string(forKey: Key.lastPlanReason) ?? "-")",
+        ].joined(separator: " ")
+    }
+
     /// Read the whole policy out of the app group. Used by the app AND both
     /// extensions, so a re-lock in the background is byte-for-byte the re-lock
     /// the app would have applied.
@@ -276,6 +311,9 @@ enum TofyShield {
         defaults.set(reason, forKey: Key.lastPlanReason)
         defaults.set(Date().timeIntervalSince1970, forKey: Key.lastPlanAt)
         log?.notice("shield applied (\(reason, privacy: .public)) \(plan.summary, privacy: .public)")
+        if plan.categoryOnlyAndWeak {
+            log?.error("shield WARNING: categories but ZERO app tokens — Safari/Photos/Messages are NOT covered. The parent's picker returned no application tokens (includeEntireCategory off, or only categories ticked).")
+        }
     }
 
     /// `true` while the parent's short "you may delete Tofy" window is open.

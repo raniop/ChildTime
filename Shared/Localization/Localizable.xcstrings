@@ -4564,6 +4564,110 @@
         }
       }
     },
+    "%lld אפליקציות" : {
+      "localizations" : {
+        "ar" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيقات"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيقًا"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيق"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيق"
+                }
+              },
+              "two" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيقان"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيق"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld apps"
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложения"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложений"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложение"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложения"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld אפליקציות · %lld קטגוריות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld تطبيق · %lld فئة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld apps · %lld categories"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld прил. · %lld катег."
+          }
+        }
+      }
+    },
     "%lld אפליקציות נבחרו" : {
       "localizations" : {
         "ar" : {
@@ -16625,6 +16729,28 @@
         }
       }
     },
+    "אין — שום נעילה לא תעבוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غير ممنوح — لن يعمل أي إقفال"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Missing — no lock will work"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет — никакая блокировка не сработает"
+          }
+        }
+      }
+    },
     "איסוף נתונים מינימלי" : {
       "localizations" : {
         "ar" : {
@@ -16951,6 +17077,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Другое приложение на устройстве уже использует Screen Time (Apple разрешает только одно). Удалите его в «Настройки → Экранное время → Приложения с доступом» и попробуйте снова."
+          }
+        }
+      }
+    },
+    "אפליקציה חדשה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تطبيق جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new app"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новое приложение"
           }
         }
       }
@@ -21500,6 +21648,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выберите, что остаётся открытым"
+          }
+        }
+      }
+    },
+    "בחרתם קטגוריות בלבד, בלי אף אפליקציה. נעילה לפי קטגוריה לא מגיעה לאפליקציות של אפל — ספארי, תמונות, הודעות, מצלמה — ולכן נראה שכלום לא השתנה. פתחו שוב את הרשימה וסמנו אפליקציות, או עדיף: בחרו מה נשאר פתוח." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اخترتم فئات فقط، دون أي تطبيق. الإقفال حسب الفئة لا يصل إلى تطبيقات آبل — سفاري والصور والرسائل والكاميرا — ولذلك يبدو أن شيئًا لم يتغيّر. افتحوا القائمة مجددًا وعلّموا تطبيقات، أو الأفضل: اختاروا ما يبقى مفتوحًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You picked categories only, with no app at all. A category lock does not reach Apple's own apps — Safari, Photos, Messages, Camera — which is why nothing seems to have changed. Open the list again and tick apps, or better: choose what stays open."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы выбрали только категории, без единого приложения. Блокировка по категории не достаёт до собственных приложений Apple — Safari, Фото, Сообщения, Камера — поэтому кажется, что ничего не изменилось. Откройте список снова и отметьте приложения — или лучше: выберите, что остаётся открытым."
           }
         }
       }
@@ -33787,6 +33957,28 @@
         }
       }
     },
+    "החילו עכשיו ובדקו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طبّقوا الآن وتحقّقوا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apply now and check"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Применить и проверить"
+          }
+        }
+      }
+    },
     "החשבון במכשיר לא מאפשר את זה. ודאו שמחוברים עם Apple ID של הורה (לא של ילד)." : {
       "localizations" : {
         "ar" : {
@@ -35679,6 +35871,28 @@
         }
       }
     },
+    "הרשאת זמן מסך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إذن وقت الشاشة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen Time permission"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешение Screen Time"
+          }
+        }
+      }
+    },
     "הרשמה" : {
       "localizations" : {
         "ar" : {
@@ -37434,6 +37648,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Это всё"
+          }
+        }
+      }
+    },
+    "זה מה ש-iOS קיבל מאיתנו ברגע זה — לא מה שסומן במסכים למעלה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا ما تسلّمته iOS منّا الآن — وليس ما هو مُعلّم في الشاشات أعلاه."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is what iOS was told right now — not what is ticked on the screens above."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это то, что iOS получила от нас сейчас, — а не то, что отмечено на экранах выше."
           }
         }
       }
@@ -43802,6 +44038,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новый ребёнок · последний шаг"
+          }
+        }
+      }
+    },
+    "יש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ممنوح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Granted"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Есть"
           }
         }
       }
@@ -58175,6 +58433,28 @@
         }
       }
     },
+    "מה נעול בפועל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما هو مقفل فعليًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What is actually locked"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что заблокировано на самом деле"
+          }
+        }
+      }
+    },
     "מה נשאר פתוח" : {
       "localizations" : {
         "ar" : {
@@ -62584,6 +62864,50 @@
         }
       }
     },
+    "נעולה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مقفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locked"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заблокировано"
+          }
+        }
+      }
+    },
+    "נעולות ברשימה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مقفل في القائمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locked in the list"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заблокировано в списке"
+          }
+        }
+      }
+    },
     "נעולות רק האפליקציות שתבחרו. כל השאר נשארות פתוחות, וגם אפליקציה חדשה שהילד מתקין." : {
       "localizations" : {
         "ar" : {
@@ -62845,6 +63169,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Похоже, %@ пока трудно с темой «%@». Это отличная область, чтобы позаниматься вместе."
+          }
+        }
+      }
+    },
+    "נשארות פתוחות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تبقى مفتوحة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stay open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Остаются открытыми"
+          }
+        }
+      }
+    },
+    "נשארת פתוחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يبقى مفتوحًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stays open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Остаётся открытым"
           }
         }
       }
@@ -81610,6 +81978,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Мы устранили редкую ошибку: на общем устройстве прогресс одного ребёнка мог записаться брату или сестре. Теперь это просто невозможно"
+          }
+        }
+      }
+    },
+    "תמיד מותרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مسموحة دائمًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Always allowed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всегда разрешены"
           }
         }
       }

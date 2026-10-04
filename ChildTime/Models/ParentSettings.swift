@@ -460,6 +460,25 @@ final class ParentSettings: ObservableObject {
         // from the child's learning level — not a global age default here.
     }
 
+    /// 🔁 One-time repair for selections stored by a build that created them
+    /// with `includeEntireCategory: false`. The flag is immutable, so the only
+    /// way to fix a stored selection is to rebuild and re-save it — and until
+    /// that happens the diagnostics card reports the old flag and a re-opened
+    /// picker can still hand back a category with no apps in it.
+    /// Idempotent and cheap: a no-op once every stored selection is clean.
+    func normalizeStoredSelections() {
+        for keyPath in [\ParentSettings.activitySelectionData,
+                        \ParentSettings.allowedAppsData,
+                        \ParentSettings.alwaysAllowedAppsData,
+                        \ParentSettings.allowExceptionData] {
+            guard let data = self[keyPath: keyPath] else { continue }
+            let decoded = SelectionStorage.decode(data)          // decode normalizes
+            guard decoded.includeEntireCategory == SelectionStorage.includeEntireCategory,
+                  let fixed = SelectionStorage.encode(decoded), fixed != data else { continue }
+            self[keyPath: keyPath] = fixed
+        }
+    }
+
     /// True while a temporary per-app allowance is in effect.
     var allowExceptionActive: Bool {
         guard let end = allowExceptionEndsAt else { return false }

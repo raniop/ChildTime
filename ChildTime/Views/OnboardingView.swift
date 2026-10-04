@@ -8,7 +8,7 @@ struct OnboardingView: View {
     @Environment(\.horizontalSizeClass) private var hsc
 
     @State private var step: Step = .welcome
-    @State private var selection = FamilyActivitySelection()
+    @State private var selection = SelectionStorage.empty()
     @State private var showPicker = false
     @State private var newPIN: String = ""
     @State private var confirmPIN: String = ""

@@ -13,9 +13,9 @@ struct ParentSettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var showAppPicker = false
-    @State private var pickerSelection = FamilyActivitySelection()
+    @State private var pickerSelection = SelectionStorage.empty()
     @State private var showAllowedPicker = false
-    @State private var allowedSelection = FamilyActivitySelection()
+    @State private var allowedSelection = SelectionStorage.empty()
     @State private var showChangePIN = false
     @State private var showWhatsNew = false
     /// 📖 The story version — what the closing card points back to.
@@ -638,7 +638,7 @@ struct ParentSettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.green)
                     Button(role: .destructive) {
-                        allowedSelection = FamilyActivitySelection()
+                        allowedSelection = SelectionStorage.empty()
                     } label: {
                         Label(tr("נקו את הרשימה"), systemImage: "trash")
                     }
@@ -662,7 +662,7 @@ struct ParentSettingsView: View {
             }
             if !(pickerSelection.applicationTokens.isEmpty && pickerSelection.categoryTokens.isEmpty) {
                 Button(role: .destructive) {
-                    pickerSelection = FamilyActivitySelection()
+                    pickerSelection = SelectionStorage.empty()
                 } label: {
                     Label(tr("נקו את הבחירה"), systemImage: "trash")
                 }

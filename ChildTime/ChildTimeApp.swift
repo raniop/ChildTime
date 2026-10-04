@@ -307,6 +307,11 @@ struct ChildTimeApp: App {
                         // were away — an expired token silently stops shielding
                         // its app (iOS 26.5+; a no-op below that).
                         TokenRefresher.shared.start()
+                        // 🔁 Repair selections saved with includeEntireCategory
+                        // off, where ticking a whole category stored the category
+                        // and NO apps — a shield that cannot reach Safari,
+                        // Photos or Messages. No-op once they are clean.
+                        settings.normalizeStoredSelections()
                         // ☁️ Pull any question topics the admin changed since last
                         // time (one tiny read; full topics only when versions move).
                         RemoteQuestionBank.shared.syncIfNeeded()

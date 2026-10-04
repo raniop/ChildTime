@@ -304,3 +304,90 @@ struct ShieldInputsFromDefaultsTests {
         store.clearAllSettings()
     }
 }
+
+// MARK: - What Apple's picker actually hands back
+
+@Suite("Shield policy — includeEntireCategory")
+struct SelectionFlagTests {
+
+    @Test("Every selection Tofy builds includes the apps inside a ticked category")
+    func emptySelectionCarriesTheFlag() {
+        // With this OFF — which is what the whole app used to do — ticking a
+        // whole category in Apple's picker returns the CATEGORY token and zero
+        // application tokens. Rani ticked everything in "אילו אפליקציות נעולות"
+        // on his daughter's iPhone and nothing moved, because the shield was
+        // then `applications = nil` plus a category policy, and a category
+        // policy cannot reach Apple's own apps (Safari, Photos, Messages,
+        // Camera, App Store have no App Store category).
+        #expect(SelectionStorage.empty().includeEntireCategory == true)
+        #expect(SelectionStorage.includeEntireCategory == true)
+    }
+
+    @Test("A selection stored by an older build is re-homed onto the flag")
+    func legacySelectionIsNormalised() {
+        // The flag is a `let`, so an old stored selection can only be fixed by
+        // rebuilding it — otherwise the parent re-opens the picker and it still
+        // behaves the old way.
+        let legacy = FamilyActivitySelection(includeEntireCategory: false)
+        #expect(legacy.includeEntireCategory == false)
+
+        let data = try? JSONEncoder().encode(legacy)
+        #expect(data != nil)
+        #expect(SelectionStorage.decode(data).includeEntireCategory == true)
+        #expect(SelectionStorage.normalized(legacy).includeEntireCategory == true)
+
+        // …and re-encoding stores the fixed one, so the next read is clean.
+        let round = SelectionStorage.decode(SelectionStorage.encode(legacy))
+        #expect(round.includeEntireCategory == true)
+    }
+
+    @Test("Nil and garbage decode to a correctly flagged empty selection")
+    func decodeFallbacksCarryTheFlag() {
+        #expect(SelectionStorage.decode(nil).includeEntireCategory == true)
+        #expect(SelectionStorage.decode(Data([0x00, 0x01])).includeEntireCategory == true)
+    }
+}
+
+@Suite("Shield policy — a shield that looks locked but isn't")
+struct WeakShieldTests {
+
+    @Test("Categories with ZERO app tokens is flagged as weak")
+    func categoryOnlyIsWeak() {
+        var i = Inputs()
+        i.lockNewApps = false
+        i.blockedApps = []              // the picker returned no app tokens…
+        i.blockedCategories = ["games", "social", "entertainment"]
+        let plan = i.plan()
+        #expect(plan.kind == .blockList)
+        // …so Safari, Photos and Messages are untouched however many categories
+        // the parent ticked. This is the state Rani's device was in.
+        #expect(plan.categoryOnlyAndWeak == true)
+        #expect(plan.summary.contains("CATEGORY_ONLY_WEAK=true"))
+    }
+
+    @Test("Named apps are not weak")
+    func namedAppsAreNotWeak() {
+        var i = Inputs()
+        i.lockNewApps = false
+        i.blockedApps = [1, 2, 3]
+        i.blockedCategories = ["games"]
+        #expect(i.plan().categoryOnlyAndWeak == false)
+    }
+
+    @Test("The allow-list model is never weak — it covers everything by shape")
+    func allowListIsNeverWeak() {
+        var i = Inputs()
+        i.lockNewApps = true
+        i.openByDesignApps = [7]
+        let plan = i.plan()
+        #expect(plan.coversUnknownApps == true)
+        #expect(plan.categoryOnlyAndWeak == false)
+    }
+
+    @Test("An empty block-list is not reported as weak — there is nothing to warn about")
+    func emptyBlockListIsNotWeak() {
+        var i = Inputs()
+        i.lockNewApps = false
+        #expect(i.plan().categoryOnlyAndWeak == false)
+    }
+}
