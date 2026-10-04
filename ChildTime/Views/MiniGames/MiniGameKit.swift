@@ -729,12 +729,18 @@ struct MiniGameDemoHost: View {
                 earn = MiniGameEarnSession(world: world)
             }
         }
-        .onAppear {
-            if let g = env["DEMO_GRADE"].flatMap(Int.init), var p = ProfileStore.shared.active {
-                p.grade = g
-                p.gradeSchoolYear = Profile.schoolYear()
-                ProfileStore.shared.update(p)
-            }
+    }
+
+    /// The grade has to be in place BEFORE the game deals its round: a surprise
+    /// round deals in its own `onAppear`, which SwiftUI runs before the host's,
+    /// so setting it there handed the screenshot a board at the old grade.
+    init(screen: String) {
+        self.screen = screen
+        if let g = ProcessInfo.processInfo.environment["DEMO_GRADE"].flatMap(Int.init),
+           var p = ProfileStore.shared.active, p.grade != g {
+            p.grade = g
+            p.gradeSchoolYear = Profile.schoolYear()
+            ProfileStore.shared.update(p)
         }
     }
 }
