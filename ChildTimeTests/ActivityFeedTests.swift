@@ -256,6 +256,146 @@ final class ActivityFeedTests: XCTestCase {
         XCTAssertEqual(ActivityKind.minutesEarned.destination, .child)
     }
 
+    // MARK: - 🎁 The offers that used to sit above the children
+
+    private func offerInput(premium: Bool = false) -> ActivityOffers.Input {
+        var input = ActivityOffers.Input()
+        input.isPremium = premium
+        input.notificationsOn = true
+        input.children = [Profile(name: "דנה", gender: .girl, age: .grade1)]
+        return input
+    }
+
+    /// Every offer line is parent-facing copy too.
+    ///
+    /// Content NAMES are excluded: a world and a topic are named once, in the
+    /// kid-facing catalog, with niqqud ("מַמְלֶכֶת הַמָּתֵמָטִיקָה"), and every parent
+    /// screen that mentions one has always shown it that way — the banners this
+    /// replaced included. What is checked here is the copy around them.
+    func testOffersCarryNoNiqqud() {
+        let niqqud = CharacterSet(charactersIn:
+            "\u{05B0}\u{05B1}\u{05B2}\u{05B3}\u{05B4}\u{05B5}\u{05B6}\u{05B7}"
+            + "\u{05B8}\u{05B9}\u{05BA}\u{05BB}\u{05BC}\u{05C1}\u{05C2}\u{05C7}")
+        let contentNames = Worlds.all.map(\.name)
+            + Topic.allCases.map(\.displayName)
+            + WorldPasses.available.map(\.name)
+        func copyOnly(_ text: String) -> String {
+            contentNames.reduce(text) { $0.replacingOccurrences(of: $1, with: "…") }
+        }
+        var seen = 0
+        for state in offerStates() {
+            for offer in ActivityOffers.current(state) {
+                seen += 1
+                XCTAssertFalse(offer.title.isEmpty)
+                XCTAssertNil(copyOnly(offer.title).rangeOfCharacter(from: niqqud), offer.title)
+                if let detail = offer.detail {
+                    XCTAssertNil(copyOnly(detail).rangeOfCharacter(from: niqqud), detail)
+                }
+            }
+        }
+        XCTAssertGreaterThan(seen, 6, "the states should have produced offers to check")
+    }
+
+    /// Every family state the home used to branch on.
+    private func offerStates() -> [ActivityOffers.Input] {
+        let now = Date()
+        let kid = Profile(name: "דנה", gender: .girl, age: .grade1)
+        var snapshot = ProgressSnapshot.blank
+        snapshot.totalAnswered = 120
+        snapshot.totalCorrect = 100
+        snapshot.topicAnswered = [Topic.math.rawValue: 80, Topic.english.rawValue: 40]
+
+        var plain = ActivityOffers.Input(); plain.children = [kid]
+        var noPush = plain; noPush.notificationsOn = false
+        var premium = plain; premium.isPremium = true
+        var intro = plain; intro.introEligible = true
+        var giftEarly = plain
+        giftEarly.isPremium = true
+        giftEarly.giftUntil = now.addingTimeInterval(11 * 86_400)
+        giftEarly.giftStarted = true
+        var giftLate = giftEarly
+        giftLate.giftUntil = now.addingTimeInterval(2 * 86_400)
+        giftLate.star = (profile: kid, snapshot: snapshot)
+        var activating = plain
+        activating.activation = ActivationProgress(days: 1, questions: 18, needDays: 3, needQuestions: 40)
+        activating.star = (profile: kid, snapshot: snapshot)
+        var asking = plain
+        asking.premiumAskers = [kid]
+        asking.premiumTopics = [kid.id: Topic.math.rawValue]
+        var askingPack = plain
+        if let pack = WorldPasses.available.first { askingPack.packAskers = [(child: kid, pack: pack)] }
+        return [plain, noPush, premium, intro, giftEarly, giftLate, activating, asking, askingPack]
+    }
+
+    /// One row per offer, and it is gone the moment the offer is — that is what
+    /// keeps a standing offer from flooding a chronological feed.
+    func testOffersAreOneRowEachAndDisappearWithTheirState() {
+        var input = offerInput()
+        input.notificationsOn = false
+        let ids = ActivityOffers.current(input).map(\.id)
+        XCTAssertEqual(Set(ids).count, ids.count, "no offer may appear twice")
+        XCTAssertTrue(ids.contains("offer.notifications"))
+        XCTAssertTrue(ids.contains("offer.tofyPlus"))
+
+        input.notificationsOn = true
+        XCTAssertFalse(ActivityOffers.current(input).contains { $0.id == "offer.notifications" })
+
+        // Subscribing turns the sell into a management row, never two rows.
+        let premiumOffers = ActivityOffers.current(offerInput(premium: true))
+        XCTAssertEqual(premiumOffers.filter { $0.id == "offer.tofyPlus" }.count, 1)
+        XCTAssertEqual(premiumOffers.first { $0.id == "offer.tofyPlus" }?.action, .manageSubscription)
+    }
+
+    /// Each offer still leads where its pane led.
+    func testOffersRouteWhereThePanesLed() {
+        var input = offerInput()
+        input.notificationsOn = false
+        let offers = ActivityOffers.current(input)
+        XCTAssertEqual(offers.first { $0.id == "offer.notifications" }?.action, .notificationSettings)
+        guard case .paywall = offers.first(where: { $0.id == "offer.tofyPlus" })?.action else {
+            return XCTFail("the Tofy+ row must open the paywall")
+        }
+
+        // One child asking for ONE world opens that world's page, exactly as the
+        // old banner did — not the generic paywall.
+        let kid = Profile(name: "יואב", gender: .boy, age: .grade1)
+        var asking = offerInput()
+        asking.children = [kid]
+        asking.premiumAskers = [kid]
+        asking.premiumTopics = [kid.id: Topic.math.rawValue]
+        let request = ActivityOffers.current(asking).first { $0.id == "offer.premiumRequest" }
+        XCTAssertNotNil(request)
+        if let pass = WorldPasses.pass(for: .math) {
+            XCTAssertEqual(request?.action, .pack(id: pass.id, childID: kid.id.uuidString))
+        }
+        XCTAssertTrue(request?.title.contains("יואב") == true)
+    }
+
+    /// The gift journey keeps its numbers — that copy is the conversion message.
+    func testGiftOfferKeepsItsNumbers() {
+        let now = Date()
+        let kid = Profile(name: "דנה", gender: .girl, age: .grade1)
+        var snapshot = ProgressSnapshot.blank
+        snapshot.totalAnswered = 120
+        snapshot.totalCorrect = 90
+        snapshot.topicAnswered = [Topic.math.rawValue: 80, Topic.english.rawValue: 40]
+
+        var early = offerInput(premium: true)
+        early.now = now
+        early.giftUntil = now.addingTimeInterval(11 * 86_400 + 3_600)
+        let earlyRow = ActivityOffers.current(early).first { $0.id == "offer.gift" }
+        XCTAssertTrue(earlyRow?.title.contains("12") == true, earlyRow?.title ?? "—")
+        XCTAssertEqual(earlyRow?.action, ActivityOfferAction.none, "no selling in the first week")
+
+        var late = early
+        late.giftUntil = now.addingTimeInterval(2 * 86_400)
+        late.star = (profile: kid, snapshot: snapshot)
+        let lateRow = ActivityOffers.current(late).first { $0.id == "offer.gift" }
+        XCTAssertEqual(lateRow?.action, .paywall(source: "gift_card"))
+        XCTAssertTrue(lateRow?.detail?.contains("120") == true, lateRow?.detail ?? "—")
+        XCTAssertTrue(lateRow?.detail?.contains("75") == true, "90/120 is 75% — \(lateRow?.detail ?? "—")")
+    }
+
     // MARK: - Other languages
 
     func testLinesTranslate() {
