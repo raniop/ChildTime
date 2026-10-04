@@ -4646,6 +4646,170 @@
         }
       }
     },
+    "%lld אפליקציות נשארות פתוחות · הקישו לעריכה" : {
+      "localizations" : {
+        "ar" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيقات تبقى مفتوحة · اضغطوا للتعديل"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيقًا تبقى مفتوحة · اضغطوا للتعديل"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيق يبقى مفتوحًا · اضغطوا للتعديل"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيق يبقى مفتوحًا · اضغطوا للتعديل"
+                }
+              },
+              "two" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيقان يبقيان مفتوحين · اضغطوا للتعديل"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيق يبقى مفتوحًا · اضغطوا للتعديل"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld apps stay open · tap to edit"
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложения остаются открытыми · изменить"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложений остаются открытыми · изменить"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложение остаётся открытым · изменить"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложения остаются открытыми · изменить"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld אפליקציות נשארות פתוחות · עריכה" : {
+      "localizations" : {
+        "ar" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيقات تبقى مفتوحة · تعديل"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيقًا تبقى مفتوحة · تعديل"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيق يبقى مفتوحًا · تعديل"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيق يبقى مفتوحًا · تعديل"
+                }
+              },
+              "two" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيقان يبقيان مفتوحين · تعديل"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld تطبيق يبقى مفتوحًا · تعديل"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld apps stay open · edit"
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложения остаются открытыми · изменить"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложений остаются открытыми · изменить"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложение остаётся открытым · изменить"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld приложения остаются открытыми · изменить"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld בְּדִיּוּק" : {
       "localizations" : {
         "ar" : {
@@ -7578,6 +7742,64 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld פתוחות" : {
+      "localizations" : {
+        "ar" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld مفتوحة"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld مفتوحًا"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld مفتوح"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld مفتوح"
+                }
+              },
+              "two" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld مفتوحان"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld مفتوح"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld открыто"
           }
         }
       }
@@ -14994,6 +15216,28 @@
         }
       }
     },
+    "אבחר אחר כך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سأختار لاحقًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I'll choose later"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберу позже"
+          }
+        }
+      }
+    },
     "אבטחה" : {
       "localizations" : {
         "ar" : {
@@ -16447,6 +16691,28 @@
         }
       }
     },
+    "אם הילד מתקין אפליקציה חדשה היא לא נעולה. כדי לסגור את זה, בחרו מה נשאר פתוח — וכללו את טופי עצמה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إذا نزّل طفلكم تطبيقًا جديدًا فلن يكون مقفلًا. لإغلاق هذه الثغرة، اختاروا ما يبقى مفتوحًا — وضمّنوا توفي نفسها."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If your child installs a new app, it is not locked. To close that, choose what stays open — and include Tofy itself."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если ребёнок установит новое приложение, оно не будет заблокировано. Чтобы это закрыть, выберите, что остаётся открытым, — и включите саму Tofy."
+          }
+        }
+      }
+    },
     "אם נפתח חלון בלי רשת, ברגע שהחיבור חוזר האפליקציה מסדרת הכול לבד — ובלי לקחת מהילד דקות שהרוויח" : {
       "localizations" : {
         "ar" : {
@@ -16487,6 +16753,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Если открыть не удаётся дважды подряд, ребёнок слышит спокойную фразу вместо тишины, а вы получаете уведомление. Минуты никогда не списываются — они остаются у него."
+          }
+        }
+      }
+    },
+    "אם תדלגו, נעולות רק האפליקציות שבחרתם קודם — ואפליקציה חדשה שהילד מתקין תישאר פתוחה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إذا تجاوزتم، تُقفل فقط التطبيقات التي اخترتموها سابقًا — وأي تطبيق جديد يُنزّله طفلكم يبقى مفتوحًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you skip, only the apps you picked earlier are locked — and a new app your child installs stays open."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если пропустить, заблокированы только выбранные ранее приложения, а новое приложение останется открытым."
           }
         }
       }
@@ -16667,6 +16955,50 @@
         }
       }
     },
+    "אפליקציה חדשה שהילד מתקין לא נעולה במכשיר הזה. פתחו בו את טופי ← ⚙️ ← ״לנעול גם אפליקציות חדשות״ ובחרו מה נשאר פתוח." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التطبيق الجديد الذي يُنزّله طفلكم غير مقفل على هذا الجهاز. افتحوا توفي عليه ← ⚙️ ← «اقفلوا التطبيقات الجديدة أيضًا» واختاروا ما يبقى مفتوحًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new app your child installs is not locked on this device. Open Tofy on it ← ⚙️ ← “Lock new apps too” and choose what stays open."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новое приложение, установленное ребёнком, не блокируется на этом устройстве. Откройте на нём Tofy → ⚙️ → «Блокировать и новые приложения» и выберите, что остаётся открытым."
+          }
+        }
+      }
+    },
+    "אפליקציות חדשות לא נעולות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التطبيقات الجديدة غير مقفلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New apps are not locked"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новые приложения не блокируются"
+          }
+        }
+      }
+    },
     "אפליקציות לחסום" : {
       "localizations" : {
         "ar" : {
@@ -16679,6 +17011,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apps to block"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложения для блокировки"
+          }
+        }
+      }
+    },
+    "אפליקציות לנעילה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تطبيقات للإقفال"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apps to lock"
           }
         },
         "ru" : {
@@ -21124,6 +21478,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "выбрала"
+          }
+        }
+      }
+    },
+    "בחרו מה נשאר פתוח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختاروا ما يبقى مفتوحًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose what stays open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите, что остаётся открытым"
           }
         }
       }
@@ -33798,6 +34174,28 @@
         }
       }
     },
+    "הכול נעול עד שהילד מרוויח זמן, חוץ ממה שבחרתם שיישאר פתוח — ולכן גם אפליקציה שתותקן מחר נעולה. הרשימה למטה כבר לא משנה את הנעילה, היא נשמרת כגיבוי." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل شيء مقفل حتى يكسب طفلكم وقتًا، إلا ما اخترتم أن يبقى مفتوحًا — ولذلك أي تطبيق يُنزّل غدًا مقفل أيضًا. القائمة أدناه لم تعد تؤثر على الإقفال، وتُحفظ كنسخة احتياطية."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything is locked until your child earns time, except what you chose to keep open — so an app installed tomorrow is locked too. The list below no longer changes the lock; it is kept as a backup."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всё заблокировано, пока ребёнок не заработает время, кроме того, что вы оставили открытым, — поэтому приложение, установленное завтра, тоже заблокировано. Список ниже больше не влияет на блокировку, он сохраняется как резерв."
+          }
+        }
+      }
+    },
     "הכי בוער 🔥" : {
       "localizations" : {
         "ar" : {
@@ -39471,6 +39869,28 @@
         }
       }
     },
+    "חָשׁוּב לְסַמֵּן אֶת טוֹפִי עַצְמָהּ, אַחֶרֶת הַיֶּלֶד לֹא יוּכַל לְהַרְוִיחַ זְמַן. כְּדַאי גַּם טֶלֶפוֹן, הוֹדָעוֹת, מַצְלֵמָה וְשָׁעוֹן." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من المهم تعليم توفي نفسها، وإلا لن يستطيع طفلكم كسب وقت. ويُستحسن إضافة الهاتف والرسائل والكاميرا والساعة أيضًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Be sure to tick Tofy itself, or your child could not earn time. Phone, messages, camera and clock are worth adding too."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обязательно отметьте саму Tofy, иначе ребёнок не сможет заработать время. Телефон, сообщения, камеру и часы тоже стоит добавить."
+          }
+        }
+      }
+    },
     "חָתוּל" : {
       "localizations" : {
         "ar" : {
@@ -40318,6 +40738,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Родительский аккаунт"
+          }
+        }
+      }
+    },
+    "חשוב: סמנו את טופי, ואת מה שחייב לעבוד תמיד — טלפון, הודעות, מצלמה ושעון. בלי טופי ברשימה הילד לא יוכל להרוויח זמן, ולכן עד שתבחרו הנעילה נשארת כמו שהייתה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهم: علّموا توفي، وكل ما يجب أن يعمل دائمًا — الهاتف والرسائل والكاميرا والساعة. بدون توفي في القائمة لن يستطيع طفلكم كسب وقت، ولذلك يبقى الإقفال كما كان حتى تختاروا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Important: tick Tofy, and whatever must always work — phone, messages, camera and clock. Without Tofy on the list your child could not earn time, so until you choose, the lock stays exactly as it was."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Важно: отметьте Tofy и всё, что должно работать всегда, — телефон, сообщения, камеру и часы. Без Tofy в списке ребёнок не сможет заработать время, поэтому до вашего выбора блокировка остаётся прежней."
           }
         }
       }
@@ -45771,6 +46213,28 @@
         }
       }
     },
+    "כָּל הַשְּׁאָר נָעוּל עַד שֶׁמַּרְוִיחִים זְמַן — גַּם אַפְּלִיקַצְיָה שֶׁתֻּתְקַן מָחָר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل ما تبقّى مقفل حتى يُكتسب الوقت — بما في ذلك تطبيق يُنزّل غدًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything else is locked until time is earned — including an app installed tomorrow."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всё остальное заблокировано, пока не заработано время, — включая приложение, установленное завтра."
+          }
+        }
+      }
+    },
     "כָּל הַשִּׂיחוֹת" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -47129,6 +47593,28 @@
         }
       }
     },
+    "כולל אפליקציות חדשות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بما في ذلك التطبيقات الجديدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New apps included"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включая новые приложения"
+          }
+        }
+      }
+    },
     "כולל כל עולם חדש שנוסיף" : {
       "localizations" : {
         "ar" : {
@@ -47339,6 +47825,28 @@
         }
       }
     },
+    "כל אפליקציה נעולה עד שמרוויחים זמן — כולל אפליקציה שתותקן מחר. פתוחות רק אלה שבחרתם." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل تطبيق مقفل حتى يُكتسب الوقت — بما في ذلك تطبيق يُنزّل غدًا. تبقى مفتوحة فقط التطبيقات التي اخترتموها."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every app is locked until time is earned — including an app installed tomorrow. Only the ones you chose stay open."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждое приложение заблокировано, пока не заработано время, — включая установленное завтра. Открыты только выбранные вами."
+          }
+        }
+      }
+    },
     "כל האפליקציה והשאלות — כמעט 3,000 שאלות בערבית, ועולם חדש של الأعياد: רמדאן, שני העידים, חג המולד והפסחא. בהגדרות ההורים, במסך \"שפה\", בוחרים עברית, ערבית, רוסית או אנגלית" : {
       "localizations" : {
         "ar" : {
@@ -47379,6 +47887,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Всё приложение и сами вопросы — почти 3 000 вопросов, заново написанных по-русски, включая мир «Израиль» и праздники тишрея. В родительских настройках, в разделе «Язык», можно выбрать иврит, английский или русский."
+          }
+        }
+      }
+    },
+    "כל האפליקציות במכשיר הזה יהיו נעולות עד שהילד מרוויח זמן מסך בטופי — גם אפליקציה שתותקן מחר. בחרו כאן מה נשאר פתוח תמיד: את טופי עצמה, וגם טלפון, הודעות, מצלמה ושעון. אפשר לשנות בכל עת." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ستُقفل كل التطبيقات على هذا الجهاز حتى يكسب طفلكم وقت شاشة في توفي — بما في ذلك تطبيق يُنزّل غدًا. اختاروا هنا ما يبقى مفتوحًا دائمًا: توفي نفسها، وكذلك الهاتف والرسائل والكاميرا والساعة. يمكن التغيير في أي وقت."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every app on this device will be locked until your child earns screen time in Tofy — including an app installed tomorrow. Choose here what always stays open: Tofy itself, and also phone, messages, camera and clock. You can change this at any time."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все приложения на этом устройстве будут заблокированы, пока ребёнок не заработает время в Tofy, — включая приложение, установленное завтра. Выберите здесь, что остаётся открытым всегда: саму Tofy, а также телефон, сообщения, камеру и часы. Это можно изменить в любое время."
           }
         }
       }
@@ -48297,6 +48827,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Кнопка «Я сделал!» в цвете ребёнка, корона и поздравление «Чемпион!», а также отдельная категория «Сделано сегодня». Награда — всегда минуты игры"
+          }
+        }
+      }
+    },
+    "כרגע נעולות רק האפליקציות שבחרתם ברשימה למטה. אפליקציה חדשה שהילד מתקין נשארת פתוחה — בחרו מה נשאר פתוח כדי לסגור את הפרצה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حاليًا تُقفل فقط التطبيقات التي اخترتموها في القائمة أدناه. أي تطبيق جديد يُنزّله طفلكم يبقى مفتوحًا — اختاروا ما يبقى مفتوحًا لإغلاق هذه الثغرة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right now only the apps you picked in the list below are locked. A new app your child installs stays open — choose what stays open to close that gap."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас заблокированы только приложения из списка ниже. Новое приложение, установленное ребёнком, остаётся открытым — выберите, что остаётся открытым, чтобы закрыть эту брешь."
           }
         }
       }
@@ -51778,6 +52330,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Учёба по желанию"
+          }
+        }
+      }
+    },
+    "לנעול אפליקציות חדשות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اقفلوا التطبيقات الجديدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock new apps"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокировать новые приложения"
+          }
+        }
+      }
+    },
+    "לנעול גם אפליקציות חדשות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اقفلوا التطبيقات الجديدة أيضًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock new apps too"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокировать и новые приложения"
           }
         }
       }
@@ -57535,6 +58131,50 @@
         }
       }
     },
+    "מה נשאר פתוח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما يبقى مفتوحًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What stays open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что остаётся открытым"
+          }
+        }
+      }
+    },
+    "מה נשאר פתוח?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما يبقى مفتوحًا؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What stays open?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что остаётся открытым?"
+          }
+        }
+      }
+    },
     "מוֹסְקְבָה" : {
       "localizations" : {
         "ar" : {
@@ -61900,6 +62540,28 @@
         }
       }
     },
+    "נעולות רק האפליקציות שתבחרו. כל השאר נשארות פתוחות, וגם אפליקציה חדשה שהילד מתקין." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُقفل فقط التطبيقات التي تختارونها. كل ما تبقّى يبقى مفتوحًا، بما في ذلك تطبيق جديد يُنزّله طفلكم."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only the apps you choose are locked. Everything else stays open, including a new app your child installs."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заблокированы только выбранные приложения. Всё остальное остаётся открытым, включая новое приложение, установленное ребёнком."
+          }
+        }
+      }
+    },
     "נעילה מרחוק שתמיד עובדת" : {
       "localizations" : {
         "ar" : {
@@ -61918,6 +62580,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалённая блокировка, которая всегда работает"
+          }
+        }
+      }
+    },
+    "נעילת אפליקציות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إقفال التطبيقات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App locking"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокировка приложений"
           }
         }
       }
@@ -62007,6 +62691,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Очистить список разрешённых"
+          }
+        }
+      }
+    },
+    "נקו את הבחירה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "امسحوا الاختيار"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear the selection"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очистить выбор"
+          }
+        }
+      }
+    },
+    "נקו את הרשימה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "امسحوا القائمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear the list"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очистить список"
           }
         }
       }
@@ -81720,6 +82448,28 @@
         }
       }
     },
+    "⚠️ עד שתבחרו מה נשאר פתוח, אפליקציה חדשה שהילד מתקין לא תיחסם. בחרו את טופי עצמה ואת מה שחייב לעבוד תמיד — טלפון, הודעות, מצלמה ושעון." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ حتى تختاروا ما يبقى مفتوحًا، لن يُحجب أي تطبيق جديد يُنزّله طفلكم. اختاروا توفي نفسها وكل ما يجب أن يعمل دائمًا — الهاتف والرسائل والكاميرا والساعة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Until you choose what stays open, a new app your child installs will not be blocked. Pick Tofy itself and whatever must always work — phone, messages, camera and clock."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Пока вы не выберете, что остаётся открытым, новое приложение, установленное ребёнком, не будет заблокировано. Отметьте саму Tofy и всё, что должно работать всегда, — телефон, сообщения, камеру и часы."
+          }
+        }
+      }
+    },
     "⚠️ קוֹד קַל לְנִחוּשׁ — הַיֶּלֶד רוֹאֶה אֶתְכֶם מַקְלִידִים אוֹתוֹ. אֶפְשָׁר לְאַשֵּׁר בְּכָל זֹאת, אוֹ לַחֲזוֹר וְלִבְחֹר אַחֵר." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -82007,6 +82757,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "✅ Уже %@"
+          }
+        }
+      }
+    },
+    "✅ כל אפליקציה אחרת נעולה — כולל אפליקציה שתותקן מחר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ كل تطبيق آخر مقفل — بما في ذلك تطبيق يُنزّل غدًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ Every other app is locked — including one installed tomorrow."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ Все остальные приложения заблокированы — включая установленное завтра."
           }
         }
       }

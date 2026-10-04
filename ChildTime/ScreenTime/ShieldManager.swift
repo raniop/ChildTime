@@ -115,13 +115,6 @@ final class ShieldManager: ObservableObject {
 
     // MARK: - Shield (block) management
 
-    func applyShield(from selection: FamilyActivitySelection) {
-        // Route through the allowing: variant so the parent's permanent
-        // "always allowed" whitelist is honored here too — a whitelisted app must
-        // never be shielded, even when its whole category is blocked.
-        applyShield(from: selection, allowing: FamilyActivitySelection())
-    }
-
     /// Prevent DELETING apps (iOS Screen Time restriction). Deleting ChildTime
     /// would wipe the shield and unlock every app, so a managed device keeps this
     /// ON — even during a temporary play-time window. Device-wide (iOS can't
@@ -140,116 +133,84 @@ final class ShieldManager: ObservableObject {
         // CRITICAL: also drop the all-web category restriction set by Kid Mode,
         // otherwise the browser stays blocked after exiting.
         store.shield.webDomainCategories = ShieldSettings.ActivityCategoryPolicy<WebDomain>.none
+        TofyShield.defaults.set("cleared", forKey: TofyShield.Key.lastPlan)
+        TofyShield.defaults.set(Date().timeIntervalSince1970, forKey: TofyShield.Key.lastPlanAt)
     }
 
-    /// Kid Mode (parent's own phone): lock EVERY app except the `allowed` set —
-    /// the inverse of the normal block-list. Everything the parent didn't approve
-    /// is shielded; ChildTime + the approved apps stay open. The kid is confined
-    /// to a safe sandbox on the parent's device.
+    /// Kid Mode (parent's own phone): lock EVERY app except the `allowed` set.
     ///
-    /// NOTE: `.all(except:)` shields all categories. iOS keeps the *foreground*
-    /// controlling app usable, but to guarantee the kid can always return to
-    /// ChildTime, pass ChildTime's own token in `allowed` too (the entry screen
-    /// nudges the parent to include it). Verify on a real device — the simulator
-    /// does not enforce shields.
+    /// NOTE: `.all(except:)` shields all categories. To guarantee the kid can
+    /// always return to ChildTime, the parent must include ChildTime's own token
+    /// in `allowed` (the entry screen nudges them to). Verify on a real device —
+    /// the simulator does not enforce shields.
     func applyLockAllExcept(_ allowed: FamilyActivitySelection) {
-        store.shield.applications = nil
-        store.shield.applicationCategories = .all(except: allowed.applicationTokens)
-        store.shield.webDomains = nil
-        store.shield.webDomainCategories =
-            ShieldSettings.ActivityCategoryPolicy<WebDomain>.all(except: allowed.webDomainTokens)
+        var inputs = TofyShieldInputs()
+        inputs.kidModeActive = true
+        inputs.kidModeAllowedApps = allowed.applicationTokens
+        inputs.kidModeAllowedWebDomains = allowed.webDomainTokens
+        TofyShield.apply(inputs.plan(), to: store, reason: "kid-mode", log: screenTimeLog)
         // Kid Mode: also block app deletion (can't sneak out by removing ChildTime).
         store.application.denyAppRemoval = true
     }
 
-    /// Block the full `blocked` set EXCEPT the `allowed` apps — so specific apps
-    /// (e.g. YouTube) stay open while everything else remains locked.
-    func applyShield(from blocked: FamilyActivitySelection, allowing allowed: FamilyActivitySelection) {
-        // The exempt set = the caller's `allowed` (e.g. a temporary per-app window)
-        // PLUS the parent's permanent "always allowed" whitelist. Both stay open
-        // even when their category is blocked, via `.specific(_, except:)`.
-        let allowedApps = allowed.applicationTokens
-            .union(SelectionStorage.decode(ParentSettings.shared.alwaysAllowedAppsData).applicationTokens)
-        let blockedApps = blocked.applicationTokens.subtracting(allowedApps)
-        store.shield.applications = blockedApps.isEmpty ? nil : blockedApps
-        store.shield.applicationCategories = blocked.categoryTokens.isEmpty
-            ? ShieldSettings.ActivityCategoryPolicy<Application>.none
-            : .specific(blocked.categoryTokens, except: allowedApps)
-        store.shield.webDomains = blocked.webDomainTokens.isEmpty ? nil : blocked.webDomainTokens
-        store.shield.webDomainCategories = ShieldSettings.ActivityCategoryPolicy<WebDomain>.none
-    }
-
     /// Start a temporary per-app allowance: open `allowed` now (rest stays
     /// locked) and re-shield after `minutes` of actual use of those apps.
+    ///
+    /// The caller has already persisted `allowExceptionData` / `allowExceptionEndsAt`,
+    /// so re-applying the baseline picks the allowance up in BOTH models — the
+    /// allow-list (`.all(except: … union allowed)`) and the classic block-list.
     func startAllowException(allowed: FamilyActivitySelection,
-                             blocked: FamilyActivitySelection,
+                             blocked _: FamilyActivitySelection,
                              minutes: Int) {
-        applyShield(from: blocked, allowing: allowed)
+        applyDefaultLock()
         // The kid spends the window inside the `allowed` apps — meter THOSE.
         scheduleUsageLimit(after: minutes, monitoring: allowed)
     }
 
+    /// The single "re-lock the baseline NOW" entry point, for the app, the
+    /// monitor extension and the push service alike. Kid-Mode-aware, allow-list
+    /// aware, allowance-aware — because all three now ask the same brain
+    /// (`ShieldPolicy.swift`) instead of each re-deriving the policy by hand.
+    func relockBaseline() { applyDefaultLock() }
+
     /// Apply the device's LOCKED baseline (called whenever no play window is
-    /// active). Two models:
-    ///  • block-all-except-allowlist — when the parent enabled it AND picked a
-    ///    non-empty allowlist (which must include ChildTime). The safe default.
-    ///  • classic block-list — block only the parent-selected apps, honoring a
-    ///    temporary per-app allowance.
-    /// The single "re-lock the baseline NOW" entry point. Kid-Mode-aware: on a
-    /// parent phone in Kid Mode, the baseline is the kid-mode allow-list, NOT the
-    /// (usually empty) parent block-list — calling applyDefaultLock there UNLOCKED
-    /// the whole phone for the kid until the next foreground enforce.
-    func relockBaseline() {
-        if KidModeManager.shared.active {
-            applyLockAllExcept(KidModeManager.shared.allowedSelection)
-        } else {
-            applyDefaultLock()
-        }
+    /// active). The shape is decided in one place — see `ShieldPolicy.swift`:
+    ///  - Kid Mode on a parent phone  -> everything except the kid-mode list
+    ///  - allow-list armed            -> everything, INCLUDING apps installed
+    ///                                   later, except what stays open
+    ///  - otherwise                   -> the classic enumerated block-list
+    func applyDefaultLock() {
+        TofyShield.relock(reason: "app", log: screenTimeLog)
     }
 
-    func applyDefaultLock() {
-        // A managed device must not be deletable — that would remove the shield.
-        store.application.denyAppRemoval = true
-        let s = ParentSettings.shared
-        if s.blockAllActive {
-            applyLockAllExcept(SelectionStorage.decode(s.allowedAppsData))
-            return
-        }
-        let blocked = SelectionStorage.decode(s.activitySelectionData)
-        if s.allowExceptionActive, let aData = s.allowExceptionData {
-            applyShield(from: blocked, allowing: SelectionStorage.decode(aData))
-        } else {
-            applyShield(from: blocked)
-        }
+    /// What the last shield write actually did — the breadcrumb a real-device run
+    /// can be checked against in Console.app, and what the tests assert.
+    var lastAppliedPlanSummary: String {
+        TofyShield.defaults.string(forKey: TofyShield.Key.lastPlan) ?? "none"
     }
 
     // MARK: - Unlock for a duration
 
     func unlock(minutes: Int) {
+        let plan = TofyShield.inputs().plan()
         clearShield()
-        let s = ParentSettings.shared
-        // Kid Mode (parent phone) baseline is lock-all-except-allowlist — same
-        // shape as block-all — so there's NO concrete blocked set to usage-meter.
-        // Use the wall-clock backstop; without this, unlock() left the phone wide
-        // open with no re-lock scheduled and the kid could roam the whole device.
-        if KidModeManager.shared.active {
-            screenTimeLog.notice("unlock(\(minutes, privacy: .public) min) mode=kid-mode → wall-clock reshield")
-            scheduleWallClockReshield(after: minutes)
-            return
-        }
-        screenTimeLog.notice("unlock(\(minutes, privacy: .public) min) mode=\(s.blockAllActive ? "block-all" : "block-list", privacy: .public)")
-        if s.blockAllActive {
-            // Block-all has no concrete blocked-token set to usage-meter, so the
-            // shield returns via a wall-clock backstop (the in-app timer re-locks
-            // sooner when the kid comes back to ChildTime).
-            scheduleWallClockReshield(after: minutes)
-        } else {
-            // Everything in the blocked set is now open. Meter usage of those apps
-            // so the shield comes back after `minutes` of real play — even while
-            // ChildTime is in the background and the kid is inside another app
-            // (e.g. YouTube). This is what makes short (<15 min) grants enforce.
-            let monitored = SelectionStorage.decode(s.activitySelectionData)
+        screenTimeLog.notice("unlock(\(minutes, privacy: .public) min) baseline=\(plan.kind.rawValue, privacy: .public)")
+        // Everything that was shielded is now open. Meter usage of the parent's
+        // block-list so the shield comes back after `minutes` of REAL play — even
+        // while ChildTime is backgrounded and the kid is inside another app. This
+        // is what makes short (<15 min) grants enforce.
+        //
+        // In the allow-list model there is no enumerated blocked set covering the
+        // whole device, so when the parent has no block-list left we fall back to
+        // the wall-clock backstop (floor: iOS's 15-minute schedule minimum).
+        let monitored = SelectionStorage.decode(ParentSettings.shared.activitySelectionData)
+        let meterable = !monitored.applicationTokens.isEmpty
+            || !monitored.categoryTokens.isEmpty
+            || !monitored.webDomainTokens.isEmpty
+        if meterable {
             scheduleUsageLimit(after: minutes, monitoring: monitored)
+        } else {
+            scheduleWallClockReshield(after: minutes)
         }
     }
 

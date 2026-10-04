@@ -603,77 +603,78 @@ struct ParentSettingsView: View {
         .glassRows()
     }
 
+    /// 🔒 The lock model. The allow-list is the real one: everything is shielded
+    /// except what the parent names, so an app the child installs TOMORROW is
+    /// locked without anyone touching Tofy. The classic block-list below it is
+    /// the fallback that runs until the allow-list has been filled in — see
+    /// `ShieldPolicy.swift` for why it cannot arm itself.
     private var appsSection: some View {
         Section {
-            Toggle(isOn: $settings.blockAllExceptAllowed) {
-                Label(tr("חסום הכל חוץ מהמותר"), systemImage: "lock.shield.fill")
+            Toggle(isOn: $settings.lockNewApps) {
+                Label(tr("לנעול גם אפליקציות חדשות"), systemImage: "lock.shield.fill")
             }
 
-            if settings.blockAllExceptAllowed {
-                // Block-all-except-allowlist model.
+            if settings.lockNewApps {
                 Button {
                     showAllowedPicker = true
                 } label: {
                     HStack {
                         Image(systemName: "checkmark.shield.fill")
-                        Text(tr("בחר אפליקציות מותרות"))
+                        Text(tr("מה נשאר פתוח"))
                         Spacer()
                         let count = allowedSelection.applicationTokens.count
-                            + allowedSelection.categoryTokens.count
                         if count > 0 {
-                            Text(tr("\(count) מותרות")).foregroundStyle(.secondary)
+                            Text(tr("\(count) פתוחות")).foregroundStyle(.secondary)
                         }
                         Image(systemName: AppSymbol.forwardChevron).foregroundStyle(.secondary)
                     }
                 }
-                if allowedSelection.applicationTokens.isEmpty
-                    && allowedSelection.categoryTokens.isEmpty {
-                    Text(tr("⚠️ חשוב: בחרו אילו אפליקציות יישארו פתוחות — והקפידו לכלול את טופי (וכן אפליקציות חיוניות כמו טלפון). עד שתבחרו — לא ייחסם כלום, כדי לא לנעול את המכשיר בטעות."))
+                if allowedSelection.applicationTokens.isEmpty {
+                    Text(tr("⚠️ עד שתבחרו מה נשאר פתוח, אפליקציה חדשה שהילד מתקין לא תיחסם. בחרו את טופי עצמה ואת מה שחייב לעבוד תמיד — טלפון, הודעות, מצלמה ושעון."))
                         .font(.caption)
                         .foregroundStyle(.orange)
                 } else {
+                    Text(tr("✅ כל אפליקציה אחרת נעולה — כולל אפליקציה שתותקן מחר."))
+                        .font(.caption)
+                        .foregroundStyle(.green)
                     Button(role: .destructive) {
                         allowedSelection = FamilyActivitySelection()
                     } label: {
-                        Label(tr("נקה רשימת מותרות"), systemImage: "trash")
-                    }
-                }
-            } else {
-                // Classic block-list model.
-                Button {
-                    showAppPicker = true
-                } label: {
-                    HStack {
-                        Image(systemName: "app.badge.fill")
-                        Text(tr("בחר אפליקציות"))
-                        Spacer()
-                        let count = pickerSelection.applicationTokens.count
-                            + pickerSelection.categoryTokens.count
-                        if count > 0 {
-                            Text(tr("\(count) נבחרו")).foregroundStyle(.secondary)
-                        }
-                        Image(systemName: AppSymbol.forwardChevron).foregroundStyle(.secondary)
-                    }
-                }
-                if pickerSelection.applicationTokens.isEmpty
-                    && pickerSelection.categoryTokens.isEmpty {
-                    Text(tr("עדיין לא בחרת אפליקציות לחסום. בלי בחירה - לא יקרה כלום כשהילד פותח את ה-iPad."))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else {
-                    Button(role: .destructive) {
-                        pickerSelection = FamilyActivitySelection()
-                    } label: {
-                        Label(tr("נקה בחירה"), systemImage: "trash")
+                        Label(tr("נקו את הרשימה"), systemImage: "trash")
                     }
                 }
             }
+
+            Button {
+                showAppPicker = true
+            } label: {
+                HStack {
+                    Image(systemName: "app.badge.fill")
+                    Text(tr("אפליקציות לנעילה"))
+                    Spacer()
+                    let count = pickerSelection.applicationTokens.count
+                        + pickerSelection.categoryTokens.count
+                    if count > 0 {
+                        Text(tr("\(count) נבחרו")).foregroundStyle(.secondary)
+                    }
+                    Image(systemName: AppSymbol.forwardChevron).foregroundStyle(.secondary)
+                }
+            }
+            if !(pickerSelection.applicationTokens.isEmpty && pickerSelection.categoryTokens.isEmpty) {
+                Button(role: .destructive) {
+                    pickerSelection = FamilyActivitySelection()
+                } label: {
+                    Label(tr("נקו את הבחירה"), systemImage: "trash")
+                }
+            }
         } header: {
-            Text(tr("חסימת אפליקציות"))
+            Text(tr("נעילת אפליקציות"))
         } footer: {
-            Text(settings.blockAllExceptAllowed
-                 ? tr("כל האפליקציות ייחסמו עד שהילד מרוויח זמן — חוץ מהאפליקציות שתבחרו כ\"מותרות\". חובה לכלול את טופי ברשימה.")
-                 : tr("רק האפליקציות שתבחרו ייחסמו. כל השאר נשארות פתוחות."))
+            Text(settings.allowListNeedsSetup
+                 ? tr("כרגע נעולות רק האפליקציות שבחרתם ברשימה למטה. אפליקציה חדשה שהילד מתקין נשארת פתוחה — בחרו מה נשאר פתוח כדי לסגור את הפרצה.")
+                 : (settings.newAppLockArmed
+                    ? tr("הכול נעול עד שהילד מרוויח זמן, חוץ ממה שבחרתם שיישאר פתוח — ולכן גם אפליקציה שתותקן מחר נעולה. הרשימה למטה כבר לא משנה את הנעילה, היא נשמרת כגיבוי.")
+                    : tr("נעולות רק האפליקציות שתבחרו. כל השאר נשארות פתוחות, וגם אפליקציה חדשה שהילד מתקין.")))
         }
         .glassRows()
     }

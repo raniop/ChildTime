@@ -25,11 +25,18 @@ struct ChildDeviceControlsView: View {
     @State private var allowSelection = FamilyActivitySelection()
     @State private var showAlwaysAllowPicker = false
     @State private var alwaysAllowSelection = FamilyActivitySelection()
+    @State private var showOpenPicker = false
+    @State private var openSelection = FamilyActivitySelection()
 
     private var selectedCount: Int {
         selection.applicationTokens.count + selection.categoryTokens.count
     }
     private var allowCount: Int { allowSelection.applicationTokens.count }
+    /// Apps that stay open on a locked device. This is the list that ARMS the
+    /// "new apps are locked too" model — only apps count, not categories
+    /// (see `ShieldPolicy.swift`).
+    private var openCount: Int { openSelection.applicationTokens.count }
+    private var newAppsLocked: Bool { settings.lockNewApps && openCount > 0 }
     private var alwaysAllowCount: Int { alwaysAllowSelection.applicationTokens.count }
     private var isUnlocked: Bool { progress.isUnlocked }
 
@@ -45,6 +52,7 @@ struct ChildDeviceControlsView: View {
                     statusBanner
                     quickOpenCard
                     perAppAllowCard
+                    newAppLockCard
                     appLockCard
                     alwaysAllowedCard
                     allowDeleteCard
@@ -79,12 +87,15 @@ struct ChildDeviceControlsView: View {
         .onChangeCompat(of: selection) { _, new in
             settings.activitySelectionData = SelectionStorage.encode(new)
             // Keep the live shield in sync only when the child isn't mid-unlock.
-            if !isUnlocked { shields.applyShield(from: new) }
+            // applyDefaultLock (not the raw block-list) — otherwise editing this
+            // list downgraded an armed allow-list to the leaky model.
+            if !isUnlocked { shields.applyDefaultLock() }
         }
         .onAppear {
             selection = SelectionStorage.decode(settings.activitySelectionData)
             allowSelection = SelectionStorage.decode(settings.allowExceptionData)
             alwaysAllowSelection = SelectionStorage.decode(settings.alwaysAllowedAppsData)
+            openSelection = SelectionStorage.decode(settings.allowedAppsData)
         }
         .confirmationDialog(tr("לְנַתֵּק אֶת הַמַּכְשִׁיר?"),
                             isPresented: $showDisconnect, titleVisibility: .visible) {
@@ -173,7 +184,11 @@ struct ChildDeviceControlsView: View {
                    detail: tr("הַשְּׁאָר נְעוּלוֹת\(allowEndText)"),
                    open: true, lock: { Haptic.medium(); cancelAllowException() })
         } else {
-            banner(title: tr("הַכֹּל נָעוּל"), detail: tr("הַיֶּלֶד מַרְוִיחַ זְמַן כְּדֵי לִפְתּוֹחַ"), open: false, lock: nil)
+            banner(title: tr("הַכֹּל נָעוּל"),
+                   detail: newAppsLocked
+                       ? tr("כולל אפליקציות חדשות")
+                       : tr("אפליקציות חדשות לא נעולות"),
+                   open: false, lock: nil)
         }
     }
 
@@ -317,6 +332,78 @@ struct ChildDeviceControlsView: View {
         return tr(" עַד \(f.string(from: end))")
     }
 
+    // MARK: - Lock newly installed apps (the allow-list model)
+
+    /// 🔒 The core safety control on a child's device.
+    ///
+    /// An `ApplicationToken` only exists for an app a parent picked in Apple's
+    /// picker, so a list of "apps to lock" can never name an app the child
+    /// installs tomorrow — they would download something new and walk straight
+    /// out of the lock. The only policy that covers an unknown future app is
+    /// "everything except these", which is what this card fills in.
+    ///
+    /// It cannot arm itself: `.all(except:)` shields Tofy too, and an app cannot
+    /// mint its own token, so the parent must name at least one app that stays
+    /// open. Until they do we keep the old block-list in force (leaky, but it
+    /// can never lock a child away from the app that earns their minutes) and
+    /// say so in plain words.
+    private var newAppLockCard: some View {
+        controlCard(tint: newAppsLocked ? AppColor.successMint : AppColor.flameOrange) {
+            sectionHead(tr("לנעול גם אפליקציות חדשות"),
+                        newAppsLocked
+                            ? tr("כל אפליקציה נעולה עד שמרוויחים זמן — כולל אפליקציה שתותקן מחר. פתוחות רק אלה שבחרתם.")
+                            : tr("אם הילד מתקין אפליקציה חדשה היא לא נעולה. כדי לסגור את זה, בחרו מה נשאר פתוח — וכללו את טופי עצמה."),
+                        icon: newAppsLocked ? "lock.shield.fill" : "exclamationmark.triangle.fill",
+                        tint: newAppsLocked ? AppColor.successMint : AppColor.flameOrange)
+
+            Toggle(isOn: $settings.lockNewApps) {
+                Text(tr("לנעול אפליקציות חדשות"))
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+            }
+            .tint(AppColor.successMint)
+
+            if settings.lockNewApps {
+                Button {
+                    Task {
+                        await shields.requestAuthorizationIfNeeded(userInitiated: true)
+                        if shields.isAuthorized { showOpenPicker = true }
+                    }
+                } label: {
+                    Label(openCount > 0
+                          ? tr("\(openCount) אפליקציות נשארות פתוחות · עריכה")
+                          : tr("בחרו מה נשאר פתוח"),
+                          systemImage: "checkmark.shield.fill")
+                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "4B3FBF"))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
+                }
+                .buttonStyle(.juicy)
+
+                if openCount == 0 {
+                    Text(tr("חשוב: סמנו את טופי, ואת מה שחייב לעבוד תמיד — טלפון, הודעות, מצלמה ושעון. בלי טופי ברשימה הילד לא יוכל להרוויח זמן, ולכן עד שתבחרו הנעילה נשארת כמו שהייתה."))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(AppColor.starGold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .tofyActivityPicker(title: PickerCopy.allowList.title, header: PickerCopy.allowList.header, footer: PickerCopy.allowList.footer, isPresented: $showOpenPicker, selection: $openSelection)
+        .onChangeCompat(of: openSelection) { _, new in
+            settings.allowedAppsData = SelectionStorage.encode(new)
+            // Takes effect immediately — no relaunch. (Not while the child is
+            // mid-window: everything is open then, and the baseline is re-applied
+            // when the window closes.)
+            if !isUnlocked { shields.applyDefaultLock() }
+        }
+        .onChangeCompat(of: settings.lockNewApps) { _, _ in
+            if !isUnlocked { shields.applyDefaultLock() }
+        }
+    }
+
     // MARK: - App lock
 
     private var appLockCard: some View {
@@ -448,7 +535,7 @@ struct ChildDeviceControlsView: View {
         // Save, don't burn — same semantics as the remote lock: an EARNED window
         // banks back to the wallet, a parent window freezes for later.
         progress.stopAndSaveCurrentUnlock()
-        shields.applyShield(from: SelectionStorage.decode(settings.activitySelectionData))
+        shields.relockBaseline()
         dismiss()
     }
 
@@ -466,7 +553,7 @@ struct ChildDeviceControlsView: View {
     private func cancelAllowException() {
         shields.cancelScheduledReshield()
         settings.clearAllowException()
-        shields.applyShield(from: SelectionStorage.decode(settings.activitySelectionData))
+        shields.relockBaseline()
         dismiss()
     }
 

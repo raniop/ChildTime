@@ -1,11 +1,17 @@
 import SwiftUI
 import FamilyControls
 
-/// One-time setup shown on a CHILD's device right after it joins: the parent
-/// chooses which apps get locked until the child earns screen time. Shielding is
-/// device-local in Family Controls, so this MUST run on the child's device (not
-/// the parent's control-center device). Skippable — reachable later from
-/// Parent Settings → "אפליקציות לחסום".
+/// One-time setup shown on a CHILD's device right after it joins.
+///
+/// It asks for the ALLOW-list — what stays open — not for a list of apps to
+/// lock, because a list of apps to lock can never name an app the child installs
+/// tomorrow (an `ApplicationToken` only exists for an app someone already
+/// picked). Everything the parent does not name here is shielded until the child
+/// earns minutes, now and in the future. See `ShieldPolicy.swift`.
+///
+/// Shielding is device-local in Family Controls, so this MUST run on the child's
+/// device (not the parent's control-center device). Skippable — reachable later
+/// from the gear on this device, behind the parent code.
 struct ChildAppLockSetupView: View {
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var shields: ShieldManager
@@ -13,12 +19,11 @@ struct ChildAppLockSetupView: View {
 
     @State private var showAppPicker = false
     @State private var requestingAuth = false
-    @State private var selection = FamilyActivitySelection()
+    @State private var openSelection = FamilyActivitySelection()
     @StateObject private var companion = CompanionController()
 
-    private var selectedCount: Int {
-        selection.applicationTokens.count + selection.categoryTokens.count
-    }
+    /// Apps named as "stays open". Only apps arm the lock, not categories.
+    private var selectedCount: Int { openSelection.applicationTokens.count }
 
     var body: some View {
         ZStack {
@@ -31,12 +36,12 @@ struct ChildAppLockSetupView: View {
                         .font(.system(size: 64))
                         .foregroundStyle(AppColor.starGold)
 
-                    Text(tr("אֵילוּ אַפְּלִיקַצְיוֹת לִנְעַל?"))
+                    Text(tr("מה נשאר פתוח?"))
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
 
-                    Text(tr("בַּחֲרוּ אֶת הָאַפְּלִיקַצְיוֹת שֶׁיִּהְיוּ נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה — עַד שֶׁהַיֶּלֶד מַרְוִיחַ זְמַן מָסָךְ בְּטוֹפִי. אֶפְשָׁר לְשַׁנּוֹת בְּכָל עֵת בְּהַגְדָּרוֹת הוֹרֶה."))
+                    Text(tr("כל האפליקציות במכשיר הזה יהיו נעולות עד שהילד מרוויח זמן מסך בטופי — גם אפליקציה שתותקן מחר. בחרו כאן מה נשאר פתוח תמיד: את טופי עצמה, וגם טלפון, הודעות, מצלמה ושעון. אפשר לשנות בכל עת."))
                         .font(.system(size: 16, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
@@ -63,8 +68,8 @@ struct ChildAppLockSetupView: View {
                             } else {
                                 Image(systemName: selectedCount > 0 ? "checkmark.circle.fill" : "app.badge.fill")
                                 Text(selectedCount > 0
-                                     ? tr("\(selectedCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · הַקִּישׁוּ לַעֲרוֹךְ")
-                                     : tr("בַּחֲרוּ אַפְּלִיקַצְיוֹת"))
+                                     ? tr("\(selectedCount) אפליקציות נשארות פתוחות · הקישו לעריכה")
+                                     : tr("בחרו מה נשאר פתוח"))
                             }
                         }
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
@@ -110,11 +115,16 @@ struct ChildAppLockSetupView: View {
                         .buttonStyle(.juicy)
                         .padding(.top, AppSpacing.sm)
                     } else {
+                        Text(tr("אם תדלגו, נעולות רק האפליקציות שבחרתם קודם — ואפליקציה חדשה שהילד מתקין תישאר פתוחה."))
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(AppColor.starGold)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, AppSpacing.md)
                         Button {
                             Haptic.medium()
                             finish()
                         } label: {
-                            Text(tr("אֶבְחַר אַחַר כָּךְ"))
+                            Text(tr("אבחר אחר כך"))
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white.opacity(0.85))
                                 .padding(.horizontal, 28).padding(.vertical, 12)
@@ -128,13 +138,14 @@ struct ChildAppLockSetupView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .tofyActivityPicker(title: PickerCopy.blocked.title, header: PickerCopy.blocked.header, footer: PickerCopy.blocked.footer, isPresented: $showAppPicker, selection: $selection)
-        .onChangeCompat(of: selection) { _, new in
-            settings.activitySelectionData = SelectionStorage.encode(new)
-            shields.applyShield(from: new)
+        .tofyActivityPicker(title: PickerCopy.allowList.title, header: PickerCopy.allowList.header, footer: PickerCopy.allowList.footer, isPresented: $showAppPicker, selection: $openSelection)
+        .onChangeCompat(of: openSelection) { _, new in
+            settings.allowedAppsData = SelectionStorage.encode(new)
+            // Arms immediately — no relaunch needed.
+            shields.applyDefaultLock()
         }
         .onAppear {
-            selection = SelectionStorage.decode(settings.activitySelectionData)
+            openSelection = SelectionStorage.decode(settings.allowedAppsData)
         }
     }
 

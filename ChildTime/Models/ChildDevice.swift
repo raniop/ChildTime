@@ -78,6 +78,11 @@ struct ChildDevice: Codable, Identifiable, Equatable {
     /// green "מחובר" row and had no way to know that locking does nothing here.
     /// Optional: older rows simply don't have it, and nil means "not reported".
     var shieldAuthorized: Bool?
+    /// Does the locked baseline on this device cover an app the child installs
+    /// tomorrow? `false` means the allow-list has not been filled in, so the
+    /// device is still on the enumerated block-list and a new app stays open.
+    /// The parent cannot tell that from their own phone otherwise.
+    var newAppsLocked: Bool?
 
     var sfSymbol: String {
         switch kind {

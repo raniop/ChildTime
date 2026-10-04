@@ -63,7 +63,12 @@ final class TokenRefresher {
         // Re-apply so the freshly minted tokens actually take effect. Only when
         // the shield is supposed to be up — never re-lock a child mid-window.
         if !ProgressStore.shared.isUnlocked {
-            ShieldManager.shared.applyShield(from: SelectionStorage.decode(s.activitySelectionData))
+            // Re-apply the BASELINE, not the block-list: re-applying the raw
+            // block-list here used to replace an armed `.all(except:)` with the
+            // enumerated policy, quietly re-opening every app the parent had not
+            // picked (including every newly installed one) until the next
+            // foreground enforce.
+            ShieldManager.shared.relockBaseline()
         }
         screenTimeLog.notice("[TokenRefresher] refreshed (\(reason, privacy: .public)) — shield re-applied")
     }

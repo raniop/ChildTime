@@ -687,6 +687,7 @@ final class HouseholdManager: ObservableObject {
         // to see that from their own phone — the row looked perfectly healthy.
         ShieldManager.shared.refreshStatus()
         device.shieldAuthorized = ShieldManager.shared.isAuthorized
+        device.newAppsLocked = ParentSettings.shared.newAppLockArmed
         do {
             // Don't clobber the original joinedAt on relaunch.
             let existing = try? await db.collection("childDevices").document(docID).getDocument()

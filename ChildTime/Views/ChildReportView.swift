@@ -521,6 +521,22 @@ struct ChildReportView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.bottom, 8)
                     }
+                    // 🔒 The migration nudge. Screen Time is granted and apps are
+                    // locked, but the allow-list is empty, so the device is still
+                    // on the enumerated block-list and anything the child installs
+                    // stays open. Only the parent can fix it (Apple's picker needs
+                    // a human), and only on the child's device — so say exactly
+                    // where to tap. Older devices report nil: say nothing then
+                    // rather than cry wolf.
+                    if d.newAppsLocked == false, d.shieldAuthorized != false, d.role != "parent" {
+                        Label(tr("אפליקציה חדשה שהילד מתקין לא נעולה במכשיר הזה. פתחו בו את טופי ← ⚙️ ← ״לנעול גם אפליקציות חדשות״ ובחרו מה נשאר פתוח."),
+                              systemImage: "lock.open.trianglebadge.exclamationmark")
+                            .font(.system(size: 11.5, weight: .semibold, design: .rounded))
+                            .foregroundStyle(AppColor.starGold)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.bottom, 8)
+                    }
                     if d.id != devices.last?.id { Divider().overlay(Color.white.opacity(0.16)) }
                 }
                 if devices.isEmpty {

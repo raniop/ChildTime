@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C0DE5H1E1DC0RE0000000003 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
+		C0DE5H1E1DC0RE0000000004 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
+		C0DE5H1E1DC0RE0000000005 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
 		0AD12B6CBB301CB2D63C2196 /* DeviceActivityMonitorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE5B1972704D3335DBFF6B3 /* DeviceActivityMonitorExtension.swift */; };
 		4F8401CC2FCD64020076E20B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F8401CB2FCD64020076E20B /* WidgetKit.framework */; };
 		4F8401CE2FCD64020076E20B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F8401CD2FCD64020076E20B /* SwiftUI.framework */; };
@@ -138,6 +141,7 @@
 		51F3B5ED0AA76C9A122C43D7 /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
 		7A110C4E00000000000000A1 /* LockPushService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LockPushService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B110C4E00000000000000B2 /* TofyWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TofyWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldPolicy.swift; sourceTree = "<group>"; };
 		873C358DCB5A2C2F44C51CDB /* ShieldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldState.swift; sourceTree = "<group>"; };
 		AF85E1C4DBB972D75EDDF8BB /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CBA173C4588B868B8087E73A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
@@ -332,6 +336,14 @@
 			path = ShieldConfigurationExt;
 			sourceTree = "<group>";
 		};
+		C0DE5H1E1DC0RE0000000002 /* ShieldCore */ = {
+			isa = PBXGroup;
+			children = (
+				C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */,
+			);
+			path = ShieldCore;
+			sourceTree = "<group>";
+		};
 		3AE5479DF6FCC1ACB0E2F2D2 /* DeviceActivityMonitorExt */ = {
 			isa = PBXGroup;
 			children = (
@@ -357,6 +369,7 @@
 				64430A789AE674FF9A3F857D /* Frameworks */,
 				3AE5479DF6FCC1ACB0E2F2D2 /* DeviceActivityMonitorExt */,
 				321CE6FFA5191015CE02583D /* ShieldConfigurationExt */,
+				C0DE5H1E1DC0RE0000000002 /* ShieldCore */,
 			);
 			sourceTree = "<group>";
 		};
@@ -736,6 +749,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0DE5H1E1DC0RE0000000004 /* ShieldPolicy.swift in Sources */,
 				0AD12B6CBB301CB2D63C2196 /* DeviceActivityMonitorExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -758,6 +772,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0DE5H1E1DC0RE0000000003 /* ShieldPolicy.swift in Sources */,
 				7032B13B15E66D8195A4C915 /* ShieldState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -780,6 +795,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0DE5H1E1DC0RE0000000005 /* ShieldPolicy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
