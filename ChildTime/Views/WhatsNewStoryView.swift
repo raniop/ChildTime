@@ -168,13 +168,35 @@ struct WhatsNewStoryView: View {
         .opacity(risen ? 1 : 0)
     }
 
+    /// "🎈 בַּלּוֹנִים" → the mark on its own line above the name. Inline, an
+    /// emoji sits on the wrong edge of a centred RTL title and the whole line
+    /// reads off-centre (Rani, build 188).
     private func kidTitle(_ item: StoryItem) -> some View {
-        Text(item.title)
-            .font(.system(size: kidTitleSize, weight: .black, design: .rounded))
-            .foregroundStyle(.white)
-            .multilineTextAlignment(.center)
-            .lineLimit(2).minimumScaleFactor(0.55)
-            .shadow(color: .black.opacity(0.3), radius: 10, y: 4)
+        let (mark, name) = Self.splitLeadingMark(item.title)
+        return VStack(spacing: short ? 1 : 4) {
+            if let mark {
+                Text(mark)
+                    .font(.system(size: kidTitleSize * 0.95))
+                    .shadow(color: .black.opacity(0.26), radius: 8, y: 3)
+            }
+            Text(name)
+                .font(.system(size: kidTitleSize, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .lineLimit(2).minimumScaleFactor(0.55)
+                .shadow(color: .black.opacity(0.3), radius: 10, y: 4)
+        }
+    }
+
+    /// Splits "🎈 בַּלּוֹנִים" into ("🎈", "בַּלּוֹנִים"); returns (nil, title) when
+    /// the title does not start with one.
+    static func splitLeadingMark(_ title: String) -> (String?, String) {
+        guard let first = title.first, first.unicodeScalars.contains(where: { $0.properties.isEmoji && $0.value > 0x238C }),
+              let space = title.firstIndex(of: " ") else { return (nil, title) }
+        let mark = String(title[title.startIndex..<space])
+        let rest = String(title[title.index(after: space)...])
+        guard !rest.isEmpty else { return (nil, title) }
+        return (mark, rest)
     }
 
     private func kidLine(_ item: StoryItem) -> some View {
