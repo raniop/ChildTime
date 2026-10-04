@@ -437,11 +437,11 @@ struct BalloonPopView: View {
                 }
                 return
             }
-            if !qMissed {
-                MiniGameLedger.record(correct: true, topic: q.topic,
-                                      responseMs: Date().timeIntervalSince(qShownAt) * 1000,
-                                      streak: streak, earn: earn, surprise: surprise)
-            }
+            // Popping the right balloon pays even after a wobble — the ⭐ at the
+            // end already count it, so the minutes must count it too.
+            MiniGameLedger.record(correct: true, topic: q.topic,
+                                  responseMs: Date().timeIntervalSince(qShownAt) * 1000,
+                                  streak: streak, earn: earn, surprise: surprise, retry: qMissed)
             // The next question: this one's other balloons drift off.
             let old = qIndex
             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { qIndex += 1 }

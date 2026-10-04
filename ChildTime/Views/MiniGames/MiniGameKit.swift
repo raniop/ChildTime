@@ -559,7 +559,8 @@ struct PreReaderEndCard: View {
                 .lineLimit(1).minimumScaleFactor(0.6)
                 .glow(AppColor.starGold, radius: 10)
             }
-            if let grant {
+            // 👶 No "+0" here either: a round that paid nothing shows no chip.
+            if let grant, grant.stars > 0 || grant.diamonds > 0 {
                 HStack(spacing: 12) {
                     MiniGameRewardChip(emoji: "⭐", value: grant.stars, color: AppColor.starGold, shown: reveal >= 1)
                     if grant.diamonds > 0 {
@@ -706,18 +707,22 @@ struct MiniGameEndCard: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             if let grant {
-                HStack(spacing: 12) {
-                    MiniGameRewardChip(emoji: "⭐", value: grant.stars, color: AppColor.starGold, shown: reveal >= 1)
-                    if grant.diamonds > 0 {
-                        MiniGameRewardChip(emoji: "💎", value: grant.diamonds, color: AppColor.diamondBlue, shown: reveal >= 2)
+                // ⭐ +0 is not a prize and not a message — a round that paid
+                // nothing shows no chip at all (Rani saw "⭐ +0" on an end card).
+                if grant.stars > 0 || grant.diamonds > 0 {
+                    HStack(spacing: 12) {
+                        MiniGameRewardChip(emoji: "⭐", value: grant.stars, color: AppColor.starGold, shown: reveal >= 1)
+                        if grant.diamonds > 0 {
+                            MiniGameRewardChip(emoji: "💎", value: grant.diamonds, color: AppColor.diamondBlue, shown: reveal >= 2)
+                        }
                     }
+                    .padding(.top, 2)
                 }
-                .padding(.top, 2)
                 if grant.doubled && (grant.stars > 0 || grant.diamonds > 0) {
                     Text(tr("פִּי 2 — סִבּוּב הַפְתָּעָה! ⚡"))
                         .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                         .foregroundStyle(AppColor.starGold)
-                } else if !grant.full {
+                } else if !grant.full && grant.stars > 0 {
                     Text(tr("הַפְּרָס הַגָּדוֹל חוֹזֵר מָחָר 🌟"))
                         .font(.system(size: 13.5, weight: .semibold, design: .rounded))
                         .foregroundStyle(GlassInk.tertiary)

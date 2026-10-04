@@ -377,10 +377,15 @@ enum MiniGameReward {
         } else {
             let key = dayKey(game)
             let usedToday = DayGate.usedToday(UserDefaults.standard.object(forKey: key) as? Date)
-            if !usedToday && n > 0 {
+            if n == 0 {
+                // Nothing solved: nothing paid — and today's big prize is still
+                // waiting, so the card must not say it has been used up.
+                grant = Grant(stars: 0, diamonds: 0, full: !usedToday)
+            } else if !usedToday {
                 grant = Grant(stars: n * starsPer, diamonds: n * diamondsPer, full: true)
                 UserDefaults.standard.set(Date(), forKey: key)
             } else {
+                // A replay: the practice reward, capped at 5 ⭐ — capped, never zeroed.
                 grant = Grant(stars: min(n, 5), diamonds: 0, full: false)
             }
         }

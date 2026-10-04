@@ -33,10 +33,15 @@ final class MiniGameEarnSession: ObservableObject {
     @Published private(set) var capReached = false
 
     private var tokens = MiniGameEarnSession.startTokens
-    private var lastRefill = Date()
+    private var lastRefill: Date
+    /// The bucket's clock. Real time in the app; the economy harness replaces it
+    /// with a virtual one so a whole round can be replayed at any pace.
+    private let clock: () -> Date
 
-    init(world: World) {
+    init(world: World, clock: @escaping () -> Date = { Date() }) {
         self.world = world
+        self.clock = clock
+        self.lastRefill = clock()
         // The runner's session start, so the parent sees the sitting.
         let progress = ProgressStore.shared
         progress.registerSessionToday()
@@ -49,7 +54,7 @@ final class MiniGameEarnSession: ObservableObject {
 
     /// Spend one credit if the pace allows it.
     func takeCredit() -> Bool {
-        let now = Date()
+        let now = clock()
         tokens = min(Self.capacity, tokens + now.timeIntervalSince(lastRefill) / Self.secondsPerCredit)
         lastRefill = now
         guard tokens >= 1 else { return false }
@@ -76,7 +81,10 @@ final class MiniGameEarnSession: ObservableObject {
         }
     }
 
-    func noteCap() { capReached = true }
+    func noteCap() {
+        guard !capReached else { return }
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) { capReached = true }
+    }
 }
 
 /// The one place a game reports an answer.
@@ -87,9 +95,15 @@ enum MiniGameLedger {
     ///   minutes, cycle, cap, adaptive level, ⭐/💎 per answer.
     /// - Otherwise (a surprise round): counted for the parent's reports only;
     ///   the game pays its ⭐/💎 at the end.
+    ///
+    /// `retry` is a right answer that came after a miss on the SAME item — the
+    /// runner's re-asked question. It pays in full (Rani, 2026-10-04: a child
+    /// who fixes a mistake has learnt the thing, and a card reading "⭐ +0"
+    /// after a round they finished is the opposite of the truth), but it does
+    /// not claim the recovery pot, which is the prize for a clean answer.
     @MainActor
     static func record(correct: Bool, topic: Topic, responseMs: Double = 0, streak: Int = 0,
-                       earn: MiniGameEarnSession?, surprise: Bool) {
+                       earn: MiniGameEarnSession?, surprise: Bool, retry: Bool = false) {
         let progress = ProgressStore.shared
         guard let earn, !surprise else {
             progress.recordGameAnswer(correct: correct)
@@ -99,33 +113,37 @@ enum MiniGameLedger {
         }
         let settings = ParentSettings.shared
         if correct {
-            guard earn.takeCredit() else {
-                // Faster than any child answers regular questions: counted, unpaid.
-                progress.recordGameAnswer(correct: true)
-                LearningHistoryStore.shared.recordAnswer(topic: topic, correct: true, responseMs: responseMs,
-                                                         earnedMinutes: 0, streak: streak)
-                return
-            }
+            // The token bucket withholds MINUTES ONLY. An answer faster than the
+            // pace still counts in the parent's reports, still teaches the
+            // adaptive engine and still pays its ⭐/💎 — a child racing through a
+            // board of balloons used to watch their stars stop dead.
+            let paysMinutes = earn.takeCredit()
             let cappedBefore = progress.atDailyCap
             let minutesBefore = progress.pendingMinutes
-            progress.recordCorrect(
+            let stars = progress.recordCorrect(
                 ProgressStore.AnswerContext(topic: topic, combo: progress.currentStreak,
                                             isSuperQuestion: false, isMysteryPortal: false),
                 minutesPerCorrect: settings.minutesPerCorrectAnswer,
                 responseMs: responseMs,
-                grantsScreenTime: true)
+                hadMistakeThisQuestion: retry,
+                grantsScreenTime: paysMinutes)
             let minutesGranted = max(0, progress.pendingMinutes - minutesBefore)
             LearningHistoryStore.shared.recordAnswer(topic: topic, correct: true, responseMs: responseMs,
                                                      earnedMinutes: minutesGranted,
-                                                     streak: progress.currentStreak, voluntary: cappedBefore)
+                                                     streak: progress.currentStreak,
+                                                     voluntary: cappedBefore || !paysMinutes)
             // The runner's one-shot companion flags — no companion here, so they
             // are spent now rather than surfacing late in the next session.
             progress.varietyBonusJustEarned = 0
             progress.topicBalanceNudgeTopic = nil
             progress.lastRecoveredMinutes = 0
             progress.newStreakRecord = false
-            if !cappedBefore {
+            // Answering right is NEVER silent: seconds when seconds were earned,
+            // the stars themselves when they weren't.
+            if paysMinutes && !cappedBefore {
                 earn.flash(tr("+\(progress.secondsPerCorrect) שְׁנִיּוֹת"), positive: true)
+            } else {
+                earn.flash("⭐ +\(stars)", positive: true)
             }
             if minutesGranted > 0 { earn.popMinutes(minutesGranted) }
             if progress.atDailyCap { earn.noteCap() }
@@ -162,6 +180,22 @@ struct MiniGameEarnOverlay: View {
                                             removal: .move(edge: .top).combined(with: .opacity)))
                     .padding(.top, 104)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            }
+            // ⏰ Today's time is full. The child keeps playing and keeps earning
+            // ⭐/💎 — so say that, instead of going quiet and letting it look
+            // like the game stopped paying.
+            if earn.capReached {
+                Text(tr("אָסַפְתֶּם אֶת כָּל הַזְּמַן לְהַיּוֹם! מַמְשִׁיכִים לֶאֱסֹף כּוֹכָבִים ⭐"))
+                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.7)
+                    .padding(.horizontal, 14).padding(.vertical, 8)
+                    .background(Capsule().fill(AppColor.starGold.opacity(0.9)))
+                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.top, 150)   // under the top bar and under the flash
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .transition(.opacity)
             }
         }
         .allowsHitTesting(false)

@@ -348,9 +348,11 @@ struct SortBasketsView: View {
                 cleanCount += 1
                 streak += 1
                 bestStreak = max(bestStreak, streak)
-                MiniGameLedger.record(correct: true, topic: s.topic, responseMs: Date().timeIntervalSince(shownAt) * 1000,
-                                      streak: streak, earn: earn, surprise: surprise)
             }
+            // An item that found its basket on the second try still pays —
+            // exactly what the runner does when it re-asks a missed question.
+            MiniGameLedger.record(correct: true, topic: s.topic, responseMs: Date().timeIntervalSince(shownAt) * 1000,
+                                  streak: streak, earn: earn, surprise: surprise, retry: missedCurrent)
             burst += 1
             SoundPlayer.shared.play(streak > 0 && streak % 5 == 0 ? .streakUp : .correctSmall)
             Haptic.success()
@@ -397,7 +399,9 @@ struct SortBasketsView: View {
 
     private func finish() {
         guard phase == .playing else { return }
-        grant = MiniGameReward.grant(game: "sort", correct: cleanCount, starsPer: 1, diamondsPer: 1,
+        // Every item that reached a basket pays — `cleanCount` is the headline
+        // ("מֻשְׁלָם!"), not the price.
+        grant = MiniGameReward.grant(game: "sort", correct: placedCount, starsPer: 1, diamondsPer: 1,
                                      cap: total, surprise: surprise)
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { phase = .done }
         SoundPlayer.shared.play(.chestOpen)
