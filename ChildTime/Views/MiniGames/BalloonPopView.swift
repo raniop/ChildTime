@@ -278,7 +278,16 @@ struct BalloonPopView: View {
             return BalloonItem(emoji: "", label: label, correct: right)
         }
         guard let s = set else { return nil }
-        let wantTarget = Double.random(in: 0...1) < 0.55
+        // 🎚️ The younger the child, the more of the balloons are the right
+        // ones; by ז׳–ח׳ most of what floats up is a distractor.
+        let share: Double
+        switch MiniGameBand.of(grade) {
+        case .preReader, .lower: share = 0.65
+        case .middle:            share = 0.55
+        case .upper:             share = 0.48
+        case .top:               share = 0.42
+        }
+        let wantTarget = Double.random(in: 0...1) < share
         if wantTarget {
             if targetQueue.isEmpty { targetQueue = s.targets.shuffled() }
             return targetQueue.popLast()
@@ -304,7 +313,14 @@ struct BalloonPopView: View {
             var lane = CGFloat.random(in: 0...1)
             if abs(lane - lastLane) < 0.25 { lane = lane > 0.5 ? lane - 0.35 : lane + 0.35 }
             lastLane = lane
-            let slow = grade <= 1 ? 1.25 : 1.0
+            // 🎚️ And they rise faster: a ח׳ child has less time to decide.
+            let slow: Double
+            switch MiniGameBand.of(grade) {
+            case .preReader, .lower: slow = grade <= 1 ? 1.25 : 1.1
+            case .middle:            slow = 1.0
+            case .upper:             slow = 0.88
+            case .top:               slow = 0.78
+            }
             balloons.append(Balloon(item: item, lane: lane, spawnedAt: t, round: qIndex,
                                     duration: Double.random(in: 4.6...7.0) * slow,
                                     color: Self.palette.randomElement()!,

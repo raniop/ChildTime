@@ -1,7 +1,9 @@
 import SwiftUI
 
 /// 🔐 "הַכַּסֶּפֶת" — a secret code of distinct digits (3 up to ג׳, 4 from ד׳)
-/// and six tries. Each try lights its digits: green = right digit, right
+/// and six tries. 🎚️ The key cards are what scales: 2 for א׳–ב׳, 3 for ג׳–ה׳,
+/// 2 for ו׳ and a single one for ז׳–ח׳, whose key questions are roots, signed
+/// products and squares. A ח׳ child deduces three of the four digits. Each try lights its digits: green = right digit, right
 /// place; orange = in the code, another place; plain = not in the code (a
 /// small legend says so). A key card opens one digit for a right answer — in
 /// the math worlds a clue to work out ("הַסְּפָרָה הָרִאשׁוֹנָה = 3 × 2"), in any
@@ -45,7 +47,9 @@ struct VaultGameView: View {
     private var digits: Int { code.count }
     /// A numbers world: its keys are clues to work out. Any other world: its questions.
     private var mathWorld: Bool { topic == nil || [.math, .money, .logic, .gifted].contains(topic!) }
-    private var maxKeys: Int { max(1, digits - 1) }
+    /// 🎚️ Fewer keys as the child grows — by ז׳–ח׳ one key card, and the rest
+    /// of the code has to be deduced (VaultGen.maxKeys).
+    private var maxKeys: Int { min(max(1, digits - 1), VaultGen.maxKeys(grade: grade)) }
     private var recordTopic: Topic { topic ?? .logic }
     private var full: Bool { !input.isEmpty && input.allSatisfy { $0 != nil } }
 

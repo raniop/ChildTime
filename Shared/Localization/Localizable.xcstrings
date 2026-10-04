@@ -11463,6 +11463,50 @@
         }
       }
     },
+    "אֲפוּנָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بازلاء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peas"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Горох"
+          }
+        }
+      }
+    },
+    "אֲרוּחַת בֹּקֶר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فطور"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Breakfast"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завтрак"
+          }
+        }
+      }
+    },
     "אֲתָרִים מְפֻרְסָמִים בָּעוֹלָם" : {
       "localizations" : {
         "ar" : {
@@ -13076,6 +13120,28 @@
         }
       }
     },
+    "אַבּוּב" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مزمار أوبوا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oboe"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Гобой"
+          }
+        }
+      }
+    },
     "אַגָּדִי" : {
       "localizations" : {
         "ar" : {
@@ -13405,6 +13471,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подтвердите личность, чтобы выйти из детского режима"
+          }
+        }
+      }
+    },
+    "אַמְבּוּלַנְס" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سيارة إسعاف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ambulance"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скорая помощь"
           }
         }
       }
@@ -14554,6 +14642,28 @@
         }
       }
     },
+    "אוֹהֵד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مشجع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fan"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Болельщик"
+          }
+        }
+      }
+    },
     "אוֹהֶבֶת" : {
       "localizations" : {
         "ar" : {
@@ -14924,6 +15034,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Хорошо"
+          }
+        }
+      }
+    },
+    "אוֹרְקָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حوت أوركا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orca"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Косатка"
           }
         }
       }
@@ -17391,6 +17523,72 @@
         }
       }
     },
+    "בִּנְיַן הִפְעִיל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وزن هِفْعيل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hif'il stem"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Биньян хифъиль"
+          }
+        }
+      }
+    },
+    "בִּנְיַן פִּעֵל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وزن فِعِّل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pi'el stem"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Биньян пиэль"
+          }
+        }
+      }
+    },
+    "בִּנְיַן פָּעַל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وزن فَعَلَ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pa'al stem"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Биньян пааль"
+          }
+        }
+      }
+    },
     "בִּקְשׁוּ מֵאַבָּא אוֹ מֵאִמָּא לְסַיֵּם אֶת הַהַגְדָּרָה שֶׁל טוֹפִי" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17523,6 +17721,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "яйца"
+          }
+        }
+      }
+    },
+    "בֵּית חוֹלִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مستشفى"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hospital"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Больница"
           }
         }
       }
@@ -18180,6 +18400,28 @@
         }
       }
     },
+    "בַּלָּם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قلب الدفاع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Centre-back"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Центральный защитник"
+          }
+        }
+      }
+    },
     "בַּלּוֹן" : {
       "localizations" : {
         "ar" : {
@@ -18422,6 +18664,28 @@
         }
       }
     },
+    "בַּסּוּן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "باسون"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bassoon"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фагот"
+          }
+        }
+      }
+    },
     "בַּעֲלֵי חַיִּים" : {
       "localizations" : {
         "ar" : {
@@ -18641,6 +18905,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "В коде, на другом месте"
+          }
+        }
+      }
+    },
+    "בַּרְזֶל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iron"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Железо"
           }
         }
       }
@@ -20540,6 +20826,28 @@
         }
       }
     },
+    "גֶּשֶׁר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جسر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bridge"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мост"
+          }
+        }
+      }
+    },
     "גַּז" : {
       "localizations" : {
         "ar" : {
@@ -20816,6 +21124,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Старшая группа"
+          }
+        }
+      }
+    },
+    "גַּרְגְּרֵי חֻמּוּס" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حُمّص"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chickpeas"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нут"
           }
         }
       }
@@ -21453,6 +21783,28 @@
         }
       }
     },
+    "דְּיוֹנוּן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حبّار"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Squid"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кальмар"
+          }
+        }
+      }
+    },
     "דְּמֵי כִּיס" : {
       "localizations" : {
         "ar" : {
@@ -21559,6 +21911,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "дилофозавр"
+          }
+        }
+      }
+    },
+    "דִּינוֹזָאוּר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ديناصور"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dinosaur"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Динозавр"
           }
         }
       }
@@ -22977,6 +23351,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Понимание прочитанного"
+          }
+        }
+      }
+    },
+    "הֲגָנָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دفاع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defence"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Защита"
           }
         }
       }
@@ -28882,6 +29278,28 @@
         }
       }
     },
+    "הַתְקָפָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هجوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attack"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Атака"
+          }
+        }
+      }
+    },
     "הַתְרָאוֹת" : {
       "localizations" : {
         "ar" : {
@@ -30183,6 +30601,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Расход"
+          }
+        }
+      }
+    },
+    "הוֹצָאָה מִשְׁתַּנָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مصروف متغيّر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variable expense"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переменный расход"
+          }
+        }
+      }
+    },
+    "הוֹצָאָה קְבוּעָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مصروف ثابت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fixed expense"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Постоянный расход"
           }
         }
       }
@@ -32886,6 +33348,28 @@
         }
       }
     },
+    "וְרִידִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأوردة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veins"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вены"
+          }
+        }
+      }
+    },
     "וִינָה" : {
       "localizations" : {
         "ar" : {
@@ -33736,6 +34220,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Куртка"
+          }
+        }
+      }
+    },
+    "זָהָב" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ذهب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Золото"
           }
         }
       }
@@ -35155,6 +35661,28 @@
         }
       }
     },
+    "חַבְּרוּ אֲרִיחִים זֵהִים — וְכָל כַּמָּה מַהֲלָכִים מַגִּיעָה שְׁאֵלַת בּוֹנוּס" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وصّلوا البلاطات المتشابهة — وكل عدة حركات يظهر سؤال مكافأة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Join matching tiles — and every few moves a bonus question drops in"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Соединяйте одинаковые плитки — и каждые несколько ходов появляется бонусный вопрос"
+          }
+        }
+      }
+    },
     "חַבְּרוּ אֶת הַזּוּגוֹת" : {
       "localizations" : {
         "ar" : {
@@ -35995,6 +36523,50 @@
         }
       }
     },
+    "חָלוּץ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهاجم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Striker"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нападающий"
+          }
+        }
+      }
+    },
+    "חָלוּץ מְרֻכָּז" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهاجم صريح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Centre-forward"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Центрфорвард"
+          }
+        }
+      }
+    },
     "חָלוּק מַדְעָן" : {
       "localizations" : {
         "ar" : {
@@ -36146,6 +36718,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вернитесь сюда и отсканируйте код"
+          }
+        }
+      }
+    },
+    "חוֹף" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شاطئ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beach"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пляж"
           }
         }
       }
@@ -36846,6 +37440,28 @@
         }
       }
     },
+    "טְחוֹל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الطحال"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spleen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Селезёнка"
+          }
+        }
+      }
+    },
     "טְרִיצֶרָטוֹפְּס" : {
       "localizations" : {
         "ar" : {
@@ -36886,6 +37502,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Младшая группа"
+          }
+        }
+      }
+    },
+    "טְרוֹמְבּוֹן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ترومبون"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trombone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тромбон"
           }
         }
       }
@@ -36952,6 +37590,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Телескопы, звёзды и кометы"
+          }
+        }
+      }
+    },
+    "טֶמְפֶּרָטוּרָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "درجة الحرارة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Температура"
           }
         }
       }
@@ -37260,6 +37920,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Токио"
+          }
+        }
+      }
+    },
+    "טוּבָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "توبا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tuba"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туба"
           }
         }
       }
@@ -37745,6 +38427,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "дней подряд"
+          }
+        }
+      }
+    },
+    "יְסוֹד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عنصر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Element"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Элемент"
           }
         }
       }
@@ -40837,6 +41541,28 @@
         }
       }
     },
+    "כֶּלֶב יָם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فقمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seal"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тюлень"
+          }
+        }
+      }
+    },
     "כֶּסֶף שֶׁקִּבַּלְנוּ בְּמַתָּנָה" : {
       "localizations" : {
         "ar" : {
@@ -41277,6 +42003,28 @@
         }
       }
     },
+    "כַּנְפָן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جناح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Winger"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Крайний нападающий"
+          }
+        }
+      }
+    },
     "כַּף רֶגֶל" : {
       "localizations" : {
         "ar" : {
@@ -41295,6 +42043,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ступня"
+          }
+        }
+      }
+    },
+    "כַּרְטִיס" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تذكرة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ticket"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Билет"
           }
         }
       }
@@ -41361,6 +42131,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "жёлтая карточка"
+          }
+        }
+      }
+    },
+    "כַּרְטִיסִיָּה חֹדְשִׁית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بطاقة مواصلات شهرية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly travel pass"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Месячный проездной"
           }
         }
       }
@@ -42722,6 +43514,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Планета"
+          }
+        }
+      }
+    },
+    "כּוֹכַב לֶכֶת גַּזִּי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كوكب غازي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gas giant"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Газовая планета"
+          }
+        }
+      }
+    },
+    "כּוֹכַב לֶכֶת סַלְעִי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كوكب صخري"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rocky planet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каменная планета"
           }
         }
       }
@@ -45951,6 +46787,28 @@
         }
       }
     },
+    "לֹא דִּינוֹזָאוּר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ليس ديناصورًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not a dinosaur"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не динозавр"
+          }
+        }
+      }
+    },
     "לֹא הִסְפַּקְנוּ לִשְׁלֹחַ לְאַבָּא אוֹ אִמָּא. נַסּוּ שׁוּב עוֹד רֶגַע 🙂" : {
       "localizations" : {
         "ar" : {
@@ -47712,6 +48570,28 @@
         }
       }
     },
+    "מְאַמֵּן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مدرب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coach"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тренер"
+          }
+        }
+      }
+    },
     "מְאַשְּׁרִים מוּל Apple…" : {
       "localizations" : {
         "ar" : {
@@ -49318,6 +50198,28 @@
         }
       }
     },
+    "מִנּוּי לַטֶּלֶפוֹן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اشتراك الهاتف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phone plan"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оплата телефона"
+          }
+        }
+      }
+    },
     "מִסְפָּר %lld" : {
       "localizations" : {
         "ar" : {
@@ -50391,6 +51293,28 @@
         }
       }
     },
+    "מֵגֵן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ظهير"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full-back"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Защитник"
+          }
+        }
+      }
+    },
     "מֵדוּזָה" : {
       "localizations" : {
         "ar" : {
@@ -50409,6 +51333,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "медуза"
+          }
+        }
+      }
+    },
+    "מֵי יָם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ماء البحر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sea water"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Морская вода"
           }
         }
       }
@@ -50541,6 +51487,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Медаль"
+          }
+        }
+      }
+    },
+    "מֶלַח בִּשּׁוּל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ملح الطعام"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Table salt"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поваренная соль"
           }
         }
       }
@@ -50717,6 +51685,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Приглашаем, все отвечают одновременно — кто быстрее?"
+          }
+        }
+      }
+    },
+    "מַזָּג אֲוִיר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الطقس"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Погода"
           }
         }
       }
@@ -51139,6 +52129,28 @@
         }
       }
     },
+    "מַסָּע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رحلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journey"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Путешествие"
+          }
+        }
+      }
+    },
     "מַסָּע סְבִיב הָעוֹלָם" : {
       "localizations" : {
         "ar" : {
@@ -51289,6 +52301,94 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отслеживание, отчёты и управление"
+          }
+        }
+      }
+    },
+    "מַעֲרֶכֶת הַדָּם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجهاز الدوري"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Circulatory system"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кровеносная система"
+          }
+        }
+      }
+    },
+    "מַעֲרֶכֶת הַנְּשִׁימָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجهاز التنفسي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Respiratory system"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дыхательная система"
+          }
+        }
+      }
+    },
+    "מַעֲרֶכֶת הָעִכּוּל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجهاز الهضمي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digestive system"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пищеварительная система"
+          }
+        }
+      }
+    },
+    "מַעַיִם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأمعاء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intestines"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кишечник"
           }
         }
       }
@@ -51559,6 +52659,28 @@
     },
     "מַתָּנָה" : {
 
+    },
+    "מַתָּנָה לְחָבֵר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هدية لصديق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A gift for a friend"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подарок другу"
+          }
+        }
+      }
     },
     "מַתָּנָה מֵאַבָּא וְאִמָּא 💝 · נוֹתְרוּ" : {
       "localizations" : {
@@ -54109,6 +55231,28 @@
         }
       }
     },
+    "נְחֹשֶׁת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نحاس"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copper"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Медь"
+          }
+        }
+      }
+    },
     "נְיוּ דֶּלְהִי" : {
       "localizations" : {
         "ar" : {
@@ -54461,6 +55605,50 @@
         }
       }
     },
+    "נְשִׁיפָה מִמַּתֶּכֶת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آلات النفخ النحاسية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brass"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Медные духовые"
+          }
+        }
+      }
+    },
+    "נְשִׁיפָה מֵעֵץ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آلات النفخ الخشبية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Woodwind"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Деревянные духовые"
+          }
+        }
+      }
+    },
     "נְתַנְיָה" : {
       "localizations" : {
         "ar" : {
@@ -54623,6 +55811,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "נִסּוּי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تجربة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experiment"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Опыт"
           }
         }
       }
@@ -57454,6 +58664,50 @@
         }
       }
     },
+    "סִמְפּוֹנוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الشعب الهوائية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bronchi"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бронхи"
+          }
+        }
+      }
+    },
+    "סִפְרִיָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مكتبة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Library"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Библиотека"
+          }
+        }
+      }
+    },
     "סִרְקוּ חָבֵר" : {
       "localizations" : {
         "ar" : {
@@ -57847,6 +59101,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Закрыть"
+          }
+        }
+      }
+    },
+    "סֻכָּר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سكر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сахар"
           }
         }
       }
@@ -58365,6 +59641,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Приложения для блокировки ещё не выбраны."
+          }
+        }
+      }
+    },
+    "עֲדָשִׁים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عدس"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lentils"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чечевица"
           }
         }
       }
@@ -61149,6 +62447,28 @@
         }
       }
     },
+    "עוֹרְקִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الشرايين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arteries"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Артерии"
+          }
+        }
+      }
+    },
     "עוּגִיּוֹת" : {
       "localizations" : {
         "ar" : {
@@ -61565,6 +62885,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Десятки новых текстов для чтения"
+          }
+        }
+      }
+    },
+    "פְּלָדָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فولاذ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steel"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сталь"
           }
         }
       }
@@ -62541,6 +63883,28 @@
         }
       }
     },
+    "פֶּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mouth"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рот"
+          }
+        }
+      }
+    },
     "פֶּנְדֵּל" : {
       "localizations" : {
         "ar" : {
@@ -62603,6 +63967,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Фенек"
+          }
+        }
+      }
+    },
+    "פַּחְמָן דּוּ־חַמְצָנִי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ثاني أكسيد الكربون"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbon dioxide"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Углекислый газ"
           }
         }
       }
@@ -63158,6 +64544,28 @@
         }
       }
     },
+    "פּוֹל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فول"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fava beans"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бобы"
+          }
+        }
+      }
+    },
     "פּוֹעֲלוֹת" : {
       "localizations" : {
         "ar" : {
@@ -63220,6 +64628,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Лопните правильный ответ!"
+          }
+        }
+      }
+    },
+    "פּוֹצְצוּ אֶת כָּל הַדִּינוֹזָאוּרִים שֶׁאָכְלוּ בָּשָׂר!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فرقعوا كل الديناصورات آكلة اللحم!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pop all the meat-eating dinosaurs!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лопайте всех хищных динозавров!"
           }
         }
       }
@@ -63290,6 +64720,28 @@
         }
       }
     },
+    "פּוֹצְצוּ אֶת כָּל הַיּוֹנְקִים שֶׁחַיִּים בַּיָּם!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فرقعوا كل الثدييات البحرية!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pop all the sea mammals!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лопайте всех морских млекопитающих!"
+          }
+        }
+      }
+    },
     "פּוֹצְצוּ אֶת כָּל הַמִּסְפָּרִים הַזּוּגִיִּים!" : {
       "localizations" : {
         "ar" : {
@@ -63334,6 +64786,50 @@
         }
       }
     },
+    "פּוֹצְצוּ אֶת כָּל הַמִּסְפָּרִים הָרִאשׁוֹנִיִּים!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فرقعوا كل الأعداد الأولية!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pop all the prime numbers!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лопайте все простые числа!"
+          }
+        }
+      }
+    },
+    "פּוֹצְצוּ אֶת כָּל הַמִּסְפָּרִים הָרִבּוּעִיִּים!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فرقعوا كل الأعداد المربعة!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pop all the square numbers!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лопайте все квадраты чисел!"
+          }
+        }
+      }
+    },
     "פּוֹצְצוּ אֶת כָּל הַמִּסְפָּרִים שֶׁמִּתְחַלְּקִים בְּ־%lld!" : {
       "localizations" : {
         "ar" : {
@@ -63352,6 +64848,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Лопайте все числа, которые делятся на %lld!"
+          }
+        }
+      }
+    },
+    "פּוֹצְצוּ אֶת כָּל הַפְּעָלִים בְּאַנְגְּלִית!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فرقعوا كل الأفعال بالإنجليزية!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pop all the English verbs!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лопайте все английские глаголы!"
+          }
+        }
+      }
+    },
+    "פּוֹצְצוּ אֶת כָּל כּוֹכְבֵי הַלֶּכֶת הַגָּזִיִּים!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فرقعوا كل الكواكب الغازية!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pop all the gas giant planets!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лопайте все газовые планеты!"
           }
         }
       }
@@ -63418,6 +64958,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Лопайте все столицы!"
+          }
+        }
+      }
+    },
+    "פּוֹצְצוּ אֶת כָּל תַּפְקִידֵי הַהֲגָנָה!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فرقعوا كل مراكز الدفاع!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pop all the defending positions!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лопайте все позиции защиты!"
           }
         }
       }
@@ -64481,6 +66043,28 @@
         }
       }
     },
+    "צָב יָם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سلحفاة بحرية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sea turtle"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Морская черепаха"
+          }
+        }
+      }
+    },
     "צָהוֹב-זָהוּב" : {
       "localizations" : {
         "ar" : {
@@ -65389,6 +66973,28 @@
         }
       }
     },
+    "קְנֵה נְשִׁימָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "القصبة الهوائية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Windpipe"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трахея"
+          }
+        }
+      }
+    },
     "קְסִילוֹפוֹן" : {
       "localizations" : {
         "ar" : {
@@ -65518,6 +67124,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Мы получили ваш отзыв — это очень нам помогает."
+          }
+        }
+      }
+    },
+    "קִטְנִיּוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بقوليات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legumes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бобовые"
           }
         }
       }
@@ -65766,6 +67394,28 @@
         }
       }
     },
+    "קֶרֶן יַעַר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البوق الفرنسي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "French horn"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Валторна"
+          }
+        }
+      }
+    },
     "קֶרֶשׁ" : {
       "localizations" : {
         "ar" : {
@@ -65916,6 +67566,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "носорог"
+          }
+        }
+      }
+    },
+    "קַשָּׁר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لاعب وسط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Midfielder"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Полузащитник"
+          }
+        }
+      }
+    },
+    "קַשָּׁר הֲגַנָּתִי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لاعب وسط مدافع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defensive midfielder"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Опорный полузащитник"
+          }
+        }
+      }
+    },
+    "קַשָּׁר הַתְקָפִי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لاعب وسط مهاجم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attacking midfielder"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Атакующий полузащитник"
           }
         }
       }
@@ -68263,6 +69979,28 @@
         }
       }
     },
+    "רוֹפֵא שִׁנַּיִם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طبيب أسنان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dentist"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стоматолог"
+          }
+        }
+      }
+    },
     "רוֹצִים לְצָרֵף תְּמוּנָה שֶׁל מַה שֶּׁעֲשִׂיתֶם? 📸" : {
       "localizations" : {
         "ar" : {
@@ -69752,6 +71490,28 @@
         }
       }
     },
+    "שְׁעוּעִית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فاصولياء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beans"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фасоль"
+          }
+        }
+      }
+    },
     "שְׁתֵּי יְלָדוֹת" : {
       "localizations" : {
         "ar" : {
@@ -69792,6 +71552,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "аренда квартиры"
+          }
+        }
+      }
+    },
+    "שְׂכַר לִמּוּד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قسط الدراسة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tuition"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плата за учёбу"
           }
         }
       }
@@ -69924,6 +71706,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сохранить"
+          }
+        }
+      }
+    },
+    "שִׁעוּרֵי בַּיִת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "واجب بيتي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homework"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Домашнее задание"
           }
         }
       }
@@ -70403,6 +72207,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Существительное"
+          }
+        }
+      }
+    },
+    "שֵׁם פְּעֻלָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسم المصدر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbal noun"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отглагольное существительное"
           }
         }
       }
@@ -71403,6 +73229,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "вратарь"
+          }
+        }
+      }
+    },
+    "שׁוֹפֵט" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Referee"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Судья"
           }
         }
       }
@@ -73122,6 +74970,28 @@
         }
       }
     },
+    "תִּקּוּן פַּנְצֶ'ר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تصليح بنشر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fixing a flat tyre"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ремонт прокола"
+          }
+        }
+      }
+    },
     "תִּרְצֶה" : {
       "localizations" : {
         "ar" : {
@@ -73342,6 +75212,28 @@
         }
       }
     },
+    "תַּעֲרֹבֶת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مخلوط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mixture"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Смесь"
+          }
+        }
+      }
+    },
     "תַּפְזֹרֶת" : {
       "localizations" : {
         "ar" : {
@@ -73492,6 +75384,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Яблоки с мёдом, гранат и праздничные символы"
+          }
+        }
+      }
+    },
+    "תַּרְכֹּבֶת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مركّب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compound"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Соединение"
           }
         }
       }

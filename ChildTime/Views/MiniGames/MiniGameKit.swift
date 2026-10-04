@@ -78,7 +78,7 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .lightning:  return tr("\(seconds(surprise: surprise)) שְׁנִיּוֹת — כַּמָּה שֶׁיּוֹתֵר תְּשׁוּבוֹת נְכוֹנוֹת!")
         case .sort:       return tr("\(seconds(surprise: surprise)) שְׁנִיּוֹת — גִּרְרוּ כָּל פְּרִיט לַסַּל הַמַּתְאִים")
         case .pattern:    return tr("6 סְדָרוֹת — מָה מַשְׁלִים אֶת הַתַּבְנִית?")
-        case .game2048:   return tr("חַבְּרוּ אֲרִיחִים זֵהִים — וְכָל 5 מַהֲלָכִים שְׁאֵלַת בּוֹנוּס")
+        case .game2048:   return tr("חַבְּרוּ אֲרִיחִים זֵהִים — וְכָל כַּמָּה מַהֲלָכִים מַגִּיעָה שְׁאֵלַת בּוֹנוּס")
         case .vault:      return tr("פַּצְּחוּ אֶת הַקּוֹד הַסּוֹדִי — 6 נִסְיוֹנוֹת, וּמַפְתְּחוֹת שֶׁפּוֹתְחִים סְפָרוֹת")
         case .grocery:    return surprise ? tr("2 קְנִיּוֹת — קוֹנִים לְפִי הָרְשִׁימָה וּמְחַשְּׁבִים עֹדֶף")
                                           : tr("3 קְנִיּוֹת — קוֹנִים לְפִי הָרְשִׁימָה וּמְחַשְּׁבִים עֹדֶף")
@@ -122,9 +122,11 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         }
     }
 
-    /// Text games — a pre-reader (גן) never gets one.
+    /// Text games — a pre-reader (גן) never gets one. Which of the twelve a
+    /// reader does get, grade by grade, is `MiniGameGradeFit` — the single
+    /// table behind the chooser, the surprise round and reports/games/grade-fit.md.
     static var availableForActiveChild: Bool {
-        (ProfileStore.shared.active?.effectiveGrade ?? 1) >= 1
+        MiniGameBand.of(ProfileStore.shared.active?.effectiveGrade ?? 1) > .preReader
     }
 }
 
