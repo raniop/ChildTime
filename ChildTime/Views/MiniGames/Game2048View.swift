@@ -20,6 +20,9 @@ struct Game2048View: View {
     @ObservedObject private var profiles = ProfileStore.shared
     @ObservedObject private var display = DisplayGeometry.shared
     @Environment(\.horizontalSizeClass) private var hsc
+    /// 🖼 A miniature on a What's-New story card: show the real screen,
+    /// but do not play it — no round is scored and no clock runs.
+    @Environment(\.isInertPreview) private var inertPreview
 
     private enum Phase { case intro, playing, done }
     static let movesPerBonus = 5
@@ -113,9 +116,10 @@ struct Game2048View: View {
         .environment(\.layoutDirection, .app)
         .onAppear {
             best = UserDefaults.standard.integer(forKey: Board2048.bestKey())
-            if (surprise || earn != nil) && phase == .intro { start() }
+            if (surprise || earn != nil || inertPreview) && phase == .intro { start() }
         }
         .onReceive(ticker) { t in
+            guard !inertPreview else { return }
             guard phase == .playing else { return }
             now = t
             if remaining <= 0 && bonus == nil { finish() }

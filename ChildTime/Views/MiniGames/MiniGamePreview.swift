@@ -14,6 +14,25 @@ struct MiniGamePreview: View {
     var topic: Topic?
     /// 👶 Draw the pre-reader's board. Defaults to the active child.
     var preReader: Bool = PreReaderGames.activeChildIsPreReader
+    /// How much room this miniature is meant to command.
+    var density: Density = .tile
+
+    /// 🔍 A miniature on a chooser tile and a miniature that IS a story card
+    /// are not the same picture.
+    ///
+    /// Every board below is drawn from one scalar `s`, but each uses a
+    /// different share of it — the word search fills under half, the pattern
+    /// row nearly all of it. On a 90pt chooser tile nobody notices. Given a
+    /// whole story card it is the difference between a hero and a stamp, and
+    /// Rani noticed immediately: "ציפיתי לראות באמת תמונה מוקטנת של כל משחק",
+    /// and what he got was a third of the width floating in a band of empty
+    /// gradient.
+    ///
+    /// So `.stage` grows `s` until the board's own drawn box touches the frame
+    /// it was given. `.tile` is the size every other screen has always used
+    /// and is unchanged — the chooser, the world screens and the story's own
+    /// two-up chooser card all keep it.
+    enum Density { case tile, stage }
 
     private static let blue = Color(hex: "48BFE3"), purple = Color(hex: "9B5DE5"), pink = Color(hex: "FF6B9D"),
                         orange = Color(hex: "FFB84D"), mint = Color(hex: "06D6A0")
@@ -24,13 +43,60 @@ struct MiniGamePreview: View {
 
     var body: some View {
         GeometryReader { geo in
-            let s = min(geo.size.width, geo.size.height * 1.6)
-            content(s)
+            content(scale(in: geo.size))
                 .frame(width: geo.size.width, height: geo.size.height)
         }
         .environment(\.layoutDirection, .leftToRight)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+
+    /// The scalar every board draws from. `.tile` keeps the historic value;
+    /// `.stage` enlarges it until this kind's own box fills the frame, and
+    /// never past it — the board grows at full resolution (fonts and frames
+    /// are computed from `s`), so nothing is a scaled, blurry layer.
+    private func scale(in size: CGSize) -> CGFloat {
+        let base = Swift.min(size.width, size.height * 1.6)
+        guard density == .stage, base > 0, size.width > 0, size.height > 0 else { return base }
+        let box = Self.extent(for: kind, preReader: preReader && kind.hasPreReaderForm)
+        let grow = Swift.min(size.width * 0.96 / (base * box.width),
+                             size.height * 0.96 / (base * box.height))
+        return base * Swift.min(Swift.max(grow, 1), 3.2)
+    }
+
+    /// 📐 What each board actually draws, as a fraction of `s` — measured off
+    /// the draw code below, which is where the numbers live. A story asks for
+    /// this to size its stage, so a square board (the word search, 2048) gets
+    /// a square card and a wide one (the pattern row) gets a shallow band,
+    /// instead of every game being posted into one 1.6 letterbox.
+    ///
+    /// Change a board's layout and you change its entry here; being a few
+    /// percent out only costs a few percent of size, never an overflow.
+    static func extent(for kind: MiniGameKind, preReader: Bool) -> CGSize {
+        if preReader {
+            switch kind {
+            case .pairs:   return CGSize(width: 0.70, height: 0.58)
+            case .balloon: return CGSize(width: 0.76, height: 0.45)
+            case .sort:    return CGSize(width: 0.66, height: 0.43)
+            case .pattern: return CGSize(width: 0.81, height: 0.34)
+            case .crush:   return CGSize(width: 0.66, height: 0.39)
+            default: break
+            }
+        }
+        switch kind {
+        case .pairs:      return CGSize(width: 0.73, height: 0.48)
+        case .balloon:    return CGSize(width: 0.72, height: 0.42)
+        case .word:       return CGSize(width: 0.43, height: 0.51)
+        case .crush:      return CGSize(width: 0.60, height: 0.43)
+        case .wordSearch: return CGSize(width: 0.46, height: 0.46)
+        case .lightning:  return CGSize(width: 0.62, height: 0.38)
+        case .sort:       return CGSize(width: 0.66, height: 0.40)
+        case .pattern:    return CGSize(width: 0.78, height: 0.32)
+        case .game2048:   return CGSize(width: 0.49, height: 0.49)
+        case .vault:      return CGSize(width: 0.72, height: 0.42)
+        case .grocery:    return CGSize(width: 0.66, height: 0.41)
+        case .balance:    return CGSize(width: 0.86, height: 0.45)
+        }
     }
 
     @ViewBuilder

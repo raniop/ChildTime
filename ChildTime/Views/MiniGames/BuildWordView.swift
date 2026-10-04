@@ -27,6 +27,9 @@ struct BuildWordView: View {
     @ObservedObject private var profiles = ProfileStore.shared
     @ObservedObject private var display = DisplayGeometry.shared
     @Environment(\.horizontalSizeClass) private var hsc
+    /// 🖼 A miniature on a What's-New story card: show the real screen,
+    /// but do not play it — no round is scored and no clock runs.
+    @Environment(\.isInertPreview) private var inertPreview
 
     private struct Tile: Identifiable { let id: Int; let letter: Character }
 
@@ -101,7 +104,7 @@ struct BuildWordView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if (surprise || earn != nil) && !started { begin() } }
+        .onAppear { if (surprise || earn != nil || inertPreview) && !started { begin() } }
     }
 
     // MARK: - Board

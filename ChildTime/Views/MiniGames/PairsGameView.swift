@@ -24,6 +24,9 @@ struct PairsGameView: View {
     @ObservedObject private var profiles = ProfileStore.shared
     @ObservedObject private var display = DisplayGeometry.shared
     @Environment(\.horizontalSizeClass) private var hsc
+    /// 🖼 A miniature on a What's-New story card: show the real screen,
+    /// but do not play it — no round is scored and no clock runs.
+    @Environment(\.isInertPreview) private var inertPreview
 
     /// The most pairs a board ever shows (two columns of six).
     static let pairCount = 6
@@ -55,7 +58,13 @@ struct PairsGameView: View {
     private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
     /// 👶 A pre-reader (גן): pictures only, four pairs, bigger tiles.
     /// One definition for all five games — see `PreReaderGames`.
+    /// 🖼 A story card showing the גן form to a PARENT has no גן child
+    /// active, so it says which form it wants. Everywhere else this is nil
+    /// and the answer is simply "is the child using the app a pre-reader".
+    var forcePreReader: Bool? = nil
+
     private var preReader: Bool {
+        if let forcePreReader { return forcePreReader }
         _ = profiles.active      // redraw when the active child changes
         return PreReaderGames.activeChildIsPreReader
     }
@@ -114,7 +123,7 @@ struct PairsGameView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if (surprise || earn != nil) && !started { deal() } }
+        .onAppear { if (surprise || earn != nil || inertPreview) && !started { deal() } }
     }
 
     private var subtitle: String {

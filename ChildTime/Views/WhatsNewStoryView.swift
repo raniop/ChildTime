@@ -33,7 +33,6 @@ struct WhatsNewStoryView: View {
     var liveInDemo: Bool = false
 
     @Environment(\.horizontalSizeClass) private var hsc
-    @Environment(\.layoutDirection) private var direction
 
     /// 🧊 The glass this story has, MEASURED here.
     ///
@@ -136,31 +135,71 @@ struct WhatsNewStoryView: View {
 
     // MARK: - 👧 The child's story: art first, name under it
 
+    /// 🎮 …except on a GAME card, where the name goes ON TOP. Rani pictured
+    /// it that way — "תמונה מוקטנת של כל משחק עם הסבר קטן למעלה" — and he is
+    /// right: the board is the thing to look at, so it gets the bottom of the
+    /// card to itself instead of being a lid over two lines of text.
+    private func namesGameFirst(_ item: StoryItem) -> Bool {
+        if case .game = item.art { return true }
+        return false
+    }
+
     @ViewBuilder
     private func kidBody(_ item: StoryItem) -> some View {
         VStack(spacing: short ? 8 : 14) {
+            if namesGameFirst(item) {
+                kidTitle(item)
+                kidLine(item)
+            }
+
             StoryArtView(art: item.art, isCompact: isCompact, short: short)
                 .frame(maxWidth: .infinity)
                 .frame(height: kidArtHeight)
 
-            Text(item.title)
-                .font(.system(size: kidTitleSize, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .lineLimit(2).minimumScaleFactor(0.55)
-                .shadow(color: .black.opacity(0.3), radius: 10, y: 4)
-
-            Text(item.line)
-                .font(.system(size: kidLineSize, weight: .bold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.95))
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+            if !namesGameFirst(item) {
+                kidTitle(item)
+                kidLine(item)
+            }
         }
         .padding(.horizontal, 22)
         .padding(.top, short ? 6 : 14)
         .padding(.bottom, short ? 6 : 16)
         .offset(y: risen ? 0 : 16)
         .opacity(risen ? 1 : 0)
+    }
+
+    /// The card already shows the real screen — the game's emoji on top of that
+    /// was noise, and inline it pushed a centred RTL title off-centre. Dropped
+    /// entirely (Rani, build 188): the name alone.
+    private func kidTitle(_ item: StoryItem) -> some View {
+        let (_, name) = Self.splitLeadingMark(item.title)
+        return VStack(spacing: 0) {
+            Text(name)
+                .font(.system(size: kidTitleSize, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .lineLimit(2).minimumScaleFactor(0.55)
+                .shadow(color: .black.opacity(0.3), radius: 10, y: 4)
+        }
+    }
+
+    /// Splits "🎈 בַּלּוֹנִים" into ("🎈", "בַּלּוֹנִים"); returns (nil, title) when
+    /// the title does not start with one.
+    static func splitLeadingMark(_ title: String) -> (String?, String) {
+        guard let first = title.first, first.unicodeScalars.contains(where: { $0.properties.isEmoji && $0.value > 0x238C }),
+              let space = title.firstIndex(of: " ") else { return (nil, title) }
+        let mark = String(title[title.startIndex..<space])
+        let rest = String(title[title.index(after: space)...])
+        guard !rest.isEmpty else { return (nil, title) }
+        return (mark, rest)
+    }
+
+    private func kidLine(_ item: StoryItem) -> some View {
+        Text(item.line)
+            .font(.system(size: kidLineSize, weight: .bold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.95))
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     // MARK: - 👨‍👩‍👧 The parent's story: the point first, the example under it
@@ -189,11 +228,15 @@ struct WhatsNewStoryView: View {
 
             // The stage runs from under the lead to just above the footer, as
             // the mockup draws it — it is what grows on a tall screen.
+            //
+            // 📱 …except a card that IS a phone. That art already carries a
+            // device frame of its own, and a glass pane around a phone is two
+            // frames arguing, with a band of empty glass between them.
             StoryArtView(art: item.art, isCompact: isCompact, short: short)
                 .frame(maxWidth: .infinity)
                 .frame(height: parentStageHeight(item.art))
-                .padding(.vertical, short ? 10 : 16)
-                .glassPane(radius: 24)
+                .padding(.vertical, framesItself(item.art) ? 0 : (short ? 10 : 16))
+                .glassPaneUnless(framesItself(item.art), radius: 24)
                 .padding(.top, short ? 8 : 14)
         }
         .padding(.horizontal, 20)
@@ -203,21 +246,36 @@ struct WhatsNewStoryView: View {
         .opacity(risen ? 1 : 0)
     }
 
+    /// A phone-framed screen brings its own border and shadow.
+    private func framesItself(_ art: StoryArt) -> Bool {
+        switch art {
+        case .game, .preReaderGame: return true
+        default: return false
+        }
+    }
+
     // MARK: - Chrome
 
     /// The thin segments children know: one per story, filling in real time.
     ///
-    /// 🐛 Rani, tapping through by hand: "יש באג למעלה עם החיווי הצהוב שזז" —
-    /// on the LAST card the bar showed segment 1 grey, 2 gold, 3 half-filled
-    /// and the rest gold. The cause: ONE animated `fill` drives every segment's
-    /// width, so a segment the tap skipped past kept the interrupted `.linear`
-    /// animation and crawled toward its new target for the rest of that
-    /// animation's duration — leaving the bar mid-fill in several places at once.
+    /// 🐛 Twice now, from Rani tapping through by hand: "החיווי למעלה שעוברים
+    /// מסך ידני עדיין לא תקין". Two separate causes, both fixed here.
     ///
-    /// So the bar is now a pure function of `(index, fill)`, and only the
-    /// CURRENT segment is allowed to animate at all. The ones behind it snap to
-    /// full, the ones ahead snap to empty, and `begin()` resets `fill` inside a
-    /// transaction with animations off so nothing can be left in flight.
+    /// 1️⃣ ANIMATION. One animated `fill` drove every segment's width, so a
+    /// segment a tap skipped past kept the interrupted `.linear` animation and
+    /// crawled toward its new target for the rest of that animation. The bar is
+    /// now a pure function of `(index, fill)` and only the CURRENT segment may
+    /// animate at all; everything else snaps.
+    ///
+    /// 2️⃣ DIRECTION — the one that survived to the device. The bar INHERITED
+    /// its layout direction, so in Hebrew the `HStack` mirrored and segment 0
+    /// sat on the RIGHT. Read the way anybody reads a progress bar, left to
+    /// right, that puts the filled segments AFTER the empty ones: "יש גריי
+    /// ואז זהב". The bar is a TIME AXIS, not a sentence — the same reason the
+    /// vault's code slots and the dashboard's "60/90" are pinned — so it is
+    /// pinned left-to-right in every language. Segment 0 is always leftmost
+    /// and the gold always grows rightwards. Inheriting is what broke it, so
+    /// nothing here is inherited.
     private var segments: some View {
         HStack(spacing: 4) {
             ForEach(items.indices, id: \.self) { i in
@@ -236,6 +294,9 @@ struct WhatsNewStoryView: View {
             }
         }
         .frame(height: 4)
+        // 🧭 Pinned, not inherited: a timeline reads left to right in Hebrew
+        // and Arabic too, and this is the bug Rani saw on the device.
+        .environment(\.layoutDirection, .leftToRight)
     }
 
     /// Read it as state, not as a timeline: before = done, current = running,
@@ -411,7 +472,7 @@ struct WhatsNewStoryView: View {
 
                 guard abs(dx) > abs(dy) else { return }
                 let towardsStart = dx > 0
-                let forward = direction == .rightToLeft ? towardsStart : !towardsStart
+                let forward = LayoutDirection.app == .rightToLeft ? towardsStart : !towardsStart
                 forward ? advance() : back()
             }
     }
@@ -500,9 +561,12 @@ struct WhatsNewStoryView: View {
         return Swift.min(safeW * 0.92, 900)
     }
 
-    /// 👧 Art first and big — on a large screen it takes more than half.
+    /// 👧 Art first and big. 📱 A game card is now a whole PHONE, so it takes
+    /// every point it can get — the frame is tall and narrow, and the slack
+    /// left over goes beside it, not above it.
     private var kidArtHeight: CGFloat {
-        share(isCompact ? 0.45 : 0.55, min: 170, max: 860)
+        if case .game = item?.art { return share(isCompact ? 0.62 : 0.66, min: 200, max: 980) }
+        return share(isCompact ? 0.48 : 0.58, min: 170, max: 860)
     }
 
     /// 👨‍👩‍👧 The stage's height, inside the glass pane's own padding.
@@ -523,6 +587,9 @@ struct WhatsNewStoryView: View {
             // Bubbles, like rows, look stranded in a pane built for a poster.
             let n = CGFloat(Swift.max(lines.count, 1))
             return Swift.min(height, n * (isCompact ? 104 : 140) + gap)
+        case .game, .preReaderGame:
+            // A phone wants height, and the parent's cards have text above it.
+            return share(isCompact ? 0.52 : 0.58, min: 180, max: 900)
         default:
             return height
         }
@@ -640,28 +707,23 @@ private struct Box: View {
         .frame(width: box.width, height: box.height)
     }
 
-    /// 🎮 The game's own emoji, and under it the real board it plays on — so
-    /// the child recognises the screen before they ever open it. The miniature
-    /// draws its גן form by itself for a pre-reader.
+    /// 📱 THE REAL SCREEN, JUST SMALLER.
     ///
-    /// The frame HUGS the board: `MiniGamePreview` draws at `min(w, h × 1.6)`,
-    /// so a box in that exact ratio is filled edge to edge instead of being a
-    /// large pane of padding around a small board.
+    /// Rani, after build 188: "אני רוצה שהסטוריז התצוגה של מסך חדש תהיה
+    /// אמיתית מתוך האפליקציה פשוט מוקטנת קצת" — with a picture of the whole
+    /// grocery screen inside a phone. So the card no longer draws a stylised
+    /// board at all: `MiniGameScreenPreview` builds the game's REAL view at a
+    /// phone's size, inert, and scales it into the stage inside a device
+    /// frame. The title and its one line stay above it.
     private func gameArt(_ kind: MiniGameKind, topic: Topic, preReader: Bool? = nil) -> some View {
-        let gap = box.height * 0.04
-        let emojiBand = box.height * 0.32
-        let boardH = box.height - emojiBand - gap
-        return VStack(spacing: gap) {
-            ZStack {
-                glow(AppColor.starGold, size: emojiBand * 1.5)
-                Text(kind.emoji)
-                    .font(.system(size: emojiBand * 0.92))
-                    .shadow(color: .black.opacity(0.3), radius: 14, y: 9)
+        Group {
+            if let preReader {
+                MiniGameScreenPreview(kind: kind, topic: topic, preReader: preReader, box: box)
+            } else {
+                MiniGameScreenPreview(kind: kind, topic: topic, box: box)
             }
-            .frame(height: emojiBand)
-
-            board(kind, topic: topic, preReader: preReader, height: boardH)
         }
+        .frame(width: box.width, height: box.height)
     }
 
     /// The real board in a frame that HUGS it: `MiniGamePreview` draws at
