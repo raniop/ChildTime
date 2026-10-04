@@ -57587,6 +57587,28 @@
         }
       }
     },
+    "נַחֲשׁוּ אֶת הַקּוֹד! אַחֲרֵי כָּל נִסָּיוֹן הַצְּבָעִים מְגַלִּים כַּמָּה הִתְקָרַבְתֶּם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خمّنوا الرمز! بعد كل محاولة تكشف الألوان كم اقتربتم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guess the code! After each try the colors show how close you got"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Угадайте код! После каждой попытки цвета показывают, насколько вы близко"
+          }
+        }
+      }
+    },
     "נַסֵּה לְהִזָּכֵר בְּמַשֶּׁהוּ דּוֹמֶה שֶׁרָאִיתָ בָּעוֹלָם הָאֲמִתִּי." : {
       "localizations" : {
         "ar" : {

@@ -306,7 +306,10 @@ struct WorldGameChooserView: View {
             .frame(maxWidth: .infinity)
             .miniGameTile(.normal, tint: OptionCard.tints[i % OptionCard.tints.count], radius: 24)
             .overlay(outline(kind.rawValue))
-            .scaleEffect(appeared ? 1 : 0.9)
+            // Rises into place instead of scaling up: SwiftUI rasterizes a
+            // scaling view, so animating the card's scale blurred every label
+            // on it for the length of the animation.
+            .offset(y: appeared ? 0 : 14)
             .opacity(appeared ? 1 : 0)
             .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.03 * Double(i)), value: appeared)
         }
