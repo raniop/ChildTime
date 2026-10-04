@@ -16,13 +16,17 @@ struct ActivityCenterView: View {
     /// Where a tapped row should take the parent. The dashboard owns the actual
     /// navigation, so the sheet can close first and the destination open after.
     var onOpen: (ActivityRoute, Profile?) -> Void = { _, _ in }
+    /// 🎁 And where a tapped offer goes — the paywall, a pack's page, iOS settings.
+    var onOffer: (ActivityOfferAction) -> Void = { _ in }
+    /// A pack card from the shelf at the bottom.
+    var onPack: (QuestionPack) -> Void = { _ in }
 
     private var days: [ActivityDay] { ActivityDay.group(feed.items) }
 
     var body: some View {
         NavigationStack {
             Group {
-                if days.isEmpty {
+                if days.isEmpty && feed.offers.isEmpty && !feed.showsPacksShelf {
                     emptyState
                 } else {
                     list
@@ -53,6 +57,29 @@ struct ActivityCenterView: View {
 
     private var list: some View {
         List {
+            // 🎁 Standing offers first — this is where the panes that used to sit
+            // above the children's cards live now.
+            if !feed.offers.isEmpty {
+                Section {
+                    ForEach(feed.offers) { offer in
+                        Button { open(offer) } label: { offerRow(offer) }
+                            .buttonStyle(.plain)
+                    }
+                } header: {
+                    sectionHeader(tr("מטופי"))
+                }
+                .glassRows()
+            }
+            if days.isEmpty {
+                Section {
+                    Text(tr("עוד אין פעילות להראות. ברגע שהילדים יתחילו לשחק, הכל יופיע כאן."))
+                        .font(.system(size: 13))
+                        .foregroundStyle(GlassInk.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .multilineTextAlignment(.center)
+                        .listRowBackground(Color.clear)
+                }
+            }
             ForEach(days) { day in
                 Section {
                     ForEach(day.items) { item in
@@ -60,9 +87,7 @@ struct ActivityCenterView: View {
                             .buttonStyle(.plain)
                     }
                 } header: {
-                    Text(day.title)
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
-                        .foregroundStyle(GlassInk.secondary)
+                    sectionHeader(day.title)
                 }
                 .glassRows()
             }
@@ -72,6 +97,16 @@ struct ActivityCenterView: View {
                     .foregroundStyle(GlassInk.tertiary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .listRowBackground(Color.clear)
+            }
+            // 🌍 The worlds / packs shelf, with its own card design: each card is
+            // a different destination and carries a per-child status, so it would
+            // lose its meaning flattened into one row.
+            if feed.showsPacksShelf {
+                Section {
+                    PacksHomeSection { onPack($0) }
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                }
             }
         }
         .listStyle(.insetGrouped)
@@ -137,6 +172,49 @@ struct ActivityCenterView: View {
         }
     }
 
+    private func sectionHeader(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .foregroundStyle(GlassInk.secondary)
+    }
+
+    /// An offer reads like every other row — avatar disc, a line, a detail — but
+    /// gold, and with a chevron instead of a time, so it is plainly an offer and
+    /// not something that happened at 19:04.
+    private func offerRow(_ offer: ActivityOffer) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text(offer.emoji)
+                .font(.system(size: 20))
+                .frame(width: 44, height: 44)
+                .background(Circle().fill(offer.gold ? Color(hex: "FFD23F").opacity(0.28)
+                                                     : Color.white.opacity(0.18)))
+                .overlay(Circle().strokeBorder(offer.gold ? Color(hex: "FFEBAA").opacity(0.6)
+                                                          : Color.white.opacity(0.26), lineWidth: 1))
+            VStack(alignment: .leading, spacing: 3) {
+                Text(offer.title)
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(GlassInk.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let detail = offer.detail {
+                    Text(detail)
+                        .font(.system(size: 13))
+                        .foregroundStyle(GlassInk.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Spacer(minLength: 4)
+            if offer.action != .none {
+                Image(systemName: AppSymbol.forwardChevron)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(GlassInk.tertiary)
+                    .padding(.top, 2)
+            }
+        }
+        .padding(.vertical, 4)
+        .environment(\.layoutDirection, .app)
+        .contentShape(Rectangle())
+    }
+
     // MARK: Empty
 
     private var emptyState: some View {
@@ -176,6 +254,13 @@ struct ActivityCenterView: View {
 
     private func childName(_ item: ActivityItem) -> String? {
         profile(for: item)?.name ?? item.childName
+    }
+
+    private func open(_ offer: ActivityOffer) {
+        guard offer.action != .none else { return }
+        Haptic.light()
+        dismiss()
+        onOffer(offer.action)
     }
 
     private func open(_ item: ActivityItem) {

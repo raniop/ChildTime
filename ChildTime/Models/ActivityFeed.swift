@@ -516,6 +516,157 @@ enum ActivityDerived {
     }
 }
 
+// MARK: - Standing offers (what used to sit above the children)
+
+/// Where a tapped offer goes. The screen that presents the feed owns the actual
+/// navigation, so this type stays free of SwiftUI — same shape as `ActivityRoute`.
+enum ActivityOfferAction: Equatable {
+    case none
+    case paywall(source: String)
+    case manageSubscription
+    /// A world pass or a question pack, by `QuestionPack.id`, for one child.
+    case pack(id: String, childID: String?)
+    case notificationSettings
+}
+
+/// 🎁 A standing offer or notice — Tofy+, the gift journey, a child's request,
+/// "notifications are off".
+///
+/// These used to stack ABOVE the children's cards on the parent home and push
+/// them down the screen; the children are the point of that screen, so they live
+/// here now (Rani). An offer is NOT something that happened: it carries no
+/// timestamp, never counts toward the unread badge, and is never stored. It is
+/// derived live from the very state the panes read, which is what keeps it from
+/// flooding the feed — exactly one row per offer, replaced rather than repeated,
+/// and gone the moment the offer is.
+struct ActivityOffer: Identifiable, Equatable {
+    var id: String
+    var emoji: String
+    var title: String
+    var detail: String?
+    var action: ActivityOfferAction = .none
+    /// Gold = the Tofy+ family of offers; plain glass = a notice.
+    var gold: Bool = false
+}
+
+/// Pure: the offers that apply right now.
+enum ActivityOffers {
+    struct Input {
+        var now: Date = Date()
+        var isPremium = false
+        var introEligible = false
+        var notificationsOn = true
+        var children: [Profile] = []
+        /// `households/{id}` conversion journey.
+        var giftUntil: Date?
+        var giftStarted = false
+        var giftEnded = false
+        var activation: ActivationProgress?
+        /// Children who tapped "ask a parent" on their own device.
+        var premiumAskers: [Profile] = []
+        var premiumTopics: [UUID: String] = [:]
+        var packAskers: [(child: Profile, pack: QuestionPack)] = []
+        /// Best child by answered questions — the one the gift copy talks about.
+        var star: (profile: Profile, snapshot: ProgressSnapshot)?
+    }
+
+    static func current(_ input: Input) -> [ActivityOffer] {
+        var out: [ActivityOffer] = []
+
+        // A child's own request comes first — it is the reason the parent opened
+        // the app at all.
+        if !input.isPremium, !input.premiumAskers.isEmpty {
+            // "רוצה" is spelled the same for a boy and for a girl once the
+            // niqqud is gone — which is how one string serves both.
+            var title = tr("\(input.premiumAskers.map(\.name).joined(separator: tr(" ו"))) רוצים טופי+")
+            if input.premiumAskers.count == 1, let p = input.premiumAskers.first {
+                title = tr("\(p.name) רוצה טופי+")
+            }
+            var emoji = "👑"
+            var detail = tr("מנוי אחד לכל המשפחה — נפתח מכאן, בטלפון שלכם")
+            var action = ActivityOfferAction.paywall(source: "child_request")
+            if input.premiumAskers.count == 1, let p = input.premiumAskers.first,
+               let raw = input.premiumTopics[p.id], let topic = Topic(rawValue: raw),
+               let pass = WorldPasses.pass(for: topic) {
+                emoji = topic.emoji
+                detail = tr("\(topic.displayName) — עולם בודד ל-30 יום, או טופי+ לכל המשפחה")
+                action = .pack(id: pass.id, childID: p.id.uuidString)
+            }
+            out.append(ActivityOffer(id: "offer.premiumRequest", emoji: emoji,
+                                     title: title,
+                                     detail: detail, action: action, gold: true))
+        }
+        for row in input.packAskers {
+            out.append(ActivityOffer(id: "offer.pack.\(row.child.id.uuidString).\(row.pack.id)",
+                                     emoji: row.pack.emoji,
+                                     title: tr("\(row.child.name) רוצה את \(row.pack.name)"),
+                                     detail: tr("שאלון חדש · תוספת · נפתח מכאן, בטלפון שלכם"),
+                                     action: .pack(id: row.pack.id, childID: row.child.id.uuidString),
+                                     gold: false))
+        }
+
+        // The conversion journey — one row for wherever the family stands.
+        if let until = input.giftUntil, until > input.now {
+            let days = max(0, Int(ceil(until.timeIntervalSince(input.now) / 86_400)))
+            if days > 7 {
+                out.append(ActivityOffer(id: "offer.gift", emoji: "🎁",
+                                         title: tr("טופי+ במתנה — עוד \(days) ימים"),
+                                         detail: tr("כל העולמות פתוחים עד \(shortDate(until)). בלי כרטיס, לא מתחדש."),
+                                         action: .none, gold: true))
+            } else {
+                var detail = tr("אפשר להשאיר את כל העולמות פתוחים")
+                if let star = input.star, star.snapshot.totalAnswered > 0 {
+                    let s = star.snapshot
+                    let worlds = s.topicAnswered.values.filter { $0 > 0 }.count
+                    let accuracy = Int((Double(s.totalCorrect) / Double(s.totalAnswered) * 100).rounded())
+                    detail = tr("\(worlds) עולמות · \(s.totalAnswered) שאלות · \(accuracy)% הצלחה — אפשר להשאיר הכל פתוח")
+                }
+                out.append(ActivityOffer(id: "offer.gift", emoji: "🎁",
+                                         title: tr("המתנה מסתיימת ב-\(shortDate(until))"),
+                                         detail: detail,
+                                         action: .paywall(source: "gift_card"), gold: true))
+            }
+        } else if !input.isPremium, !input.giftStarted,
+                  let a = input.activation, a.questions > 0, let star = input.star {
+            let next = a.daysLeft > 0
+                ? tr("\(star.profile.name) · \(a.questions) שאלות עד עכשיו · עוד \(a.daysLeft) ימים פעילים")
+                : tr("\(star.profile.name) · \(a.questions) שאלות עד עכשיו · עוד \(a.questionsLeft) שאלות")
+            out.append(ActivityOffer(id: "offer.activation", emoji: "🎉",
+                                     title: tr("עוד קצת וטופי+ ייפתח לכם במתנה"),
+                                     detail: next, action: .none, gold: true))
+        } else if input.isPremium {
+            out.append(ActivityOffer(id: "offer.tofyPlus", emoji: "👑",
+                                     title: tr("טופי+ פעיל"),
+                                     detail: tr("לכל המשפחה · ניהול המנוי"),
+                                     action: .manageSubscription, gold: true))
+        } else {
+            out.append(ActivityOffer(id: "offer.tofyPlus", emoji: "👑",
+                                     title: tr("טופי+ לכל המשפחה"),
+                                     detail: input.introEligible
+                                        ? tr("כל העולמות, המשחקים והמטלות, לכל הילדים ובכל המכשירים · 7 ימים חינם")
+                                        : tr("כל העולמות, המשחקים והמטלות, לכל הילדים ובכל המכשירים"),
+                                     action: .paywall(source: "activity_center"), gold: true))
+        }
+
+        // 🔔 Notifications off — the one notice that belongs here more than it
+        // ever belonged on the home: this IS the page about notifications.
+        if !input.notificationsOn {
+            out.append(ActivityOffer(id: "offer.notifications", emoji: "🔕",
+                                     title: tr("ההתראות כבויות"),
+                                     detail: tr("הפעילו כדי לדעת מיד כשמשהו קורה אצל הילדים"),
+                                     action: .notificationSettings, gold: false))
+        }
+        return out
+    }
+
+    private static func shortDate(_ d: Date) -> String {
+        let f = DateFormatter()
+        f.locale = LanguageStore.shared.current.locale
+        f.setLocalizedDateFormatFromTemplate("d MMMM")
+        return f.string(from: d)
+    }
+}
+
 // MARK: - The store the bell and the screen read
 
 /// Merges the three sources into one feed and keeps the unread count.
@@ -531,8 +682,13 @@ final class ActivityFeedStore: ObservableObject {
 
     /// Newest first, already merged and capped.
     @Published private(set) var items: [ActivityItem] = []
-    /// Rows newer than the parent's last visit.
+    /// Rows newer than the parent's last visit. Offers are never counted — a
+    /// standing offer would keep the badge lit for ever.
     @Published private(set) var unread: Int = 0
+    /// 🎁 The standing offers that used to sit above the children's cards.
+    @Published private(set) var offers: [ActivityOffer] = []
+    /// Whether the worlds / packs shelf has anything to show down there.
+    @Published private(set) var showsPacksShelf = false
 
     static let cloudLimit = 60
 
@@ -540,6 +696,8 @@ final class ActivityFeedStore: ObservableObject {
     private var demoItems: [ActivityItem]?
     /// A demo run never touches the stored read mark — it keeps its own.
     private var demoReadAt: Date?
+    /// A demo run shows the offers too (they are half the screen's story).
+    private var demoOffers = false
     private var started = false
     private var bag = Set<AnyCancellable>()
     private var pendingRefresh = false
@@ -609,8 +767,14 @@ final class ActivityFeedStore: ObservableObject {
         if let demoItems {
             items = ActivityItem.merged(demoItems)
             unread = items.filter { $0.at > readMark }.count
+            if demoOffers {
+                offers = ActivityOffers.current(offersInput())
+                showsPacksShelf = true
+            }
             return
         }
+        offers = ActivityOffers.current(offersInput())
+        showsPacksShelf = packsShelfApplies
         let derived = ActivityDerived.items(derivedInput())
         items = ActivityItem.merged(ActivityLog.items + cloudItems + derived)
         let since = readMark
@@ -640,6 +804,49 @@ final class ActivityFeedStore: ObservableObject {
         input.devices = HouseholdManager.shared.devicesByChild
         input.supportUnread = SupportChatStore.shared.parentUnread
         return input
+    }
+
+    /// Everything the standing offers are decided from. Cheap: all of it is
+    /// already in memory for the parent home.
+    private func offersInput() -> ActivityOffers.Input {
+        var input = ActivityOffers.Input()
+        let profiles = ProfileStore.shared.profiles
+        let subs = SubscriptionManager.shared
+        let remote = RemoteSyncManager.shared
+        input.children = profiles
+        input.isPremium = subs.isPremium
+        input.introEligible = subs.yearlyIntroEligible
+        input.notificationsOn = PushManager.shared.authorized
+        if let hh = HouseholdManager.shared.household {
+            if hh.premiumSource == "gift" { input.giftUntil = hh.giftUntil ?? hh.premiumUntil }
+            input.giftStarted = hh.giftStartedAt != nil
+            input.giftEnded = hh.giftEndedAt != nil
+            input.activation = hh.activation
+        }
+        input.premiumAskers = profiles.filter { remote.premiumRequests[$0.id] != nil }
+        input.premiumTopics = remote.premiumRequestTopics
+        input.packAskers = profiles.compactMap { p in
+            guard let id = remote.packRequests[p.id], let pack = QuestionPacks.find(id),
+                  !p.owns(pack) else { return nil }
+            return (child: p, pack: pack)
+        }
+        // The child with the most play — the one the gift copy talks about.
+        var best: (profile: Profile, snapshot: ProgressSnapshot)?
+        for p in profiles {
+            let snap = remote.remoteSnapshots[p.id] ?? ProgressVault.shared.snapshot(for: p.id)
+            if snap.totalAnswered > (best?.snapshot.totalAnswered ?? -1) { best = (p, snap) }
+        }
+        input.star = best
+        return input
+    }
+
+    /// 🌍 The one-time doors (30-day worlds, packs) are the fallback for a family
+    /// that will not subscribe — the same founder knob the home used: shown only
+    /// once the gift has ended, never beside it.
+    private var packsShelfApplies: Bool {
+        if SubscriptionManager.shared.isPremium { return true }
+        if !ConversionConfig.shared.oneTimeAfterGiftOnly { return true }
+        return HouseholdManager.shared.household?.giftEndedAt != nil
     }
 
     // MARK: Read state
@@ -721,6 +928,7 @@ final class ActivityFeedStore: ObservableObject {
             item(4_400, .weeklyReport,  first),
         ]
         demoReadAt = now.addingTimeInterval(-60 * 60)   // a few unread, for the badge
+        demoOffers = true
         refresh()
     }
 

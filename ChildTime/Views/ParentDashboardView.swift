@@ -284,6 +284,36 @@ struct ParentDashboardView: View {
         if let target { choresProfile = target }
     }
 
+    /// 🎁 A tapped offer in the bell's page — the panes that used to live above
+    /// the children keep leading exactly where they led before.
+    private func openOffer(_ action: ActivityOfferAction) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            switch action {
+            case .none:
+                break
+            case .paywall(let source):
+                household.bumpFunnel("parentOpened")
+                paywallSource = source
+                showingPaywall = true
+            case .manageSubscription:
+                showingManageSubscription = true
+            case .pack(let id, let childID):
+                packRequestChild = childID.flatMap { raw in
+                    profiles.profiles.first { $0.id.uuidString == raw }
+                }
+                packToShow = QuestionPacks.find(id) ?? WorldPasses.all.first { $0.id == id }
+            case .notificationSettings:
+                Task {
+                    await PushManager.shared.requestAuthorization()
+                    if !PushManager.shared.authorized,
+                       let url = URL(string: UIApplication.openSettingsURLString) {
+                        await MainActor.run { openURL(url) }
+                    }
+                }
+            }
+        }
+    }
+
     /// 🔔 A tapped feed row. The sheet has already dismissed itself; give UIKit
     /// a beat before presenting the next one, or the second sheet is swallowed.
     private func openActivity(_ route: ActivityRoute, _ who: Profile?) {
@@ -325,31 +355,21 @@ struct ParentDashboardView: View {
                                 homeHeader
                                 // ⚙️ / ＋ / 🧹 moved into the rail on the Duo.
                                 if !useRail { homeActionsRow }
-                                // 🧠 A child is stuck on a question RIGHT NOW — above
-                                // everything else; it is live and it is short.
+                                // Rani: "אני לא רוצה יותר להציג את זה שם" — nothing
+                                // promotional or merely informational stacks above the
+                                // children any more. Tofy+, the gift journey, a child's
+                                // purchase request, the worlds/packs shelf and the
+                                // "notifications are off" notice all moved into the 🔔
+                                // page (see `ActivityOffers`), and the children's cards
+                                // moved up into the space they left.
+                                //
+                                // What is still allowed here is only what the parent has
+                                // to ACT on, and only while they have to:
+                                // 🧠 a child stuck on a question RIGHT NOW — live, and
+                                // gone again within the hour.
                                 ForEach(parentHelp.pendingForParent) { req in helpRequestBanner(req) }
-                                // 🎁 The conversion journey (approved mockups): a card for
-                                // where the family is — before the gift, inside it, near
-                                // its end — instead of one static Tofy+ card.
-                                if let gift = giftState {
-                                    giftCards(gift)
-                                } else {
-                                    activationCard
-                                    tofyPlusCard
-                                }
-                                // A child's request comes FIRST (approved mockup) — it is
-                                // the reason the parent opened the app.
-                                if !subs.isPremium, !remote.premiumRequests.isEmpty {
-                                    premiumRequestBanner
-                                }
-                                ForEach(packRequestRows, id: \.child.id) { row in packRequestBanner(row.child, row.pack) }
-                                // The one-time doors (30-day worlds, packs) are the fallback
-                                // for a family that will not subscribe — shown only once the
-                                // gift has ended (founder knob), never beside it.
-                                if subs.isPremium || !ConversionConfig.shared.oneTimeAfterGiftOnly || household.household?.giftEndedAt != nil {
-                                    PacksHomeSection { packToShow = $0 }
-                                }
-                                if !push.authorized { notificationsBanner }
+                                // 🧹 a kid finished a chore and cannot get their reward
+                                // until someone approves it.
                                 if !choreStore.pendingApproval.isEmpty { choresApprovalBanner }
                                 // ⏱ Once: the daily screen-time ceiling, per child —
                                 // right above the children it is about.
@@ -492,8 +512,20 @@ struct ParentDashboardView: View {
             // 🔔 The activity centre. The sheet closes itself first and hands the
             // destination back here, so a tapped row lands on the real screen.
             .sheet(isPresented: $showingActivity) {
-                ActivityCenterView { route, who in openActivity(route, who) }
+                ActivityCenterView(
+                    onOpen: { route, who in openActivity(route, who) },
+                    onOffer: { action in openOffer(action) },
+                    onPack: { pack in
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                            packRequestChild = nil
+                            packToShow = pack
+                        }
+                    })
             }
+            // 👑 The App Store's own "manage subscription" sheet. It used to hang
+            // off the Tofy+ pane on the home; that pane is a row in the bell's
+            // page now, so its host lives here, where it is always mounted.
+            .manageSubscriptionsSheet(isPresented: $showingManageSubscription)
             .sheet(isPresented: $showingReorder) {
                 ChildOrderView(profiles: rows.map(\.profile)) { ordered in
                     household.setChildOrder(ordered.map(\.id))
@@ -733,75 +765,6 @@ struct ParentDashboardView: View {
         }
     }
 
-    /// ⚽ Children asking for a pack (from their device), with the pack resolved.
-    private var packRequestRows: [(child: Profile, pack: QuestionPack)] {
-        profiles.profiles.compactMap { p in
-            guard let id = remote.packRequests[p.id], let pack = QuestionPacks.find(id), !p.owns(pack) else { return nil }
-            return (p, pack)
-        }
-    }
-
-    private func packRequestBanner(_ child: Profile, _ pack: QuestionPack) -> some View {
-        Button {
-            Haptic.light()
-            packRequestChild = child
-            packToShow = pack
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold))
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(tr("\(child.name) \(child.gender == .girl ? tr("מְבַקֶּשֶׁת") : tr("מְבַקֵּשׁ")) אֶת \(pack.name) \(pack.emoji)"))
-                        .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    Text(tr("שְׁאֵלוֹן חָדָשׁ · תּוֹסֶפֶת · נִפְתָּח מִכָּאן, בַּטֶּלֶפוֹן שֶׁלָּכֶם"))
-                        .font(.system(size: 12.5, weight: .medium, design: .rounded))
-                        .foregroundStyle(GlassInk.secondary)
-                }
-                .multilineTextAlignment(.appMirroredText)
-                Text(pack.emoji).font(.system(size: 26))
-            }
-            .foregroundStyle(GlassInk.primary)
-            .padding(14)
-            .glassPane(radius: 20, strength: 0.18, tint: Color(hex: "8CFFC4"))
-        }
-        .buttonStyle(.plain)
-        .overlay(alignment: .topLeading) {
-            Button { Haptic.light(); remote.clearPackRequest(childID: child.id) } label: {
-                Image(systemName: "xmark").font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(GlassInk.secondary).padding(8)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(tr("סגור את הבקשה"))
-        }
-    }
-
-    /// "נועה רוצה ללמוד מתמטיקה 🧮 — טופי+" when she tapped a world; else the generic line.
-    /// The second line: after a gift, the child's own history in that world
-    /// ("בתקופת המתנה היא ענתה שם על 72 שאלות ב־91%") — approved mockup.
-    private func premiumRequestLine(_ askers: [Profile]) -> String {
-        if askers.count == 1, let p = askers.first, let raw = remote.premiumRequestTopics[p.id] {
-            if household.household?.giftEndedAt != nil,
-               let snap = remote.remoteSnapshots[p.id], let n = snap.topicAnswered[raw], n > 0 {
-                let c = snap.topicCorrect[raw] ?? 0
-                let acc = Int((Double(c) / Double(n) * 100).rounded())
-                let g = p.gender == .girl
-                return tr("בתקופת המתנה \(g ? tr("היא ענתה") : tr("הוא ענה")) שם על \(n) שאלות ב־\(acc)%. ההתקדמות \(g ? tr("שלה") : tr("שלו")) שמורה.")
-            }
-            return tr("עולם בודד ל־30 יום, או טופי+ לכל המשפחה — מכאן, בטלפון שלכם")
-        }
-        return tr("מנוי אחד לכל המשפחה — נפתח מכאן, בטלפון שלכם")
-    }
-
-    private func premiumRequestTitle(_ askers: [Profile]) -> String {
-        let names = askers.map(\.name)
-        if askers.count == 1, let p = askers.first,
-           let raw = remote.premiumRequestTopics[p.id], let topic = Topic(rawValue: raw) {
-            let ended = WorldPasses.pass(for: topic).map { p.passExpired($0) } ?? false
-            return tr("\(p.name) \(p.gender == .girl ? tr("רוצה") : tr("רוצה")) \(ended ? tr("להמשיך") : tr("ללמוד")) \(topic.displayName) \(topic.emoji)")
-        }
-        return names.count == 1 ? tr("\(names[0]) רוצה טופי+ 👑") : tr("\(names.joined(separator: tr(" ו"))) רוצים טופי+ 👑")
-    }
-
     /// 🧠 "נועה מבקשת עזרה בשאלה" — tap opens the answer sheet.
     private func helpRequestBanner(_ req: HelpRequest) -> some View {
         Button {
@@ -826,51 +789,6 @@ struct ParentDashboardView: View {
             .glassPane(radius: 20, strength: 0.18, tint: Color(hex: "7A5CFF"))
         }
         .buttonStyle(.plain)
-    }
-
-    private var premiumRequestBanner: some View {
-        let askers = profiles.profiles.filter { remote.premiumRequests[$0.id] != nil }
-        let names = askers.map(\.name)
-        return Button {
-            Haptic.light()
-            household.bumpFunnel("parentOpened")
-            paywallSource = "child_request"
-            // One child asked for ONE world → its page (30 days, or Tofy+).
-            if askers.count == 1, let p = askers.first,
-               let raw = remote.premiumRequestTopics[p.id], let topic = Topic(rawValue: raw),
-               let pass = WorldPasses.pass(for: topic) {
-                packRequestChild = p
-                packToShow = pass
-            } else {
-                showingPaywall = true
-            }
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold))
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(premiumRequestTitle(askers))
-                        .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    Text(premiumRequestLine(askers))
-                        .font(.system(size: 12.5, weight: .medium, design: .rounded))
-                        .foregroundStyle(GlassInk.secondary)
-                }
-                .multilineTextAlignment(.appMirroredText)
-                Text("👑").font(.system(size: 26))
-            }
-            .foregroundStyle(GlassInk.primary)
-            .padding(14)
-            .glassPane(radius: 20, strength: 0.18, tint: AppColor.starGold)
-        }
-        .buttonStyle(.plain)
-        .overlay(alignment: .topLeading) {
-            Button { Haptic.light(); remote.clearPremiumRequests() } label: {
-                Image(systemName: "xmark").font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(GlassInk.secondary).padding(8)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(tr("סגור את הבקשה"))
-        }
     }
 
 
@@ -1325,184 +1243,14 @@ struct ParentDashboardView: View {
         .environment(\.layoutDirection, .app)
     }
 
-    /// 👑 Tofy+ lives on the home (Rani) — the one warm pane: the family offer
-    /// until they subscribe, a quiet status line once they have. The only way
-    /// into the (parent-gated) paywall.
-    // MARK: - 🎁 Conversion journey cards (parent home)
-
-    /// The family holds Tofy+ as the engine's gift — how many days remain.
-    private struct GiftState { let until: Date; let daysLeft: Int }
-    private var giftState: GiftState? {
-        guard subs.isPremium, let hh = household.household, hh.premiumSource == "gift",
-              let until = hh.giftUntil ?? hh.premiumUntil, until > .now else { return nil }
-        let days = Int(ceil(until.timeIntervalSinceNow / 86_400))
-        return GiftState(until: until, daysLeft: max(0, days))
-    }
-
-    /// The child with the most play — the one the copy talks about.
-    private var starRow: (profile: Profile, snapshot: ProgressSnapshot)? {
-        rows.max { $0.snapshot.totalAnswered < $1.snapshot.totalAnswered }
-    }
-    private func girl(_ p: Profile) -> Bool { p.gender == .girl }
-    private func favoriteWorld(_ s: ProgressSnapshot) -> (world: World, questions: Int)? {
-        guard let (key, n) = s.topicAnswered.filter({ $0.value > 0 }).max(by: { $0.value < $1.value }),
-              let topic = Topic(rawValue: key), let world = Worlds.all.first(where: { $0.topic == topic }) else { return nil }
-        return (world, n)
-    }
-    private func shortDate(_ d: Date) -> String {
-        let f = DateFormatter(); f.locale = LanguageStore.shared.current.locale; f.dateFormat = "d.M"; return f.string(from: d)
-    }
-    private func weekdayName(_ d: Date) -> String {
-        let cal = Calendar.current
-        if cal.isDateInToday(d) { return tr("הַיּוֹם") }
-        if cal.isDateInTomorrow(d) { return tr("מָחָר") }
-        let f = DateFormatter(); f.locale = LanguageStore.shared.current.locale; f.dateFormat = "EEEE"
-        return tr("בְּיוֹם ") + f.string(from: d).replacingOccurrences(of: "יום ", with: "")
-    }
-
-    @ViewBuilder private func giftCards(_ gift: GiftState) -> some View {
-        let names = rows.map(\.profile.name)
-        let who = names.count == 1 ? tr("לְ\(names[0])") : tr("לַיְלָדִים")
-        let star = starRow
-        if gift.daysLeft > 7 {
-            // Days 1–7: the gift card in place of the Tofy+ card. No selling yet.
-            journeyCard(title: tr("🎁 טוֹפִי+ בְּמַתָּנָה · עוֹד \(gift.daysLeft) יָמִים"),
-                        body: tr("כָּל הָעוֹלָמוֹת פְּתוּחִים \(who) עַד \(shortDate(gift.until)). בְּלִי כַּרְטִיס, לֹא מִתְחַדֵּשׁ. בֵּינְתַיִם תִּרְאוּ מָה \(names.count == 1 ? (girl(rows[0].profile) ? tr("הִיא אוֹהֶבֶת") : tr("הוּא אוֹהֵב")) : tr("הֵם אוֹהֲבִים"))."),
-                        button: nil, gold: false)
-            if let star, let fav = favoriteWorld(star.snapshot), fav.questions >= 20 {
-                journeyCard(title: tr("❤️ נִרְאֶה שֶׁ\(star.profile.name) \(girl(star.profile) ? tr("מָצְאָה") : tr("מָצָא")) מַשֶּׁהוּ שֶׁ\(girl(star.profile) ? tr("הִיא אוֹהֶבֶת") : tr("הוּא אוֹהֵב"))"),
-                            body: tr("\(fav.world.emoji) \(fav.world.name) הוּא הַמָּקוֹם שֶׁ\(girl(star.profile) ? tr("הִיא חוֹזֶרֶת") : tr("הוּא חוֹזֵר")) אֵלָיו הֲכִי הַרְבֵּה: \(fav.questions) שְׁאֵלוֹת."),
-                            button: nil, gold: false)
-            }
-        } else {
-            // Days 8–14: the card turns personal and grows its one button.
-            let s = star?.snapshot
-            let worlds = s.map { $0.topicAnswered.values.filter { $0 > 0 }.count } ?? 0
-            let questions = s?.totalAnswered ?? 0
-            let accuracy = (s?.totalAnswered ?? 0) > 0 ? Int((Double(s!.totalCorrect) / Double(s!.totalAnswered) * 100).rounded()) : 0
-            VStack(alignment: .leading, spacing: 10) {
-                Text(tr("🎁 הַמַּתָּנָה מִסְתַּיֶּמֶת \(weekdayName(gift.until))"))
-                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                HStack(spacing: 8) {
-                    journeyStat("\(worlds)", worlds == 1 ? tr("עוֹלָם") : tr("עוֹלָמוֹת"))
-                    journeyStat("\(questions)", tr("שְׁאֵלוֹת"))
-                    journeyStat("\(accuracy)%", tr("הַצְלָחָה"))
-                }
-                if let star, let fav = favoriteWorld(star.snapshot) {
-                    Text(tr("\(fav.world.emoji) הַתְּחוּם הָאָהוּב: \(fav.world.name) · \(fav.questions) שְׁאֵלוֹת"))
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(GlassInk.secondary)
-                }
-                Button { Haptic.light(); paywallSource = "gift_card"; showingPaywall = true } label: {
-                    Text(tr("הַשְׁאִירוּ \(who) אֶת כָּל הָעוֹלָמוֹת פְּתוּחִים"))
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                        .foregroundStyle(Color(hex: "4B3FBF"))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.92)))
-                }
-                .buttonStyle(.plain)
-            }
-            .foregroundStyle(GlassInk.primary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .background(LinearGradient(colors: [Color(hex: "FFE082").opacity(0.62), Color(hex: "FFB840").opacity(0.5)],
-                                       startPoint: .topLeading, endPoint: .bottomTrailing),
-                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .strokeBorder(Color(hex: "FFEBAA").opacity(0.7), lineWidth: 1))
-            .shadow(color: .black.opacity(0.22), radius: 14, y: 8)
-            .environment(\.layoutDirection, .app)
-        }
-    }
-
-    /// Before the gift: proof of value, and how close the family is to it.
-    @ViewBuilder private var activationCard: some View {
-        if !subs.isPremium, let hh = household.household, hh.giftStartedAt == nil,
-           let a = hh.activation, a.questions > 0, let star = starRow {
-            let name = star.profile.name, g = girl(star.profile)
-            let next: String = a.daysLeft > 0
-                ? tr("עוֹד \(a.daysLeft == 1 ? tr("יוֹם פָּעִיל אֶחָד") : tr("\(a.daysLeft) יָמִים פְּעִילִים")) וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁")
-                : tr("עוֹד \(a.questionsLeft) שְׁאֵלוֹת וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁")
-            journeyCard(title: tr("🎉 \(name) כְּבָר \(g ? tr("עָנְתָה") : tr("עָנָה")) עַל \(a.questions) שְׁאֵלוֹת"),
-                        body: next, button: nil, gold: false)
-        }
-    }
-
-    private func journeyStat(_ value: String, _ label: String) -> some View {
-        VStack(spacing: 2) {
-            Text(value).font(.system(size: 18, weight: .heavy, design: .rounded)).monospacedDigit()
-            Text(label).font(.system(size: 10.5, weight: .semibold, design: .rounded)).foregroundStyle(GlassInk.secondary)
-        }
-        .frame(maxWidth: .infinity).padding(.vertical, 8)
-        .glassInset(radius: 12)
-    }
-
-    private func journeyCard(title: String, body: String, button: String?, gold: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title).font(.system(size: 15.5, weight: .heavy, design: .rounded))
-            Text(body).font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundStyle(GlassInk.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .foregroundStyle(GlassInk.primary)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .multilineTextAlignment(.leading)
-        .padding(14)
-        .glassPane(radius: 22, tint: gold ? Color(hex: "FFD23F") : nil, shadow: false)
-        .environment(\.layoutDirection, .app)
-    }
-
-    @ViewBuilder private var tofyPlusCard: some View {
-        if subs.isPremium {
-            Button { Haptic.light(); showingManageSubscription = true } label: {
-                HStack {
-                    Text(tr("👑 טוֹפִי+ פָּעִיל"))
-                        .font(.system(size: 14.5, weight: .heavy, design: .rounded))
-                    Spacer()
-                    Text(tr("לְכָל הַמִּשְׁפָּחָה · נִהוּל"))
-                        .font(.system(size: 12.5, weight: .semibold, design: .rounded))
-                        .foregroundStyle(GlassInk.secondary)
-                }
-                .foregroundStyle(GlassInk.primary)
-                .padding(.horizontal, 14).padding(.vertical, 10)
-                .frame(maxWidth: .infinity)
-                .glassPane(radius: 16, tint: Color(hex: "FFD23F"), shadow: false)
-            }
-            .buttonStyle(.plain)
-            .environment(\.layoutDirection, .app)
-            .manageSubscriptionsSheet(isPresented: $showingManageSubscription)
-        } else {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(tr("👑 טוֹפִי+ לְכָל הַמִּשְׁפָּחָה"))
-                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                Text(tr("כָּל הָעוֹלָמוֹת — כּוֹלֵל כָּל עוֹלָם חָדָשׁ שֶׁנּוֹסִיף — הַמִּשְׂחָקִים וְהַמַּטְלוֹת, לְכָל הַיְלָדִים, בְּכָל הַמַּכְשִׁירִים. קוֹנִים פַּעַם אַחַת, כָּאן."))
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                Button { Haptic.light(); showingPaywall = true } label: {
-                    Text(subs.yearlyIntroEligible ? tr("הַתְחִילוּ 7 יָמִים חִנָּם") : tr("לְכָל הַפְּרָטִים"))
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                        .foregroundStyle(Color(hex: "4B3FBF"))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.92)))
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 4)
-            }
-            .foregroundStyle(GlassInk.primary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .background(LinearGradient(colors: [Color(hex: "FFE082").opacity(0.62), Color(hex: "FFB840").opacity(0.5)],
-                                       startPoint: .topLeading, endPoint: .bottomTrailing),
-                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .strokeBorder(Color(hex: "FFEBAA").opacity(0.7), lineWidth: 1))
-            .shadow(color: .black.opacity(0.22), radius: 14, y: 8)
-            .environment(\.layoutDirection, .app)
-        }
-    }
+    // MARK: - 🎁 Conversion journey, a child's purchase request, the packs shelf
+    //
+    // These used to be cards stacked ABOVE the children on this screen. Rani:
+    // "במכשירים שלא רשומים אנחנו מקפיצים חלוניות של טופי+ וכל מיני חלוניות
+    // אחרות למעלה מעל הילדים, אני לא רוצה יותר להציג את זה שם, שיהיה בתוך
+    // העמוד של הפעמון". They are rows in the 🔔 activity centre now — built by
+    // `ActivityOffers.current` and routed back here by `openOffer`, so every one
+    // of them still leads exactly where its pane led.
 
     /// "שלום עמית 👋" and one true line about the family — in the page, like the mockup.
     private var homeHeader: some View {
