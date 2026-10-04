@@ -195,7 +195,7 @@ enum WhatsNewStories {
         let table = byBuild
         return unseenBuilds.sorted()
             .flatMap { table[$0] ?? [] }
-            .filter { $0.audience.includes(audience) }
+            .filter { $0.audience.includes(audience) && offered($0) }
     }
 
     /// The current build's stories — what a demo screen and a re-open show.
@@ -205,7 +205,21 @@ enum WhatsNewStories {
         // The newest entry at or below this build; a story is never shown on a
         // build that predates it.
         guard let newest = table.keys.filter({ $0 <= build }).max() ?? table.keys.max() else { return [] }
-        return (table[newest] ?? []).filter { $0.audience.includes(audience) }
+        return (table[newest] ?? []).filter { $0.audience.includes(audience) && offered($0) }
+    }
+
+    /// 👶 A גן child is shown the five games they will actually be dealt, and
+    /// not the seven `MiniGameGradeFit` keeps shut for them.
+    ///
+    /// Rani's "אם יש 12 מסכים חדשים אז את כולם" means never fold twelve new
+    /// things into one summary card — it does not mean advertise a game this
+    /// child's app will never offer. Every other grade still sees all twelve;
+    /// the chooser is what decides which of them a given WORLD carries.
+    private static func offered(_ item: StoryItem) -> Bool {
+        guard case .game(let kind, _) = item.art else { return true }
+        let grade = ProfileStore.shared.active?.effectiveGrade ?? 1
+        guard PreReaderGames.isPreReader(grade) else { return true }
+        return MiniGameGradeFit.preReaderRoster.contains(kind)
     }
 
     // MARK: - 👨‍👩‍👧 Shown once, on the parent's device

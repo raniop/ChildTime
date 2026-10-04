@@ -84,7 +84,11 @@ struct WhatsNewStoryView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, short ? 10 : 18)
             }
-            .frame(maxWidth: 560)
+            // A story is a POSTER, not a phone screen parked in the middle of
+            // an iPad. The column still has a readable cap, but a generous one:
+            // on a 13" iPad it uses most of the glass instead of a 560pt strip
+            // marooned in the centre.
+            .frame(maxWidth: columnWidth)
             .frame(maxWidth: .infinity)
         }
         .environment(\.layoutDirection, .app)
@@ -101,7 +105,7 @@ struct WhatsNewStoryView: View {
     @ViewBuilder
     private func kidBody(_ item: StoryItem) -> some View {
         VStack(spacing: short ? 8 : 14) {
-            StoryArtView(art: item.art, isKid: true, isCompact: isCompact, short: short)
+            StoryArtView(art: item.art, isCompact: isCompact, short: short)
                 .frame(maxWidth: .infinity)
                 .frame(height: kidArtHeight)
 
@@ -113,7 +117,7 @@ struct WhatsNewStoryView: View {
                 .shadow(color: .black.opacity(0.3), radius: 10, y: 4)
 
             Text(item.line)
-                .font(.system(size: isCompact ? (short ? 15 : 17) : 20, weight: .bold, design: .rounded))
+                .font(.system(size: kidLineSize, weight: .bold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.95))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -132,7 +136,7 @@ struct WhatsNewStoryView: View {
         VStack(spacing: short ? 6 : 10) {
             if let kicker = item.kicker {
                 Text(kicker)
-                    .font(.system(size: isCompact ? 13.5 : 15, weight: .black, design: .rounded))
+                    .font(.system(size: parentKickerSize, weight: .black, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
             }
             Text(item.title)
@@ -143,7 +147,7 @@ struct WhatsNewStoryView: View {
                 .shadow(color: .black.opacity(0.26), radius: 9, y: 3)
 
             Text(item.line)
-                .font(.system(size: isCompact ? (short ? 14 : 15.5) : 18, weight: .semibold, design: .rounded))
+                .font(.system(size: parentLineSize, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.94))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -151,9 +155,9 @@ struct WhatsNewStoryView: View {
 
             // The stage runs from under the lead to just above the footer, as
             // the mockup draws it — it is what grows on a tall screen.
-            StoryArtView(art: item.art, isKid: false, isCompact: isCompact, short: short)
+            StoryArtView(art: item.art, isCompact: isCompact, short: short)
                 .frame(maxWidth: .infinity)
-                .frame(height: parentStageHeight)
+                .frame(height: parentStageHeight(item.art))
                 .padding(.vertical, short ? 10 : 16)
                 .glassPane(radius: 24)
                 .padding(.top, short ? 8 : 14)
@@ -362,24 +366,70 @@ struct WhatsNewStoryView: View {
 
     // MARK: - Sizes
 
-    /// The art is a SHARE of the screen, not a constant — the mockup gives it
-    /// a little under half, and that has to hold on a short foldable, a tall
-    /// phone and an iPad in either orientation. Clamped so it can never
-    /// squeeze the real board out or grow past what the emoji can fill.
+    // MARK: Sizes
+    //
+    // Everything here is a SHARE of the glass this story actually has, not a
+    // constant: the mockup's art dominates the frame, and that has to stay true
+    // on a short foldable, a tall phone and a 13" iPad alike. A fixed column
+    // with fixed type made the iPad a phone layout floating in the middle.
+
+    private var safeH: CGFloat { display.safeSize.height }
+    private var safeW: CGFloat { display.safeSize.width }
+
+    /// Height-driven value, clamped. Falls back to `lo` before the first
+    /// measurement lands.
     private func share(_ fraction: CGFloat, min lo: CGFloat, max hi: CGFloat) -> CGFloat {
-        let h = display.safeSize.height
-        guard h > 0 else { return lo }
-        return Swift.min(Swift.max(h * fraction, lo), hi)
+        guard safeH > 0 else { return lo }
+        return Swift.min(Swift.max(safeH * fraction, lo), hi)
     }
 
-    private var kidArtHeight: CGFloat { share(0.45, min: 170, max: 560) }
-    private var parentStageHeight: CGFloat { share(0.40, min: 150, max: 540) }
+    /// The readable column. A phone uses all of it; a big screen keeps a cap,
+    /// but a poster-sized one. Only ever a CAP — nothing inside is given a
+    /// fixed width, or a screen narrower than the cap would overflow it.
+    private var columnWidth: CGFloat {
+        guard !isCompact, safeW > 0 else { return 560 }
+        return Swift.min(safeW * 0.92, 900)
+    }
+
+    /// 👧 Art first and big — on a large screen it takes more than half.
+    private var kidArtHeight: CGFloat {
+        share(isCompact ? 0.45 : 0.55, min: 170, max: 860)
+    }
+
+    /// 👨‍👩‍👧 The stage's height, inside the glass pane's own padding.
+    ///
+    /// A hero or a grid happily fills whatever it is given. A list of example
+    /// ROWS does not — stretched over an iPad's share it becomes three
+    /// enormous bands with a line of text floating in each — so the pane hugs
+    /// them instead, and a row stays the size of a row.
+    private func parentStageHeight(_ art: StoryArt) -> CGFloat {
+        let height = share(isCompact ? 0.40 : 0.48, min: 150, max: 780)
+        guard case .rows(let list) = art else { return height }
+        let n = CGFloat(Swift.max(list.count, 1))
+        let tallestRow: CGFloat = isCompact ? 58 : 112
+        let gap = Swift.max(8, height * 0.045)
+        return Swift.min(height, n * tallestRow + (n - 1) * gap)
+    }
+
+    private func type(_ fraction: CGFloat, min lo: CGFloat, max hi: CGFloat) -> CGFloat {
+        guard safeH > 0 else { return lo }
+        return Swift.min(Swift.max(safeH * fraction, lo), hi)
+    }
 
     private var kidTitleSize: CGFloat {
-        isCompact ? (short ? 26 : 32) : 40
+        isCompact ? (short ? 26 : 32) : type(0.046, min: 38, max: 72)
+    }
+    private var kidLineSize: CGFloat {
+        isCompact ? (short ? 15 : 17) : type(0.023, min: 20, max: 36)
     }
     private var parentTitleSize: CGFloat {
-        isCompact ? (short ? 23 : 28) : 34
+        isCompact ? (short ? 23 : 28) : type(0.039, min: 32, max: 60)
+    }
+    private var parentLineSize: CGFloat {
+        isCompact ? (short ? 14 : 15.5) : type(0.020, min: 18, max: 30)
+    }
+    private var parentKickerSize: CGFloat {
+        isCompact ? 13.5 : type(0.016, min: 15, max: 24)
     }
 }
 
@@ -387,9 +437,32 @@ struct WhatsNewStoryView: View {
 
 /// Everything that can fill the middle of a story. Adding a kind of card is a
 /// case here plus a case in `StoryArt` — never a new screen.
+///
+/// Every size below is derived from `box`, the glass this card actually got.
+/// That is the whole difference between a poster on a 13" iPad and a phone
+/// card stranded in the middle of one.
 private struct StoryArtView: View {
     let art: StoryArt
-    let isKid: Bool
+    let isCompact: Bool
+    let short: Bool
+
+    /// The card MEASURES the space it was given rather than being told a
+    /// width. A width handed down from `DisplayGeometry` is a fixed width, and
+    /// a fixed width wider than the screen pushes the whole column off both
+    /// edges — which is exactly what it did on a 420pt phone.
+    var body: some View {
+        GeometryReader { geo in
+            Box(art: art, box: geo.size, isCompact: isCompact, short: short)
+                .frame(width: geo.size.width, height: geo.size.height)
+        }
+    }
+}
+
+/// The card itself, once its space is known.
+private struct Box: View {
+    let art: StoryArt
+    /// The space this card is drawn in. Nothing here is a constant.
+    let box: CGSize
     let isCompact: Bool
     let short: Bool
 
@@ -421,52 +494,67 @@ private struct StoryArtView: View {
 
     private func characterHero(_ who: StoryCharacter) -> some View {
         ZStack {
-            glow(AppColor.starGold)
+            glow(AppColor.starGold, size: glowSize)
             CharacterView(character: character(who))
-                .frame(width: heroSize * 1.6, height: heroSize * 1.6)
+                .frame(width: heroSize * 1.3, height: heroSize * 1.3)
                 .float(amplitude: 8)
         }
+        .frame(width: box.width, height: box.height)
     }
 
     /// One huge emoji on its own glow — the simplest story there is.
     private func hero(_ emoji: String) -> some View {
         ZStack {
-            glow(AppColor.starGold)
+            glow(AppColor.starGold, size: glowSize)
             Text(emoji)
                 .font(.system(size: heroSize))
                 .shadow(color: .black.opacity(0.32), radius: 18, y: 12)
         }
+        .frame(width: box.width, height: box.height)
     }
 
     /// 🎮 The game's own emoji, and under it the real board it plays on — so
     /// the child recognises the screen before they ever open it. The miniature
     /// draws its גן form by itself for a pre-reader.
+    ///
+    /// The frame HUGS the board: `MiniGamePreview` draws at `min(w, h × 1.6)`,
+    /// so a box in that exact ratio is filled edge to edge instead of being a
+    /// large pane of padding around a small board.
     private func gameArt(_ kind: MiniGameKind, topic: Topic) -> some View {
-        VStack(spacing: short ? 6 : 12) {
+        let gap = box.height * 0.04
+        let emojiBand = box.height * 0.32
+        let boardH = box.height - emojiBand - gap
+        let pad = Swift.max(8, box.height * 0.035)
+        let boardW = Swift.min(box.width, (boardH - pad * 2) * 1.6 + pad * 2)
+        return VStack(spacing: gap) {
             ZStack {
-                glow(AppColor.starGold)
+                glow(AppColor.starGold, size: emojiBand * 1.5)
                 Text(kind.emoji)
-                    .font(.system(size: heroSize * 0.78))
+                    .font(.system(size: emojiBand * 0.92))
                     .shadow(color: .black.opacity(0.3), radius: 14, y: 9)
             }
-            .frame(height: heroSize * 0.92)
+            .frame(height: emojiBand)
 
             MiniGamePreview(kind: kind, topic: topic)
-                .frame(maxWidth: 330)
-                .frame(maxHeight: short ? 150 : 230)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 10)
-                .glassInset(radius: 18)
+                .frame(width: boardW - pad * 2, height: boardH - pad * 2)
+                .padding(pad)
+                .glassInset(radius: Swift.max(14, box.height * 0.055))
         }
     }
 
     /// Every game at once — what the parent actually got, in one look.
     private func tiles(_ list: [String]) -> some View {
-        let side: CGFloat = isCompact ? (short ? 36 : 44) : 54
-        return LazyVGrid(columns: Array(repeating: GridItem(.fixed(side), spacing: 9), count: 4), spacing: 9) {
+        let columns = 4
+        let rows = CGFloat((list.count + columns - 1) / columns)
+        let gap = Swift.max(7, box.height * 0.035)
+        let byWidth = (box.width - gap * CGFloat(columns - 1)) / CGFloat(columns)
+        let byHeight = (box.height - gap * (rows - 1)) / rows
+        let side = Swift.max(30, Swift.min(byWidth, byHeight))
+        return LazyVGrid(columns: Array(repeating: GridItem(.fixed(side), spacing: gap), count: columns),
+                         spacing: gap) {
             ForEach(Array(list.enumerated()), id: \.offset) { _, e in
                 Text(e)
-                    .font(.system(size: side * 0.52))
+                    .font(.system(size: side * 0.54))
                     .frame(width: side, height: side)
                     .background(RoundedRectangle(cornerRadius: side * 0.28, style: .continuous).fill(.white.opacity(0.2)))
                     .overlay(RoundedRectangle(cornerRadius: side * 0.28, style: .continuous)
@@ -477,90 +565,111 @@ private struct StoryArtView: View {
 
     /// A real example instead of an explanation — the parent's cards show the
     /// thing itself: the words a ג׳ child gets, the switch where it really sits.
-    private func rowsArt(_ rows: [StoryRow]) -> some View {
-        VStack(spacing: 9) {
-            ForEach(rows) { row in
-                HStack(spacing: 9) {
+    private func rowsArt(_ list: [StoryRow]) -> some View {
+        let n = CGFloat(Swift.max(list.count, 1))
+        let gap = Swift.max(8, box.height * 0.045)
+        let rowH = Swift.max(42, (box.height - gap * (n - 1)) / n)
+        // A phone keeps the label and its example on ONE line; only a big
+        // screen earns the bigger type.
+        let font = Swift.min(Swift.max(rowH * 0.32, 13.5), isCompact ? 15 : 26)
+        return VStack(spacing: gap) {
+            ForEach(list) { row in
+                HStack(spacing: font * 0.65) {
                     if row.kind == .bullet {
-                        Text("●").font(.system(size: 13)).foregroundStyle(GlassInk.good)
+                        Text("●").font(.system(size: font * 0.9)).foregroundStyle(GlassInk.good)
                     }
                     Text(row.label)
-                        .font(.system(size: isCompact ? 13.5 : 15.5, weight: .heavy, design: .rounded))
+                        .font(.system(size: font, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .lineLimit(2).minimumScaleFactor(0.7)
                     Spacer(minLength: 6)
                     switch row.kind {
                     case .switchOn:
-                        fakeSwitch
+                        fakeSwitch(font * 2.1)
                     case .bullet:
                         Text(row.value)
-                            .font(.system(size: isCompact ? 13.5 : 15.5, weight: .heavy, design: .rounded))
+                            .font(.system(size: font, weight: .heavy, design: .rounded))
                             .foregroundStyle(AppColor.starGold)
                             .multilineTextAlignment(.trailing)
                             .lineLimit(2).minimumScaleFactor(0.7)
                     }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .glassInset(radius: 14)
+                .padding(.horizontal, font)
+                .frame(height: rowH)
+                .glassInset(radius: Swift.min(rowH * 0.32, 22))
             }
         }
-        .padding(.horizontal, 18)
+        // A label and the thing beside it belong in one glance: left to the
+        // full width of an iPad, "כיתה" and "ד׳" end up a hand apart.
+        .frame(maxWidth: Swift.min(box.width, DisplayGeometry.readableWidth))
     }
 
     /// The switch as it looks in the child's page, drawn rather than live —
     /// nothing in a story is tappable except the story itself.
-    private var fakeSwitch: some View {
-        Capsule()
+    private func fakeSwitch(_ width: CGFloat) -> some View {
+        let h = width * 0.58
+        return Capsule()
             .fill(LinearGradient(colors: [GlassInk.good, AppColor.successMint],
                                  startPoint: .topLeading, endPoint: .bottomTrailing))
-            .frame(width: 46, height: 27)
+            .frame(width: width, height: h)
             .overlay(alignment: .trailing) {
-                Circle().fill(.white).frame(width: 21, height: 21).padding(3)
+                Circle().fill(.white).frame(width: h - 6, height: h - 6).padding(3)
             }
             .accessibilityHidden(true)
     }
 
     /// ⭐/💎 for having watched to the end, handed over by the child's own buddy.
+    ///
+    /// The buddy's band is MEASURED off what the chips leave — a `ZStack` left
+    /// to size itself takes the glow's diameter, which on an iPad pushed the
+    /// chips straight through the title underneath.
     private func gift(_ who: StoryCharacter, stars: Int, diamonds: Int) -> some View {
-        VStack(spacing: short ? 8 : 14) {
+        let chip = Swift.min(Swift.max(box.height * 0.075, 16), 34)
+        let gap = box.height * 0.05
+        let band = Swift.max(box.height - chip * 2.4 - gap, 70)
+        return VStack(spacing: gap) {
             ZStack {
-                glow(AppColor.gemPurple)
+                glow(AppColor.gemPurple, size: Swift.min(band, box.width))
                 CharacterView(character: character(who))
-                    .frame(width: heroSize * 1.45, height: heroSize * 1.45)
+                    .frame(width: band * 0.86, height: band * 0.86)
                     .float(amplitude: 8)
             }
-            HStack(spacing: 9) {
-                chip("⭐", "+\(stars)")
-                chip("💎", "+\(diamonds)")
+            .frame(height: band)
+            HStack(spacing: chip * 0.55) {
+                chipView("⭐", "+\(stars)", font: chip)
+                chipView("💎", "+\(diamonds)", font: chip)
             }
         }
     }
 
-    private func chip(_ emoji: String, _ amount: String) -> some View {
-        HStack(spacing: 5) {
-            Text(emoji).font(.system(size: 16))
+    private func chipView(_ emoji: String, _ amount: String, font: CGFloat) -> some View {
+        HStack(spacing: font * 0.3) {
+            Text(emoji).font(.system(size: font))
             Text(amount)
-                .font(.system(size: isCompact ? 16 : 18, weight: .black, design: .rounded))
+                .font(.system(size: font, weight: .black, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(.white)
         }
-        .padding(.horizontal, 15).padding(.vertical, 8)
+        .padding(.horizontal, font * 0.9).padding(.vertical, font * 0.48)
         .background(Capsule().fill(.white.opacity(0.2)))
         .overlay(Capsule().strokeBorder(.white.opacity(0.4), lineWidth: 1))
     }
 
-    private func glow(_ color: Color) -> some View {
+    private func glow(_ color: Color, size: CGFloat) -> some View {
         Circle()
             .fill(color)
-            .frame(width: heroSize * 1.5, height: heroSize * 1.5)
-            .blur(radius: 38)
+            .frame(width: size, height: size)
+            .blur(radius: Swift.max(24, size * 0.2))
             .opacity(0.55)
     }
 
+    /// A hero fills the card it was given — it is the story, not a bullet point.
     private var heroSize: CGFloat {
-        if !isCompact { return short ? 130 : 165 }
-        return short ? 96 : 132
+        Swift.max(Swift.min(box.height * 0.62, box.width * 0.56), 70)
+    }
+    /// The glow stays inside the card, so it never pushes what is under it.
+    private var glowSize: CGFloat {
+        Swift.min(heroSize * 1.5, box.height, box.width)
     }
 }
 
