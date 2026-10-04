@@ -168,17 +168,12 @@ struct WhatsNewStoryView: View {
         .opacity(risen ? 1 : 0)
     }
 
-    /// "🎈 בַּלּוֹנִים" → the mark on its own line above the name. Inline, an
-    /// emoji sits on the wrong edge of a centred RTL title and the whole line
-    /// reads off-centre (Rani, build 188).
+    /// The card already shows the real screen — the game's emoji on top of that
+    /// was noise, and inline it pushed a centred RTL title off-centre. Dropped
+    /// entirely (Rani, build 188): the name alone.
     private func kidTitle(_ item: StoryItem) -> some View {
-        let (mark, name) = Self.splitLeadingMark(item.title)
-        return VStack(spacing: short ? 1 : 4) {
-            if let mark {
-                Text(mark)
-                    .font(.system(size: kidTitleSize * 0.95))
-                    .shadow(color: .black.opacity(0.26), radius: 8, y: 3)
-            }
+        let (_, name) = Self.splitLeadingMark(item.title)
+        return VStack(spacing: 0) {
             Text(name)
                 .font(.system(size: kidTitleSize, weight: .black, design: .rounded))
                 .foregroundStyle(.white)
