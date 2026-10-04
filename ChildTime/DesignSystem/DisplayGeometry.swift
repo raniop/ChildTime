@@ -322,7 +322,15 @@ final class DisplayProbeView: UIView {
         // that back would say "a bar on both sides".
         let screen = window?.bounds.size ?? .zero
         let wl = window?.safeAreaInsets.left ?? 0, wr = window?.safeAreaInsets.right ?? 0
-        let inset = max(wl, wr), onLeft = wl > wr
+        // A bar lives on ONE side. An ordinary iPhone turned sideways has the
+        // SAME inset on both (measured on a 17e: screen 844×390, l47 r47) and
+        // was passing the old `inset >= 40` test — so every notched iPhone in
+        // landscape grew the foldable's side rail, and the parent's home even
+        // split into two panes. `unmirrorVerticalBar` above already tests the
+        // asymmetry; this makes the published strip agree with it, so a phone
+        // held sideways is simply a short, wide phone again.
+        let sided = abs(wl - wr) >= 40
+        let inset = sided ? max(wl, wr) : 0, onLeft = wl > wr
         let (h, a) = (hinge, angle)
         Task { @MainActor in
             DisplayGeometry.shared.update(hinge: h, angle: .some(a), bar: bar, sizeClass: sc,
@@ -332,16 +340,22 @@ final class DisplayProbeView: UIView {
     }
 }
 
-/// 📐 Rows at a readable width on a wide, short screen (the open foldable).
-/// A Form there ran its rows 780pt across — the label on one side and its
-/// switch on the other, too far apart to read as one line. `contentMargins`
-/// narrows the rows INSIDE the scroll view, so the backdrop behind still runs
-/// edge to edge. Nothing changes anywhere else.
-struct ReadableWidthOnWideShort: ViewModifier {
+/// 📐 Rows at a readable width on ANY wide screen.
+/// A Form on the open foldable ran its rows 780pt across — the label on one
+/// side and its switch on the other, too far apart to read as one line. The
+/// same thing happens, worse, on an iPad: 1376pt in landscape, with the world's
+/// name against one edge and its toggle against the other.
+///
+/// It used to be gated on `isWideShort`, which is the foldable alone — so every
+/// parent Form stayed full-bleed on both iPads and on a phone held sideways.
+/// The rule is about WIDTH, not about the foldable: past the readable width,
+/// cap the column. A phone in portrait (≤440pt) never reaches it and is
+/// untouched.
+struct ReadableWidthColumn: ViewModifier {
     @ObservedObject private var display = DisplayGeometry.shared
 
     func body(content: Content) -> some View {
-        if display.isWideShort, display.safeSize.width > DisplayGeometry.readableWidth {
+        if display.safeSize.width > DisplayGeometry.readableWidth {
             // A capped, centred frame — NOT `contentMargins(for: .scrollContent)`,
             // which measured on the open Duo as doing nothing to a Form: the rows
             // still ran the full 867pt with the label at one edge and its control
@@ -357,6 +371,6 @@ struct ReadableWidthOnWideShort: ViewModifier {
 }
 
 extension View {
-    /// See `ReadableWidthOnWideShort`.
-    func readableOnWideShort() -> some View { modifier(ReadableWidthOnWideShort()) }
+    /// See `ReadableWidthColumn`.
+    func readableColumn() -> some View { modifier(ReadableWidthColumn()) }
 }

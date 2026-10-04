@@ -129,7 +129,10 @@ struct PackRevealView: View {
                             .shadow(color: Color(hex: "FFD23F").opacity(ctaPulse ? 0.55 : 0.15), radius: ctaPulse ? 26 : 10, y: 8)
                     }
                     .buttonStyle(.juicy)
-                    .scaleEffect(ctaPulse ? 1.04 : 0.98)
+                    // The glow does the pulsing. A `scaleEffect` that never
+                    // rests on 1 rasterises the label and keeps it permanently
+                    // soft — the same thing that was fixed on the world's
+                    // "how do you want to play?" cards.
                     .transition(.scale(scale: 0.6).combined(with: .opacity))
                 }
                 Button { Haptic.light(); onSkip() } label: {

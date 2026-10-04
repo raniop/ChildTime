@@ -74,7 +74,7 @@ struct ChildScreenTimeView: View {
                 }
                 .glassRows()
             }
-            .readableOnWideShort()
+            .readableColumn()
             .glassForm()
             .navigationTitle(tr("זְמַן מָסָךְ יוֹמִי"))
             .navigationBarTitleDisplayMode(.inline)

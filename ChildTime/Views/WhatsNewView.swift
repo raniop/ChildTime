@@ -93,6 +93,11 @@ struct WhatsNewView: View {
                         }
                     }
                     .padding(.horizontal, 20)
+                    // 📐 One readable column. On an iPad in landscape these
+                    // notes ran 1376pt across, with the emoji at one edge and
+                    // the sentence trailing off toward the other.
+                    .frame(maxWidth: 560)
+                    .frame(maxWidth: .infinity)
                 }
 
                 Button {

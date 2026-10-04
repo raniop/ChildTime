@@ -27,6 +27,14 @@ struct KidPINView: View {
     @State private var firstEntry: String?   // set-mode: the code awaiting confirm
     @State private var shake = false
     @State private var almost = false        // gentle wrong-code feedback
+    /// 📐 Sideways on a phone there are ~323pt of height. The 76pt keys stacked
+    /// under the header pushed "0" and "⌫" off the bottom with nothing to
+    /// scroll — the child could not type a code with a zero and could not undo
+    /// a tap. Short screens get smaller keys; a wide short one puts the header
+    /// beside the keypad.
+    @ObservedObject private var display = DisplayGeometry.shared
+    private var keySize: CGFloat { display.isShort ? 56 : 76 }
+    private var keyGap: CGFloat { display.isShort ? 9 : 14 }
 
     private var isSetMode: Bool { mode == .setNew }
 
@@ -70,39 +78,19 @@ struct KidPINView: View {
                 }
                 .padding(.horizontal, 16)
 
-                VStack(spacing: 14) {
-                    Text("🔒")
-                        .font(.system(size: 54))
-                        .glow(AppColor.starGold, radius: 12)
-
-                    Text(title)
-                        .font(.system(size: 27, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
-
-                    Text(subtitle)
-                        .font(.system(size: 15.5, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 28)
-                        .animation(.easeInOut(duration: 0.2), value: subtitle)
-
-                    HStack(spacing: 18) {
-                        ForEach(0..<4, id: \.self) { i in
-                            Circle()
-                                .stroke(.white.opacity(0.7), lineWidth: 2)
-                                .background(Circle().fill(i < entered.count ? AppColor.starGold : Color.clear))
-                                .frame(width: 24, height: 24)
-                        }
+                if display.isWideShort {
+                    HStack(alignment: .center, spacing: 28) {
+                        header.frame(maxWidth: .infinity)
+                        keypad
                     }
-                    .padding(.top, 2)
-                    .offset(x: shake ? -10 : 0)
-                    .animation(shake ? .default.repeatCount(3, autoreverses: true).speed(6) : .default, value: shake)
+                    .padding(.top, 4)
+                    .environment(\.layoutDirection, .leftToRight)
+                } else {
+                    header
+                        .padding(.top, display.isShort ? 4 : 10)
+                    Color.clear.frame(height: display.isShort ? 10 : 26)
+                    keypad
                 }
-                .padding(.top, 10)
-
-                Color.clear.frame(height: 26)
-                keypad
 
                 if !isSetMode, let onForgot {
                     Button {
@@ -116,12 +104,44 @@ struct KidPINView: View {
                             .background(.white.opacity(0.12), in: Capsule())
                     }
                     .buttonStyle(.plain)
-                    .padding(.top, 16)
+                    .padding(.top, display.isShort ? 8 : 16)
                 }
                 Spacer(minLength: 0)
             }
-            .padding(.top, 14)
-            .padding(.bottom, 24)
+            .padding(.top, display.isShort ? 6 : 14)
+            .padding(.bottom, display.isShort ? 8 : 24)
+        }
+    }
+
+    private var header: some View {
+        VStack(spacing: display.isShort ? 8 : 14) {
+            Text("🔒")
+                .font(.system(size: display.isShort ? 34 : 54))
+                .glow(AppColor.starGold, radius: 12)
+
+            Text(title)
+                .font(.system(size: display.isShort ? 21 : 27, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+
+            Text(subtitle)
+                .font(.system(size: display.isShort ? 13.5 : 15.5, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, display.isShort ? 10 : 28)
+                .animation(.easeInOut(duration: 0.2), value: subtitle)
+
+            HStack(spacing: 18) {
+                ForEach(0..<4, id: \.self) { i in
+                    Circle()
+                        .stroke(.white.opacity(0.7), lineWidth: 2)
+                        .background(Circle().fill(i < entered.count ? AppColor.starGold : Color.clear))
+                        .frame(width: 24, height: 24)
+                }
+            }
+            .padding(.top, 2)
+            .offset(x: shake ? -10 : 0)
+            .animation(shake ? .default.repeatCount(3, autoreverses: true).speed(6) : .default, value: shake)
         }
     }
 
@@ -129,18 +149,18 @@ struct KidPINView: View {
         let layout: [[String]] = [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"], ["", "0", "⌫"]]
         // A number pad reads 1-2-3 left-to-right even in Hebrew (like the iOS
         // passcode screen) — pin the direction so RTL doesn't mirror the rows.
-        return VStack(spacing: 14) {
+        return VStack(spacing: keyGap) {
             ForEach(layout, id: \.self) { row in
-                HStack(spacing: 22) {
+                HStack(spacing: keyGap + 8) {
                     ForEach(row, id: \.self) { key in
                         if key.isEmpty {
-                            Color.clear.frame(width: 76, height: 76)
+                            Color.clear.frame(width: keySize, height: keySize)
                         } else {
                             Button { press(key) } label: {
                                 Text(key)
-                                    .font(.system(size: key == "⌫" ? 26 : 32, weight: .heavy, design: .rounded))
+                                    .font(.system(size: keySize * (key == "⌫" ? 0.34 : 0.42), weight: .heavy, design: .rounded))
                                     .foregroundStyle(.white)
-                                    .frame(width: 76, height: 76)
+                                    .frame(width: keySize, height: keySize)
                                     .background(.white.opacity(0.14), in: Circle())
                                     .overlay(Circle().stroke(.white.opacity(0.22), lineWidth: 1))
                             }

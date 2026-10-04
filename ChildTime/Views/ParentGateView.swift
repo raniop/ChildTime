@@ -49,6 +49,14 @@ struct ParentGateView<Content: View>: View {
 
     @EnvironmentObject var settings: ParentSettings
     @ObservedObject private var household = HouseholdManager.shared
+    /// 📐 A phone held sideways has ~323pt to work with. The 76pt keys stacked
+    /// under the header ran the "0" and "⌫" rows — and the ✕ — clean off the
+    /// bottom, with nothing to scroll: a parent could not type a code with a
+    /// zero and could not get out. Short screens get smaller keys, and a wide
+    /// short one puts the header beside the keypad instead of above it.
+    @ObservedObject private var display = DisplayGeometry.shared
+    private var keySize: CGFloat { display.isShort ? 56 : 76 }
+    private var keyGap: CGFloat { display.isShort ? 10 : 18 }
     @Environment(\.dismiss) private var dismiss
     @State private var confirmDeviceReset = false
     @State private var loadingTimedOut = false
@@ -293,18 +301,58 @@ struct ParentGateView<Content: View>: View {
 
                 // Header block — pulled toward the top so nothing floats in a
                 // big empty middle.
-                VStack(spacing: 16) {
+                gateHeaderAndKeypad
+                // All remaining slack collects at the bottom — everything rides
+                // high on the screen.
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 12)
+            .padding(.bottom, display.isShort ? 8 : 24)
+        }
+        .onAppear {
+            // Pull the freshest family code so a just-changed parent code works here
+            // immediately (and the old one stops) even if the live listener lagged.
+            household.refreshHouseholdNow()
+            if canUseFaceID { Task { await tryBiometric() } }
+        }
+    }
+
+    /// Above each other on a tall screen; side by side when the screen is wide
+    /// and short, where stacking does not fit.
+    @ViewBuilder private var gateHeaderAndKeypad: some View {
+        if display.isWideShort {
+            HStack(alignment: .center, spacing: 28) {
+                gateHeader
+                    .frame(maxWidth: .infinity)
+                keypad
+            }
+            .padding(.top, 4)
+            .environment(\.layoutDirection, .leftToRight)
+        } else {
+            gateHeader
+                .padding(.top, display.isShort ? 8 : 28)
+            // Fixed gap (not flexible) so the header + keypad stay grouped
+            // near the top instead of drifting to the vertical center.
+            Color.clear.frame(height: display.isShort ? 12 : 32)
+            keypad
+        }
+    }
+
+    private var gateHeader: some View {
+                VStack(spacing: display.isShort ? 8 : 16) {
                     Image(systemName: "lock.fill")
-                        .font(.system(size: 52, weight: .semibold))
+                        .font(.system(size: display.isShort ? 32 : 52, weight: .semibold))
                         .foregroundStyle(.white)
                         .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
 
                     Text(isSetupMode ? tr("בַּחֲרוּ קוֹד הוֹרֶה") : (gateTitle ?? tr("הַגְדָּרוֹת הוֹרֶה")))
-                        .font(.system(size: 30, weight: .heavy, design: .rounded))
+                        .font(.system(size: display.isShort ? 22 : 30, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
 
                     Text(gateSubtitle)
-                        .font(.system(size: 17, weight: .medium, design: .rounded))
+                        .font(.system(size: display.isShort ? 14 : 17, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.8))
                         .multilineTextAlignment(.center)
 
@@ -349,28 +397,6 @@ struct ParentGateView<Content: View>: View {
                         .padding(.top, 6)
                     }
                 }
-                .padding(.top, 28)
-
-                // Fixed gap (not flexible) so the header + keypad stay grouped
-                // near the top instead of drifting to the vertical center.
-                Color.clear.frame(height: 32)
-
-                keypad
-
-                // All remaining slack collects at the bottom — everything rides
-                // high on the screen.
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 12)
-            .padding(.bottom, 24)
-        }
-        .onAppear {
-            // Pull the freshest family code so a just-changed parent code works here
-            // immediately (and the old one stops) even if the live listener lagged.
-            household.refreshHouseholdNow()
-            if canUseFaceID { Task { await tryBiometric() } }
-        }
     }
 
     private func tryBiometric() async {
@@ -409,9 +435,9 @@ struct ParentGateView<Content: View>: View {
             ["7", "8", "9"],
             ["", "0", "⌫"]
         ]
-        return VStack(spacing: 18) {
+        return VStack(spacing: keyGap) {
             ForEach(layout, id: \.self) { row in
-                HStack(spacing: 22) {
+                HStack(spacing: keyGap + 4) {
                     ForEach(row, id: \.self) { key in
                         keyButton(key)
                     }
@@ -424,7 +450,7 @@ struct ParentGateView<Content: View>: View {
     private func keyButton(_ key: String) -> some View {
         Group {
             if key.isEmpty {
-                Color.clear.frame(width: 76, height: 76)
+                Color.clear.frame(width: keySize, height: keySize)
             } else {
                 Button {
                     handleKey(key)
@@ -432,14 +458,14 @@ struct ParentGateView<Content: View>: View {
                     Group {
                         if key == "⌫" {
                             Image(systemName: "delete.left.fill")
-                                .font(.system(size: 26, weight: .medium))
+                                .font(.system(size: keySize * 0.34, weight: .medium))
                         } else {
                             Text(key)
-                                .font(.system(size: 32, weight: .semibold, design: .rounded))
+                                .font(.system(size: keySize * 0.42, weight: .semibold, design: .rounded))
                         }
                     }
                     .foregroundStyle(.white)
-                    .frame(width: 76, height: 76)
+                    .frame(width: keySize, height: keySize)
                     .background(.white.opacity(0.22), in: Circle()).overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                     .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
                 }

@@ -46,7 +46,10 @@ struct WorldCard: View {
                 }
             }
             .shadow(color: Color(hex: "FFD23F").opacity(pulse ? (glow ? 0.7 : 0.15) : 0), radius: glow ? 22 : 8)
-            .scaleEffect(pulse && glow ? 1.03 : 1)
+            // The gold border and the shadow carry the pulse. Breathing the
+            // whole tile between 1 and 1.03 also breathed its NAME and its
+            // "חֶדֶר 3/10" line, which SwiftUI rasterises and then scales —
+            // the world a child is being pointed at was the one with soft text.
         }
         .buttonStyle(.juicy)
         .onAppear {
