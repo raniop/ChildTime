@@ -155,10 +155,27 @@ struct ShieldInputs<App: Hashable, Cat: Hashable, Web: Hashable> {
         let exemptApps = self.exemptApps
         let exemptWebDomains = self.exemptWebDomains
         if newAppLockArmed {
+            // 🐛 THE ONE THAT SHIPPED AND DID NOTHING (Rani, build 190: "לא
+            // השתנה כלום! מה שהיה פתוח נשאר פתוח"). This used to hand back an
+            // EMPTY `shieldedApps`, on the reasoning that `.all(except:)`
+            // already covers everything — and `apply` then wrote
+            // `shield.applications = nil`, throwing away the 119 application
+            // tokens the parent's picker had just produced.
+            //
+            // A category policy only reaches an app iOS files under an App
+            // Store category. Apple's own apps — Safari, Photos, Messages,
+            // Camera, App Store, Settings — carry no category, so `.all` never
+            // touched them, and every app that WAS covered was already covered
+            // by the old `.specific(13 categories)`. Same shield, new name:
+            // nothing on the device changed.
+            //
+            // The two shapes are a UNION, not a choice. Name every app we hold
+            // a token for AS WELL, and `.all(except:)` goes on covering the
+            // ones nobody has ever picked.
             return ShieldPlan(lockEverything: true,
-                              shieldedApps: [],
+                              shieldedApps: blockedApps.subtracting(exemptApps),
                               shieldedCategories: [],
-                              shieldedWebDomains: [],
+                              shieldedWebDomains: blockedWebDomains.subtracting(exemptWebDomains),
                               exemptApps: exemptApps,
                               exemptWebDomains: exemptWebDomains,
                               kind: .lockEverythingNew)

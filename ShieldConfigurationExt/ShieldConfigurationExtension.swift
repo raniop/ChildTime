@@ -77,7 +77,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         case .needsQuestions:
             // The honest rule, and the only one Tofy actually has: a correct
             // answer banks minutes. There is no question quota to reach.
-            let m = max(1, s.minutesPerCorrect)
+            let m = max(1, s.batchMinutes)
             let n = max(1, s.batchAnswers)
             let worth = m == 1 ? tr("דַּקָּה אַחַת") : tr("\(m) דַּקּוֹת")
             let noMinutes: String = {

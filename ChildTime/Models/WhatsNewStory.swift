@@ -13,9 +13,13 @@ import Foundation
 ///
 /// Two rules shaped this file:
 ///
-/// 1. **Every new thing gets its own story.** Rani: "בסטורי צריך להציג את כל
-///    החידושים! כלומר אם יש 12 מסכים חדשים אז את כולם" — twelve new games are
-///    twelve stories on the child's side, never one summary card.
+/// 1. **Every new thing is SHOWN — five cards at most.** Rani: "בסטורי צריך
+///    להציג את כל החידושים! כלומר אם יש 12 מסכים חדשים אז את כולם", and later:
+///    "מקסימום 5 שקפים" — and then the rule that reconciles the two: "12 …
+///    לא יכנסו, צריך להציג אותם כמה ביחד נגיד 4 בטאב אחד ואז יהיה 3 טאבים
+///    שמדברים על המשחקים החדשים וישארו עוד 2 טאבים". So every game keeps its
+///    own real screen, and `fit` packs them four to a card; what is left of
+///    the five goes to the other news, by `priority`.
 /// 2. **Content, not screens.** The next release is an edit to `byBuild`
 ///    below — a story carries an id, its art, a title, one line and the
 ///    audience it belongs to, and `WhatsNewStoryView` draws whatever it finds.
@@ -54,17 +58,8 @@ enum WhatsNewStories {
             art: .emoji("🎮"),
             title: Gendered.g(tr("אֵיךְ בָּא לְךָ לְשַׂחֵק?"), tr("אֵיךְ בָּא לָךְ לְשַׂחֵק?")),
             line: tr("בּוֹחֲרִים עוֹלָם, וְאָז בּוֹחֲרִים: שְׁאֵלוֹת רְגִילוֹת אוֹ מִשְׂחָק"),
-            audience: .child))
-
-        // 👨‍👩‍👧 …and the parent meets all twelve at once, with what it means.
-        items.append(StoryItem(
-            id: "187.games.parent",
-            art: .tiles(MiniGameKind.allCases.map(\.emoji)),
-            kicker: tr("מה חדש"),
-            title: tr("12 משחקים חדשים"),
-            line: tr("הילד בוחר איך לענות: שאלות רגילות או משחק — והתוכן נשאר אותו תוכן"),
-            audience: .parent,
-            seconds: 6.5))
+            audience: .child,
+            priority: 3))
 
         // …and the chooser itself, drawn as the screen the child will meet:
         // "שאלות" on one side, a real game board on the other.
@@ -74,23 +69,38 @@ enum WhatsNewStories {
             kicker: tr("מסך חדש"),
             title: tr("איך בא לך לשחק?"),
             line: tr("בלחיצה אחת נכנסים ישר לשחק — או ישר לשאלות"),
-            audience: .parent))
+            audience: .parent,
+            priority: 1))
 
-        // ── 2 · One story per game ────────────────────────────────────────
-        // Rani: all twelve, never a summary. Title, line and art are the
-        // game's own, so a thirteenth game is a new `MiniGameKind` and
-        // nothing here.
+        // ── 2 · Every game, by its real screen ────────────────────────────
+        // One entry per game, for BOTH readers; `fit` packs them four to a
+        // card. A thirteenth game is a new `MiniGameKind` and nothing here.
         for kind in MiniGameKind.allCases {
             items.append(StoryItem(
                 id: "187.game.\(kind.rawValue)",
                 art: .game(kind, topic: previewTopic(kind)),
-                // 🎈 The emoji is a small MARK beside the name now — the board
-                // itself is the picture (Rani, build 188).
-                title: "\(kind.emoji) \(kind.shortName)",
+                title: kind.shortName,
                 line: kind.blurb,
-                audience: .child,
-                seconds: 4.2))
+                audience: .both,
+                seconds: 4.2,
+                priority: 3))
         }
+
+        // 🔒 THE thing this build fixed for parents: one place for what stays
+        // open, and everything else locked — a new app included.
+        items.append(StoryItem(
+            id: "191.lock.parent",
+            art: .rows([
+                StoryRow(label: tr("פתוחות תמיד"), value: tr("טופי · טלפון · מצלמה")),
+                StoryRow(label: tr("כל השאר"), value: tr("נעול")),
+                StoryRow(label: tr("אפליקציה חדשה"), value: tr("נעולה גם היא")),
+            ]),
+            kicker: tr("נעילה"),
+            title: tr("מה פתוח ומה נעול — במקום אחד"),
+            line: tr("בוחרים פעם אחת מה נשאר פתוח, וכל השאר ננעל עד שמרוויחים זמן — גם אפליקציה שהילד יתקין מחר"),
+            audience: .parent,
+            seconds: 7,
+            priority: 2))
 
         // ── 3 · Grade-matched content (parent: a real example) ────────────
         items.append(StoryItem(
@@ -104,7 +114,8 @@ enum WhatsNewStories {
             title: tr("כל משחק לפי הכיתה של הילד"),
             line: note("gradefit"),
             audience: .parent,
-            seconds: 7))
+            seconds: 7,
+            priority: 1))
 
         // 👶 …and the other end of that ladder: what גן actually gets. The
         // board here is the real text-free one, so a parent can see that
@@ -116,7 +127,8 @@ enum WhatsNewStories {
             title: tr("חמישה משחקים בלי מילים"),
             line: tr("בגן המשחקים הם תמונות, צבעים וכמויות — וההוראה נאמרת בקול, לא נכתבת"),
             audience: .parent,
-            seconds: 6.5))
+            seconds: 6.5,
+            priority: 0))
 
         // 🔐 One game shown as what it really asks for: deduction.
         items.append(StoryItem(
@@ -130,7 +142,8 @@ enum WhatsNewStories {
             title: tr("הכספת — משחק של הסקה"),
             line: tr("כל תשובה נכונה פותחת רמז, והרמזים ביחד מגלים את הקוד"),
             audience: .parent,
-            seconds: 7))
+            seconds: 7,
+            priority: 0))
 
         // ── 4 · Minutes are earned in a game too ─────────────────────────
         items.append(StoryItem(
@@ -138,7 +151,8 @@ enum WhatsNewStories {
             art: .emoji("⏱"),
             title: tr("גַּם בַּמִּשְׂחָקִים מַרְוִיחִים דַּקּוֹת"),
             line: tr("כָּל תְּשׁוּבָה נְכוֹנָה מוֹסִיפָה זְמַן מִשְׂחָק"),
-            audience: .child))
+            audience: .child,
+            priority: 1))
 
         items.append(StoryItem(
             id: "187.minutes.parent",
@@ -151,7 +165,8 @@ enum WhatsNewStories {
             title: tr("גם במשחקים מרוויחים דקות"),
             line: note("minutes"),
             audience: .parent,
-            seconds: 6.5))
+            seconds: 6.5,
+            priority: 1))
 
         // ── 5 · The surprise round (child only — it is a surprise) ───────
         items.append(StoryItem(
@@ -159,7 +174,8 @@ enum WhatsNewStories {
             art: .emoji("⚡"),
             title: tr("סִבּוּב הַפְתָּעָה"),
             line: tr("כָּל כַּמָּה שְׁאֵלוֹת קוֹפֵץ מִשְׂחָק קָצָר — עִם כּוֹכָבִים וְיַהֲלוֹמִים כְּפוּלִים"),
-            audience: .child))
+            audience: .child,
+            priority: 0))
 
         // ── 6 · "רק שאלות רגילות" — where it actually lives ──────────────
         items.append(StoryItem(
@@ -173,7 +189,8 @@ enum WhatsNewStories {
             title: tr("רק שאלות רגילות"),
             line: note("onlyQuestions"),
             audience: .parent,
-            seconds: 7))
+            seconds: 7,
+            priority: 1))
 
         // ── 7 · The rest of the parent's own screens ────────────────────
         // ⏱ The daily ceiling, drawn as the picker it really is — including
@@ -186,21 +203,23 @@ enum WhatsNewStories {
             title: tr("אתם קובעים כמה"),
             line: tr("חצי שעה, שעה, שעתיים, בלי הגבלה — או כל מספר דקות שתקלידו"),
             audience: .parent,
-            seconds: 6.5))
+            seconds: 6.5,
+            priority: 0))
 
         // 🧒 Kid Mode. Parents were writing in that they could not find it, so
         // the card shows the row the button really sits on.
         items.append(StoryItem(
             id: "187.kidMode.parent",
             art: .rows([
-                StoryRow(label: tr("כרטיס הילד"), kind: .action(tr("🧒 תנו לשחק כאן"))),
+                StoryRow(label: tr("כרטיס הילד"), kind: .action(tr("תנו ל\(exampleChild) לשחק כאן 🧒"))),
                 StoryRow(label: tr("יציאה ממצב ילד"), value: tr("מוגן בקוד הורים")),
             ]),
             kicker: tr("הטלפון שלכם"),
-            title: tr("תנו לילד לשחק כאן"),
+            title: tr("תנו ל\(exampleChild) לשחק כאן"),
             line: tr("מוסרים לילד את הטלפון שלכם לכמה דקות — והיציאה חזרה מוגנת בקוד"),
             audience: .parent,
-            seconds: 6.5))
+            seconds: 6.5,
+            priority: 2))
 
         // 📱 The iPad that was set up as a parent device by mistake.
         items.append(StoryItem(
@@ -213,7 +232,8 @@ enum WhatsNewStories {
             title: tr("האייפד הוא של הילד"),
             line: tr("אייפד שהוגדר בטעות כמכשיר הורה הופך למכשיר של ילד בלחיצה אחת, בלי למחוק כלום"),
             audience: .parent,
-            seconds: 6.5))
+            seconds: 6.5,
+            priority: 0))
 
         // 💬 And the way to reach us, as the conversation it opens.
         items.append(StoryItem(
@@ -226,7 +246,8 @@ enum WhatsNewStories {
             title: tr("צ'אט עם צוות טופי"),
             line: tr("הכפתור 💬 במסך הבית פותח שיחה איתנו — והתשובה מגיעה לטלפון שלכם"),
             audience: .parent,
-            seconds: 6.5))
+            seconds: 6.5,
+            priority: 1))
 
         // ── 8 · The closing story ────────────────────────────────────────
         // 🦊 The child's own buddy hands them a small ⭐/💎 for having watched,
@@ -237,9 +258,12 @@ enum WhatsNewStories {
             id: "187.closing.kid",
             art: .gift(.childsBuddy, stars: Self.watchStars, diamonds: Self.watchDiamonds),
             title: tr("בּוֹאוּ נְשַׂחֵק! 🚀"),
-            line: tr("וְהִנֵּה מַתָּנָה קְטַנָּה בִּשְׁבִילְכֶם"),
+            // The minutes card rarely survives the cut to five, so the
+            // closing card says it too.
+            line: tr("גַּם בַּמִּשְׂחָקִים מַרְוִיחִים דַּקּוֹת — וְהִנֵּה מַתָּנָה קְטַנָּה בִּשְׁבִילְכֶם"),
             audience: .child,
-            seconds: 6))
+            seconds: 6,
+            priority: 3))
 
         // 🦁 Tofy's own lion for the parent: where to find this again, and in.
         items.append(StoryItem(
@@ -249,7 +273,8 @@ enum WhatsNewStories {
             title: tr("נתראה בפנים 👋"),
             line: tr("אפשר לראות את זה שוב בכל רגע: הגדרות ← מה חדש"),
             audience: .parent,
-            seconds: 6))
+            seconds: 6,
+            priority: 0))
 
         return items
     }
@@ -269,13 +294,22 @@ enum WhatsNewStories {
     /// Which world a game's miniature should be drawn FROM, so the board the
     /// child sees in the story is the board they will play: letters for the
     /// word games, prices for the grocery, numbers for the rest.
-    private static func previewTopic(_ kind: MiniGameKind) -> Topic {
+    static func previewTopic(_ kind: MiniGameKind) -> Topic {
         switch kind {
         case .word, .wordSearch: return .hebrew
         case .sort, .lightning:  return .science
         case .grocery:           return .money
         default:                 return .math
         }
+    }
+
+    /// The name on the "תנו ל… לשחק כאן" card: the family's own first child,
+    /// so the card shows the button exactly as this parent will find it.
+    private static var exampleChild: String {
+        // The parent side carries no niqqud, and a name typed on a child's
+        // device may have some ("דָּנָה"). A name is safe to strip — unlike a
+        // word, it has no plene spelling to lose.
+        Question.stripNiqqud(ProfileStore.shared.profiles.first?.name ?? tr("דנה"))
     }
 
     // MARK: - Which stories, for whom
@@ -291,10 +325,10 @@ enum WhatsNewStories {
     /// reader has not seen. One release is one story run.
     static func items(for audience: StoryAudience, unseenBuilds: [Int]) -> [StoryItem] {
         let table = byBuild
-        return Array(unseenBuilds.sorted()
+        return fit(unseenBuilds.sorted()
             .flatMap { table[$0] ?? [] }
-            .filter { $0.audience.includes(audience) && offered($0) }
-            .prefix(maxCards))
+            .filter { $0.audience.includes(audience) && offered($0) },
+                   for: audience)
     }
 
     /// The current build's stories — what a demo screen and a re-open show.
@@ -304,9 +338,83 @@ enum WhatsNewStories {
         // The newest entry at or below this build; a story is never shown on a
         // build that predates it.
         guard let newest = table.keys.filter({ $0 <= build }).max() ?? table.keys.max() else { return [] }
-        return Array((table[newest] ?? [])
-            .filter { $0.audience.includes(audience) && offered($0) }
-            .prefix(maxCards))
+        return fit((table[newest] ?? [])
+            .filter { $0.audience.includes(audience) && offered($0) },
+                   for: audience)
+    }
+
+    /// 🧩 Everything new, in five cards at most — the smart part.
+    ///
+    /// 1. **Games are packed, never cut.** Every run of game cards becomes
+    ///    cards of up to `perGrid` real screens each, balanced: twelve games
+    ///    are 4 · 4 · 4, a גן child's five are 3 · 2. A lone game stays a
+    ///    full-size card.
+    /// 2. **Then the five are chosen by `priority`**, ties broken by story
+    ///    order, and shown in story order. With twelve games that is the
+    ///    three game cards plus the two highest-priority others; the rest of
+    ///    the release still lives in הגדרות ← מה חדש.
+    static func fit(_ list: [StoryItem], for audience: StoryAudience) -> [StoryItem] {
+        var packed: [StoryItem] = []
+        var run: [StoryItem] = []
+
+        func flush() {
+            defer { run.removeAll() }
+            guard run.count > 1 else { packed.append(contentsOf: run); return }
+            let cards = Int((Double(run.count) / Double(perGrid)).rounded(.up))
+            var start = 0
+            for c in 0..<cards {
+                // Balanced: the first `run.count % cards` cards take one more.
+                let size = run.count / cards + (c < run.count % cards ? 1 : 0)
+                let slice = Array(run[start..<(start + size)])
+                start += size
+                packed.append(gridCard(slice, part: c + 1, of: cards,
+                                       total: run.count, for: audience))
+            }
+        }
+        for item in list {
+            if case .game = item.art { run.append(item) } else { flush(); packed.append(item) }
+        }
+        flush()
+
+        guard packed.count > maxCards else { return packed }
+        let keep = Set(packed.indices.sorted {
+            packed[$0].priority != packed[$1].priority
+                ? packed[$0].priority > packed[$1].priority
+                : $0 < $1
+        }.prefix(maxCards))
+        return packed.indices.filter(keep.contains).map { packed[$0] }
+    }
+
+    /// How many real game screens share one card — four still read as phones
+    /// on the smallest iPhone.
+    static let perGrid = 4
+
+    private static func gridCard(_ games: [StoryItem], part: Int, of parts: Int,
+                                 total: Int, for audience: StoryAudience) -> StoryItem {
+        let kinds: [MiniGameKind] = games.compactMap {
+            if case .game(let kind, _) = $0.art { return kind }
+            return nil
+        }
+        let isKid = audience != .parent
+        let names = kinds.map { isKid ? $0.shortName : $0.parentName }
+        let title = isKid ? tr("מִשְׂחָקִים חֲדָשִׁים") : tr("\(total) משחקים חדשים")
+        let line: String = {
+            if isKid { return parts > 1 ? tr("חֵלֶק \(part) מִתּוֹךְ \(parts)") : "" }
+            return parts > 1
+                ? tr("חלק \(part) מתוך \(parts) · הילד בוחר: שאלות רגילות או משחק")
+                : tr("הילד בוחר: שאלות רגילות או משחק")
+        }()
+        return StoryItem(
+            id: "games.\(part).\(kinds.map(\.rawValue).joined(separator: "-"))",
+            art: .gameGrid(kinds, names: names),
+            kicker: isKid ? nil : tr("מה חדש"),
+            title: title,
+            line: line,
+            audience: audience,
+            // A pre-reader hears which games are on the card, not "part 2 of 3".
+            spoken: "\(title). " + names.joined(separator: ", "),
+            seconds: 6.5,
+            priority: games.map(\.priority).max() ?? 3)
     }
 
     /// 👶 A גן child is shown the five games they will actually be dealt, and
@@ -462,6 +570,9 @@ enum StoryArt {
     /// 🎮 A real mini-game: its own emoji huge, and under it the real board,
     /// drawn by `MiniGamePreview` (including the גן form for a pre-reader).
     case game(MiniGameKind, topic: Topic)
+    /// 🎮🎮 Up to four real games on one card, each in its own phone with its
+    /// name under it — what `WhatsNewStories.fit` packs a run of games into.
+    case gameGrid([MiniGameKind], names: [String])
     /// 👶 The same, forced to the pre-reader board — so a PARENT can see the
     /// text-free גן form their five-year-old actually gets.
     case preReaderGame(MiniGameKind, topic: Topic)
@@ -500,6 +611,9 @@ struct StoryItem: Identifiable {
     var spoken: String? = nil
     /// How long before it moves on by itself.
     var seconds: Double = 5.0
+    /// Which cards survive the cut to `WhatsNewStories.maxCards`: higher
+    /// first, story order breaking ties. 3 = the heart of the release.
+    var priority: Int = 1
 
     var spokenText: String { spoken ?? "\(title). \(line)" }
 }

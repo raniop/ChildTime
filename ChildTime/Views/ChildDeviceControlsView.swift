@@ -23,11 +23,18 @@ struct ChildDeviceControlsView: View {
     @State private var selection = SelectionStorage.empty()
     @State private var showAllowPicker = false
     @State private var allowSelection = SelectionStorage.empty()
-    @State private var showAlwaysAllowPicker = false
-    @State private var alwaysAllowSelection = SelectionStorage.empty()
     @State private var showOpenPicker = false
     @State private var openSelection = SelectionStorage.empty()
     @State private var diagnostic: String?
+    /// The main button runs the one-time "every app" step first, then this.
+    @State private var openAfterAllApps = false
+    /// 🧪 "מה נעול בפועל" is a tool for US, not something to show a family —
+    /// Rani: "אי אפשר להציג דבר כזה במכשיר אמיתי של אנשים! תשאיר את זה אולי
+    /// רק על המשפחה שלי בשביל הבדיקות". A child device has no account to
+    /// recognise the team by, so it is a switch on the device itself: a
+    /// three-second press on the icon at the top of this screen (which is
+    /// already behind the parent code). Per device, off by default.
+    @AppStorage("tofy.team.lockDiagnostics") private var teamDiagnostics = false
 
     private var selectedCount: Int {
         selection.applicationTokens.count + selection.categoryTokens.count
@@ -41,10 +48,9 @@ struct ChildDeviceControlsView: View {
     /// Apps the block-list names individually. A list of CATEGORIES with zero
     /// apps cannot reach Safari, Photos or Messages — see SelectionStorage.
     private var blockedAppCount: Int { selection.applicationTokens.count }
-    private var blockedCategoryCount: Int { selection.categoryTokens.count }
-    private var blockListIsCategoryOnly: Bool { blockedAppCount == 0 && blockedCategoryCount > 0 }
-    private var alwaysAllowCount: Int { alwaysAllowSelection.applicationTokens.count }
     private var isUnlocked: Bool { progress.isUnlocked }
+    /// Apps the shield names right now, from the same plan every process writes.
+    private var shieldedNow: Int { TofyShield.inputs().plan().shieldedApps.count }
 
     var body: some View {
         ZStack {
@@ -57,11 +63,8 @@ struct ChildDeviceControlsView: View {
                     if kidMode.active { exitKidModeButton }
                     statusBanner
                     quickOpenCard
-                    perAppAllowCard
-                    newAppLockCard
-                    appLockCard
-                    alwaysAllowedCard
-                    lockDiagnosticsCard
+                    appsCard
+                    if teamDiagnostics { lockDiagnosticsCard }
                     allowDeleteCard
                     disconnectButton
 
@@ -90,19 +93,11 @@ struct ChildDeviceControlsView: View {
             }
         }
         .environment(\.layoutDirection, .app)
-        .tofyActivityPicker(title: PickerCopy.blocked.title, header: PickerCopy.blocked.header, footer: PickerCopy.blocked.footer, isPresented: $showAppPicker, selection: $selection)
-        .onChangeCompat(of: selection) { _, new in
-            settings.activitySelectionData = SelectionStorage.encode(new)
-            // Keep the live shield in sync only when the child isn't mid-unlock.
-            // applyDefaultLock (not the raw block-list) — otherwise editing this
-            // list downgraded an armed allow-list to the leaky model.
-            if !isUnlocked { shields.applyDefaultLock() }
-        }
         .onAppear {
             selection = SelectionStorage.decode(settings.activitySelectionData)
             allowSelection = SelectionStorage.decode(settings.allowExceptionData)
-            alwaysAllowSelection = SelectionStorage.decode(settings.alwaysAllowedAppsData)
             openSelection = SelectionStorage.decode(settings.allowedAppsData)
+            foldIntoOneList()
         }
         .confirmationDialog(tr("לְנַתֵּק אֶת הַמַּכְשִׁיר?"),
                             isPresented: $showDisconnect, titleVisibility: .visible) {
@@ -124,6 +119,11 @@ struct ChildDeviceControlsView: View {
                 .font(.system(size: 44, weight: .semibold))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+                // 🧪 The team's switch for "מה נעול בפועל" — see `teamDiagnostics`.
+                .onLongPressGesture(minimumDuration: 3) {
+                    teamDiagnostics.toggle()
+                    Haptic.success()
+                }
             Text(tr("בַּקָּרַת הַמַּכְשִׁיר"))
                 .font(.system(size: 28, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
@@ -142,8 +142,11 @@ struct ChildDeviceControlsView: View {
             kidMode.exit()
             dismiss()
         } label: {
-            Label(tr("צֵא מִמַּצַּב יֶלֶד"), systemImage: "figure.walk.departure")
+            // The same words as the button on the child's home — one action,
+            // one name everywhere.
+            Label(tr("יְצִיאָה מִמַּצַּב יֶלֶד וְשִׁחְרוּר נְעִילַת הַמַּכְשִׁיר"), systemImage: "lock.open.fill")
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .multilineTextAlignment(.center)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 15)
@@ -193,8 +196,8 @@ struct ChildDeviceControlsView: View {
         } else {
             banner(title: tr("הַכֹּל נָעוּל"),
                    detail: newAppsLocked
-                       ? tr("כולל אפליקציות חדשות")
-                       : tr("אפליקציות חדשות לא נעולות"),
+                       ? tr("כּוֹלֵל אַפְּלִיקַצְיוֹת חֲדָשׁוֹת")
+                       : tr("אַפְּלִיקַצְיוֹת חֲדָשׁוֹת לֹא נְעוּלוֹת"),
                    open: false, lock: nil)
         }
     }
@@ -280,23 +283,83 @@ struct ChildDeviceControlsView: View {
         .opacity(allowed <= 0 ? 0.45 : 1)
     }
 
-    // MARK: - Per-app temporary allowance
+    // MARK: - 📱 Apps: ONE place
 
-    private var perAppAllowCard: some View {
-        controlCard(tint: AppColor.diamondBlue) {
-            sectionHead(tr("פְּתִיחַת אַפְּלִיקַצְיָה מְסוּיֶּמֶת"),
-                        tr("רַק אַפְּלִיקַצְיָה אַחַת אוֹ כַּמָּה (לְמָשָׁל יוּטְיוּבּ). הַשְּׁאָר נְעוּלוֹת."),
-                        icon: "app.badge.checkmark", tint: AppColor.diamondBlue)
+    /// Everything about which apps open, in ONE card.
+    ///
+    /// Rani, on his daughter's device: "בחר מה נשאר פתוח הוא ריק… באילו
+    /// אפליקציות נעולות עשיתי הכל וזה לא שינה כלום… למה צריך 4 שונים במקום
+    /// שיהיה 1 ששולט". This screen had four cards, four of Apple's pickers and
+    /// a switch — "locked apps", "always allowed", "lock new apps too" and
+    /// "open one app" — that all fed the same shield and contradicted each
+    /// other. Now there is one decision and it is stated as one:
+    ///
+    /// 1️⃣ **What stays open.** Everything else is locked, an app installed
+    ///    tomorrow included. This is the list that matters, so it is the big
+    ///    white button. ("Always allowed" was the same list under a second
+    ///    name; it is folded in by `foldIntoOneList`.)
+    /// 2️⃣ **Every app on the device, once.** Not a second list to curate: the
+    ///    one-time step that hands us a token for each app, because iOS will
+    ///    only lock an app by name — Safari, Photos and Messages have no
+    ///    category and were never covered without it (build 190's "nothing
+    ///    changed"). It shows a ✓ once done and is only loud while missing.
+    /// 3️⃣ **Open for a while** — an action, not a list: pick an app, pick how
+    ///    long, it locks again by itself.
+    private var appsCard: some View {
+        controlCard(tint: newAppsLocked ? AppColor.successMint : AppColor.flameOrange) {
+            sectionHead(tr("מָה פָּתוּחַ וּמָה נָעוּל"),
+                        newAppsLocked
+                            ? tr("הַכֹּל נָעוּל עַד שֶׁמַּרְוִיחִים זְמַן — גַּם אַפְּלִיקַצְיָה שֶׁתֻּתְקַן מָחָר. פְּתוּחוֹת רַק אֵלֶּה שֶׁבְּחַרְתֶּם.")
+                            : tr("בַּחֲרוּ מָה נִשְׁאָר פָּתוּחַ וְסַמְּנוּ גַּם אֶת טוֹפִי. כָּל הַשְּׁאָר יִנָּעֵל — גַּם אַפְּלִיקַצְיָה שֶׁתֻּתְקַן מָחָר."),
+                        icon: newAppsLocked ? "lock.shield.fill" : "exclamationmark.triangle.fill",
+                        tint: newAppsLocked ? AppColor.successMint : AppColor.flameOrange)
 
+            // 1️⃣ The one button. The first time, it runs the one-time "every
+            // app on the device" step and goes straight on to "what stays
+            // open" — so there is a single place, not two buttons to
+            // understand (Rani: "רק מקום אחד שפותח ונועל").
             Button {
-                Task {
-                    await shields.requestAuthorizationIfNeeded(userInitiated: true)
-                    if shields.isAuthorized { showAllowPicker = true }
+                if blockedAppCount == 0 {
+                    openAfterAllApps = true
+                    openPicker { showAppPicker = true }
+                } else {
+                    openPicker { showOpenPicker = true }
                 }
             } label: {
-                Label(allowCount > 0 ? tr("\(allowCount) אַפְּלִיקַצְיוֹת נִבְחֲרוּ · עֲרִיכָה") : tr("בְּחִירַת אַפְּלִיקַצְיוֹת"),
-                      systemImage: "checkmark.circle.fill")
+                Label(openCount > 0
+                      ? tr("פְּתוּחוֹת תָּמִיד: \(openCount) · עֲרִיכָה")
+                      : tr("בַּחֲרוּ מָה נִשְׁאָר פָּתוּחַ"),
+                      systemImage: "checkmark.shield.fill")
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color(hex: "4B3FBF"))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 13)
+                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
+            }
+            .buttonStyle(.juicy)
+
+            Rectangle().fill(.white.opacity(0.18)).frame(height: 1).padding(.vertical, 2)
+
+            // 3️⃣ Open for a while.
+            VStack(alignment: .leading, spacing: 2) {
+                Text(tr("פְּתִיחָה זְמַנִּית"))
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text(tr("אַפְּלִיקַצְיָה אַחַת אוֹ כַּמָּה, לִזְמַן קָצוּב. בְּסוֹפוֹ הֵן נִנְעָלוֹת לְבַד."))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.75))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button {
+                openPicker { showAllowPicker = true }
+            } label: {
+                Label(allowCount > 0
+                      ? tr("נִבְחֲרוּ: \(allowCount) · עֲרִיכָה")
+                      : tr("בְּחִירַת אַפְּלִיקַצְיוֹת לִפְתִּיחָה"),
+                      systemImage: "timer")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
@@ -314,7 +377,51 @@ struct ChildDeviceControlsView: View {
                 }
             }
         }
+        .tofyActivityPicker(title: PickerCopy.allowList.title, header: PickerCopy.allowList.header, footer: PickerCopy.allowList.footer, isPresented: $showOpenPicker, selection: $openSelection)
+        .tofyActivityPicker(title: PickerCopy.blocked.title, header: PickerCopy.blocked.header, footer: PickerCopy.blocked.footer, isPresented: $showAppPicker, selection: $selection)
         .tofyActivityPicker(title: PickerCopy.temporaryAllow.title, header: PickerCopy.temporaryAllow.header, footer: PickerCopy.temporaryAllow.footer, isPresented: $showAllowPicker, selection: $allowSelection)
+        // Every change takes effect at once — no relaunch. Not while the child
+        // is mid-window: everything is open then, and the baseline comes back
+        // when the window closes.
+        .onChangeCompat(of: openSelection) { _, new in
+            settings.allowedAppsData = SelectionStorage.encode(new)
+            if !isUnlocked { shields.applyDefaultLock() }
+        }
+        .onChangeCompat(of: selection) { _, new in
+            settings.activitySelectionData = SelectionStorage.encode(new)
+            if !isUnlocked { shields.applyDefaultLock() }
+        }
+        // Step 1 closed → step 2. A sheet cannot be presented while the last
+        // one is still sliding away, hence the short wait.
+        .onChangeCompat(of: showAppPicker) { _, shown in
+            guard !shown, openAfterAllApps else { return }
+            openAfterAllApps = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { showOpenPicker = true }
+        }
+    }
+
+    /// Ask for Screen Time first (a no-op once granted), then open the picker.
+    private func openPicker(_ show: @escaping () -> Void) {
+        Task {
+            await shields.requestAuthorizationIfNeeded(userInitiated: true)
+            if shields.isAuthorized { show() }
+        }
+    }
+
+    /// The four lists became one, so an install that still holds the old pieces
+    /// is folded into it once: "always allowed" joins "what stays open" (the
+    /// policy already treated them the same), and "lock new apps too" — a
+    /// switch that no longer exists on screen — is on, the allow-list model
+    /// Rani chose. Nothing that was open is closed by this.
+    private func foldIntoOneList() {
+        if !settings.lockNewApps { settings.lockNewApps = true }
+        let always = SelectionStorage.decode(settings.alwaysAllowedAppsData)
+        guard !always.applicationTokens.isEmpty || !always.webDomainTokens.isEmpty else { return }
+        var merged = openSelection
+        merged.applicationTokens.formUnion(always.applicationTokens)
+        merged.webDomainTokens.formUnion(always.webDomainTokens)
+        settings.alwaysAllowedAppsData = SelectionStorage.encode(SelectionStorage.empty())
+        openSelection = merged   // saved + applied by the onChange above
     }
 
     private func allowDurationPill(_ title: String, minutes: Int) -> some View {
@@ -339,142 +446,6 @@ struct ChildDeviceControlsView: View {
         return tr(" עַד \(f.string(from: end))")
     }
 
-    // MARK: - Lock newly installed apps (the allow-list model)
-
-    /// 🔒 The core safety control on a child's device.
-    ///
-    /// An `ApplicationToken` only exists for an app a parent picked in Apple's
-    /// picker, so a list of "apps to lock" can never name an app the child
-    /// installs tomorrow — they would download something new and walk straight
-    /// out of the lock. The only policy that covers an unknown future app is
-    /// "everything except these", which is what this card fills in.
-    ///
-    /// It cannot arm itself: `.all(except:)` shields Tofy too, and an app cannot
-    /// mint its own token, so the parent must name at least one app that stays
-    /// open. Until they do we keep the old block-list in force (leaky, but it
-    /// can never lock a child away from the app that earns their minutes) and
-    /// say so in plain words.
-    private var newAppLockCard: some View {
-        controlCard(tint: newAppsLocked ? AppColor.successMint : AppColor.flameOrange) {
-            sectionHead(tr("לנעול גם אפליקציות חדשות"),
-                        newAppsLocked
-                            ? tr("כל אפליקציה נעולה עד שמרוויחים זמן — כולל אפליקציה שתותקן מחר. פתוחות רק אלה שבחרתם.")
-                            : tr("אם הילד מתקין אפליקציה חדשה היא לא נעולה. כדי לסגור את זה, בחרו מה נשאר פתוח — וכללו את טופי עצמה."),
-                        icon: newAppsLocked ? "lock.shield.fill" : "exclamationmark.triangle.fill",
-                        tint: newAppsLocked ? AppColor.successMint : AppColor.flameOrange)
-
-            Toggle(isOn: $settings.lockNewApps) {
-                Text(tr("לנעול אפליקציות חדשות"))
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-            }
-            .tint(AppColor.successMint)
-
-            if settings.lockNewApps {
-                Button {
-                    Task {
-                        await shields.requestAuthorizationIfNeeded(userInitiated: true)
-                        if shields.isAuthorized { showOpenPicker = true }
-                    }
-                } label: {
-                    Label(openCount > 0
-                          ? tr("\(openCount) אפליקציות נשארות פתוחות · עריכה")
-                          : tr("בחרו מה נשאר פתוח"),
-                          systemImage: "checkmark.shield.fill")
-                        .font(.system(size: 16, weight: .heavy, design: .rounded))
-                        .foregroundStyle(Color(hex: "4B3FBF"))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 13)
-                        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
-                }
-                .buttonStyle(.juicy)
-
-                if openCount == 0 {
-                    Text(tr("חשוב: סמנו את טופי, ואת מה שחייב לעבוד תמיד — טלפון, הודעות, מצלמה ושעון. בלי טופי ברשימה הילד לא יוכל להרוויח זמן, ולכן עד שתבחרו הנעילה נשארת כמו שהייתה."))
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(AppColor.starGold)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        }
-        .tofyActivityPicker(title: PickerCopy.allowList.title, header: PickerCopy.allowList.header, footer: PickerCopy.allowList.footer, isPresented: $showOpenPicker, selection: $openSelection)
-        .onChangeCompat(of: openSelection) { _, new in
-            settings.allowedAppsData = SelectionStorage.encode(new)
-            // Takes effect immediately — no relaunch. (Not while the child is
-            // mid-window: everything is open then, and the baseline is re-applied
-            // when the window closes.)
-            if !isUnlocked { shields.applyDefaultLock() }
-        }
-        .onChangeCompat(of: settings.lockNewApps) { _, _ in
-            if !isUnlocked { shields.applyDefaultLock() }
-        }
-    }
-
-    // MARK: - App lock
-
-    private var appLockCard: some View {
-        controlCard(tint: AppColor.successMint) {
-            sectionHead(tr("אֵילוּ אַפְּלִיקַצְיוֹת נְעוּלוֹת"),
-                        selectedCount > 0
-                            ? tr("\(selectedCount) אַפְּלִיקַצְיוֹת/קָטֵגוֹרְיוֹת נְעוּלוֹת עַד שֶׁמַּרְוִיחִים זְמַן.")
-                            : tr("עֲדַיִן לֹא נִבְחֲרוּ אַפְּלִיקַצְיוֹת לִנְעִילָה."),
-                        icon: "lock.app.dashed", tint: AppColor.successMint)
-            Button {
-                Task {
-                    await shields.requestAuthorizationIfNeeded(userInitiated: true)
-                    if shields.isAuthorized { showAppPicker = true }
-                }
-            } label: {
-                Label(selectedCount > 0 ? tr("עֲרִיכַת הָרְשִׁימָה") : tr("בְּחִירַת אַפְּלִיקַצְיוֹת"),
-                      systemImage: "app.badge.fill")
-                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color(hex: "4B3FBF"))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
-                    .foregroundStyle(Color(hex: "4B3FBF"))
-            }
-            .buttonStyle(.juicy)
-        }
-    }
-
-    // MARK: - Always-allowed apps (permanent whitelist, even under a blocked category)
-
-    /// Apps that are NEVER locked — even when their whole category is blocked. Lets
-    /// the parent permanently allow a specific app (e.g. a newly installed app that
-    /// fell under a locked category) without unlocking the entire category.
-    private var alwaysAllowedCard: some View {
-        controlCard(tint: AppColor.companionGlow) {
-            sectionHead(tr("אַפְּלִיקַצְיוֹת שֶׁתָּמִיד מוּתָּרוֹת"),
-                        tr("אַף פַּעַם לֹא נְעוּלוֹת — גַּם אִם הַקָּטֵגוֹרְיָה שֶׁלָּהֶן חֲסוּמָה. שִׁמּוּשִׁי כְּדֵי לְאַפְשֵׁר אַפְּלִיקַצְיָה חֲדָשָׁה לִצְמִיתוּת."),
-                        icon: "checkmark.shield.fill", tint: AppColor.companionGlow)
-            Button {
-                Task {
-                    await shields.requestAuthorizationIfNeeded(userInitiated: true)
-                    if shields.isAuthorized { showAlwaysAllowPicker = true }
-                }
-            } label: {
-                Label(alwaysAllowCount > 0 ? tr("\(alwaysAllowCount) אַפְּלִיקַצְיוֹת מוּתָּרוֹת · עֲרִיכָה") : tr("בְּחִירַת אַפְּלִיקַצְיוֹת"),
-                      systemImage: "checkmark.shield.fill")
-                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.14)))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
-            }
-            .buttonStyle(.juicy)
-        }
-        .tofyActivityPicker(title: PickerCopy.alwaysAllowed.title, header: PickerCopy.alwaysAllowed.header, footer: PickerCopy.alwaysAllowed.footer, isPresented: $showAlwaysAllowPicker, selection: $alwaysAllowSelection)
-        .onChangeCompat(of: alwaysAllowSelection) { _, new in
-            settings.alwaysAllowedAppsData = SelectionStorage.encode(new)
-            // Re-apply the locked baseline so the whitelist takes effect right away
-            // (unless the child is mid-unlock, where everything is already open).
-            if !isUnlocked { shields.applyDefaultLock() }
-        }
-    }
-
     // MARK: - 🩺 What is really locked right now
 
     /// The screen that turns "I pressed it and nothing happened" into facts.
@@ -487,35 +458,39 @@ struct ChildDeviceControlsView: View {
     /// empty (so new apps are not covered).
     private var lockDiagnosticsCard: some View {
         controlCard(tint: AppColor.companionGlow) {
-            sectionHead(tr("מה נעול בפועל"),
-                        tr("זה מה ש-iOS קיבל מאיתנו ברגע זה — לא מה שסומן במסכים למעלה."),
+            sectionHead(tr("מָה נָעוּל בְּפֹעַל"),
+                        tr("זֶה מָה שֶׁ-iOS קִבֵּל מֵאִתָּנוּ בָּרֶגַע זֶה."),
                         icon: "stethoscope", tint: AppColor.companionGlow)
 
-            diagnosticRow(tr("הרשאת זמן מסך"),
-                          shields.isAuthorized ? tr("יש") : tr("אין — שום נעילה לא תעבוד"),
+            diagnosticRow(tr("הַרְשָׁאַת זְמַן מָסָךְ"),
+                          shields.isAuthorized ? tr("יֵשׁ") : tr("אֵין — שׁוּם נְעִילָה לֹא תַּעֲבֹד"),
                           ok: shields.isAuthorized)
-            diagnosticRow(tr("נעולות ברשימה"),
-                          tr("\(blockedAppCount) אפליקציות · \(blockedCategoryCount) קטגוריות"),
-                          ok: blockedAppCount > 0 || newAppsLocked)
-            diagnosticRow(tr("נשארות פתוחות"), tr("\(openCount) אפליקציות"), ok: openCount > 0)
-            diagnosticRow(tr("תמיד מותרות"), tr("\(alwaysAllowCount) אפליקציות"), ok: true)
-            diagnosticRow(tr("אפליקציה חדשה"),
-                          newAppsLocked ? tr("נעולה") : tr("נשארת פתוחה"),
+            diagnosticRow(tr("אַפְּלִיקַצְיוֹת בַּמַּכְשִׁיר"), "\(blockedAppCount)", ok: blockedAppCount > 0)
+            diagnosticRow(tr("פְּתוּחוֹת תָּמִיד"), "\(openCount)", ok: openCount > 0)
+            // What was actually WRITTEN by name — the number that read 0 on
+            // build 190 while 119 sat in the list.
+            diagnosticRow(tr("נְעוּלוֹת בְּפֹעַל"), "\(shieldedNow)", ok: shieldedNow > 0)
+            diagnosticRow(tr("אַפְּלִיקַצְיָה חֲדָשָׁה"),
+                          newAppsLocked ? tr("נְעוּלָה") : tr("פְּתוּחָה"),
                           ok: newAppsLocked)
 
-            if blockListIsCategoryOnly && !newAppsLocked {
-                Text(tr("בחרתם קטגוריות בלבד, בלי אף אפליקציה. נעילה לפי קטגוריה לא מגיעה לאפליקציות של אפל — ספארי, תמונות, הודעות, מצלמה — ולכן נראה שכלום לא השתנה. פתחו שוב את הרשימה וסמנו אפליקציות, או עדיף: בחרו מה נשאר פתוח."))
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(AppColor.starGold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
+            Button {
+                openPicker { showAppPicker = true }
+            } label: {
+                Label(tr("סִמּוּן מֵחָדָשׁ שֶׁל כָּל הָאַפְּלִיקַצְיוֹת"), systemImage: "square.grid.3x3.fill")
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).padding(.vertical, 11)
+                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.14)))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
             }
+            .buttonStyle(.juicy)
 
             Button {
                 Haptic.light()
                 diagnostic = shields.applyAndReport()
             } label: {
-                Label(tr("החילו עכשיו ובדקו"), systemImage: "arrow.clockwise")
+                Label(tr("הַחִילוּ עַכְשָׁו וּבִדְקוּ"), systemImage: "arrow.clockwise")
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 11)

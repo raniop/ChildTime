@@ -19,7 +19,7 @@ enum ShieldBridge {
         state.childName = profile?.name ?? ""
         state.girl = profile?.gender == .girl
         state.availableMinutes = max(0, p.pendingMinutes)
-        state.minutesPerCorrect = max(1, s.minutesPerCorrectAnswer)
+        state.batchMinutes = max(1, s.batchMinutes)
         state.batchAnswers = max(1, s.batchAnswers)
         state.updatedAt = Date().timeIntervalSince1970
 

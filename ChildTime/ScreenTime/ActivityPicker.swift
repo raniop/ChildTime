@@ -31,11 +31,14 @@ extension View {
 /// lists stay distinguishable from one another — a parent who opens the wrong
 /// one should notice immediately.
 enum PickerCopy {
-    /// The apps that stay locked until the child earns minutes.
+    /// The one-time step: every app on the device, so iOS holds a token for
+    /// each and can lock it by name — Apple's own apps (Safari, Photos,
+    /// Messages) have no category and are reachable no other way. Not a list
+    /// the parent curates; "what stays open" is that list.
     static var blocked: (title: String, header: String, footer: String) { (
-        title: tr("אֵילוּ אַפְּלִיקַצְיוֹת לִנְעֹל"),
-        header: tr("אֵלֶּה יִנָּעֲלוּ עַד שֶׁהַיֶּלֶד יַרְוִיחַ דַּקּוֹת מִשְׂחָק."),
-        footer: tr("אֶפְשָׁר לִבְחֹר קָטֵגוֹרְיָה שְׁלֵמָה (מִשְׂחָקִים, רְשָׁתוֹת חֶבְרָתִיּוֹת) אוֹ אַפְּלִיקַצְיוֹת מְסֻיָּמוֹת. תָּמִיד אֶפְשָׁר לְשַׁנּוֹת.")
+        title: tr("כָּל הָאַפְּלִיקַצְיוֹת בַּמַּכְשִׁיר"),
+        header: tr("סַמְּנוּ אֶת כָּל הַקָּטֵגוֹרְיוֹת — כָּךְ נִנְעָלוֹת גַּם הָאַפְּלִיקַצְיוֹת שֶׁל אַפֶּל: סָפָארִי, תְּמוּנוֹת, הוֹדָעוֹת."),
+        footer: tr("בַּשָּׁלָב הַבָּא בּוֹחֲרִים מָה נִשְׁאָר פָּתוּחַ — וְהוּא נִשְׁאָר פָּתוּחַ גַּם אִם הוּא מְסֻמָּן כָּאן.")
     ) }
     /// Apps that are never locked, whatever else is blocked.
     static var alwaysAllowed: (title: String, header: String, footer: String) { (

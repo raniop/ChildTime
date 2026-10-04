@@ -14,12 +14,18 @@ struct ShieldState: Codable {
     var girl: Bool = false
     /// Minutes already earned and not yet opened (`hasMinutes`).
     var availableMinutes: Int = 0
-    /// 🧮 The real rule, and the one the rest of the app states: `batchAnswers`
-    /// correct answers are worth `minutesPerCorrect` minutes. The lock screen
-    /// used to promise `minutesPerCorrect` for EVERY answer, which is what the
-    /// parent home calls "כל 10 נכונות = 4 דקות משחק" — a child reading the
-    /// shield was told they earn ten times what they earn (Rani, build 189).
-    var minutesPerCorrect: Int = 2
+    /// 🧮 Tofy's one reward rule, written exactly as the parent's own settings
+    /// screen writes it: `batchAnswers` correct answers are worth
+    /// `batchMinutes` minutes. Default 10 → 4.
+    ///
+    /// 🐛 Twice wrong on a real device. Build 189 promised `minutesPerCorrect`
+    /// for EVERY answer (ten times the truth). Build 190 fixed the sentence but
+    /// kept feeding it `minutesPerCorrectAnswer` — a different, legacy knob
+    /// whose value is 2 — so the shield read "כל 10 תשובות נכונות = 2 דקות",
+    /// half of what the child really earns (Rani: "גם זה לא סודר"). The number
+    /// now comes from `batchMinutes`, the same field the parent edits, so the
+    /// two screens cannot say different things again.
+    var batchMinutes: Int = 4
     var batchAnswers: Int = 10
     var updatedAt: Double = 0
 

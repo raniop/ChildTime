@@ -78,6 +78,26 @@ struct NewAppShieldTests {
         #expect(!plan.exemptApps.contains(newlyInstalledApp))
         #expect(plan.exemptApps == [7])
     }
+
+    @Test("Build 190 regression: the allow-list ALSO names every app we hold a token for")
+    func allowListKeepsTheKnownApps() {
+        // On Rani's daughter's device: 119 app tokens in the list, one app kept
+        // open — and the shield written was `apps=0 categories=all`. Apple's
+        // own apps carry no App Store category, so `.all` never reached
+        // Safari, Photos or Messages, and nothing on the device changed.
+        var i = Inputs()
+        i.lockNewApps = true
+        i.openByDesignApps = [7]
+        i.blockedApps = [1, 2, 3, 7]     // the parent ticked everything, Tofy included
+        i.blockedWebDomains = [9]
+        let plan = i.plan()
+
+        #expect(plan.kind == .lockEverythingNew)
+        #expect(plan.lockEverything == true)          // still covers unknown apps
+        #expect(plan.shieldedApps == [1, 2, 3])       // AND names the known ones…
+        #expect(!plan.shieldedApps.contains(7))       // …never the one kept open
+        #expect(plan.shieldedWebDomains == [9])
+    }
 }
 
 // MARK: - The things that must not break

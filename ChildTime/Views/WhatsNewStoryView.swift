@@ -31,6 +31,9 @@ struct WhatsNewStoryView: View {
     /// Screenshot runs only: keep the clock RUNNING instead of holding the
     /// story still, so the segment bar can be driven and checked by hand.
     var liveInDemo: Bool = false
+    /// Screenshot runs only (`DEMO_SLOW=1`): a long clock, so the bar can be
+    /// photographed mid-fill after each tap.
+    var demoSeconds: Double? = nil
 
     @Environment(\.horizontalSizeClass) private var hsc
 
@@ -54,6 +57,8 @@ struct WhatsNewStoryView: View {
     /// text for the whole animation, and this screen is mostly text.
     @State private var risen = false
     @State private var finished = false
+    /// `startAt` has been applied — see `onAppear`.
+    @State private var started = false
     /// How far a dismiss drag has pulled the card down, in points.
     @State private var dragY: CGFloat = 0
 
@@ -81,10 +86,18 @@ struct WhatsNewStoryView: View {
 
     private var story: some View {
         ZStack {
+            // 🖼 Edge to edge. The story is laid out inside the safe area, and
+            // the backdrop used to be too — so the strip behind the clock and
+            // the one under the home bar showed the flat colour of whatever was
+            // behind the story (Rani: "הרקע פה משהו לא תקין בחלק התחתון
+            // והעליון"). The glass now runs under both; only the content keeps
+            // to the safe area.
             GlassBackdrop()
+                .ignoresSafeArea()
             // Few and small: a sparkle landing on a word reads as a typo, and
             // this screen is mostly words.
             SparkleField(count: short ? 5 : 7, size: 10)
+                .ignoresSafeArea()
 
             // The tap layer sits UNDER the chrome, so 🔊 and ✕ keep their taps.
             tapZones
@@ -103,9 +116,18 @@ struct WhatsNewStoryView: View {
                 // plain top-pinned VStack left a third of a tall phone — and
                 // half an iPad — empty under the last line.
                 Spacer(minLength: 0)
-                if let item {
-                    if isKid { kidBody(item) } else { parentBody(item) }
+                // 👆 A story is looked at, never operated. The real app screens
+                // shrunk into the phone frame are LIVE views — the balloons,
+                // the vault — and they used to swallow every tap that landed
+                // on them, so a tap on the side did nothing over half the
+                // card (Rani: "הצדדים לא תקינים בלחיצות"). Nothing in here is
+                // a control, so taps go straight through to the side zones.
+                Group {
+                    if let item {
+                        if isKid { kidBody(item) } else { parentBody(item) }
+                    }
                 }
+                .allowsHitTesting(false)
                 Spacer(minLength: 0)
 
                 footer
@@ -122,11 +144,25 @@ struct WhatsNewStoryView: View {
         // 👇 Swipe-down-to-dismiss: the whole card rides the finger and takes a
         // sheet's corner radius on the way, so letting go feels like letting go
         // of a story rather than like a button.
-        .clipShape(RoundedRectangle(cornerRadius: dragY > 0 ? 34 : 0, style: .continuous))
+        // A mask that reaches past the safe area too — a plain `clipShape` cut
+        // the edge-to-edge backdrop above back to the safe area.
+        .mask {
+            RoundedRectangle(cornerRadius: dragY > 0 ? 34 : 0, style: .continuous)
+                .ignoresSafeArea()
+        }
         .offset(y: dragY)
         .environment(\.layoutDirection, .app)
         .onAppear {
-            if startAt > 0, items.indices.contains(startAt) { index = startAt } else { begin() }
+            // The start index is applied ONCE. `onAppear` can fire again for
+            // the same story (a re-layout, a return from the background), and
+            // re-applying `startAt` then threw a tap's move away.
+            if !started, startAt > 0, items.indices.contains(startAt) {
+                started = true
+                index = startAt
+            } else {
+                started = true
+                begin()
+            }
         }
         .onDisappear { ticker?.cancel(); SpeechReader.shared.stop() }
         .onChangeCompat(of: index) { _, _ in begin() }
@@ -140,8 +176,10 @@ struct WhatsNewStoryView: View {
     /// right: the board is the thing to look at, so it gets the bottom of the
     /// card to itself instead of being a lid over two lines of text.
     private func namesGameFirst(_ item: StoryItem) -> Bool {
-        if case .game = item.art { return true }
-        return false
+        switch item.art {
+        case .game, .gameGrid: return true
+        default: return false
+        }
     }
 
     @ViewBuilder
@@ -249,7 +287,7 @@ struct WhatsNewStoryView: View {
     /// A phone-framed screen brings its own border and shadow.
     private func framesItself(_ art: StoryArt) -> Bool {
         switch art {
-        case .game, .preReaderGame, .chooser, .chat: return true
+        case .game, .preReaderGame, .gameGrid, .chooser, .chat: return true
         case .chips: return ProfileStore.shared.active != nil
         default: return false
         }
@@ -268,15 +306,18 @@ struct WhatsNewStoryView: View {
     /// now a pure function of `(index, fill)` and only the CURRENT segment may
     /// animate at all; everything else snaps.
     ///
-    /// 2️⃣ DIRECTION — the one that survived to the device. The bar INHERITED
-    /// its layout direction, so in Hebrew the `HStack` mirrored and segment 0
-    /// sat on the RIGHT. Read the way anybody reads a progress bar, left to
-    /// right, that puts the filled segments AFTER the empty ones: "יש גריי
-    /// ואז זהב". The bar is a TIME AXIS, not a sentence — the same reason the
-    /// vault's code slots and the dashboard's "60/90" are pinned — so it is
-    /// pinned left-to-right in every language. Segment 0 is always leftmost
-    /// and the gold always grows rightwards. Inheriting is what broke it, so
-    /// nothing here is inherited.
+    /// 2️⃣ DIRECTION. I pinned this bar left-to-right once, reasoning that a
+    /// progress bar is a time axis rather than a sentence. That was wrong, and
+    /// Rani sent it back: "תחזיר מצד ימין לשמאל בעברית". In Hebrew the whole
+    /// story mirrors — the first card is on the RIGHT, a tap on the right goes
+    /// back, the swipe runs right-to-left — and a bar that filled the other
+    /// way fought every one of them. That mismatch is what made the side taps
+    /// feel "הפוכים": the bar said story 1 was on the left, the taps said it
+    /// was on the right.
+    ///
+    /// So the bar mirrors with everything else. Segment 0 sits on the leading
+    /// edge — right in Hebrew and Arabic, left in English and Russian — and
+    /// the gold grows towards the trailing edge, inside each segment too.
     private var segments: some View {
         HStack(spacing: 4) {
             ForEach(items.indices, id: \.self) { i in
@@ -285,8 +326,19 @@ struct WhatsNewStoryView: View {
                         Capsule().fill(.white.opacity(0.3))
                         Capsule().fill(AppColor.starGold)
                             .frame(width: g.size.width * segmentFill(i))
-                            // Everything that is not the running segment is a
-                            // hard state: full or empty, never a tween.
+                            // 🐛 3️⃣ THE CRAWL — caught on the simulator with a
+                            // slowed clock. Leave a segment before it is full
+                            // and its `.linear` tween is still in flight; its
+                            // target (full) does not even change, so SwiftUI
+                            // lets that tween run on and the segment you left
+                            // creeps up for the rest of its seconds while the
+                            // next one is already filling. Switching the
+                            // animation off cannot stop a tween already
+                            // running — a NEW view can. The gold bar takes a
+                            // fresh identity whenever its segment changes
+                            // phase (done / now / next), so it is born in its
+                            // final state with nothing left over to finish.
+                            .id(segmentPhase(i))
                             .transaction { t in if i != index { t.animation = nil } }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -295,13 +347,17 @@ struct WhatsNewStoryView: View {
             }
         }
         .frame(height: 4)
-        // 🧭 Pinned, not inherited: a timeline reads left to right in Hebrew
-        // and Arabic too, and this is the bug Rani saw on the device.
-        .environment(\.layoutDirection, .leftToRight)
+        // 🧭 The same direction as the taps and the swipe — see above. Stated
+        // rather than inherited, so no parent can flip the bar away from them.
+        .environment(\.layoutDirection, .app)
     }
 
     /// Read it as state, not as a timeline: before = done, current = running,
     /// after = not started.
+    private func segmentPhase(_ i: Int) -> String {
+        "\(i)." + (i < index ? "done" : i == index ? "now" : "next")
+    }
+
     private func segmentFill(_ i: Int) -> CGFloat {
         if i < index { return 1 }
         if i == index { return fill }
@@ -399,7 +455,12 @@ struct WhatsNewStoryView: View {
             .padding(.horizontal, 8)
         } else {
             HStack(spacing: 6) {
-                Text(isKid ? tr("הַחְלִיקוּ לַבָּא") : tr("מתחלף לבד · אפשר להחליק"))
+                // 👆 The gesture that is actually used is a TAP on the side, so
+                // the hint names the side (Rani: "רשמת החליקו לבא — יש החלקה
+                // או רק לחיצה בצדדים?"). The side is in each translation: left
+                // in Hebrew and Arabic, right in English and Russian — and the
+                // chevron beside it points the same way.
+                Text(isKid ? tr("לוֹחֲצִים מִשְּׂמֹאל לַבָּא") : tr("מתחלף לבד · לחיצה משמאל לבא"))
                 Image(systemName: AppSymbol.forwardChevron).font(.system(size: 11, weight: .black))
             }
             .font(.system(size: isCompact ? 13 : 14, weight: .bold, design: .rounded))
@@ -409,29 +470,42 @@ struct WhatsNewStoryView: View {
 
     // MARK: - Moving between stories
 
-    /// Instagram's two zones, full height: the leading third goes back, the
-    /// whole rest goes on. Rani: "תן לי אפשרות לעשות טאפ בצדדים שמעביר לכל צד
-    /// כמו באינסטגרם". The side is taken from the layout direction, so "back"
-    /// is the RIGHT in Hebrew and Arabic and the left in English and Russian —
-    /// always the side the story came from.
+    /// Instagram's two zones, full height: the third on the START side goes
+    /// back, everything else goes on. Rani: "תן לי אפשרות לעשות טאפ בצדדים
+    /// שמעביר לכל צד כמו באינסטגרם" — and then, on the device: "הצדדים
+    /// הפוכים! תחזיר מצד ימין לשמאל בעברית".
+    ///
+    /// In Hebrew and Arabic the story runs right to left: the first card is on
+    /// the RIGHT (so is the first segment of the bar), a tap on the right goes
+    /// BACK and a tap on the left goes ON. English and Russian are the mirror.
+    ///
+    /// 🐛 Measured on the simulator: in a Hebrew screen a tap's LOCAL x comes
+    /// back mirrored — a tap on the physical left edge reported x ≈ width —
+    /// so the side zones ran backwards, exactly what Rani felt on the device.
+    /// The tap is now read in GLOBAL (screen) coordinates, which no layout
+    /// direction ever mirrors, against this layer's own global frame, and
+    /// `sideTap` says in one line which physical side is which.
     ///
     /// This layer sits under the chrome in the ZStack, so 🔊, ✕ / "דלג" and the
-    /// last card's button keep their own taps.
+    /// last card's button keep their own taps; the card's content is
+    /// `allowsHitTesting(false)` so it cannot swallow a tap meant for a side.
     private var tapZones: some View {
         GeometryReader { g in
-            HStack(spacing: 0) {
-                Color.clear
-                    .frame(width: g.size.width * 0.32, height: g.size.height)
-                    .contentShape(Rectangle())
-                    .onTapGesture { back() }
-                Color.clear
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .contentShape(Rectangle())
-                    .onTapGesture { advance() }
-            }
-            .frame(width: g.size.width, height: g.size.height)
+            Color.clear
+                .contentShape(Rectangle())
+                .gesture(SpatialTapGesture(coordinateSpace: .global).onEnded { tap in
+                    let frame = g.frame(in: .global)
+                    sideTap(fromLeft: (tap.location.x - frame.minX) / max(1, frame.width))
+                })
         }
         .ignoresSafeArea()
+    }
+
+    /// `fromLeft` is 0 at the physical left edge and 1 at the right.
+    private func sideTap(fromLeft: CGFloat) {
+        let rtl = LayoutDirection.app == .rightToLeft
+        let onStartSide = rtl ? fromLeft > 0.68 : fromLeft < 0.32
+        onStartSide ? back() : advance()
     }
 
     /// One gesture for both axes, so they cannot fight each other.
@@ -492,7 +566,7 @@ struct WhatsNewStoryView: View {
         // 📸 A screenshot run holds the story still — the segment is drawn
         // part-filled so the bar still reads as "mid-story".
         guard !AppInfo.isDemoRun || liveInDemo else { snap { risen = true; fill = 0.45 }; return }
-        let seconds = item?.seconds ?? 5
+        let seconds = demoSeconds ?? item?.seconds ?? 5
         withAnimation(.linear(duration: seconds)) { fill = 1 }
         speakIfPreReader()
         ticker = Task { @MainActor in
@@ -514,7 +588,10 @@ struct WhatsNewStoryView: View {
         guard !finished else { return }
         Haptic.light()
         if index + 1 < items.count {
-            snap { index += 1 }
+            // `fill = 0` in the SAME transaction as the move: the new segment
+            // is born empty instead of inheriting the old one's full bar for
+            // a frame.
+            snap { index += 1; fill = 0 }
         } else {
             finish()
         }
@@ -523,7 +600,7 @@ struct WhatsNewStoryView: View {
     private func back() {
         guard !finished, index > 0 else { return }
         Haptic.light()
-        snap { index -= 1 }
+        snap { index -= 1; fill = 0 }
     }
 
     /// One way out, used by the last story, by ✕ and by "דלג" alike — and only
@@ -567,7 +644,10 @@ struct WhatsNewStoryView: View {
     /// every point it can get — the frame is tall and narrow, and the slack
     /// left over goes beside it, not above it.
     private var kidArtHeight: CGFloat {
-        if case .game = item?.art { return share(isCompact ? 0.62 : 0.66, min: 200, max: 980) }
+        switch item?.art {
+        case .game?, .gameGrid?: return share(isCompact ? 0.62 : 0.66, min: 200, max: 980)
+        default: break
+        }
         return share(isCompact ? 0.48 : 0.58, min: 170, max: 860)
     }
 
@@ -591,7 +671,7 @@ struct WhatsNewStoryView: View {
             // Bubbles, like rows, look stranded in a pane built for a poster.
             let n = CGFloat(Swift.max(lines.count, 1))
             return Swift.min(height, n * (isCompact ? 104 : 140) + gap)
-        case .game, .preReaderGame:
+        case .game, .preReaderGame, .gameGrid:
             // A phone wants height, and the parent's cards have text above it.
             return share(isCompact ? 0.52 : 0.58, min: 180, max: 900)
         default:
@@ -664,6 +744,8 @@ private struct Box: View {
             gameArt(kind, topic: topic)
         case .preReaderGame(let kind, let topic):
             gameArt(kind, topic: topic, preReader: true)
+        case .gameGrid(let kinds, let names):
+            gameGridArt(kinds, names: names)
         case .chooser(let kind, let topic):
             chooserArt(kind, topic: topic)
         case .vault(let code, let clues):
@@ -725,6 +807,42 @@ private struct Box: View {
                 MiniGameScreenPreview(kind: kind, topic: topic, preReader: preReader, box: box)
             } else {
                 MiniGameScreenPreview(kind: kind, topic: topic, box: box)
+            }
+        }
+        .frame(width: box.width, height: box.height)
+    }
+
+    /// 🎮🎮 Up to four games on one card — each the REAL screen in its own
+    /// phone, its name under it. Two to a row; an odd last one sits centred.
+    /// Every size comes from `box`, so the same card is four small phones on
+    /// an SE and four big ones on a 13" iPad.
+    private func gameGridArt(_ kinds: [MiniGameKind], names: [String]) -> some View {
+        let cols = kinds.count == 1 ? 1 : 2
+        let rows = (kinds.count + cols - 1) / cols
+        let gap = Swift.max(10, Swift.min(box.width, box.height) * 0.04)
+        let label = Swift.max(18, Swift.min(34, box.height * 0.045))
+        let cellW = (box.width - gap * CGFloat(cols - 1)) / CGFloat(cols)
+        let cellH = (box.height - gap * CGFloat(rows - 1)) / CGFloat(rows)
+        let phone = CGSize(width: cellW, height: Swift.max(40, cellH - label - 6))
+        return VStack(spacing: gap) {
+            ForEach(0..<rows, id: \.self) { r in
+                HStack(spacing: gap) {
+                    ForEach(r * cols ..< Swift.min(kinds.count, r * cols + cols), id: \.self) { i in
+                        VStack(spacing: 6) {
+                            MiniGameScreenPreview(kind: kinds[i],
+                                                  topic: WhatsNewStories.previewTopic(kinds[i]),
+                                                  box: phone)
+                                .frame(width: phone.width, height: phone.height)
+                            Text(names.indices.contains(i) ? names[i] : "")
+                                .font(.system(size: label * 0.8, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .lineLimit(1).minimumScaleFactor(0.6)
+                                .shadow(color: .black.opacity(0.3), radius: 6, y: 2)
+                                .frame(height: label)
+                        }
+                        .frame(width: cellW)
+                    }
+                }
             }
         }
         .frame(width: box.width, height: box.height)
@@ -1028,7 +1146,8 @@ struct WhatsNewStoryDemo: View {
                           items: WhatsNewStories.current(for: audience),
                           onFinish: {},
                           startAt: startAt,
-                          liveInDemo: live)
+                          liveInDemo: live,
+                          demoSeconds: ProcessInfo.processInfo.environment["DEMO_SLOW"] == "1" ? 30 : nil)
             .onAppear {
                 guard let grade = Int(ProcessInfo.processInfo.environment["DEMO_GRADE"] ?? ""),
                       var p = ProfileStore.shared.active else { return }

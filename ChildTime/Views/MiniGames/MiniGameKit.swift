@@ -104,6 +104,27 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         }
     }
 
+    /// The name on the PARENT's side, which is written without niqqud. Spelled
+    /// out rather than derived by stripping the marks off `shortName`: that
+    /// gives "תפזרת", "המכלת" and "בנו מלה" — defective spelling, which a
+    /// parent reads as a typo.
+    var parentName: String {
+        switch self {
+        case .pairs:      return tr("זוגות")
+        case .balloon:    return tr("בלונים")
+        case .word:       return tr("בנו מילה")
+        case .crush:      return tr("מפצחים")
+        case .wordSearch: return tr("תפזורת")
+        case .lightning:  return tr("נכון או לא")
+        case .sort:       return tr("מיון לסלים")
+        case .pattern:    return tr("התבנית")
+        case .game2048:   return tr("2048 של טופי")
+        case .vault:      return tr("הכספת")
+        case .grocery:    return tr("המכולת")
+        case .balance:    return tr("מאזניים")
+        }
+    }
+
     /// One line under the game's card in the world's chooser.
     var blurb: String {
         switch self {
