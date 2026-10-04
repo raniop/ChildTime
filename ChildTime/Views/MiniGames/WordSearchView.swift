@@ -40,6 +40,8 @@ struct WordSearchView: View {
     @State private var found: [String] = []
     @State private var dragStart: GridCell?
     @State private var dragCells: [GridCell] = []
+    /// Single-cell "drags" in a row — a child tapping letters instead of sliding.
+    @State private var taps = 0
     @State private var lastFindAt = Date()
     @State private var hintCell: GridCell?
     @State private var hintPulse = false
@@ -110,7 +112,10 @@ struct WordSearchView: View {
         VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
             // An iPad: the board sits in the middle of the glass, not at the top.
             if !isCompact && !display.isShort { Spacer(minLength: 0) }
-            Text(tr("גִּרְרוּ אֶצְבַּע עַל כָּל מִלָּה שֶׁמְּצָאתֶם"))
+            // Children kept TAPPING letters one by one. Spell out the gesture,
+            // and say it again the moment a tap shows they haven't got it.
+            Text(taps >= 2 ? tr("👆 לֹא לוֹחֲצִים — מַנִּיחִים אֶצְבַּע עַל הָאוֹת הָרִאשׁוֹנָה וּמַחְלִיקִים עַד הָאַחֲרוֹנָה")
+                           : tr("👆 מַנִּיחִים אֶצְבַּע עַל הָאוֹת הָרִאשׁוֹנָה שֶׁל הַמִּלָּה וּמַחְלִיקִים עַד הָאוֹת הָאַחֲרוֹנָה"))
                 .font(.system(size: isCompact ? 15 : 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
@@ -293,7 +298,7 @@ struct WordSearchView: View {
             board = WordSearch.make(topic: topic, script: script, grade: grade, size: gridSize(script))
             wordTopic = script.topic
         }
-        found = []; dragStart = nil; dragCells = []; hintCell = nil; grant = nil
+        found = []; dragStart = nil; dragCells = []; hintCell = nil; grant = nil; taps = 0
         lastFindAt = Date(); shownAt = Date()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { started = true; done = false }
     }
@@ -303,7 +308,13 @@ struct WordSearchView: View {
             dragStart = nil
             withAnimation(.easeOut(duration: 0.2)) { dragCells = [] }
         }
-        guard dragCells.count >= 2 else { return }
+        guard dragCells.count >= 2 else {
+            // One cell = a tap. Count it, so the instruction can switch to the
+            // plainer wording for a child who is tapping letter by letter.
+            if dragCells.count == 1 { taps += 1 }
+            return
+        }
+        taps = 0
         // Either direction counts — a word dragged end-to-start is still found.
         let hit = words.first { w in
             !found.contains(w.word) && (w.cells == dragCells || w.cells == Array(dragCells.reversed()))
