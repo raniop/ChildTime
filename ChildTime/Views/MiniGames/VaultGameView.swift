@@ -85,7 +85,11 @@ struct VaultGameView: View {
             }
 
             if let item = key, phase == .playing {
+                // Tapping outside closes it — the ✕ sits behind this layer, and a
+                // child who can't answer must still be able to leave. The key is
+                // already spent, so putting it away costs the same as a miss.
                 Color.black.opacity(0.35).ignoresSafeArea().transition(.opacity)
+                    .onTapGesture { withAnimation(.easeOut(duration: 0.2)) { key = nil; keyFor = nil } }
                 MiniGameQuestionCard(item: item, header: tr("🔑 תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת סִפְרָה!")) { right in
                     answerKey(item, right: right)
                 }
@@ -138,6 +142,12 @@ struct VaultGameView: View {
             .frame(maxWidth: .infinity)
             .glassPane(radius: 24)
 
+            Text(tr("נַחֲשׁוּ אֶת הַקּוֹד! אַחֲרֵי כָּל נִסָּיוֹן הַצְּבָעִים מְגַלִּים כַּמָּה הִתְקָרַבְתֶּם"))
+                .font(.system(size: isCompact ? 13 : 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+
             legend
 
             // The tries so far, newest at the bottom, then the one being typed.
@@ -149,7 +159,7 @@ struct VaultGameView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            .frame(maxHeight: isCompact ? 200 : 320)
+            .frame(height: min(CGFloat(tries.count + 1) * (slot * 0.72 + 6), isCompact ? 200 : 260))
             .scrollAnchorBottom()
 
             MiniGameNumberPad(keyHeight: display.isShort ? 40 : (isCompact ? 46 : 60)) { k in press(k) }
