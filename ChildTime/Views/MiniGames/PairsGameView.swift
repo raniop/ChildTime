@@ -54,7 +54,11 @@ struct PairsGameView: View {
     private var isCompact: Bool { hsc == .compact }
     private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
     /// 👶 A pre-reader (גן): pictures only, four pairs, bigger tiles.
-    private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
+    /// One definition for all five games — see `PreReaderGames`.
+    private var preReader: Bool {
+        _ = profiles.active      // redraw when the active child changes
+        return PreReaderGames.activeChildIsPreReader
+    }
     /// 🎚️ Five pairs up to ד׳, six from ה׳ — a sixth row needs the height,
     /// so a short screen keeps five whatever the grade. 👶 גן: four.
     private var pairCount: Int {
@@ -140,7 +144,7 @@ struct PairsGameView: View {
                     columns
                     Spacer(minLength: 0)
                 }
-                .frame(maxWidth: 760)
+                .frame(maxWidth: preReader ? 600 : 760)
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.bottom, AppSpacing.sm)
                 ScrollView(showsIndicators: false) {
@@ -149,7 +153,7 @@ struct PairsGameView: View {
                         columns
                     }
                 }
-                .frame(maxWidth: 760)
+                .frame(maxWidth: preReader ? 600 : 760)
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.bottom, AppSpacing.sm)
             }
@@ -158,7 +162,7 @@ struct PairsGameView: View {
                 boardTitle
                 ScrollView(showsIndicators: false) { columns }
             }
-            .frame(maxWidth: 680)
+            .frame(maxWidth: preReader ? 560 : 680)
             .padding(.horizontal, AppSpacing.md)
             .padding(.bottom, AppSpacing.sm)
         }

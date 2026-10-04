@@ -91,7 +91,11 @@ struct BalloonPopView: View {
     private var timeFrac: Double { remaining / roundSeconds }
     private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
     /// 👶 A pre-reader (גן): no words on screen, and no clock to lose to.
-    private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
+    /// One definition for all five games — see `PreReaderGames`.
+    private var preReader: Bool {
+        _ = profiles.active      // redraw when the active child changes
+        return PreReaderGames.activeChildIsPreReader
+    }
     /// 👶 Bigger balloons — a five-year-old's finger, not a ten-year-old's.
     private var balloonSize: CGSize {
         if preReader {
@@ -228,7 +232,7 @@ struct BalloonPopView: View {
             }
             .clipped()
         }
-        .frame(maxWidth: isCompact ? 700 : 900)
+        .frame(maxWidth: preReader ? (isCompact ? 620 : 700) : (isCompact ? 700 : 900))
     }
 
     private var timerBar: some View {

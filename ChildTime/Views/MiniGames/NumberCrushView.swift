@@ -79,7 +79,11 @@ struct NumberCrushView: View {
     /// The child's level in math (adaptive), not just the class.
     private var grade: Int { MiniGameLevel.grade(for: .math) }
     /// 👶 A pre-reader (גן): objects instead of numerals, and no clock.
-    private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
+    /// One definition for all five games — see `PreReaderGames`.
+    private var preReader: Bool {
+        _ = profiles.active      // redraw when the active child changes
+        return PreReaderGames.activeChildIsPreReader
+    }
     /// Hits count in the world they're played in when it is a numbers world.
     private var recordTopic: Topic {
         // 👶 A גן round is counting, whatever world it was opened from.
@@ -206,9 +210,19 @@ struct NumberCrushView: View {
     /// The basket and the cards are one act, so they sit together with no gap:
     /// goal, the sentence, the arrow, then the cards straight underneath.
     private func preReaderBoard(_ collect: PreReaderGames.Collect) -> some View {
-        VStack(spacing: display.isShort ? AppSpacing.xs : AppSpacing.sm) {
+        // 📐 On a phone the cards are height-bound and fill what is left. On an
+        // iPad they are capped, so the leftover height is real: the question,
+        // the goal and the cards sit together as ONE centred group rather than
+        // clinging to the top of a very tall screen.
+        let capped = !isCompact && !display.isShort
+        let rows = Int(ceil(Double(PreReaderGames.countingCards) / Double(preReaderCardColumns)))
+        let cardsHeight = preReaderCardMaxSide * CGFloat(rows) + 14 * CGFloat(rows - 1)
+        return VStack(spacing: display.isShort ? AppSpacing.xs : AppSpacing.sm) {
+            if capped { Spacer(minLength: 0) }
             preReaderGoal(collect)
             preReaderCards(collect)
+                .frame(maxHeight: capped ? cardsHeight : .infinity)
+            if capped { Spacer(minLength: 0) }
         }
         .frame(maxWidth: isCompact ? 620 : 700)
         .padding(.horizontal, AppSpacing.md)
@@ -226,48 +240,51 @@ struct NumberCrushView: View {
     /// reading, no counting-out-loud and no explaining. Nothing else goes in
     /// the frame, because anything else in it gets counted too.
     private func preReaderGoal(_ collect: PreReaderGames.Collect) -> some View {
-        VStack(spacing: display.isShort ? 6 : 10) {
+        VStack(spacing: display.isShort ? 7 : 12) {
+            // 1️⃣ The question first, centred, and the biggest text here —
+            //    it IS the question, so it has to look like one. The 🔊 sits
+            //    beside it instead of floating at the opposite edge.
+            HStack(spacing: isCompact ? 9 : 13) {
+                Text(collect.cue.spoken)
+                    .font(.system(size: display.isShort ? 16 : (isCompact ? 19 : 26),
+                                  weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3).minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
+                PreReaderSpeakButton(spoken: collect.cue.spoken,
+                                     side: display.isShort ? 40 : (isCompact ? 46 : 58))
+            }
+            .frame(maxWidth: .infinity)
+
+            // 2️⃣ …and under it, centred, what to look for.
             HStack(spacing: isCompact ? 3 : 6) {
                 ForEach(Array(0..<max(1, collect.target)), id: \.self) { _ in
                     Text(collect.emoji).font(.system(size: goalGlyph(collect.target)))
                 }
             }
             .lineLimit(1).minimumScaleFactor(0.5)
-            .padding(.horizontal, isCompact ? 16 : 22)
-            .padding(.vertical, display.isShort ? 7 : 10)
-            .background(RoundedRectangle(cornerRadius: 18, style: .continuous)
+            .padding(.horizontal, isCompact ? 16 : 24)
+            .padding(.vertical, display.isShort ? 7 : 12)
+            .background(RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(AppColor.starGold.opacity(0.20)))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .strokeBorder(AppColor.starGold.opacity(0.9), lineWidth: 2.5))
             .glow(AppColor.starGold, radius: 10)
             .scaleEffect(targetPop ? 1.08 : 1)
             .animation(.spring(response: 0.3, dampingFraction: 0.55), value: targetPop)
-
-            // The rule in words, for whoever is reading, and out loud on tap.
-            // No arrow under it any more: the goal is concrete and the cards
-            // start a few points below it, so it was pointing at the obvious.
-            HStack(spacing: 9) {
-                PreReaderSpeakButton(spoken: collect.cue.spoken, side: display.isShort ? 38 : (isCompact ? 44 : 54))
-                Text(collect.cue.spoken)
-                    .font(.system(size: display.isShort ? 12.5 : (isCompact ? 14 : 17),
-                                  weight: .semibold, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary)
-                    .multilineTextAlignment(.leading)
-                    .lineLimit(2).minimumScaleFactor(0.75)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, 12).padding(.vertical, display.isShort ? 8 : 11)
+        .padding(.horizontal, 12).padding(.vertical, display.isShort ? 9 : 14)
         .glassPane(radius: 22)
     }
 
     /// Five objects in the frame still have to fit a phone's width beside the
-    /// gold border, so the more there are the smaller each one is — but never
-    /// smaller than they are on a card, or the match stops being obvious.
+    /// gold border, so the more there are the smaller each one is — but the
+    /// goal is the content, so it is drawn larger than any single card's
+    /// object, not smaller.
     private func goalGlyph(_ count: Int) -> CGFloat {
-        let base: CGFloat = display.isShort ? 38 : (isCompact ? 58 : 72)
+        let base: CGFloat = display.isShort ? 40 : (isCompact ? 62 : 92)
         switch count {
         case ...2: return base
         case 3:    return base * 0.92
@@ -278,12 +295,18 @@ struct NumberCrushView: View {
 
     /// Six cards, each holding one to five objects. One tap, one answer.
     ///
-    /// Upright they go 2 across and 3 down: the leftover height was dead space
-    /// either way, and spent on the cards it makes every one of them half as
-    /// wide again — which is what a five-year-old's finger wants. On its side
-    /// the height is what runs out, so they go 3 across and 2 down instead;
-    /// kept at 2 × 3 there, six cards shrank to a narrow column in the middle.
-    private var preReaderCardColumns: Int { display.isShort ? 3 : 2 }
+    /// On a phone upright they go 2 across and 3 down: the leftover height was
+    /// dead space either way, and spent on the cards it makes every one of them
+    /// half as wide again — which is what a five-year-old's finger wants. On a
+    /// short screen (a phone on its side) the height is what runs out, so they
+    /// go 3 across and 2 down; kept at 2 × 3 there, six cards shrank to a
+    /// narrow column in the middle. On an iPad they go 3 across too — at 2 the
+    /// grid stretched a two-apple card to 450pt, which is a poster, not a card.
+    private var preReaderCardColumns: Int { (display.isShort || !isCompact) ? 3 : 2 }
+
+    /// A card is sized to a hand, not to the screen. Past this it stops being
+    /// easier to hit and just starts crowding out the question above it.
+    private var preReaderCardMaxSide: CGFloat { isCompact ? 190 : 210 }
 
     private func preReaderCards(_ collect: PreReaderGames.Collect) -> some View {
         GeometryReader { geo in
@@ -292,7 +315,7 @@ struct NumberCrushView: View {
             let gap: CGFloat = isCompact ? 10 : 14
             let w = (geo.size.width - gap * CGFloat(cols - 1)) / CGFloat(cols)
             let h = (geo.size.height - gap * CGFloat(rows - 1)) / CGFloat(rows)
-            let side = max(60, min(w, h))
+            let side = max(60, min(min(w, h), preReaderCardMaxSide))
             VStack(spacing: gap) {
                 ForEach(0..<rows, id: \.self) { row in
                     HStack(spacing: gap) {

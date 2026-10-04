@@ -409,8 +409,14 @@ struct WorldGameChooserDemo: View {
     init(topic: Topic) {
         self.topic = topic
         // Before the chooser counts which games fit — they depend on the grade.
-        if let g = ProcessInfo.processInfo.environment["DEMO_GRADE"].flatMap(Int.init), var p = ProfileStore.shared.active,
-           p.grade != g {
+        // 📅 Re-stamp the school year EVERY time, not only when the grade
+        // changes: a profile a previous run left at DEMO_GRADE=0 keeps that 0
+        // but carries last year's `gradeSchoolYear`, and September's auto
+        // advance then makes `effectiveGrade` 1 — so a גן screenshot run on a
+        // device that has been used before quietly rendered the reader form.
+        if let g = ProcessInfo.processInfo.environment["DEMO_GRADE"].flatMap(Int.init),
+           var p = ProfileStore.shared.active,
+           p.grade != g || p.gradeSchoolYear != Profile.schoolYear() {
             p.grade = g
             p.gradeSchoolYear = Profile.schoolYear()
             ProfileStore.shared.update(p)

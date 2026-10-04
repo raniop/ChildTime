@@ -43,7 +43,11 @@ struct PatternGameView: View {
         return surprise ? 5 : PatternGen.roundCount
     }
     /// 👶 A pre-reader (גן): pictures only, bigger cells, four rows a round.
-    private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
+    /// One definition for all five games — see `PreReaderGames`.
+    private var preReader: Bool {
+        _ = profiles.active      // redraw when the active child changes
+        return PreReaderGames.activeChildIsPreReader
+    }
     private var grade: Int {
         if preReader { return 0 }
         switch topic {
@@ -132,7 +136,7 @@ struct PatternGameView: View {
             answers
             Spacer(minLength: 0)
         }
-        .frame(maxWidth: isCompact ? 640 : 820)
+        .frame(maxWidth: preReader ? (isCompact ? 560 : 620) : (isCompact ? 640 : 820))
         .padding(.horizontal, AppSpacing.md)
         .padding(.bottom, AppSpacing.md)
     }
@@ -194,7 +198,7 @@ struct PatternGameView: View {
                         .lineLimit(1).minimumScaleFactor(0.5)
                         .frame(maxWidth: .infinity,
                                minHeight: preReader
-                               ? (display.isShort ? 70 : (isCompact ? 100 : 130))
+                               ? (display.isShort ? 70 : (isCompact ? 100 : 120))
                                : (isCompact ? 76 : 110))
                         .miniGameTile(state, tint: OptionCard.tints[i % OptionCard.tints.count], radius: 22)
                         .mathLTR(round?.direction == .leftToRight)
